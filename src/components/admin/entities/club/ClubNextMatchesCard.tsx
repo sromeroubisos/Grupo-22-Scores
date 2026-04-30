@@ -92,7 +92,7 @@ export function ClubNextMatchesCard({ categories, matches, loading }: ClubNextMa
 
                             <div style={{ flex: 1 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                                    <span style={{ padding: '0.125rem 0.375rem', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.16)', color: 'var(--accent)', fontSize: '0.55rem', fontWeight: 900, textTransform: 'uppercase', borderRadius: '999px' }}>
+                                    <span style={{ padding: '0.125rem 0.375rem', background: 'color-mix(in srgb, var(--ca-accent) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--ca-accent) 16%, transparent)', color: 'var(--accent)', fontSize: '0.55rem', fontWeight: 900, textTransform: 'uppercase', borderRadius: '999px' }}>
                                         Primera
                                     </span>
                                     <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>
@@ -135,8 +135,8 @@ export function ClubNextMatchesCard({ categories, matches, loading }: ClubNextMa
                                                 gap: '0.5rem',
                                                 padding: '0.35rem 0.65rem',
                                                 borderRadius: '999px',
-                                                background: 'rgba(16, 185, 129, 0.12)',
-                                                border: '1px solid rgba(16, 185, 129, 0.2)',
+                                                background: 'color-mix(in srgb, var(--ca-success) 12%, transparent)',
+                                                border: '1px solid color-mix(in srgb, var(--ca-success) 20%, transparent)',
                                                 color: 'var(--text)',
                                             }}
                                         >

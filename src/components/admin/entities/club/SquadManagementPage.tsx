@@ -93,7 +93,7 @@ export function SquadManagementPage() {
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="px-5 py-3 bg-[rgba(255,255,255,0.05)] border border-[var(--border)] text-[#e2e2e2] font-bold uppercase text-xs hover:bg-[rgba(255,255,255,0.08)] transition-all"
+                    className="px-5 py-3 bg-[var(--ca-surface-hover)] border border-[var(--ca-border)] text-[var(--ca-text)] font-bold uppercase text-xs hover:bg-[var(--ca-surface-hover)] transition-all"
                 >
                     Volver
                 </button>

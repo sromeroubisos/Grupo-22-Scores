@@ -103,7 +103,7 @@ export function ChartBuilderModal<TData>({
             style={{
                 position: 'fixed',
                 inset: 0,
-                background: 'rgba(0,0,0,0.65)',
+                background: 'color-mix(in srgb, var(--ca-bg) 65%, transparent)',
                 backdropFilter: 'blur(8px)',
                 zIndex: 1000,
                 display: 'flex',
@@ -114,8 +114,8 @@ export function ChartBuilderModal<TData>({
         >
             <div
                 style={{
-                    background: '#0f172a',
-                    border: '1px solid rgba(255,255,255,0.12)',
+                    background: 'var(--ca-surface)',
+                    border: '1px solid var(--ca-border)',
                     borderRadius: 16,
                     width: '100%',
                     maxWidth: 720,
@@ -123,7 +123,7 @@ export function ChartBuilderModal<TData>({
                     display: 'flex',
                     flexDirection: 'column',
                     overflow: 'hidden',
-                    color: '#e2e8f0',
+                    color: 'var(--ca-text)',
                 }}
             >
                 <header
@@ -132,7 +132,7 @@ export function ChartBuilderModal<TData>({
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         padding: '16px 20px',
-                        borderBottom: '1px solid rgba(255,255,255,0.08)',
+                        borderBottom: '1px solid var(--ca-border)',
                     }}
                 >
                     <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
@@ -145,7 +145,7 @@ export function ChartBuilderModal<TData>({
                         style={{
                             background: 'transparent',
                             border: 'none',
-                            color: '#94a3b8',
+                            color: 'var(--ca-text-secondary)',
                             cursor: saving ? 'not-allowed' : 'pointer',
                             fontSize: '1.2rem',
                         }}
@@ -156,7 +156,7 @@ export function ChartBuilderModal<TData>({
 
                 <div style={{ padding: 20, overflow: 'auto', display: 'grid', gap: 18 }}>
                     <section>
-                        <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+                        <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--ca-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
                             Tipo de gráfico
                         </label>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
@@ -170,16 +170,16 @@ export function ChartBuilderModal<TData>({
                                         style={{
                                             padding: '12px 14px',
                                             borderRadius: 10,
-                                            border: `1px solid ${active ? '#3b82f6' : 'rgba(255,255,255,0.12)'}`,
-                                            background: active ? 'rgba(59,130,246,0.18)' : 'rgba(255,255,255,0.04)',
-                                            color: active ? '#fff' : '#cbd5e1',
+                                            border: `1px solid ${active ? 'var(--ca-accent)' : 'var(--ca-border)'}`,
+                                            background: active ? 'color-mix(in srgb, var(--ca-accent) 18%, transparent)' : 'var(--ca-surface-hover)',
+                                            color: active ? 'var(--ca-text)' : 'var(--ca-text-secondary)',
                                             cursor: 'pointer',
                                             textAlign: 'left',
                                             transition: 'all 0.15s ease',
                                         }}
                                     >
                                         <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{CHART_TYPE_LABELS[type]}</div>
-                                        <div style={{ fontSize: '0.7rem', color: 'rgba(203,213,225,0.7)', marginTop: 4 }}>{CHART_TYPE_HINTS[type]}</div>
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--ca-text-secondary)', marginTop: 4 }}>{CHART_TYPE_HINTS[type]}</div>
                                     </button>
                                 );
                             })}
@@ -187,7 +187,7 @@ export function ChartBuilderModal<TData>({
                     </section>
 
                     <section>
-                        <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+                        <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--ca-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
                             Título (opcional)
                         </label>
                         <input
@@ -199,10 +199,10 @@ export function ChartBuilderModal<TData>({
                             style={{
                                 width: '100%',
                                 padding: '10px 12px',
-                                background: 'rgba(255,255,255,0.04)',
-                                border: '1px solid rgba(255,255,255,0.12)',
+                                background: 'var(--ca-surface-hover)',
+                                border: '1px solid var(--ca-border)',
                                 borderRadius: 8,
-                                color: '#fff',
+                                color: 'var(--ca-text)',
                                 fontSize: '0.85rem',
                             }}
                         />
@@ -210,17 +210,17 @@ export function ChartBuilderModal<TData>({
 
                     <section>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                            <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                            <label style={{ fontSize: '0.75rem', color: 'var(--ca-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                                 Estadísticas
                             </label>
-                            <span style={{ fontSize: '0.7rem', color: '#cbd5e1' }}>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--ca-text-secondary)' }}>
                                 {statKeys.length} elegida{statKeys.length === 1 ? '' : 's'}
                             </span>
                         </div>
                         <div style={{ display: 'grid', gap: 14 }}>
                             {grouped.map((group) => (
                                 <div key={group.category}>
-                                    <div style={{ fontSize: '0.7rem', color: '#cbd5e1', marginBottom: 6, fontWeight: 600 }}>
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--ca-text-secondary)', marginBottom: 6, fontWeight: 600 }}>
                                         {group.category}
                                     </div>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -234,9 +234,9 @@ export function ChartBuilderModal<TData>({
                                                     style={{
                                                         padding: '6px 12px',
                                                         borderRadius: 16,
-                                                        border: `1px solid ${active ? '#10b981' : 'rgba(255,255,255,0.12)'}`,
-                                                        background: active ? 'rgba(16,185,129,0.18)' : 'rgba(255,255,255,0.04)',
-                                                        color: active ? '#fff' : '#cbd5e1',
+                                                        border: `1px solid ${active ? 'var(--ca-success)' : 'var(--ca-border)'}`,
+                                                        background: active ? 'color-mix(in srgb, var(--ca-success) 18%, transparent)' : 'var(--ca-surface-hover)',
+                                                        color: active ? 'var(--ca-text)' : 'var(--ca-text-secondary)',
                                                         fontSize: '0.75rem',
                                                         cursor: 'pointer',
                                                         transition: 'all 0.15s ease',
@@ -257,9 +257,9 @@ export function ChartBuilderModal<TData>({
                             style={{
                                 padding: '10px 12px',
                                 borderRadius: 8,
-                                background: 'rgba(239,68,68,0.12)',
-                                border: '1px solid rgba(239,68,68,0.4)',
-                                color: '#fca5a5',
+                                background: 'color-mix(in srgb, var(--ca-danger) 12%, transparent)',
+                                border: '1px solid color-mix(in srgb, var(--ca-danger) 40%, transparent)',
+                                color: 'var(--ca-danger)',
                                 fontSize: '0.8rem',
                             }}
                         >
@@ -274,7 +274,7 @@ export function ChartBuilderModal<TData>({
                         justifyContent: 'flex-end',
                         gap: 10,
                         padding: '14px 20px',
-                        borderTop: '1px solid rgba(255,255,255,0.08)',
+                        borderTop: '1px solid var(--ca-border)',
                     }}
                 >
                     <button
@@ -284,9 +284,9 @@ export function ChartBuilderModal<TData>({
                         style={{
                             padding: '8px 16px',
                             borderRadius: 8,
-                            border: '1px solid rgba(255,255,255,0.12)',
+                            border: '1px solid var(--ca-border)',
                             background: 'transparent',
-                            color: '#cbd5e1',
+                            color: 'var(--ca-text-secondary)',
                             fontSize: '0.85rem',
                             cursor: saving ? 'not-allowed' : 'pointer',
                         }}
@@ -301,8 +301,8 @@ export function ChartBuilderModal<TData>({
                             padding: '8px 18px',
                             borderRadius: 8,
                             border: 'none',
-                            background: validation ? 'rgba(59,130,246,0.4)' : 'linear-gradient(90deg, #3b82f6, #2563eb)',
-                            color: '#fff',
+                            background: validation ? 'color-mix(in srgb, var(--ca-accent) 40%, transparent)' : 'linear-gradient(90deg, var(--ca-accent), var(--ca-accent-hover))',
+                            color: 'var(--ca-text)',
                             fontSize: '0.85rem',
                             fontWeight: 700,
                             cursor: saving || validation ? 'not-allowed' : 'pointer',

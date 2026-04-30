@@ -8,6 +8,7 @@ import {
     fetchPeopleByDivision,
     updatePersonInClub,
 } from '@/lib/services/personService';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
 function jsonError(message: string, status: number) {
@@ -42,9 +43,10 @@ export async function GET(request: NextRequest) {
     if (access.error) return access.error;
 
     try {
+        const admin = createAdminClient();
         const people = divisionId
-            ? await fetchPeopleByDivision(clubId, divisionId)
-            : await fetchPeopleByClub(clubId);
+            ? await fetchPeopleByDivision(clubId, divisionId, admin)
+            : await fetchPeopleByClub(clubId, admin);
         return NextResponse.json({ ok: true, data: people });
     } catch (error) {
         return jsonError(error instanceof Error ? error.message : 'No se pudo cargar el plantel', 500);
@@ -61,6 +63,7 @@ export async function POST(request: NextRequest) {
     const access = await ensureManagedClub(clubId);
     if (access.error) return access.error;
 
+    const admin = createAdminClient();
     const result = await addPersonToClub(clubId, {
         first_name: typeof body?.first_name === 'string' ? body.first_name : '',
         last_name: typeof body?.last_name === 'string' ? body.last_name : '',
@@ -77,7 +80,7 @@ export async function POST(request: NextRequest) {
         squad_role: typeof body?.squad_role === 'string' ? body.squad_role : undefined,
         existing_person_id: typeof body?.existing_person_id === 'string' ? body.existing_person_id : undefined,
         force_create_new: body?.force_create_new === true,
-    });
+    }, admin);
 
     if (!result.success) {
         return NextResponse.json({
@@ -103,6 +106,7 @@ export async function PATCH(request: NextRequest) {
     const access = await ensureManagedClub(clubId);
     if (access.error) return access.error;
 
+    const admin = createAdminClient();
     const result = await updatePersonInClub(clubId, personId, {
         first_name: typeof body?.first_name === 'string' ? body.first_name : '',
         last_name: typeof body?.last_name === 'string' ? body.last_name : '',
@@ -117,7 +121,7 @@ export async function PATCH(request: NextRequest) {
         height: typeof body?.height === 'number' ? body.height : undefined,
         jersey_number: typeof body?.jersey_number === 'number' ? body.jersey_number : undefined,
         squad_role: typeof body?.squad_role === 'string' ? body.squad_role : undefined,
-    });
+    }, admin);
 
     if (!result.success) {
         return jsonError(result.error || 'No se pudo actualizar la ficha', 400);
@@ -138,7 +142,8 @@ export async function DELETE(request: NextRequest) {
     const access = await ensureManagedClub(clubId);
     if (access.error) return access.error;
 
-    const result = await deletePersonFromClub(clubId, personId, divisionId);
+    const admin = createAdminClient();
+    const result = await deletePersonFromClub(clubId, personId, divisionId, admin);
     if (!result.success) {
         return jsonError(result.error || 'No se pudo eliminar la ficha', 400);
     }

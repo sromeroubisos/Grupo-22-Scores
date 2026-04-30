@@ -369,7 +369,7 @@ export function ClubSquadsTab(props: ClubSquadsTabProps) {
                                                 {person.birth_date ? new Date(person.birth_date).toLocaleDateString('es-AR') : 'Sin fecha'}
                                             </td>
                                             <td>
-                                                <span className="player-tag-v2" style={{ color: 'var(--success)', borderColor: 'rgba(34,197,94,0.3)' }}>
+                                                <span className="player-tag-v2" style={{ color: 'var(--ca-success)', borderColor: 'color-mix(in srgb, var(--ca-success) 30%, transparent)' }}>
                                                     {person.status || 'ACTIVE'}
                                                 </span>
                                             </td>

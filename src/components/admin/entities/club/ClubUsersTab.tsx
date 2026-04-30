@@ -590,7 +590,7 @@ export function ClubUsersTab({ clubId }: ClubUsersTabProps) {
                 </form>
 
                 {/* Links de invitacion */}
-                <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.5rem' }}>
+                <div style={{ marginTop: '2rem', borderTop: '1px solid var(--ca-border)', paddingTop: '1.5rem' }}>
                     <div className="club-ops-panel-header" style={{ marginBottom: '1rem' }}>
                         <div>
                             <div className="card-title">Links de invitacion</div>

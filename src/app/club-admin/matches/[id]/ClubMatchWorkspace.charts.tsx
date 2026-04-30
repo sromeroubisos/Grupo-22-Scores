@@ -8,17 +8,17 @@ export function ComparisonBarChart({ home, away, max, homeLabel, awayLabel }: { 
   return (
     <div style={{ display: 'grid', gap: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem' }}>
-        <span style={{ minWidth: 60, textAlign: 'right', color: '#6ee7b7' }}>{homeLabel || 'Local'}</span>
-        <div style={{ flex: 1, height: 20, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden', display: 'flex', position: 'relative' }}>
-          <div style={{ width: `${homePct}%`, background: 'linear-gradient(90deg, #10b981, #34d399)', height: '100%', transition: 'width 0.4s ease' }} />
-          {!hasData && <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)' }}>Sin datos</span>}
+        <span style={{ minWidth: 60, textAlign: 'right', color: 'var(--success)' }}>{homeLabel || 'Local'}</span>
+        <div style={{ flex: 1, height: 20, background: 'var(--surface)', borderRadius: 4, overflow: 'hidden', display: 'flex', position: 'relative' }}>
+          <div style={{ width: `${homePct}%`, background: 'linear-gradient(90deg, var(--success), color-mix(in srgb, var(--success) 70%, #fff))', height: '100%', transition: 'width 0.4s ease' }} />
+          {!hasData && <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', color: 'var(--text-dim)' }}>Sin datos</span>}
         </div>
         <strong style={{ minWidth: 28, textAlign: 'right' }}>{home}</strong>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem' }}>
-        <span style={{ minWidth: 60, textAlign: 'right', color: '#93c5fd' }}>{awayLabel || 'Visitante'}</span>
-        <div style={{ flex: 1, height: 20, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden', display: 'flex', position: 'relative' }}>
-          <div style={{ width: `${awayPct}%`, background: 'linear-gradient(90deg, #3b82f6, #60a5fa)', height: '100%', transition: 'width 0.4s ease' }} />
+        <span style={{ minWidth: 60, textAlign: 'right', color: 'var(--club-accent)' }}>{awayLabel || 'Visitante'}</span>
+        <div style={{ flex: 1, height: 20, background: 'var(--surface)', borderRadius: 4, overflow: 'hidden', display: 'flex', position: 'relative' }}>
+          <div style={{ width: `${awayPct}%`, background: 'linear-gradient(90deg, var(--club-accent), color-mix(in srgb, var(--club-accent) 70%, #fff))', height: '100%', transition: 'width 0.4s ease' }} />
         </div>
         <strong style={{ minWidth: 28, textAlign: 'right' }}>{away}</strong>
       </div>
@@ -38,14 +38,14 @@ export function MiniBarChart({ data }: { data: Array<{ label: string; home: numb
             <span>{item.label}</span>
             <span>{item.home} - {item.away}</span>
           </div>
-          <div style={{ display: 'flex', gap: 4, height: 8, background: 'rgba(255,255,255,0.06)', borderRadius: 4, overflow: 'hidden' }}>
-            <div style={{ width: `${(item.home / max) * 100}%`, background: '#10b981', height: '100%', transition: 'width 0.4s ease' }} />
-            <div style={{ width: `${(item.away / max) * 100}%`, background: '#3b82f6', height: '100%', transition: 'width 0.4s ease' }} />
+          <div style={{ display: 'flex', gap: 4, height: 8, background: 'var(--surface-strong)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ width: `${(item.home / max) * 100}%`, background: 'var(--success)', height: '100%', transition: 'width 0.4s ease' }} />
+            <div style={{ width: `${(item.away / max) * 100}%`, background: 'var(--club-accent)', height: '100%', transition: 'width 0.4s ease' }} />
           </div>
         </div>
       ))}
       {!hasAnyData && (
-        <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', padding: '12px 0' }}>
+        <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-dim)', padding: '12px 0' }}>
           Cargá eventos en &quot;En Vivo&quot; para ver las estadísticas
         </div>
       )}
@@ -71,7 +71,7 @@ export function RadarChart({ axes, size = 280 }: { axes: RadarAxis[]; size?: num
 
   if (safeAxes.length === 0) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: size, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: size, fontSize: '0.85rem', color: 'var(--text-dim)' }}>
         Necesitás al menos 3 estadísticas para un radar
       </div>
     );
@@ -89,29 +89,29 @@ export function RadarChart({ axes, size = 280 }: { axes: RadarAxis[]; size?: num
     <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
       <svg width={size} height={size} style={{ opacity: hasData ? 1 : 0.4 }}>
         {[...Array(levels)].map((_, i) => (
-          <circle key={i} cx={cx} cy={cy} r={(radius * (i + 1)) / levels} fill="none" stroke="rgba(255,255,255,0.18)" />
+          <circle key={i} cx={cx} cy={cy} r={(radius * (i + 1)) / levels} fill="none" stroke="var(--border)" />
         ))}
         {safeAxes.map((_, i) => {
           const angle = (Math.PI * 2 * i) / safeAxes.length - Math.PI / 2;
           const x = cx + radius * Math.cos(angle);
           const y = cy + radius * Math.sin(angle);
-          return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="rgba(255,255,255,0.18)" />;
+          return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="var(--border)" />;
         })}
-        <polygon points={homePoly} fill="rgba(16,185,129,0.25)" stroke="#10b981" strokeWidth={2} />
-        <polygon points={awayPoly} fill="rgba(59,130,246,0.25)" stroke="#3b82f6" strokeWidth={2} />
+        <polygon points={homePoly} fill="color-mix(in srgb, var(--success) 25%, transparent)" stroke="var(--success)" strokeWidth={2} />
+        <polygon points={awayPoly} fill="color-mix(in srgb, var(--club-accent) 25%, transparent)" stroke="var(--club-accent)" strokeWidth={2} />
         {safeAxes.map((axis, i) => {
           const angle = (Math.PI * 2 * i) / safeAxes.length - Math.PI / 2;
           const x = cx + (radius + 18) * Math.cos(angle);
           const y = cy + (radius + 18) * Math.sin(angle);
           return (
-            <text key={`label-${i}`} x={x} y={y} textAnchor="middle" dominantBaseline="middle" fill="rgba(255,255,255,0.7)" fontSize={11} fontWeight={700}>
+            <text key={`label-${i}`} x={x} y={y} textAnchor="middle" dominantBaseline="middle" fill="var(--text-main)" fontSize={11} fontWeight={700}>
               {axis.label}
             </text>
           );
         })}
       </svg>
       {!hasData && (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', color: 'var(--text-dim)' }}>
           Sin datos de eventos
         </div>
       )}

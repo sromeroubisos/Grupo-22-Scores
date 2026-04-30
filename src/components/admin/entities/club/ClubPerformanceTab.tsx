@@ -2269,7 +2269,7 @@ export function ClubPerformanceTab({
                         {section.label}
                     </button>
                 ))}
-                <span style={{ width: 1, background: 'rgba(255,255,255,0.08)', margin: '4px 8px' }} />
+                <span style={{ width: 1, background: 'var(--ca-border)', margin: '4px 8px' }} />
                 {ADVANCED_TABS.map((section) => (
                     <button
                         key={section.id}

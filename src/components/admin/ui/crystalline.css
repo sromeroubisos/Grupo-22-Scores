@@ -20,6 +20,48 @@
   --crys-transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+[data-theme="light"] {
+  --crys-bg-bedrock: #f8fafc;
+  --crys-bg-elevated: rgba(241, 245, 249, 0.85);
+  --crys-border: rgba(0, 0, 0, 0.08);
+  --crys-border-strong: rgba(0, 0, 0, 0.14);
+  --crys-text-primary: #0f172a;
+  --crys-text-secondary: #475569;
+  --crys-text-muted: #94a3b8;
+  --crys-accent-start: #00c2ff;
+  --crys-accent-mid: #0055d4;
+  --crys-accent-end: #5500cc;
+  --crys-accent-gradient: linear-gradient(135deg, #00c2ff 0%, #0055d4 50%, #5500cc 100%);
+  --crys-success: #059669;
+  --crys-warning: #d97706;
+  --crys-error: #dc2626;
+  --crys-step-inactive: #e2e8f0;
+}
+
+[data-theme="light"] .crys-glass::after {
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.06), transparent);
+}
+
+[data-theme="light"] .crys-btn-ghost:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .crys-table td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .crys-table tr:hover td {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .crys-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .crys-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
 .crys-glass {
   background: var(--crys-bg-elevated);
   border: 1px solid var(--crys-border);

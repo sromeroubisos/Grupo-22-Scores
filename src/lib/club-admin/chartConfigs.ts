@@ -76,7 +76,9 @@ type ApiRes<T> = ApiOk<T> | ApiErr;
 
 async function parse<T>(res: Response): Promise<T> {
     const json = (await res.json()) as ApiRes<T>;
-    if (!json.ok) throw new Error(json.error || 'Request failed');
+    if (!json.ok) {
+        throw new Error('error' in json ? json.error : 'Request failed');
+    }
     return json.data;
 }
 

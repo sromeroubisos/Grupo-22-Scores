@@ -75,7 +75,7 @@ export function ClubPerformanceShell({
                 cursor: 'pointer',
                 border: 'none',
                 background: isActive ? 'var(--crys-accent-gradient)' : 'transparent',
-                color: isActive ? 'white' : 'var(--crys-text-secondary)',
+                color: isActive ? 'var(--crys-text-primary)' : 'var(--crys-text-secondary)',
                 transition: 'var(--crys-transition)',
               }}
             >

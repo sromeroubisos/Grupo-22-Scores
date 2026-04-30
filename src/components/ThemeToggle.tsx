@@ -5,6 +5,11 @@ import styles from './ThemeToggle.module.css';
 
 type Theme = 'dark' | 'light';
 
+function applyTheme(theme: Theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+}
+
 export default function ThemeToggle() {
     const [theme, setTheme] = useState<Theme>('dark');
     const [mounted, setMounted] = useState(false);
@@ -15,13 +20,13 @@ export default function ThemeToggle() {
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
         setTheme(initialTheme);
-        document.documentElement.setAttribute('data-theme', initialTheme);
+        applyTheme(initialTheme);
     }, []);
 
     const toggleTheme = () => {
         const newTheme = theme === 'dark' ? 'light' : 'dark';
         setTheme(newTheme);
-        document.documentElement.setAttribute('data-theme', newTheme);
+        applyTheme(newTheme);
         localStorage.setItem('g22-theme', newTheme);
     };
 

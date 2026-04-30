@@ -12,7 +12,7 @@ function getStatusCopy(status: ClubDashboardHealth['status']) {
         return {
             label: 'Requiere atencion',
             color: 'var(--danger)',
-            glow: 'rgba(239, 68, 68, 0.12)',
+            glow: 'color-mix(in srgb, var(--ca-danger) 12%, transparent)',
             Icon: ShieldAlert,
         };
     }
@@ -21,7 +21,7 @@ function getStatusCopy(status: ClubDashboardHealth['status']) {
         return {
             label: 'Con alertas',
             color: 'var(--warning)',
-            glow: 'rgba(245, 158, 11, 0.12)',
+            glow: 'color-mix(in srgb, var(--ca-warning) 12%, transparent)',
             Icon: Activity,
         };
     }
@@ -29,7 +29,7 @@ function getStatusCopy(status: ClubDashboardHealth['status']) {
     return {
         label: 'Operativo',
         color: 'var(--success)',
-        glow: 'rgba(0, 163, 101, 0.12)',
+        glow: 'color-mix(in srgb, var(--ca-success) 12%, transparent)',
         Icon: ShieldCheck,
     };
 }
@@ -122,8 +122,8 @@ export function ClubDataHealthCard({ health }: ClubDataHealthCardProps) {
                             textAlign: 'center',
                             padding: '1.25rem',
                             borderRadius: '1rem',
-                            border: '1px solid rgba(0, 163, 101, 0.16)',
-                            background: 'rgba(0, 163, 101, 0.05)',
+                            border: '1px solid color-mix(in srgb, var(--ca-success) 16%, transparent)',
+                            background: 'color-mix(in srgb, var(--ca-success) 5%, transparent)',
                         }}
                     >
                         <div>
@@ -143,7 +143,7 @@ export function ClubDataHealthCard({ health }: ClubDataHealthCardProps) {
                                     padding: '0.95rem 1rem',
                                     borderRadius: '0.9rem',
                                     background: 'var(--surface-elevated)',
-                                    border: `1px solid ${issue.severity === 'error' ? 'rgba(239, 68, 68, 0.14)' : 'rgba(245, 158, 11, 0.14)'}`,
+                                    border: `1px solid ${issue.severity === 'error' ? 'color-mix(in srgb, var(--ca-danger) 14%, transparent)' : 'color-mix(in srgb, var(--ca-warning) 14%, transparent)'}`,
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',

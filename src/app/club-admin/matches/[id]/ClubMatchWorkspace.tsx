@@ -1938,7 +1938,7 @@ export default function ClubMatchWorkspace({
                       const video = normalizeVideoUrl(matchDraft.broadcastUrl);
                       if (video.type === 'unsupported') {
                         return (
-                          <div style={{ padding: '32px 0', textAlign: 'center', color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem' }}>
+                          <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.85rem' }}>
                             {video.message || 'Cargá el link de transmisión para ver el partido aquí'}
                           </div>
                         );
@@ -2675,7 +2675,7 @@ export default function ClubMatchWorkspace({
                                   type="button"
                                   onClick={() => seekVideoTo(event.videoTime || '')}
                                   title={`Saltar al ${event.videoTime} del video`}
-                                  style={{ cursor: 'pointer', background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 4, padding: '2px 6px', fontSize: '0.7rem', color: '#93c5fd', marginLeft: 6, whiteSpace: 'nowrap' }}
+                                  style={{ cursor: 'pointer', background: 'color-mix(in srgb, var(--club-accent) 15%, transparent)', border: '1px solid color-mix(in srgb, var(--club-accent) 30%, transparent)', borderRadius: 4, padding: '2px 6px', fontSize: '0.7rem', color: 'var(--club-accent)', marginLeft: 6, whiteSpace: 'nowrap' }}
                                 >
                                   <Play size={12} /> {event.videoTime}
                                 </button>
@@ -2690,7 +2690,7 @@ export default function ClubMatchWorkspace({
                                 {(() => {
                                   const eventScore = timelineScoreById.get(event.id);
                                   return eventScore && eventScore.points > 0 ? (
-                                    <p style={{ color: '#86efac', fontWeight: 800 }}>
+                                    <p style={{ color: 'var(--success)', fontWeight: 800 }}>
                                       Marcador {eventScore.home} - {eventScore.away}
                                     </p>
                                   ) : null;
@@ -3392,7 +3392,7 @@ export default function ClubMatchWorkspace({
                     style={{
                       textAlign: 'center',
                       padding: '10px 8px',
-                      color: effectiveSortMetric === metric ? tone || '#f8fafc' : 'var(--text-dim)',
+                      color: effectiveSortMetric === metric ? tone || 'var(--text-main)' : 'var(--text-dim)',
                       fontWeight: 600,
                       textTransform: 'uppercase',
                       fontSize: '0.7rem',
@@ -3402,7 +3402,7 @@ export default function ClubMatchWorkspace({
                     <button type="button" style={sortableHeaderButtonStyle} onClick={() => handlePlayerStatsSort(metric)}>
                       <span>{label}</span>
                       {effectiveSortMetric === metric ? (
-                        <span style={{ fontSize: '0.72rem', color: tone || '#f8fafc' }}>
+                        <span style={{ fontSize: '0.72rem', color: tone || 'var(--text-main)' }}>
                           {playerStatsSortDirection === 'desc' ? 'v' : '^'}
                         </span>
                       ) : null}
@@ -3438,7 +3438,7 @@ export default function ClubMatchWorkspace({
                               style={{
                                 borderRadius: 10,
                                 border: '1px solid var(--border)',
-                                background: 'rgba(15,23,42,0.7)',
+                                background: 'var(--surface-strong)',
                                 color: 'var(--text)',
                                 padding: '10px 12px',
                                 fontSize: '0.9rem',
@@ -3457,7 +3457,7 @@ export default function ClubMatchWorkspace({
                               style={{
                                 borderRadius: 10,
                                 border: '1px solid var(--border)',
-                                background: 'rgba(15,23,42,0.7)',
+                                background: 'var(--surface-strong)',
                                 color: 'var(--text)',
                                 padding: '10px 12px',
                                 fontSize: '0.9rem',
@@ -3495,7 +3495,7 @@ export default function ClubMatchWorkspace({
                                       {renderSortableHeader('Pase Fwd', 'forwardPasses')}
                                       {renderSortableHeader('Knock On', 'knockOns')}
                                       {renderSortableHeader('Ruck propio', 'rucksFor')}
-                                      {renderSortableHeader('Atq Tot', 'category_total', '#93c5fd')}
+                                      {renderSortableHeader('Atq Tot', 'category_total', 'var(--club-accent)')}
                                     </>
                                   ) : (
                                     <>
@@ -3504,14 +3504,14 @@ export default function ClubMatchWorkspace({
                                       {renderSortableHeader('Ruck contra', 'rucksAgainst')}
                                       {renderSortableHeader('Tackle', 'tackles')}
                                       {renderSortableHeader('Line en contra', 'linesAgainst')}
-                                      {renderSortableHeader('Def Tot', 'category_total', '#fca5a5')}
+                                      {renderSortableHeader('Def Tot', 'category_total', 'var(--danger)')}
                                     </>
                                   )}
                                 </tr>
                               </thead>
                               <tbody>
                                 {filteredPlayerStats.map((player, idx) => (
-                                  <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                                  <tr key={idx} style={{ borderBottom: '1px solid var(--border)' }}>
                                     <td style={{ padding: '10px 8px', fontWeight: 600 }}>{player.name}</td>
                                     <td style={{ padding: '10px 8px', color: 'var(--text-dim)' }}>{player.team === 'home' ? (homeClub?.short_name || 'Local') : player.team === 'away' ? (awayClub?.short_name || 'Visitante') : '-'}</td>
                                     {playerStatsTab === 'ataque' ? (
@@ -3530,7 +3530,7 @@ export default function ClubMatchWorkspace({
                                         <td style={{ padding: '10px 8px', textAlign: 'center', fontFamily: 'monospace' }}>{player.forwardPasses || '-'}</td>
                                         <td style={{ padding: '10px 8px', textAlign: 'center', fontFamily: 'monospace' }}>{player.knockOns || '-'}</td>
                                         <td style={{ padding: '10px 8px', textAlign: 'center', fontFamily: 'monospace' }}>{player.rucksFor || '-'}</td>
-                                        <td style={{ padding: '10px 8px', textAlign: 'center', fontWeight: 700, fontFamily: 'monospace', color: '#93c5fd' }}>{getPlayerAttackTotal(player) || '-'}</td>
+                                        <td style={{ padding: '10px 8px', textAlign: 'center', fontWeight: 700, fontFamily: 'monospace', color: 'var(--club-accent)' }}>{getPlayerAttackTotal(player) || '-'}</td>
                                       </>
                                     ) : (
                                       <>
@@ -3539,7 +3539,7 @@ export default function ClubMatchWorkspace({
                                         <td style={{ padding: '10px 8px', textAlign: 'center', fontFamily: 'monospace' }}>{player.rucksAgainst || '-'}</td>
                                         <td style={{ padding: '10px 8px', textAlign: 'center', fontFamily: 'monospace' }}>{player.tackles || '-'}</td>
                                         <td style={{ padding: '10px 8px', textAlign: 'center', fontFamily: 'monospace' }}>{player.linesAgainst || '-'}</td>
-                                        <td style={{ padding: '10px 8px', textAlign: 'center', fontWeight: 700, fontFamily: 'monospace', color: '#fca5a5' }}>{getPlayerDefenseTotal(player) || '-'}</td>
+                                        <td style={{ padding: '10px 8px', textAlign: 'center', fontWeight: 700, fontFamily: 'monospace', color: 'var(--danger)' }}>{getPlayerDefenseTotal(player) || '-'}</td>
                                       </>
                                     )}
                                   </tr>
@@ -3587,18 +3587,18 @@ export default function ClubMatchWorkspace({
                   <>
                     <style dangerouslySetInnerHTML={{ __html: `
                       .postTabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-                      .postTab { padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #94a3b8; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
-                      .postTab:hover { background: rgba(255,255,255,0.08); color: #f8fafc; }
-                      .postTabActive { background: rgba(59,130,246,0.18) !important; border-color: rgba(59,130,246,0.35) !important; color: #93c5fd !important; }
+                      .postTab { padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text-dim); font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
+                      .postTab:hover { background: var(--surface-strong); color: var(--text-main); }
+                      .postTabActive { background: color-mix(in srgb, var(--club-accent) 18%, transparent) !important; border-color: color-mix(in srgb, var(--club-accent) 35%, transparent) !important; color: var(--club-accent) !important; }
                       .scoreboardBig { display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; align-items: center; justify-items: center; padding: 24px; }
                       .scoreboardTeam { display: grid; gap: 8px; text-align: center; }
-                      .scoreboardTeam strong { font-size: 1.1rem; font-weight: 800; color: #94a3b8; }
-                      .scoreboardTeam span { font-size: 3rem; font-weight: 900; letter-spacing: -0.04em; line-height: 1; color: #f8fafc; }
-                      .scoreboardVersus { font-size: 1.5rem; font-weight: 800; color: #94a3b8; opacity: 0.5; }
+                      .scoreboardTeam strong { font-size: 1.1rem; font-weight: 800; color: var(--text-dim); }
+                      .scoreboardTeam span { font-size: 3rem; font-weight: 900; letter-spacing: -0.04em; line-height: 1; color: var(--text-main); }
+                      .scoreboardVersus { font-size: 1.5rem; font-weight: 800; color: var(--text-dim); opacity: 0.5; }
                       .kpiGrid { display: grid; gap: 10px; }
-                      .kpiItem { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 8px; background: rgba(255,255,255,0.03); font-size: 0.85rem; }
-                      .kpiItem span { color: #94a3b8; }
-                      .kpiItem strong { font-weight: 800; font-size: 1rem; color: #f8fafc; }
+                      .kpiItem { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 8px; background: var(--surface); font-size: 0.85rem; }
+                      .kpiItem span { color: var(--text-dim); }
+                      .kpiItem strong { font-weight: 800; font-size: 1rem; color: var(--text-main); }
                       .timelineRowChild { margin-left: 24px !important; border-left: 3px solid rgba(59,130,246,0.4) !important; background: rgba(59,130,246,0.06) !important; }
                     ` }} />
                     <HeaderBlock title="Cierre postpartido" subtitle="Análisis, estadísticas e informe completo del partido." />
@@ -3664,7 +3664,7 @@ export default function ClubMatchWorkspace({
                           <h4 style={{ marginBottom: 12, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.6 }}>Insights</h4>
                           <ul style={{ display: 'grid', gap: 8, fontSize: '0.85rem' }}>
                             {insights.map((insight, i) => (
-                              <li key={i} style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: 8, borderLeft: '3px solid rgba(59,130,246,0.5)' }}>{insight}</li>
+                              <li key={i} style={{ padding: '8px 12px', background: 'var(--surface)', borderRadius: 8, borderLeft: '3px solid var(--club-accent)' }}>{insight}</li>
                             ))}
                           </ul>
                         </div>
@@ -3686,12 +3686,12 @@ export default function ClubMatchWorkspace({
                         ))}
                         <div className={styles.card} style={{ gridColumn: '1 / -1' }}>
                           <h4 style={{ marginBottom: 8, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.6 }}>Tasa de conversión 22</h4>
-                          <p style={{ fontSize: '0.8rem', color: 'rgba(248,250,252,0.55)', marginBottom: 12 }}>
+                          <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: 12 }}>
                             (Try, try penal, penal a palos o drop) por cada visita al 22 rival.
                           </p>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, fontSize: '0.95rem' }}>
-                            <div><span style={{ color: '#6ee7b7', fontWeight: 700 }}>{homeClub?.short_name || 'Local'}</span>: <strong style={{ fontFamily: 'monospace' }}>{formatTasa22FromStats(stats, 'home')}</strong></div>
-                            <div><span style={{ color: '#93c5fd', fontWeight: 700 }}>{awayClub?.short_name || 'Visitante'}</span>: <strong style={{ fontFamily: 'monospace' }}>{formatTasa22FromStats(stats, 'away')}</strong></div>
+                            <div><span style={{ color: 'var(--success)', fontWeight: 700 }}>{homeClub?.short_name || 'Local'}</span>: <strong style={{ fontFamily: 'monospace' }}>{formatTasa22FromStats(stats, 'home')}</strong></div>
+                            <div><span style={{ color: 'var(--club-accent)', fontWeight: 700 }}>{awayClub?.short_name || 'Visitante'}</span>: <strong style={{ fontFamily: 'monospace' }}>{formatTasa22FromStats(stats, 'away')}</strong></div>
                           </div>
                         </div>
                       </div>
@@ -3743,7 +3743,7 @@ export default function ClubMatchWorkspace({
                                   {(() => {
                                     const eventScore = timelineScoreById.get(event.id);
                                     return eventScore && eventScore.points > 0 ? (
-                                      <p style={{ color: '#86efac', fontWeight: 800 }}>
+                                      <p style={{ color: 'var(--success)', fontWeight: 800 }}>
                                         Marcador {eventScore.home} - {eventScore.away}
                                       </p>
                                     ) : null;
@@ -3770,8 +3770,8 @@ export default function ClubMatchWorkspace({
                             { label: 'Line', home: stats.lines.home.won, away: stats.lines.away.won, max: 15 },
                           ]} />
                           <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginTop: 12, fontSize: '0.8rem' }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 12, height: 12, background: '#10b981', borderRadius: 3 }} /> {homeClub?.short_name || 'Local'}</span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 12, height: 12, background: '#3b82f6', borderRadius: 3 }} /> {awayClub?.short_name || 'Visitante'}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 12, height: 12, background: 'var(--success)', borderRadius: 3 }} /> {homeClub?.short_name || 'Local'}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 12, height: 12, background: 'var(--club-accent)', borderRadius: 3 }} /> {awayClub?.short_name || 'Visitante'}</span>
                           </div>
                         </div>
                         <div className={styles.card}>

@@ -31,7 +31,7 @@ export function CustomChartRenderer<TData>({
 
     if (entries.length === 0) {
         return (
-            <div style={{ padding: 16, fontSize: '0.85rem', color: 'rgba(255,255,255,0.55)', textAlign: 'center' }}>
+            <div style={{ padding: 16, fontSize: '0.85rem', color: 'var(--ca-text-secondary)', textAlign: 'center' }}>
                 Las estadísticas elegidas ya no están disponibles. Editá el gráfico para actualizarlas.
             </div>
         );
@@ -43,7 +43,7 @@ export function CustomChartRenderer<TData>({
             const value = entry.getValue(data);
             return (
                 <div>
-                    <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>{entry.label}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--ca-text-secondary)', marginBottom: 8 }}>{entry.label}</div>
                     <ComparisonBarChart
                         home={value.home}
                         away={value.away}
@@ -102,11 +102,11 @@ export function CustomChartRenderer<TData>({
 function ChartLegend({ homeLabel = 'Local', awayLabel = 'Visitante' }: { homeLabel?: string; awayLabel?: string }) {
     return (
         <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 12, fontSize: '0.75rem' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#a7f3d0' }}>
-                <span style={{ width: 10, height: 10, background: '#10b981', borderRadius: 2 }} /> {homeLabel}
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--ca-success)' }}>
+                <span style={{ width: 10, height: 10, background: 'var(--ca-success)', borderRadius: 2 }} /> {homeLabel}
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#bfdbfe' }}>
-                <span style={{ width: 10, height: 10, background: '#3b82f6', borderRadius: 2 }} /> {awayLabel}
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--ca-accent)' }}>
+                <span style={{ width: 10, height: 10, background: 'var(--ca-accent)', borderRadius: 2 }} /> {awayLabel}
             </span>
         </div>
     );

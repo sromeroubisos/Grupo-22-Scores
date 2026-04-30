@@ -126,8 +126,8 @@ export function ChartConfigPanel<TData>({
                 marginTop: 24,
                 padding: 18,
                 borderRadius: 14,
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'var(--ca-surface-hover)',
+                border: '1px solid var(--ca-border)',
             }}
         >
             <header
@@ -141,8 +141,8 @@ export function ChartConfigPanel<TData>({
                 }}
             >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <BarChart3 size={18} color="#60a5fa" />
-                    <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0' }}>
+                    <BarChart3 size={18} color="var(--ca-accent)" />
+                    <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--ca-text)' }}>
                         {sectionTitle}
                     </h3>
                 </div>
@@ -156,8 +156,8 @@ export function ChartConfigPanel<TData>({
                         padding: '8px 14px',
                         borderRadius: 8,
                         border: 'none',
-                        background: 'linear-gradient(90deg, #3b82f6, #2563eb)',
-                        color: '#fff',
+                        background: 'linear-gradient(90deg, var(--ca-accent), var(--ca-accent-hover))',
+                        color: 'var(--ca-text)',
                         fontSize: '0.8rem',
                         fontWeight: 700,
                         cursor: 'pointer',
@@ -173,8 +173,8 @@ export function ChartConfigPanel<TData>({
                         padding: '10px 12px',
                         marginBottom: 12,
                         borderRadius: 8,
-                        background: 'rgba(239,68,68,0.12)',
-                        border: '1px solid rgba(239,68,68,0.4)',
+                        background: 'color-mix(in srgb, var(--ca-danger) 12%, transparent)',
+                        border: '1px solid color-mix(in srgb, var(--ca-danger) 40%, transparent)',
                         color: '#fca5a5',
                         fontSize: '0.8rem',
                     }}
@@ -184,11 +184,11 @@ export function ChartConfigPanel<TData>({
             )}
 
             {loading ? (
-                <div style={{ padding: 30, textAlign: 'center', fontSize: '0.85rem', color: 'rgba(226,232,240,0.6)' }}>
+                <div style={{ padding: 30, textAlign: 'center', fontSize: '0.85rem', color: 'var(--ca-text-secondary)' }}>
                     Cargando gráficos…
                 </div>
             ) : configs.length === 0 ? (
-                <div style={{ padding: 24, textAlign: 'center', fontSize: '0.85rem', color: 'rgba(226,232,240,0.55)' }}>
+                <div style={{ padding: 24, textAlign: 'center', fontSize: '0.85rem', color: 'var(--ca-text-secondary)' }}>
                     {emptyHint}
                 </div>
             ) : (
@@ -199,8 +199,8 @@ export function ChartConfigPanel<TData>({
                             style={{
                                 padding: 14,
                                 borderRadius: 12,
-                                background: 'rgba(15,23,42,0.6)',
-                                border: '1px solid rgba(255,255,255,0.08)',
+                                background: 'var(--ca-surface)',
+                                border: '1px solid var(--ca-border)',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: 12,
@@ -212,7 +212,7 @@ export function ChartConfigPanel<TData>({
                                         style={{
                                             fontSize: '0.85rem',
                                             fontWeight: 700,
-                                            color: '#fff',
+                                            color: 'var(--ca-text)',
                                             whiteSpace: 'nowrap',
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
@@ -220,7 +220,7 @@ export function ChartConfigPanel<TData>({
                                     >
                                         {config.title || defaultTitle(config)}
                                     </div>
-                                    <div style={{ fontSize: '0.7rem', color: 'rgba(226,232,240,0.55)', marginTop: 2 }}>
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--ca-text-secondary)', marginTop: 2 }}>
                                         {config.statKeys.length} stat{config.statKeys.length === 1 ? '' : 's'} · {chartTypeLabel(config.chartType)}
                                     </div>
                                 </div>
@@ -306,9 +306,9 @@ function IconButton({
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: 6,
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.04)',
-                color: accent === 'danger' ? '#fca5a5' : '#cbd5e1',
+                border: '1px solid var(--ca-border)',
+                background: 'var(--ca-surface-hover)',
+                color: accent === 'danger' ? 'var(--ca-danger)' : 'var(--ca-text-secondary)',
                 cursor: disabled ? 'not-allowed' : 'pointer',
                 opacity: disabled ? 0.4 : 1,
                 transition: 'all 0.15s ease',

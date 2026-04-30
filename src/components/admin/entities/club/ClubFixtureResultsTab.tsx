@@ -821,10 +821,10 @@ export function ClubFixtureResultsTab({
             {/* ── Calendar Modal ── */}
             {calendarOpen && (
                 <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md" onClick={() => setCalendarOpen(false)}>
-                    <div className="bg-[#111118] border border-white/10 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-[var(--ca-surface)] border border-[var(--ca-border)] rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-5 border-b border-white/10">
                             <h3 className="text-lg font-bold">Calendario del club</h3>
-                            <button onClick={() => setCalendarOpen(false)} className="text-white/50 hover:text-white"><X className="w-5 h-5" /></button>
+                            <button onClick={() => setCalendarOpen(false)} className="text-[var(--ca-text-secondary)] hover:text-white"><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-5">
                             <div className="space-y-2">
@@ -834,9 +834,9 @@ export function ClubFixtureResultsTab({
                                     .map((entry) => {
                                         const w = formatDateTime(entry.match.dateTime);
                                         return (
-                                            <div key={entry.match.id} className="flex items-center gap-4 p-3 bg-white/5 rounded-lg border border-white/5">
+                                            <div key={entry.match.id} className="flex items-center gap-4 p-3 bg-[var(--ca-surface-hover)] rounded-lg border border-white/5">
                                                 <div className="text-center min-w-[60px]">
-                                                    <div className="text-xs text-white/40 uppercase">{w.day.split(' ')[0]}</div>
+                                                    <div className="text-xs text-[var(--ca-text-muted)] uppercase">{w.day.split(' ')[0]}</div>
                                                     <div className="text-lg font-bold">{w.day.split(' ')[1]}</div>
                                                 </div>
                                                 <div className="flex-1">

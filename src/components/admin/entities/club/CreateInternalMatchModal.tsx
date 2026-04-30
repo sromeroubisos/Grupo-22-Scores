@@ -248,7 +248,7 @@ export function CreateInternalMatchModal({
                     justify-content: center;
                     align-items: center;
                     padding: 16px;
-                    background-color: #05070a;
+                    background-color: var(--color-bg-primary);
                     background-image:
                         radial-gradient(circle at 20% 30%, rgba(0, 255, 136, 0.05) 0%, transparent 40%),
                         radial-gradient(circle at 80% 70%, rgba(0, 136, 255, 0.05) 0%, transparent 40%);
@@ -259,10 +259,10 @@ export function CreateInternalMatchModal({
                     position: relative;
                     width: 100%;
                     max-width: 640px;
-                    background: rgba(255, 255, 255, 0.03);
+                    background: var(--color-bg-hover);
                     backdrop-filter: blur(40px) saturate(150%);
                     -webkit-backdrop-filter: blur(40px) saturate(150%);
-                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    border: 1px solid var(--color-border);
                     border-radius: 32px;
                     padding: 40px;
                     box-shadow:
@@ -271,7 +271,7 @@ export function CreateInternalMatchModal({
                     animation: cim-panelEntry 1s cubic-bezier(0.16, 1, 0.3, 1);
                     overflow: hidden;
                     font-family: 'Plus Jakarta Sans', sans-serif;
-                    color: #ffffff;
+                    color: var(--color-text-primary);
                 }
 
                 .cim-glass::before {
@@ -305,13 +305,13 @@ export function CreateInternalMatchModal({
                 }
 
                 .cim-header-content p {
-                    color: rgba(255, 255, 255, 0.6);
+                    color: var(--color-text-secondary);
                     font-size: 1rem;
                 }
 
                 .cim-btn-close {
-                    background: rgba(255,255,255,0.05);
-                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    background: var(--color-bg-hover);
+                    border: 1px solid var(--color-border);
                     width: 40px;
                     height: 40px;
                     border-radius: 50%;
@@ -320,12 +320,12 @@ export function CreateInternalMatchModal({
                     justify-content: center;
                     cursor: pointer;
                     transition: all 0.3s ease;
-                    color: white;
+                    color: var(--color-text-primary);
                     flex-shrink: 0;
                 }
 
                 .cim-btn-close:hover {
-                    background: rgba(255,255,255,0.1);
+                    background: var(--color-bg-tertiary);
                     transform: rotate(90deg);
                 }
 
@@ -343,7 +343,7 @@ export function CreateInternalMatchModal({
                     font-weight: 700;
                     text-transform: uppercase;
                     letter-spacing: 0.2em;
-                    color: rgba(255, 255, 255, 0.6);
+                    color: var(--color-text-secondary);
                     margin-bottom: 16px;
                 }
 
@@ -420,7 +420,7 @@ export function CreateInternalMatchModal({
                 .cim-input-group label {
                     font-size: 0.8rem;
                     font-weight: 500;
-                    color: rgba(255, 255, 255, 0.6);
+                    color: var(--color-text-secondary);
                     padding-left: 4px;
                     font-family: 'Plus Jakarta Sans', sans-serif;
                 }
@@ -429,10 +429,10 @@ export function CreateInternalMatchModal({
                 .cim-input-group select,
                 .cim-input-group textarea {
                     background: rgba(255, 255, 255, 0.03);
-                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    border: 1px solid var(--color-border);
                     border-radius: 12px;
                     padding: 14px 16px;
-                    color: white;
+                    color: var(--color-text-primary);
                     font-family: 'Plus Jakarta Sans', sans-serif;
                     font-size: 0.95rem;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -445,9 +445,9 @@ export function CreateInternalMatchModal({
                 .cim-input-group input:focus,
                 .cim-input-group select:focus,
                 .cim-input-group textarea:focus {
-                    background: rgba(255, 255, 255, 0.07);
-                    border-color: rgba(255, 255, 255, 0.3);
-                    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+                    background: var(--color-bg-tertiary);
+                    border-color: var(--color-border-light);
+                    box-shadow: 0 0 20px var(--color-border);
                 }
 
                 .cim-input-group select {
@@ -458,19 +458,19 @@ export function CreateInternalMatchModal({
                 }
 
                 .cim-input-group ::placeholder {
-                    color: rgba(255,255,255,0.2);
+                    color: var(--color-text-muted);
                 }
 
                 .cim-input-group option {
-                    background: #111118;
-                    color: #fff;
+                    background: var(--color-bg-secondary);
+                    color: var(--color-text-primary);
                 }
 
                 .cim-error-container {
                     margin-top: 10px;
                     padding: 12px;
-                    background: rgba(255, 51, 68, 0.05);
-                    border-left: 2px solid #ff3344;
+                    background: color-mix(in srgb, var(--color-error) 5%, transparent);
+                    border-left: 2px solid var(--color-error);
                     border-radius: 4px 12px 12px 4px;
                     animation: cim-shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
                 }
@@ -478,7 +478,7 @@ export function CreateInternalMatchModal({
                 .cim-error-text {
                     font-family: 'Space Mono', monospace;
                     font-size: 0.75rem;
-                    color: #ff3344;
+                    color: var(--color-error);
                     line-height: 1.4;
                 }
 
@@ -495,7 +495,7 @@ export function CreateInternalMatchModal({
                     gap: 16px;
                     margin-top: 48px;
                     padding-top: 32px;
-                    border-top: 1px solid rgba(255, 255, 255, 0.12);
+                    border-top: 1px solid var(--color-border);
                 }
 
                 .cim-btn {
@@ -515,13 +515,13 @@ export function CreateInternalMatchModal({
 
                 .cim-btn-ghost {
                     background: transparent;
-                    border: 1px solid rgba(255, 255, 255, 0.12);
-                    color: rgba(255, 255, 255, 0.6);
+                    border: 1px solid var(--color-border);
+                    color: var(--color-text-secondary);
                 }
 
                 .cim-btn-ghost:hover {
-                    background: rgba(255,255,255,0.05);
-                    color: white;
+                    background: var(--color-bg-hover);
+                    color: var(--color-text-primary);
                     transform: translateY(-2px);
                 }
 
@@ -562,7 +562,7 @@ export function CreateInternalMatchModal({
                 .cim-info-text {
                     font-family: 'Space Mono', monospace;
                     font-size: 0.75rem;
-                    color: rgba(255,255,255,0.5);
+                    color: var(--color-text-secondary);
                     line-height: 1.4;
                     margin-top: 8px;
                 }
@@ -570,8 +570,8 @@ export function CreateInternalMatchModal({
                 .cim-new-panel {
                     margin-top: 12px;
                     padding: 16px;
-                    background: rgba(0, 255, 136, 0.05);
-                    border: 1px solid rgba(0, 255, 136, 0.2);
+                    background: color-mix(in srgb, var(--color-success) 5%, transparent);
+                    border: 1px solid color-mix(in srgb, var(--color-success) 20%, transparent);
                     border-radius: 12px;
                 }
 
@@ -581,8 +581,37 @@ export function CreateInternalMatchModal({
                     gap: 8px;
                     font-family: 'Space Mono', monospace;
                     font-size: 0.75rem;
-                    color: rgba(255,255,255,0.4);
+                    color: var(--color-text-secondary);
                     margin-top: 8px;
+                }
+
+                [data-theme="light"] .cim-glass {
+                    background: rgba(255, 255, 255, 0.7);
+                    box-shadow:
+                        0 25px 50px -12px rgba(0, 0, 0, 0.1),
+                        inset 0 0 20px rgba(0, 0, 0, 0.02);
+                }
+
+                [data-theme="light"] .cim-glass::before {
+                    background: linear-gradient(135deg, rgba(0,0,0,0.05) 0%, transparent 50%, rgba(0,0,0,0.02) 100%);
+                }
+
+                [data-theme="light"] .cim-header-content h1 {
+                    background: linear-gradient(to bottom, #0f172a 40%, rgba(15,23,42,0.5));
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                }
+
+                [data-theme="light"] .cim-input-group input:focus,
+                [data-theme="light"] .cim-input-group select:focus,
+                [data-theme="light"] .cim-input-group textarea:focus {
+                    background: rgba(0, 0, 0, 0.03);
+                    border-color: rgba(0, 0, 0, 0.2);
+                    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+                }
+
+                [data-theme="light"] .cim-btn-primary::after {
+                    background: radial-gradient(circle, rgba(0,0,0,0.15) 0%, transparent 60%);
                 }
             `}</style>
 

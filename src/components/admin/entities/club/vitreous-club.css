@@ -2142,7 +2142,7 @@
 
 .manager-btn-inline {
     background: #d32f2f;
-    color: #ffffff;
+    color: var(--text);
     border: none;
     padding: 6px 12px;
     font-size: 0.7rem;
@@ -2231,7 +2231,7 @@
 .btn-metal {
     background: linear-gradient(180deg, #2a2a30 0%, #1a1a1f 100%);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: var(--text);
     transition: all 0.2s ease;
 }
 
@@ -2881,7 +2881,7 @@
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 6px;
     padding: 6px 10px;
-    color: #fff;
+    color: var(--text);
     font-size: 0.85rem;
 }
 
@@ -5685,11 +5685,12 @@
 
 .club-training-form-label {
     display: block;
-    font-size: 0.68rem;
-    color: var(--text-muted);
+    font-size: 0.72rem;
+    color: rgba(226, 232, 240, 0.58);
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 800;
+    letter-spacing: 0.16em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 500;
     margin-bottom: 0.4rem;
 }
 
@@ -5697,20 +5698,22 @@
 .club-training-form-select,
 .club-training-form-textarea {
     width: 100%;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.65rem 0.9rem;
-    color: var(--text);
-    font-size: 0.85rem;
-    transition: border-color 0.2s ease;
+    background: rgba(7, 13, 24, 0.92);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 14px;
+    padding: 0.78rem 1rem;
+    color: var(--text-strong, #f8fbff);
+    font: inherit;
+    font-size: 0.88rem;
+    transition: border-color 0.18s ease, transform 0.18s ease;
 }
 
 .club-training-form-input:focus,
 .club-training-form-select:focus,
 .club-training-form-textarea:focus {
     outline: none;
-    border-color: rgba(59, 130, 246, 0.5);
+    border-color: rgba(101, 243, 255, 0.55);
+    transform: translateY(-1px);
 }
 
 .club-training-form-textarea {
@@ -5721,10 +5724,10 @@
 .club-training-architect {
     max-width: min(1360px, calc(100vw - 24px));
     border-radius: 28px;
+    border: 1px solid var(--gym-mineral-border, rgba(255, 255, 255, 0.08));
     background:
-        radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 26%),
-        radial-gradient(circle at bottom right, rgba(244, 63, 94, 0.08), transparent 26%),
-        #0b0f15;
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.005)),
+        #07090d;
 }
 
 .club-training-architect-header {
@@ -5739,12 +5742,12 @@
 }
 
 .club-training-architect-kicker {
-    color: #93c5fd;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem;
-    font-weight: 800;
+    color: rgba(226, 232, 240, 0.52);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.74rem;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.2em;
 }
 
 .club-training-architect-title-row {
@@ -5755,10 +5758,11 @@
 }
 
 .club-training-architect-title-row h3 {
-    font-size: clamp(1.8rem, 2.7vw, 2.65rem);
-    line-height: 0.96;
-    font-weight: 900;
-    letter-spacing: -0.06em;
+    font-size: clamp(1.65rem, 2.4vw, 2.2rem);
+    line-height: 1.05;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text-strong, #f8fbff);
 }
 
 .club-training-architect-title-row p {
@@ -5772,26 +5776,28 @@
 .club-training-architect-status {
     min-width: 180px;
     display: grid;
-    gap: 0.2rem;
+    gap: 0.25rem;
     justify-items: end;
-    padding: 1rem 1.1rem;
-    border-radius: 18px;
-    border: 1px solid rgba(59, 130, 246, 0.18);
-    background: rgba(59, 130, 246, 0.08);
+    padding: 0.95rem 1.1rem;
+    border-radius: 16px;
+    border: 1px solid var(--gym-mineral-border, rgba(255, 255, 255, 0.08));
+    background: rgba(7, 13, 24, 0.55);
 }
 
 .club-training-architect-status span {
-    color: #bfdbfe;
-    font-size: 0.68rem;
+    color: rgba(226, 232, 240, 0.5);
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-weight: 800;
+    letter-spacing: 0.16em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 500;
 }
 
 .club-training-architect-status strong {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.2rem;
-    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: var(--text-strong, #f8fbff);
 }
 
 .club-training-architect-body {
@@ -5809,14 +5815,32 @@
 
 .club-training-architect-panel,
 .club-training-architect-side-panel {
-    border-radius: 22px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
-        rgba(255, 255, 255, 0.015);
-    padding: 1.2rem;
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid var(--gym-mineral-border, rgba(255, 255, 255, 0.08));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 1.4rem;
     display: grid;
     gap: 1rem;
+}
+
+.club-training-architect-panel::before,
+.club-training-architect-side-panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--gym-mineral-shine, rgba(255, 255, 255, 0.15)),
+        transparent
+    );
 }
 
 .club-training-architect-panel--timeline {
@@ -5848,19 +5872,22 @@
 .club-training-architect-library-item,
 .club-training-architect-list-row,
 .club-training-architect-icon-btn {
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--text);
-    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+    border: 1px solid var(--gym-mineral-border, rgba(255, 255, 255, 0.08));
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-muted, rgba(226, 232, 240, 0.72));
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
 }
 
 .club-training-architect-chip,
 .club-training-architect-pill {
-    min-height: 34px;
-    padding: 0.45rem 0.8rem;
+    min-height: 30px;
+    padding: 0.35rem 0.75rem;
     border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 800;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     cursor: pointer;
 }
 
@@ -5871,16 +5898,17 @@
 .club-training-architect-list-row:hover,
 .club-training-architect-icon-btn:hover {
     transform: translateY(-1px);
-    border-color: rgba(59, 130, 246, 0.24);
-    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(101, 243, 255, 0.32);
+    background: rgba(101, 243, 255, 0.06);
+    color: var(--text-strong, #f8fbff);
 }
 
 .club-training-architect-chip.active,
 .club-training-architect-pill.active,
 .club-training-architect-status-btn.active {
-    border-color: rgba(59, 130, 246, 0.28);
-    background: rgba(59, 130, 246, 0.14);
-    color: #dbeafe;
+    border-color: rgba(101, 243, 255, 0.5);
+    background: rgba(101, 243, 255, 0.12);
+    color: var(--cyan, #65f3ff);
 }
 
 .club-training-architect-grid,
@@ -5907,11 +5935,10 @@
     gap: 0.3rem;
     margin-top: 0.95rem;
     padding: 0.95rem 1rem;
-    border-radius: 16px;
-    border: 1px solid rgba(59, 130, 246, 0.16);
-    background:
-        linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(15, 23, 42, 0.2)),
-        rgba(255, 255, 255, 0.02);
+    border-radius: 14px;
+    border: 1px solid rgba(101, 243, 255, 0.22);
+    border-left: 2px solid var(--cyan, #65f3ff);
+    background: rgba(7, 13, 24, 0.55);
 }
 
 .club-training-architect-context-card strong {
@@ -5933,9 +5960,10 @@
 }
 
 .club-training-architect-inline-head span:last-child {
-    color: var(--text-muted);
+    color: rgba(226, 232, 240, 0.5);
     font-size: 0.72rem;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.05em;
 }
 
 .club-training-architect-goal-input {
@@ -6019,18 +6047,20 @@
 }
 
 .club-training-architect-summary span {
-    color: var(--text-muted);
+    color: rgba(226, 232, 240, 0.5);
     font-size: 0.7rem;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.16em;
 }
 
 .club-training-architect-summary strong {
     font-size: 1.45rem;
-    line-height: 1;
-    font-weight: 900;
-    letter-spacing: -0.05em;
+    line-height: 1.05;
+    font-weight: 300;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: -0.02em;
+    color: var(--text-strong, #f8fbff);
 }
 
 .club-training-architect-timeline {
@@ -6045,7 +6075,7 @@
     top: 0.2rem;
     bottom: 0.2rem;
     width: 1px;
-    background: linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(59, 130, 246, 0.04));
+    background: linear-gradient(180deg, rgba(101, 243, 255, 0.55), rgba(101, 243, 255, 0.04));
 }
 
 .club-training-architect-block {
@@ -6068,16 +6098,123 @@
     width: 12px;
     height: 12px;
     border-radius: 999px;
-    background: rgba(59, 130, 246, 0.22);
-    border: 2px solid rgba(59, 130, 246, 0.42);
-    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.06);
+    background: rgba(101, 243, 255, 0.22);
+    border: 2px solid rgba(101, 243, 255, 0.45);
+    box-shadow: 0 0 0 6px rgba(101, 243, 255, 0.06);
 }
 
 .club-training-architect-block.active {
-    border-color: rgba(59, 130, 246, 0.24);
+    border-color: rgba(101, 243, 255, 0.32);
     background:
-        linear-gradient(180deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.04)),
+        linear-gradient(180deg, rgba(101, 243, 255, 0.06), rgba(101, 243, 255, 0.02)),
         rgba(255, 255, 255, 0.02);
+}
+
+.club-training-architect-block--collapsed {
+    padding: 0.7rem 1rem;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.club-training-architect-block--collapsed:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.club-training-architect-block-collapsed-body {
+    display: grid;
+    gap: 0.4rem;
+    align-content: center;
+    min-width: 0;
+}
+
+.club-training-architect-block-collapsed-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.club-training-architect-block-collapsed-head strong {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.club-training-architect-block--collapsed .club-training-architect-block-meta {
+    margin: 0;
+}
+
+.club-training-architect-conditions {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.club-training-architect-conditions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+}
+
+.club-training-architect-details {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.club-training-architect-details > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.9rem;
+    user-select: none;
+}
+
+.club-training-architect-details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.club-training-architect-details > summary::after {
+    content: "+";
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: transform 0.15s ease;
+    line-height: 1;
+}
+
+.club-training-architect-details[open] > summary::after {
+    content: "−";
+}
+
+.club-training-architect-details > summary > .club-training-form-label {
+    margin-bottom: 0;
+}
+
+.club-training-architect-details-count {
+    font-size: 0.72rem;
+    color: rgba(226, 232, 240, 0.5);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    margin-left: auto;
+    letter-spacing: 0.04em;
+}
+
+.club-training-architect-details-body {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0 0.9rem 0.9rem 0.9rem;
+}
+
+@media (max-width: 720px) {
+    .club-training-architect-conditions-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .club-training-architect-block-time {
@@ -6089,18 +6226,20 @@
 }
 
 .club-training-architect-block-time strong {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #93c5fd;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: var(--cyan, #65f3ff);
+    letter-spacing: -0.02em;
 }
 
 .club-training-architect-block-time span {
-    color: var(--text-muted);
-    font-size: 0.72rem;
+    color: rgba(226, 232, 240, 0.5);
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 800;
+    letter-spacing: 0.16em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 500;
 }
 
 .club-training-architect-grip {
@@ -6142,9 +6281,10 @@
 
 .club-training-architect-block-meta span {
     margin-top: 0;
-    color: var(--text-muted);
+    color: rgba(226, 232, 240, 0.55);
     font-size: 0.72rem;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.04em;
 }
 
 .club-training-architect-block-footer {
@@ -6168,6 +6308,59 @@
 
 .club-training-architect-side-panel {
     gap: 0.9rem;
+}
+
+.club-training-architect-checklist-panel .club-training-architect-inline-head span:last-child {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.74rem;
+    font-weight: 500;
+    color: var(--cyan, #65f3ff);
+    letter-spacing: 0.05em;
+}
+
+.club-training-architect-checklist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.35rem;
+}
+
+.club-training-architect-check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.18);
+    line-height: 1.2;
+}
+
+.club-training-architect-check-item.done {
+    color: #86efac;
+    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(34, 197, 94, 0.22);
+}
+
+.club-training-architect-check-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+}
+
+.club-training-architect-check-item.done .club-training-architect-check-mark {
+    background: rgba(34, 197, 94, 0.2);
 }
 
 .club-training-architect-metric {
@@ -6297,6 +6490,28 @@
 [data-theme="light"] .flash-ui-container .club-training-architect-mini-stats article,
 [data-theme="light"] .flash-ui-container .club-training-architect-status-grid article {
     background: rgba(255, 255, 255, 0.92);
+}
+
+[data-theme="light"] .flash-ui-container .club-training-architect-check-item {
+    color: #b91c1c;
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.28);
+}
+
+[data-theme="light"] .flash-ui-container .club-training-architect-check-item.done {
+    color: #15803d;
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.32);
+}
+
+[data-theme="light"] .flash-ui-container .club-training-architect-block--collapsed:hover {
+    background: rgba(15, 23, 42, 0.04);
+    border-color: rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .flash-ui-container .club-training-architect-details {
+    border-color: rgba(15, 23, 42, 0.08);
+    background: rgba(15, 23, 42, 0.02);
 }
 
 .club-training-detail-tabs {
@@ -7598,7 +7813,7 @@
     border-radius: 12px;
     font-size: 13px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text);
     background: rgba(20, 20, 30, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
@@ -8435,7 +8650,7 @@
 
 /* --- HEADER --- */
 .registry-header {
-    background: #111;
+    background: var(--surface-frame);
     padding: 1.5rem 2rem;
     display: flex;
     justify-content: space-between;
@@ -8457,7 +8672,7 @@
     font-size: 1.75rem;
     font-weight: 800;
     letter-spacing: -0.5px;
-    color: #fff;
+    color: var(--text);
 }
 
 .registry-header-info p {
@@ -8471,7 +8686,7 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.65rem;
     padding: 4px 8px;
-    background: #000;
+    background: var(--bg);
     border: 1px solid #333;
     color: #666;
     margin-right: 1rem;
@@ -8513,7 +8728,7 @@
     display: grid;
     grid-template-columns: 320px 1fr 300px;
     gap: 2px;
-    background: #000;
+    background: var(--bg);
 }
 
 .registry-column {
@@ -8564,7 +8779,7 @@
 .registry-field-group input,
 .registry-field-group select {
     width: 100%;
-    background: #111;
+    background: var(--surface-frame);
     border: 1px solid #333;
     padding: 12px;
     color: white;
@@ -8645,7 +8860,7 @@
 
 .registry-pos-btn:hover {
     background: #3a3a3a;
-    color: #fff;
+    color: var(--text);
 }
 
 .registry-pos-btn.active {
@@ -8669,7 +8884,7 @@
 .registry-avatar-container {
     width: 120px;
     height: 120px;
-    background: #111;
+    background: var(--surface-frame);
     border: 2px dashed #444;
     border-radius: 4px;
     display: flex;
@@ -8786,7 +9001,7 @@
 
 /* --- FOOTER --- */
 .registry-footer {
-    background: #111;
+    background: var(--surface-frame);
     padding: 1.5rem 2rem;
     display: flex;
     justify-content: space-between;
@@ -8805,7 +9020,7 @@
 
 .registry-division-selector select {
     width: 260px;
-    background: #111;
+    background: var(--surface-frame);
     border: 1px solid #333;
     padding: 12px;
     color: white;
@@ -8922,7 +9137,7 @@
     font-size: 0.9rem;
     font-weight: 800;
     text-transform: uppercase;
-    color: #fff;
+    color: var(--text);
     letter-spacing: 0.05em;
 }
 
@@ -9357,11 +9572,11 @@
 .csv-monolith-textarea {
     width: 100%;
     height: 220px;
-    background: #000;
+    background: var(--bg);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 4px;
     padding: 20px;
-    color: #fff;
+    color: var(--text);
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.9rem;
     line-height: 1.6;
@@ -9442,7 +9657,7 @@
 }
 
 .csv-tag {
-    background: #000;
+    background: var(--bg);
     border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 4px 8px;
     font-family: 'JetBrains Mono', monospace;
@@ -9464,7 +9679,7 @@
 }
 
 .csv-monolith-select {
-    background: #000;
+    background: var(--bg);
     border: 1px solid rgba(255, 255, 255, 0.08);
     color: #e2e8f0;
     padding: 12px;
@@ -9510,7 +9725,7 @@
 }
 
 .csv-sieve-table tr:hover td {
-    color: #fff;
+    color: var(--text);
     background: rgba(255, 255, 255, 0.02);
 }
 
@@ -9528,7 +9743,7 @@
 
 .csv-btn-primary {
     background: #3b82f6;
-    color: #fff;
+    color: var(--text);
     border: none;
     padding: 14px 32px;
     font-size: 0.9rem;
@@ -9568,7 +9783,7 @@
 }
 
 .csv-btn-cancel:hover {
-    color: #fff;
+    color: var(--text);
 }
 
 /* --- CONFLICTS (Monolith style) --- */
@@ -9713,7 +9928,7 @@
 
 .csv-btn-small:hover {
     background: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    color: var(--text);
 }
 
 .csv-btn-small.selected {
@@ -9746,7 +9961,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #fff;
+    color: var(--text);
 }
 
 .csv-result-desc {
@@ -9818,7 +10033,7 @@
 
 /* --- TEMPLATE PREVIEW --- */
 .csv-template-block {
-    background: #000;
+    background: var(--bg);
     border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 16px;
     border-radius: 2px;
@@ -10200,7 +10415,7 @@
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(244, 63, 94, 0.45));
-    color: #fff;
+    color: var(--text);
     font-weight: 800;
 }
 
@@ -10437,4 +10652,255 @@
 
 .club-invite-copy:hover {
     background: rgba(59, 130, 246, 0.2);
+}
+
+/* Tema claro: legibilidad transversal en Club Admin */
+[data-theme="light"] .flash-ui-container {
+    --text-primary: var(--text);
+}
+
+[data-theme="light"] .flash-ui-container .club-ops-panel,
+[data-theme="light"] .flash-ui-container .club-users-row,
+[data-theme="light"] .flash-ui-container .club-users-membership,
+[data-theme="light"] .flash-ui-container .club-invite-row,
+[data-theme="light"] .flash-ui-container .club-training-modal,
+[data-theme="light"] .flash-ui-container .club-training-architect-status,
+[data-theme="light"] .flash-ui-container .club-training-architect-context-card,
+[data-theme="light"] .flash-ui-container .club-training-architect-list-row,
+[data-theme="light"] .flash-ui-container .club-training-architect-library-item,
+[data-theme="light"] .flash-ui-container .club-training-architect-empty,
+[data-theme="light"] .flash-ui-container .club-training-architect-add-block,
+[data-theme="light"] .flash-ui-container .club-training-architect-add-btn,
+[data-theme="light"] .flash-ui-container .club-training-architect-icon-btn,
+[data-theme="light"] .flash-ui-container .club-training-architect-status-btn,
+[data-theme="light"] .flash-ui-container .registry-modal-shell,
+[data-theme="light"] .flash-ui-container .registry-header,
+[data-theme="light"] .flash-ui-container .registry-column,
+[data-theme="light"] .flash-ui-container .registry-column-alt,
+[data-theme="light"] .flash-ui-container .registry-preview-panel,
+[data-theme="light"] .flash-ui-container .registry-footer,
+[data-theme="light"] .flash-ui-container .registry-identity-prompt,
+[data-theme="light"] .flash-ui-container .registry-identity-match {
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(148, 163, 184, 0.26);
+    color: var(--text);
+    box-shadow: 0 18px 40px -30px rgba(15, 23, 42, 0.22);
+}
+
+[data-theme="light"] .flash-ui-container .club-ops-panel,
+[data-theme="light"] .flash-ui-container .club-training-modal,
+[data-theme="light"] .flash-ui-container .club-training-architect,
+[data-theme="light"] .flash-ui-container .registry-modal-shell {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94)),
+        var(--surface);
+}
+
+[data-theme="light"] .flash-ui-container .club-training-modal-overlay,
+[data-theme="light"] .flash-ui-container .registry-modal-overlay {
+    background: rgba(15, 23, 42, 0.42);
+}
+
+[data-theme="light"] .flash-ui-container .club-users-input,
+[data-theme="light"] .flash-ui-container .club-users-role-select,
+[data-theme="light"] .flash-ui-container .club-training-form-input,
+[data-theme="light"] .flash-ui-container .club-training-form-select,
+[data-theme="light"] .flash-ui-container .club-training-form-textarea,
+[data-theme="light"] .flash-ui-container .registry-field-group input,
+[data-theme="light"] .flash-ui-container .registry-field-group select,
+[data-theme="light"] .flash-ui-container .registry-division-selector select {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+    box-shadow: none;
+    color-scheme: light;
+}
+
+[data-theme="light"] .flash-ui-container .club-users-input::placeholder,
+[data-theme="light"] .flash-ui-container .club-training-form-input::placeholder,
+[data-theme="light"] .flash-ui-container .club-training-form-textarea::placeholder,
+[data-theme="light"] .flash-ui-container .registry-field-group input::placeholder {
+    color: #94a3b8;
+}
+
+[data-theme="light"] .flash-ui-container .club-users-input:focus,
+[data-theme="light"] .flash-ui-container .club-users-role-select:focus,
+[data-theme="light"] .flash-ui-container .club-training-form-input:focus,
+[data-theme="light"] .flash-ui-container .club-training-form-select:focus,
+[data-theme="light"] .flash-ui-container .club-training-form-textarea:focus,
+[data-theme="light"] .flash-ui-container .registry-field-group input:focus,
+[data-theme="light"] .flash-ui-container .registry-field-group select:focus,
+[data-theme="light"] .flash-ui-container .registry-division-selector select:focus {
+    border-color: rgba(37, 99, 235, 0.58);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+[data-theme="light"] .flash-ui-container .club-users-identity-copy strong,
+[data-theme="light"] .flash-ui-container .club-users-membership-scope,
+[data-theme="light"] .flash-ui-container .club-invite-scope,
+[data-theme="light"] .flash-ui-container .club-training-modal-header h3,
+[data-theme="light"] .flash-ui-container .club-training-architect-title-row h3,
+[data-theme="light"] .flash-ui-container .club-training-architect-status strong,
+[data-theme="light"] .flash-ui-container .club-training-architect-library-item strong,
+[data-theme="light"] .flash-ui-container .club-training-architect-player-row strong,
+[data-theme="light"] .flash-ui-container .club-training-architect-block-meta span:first-child,
+[data-theme="light"] .flash-ui-container .club-training-architect-footer-copy strong,
+[data-theme="light"] .flash-ui-container .club-training-architect-summary strong,
+[data-theme="light"] .flash-ui-container .club-training-architect-block-collapsed-head strong,
+[data-theme="light"] .flash-ui-container .registry-header-info h1,
+[data-theme="light"] .flash-ui-container .registry-preview-name,
+[data-theme="light"] .flash-ui-container .registry-identity-match-name {
+    color: #0f172a;
+}
+
+[data-theme="light"] .flash-ui-container .club-users-empty,
+[data-theme="light"] .flash-ui-container .club-invite-role,
+[data-theme="light"] .flash-ui-container .club-training-form-label,
+[data-theme="light"] .flash-ui-container .club-training-architect-kicker,
+[data-theme="light"] .flash-ui-container .club-training-architect-title-row p,
+[data-theme="light"] .flash-ui-container .club-training-architect-status span,
+[data-theme="light"] .flash-ui-container .club-training-architect-context-card span,
+[data-theme="light"] .flash-ui-container .club-training-architect-context-card small,
+[data-theme="light"] .flash-ui-container .club-training-architect-library-item span,
+[data-theme="light"] .flash-ui-container .club-training-architect-player-row span,
+[data-theme="light"] .flash-ui-container .club-training-architect-note,
+[data-theme="light"] .flash-ui-container .club-training-architect-footer-copy span,
+[data-theme="light"] .flash-ui-container .club-training-architect-summary span,
+[data-theme="light"] .flash-ui-container .club-training-architect-block-time span,
+[data-theme="light"] .flash-ui-container .club-training-architect-block-meta span,
+[data-theme="light"] .flash-ui-container .club-training-architect-inline-head span:last-child,
+[data-theme="light"] .flash-ui-container .club-training-architect-details-count,
+[data-theme="light"] .flash-ui-container .club-users-email,
+[data-theme="light"] .flash-ui-container .club-users-meta-line,
+[data-theme="light"] .flash-ui-container .club-users-field,
+[data-theme="light"] .flash-ui-container .club-users-role-hint,
+[data-theme="light"] .flash-ui-container .club-invite-meta,
+[data-theme="light"] .flash-ui-container .registry-header-info p,
+[data-theme="light"] .flash-ui-container .registry-column-title,
+[data-theme="light"] .flash-ui-container .registry-field-group > label:first-child,
+[data-theme="light"] .flash-ui-container .registry-field-group label.registry-field-label,
+[data-theme="light"] .flash-ui-container .registry-upload-text,
+[data-theme="light"] .flash-ui-container .registry-preview-label,
+[data-theme="light"] .flash-ui-container .registry-preview-val,
+[data-theme="light"] .flash-ui-container .registry-check-item,
+[data-theme="light"] .flash-ui-container .registry-division-hint,
+[data-theme="light"] .flash-ui-container .registry-identity-prompt-desc,
+[data-theme="light"] .flash-ui-container .registry-identity-match-meta,
+[data-theme="light"] .flash-ui-container .registry-identity-tag {
+    color: #475569;
+}
+
+[data-theme="light"] .flash-ui-container .club-users-empty,
+[data-theme="light"] .flash-ui-container .club-training-architect-empty {
+    border-color: rgba(148, 163, 184, 0.28);
+    background: rgba(248, 250, 252, 0.74);
+}
+
+[data-theme="light"] .flash-ui-container .club-users-alert {
+    background: rgba(244, 63, 94, 0.1);
+    border-color: rgba(244, 63, 94, 0.28);
+    color: #be123c;
+}
+
+[data-theme="light"] .flash-ui-container .club-users-notice,
+[data-theme="light"] .flash-ui-container .club-invite-copy {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.26);
+    color: #1d4ed8;
+}
+
+[data-theme="light"] .flash-ui-container .club-users-remove {
+    background: rgba(244, 63, 94, 0.1);
+    border-color: rgba(244, 63, 94, 0.26);
+    color: #be123c;
+}
+
+[data-theme="light"] .flash-ui-container .club-training-architect-chip,
+[data-theme="light"] .flash-ui-container .club-training-architect-pill {
+    background: rgba(248, 250, 252, 0.86);
+    border-color: rgba(148, 163, 184, 0.26);
+    color: #475569;
+}
+
+[data-theme="light"] .flash-ui-container .club-training-architect-chip:hover,
+[data-theme="light"] .flash-ui-container .club-training-architect-pill:hover,
+[data-theme="light"] .flash-ui-container .club-training-architect-add-block:hover,
+[data-theme="light"] .flash-ui-container .club-training-architect-library-item:hover,
+[data-theme="light"] .flash-ui-container .club-training-architect-list-row:hover,
+[data-theme="light"] .flash-ui-container .club-training-architect-icon-btn:hover {
+    background: rgba(37, 99, 235, 0.08);
+    border-color: rgba(37, 99, 235, 0.28);
+    color: #1d4ed8;
+}
+
+[data-theme="light"] .flash-ui-container .club-training-architect-chip.active,
+[data-theme="light"] .flash-ui-container .club-training-architect-pill.active,
+[data-theme="light"] .flash-ui-container .club-training-architect-status-btn.active {
+    background: rgba(8, 145, 178, 0.12);
+    border-color: rgba(8, 145, 178, 0.34);
+    color: #0e7490;
+}
+
+[data-theme="light"] .flash-ui-container .club-training-architect-context-card,
+[data-theme="light"] .flash-ui-container .club-training-architect-pizarra-preview {
+    background: rgba(239, 246, 255, 0.78);
+    border-color: rgba(8, 145, 178, 0.26);
+}
+
+[data-theme="light"] .flash-ui-container .club-training-architect-block-time {
+    border-right-color: rgba(148, 163, 184, 0.24);
+}
+
+[data-theme="light"] .flash-ui-container .club-training-architect-grip span {
+    background: rgba(71, 85, 105, 0.32);
+}
+
+[data-theme="light"] .flash-ui-container .registry-form-grid {
+    background: #cbd5e1;
+}
+
+[data-theme="light"] .flash-ui-container .registry-header,
+[data-theme="light"] .flash-ui-container .registry-footer,
+[data-theme="light"] .flash-ui-container .registry-identity-prompt,
+[data-theme="light"] .flash-ui-container .registry-form-error {
+    border-color: rgba(148, 163, 184, 0.28);
+}
+
+[data-theme="light"] .flash-ui-container .registry-version-badge,
+[data-theme="light"] .flash-ui-container .registry-close-btn,
+[data-theme="light"] .flash-ui-container .registry-pos-btn,
+[data-theme="light"] .flash-ui-container .registry-avatar-container,
+[data-theme="light"] .flash-ui-container .registry-identity-tag {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #475569;
+    box-shadow: none;
+}
+
+[data-theme="light"] .flash-ui-container .registry-pos-btn:hover,
+[data-theme="light"] .flash-ui-container .registry-avatar-container:hover,
+[data-theme="light"] .flash-ui-container .registry-btn-cancel:hover {
+    background: #eef2f7;
+    border-color: rgba(37, 99, 235, 0.34);
+    color: #0f172a;
+}
+
+[data-theme="light"] .flash-ui-container .registry-pos-btn.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+[data-theme="light"] .flash-ui-container .registry-preview-row,
+[data-theme="light"] .flash-ui-container .registry-check-item {
+    border-color: rgba(148, 163, 184, 0.24);
+}
+
+[data-theme="light"] .flash-ui-container .registry-column-title::after {
+    background-color: rgba(148, 163, 184, 0.24);
+}
+
+[data-theme="light"] .flash-ui-container .registry-btn-cancel {
+    border-color: #cbd5e1;
+    color: #334155;
 }

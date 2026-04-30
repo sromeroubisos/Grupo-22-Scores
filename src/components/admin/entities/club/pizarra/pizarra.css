@@ -1506,3 +1506,161 @@
 .pizarra-frame-edit-btn.is-ghost {
     background: transparent;
 }
+
+[data-theme="light"] .pizarra-mode-selector {
+    border-color: var(--border);
+    background: linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01));
+}
+
+[data-theme="light"] .pizarra-mode-btn:hover {
+    background: rgba(0,0,0,0.03);
+}
+
+[data-theme="light"] .pizarra-mode-btn.active {
+    background: rgba(37, 99, 235, 0.12);
+    border-color: rgba(37, 99, 235, 0.25);
+    color: #1e40af;
+}
+
+[data-theme="light"] .pizarra-mode-icon {
+    background: rgba(0,0,0,0.04);
+}
+
+[data-theme="light"] .pizarra-storage-card {
+    border-color: rgba(0,0,0,0.06);
+    background: linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02));
+}
+
+[data-theme="light"] .pizarra-storage-pill.is-club {
+    background: rgba(5, 150, 105, 0.12);
+    color: #047857;
+}
+
+[data-theme="light"] .pizarra-storage-pill.is-local {
+    background: rgba(202, 138, 4, 0.12);
+    color: #92400e;
+}
+
+[data-theme="light"] .pizarra-storage-error {
+    color: #dc2626 !important;
+}
+
+[data-theme="light"] .pizarra-toolbar {
+    border-color: var(--border);
+    background: linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02));
+}
+
+[data-theme="light"] .pizarra-mobile-sheet {
+    border-color: rgba(0,0,0,0.08);
+    background: linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01));
+    box-shadow: 0 24px 60px -28px rgba(0,0,0,0.2);
+}
+
+[data-theme="light"] .pizarra-frame-edit-banner {
+    border-color: rgba(217, 119, 6, 0.3);
+    background: linear-gradient(180deg, rgba(217, 119, 6, 0.1), rgba(217, 119, 6, 0.04));
+    box-shadow: 0 0 24px rgba(217, 119, 6, 0.08);
+}
+
+[data-theme="light"] .pizarra-frame-edit-info strong {
+    color: #78350f;
+}
+
+[data-theme="light"] .pizarra-frame-edit-info small {
+    color: rgba(120, 53, 15, 0.78);
+}
+
+[data-theme="light"] .pizarra-frame-edit-btn {
+    border-color: rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.04);
+}
+
+[data-theme="light"] .pizarra-frame-edit-btn:hover:not(:disabled) {
+    background: rgba(0,0,0,0.07);
+}
+
+[data-theme="light"] .pizarra-frame-edit-btn.is-primary {
+    background: rgba(5, 150, 105, 0.18);
+    border-color: rgba(5, 150, 105, 0.35);
+    color: #065f46;
+}
+
+[data-theme="light"] .pizarra-frame-edit-btn.is-primary:hover:not(:disabled) {
+    background: rgba(5, 150, 105, 0.3);
+    color: #064e3b;
+}
+
+[data-theme="light"] .pizarra-canvas-wrap {
+    background: linear-gradient(180deg, rgba(241,245,249,0.94), rgba(226,232,240,0.88));
+}
+
+[data-theme="light"] .pizarra-zoom-controls {
+    background: rgba(255, 255, 255, 0.82);
+    border-color: var(--border);
+}
+
+[data-theme="light"] .pizarra-playhead {
+    background: #0f172a;
+    box-shadow: 0 0 8px rgba(0,0,0,0.25);
+}
+
+[data-theme="light"] .pizarra-tool-btn.active {
+    color: #1e40af;
+}
+
+[data-theme="light"] .pizarra-tool-btn.pizarra-cta-btn {
+    color: #047857;
+}
+
+[data-theme="light"] .pizarra-tool-btn.pizarra-cta-btn:hover {
+    color: #064e3b;
+}
+
+[data-theme="light"] .pizarra-toolbar-draw-row {
+    background: rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .pizarra-speed-chip.active {
+    color: #1e40af;
+}
+
+[data-theme="light"] .pizarra-zoom-preset-mini.active {
+    color: #1e40af;
+}
+
+[data-theme="light"] .club-pizarra-frame-action-primary {
+    color: #047857;
+}
+
+[data-theme="light"] .club-pizarra-frame-action-primary:hover {
+    color: #064e3b;
+}
+
+[data-theme="light"] .club-pizarra-frame-badge {
+    color: #0f172a;
+}
+
+[data-theme="light"] .club-pizarra-frame-name {
+    background: rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .club-pizarra-frame-dur input {
+    background: rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .pizarra-drawer-save-form input {
+    background: rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .pizarra-drawer-item-delete:hover {
+    color: #dc2626;
+}
+
+[data-theme="light"] .pizarra-orientation-btn.active {
+    color: #1e40af;
+}
+
+[data-theme="light"] .pizarra-color-swatch.active {
+    border-color: #0f172a;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
+}

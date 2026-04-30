@@ -75,7 +75,7 @@ function getAgeLabel(birthDate: string) {
     return `${age} anos`;
 }
 
-export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSuccess, initialMode, lockDivisionId, person, submitMode = 'service' }: Props) {
+export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSuccess, initialMode, lockDivisionId, person, submitMode = 'club-admin-api' }: Props) {
     const [loading, setLoading] = useState(false);
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -470,7 +470,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                     <img src={photoUrl} alt="Preview" />
                                 ) : (
                                     <>
-                                        <User className="w-8 h-8 text-[#666]" />
+                                        <User className="w-8 h-8 text-[var(--ca-text-muted)]" />
                                         <span className="registry-upload-text">Upload Photo</span>
                                     </>
                                 )}

@@ -57,7 +57,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                const theme = localStorage.getItem('g22-theme') || 'dark';
+                const savedTheme = localStorage.getItem('g22-theme');
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const theme = savedTheme || (prefersDark ? 'dark' : 'light');
                 document.documentElement.setAttribute('data-theme', theme);
                 if (theme === 'dark') {
                   document.documentElement.classList.add('dark');

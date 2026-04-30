@@ -172,7 +172,7 @@ export function ClubSeasonStatsPanel({
     if (error) {
         return (
             <div className="club-matches-shell">
-                <div className="club-matches-empty" style={{ color: '#ef4444' }}>
+                <div className="club-matches-empty" style={{ color: 'var(--ca-danger)' }}>
                     {error}
                 </div>
             </div>
@@ -207,16 +207,16 @@ export function ClubSeasonStatsPanel({
                 <div className="club-season-stats-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     {onSeasonChange ? (
                         <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-                            <span style={{ color: 'rgba(255,255,255,0.6)' }}>Periodo</span>
+                            <span style={{ color: 'var(--ca-text-secondary)' }}>Periodo</span>
                             <select
                                 value={effectiveSeason}
                                 onChange={(e) => onSeasonChange(e.target.value)}
                                 style={{
-                                    background: 'rgba(255,255,255,0.08)',
-                                    border: '1px solid rgba(255,255,255,0.12)',
+                                    background: 'var(--ca-surface-hover)',
+                                    border: '1px solid var(--ca-border)',
                                     borderRadius: '6px',
                                     padding: '4px 8px',
-                                    color: '#fff',
+                                    color: 'var(--ca-text)',
                                     fontSize: '0.85rem',
                                 }}
                             >

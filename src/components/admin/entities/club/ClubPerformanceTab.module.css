@@ -1862,3 +1862,1519 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Excel-style training timeline table */
+.trainingTableWrap {
+    margin-top: 0.9rem;
+    border: 1px solid var(--gym-mineral-border, rgba(255, 255, 255, 0.1));
+    border-radius: 14px;
+    overflow: auto;
+    background: rgba(8, 12, 18, 0.45);
+    max-height: 70vh;
+}
+
+.trainingTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.85);
+    min-width: 1080px;
+}
+
+.trainingTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(12, 18, 26, 0.96);
+    backdrop-filter: blur(8px);
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    white-space: nowrap;
+}
+
+.trainingTable thead th:last-child {
+    border-right: none;
+}
+
+.trainingTable tbody td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid rgba(255, 255, 255, 0.04);
+    vertical-align: middle;
+}
+
+.trainingTable tbody td:last-child {
+    border-right: none;
+}
+
+.trainingTable tbody tr:hover td {
+    background: rgba(101, 243, 255, 0.04);
+}
+
+.trainingTable tbody tr.alertRow td {
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.trainingTable tbody tr.alertRow:hover td {
+    background: rgba(245, 158, 11, 0.09);
+}
+
+.trainingTableIndex {
+    width: 36px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.4);
+    font-variant-numeric: tabular-nums;
+    background: rgba(255, 255, 255, 0.02);
+    font-weight: 600;
+}
+
+.trainingTableDate {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.trainingTableDate strong {
+    display: block;
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.trainingTableDate span {
+    display: block;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.7rem;
+}
+
+.trainingTableTitle {
+    min-width: 220px;
+    max-width: 280px;
+}
+
+.trainingTableTitle strong {
+    display: block;
+    font-weight: 600;
+    color: #fff;
+    font-size: 0.82rem;
+    line-height: 1.2;
+}
+
+.trainingTableTitle span {
+    display: block;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.7rem;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.trainingTableBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+}
+
+.trainingTableBadgeScheduled { color: #93c5fd; border-color: rgba(147, 197, 253, 0.4); background: rgba(59, 130, 246, 0.12); }
+.trainingTableBadgeLive { color: #fcd34d; border-color: rgba(252, 211, 77, 0.4); background: rgba(245, 158, 11, 0.15); }
+.trainingTableBadgePlayed { color: #86efac; border-color: rgba(134, 239, 172, 0.4); background: rgba(34, 197, 94, 0.12); }
+.trainingTableBadgeAlert { color: #fca5a5; border-color: rgba(252, 165, 165, 0.4); background: rgba(239, 68, 68, 0.12); }
+
+.trainingTableTimeline {
+    min-width: 320px;
+    width: 380px;
+}
+
+.trainingTimeline {
+    width: 100%;
+}
+
+.trainingTimelineRuler {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.35);
+    margin-bottom: 4px;
+    font-variant-numeric: tabular-nums;
+}
+
+.trainingTimelineRuler span {
+    flex: 1;
+    text-align: left;
+    border-left: 1px dashed rgba(255, 255, 255, 0.06);
+    padding-left: 3px;
+}
+
+.trainingTimelineRuler span:first-child {
+    border-left: none;
+    padding-left: 0;
+}
+
+.trainingTimelineBar {
+    display: flex;
+    height: 22px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.trainingTimelineSegment {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.85);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 0 4px;
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+    transition: filter 0.15s ease;
+}
+
+.trainingTimelineSegment:last-child {
+    border-right: none;
+}
+
+.trainingTimelineSegment:hover {
+    filter: brightness(1.15);
+}
+
+.trainingTimelineEmpty {
+    display: flex;
+    align-items: center;
+    height: 22px;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.7rem;
+    font-style: italic;
+}
+
+.trainingTimelineLegend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-top: 5px;
+    font-size: 0.62rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.trainingTimelineLegend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.trainingTimelineLegendDot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+}
+
+.trainingTableProgress {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+}
+
+.trainingTableProgressDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.trainingTableProgressDotComplete {
+    background: #4ade80;
+    box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+}
+
+.trainingTableProgressLabel {
+    margin-left: 6px;
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.55);
+    font-variant-numeric: tabular-nums;
+}
+
+.trainingTableNumber {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+}
+
+.trainingTableActions {
+    white-space: nowrap;
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+}
+
+.trainingTableActionBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.trainingTableActionBtn:hover {
+    background: rgba(101, 243, 255, 0.1);
+    border-color: rgba(101, 243, 255, 0.3);
+    color: #fff;
+}
+
+.trainingTableActionBtnPrimary {
+    background: rgba(101, 243, 255, 0.12);
+    border-color: rgba(101, 243, 255, 0.3);
+    color: #65f3ff;
+}
+
+.trainingTableActionBtnDanger:hover {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+}
+
+.trainingTableActionBtn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================================
+   Action-panel layout: day groups + card rows + smart progress
+   ============================================================ */
+.trainingDeck {
+    margin-top: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+}
+
+.trainingDayGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.trainingDayHeader {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.55rem 0.85rem;
+    background: linear-gradient(180deg, rgba(8, 12, 18, 0.95) 0%, rgba(8, 12, 18, 0.78) 100%);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(101, 243, 255, 0.18);
+    border-radius: 8px 8px 0 0;
+}
+
+.trainingDayHeaderPrimary {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #65f3ff;
+}
+
+.trainingDayHeaderSecondary {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: capitalize;
+}
+
+.trainingDayHeaderCount {
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+.trainingCard {
+    position: relative;
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr) 220px;
+    gap: 1rem;
+    padding: 0.95rem 1rem 0.95rem 0.85rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, rgba(255, 255, 255, 0.012) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+    overflow: hidden;
+}
+
+.trainingCard::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--training-card-color, rgba(101, 243, 255, 0.6));
+    border-radius: 14px 0 0 14px;
+}
+
+.trainingCard:hover {
+    border-color: rgba(101, 243, 255, 0.35);
+    background: linear-gradient(180deg, rgba(101, 243, 255, 0.04) 0%, rgba(255, 255, 255, 0.02) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px -22px rgba(101, 243, 255, 0.4);
+}
+
+.trainingCardAlert::before {
+    background: #f59e0b;
+}
+
+.trainingCardAlert {
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.015) 100%);
+}
+
+.trainingCardHighlight {
+    animation: trainingCardPulse 1.6s ease-out 0s 2;
+    border-color: rgba(74, 222, 128, 0.55);
+    box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.45), 0 22px 48px -22px rgba(74, 222, 128, 0.6);
+}
+
+@keyframes trainingCardPulse {
+    0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+    35% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0.28); }
+    100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+}
+
+.trainingCardDate {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: flex-start;
+    justify-content: center;
+    padding-left: 6px;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    padding-right: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.trainingCardTime {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.trainingCardWeekday {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.42);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+}
+
+.trainingCardDuration {
+    margin-top: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.66rem;
+    color: rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.trainingCardBody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    min-width: 0;
+}
+
+.trainingCardTopRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.trainingCardTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.trainingCardChips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.trainingStatusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border: 1px solid;
+}
+
+.trainingStatusScheduled { color: #93c5fd; border-color: rgba(147, 197, 253, 0.45); background: rgba(59, 130, 246, 0.14); }
+.trainingStatusLive { color: #fcd34d; border-color: rgba(252, 211, 77, 0.5); background: rgba(245, 158, 11, 0.18); }
+.trainingStatusPlayed { color: #86efac; border-color: rgba(134, 239, 172, 0.45); background: rgba(34, 197, 94, 0.14); }
+.trainingStatusAlert { color: #fca5a5; border-color: rgba(252, 165, 165, 0.45); background: rgba(239, 68, 68, 0.14); }
+
+.trainingTypeChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trainingFocusChip {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(168, 85, 247, 0.15);
+    color: #c4b5fd;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    font-weight: 600;
+}
+
+.trainingTagChip {
+    font-size: 0.62rem;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(101, 243, 255, 0.08);
+    color: #65f3ff;
+    border: 1px solid rgba(101, 243, 255, 0.22);
+}
+
+.trainingCardContext {
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+}
+
+.trainingCardContext span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.trainingCardContext strong {
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 600;
+}
+
+.trainingCardStatusHint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+}
+
+.trainingCardStatusHint.alert {
+    color: #fcd34d;
+    font-style: normal;
+}
+
+.trainingCardTimeline {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.trainingCardTimelineHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.62rem;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+}
+
+.trainingCardTimelineHead strong {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.74rem;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
+}
+
+.trainingTimelineTable {
+    display: grid;
+    grid-template-columns: 56px minmax(140px, 1.1fr) minmax(180px, 2fr) minmax(140px, 1.3fr);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.015);
+    font-variant-numeric: tabular-nums;
+}
+
+.trainingTimelineHeadRow,
+.trainingTimelineRow {
+    display: contents;
+}
+
+.trainingTimelineHeadRow > span {
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    white-space: nowrap;
+}
+
+.trainingTimelineHeadRow > span:last-child {
+    border-right: none;
+}
+
+.trainingTimelineRow > * {
+    padding: 7px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    min-height: 36px;
+}
+
+.trainingTimelineRow > *:last-child {
+    border-right: none;
+}
+
+.trainingTimelineRow:last-child > * {
+    border-bottom: none;
+}
+
+.trainingTimelineCellDuration {
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: rgba(0, 0, 0, 0.88);
+    letter-spacing: -0.02em;
+}
+
+.trainingTimelineCellPhase {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    border-left: 3px solid;
+    padding-left: 8px;
+}
+
+.trainingTimelinePhaseType {
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.trainingTimelinePhaseTitle {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.15;
+}
+
+.trainingTimelineCellDesc {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    line-height: 1.25;
+}
+
+.trainingTimelineDescText {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.74rem;
+    word-break: break-word;
+}
+
+.trainingTimelineDescMeta {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.trainingTimelineCellStaff {
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.trainingTimelineStaffChip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(101, 243, 255, 0.1);
+    border: 1px solid rgba(101, 243, 255, 0.28);
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.65rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.trainingTimelineStaffEmpty {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.68rem;
+    font-style: italic;
+}
+
+@media (max-width: 720px) {
+    .trainingTimelineTable {
+        grid-template-columns: 48px minmax(110px, 1fr) minmax(140px, 1.6fr);
+    }
+
+    .trainingTimelineHeadRow > span:nth-child(4),
+    .trainingTimelineRow > *:nth-child(4) {
+        display: none;
+    }
+}
+
+.trainingCardTimelineEmpty {
+    height: 18px;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.65rem;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.trainingCardProgress {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.trainingProgressStep {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px 3px 6px;
+    border-radius: 999px;
+    font-size: 0.66rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.55);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.trainingProgressStep:hover {
+    border-color: rgba(101, 243, 255, 0.35);
+    color: #fff;
+    background: rgba(101, 243, 255, 0.08);
+}
+
+.trainingProgressStepDone {
+    color: #86efac;
+    border-color: rgba(134, 239, 172, 0.35);
+    background: rgba(34, 197, 94, 0.08);
+    cursor: default;
+}
+
+.trainingProgressStepDone:hover {
+    color: #86efac;
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(134, 239, 172, 0.45);
+}
+
+.trainingCardSide {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+    justify-content: space-between;
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    padding-left: 12px;
+}
+
+.trainingCardPrimaryBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(101, 243, 255, 0.18) 0%, rgba(101, 243, 255, 0.08) 100%);
+    border: 1px solid rgba(101, 243, 255, 0.4);
+    color: #65f3ff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.trainingCardPrimaryBtn:hover {
+    background: linear-gradient(135deg, rgba(101, 243, 255, 0.28) 0%, rgba(101, 243, 255, 0.14) 100%);
+    border-color: #65f3ff;
+    box-shadow: 0 8px 18px -10px rgba(101, 243, 255, 0.6);
+}
+
+.trainingCardCompletion {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.trainingCardCompletionLabel {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.62rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+}
+
+.trainingCardCompletionLabel strong {
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.76rem;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    font-weight: 800;
+}
+
+.trainingCardCompletionTrack {
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+    overflow: hidden;
+}
+
+.trainingCardCompletionFill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #65f3ff, #4ade80);
+    transition: width 0.4s ease;
+}
+
+.trainingCardSecondaryRow {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.trainingCardIconBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.trainingCardIconBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.trainingCardIconBtn.danger:hover {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+}
+
+.trainingCardMenu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 5;
+    min-width: 180px;
+    background: rgba(12, 16, 22, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 18px 38px -18px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.trainingCardMenuItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.78rem;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: background 0.12s ease;
+}
+
+.trainingCardMenuItem:hover {
+    background: rgba(101, 243, 255, 0.1);
+    color: #fff;
+}
+
+.trainingCardMenuItem.danger {
+    color: #fca5a5;
+}
+
+.trainingCardMenuItem.danger:hover {
+    background: rgba(239, 68, 68, 0.12);
+}
+
+/* Toast */
+.trainingToastWrap {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.trainingToast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: rgba(8, 14, 22, 0.96);
+    border: 1px solid rgba(74, 222, 128, 0.4);
+    color: #fff;
+    font-size: 0.84rem;
+    font-weight: 600;
+    box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    pointer-events: auto;
+    animation: trainingToastIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 380px;
+}
+
+.trainingToastError {
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.trainingToastIcon {
+    display: inline-flex;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(74, 222, 128, 0.18);
+    color: #4ade80;
+    flex-shrink: 0;
+}
+
+.trainingToastError .trainingToastIcon {
+    background: rgba(239, 68, 68, 0.18);
+    color: #fca5a5;
+}
+
+@keyframes trainingToastIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 880px) {
+    .trainingCard {
+        grid-template-columns: 70px minmax(0, 1fr);
+    }
+    .trainingCardSide {
+        grid-column: 1 / -1;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        padding-left: 0;
+        padding-top: 8px;
+    }
+}
+
+[data-theme="light"] .shell {
+    --panel-bg: linear-gradient(180deg, rgba(241, 245, 249, 0.96), rgba(226, 232, 240, 0.98));
+    --panel-soft: rgba(0, 0, 0, 0.03);
+    --panel-border: rgba(148, 163, 184, 0.22);
+    --text-strong: #0f172a;
+    --text-muted: rgba(71, 85, 105, 0.72);
+    --cyan: #0891b2;
+    --green: #059669;
+    --yellow: #d97706;
+    --red: #e11d48;
+    --shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
+    color: var(--text-strong);
+}
+
+[data-theme="light"] .gymFlashShell {
+    --gym-bg-deep: #f8fafc;
+    --gym-mineral-quartz: rgba(0, 0, 0, 0.02);
+    --gym-mineral-border: rgba(0, 0, 0, 0.06);
+    --gym-mineral-shine: rgba(0, 0, 0, 0.1);
+    --gym-purple: #4f46e5;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(79, 70, 229, 0.1), transparent 36%),
+        radial-gradient(circle at 100% 100%, rgba(8, 145, 178, 0.06), transparent 34%);
+}
+
+[data-theme="light"] .hero,
+[data-theme="light"] .panel,
+[data-theme="light"] .filterBar,
+[data-theme="light"] .connectionStrip,
+[data-theme="light"] .trainingTableWrap,
+[data-theme="light"] .trainingCard,
+[data-theme="light"] .sheetCard,
+[data-theme="light"] .modalShell {
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: var(--text-strong);
+    box-shadow: 0 18px 40px -30px rgba(15, 23, 42, 0.22);
+}
+
+[data-theme="light"] .filterField span,
+[data-theme="light"] .trainingDayHeaderSecondary,
+[data-theme="light"] .trainingDayHeaderCount {
+    color: rgba(71, 85, 105, 0.68);
+}
+
+[data-theme="light"] .filterField select,
+[data-theme="light"] .filterField input,
+[data-theme="light"] .filterField textarea,
+[data-theme="light"] .searchField input,
+[data-theme="light"] .sheetInput,
+[data-theme="light"] .sheetSelect {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+    color-scheme: light;
+}
+
+[data-theme="light"] .filterField select:focus,
+[data-theme="light"] .filterField input:focus,
+[data-theme="light"] .filterField textarea:focus,
+[data-theme="light"] .searchField input:focus,
+[data-theme="light"] .sheetInput:focus,
+[data-theme="light"] .sheetSelect:focus {
+    border-color: rgba(8, 145, 178, 0.45);
+    box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.12);
+}
+
+[data-theme="light"] .trainingTable {
+    color: #0f172a;
+}
+
+[data-theme="light"] .trainingTable thead th {
+    background: rgba(248, 250, 252, 0.98);
+    color: rgba(71, 85, 105, 0.76);
+    border-color: rgba(148, 163, 184, 0.24);
+}
+
+[data-theme="light"] .trainingTable tbody td {
+    border-color: rgba(148, 163, 184, 0.18);
+}
+
+[data-theme="light"] .trainingTable tbody tr:hover td {
+    background: rgba(8, 145, 178, 0.06);
+}
+
+[data-theme="light"] .trainingTable tbody tr.alertRow td {
+    background: rgba(245, 158, 11, 0.08);
+}
+
+[data-theme="light"] .trainingCard:hover {
+    background: rgba(239, 246, 255, 0.9);
+    box-shadow: 0 18px 38px -28px rgba(8, 145, 178, 0.28);
+}
+
+[data-theme="light"] .kpiCard {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94)),
+        linear-gradient(135deg, rgba(8, 145, 178, 0.08), transparent 56%);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: #0f172a;
+    box-shadow: 0 18px 40px -30px rgba(15, 23, 42, 0.24);
+}
+
+[data-theme="light"] .kpiCard:hover,
+[data-theme="light"] .kpiActive {
+    border-color: rgba(8, 145, 178, 0.32);
+    box-shadow: 0 18px 38px -28px rgba(8, 145, 178, 0.28);
+}
+
+[data-theme="light"] .kpiLabel {
+    color: rgba(71, 85, 105, 0.72);
+}
+
+[data-theme="light"] .kpiDetail {
+    color: #64748b;
+}
+
+[data-theme="light"] .trainingCardDate,
+[data-theme="light"] .trainingCardSide {
+    border-color: rgba(148, 163, 184, 0.22);
+}
+
+[data-theme="light"] .trainingCardTime,
+[data-theme="light"] .trainingCardTitle,
+[data-theme="light"] .trainingCardTimelineHead strong,
+[data-theme="light"] .trainingCardCompletionLabel strong,
+[data-theme="light"] .trainingTimelinePhaseTitle {
+    color: #0f172a;
+}
+
+[data-theme="light"] .trainingCardWeekday,
+[data-theme="light"] .trainingCardDuration,
+[data-theme="light"] .trainingCardContext,
+[data-theme="light"] .trainingCardContext span,
+[data-theme="light"] .trainingCardStatusHint,
+[data-theme="light"] .trainingCardTimelineHead,
+[data-theme="light"] .trainingCardCompletionLabel,
+[data-theme="light"] .trainingTimelinePhaseType,
+[data-theme="light"] .trainingTimelineDescMeta,
+[data-theme="light"] .trainingTimelineStaffEmpty {
+    color: #64748b;
+}
+
+[data-theme="light"] .trainingCardContext strong,
+[data-theme="light"] .trainingTimelineDescText,
+[data-theme="light"] .trainingTimelineCellDesc,
+[data-theme="light"] .trainingTimelineCellStaff {
+    color: #334155;
+}
+
+[data-theme="light"] .trainingCardDuration,
+[data-theme="light"] .trainingTypeChip,
+[data-theme="light"] .trainingProgressStep {
+    background: rgba(248, 250, 252, 0.88);
+    border-color: rgba(148, 163, 184, 0.28);
+    color: #475569;
+}
+
+[data-theme="light"] .trainingStatusScheduled {
+    color: #1d4ed8;
+    border-color: rgba(59, 130, 246, 0.35);
+    background: rgba(59, 130, 246, 0.12);
+}
+
+[data-theme="light"] .trainingStatusLive {
+    color: #92400e;
+    border-color: rgba(245, 158, 11, 0.35);
+    background: rgba(245, 158, 11, 0.14);
+}
+
+[data-theme="light"] .trainingStatusPlayed,
+[data-theme="light"] .trainingProgressStepDone {
+    color: #15803d;
+    border-color: rgba(34, 197, 94, 0.34);
+    background: rgba(34, 197, 94, 0.12);
+}
+
+[data-theme="light"] .trainingStatusAlert,
+[data-theme="light"] .trainingCardStatusHint.alert {
+    color: #b45309;
+    border-color: rgba(245, 158, 11, 0.35);
+    background: rgba(245, 158, 11, 0.12);
+}
+
+[data-theme="light"] .trainingFocusChip {
+    color: #6d28d9;
+    border-color: rgba(124, 58, 237, 0.28);
+    background: rgba(124, 58, 237, 0.1);
+}
+
+[data-theme="light"] .trainingTagChip {
+    color: #0e7490;
+    border-color: rgba(8, 145, 178, 0.28);
+    background: rgba(8, 145, 178, 0.1);
+}
+
+[data-theme="light"] .trainingTimelineTable {
+    background: rgba(255, 255, 255, 0.82);
+    border-color: rgba(148, 163, 184, 0.28);
+}
+
+[data-theme="light"] .trainingTimelineHeadRow > span {
+    background: rgba(241, 245, 249, 0.92);
+    color: #475569;
+    border-color: rgba(148, 163, 184, 0.24);
+}
+
+[data-theme="light"] .trainingTimelineRow > * {
+    color: #334155;
+    border-color: rgba(148, 163, 184, 0.18);
+}
+
+[data-theme="light"] .trainingTimelineCellPhase {
+    background-color: color-mix(in srgb, currentColor 8%, #ffffff);
+}
+
+[data-theme="light"] .trainingProgressStep:hover {
+    background: rgba(8, 145, 178, 0.08);
+    border-color: rgba(8, 145, 178, 0.3);
+    color: #0e7490;
+}
+
+[data-theme="light"] .gymTechnicalWarning {
+    background: rgba(225, 29, 72, 0.06);
+    border: 1px solid rgba(225, 29, 72, 0.18);
+    color: #be123c;
+}
+
+[data-theme="light"] .gymTechnicalWarning strong {
+    color: #9f1239;
+}
+
+[data-theme="light"] .gymSoftNotice {
+    background: rgba(0, 0, 0, 0.02);
+    color: var(--text-muted);
+}
+
+[data-theme="light"] .gymFlashEyebrow {
+    color: rgba(71, 85, 105, 0.6);
+}
+
+[data-theme="light"] .gymFlashSlash,
+[data-theme="light"] .gymFlashTabGhost {
+    color: rgba(71, 85, 105, 0.5);
+}
+
+[data-theme="light"] .gymSyncButton {
+    background: var(--gym-mineral-quartz);
+    color: var(--text-strong);
+}
+
+[data-theme="light"] .gymPrimaryButton {
+    background: #0f172a;
+    color: #ffffff;
+}
+
+[data-theme="light"] .gymPrimaryButton:hover {
+    background: #1e293b;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.22);
+}
+
+[data-theme="light"] .gymPrimaryButton:disabled {
+    background: #dbeafe;
+    border: 1px solid #bfdbfe;
+    color: #64748b;
+}
+
+[data-theme="light"] .gymPanelEyebrow,
+[data-theme="light"] .gymStatusBadge,
+[data-theme="light"] .gymInternalTab {
+    color: rgba(71, 85, 105, 0.68);
+}
+
+[data-theme="light"] .gymStatusBadge {
+    background: rgba(248, 250, 252, 0.82);
+    border-color: rgba(148, 163, 184, 0.24);
+}
+
+[data-theme="light"] .gymInternalTabActive {
+    color: var(--cyan);
+}
+
+[data-theme="light"] .gymSyncButton:hover {
+    border-color: rgba(8, 145, 178, 0.35);
+    box-shadow: 0 0 24px rgba(8, 145, 178, 0.08);
+}
+
+[data-theme="light"] .gymConnectedState {
+    color: rgba(8, 145, 178, 0.8);
+}
+
+[data-theme="light"] .gymKpiCard {
+    background: rgba(248, 250, 252, 0.96);
+}
+
+[data-theme="light"] .gymKpiLabel {
+    color: rgba(71, 85, 105, 0.55);
+}
+
+[data-theme="light"] .gymKpiHint {
+    color: rgba(71, 85, 105, 0.58);
+}
+
+[data-theme="light"] .gymKpiSelect {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.02);
+    color: var(--text-strong);
+}
+
+[data-theme="light"] .trainingCard {
+    background: rgba(248, 250, 252, 0.96);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .trainingCardSide {
+    border-left-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .trainingCardMenu {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 18px 38px -18px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .trainingCardMenuItem {
+    color: rgba(15, 23, 42, 0.85);
+}
+
+[data-theme="light"] .trainingCardMenuItem:hover {
+    background: rgba(8, 145, 178, 0.08);
+    color: #0f172a;
+}
+
+[data-theme="light"] .trainingCardMenuItem.danger {
+    color: #e11d48;
+}
+
+[data-theme="light"] .trainingToast {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(5, 150, 105, 0.35);
+    color: #0f172a;
+    box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .trainingToastError {
+    border-color: rgba(220, 38, 38, 0.4);
+}
+
+[data-theme="light"] .trainingToastIcon {
+    background: rgba(5, 150, 105, 0.15);
+    color: #059669;
+}
+
+[data-theme="light"] .trainingToastError .trainingToastIcon {
+    background: rgba(220, 38, 38, 0.15);
+    color: #e11d48;
+}
+
+[data-theme="light"] .trainingCardIconBtn {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.06);
+    color: rgba(15, 23, 42, 0.65);
+}
+
+[data-theme="light"] .trainingCardIconBtn:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: #0f172a;
+}
+
+[data-theme="light"] .trainingCardIconBtn.danger:hover {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.3);
+    color: #e11d48;
+}
+
+[data-theme="light"] .trainingCardCompletionTrack {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 880px) {
+    [data-theme="light"] .trainingCardSide {
+        border-top-color: rgba(0, 0, 0, 0.06);
+    }
+}
+
+[data-theme="light"] .trainingCardIconBtn {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.06);
+    color: rgba(15, 23, 42, 0.65);
+}
+
+[data-theme="light"] .trainingCardIconBtn:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: #0f172a;
+}
+
+[data-theme="light"] .trainingCardIconBtn.danger:hover {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.3);
+    color: #e11d48;
+}
+
+[data-theme="light"] .trainingCardCompletionTrack {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .trainingCardMenu {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 18px 38px -18px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .trainingCardMenuItem {
+    color: rgba(15, 23, 42, 0.85);
+}
+
+[data-theme="light"] .trainingCardMenuItem:hover {
+    background: rgba(8, 145, 178, 0.08);
+    color: #0f172a;
+}
+
+[data-theme="light"] .trainingCardMenuItem.danger {
+    color: #e11d48;
+}
+
+[data-theme="light"] .trainingToast {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(5, 150, 105, 0.35);
+    color: #0f172a;
+    box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .trainingToastError {
+    border-color: rgba(220, 38, 38, 0.4);
+}
+
+[data-theme="light"] .trainingToastIcon {
+    background: rgba(5, 150, 105, 0.15);
+    color: #059669;
+}
+
+[data-theme="light"] .trainingToastError .trainingToastIcon {
+    background: rgba(220, 38, 38, 0.15);
+    color: #e11d48;
+}
+
+[data-theme="light"] .gymKpiCard {
+    background: rgba(248, 250, 252, 0.96);
+}
+
+[data-theme="light"] .gymKpiLabel {
+    color: rgba(71, 85, 105, 0.55);
+}
+
+[data-theme="light"] .gymKpiHint {
+    color: rgba(71, 85, 105, 0.58);
+}
+
+[data-theme="light"] .gymKpiSelect {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.02);
+    color: var(--text-strong);
+}
+
+[data-theme="light"] .gymSyncButton {
+    background: var(--gym-mineral-quartz);
+    color: var(--text-strong);
+}
+
+[data-theme="light"] .gymSyncButton:hover {
+    border-color: rgba(8, 145, 178, 0.35);
+    box-shadow: 0 0 24px rgba(8, 145, 178, 0.08);
+}
+
+[data-theme="light"] .gymConnectedState {
+    color: rgba(8, 145, 178, 0.8);
+}
+
+[data-theme="light"] .gymTechnicalWarning {
+    background: rgba(225, 29, 72, 0.06);
+    border: 1px solid rgba(225, 29, 72, 0.18);
+    color: #be123c;
+}
+
+[data-theme="light"] .gymTechnicalWarning strong {
+    color: #9f1239;
+}
+
+[data-theme="light"] .gymSoftNotice {
+    background: rgba(0, 0, 0, 0.02);
+    color: var(--text-muted);
+}
+
+[data-theme="light"] .gymFlashEyebrow {
+    color: rgba(71, 85, 105, 0.6);
+}
+
+[data-theme="light"] .gymFlashSlash,
+[data-theme="light"] .gymFlashTabGhost {
+    color: rgba(71, 85, 105, 0.5);
+}
+
+[data-theme="light"] .gymFlashShell {
+    --gym-bg-deep: #f8fafc;
+    --gym-mineral-quartz: rgba(0, 0, 0, 0.02);
+    --gym-mineral-border: rgba(0, 0, 0, 0.06);
+    --gym-mineral-shine: rgba(0, 0, 0, 0.1);
+    --gym-purple: #4f46e5;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(79, 70, 229, 0.1), transparent 36%),
+        radial-gradient(circle at 100% 100%, rgba(8, 145, 178, 0.06), transparent 34%);
+}

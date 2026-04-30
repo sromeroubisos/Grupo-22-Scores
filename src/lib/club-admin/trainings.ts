@@ -9,6 +9,17 @@ export type PlanBlockType = 'warmup' | 'tecnico' | 'tactico' | 'fisico' | 'cierr
 export type TrainingExerciseResult = 'correcto' | 'parcial' | 'no_logrado';
 export type TrainingTechnicalEventType = 'patadas' | 'jugadas' | 'scrums' | 'lines' | 'secuencias';
 
+export interface TrainingExerciseDrill {
+    id: string;
+    name: string;
+    sets?: number;
+    reps?: number;
+    duration?: number;
+    distance?: number;
+    equipment?: string;
+    notes?: string;
+}
+
 export interface PlanBlock {
     id: string;
     type: PlanBlockType;
@@ -16,6 +27,10 @@ export interface PlanBlock {
     duration: number;
     notes: string;
     intensity?: string;
+    targetRpe?: number;
+    workRest?: string;
+    color?: string;
+    exercises?: TrainingExerciseDrill[];
 }
 
 export interface TrainingPlan {
@@ -64,6 +79,17 @@ export interface TrainingPlayer {
     divisionName: string | null;
 }
 
+export interface TrainingCustomField {
+    key: string;
+    value: string;
+}
+
+export interface TrainingConditions {
+    weather?: string;
+    temperature?: string;
+    field?: string;
+}
+
 export interface TrainingEntry {
     id: string;
     persistedId?: string | null;
@@ -85,6 +111,12 @@ export interface TrainingEntry {
     plan?: TrainingPlan;
     evaluation?: TrainingEvaluation;
     attendance?: Record<string, AttendanceState>;
+    tags?: string[];
+    notes?: string;
+    color?: string;
+    customFocus?: string;
+    conditions?: TrainingConditions;
+    customFields?: TrainingCustomField[];
 }
 
 interface BuildClubTrainingEntriesArgs {

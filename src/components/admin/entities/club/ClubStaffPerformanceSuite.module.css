@@ -421,3 +421,80 @@
         justify-content: flex-start;
     }
 }
+
+[data-theme="light"] .suite {
+    --staff-bg: rgba(248, 250, 252, 0.94);
+    --staff-panel: rgba(0, 0, 0, 0.035);
+    --staff-panel-strong: rgba(0, 0, 0, 0.065);
+    --staff-border: rgba(148, 163, 184, 0.25);
+    --staff-text: #0f172a;
+    --staff-muted: rgba(71, 85, 105, 0.72);
+    --staff-blue: #2563eb;
+    --staff-green: #059669;
+    --staff-yellow: #d97706;
+    --staff-red: #e11d48;
+    color: var(--staff-text);
+}
+
+[data-theme="light"] .hero,
+[data-theme="light"] .filters,
+[data-theme="light"] .panel,
+[data-theme="light"] .notice,
+[data-theme="light"] .spreadsheet {
+    background: linear-gradient(180deg, rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.96));
+    box-shadow: 0 24px 60px -32px rgba(0, 0, 0, 0.15);
+    border-color: var(--staff-border);
+}
+
+[data-theme="light"] .scopeCard,
+[data-theme="light"] .kpiCard,
+[data-theme="light"] .alertCard,
+[data-theme="light"] .moduleButton {
+    border-color: rgba(148, 163, 184, 0.18);
+}
+
+[data-theme="light"] .button {
+    background: var(--staff-blue);
+    border-color: rgba(37, 99, 235, 0.5);
+    color: #ffffff;
+}
+
+[data-theme="light"] .ghostButton:hover,
+[data-theme="light"] .moduleButton:hover,
+[data-theme="light"] .iconButton:hover {
+    border-color: rgba(37, 99, 235, 0.35);
+    background: rgba(37, 99, 235, 0.08);
+}
+
+[data-theme="light"] .field input,
+[data-theme="light"] .field select,
+[data-theme="light"] .field textarea {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(148, 163, 184, 0.2);
+    color: var(--staff-text);
+}
+
+[data-theme="light"] .table th {
+    background: #f1f5f9;
+    color: rgba(71, 85, 105, 0.72);
+}
+
+[data-theme="light"] .table td {
+    border-bottom-color: rgba(148, 163, 184, 0.15);
+}
+
+[data-theme="light"] .notice {
+    color: #92400e;
+}
+
+[data-theme="light"] .empty {
+    border-color: rgba(148, 163, 184, 0.25);
+}
+
+[data-theme="light"] .scopeMatch {
+    color: #1d4ed8;
+}
+
+[data-theme="light"] .scopePrivate {
+    color: #059669;
+}

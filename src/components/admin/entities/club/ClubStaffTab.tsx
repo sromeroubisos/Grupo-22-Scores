@@ -143,7 +143,7 @@ export function ClubStaffTab({
                 </div>
 
                 {error && (
-                    <div className="m-4 p-4 rounded border border-red-500/30 bg-red-500/10 text-red-200 text-sm flex items-center gap-2">
+                    <div className="m-4 p-4 rounded border border-[color-mix(in_srgb,var(--ca-danger)_30%,transparent)] bg-[color-mix(in_srgb,var(--ca-danger)_10%,transparent)] text-[var(--ca-danger)] text-sm flex items-center gap-2">
                         <AlertCircle className="w-4 h-4" />
                         {error}
                     </div>
@@ -162,11 +162,11 @@ export function ClubStaffTab({
                 {/* Staff Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
                     {!loading && filteredRows.map((p) => (
-                        <div key={p.id} className="card group hover:border-amber-500/30 transition-all">
+                        <div key={p.id} className="card group hover:border-[color-mix(in_srgb,var(--ca-warning)_30%,transparent)] transition-all">
                             <div className="flex items-center gap-4 mb-6">
                                 <div
                                     className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0"
-                                    style={{ background: 'var(--surface-row)', border: '1px solid var(--border-standard)' }}
+                                    style={{ background: 'var(--ca-surface)', border: '1px solid var(--ca-border)' }}
                                 >
                                     {p.photo_url ? (
                                         <img src={p.photo_url} alt={p.first_name} className="w-full h-full object-cover" />
@@ -178,7 +178,7 @@ export function ClubStaffTab({
                                     <h3 className="text-sm font-black uppercase truncate" style={{ color: 'var(--text-main)' }}>
                                         {p.first_name} {p.last_name}
                                     </h3>
-                                    <p className="text-[10px] text-amber-500 font-mono font-black uppercase tracking-widest">
+                                    <p className="text-[10px] text-[var(--ca-warning)] font-mono font-black uppercase tracking-widest">
                                         {p.position || formatStaffRole(p.role)}
                                     </p>
                                 </div>
@@ -187,21 +187,21 @@ export function ClubStaffTab({
                             <div className="space-y-2 mb-6">
                                 <div
                                     className="flex justify-between items-center py-2 px-3 rounded-lg"
-                                    style={{ background: 'var(--surface-row)' }}
+                                    style={{ background: 'var(--ca-surface)' }}
                                 >
                                     <span className="text-[9px] font-bold uppercase" style={{ color: 'var(--text-dim)' }}>Estado</span>
-                                    <span className="text-[9px] text-green-500 font-black uppercase">{p.status || 'active'}</span>
+                                    <span className="text-[9px] text-[var(--ca-success)] font-black uppercase">{p.status || 'active'}</span>
                                 </div>
                                 <div
                                     className="flex justify-between items-center py-2 px-3 rounded-lg"
-                                    style={{ background: 'var(--surface-row)' }}
+                                    style={{ background: 'var(--ca-surface)' }}
                                 >
                                     <span className="text-[9px] font-bold uppercase" style={{ color: 'var(--text-dim)' }}>Rol</span>
                                     <span className="text-[9px] font-mono" style={{ color: 'var(--text-secondary)' }}>{formatStaffRole(p.role)}</span>
                                 </div>
                                 <div
                                     className="flex justify-between items-center py-2 px-3 rounded-lg"
-                                    style={{ background: 'var(--surface-row)' }}
+                                    style={{ background: 'var(--ca-surface)' }}
                                 >
                                     <span className="text-[9px] font-bold uppercase" style={{ color: 'var(--text-dim)' }}>Documento</span>
                                     <span className="text-[9px] font-mono" style={{ color: 'var(--text-secondary)' }}>{p.id_number || '-'}</span>
@@ -223,7 +223,7 @@ export function ClubStaffTab({
                         <div
                             key={i}
                             className="card animate-pulse h-[220px]"
-                            style={{ background: 'var(--surface-row)', borderColor: 'var(--border-standard)' }}
+                            style={{ background: 'var(--ca-surface)', borderColor: 'var(--ca-border)' }}
                         />
                     ))}
                 </div>

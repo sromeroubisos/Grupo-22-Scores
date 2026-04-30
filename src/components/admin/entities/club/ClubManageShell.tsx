@@ -675,9 +675,9 @@ export function ClubManageShell({
             <div
                 className={`flash-ui-container${isPizarraFocus ? ' is-pizarra-focus' : ''}`}
                 style={{
-                    '--accent': '#3b82f6',
-                    '--accent-secondary': '#3b82f6',
-                    '--accent-tertiary': '#f43f5e',
+                    '--accent': 'var(--ca-accent)',
+                    '--accent-secondary': 'var(--ca-accent)',
+                    '--accent-tertiary': 'var(--ca-accent-tertiary)',
                     '--club-primary': form.primary_color || '#3b82f6',
                 } as CSSProperties}
             >

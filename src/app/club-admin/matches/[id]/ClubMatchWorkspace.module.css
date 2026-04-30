@@ -6,7 +6,9 @@
   --surface-strong: #1c1f24;
   --border: #2a2d31;
   --text-main: #f4f4f5;
+  --text: #f4f4f5;
   --text-dim: #a1a1aa;
+  --text-muted: #a1a1aa;
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
@@ -2934,4 +2936,225 @@
   justify-content: flex-end;
   gap: 8px;
   margin-top: 4px;
+}
+
+[data-theme="light"] .shell {
+  --club-accent: #2563eb;
+  --club-accent-glow: color-mix(in srgb, var(--club-accent) 22%, transparent);
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-strong: #f1f5f9;
+  --border: #e2e8f0;
+  --text-main: #0f172a;
+  --text: #0f172a;
+  --text-dim: #64748b;
+  --text-muted: #64748b;
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(148, 163, 184, 0.25) 0%, transparent 48%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  color: var(--text-main);
+}
+
+[data-theme="light"] .header {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .backButton {
+  background: #e2e8f0;
+  color: var(--text-main);
+  border-color: var(--border);
+}
+
+[data-theme="light"] .backButton:hover {
+  background: #cbd5e1;
+  border-color: color-mix(in srgb, var(--club-accent) 45%, var(--border));
+}
+
+[data-theme="light"] .shield {
+  background: linear-gradient(180deg, rgba(241, 245, 249, 0.9), rgba(226, 232, 240, 1));
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .statusScheduled {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+[data-theme="light"] .statusLive {
+  background: rgba(217, 119, 6, 0.1);
+  border-color: rgba(217, 119, 6, 0.2);
+}
+
+[data-theme="light"] .statusFinal {
+  background: rgba(5, 150, 105, 0.1);
+  border-color: rgba(5, 150, 105, 0.2);
+}
+
+[data-theme="light"] .statusSuspended,
+[data-theme="light"] .statusPostponed {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+[data-theme="light"] .eventPanelConfigFooter {
+  background: rgba(241, 245, 249, 0.6);
+}
+
+[data-theme="light"] .videoPlayer,
+[data-theme="light"] .videoOverlay,
+[data-theme="light"] .videoFullscreenLabel {
+    background: #000;
+    color: #fff;
+}
+
+[data-theme="light"] .btn,
+[data-theme="light"] .miniBtn,
+[data-theme="light"] .sidebarWidget,
+[data-theme="light"] .kpiCard,
+[data-theme="light"] .tabContent,
+[data-theme="light"] .card,
+[data-theme="light"] .playerRow,
+[data-theme="light"] .quickLink,
+[data-theme="light"] .statusTag,
+[data-theme="light"] .liveSubviewBtn,
+[data-theme="light"] .liveScoreHeader,
+[data-theme="light"] .liveComposerCard,
+[data-theme="light"] .liveTimelineCard,
+[data-theme="light"] .liveDataCard,
+[data-theme="light"] .liveActionBtn,
+[data-theme="light"] .timelineRow,
+[data-theme="light"] .liveCheckbox,
+[data-theme="light"] .livePointTotalCard,
+[data-theme="light"] .liveAutoBadge,
+[data-theme="light"] .liveMiniStat,
+[data-theme="light"] .kpiItem,
+[data-theme="light"] .eventPanelToolbar,
+[data-theme="light"] .eventPanelConfigCard,
+[data-theme="light"] .eventPanelConfigGroup,
+[data-theme="light"] .eventPanelConfigItem,
+[data-theme="light"] .customEventListItem,
+[data-theme="light"] .customEventEditor {
+  background: #ffffff;
+  border-color: var(--border);
+  color: var(--text-main);
+  box-shadow: 0 16px 34px -28px rgba(15, 23, 42, 0.2);
+}
+
+[data-theme="light"] .card,
+[data-theme="light"] .liveScoreHeader,
+[data-theme="light"] .liveComposerCard,
+[data-theme="light"] .liveTimelineCard,
+[data-theme="light"] .liveDataCard,
+[data-theme="light"] .eventPanelConfigCard {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+}
+
+[data-theme="light"] .liveScoreValue {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: var(--text-main);
+  box-shadow: 0 14px 28px -24px rgba(15, 23, 42, 0.3);
+}
+
+[data-theme="light"] .liveScoreValue small {
+  color: var(--text-dim);
+}
+
+[data-theme="light"] .input,
+[data-theme="light"] .select,
+[data-theme="light"] .textarea,
+[data-theme="light"] .noteArea {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: var(--text-main);
+}
+
+[data-theme="light"] .input::placeholder,
+[data-theme="light"] .textarea::placeholder {
+  color: #94a3b8;
+}
+
+[data-theme="light"] .input:read-only,
+[data-theme="light"] .select:disabled {
+  background: #eef2f7;
+  color: var(--text-main);
+  opacity: 1;
+}
+
+[data-theme="light"] .playerRow:hover,
+[data-theme="light"] .btn:hover,
+[data-theme="light"] .btnGhost:hover,
+[data-theme="light"] .miniBtn:hover,
+[data-theme="light"] .quickLink:hover,
+[data-theme="light"] .liveActionBtn:hover,
+[data-theme="light"] .timelineRow:hover {
+  background: #f1f5f9;
+}
+
+[data-theme="light"] .btnGhost,
+[data-theme="light"] .postTab {
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text-main);
+  border-color: var(--border);
+}
+
+[data-theme="light"] .postTab:hover,
+[data-theme="light"] .postTabActive,
+[data-theme="light"] .liveSubviewBtnActive {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.32);
+  color: #1d4ed8;
+}
+
+[data-theme="light"] .suggestionCard,
+[data-theme="light"] .liveHintCard {
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.98), rgba(255, 255, 255, 0.96));
+  color: var(--text-main);
+}
+
+[data-theme="light"] .liveActionBtnGreen {
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.14), rgba(255, 255, 255, 0.98));
+}
+
+[data-theme="light"] .liveActionBtnYellow {
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.14), rgba(255, 255, 255, 0.98));
+}
+
+[data-theme="light"] .liveActionBtnBlue {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.14), rgba(255, 255, 255, 0.98));
+}
+
+[data-theme="light"] .liveActionBtnNeutral {
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.13), rgba(255, 255, 255, 0.98));
+}
+
+[data-theme="light"] .liveActionBtnRed {
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.14), rgba(255, 255, 255, 0.98));
+}
+
+[data-theme="light"] .liveActionBtnBrown {
+  background: linear-gradient(180deg, rgba(180, 83, 9, 0.13), rgba(255, 255, 255, 0.98));
+}
+
+[data-theme="light"] .liveToneGreen { color: #047857; }
+[data-theme="light"] .liveToneYellow { color: #92400e; }
+[data-theme="light"] .liveToneBlue { color: #1d4ed8; }
+[data-theme="light"] .liveToneNeutral { color: #475569; }
+[data-theme="light"] .liveToneRed { color: #b91c1c; }
+[data-theme="light"] .liveToneBrown { color: #92400e; }
+
+[data-theme="light"] .eventPanelConfigFooter {
+  background: #f8fafc;
+}
+
+[data-theme="light"] .eventPanelConfigItemGlyph {
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--text-main);
 }

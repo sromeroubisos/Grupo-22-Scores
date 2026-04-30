@@ -84,8 +84,8 @@ export function ClubIdentityTab({ data, unions }: ClubIdentityTabProps) {
                                     <span>Sin escudo</span>
                                 </div>
                             )}
-                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4" style={{ background: 'rgba(15, 23, 42, 0.68)' }}>
-                                    <p className="text-[10px] font-bold uppercase text-center leading-tight" style={{ color: '#fff' }}>Configura a la derecha</p>
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4" style={{ background: 'var(--ca-surface-hover)' }}>
+                                    <p className="text-[10px] font-bold uppercase text-center leading-tight" style={{ color: 'var(--ca-text)' }}>Configura a la derecha</p>
                                 </div>
                         </div>
 
@@ -125,7 +125,7 @@ export function ClubIdentityTab({ data, unions }: ClubIdentityTabProps) {
                         ) : (
                             <div className="manager-input-group mb-8">
                                 <label className="manager-field-label">Subir Logo (PNG/SVG/JPG)</label>
-                                <div className="p-4 border border-[var(--border)] bg-[rgba(255,255,255,0.02)] min-h-[140px] flex items-center justify-center">
+                                <div className="p-4 border border-[var(--border)] bg-[var(--ca-surface-hover)] min-h-[140px] flex items-center justify-center">
                                     <LogoUploader
                                         onUpload={(url) => updateField({ logo_url: url })}
                                         accentColor="var(--accent)"
@@ -138,10 +138,10 @@ export function ClubIdentityTab({ data, unions }: ClubIdentityTabProps) {
                         <div className="grid grid-cols-2 gap-6">
                             <div className="manager-input-group">
                                 <label className="manager-field-label">Color Institucional</label>
-                                <div className="flex items-center gap-4 border border-[rgba(255,255,255,0.2)] p-2 rounded-lg bg-[rgba(255,255,255,0.02)]">
+                                <div className="flex items-center gap-4 border border-[var(--ca-border-light)] p-2 rounded-lg bg-[var(--ca-surface-hover)]">
                                     <input
                                         type="color"
-                                        className="w-10 h-10 rounded-lg bg-transparent border border-[rgba(255,255,255,0.1)] cursor-pointer"
+                                        className="w-10 h-10 rounded-lg bg-transparent border border-[var(--ca-border)] cursor-pointer"
                                         value={form.primary_color || '#3b82f6'}
                                         onChange={(e) => updateField({ primary_color: e.target.value })}
                                     />
@@ -156,12 +156,12 @@ export function ClubIdentityTab({ data, unions }: ClubIdentityTabProps) {
                                         onClick={() => updateField({ is_visible: !form.is_visible })}
                                         className={clsx(
                                             'w-12 h-6 rounded-full transition-all relative flex items-center px-1 border',
-                                            form.is_visible ? 'bg-[rgba(0,255,133,0.1)] border-[rgba(0,255,133,0.3)]' : 'bg-transparent border-[rgba(255,255,255,0.2)]'
+                                            form.is_visible ? 'bg-[color-mix(in_srgb,var(--ca-success)_10%,transparent)] border-[color-mix(in_srgb,var(--ca-success)_30%,transparent)]' : 'bg-transparent border-[var(--ca-border-light)]'
                                         )}
                                     >
                                         <div className={clsx(
                                             'w-4 h-4 rounded-full transition-all shadow-md',
-                                            form.is_visible ? 'translate-x-6 bg-[var(--success)]' : 'translate-x-0 bg-[#52525b]'
+                                            form.is_visible ? 'translate-x-6 bg-[var(--success)]' : 'translate-x-0 bg-[var(--ca-text-muted)]'
                                         )} />
                                     </button>
                                     <span className="text-[13px] font-bold uppercase tracking-tighter" style={{ color: 'var(--text)' }}>

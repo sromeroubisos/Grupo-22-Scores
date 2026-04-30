@@ -132,38 +132,38 @@ export function ClubSquadBuilder({ clubId, onBack }: ClubSquadBuilderProps) {
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20 relative">
-            <div className="fixed inset-0 pointer-events-none opacity-5 z-[9999] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
+            <div className="fixed inset-0 pointer-events-none z-[9999] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay opacity-[0.03]"></div>
 
-            <header className="pb-4 pt-2 mb-4 border-b border-[rgba(255,255,255,0.08)] flex justify-between items-end gap-4 flex-wrap">
+            <header className="pb-4 pt-2 mb-4 border-b border-[var(--ca-border)] flex justify-between items-end gap-4 flex-wrap">
                 <div className="flex flex-col gap-2">
                     <button
                         type="button"
                         onClick={onBack}
-                        className="flex items-center gap-2 text-[var(--accent)] hover:text-white transition-colors uppercase tracking-widest text-[11px] font-mono group"
+                        className="flex items-center gap-2 text-[var(--accent)] hover:text-[var(--ca-text)] transition-colors uppercase tracking-widest text-[11px] font-mono group"
                     >
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Volver a planteles
                     </button>
-                    <div className="font-mono text-[11px] uppercase tracking-widest text-[#94a3b8]">Club / Equipos / Plantel</div>
+                    <div className="font-mono text-[11px] uppercase tracking-widest text-[var(--ca-text-secondary)]">Club / Equipos / Plantel</div>
                     <input
                         type="text"
                         value={squadName}
                         onChange={(event) => setSquadName(event.target.value)}
-                        className="bg-transparent font-black text-3xl tracking-tighter text-[#f8fafc] leading-tight outline-none border-b border-transparent focus:border-[rgba(255,255,255,0.2)] transition-colors w-full sm:w-[500px]"
+                        className="bg-transparent font-black text-3xl tracking-tighter text-[var(--ca-text)] leading-tight outline-none border-b border-transparent focus:border-[var(--ca-border-light)] transition-colors w-full sm:w-[500px]"
                         placeholder="Nombre del plantel"
                     />
-                    <p className="text-[14px] text-[#94a3b8] font-medium">Temporada 2026</p>
+                    <p className="text-[14px] text-[var(--ca-text-secondary)] font-medium">Temporada 2026</p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
                     <button
                         type="button"
-                        className="flex items-center gap-2 px-4 py-2 bg-[#0f0f0f] border border-[rgba(255,255,255,0.08)] text-[#f8fafc] text-[13px] font-bold rounded-lg hover:bg-[rgba(255,255,255,0.03)] hover:border-[rgba(255,255,255,0.2)] hover:-translate-y-px transition-all"
+                        className="flex items-center gap-2 px-4 py-2 bg-[var(--ca-surface)] border border-[var(--ca-border)] text-[var(--ca-text)] text-[13px] font-bold rounded-lg hover:bg-[var(--ca-surface-hover)] hover:border-[var(--ca-border-light)] hover:-translate-y-px transition-all"
                     >
                         <Calendar className="w-4 h-4" /> Historial
                     </button>
                     <button
                         type="button"
-                        className="flex items-center gap-2 px-4 py-2 bg-[#0f0f0f] border border-[rgba(255,255,255,0.08)] text-[#f8fafc] text-[13px] font-bold rounded-lg hover:bg-[rgba(255,255,255,0.03)] hover:border-[rgba(255,255,255,0.2)] hover:-translate-y-px transition-all"
+                        className="flex items-center gap-2 px-4 py-2 bg-[var(--ca-surface)] border border-[var(--ca-border)] text-[var(--ca-text)] text-[13px] font-bold rounded-lg hover:bg-[var(--ca-surface-hover)] hover:border-[var(--ca-border-light)] hover:-translate-y-px transition-all"
                     >
                         <Download className="w-4 h-4" /> Exportar
                     </button>
@@ -171,46 +171,46 @@ export function ClubSquadBuilder({ clubId, onBack }: ClubSquadBuilderProps) {
                         type="button"
                         onClick={handleSaveSquad}
                         disabled={isSaving}
-                        className="flex items-center gap-2 px-5 py-2 bg-[#3b82f6] text-white text-[13px] font-bold rounded-lg hover:bg-[#2563eb] border-none shadow-[0_0_15px_rgba(59,130,246,0.2)] animate-pulse transition-all disabled:opacity-50 disabled:animate-none"
+                        className="flex items-center gap-2 px-5 py-2 bg-[var(--ca-accent)] text-white text-[13px] font-bold rounded-lg hover:bg-[var(--ca-accent-hover)] border-none shadow-[0_0_15px_color-mix(in_srgb,var(--ca-accent)_20%,transparent)] animate-pulse transition-all disabled:opacity-50 disabled:animate-none"
                     >
                         {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Guardar plantel'}
                     </button>
                     <button
                         type="button"
-                        className="flex items-center justify-center p-2.5 bg-[#0f0f0f] border border-[rgba(255,255,255,0.08)] text-[#f8fafc] rounded-lg hover:bg-[rgba(255,255,255,0.03)] transition-all"
+                        className="flex items-center justify-center p-2.5 bg-[var(--ca-surface)] border border-[var(--ca-border)] text-[var(--ca-text)] rounded-lg hover:bg-[var(--ca-surface-hover)] transition-all"
                     >
                         <Settings className="w-[18px] h-[18px]" />
                     </button>
                 </div>
             </header>
 
-            <section className="bg-[rgba(255,255,255,0.02)] backdrop-blur-md border border-[rgba(255,255,255,0.08)] rounded-xl p-4 flex flex-wrap justify-around items-center gap-4 mb-4">
+            <section className="bg-[var(--ca-surface-hover)] backdrop-blur-md border border-[var(--ca-border)] rounded-xl p-4 flex flex-wrap justify-around items-center gap-4 mb-4">
                 <div className="text-center">
-                    <span className="block text-[10px] uppercase text-[#94a3b8] tracking-widest mb-1">Jugadores</span>
-                    <span className="block font-mono text-[18px] font-bold text-[#f8fafc]">{squadPlayers.length} / 40</span>
+                    <span className="block text-[10px] uppercase text-[var(--ca-text-secondary)] tracking-widest mb-1">Jugadores</span>
+                    <span className="block font-mono text-[18px] font-bold text-[var(--ca-text)]">{squadPlayers.length} / 40</span>
                 </div>
-                <div className="w-px h-8 bg-[rgba(255,255,255,0.08)] hidden md:block"></div>
+                <div className="w-px h-8 bg-[var(--ca-border)] hidden md:block"></div>
                 <div className="text-center">
-                    <span className="block text-[10px] uppercase text-[#94a3b8] tracking-widest mb-1">Seleccionados</span>
-                    <span className="block font-mono text-[18px] font-bold text-[#10b981]">{squadPlayers.length}</span>
+                    <span className="block text-[10px] uppercase text-[var(--ca-text-secondary)] tracking-widest mb-1">Seleccionados</span>
+                    <span className="block font-mono text-[18px] font-bold text-[var(--ca-success)]">{squadPlayers.length}</span>
                 </div>
-                <div className="w-px h-8 bg-[rgba(255,255,255,0.08)] hidden md:block"></div>
+                <div className="w-px h-8 bg-[var(--ca-border)] hidden md:block"></div>
                 <div className="text-center">
-                    <span className="block text-[10px] uppercase text-[#94a3b8] tracking-widest mb-1">Disponibles</span>
-                    <span className="block font-mono text-[18px] font-bold text-[#3b82f6]">{filteredAvailable.length}</span>
+                    <span className="block text-[10px] uppercase text-[var(--ca-text-secondary)] tracking-widest mb-1">Disponibles</span>
+                    <span className="block font-mono text-[18px] font-bold text-[var(--ca-accent)]">{filteredAvailable.length}</span>
                 </div>
-                <div className="w-px h-8 bg-[rgba(255,255,255,0.08)] hidden md:block"></div>
+                <div className="w-px h-8 bg-[var(--ca-border)] hidden md:block"></div>
                 <div className="text-center">
-                    <span className="block text-[10px] uppercase text-[#94a3b8] tracking-widest mb-1">Prom. edad</span>
-                    <span className="block font-mono text-[18px] font-bold text-[#f8fafc]">{averageAge ? `${averageAge}` : '-'}</span>
+                    <span className="block text-[10px] uppercase text-[var(--ca-text-secondary)] tracking-widest mb-1">Prom. edad</span>
+                    <span className="block font-mono text-[18px] font-bold text-[var(--ca-text)]">{averageAge ? `${averageAge}` : '-'}</span>
                 </div>
             </section>
 
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr_1.1fr] xl:grid-cols-[320px_1fr_340px] gap-4 min-h-[600px] items-stretch">
-                <aside className="bg-[#0f0f0f] border border-[rgba(255,255,255,0.08)] rounded-2xl flex flex-col overflow-hidden relative">
-                    <div className="p-5 border-b border-[rgba(255,255,255,0.08)] bg-gradient-to-b from-[rgba(255,255,255,0.02)] to-transparent">
-                        <h2 className="font-bold text-[14px] uppercase tracking-widest text-[#f8fafc] flex justify-between items-center">
-                            Disponibles del club <Search className="w-4 h-4 text-[#94a3b8]" />
+                <aside className="bg-[var(--ca-surface)] border border-[var(--ca-border)] rounded-2xl flex flex-col overflow-hidden relative">
+                    <div className="p-5 border-b border-[var(--ca-border)] bg-gradient-to-b from-[var(--ca-surface-hover)] to-transparent">
+                        <h2 className="font-bold text-[14px] uppercase tracking-widest text-[var(--ca-text)] flex justify-between items-center">
+                            Disponibles del club <Search className="w-4 h-4 text-[var(--ca-text-secondary)]" />
                         </h2>
                     </div>
                     <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
@@ -219,14 +219,14 @@ export function ClubSquadBuilder({ clubId, onBack }: ClubSquadBuilderProps) {
                                 type="text"
                                 value={searchQuery}
                                 onChange={(event) => setSearchQuery(event.target.value)}
-                                className="w-full bg-[#050505] border border-[rgba(255,255,255,0.08)] p-2.5 rounded-lg text-white text-[13px] outline-none focus:border-[#3b82f6] transition-colors"
+                                className="w-full bg-[var(--ca-bg)] border border-[var(--ca-border)] p-2.5 rounded-lg text-[var(--ca-text)] text-[13px] outline-none focus:border-[var(--ca-accent)] transition-colors"
                                 placeholder="Buscar jugador o posicion..."
                             />
                         </div>
 
                         {loading ? (
                             <div className="flex justify-center p-4">
-                                <Loader2 className="w-6 h-6 animate-spin text-[#3b82f6]" />
+                                <Loader2 className="w-6 h-6 animate-spin text-[var(--ca-accent)]" />
                             </div>
                         ) : (
                             <div className="space-y-2">
@@ -237,20 +237,20 @@ export function ClubSquadBuilder({ clubId, onBack }: ClubSquadBuilderProps) {
                                         className={clsx(
                                             'flex items-center gap-3 p-2.5 rounded-xl border transition-all cursor-pointer group',
                                             selectedPlayer?.id === player.id
-                                                ? 'bg-[rgba(255,255,255,0.05)] border-[rgba(255,255,255,0.15)]'
-                                                : 'border-transparent hover:bg-[rgba(255,255,255,0.03)] hover:border-[rgba(255,255,255,0.08)]'
+                                                ? 'bg-[var(--ca-surface-hover)] border-[var(--ca-border-light)]'
+                                                : 'border-transparent hover:bg-[var(--ca-surface-hover)] hover:border-[var(--ca-border)]'
                                         )}
                                     >
-                                        <div className="w-9 h-9 rounded-full bg-[#3b82f6]/20 border border-[rgba(59,130,246,0.3)] flex items-center justify-center shrink-0">
-                                            <span className="text-[#3b82f6] text-[12px] font-black">{getInitials(player.first_name, player.last_name)}</span>
+                                        <div className="w-9 h-9 rounded-full bg-[color-mix(in_srgb,var(--ca-accent)_20%,transparent)] border border-[color-mix(in_srgb,var(--ca-accent)_30%,transparent)] flex items-center justify-center shrink-0">
+                                            <span className="text-[var(--ca-accent)] text-[12px] font-black">{getInitials(player.first_name, player.last_name)}</span>
                                         </div>
                                         <div className="flex flex-col overflow-hidden">
-                                            <h4 className="text-[13px] font-bold text-[#f8fafc] truncate">{getPlayerDisplayName(player)}</h4>
-                                            <p className="text-[11px] text-[#94a3b8]">{player.position || 'Sin posicion'} / {getPlayerAge(player.birth_date)} anos</p>
+                                            <h4 className="text-[13px] font-bold text-[var(--ca-text)] truncate">{getPlayerDisplayName(player)}</h4>
+                                            <p className="text-[11px] text-[var(--ca-text-secondary)]">{player.position || 'Sin posicion'} / {getPlayerAge(player.birth_date)} anos</p>
                                         </div>
                                         <div className="ml-auto">
                                             {player.division_id ? (
-                                                <span className="bg-[rgba(59,130,246,0.1)] text-[#3b82f6] text-[9px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">
+                                                <span className="bg-[color-mix(in_srgb,var(--ca-accent)_10%,transparent)] text-[var(--ca-accent)] text-[9px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">
                                                     En otro plantel
                                                 </span>
                                             ) : (
@@ -260,7 +260,7 @@ export function ClubSquadBuilder({ clubId, onBack }: ClubSquadBuilderProps) {
                                                         event.stopPropagation();
                                                         handleAddPlayer(player);
                                                     }}
-                                                    className="flex items-center justify-center w-7 h-7 bg-[#0f0f0f] border border-[rgba(255,255,255,0.08)] text-[#f8fafc] rounded-md hover:bg-[#3b82f6] hover:border-[#3b82f6] transition-all font-mono opacity-0 group-hover:opacity-100"
+                                                    className="flex items-center justify-center w-7 h-7 bg-[var(--ca-surface)] border border-[var(--ca-border)] text-[var(--ca-text)] rounded-md hover:bg-[var(--ca-accent)] hover:border-[var(--ca-accent)] transition-all font-mono opacity-0 group-hover:opacity-100"
                                                 >
                                                     +
                                                 </button>
@@ -269,27 +269,27 @@ export function ClubSquadBuilder({ clubId, onBack }: ClubSquadBuilderProps) {
                                     </div>
                                 ))}
                                 {filteredAvailable.length === 0 && !loading ? (
-                                    <div className="text-center text-[12px] text-[#94a3b8] p-4">No hay jugadores disponibles</div>
+                                    <div className="text-center text-[12px] text-[var(--ca-text-secondary)] p-4">No hay jugadores disponibles</div>
                                 ) : null}
                             </div>
                         )}
                     </div>
                 </aside>
 
-                <section className="bg-[#0f0f0f] border border-[rgba(255,255,255,0.08)] rounded-2xl flex flex-col overflow-hidden relative">
-                    <div className="p-5 border-b border-[rgba(255,255,255,0.08)] bg-gradient-to-b from-[rgba(255,255,255,0.02)] to-transparent">
-                        <h2 className="font-bold text-[14px] uppercase tracking-widest text-[#f8fafc] flex justify-between items-center">
-                            Composicion del plantel <span className="font-mono text-[11px] text-[#3b82f6]">{squadPlayers.length} seleccionados</span>
+                <section className="bg-[var(--ca-surface)] border border-[var(--ca-border)] rounded-2xl flex flex-col overflow-hidden relative">
+                    <div className="p-5 border-b border-[var(--ca-border)] bg-gradient-to-b from-[var(--ca-surface-hover)] to-transparent">
+                        <h2 className="font-bold text-[14px] uppercase tracking-widest text-[var(--ca-text)] flex justify-between items-center">
+                            Composicion del plantel <span className="font-mono text-[11px] text-[var(--ca-accent)]">{squadPlayers.length} seleccionados</span>
                         </h2>
                     </div>
                     <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                         {squadPlayers.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full text-center px-4 opacity-50">
-                                <div className="w-16 h-16 rounded-full border border-dashed border-[rgba(255,255,255,0.2)] flex items-center justify-center mb-4">
-                                    <Users className="w-6 h-6 text-[#94a3b8]" />
+                                <div className="w-16 h-16 rounded-full border border-dashed border-[var(--ca-border-light)] flex items-center justify-center mb-4">
+                                    <Users className="w-6 h-6 text-[var(--ca-text-secondary)]" />
                                 </div>
-                                <h3 className="font-bold text-[16px] text-[#f8fafc] mb-2 uppercase tracking-widest">Plantel vacio</h3>
-                                <p className="text-[#94a3b8] text-[13px] max-w-xs">Agrega jugadores desde la columna de disponibles para armar el plantel y luego guardarlo.</p>
+                                <h3 className="font-bold text-[16px] text-[var(--ca-text)] mb-2 uppercase tracking-widest">Plantel vacio</h3>
+                                <p className="text-[var(--ca-text-secondary)] text-[13px] max-w-xs">Agrega jugadores desde la columna de disponibles para armar el plantel y luego guardarlo.</p>
                             </div>
                         ) : (
                             <div className="space-y-2">
@@ -300,17 +300,17 @@ export function ClubSquadBuilder({ clubId, onBack }: ClubSquadBuilderProps) {
                                         className={clsx(
                                             'flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer group relative overflow-hidden',
                                             selectedPlayer?.id === player.id
-                                                ? 'bg-[rgba(255,255,255,0.05)] border-[rgba(255,255,255,0.15)]'
-                                                : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.15)]'
+                                                ? 'bg-[var(--ca-surface-hover)] border-[var(--ca-border-light)]'
+                                                : 'bg-[var(--ca-surface-hover)] border-[var(--ca-border)] hover:border-[var(--ca-border-light)]'
                                         )}
                                     >
-                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#10b981]"></div>
-                                        <div className="w-10 h-10 ml-2 rounded-full bg-[#10b981]/20 border border-[rgba(16,185,129,0.3)] flex items-center justify-center shrink-0">
-                                            <span className="text-[#10b981] text-[13px] font-black">{getInitials(player.first_name, player.last_name)}</span>
+                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--ca-success)]"></div>
+                                        <div className="w-10 h-10 ml-2 rounded-full bg-[color-mix(in_srgb,var(--ca-success)_20%,transparent)] border border-[color-mix(in_srgb,var(--ca-success)_30%,transparent)] flex items-center justify-center shrink-0">
+                                            <span className="text-[var(--ca-success)] text-[13px] font-black">{getInitials(player.first_name, player.last_name)}</span>
                                         </div>
                                         <div className="flex flex-col overflow-hidden">
-                                            <h4 className="text-[14px] font-bold text-[#f8fafc] truncate mb-0.5">{getPlayerDisplayName(player)}</h4>
-                                            <p className="text-[11px] text-[#94a3b8] tracking-widest uppercase">{player.position || 'Sin pos.'} / {getPlayerAge(player.birth_date)} anos</p>
+                                            <h4 className="text-[14px] font-bold text-[var(--ca-text)] truncate mb-0.5">{getPlayerDisplayName(player)}</h4>
+                                            <p className="text-[11px] text-[var(--ca-text-secondary)] tracking-widest uppercase">{player.position || 'Sin pos.'} / {getPlayerAge(player.birth_date)} anos</p>
                                         </div>
                                         <div className="ml-auto">
                                             <button
@@ -319,7 +319,7 @@ export function ClubSquadBuilder({ clubId, onBack }: ClubSquadBuilderProps) {
                                                     event.stopPropagation();
                                                     handleRemovePlayer(player.id);
                                                 }}
-                                                className="flex items-center justify-center w-8 h-8 bg-transparent text-[#94a3b8] rounded-md hover:bg-[rgba(239,68,68,0.1)] hover:text-[#ef4444] transition-all"
+                                                className="flex items-center justify-center w-8 h-8 bg-transparent text-[var(--ca-text-secondary)] rounded-md hover:bg-[color-mix(in_srgb,var(--ca-danger)_10%,transparent)] hover:text-[var(--ca-danger)] transition-all"
                                             >
                                                 <X className="w-4 h-4" />
                                             </button>
@@ -331,57 +331,57 @@ export function ClubSquadBuilder({ clubId, onBack }: ClubSquadBuilderProps) {
                     </div>
                 </section>
 
-                <aside className="bg-[#0f0f0f] border border-[rgba(255,255,255,0.08)] rounded-2xl flex flex-col overflow-hidden relative">
-                    <div className="p-5 border-b border-[rgba(255,255,255,0.08)] bg-gradient-to-b from-[rgba(255,255,255,0.02)] to-transparent">
-                        <h2 className="font-bold text-[14px] uppercase tracking-widest text-[#f8fafc] flex justify-between items-center">
-                            Detalle seleccionado <span className="text-[10px] bg-[#3b82f6]/20 text-[#3b82f6] px-1.5 py-0.5 rounded font-bold">INFO</span>
+                <aside className="bg-[var(--ca-surface)] border border-[var(--ca-border)] rounded-2xl flex flex-col overflow-hidden relative">
+                    <div className="p-5 border-b border-[var(--ca-border)] bg-gradient-to-b from-[var(--ca-surface-hover)] to-transparent">
+                        <h2 className="font-bold text-[14px] uppercase tracking-widest text-[var(--ca-text)] flex justify-between items-center">
+                            Detalle seleccionado <span className="text-[10px] bg-[color-mix(in_srgb,var(--ca-accent)_20%,transparent)] text-[var(--ca-accent)] px-1.5 py-0.5 rounded font-bold">INFO</span>
                         </h2>
                     </div>
                     <div className="flex-1 overflow-y-auto p-6 custom-scrollbar text-center">
                         {selectedPlayer ? (
                             <>
-                                <div className="w-[120px] h-[120px] mx-auto mb-5 rounded-full border-[3px] border-[rgba(255,255,255,0.08)] p-1 relative flex items-center justify-center bg-[rgba(255,255,255,0.02)]">
-                                    <span className="text-[#f8fafc] text-4xl font-black">{getInitials(selectedPlayer.first_name, selectedPlayer.last_name)}</span>
-                                    <div className="absolute bottom-2 right-2 w-5 h-5 border-[3px] border-[#0f0f0f] rounded-full bg-[#10b981]"></div>
+                                <div className="w-[120px] h-[120px] mx-auto mb-5 rounded-full border-[3px] border-[var(--ca-border)] p-1 relative flex items-center justify-center bg-[var(--ca-surface-hover)]">
+                                    <span className="text-[var(--ca-text)] text-4xl font-black">{getInitials(selectedPlayer.first_name, selectedPlayer.last_name)}</span>
+                                    <div className="absolute bottom-2 right-2 w-5 h-5 border-[3px] border-[var(--ca-surface)] rounded-full bg-[var(--ca-success)]"></div>
                                 </div>
 
-                                <h2 className="text-[22px] font-black text-[#f8fafc] mb-1">{getPlayerDisplayName(selectedPlayer)}</h2>
-                                <p className="font-mono text-[13px] text-[#3b82f6] uppercase tracking-widest mb-6">
+                                <h2 className="text-[22px] font-black text-[var(--ca-text)] mb-1">{getPlayerDisplayName(selectedPlayer)}</h2>
+                                <p className="font-mono text-[13px] text-[var(--ca-accent)] uppercase tracking-widest mb-6">
                                     {selectedPlayer.position || 'Jugador'}
                                 </p>
 
                                 <div className="grid grid-cols-2 gap-3 mb-6 text-left">
-                                    <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-xl p-3">
-                                        <label className="text-[9px] uppercase tracking-widest text-[#94a3b8] block mb-1">Edad</label>
-                                        <span className="font-bold text-[14px] text-[#f8fafc]">{getPlayerAge(selectedPlayer.birth_date)} anos</span>
+                                    <div className="bg-[var(--ca-surface-hover)] border border-[var(--ca-border)] rounded-xl p-3">
+                                        <label className="text-[9px] uppercase tracking-widest text-[var(--ca-text-secondary)] block mb-1">Edad</label>
+                                        <span className="font-bold text-[14px] text-[var(--ca-text)]">{getPlayerAge(selectedPlayer.birth_date)} anos</span>
                                     </div>
-                                    <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-xl p-3">
-                                        <label className="text-[9px] uppercase tracking-widest text-[#94a3b8] block mb-1">DNI</label>
-                                        <span className="font-bold text-[14px] text-[#f8fafc]">{selectedPlayer.id_number || 'N/A'}</span>
+                                    <div className="bg-[var(--ca-surface-hover)] border border-[var(--ca-border)] rounded-xl p-3">
+                                        <label className="text-[9px] uppercase tracking-widest text-[var(--ca-text-secondary)] block mb-1">DNI</label>
+                                        <span className="font-bold text-[14px] text-[var(--ca-text)]">{selectedPlayer.id_number || 'N/A'}</span>
                                     </div>
-                                    <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-xl p-3">
-                                        <label className="text-[9px] uppercase tracking-widest text-[#94a3b8] block mb-1">Division actual</label>
-                                        <span className="font-bold text-[11px] text-[#3b82f6] uppercase">{selectedPlayer.division_name || 'Ninguna'}</span>
+                                    <div className="bg-[var(--ca-surface-hover)] border border-[var(--ca-border)] rounded-xl p-3">
+                                        <label className="text-[9px] uppercase tracking-widest text-[var(--ca-text-secondary)] block mb-1">Division actual</label>
+                                        <span className="font-bold text-[11px] text-[var(--ca-accent)] uppercase">{selectedPlayer.division_name || 'Ninguna'}</span>
                                     </div>
-                                    <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-xl p-3">
-                                        <label className="text-[9px] uppercase tracking-widest text-[#94a3b8] block mb-1">Rol</label>
-                                        <span className="font-bold text-[13px] text-[#f8fafc] uppercase">{selectedPlayer.role || 'player'}</span>
+                                    <div className="bg-[var(--ca-surface-hover)] border border-[var(--ca-border)] rounded-xl p-3">
+                                        <label className="text-[9px] uppercase tracking-widest text-[var(--ca-text-secondary)] block mb-1">Rol</label>
+                                        <span className="font-bold text-[13px] text-[var(--ca-text)] uppercase">{selectedPlayer.role || 'player'}</span>
                                     </div>
                                 </div>
 
-                                <div className="text-left mb-6 rounded-xl border border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.02)] p-4">
-                                    <label className="text-[11px] uppercase tracking-widest text-[#94a3b8] block mb-2">Observaciones</label>
-                                    <p className="text-[13px] leading-6 text-[#cbd5e1]">
+                                <div className="text-left mb-6 rounded-xl border border-[var(--ca-border)] bg-[var(--ca-surface-hover)] p-4">
+                                    <label className="text-[11px] uppercase tracking-widest text-[var(--ca-text-secondary)] block mb-2">Observaciones</label>
+                                    <p className="text-[13px] leading-6 text-[var(--ca-text-secondary)]">
                                         Este panel guarda la composicion del plantel. Las notas tecnicas detalladas se editan despues desde la gestion del plantel ya creado.
                                     </p>
                                 </div>
 
-                                <div className="pt-6 border-t border-[rgba(255,255,255,0.05)]">
+                                <div className="pt-6 border-t border-[var(--ca-border)]">
                                     <button
                                         type="button"
                                         onClick={handleSaveSquad}
                                         disabled={isSaving}
-                                        className="w-full flex items-center justify-center py-3 bg-[#3b82f6] text-white text-[13px] font-bold rounded-xl hover:bg-[#2563eb] transition-all disabled:opacity-50"
+                                        className="w-full flex items-center justify-center py-3 bg-[var(--ca-accent)] text-white text-[13px] font-bold rounded-xl hover:bg-[var(--ca-accent-hover)] transition-all disabled:opacity-50"
                                     >
                                         {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Guardar plantel'}
                                     </button>
@@ -389,8 +389,8 @@ export function ClubSquadBuilder({ clubId, onBack }: ClubSquadBuilderProps) {
                             </>
                         ) : (
                             <div className="flex flex-col items-center justify-center h-full opacity-50">
-                                <Users className="w-8 h-8 text-[#94a3b8] mb-4" />
-                                <p className="text-[13px] text-[#94a3b8]">Selecciona un jugador para ver detalles.</p>
+                                <Users className="w-8 h-8 text-[var(--ca-text-secondary)] mb-4" />
+                                <p className="text-[13px] text-[var(--ca-text-secondary)]">Selecciona un jugador para ver detalles.</p>
                             </div>
                         )}
                     </div>

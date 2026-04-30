@@ -31,7 +31,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           className={cn(
             'ca-input',
-            error && 'border-[var(--ca-danger)] focus:border-[var(--ca-danger)] focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]',
+            error && 'border-[var(--ca-danger)] focus:border-[var(--ca-danger)] focus:shadow-[0_0_0_3px_color-mix(in srgb, var(--ca-danger) 12%, transparent)]',
             className
           )}
           aria-invalid={error ? 'true' : 'false'}
@@ -80,7 +80,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           id={selectId}
           className={cn(
             'ca-select',
-            error && 'border-[var(--ca-danger)] focus:border-[var(--ca-danger)] focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]',
+            error && 'border-[var(--ca-danger)] focus:border-[var(--ca-danger)] focus:shadow-[0_0_0_3px_color-mix(in srgb, var(--ca-danger) 12%, transparent)]',
             className
           )}
           aria-invalid={error ? 'true' : 'false'}
@@ -138,7 +138,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           id={textareaId}
           className={cn(
             'ca-textarea',
-            error && 'border-[var(--ca-danger)] focus:border-[var(--ca-danger)] focus:shadow-[0_0_0_3px_rgba(239,68,68,0.12)]',
+            error && 'border-[var(--ca-danger)] focus:border-[var(--ca-danger)] focus:shadow-[0_0_0_3px_color-mix(in srgb, var(--ca-danger) 12%, transparent)]',
             className
           )}
           aria-invalid={error ? 'true' : 'false'}

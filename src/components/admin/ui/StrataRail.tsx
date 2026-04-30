@@ -91,7 +91,7 @@ export function StrataRail({ steps, activeStep, onStepChange }: StrataRailProps)
                   : isCompleted
                     ? 'var(--crys-success)'
                     : 'var(--crys-step-inactive)',
-                boxShadow: isActive ? '0 0 15px rgba(0, 106, 255, 0.5)' : undefined,
+                boxShadow: isActive ? '0 0 15px color-mix(in srgb, var(--ca-accent) 50%, transparent)' : undefined,
                 transition: 'var(--crys-transition)',
               }}
             />

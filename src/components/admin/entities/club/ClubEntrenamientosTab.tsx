@@ -4,11 +4,14 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import {
     Activity,
+    AlertCircle,
     BarChart3,
     Calendar,
     CalendarClock,
+    CheckCircle,
     CheckCircle2,
     ChevronRight,
+    Circle,
     ClipboardList,
     Clock,
     Copy,
@@ -19,11 +22,13 @@ import {
     MapPin,
     MoreHorizontal,
     NotebookPen,
+    PlayCircle,
     Plus,
     RefreshCw,
     Save,
     Send,
     Shield,
+    Sparkles,
     Target,
     Trash2,
     Users,
@@ -328,6 +333,61 @@ function sortTrainingsByDate(entries: TrainingEntry[]) {
     return [...entries].sort((left, right) => new Date(left.date).getTime() - new Date(right.date).getTime());
 }
 
+function getDayKey(value: string) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'sin-fecha';
+    return new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+}
+
+function getRelativeDayLabel(value: string) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return { primary: 'Sin fecha', secondary: '' };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(date);
+    target.setHours(0, 0, 0, 0);
+    const diff = Math.round((target.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
+    const fullLabel = new Intl.DateTimeFormat('es-AR', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+    }).format(date);
+    if (diff === 0) return { primary: 'Hoy', secondary: fullLabel };
+    if (diff === 1) return { primary: 'Manana', secondary: fullLabel };
+    if (diff === -1) return { primary: 'Ayer', secondary: fullLabel };
+    if (diff > 1 && diff <= 7) return { primary: 'Esta semana', secondary: fullLabel };
+    if (diff < -1 && diff >= -7) return { primary: 'Semana pasada', secondary: fullLabel };
+    return { primary: fullLabel, secondary: '' };
+}
+
+function getStatusContextCopy(entry: TrainingEntry, state: ReturnType<typeof inferOperationalState>) {
+    if (entry.status === 'finalizado') return 'Sesion cerrada · revisa stats y carga';
+    if (entry.status === 'sin_evaluar') return 'Pendiente de evaluacion · cierra el feedback';
+    if (entry.status === 'en_curso') return 'En curso ahora · seguimiento en vivo';
+    if (!state.hasPlan) return 'Pendiente de cargar el plan';
+    if (!state.hasAttendance) return 'Listo para convocar al plantel';
+    if (!state.hasEval) return 'Listo para registrar evaluacion';
+    if (!state.hasLoad) return 'Falta registrar carga RPE';
+    return 'Listo para arrancar la sesion';
+}
+
+interface ProgressStep {
+    key: 'plan' | 'attendance' | 'eval' | 'load';
+    label: string;
+    done: boolean;
+    cta: string;
+    target: PlanTab;
+}
+
+function getProgressSteps(entry: TrainingEntry, state: ReturnType<typeof inferOperationalState>): ProgressStep[] {
+    return [
+        { key: 'plan', label: 'Plan', done: state.hasPlan, cta: 'Cargar plan', target: 'plan' },
+        { key: 'attendance', label: 'Convocados', done: state.hasAttendance, cta: 'Convocar plantel', target: 'convocados' },
+        { key: 'eval', label: 'Evaluacion', done: state.hasEval, cta: 'Evaluar sesion', target: entry.status === 'finalizado' ? 'stats' : 'evaluacion' },
+        { key: 'load', label: 'Carga', done: state.hasLoad, cta: 'Registrar carga', target: 'evaluacion' },
+    ];
+}
+
 function matchesTrainingIdentity(
     left: Pick<TrainingEntry, 'id' | 'persistedId' | 'sourceKey'>,
     right: Pick<TrainingEntry, 'id' | 'persistedId' | 'sourceKey'>,
@@ -388,7 +448,7 @@ export function ClubEntrenamientosTab({
     onTabChange,
 }: ClubEntrenamientosTabProps) {
     const [trainings, setTrainings] = useState<TrainingEntry[]>([]);
-    const [activeMainTab, setActiveMainTab] = useState<TrainingMainTab>('gimnasio');
+    const [activeMainTab, setActiveMainTab] = useState<TrainingMainTab>('entrenamientos');
     const [activeSegment, setActiveSegment] = useState<TrainingSegment>('today');
     const [operationalFilter, setOperationalFilter] = useState<TrainingOperationalFilter>('all');
     const [filtersOpen, setFiltersOpen] = useState(false);
@@ -401,6 +461,9 @@ export function ClubEntrenamientosTab({
     const [savingTrainingId, setSavingTrainingId] = useState<string | null>(null);
     const [deletingTrainingId, setDeletingTrainingId] = useState<string | null>(null);
     const [reloadKey, setReloadKey] = useState(0);
+    const [highlightedId, setHighlightedId] = useState<string | null>(null);
+    const [toast, setToast] = useState<{ kind: 'success' | 'error'; message: string } | null>(null);
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const connectedSummary = useMemo(() => {
         const fragments = [
             `${players.length} jugadores`,
@@ -616,6 +679,21 @@ export function ClubEntrenamientosTab({
         }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     }, [trainings, activeSegment, operationalFilter]);
 
+    const groupedByDay = useMemo(() => {
+        const groups = new Map<string, { key: string; primary: string; secondary: string; entries: TrainingEntry[] }>();
+        filtered.forEach((entry) => {
+            const key = getDayKey(entry.date);
+            const existing = groups.get(key);
+            if (existing) {
+                existing.entries.push(entry);
+                return;
+            }
+            const labels = getRelativeDayLabel(entry.date);
+            groups.set(key, { key, primary: labels.primary, secondary: labels.secondary, entries: [entry] });
+        });
+        return Array.from(groups.values());
+    }, [filtered]);
+
     const nextTraining = trainings
         .filter((t) => isFuture(t.date) || isToday(t.date))
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0] ?? null;
@@ -685,8 +763,33 @@ export function ClubEntrenamientosTab({
         ];
     }, [trainings, activeSegment, operationalFilter, nextTraining]);
 
+    useEffect(() => {
+        if (!toast) return undefined;
+        const timer = window.setTimeout(() => setToast(null), 4500);
+        return () => window.clearTimeout(timer);
+    }, [toast]);
+
+    useEffect(() => {
+        if (!highlightedId) return undefined;
+        const timer = window.setTimeout(() => setHighlightedId(null), 5000);
+        return () => window.clearTimeout(timer);
+    }, [highlightedId]);
+
+    useEffect(() => {
+        if (!openMenuId) return undefined;
+        const handler = () => setOpenMenuId(null);
+        window.addEventListener('click', handler);
+        return () => window.removeEventListener('click', handler);
+    }, [openMenuId]);
+
     const handleCreate = async (newTraining: TrainingEntry) => {
         const saved = await persistTraining(newTraining);
+        if (saved) {
+            setHighlightedId(saved.persistedId || saved.id);
+            setToast({ kind: 'success', message: `Entrenamiento "${saved.title}" publicado correctamente.` });
+        } else {
+            setToast({ kind: 'error', message: 'No se pudo publicar el entrenamiento.' });
+        }
         return Boolean(saved);
     };
 
@@ -719,6 +822,25 @@ export function ClubEntrenamientosTab({
 
     return (
         <div className="club-matches-shell">
+            {toast ? (
+                <div className={gymStyles.trainingToastWrap}>
+                    <div className={cn(gymStyles.trainingToast, toast.kind === 'error' && gymStyles.trainingToastError)}>
+                        <span className={gymStyles.trainingToastIcon}>
+                            {toast.kind === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                        </span>
+                        <span>{toast.message}</span>
+                        <button
+                            type="button"
+                            className={gymStyles.trainingCardIconBtn}
+                            style={{ marginLeft: 'auto' }}
+                            onClick={() => setToast(null)}
+                            aria-label="Cerrar"
+                        >
+                            <X className="w-3.5 h-3.5" />
+                        </button>
+                    </div>
+                </div>
+            ) : null}
             {/* Header */}
             <header className="club-matches-header">
                 <div className="club-matches-header-copy">
@@ -771,19 +893,19 @@ export function ClubEntrenamientosTab({
             <nav className="club-matches-tabs" aria-label="Modulos de entrenamiento">
                 <button
                     type="button"
-                    className={`club-matches-tab${activeMainTab === 'gimnasio' ? ' active' : ''}`}
-                    onClick={() => setActiveMainTab('gimnasio')}
-                >
-                    <Dumbbell className="w-4 h-4" />
-                    Gimnasio
-                </button>
-                <button
-                    type="button"
                     className={`club-matches-tab${activeMainTab === 'entrenamientos' ? ' active' : ''}`}
                     onClick={() => setActiveMainTab('entrenamientos')}
                 >
                     <ClipboardList className="w-4 h-4" />
                     Entrenamientos
+                </button>
+                <button
+                    type="button"
+                    className={`club-matches-tab${activeMainTab === 'gimnasio' ? ' active' : ''}`}
+                    onClick={() => setActiveMainTab('gimnasio')}
+                >
+                    <Dumbbell className="w-4 h-4" />
+                    Gimnasio
                 </button>
             </nav>
 
@@ -831,7 +953,7 @@ export function ClubEntrenamientosTab({
                                 type="button"
                                 className={cn(gymStyles.gymKpiCard, gymStyles.gymKpiCardInteractive)}
                                 onClick={kpi.onClick}
-                                style={kpi.active ? { boxShadow: 'inset 0 0 0 1px rgba(101, 243, 255, 0.45)' } : undefined}
+                                style={kpi.active ? { boxShadow: 'inset 0 0 0 1px color-mix(in srgb, var(--ca-accent) 45%, transparent)' } : undefined}
                             >
                                 <span className={gymStyles.gymKpiLabel}>{kpi.label}</span>
                                 <strong className={gymStyles.gymKpiValue}>{kpi.value}</strong>
@@ -938,138 +1060,327 @@ export function ClubEntrenamientosTab({
                             </div>
                         </div>
 
-                        <main className="club-matches-timeline">
-                            {filtered.length === 0 ? (
-                                <div className={gymStyles.gymTablePlaceholder}>
-                                    {(loading || persistLoading) && trainings.length === 0
-                                        ? 'Cargando entrenamientos del club...'
-                                        : persistError && trainings.length === 0
-                                            ? 'No se pudieron cargar los entrenamientos del club.'
-                                            : trainings.length === 0
-                                                ? 'No hay entrenamientos cargados.'
-                                                : 'No encontramos entrenamientos para los filtros actuales.'}
-                                </div>
-                            ) : null}
-
-                {filtered.map((entry) => {
-                    const when = formatDateTime(entry.date);
-                    const state = inferOperationalState(entry);
-                    const statusMeta = STATUS_META[entry.status];
-                    const typeMeta = TYPE_META[entry.type];
-                    const needsAction = entry.status === 'sin_evaluar' || (entry.status === 'planificado' && !state.hasPlan);
-
-                    return (
-                        <article
-                            key={entry.id}
-                            className={`club-match-card${needsAction ? ' has-pending' : ''}`}
-                        >
-                            <div className="club-match-card-main">
-                                <div className="club-match-card-header">
-                                    <div className="club-match-card-date">
-                                        <span>{when.day}</span>
-                                        <strong>{when.time}</strong>
-                                    </div>
-                                    <div className="club-match-card-identity">
-                                        <div className="club-match-card-title-wrap">
-                                            <h3>{entry.title}</h3>
-                                        </div>
-                                        <div className="club-match-card-meta">
-                                            <span className={`club-match-status ${statusMeta.tone}`}>{statusMeta.label}</span>
-                                            <span className={`club-training-type-badge ${typeMeta.className}`}>{typeMeta.label}</span>
-                                            <span className="club-match-origin">{entry.location}</span>
-                                        </div>
-                                        <div className="club-match-card-meta" style={{ marginTop: 4 }}>
-                                            <span><Clock className="w-3.5 h-3.5" /> {entry.duration} min</span>
-                                            <span><Target className="w-3.5 h-3.5" /> {entry.objective}</span>
-                                            <span><Users className="w-3.5 h-3.5" /> {entry.convocados || '--'} convocados</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <section className="club-match-operational">
-                                    <div className="club-match-operational-head">
-                                        <div>
-                                            <span className="club-match-operational-label">Estado operativo</span>
-                                            <strong>Progreso {state.completed}/4</strong>
-                                        </div>
-                                        {needsAction ? (
-                                            <span className="club-match-operational-alert">Requiere acción</span>
-                                        ) : (
-                                            <span className="club-match-operational-ok">Operativo</span>
-                                        )}
-                                    </div>
-
-                                    <div className="club-training-status-dots">
-                                        <div className="club-training-status-item">
-                                            <div className={`club-training-status-dot ${state.hasPlan ? 'is-complete' : 'is-pending'}`} />
-                                            <span>Plan</span>
-                                        </div>
-                                        <div className="club-training-status-item">
-                                            <div className={`club-training-status-dot ${state.hasAttendance ? 'is-complete' : 'is-pending'}`} />
-                                            <span>Asist</span>
-                                        </div>
-                                        <div className="club-training-status-item">
-                                            <div className={`club-training-status-dot ${state.hasEval ? 'is-complete' : 'is-pending'}`} />
-                                            <span>Eval</span>
-                                        </div>
-                                        <div className="club-training-status-item">
-                                            <div className={`club-training-status-dot ${state.hasLoad ? 'is-complete' : 'is-pending'}`} />
-                                            <span>Carga</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="club-match-indicators">
-                                        <span><Users className="w-3.5 h-3.5" /> {entry.staff.join(', ') || 'Sin staff asignado'}</span>
-                                        {entry.evaluation && (
-                                            <span><Activity className="w-3.5 h-3.5" /> Carga: {entry.evaluation.loadTotal} RPE</span>
-                                        )}
-                                    </div>
-                                </section>
+                        {filtered.length === 0 ? (
+                            <div className={gymStyles.gymTablePlaceholder}>
+                                {(loading || persistLoading) && trainings.length === 0
+                                    ? 'Cargando entrenamientos del club...'
+                                    : persistError && trainings.length === 0
+                                        ? 'No se pudieron cargar los entrenamientos del club.'
+                                        : trainings.length === 0
+                                            ? 'No hay entrenamientos guardados todavia. Crea uno con "Crear entrenamiento" y aparecera en la linea de tiempo.'
+                                            : 'No encontramos entrenamientos para los filtros actuales.'}
                             </div>
+                        ) : (
+                            <div className={gymStyles.trainingDeck}>
+                                {groupedByDay.map((group) => (
+                                    <div key={group.key} className={gymStyles.trainingDayGroup}>
+                                        <div className={gymStyles.trainingDayHeader}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                                                <span className={gymStyles.trainingDayHeaderPrimary}>{group.primary}</span>
+                                                {group.secondary ? (
+                                                    <span className={gymStyles.trainingDayHeaderSecondary}>{group.secondary}</span>
+                                                ) : null}
+                                            </div>
+                                            <span className={gymStyles.trainingDayHeaderCount}>
+                                                {group.entries.length} sesion{group.entries.length === 1 ? '' : 'es'}
+                                            </span>
+                                        </div>
+                                        {group.entries.map((entry) => {
+                                            const when = formatDateTime(entry.date);
+                                            const state = inferOperationalState(entry);
+                                            const statusMeta = STATUS_META[entry.status];
+                                            const typeMeta = TYPE_META[entry.type];
+                                            const needsAction = entry.status === 'sin_evaluar' || (entry.status === 'planificado' && !state.hasPlan);
+                                            const planBlocks = entry.plan?.blocks || [];
+                                            const totalPlanMinutes = planBlocks.reduce((sum, b) => sum + (b.duration || 0), 0) || entry.duration || 0;
+                                            const statusClass = statusMeta.tone === 'tone-scheduled'
+                                                ? gymStyles.trainingStatusScheduled
+                                                : statusMeta.tone === 'tone-live'
+                                                    ? gymStyles.trainingStatusLive
+                                                    : statusMeta.tone === 'tone-played'
+                                                        ? gymStyles.trainingStatusPlayed
+                                                        : gymStyles.trainingStatusAlert;
+                                            const StatusIcon = entry.status === 'finalizado'
+                                                ? CheckCircle
+                                                : entry.status === 'sin_evaluar'
+                                                    ? AlertCircle
+                                                    : entry.status === 'en_curso'
+                                                        ? PlayCircle
+                                                        : Clock;
+                                            const progressSteps = getProgressSteps(entry, state);
+                                            const completionPct = Math.round((state.completed / 4) * 100);
+                                            const contextCopy = getStatusContextCopy(entry, state);
+                                            const isHighlighted = highlightedId && (highlightedId === entry.persistedId || highlightedId === entry.id);
+                                            const cardRowClass = cn(
+                                                gymStyles.trainingCard,
+                                                needsAction && gymStyles.trainingCardAlert,
+                                                isHighlighted && gymStyles.trainingCardHighlight,
+                                            );
 
-                            <div className="club-match-actions">
-                                <button
-                                    type="button"
-                                    className="club-match-action primary"
-                                    onClick={() => openDetail(entry, 'plan')}
-                                >
-                                    {state.hasPlan ? 'Ver plan' : 'Cargar plan'}
-                                    <ChevronRight className="w-4 h-4" />
-                                </button>
-                                <button type="button" className="club-match-action" onClick={() => openDetail(entry, 'convocados')}>
-                                    <Users className="w-4 h-4" />
-                                    Convocados
-                                </button>
-                                {entry.status !== 'finalizado' && (
-                                    <button type="button" className="club-match-action" onClick={() => openDetail(entry, 'evaluacion')}>
-                                        <NotebookPen className="w-4 h-4" />
-                                        Evaluación
-                                    </button>
-                                )}
-                                {entry.status === 'finalizado' && (
-                                    <button type="button" className="club-match-action" onClick={() => openDetail(entry, 'stats')}>
-                                        <BarChart3 className="w-4 h-4" />
-                                        Stats
-                                    </button>
-                                )}
-                                <button type="button" className="club-match-action" onClick={() => { /* export */ }}>
-                                    <FileBarChart2 className="w-4 h-4" />
-                                    Exportar
-                                </button>
-                                <button
-                                    type="button"
-                                    className="club-match-action danger"
-                                    onClick={() => handleDeleteTraining(entry)}
-                                    disabled={deletingTrainingId === entry.id}
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                    {deletingTrainingId === entry.id ? 'Borrando...' : 'Borrar'}
-                                </button>
+                                            return (
+                                                <div
+                                                    key={entry.id}
+                                                    className={cardRowClass}
+                                                    style={{ '--training-card-color': entry.color || BLOCK_TYPE_COLORS[planBlocks[0]?.type ?? 'tecnico'] || 'color-mix(in srgb, var(--ca-accent) 60%, transparent)' } as CSSProperties}
+                                                    onClick={() => openDetail(entry, state.hasPlan ? 'resumen' : 'plan')}
+                                                >
+                                                    <div className={gymStyles.trainingCardDate}>
+                                                        <span className={gymStyles.trainingCardWeekday}>{when.day.split(' ')[0]}</span>
+                                                        <span className={gymStyles.trainingCardTime}>{when.time}</span>
+                                                        <span className={gymStyles.trainingCardDuration}>
+                                                            <Clock className="w-3 h-3" />
+                                                            {entry.duration} min
+                                                        </span>
+                                                    </div>
+
+                                                    <div className={gymStyles.trainingCardBody}>
+                                                        <div className={gymStyles.trainingCardTopRow}>
+                                                            <h3 className={gymStyles.trainingCardTitle}>{entry.title}</h3>
+                                                            <div className={gymStyles.trainingCardChips}>
+                                                                <span className={cn(gymStyles.trainingStatusBadge, statusClass)}>
+                                                                    <StatusIcon className="w-3 h-3" />
+                                                                    {statusMeta.label}
+                                                                </span>
+                                                                <span className={gymStyles.trainingTypeChip}>
+                                                                    {entry.type === 'gimnasio' ? <Dumbbell className="w-3 h-3" /> : <Target className="w-3 h-3" />}
+                                                                    {typeMeta.label}
+                                                                </span>
+                                                                {entry.customFocus ? (
+                                                                    <span className={gymStyles.trainingFocusChip}>{entry.customFocus}</span>
+                                                                ) : null}
+                                                                {(entry.tags || []).slice(0, 3).map((tag) => (
+                                                                    <span key={tag} className={gymStyles.trainingTagChip}>#{tag}</span>
+                                                                ))}
+                                                                {entry.tags && entry.tags.length > 3 ? (
+                                                                    <span className={gymStyles.trainingTagChip}>+{entry.tags.length - 3}</span>
+                                                                ) : null}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className={gymStyles.trainingCardContext}>
+                                                            <span><MapPin className="w-3.5 h-3.5" /> <strong>{entry.location || 'Sin sede'}</strong></span>
+                                                            {entry.objective ? (
+                                                                <span><Target className="w-3.5 h-3.5" /> {entry.objective.length > 80 ? `${entry.objective.slice(0, 80)}...` : entry.objective}</span>
+                                                            ) : null}
+                                                            <span className={cn(gymStyles.trainingCardStatusHint, needsAction && 'alert')}>
+                                                                <Sparkles className="w-3 h-3" />
+                                                                {contextCopy}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className={gymStyles.trainingCardTimeline}>
+                                                            <div className={gymStyles.trainingCardTimelineHead}>
+                                                                <span>Linea de tiempo</span>
+                                                                <strong>{totalPlanMinutes} min · {planBlocks.length} bloque{planBlocks.length === 1 ? '' : 's'}</strong>
+                                                            </div>
+                                                            {planBlocks.length === 0 ? (
+                                                                <div className={gymStyles.trainingCardTimelineEmpty}>Sin bloques · click para cargar el plan</div>
+                                                            ) : (
+                                                                <div
+                                                                    className={gymStyles.trainingTimelineTable}
+                                                                    role="table"
+                                                                    aria-label="Bloques del entrenamiento"
+                                                                >
+                                                                    <div className={gymStyles.trainingTimelineHeadRow} role="row">
+                                                                        <span role="columnheader">Min</span>
+                                                                        <span role="columnheader">Fase</span>
+                                                                        <span role="columnheader">Descripción</span>
+                                                                        <span role="columnheader">Encargado</span>
+                                                                    </div>
+                                                                    {planBlocks.map((block) => {
+                                                                        const blockColor = block.color || BLOCK_TYPE_COLORS[block.type];
+                                                                        const phaseLabel = BLOCK_TYPE_LABELS[block.type];
+                                                                        const exerciseCount = block.exercises?.length || 0;
+                                                                        const description = block.notes?.trim()
+                                                                            || (exerciseCount > 0
+                                                                                ? `${exerciseCount} ejercicio${exerciseCount === 1 ? '' : 's'}`
+                                                                                : '—');
+                                                                        const meta = [
+                                                                            block.intensity ? `Int. ${block.intensity}` : null,
+                                                                            typeof block.targetRpe === 'number' ? `RPE ${block.targetRpe}/10` : null,
+                                                                            block.workRest ? `T/P ${block.workRest}` : null,
+                                                                        ].filter(Boolean) as string[];
+                                                                        return (
+                                                                            <div
+                                                                                key={block.id}
+                                                                                className={gymStyles.trainingTimelineRow}
+                                                                                role="row"
+                                                                                title={[
+                                                                                    `${phaseLabel}: ${block.title}`,
+                                                                                    `${block.duration} min`,
+                                                                                    ...meta,
+                                                                                ].join(' · ')}
+                                                                            >
+                                                                                <div
+                                                                                    className={gymStyles.trainingTimelineCellDuration}
+                                                                                    style={{ background: blockColor }}
+                                                                                    role="cell"
+                                                                                >
+                                                                                    {block.duration}&apos;
+                                                                                </div>
+                                                                                <div
+                                                                                    className={gymStyles.trainingTimelineCellPhase}
+                                                                                    style={{
+                                                                                        background: `${blockColor}26`,
+                                                                                        borderLeftColor: blockColor,
+                                                                                    }}
+                                                                                    role="cell"
+                                                                                >
+                                                                                    <span className={gymStyles.trainingTimelinePhaseType}>{phaseLabel}</span>
+                                                                                    {block.title ? (
+                                                                                        <span className={gymStyles.trainingTimelinePhaseTitle}>{block.title}</span>
+                                                                                    ) : null}
+                                                                                </div>
+                                                                                <div className={gymStyles.trainingTimelineCellDesc} role="cell">
+                                                                                    <span className={gymStyles.trainingTimelineDescText}>{description}</span>
+                                                                                    {meta.length > 0 ? (
+                                                                                        <span className={gymStyles.trainingTimelineDescMeta}>{meta.join(' · ')}</span>
+                                                                                    ) : null}
+                                                                                </div>
+                                                                                <div className={gymStyles.trainingTimelineCellStaff} role="cell">
+                                                                                    {entry.staff && entry.staff.length > 0 ? (
+                                                                                        entry.staff.map((s) => (
+                                                                                            <span key={s} className={gymStyles.trainingTimelineStaffChip}>{s}</span>
+                                                                                        ))
+                                                                                    ) : (
+                                                                                        <span className={gymStyles.trainingTimelineStaffEmpty}>Sin asignar</span>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        <div className={gymStyles.trainingCardProgress}>
+                                                            {progressSteps.map((step) => (
+                                                                <button
+                                                                    key={step.key}
+                                                                    type="button"
+                                                                    className={cn(gymStyles.trainingProgressStep, step.done && gymStyles.trainingProgressStepDone)}
+                                                                    onClick={(event) => {
+                                                                        event.stopPropagation();
+                                                                        if (!step.done) openDetail(entry, step.target);
+                                                                    }}
+                                                                    title={step.done ? `${step.label} completado` : step.cta}
+                                                                >
+                                                                    {step.done ? <CheckCircle className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+                                                                    {step.done ? step.label : step.cta}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className={gymStyles.trainingCardSide} onClick={(event) => event.stopPropagation()}>
+                                                        <div className={gymStyles.trainingCardCompletion}>
+                                                            <div className={gymStyles.trainingCardCompletionLabel}>
+                                                                <span>Progreso</span>
+                                                                <strong>{completionPct}%</strong>
+                                                            </div>
+                                                            <div className={gymStyles.trainingCardCompletionTrack}>
+                                                                <div className={gymStyles.trainingCardCompletionFill} style={{ width: `${completionPct}%` }} />
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            className={gymStyles.trainingCardPrimaryBtn}
+                                                            onClick={() => openDetail(entry, state.hasPlan ? 'resumen' : 'plan')}
+                                                        >
+                                                            Abrir entrenamiento
+                                                            <ChevronRight className="w-4 h-4" />
+                                                        </button>
+                                                        <div className={gymStyles.trainingCardSecondaryRow}>
+                                                            <button
+                                                                type="button"
+                                                                className={gymStyles.trainingCardIconBtn}
+                                                                onClick={() => openDetail(entry, 'convocados')}
+                                                                title="Convocar plantel"
+                                                            >
+                                                                <Users className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className={gymStyles.trainingCardIconBtn}
+                                                                onClick={() => openDetail(entry, entry.status === 'finalizado' ? 'stats' : 'evaluacion')}
+                                                                title={entry.status === 'finalizado' ? 'Ver stats' : 'Cargar evaluacion'}
+                                                            >
+                                                                {entry.status === 'finalizado'
+                                                                    ? <BarChart3 className="w-4 h-4" />
+                                                                    : <NotebookPen className="w-4 h-4" />}
+                                                            </button>
+                                                            <div style={{ position: 'relative' }}>
+                                                                <button
+                                                                    type="button"
+                                                                    className={gymStyles.trainingCardIconBtn}
+                                                                    onClick={() => setOpenMenuId((current) => current === entry.id ? null : entry.id)}
+                                                                    title="Mas opciones"
+                                                                >
+                                                                    <MoreHorizontal className="w-4 h-4" />
+                                                                </button>
+                                                                {openMenuId === entry.id ? (
+                                                                    <div
+                                                                        className={gymStyles.trainingCardMenu}
+                                                                        onClick={(event) => event.stopPropagation()}
+                                                                    >
+                                                                        <button
+                                                                            type="button"
+                                                                            className={gymStyles.trainingCardMenuItem}
+                                                                            onClick={() => {
+                                                                                setOpenMenuId(null);
+                                                                                openDetail(entry, 'plan');
+                                                                            }}
+                                                                        >
+                                                                            <ClipboardList className="w-3.5 h-3.5" />
+                                                                            Editar plan
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            className={gymStyles.trainingCardMenuItem}
+                                                                            onClick={() => {
+                                                                                setOpenMenuId(null);
+                                                                                void handleDuplicateTraining(entry);
+                                                                            }}
+                                                                        >
+                                                                            <Copy className="w-3.5 h-3.5" />
+                                                                            Duplicar sesion
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            className={gymStyles.trainingCardMenuItem}
+                                                                            onClick={() => {
+                                                                                setOpenMenuId(null);
+                                                                                openDetail(entry, 'eventos');
+                                                                            }}
+                                                                        >
+                                                                            <FileBarChart2 className="w-3.5 h-3.5" />
+                                                                            Eventos tecnicos
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            className={gymStyles.trainingCardMenuItem}
+                                                                            onClick={() => {
+                                                                                setOpenMenuId(null);
+                                                                                void handleDeleteTraining(entry);
+                                                                            }}
+                                                                            disabled={deletingTrainingId === entry.id}
+                                                                            style={{ color: 'var(--ca-danger)' }}
+                                                                        >
+                                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                                            {deletingTrainingId === entry.id ? 'Borrando...' : 'Borrar'}
+                                                                        </button>
+                                                                    </div>
+                                                                ) : null}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ))}
                             </div>
-                        </article>
-                    );
-                })}
-                        </main>
+                        )}
                     </section>
 
                     <ClubTrainingCreateModal
@@ -1320,7 +1631,7 @@ function TrainingDetailModal({
                                     />
                                     {block.type === 'tactico' && (
                                         <div className="club-training-plan-block-pizarra">
-                                            <Target className="w-4 h-4 text-[#3b82f6]" />
+                                            <Target className="w-4 h-4 text-[var(--ca-accent)]" />
                                             [ PIZARRA ASOCIADA: Puedes insertar jugadas y formaciones desde el módulo Pizarra ]
                                         </div>
                                     )}
@@ -1354,7 +1665,7 @@ function TrainingDetailModal({
                     {tab === 'pizarra' && (
                         <div className="space-y-4">
                             <div className="club-training-plan-block-pizarra" style={{ padding: '2rem', justifyContent: 'center' }}>
-                                <Target className="w-6 h-6 text-[#3b82f6]" />
+                                <Target className="w-6 h-6 text-[var(--ca-accent)]" />
                                 <span className="text-sm">Integración con módulo Pizarra próximamente</span>
                             </div>
                             <p className="text-sm text-white/50">
@@ -2579,8 +2890,8 @@ function TrainingWorkspaceModal({
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    borderColor: 'rgba(59, 130, 246, 0.24)',
-                                                    background: 'radial-gradient(circle at top, rgba(59, 130, 246, 0.18), transparent 58%), rgba(7, 17, 28, 0.92)',
+                                                    borderColor: 'color-mix(in srgb, var(--ca-accent) 24%, transparent)',
+                                                    background: 'radial-gradient(circle at top, color-mix(in srgb, var(--ca-accent) 18%, transparent), transparent 58%), var(--ca-surface)',
                                                 }}
                                             >
                                                 <div style={{ display: 'grid', gap: '0.35rem', textAlign: 'center' }}>
@@ -2704,11 +3015,11 @@ function TrainingWorkspaceModal({
                                                             gap: '0.8rem',
                                                             textAlign: 'left',
                                                             cursor: 'pointer',
-                                                            borderColor: isActive ? 'rgba(59, 130, 246, 0.34)' : 'rgba(255, 255, 255, 0.08)',
+                                                            borderColor: isActive ? 'color-mix(in srgb, var(--ca-accent) 34%, transparent)' : 'var(--ca-border)',
                                                             background: isActive
-                                                                ? 'radial-gradient(circle at top, rgba(59, 130, 246, 0.14), transparent 62%), rgba(59, 130, 246, 0.08)'
-                                                                : 'rgba(255, 255, 255, 0.02)',
-                                                            boxShadow: isActive ? 'inset 0 0 0 1px rgba(59, 130, 246, 0.12)' : 'none',
+                                                                ? 'radial-gradient(circle at top, color-mix(in srgb, var(--ca-accent) 14%, transparent), transparent 62%), color-mix(in srgb, var(--ca-accent) 8%, transparent)'
+                                                                : 'var(--ca-surface-hover)',
+                                                            boxShadow: isActive ? 'inset 0 0 0 1px color-mix(in srgb, var(--ca-accent) 12%, transparent)' : 'none',
                                                         }}
                                                     >
                                                         <strong style={{ fontSize: '0.92rem', lineHeight: 1.3 }}>{preset.name}</strong>

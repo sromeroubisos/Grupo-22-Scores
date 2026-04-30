@@ -545,8 +545,8 @@ export function CSVImportModal({ clubId, divisions, isOpen, onClose, onSuccess, 
                                     <h3>Estructura y Reglas</h3>
                                     <ul className="csv-help-list">
                                         <li><strong>Nombre y Apellido</strong> son estrictamente obligatorios para la creacion.</li>
-                                        <li>Formato de fecha recomendado: <code style={{ color: '#fff' }}>AAAA-MM-DD</code>.</li>
-                                        <li>Si el <code style={{ color: '#fff' }}>division_id</code> es omitido, el sistema asignara al plantel base.</li>
+                                        <li>Formato de fecha recomendado: <code style={{ color: 'var(--ca-text)' }}>AAAA-MM-DD</code>.</li>
+                                        <li>Si el <code style={{ color: 'var(--ca-text)' }}>division_id</code> es omitido, el sistema asignara al plantel base.</li>
                                     </ul>
                                 </div>
 

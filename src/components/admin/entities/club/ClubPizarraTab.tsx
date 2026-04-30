@@ -1780,7 +1780,7 @@ export function ClubPizarraTab({
                 {exportState.status === 'done' && (
                     <div className="pizarra-export-overlay">
                         <div className="pizarra-export-panel">
-                            <span className="pizarra-export-message" style={{ color: '#22c55e' }}>Video exportado</span>
+                            <span className="pizarra-export-message" style={{ color: 'var(--ca-success)' }}>Video exportado</span>
                         </div>
                     </div>
                 )}
@@ -1788,7 +1788,7 @@ export function ClubPizarraTab({
                 {exportState.status === 'error' && (
                     <div className="pizarra-export-overlay">
                         <div className="pizarra-export-panel">
-                            <span className="pizarra-export-message" style={{ color: '#ef4444' }}>{exportState.message}</span>
+                            <span className="pizarra-export-message" style={{ color: 'var(--ca-danger)' }}>{exportState.message}</span>
                         </div>
                     </div>
                 )}
@@ -2015,7 +2015,7 @@ export function ClubPizarraTab({
             {exportState.status === 'done' && (
                 <div className="pizarra-export-overlay">
                     <div className="pizarra-export-panel">
-                        <span className="pizarra-export-message" style={{ color: '#22c55e' }}>Video exportado</span>
+                        <span className="pizarra-export-message" style={{ color: 'var(--ca-success)' }}>Video exportado</span>
                     </div>
                 </div>
             )}
@@ -2023,7 +2023,7 @@ export function ClubPizarraTab({
             {exportState.status === 'error' && (
                 <div className="pizarra-export-overlay">
                     <div className="pizarra-export-panel">
-                        <span className="pizarra-export-message" style={{ color: '#ef4444' }}>{exportState.message}</span>
+                        <span className="pizarra-export-message" style={{ color: 'var(--ca-danger)' }}>{exportState.message}</span>
                     </div>
                 </div>
             )}

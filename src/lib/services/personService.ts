@@ -311,6 +311,7 @@ async function insertPersonRecord(supabase: any, personData: {
     if (!error) return { data, error: null };
 
     const safePayload = {
+        club_id: personData.club_id,
         first_name: personData.first_name,
         last_name: personData.last_name,
         birth_date: personData.birth_date || null,
@@ -336,9 +337,10 @@ async function updatePersonRecord(supabase: any, personId: string, personData: {
     position?: string,
     role?: string,
     status?: string,
+    club_id?: string,
 }) {
     const fullName = `${personData.first_name} ${personData.last_name}`.trim();
-    const richPayload = {
+    const richPayload: Record<string, any> = {
         first_name: personData.first_name,
         last_name: personData.last_name,
         full_name: fullName,
@@ -353,6 +355,9 @@ async function updatePersonRecord(supabase: any, personId: string, personData: {
         role: personData.role || null,
         status: personData.status || 'active',
     };
+    if (personData.club_id) {
+        richPayload.club_id = personData.club_id;
+    }
 
     const notFoundError = {
         message: 'No se pudo actualizar el jugador. Verifica que el ID exista y que tengas permisos sobre el club.',
@@ -370,13 +375,16 @@ async function updatePersonRecord(supabase: any, personId: string, personData: {
         return { data: null, error: notFoundError };
     }
 
-    const safePayload = {
+    const safePayload: Record<string, any> = {
         first_name: personData.first_name,
         last_name: personData.last_name,
         birth_date: personData.birth_date || null,
         id_number: personData.id_number || null,
         avatar_url: personData.photo_url || null,
     };
+    if (personData.club_id) {
+        safePayload.club_id = personData.club_id;
+    }
 
     const fallback = await supabase
         .from('people')
@@ -755,6 +763,24 @@ async function isPersonLinkedToClub(
     return hasRoles || hasMemberships;
 }
 
+async function isPersonInClubScope(
+    supabase: any,
+    clubId: string,
+    personId: string,
+) {
+    const { data: directPerson, error: directPersonError } = await supabase
+        .from('people')
+        .select('id')
+        .match({ id: personId, club_id: clubId })
+        .maybeSingle();
+
+    if (directPersonError && !isMissingTableError(directPersonError)) {
+        throw directPersonError;
+    }
+
+    return Boolean(directPerson) || await isPersonLinkedToClub(supabase, clubId, personId);
+}
+
 export async function findPotentialPersonIdentityMatches(
     clubId: string,
     personData: Pick<PersonClubInput, 'first_name' | 'last_name'>,
@@ -999,15 +1025,15 @@ export async function fetchPeopleByClub(clubId: string, supabaseClient?: any): P
     return fetchPeopleFromLegacy(rosterOwnerClubId, undefined, supabase);
 }
 
-export async function fetchPeopleByDivision(clubId: string, divisionId: string): Promise<PersonWithRole[]> {
+export async function fetchPeopleByDivision(clubId: string, divisionId: string, supabaseClient?: any): Promise<PersonWithRole[]> {
     const clubBaseRosterId = parseClubBaseRosterId(divisionId);
     if (clubBaseRosterId) {
-        const clubRosterPeople = await fetchPeopleByClub(clubBaseRosterId);
+        const clubRosterPeople = await fetchPeopleByClub(clubBaseRosterId, supabaseClient);
         return clubRosterPeople.filter((person) => !person.division_id);
     }
 
     const familyDivision = parseFamilyDivisionId(divisionId);
-    const supabase = await createClient();
+    const supabase = supabaseClient ?? await createClient();
     const rosterScope = await resolveRosterScope(clubId, supabase as any, divisionId);
     const rosterClubId = familyDivision?.rosterOwnerClubId ?? rosterScope.rosterOwnerClubId;
     const effectiveDivisionId = familyDivision ? undefined : rosterScope.rosterDivisionId;
@@ -1018,14 +1044,14 @@ export async function fetchPeopleByDivision(clubId: string, divisionId: string):
     if (legacyPeople.length > 0) return legacyPeople;
 
     if (familyDivision && rosterClubId !== clubId) {
-        return fetchPeopleByClub(rosterClubId);
+        return fetchPeopleByClub(rosterClubId, supabase);
     }
 
     return [];
 }
 
-export async function addPersonToClub(clubId: string, personData: PersonClubInput): Promise<PersonMutationResult> {
-    const supabase = await createClient();
+export async function addPersonToClub(clubId: string, personData: PersonClubInput, supabaseClient?: any): Promise<PersonMutationResult> {
+    const supabase = supabaseClient ?? await createClient();
     const db = supabase as any;
     const { rosterOwnerClubId: rosterClubId, rosterDivisionId } = await resolveRosterScope(
         clubId,
@@ -1068,7 +1094,7 @@ export async function addPersonToClub(clubId: string, personData: PersonClubInpu
         const { data: updatedPerson, error: personError } = await updatePersonRecord(
             supabase,
             normalizedPayload.existing_person_id,
-            mergedPerson,
+            { ...mergedPerson, club_id: rosterClubId },
         );
 
         if (personError) {
@@ -1161,8 +1187,8 @@ export async function updatePersonInClub(clubId: string, personId: string, perso
     height?: number,
     jersey_number?: number,
     squad_role?: string
-}) {
-    const supabase = await createClient();
+}, supabaseClient?: any) {
+    const supabase = supabaseClient ?? await createClient();
     const db = supabase as any;
     const { rosterOwnerClubId: rosterClubId, rosterDivisionId } = await resolveRosterScope(
         clubId,
@@ -1170,7 +1196,23 @@ export async function updatePersonInClub(clubId: string, personId: string, perso
         personData.division_id,
     );
 
-    const { data: person, error: personError } = await updatePersonRecord(supabase, personId, personData);
+    try {
+        const isLinkedToRosterClub = await isPersonInClubScope(db, rosterClubId, personId);
+        if (!isLinkedToRosterClub) {
+            return {
+                success: false,
+                error: 'No se pudo actualizar el jugador. Verifica que el ID exista y que tengas permisos sobre el club.',
+            };
+        }
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+
+    const { data: person, error: personError } = await updatePersonRecord(
+        supabase,
+        personId,
+        { ...personData, club_id: rosterClubId },
+    );
     if (personError) {
         return { success: false, error: personError.message };
     }
@@ -1231,14 +1273,26 @@ export async function updatePersonInClub(clubId: string, personId: string, perso
     return { success: true, data: person };
 }
 
-export async function deletePersonFromClub(clubId: string, personId: string, divisionId?: string) {
-    const supabase = await createClient();
+export async function deletePersonFromClub(clubId: string, personId: string, divisionId?: string, supabaseClient?: any) {
+    const supabase = supabaseClient ?? await createClient();
     const db = supabase as any;
     const { rosterOwnerClubId: rosterClubId, rosterDivisionId } = await resolveRosterScope(
         clubId,
         db,
         divisionId,
     );
+
+    try {
+        const isLinkedToRosterClub = await isPersonInClubScope(db, rosterClubId, personId);
+        if (!isLinkedToRosterClub) {
+            return {
+                success: false,
+                error: 'No se pudo eliminar la ficha. Verifica que el ID exista y que tengas permisos sobre el club.',
+            };
+        }
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
 
     let teamReference;
     try {

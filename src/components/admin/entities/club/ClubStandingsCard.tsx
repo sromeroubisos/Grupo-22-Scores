@@ -33,7 +33,7 @@ export function ClubStandingsCard({ tournamentName, standings, loading }: ClubSt
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', overflow: 'hidden' }}>
-            <Trophy className="w-48 h-48" style={{ position: 'absolute', right: '-2.5rem', bottom: '-2.5rem', color: 'rgba(255,255,255,0.02)', pointerEvents: 'none' }} />
+            <Trophy className="w-48 h-48" style={{ position: 'absolute', right: '-2.5rem', bottom: '-2.5rem', color: 'var(--ca-border)', pointerEvents: 'none' }} />
 
             <div className="card-header">
                 <div>

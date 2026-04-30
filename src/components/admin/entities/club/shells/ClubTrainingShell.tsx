@@ -41,7 +41,7 @@ export function ClubTrainingShell({
       <section
         className="club-training-canvas"
         style={{
-          background: 'rgba(255, 255, 255, 0.01)',
+          background: 'var(--ca-surface-hover)',
           padding: '2.5rem',
           overflowY: 'auto',
         }}
@@ -71,7 +71,7 @@ export function ClubTrainingShell({
           style={{
             borderLeft: '1px solid var(--crys-border)',
             padding: '2rem 1.5rem',
-            background: 'rgba(5, 7, 10, 0.4)',
+            background: 'var(--ca-surface)',
             overflowY: 'auto',
           }}
         >
