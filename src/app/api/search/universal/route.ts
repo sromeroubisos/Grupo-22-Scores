@@ -15,30 +15,6 @@ type SearchResult = {
     searchWeight: number;
 };
 
-type TournamentSearchRow = {
-    id: string;
-    name: string;
-    display_name: string | null;
-    slug: string | null;
-    logo_url: string | null;
-    sport_id: string | null;
-    country_id: string | null;
-    is_visible: boolean | null;
-    sport: { name: string } | null;
-    country: { name: string } | null;
-};
-
-type ClubSearchRow = {
-    id: string;
-    name: string;
-    short_name: string | null;
-    slug: string | null;
-    city: string | null;
-    country: string | null;
-    logo_url: string | null;
-    is_visible: boolean | null;
-};
-
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const rawSearch = (searchParams.get('q') || '').slice(0, 80).trim();
@@ -66,11 +42,11 @@ export async function GET(request: Request) {
     try {
         const [tournamentsRes, clubsRes, fsSearchRaw, rugbyTeams, rugbyLeagues] = await Promise.all([
             supabase.from('tournaments')
-                .select('id, name, display_name, slug, logo_url, sport_id, country_id, is_visible, sport:sports(name), country:countries(name)')
+                .select('id, name, display_name, slug, sport_id, country_id, is_visible, sport:sports(name), country:countries(name)')
                 .or(`name.ilike.%${escapedSearch}%,display_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`)
                 .limit(limit),
             supabase.from('clubs')
-                .select('id, name, short_name, slug, city, country, logo_url, is_visible')
+                .select('id, name, short_name, slug, city, country, is_visible')
                 .or(`name.ilike.%${escapedSearch}%,short_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`)
                 .limit(limit),
             searchFlashScore(search).catch(() => null),
@@ -107,7 +83,7 @@ export async function GET(request: Request) {
                     title,
                     subtitle: `${sportLabel} · ${countryLabel}`,
                     url: `/tournaments/${t.slug || t.id}`,
-                    logo_url: t.logo_url,
+                    logo_url: null,
                     searchWeight: calculateWeight(title, t.name, t.slug, lSearch, 0)
                 };
             }));
@@ -120,7 +96,7 @@ export async function GET(request: Request) {
                 title: c.name,
                 subtitle: `Club · ${c.city || c.country || ''}`,
                 url: `/clubs/${c.slug || c.id}`,
-                logo_url: c.logo_url,
+                logo_url: null,
                 searchWeight: calculateWeight(c.name, c.short_name, c.slug, lSearch, 1)
             })));
         }

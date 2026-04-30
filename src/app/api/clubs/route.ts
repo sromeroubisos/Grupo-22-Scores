@@ -29,7 +29,7 @@ type PublicClubRow = {
     id: string;
     name: string;
     slug: string | null;
-    logo_url: string | null;
+    logo_url?: string | null;
     city: string | null;
     country: string | null;
     is_visible: boolean | null;
@@ -39,7 +39,7 @@ type PublicClubRow = {
     sport_ref: { name: string } | null;
 };
 
-const PUBLIC_CLUB_SELECT = 'id, name, slug, logo_url, city, country, is_visible, status, sport, sport_id';
+const PUBLIC_CLUB_SELECT = 'id, name, slug, city, country, is_visible, status, sport, sport_id';
 const ADMIN_CLUB_SELECT = 'id, name, slug, logo_url, city, country, is_visible, status, sport, sport_id';
 
 function resolveSportFilter(rawSport: string | null) {
@@ -61,6 +61,13 @@ function requestHasSupabaseSession(request: NextRequest) {
         const name = cookie.name.toLowerCase();
         return name.startsWith('sb-') && name.includes('auth-token') && Boolean(cookie.value);
     });
+}
+
+function sanitizePublicLogoUrl(value: unknown): string | null {
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim();
+    if (!trimmed || trimmed.toLowerCase().startsWith('data:')) return null;
+    return trimmed;
 }
 
 async function getAuthenticatedUser(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -235,7 +242,7 @@ export async function GET(request: NextRequest) {
             id: club.id,
             name: club.name,
             slug: club.slug,
-            logo_url: club.logo_url,
+            logo_url: sanitizePublicLogoUrl(club.logo_url),
             city: club.city,
             country: club.country,
             is_visible: club.is_visible !== false,

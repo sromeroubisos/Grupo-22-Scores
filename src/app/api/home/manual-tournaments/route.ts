@@ -11,7 +11,7 @@ type ManualTournamentRow = {
     legacy_sport?: string | null;
     country: string | null;
     country_id: string | null;
-    logo_url: string | null;
+    logo_url?: string | null;
     category: string | null;
     season_id: string | null;
     status: string | null;
@@ -34,7 +34,6 @@ const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = `
     legacy_sport:sport,
     country,
     country_id,
-    logo_url,
     category,
     season_id,
     status,
@@ -51,7 +50,6 @@ const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = `
     sport_id,
     country,
     country_id,
-    logo_url,
     category,
     season_id,
     status,
@@ -69,7 +67,6 @@ const SELECT_WITH_LEGACY_SPORT = `
     legacy_sport:sport,
     country,
     country_id,
-    logo_url,
     category,
     season_id,
     status,
@@ -85,7 +82,6 @@ const SELECT_WITHOUT_LEGACY_SPORT = `
     sport_id,
     country,
     country_id,
-    logo_url,
     category,
     season_id,
     status,
@@ -157,6 +153,7 @@ export async function GET() {
         }).map((tournament) => ({
             ...tournament,
             sport_id: tournament.sport_id || tournament.legacy_sport || 'rugby',
+            logo_url: null,
             priority: typeof tournament.priority === 'number' ? tournament.priority : 0,
         })));
 

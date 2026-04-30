@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10', 10);
 
     const supabase = await createClient();
-    let query = supabase.from('clubs').select('id, name, logo_url');
+    let query = supabase.from('clubs').select('id, name');
 
     if (search) {
         query = query.ilike('name', `%${search}%`);

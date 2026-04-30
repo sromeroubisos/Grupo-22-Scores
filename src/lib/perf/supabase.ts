@@ -112,7 +112,7 @@ export function createInstrumentedSupabaseFetch(
         const requestUrl = resolveUrl(input);
         const isSupabaseRequest = Boolean(supabaseUrl) && requestUrl.startsWith(String(supabaseUrl));
 
-        if (!isSupabaseRequest) {
+        if (!isSupabaseRequest || !isPerfEnabled(runtime)) {
             return fetchImpl(input, init);
         }
 

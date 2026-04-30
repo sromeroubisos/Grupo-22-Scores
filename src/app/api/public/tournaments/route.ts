@@ -28,10 +28,10 @@ export const revalidate = 0;
 
 const RUGBY_SPORT_IDS = ['rugby', 'rugby-union', 'rugby-league'];
 const RUGBY_FLASHSCORE_SPORT_KEY = 'rugby';
-const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, priority, category, age_grade';
-const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, priority, category, age_grade';
-const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, category, age_grade';
-const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, category, age_grade';
+const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, slug, is_visible, status, priority, category, age_grade';
+const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, slug, is_visible, status, priority, category, age_grade';
+const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, slug, is_visible, status, category, age_grade';
+const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, slug, is_visible, status, category, age_grade';
 const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITH_LEGACY_SPORT_AND_PRIORITY}, review_status`;
 const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY}, review_status`;
 const SELECT_WITH_LEGACY_SPORT_REVIEW = `${SELECT_WITH_LEGACY_SPORT}, review_status`;
@@ -48,7 +48,7 @@ type PublicTournamentRow = {
     country_ref: { name?: string } | null;
     sport_id: string | null;
     legacy_sport?: string | null;
-    logo_url: string | null;
+    logo_url?: string | null;
     slug: string | null;
     is_visible: boolean | null;
     status: string | null;

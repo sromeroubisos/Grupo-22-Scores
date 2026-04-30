@@ -20,6 +20,7 @@ type TeamLogoProps = {
     size?: number;
     radius?: 'round' | 'square';
     title?: string;
+    disableLookup?: boolean;
 };
 
 function joinClasses(...values: Array<string | undefined | null | false>) {
@@ -68,6 +69,7 @@ export default function TeamLogo({
     size,
     radius = 'square',
     title,
+    disableLookup = false,
 }: TeamLogoProps) {
     const seedSource = useMemo<LogoSource>(() => ({
         id: teamId ?? undefined,
@@ -100,9 +102,10 @@ export default function TeamLogo({
     }, [name, shortName, source, teamId]);
 
     const lookupUrl = useMemo(() => {
+        if (disableLookup) return '';
         if (!lookupKey && !name.trim()) return '';
         return buildLookupUrl(lookupKey || name.trim(), name);
-    }, [lookupKey, name]);
+    }, [disableLookup, lookupKey, name]);
 
     const [failedSources, setFailedSources] = useState<string[]>([]);
     const candidateSources = useMemo(
