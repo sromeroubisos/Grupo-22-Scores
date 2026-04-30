@@ -133,7 +133,6 @@ export default function ClubesPage() {
                                                                     name={club.name}
                                                                     teamId={club.id}
                                                                     logoUrl={club.logo_url}
-                                                                    disableLookup={!club.logo_url}
                                                                     className="w-12 h-12 rounded-lg"
                                                                     imgClassName="w-10 h-10 object-contain"
                                                                     style={{ background: 'transparent', border: 'none' }}

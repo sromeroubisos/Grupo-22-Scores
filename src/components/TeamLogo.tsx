@@ -133,6 +133,8 @@ export default function TeamLogo({
                     src={currentSrc}
                     alt={title || name}
                     className={joinClasses(styles.image, imgClassName)}
+                    loading="lazy"
+                    decoding="async"
                     onError={() => {
                         setFailedSources((current) => (
                             current.includes(currentSrc) ? current : [...current, currentSrc]

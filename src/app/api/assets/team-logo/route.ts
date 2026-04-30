@@ -10,7 +10,7 @@ import { getPlayerDetails, getTeamDetails } from '@/lib/services/flashscore';
 
 const LOGO_DIR = path.join(process.cwd(), 'public', 'logos', 'clubs');
 const EXTENSIONS = ['.png', '.svg', '.webp', '.jpg', '.jpeg', '.avif'];
-const PROXY_CACHE_CONTROL = 'private, no-store, no-cache, max-age=0, must-revalidate';
+const PROXY_CACHE_CONTROL = 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=604800';
 
 function normalizeSourceUrl(source: string): string {
     const trimmed = source.trim();

@@ -123,7 +123,6 @@ function SearchResultItem({ res, onSelect }: { res: SearchResult; onSelect: (url
                     name={res.title}
                     teamId={res.id}
                     logoUrl={res.logo_url}
-                    disableLookup={!res.logo_url}
                     className={styles.resultIcon}
                     size={40}
                 />
