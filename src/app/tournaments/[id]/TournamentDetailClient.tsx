@@ -1348,6 +1348,7 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
     const allMatches = (Array.isArray(dbData.matches) ? dbData.matches : []).map(mapDbMatchToFrontend);
     const tournament = dbData.tournament as any;
     const tournamentRuleset = tournament?.ruleset ?? null;
+    const hasRugbyExternalConfig = Boolean(getTournamentRugbyApiSportsConfig(tournament)?.league_id);
     const isCircuitCompetition = isCircuitTournamentRuleset(tournamentRuleset, tournament?.format ?? null);
     const { activePhase, phases } = getDbStandingsContext(dbData);
     const standingsScopeViews = isCircuitCompetition ? buildCircuitStandingsViews(dbData) : buildPhaseStandingsViews(dbData);
@@ -1389,7 +1390,7 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
             type: isCircuitCompetition ? 'circuit' : 'league',
             categories: [],
             priority: 0,
-            __isDbOnly: !tournament.url && !hasConfiguredFlashScoreSource(tournament),
+            __isDbOnly: !tournament.url && !hasRugbyExternalConfig && !hasConfiguredFlashScoreSource(tournament),
         } : null,
         results: sortMatchesByDate(allMatches.filter((match: any) => match.status === 'finished'), 'desc'),
         fixtures: sortMatchesByDate(allMatches.filter((match: any) => match.status !== 'finished'), 'asc'),
