@@ -2567,7 +2567,14 @@ export default function MatchCenterClient({
     const hasUnsavedMatchParameters = scoreDirty || clockDirty || statusDirty || venueDirty || notesDirty || dateTimeDirty;
     const liveClockLabel = formatMatchClock(clockDraft);
     const sortedEvents = useMemo(
-        () => (activeTab === 'eventos' ? [...events].sort((a, b) => a.minute - b.minute || a.id.localeCompare(b.id)) : []),
+        () => {
+            if (activeTab !== 'eventos') return [];
+
+            return events
+                .map((event, index) => ({ event, index }))
+                .sort((a, b) => b.event.minute - a.event.minute || b.index - a.index)
+                .map(({ event }) => event);
+        },
         [activeTab, events],
     );
     const eventPanelGroups = useMemo(() => {
@@ -3117,7 +3124,7 @@ export default function MatchCenterClient({
                                     <div style={{ display: 'grid', gridTemplateColumns: '70px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.7rem', fontWeight: 800, color: '#666', borderBottom: '1px solid #222' }}>
                                         <div>MIN</div><div>TIPO</div><div>EQUIPO</div><div>JUGADOR / DETALLE</div><div style={{ textAlign: 'right' }}>ACCION</div>
                                     </div>
-                                    {sortedEvents.map((ev, sortedIdx) => {
+                                    {sortedEvents.map((ev) => {
                                         const selectedDefinition = eventDefinitionMap[ev.type] || {
                                             type: ev.type,
                                             label: eventTypeLabel(ev.type, availableEventDefinitions),
@@ -3262,7 +3269,10 @@ export default function MatchCenterClient({
                                                     />
                                                 )}
                                                 {ev.type === 'substitution' ? (() => {
-                                                    const mins = minutesPlayedWhenSubstitutedOut(sortedEvents, sortedIdx);
+                                                    const chronologicalIndex = eventsChronologicalAsc.findIndex((event) => event.id === ev.id);
+                                                    const mins = chronologicalIndex >= 0
+                                                        ? minutesPlayedWhenSubstitutedOut(eventsChronologicalAsc, chronologicalIndex)
+                                                        : null;
                                                     if (mins == null) return null;
                                                     return (
                                                         <span style={{ fontSize: '0.72rem', color: '#888', fontWeight: 600 }}>
