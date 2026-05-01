@@ -1,6 +1,6 @@
 'use client';
 
-import { ArchiveRestore, ChevronDown, MoreHorizontal } from 'lucide-react';
+import { ArchiveRestore, CalendarPlus, ChevronDown, MoreHorizontal } from 'lucide-react';
 import { Database } from '@/lib/database.types';
 import { getTournamentFormatLabel } from '@/lib/utils/tournamentFormat';
 import './basalt.css';
@@ -34,6 +34,7 @@ export interface TournamentHeaderProps {
     onMenuClose: () => void;
     onSeasonMenuToggle: () => void;
     onSeasonMenuClose: () => void;
+    onOpenSeasonCreation: () => void;
     onOpenHistoricalSeasonImport: () => void;
     onSeasonNavigate: (href: string) => void;
 }
@@ -48,7 +49,7 @@ export function computeHealth(data: TournamentRow): 'OK' | 'WARNING' | 'ERROR' {
 export function TournamentHeader({
     data, isDirty, dirtyLabels = [], isTransitioning, menuOpen, seasonMenuOpen, seasonItems,
     onSave, onStatusTransition, onRecalculate, onDuplicate, onExport, onDelete,
-    onMenuToggle, onMenuClose, onSeasonMenuToggle, onSeasonMenuClose, onOpenHistoricalSeasonImport, onSeasonNavigate,
+    onMenuToggle, onMenuClose, onSeasonMenuToggle, onSeasonMenuClose, onOpenSeasonCreation, onOpenHistoricalSeasonImport, onSeasonNavigate,
 }: TournamentHeaderProps) {
     const tournament = data as TournamentDisplayRow;
     const status = (data.status ?? 'draft').toUpperCase();
@@ -216,14 +217,29 @@ export function TournamentHeader({
                                             role="menuitem"
                                             onClick={() => {
                                                 onSeasonMenuClose();
+                                                onOpenSeasonCreation();
+                                            }}
+                                        >
+                                            <span className="basalt-season-menu-copy">
+                                                <CalendarPlus size={16} />
+                                                <span>Nueva temporada</span>
+                                            </span>
+                                            <small>Rapida, copia, manual o historica dentro del mismo torneo.</small>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="basalt-overflow-item"
+                                            role="menuitem"
+                                            onClick={() => {
+                                                onSeasonMenuClose();
                                                 onOpenHistoricalSeasonImport();
                                             }}
                                         >
                                             <span className="basalt-season-menu-copy">
                                                 <ArchiveRestore size={16} />
-                                                <span>Agregar temporada antigua</span>
+                                                <span>Importar torneo historico legado</span>
                                             </span>
-                                            <small>Importa fixture, tabla final, posiciones y campeon desde texto estructurado.</small>
+                                            <small>Crea otro torneo vinculado. Usar solo por compatibilidad.</small>
                                         </button>
                                     </div>
                                 </div>
@@ -257,6 +273,11 @@ export function TournamentHeader({
                     ) : (
                         <div className="basalt-header-action-placeholder" aria-hidden="true" />
                     )}
+
+                    <button className="basalt-btn basalt-btn-primary" onClick={onOpenSeasonCreation} disabled={isTransitioning} type="button">
+                        <CalendarPlus size={15} />
+                        Nueva temporada
+                    </button>
 
                     <button className="basalt-btn basalt-btn-primary" onClick={onStatusTransition} disabled={isTransitioning} type="button">
                         {isTransitioning ? 'Procesando...' : 'Cambiar estado'}

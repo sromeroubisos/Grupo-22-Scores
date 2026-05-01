@@ -1347,6 +1347,7 @@ function buildPhaseStandingsViews(dbData: TournamentInitialData): StandingsScope
 function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
     const allMatches = (Array.isArray(dbData.matches) ? dbData.matches : []).map(mapDbMatchToFrontend);
     const tournament = dbData.tournament as any;
+    const tournamentSeason = dbData.season as any;
     const tournamentRuleset = tournament?.ruleset ?? null;
     const hasRugbyExternalConfig = Boolean(getTournamentRugbyApiSportsConfig(tournament)?.league_id);
     const isCircuitCompetition = isCircuitTournamentRuleset(tournamentRuleset, tournament?.format ?? null);
@@ -1384,9 +1385,9 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
             externalId: tournament.external_id || null,
             ruleset: tournamentRuleset,
             url: tournament.url || '',
-            season_id: tournament.season_id != null && String(tournament.season_id).trim()
+            season_id: tournamentSeason?.season_code || (tournament.season_id != null && String(tournament.season_id).trim()
                 ? String(tournament.season_id).trim()
-                : null,
+                : null),
             type: isCircuitCompetition ? 'circuit' : 'league',
             categories: [],
             priority: 0,
@@ -1632,7 +1633,9 @@ export default function TournamentDetailPage({
                         // Server passed initial data — skip the HTTP round-trip
                         dbData = initialData;
                     } else {
-                        const dbDataRes = await fetch(`/api/db/tournaments/${id}/data`, {
+                        const dbDataQuery = new URLSearchParams();
+                        if (overrideSeason) dbDataQuery.set('seasonId', overrideSeason);
+                        const dbDataRes = await fetch(`/api/db/tournaments/${id}/data${dbDataQuery.size ? `?${dbDataQuery.toString()}` : ''}`, {
                             cache: 'no-store',
                             signal: controller.signal,
                         });
@@ -1683,9 +1686,9 @@ export default function TournamentDetailPage({
                                             externalId: (t as any).external_id || tournamentMeta?.externalId || null,
                                             ruleset: (t as any).ruleset ?? tournamentMeta?.ruleset ?? null,
                                             url: dbStoredUrl,
-                                            season_id: (t as any).season_id != null && String((t as any).season_id).trim()
+                                            season_id: (dbData.season as any)?.season_code || ((t as any).season_id != null && String((t as any).season_id).trim()
                                                 ? String((t as any).season_id).trim()
-                                                : tournamentMeta?.season_id ?? null,
+                                                : tournamentMeta?.season_id ?? null),
                                             type: isCircuitTournamentRuleset((t as any).ruleset ?? tournamentMeta?.ruleset ?? null)
                                                 ? 'circuit'
                                                 : (tournamentMeta?.type || 'league'),

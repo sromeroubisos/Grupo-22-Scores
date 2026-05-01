@@ -19,6 +19,10 @@ export async function GET(
     });
     const { searchParams } = new URL(request.url);
     const phaseId = searchParams.get('phaseId');
+    const seasonId =
+      searchParams.get('seasonId') ||
+      searchParams.get('season_id') ||
+      searchParams.get('season');
 
     let query = supabase
       .from('tournament_groups')
@@ -28,6 +32,10 @@ export async function GET(
 
     if (phaseId) {
       query = query.eq('phase_id', phaseId);
+    }
+
+    if (seasonId) {
+      query = query.eq('season_id', seasonId);
     }
 
     const { data: groups, error } = await perf.measureStep(
@@ -79,12 +87,24 @@ export async function POST(
       return perf.json({ error: 'phase_id and name are required' }, { status: 400 });
     }
 
+    const { data: phase } = await supabase
+      .from('tournament_phases')
+      .select('id, tournament_id, season_id')
+      .eq('id', body.phase_id)
+      .eq('tournament_id', tournamentId)
+      .maybeSingle();
+
+    if (!phase) {
+      return perf.json({ error: 'Phase not found' }, { status: 404 });
+    }
+
     const { data: group, error } = await perf.measureStep(
       'insert_group',
       async () => supabase
         .from('tournament_groups')
         .insert({
           phase_id: body.phase_id,
+          season_id: phase.season_id ?? null,
           name: body.name,
           order_index: body.order_index ?? 0,
         })

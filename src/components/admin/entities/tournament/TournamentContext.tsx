@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { MatchEventDefinition } from '@/lib/matchEventCatalog';
 
-export type TournamentDraftSection = 'details' | 'format';
+export type TournamentDraftSection = 'details' | 'format' | 'structure';
 
 export interface TournamentDetailsDraft {
     name: string;
@@ -29,6 +29,10 @@ export interface TournamentFormatDraft {
 type TournamentDraftPayloads = {
     details?: TournamentDetailsDraft;
     format?: TournamentFormatDraft;
+    // Structure has its own per-action save buttons (model selector, phase
+    // wizard) so we do not stash a draft payload here — only the dirty flag
+    // is tracked, and the slot is reserved for parity with other sections.
+    structure?: { touched: true };
 };
 
 type TournamentDirtySections = Partial<Record<TournamentDraftSection, boolean>>;

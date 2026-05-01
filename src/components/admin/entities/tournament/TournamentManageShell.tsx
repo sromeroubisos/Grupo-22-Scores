@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateEntity, deleteEntity, duplicateTournament } from '@/app/admin/entities/actions';
 import { Database } from '@/lib/database.types';
 import { TournamentHeader } from './TournamentHeader';
 import { HistoricalSeasonImportDrawer } from './HistoricalSeasonImportDrawer';
+import { TournamentSeasonCreationModal } from './TournamentSeasonCreationModal';
 import { TournamentTabs } from './TournamentTabs';
 import { TournamentRightSidebar } from './TournamentRightSidebar';
 import {
@@ -111,11 +112,12 @@ export function TournamentManageShell(props: ShellProps) {
     );
 }
 
-function TournamentManageShellInner({ id, data, currentTab, children, seasonMenuItems = [] }: ShellProps) {
+function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null, children, seasonMenuItems = [] }: ShellProps) {
     const router = useRouter();
     const tournament = data as TournamentManageRow;
     const hasSidebar = currentTab === 'resumen';
     const useWideWorkspace = !hasSidebar;
+    const shellRef = useRef<HTMLDivElement | null>(null);
     usePerfComponentLifecycle('TournamentManageShell', {
         tournamentId: id,
         tab: currentTab,
@@ -133,7 +135,40 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
     const [menuOpen, setMenuOpen] = useState(false);
     const [seasonMenuOpen, setSeasonMenuOpen] = useState(false);
     const [historicalImportOpen, setHistoricalImportOpen] = useState(false);
+    const [seasonCreationOpen, setSeasonCreationOpen] = useState(false);
     const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    useEffect(() => {
+        const shell = shellRef.current;
+        if (!shell || typeof window === 'undefined') return;
+
+        const header = shell.querySelector<HTMLElement>('.basalt-header');
+        const tabs = shell.querySelector<HTMLElement>('.basalt-tabs');
+        if (!header || !tabs) return;
+
+        const updateChromeOffsets = () => {
+            shell.style.setProperty('--basalt-header-offset', `${Math.ceil(header.getBoundingClientRect().height)}px`);
+            shell.style.setProperty('--basalt-tabs-offset', `${Math.ceil(tabs.getBoundingClientRect().height)}px`);
+        };
+
+        updateChromeOffsets();
+        window.addEventListener('resize', updateChromeOffsets);
+
+        if (typeof ResizeObserver === 'undefined') {
+            return () => {
+                window.removeEventListener('resize', updateChromeOffsets);
+            };
+        }
+
+        const resizeObserver = new ResizeObserver(updateChromeOffsets);
+        resizeObserver.observe(header);
+        resizeObserver.observe(tabs);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', updateChromeOffsets);
+        };
+    }, []);
 
     useEffect(() => {
         if (!actionMessage) return;
@@ -150,12 +185,14 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
         () => Boolean(dirtySections.format && drafts.format),
         [dirtySections.format, drafts.format],
     );
+    const hasDirtyStructure = Boolean(dirtySections.structure);
     const dirtyLabels = useMemo(
         () => [
             hasDirtyDetails ? 'Detalles' : null,
             hasDirtyFormat ? 'Formato' : null,
+            hasDirtyStructure ? 'Estructura' : null,
         ].filter(Boolean) as string[],
-        [hasDirtyDetails, hasDirtyFormat],
+        [hasDirtyDetails, hasDirtyFormat, hasDirtyStructure],
     );
 
     const handleSave = useCallback(async () => {
@@ -187,7 +224,16 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
         }
 
         if (Object.keys(updates).length === 0) {
-            setActionMessage({ type: 'error', text: 'No hay cambios persistibles en el torneo.' });
+            // Structure has its own per-action save buttons (model selector,
+            // phase wizard) and the shell does not know how to persist them,
+            // so fall back to a clearer hint when that's the only dirty area.
+            const hasOnlyStructureDirty = !hasDirtyDetails && !hasDirtyFormat && Boolean(dirtySections.structure);
+            setActionMessage({
+                type: 'error',
+                text: hasOnlyStructureDirty
+                    ? 'Guardá los cambios desde los botones de Estructura (Modelo competitivo o Crear/Guardar fase).'
+                    : 'No hay cambios persistibles en el torneo.',
+            });
             return;
         }
 
@@ -237,6 +283,7 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
         }
     }, [
         clearSectionDraft,
+        dirtySections.structure,
         drafts.details,
         drafts.format,
         hasDirtyDetails,
@@ -434,7 +481,7 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
     }, [clearAllDrafts, isDirty, router]);
 
     return (
-        <div className="basalt-body flex flex-col min-h-screen">
+        <div ref={shellRef} className="basalt-body flex flex-col min-h-screen">
             <TournamentHeader
                 data={data}
                 isDirty={isDirty}
@@ -463,6 +510,11 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
                     setMenuOpen(false);
                     setSeasonMenuOpen(false);
                     setHistoricalImportOpen(true);
+                }}
+                onOpenSeasonCreation={() => {
+                    setMenuOpen(false);
+                    setSeasonMenuOpen(false);
+                    setSeasonCreationOpen(true);
                 }}
                 onSeasonNavigate={handleSeasonNavigate}
             />
@@ -533,6 +585,19 @@ function TournamentManageShellInner({ id, data, currentTab, children, seasonMenu
                 tournamentId={id}
                 seasonLabel={data.season_id}
                 onClose={() => setHistoricalImportOpen(false)}
+            />
+            <TournamentSeasonCreationModal
+                open={seasonCreationOpen}
+                tournamentId={id}
+                tournamentName={data.name || 'Torneo'}
+                onClose={() => setSeasonCreationOpen(false)}
+                onCreated={(seasonId) => {
+                    setSeasonCreationOpen(false);
+                    const params = new URLSearchParams({ type: 'tournament', tab: currentTab || 'resumen', seasonId });
+                    if (currentSubtab) params.set('subtab', currentSubtab);
+                    router.push(`/admin/entities/${id}/manage?${params.toString()}`);
+                    router.refresh();
+                }}
             />
         </div>
     );

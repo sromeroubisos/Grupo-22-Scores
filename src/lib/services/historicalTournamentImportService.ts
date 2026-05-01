@@ -152,6 +152,7 @@ type ConfirmParams = {
   displayName?: string | null;
   slug?: string | null;
   publish?: boolean;
+  status?: 'completed' | 'archived' | 'draft' | 'active';
 };
 
 const STANDINGS_HEADER_REGEX = /^pos\.?\b/i;
@@ -569,6 +570,427 @@ export class HistoricalTournamentImportService {
     } catch (error) {
       if (tournamentInserted) {
         await this.cleanupImportedTournament(supabase, importedTournamentId);
+      }
+      throw error;
+    }
+  }
+
+  static async confirmIntoSeason(params: ConfirmParams): Promise<HistoricalImportConfirmResult> {
+    const supabase = createAdminClient();
+    const db = supabase as unknown as UntypedSupabaseClient;
+    const typedDb = supabase as any;
+    const context = await this.loadContext(supabase, params.baseTournamentId);
+    const model = this.buildModel(context, params.rawText, params.overrides || {}, params.phaseOverrides || {});
+    const warnings = model.issues
+      .filter((issue) => issue.severity !== 'error')
+      .map((issue) => issue.message);
+
+    const unresolved = model.clubs.filter((club) => !club.matchedClubId);
+    if (model.issues.some((issue) => issue.severity === 'error') || unresolved.length > 0) {
+      return {
+        ok: false,
+        tournamentId: params.baseTournamentId,
+        seasonId: null,
+        relationCreated: false,
+        created: { participants: 0, phases: 0, rounds: 0, matches: 0, standings: 0 },
+        warnings: [
+          ...warnings,
+          ...unresolved.map((club) => `Falta resolver el club "${club.sourceName}".`),
+        ],
+      };
+    }
+
+    const now = new Date().toISOString();
+    const targetName = this.readText(params.tournamentName) || model.suggestedName;
+    const targetDisplayName = this.readText(params.displayName) || model.suggestedDisplayName;
+    const status = params.status || 'completed';
+    const resolvedClubIds = new Map(
+      model.clubs
+        .filter((club): club is HistoricalImportClubResolution & { matchedClubId: string } => Boolean(club.matchedClubId))
+        .map((club) => [club.normalizedName, club.matchedClubId as string])
+    );
+    const sameClubMatches = model.parsedMatches.filter((match) => {
+      const homeClubId = resolvedClubIds.get(this.normalizeKey(match.homeTeam));
+      const awayClubId = resolvedClubIds.get(this.normalizeKey(match.awayTeam));
+      return Boolean(homeClubId && awayClubId && homeClubId === awayClubId);
+    });
+
+    if (sameClubMatches.length > 0) {
+      return {
+        ok: false,
+        tournamentId: params.baseTournamentId,
+        seasonId: null,
+        relationCreated: false,
+        created: { participants: 0, phases: 0, rounds: 0, matches: 0, standings: 0 },
+        warnings: [
+          ...warnings,
+          ...sameClubMatches.slice(0, 5).map((match) =>
+            `El partido "${match.homeTeam} - ${match.awayTeam}" resuelve ambos lados al mismo club.`
+          ),
+        ],
+      };
+    }
+
+    const teamRows = this.buildResolvedTeams(model, resolvedClubIds);
+    const leagueNeeded = model.parsedStandings.length > 0 || model.parsedMatches.some((match) => match.phaseKey === 'league');
+    const playoffNeeded = model.parsedMatches.some((match) => match.phaseKey === 'playoff');
+    const startDate = model.parsedMatches.length ? model.parsedMatches[0].date : null;
+    const endDate = model.parsedMatches.length ? model.parsedMatches[model.parsedMatches.length - 1].date : null;
+    const phaseByKey = new Map(model.phases.map((phase) => [phase.key, phase]));
+    const championClubId = model.champion ? resolvedClubIds.get(this.normalizeKey(model.champion)) || null : null;
+    let seasonId: string | null = null;
+
+    try {
+      const { data: season, error: seasonError } = await typedDb
+        .from('tournament_seasons')
+        .insert({
+          tournament_id: params.baseTournamentId,
+          legacy_tournament_id: params.baseTournamentId,
+          season_code: model.seasonId,
+          name: targetName,
+          display_name: targetDisplayName,
+          status,
+          is_active: status === 'active',
+          start_date: startDate,
+          end_date: endDate,
+          format: context.tournament.format,
+          ruleset: context.tournament.ruleset || {},
+          settings: {
+            source: 'historical-season-import',
+            imported: true,
+            visibility: params.publish === true ? 'public' : 'private',
+            runner_up: model.runnerUp,
+            third_place: model.thirdPlace,
+          },
+          champion_club_id: championClubId,
+          created_by_user_id: params.actorUserId,
+          created_at: now,
+          updated_at: now,
+        })
+        .select('*')
+        .single();
+
+      if (seasonError || !season?.id) {
+        throw new Error(seasonError?.message || 'No se pudo crear la temporada historica.');
+      }
+      seasonId = season.id;
+
+      if (status === 'active') {
+        const { error: clearActiveError } = await typedDb
+          .from('tournament_seasons')
+          .update({ is_active: false })
+          .eq('tournament_id', params.baseTournamentId)
+          .neq('id', season.id);
+        if (clearActiveError) throw new Error(clearActiveError.message || 'No se pudo desactivar la temporada anterior.');
+
+        const { error: currentSeasonError } = await typedDb
+          .from('tournaments')
+          .update({ current_season_id: season.id })
+          .eq('id', params.baseTournamentId);
+        if (currentSeasonError) throw new Error(currentSeasonError.message || 'No se pudo actualizar la temporada actual.');
+      }
+
+      const participantRows = teamRows.map((team) => {
+        const participantId = crypto.randomUUID();
+        const entryId = crypto.randomUUID();
+        return {
+          participant: {
+            id: participantId,
+            tournament_id: params.baseTournamentId,
+            season_id: season.id,
+            season_entry_id: entryId,
+            club_id: team.clubId,
+            name: team.clubName,
+            type: 'club',
+            status: 'active',
+            seed: team.position,
+            short_code: team.shortCode,
+            notes: null,
+            created_at: now,
+            updated_at: now,
+          },
+          entry: {
+            id: entryId,
+            season_id: season.id,
+            tournament_id: params.baseTournamentId,
+            club_id: team.clubId,
+            team_id: null,
+            source_participant_id: participantId,
+            group_id: null,
+            zone: null,
+            category: null,
+            status: 'active',
+            seed: team.position,
+            notes: null,
+            settings: {
+              source: 'historical-season-import',
+              imported_team_name: team.clubName,
+            },
+            created_at: now,
+            updated_at: now,
+          },
+        };
+      });
+
+      const teamEntryInserts = participantRows.map((row) => row.entry);
+      if (teamEntryInserts.length > 0) {
+        const { error: entryError } = await typedDb.from('team_season_entries').insert(teamEntryInserts);
+        if (entryError) throw new Error(entryError.message || 'No se pudieron crear los participantes historicos.');
+      }
+
+      const participantInserts = participantRows.map((row) => row.participant);
+      if (participantInserts.length > 0) {
+        const { error: participantError } = await typedDb.from('tournament_participants').insert(participantInserts);
+        if (participantError) throw new Error(participantError.message || 'No se pudieron crear los participantes compatibles.');
+      }
+
+      const rosterInserts = teamEntryInserts.map((entry) => ({
+        season_id: season.id,
+        tournament_id: params.baseTournamentId,
+        team_season_entry_id: entry.id,
+        club_id: entry.club_id,
+        team_id: null,
+        name: `${entry.category || 'Plantel'} ${model.seasonId}`.trim(),
+        roster_type: 'official',
+        status: status === 'archived' ? 'archived' : 'active',
+        settings: { source: 'historical-season-import' },
+        created_at: now,
+        updated_at: now,
+      }));
+      if (rosterInserts.length > 0) {
+        const { error: rosterError } = await typedDb.from('season_rosters').insert(rosterInserts);
+        if (rosterError) throw new Error(rosterError.message || 'No se pudieron crear los planteles historicos.');
+      }
+
+      const phaseBlueprints = [
+        leagueNeeded
+          ? {
+              key: 'league' as const,
+              name: phaseByKey.get('league')?.name || 'Temporada regular',
+              phase_type: phaseByKey.get('league')?.phaseType || 'league',
+              order_index: 1,
+              is_active: true,
+              settings: {
+                source: 'historical_import',
+                imported: true,
+                standings: {
+                  mode: 'fully_manual',
+                  editable: false,
+                },
+              },
+            }
+          : null,
+        playoffNeeded
+          ? {
+              key: 'playoff' as const,
+              name: phaseByKey.get('playoff')?.name || 'Playoffs',
+              phase_type: phaseByKey.get('playoff')?.phaseType || 'playoff',
+              order_index: leagueNeeded ? 2 : 1,
+              is_active: !leagueNeeded,
+              settings: {
+                source: 'historical_import',
+                imported: true,
+              },
+            }
+          : null,
+      ].filter(Boolean) as Array<{
+        key: 'league' | 'playoff';
+        name: string;
+        phase_type: string;
+        order_index: number;
+        is_active: boolean;
+        settings: Record<string, unknown>;
+      }>;
+
+      const phaseIdByKey = new Map<'league' | 'playoff', string>();
+      const phaseRows = phaseBlueprints.map((phase) => {
+        const phaseId = crypto.randomUUID();
+        phaseIdByKey.set(phase.key, phaseId);
+        return {
+          id: phaseId,
+          tournament_id: params.baseTournamentId,
+          season_id: season.id,
+          name: phase.name,
+          phase_type: phase.phase_type,
+          order_index: phase.order_index,
+          is_active: phase.is_active,
+          settings: phase.settings,
+          start_date: startDate,
+          end_date: endDate,
+          created_at: now,
+          updated_at: now,
+        };
+      });
+
+      if (phaseRows.length > 0) {
+        const { error: phasesError } = await this.insertManyWithOptionalColumns(
+          db,
+          'tournament_phases',
+          phaseRows,
+          ['season_id', 'start_date', 'end_date', 'settings', 'created_at', 'updated_at']
+        );
+        if (phasesError) {
+          throw new Error(phasesError.message || 'No se pudieron crear las fases historicas.');
+        }
+      }
+
+      const roundBlueprints = this.buildRoundBlueprints(model);
+      const roundIdByKey = new Map<string, string>();
+      const roundRows: Record<string, unknown>[] = [];
+      for (const round of roundBlueprints) {
+        const phaseId = phaseIdByKey.get(round.phaseKey);
+        if (!phaseId) continue;
+        const roundId = crypto.randomUUID();
+        roundIdByKey.set(round.key, roundId);
+        roundRows.push({
+          id: roundId,
+          phase_id: phaseId,
+          season_id: season.id,
+          name: round.name,
+          order_index: round.orderIndex,
+          start_date: round.date,
+          end_date: round.date,
+          is_completed: true,
+          notes: round.notes,
+          created_at: now,
+          updated_at: now,
+        });
+      }
+
+      if (roundRows.length > 0) {
+        const { error: roundsError } = await this.insertManyWithOptionalColumns(
+          db,
+          'tournament_rounds',
+          roundRows,
+          ['season_id', 'start_date', 'end_date', 'is_completed', 'notes', 'created_at', 'updated_at']
+        );
+        if (roundsError) {
+          throw new Error(roundsError.message || 'No se pudieron crear las jornadas historicas.');
+        }
+      }
+
+      const scoreRules = this.resolvePointsRules(context.tournament.ruleset);
+      const matchInserts = model.parsedMatches.map((match) => {
+        const homeClubId = resolvedClubIds.get(this.normalizeKey(match.homeTeam)) || null;
+        const awayClubId = resolvedClubIds.get(this.normalizeKey(match.awayTeam)) || null;
+        const phaseId = phaseIdByKey.get(match.phaseKey) || null;
+        const roundId = roundIdByKey.get(match.roundKey) || null;
+        const basePoints = this.calculateBasePoints(match.homeScore, match.awayScore, scoreRules);
+
+        return {
+          id: crypto.randomUUID(),
+          tournament_id: params.baseTournamentId,
+          season_id: season.id,
+          phase_id: phaseId,
+          round_uuid: roundId,
+          group_id: null,
+          home_club_id: homeClubId,
+          away_club_id: awayClubId,
+          date_time: this.toMiddayIso(match.date),
+          venue: null,
+          status: 'final',
+          score: { home: match.homeScore, away: match.awayScore },
+          notes: `Importado desde ${match.stageLabel}`,
+          home_base_points: basePoints.home,
+          away_base_points: basePoints.away,
+          home_bonus_points: 0,
+          away_bonus_points: 0,
+          points_autocalculated: true,
+          points_override_reason: null,
+          created_at: now,
+          updated_at: now,
+        };
+      });
+
+      if (matchInserts.length > 0) {
+        const { error: matchesError } = await typedDb.from('matches').insert(matchInserts);
+        if (matchesError) {
+          throw new Error(matchesError.message || 'No se pudieron crear los resultados historicos.');
+        }
+      }
+
+      const standingsPhaseId = phaseIdByKey.get('league') || null;
+      let standingsInsertedCount = 0;
+      if (standingsPhaseId && model.parsedStandings.length > 0) {
+        const seenStandingClubIds = new Set<string>();
+        const standingsInserts = model.parsedStandings.flatMap((row) => {
+          const clubId = resolvedClubIds.get(this.normalizeKey(row.teamName));
+          if (!clubId) return [];
+          if (seenStandingClubIds.has(clubId)) {
+            warnings.push(`Se omitio una fila duplicada de tabla para "${row.teamName}".`);
+            return [];
+          }
+          seenStandingClubIds.add(clubId);
+          return [{
+            id: crypto.randomUUID(),
+            tournament_id: params.baseTournamentId,
+            season_id: season.id,
+            phase_id: standingsPhaseId,
+            group_id: null,
+            club_id: clubId,
+            position: row.position,
+            played: row.played,
+            won: row.won,
+            drawn: row.drawn,
+            lost: row.lost,
+            points: row.points,
+            scored: row.scored,
+            conceded: row.conceded,
+            bonus_points: row.tryBonus + row.losingBonus,
+            form: null,
+            streak: null,
+            stats: {
+              imported: true,
+              difference: row.difference,
+              try_bonus: row.tryBonus,
+              losing_bonus: row.losingBonus,
+              note: row.note,
+              team_name: row.teamName,
+              status: row.note,
+            },
+            last_updated: now,
+          }];
+        });
+
+        standingsInsertedCount = standingsInserts.length;
+        if (standingsInserts.length > 0) {
+          const { error: standingsError } = await typedDb.from('tournament_standings').insert(standingsInserts);
+          if (standingsError) {
+            throw new Error(standingsError.message || 'No se pudo guardar la tabla historica.');
+          }
+        }
+      }
+
+      await this.learnAliases(supabase, model.clubs);
+      await this.writeAudit(supabase, params.actorUserId, params.baseTournamentId, {
+        scope: 'historical_season_import',
+        season_id: model.seasonId,
+        tournament_season_id: season.id,
+        champion: model.champion,
+        runner_up: model.runnerUp,
+        teams: teamRows.length,
+        matches: matchInserts.length,
+        standings: standingsInsertedCount,
+        creates_new_tournament: false,
+      });
+
+      return {
+        ok: true,
+        tournamentId: params.baseTournamentId,
+        seasonId: season.id,
+        relationCreated: false,
+        created: {
+          participants: participantInserts.length,
+          phases: phaseBlueprints.length,
+          rounds: roundBlueprints.length,
+          matches: matchInserts.length,
+          standings: standingsInsertedCount,
+        },
+        warnings,
+      };
+    } catch (error) {
+      if (seasonId) {
+        await typedDb.from('tournament_seasons').delete().eq('id', seasonId);
       }
       throw error;
     }
@@ -1474,7 +1896,8 @@ export class HistoricalTournamentImportService {
       );
       if (!removable) return result;
       removed.add(removable);
-      const { [removable]: _omitted, ...rest } = attempt as Record<string, unknown>;
+      const rest = { ...attempt } as Record<string, unknown>;
+      delete rest[removable];
       attempt = rest;
     }
     return await db.from(table).insert(attempt);
@@ -1506,7 +1929,8 @@ export class HistoricalTournamentImportService {
       if (!removable) return result;
       removed.add(removable);
       attempts = attempts.map((row) => {
-        const { [removable]: _omitted, ...rest } = row as Record<string, unknown>;
+        const rest = { ...row } as Record<string, unknown>;
+        delete rest[removable];
         return rest;
       });
     }

@@ -120,7 +120,7 @@ async function resolveSeasonAnchorRow(
 }
 
 export async function GET(
-    _req: NextRequest,
+    req: NextRequest,
     { params }: { params: Promise<{ id: string }> },
 ) {
     const { id } = await params;
@@ -133,6 +133,40 @@ export async function GET(
     }
 
     const currentId = lookup.id;
+    const requestedSeasonId =
+        req.nextUrl.searchParams.get('seasonId') ||
+        req.nextUrl.searchParams.get('season_id') ||
+        req.nextUrl.searchParams.get('season');
+
+    const { data: tournamentSeasonRows, error: tournamentSeasonError } = await supabase
+        .from('tournament_seasons')
+        .select('id, tournament_id, season_code, name, display_name, status, is_active, start_date, end_date')
+        .eq('tournament_id', lookup.id)
+        .order('season_code', { ascending: false })
+        .order('created_at', { ascending: false });
+
+    if (!tournamentSeasonError && Array.isArray(tournamentSeasonRows) && tournamentSeasonRows.length > 0) {
+        const activeSeason =
+            tournamentSeasonRows.find((season: any) => requestedSeasonId && season.id === requestedSeasonId) ||
+            tournamentSeasonRows.find((season: any) => season.is_active) ||
+            tournamentSeasonRows[0];
+
+        const seasons: SeasonOption[] = tournamentSeasonRows.map((season: any) => {
+            const label = String(season.season_code || season.display_name || season.name || 'Temporada').trim();
+            return {
+                id: season.id,
+                label,
+                name: season.display_name || season.name || label,
+                slug: lookup.slug,
+                seasonId: season.id,
+                isCurrent: season.id === activeSeason?.id,
+                href: `${buildHref(lookup.slug, lookup.id)}?seasonId=${encodeURIComponent(season.id)}`,
+            };
+        });
+
+        seasons.sort(compareSeasonLabels);
+        return jsonNoStore({ ok: true, seasons, currentId: activeSeason?.id ?? null, tournamentId: lookup.id });
+    }
 
     const relationTypes = SEASON_RELATION_TYPES as unknown as string[];
     const isActiveRelation = (rel: RelationRow) =>

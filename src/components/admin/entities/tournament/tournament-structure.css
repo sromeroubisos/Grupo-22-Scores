@@ -8,19 +8,22 @@
 .structure-hero-panel {
     gap: 28px;
     align-items: stretch;
+    flex-wrap: wrap;
 }
 
 .structure-hero-copy {
     display: grid;
     gap: 14px;
+    flex: 1 1 360px;
+    min-width: 0;
     max-width: 720px;
 }
 
 .structure-hero-title {
     margin: 0;
-    font-size: clamp(28px, 3vw, 42px);
-    line-height: 0.98;
-    letter-spacing: -0.05em;
+    font-size: clamp(26px, 2.6vw, 36px);
+    line-height: 1;
+    letter-spacing: -0.04em;
     color: var(--text-main);
     text-transform: uppercase;
 }
@@ -46,7 +49,7 @@
 .structure-hero-meta span {
     display: inline-flex;
     align-items: center;
-    min-height: 34px;
+    min-height: 30px;
     padding: 0 12px;
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -56,17 +59,20 @@
 .structure-summary-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-    width: 100%;
+    gap: 12px;
+    flex: 1 1 540px;
+    min-width: 0;
+    max-width: 640px;
+    align-self: stretch;
 }
 
 .structure-summary-card {
-    min-height: 138px;
     display: grid;
-    align-content: start;
-    gap: 8px;
-    padding: 18px;
-    border-radius: 20px;
+    grid-template-rows: auto 1fr auto;
+    gap: 10px;
+    padding: 16px;
+    min-height: 132px;
+    border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 42%),
@@ -84,27 +90,47 @@
 
 .structure-summary-label {
     color: var(--text-dim);
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
 }
 
+/* Numeric values are kept prominent but no longer dwarf the text values. */
 .structure-summary-value {
     color: var(--text-main);
-    font-size: clamp(28px, 3vw, 40px);
+    font-size: clamp(24px, 2.2vw, 30px);
+    font-weight: 800;
     line-height: 1;
-    letter-spacing: -0.05em;
+    letter-spacing: -0.04em;
+    align-self: end;
 }
 
+/* The text variant (active phase name) needs to fit two cramped columns
+ * without overflowing or wrapping into giant headlines. */
 .structure-summary-value--text {
-    font-size: clamp(18px, 2vw, 24px);
-    line-height: 1.15;
+    font-size: clamp(14px, 1.3vw, 16px) !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.01em !important;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .structure-summary-foot {
     color: var(--text-dim);
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+@media (max-width: 720px) {
+    .structure-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: none;
+    }
 }
 
 .structure-module {
@@ -915,12 +941,25 @@
         rgba(18, 24, 30, 0.96);
 }
 
+/* Unified type scale: numeric values stay prominent but never larger than the
+ * page-level h2 (clamp 26-36px). The earlier override pushed them to 52px and
+ * dwarfed the section titles — keep them in band here. */
 .structure-summary-value {
-    font-size: clamp(32px, 4vw, 52px);
+    font-size: clamp(22px, 2vw, 28px) !important;
+}
+
+/* Section titles inside `.structure-module` reuse `.basalt-h1`, but the global
+ * `.basalt-h1` cascade ends at clamp(28px, 4.8vw, 56px). Pin the in-tab modules
+ * to the same scale as the hero title so all headings agree visually. */
+.structure-module-title,
+.structure-empty-title {
+    font-size: clamp(22px, 2.2vw, 28px) !important;
+    letter-spacing: -0.03em !important;
+    line-height: 1.05 !important;
 }
 
 .structure-module {
-    padding: clamp(1.35rem, 2vw, 1.8rem) !important;
+    padding: clamp(1.25rem, 1.8vw, 1.65rem) !important;
 }
 
 .structure-module-header {
@@ -933,9 +972,9 @@
 }
 
 .structure-phase-card {
-    min-height: 132px;
+    min-height: 96px;
     padding: 16px 18px !important;
-    border-radius: 32px !important;
+    border-radius: 18px !important;
     border-color: rgba(148, 163, 184, 0.14) !important;
     background:
         radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), transparent 38%),
@@ -944,25 +983,28 @@
 }
 
 .structure-phase-card::before {
-    inset: 16px auto 16px 0;
-    width: 4px;
+    inset: 14px auto 14px 0;
+    width: 3px;
 }
 
 .structure-phase-icon {
-    width: 44px !important;
-    height: 44px !important;
-    border-radius: 18px !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 12px !important;
     background: rgba(255, 255, 255, 0.03) !important;
 }
 
+/* Phase row title aligned with summary text values, not used as a hero title.
+ * Previously clamp(1.9rem, 3vw, 2.9rem) which rendered ~46px and competed with
+ * the module heading. */
 .structure-phase-title {
-    font-size: clamp(1.9rem, 3vw, 2.9rem) !important;
-    line-height: 0.98;
-    letter-spacing: -0.06em;
+    font-size: clamp(1rem, 1.3vw, 1.25rem) !important;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
 }
 
 .structure-phase-meta {
-    font-size: 0.92rem !important;
+    font-size: 0.78rem !important;
 }
 
 .structure-phase-meta-single {
@@ -974,10 +1016,13 @@
     padding-top: 20px !important;
 }
 
+/* The earlier rule turned this into an oversized rectangular CTA. Bring it
+ * back to the standard pill primary button used everywhere else in the tab. */
 .structure-module-footer .basalt-btn-primary {
-    min-width: min(100%, 320px);
-    min-height: 3.45rem;
-    border-radius: 2px;
+    min-width: 0;
+    min-height: 42px;
+    padding-inline: 22px;
+    border-radius: 999px;
 }
 
 .tournament-structure-shell .basalt-btn,
@@ -1032,9 +1077,9 @@
 
 .tournament-structure-shell .structure-module-footer .basalt-btn-primary,
 .tournament-structure-shell .structure-wizard-footer .basalt-btn-primary {
-    min-height: 54px;
-    padding-inline: 28px;
-    border-radius: 2px;
+    min-height: 44px;
+    padding-inline: 24px;
+    border-radius: 999px;
 }
 
 .tournament-structure-shell .structure-phase-actions button {
@@ -1116,7 +1161,7 @@
     }
 
     .structure-phase-title {
-        font-size: 2rem !important;
+        font-size: 1.05rem !important;
     }
 }
 
@@ -1127,9 +1172,9 @@
 }
 
 .structure-step-heading-main {
-    font-size: clamp(2rem, 3vw, 3rem) !important;
-    line-height: 0.94;
-    letter-spacing: -0.05em;
+    font-size: clamp(1.4rem, 1.8vw, 1.75rem) !important;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
     text-transform: none;
 }
 

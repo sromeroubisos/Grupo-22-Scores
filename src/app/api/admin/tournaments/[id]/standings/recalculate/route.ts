@@ -12,15 +12,20 @@ export async function POST(
     try {
         const { id: tournamentId } = await params;
         const body = await request.json();
-        const { phaseId, groupId, tableType = 'general' } = body;
+        const {
+            phaseId,
+            groupId,
+            tableType = 'general',
+            seasonId = body?.season_id ?? body?.season ?? null,
+        } = body;
 
         if (!phaseId) {
             return NextResponse.json({ error: 'phaseId is required' }, { status: 400 });
         }
 
         const result = groupId
-            ? await recalculateAndPersistStandings(tournamentId, phaseId, groupId, tableType)
-            : await recalculatePhaseStandingsScopes(tournamentId, phaseId, tableType);
+            ? await recalculateAndPersistStandings(tournamentId, phaseId, groupId, tableType, seasonId)
+            : await recalculatePhaseStandingsScopes(tournamentId, phaseId, tableType, seasonId);
 
         if (!result.ok) {
             return NextResponse.json({ error: 'Failed to recalculate standings' }, { status: 500 });
@@ -35,6 +40,7 @@ export async function POST(
             action: 'recalculated_standings_table',
             changes: {
                 phase_id: phaseId,
+                season_id: seasonId ?? null,
                 group_id: groupId ?? null,
                 table_type: tableType,
                 rows_calculated: result.rows_calculated,

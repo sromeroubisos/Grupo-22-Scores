@@ -21,19 +21,33 @@ type TournamentPhaseRow = {
 };
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const tournamentId = (await params).id;
+  let seasonId =
+    request.nextUrl.searchParams.get('seasonId') ||
+    request.nextUrl.searchParams.get('season_id') ||
+    request.nextUrl.searchParams.get('season');
   const route = `/api/tournaments/${tournamentId}/fixture`;
   const perf = createApiPerfTracker(route);
 
   try {
     console.log(`[fixture/route] GET fixture for tournament: ${tournamentId}`);
 
+    if (!seasonId) {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from('tournaments')
+        .select('current_season_id')
+        .eq('id', tournamentId)
+        .maybeSingle();
+      seasonId = data?.current_season_id ?? null;
+    }
+
     const fixture = await perf.measureStep(
       'fixture_service',
-      async () => FixtureService.getTournamentFixture(tournamentId),
+      async () => FixtureService.getTournamentFixture(tournamentId, seasonId),
       {
         bucket: 'query',
         logQuery: true,
@@ -77,13 +91,19 @@ export async function GET(
       reason: 'fallback select(*) from tournament_phases',
     }, 'server');
 
+    let phasesQuery = supabase
+      .from('tournament_phases')
+      .select('*')
+      .eq('tournament_id', tournamentId)
+      .order('order_index', { ascending: true });
+
+    if (seasonId) {
+      phasesQuery = phasesQuery.eq('season_id', seasonId);
+    }
+
     const { data: phases, error: phasesError } = await perf.measureStep(
       'fallback_load_phases',
-      async () => supabase
-        .from('tournament_phases')
-        .select('*')
-        .eq('tournament_id', tournamentId)
-        .order('order_index', { ascending: true }),
+      async () => phasesQuery,
       {
         bucket: 'query',
         logQuery: true,
@@ -117,7 +137,7 @@ export async function GET(
     return perf.json({
       tournamentId: tournament.id,
       tournamentName: tournament.name,
-      tournamentSeason: null,
+      tournamentSeason: seasonId,
       currentPhaseId: currentPhase?.id || null,
       currentRoundId: null,
       phases: mappedPhases,

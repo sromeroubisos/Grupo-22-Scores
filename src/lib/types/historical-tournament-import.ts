@@ -93,6 +93,7 @@ export interface HistoricalImportPreviewResult {
 export interface HistoricalImportConfirmResult {
   ok: boolean;
   tournamentId: string | null;
+  seasonId?: string | null;
   relationCreated: boolean;
   created: {
     participants: number;

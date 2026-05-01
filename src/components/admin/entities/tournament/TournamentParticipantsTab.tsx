@@ -18,6 +18,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
     Users, Search, Plus, Download, FileUp, History,
     Pencil, Trash2, IdCard, Hash, ChevronDown, ChevronUp,
@@ -106,6 +107,11 @@ interface Props {
 // ============================================
 
 export function TournamentParticipantsTab({ id: tournamentId }: Props) {
+    const searchParams = useSearchParams();
+    const currentSeasonId =
+        searchParams.get('seasonId') ||
+        searchParams.get('season_id') ||
+        searchParams.get('season');
     usePerfComponentLifecycle('TournamentParticipantsTab', {
         tournamentId: tournamentId || 'unknown',
     });
@@ -151,7 +157,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
             loadGroups();
             loadPhases();
         }
-    }, [tournamentId]);
+    }, [currentSeasonId, tournamentId]);
 
     const loadParticipants = async () => {
         try {
@@ -159,7 +165,9 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
             const request = beginClientRequest(`tournament:${tournamentId}:participants:full`, 'mount', {
                 component: 'TournamentParticipantsTab',
             });
-            const response = await fetch(`/api/tournaments/${tournamentId}/participants?full=true`);
+            const query = new URLSearchParams({ full: 'true' });
+            if (currentSeasonId) query.set('seasonId', currentSeasonId);
+            const response = await fetch(`/api/tournaments/${tournamentId}/participants?${query.toString()}`);
             request.end({
                 status: response.status,
                 error: !response.ok,
@@ -180,7 +188,9 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
             const request = beginClientRequest(`tournament:${tournamentId}:groups`, 'mount', {
                 component: 'TournamentParticipantsTab',
             });
-            const response = await fetch(`/api/tournaments/${tournamentId}/groups`);
+            const query = new URLSearchParams();
+            if (currentSeasonId) query.set('seasonId', currentSeasonId);
+            const response = await fetch(`/api/tournaments/${tournamentId}/groups${query.size ? `?${query.toString()}` : ''}`);
             request.end({
                 status: response.status,
                 error: !response.ok,
@@ -199,7 +209,9 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
             const request = beginClientRequest(`tournament:${tournamentId}:phases`, 'mount', {
                 component: 'TournamentParticipantsTab',
             });
-            const response = await fetch(`/api/tournaments/${tournamentId}/phases`, { cache: 'no-store' });
+            const query = new URLSearchParams();
+            if (currentSeasonId) query.set('seasonId', currentSeasonId);
+            const response = await fetch(`/api/tournaments/${tournamentId}/phases${query.size ? `?${query.toString()}` : ''}`, { cache: 'no-store' });
             request.end({
                 status: response.status,
                 error: !response.ok,
@@ -462,7 +474,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                 fetch(`/api/tournaments/${tournamentId}/participants`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(p),
+                    body: JSON.stringify({ ...p, seasonId: currentSeasonId }),
                 }).then(res => res.json())
             );
             const results = await Promise.all(promises);
@@ -480,7 +492,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                 fetch(`/api/tournaments/${tournamentId}/participants`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(p),
+                    body: JSON.stringify({ ...p, seasonId: currentSeasonId }),
                 }).then(async res => {
                     if (!res.ok) throw new Error('Error al crear participante');
                     return res.json();

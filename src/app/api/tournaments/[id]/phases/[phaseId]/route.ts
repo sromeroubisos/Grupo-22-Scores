@@ -46,11 +46,17 @@ export async function PATCH(
     }
 
     if (body.is_active === true) {
-      const { error: deactivateError } = await supabase
+      let deactivateQuery = supabase
         .from('tournament_phases')
         .update({ is_active: false })
         .eq('tournament_id', tournamentId)
         .neq('id', phaseId);
+
+      if (phase?.season_id) {
+        deactivateQuery = deactivateQuery.eq('season_id', phase.season_id);
+      }
+
+      const { error: deactivateError } = await deactivateQuery;
 
       if (deactivateError) {
         console.error('Error clearing active phase:', deactivateError);
@@ -72,6 +78,7 @@ export async function PATCH(
       } else if (shouldHaveGroups && sanitizedGroupNames.length > 0) {
         const groupInserts = sanitizedGroupNames.map((name, index) => ({
           phase_id: phaseId,
+          season_id: phase.season_id ?? null,
           name: name.trim(),
           order_index: index,
         }));
@@ -112,7 +119,7 @@ export async function DELETE(
 
     const { data: phaseToDelete, error: phaseLookupError } = await supabase
       .from('tournament_phases')
-      .select('id, is_active')
+      .select('id, is_active, season_id')
       .eq('id', phaseId)
       .eq('tournament_id', tournamentId)
       .single();
@@ -134,13 +141,18 @@ export async function DELETE(
     }
 
     if (phaseToDelete?.is_active) {
-      const { data: replacementPhase, error: replacementError } = await supabase
+      let replacementQuery = supabase
         .from('tournament_phases')
         .select('id')
         .eq('tournament_id', tournamentId)
         .order('order_index', { ascending: true })
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
+
+      if (phaseToDelete.season_id) {
+        replacementQuery = replacementQuery.eq('season_id', phaseToDelete.season_id);
+      }
+
+      const { data: replacementPhase, error: replacementError } = await replacementQuery.maybeSingle();
 
       if (replacementError) {
         console.error('Error finding replacement active phase:', replacementError);

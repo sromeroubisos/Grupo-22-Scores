@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Database } from '@/lib/database.types';
 import './basalt.css';
 
@@ -54,18 +55,18 @@ export function TournamentRightSidebar({ id, data, onDelete }: RightSidebarProps
                 <div className="basalt-sidebar-section-header">
                     <span className="basalt-sidebar-title">Operation Shortcuts</span>
                 </div>
-                <a className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=participantes`}>
+                <Link className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=participantes`}>
                     Edit Participant List
-                </a>
-                <a className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=estructura`}>
+                </Link>
+                <Link className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=estructura`}>
                     Define Competitive Structure
-                </a>
-                <a className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=operacion`}>
+                </Link>
+                <Link className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=operacion`}>
                     Operate Fixture & Table
-                </a>
-                <a className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=audit`}>
+                </Link>
+                <Link className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=audit`}>
                     Review Audit Trail
-                </a>
+                </Link>
             </div>
 
             <div className="sidebar-section basalt-rail-section mb-8">

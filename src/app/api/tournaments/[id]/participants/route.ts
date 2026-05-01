@@ -75,6 +75,7 @@ type TournamentParticipantRecord = {
 type TournamentParticipantUpdateContext = {
   id: string;
   tournament_id: string;
+  season_id?: string | null;
   club_id: string | null;
   division_id?: string | null;
   name?: string | null;
@@ -86,17 +87,6 @@ type TournamentStandingReplacementRow = {
   phase_id: string | null;
   group_id: string | null;
   stats?: Record<string, unknown> | null;
-};
-
-type TournamentParticipantsListQuery = {
-  select(columns: string): {
-    eq(column: 'tournament_id', value: string): {
-      order(
-        column: 'created_at',
-        options: { ascending: boolean },
-      ): Promise<{ data: TournamentParticipantRecord[] | null; error: SupabaseLikeError | null }>;
-    };
-  };
 };
 
 type FlashscoreParticipantLike = {
@@ -264,6 +254,7 @@ function getTournamentParticipantSelectColumns(supportsDivisionId: boolean) {
     ? `
         id,
         tournament_id,
+        season_id,
         club_id,
         division_id,
         name,
@@ -295,6 +286,7 @@ function getTournamentParticipantSelectColumns(supportsDivisionId: boolean) {
     : `
         id,
         tournament_id,
+        season_id,
         club_id,
         name,
         type,
@@ -698,6 +690,19 @@ export async function GET(
     // Check if query param 'full' is set to return full participant data
     const { searchParams } = new URL(request.url);
     const full = searchParams.get('full') === 'true';
+    const requestedSeasonId =
+      searchParams.get('seasonId') ||
+      searchParams.get('season_id') ||
+      searchParams.get('season');
+    let scopedSeasonId = requestedSeasonId?.trim() || null;
+    if (!scopedSeasonId) {
+      const { data: tournamentSeason } = await supabase
+        .from('tournaments')
+        .select('current_season_id')
+        .eq('id', tournamentId)
+        .maybeSingle();
+      scopedSeasonId = tournamentSeason?.current_season_id ?? null;
+    }
     perf.note({ full });
 
     // ─── FLASH SCORE SUPPORT ──────────────────────────────────────────────────
@@ -880,15 +885,18 @@ export async function GET(
       }, 'server');
     }
 
-    const participantListQuery = supabase
-      .from('tournament_participants') as unknown as TournamentParticipantsListQuery;
+    let participantListQuery = supabase
+      .from('tournament_participants')
+      .select(getTournamentParticipantSelectColumns(supportsDivisionId))
+      .eq('tournament_id', tournamentId);
+
+    if (scopedSeasonId) {
+      participantListQuery = participantListQuery.eq('season_id', scopedSeasonId);
+    }
 
     const { data: participants, error } = await perf.measureStep(
       'load_tournament_participants',
-      async () => participantListQuery
-        .select(getTournamentParticipantSelectColumns(supportsDivisionId))
-        .eq('tournament_id', tournamentId)
-        .order('created_at', { ascending: false }),
+      async () => participantListQuery.order('created_at', { ascending: false }),
       {
         bucket: 'query',
         logQuery: true,
@@ -940,6 +948,15 @@ export async function POST(
     const tournamentId = (await params).id;
     const body = await request.json();
     const supportsDivisionId = await supportsTournamentParticipantDivisionId(supabase);
+    let scopedSeasonId = String(body?.seasonId || body?.season_id || body?.season || '').trim() || null;
+    if (!scopedSeasonId) {
+      const { data: tournamentSeason } = await supabase
+        .from('tournaments')
+        .select('current_season_id')
+        .eq('id', tournamentId)
+        .maybeSingle();
+      scopedSeasonId = tournamentSeason?.current_season_id ?? null;
+    }
 
     // Validate required fields
     if (!body.name && !body.club_id) {
@@ -1019,6 +1036,7 @@ export async function POST(
     // Log the data being inserted for debugging
     const insertData = {
       tournament_id: tournamentId,
+      season_id: scopedSeasonId,
       club_id: finalClubId,
       name: resolvedClub?.name ?? body.name ?? null,
       type: body.type ?? 'club',
@@ -1112,8 +1130,8 @@ export async function PATCH(
 
       const { data: currentParticipant, error: currentParticipantError } = await participantsTable
         .select(supportsDivisionId
-          ? 'id, tournament_id, club_id, division_id, name, short_code'
-          : 'id, tournament_id, club_id, name, short_code')
+          ? 'id, tournament_id, season_id, club_id, division_id, name, short_code'
+          : 'id, tournament_id, season_id, club_id, name, short_code')
         .eq('id', participantId)
         .single();
 
@@ -1195,6 +1213,38 @@ export async function PATCH(
         );
       }
 
+      const replacementSeasonId = existingParticipant.season_id ?? null;
+      let duplicateParticipantQuery = supabase
+        .from('tournament_participants')
+        .select('id, name')
+        .eq('tournament_id', tournamentId)
+        .eq('club_id', targetClubId)
+        .neq('id', participantId)
+        .limit(1);
+      let sourceStandingsQuery = supabase
+        .from('tournament_standings')
+        .select('id, phase_id, group_id, stats')
+        .eq('tournament_id', tournamentId)
+        .eq('club_id', sourceClubId);
+      let targetStandingsQuery = supabase
+        .from('tournament_standings')
+        .select('id, phase_id, group_id')
+        .eq('tournament_id', tournamentId)
+        .eq('club_id', targetClubId);
+      let conflictingMatchesQuery = supabase
+        .from('matches')
+        .select('id')
+        .eq('tournament_id', tournamentId)
+        .or(`and(home_club_id.eq.${sourceClubId},away_club_id.eq.${targetClubId}),and(home_club_id.eq.${targetClubId},away_club_id.eq.${sourceClubId})`)
+        .limit(1);
+
+      if (replacementSeasonId) {
+        duplicateParticipantQuery = duplicateParticipantQuery.eq('season_id', replacementSeasonId);
+        sourceStandingsQuery = sourceStandingsQuery.eq('season_id', replacementSeasonId);
+        targetStandingsQuery = targetStandingsQuery.eq('season_id', replacementSeasonId);
+        conflictingMatchesQuery = conflictingMatchesQuery.eq('season_id', replacementSeasonId);
+      }
+
       const [
         targetClubRes,
         duplicateParticipantRes,
@@ -1207,29 +1257,10 @@ export async function PATCH(
           .select('id, name, short_name, logo_url')
           .eq('id', targetClubId)
           .single(),
-        supabase
-          .from('tournament_participants')
-          .select('id, name')
-          .eq('tournament_id', tournamentId)
-          .eq('club_id', targetClubId)
-          .neq('id', participantId)
-          .limit(1),
-        supabase
-          .from('tournament_standings')
-          .select('id, phase_id, group_id, stats')
-          .eq('tournament_id', tournamentId)
-          .eq('club_id', sourceClubId),
-        supabase
-          .from('tournament_standings')
-          .select('id, phase_id, group_id')
-          .eq('tournament_id', tournamentId)
-          .eq('club_id', targetClubId),
-        supabase
-          .from('matches')
-          .select('id')
-          .eq('tournament_id', tournamentId)
-          .or(`and(home_club_id.eq.${sourceClubId},away_club_id.eq.${targetClubId}),and(home_club_id.eq.${targetClubId},away_club_id.eq.${sourceClubId})`)
-          .limit(1),
+        duplicateParticipantQuery,
+        sourceStandingsQuery,
+        targetStandingsQuery,
+        conflictingMatchesQuery,
       ]);
 
       if (targetClubRes.error || !targetClubRes.data) {
@@ -1301,6 +1332,7 @@ export async function PATCH(
     if (shouldReplaceAcrossTournament && existingParticipant?.club_id && data?.club_id) {
       const sourceClubId = existingParticipant.club_id;
       const targetClubId = data.club_id;
+      const replacementSeasonId = existingParticipant.season_id ?? null;
       const replacementTeamName = replacementClubForStats?.name ?? data.name ?? 'Equipo';
       const replacementTeamLogo = replacementClubForStats?.logo_url ?? data.clubs?.logo_url ?? null;
       const standingsUpdates = standingsToReplace.map((row) =>
@@ -1317,22 +1349,32 @@ export async function PATCH(
           .eq('id', row.id)
       );
 
+      let homeUpdateQuery = supabase
+        .from('matches')
+        .update({ home_club_id: targetClubId })
+        .eq('tournament_id', tournamentId)
+        .eq('home_club_id', sourceClubId);
+      let awayUpdateQuery = supabase
+        .from('matches')
+        .update({ away_club_id: targetClubId })
+        .eq('tournament_id', tournamentId)
+        .eq('away_club_id', sourceClubId);
+      let incidentsUpdateQuery = supabase
+        .from('discipline_incidents')
+        .update({ club_id: targetClubId })
+        .eq('tournament_id', tournamentId)
+        .eq('club_id', sourceClubId);
+
+      if (replacementSeasonId) {
+        homeUpdateQuery = homeUpdateQuery.eq('season_id', replacementSeasonId);
+        awayUpdateQuery = awayUpdateQuery.eq('season_id', replacementSeasonId);
+        incidentsUpdateQuery = incidentsUpdateQuery.eq('season_id', replacementSeasonId);
+      }
+
       const [homeUpdate, awayUpdate, incidentsUpdate, ...standingUpdateResults] = await Promise.all([
-        supabase
-          .from('matches')
-          .update({ home_club_id: targetClubId })
-          .eq('tournament_id', tournamentId)
-          .eq('home_club_id', sourceClubId),
-        supabase
-          .from('matches')
-          .update({ away_club_id: targetClubId })
-          .eq('tournament_id', tournamentId)
-          .eq('away_club_id', sourceClubId),
-        supabase
-          .from('discipline_incidents')
-          .update({ club_id: targetClubId })
-          .eq('tournament_id', tournamentId)
-          .eq('club_id', sourceClubId),
+        homeUpdateQuery,
+        awayUpdateQuery,
+        incidentsUpdateQuery,
         ...standingsUpdates,
       ]);
 

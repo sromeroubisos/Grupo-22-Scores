@@ -6,9 +6,25 @@ import { logOverfetchWarning } from '@/lib/perf/measure';
 
 export const dynamic = 'force-dynamic';
 
+async function resolveSeasonId(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  tournamentId: string,
+  explicitSeasonId?: string | null,
+) {
+  if (explicitSeasonId && explicitSeasonId.trim()) return explicitSeasonId.trim();
+
+  const { data } = await supabase
+    .from('tournaments')
+    .select('current_season_id')
+    .eq('id', tournamentId)
+    .maybeSingle();
+
+  return data?.current_season_id ?? null;
+}
+
 // GET all phases for a tournament
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const tournamentId = (await params).id;
@@ -19,19 +35,30 @@ export async function GET(
     const supabase = await perf.measureStep('create_client', () => createClient(), {
       bucket: 'client',
     });
+    const requestedSeasonId =
+      request.nextUrl.searchParams.get('seasonId') ||
+      request.nextUrl.searchParams.get('season_id') ||
+      request.nextUrl.searchParams.get('season');
+    const scopedSeasonId = await resolveSeasonId(supabase, tournamentId, requestedSeasonId);
 
     logOverfetchWarning({
       endpoint: route,
       reason: 'select(*) from tournament_phases',
     }, 'server');
 
+    let phasesQuery = supabase
+      .from('tournament_phases')
+      .select('*')
+      .eq('tournament_id', tournamentId)
+      .order('order_index', { ascending: true });
+
+    if (scopedSeasonId) {
+      phasesQuery = phasesQuery.eq('season_id', scopedSeasonId);
+    }
+
     const { data: phases, error } = await perf.measureStep(
       'load_phases',
-      async () => supabase
-        .from('tournament_phases')
-        .select('*')
-        .eq('tournament_id', tournamentId)
-        .order('order_index', { ascending: true }),
+      async () => phasesQuery,
       {
         bucket: 'query',
         logQuery: true,
@@ -64,6 +91,11 @@ export async function POST(
       bucket: 'client',
     });
     const body = await request.json();
+    const scopedSeasonId = await resolveSeasonId(
+      supabase,
+      tournamentId,
+      body?.seasonId || body?.season_id || body?.season || null,
+    );
     const phaseName = typeof body.name === 'string' ? body.name.trim() : '';
     const phaseType = body.phase_type || 'league';
     const groupNames: string[] = phaseType === 'group_stage'
@@ -85,12 +117,18 @@ export async function POST(
       return perf.json({ error: 'El nombre de la fase es obligatorio.' }, { status: 400 });
     }
 
+    let countQuery = supabase
+      .from('tournament_phases')
+      .select('id', { count: 'exact', head: true })
+      .eq('tournament_id', tournamentId);
+
+    if (scopedSeasonId) {
+      countQuery = countQuery.eq('season_id', scopedSeasonId);
+    }
+
     const { count: existingPhaseCount, error: countError } = await perf.measureStep(
       'count_existing_phases',
-      async () => supabase
-        .from('tournament_phases')
-        .select('id', { count: 'exact', head: true })
-        .eq('tournament_id', tournamentId),
+      async () => countQuery,
       {
         bucket: 'query',
         logQuery: true,
@@ -110,6 +148,7 @@ export async function POST(
         .from('tournament_phases')
         .insert({
           tournament_id: tournamentId,
+          season_id: scopedSeasonId,
           name: phaseName,
           phase_type: phaseType,
           order_index: body.order_index ?? 0,
@@ -137,13 +176,19 @@ export async function POST(
     }
 
     if (phase && shouldActivate) {
+      let deactivateQuery = supabase
+        .from('tournament_phases')
+        .update({ is_active: false })
+        .eq('tournament_id', tournamentId)
+        .neq('id', phase.id);
+
+      if (scopedSeasonId) {
+        deactivateQuery = deactivateQuery.eq('season_id', scopedSeasonId);
+      }
+
       const { error: deactivateError } = await perf.measureStep(
         'deactivate_previous_phases',
-        async () => supabase
-          .from('tournament_phases')
-          .update({ is_active: false })
-          .eq('tournament_id', tournamentId)
-          .neq('id', phase.id),
+        async () => deactivateQuery,
         {
           bucket: 'query',
           logQuery: true,
@@ -158,6 +203,7 @@ export async function POST(
     if (phase && phaseType === 'group_stage' && groupNames.length > 0) {
       const groupInserts = groupNames.map((name, index) => ({
         phase_id: phase.id,
+        season_id: scopedSeasonId,
         name: name.trim(),
         order_index: index,
       }));
