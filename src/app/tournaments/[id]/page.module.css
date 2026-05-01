@@ -1618,6 +1618,22 @@
     flex-direction: column;
 }
 
+.matchDayDivider {
+    padding: 8px 20px;
+    background: var(--fl-surface-alt, var(--fl-bg));
+    color: var(--fl-text-dim);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: center;
+    border-top: 1px solid var(--fl-border-sub);
+    border-bottom: 1px solid var(--fl-border-sub);
+}
+.matchDayDivider:first-child {
+    border-top: none;
+}
+
 .matchRow {
     display: grid;
     grid-template-columns: 60px 1fr 88px 1fr 52px;
@@ -2934,6 +2950,7 @@
     .matchScore { font-size: 0.82rem; }
     .matchScoreBox { padding: 4px 5px; }
     .matchDateTime { font-size: 0.6rem; }
+    .matchDayDivider { padding: 7px 10px; font-size: 0.65rem; letter-spacing: 0.05em; }
 
     /* Teams */
     .teamsGrid { grid-template-columns: repeat(2, 1fr); }

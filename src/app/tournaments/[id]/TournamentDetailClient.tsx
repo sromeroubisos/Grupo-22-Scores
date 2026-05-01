@@ -3187,6 +3187,39 @@ export default function TournamentDetailPage({
         isMotorsportTournament ? renderMotorsportMatchItemV2(match, isResult, index) : renderMatchItem(match, isResult, index)
     );
 
+    const formatDayDividerLabel = (date: Date | null, dayKey: string): string => {
+        if (!date) return 'Sin fecha';
+        const yesterdayKey = addDaysToIsoDate(renderTodayKey, -1);
+        const tomorrowKey = addDaysToIsoDate(renderTodayKey, 1);
+        let prefix = '';
+        if (dayKey === renderTodayKey) prefix = 'Hoy · ';
+        else if (dayKey === yesterdayKey) prefix = 'Ayer · ';
+        else if (dayKey === tomorrowKey) prefix = 'Mañana · ';
+        const label = formatArgentinaDate(date, { weekday: 'long', day: 'numeric', month: 'long' }) || '';
+        const capitalized = label.charAt(0).toUpperCase() + label.slice(1);
+        return `${prefix}${capitalized}`;
+    };
+
+    const renderMatchListWithDayDividers = (matches: any[], isResult: boolean): React.ReactNode[] => {
+        const nodes: React.ReactNode[] = [];
+        let lastDayKey: string | null = null;
+        matches.forEach((m, idx) => {
+            const ts = m.timestamp || m.start_time || m.time;
+            const date = ts ? new Date(ts * 1000) : null;
+            const dayKey = date ? formatDateKey(date, APP_TIMEZONE) : 'no-date';
+            if (dayKey !== lastDayKey) {
+                nodes.push(
+                    <div key={`day-${dayKey}-${idx}`} className={styles.matchDayDivider}>
+                        {formatDayDividerLabel(date, dayKey)}
+                    </div>
+                );
+                lastDayKey = dayKey;
+            }
+            nodes.push(renderCompetitionItem(m, isResult, idx));
+        });
+        return nodes;
+    };
+
     return (
         <div className={styles.page}>
 
@@ -3638,7 +3671,7 @@ export default function TournamentDetailPage({
                             ) : (
                                 <div className={styles.matchList}>
                                     {results.length > 0
-                                        ? results.map((m, idx) => renderCompetitionItem(m, true, idx))
+                                        ? renderMatchListWithDayDividers(results, true)
                                         : <p className={styles.emptyState}>No hay resultados registrados.</p>}
                                 </div>
                             )}
@@ -3684,7 +3717,7 @@ export default function TournamentDetailPage({
                             ) : (
                                 <div className={styles.matchList}>
                                     {fixtures.length > 0
-                                        ? fixtures.map((m, idx) => renderCompetitionItem(m, false, idx))
+                                        ? renderMatchListWithDayDividers(fixtures, false)
                                         : <p className={styles.emptyState}>No hay partidos programados.</p>}
                                 </div>
                             )}
