@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
@@ -498,18 +498,6 @@ async function syncPlayerSquadMembership(supabase: any, clubId: string, personId
         status: string | null;
     }>;
 
-    const rowsToDelete = rows.filter((row) => row.division_id && row.division_id !== nextDivisionId);
-    if (rowsToDelete.length > 0) {
-        const { error: deleteError } = await supabase
-            .from('squad_members')
-            .delete()
-            .in('id', rowsToDelete.map((row) => row.id));
-
-        if (deleteError && !isMissingTableError(deleteError)) {
-            return { success: false as const, error: deleteError.message };
-        }
-    }
-
     if (!nextDivisionId) {
         return { success: true as const };
     }
@@ -602,18 +590,6 @@ async function syncPlayerSquadMembershipWithOptions(
         status: string | null;
     }>;
 
-    const rowsToDelete = rows.filter((row) => row.division_id && row.division_id !== options.nextDivisionId);
-    if (rowsToDelete.length > 0) {
-        const { error: deleteError } = await supabase
-            .from('squad_members')
-            .delete()
-            .in('id', rowsToDelete.map((row) => row.id));
-
-        if (deleteError && !isMissingTableError(deleteError)) {
-            return { success: false as const, error: deleteError.message };
-        }
-    }
-
     if (!options.nextDivisionId) {
         return { success: true as const };
     }
@@ -705,32 +681,80 @@ async function insertPersonAssignmentsInClub(
         source?: string;
     }
 ) {
-    const { error: roleError } = await supabase
+    let existingRoleQuery = supabase
         .from('club_person_roles')
-        .insert({
+        .select('id')
+        .match({
             club_id: params.clubId,
             person_id: params.personId,
             role: params.role,
-            division_id: params.legacyDivisionId || null,
-            status: params.status || 'active',
-            position: params.position || null,
-        });
+        })
+        .limit(1);
+
+    existingRoleQuery = params.legacyDivisionId
+        ? existingRoleQuery.eq('division_id', params.legacyDivisionId)
+        : existingRoleQuery.is('division_id', null);
+
+    const { data: existingRole, error: existingRoleError } = await existingRoleQuery.maybeSingle();
+
+    if (existingRoleError && !isMissingTableError(existingRoleError)) {
+        return { success: false as const, error: existingRoleError.message };
+    }
+
+    const rolePayload = {
+        club_id: params.clubId,
+        person_id: params.personId,
+        role: params.role,
+        division_id: params.legacyDivisionId || null,
+        status: params.status || 'active',
+        position: params.position || null,
+    };
+
+    const roleMutation = existingRole?.id
+        ? supabase.from('club_person_roles').update(rolePayload).eq('id', existingRole.id)
+        : supabase.from('club_person_roles').insert(rolePayload);
+
+    const { error: roleError } = await roleMutation;
 
     if (roleError && !isMissingTableError(roleError)) {
         return { success: false as const, error: roleError.message };
     }
 
-    const { error: membershipError } = await supabase
+    let existingMembershipQuery = supabase
         .from('team_memberships')
-        .insert({
+        .select('id')
+        .match({
             club_id: params.clubId,
-            team_id: params.teamId || null,
             person_id: params.personId,
             role: params.role,
-            status: params.status || 'active',
-            position: params.position || null,
-            source: params.source || 'manual',
-        });
+        })
+        .limit(1);
+
+    existingMembershipQuery = params.teamId
+        ? existingMembershipQuery.eq('team_id', params.teamId)
+        : existingMembershipQuery.is('team_id', null);
+
+    const { data: existingMembership, error: existingMembershipError } = await existingMembershipQuery.maybeSingle();
+
+    if (existingMembershipError && !isMissingTableError(existingMembershipError)) {
+        return { success: false as const, error: existingMembershipError.message };
+    }
+
+    const membershipPayload = {
+        club_id: params.clubId,
+        team_id: params.teamId || null,
+        person_id: params.personId,
+        role: params.role,
+        status: params.status || 'active',
+        position: params.position || null,
+        source: params.source || 'manual',
+    };
+
+    const membershipMutation = existingMembership?.id
+        ? supabase.from('team_memberships').update(membershipPayload).eq('id', existingMembership.id)
+        : supabase.from('team_memberships').insert(membershipPayload);
+
+    const { error: membershipError } = await membershipMutation;
 
     if (membershipError && !isMissingTableError(membershipError)) {
         return { success: false as const, error: membershipError.message };
@@ -1082,7 +1106,6 @@ export async function addPersonToClub(clubId: string, personData: PersonClubInpu
 
     let person: any;
     let reusedExistingPerson = false;
-    let replaceExistingClubAssignment = false;
 
     if (normalizedPayload.existing_person_id) {
         const existingPerson = await fetchPersonRowById(supabase, normalizedPayload.existing_person_id);
@@ -1103,7 +1126,6 @@ export async function addPersonToClub(clubId: string, personData: PersonClubInpu
 
         person = updatedPerson;
         reusedExistingPerson = true;
-        replaceExistingClubAssignment = await isPersonLinkedToClub(db, rosterClubId, normalizedPayload.existing_person_id);
     } else {
         const { data: insertedPerson, error: personError } = await insertPersonRecord(supabase, {
             ...normalizedPayload,
@@ -1128,13 +1150,6 @@ export async function addPersonToClub(clubId: string, personData: PersonClubInpu
         teamReference = await resolveTeamReference(db, rosterClubId, rosterDivisionId);
     } catch (error: any) {
         return { success: false, error: error.message };
-    }
-
-    if (replaceExistingClubAssignment) {
-        const clearAssignments = await clearPersonAssignmentsInClub(db, rosterClubId, person.id);
-        if (!clearAssignments.success) {
-            return { success: false, error: clearAssignments.error };
-        }
     }
 
     const assignments = await insertPersonAssignmentsInClub(db, {
@@ -1222,11 +1237,6 @@ export async function updatePersonInClub(clubId: string, personId: string, perso
         teamReference = await resolveTeamReference(db, rosterClubId, rosterDivisionId);
     } catch (error: any) {
         return { success: false, error: error.message };
-    }
-
-    const clearAssignments = await clearPersonAssignmentsInClub(db, rosterClubId, personId);
-    if (!clearAssignments.success) {
-        return { success: false, error: clearAssignments.error };
     }
 
     const assignments = await insertPersonAssignmentsInClub(db, {

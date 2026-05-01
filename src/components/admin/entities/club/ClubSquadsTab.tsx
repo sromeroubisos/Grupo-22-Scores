@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Database } from '@/lib/database.types';
-import { LayoutGrid, List, Plus, Search, Shield, Upload } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, History, LayoutGrid, List, Plus, Repeat2, Search, Shield, Upload } from 'lucide-react';
 import { Division, fetchDivisions } from '@/lib/services/divisionService';
 import { fetchPeopleByClub, PersonWithRole } from '@/lib/services/personService';
 import { PersonManagementModal } from './PersonManagementModal';
@@ -10,6 +10,41 @@ import { CSVImportModal } from './CSVImportModal';
 import type { ClubConsoleMode } from '@/lib/clubAdminRoutes';
 
 type ClubRow = Database['public']['Tables']['clubs']['Row'];
+type ClubSeasonRosterMembership = {
+    id: string;
+    player_id: string;
+    status: string;
+    jersey_number?: number | null;
+    player?: {
+        id: string;
+        first_name?: string | null;
+        last_name?: string | null;
+        full_name?: string | null;
+        name?: string | null;
+    } | null;
+};
+type ClubSeasonRoster = {
+    id: string;
+    name: string;
+    roster_type: string;
+    status: string;
+    created_at?: string | null;
+    season?: {
+        id: string;
+        season_code?: string | null;
+        name?: string | null;
+        display_name?: string | null;
+        status?: string | null;
+        is_active?: boolean | null;
+        start_date?: string | null;
+    } | null;
+    tournament?: {
+        id: string;
+        name?: string | null;
+        display_name?: string | null;
+    } | null;
+    memberships?: ClubSeasonRosterMembership[];
+};
 
 interface ClubSquadsTabProps {
     id: string;
@@ -39,10 +74,29 @@ async function loadClubPlayers(clubId: string): Promise<PersonWithRole[]> {
         });
 }
 
+async function loadClubSeasonRosters(clubId: string): Promise<ClubSeasonRoster[]> {
+    const response = await fetch(`/api/clubs/${clubId}/season-rosters?includeMemberships=true`, { cache: 'no-store' });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok || !json?.ok) {
+        throw new Error(json?.error || 'No se pudieron cargar los planteles por temporada.');
+    }
+    return Array.isArray(json.rosters) ? json.rosters : [];
+}
+
+function getSeasonRosterLabel(roster: ClubSeasonRoster) {
+    return roster.season?.display_name || roster.season?.name || roster.season?.season_code || 'Temporada';
+}
+
+function getRosterPlayerName(membership: ClubSeasonRosterMembership) {
+    const player = membership.player;
+    if (!player) return 'Jugador';
+    const byParts = `${player.first_name || ''} ${player.last_name || ''}`.trim();
+    return player.full_name || player.name || byParts || 'Jugador';
+}
+
 export function ClubSquadsTab(props: ClubSquadsTabProps) {
     const {
         id,
-        data,
         initialPlayers,
         initialPlayersLoaded = false,
         initialDivisions,
@@ -52,6 +106,8 @@ export function ClubSquadsTab(props: ClubSquadsTabProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [players, setPlayers] = useState<PersonWithRole[]>(initialPlayers ?? []);
     const [divisions, setDivisions] = useState<Division[]>(initialDivisions ?? []);
+    const [seasonRosters, setSeasonRosters] = useState<ClubSeasonRoster[]>([]);
+    const [seasonRostersLoading, setSeasonRostersLoading] = useState(true);
     const [loading, setLoading] = useState(!(initialPlayersLoaded && initialDivisionsLoaded));
     const [actionMessage, setActionMessage] = useState<string | null>(null);
     const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
@@ -59,12 +115,14 @@ export function ClubSquadsTab(props: ClubSquadsTabProps) {
     const [editingPlayer, setEditingPlayer] = useState<PersonWithRole | null>(null);
 
     async function refreshPlayersData() {
-        const [nextPlayers, nextDivisions] = await Promise.all([
+        const [nextPlayers, nextDivisions, nextSeasonRosters] = await Promise.all([
             loadClubPlayers(id),
             fetchDivisions(id),
+            loadClubSeasonRosters(id),
         ]);
         setPlayers(nextPlayers);
         setDivisions(nextDivisions);
+        setSeasonRosters(nextSeasonRosters);
     }
 
     useEffect(() => {
@@ -112,6 +170,25 @@ export function ClubSquadsTab(props: ClubSquadsTabProps) {
         };
     }, [id, initialDivisionsLoaded, initialPlayersLoaded]);
 
+    useEffect(() => {
+        let isMounted = true;
+        setSeasonRostersLoading(true);
+        loadClubSeasonRosters(id)
+            .then((nextRosters) => {
+                if (isMounted) setSeasonRosters(nextRosters);
+            })
+            .catch(() => {
+                if (isMounted) setSeasonRosters([]);
+            })
+            .finally(() => {
+                if (isMounted) setSeasonRostersLoading(false);
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [id]);
+
     function handleRegisterPlayer() {
         setActionMessage(null);
         setEditingPlayer(null);
@@ -137,6 +214,31 @@ export function ClubSquadsTab(props: ClubSquadsTabProps) {
     }), [players, searchQuery]);
 
     const playersAssignedToDivision = players.filter((person) => Boolean(person.division_id)).length;
+    const sortedSeasonRosters = useMemo(
+        () => [...seasonRosters].sort((left, right) => {
+            const leftDate = left.season?.start_date || left.created_at || '';
+            const rightDate = right.season?.start_date || right.created_at || '';
+            return rightDate.localeCompare(leftDate);
+        }),
+        [seasonRosters],
+    );
+    const currentSeasonRosters = useMemo(
+        () => sortedSeasonRosters.filter((roster) => roster.season?.is_active || roster.season?.status === 'active'),
+        [sortedSeasonRosters],
+    );
+    const latestRoster = currentSeasonRosters[0] || sortedSeasonRosters[0] || null;
+    const previousRoster = sortedSeasonRosters.find((roster) => roster.id !== latestRoster?.id) || null;
+    const latestPlayerIds = new Set((latestRoster?.memberships ?? [])
+        .filter((membership) => membership.status !== 'released' && membership.status !== 'inactive')
+        .map((membership) => membership.player_id)
+        .filter(Boolean));
+    const previousPlayerIds = new Set((previousRoster?.memberships ?? [])
+        .filter((membership) => membership.status !== 'released' && membership.status !== 'inactive')
+        .map((membership) => membership.player_id)
+        .filter(Boolean));
+    const repeatedPlayers = Array.from(latestPlayerIds).filter((playerId) => previousPlayerIds.has(playerId)).length;
+    const newPlayers = Array.from(latestPlayerIds).filter((playerId) => !previousPlayerIds.has(playerId)).length;
+    const departedPlayers = Array.from(previousPlayerIds).filter((playerId) => !latestPlayerIds.has(playerId)).length;
 
     return (
         <div className="players-module-shell animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
@@ -164,6 +266,98 @@ export function ClubSquadsTab(props: ClubSquadsTabProps) {
                         </span>
                     </div>
                 </div>
+            </section>
+
+            <section className="card" style={{ display: 'grid', gap: 18 }}>
+                <div className="card-header">
+                    <div>
+                        <div className="card-title">Planteles por temporada</div>
+                        <div className="subinfo" style={{ marginTop: '0.25rem' }}>
+                            Lectura directa de season_rosters y roster_memberships del club.
+                        </div>
+                    </div>
+                    <History className="w-5 h-5 text-muted" />
+                </div>
+
+                {seasonRostersLoading ? (
+                    <div className="py-10 flex items-center justify-center gap-3 opacity-60">
+                        <div className="w-5 h-5 border-2 border-[var(--accent)]/20 border-t-[var(--accent)] rounded-full animate-spin" />
+                        <span className="text-xs uppercase tracking-widest">Cargando planteles historicos...</span>
+                    </div>
+                ) : sortedSeasonRosters.length > 0 ? (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div className="players-metric-item">
+                                <span className="players-metric-label">Actual</span>
+                                <span className="players-metric-value">{latestRoster?.memberships?.length ?? 0}</span>
+                            </div>
+                            <div className="players-metric-item">
+                                <span className="players-metric-label">Repiten</span>
+                                <span className="players-metric-value">{repeatedPlayers}</span>
+                            </div>
+                            <div className="players-metric-item">
+                                <span className="players-metric-label">Altas</span>
+                                <span className="players-metric-value">{newPlayers}</span>
+                            </div>
+                            <div className="players-metric-item">
+                                <span className="players-metric-label">Bajas</span>
+                                <span className="players-metric-value">{departedPlayers}</span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                            {sortedSeasonRosters.slice(0, 6).map((roster) => {
+                                const activePlayers = (roster.memberships ?? []).filter((membership) => membership.status !== 'released' && membership.status !== 'inactive');
+                                const isCurrent = roster.id === latestRoster?.id || roster.season?.is_active || roster.season?.status === 'active';
+                                return (
+                                    <article
+                                        key={roster.id}
+                                        className="border border-[var(--border)] bg-[var(--surface-soft)] p-4"
+                                        style={{ borderRadius: 12 }}
+                                    >
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <div className="text-[11px] uppercase tracking-[0.16em] text-muted">
+                                                    {roster.tournament?.display_name || roster.tournament?.name || 'Torneo'}
+                                                </div>
+                                                <h3 className="font-black text-base mt-1">{getSeasonRosterLabel(roster)}</h3>
+                                                <p className="text-xs text-muted mt-1">{roster.name} - {roster.status}</p>
+                                            </div>
+                                            <span className="player-tag-v2">
+                                                {isCurrent ? 'Actual' : 'Historico'}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-3 mt-4 text-xs text-muted">
+                                            <span className="inline-flex items-center gap-1"><Repeat2 className="w-3.5 h-3.5" /> {activePlayers.length} jugadores</span>
+                                            {isCurrent && previousRoster ? (
+                                                <>
+                                                    <span className="inline-flex items-center gap-1"><ArrowUpRight className="w-3.5 h-3.5" /> {newPlayers} altas</span>
+                                                    <span className="inline-flex items-center gap-1"><ArrowDownRight className="w-3.5 h-3.5" /> {departedPlayers} bajas</span>
+                                                </>
+                                            ) : null}
+                                        </div>
+
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {activePlayers.slice(0, 8).map((membership) => (
+                                                <span key={membership.id} className="player-tag-v2">
+                                                    {membership.jersey_number ? `#${membership.jersey_number} ` : ''}{getRosterPlayerName(membership)}
+                                                </span>
+                                            ))}
+                                            {activePlayers.length > 8 ? (
+                                                <span className="player-tag-v2">+{activePlayers.length - 8}</span>
+                                            ) : null}
+                                        </div>
+                                    </article>
+                                );
+                            })}
+                        </div>
+                    </>
+                ) : (
+                    <div className="py-10 text-center text-sm text-muted">
+                        Todavia no hay planteles por temporada para este club.
+                    </div>
+                )}
             </section>
 
             {/* CONTROL BAR */}

@@ -21,12 +21,15 @@ type SupabaseLikeError = {
 
 type MatchContextRow = {
   id: string;
+  season_id?: string | null;
   category?: string | null;
   date_time?: string | null;
   events?: unknown;
   lineups?: unknown;
   home_club_id?: string | null;
   away_club_id?: string | null;
+  home_team_id?: string | null;
+  away_team_id?: string | null;
   home_division_id?: string | null;
   away_division_id?: string | null;
 };
@@ -409,12 +412,13 @@ function findClockSnapshotJsonEvent(events: unknown[]) {
 }
 
 function buildClockSnapshotRelationalEvent(
-  match: { id: string; home_club_id?: string | null; away_club_id?: string | null },
+  match: { id: string; season_id?: string | null; home_club_id?: string | null; away_club_id?: string | null },
   clock: NonNullable<ReturnType<typeof normalizeClockPayload>>,
 ) {
   return {
     id: crypto.randomUUID(),
     match_id: match.id,
+    season_id: match.season_id ?? null,
     club_id: null,
     player_id: null,
     player_name: null,
@@ -521,18 +525,35 @@ function mapJsonEvent(row: unknown) {
 }
 
 function mapEventToInsert(
-  match: { id: string; home_club_id?: string | null; away_club_id?: string | null },
+  match: {
+    id: string;
+    season_id?: string | null;
+    home_club_id?: string | null;
+    away_club_id?: string | null;
+    home_team_id?: string | null;
+    away_team_id?: string | null;
+  },
   event: ReturnType<typeof normalizeEventInput>,
 ) {
+  const clubId =
+    event.team === 'home'
+      ? match.home_club_id || null
+      : event.team === 'away'
+        ? match.away_club_id || null
+        : null;
+  const teamId =
+    event.team === 'home'
+      ? match.home_team_id || null
+      : event.team === 'away'
+        ? match.away_team_id || null
+        : null;
+
   return {
     id: event.id,
     match_id: match.id,
-    club_id:
-      event.team === 'home'
-        ? match.home_club_id || null
-        : event.team === 'away'
-          ? match.away_club_id || null
-          : null,
+    season_id: match.season_id ?? null,
+    club_id: clubId,
+    team_id: teamId,
     player_id: event.playerId || null,
     player_name: event.playerName || null,
     event_type: event.type,
