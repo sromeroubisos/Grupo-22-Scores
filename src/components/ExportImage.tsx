@@ -304,6 +304,14 @@ type PersistedExportPresetRow = {
     payload: unknown;
     updated_at?: string;
 };
+type RemoteExportPresetRow = {
+    id: string;
+    user_id: string;
+    preset_type: ExportPresetKind;
+    name: string;
+    name_normalized: string;
+    payload: Record<string, unknown>;
+};
 
 interface ExportImageProps {
     template: ExportTemplate;
@@ -1268,7 +1276,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         const nextPresets = upsertSavedEditorialPreset(savedEditorialPresets, nextPreset);
         setSavedEditorialPresets(nextPresets);
         try {
-            const storageMode = await persistSavedEditorialPresets(nextPresets, supabase);
+            const storageMode = await persistSavedEditorialPreset(nextPresets, nextPreset, supabase);
             setPresetStorageMode(storageMode);
             setEditorialPresetName('');
             setStatus(storageMode === 'cloud'
@@ -1311,7 +1319,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         const nextPresets = upsertSavedGradientPreset(savedGradientPresets, nextPreset);
         setSavedGradientPresets(nextPresets);
         try {
-            const storageMode = await persistSavedGradientPresets(nextPresets, supabase);
+            const storageMode = await persistSavedGradientPreset(nextPresets, nextPreset, supabase);
             setPresetStorageMode(storageMode);
             setGradientPresetName('');
             setStatus(storageMode === 'cloud'
@@ -1329,7 +1337,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setSavedEditorialPresets(nextPresets);
 
         try {
-            const storageMode = await persistSavedEditorialPresets(nextPresets, supabase);
+            const storageMode = await deleteSavedEditorialPreset(nextPresets, presetName, supabase);
             setPresetStorageMode(storageMode);
             setStatus(storageMode === 'cloud'
                 ? `Preset "${presetName}" eliminado y sincronizado`
@@ -1347,7 +1355,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setSavedGradientPresets(nextPresets);
 
         try {
-            const storageMode = await persistSavedGradientPresets(nextPresets, supabase);
+            const storageMode = await deleteSavedGradientPreset(nextPresets, presetName, supabase);
             setPresetStorageMode(storageMode);
             setStatus(storageMode === 'cloud'
                 ? `Gradiente "${presetName}" eliminado y sincronizado`
@@ -3499,12 +3507,8 @@ async function readRemotePresetRows(
     return (data ?? []) as PersistedExportPresetRow[];
 }
 
-async function replaceRemoteEditorialPresets(
-    supabase: SupabaseBrowserClient,
-    userId: string,
-    presets: SavedMatchEditorialPreset[],
-): Promise<void> {
-    const rows = presets.map((preset) => ({
+function buildRemoteEditorialPresetRow(userId: string, preset: SavedMatchEditorialPreset): RemoteExportPresetRow {
+    return {
         id: buildRemotePresetRowId(userId, 'editorial', preset.name),
         user_id: userId,
         preset_type: 'editorial',
@@ -3517,40 +3521,11 @@ async function replaceRemoteEditorialPresets(
             gradientImage: preset.gradientImage,
             sponsors: preset.sponsors,
         },
-    }));
-
-    if (rows.length > 0) {
-        const { error: insertError } = await supabase
-            .from(EXPORT_PRESETS_TABLE)
-            .upsert(rows, { onConflict: 'user_id,preset_type,name_normalized' });
-
-        if (insertError) {
-            throw insertError;
-        }
-    }
-
-    const retainedNames = rows.map((row) => row.name_normalized);
-    const deleteQuery = supabase
-        .from(EXPORT_PRESETS_TABLE)
-        .delete()
-        .eq('user_id', userId)
-        .eq('preset_type', 'editorial');
-
-    const { error: deleteError } = retainedNames.length > 0
-        ? await deleteQuery.not('name_normalized', 'in', `(${retainedNames.map((name) => `"${name.replace(/"/g, '""')}"`).join(',')})`)
-        : await deleteQuery;
-
-    if (deleteError) {
-        throw deleteError;
-    }
+    };
 }
 
-async function replaceRemoteGradientPresets(
-    supabase: SupabaseBrowserClient,
-    userId: string,
-    presets: SavedMatchGradientPreset[],
-): Promise<void> {
-    const rows = presets.map((preset) => ({
+function buildRemoteGradientPresetRow(userId: string, preset: SavedMatchGradientPreset): RemoteExportPresetRow {
+    return {
         id: buildRemotePresetRowId(userId, 'gradient', preset.name),
         user_id: userId,
         preset_type: 'gradient',
@@ -3561,31 +3536,61 @@ async function replaceRemoteGradientPresets(
             gradientRightColor: preset.gradientRightColor,
             gradientImage: preset.gradientImage,
         },
-    }));
+    };
+}
 
-    if (rows.length > 0) {
-        const { error: insertError } = await supabase
+function compareRemotePresetRows(a: RemoteExportPresetRow, b: RemoteExportPresetRow): number {
+    return a.preset_type.localeCompare(b.preset_type)
+        || a.name_normalized.localeCompare(b.name_normalized)
+        || a.id.localeCompare(b.id);
+}
+
+async function upsertRemotePresetRows(
+    supabase: SupabaseBrowserClient,
+    rows: RemoteExportPresetRow[],
+): Promise<void> {
+    for (const row of [...rows].sort(compareRemotePresetRows)) {
+        const { error } = await supabase
             .from(EXPORT_PRESETS_TABLE)
-            .upsert(rows, { onConflict: 'user_id,preset_type,name_normalized' });
+            .upsert(row, { onConflict: 'user_id,preset_type,name_normalized' });
 
-        if (insertError) {
-            throw insertError;
+        if (error) {
+            throw error;
         }
     }
+}
 
-    const retainedNames = rows.map((row) => row.name_normalized);
-    const deleteQuery = supabase
+async function upsertRemoteEditorialPresets(
+    supabase: SupabaseBrowserClient,
+    userId: string,
+    presets: SavedMatchEditorialPreset[],
+): Promise<void> {
+    await upsertRemotePresetRows(supabase, presets.map((preset) => buildRemoteEditorialPresetRow(userId, preset)));
+}
+
+async function upsertRemoteGradientPresets(
+    supabase: SupabaseBrowserClient,
+    userId: string,
+    presets: SavedMatchGradientPreset[],
+): Promise<void> {
+    await upsertRemotePresetRows(supabase, presets.map((preset) => buildRemoteGradientPresetRow(userId, preset)));
+}
+
+async function deleteRemotePresetByName(
+    supabase: SupabaseBrowserClient,
+    userId: string,
+    presetType: ExportPresetKind,
+    presetName: string,
+): Promise<void> {
+    const { error } = await supabase
         .from(EXPORT_PRESETS_TABLE)
         .delete()
         .eq('user_id', userId)
-        .eq('preset_type', 'gradient');
+        .eq('preset_type', presetType)
+        .eq('name_normalized', normalizePresetName(presetName));
 
-    const { error: deleteError } = retainedNames.length > 0
-        ? await deleteQuery.not('name_normalized', 'in', `(${retainedNames.map((name) => `"${name.replace(/"/g, '""')}"`).join(',')})`)
-        : await deleteQuery;
-
-    if (deleteError) {
-        throw deleteError;
+    if (error) {
+        throw error;
     }
 }
 
@@ -3624,11 +3629,11 @@ async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): P
         ]);
 
         if (getPresetComparableSignature(mergedEditorialPresets) !== getPresetComparableSignature(remoteEditorialPresets)) {
-            await replaceRemoteEditorialPresets(supabase, userId, mergedEditorialPresets);
+            await upsertRemoteEditorialPresets(supabase, userId, mergedEditorialPresets);
         }
 
         if (getPresetComparableSignature(mergedGradientPresets) !== getPresetComparableSignature(remoteGradientPresets)) {
-            await replaceRemoteGradientPresets(supabase, userId, mergedGradientPresets);
+            await upsertRemoteGradientPresets(supabase, userId, mergedGradientPresets);
         }
 
         return {
@@ -3646,8 +3651,9 @@ async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): P
     }
 }
 
-async function persistSavedEditorialPresets(
+async function persistSavedEditorialPreset(
     presets: SavedMatchEditorialPreset[],
+    preset: SavedMatchEditorialPreset,
     supabase: SupabaseBrowserClient,
 ): Promise<ExportPresetStorageMode> {
     await persistLocalSavedEditorialPresets(presets);
@@ -3655,12 +3661,13 @@ async function persistSavedEditorialPresets(
     const userId = await getAuthenticatedPresetUserId(supabase);
     if (!userId) return 'local';
 
-    await replaceRemoteEditorialPresets(supabase, userId, presets);
+    await upsertRemotePresetRows(supabase, [buildRemoteEditorialPresetRow(userId, preset)]);
     return 'cloud';
 }
 
-async function persistSavedGradientPresets(
+async function persistSavedGradientPreset(
     presets: SavedMatchGradientPreset[],
+    preset: SavedMatchGradientPreset,
     supabase: SupabaseBrowserClient,
 ): Promise<ExportPresetStorageMode> {
     await persistLocalSavedGradientPresets(presets);
@@ -3668,7 +3675,35 @@ async function persistSavedGradientPresets(
     const userId = await getAuthenticatedPresetUserId(supabase);
     if (!userId) return 'local';
 
-    await replaceRemoteGradientPresets(supabase, userId, presets);
+    await upsertRemotePresetRows(supabase, [buildRemoteGradientPresetRow(userId, preset)]);
+    return 'cloud';
+}
+
+async function deleteSavedEditorialPreset(
+    presets: SavedMatchEditorialPreset[],
+    presetName: string,
+    supabase: SupabaseBrowserClient,
+): Promise<ExportPresetStorageMode> {
+    await persistLocalSavedEditorialPresets(presets);
+
+    const userId = await getAuthenticatedPresetUserId(supabase);
+    if (!userId) return 'local';
+
+    await deleteRemotePresetByName(supabase, userId, 'editorial', presetName);
+    return 'cloud';
+}
+
+async function deleteSavedGradientPreset(
+    presets: SavedMatchGradientPreset[],
+    presetName: string,
+    supabase: SupabaseBrowserClient,
+): Promise<ExportPresetStorageMode> {
+    await persistLocalSavedGradientPresets(presets);
+
+    const userId = await getAuthenticatedPresetUserId(supabase);
+    if (!userId) return 'local';
+
+    await deleteRemotePresetByName(supabase, userId, 'gradient', presetName);
     return 'cloud';
 }
 
