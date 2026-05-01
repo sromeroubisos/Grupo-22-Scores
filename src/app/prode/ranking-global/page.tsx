@@ -3,9 +3,17 @@ import styles from '../page.module.css';
 import { listPublicProdeUserTotals } from '@/lib/server/prodeCompetitions';
 import { refreshStoredProdeScoreboards } from '@/lib/server/prodeScoring';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProdeGlobalRankingPage() {
-    await refreshStoredProdeScoreboards();
-    const { schemaReady, data } = await listPublicProdeUserTotals();
+    await refreshStoredProdeScoreboards().catch((error) => {
+        console.error('[prode/ranking-global] scoreboard refresh skipped:', error);
+    });
+
+    const { schemaReady, data } = await listPublicProdeUserTotals().catch((error) => {
+        console.error('[prode/ranking-global] totals read failed:', error);
+        return { schemaReady: false, data: [] };
+    });
 
     return (
         <div className={styles.page}>
