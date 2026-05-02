@@ -8,6 +8,7 @@ import {
 } from '@/lib/standings/matchPointsPreview';
 import { parseSubstitutionIncomingPlayer } from '@/lib/matchEventStats';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { isUuid } from '@/lib/utils/postgrest';
 
 type SupabaseLike = {
   from: (table: string) => any;
@@ -1290,6 +1291,12 @@ async function resolvePersistedEvents(
 }
 
 export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: string) {
+  // `matches.id` is UUID; bail out for external/provider IDs (FlashScore, ESPN, Rugby API)
+  // so we don't spam Postgres with `invalid input syntax for type uuid` errors.
+  if (!isUuid(matchId)) {
+    return { data: null, error: null };
+  }
+
   const { data, error } = await client
     .from('matches')
     .select(`
