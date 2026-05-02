@@ -15,9 +15,9 @@ const nextConfig: NextConfig = {
     ],
   },
   typescript: {
-    // Velocidad extrema: saltamos la comprobación de tipos durante el build.
-    // Los errores se verán en el IDE o en el pre-commit.
-    ignoreBuildErrors: true,
+    // Keep production builds honest: type errors must fail the build.
+    // Temporary scratch files are excluded in tsconfig.json instead.
+    ignoreBuildErrors: false,
   },
   experimental: {
     // Optimiza la carga de librerías pesadas para que el build y el HMR sean más rápidos

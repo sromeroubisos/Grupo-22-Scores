@@ -43,6 +43,7 @@ import {
 import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import {
     applyExternalTournamentOverride,
     getExternalTournamentOverride,
@@ -90,12 +91,14 @@ function normalizeTournamentUrl(raw?: string): string | undefined {
 function applyDbTournamentPresentationOverrides(
     payload: unknown,
     dbTournamentMeta: {
+        id?: string | null;
         name?: string | null;
         display_name?: string | null;
         logo_url?: string | null;
         banner_url?: string | null;
         country_id?: string | null;
         url?: string | null;
+        slug?: string | null;
     } | null,
 ) {
     const basePayload = payload && typeof payload === 'object'
@@ -107,7 +110,10 @@ function applyDbTournamentPresentationOverrides(
     }
 
     const resolvedName = normalizeId(dbTournamentMeta.display_name || dbTournamentMeta.name);
-    const resolvedLogo = normalizeId(dbTournamentMeta.logo_url || dbTournamentMeta.banner_url);
+    const resolvedLogo = resolveSerializableLogoUrl(dbTournamentMeta.logo_url || dbTournamentMeta.banner_url, {
+        key: dbTournamentMeta.id || dbTournamentMeta.slug,
+        name: dbTournamentMeta.display_name || dbTournamentMeta.name,
+    });
     const resolvedCountryId = normalizeId(dbTournamentMeta.country_id);
     const resolvedUrl = normalizeTournamentUrl(dbTournamentMeta.url || undefined) || normalizeId(dbTournamentMeta.url);
 
@@ -1670,18 +1676,6 @@ export async function GET(request: Request) {
         try {
             const fallbackEntityId = tournamentId || stageId || id || url || 'unknown';
             const fallbackKey = { entityType: 'tournament' as const, entityId: fallbackEntityId };
-            const fallbackTabs = [
-                'details',
-                'results',
-                'fixtures',
-                'standings',
-                'standingsForm',
-                'standingsHtFt',
-                'standingsOverUnder',
-                'topScorers',
-                'draw',
-                'archives'
-            ];
             const fallbackSources: Record<string, 'snapshot' | 'empty'> = {};
 
             const readFallback = (tab: string, emptyValue: any) => {

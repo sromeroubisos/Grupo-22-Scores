@@ -3,27 +3,49 @@ import { createInstrumentedSupabaseFetch } from '@/lib/perf/supabase';
 import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure';
 import type { LooseSupabaseClient } from './supabase/loose';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const startedAt = nowMs();
+let supabaseSingleton: LooseSupabaseClient | null = null;
 
-export const supabase = createSupabaseClient(
-    supabaseUrl,
-    supabaseAnonKey,
-    {
-        global: {
-            fetch: createInstrumentedSupabaseFetch('client', supabaseUrl, fetch),
+function getPublicSupabaseConfig() {
+    return {
+        url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+        anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key',
+    };
+}
+
+export function getSupabaseClient(): LooseSupabaseClient {
+    if (supabaseSingleton) return supabaseSingleton;
+
+    const { url, anonKey } = getPublicSupabaseConfig();
+    const startedAt = nowMs();
+
+    supabaseSingleton = createSupabaseClient(
+        url,
+        anonKey,
+        {
+            global: {
+                fetch: createInstrumentedSupabaseFetch('client', url, fetch),
+            },
+        }
+    ) as LooseSupabaseClient;
+
+    logPerf(
+        ['CLIENT', 'SUPABASE'],
+        {
+            operation: 'create_shared_client',
+            duration: formatDurationMs(nowMs() - startedAt),
         },
-    }
-) as LooseSupabaseClient;
+        'client',
+    );
 
-logPerf(
-    ['CLIENT', 'SUPABASE'],
-    {
-        operation: 'create_shared_client',
-        duration: formatDurationMs(nowMs() - startedAt),
+    return supabaseSingleton;
+}
+
+export const supabase = new Proxy({} as LooseSupabaseClient, {
+    get(_target, property, receiver) {
+        const client = getSupabaseClient() as Record<PropertyKey, unknown>;
+        const value = Reflect.get(client, property, receiver);
+        return typeof value === 'function' ? value.bind(client) : value;
     },
-    'client',
-)
+});
 
 export { createSupabaseClient as createClient };

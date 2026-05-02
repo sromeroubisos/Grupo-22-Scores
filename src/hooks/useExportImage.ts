@@ -99,10 +99,11 @@ export function useExportImage(): UseExportImageReturn {
         setError(null);
 
         try {
+            const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
             const exportOptions = {
-                quality: 0.95,
-                pixelRatio: 2,
-                backgroundColor: '#0a0a0f',
+                quality: mergedOptions.quality,
+                pixelRatio: mergedOptions.scale,
+                backgroundColor: mergedOptions.backgroundColor,
                 cacheBust: true,
                 skipFonts: true,
             };

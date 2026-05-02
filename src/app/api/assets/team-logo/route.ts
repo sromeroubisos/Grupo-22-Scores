@@ -293,6 +293,67 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
             }
         }
 
+        const tournamentCandidates = candidates.filter((candidate) => /^[a-z0-9-]+$/i.test(candidate) && !hasExternalCandidatePrefix(candidate));
+        if (tournamentCandidates.length > 0) {
+            const tournamentsByIdResult = await (readClient as any)
+                .from('tournaments')
+                .select('id, name, display_name, slug, logo_url, banner_url')
+                .in('id', tournamentCandidates);
+            let tournamentsById = tournamentsByIdResult.data;
+
+            if (tournamentsByIdResult.error) {
+                const fallback = await (readClient as any)
+                    .from('tournaments')
+                    .select('id, name, display_name, slug, logo_url')
+                    .in('id', tournamentCandidates);
+                tournamentsById = fallback.data;
+            }
+
+            const tournamentIdMap = new Map<string, Record<string, unknown>>();
+            for (const row of tournamentsById || []) {
+                if (row?.id) {
+                    tournamentIdMap.set(String(row.id), row);
+                }
+            }
+
+            for (const candidate of candidates) {
+                const record = tournamentIdMap.get(candidate);
+                const logoUrl = record?.logo_url || record?.banner_url;
+                if (logoUrl) {
+                    return String(logoUrl);
+                }
+            }
+
+            const tournamentsBySlugResult = await (readClient as any)
+                .from('tournaments')
+                .select('id, name, display_name, slug, logo_url, banner_url')
+                .in('slug', tournamentCandidates);
+            let tournamentsBySlug = tournamentsBySlugResult.data;
+
+            if (tournamentsBySlugResult.error) {
+                const fallback = await (readClient as any)
+                    .from('tournaments')
+                    .select('id, name, display_name, slug, logo_url')
+                    .in('slug', tournamentCandidates);
+                tournamentsBySlug = fallback.data;
+            }
+
+            const tournamentSlugMap = new Map<string, Record<string, unknown>>();
+            for (const row of tournamentsBySlug || []) {
+                if (typeof row?.slug === 'string' && row.slug.trim()) {
+                    tournamentSlugMap.set(String(row.slug), row);
+                }
+            }
+
+            for (const candidate of candidates) {
+                const record = tournamentSlugMap.get(candidate);
+                const logoUrl = record?.logo_url || record?.banner_url;
+                if (logoUrl) {
+                    return String(logoUrl);
+                }
+            }
+        }
+
         const idCandidates = candidates.filter((candidate) => /^[a-z0-9-]+$/i.test(candidate));
         if (idCandidates.length > 0) {
             const { data } = await (readClient as any)

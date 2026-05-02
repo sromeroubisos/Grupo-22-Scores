@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { searchFlashScore } from '@/lib/services/flashscore';
 import { getRugbyApiSportsLeagues, getRugbyApiSportsTeams } from '@/lib/services/rugbyApiSports';
+import { getReadClient } from '@/lib/supabase/read';
 import { isBlockedRugbyApiSportsLeagueId } from '@/lib/utils/blockedTournaments';
 import { escapePostgrestLike } from '@/lib/utils/postgrest';
 
@@ -15,6 +15,42 @@ type SearchResult = {
     searchWeight: number;
 };
 
+type TournamentSearchRow = {
+    id: string;
+    name: string | null;
+    display_name: string | null;
+    slug: string | null;
+    sport_id: string | null;
+    country_id: string | null;
+    logo_url: string | null;
+    is_visible: boolean | null;
+    status: string | null;
+    review_status?: string | null;
+    sport?: { name?: string | null } | null;
+    country?: { name?: string | null } | null;
+};
+
+type ClubSearchRow = {
+    id: string;
+    name: string | null;
+    short_name: string | null;
+    slug: string | null;
+    city: string | null;
+    country: string | null;
+    logo_url: string | null;
+    is_visible: boolean | null;
+};
+
+function sanitizeSearchLogoUrl(value: unknown, proxyKey: string): string | null {
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    if (trimmed.startsWith('data:')) {
+        return `/api/assets/team-logo?key=${encodeURIComponent(proxyKey)}`;
+    }
+    return trimmed;
+}
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const rawSearch = (searchParams.get('q') || '').slice(0, 80).trim();
@@ -27,27 +63,24 @@ export async function GET(request: Request) {
 
     const search = rawSearch;
     const escapedSearch = escapePostgrestLike(search);
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = await getReadClient();
     const lSearch = search.toLowerCase();
 
     let debugInfo: Record<string, unknown> = {
         query: search,
-        url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-        hasAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     };
 
     try {
         const [tournamentsRes, clubsRes, fsSearchRaw, rugbyTeams, rugbyLeagues] = await Promise.all([
             supabase.from('tournaments')
-                .select('id, name, display_name, slug, sport_id, country_id, is_visible, sport:sports(name), country:countries(name)')
+                .select('id, name, display_name, slug, sport_id, country_id, logo_url, is_visible, status, review_status, sport:sports(name), country:countries(name)')
                 .or(`name.ilike.%${escapedSearch}%,display_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`)
+                .neq('is_visible', false)
                 .limit(limit),
             supabase.from('clubs')
-                .select('id, name, short_name, slug, city, country, is_visible')
+                .select('id, name, short_name, slug, city, country, logo_url, is_visible')
                 .or(`name.ilike.%${escapedSearch}%,short_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`)
+                .neq('is_visible', false)
                 .limit(limit),
             searchFlashScore(search).catch(() => null),
             search.length >= 3 ? getRugbyApiSportsTeams({ search }).catch(() => []) : Promise.resolve([]),
@@ -72,8 +105,10 @@ export async function GET(request: Request) {
         const rawResults: SearchResult[] = [];
 
         if (tournamentsRes.data) {
-            rawResults.push(...(tournamentsRes.data as any[]).map((t) => {
-                const title = t.display_name || t.name;
+            rawResults.push(...(tournamentsRes.data as TournamentSearchRow[])
+                .filter((t) => t.is_visible !== false && t.review_status !== 'rejected')
+                .map((t) => {
+                const title = t.display_name || t.name || 'Torneo';
                 const sportLabel = t.sport?.name || t.sport_id || 'Torneo';
                 const countryLabel = t.country?.name || t.country_id || 'Internacional';
 
@@ -83,21 +118,23 @@ export async function GET(request: Request) {
                     title,
                     subtitle: `${sportLabel} · ${countryLabel}`,
                     url: `/tournaments/${t.slug || t.id}`,
-                    logo_url: null,
+                    logo_url: sanitizeSearchLogoUrl(t.logo_url, t.id),
                     searchWeight: calculateWeight(title, t.name, t.slug, lSearch, 0)
                 };
             }));
         }
 
         if (clubsRes.data) {
-            rawResults.push(...(clubsRes.data as any[]).map((c) => ({
+            rawResults.push(...(clubsRes.data as ClubSearchRow[])
+                .filter((c) => c.is_visible !== false)
+                .map((c) => ({
                 id: c.id,
                 type: 'club' as const,
-                title: c.name,
+                title: c.name || c.short_name || 'Club',
                 subtitle: `Club · ${c.city || c.country || ''}`,
                 url: `/clubs/${c.slug || c.id}`,
-                logo_url: null,
-                searchWeight: calculateWeight(c.name, c.short_name, c.slug, lSearch, 1)
+                logo_url: sanitizeSearchLogoUrl(c.logo_url, c.id),
+                searchWeight: calculateWeight(c.name || c.short_name || '', c.short_name, c.slug, lSearch, 1)
             })));
         }
 

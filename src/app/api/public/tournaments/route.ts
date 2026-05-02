@@ -28,10 +28,10 @@ export const revalidate = 0;
 
 const RUGBY_SPORT_IDS = ['rugby', 'rugby-union', 'rugby-league'];
 const RUGBY_FLASHSCORE_SPORT_KEY = 'rugby';
-const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, slug, is_visible, status, priority, category, age_grade';
-const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, slug, is_visible, status, priority, category, age_grade';
-const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, slug, is_visible, status, category, age_grade';
-const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, slug, is_visible, status, category, age_grade';
+const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, priority, category, age_grade';
+const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, priority, category, age_grade';
+const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, category, age_grade';
+const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, category, age_grade';
 const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITH_LEGACY_SPORT_AND_PRIORITY}, review_status`;
 const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY}, review_status`;
 const SELECT_WITH_LEGACY_SPORT_REVIEW = `${SELECT_WITH_LEGACY_SPORT}, review_status`;
@@ -171,7 +171,7 @@ type TournamentsTraceContext = {
     parentRequestId?: string;
 };
 
-const TOURNAMENTS_RESPONSE_CACHE_PREFIX = 'public-tournaments-response:v7';
+const TOURNAMENTS_RESPONSE_CACHE_PREFIX = 'public-tournaments-response:v8';
 const tournamentsRefreshLocks = new Map<string, Promise<void>>();
 const tournamentsInFlightResponses = new Map<string, Promise<PublicTournamentsPayload>>();
 const tournamentsSnapshotPersistLocks = new Map<string, Promise<boolean>>();
@@ -300,13 +300,13 @@ function normalizeLookupValue(value: unknown): string {
         .toLowerCase();
 }
 
-function sanitizePublicLogoUrl(value: unknown): string | null {
+function sanitizePublicLogoUrl(value: unknown, proxyKey?: string | null): string | null {
     const normalized = normalizeText(value);
     if (!normalized) return null;
 
     // Avoid serving giant inline base64 images in list/catalog feeds.
     if (normalized.startsWith('data:')) {
-        return null;
+        return proxyKey ? `/api/assets/team-logo?key=${encodeURIComponent(proxyKey)}` : null;
     }
 
     return normalized;
@@ -716,7 +716,7 @@ function filterPublicDbTournaments(args: {
             country: tournament.country || (tournament.country_ref as { name?: string } | null)?.name || null,
             country_id: tournament.country_id,
             sport_id: tournament.sport_id || tournament.legacy_sport || 'rugby',
-            logo_url: sanitizePublicLogoUrl(tournament.logo_url),
+            logo_url: sanitizePublicLogoUrl(tournament.logo_url, tournament.id),
             slug: tournament.slug,
             priority: typeof tournament.priority === 'number' ? tournament.priority : 0,
         })));

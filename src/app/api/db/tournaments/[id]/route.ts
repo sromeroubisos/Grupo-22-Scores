@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 
 type TournamentLookupRow = {
     id: string;
@@ -22,11 +23,14 @@ type TournamentLookupRow = {
 const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, external_id, logo_url, banner_url, sport_id, legacy_sport:sport, country_id, slug, format, ruleset, is_visible, status';
 const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, external_id, logo_url, banner_url, sport_id, country_id, slug, format, ruleset, is_visible, status';
 
-function sanitizeInlineAssetUrl(value: unknown): string | null {
-    if (typeof value !== 'string') return null;
-    const normalized = value.trim();
-    if (!normalized) return null;
-    return normalized;
+function sanitizeInlineAssetUrl(
+    value: unknown,
+    tournament: { id: string; name?: string | null; display_name?: string | null },
+): string | null {
+    return resolveSerializableLogoUrl(value, {
+        key: tournament.id,
+        name: tournament.display_name || tournament.name,
+    });
 }
 
 export async function GET(
@@ -82,8 +86,8 @@ export async function GET(
         ok: true,
         tournament: {
             ...data,
-            logo_url: sanitizeInlineAssetUrl(data.logo_url),
-            banner_url: sanitizeInlineAssetUrl(data.banner_url),
+            logo_url: sanitizeInlineAssetUrl(data.logo_url, data),
+            banner_url: sanitizeInlineAssetUrl(data.banner_url, data),
             sport_id: data.sport_id || data.legacy_sport || 'rugby',
         }
     });

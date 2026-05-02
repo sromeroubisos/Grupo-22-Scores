@@ -1,14 +1,9 @@
-import { createClient } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import { RUGBY_TOURNAMENTS_INTERNATIONAL, RUGBY_TOURNAMENTS_BY_COUNTRY } from '@/lib/data/tournaments/rugby';
 import { BASKETBALL_TOURNAMENTS_INTERNATIONAL, BASKETBALL_TOURNAMENTS_BY_COUNTRY } from '@/lib/data/tournaments/basketball';
 import { HOCKEY_TOURNAMENTS_INTERNATIONAL, HOCKEY_TOURNAMENTS_BY_COUNTRY } from '@/lib/data/tournaments/hockey';
 import type { Tournament } from '@/lib/types';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 type SportId = 'rugby' | 'field-hockey' | 'basketball';
 
@@ -57,6 +52,7 @@ export const syncStaticTournaments = async () => {
 
 const upsertTournament = async (t: Tournament, sportId: SportId, results: any) => {
     results.total++;
+    const supabase = getSupabaseClient();
     
     try {
         const payload = {
