@@ -397,15 +397,20 @@ function getDisplayLineupBadges(
         role: string | null;
         rating: number | null;
     },
+    options?: { isTopRated?: boolean },
 ) {
-    const badges: Array<{ label: string; kind: 'position' | 'rating' }> = [];
+    const badges: Array<{ label: string; kind: 'position' | 'rating'; isTopRated?: boolean }> = [];
     const position = String(player.position || '').trim();
     if (position && !isGenericLineupRoleLabel(position)) {
         badges.push({ label: position, kind: 'position' });
     }
 
     if (typeof player.rating === 'number') {
-        badges.push({ label: player.rating.toFixed(1), kind: 'rating' });
+        badges.push({
+            label: player.rating.toFixed(1),
+            kind: 'rating',
+            isTopRated: options?.isTopRated === true,
+        });
     }
 
     const role = String(player.role || '').trim();
@@ -414,6 +419,18 @@ function getDisplayLineupBadges(
     }
 
     return badges;
+}
+
+function getTopLineupRating(
+    players: Array<{ rating: number | null }>,
+) {
+    let top = Number.NEGATIVE_INFINITY;
+    for (const p of players) {
+        if (typeof p.rating === 'number' && p.rating > top) {
+            top = p.rating;
+        }
+    }
+    return Number.isFinite(top) ? top : null;
 }
 
 
@@ -1315,6 +1332,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     );
     const homeLineupGroups = splitDisplayLineupPlayers(displayHomeLineup);
     const awayLineupGroups = splitDisplayLineupPlayers(displayAwayLineup);
+    const topMatchLineupRating = getTopLineupRating([...displayHomeLineup, ...displayAwayLineup]);
     const hasAnyLineups = displayHomeLineup.length > 0 || displayAwayLineup.length > 0;
     const motorsportRows = (Array.isArray(matchData.standings) && matchData.standings.length > 0
         ? matchData.standings
@@ -2066,7 +2084,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                         const pId = p.id;
                                                         const pName = p.name;
                                                         const pNumber = p.number;
-                                                        const pBadges = getDisplayLineupBadges(p);
+                                                        const pBadges = getDisplayLineupBadges(p, {
+                                                            isTopRated: topMatchLineupRating !== null && p.rating === topMatchLineupRating,
+                                                        });
                                                         return (
                                                             <div key={`home-starter-${i}`} className={styles.playerItem}>
                                                                 <span className={styles.playerMain}>
@@ -2075,7 +2095,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                                 </span>
                                                                 <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                     {pBadges.map((badge) => (
-                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>{badge.label}</span>
+                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>
+                                                                            {badge.label}
+                                                                            {badge.kind === 'rating' && badge.isTopRated ? <span aria-label="Mejor puntuación" title="Mejor puntuación del partido" style={{ marginLeft: '4px' }}>⭐</span> : null}
+                                                                        </span>
                                                                     ))}
                                                                 </span>
                                                             </div>
@@ -2091,7 +2114,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                             const pId = p.id;
                                                             const pName = p.name;
                                                             const pNumber = p.number;
-                                                            const pBadges = getDisplayLineupBadges(p);
+                                                            const pBadges = getDisplayLineupBadges(p, {
+                                                                isTopRated: topMatchLineupRating !== null && p.rating === topMatchLineupRating,
+                                                            });
                                                             return (
                                                                 <div key={`home-finisher-${i}`} className={styles.playerItem}>
                                                                     <span className={styles.playerMain}>
@@ -2100,7 +2125,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                                     </span>
                                                                     <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                         {pBadges.map((badge) => (
-                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>{badge.label}</span>
+                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>
+                                                                                {badge.label}
+                                                                                {badge.kind === 'rating' && badge.isTopRated ? <span aria-label="Mejor puntuación" title="Mejor puntuación del partido" style={{ marginLeft: '4px' }}>⭐</span> : null}
+                                                                            </span>
                                                                         ))}
                                                                     </span>
                                                                 </div>
@@ -2119,7 +2147,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                         const pId = p.id;
                                                         const pName = p.name;
                                                         const pNumber = p.number;
-                                                        const pBadges = getDisplayLineupBadges(p);
+                                                        const pBadges = getDisplayLineupBadges(p, {
+                                                            isTopRated: topMatchLineupRating !== null && p.rating === topMatchLineupRating,
+                                                        });
                                                         return (
                                                             <div key={`away-starter-${i}`} className={styles.playerItem}>
                                                                 <span className={styles.playerMain}>
@@ -2128,7 +2158,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                                 </span>
                                                                 <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                     {pBadges.map((badge) => (
-                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>{badge.label}</span>
+                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>
+                                                                            {badge.label}
+                                                                            {badge.kind === 'rating' && badge.isTopRated ? <span aria-label="Mejor puntuación" title="Mejor puntuación del partido" style={{ marginLeft: '4px' }}>⭐</span> : null}
+                                                                        </span>
                                                                     ))}
                                                                 </span>
                                                             </div>
@@ -2144,7 +2177,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                             const pId = p.id;
                                                             const pName = p.name;
                                                             const pNumber = p.number;
-                                                            const pBadges = getDisplayLineupBadges(p);
+                                                            const pBadges = getDisplayLineupBadges(p, {
+                                                                isTopRated: topMatchLineupRating !== null && p.rating === topMatchLineupRating,
+                                                            });
                                                             return (
                                                                 <div key={`away-finisher-${i}`} className={styles.playerItem}>
                                                                     <span className={styles.playerMain}>
@@ -2153,7 +2188,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                                     </span>
                                                                     <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                         {pBadges.map((badge) => (
-                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>{badge.label}</span>
+                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>
+                                                                                {badge.label}
+                                                                                {badge.kind === 'rating' && badge.isTopRated ? <span aria-label="Mejor puntuación" title="Mejor puntuación del partido" style={{ marginLeft: '4px' }}>⭐</span> : null}
+                                                                            </span>
                                                                         ))}
                                                                     </span>
                                                                 </div>
