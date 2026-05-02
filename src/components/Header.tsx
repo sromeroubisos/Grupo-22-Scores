@@ -7,7 +7,10 @@ import { useAuth } from '@/context/AuthContext';
 import { useSport } from '@/context/SportContext';
 import { usePathname, useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
-import NotificationsBell from '@/components/NotificationsBell';
+// NotificationsBell renders conditionally on `user`, which is null on the server
+// but may be hydrated from localStorage on the client → hydration mismatch.
+// Loading it client-only keeps both renders identical until hydration finishes.
+const NotificationsBell = dynamic(() => import('@/components/NotificationsBell'), { ssr: false });
 const GlobalSearch = dynamic(() => import('@/components/GlobalSearch'), { ssr: false });
 import { getRoleLabel, resolveAdminPanel } from '@/lib/auth/roles';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
