@@ -50,6 +50,7 @@ import {
   getExternalTournamentOverride,
   type ExternalTournamentOverrideRecord,
 } from '@/lib/server/externalTournamentOverrides';
+import { getExternalMatchLineupOverride } from '@/lib/server/externalMatchLineupOverrides';
 
 function jsonNoStore(body: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
@@ -185,6 +186,15 @@ async function getFlashScoreMatchBundle(matchId: string) {
     topScorers,
   ] = results.map((result) => (result.status === 'fulfilled' ? result.value : null));
 
+  const lineupOverride = await getExternalMatchLineupOverride(matchId).catch(() => null);
+  const lineupsWithOverride = lineupOverride
+    ? {
+        ...(lineups && typeof lineups === 'object' ? lineups as Record<string, unknown> : {}),
+        home: lineupOverride.lineups.home,
+        away: lineupOverride.lineups.away,
+      }
+    : lineups;
+
   return {
     source: 'flashscore' as const,
     details: resolvedDetails,
@@ -192,7 +202,14 @@ async function getFlashScoreMatchBundle(matchId: string) {
     stats,
     h2h,
     form,
-    lineups,
+    lineups: lineupsWithOverride,
+    lineupOverride: lineupOverride
+      ? {
+          provider: lineupOverride.provider,
+          ratedAt: lineupOverride.rated_at,
+          ratedBy: lineupOverride.rated_by,
+        }
+      : null,
     standings,
     dayMatches,
     playerStats,
