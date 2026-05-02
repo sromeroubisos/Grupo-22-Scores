@@ -8003,14 +8003,6 @@ function computeHighestLineupRating(teams: Array<{ starters?: LineupExportPlayer
     return best;
 }
 
-function getLineupExportRatingSuffix(player: LineupExportPlayerData, highestRating: number | null): string {
-    const rating = formatLineupExportRating(player?.rating);
-    if (!rating) return '';
-    const numeric = Number(rating);
-    const isTop = highestRating != null && Number.isFinite(numeric) && numeric === highestRating;
-    return isTop ? `  ${rating} ★` : `  ${rating}`;
-}
-
 type SquadPageGroupData = SquadExportGroupData & {
     continuedFromPrevious?: boolean;
     continuesOnNext?: boolean;
@@ -9109,10 +9101,13 @@ async function drawG22BaseLineups(
     const columnTop = contentPanelY + contentInsetTop;
     const bannerInnerHeight = teamBannerHeight - sy(28);
     const teamNameMaxWidth = columnWidth - sx(48);
-    const playerTextMaxWidth = columnWidth - sx(68);
+    const hasAnyRating = highestRating != null;
+    const ratingAreaWidth = hasAnyRating ? sx(96) : 0;
+    const ratingRightInset = sx(20);
+    const playerTextMaxWidth = columnWidth - sx(68) - ratingAreaWidth;
     const teamNameBaseSize = isSingleTeam ? sf(36) : sf(32);
     const teamNameMinSize = sf(20);
-    const playerLabels = selectedTeams.flatMap((team) => [...team.starters, ...team.bench].map((player) => `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`));
+    const playerLabels = selectedTeams.flatMap((team) => [...team.starters, ...team.bench].map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()));
 
     const teamNameLayouts = selectedTeams.map((team) =>
         fitTextLinesToWidth(ctx, team.name.toUpperCase(), teamNameMaxWidth, '900', teamNameBaseSize, FONT_DISPLAY, teamNameMinSize, 2),
@@ -9518,7 +9513,7 @@ async function drawG22BaseLineups(
             const rowY = listStartY + index * (starterRowHeight + starterRowGap);
             const centerY = rowY + starterRowHeight / 2;
             const numberLabel = String(player.number ?? index + 1).padStart(2, '0');
-            const playerLabel = `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`;
+            const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
 
             ctx.textAlign = 'right';
             ctx.fillStyle = numberColor;
@@ -9529,6 +9524,19 @@ async function drawG22BaseLineups(
             ctx.fillStyle = primaryText;
             ctx.font = `700 ${starterFontSize}px ${FONT_BODY}`;
             ctx.fillText(truncateTextToWidth(ctx, playerLabel, playerTextMaxWidth), team.columnX + textStartOffset, centerY + 1);
+
+            if (hasAnyRating) {
+                const ratingLabel = formatLineupExportRating(player.rating);
+                if (ratingLabel) {
+                    const ratingValue = getLineupExportRatingValue(player.rating);
+                    const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = isTopRated ? '#facc15' : team.accentTone;
+                    ctx.font = `800 ${starterFontSize}px ${FONT_MONO}`;
+                    const display = isTopRated ? `${ratingLabel} ★` : ratingLabel;
+                    ctx.fillText(display, team.columnX + columnWidth - ratingRightInset, centerY + 1);
+                }
+            }
         });
 
         if (team.bench.length > 0) {
@@ -9558,7 +9566,7 @@ async function drawG22BaseLineups(
                 const rowY = benchLabelCenterY + benchLabelFontSize / 2 + benchLabelToListGap + index * (benchRowHeight + benchRowGap);
                 const centerY = rowY + benchRowHeight / 2;
                 const numberLabel = String(player.number ?? team.starters.length + index + 1).padStart(2, '0');
-                const playerLabel = `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`;
+                const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
 
                 ctx.textAlign = 'right';
                 ctx.fillStyle = numberColor;
@@ -9569,6 +9577,19 @@ async function drawG22BaseLineups(
                 ctx.fillStyle = primaryText;
                 ctx.font = `700 ${benchFontSize}px ${FONT_BODY}`;
                 ctx.fillText(truncateTextToWidth(ctx, playerLabel, playerTextMaxWidth), team.columnX + textStartOffset, centerY + 1);
+
+                if (hasAnyRating) {
+                    const ratingLabel = formatLineupExportRating(player.rating);
+                    if (ratingLabel) {
+                        const ratingValue = getLineupExportRatingValue(player.rating);
+                        const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
+                        ctx.textAlign = 'right';
+                        ctx.fillStyle = isTopRated ? '#facc15' : team.accentTone;
+                        ctx.font = `800 ${benchFontSize}px ${FONT_MONO}`;
+                        const display = isTopRated ? `${ratingLabel} ★` : ratingLabel;
+                        ctx.fillText(display, team.columnX + columnWidth - ratingRightInset, centerY + 1);
+                    }
+                }
             });
         }
 
@@ -11764,10 +11785,15 @@ async function drawMomentumLineups(
         );
         ctx.restore();
 
+        const hasAnyRating = highestRating != null;
+        const ratingColumnWidth = hasAnyRating ? 84 : 0;
+        const ratingRightInset = 22;
+        const starterNameMaxWidth = (columnWidth - 156) - ratingColumnWidth;
+        const benchNameMaxWidth = (columnWidth - 152) - ratingColumnWidth;
         starters.forEach((player, playerIndex) => {
             const y = listStartY + playerIndex * (scaledStarterRowHeight + scaledStarterGap);
             const numberLabel = String(player.number ?? playerIndex + 1).padStart(2, '0');
-            const playerLabel = `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`;
+            const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
             const numberChipHeight = Math.max(16, scaledStarterRowHeight - Math.max(10, Math.round(16 * layoutScale)));
             const numberChipY = y + Math.round((scaledStarterRowHeight - numberChipHeight) / 2);
             ctx.save();
@@ -11785,8 +11811,21 @@ async function drawMomentumLineups(
             ctx.fillText(numberLabel, x + 51, y + scaledStarterRowHeight / 2 + 4);
             ctx.textAlign = 'left';
             ctx.fillStyle = '#ffffff';
-            setFittedFont(ctx, playerLabel, columnWidth - 156, '800', starterNameFontSize, FONT_BODY, 10);
-            ctx.fillText(truncateTextToWidth(ctx, playerLabel, columnWidth - 156), x + 94, y + scaledStarterRowHeight / 2 + 5);
+            setFittedFont(ctx, playerLabel, starterNameMaxWidth, '800', starterNameFontSize, FONT_BODY, 10);
+            ctx.fillText(truncateTextToWidth(ctx, playerLabel, starterNameMaxWidth), x + 94, y + scaledStarterRowHeight / 2 + 5);
+
+            if (hasAnyRating) {
+                const ratingLabel = formatLineupExportRating(player.rating);
+                if (ratingLabel) {
+                    const ratingValue = getLineupExportRatingValue(player.rating);
+                    const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = isTopRated ? '#facc15' : accent;
+                    ctx.font = `800 ${starterNameFontSize}px ${FONT_MONO}`;
+                    const display = isTopRated ? `${ratingLabel} ★` : ratingLabel;
+                    ctx.fillText(display, x + columnWidth - ratingRightInset, y + scaledStarterRowHeight / 2 + 5);
+                }
+            }
             ctx.restore();
         });
 
@@ -11810,7 +11849,7 @@ async function drawMomentumLineups(
             bench.forEach((player, benchIndex) => {
                 const y = benchHeaderY + benchSectionHeight + benchIndex * (scaledBenchRowHeight + scaledBenchGap);
                 const numberLabel = String(player.number ?? starters.length + benchIndex + 1).padStart(2, '0');
-                const playerLabel = `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`;
+                const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
                 const numberChipHeight = Math.max(14, scaledBenchRowHeight - Math.max(8, Math.round(12 * layoutScale)));
                 const numberChipY = y + Math.round((scaledBenchRowHeight - numberChipHeight) / 2);
                 ctx.save();
@@ -11829,8 +11868,21 @@ async function drawMomentumLineups(
                 ctx.fillText(numberLabel, x + 49, y + scaledBenchRowHeight / 2 + 4);
                 ctx.textAlign = 'left';
                 ctx.fillStyle = '#ffffff';
-                setFittedFont(ctx, playerLabel, columnWidth - 152, '800', benchNameFontSize, FONT_BODY, 10);
-                ctx.fillText(truncateTextToWidth(ctx, playerLabel, columnWidth - 152), x + 88, y + scaledBenchRowHeight / 2 + 4);
+                setFittedFont(ctx, playerLabel, benchNameMaxWidth, '800', benchNameFontSize, FONT_BODY, 10);
+                ctx.fillText(truncateTextToWidth(ctx, playerLabel, benchNameMaxWidth), x + 88, y + scaledBenchRowHeight / 2 + 4);
+
+                if (hasAnyRating) {
+                    const ratingLabel = formatLineupExportRating(player.rating);
+                    if (ratingLabel) {
+                        const ratingValue = getLineupExportRatingValue(player.rating);
+                        const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
+                        ctx.textAlign = 'right';
+                        ctx.fillStyle = isTopRated ? '#facc15' : accent;
+                        ctx.font = `800 ${benchNameFontSize}px ${FONT_MONO}`;
+                        const display = isTopRated ? `${ratingLabel} ★` : ratingLabel;
+                        ctx.fillText(display, x + columnWidth - ratingRightInset, y + scaledBenchRowHeight / 2 + 4);
+                    }
+                }
                 ctx.restore();
             });
         }
@@ -15015,14 +15067,23 @@ async function drawPosterV3Lineups(
         const contentBottom = canvas.height - 112;
         const contentWidth = 560;
         const numberAreaWidth = 84;
-        const nameAreaWidth = contentWidth - numberAreaWidth - 12;
+        const ratingAreaWidth = highestRating != null ? 92 : 0;
+        const nameAreaWidth = contentWidth - numberAreaWidth - 12 - ratingAreaWidth;
         const numberCenterX = canvas.width / 2 - contentWidth / 2 + numberAreaWidth / 2;
         const nameX = canvas.width / 2 - contentWidth / 2 + numberAreaWidth + 12;
+        const ratingRightX = canvas.width / 2 + contentWidth / 2 - 12;
         const buildBenchLayout = (labelFontSize: number, itemFontSize: number) => {
-            const entries = bench.map((player, index) => ({
-                number: String(player.number ?? starters.length + index + 1),
-                label: `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`,
-            }));
+            const entries = bench.map((player, index) => {
+                const ratingLabel = formatLineupExportRating(player.rating);
+                const ratingValue = getLineupExportRatingValue(player.rating);
+                const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
+                return {
+                    number: String(player.number ?? starters.length + index + 1),
+                    label: `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase(),
+                    rating: ratingLabel ? (isTopRated ? `${ratingLabel} ★` : ratingLabel) : '',
+                    isTopRated,
+                };
+            });
             if (entries.length === 0) return { lines: [] as typeof entries[], lineHeight: 0, height: 0 };
 
             ctx.save();
@@ -15035,7 +15096,8 @@ async function drawPosterV3Lineups(
             let currentWidth = labelWidth + 12;
 
             entries.forEach((entry) => {
-                const segmentWidth = ctx.measureText(`${entry.number} ${entry.label}`).width + 22;
+                const ratingSegment = entry.rating ? ` ${entry.rating}` : '';
+                const segmentWidth = ctx.measureText(`${entry.number} ${entry.label}${ratingSegment}`).width + 22;
                 if (currentLine.length > 0 && currentWidth + segmentWidth > maxWidth) {
                     lines.push(currentLine);
                     currentLine = [];
@@ -15053,7 +15115,7 @@ async function drawPosterV3Lineups(
 
         let starterNameFont = getSharedFittedFontSize(
             ctx,
-            starters.map((player) => ({ text: `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`, maxWidth: nameAreaWidth })),
+            starters.map((player) => ({ text: `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase(), maxWidth: nameAreaWidth })),
             '800',
             46,
             FONT_BODY,
@@ -15083,7 +15145,7 @@ async function drawPosterV3Lineups(
         starters.forEach((player, index) => {
             const centerY = startY + index * starterRowHeight + starterRowHeight / 2;
             const numberLabel = String(player.number ?? index + 1);
-            const playerLabel = `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`;
+            const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
 
             ctx.save();
             ctx.textBaseline = 'middle';
@@ -15095,6 +15157,18 @@ async function drawPosterV3Lineups(
             ctx.fillStyle = primaryText;
             ctx.font = `800 ${starterNameFont}px ${FONT_BODY}`;
             ctx.fillText(truncateTextToWidth(ctx, playerLabel, nameAreaWidth), nameX, centerY + 1);
+
+            if (highestRating != null) {
+                const ratingLabel = formatLineupExportRating(player.rating);
+                if (ratingLabel) {
+                    const ratingValue = getLineupExportRatingValue(player.rating);
+                    const isTopRated = ratingValue != null && ratingValue === highestRating;
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = isTopRated ? '#facc15' : accent;
+                    ctx.font = `800 ${starterNameFont}px ${FONT_MONO}`;
+                    ctx.fillText(isTopRated ? `${ratingLabel} ★` : ratingLabel, ratingRightX, centerY + 1);
+                }
+            }
             ctx.restore();
         });
 
@@ -15114,6 +15188,9 @@ async function drawPosterV3Lineups(
                 let totalWidth = 0;
                 line.forEach((entry, entryIndex) => {
                     totalWidth += ctx.measureText(`${entry.number} ${entry.label}`).width;
+                    if (entry.rating) {
+                        totalWidth += ctx.measureText(` ${entry.rating}`).width;
+                    }
                     if (entryIndex < line.length - 1) totalWidth += 22;
                 });
                 let cursorX = canvas.width / 2 - totalWidth / 2;
@@ -15125,6 +15202,12 @@ async function drawPosterV3Lineups(
                     ctx.fillStyle = primaryText;
                     ctx.fillText(entry.label, cursorX, y);
                     cursorX += ctx.measureText(entry.label).width;
+                    if (entry.rating) {
+                        const ratingText = ` ${entry.rating}`;
+                        ctx.fillStyle = entry.isTopRated ? '#facc15' : accent;
+                        ctx.fillText(ratingText, cursorX, y);
+                        cursorX += ctx.measureText(ratingText).width;
+                    }
                     if (entryIndex < line.length - 1) cursorX += 22;
                 });
                 ctx.restore();
@@ -15327,13 +15410,14 @@ async function drawPosterV3Lineups(
     ctx.fillRect(canvas.width / 2 - 220, metaY + 24, 440, 3);
     ctx.restore();
 
-    const leftStarterLabels = leftSplit.starters.map((player) => `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`);
-    const rightStarterLabels = rightSplit.starters.map((player) => `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`);
-    const leftBenchLabels = leftSplit.bench.map((player) => `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`);
-    const rightBenchLabels = rightSplit.bench.map((player) => `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`);
+    const leftStarterLabels = leftSplit.starters.map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase());
+    const rightStarterLabels = rightSplit.starters.map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase());
+    const leftBenchLabels = leftSplit.bench.map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase());
+    const rightBenchLabels = rightSplit.bench.map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase());
+    const twoTeamRatingColumnWidth = highestRating != null ? 70 : 0;
     let starterFont = getSharedFittedFontSize(
         ctx,
-        [...leftStarterLabels, ...rightStarterLabels].map((text) => ({ text, maxWidth: columnWidth - 24 })),
+        [...leftStarterLabels, ...rightStarterLabels].map((text) => ({ text, maxWidth: columnWidth - 24 - twoTeamRatingColumnWidth })),
         '900',
         38,
         FONT_BODY,
@@ -15408,16 +15492,33 @@ async function drawPosterV3Lineups(
         ctx.fillText(teamName.toUpperCase(), centerX, teamNameY);
         ctx.restore();
 
+        const ratingColumnWidth = highestRating != null ? 70 : 0;
+        const innerLeftX = centerX - columnWidth / 2 + 10;
+        const innerRightX = centerX + columnWidth / 2 - 10;
+        const nameMaxWidth = columnWidth - 24 - ratingColumnWidth;
+
         ctx.save();
-        ctx.textAlign = 'center';
-        ctx.fillStyle = primaryText;
         ctx.textBaseline = 'alphabetic';
         ctx.font = `900 ${starterFont}px ${FONT_BODY}`;
-        const maxWidth = columnWidth - 20;
         starters.forEach((player, index) => {
             const y = metrics.startersStartY + index * starterRowGap;
-            const playerLabel = `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`;
-            ctx.fillText(truncateTextToWidth(ctx, playerLabel, maxWidth), centerX, y);
+            const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
+            ctx.textAlign = 'left';
+            ctx.fillStyle = primaryText;
+            ctx.fillText(truncateTextToWidth(ctx, playerLabel, nameMaxWidth), innerLeftX, y);
+
+            if (highestRating != null) {
+                const ratingLabel = formatLineupExportRating(player.rating);
+                if (ratingLabel) {
+                    const ratingValue = getLineupExportRatingValue(player.rating);
+                    const isTopRated = ratingValue != null && ratingValue === highestRating;
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = isTopRated ? '#facc15' : hexToRGBA(accentSoft, 0.96);
+                    ctx.font = `800 ${starterFont}px ${FONT_MONO}`;
+                    ctx.fillText(isTopRated ? `${ratingLabel} ★` : ratingLabel, innerRightX, y);
+                    ctx.font = `900 ${starterFont}px ${FONT_BODY}`;
+                }
+            }
         });
         ctx.restore();
 
@@ -15431,14 +15532,27 @@ async function drawPosterV3Lineups(
             ctx.restore();
 
             ctx.save();
-            ctx.textAlign = 'center';
             ctx.textBaseline = 'alphabetic';
-            ctx.fillStyle = secondaryText;
             ctx.font = `700 ${benchFont}px ${FONT_BODY}`;
             bench.forEach((player, index) => {
                 const y = metrics.benchStartY + index * benchRowGap;
-                const playerLabel = `${`${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()}${getLineupExportRatingSuffix(player, highestRating)}`;
-                ctx.fillText(truncateTextToWidth(ctx, playerLabel, maxWidth), centerX, y);
+                const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
+                ctx.textAlign = 'left';
+                ctx.fillStyle = secondaryText;
+                ctx.fillText(truncateTextToWidth(ctx, playerLabel, nameMaxWidth), innerLeftX, y);
+
+                if (highestRating != null) {
+                    const ratingLabel = formatLineupExportRating(player.rating);
+                    if (ratingLabel) {
+                        const ratingValue = getLineupExportRatingValue(player.rating);
+                        const isTopRated = ratingValue != null && ratingValue === highestRating;
+                        ctx.textAlign = 'right';
+                        ctx.fillStyle = isTopRated ? '#facc15' : hexToRGBA(accentSoft, 0.92);
+                        ctx.font = `800 ${benchFont}px ${FONT_MONO}`;
+                        ctx.fillText(isTopRated ? `${ratingLabel} ★` : ratingLabel, innerRightX, y);
+                        ctx.font = `700 ${benchFont}px ${FONT_BODY}`;
+                    }
+                }
             });
             ctx.restore();
         }
