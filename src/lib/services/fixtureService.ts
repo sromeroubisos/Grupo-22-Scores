@@ -10,6 +10,7 @@ import {
   getMatchRankingSnapshot,
   syncClubRankingsForMatchUpdate,
 } from '@/lib/server/clubRankings';
+import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
 import {
   APP_TIMEZONE,
   addDaysToIsoDate,
@@ -48,6 +49,14 @@ export class FixtureService {
 
   private static getMatchRoundId(match: { round_uuid?: string | null; round_id?: string | null }) {
     return match.round_uuid ?? match.round_id ?? null;
+  }
+
+  private static async invalidatePublicMatchesFeed() {
+    try {
+      await invalidateMatchesFeedCaches();
+    } catch (error) {
+      console.error('[FixtureService] Failed to invalidate public matches feed cache:', error);
+    }
   }
 
   private static async getWriteClient() {
@@ -802,6 +811,7 @@ export class FixtureService {
     }
 
     await this.syncClubRankingsAfterMatchChange(match.id);
+    await this.invalidatePublicMatchesFeed();
     return this.mapMatch(match);
   }
 
@@ -983,6 +993,7 @@ export class FixtureService {
     if (shouldSyncRankings) {
       await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
     }
+    await this.invalidatePublicMatchesFeed();
     return this.mapMatch(match);
   }
 
@@ -1001,6 +1012,7 @@ export class FixtureService {
     }
 
     await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
+    await this.invalidatePublicMatchesFeed();
     return true;
   }
 
@@ -1294,6 +1306,8 @@ export class FixtureService {
       if ((insertedMatches || []).length !== matches.length) {
         throw new Error('No se pudieron persistir todos los partidos generados.');
       }
+
+      await this.invalidatePublicMatchesFeed();
     }
 
     return true;
@@ -1374,6 +1388,10 @@ export class FixtureService {
           errors.push(`El lote ${Math.floor(i / chunkSize) + 1} se insertó de forma incompleta.`);
         }
       }
+    }
+
+    if (importedCount > 0) {
+      await this.invalidatePublicMatchesFeed();
     }
 
     return {
@@ -1461,6 +1479,10 @@ export class FixtureService {
       }
     }
 
+    if (needsPerRowReschedule || params.newVenue) {
+      await this.invalidatePublicMatchesFeed();
+    }
+
     return true;
   }
 
@@ -1480,6 +1502,8 @@ export class FixtureService {
 
     // Mark round as not completed
     await supabase.from('tournament_rounds').update({ is_completed: false }).eq('id', roundId);
+
+    await this.invalidatePublicMatchesFeed();
 
     return true;
   }

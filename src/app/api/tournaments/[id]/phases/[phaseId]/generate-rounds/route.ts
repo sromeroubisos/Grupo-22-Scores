@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
 import { createClient } from '@/lib/supabase/server';
 
 // POST generate rounds for a phase
@@ -131,6 +132,8 @@ export async function POST(
           }
         }
       }
+
+      await invalidateMatchesFeedCaches();
 
       return NextResponse.json({ data: createdRounds, count: createdRoundsCount }, { status: 201 });
 

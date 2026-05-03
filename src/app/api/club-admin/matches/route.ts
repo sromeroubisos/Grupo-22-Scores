@@ -8,6 +8,7 @@ import { MANAGEMENT_MEMBERSHIP_ROLES, isGlobalAdminRole } from '@/lib/auth/roles
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { MATCH_REVIEW_STATUS } from '@/lib/matchReview';
+import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
 import { combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 import { TOURNAMENT_REVIEW_STATUS, isTournamentVisibleToPublic } from '@/lib/tournamentReview';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
@@ -362,6 +363,8 @@ export async function POST(request: NextRequest) {
       console.error('[ClubAdmin CREATE match]', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    await invalidateMatchesFeedCaches(admin);
 
     return NextResponse.json({
       ok: true,
