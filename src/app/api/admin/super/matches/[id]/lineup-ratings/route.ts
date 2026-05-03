@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getApiErrorStatus, requireGlobalAdminApiContext } from '@/lib/auth/apiAdmin';
-import { isSuperAdminRole } from '@/lib/auth/roles';
+import { isGlobalAdminRole } from '@/lib/auth/roles';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
   getExternalMatchLineupOverride,
@@ -97,12 +97,10 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  // Strict: only `super_admin`. The shared helper allows admin_general too;
-  // the spec restricts this action to Super Admin specifically.
   let actorUserId: string;
   try {
     const context = await requireGlobalAdminApiContext();
-    if (!isSuperAdminRole(context.role)) {
+    if (!isGlobalAdminRole(context.role)) {
       return jsonError('Forbidden', 403);
     }
     actorUserId = context.userId;

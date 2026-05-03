@@ -370,7 +370,7 @@ export default function LineupRatingEditorModal({
                             {startedEmpty ? 'Cargar alineación y puntajes' : 'Editar puntajes de alineación'}
                         </div>
                         <div style={{ fontSize: 12, color: 'var(--color-text-tertiary, #888)', marginTop: 4 }}>
-                            Solo Super Admin. Los cambios sobreescriben cualquier dato del proveedor.
+                            Solo administradores globales. Los cambios sobreescriben cualquier dato del proveedor.
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
