@@ -140,7 +140,9 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
   }, [sortedRows, searchQuery, filterTeam, filterPosition, topN]);
 
   const activeMetricId = displayedMetrics[activeSortSlot] || displayedMetrics[0];
-  const activeMetricMeta = getPlayerMetricMeta(activeMetricId, tableData.metricLabels[activeMetricId]);
+  const activeMetricMeta = activeMetricId
+    ? getPlayerMetricMeta(activeMetricId, tableData.metricLabels[activeMetricId])
+    : null;
   const activeDirection = displayedSorts[activeSortSlot]?.direction || 'desc';
   const topScorer = sortedRows[0];
 
@@ -410,9 +412,11 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
             Máximo anotador: <strong>{topScorer.name}</strong> ({formatPlayerMetricValue('points', topScorer.metrics.points, 'Puntos')})
           </span>
         )}
-        <span className={`${styles.playerStatsSummaryItem} ${styles.playerStatsSummaryHighlight}`}>
-          Ordenado por: <strong>{activeMetricMeta.label}</strong> ({activeDirection === 'desc' ? 'Descendente' : 'Ascendente'})
-        </span>
+        {activeMetricMeta && (
+          <span className={`${styles.playerStatsSummaryItem} ${styles.playerStatsSummaryHighlight}`}>
+            Ordenado por: <strong>{activeMetricMeta.label}</strong> ({activeDirection === 'desc' ? 'Descendente' : 'Ascendente'})
+          </span>
+        )}
         {filterTeam !== 'all' && (
           <span className={styles.playerStatsSummaryItem}>Equipo: {filterTeam === 'home' ? homeName : awayName}</span>
         )}
