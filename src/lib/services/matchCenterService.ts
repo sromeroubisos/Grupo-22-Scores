@@ -9,6 +9,7 @@ import {
 import { parseSubstitutionIncomingPlayer } from '@/lib/matchEventStats';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { isUuid } from '@/lib/utils/postgrest';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 
 type SupabaseLike = {
   from: (table: string) => any;
@@ -130,6 +131,44 @@ export type MatchCenterLineupsInput = {
 const EMPTY_LINEUPS = { home: [] as PersistedLineupPlayer[], away: [] as PersistedLineupPlayer[] };
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CLOCK_SNAPSHOT_EVENT_TYPE = '__clock_state__';
+const MATCH_CENTER_MATCH_SELECT = `
+  id,
+  tournament_id,
+  phase_id,
+  round_id,
+  date_time,
+  venue,
+  notes,
+  home_club_id,
+  away_club_id,
+  home_division_id,
+  away_division_id,
+  status,
+  score,
+  clock,
+  lineups,
+  broadcast_url,
+  stream_url,
+  replay_url,
+  created_at,
+  updated_at,
+  home_base_points,
+  away_base_points,
+  home_bonus_points,
+  away_bonus_points,
+  points_autocalculated,
+  points_override_reason,
+  category,
+  round_label,
+  sport_id,
+  sport,
+  season_id,
+  home_team_id,
+  away_team_id,
+  homeClub:home_club_id (id, name, short_name, primary_color),
+  awayClub:away_club_id (id, name, short_name, primary_color),
+  tournament:tournament_id (id, name, sport_id, external_id)
+`;
 
 async function fetchMatchPointsRules(client: SupabaseLike, match: MatchPointsRulesContext) {
   try {
@@ -522,6 +561,33 @@ function mapJsonEvent(row: unknown) {
         : Number.isFinite(Number(source.sequence))
           ? Number(source.sequence)
           : null,
+  });
+}
+
+async function fetchLegacyJsonEvents(client: SupabaseLike, matchId: string) {
+  const { data, error } = await client
+    .from('matches')
+    .select('events')
+    .eq('id', matchId)
+    .single();
+
+  if (error) {
+    if (isMissingColumnError(error, 'events')) {
+      return [];
+    }
+
+    console.error('[matchCenterService] Failed to load legacy match events:', error);
+    return [];
+  }
+
+  return Array.isArray((data as any)?.events) ? (data as any).events as unknown[] : [];
+}
+
+function buildMatchCenterLogoUrl(entity: unknown, fallbackKey?: string | null) {
+  const source = entity && typeof entity === 'object' ? entity as Record<string, unknown> : {};
+  return buildTeamLogoProxyUrl({
+    key: normalizeText(source.id) || normalizeText(fallbackKey) || null,
+    name: normalizeText(source.name) || normalizeText(source.display_name) || null,
   });
 }
 
@@ -1299,12 +1365,7 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
 
   const { data, error } = await client
     .from('matches')
-    .select(`
-      *,
-      homeClub:home_club_id (id, name, short_name, logo_url, primary_color),
-      awayClub:away_club_id (id, name, short_name, logo_url, primary_color),
-      tournament:tournament_id (id, name, logo_url, sport_id, external_id)
-    `)
+    .select(MATCH_CENTER_MATCH_SELECT)
     .eq('id', matchId)
     .single();
 
@@ -1337,8 +1398,9 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
     console.error('[matchCenterService] Failed to load match events:', eventsError);
   }
 
-  if ((!loadedFromRelationalTable || events.length === 0) && Array.isArray((data as any).events)) {
-    events = ((data as any).events as unknown[]).flatMap((row) => {
+  if (!loadedFromRelationalTable || events.length === 0) {
+    const legacyEvents = await fetchLegacyJsonEvents(client, matchId);
+    events = legacyEvents.flatMap((row) => {
       const source = row && typeof row === 'object' ? row as Record<string, unknown> : {};
       if (isClockSnapshotRecord(source)) {
         supplementalClock = extractClockSnapshotFromDetails(source);
@@ -1360,6 +1422,11 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
     : null;
   const resolvedTournament = tournamentRaw
     ? applyExternalTournamentOverride(tournamentRaw, tournamentOverride)
+    : null;
+  const homeLogoUrl = buildMatchCenterLogoUrl(homeClubRaw, (data as any).home_club_id);
+  const awayLogoUrl = buildMatchCenterLogoUrl(awayClubRaw, (data as any).away_club_id);
+  const tournamentLogoUrl = resolvedTournament
+    ? buildMatchCenterLogoUrl(resolvedTournament, tournamentOverrideId)
     : null;
   const [homeDivisionId, awayDivisionId, pointsRules] = await Promise.all([
     resolveTeamDivisionId(client, data as MatchContextRow, 'home'),
@@ -1385,12 +1452,13 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
       roundLabel: (data as any).round_label ?? null,
       roundId: (data as any).round_id ?? null,
       clock: (data as any).clock ?? supplementalClock ?? null,
-      homeClub: homeClubRaw ? { ...homeClubRaw, logo: homeClubRaw.logo_url ?? null } : null,
-      awayClub: awayClubRaw ? { ...awayClubRaw, logo: awayClubRaw.logo_url ?? null } : null,
+      homeClub: homeClubRaw ? { ...homeClubRaw, logo_url: homeLogoUrl, logo: homeLogoUrl } : null,
+      awayClub: awayClubRaw ? { ...awayClubRaw, logo_url: awayLogoUrl, logo: awayLogoUrl } : null,
       tournament: resolvedTournament
         ? {
             ...resolvedTournament,
-            logo: resolvedTournament.logo_url ?? resolvedTournament.logo ?? null,
+            logo_url: tournamentLogoUrl,
+            logo: tournamentLogoUrl,
             sportId: resolvedTournament.sport_id ?? null,
           }
         : null,

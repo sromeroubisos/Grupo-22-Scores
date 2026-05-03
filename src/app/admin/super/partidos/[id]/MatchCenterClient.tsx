@@ -2175,18 +2175,41 @@ export default function MatchCenterClient({
     );
     const eventScoreById = useMemo(() => {
         const map = new Map<string, { home: number; away: number; points: number }>();
+        const normalizedScore = normalizeMatchScore(scoreDraft);
+        const manualOverride = normalizedScore.manualOverride;
+        let home = manualOverride ? manualOverride.home : 0;
+        let away = manualOverride ? manualOverride.away : 0;
+        let hasScoringEvents = false;
 
-        eventsChronologicalAsc.forEach((event, index) => {
-            const scoreAtEvent = resolveOfficialScore(scoreDraft, eventsChronologicalAsc.slice(0, index + 1));
+        eventsChronologicalAsc.forEach((event) => {
+            const points = getConfiguredEventPoints(event, eventDefinitionMap);
+            const countsForScore =
+                points > 0
+                && (manualOverride?.cutoffMinute === null || manualOverride?.cutoffMinute === undefined || event.minute > manualOverride.cutoffMinute);
+
+            if (countsForScore && event.team === 'home') {
+                home += points;
+                hasScoringEvents = true;
+            }
+
+            if (countsForScore && event.team === 'away') {
+                away += points;
+                hasScoringEvents = true;
+            }
+
+            const scoreAtEvent = manualOverride || hasScoringEvents
+                ? { home, away }
+                : normalizedScore;
+
             map.set(event.id, {
                 home: scoreAtEvent.home,
                 away: scoreAtEvent.away,
-                points: getConfiguredEventPoints(event, eventDefinitionMap),
+                points,
             });
         });
 
         return map;
-    }, [eventDefinitionMap, eventsChronologicalAsc, resolveOfficialScore, scoreDraft]);
+    }, [eventDefinitionMap, eventsChronologicalAsc, scoreDraft]);
 
     useEffect(() => {
         const definitionMap = buildMatchEventDefinitionMap(availableEventDefinitions);
