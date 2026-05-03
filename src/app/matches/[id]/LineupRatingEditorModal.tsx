@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 type LineupPlayer = {
     id: string | null;
@@ -55,6 +55,35 @@ const BULK_ROLE_VALUES = new Set(['starter', 'titular', 'starting', 'bench', 'su
 
 function cleanBulkCell(value: unknown): string {
     return String(value ?? '').trim().replace(/^["']|["']$/g, '').trim();
+}
+
+function clonePlayers(players: LineupPlayer[]): LineupPlayer[] {
+    return players.map((player) => ({ ...player }));
+}
+
+function cleanPlayerForPayload(player: LineupPlayer) {
+    return {
+        id: player.id ?? null,
+        number: player.number,
+        name: player.name.trim(),
+        position: player.position ?? null,
+        role: player.role ?? null,
+        rating: player.rating,
+        isCaptain: player.isCaptain,
+    };
+}
+
+function cleanSideForPayload(side: LineupPlayer[]) {
+    return side
+        .filter((player) => player.name.trim().length > 0)
+        .map(cleanPlayerForPayload);
+}
+
+function buildDraftSignature(home: LineupPlayer[], away: LineupPlayer[]) {
+    return JSON.stringify({
+        home: cleanSideForPayload(home),
+        away: cleanSideForPayload(away),
+    });
 }
 
 function normalizeBulkKey(value: unknown): string {
@@ -348,24 +377,58 @@ export default function LineupRatingEditorModal({
     const [bulkHomeText, setBulkHomeText] = useState('');
     const [bulkAwayText, setBulkAwayText] = useState('');
     const [bulkMode, setBulkMode] = useState<'replace' | 'append'>('replace');
+    const [initialSignature, setInitialSignature] = useState('');
+    const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+    const wasOpenRef = useRef(false);
+    const hydratedMatchRef = useRef<string | null>(null);
 
     useEffect(() => {
-        if (!open) return;
-        setHomeDraft(homePlayers.map((p) => ({ ...p })));
-        setAwayDraft(awayPlayers.map((p) => ({ ...p })));
+        if (!open) {
+            wasOpenRef.current = false;
+            return;
+        }
+
+        if (wasOpenRef.current && hydratedMatchRef.current === matchId) return;
+
+        wasOpenRef.current = true;
+        hydratedMatchRef.current = matchId;
+        const nextHome = clonePlayers(homePlayers);
+        const nextAway = clonePlayers(awayPlayers);
+        setHomeDraft(nextHome);
+        setAwayDraft(nextAway);
+        setInitialSignature(buildDraftSignature(nextHome, nextAway));
+        setLastSavedAt(null);
         setErrorMsg(null);
         setBulkOpen(false);
         setBulkHomeText('');
         setBulkAwayText('');
         setBulkMode('replace');
-    }, [open, homePlayers, awayPlayers]);
+    }, [open, matchId, homePlayers, awayPlayers]);
 
     const startedEmpty = useMemo(
         () => homePlayers.length === 0 && awayPlayers.length === 0,
         [homePlayers, awayPlayers],
     );
+    const draftSignature = useMemo(
+        () => buildDraftSignature(homeDraft, awayDraft),
+        [homeDraft, awayDraft],
+    );
+    const isDirty = Boolean(open && initialSignature && draftSignature !== initialSignature);
+    const draftPlayerCount = useMemo(
+        () => cleanSideForPayload(homeDraft).length + cleanSideForPayload(awayDraft).length,
+        [homeDraft, awayDraft],
+    );
 
     if (!open) return null;
+
+    const requestClose = () => {
+        if (saving) return;
+        if (isDirty) {
+            const shouldClose = window.confirm('Tenes cambios sin guardar en la alineacion. Cerrar el editor?');
+            if (!shouldClose) return;
+        }
+        onClose();
+    };
 
     const setSide = (side: 'home' | 'away', next: LineupPlayer[]) => {
         if (side === 'home') setHomeDraft(next);
@@ -418,23 +481,10 @@ export default function LineupRatingEditorModal({
         setSaving(true);
         setErrorMsg(null);
         try {
-            const cleanSide = (side: LineupPlayer[]) =>
-                side
-                    .filter((p) => p.name.trim().length > 0)
-                    .map((p) => ({
-                        id: p.id ?? null,
-                        number: p.number,
-                        name: p.name.trim(),
-                        position: p.position ?? null,
-                        role: p.role ?? null,
-                        rating: p.rating,
-                        isCaptain: p.isCaptain,
-                    }));
-
             const payload = {
                 lineups: {
-                    home: cleanSide(homeDraft),
-                    away: cleanSide(awayDraft),
+                    home: cleanSideForPayload(homeDraft),
+                    away: cleanSideForPayload(awayDraft),
                 },
             };
 
@@ -453,8 +503,9 @@ export default function LineupRatingEditorModal({
                 throw new Error(data?.error || `Error ${res.status}`);
             }
 
+            setInitialSignature(buildDraftSignature(homeDraft, awayDraft));
+            setLastSavedAt(new Date());
             onSaved();
-            onClose();
         } catch (err) {
             setErrorMsg(err instanceof Error ? err.message : 'No se pudo guardar.');
         } finally {
@@ -593,7 +644,7 @@ export default function LineupRatingEditorModal({
                 padding: 16,
             }}
             onClick={(e) => {
-                if (e.target === e.currentTarget && !saving) onClose();
+                if (e.target === e.currentTarget) e.stopPropagation();
             }}
         >
             <div style={{
@@ -611,6 +662,29 @@ export default function LineupRatingEditorModal({
                         </div>
                         <div style={{ fontSize: 12, color: 'var(--color-text-tertiary, #888)', marginTop: 4 }}>
                             Solo administradores globales. Los cambios sobreescriben cualquier dato del proveedor.
+                        </div>
+                        <div
+                            role="status"
+                            aria-live="polite"
+                            style={{
+                                display: 'inline-flex',
+                                marginTop: 8,
+                                padding: '4px 8px',
+                                borderRadius: 999,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                color: isDirty ? '#fbbf24' : 'var(--color-text-secondary, #9aa)',
+                                background: isDirty ? 'rgba(245, 158, 11, 0.12)' : 'rgba(255,255,255,0.05)',
+                                border: isDirty ? '1px solid rgba(245, 158, 11, 0.24)' : '1px solid rgba(255,255,255,0.08)',
+                            }}
+                        >
+                            {saving
+                                ? 'Guardando...'
+                                : isDirty
+                                    ? 'Cambios sin guardar'
+                                    : lastSavedAt
+                                        ? 'Guardado'
+                                        : `${draftPlayerCount} jugadores cargados`}
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -630,7 +704,7 @@ export default function LineupRatingEditorModal({
                         </button>
                         <button
                             type="button"
-                            onClick={onClose}
+                            onClick={requestClose}
                             disabled={saving}
                             style={{
                                 background: 'transparent', border: 'none',
@@ -741,7 +815,7 @@ export default function LineupRatingEditorModal({
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                     <button
                         type="button"
-                        onClick={onClose}
+                        onClick={requestClose}
                         disabled={saving}
                         style={{
                             padding: '8px 16px', borderRadius: 6,
@@ -751,7 +825,7 @@ export default function LineupRatingEditorModal({
                             fontSize: 13, fontWeight: 600,
                         }}
                     >
-                        Cancelar
+                        Cerrar
                     </button>
                     <button
                         type="button"
@@ -765,7 +839,7 @@ export default function LineupRatingEditorModal({
                             opacity: saving ? 0.6 : 1,
                         }}
                     >
-                        {saving ? 'Guardando…' : 'Guardar'}
+                        {saving ? 'Guardando...' : 'Guardar y seguir editando'}
                     </button>
                 </div>
             </div>
