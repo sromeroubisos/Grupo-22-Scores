@@ -1632,9 +1632,13 @@ export async function persistMatchCenterSupplementalData(
       : resolvedEvents;
 
   const shouldPersistHomeDivisionId =
-    !normalizeText((match as any).home_division_id) && Boolean(contexts.home.divisionId);
+    contexts !== null
+    && !normalizeText((match as any).home_division_id)
+    && Boolean(contexts.home.divisionId);
   const shouldPersistAwayDivisionId =
-    !normalizeText((match as any).away_division_id) && Boolean(contexts.away.divisionId);
+    contexts !== null
+    && !normalizeText((match as any).away_division_id)
+    && Boolean(contexts.away.divisionId);
 
   let persistedLineups = false;
   let persistedClock = payload.clock === undefined;
