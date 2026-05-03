@@ -50,7 +50,10 @@ import {
   getExternalTournamentOverride,
   type ExternalTournamentOverrideRecord,
 } from '@/lib/server/externalTournamentOverrides';
-import { getExternalMatchLineupOverride } from '@/lib/server/externalMatchLineupOverrides';
+import {
+  getExternalMatchLineupOverride,
+  type ExternalMatchLineupOverrideRecord,
+} from '@/lib/server/externalMatchLineupOverrides';
 
 function jsonNoStore(body: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
@@ -125,6 +128,47 @@ function isFlashScoreMatchId(matchId: string) {
   return /^[A-Za-z0-9]{8}$/.test(matchId);
 }
 
+function serializeLineupOverride(override: ExternalMatchLineupOverrideRecord | null) {
+  return override
+    ? {
+        provider: override.provider,
+        ratedAt: override.rated_at,
+        ratedBy: override.rated_by,
+      }
+    : null;
+}
+
+function mergeLineupOverride(
+  lineups: unknown,
+  override: ExternalMatchLineupOverrideRecord | null,
+) {
+  if (!override) return lineups;
+
+  return {
+    ...(lineups && typeof lineups === 'object' ? lineups as Record<string, unknown> : {}),
+    home: override.lineups.home,
+    away: override.lineups.away,
+  };
+}
+
+async function applyLineupOverrideToExternalMatchBundle<
+  T extends { match?: Record<string, unknown> | null; lineupOverride?: unknown },
+>(matchId: string, bundle: T | null): Promise<T | null> {
+  if (!bundle?.match) return bundle;
+
+  const lineupOverride = await getExternalMatchLineupOverride(matchId).catch(() => null);
+  if (!lineupOverride) return bundle;
+
+  return {
+    ...bundle,
+    match: {
+      ...bundle.match,
+      lineups: mergeLineupOverride(bundle.match.lineups, lineupOverride),
+    },
+    lineupOverride: serializeLineupOverride(lineupOverride),
+  };
+}
+
 async function getWriteClient() {
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return createAdminClient();
@@ -187,13 +231,7 @@ async function getFlashScoreMatchBundle(matchId: string) {
   ] = results.map((result) => (result.status === 'fulfilled' ? result.value : null));
 
   const lineupOverride = await getExternalMatchLineupOverride(matchId).catch(() => null);
-  const lineupsWithOverride = lineupOverride
-    ? {
-        ...(lineups && typeof lineups === 'object' ? lineups as Record<string, unknown> : {}),
-        home: lineupOverride.lineups.home,
-        away: lineupOverride.lineups.away,
-      }
-    : lineups;
+  const lineupsWithOverride = mergeLineupOverride(lineups, lineupOverride);
 
   return {
     source: 'flashscore' as const,
@@ -203,13 +241,7 @@ async function getFlashScoreMatchBundle(matchId: string) {
     h2h,
     form,
     lineups: lineupsWithOverride,
-    lineupOverride: lineupOverride
-      ? {
-          provider: lineupOverride.provider,
-          ratedAt: lineupOverride.rated_at,
-          ratedBy: lineupOverride.rated_by,
-        }
-      : null,
+    lineupOverride: serializeLineupOverride(lineupOverride),
     standings,
     dayMatches,
     playerStats,
@@ -326,7 +358,10 @@ export async function GET(
     const espnMotorsportMatchId = parseEspnMotorsportMatchId(matchId);
 
     if (rugbyMatchId) {
-      const bundle = await getRugbyApiSportsMatchBundle(rugbyMatchId);
+      const bundle = await applyLineupOverrideToExternalMatchBundle(
+        matchId,
+        await getRugbyApiSportsMatchBundle(rugbyMatchId),
+      );
       if (!bundle) {
         return jsonNoStore(
           { error: 'Match not found' },
@@ -338,7 +373,10 @@ export async function GET(
     }
 
     if (espnMatchId) {
-      const bundle = await getEspnAmericanFootballMatchBundle(espnMatchId);
+      const bundle = await applyLineupOverrideToExternalMatchBundle(
+        matchId,
+        await getEspnAmericanFootballMatchBundle(espnMatchId),
+      );
       if (!bundle) {
         return jsonNoStore(
           { error: 'Match not found' },

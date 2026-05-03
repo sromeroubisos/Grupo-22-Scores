@@ -50,17 +50,264 @@ function emptyPlayer(nextNumber: number): LineupPlayer {
 
 const BULK_LINE_PATTERN = /^\s*(\d{1,3})\s*[-.–—):]?\s+(.+?)\s*$/;
 
+const BULK_NUMBERED_LINE_PATTERN = /^\s*(?:#|n(?:ro|o|um|umber)?\.?)?\s*(\d{1,3})\s*(?:[-.\u2013\u2014):]\s*|\s+)(.+?)\s*$/i;
+const BULK_ROLE_VALUES = new Set(['starter', 'titular', 'starting', 'bench', 'suplente', 'substitute', 'finisher', 'reserva']);
+
+function cleanBulkCell(value: unknown): string {
+    return String(value ?? '').trim().replace(/^["']|["']$/g, '').trim();
+}
+
+function normalizeBulkKey(value: unknown): string {
+    return cleanBulkCell(value)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9#]/g, '');
+}
+
+function parseBulkNumber(value: unknown): number | null {
+    const normalized = normalizeBulkKey(value);
+    const match = /^(?:#|nro|no|num|number|dorsal|camiseta|jersey)?(\d{1,3})$/.exec(normalized);
+    if (!match) return null;
+    const number = Number(match[1]);
+    return Number.isInteger(number) && number >= 0 && number <= 999 ? number : null;
+}
+
+function splitDelimitedLine(line: string): string[] | null {
+    const delimiter = line.includes('\t') ? '\t' : line.includes(';') ? ';' : line.includes(',') ? ',' : null;
+    if (!delimiter) return null;
+
+    const cells: string[] = [];
+    let current = '';
+    let quoted = false;
+
+    for (const char of line) {
+        if (char === '"') {
+            quoted = !quoted;
+            continue;
+        }
+        if (char === delimiter && !quoted) {
+            cells.push(cleanBulkCell(current));
+            current = '';
+            continue;
+        }
+        current += char;
+    }
+
+    cells.push(cleanBulkCell(current));
+    const nonEmpty = cells.filter(Boolean);
+    return nonEmpty.length >= 2 ? nonEmpty : null;
+}
+
+function classifyBulkHeader(value: unknown): 'number' | 'name' | 'position' | 'role' | 'rating' | null {
+    const key = normalizeBulkKey(value);
+    if (['#', 'n', 'no', 'nro', 'num', 'numero', 'number', 'dorsal', 'camiseta', 'jersey', 'jerseynumber', 'shirt'].includes(key)) return 'number';
+    if (['name', 'nombre', 'jugador', 'player', 'displayname', 'fullname', 'athlete'].includes(key)) return 'name';
+    if (['position', 'posicion', 'puesto', 'pos'].includes(key)) return 'position';
+    if (['role', 'rol', 'tipo', 'lineuprole', 'squadrole'].includes(key)) return 'role';
+    if (['rating', 'puntaje', 'score', 'calificacion'].includes(key)) return 'rating';
+    return null;
+}
+
+function looksLikeHeaderRow(cells: string[]) {
+    return cells.map(classifyBulkHeader).filter(Boolean).length >= 2;
+}
+
+function buildPlayerFromParts(input: {
+    number: number | null;
+    name: string;
+    position?: string | null;
+    role?: string | null;
+    rating?: number | null;
+}, fallbackNumber: number): { player: LineupPlayer; nextNumber: number } | null {
+    const name = cleanBulkCell(input.name);
+    if (!name) return null;
+
+    const number = input.number ?? fallbackNumber;
+    const position = cleanBulkCell(input.position);
+    const role = cleanBulkCell(input.role);
+
+    return {
+        player: {
+            id: null,
+            name,
+            number,
+            position: position || null,
+            role: role || null,
+            rating: input.rating ?? null,
+            isCaptain: false,
+        },
+        nextNumber: Math.max(fallbackNumber, number) + 1,
+    };
+}
+
+function parseDelimitedPlayer(
+    cells: string[],
+    headers: Array<ReturnType<typeof classifyBulkHeader>> | null,
+    fallbackNumber: number,
+) {
+    const byHeader = (kind: NonNullable<ReturnType<typeof classifyBulkHeader>>) => {
+        const index = headers?.findIndex((header) => header === kind) ?? -1;
+        return index >= 0 ? cells[index] : '';
+    };
+
+    if (headers) {
+        return buildPlayerFromParts({
+            number: parseBulkNumber(byHeader('number')),
+            name: byHeader('name'),
+            position: byHeader('position'),
+            role: byHeader('role'),
+            rating: parseRatingInput(byHeader('rating')),
+        }, fallbackNumber);
+    }
+
+    const numberIndex = cells.findIndex((cell) => parseBulkNumber(cell) !== null);
+    const ratingIndex = cells.findIndex((cell, index) => {
+        if (index === numberIndex) return false;
+        const rating = parseRatingInput(cell);
+        return rating !== null && /^[0-9]+([,.][0-9]+)?$/.test(cleanBulkCell(cell));
+    });
+    const nameIndex = cells.findIndex((cell, index) => {
+        if (index === numberIndex || index === ratingIndex) return false;
+        return /[A-Za-zÀ-ÿ]/.test(cell) && !BULK_ROLE_VALUES.has(normalizeBulkKey(cell));
+    });
+
+    if (nameIndex < 0) return null;
+
+    const roleIndex = cells.findIndex((cell, index) => (
+        index !== numberIndex &&
+        index !== nameIndex &&
+        index !== ratingIndex &&
+        BULK_ROLE_VALUES.has(normalizeBulkKey(cell))
+    ));
+    const positionIndex = cells.findIndex((cell, index) => (
+        index !== numberIndex &&
+        index !== nameIndex &&
+        index !== ratingIndex &&
+        index !== roleIndex &&
+        /[A-Za-zÀ-ÿ]/.test(cell)
+    ));
+
+    return buildPlayerFromParts({
+        number: numberIndex >= 0 ? parseBulkNumber(cells[numberIndex]) : null,
+        name: cells[nameIndex],
+        position: positionIndex >= 0 ? cells[positionIndex] : null,
+        role: roleIndex >= 0 ? cells[roleIndex] : null,
+        rating: ratingIndex >= 0 ? parseRatingInput(cells[ratingIndex]) : null,
+    }, fallbackNumber);
+}
+
+function collectJsonPlayers(value: unknown, depth = 0): Record<string, unknown>[] {
+    if (depth > 5 || value == null) return [];
+    if (Array.isArray(value)) {
+        return value.flatMap((item) => collectJsonPlayers(item, depth + 1));
+    }
+    if (typeof value !== 'object') return [];
+
+    const record = value as Record<string, unknown>;
+    const hasPlayerName = [
+        record.name,
+        record.displayName,
+        record.fullName,
+        record.full_name,
+        record.player_name,
+        record.PLAYER_NAME,
+        record.NAME,
+    ].some((candidate) => cleanBulkCell(candidate));
+
+    if (hasPlayerName) return [record];
+
+    return ['players', 'items', 'athletes', 'squad', 'list', 'DATA', 'data']
+        .flatMap((key) => collectJsonPlayers(record[key], depth + 1));
+}
+
+function parseJsonLineup(input: string): LineupPlayer[] {
+    const trimmed = input.trim();
+    if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return [];
+
+    try {
+        const records = collectJsonPlayers(JSON.parse(trimmed));
+        const result: LineupPlayer[] = [];
+        let fallbackNumber = 1;
+
+        for (const record of records) {
+            const parsed = buildPlayerFromParts({
+                number: parseBulkNumber(
+                    record.number ??
+                    record.jerseyNumber ??
+                    record.jersey_number ??
+                    record.shirtNumber ??
+                    record.shirt_number ??
+                    record.PLAYER_NUMBER ??
+                    record.NUMBER,
+                ),
+                name:
+                    cleanBulkCell(record.name) ||
+                    cleanBulkCell(record.displayName) ||
+                    cleanBulkCell(record.fullName) ||
+                    cleanBulkCell(record.full_name) ||
+                    cleanBulkCell(record.player_name) ||
+                    cleanBulkCell(record.PLAYER_NAME) ||
+                    cleanBulkCell(record.NAME),
+                position:
+                    cleanBulkCell(record.position) ||
+                    cleanBulkCell(record.positionName) ||
+                    cleanBulkCell(record.position_name) ||
+                    cleanBulkCell(record.POSITION_NAME),
+                role:
+                    cleanBulkCell(record.role) ||
+                    cleanBulkCell(record.lineupRole) ||
+                    cleanBulkCell(record.lineup_role) ||
+                    cleanBulkCell(record.squad_role),
+                rating: parseRatingInput(
+                    cleanBulkCell(record.rating) ||
+                    cleanBulkCell(record.score) ||
+                    cleanBulkCell(record.puntaje),
+                ),
+            }, fallbackNumber);
+
+            if (!parsed) continue;
+            result.push(parsed.player);
+            fallbackNumber = parsed.nextNumber;
+        }
+
+        return result;
+    } catch {
+        return [];
+    }
+}
+
 export function parseBulkLineup(input: string): LineupPlayer[] {
     if (!input) return [];
+    const jsonPlayers = parseJsonLineup(input);
+    if (jsonPlayers.length > 0) return jsonPlayers;
+
     const lines = input.split(/\r?\n/);
     const result: LineupPlayer[] = [];
     let fallbackNumber = 1;
+    let headers: Array<ReturnType<typeof classifyBulkHeader>> | null = null;
 
     for (const rawLine of lines) {
         const line = rawLine.trim();
         if (!line) continue;
+        if (/^-{3,}$/.test(line)) continue;
 
-        const match = BULK_LINE_PATTERN.exec(line);
+        const cells = splitDelimitedLine(line);
+        if (cells) {
+            if (looksLikeHeaderRow(cells)) {
+                headers = cells.map(classifyBulkHeader);
+                continue;
+            }
+
+            const parsedDelimited = parseDelimitedPlayer(cells, headers, fallbackNumber);
+            if (parsedDelimited) {
+                result.push(parsedDelimited.player);
+                fallbackNumber = parsedDelimited.nextNumber;
+                continue;
+            }
+        }
+
+        const match = BULK_NUMBERED_LINE_PATTERN.exec(line) || BULK_LINE_PATTERN.exec(line);
         let number: number;
         let name: string;
 
@@ -76,15 +323,8 @@ export function parseBulkLineup(input: string): LineupPlayer[] {
         if (!Number.isFinite(number) || number < 0) number = fallbackNumber;
         fallbackNumber = Math.max(fallbackNumber, number) + 1;
 
-        result.push({
-            id: null,
-            name,
-            number,
-            position: null,
-            role: null,
-            rating: null,
-            isCaptain: false,
-        });
+        const parsed = buildPlayerFromParts({ number, name }, fallbackNumber - 1);
+        if (parsed) result.push(parsed.player);
     }
 
     return result;

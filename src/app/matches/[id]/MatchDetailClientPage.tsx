@@ -636,6 +636,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
             : isLimitedExternalSource
             ? [
                 { id: 'summary', label: 'Resumen' },
+                { id: 'lineups', label: 'Alineaciones' },
                 { id: 'h2h', label: 'H2H' },
                 { id: 'standings', label: 'Clasificacion' },
             ]
