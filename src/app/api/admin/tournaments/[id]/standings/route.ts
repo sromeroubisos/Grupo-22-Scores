@@ -77,7 +77,7 @@ function resolveCircuitPlacementPoints(
         ? (tournamentRuleset as any).circuit.stages
         : [];
     const stageMatch = stages.find(
-        (s: any, index: number) =>
+        (s: any) =>
             String(s?.id || '') === phaseId ||
             Number(s?.order) === phaseOrder + 1 ||
             Number(s?.order) === phaseOrder,
@@ -90,8 +90,7 @@ function resolveCircuitPlacementPoints(
 
 // --- Circuit global aggregation ---
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handleCircuitGlobalStandings(tournamentId: string, supabase: any) {
+async function handleCircuitGlobalStandings(tournamentId: string, supabase: any, seasonId?: string | null) {
     // Fetch tournament ruleset
     const { data: tournament, error: tErr } = await supabase
         .from('tournaments')
@@ -103,11 +102,17 @@ async function handleCircuitGlobalStandings(tournamentId: string, supabase: any)
     const ruleset = (tournament.ruleset ?? {}) as Record<string, unknown>;
 
     // Fetch all phases ordered
-    const { data: phases, error: pErr } = await supabase
+    let phasesQuery = supabase
         .from('tournament_phases')
         .select('id, name, order_index, settings')
         .eq('tournament_id', tournamentId)
         .order('order_index', { ascending: true });
+
+    if (seasonId) {
+        phasesQuery = phasesQuery.eq('season_id', seasonId);
+    }
+
+    const { data: phases, error: pErr } = await phasesQuery;
     if (pErr) return NextResponse.json({ error: 'Error fetching phases' }, { status: 500 });
 
     if (!phases || phases.length === 0) {
@@ -134,22 +139,34 @@ async function handleCircuitGlobalStandings(tournamentId: string, supabase: any)
                 .map(({ position, points }) => [position, points]),
         );
 
-        const { data: rows } = await supabase
+        let rowsQuery = supabase
             .from('tournament_standings')
             .select('club_id, position, points, stats')
             .eq('tournament_id', tournamentId)
             .eq('phase_id', phase.id)
             .order('position', { ascending: true });
 
+        if (seasonId) {
+            rowsQuery = rowsQuery.eq('season_id', seasonId);
+        }
+
+        const { data: rows } = await rowsQuery;
+
         if (!rows || rows.length === 0) continue;
 
         // Count final matches for this phase as a proxy for "played"
-        const { count: phaseMatchCount } = await supabase
+        let phaseMatchQuery = supabase
             .from('matches')
             .select('id', { count: 'exact', head: true })
             .eq('tournament_id', tournamentId)
             .eq('phase_id', phase.id)
             .in('status', [...FINAL_STANDINGS_STATUSES]);
+
+        if (seasonId) {
+            phaseMatchQuery = phaseMatchQuery.eq('season_id', seasonId);
+        }
+
+        const { count: phaseMatchCount } = await phaseMatchQuery;
         totalFinalMatches += phaseMatchCount ?? 0;
 
         for (const row of rows) {
@@ -229,17 +246,28 @@ export async function GET(
         const phaseId = searchParams.get('phaseId');
         const groupId = searchParams.get('groupId');
         const tableType = searchParams.get('tableType') || 'general';
+        let seasonId =
+            searchParams.get('seasonId') ||
+            searchParams.get('season_id') ||
+            searchParams.get('season');
 
         if (!phaseId) {
             return NextResponse.json({ error: 'phaseId is required' }, { status: 400 });
         }
 
-        if (phaseId === CIRCUIT_GLOBAL_SENTINEL) {
-            const supabase = await createClient();
-            return handleCircuitGlobalStandings(tournamentId, supabase);
+        const supabase = await createClient();
+        if (!seasonId) {
+            const { data: tournamentSeason } = await supabase
+                .from('tournaments')
+                .select('current_season_id')
+                .eq('id', tournamentId)
+                .maybeSingle();
+            seasonId = tournamentSeason?.current_season_id ?? null;
         }
 
-        const supabase = await createClient();
+        if (phaseId === CIRCUIT_GLOBAL_SENTINEL) {
+            return handleCircuitGlobalStandings(tournamentId, supabase, seasonId);
+        }
 
         // 1. Fetch phase + tournament rules
         const { data: phase, error: phaseError } = await supabase
@@ -281,31 +309,44 @@ export async function GET(
                 standingsQuery = (standingsQuery as typeof standingsQuery & { is: (column: string, value: null) => typeof standingsQuery }).is('group_id', null);
             }
 
+            if (seasonId) {
+                standingsQuery = standingsQuery.eq('season_id', seasonId);
+            }
+
+            let participantsQuery = scopedGroupId
+                ? supabase
+                    .from('tournament_participants')
+                    .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
+                    .eq('tournament_id', tournamentId)
+                    .eq('group_id', scopedGroupId)
+                    .not('status', 'in', '("withdrawn","disqualified")')
+                : supabase
+                    .from('tournament_participants')
+                    .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
+                    .eq('tournament_id', tournamentId)
+                    .not('status', 'in', '("withdrawn","disqualified")');
+
+            let manualMatchesQuery = scopedGroupId
+                ? supabase
+                    .from('matches')
+                    .select('id, status, group_id, home_club_id, away_club_id')
+                    .eq('tournament_id', tournamentId)
+                    .eq('phase_id', phaseId)
+                : supabase
+                    .from('matches')
+                    .select('id, status, group_id, home_club_id, away_club_id')
+                    .eq('tournament_id', tournamentId)
+                    .eq('phase_id', phaseId);
+
+            if (seasonId) {
+                participantsQuery = participantsQuery.eq('season_id', seasonId);
+                manualMatchesQuery = manualMatchesQuery.eq('season_id', seasonId);
+            }
+
             const [{ data: persistedRows, error: persistedError }, { data: participants, error: pError }, { data: matches, error: mError }] = await Promise.all([
                 standingsQuery,
-                (scopedGroupId
-                    ? supabase
-                        .from('tournament_participants')
-                        .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
-                        .eq('tournament_id', tournamentId)
-                        .eq('group_id', scopedGroupId)
-                        .not('status', 'in', '("withdrawn","disqualified")')
-                    : supabase
-                        .from('tournament_participants')
-                        .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
-                        .eq('tournament_id', tournamentId)
-                        .not('status', 'in', '("withdrawn","disqualified")')),
-                (scopedGroupId
-                    ? supabase
-                        .from('matches')
-                        .select('id, status, group_id, home_club_id, away_club_id')
-                        .eq('tournament_id', tournamentId)
-                        .eq('phase_id', phaseId)
-                    : supabase
-                        .from('matches')
-                        .select('id, status, group_id, home_club_id, away_club_id')
-                        .eq('tournament_id', tournamentId)
-                        .eq('phase_id', phaseId)),
+                participantsQuery,
+                manualMatchesQuery,
             ]);
 
             if (persistedError) {
@@ -377,6 +418,7 @@ export async function GET(
             .eq('tournament_id', tournamentId)
             .not('status', 'in', '("withdrawn","disqualified")');
 
+        if (seasonId) pQuery = pQuery.eq('season_id', seasonId);
         if (scopedGroupId) pQuery = pQuery.eq('group_id', scopedGroupId);
         const { data: participants, error: pError } = await pQuery;
         if (pError) throw pError;
@@ -389,6 +431,7 @@ export async function GET(
                 .eq('tournament_id', tournamentId)
                 .eq('phase_id', phaseId)
                 .in('status', [...FINAL_STANDINGS_STATUSES]);
+            if (seasonId) query = query.eq('season_id', seasonId);
             const { data, error } = await query;
             return {
                 data: data as StandingMatchRow[] | null,
@@ -403,6 +446,7 @@ export async function GET(
                 .eq('tournament_id', tournamentId)
                 .eq('phase_id', phaseId)
                 .in('status', [...FINAL_STANDINGS_STATUSES]);
+            if (seasonId) query = query.eq('season_id', seasonId);
             const { data, error } = await query;
             return {
                 data: data as StandingMatchRowWithoutEvents[] | null,
@@ -436,12 +480,14 @@ export async function GET(
         };
 
         // Count non-final matches for this phase
-        const { data: pendingMatches, error: pendingError } = await supabase
+        let pendingQuery = supabase
             .from('matches')
             .select('id, group_id, home_club_id, away_club_id, status')
             .eq('tournament_id', tournamentId)
             .eq('phase_id', phaseId)
             .in('status', ['scheduled', 'live', 'suspended', 'delayed', 'postponed']);
+        if (seasonId) pendingQuery = pendingQuery.eq('season_id', seasonId);
+        const { data: pendingMatches, error: pendingError } = await pendingQuery;
         if (pendingError) throw pendingError;
         metrics.pending_results = filterMatchesForGroupScope(
             pendingMatches || [],
@@ -459,6 +505,10 @@ export async function GET(
                 .eq('phase_id', phaseId)
                 .order('last_updated', { ascending: false })
                 .limit(1);
+
+            if (seasonId) {
+                cQuery = cQuery.eq('season_id', seasonId);
+            }
 
             if (scopedGroupId) {
                 cQuery = cQuery.eq('group_id', scopedGroupId);

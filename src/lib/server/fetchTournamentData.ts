@@ -35,6 +35,7 @@ export type TournamentInitialData = {
     partial?: boolean;
     error?: string;
     tournament: Record<string, unknown> | null;
+    season?: Record<string, unknown> | null;
     participants: unknown[];
     matches: unknown[];
     standings: unknown[];
@@ -81,6 +82,22 @@ type TournamentClubLookup = {
 
 type SlugLookupRow = {
     id: string;
+};
+
+type FetchTournamentDataOptions = {
+    seasonId?: string | null;
+};
+
+type TournamentSeasonRow = {
+    id: string;
+    tournament_id: string;
+    season_code: string;
+    name: string;
+    display_name: string | null;
+    status: string;
+    is_active: boolean;
+    start_date: string | null;
+    end_date: string | null;
 };
 
 type TournamentRow = {
@@ -202,6 +219,7 @@ function emptyTournamentData(error?: string): TournamentInitialData {
         ok: false,
         error,
         tournament: null,
+        season: null,
         participants: [],
         matches: [],
         standings: [],
@@ -220,6 +238,11 @@ function emptyTournamentData(error?: string): TournamentInitialData {
             teamLabels: null,
         },
     };
+}
+
+function cleanSeasonFilter(value: string | null | undefined): string | null {
+    const trimmed = String(value ?? '').trim();
+    return trimmed || null;
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
@@ -533,7 +556,48 @@ async function getTournamentByIdBareFallback(
     return result;
 }
 
-export async function fetchTournamentData(id: string): Promise<TournamentInitialData | null> {
+async function resolveSeasonFilter(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+    tournamentId: string,
+    seasonFilter: string | null,
+): Promise<TournamentSeasonRow | null> {
+    if (!seasonFilter) {
+        const { data: current } = await supabase
+            .from('tournaments')
+            .select('current_season_id')
+            .eq('id', tournamentId)
+            .maybeSingle();
+
+        if (!current?.current_season_id) return null;
+
+        const { data } = await supabase
+            .from('tournament_seasons')
+            .select('id, tournament_id, season_code, name, display_name, status, is_active, start_date, end_date')
+            .eq('id', current.current_season_id)
+            .maybeSingle();
+
+        return data as TournamentSeasonRow | null;
+    }
+
+    let query = supabase
+        .from('tournament_seasons')
+        .select('id, tournament_id, season_code, name, display_name, status, is_active, start_date, end_date')
+        .eq('tournament_id', tournamentId);
+
+    query = UUID_RE.test(seasonFilter)
+        ? query.eq('id', seasonFilter)
+        : query.eq('season_code', seasonFilter);
+
+    const { data, error } = await query.maybeSingle();
+    if (error) {
+        console.warn('[fetchTournamentData] season filter failed:', error.message);
+        return null;
+    }
+
+    return data as TournamentSeasonRow | null;
+}
+
+export async function fetchTournamentData(id: string, options: FetchTournamentDataOptions = {}): Promise<TournamentInitialData | null> {
     try {
         const supabase = await getReadClient();
 
@@ -557,6 +621,88 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             tournamentId = slugLookup.data.id;
         }
 
+        const requestedSeason = cleanSeasonFilter(options.seasonId);
+        const seasonContext = await resolveSeasonFilter(supabase, tournamentId, requestedSeason);
+        if (requestedSeason && !seasonContext) {
+            return emptyTournamentData('Season not found');
+        }
+        const scopedSeasonId = seasonContext?.id ?? null;
+
+        let participantsQuery = supabase
+            .from('tournament_participants')
+            .select(`
+                id, club_id, name, seed, status, type, group_id,
+                clubs:clubs!tournament_participants_club_id_fkey(
+                    id, name, logo_url, short_name, slug
+                )
+            `)
+            .eq('tournament_id', tournamentId)
+            .not('status', 'in', '("withdrawn","disqualified")')
+            .order('seed', { ascending: true, nullsFirst: false });
+
+        let matchesQueryWithEvents = supabase
+            .from('matches')
+            .select(`
+                id, date_time, status, score, events, venue, round_label, notes,
+                home_club_id, away_club_id,
+                phase_id, group_id, round_uuid,
+                home_base_points, away_base_points,
+                home_bonus_points, away_bonus_points,
+                points_autocalculated, points_override_reason
+            `)
+            .eq('tournament_id', tournamentId)
+            .order('date_time', { ascending: true });
+
+        let matchesQueryWithoutEvents = supabase
+            .from('matches')
+            .select(`
+                id, date_time, status, score, venue, round_label, notes,
+                home_club_id, away_club_id,
+                phase_id, group_id, round_uuid,
+                home_base_points, away_base_points,
+                home_bonus_points, away_bonus_points,
+                points_autocalculated, points_override_reason
+            `)
+            .eq('tournament_id', tournamentId)
+            .order('date_time', { ascending: true });
+
+        let standingsQuery = supabase
+            .from('tournament_standings')
+            .select(`
+                id, position, played, won, drawn, lost, points, scored, conceded,
+                bonus_points, form, stats, club_id, phase_id, group_id
+            `)
+            .eq('tournament_id', tournamentId)
+            .order('position', { ascending: true });
+
+        let phasesQuery = supabase
+            .from('tournament_phases')
+            .select('*')
+            .eq('tournament_id', tournamentId)
+            .order('order_index', { ascending: true });
+
+        let roundsQuery = supabase
+            .from('tournament_rounds')
+            .select('id, name, phase_id, order_index, tournament_phases!inner(tournament_id)')
+            .eq('tournament_phases.tournament_id', tournamentId)
+            .order('order_index', { ascending: true });
+
+        let groupsQuery = supabase
+            .from('tournament_groups')
+            .select('id, name, phase_id, order_index, tournament_phases!inner(tournament_id)')
+            .eq('tournament_phases.tournament_id', tournamentId)
+            .order('order_index', { ascending: true });
+
+        if (scopedSeasonId) {
+            participantsQuery = participantsQuery.eq('season_id', scopedSeasonId);
+            matchesQueryWithEvents = matchesQueryWithEvents.eq('season_id', scopedSeasonId);
+            matchesQueryWithoutEvents = matchesQueryWithoutEvents.eq('season_id', scopedSeasonId);
+            standingsQuery = standingsQuery.eq('season_id', scopedSeasonId);
+            phasesQuery = phasesQuery.eq('season_id', scopedSeasonId);
+            roundsQuery = roundsQuery.eq('season_id', scopedSeasonId);
+            groupsQuery = groupsQuery.eq('season_id', scopedSeasonId);
+        }
+
         const [
             tournamentRes,
             participantsRes,
@@ -574,88 +720,37 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
             ),
             settleSupabaseQuery(
                 'participants',
-                supabase
-                    .from('tournament_participants')
-                    .select(`
-                        id, club_id, name, seed, status, type, group_id,
-                        clubs:clubs!tournament_participants_club_id_fkey(
-                            id, name, logo_url, short_name, slug
-                        )
-                    `)
-                    .eq('tournament_id', tournamentId)
-                    .not('status', 'in', '("withdrawn","disqualified")')
-                    .order('seed', { ascending: true, nullsFirst: false }),
+                participantsQuery,
                 [] as TournamentParticipantRow[],
             ),
             settleSupabaseQuery(
                 'matches',
                 queryMatchesWithOptionalEvents<TournamentMatchRow>(
-                    () => supabase
-                        .from('matches')
-                        .select(`
-                            id, date_time, status, score, events, venue, round_label, notes,
-                            home_club_id, away_club_id,
-                            phase_id, group_id, round_uuid,
-                            home_base_points, away_base_points,
-                            home_bonus_points, away_bonus_points,
-                            points_autocalculated, points_override_reason
-                        `)
-                        .eq('tournament_id', tournamentId)
-                        .order('date_time', { ascending: true }),
-                    () => supabase
-                        .from('matches')
-                        .select(`
-                            id, date_time, status, score, venue, round_label, notes,
-                            home_club_id, away_club_id,
-                            phase_id, group_id, round_uuid,
-                            home_base_points, away_base_points,
-                            home_bonus_points, away_bonus_points,
-                            points_autocalculated, points_override_reason
-                        `)
-                        .eq('tournament_id', tournamentId)
-                        .order('date_time', { ascending: true }),
+                    () => matchesQueryWithEvents,
+                    () => matchesQueryWithoutEvents,
                 ),
                 [] as TournamentMatchRow[],
                 MATCHES_TIMEOUT_MS,
             ),
             settleSupabaseQuery(
                 'standings',
-                supabase
-                    .from('tournament_standings')
-                    .select(`
-                        id, position, played, won, drawn, lost, points, scored, conceded,
-                        bonus_points, form, stats, club_id, phase_id, group_id
-                    `)
-                    .eq('tournament_id', tournamentId)
-                    .order('position', { ascending: true }),
+                standingsQuery,
                 [] as TournamentStandingRow[],
                 STANDINGS_TIMEOUT_MS,
             ),
             settleSupabaseQuery(
                 'phases',
-                supabase
-                    .from('tournament_phases')
-                    .select('*')
-                    .eq('tournament_id', tournamentId)
-                    .order('order_index', { ascending: true }),
+                phasesQuery,
                 [] as unknown[],
             ),
             settleSupabaseQuery(
                 'rounds',
-                supabase
-                    .from('tournament_rounds')
-                    .select('id, name, phase_id, order_index, tournament_phases!inner(tournament_id)')
-                    .eq('tournament_phases.tournament_id', tournamentId)
-                    .order('order_index', { ascending: true }),
+                roundsQuery,
                 [] as TournamentRoundWithPhaseFilter[],
             ),
             settleSupabaseQuery(
                 'groups',
-                supabase
-                    .from('tournament_groups')
-                    .select('id, name, phase_id, order_index, tournament_phases!inner(tournament_id)')
-                    .eq('tournament_phases.tournament_id', tournamentId)
-                    .order('order_index', { ascending: true }),
+                groupsQuery,
                 [] as TournamentGroupWithPhaseFilter[],
             ),
             settleSupabaseQuery(
@@ -743,6 +838,7 @@ export async function fetchTournamentData(id: string): Promise<TournamentInitial
                 sport_id: tournamentRow.sport_id || tournamentRow.legacy_sport || 'rugby',
                 country_name: tournamentRow.country || (tournamentRow.country_ref as { name?: string } | null)?.name || null,
             } : null,
+            season: seasonContext,
             participants: sanitizedParticipants,
             matches: hydratedMatches,
             standings: hydratedStandings,

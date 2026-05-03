@@ -556,9 +556,7 @@ export default function TorneosPage() {
                 searchParams.set('country_flag', group.flagEmoji);
             }
 
-            const response = await fetch(`/api/public/tournaments?${searchParams.toString()}`, {
-                cache: 'no-store',
-            });
+            const response = await fetch(`/api/public/tournaments?${searchParams.toString()}`);
             const payload = await response.json().catch(() => ({}));
 
             if (!response.ok) {
@@ -717,7 +715,6 @@ export default function TorneosPage() {
                 });
 
                 const response = await fetch(`/api/public/tournaments?${searchParams.toString()}`, {
-                    cache: 'no-store',
                     signal: controller.signal,
                 });
                 const payload = await response.json().catch(() => ({}));

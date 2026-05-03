@@ -15,12 +15,13 @@ export async function recalculatePhaseStandingsScopes(
     tournamentId: string,
     phaseId: string,
     tableType = 'general',
+    seasonId?: string | null,
 ): Promise<{ ok: boolean; rows_calculated: number; scopes_recalculated: number }> {
     const supabase = createAdminClient();
 
     const { data: phase, error: phaseError } = await supabase
         .from('tournament_phases')
-        .select('id, phase_type')
+        .select('id, phase_type, season_id')
         .eq('id', phaseId)
         .eq('tournament_id', tournamentId)
         .single();
@@ -30,11 +31,19 @@ export async function recalculatePhaseStandingsScopes(
         return { ok: false, rows_calculated: 0, scopes_recalculated: 0 };
     }
 
-    const { error: deleteError } = await supabase
+    const scopedSeasonId = seasonId ?? phase.season_id ?? null;
+
+    let deleteQuery = supabase
         .from('tournament_standings')
         .delete()
         .eq('tournament_id', tournamentId)
         .eq('phase_id', phaseId);
+
+    if (scopedSeasonId) {
+        deleteQuery = deleteQuery.eq('season_id', scopedSeasonId);
+    }
+
+    const { error: deleteError } = await deleteQuery;
 
     if (deleteError) {
         console.error('[recalculatePhaseStandingsScopes] Error clearing stale standings', deleteError);
@@ -55,7 +64,13 @@ export async function recalculatePhaseStandingsScopes(
 
         if (Array.isArray(groups) && groups.length > 0) {
             const results = await Promise.all(
-                groups.map((group) => recalculateAndPersistStandings(tournamentId, phaseId, group.id, tableType)),
+                groups.map((group) => recalculateAndPersistStandings(
+                    tournamentId,
+                    phaseId,
+                    group.id,
+                    tableType,
+                    scopedSeasonId,
+                )),
             );
 
             return {
@@ -66,7 +81,7 @@ export async function recalculatePhaseStandingsScopes(
         }
     }
 
-    const result = await recalculateAndPersistStandings(tournamentId, phaseId, null, tableType);
+    const result = await recalculateAndPersistStandings(tournamentId, phaseId, null, tableType, scopedSeasonId);
     return {
         ok: result.ok,
         rows_calculated: result.rows_calculated,
@@ -79,6 +94,7 @@ export async function recalculateAndPersistStandings(
     phaseId: string,
     groupId?: string | null,
     tableType = 'general',
+    seasonId?: string | null,
 ): Promise<{ ok: boolean; rows_calculated: number }> {
     const supabase = createAdminClient();
 
@@ -86,7 +102,7 @@ export async function recalculateAndPersistStandings(
     const [{ data: phase, error: phaseError }, { data: tournament }] = await Promise.all([
         supabase
             .from('tournament_phases')
-            .select('id, settings')
+            .select('id, settings, season_id')
             .eq('id', phaseId)
             .eq('tournament_id', tournamentId)
             .single(),
@@ -103,6 +119,7 @@ export async function recalculateAndPersistStandings(
     }
 
     const resolvedRules = StandingsEngine.resolveRules(phase.settings, tournament?.ruleset);
+    const scopedSeasonId = seasonId ?? phase.season_id ?? null;
 
     // 2. Fetch participants (exclude withdrawn/disqualified)
     let pQuery = supabase
@@ -111,6 +128,7 @@ export async function recalculateAndPersistStandings(
         .eq('tournament_id', tournamentId)
         .not('status', 'in', '("withdrawn","disqualified")');
 
+    if (scopedSeasonId) pQuery = pQuery.eq('season_id', scopedSeasonId);
     if (groupId) pQuery = pQuery.eq('group_id', groupId);
     const { data: participants, error: pError } = await pQuery;
     if (pError) {
@@ -128,6 +146,10 @@ export async function recalculateAndPersistStandings(
             .eq('tournament_id', tournamentId)
             .eq('phase_id', phaseId)
             .in('status', [...FINAL_STANDINGS_STATUSES]);
+
+        if (scopedSeasonId) {
+            query = query.eq('season_id', scopedSeasonId);
+        }
 
         return query;
     };
@@ -164,6 +186,10 @@ export async function recalculateAndPersistStandings(
         .eq('tournament_id', tournamentId)
         .eq('phase_id', phaseId);
 
+    if (scopedSeasonId) {
+        delQuery = delQuery.eq('season_id', scopedSeasonId);
+    }
+
     if (groupId) {
         delQuery = delQuery.eq('group_id', groupId);
     } else {
@@ -175,6 +201,7 @@ export async function recalculateAndPersistStandings(
 
     const rows = table.map((row) => ({
         tournament_id: tournamentId,
+        season_id: scopedSeasonId,
         phase_id: phaseId,
         group_id: groupId || null,
         club_id: row.teamId,

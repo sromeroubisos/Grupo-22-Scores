@@ -12,7 +12,6 @@ function getClientIp(request: NextRequest | Request): string {
     if (forwarded) {
         return forwarded.split(',')[0].trim();
     }
-    // @ts-ignore
     if (req.socket?.remoteAddress) return req.socket.remoteAddress;
     return 'unknown';
 }

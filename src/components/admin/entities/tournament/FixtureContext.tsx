@@ -130,9 +130,10 @@ interface FixtureProviderProps {
   children: React.ReactNode;
   initialFixture: TournamentFixture | null;
   tournamentId: string;
+  seasonId?: string | null;
 }
 
-export function FixtureProvider({ children, initialFixture, tournamentId }: FixtureProviderProps) {
+export function FixtureProvider({ children, initialFixture, tournamentId, seasonId }: FixtureProviderProps) {
   // Data state
   const [fixture, setFixture] = useState<TournamentFixture | null>(initialFixture);
   const [isLoadingFixture, setIsLoadingFixture] = useState(false);
@@ -185,7 +186,17 @@ export function FixtureProvider({ children, initialFixture, tournamentId }: Fixt
     setFixtureError(null);
 
     try {
-      const response = await fetch(`/api/tournaments/${tournamentId}/fixture`, {
+      const urlSeasonId =
+        seasonId ||
+        (typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search).get('seasonId') ||
+          new URLSearchParams(window.location.search).get('season_id') ||
+          new URLSearchParams(window.location.search).get('season')
+          : null);
+      const query = new URLSearchParams();
+      if (urlSeasonId) query.set('seasonId', urlSeasonId);
+
+      const response = await fetch(`/api/tournaments/${tournamentId}/fixture${query.size ? `?${query.toString()}` : ''}`, {
         cache: 'no-store',
         signal: abortController.signal,
       });
@@ -230,7 +241,7 @@ export function FixtureProvider({ children, initialFixture, tournamentId }: Fixt
       window.clearTimeout(timeoutId);
       setIsLoadingFixture(false);
     }
-  }, [tournamentId]);
+  }, [seasonId, tournamentId]);
 
   const generateFixture = useCallback(async (params: { numRounds: number, namePattern: string }) => {
     if (!selectedPhaseId) return false;

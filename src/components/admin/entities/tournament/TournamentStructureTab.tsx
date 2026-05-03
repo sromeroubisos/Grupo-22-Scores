@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { AlertCircle, CheckCircle, ChevronRight, Layers, Plus, Trash2 } from 'lucide-react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
+import { AlertCircle, CheckCircle, ChevronRight, Globe, Layers, Plus, Trash2 } from 'lucide-react';
 import './basalt.css';
 import './phase-wizard.css';
 import './tournament-structure.css';
@@ -12,6 +12,7 @@ import { LabelChip } from './standings/LabelChip';
 import { PhaseSettings, GroupLabel } from '@/types/phase-settings';
 import { updateEntity } from '@/app/admin/entities/actions';
 import { buildTournamentCompetitionConfig } from '@/lib/utils/tournamentFormat';
+import { useTournamentDirty } from './TournamentContext';
 
 interface Phase {
     id: string;
@@ -63,6 +64,17 @@ const COLUMN_TIEBREAKER_CONFIG: Record<string, { label: string; description?: st
 };
 
 export function TournamentStructureTab({ data, id }: { data?: any; id?: string }) {
+    const { markSectionDirty, setSectionDraft, clearSectionDraft, triggerSectionSavedFlash } = useTournamentDirty();
+    const isApiManaged = Boolean((data as any)?.is_api_managed);
+    const markStructureDirty = useCallback(() => {
+        setSectionDraft('structure', { touched: true });
+        markSectionDirty('structure', true);
+    }, [markSectionDirty, setSectionDraft]);
+    const markStructureClean = useCallback(() => {
+        clearSectionDraft('structure');
+        markSectionDirty('structure', false);
+    }, [clearSectionDraft, markSectionDirty]);
+
     const [phases, setPhases] = useState<Phase[]>([]);
     const [loading, setLoading] = useState(true);
     const [activatingPhaseId, setActivatingPhaseId] = useState<string | null>(null);
@@ -75,19 +87,27 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const [advanceCount, setAdvanceCount] = useState<number | ''>('');
     const [legs, setLegs] = useState<1 | 2>(1);
 
-    const isRugby = data?.sport?.toLowerCase() === 'rugby';
+    // sport_id stores the sport slug (e.g. 'rugby', 'football'); the legacy
+    // `sport` column does not exist in the schema, so the previous lookup
+    // always returned undefined and rugby defaults never applied.
+    const isRugby = (data?.sport_id ?? '').toString().toLowerCase() === 'rugby';
 
     // Tournament model (circuit vs normal)
-    const [tournamentFormat, setTournamentFormat] = useState<'circuit' | 'league'>(() => {
+    const initialTournamentFormat = useMemo<'circuit' | 'league'>(() => {
         const f = (data as any)?.format;
         const r = (data as any)?.ruleset?.competition?.season_model;
         return f === 'circuit' || r === 'circuit' ? 'circuit' : 'league';
-    });
-    const [circuitChampionMode, setCircuitChampionMode] = useState<'accumulation' | 'final'>(() => {
+    }, [data]);
+    const initialChampionMode = useMemo<'accumulation' | 'final'>(() => {
         return (data as any)?.ruleset?.competition?.parameters?.champion_mode === 'final' ? 'final' : 'accumulation';
-    });
+    }, [data]);
+    const [tournamentFormat, setTournamentFormat] = useState<'circuit' | 'league'>(initialTournamentFormat);
+    const [circuitChampionMode, setCircuitChampionMode] = useState<'accumulation' | 'final'>(initialChampionMode);
+    const [savedFormat, setSavedFormat] = useState<'circuit' | 'league'>(initialTournamentFormat);
+    const [savedChampionMode, setSavedChampionMode] = useState<'accumulation' | 'final'>(initialChampionMode);
     const [savingFormat, setSavingFormat] = useState(false);
     const [formatSaved, setFormatSaved] = useState(false);
+    const [formatError, setFormatError] = useState<string | null>(null);
 
     const isCircuit = tournamentFormat === 'circuit';
 
@@ -362,9 +382,10 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     };
 
     const handleSaveTournamentFormat = async () => {
-        if (!id) return;
+        if (!id || isApiManaged) return;
         setSavingFormat(true);
         setFormatSaved(false);
+        setFormatError(null);
         try {
             const competition = buildTournamentCompetitionConfig(
                 tournamentFormat,
@@ -375,12 +396,33 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 format: tournamentFormat,
                 ruleset: { ...currentRuleset, competition },
             });
+            setSavedFormat(tournamentFormat);
+            setSavedChampionMode(circuitChampionMode);
             setFormatSaved(true);
+            triggerSectionSavedFlash('structure');
             setTimeout(() => setFormatSaved(false), 3000);
+        } catch (error: unknown) {
+            setFormatError(error instanceof Error ? error.message : 'No se pudo guardar el modelo competitivo.');
         } finally {
             setSavingFormat(false);
         }
     };
+
+    // Mirror local wizard / model edits into the shared dirty tracker so the
+    // shell can warn before navigation, paint the tab dot, and block accidental
+    // tab swaps. We deliberately do NOT instrument every input — instead we
+    // derive dirtiness from two clear signals: the wizard being open and the
+    // tournament model differing from its last saved value.
+    const formatModelDirty = tournamentFormat !== savedFormat
+        || (tournamentFormat === 'circuit' && circuitChampionMode !== savedChampionMode);
+    const isStructureDirty = showPhaseForm || formatModelDirty;
+    useEffect(() => {
+        if (isStructureDirty) {
+            markStructureDirty();
+        } else {
+            markStructureClean();
+        }
+    }, [isStructureDirty, markStructureDirty, markStructureClean]);
 
     const resetForm = () => {
         setCurrentStep(1);
@@ -421,6 +463,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     };
 
     const loadPhaseIntoForm = (phase: Phase) => {
+        if (isApiManaged) return;
         setEditingPhaseId(phase.id);
         setPhaseName(phase.name);
         setPhaseType(phase.phase_type as any);
@@ -497,6 +540,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const handleCreatePhase = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!id) return;
+        if (isApiManaged) return;
         if (phaseFormErrors.length > 0) {
             alert(phaseFormErrors[0]);
             return;
@@ -609,6 +653,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             });
 
             if (response.ok) {
+                triggerSectionSavedFlash('structure');
                 resetForm();
                 await loadPhases();
             } else {
@@ -633,7 +678,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     };
 
     const handleSetActivePhase = async (phaseId: string) => {
-        if (!id) return;
+        if (!id || isApiManaged) return;
         const targetPhase = phases.find(phase => phase.id === phaseId);
         if (!targetPhase || targetPhase.is_active) return;
 
@@ -671,6 +716,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     };
 
     const handleDeletePhase = async (phaseId: string) => {
+        if (isApiManaged) return;
         if (!confirm('¿Seguro quieres eliminar esta fase y todas sus dependencias?')) return;
         try {
             const response = await fetch(`/api/tournaments/${id}/phases/${phaseId}`, { method: 'DELETE' });
@@ -759,9 +805,29 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     return (
         <div className="tournament-structure-shell flex flex-col gap-8 animate-in fade-in duration-500 pb-24">
 
+            {isApiManaged && (
+                <div
+                    role="status"
+                    className="flex items-start gap-4 rounded-xl border border-blue-500/30 bg-blue-500/10 px-5 py-4 text-blue-100"
+                >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/20 text-blue-300">
+                        <Globe size={20} />
+                    </span>
+                    <div className="flex-1">
+                        <h3 className="mb-1 text-sm font-bold uppercase tracking-wider text-blue-300">
+                            Torneo gestionado por API
+                        </h3>
+                        <p className="text-xs leading-relaxed text-blue-100/80">
+                            Las fases y el modelo competitivo se sincronizan automáticamente desde la fuente externa.
+                            La edición manual está deshabilitada para evitar que la próxima sincronización sobrescriba tus cambios.
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* ── Tournament model selector ── */}
             {!showPhaseForm && (
-                <section className="basalt-card structure-module p-6">
+                <section className="basalt-card structure-module p-6" aria-disabled={isApiManaged || undefined}>
                     <div className="structure-module-header mb-5">
                         <p className="basalt-section-kicker mb-1">Modelo competitivo</p>
                         <h2 className="basalt-h1 structure-module-title">Rol del torneo</h2>
@@ -770,7 +836,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                         </p>
                     </div>
 
-                    <div className="structure-option-grid grid grid-cols-2 gap-3 mb-5">
+                    <div className={`structure-option-grid grid grid-cols-2 gap-3 mb-5 ${isApiManaged ? 'opacity-60 pointer-events-none' : ''}`}>
                         {([
                             { value: 'league' as const, label: 'Torneo estándar', desc: 'Liga, grupos, playoffs o eliminación directa' },
                             { value: 'circuit' as const, label: 'Circuito por eventos', desc: 'Múltiples etapas con ranking acumulado por puntos' },
@@ -779,6 +845,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 key={opt.value}
                                 type="button"
                                 onClick={() => setTournamentFormat(opt.value)}
+                                disabled={isApiManaged}
                                 className={`structure-option-card ${tournamentFormat === opt.value ? 'is-active' : ''} flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${tournamentFormat === opt.value
                                     ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
                                     : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
@@ -791,7 +858,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     </div>
 
                     {isCircuit && (
-                        <div className="mb-5">
+                        <div className={`mb-5 ${isApiManaged ? 'opacity-60 pointer-events-none' : ''}`}>
                             <label className="block text-xs font-bold text-dim uppercase tracking-widest mb-2">
                                 Definición del campeón
                             </label>
@@ -804,6 +871,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                         key={opt.value}
                                         type="button"
                                         onClick={() => setCircuitChampionMode(opt.value)}
+                                        disabled={isApiManaged}
                                         className={`structure-option-card ${circuitChampionMode === opt.value ? 'is-active' : ''} flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${circuitChampionMode === opt.value
                                             ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
                                             : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
@@ -817,15 +885,21 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                         </div>
                     )}
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
                         <button
                             type="button"
                             className="basalt-btn basalt-btn-primary"
                             onClick={handleSaveTournamentFormat}
-                            disabled={savingFormat}
+                            disabled={savingFormat || isApiManaged}
                         >
                             {savingFormat ? 'Guardando...' : 'Guardar modelo'}
                         </button>
+                        {formatError && (
+                            <span className="flex items-center gap-1.5 text-sm text-[var(--status-error)] font-semibold">
+                                <AlertCircle size={15} />
+                                {formatError}
+                            </span>
+                        )}
                         {formatSaved && (
                             <span className="flex items-center gap-1.5 text-sm text-[var(--status-active)] font-semibold">
                                 <CheckCircle size={15} />
@@ -840,14 +914,14 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 <section className="basalt-card basalt-hero structure-hero-panel">
                     <div className="structure-hero-copy">
                         <p className="basalt-section-kicker">Competitive workspace</p>
-                        <h2 className="structure-hero-title">Estructura y creacion de fases</h2>
+                        <h2 className="structure-hero-title">Estructura y creación de fases</h2>
                         <p className="structure-hero-text">
                             Ordena el recorrido competitivo del torneo y prepara la base visual para fixture,
-                            clasificacion y configuracion avanzada.
+                            clasificación y configuración avanzada.
                         </p>
                         <div className="structure-hero-meta">
-                            <span>{phases.length > 0 ? 'Sistema estructural activo' : 'Pendiente de configuracion'}</span>
-                            <span>{structureMetrics.activePhase?.name || 'Sin fase principal definida'}</span>
+                            <span>{phases.length > 0 ? 'Sistema estructural activo' : 'Pendiente de configuración'}</span>
+                            <span>{phases.length} {phases.length === 1 ? 'fase configurada' : 'fases configuradas'}</span>
                         </div>
                     </div>
 
@@ -865,7 +939,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                             <small className="structure-summary-foot">
                                 {structureMetrics.activePhase
                                     ? PHASE_TYPE_LABELS[structureMetrics.activePhase.phase_type] || structureMetrics.activePhase.phase_type
-                                    : 'Todavia no hay etapa principal'}
+                                    : 'Todavía no hay etapa principal'}
                             </small>
                         </article>
                         <article className="structure-summary-card">
@@ -876,7 +950,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                             </small>
                         </article>
                         <article className="structure-summary-card">
-                            <span className="structure-summary-label">Eliminacion</span>
+                            <span className="structure-summary-label">Eliminación</span>
                             <strong className="structure-summary-value">{structureMetrics.knockoutPhaseCount}</strong>
                             <small className="structure-summary-foot">Llaves y playoffs configurados</small>
                         </article>
@@ -892,7 +966,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                             <p className="basalt-section-kicker mb-1">Competitive map</p>
                             <h2 className="basalt-h1 structure-module-title">Fases del torneo</h2>
                             <p className="structure-module-copy">
-                                Cada modulo concentra una etapa del torneo con su formato y reglas base.
+                                Cada módulo concentra una etapa del torneo con su formato y reglas base.
                             </p>
                         </div>
                         <span className="basalt-badge badge-ok">
@@ -904,8 +978,18 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                         {phases.map((phase, index) => (
                             <div
                                 key={phase.id}
-                                onClick={() => loadPhaseIntoForm(phase)}
-                                className="structure-phase-card group relative flex items-start sm:items-center justify-between gap-4 p-5 rounded-xl border border-[var(--border-basalt)] bg-[var(--surface-basalt)] hover:border-[var(--accent-primary)] hover:bg-[var(--surface-elevated)] transition-all duration-200 cursor-pointer"
+                                role="button"
+                                tabIndex={isApiManaged ? -1 : 0}
+                                aria-disabled={isApiManaged || undefined}
+                                onClick={() => { if (!isApiManaged) loadPhaseIntoForm(phase); }}
+                                onKeyDown={(e) => {
+                                    if (isApiManaged) return;
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        loadPhaseIntoForm(phase);
+                                    }
+                                }}
+                                className={`structure-phase-card group relative flex items-start sm:items-center justify-between gap-4 p-5 rounded-xl border border-[var(--border-basalt)] bg-[var(--surface-basalt)] transition-all duration-200 ${isApiManaged ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:border-[var(--accent-primary)] hover:bg-[var(--surface-elevated)]'}`}
                             >
                                 <div className="structure-phase-main flex items-start sm:items-center gap-4 min-w-0">
                                     <div className="structure-phase-icon flex-shrink-0 w-10 h-10 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border-basalt)] flex items-center justify-center">
@@ -938,7 +1022,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                             )}
                                             {phase.phase_type !== 'group_stage' && !((phase.settings as any)?.group_names?.length > 0) && (
                                                 <span className="structure-phase-meta-single text-white/70 font-semibold">
-                                                    Tabla unica
+                                                    Tabla única
                                                 </span>
                                             )}
                                             {(phase.settings as any)?.group_names?.length > 0 && (
@@ -960,7 +1044,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 </div>
 
                                 <div className="structure-phase-actions flex items-center gap-2 flex-shrink-0">
-                                    {!phase.is_active && (
+                                    {!phase.is_active && !isApiManaged && (
                                         <button
                                             type="button"
                                             onClick={e => {
@@ -975,14 +1059,16 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                         </button>
                                     )}
                                     <ChevronRight size={16} className="structure-phase-chevron text-dim group-hover:text-white transition-colors" />
-                                    <button
-                                        type="button"
-                                        onClick={e => { e.stopPropagation(); handleDeletePhase(phase.id); }}
-                                        className="structure-phase-delete opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-red-500/10 text-dim hover:text-red-400 transition-all duration-200"
-                                        title="Eliminar fase"
-                                    >
-                                        <Trash2 size={15} />
-                                    </button>
+                                    {!isApiManaged && (
+                                        <button
+                                            type="button"
+                                            onClick={e => { e.stopPropagation(); handleDeletePhase(phase.id); }}
+                                            className="structure-phase-delete opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-red-500/10 text-dim hover:text-red-400 transition-all duration-200"
+                                            title="Eliminar fase"
+                                        >
+                                            <Trash2 size={15} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -992,6 +1078,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                         <button
                             className="basalt-btn basalt-btn-primary"
                             onClick={() => { resetForm(); setShowPhaseForm(true); }}
+                            disabled={isApiManaged}
                         >
                             <Plus size={16} />
                             Agregar nueva fase

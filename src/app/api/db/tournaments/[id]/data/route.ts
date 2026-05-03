@@ -21,11 +21,15 @@ function jsonNoStore(body: unknown, init?: ResponseInit) {
 }
 
 export async function GET(
-    _req: NextRequest,
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> },
 ) {
     const { id } = await params;
-    const data = await fetchTournamentData(id);
+    const seasonId =
+        request.nextUrl.searchParams.get('seasonId') ||
+        request.nextUrl.searchParams.get('season_id') ||
+        request.nextUrl.searchParams.get('season');
+    const data = await fetchTournamentData(id, { seasonId });
 
     if (!data) {
         return jsonNoStore(

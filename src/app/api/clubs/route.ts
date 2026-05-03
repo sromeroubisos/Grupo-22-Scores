@@ -8,6 +8,7 @@ import { EDIT_MEMBERSHIP_ROLES, isGlobalAdminRole } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
+import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -39,7 +40,7 @@ type PublicClubRow = {
     sport_ref: { name: string } | null;
 };
 
-const PUBLIC_CLUB_SELECT = 'id, name, slug, city, country, is_visible, status, sport, sport_id';
+const PUBLIC_CLUB_SELECT = 'id, name, slug, logo_url, city, country, is_visible, status, sport, sport_id';
 const ADMIN_CLUB_SELECT = 'id, name, slug, logo_url, city, country, is_visible, status, sport, sport_id';
 
 function resolveSportFilter(rawSport: string | null) {
@@ -63,11 +64,11 @@ function requestHasSupabaseSession(request: NextRequest) {
     });
 }
 
-function sanitizePublicLogoUrl(value: unknown): string | null {
-    if (typeof value !== 'string') return null;
-    const trimmed = value.trim();
-    if (!trimmed || trimmed.toLowerCase().startsWith('data:')) return null;
-    return trimmed;
+function sanitizePublicLogoUrl(value: unknown, club: { id: string; name: string | null }): string | null {
+    return resolveSerializableLogoUrl(value, {
+        key: club.id,
+        name: club.name,
+    });
 }
 
 async function getAuthenticatedUser(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -242,7 +243,7 @@ export async function GET(request: NextRequest) {
             id: club.id,
             name: club.name,
             slug: club.slug,
-            logo_url: sanitizePublicLogoUrl(club.logo_url),
+            logo_url: sanitizePublicLogoUrl(club.logo_url, { id: club.id, name: club.name }),
             city: club.city,
             country: club.country,
             is_visible: club.is_visible !== false,

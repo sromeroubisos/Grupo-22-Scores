@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getReadClient } from '@/lib/supabase/read';
 import { cookies } from 'next/headers';
 import { resolveClubFamilyIds } from '@/lib/club-admin/managedClubFamily';
+import { isUuid } from '@/lib/utils/postgrest';
 import {
     EDIT_MEMBERSHIP_ROLES,
     MANAGEMENT_MEMBERSHIP_ROLES,
@@ -399,6 +400,13 @@ export async function getMatchManagementTarget(
     supabase: SupabaseServerClient,
     matchId: string
 ): Promise<MatchManagementTarget | null> {
+    // External provider IDs (FlashScore, ESPN, Rugby API) are not UUIDs and have no
+    // local management target. Skip the lookup so we don't spam Postgres with
+    // `invalid input syntax for type uuid` errors.
+    if (!isUuid(matchId)) {
+        return null;
+    }
+
     const { data: matchData, error: matchError } = await supabase
         .from('matches')
         .select('id, tournament_id, sport_id, sport')

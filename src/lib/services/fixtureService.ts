@@ -35,6 +35,12 @@ import type {
   MassRescheduleParams,
 } from '@/lib/types/fixture';
 
+type PhaseContext = {
+  id: string;
+  tournament_id: string;
+  season_id?: string | null;
+};
+
 export class FixtureService {
   private static _supportsRoundLabel: boolean | null = null;
   private static _matchColumnSupport = new Map<string, boolean>();
@@ -62,7 +68,7 @@ export class FixtureService {
     matchId: string,
   ) {
     const variants = [
-      'id, tournament_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, status, score, clock, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason',
+      'id, tournament_id, season_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, status, score, clock, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason',
       'id, tournament_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, status, score, clock',
       'id, tournament_id, phase_id, round_id, group_id, home_club_id, away_club_id, status, score',
       'id, tournament_id, phase_id, home_club_id, away_club_id, status, score',
@@ -160,10 +166,10 @@ export class FixtureService {
     supabase: any,
     tournamentId: string,
     phaseId: string
-  ): Promise<void> {
+  ): Promise<PhaseContext> {
     const { data: phase, error } = await supabase
       .from('tournament_phases')
-      .select('id, tournament_id')
+      .select('id, tournament_id, season_id')
       .eq('id', phaseId)
       .single();
 
@@ -174,6 +180,8 @@ export class FixtureService {
     if (phase.tournament_id !== tournamentId) {
       throw new Error('La fase seleccionada no pertenece al torneo activo.');
     }
+
+    return phase;
   }
 
   private static async assertRoundBelongsToPhase(
@@ -231,14 +239,16 @@ export class FixtureService {
       homeClubId: string | null;
       awayClubId: string | null;
     }
-  ): Promise<void> {
+  ): Promise<PhaseContext> {
     if (!context.homeClubId || !context.awayClubId) {
       throw new Error('Debes seleccionar ambos equipos del partido.');
     }
 
-    await this.assertPhaseBelongsToTournament(supabase, context.tournamentId, context.phaseId);
+    const phase = await this.assertPhaseBelongsToTournament(supabase, context.tournamentId, context.phaseId);
     await this.assertRoundBelongsToPhase(supabase, context.phaseId, context.roundId);
     await this.assertClubReferences(supabase, [context.homeClubId, context.awayClubId]);
+
+    return phase;
   }
 
   /**
@@ -301,8 +311,19 @@ export class FixtureService {
   /**
    * Get complete fixture structure for a tournament
    */
-  static async getTournamentFixture(tournamentId: string): Promise<TournamentFixture | null> {
+  static async getTournamentFixture(tournamentId: string, seasonId?: string | null): Promise<TournamentFixture | null> {
     const supabase = await getReadClient();
+    const scopedSeasonId = seasonId?.trim() || null;
+
+    let phasesQuery = supabase
+      .from('tournament_phases')
+      .select('*')
+      .eq('tournament_id', tournamentId)
+      .order('order_index', { ascending: true });
+
+    if (scopedSeasonId) {
+      phasesQuery = phasesQuery.eq('season_id', scopedSeasonId);
+    }
 
     const [
       { data: tournament, error: tournamentError },
@@ -315,11 +336,7 @@ export class FixtureService {
         .eq('id', tournamentId)
         .single(),
       // 2. Get phases
-      supabase
-        .from('tournament_phases')
-        .select('*')
-        .eq('tournament_id', tournamentId)
-        .order('order_index', { ascending: true }),
+      phasesQuery,
     ]);
 
     if (tournamentError || !tournament) {
@@ -345,19 +362,9 @@ export class FixtureService {
         .order('order_index', { ascending: true })
       : Promise.resolve({ data: [], error: null });
 
-    const [
-      { data: allRounds, error: roundsError },
-      { data: allMatches, error: matchesError },
-      { data: participants, error: participantsError },
-    ] = await Promise.all([
-      roundsPromise,
-      // 4. Get ALL matches for this tournament directly by tournament_id
-      // This captures even "orphaned" matches and is much more efficient.
-      // Explicit columns exclude heavy JSONB fields (events, lineups, weather, clock)
-      // that are not needed for the fixture list view.
-      supabase
-        .from('matches')
-        .select(`
+    let matchesQuery = supabase
+      .from('matches')
+      .select(`
           id, tournament_id, round_uuid, round_id, phase_id, group_id,
           date_time, venue, status, score,
           referee, pitch, category,
@@ -371,14 +378,33 @@ export class FixtureService {
           home_club:clubs!matches_home_club_id_fkey(id, name, short_name),
           away_club:clubs!matches_away_club_id_fkey(id, name, short_name)
         `)
-        .eq('tournament_id', tournamentId)
-        .order('date_time', { ascending: true }),
+      .eq('tournament_id', tournamentId)
+      .order('date_time', { ascending: true });
+
+    let participantsQuery = supabase
+      .from('tournament_participants')
+      .select('id, club_id, name, short_code, clubs:club_id(logo_url)')
+      .eq('tournament_id', tournamentId)
+      .eq('status', 'active');
+
+    if (scopedSeasonId) {
+      matchesQuery = matchesQuery.eq('season_id', scopedSeasonId);
+      participantsQuery = participantsQuery.eq('season_id', scopedSeasonId);
+    }
+
+    const [
+      { data: allRounds, error: roundsError },
+      { data: allMatches, error: matchesError },
+      { data: participants, error: participantsError },
+    ] = await Promise.all([
+      roundsPromise,
+      // 4. Get ALL matches for this tournament directly by tournament_id
+      // This captures even "orphaned" matches and is much more efficient.
+      // Explicit columns exclude heavy JSONB fields (events, lineups, weather, clock)
+      // that are not needed for the fixture list view.
+      matchesQuery,
       // 5. Get participants
-      supabase
-        .from('tournament_participants')
-        .select('id, club_id, name, short_code, clubs:club_id(logo_url)')
-        .eq('tournament_id', tournamentId)
-        .eq('status', 'active'),
+      participantsQuery,
     ]);
 
     if (roundsError) {
@@ -457,7 +483,7 @@ export class FixtureService {
     return {
       tournamentId: tournament.id,
       tournamentName: tournament.name,
-      tournamentSeason: null, // Season field removed from DB
+      tournamentSeason: scopedSeasonId,
       currentPhaseId: currentPhase?.id || null,
       currentRoundId: currentRound?.id || null,
       phases: phasesWithRounds,
@@ -585,6 +611,12 @@ export class FixtureService {
 
     const supabase = await this.getWriteClient();
 
+    const { data: phaseContext } = await supabase
+      .from('tournament_phases')
+      .select('season_id')
+      .eq('id', phaseId)
+      .maybeSingle();
+
     // 1. Try to find existing round with this name in this phase
     const { data: existing } = await supabase
       .from('tournament_rounds')
@@ -611,6 +643,7 @@ export class FixtureService {
       .from('tournament_rounds')
       .insert({
         phase_id: phaseId,
+        season_id: phaseContext?.season_id ?? null,
         name: roundLabel,
         order_index: nextOrder,
         status: 'draft'
@@ -686,7 +719,7 @@ export class FixtureService {
       finalRoundId = await this.findOrCreateRound(data.phaseId, data.roundLabel);
     }
 
-    await this.assertMatchContext(supabase, {
+    const phaseContext = await this.assertMatchContext(supabase, {
       tournamentId: data.tournamentId,
       phaseId: data.phaseId,
       roundId: finalRoundId,
@@ -708,6 +741,10 @@ export class FixtureService {
       notes: data.notes || null,
       score: data.score || { home: 0, away: 0 },
     };
+
+    if (phaseContext.season_id) {
+      insertData.season_id = phaseContext.season_id;
+    }
 
     if (supportsHomeBasePoints && data.homeBasePoints !== undefined) insertData.home_base_points = data.homeBasePoints;
     if (supportsAwayBasePoints && data.awayBasePoints !== undefined) insertData.away_base_points = data.awayBasePoints;
@@ -843,13 +880,15 @@ export class FixtureService {
       throw new Error('El equipo local y el visitante no pueden ser el mismo.');
     }
 
+    let nextPhaseContext: PhaseContext | null = null;
+
     if (requiresContextValidation) {
       const nextPhaseId = data.phaseId ?? existingMatch.phase_id;
       if (!nextPhaseId) {
         throw new Error('El partido debe pertenecer a una fase.');
       }
 
-      await this.assertMatchContext(supabase, {
+      nextPhaseContext = await this.assertMatchContext(supabase, {
         tournamentId: existingMatch.tournament_id,
         phaseId: nextPhaseId,
         roundId: updateData.round_uuid !== undefined ? updateData.round_uuid : this.getMatchRoundId(existingMatch),
@@ -897,6 +936,7 @@ export class FixtureService {
     }
 
     if (data.phaseId) updateData.phase_id = data.phaseId;
+    if (nextPhaseContext?.season_id) updateData.season_id = nextPhaseContext.season_id;
     if (data.groupId !== undefined) updateData.group_id = data.groupId;
     if (data.notes !== undefined) updateData.notes = data.notes;
     if (supportsBroadcastUrl && data.streamUrl !== undefined) updateData.broadcast_url = data.streamUrl || null;
@@ -970,10 +1010,17 @@ export class FixtureService {
   static async createRound(data: RoundFormData): Promise<TournamentRound | null> {
     const supabase = await this.getWriteClient();
 
+    const { data: phaseContext } = await supabase
+      .from('tournament_phases')
+      .select('season_id')
+      .eq('id', data.phaseId)
+      .maybeSingle();
+
     const { data: round, error } = await supabase
       .from('tournament_rounds')
       .insert({
         phase_id: data.phaseId,
+        season_id: phaseContext?.season_id ?? null,
         name: data.name,
         order_index: data.orderIndex,
         start_date: data.startDate || null,
@@ -1040,11 +1087,17 @@ export class FixtureService {
    */
   static async createPhase(data: PhaseFormData): Promise<TournamentPhase | null> {
     const supabase = await this.getWriteClient();
+    const scopedSeasonId = (
+      (data as PhaseFormData & { seasonId?: string | null; season_id?: string | null }).seasonId ??
+      (data as PhaseFormData & { seasonId?: string | null; season_id?: string | null }).season_id ??
+      null
+    );
 
     const { data: phase, error } = await supabase
       .from('tournament_phases')
       .insert({
         tournament_id: data.tournamentId,
+        season_id: scopedSeasonId,
         name: data.name,
         phase_type: data.phaseType,
         order_index: data.orderIndex,
@@ -1074,6 +1127,12 @@ export class FixtureService {
   ): Promise<boolean> {
     const supabase = await this.getWriteClient();
 
+    const { data: phaseContext } = await supabase
+      .from('tournament_phases')
+      .select('season_id')
+      .eq('id', phaseId)
+      .maybeSingle();
+
     const { error } = await supabase.rpc('generate_rounds_for_phase', {
       p_phase_id: phaseId,
       p_num_rounds: numRounds,
@@ -1083,6 +1142,14 @@ export class FixtureService {
     if (error) {
       console.error('Error generating rounds:', error);
       return false;
+    }
+
+    if (phaseContext?.season_id) {
+      await supabase
+        .from('tournament_rounds')
+        .update({ season_id: phaseContext.season_id })
+        .eq('phase_id', phaseId)
+        .is('season_id', null);
     }
 
     return true;
@@ -1099,23 +1166,30 @@ export class FixtureService {
     // 1. Resolve the tournament from the selected phase
     const { data: phaseData } = await supabase
       .from('tournament_phases')
-      .select('tournament_id')
+      .select('tournament_id, season_id')
       .eq('id', params.phaseId)
       .single();
 
     const tournamentId = phaseData?.tournament_id;
+    const seasonId = phaseData?.season_id ?? null;
 
     if (!tournamentId) {
       throw new Error('La fase seleccionada no pertenece a ningún torneo.');
     }
 
     // 2. Get active participants for the selected clubs inside this tournament
-    const { data: participants, error: pError } = await supabase
+    let participantsQuery = supabase
       .from('tournament_participants')
       .select('id, club_id')
       .eq('tournament_id', tournamentId)
       .in('club_id', requestedClubIds)
       .eq('status', 'active');
+
+    if (seasonId) {
+      participantsQuery = participantsQuery.eq('season_id', seasonId);
+    }
+
+    const { data: participants, error: pError } = await participantsQuery;
 
     if (pError || !participants || participants.length < 2) {
       throw new Error('Se necesitan al menos 2 participantes activos.');
@@ -1144,6 +1218,7 @@ export class FixtureService {
         .from('tournament_rounds')
         .insert({
           phase_id: params.phaseId,
+          season_id: seasonId,
           name: `Fecha ${i + 1}`,
           order_index: i + 1,
         })
@@ -1194,6 +1269,7 @@ export class FixtureService {
 
         matches.push({
           tournament_id: tournamentId,
+          season_id: seasonId,
           phase_id: params.phaseId,
           round_uuid: roundId,
           group_id: params.groupId || null,
@@ -1230,9 +1306,10 @@ export class FixtureService {
     const supabase = await this.getWriteClient();
     const errors: string[] = [];
     let importedCount = 0;
+    let phaseContext: PhaseContext | null = null;
 
     try {
-      await this.assertPhaseBelongsToTournament(supabase, tournamentId, phaseId);
+      phaseContext = await this.assertPhaseBelongsToTournament(supabase, tournamentId, phaseId);
       const roundIds = Array.from(new Set(matchesData.map((match) => match.roundId).filter(Boolean)));
 
       for (const roundId of roundIds) {
@@ -1267,6 +1344,7 @@ export class FixtureService {
 
     const matchesToInsert = matchesData.map(m => ({
       tournament_id: tournamentId,
+      season_id: phaseContext?.season_id ?? null,
       phase_id: phaseId,
       round_uuid: m.roundId,
       group_id: m.groupId || null,

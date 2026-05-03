@@ -28,16 +28,16 @@ export const revalidate = 0;
 
 const RUGBY_SPORT_IDS = ['rugby', 'rugby-union', 'rugby-league'];
 const RUGBY_FLASHSCORE_SPORT_KEY = 'rugby';
-const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, slug, is_visible, status, priority, category, age_grade';
-const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, slug, is_visible, status, priority, category, age_grade';
-const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, slug, is_visible, status, category, age_grade';
-const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, slug, is_visible, status, category, age_grade';
+const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, priority, category, age_grade';
+const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, priority, category, age_grade';
+const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, category, age_grade';
+const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, category, age_grade';
 const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITH_LEGACY_SPORT_AND_PRIORITY}, review_status`;
 const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY}, review_status`;
 const SELECT_WITH_LEGACY_SPORT_REVIEW = `${SELECT_WITH_LEGACY_SPORT}, review_status`;
 const SELECT_WITHOUT_LEGACY_SPORT_REVIEW = `${SELECT_WITHOUT_LEGACY_SPORT}, review_status`;
 const FLAT_CACHE_CONTROL = 'public, max-age=300, stale-while-revalidate=600';
-const CATALOG_CACHE_CONTROL = 'no-store, no-cache, must-revalidate';
+const CATALOG_CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300';
 
 type PublicTournamentRow = {
     id: string;
@@ -108,6 +108,7 @@ type PublicExternalTournament = {
 type PublicRugbyCountrySummary = {
     id: string;
     external_country_id: string;
+    external_country_ids?: string[];
     name: string;
     flag?: string | null;
     tournament_count?: number | null;
@@ -116,6 +117,24 @@ type PublicRugbyCountrySummary = {
 
 type PublicTournamentsPayload = {
     data: unknown;
+};
+
+type PublicDbTournamentListItem = {
+    id: string;
+    name: string | null;
+    display_name: string | null;
+    country: string | null;
+    country_id: string | null;
+    sport_id: string;
+    logo_url: string | null;
+    slug: string | null;
+    priority: number;
+};
+
+type PublicTournamentCountryFilter = {
+    externalCountryId: string | null;
+    externalCountryIds?: string[];
+    countryName: string | null;
 };
 
 type PublicTournamentsRequestParams = {
@@ -128,6 +147,7 @@ type PublicTournamentsRequestParams = {
     search: string;
     audience: TournamentAudience;
     externalCountryId: string | null;
+    externalCountryIds: string[];
     countryName: string | null;
     countryFlag: string | null;
 };
@@ -151,7 +171,7 @@ type TournamentsTraceContext = {
     parentRequestId?: string;
 };
 
-const TOURNAMENTS_RESPONSE_CACHE_PREFIX = 'public-tournaments-response:v4';
+const TOURNAMENTS_RESPONSE_CACHE_PREFIX = 'public-tournaments-response:v8';
 const tournamentsRefreshLocks = new Map<string, Promise<void>>();
 const tournamentsInFlightResponses = new Map<string, Promise<PublicTournamentsPayload>>();
 const tournamentsSnapshotPersistLocks = new Map<string, Promise<boolean>>();
@@ -256,6 +276,23 @@ function normalizeIdentifier(value: unknown): string {
     return normalizeText(value);
 }
 
+function uniqueNormalizedIdentifiers(values: unknown[]): string[] {
+    const unique = new Set<string>();
+
+    values.forEach((value) => {
+        const normalized = normalizeIdentifier(value);
+        if (normalized) unique.add(normalized);
+    });
+
+    return [...unique];
+}
+
+function parseRequestIdentifierList(values: string[]) {
+    return uniqueNormalizedIdentifiers(
+        values.flatMap((value) => value.split(',').map((part) => part.trim())),
+    );
+}
+
 function normalizeLookupValue(value: unknown): string {
     return normalizeIdentifier(value)
         .normalize('NFD')
@@ -263,13 +300,13 @@ function normalizeLookupValue(value: unknown): string {
         .toLowerCase();
 }
 
-function sanitizePublicLogoUrl(value: unknown): string | null {
+function sanitizePublicLogoUrl(value: unknown, proxyKey?: string | null): string | null {
     const normalized = normalizeText(value);
     if (!normalized) return null;
 
     // Avoid serving giant inline base64 images in list/catalog feeds.
     if (normalized.startsWith('data:')) {
-        return null;
+        return proxyKey ? `/api/assets/team-logo?key=${encodeURIComponent(proxyKey)}` : null;
     }
 
     return normalized;
@@ -390,6 +427,7 @@ function buildRugbyCountrySummaries(payload: unknown): PublicRugbyCountrySummary
         byCountryId.set(externalCountryId, {
             id: resolveRugbyCountryId(countryName),
             external_country_id: externalCountryId,
+            external_country_ids: [externalCountryId],
             name: countryName,
             flag: normalizeText(country.flag) || null,
             tournament_count: typeof country.tournament_count === 'number' ? country.tournament_count : null,
@@ -435,19 +473,24 @@ function mapFlashScoreTournamentToPublicTournament(
 }
 
 async function queryRugbyCountrySummaries() {
-    const payloads = await Promise.all([
+    const requests = [
         getCountriesBySport('rugby-union'),
         getCountriesBySport('rugby-league'),
-    ]);
+    ];
+    const results = await Promise.allSettled(requests);
+    const payloads = results
+        .filter((result): result is PromiseFulfilledResult<unknown> => result.status === 'fulfilled')
+        .map((result) => result.value);
 
-    const byCountryId = new Map<string, PublicRugbyCountrySummary>();
-    for (const country of payloads.flatMap((payload) => buildRugbyCountrySummaries(payload))) {
-        if (!byCountryId.has(country.external_country_id)) {
-            byCountryId.set(country.external_country_id, country);
-        }
+    if (payloads.length === 0) {
+        const firstError = results.find((result): result is PromiseRejectedResult => result.status === 'rejected');
+        throw firstError?.reason || new Error('FlashScore rugby countries are unavailable.');
     }
 
-    return [...byCountryId.values()].sort((left, right) => left.name.localeCompare(right.name));
+    return mergeRugbyCountrySummaries(
+        payloads.flatMap((payload) => buildRugbyCountrySummaries(payload)),
+        [],
+    );
 }
 
 async function queryFlashScoreCountrySummaries(sportKey: string) {
@@ -457,31 +500,60 @@ async function queryFlashScoreCountrySummaries(sportKey: string) {
 
 async function queryRugbyCountryTournaments(args: {
     externalCountryId: string;
+    externalCountryIds?: string[];
     countryName: string;
     flag?: string | null;
     search: string;
     audience: TournamentAudience;
 }) {
-    const entity: FlashScoreTournamentEntity = {
-        id: args.externalCountryId,
-        name: args.countryName,
-        type: 'country',
-        flag: args.flag || null,
-    };
-
-    const payloads = await Promise.all([
-        getTournamentsBySportAndEntity('rugby-union', args.externalCountryId),
-        getTournamentsBySportAndEntity('rugby-league', args.externalCountryId),
+    const externalCountryIds = uniqueNormalizedIdentifiers([
+        ...(args.externalCountryIds || []),
+        args.externalCountryId,
     ]);
 
-    const mapped = payloads.flatMap((payload, index) => {
-        const sportKey = index === 0 ? 'rugby-union' : 'rugby-league';
-        return extractListData<FlashScoreTournamentListItem>(payload)
+    if (externalCountryIds.length === 0) return [];
+
+    const requests = externalCountryIds.flatMap((externalCountryId) => [
+        {
+            sportKey: 'rugby-union',
+            externalCountryId,
+            promise: getTournamentsBySportAndEntity('rugby-union', externalCountryId),
+        },
+        {
+            sportKey: 'rugby-league',
+            externalCountryId,
+            promise: getTournamentsBySportAndEntity('rugby-league', externalCountryId),
+        },
+    ]);
+    const results = await Promise.allSettled(requests.map((request) => request.promise));
+    const fulfilledCount = results.filter((result) => result.status === 'fulfilled').length;
+
+    if (fulfilledCount === 0) {
+        return [];
+    }
+
+    const mapped = results.flatMap((result, index) => {
+        if (result.status !== 'fulfilled') return [];
+        const { sportKey, externalCountryId } = requests[index];
+        const entity: FlashScoreTournamentEntity = {
+            id: externalCountryId,
+            name: args.countryName,
+            type: 'country',
+            flag: args.flag || null,
+        };
+        return extractListData<FlashScoreTournamentListItem>(result.value)
             .map((tournament) => mapFlashScoreTournamentToPublicTournament(tournament, entity, sportKey))
             .filter((tournament): tournament is PublicExternalTournament => tournament !== null);
     });
 
-    const withOverrides = await applyStoredTournamentOverrides(mapped);
+    const uniqueById = new Map<string, PublicExternalTournament>();
+    for (const tournament of mapped) {
+        if (!uniqueById.has(tournament.id)) {
+            uniqueById.set(tournament.id, tournament);
+        }
+    }
+
+    const withOverrides = await applyStoredTournamentOverrides([...uniqueById.values()]);
 
     return sortTournamentsByPriority(withOverrides.filter((tournament) => {
         if (resolveTournamentAudience({
@@ -553,6 +625,7 @@ async function queryPublicRugbyFlashScoreTournaments(args: {
     const grouped = await mapWithConcurrency(countries, 6, (country) =>
         queryRugbyCountryTournaments({
             externalCountryId: country.external_country_id,
+            externalCountryIds: country.external_country_ids,
             countryName: country.name,
             flag: country.flag,
             search: args.search,
@@ -604,9 +677,12 @@ async function queryPublicFlashScoreTournaments(args: {
 function filterPublicDbTournaments(args: {
     tournaments: PublicTournamentRow[];
     sportFilter: string[];
-    audience: TournamentAudience;
+    audience: TournamentAudience | 'all';
     search: string;
-}) {
+    countryFilter?: PublicTournamentCountryFilter | null;
+}): PublicDbTournamentListItem[] {
+    const countryFilterValues = buildCountryFilterLookupValues(args.countryFilter);
+
     return sortTournamentsByPriority(args.tournaments
         .filter((tournament) => {
             if (!isTournamentVisibleToPublic(tournament)) return false;
@@ -614,7 +690,14 @@ function filterPublicDbTournaments(args: {
             const normalizedSport = tournament.sport_id || tournament.legacy_sport || 'rugby';
             if (!args.sportFilter.includes(normalizedSport)) return false;
 
-            if (resolveTournamentAudience({ ageGrade: tournament.age_grade, category: tournament.category }) !== args.audience) {
+            if (countryFilterValues && !tournamentMatchesCountryFilter(tournament, countryFilterValues)) {
+                return false;
+            }
+
+            if (
+                args.audience !== 'all' &&
+                resolveTournamentAudience({ ageGrade: tournament.age_grade, category: tournament.category }) !== args.audience
+            ) {
                 return false;
             }
 
@@ -633,10 +716,153 @@ function filterPublicDbTournaments(args: {
             country: tournament.country || (tournament.country_ref as { name?: string } | null)?.name || null,
             country_id: tournament.country_id,
             sport_id: tournament.sport_id || tournament.legacy_sport || 'rugby',
-            logo_url: sanitizePublicLogoUrl(tournament.logo_url),
+            logo_url: sanitizePublicLogoUrl(tournament.logo_url, tournament.id),
             slug: tournament.slug,
             priority: typeof tournament.priority === 'number' ? tournament.priority : 0,
         })));
+}
+
+function addCountryLookupValue(values: Set<string>, value: unknown) {
+    const normalized = normalizeLookupValue(value);
+    if (normalized) values.add(normalized);
+
+    const text = normalizeText(value);
+    if (!text) return;
+
+    const slug = slugifyCountryId(text);
+    if (slug) values.add(normalizeLookupValue(slug));
+
+    const rugbyCountryId = resolveRugbyCountryId(text);
+    if (rugbyCountryId) values.add(normalizeLookupValue(rugbyCountryId));
+}
+
+function buildCountryFilterLookupValues(countryFilter?: PublicTournamentCountryFilter | null) {
+    if (
+        !countryFilter?.externalCountryId &&
+        !countryFilter?.countryName &&
+        (!countryFilter?.externalCountryIds || countryFilter.externalCountryIds.length === 0)
+    ) {
+        return null;
+    }
+
+    const values = new Set<string>();
+    addCountryLookupValue(values, countryFilter.externalCountryId);
+    (countryFilter.externalCountryIds || []).forEach((externalCountryId) => {
+        addCountryLookupValue(values, externalCountryId);
+    });
+    addCountryLookupValue(values, countryFilter.countryName);
+    return values.size > 0 ? values : null;
+}
+
+function tournamentMatchesCountryFilter(tournament: PublicTournamentRow, countryFilterValues: Set<string>) {
+    const values = new Set<string>();
+    addCountryLookupValue(values, tournament.country_id);
+    addCountryLookupValue(values, tournament.country);
+    addCountryLookupValue(values, tournament.country_ref?.name);
+
+    for (const value of values) {
+        if (countryFilterValues.has(value)) return true;
+    }
+
+    return false;
+}
+
+function buildDbCountrySummaries(tournaments: PublicDbTournamentListItem[]) {
+    const summaries = new Map<string, PublicRugbyCountrySummary>();
+
+    for (const tournament of tournaments) {
+        const rawCountryName = normalizeText(tournament.country);
+        const rawCountryId = normalizeText(tournament.country_id);
+        const countryName = rawCountryName || (rawCountryId === 'international' ? 'Internacional' : rawCountryId);
+        if (!countryName) continue;
+
+        const countryId = rawCountryId || resolveRugbyCountryId(countryName);
+        const key = slugifyCountryId(countryName) || normalizeLookupValue(countryId);
+        if (!key) continue;
+
+        const existing = summaries.get(key);
+        if (existing) {
+            existing.tournament_count = (existing.tournament_count || 0) + 1;
+            continue;
+        }
+
+        summaries.set(key, {
+            id: resolveRugbyCountryId(countryName),
+            external_country_id: countryId || key,
+            name: countryName,
+            flag: null,
+            tournament_count: 1,
+            type: 'country',
+        });
+    }
+
+    return [...summaries.values()].sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function buildCountrySummaryMergeKey(summary: PublicRugbyCountrySummary) {
+    return slugifyCountryId(summary.name) || normalizeLookupValue(summary.external_country_id || summary.id);
+}
+
+function collectSummaryExternalCountryIds(...summaries: PublicRugbyCountrySummary[]) {
+    const ids = new Set<string>();
+
+    summaries.forEach((summary) => {
+        const localIds = new Set([
+            normalizeLookupValue(summary.id),
+            normalizeLookupValue(slugifyCountryId(summary.name)),
+            'international',
+        ]);
+        const fallbackCountryId = normalizeIdentifier(summary.external_country_id);
+        const sourceIds = summary.external_country_ids?.length
+            ? summary.external_country_ids
+            : /^\d+$/.test(fallbackCountryId)
+                ? [fallbackCountryId]
+                : [];
+
+        sourceIds.forEach((value) => {
+            const normalized = normalizeIdentifier(value);
+            if (!normalized || localIds.has(normalizeLookupValue(normalized))) return;
+            ids.add(normalized);
+        });
+    });
+
+    return [...ids];
+}
+
+function mergeRugbyCountrySummaries(
+    primary: PublicRugbyCountrySummary[],
+    secondary: PublicRugbyCountrySummary[],
+) {
+    const merged = new Map<string, PublicRugbyCountrySummary>();
+
+    for (const summary of [...primary, ...secondary]) {
+        const key = buildCountrySummaryMergeKey(summary);
+        if (!key) continue;
+
+        const existing = merged.get(key);
+        if (!existing) {
+            const externalCountryIds = collectSummaryExternalCountryIds(summary);
+            merged.set(key, {
+                ...summary,
+                external_country_ids: externalCountryIds.length > 0 ? externalCountryIds : summary.external_country_ids,
+            });
+            continue;
+        }
+
+        const externalCountryIds = collectSummaryExternalCountryIds(existing, summary);
+        merged.set(key, {
+            ...existing,
+            external_country_id: externalCountryIds[0] || existing.external_country_id || summary.external_country_id,
+            external_country_ids: externalCountryIds.length > 0 ? externalCountryIds : existing.external_country_ids,
+            flag: existing.flag || summary.flag || null,
+            tournament_count:
+                typeof existing.tournament_count === 'number' || typeof summary.tournament_count === 'number'
+                    ? (existing.tournament_count || 0) + (summary.tournament_count || 0)
+                    : null,
+        });
+    }
+
+    return [...merged.values()].sort((left, right) => left.name.localeCompare(right.name));
 }
 
 function buildTournamentMergeKey(tournament: {
@@ -735,12 +961,52 @@ async function queryVisiblePublicTournaments(
     };
 }
 
+async function queryPublicDbTournamentsForRequest(
+    params: PublicTournamentsRequestParams,
+    trace: TournamentsTraceContext | undefined,
+    options: {
+        audience?: TournamentAudience | 'all';
+        countryFilter?: PublicTournamentCountryFilter | null;
+    } = {},
+) {
+    const supabase = await getReadClient();
+    const supabaseReadStartedAt = Date.now();
+    const queryResult = await queryVisiblePublicTournaments(supabase);
+    if (trace) {
+        trackDuration(trace.metrics, 'supabase_tournaments_read_ms', supabaseReadStartedAt);
+    }
+
+    const buildDbPayloadStartedAt = Date.now();
+    const dbTournaments = !queryResult.error
+        ? filterPublicDbTournaments({
+            tournaments: queryResult.data || [],
+            sportFilter: resolveSportFilter(params.sport),
+            audience: options.audience ?? params.audience,
+            search: params.search,
+            countryFilter: options.countryFilter ?? null,
+        })
+        : [];
+    if (trace) {
+        addDurationMetric(trace.metrics, 'build_payload_ms', Date.now() - buildDbPayloadStartedAt);
+    }
+
+    return {
+        dbTournaments,
+        error: queryResult.error,
+    };
+}
+
 function normalizePublicTournamentsRequest(request: Request): PublicTournamentsRequestParams {
     const { searchParams } = new URL(request.url);
     const sport = searchParams.get('sport');
     const flashScoreSportKey = resolveFlashScoreSportKey(sport);
     const scope = searchParams.get('scope');
     const search = searchParams.get('search')?.trim().toLowerCase() || '';
+    const explicitExternalCountryId = searchParams.get('external_country_id')?.trim() || null;
+    const externalCountryIds = uniqueNormalizedIdentifiers([
+        explicitExternalCountryId,
+        ...parseRequestIdentifierList(searchParams.getAll('external_country_ids')),
+    ]);
 
     return {
         sport,
@@ -751,7 +1017,8 @@ function normalizePublicTournamentsRequest(request: Request): PublicTournamentsR
         forceFullCatalog: scope === 'full',
         search,
         audience: resolveAudienceFilter(searchParams.get('audience')),
-        externalCountryId: searchParams.get('external_country_id')?.trim() || null,
+        externalCountryId: explicitExternalCountryId || externalCountryIds[0] || null,
+        externalCountryIds,
         countryName: searchParams.get('country_name')?.trim() || null,
         countryFlag: searchParams.get('country_flag')?.trim() || null,
     };
@@ -769,16 +1036,21 @@ function buildPublicTournamentsResponse(payload: PublicTournamentsPayload, param
     return withCacheControl(payload, resolveCacheControl(params));
 }
 
+function buildCacheKeyPart(value: string | null | undefined, fallback = 'none') {
+    return value ? encodeURIComponent(value) : fallback;
+}
+
 function buildPublicTournamentsCacheKey(params: PublicTournamentsRequestParams) {
     return [
         TOURNAMENTS_RESPONSE_CACHE_PREFIX,
-        params.scope || 'default',
-        params.sport || 'all',
-        params.audience,
-        params.search || 'all',
-        params.externalCountryId || 'none',
-        params.countryName ? slugifyCountryId(params.countryName) : 'none',
-        params.countryFlag || 'none',
+        buildCacheKeyPart(params.scope, 'default'),
+        buildCacheKeyPart(params.sport, 'all'),
+        buildCacheKeyPart(params.audience),
+        buildCacheKeyPart(params.search, 'all'),
+        buildCacheKeyPart(params.externalCountryId),
+        buildCacheKeyPart(params.externalCountryIds.length > 0 ? params.externalCountryIds.join(',') : null),
+        buildCacheKeyPart(params.countryName ? slugifyCountryId(params.countryName) : null),
+        buildCacheKeyPart(params.countryFlag),
         params.forceFullCatalog ? 'full' : 'normal',
     ].join(':');
 }
@@ -964,86 +1236,111 @@ async function computePublicTournamentsPayload(
 
     try {
         if (params.flashScoreCatalogEnabled && params.scope === 'summary') {
+            const { dbTournaments, error } = await queryPublicDbTournamentsForRequest(params, trace, {
+                audience: 'all',
+            });
+            dbItemsCount = dbTournaments.length;
+            const dbCountries = error ? [] : buildDbCountrySummaries(dbTournaments);
+            let countries = dbCountries;
             const externalFetchStartedAt = Date.now();
             try {
-                const countries = await queryFlashScoreCountrySummaries(params.flashScoreSportKey);
-                externalItemsCount = countries.length;
+                const externalCountries = params.shouldAggregateRugby
+                    ? await queryRugbyCountrySummaries()
+                    : await queryFlashScoreCountrySummaries(params.flashScoreSportKey);
+                externalItemsCount = externalCountries.length;
                 if (trace) {
                     trackDuration(trace.metrics, 'external_tournaments_fetch_ms', externalFetchStartedAt);
-                    trace.metrics.build_payload_ms = 0;
-                    trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
-                    logSlowTournamentsComputeStageWarnings(trace);
-                    logTournamentsEvent('info', 'tournaments_compute_summary', trace, {
-                        db_items_count: dbItemsCount,
-                        external_items_count: externalItemsCount,
-                        final_items_count: externalItemsCount,
-                    });
                 }
-                return { data: { countries } };
+
+                const mergeStartedAt = Date.now();
+                countries = mergeRugbyCountrySummaries(externalCountries, dbCountries);
+                if (trace) {
+                    trackDuration(trace.metrics, 'merge_sources_ms', mergeStartedAt);
+                }
             } catch (error) {
                 console.error('[GET /api/public/tournaments] catalog summary failed:', error);
                 if (trace) {
                     trackDuration(trace.metrics, 'external_tournaments_fetch_ms', externalFetchStartedAt);
                 }
-                return { data: { countries: [] } };
             }
-        }
 
-        if (params.flashScoreCatalogEnabled && params.scope === 'country') {
-            const externalFetchStartedAt = Date.now();
-            const tournaments = params.shouldAggregateRugby
-                ? await queryRugbyCountryTournaments({
-                    externalCountryId: params.externalCountryId || '',
-                    countryName: params.countryName || '',
-                    flag: params.countryFlag || null,
-                    search: params.search,
-                    audience: params.audience,
-                })
-                : await queryFlashScoreCountryTournaments({
-                    sportKey: params.flashScoreSportKey,
-                    externalCountryId: params.externalCountryId || '',
-                    countryName: params.countryName || '',
-                    flag: params.countryFlag || null,
-                    search: params.search,
-                    audience: params.audience,
-                });
-
-            externalItemsCount = tournaments.length;
-            finalItemsCount = tournaments.length;
+            finalItemsCount = countries.length;
             if (trace) {
-                trackDuration(trace.metrics, 'external_tournaments_fetch_ms', externalFetchStartedAt);
                 trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
                 logSlowTournamentsComputeStageWarnings(trace);
                 logTournamentsEvent('info', 'tournaments_compute_summary', trace, {
                     db_items_count: dbItemsCount,
                     external_items_count: externalItemsCount,
                     final_items_count: finalItemsCount,
+                    fallback_path: externalItemsCount === 0 && dbCountries.length > 0 ? 'db_country_summary' : undefined,
                 });
             }
+            return { data: { countries } };
+        }
+
+        if (params.flashScoreCatalogEnabled && params.scope === 'country') {
+            const countryFilter = {
+                externalCountryId: params.externalCountryId,
+                externalCountryIds: params.externalCountryIds,
+                countryName: params.countryName,
+            };
+            const { dbTournaments, error } = await queryPublicDbTournamentsForRequest(params, trace, {
+                countryFilter,
+            });
+            dbItemsCount = dbTournaments.length;
+            let externalTournaments: PublicExternalTournament[] = [];
+            const externalFetchStartedAt = Date.now();
+            try {
+                externalTournaments = params.shouldAggregateRugby
+                    ? await queryRugbyCountryTournaments({
+                        externalCountryId: params.externalCountryId || '',
+                        externalCountryIds: params.externalCountryIds,
+                        countryName: params.countryName || '',
+                        flag: params.countryFlag || null,
+                        search: params.search,
+                        audience: params.audience,
+                    })
+                    : await queryFlashScoreCountryTournaments({
+                        sportKey: params.flashScoreSportKey,
+                        externalCountryId: params.externalCountryId || '',
+                        countryName: params.countryName || '',
+                        flag: params.countryFlag || null,
+                        search: params.search,
+                        audience: params.audience,
+                    });
+                externalItemsCount = externalTournaments.length;
+            } catch (externalError) {
+                console.error('[GET /api/public/tournaments] catalog country failed, using DB fallback:', externalError);
+            }
+
+            if (trace) {
+                trackDuration(trace.metrics, 'external_tournaments_fetch_ms', externalFetchStartedAt);
+            }
+
+            const mergeStartedAt = Date.now();
+            const tournaments = mergePublicTournamentLists(dbTournaments, externalTournaments);
+            finalItemsCount = tournaments.length;
+            if (trace) {
+                trackDuration(trace.metrics, 'merge_sources_ms', mergeStartedAt);
+                trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+                logSlowTournamentsComputeStageWarnings(trace);
+                logTournamentsEvent('info', 'tournaments_compute_summary', trace, {
+                    db_items_count: dbItemsCount,
+                    external_items_count: externalItemsCount,
+                    final_items_count: finalItemsCount,
+                    fallback_path: externalItemsCount === 0 && dbItemsCount > 0 ? 'db_country' : undefined,
+                });
+            }
+
+            if (error && finalItemsCount === 0) {
+                throw error;
+            }
+
             return { data: tournaments };
         }
 
-        const supabase = await getReadClient();
-        const supabaseReadStartedAt = Date.now();
-        const queryResult = await queryVisiblePublicTournaments(supabase);
-        if (trace) {
-            trackDuration(trace.metrics, 'supabase_tournaments_read_ms', supabaseReadStartedAt);
-        }
-        const { data, error } = queryResult;
-
-        const buildDbPayloadStartedAt = Date.now();
-        const dbTournaments = !error
-            ? filterPublicDbTournaments({
-                tournaments: data || [],
-                sportFilter: resolveSportFilter(params.sport),
-                audience: params.audience,
-                search: params.search,
-            })
-            : [];
+        const { dbTournaments, error } = await queryPublicDbTournamentsForRequest(params, trace);
         dbItemsCount = dbTournaments.length;
-        if (trace) {
-            addDurationMetric(trace.metrics, 'build_payload_ms', Date.now() - buildDbPayloadStartedAt);
-        }
 
         if (params.scope === 'db') {
             if (error) {
@@ -1240,7 +1537,7 @@ export async function GET(request: NextRequest) {
     if (
         params.flashScoreCatalogEnabled &&
         params.scope === 'country' &&
-        (!params.externalCountryId || !params.countryName)
+        ((!params.externalCountryId && params.externalCountryIds.length === 0) || !params.countryName)
     ) {
         const response = NextResponse.json(
             { error: 'Faltan external_country_id o country_name.' },

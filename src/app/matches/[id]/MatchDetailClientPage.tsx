@@ -31,13 +31,14 @@ import { getMatchPenaltyScore, hasMatchPenaltyShootout } from '@/lib/matchUtils'
 import { parseAnyMatches, withStats } from '@/lib/matchSchema';
 import { SPORTS } from '@/lib/data/sports';
 import { findCountryRecord } from '@/lib/data/countries';
-import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { isGlobalAdminRole, isSuperAdminRole } from '@/lib/auth/roles';
 import { APP_TIMEZONE } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import {
     buildPlayerStatsTableData,
 } from '@/lib/playerStats';
 import PlayerStatsPanel from './PlayerStatsPanel';
+import LineupRatingEditorModal from './LineupRatingEditorModal';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { useAuth } from '@/context/AuthContext';
@@ -397,15 +398,20 @@ function getDisplayLineupBadges(
         role: string | null;
         rating: number | null;
     },
+    options?: { isTopRated?: boolean },
 ) {
-    const badges: Array<{ label: string; kind: 'position' | 'rating' }> = [];
+    const badges: Array<{ label: string; kind: 'position' | 'rating'; isTopRated?: boolean }> = [];
     const position = String(player.position || '').trim();
     if (position && !isGenericLineupRoleLabel(position)) {
         badges.push({ label: position, kind: 'position' });
     }
 
     if (typeof player.rating === 'number') {
-        badges.push({ label: player.rating.toFixed(1), kind: 'rating' });
+        badges.push({
+            label: player.rating.toFixed(1),
+            kind: 'rating',
+            isTopRated: options?.isTopRated === true,
+        });
     }
 
     const role = String(player.role || '').trim();
@@ -414,6 +420,18 @@ function getDisplayLineupBadges(
     }
 
     return badges;
+}
+
+function getTopLineupRating(
+    players: Array<{ rating: number | null }>,
+) {
+    let top = Number.NEGATIVE_INFINITY;
+    for (const p of players) {
+        if (typeof p.rating === 'number' && p.rating > top) {
+            top = p.rating;
+        }
+    }
+    return Number.isFinite(top) ? top : null;
 }
 
 
@@ -571,6 +589,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
     const [activeTab, setActiveTab] = useState('summary');
     const [publicStatsTab, setPublicStatsTab] = useState('marcador');
+    const [lineupModalOpen, setLineupModalOpen] = useState(false);
+    const [lineupReloadKey, setLineupReloadKey] = useState(0);
     const statusRef = useRef<string>('scheduled');
     const isFlashScore = /^[A-Za-z0-9]{8}$/.test(id);
     const isRugbyExternal = isRugbyApiSportsMatchId(id);
@@ -1215,7 +1235,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                 controller.abort(new DOMException('Match detail effect cleanup', 'AbortError'));
             }
         };
-    }, [id]);
+    }, [id, lineupReloadKey]);
 
     useEffect(() => {
         if (visibleTabs.some((tab) => tab.id === activeTab)) return;
@@ -1315,6 +1335,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     );
     const homeLineupGroups = splitDisplayLineupPlayers(displayHomeLineup);
     const awayLineupGroups = splitDisplayLineupPlayers(displayAwayLineup);
+    const topMatchLineupRating = getTopLineupRating([...displayHomeLineup, ...displayAwayLineup]);
     const hasAnyLineups = displayHomeLineup.length > 0 || displayAwayLineup.length > 0;
     const motorsportRows = (Array.isArray(matchData.standings) && matchData.standings.length > 0
         ? matchData.standings
@@ -2030,6 +2051,23 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                     Exporta una pieza para post o historia con ambos equipos o una sola formacion, sin salir del lenguaje visual que ya usa la vista publica.
                                                 </p>
                                             </div>
+                                            {isSuperAdminRole(user?.role) && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setLineupModalOpen(true)}
+                                                    className={styles.lineupsExportAction}
+                                                    style={{
+                                                        padding: '8px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                                                        background: 'transparent',
+                                                        border: '1px solid var(--accent)',
+                                                        color: 'var(--accent)', cursor: 'pointer',
+                                                        textTransform: 'uppercase', letterSpacing: '0.06em',
+                                                    }}
+                                                    aria-label="Editar puntajes de la alineación"
+                                                >
+                                                    Editar puntajes
+                                                </button>
+                                            )}
                                             <ExportImage
                                                 className={styles.lineupsExportAction}
                                                 template="lineups"
@@ -2066,7 +2104,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                         const pId = p.id;
                                                         const pName = p.name;
                                                         const pNumber = p.number;
-                                                        const pBadges = getDisplayLineupBadges(p);
+                                                        const pBadges = getDisplayLineupBadges(p, {
+                                                            isTopRated: topMatchLineupRating !== null && p.rating === topMatchLineupRating,
+                                                        });
                                                         return (
                                                             <div key={`home-starter-${i}`} className={styles.playerItem}>
                                                                 <span className={styles.playerMain}>
@@ -2075,7 +2115,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                                 </span>
                                                                 <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                     {pBadges.map((badge) => (
-                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>{badge.label}</span>
+                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>
+                                                                            {badge.label}
+                                                                            {badge.kind === 'rating' && badge.isTopRated ? <span aria-label="Mejor puntuación" title="Mejor puntuación del partido" style={{ marginLeft: '4px' }}>⭐</span> : null}
+                                                                        </span>
                                                                     ))}
                                                                 </span>
                                                             </div>
@@ -2091,7 +2134,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                             const pId = p.id;
                                                             const pName = p.name;
                                                             const pNumber = p.number;
-                                                            const pBadges = getDisplayLineupBadges(p);
+                                                            const pBadges = getDisplayLineupBadges(p, {
+                                                                isTopRated: topMatchLineupRating !== null && p.rating === topMatchLineupRating,
+                                                            });
                                                             return (
                                                                 <div key={`home-finisher-${i}`} className={styles.playerItem}>
                                                                     <span className={styles.playerMain}>
@@ -2100,7 +2145,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                                     </span>
                                                                     <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                         {pBadges.map((badge) => (
-                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>{badge.label}</span>
+                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>
+                                                                                {badge.label}
+                                                                                {badge.kind === 'rating' && badge.isTopRated ? <span aria-label="Mejor puntuación" title="Mejor puntuación del partido" style={{ marginLeft: '4px' }}>⭐</span> : null}
+                                                                            </span>
                                                                         ))}
                                                                     </span>
                                                                 </div>
@@ -2119,7 +2167,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                         const pId = p.id;
                                                         const pName = p.name;
                                                         const pNumber = p.number;
-                                                        const pBadges = getDisplayLineupBadges(p);
+                                                        const pBadges = getDisplayLineupBadges(p, {
+                                                            isTopRated: topMatchLineupRating !== null && p.rating === topMatchLineupRating,
+                                                        });
                                                         return (
                                                             <div key={`away-starter-${i}`} className={styles.playerItem}>
                                                                 <span className={styles.playerMain}>
@@ -2128,7 +2178,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                                 </span>
                                                                 <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                     {pBadges.map((badge) => (
-                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>{badge.label}</span>
+                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>
+                                                                            {badge.label}
+                                                                            {badge.kind === 'rating' && badge.isTopRated ? <span aria-label="Mejor puntuación" title="Mejor puntuación del partido" style={{ marginLeft: '4px' }}>⭐</span> : null}
+                                                                        </span>
                                                                     ))}
                                                                 </span>
                                                             </div>
@@ -2144,7 +2197,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                             const pId = p.id;
                                                             const pName = p.name;
                                                             const pNumber = p.number;
-                                                            const pBadges = getDisplayLineupBadges(p);
+                                                            const pBadges = getDisplayLineupBadges(p, {
+                                                                isTopRated: topMatchLineupRating !== null && p.rating === topMatchLineupRating,
+                                                            });
                                                             return (
                                                                 <div key={`away-finisher-${i}`} className={styles.playerItem}>
                                                                     <span className={styles.playerMain}>
@@ -2153,7 +2208,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                                     </span>
                                                                     <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                         {pBadges.map((badge) => (
-                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>{badge.label}</span>
+                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>
+                                                                                {badge.label}
+                                                                                {badge.kind === 'rating' && badge.isTopRated ? <span aria-label="Mejor puntuación" title="Mejor puntuación del partido" style={{ marginLeft: '4px' }}>⭐</span> : null}
+                                                                            </span>
                                                                         ))}
                                                                     </span>
                                                                 </div>
@@ -2169,6 +2227,24 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                         <div style={{ fontSize: '40px', marginBottom: '16px', opacity: 0.3 }}>📋</div>
                                         <p className={styles.placeholderText} style={{ fontSize: '16px', fontWeight: '600' }}>Alineación no registrada</p>
                                         <p style={{ fontSize: '13px', opacity: 0.5 }}>Los equipos aún no han confirmado sus jugadores para este encuentro.</p>
+                                        {isSuperAdminRole(user?.role) && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setLineupModalOpen(true)}
+                                                style={{
+                                                    marginTop: 16,
+                                                    padding: '10px 18px', borderRadius: 8,
+                                                    fontSize: 12, fontWeight: 700,
+                                                    background: 'transparent',
+                                                    border: '1px solid var(--accent)',
+                                                    color: 'var(--accent)', cursor: 'pointer',
+                                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                                                }}
+                                                aria-label="Crear alineación y puntajes"
+                                            >
+                                                Cargar alineación
+                                            </button>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -2542,6 +2618,19 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     </aside>
                 </main>
             </div>
+
+            {isSuperAdminRole(user?.role) && (
+                <LineupRatingEditorModal
+                    open={lineupModalOpen}
+                    matchId={id}
+                    homeTeamName={matchData.home.name}
+                    awayTeamName={matchData.away.name}
+                    homePlayers={displayHomeLineup}
+                    awayPlayers={displayAwayLineup}
+                    onClose={() => setLineupModalOpen(false)}
+                    onSaved={() => setLineupReloadKey((k) => k + 1)}
+                />
+            )}
         </div>
     );
 }

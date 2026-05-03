@@ -23,13 +23,25 @@ type SportConfigRow = {
     display_order: number | null;
 };
 
+// Static defaults so the sport selector renders on first paint, even if the
+// Supabase `sports` config endpoint is slow or unreachable. Supabase config
+// only refines visibility/order; it must never block the UI.
+const DEFAULT_SPORTS: Sport[] = (Object.values(SPORTS) as Sport[])
+    .map((sport) => ({
+        ...sport,
+        isVisible: sport.isActive !== false,
+        displayOrder: sport.priority,
+    }))
+    .sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999));
+
 export function SportProvider({ children }: { children: ReactNode }) {
     const supabase = useMemo(() => createClient(), []);
     const { user } = useAuth();
-    const [isLoading, setIsLoading] = useState(true);
-    const [allSports, setAllSports] = useState<Sport[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [allSports, setAllSports] = useState<Sport[]>(DEFAULT_SPORTS);
     const [selectedSport, setSelectedSport] = useState<Sport>(
-        Object.values(SPORTS)[0] as Sport
+        DEFAULT_SPORTS.find((sport) => sport.isVisible !== false && !sport.groupKey)
+            ?? (Object.values(SPORTS)[0] as Sport)
     );
     const hasAutoSelectedRef = useRef<string | null>(null);
 
@@ -39,12 +51,20 @@ export function SportProvider({ children }: { children: ReactNode }) {
     const activeSports = allSports.filter(s => s.isVisible !== false && !s.groupKey);
 
     useEffect(() => {
+        let cancelled = false;
         const fetchConfig = async () => {
             try {
-                const { data: configs } = await supabase
+                const { data: configs, error } = await supabase
                     .from('sports')
                     .select('id, is_visible, display_order')
                     .order('display_order', { ascending: true });
+
+                if (cancelled) return;
+                if (error) {
+                    // Keep the static defaults already rendered; just log.
+                    console.warn('[SportContext] Sports config fetch error:', error.message);
+                    return;
+                }
 
                 const staticList = Object.values(SPORTS) as Sport[];
                 const merged = staticList.map(sport => {
@@ -56,25 +76,34 @@ export function SportProvider({ children }: { children: ReactNode }) {
                     };
                 }).sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999));
 
-                setAllSports(merged);
+                // Safety net: if Supabase reports every sport as hidden (likely a
+                // misconfiguration), keep showing the static defaults so the UI
+                // never goes blank.
+                const anyVisible = merged.some((s) => s.isVisible !== false && !s.groupKey);
+                setAllSports(anyVisible ? merged : DEFAULT_SPORTS);
 
                 setSelectedSport((currentSelected) => {
-                    const mergedSelected = merged.find((sport) => sport.id === currentSelected.id);
+                    const source = anyVisible ? merged : DEFAULT_SPORTS;
+                    const mergedSelected = source.find((sport) => sport.id === currentSelected.id);
                     if (mergedSelected?.isVisible !== false) {
                         return mergedSelected ?? currentSelected;
                     }
 
-                    return merged.find((sport) => sport.isVisible !== false) ?? currentSelected;
+                    return source.find((sport) => sport.isVisible !== false) ?? currentSelected;
                 });
             } catch (err) {
+                if (cancelled) return;
                 console.error('Error loading sports config:', err);
-                setAllSports(Object.values(SPORTS) as Sport[]);
+                // Static defaults are already in state; nothing else to do.
             } finally {
-                setIsLoading(false);
+                if (!cancelled) setIsLoading(false);
             }
         };
 
         fetchConfig();
+        return () => {
+            cancelled = true;
+        };
     }, [supabase]);
 
     useEffect(() => {

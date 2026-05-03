@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
+import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 
 const FINAL_STATUSES = ['final', 'finished', 'ft'] as const;
 
@@ -108,6 +109,17 @@ function mergeMatchRows(...rowGroups: Array<DbH2HMatchRow[] | null | undefined>)
     });
 }
 
+function serializeClubLogo(input: {
+    id?: string | null;
+    name?: string | null;
+    logo?: string | null;
+}) {
+    return resolveSerializableLogoUrl(input.logo, {
+        key: input.id ?? null,
+        name: input.name ?? null,
+    }) ?? '';
+}
+
 // GET /api/db/h2h?home=<clubId>&away=<clubId>
 // Returns recent matches involving either club (for form columns) and
 // direct head-to-head matches, mapped to the FlashScore H2H format used
@@ -184,8 +196,6 @@ export async function GET(req: NextRequest) {
         .slice(0, 30);
 
     const matches = filteredRows.map((m) => {
-        const homeLogo = m.home?.logo_url ?? '';
-        const awayLogo = m.away?.logo_url ?? '';
         const normalizedHomeId = m.home_club_id && homeFamilySet.has(m.home_club_id)
             ? homeId
             : m.home_club_id && awayFamilySet.has(m.home_club_id)
@@ -196,6 +206,16 @@ export async function GET(req: NextRequest) {
             : m.away_club_id && awayFamilySet.has(m.away_club_id)
                 ? awayId
                 : m.away_club_id;
+        const homeLogo = serializeClubLogo({
+            id: normalizedHomeId,
+            name: m.home?.name ?? null,
+            logo: m.home?.logo_url ?? null,
+        });
+        const awayLogo = serializeClubLogo({
+            id: normalizedAwayId,
+            name: m.away?.name ?? null,
+            logo: m.away?.logo_url ?? null,
+        });
 
         return ({
         match_id: m.id,

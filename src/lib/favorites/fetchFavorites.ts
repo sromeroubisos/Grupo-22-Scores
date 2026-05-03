@@ -527,6 +527,7 @@ async function fetchFavoritesFallback(
         .map((row) => row.entity_id);
     const internalTournamentIds = tournamentIds.filter(isUuid);
     const internalPlayerIds = playerIds.filter(isUuid);
+    const internalClubIds = clubIds.filter(isUuid);
     const externalClubCandidateIds = uniqueStrings(clubIds.flatMap(buildClubCandidateIds));
     const externalTournamentCandidateIds = uniqueStrings(tournamentIds.flatMap(buildTournamentCandidateIds));
     const externalLookupClient = supabase as unknown as ExternalLookupClient;
@@ -540,8 +541,8 @@ async function fetchFavoritesFallback(
         externalTournamentsRes,
         peopleRes,
     ] = await Promise.all([
-        clubIds.length > 0
-            ? supabase.from('clubs').select('id, external_id, name, logo_url, primary_color').in('id', clubIds)
+        internalClubIds.length > 0
+            ? supabase.from('clubs').select('id, external_id, name, logo_url, primary_color').in('id', internalClubIds)
             : Promise.resolve({ data: [], error: null }),
         externalClubCandidateIds.length > 0
             ? supabase.from('clubs').select('id, external_id, name, logo_url, primary_color').in('external_id', externalClubCandidateIds)

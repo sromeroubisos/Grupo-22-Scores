@@ -47,7 +47,7 @@ export function HistoricalSeasonImportDrawer({
         className="pp-drawer-panel pp-drawer-panel-wide historical-season-drawer"
         role="dialog"
         aria-modal="true"
-        aria-label="Importar temporada historica"
+        aria-label="Importar torneo historico legado"
       >
         <div className="pp-drawer-header">
           <div className="pp-drawer-header-content">
@@ -56,9 +56,9 @@ export function HistoricalSeasonImportDrawer({
                 <ArchiveRestore />
               </div>
               <div>
-                <h2 className="pp-drawer-title">Agregar temporada antigua</h2>
+                <h2 className="pp-drawer-title">Importar torneo historico legado</h2>
                 <p className="pp-drawer-subtitle">
-                  Crea una edicion historica nueva con fixture, tabla final y campeon vinculada a la temporada {seasonLabel || 'actual'}.
+                  Crea otro torneo vinculado a {seasonLabel || 'la temporada actual'}. Usar solo si necesitas conservar el modelo anterior.
                 </p>
               </div>
             </div>
@@ -82,6 +82,7 @@ export function HistoricalSeasonImportDrawer({
             }}
             showStandaloneHeader={false}
             redirectTab="resumen"
+            legacyMode
           />
         </div>
       </div>

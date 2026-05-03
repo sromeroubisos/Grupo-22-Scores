@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { canManageMatchContext, getMatchManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
 import { EDIT_MEMBERSHIP_ROLES, MANAGEMENT_MEMBERSHIP_ROLES, hasFederationAdminAccess } from '@/lib/auth/roles';
+import { isMatchVisibleToPublic } from '@/lib/matchReview';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
@@ -49,6 +50,7 @@ import {
   getExternalTournamentOverride,
   type ExternalTournamentOverrideRecord,
 } from '@/lib/server/externalTournamentOverrides';
+import { getExternalMatchLineupOverride } from '@/lib/server/externalMatchLineupOverrides';
 
 function jsonNoStore(body: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
@@ -184,6 +186,15 @@ async function getFlashScoreMatchBundle(matchId: string) {
     topScorers,
   ] = results.map((result) => (result.status === 'fulfilled' ? result.value : null));
 
+  const lineupOverride = await getExternalMatchLineupOverride(matchId).catch(() => null);
+  const lineupsWithOverride = lineupOverride
+    ? {
+        ...(lineups && typeof lineups === 'object' ? lineups as Record<string, unknown> : {}),
+        home: lineupOverride.lineups.home,
+        away: lineupOverride.lineups.away,
+      }
+    : lineups;
+
   return {
     source: 'flashscore' as const,
     details: resolvedDetails,
@@ -191,7 +202,14 @@ async function getFlashScoreMatchBundle(matchId: string) {
     stats,
     h2h,
     form,
-    lineups,
+    lineups: lineupsWithOverride,
+    lineupOverride: lineupOverride
+      ? {
+          provider: lineupOverride.provider,
+          ratedAt: lineupOverride.rated_at,
+          ratedBy: lineupOverride.rated_by,
+        }
+      : null,
     standings,
     dayMatches,
     playerStats,
@@ -288,6 +306,15 @@ async function ensureMatchAccess(
   }
 }
 
+async function canReadHiddenMatch(matchId: string) {
+  try {
+    await ensureMatchAccess(matchId, MANAGEMENT_MEMBERSHIP_ROLES);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -351,6 +378,13 @@ export async function GET(
     const { data: match, error: matchError } = await fetchMatchCenterMatch(readClient, matchId);
 
     if (matchError || !match) {
+      return jsonNoStore(
+        { error: 'Match not found' },
+        { status: 404 }
+      );
+    }
+
+    if (!isMatchVisibleToPublic(match) && !(await canReadHiddenMatch(matchId))) {
       return jsonNoStore(
         { error: 'Match not found' },
         { status: 404 }

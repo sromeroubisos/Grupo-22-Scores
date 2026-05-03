@@ -1347,7 +1347,9 @@ function buildPhaseStandingsViews(dbData: TournamentInitialData): StandingsScope
 function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
     const allMatches = (Array.isArray(dbData.matches) ? dbData.matches : []).map(mapDbMatchToFrontend);
     const tournament = dbData.tournament as any;
+    const tournamentSeason = dbData.season as any;
     const tournamentRuleset = tournament?.ruleset ?? null;
+    const hasRugbyExternalConfig = Boolean(getTournamentRugbyApiSportsConfig(tournament)?.league_id);
     const isCircuitCompetition = isCircuitTournamentRuleset(tournamentRuleset, tournament?.format ?? null);
     const { activePhase, phases } = getDbStandingsContext(dbData);
     const standingsScopeViews = isCircuitCompetition ? buildCircuitStandingsViews(dbData) : buildPhaseStandingsViews(dbData);
@@ -1383,13 +1385,13 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
             externalId: tournament.external_id || null,
             ruleset: tournamentRuleset,
             url: tournament.url || '',
-            season_id: tournament.season_id != null && String(tournament.season_id).trim()
+            season_id: tournamentSeason?.season_code || (tournament.season_id != null && String(tournament.season_id).trim()
                 ? String(tournament.season_id).trim()
-                : null,
+                : null),
             type: isCircuitCompetition ? 'circuit' : 'league',
             categories: [],
             priority: 0,
-            __isDbOnly: !tournament.url && !hasConfiguredFlashScoreSource(tournament),
+            __isDbOnly: !tournament.url && !hasRugbyExternalConfig && !hasConfiguredFlashScoreSource(tournament),
         } : null,
         results: sortMatchesByDate(allMatches.filter((match: any) => match.status === 'finished'), 'desc'),
         fixtures: sortMatchesByDate(allMatches.filter((match: any) => match.status !== 'finished'), 'asc'),
@@ -1631,7 +1633,9 @@ export default function TournamentDetailPage({
                         // Server passed initial data — skip the HTTP round-trip
                         dbData = initialData;
                     } else {
-                        const dbDataRes = await fetch(`/api/db/tournaments/${id}/data`, {
+                        const dbDataQuery = new URLSearchParams();
+                        if (overrideSeason) dbDataQuery.set('seasonId', overrideSeason);
+                        const dbDataRes = await fetch(`/api/db/tournaments/${id}/data${dbDataQuery.size ? `?${dbDataQuery.toString()}` : ''}`, {
                             cache: 'no-store',
                             signal: controller.signal,
                         });
@@ -1682,9 +1686,9 @@ export default function TournamentDetailPage({
                                             externalId: (t as any).external_id || tournamentMeta?.externalId || null,
                                             ruleset: (t as any).ruleset ?? tournamentMeta?.ruleset ?? null,
                                             url: dbStoredUrl,
-                                            season_id: (t as any).season_id != null && String((t as any).season_id).trim()
+                                            season_id: (dbData.season as any)?.season_code || ((t as any).season_id != null && String((t as any).season_id).trim()
                                                 ? String((t as any).season_id).trim()
-                                                : tournamentMeta?.season_id ?? null,
+                                                : tournamentMeta?.season_id ?? null),
                                             type: isCircuitTournamentRuleset((t as any).ruleset ?? tournamentMeta?.ruleset ?? null)
                                                 ? 'circuit'
                                                 : (tournamentMeta?.type || 'league'),
@@ -3183,6 +3187,39 @@ export default function TournamentDetailPage({
         isMotorsportTournament ? renderMotorsportMatchItemV2(match, isResult, index) : renderMatchItem(match, isResult, index)
     );
 
+    const formatDayDividerLabel = (date: Date | null, dayKey: string): string => {
+        if (!date) return 'Sin fecha';
+        const yesterdayKey = addDaysToIsoDate(renderTodayKey, -1);
+        const tomorrowKey = addDaysToIsoDate(renderTodayKey, 1);
+        let prefix = '';
+        if (dayKey === renderTodayKey) prefix = 'Hoy · ';
+        else if (dayKey === yesterdayKey) prefix = 'Ayer · ';
+        else if (dayKey === tomorrowKey) prefix = 'Mañana · ';
+        const label = formatArgentinaDate(date, { weekday: 'long', day: 'numeric', month: 'long' }) || '';
+        const capitalized = label.charAt(0).toUpperCase() + label.slice(1);
+        return `${prefix}${capitalized}`;
+    };
+
+    const renderMatchListWithDayDividers = (matches: any[], isResult: boolean): React.ReactNode[] => {
+        const nodes: React.ReactNode[] = [];
+        let lastDayKey: string | null = null;
+        matches.forEach((m, idx) => {
+            const ts = m.timestamp || m.start_time || m.time;
+            const date = ts ? new Date(ts * 1000) : null;
+            const dayKey = date ? formatDateKey(date, APP_TIMEZONE) : 'no-date';
+            if (dayKey !== lastDayKey) {
+                nodes.push(
+                    <div key={`day-${dayKey}-${idx}`} className={styles.matchDayDivider}>
+                        {formatDayDividerLabel(date, dayKey)}
+                    </div>
+                );
+                lastDayKey = dayKey;
+            }
+            nodes.push(renderCompetitionItem(m, isResult, idx));
+        });
+        return nodes;
+    };
+
     return (
         <div className={styles.page}>
 
@@ -3634,7 +3671,7 @@ export default function TournamentDetailPage({
                             ) : (
                                 <div className={styles.matchList}>
                                     {results.length > 0
-                                        ? results.map((m, idx) => renderCompetitionItem(m, true, idx))
+                                        ? renderMatchListWithDayDividers(results, true)
                                         : <p className={styles.emptyState}>No hay resultados registrados.</p>}
                                 </div>
                             )}
@@ -3680,7 +3717,7 @@ export default function TournamentDetailPage({
                             ) : (
                                 <div className={styles.matchList}>
                                     {fixtures.length > 0
-                                        ? fixtures.map((m, idx) => renderCompetitionItem(m, false, idx))
+                                        ? renderMatchListWithDayDividers(fixtures, false)
                                         : <p className={styles.emptyState}>No hay partidos programados.</p>}
                                 </div>
                             )}

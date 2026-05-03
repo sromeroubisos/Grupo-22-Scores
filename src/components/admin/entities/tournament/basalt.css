@@ -121,11 +121,8 @@
 }
 
 .basalt-season-menu {
-    left: 0;
-    right: auto;
     top: calc(100% + 10px);
     width: min(340px, calc(100vw - 24px));
-    transform-origin: top left;
 }
 
 .basalt-season-menu-copy {
@@ -5333,5 +5330,53 @@ select.basalt-input {
 
     .basalt-body .details-console-shell .details-integration-layout {
         grid-template-columns: 1fr;
+    }
+}
+
+.basalt-tabs-progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    pointer-events: none;
+    overflow: hidden;
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.basalt-tabs-progress::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 42%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+    animation: basalt-tabs-progress-run 1.05s ease-in-out infinite;
+}
+
+.basalt-tab-item.is-pending,
+.basalt-tabs-sheet-item.is-pending,
+.operation-subtab.is-pending {
+    cursor: progress;
+}
+
+.basalt-tab-item.is-pending .basalt-tab-label,
+.basalt-tabs-sheet-item.is-pending .basalt-tabs-sheet-item-text > span {
+    color: var(--text-main);
+}
+
+@keyframes basalt-tabs-progress-run {
+    0% {
+        transform: translateX(-120%);
+    }
+
+    100% {
+        transform: translateX(240%);
+    }
+}
+
+@media (max-width: 1023px) {
+    .basalt-shell-stage {
+        padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
     }
 }

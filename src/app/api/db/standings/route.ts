@@ -6,6 +6,7 @@ import {
     filterMatchesForGroupScope,
 } from '@/lib/standings/matchScope';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
+import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 
 type PhaseRow = {
     id: string;
@@ -88,17 +89,35 @@ type GeneratedStandingRow = {
     form?: string[] | string | null;
 };
 
+function serializeClubLogo(input: {
+    id?: string | null;
+    name?: string | null;
+    logo?: string | null;
+}) {
+    return resolveSerializableLogoUrl(input.logo, {
+        key: input.id ?? null,
+        name: input.name ?? null,
+    }) ?? '';
+}
+
 function mapPersistedStanding(row: PersistedStandingRow) {
+    const name = row.club?.name ?? row.stats?.team_name ?? '';
+    const logo = serializeClubLogo({
+        id: row.club_id,
+        name,
+        logo: row.club?.logo_url ?? row.stats?.team_logo ?? null,
+    });
+
     return {
         position: row.position,
         team: {
-            name: row.club?.name ?? row.stats?.team_name ?? '',
-            logo: row.club?.logo_url ?? row.stats?.team_logo ?? '',
+            name,
+            logo,
             id: row.club_id,
         },
         team_id: row.club_id,
-        team_name: row.club?.name ?? row.stats?.team_name ?? '',
-        team_logo: row.club?.logo_url ?? row.stats?.team_logo ?? '',
+        team_name: name,
+        team_logo: logo,
         matches_total: row.played ?? 0,
         wins_total: row.won ?? 0,
         draws_total: row.drawn ?? 0,
@@ -118,17 +137,24 @@ function mapCalculatedStanding(row: GeneratedStandingRow, participants: Particip
     const participant = participants.find((candidate) =>
         candidate?.club_id === row.teamId || candidate?.id === row.participantId,
     );
+    const id = row.teamId ?? participant?.club_id ?? participant?.id ?? null;
+    const name = row.team?.name ?? participant?.clubs?.name ?? participant?.name ?? 'Equipo';
+    const logo = serializeClubLogo({
+        id,
+        name,
+        logo: row.team?.logo ?? participant?.clubs?.logo_url ?? null,
+    });
 
     return {
         position: row.position,
         team: {
-            name: row.team?.name ?? participant?.clubs?.name ?? participant?.name ?? 'Equipo',
-            logo: row.team?.logo ?? participant?.clubs?.logo_url ?? '',
-            id: row.teamId ?? participant?.club_id ?? participant?.id ?? null,
+            name,
+            logo,
+            id,
         },
-        team_id: row.teamId ?? participant?.club_id ?? participant?.id ?? null,
-        team_name: row.team?.name ?? participant?.clubs?.name ?? participant?.name ?? 'Equipo',
-        team_logo: row.team?.logo ?? participant?.clubs?.logo_url ?? '',
+        team_id: id,
+        team_name: name,
+        team_logo: logo,
         matches_total: row.played ?? 0,
         wins_total: row.won ?? 0,
         draws_total: row.drawn ?? 0,

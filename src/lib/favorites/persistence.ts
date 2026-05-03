@@ -55,11 +55,14 @@ async function resolveClubLinkedIds(
         return [entityId];
     }
 
+    const uuidAliasIds = aliasIds.filter(isUuid);
     const [byIdRes, byExternalIdRes] = await Promise.all([
-        supabaseAny
-            .from('clubs')
-            .select('id, external_id')
-            .in('id', aliasIds),
+        uuidAliasIds.length > 0
+            ? supabaseAny
+                .from('clubs')
+                .select('id, external_id')
+                .in('id', uuidAliasIds)
+            : Promise.resolve({ data: [], error: null }),
         supabaseAny
             .from('clubs')
             .select('id, external_id')
@@ -119,11 +122,14 @@ export async function resolveClubCanonicalPreferenceId(
     }
 
     const supabaseAny = supabase as any;
+    const uuidLinkedIds = linkedIds.filter(isUuid);
     const [byIdRes, byExternalIdRes] = await Promise.all([
-        supabaseAny
-            .from('clubs')
-            .select('id, external_id')
-            .in('id', linkedIds),
+        uuidLinkedIds.length > 0
+            ? supabaseAny
+                .from('clubs')
+                .select('id, external_id')
+                .in('id', uuidLinkedIds)
+            : Promise.resolve({ data: [], error: null }),
         supabaseAny
             .from('clubs')
             .select('id, external_id')

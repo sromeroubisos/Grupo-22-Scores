@@ -110,26 +110,28 @@ function normalizePlayerMetricKey(value: unknown) {
   return normalized;
 }
 
-function formatMetricLabel(value: string) {
+function formatMetricLabel(value: string | null | undefined) {
+  if (typeof value !== 'string' || value.length === 0) return '—';
   return value
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-export function getPlayerMetricMeta(metricId: string, fallbackLabel?: string | null): PlayerMetricMeta {
-  const preset = PLAYER_METRIC_PRESETS[metricId];
+export function getPlayerMetricMeta(metricId: string | null | undefined, fallbackLabel?: string | null): PlayerMetricMeta {
+  const safeId = typeof metricId === 'string' ? metricId : '';
+  const preset = safeId ? PLAYER_METRIC_PRESETS[safeId] : undefined;
   if (preset) return preset;
 
-  const label = fallbackLabel?.trim() || formatMetricLabel(metricId);
+  const label = fallbackLabel?.trim() || formatMetricLabel(safeId);
   return {
-    id: metricId,
+    id: safeId,
     label,
     shortLabel: label,
     kind: label.includes('%') ? 'percent' : 'number',
   };
 }
 
-export function formatPlayerMetricValue(metricId: string, value: number | string | null | undefined, fallbackLabel?: string | null) {
+export function formatPlayerMetricValue(metricId: string | null | undefined, value: number | string | null | undefined, fallbackLabel?: string | null) {
   if (value == null || value === '') return '—';
 
   const meta = getPlayerMetricMeta(metricId, fallbackLabel);

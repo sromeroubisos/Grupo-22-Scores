@@ -25,7 +25,28 @@ export async function POST(
       return NextResponse.json(preview);
     }
 
-    if (action === 'confirm') {
+    if (action === 'confirm' || action === 'confirmSeason') {
+      const result = await HistoricalTournamentImportService.confirmIntoSeason({
+        baseTournamentId,
+        actorUserId,
+        rawText,
+        overrides: body?.overrides || {},
+        phaseOverrides: body?.phaseOverrides || {},
+        tournamentName: body?.tournamentName || null,
+        displayName: body?.displayName || null,
+        slug: body?.slug || null,
+        publish: body?.publish === true,
+        status: body?.status || 'completed',
+      });
+
+      if (!result.ok) {
+        return NextResponse.json(result, { status: 400 });
+      }
+
+      return NextResponse.json(result);
+    }
+
+    if (action === 'confirmLegacy') {
       const result = await HistoricalTournamentImportService.confirm({
         baseTournamentId,
         actorUserId,

@@ -304,6 +304,14 @@ type PersistedExportPresetRow = {
     payload: unknown;
     updated_at?: string;
 };
+type RemoteExportPresetRow = {
+    id: string;
+    user_id: string;
+    preset_type: ExportPresetKind;
+    name: string;
+    name_normalized: string;
+    payload: Record<string, unknown>;
+};
 
 interface ExportImageProps {
     template: ExportTemplate;
@@ -1268,7 +1276,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         const nextPresets = upsertSavedEditorialPreset(savedEditorialPresets, nextPreset);
         setSavedEditorialPresets(nextPresets);
         try {
-            const storageMode = await persistSavedEditorialPresets(nextPresets, supabase);
+            const storageMode = await persistSavedEditorialPreset(nextPresets, nextPreset, supabase);
             setPresetStorageMode(storageMode);
             setEditorialPresetName('');
             setStatus(storageMode === 'cloud'
@@ -1311,7 +1319,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         const nextPresets = upsertSavedGradientPreset(savedGradientPresets, nextPreset);
         setSavedGradientPresets(nextPresets);
         try {
-            const storageMode = await persistSavedGradientPresets(nextPresets, supabase);
+            const storageMode = await persistSavedGradientPreset(nextPresets, nextPreset, supabase);
             setPresetStorageMode(storageMode);
             setGradientPresetName('');
             setStatus(storageMode === 'cloud'
@@ -1329,7 +1337,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setSavedEditorialPresets(nextPresets);
 
         try {
-            const storageMode = await persistSavedEditorialPresets(nextPresets, supabase);
+            const storageMode = await deleteSavedEditorialPreset(nextPresets, presetName, supabase);
             setPresetStorageMode(storageMode);
             setStatus(storageMode === 'cloud'
                 ? `Preset "${presetName}" eliminado y sincronizado`
@@ -1347,7 +1355,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         setSavedGradientPresets(nextPresets);
 
         try {
-            const storageMode = await persistSavedGradientPresets(nextPresets, supabase);
+            const storageMode = await deleteSavedGradientPreset(nextPresets, presetName, supabase);
             setPresetStorageMode(storageMode);
             setStatus(storageMode === 'cloud'
                 ? `Gradiente "${presetName}" eliminado y sincronizado`
@@ -3499,12 +3507,8 @@ async function readRemotePresetRows(
     return (data ?? []) as PersistedExportPresetRow[];
 }
 
-async function replaceRemoteEditorialPresets(
-    supabase: SupabaseBrowserClient,
-    userId: string,
-    presets: SavedMatchEditorialPreset[],
-): Promise<void> {
-    const rows = presets.map((preset) => ({
+function buildRemoteEditorialPresetRow(userId: string, preset: SavedMatchEditorialPreset): RemoteExportPresetRow {
+    return {
         id: buildRemotePresetRowId(userId, 'editorial', preset.name),
         user_id: userId,
         preset_type: 'editorial',
@@ -3517,40 +3521,11 @@ async function replaceRemoteEditorialPresets(
             gradientImage: preset.gradientImage,
             sponsors: preset.sponsors,
         },
-    }));
-
-    if (rows.length > 0) {
-        const { error: insertError } = await supabase
-            .from(EXPORT_PRESETS_TABLE)
-            .upsert(rows, { onConflict: 'user_id,preset_type,name_normalized' });
-
-        if (insertError) {
-            throw insertError;
-        }
-    }
-
-    const retainedNames = rows.map((row) => row.name_normalized);
-    const deleteQuery = supabase
-        .from(EXPORT_PRESETS_TABLE)
-        .delete()
-        .eq('user_id', userId)
-        .eq('preset_type', 'editorial');
-
-    const { error: deleteError } = retainedNames.length > 0
-        ? await deleteQuery.not('name_normalized', 'in', `(${retainedNames.map((name) => `"${name.replace(/"/g, '""')}"`).join(',')})`)
-        : await deleteQuery;
-
-    if (deleteError) {
-        throw deleteError;
-    }
+    };
 }
 
-async function replaceRemoteGradientPresets(
-    supabase: SupabaseBrowserClient,
-    userId: string,
-    presets: SavedMatchGradientPreset[],
-): Promise<void> {
-    const rows = presets.map((preset) => ({
+function buildRemoteGradientPresetRow(userId: string, preset: SavedMatchGradientPreset): RemoteExportPresetRow {
+    return {
         id: buildRemotePresetRowId(userId, 'gradient', preset.name),
         user_id: userId,
         preset_type: 'gradient',
@@ -3561,31 +3536,61 @@ async function replaceRemoteGradientPresets(
             gradientRightColor: preset.gradientRightColor,
             gradientImage: preset.gradientImage,
         },
-    }));
+    };
+}
 
-    if (rows.length > 0) {
-        const { error: insertError } = await supabase
+function compareRemotePresetRows(a: RemoteExportPresetRow, b: RemoteExportPresetRow): number {
+    return a.preset_type.localeCompare(b.preset_type)
+        || a.name_normalized.localeCompare(b.name_normalized)
+        || a.id.localeCompare(b.id);
+}
+
+async function upsertRemotePresetRows(
+    supabase: SupabaseBrowserClient,
+    rows: RemoteExportPresetRow[],
+): Promise<void> {
+    for (const row of [...rows].sort(compareRemotePresetRows)) {
+        const { error } = await supabase
             .from(EXPORT_PRESETS_TABLE)
-            .upsert(rows, { onConflict: 'user_id,preset_type,name_normalized' });
+            .upsert(row, { onConflict: 'user_id,preset_type,name_normalized' });
 
-        if (insertError) {
-            throw insertError;
+        if (error) {
+            throw error;
         }
     }
+}
 
-    const retainedNames = rows.map((row) => row.name_normalized);
-    const deleteQuery = supabase
+async function upsertRemoteEditorialPresets(
+    supabase: SupabaseBrowserClient,
+    userId: string,
+    presets: SavedMatchEditorialPreset[],
+): Promise<void> {
+    await upsertRemotePresetRows(supabase, presets.map((preset) => buildRemoteEditorialPresetRow(userId, preset)));
+}
+
+async function upsertRemoteGradientPresets(
+    supabase: SupabaseBrowserClient,
+    userId: string,
+    presets: SavedMatchGradientPreset[],
+): Promise<void> {
+    await upsertRemotePresetRows(supabase, presets.map((preset) => buildRemoteGradientPresetRow(userId, preset)));
+}
+
+async function deleteRemotePresetByName(
+    supabase: SupabaseBrowserClient,
+    userId: string,
+    presetType: ExportPresetKind,
+    presetName: string,
+): Promise<void> {
+    const { error } = await supabase
         .from(EXPORT_PRESETS_TABLE)
         .delete()
         .eq('user_id', userId)
-        .eq('preset_type', 'gradient');
+        .eq('preset_type', presetType)
+        .eq('name_normalized', normalizePresetName(presetName));
 
-    const { error: deleteError } = retainedNames.length > 0
-        ? await deleteQuery.not('name_normalized', 'in', `(${retainedNames.map((name) => `"${name.replace(/"/g, '""')}"`).join(',')})`)
-        : await deleteQuery;
-
-    if (deleteError) {
-        throw deleteError;
+    if (error) {
+        throw error;
     }
 }
 
@@ -3624,11 +3629,11 @@ async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): P
         ]);
 
         if (getPresetComparableSignature(mergedEditorialPresets) !== getPresetComparableSignature(remoteEditorialPresets)) {
-            await replaceRemoteEditorialPresets(supabase, userId, mergedEditorialPresets);
+            await upsertRemoteEditorialPresets(supabase, userId, mergedEditorialPresets);
         }
 
         if (getPresetComparableSignature(mergedGradientPresets) !== getPresetComparableSignature(remoteGradientPresets)) {
-            await replaceRemoteGradientPresets(supabase, userId, mergedGradientPresets);
+            await upsertRemoteGradientPresets(supabase, userId, mergedGradientPresets);
         }
 
         return {
@@ -3646,8 +3651,9 @@ async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): P
     }
 }
 
-async function persistSavedEditorialPresets(
+async function persistSavedEditorialPreset(
     presets: SavedMatchEditorialPreset[],
+    preset: SavedMatchEditorialPreset,
     supabase: SupabaseBrowserClient,
 ): Promise<ExportPresetStorageMode> {
     await persistLocalSavedEditorialPresets(presets);
@@ -3655,12 +3661,13 @@ async function persistSavedEditorialPresets(
     const userId = await getAuthenticatedPresetUserId(supabase);
     if (!userId) return 'local';
 
-    await replaceRemoteEditorialPresets(supabase, userId, presets);
+    await upsertRemotePresetRows(supabase, [buildRemoteEditorialPresetRow(userId, preset)]);
     return 'cloud';
 }
 
-async function persistSavedGradientPresets(
+async function persistSavedGradientPreset(
     presets: SavedMatchGradientPreset[],
+    preset: SavedMatchGradientPreset,
     supabase: SupabaseBrowserClient,
 ): Promise<ExportPresetStorageMode> {
     await persistLocalSavedGradientPresets(presets);
@@ -3668,7 +3675,35 @@ async function persistSavedGradientPresets(
     const userId = await getAuthenticatedPresetUserId(supabase);
     if (!userId) return 'local';
 
-    await replaceRemoteGradientPresets(supabase, userId, presets);
+    await upsertRemotePresetRows(supabase, [buildRemoteGradientPresetRow(userId, preset)]);
+    return 'cloud';
+}
+
+async function deleteSavedEditorialPreset(
+    presets: SavedMatchEditorialPreset[],
+    presetName: string,
+    supabase: SupabaseBrowserClient,
+): Promise<ExportPresetStorageMode> {
+    await persistLocalSavedEditorialPresets(presets);
+
+    const userId = await getAuthenticatedPresetUserId(supabase);
+    if (!userId) return 'local';
+
+    await deleteRemotePresetByName(supabase, userId, 'editorial', presetName);
+    return 'cloud';
+}
+
+async function deleteSavedGradientPreset(
+    presets: SavedMatchGradientPreset[],
+    presetName: string,
+    supabase: SupabaseBrowserClient,
+): Promise<ExportPresetStorageMode> {
+    await persistLocalSavedGradientPresets(presets);
+
+    const userId = await getAuthenticatedPresetUserId(supabase);
+    if (!userId) return 'local';
+
+    await deleteRemotePresetByName(supabase, userId, 'gradient', presetName);
     return 'cloud';
 }
 
@@ -4365,8 +4400,15 @@ function normalizeImageSource(value: string): string {
     return trimmed;
 }
 
+const EXPORT_IMAGE_LOAD_TIMEOUT_MS = 8000;
+
 function buildProxyUrl(url: string): string {
-    return `https://images.weserv.nl/?url=${encodeURIComponent(url.replace(/^https?:\/\//, ''))}&w=400&h=400&fit=contain&output=png`;
+    if (typeof window === 'undefined') return url;
+
+    const proxyUrl = new URL('/api/assets/team-logo', window.location.origin);
+    proxyUrl.searchParams.set('key', 'export-image');
+    proxyUrl.searchParams.set('fallback', url);
+    return proxyUrl.toString();
 }
 
 async function loadImage(url: string): Promise<HTMLImageElement | null> {
@@ -4381,10 +4423,22 @@ async function loadImage(url: string): Promise<HTMLImageElement | null> {
                 return;
             }
             const image = new Image();
+            const timeoutId = window.setTimeout(() => {
+                image.onload = null;
+                image.onerror = null;
+                tryLoad(index + 1);
+            }, EXPORT_IMAGE_LOAD_TIMEOUT_MS);
+            const clearImageTimeout = () => window.clearTimeout(timeoutId);
             image.crossOrigin = 'anonymous';
             image.referrerPolicy = 'no-referrer';
-            image.onload = () => resolve(image);
-            image.onerror = () => tryLoad(index + 1);
+            image.onload = () => {
+                clearImageTimeout();
+                resolve(image);
+            };
+            image.onerror = () => {
+                clearImageTimeout();
+                tryLoad(index + 1);
+            };
             image.src = sources[index];
         };
         tryLoad(0);
@@ -7935,6 +7989,20 @@ function getLineupExportRatingValue(value: unknown) {
     return Number.isFinite(parsed) ? parsed : null;
 }
 
+function computeHighestLineupRating(teams: Array<{ starters?: LineupExportPlayerData[] | null } | null | undefined>): number | null {
+    let best: number | null = null;
+    for (const team of teams) {
+        const players = team?.starters;
+        if (!Array.isArray(players)) continue;
+        for (const player of players) {
+            const rating = getLineupExportRatingValue(player?.rating);
+            if (rating == null) continue;
+            if (best == null || rating > best) best = rating;
+        }
+    }
+    return best;
+}
+
 type SquadPageGroupData = SquadExportGroupData & {
     continuedFromPrevious?: boolean;
     continuesOnNext?: boolean;
@@ -8999,6 +9067,9 @@ async function drawG22BaseLineups(
     }
 
     const totalPlayers = selectedTeams.reduce((sum, team) => sum + team.starters.length + team.bench.length, 0);
+    const highestRating = computeHighestLineupRating(
+        selectedTeams.map((team) => ({ starters: [...team.starters, ...team.bench] })),
+    );
     const scaleX = canvas.width / 1080;
     const scaleY = canvas.height / 1350;
     const scaleFont = Math.min(scaleX, scaleY);
@@ -9030,7 +9101,10 @@ async function drawG22BaseLineups(
     const columnTop = contentPanelY + contentInsetTop;
     const bannerInnerHeight = teamBannerHeight - sy(28);
     const teamNameMaxWidth = columnWidth - sx(48);
-    const playerTextMaxWidth = columnWidth - sx(68);
+    const hasAnyRating = highestRating != null;
+    const ratingAreaWidth = hasAnyRating ? sx(96) : 0;
+    const ratingRightInset = sx(20);
+    const playerTextMaxWidth = columnWidth - sx(68) - ratingAreaWidth;
     const teamNameBaseSize = isSingleTeam ? sf(36) : sf(32);
     const teamNameMinSize = sf(20);
     const playerLabels = selectedTeams.flatMap((team) => [...team.starters, ...team.bench].map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()));
@@ -9450,6 +9524,19 @@ async function drawG22BaseLineups(
             ctx.fillStyle = primaryText;
             ctx.font = `700 ${starterFontSize}px ${FONT_BODY}`;
             ctx.fillText(truncateTextToWidth(ctx, playerLabel, playerTextMaxWidth), team.columnX + textStartOffset, centerY + 1);
+
+            if (hasAnyRating) {
+                const ratingLabel = formatLineupExportRating(player.rating);
+                if (ratingLabel) {
+                    const ratingValue = getLineupExportRatingValue(player.rating);
+                    const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = isTopRated ? '#facc15' : team.accentTone;
+                    ctx.font = `800 ${starterFontSize}px ${FONT_MONO}`;
+                    const display = isTopRated ? `${ratingLabel} ★` : ratingLabel;
+                    ctx.fillText(display, team.columnX + columnWidth - ratingRightInset, centerY + 1);
+                }
+            }
         });
 
         if (team.bench.length > 0) {
@@ -9490,6 +9577,19 @@ async function drawG22BaseLineups(
                 ctx.fillStyle = primaryText;
                 ctx.font = `700 ${benchFontSize}px ${FONT_BODY}`;
                 ctx.fillText(truncateTextToWidth(ctx, playerLabel, playerTextMaxWidth), team.columnX + textStartOffset, centerY + 1);
+
+                if (hasAnyRating) {
+                    const ratingLabel = formatLineupExportRating(player.rating);
+                    if (ratingLabel) {
+                        const ratingValue = getLineupExportRatingValue(player.rating);
+                        const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
+                        ctx.textAlign = 'right';
+                        ctx.fillStyle = isTopRated ? '#facc15' : team.accentTone;
+                        ctx.font = `800 ${benchFontSize}px ${FONT_MONO}`;
+                        const display = isTopRated ? `${ratingLabel} ★` : ratingLabel;
+                        ctx.fillText(display, team.columnX + columnWidth - ratingRightInset, centerY + 1);
+                    }
+                }
             });
         }
 
@@ -11557,6 +11657,7 @@ async function drawMomentumLineups(
         : mode === 'home'
             ? [{ team: data.homeTeam, logo: homeLogo }]
             : [{ team: data.awayTeam, logo: awayLogo }];
+    const highestRating = computeHighestLineupRating(teams.map((entry) => entry.team));
 
     drawMomentumBackdrop(ctx, canvas, accentColor, bgColor);
 
@@ -11684,6 +11785,11 @@ async function drawMomentumLineups(
         );
         ctx.restore();
 
+        const hasAnyRating = highestRating != null;
+        const ratingColumnWidth = hasAnyRating ? 84 : 0;
+        const ratingRightInset = 22;
+        const starterNameMaxWidth = (columnWidth - 156) - ratingColumnWidth;
+        const benchNameMaxWidth = (columnWidth - 152) - ratingColumnWidth;
         starters.forEach((player, playerIndex) => {
             const y = listStartY + playerIndex * (scaledStarterRowHeight + scaledStarterGap);
             const numberLabel = String(player.number ?? playerIndex + 1).padStart(2, '0');
@@ -11705,8 +11811,21 @@ async function drawMomentumLineups(
             ctx.fillText(numberLabel, x + 51, y + scaledStarterRowHeight / 2 + 4);
             ctx.textAlign = 'left';
             ctx.fillStyle = '#ffffff';
-            setFittedFont(ctx, playerLabel, columnWidth - 156, '800', starterNameFontSize, FONT_BODY, 10);
-            ctx.fillText(truncateTextToWidth(ctx, playerLabel, columnWidth - 156), x + 94, y + scaledStarterRowHeight / 2 + 5);
+            setFittedFont(ctx, playerLabel, starterNameMaxWidth, '800', starterNameFontSize, FONT_BODY, 10);
+            ctx.fillText(truncateTextToWidth(ctx, playerLabel, starterNameMaxWidth), x + 94, y + scaledStarterRowHeight / 2 + 5);
+
+            if (hasAnyRating) {
+                const ratingLabel = formatLineupExportRating(player.rating);
+                if (ratingLabel) {
+                    const ratingValue = getLineupExportRatingValue(player.rating);
+                    const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = isTopRated ? '#facc15' : accent;
+                    ctx.font = `800 ${starterNameFontSize}px ${FONT_MONO}`;
+                    const display = isTopRated ? `${ratingLabel} ★` : ratingLabel;
+                    ctx.fillText(display, x + columnWidth - ratingRightInset, y + scaledStarterRowHeight / 2 + 5);
+                }
+            }
             ctx.restore();
         });
 
@@ -11749,8 +11868,21 @@ async function drawMomentumLineups(
                 ctx.fillText(numberLabel, x + 49, y + scaledBenchRowHeight / 2 + 4);
                 ctx.textAlign = 'left';
                 ctx.fillStyle = '#ffffff';
-                setFittedFont(ctx, playerLabel, columnWidth - 152, '800', benchNameFontSize, FONT_BODY, 10);
-                ctx.fillText(truncateTextToWidth(ctx, playerLabel, columnWidth - 152), x + 88, y + scaledBenchRowHeight / 2 + 4);
+                setFittedFont(ctx, playerLabel, benchNameMaxWidth, '800', benchNameFontSize, FONT_BODY, 10);
+                ctx.fillText(truncateTextToWidth(ctx, playerLabel, benchNameMaxWidth), x + 88, y + scaledBenchRowHeight / 2 + 4);
+
+                if (hasAnyRating) {
+                    const ratingLabel = formatLineupExportRating(player.rating);
+                    if (ratingLabel) {
+                        const ratingValue = getLineupExportRatingValue(player.rating);
+                        const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
+                        ctx.textAlign = 'right';
+                        ctx.fillStyle = isTopRated ? '#facc15' : accent;
+                        ctx.font = `800 ${benchNameFontSize}px ${FONT_MONO}`;
+                        const display = isTopRated ? `${ratingLabel} ★` : ratingLabel;
+                        ctx.fillText(display, x + columnWidth - ratingRightInset, y + scaledBenchRowHeight / 2 + 4);
+                    }
+                }
                 ctx.restore();
             });
         }
@@ -14844,6 +14976,7 @@ async function drawPosterV3Lineups(
             : [],
     }));
     const isSingleTeam = teams.length === 1;
+    const highestRating = computeHighestLineupRating(teams);
     const metaLabel = getLineupMetaLabel(data);
     const accent = accentColor;
     const accentSoft = mixHexColors(accentColor, '#ffffff', 0.24);
@@ -14934,14 +15067,23 @@ async function drawPosterV3Lineups(
         const contentBottom = canvas.height - 112;
         const contentWidth = 560;
         const numberAreaWidth = 84;
-        const nameAreaWidth = contentWidth - numberAreaWidth - 12;
+        const ratingAreaWidth = highestRating != null ? 92 : 0;
+        const nameAreaWidth = contentWidth - numberAreaWidth - 12 - ratingAreaWidth;
         const numberCenterX = canvas.width / 2 - contentWidth / 2 + numberAreaWidth / 2;
         const nameX = canvas.width / 2 - contentWidth / 2 + numberAreaWidth + 12;
+        const ratingRightX = canvas.width / 2 + contentWidth / 2 - 12;
         const buildBenchLayout = (labelFontSize: number, itemFontSize: number) => {
-            const entries = bench.map((player, index) => ({
-                number: String(player.number ?? starters.length + index + 1),
-                label: `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase(),
-            }));
+            const entries = bench.map((player, index) => {
+                const ratingLabel = formatLineupExportRating(player.rating);
+                const ratingValue = getLineupExportRatingValue(player.rating);
+                const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
+                return {
+                    number: String(player.number ?? starters.length + index + 1),
+                    label: `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase(),
+                    rating: ratingLabel ? (isTopRated ? `${ratingLabel} ★` : ratingLabel) : '',
+                    isTopRated,
+                };
+            });
             if (entries.length === 0) return { lines: [] as typeof entries[], lineHeight: 0, height: 0 };
 
             ctx.save();
@@ -14954,7 +15096,8 @@ async function drawPosterV3Lineups(
             let currentWidth = labelWidth + 12;
 
             entries.forEach((entry) => {
-                const segmentWidth = ctx.measureText(`${entry.number} ${entry.label}`).width + 22;
+                const ratingSegment = entry.rating ? ` ${entry.rating}` : '';
+                const segmentWidth = ctx.measureText(`${entry.number} ${entry.label}${ratingSegment}`).width + 22;
                 if (currentLine.length > 0 && currentWidth + segmentWidth > maxWidth) {
                     lines.push(currentLine);
                     currentLine = [];
@@ -15014,6 +15157,18 @@ async function drawPosterV3Lineups(
             ctx.fillStyle = primaryText;
             ctx.font = `800 ${starterNameFont}px ${FONT_BODY}`;
             ctx.fillText(truncateTextToWidth(ctx, playerLabel, nameAreaWidth), nameX, centerY + 1);
+
+            if (highestRating != null) {
+                const ratingLabel = formatLineupExportRating(player.rating);
+                if (ratingLabel) {
+                    const ratingValue = getLineupExportRatingValue(player.rating);
+                    const isTopRated = ratingValue != null && ratingValue === highestRating;
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = isTopRated ? '#facc15' : accent;
+                    ctx.font = `800 ${starterNameFont}px ${FONT_MONO}`;
+                    ctx.fillText(isTopRated ? `${ratingLabel} ★` : ratingLabel, ratingRightX, centerY + 1);
+                }
+            }
             ctx.restore();
         });
 
@@ -15033,6 +15188,9 @@ async function drawPosterV3Lineups(
                 let totalWidth = 0;
                 line.forEach((entry, entryIndex) => {
                     totalWidth += ctx.measureText(`${entry.number} ${entry.label}`).width;
+                    if (entry.rating) {
+                        totalWidth += ctx.measureText(` ${entry.rating}`).width;
+                    }
                     if (entryIndex < line.length - 1) totalWidth += 22;
                 });
                 let cursorX = canvas.width / 2 - totalWidth / 2;
@@ -15044,6 +15202,12 @@ async function drawPosterV3Lineups(
                     ctx.fillStyle = primaryText;
                     ctx.fillText(entry.label, cursorX, y);
                     cursorX += ctx.measureText(entry.label).width;
+                    if (entry.rating) {
+                        const ratingText = ` ${entry.rating}`;
+                        ctx.fillStyle = entry.isTopRated ? '#facc15' : accent;
+                        ctx.fillText(ratingText, cursorX, y);
+                        cursorX += ctx.measureText(ratingText).width;
+                    }
                     if (entryIndex < line.length - 1) cursorX += 22;
                 });
                 ctx.restore();
@@ -15250,9 +15414,10 @@ async function drawPosterV3Lineups(
     const rightStarterLabels = rightSplit.starters.map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase());
     const leftBenchLabels = leftSplit.bench.map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase());
     const rightBenchLabels = rightSplit.bench.map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase());
+    const twoTeamRatingColumnWidth = highestRating != null ? 70 : 0;
     let starterFont = getSharedFittedFontSize(
         ctx,
-        [...leftStarterLabels, ...rightStarterLabels].map((text) => ({ text, maxWidth: columnWidth - 24 })),
+        [...leftStarterLabels, ...rightStarterLabels].map((text) => ({ text, maxWidth: columnWidth - 24 - twoTeamRatingColumnWidth })),
         '900',
         38,
         FONT_BODY,
@@ -15327,16 +15492,33 @@ async function drawPosterV3Lineups(
         ctx.fillText(teamName.toUpperCase(), centerX, teamNameY);
         ctx.restore();
 
+        const ratingColumnWidth = highestRating != null ? 70 : 0;
+        const innerLeftX = centerX - columnWidth / 2 + 10;
+        const innerRightX = centerX + columnWidth / 2 - 10;
+        const nameMaxWidth = columnWidth - 24 - ratingColumnWidth;
+
         ctx.save();
-        ctx.textAlign = 'center';
-        ctx.fillStyle = primaryText;
         ctx.textBaseline = 'alphabetic';
         ctx.font = `900 ${starterFont}px ${FONT_BODY}`;
-        const maxWidth = columnWidth - 20;
         starters.forEach((player, index) => {
             const y = metrics.startersStartY + index * starterRowGap;
             const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
-            ctx.fillText(truncateTextToWidth(ctx, playerLabel, maxWidth), centerX, y);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = primaryText;
+            ctx.fillText(truncateTextToWidth(ctx, playerLabel, nameMaxWidth), innerLeftX, y);
+
+            if (highestRating != null) {
+                const ratingLabel = formatLineupExportRating(player.rating);
+                if (ratingLabel) {
+                    const ratingValue = getLineupExportRatingValue(player.rating);
+                    const isTopRated = ratingValue != null && ratingValue === highestRating;
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = isTopRated ? '#facc15' : hexToRGBA(accentSoft, 0.96);
+                    ctx.font = `800 ${starterFont}px ${FONT_MONO}`;
+                    ctx.fillText(isTopRated ? `${ratingLabel} ★` : ratingLabel, innerRightX, y);
+                    ctx.font = `900 ${starterFont}px ${FONT_BODY}`;
+                }
+            }
         });
         ctx.restore();
 
@@ -15350,14 +15532,27 @@ async function drawPosterV3Lineups(
             ctx.restore();
 
             ctx.save();
-            ctx.textAlign = 'center';
             ctx.textBaseline = 'alphabetic';
-            ctx.fillStyle = secondaryText;
             ctx.font = `700 ${benchFont}px ${FONT_BODY}`;
             bench.forEach((player, index) => {
                 const y = metrics.benchStartY + index * benchRowGap;
                 const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
-                ctx.fillText(truncateTextToWidth(ctx, playerLabel, maxWidth), centerX, y);
+                ctx.textAlign = 'left';
+                ctx.fillStyle = secondaryText;
+                ctx.fillText(truncateTextToWidth(ctx, playerLabel, nameMaxWidth), innerLeftX, y);
+
+                if (highestRating != null) {
+                    const ratingLabel = formatLineupExportRating(player.rating);
+                    if (ratingLabel) {
+                        const ratingValue = getLineupExportRatingValue(player.rating);
+                        const isTopRated = ratingValue != null && ratingValue === highestRating;
+                        ctx.textAlign = 'right';
+                        ctx.fillStyle = isTopRated ? '#facc15' : hexToRGBA(accentSoft, 0.92);
+                        ctx.font = `800 ${benchFont}px ${FONT_MONO}`;
+                        ctx.fillText(isTopRated ? `${ratingLabel} ★` : ratingLabel, innerRightX, y);
+                        ctx.font = `700 ${benchFont}px ${FONT_BODY}`;
+                    }
+                }
             });
             ctx.restore();
         }

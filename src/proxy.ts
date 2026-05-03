@@ -63,7 +63,7 @@ function hasGuestClubAccess(request: NextRequest): boolean {
 
 function redirectToLogin(request: NextRequest) {
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('returnTo', request.nextUrl.pathname);
+    loginUrl.searchParams.set('returnTo', `${request.nextUrl.pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(loginUrl);
 }
 

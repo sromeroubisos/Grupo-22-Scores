@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
+import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 
 type ManualTournamentRow = {
     id: string;
@@ -34,6 +35,7 @@ const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = `
     legacy_sport:sport,
     country,
     country_id,
+    logo_url,
     category,
     season_id,
     status,
@@ -50,6 +52,7 @@ const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = `
     sport_id,
     country,
     country_id,
+    logo_url,
     category,
     season_id,
     status,
@@ -67,6 +70,7 @@ const SELECT_WITH_LEGACY_SPORT = `
     legacy_sport:sport,
     country,
     country_id,
+    logo_url,
     category,
     season_id,
     status,
@@ -82,6 +86,7 @@ const SELECT_WITHOUT_LEGACY_SPORT = `
     sport_id,
     country,
     country_id,
+    logo_url,
     category,
     season_id,
     status,
@@ -153,7 +158,10 @@ export async function GET() {
         }).map((tournament) => ({
             ...tournament,
             sport_id: tournament.sport_id || tournament.legacy_sport || 'rugby',
-            logo_url: null,
+            logo_url: resolveSerializableLogoUrl(tournament.logo_url, {
+                key: tournament.id,
+                name: tournament.display_name || tournament.name,
+            }),
             priority: typeof tournament.priority === 'number' ? tournament.priority : 0,
         })));
 

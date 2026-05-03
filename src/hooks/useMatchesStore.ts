@@ -163,7 +163,6 @@ export function useMatchesStore(
         const url = `/api/matches?date=${date}&sport=${sportId}&external=true&tz=${encodeURIComponent(timeZone)}`;
         const res = await fetch(url, {
           signal,
-          cache: 'no-store',
         });
         if (!res.ok) return { matches: [] };
         const data = await res.json();

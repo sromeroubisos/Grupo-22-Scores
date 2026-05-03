@@ -368,6 +368,8 @@ export type Database = {
           category: string | null
           clock: Json | null
           created_at: string
+          created_by_club_id: string | null
+          created_by_user_id: string | null
           date_time: string | null
           events: Json | null
           group_id: string | null
@@ -379,6 +381,10 @@ export type Database = {
           phase_id: string | null
           pitch: string | null
           referee: string | null
+          review_notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by_user_id: string | null
           round_id: string | null
           sport: string | null
           sport_id: string | null
@@ -389,6 +395,7 @@ export type Database = {
           updated_at: string
           venue: string | null
           weather: Json | null
+          is_visible: boolean
           home_base_points: number
           away_base_points: number
           home_bonus_points: number
@@ -404,6 +411,8 @@ export type Database = {
           category?: string | null
           clock?: Json | null
           created_at?: string
+          created_by_club_id?: string | null
+          created_by_user_id?: string | null
           date_time?: string | null
           events?: Json | null
           group_id?: string | null
@@ -415,6 +424,10 @@ export type Database = {
           phase_id?: string | null
           pitch?: string | null
           referee?: string | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
           round_id?: string | null
           sport?: string | null
           sport_id?: string | null
@@ -425,6 +438,7 @@ export type Database = {
           updated_at?: string
           venue?: string | null
           weather?: Json | null
+          is_visible?: boolean
           home_base_points?: number
           away_base_points?: number
           home_bonus_points?: number
@@ -440,6 +454,8 @@ export type Database = {
           category?: string | null
           clock?: Json | null
           created_at?: string
+          created_by_club_id?: string | null
+          created_by_user_id?: string | null
           date_time?: string | null
           events?: Json | null
           group_id?: string | null
@@ -451,6 +467,10 @@ export type Database = {
           phase_id?: string | null
           pitch?: string | null
           referee?: string | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by_user_id?: string | null
           round_id?: string | null
           sport?: string | null
           sport_id?: string | null
@@ -461,6 +481,7 @@ export type Database = {
           updated_at?: string
           venue?: string | null
           weather?: Json | null
+          is_visible?: boolean
           home_base_points?: number
           away_base_points?: number
           home_bonus_points?: number

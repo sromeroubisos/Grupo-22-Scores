@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useTransition } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -54,6 +54,7 @@ type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 interface TournamentOperationTabProps {
     id: string;
     data: TournamentRow;
+    initialSubtab?: string | null;
 }
 
 interface RawPhase {
@@ -74,7 +75,18 @@ const OPERATION_SUB_TABS = [
     { id: 'sincronizacion', label: 'Sincronizacion', icon: Link2, description: 'Integraciones y sincronias externas' },
 ];
 
-export function TournamentOperationTab({ id, data }: TournamentOperationTabProps) {
+const OPERATION_SUB_TAB_IDS = new Set(OPERATION_SUB_TABS.map((tab) => tab.id));
+
+function normalizeOperationSubTab(value: string | null | undefined) {
+    return value && OPERATION_SUB_TAB_IDS.has(value) ? value : 'fixture';
+}
+
+export function TournamentOperationTab({ id, data, initialSubtab }: TournamentOperationTabProps) {
+    const searchParams = useSearchParams();
+    const currentSeasonId =
+        searchParams.get('seasonId') ||
+        searchParams.get('season_id') ||
+        searchParams.get('season');
     const [phases, setPhases] = useState<RawPhase[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -85,7 +97,9 @@ export function TournamentOperationTab({ id, data }: TournamentOperationTabProps
         setError(null);
 
         try {
-            const res = await fetch(`/api/tournaments/${id}/phases`, {
+            const query = new URLSearchParams();
+            if (currentSeasonId) query.set('seasonId', currentSeasonId);
+            const res = await fetch(`/api/tournaments/${id}/phases${query.size ? `?${query.toString()}` : ''}`, {
                 cache: 'no-store',
             });
 
@@ -98,17 +112,22 @@ export function TournamentOperationTab({ id, data }: TournamentOperationTabProps
             const fetchedPhases: RawPhase[] = json.data || [];
 
             setPhases(fetchedPhases);
-
-            if (fetchedPhases.length > 0 && !selectedPhaseId) {
+            setSelectedPhaseId((currentPhaseId) => {
+                if (currentPhaseId && (
+                    currentPhaseId === CIRCUIT_GLOBAL_SENTINEL ||
+                    fetchedPhases.some((phase) => phase.id === currentPhaseId)
+                )) {
+                    return currentPhaseId;
+                }
                 const active = fetchedPhases.find((phase) => phase.is_active);
-                setSelectedPhaseId(active?.id || fetchedPhases[0].id);
-            }
+                return active?.id || fetchedPhases[0]?.id || null;
+            });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error loading phases');
         } finally {
             setLoading(false);
         }
-    }, [id, selectedPhaseId]);
+    }, [currentSeasonId, id]);
 
     useEffect(() => {
         loadPhases();
@@ -146,13 +165,14 @@ export function TournamentOperationTab({ id, data }: TournamentOperationTabProps
     }
 
     return (
-        <FixtureProvider tournamentId={id} initialFixture={null}>
+        <FixtureProvider tournamentId={id} initialFixture={null} seasonId={currentSeasonId}>
             <OperationContent
                 id={id}
                 data={data}
                 phases={phases}
                 selectedPhaseId={selectedPhaseId}
                 onSelectPhase={setSelectedPhaseId}
+                initialSubtab={initialSubtab}
             />
         </FixtureProvider>
     );
@@ -203,6 +223,7 @@ interface OperationContentProps {
     phases: RawPhase[];
     selectedPhaseId: string | null;
     onSelectPhase: (phaseId: string) => void;
+    initialSubtab?: string | null;
 }
 
 function OperationContent({
@@ -211,30 +232,40 @@ function OperationContent({
     phases,
     selectedPhaseId,
     onSelectPhase,
+    initialSubtab,
 }: OperationContentProps) {
-    const router = useRouter();
     const searchParams = useSearchParams();
-    const [isNavPending, startNavTransition] = useTransition();
     const { fixture, refreshFixture } = useFixture();
     const [mobilePhasePickerOpen, setMobilePhasePickerOpen] = useState(false);
     const [mobileSubtabPickerOpen, setMobileSubtabPickerOpen] = useState(false);
     const subtabSheet = useAnimatedDisclosure(mobileSubtabPickerOpen, 180);
     const phaseSheet = useAnimatedDisclosure(mobilePhasePickerOpen, 180);
 
-    const currentSubTab = searchParams.get('subtab') || 'fixture';
+    const currentSubTab = normalizeOperationSubTab(searchParams.get('subtab') || initialSubtab);
     const [optimisticSubTab, setOptimisticSubTab] = useState(currentSubTab);
+
+    const buildSubTabUrl = useCallback((subTabId: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('type', 'tournament');
+        params.set('tab', 'operacion');
+        params.set('subtab', subTabId);
+        return `/admin/entities/${id}/manage?${params.toString()}`;
+    }, [id, searchParams]);
+
+    const replaceSubTabUrl = useCallback((subTabId: string) => {
+        if (typeof window === 'undefined') return;
+        const nextUrl = buildSubTabUrl(subTabId);
+        const currentUrl = `${window.location.pathname}${window.location.search}`;
+
+        if (currentUrl !== nextUrl) {
+            window.history.replaceState(null, '', nextUrl);
+        }
+    }, [buildSubTabUrl]);
 
     useEffect(() => {
         setOptimisticSubTab(currentSubTab);
-    }, [currentSubTab]);
-
-    useEffect(() => {
-        OPERATION_SUB_TABS.forEach((tab) => {
-            const params = new URLSearchParams(searchParams.toString());
-            params.set('subtab', tab.id);
-            router.prefetch(`/admin/entities/${id}/manage?${params.toString()}`);
-        });
-    }, [id, router, searchParams]);
+        replaceSubTabUrl(currentSubTab);
+    }, [currentSubTab, replaceSubTabUrl]);
 
     useEffect(() => {
         if (!fixture) {
@@ -254,24 +285,19 @@ function OperationContent({
         [optimisticSubTab],
     );
 
-    const switchSubTab = (subTabId: string) => {
-        if (subTabId === currentSubTab || isNavPending) return;
+    const switchSubTab = useCallback((subTabId: string) => {
+        if (subTabId === optimisticSubTab) return;
         setMobileSubtabPickerOpen(false);
         setOptimisticSubTab(subTabId);
-        const params = new URLSearchParams(searchParams.toString());
-        params.set('subtab', subTabId);
-        startNavTransition(() => {
-            router.replace(`/admin/entities/${id}/manage?${params.toString()}`, { scroll: false });
-        });
-    };
+        replaceSubTabUrl(subTabId);
+    }, [optimisticSubTab, replaceSubTabUrl]);
 
     // When global circuit is selected, only the standings tab is meaningful
     useEffect(() => {
         if (isGlobalSelected && currentSubTab !== 'tabla') {
             switchSubTab('tabla');
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isGlobalSelected, currentSubTab]);
+    }, [currentSubTab, isGlobalSelected, switchSubTab]);
 
     const selectPhaseAndClose = (phaseId: string) => {
         setMobilePhasePickerOpen(false);
@@ -377,8 +403,10 @@ function OperationContent({
                     return (
                         <button
                             key={tab.id}
+                            type="button"
                             onClick={() => switchSubTab(tab.id)}
                             className={`operation-subtab ${isActive ? 'active' : ''}`}
+                            aria-current={currentSubTab === tab.id ? 'page' : undefined}
                         >
                             <Icon size={15} />
                             <span>{tab.label}</span>

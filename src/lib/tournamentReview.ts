@@ -17,6 +17,11 @@ export function isPublicTournamentStatus(value: unknown) {
     return status === 'active' || status === 'published';
 }
 
+function isHiddenTournamentStatus(value: unknown) {
+    const status = typeof value === 'string' ? value.trim().toLowerCase() : '';
+    return status === 'archived' || status === 'deleted';
+}
+
 export function isTournamentVisibleToPublic(tournament: {
     status?: string | null;
     is_visible?: boolean | null;
@@ -25,5 +30,8 @@ export function isTournamentVisibleToPublic(tournament: {
     if (!tournament) return false;
     if (tournament.is_visible === false) return false;
     if (isPendingClubTournamentStatus(tournament.review_status)) return false;
+    if (tournament.review_status === TOURNAMENT_REVIEW_STATUS.rejected) return false;
+    if (isHiddenTournamentStatus(tournament.status)) return false;
+    if (tournament.is_visible === true) return true;
     return isPublicTournamentStatus(tournament.status);
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     ChevronDown,
@@ -43,30 +43,47 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
     const [isPending, startTransition] = useTransition();
     const { hasDirtySection, hasRecentlySavedSection } = useTournamentDirty();
     const [mobileSelectorOpen, setMobileSelectorOpen] = useState(false);
+    const [optimisticTab, setOptimisticTab] = useState(currentTab);
+    const prefetchedTabsRef = useRef<Set<string>>(new Set());
     const { shouldRender, isVisible } = useAnimatedDisclosure(mobileSelectorOpen, 180);
-    const activeTab = TOURNAMENT_TABS.find((tab) => tab.id === currentTab) || TOURNAMENT_TABS[0];
+    const visualTabId = TOURNAMENT_TABS.some((tab) => tab.id === optimisticTab) ? optimisticTab : currentTab;
+    const activeTab = TOURNAMENT_TABS.find((tab) => tab.id === visualTabId) || TOURNAMENT_TABS[0];
     const activeTabIndex = TOURNAMENT_TABS.findIndex((tab) => tab.id === activeTab.id);
+    const isTabNavigationPending = isPending || activeTab.id !== currentTab;
     const activeTabHasDraft =
         (activeTab.id === 'detalles' && hasDirtySection('details')) ||
-        (activeTab.id === 'formato' && hasDirtySection('format'));
+        (activeTab.id === 'formato' && hasDirtySection('format')) ||
+        (activeTab.id === 'estructura' && hasDirtySection('structure'));
     const activeTabWasSaved =
         (activeTab.id === 'detalles' && hasRecentlySavedSection('details')) ||
-        (activeTab.id === 'formato' && hasRecentlySavedSection('format'));
+        (activeTab.id === 'formato' && hasRecentlySavedSection('format')) ||
+        (activeTab.id === 'estructura' && hasRecentlySavedSection('structure'));
 
-    const tabHref = useMemo(
-        () => (tabId: string) => `/admin/entities/${id}/manage?type=tournament&tab=${tabId}`,
+    const tabHref = useCallback(
+        (tabId: string) => `/admin/entities/${id}/manage?type=tournament&tab=${tabId}`,
         [id],
     );
 
     useEffect(() => {
-        TOURNAMENT_TABS.forEach((tab) => {
-            router.prefetch(tabHref(tab.id));
-        });
-    }, [router, tabHref]);
+        setOptimisticTab(currentTab);
+    }, [currentTab]);
+
+    const prefetchTab = useCallback((tabId: string) => {
+        if (tabId === currentTab || prefetchedTabsRef.current.has(tabId)) return;
+        prefetchedTabsRef.current.add(tabId);
+        router.prefetch(tabHref(tabId));
+    }, [currentTab, router, tabHref]);
+
+    useEffect(() => {
+        if (!mobileSelectorOpen) return;
+        TOURNAMENT_TABS.forEach((tab) => prefetchTab(tab.id));
+    }, [mobileSelectorOpen, prefetchTab]);
 
     const switchTab = (tabId: string) => {
-        if (tabId === currentTab || isPending) return;
+        if (tabId === visualTabId) return;
         setMobileSelectorOpen(false);
+        setOptimisticTab(tabId);
+        prefetchTab(tabId);
         startTransition(() => {
             router.push(tabHref(tabId), { scroll: false });
         });
@@ -75,19 +92,21 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
     const tabHasDraft = (tabId: string) => {
         if (tabId === 'detalles') return hasDirtySection('details');
         if (tabId === 'formato') return hasDirtySection('format');
+        if (tabId === 'estructura') return hasDirtySection('structure');
         return false;
     };
 
     const tabWasRecentlySaved = (tabId: string) => {
         if (tabId === 'detalles') return hasRecentlySavedSection('details');
         if (tabId === 'formato') return hasRecentlySavedSection('format');
+        if (tabId === 'estructura') return hasRecentlySavedSection('structure');
         return false;
     };
 
     const ActiveIcon = activeTab.icon;
 
     return (
-        <nav className="basalt-tabs">
+        <nav className="basalt-tabs" aria-busy={isTabNavigationPending}>
             <div className="basalt-tabs-mobile">
                 <div className="basalt-tabs-mobile-head">
                     <span className="basalt-tabs-mobile-label">Modulo activo</span>
@@ -156,17 +175,19 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
             <div className="basalt-tabs-inner">
                 {TOURNAMENT_TABS.map((tab) => {
                     const Icon = tab.icon;
-                    const isActive = currentTab === tab.id;
+                    const isActive = activeTab.id === tab.id;
                     const index = TOURNAMENT_TABS.indexOf(tab);
                     const hasDraft = tabHasDraft(tab.id);
                     const wasSaved = tabWasRecentlySaved(tab.id);
                     return (
                         <button
                             key={tab.id}
-                            className={`basalt-tab-item ${isActive ? 'active' : ''}`}
+                            className={`basalt-tab-item ${isActive ? 'active' : ''} ${isActive && isTabNavigationPending ? 'is-pending' : ''}`}
                             onClick={() => switchTab(tab.id)}
+                            onFocus={() => prefetchTab(tab.id)}
+                            onPointerEnter={() => prefetchTab(tab.id)}
                             type="button"
-                            aria-current={isActive ? 'page' : undefined}
+                            aria-current={currentTab === tab.id ? 'page' : undefined}
                         >
                             <span className="basalt-tab-step">{String(index + 1).padStart(2, '0')}</span>
                             <span className="basalt-tab-glyph">
@@ -211,6 +232,8 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
                 })}
             </div>
 
+            {isTabNavigationPending ? <span className="basalt-tabs-progress" aria-hidden="true" /> : null}
+
             {shouldRender && (
                 <>
                     <button
@@ -244,7 +267,7 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
                         <div className="basalt-tabs-sheet-list">
                             {TOURNAMENT_TABS.map((tab) => {
                                 const Icon = tab.icon;
-                                const isActive = currentTab === tab.id;
+                                const isActive = activeTab.id === tab.id;
                                 const hasDraft = tabHasDraft(tab.id);
                                 const wasSaved = tabWasRecentlySaved(tab.id);
 
@@ -252,8 +275,9 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
                                     <button
                                         key={tab.id}
                                         type="button"
-                                        className={`basalt-tabs-sheet-item ${isActive ? 'active' : ''}`}
+                                        className={`basalt-tabs-sheet-item ${isActive ? 'active' : ''} ${isActive && isTabNavigationPending ? 'is-pending' : ''}`}
                                         onClick={() => switchTab(tab.id)}
+                                        onFocus={() => prefetchTab(tab.id)}
                                     >
                                         <span className="basalt-tabs-sheet-item-copy">
                                             <span className="basalt-tabs-sheet-item-glyph">

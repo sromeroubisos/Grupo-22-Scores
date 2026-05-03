@@ -7,8 +7,10 @@ import {
 import { MANAGEMENT_MEMBERSHIP_ROLES, isGlobalAdminRole } from '@/lib/auth/roles';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { MATCH_REVIEW_STATUS } from '@/lib/matchReview';
 import { combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 import { TOURNAMENT_REVIEW_STATUS, isTournamentVisibleToPublic } from '@/lib/tournamentReview';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -29,6 +31,20 @@ function slugify(value: string) {
 
 function getCurrentSeason() {
   return String(new Date().getFullYear());
+}
+
+async function supportsMatchesColumn(
+  admin: ReturnType<typeof createAdminClient>,
+  column: string
+) {
+  const { error } = await admin
+    .from('matches')
+    .select(column)
+    .limit(0);
+
+  if (!error) return true;
+  if (isMissingColumnError(error, column)) return false;
+  return false;
 }
 
 async function resolveClubReference(admin: ReturnType<typeof createAdminClient>, value: unknown) {
@@ -270,6 +286,7 @@ export async function POST(request: NextRequest) {
     }
 
     const finalTournamentId = requestedTournamentId || createdTournament?.id || null;
+    const requiresSuperAdminReview = !isGlobalAdminRole(context.role);
     const unresolvedOpponentNote = opponentLabel && !opponentClubId
       ? `Rival externo: ${opponentLabel}`
       : null;
@@ -292,6 +309,48 @@ export async function POST(request: NextRequest) {
       tournament_id: finalTournamentId,
       score: { home: null, away: null },
     };
+
+    const [
+      supportsVisibility,
+      supportsReviewStatus,
+      supportsCreatedByUser,
+      supportsCreatedByClub,
+      supportsReviewNotes,
+    ] = await Promise.all([
+      supportsMatchesColumn(admin, 'is_visible'),
+      supportsMatchesColumn(admin, 'review_status'),
+      supportsMatchesColumn(admin, 'created_by_user_id'),
+      supportsMatchesColumn(admin, 'created_by_club_id'),
+      supportsMatchesColumn(admin, 'review_notes'),
+    ]);
+
+    if (
+      requiresSuperAdminReview &&
+      (!supportsVisibility || !supportsReviewStatus || !supportsCreatedByUser || !supportsCreatedByClub)
+    ) {
+      return NextResponse.json(
+        { error: 'La base de datos aun no tiene el flujo de revision de partidos. No se creo el partido.' },
+        { status: 409 }
+      );
+    }
+
+    if (supportsVisibility) {
+      insertData.is_visible = !requiresSuperAdminReview;
+    }
+    if (supportsReviewStatus) {
+      insertData.review_status = requiresSuperAdminReview
+        ? MATCH_REVIEW_STATUS.pending
+        : MATCH_REVIEW_STATUS.approved;
+    }
+    if (supportsCreatedByUser) {
+      insertData.created_by_user_id = context.userId;
+    }
+    if (supportsCreatedByClub) {
+      insertData.created_by_club_id = originClubId;
+    }
+    if (supportsReviewNotes && requiresSuperAdminReview) {
+      insertData.review_notes = 'Creado desde Club Admin. Pendiente de aprobacion de Super Admin.';
+    }
 
     const { data, error } = await admin
       .from('matches')

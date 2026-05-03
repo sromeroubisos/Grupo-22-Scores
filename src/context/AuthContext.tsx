@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { User as SupabaseUser, type AuthChangeEvent, type Session } from '@supabase/supabase-js';
 import { normalizeRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
 import { clearFavoritesCache } from '@/lib/favoritesCache';
@@ -16,6 +17,7 @@ import {
 } from '@/lib/services/preferencesService';
 import { clearSupabaseBrowserSession, createClient } from '@/lib/supabase/client';
 import { logPerf, measureAsync, nowMs, warnIfDuplicateWindow } from '@/lib/perf/measure';
+import { getReservedAdminRole } from '@/lib/types/user';
 
 interface User {
     id: string;
@@ -65,13 +67,30 @@ const isSupabaseNetworkError = (err: unknown) => {
     );
 };
 
+function buildOptimisticUser(sbUser: SupabaseUser, onboardingCompleted: boolean | null): User {
+    const reservedRole = getReservedAdminRole(sbUser.email);
+    return {
+        id: sbUser.id,
+        name: sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
+        email: sbUser.email || '',
+        role: reservedRole ?? 'fan',
+        avatarUrl: sbUser.user_metadata?.avatar_url,
+        onboardingCompleted,
+    };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
+    const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const supabase = useMemo(() => createClient(), []);
     const isMounted = useRef(true);
     const authProviderStartedAt = useRef(nowMs());
     const activeProfileFetchRef = useRef<{ userId: string; startedAt: number } | null>(null);
+    const lastAuthEventRef = useRef<{ event: AuthChangeEvent | 'INIT'; userId: string | null }>({
+        event: 'INIT',
+        userId: null,
+    });
 
     const trackAuthDuplicate = useCallback((step: string, metadata: Record<string, unknown> = {}) => {
         return warnIfDuplicateWindow(
@@ -114,6 +133,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         trackAuthDuplicate('restoreUser', { userId: sbUser.id });
         console.log('[AuthContext] fetchAndSetUser start for:', sbUser.email);
         const fallbackOnboarding = resolveFallbackOnboarding(sbUser);
+
+        // Optimistic UI: surface the authenticated user immediately from the
+        // session metadata so the UI flips out of the loading state without
+        // waiting on the (potentially slow) `users` and onboarding queries.
+        // The profile fetch below will refine name/role/avatar once it arrives.
+        if (isMounted.current) {
+            setUser((prev) => {
+                if (prev && prev.id === sbUser.id) return prev;
+                return buildOptimisticUser(
+                    sbUser,
+                    fallbackOnboarding.completed ? true : null,
+                );
+            });
+            setIsLoading(false);
+        }
 
         try {
             const { data: profile, error: profileError } = await measureAsync(
@@ -193,7 +227,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 console.log('[AuthContext] Setting user with profile:', finalUser.email, 'role:', finalUser.role, 'onboardingCompleted:', onboardingCompleted);
                 setUser(finalUser);
             } else {
-                const { getReservedAdminRole } = await import('@/lib/types/user');
                 const fallbackRole = getReservedAdminRole(sbUser.email) ?? 'fan';
 
                 if (fallbackOnboarding.completed) {
@@ -325,9 +358,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
                     if (session?.user) {
                         console.log('[AuthContext] Event result: fetching user for event:', event);
+                        const previousUserId = lastAuthEventRef.current.userId;
                         fetchAndSetUser(session.user).catch((backgroundError: unknown) => {
                             console.error('[AuthContext] Background fetchAndSetUser failed:', backgroundError);
                         });
+                        // Refresh server-rendered data when the identity actually
+                        // changes (or we sign in for the first time). Skipping
+                        // when the same user is signed in avoids spurious data
+                        // re-fetches on tab focus/`USER_UPDATED` chatter.
+                        if (
+                            event === 'SIGNED_IN'
+                            && session.user.id !== previousUserId
+                        ) {
+                            try { router.refresh(); } catch { /* router may be unavailable in tests */ }
+                        }
+                        lastAuthEventRef.current = { event, userId: session.user.id };
                     } else {
                         console.warn('[AuthContext] SIGNED_IN event received but no user present in session');
                         setUser(null);
@@ -353,6 +398,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     setUser(null);
                     setIsLoading(false);
                     localStorage.removeItem('g22_user');
+                    lastAuthEventRef.current = { event, userId: null };
+                    // Invalidate any server-rendered user-specific data so the UI
+                    // reflects the signed-out state on the next paint.
+                    try { router.refresh(); } catch { /* noop */ }
                 }
 
                 if (event === 'SIGNED_OUT' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
@@ -380,7 +429,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isMounted.current = false;
             subscription.unsubscribe();
         };
-    }, [fetchAndSetUser, supabase, trackAuthDuplicate]);
+    }, [fetchAndSetUser, router, supabase, trackAuthDuplicate]);
 
     const login = (_role: AppUserRole = 'fan', returnTo?: string) => {
         void _role;
@@ -394,13 +443,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const logout = async () => {
+        // Optimistic UI: clear local user state immediately so the header/menu
+        // flips to signed-out without waiting on the Supabase round trip
+        // (the auth `/logout` endpoint occasionally takes seconds on slow auth).
+        if (isMounted.current) {
+            setUser(null);
+            setIsLoading(false);
+        }
+        if (typeof window !== 'undefined') {
+            try { localStorage.removeItem('g22_user'); } catch { /* noop */ }
+        }
+        clearFavoritesLocalCache();
+        try { router.refresh(); } catch { /* noop */ }
+
         try {
             await supabase.auth.signOut();
-            if (isMounted.current) {
-                setUser(null);
-                localStorage.removeItem('g22_user');
-            }
-            clearFavoritesLocalCache();
         } catch (error) {
             console.error('Error logging out:', error);
             clearSupabaseBrowserSession();

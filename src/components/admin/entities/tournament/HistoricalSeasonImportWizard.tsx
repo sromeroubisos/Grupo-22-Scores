@@ -14,7 +14,7 @@ import './historical-season-import.css';
 type FormState = {
   tournamentName: string;
   displayName: string;
-  slug: string;
+  status: 'completed' | 'archived' | 'draft';
   publish: boolean;
 };
 
@@ -29,7 +29,7 @@ function createForm(preview: HistoricalImportPreviewResult | null): FormState {
   return {
     tournamentName: preview?.summary.suggestedName || '',
     displayName: preview?.summary.suggestedDisplayName || '',
-    slug: preview?.summary.suggestedSlug || '',
+    status: 'completed',
     publish: false,
   };
 }
@@ -59,13 +59,15 @@ export function HistoricalSeasonImportWizard({
   onPreviewChange,
   showStandaloneHeader = true,
   redirectTab = 'resumen',
+  legacyMode = false,
 }: {
   tournamentId: string;
   onBack: () => void;
-  onComplete?: (newTournamentId: string) => void;
+  onComplete?: (target: { tournamentId: string; seasonId?: string | null }) => void;
   onPreviewChange?: (preview: HistoricalImportPreviewResult | null) => void;
   showStandaloneHeader?: boolean;
   redirectTab?: string;
+  legacyMode?: boolean;
 }) {
   const router = useRouter();
   const [rawText, setRawText] = useState('');
@@ -105,13 +107,12 @@ export function HistoricalSeasonImportWizard({
   );
   const creationBlockReason = useMemo(() => {
     if (!form.tournamentName.trim()) return 'Completa el nombre del torneo antes de crear la temporada.';
-    if (!form.slug.trim()) return 'Completa el slug antes de crear la temporada.';
     if (hasInvalidPhaseStructure) return 'Hay una fase detectada sin nombre.';
     if (unresolvedAfterOverrides > 0) {
       return `Falta resolver ${unresolvedAfterOverrides} ${unresolvedAfterOverrides === 1 ? 'club' : 'clubes'} antes de crear.`;
     }
     return null;
-  }, [form.slug, form.tournamentName, hasInvalidPhaseStructure, unresolvedAfterOverrides]);
+  }, [form.tournamentName, hasInvalidPhaseStructure, unresolvedAfterOverrides]);
 
   const updatePhaseOverride = (phaseKey: string, changes: Partial<PhaseEditorState>) => {
     const source = preview?.phases.find((phase) => phase.key === phaseKey);
@@ -189,13 +190,13 @@ export function HistoricalSeasonImportWizard({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'confirm',
+          action: legacyMode ? 'confirmLegacy' : 'confirm',
           rawText,
           overrides,
           phaseOverrides: phaseOverridePayload,
           tournamentName: form.tournamentName,
           displayName: form.displayName,
-          slug: form.slug,
+          status: legacyMode ? undefined : form.status,
           publish: form.publish,
         }),
       });
@@ -211,13 +212,17 @@ export function HistoricalSeasonImportWizard({
 
       setFeedback({
         tone: 'ok',
-        message: `Temporada creada. ${json.created?.matches || 0} partidos y ${json.created?.standings || 0} filas de tabla importadas.`,
+        message: legacyMode
+          ? `Torneo historico creado. ${json.created?.matches || 0} partidos importados.`
+          : `Temporada cargada. ${json.created?.matches || 0} partidos y ${json.created?.standings || 0} filas de tabla importadas.`,
       });
       onPreviewChange?.(null);
 
       if (json.tournamentId) {
-        onComplete?.(json.tournamentId);
-        router.push(`/admin/entities/${json.tournamentId}/manage?type=tournament&tab=${redirectTab}`);
+        onComplete?.({ tournamentId: json.tournamentId, seasonId: json.seasonId ?? null });
+        const nextUrl = new URLSearchParams({ type: 'tournament', tab: redirectTab });
+        if (json.seasonId) nextUrl.set('seasonId', json.seasonId);
+        router.push(`/admin/entities/${json.tournamentId}/manage?${nextUrl.toString()}`);
       }
     } catch (error) {
       setFeedback({
@@ -237,11 +242,14 @@ export function HistoricalSeasonImportWizard({
         <div className="hi-section">
           <div className="hi-section-head" style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
             <div>
-              <span className="hi-section-kicker">Temporadas archivadas</span>
-              <h4 className="hi-section-title">Importar temporada historica desde texto</h4>
+              <span className="hi-section-kicker">{legacyMode ? 'Compatibilidad legado' : 'Temporadas archivadas'}</span>
+              <h4 className="hi-section-title">
+                {legacyMode ? 'Importar torneo historico legado desde texto' : 'Importar temporada historica desde texto'}
+              </h4>
               <p className="hi-section-help">
-                Este flujo crea un torneo nuevo de temporada usando el torneo actual como plantilla de identidad y
-                relaciones. No mezcla datos dentro de la temporada activa.
+                {legacyMode
+                  ? 'Este flujo conserva el comportamiento anterior: crea otro torneo y lo vincula como temporada previa.'
+                  : 'Este flujo crea una temporada dentro del torneo actual. No crea otro torneo ni mezcla datos con la temporada activa.'}
               </p>
             </div>
             <button type="button" className="basalt-btn" onClick={onBack}>
@@ -378,14 +386,23 @@ export function HistoricalSeasonImportWizard({
                   onChange={(event) => setForm((current) => ({ ...current, displayName: event.target.value }))}
                 />
               </label>
-              <label className="hi-field hi-field-span-2">
-                <span className="hi-field-label">Slug</span>
-                <input
-                  className="basalt-input"
-                  value={form.slug}
-                  onChange={(event) => setForm((current) => ({ ...current, slug: event.target.value }))}
-                />
-              </label>
+              {!legacyMode ? (
+                <label className="hi-field hi-field-span-2">
+                  <span className="hi-field-label">Estado</span>
+                  <select
+                    className="basalt-input"
+                    value={form.status}
+                    onChange={(event) => setForm((current) => ({
+                      ...current,
+                      status: event.target.value as FormState['status'],
+                    }))}
+                  >
+                    <option value="completed">Finalizada</option>
+                    <option value="archived">Archivada</option>
+                    <option value="draft">Borrador</option>
+                  </select>
+                </label>
+              ) : null}
             </div>
 
             <label className="hi-toggle">
@@ -499,7 +516,7 @@ export function HistoricalSeasonImportWizard({
 
           <div className="hi-confirm-bar">
             <div className={`hi-confirm-status${creationBlockReason ? ' is-warning' : ''}`}>
-              {creationBlockReason || 'Listo para crear la temporada historica.'}
+              {creationBlockReason || (legacyMode ? 'Listo para crear el torneo historico legado.' : 'Listo para crear la temporada historica.')}
             </div>
             <div className="hi-confirm-buttons">
               <button type="button" className="basalt-btn" onClick={onBack}>
@@ -512,7 +529,7 @@ export function HistoricalSeasonImportWizard({
                 onClick={() => void handleImport()}
               >
                 {isImporting ? <RefreshCw size={15} className="spin" /> : <ArchiveRestore size={15} />}
-                Crear temporada historica
+                {legacyMode ? 'Crear torneo legado' : 'Crear temporada historica'}
               </button>
             </div>
           </div>
