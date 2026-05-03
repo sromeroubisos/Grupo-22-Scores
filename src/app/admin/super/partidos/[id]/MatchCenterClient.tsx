@@ -177,6 +177,8 @@ type ApplyMatchResponseOptions = {
 
 type PersistMatchPatchOptions = {
     includePoints?: boolean;
+    compactResponse?: boolean;
+    eventsOverride?: MatchEvent[];
     preserveLineupsIfIncomingEmpty?: boolean;
     preserveUnsavedScore?: boolean;
     preserveUnsavedClock?: boolean;
@@ -1636,10 +1638,14 @@ export default function MatchCenterClient({
                 events: localEventsRef.current,
             }
             : payload;
-        const effectiveEvents = Array.isArray(effectivePayload.events)
+        const payloadIncludesEventPatch = Object.prototype.hasOwnProperty.call(effectivePayload, 'eventPatch');
+        const effectiveEvents = options?.eventsOverride
+            ? options.eventsOverride
+            : Array.isArray(effectivePayload.events)
             ? effectivePayload.events as MatchEvent[]
             : localEventsRef.current;
         const payloadIncludesEvents = Object.prototype.hasOwnProperty.call(effectivePayload, 'events');
+        const payloadUpdatesEvents = payloadIncludesEvents || payloadIncludesEventPatch;
         const payloadIncludesLineups = Object.prototype.hasOwnProperty.call(effectivePayload, 'lineups');
         const payloadIncludesScore = Object.prototype.hasOwnProperty.call(effectivePayload, 'score');
         const payloadIncludesClock = Object.prototype.hasOwnProperty.call(effectivePayload, 'clock');
@@ -1648,7 +1654,7 @@ export default function MatchCenterClient({
             effectiveEvents,
         );
         const payloadWithScore =
-            payloadIncludesScore || payloadIncludesEvents
+            payloadIncludesScore || payloadUpdatesEvents
                 ? {
                     ...effectivePayload,
                     score: effectiveScore,
@@ -1659,6 +1665,7 @@ export default function MatchCenterClient({
             options?.includePoints !== false
             && (
                 payloadIncludesEvents
+                || payloadIncludesEventPatch
                 || payloadIncludesScore
                 || typeof payloadWithScore.status === 'string'
             );
@@ -1688,7 +1695,11 @@ export default function MatchCenterClient({
                 ...pointsPayload,
             };
 
-        const res = await fetch(resolvedMatchEndpoint, {
+        const requestEndpoint = options?.compactResponse
+            ? `${resolvedMatchEndpoint}${resolvedMatchEndpoint.includes('?') ? '&' : '?'}response=compact`
+            : resolvedMatchEndpoint;
+
+        const res = await fetch(requestEndpoint, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(finalPayload),
@@ -1700,7 +1711,26 @@ export default function MatchCenterClient({
         }
 
         const warnings = (result as { matchCenterWarnings?: PersistMatchWarnings } | null)?.matchCenterWarnings || {};
-        const updatedMatch = result as MatchRow;
+        const updatedMatch = options?.compactResponse
+            ? {
+                ...persistedMatchRef.current,
+                ...(typeof payloadWithScore.status === 'string' ? { status: payloadWithScore.status } : {}),
+                ...(typeof payloadWithScore.venue === 'string' ? { venue: payloadWithScore.venue } : {}),
+                ...(Object.prototype.hasOwnProperty.call(payloadWithScore, 'notes') ? { notes: payloadWithScore.notes as string | null } : {}),
+                ...(typeof payloadWithScore.dateTime === 'string' ? { date_time: payloadWithScore.dateTime } : {}),
+                ...(payloadIncludesScore || payloadUpdatesEvents ? { score: effectiveScore } : {}),
+                ...(payloadIncludesClock ? { clock: normalizeMatchClock(payloadWithScore.clock as MatchClock) } : {}),
+                ...(payloadUpdatesEvents ? { events: effectiveEvents } : {}),
+                ...(payloadIncludesLineups ? { lineups: effectivePayload.lineups as MatchLineups } : {}),
+                ...(typeof finalPayload.homeBasePoints === 'number' ? { home_base_points: finalPayload.homeBasePoints } : {}),
+                ...(typeof finalPayload.awayBasePoints === 'number' ? { away_base_points: finalPayload.awayBasePoints } : {}),
+                ...(typeof finalPayload.homeBonusPoints === 'number' ? { home_bonus_points: finalPayload.homeBonusPoints } : {}),
+                ...(typeof finalPayload.awayBonusPoints === 'number' ? { away_bonus_points: finalPayload.awayBonusPoints } : {}),
+                ...(typeof finalPayload.pointsAutocalculated === 'boolean' ? { points_autocalculated: finalPayload.pointsAutocalculated } : {}),
+                ...(Object.prototype.hasOwnProperty.call(finalPayload, 'pointsOverrideReason') ? { points_override_reason: finalPayload.pointsOverrideReason as string | null } : {}),
+                updated_at: new Date().toISOString(),
+            } as MatchRow
+            : result as MatchRow;
         applyMatchResponse(updatedMatch, {
             preserveLineupsIfIncomingEmpty:
                 options?.preserveLineupsIfIncomingEmpty
@@ -1711,7 +1741,7 @@ export default function MatchCenterClient({
                 options?.preserveUnsavedClock
                 ?? warnings.clockNotPersisted
                 ?? !payloadIncludesClock,
-            preserveUnsavedEvents: options?.preserveUnsavedEvents ?? !payloadIncludesEvents,
+            preserveUnsavedEvents: options?.preserveUnsavedEvents ?? !payloadUpdatesEvents,
             preserveUnsavedLineups:
                 options?.preserveUnsavedLineups
                 ?? warnings.lineupsNotPersisted
@@ -1920,7 +1950,12 @@ export default function MatchCenterClient({
         try {
             console.log('[MatchCenter] Saving via API - events:', localEvents.length, 'lineups home:', localLineups.home.length, 'away:', localLineups.away.length);
 
-            const saveResult = await persistMatchPatch(payload);
+            const saveResult = await persistMatchPatch(
+                payload,
+                eventsDirty && !lineupsDirty
+                    ? { compactResponse: true, eventsOverride: localEvents }
+                    : undefined,
+            );
             setSaveMsg(
                 saveResult.warnings.lineupsNotPersisted
                     ? { type: 'warn', text: 'Se guardó el partido, pero este entorno no tiene almacenamiento para alineaciones.' }
@@ -2139,7 +2174,10 @@ export default function MatchCenterClient({
         setSaveMsg(null);
 
         try {
-            const saveResult = await persistMatchPatch({ events: nextEvents });
+            const saveResult = await persistMatchPatch(
+                { eventPatch: { upsert: [nextEvent] } },
+                { compactResponse: true, eventsOverride: nextEvents },
+            );
             setGuidedEvent(null);
             setSaveMsg(
                 saveResult.warnings.lineupsNotPersisted

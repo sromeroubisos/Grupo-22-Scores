@@ -53,9 +53,10 @@ export async function PATCH(
 ) {
   try {
     const matchId = (await params).id;
+    const compactResponse = request.nextUrl.searchParams.get('response') === 'compact';
     await ensureMatchManagementAccess(matchId, MANAGEMENT_MEMBERSHIP_ROLES);
     const body = await request.json();
-    const { events, lineups, ...rawMatchFields } = body as Record<string, unknown>;
+    const { events, eventPatch, lineups, ...rawMatchFields } = body as Record<string, unknown>;
     const matchFields = { ...rawMatchFields };
     const writeClient = await getWriteClient();
 
@@ -74,16 +75,14 @@ export async function PATCH(
 
     const supplemental = await persistMatchCenterSupplementalData(writeClient, matchId, {
       events: Array.isArray(events) ? events : undefined,
+      eventPatch: eventPatch && typeof eventPatch === 'object'
+        ? eventPatch as { upsert?: unknown[]; deleteIds?: string[] }
+        : undefined,
       lineups: lineups as { home?: unknown[]; away?: unknown[] } | null | undefined,
       clock: Object.prototype.hasOwnProperty.call(rawMatchFields, 'clock')
         ? rawMatchFields.clock as { minute?: unknown; seconds?: unknown; period?: unknown; running?: unknown; syncedAt?: unknown } | null | undefined
         : undefined,
     });
-
-    const { data, error } = await fetchMatchCenterMatch(writeClient, matchId);
-    if (error || !data) {
-      return jsonError('Failed to update match. Check server logs for Supabase error details.', 500);
-    }
 
     const matchCenterWarnings =
       lineups !== undefined && !supplemental.persistedLineups
@@ -91,6 +90,19 @@ export async function PATCH(
         : !supplemental.persistedClock
           ? { clockNotPersisted: true }
           : null;
+
+    if (compactResponse) {
+      return NextResponse.json({
+        id: matchId,
+        compact: true,
+        ...(matchCenterWarnings ? { matchCenterWarnings } : {}),
+      });
+    }
+
+    const { data, error } = await fetchMatchCenterMatch(writeClient, matchId);
+    if (error || !data) {
+      return jsonError('Failed to update match. Check server logs for Supabase error details.', 500);
+    }
 
     return NextResponse.json(matchCenterWarnings ? { ...data, matchCenterWarnings } : data);
   } catch (error: unknown) {

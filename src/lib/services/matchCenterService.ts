@@ -128,6 +128,11 @@ export type MatchCenterLineupsInput = {
   [key: string]: unknown;
 } | null | undefined;
 
+export type MatchCenterEventPatchInput = {
+  upsert?: MatchCenterEventInput[];
+  deleteIds?: string[];
+} | null | undefined;
+
 const EMPTY_LINEUPS = { home: [] as PersistedLineupPlayer[], away: [] as PersistedLineupPlayer[] };
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CLOCK_SNAPSHOT_EVENT_TYPE = '__clock_state__';
@@ -169,6 +174,38 @@ const MATCH_CENTER_MATCH_SELECT = `
   awayClub:away_club_id (id, name, short_name, primary_color),
   tournament:tournament_id (id, name, sport_id, external_id)
 `;
+const PERSIST_MATCH_SELECT_BASE = `
+  id,
+  season_id,
+  category,
+  date_time,
+  tournament_id,
+  phase_id,
+  round_id,
+  home_club_id,
+  away_club_id,
+  home_team_id,
+  away_team_id,
+  home_division_id,
+  away_division_id,
+  lineups
+`;
+const PERSIST_MATCH_SELECT_EVENT_PATCH = `
+  id,
+  season_id,
+  category,
+  date_time,
+  tournament_id,
+  phase_id,
+  round_id,
+  home_club_id,
+  away_club_id,
+  home_team_id,
+  away_team_id,
+  home_division_id,
+  away_division_id
+`;
+const PERSIST_MATCH_SELECT_WITH_EVENTS = `${PERSIST_MATCH_SELECT_BASE}, events`;
 
 async function fetchMatchPointsRules(client: SupabaseLike, match: MatchPointsRulesContext) {
   try {
@@ -589,6 +626,28 @@ function buildMatchCenterLogoUrl(entity: unknown, fallbackKey?: string | null) {
     key: normalizeText(source.id) || normalizeText(fallbackKey) || null,
     name: normalizeText(source.name) || normalizeText(source.display_name) || null,
   });
+}
+
+function hasResolvedEventPlayerReferences(event: ReturnType<typeof normalizeEventInput>) {
+  if (!event.team) return true;
+  if (event.playerName && !event.playerId) return false;
+  if (event.secondaryPlayerName && !event.secondaryPlayerId) return false;
+  return true;
+}
+
+async function resolveEventsForPersistence(
+  client: SupabaseLike,
+  match: MatchContextRow,
+  lineups: ReturnType<typeof normalizeLineups>,
+  events: MatchCenterEventInput[],
+) {
+  const normalizedEvents = events.map((event) => normalizeEventInput(event));
+  if (normalizedEvents.every(hasResolvedEventPlayerReferences)) {
+    return normalizedEvents;
+  }
+
+  const contexts = await buildTeamContexts(client, match, lineups);
+  return resolvePersistedEvents(client, contexts, events);
 }
 
 function mapEventToInsert(
@@ -1480,13 +1539,30 @@ export async function persistMatchCenterSupplementalData(
   matchId: string,
   payload: {
     events?: MatchCenterEventInput[];
+    eventPatch?: MatchCenterEventPatchInput;
     lineups?: MatchCenterLineupsInput;
     clock?: MatchCenterClockInput;
   },
 ) {
+  const eventPatchUpserts = Array.isArray(payload.eventPatch?.upsert) ? payload.eventPatch.upsert : [];
+  const canUseResolvedEventPatch =
+    payload.eventPatch !== undefined
+    && payload.events === undefined
+    && payload.lineups === undefined
+    && payload.clock === undefined
+    && eventPatchUpserts.map((event) => normalizeEventInput(event)).every(hasResolvedEventPlayerReferences);
+  const needsLegacyEvents =
+    payload.events === undefined
+    && payload.eventPatch === undefined
+    && payload.clock === undefined;
+  const matchSelect = needsLegacyEvents
+    ? PERSIST_MATCH_SELECT_WITH_EVENTS
+    : canUseResolvedEventPatch
+      ? PERSIST_MATCH_SELECT_EVENT_PATCH
+      : PERSIST_MATCH_SELECT_BASE;
   const { data: match, error: matchError } = await client
     .from('matches')
-    .select('*')
+    .select(matchSelect)
     .eq('id', matchId)
     .single();
 
@@ -1495,14 +1571,26 @@ export async function persistMatchCenterSupplementalData(
   }
 
   const normalizedClock = normalizeClockPayload(payload.clock);
+  const hasEventReplacement = payload.events !== undefined;
+  const hasEventPatch = payload.eventPatch !== undefined;
+  const touchesEvents = hasEventReplacement || hasEventPatch;
+  const touchesEventStorage = touchesEvents || payload.clock !== undefined;
 
-  const [supportsEventsColumn, supportsRelationalEvents] = await Promise.all([
-    payload.events !== undefined ? supportsMatchesColumn(client, 'events') : Promise.resolve(false),
-    payload.events !== undefined || payload.clock !== undefined ? supportsMatchEventsTable(client) : Promise.resolve(false),
-  ]);
+  const supportsRelationalEvents = hasEventPatch
+    ? true
+    : touchesEventStorage
+    ? await supportsMatchEventsTable(client)
+    : false;
+  const supportsEventsColumn = (touchesEvents || payload.clock !== undefined) && !supportsRelationalEvents
+    ? await supportsMatchesColumn(client, 'events')
+    : false;
 
-  if (payload.events !== undefined && !supportsRelationalEvents && !supportsEventsColumn) {
+  if (touchesEvents && !supportsRelationalEvents && !supportsEventsColumn) {
     throw new Error('No hay almacenamiento disponible para los eventos del partido.');
+  }
+
+  if (hasEventPatch && !supportsRelationalEvents) {
+    throw new Error('El guardado incremental de eventos requiere la tabla match_events.');
   }
 
   const normalizedExistingLineups = normalizeLineups((match as any).lineups);
@@ -1518,16 +1606,19 @@ export async function persistMatchCenterSupplementalData(
         away: normalizedIncomingLineups.away,
       }
     : normalizedExistingLineups;
-  const contexts = await buildTeamContexts(client, match as MatchContextRow, mergedIncomingLineups);
+  const needsLineupResolution = payload.lineups !== undefined;
+  const contexts = needsLineupResolution
+    ? await buildTeamContexts(client, match as MatchContextRow, mergedIncomingLineups)
+    : null;
 
   const resolvedLineups =
     payload.lineups !== undefined
-      ? await resolvePersistedLineups(client, contexts, mergedIncomingLineups)
+      ? await resolvePersistedLineups(client, contexts!, mergedIncomingLineups)
       : normalizedExistingLineups;
 
   const resolvedEvents =
     payload.events !== undefined
-      ? await resolvePersistedEvents(client, contexts, payload.events)
+      ? await resolveEventsForPersistence(client, match as MatchContextRow, mergedIncomingLineups, payload.events)
       : Array.isArray((match as any).events)
         ? ((match as any).events as unknown[]).map((row) => mapJsonEvent(row))
         : [];
@@ -1618,6 +1709,42 @@ export async function persistMatchCenterSupplementalData(
 
       if (deleteError) {
         throw new Error(deleteError.message || 'No se pudieron depurar los eventos antiguos del partido.');
+      }
+    }
+  }
+
+  if (payload.eventPatch !== undefined && supportsRelationalEvents) {
+    const upsertEvents = Array.isArray(payload.eventPatch?.upsert) ? payload.eventPatch.upsert : [];
+    const deleteIds = Array.isArray(payload.eventPatch?.deleteIds)
+      ? payload.eventPatch.deleteIds.map((id) => normalizeText(id)).filter(Boolean)
+      : [];
+
+    if (upsertEvents.length > 0) {
+      const resolvedUpsertEvents = await resolveEventsForPersistence(
+        client,
+        match as MatchContextRow,
+        mergedIncomingLineups,
+        upsertEvents,
+      );
+      const eventRows = resolvedUpsertEvents.map((event) => mapEventToInsert(match, event));
+      const { error: upsertError } = await client
+        .from('match_events')
+        .upsert(eventRows, { onConflict: 'id' });
+
+      if (upsertError) {
+        throw new Error(upsertError.message || 'No se pudo guardar el evento del partido.');
+      }
+    }
+
+    if (deleteIds.length > 0) {
+      const { error: deleteError } = await client
+        .from('match_events')
+        .delete()
+        .eq('match_id', matchId)
+        .in('id', deleteIds);
+
+      if (deleteError) {
+        throw new Error(deleteError.message || 'No se pudieron eliminar eventos del partido.');
       }
     }
   }
