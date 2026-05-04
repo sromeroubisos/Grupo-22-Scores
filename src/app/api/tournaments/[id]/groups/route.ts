@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { requireTournamentMutationContext, TournamentApiError } from '@/lib/auth/tournamentApi';
 import { createApiPerfTracker } from '@/lib/perf/api';
 
 export const dynamic = 'force-dynamic';
@@ -78,8 +79,8 @@ export async function POST(
   const perf = createApiPerfTracker(route);
 
   try {
-    const supabase = await perf.measureStep('create_client', () => createClient(), {
-      bucket: 'client',
+    const { writer: supabase } = await perf.measureStep('authorize_tournament_write', () => requireTournamentMutationContext(tournamentId), {
+      bucket: 'auth',
     });
     const body = await request.json();
 
@@ -124,6 +125,9 @@ export async function POST(
     return perf.json({ data: group }, { status: 201 });
   } catch (error: unknown) {
     console.error('Error in POST /api/tournaments/[id]/groups:', error);
+    if (error instanceof TournamentApiError) {
+      return perf.json({ error: error.message }, { status: error.status });
+    }
     return perf.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
   }
 }

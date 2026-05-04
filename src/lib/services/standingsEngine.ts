@@ -30,6 +30,36 @@ export interface PhaseSettings {
   };
 }
 
+export interface StandingsCarryOverRow {
+  participantId?: string | null;
+  teamId?: string | null;
+  team?: {
+    id?: string | null;
+    name?: string | null;
+    logo?: string | null;
+  } | null;
+  played?: number | null;
+  won?: number | null;
+  drawn?: number | null;
+  lost?: number | null;
+  points_for?: number | null;
+  points_against?: number | null;
+  tries_for?: number | null;
+  tries_against?: number | null;
+  base_points?: number | null;
+  bonus_offensive?: number | null;
+  bonus_defensive?: number | null;
+  adjustments?: number | null;
+  total_points?: number | null;
+  form?: string[] | string | null;
+  sourcePhaseId?: string | null;
+  sourcePhaseName?: string | null;
+}
+
+export interface StandingsGenerateOptions {
+  carryOverRows?: StandingsCarryOverRow[];
+}
+
 export class StandingsEngine {
   private static toFiniteNumber(value: unknown): number | null {
     const normalized = typeof value === 'string' && value.trim() === '' ? Number.NaN : Number(value);
@@ -186,6 +216,7 @@ export class StandingsEngine {
       editable_mode: phaseSettings?.standings?.editable ?? false,
       calculation_mode: phaseSettings?.standings?.mode ?? 'automatic',
       adjustments: phaseSettings?.standings?.adjustments ?? [],
+      carry_over: phaseSettings?.carryOver ?? null,
     };
   }
 
@@ -194,6 +225,10 @@ export class StandingsEngine {
    */
   private static getTeamId(participant: any): string {
     return participant.club_id || participant.id;
+  }
+
+  private static getCarryOverTeamId(row: StandingsCarryOverRow): string {
+    return String(row.teamId || row.team?.id || row.participantId || '').trim();
   }
 
   /**
@@ -351,6 +386,7 @@ export class StandingsEngine {
     matches: any[],
     rules: any,
     tableType: string,
+    options: StandingsGenerateOptions = {},
   ) {
     const statsMap = new Map<string, any>();
 
@@ -381,11 +417,61 @@ export class StandingsEngine {
         total_points: 0,
         form: [] as string[],
         status: null as string | null,
+        carry_over: null as any,
         _matchIds: [] as string[],
       });
     });
 
-    const finalMatches = matches.filter((m) => m.status === 'final');
+    if (Array.isArray(options.carryOverRows) && options.carryOverRows.length > 0) {
+      options.carryOverRows.forEach((row) => {
+        const teamId = this.getCarryOverTeamId(row);
+        if (!teamId) return;
+
+        const stats = statsMap.get(teamId);
+        if (!stats) return;
+
+        const bonusOffensive = this.toFiniteNumber(row.bonus_offensive) ?? 0;
+        const bonusDefensive = this.toFiniteNumber(row.bonus_defensive) ?? 0;
+        const adjustments = this.toFiniteNumber(row.adjustments) ?? 0;
+        const explicitBasePoints = this.toFiniteNumber(row.base_points);
+        const explicitTotalPoints = this.toFiniteNumber(row.total_points);
+        const basePoints = explicitBasePoints ??
+          (explicitTotalPoints !== null
+            ? explicitTotalPoints - bonusOffensive - bonusDefensive - adjustments
+            : 0);
+
+        stats.played += this.toFiniteNumber(row.played) ?? 0;
+        stats.won += this.toFiniteNumber(row.won) ?? 0;
+        stats.drawn += this.toFiniteNumber(row.drawn) ?? 0;
+        stats.lost += this.toFiniteNumber(row.lost) ?? 0;
+        stats.points_for += this.toFiniteNumber(row.points_for) ?? 0;
+        stats.points_against += this.toFiniteNumber(row.points_against) ?? 0;
+        stats.tries_for += this.toFiniteNumber(row.tries_for) ?? 0;
+        stats.tries_against += this.toFiniteNumber(row.tries_against) ?? 0;
+        stats.base_points += basePoints;
+        stats.bonus_offensive += bonusOffensive;
+        stats.bonus_defensive += bonusDefensive;
+        stats.adjustments += adjustments;
+
+        const form = Array.isArray(row.form)
+          ? row.form
+          : typeof row.form === 'string'
+            ? row.form.split('')
+            : [];
+        stats.form.push(...form.filter(Boolean));
+
+        stats.carry_over = {
+          source_phase_id: row.sourcePhaseId ?? null,
+          source_phase_name: row.sourcePhaseName ?? null,
+          played: (stats.carry_over?.played ?? 0) + (this.toFiniteNumber(row.played) ?? 0),
+          points: (stats.carry_over?.points ?? 0) + (explicitTotalPoints ?? basePoints + bonusOffensive + bonusDefensive + adjustments),
+        };
+      });
+    }
+
+    const finalMatches = matches.filter((m) =>
+      ['final', 'finished', 'ft'].includes(String(m.status ?? '').toLowerCase()),
+    );
     finalMatches.sort(
       (a, b) =>
         new Date(a.date_time || 0).getTime() - new Date(b.date_time || 0).getTime(),
@@ -652,8 +738,9 @@ export class StandingsEngine {
     matches: any[],
     rules: any,
     tableType: string = 'general',
+    options: StandingsGenerateOptions = {},
   ) {
-    const table = this.buildTableRows(participants, matches, rules, tableType);
+    const table = this.buildTableRows(participants, matches, rules, tableType, options);
     const sortedTable = this.sortTable(table, matches, rules, tableType);
 
     const totalTeams = sortedTable.length;

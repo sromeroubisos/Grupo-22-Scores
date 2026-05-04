@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
     getApiErrorMessage,
     getApiErrorStatus,
-    requireAdminApiUser,
 } from '@/lib/auth/apiAdmin';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
 import {
@@ -130,8 +130,8 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> },
 ) {
     try {
-        const actorUserId = await requireAdminApiUser();
         const { id: tournamentId } = await params;
+        const { actorUserId } = await requireTournamentMutationContext(tournamentId);
         const body = await request.json().catch(() => ({}));
         const db = createAdminClient();
         const action = String(body?.action || (body?.sourceSeasonId ? 'copy' : 'create'));
@@ -175,6 +175,6 @@ export async function POST(
 
         return NextResponse.json({ ok: false, error: 'Accion invalida.' }, { status: 400 });
     } catch (error) {
-        return jsonError(error);
+        return tournamentApiErrorResponse(error);
     }
 }

@@ -8,6 +8,7 @@ import {
     isFinalStandingsStatus,
 } from '@/lib/standings/matchScope';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
+import { resolveStandingsCarryOverRows } from '@/lib/server/standingsCarryOver';
 
 // --- Circuit placement points helpers ---
 
@@ -272,7 +273,7 @@ export async function GET(
         // 1. Fetch phase + tournament rules
         const { data: phase, error: phaseError } = await supabase
             .from('tournament_phases')
-            .select('id, phase_type, settings, tournament_id')
+            .select('id, name, phase_type, order_index, settings, season_id, tournament_id')
             .eq('id', phaseId)
             .eq('tournament_id', tournamentId)
             .single();
@@ -461,6 +462,14 @@ export async function GET(
         if (mError) throw mError;
 
         const scopedMatches = filterMatchesForGroupScope(matches || [], participants || [], scopedGroupId);
+        const carryOver = await resolveStandingsCarryOverRows({
+            supabase,
+            tournamentId,
+            currentPhase: phase,
+            tournamentRuleset: tournament?.ruleset,
+            seasonId,
+            tableType,
+        });
 
         // 4. Compute standings
         const table = StandingsEngine.generateTable(
@@ -468,6 +477,7 @@ export async function GET(
             scopedMatches,
             resolvedRules,
             tableType,
+            { carryOverRows: carryOver.rows },
         );
 
         // 5. Metrics
@@ -524,6 +534,12 @@ export async function GET(
             table,
             metrics,
             rules: resolvedRules,
+            carry_over: {
+                enabled: carryOver.enabled,
+                source_phase_id: carryOver.sourcePhaseId,
+                source_phase_name: carryOver.sourcePhaseName,
+                rows: carryOver.rows.length,
+            },
             last_calculated_at: lastCalculatedAt,
         });
     } catch (e: unknown) {

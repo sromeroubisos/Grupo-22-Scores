@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import {
     getTournamentFlashScoreConfig,
     isFlashScoreEnabledForSport,
@@ -55,7 +56,7 @@ export async function PUT(
             return NextResponse.json({ error: 'config object is required' }, { status: 400 });
         }
 
-        const supabase = await createClient();
+        const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
 
         // Read current ruleset to merge
         const { data: existing, error: readError } = await supabase
@@ -85,7 +86,7 @@ export async function PUT(
 
         const mergedConfig = getTournamentFlashScoreConfig({ ...existing, ruleset: mergedRuleset });
         return NextResponse.json({ config: mergedConfig });
-    } catch (err: any) {
-        return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+    } catch (err: unknown) {
+        return tournamentApiErrorResponse(err);
     }
 }

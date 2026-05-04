@@ -24,6 +24,11 @@ export interface StandingsRules {
     relegated?: number;
     descenso?: number;
   } | null;
+  carry_over?: {
+    enabled?: boolean;
+    sourcePhaseId?: string | null;
+    source_phase_id?: string | null;
+  } | null;
 }
 
 export interface StandingsGroup {
@@ -40,6 +45,11 @@ export interface StandingsPhase {
   settings?: {
     tableColumns?: Record<string, boolean>;
     groupLabels?: GroupLabel[];
+    carryOver?: {
+      enabled?: boolean;
+      sourcePhaseId?: string | null;
+    };
+    carryOverPreviousPhase?: boolean;
   };
   resolvedRules?: StandingsRules | null;
 }
@@ -91,6 +101,12 @@ export interface StandingsDataPayload {
   metrics?: StandingsMetrics;
   rules?: StandingsRules | null;
   table?: StandingsRow[];
+  carry_over?: {
+    enabled?: boolean;
+    source_phase_id?: string | null;
+    source_phase_name?: string | null;
+    rows?: number;
+  };
   last_calculated_at?: string | null;
 }
 

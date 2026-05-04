@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import {
     recalculateAndPersistStandings,
     recalculatePhaseStandingsScopes,
@@ -11,6 +11,7 @@ export async function POST(
 ) {
     try {
         const { id: tournamentId } = await params;
+        const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
         const body = await request.json();
         const {
             phaseId,
@@ -23,6 +24,17 @@ export async function POST(
             return NextResponse.json({ error: 'phaseId is required' }, { status: 400 });
         }
 
+        const { data: phase, error: phaseError } = await supabase
+            .from('tournament_phases')
+            .select('id')
+            .eq('id', phaseId)
+            .eq('tournament_id', tournamentId)
+            .single();
+
+        if (phaseError || !phase) {
+            return NextResponse.json({ error: 'Phase not found in this tournament' }, { status: 404 });
+        }
+
         const result = groupId
             ? await recalculateAndPersistStandings(tournamentId, phaseId, groupId, tableType, seasonId)
             : await recalculatePhaseStandingsScopes(tournamentId, phaseId, tableType, seasonId);
@@ -32,7 +44,6 @@ export async function POST(
         }
 
         // Audit log
-        const supabase = await createClient();
         const calculatedAt = new Date().toISOString();
         await supabase.from('admin_audit_log').insert({
             entity_type: 'standings',
@@ -54,6 +65,10 @@ export async function POST(
             calculated_at: calculatedAt,
         });
     } catch (e: unknown) {
+        if (e instanceof Error && (e.name === 'TournamentApiError')) {
+            return tournamentApiErrorResponse(e);
+        }
+
         const message = e instanceof Error ? e.message : 'Unknown error';
         console.error('Exception recalculating standings:', e);
         return NextResponse.json(

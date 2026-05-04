@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { getTournamentIds } from '@/lib/services/flashscore';
 import type { FlashScoreConfig } from '@/lib/types/flashscore-integration';
 import {
@@ -29,7 +29,7 @@ export async function POST(
             );
         }
 
-        const supabase = await createClient();
+        const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
 
         const { data: existing, error: readError } = await supabase
             .from('tournaments')
@@ -76,7 +76,7 @@ export async function POST(
 
         const config = getTournamentFlashScoreConfig({ ...existing, ruleset: mergedRuleset });
         return NextResponse.json({ config });
-    } catch (err: any) {
-        return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+    } catch (err: unknown) {
+        return tournamentApiErrorResponse(err);
     }
 }

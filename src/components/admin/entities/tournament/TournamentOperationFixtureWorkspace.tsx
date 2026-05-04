@@ -492,6 +492,15 @@ export function TournamentOperationFixtureWorkspace({
     () => (selectedPhase?.rounds || []).filter((round) => !round.id.startsWith('orphaned-')),
     [selectedPhase],
   );
+  const isSelectedPhasePlayoff = selectedPhase?.phaseType === 'playoff' || selectedPhase?.phaseType === 'knockout';
+  const playoffTeamsCount = Number((selectedPhase?.settings as { teamsCount?: number } | undefined)?.teamsCount || 0);
+  const playoffBracketColumns = useMemo(
+    () => realRounds.map((round) => ({
+      round,
+      matches: round.matches,
+    })),
+    [realRounds],
+  );
 
   const roundDateById = useMemo(
     () => new Map(realRounds.map((round) => [round.id, round.startDate ? toInputDate(round.startDate) : ''])),
@@ -582,6 +591,16 @@ export function TournamentOperationFixtureWorkspace({
 
   useEffect(() => {
     setManualForm((current) => {
+      if (isSelectedPhasePlayoff) {
+        const firstRoundId = realRounds[0]?.id || '';
+        return {
+          ...current,
+          roundMode: 'existing',
+          roundId: realRounds.some((round) => round.id === current.roundId) ? current.roundId : firstRoundId,
+          roundLabel: '',
+          matchDate: current.roundId ? current.matchDate : (roundDateById.get(firstRoundId) || current.matchDate),
+        };
+      }
       if (realRounds.length === 0) {
         return { ...current, roundMode: 'new', roundId: '', roundLabel: current.roundLabel || 'Fecha 1' };
       }
@@ -591,7 +610,7 @@ export function TournamentOperationFixtureWorkspace({
       }
       return current;
     });
-  }, [realRounds, roundDateById]);
+  }, [isSelectedPhasePlayoff, realRounds, roundDateById]);
 
   useEffect(() => {
     setManualForm((current) => {
@@ -663,7 +682,7 @@ export function TournamentOperationFixtureWorkspace({
         tone: getContainerTone(round),
       }))
       .filter((container) => !hasFilters || manageRoundFilter !== 'all' || container.matches.length > 0 || container.roundId !== null);
-  }, [deferredManageSearch, filteredManageEntries, groupOptions, manageGroupFilter, manageGrouping, manageRoundFilter, manageStatusFilter, selectedPhase]);
+  }, [deferredManageSearch, filteredManageEntries, getGroupLabel, manageGroupFilter, manageGrouping, manageRoundFilter, manageStatusFilter, selectedPhase]);
 
   const activeFilterCount = useMemo(
     () => [
@@ -920,7 +939,8 @@ export function TournamentOperationFixtureWorkspace({
       nextErrors.awayClubId = 'Local y visitante no pueden ser el mismo club.';
     }
     if (!manualForm.matchDate) nextErrors.matchDate = 'Debes seleccionar una fecha para el partido.';
-    if (manualForm.roundMode === 'existing' && realRounds.length > 0 && !manualForm.roundId) nextErrors.roundId = 'Selecciona una jornada.';
+    if (isSelectedPhasePlayoff && !manualForm.roundId) nextErrors.roundId = 'Selecciona una etapa de eliminacion.';
+    if (!isSelectedPhasePlayoff && manualForm.roundMode === 'existing' && realRounds.length > 0 && !manualForm.roundId) nextErrors.roundId = 'Selecciona una jornada.';
     setManualErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -1021,10 +1041,10 @@ export function TournamentOperationFixtureWorkspace({
     setFeedback(null);
     const ok = await generateFixture(structureForm);
     if (ok) {
-      await afterMutation('Se genero la estructura base.');
+      await afterMutation(isSelectedPhasePlayoff ? 'Se armo el cuadro playoff.' : 'Se genero la estructura base.');
       openManualCreate({ roundMode: 'existing', roundId: '' });
     } else {
-      setFeedback({ tone: 'error', message: 'No se pudieron generar las jornadas.' });
+      setFeedback({ tone: 'error', message: isSelectedPhasePlayoff ? 'No se pudo armar el cuadro playoff.' : 'No se pudieron generar las jornadas.' });
     }
     setBusyAction(null);
   };
@@ -1406,9 +1426,9 @@ export function TournamentOperationFixtureWorkspace({
                 <div className="operation-manual-round-mode">
                   <button type="button" className={`operation-mode-chip ${manualForm.roundMode === 'existing' ? 'is-active' : ''}`} onClick={() => setManualField('roundMode', 'existing')} disabled={realRounds.length === 0}>
                     <ClipboardList size={15} />
-                    <span>Usar jornada existente</span>
+                    <span>{isSelectedPhasePlayoff ? 'Usar etapa definida' : 'Usar jornada existente'}</span>
                   </button>
-                  <button type="button" className={`operation-mode-chip ${manualForm.roundMode === 'new' ? 'is-active' : ''}`} onClick={() => setManualField('roundMode', 'new')}>
+                  <button type="button" className={`operation-mode-chip ${manualForm.roundMode === 'new' ? 'is-active' : ''}`} onClick={() => setManualField('roundMode', 'new')} disabled={isSelectedPhasePlayoff}>
                     <CalendarPlus2 size={15} />
                     <span>Crear jornada rapida</span>
                   </button>
@@ -1417,9 +1437,9 @@ export function TournamentOperationFixtureWorkspace({
                 <div className="operation-manual-grid">
                   {manualForm.roundMode === 'existing' ? (
                     <label className="operation-form-field">
-                      <span>Jornada</span>
+                      <span>{isSelectedPhasePlayoff ? 'Etapa de eliminacion' : 'Jornada'}</span>
                       <select className="basalt-input" value={manualForm.roundId} onChange={(event) => setManualField('roundId', event.target.value)}>
-                        <option value="">{realRounds.length ? 'Selecciona una jornada' : 'No hay jornadas todavia'}</option>
+                        <option value="">{realRounds.length ? (isSelectedPhasePlayoff ? 'Selecciona una etapa' : 'Selecciona una jornada') : (isSelectedPhasePlayoff ? 'No hay etapas definidas' : 'No hay jornadas todavia')}</option>
                         {realRounds.map((round) => <option key={round.id} value={round.id}>{round.name}</option>)}
                       </select>
                       {manualErrors.roundId ? <small className="operation-field-error">{manualErrors.roundId}</small> : null}
@@ -1521,24 +1541,31 @@ export function TournamentOperationFixtureWorkspace({
                 <div className="operation-fixture-panel-head">
                   <div>
                     <span className="operation-fixture-kicker">Estructura base</span>
-                    <h4>Generar jornadas vacias</h4>
-                    <p>Crea bloques de jornadas para completar despues desde la sub-tab de gestion.</p>
+                    <h4>{isSelectedPhasePlayoff ? 'Armar cuadro playoff' : 'Generar jornadas vacias'}</h4>
+                    <p>{isSelectedPhasePlayoff ? 'Crea los partidos vacios del bracket segun los equipos y etapas definidos en la fase.' : 'Crea bloques de jornadas para completar despues desde la sub-tab de gestion.'}</p>
                   </div>
                 </div>
-                <div className="operation-form-grid">
-                  <label className="operation-form-field">
-                    <span>Cantidad de jornadas</span>
-                    <input className="basalt-input" type="number" min={1} value={structureForm.numRounds} onChange={(event) => setStructureForm((current) => ({ ...current, numRounds: Number(event.target.value) || 1 }))} />
-                  </label>
-                  <label className="operation-form-field">
-                    <span>Patron de nombre</span>
-                    <input className="basalt-input" type="text" value={structureForm.namePattern} onChange={(event) => setStructureForm((current) => ({ ...current, namePattern: event.target.value }))} placeholder="Fecha {n}" />
-                  </label>
-                </div>
+                {isSelectedPhasePlayoff ? (
+                  <div className="operation-inline-note">
+                    <LayoutGrid size={16} />
+                    <span>{playoffTeamsCount || 0} equipos configurados · {realRounds.length} etapas disponibles · se completaran los slots faltantes sin equipos asignados.</span>
+                  </div>
+                ) : (
+                  <div className="operation-form-grid">
+                    <label className="operation-form-field">
+                      <span>Cantidad de jornadas</span>
+                      <input className="basalt-input" type="number" min={1} value={structureForm.numRounds} onChange={(event) => setStructureForm((current) => ({ ...current, numRounds: Number(event.target.value) || 1 }))} />
+                    </label>
+                    <label className="operation-form-field">
+                      <span>Patron de nombre</span>
+                      <input className="basalt-input" type="text" value={structureForm.namePattern} onChange={(event) => setStructureForm((current) => ({ ...current, namePattern: event.target.value }))} placeholder="Fecha {n}" />
+                    </label>
+                  </div>
+                )}
                 <div className="operation-inline-actions">
                   <button type="button" className="basalt-btn basalt-btn-primary" disabled={busyAction === 'structure'} onClick={() => void handleGenerateStructure()}>
                     {busyAction === 'structure' ? <RefreshCw size={15} className="spin" /> : <LayoutGrid size={15} />}
-                    Generar jornadas
+                    {isSelectedPhasePlayoff ? 'Completar cuadro' : 'Generar jornadas'}
                   </button>
                 </div>
               </section>
@@ -1661,6 +1688,51 @@ export function TournamentOperationFixtureWorkspace({
                 <p>Recupera el sistema visual por cards y evita bajar por toda la pantalla para administrar partidos.</p>
               </div>
             </div>
+
+            {isSelectedPhasePlayoff ? (
+              <div className="operation-playoff-bracket">
+                <div className="operation-playoff-bracket-head">
+                  <div>
+                    <span className="operation-fixture-kicker">Bracket playoff</span>
+                    <h4>Cuadro completo</h4>
+                    <p>{playoffTeamsCount || 0} equipos configurados · {playoffBracketColumns.length} etapas</p>
+                  </div>
+                  <button type="button" className="basalt-btn basalt-btn-primary" disabled={busyAction === 'structure'} onClick={() => void handleGenerateStructure()}>
+                    {busyAction === 'structure' ? <RefreshCw size={15} className="spin" /> : <LayoutGrid size={15} />}
+                    Completar slots
+                  </button>
+                </div>
+                <div className="operation-playoff-bracket-grid">
+                  {playoffBracketColumns.map(({ round, matches }) => (
+                    <section key={round.id} className="operation-playoff-round">
+                      <div className="operation-playoff-round-head">
+                        <strong>{round.name}</strong>
+                        <span>{matches.length} partido{matches.length !== 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="operation-playoff-slots">
+                        {matches.length > 0 ? matches.map((match, index) => (
+                          <button
+                            key={match.id}
+                            type="button"
+                            className="operation-playoff-slot"
+                            onClick={() => openEditMatch(match, 'edit')}
+                          >
+                            <span className="operation-playoff-slot-index">#{index + 1}</span>
+                            <span>{match.homeClub?.name || 'Equipo por definir'}</span>
+                            <span>{match.awayClub?.name || 'Equipo por definir'}</span>
+                          </button>
+                        )) : (
+                          <div className="operation-playoff-empty-slot">
+                            <Calendar size={18} />
+                            <span>Sin slots todavia</span>
+                          </div>
+                        )}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             <div className="operation-manage-toolbar">
               <label className="operation-manage-search">
@@ -2243,6 +2315,7 @@ function TeamBlock({
     <div className="fixture-team-block">
       <span className="fixture-team-side">{side}</span>
       <div className="fixture-team-logo">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         {team?.logo ? <img src={team.logo} alt={team.name} className="fixture-team-logo-image" /> : <ShieldCheck size={24} />}
       </div>
       <span className="fixture-team-name">{team?.shortName || team?.name || fallback}</span>

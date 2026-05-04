@@ -12,6 +12,14 @@ import { LabelChip } from './standings/LabelChip';
 import { PhaseSettings, GroupLabel } from '@/types/phase-settings';
 import { updateEntity } from '@/app/admin/entities/actions';
 import { buildTournamentCompetitionConfig } from '@/lib/utils/tournamentFormat';
+import {
+    DEFAULT_PLAYOFF_STAGE_NAMES,
+    getDefaultPlayoffStageNames,
+    getPlayoffMatchCounts,
+    getPlayoffTeamsCount,
+    normalizePlayoffStageNames,
+    resolvePlayoffStagesForTeams,
+} from '@/lib/utils/playoffStages';
 import { useTournamentDirty } from './TournamentContext';
 
 interface Phase {
@@ -45,6 +53,21 @@ const PRESET_COLORS = [
 
 const DEFAULT_PLACEMENT_PTS = [25, 18, 15, 12, 10, 8, 6, 4];
 const DEFAULT_PLACEMENT_POINTS = DEFAULT_PLACEMENT_PTS.map((pts, i) => ({ position: i + 1, points: pts }));
+const DEFAULT_PLAYOFF_STAGE_MATCH_COUNTS = getPlayoffMatchCounts(16, DEFAULT_PLAYOFF_STAGE_NAMES.length);
+
+function toPositiveStageMatchCount(value: unknown, fallback = 1) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return fallback;
+    return Math.max(1, Math.floor(parsed));
+}
+
+function normalizePlayoffStageMatchCounts(stageNames: string[], counts: number[], teamsCount: number) {
+    const defaults = getPlayoffMatchCounts(teamsCount, stageNames.length);
+
+    return stageNames.map((_, index) => (
+        toPositiveStageMatchCount(counts[index], toPositiveStageMatchCount(defaults[index], 1))
+    ));
+}
 
 const COLUMN_TIEBREAKER_CONFIG: Record<string, { label: string; description?: string }> = {
     points:        { label: 'Puntos' },
@@ -142,12 +165,16 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         { metric: 'pointsFor',  label: 'Puntos a Favor',         enabled: true, order: 'desc', priority: 4 },
     ]);
     const [statsAssignment, setStatsAssignment] = useState<'played' | 'starters'>('played');
+    const [carryOverPreviousPhase, setCarryOverPreviousPhase] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
     const [editingPhaseId, setEditingPhaseId] = useState<string | null>(null);
     const [creating, setCreating] = useState(false);
 
     // Group names (actual DB groups for group_stage)
     const [groupNames, setGroupNames] = useState<string[]>([]);
+    const [playoffStageNames, setPlayoffStageNames] = useState<string[]>(DEFAULT_PLAYOFF_STAGE_NAMES);
+    const [playoffStageMatchCounts, setPlayoffStageMatchCounts] = useState<number[]>(DEFAULT_PLAYOFF_STAGE_MATCH_COUNTS);
+    const [playoffStagesCustomized, setPlayoffStagesCustomized] = useState(false);
 
     // Classification zone labels
     const [groupLabels, setGroupLabels] = useState<GroupLabel[]>([]);
@@ -184,6 +211,52 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const removeGroupName = (index: number) => {
         setGroupNames(prev => prev.filter((_, i) => i !== index));
     };
+
+    const addPlayoffStageName = () => {
+        const suggested = DEFAULT_PLAYOFF_STAGE_NAMES[playoffStageNames.length] || `Etapa ${playoffStageNames.length + 1}`;
+        const nextNames = [...playoffStageNames, suggested];
+        setPlayoffStageNames(nextNames);
+        setPlayoffStageMatchCounts(prev => normalizePlayoffStageMatchCounts(nextNames, prev, formPlayoffTeamsCount));
+        setPlayoffStagesCustomized(true);
+    };
+
+    const updatePlayoffStageName = (index: number, value: string) => {
+        setPlayoffStageNames(prev => prev.map((name, i) => (i === index ? value : name)));
+        setPlayoffStagesCustomized(true);
+    };
+
+    const updatePlayoffStageMatchCount = (index: number, value: number | '') => {
+        setPlayoffStageMatchCounts(prev => {
+            const next = [...prev];
+            next[index] = toPositiveStageMatchCount(value, 1);
+            return normalizePlayoffStageMatchCounts(playoffStageNames, next, formPlayoffTeamsCount);
+        });
+        setPlayoffStagesCustomized(true);
+    };
+
+    const removePlayoffStageName = (index: number) => {
+        const nextNames = playoffStageNames.filter((_, i) => i !== index);
+        setPlayoffStageNames(nextNames);
+        setPlayoffStageMatchCounts(prev => normalizePlayoffStageMatchCounts(
+            nextNames,
+            prev.filter((_, i) => i !== index),
+            formPlayoffTeamsCount,
+        ));
+        setPlayoffStagesCustomized(true);
+    };
+
+    const formPlayoffTeamsCount = useMemo(
+        () => getPlayoffTeamsCount({ teamsCount: teamsCount === '' ? 0 : Number(teamsCount) }),
+        [teamsCount],
+    );
+
+    useEffect(() => {
+        if (phaseType !== 'playoff' && phaseType !== 'knockout') return;
+        if (playoffStagesCustomized) return;
+        const defaultNames = getDefaultPlayoffStageNames(formPlayoffTeamsCount);
+        setPlayoffStageNames(defaultNames);
+        setPlayoffStageMatchCounts(normalizePlayoffStageMatchCounts(defaultNames, [], formPlayoffTeamsCount));
+    }, [formPlayoffTeamsCount, phaseType, playoffStagesCustomized]);
 
     // --- Label helpers ---
     const resetLabelForm = () => {
@@ -331,6 +404,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         const normalizedTeams = teamsCount === '' ? null : Number(teamsCount);
         const normalizedAdvance = advanceCount === '' ? null : Number(advanceCount);
         const activeGroupNames = groupNames.filter(name => name.trim());
+        const activePlayoffStages = normalizePlayoffStageNames(playoffStageNames);
 
         if (!normalizedName) errors.push('Debes ingresar un nombre de fase.');
         if (normalizedTeams !== null && normalizedTeams < 2) errors.push('La fase debe tener al menos 2 equipos.');
@@ -341,9 +415,18 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         if (phaseType === 'group_stage' && activeGroupNames.length === 0) {
             errors.push('La fase de grupos necesita al menos un grupo.');
         }
+        if ((phaseType === 'playoff' || phaseType === 'knockout') && normalizedTeams === null) {
+            errors.push('La fase playoff necesita definir cuantos equipos juegan.');
+        }
+        if ((phaseType === 'playoff' || phaseType === 'knockout') && activePlayoffStages.length === 0) {
+            errors.push('La fase playoff necesita al menos una etapa de eliminacion.');
+        }
+        if ((phaseType === 'playoff' || phaseType === 'knockout') && activePlayoffStages.some((_, index) => toPositiveStageMatchCount(playoffStageMatchCounts[index], 0) < 1)) {
+            errors.push('Cada etapa playoff necesita al menos 1 partido configurado.');
+        }
 
         return errors;
-    }, [advanceCount, groupNames, phaseName, phaseType, teamsCount]);
+    }, [advanceCount, groupNames, phaseName, phaseType, playoffStageMatchCounts, playoffStageNames, teamsCount]);
 
     const tiebreakerListItems = useMemo((): TiebreakerItem[] => {
         const activeMetrics = new Set(tiebreakers.map(t => t.metric));
@@ -440,6 +523,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         setPointsDrawExtra(1);
         setPointsLossExtra(0);
         setStatsAssignment('played');
+        setCarryOverPreviousPhase(false);
         setTiebreakers([
             { metric: 'points',     label: 'Puntos',                 enabled: true, order: 'desc', priority: 1 },
             { metric: 'headToHead', label: 'Enfrentamiento Directo', enabled: true, order: 'desc', priority: 2, requiresRoundRobin: true },
@@ -456,6 +540,9 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         });
         setGroupLabels([]);
         setGroupNames([]);
+        setPlayoffStageNames(DEFAULT_PLAYOFF_STAGE_NAMES);
+        setPlayoffStageMatchCounts(DEFAULT_PLAYOFF_STAGE_MATCH_COUNTS);
+        setPlayoffStagesCustomized(false);
         setPlacementPoints(DEFAULT_PLACEMENT_POINTS);
         resetLabelForm();
         setShowPhaseForm(false);
@@ -467,6 +554,9 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         setEditingPhaseId(phase.id);
         setPhaseName(phase.name);
         setPhaseType(phase.phase_type as any);
+        setPlayoffStageNames(DEFAULT_PLAYOFF_STAGE_NAMES);
+        setPlayoffStageMatchCounts(DEFAULT_PLAYOFF_STAGE_MATCH_COUNTS);
+        setPlayoffStagesCustomized(false);
 
         if (phase.settings) {
             const s = phase.settings;
@@ -506,7 +596,15 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
             setGroupLabels(normalizeGroupLabels(s.groupLabels || []));
             setGroupNames((s as any).group_names || []);
+            const stageConfigs = resolvePlayoffStagesForTeams(s, getPlayoffTeamsCount(s));
+            const stageNames = stageConfigs.map(stage => stage.name);
+            setPlayoffStageNames(stageNames.length > 0 ? stageNames : DEFAULT_PLAYOFF_STAGE_NAMES);
+            setPlayoffStageMatchCounts(stageNames.length > 0
+                ? normalizePlayoffStageMatchCounts(stageNames, stageConfigs.map(stage => stage.matchCount), getPlayoffTeamsCount(s))
+                : DEFAULT_PLAYOFF_STAGE_MATCH_COUNTS);
+            setPlayoffStagesCustomized(stageConfigs.length > 0);
             setStatsAssignment(s.statsAssignment || (s.playerStats?.assignOnlyToStarters ? 'starters' : 'played'));
+            setCarryOverPreviousPhase(Boolean(s.carryOver?.enabled || s.carryOverPreviousPhase));
 
             const pts = (s as any).circuit?.pointsByPlacement;
             setPlacementPoints(Array.isArray(pts) && pts.length > 0 ? pts : DEFAULT_PLACEMENT_POINTS);
@@ -537,6 +635,15 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         }
     };
 
+    const getPreviousPhaseForForm = () => {
+        const targetIndex = editingPhaseId
+            ? phases.findIndex(phase => phase.id === editingPhaseId)
+            : phases.length;
+
+        if (targetIndex <= 0) return null;
+        return phases[targetIndex - 1] ?? null;
+    };
+
     const handleCreatePhase = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!id) return;
@@ -561,6 +668,23 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         const sanitizedGroupNames = phaseType === 'group_stage'
             ? groupNames.map(name => name.trim()).filter(Boolean)
             : [];
+        const sanitizedPlayoffStages = (phaseType === 'playoff' || phaseType === 'knockout')
+            ? resolvePlayoffStagesForTeams(
+                {
+                    teamsCount: formPlayoffTeamsCount,
+                    playoffStages: playoffStageNames.map((name, index) => ({
+                        name,
+                        matchCount: playoffStageMatchCounts[index],
+                    })),
+                },
+                formPlayoffTeamsCount,
+            )
+            : [];
+        const sanitizedPlayoffStageNames = sanitizedPlayoffStages.map(stage => stage.name);
+        const sanitizedPlayoffStageMatchCounts = sanitizedPlayoffStages.map(stage => stage.matchCount);
+        const previousPhaseForCarryOver = getPreviousPhaseForForm();
+        const canCarryOverPreviousPhase = Boolean(previousPhaseForCarryOver);
+        const carryOverEnabled = carryOverPreviousPhase && canCarryOverPreviousPhase;
 
         try {
             const response = await fetch(url, {
@@ -579,7 +703,29 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                         tableColumns: tableCols,
                         groupLabels,
                         statsAssignment,
+                        carryOverPreviousPhase: carryOverEnabled,
+                        carryOver: {
+                            enabled: carryOverEnabled,
+                            source: 'previous_phase',
+                            sourcePhaseId: null,
+                            mode: 'table_totals',
+                            include: {
+                                standings: true,
+                                points: true,
+                                scores: true,
+                                form: true,
+                            },
+                        },
                         group_names: sanitizedGroupNames,
+                        playoffStages: sanitizedPlayoffStages.map((stage, index) => ({
+                            id: `playoff_stage_${index + 1}`,
+                            name: stage.name,
+                            orderIndex: index + 1,
+                            matchCount: stage.matchCount,
+                        })),
+                        playoff_stage_names: sanitizedPlayoffStageNames,
+                        playoffStageMatchCounts: sanitizedPlayoffStageMatchCounts,
+                        playoff_match_counts: sanitizedPlayoffStageMatchCounts,
                         groupTags: groupLabels.map(l => l.name),
                         playerStats: {
                             assignTeamStatsToPlayersWhoPlayed: statsAssignment === 'played',
@@ -763,6 +909,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const currentStepIndex = Math.max(visibleSteps.findIndex(step => step.step === currentStep), 0);
     const lastVisibleStep = visibleSteps[visibleSteps.length - 1]?.step ?? 5;
     const currentPhaseOrdinal = editingPhaseId ? phases.findIndex(phase => phase.id === editingPhaseId) + 1 : phases.length + 1;
+    const previousPhaseForForm = getPreviousPhaseForForm();
     const canSubmitPhase = phaseFormErrors.length === 0 && !validationErrors.some(error => error.includes('Debe haber'));
     const progressPercent = visibleSteps.length > 0
         ? ((currentStepIndex + 1) / visibleSteps.length) * 100
@@ -827,7 +974,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
             {/* ── Tournament model selector ── */}
             {!showPhaseForm && (
-                <section className="basalt-card structure-module p-6" aria-disabled={isApiManaged || undefined}>
+                <section className="basalt-card structure-module p-6" data-disabled={isApiManaged || undefined}>
                     <div className="structure-module-header mb-5">
                         <p className="basalt-section-kicker mb-1">Modelo competitivo</p>
                         <h2 className="basalt-h1 structure-module-title">Rol del torneo</h2>
@@ -1028,6 +1175,21 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                             {(phase.settings as any)?.group_names?.length > 0 && (
                                                 <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
                                                     {(phase.settings as any).group_names.length} grupos
+                                                </span>
+                                            )}
+                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && normalizePlayoffStageNames(phase.settings).length > 0 && (
+                                                <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
+                                                    {normalizePlayoffStageNames(phase.settings).length} etapas
+                                                </span>
+                                            )}
+                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && resolvePlayoffStagesForTeams(phase.settings, getPlayoffTeamsCount(phase.settings)).length > 0 && (
+                                                <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
+                                                    {resolvePlayoffStagesForTeams(phase.settings, getPlayoffTeamsCount(phase.settings)).reduce((total, stage) => total + stage.matchCount, 0)} partidos de cuadro
+                                                </span>
+                                            )}
+                                            {(phase.settings?.carryOver?.enabled || phase.settings?.carryOverPreviousPhase) && (
+                                                <span className="structure-phase-meta-info text-[var(--accent-primary)] font-semibold">
+                                                    Arrastra fase previa
                                                 </span>
                                             )}
                                             {isCircuit && (() => {
@@ -1238,6 +1400,16 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                                 } else if (type !== 'group_stage') {
                                                                     setGroupNames([]);
                                                                 }
+                                                    if (type === 'playoff' || type === 'knockout') {
+                                                        const defaultNames = getDefaultPlayoffStageNames(formPlayoffTeamsCount);
+                                                        setPlayoffStageNames(defaultNames);
+                                                        setPlayoffStageMatchCounts(normalizePlayoffStageMatchCounts(defaultNames, [], formPlayoffTeamsCount));
+                                                        setPlayoffStagesCustomized(false);
+                                                    } else {
+                                                        setPlayoffStageNames(DEFAULT_PLAYOFF_STAGE_NAMES);
+                                                        setPlayoffStageMatchCounts(DEFAULT_PLAYOFF_STAGE_MATCH_COUNTS);
+                                                        setPlayoffStagesCustomized(false);
+                                                    }
                                                             }}
                                                             className={`structure-option-card ${phaseType === type ? 'is-active' : ''} flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${phaseType === type
                                                                 ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
@@ -1259,7 +1431,74 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                             </div>
 
                                             {/* Groups definition — only for group_stage */}
-                                            {phaseType !== 'group_stage' && (
+                                            {(phaseType === 'playoff' || phaseType === 'knockout') && (
+                                                <div className="structure-field-panel structure-field-panel-wide structure-field-panel-accent structure-basic-groups-panel rounded-xl border border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/5 p-5">
+                                                    <div className="flex items-center justify-between gap-3 mb-4">
+                                                        <div>
+                                                            <p className="text-xs font-bold text-dim uppercase tracking-widest mb-0.5">
+                                                                Etapas de eliminacion
+                                                            </p>
+                                                            <p className="text-sm text-white font-semibold">
+                                                                Define las etapas que guiaran el cuadro playoff
+                                                            </p>
+                                                        </div>
+                                                        <span className="basalt-badge badge-published">
+                                                            {normalizePlayoffStageNames(playoffStageNames).length} etapa{normalizePlayoffStageNames(playoffStageNames).length !== 1 ? 's' : ''}
+                                                            {' · '}
+                                                            {normalizePlayoffStageMatchCounts(playoffStageNames, playoffStageMatchCounts, formPlayoffTeamsCount).reduce((total, count) => total + count, 0)} partido{normalizePlayoffStageMatchCounts(playoffStageNames, playoffStageMatchCounts, formPlayoffTeamsCount).reduce((total, count) => total + count, 0) !== 1 ? 's' : ''}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="flex flex-col gap-2 mb-4">
+                                                        {playoffStageNames.map((name, i) => (
+                                                            <div key={i} className="structure-group-row flex flex-col sm:flex-row gap-2">
+                                                                <div className="flex-1 min-w-0">
+                                                                    <input
+                                                                        type="text"
+                                                                        className="basalt-input w-full"
+                                                                        value={name}
+                                                                        onChange={e => updatePlayoffStageName(i, e.target.value)}
+                                                                        placeholder={DEFAULT_PLAYOFF_STAGE_NAMES[i] || `Etapa ${i + 1}`}
+                                                                    />
+                                                                </div>
+                                                                <label className="flex items-center gap-2 rounded-xl border border-[var(--border-basalt)] bg-black/20 px-3 py-2 min-w-[150px]">
+                                                                    <span className="text-[10px] font-black uppercase tracking-widest text-dim">
+                                                                        Partidos
+                                                                    </span>
+                                                                    <input
+                                                                        type="number"
+                                                                        min={1}
+                                                                        max={64}
+                                                                        className="w-16 bg-transparent text-center text-white font-black outline-none"
+                                                                        value={playoffStageMatchCounts[i] ?? 1}
+                                                                        onChange={e => updatePlayoffStageMatchCount(i, e.target.value ? Number(e.target.value) : '')}
+                                                                        aria-label={`Partidos en ${name || `etapa ${i + 1}`}`}
+                                                                    />
+                                                                </label>
+                                                                <button
+                                                                    type="button"
+                                                                    className="basalt-btn flex-shrink-0 px-3"
+                                                                    onClick={() => removePlayoffStageName(i)}
+                                                                    title="Eliminar etapa"
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <button
+                                                        type="button"
+                                                        className="basalt-btn w-full"
+                                                        onClick={addPlayoffStageName}
+                                                    >
+                                                        <Plus size={14} />
+                                                        Agregar etapa
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {phaseType !== 'group_stage' && phaseType !== 'playoff' && phaseType !== 'knockout' && (
                                                 <div className="structure-field-panel structure-field-panel-wide structure-single-table-note">
                                                     <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-2">
                                                         Tabla competitiva
@@ -1764,6 +2003,26 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                 <div>
                                                     <span className="text-sm font-semibold text-white">Asignar estadísticas solo a titulares</span>
                                                     <p className="text-xs text-dim mt-1">Si está inactivo, se asignará a todos los jugadores que hayan jugado.</p>
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        <div className="structure-field-panel rounded-xl border border-[var(--border-basalt)] bg-[var(--surface-basalt)] p-5">
+                                            <label className={`flex items-start gap-3 ${previousPhaseForForm ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}>
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 mt-0.5 accent-[var(--accent-primary)]"
+                                                    checked={carryOverPreviousPhase && Boolean(previousPhaseForForm)}
+                                                    disabled={!previousPhaseForForm}
+                                                    onChange={e => setCarryOverPreviousPhase(e.target.checked)}
+                                                />
+                                                <div>
+                                                    <span className="text-sm font-semibold text-white">Arrastrar estadisticas de la fase previa</span>
+                                                    <p className="text-xs text-dim mt-1">
+                                                        {previousPhaseForForm
+                                                            ? `La tabla de esta fase empieza con los totales acumulados en ${previousPhaseForForm.name}.`
+                                                            : 'Disponible desde la segunda fase del torneo.'}
+                                                    </p>
                                                 </div>
                                             </label>
                                         </div>

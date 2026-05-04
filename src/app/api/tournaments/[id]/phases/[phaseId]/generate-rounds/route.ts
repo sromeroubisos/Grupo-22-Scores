@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
-import { createClient } from '@/lib/supabase/server';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
+import { FixtureService } from '@/lib/services/fixtureService';
 
 // POST generate rounds for a phase
 export async function POST(
@@ -8,8 +9,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string, phaseId: string }> }
 ) {
   try {
-    const supabase = await createClient();
     const { id: tournamentId, phaseId } = await params;
+    const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
     const body = await request.json();
 
     const namePattern = body.name_pattern || 'Fecha {n}';
@@ -19,10 +20,33 @@ export async function POST(
       .from('tournament_phases')
       .select('phase_type, settings')
       .eq('id', phaseId)
+      .eq('tournament_id', tournamentId)
       .single();
 
     if (phaseError || !phase) {
       return NextResponse.json({ error: 'Phase not found' }, { status: 404 });
+    }
+
+    if (phase.phase_type === 'playoff' || phase.phase_type === 'knockout') {
+      const result = await FixtureService.generateRoundsForPhase(phaseId, body.num_rounds || 0, namePattern);
+
+      if (!result) {
+        return NextResponse.json({ error: 'Error generating playoff bracket' }, { status: 500 });
+      }
+
+      const { data: rounds, error: fetchError } = await supabase
+        .from('tournament_rounds')
+        .select('*')
+        .eq('phase_id', phaseId)
+        .order('order_index', { ascending: true });
+
+      if (fetchError) {
+        return NextResponse.json({ error: 'Bracket created but error fetching rounds' }, { status: 500 });
+      }
+
+      await invalidateMatchesFeedCaches();
+
+      return NextResponse.json({ data: rounds || [], count: rounds?.length || 0 }, { status: 201 });
     }
 
     if (phase.phase_type === 'league') {
@@ -162,8 +186,8 @@ export async function POST(
 
       return NextResponse.json({ data: rounds || [], count: rounds?.length || 0 }, { status: 201 });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in POST generate-rounds:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return tournamentApiErrorResponse(error);
   }
 }

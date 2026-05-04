@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiErrorMessage, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
-import { createClient } from '@/lib/supabase/server';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { FixtureService } from '@/lib/services/fixtureService';
 import {
     getTournamentEspnAmericanFootballConfig,
@@ -18,7 +17,7 @@ export async function POST(
 ) {
     try {
         const tournamentId = (await params).id;
-        await requireAdminApiUser();
+        const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
 
         const body: SyncRequest = await request.json();
         const { phase_id, round_id, matches } = body;
@@ -35,7 +34,6 @@ export async function POST(
             }, { status: 400 });
         }
 
-        const supabase = await createClient();
         const { data: tournamentMeta } = await supabase
             .from('tournaments')
             .select('sport_id, sport, ruleset')
@@ -98,9 +96,6 @@ export async function POST(
 
         return NextResponse.json(result);
     } catch (error: unknown) {
-        return NextResponse.json(
-            { error: getApiErrorMessage(error) },
-            { status: getApiErrorStatus(error) }
-        );
+        return tournamentApiErrorResponse(error);
     }
 }

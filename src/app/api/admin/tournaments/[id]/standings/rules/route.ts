@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 
 export async function PUT(
@@ -15,7 +15,7 @@ export async function PUT(
             return NextResponse.json({ error: 'phaseId and rules are required' }, { status: 400 });
         }
 
-        const supabase = await createClient();
+        const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
         const hasShootoutPoints =
             Number.isFinite(Number(rules.points_for_shootout_win))
             && Number.isFinite(Number(rules.points_for_shootout_loss));
@@ -112,7 +112,6 @@ export async function PUT(
         return NextResponse.json({ ok: true });
     } catch (e: unknown) {
         console.error('Exception saving standings rules:', e);
-        const details = e instanceof Error ? e.message : 'Unknown error';
-        return NextResponse.json({ error: 'Internal server error', details }, { status: 500 });
+        return tournamentApiErrorResponse(e);
     }
 }

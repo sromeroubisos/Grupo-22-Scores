@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { createClub, linkDerivedClub } from '@/lib/services/clubService';
 import { getTournamentStandings } from '@/lib/services/flashscore';
 import {
@@ -944,8 +945,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
     const tournamentId = (await params).id;
+    const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
     const body = await request.json();
     const supportsDivisionId = await supportsTournamentParticipantDivisionId(supabase);
     let scopedSeasonId = String(body?.seasonId || body?.season_id || body?.season || '').trim() || null;
@@ -1090,10 +1091,7 @@ export async function POST(
     return NextResponse.json(data);
   } catch (error: unknown) {
     console.error('[Participants API] Unexpected error in POST:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return tournamentApiErrorResponse(error, 'Error interno del servidor');
   }
 }
 
@@ -1102,8 +1100,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const supabase = await createClient();
     const tournamentId = (await params).id;
+    const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
     const { searchParams } = new URL(request.url);
     const participantId = searchParams.get('id');
 
@@ -1393,16 +1391,17 @@ export async function PATCH(
 
     return NextResponse.json(data);
   } catch (error: unknown) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 },
-    );
+    return tournamentApiErrorResponse(error);
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
-    const supabase = await createClient();
+    const tournamentId = (await params).id;
+    const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -1410,12 +1409,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Missing participant ID' }, { status: 400 });
     }
 
-    const participantsTable = supabase
-      .from('tournament_participants') as unknown as TournamentParticipantsTableClient;
-
-    const { error } = await participantsTable
+    const { error } = await (supabase as any)
+      .from('tournament_participants')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('tournament_id', tournamentId);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -1423,9 +1421,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 },
-    );
+    return tournamentApiErrorResponse(error);
   }
 }

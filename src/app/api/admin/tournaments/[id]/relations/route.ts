@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { getTournamentLinkedRelations } from '@/lib/services/tournamentRelatedService';
+import type { LooseSupabaseClient } from '@/lib/supabase/loose';
 import {
     TOURNAMENT_RELATION_DIRECTION_OPTIONS,
     TOURNAMENT_RELATION_STATUS_OPTIONS,
@@ -23,7 +22,7 @@ const STATUS_VALUES = TOURNAMENT_RELATION_STATUS_OPTIONS.map((option) => option.
 const TYPE_VALUES = TOURNAMENT_RELATION_TYPE_OPTIONS.map((option) => option.value);
 
 async function writeAudit(
-    supabase: Awaited<ReturnType<typeof createClient>>,
+    supabase: LooseSupabaseClient,
     userId: string,
     tournamentId: string,
     action: string,
@@ -60,13 +59,9 @@ export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    try {
     const { id: tournamentId } = await params;
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { writer: supabase, actorUserId } = await requireTournamentMutationContext(tournamentId);
 
     const body = await request.json();
     const linkedTournamentId = String(body.linked_tournament_id || '');
@@ -118,26 +113,26 @@ export async function POST(
         return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    await writeAudit(supabase, user.id, tournamentId, 'create_relation', { relationId: data.id, payload });
+    await writeAudit(supabase, actorUserId, tournamentId, 'create_relation', { relationId: data.id, payload });
 
     return NextResponse.json({ ok: true, id: data.id });
+    } catch (error) {
+        return tournamentApiErrorResponse(error);
+    }
 }
 
 export async function PATCH(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    try {
     const { id: tournamentId } = await params;
     const relationId = new URL(request.url).searchParams.get('id');
     if (!relationId) {
         return NextResponse.json({ error: 'Missing relation id' }, { status: 400 });
     }
 
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { writer: supabase, actorUserId } = await requireTournamentMutationContext(tournamentId);
 
     const body = await request.json();
     const linkedTournamentId = String(body.linked_tournament_id || '');
@@ -189,26 +184,26 @@ export async function PATCH(
         return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    await writeAudit(supabase, user.id, tournamentId, 'update_relation', { relationId, updates });
+    await writeAudit(supabase, actorUserId, tournamentId, 'update_relation', { relationId, updates });
 
     return NextResponse.json({ ok: true });
+    } catch (error) {
+        return tournamentApiErrorResponse(error);
+    }
 }
 
 export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    try {
     const { id: tournamentId } = await params;
     const relationId = new URL(request.url).searchParams.get('id');
     if (!relationId) {
         return NextResponse.json({ error: 'Missing relation id' }, { status: 400 });
     }
 
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { writer: supabase, actorUserId } = await requireTournamentMutationContext(tournamentId);
 
     const { error } = await (supabase as any)
         .from('tournament_relations')
@@ -222,7 +217,10 @@ export async function DELETE(
         return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    await writeAudit(supabase, user.id, tournamentId, 'delete_relation', { relationId });
+    await writeAudit(supabase, actorUserId, tournamentId, 'delete_relation', { relationId });
 
     return NextResponse.json({ ok: true });
+    } catch (error) {
+        return tournamentApiErrorResponse(error);
+    }
 }
