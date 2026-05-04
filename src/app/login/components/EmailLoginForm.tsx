@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
 import styles from '../login.module.css'
@@ -12,12 +12,14 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
+    const submittingRef = useRef(false)
     const searchParams = useSearchParams()
     const roleIntent = searchParams.get('roleIntent')
     const returnTo = sanitizeReturnTo(searchParams.get('returnTo'), roleIntent)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        if (submittingRef.current) return
         onError(null)
 
         const normalizedEmail = normalizeEmail(email)
@@ -27,6 +29,7 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
             return
         }
 
+        submittingRef.current = true
         setLoading(true)
         try {
             await signInWithPasswordAndRedirect({
@@ -35,9 +38,9 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
                 returnTo,
             })
         } catch (error: unknown) {
-            console.error('[EmailLoginForm] Login error:', error)
             onError(error instanceof Error ? error.message : 'Ocurrio un error al iniciar sesion')
         } finally {
+            submittingRef.current = false
             setLoading(false)
         }
     }

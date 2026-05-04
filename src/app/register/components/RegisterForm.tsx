@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { getAuthErrorMessage } from '@/lib/auth/errors'
 import styles from '../../login/login.module.css'
 
 function normalizeEmail(value: string): string {
@@ -27,10 +28,11 @@ export default function RegisterForm({ onError, onSuccess }: RegisterFormProps) 
     const [confirmPassword, setConfirmPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
-    const supabase = createClient()
+    const submittingRef = useRef(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        if (submittingRef.current) return
         onError(null)
         onSuccess(null)
 
@@ -51,8 +53,10 @@ export default function RegisterForm({ onError, onSuccess }: RegisterFormProps) 
             return
         }
 
+        submittingRef.current = true
         setLoading(true)
         try {
+            const supabase = createClient()
             const { error } = await supabase.auth.signUp({
                 email: normalizedEmail,
                 password,
@@ -65,8 +69,9 @@ export default function RegisterForm({ onError, onSuccess }: RegisterFormProps) 
 
             onSuccess('Te enviamos un email para confirmar tu cuenta. Revisa tu bandeja y sigue el enlace para activar el acceso.')
         } catch (error: unknown) {
-            onError(error instanceof Error ? error.message : 'Ocurrio un error al registrarse')
+            onError(getAuthErrorMessage(error, 'Ocurrio un error al registrarse'))
         } finally {
+            submittingRef.current = false
             setLoading(false)
         }
     }

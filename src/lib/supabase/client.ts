@@ -68,8 +68,9 @@ function buildAuthFailureResponse() {
 // once, autoRefresh ticker firing while a manual refresh is also in flight)
 // would otherwise each hit Supabase Auth simultaneously, with all but one
 // failing with 429 (over_request_rate_limit) due to per-IP /token caps.
-let inFlightRefresh: { promise: Promise<Response>; finishedAt: number } | null = null
+let inFlightRefresh: { promise: Promise<Response>; finishedAt: number; reuseUntil: number } | null = null
 const REFRESH_RESULT_REUSE_WINDOW_MS = 1500
+const REFRESH_RATE_LIMIT_REUSE_WINDOW_MS = 10000
 
 export function createClient() {
     if (client) return client
@@ -125,15 +126,15 @@ export function createClient() {
             if (inFlightRefresh) {
                 const stillFresh =
                     inFlightRefresh.finishedAt === 0 ||
-                    nowMs() - inFlightRefresh.finishedAt < REFRESH_RESULT_REUSE_WINDOW_MS
+                    nowMs() < inFlightRefresh.reuseUntil
                 if (stillFresh) {
                     try {
                         const cached = await inFlightRefresh.promise
-                        if (cached.ok) {
+                        if (cached.ok || cached.status === 429) {
                             return cached.clone()
                         }
-                        // Non-OK cached response (e.g. 429): fall through and
-                        // attempt a fresh request below.
+                        // Non-OK responses other than rate limits can attempt a
+                        // fresh request below.
                     } catch {
                         // Fall through to a fresh attempt if the cached one failed.
                     }
@@ -149,17 +150,25 @@ export function createClient() {
                 }
             })()
 
-            inFlightRefresh = { promise: attempt, finishedAt: 0 }
+            inFlightRefresh = { promise: attempt, finishedAt: 0, reuseUntil: Number.POSITIVE_INFINITY }
 
             try {
                 const response = await attempt
-                if (response.ok) {
-                    inFlightRefresh = { promise: attempt, finishedAt: nowMs() }
+                if (response.ok || response.status === 429) {
+                    const finishedAt = nowMs()
+                    const reuseWindowMs = response.status === 429
+                        ? REFRESH_RATE_LIMIT_REUSE_WINDOW_MS
+                        : REFRESH_RESULT_REUSE_WINDOW_MS
+                    inFlightRefresh = {
+                        promise: attempt,
+                        finishedAt,
+                        reuseUntil: finishedAt + reuseWindowMs,
+                    }
                     setTimeout(() => {
                         if (inFlightRefresh && inFlightRefresh.promise === attempt) {
                             inFlightRefresh = null
                         }
-                    }, REFRESH_RESULT_REUSE_WINDOW_MS)
+                    }, reuseWindowMs)
                 } else {
                     inFlightRefresh = null
                 }

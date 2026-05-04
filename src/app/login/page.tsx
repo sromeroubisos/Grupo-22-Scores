@@ -56,7 +56,7 @@ function LoginContent() {
                 <p className={styles.subtitle}>Elige un metodo para continuar</p>
             </div>
 
-            <OAuthButtons />
+            <OAuthButtons onError={setError} />
 
             <div className={styles.divider}>
                 <span>o con email</span>

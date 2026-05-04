@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { User as SupabaseUser, type AuthChangeEvent, type Session } from '@supabase/supabase-js';
 import { normalizeRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
 import { clearFavoritesCache } from '@/lib/favoritesCache';
@@ -15,7 +15,9 @@ import {
     ensureOnboardingStatus,
     getOnboardingStatus,
 } from '@/lib/services/preferencesService';
+import { isAuthRateLimitError } from '@/lib/auth/errors';
 import { clearSupabaseBrowserSession, createClient } from '@/lib/supabase/client';
+import type { LooseSupabaseClient } from '@/lib/supabase/loose';
 import { logPerf, measureAsync, nowMs, warnIfDuplicateWindow } from '@/lib/perf/measure';
 import { getReservedAdminRole } from '@/lib/types/user';
 
@@ -67,6 +69,15 @@ const isSupabaseNetworkError = (err: unknown) => {
     );
 };
 
+function isAuthEntryPath(pathname: string | null): boolean {
+    if (!pathname) return false;
+    return (
+        pathname === '/login' ||
+        pathname === '/register' ||
+        pathname.startsWith('/auth/')
+    );
+}
+
 function buildOptimisticUser(sbUser: SupabaseUser, onboardingCompleted: boolean | null): User {
     const reservedRole = getReservedAdminRole(sbUser.email);
     return {
@@ -81,9 +92,11 @@ function buildOptimisticUser(sbUser: SupabaseUser, onboardingCompleted: boolean 
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
+    const pathname = usePathname();
+    const skipAuthBootstrap = isAuthEntryPath(pathname);
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const supabase = useMemo(() => createClient(), []);
+    const supabaseRef = useRef<LooseSupabaseClient | null>(null);
     const isMounted = useRef(true);
     const authProviderStartedAt = useRef(nowMs());
     const activeProfileFetchRef = useRef<{ userId: string; startedAt: number } | null>(null);
@@ -108,6 +121,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
     }, []);
 
+    const getSupabaseClient = useCallback(() => {
+        if (!supabaseRef.current) {
+            supabaseRef.current = createClient();
+        }
+
+        return supabaseRef.current;
+    }, []);
+
     const resolveFallbackOnboarding = useCallback((sbUser: SupabaseUser) => {
         const metadataStatus = getOnboardingMetadataStatus(sbUser.user_metadata);
         const storageStatus = getOnboardingStorageStatus(sbUser.id);
@@ -119,8 +140,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const rehydrateMissingOnboardingStatus = useCallback((userId: string) => {
+        const supabase = getSupabaseClient();
         ensureOnboardingStatus(supabase, userId).catch(() => { });
-    }, [supabase]);
+    }, [getSupabaseClient]);
 
     const fetchAndSetUser = useCallback(async (sbUser: SupabaseUser) => {
         const activeFetch = activeProfileFetchRef.current;
@@ -130,6 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         activeProfileFetchRef.current = { userId: sbUser.id, startedAt: currentTime };
+        const supabase = getSupabaseClient();
         trackAuthDuplicate('restoreUser', { userId: sbUser.id });
         console.log('[AuthContext] fetchAndSetUser start for:', sbUser.email);
         const fallbackOnboarding = resolveFallbackOnboarding(sbUser);
@@ -266,10 +289,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setIsLoading(false);
             }
         }
-    }, [rehydrateMissingOnboardingStatus, resolveFallbackOnboarding, supabase, trackAuthDuplicate]);
+    }, [getSupabaseClient, rehydrateMissingOnboardingStatus, resolveFallbackOnboarding, trackAuthDuplicate]);
 
     useEffect(() => {
         isMounted.current = true;
+
+        if (skipAuthBootstrap) {
+            activeProfileFetchRef.current = null;
+            lastAuthEventRef.current = { event: 'INIT', userId: null };
+            setUser(null);
+            setIsLoading(false);
+
+            return () => {
+                isMounted.current = false;
+            };
+        }
+
+        const supabase = getSupabaseClient();
         logPerf(
             ['AUTH'],
             {
@@ -312,14 +348,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }
             } catch (err: unknown) {
                 if (isAbortError(err)) return;
-                console.error('[AuthContext] initAuth error:', err);
-                if (isSupabaseNetworkError(err)) {
-                    console.warn('[AuthContext] initAuth network failure, keeping existing local session state');
+                if (isSupabaseNetworkError(err) || isAuthRateLimitError(err)) {
+                    console.warn('[AuthContext] initAuth skipped because Supabase Auth is temporarily unavailable');
                     if (isMounted.current) {
                         setIsLoading(false);
                     }
                     return;
                 }
+                console.error('[AuthContext] initAuth error:', err);
                 if (isMounted.current) setIsLoading(false);
             }
         };
@@ -429,7 +465,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isMounted.current = false;
             subscription.unsubscribe();
         };
-    }, [fetchAndSetUser, router, supabase, trackAuthDuplicate]);
+    }, [fetchAndSetUser, getSupabaseClient, router, skipAuthBootstrap, trackAuthDuplicate]);
 
     const login = (_role: AppUserRole = 'fan', returnTo?: string) => {
         void _role;
@@ -457,6 +493,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try { router.refresh(); } catch { /* noop */ }
 
         try {
+            const supabase = getSupabaseClient();
             await supabase.auth.signOut();
         } catch (error) {
             console.error('Error logging out:', error);
