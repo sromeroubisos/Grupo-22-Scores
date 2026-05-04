@@ -34,7 +34,7 @@ const PUBLIC_STALE_TTL = 5 * 60 * 1000;     // 5 minutes - shared public cache w
 const PUBLIC_LIVE_POLL_INTERVAL = 60_000;   // 1 minute - live refresh cadence
 const PREFETCH_WINDOW_DAYS = 7;
 const PREFETCH_BATCH_SIZE = 2;
-const MATCHES_STORE_CACHE_VERSION = 'v3';
+const MATCHES_STORE_CACHE_VERSION = 'v4';
 
 // Module-level cache shared across hook instances
 const matchesCache = new Map<string, any[]>();
@@ -78,7 +78,6 @@ export function useMatchesStore(
 ): MatchesStoreResult {
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [tick, setTick] = useState(0); // force re-render on cache update
   const [sourceError, setSourceError] = useState<SourceError | null>(null);
   const [isPageVisible, setIsPageVisible] = useState(
     () => typeof document === 'undefined' || document.visibilityState === 'visible'
@@ -158,13 +157,13 @@ export function useMatchesStore(
 
   // Fetch a single date, update cache, return data + sources metadata
   const fetchDate = useCallback(
-    async (date: string, signal?: AbortSignal): Promise<{ matches: any[]; sources?: any }> => {
+    async (date: string, signal?: AbortSignal): Promise<{ matches: any[]; sources?: any; ok: boolean }> => {
       try {
         const url = `/api/matches?date=${date}&sport=${sportId}&external=true&tz=${encodeURIComponent(timeZone)}`;
         const res = await fetch(url, {
           signal,
         });
-        if (!res.ok) return { matches: [] };
+        if (!res.ok) return { matches: [], ok: false };
         const data = await res.json();
         const arr = Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
         const sources = data.sources || null;
@@ -176,11 +175,11 @@ export function useMatchesStore(
         matchesCache.set(cacheKey(date, sportId), arr);
         lastFetchedAt.set(cacheKey(date, sportId), hasError ? Date.now() - SHORT_MISS : Date.now());
 
-        return { matches: arr, sources };
+        return { matches: arr, sources, ok: true };
       } catch (e: any) {
-        if (e?.name === 'AbortError') return { matches: [] };
+        if (e?.name === 'AbortError') return { matches: [], ok: false };
         console.error('fetchDate error:', e);
-        return { matches: [] };
+        return { matches: [], ok: false };
       }
     },
     [sportId, timeZone]
@@ -226,11 +225,9 @@ export function useMatchesStore(
 
       if (isStale) {
         // Background refresh
-        fetchDate(selectedDate, controller.signal).then(({ matches: data, sources }) => {
-          if (!controller.signal.aborted && data.length > 0) {
+        fetchDate(selectedDate, controller.signal).then(({ matches: data, sources, ok }) => {
+          if (!controller.signal.aborted && ok) {
             setMatches(data);
-          }
-          if (!controller.signal.aborted && sources) {
             setSourceError(buildSourceError(sources));
           }
         });
@@ -242,17 +239,17 @@ export function useMatchesStore(
       // If we are switching sports, clear previous matches immediately
       setMatches([]);
 
-      fetchDate(selectedDate, controller.signal).then(({ matches: data, sources }) => {
+      fetchDate(selectedDate, controller.signal).then(({ matches: data, sources, ok }) => {
         if (!controller.signal.aborted) {
           setMatches(data);
           setLoading(false);
-          setSourceError(buildSourceError(sources));
+          if (ok) setSourceError(buildSourceError(sources));
         }
       });
     }
 
     return () => controller.abort();
-  }, [selectedDate, sportId, fetchDate, tick]);
+  }, [selectedDate, sportId, fetchDate]);
 
   // Prefetch 7 days in background (once per sport change)
   useEffect(() => {
@@ -356,11 +353,10 @@ export function useMatchesStore(
         //    Can restart polling if fresh data surfaces new live matches.
         const lastFull = lastFetchedAt.get(key) ?? 0;
         if (Date.now() - lastFull > PUBLIC_STALE_TTL) {
-          const { matches: freshData } = await fetchDate(selectedDate, controller.signal);
-          if (!controller.signal.aborted && freshData.length > 0) {
-            matchesCache.set(key, freshData);
-            lastFetchedAt.set(key, Date.now());
+          const { matches: freshData, sources, ok } = await fetchDate(selectedDate, controller.signal);
+          if (!controller.signal.aborted && ok) {
             setMatches(freshData);
+            setSourceError(buildSourceError(sources));
             const freshLive = freshData.filter(
               (m: { status?: string | null }) => m.status === 'live'
             ).length;

@@ -895,3 +895,55 @@
     flex-direction: column;
     gap: 1.5rem;
 }
+
+/* Light theme overrides */
+:root[data-theme="light"] .phase-wizard-wrapper {
+    --carbon-black: #f4f6fb;
+    --carbon-deep: #ffffff;
+    --carbon-surface: #f7f9fc;
+    --carbon-border: rgba(15, 23, 42, 0.1);
+    --carbon-grid: rgba(15, 23, 42, 0.05);
+    --accent-dim: rgba(4, 120, 87, 0.18);
+    --text-main: #0f172a;
+    --text-dim: #475569;
+}
+
+:root[data-theme="light"] .monolith-container {
+    box-shadow: 0 0 60px rgba(15, 23, 42, 0.1);
+}
+
+:root[data-theme="light"] .sidebar-header p,
+:root[data-theme="light"] .section-header h1,
+:root[data-theme="light"] .step-item-title,
+:root[data-theme="light"] .stepper-number {
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .step-item-desc {
+    color: var(--text-dim);
+}
+
+:root[data-theme="light"] .step-item:hover {
+    background: rgba(15, 23, 42, 0.04);
+}
+
+:root[data-theme="light"] .wizard-input,
+:root[data-theme="light"] .wizard-select {
+    background: #ffffff;
+    border-color: rgba(15, 23, 42, 0.16);
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .radio-option {
+    background: rgba(15, 23, 42, 0.04);
+    border-color: rgba(15, 23, 42, 0.1);
+}
+
+:root[data-theme="light"] .radio-label {
+    color: var(--text-main);
+}
+
+:root[data-theme="light"] .glossary-badge.partial {
+    background: rgba(15, 23, 42, 0.08);
+    color: #0f172a;
+}

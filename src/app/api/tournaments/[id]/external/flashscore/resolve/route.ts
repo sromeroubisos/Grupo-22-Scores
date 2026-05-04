@@ -4,8 +4,6 @@ import { getTournamentIds } from '@/lib/services/flashscore';
 import type { FlashScoreConfig } from '@/lib/types/flashscore-integration';
 import {
     getTournamentFlashScoreConfig,
-    isFlashScoreEnabledForSport,
-    RUGBY_FLASHSCORE_DISABLED_MESSAGE,
     withFlashScoreRuleset,
 } from '@/lib/externalProviderPolicy';
 
@@ -39,10 +37,6 @@ export async function POST(
 
         if (readError || !existing) {
             return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
-        }
-
-        if (!isFlashScoreEnabledForSport((existing as any).sport_id ?? (existing as any).sport ?? null)) {
-            return NextResponse.json({ error: RUGBY_FLASHSCORE_DISABLED_MESSAGE }, { status: 409 });
         }
 
         const raw = await getTournamentIds(tournament_url);

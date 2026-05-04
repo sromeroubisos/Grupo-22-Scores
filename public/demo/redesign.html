@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rediseño UI — Entrenamiento y Rendimiento</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-bedrock: #05070a;
+            --crystal-glass: rgba(15, 20, 28, 0.7);
+            --crystal-border: rgba(255, 255, 255, 0.08);
+            --accent-prism: linear-gradient(135deg, #00f2ff 0%, #006aff 50%, #7000ff 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --step-inactive: #1e293b;
+            --sidebar-width: 240px;
+            --rail-width: 200px;
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-bedrock);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .bg-facets {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 106, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(112, 0, 255, 0.05) 0%, transparent 40%);
+        }
+
+        aside.global-nav {
+            width: var(--sidebar-width);
+            background: var(--bg-bedrock);
+            border-right: 1px solid var(--crystal-border);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.5rem;
+            z-index: 10;
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 1.25rem;
+            letter-spacing: -0.02em;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-prism);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        .nav-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border: 1px solid transparent;
+        }
+
+        .nav-item:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .nav-item.active {
+            color: var(--text-primary);
+            background: var(--crystal-glass);
+            border-color: var(--crystal-border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+
+        header.top-bar {
+            height: 64px;
+            border-bottom: 1px solid var(--crystal-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            background: rgba(5, 7, 10, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .breadcrumb {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .breadcrumb span:last-child {
+            color: var(--text-primary);
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: var(--rail-width) 1fr 300px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .strata-rail {
+            border-right: 1px solid var(--crystal-border);
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .strata-step {
+            position: relative;
+            padding: 1.5rem 1rem;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            text-align: left;
+            width: 100%;
+        }
+
+        .strata-step::before {
+            content: '';
+            position: absolute;
+            left: -1px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--step-inactive);
+            transition: var(--transition);
+        }
+
+        .strata-step.active::before {
+            background: var(--accent-prism);
+            box-shadow: 0 0 15px rgba(0, 106, 255, 0.5);
+        }
+
+        .strata-step .step-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .strata-step .step-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .strata-step.completed .step-title {
+            color: var(--success);
+        }
+
+        .canvas {
+            background: rgba(255, 255, 255, 0.01);
+            padding: 2.5rem;
+            overflow-y: auto;
+        }
+
+        .canvas-header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .canvas-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .glass-card {
+            background: var(--crystal-glass);
+            border: 1px solid var(--crystal-border);
+            padding: 1.5rem;
+            border-radius: 2px;
+            backdrop-filter: blur(12px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            border-bottom: 1px solid var(--crystal-border);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .player-row:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .badge {
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            border-radius: 2px;
+            text-transform: uppercase;
+        }
+
+        .badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid var(--warning); }
+        .badge-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid var(--success); }
+
+        .context-panel {
+            border-left: 1px solid var(--crystal-border);
+            padding: 2rem 1.5rem;
+            background: rgba(5, 7, 10, 0.4);
+        }
+
+        .panel-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .panel-section h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .dashboard-grid {
+            padding: 2.5rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: auto auto 1fr;
+            gap: 1.5rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .kpi-card {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .chart-container {
+            grid-column: span 3;
+            height: 300px;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            padding-top: 2rem;
+            position: relative;
+        }
+
+        .bar {
+            flex: 1;
+            background: var(--accent-prism);
+            opacity: 0.4;
+            transition: var(--transition);
+            border-radius: 1px 1px 0 0;
+            position: relative;
+        }
+
+        .bar:hover {
+            opacity: 1;
+            transform: scaleY(1.05);
+        }
+
+        .alert-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--crystal-border);
+        }
+
+        .alert-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 4px;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 2px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent-prism);
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 106, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 106, 255, 0.5);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--crystal-border);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .hidden { display: none !important; }
+        .sparkline {
+            width: 80px;
+            height: 20px;
+            stroke: var(--accent-prism);
+            fill: none;
+            stroke-width: 2;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-facets"></div>
+
+    <aside class="global-nav">
+        <div class="brand">
+            <div class="brand-icon"></div>
+            FLASH UI
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-item" onclick="showModule('general')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                General
+            </div>
+            <div class="nav-item active" id="nav-entrenamiento" onclick="showModule('entrenamiento')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                Entrenamiento
+            </div>
+            <div class="nav-item" id="nav-rendimiento" onclick="showModule('rendimiento')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                Rendimiento
+            </div>
+            <div class="nav-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Configuración
+            </div>
+        </div>
+    </aside>
+
+    <main>
+        <header class="top-bar">
+            <div class="breadcrumb">
+                Club > <span id="current-module">Entrenamiento</span> > <span id="current-view">Sesión #124</span>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <span style="font-size: 0.75rem; color: var(--success); font-family: 'JetBrains Mono';">● Borrador guardado hace 8s</span>
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: #2d3748; border: 1px solid var(--crystal-border);"></div>
+            </div>
+        </header>
+
+        <!-- MODULE: ENTRENAMIENTO WORKSPACE -->
+        <div id="module-entrenamiento" class="workspace">
+            <nav class="strata-rail">
+                <div class="strata-step completed">
+                    <span class="step-label">Paso 01</span>
+                    <span class="step-title">Planificar</span>
+                </div>
+                <div class="strata-step active">
+                    <span class="step-label">Paso 02</span>
+                    <span class="step-title">Convocar</span>
+                </div>
+                <div class="strata-step">
+                    <span class="step-label">Paso 03</span>
+                    <span class="step-title">Ejecutar</span>
+                </div>
+                <div class="strata-step">
+                    <span class="step-label">Paso 04</span>
+                    <span class="step-title">Evaluar</span>
+                </div>
+                <div class="strata-step">
+                    <span class="step-label">Paso 05</span>
+                    <span class="step-title">Cerrar</span>
+                </div>
+            </nav>
+
+            <section class="canvas">
+                <div class="canvas-header">
+                    <div>
+                        <h1>Convocatoria</h1>
+                        <p style="color: var(--text-secondary); margin-top: 0.5rem;">Martes AM · Plantel Superior · Predio A</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-ghost">Importar Lista</button>
+                        <button class="btn btn-primary">Guardar y Continuar</button>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                        <input type="text" placeholder="Buscar jugador..." style="background: rgba(0,0,0,0.3); border: 1px solid var(--crystal-border); padding: 0.5rem 1rem; color: white; width: 300px;">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <span class="badge badge-success">Convocados: 24</span>
+                            <span class="badge badge-warning">Dudas: 2</span>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" checked></th>
+                                <th>Jugador</th>
+                                <th>Posición</th>
+                                <th>Estado Físico</th>
+                                <th>Carga Semanal</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="player-row">
+                                <td><input type="checkbox" checked></td>
+                                <td style="font-weight: 600;">Mateo Rodriguez</td>
+                                <td>Pilar</td>
+                                <td><span class="badge badge-success">Disponible</span></td>
+                                <td style="font-family: 'JetBrains Mono';">840 AU</td>
+                                <td><button class="btn btn-ghost" style="padding: 4px 8px;">Editar</button></td>
+                            </tr>
+                            <tr class="player-row">
+                                <td><input type="checkbox" checked></td>
+                                <td style="font-weight: 600;">Julian Alvarez</td>
+                                <td>Medioscrum</td>
+                                <td><span class="badge badge-warning">Tocado</span></td>
+                                <td style="font-family: 'JetBrains Mono';">920 AU</td>
+                                <td><button class="btn btn-ghost" style="padding: 4px 8px;">Editar</button></td>
+                            </tr>
+                            <tr class="player-row">
+                                <td><input type="checkbox"></td>
+                                <td style="font-weight: 600; opacity: 0.5;">Lucas Gomez</td>
+                                <td style="opacity: 0.5;">Wing</td>
+                                <td><span class="badge" style="background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid var(--error);">Lesionado</span></td>
+                                <td style="font-family: 'JetBrains Mono'; opacity: 0.5;">--</td>
+                                <td><button class="btn btn-ghost" style="padding: 4px 8px;">Ver</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <aside class="context-panel">
+                <div class="panel-section">
+                    <h3>Resumen de Sesión <span style="color: var(--accent-prism);">#124</span></h3>
+                    <div class="stat-row">
+                        <span>Duración Planificada</span>
+                        <span>90 min</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Intensidad Est.</span>
+                        <span>7/10</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Recursos</span>
+                        <span style="color: var(--warning);">3 Faltantes</span>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Alertas de Convocatoria</h3>
+                    <div class="glass-card" style="padding: 1rem; font-size: 0.8rem; margin-bottom: 1rem; border-left: 3px solid var(--warning);">
+                        <strong>Exceso de Carga:</strong> J. Alvarez ha superado el umbral del 15% esta semana.
+                    </div>
+                    <div class="glass-card" style="padding: 1rem; font-size: 0.8rem; border-left: 3px solid var(--error);">
+                        <strong>Inconsistencia:</strong> 2 jugadores no tienen RPE de la sesión pasada.
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- MODULE: RENDIMIENTO WORKSPACE -->
+        <div id="module-rendimiento" class="hidden" style="flex: 1; overflow: hidden;">
+            <div class="dashboard-grid">
+                <div class="glass-card kpi-card">
+                    <span class="kpi-label">Carga Media</span>
+                    <span class="kpi-value">742 <small style="font-size: 0.8rem; color: var(--success);">↑ 4%</small></span>
+                </div>
+                <div class="glass-card kpi-card">
+                    <span class="kpi-label">Asistencia</span>
+                    <span class="kpi-value">92% <small style="font-size: 0.8rem; color: var(--error);">↓ 2%</small></span>
+                </div>
+                <div class="glass-card kpi-card">
+                    <span class="kpi-label">Alertas Activas</span>
+                    <span class="kpi-value" style="color: var(--warning);">5</span>
+                </div>
+                <div class="glass-card kpi-card">
+                    <span class="kpi-label">Sesiones Cerradas</span>
+                    <span class="kpi-value">12/14</span>
+                </div>
+
+                <div class="glass-card chart-container">
+                    <div class="bar" style="height: 60%;"></div>
+                    <div class="bar" style="height: 45%;"></div>
+                    <div class="bar" style="height: 80%;"></div>
+                    <div class="bar" style="height: 55%;"></div>
+                    <div class="bar" style="height: 90%;"></div>
+                    <div class="bar" style="height: 70%;"></div>
+                    <div class="bar" style="height: 85%;"></div>
+                    <div class="bar" style="height: 40%;"></div>
+                    <div class="bar" style="height: 65%;"></div>
+                    <div class="bar" style="height: 95%;"></div>
+                    <div style="position: absolute; top: 1rem; left: 1.5rem;">
+                        <h3 style="font-size: 1rem;">Evolución de Carga (Semanas)</h3>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="grid-column: span 1; display: flex; flex-direction: column;">
+                    <h3 style="font-size: 0.75rem; text-transform: uppercase; margin-bottom: 1rem;">Alertas Prioritarias</h3>
+                    <div class="alert-item">
+                        <div class="alert-icon" style="background: var(--error);"></div>
+                        <div>
+                            <p style="font-size: 0.85rem; font-weight: 600;">Riesgo de Lesión</p>
+                            <p style="font-size: 0.75rem; color: var(--text-secondary);">M. Rodriguez (Fatiga aguda)</p>
+                        </div>
+                    </div>
+                    <div class="alert-item">
+                        <div class="alert-icon" style="background: var(--warning);"></div>
+                        <div>
+                            <p style="font-size: 0.85rem; font-weight: 600;">Baja Asistencia</p>
+                            <p style="font-size: 0.75rem; color: var(--text-secondary);">Grupo Pilares (-20%)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="grid-column: span 4;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1.5rem;">Detalle de Rendimiento por Jugador</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Jugador</th>
+                                <th>Asistencia</th>
+                                <th>RPE Medio</th>
+                                <th>Técnico</th>
+                                <th>Tendencia</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: 600;">Mateo Rodriguez</td>
+                                <td>100%</td>
+                                <td>7.2</td>
+                                <td><span class="badge badge-success">Apto</span></td>
+                                <td>
+                                    <svg class="sparkline"><path d="M0 10 L20 5 L40 15 L60 8 L80 12" /></svg>
+                                </td>
+                                <td><button class="btn btn-ghost" style="padding: 4px 8px;">Detalle</button></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 600;">Julian Alvarez</td>
+                                <td>85%</td>
+                                <td>8.5</td>
+                                <td><span class="badge badge-warning">Revisar</span></td>
+                                <td>
+                                    <svg class="sparkline"><path d="M0 15 L20 18 L40 12 L60 5 L80 2" stroke="#ef4444" /></svg>
+                                </td>
+                                <td><button class="btn btn-ghost" style="padding: 4px 8px;">Detalle</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function showModule(module) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            if(module === 'entrenamiento') document.getElementById('nav-entrenamiento').classList.add('active');
+            if(module === 'rendimiento') document.getElementById('nav-rendimiento').classList.add('active');
+
+            const trainMod = document.getElementById('module-entrenamiento');
+            const rendMod = document.getElementById('module-rendimiento');
+            const breadModule = document.getElementById('current-module');
+            const breadView = document.getElementById('current-view');
+
+            if (module === 'entrenamiento') {
+                trainMod.classList.remove('hidden');
+                rendMod.classList.add('hidden');
+                breadModule.innerText = "Entrenamiento";
+                breadView.innerText = "Sesión #124";
+            } else if (module === 'rendimiento') {
+                trainMod.classList.add('hidden');
+                rendMod.classList.remove('hidden');
+                breadModule.innerText = "Rendimiento";
+                breadView.innerText = "Vista: Carga";
+            }
+        }
+    </script>
+</body>
+</html>

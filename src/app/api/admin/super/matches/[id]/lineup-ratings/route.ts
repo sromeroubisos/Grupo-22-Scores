@@ -9,7 +9,6 @@ import {
   type ExternalMatchLineupOverridePlayer,
 } from '@/lib/server/externalMatchLineupOverrides';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
-import { parseRugbyApiSportsMatchId } from '@/lib/services/rugbyApiSports';
 import { parseEspnAmericanFootballMatchId } from '@/lib/services/espnAmericanFootball';
 import { parseEspnMotorsportMatchId } from '@/lib/services/espnMotorsport';
 
@@ -46,10 +45,9 @@ const PayloadSchema = z.object({
 
 type ParsedPlayer = z.infer<typeof PlayerSchema>;
 
-function detectMatchKind(matchId: string): 'local' | 'flashscore' | 'rugby' | 'espn-football' | 'espn-motorsport' | 'unknown' {
+function detectMatchKind(matchId: string): 'local' | 'flashscore' | 'espn-football' | 'espn-motorsport' | 'unknown' {
   if (UUID_PATTERN.test(matchId)) return 'local';
   if (FLASHSCORE_ID_PATTERN.test(matchId)) return 'flashscore';
-  if (parseRugbyApiSportsMatchId(matchId)) return 'rugby';
   if (parseEspnAmericanFootballMatchId(matchId)) return 'espn-football';
   if (parseEspnMotorsportMatchId(matchId)) return 'espn-motorsport';
   return 'unknown';
@@ -197,10 +195,9 @@ export async function PATCH(
       });
     }
 
-    // External: FlashScore / Rugby / ESPN football. Persist into override table.
+    // External: FlashScore / ESPN football. Persist into override table.
     const provider =
       kind === 'flashscore' ? 'flashscore'
-      : kind === 'rugby' ? 'rugby-api-sports'
       : 'espn';
 
     const previous = await getExternalMatchLineupOverride(matchId).catch(() => null);

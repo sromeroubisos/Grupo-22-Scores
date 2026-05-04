@@ -420,3 +420,30 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Light theme overrides */
+:root[data-theme="light"] .season-modal-backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+:root[data-theme="light"] .season-modal {
+  border-color: rgba(15, 23, 42, 0.12);
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 28px 90px rgba(15, 23, 42, 0.18);
+}
+
+:root[data-theme="light"] .season-modal-header {
+  border-bottom-color: rgba(15, 23, 42, 0.1);
+  background: rgba(248, 250, 252, 0.92);
+}
+
+:root[data-theme="light"] .season-modal-rail {
+  border-right-color: rgba(15, 23, 42, 0.1);
+}
+
+@media (max-width: 1024px) {
+  :root[data-theme="light"] .season-modal-rail {
+    border-bottom-color: rgba(15, 23, 42, 0.1);
+  }
+}

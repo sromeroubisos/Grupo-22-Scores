@@ -30,9 +30,7 @@ const MOTORSPORT_SPORT_KEYS = new Set([
 ]);
 
 export const FLASHSCORE_PROVIDER = 'flashscore';
-export const RUGBY_API_SPORTS_PROVIDER = 'rugby-api-sports';
 export const ESPN_PROVIDER = 'espn';
-export const RUGBY_FLASHSCORE_DISABLED_MESSAGE = 'FlashScore estÃ¡ deshabilitado para este torneo de rugby.';
 
 export function normalizeSportKey(value: unknown): string | null {
     if (value === null || value === undefined) return null;
@@ -65,12 +63,12 @@ export function isMotorsportSport(value: unknown): boolean {
     return MOTORSPORT_SPORT_KEYS.has(normalized);
 }
 
-export function isFlashScoreEnabledForSport(_value: unknown): boolean {
+export function isFlashScoreEnabledForSport(value?: unknown): boolean {
+    void value;
     return true;
 }
 
 export function getPreferredExternalProviderForSport(value: unknown) {
-    if (isRugbySport(value)) return RUGBY_API_SPORTS_PROVIDER;
     if (isAmericanFootballSport(value)) return ESPN_PROVIDER;
     if (isMotorsportSport(value)) return ESPN_PROVIDER;
     return FLASHSCORE_PROVIDER;
@@ -101,23 +99,9 @@ export function getTournamentFlashScoreConfig(
     return getRulesetFlashScoreConfig(tournament.ruleset);
 }
 
-export function getRulesetRugbyApiSportsConfig(ruleset: unknown): RugbyApiSportsConfig | null {
-    if (!ruleset || typeof ruleset !== 'object') return null;
-
-    const rawRuleset = ruleset as Record<string, unknown>;
-    const external = rawRuleset.external && typeof rawRuleset.external === 'object'
-        ? rawRuleset.external as Record<string, unknown>
-        : null;
-
-    const rawConfig =
-        external?.rugbyApiSports ??
-        external?.rugby_api_sports ??
-        rawRuleset.rugbyApiSports ??
-        rawRuleset.rugby_api_sports ??
-        null;
-
-    if (!rawConfig || typeof rawConfig !== 'object') return null;
-    return rawConfig as RugbyApiSportsConfig;
+export function getRulesetRugbyApiSportsConfig(ruleset?: unknown): RugbyApiSportsConfig | null {
+    void ruleset;
+    return null;
 }
 
 export function getTournamentRugbyApiSportsConfig(
@@ -199,11 +183,17 @@ export function withFlashScoreRuleset(ruleset: unknown, config: Partial<FlashSco
         : {};
 
     const currentFlashScore = getRulesetFlashScoreConfig(currentRuleset) ?? {};
+    const cleanRuleset = { ...currentRuleset };
+    const cleanExternal = { ...currentExternal };
+    delete cleanRuleset.rugbyApiSports;
+    delete cleanRuleset.rugby_api_sports;
+    delete cleanExternal.rugbyApiSports;
+    delete cleanExternal.rugby_api_sports;
 
     return {
-        ...currentRuleset,
+        ...cleanRuleset,
         external: {
-            ...currentExternal,
+            ...cleanExternal,
             flashscore: {
                 ...currentFlashScore,
                 ...config,
@@ -216,31 +206,13 @@ export function withFlashScoreRuleset(ruleset: unknown, config: Partial<FlashSco
     };
 }
 
-export function withRugbyApiSportsRuleset(ruleset: unknown, config: Partial<RugbyApiSportsConfig>) {
+export function withRugbyApiSportsRuleset(ruleset: unknown, config?: Partial<RugbyApiSportsConfig>) {
+    void config;
     const currentRuleset = (ruleset && typeof ruleset === 'object')
         ? ruleset as Record<string, unknown>
         : {};
 
-    const currentExternal = currentRuleset.external && typeof currentRuleset.external === 'object'
-        ? currentRuleset.external as Record<string, unknown>
-        : {};
-
-    const currentConfig = getRulesetRugbyApiSportsConfig(currentRuleset) ?? {};
-
-    return {
-        ...currentRuleset,
-        external: {
-            ...currentExternal,
-            rugbyApiSports: {
-                ...currentConfig,
-                ...config,
-            },
-        },
-        rugbyApiSports: {
-            ...currentConfig,
-            ...config,
-        },
-    };
+    return currentRuleset;
 }
 
 export function withEspnAmericanFootballRuleset(ruleset: unknown, config: Partial<EspnAmericanFootballConfig>) {

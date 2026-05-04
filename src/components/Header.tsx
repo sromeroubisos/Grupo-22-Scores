@@ -21,7 +21,12 @@ export default function Header() {
     const router = useRouter();
     const pathname = usePathname();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [hasHydrated, setHasHydrated] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        setHasHydrated(true);
+    }, []);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -119,7 +124,8 @@ export default function Header() {
         );
     }, [pathname]);
 
-    const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
+    const displayUser = hasHydrated ? user : null;
+    const adminPanel = resolveAdminPanel(displayUser?.role, displayUser?.memberships);
     const canSeeProde = true;
     const isNewsRoute = pathname?.startsWith('/noticias') ?? false;
     const isRankingsRoute = pathname?.startsWith('/rankings') ?? false;
@@ -235,10 +241,10 @@ export default function Header() {
                             aria-expanded={isUserMenuOpen}
                             type="button"
                         >
-                            {user ? (
+                            {displayUser ? (
                                 <>
-                                    <div className="avatar">{getInitials(user.name || '')}</div>
-                                    <span className="name">{user.name || 'Usuario'}</span>
+                                    <div className="avatar">{getInitials(displayUser.name || '')}</div>
+                                    <span className="name">{displayUser.name || 'Usuario'}</span>
                                 </>
                             ) : (
                                 // Fallback if no user loaded yet or guest
@@ -263,26 +269,26 @@ export default function Header() {
 
                         {/* DROPDOWN - Controlled by class 'show' or inline styles based on state */}
                         <div className={`g22-user-menu ${isUserMenuOpen ? 'show' : ''}`} style={isUserMenuOpen ? { opacity: 1, visibility: 'visible', transform: 'translateY(0)' } : {}}>
-                            {user && (
+                            {displayUser && (
                                 <>
                                     <div style={{ padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                                            {user.avatarUrl ? (
+                                            {displayUser.avatarUrl ? (
                                                 // eslint-disable-next-line @next/next/no-img-element
-                                                <img src={user.avatarUrl} alt={user.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--color-border)' }} />
+                                                <img src={displayUser.avatarUrl} alt={displayUser.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--color-border)' }} />
                                             ) : (
                                                 <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--color-bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-secondary)', fontWeight: 'bold', border: '1px solid var(--color-border)' }}>
-                                                    {getInitials(user.name || '')}
+                                                    {getInitials(displayUser.name || '')}
                                                 </div>
                                             )}
                                             <div style={{ minWidth: 0, flex: 1 }}>
-                                                <div style={{ fontWeight: 700, color: 'var(--color-text-primary)', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.name || 'Usuario'}</div>
-                                                <div style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>@{user.email?.split('@')[0] || 'usuario'}</div>
+                                                <div style={{ fontWeight: 700, color: 'var(--color-text-primary)', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayUser.name || 'Usuario'}</div>
+                                                <div style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>@{displayUser.email?.split('@')[0] || 'usuario'}</div>
                                             </div>
                                         </div>
-                                        <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>{user.email}</div>
+                                        <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>{displayUser.email}</div>
                                         <div style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '4px', background: 'var(--color-bg-tertiary)', fontSize: '11px', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}>
-                                            {user?.role ? getRoleLabel(user.role) : 'Usuario'}
+                                            {displayUser?.role ? getRoleLabel(displayUser.role) : 'Usuario'}
                                         </div>
                                         <Link href="/profile" onClick={() => setIsUserMenuOpen(false)} style={{ display: 'block', marginTop: '12px', textAlign: 'center', background: 'var(--color-button-primary, #00C853)', color: 'white', padding: '8px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
                                             Editar perfil
@@ -331,7 +337,7 @@ export default function Header() {
                                     </button>
                                 </>
                             )}
-                            {!user && (
+                            {!displayUser && (
                                 <Link href="/login" className="logout" onClick={() => setIsUserMenuOpen(false)} style={{ color: 'var(--color-text-primary)' }}>
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
                                     Iniciar Sesión

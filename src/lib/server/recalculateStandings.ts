@@ -14,6 +14,7 @@ import {
     findCarryOverDependentPhases,
     resolveStandingsCarryOverRows,
 } from '@/lib/server/standingsCarryOver';
+import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
 
 type RecalculateOptions = {
     includeDependents?: boolean;
@@ -193,18 +194,19 @@ export async function recalculateAndPersistStandings(
     const resolvedRules = StandingsEngine.resolveRules(phase.settings, tournament?.ruleset);
     const scopedSeasonId = seasonId ?? phase.season_id ?? null;
 
-    // 2. Fetch participants (exclude withdrawn/disqualified)
-    let pQuery = supabase
-        .from('tournament_participants')
-        .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
-        .eq('tournament_id', tournamentId)
-        .not('status', 'in', '("withdrawn","disqualified")');
-
-    if (scopedSeasonId) pQuery = pQuery.eq('season_id', scopedSeasonId);
-    if (groupId) pQuery = pQuery.eq('group_id', groupId);
-    const { data: participants, error: pError } = await pQuery;
-    if (pError) {
-        console.error('[recalculateStandings] Error fetching participants', pError);
+    // 2. Fetch participants scoped to this phase/group. Falls back to the
+    // legacy tournament_participants.group_id model until the migration exists.
+    let participants: Awaited<ReturnType<typeof loadPhaseScopedParticipants>>['participants'];
+    try {
+        const participantScope = await loadPhaseScopedParticipants(supabase, {
+            tournamentId,
+            phaseId,
+            groupId,
+            seasonId: scopedSeasonId,
+        });
+        participants = participantScope.participants;
+    } catch (error) {
+        console.error('[recalculateStandings] Error fetching phase participants', error);
         return { ok: false, rows_calculated: 0 };
     }
 

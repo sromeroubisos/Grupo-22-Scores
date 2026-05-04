@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { FixtureService } from '@/lib/services/fixtureService';
-import {
-    isFlashScoreEnabledForSport,
-    RUGBY_FLASHSCORE_DISABLED_MESSAGE,
-    withFlashScoreRuleset,
-} from '@/lib/externalProviderPolicy';
+import { withFlashScoreRuleset } from '@/lib/externalProviderPolicy';
 import type { SyncRequest } from '@/lib/types/flashscore-integration';
 
 export async function POST(
@@ -35,16 +31,6 @@ export async function POST(
                 },
                 { status: 400 }
             );
-        }
-
-        const { data: tournamentMeta } = await supabase
-            .from('tournaments')
-            .select('sport_id, sport')
-            .eq('id', tournamentId)
-            .single();
-
-        if (!isFlashScoreEnabledForSport((tournamentMeta as any)?.sport_id ?? (tournamentMeta as any)?.sport ?? null)) {
-            return NextResponse.json({ error: RUGBY_FLASHSCORE_DISABLED_MESSAGE }, { status: 409 });
         }
 
         // Validate phase belongs to this tournament

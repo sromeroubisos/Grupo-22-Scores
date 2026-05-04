@@ -2487,3 +2487,26 @@ select.glass-input option {
         -webkit-backdrop-filter: blur(10px) saturate(120%);
     }
 }
+
+/* Light theme: redefine the fixture tokens declared at :root above. */
+:root[data-theme="light"] {
+    --fixture-bg-base: #f4f6fb;
+    --fixture-glass-base: rgba(255, 255, 255, 0.92);
+    --fixture-glass-strong: rgba(255, 255, 255, 0.96);
+    --fixture-glass-border: rgba(15, 23, 42, 0.1);
+    --fixture-text-main: #0f172a;
+    --fixture-text-muted: rgba(15, 23, 42, 0.7);
+    --fixture-text-dim: rgba(15, 23, 42, 0.55);
+    --fixture-accent-primary: #047857;
+    --fixture-accent-secondary: #059669;
+    --fixture-accent-success: #047857;
+    --fixture-accent-info: #047857;
+    --fixture-accent-glow: rgba(4, 120, 87, 0.3);
+    --fixture-shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.1);
+    --fixture-shadow-glow: 0 0 0 1px rgba(4, 120, 87, 0.18), 0 22px 50px rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme="light"] .operation-playoff-bracket {
+    background: rgba(15, 23, 42, 0.04);
+    border-color: rgba(15, 23, 42, 0.1);
+}

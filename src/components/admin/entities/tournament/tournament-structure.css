@@ -1401,3 +1401,91 @@
         grid-column: 1 / -1 !important;
     }
 }
+
+/* Light theme overrides */
+:root[data-theme="light"] .tournament-structure-shell {
+    --border: rgba(15, 23, 42, 0.1);
+}
+
+:root[data-theme="light"] .structure-hero-meta span {
+    border-color: rgba(15, 23, 42, 0.1);
+    background: rgba(15, 23, 42, 0.04);
+    color: rgba(15, 23, 42, 0.7);
+}
+
+:root[data-theme="light"] .structure-summary-card {
+    border-color: rgba(15, 23, 42, 0.1);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), transparent 42%),
+        rgba(255, 255, 255, 0.96);
+}
+
+:root[data-theme="light"] .structure-summary-card:hover {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), transparent 42%),
+        rgba(247, 249, 252, 0.96);
+}
+
+:root[data-theme="light"] .structure-module {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), transparent 34%),
+        rgba(255, 255, 255, 0.94);
+}
+
+:root[data-theme="light"] .structure-phase-card {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), transparent 34%),
+        rgba(255, 255, 255, 0.94) !important;
+}
+
+:root[data-theme="light"] .structure-module-footer {
+    border-top-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+:root[data-theme="light"] .structure-empty-panel {
+    background: linear-gradient(180deg, #ecfdf5, rgba(187, 247, 208, 0.7));
+    color: #064e3b;
+}
+
+:root[data-theme="light"] .structure-empty-title,
+:root[data-theme="light"] .structure-hero-title,
+:root[data-theme="light"] .structure-module-title,
+:root[data-theme="light"] .structure-phase-title {
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .structure-hero-text,
+:root[data-theme="light"] .structure-module-copy,
+:root[data-theme="light"] .structure-summary-foot,
+:root[data-theme="light"] .structure-phase-meta,
+:root[data-theme="light"] .structure-empty-copy {
+    color: rgba(15, 23, 42, 0.7);
+}
+
+:root[data-theme="light"] .structure-summary-label {
+    color: rgba(15, 23, 42, 0.55);
+}
+
+:root[data-theme="light"] .structure-summary-value,
+:root[data-theme="light"] .structure-summary-value--text {
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .structure-step-panel,
+:root[data-theme="light"] .structure-basic-name-panel,
+:root[data-theme="light"] .structure-basic-type-panel,
+:root[data-theme="light"] .structure-basic-format-panel {
+    border-color: rgba(15, 23, 42, 0.1) !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), transparent 32%),
+        rgba(255, 255, 255, 0.96) !important;
+}
+
+:root[data-theme="light"] .structure-step-panel .tiebreaker-card,
+:root[data-theme="light"] .structure-step-panel .available-item {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), transparent 30%),
+        rgba(247, 249, 252, 0.96) !important;
+    border-color: rgba(15, 23, 42, 0.1) !important;
+    color: #0f172a;
+}

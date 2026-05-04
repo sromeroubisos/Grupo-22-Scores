@@ -33,19 +33,6 @@ import {
   parseEspnMotorsportMatchId,
 } from '@/lib/services/espnMotorsport';
 import {
-  getRugbyApiSportsGame,
-  getRugbyApiSportsGamesH2H,
-  getRugbyApiSportsStandings,
-  parseRugbyApiSportsMatchId,
-  toRugbyApiSportsTournamentId,
-  type RugbyApiSportsGame,
-} from '@/lib/services/rugbyApiSports';
-import {
-  normalizeRugbyGameForMatchDetail,
-  normalizeRugbyGameForTournamentViews,
-  normalizeRugbyStandingsRows,
-} from '@/lib/services/rugbyApiSportsTransforms';
-import {
   applyExternalTournamentOverride,
   getExternalTournamentOverride,
   type ExternalTournamentOverrideRecord,
@@ -251,72 +238,6 @@ async function getFlashScoreMatchBundle(matchId: string) {
   };
 }
 
-async function getRugbyApiSportsMatchBundle(matchId: string) {
-  const game = await getRugbyApiSportsGame(matchId, 'America/Argentina/Buenos_Aires');
-  if (!game) {
-    return null;
-  }
-
-  const homeId = game.teams?.home?.id;
-  const awayId = game.teams?.away?.id;
-
-  const [h2hResult, standingsResult] = await Promise.allSettled([
-    homeId && awayId
-      ? getRugbyApiSportsGamesH2H({
-        homeTeamId: homeId,
-        awayTeamId: awayId,
-        timezone: 'America/Argentina/Buenos_Aires',
-      })
-      : Promise.resolve([]),
-    game.league?.id && game.league?.season
-      ? getRugbyApiSportsStandings({
-        league: game.league.id,
-        season: game.league.season,
-      })
-      : Promise.resolve([]),
-  ]);
-
-  const tournamentOverride = game.league?.id
-    ? await getExternalTournamentOverride(toRugbyApiSportsTournamentId(game.league.id)).catch(() => null)
-    : null;
-  const resolvedGame: RugbyApiSportsGame = game.league && tournamentOverride
-    ? {
-      ...game,
-      league: applyExternalTournamentOverride(
-        game.league as Record<string, unknown>,
-        tournamentOverride,
-      ) as RugbyApiSportsGame['league'],
-    }
-    : game;
-  const match = normalizeRugbyGameForMatchDetail(resolvedGame);
-  const h2h = h2hResult.status === 'fulfilled'
-    ? h2hResult.value.map((item) => normalizeRugbyGameForTournamentViews(item))
-    : [];
-  const standingsRows = standingsResult.status === 'fulfilled'
-    ? normalizeRugbyStandingsRows(standingsResult.value)
-    : [];
-
-  match.h2h = h2h;
-  match.standings = standingsRows.map((row) => ({
-    rank: row.position,
-    name: row.team_name,
-    team_id: row.team_id,
-    logo: row.team_logo || '',
-    team: row.team_id ? { id: row.team_id, name: row.team_name, logo: row.team_logo || '' } : null,
-    matches_played: row.played,
-    goal_difference: (row.scored ?? 0) - (row.conceded ?? 0),
-    points: row.points,
-    played: row.played,
-  }));
-
-  return {
-    source: 'rugby-api-sports' as const,
-    match,
-    h2h,
-    standings: match.standings,
-  };
-}
-
 async function ensureMatchAccess(
   matchId: string,
   allowedRoles: ReadonlySet<string>
@@ -353,24 +274,8 @@ export async function GET(
 ) {
   try {
     const matchId = (await params).id;
-    const rugbyMatchId = parseRugbyApiSportsMatchId(matchId);
     const espnMatchId = parseEspnAmericanFootballMatchId(matchId);
     const espnMotorsportMatchId = parseEspnMotorsportMatchId(matchId);
-
-    if (rugbyMatchId) {
-      const bundle = await applyLineupOverrideToExternalMatchBundle(
-        matchId,
-        await getRugbyApiSportsMatchBundle(rugbyMatchId),
-      );
-      if (!bundle) {
-        return jsonNoStore(
-          { error: 'Match not found' },
-          { status: 404 }
-        );
-      }
-
-      return jsonNoStore(bundle);
-    }
 
     if (espnMatchId) {
       const bundle = await applyLineupOverrideToExternalMatchBundle(

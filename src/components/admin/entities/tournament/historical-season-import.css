@@ -682,3 +682,15 @@
         transform: rotate(360deg);
     }
 }
+
+/* Light theme overrides */
+:root[data-theme="light"] .pp-drawer-panel.historical-season-drawer {
+    background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.03), transparent 22%),
+        #f7f9fc;
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .historical-season-overlay {
+    background: rgba(15, 23, 42, 0.45);
+}

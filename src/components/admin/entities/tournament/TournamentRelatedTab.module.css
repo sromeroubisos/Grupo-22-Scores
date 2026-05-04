@@ -938,3 +938,101 @@
         padding: 18px;
     }
 }
+
+/* Light theme overrides */
+:root[data-theme="light"] .hero {
+    border-color: rgba(15, 23, 42, 0.1);
+    background:
+        linear-gradient(140deg, rgba(255, 255, 255, 0.96), rgba(247, 249, 252, 0.92)),
+        rgba(255, 255, 255, 0.9);
+    box-shadow: 0 18px 52px rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme="light"] .eyebrow,
+:root[data-theme="light"] .sectionEyebrow,
+:root[data-theme="light"] .cardEyebrow {
+    color: #0e7490;
+}
+
+:root[data-theme="light"] .title {
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .subtitle {
+    color: rgba(15, 23, 42, 0.7);
+}
+
+:root[data-theme="light"] .metricCard {
+    border-color: rgba(15, 23, 42, 0.1);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.06), rgba(15, 23, 42, 0.03));
+}
+
+:root[data-theme="light"] .metricLabel {
+    color: rgba(15, 23, 42, 0.6);
+}
+
+:root[data-theme="light"] .metricValue {
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .switcherButton {
+    border-color: rgba(15, 23, 42, 0.1);
+}
+
+:root[data-theme="light"] .switcherButton:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+:root[data-theme="light"] .switcherButton strong {
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .switcherButtonActive {
+    background: rgba(4, 120, 87, 0.1);
+    border-color: rgba(4, 120, 87, 0.32);
+    color: #064e3b;
+}
+
+:root[data-theme="light"] .switcherButtonActive strong {
+    color: #064e3b;
+}
+
+:root[data-theme="light"] .heroHint,
+:root[data-theme="light"] .sectionText {
+    color: rgba(15, 23, 42, 0.7);
+}
+
+:root[data-theme="light"] .alertCard,
+:root[data-theme="light"] .feedback {
+    border-color: rgba(15, 23, 42, 0.1);
+}
+
+:root[data-theme="light"] .feedback {
+    color: #92400e;
+}
+
+:root[data-theme="light"] .viewport {
+    border-color: rgba(15, 23, 42, 0.08);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94)),
+        rgba(255, 255, 255, 0.92);
+}
+
+:root[data-theme="light"] .sectionTitle {
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .mercuryCard,
+:root[data-theme="light"] .formPanel,
+:root[data-theme="light"] .linkedCard,
+:root[data-theme="light"] .emptyPanel {
+    border-color: rgba(15, 23, 42, 0.1);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .mercuryCard:hover,
+:root[data-theme="light"] .linkedCard:hover {
+    border-color: rgba(4, 120, 87, 0.32);
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+}

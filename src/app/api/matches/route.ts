@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/mock-db';
-import { getFlashScoreMatches, getFlashScoreLiveMatches } from '@/lib/services/flashscore';
+import {
+    getFlashScoreMatches,
+    getFlashScoreLiveMatches,
+    isFlashScoreMatchesListDateSupported,
+} from '@/lib/services/flashscore';
 import { persistFromExternalMatches } from '@/lib/sync/catalog';
 import {
     addDaysToIsoDate,
@@ -636,12 +640,14 @@ async function fetchPublicSupabaseMatches(options: {
     }
 }
 
-function buildPublicCacheHeaders(options: { liveOnly: boolean; date?: string | null }) {
+function buildPublicCacheHeaders(options: { liveOnly: boolean; date?: string | null; useExternal?: boolean }) {
     const headers = new Headers();
 
     if (options.liveOnly) {
         headers.set('Cache-Control', 'private, no-store, no-cache, max-age=0, must-revalidate');
         headers.set('Pragma', 'no-cache');
+    } else if (options.date && options.useExternal) {
+        headers.set('Cache-Control', 'public, max-age=10, s-maxage=15');
     } else if (options.date) {
         headers.set('Cache-Control', 'public, max-age=20, s-maxage=30, stale-while-revalidate=90');
     }
@@ -649,7 +655,7 @@ function buildPublicCacheHeaders(options: { liveOnly: boolean; date?: string | n
     return headers;
 }
 
-function jsonWithPublicCache(payload: unknown, options: { liveOnly: boolean; date?: string | null }) {
+function jsonWithPublicCache(payload: unknown, options: { liveOnly: boolean; date?: string | null; useExternal?: boolean }) {
     const headers = buildPublicCacheHeaders(options);
     return NextResponse.json(payload, headers.get('Cache-Control') ? { headers } : undefined);
 }
@@ -705,7 +711,7 @@ type MatchesTraceContext = {
 
 // Bump the cache namespace when response-shaping logic changes so we don't
 // keep serving stale persisted snapshots for historical dates.
-const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response:v5';
+const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response:v10';
 const EXTERNAL_MATCHES_PERSIST_TTL_MS = 10 * 60 * 1000;
 const MATCHES_DB_SELECT_COLUMNS = [
     'id',
@@ -910,6 +916,10 @@ function shouldUsePersistedFeedCache(params: MatchesRequestParams) {
     return !params.liveOnly;
 }
 
+function shouldServeStaleMatchesFeed(params: MatchesRequestParams) {
+    return !params.useExternal;
+}
+
 function buildExternalPersistKey(
     params: MatchesRequestParams,
     scope: 'live' | 'daily',
@@ -935,9 +945,30 @@ function shouldPersistExternalCatalog(
     return true;
 }
 
-function getMatchesResponseCachePolicy(params: MatchesRequestParams) {
+function hasSourceDegradation(payload?: MatchesPayload) {
+    if (!payload?.sources) return false;
+    return payload.sources.flashscore?.ok === false || payload.sources.supabase?.ok === false;
+}
+
+function hasShortLivedExternalResult(params: MatchesRequestParams, payload?: MatchesPayload) {
+    if (!params.useExternal || !payload?.sources) return false;
+    if (hasSourceDegradation(payload)) return true;
+
+    const flashscoreReason = payload.sources.flashscore?.reason;
+    return flashscoreReason === 'empty_result' || flashscoreReason === 'flashscore_empty_cache_fallback';
+}
+
+function getMatchesResponseCachePolicy(params: MatchesRequestParams, payload?: MatchesPayload) {
     if (params.liveOnly) {
         return { freshTtlSec: 60, staleTtlSec: 240 };
+    }
+
+    if (hasShortLivedExternalResult(params, payload)) {
+        return { freshTtlSec: 15, staleTtlSec: 60 };
+    }
+
+    if (params.useExternal && isFlashScoreMatchesListDateSupported(params.requestedDate, params.timeZone)) {
+        return { freshTtlSec: 60, staleTtlSec: 180 };
     }
 
     const todayKey = formatDateKey(new Date(), params.timeZone);
@@ -1008,7 +1039,7 @@ function writeMatchesResponseCache(
     params: MatchesRequestParams,
     createdAt: number = Date.now(),
 ) {
-    const policy = getMatchesResponseCachePolicy(params);
+    const policy = getMatchesResponseCachePolicy(params, payload);
     const entry: MatchesResponseCacheEntry = {
         payload,
         createdAt,
@@ -1030,8 +1061,7 @@ async function persistMatchesFeedSnapshot(
         return false;
     }
 
-    const { freshTtlSec } = getMatchesResponseCachePolicy(params);
-    const { staleTtlSec } = getMatchesResponseCachePolicy(params);
+    const { freshTtlSec, staleTtlSec } = getMatchesResponseCachePolicy(params, payload);
     const persistStartedAt = Date.now();
 
     try {
@@ -1257,7 +1287,8 @@ async function computeMatchesPayload(
                             status: 'published' as const,
                             country: (m as any).countryName || 'Internacional'
                         },
-                        liveEnabled: true
+                        liveEnabled: true,
+                        source: 'flashscore' as const
                     };
                 });
                 if (trace) {
@@ -1433,23 +1464,31 @@ async function computeMatchesPayload(
                 // Check if date is today for live updates (user timezone aware when provided)
                 const todayKey = formatDateKey(new Date(), timeZone);
                 const isToday = date === todayKey;
+                const supportsFlashScoreDailyList = isFlashScoreMatchesListDateSupported(date, timeZone);
 
                 // Track whether FlashScore API actually failed (vs returned 0 results)
                 let fsFetchFailed = false;
+                let usedExternalCacheFallback = false;
+                if (!supportsFlashScoreDailyList) {
+                    fsOk = true;
+                    fsReason = 'flashscore_date_out_of_window';
+                }
 
                 // Parallel fetch if today, otherwise just list
                 const externalFetchStartedAt = Date.now();
                 const [externalMatches, liveMatches] = await Promise.all([
-                    getFlashScoreMatches(localDate, sport || 'rugby', {
-                        timeZone,
-                        targetDateKey: date || undefined
-                    }).catch(e => {
-                        console.warn('[matches] FlashScore fetch failed - trying cache', e?.message);
-                        fsFetchFailed = true;
-                        fsReason = 'flashscore_fetch_failed';
-                        fsMessage = 'No se pudieron cargar los partidos desde FlashScore.';
-                        return [];
-                    }),
+                    supportsFlashScoreDailyList
+                        ? getFlashScoreMatches(localDate, sport || 'rugby', {
+                            timeZone,
+                            targetDateKey: date || undefined
+                        }).catch(e => {
+                            console.warn('[matches] FlashScore fetch failed - trying cache', e?.message);
+                            fsFetchFailed = true;
+                            fsReason = 'flashscore_fetch_failed';
+                            fsMessage = 'No se pudieron cargar los partidos desde FlashScore.';
+                            return [];
+                        })
+                        : Promise.resolve([]),
                     isToday ? getFlashScoreLiveMatches(sport || 'rugby').catch(e => {
                         console.warn('[matches] FlashScore live fetch failed', e?.message);
                         return [];
@@ -1462,7 +1501,7 @@ async function computeMatchesPayload(
                 externalItemsCount = externalMatches.length;
 
                 // ── Cache fallback when FlashScore is unavailable ─────────────
-                if (fsFetchFailed) {
+                if (fsFetchFailed || !supportsFlashScoreDailyList || externalMatches.length === 0) {
                     try {
                         const externalCacheFallbackStartedAt = Date.now();
                         const supabaseForCache = await readClientPromise;
@@ -1479,20 +1518,25 @@ async function computeMatchesPayload(
                                 addDurationMetric(trace.metrics, 'merge_sources_ms', Date.now() - mergeFallbackStartedAt);
                                 trackDuration(trace.metrics, 'external_cache_fallback_ms', externalCacheFallbackStartedAt);
                             }
-                            fsOk = false;
+                            fsOk = !fsFetchFailed;
                             fsFromCache = true;
+                            usedExternalCacheFallback = true;
                             fsCount = fromCache.length;
-                            fsReason = 'flashscore_cache_fallback';
+                            fsReason = !supportsFlashScoreDailyList
+                                ? 'flashscore_date_out_of_window'
+                                : fsFetchFailed
+                                    ? 'flashscore_cache_fallback'
+                                    : 'flashscore_empty_cache_fallback';
                             fsMessage = 'Datos de FlashScore desde caché; puede haber un leve retraso.';
                             console.log(`[matches] FlashScore cache fallback: ${fsCount} matches for date=${date}`);
                         }
                     } catch (cacheErr) {
                         console.warn('[matches] Cache fallback also failed:', cacheErr);
                     }
-                    // Skip the rest of the FlashScore enrichment path
+                    // A populated cache fallback replaces the FlashScore list enrichment path.
                 }
 
-                if (!fsFetchFailed) {
+                if (supportsFlashScoreDailyList && !fsFetchFailed && !usedExternalCacheFallback) {
                 // Merge live data into list
                 const mergeExternalStartedAt = Date.now();
                 const mergedExternalMatches = liveMatches && liveMatches.length > 0
@@ -1572,7 +1616,8 @@ async function computeMatchesPayload(
                             status: 'published' as const,
                             country: (m as any).countryName || 'Internacional'
                         },
-                        liveEnabled: false
+                        liveEnabled: false,
+                        source: 'flashscore' as const
                     };
                 });
                 if (trace) {
@@ -1722,6 +1767,12 @@ export async function GET(request: Request) {
         params,
         metrics: {},
     };
+    const responseCacheOptions = {
+        liveOnly: params.liveOnly,
+        date: params.date,
+        useExternal: params.useExternal,
+    };
+    const canServeStale = shouldServeStaleMatchesFeed(params);
 
     const memoryLookupStartedAt = Date.now();
     const cacheState = readMatchesResponseCache(cacheKey);
@@ -1729,7 +1780,7 @@ export async function GET(request: Request) {
 
     if (cacheState.state === 'fresh' && cacheState.entry) {
         const serializeStartedAt = Date.now();
-        const response = jsonWithPublicCache(cacheState.entry.payload, { liveOnly: params.liveOnly, date: params.date });
+        const response = jsonWithPublicCache(cacheState.entry.payload, responseCacheOptions);
         trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
         finalizeRequestMetrics(trace, requestStartedAt);
         attachObservabilityHeaders(response, trace, 'HIT');
@@ -1737,15 +1788,17 @@ export async function GET(request: Request) {
         return response;
     }
 
-    if (cacheState.state === 'stale' && cacheState.entry) {
+    if (cacheState.state === 'stale' && cacheState.entry && canServeStale) {
         void refreshMatchesResponseCache(cacheKey, params, trace.requestId);
         const serializeStartedAt = Date.now();
-        const response = jsonWithPublicCache(cacheState.entry.payload, { liveOnly: params.liveOnly, date: params.date });
+        const response = jsonWithPublicCache(cacheState.entry.payload, responseCacheOptions);
         trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
         finalizeRequestMetrics(trace, requestStartedAt);
         attachObservabilityHeaders(response, trace, 'STALE');
         logMatchesEvent('info', 'matches_cache_stale', trace, { cache_status: 'STALE' });
         return response;
+    } else if (cacheState.state === 'stale' && cacheState.entry) {
+        logMatchesEvent('info', 'matches_cache_stale_bypassed', trace, { cache_status: 'STALE-BYPASS' });
     }
 
     try {
@@ -1774,7 +1827,7 @@ export async function GET(request: Request) {
                 if (persistedState.state === 'fresh') {
                     writeMatchesResponseCache(cacheKey, persistedSnapshot.payload, params, persistedState.createdAt);
                     const serializeStartedAt = Date.now();
-                    const response = jsonWithPublicCache(persistedSnapshot.payload, { liveOnly: params.liveOnly, date: params.date });
+                    const response = jsonWithPublicCache(persistedSnapshot.payload, responseCacheOptions);
                     trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
                     finalizeRequestMetrics(trace, requestStartedAt);
                     attachObservabilityHeaders(response, trace, 'PERSISTED-HIT');
@@ -1782,16 +1835,21 @@ export async function GET(request: Request) {
                     return response;
                 }
 
-                if (persistedState.state === 'stale') {
+                if (persistedState.state === 'stale' && canServeStale) {
                     writeMatchesResponseCache(cacheKey, persistedSnapshot.payload, params, persistedState.createdAt);
                     void refreshMatchesResponseCache(cacheKey, params, trace.requestId);
                     const serializeStartedAt = Date.now();
-                    const response = jsonWithPublicCache(persistedSnapshot.payload, { liveOnly: params.liveOnly, date: params.date });
+                    const response = jsonWithPublicCache(persistedSnapshot.payload, responseCacheOptions);
                     trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
                     finalizeRequestMetrics(trace, requestStartedAt);
                     attachObservabilityHeaders(response, trace, 'PERSISTED-STALE');
                     logMatchesEvent('info', 'matches_cache_persisted_stale', trace, { cache_status: 'PERSISTED-STALE', persisted_snapshot_state: 'stale' });
                     return response;
+                } else if (persistedState.state === 'stale') {
+                    logMatchesEvent('info', 'matches_cache_persisted_stale_bypassed', trace, {
+                        cache_status: 'PERSISTED-STALE-BYPASS',
+                        persisted_snapshot_state: 'stale',
+                    });
                 }
             }
 
@@ -1809,7 +1867,7 @@ export async function GET(request: Request) {
 
         const payload = await getOrComputeMatchesPayload(cacheKey, params, trace);
         const serializeStartedAt = Date.now();
-        const response = jsonWithPublicCache(payload, { liveOnly: params.liveOnly, date: params.date });
+        const response = jsonWithPublicCache(payload, responseCacheOptions);
         trackDuration(trace.metrics, 'serialize_response_ms', serializeStartedAt);
         finalizeRequestMetrics(trace, requestStartedAt);
         attachObservabilityHeaders(response, trace, 'MISS');
@@ -2010,5 +2068,3 @@ export async function POST(request: Request) {
         );
     }
 }
-
-

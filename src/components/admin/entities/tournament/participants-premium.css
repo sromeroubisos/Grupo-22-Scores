@@ -1425,3 +1425,31 @@ tr:hover .pp-participant-name {
     color: var(--pp-accent);
     flex-shrink: 0;
 }
+
+/* Light theme: redefines the --pp-* tokens declared at :root above. */
+:root[data-theme="light"] {
+    --pp-bg: #f4f6fb;
+    --pp-surface: #ffffff;
+    --pp-surface-accent: #f7f9fc;
+    --pp-surface-elevated: rgba(255, 255, 255, 0.9);
+
+    --pp-border: rgba(15, 23, 42, 0.12);
+    --pp-border-subtle: rgba(15, 23, 42, 0.06);
+    --pp-border-medium: rgba(15, 23, 42, 0.1);
+    --pp-border-strong: rgba(15, 23, 42, 0.16);
+
+    --pp-accent: #047857;
+    --pp-accent-hover: #065f46;
+    --pp-accent-dim: rgba(4, 120, 87, 0.12);
+    --pp-accent-glow: rgba(4, 120, 87, 0.2);
+    --pp-accent-border: rgba(4, 120, 87, 0.36);
+
+    --pp-text-main: #0f172a;
+    --pp-text-secondary: rgba(15, 23, 42, 0.85);
+    --pp-text-muted: rgba(15, 23, 42, 0.6);
+    --pp-text-dim: rgba(15, 23, 42, 0.5);
+    --pp-text-ghost: rgba(15, 23, 42, 0.3);
+
+    --pp-lattice-grid: linear-gradient(rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+}

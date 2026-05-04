@@ -725,3 +725,24 @@
     bottom: 0;
   }
 }
+
+/* Light theme overrides for the kinetic polycarbonate tokens. */
+:root[data-theme="light"] {
+  --fixture-bg: #f4f6fb;
+  --fixture-poly-surface: rgba(255, 255, 255, 0.92);
+  --fixture-poly-border: rgba(15, 23, 42, 0.1);
+  --fixture-poly-shine: rgba(15, 23, 42, 0.06);
+  --fixture-text-main: #0f172a;
+  --fixture-text-dim: rgba(15, 23, 42, 0.6);
+  --fixture-suspension-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+}
+
+:root[data-theme="light"] .fixture-ambient-mesh {
+  opacity: 0.5;
+  background-image: radial-gradient(
+      circle at 20% 20%,
+      rgba(4, 120, 87, 0.06) 0%,
+      transparent 40%
+    ),
+    radial-gradient(circle at 80% 80%, rgba(13, 83, 126, 0.05) 0%, transparent 40%);
+}
