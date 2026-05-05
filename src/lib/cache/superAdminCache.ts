@@ -178,14 +178,23 @@ function getSupabase() {
     return createClient();
 }
 
-async function fetchAdminConsoleResource<T>(resource: 'clubs' | 'matches' | 'tournaments', signal?: AbortSignal): Promise<T[]> {
+async function fetchAdminConsoleResource<T>(
+    resource: 'clubs' | 'matches' | 'tournaments',
+    signal?: AbortSignal,
+    options?: { limit?: number },
+): Promise<T[]> {
     type ConsolePayload = {
         data?: T[];
         error?: string;
         details?: unknown;
     };
 
-    const response = await fetch(`/api/admin/super/console-data?resource=${resource}`, {
+    const searchParams = new URLSearchParams({ resource });
+    if (options?.limit) {
+        searchParams.set('limit', String(options.limit));
+    }
+
+    const response = await fetch(`/api/admin/super/console-data?${searchParams.toString()}`, {
         credentials: 'include',
         cache: 'no-store',
         signal,
@@ -235,7 +244,7 @@ export async function fetchClubs(force = false): Promise<ClubWithUnion[]> {
     if (force) invalidateCache(KEY);
 
     return cachedFetch(KEY, async (context) => {
-        return fetchAdminConsoleResource<ClubWithUnion>('clubs', context?.signal);
+        return fetchAdminConsoleResource<ClubWithUnion>('clubs', context?.signal, { limit: 2000 });
     }, DEFAULT_TTL_MS, { timeoutMs: CONSOLE_RESOURCE_TIMEOUT_MS });
 }
 

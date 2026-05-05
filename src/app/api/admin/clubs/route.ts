@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getReadClient } from '@/lib/supabase/read';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { escapePostgrestLike } from '@/lib/utils/postgrest';
 
@@ -19,8 +20,8 @@ type AdminClubRow = {
   sport_id?: string | null
 }
 
-const DEFAULT_LIMIT = 500;
-const MAX_LIMIT = 1000;
+const DEFAULT_LIMIT = 2000;
+const MAX_LIMIT = 5000;
 
 function parseLimit(value: string | null) {
   const parsed = Number.parseInt(value || '', 10);
@@ -54,10 +55,6 @@ export async function GET(request: NextRequest) {
     const limit = parseLimit(searchParams.get('limit'));
 
     const variants = [
-      'id, name, short_name, logo_url, region, country, sport, sport_id',
-      'id, name, short_name, logo_url, region, country, sport_id',
-      'id, name, short_name, logo_url, region, country, sport',
-      'id, name, short_name, logo_url, region, country',
       'id, name, short_name, region, country, sport, sport_id',
       'id, name, short_name, region, country, sport_id',
       'id, name, short_name, region, country, sport',
@@ -112,7 +109,10 @@ export async function GET(request: NextRequest) {
         })
       : (clubs || []);
 
-    return NextResponse.json(filteredClubs);
+    return NextResponse.json(filteredClubs.map((club) => ({
+      ...club,
+      logo_url: buildTeamLogoProxyUrl({ key: club.id, name: club.name }),
+    })));
   } catch (error) {
     console.error('Unexpected error fetching clubs:', error);
     const message = error instanceof Error ? error.message : 'Internal server error';
