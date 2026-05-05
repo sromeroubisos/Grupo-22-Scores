@@ -5,6 +5,7 @@ import { logPerf, measureAsync } from '@/lib/perf/measure';
 
 const AUTH_REFRESH_TIMEOUT_MS = 2500;
 const SHOULD_LOG_PROXY_AUTH = process.env.ENABLE_SERVER_PERF_LOGS === 'true' || process.env.NODE_ENV !== 'production';
+const MAX_AUTH_COOKIE_CHUNKS = 12;
 // Margin before access_token expiry where the proxy will trigger a refresh.
 // Anything fresher than this window is treated as valid and the entire auth
 // roundtrip is skipped to avoid hammering Supabase Auth with /token calls.
@@ -34,6 +35,80 @@ function getSupabaseProjectRef(): string | null {
     }
 }
 
+function getSupabaseAuthCookieBaseName(): string | null {
+    const projectRef = getSupabaseProjectRef();
+    return projectRef ? `sb-${projectRef}-auth-token` : null;
+}
+
+function getAuthCookieChunkIndex(name: string, baseName: string): number | null {
+    if (!name.startsWith(`${baseName}.`)) return null;
+
+    const suffix = name.slice(baseName.length + 1);
+    if (!/^\d+$/.test(suffix)) return null;
+
+    const index = Number(suffix);
+    return Number.isInteger(index) && index >= 0 ? index : null;
+}
+
+function getStaleAuthCookieNamesToClear(cookiesToSet: Array<{ name: string }>): string[] {
+    const baseName = getSupabaseAuthCookieBaseName();
+    if (!baseName) return [];
+
+    const incomingNames = new Set(cookiesToSet.map((cookie) => cookie.name));
+    const authNames = [...incomingNames].filter((name) => (
+        name === baseName || name.startsWith(`${baseName}.`)
+    ));
+    if (authNames.length === 0) return [];
+
+    const chunkIndexes = authNames
+        .map((name) => getAuthCookieChunkIndex(name, baseName))
+        .filter((index): index is number => index !== null);
+    const hasDirectCookie = incomingNames.has(baseName);
+    const staleNames = new Set<string>();
+
+    if (hasDirectCookie) {
+        for (let i = 0; i < MAX_AUTH_COOKIE_CHUNKS; i += 1) {
+            staleNames.add(`${baseName}.${i}`);
+        }
+    }
+
+    if (chunkIndexes.length > 0) {
+        staleNames.add(baseName);
+        const lastIncomingChunk = Math.max(...chunkIndexes);
+        for (let i = lastIncomingChunk + 1; i < MAX_AUTH_COOKIE_CHUNKS; i += 1) {
+            staleNames.add(`${baseName}.${i}`);
+        }
+    }
+
+    incomingNames.forEach((name) => staleNames.delete(name));
+    return [...staleNames];
+}
+
+function upsertCookieHeaderValue(header: string, name: string, value: string): string {
+    const parts = header
+        .split(';')
+        .map((part) => part.trim())
+        .filter(Boolean);
+    const nextCookie = `${name}=${value}`;
+    const index = parts.findIndex((part) => part.startsWith(`${name}=`));
+
+    if (index >= 0) {
+        parts[index] = nextCookie;
+    } else {
+        parts.push(nextCookie);
+    }
+
+    return parts.join('; ');
+}
+
+function removeCookieHeaderValue(header: string, name: string): string {
+    return header
+        .split(';')
+        .map((part) => part.trim())
+        .filter((part) => part && !part.startsWith(`${name}=`))
+        .join('; ');
+}
+
 function decodeBase64Url(value: string): string | null {
     try {
         let normalized = value.replace(/-/g, '+').replace(/_/g, '/');
@@ -49,16 +124,15 @@ function decodeBase64Url(value: string): string | null {
 }
 
 function readAuthCookieValue(request: NextRequest): string | null {
-    const projectRef = getSupabaseProjectRef();
-    if (!projectRef) return null;
+    const baseName = getSupabaseAuthCookieBaseName();
+    if (!baseName) return null;
 
-    const baseName = `sb-${projectRef}-auth-token`;
     const direct = request.cookies.get(baseName)?.value;
     if (direct) return direct;
 
     // The cookie is chunked (.0, .1, ...) when it exceeds the browser's size limit.
     const chunks: string[] = [];
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < MAX_AUTH_COOKIE_CHUNKS; i++) {
         const chunk = request.cookies.get(`${baseName}.${i}`)?.value;
         if (!chunk) break;
         chunks.push(chunk);
@@ -161,22 +235,22 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                     if (SHOULD_LOG_PROXY_AUTH) {
                         console.log('[Middleware] Setting cookies:', cookiesToSet.map(c => c.name).join(', '));
                     }
+                    const staleAuthCookieNames = getStaleAuthCookieNamesToClear(cookiesToSet);
+
                     cookiesToSet.forEach(({ name, value }) => {
                         request.cookies.set(name, value)
                     })
+                    staleAuthCookieNames.forEach((name) => {
+                        request.cookies.delete(name)
+                    })
+
                     const requestHeaders = new Headers(request.headers)
                     let currentCookie = requestHeaders.get('Cookie') || '';
                     cookiesToSet.forEach(({ name, value }) => {
-                        // For the upstream REQUEST being passed to the application,
-                        // we need to set/update the 'Cookie' header.
-                        // Append or update existing cookie values
-                        if (currentCookie.includes(`${name}=`)) {
-                            // Simple replacement if already exists (naive)
-                            const reg = new RegExp(`${name}=[^;]+`);
-                            currentCookie = currentCookie.replace(reg, `${name}=${value}`);
-                        } else {
-                            currentCookie = currentCookie ? `${currentCookie}; ${name}=${value}` : `${name}=${value}`;
-                        }
+                        currentCookie = upsertCookieHeaderValue(currentCookie, name, value);
+                    })
+                    staleAuthCookieNames.forEach((name) => {
+                        currentCookie = removeCookieHeaderValue(currentCookie, name);
                     })
                     requestHeaders.set('Cookie', currentCookie)
 
@@ -185,7 +259,8 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                             headers: requestHeaders,
                         },
                     })
-                    cookiesToSet.forEach(({ name, value, options }) => {
+                    type ResponseCookieOptions = NonNullable<Parameters<typeof response.cookies.set>[2]>;
+                    const buildCookieOptions = (options?: ResponseCookieOptions): ResponseCookieOptions => {
                         const isProd = process.env.NODE_ENV === 'production';
                         // NOTE on httpOnly: @supabase/ssr requires the browser
                         // client to read the auth cookie via document.cookie to
@@ -194,7 +269,7 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                         // auth. Mitigations: secure+sameSite=lax in prod, short
                         // access-token TTL, refresh-token rotation, and a strong
                         // CSP at the app shell to limit XSS exfiltration.
-                        const cookieOptions = {
+                        return {
                             ...options,
                             sameSite: 'lax' as const,
                             secure: isProd,
@@ -202,7 +277,17 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                             path: '/',
                             ...(isProd && { domain: '.g22scores.com' })
                         };
-                        response.cookies.set(name, value, cookieOptions)
+                    };
+
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        response.cookies.set(name, value, buildCookieOptions(options))
+                    })
+                    staleAuthCookieNames.forEach((name) => {
+                        response.cookies.set(name, '', {
+                            ...buildCookieOptions(),
+                            maxAge: 0,
+                            expires: new Date(0),
+                        })
                     })
                 },
             },

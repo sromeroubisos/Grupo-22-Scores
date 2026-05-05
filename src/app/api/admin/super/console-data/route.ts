@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getApiErrorStatus, requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getReadClient } from '@/lib/supabase/read';
-import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 type QueryError = {
@@ -252,7 +252,7 @@ function normalizeSportValue(value: string | null | undefined) {
 // smaller pages via ?limit= and traverse with ?offset=.
 const DEFAULT_PAGE_SIZE: Record<string, number> = {
     matches: 500,
-    clubs: 500,
+    clubs: 2000,
     tournaments: 500,
 };
 const MAX_PAGE_SIZE = 2000;
@@ -295,9 +295,9 @@ export async function GET(request: NextRequest) {
                 selectWithFallback<ClubConsoleRow>(
                     readClient.from('clubs'),
                     [
-                        'id, name, short_name, city, region, country, logo_url, primary_color, slug, is_visible, union_id, sport, sport_id',
-                        'id, name, short_name, city, country, logo_url, primary_color, slug, is_visible, union_id, sport',
-                        'id, name, city, country, logo_url, slug, is_visible, union_id',
+                        'id, name, short_name, city, region, country, primary_color, slug, is_visible, union_id, sport, sport_id',
+                        'id, name, short_name, city, country, primary_color, slug, is_visible, union_id, sport',
+                        'id, name, city, country, slug, is_visible, union_id',
                     ],
                     { column: 'name', ascending: true },
                     pagination.range,
@@ -324,7 +324,7 @@ export async function GET(request: NextRequest) {
             const unionMap = new Map(((unionsError ? [] : unions) ?? []).map((union) => [union.id, union]));
             const data = (clubs ?? []).map((club) => ({
                 ...club,
-                logo_url: resolveSerializableLogoUrl(club.logo_url, { key: club.id, name: club.name }),
+                logo_url: buildTeamLogoProxyUrl({ key: club.id, name: club.name }),
                 sport: club.sport || club.sport_id || null,
                 union: club.union_id ? unionMap.get(club.union_id) ?? null : null,
                 followers_count: 0,
@@ -457,13 +457,12 @@ export async function GET(request: NextRequest) {
                             error: QueryError;
                         }>,
                     [
-                        'id, name, logo_url, primary_color, sport, sport_id',
-                        'id, name, logo_url, primary_color, sport_id',
-                        'id, name, logo_url, primary_color, sport',
-                        'id, name, logo_url, sport, sport_id',
-                        'id, name, logo_url, sport_id',
-                        'id, name, logo_url, sport',
-                        'id, name, logo_url',
+                        'id, name, primary_color, sport, sport_id',
+                        'id, name, primary_color, sport_id',
+                        'id, name, primary_color, sport',
+                        'id, name, sport, sport_id',
+                        'id, name, sport_id',
+                        'id, name, sport',
                         'id, name'
                     ]
                 )
@@ -486,7 +485,7 @@ export async function GET(request: NextRequest) {
             club.id,
             {
                 ...club,
-                logo_url: resolveSerializableLogoUrl(club.logo_url, { key: club.id, name: club.name }),
+                logo_url: buildTeamLogoProxyUrl({ key: club.id, name: club.name }),
             },
         ]));
 
