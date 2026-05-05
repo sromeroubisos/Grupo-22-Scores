@@ -17,6 +17,7 @@ import {
     type PlayerStatsData,
     type PlayoffBracketData,
     type StandingsData,
+    type TeamOfWeekData,
 } from '@/components/ExportImage';
 import {
     EXPORT_DESIGN_CUSTOMIZATION_EVENT,
@@ -67,6 +68,7 @@ type PreviewVariantId =
     | 'dailyMatches'
     | 'standings'
     | 'lineups'
+    | 'teamOfWeek'
     | 'playoffBracket'
     | 'playerStats';
 type PreviewVariant = {
@@ -87,6 +89,7 @@ const PREVIEW_VARIANTS: PreviewVariant[] = [
     { id: 'dailyMatches', label: 'Fixture', description: 'Agenda de partidos del torneo.', template: 'dailyMatches' },
     { id: 'standings', label: 'Tabla', description: 'Tabla de posiciones del torneo.', template: 'standings' },
     { id: 'lineups', label: 'Alineaciones', description: 'Formacion base del partido.', template: 'lineups' },
+    { id: 'teamOfWeek', label: 'Equipo de la semana', description: 'Starting XV con escudo de equipo por jugador.', template: 'teamOfWeek' },
     { id: 'playoffBracket', label: 'Playoff', description: 'Cuadro eliminatorio de muestra.', template: 'playoffBracket' },
     { id: 'playerStats', label: 'Jugador', description: 'Ficha individual de performance.', template: 'playerStats' },
 ];
@@ -567,6 +570,42 @@ function buildPreviewPayloads(match: FixedPreviewMatch) {
         },
     };
 
+    const teamOfWeekData: TeamOfWeekData = {
+        title: 'Starting XV',
+        subtitle: 'Equipo de la semana',
+        tournament: match.tournament,
+        tournamentLogo: match.tournamentLogo,
+        date: match.dateLabel,
+        venue: match.venueLabel,
+        players: [
+            { number: 1, name: 'Mateo Aguirre', team: match.homeTeam, teamLogo: match.homeLogo },
+            { number: 2, name: 'Bruno Lagos', team: match.awayTeam, teamLogo: match.awayLogo },
+            { number: 3, name: 'Tomas Rivas', team: 'Dogos XV', teamLogo: match.homeLogo },
+            { number: 4, name: 'Santiago Vera', team: 'Pampas', teamLogo: match.awayLogo },
+            { number: 5, name: 'Nicolas Funes', team: match.homeTeam, teamLogo: match.homeLogo },
+            { number: 6, name: 'Lautaro Sosa', team: 'Penarol Rugby', teamLogo: match.awayLogo },
+            { number: 7, name: 'Franco Medina', team: match.homeTeam, teamLogo: match.homeLogo },
+            { number: 8, name: 'Ivo Herrera', team: 'Cobras Brasil', teamLogo: match.awayLogo },
+            { number: 9, name: 'Joaquin Castro', team: match.awayTeam, teamLogo: match.awayLogo },
+            { number: 10, name: 'Pedro Alvarez', team: match.homeTeam, teamLogo: match.homeLogo },
+            { number: 11, name: 'Juan Molina', team: 'Dogos XV', teamLogo: match.homeLogo },
+            { number: 12, name: 'Bautista Rey', team: 'Pampas', teamLogo: match.awayLogo },
+            { number: 13, name: 'Lucas Cabrera', team: match.homeTeam, teamLogo: match.homeLogo },
+            { number: 14, name: 'Rafael Costa', team: 'Cobras Brasil', teamLogo: match.awayLogo },
+            { number: 15, name: 'Manuel Ortega', team: match.awayTeam, teamLogo: match.awayLogo },
+        ],
+        replacements: [
+            { number: 16, name: 'Ignacio Silva', team: match.homeTeam, teamLogo: match.homeLogo },
+            { number: 17, name: 'Ramon Diaz', team: match.awayTeam, teamLogo: match.awayLogo },
+            { number: 18, name: 'Valentin Arias', team: 'Dogos XV', teamLogo: match.homeLogo },
+            { number: 19, name: 'Elias Peralta', team: 'Pampas', teamLogo: match.awayLogo },
+            { number: 20, name: 'Martin Gil', team: match.homeTeam, teamLogo: match.homeLogo },
+            { number: 21, name: 'Felipe Luna', team: match.awayTeam, teamLogo: match.awayLogo },
+            { number: 22, name: 'Alan Correa', team: 'Cobras Brasil', teamLogo: match.awayLogo },
+            { number: 23, name: 'Dante Navarro', team: 'Penarol Rugby', teamLogo: match.homeLogo },
+        ],
+    };
+
     const playoffBracketData: PlayoffBracketData = {
         title: 'Playoff',
         subtitle: match.tournament,
@@ -621,6 +660,7 @@ function buildPreviewPayloads(match: FixedPreviewMatch) {
         dailyMatches: dailyMatchesData,
         standings: standingsData,
         lineups: lineupsData,
+        teamOfWeek: teamOfWeekData,
         playoffBracket: playoffBracketData,
         playerStats: playerStatsData,
     };
@@ -1025,6 +1065,8 @@ function ExportDesignDetailPageContent({ design }: { design: ExportDesign }) {
                 return previewPayloads.standings;
             case 'lineups':
                 return previewPayloads.lineups;
+            case 'teamOfWeek':
+                return previewPayloads.teamOfWeek;
             case 'playoffBracket':
                 return previewPayloads.playoffBracket;
             case 'playerStats':

@@ -120,7 +120,7 @@ export async function getAdminExportDesigns(): Promise<ExportDesign[]> {
             name: 'G22 Base',
             shortDescription: 'Sistema real de exportacion actualmente activo en la web, conectado al motor ExportImage y a presets sincronizados en cloud.',
             longDescription:
-                'Este diseno representa el sistema visual que hoy usa la plataforma para exportar tablas, resultados, fixtures, alineaciones, brackets y estadisticas. La pantalla toma datos reales del motor de exportacion y de user_export_presets para reflejar el estado actual del usuario.',
+                'Este diseno representa el sistema visual que hoy usa la plataforma para exportar tablas, resultados, fixtures, alineaciones, equipo de la semana, brackets y estadisticas. La pantalla toma datos reales del motor de exportacion y de user_export_presets para reflejar el estado actual del usuario.',
             category: 'stats',
             status: 'active',
             createdAtLabel: firstCreatedAtLabel,
@@ -166,7 +166,7 @@ export async function getAdminExportDesigns(): Promise<ExportDesign[]> {
             name: 'Momentum V2',
             shortDescription: 'Segunda familia visual inspirada en los templates editoriales del paquete EXPORT V2, integrada al mismo motor real de exportacion.',
             longDescription:
-                'Momentum V2 toma como referencia los templates del rar para crear una linea mas dramatica: fotografia dominante, paneles negros, titulares condensados, capsulas neon y composiciones de alto contraste para scores, fixtures, standings, lineups y player cards.',
+                'Momentum V2 toma como referencia los templates del rar para crear una linea mas dramatica: fotografia dominante, paneles negros, titulares condensados, capsulas neon y composiciones de alto contraste para scores, fixtures, standings, lineups, equipo de la semana y player cards.',
             category: 'editorial',
             status: 'active',
             createdAtLabel: firstCreatedAtLabel,
@@ -200,7 +200,7 @@ export async function getAdminExportDesigns(): Promise<ExportDesign[]> {
                 {
                     id: 'momentum-coverage',
                     label: 'Cobertura',
-                    value: 'Disponible en el mismo ExportImage para standings, fixtures, match stats, player stats, lineups y playoff',
+                    value: 'Disponible en el mismo ExportImage para standings, fixtures, match stats, player stats, lineups, equipo de la semana y playoff',
                 },
             ],
             baseGuidelines: [
@@ -214,7 +214,7 @@ export async function getAdminExportDesigns(): Promise<ExportDesign[]> {
             name: 'Poster V3',
             shortDescription: 'Tercera familia visual inspirada en el paquete EXPORT V3, con lenguaje de afiche, titulos gigantes y acentos neon.',
             longDescription:
-                'Poster V3 lleva el motor de ExportImage hacia una estetica mas agresiva: fondos carbon, luces verticales, tipografia de alto impacto, contornos editoriales y bloques neon para fixtures, standings, lineups, resultados, playoff y player cards.',
+                'Poster V3 lleva el motor de ExportImage hacia una estetica mas agresiva: fondos carbon, luces verticales, tipografia de alto impacto, contornos editoriales y bloques neon para fixtures, standings, lineups, equipo de la semana, resultados, playoff y player cards.',
             category: 'editorial',
             status: 'active',
             createdAtLabel: firstCreatedAtLabel,
@@ -248,7 +248,7 @@ export async function getAdminExportDesigns(): Promise<ExportDesign[]> {
                 {
                     id: 'poster-coverage',
                     label: 'Cobertura',
-                    value: 'Disponible en ExportImage para match stats, fixtures, standings, lineups, playoff y player cards',
+                    value: 'Disponible en ExportImage para match stats, fixtures, standings, lineups, equipo de la semana, playoff y player cards',
                 },
             ],
             baseGuidelines: [
