@@ -141,8 +141,9 @@ export default function Header() {
         return (
             <header className="g22-header">
                 <div className="g22-header-inner">
-                    <Link href="/" className="g22-logo">
-                        G22<span>Scores</span>
+                    <Link href="/" className="g22-logo" aria-label="G22 Scores">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/header-logo.png" alt="G22 Scores" className="g22-logo-img" />
                     </Link>
 
                     <div className="g22-header-center-zone" />
@@ -159,8 +160,9 @@ export default function Header() {
         <header className="g22-header">
             <div className="g22-header-inner">
                 {/* LOGO: Left Zone */}
-                <Link href="/" className="g22-logo">
-                    G22<span>Scores</span>
+                <Link href="/" className="g22-logo" aria-label="G22 Scores">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/header-logo.png" alt="G22 Scores" className="g22-logo-img" />
                 </Link>
 
                 {/* BREADCRUMB: Center Zone (Contextual) */}
