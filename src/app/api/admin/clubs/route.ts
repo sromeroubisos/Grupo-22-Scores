@@ -13,9 +13,13 @@ type AdminClubRow = {
   id: string
   name: string
   short_name?: string | null
+  slug?: string | null
   logo_url?: string | null
+  primary_color?: string | null
+  city?: string | null
   region?: string | null
   country?: string | null
+  entity_type?: string | null
   sport?: string | null
   sport_id?: string | null
 }
@@ -27,6 +31,12 @@ function parseLimit(value: string | null) {
   const parsed = Number.parseInt(value || '', 10);
   if (!Number.isFinite(parsed) || parsed <= 0) return DEFAULT_LIMIT;
   return Math.min(parsed, MAX_LIMIT);
+}
+
+function parseOffset(value: string | null) {
+  const parsed = Number.parseInt(value || '', 10);
+  if (!Number.isFinite(parsed) || parsed < 0) return 0;
+  return parsed;
 }
 
 function normalizeSport(value: string | null | undefined) {
@@ -53,13 +63,21 @@ export async function GET(request: NextRequest) {
     const search = String(searchParams.get('search') || '').trim();
     const sport = String(searchParams.get('sport') || '').trim();
     const limit = parseLimit(searchParams.get('limit'));
+    const offset = parseOffset(searchParams.get('offset'));
 
     const variants = [
+      'id, name, short_name, slug, primary_color, city, region, country, entity_type, sport, sport_id',
+      'id, name, short_name, slug, city, region, country, entity_type, sport, sport_id',
+      'id, name, short_name, slug, city, region, country, sport, sport_id',
+      'id, name, short_name, city, region, country, entity_type, sport, sport_id',
+      'id, name, short_name, city, region, country, sport, sport_id',
+      'id, name, short_name, region, country, entity_type, sport, sport_id',
       'id, name, short_name, region, country, sport, sport_id',
       'id, name, short_name, region, country, sport_id',
       'id, name, short_name, region, country, sport',
       'id, name, short_name, region, country',
     ];
+    const optionalColumns = ['sport', 'sport_id', 'entity_type', 'city', 'slug', 'primary_color'];
 
     let clubs: AdminClubRow[] | null = null;
     let error: { message?: string | null; details?: string | null; code?: string | null } | null = null;
@@ -75,7 +93,7 @@ export async function GET(request: NextRequest) {
         query = query.or(`name.ilike.%${escapedSearch}%,short_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`);
       }
 
-      const result = await query.limit(limit);
+      const result = await query.range(offset, offset + limit - 1);
 
       if (!result.error) {
         clubs = result.data || [];
@@ -85,10 +103,7 @@ export async function GET(request: NextRequest) {
 
       error = result.error;
 
-      if (
-        !isMissingColumnError(result.error, 'sport') &&
-        !isMissingColumnError(result.error, 'sport_id')
-      ) {
+      if (!optionalColumns.some((column) => isMissingColumnError(result.error, column))) {
         break;
       }
     }

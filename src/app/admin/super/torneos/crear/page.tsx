@@ -126,9 +126,15 @@ type ClubRecord = {
     name: string;
     short_name?: string | null;
     shortName?: string | null;
+    slug?: string | null;
+    entity_type?: string | null;
     city?: string | null;
+    region?: string | null;
+    country?: string | null;
     logo_url?: string | null;
     primary_color?: string | null;
+    sport?: string | null;
+    sport_id?: string | null;
 };
 
 type SquadRecord = {
@@ -231,6 +237,50 @@ function getClubShortName(club: Pick<ClubRecord, 'name' | 'short_name' | 'shortN
         .toUpperCase();
 }
 
+function getClubEntityTypeLabel(value: string | null | undefined): string {
+    const normalized = String(value || 'club').trim().toLowerCase();
+
+    switch (normalized) {
+        case 'seleccion':
+            return 'Seleccion';
+        case 'academia':
+            return 'Academia';
+        case 'franquicia':
+            return 'Franquicia';
+        default:
+            return 'Club';
+    }
+}
+
+const ADMIN_CLUB_PAGE_SIZE = 1000;
+
+async function fetchAdminClubPage(offset: number): Promise<ClubRecord[]> {
+    const response = await fetch(`/api/admin/clubs?limit=${ADMIN_CLUB_PAGE_SIZE}&offset=${offset}`, { cache: 'no-store' });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+        const message = payload && typeof payload === 'object' && 'error' in payload
+            ? String(payload.error || '')
+            : '';
+        throw new Error(message || 'No se pudieron cargar los equipos.');
+    }
+
+    return Array.isArray(payload) ? payload as ClubRecord[] : [];
+}
+
+async function fetchAllAdminClubs(): Promise<ClubRecord[]> {
+    const allClubs: ClubRecord[] = [];
+
+    for (let offset = 0; ; offset += ADMIN_CLUB_PAGE_SIZE) {
+        const page = await fetchAdminClubPage(offset);
+        allClubs.push(...page);
+
+        if (page.length < ADMIN_CLUB_PAGE_SIZE) {
+            return allClubs;
+        }
+    }
+}
+
 function createDefaultPhaseConfig(
     phaseType: PhaseConfiguration['phaseType'],
     selectedTeamIds: string[],
@@ -320,6 +370,8 @@ export default function SuperCreateTournament() {
     const [isEdit, setIsEdit] = useState(false);
     const [availableUnions, setAvailableUnions] = useState<UnionOption[]>([]);
     const [clubs, setClubs] = useState<ClubRecord[]>([]);
+    const [loadingClubs, setLoadingClubs] = useState(true);
+    const [clubsError, setClubsError] = useState<string | null>(null);
     const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
     const [selectedDivisionByClub, setSelectedDivisionByClub] = useState<Record<string, string>>({});
     const [clubSquadsByClub, setClubSquadsByClub] = useState<Record<string, SquadRecord[]>>({});
@@ -410,11 +462,36 @@ export default function SuperCreateTournament() {
         setSelectedClubs(clubs.map((club) => club.id));
     };
 
+    // Load complete admin club catalog. This intentionally includes every entity_type.
+    useEffect(() => {
+        let isCancelled = false;
+
+        setLoadingClubs(true);
+        setClubsError(null);
+
+        fetchAllAdminClubs()
+            .then((data) => {
+                if (isCancelled) return;
+                setClubs(data);
+            })
+            .catch((error) => {
+                if (isCancelled) return;
+                console.error('Error loading admin club catalog:', error);
+                setClubs([]);
+                setClubsError(error instanceof Error ? error.message : 'No se pudieron cargar los equipos.');
+            })
+            .finally(() => {
+                if (isCancelled) return;
+                setLoadingClubs(false);
+            });
+
+        return () => {
+            isCancelled = true;
+        };
+    }, []);
+
     // Load reference data
     useEffect(() => {
-        supabase.from('clubs').select('*').order('name').then(({ data }) => {
-            setClubs(data || []);
-        });
         supabase.from('countries').select('id, name, code, flag_emoji').order('name').then(({ data }) => {
             setCountryOptions(getTournamentCountryOptions(data || []));
         });
@@ -644,6 +721,19 @@ export default function SuperCreateTournament() {
     const selectedCountryOption = countryOptions.find((option) => option.id === formData.country) || null;
     const heroTitle = formData.name.trim() || 'Nuevo torneo';
     const heroStatus = formData.visibility === 'public' ? 'READY' : 'DRAFT';
+    const normalizedClubSearch = searchTerm.trim().toLowerCase();
+    const filteredClubs = normalizedClubSearch
+        ? clubs.filter((club) => [
+            club.name,
+            club.short_name,
+            club.shortName,
+            club.slug,
+            club.city,
+            club.region,
+            club.country,
+            getClubEntityTypeLabel(club.entity_type),
+        ].some((value) => String(value || '').toLowerCase().includes(normalizedClubSearch)))
+        : clubs;
 
     useEffect(() => {
         setPhaseConfig((current) => {
@@ -1350,23 +1440,30 @@ export default function SuperCreateTournament() {
                 {currentStep === 3 && (
                     <article className="partition">
                         <div className="partition-header">
-                            <h2>Clubes Participantes</h2>
-                            <p>Selecciona los clubes que formarán parte de este torneo.</p>
+                            <h2>Equipos Participantes</h2>
+                            <p>Selecciona los clubes, selecciones, franquicias o academias que formaran parte de este torneo.</p>
                         </div>
                         <div className="partition-body">
                             <div className="form-grid">
                                 <div className="field-group">
-                                    <label>BUSCAR Y AGREGAR CLUBES</label>
+                                    <label>BUSCAR Y AGREGAR EQUIPOS</label>
                                     <div className="search-box">
                                         <Search className="icon" size={18} />
                                         <input
                                             type="text"
-                                            placeholder="Escribe el nombre del club..."
+                                            placeholder="Escribe el nombre, tipo o ubicacion..."
                                             className="form-input"
                                             value={searchTerm}
                                             onChange={e => setSearchTerm(e.target.value)}
                                         />
                                     </div>
+                                    <p className="field-help">
+                                        {loadingClubs
+                                            ? 'Cargando catalogo completo...'
+                                            : clubsError
+                                                ? clubsError
+                                                : `${filteredClubs.length} de ${clubs.length} equipos disponibles.`}
+                                    </p>
                                 </div>
 
                                 <div className="table-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -1380,20 +1477,32 @@ export default function SuperCreateTournament() {
                                                         onChange={toggleAllClubs}
                                                     />
                                                 </th>
-                                                <th>CLUB</th>
+                                                <th>EQUIPO</th>
                                                 <th>PLANTEL</th>
                                                 <th>UBICACIÓN</th>
                                                 <th style={{ width: '100px' }}>ACCIÓN</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {clubs.length === 0 ? (
+                                            {loadingClubs ? (
                                                 <tr>
                                                     <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
-                                                        Cargando clubes...
+                                                        Cargando equipos...
                                                     </td>
                                                 </tr>
-                                            ) : clubs.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase())).map(club => (
+                                            ) : clubsError ? (
+                                                <tr>
+                                                    <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: '#fca5a5' }}>
+                                                        {clubsError}
+                                                    </td>
+                                                </tr>
+                                            ) : filteredClubs.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
+                                                        No hay equipos que coincidan con la busqueda.
+                                                    </td>
+                                                </tr>
+                                            ) : filteredClubs.map(club => (
                                                 <tr key={club.id} className={selectedClubs.includes(club.id) ? 'active' : ''}>
                                                     <td>
                                                         <input
@@ -1406,6 +1515,18 @@ export default function SuperCreateTournament() {
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                             {club.logo_url && <img src={club.logo_url} alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />}
                                                             <span>{club.name}</span>
+                                                            <span style={{
+                                                                border: '1px solid var(--border)',
+                                                                borderRadius: '999px',
+                                                                color: 'var(--text-dim)',
+                                                                fontSize: '10px',
+                                                                fontWeight: 800,
+                                                                lineHeight: 1,
+                                                                padding: '4px 7px',
+                                                                textTransform: 'uppercase',
+                                                            }}>
+                                                                {getClubEntityTypeLabel(club.entity_type)}
+                                                            </span>
                                                         </div>
                                                     </td>
                                                     <td>
@@ -1447,10 +1568,10 @@ export default function SuperCreateTournament() {
                                                                 )}
                                                             </div>
                                                         ) : (
-                                                            <span style={{ color: 'var(--text-dim)' }}>Selecciona el club</span>
+                                                            <span style={{ color: 'var(--text-dim)' }}>Selecciona el equipo</span>
                                                         )}
                                                     </td>
-                                                    <td>{club.city || club.short_name || 'Sede Central'}</td>
+                                                    <td>{club.city || club.region || club.country || club.short_name || 'Sede Central'}</td>
                                                     <td>
                                                         <button
                                                             type="button"
@@ -1572,7 +1693,7 @@ export default function SuperCreateTournament() {
                                 </div>
                                 <div className="summary-item">
                                     <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Participantes</strong>
-                                    <span style={{ fontSize: '16px', color: 'white' }}>{selectedClubs.length} club{selectedClubs.length !== 1 ? 's' : ''}</span>
+                                    <span style={{ fontSize: '16px', color: 'white' }}>{selectedClubs.length} equipo{selectedClubs.length !== 1 ? 's' : ''}</span>
                                 </div>
                                 <div className="summary-item">
                                     <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Formato</strong>
