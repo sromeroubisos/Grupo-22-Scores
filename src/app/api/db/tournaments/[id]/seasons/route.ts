@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
+import { fetchTournamentData } from '@/lib/server/fetchTournamentData';
 import {
     collectSeasonLinkedTournamentIds,
     collectTournamentSeasonFamilyRows,
@@ -77,6 +78,24 @@ function compareSeasonLabels(a: SeasonOption, b: SeasonOption): number {
 
 const ANCHOR_SELECT =
     'id, name, display_name, slug, season_id, status, is_visible, sport_id, country_id';
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function coerceTournamentRow(value: Record<string, unknown> | null | undefined): TournamentRow | null {
+    const id = typeof value?.id === 'string' ? value.id.trim() : '';
+    if (!id) return null;
+
+    return {
+        id,
+        name: typeof value?.name === 'string' ? value.name : null,
+        display_name: typeof value?.display_name === 'string' ? value.display_name : null,
+        slug: typeof value?.slug === 'string' ? value.slug : null,
+        season_id: typeof value?.season_id === 'string' ? value.season_id : null,
+        status: typeof value?.status === 'string' ? value.status : null,
+        is_visible: typeof value?.is_visible === 'boolean' ? value.is_visible : null,
+        sport_id: typeof value?.sport_id === 'string' ? value.sport_id : null,
+        country_id: typeof value?.country_id === 'string' ? value.country_id : null,
+    };
+}
 
 /** DB `external_id` is often stored without the public route prefix (see favorites migrations). */
 function stripPublicRoutePrefix(routeId: string): string {
@@ -87,14 +106,26 @@ async function resolveSeasonAnchorRow(
     supabase: Awaited<ReturnType<typeof getReadClient>>,
     routeId: string,
 ): Promise<TournamentRow | null> {
-    const { data: byIdOrSlugData } = await supabase
+    const routeKey = routeId.trim();
+
+    if (UUID_RE.test(routeKey)) {
+        const { data: byIdData } = await supabase
+            .from('tournaments')
+            .select(ANCHOR_SELECT)
+            .eq('id', routeKey)
+            .maybeSingle();
+        const byId = byIdData as TournamentRow | null;
+        if (byId) return byId;
+    }
+
+    const { data: bySlugData } = await supabase
         .from('tournaments')
         .select(ANCHOR_SELECT)
-        .or(`id.eq.${routeId},slug.eq.${routeId}`)
+        .eq('slug', routeKey)
         .maybeSingle();
-    const byIdOrSlug = byIdOrSlugData as TournamentRow | null;
+    const bySlug = bySlugData as TournamentRow | null;
 
-    if (byIdOrSlug) return byIdOrSlug;
+    if (bySlug) return bySlug;
 
     const tryExternalId = async (value: string) => {
         if (!value.trim()) return null;
@@ -107,19 +138,23 @@ async function resolveSeasonAnchorRow(
         return data[0] as TournamentRow;
     };
 
-    const direct = await tryExternalId(routeId);
+    const direct = await tryExternalId(routeKey);
     if (direct) return direct;
 
-    const stripped = stripPublicRoutePrefix(routeId);
-    if (stripped !== routeId) {
+    const stripped = stripPublicRoutePrefix(routeKey);
+    if (stripped !== routeKey) {
         const byStripped = await tryExternalId(stripped);
         if (byStripped) return byStripped;
     }
 
-    if (!/^fs-/i.test(routeId)) {
-        const withFs = await tryExternalId(`fs-${routeId}`);
+    if (!/^fs-/i.test(routeKey)) {
+        const withFs = await tryExternalId(`fs-${routeKey}`);
         if (withFs) return withFs;
     }
+
+    const fallback = await fetchTournamentData(routeKey);
+    const fallbackTournament = coerceTournamentRow(fallback?.tournament);
+    if (fallbackTournament) return fallbackTournament;
 
     return null;
 }
@@ -192,12 +227,15 @@ export async function GET(
     const seasons: SeasonOption[] = seasonRows.map((season) => {
         const owner = tournamentById.get(season.tournament_id) || lookup;
         const label = pickSeasonLabel(season);
+        const seasonName = pickSeasonName(season);
+        const ownerName = owner.display_name || owner.name || 'Torneo';
+        const name = owner.id === lookup.id || ownerName.trim() === seasonName.trim()
+            ? seasonName
+            : `${ownerName} - ${seasonName}`;
         return {
             id: season.id,
             label,
-            name: owner.id === lookup.id
-                ? pickSeasonName(season)
-                : `${owner.display_name || owner.name || 'Torneo'} - ${pickSeasonName(season)}`,
+            name,
             slug: owner.slug,
             seasonId: season.id,
             isCurrent: owner.id === currentId && season.id === activeSeason?.id,

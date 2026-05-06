@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 import { getTournamentById } from '@/lib/data/tournaments';
 import { ArrowLeft, Calendar, Trophy, Users, ChevronRight, Share2, MapPin } from 'lucide-react';
@@ -45,6 +45,16 @@ const BASE_TABS = [
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
+
+type SeasonOption = {
+    id: string;
+    label: string;
+    name: string;
+    slug: string | null;
+    seasonId: string | null;
+    isCurrent: boolean;
+    href: string;
+};
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DEFAULT_CIRCUIT_PLACEMENT_POINTS = [25, 18, 15, 12, 10, 8, 6, 4];
@@ -160,6 +170,142 @@ function buildClubHref(
 
     const query = params.toString();
     return `/clubs/${normalizedId}${query ? `?${query}` : ''}`;
+}
+
+function cleanSeasonValue(value: unknown): string | null {
+    if (typeof value !== 'string' && typeof value !== 'number') return null;
+    const text = String(value).trim();
+    return text || null;
+}
+
+function readArchiveValue(source: any, keys: string[]): string | null {
+    if (!source || typeof source !== 'object') return null;
+    for (const key of keys) {
+        const direct = cleanSeasonValue(source[key]);
+        if (direct) return direct;
+    }
+    for (const nestedKey of ['season', 'tournament', 'stage', 'tournament_stage']) {
+        const nested = source[nestedKey];
+        if (nested && typeof nested === 'object') {
+            const nestedValue = readArchiveValue(nested, keys);
+            if (nestedValue) return nestedValue;
+        }
+    }
+    return null;
+}
+
+function pickArchiveSeasonIds(source: any) {
+    const explicitSeasonId = readArchiveValue(source, ['season_id', 'seasonId']);
+    const explicitStageId = readArchiveValue(source, ['tournament_stage_id', 'tournamentStageId', 'stage_id', 'stageId']);
+    const rawId = cleanSeasonValue(source?.id);
+
+    return {
+        seasonId: explicitSeasonId || (rawId && /^\d+$/.test(rawId) ? rawId : null),
+        stageId: explicitStageId || (rawId && !/^\d+$/.test(rawId) ? rawId : null),
+        templateId: readArchiveValue(source, ['tournament_template_id', 'tournamentTemplateId', 'template_id', 'templateId']),
+        tournamentId: readArchiveValue(source, ['tournament_id', 'tournamentId', 'league_id', 'leagueId']),
+    };
+}
+
+function pickArchiveSeasonName(source: any): string {
+    return (
+        readArchiveValue(source, ['display_name', 'displayName', 'name', 'season_name', 'seasonName', 'title', 'label', 'season']) ||
+        readArchiveValue(source, ['year', 'season_year', 'seasonYear']) ||
+        readArchiveValue(source, ['season_id', 'seasonId']) ||
+        'Temporada'
+    );
+}
+
+function pickArchiveSeasonLabel(source: any): string {
+    const name = pickArchiveSeasonName(source);
+    const year = name.match(/\b(19|20)\d{2}(?:[/-]\d{2,4})?\b/);
+    if (year) return year[0];
+    const explicit = readArchiveValue(source, ['year', 'season_year', 'seasonYear', 'season_id', 'seasonId']);
+    return explicit || name;
+}
+
+function buildExternalSeasonHref(
+    routeId: string,
+    source: any,
+    currentIds: any,
+    routeSearch: string,
+) {
+    const ids = pickArchiveSeasonIds(source);
+    const params = new URLSearchParams();
+    const currentQuery = new URLSearchParams(routeSearch);
+
+    for (const key of ['sport', 'url', 'name']) {
+        const value = currentQuery.get(key);
+        if (value) params.set(key, value);
+    }
+
+    const tournamentId = ids.tournamentId || currentIds?.tournamentId;
+    const templateId = ids.templateId || currentIds?.tournamentTemplateId;
+    const seasonId = ids.seasonId;
+    const stageId = ids.stageId;
+    const archiveUrl = readArchiveValue(source, ['url', 'tournament_url', 'tournamentUrl', 'link']);
+
+    if (archiveUrl) params.set('url', archiveUrl);
+    if (tournamentId) params.set('tournament_id', String(tournamentId));
+    if (templateId) params.set('tournament_template_id', String(templateId));
+    if (stageId) params.set('tournament_stage_id', String(stageId));
+    if (seasonId) params.set('season_id', String(seasonId));
+
+    const query = params.toString();
+    return `/tournaments/${routeId}${query ? `?${query}` : ''}`;
+}
+
+function buildExternalSeasonOptions(
+    archives: any[],
+    routeId: string,
+    currentIds: any,
+    routeSearch: string,
+): SeasonOption[] {
+    if (!Array.isArray(archives) || archives.length === 0) return [];
+
+    const currentQuery = new URLSearchParams(routeSearch);
+    const selectedSeasonId =
+        cleanSeasonValue(currentQuery.get('season_id')) ||
+        cleanSeasonValue(currentQuery.get('seasonId')) ||
+        cleanSeasonValue(currentQuery.get('season'));
+    const selectedStageId =
+        cleanSeasonValue(currentQuery.get('tournament_stage_id')) ||
+        cleanSeasonValue(currentQuery.get('tournamentStageId')) ||
+        cleanSeasonValue(currentQuery.get('stageId'));
+    const fallbackSeasonId = cleanSeasonValue(currentIds?.seasonId);
+    const fallbackStageId = cleanSeasonValue(currentIds?.tournamentStageId);
+    const seen = new Set<string>();
+
+    const options = archives
+        .map((archive, index): SeasonOption | null => {
+            const ids = pickArchiveSeasonIds(archive);
+            const key = ids.seasonId || ids.stageId || cleanSeasonValue(archive?.id) || `${index}`;
+            if (!key || seen.has(key)) return null;
+            seen.add(key);
+
+            const label = pickArchiveSeasonLabel(archive);
+            const name = pickArchiveSeasonName(archive);
+            const isCurrent =
+                Boolean(ids.seasonId && (selectedSeasonId || fallbackSeasonId) && ids.seasonId === (selectedSeasonId || fallbackSeasonId)) ||
+                Boolean(ids.stageId && (selectedStageId || fallbackStageId) && ids.stageId === (selectedStageId || fallbackStageId));
+
+            return {
+                id: key,
+                label,
+                name,
+                slug: null,
+                seasonId: ids.seasonId,
+                isCurrent,
+                href: buildExternalSeasonHref(routeId, archive, currentIds, routeSearch),
+            };
+        })
+        .filter((option): option is SeasonOption => option !== null);
+
+    if (options.length > 0 && !options.some((option) => option.isCurrent) && !selectedSeasonId && !selectedStageId) {
+        return options.map((option, index) => index === 0 ? { ...option, isCurrent: true } : option);
+    }
+
+    return options;
 }
 
 function getParticipantClub(participant: any) {
@@ -1498,6 +1644,8 @@ export default function TournamentDetailPage({
     renderYear,
 }: TournamentDetailPageProps) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const routeSearch = searchParams.toString();
     const { isLeagueFavorite, toggleLeagueFavorite } = useFavorites();
     const { user, isLoading: authLoading } = useAuth();
 
@@ -1520,15 +1668,7 @@ export default function TournamentDetailPage({
     const [standingsOverUnderTeamLabels, setStandingsOverUnderTeamLabels] = useState<any[]>([]);
     const [customStandingsTables, setCustomStandingsTables] = useState<any[]>([]);
     const [archives, setArchives] = useState<any[]>([]);
-    const [seasonOptions, setSeasonOptions] = useState<Array<{
-        id: string;
-        label: string;
-        name: string;
-        slug: string | null;
-        seasonId: string | null;
-        isCurrent: boolean;
-        href: string;
-    }>>([]);
+    const [seasonOptions, setSeasonOptions] = useState<SeasonOption[]>([]);
     const [seasonMenuOpen, setSeasonMenuOpen] = useState(false);
     const [results, setResults] = useState<any[]>(preloaded?.results ?? []);
     const [fixtures, setFixtures] = useState<any[]>(preloaded?.fixtures ?? []);
@@ -1573,6 +1713,15 @@ export default function TournamentDetailPage({
             isCircuitTournamentRuleset(preloaded?.tournamentMeta?.ruleset) ||
             isCircuitTournamentRuleset((initialData?.tournament as any)?.ruleset),
         );
+        const routeQuery = new URLSearchParams(routeSearch);
+        const hasRouteSeasonOverride = Boolean(
+            routeQuery.get('season') ||
+            routeQuery.get('season_id') ||
+            routeQuery.get('seasonId') ||
+            routeQuery.get('tournament_stage_id') ||
+            routeQuery.get('tournamentStageId') ||
+            routeQuery.get('stageId')
+        );
 
         async function fetchData() {
             // Skip refetch when SSR already has a real name; still run when logo is missing so `/api/db/tournaments/[id]` can fill `banner_url`.
@@ -1585,7 +1734,7 @@ export default function TournamentDetailPage({
                 const hasKnownExternalUrl = Boolean(String(meta?.url || catalogTournament?.url || '').trim());
                 const hasFlashScoreConfig = hasConfiguredFlashScoreSource(meta) || hasConfiguredFlashScoreSource(catalogTournament);
                 const isDbOnlySnapshot = Boolean(meta?.__isDbOnly) && !hasKnownExternalUrl && !hasFlashScoreConfig;
-                if (hasName && hasLogo && isDbOnlySnapshot && !hasRugbyExternalConfig) {
+                if (hasName && hasLogo && isDbOnlySnapshot && !hasRugbyExternalConfig && !hasRouteSeasonOverride) {
                     setLoading(false);
                     return;
                 }
@@ -1593,7 +1742,7 @@ export default function TournamentDetailPage({
             setLoading(!preloaded);
             let localTournament: any = null;
             try {
-                const sp = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+                const sp = new URLSearchParams(routeSearch);
                 const overrideSport = sp.get('sport') || undefined;
                 const overrideTournamentId = sp.get('tournament_id') || sp.get('tournamentId');
                 const overrideStageId = sp.get('tournament_stage_id') || sp.get('tournamentStageId') || sp.get('stageId');
@@ -1833,7 +1982,7 @@ export default function TournamentDetailPage({
                 if (overrideStageId) query.set('tournament_stage_id', overrideStageId);
                 else if (flashScoreConfig?.tournament_stage_id) query.set('tournament_stage_id', String(flashScoreConfig.tournament_stage_id));
                 if (flashScoreConfig?.tournament_template_id) query.set('tournament_template_id', String(flashScoreConfig.tournament_template_id));
-                if (overrideSeason) query.set('season', overrideSeason);
+                if (overrideSeason) query.set('season_id', overrideSeason);
                 else if (flashScoreConfig?.season_id != null) query.set('season_id', String(flashScoreConfig.season_id));
 
                 const res = await fetch(`/api/tournaments?${query.toString()}`, {
@@ -1930,7 +2079,7 @@ export default function TournamentDetailPage({
 
         fetchData();
         return () => controller.abort();
-    }, [id, initialData, preloaded]);
+    }, [id, initialData, preloaded, routeSearch]);
 
     useEffect(() => {
         setTournamentLogoFailed(false);
@@ -1941,9 +2090,7 @@ export default function TournamentDetailPage({
         (async () => {
             try {
                 const query = new URLSearchParams();
-                const pageQuery = typeof window !== 'undefined'
-                    ? new URLSearchParams(window.location.search)
-                    : new URLSearchParams();
+                const pageQuery = new URLSearchParams(routeSearch);
                 const selectedSeasonParam =
                     pageQuery.get('seasonId') ||
                     pageQuery.get('season_id') ||
@@ -1969,7 +2116,7 @@ export default function TournamentDetailPage({
             }
         })();
         return () => controller.abort();
-    }, [id, initialData?.season]);
+    }, [id, initialData?.season, routeSearch]);
 
     useEffect(() => {
         if (!seasonMenuOpen) return;
@@ -2072,6 +2219,22 @@ export default function TournamentDetailPage({
             setStandingsView('overall');
         }
     }, [customStandingsTables, standingsForm.length, standingsHtFt.length, standingsOverUnder.length, standingsView]);
+
+    const currentFlashScoreIds = (tournamentData as any)?.flashScoreIds;
+    const externalSeasonOptions = useMemo(
+        () => buildExternalSeasonOptions(
+            archives,
+            id,
+            currentFlashScoreIds,
+            routeSearch,
+        ),
+        [archives, id, routeSearch, currentFlashScoreIds],
+    );
+    const availableSeasonOptions =
+        seasonOptions.length > 1 || externalSeasonOptions.length === 0
+            ? seasonOptions
+            : externalSeasonOptions;
+    const currentSeasonOption = availableSeasonOptions.find((s) => s.isCurrent);
 
     if (loading) {
         return (
@@ -2322,7 +2485,6 @@ export default function TournamentDetailPage({
         return null;
     };
 
-    const currentSeasonOption = seasonOptions.find((s) => s.isCurrent);
     const rawSeasonId =
         (tournamentData as any)?.season_id ?? (initialData?.tournament as any)?.season_id ?? null;
     const dbSeasonYearHint =
@@ -3316,7 +3478,7 @@ export default function TournamentDetailPage({
                                     {yearDisplay && (
                                         <>
                                             <span className={styles.heroMetaDot} />
-                                            {seasonOptions.length > 0 ? (
+                                            {availableSeasonOptions.length > 0 ? (
                                                 <span className={styles.seasonSwitcher}>
                                                     <button
                                                         type="button"
@@ -3344,7 +3506,7 @@ export default function TournamentDetailPage({
                                                     </button>
                                                     {seasonMenuOpen && (
                                                         <div className={styles.seasonSwitcherMenu} role="listbox">
-                                                            {seasonOptions.map((season) => (
+                                                            {availableSeasonOptions.map((season) => (
                                                                 <Link
                                                                     key={season.id}
                                                                     href={season.href}
@@ -4069,11 +4231,11 @@ export default function TournamentDetailPage({
                             <div className={styles.archiveGrid}>
                                 {archives.map((season: any) => (
                                     <Link
-                                        key={season.season_id || season.id}
-                                        href={`/tournaments/${id}?season_id=${season.season_id || season.id}`}
+                                        key={pickArchiveSeasonIds(season).seasonId || pickArchiveSeasonIds(season).stageId || season.id}
+                                        href={buildExternalSeasonHref(id, season, currentFlashScoreIds, routeSearch)}
                                         className={styles.archiveItem}
                                     >
-                                        {season.name || season.season_name}
+                                        {pickArchiveSeasonName(season)}
                                     </Link>
                                 ))}
                             </div>

@@ -776,7 +776,7 @@ export async function GET(request: Request) {
     let tournamentId = searchParams.get('tournament_id') || searchParams.get('tournamentId') || undefined;
     let stageId = searchParams.get('tournament_stage_id') || searchParams.get('tournamentStageId') || searchParams.get('stageId') || undefined;
     let templateId = searchParams.get('tournament_template_id') || searchParams.get('templateId') || undefined;
-    let seasonId = searchParams.get('season_id') || searchParams.get('seasonId') || undefined;
+    let seasonId = searchParams.get('season_id') || searchParams.get('seasonId') || requestedSeason || undefined;
     let drawStageId = searchParams.get('draw_stage_id') || searchParams.get('drawStageId') || undefined;
     const flashScoreEnabledForSport = isFlashScoreEnabledForSport(sport);
 
