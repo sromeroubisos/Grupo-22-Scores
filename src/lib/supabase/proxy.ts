@@ -14,6 +14,11 @@ const SHOULD_LOG_PROXY_AUTH = process.env.ENABLE_SERVER_PERF_LOGS === 'true' || 
 // Anything fresher than this window is treated as valid and the entire auth
 // roundtrip is skipped to avoid hammering Supabase Auth with /token calls.
 const ACCESS_TOKEN_REFRESH_MARGIN_SECONDS = 120;
+const INVALID_REFRESH_TOKEN_CODES = new Set([
+    'refresh_token_already_used',
+    'invalid_refresh_token',
+    'refresh_token_not_found',
+]);
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -31,6 +36,64 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): 
 
 function getSupabaseAuthCookieBaseName(): string | null {
     return getSupabaseAuthStorageKey();
+}
+
+function getRequestHost(request: NextRequest) {
+    return request.headers.get('x-forwarded-host') || request.headers.get('host') || request.nextUrl.hostname;
+}
+
+function buildResponseAuthCookieOptions(request: NextRequest, options?: NonNullable<Parameters<NextResponse['cookies']['set']>[2]>) {
+    const sharedCookieOptions = getSupabaseAuthCookieOptions(getRequestHost(request));
+    return {
+        ...sharedCookieOptions,
+        ...options,
+        sameSite: 'lax' as const,
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: false,
+        path: '/',
+        ...(sharedCookieOptions.domain ? { domain: sharedCookieOptions.domain } : {}),
+    };
+}
+
+function getAuthCookieNames(): string[] {
+    const baseName = getSupabaseAuthCookieBaseName();
+    if (!baseName) return [];
+
+    const names = [baseName, `${baseName}-code-verifier`, `${baseName}-user`];
+    for (let index = 0; index < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; index += 1) {
+        names.push(`${baseName}.${index}`);
+    }
+    return names;
+}
+
+function clearAuthCookies(request: NextRequest, response: NextResponse) {
+    for (const name of getAuthCookieNames()) {
+        request.cookies.delete(name);
+        response.cookies.set(name, '', {
+            ...buildResponseAuthCookieOptions(request),
+            maxAge: 0,
+            expires: new Date(0),
+        });
+    }
+}
+
+function isInvalidRefreshTokenError(error: unknown) {
+    if (!error || typeof error !== 'object') {
+        return false;
+    }
+
+    const code = 'code' in error && typeof error.code === 'string'
+        ? error.code.toLowerCase()
+        : '';
+    const message = 'message' in error && typeof error.message === 'string'
+        ? error.message.toLowerCase()
+        : '';
+
+    return (
+        INVALID_REFRESH_TOKEN_CODES.has(code) ||
+        message.includes('invalid refresh token') ||
+        message.includes('refresh token already used')
+    );
 }
 
 function getAuthCookieChunkIndex(name: string, baseName: string): number | null {
@@ -216,12 +279,21 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
         }
     }
 
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+        console.error('[Middleware] Missing Supabase auth environment variables');
+        clearAuthCookies(request, response);
+        return { response, user: null };
+    }
+
     const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        supabaseUrl,
+        supabaseAnonKey,
         {
             cookieOptions: getSupabaseAuthCookieOptions(
-                request.headers.get('x-forwarded-host') || request.headers.get('host') || request.nextUrl.hostname,
+                getRequestHost(request),
             ),
             cookies: {
                 getAll() {
@@ -255,12 +327,8 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                             headers: requestHeaders,
                         },
                     })
-                    type ResponseCookieOptions = NonNullable<Parameters<typeof response.cookies.set>[2]>;
-                    const buildCookieOptions = (options?: ResponseCookieOptions): ResponseCookieOptions => {
-                        const isProd = process.env.NODE_ENV === 'production';
-                        const sharedCookieOptions = getSupabaseAuthCookieOptions(
-                            request.headers.get('x-forwarded-host') || request.headers.get('host') || request.nextUrl.hostname,
-                        );
+
+                    cookiesToSet.forEach(({ name, value, options }) => {
                         // NOTE on httpOnly: @supabase/ssr requires the browser
                         // client to read the auth cookie via document.cookie to
                         // refresh sessions, so we cannot set httpOnly: true on
@@ -268,23 +336,11 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                         // auth. Mitigations: secure+sameSite=lax in prod, short
                         // access-token TTL, refresh-token rotation, and a strong
                         // CSP at the app shell to limit XSS exfiltration.
-                        return {
-                            ...sharedCookieOptions,
-                            ...options,
-                            sameSite: 'lax' as const,
-                            secure: isProd,
-                            httpOnly: false,
-                            path: '/',
-                            ...(sharedCookieOptions.domain ? { domain: sharedCookieOptions.domain } : {}),
-                        };
-                    };
-
-                    cookiesToSet.forEach(({ name, value, options }) => {
-                        response.cookies.set(name, value, buildCookieOptions(options))
+                        response.cookies.set(name, value, buildResponseAuthCookieOptions(request, options))
                     })
                     staleAuthCookieNames.forEach((name) => {
                         response.cookies.set(name, '', {
-                            ...buildCookieOptions(),
+                            ...buildResponseAuthCookieOptions(request),
                             maxAge: 0,
                             expires: new Date(0),
                         })
@@ -292,7 +348,7 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                 },
             },
             global: {
-                fetch: createInstrumentedSupabaseFetch('server', process.env.NEXT_PUBLIC_SUPABASE_URL, fetch),
+                fetch: createInstrumentedSupabaseFetch('server', supabaseUrl, fetch),
             },
         }
     )
@@ -344,8 +400,12 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
         : null;
 
     if (error) {
+        if (isInvalidRefreshTokenError(error)) {
+            clearAuthCookies(request, response);
+        }
+
         // Only log if it's not a common "no session" state
-        if (!error.message.includes('Auth session missing')) {
+        if (!error.message.includes('Auth session missing') && !isInvalidRefreshTokenError(error)) {
             console.error('[Middleware] getSession error:', error.message);
         }
     } else if (user) {

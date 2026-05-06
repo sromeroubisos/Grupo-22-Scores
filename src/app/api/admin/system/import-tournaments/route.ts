@@ -5,11 +5,17 @@ import { getAllCountries } from '@/lib/data/countries';
 import { getAllTournaments } from '@/lib/data/tournaments';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
-// Use the service role key to bypass RLS for this admin import script
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+function createImportClient() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseKey) as any;
+    if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Missing Supabase credentials for tournament import');
+    }
+
+    // Use the service role key when available to bypass RLS for this admin import script.
+    return createClient(supabaseUrl, supabaseKey) as any;
+}
 
 export async function POST(request: Request) {
     // Basic protection: requiring a secret header or checking auth.
@@ -21,6 +27,7 @@ export async function POST(request: Request) {
     }
 
     try {
+        const supabase = createImportClient();
         console.log('Starting API Tournaments import...');
 
         // 1. Upsert Sports

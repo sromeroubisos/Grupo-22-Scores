@@ -394,7 +394,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         if (useExtraTimePoints && !tableCols.extraWon && !tableCols.extraDrawn)
             errors.push('Prórroga activada pero sin columnas de prórroga visibles');
         if (enabled.some(tb => tb.metric === 'points') && enabled.some(tb => tb.metric === 'won'))
-            errors.push('Advertencia: "Puntos" y "Victorias" pueden ser redundantes');
+            errors.push('Posible redundancia: «Puntos» normalmente ya considera victorias. Mantené «Victorias» solo si querés priorizar partidos ganados como criterio adicional.');
         return errors;
     }, [tiebreakers, useExtraTimePoints, tableCols]);
 
@@ -1338,19 +1338,22 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                     ))}
                                 </nav>
 
-                                <div className="structure-sidebar-facts">
-                                    <div className="structure-sidebar-fact">
-                                        <span>Tipo</span>
-                                        <strong>{PHASE_TYPE_LABELS[phaseType] || phaseType}</strong>
-                                    </div>
-                                    <div className="structure-sidebar-fact">
-                                        <span>Equipos</span>
-                                        <strong>{teamsCount === '' ? '--' : teamsCount}</strong>
-                                    </div>
-                                    <div className="structure-sidebar-fact">
-                                        <span>Avanzan</span>
-                                        <strong>{advanceCount === '' ? '--' : advanceCount}</strong>
-                                    </div>
+                                {/* Inline meta strip — single-line summary in
+                                    place of the 3-card stack. Reads like a
+                                    breadcrumb: "Liga · 16 equipos · Avanzan 8".
+                                    The legacy 3-card grid wasted ~140px of
+                                    vertical space for data that doesn't change
+                                    in this paso. */}
+                                <div className="structure-sidebar-facts structure-sidebar-facts-inline">
+                                    <span className="structure-sidebar-fact-inline">
+                                        {PHASE_TYPE_LABELS[phaseType] || phaseType}
+                                    </span>
+                                    <span className="structure-sidebar-fact-inline">
+                                        {teamsCount === '' ? '— equipos' : `${teamsCount} equipos`}
+                                    </span>
+                                    <span className="structure-sidebar-fact-inline">
+                                        Avanzan {advanceCount === '' ? '—' : advanceCount}
+                                    </span>
                                 </div>
                             </aside>
 
@@ -1692,19 +1695,17 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                         </div>
 
                                         {validationErrors.length > 0 && (
-                                            <div className="structure-inline-alert flex flex-col gap-1.5 p-4 rounded-lg bg-[var(--status-warning)]/10 border border-[var(--status-warning)]/30 text-[var(--status-warning)] text-xs">
+                                            <div className="structure-inline-alert flex flex-col gap-2 p-3 rounded-lg bg-amber-500/8 border border-amber-500/20 text-amber-200/90 text-xs leading-relaxed">
                                                 {validationErrors.map((err, i) => (
-                                                    <span key={i} className="flex items-center gap-2">
-                                                        <AlertCircle size={12} /> {err}
+                                                    <span key={i} className="flex items-start gap-2">
+                                                        <AlertCircle size={13} className="flex-shrink-0 mt-px text-amber-400/80" />
+                                                        <span className="flex-1 min-w-0">{err}</span>
                                                     </span>
                                                 ))}
                                             </div>
                                         )}
 
                                         <div className="structure-field-panel">
-                                            <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-3">
-                                                Reglas de desempate (arrastrar para priorizar)
-                                            </label>
                                             <TiebreakerList
                                                 items={tiebreakerListItems}
                                                 onChange={(newItems) => setTiebreakers(newItems.filter(t => (t.priority ?? 0) > 0))}

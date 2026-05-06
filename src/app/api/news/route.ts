@@ -50,6 +50,18 @@ function extractMissingNewsColumn(error: unknown) {
     return match?.[1] || null;
 }
 
+function isTransientSupabaseReadError(error: unknown) {
+    const message = getErrorMessage(error).toLowerCase();
+    return (
+        message.includes('timed out') ||
+        message.includes('fetch failed') ||
+        message.includes('connection timed out') ||
+        message.includes('error 522') ||
+        message.includes('<!doctype html') ||
+        message.includes('supabase.co')
+    );
+}
+
 function removeUndefinedFields(record: Record<string, unknown>) {
     return Object.fromEntries(
         Object.entries(record).filter(([, value]) => value !== undefined)
@@ -102,10 +114,11 @@ async function updateNewsWithSchemaFallback(
 }
 
 export async function GET(req: Request) {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
     try {
         const { supabase, role } = await getServerAuthRole();
-        const { searchParams } = new URL(req.url);
-        const id = searchParams.get('id');
         const canManageNews = hasNewsManagementAccess(role);
 
         if (id) {
@@ -133,6 +146,14 @@ export async function GET(req: Request) {
 
         return NextResponse.json({ data });
     } catch (error) {
+        if (isTransientSupabaseReadError(error)) {
+            console.warn('[api/news][GET] transient Supabase read error:', getErrorMessage(error));
+            return NextResponse.json({
+                data: id ? null : [],
+                degraded: true,
+            });
+        }
+
         return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
     }
 }

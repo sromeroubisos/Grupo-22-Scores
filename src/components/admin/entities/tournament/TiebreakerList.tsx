@@ -110,33 +110,52 @@ function SortableTiebreakerItem({
         )}
       </div>
 
-      {/* ASC/DESC Toggle */}
-      <div className="order-pill-wrapper">
-        <button
-          onClick={(e) => { e.preventDefault(); onToggleOrder('asc'); }}
-          className={`order-pill-btn ${item.order === 'asc' ? 'active' : ''}`}
-          title="Ascendente (menor a mayor)"
-        >
-          Asc
-        </button>
-        <button
-          onClick={(e) => { e.preventDefault(); onToggleOrder('desc'); }}
-          className={`order-pill-btn ${item.order === 'desc' ? 'active' : ''}`}
-          title="Descendente (mayor a menor)"
-        >
-          Desc
-        </button>
-      </div>
+      {/* Order toggle — human-readable. headToHead doesn't have a numeric
+          order, so we collapse to a single "Mejor gana" pill that's always
+          selected (the metric resolves itself by direct match between
+          tied teams, not by ascending/descending a numeric column). */}
+      {item.metric === 'headToHead' ? (
+        <div className="order-pill-wrapper">
+          <button
+            type="button"
+            onClick={(e) => e.preventDefault()}
+            className="order-pill-btn active"
+            title="Mejor resultado entre los equipos empatados"
+          >
+            Mejor gana
+          </button>
+        </div>
+      ) : (
+        <div className="order-pill-wrapper">
+          <button
+            onClick={(e) => { e.preventDefault(); onToggleOrder('asc'); }}
+            className={`order-pill-btn ${item.order === 'asc' ? 'active' : ''}`}
+            title="El menor valor desempata primero"
+          >
+            Menor gana
+          </button>
+          <button
+            onClick={(e) => { e.preventDefault(); onToggleOrder('desc'); }}
+            className={`order-pill-btn ${item.order === 'desc' ? 'active' : ''}`}
+            title="El mayor valor desempata primero"
+          >
+            Mayor gana
+          </button>
+        </div>
+      )}
 
-      {/* Enabled Toggle Switch */}
-      <label className="custom-switch-label" title={item.enabled ? 'Deshabilitar' : 'Habilitar'}>
-        <input
-          type="checkbox"
-          checked={item.enabled}
-          onChange={onToggleEnabled}
-        />
-        <span className="custom-switch-slider"></span>
-      </label>
+      {/* Enabled chip — text label instead of an opaque toggle. The
+          previous slider switch made it unclear whether ON meant
+          "applied", "available" or "locked". The text is unambiguous. */}
+      <button
+        type="button"
+        onClick={(e) => { e.preventDefault(); onToggleEnabled(); }}
+        className={`tiebreaker-status-chip ${item.enabled ? 'is-on' : 'is-off'}`}
+        title={item.enabled ? 'Desactivar este criterio' : 'Activar este criterio'}
+        aria-pressed={item.enabled}
+      >
+        {item.enabled ? 'Activo' : 'Inactivo'}
+      </button>
 
       {/* Remove Button */}
       <button
@@ -259,14 +278,14 @@ export function TiebreakerList({ items, onChange, phaseType }: TiebreakerListPro
       {/* Left Column: Active Tiebreakers */}
       <div className="space-y-4">
         <div>
-          <h3 className="wizard-section-title">
-             Activos
-            <span className="text-xs font-mono text-[#888] bg-[rgba(255,255,255,0.05)] px-2 py-0.5 rounded ml-2 normal-case">
+          <h3 className="wizard-section-title tiebreaker-section-heading">
+            Criterios activos
+            <span className="tiebreaker-section-count">
               {activeItems.length} seleccionados
             </span>
           </h3>
-          <p className="text-xs text-[#888] mb-4">
-            El sistema aplicará los criterios en este orden hasta desempatar. Arrastra desde (⋮⋮) para reordenar la prioridad real.
+          <p className="tiebreaker-section-help">
+            Arrastrá para cambiar la prioridad. El sistema probará cada criterio en orden hasta resolver el empate.
           </p>
         </div>
 
@@ -287,32 +306,59 @@ export function TiebreakerList({ items, onChange, phaseType }: TiebreakerListPro
             </span>
           </div>
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={activeItems.map(item => item.metric)} strategy={verticalListSortingStrategy}>
-              <div className="space-y-3">
-                {activeItems.map((item, index) => (
-                  <SortableTiebreakerItem
-                    key={item.metric}
-                    item={item}
-                    index={index}
-                    onToggleEnabled={() => handleToggleEnabled(item.metric)}
-                    onToggleOrder={(order) => handleToggleOrder(item.metric, order)}
-                    onRemove={() => handleRemoveActive(item.metric)}
-                    showWarning={!!item.requiresRoundRobin && phaseType !== 'league'}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+          <>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={activeItems.map(item => item.metric)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-3">
+                  {activeItems.map((item, index) => (
+                    <SortableTiebreakerItem
+                      key={item.metric}
+                      item={item}
+                      index={index}
+                      onToggleEnabled={() => handleToggleEnabled(item.metric)}
+                      onToggleOrder={(order) => handleToggleOrder(item.metric, order)}
+                      onRemove={() => handleRemoveActive(item.metric)}
+                      showWarning={!!item.requiresRoundRobin && phaseType !== 'league'}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+
+            {/* Plain-language summary of how the cascade resolves. Names
+                the first 2 active criteria and falls back to "y así
+                sucesivamente" for the long tail — this makes the order
+                semantics tangible without forcing the user to mentally
+                trace the priority list. */}
+            {(() => {
+              const enabledActive = activeItems.filter(item => item.enabled);
+              if (enabledActive.length === 0) return null;
+              const first = enabledActive[0]?.label;
+              const second = enabledActive[1]?.label;
+              return (
+                <p className="tiebreaker-cascade-summary">
+                  Se aplicará primero <strong>«{first}»</strong>
+                  {second && (
+                    <>
+                      . Si persiste el empate, se usará <strong>«{second}»</strong>
+                      {enabledActive.length > 2 && ', y así sucesivamente'}
+                    </>
+                  )}
+                  {!second && ' como único criterio'}
+                  .
+                </p>
+              );
+            })()}
+          </>
         )}
       </div>
 
       {/* Right Column: Available Tiebreakers */}
       <div className="wizard-right-panel">
         <div className="flex flex-col h-full max-h-[400px]">
-          <h3 className="wizard-section-title">
+          <h3 className="wizard-section-title tiebreaker-section-heading">
             Disponibles
-            <span className="text-xs font-mono text-[#888] bg-[rgba(255,255,255,0.05)] px-2 py-0.5 rounded ml-2 normal-case">
+            <span className="tiebreaker-section-count">
               {availableItems.length}
             </span>
           </h3>

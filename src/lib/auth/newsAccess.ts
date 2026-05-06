@@ -1,32 +1,53 @@
 import type { Session } from '@supabase/supabase-js';
 
 import { createClient } from '@/lib/supabase/server';
+import { getReadClient } from '@/lib/supabase/read';
 import { hasNewsManagementAccess } from '@/lib/auth/roles';
+import type { LooseSupabaseClient } from '@/lib/supabase/loose';
 
 type ServerAuthContext = {
     role: string | null;
     session: Session | null;
-    supabase: Awaited<ReturnType<typeof createClient>>;
+    supabase: LooseSupabaseClient;
 };
 
 export async function getServerAuthRole(): Promise<ServerAuthContext> {
-    const supabase = await createClient();
-    const {
-        data: { session },
-    } = await supabase.auth.getSession();
+    const authClient = await createClient();
+    const fallbackToAnonymous = async (error?: unknown): Promise<ServerAuthContext> => {
+        if (error) {
+            console.warn('[newsAccess] Treating auth lookup as anonymous:', error);
+        }
+        return {
+            supabase: await getReadClient(),
+            session: null,
+            role: null,
+        };
+    };
 
-    if (!session?.user?.id) {
-        return { supabase, session: null, role: null };
+    let session: Session | null = null;
+
+    try {
+        const { data, error } = await authClient.auth.getSession();
+        if (error) {
+            return fallbackToAnonymous(error);
+        }
+        session = data.session;
+    } catch (error) {
+        return fallbackToAnonymous(error);
     }
 
-    const { data: userData } = await supabase
+    if (!session?.user?.id) {
+        return fallbackToAnonymous();
+    }
+
+    const { data: userData } = await authClient
         .from('users')
         .select('role')
         .eq('id', session.user.id)
         .maybeSingle();
 
     return {
-        supabase,
+        supabase: authClient,
         session,
         role: userData?.role || session.user.user_metadata?.role || null,
     };

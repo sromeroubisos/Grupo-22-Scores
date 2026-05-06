@@ -1,3 +1,15 @@
+/* CSS_REBUILD_STAMP_1778099386962 */
+/* CSS_REBUILD_STAMP_1778098944791 */
+/* CSS_REBUILD_STAMP_1778098320170 */
+/* CSS_REBUILD_STAMP_1778097985614 */
+/* CSS_REBUILD_STAMP_1778094077514 */
+/* CSS_REBUILD_STAMP_1778093586631 */
+/* CSS_REBUILD_STAMP_1778093255828 */
+/* CSS_REBUILD_STAMP_1778092682759 */
+/* CSS_REBUILD_STAMP_1778091573147 */
+/* CSS_REBUILD_STAMP_1778090893065 */
+/* CSS_REBUILD_STAMP_1778089752231 */
+/* CSS_REBUILD_STAMP_1778088962101 */
 /* ============================================================================
    Tournament Console — Mobile refinements layer
    ----------------------------------------------------------------------------
@@ -18,8 +30,12 @@
     .basalt-shell-main,
     .basalt-shell-main-full {
         max-width: 100vw !important;
-        overflow-x: clip;
+        overflow-x: hidden !important;
     }
+
+    /* Note: don't apply overflow-x: hidden on html/body here — it breaks
+       position: sticky on the basalt-header in some browsers. The shell-stage
+       and shell-main rules above are sufficient as the scroll-clip ancestors. */
 
     /* Tailwind grid collapses — Tailwind generates `.grid-cols-N` selectors
        inside the basalt body that we want to flatten on phones. Use !important
@@ -78,21 +94,18 @@
         width: 100%;
     }
 
-    /* Group rows / playoff rows: stack vertically on phones */
+    /* Group rows / playoff rows: ONE row layout, see section 10 for the
+       full per-stage compaction. We keep flex-row here so this rule
+       doesn't override section 10's row layout via specificity ties. */
     .basalt-body .structure-group-row {
-        flex-direction: column !important;
+        flex-direction: row !important;
         align-items: stretch !important;
-        gap: 6px !important;
+        gap: 4px !important;
+        flex-wrap: nowrap !important;
     }
 
     .basalt-body .structure-group-row > * {
-        width: 100% !important;
         min-width: 0 !important;
-    }
-
-    .basalt-body .structure-group-row .basalt-btn {
-        width: auto !important;
-        align-self: flex-end;
     }
 
     /* Tailwind min-w-[…] hard-coded mins on phase rows force overflow; release
@@ -152,23 +165,139 @@
    1) SHELL — header, tabs, footer
    --------------------------------------------------------------------------- */
 
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
     .basalt-body {
         --basalt-page-gutter: 12px;
     }
 
-    /* Compact action footer on tablets/phones; the fixed savebar handles save */
+    /* Action footer is dead weight on phones, tablets, small laptops, and any
+       zoomed mobile viewport (the project applies html { zoom: 0.7 } at
+       >=768px). It pins to the bottom of the page, repeats Save/Recalculate
+       from the header, and eats vertical space. Hide it across the entire
+       <1280px range so it never competes with the compact stacked Estructura
+       layout. The header's "Guardar" button (visible while isDirty) and the
+       Recalcular entry inside the overflow menu cover the same actions. */
     .basalt-action-footer {
-        order: 99;
+        display: none !important;
     }
 
-    .basalt-action-footer-copy {
-        gap: 4px;
+    /* ─── Estructura tab — full responsive rewrite ───
+       The Tectonic Basalt scoped block in tournament-structure.css forces the
+       wizard layout into a desktop shape (32px card padding, 22px sidebar
+       padding, 760px min-height, lg:flex-row, lg:w-64 sidebar, p-6/p-8 content)
+       which doesn't collapse cleanly below 1280px. Rather than chase one
+       selector at a time, this block flattens the whole wizard into a simple
+       block stack and kills every fixed dimension. Apply to <1280px so it
+       covers phones, tablets, small laptops, and `html { zoom: 0.7 }` zoomed
+       viewports. */
+
+    /* Shell-main paddings — drop the desktop 40px for tablets too */
+    .basalt-body .basalt-shell-main,
+    .basalt-body .basalt-shell-main-full {
+        padding: 16px 12px 0 !important;
     }
 
-    .basalt-action-footer-text {
-        font-size: 12px;
-        line-height: 1.35;
+    /* Layer 1: every Estructura container is responsive — full container
+       width, can shrink to 0 (so flex children don't blow out the parent),
+       and box-sizing border-box so paddings don't push past the parent.
+       NO overflow: hidden here — the user explicitly asked for content to
+       ADAPT, not be clipped. If anything still overflows after this, it's
+       a real layout bug to fix at the child level (typically a fixed
+       width or a hard-coded min-width on a Tailwind utility). */
+    .basalt-body .tournament-structure-shell,
+    .basalt-body .tournament-structure-shell .basalt-card,
+    .basalt-body .tournament-structure-shell .structure-module,
+    .basalt-body .tournament-structure-shell .structure-wizard-card,
+    .basalt-body .tournament-structure-shell .phase-wizard-card,
+    .basalt-body .tournament-structure-shell .structure-wizard-layout,
+    .basalt-body .tournament-structure-shell .phase-wizard-layout,
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .structure-wizard-content,
+    .basalt-body .tournament-structure-shell .phase-wizard-content,
+    .basalt-body .tournament-structure-shell .structure-step-panel,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-panel,
+    .basalt-body .tournament-structure-shell .phase-wizard-fields,
+    .basalt-body .tournament-structure-shell .structure-field-panel,
+    .basalt-body .tournament-structure-shell .structure-field-panel-wide,
+    .basalt-body .tournament-structure-shell .structure-sidebar-facts,
+    .basalt-body .tournament-structure-shell .structure-sidebar-fact,
+    .basalt-body .tournament-structure-shell .structure-wizard-progress-card,
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar-head {
+        max-width: 100% !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Layer 2: flatten the wizard layout into a vertical stack. We force
+       display: block so neither flex nor grid can re-introduce wide columns. */
+    .basalt-body .tournament-structure-shell .structure-wizard-layout,
+    .basalt-body .tournament-structure-shell .phase-wizard-layout {
+        display: block !important;
+        min-height: 0 !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .structure-wizard-content,
+    .basalt-body .tournament-structure-shell .phase-wizard-content {
+        display: block !important;
+        flex: none !important;
+        flex-shrink: 1 !important;
+    }
+
+    /* Layer 3: paddings — wizard card flush, sidebar/content 14px each */
+    .basalt-body .tournament-structure-shell .basalt-card.structure-wizard-card,
+    .basalt-body .tournament-structure-shell .basalt-card.phase-wizard-card,
+    .basalt-body .tournament-structure-shell .structure-wizard-card,
+    .basalt-body .tournament-structure-shell .phase-wizard-card {
+        padding: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .structure-wizard-content,
+    .basalt-body .tournament-structure-shell .phase-wizard-content {
+        padding: 14px !important;
+    }
+
+    /* Layer 4: kill fixed dimensions on inner items */
+    .basalt-body .tournament-structure-shell .structure-wizard-step,
+    .basalt-body .tournament-structure-shell .phase-wizard-step {
+        min-width: 140px !important;
+        max-width: 220px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-sidebar-fact {
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-progress-card {
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+    }
+
+    /* Layer 5: hide the descriptive paragraph — the kicker (EDITANDO) +
+       title (Fase Regular) carry the same intent and the copy adds
+       2-3 lines of vertical scroll without new info. */
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar-copy {
+        display: none !important;
+    }
+
+    /* Layer 6: word-break safety net — long single words that would
+       otherwise overflow break to next line. */
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .structure-wizard-content,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-heading,
+    .basalt-body .tournament-structure-shell .structure-step-heading-main,
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar-title,
+    .basalt-body .tournament-structure-shell .structure-phase-title,
+    .basalt-body .tournament-structure-shell .basalt-h1 {
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
     }
 }
 
@@ -258,6 +387,18 @@
         grid-template-columns: 1fr 1fr 44px !important;
         gap: 6px !important;
         width: 100% !important;
+    }
+
+    /* The placeholder reserves space for Guardar on desktop; on mobile we
+       collapse it so Nueva temporada and Cambiar estado share the same row. */
+    .basalt-header-primary .basalt-header-action-placeholder {
+        display: none !important;
+    }
+
+    /* When Guardar is rendered (isDirty), make it span the full width on its
+       own row so the rest of the actions stay together below it. */
+    .basalt-header-primary > .basalt-btn-primary:first-child {
+        grid-column: 1 / -1;
     }
 
     .basalt-header-primary > .basalt-btn {
@@ -731,7 +872,7 @@
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
-        overflow-x: clip;
+        overflow-x: hidden !important;
     }
 
     .basalt-body .tournament-structure-shell .basalt-card,
@@ -888,30 +1029,12 @@
         margin-bottom: 12px !important;
     }
 
-    /* Summary grid (Resumen de Estructura — 4 metric cards) — 2-col on phones,
-       defeat the desktop repeat(4, 1fr). The CSS module file collapses them at
-       768px to 1-col, but 2-col reads better and keeps the metrics on screen. */
+    /* Summary grid — see section 10 for the full horizontal stat-tile
+       redesign (label left, value right, ~52px tall total). This block
+       only sets the grid columns; card layout is overridden later. */
     .basalt-body .tournament-structure-shell .structure-summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 10px !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-summary-card {
-        padding: 12px !important;
-        gap: 4px !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-summary-value {
-        font-size: 1.5rem !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-summary-value--text {
-        font-size: 0.95rem !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-summary-label {
-        font-size: 0.6rem !important;
-        letter-spacing: 0.1em !important;
+        gap: 6px !important;
     }
 
     /* ----- Wizard sidebar (progress + facts) ----- */
@@ -1672,5 +1795,2369 @@
         transform: none;
         max-width: none;
         width: auto;
+    }
+}
+
+/* ============================================================================
+   9b) ESTRUCTURA — always-on width clamp (no media query)
+   ----------------------------------------------------------------------------
+   Hard guarantee that the Estructura tab and EVERY descendant fit within
+   the parent container, at any viewport size. This is the foundation —
+   the responsive sizing rules in section 10 below add typography and
+   layout adjustments on top, but the width clamp is unconditional.
+
+   Why no media query: the user reported the wizard card extending past
+   the viewport even at 1024-1279px (where Tailwind `lg:flex-row` and
+   `lg:w-64` activate AND the desktop CSS grid `minmax(280px, 340px)
+   minmax(0, 1fr)` kicks in). Bumping a media query is fragile — a single
+   `min-w-[600px]` or `width: max-content` Tailwind utility can blow this
+   up. Apply max-width: 100% and min-width: 0 universally instead, so no
+   child can ever push past its parent.
+   ============================================================================ */
+
+.basalt-body .tournament-structure-shell,
+.basalt-body .tournament-structure-shell *,
+.basalt-body .tournament-structure-shell *::before,
+.basalt-body .tournament-structure-shell *::after {
+    box-sizing: border-box !important;
+}
+
+.basalt-body .tournament-structure-shell {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    overflow-x: clip;
+}
+
+/* Every direct child of the structure shell — wizard cards, modules,
+   hero panels — fits its parent. Never wider. */
+.basalt-body .tournament-structure-shell > * {
+    max-width: 100% !important;
+    min-width: 0 !important;
+}
+
+/* Wizard card and every nested layout container collapses to the
+   container width. This defeats the desktop grid `minmax(280px, 340px)`
+   which would otherwise force the column to be at least 280px and the
+   total grid to overflow when the parent is narrower. */
+.basalt-body .tournament-structure-shell .basalt-card,
+.basalt-body .tournament-structure-shell .structure-wizard-card,
+.basalt-body .tournament-structure-shell .phase-wizard-card,
+.basalt-body .tournament-structure-shell .structure-wizard-layout,
+.basalt-body .tournament-structure-shell .phase-wizard-layout,
+.basalt-body .tournament-structure-shell .structure-wizard-sidebar,
+.basalt-body .tournament-structure-shell .phase-wizard-sidebar,
+.basalt-body .tournament-structure-shell .structure-wizard-content,
+.basalt-body .tournament-structure-shell .phase-wizard-content {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+}
+
+/* Force vertical wizard stack at any viewport <1280px, no media query
+   wrapper. This complements section 10's media-queried rules (which the
+   dev server has been slow to recompile) and ensures the layout adapts
+   even if the bundled CSS is stale. The wizard layout's own desktop
+   grid (`grid-template-columns: minmax(280px, 340px) minmax(0, 1fr)`)
+   would otherwise force a 280px sidebar column AND content column,
+   making the total layout overflow narrow viewports. */
+@supports (width: 100%) {
+    .basalt-body .tournament-structure-shell .structure-wizard-layout,
+    .basalt-body .tournament-structure-shell .phase-wizard-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .structure-wizard-content,
+    .basalt-body .tournament-structure-shell .phase-wizard-content {
+        flex: 0 0 auto !important;
+        flex-shrink: 1 !important;
+    }
+}
+
+/* Re-enable horizontal wizard layout only at true desktop widths.
+   At >=1280px the admin shell has comfortable room for sidebar + content
+   side by side without overflow. */
+@media (min-width: 1280px) {
+    .basalt-body .tournament-structure-shell .structure-wizard-layout,
+    .basalt-body .tournament-structure-shell .phase-wizard-layout {
+        display: grid !important;
+        grid-template-columns: minmax(260px, 320px) minmax(0, 1fr) !important;
+        flex-direction: row !important;
+    }
+}
+
+/* Always-on typography clamps for the structure shell. Floors are sized
+   for ~360px phones, ceilings for desktop. Word-break safety guarantees
+   long Spanish words don't push the parent past the viewport edge. */
+.basalt-body .tournament-structure-shell .structure-module-title,
+.basalt-body .tournament-structure-shell .basalt-h1.structure-module-title,
+.basalt-body .tournament-structure-shell .structure-empty-title,
+.basalt-body .tournament-structure-shell .structure-hero-title,
+.basalt-body .tournament-structure-shell .phase-wizard-sidebar-title,
+.basalt-body .tournament-structure-shell .phase-wizard-step-heading,
+.basalt-body .tournament-structure-shell .structure-step-heading-main {
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    max-width: 100% !important;
+}
+
+@media (max-width: 1279px) {
+    .basalt-body .tournament-structure-shell .structure-module-title,
+    .basalt-body .tournament-structure-shell .basalt-h1.structure-module-title,
+    .basalt-body .tournament-structure-shell .structure-empty-title,
+    .basalt-body .tournament-structure-shell .structure-hero-title {
+        font-size: clamp(0.92rem, 2.2vw, 1.15rem) !important;
+        line-height: 1.1 !important;
+        letter-spacing: -0.02em !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar-title,
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar .phase-wizard-sidebar-title {
+        font-size: clamp(0.95rem, 2.4vw, 1.2rem) !important;
+        line-height: 1.1 !important;
+        letter-spacing: -0.01em !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step-heading,
+    .basalt-body .tournament-structure-shell .structure-step-heading-main {
+        font-size: clamp(0.92rem, 2.2vw, 1.1rem) !important;
+        line-height: 1.1 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-module-copy,
+    .basalt-body .tournament-structure-shell .structure-hero-text,
+    .basalt-body .tournament-structure-shell .structure-empty-text,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-subtitle {
+        font-size: clamp(0.68rem, 1.7vw, 0.8rem) !important;
+        line-height: 1.35 !important;
+        max-width: 100% !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+    }
+
+    /* Wizard sidebar copy — hidden to reduce vertical scroll. The kicker
+       (EDITANDO) and title (Fase Regular) already convey the same intent. */
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar-copy {
+        display: none !important;
+    }
+}
+
+/* ============================================================================
+   10) ESTRUCTURA — fluid responsive pass (phones, tablets, small laptops)
+   ----------------------------------------------------------------------------
+   Loaded last, scoped with `.basalt-body .tournament-structure-shell` (4
+   classes) so it wins specificity AND source order against the Tectonic
+   Basalt scoped block at the end of tournament-structure.css (3 classes,
+   loaded later).
+
+   Breakpoint: <=1279px catches phones, tablets, AND small laptops up to
+   1280px. The wizard's desktop layout uses `display: grid;
+   grid-template-columns: minmax(280px, 340px) minmax(0, 1fr)` plus
+   Tailwind `lg:flex-row lg:w-64 xl:w-72` — meaning at 1024-1279px it
+   tries to be a 2-column horizontal layout that can't fit comfortably in
+   the available admin shell. We stack vertically until 1280px so the
+   content area always has the FULL container width to render its inputs,
+   option grids, and stepper without horizontal overflow.
+
+   No `overflow: hidden` here — the user explicitly asked for content to
+   ADAPT to the viewport, not be clipped. We rely on flex-wrap, min-width
+   0, max-width 100%, and clamp() typography so children naturally shrink
+   and wrap instead of pushing the parent past the viewport edge.
+
+   Tap targets stay at 40-44px (WCAG 2.5.5).
+   ============================================================================ */
+
+@media (max-width: 1279px) {
+    /* --- Shell rhythm — minimal vertical gap between modules --- */
+    .basalt-body .tournament-structure-shell {
+        gap: 10px !important;
+        padding-bottom: 40px !important;
+    }
+
+    /* --- Module / hero / empty plates: collapse desktop padding (32px) --- */
+    .basalt-body .tournament-structure-shell .basalt-card,
+    .basalt-body .tournament-structure-shell .basalt-card.structure-module,
+    .basalt-body .tournament-structure-shell .basalt-card.structure-empty-panel,
+    .basalt-body .tournament-structure-shell .basalt-card.structure-hero-panel,
+    .basalt-body .tournament-structure-shell .structure-module {
+        padding: 10px !important;
+    }
+
+    /* Module header — kicker + title + copy stack tightly */
+    .basalt-body .tournament-structure-shell .structure-module-header {
+        padding-bottom: 6px !important;
+        margin-bottom: 8px !important;
+        gap: 2px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .basalt-section-kicker {
+        font-size: 0.55rem !important;
+        letter-spacing: 0.14em !important;
+        margin-bottom: 2px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-module-title,
+    .basalt-body .tournament-structure-shell .basalt-h1.structure-module-title,
+    .basalt-body .tournament-structure-shell .structure-empty-title,
+    .basalt-body .tournament-structure-shell .structure-hero-title {
+        font-size: clamp(0.95rem, 3.4vw, 1.25rem) !important;
+        line-height: 1.15 !important;
+        margin-bottom: 4px !important;
+        letter-spacing: -0.02em !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-module-copy,
+    .basalt-body .tournament-structure-shell .structure-hero-text,
+    .basalt-body .tournament-structure-shell .structure-empty-text {
+        font-size: clamp(0.7rem, 2vw, 0.82rem) !important;
+        line-height: 1.4 !important;
+        max-width: 100% !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+    }
+
+    /* --- Tournament model option cards (Estándar / Circuito) --- */
+    .basalt-body .tournament-structure-shell .structure-option-grid,
+    .basalt-body .tournament-structure-shell .structure-option-grid.grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 6px !important;
+        margin-top: 8px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-option-card {
+        padding: 8px 10px !important;
+        min-height: 0 !important;
+        gap: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-option-card > span:first-child {
+        font-size: 0.78rem !important;
+        gap: 6px !important;
+        margin-bottom: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-option-card > span:not(:first-child) {
+        font-size: 0.65rem !important;
+        line-height: 1.3 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-option-card > span:first-child::before {
+        width: 9px !important;
+        height: 9px !important;
+        border-width: 1.5px !important;
+    }
+
+    /* --- Champion mode label inside model card --- */
+    .basalt-body .tournament-structure-shell .structure-module label.block.text-xs {
+        font-size: 0.64rem !important;
+        letter-spacing: 0.14em !important;
+        margin-bottom: 6px !important;
+    }
+
+    /* --- Hero panel summary metrics --- */
+    .basalt-body .tournament-structure-shell .structure-hero-panel {
+        gap: 10px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-hero-meta {
+        gap: 6px !important;
+        font-size: 0.6rem !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-hero-meta span {
+        min-height: 22px !important;
+        padding: 0 8px !important;
+        font-size: 0.6rem !important;
+    }
+
+    /* --- Summary cards (FASES / FASE ACTIVA / GRUPOS / ELIMINACIÓN) ---
+       Default Tectonic Basalt design is a centered square with 132-170px
+       min-height — at mobile that's 250px+ of empty space per card. We
+       flip to a HORIZONTAL stat-tile pattern: label small on left, value
+       bold on right, total ~52px tall. Defeat every desktop min-height
+       (132px from base, 170px from Tectonic Basalt override). */
+    .basalt-body .tournament-structure-shell .structure-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-summary-card {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        text-align: left !important;
+        gap: 8px !important;
+        padding: 10px 12px !important;
+        min-height: 0 !important;
+        height: auto !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-summary-label {
+        order: 1 !important;
+        font-size: 0.58rem !important;
+        letter-spacing: 0.1em !important;
+        line-height: 1.2 !important;
+        margin: 0 !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        text-align: left !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-summary-value {
+        order: 2 !important;
+        font-size: 1.4rem !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        flex: 0 0 auto !important;
+        text-align: right !important;
+    }
+
+    /* Text values (e.g. "Fase de Grupos" for FASE ACTIVA) are too long
+       to live on the right of the label — let them wrap below in a
+       2-line ellipsis. Force this card to stack vertically. */
+    .basalt-body .tournament-structure-shell .structure-summary-card:has(.structure-summary-value--text) {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 2px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-summary-value--text {
+        font-size: 0.85rem !important;
+        line-height: 1.2 !important;
+        font-weight: 700 !important;
+        text-align: left !important;
+        max-width: 100% !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+    }
+
+    /* Foot text (small description) stays hidden on phones to save space */
+    .basalt-body .tournament-structure-shell .structure-summary-foot {
+        display: none !important;
+    }
+
+    /* --- Phase list --- */
+    .basalt-body .tournament-structure-shell .structure-phase-list {
+        gap: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-phase-card {
+        padding: 10px 12px !important;
+        gap: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-phase-icon {
+        padding: 3px 6px !important;
+        font-size: 0.62rem !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-phase-icon svg {
+        width: 12px !important;
+        height: 12px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-phase-step {
+        font-size: 9px !important;
+        letter-spacing: 0.12em !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-phase-title {
+        font-size: 0.84rem !important;
+        line-height: 1.2 !important;
+        letter-spacing: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-phase-meta {
+        font-size: 0.65rem !important;
+        gap: 4px 8px !important;
+        margin-top: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-phase-actions {
+        gap: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-phase-actions button[class*='border-[var(--status-active)]'] {
+        min-height: 30px !important;
+        padding: 0 8px !important;
+        font-size: 9px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-phase-delete {
+        min-width: 32px !important;
+        min-height: 32px !important;
+        padding: 6px !important;
+    }
+
+    /* --- Module footer "Agregar nueva fase" CTA --- */
+    .basalt-body .tournament-structure-shell .structure-module-footer {
+        margin-top: 14px !important;
+        padding-top: 14px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-module-footer .basalt-btn,
+    .basalt-body .tournament-structure-shell .structure-module-footer .basalt-btn-primary {
+        width: 100% !important;
+        min-height: 42px !important;
+        font-size: 0.72rem !important;
+        letter-spacing: 0.06em !important;
+        padding: 10px 14px !important;
+    }
+
+    /* --- Empty state (no fases yet) --- */
+    .basalt-body .tournament-structure-shell .structure-empty-panel {
+        padding: 28px 14px !important;
+        gap: 10px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-empty-icon {
+        width: 44px !important;
+        height: 44px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-empty-icon svg {
+        width: 20px !important;
+        height: 20px !important;
+    }
+
+    /* --- Wizard card: chrome-free; sidebar becomes a slim top strip --- */
+    .basalt-body .tournament-structure-shell .basalt-card.structure-wizard-card,
+    .basalt-body .tournament-structure-shell .basalt-card.phase-wizard-card,
+    .basalt-body .tournament-structure-shell .structure-wizard-card,
+    .basalt-body .tournament-structure-shell .phase-wizard-card {
+        padding: 0 !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Force a true vertical stack at <=1279px. Three competing rules
+       want a 2-column horizontal layout: Tailwind `lg:flex-row` (>=1024),
+       Tailwind `lg:w-64 xl:w-72` (sidebar fixed width >=1024), and the
+       desktop grid in tournament-structure.css (`grid-template-columns:
+       minmax(280px, 340px) minmax(0, 1fr)`). We override all three with
+       `display: block` and give every child the full container width, so
+       the content area can render at the viewport's full inner width and
+       its inputs / grids never need to compete with a 280px sidebar. */
+    .basalt-body .tournament-structure-shell .structure-wizard-layout,
+    .basalt-body .tournament-structure-shell .phase-wizard-layout {
+        display: block !important;
+        min-height: 0 !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar {
+        padding: 10px !important;
+        gap: 8px !important;
+        border-bottom: 1px solid var(--tb-border, rgba(255, 255, 255, 0.08)) !important;
+        border-right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: none !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar-head,
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar-head {
+        margin-bottom: 0 !important;
+        gap: 1px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar .phase-wizard-sidebar-title,
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar-title {
+        font-size: clamp(0.95rem, 2.6vw, 1.2rem) !important;
+        line-height: 1.1 !important;
+        letter-spacing: -0.01em !important;
+        margin: 0 !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-kicker {
+        font-size: 0.55rem !important;
+        letter-spacing: 0.16em !important;
+        margin-bottom: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-progress-card {
+        padding: 6px 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-progress-head {
+        font-size: 8px !important;
+        margin-bottom: 4px !important;
+        letter-spacing: 0.1em !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-progress-bar {
+        height: 4px !important;
+        padding: 0 !important;
+    }
+
+    /* --- Wizard stepper — iOS-style underlined tabs ---
+       Strip the boxed pill design: each step becomes a flat text tab with
+       only an underline indicator on the active step. Completed steps get
+       a checkmark prefix (handled by the JSX, just style the index chip
+       to be a tiny green check dot). Inactive numbers fade to dim text.
+
+       Layout: horizontal scroll list, but visually flat — no borders, no
+       backgrounds on individual steps, just typography + underline. */
+    .basalt-body .tournament-structure-shell .phase-wizard-stepper,
+    .basalt-body .tournament-structure-shell .structure-wizard-stepper {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 0 !important;
+        overflow-x: auto !important;
+        scrollbar-width: none !important;
+        margin: 0 -10px !important;
+        padding: 0 10px !important;
+        border-bottom: 1px solid var(--tb-border, rgba(255, 255, 255, 0.08)) !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-stepper::-webkit-scrollbar,
+    .basalt-body .tournament-structure-shell .structure-wizard-stepper::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    /* Each tab — flat, no border, no background, just text with bottom
+       padding to make room for the underline indicator. */
+    .basalt-body .tournament-structure-shell .phase-wizard-step,
+    .basalt-body .tournament-structure-shell .structure-wizard-step {
+        flex: 0 0 auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        min-height: 0 !important;
+        padding: 8px 10px !important;
+        gap: 5px !important;
+        border: 0 !important;
+        background: transparent !important;
+        background-image: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        position: relative !important;
+        align-items: center !important;
+    }
+
+    /* Active tab: blue underline that hangs off the bottom of the list.
+       Also defeat the Tectonic Basalt active-step boxed glow (line 1903
+       of tournament-structure.css adds rgba(56,189,248,0.08) background
+       and a blue border that fight our flat tabs). */
+    .basalt-body .tournament-structure-shell .phase-wizard-step.is-active,
+    .basalt-body .tournament-structure-shell .structure-wizard-step.is-active,
+    .basalt-body .tournament-structure-shell .structure-wizard-step.is-complete,
+    .basalt-body .tournament-structure-shell .phase-wizard-step.is-complete {
+        background: transparent !important;
+        background-image: none !important;
+        border: 0 !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step.is-active::after,
+    .basalt-body .tournament-structure-shell .structure-wizard-step.is-active::after {
+        content: '' !important;
+        position: absolute !important;
+        left: 8px !important;
+        right: 8px !important;
+        bottom: -1px !important;
+        height: 2px !important;
+        background: var(--tb-blue, #38BDF8) !important;
+        border-radius: 1px !important;
+    }
+
+    /* Step index chip — shrink to a tiny number that sits before the label
+       like "2 Puntos". Inactive: dim text. Active: blue text. Complete:
+       green checkmark (the JSX renders <CheckCircle/> which is an SVG). */
+    .basalt-body .tournament-structure-shell .structure-wizard-step-index,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-index {
+        width: auto !important;
+        min-width: 0 !important;
+        height: auto !important;
+        padding: 0 !important;
+        background: transparent !important;
+        background-image: none !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        color: var(--tb-text-2, #98A6B3) !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-step.is-active .structure-wizard-step-index,
+    .basalt-body .tournament-structure-shell .phase-wizard-step.is-active .phase-wizard-step-index {
+        color: var(--tb-blue, #38BDF8) !important;
+        background: transparent !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-step.is-complete .structure-wizard-step-index,
+    .basalt-body .tournament-structure-shell .phase-wizard-step.is-complete .phase-wizard-step-index {
+        color: var(--tb-green, #22C55E) !important;
+        background: transparent !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-step-index svg,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-index svg {
+        width: 12px !important;
+        height: 12px !important;
+    }
+
+    /* Step title — primary text. Inactive dim, active white, complete dim. */
+    .basalt-body .tournament-structure-shell .phase-wizard-step-title {
+        font-size: 0.74rem !important;
+        font-weight: 600 !important;
+        line-height: 1.1 !important;
+        white-space: nowrap !important;
+        color: var(--tb-text-2, #98A6B3) !important;
+        letter-spacing: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-step.is-active .phase-wizard-step-title,
+    .basalt-body .tournament-structure-shell .phase-wizard-step.is-active .phase-wizard-step-title {
+        color: var(--tb-text, #F4F7FA) !important;
+        font-weight: 700 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-step.is-complete .phase-wizard-step-title,
+    .basalt-body .tournament-structure-shell .phase-wizard-step.is-complete .phase-wizard-step-title {
+        color: var(--tb-text-2, #98A6B3) !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step-copy {
+        flex-direction: row !important;
+        gap: 5px !important;
+        align-items: center !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step-desc {
+        display: none !important;
+    }
+
+    /* --- Sidebar facts (Tipo / Equipos / Avanzan) — horizontal 3-up to
+       reclaim the vertical space the desktop default (1 col stacked)
+       wastes. Each card is short label + numeric strong, fits 3 cols
+       even on 360px phones. */
+    .basalt-body .tournament-structure-shell .structure-sidebar-facts {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-sidebar-fact {
+        padding: 6px 8px !important;
+        gap: 0 !important;
+        min-width: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-sidebar-fact span {
+        font-size: 8px !important;
+        letter-spacing: 0.1em !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-sidebar-fact strong {
+        font-size: 0.72rem !important;
+        line-height: 1.15 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    /* --- Wizard content area --- */
+    .basalt-body .tournament-structure-shell .structure-wizard-content,
+    .basalt-body .tournament-structure-shell .phase-wizard-content {
+        padding: 10px !important;
+        gap: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step-panel,
+    .basalt-body .tournament-structure-shell .structure-step-panel {
+        gap: 10px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-step-head,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-head {
+        gap: 1px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-step-heading-main,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-heading {
+        font-size: clamp(0.95rem, 2.4vw, 1.15rem) !important;
+        line-height: 1.1 !important;
+        margin: 0 !important;
+        letter-spacing: -0.01em !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step-subtitle {
+        font-size: clamp(0.65rem, 1.6vw, 0.75rem) !important;
+        line-height: 1.35 !important;
+        margin: 0 !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    /* --- Field panels --- */
+    .basalt-body .tournament-structure-shell .structure-field-panel,
+    .basalt-body .tournament-structure-shell .structure-field-panel-wide {
+        padding: 8px 10px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-field-panel::before {
+        left: 10px !important;
+        right: 10px !important;
+        top: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-field-label {
+        font-size: 0.58rem !important;
+        margin-bottom: 6px !important;
+        padding-top: 2px !important;
+        letter-spacing: 0.1em !important;
+    }
+
+    /* Wizard fields grid → single column always (it already is via earlier
+       rule, but bump specificity here to defeat tournament-structure.css's
+       12-col grid + structure-basic-name-panel span 6). */
+    .basalt-body .tournament-structure-shell .structure-step-panel .phase-wizard-fields {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-basic-name-panel,
+    .basalt-body .tournament-structure-shell .structure-basic-type-panel,
+    .basalt-body .tournament-structure-shell .structure-basic-format-panel,
+    .basalt-body .tournament-structure-shell .structure-basic-groups-panel,
+    .basalt-body .tournament-structure-shell .structure-split-grid {
+        grid-column: auto !important;
+        width: 100% !important;
+    }
+
+    /* --- Inputs (compact, but keep 36px min-height for thumb-friendly tap) --- */
+    .basalt-body .tournament-structure-shell .structure-step-panel .basalt-input,
+    .basalt-body .tournament-structure-shell .structure-step-panel input[type='number'],
+    .basalt-body .tournament-structure-shell .structure-step-panel input[type='text'],
+    .basalt-body .tournament-structure-shell .structure-step-panel select.basalt-input,
+    .basalt-body .tournament-structure-shell input[type='text']:not(.structure-counter-input),
+    .basalt-body .tournament-structure-shell input[type='number']:not(.structure-counter-input),
+    .basalt-body .tournament-structure-shell select,
+    .basalt-body .tournament-structure-shell textarea {
+        min-height: 36px !important;
+        font-size: 0.78rem !important;
+        padding: 6px 9px !important;
+        font-weight: 500 !important;
+    }
+
+    /* --- Phase type 4-up grid: 2 cols on phones --- */
+    .basalt-body .tournament-structure-shell .structure-basic-type-panel .structure-option-grid,
+    .basalt-body .tournament-structure-shell .structure-basic-type-panel .structure-option-grid.grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+    }
+
+    /* --- Counter shell — slimmer --- */
+    .basalt-body .tournament-structure-shell .structure-counter-shell,
+    .basalt-body .tournament-structure-shell div.structure-counter-shell {
+        height: 36px !important;
+        min-height: 36px !important;
+        max-height: 36px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-counter-shell .structure-counter-button,
+    .basalt-body .tournament-structure-shell button.structure-counter-button {
+        min-width: 36px !important;
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 0.95rem !important;
+        flex: 0 0 36px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-counter-shell .structure-counter-input,
+    .basalt-body .tournament-structure-shell input.structure-counter-input {
+        height: 36px !important;
+        min-height: 36px !important;
+        max-height: 36px !important;
+        font-size: 0.9rem !important;
+        padding: 0 6px !important;
+    }
+
+    /* --- Score grid (Victoria/Empate/Derrota) — keep 3 cols, tighter --- */
+    .basalt-body .tournament-structure-shell .structure-score-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-score-panel {
+        padding: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-score-panel .structure-field-label {
+        font-size: 0.55rem !important;
+        margin-bottom: 4px !important;
+        text-align: center;
+        padding-top: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-score-panel input.basalt-input {
+        text-align: center !important;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        padding: 6px !important;
+        min-height: 36px !important;
+    }
+
+    /* --- Match format toggle (Partido único / Ida y vuelta) --- */
+    .basalt-body .tournament-structure-shell .structure-option-grid-double {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-option-grid-double .structure-option-card {
+        min-height: 40px !important;
+        padding: 8px !important;
+        font-size: 0.78rem !important;
+        text-align: center !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* --- Group / playoff stage rows: ONE compact row per stage ---
+       Layout: [name input · flex-1] [PARTIDOS counter · auto] [🗑 · auto]
+       Default JSX uses `flex flex-col sm:flex-row` (column < 640px, row at
+       sm+) — but stacking 3 elements per stage wastes vertical space and
+       the user explicitly asked to reduce scroll. Force a single horizontal
+       row with flex-wrap so very narrow phones (<360px) wrap gracefully. */
+    .basalt-body .tournament-structure-shell .structure-group-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: stretch !important;
+        gap: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-group-row > div:first-child,
+    .basalt-body .tournament-structure-shell .structure-group-row .flex-1 {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-group-row .basalt-input {
+        min-height: 34px !important;
+        font-size: 0.78rem !important;
+        padding: 6px 9px !important;
+    }
+
+    /* The PARTIDOS chip — inline label + small numeric input */
+    .basalt-body .tournament-structure-shell .structure-group-row label {
+        flex: 0 0 auto !important;
+        min-height: 34px !important;
+        padding: 0 8px !important;
+        gap: 6px !important;
+        min-width: 0 !important;
+        align-items: center !important;
+        border-radius: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-group-row label .text-\[10px\] {
+        font-size: 0.5rem !important;
+        letter-spacing: 0.1em !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-group-row label input {
+        min-height: 28px !important;
+        height: 28px !important;
+        width: 32px !important;
+        font-size: 0.78rem !important;
+        padding: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-group-row .basalt-btn {
+        align-self: stretch !important;
+        flex: 0 0 auto !important;
+        width: 34px !important;
+        min-width: 34px !important;
+        min-height: 34px !important;
+        padding: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-group-row .basalt-btn svg {
+        width: 12px !important;
+        height: 12px !important;
+    }
+
+    /* "Agregar etapa / grupo" CTA inside accent panels */
+    .basalt-body .tournament-structure-shell .structure-basic-groups-panel > .basalt-btn {
+        min-height: 34px !important;
+        font-size: 0.65rem !important;
+        padding: 6px 10px !important;
+    }
+
+    /* Playoff/Group panel header: title + description + badge — minimize.
+       The title ("Etapas de eliminacion") and description ("Define las
+       etapas que guiaran el cuadro playoff") on top + a "3 etapas · 7
+       partidos" badge to the right is too much vertical estate. */
+    .basalt-body .tournament-structure-shell .structure-basic-groups-panel > .flex.items-center.justify-between {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 4px !important;
+        margin-bottom: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-basic-groups-panel > .flex.items-center.justify-between > div p:first-child {
+        font-size: 0.6rem !important;
+        letter-spacing: 0.12em !important;
+        margin-bottom: 2px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-basic-groups-panel > .flex.items-center.justify-between > div p:nth-child(2) {
+        font-size: 0.74rem !important;
+        line-height: 1.2 !important;
+    }
+
+    /* Inner spacer between rows + add-stage button */
+    .basalt-body .tournament-structure-shell .structure-basic-groups-panel > .flex.flex-col.gap-2 {
+        gap: 4px !important;
+        margin-bottom: 8px !important;
+    }
+
+    /* --- Step 2: "Puntos diferentes por prórroga" / bonus checkboxes --- */
+    .basalt-body .tournament-structure-shell .structure-step-panel-points .structure-field-panel label.cursor-pointer {
+        gap: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-step-panel-points label .text-sm,
+    .basalt-body .tournament-structure-shell .structure-step-panel-stats label .text-sm {
+        font-size: 0.78rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-step-panel-points label .text-xs,
+    .basalt-body .tournament-structure-shell .structure-step-panel-stats label .text-xs {
+        font-size: 0.68rem !important;
+        line-height: 1.35 !important;
+    }
+
+    /* --- Step 4: Etiquetas (labels editor) --- */
+    .basalt-body .tournament-structure-shell .structure-labels-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-labels-list-panel,
+    .basalt-body .tournament-structure-shell .structure-labels-form-panel {
+        padding: 10px 12px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-label-empty {
+        min-height: 0 !important;
+        padding: 16px 12px !important;
+        font-size: 0.74rem !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-label-row {
+        padding: 10px !important;
+        gap: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-label-action-btn,
+    .basalt-body .tournament-structure-shell .structure-label-mode-btn {
+        min-height: 34px !important;
+        font-size: 0.68rem !important;
+        padding: 0 10px !important;
+        letter-spacing: 0.06em !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-label-color-input {
+        height: 38px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-label-swatch {
+        width: 28px !important;
+        height: 28px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-label-row-meta,
+    .basalt-body .tournament-structure-shell .structure-label-helper,
+    .basalt-body .tournament-structure-shell .structure-label-preview-label {
+        font-size: 0.65rem !important;
+    }
+
+    /* --- Step 6: Circuito table rows --- */
+    .basalt-body .tournament-structure-shell .structure-step-panel .flex.items-center.gap-4.px-5 {
+        gap: 8px !important;
+        padding: 6px 10px !important;
+    }
+
+    /* --- Footer wizard actions: stacked, full-width --- */
+    .basalt-body .tournament-structure-shell .phase-wizard-footer,
+    .basalt-body .tournament-structure-shell .structure-wizard-footer {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 6px !important;
+        margin-top: 10px !important;
+        padding-top: 10px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-footer .basalt-btn,
+    .basalt-body .tournament-structure-shell .structure-wizard-footer .basalt-btn {
+        width: 100% !important;
+        min-height: 38px !important;
+        font-size: 0.68rem !important;
+        padding: 8px 12px !important;
+        letter-spacing: 0.05em !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-footer-actions {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+
+    /* --- All wizard buttons (kicker text) — readable but compact --- */
+    .basalt-body .tournament-structure-shell .basalt-btn {
+        font-size: 0.68rem !important;
+        padding: 7px 12px !important;
+        letter-spacing: 0.05em !important;
+        min-height: 36px !important;
+    }
+
+    /* "Guardar modelo" / model save button on the model card */
+    .basalt-body .tournament-structure-shell .structure-module .basalt-btn-primary {
+        width: 100% !important;
+        min-height: 38px !important;
+    }
+
+    /* Inline save state messages (Guardado / error) wrap below the CTA */
+    .basalt-body .tournament-structure-shell .structure-module .flex.items-center.gap-3.flex-wrap {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+
+    /* --- Inline alerts in wizard --- */
+    .basalt-body .tournament-structure-shell .structure-inline-alert,
+    .basalt-body .tournament-structure-shell .structure-inline-alert-error,
+    .basalt-body .tournament-structure-shell .structure-inline-alert-danger {
+        padding: 8px 10px !important;
+        font-size: 0.7rem !important;
+        line-height: 1.35 !important;
+    }
+
+    /* --- Badges inside structure (e.g. "1 FASE" pill) --- */
+    .basalt-body .tournament-structure-shell .basalt-badge {
+        font-size: 0.6rem !important;
+        padding: 2px 6px !important;
+        letter-spacing: 0.06em !important;
+    }
+
+    /* --- Module header inline badge alignment when title + badge share row --- */
+    .basalt-body .tournament-structure-shell .structure-module-header.flex.items-center.justify-between {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+    }
+
+    /* --- Final overflow guards: any Tailwind utility with a hard-coded
+       min-width (e.g. `min-w-[150px]` on the playoff-stage match-count
+       label) can still push a row past the viewport even after the parent
+       container is clipped. Release every such constraint inside the
+       wizard step panels so children can shrink to fit. */
+    .basalt-body .tournament-structure-shell .structure-step-panel [class*='min-w-\\['],
+    .basalt-body .tournament-structure-shell .structure-step-panel [class*='min-w-\\['] * {
+        min-width: 0 !important;
+    }
+
+    /* --- Hard parent caps: every direct descendant of the structure shell
+       must respect the viewport width. Catch-all so no Tailwind utility,
+       no inline style, no third-party component can push horizontal scroll. */
+    .basalt-body .tournament-structure-shell > * {
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+    }
+}
+
+/* Sub-420px: collapse the 4-up summary metrics to one column, slim down the
+   wizard stepper items, and let sidebar facts stay 3-up because each is
+   just a short label + numeric strong. Keeps everything legible on the
+   smallest phones (iPhone SE / Android compact). */
+@media (max-width: 419px) {
+    .basalt-body .tournament-structure-shell .structure-summary-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step,
+    .basalt-body .tournament-structure-shell .structure-wizard-step {
+        min-width: 130px !important;
+    }
+}
+
+/* ============================================================================
+   11) ESTRUCTURA — readability pass (loosen density, allow wraps)
+   ----------------------------------------------------------------------------
+   Reverse the over-compaction from previous passes. The user reported the
+   tab was "ilegible y comprimido" (illegible and cramped) and asked for
+   más espacios libres (more breathing room) on mobile. Goals:
+
+     · Bump fonts back up ~15-20% from the floor sizes
+     · Restore comfortable padding inside cards/panels (12-14px not 8-10)
+     · Wider gaps between sibling elements (8-10px not 4-6)
+     · Allow truncation-prone names (tiebreaker, label) to wrap to 2 lines
+     · Inputs to 40px min-height with 0.85rem text (was 36px / 0.78rem)
+
+   This block sits AFTER section 10 in source order and re-overrides values
+   set there. Specificity matches (.basalt-body .tournament-structure-shell
+   selectors), so source order wins.
+   ============================================================================ */
+
+@media (max-width: 1279px) {
+    /* --- Shell + module rhythm: more breathing room between sections --- */
+    .basalt-body .tournament-structure-shell {
+        gap: 14px !important;
+        padding-bottom: 48px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .basalt-card,
+    .basalt-body .tournament-structure-shell .basalt-card.structure-module,
+    .basalt-body .tournament-structure-shell .basalt-card.structure-empty-panel,
+    .basalt-body .tournament-structure-shell .basalt-card.structure-hero-panel,
+    .basalt-body .tournament-structure-shell .structure-module {
+        padding: 14px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-module-header {
+        padding-bottom: 10px !important;
+        margin-bottom: 12px !important;
+        gap: 4px !important;
+    }
+
+    /* --- Typography bump: titles, headings, copy all readable --- */
+    .basalt-body .tournament-structure-shell .basalt-section-kicker {
+        font-size: 0.62rem !important;
+        letter-spacing: 0.16em !important;
+        margin-bottom: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-module-title,
+    .basalt-body .tournament-structure-shell .basalt-h1.structure-module-title,
+    .basalt-body .tournament-structure-shell .structure-empty-title,
+    .basalt-body .tournament-structure-shell .structure-hero-title {
+        font-size: clamp(1.05rem, 2.6vw, 1.35rem) !important;
+        line-height: 1.15 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar-title,
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar .phase-wizard-sidebar-title {
+        font-size: clamp(1.05rem, 2.6vw, 1.35rem) !important;
+        line-height: 1.15 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step-heading,
+    .basalt-body .tournament-structure-shell .structure-step-heading-main {
+        font-size: clamp(1.1rem, 2.6vw, 1.35rem) !important;
+        line-height: 1.2 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-module-copy,
+    .basalt-body .tournament-structure-shell .structure-hero-text,
+    .basalt-body .tournament-structure-shell .structure-empty-text,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-subtitle {
+        font-size: clamp(0.78rem, 1.8vw, 0.9rem) !important;
+        line-height: 1.45 !important;
+    }
+
+    /* --- Stepper: bigger tap area, larger text --- */
+    .basalt-body .tournament-structure-shell .phase-wizard-step,
+    .basalt-body .tournament-structure-shell .structure-wizard-step {
+        padding: 12px 14px !important;
+        gap: 6px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-step-index,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-index {
+        font-size: 0.85rem !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-step-index svg,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-index svg {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step-title {
+        font-size: 0.85rem !important;
+        line-height: 1.15 !important;
+    }
+
+    /* --- Wizard sidebar: more padding, larger progress bar --- */
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar {
+        padding: 14px !important;
+        gap: 12px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-progress-card {
+        padding: 10px 12px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-progress-head {
+        font-size: 0.6rem !important;
+        margin-bottom: 6px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-progress-bar {
+        height: 6px !important;
+    }
+
+    /* --- Sidebar facts: legacy 3-card layout (now unused — JSX renders
+       the inline strip below). Kept here for any callers that still use
+       the old DOM. --- */
+    .basalt-body .tournament-structure-shell .structure-sidebar-facts {
+        gap: 6px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-sidebar-fact {
+        padding: 10px 12px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-sidebar-fact span {
+        font-size: 0.58rem !important;
+        margin-bottom: 2px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-sidebar-fact strong {
+        font-size: 0.85rem !important;
+    }
+
+    /* --- Sidebar facts: inline strip ("Liga · 16 equipos · Avanzan 8") ---
+       New compact variant. Defeats the desktop 3-up grid and renders as
+       a single text line with bullet separators. Saves ~140px of
+       vertical scroll vs the 3-card stack. */
+    .basalt-body .tournament-structure-shell .structure-sidebar-facts.structure-sidebar-facts-inline {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 4px 6px !important;
+        /* 10px breathing room above + below — separates the meta strip
+           from the stepper tabs above and the step heading below. */
+        padding: 10px 0 !important;
+        background: transparent !important;
+        border: 0 !important;
+        grid-template-columns: none !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-sidebar-fact-inline {
+        display: inline-flex !important;
+        align-items: center !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        color: var(--tb-text-2, #98A6B3) !important;
+        line-height: 1.3 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: 0 !important;
+    }
+
+    /* Bullet separator (·) between siblings, skipping the first */
+    .basalt-body .tournament-structure-shell .structure-sidebar-fact-inline + .structure-sidebar-fact-inline::before {
+        content: '·' !important;
+        margin: 0 6px 0 0 !important;
+        color: var(--tb-text-2, #98A6B3) !important;
+        opacity: 0.5 !important;
+        font-weight: 700 !important;
+    }
+
+    /* --- Wizard content area: more padding --- */
+    .basalt-body .tournament-structure-shell .structure-wizard-content,
+    .basalt-body .tournament-structure-shell .phase-wizard-content {
+        padding: 16px 14px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step-panel,
+    .basalt-body .tournament-structure-shell .structure-step-panel {
+        gap: 16px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-step-head,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-head {
+        gap: 4px !important;
+    }
+
+    /* --- Field panels: comfortable padding --- */
+    .basalt-body .tournament-structure-shell .structure-field-panel,
+    .basalt-body .tournament-structure-shell .structure-field-panel-wide {
+        padding: 12px 14px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-field-panel::before {
+        left: 14px !important;
+        right: 14px !important;
+        top: 12px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-field-label {
+        font-size: 0.68rem !important;
+        margin-bottom: 10px !important;
+        padding-top: 6px !important;
+        letter-spacing: 0.12em !important;
+    }
+
+    /* --- Inputs: comfortable size --- */
+    .basalt-body .tournament-structure-shell .structure-step-panel .basalt-input,
+    .basalt-body .tournament-structure-shell .structure-step-panel input[type='number'],
+    .basalt-body .tournament-structure-shell .structure-step-panel input[type='text'],
+    .basalt-body .tournament-structure-shell .structure-step-panel select.basalt-input,
+    .basalt-body .tournament-structure-shell input[type='text']:not(.structure-counter-input),
+    .basalt-body .tournament-structure-shell input[type='number']:not(.structure-counter-input),
+    .basalt-body .tournament-structure-shell select,
+    .basalt-body .tournament-structure-shell textarea {
+        min-height: 40px !important;
+        font-size: 0.85rem !important;
+        padding: 9px 12px !important;
+    }
+
+    /* Counter shells (cantidad de equipos / avanzan) */
+    .basalt-body .tournament-structure-shell .structure-counter-shell,
+    .basalt-body .tournament-structure-shell div.structure-counter-shell {
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-counter-shell .structure-counter-button,
+    .basalt-body .tournament-structure-shell button.structure-counter-button {
+        min-width: 40px !important;
+        width: 40px !important;
+        height: 40px !important;
+        flex: 0 0 40px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-counter-shell .structure-counter-input,
+    .basalt-body .tournament-structure-shell input.structure-counter-input {
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        font-size: 1rem !important;
+    }
+
+    /* --- Wizard fields gap --- */
+    .basalt-body .tournament-structure-shell .structure-step-panel .phase-wizard-fields {
+        gap: 12px !important;
+    }
+
+    /* --- Buttons: comfortable tap target --- */
+    .basalt-body .tournament-structure-shell .basalt-btn {
+        font-size: 0.78rem !important;
+        padding: 9px 14px !important;
+        min-height: 40px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-footer .basalt-btn,
+    .basalt-body .tournament-structure-shell .structure-wizard-footer .basalt-btn {
+        min-height: 42px !important;
+        font-size: 0.78rem !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-module .basalt-btn-primary {
+        min-height: 42px !important;
+    }
+
+    /* --- Option cards (modelo competitivo, tipo de fase): more padding --- */
+    .basalt-body .tournament-structure-shell .structure-option-card {
+        padding: 12px 14px !important;
+        gap: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-option-card > span:first-child {
+        font-size: 0.9rem !important;
+        gap: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-option-card > span:not(:first-child) {
+        font-size: 0.74rem !important;
+        line-height: 1.4 !important;
+    }
+
+    /* --- Inline alerts (warning, error banners): readable size --- */
+    .basalt-body .tournament-structure-shell .structure-inline-alert,
+    .basalt-body .tournament-structure-shell .structure-inline-alert-error,
+    .basalt-body .tournament-structure-shell .structure-inline-alert-danger {
+        padding: 10px 12px !important;
+        font-size: 0.78rem !important;
+        line-height: 1.4 !important;
+    }
+
+    /* --- Tiebreaker section headings: sentence case, lighter weight ---
+       The base `.wizard-section-title` from phase-wizard.css forces
+       `text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800`
+       which reads as a heavy all-caps label. Soften to sentence case. */
+    .basalt-body .tournament-structure-shell .tiebreaker-section-heading {
+        text-transform: none !important;
+        letter-spacing: -0.005em !important;
+        font-size: 0.95rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 6px !important;
+        gap: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-section-count {
+        font-size: 0.7rem !important;
+        font-weight: 500 !important;
+        color: var(--tb-text-2, #98A6B3) !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        padding: 2px 8px !important;
+        border-radius: 4px !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-section-help {
+        font-size: 0.78rem !important;
+        line-height: 1.45 !important;
+        color: var(--tb-text-2, #98A6B3) !important;
+        margin-bottom: 12px !important;
+    }
+
+    /* --- Cascade summary ("Se aplicará primero «X». Si persiste el
+       empate, se usará «Y»...") — sits below the active list and makes
+       the priority cascade tangible. Visual: subtle bordered note with
+       blue accent on the named criteria. */
+    .basalt-body .tournament-structure-shell .tiebreaker-cascade-summary {
+        margin-top: 12px !important;
+        padding: 10px 12px !important;
+        font-size: 0.78rem !important;
+        line-height: 1.45 !important;
+        color: var(--tb-text-2, #98A6B3) !important;
+        background: rgba(56, 189, 248, 0.04) !important;
+        border: 1px solid rgba(56, 189, 248, 0.14) !important;
+        border-radius: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-cascade-summary strong {
+        color: var(--tb-blue, #38BDF8) !important;
+        font-weight: 600 !important;
+    }
+
+    /* --- Tiebreaker list (Step 3: Reglas de desempate) ---
+       Default `.tiebreaker-name` from phase-wizard.css uses
+       `white-space: nowrap; overflow: hidden; text-overflow: ellipsis`,
+       which truncates "Enfrentamiento Directo" → "Enfrentamiento D".
+       On mobile, allow 2-line wrap so the full name is visible. */
+    .basalt-body .tournament-structure-shell .tiebreaker-card,
+    .basalt-body .structure-step-panel .tiebreaker-card {
+        padding: 12px !important;
+        gap: 10px !important;
+        border-radius: 12px !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-info {
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-name {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        font-size: 0.88rem !important;
+        line-height: 1.25 !important;
+        /* Wrap at WORD boundaries only ('Enfrentamiento\nDirecto'), never
+           in the middle of a word ('Enfrentam-iento\n...Directo'). The
+           previous version used `overflow-wrap: anywhere` which broke
+           mid-word — too aggressive. `normal` lets the browser wrap at
+           spaces and rely on text-overflow for true overflow cases. */
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+        hyphens: none !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-desc {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        font-size: 0.7rem !important;
+        line-height: 1.35 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-priority-badge {
+        width: 26px !important;
+        height: 26px !important;
+        font-size: 0.7rem !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-drag-handle {
+        padding: 4px 2px !important;
+    }
+
+    /* ASC / DESC pill segmented control + on/off toggle + remove button:
+       keep them inline on the right but compact so the name has room. */
+    .basalt-body .tournament-structure-shell .order-pill-wrapper {
+        flex: 0 0 auto !important;
+    }
+
+    .basalt-body .tournament-structure-shell .order-pill-btn {
+        padding: 6px 10px !important;
+        font-size: 0.7rem !important;
+        min-height: 30px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .custom-switch-label {
+        flex: 0 0 auto !important;
+    }
+
+    /* --- Tiebreaker status chip (replaces the opaque blue toggle) ---
+       Text-labelled pill: "Activo" green when on, "Inactivo" dim when off.
+       Clear semantic — no doubt about what state means what. */
+    .basalt-body .tournament-structure-shell .tiebreaker-status-chip {
+        flex: 0 0 auto !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 30px !important;
+        padding: 0 12px !important;
+        font-size: 0.7rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.04em !important;
+        border-radius: 999px !important;
+        border: 1px solid transparent !important;
+        cursor: pointer !important;
+        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+        white-space: nowrap !important;
+        font-family: inherit !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-status-chip.is-on {
+        background: rgba(34, 197, 94, 0.14) !important;
+        border-color: rgba(34, 197, 94, 0.32) !important;
+        color: var(--tb-green, #22C55E) !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-status-chip.is-on:hover {
+        background: rgba(34, 197, 94, 0.2) !important;
+        border-color: rgba(34, 197, 94, 0.45) !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-status-chip.is-off {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        color: var(--tb-text-2, #98A6B3) !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-status-chip.is-off:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+        color: var(--tb-text, #F4F7FA) !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-remove-btn {
+        flex: 0 0 auto !important;
+        min-width: 28px !important;
+        padding: 4px !important;
+    }
+}
+
+/* Sub-420px: drop ASC/DESC + toggle to a second line below the name so
+   the whole row doesn't get squeezed on tiny phones. */
+@media (max-width: 419px) {
+    .basalt-body .tournament-structure-shell .tiebreaker-card,
+    .basalt-body .structure-step-panel .tiebreaker-card {
+        flex-wrap: wrap !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-info {
+        flex: 1 1 100% !important;
+        order: 2 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-priority-badge {
+        order: 1 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-drag-handle {
+        order: 0 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .order-pill-wrapper {
+        order: 3 !important;
+        flex: 1 1 auto !important;
+    }
+
+    .basalt-body .tournament-structure-shell .custom-switch-label,
+    .basalt-body .tournament-structure-shell .tiebreaker-status-chip {
+        order: 4 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-remove-btn {
+        order: 5 !important;
+    }
+}
+
+/* ============================================================================
+   12) ESTRUCTURA — final compact pass (-30% from previous values)
+   ----------------------------------------------------------------------------
+   The user asked to reduce ALL elements/text by 30% on mobile WITHOUT
+   using zoom (so each rule explicitly carries the new size). Multiplier:
+   ~0.7 applied to fonts, heights, paddings, and gaps from the previous
+   compact pass. No floors enforced — the user explicitly chose density
+   over WCAG tap targets, and the gestor de torneos is admin/power-user
+   surface, not consumer-facing.
+
+   Conversion factor: previous_value × 0.7 (rounded to nice CSS values).
+     · Card padding ........... 10 → 7px
+     · Field panel padding .... 8x10 → 6x7px
+     · Inputs / buttons ....... 34 → 28px
+     · Counter shells ......... 34 → 28px
+     · Module title ........... 0.9-1.1rem → 0.65-0.78rem
+     · Body copy .............. 0.7-0.78rem → 0.5-0.55rem
+     · Tiebreaker card pad .... 8x10 → 6x7px
+     · Status chip / order .... 26 → 20px
+     · Step panel gap ......... 12 → 8px
+     · Wizard content pad ..... 12x10 → 8x7px
+   ============================================================================ */
+
+@media (max-width: 1279px) {
+    /* --- Shell + module rhythm --- */
+    .basalt-body .tournament-structure-shell {
+        gap: 7px !important;
+        padding-bottom: 22px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .basalt-card,
+    .basalt-body .tournament-structure-shell .basalt-card.structure-module,
+    .basalt-body .tournament-structure-shell .basalt-card.structure-empty-panel,
+    .basalt-body .tournament-structure-shell .basalt-card.structure-hero-panel,
+    .basalt-body .tournament-structure-shell .structure-module {
+        padding: 7px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-module-header {
+        padding-bottom: 4px !important;
+        margin-bottom: 6px !important;
+        gap: 1px !important;
+    }
+
+    /* --- Typography: tighter --- */
+    .basalt-body .tournament-structure-shell .basalt-section-kicker {
+        font-size: 0.5rem !important;
+        letter-spacing: 0.13em !important;
+        margin-bottom: 1px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-module-title,
+    .basalt-body .tournament-structure-shell .basalt-h1.structure-module-title,
+    .basalt-body .tournament-structure-shell .structure-empty-title,
+    .basalt-body .tournament-structure-shell .structure-hero-title {
+        font-size: clamp(0.65rem, 1.6vw, 0.8rem) !important;
+        line-height: 1.1 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar-title,
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar .phase-wizard-sidebar-title {
+        font-size: clamp(0.65rem, 1.6vw, 0.8rem) !important;
+        line-height: 1.1 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step-heading,
+    .basalt-body .tournament-structure-shell .structure-step-heading-main {
+        font-size: clamp(0.68rem, 1.6vw, 0.82rem) !important;
+        line-height: 1.15 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-module-copy,
+    .basalt-body .tournament-structure-shell .structure-hero-text,
+    .basalt-body .tournament-structure-shell .structure-empty-text,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-subtitle {
+        font-size: clamp(0.5rem, 1.2vw, 0.55rem) !important;
+        line-height: 1.4 !important;
+    }
+
+    /* --- Wizard sidebar --- */
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar {
+        padding: 7px !important;
+        gap: 6px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-progress-card {
+        padding: 5px 7px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-progress-head {
+        font-size: 0.45rem !important;
+        margin-bottom: 3px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-progress-bar {
+        height: 3px !important;
+    }
+
+    /* --- Stepper tabs --- */
+    .basalt-body .tournament-structure-shell .phase-wizard-step,
+    .basalt-body .tournament-structure-shell .structure-wizard-step {
+        padding: 6px 7px !important;
+        gap: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-step-index,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-index {
+        font-size: 0.55rem !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-wizard-step-index svg,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-index svg {
+        width: 9px !important;
+        height: 9px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step-title {
+        font-size: 0.55rem !important;
+    }
+
+    /* --- Inline meta strip --- */
+    .basalt-body .tournament-structure-shell .structure-sidebar-fact-inline {
+        font-size: 0.5rem !important;
+    }
+
+    /* --- Wizard content area --- */
+    .basalt-body .tournament-structure-shell .structure-wizard-content,
+    .basalt-body .tournament-structure-shell .phase-wizard-content {
+        padding: 8px 7px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-step-panel,
+    .basalt-body .tournament-structure-shell .structure-step-panel {
+        gap: 8px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-step-head,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-head {
+        gap: 1px !important;
+    }
+
+    /* --- Field panels --- */
+    .basalt-body .tournament-structure-shell .structure-field-panel,
+    .basalt-body .tournament-structure-shell .structure-field-panel-wide {
+        padding: 6px 7px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-field-panel::before {
+        left: 7px !important;
+        right: 7px !important;
+        top: 6px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-field-label {
+        font-size: 0.45rem !important;
+        margin-bottom: 4px !important;
+        padding-top: 1px !important;
+        letter-spacing: 0.09em !important;
+    }
+
+    /* --- Inputs --- */
+    .basalt-body .tournament-structure-shell .structure-step-panel .basalt-input,
+    .basalt-body .tournament-structure-shell .structure-step-panel input[type='number'],
+    .basalt-body .tournament-structure-shell .structure-step-panel input[type='text'],
+    .basalt-body .tournament-structure-shell .structure-step-panel select.basalt-input,
+    .basalt-body .tournament-structure-shell input[type='text']:not(.structure-counter-input),
+    .basalt-body .tournament-structure-shell input[type='number']:not(.structure-counter-input),
+    .basalt-body .tournament-structure-shell select,
+    .basalt-body .tournament-structure-shell textarea {
+        min-height: 28px !important;
+        font-size: 0.55rem !important;
+        padding: 5px 7px !important;
+    }
+
+    /* Counter shells */
+    .basalt-body .tournament-structure-shell .structure-counter-shell,
+    .basalt-body .tournament-structure-shell div.structure-counter-shell {
+        height: 28px !important;
+        min-height: 28px !important;
+        max-height: 28px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-counter-shell .structure-counter-button,
+    .basalt-body .tournament-structure-shell button.structure-counter-button {
+        min-width: 28px !important;
+        width: 28px !important;
+        height: 28px !important;
+        flex: 0 0 28px !important;
+        font-size: 0.65rem !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-counter-shell .structure-counter-input,
+    .basalt-body .tournament-structure-shell input.structure-counter-input {
+        height: 28px !important;
+        min-height: 28px !important;
+        max-height: 28px !important;
+        font-size: 0.6rem !important;
+    }
+
+    /* --- Wizard fields gap --- */
+    .basalt-body .tournament-structure-shell .structure-step-panel .phase-wizard-fields {
+        gap: 7px !important;
+    }
+
+    /* --- Buttons --- */
+    .basalt-body .tournament-structure-shell .basalt-btn {
+        font-size: 0.5rem !important;
+        padding: 5px 9px !important;
+        min-height: 28px !important;
+        letter-spacing: 0.03em !important;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-wizard-footer .basalt-btn,
+    .basalt-body .tournament-structure-shell .structure-wizard-footer .basalt-btn {
+        min-height: 28px !important;
+        font-size: 0.5rem !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-module .basalt-btn-primary {
+        min-height: 28px !important;
+    }
+
+    /* --- Option cards --- */
+    .basalt-body .tournament-structure-shell .structure-option-card {
+        padding: 6px 8px !important;
+        gap: 1px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-option-card > span:first-child {
+        font-size: 0.55rem !important;
+        gap: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-option-card > span:not(:first-child) {
+        font-size: 0.46rem !important;
+        line-height: 1.35 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-option-card > span:first-child::before {
+        width: 7px !important;
+        height: 7px !important;
+    }
+
+    /* --- Inline alerts --- */
+    .basalt-body .tournament-structure-shell .structure-inline-alert,
+    .basalt-body .tournament-structure-shell .structure-inline-alert-error,
+    .basalt-body .tournament-structure-shell .structure-inline-alert-danger {
+        padding: 6px 7px !important;
+        font-size: 0.5rem !important;
+        line-height: 1.35 !important;
+    }
+
+    /* --- Tiebreaker section headings --- */
+    .basalt-body .tournament-structure-shell .tiebreaker-section-heading {
+        font-size: 0.6rem !important;
+        margin-bottom: 3px !important;
+        gap: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-section-count {
+        font-size: 0.45rem !important;
+        padding: 1px 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-section-help {
+        font-size: 0.5rem !important;
+        line-height: 1.4 !important;
+        margin-bottom: 6px !important;
+    }
+
+    /* --- Tiebreaker cards --- */
+    .basalt-body .tournament-structure-shell .tiebreaker-card,
+    .basalt-body .structure-step-panel .tiebreaker-card {
+        padding: 6px 7px !important;
+        gap: 6px !important;
+        border-radius: 6px !important;
+    }
+
+    /* Reduce spacing between cards */
+    .basalt-body .tournament-structure-shell .space-y-3 > * + * {
+        margin-top: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-name {
+        font-size: 0.55rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-desc {
+        font-size: 0.45rem !important;
+        line-height: 1.3 !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-priority-badge {
+        width: 16px !important;
+        height: 16px !important;
+        font-size: 0.45rem !important;
+        border-radius: 3px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-drag-handle {
+        padding: 1px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-drag-handle svg {
+        width: 9px !important;
+        height: 9px !important;
+    }
+
+    /* ASC/DESC pills + status chip + remove */
+    .basalt-body .tournament-structure-shell .order-pill-btn {
+        padding: 3px 6px !important;
+        font-size: 0.45rem !important;
+        min-height: 20px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-status-chip {
+        min-height: 20px !important;
+        padding: 0 7px !important;
+        font-size: 0.45rem !important;
+        letter-spacing: 0.02em !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-remove-btn {
+        min-width: 18px !important;
+        padding: 1px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .tiebreaker-remove-btn svg {
+        width: 9px !important;
+        height: 9px !important;
+    }
+
+    /* --- Cascade summary --- */
+    .basalt-body .tournament-structure-shell .tiebreaker-cascade-summary {
+        margin-top: 6px !important;
+        padding: 5px 7px !important;
+        font-size: 0.5rem !important;
+        line-height: 1.4 !important;
+    }
+}
+
+@media (max-width: 419px) {
+    /* On <420px the tiebreaker chip+pill row sits on its own line below
+       the name. Don't inflate sizes from the <=1279px base; just keep
+       them aligned with the surrounding density. */
+    .basalt-body .tournament-structure-shell .order-pill-btn,
+    .basalt-body .tournament-structure-shell .tiebreaker-status-chip {
+        font-size: 0.42rem !important;
+        padding: 2px 5px !important;
+        min-height: 18px !important;
+    }
+}
+
+/* ============================================================================
+   13) ESTRUCTURA — surgical -30% on remaining heavy elements
+   ----------------------------------------------------------------------------
+   The user shipped 4 screenshots showing elements that section 12's blanket
+   pass didn't catch:
+     · Step head (PASO N + title + subtitle) — title still rendered ~28px
+       because the Tectonic Basalt scoped rule `.structure-step-heading-main
+       { font-size: clamp(1.4rem, 1.8vw, 1.75rem) }` was winning specificity
+       in some viewports
+     · TableColumnSelector ("GLOSARIO DE COLUMNAS") — uses inline Tailwind
+       arbitrary-value classes (`text-[14px]`, `h-[44px]`, `px-[24px]`),
+       which need targeted overrides via descendant selectors
+     · Available items in Disponibles (Tries, Conversiones, Penales…) —
+       only `.available-item` was lightly styled
+     · Label editor (Step 4: Etiquetas) — buttons and cards (EDITAR,
+       ELIMINAR, AUTOMATICO, MANUAL, AGREGAR) keep uppercase + heavy
+       letter-spacing that makes them feel large
+     · Search inputs (`.manager-url-input`) — stayed at 44px h with text-sm
+   ============================================================================ */
+
+@media (max-width: 1279px) {
+    /* --- Step head: kicker + title + subtitle (PASO N / heading / desc) --- */
+    .basalt-body .tournament-structure-shell .structure-step-head .text-\[10px\],
+    .basalt-body .tournament-structure-shell .phase-wizard-step-head .text-\[10px\] {
+        font-size: 0.4rem !important;
+        letter-spacing: 0.12em !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* Defeat the Tectonic Basalt rule that paints heading at clamp(1.4rem,
+       1.8vw, 1.75rem) — it has !important and lives in tournament-structure
+       .css. Match it with a higher-specificity selector. */
+    .basalt-body .tournament-structure-shell .structure-step-panel .structure-step-heading-main,
+    .basalt-body .tournament-structure-shell .structure-step-panel .phase-wizard-step-heading,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-panel .structure-step-heading-main,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-panel .phase-wizard-step-heading {
+        font-size: clamp(0.62rem, 1.4vw, 0.78rem) !important;
+        line-height: 1.1 !important;
+        margin: 0 !important;
+        letter-spacing: -0.01em !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-step-panel .text-dim.text-sm,
+    .basalt-body .tournament-structure-shell .phase-wizard-step-subtitle {
+        font-size: 0.45rem !important;
+        line-height: 1.3 !important;
+        margin: 0 !important;
+    }
+
+    /* --- TableColumnSelector ("GLOSARIO DE COLUMNAS") --- */
+    /* Outer container — was px-[24px] py-[20px] */
+    .basalt-body .tournament-structure-shell .structure-step-panel .px-\[24px\].py-\[20px\] {
+        padding: 8px 10px !important;
+    }
+
+    /* "GLOSARIO DE COLUMNAS" headline — was text-[0.85rem] uppercase tracking-[0.14em] */
+    .basalt-body .tournament-structure-shell h3.text-\[0\.85rem\],
+    .basalt-body .tournament-structure-shell .text-\[0\.85rem\].font-mono {
+        font-size: 0.55rem !important;
+        margin-bottom: 6px !important;
+        letter-spacing: 0.1em !important;
+    }
+
+    /* "15 de 21 seleccionadas" counter */
+    .basalt-body .tournament-structure-shell .text-\[0\.75rem\].font-mono {
+        font-size: 0.5rem !important;
+    }
+
+    /* Search input row — was h-[44px] */
+    .basalt-body .tournament-structure-shell .h-\[44px\] {
+        height: 28px !important;
+        font-size: 0.55rem !important;
+        padding-left: 26px !important;
+        padding-right: 8px !important;
+    }
+
+    /* Category labels (BÁSICAS, RESULTADOS, etc.) — were text-[12px] tracking-[0.14em] */
+    .basalt-body .tournament-structure-shell .text-\[12px\].font-\[800\].uppercase {
+        font-size: 0.52rem !important;
+        letter-spacing: 0.1em !important;
+    }
+
+    /* Items inside categories (Variación, Puntos, etc.) — were text-[14px] */
+    .basalt-body .tournament-structure-shell label.text-\[14px\],
+    .basalt-body .tournament-structure-shell label.cursor-pointer.text-\[14px\] {
+        font-size: 0.55rem !important;
+        padding: 2px 0 !important;
+        gap: 6px !important;
+    }
+
+    /* Glossary badges (3/4, 0/4, 6/6) */
+    .basalt-body .tournament-structure-shell .glossary-badge {
+        font-size: 0.45rem !important;
+        padding: 1px 4px !important;
+    }
+
+    /* Checkbox container (16x16) — keep it visible but tighter */
+    .basalt-body .tournament-structure-shell .w-\[16px\].h-\[16px\] {
+        width: 12px !important;
+        height: 12px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .w-\[16px\].h-\[16px\] input.peer {
+        width: 12px !important;
+        height: 12px !important;
+    }
+
+    /* Category section bottom margin (mb-6) → tight */
+    .basalt-body .tournament-structure-shell .pr-1 .mb-6 {
+        margin-bottom: 8px !important;
+    }
+
+    /* Category header row (py-2 mb-3) → tighter */
+    .basalt-body .tournament-structure-shell .pr-1 .py-2.border-b {
+        padding: 3px 0 !important;
+        margin-bottom: 4px !important;
+    }
+
+    /* Items grid gap (gap-x-6 gap-y-[6px]) → tighter */
+    .basalt-body .tournament-structure-shell .grid.grid-cols-2.gap-x-6 {
+        gap: 2px 12px !important;
+    }
+
+    /* Empty state inside selector (py-8 text-[14px]) */
+    .basalt-body .tournament-structure-shell .text-center.py-8.text-\[14px\] {
+        padding: 12px 0 !important;
+        font-size: 0.55rem !important;
+    }
+
+    /* Scrollable list max-height — keep contained */
+    .basalt-body .tournament-structure-shell .max-h-\[520px\] {
+        max-height: 320px !important;
+    }
+
+    /* --- Available items (Disponibles list: Tries, Conversiones, …) --- */
+    .basalt-body .tournament-structure-shell .available-items-list {
+        gap: 4px !important;
+        max-height: 240px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .available-item {
+        padding: 6px 8px !important;
+        border-radius: 6px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .available-item .text-sm {
+        font-size: 0.6rem !important;
+    }
+
+    .basalt-body .tournament-structure-shell .available-item .text-\[10px\] {
+        font-size: 0.45rem !important;
+    }
+
+    /* Plus button on each available item — was w-6 h-6 (24px) */
+    .basalt-body .tournament-structure-shell .available-item .w-6.h-6 {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .available-item .w-6.h-6 svg {
+        width: 10px !important;
+        height: 10px !important;
+    }
+
+    /* --- Search input (.manager-url-input) used inside TiebreakerList right
+       column for "Buscar criterio…" --- */
+    .basalt-body .tournament-structure-shell .manager-url-input {
+        height: 28px !important;
+        min-height: 28px !important;
+        font-size: 0.55rem !important;
+        padding: 4px 8px 4px 26px !important;
+    }
+
+    /* Search icon container — shrink */
+    .basalt-body .tournament-structure-shell .relative.mb-4 svg {
+        width: 12px !important;
+        height: 12px !important;
+        left: 8px !important;
+    }
+
+    /* --- Label editor (Step 4: Etiquetas) --- */
+    .basalt-body .tournament-structure-shell .structure-labels-list-panel,
+    .basalt-body .tournament-structure-shell .structure-labels-form-panel {
+        padding: 7px !important;
+    }
+
+    /* Field label inside panels ("ETIQUETAS CREADAS", "NUEVA ETIQUETA") */
+    .basalt-body .tournament-structure-shell .structure-labels-list-panel > .structure-field-label,
+    .basalt-body .tournament-structure-shell .structure-labels-form-panel > .structure-field-label {
+        font-size: 0.45rem !important;
+        margin-bottom: 4px !important;
+        letter-spacing: 0.08em !important;
+    }
+
+    /* Each label row */
+    .basalt-body .tournament-structure-shell .structure-label-row {
+        padding: 7px !important;
+        gap: 6px !important;
+        border-radius: 6px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-label-row-meta,
+    .basalt-body .tournament-structure-shell .structure-label-helper,
+    .basalt-body .tournament-structure-shell .structure-label-preview-label {
+        font-size: 0.5rem !important;
+    }
+
+    /* EDITAR / ELIMINAR / AUTOMATICO / MANUAL — pill buttons */
+    .basalt-body .tournament-structure-shell .structure-label-action-btn,
+    .basalt-body .tournament-structure-shell .structure-label-mode-btn {
+        min-height: 22px !important;
+        padding: 0 8px !important;
+        font-size: 0.5rem !important;
+        letter-spacing: 0.04em !important;
+        border-radius: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-label-action-btn svg,
+    .basalt-body .tournament-structure-shell .structure-label-mode-btn svg {
+        width: 9px !important;
+        height: 9px !important;
+    }
+
+    /* Mode toggle wrapper (segmented AUTOMATICO/MANUAL) */
+    .basalt-body .tournament-structure-shell .structure-label-mode-toggle-form {
+        padding: 2px !important;
+        border-radius: 6px !important;
+    }
+
+    /* Color input swatch */
+    .basalt-body .tournament-structure-shell .structure-label-color-input {
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 4px !important;
+    }
+
+    /* Preset color swatches */
+    .basalt-body .tournament-structure-shell .structure-label-swatch {
+        width: 18px !important;
+        height: 18px !important;
+        border-radius: 3px !important;
+    }
+
+    /* Submit button (+ AGREGAR) — was very tall green pill */
+    .basalt-body .tournament-structure-shell .structure-label-submit {
+        min-height: 28px !important;
+        padding: 4px 10px !important;
+        font-size: 0.55rem !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-label-submit svg {
+        width: 10px !important;
+        height: 10px !important;
+    }
+
+    /* Form actions row */
+    .basalt-body .tournament-structure-shell .structure-label-form-actions {
+        gap: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-label-form-actions .basalt-btn {
+        min-height: 26px !important;
+        font-size: 0.5rem !important;
+        padding: 4px 8px !important;
+    }
+
+    /* Form vertical gap */
+    .basalt-body .tournament-structure-shell .structure-label-form {
+        gap: 6px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-label-input-row {
+        gap: 4px !important;
+    }
+
+    /* LabelChip preview (PLAYOFF tag) */
+    .basalt-body .tournament-structure-shell .structure-label-preview span[style] {
+        font-size: 0.42rem !important;
+        padding: 2px 6px !important;
+    }
+
+    /* Empty state */
+    .basalt-body .tournament-structure-shell .structure-label-empty {
+        padding: 8px !important;
+        font-size: 0.5rem !important;
+    }
+}
+
+/* ============================================================================
+   12) ESTRUCTURA — summary cards (FASES / FASE ACTIVA / GRUPOS / ELIMINACIÓN)
+   ----------------------------------------------------------------------------
+   El usuario pidió reducir el tamaño de los recuadros del "Resumen" en ~80%
+   en MOBILE únicamente. Los pases anteriores quedaron grandes/cuadrados por
+   el min-height heredado del diseño Tectonic Basalt y por el stretch del
+   grid. Acá fijamos: card horizontal compacta (~32px), tipografías chicas,
+   gap mínimo y align-items:start en el grid para impedir el stretch vertical.
+   ============================================================================ */
+@media (max-width: 768px) {
+    .basalt-body .tournament-structure-shell .structure-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 4px !important;
+        align-items: start !important;
+        grid-auto-rows: auto !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-summary-card {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        text-align: left !important;
+        gap: 6px !important;
+        padding: 4px 6px !important;
+        min-height: 0 !important;
+        height: auto !important;
+        max-height: 34px !important;
+        align-self: start !important;
+        border-radius: 4px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-summary-label {
+        order: 1 !important;
+        font-size: 0.42rem !important;
+        letter-spacing: 0.08em !important;
+        line-height: 1.1 !important;
+        margin: 0 !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        text-align: left !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-summary-value {
+        order: 2 !important;
+        font-size: 0.78rem !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        flex: 0 0 auto !important;
+        text-align: right !important;
+    }
+
+    /* Card con texto (FASE ACTIVA → "Fase Regular") sigue stack-vertical pero
+       chiquita: deja respirar las dos líneas sin agrandar el resto. */
+    .basalt-body .tournament-structure-shell .structure-summary-card:has(.structure-summary-value--text) {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: center !important;
+        gap: 1px !important;
+        max-height: 34px !important;
+        padding: 4px 6px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-summary-value--text {
+        font-size: 0.5rem !important;
+        line-height: 1.1 !important;
+        font-weight: 700 !important;
+        text-align: left !important;
+        max-width: 100% !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 1 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-summary-foot {
+        display: none !important;
+    }
+}
+
+/* Sub-420px: una sola columna, mismas alturas mínimas */
+@media (max-width: 419px) {
+    .basalt-body .tournament-structure-shell .structure-summary-grid {
+        grid-template-columns: 1fr !important;
+        gap: 3px !important;
+    }
+
+    .basalt-body .tournament-structure-shell .structure-summary-card,
+    .basalt-body .tournament-structure-shell .structure-summary-card:has(.structure-summary-value--text) {
+        max-height: 30px !important;
+        padding: 3px 6px !important;
     }
 }

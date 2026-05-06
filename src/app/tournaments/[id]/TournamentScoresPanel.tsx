@@ -434,6 +434,14 @@ function getPositionNumberFromLabel(label: string) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function getPositionSlotKey(entry: ScoreEntry, sportId?: string | null) {
+  const sortNumber = getPositionSortNumber(entry, sportId);
+  if (sortNumber !== null) return `number:${sortNumber}`;
+
+  const positionLabel = getPositionLabel(entry, sportId);
+  return normalizeKey(positionLabel) || positionLabel;
+}
+
 function getSlotPositionMeta(slot: TeamSlot) {
   const number = slot.sortNumber ?? getPositionNumberFromLabel(slot.positionLabel);
   const rawLabel = readString(slot.positionLabel);
@@ -505,7 +513,7 @@ function buildTeamByPosition(entries: ScoreEntry[], sportId?: string | null): Te
 
   entries.forEach((entry) => {
     const positionLabel = getPositionLabel(entry, sportId);
-    const positionKey = normalizeKey(positionLabel) || positionLabel;
+    const positionKey = getPositionSlotKey(entry, sportId);
     const current = slots.get(positionKey);
     const nextSlot = {
       positionKey,

@@ -76,11 +76,22 @@ function parseIds(value: unknown) {
     .slice(0, 100);
 }
 
+async function getAuthenticatedUserOrNull(supabase: Awaited<ReturnType<typeof createClient>>) {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) return null;
+    return user;
+  } catch (error) {
+    console.warn('[api/notifications] Auth lookup failed:', error);
+    return null;
+  }
+}
+
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUserOrNull(supabase);
 
-  if (authError || !user) {
+  if (!user) {
     return jsonNoStore({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -141,9 +152,9 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUserOrNull(supabase);
 
-  if (authError || !user) {
+  if (!user) {
     return jsonNoStore({ error: 'Unauthorized' }, { status: 401 });
   }
 

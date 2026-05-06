@@ -20,6 +20,9 @@ type SupabaseMinimalQueryable = {
     };
 };
 
+const DEFAULT_SERVER_SUPABASE_FETCH_TIMEOUT_MS = 8000;
+const DEFAULT_CLIENT_SUPABASE_FETCH_TIMEOUT_MS = 15000;
+
 function resolveUrl(input: string | URL | Request) {
     if (typeof input === 'string') return input;
     if (input instanceof URL) return input.toString();
@@ -35,6 +38,60 @@ function getSupabaseServiceLabel(pathname: string) {
     if (pathname.includes('/storage/v1')) return 'STORAGE';
     if (pathname.includes('/rest/v1')) return 'SUPABASE';
     return 'SUPABASE';
+}
+
+function getSupabaseFetchTimeoutMs(runtime: Exclude<PerfRuntime, 'either'>) {
+    if (runtime === 'client') {
+        return DEFAULT_CLIENT_SUPABASE_FETCH_TIMEOUT_MS;
+    }
+
+    const configured = Number(process.env.SUPABASE_FETCH_TIMEOUT_MS);
+    if (Number.isFinite(configured) && configured > 0) {
+        return configured;
+    }
+
+    return DEFAULT_SERVER_SUPABASE_FETCH_TIMEOUT_MS;
+}
+
+async function fetchWithTimeout(
+    fetchImpl: typeof fetch,
+    input: string | URL | Request,
+    init: RequestInit | undefined,
+    timeoutMs: number,
+    label: string,
+) {
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+        return fetchImpl(input, init);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+        controller.abort(new Error(`${label} timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+    const upstreamSignal = init?.signal;
+    const abortFromUpstream = () => {
+        controller.abort(upstreamSignal?.reason);
+    };
+
+    if (upstreamSignal) {
+        if (upstreamSignal.aborted) {
+            abortFromUpstream();
+        } else {
+            upstreamSignal.addEventListener('abort', abortFromUpstream, { once: true });
+        }
+    }
+
+    try {
+        return await fetchImpl(input, {
+            ...init,
+            signal: controller.signal,
+        });
+    } finally {
+        clearTimeout(timeoutId);
+        if (upstreamSignal) {
+            upstreamSignal.removeEventListener('abort', abortFromUpstream);
+        }
+    }
 }
 
 function getOperationLabel(method: string, pathname: string, searchParams: URLSearchParams) {
@@ -112,7 +169,7 @@ export function createInstrumentedSupabaseFetch(
         const requestUrl = resolveUrl(input);
         const isSupabaseRequest = Boolean(supabaseUrl) && requestUrl.startsWith(String(supabaseUrl));
 
-        if (!isSupabaseRequest || !isPerfEnabled(runtime)) {
+        if (!isSupabaseRequest) {
             return fetchImpl(input, init);
         }
 
@@ -122,11 +179,23 @@ export function createInstrumentedSupabaseFetch(
         const operation = getOperationLabel(method, parsedUrl.pathname, parsedUrl.searchParams);
         const table = getTableLabel(parsedUrl.pathname);
         const selectValue = parsedUrl.searchParams.get('select') || '';
+        const timeoutMs = getSupabaseFetchTimeoutMs(runtime);
+        const timedFetch = () => fetchWithTimeout(
+            fetchImpl,
+            input,
+            init,
+            timeoutMs,
+            `${runtime}:${service}:${operation}`,
+        );
+
+        if (!isPerfEnabled(runtime)) {
+            return timedFetch();
+        }
 
         const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
 
         try {
-            const response = await fetchImpl(input, init);
+            const response = await timedFetch();
             const durationMs = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt;
             const inspection = await inspectSupabaseResponse(response);
 
