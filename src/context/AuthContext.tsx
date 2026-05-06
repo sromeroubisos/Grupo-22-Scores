@@ -44,6 +44,62 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AUTH_LOCAL_USER_KEY = 'g22_user';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function readCachedAuthUser(): User | null {
+    if (typeof window === 'undefined') return null;
+
+    try {
+        const raw = window.localStorage.getItem(AUTH_LOCAL_USER_KEY);
+        if (!raw) return null;
+
+        const parsed = JSON.parse(raw) as unknown;
+        if (!isRecord(parsed)) return null;
+        if (typeof parsed.id !== 'string' || typeof parsed.email !== 'string') return null;
+
+        const name = typeof parsed.name === 'string' && parsed.name.trim()
+            ? parsed.name
+            : parsed.email.split('@')[0] || 'Usuario';
+        const onboardingCompleted =
+            typeof parsed.onboardingCompleted === 'boolean'
+                ? parsed.onboardingCompleted
+                : null;
+
+        return {
+            id: parsed.id,
+            name,
+            email: parsed.email,
+            role: normalizeRole(typeof parsed.role === 'string' ? parsed.role : null),
+            avatarUrl: typeof parsed.avatarUrl === 'string' ? parsed.avatarUrl : undefined,
+            unionId: typeof parsed.unionId === 'string' ? parsed.unionId : undefined,
+            tournamentId: typeof parsed.tournamentId === 'string' ? parsed.tournamentId : undefined,
+            clubId: typeof parsed.clubId === 'string' ? parsed.clubId : undefined,
+            memberships: Array.isArray(parsed.memberships) ? (parsed.memberships as MembershipLike[]) : undefined,
+            onboardingCompleted,
+        };
+    } catch {
+        return null;
+    }
+}
+
+function writeCachedAuthUser(user: User | null) {
+    if (typeof window === 'undefined') return;
+
+    try {
+        if (!user) {
+            window.localStorage.removeItem(AUTH_LOCAL_USER_KEY);
+            return;
+        }
+
+        window.localStorage.setItem(AUTH_LOCAL_USER_KEY, JSON.stringify(user));
+    } catch {
+        // Local persistence is best-effort only; Supabase cookies remain the source of truth.
+    }
+}
 
 const isAbortError = (err: unknown) => {
     if (!(err instanceof Error)) {
@@ -62,10 +118,20 @@ const isSupabaseNetworkError = (err: unknown) => {
         return false;
     }
 
+    const maybeStatus = (err as { status?: unknown }).status;
+    const status = typeof maybeStatus === 'number' ? maybeStatus : null;
+    const message = err.message.toLowerCase();
+
     return (
-        err.message.includes('Failed to fetch') ||
-        err.message.includes('NetworkError') ||
-        err.message.includes('Load failed')
+        err.name === 'AuthRetryableFetchError' ||
+        status === 0 ||
+        (typeof status === 'number' && status >= 500) ||
+        message.includes('failed to fetch') ||
+        message.includes('networkerror') ||
+        message.includes('load failed') ||
+        message.includes('timeout') ||
+        message.includes('context canceled') ||
+        message.includes('temporarily unavailable')
     );
 };
 
@@ -94,8 +160,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const skipAuthBootstrap = isAuthEntryPath(pathname);
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const initialCachedUser = skipAuthBootstrap ? null : readCachedAuthUser();
+    const [user, setUser] = useState<User | null>(() => initialCachedUser);
+    const [isLoading, setIsLoading] = useState(() => !initialCachedUser);
     const supabaseRef = useRef<LooseSupabaseClient | null>(null);
     const isMounted = useRef(true);
     const authProviderStartedAt = useRef(nowMs());
@@ -119,6 +186,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 warnAfterCount: 2,
             },
         );
+    }, []);
+
+    const setPersistentUser = useCallback((
+        value: User | null | ((prev: User | null) => User | null)
+    ) => {
+        setUser((prev) => {
+            const next = typeof value === 'function' ? value(prev) : value;
+            writeCachedAuthUser(next);
+            return next;
+        });
     }, []);
 
     const getSupabaseClient = useCallback(() => {
@@ -162,7 +239,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // waiting on the (potentially slow) `users` and onboarding queries.
         // The profile fetch below will refine name/role/avatar once it arrives.
         if (isMounted.current) {
-            setUser((prev) => {
+            setPersistentUser((prev) => {
                 if (prev && prev.id === sbUser.id) return prev;
                 return buildOptimisticUser(
                     sbUser,
@@ -248,7 +325,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 };
 
                 console.log('[AuthContext] Setting user with profile:', finalUser.email, 'role:', finalUser.role, 'onboardingCompleted:', onboardingCompleted);
-                setUser(finalUser);
+                setPersistentUser(finalUser);
             } else {
                 const fallbackRole = getReservedAdminRole(sbUser.email) ?? 'fan';
 
@@ -264,7 +341,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 });
 
                 console.log('[AuthContext] No profile in DB, using fallback metadata with role:', fallbackRole);
-                setUser({
+                setPersistentUser({
                     id: sbUser.id,
                     name: sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
                     email: sbUser.email || '',
@@ -276,7 +353,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (err: unknown) {
             if (isAbortError(err)) return;
             console.error('[AuthContext] Error fetching user profile:', err);
-            setUser({
+            setPersistentUser({
                 id: sbUser.id,
                 name: sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
                 email: sbUser.email || '',
@@ -289,7 +366,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setIsLoading(false);
             }
         }
-    }, [getSupabaseClient, rehydrateMissingOnboardingStatus, resolveFallbackOnboarding, trackAuthDuplicate]);
+    }, [getSupabaseClient, rehydrateMissingOnboardingStatus, resolveFallbackOnboarding, setPersistentUser, trackAuthDuplicate]);
 
     useEffect(() => {
         isMounted.current = true;
@@ -342,7 +419,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         await fetchAndSetUser(session.user);
                     } else {
                         console.log('[AuthContext] initAuth: No session');
-                        setUser(null);
+                        setPersistentUser(null);
                         setIsLoading(false);
                     }
                 }
@@ -356,7 +433,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     return;
                 }
                 console.error('[AuthContext] initAuth error:', err);
-                if (isMounted.current) setIsLoading(false);
+                if (isMounted.current) {
+                    setPersistentUser(null);
+                    setIsLoading(false);
+                }
             }
         };
 
@@ -411,7 +491,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         lastAuthEventRef.current = { event, userId: session.user.id };
                     } else {
                         console.warn('[AuthContext] SIGNED_IN event received but no user present in session');
-                        setUser(null);
+                        setPersistentUser(null);
                         setIsLoading(false);
                     }
                 } else if (event === 'TOKEN_REFRESHED') {
@@ -422,7 +502,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     if (!session?.user) {
                         return;
                     }
-                    setUser((prev) => {
+                    setPersistentUser((prev) => {
                         if (!prev) return prev;
                         if (prev.id !== session.user.id) return prev;
                         const nextAvatar = session.user.user_metadata?.avatar_url ?? prev.avatarUrl;
@@ -431,9 +511,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     });
                 } else if (event === 'SIGNED_OUT') {
                     console.log('[AuthContext] Event result: signing out');
-                    setUser(null);
+                    setPersistentUser(null);
                     setIsLoading(false);
-                    localStorage.removeItem('g22_user');
                     lastAuthEventRef.current = { event, userId: null };
                     // Invalidate any server-rendered user-specific data so the UI
                     // reflects the signed-out state on the next paint.
@@ -465,7 +544,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isMounted.current = false;
             subscription.unsubscribe();
         };
-    }, [fetchAndSetUser, getSupabaseClient, router, skipAuthBootstrap, trackAuthDuplicate]);
+    }, [fetchAndSetUser, getSupabaseClient, router, setPersistentUser, skipAuthBootstrap, trackAuthDuplicate]);
 
     const login = (_role: AppUserRole = 'fan', returnTo?: string) => {
         void _role;
@@ -483,11 +562,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // flips to signed-out without waiting on the Supabase round trip
         // (the auth `/logout` endpoint occasionally takes seconds on slow auth).
         if (isMounted.current) {
-            setUser(null);
+            setPersistentUser(null);
             setIsLoading(false);
-        }
-        if (typeof window !== 'undefined') {
-            try { localStorage.removeItem('g22_user'); } catch { /* noop */ }
         }
         clearFavoritesLocalCache();
         try { router.refresh(); } catch { /* noop */ }
@@ -533,7 +609,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             if (isMounted.current) {
-                setUser(prev => prev ? { ...prev, onboardingCompleted } : null);
+                setPersistentUser(prev => prev ? { ...prev, onboardingCompleted } : null);
             }
         } catch (err) {
             console.error('[AuthContext] refreshOnboardingStatus error:', err);

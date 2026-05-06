@@ -2,6 +2,11 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { createInstrumentedSupabaseFetch } from '@/lib/perf/supabase';
 import { logPerf, measureAsync } from '@/lib/perf/measure';
+import {
+    getSupabaseAuthCookieOptions,
+    getSupabaseAuthStorageKey,
+    MAX_SUPABASE_AUTH_COOKIE_CHUNKS,
+} from '@/lib/supabase/auth-cookie';
 
 const AUTH_REFRESH_TIMEOUT_MS = 2500;
 const SHOULD_LOG_PROXY_AUTH = process.env.ENABLE_SERVER_PERF_LOGS === 'true' || process.env.NODE_ENV !== 'production';
@@ -24,14 +29,8 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): 
     });
 }
 
-function getSupabaseProjectRef(): string | null {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (!supabaseUrl) return null;
-    try {
-        return new URL(supabaseUrl).hostname.split('.')[0] || null;
-    } catch {
-        return null;
-    }
+function getSupabaseAuthCookieBaseName(): string | null {
+    return getSupabaseAuthStorageKey();
 }
 
 function decodeBase64Url(value: string): string | null {
@@ -49,16 +48,15 @@ function decodeBase64Url(value: string): string | null {
 }
 
 function readAuthCookieValue(request: NextRequest): string | null {
-    const projectRef = getSupabaseProjectRef();
-    if (!projectRef) return null;
+    const baseName = getSupabaseAuthCookieBaseName();
+    if (!baseName) return null;
 
-    const baseName = `sb-${projectRef}-auth-token`;
     const direct = request.cookies.get(baseName)?.value;
     if (direct) return direct;
 
     // The cookie is chunked (.0, .1, ...) when it exceeds the browser's size limit.
     const chunks: string[] = [];
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; i++) {
         const chunk = request.cookies.get(`${baseName}.${i}`)?.value;
         if (!chunk) break;
         chunks.push(chunk);
@@ -153,6 +151,9 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
+            cookieOptions: getSupabaseAuthCookieOptions(
+                request.headers.get('x-forwarded-host') || request.headers.get('host') || request.nextUrl.hostname,
+            ),
             cookies: {
                 getAll() {
                     return request.cookies.getAll()
@@ -187,6 +188,9 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                     })
                     cookiesToSet.forEach(({ name, value, options }) => {
                         const isProd = process.env.NODE_ENV === 'production';
+                        const sharedCookieOptions = getSupabaseAuthCookieOptions(
+                            request.headers.get('x-forwarded-host') || request.headers.get('host') || request.nextUrl.hostname,
+                        );
                         // NOTE on httpOnly: @supabase/ssr requires the browser
                         // client to read the auth cookie via document.cookie to
                         // refresh sessions, so we cannot set httpOnly: true on
@@ -195,12 +199,13 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                         // access-token TTL, refresh-token rotation, and a strong
                         // CSP at the app shell to limit XSS exfiltration.
                         const cookieOptions = {
+                            ...sharedCookieOptions,
                             ...options,
                             sameSite: 'lax' as const,
                             secure: isProd,
                             httpOnly: false,
                             path: '/',
-                            ...(isProd && { domain: '.g22scores.com' })
+                            ...(sharedCookieOptions.domain ? { domain: sharedCookieOptions.domain } : {}),
                         };
                         response.cookies.set(name, value, cookieOptions)
                     })
