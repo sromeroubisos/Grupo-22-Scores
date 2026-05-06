@@ -1940,7 +1940,17 @@ export default function TournamentDetailPage({
         const controller = new AbortController();
         (async () => {
             try {
-                const res = await fetch(`/api/db/tournaments/${encodeURIComponent(id)}/seasons`, {
+                const query = new URLSearchParams();
+                const pageQuery = typeof window !== 'undefined'
+                    ? new URLSearchParams(window.location.search)
+                    : new URLSearchParams();
+                const selectedSeasonParam =
+                    pageQuery.get('seasonId') ||
+                    pageQuery.get('season_id') ||
+                    pageQuery.get('season') ||
+                    ((initialData?.season as any)?.id ? String((initialData?.season as any).id) : null);
+                if (selectedSeasonParam) query.set('seasonId', selectedSeasonParam);
+                const res = await fetch(`/api/db/tournaments/${encodeURIComponent(id)}/seasons${query.size ? `?${query.toString()}` : ''}`, {
                     signal: controller.signal,
                     cache: 'no-store',
                 });
@@ -1959,7 +1969,7 @@ export default function TournamentDetailPage({
             }
         })();
         return () => controller.abort();
-    }, [id]);
+    }, [id, initialData?.season]);
 
     useEffect(() => {
         if (!seasonMenuOpen) return;

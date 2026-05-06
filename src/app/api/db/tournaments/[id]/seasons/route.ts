@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
-import { mergeSlugSeasonFamilyIntoSet, mergeSlugSeasonFamilyIntoSetLoose } from '@/lib/tournamentSeasonChain';
+import {
+    collectSeasonLinkedTournamentIds,
+    mergeSlugSeasonFamilyIntoSet,
+    mergeSlugSeasonFamilyIntoSetLoose,
+} from '@/lib/tournamentSeasonChain';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -10,8 +14,6 @@ const NO_STORE_HEADERS = {
     Pragma: 'no-cache',
     Expires: '0',
 };
-
-const SEASON_RELATION_TYPES = ['previous_season', 'next_season'] as const;
 
 type TournamentRow = {
     id: string;
@@ -25,13 +27,6 @@ type TournamentRow = {
     country_id?: string | null;
 };
 
-type RelationRow = {
-    source_tournament_id: string;
-    target_tournament_id: string;
-    relation_type: string;
-    status: string | null;
-};
-
 type SeasonOption = {
     id: string;
     label: string;
@@ -40,6 +35,18 @@ type SeasonOption = {
     seasonId: string | null;
     isCurrent: boolean;
     href: string;
+};
+type TournamentSeasonRow = {
+    id: string;
+    tournament_id: string;
+    season_code: string | null;
+    name: string | null;
+    display_name: string | null;
+    status: string | null;
+    is_active: boolean | null;
+    start_date?: string | null;
+    end_date?: string | null;
+    created_at?: string | null;
 };
 
 function jsonNoStore(body: unknown, init?: ResponseInit) {
@@ -61,9 +68,18 @@ function pickLabel(row: TournamentRow): string {
     return row.display_name || row.name || 'Temporada';
 }
 
+function pickSeasonLabel(row: TournamentSeasonRow): string {
+    return String(row.season_code || row.display_name || row.name || 'Temporada').trim();
+}
+
+function pickSeasonName(row: TournamentSeasonRow): string {
+    const label = pickSeasonLabel(row);
+    return String(row.display_name || row.name || label).trim();
+}
+
 function compareSeasonLabels(a: SeasonOption, b: SeasonOption): number {
-    const yearA = Number.parseInt(String(a.seasonId ?? a.label), 10);
-    const yearB = Number.parseInt(String(b.seasonId ?? b.label), 10);
+    const yearA = Number.parseInt(String(a.label || a.seasonId || ''), 10);
+    const yearB = Number.parseInt(String(b.label || b.seasonId || ''), 10);
     if (Number.isFinite(yearA) && Number.isFinite(yearB) && yearA !== yearB) {
         return yearB - yearA;
     }
@@ -138,78 +154,12 @@ export async function GET(
         req.nextUrl.searchParams.get('season_id') ||
         req.nextUrl.searchParams.get('season');
 
-    const { data: tournamentSeasonRows, error: tournamentSeasonError } = await supabase
-        .from('tournament_seasons')
-        .select('id, tournament_id, season_code, name, display_name, status, is_active, start_date, end_date')
-        .eq('tournament_id', lookup.id)
-        .order('season_code', { ascending: false })
-        .order('created_at', { ascending: false });
-
-    if (!tournamentSeasonError && Array.isArray(tournamentSeasonRows) && tournamentSeasonRows.length > 0) {
-        const activeSeason =
-            tournamentSeasonRows.find((season: any) => requestedSeasonId && season.id === requestedSeasonId) ||
-            tournamentSeasonRows.find((season: any) => season.is_active) ||
-            tournamentSeasonRows[0];
-
-        const seasons: SeasonOption[] = tournamentSeasonRows.map((season: any) => {
-            const label = String(season.season_code || season.display_name || season.name || 'Temporada').trim();
-            return {
-                id: season.id,
-                label,
-                name: season.display_name || season.name || label,
-                slug: lookup.slug,
-                seasonId: season.id,
-                isCurrent: season.id === activeSeason?.id,
-                href: `${buildHref(lookup.slug, lookup.id)}?seasonId=${encodeURIComponent(season.id)}`,
-            };
-        });
-
-        seasons.sort(compareSeasonLabels);
-        return jsonNoStore({ ok: true, seasons, currentId: activeSeason?.id ?? null, tournamentId: lookup.id });
-    }
-
-    const relationTypes = SEASON_RELATION_TYPES as unknown as string[];
-    const isActiveRelation = (rel: RelationRow) =>
-        (rel.status ?? 'active') !== 'inactive' && (rel.status ?? 'active') !== 'archived';
-
-    /** Full season cluster: walk previous_season/next_season as an undirected graph (linear chains were missing ends). */
     const involvedIds = new Set<string>([currentId]);
-    let grew = true;
-    while (grew) {
-        grew = false;
-        const frontier = Array.from(involvedIds);
-        const [{ data: bySource, error: errSource }, { data: byTarget, error: errTarget }] = await Promise.all([
-            supabase
-                .from('tournament_relations')
-                .select('source_tournament_id, target_tournament_id, relation_type, status')
-                .in('source_tournament_id', frontier)
-                .in('relation_type', relationTypes),
-            supabase
-                .from('tournament_relations')
-                .select('source_tournament_id, target_tournament_id, relation_type, status')
-                .in('target_tournament_id', frontier)
-                .in('relation_type', relationTypes),
-        ]);
-
-        if (errSource || errTarget) {
-            const msg = errSource?.message || errTarget?.message || 'relations query failed';
-            return jsonNoStore({ ok: false, seasons: [], error: msg }, { status: 500 });
-        }
-
-        const batch = [...(bySource ?? []), ...(byTarget ?? [])] as RelationRow[];
-        for (const rel of batch) {
-            if (!isActiveRelation(rel)) continue;
-            const a = rel.source_tournament_id;
-            const b = rel.target_tournament_id;
-            if (!involvedIds.has(a)) {
-                involvedIds.add(a);
-                grew = true;
-            }
-            if (!involvedIds.has(b)) {
-                involvedIds.add(b);
-                grew = true;
-            }
-        }
+    try {
+        const linkedIds = await collectSeasonLinkedTournamentIds(supabase as any, currentId);
+        linkedIds.forEach((linkedId) => involvedIds.add(linkedId));
+    } catch {
+        // Keep the public switcher useful even if relation metadata is temporarily unavailable.
     }
 
     await mergeSlugSeasonFamilyIntoSet(supabase as any, {
@@ -223,22 +173,6 @@ export async function GET(
         await mergeSlugSeasonFamilyIntoSetLoose(supabase as any, { slug: lookup.slug }, involvedIds);
     }
 
-    if (involvedIds.size <= 1) {
-        return jsonNoStore({
-            ok: true,
-            seasons: [{
-                id: lookup.id,
-                label: pickLabel(lookup),
-                name: lookup.display_name || lookup.name || 'Temporada',
-                slug: lookup.slug,
-                seasonId: lookup.season_id,
-                isCurrent: true,
-                href: buildHref(lookup.slug, lookup.id),
-            }],
-            currentId,
-        });
-    }
-
     const { data: tournamentRowsData, error: tournamentRowsError } = await supabase
         .from('tournaments')
         .select('id, name, display_name, slug, season_id, status, is_visible')
@@ -248,19 +182,60 @@ export async function GET(
         return jsonNoStore({ ok: false, seasons: [], error: tournamentRowsError.message }, { status: 500 });
     }
 
-    const rows = (tournamentRowsData ?? []) as TournamentRow[];
-    /* Same competition / linked seasons: list every edition so the switcher stays consistent on every URL. */
-    const seasons: SeasonOption[] = rows.map((row) => ({
-        id: row.id,
-        label: pickLabel(row),
-        name: row.display_name || row.name || 'Temporada',
-        slug: row.slug,
-        seasonId: row.season_id,
-        isCurrent: row.id === currentId,
-        href: buildHref(row.slug, row.id),
-    }));
+    const rows = ((tournamentRowsData ?? []) as TournamentRow[]);
+    if (!rows.some((row) => row.id === lookup.id)) {
+        rows.push(lookup);
+    }
+    const tournamentById = new Map(rows.map((row) => [row.id, row]));
+
+    const { data: tournamentSeasonRows, error: tournamentSeasonError } = await supabase
+        .from('tournament_seasons')
+        .select('id, tournament_id, season_code, name, display_name, status, is_active, start_date, end_date, created_at')
+        .in('tournament_id', Array.from(tournamentById.keys()))
+        .order('season_code', { ascending: false })
+        .order('created_at', { ascending: false });
+
+    const seasonRows = !tournamentSeasonError && Array.isArray(tournamentSeasonRows)
+        ? tournamentSeasonRows as TournamentSeasonRow[]
+        : [];
+    const currentTournamentSeasons = seasonRows.filter((season) => season.tournament_id === currentId);
+    const activeSeason =
+        currentTournamentSeasons.find((season) => requestedSeasonId && season.id === requestedSeasonId) ||
+        currentTournamentSeasons.find((season) => season.is_active) ||
+        currentTournamentSeasons[0] ||
+        null;
+
+    const seasons: SeasonOption[] = seasonRows.map((season) => {
+        const owner = tournamentById.get(season.tournament_id) || lookup;
+        const label = pickSeasonLabel(season);
+        return {
+            id: season.id,
+            label,
+            name: owner.id === lookup.id
+                ? pickSeasonName(season)
+                : `${owner.display_name || owner.name || 'Torneo'} - ${pickSeasonName(season)}`,
+            slug: owner.slug,
+            seasonId: season.id,
+            isCurrent: owner.id === currentId && season.id === activeSeason?.id,
+            href: `${buildHref(owner.slug, owner.id)}?seasonId=${encodeURIComponent(season.id)}`,
+        };
+    });
+
+    const tournamentIdsWithSeasonRows = new Set(seasonRows.map((season) => season.tournament_id));
+    for (const row of rows) {
+        if (tournamentIdsWithSeasonRows.has(row.id)) continue;
+        seasons.push({
+            id: row.id,
+            label: pickLabel(row),
+            name: row.display_name || row.name || 'Temporada',
+            slug: row.slug,
+            seasonId: row.season_id,
+            isCurrent: row.id === currentId && !activeSeason,
+            href: buildHref(row.slug, row.id),
+        });
+    }
 
     seasons.sort(compareSeasonLabels);
 
-    return jsonNoStore({ ok: true, seasons, currentId });
+    return jsonNoStore({ ok: true, seasons, currentId: activeSeason?.id ?? currentId, tournamentId: lookup.id });
 }

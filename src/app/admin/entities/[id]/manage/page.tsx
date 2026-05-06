@@ -19,10 +19,15 @@ import { TournamentParticipantsTab } from '@/components/admin/entities/tournamen
 import { TournamentOperationTab } from '@/components/admin/entities/tournament/TournamentOperationTab';
 import { TournamentRelatedTab } from '@/components/admin/entities/tournament/TournamentRelatedTab';
 import { Database } from '@/lib/database.types';
-import { getTournamentLinkedRelations, getTournamentRelatedTabData } from '@/lib/services/tournamentRelatedService';
+import { getTournamentRelatedTabData } from '@/lib/services/tournamentRelatedService';
 import { requireUserAccessContext } from '@/lib/auth/permissions';
 import { getManagedClubSummaries } from '@/lib/club-admin/managedClubFamily';
 import { normalizeClubManageTab } from '@/lib/club-admin/manageTabs';
+import {
+    collectSeasonLinkedTournamentIds,
+    mergeSlugSeasonFamilyIntoSet,
+    mergeSlugSeasonFamilyIntoSetLoose,
+} from '@/lib/tournamentSeasonChain';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +38,25 @@ type TournamentSeasonMenuItem = {
     subtitle: string;
     href: string;
     isCurrent: boolean;
+};
+type TournamentSeasonRow = {
+    id: string;
+    tournament_id: string;
+    season_code: string | null;
+    name: string | null;
+    display_name: string | null;
+    status: string | null;
+    is_active: boolean | null;
+    created_at?: string | null;
+};
+type TournamentSeasonOwnerRow = {
+    id: string;
+    name: string | null;
+    display_name: string | null;
+    slug: string | null;
+    season_id: string | null;
+    sport_id?: string | null;
+    country_id?: string | null;
 };
 
 interface ManagePageProps {
@@ -66,6 +90,180 @@ const TOURNAMENT_TAB_ALIASES: Record<string, string> = {
     estadisticas: 'operacion',
     sincronizacion: 'operacion',
 };
+
+function compactText(value: unknown): string | null {
+    if (typeof value !== 'string' && typeof value !== 'number') return null;
+    const text = String(value).trim();
+    return text || null;
+}
+
+function seasonMenuLabel(row: TournamentSeasonRow | TournamentSeasonOwnerRow): string {
+    if ('season_code' in row) {
+        return compactText(row.season_code)
+            || compactText(row.display_name)
+            || compactText(row.name)
+            || 'Temporada';
+    }
+
+    return compactText(row.season_id)
+        || compactText(row.display_name)
+        || compactText(row.name)
+        || 'Temporada';
+}
+
+function compareSeasonMenuItems(left: TournamentSeasonMenuItem, right: TournamentSeasonMenuItem) {
+    const leftYear = Number.parseInt(left.label, 10);
+    const rightYear = Number.parseInt(right.label, 10);
+    if (Number.isFinite(leftYear) && Number.isFinite(rightYear) && leftYear !== rightYear) {
+        return rightYear - leftYear;
+    }
+    return right.label.localeCompare(left.label, 'es');
+}
+
+function buildTournamentManageHref(
+    tournamentId: string,
+    currentTab: string,
+    currentSubtab: string | null,
+    seasonId?: string | null,
+) {
+    const params = new URLSearchParams();
+    params.set('type', 'tournament');
+    params.set('tab', currentTab);
+    if (currentSubtab && currentTab === 'operacion') {
+        params.set('subtab', currentSubtab);
+    }
+    if (seasonId) {
+        params.set('seasonId', seasonId);
+    }
+    return `/admin/entities/${tournamentId}/manage?${params.toString()}`;
+}
+
+async function buildTournamentSeasonNavigation({
+    supabase,
+    tournament,
+    currentTab,
+    currentSubtab,
+    requestedSeasonId,
+}: {
+    supabase: Awaited<ReturnType<typeof createClient>>;
+    tournament: TournamentRow;
+    currentTab: string;
+    currentSubtab: string | null;
+    requestedSeasonId: string | null;
+}): Promise<{ shellData: TournamentRow; items: TournamentSeasonMenuItem[] }> {
+    const ownerIds = new Set<string>([tournament.id]);
+
+    try {
+        const linkedIds = await collectSeasonLinkedTournamentIds(supabase as any, tournament.id);
+        linkedIds.forEach((linkedId) => ownerIds.add(linkedId));
+    } catch {
+        // The switcher still works with the current tournament if relation metadata is unavailable.
+    }
+
+    try {
+        await mergeSlugSeasonFamilyIntoSet(supabase as any, {
+            id: tournament.id,
+            slug: tournament.slug,
+            sport_id: tournament.sport_id,
+            country_id: tournament.country_id,
+        }, ownerIds);
+        if (ownerIds.size <= 1) {
+            await mergeSlugSeasonFamilyIntoSetLoose(supabase as any, { slug: tournament.slug }, ownerIds);
+        }
+    } catch {
+        // Slug fallback is best-effort; explicit relations remain the source of truth.
+    }
+
+    const ownerIdList = Array.from(ownerIds);
+    const { data: ownerRowsData } = await supabase
+        .from('tournaments')
+        .select('id, name, display_name, slug, season_id, sport_id, country_id')
+        .in('id', ownerIdList);
+
+    const ownerRows = (Array.isArray(ownerRowsData) && ownerRowsData.length > 0
+        ? ownerRowsData
+        : [tournament]) as TournamentSeasonOwnerRow[];
+    const ownerMap = new Map<string, TournamentSeasonOwnerRow>();
+    ownerRows.forEach((row) => ownerMap.set(row.id, row));
+    ownerMap.set(tournament.id, {
+        id: tournament.id,
+        name: tournament.name,
+        display_name: tournament.display_name,
+        slug: tournament.slug,
+        season_id: tournament.season_id,
+        sport_id: tournament.sport_id,
+        country_id: tournament.country_id,
+    });
+
+    const { data: seasonRowsData } = await supabase
+        .from('tournament_seasons')
+        .select('id, tournament_id, season_code, name, display_name, status, is_active, created_at')
+        .in('tournament_id', Array.from(ownerMap.keys()))
+        .order('season_code', { ascending: false })
+        .order('created_at', { ascending: false });
+
+    const seasonRows = Array.isArray(seasonRowsData) ? seasonRowsData as TournamentSeasonRow[] : [];
+    const currentTournamentSeasons = seasonRows.filter((row) => row.tournament_id === tournament.id);
+    const selectedSeason =
+        currentTournamentSeasons.find((row) => requestedSeasonId && row.id === requestedSeasonId) ||
+        currentTournamentSeasons.find((row) => row.is_active) ||
+        currentTournamentSeasons[0] ||
+        null;
+
+    const shellData = selectedSeason
+        ? { ...tournament, season_id: seasonMenuLabel(selectedSeason) } as TournamentRow
+        : tournament;
+
+    const items: TournamentSeasonMenuItem[] = seasonRows.map((seasonRow) => {
+        const owner = ownerMap.get(seasonRow.tournament_id) || ownerMap.get(tournament.id)!;
+        const label = seasonMenuLabel(seasonRow);
+        const seasonTitle = compactText(seasonRow.display_name) || compactText(seasonRow.name) || label;
+        const ownerTitle = compactText(owner.display_name) || compactText(owner.name) || 'Torneo';
+        const subtitle = owner.id === tournament.id
+            ? seasonTitle
+            : `${ownerTitle} - ${seasonTitle}`;
+
+        return {
+            id: seasonRow.id,
+            label,
+            subtitle,
+            href: buildTournamentManageHref(owner.id, currentTab, currentSubtab, seasonRow.id),
+            isCurrent: owner.id === tournament.id && seasonRow.id === selectedSeason?.id,
+        };
+    });
+
+    const ownersWithSeasonRows = new Set(seasonRows.map((row) => row.tournament_id));
+    ownerRows
+        .filter((owner) => !ownersWithSeasonRows.has(owner.id))
+        .forEach((owner) => {
+            const label = seasonMenuLabel(owner);
+            items.push({
+                id: owner.id,
+                label,
+                subtitle: compactText(owner.display_name) || compactText(owner.name) || label,
+                href: buildTournamentManageHref(owner.id, currentTab, currentSubtab),
+                isCurrent: owner.id === tournament.id && !selectedSeason,
+            });
+        });
+
+    if (items.length === 0) {
+        const label = tournament.season_id || '--';
+        items.push({
+            id: tournament.id,
+            label,
+            subtitle: tournament.display_name || tournament.name,
+            href: buildTournamentManageHref(tournament.id, currentTab, currentSubtab, requestedSeasonId),
+            isCurrent: true,
+        });
+    }
+
+    return {
+        shellData,
+        items: items
+            .filter((item, index, list) => list.findIndex((candidate) => candidate.href === item.href) === index)
+            .sort(compareSeasonMenuItems),
+    };
+}
 
 export default async function ManageEntityPage({ params, searchParams }: ManagePageProps) {
     const { id } = await params;
@@ -181,7 +379,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
         tournamentShellData = tournamentData;
         const needsDetailsData = effectiveTab === 'detalles';
         const needsMatchCount = effectiveTab === 'resumen';
-        const [{ data: unionsData }, { data: matchRows }, { data: countriesData }, linkedRelations] = await Promise.all([
+        const [{ data: unionsData }, { data: matchRows }, { data: countriesData }, seasonNavigation] = await Promise.all([
             needsDetailsData
                 ? supabase.from('unions').select('id, name').order('name')
                 : Promise.resolve({ data: [] as Array<{ id: string; name: string }> }),
@@ -191,103 +389,21 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
             needsDetailsData
                 ? supabase.from('countries').select('id, name, code, flag_emoji').order('name')
                 : Promise.resolve({ data: [] as Array<{ id: string; name: string; code: string | null; flag_emoji: string | null }> }),
-            getTournamentLinkedRelations(id),
+            buildTournamentSeasonNavigation({
+                supabase,
+                tournament: tournamentData,
+                currentTab: effectiveTab,
+                currentSubtab: effectiveSubtab,
+                requestedSeasonId: requestedTournamentSeasonId,
+            }),
         ]);
         tournamentUnions = unionsData ?? [];
         tournamentCountries = countriesData ?? [];
         tournamentMatchCount = matchRows?.length ?? 0;
+        tournamentShellData = seasonNavigation.shellData;
+        tournamentSeasonMenuItems = seasonNavigation.items;
         if (tournamentData.union_id) {
             tournamentUnionName = tournamentUnions.find((unionItem) => unionItem.id === tournamentData.union_id)?.name;
-        }
-
-        const { data: seasonRows } = await supabase
-            .from('tournament_seasons')
-            .select('id, season_code, name, display_name, status, is_active')
-            .eq('tournament_id', id)
-            .order('season_code', { ascending: false })
-            .order('created_at', { ascending: false });
-
-        if (Array.isArray(seasonRows) && seasonRows.length > 0) {
-            const selectedSeason =
-                seasonRows.find((row: any) => requestedTournamentSeasonId && row.id === requestedTournamentSeasonId) ||
-                seasonRows.find((row: any) => row.is_active) ||
-                seasonRows[0];
-
-            tournamentShellData = {
-                ...tournamentData,
-                season_id: selectedSeason?.season_code ?? tournamentData.season_id,
-            } as TournamentRow;
-
-            const activeParams = new URLSearchParams();
-            activeParams.set('type', 'tournament');
-            activeParams.set('tab', effectiveTab);
-            if (effectiveSubtab && effectiveTab === 'operacion') {
-                activeParams.set('subtab', effectiveSubtab);
-            }
-
-            tournamentSeasonMenuItems = seasonRows.map((row: any) => {
-                const paramsForSeason = new URLSearchParams(activeParams.toString());
-                paramsForSeason.set('seasonId', row.id);
-                const label = String(row.season_code || row.display_name || row.name || 'Temporada').trim();
-                return {
-                    id: row.id,
-                    label,
-                    subtitle: row.display_name || row.name || label,
-                    href: `/admin/entities/${id}/manage?${paramsForSeason.toString()}`,
-                    isCurrent: row.id === selectedSeason?.id,
-                };
-            });
-        }
-
-        const activeParams = new URLSearchParams();
-        activeParams.set('type', 'tournament');
-        activeParams.set('tab', effectiveTab);
-        if (effectiveSubtab && effectiveTab === 'operacion') {
-            activeParams.set('subtab', effectiveSubtab);
-        }
-
-        if (requestedTournamentSeasonId) {
-            activeParams.set('seasonId', requestedTournamentSeasonId);
-        }
-
-        const seasonRelationTypes = new Set(['previous_season', 'next_season']);
-        const linkedSeasonItems = linkedRelations.items
-            .filter((item) => seasonRelationTypes.has(item.relationType))
-            .reduce<TournamentSeasonMenuItem[]>((items, item) => {
-                if (items.some((existing) => existing.id === item.linkedTournamentId)) {
-                    return items;
-                }
-
-                const paramsForItem = new URLSearchParams(activeParams.toString());
-                items.push({
-                    id: item.linkedTournamentId,
-                    label: item.season || item.linkedTournamentName,
-                    subtitle: item.linkedTournamentName,
-                    href: `/admin/entities/${item.linkedTournamentId}/manage?${paramsForItem.toString()}`,
-                    isCurrent: false,
-                });
-                return items;
-            }, [])
-            .sort((left, right) => {
-                const leftYear = Number.parseInt(left.label, 10);
-                const rightYear = Number.parseInt(right.label, 10);
-                if (Number.isFinite(leftYear) && Number.isFinite(rightYear) && leftYear !== rightYear) {
-                    return rightYear - leftYear;
-                }
-                return right.label.localeCompare(left.label, 'es');
-            });
-
-        if (tournamentSeasonMenuItems.length === 0) {
-            tournamentSeasonMenuItems = [
-                {
-                    id,
-                    label: tournamentData.season_id || '--',
-                    subtitle: tournamentData.display_name || tournamentData.name,
-                    href: `/admin/entities/${id}/manage?${activeParams.toString()}`,
-                    isCurrent: true,
-                },
-                ...linkedSeasonItems,
-            ];
         }
     }
 
