@@ -3316,7 +3316,7 @@ export default function TournamentDetailPage({
                                     {yearDisplay && (
                                         <>
                                             <span className={styles.heroMetaDot} />
-                                            {seasonOptions.length > 1 ? (
+                                            {seasonOptions.length > 0 ? (
                                                 <span className={styles.seasonSwitcher}>
                                                     <button
                                                         type="button"

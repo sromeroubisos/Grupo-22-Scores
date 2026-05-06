@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
 import {
     collectSeasonLinkedTournamentIds,
+    collectTournamentSeasonFamilyRows,
     mergeSlugSeasonFamilyIntoSet,
     mergeSlugSeasonFamilyIntoSetLoose,
+    type TournamentSeasonFamilyRow,
 } from '@/lib/tournamentSeasonChain';
 
 export const dynamic = 'force-dynamic';
@@ -36,19 +38,6 @@ type SeasonOption = {
     isCurrent: boolean;
     href: string;
 };
-type TournamentSeasonRow = {
-    id: string;
-    tournament_id: string;
-    season_code: string | null;
-    name: string | null;
-    display_name: string | null;
-    status: string | null;
-    is_active: boolean | null;
-    start_date?: string | null;
-    end_date?: string | null;
-    created_at?: string | null;
-};
-
 function jsonNoStore(body: unknown, init?: ResponseInit) {
     return NextResponse.json(body, {
         ...init,
@@ -68,11 +57,11 @@ function pickLabel(row: TournamentRow): string {
     return row.display_name || row.name || 'Temporada';
 }
 
-function pickSeasonLabel(row: TournamentSeasonRow): string {
+function pickSeasonLabel(row: TournamentSeasonFamilyRow): string {
     return String(row.season_code || row.display_name || row.name || 'Temporada').trim();
 }
 
-function pickSeasonName(row: TournamentSeasonRow): string {
+function pickSeasonName(row: TournamentSeasonFamilyRow): string {
     const label = pickSeasonLabel(row);
     return String(row.display_name || row.name || label).trim();
 }
@@ -173,6 +162,12 @@ export async function GET(
         await mergeSlugSeasonFamilyIntoSetLoose(supabase as any, { slug: lookup.slug }, involvedIds);
     }
 
+    const seasonRows = await collectTournamentSeasonFamilyRows(supabase as any, involvedIds, requestedSeasonId);
+    seasonRows.forEach((season) => {
+        if (season.tournament_id) involvedIds.add(season.tournament_id);
+        if (season.legacy_tournament_id) involvedIds.add(season.legacy_tournament_id);
+    });
+
     const { data: tournamentRowsData, error: tournamentRowsError } = await supabase
         .from('tournaments')
         .select('id, name, display_name, slug, season_id, status, is_visible')
@@ -187,17 +182,6 @@ export async function GET(
         rows.push(lookup);
     }
     const tournamentById = new Map(rows.map((row) => [row.id, row]));
-
-    const { data: tournamentSeasonRows, error: tournamentSeasonError } = await supabase
-        .from('tournament_seasons')
-        .select('id, tournament_id, season_code, name, display_name, status, is_active, start_date, end_date, created_at')
-        .in('tournament_id', Array.from(tournamentById.keys()))
-        .order('season_code', { ascending: false })
-        .order('created_at', { ascending: false });
-
-    const seasonRows = !tournamentSeasonError && Array.isArray(tournamentSeasonRows)
-        ? tournamentSeasonRows as TournamentSeasonRow[]
-        : [];
     const currentTournamentSeasons = seasonRows.filter((season) => season.tournament_id === currentId);
     const activeSeason =
         currentTournamentSeasons.find((season) => requestedSeasonId && season.id === requestedSeasonId) ||

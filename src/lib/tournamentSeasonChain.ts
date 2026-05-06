@@ -4,13 +4,27 @@
  */
 
 type AnyDb = {
-    from: (t: string) => {
-        select: (...args: unknown[]) => any;
-        upsert: (...args: unknown[]) => any;
-    };
+    from: (t: string) => any;
 };
 
 const SEASON_LINK_TYPES = ['previous_season', 'next_season'];
+const TOURNAMENT_SEASON_SELECT =
+    'id, tournament_id, legacy_tournament_id, copied_from_season_id, season_code, name, display_name, status, is_active, start_date, end_date, created_at';
+
+export type TournamentSeasonFamilyRow = {
+    id: string;
+    tournament_id: string;
+    legacy_tournament_id?: string | null;
+    copied_from_season_id?: string | null;
+    season_code: string | null;
+    name: string | null;
+    display_name: string | null;
+    status: string | null;
+    is_active: boolean | null;
+    start_date?: string | null;
+    end_date?: string | null;
+    created_at?: string | null;
+};
 
 function isActiveRelStatus(status: string | null | undefined): boolean {
     const s = status ?? 'active';
@@ -135,6 +149,91 @@ export async function collectSeasonLinkedTournamentIds(db: AnyDb, startId: strin
         }
     }
     return involved;
+}
+
+function addId(into: Set<string>, value: unknown): boolean {
+    const id = typeof value === 'string' ? value.trim() : '';
+    if (!id || into.has(id)) return false;
+    into.add(id);
+    return true;
+}
+
+function mergeSeasonRows(into: Map<string, TournamentSeasonFamilyRow>, rows: unknown): boolean {
+    if (!Array.isArray(rows)) return false;
+    let grew = false;
+    for (const row of rows as TournamentSeasonFamilyRow[]) {
+        if (!row?.id || into.has(row.id)) continue;
+        into.set(row.id, row);
+        grew = true;
+    }
+    return grew;
+}
+
+async function getSeasonRowsBy(
+    db: AnyDb,
+    column: 'id' | 'tournament_id' | 'legacy_tournament_id' | 'copied_from_season_id',
+    ids: Set<string>,
+): Promise<TournamentSeasonFamilyRow[]> {
+    if (ids.size === 0) return [];
+    const query = db
+        .from('tournament_seasons')
+        .select(TOURNAMENT_SEASON_SELECT);
+
+    const { data, error } = column === 'id'
+        ? await query.in('id', Array.from(ids))
+        : await query.in(column, Array.from(ids));
+    if (error || !Array.isArray(data)) return [];
+    return data as TournamentSeasonFamilyRow[];
+}
+
+/**
+ * Returns every internal tournament_seasons row that belongs to the same season family:
+ * same tournament_id, same legacy_tournament_id, or any transitive copied_from_season_id chain.
+ */
+export async function collectTournamentSeasonFamilyRows(
+    db: AnyDb,
+    tournamentIds: Set<string>,
+    requestedSeasonId?: string | null,
+): Promise<TournamentSeasonFamilyRow[]> {
+    const ownerIds = new Set<string>(Array.from(tournamentIds).filter(Boolean));
+    const knownSeasonIds = new Set<string>();
+    const requested = typeof requestedSeasonId === 'string' ? requestedSeasonId.trim() : '';
+    if (requested) knownSeasonIds.add(requested);
+
+    const rowsById = new Map<string, TournamentSeasonFamilyRow>();
+    let grew = true;
+    while (grew) {
+        grew = false;
+        const [byTournament, byLegacyTournament, byKnownId, byCopiedFrom] = await Promise.all([
+            getSeasonRowsBy(db, 'tournament_id', ownerIds),
+            getSeasonRowsBy(db, 'legacy_tournament_id', ownerIds),
+            getSeasonRowsBy(db, 'id', knownSeasonIds),
+            getSeasonRowsBy(db, 'copied_from_season_id', knownSeasonIds),
+        ]);
+
+        grew = mergeSeasonRows(rowsById, byTournament) || grew;
+        grew = mergeSeasonRows(rowsById, byLegacyTournament) || grew;
+        grew = mergeSeasonRows(rowsById, byKnownId) || grew;
+        grew = mergeSeasonRows(rowsById, byCopiedFrom) || grew;
+
+        for (const row of rowsById.values()) {
+            grew = addId(ownerIds, row.tournament_id) || grew;
+            grew = addId(ownerIds, row.legacy_tournament_id) || grew;
+            grew = addId(knownSeasonIds, row.id) || grew;
+            grew = addId(knownSeasonIds, row.copied_from_season_id) || grew;
+        }
+    }
+
+    return Array.from(rowsById.values()).sort((left, right) => {
+        const leftCode = String(left.season_code || '');
+        const rightCode = String(right.season_code || '');
+        const leftYear = Number.parseInt(leftCode, 10);
+        const rightYear = Number.parseInt(rightCode, 10);
+        if (Number.isFinite(leftYear) && Number.isFinite(rightYear) && leftYear !== rightYear) {
+            return rightYear - leftYear;
+        }
+        return rightCode.localeCompare(leftCode, 'es') || String(right.created_at || '').localeCompare(String(left.created_at || ''));
+    });
 }
 
 export async function upsertPreviousSeasonEdge(db: AnyDb, olderTournamentId: string, newerTournamentId: string): Promise<void> {

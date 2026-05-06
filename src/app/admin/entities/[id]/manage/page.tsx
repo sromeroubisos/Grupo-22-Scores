@@ -25,8 +25,10 @@ import { getManagedClubSummaries } from '@/lib/club-admin/managedClubFamily';
 import { normalizeClubManageTab } from '@/lib/club-admin/manageTabs';
 import {
     collectSeasonLinkedTournamentIds,
+    collectTournamentSeasonFamilyRows,
     mergeSlugSeasonFamilyIntoSet,
     mergeSlugSeasonFamilyIntoSetLoose,
+    type TournamentSeasonFamilyRow,
 } from '@/lib/tournamentSeasonChain';
 
 export const dynamic = 'force-dynamic';
@@ -38,16 +40,6 @@ type TournamentSeasonMenuItem = {
     subtitle: string;
     href: string;
     isCurrent: boolean;
-};
-type TournamentSeasonRow = {
-    id: string;
-    tournament_id: string;
-    season_code: string | null;
-    name: string | null;
-    display_name: string | null;
-    status: string | null;
-    is_active: boolean | null;
-    created_at?: string | null;
 };
 type TournamentSeasonOwnerRow = {
     id: string;
@@ -97,7 +89,7 @@ function compactText(value: unknown): string | null {
     return text || null;
 }
 
-function seasonMenuLabel(row: TournamentSeasonRow | TournamentSeasonOwnerRow): string {
+function seasonMenuLabel(row: TournamentSeasonFamilyRow | TournamentSeasonOwnerRow): string {
     if ('season_code' in row) {
         return compactText(row.season_code)
             || compactText(row.display_name)
@@ -174,6 +166,12 @@ async function buildTournamentSeasonNavigation({
         // Slug fallback is best-effort; explicit relations remain the source of truth.
     }
 
+    const seasonRows = await collectTournamentSeasonFamilyRows(supabase as any, ownerIds, requestedSeasonId);
+    seasonRows.forEach((season) => {
+        if (season.tournament_id) ownerIds.add(season.tournament_id);
+        if (season.legacy_tournament_id) ownerIds.add(season.legacy_tournament_id);
+    });
+
     const ownerIdList = Array.from(ownerIds);
     const { data: ownerRowsData } = await supabase
         .from('tournaments')
@@ -195,14 +193,6 @@ async function buildTournamentSeasonNavigation({
         country_id: tournament.country_id,
     });
 
-    const { data: seasonRowsData } = await supabase
-        .from('tournament_seasons')
-        .select('id, tournament_id, season_code, name, display_name, status, is_active, created_at')
-        .in('tournament_id', Array.from(ownerMap.keys()))
-        .order('season_code', { ascending: false })
-        .order('created_at', { ascending: false });
-
-    const seasonRows = Array.isArray(seasonRowsData) ? seasonRowsData as TournamentSeasonRow[] : [];
     const currentTournamentSeasons = seasonRows.filter((row) => row.tournament_id === tournament.id);
     const selectedSeason =
         currentTournamentSeasons.find((row) => requestedSeasonId && row.id === requestedSeasonId) ||
