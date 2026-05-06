@@ -486,19 +486,17 @@
     background: transparent !important;
 }
 
+/* Tectonic Basalt — neutralized; see scoped override at bottom of file. */
 .structure-counter-shell {
-    min-height: 52px;
-    border-radius: 16px !important;
+    min-height: 0;
 }
 
 .structure-counter-shell button {
-    min-width: 42px;
-    font-size: 18px;
-    font-weight: 700;
+    /* see scoped override */
 }
 
 .structure-counter-shell input {
-    min-height: 50px;
+    /* see scoped override */
 }
 
 .structure-group-row {
@@ -1326,23 +1324,19 @@
     opacity: 0.8 !important;
 }
 
+/* Tectonic Basalt — neutralized old counter rules.
+ * Visual styling lives in the override block at the bottom of this file,
+ * scoped to .tournament-structure-shell. */
 .structure-counter-shell {
-    min-height: 64px;
-    border-radius: 22px !important;
-    border-color: rgba(148, 163, 184, 0.14) !important;
-    background: rgba(7, 10, 14, 0.94) !important;
+    min-height: 0;
 }
 
 .structure-counter-button {
-    min-width: 52px !important;
-    font-size: 24px !important;
-    color: #f8fafc !important;
+    /* see scoped override block */
 }
 
 .structure-counter-input {
-    min-height: 62px !important;
-    font-size: 2rem !important;
-    letter-spacing: -0.04em;
+    /* see scoped override block */
 }
 
 .structure-score-panel {
@@ -1488,4 +1482,672 @@
         rgba(247, 249, 252, 0.96) !important;
     border-color: rgba(15, 23, 42, 0.1) !important;
     color: #0f172a;
+}
+
+/* =============================================================================
+ * TECTONIC BASALT — UI OVERRIDE
+ * Aligns the Estructura tab to the reference HTML mock (flat plates, blue
+ * selection accent, JetBrains Mono metrics, square cards). Scoped to
+ * .tournament-structure-shell so the rest of the admin remains untouched.
+ * ========================================================================== */
+
+.tournament-structure-shell {
+    --tb-bg: #0F141A;
+    --tb-card: #151B22;
+    --tb-border: #26313B;
+    --tb-text: #F4F7FA;
+    --tb-text-2: #98A6B3;
+    --tb-green: #22C55E;
+    --tb-blue: #38BDF8;
+    --tb-red: #EF4444;
+    --tb-orange: #F59E0B;
+    --tb-plate-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+    --tb-tectonic-glow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+
+    color: var(--tb-text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+}
+
+/* ---- Eyebrow / section labels ---- */
+.tournament-structure-shell .basalt-section-kicker {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.75rem !important;
+    color: var(--tb-text-2) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.2em !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    border: 0 !important;
+    padding: 0 !important;
+    margin-bottom: 12px !important;
+    font-weight: 500 !important;
+}
+
+/* ---- Plate / card surfaces ---- */
+.tournament-structure-shell .basalt-card,
+.tournament-structure-shell .structure-module {
+    background: var(--tb-card) !important;
+    background-image: none !important;
+    border: 1px solid var(--tb-border) !important;
+    border-radius: 0 !important;
+    box-shadow: var(--tb-plate-shadow), var(--tb-tectonic-glow) !important;
+    padding: 32px !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ---- Titles inside plates ---- */
+.tournament-structure-shell .structure-module-title,
+.tournament-structure-shell .basalt-h1.structure-module-title,
+.tournament-structure-shell .structure-empty-title,
+.tournament-structure-shell .structure-hero-title {
+    font-size: clamp(1.5rem, 2.4vw, 2rem) !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.04em !important;
+    text-transform: uppercase !important;
+    color: var(--tb-text) !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    margin-bottom: 8px !important;
+    line-height: 1.05 !important;
+}
+
+.tournament-structure-shell .structure-module-copy,
+.tournament-structure-shell .structure-hero-text,
+.tournament-structure-shell .structure-empty-text {
+    color: var(--tb-text-2) !important;
+    font-size: 0.9rem !important;
+    max-width: 56ch;
+}
+
+/* ---- Model option cards (Torneo estándar / Circuito) ---- */
+.tournament-structure-shell .structure-option-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+    margin-top: 24px !important;
+    margin-bottom: 24px !important;
+}
+
+.tournament-structure-shell .structure-option-card {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid var(--tb-border) !important;
+    border-radius: 0 !important;
+    padding: 24px !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    color: var(--tb-text) !important;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tournament-structure-shell .structure-option-card:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: var(--tb-blue) !important;
+}
+
+.tournament-structure-shell .structure-option-card.is-active {
+    border-color: var(--tb-blue) !important;
+    background: rgba(56, 189, 248, 0.05) !important;
+    color: var(--tb-text) !important;
+}
+
+.tournament-structure-shell .structure-option-card > span:first-child {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: var(--tb-text) !important;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tournament-structure-shell .structure-option-card > span:first-child::before {
+    content: '';
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--tb-border);
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.tournament-structure-shell .structure-option-card.is-active > span:first-child::before {
+    border-color: var(--tb-blue);
+    background: var(--tb-blue);
+    box-shadow: 0 0 10px var(--tb-blue);
+}
+
+.tournament-structure-shell .structure-option-card > span:not(:first-child) {
+    font-size: 0.85rem !important;
+    color: var(--tb-text-2) !important;
+    opacity: 1 !important;
+    font-weight: 400 !important;
+}
+
+/* ---- Buttons ---- */
+.tournament-structure-shell .basalt-btn {
+    border-radius: 4px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-size: 0.85rem !important;
+    padding: 12px 24px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent !important;
+}
+
+.tournament-structure-shell .basalt-btn-primary {
+    background: var(--tb-green) !important;
+    color: #052E16 !important;
+    border-color: var(--tb-green) !important;
+    box-shadow: none !important;
+}
+
+.tournament-structure-shell .basalt-btn-primary:hover:not(:disabled) {
+    background: var(--tb-green) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4) !important;
+}
+
+.tournament-structure-shell .basalt-btn-secondary,
+.tournament-structure-shell .basalt-btn-ghost {
+    background: transparent !important;
+    border-color: var(--tb-border) !important;
+    color: var(--tb-text) !important;
+}
+
+.tournament-structure-shell .basalt-btn-secondary:hover:not(:disabled) {
+    background: var(--tb-border) !important;
+}
+
+/* ---- Metrics grid (Resumen de Estructura) ---- */
+.tournament-structure-shell .structure-summary-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+    margin-bottom: 0 !important;
+    max-width: none !important;
+}
+
+.tournament-structure-shell .structure-summary-card {
+    background: var(--tb-bg) !important;
+    background-image: none !important;
+    border: 1px solid var(--tb-border) !important;
+    border-radius: 0 !important;
+    padding: 20px !important;
+    text-align: center !important;
+    min-height: auto !important;
+    grid-template-rows: auto auto auto !important;
+    transform: none !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.tournament-structure-shell .structure-summary-card:hover {
+    background: var(--tb-bg) !important;
+    border-color: var(--tb-blue) !important;
+    transform: none !important;
+}
+
+.tournament-structure-shell .structure-summary-label {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.7rem !important;
+    color: var(--tb-text-2) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.14em !important;
+    order: 2 !important;
+    margin-top: 4px !important;
+}
+
+.tournament-structure-shell .structure-summary-value {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    color: var(--tb-blue) !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    order: 1 !important;
+    -webkit-text-fill-color: var(--tb-blue) !important;
+}
+
+.tournament-structure-shell .structure-summary-value--text {
+    font-size: 1.05rem !important;
+    color: var(--tb-text) !important;
+    -webkit-text-fill-color: var(--tb-text) !important;
+    line-height: 1.2 !important;
+}
+
+.tournament-structure-shell .structure-summary-foot {
+    display: none !important;
+}
+
+/* ---- Phase list / cards ---- */
+.tournament-structure-shell .structure-phase-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+}
+
+.tournament-structure-shell .structure-phase-card {
+    background: var(--tb-card) !important;
+    background-image: none !important;
+    border: 1px solid var(--tb-border) !important;
+    border-radius: 0 !important;
+    padding: 24px !important;
+    transition: transform 0.2s ease, border-color 0.2s ease !important;
+    box-shadow: none !important;
+}
+
+.tournament-structure-shell .structure-phase-card::before {
+    display: none !important;
+}
+
+.tournament-structure-shell .structure-phase-card:hover {
+    transform: scale(1.005) !important;
+    border-color: #3b4a5a !important;
+    background: var(--tb-card) !important;
+}
+
+.tournament-structure-shell .structure-phase-icon {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--tb-border) !important;
+    border-radius: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 8px 14px !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.85rem !important;
+    color: var(--tb-text-2) !important;
+    font-weight: 600;
+}
+
+.tournament-structure-shell .structure-phase-icon svg {
+    color: var(--tb-text-2) !important;
+}
+
+.tournament-structure-shell .structure-phase-title {
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    color: var(--tb-text) !important;
+    letter-spacing: -0.01em !important;
+}
+
+.tournament-structure-shell .structure-phase-step {
+    font-family: 'JetBrains Mono', monospace !important;
+    color: var(--tb-text-2) !important;
+}
+
+.tournament-structure-shell .structure-phase-meta {
+    color: var(--tb-text-2) !important;
+}
+
+.tournament-structure-shell .structure-phase-meta-accent,
+.tournament-structure-shell .structure-phase-meta-info {
+    color: var(--tb-text) !important;
+    font-weight: 600 !important;
+}
+
+.tournament-structure-shell .structure-phase-meta b,
+.tournament-structure-shell .structure-phase-meta strong {
+    color: var(--tb-text) !important;
+}
+
+.tournament-structure-shell .structure-phase-card .structure-phase-chevron {
+    color: var(--tb-text-2) !important;
+}
+
+/* ---- Badges ---- */
+.tournament-structure-shell .basalt-badge {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.7rem !important;
+    padding: 2px 8px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: var(--tb-text-2) !important;
+    border-radius: 2px !important;
+    text-transform: uppercase !important;
+    border: 0 !important;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+}
+
+.tournament-structure-shell .basalt-badge.badge-ok {
+    background: rgba(34, 197, 94, 0.15) !important;
+    color: var(--tb-green) !important;
+    border: 1px solid rgba(34, 197, 94, 0.3) !important;
+}
+
+.tournament-structure-shell .basalt-badge.badge-published {
+    background: rgba(56, 189, 248, 0.15) !important;
+    color: var(--tb-blue) !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+.tournament-structure-shell .basalt-badge.badge-warning {
+    background: rgba(245, 158, 11, 0.15) !important;
+    color: var(--tb-orange) !important;
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+.tournament-structure-shell .basalt-badge.badge-draft {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: var(--tb-text-2) !important;
+    border: 1px solid var(--tb-border) !important;
+}
+
+/* ---- Empty state ---- */
+.tournament-structure-shell .structure-empty-panel {
+    background: var(--tb-card) !important;
+    background-image: none !important;
+    border: 1px solid var(--tb-border) !important;
+    border-radius: 0 !important;
+    padding: 80px 32px !important;
+}
+
+.tournament-structure-shell .structure-empty-icon {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--tb-border) !important;
+    border-radius: 0 !important;
+    width: 64px !important;
+    height: 64px !important;
+}
+
+.tournament-structure-shell .structure-empty-icon svg {
+    color: var(--tb-text-2) !important;
+}
+
+/* ---- Hero panel (model section uses basalt-hero in some renders) ---- */
+.tournament-structure-shell .basalt-hero {
+    background: var(--tb-card) !important;
+    background-image: none !important;
+    border: 1px solid var(--tb-border) !important;
+    border-radius: 0 !important;
+}
+
+/* ---- Wizard chrome ---- */
+.tournament-structure-shell .structure-wizard-card,
+.tournament-structure-shell .phase-wizard-card {
+    background: var(--tb-bg) !important;
+    background-image: none !important;
+    border: 1px solid var(--tb-border) !important;
+    border-radius: 0 !important;
+    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.6) !important;
+    padding: 0 !important;
+}
+
+.tournament-structure-shell .structure-wizard-sidebar,
+.tournament-structure-shell .phase-wizard-sidebar {
+    background: var(--tb-card) !important;
+    background-image: none !important;
+    border-right: 1px solid var(--tb-border) !important;
+    padding: 32px !important;
+}
+
+.tournament-structure-shell .structure-wizard-progress-bar > span {
+    background: var(--tb-blue) !important;
+}
+
+.tournament-structure-shell .structure-wizard-step.is-active,
+.tournament-structure-shell .phase-wizard-step.is-active {
+    background: rgba(56, 189, 248, 0.08) !important;
+    border-color: rgba(56, 189, 248, 0.35) !important;
+    color: var(--tb-blue) !important;
+}
+
+.tournament-structure-shell .structure-wizard-step.is-active .structure-wizard-step-title,
+.tournament-structure-shell .phase-wizard-step.is-active .phase-wizard-step-title {
+    color: var(--tb-text) !important;
+}
+
+.tournament-structure-shell .structure-wizard-step-index.is-active,
+.tournament-structure-shell .phase-wizard-step-index.is-active {
+    background: var(--tb-blue) !important;
+    color: #04223A !important;
+}
+
+.tournament-structure-shell .structure-wizard-step-index.is-complete,
+.tournament-structure-shell .phase-wizard-step-index.is-complete {
+    background: var(--tb-green) !important;
+    color: #052E16 !important;
+}
+
+/* ---- Form inputs inside structure shell ----
+ * Excluded: structure-counter-input (lives inside structure-counter-shell with
+ * its own border) and any input already wearing a tailwind bg-transparent. */
+.tournament-structure-shell input[type="text"]:not(.structure-counter-input),
+.tournament-structure-shell input[type="number"]:not(.structure-counter-input),
+.tournament-structure-shell select,
+.tournament-structure-shell textarea {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--tb-border) !important;
+    border-radius: 4px !important;
+    color: var(--tb-text) !important;
+}
+
+.tournament-structure-shell input:not(.structure-counter-input):focus,
+.tournament-structure-shell select:focus,
+.tournament-structure-shell textarea:focus {
+    border-color: var(--tb-blue) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15) !important;
+}
+
+/* ---- Number stepper shell (Cantidad de equipos / avanzan) ----
+ * High-specificity rules to defeat earlier .structure-counter-* definitions
+ * and Tailwind utilities (text-lg, font-bold, text-white, py-2). */
+.tournament-structure-shell .structure-counter-shell,
+.tournament-structure-shell div.structure-counter-shell {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid var(--tb-border) !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    display: flex !important;
+    align-items: stretch !important;
+}
+
+.tournament-structure-shell .structure-counter-shell .structure-counter-button,
+.tournament-structure-shell button.structure-counter-button {
+    background: transparent !important;
+    border: 0 !important;
+    color: var(--tb-text-2) !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    min-width: 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background 0.15s ease, color 0.15s ease;
+    flex: 0 0 44px !important;
+}
+
+.tournament-structure-shell .structure-counter-shell .structure-counter-button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--tb-text) !important;
+}
+
+.tournament-structure-shell .structure-counter-shell .structure-counter-input,
+.tournament-structure-shell input.structure-counter-input {
+    background: transparent !important;
+    border: 0 !important;
+    border-left: 1px solid var(--tb-border) !important;
+    border-right: 1px solid var(--tb-border) !important;
+    border-radius: 0 !important;
+    color: var(--tb-text) !important;
+    text-align: center !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    padding: 0 8px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    width: auto !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.tournament-structure-shell .structure-counter-input::-webkit-outer-spin-button,
+.tournament-structure-shell .structure-counter-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.tournament-structure-shell .structure-counter-input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* ---- GLOSARIO DE COLUMNAS — TableColumnSelector ----
+ * The component uses inline Tailwind text-[20px] font-[800], glossary-badge
+ * variants, and a hardcoded dark surface. We tone everything down to match
+ * the rest of the wizard panels. */
+.tournament-structure-shell .pr-1.overflow-y-auto + *,  /* placeholder, no-op */
+.tournament-structure-shell h3.uppercase {
+    /* generic safety net */
+}
+
+/* Outer container of TableColumnSelector */
+.tournament-structure-shell [class*="bg-[rgba(10,10,11,0.85)]"] {
+    background: var(--tb-card) !important;
+    border-color: var(--tb-border) !important;
+    border-radius: 4px !important;
+}
+
+/* The "GLOSARIO DE COLUMNAS" headline — make it a kicker-style label */
+.tournament-structure-shell .pr-1 ~ * h3,
+.tournament-structure-shell h3.text-\[20px\],
+.tournament-structure-shell h3.uppercase.font-\[800\] {
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.14em !important;
+    color: var(--tb-text-2) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* "15 de 21 seleccionadas" counter */
+.tournament-structure-shell .text-\[14px\].font-mono {
+    font-size: 0.75rem !important;
+    color: var(--tb-text-2) !important;
+}
+
+/* Glossary category badges (3/4, 0/4, 6/6) */
+.tournament-structure-shell .glossary-badge {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--tb-text-2) !important;
+    border: 1px solid var(--tb-border) !important;
+    border-radius: 2px !important;
+    padding: 2px 8px !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.7rem !important;
+    font-weight: 500 !important;
+    box-shadow: none !important;
+}
+
+.tournament-structure-shell .glossary-badge.full {
+    background: rgba(56, 189, 248, 0.12) !important;
+    color: var(--tb-blue) !important;
+    border-color: rgba(56, 189, 248, 0.3) !important;
+}
+
+.tournament-structure-shell .glossary-badge.partial {
+    background: rgba(245, 158, 11, 0.12) !important;
+    color: var(--tb-orange) !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Glossary category labels — tone uppercase white to text-2 */
+.tournament-structure-shell .text-\[12px\].font-\[800\].uppercase {
+    color: var(--tb-text-2) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.14em !important;
+    font-size: 0.75rem !important;
+}
+
+/* Glossary checkbox accent — keep blue for consistency */
+.tournament-structure-shell input[type="checkbox"].peer:checked {
+    background-color: var(--tb-blue) !important;
+    border-color: var(--tb-blue) !important;
+}
+
+/* ---- LabelChip preview ---- */
+.tournament-structure-shell .structure-label-preview span[style] {
+    border-color: var(--tb-border) !important;
+    border-radius: 2px !important;
+    padding: 4px 10px !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.7rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    font-weight: 500 !important;
+}
+
+.tournament-structure-shell .structure-label-preview-label {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.7rem !important;
+    color: var(--tb-text-2) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.14em !important;
+    margin-right: 8px;
+}
+
+/* ---- Type selector cards inside the wizard (Grupos / Eliminación / Liga) ---- */
+.tournament-structure-shell .structure-basic-type-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+}
+
+.tournament-structure-shell .structure-basic-type-card,
+.tournament-structure-shell .structure-basic-type-option {
+    border: 1px solid var(--tb-border) !important;
+    background: var(--tb-card) !important;
+    background-image: none !important;
+    border-radius: 0 !important;
+    padding: 16px !important;
+    text-align: center !important;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.tournament-structure-shell .structure-basic-type-card.is-active,
+.tournament-structure-shell .structure-basic-type-option.is-active {
+    border-color: var(--tb-blue) !important;
+    background: rgba(56, 189, 248, 0.05) !important;
+}
+
+/* ---- Mobile collapse ---- */
+@media (max-width: 768px) {
+    .tournament-structure-shell .structure-option-grid,
+    .tournament-structure-shell .structure-summary-grid,
+    .tournament-structure-shell .structure-basic-type-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .tournament-structure-shell .structure-phase-card {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    .tournament-structure-shell .structure-module-title,
+    .tournament-structure-shell .basalt-h1.structure-module-title {
+        font-size: 1.5rem !important;
+    }
 }

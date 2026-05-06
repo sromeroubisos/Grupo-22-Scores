@@ -4,7 +4,8 @@ export type ExportTemplateId =
     | 'matchStats'
     | 'playerStats'
     | 'playoffBracket'
-    | 'lineups';
+    | 'lineups'
+    | 'teamOfWeek';
 
 export type ExportPresetType = 'editorial' | 'gradient';
 
@@ -94,6 +95,12 @@ export const EXPORT_TEMPLATE_CATALOG: ExportCatalogFormat[] = [
         name: 'Alineaciones',
         description: 'Export de formaciones de local, visitante o ambos equipos en una sola pieza.',
         outputLabel: 'Lineups',
+    },
+    {
+        id: 'teamOfWeek',
+        name: 'Equipo de la semana',
+        description: 'Afiche tipo Starting XV con 15 seleccionados, reemplazos y escudo del equipo por jugador.',
+        outputLabel: 'Team of the week',
     },
 ];
 

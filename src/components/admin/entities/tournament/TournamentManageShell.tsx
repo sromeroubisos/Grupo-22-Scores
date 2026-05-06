@@ -19,6 +19,7 @@ import { beginClientRequest, usePerfComponentLifecycle } from '@/lib/perf/react'
 import { persistTournamentLogo } from '@/lib/utils/persistTournamentLogo';
 import { normalizeSlug, normalizeText } from '@/lib/utils/normalize';
 import './basalt.css';
+import './tournament-mobile.css';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 type TournamentManageRow = TournamentRow & {
@@ -537,14 +538,18 @@ function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null
                 </div>
 
                 {actionMessage && (
-                    <div className={`mx-4 mb-4 rounded border px-4 py-3 text-sm ${actionMessage.type === 'error' ? 'border-red-500/20 bg-red-500/10 text-red-300' : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'}`}>
+                    <div
+                        className={`basalt-toast is-${actionMessage.type}`}
+                        role={actionMessage.type === 'error' ? 'alert' : 'status'}
+                        aria-live={actionMessage.type === 'error' ? 'assertive' : 'polite'}
+                    >
                         {actionMessage.text}
                     </div>
                 )}
 
                 <footer className="basalt-action-footer">
                     <div className="basalt-action-footer-copy">
-                        <span className="basalt-action-footer-kicker">Operational Console</span>
+                        <span className="basalt-action-footer-kicker">Consola operativa</span>
                         <strong className="basalt-action-footer-title">Gestion central del torneo</strong>
                         <p className="basalt-action-footer-text">
                             Coordina identidad, estructura, participantes y operacion desde una sola superficie.

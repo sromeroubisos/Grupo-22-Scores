@@ -24,6 +24,12 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { getActiveSports } from '@/lib/data/sports';
 import { getRoleLabel } from '@/lib/auth/roles';
+import {
+    disableHireCta,
+    enableHireCtaOnce,
+    getHireCtaPreference,
+    type HireCtaPreference,
+} from '@/lib/hireCtaPreferences';
 import { useAuth } from '@/context/AuthContext';
 import ProdeLobby from '@/components/prode/ProdeLobby';
 import type { ProdePrivateLeagueSummary, PublicProdeCompetition, PublicProdeUserTotal } from '@/lib/prode/types';
@@ -899,9 +905,38 @@ function ProdePanel() {
 
 function SettingsPanel({ logout }: { logout: () => void }) {
     const router = useRouter();
+    const { user } = useAuth();
     const { favoriteSportIds } = useUserPreferences();
     const allSports = getActiveSports();
     const favoriteSports = allSports.filter(sport => favoriteSportIds.includes(sport.id));
+    const [hireCtaPreference, setHireCtaPreference] = useState<HireCtaPreference | null>(null);
+
+    useEffect(() => {
+        if (!user?.id) {
+            setHireCtaPreference(null);
+            return;
+        }
+
+        setHireCtaPreference(getHireCtaPreference(user.id));
+    }, [user?.id]);
+
+    const handleEnableHireCta = () => {
+        if (!user?.id) return;
+        setHireCtaPreference(enableHireCtaOnce(user.id));
+    };
+
+    const handleDisableHireCta = () => {
+        if (!user?.id) return;
+        setHireCtaPreference(disableHireCta(user.id));
+    };
+
+    const hireCtaStatus = !hireCtaPreference
+        ? 'Disponible para usuarios con sesion.'
+        : hireCtaPreference.enabled && !hireCtaPreference.seen
+            ? 'Se va a mostrar una vez en el inicio.'
+            : hireCtaPreference.seen
+                ? 'Ya se mostro una vez en el inicio.'
+                : 'No se esta mostrando en el inicio.';
 
     return (
         <div className={styles.settingsList}>
@@ -934,6 +969,38 @@ function SettingsPanel({ logout }: { logout: () => void }) {
                         Todavia no elegiste deportes favoritos.
                     </p>
                 )}
+            </div>
+
+            <div className={styles.preferenceCard}>
+                <div className={styles.preferenceHeader}>
+                    <div className={styles.preferenceLabel}>
+                        <Trophy size={15} className={styles.preferenceIcon} />
+                        <span>Panel G22 Scores</span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleEnableHireCta}
+                        className={styles.preferenceEditBtn}
+                        disabled={!user?.id}
+                    >
+                        Mostrar una vez
+                    </button>
+                </div>
+                <p className={styles.preferenceEmptyText}>
+                    Controla el panel de contratacion de la home. Los invitados lo ven siempre.
+                </p>
+                <div className={styles.preferenceControlRow}>
+                    <span className={styles.preferenceStatus}>{hireCtaStatus}</span>
+                    {hireCtaPreference?.enabled && !hireCtaPreference.seen && (
+                        <button
+                            type="button"
+                            className={styles.preferenceSecondaryBtn}
+                            onClick={handleDisableHireCta}
+                        >
+                            No mostrar
+                        </button>
+                    )}
+                </div>
             </div>
 
             <Link href="/favorites" className={styles.settingItem}>

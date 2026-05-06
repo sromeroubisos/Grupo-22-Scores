@@ -1060,7 +1060,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             {!showPhaseForm && (
                 <section className="basalt-card basalt-hero structure-hero-panel">
                     <div className="structure-hero-copy">
-                        <p className="basalt-section-kicker">Competitive workspace</p>
+                        <p className="basalt-section-kicker">Consola competitiva</p>
                         <h2 className="structure-hero-title">Estructura y creación de fases</h2>
                         <p className="structure-hero-text">
                             Ordena el recorrido competitivo del torneo y prepara la base visual para fixture,
@@ -1110,7 +1110,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 <div className="basalt-card structure-module p-6">
                     <div className="structure-module-header flex items-center justify-between gap-4 mb-6">
                         <div>
-                            <p className="basalt-section-kicker mb-1">Competitive map</p>
+                            <p className="basalt-section-kicker mb-1">Mapa competitivo</p>
                             <h2 className="basalt-h1 structure-module-title">Fases del torneo</h2>
                             <p className="structure-module-copy">
                                 Cada módulo concentra una etapa del torneo con su formato y reglas base.
@@ -1256,7 +1256,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                         <Layers size={28} className="text-dim" />
                     </div>
                     <div className="structure-empty-copy">
-                        <p className="basalt-section-kicker mb-3">Phase builder</p>
+                        <p className="basalt-section-kicker mb-3">Constructor de fases</p>
                         <h3 className="basalt-h1 structure-empty-title mb-3">Sin fases configuradas</h3>
                         <p className="structure-empty-text text-dim text-sm max-w-md mx-auto">
                             Diseña la estructura competitiva del torneo. Define cómo se competirá y qué criterios decidirán al campeón.

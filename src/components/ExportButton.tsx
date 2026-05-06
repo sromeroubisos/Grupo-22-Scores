@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import styles from './ExportButton.module.css';
 
 type ExportFormat = '1080x1350' | '1080x1920' | 'auto';
@@ -254,9 +254,9 @@ export default function ExportButton({
         }
     };
 
-    const canExport = isGlobalAdminRole(user?.role);
+    const canExport = !isLoading && canUseRestrictedContentActions(user?.role);
 
-    if (isLoading || !canExport) {
+    if (!canExport) {
         return null;
     }
 

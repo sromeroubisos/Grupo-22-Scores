@@ -2,10 +2,14 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { createInstrumentedSupabaseFetch } from '@/lib/perf/supabase';
 import { logPerf, measureAsync } from '@/lib/perf/measure';
+import {
+    getSupabaseAuthCookieOptions,
+    getSupabaseAuthStorageKey,
+    MAX_SUPABASE_AUTH_COOKIE_CHUNKS,
+} from '@/lib/supabase/auth-cookie';
 
 const AUTH_REFRESH_TIMEOUT_MS = 2500;
 const SHOULD_LOG_PROXY_AUTH = process.env.ENABLE_SERVER_PERF_LOGS === 'true' || process.env.NODE_ENV !== 'production';
-const MAX_AUTH_COOKIE_CHUNKS = 12;
 // Margin before access_token expiry where the proxy will trigger a refresh.
 // Anything fresher than this window is treated as valid and the entire auth
 // roundtrip is skipped to avoid hammering Supabase Auth with /token calls.
@@ -25,19 +29,8 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): 
     });
 }
 
-function getSupabaseProjectRef(): string | null {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (!supabaseUrl) return null;
-    try {
-        return new URL(supabaseUrl).hostname.split('.')[0] || null;
-    } catch {
-        return null;
-    }
-}
-
 function getSupabaseAuthCookieBaseName(): string | null {
-    const projectRef = getSupabaseProjectRef();
-    return projectRef ? `sb-${projectRef}-auth-token` : null;
+    return getSupabaseAuthStorageKey();
 }
 
 function getAuthCookieChunkIndex(name: string, baseName: string): number | null {
@@ -67,7 +60,7 @@ function getStaleAuthCookieNamesToClear(cookiesToSet: Array<{ name: string }>): 
     const staleNames = new Set<string>();
 
     if (hasDirectCookie) {
-        for (let i = 0; i < MAX_AUTH_COOKIE_CHUNKS; i += 1) {
+        for (let i = 0; i < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; i += 1) {
             staleNames.add(`${baseName}.${i}`);
         }
     }
@@ -75,7 +68,7 @@ function getStaleAuthCookieNamesToClear(cookiesToSet: Array<{ name: string }>): 
     if (chunkIndexes.length > 0) {
         staleNames.add(baseName);
         const lastIncomingChunk = Math.max(...chunkIndexes);
-        for (let i = lastIncomingChunk + 1; i < MAX_AUTH_COOKIE_CHUNKS; i += 1) {
+        for (let i = lastIncomingChunk + 1; i < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; i += 1) {
             staleNames.add(`${baseName}.${i}`);
         }
     }
@@ -132,7 +125,7 @@ function readAuthCookieValue(request: NextRequest): string | null {
 
     // The cookie is chunked (.0, .1, ...) when it exceeds the browser's size limit.
     const chunks: string[] = [];
-    for (let i = 0; i < MAX_AUTH_COOKIE_CHUNKS; i++) {
+    for (let i = 0; i < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; i++) {
         const chunk = request.cookies.get(`${baseName}.${i}`)?.value;
         if (!chunk) break;
         chunks.push(chunk);
@@ -227,6 +220,9 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
+            cookieOptions: getSupabaseAuthCookieOptions(
+                request.headers.get('x-forwarded-host') || request.headers.get('host') || request.nextUrl.hostname,
+            ),
             cookies: {
                 getAll() {
                     return request.cookies.getAll()
@@ -262,6 +258,9 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                     type ResponseCookieOptions = NonNullable<Parameters<typeof response.cookies.set>[2]>;
                     const buildCookieOptions = (options?: ResponseCookieOptions): ResponseCookieOptions => {
                         const isProd = process.env.NODE_ENV === 'production';
+                        const sharedCookieOptions = getSupabaseAuthCookieOptions(
+                            request.headers.get('x-forwarded-host') || request.headers.get('host') || request.nextUrl.hostname,
+                        );
                         // NOTE on httpOnly: @supabase/ssr requires the browser
                         // client to read the auth cookie via document.cookie to
                         // refresh sessions, so we cannot set httpOnly: true on
@@ -270,12 +269,13 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                         // access-token TTL, refresh-token rotation, and a strong
                         // CSP at the app shell to limit XSS exfiltration.
                         return {
+                            ...sharedCookieOptions,
                             ...options,
                             sameSite: 'lax' as const,
                             secure: isProd,
                             httpOnly: false,
                             path: '/',
-                            ...(isProd && { domain: '.g22scores.com' })
+                            ...(sharedCookieOptions.domain ? { domain: sharedCookieOptions.domain } : {}),
                         };
                     };
 

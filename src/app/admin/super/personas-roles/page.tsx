@@ -46,6 +46,15 @@ type ClubAssignmentOption = {
     meta: string;
 };
 
+type TournamentRow = {
+    id: string;
+    name: string;
+    display_name?: string | null;
+    season_id?: string | null;
+    sport_id?: string | null;
+    status?: string | null;
+};
+
 type AccessMembershipRow = {
     scope_type: string;
     scope_id: string | null;
@@ -92,6 +101,12 @@ const ROLE_PRESETS = [
         accent: '#60a5fa',
     },
     {
+        id: 'admin_torneo',
+        title: 'Administrador de Torneos',
+        desc: 'Panel limitado para crear/vincular clubes y crear/gestionar torneos.',
+        accent: '#a855f7',
+    },
+    {
         id: 'admin_club',
         title: 'Administrador de Club',
         desc: 'Gestiona un club y puede operar el panel de club con alcance asignado.',
@@ -134,6 +149,15 @@ export default function PersonasRolesPage() {
     const [selectedScopeId, setSelectedScopeId] = useState('');
     const [initialScopeId, setInitialScopeId] = useState('');
 
+    // Tournament-admin scope state (multi-select).
+    const [tournamentsForAssignment, setTournamentsForAssignment] = useState<TournamentRow[]>([]);
+    const [tournamentSearch, setTournamentSearch] = useState('');
+    const [clubSearchTorneo, setClubSearchTorneo] = useState('');
+    const [selectedTournamentIds, setSelectedTournamentIds] = useState<string[]>([]);
+    const [selectedClubIdsTorneo, setSelectedClubIdsTorneo] = useState<string[]>([]);
+    const [initialTournamentIds, setInitialTournamentIds] = useState<string[]>([]);
+    const [initialClubIdsTorneo, setInitialClubIdsTorneo] = useState<string[]>([]);
+
     const fetchUsers = useCallback(async () => {
         try {
             setLoading(true);
@@ -171,12 +195,16 @@ export default function PersonasRolesPage() {
         setAssignmentError(null);
 
         try {
-            const [clubsResponse, familiesResponse] = await Promise.all([
+            const [clubsResponse, familiesResponse, tournamentsResponse] = await Promise.all([
                 fetch('/api/admin/clubs?limit=1000', {
                     cache: 'no-store',
                     credentials: 'include',
                 }),
                 fetch('/api/admin/super/club-families', {
+                    cache: 'no-store',
+                    credentials: 'include',
+                }),
+                fetch('/api/admin/torneo/tournaments?limit=1000', {
                     cache: 'no-store',
                     credentials: 'include',
                 }),
@@ -187,6 +215,10 @@ export default function PersonasRolesPage() {
                 data?: ClubFamilyRelationRow[];
                 error?: string;
                 details?: string | null;
+            };
+            const tournamentsPayload = await tournamentsResponse.json().catch(() => ({})) as {
+                data?: TournamentRow[];
+                error?: string;
             };
 
             if (!clubsResponse.ok || !Array.isArray(clubsPayload)) {
@@ -199,10 +231,16 @@ export default function PersonasRolesPage() {
 
             setClubsForAssignment(clubsPayload.filter((club) => club.id && club.name));
             setClubFamilyRelations(Array.isArray(familiesPayload.data) ? familiesPayload.data : []);
+            setTournamentsForAssignment(
+                tournamentsResponse.ok && Array.isArray(tournamentsPayload.data)
+                    ? tournamentsPayload.data.filter((t) => t.id && t.name)
+                    : []
+            );
         } catch (optionsError) {
             setAssignmentError(optionsError instanceof Error ? optionsError.message : 'No se pudieron cargar las opciones de vinculacion.');
             setClubsForAssignment([]);
             setClubFamilyRelations([]);
+            setTournamentsForAssignment([]);
         } finally {
             setAssignmentLoading(false);
         }
@@ -265,9 +303,20 @@ export default function PersonasRolesPage() {
                     : null;
                 const scopeId = selectedMembership?.scope_id || '';
 
+                const tournamentMembershipIds = (payload.data?.memberships ?? [])
+                    .filter((m) => m.scope_type === 'tournament' && Boolean(m.scope_id))
+                    .map((m) => String(m.scope_id));
+                const clubTorneoMembershipIds = (payload.data?.memberships ?? [])
+                    .filter((m) => m.scope_type === 'club' && Boolean(m.scope_id))
+                    .map((m) => String(m.scope_id));
+
                 if (isActive) {
                     setSelectedScopeId(scopeId);
                     setInitialScopeId(scopeId);
+                    setSelectedTournamentIds(tournamentMembershipIds);
+                    setInitialTournamentIds(tournamentMembershipIds);
+                    setSelectedClubIdsTorneo(clubTorneoMembershipIds);
+                    setInitialClubIdsTorneo(clubTorneoMembershipIds);
                 }
             } catch (accessError) {
                 if (isActive) {
@@ -287,7 +336,7 @@ export default function PersonasRolesPage() {
         };
     }, [editingUser]);
 
-    const roleOptions: AppUserRole[] = ['fan', 'familia_club', 'admin_club', 'admin_general', 'super_admin'];
+    const roleOptions: AppUserRole[] = ['fan', 'familia_club', 'admin_club', 'admin_torneo', 'admin_general', 'super_admin'];
 
     const clubScopeOptions = useMemo<ClubAssignmentOption[]>(() => {
         return clubsForAssignment
@@ -337,6 +386,37 @@ export default function PersonasRolesPage() {
             ? 'club'
             : null;
     const requiresScopeSelection = currentScopeType !== null;
+    const isTournamentAdminRole = editingRole === 'admin_torneo';
+
+    const filteredTournaments = useMemo(() => {
+        const q = tournamentSearch.trim().toLowerCase();
+        if (!q) return tournamentsForAssignment;
+        return tournamentsForAssignment.filter((t) =>
+            (t.display_name || t.name).toLowerCase().includes(q) ||
+            (t.season_id || '').toLowerCase().includes(q),
+        );
+    }, [tournamentSearch, tournamentsForAssignment]);
+
+    const filteredClubsTorneo = useMemo(() => {
+        const q = clubSearchTorneo.trim().toLowerCase();
+        if (!q) return clubsForAssignment;
+        return clubsForAssignment.filter((c) =>
+            c.name.toLowerCase().includes(q) ||
+            (c.short_name || '').toLowerCase().includes(q) ||
+            (c.region || c.country || '').toLowerCase().includes(q),
+        );
+    }, [clubSearchTorneo, clubsForAssignment]);
+
+    const tournamentScopeChanged = (() => {
+        if (selectedTournamentIds.length !== initialTournamentIds.length) return true;
+        const set = new Set(initialTournamentIds);
+        return selectedTournamentIds.some((id) => !set.has(id));
+    })();
+    const clubTorneoScopeChanged = (() => {
+        if (selectedClubIdsTorneo.length !== initialClubIdsTorneo.length) return true;
+        const set = new Set(initialClubIdsTorneo);
+        return selectedClubIdsTorneo.some((id) => !set.has(id));
+    })();
     const currentScopeOptions = useMemo(
         () => editingRole === 'familia_club'
             ? familyScopeOptions
@@ -349,14 +429,17 @@ export default function PersonasRolesPage() {
     const selectedScopeChanged = selectedScopeId !== initialScopeId;
     const selectedScopeLabel = editingRole === 'familia_club' ? 'familia de club' : 'club';
     const roleChanged = editingUser ? normalizeRole(editingUser.role) !== editingRole : false;
-    const saveDisabled = (
-        saving ||
-        (
-            requiresScopeSelection &&
-            (scopeLoading || assignmentLoading || !selectedScopeId || !selectedScopeIsValid)
-        ) ||
-        (!roleChanged && (!requiresScopeSelection || !selectedScopeChanged))
-    );
+    const saveDisabled = (() => {
+        if (saving) return true;
+        if (isTournamentAdminRole) {
+            if (scopeLoading || assignmentLoading) return true;
+            return !roleChanged && !tournamentScopeChanged && !clubTorneoScopeChanged;
+        }
+        if (requiresScopeSelection) {
+            if (scopeLoading || assignmentLoading || !selectedScopeId || !selectedScopeIsValid) return true;
+        }
+        return !roleChanged && (!requiresScopeSelection || !selectedScopeChanged);
+    })();
 
     const openEdit = (user: AppUserRow) => {
         setEditingUser(user);
@@ -373,6 +456,12 @@ export default function PersonasRolesPage() {
         setScopeLoadError(null);
         setSelectedScopeId('');
         setInitialScopeId('');
+        setSelectedTournamentIds([]);
+        setInitialTournamentIds([]);
+        setSelectedClubIdsTorneo([]);
+        setInitialClubIdsTorneo([]);
+        setTournamentSearch('');
+        setClubSearchTorneo('');
     }, []);
 
     const handleRoleSelect = (role: AppUserRole) => {
@@ -384,6 +473,20 @@ export default function PersonasRolesPage() {
 
             return role;
         });
+    };
+
+    const toggleTournamentScope = (id: string) => {
+        setSelectedTournamentIds((curr) =>
+            curr.includes(id) ? curr.filter((x) => x !== id) : [...curr, id]
+        );
+        setSaveError(null);
+    };
+
+    const toggleClubScopeTorneo = (id: string) => {
+        setSelectedClubIdsTorneo((curr) =>
+            curr.includes(id) ? curr.filter((x) => x !== id) : [...curr, id]
+        );
+        setSaveError(null);
     };
 
     const handleSaveRole = useCallback(async () => {
@@ -411,6 +514,60 @@ export default function PersonasRolesPage() {
                     setSaveError('Selecciona una opcion valida de la lista.');
                     return;
                 }
+            }
+
+            if (isTournamentAdminRole) {
+                // 1) Update role
+                const roleResp = await fetch(`/api/admin/super/personas-roles/${editingUser.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ role: editingRole }),
+                });
+                const rolePayload = await roleResp.json() as { error?: string };
+                if (!roleResp.ok) throw new Error(rolePayload.error || 'No se pudo guardar el rol.');
+
+                // 2) Replace tournament memberships (PUT replaces all of that scope_type for the user)
+                const tResp = await fetch(`/api/admin/users/${editingUser.id}/access`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        role: editingRole,
+                        scopeType: 'tournament',
+                        membershipRole: 'admin',
+                        scopeIds: selectedTournamentIds,
+                    }),
+                });
+                if (!tResp.ok) {
+                    const p = await tResp.json().catch(() => ({})) as { error?: string };
+                    throw new Error(p.error || 'No se pudieron guardar los torneos asignados.');
+                }
+
+                // 3) Replace club memberships
+                const cResp = await fetch(`/api/admin/users/${editingUser.id}/access`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        role: editingRole,
+                        scopeType: 'club',
+                        membershipRole: 'admin',
+                        scopeIds: selectedClubIdsTorneo,
+                    }),
+                });
+                if (!cResp.ok) {
+                    const p = await cResp.json().catch(() => ({})) as { error?: string };
+                    throw new Error(p.error || 'No se pudieron guardar los clubes asignados.');
+                }
+
+                setUsers((current) =>
+                    current.map((user) =>
+                        user.id === editingUser.id ? { ...user, role: editingRole } : user
+                    )
+                );
+                closeEdit();
+                return;
             }
 
             const response = requiresScopeSelection
@@ -453,10 +610,13 @@ export default function PersonasRolesPage() {
         currentScopeType,
         editingRole,
         editingUser,
+        isTournamentAdminRole,
         requiresScopeSelection,
+        selectedClubIdsTorneo,
         selectedScopeId,
         selectedScopeIsValid,
         selectedScopeLabel,
+        selectedTournamentIds,
     ]);
 
     return (
@@ -860,6 +1020,120 @@ export default function PersonasRolesPage() {
                                     )}
                                 </div>
                             )}
+                            {isTournamentAdminRole && (
+                                <div style={{ display: 'grid', gap: 16, marginTop: 18 }}>
+                                    <div style={{ fontSize: 12, color: 'var(--basalt-400)', lineHeight: 1.5 }}>
+                                        Elegí los torneos y clubes a los que este administrador podrá acceder.
+                                        Los torneos y clubes que cree desde su panel se le agregan automáticamente.
+                                    </div>
+
+                                    {/* Tournaments multi-select */}
+                                    <div style={{ display: 'grid', gap: 8 }}>
+                                        <label style={{ fontSize: 12, color: 'var(--basalt-400)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                            Torneos asignados ({selectedTournamentIds.length})
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar torneos…"
+                                            value={tournamentSearch}
+                                            onChange={(e) => setTournamentSearch(e.target.value)}
+                                            style={{
+                                                width: '100%', padding: '8px 12px', borderRadius: 8,
+                                                background: 'var(--basalt-900, #0a0d10)',
+                                                border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13,
+                                            }}
+                                        />
+                                        <div style={{
+                                            maxHeight: 180, overflowY: 'auto', display: 'grid', gap: 4,
+                                            border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: 8,
+                                            background: 'rgba(255,255,255,0.02)',
+                                        }}>
+                                            {assignmentLoading ? (
+                                                <div style={{ padding: 12, color: 'var(--basalt-400)', fontSize: 12 }}>Cargando…</div>
+                                            ) : filteredTournaments.length === 0 ? (
+                                                <div style={{ padding: 12, color: 'var(--basalt-400)', fontSize: 12 }}>Sin torneos.</div>
+                                            ) : filteredTournaments.map((t) => {
+                                                const checked = selectedTournamentIds.includes(t.id);
+                                                return (
+                                                    <label key={t.id} style={{
+                                                        display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px',
+                                                        cursor: 'pointer', borderRadius: 6,
+                                                        background: checked ? 'rgba(168, 85, 247, 0.12)' : 'transparent',
+                                                    }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={checked}
+                                                            onChange={() => toggleTournamentScope(t.id)}
+                                                            style={{ accentColor: '#a855f7' }}
+                                                        />
+                                                        <span style={{ fontSize: 13, color: '#fff' }}>
+                                                            {t.display_name || t.name}
+                                                        </span>
+                                                        <span style={{ fontSize: 11, color: 'var(--basalt-400)', marginLeft: 'auto' }}>
+                                                            {t.season_id || ''} · {t.sport_id || '—'}
+                                                        </span>
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Clubs multi-select */}
+                                    <div style={{ display: 'grid', gap: 8 }}>
+                                        <label style={{ fontSize: 12, color: 'var(--basalt-400)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                            Clubes asignados ({selectedClubIdsTorneo.length})
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar clubes…"
+                                            value={clubSearchTorneo}
+                                            onChange={(e) => setClubSearchTorneo(e.target.value)}
+                                            style={{
+                                                width: '100%', padding: '8px 12px', borderRadius: 8,
+                                                background: 'var(--basalt-900, #0a0d10)',
+                                                border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 13,
+                                            }}
+                                        />
+                                        <div style={{
+                                            maxHeight: 180, overflowY: 'auto', display: 'grid', gap: 4,
+                                            border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: 8,
+                                            background: 'rgba(255,255,255,0.02)',
+                                        }}>
+                                            {assignmentLoading ? (
+                                                <div style={{ padding: 12, color: 'var(--basalt-400)', fontSize: 12 }}>Cargando…</div>
+                                            ) : filteredClubsTorneo.length === 0 ? (
+                                                <div style={{ padding: 12, color: 'var(--basalt-400)', fontSize: 12 }}>Sin clubes.</div>
+                                            ) : filteredClubsTorneo.slice(0, 100).map((c) => {
+                                                const checked = selectedClubIdsTorneo.includes(c.id);
+                                                return (
+                                                    <label key={c.id} style={{
+                                                        display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px',
+                                                        cursor: 'pointer', borderRadius: 6,
+                                                        background: checked ? 'rgba(168, 85, 247, 0.12)' : 'transparent',
+                                                    }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={checked}
+                                                            onChange={() => toggleClubScopeTorneo(c.id)}
+                                                            style={{ accentColor: '#a855f7' }}
+                                                        />
+                                                        <span style={{ fontSize: 13, color: '#fff' }}>{c.name}</span>
+                                                        <span style={{ fontSize: 11, color: 'var(--basalt-400)', marginLeft: 'auto' }}>
+                                                            {c.region || c.country || ''}
+                                                        </span>
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
+                                        {clubSearchTorneo.trim().length === 0 && filteredClubsTorneo.length > 100 && (
+                                            <div style={{ fontSize: 11, color: 'var(--basalt-500)' }}>
+                                                Mostrando 100 de {filteredClubsTorneo.length} clubes. Usá el buscador para filtrar.
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
                             {getReservedAdminRole(editingUser.email) && (
                                 <div style={{ fontSize: 12, color: '#fbbf24', marginTop: 8 }}>
                                     Esta cuenta usa un email con rol reservado y debe conservarlo.

@@ -31,7 +31,7 @@ import { getMatchPenaltyScore, hasMatchPenaltyShootout } from '@/lib/matchUtils'
 import { parseAnyMatches, withStats } from '@/lib/matchSchema';
 import { SPORTS } from '@/lib/data/sports';
 import { findCountryRecord } from '@/lib/data/countries';
-import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { APP_TIMEZONE } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import {
@@ -563,7 +563,7 @@ function H2HItem({
 
 export default function MatchDetailClientPage({ id }: { id: string }) {
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, isLoading: authLoading } = useAuth();
 
     const [state, setState] = useState<{
         kind: 'loading' | 'error' | 'empty' | 'ok';
@@ -616,7 +616,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         const stats = buildCompleteMatchStats(evs, defMap);
         return buildCompleteStatTabs(stats, homeName, awayName);
     }, [state.kind, state.matchData, state.eventsData]);
-    const isSuperAdminUser = isGlobalAdminRole(user?.role);
+    const isSuperAdminUser = !authLoading && canUseRestrictedContentActions(user?.role);
     const isRugbyApiSportsSource = state.matchData?.externalProvider === 'rugby-api-sports';
     const isEspnSource = state.matchData?.externalProvider === 'espn';
     const isMotorsportSource =

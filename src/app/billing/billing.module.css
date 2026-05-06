@@ -1,0 +1,223 @@
+.page {
+    min-height: 100vh;
+    background: #0a0a0a;
+    color: #ffffff;
+    padding: 4rem 1.5rem;
+}
+
+.inner {
+    max-width: 42rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.title {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 800;
+}
+
+.empty {
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    padding: 2rem;
+    text-align: center;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    color: #9ca3af;
+}
+
+.cta {
+    background: var(--g22-accent, #10b981);
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.card {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 2rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    gap: 1rem;
+}
+
+.row:last-of-type {
+    border-bottom: none;
+}
+
+.label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #9ca3af;
+}
+
+.value {
+    font-weight: 600;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.muted {
+    color: #6b7280;
+    font-weight: 400;
+}
+
+.founderBadge {
+    background: var(--g22-accent, #10b981);
+    color: #ffffff;
+    padding: 0.125rem 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.625rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.tone_good { color: #34d399; }
+.tone_warn { color: #fbbf24; }
+.tone_bad { color: #f87171; }
+.tone_neutral { color: #9ca3af; }
+
+.note {
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    color: #fde68a;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+}
+
+.note a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.cancelBtn {
+    margin-top: 1rem;
+    background: transparent;
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    color: #f87171;
+    padding: 0.75rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 150ms ease;
+}
+
+.cancelBtn:hover {
+    background: rgba(248, 113, 113, 0.1);
+}
+
+.cancelConfirm {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    border-radius: 0.375rem;
+    background: rgba(248, 113, 113, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.cancelActions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.cancelBtnDanger {
+    background: #f87171;
+    color: #1f2937;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cancelBtnDanger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cancelBtnGhost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 0.75rem 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.error {
+    color: #fca5a5;
+    font-size: 0.8125rem;
+    margin: 0;
+}
+
+.history {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.historyTitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #9ca3af;
+}
+
+.historyList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.historyItem {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.25rem;
+    font-size: 0.8125rem;
+    align-items: center;
+}

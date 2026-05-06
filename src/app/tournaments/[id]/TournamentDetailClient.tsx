@@ -12,6 +12,7 @@ import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
 import TournamentPublicStats from './TournamentPublicStats';
+import TournamentScoresPanel from './TournamentScoresPanel';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { getAllCountries, getCountryById } from '@/lib/data/countries';
 import { normalizeTeamLabelAssignments, resolveStandingsRowLabel } from '@/lib/teamLabels';
@@ -23,7 +24,7 @@ import { resolveLogoPreviewSrc } from '@/lib/utils/logoUrl';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
-import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { useAuth } from '@/context/AuthContext';
 import { getTournamentFlashScoreConfig, getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
 import {
@@ -39,6 +40,7 @@ const BASE_TABS = [
     { id: 'standings', label: 'Clasificación' },
     { id: 'playoff', label: 'Playoff' },
     { id: 'teams', label: 'Equipos' },
+    { id: 'scores', label: 'Puntajes' },
     { id: 'stats', label: 'Estadísticas' },
 ];
 
@@ -877,6 +879,9 @@ function mapDbMatchToFrontend(match: any) {
         away_team: { id: match.away?.id ?? match.away_club_id ?? null, name: match.away?.name ?? '', short_name: match.away?.short_name ?? null, logo: match.away?.logo_url ?? '' },
         home_club_id: match.home_club_id,
         away_club_id: match.away_club_id,
+        lineups: match.lineups ?? null,
+        events: match.events ?? [],
+        date_time: match.date_time ?? null,
         phase_id: match.phase_id,
         group_id: match.group_id,
         round_label: match.round_label,
@@ -1494,7 +1499,7 @@ export default function TournamentDetailPage({
 }: TournamentDetailPageProps) {
     const router = useRouter();
     const { isLeagueFavorite, toggleLeagueFavorite } = useFavorites();
-    const { user } = useAuth();
+    const { user, isLoading: authLoading } = useAuth();
 
     // Pre-process initialData once (synchronously) so SSR renders full content
     const [preloaded] = useState<ReturnType<typeof processDbData> | null>(() =>
@@ -2335,8 +2340,8 @@ export default function TournamentDetailPage({
     const fixturesPageTitle = isMotorsportTournament ? 'Proximas carreras' : 'Fixture';
     const standingsCardTitle = isMotorsportTournament ? 'Pilotos' : 'Posiciones';
     const infoParticipantsLabel = isMotorsportTournament ? 'Competidores' : 'Equipos';
-    const isSuperAdminUser = isGlobalAdminRole(user?.role);
-    const isExactSuperAdmin = isGlobalAdminRole(user?.role);
+    const isSuperAdminUser = !authLoading && canUseRestrictedContentActions(user?.role);
+    const isExactSuperAdmin = isSuperAdminUser;
     const externalTournamentOverrideId = resolveExternalTournamentId({
         routeId: id,
         externalId: tournamentData?.externalId ?? tournamentData?.external_id,
@@ -4034,6 +4039,16 @@ export default function TournamentDetailPage({
                 {/* ── STATS TAB ─────────────────────────────────────────── */}
                 {activeTab === 'stats' && (
                     <TournamentPublicStats matches={initialData?.matches || []} topScorers={topScorers} />
+                )}
+
+                {activeTab === 'scores' && (
+                    <TournamentScoresPanel
+                        tournamentId={id}
+                        tournamentName={tournamentData?.name}
+                        tournamentLogo={tournamentLogo}
+                        sportId={tournamentData?.sportId}
+                        matches={results}
+                    />
                 )}
 
                 {/* ── ARCHIVE TAB ───────────────────────────────────────── */}

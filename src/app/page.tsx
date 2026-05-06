@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef, useCallback, memo, type CSSProperties, type MouseEvent } from 'react';
-import { Trophy, ChevronRight, ChevronLeft, Star } from 'lucide-react';
+import { Trophy, ChevronRight, ChevronLeft, Star, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './page.module.css';
 import InstallAppButton from '@/components/InstallAppButton';
 import { useSport } from '@/context/SportContext';
@@ -12,7 +13,9 @@ import type { Tournament } from '@/lib/types'; // Keep this for existing tournam
 import { useFavorites } from '@/hooks/useFavorites';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { useAuth } from '@/context/AuthContext';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
+import { markHireCtaSeen, shouldShowHireCtaForUser } from '@/lib/hireCtaPreferences';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
@@ -714,7 +717,38 @@ export default function HomePage() {
   const [selectedAudience, setSelectedAudience] = useState<TournamentAudience>('mayores');
 
   const { selectedSport, setSelectedSport, activeSports } = useSport();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const { favoriteSportIds } = useUserPreferences();
+  const [showHireCta, setShowHireCta] = useState(false);
+
+  useEffect(() => {
+    if (isAuthLoading) {
+      setShowHireCta(false);
+      return;
+    }
+
+    if (!user?.id) {
+      setShowHireCta(true);
+      return;
+    }
+
+    const shouldShow = shouldShowHireCtaForUser(user.id);
+    setShowHireCta(shouldShow);
+
+    if (!shouldShow) return;
+
+    const markSeenTimer = window.setTimeout(() => {
+      markHireCtaSeen(user.id);
+    }, 800);
+
+    return () => window.clearTimeout(markSeenTimer);
+  }, [isAuthLoading, user?.id]);
+
+  const handleHireCtaClick = useCallback(() => {
+    if (user?.id) {
+      markHireCtaSeen(user.id);
+    }
+  }, [user?.id]);
 
   // Sort active sports: favorites first, then rest in original order
   const sortedActiveSports = useMemo(() => {
@@ -2303,7 +2337,7 @@ export default function HomePage() {
 
         {/* Right Sidebar - News Only */}
         <aside className={styles.sidebarRight}>
-          <div className={styles.sidebarSection}>
+          <div className={`${styles.sidebarSection} ${styles.rightNewsSection}`}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div className={styles.sidebarSectionTitle} style={{ marginBottom: 0 }}>Noticias Recientes</div>
               <Link href="/noticias" style={{ fontSize: '0.8rem', color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 500 }}>
@@ -2335,6 +2369,25 @@ export default function HomePage() {
               )}
             </div>
           </div>
+          {showHireCta && (
+            <Link href="/contacto" className={styles.hirePanel} onClick={handleHireCtaClick}>
+              <span className={styles.hirePanelLogoWrap} aria-hidden="true">
+                <Image
+                  src="/G22%20GEADER.png"
+                  alt=""
+                  width={3862}
+                  height={1083}
+                  sizes="180px"
+                  className={styles.hirePanelLogo}
+                />
+              </span>
+              <span className={styles.hirePanelBenefit}>Gestioná torneos, resultados y tablas en vivo</span>
+              <span className={styles.hirePanelAction}>
+                Contratar ahora
+                <ArrowRight size={14} strokeWidth={2.5} aria-hidden="true" />
+              </span>
+            </Link>
+          )}
         </aside>
       </div >
     </div >

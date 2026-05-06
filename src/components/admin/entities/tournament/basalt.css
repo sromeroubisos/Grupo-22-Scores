@@ -1,20 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root {
-    --bg-basalt: #0a0a0c;
-    --surface-basalt: #141417;
-    --surface-elevated: #1c1c21;
-    --border-basalt: #26262c;
-    --accent-primary: #3b82f6;
-    --text-main: #e2e2e7;
-    --text-dim: #888891;
-    --status-draft: #94a3b8;
-    --status-published: #3b82f6;
-    --status-active: #10b981;
-    --status-archived: #4b5563;
-    --status-warning: #f59e0b;
-    --status-error: #ef4444;
-    --grid-line: rgba(255, 255, 255, 0.03);
+    /* Tectonic Basalt — palette aligned with Estructura UX spec
+     * (kept on :root because the admin tournament shell relies on it,
+     *  but only loaded when TournamentStructureTab mounts) */
+    --bg-basalt: #0F141A;
+    --surface-basalt: #151B22;
+    --surface-elevated: #1B232C;
+    --border-basalt: #26313B;
+    --accent-primary: #38BDF8;       /* azul informativo (links, focus, info) */
+    --accent-success: #22C55E;       /* verde acción (CTAs, activa, OK) */
+    --text-main: #F4F7FA;
+    --text-dim: #98A6B3;
+    --status-draft: #98A6B3;
+    --status-published: #38BDF8;
+    --status-active: #22C55E;
+    --status-archived: #4B5563;
+    --status-warning: #F59E0B;
+    --status-error: #EF4444;
+    --grid-line: rgba(244, 247, 250, 0.025);
     --font-main: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 }
@@ -4513,15 +4517,15 @@ select.basalt-input {
 }
 
 .basalt-btn-primary {
-    background: var(--accent-primary);
-    border-color: var(--accent-primary);
-    color: #fff;
-    box-shadow: 0 0 24px rgba(59, 130, 246, 0.22);
+    background: var(--accent-success);
+    border-color: var(--accent-success);
+    color: #052E16;
+    box-shadow: 0 0 24px rgba(34, 197, 94, 0.22);
 }
 
 .basalt-btn-primary:hover:not(:disabled) {
-    background: #4d8df7;
-    border-color: #4d8df7;
+    background: #16A34A;
+    border-color: #16A34A;
     transform: scale(1.02);
 }
 

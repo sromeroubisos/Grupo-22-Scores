@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type ChangeEv
 import { JetBrains_Mono, Outfit } from 'next/font/google';
 import { Plus, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { useAuth } from '@/context/AuthContext';
+import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { mapDesignSlugToVisualFamily, readActiveExportDesign, type ExportDesignSlug, type ExportVisualFamily } from '@/lib/exports/activeDesign';
 import {
     EXPORT_DESIGN_CUSTOMIZATION_EVENT,
@@ -20,7 +22,7 @@ import { createClient } from '@/lib/supabase/client';
 import styles from './ExportButton.module.css';
 
 export type ExportFormat = '1080x1350' | '1080x1920';
-export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats' | 'playoffBracket' | 'lineups' | 'squad';
+export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats' | 'playoffBracket' | 'lineups' | 'squad' | 'teamOfWeek';
 type ExportDateValue = string | number | Date;
 export type MatchExportMode = 'schedule' | 'result';
 export type MatchExportLayout = 'classic' | 'editorial4x5';
@@ -168,6 +170,29 @@ export interface LineupsData {
     awayTeam: LineupExportTeamData;
 }
 
+export interface TeamOfWeekPlayerData {
+    id?: string | null;
+    number?: number | string | null;
+    name: string;
+    position?: string | null;
+    team?: string | null;
+    teamLogo?: string | null;
+    rating?: number | string | null;
+    isCaptain?: boolean | null;
+}
+
+export interface TeamOfWeekData {
+    title?: string;
+    subtitle?: string;
+    tournament: string;
+    tournamentLogo?: string;
+    date?: string;
+    venue?: string;
+    meta?: string;
+    players: TeamOfWeekPlayerData[];
+    replacements?: TeamOfWeekPlayerData[];
+}
+
 export interface SquadExportPlayerData {
     id?: string | null;
     number?: number | string | null;
@@ -238,7 +263,7 @@ export interface PlayoffBracketData {
     rounds: PlayoffBracketRoundData[];
 }
 
-export type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData | LineupsData | SquadData;
+export type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData | LineupsData | SquadData | TeamOfWeekData;
 type CanvasFormat = { width: number; height: number };
 type SafeArea = { top: number; bottom: number; centerX: number; width: number; height: number };
 type MatchBackgroundUpload = { name: string; src: string };
@@ -320,12 +345,20 @@ interface ExportImageProps {
     className?: string;
 }
 
+type ExportPreviewColorOverrides = {
+    accentColor: string;
+    bgColor: string;
+    editorialGradientLeftColor?: string;
+    editorialGradientRightColor?: string;
+};
+
 type ExportImagePreviewProps = {
     template: ExportTemplate;
     data: ExportData;
     format?: ExportFormat;
     visualFamily: ExportVisualFamily;
     customizationState?: ExportDesignCustomizationState | null;
+    previewColors?: ExportPreviewColorOverrides;
     matchExportMode?: MatchExportMode;
     matchExportLayout?: MatchExportLayout;
     lineupExportMode?: LineupExportMode;
@@ -685,7 +718,17 @@ const DEFAULT_EXPORT_COLOR_DEFAULTS: ExportColorDefaults = {
     editorialGradientRightColor: DEFAULT_PALETTE.accent,
 };
 
-export default function ExportImage({ template, data, filename = 'g22-export', className = '' }: ExportImageProps) {
+export default function ExportImage(props: ExportImageProps) {
+    const { user, isLoading } = useAuth();
+
+    if (isLoading || !canUseRestrictedContentActions(user?.role)) {
+        return null;
+    }
+
+    return <ExportImageInner {...props} />;
+}
+
+function ExportImageInner({ template, data, filename = 'g22-export', className = '' }: ExportImageProps) {
     const supabase = useMemo(() => createClient(), []);
     const [isExporting, setIsExporting] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -1100,6 +1143,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         if (template === 'playoffBracket') return 'Cuadro eliminatorio';
         if (template === 'lineups') return `Alineaciones · ${getLineupExportModeLabel(lineupExportMode)}`;
         if (template === 'squad') return 'Plantel completo';
+        if (template === 'teamOfWeek') return 'Equipo de la semana';
         return 'Configuracion de exportacion';
     }, [lineupExportMode, matchExportLayout, matchExportMode, standingsExportMode, template]);
     const exportSummaryChips = useMemo(() => {
@@ -1115,6 +1159,8 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             chips.push(getLineupExportModeLabel(lineupExportMode));
         } else if (template === 'squad') {
             chips.push(`${getSquadPlayerCount(data as SquadData)} jugadores`);
+        } else if (template === 'teamOfWeek') {
+            chips.push(`${getTeamOfWeekPlayerCount(data as TeamOfWeekData)} jugadores`);
         }
         chips.push(selectedPaletteName);
 
@@ -1137,7 +1183,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
         visualFamily,
     ]);
     const paletteUsageHint = useMemo(() => {
-        if ((template === 'lineups' || template === 'squad') && visualFamily === 'posterV3') {
+        if ((template === 'lineups' || template === 'squad' || template === 'teamOfWeek') && visualFamily === 'posterV3') {
             return 'En Poster V3, Fondo construye el clima oscuro del afiche; Acento domina barras, chips numerados y remates neon. En modo de dos equipos, el segundo bloque deriva a una variante fria para separar ambas columnas.';
         }
 
@@ -1149,7 +1195,7 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
             return 'En Poster V3, Fondo mueve la atmosfera del afiche y Acento recolorea titulos, marcadores, barras y capsulas neon sin tocar los datos.';
         }
 
-        if ((template === 'lineups' || template === 'squad') && visualFamily === 'momentumV2') {
+        if ((template === 'lineups' || template === 'squad' || template === 'teamOfWeek') && visualFamily === 'momentumV2') {
             return 'En Momentum V2, Fondo redefine el matte y la atmosfera del lienzo; Acento recolorea bordes, capsulas numeradas y brillos. En vista de dos equipos, la segunda columna usa una variacion fria del mismo acento para separar ambos lados sin romper la paleta.';
         }
 
@@ -1641,6 +1687,8 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                 } else {
                     await drawG22BaseLineups(ctx, canvas, exportData as LineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode);
                 }
+            } else if (template === 'teamOfWeek') {
+                await drawG22BaseTeamOfWeek(ctx, canvas, exportData as TeamOfWeekData, config, accentColor, bgColor, brandLogo);
             } else if (template === 'playoffBracket') {
                 if (visualFamily === 'posterV3') {
                     await drawPosterV3PlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo);
@@ -1672,6 +1720,68 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
     };
 
     const dailyMatches = template === 'dailyMatches' ? (data as DailyMatchesData).matches : [];
+    const modalPreviewData = useMemo<ExportData>(() => {
+        const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset);
+
+        if (template === 'dailyMatches') {
+            const matchesData = exportData as DailyMatchesData;
+            const selectedMatches = matchesData.matches.filter((_, index) => selectedMatchIndices.has(index));
+            return {
+                ...matchesData,
+                matches: selectedMatches.length > 0 ? selectedMatches : matchesData.matches,
+            };
+        }
+
+        if (template === 'matchStats') {
+            const matchData = applyManualMatchScore(
+                applyMatchExportMode(exportData as MatchStatsData, matchExportMode),
+                manualHomeScore,
+                manualAwayScore
+            );
+
+            if (matchExportLayout !== 'editorial4x5') {
+                return matchData;
+            }
+
+            return {
+                ...matchData,
+                backgroundImage: matchBackgroundUpload?.src || matchData.backgroundImage,
+                tournamentLogo: editorialCompetitionLogoUpload?.src || matchData.tournamentLogo,
+                editorialLayoutPresetId,
+                editorialContextLabel,
+                editorialShowTopBadge,
+                editorialShowHeaderArrows,
+                editorialGradientImage: editorialGradientUpload?.src || matchData.editorialGradientImage,
+                sponsors: activeEditorialSponsors,
+            };
+        }
+
+        return exportData;
+    }, [
+        activeEditorialSponsors,
+        customTournamentName,
+        data,
+        editorialCompetitionLogoUpload?.src,
+        editorialContextLabel,
+        editorialGradientUpload?.src,
+        editorialLayoutPresetId,
+        editorialShowHeaderArrows,
+        editorialShowTopBadge,
+        manualAwayScore,
+        manualHomeScore,
+        matchBackgroundUpload?.src,
+        matchExportLayout,
+        matchExportMode,
+        selectedMatchIndices,
+        selectedTimeZonePreset,
+        template,
+    ]);
+    const modalPreviewColors = useMemo<ExportPreviewColorOverrides>(() => ({
+        accentColor,
+        bgColor,
+        editorialGradientLeftColor,
+        editorialGradientRightColor,
+    }), [accentColor, bgColor, editorialGradientLeftColor, editorialGradientRightColor]);
 
     return (
         <div className={`${styles.container} ${className}`}>
@@ -1716,17 +1826,19 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                         </div>
 
                         <div className={styles.modalBody}>
+                            <div className={styles.modalControls}>
                             <div className={styles.modalSection}>
                                 <label className={styles.modalLabel}>Diseno activo</label>
-                                <div className={styles.formatOptions}>
-                                    <button className={`${styles.formatBtn} ${styles.active}`} type="button" disabled>
-                                        {getExportVisualFamilyLabel(visualFamily)}
-                                    </button>
+                                <div className={styles.activeDesignCard}>
+                                    <div className={styles.activeDesignCopy}>
+                                        <strong>{getExportVisualFamilyLabel(visualFamily)}</strong>
+                                        <span>
+                                            {EXPORT_VISUAL_FAMILY_OPTIONS.find((option) => option.value === visualFamily)?.description}
+                                            {' '}Tipografia y estilo desde el panel de gestion.
+                                        </span>
+                                    </div>
+                                    <span className={styles.activeDesignBadge}>Activo</span>
                                 </div>
-                                <p className={styles.modalHint}>
-                                    {EXPORT_VISUAL_FAMILY_OPTIONS.find((option) => option.value === visualFamily)?.description}
-                                    {' '}La tipografia y el estilo visual se administran desde el panel de gestion.
-                                </p>
                             </div>
 
                             {false && (
@@ -2657,6 +2769,31 @@ export default function ExportImage({ template, data, filename = 'g22-export', c
                                     </div>
                                 )}
                             </div>
+                            </div>
+                            <aside className={styles.modalPreviewPanel} aria-label="Vista previa del export">
+                                <div className={styles.modalPreviewHeader}>
+                                    <div>
+                                        <span>Vista previa</span>
+                                        <strong>{exportModalSubtitle}</strong>
+                                    </div>
+                                    <small>{selectedFormatConfig.width} x {selectedFormatConfig.height}</small>
+                                </div>
+                                <div className={styles.modalPreviewCanvas}>
+                                    <ExportImagePreview
+                                        template={template}
+                                        data={modalPreviewData}
+                                        format={format}
+                                        visualFamily={visualFamily}
+                                        customizationState={designCustomizationState}
+                                        previewColors={modalPreviewColors}
+                                        matchExportMode={matchExportMode}
+                                        matchExportLayout={matchExportLayout}
+                                        lineupExportMode={lineupExportMode}
+                                        standingsExportMode={standingsExportMode}
+                                        className={styles.modalPreviewImage}
+                                    />
+                                </div>
+                            </aside>
                         </div>
 
                         <div className={styles.modalFooter}>
@@ -2700,6 +2837,7 @@ export function ExportImagePreview({
     format = '1080x1350',
     visualFamily,
     customizationState = null,
+    previewColors,
     matchExportMode = 'result',
     matchExportLayout = 'classic',
     lineupExportMode = 'both',
@@ -2724,6 +2862,7 @@ export function ExportImagePreview({
                     format,
                     visualFamily,
                     customizationState,
+                    previewColors,
                     matchExportMode,
                     matchExportLayout,
                     lineupExportMode,
@@ -2748,7 +2887,7 @@ export function ExportImagePreview({
         return () => {
             isMounted = false;
         };
-    }, [customizationState, data, format, lineupExportMode, matchExportLayout, matchExportMode, standingsExportMode, template, visualFamily]);
+    }, [customizationState, data, format, lineupExportMode, matchExportLayout, matchExportMode, previewColors, standingsExportMode, template, visualFamily]);
 
     if (previewError && !previewUrl) {
         return <div className={className}>{previewError}</div>;
@@ -2764,8 +2903,8 @@ export function ExportImagePreview({
 function getDefaultTournamentName(template: ExportTemplate, data: ExportData): string {
     if (template === 'standings') return (data as StandingsData).title || '';
     if (template === 'playoffBracket') return (data as PlayoffBracketData).title || '';
-    if (template === 'dailyMatches' || template === 'matchStats' || template === 'lineups' || template === 'squad') {
-        return (data as DailyMatchesData | MatchStatsData | LineupsData | SquadData).tournament || '';
+    if (template === 'dailyMatches' || template === 'matchStats' || template === 'lineups' || template === 'squad' || template === 'teamOfWeek') {
+        return (data as DailyMatchesData | MatchStatsData | LineupsData | SquadData | TeamOfWeekData).tournament || '';
     }
     return '';
 }
@@ -2869,6 +3008,7 @@ function resolveActiveTypographyContextId(
     if (template === 'playoffBracket') return 'playoffBracket';
     if (template === 'lineups') return 'lineups';
     if (template === 'squad') return 'lineups';
+    if (template === 'teamOfWeek') return 'teamOfWeek';
     return 'global';
 }
 
@@ -3739,6 +3879,7 @@ async function renderMatchExportPreviewDataUrl(options: {
     format: ExportFormat;
     visualFamily: ExportVisualFamily;
     customizationState: ExportDesignCustomizationState | null;
+    previewColors?: ExportPreviewColorOverrides;
     matchExportMode: MatchExportMode;
     matchExportLayout: MatchExportLayout;
     lineupExportMode: LineupExportMode;
@@ -3750,6 +3891,7 @@ async function renderMatchExportPreviewDataUrl(options: {
         format,
         visualFamily,
         customizationState,
+        previewColors,
         matchExportMode,
         matchExportLayout,
         lineupExportMode,
@@ -3786,7 +3928,14 @@ async function renderMatchExportPreviewDataUrl(options: {
             loadImage('/icon.png'),
         ]);
 
-    const previewDefaults = customizationState
+    const previewDefaults = previewColors
+        ? {
+            accentColor: previewColors.accentColor || DEFAULT_PALETTE.accent,
+            bgColor: previewColors.bgColor || DEFAULT_PALETTE.bg,
+            editorialGradientLeftColor: previewColors.editorialGradientLeftColor || '#df255c',
+            editorialGradientRightColor: previewColors.editorialGradientRightColor || previewColors.accentColor || DEFAULT_PALETTE.accent,
+        }
+        : customizationState
         ? {
             accentColor: customizationState.previewAccent || DEFAULT_PALETTE.accent,
             bgColor: customizationState.previewSurface || DEFAULT_PALETTE.bg,
@@ -3903,6 +4052,8 @@ async function renderMatchExportPreviewDataUrl(options: {
         } else {
             await drawG22BaseLineups(ctx, canvas, exportData as LineupsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupExportMode);
         }
+    } else if (template === 'teamOfWeek') {
+        await drawG22BaseTeamOfWeek(ctx, canvas, exportData as TeamOfWeekData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
     } else if (template === 'squad') {
         const squadData = exportData as SquadData;
         const firstPage = buildSquadPages(squadData, config)[0];
@@ -4198,6 +4349,14 @@ function buildExportData(
         return {
             ...squadData,
             tournament: tournamentName || squadData.tournament,
+        };
+    }
+
+    if (template === 'teamOfWeek') {
+        const teamOfWeekData = data as TeamOfWeekData;
+        return {
+            ...teamOfWeekData,
+            tournament: tournamentName || teamOfWeekData.tournament,
         };
     }
 
@@ -8049,6 +8208,12 @@ function getSquadPlayerCount(data: SquadData) {
         : 0;
 }
 
+function getTeamOfWeekPlayerCount(data: TeamOfWeekData) {
+    return Array.isArray(data.players)
+        ? data.players.filter((player) => player && String(player.name || '').trim()).length
+        : 0;
+}
+
 function formatSquadGroupLabel(group: SquadPageGroupData) {
     const label = String(group.label || '').trim();
     return group.continuedFromPrevious ? `${label.toUpperCase()} (CONT.)` : label.toUpperCase();
@@ -9597,6 +9762,359 @@ async function drawG22BaseLineups(
     });
 
     drawBrandFooter(ctx, canvas, brandLogo, isDark);
+}
+
+async function drawG22BaseTeamOfWeek(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: TeamOfWeekData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+) {
+    void format;
+
+    const isStory = canvas.height > 1500;
+    const scaleX = canvas.width / 1080;
+    const scaleY = canvas.height / (isStory ? 1920 : 1350);
+    const scaleFont = Math.min(scaleX, scaleY);
+    const sx = (value: number) => Math.round(value * scaleX);
+    const sy = (value: number) => Math.round(value * scaleY);
+    const sf = (value: number) => Math.max(1, Math.round(value * scaleFont));
+    const normalizePlayers = (players: TeamOfWeekPlayerData[] | undefined) => (
+        Array.isArray(players)
+            ? players.filter((player) => player && String(player.name || '').trim())
+            : []
+    );
+    const allPlayers = normalizePlayers(data.players);
+    const starters = allPlayers.slice(0, 15);
+    const replacements = normalizePlayers(data.replacements).length > 0
+        ? normalizePlayers(data.replacements).slice(0, 8)
+        : allPlayers.slice(15, 23);
+    const [textureImage, tournamentLogo, ...starterLogos] = await Promise.all([
+        loadImage(EDITORIAL_TEXTURE_SOURCE),
+        loadImage(data.tournamentLogo || ''),
+        ...starters.map((player) => loadImage(player.teamLogo || '')),
+    ]);
+    const requestedAccent = normalizeHexColor(accentColor);
+    const accent = /^#[0-9a-f]{6}$/i.test(requestedAccent) ? requestedAccent : BRAND_ACCENT;
+    const requestedBg = normalizeHexColor(bgColor);
+    const canvasBg = /^#[0-9a-f]{6}$/i.test(requestedBg) ? requestedBg : '#f2f1ed';
+    const isDark = getContrastColor(canvasBg) === '#ffffff';
+    const ink = getTextColor(isDark);
+    const mutedInk = getMutedColor(isDark, 0.72);
+    const subtleInk = getMutedColor(isDark, 0.42);
+    const teamPanelColor = isDark
+        ? mixHexColors(canvasBg, accent, 0.58)
+        : mixHexColors(accent, canvasBg, 0.16);
+    const teamPanelHot = mixHexColors(teamPanelColor, isDark ? '#ffffff' : '#f8fafc', isDark ? 0.16 : 0.22);
+    const teamPanelDeep = mixHexColors(teamPanelColor, isDark ? '#000000' : '#0f172a', isDark ? 0.5 : 0.24);
+    const ratingBox = isDark ? 'rgba(0,0,0,0.76)' : 'rgba(15,23,42,0.86)';
+    const ratingInk = '#fff7dc';
+
+    const paperGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    paperGradient.addColorStop(0, isDark ? mixHexColors(canvasBg, '#ffffff', 0.05) : mixHexColors(canvasBg, '#ffffff', 0.72));
+    paperGradient.addColorStop(0.5, isDark ? canvasBg : mixHexColors(canvasBg, '#ffffff', 0.38));
+    paperGradient.addColorStop(1, isDark ? mixHexColors(canvasBg, '#000000', 0.28) : mixHexColors(canvasBg, '#000000', 0.08));
+    ctx.fillStyle = paperGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const accentGlow = ctx.createRadialGradient(canvas.width * 0.78, canvas.height * 0.1, 0, canvas.width * 0.78, canvas.height * 0.1, canvas.width * 0.65);
+    accentGlow.addColorStop(0, hexToRGBA(accent, isDark ? 0.24 : 0.18));
+    accentGlow.addColorStop(0.45, hexToRGBA(accent, isDark ? 0.08 : 0.06));
+    accentGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = accentGlow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (textureImage) {
+        ctx.save();
+        ctx.globalAlpha = isDark ? 0.16 : 0.24;
+        ctx.globalCompositeOperation = isDark ? 'screen' : 'multiply';
+        ctx.drawImage(textureImage, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+    }
+
+    ctx.save();
+    const grain = (seed: number) => {
+        const value = Math.sin(seed * 12.9898) * 43758.5453;
+        return value - Math.floor(value);
+    };
+    for (let index = 0; index < 520; index += 1) {
+        const dotX = grain(index + 3.1) * canvas.width;
+        const dotY = grain(index + 9.7) * canvas.height;
+        const dotSize = sx(1 + grain(index + 15.3) * 2.4);
+        const dotAlpha = 0.025 + grain(index + 21.4) * 0.05;
+        ctx.fillStyle = isDark
+            ? `rgba(255,255,255,${dotAlpha * 0.75})`
+            : `rgba(10,10,10,${dotAlpha})`;
+        ctx.fillRect(dotX, dotY, dotSize, dotSize);
+    }
+    ctx.restore();
+
+    if (brandLogo) {
+        ctx.save();
+        ctx.globalAlpha = isDark ? 0.07 : 0.04;
+        ctx.globalCompositeOperation = isDark ? 'screen' : 'multiply';
+        const watermarkSize = sx(isStory ? 460 : 340);
+        const placement = getContainedImagePlacement(
+            brandLogo,
+            canvas.width / 2,
+            canvas.height * (isStory ? 0.54 : 0.52),
+            watermarkSize,
+            watermarkSize,
+            0
+        );
+        ctx.drawImage(brandLogo, placement.x, placement.y, placement.width, placement.height);
+        ctx.restore();
+    }
+
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height * (isStory ? 0.52 : 0.51));
+    ctx.rotate(-0.09);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.globalAlpha = isDark ? 0.11 : 0.052;
+    ctx.fillStyle = ink;
+    ctx.font = `950 ${sf(isStory ? 168 : 124)}px ${FONT_DISPLAY}`;
+    ctx.fillText('G22 SCORES', 0, 0);
+    ctx.restore();
+
+    const headerLeft = sx(58);
+    const headerTop = offsetElementY('title', sy(isStory ? 66 : 46));
+    const titleMaxWidth = canvas.width - sx(230);
+    const rawTitleText = (data.title || 'Equipo de la semana').trim();
+    const titleText = rawTitleText.toLowerCase() === 'starting xv' ? 'Equipo de la semana' : rawTitleText;
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = ink;
+    const titleSize = setFittedFont(ctx, titleText, titleMaxWidth, '900', scaleElementSize('title', sf(isStory ? 94 : 78), 86), FONT_DISPLAY, sf(48));
+    ctx.fillText(truncateTextToWidth(ctx, titleText, titleMaxWidth), headerLeft, headerTop + titleSize);
+    ctx.restore();
+
+    const headerLogoSize = scaleElementSize('tournamentLogo', sx(isStory ? 86 : 74), 74);
+    const headerLogoY = offsetElementY('tournamentLogo', headerTop + sy(isStory ? 54 : 42));
+    drawOverflowCrest(ctx, {
+        x: canvas.width - sx(72),
+        y: headerLogoY,
+        width: headerLogoSize,
+        height: headerLogoSize,
+        img: tournamentLogo,
+        label: data.tournament,
+        rawLogo: data.tournamentLogo || data.tournament,
+        isDark,
+        showFrame: !tournamentLogo,
+    });
+
+    const metaParts = [
+        data.subtitle?.trim() || data.tournament?.trim(),
+        data.meta?.trim() || data.date?.trim(),
+        'Powered by G22 Scores',
+    ].filter(Boolean).map((part) => String(part).toUpperCase());
+    if (metaParts.length > 0) {
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = mutedInk;
+        ctx.font = `800 ${sf(isStory ? 20 : 16)}px ${FONT_BODY}`;
+        const separator = '    //    ';
+        ctx.fillText(
+            truncateTextToWidth(ctx, metaParts.join(separator), canvas.width - headerLeft * 2),
+            headerLeft,
+            headerTop + titleSize + sy(isStory ? 62 : 52),
+        );
+        ctx.restore();
+    }
+
+    const gridTop = offsetElementY('rowHeight', sy(isStory ? 310 : 218));
+    const gridBottom = canvas.height - sy(isStory ? 265 : 122);
+    const sideMargin = sx(52);
+    const columnGap = sx(20);
+    const cardWidth = (canvas.width - sideMargin * 2 - columnGap * 4) / 5;
+    const labelHeight = sy(isStory ? 64 : 58);
+    const rowGap = sy(isStory ? 62 : 34);
+    const defaultVisualHeight = Math.max(sy(isStory ? 326 : 252), (gridBottom - gridTop - rowGap * 2 - labelHeight * 3) / 3);
+    const visualHeight = scaleElementSize('rowHeight', defaultVisualHeight, 274);
+    const rowStep = visualHeight + labelHeight + rowGap;
+    const wrapLabel = (label: string, maxWidth: number, maxLines: number) => {
+        const words = label.split(/\s+/).filter(Boolean);
+        const lines: string[] = [];
+        let currentLine = '';
+
+        words.forEach((word) => {
+            const candidate = currentLine ? `${currentLine} ${word}` : word;
+            if (!currentLine || ctx.measureText(candidate).width <= maxWidth) {
+                currentLine = candidate;
+                return;
+            }
+
+            lines.push(currentLine);
+            currentLine = word;
+        });
+
+        if (currentLine) lines.push(currentLine);
+        if (lines.length <= maxLines) return lines;
+
+        const trimmed = lines.slice(0, maxLines);
+        trimmed[maxLines - 1] = truncateTextToWidth(ctx, `${trimmed[maxLines - 1]} ${lines.slice(maxLines).join(' ')}`, maxWidth);
+        return trimmed;
+    };
+
+    const drawPlayerTile = (player: TeamOfWeekPlayerData, playerIndex: number) => {
+        const row = Math.floor(playerIndex / 5);
+        const column = playerIndex % 5;
+        const x = sideMargin + column * (cardWidth + columnGap);
+        const y = gridTop + row * rowStep;
+        const centerX = x + cardWidth / 2;
+        const logoImage = starterLogos[playerIndex] || null;
+        const playerNumber = String(player.number ?? playerIndex + 1).trim();
+        const playerName = `${player.name}${player.isCaptain ? ' (C)' : ''}`.trim().toUpperCase();
+        const teamName = String(player.team || player.position || '').trim().toUpperCase();
+        const ratingLabel = formatLineupExportRating(player.rating);
+        const panelGradient = ctx.createLinearGradient(x, y, x + cardWidth, y + visualHeight);
+        panelGradient.addColorStop(0, teamPanelHot);
+        panelGradient.addColorStop(0.52, teamPanelColor);
+        panelGradient.addColorStop(1, teamPanelDeep);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, cardWidth, visualHeight);
+        ctx.clip();
+
+        ctx.fillStyle = panelGradient;
+        ctx.fillRect(x, y, cardWidth, visualHeight);
+
+        if (textureImage) {
+            ctx.save();
+            ctx.globalAlpha = 0.18;
+            ctx.globalCompositeOperation = 'multiply';
+            ctx.beginPath();
+            ctx.rect(x, y, cardWidth, visualHeight);
+            ctx.clip();
+            ctx.drawImage(textureImage, x, y, cardWidth, visualHeight);
+            ctx.restore();
+        }
+
+        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.18)';
+        ctx.fillRect(x + cardWidth * 0.1, y, cardWidth * 0.18, visualHeight);
+        ctx.fillStyle = isDark ? 'rgba(0,0,0,0.18)' : 'rgba(15,23,42,0.1)';
+        ctx.beginPath();
+        ctx.moveTo(x, y + visualHeight * 0.72);
+        ctx.lineTo(x + cardWidth, y + visualHeight * 0.58);
+        ctx.lineTo(x + cardWidth, y + visualHeight);
+        ctx.lineTo(x, y + visualHeight);
+        ctx.closePath();
+        ctx.fill();
+
+        const crestWidth = scaleElementSize('teamLogo', cardWidth * 1.12, 154);
+        const crestHeight = scaleElementSize('teamLogo', visualHeight * 0.82, 154);
+        drawOverflowCrest(ctx, {
+            x: centerX,
+            y: y + visualHeight * 0.48,
+            width: crestWidth,
+            height: crestHeight,
+            img: logoImage,
+            label: teamName || player.name,
+            rawLogo: player.teamLogo,
+            isDark: getContrastColor(teamPanelColor) === '#ffffff',
+            showFrame: false,
+        });
+
+        if (ratingLabel) {
+            const ratingFont = scaleElementSize('score', sf(isStory ? 20 : 17), 16);
+            ctx.font = `900 ${ratingFont}px ${FONT_MONO}`;
+            const ratingWidth = Math.max(sx(48), ctx.measureText(ratingLabel).width + sx(22));
+            const ratingHeight = sy(isStory ? 36 : 32);
+            const ratingX = x + cardWidth - ratingWidth - sx(10);
+            const ratingY = y + sy(10);
+            ctx.fillStyle = ratingBox;
+            ctx.beginPath();
+            ctx.roundRect(ratingX, ratingY, ratingWidth, ratingHeight, sx(9));
+            ctx.fill();
+            ctx.fillStyle = ratingInk;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(ratingLabel, ratingX + ratingWidth / 2, ratingY + ratingHeight / 2 + 1);
+        }
+
+        ctx.restore();
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = ink;
+        const label = `${playerNumber}. ${playerName}`;
+        const labelFontSize = scaleElementSize('teamName', sf(isStory ? 22 : 18), 18);
+        const labelLineHeight = sy(isStory ? 25 : 21);
+        ctx.font = `950 ${labelFontSize}px ${FONT_BODY}`;
+        const labelLines = wrapLabel(label, cardWidth + sx(38), 2);
+        const firstLineY = y + visualHeight + sy(isStory ? 19 : 18);
+        labelLines.forEach((line, lineIndex) => {
+            ctx.fillText(truncateTextToWidth(ctx, line, cardWidth + sx(38)), centerX, firstLineY + lineIndex * labelLineHeight);
+        });
+        ctx.restore();
+    };
+
+    if (starters.length === 0) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = mutedInk;
+        ctx.font = `800 ${sf(24)}px ${FONT_BODY}`;
+        ctx.fillText('No hay jugadores para exportar.', canvas.width / 2, gridTop + (gridBottom - gridTop) / 2);
+        ctx.restore();
+        return;
+    }
+
+    starters.forEach(drawPlayerTile);
+
+    if (replacements.length > 0) {
+        const titleY = canvas.height - sy(isStory ? 212 : 80);
+        const lineStartY = titleY + sy(isStory ? 42 : 28);
+        const maxLineWidth = canvas.width - sx(150);
+        const replacementLabels = replacements.map((player, index) => {
+            const number = String(player.number ?? 16 + index).trim();
+            const ratingLabel = formatLineupExportRating(player.rating);
+            return `${number}. ${String(player.name || '').trim()}${ratingLabel ? ` (${ratingLabel})` : ''}`;
+        });
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = ink;
+        ctx.font = `900 ${sf(isStory ? 24 : 20)}px ${FONT_BODY}`;
+        ctx.fillText('SUPLENTES', canvas.width / 2, titleY);
+
+        ctx.font = `800 ${sf(isStory ? 17 : 14)}px ${FONT_BODY}`;
+        const lines: string[] = [];
+        let currentLine = '';
+        replacementLabels.forEach((label) => {
+            const candidate = currentLine ? `${currentLine} ${label}` : label;
+            if (!currentLine || ctx.measureText(candidate).width <= maxLineWidth) {
+                currentLine = candidate;
+            } else {
+                lines.push(currentLine);
+                currentLine = label;
+            }
+        });
+        if (currentLine) lines.push(currentLine);
+
+        ctx.fillStyle = mutedInk;
+        lines.slice(0, 3).forEach((line, index) => {
+            ctx.fillText(truncateTextToWidth(ctx, line, maxLineWidth), canvas.width / 2, lineStartY + index * sy(isStory ? 28 : 24));
+        });
+        ctx.restore();
+    } else {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = subtleInk;
+        ctx.font = `800 ${sf(isStory ? 16 : 12)}px ${FONT_MONO}`;
+        ctx.fillText('POWERED BY G22 SCORES', canvas.width / 2, canvas.height - sy(isStory ? 86 : 42));
+        ctx.restore();
+    }
 }
 
 function getBracketParticipantName(side: PlayoffBracketMatchData['home_team'], participant: PlayoffBracketMatchData['home_participant']) {

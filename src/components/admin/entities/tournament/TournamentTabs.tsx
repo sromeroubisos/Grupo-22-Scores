@@ -79,6 +79,21 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
         TOURNAMENT_TABS.forEach((tab) => prefetchTab(tab.id));
     }, [mobileSelectorOpen, prefetchTab]);
 
+    useEffect(() => {
+        if (!mobileSelectorOpen || typeof document === 'undefined') return;
+        // Prevent the page from scrolling behind the bottom-sheet on iOS Safari,
+        // which doesn't honour overflow:hidden on html alone. Restore both
+        // properties on close so we don't leak state across navigations.
+        const previousBodyOverflow = document.body.style.overflow;
+        const previousHtmlOverflow = document.documentElement.style.overflow;
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = previousBodyOverflow;
+            document.documentElement.style.overflow = previousHtmlOverflow;
+        };
+    }, [mobileSelectorOpen]);
+
     const switchTab = (tabId: string) => {
         if (tabId === visualTabId) return;
         setMobileSelectorOpen(false);
@@ -278,6 +293,7 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
                                         className={`basalt-tabs-sheet-item ${isActive ? 'active' : ''} ${isActive && isTabNavigationPending ? 'is-pending' : ''}`}
                                         onClick={() => switchTab(tab.id)}
                                         onFocus={() => prefetchTab(tab.id)}
+                                        aria-current={currentTab === tab.id ? 'page' : undefined}
                                     >
                                         <span className="basalt-tabs-sheet-item-copy">
                                             <span className="basalt-tabs-sheet-item-glyph">

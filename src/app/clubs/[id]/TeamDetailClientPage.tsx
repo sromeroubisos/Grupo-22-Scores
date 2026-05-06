@@ -11,7 +11,7 @@ import { SPORTS_BY_ID } from '@/lib/sports';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import ExportImage, { type SquadData } from '@/components/ExportImage';
 import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
-import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { useAuth } from '@/context/AuthContext';
@@ -173,7 +173,7 @@ function formatPlayerStatus(value: unknown) {
 function TeamDetailInner({ id }: { id: string }) {
     const router = useRouter();
     const sp = useSearchParams();
-    const { user } = useAuth();
+    const { user, isLoading: authLoading } = useAuth();
 
     const [activeTab, setActiveTab] = useState('summary');
     const [loading, setLoading] = useState(true);
@@ -331,7 +331,7 @@ function TeamDetailInner({ id }: { id: string }) {
     // Filtered matches by sport
     const filteredResults = selectedSport === 'all' ? results : results.filter(m => String(m.sport_id) === selectedSport);
     const filteredFixtures = selectedSport === 'all' ? fixtures : fixtures.filter(m => String(m.sport_id) === selectedSport);
-    const isSuperAdminUser = isGlobalAdminRole(user?.role);
+    const isSuperAdminUser = !authLoading && canUseRestrictedContentActions(user?.role);
     const externalTeamId = getExternalTeamId(rawId, hintTeamUrl);
     const adminClubId = useMemo(() => {
         if (resolvedClubId) return resolvedClubId;

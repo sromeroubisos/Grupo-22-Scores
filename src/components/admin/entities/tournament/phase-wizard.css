@@ -1,14 +1,16 @@
 /* phase-wizard.css */
 .phase-wizard-wrapper {
-    --carbon-black: #050505;
-    --carbon-deep: #0a0a0b;
-    --carbon-surface: #121214;
-    --carbon-border: #1f1f22;
-    --carbon-grid: rgba(255, 255, 255, 0.04);
-    --accent-cyan: #00a365;
-    --accent-dim: rgba(0, 163, 101, 0.15);
-    --text-main: #e2e2e4;
-    --text-dim: #84848a;
+    /* Aligned with Tectonic Basalt palette declared in basalt.css */
+    --carbon-black: #0B0F14;
+    --carbon-deep: #0F141A;
+    --carbon-surface: #151B22;
+    --carbon-border: #26313B;
+    --carbon-grid: rgba(244, 247, 250, 0.025);
+    --accent-cyan: #38BDF8;
+    --accent-dim: rgba(56, 189, 248, 0.15);
+    --accent-success: #22C55E;
+    --text-main: #F4F7FA;
+    --text-dim: #98A6B3;
     --transition-smooth: cubic-bezier(0.2, 0, 0, 1);
 
     background-color: var(--carbon-black);

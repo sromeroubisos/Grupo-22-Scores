@@ -937,19 +937,35 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                     </div>
                 </div>
                 <div className="participants-header-actions">
-                    <button onClick={() => setIsHistoryDrawerOpen(true)} className="btn-flash">
+                    <button
+                        onClick={() => setIsHistoryDrawerOpen(true)}
+                        className="btn-flash"
+                        aria-label="Historial de participantes"
+                    >
                         <History />
                         <span>Historial</span>
                     </button>
-                    <button onClick={handleExport} className="btn-flash">
+                    <button
+                        onClick={handleExport}
+                        className="btn-flash"
+                        aria-label="Exportar participantes"
+                    >
                         <Download />
                         <span>Exportar</span>
                     </button>
-                    <button onClick={() => setIsImportDrawerOpen(true)} className="btn-flash">
+                    <button
+                        onClick={() => setIsImportDrawerOpen(true)}
+                        className="btn-flash"
+                        aria-label="Importar participantes"
+                    >
                         <FileUp />
                         <span>Importar</span>
                     </button>
-                    <button onClick={() => setIsAddDrawerOpen(true)} className="btn-flash primary">
+                    <button
+                        onClick={() => setIsAddDrawerOpen(true)}
+                        className="btn-flash primary"
+                        aria-label="Nuevo participante"
+                    >
                         <Plus />
                         <span>Nuevo Participante</span>
                     </button>

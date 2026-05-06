@@ -1,14 +1,17 @@
 import 'server-only'
 
 import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/perf/supabase';
 import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure';
+import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie';
 import type { LooseSupabaseClient } from './loose';
 
 export async function createClient() {
     const startedAt = nowMs()
     const cookieStore = await cookies()
+    const headerStore = await headers()
+    const requestHost = headerStore.get('x-forwarded-host') || headerStore.get('host')
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
     const instrumentedFetch = createInstrumentedSupabaseFetch('server', url, fetch)
@@ -17,6 +20,7 @@ export async function createClient() {
         url,
         key,
         {
+            cookieOptions: getSupabaseAuthCookieOptions(requestHost),
             auth: {
                 autoRefreshToken: false,
                 detectSessionInUrl: false,

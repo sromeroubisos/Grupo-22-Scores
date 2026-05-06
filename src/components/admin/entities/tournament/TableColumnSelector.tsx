@@ -53,18 +53,15 @@ export function TableColumnSelector({
   const totalCount = categories.reduce((acc, cat) => acc + cat.columns.length, 0);
 
   return (
-    <div className="flex flex-col relative px-[24px] py-[20px] rounded-lg bg-[rgba(10,10,11,0.85)] border border-[rgba(255,255,255,0.1)] overflow-hidden">
-      {/* Texture overlay */}
-      <div className="carbon-overlay opacity-[0.18]" />
-
-      {/* Content wrapper to stay above overlay */}
+    <div className="flex flex-col relative px-[24px] py-[20px] rounded-sm bg-[#151B22] border border-[#26313B] overflow-hidden">
+      {/* Content wrapper */}
       <div className="relative z-10 flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-[24px]">
-          <h3 className="text-[20px] font-[800] text-white m-0 leading-none uppercase">
-            GLOSARIO DE COLUMNAS
+        <div className="flex items-center justify-between mb-[20px]">
+          <h3 className="text-[0.85rem] font-mono font-semibold text-[#98A6B3] m-0 leading-none uppercase tracking-[0.14em]">
+            Glosario de columnas
           </h3>
-          <span className="text-[14px] font-mono text-[rgba(255,255,255,0.7)]">
+          <span className="text-[0.75rem] font-mono text-[#98A6B3]">
             {selectedCount} de {totalCount} seleccionadas
           </span>
         </div>
