@@ -722,15 +722,71 @@
    --------------------------------------------------------------------------- */
 
 @media (max-width: 767px) {
-    /* Tighter shell rhythm */
+    /* Tighter shell rhythm + hard overflow guard. The structure tab is the
+       only place where horizontal scroll regularly leaks (lots of nested
+       grids, the wizard double-pane layout, and Tailwind utilities with
+       hard-coded mins). Clip every box to the viewport. */
     .basalt-body .tournament-structure-shell {
         gap: 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: clip;
     }
 
-    /* Module cards inside the structure shell — 14px padding (vs the 32px set
-       by .tournament-structure-shell .basalt-card on desktop). */
     .basalt-body .tournament-structure-shell .basalt-card,
+    .basalt-body .tournament-structure-shell .structure-wizard-card,
+    .basalt-body .tournament-structure-shell .structure-wizard-layout,
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .structure-wizard-content,
+    .basalt-body .tournament-structure-shell .phase-wizard-content,
+    .basalt-body .tournament-structure-shell .structure-step-panel,
+    .basalt-body .tournament-structure-shell .phase-wizard-fields,
+    .basalt-body .tournament-structure-shell .structure-field-panel,
+    .basalt-body .tournament-structure-shell .structure-field-panel-wide,
+    .basalt-body .tournament-structure-shell .structure-option-grid,
+    .basalt-body .tournament-structure-shell .structure-split-grid,
+    .basalt-body .tournament-structure-shell .structure-score-grid,
+    .basalt-body .tournament-structure-shell .structure-summary-grid,
+    .basalt-body .tournament-structure-shell .structure-labels-grid,
+    .basalt-body .tournament-structure-shell .structure-label-list,
+    .basalt-body .tournament-structure-shell .structure-label-row {
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box;
+    }
+
+    /* Module/section plates ("Modelo competitivo", "Mapa competitivo",
+       "Resumen") get 14px padding on phones — Tectonic Basalt forces 32px on
+       desktop via `.tournament-structure-shell .basalt-card`. The wizard
+       card itself stays at p-0 (its sidebar and content carry their own
+       padding), so explicitly target only the .structure-module plates. */
+    .basalt-body .tournament-structure-shell .basalt-card.structure-module,
+    .basalt-body .tournament-structure-shell .basalt-card.structure-empty-panel,
+    .basalt-body .tournament-structure-shell .basalt-card.structure-hero-panel,
     .basalt-body .tournament-structure-shell .structure-module {
+        padding: 14px !important;
+    }
+
+    /* Wizard card stays flush with no padding on phones (children paint it) */
+    .basalt-body .tournament-structure-shell .basalt-card.structure-wizard-card,
+    .basalt-body .tournament-structure-shell .basalt-card.phase-wizard-card,
+    .basalt-body .tournament-structure-shell .structure-wizard-card,
+    .basalt-body .tournament-structure-shell .phase-wizard-card {
+        padding: 0 !important;
+    }
+
+    /* Wizard sidebar on phones — defeat the desktop 22px padding override and
+       collapse it to a slim top strip with the stepper, progress and facts. */
+    .basalt-body .tournament-structure-shell .structure-wizard-sidebar,
+    .basalt-body .tournament-structure-shell .phase-wizard-sidebar {
+        padding: 14px !important;
+        width: 100% !important;
+    }
+
+    /* Wizard content padding scales down to 14px on phones */
+    .basalt-body .tournament-structure-shell .structure-wizard-content,
+    .basalt-body .tournament-structure-shell .phase-wizard-content {
         padding: 14px !important;
     }
 
