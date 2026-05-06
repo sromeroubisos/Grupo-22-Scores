@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import ConditionalLayout from "@/components/ConditionalLayout";
 // Force rebuild for ChunkLoadError fix
 import { AuthProvider } from "@/context/AuthContext";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const viewport: Viewport = {
