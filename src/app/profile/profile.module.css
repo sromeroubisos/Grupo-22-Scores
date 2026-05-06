@@ -1113,6 +1113,39 @@
     white-space: nowrap;
 }
 
+.preferenceEditBtn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.preferenceControlRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.preferenceStatus {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.preferenceSecondaryBtn {
+    flex: 0 0 auto;
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 0;
+}
+
+.preferenceSecondaryBtn:hover {
+    color: var(--color-accent);
+}
+
 .preferenceChips {
     display: flex;
     flex-wrap: wrap;

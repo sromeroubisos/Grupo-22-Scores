@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type ChangeEv
 import { JetBrains_Mono, Outfit } from 'next/font/google';
 import { Plus, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { useAuth } from '@/context/AuthContext';
+import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { mapDesignSlugToVisualFamily, readActiveExportDesign, type ExportDesignSlug, type ExportVisualFamily } from '@/lib/exports/activeDesign';
 import {
     EXPORT_DESIGN_CUSTOMIZATION_EVENT,
@@ -716,7 +718,17 @@ const DEFAULT_EXPORT_COLOR_DEFAULTS: ExportColorDefaults = {
     editorialGradientRightColor: DEFAULT_PALETTE.accent,
 };
 
-export default function ExportImage({ template, data, filename = 'g22-export', className = '' }: ExportImageProps) {
+export default function ExportImage(props: ExportImageProps) {
+    const { user, isLoading } = useAuth();
+
+    if (isLoading || !canUseRestrictedContentActions(user?.role)) {
+        return null;
+    }
+
+    return <ExportImageInner {...props} />;
+}
+
+function ExportImageInner({ template, data, filename = 'g22-export', className = '' }: ExportImageProps) {
     const supabase = useMemo(() => createClient(), []);
     const [isExporting, setIsExporting] = useState(false);
     const [showModal, setShowModal] = useState(false);

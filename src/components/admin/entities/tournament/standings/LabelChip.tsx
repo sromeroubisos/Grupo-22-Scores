@@ -20,11 +20,11 @@ export function LabelChip({
   return (
     <span
       style={{
-        backgroundColor: hexToRgba(color, 0.18),
-        border: '1px solid #00a365',
+        backgroundColor: hexToRgba(color, 0.15),
+        border: `1px solid ${hexToRgba(color, 0.35)}`,
         color: color,
       }}
-      className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium leading-none whitespace-nowrap"
+      className="inline-flex items-center gap-1 rounded-sm px-2 py-0.5 text-[0.7rem] font-mono uppercase tracking-wide leading-none whitespace-nowrap"
       title={name}
     >
       {name}
@@ -32,7 +32,7 @@ export function LabelChip({
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="ml-0.5 rounded-full opacity-70 hover:opacity-100 transition-opacity leading-none"
+          className="ml-0.5 opacity-70 hover:opacity-100 transition-opacity leading-none"
           aria-label={`Quitar etiqueta ${name}`}
         >
           ×

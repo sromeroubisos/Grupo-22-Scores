@@ -29,6 +29,37 @@ const nextConfig: NextConfig = {
       '@dnd-kit/utilities',
     ],
   },
+  async headers() {
+    return [
+      {
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/logos/clubs/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800, stale-while-revalidate=604800',
+          },
+        ],
+      },
+      {
+        source: '/manifest.json',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600',
+          },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       {

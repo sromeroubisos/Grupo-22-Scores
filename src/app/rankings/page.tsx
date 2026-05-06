@@ -18,7 +18,7 @@ import {
 import styles from './page.module.css';
 import { useSport } from '@/context/SportContext';
 import { useAuth } from '@/context/AuthContext';
-import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import type { Sport } from '@/lib/types';
 import ExportImage from '@/components/ExportImage';
 import MobileSectionTabs from '@/components/MobileSectionTabs';
@@ -251,7 +251,7 @@ function RankingsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { selectedSport, activeSports, setSelectedSport } = useSport();
-    const { user } = useAuth();
+    const { user, isLoading: authLoading } = useAuth();
     const [rankingList, setRankingList] = useState<PublicRankingSummary[]>([]);
     const [rankingDetail, setRankingDetail] = useState<PublicRankingDetail | null>(null);
     const [loadedSportId, setLoadedSportId] = useState('');
@@ -400,7 +400,7 @@ function RankingsPageContent() {
     );
     const rankingExportSubtitle = selectedRanking?.description?.trim()
         || `Base ${selectedRanking?.season || '-'} / resultados ${selectedRanking?.results_season || '-'}`;
-    const canExportPublicRanking = isGlobalAdminRole(user?.role);
+    const canExportPublicRanking = !authLoading && canUseRestrictedContentActions(user?.role);
 
     const rankingStatusLabel = loadingList || loadingDetail
         ? 'Cargando'

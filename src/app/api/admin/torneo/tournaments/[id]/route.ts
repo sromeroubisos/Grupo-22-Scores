@@ -1,0 +1,113 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { requireTournamentAdminContext } from '@/lib/auth/permissions';
+import { isScopeAllowedTournament, resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
+
+function err(message: string, status = 400, details?: unknown) {
+    return NextResponse.json({ error: message, details: details ?? null }, { status });
+}
+
+const UPDATABLE_FIELDS = [
+    'name',
+    'display_name',
+    'status',
+    'is_visible',
+    'is_popular',
+    'season_id',
+    'country',
+    'union_id',
+    'sport_id',
+] as const;
+
+export async function PATCH(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const supabase = await createClient();
+
+    let context;
+    try {
+        context = await requireTournamentAdminContext(supabase);
+    } catch {
+        return err('Unauthorized', 401);
+    }
+
+    const { id } = await params;
+    if (!id) return err('Falta el id del torneo', 400);
+
+    const scope = await resolveTournamentAdminScope(supabase, context);
+    if (!isScopeAllowedTournament(scope, id)) {
+        return err('No tenés acceso a este torneo', 403);
+    }
+
+    let body: Record<string, unknown>;
+    try {
+        body = (await request.json()) as Record<string, unknown>;
+    } catch {
+        return err('Payload JSON inválido', 400);
+    }
+
+    const updates: Record<string, unknown> = {};
+    for (const field of UPDATABLE_FIELDS) {
+        if (body[field] !== undefined) {
+            updates[field] = body[field];
+        }
+    }
+
+    if (Object.keys(updates).length === 0) {
+        return err('No hay campos para actualizar', 400);
+    }
+
+    if (updates.status === 'published' && body.is_visible === undefined) {
+        updates.is_visible = true;
+    }
+
+    const { data, error } = await supabase
+        .from('tournaments')
+        .update(updates)
+        .eq('id', id)
+        .select('id, name, display_name, slug, sport_id, season_id, status, is_visible, is_popular, country, union_id, created_at, created_by_user_id')
+        .single();
+
+    if (error) {
+        return err('No se pudo actualizar el torneo', 500, error.message);
+    }
+
+    return NextResponse.json({ data });
+}
+
+export async function DELETE(
+    _request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const supabase = await createClient();
+
+    let context;
+    try {
+        context = await requireTournamentAdminContext(supabase);
+    } catch {
+        return err('Unauthorized', 401);
+    }
+
+    const { id } = await params;
+    if (!id) return err('Falta el id del torneo', 400);
+
+    const scope = await resolveTournamentAdminScope(supabase, context);
+    if (!isScopeAllowedTournament(scope, id)) {
+        return err('No tenés acceso a este torneo', 403);
+    }
+
+    const { error } = await supabase.from('tournaments').delete().eq('id', id);
+    if (error) {
+        return err('No se pudo eliminar el torneo', 500, error.message);
+    }
+
+    // Clean up the creator membership.
+    await supabase
+        .from('memberships')
+        .delete()
+        .eq('scope_type', 'tournament')
+        .eq('scope_id', id);
+
+    return NextResponse.json({ data: { id } });
+}

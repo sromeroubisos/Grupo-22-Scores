@@ -33,6 +33,75 @@ function getSupabaseAuthCookieBaseName(): string | null {
     return getSupabaseAuthStorageKey();
 }
 
+function getAuthCookieChunkIndex(name: string, baseName: string): number | null {
+    if (!name.startsWith(`${baseName}.`)) return null;
+
+    const suffix = name.slice(baseName.length + 1);
+    if (!/^\d+$/.test(suffix)) return null;
+
+    const index = Number(suffix);
+    return Number.isInteger(index) && index >= 0 ? index : null;
+}
+
+function getStaleAuthCookieNamesToClear(cookiesToSet: Array<{ name: string }>): string[] {
+    const baseName = getSupabaseAuthCookieBaseName();
+    if (!baseName) return [];
+
+    const incomingNames = new Set(cookiesToSet.map((cookie) => cookie.name));
+    const authNames = [...incomingNames].filter((name) => (
+        name === baseName || name.startsWith(`${baseName}.`)
+    ));
+    if (authNames.length === 0) return [];
+
+    const chunkIndexes = authNames
+        .map((name) => getAuthCookieChunkIndex(name, baseName))
+        .filter((index): index is number => index !== null);
+    const hasDirectCookie = incomingNames.has(baseName);
+    const staleNames = new Set<string>();
+
+    if (hasDirectCookie) {
+        for (let i = 0; i < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; i += 1) {
+            staleNames.add(`${baseName}.${i}`);
+        }
+    }
+
+    if (chunkIndexes.length > 0) {
+        staleNames.add(baseName);
+        const lastIncomingChunk = Math.max(...chunkIndexes);
+        for (let i = lastIncomingChunk + 1; i < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; i += 1) {
+            staleNames.add(`${baseName}.${i}`);
+        }
+    }
+
+    incomingNames.forEach((name) => staleNames.delete(name));
+    return [...staleNames];
+}
+
+function upsertCookieHeaderValue(header: string, name: string, value: string): string {
+    const parts = header
+        .split(';')
+        .map((part) => part.trim())
+        .filter(Boolean);
+    const nextCookie = `${name}=${value}`;
+    const index = parts.findIndex((part) => part.startsWith(`${name}=`));
+
+    if (index >= 0) {
+        parts[index] = nextCookie;
+    } else {
+        parts.push(nextCookie);
+    }
+
+    return parts.join('; ');
+}
+
+function removeCookieHeaderValue(header: string, name: string): string {
+    return header
+        .split(';')
+        .map((part) => part.trim())
+        .filter((part) => part && !part.startsWith(`${name}=`))
+        .join('; ');
+}
+
 function decodeBase64Url(value: string): string | null {
     try {
         let normalized = value.replace(/-/g, '+').replace(/_/g, '/');
@@ -162,22 +231,22 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                     if (SHOULD_LOG_PROXY_AUTH) {
                         console.log('[Middleware] Setting cookies:', cookiesToSet.map(c => c.name).join(', '));
                     }
+                    const staleAuthCookieNames = getStaleAuthCookieNamesToClear(cookiesToSet);
+
                     cookiesToSet.forEach(({ name, value }) => {
                         request.cookies.set(name, value)
                     })
+                    staleAuthCookieNames.forEach((name) => {
+                        request.cookies.delete(name)
+                    })
+
                     const requestHeaders = new Headers(request.headers)
                     let currentCookie = requestHeaders.get('Cookie') || '';
                     cookiesToSet.forEach(({ name, value }) => {
-                        // For the upstream REQUEST being passed to the application,
-                        // we need to set/update the 'Cookie' header.
-                        // Append or update existing cookie values
-                        if (currentCookie.includes(`${name}=`)) {
-                            // Simple replacement if already exists (naive)
-                            const reg = new RegExp(`${name}=[^;]+`);
-                            currentCookie = currentCookie.replace(reg, `${name}=${value}`);
-                        } else {
-                            currentCookie = currentCookie ? `${currentCookie}; ${name}=${value}` : `${name}=${value}`;
-                        }
+                        currentCookie = upsertCookieHeaderValue(currentCookie, name, value);
+                    })
+                    staleAuthCookieNames.forEach((name) => {
+                        currentCookie = removeCookieHeaderValue(currentCookie, name);
                     })
                     requestHeaders.set('Cookie', currentCookie)
 
@@ -186,7 +255,8 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                             headers: requestHeaders,
                         },
                     })
-                    cookiesToSet.forEach(({ name, value, options }) => {
+                    type ResponseCookieOptions = NonNullable<Parameters<typeof response.cookies.set>[2]>;
+                    const buildCookieOptions = (options?: ResponseCookieOptions): ResponseCookieOptions => {
                         const isProd = process.env.NODE_ENV === 'production';
                         const sharedCookieOptions = getSupabaseAuthCookieOptions(
                             request.headers.get('x-forwarded-host') || request.headers.get('host') || request.nextUrl.hostname,
@@ -198,7 +268,7 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                         // auth. Mitigations: secure+sameSite=lax in prod, short
                         // access-token TTL, refresh-token rotation, and a strong
                         // CSP at the app shell to limit XSS exfiltration.
-                        const cookieOptions = {
+                        return {
                             ...sharedCookieOptions,
                             ...options,
                             sameSite: 'lax' as const,
@@ -207,7 +277,17 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                             path: '/',
                             ...(sharedCookieOptions.domain ? { domain: sharedCookieOptions.domain } : {}),
                         };
-                        response.cookies.set(name, value, cookieOptions)
+                    };
+
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        response.cookies.set(name, value, buildCookieOptions(options))
+                    })
+                    staleAuthCookieNames.forEach((name) => {
+                        response.cookies.set(name, '', {
+                            ...buildCookieOptions(),
+                            maxAge: 0,
+                            expires: new Date(0),
+                        })
                     })
                 },
             },

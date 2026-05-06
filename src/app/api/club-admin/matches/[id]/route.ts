@@ -51,6 +51,10 @@ function normalizeMatchUpdateFields(source: Record<string, unknown>) {
   moveField('points_autocalculated', 'pointsAutocalculated');
   moveField('points_override_reason', 'pointsOverrideReason');
 
+  if (normalized.dateTime === null || normalized.dateTime === '') {
+    delete normalized.dateTime;
+  }
+
   return normalized;
 }
 

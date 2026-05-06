@@ -123,6 +123,11 @@ const ADMIN_PANEL_ROLES = new Set<AppUserRole>([
     'gestor_clubes',
 ]);
 
+export const TOURNAMENT_ADMIN_PANEL_ROLES = new Set<AppUserRole>([
+    'admin_torneo',
+    'gestor_torneos',
+]);
+
 const EDITORIAL_PANEL_ROLES = new Set<AppUserRole>(['redactor']);
 const CLUB_PANEL_SCOPE_TYPES = CLUB_MEMBERSHIP_SCOPE_TYPES;
 const ADMIN_PANEL_SCOPE_TYPES = new Set<MembershipScope>(['union', 'sport', 'tournament', 'match']);
@@ -174,8 +179,17 @@ export function isGlobalAdminRole(role?: string | null): boolean {
     return normalized === 'admin_general' || normalized === 'super_admin';
 }
 
+export function canUseRestrictedContentActions(role?: string | null): boolean {
+    return isGlobalAdminRole(role);
+}
+
 export function isSuperAdminRole(role?: string | null): boolean {
     return normalizeRole(role) === 'super_admin';
+}
+
+export function isTournamentAdminRole(role?: string | null): boolean {
+    const normalized = normalizeRole(role);
+    return TOURNAMENT_ADMIN_PANEL_ROLES.has(normalized);
 }
 
 export function getRoleLabel(role?: string | null): string {
@@ -193,6 +207,10 @@ export function getAllowedScopesForRole(role?: string | null): MembershipScope[]
 
     if (normalized === 'admin_club' || normalized === 'gestor_clubes') {
         return ['club', 'club_family'];
+    }
+
+    if (normalized === 'admin_torneo' || normalized === 'gestor_torneos') {
+        return ['tournament', 'club'];
     }
 
     const defaultScope = DEFAULT_SCOPE_FOR_ROLE[normalized];
@@ -235,6 +253,10 @@ export function resolveAdminPanel(
 
     if (EDITORIAL_PANEL_ROLES.has(normalized)) {
         return { href: '/admin/editorial', label: 'Panel Editorial' };
+    }
+
+    if (TOURNAMENT_ADMIN_PANEL_ROLES.has(normalized)) {
+        return { href: '/admin/torneo', label: 'Panel Torneos' };
     }
 
     if (ADMIN_PANEL_ROLES.has(normalized)) {

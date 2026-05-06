@@ -24,7 +24,7 @@ import { resolveLogoPreviewSrc } from '@/lib/utils/logoUrl';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
-import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { useAuth } from '@/context/AuthContext';
 import { getTournamentFlashScoreConfig, getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
 import {
@@ -1499,7 +1499,7 @@ export default function TournamentDetailPage({
 }: TournamentDetailPageProps) {
     const router = useRouter();
     const { isLeagueFavorite, toggleLeagueFavorite } = useFavorites();
-    const { user } = useAuth();
+    const { user, isLoading: authLoading } = useAuth();
 
     // Pre-process initialData once (synchronously) so SSR renders full content
     const [preloaded] = useState<ReturnType<typeof processDbData> | null>(() =>
@@ -2340,8 +2340,8 @@ export default function TournamentDetailPage({
     const fixturesPageTitle = isMotorsportTournament ? 'Proximas carreras' : 'Fixture';
     const standingsCardTitle = isMotorsportTournament ? 'Pilotos' : 'Posiciones';
     const infoParticipantsLabel = isMotorsportTournament ? 'Competidores' : 'Equipos';
-    const isSuperAdminUser = isGlobalAdminRole(user?.role);
-    const isExactSuperAdmin = isGlobalAdminRole(user?.role);
+    const isSuperAdminUser = !authLoading && canUseRestrictedContentActions(user?.role);
+    const isExactSuperAdmin = isSuperAdminUser;
     const externalTournamentOverrideId = resolveExternalTournamentId({
         routeId: id,
         externalId: tournamentData?.externalId ?? tournamentData?.external_id,

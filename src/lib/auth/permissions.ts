@@ -8,6 +8,7 @@ import {
     MANAGEMENT_MEMBERSHIP_ROLES,
     VIEW_MEMBERSHIP_ROLES,
     isGlobalAdminRole,
+    isTournamentAdminRole,
     normalizeRole,
     type AppUserRole,
     type MembershipLike,
@@ -249,6 +250,18 @@ export async function requireGlobalAdminContext(
     const context = await requireUserAccessContext(supabase);
 
     if (!isGlobalAdminRole(context.role)) {
+        throw new Error('Forbidden');
+    }
+
+    return context;
+}
+
+export async function requireTournamentAdminContext(
+    supabase: SupabaseServerClient
+): Promise<UserAccessContext> {
+    const context = await requireUserAccessContext(supabase);
+
+    if (!isGlobalAdminRole(context.role) && !isTournamentAdminRole(context.role)) {
         throw new Error('Forbidden');
     }
 

@@ -1,6 +1,7 @@
 export function sanitizeReturnTo(raw: string | null, roleIntent?: string | null): string {
     if (!raw) {
         if (roleIntent === 'super_admin') return '/admin/super';
+        if (roleIntent === 'admin_torneo' || roleIntent === 'gestor_torneos') return '/admin/torneo';
         if (roleIntent === 'admin_club' || roleIntent === 'familia_club') return '/club-admin';
         return '/';
     }

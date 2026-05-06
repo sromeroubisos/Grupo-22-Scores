@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { User as SupabaseUser, type AuthChangeEvent, type Session } from '@supabase/supabase-js';
-import { normalizeRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
+import { canUseRestrictedContentActions, normalizeRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
 import { clearFavoritesCache } from '@/lib/favoritesCache';
 import { clearFavoritesLocalCache } from '@/lib/favorites/fetchFavorites';
 import {
@@ -69,11 +69,13 @@ function readCachedAuthUser(): User | null {
                 ? parsed.onboardingCompleted
                 : null;
 
+        const cachedRole = normalizeRole(typeof parsed.role === 'string' ? parsed.role : null);
+
         return {
             id: parsed.id,
             name,
             email: parsed.email,
-            role: normalizeRole(typeof parsed.role === 'string' ? parsed.role : null),
+            role: canUseRestrictedContentActions(cachedRole) ? 'fan' : cachedRole,
             avatarUrl: typeof parsed.avatarUrl === 'string' ? parsed.avatarUrl : undefined,
             unionId: typeof parsed.unionId === 'string' ? parsed.unionId : undefined,
             tournamentId: typeof parsed.tournamentId === 'string' ? parsed.tournamentId : undefined,
