@@ -780,9 +780,9 @@ export default function ClubMatchWorkspace({
 
   const buildPayload = useCallback((overrides?: Partial<Record<string, unknown>>) => {
     const score = buildScorePayload(matchState.score, matchDraft.score);
-    return {
+    const nextDateTime = fromDateTimeLocalInput(matchDraft.dateTime);
+    const payload: Record<string, unknown> = {
       status: matchDraft.status,
-      date_time: fromDateTimeLocalInput(matchDraft.dateTime),
       venue: matchDraft.venue.trim() || null,
       referee: matchDraft.referee.trim() || null,
       broadcast_url: matchDraft.broadcastUrl.trim() || null,
@@ -806,6 +806,14 @@ export default function ClubMatchWorkspace({
         })),
       },
       events: events.map(serializeLiveEvent),
+    };
+
+    if (nextDateTime) {
+      payload.date_time = nextDateTime;
+    }
+
+    return {
+      ...payload,
       ...overrides,
     };
   }, [events, getLiveControlForPayload, lineupsState, matchDraft, matchState.clock, matchState.score, notes]);
