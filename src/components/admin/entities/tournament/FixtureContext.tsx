@@ -251,7 +251,8 @@ export function FixtureProvider({ children, initialFixture, tournamentId, season
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phaseId: selectedPhaseId, ...params }),
       });
-      if (response.ok) {
+      const result = await response.json().catch(() => null) as { success?: boolean } | null;
+      if (response.ok && result?.success === true) {
         await refreshFixture();
         return true;
       }

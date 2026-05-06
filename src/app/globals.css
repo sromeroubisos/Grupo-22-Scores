@@ -219,6 +219,13 @@ html {
     background-color: #0a0a0b;
 }
 
+/* Escala global al 70% solo en tablet/desktop. Mobile (<768px) queda al 100%. */
+@media (min-width: 768px) {
+    html {
+        zoom: 0.7;
+    }
+}
+
 /*
   Gradiente en `html`, no en `body`: Tailwind Preflight suele asignar un fondo sólido al `body`
   después en la cascada y tapa el gradiente (muy visible en `next dev` / Simple Browser).

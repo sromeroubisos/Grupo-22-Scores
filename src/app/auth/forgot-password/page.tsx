@@ -1,8 +1,9 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useRef, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { getAuthErrorMessage } from '@/lib/auth/errors'
 import styles from '../../login/login.module.css'
 import AuthErrorBanner from '../../login/components/AuthErrorBanner'
 import AuthSuccessBanner from '../../login/components/AuthSuccessBanner'
@@ -23,10 +24,11 @@ export default function ForgotPasswordPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
-    const supabase = createClient()
+    const submittingRef = useRef(false)
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
+        if (submittingRef.current) return
         setError(null)
         setSuccess(null)
 
@@ -36,8 +38,10 @@ export default function ForgotPasswordPage() {
             return
         }
 
+        submittingRef.current = true
         setLoading(true)
         try {
+            const supabase = createClient()
             const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
                 redirectTo: getResetPasswordRedirect(),
             })
@@ -46,8 +50,9 @@ export default function ForgotPasswordPage() {
 
             setSuccess('Te enviamos un email para cambiar tu contrasena. Revisa tu bandeja y sigue el enlace.')
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'No pudimos enviar el email de recuperacion')
+            setError(getAuthErrorMessage(err, 'No pudimos enviar el email de recuperacion'))
         } finally {
+            submittingRef.current = false
             setLoading(false)
         }
     }

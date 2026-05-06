@@ -31,7 +31,7 @@ import { getMatchPenaltyScore, hasMatchPenaltyShootout } from '@/lib/matchUtils'
 import { parseAnyMatches, withStats } from '@/lib/matchSchema';
 import { SPORTS } from '@/lib/data/sports';
 import { findCountryRecord } from '@/lib/data/countries';
-import { isGlobalAdminRole, isSuperAdminRole } from '@/lib/auth/roles';
+import { isGlobalAdminRole } from '@/lib/auth/roles';
 import { APP_TIMEZONE } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import {
@@ -636,6 +636,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
             : isLimitedExternalSource
             ? [
                 { id: 'summary', label: 'Resumen' },
+                { id: 'lineups', label: 'Alineaciones' },
                 { id: 'h2h', label: 'H2H' },
                 { id: 'standings', label: 'Clasificacion' },
             ]
@@ -2051,7 +2052,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                     Exporta una pieza para post o historia con ambos equipos o una sola formacion, sin salir del lenguaje visual que ya usa la vista publica.
                                                 </p>
                                             </div>
-                                            {isSuperAdminRole(user?.role) && (
+                                            {isSuperAdminUser && (
                                                 <button
                                                     type="button"
                                                     onClick={() => setLineupModalOpen(true)}
@@ -2227,7 +2228,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                         <div style={{ fontSize: '40px', marginBottom: '16px', opacity: 0.3 }}>📋</div>
                                         <p className={styles.placeholderText} style={{ fontSize: '16px', fontWeight: '600' }}>Alineación no registrada</p>
                                         <p style={{ fontSize: '13px', opacity: 0.5 }}>Los equipos aún no han confirmado sus jugadores para este encuentro.</p>
-                                        {isSuperAdminRole(user?.role) && (
+                                        {isSuperAdminUser && (
                                             <button
                                                 type="button"
                                                 onClick={() => setLineupModalOpen(true)}
@@ -2619,7 +2620,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                 </main>
             </div>
 
-            {isSuperAdminRole(user?.role) && (
+            {isSuperAdminUser && (
                 <LineupRatingEditorModal
                     open={lineupModalOpen}
                     matchId={id}

@@ -12,6 +12,7 @@ import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
 import TournamentPublicStats from './TournamentPublicStats';
+import TournamentScoresPanel from './TournamentScoresPanel';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { getAllCountries, getCountryById } from '@/lib/data/countries';
 import { normalizeTeamLabelAssignments, resolveStandingsRowLabel } from '@/lib/teamLabels';
@@ -26,6 +27,10 @@ import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
 import { isGlobalAdminRole } from '@/lib/auth/roles';
 import { useAuth } from '@/context/AuthContext';
 import { getTournamentFlashScoreConfig, getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
+import {
+    getPlayoffTeamsCount,
+    resolvePlayoffStagesForTeams,
+} from '@/lib/utils/playoffStages';
 
 // Tabs
 const BASE_TABS = [
@@ -35,6 +40,7 @@ const BASE_TABS = [
     { id: 'standings', label: 'Clasificación' },
     { id: 'playoff', label: 'Playoff' },
     { id: 'teams', label: 'Equipos' },
+    { id: 'scores', label: 'Puntajes' },
     { id: 'stats', label: 'Estadísticas' },
 ];
 
@@ -873,6 +879,9 @@ function mapDbMatchToFrontend(match: any) {
         away_team: { id: match.away?.id ?? match.away_club_id ?? null, name: match.away?.name ?? '', short_name: match.away?.short_name ?? null, logo: match.away?.logo_url ?? '' },
         home_club_id: match.home_club_id,
         away_club_id: match.away_club_id,
+        lineups: match.lineups ?? null,
+        events: match.events ?? [],
+        date_time: match.date_time ?? null,
         phase_id: match.phase_id,
         group_id: match.group_id,
         round_label: match.round_label,
@@ -1107,35 +1116,71 @@ function buildDbPlayoffDraw(dbData: TournamentInitialData, preferredPhaseId?: st
             if (leftOrder !== rightOrder) return leftOrder - rightOrder;
             return String(left?.name || '').localeCompare(String(right?.name || ''));
         });
+    const configuredStages = resolvePlayoffStagesForTeams(phase?.settings, getPlayoffTeamsCount(phase?.settings));
+    const buildPlaceholderMatch = (roundId: string, roundIndex: number, matchIndex: number) => ({
+        match_id: `${roundId}-placeholder-${matchIndex + 1}`,
+        home_participant: null,
+        away_participant: null,
+        home_team: null,
+        away_team: null,
+        score_home: null,
+        score_away: null,
+        winner_id: null,
+        match_start_iso: null,
+        status: 'scheduled',
+        result: 'scheduled',
+        bracket_slot: matchIndex + 1,
+        round_index: roundIndex + 1,
+    });
+    const buildRoundEntry = (
+        roundId: string,
+        roundName: string,
+        roundIndex: number,
+        roundMatches: any[],
+    ) => {
+        const configuredMatchCount = configuredStages[roundIndex]?.matchCount ?? 0;
+        const visibleRoundMatches = configuredMatchCount > 0 && roundMatches.length > configuredMatchCount
+            ? [
+                ...roundMatches.filter((match: any) => match?.home_club_id || match?.away_club_id || match?.home || match?.away),
+                ...roundMatches.filter((match: any) => !(match?.home_club_id || match?.away_club_id || match?.home || match?.away)),
+            ].slice(0, Math.max(
+                configuredMatchCount,
+                roundMatches.filter((match: any) => match?.home_club_id || match?.away_club_id || match?.home || match?.away).length,
+            ))
+            : roundMatches;
+        const mappedMatches = visibleRoundMatches.map(mapMatch);
+        const desiredCount = Math.max(configuredMatchCount, mappedMatches.length);
 
-    if (phaseMatches.length === 0 && phaseRounds.length > 0) {
-        return phaseRounds.map((round: any, index: number) => ({
-            round_id: round.id,
-            name: String(round?.name || `Ronda ${index + 1}`),
-            matches: [],
-        }));
+        while (mappedMatches.length < desiredCount) {
+            mappedMatches.push(buildPlaceholderMatch(roundId, roundIndex, mappedMatches.length));
+        }
+
+        return {
+            round_id: roundId,
+            name: roundName,
+            matches: mappedMatches,
+        };
+    };
+
+    const configuredRoundCount = Math.max(phaseRounds.length, configuredStages.length);
+    if (configuredRoundCount > 0) {
+        const roundEntries = Array.from({ length: configuredRoundCount }, (_, index) => {
+            const round = phaseRounds[index];
+            const configuredStage = configuredStages[index];
+            const roundId = String(round?.id ?? `${phaseId}-stage-${index + 1}`);
+            const roundName = String(round?.name || configuredStage?.name || `Ronda ${index + 1}`);
+            const roundMatches = round
+                ? phaseMatches.filter((match: any) => String(match?.round_uuid ?? '') === roundId)
+                : phaseMatches.filter((match: any) => String(match?.round_label ?? '').trim().toLowerCase() === roundName.toLowerCase());
+
+            return buildRoundEntry(roundId, roundName, index, roundMatches);
+        });
+
+        if (roundEntries.length > 0) return roundEntries;
     }
 
     if (phaseMatches.length === 0) {
         return [];
-    }
-
-    if (phaseRounds.length > 0) {
-        const roundEntries = phaseRounds
-            .map((round: any, index: number) => {
-                const roundId = String(round?.id ?? '');
-                const roundMatches = phaseMatches.filter((match: any) => String(match?.round_uuid ?? '') === roundId);
-                if (roundMatches.length === 0) return null;
-
-                return {
-                    round_id: round.id,
-                    name: String(round?.name || `Ronda ${index + 1}`),
-                    matches: roundMatches.map(mapMatch),
-                };
-            })
-            .filter((round): round is { round_id: string; name: string; matches: any[] } => Boolean(round));
-
-        if (roundEntries.length > 0) return roundEntries;
     }
 
     const groupedByLabel = new Map<string, any[]>();
@@ -3994,6 +4039,16 @@ export default function TournamentDetailPage({
                 {/* ── STATS TAB ─────────────────────────────────────────── */}
                 {activeTab === 'stats' && (
                     <TournamentPublicStats matches={initialData?.matches || []} topScorers={topScorers} />
+                )}
+
+                {activeTab === 'scores' && (
+                    <TournamentScoresPanel
+                        tournamentId={id}
+                        tournamentName={tournamentData?.name}
+                        tournamentLogo={tournamentLogo}
+                        sportId={tournamentData?.sportId}
+                        matches={results}
+                    />
                 )}
 
                 {/* ── ARCHIVE TAB ───────────────────────────────────────── */}

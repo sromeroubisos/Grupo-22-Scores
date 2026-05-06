@@ -119,6 +119,26 @@ export interface GroupLabel {
   autoColorIndex?: number;
 }
 
+export interface PhaseCarryOverConfig {
+  enabled: boolean;
+  source: 'previous_phase';
+  sourcePhaseId?: string | null;
+  mode: 'table_totals';
+  include: {
+    standings: boolean;
+    points: boolean;
+    scores: boolean;
+    form: boolean;
+  };
+}
+
+export interface PlayoffStageConfig {
+  id?: string;
+  name: string;
+  orderIndex: number;
+  matchCount?: number;
+}
+
 export interface PhaseSettings {
   // Core Legacy Fields (kept for compatibility)
   teamsCount?: number;
@@ -126,6 +146,7 @@ export interface PhaseSettings {
   legs?: 1 | 2;
   tableColumns?: Record<string, boolean>;
   groupLabels?: GroupLabel[];
+  playoffStages?: PlayoffStageConfig[];
 
   // High-Fidelity Structure
   groupTags?: string[];
@@ -134,9 +155,14 @@ export interface PhaseSettings {
   pointsSystem?: PhasePointsSystem;
   tiebreakers?: TiebreakerMetricItem[];
   tiebreakerBehavior?: TiebreakerBehavior;
+  carryOver?: PhaseCarryOverConfig;
 
   // Legacy UI fields
   statsAssignment?: 'played' | 'starters';
+  carryOverPreviousPhase?: boolean;
+  playoff_stage_names?: string[];
+  playoffStageMatchCounts?: number[];
+  playoff_match_counts?: number[];
 }
 
 export interface CircuitRuleset {

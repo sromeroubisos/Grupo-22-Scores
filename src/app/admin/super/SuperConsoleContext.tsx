@@ -180,7 +180,7 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             setErrors(prev => ({ ...prev, clubs: null }));
         } catch (err: unknown) {
             const errorLog = toErrorLog(err);
-            console.error(`[SuperConsoleContext] Failed to load clubs:`, errorLog);
+            console.error(`[SuperConsoleContext] Failed to load clubs: ${errorLog.message}`, errorLog);
             setErrors(prev => ({ ...prev, clubs: errorLog.message }));
         } finally {
             setLoading(prev => ({ ...prev, clubs: false }));
@@ -205,7 +205,7 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             setErrors(prev => ({ ...prev, matches: null }));
         } catch (err: unknown) {
             const errorLog = toErrorLog(err);
-            console.error(`[SuperConsoleContext] Failed to load matches:`, errorLog);
+            console.error(`[SuperConsoleContext] Failed to load matches: ${errorLog.message}`, errorLog);
             setErrors(prev => ({ ...prev, matches: errorLog.message }));
         } finally {
             setLoading(prev => ({ ...prev, matches: false }));
@@ -230,7 +230,7 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             setErrors(prev => ({ ...prev, tournaments: null }));
         } catch (err: unknown) {
             const errorLog = toErrorLog(err);
-            console.error(`[SuperConsoleContext] Failed to load tournaments:`, errorLog);
+            console.error(`[SuperConsoleContext] Failed to load tournaments: ${errorLog.message}`, errorLog);
             setErrors(prev => ({ ...prev, tournaments: errorLog.message }));
         } finally {
             setLoading(prev => ({ ...prev, tournaments: false }));
@@ -255,7 +255,7 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             setErrors(prev => ({ ...prev, unions: null }));
         } catch (err: unknown) {
             const errorLog = toErrorLog(err);
-            console.error(`[SuperConsoleContext] Failed to load unions:`, errorLog);
+            console.error(`[SuperConsoleContext] Failed to load unions: ${errorLog.message}`, errorLog);
             setErrors(prev => ({ ...prev, unions: errorLog.message }));
         } finally {
             setLoading(prev => ({ ...prev, unions: false }));
@@ -280,7 +280,7 @@ export function SuperConsoleProvider({ children }: { children: React.ReactNode }
             setErrors(prev => ({ ...prev, news: null }));
         } catch (err: unknown) {
             const errorLog = toErrorLog(err);
-            console.error(`[SuperConsoleContext] Failed to load news:`, errorLog);
+            console.error(`[SuperConsoleContext] Failed to load news: ${errorLog.message}`, errorLog);
             setErrors(prev => ({ ...prev, news: errorLog.message }));
         } finally {
             setLoading(prev => ({ ...prev, news: false }));

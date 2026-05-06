@@ -10,6 +10,7 @@ import {
   getMatchRankingSnapshot,
   syncClubRankingsForMatchUpdate,
 } from '@/lib/server/clubRankings';
+import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
 import {
   APP_TIMEZONE,
   addDaysToIsoDate,
@@ -18,6 +19,13 @@ import {
   toInputDateInTimeZone,
   toInputTimeInTimeZone,
 } from '@/lib/timezone';
+import {
+  ensurePlayoffBracketMatches,
+  getPlayoffTeamsCount,
+  isPlayoffPhaseType,
+  resolvePlayoffStagesForTeams,
+  syncPlayoffStagesToRounds,
+} from '@/lib/server/playoffStages';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { assertUuid, isUuid } from '@/lib/utils/postgrest';
 import type {
@@ -39,6 +47,7 @@ type PhaseContext = {
   id: string;
   tournament_id: string;
   season_id?: string | null;
+  phase_type?: string | null;
 };
 
 export class FixtureService {
@@ -48,6 +57,14 @@ export class FixtureService {
 
   private static getMatchRoundId(match: { round_uuid?: string | null; round_id?: string | null }) {
     return match.round_uuid ?? match.round_id ?? null;
+  }
+
+  private static async invalidatePublicMatchesFeed() {
+    try {
+      await invalidateMatchesFeedCaches();
+    } catch (error) {
+      console.error('[FixtureService] Failed to invalidate public matches feed cache:', error);
+    }
   }
 
   private static async getWriteClient() {
@@ -169,7 +186,7 @@ export class FixtureService {
   ): Promise<PhaseContext> {
     const { data: phase, error } = await supabase
       .from('tournament_phases')
-      .select('id, tournament_id, season_id')
+      .select('id, tournament_id, season_id, phase_type')
       .eq('id', phaseId)
       .single();
 
@@ -245,6 +262,9 @@ export class FixtureService {
     }
 
     const phase = await this.assertPhaseBelongsToTournament(supabase, context.tournamentId, context.phaseId);
+    if (isPlayoffPhaseType(phase.phase_type) && !context.roundId) {
+      throw new Error('Para una fase playoff debes seleccionar una etapa de eliminacion definida.');
+    }
     await this.assertRoundBelongsToPhase(supabase, context.phaseId, context.roundId);
     await this.assertClubReferences(supabase, [context.homeClubId, context.awayClubId]);
 
@@ -613,7 +633,7 @@ export class FixtureService {
 
     const { data: phaseContext } = await supabase
       .from('tournament_phases')
-      .select('season_id')
+      .select('season_id, phase_type')
       .eq('id', phaseId)
       .maybeSingle();
 
@@ -626,6 +646,11 @@ export class FixtureService {
       .maybeSingle();
 
     if (existing) return existing.id;
+
+    if (isPlayoffPhaseType(phaseContext?.phase_type)) {
+      console.warn('[FixtureService] Refusing to auto-create playoff stage from free label.');
+      return null;
+    }
 
     // 2. Not found, create it
     // We need an order_index. Let's find the max one.
@@ -712,8 +737,13 @@ export class FixtureService {
     ]);
     console.log(`[FixtureService] createMatch - round_label: ${supportsRoundLabel}`);
 
+    const phaseForRound = await this.assertPhaseBelongsToTournament(supabase, data.tournamentId, data.phaseId);
+
     // Automated Round Management: if roundId is missing but label exists, find or create it.
     let finalRoundId = data.roundId;
+    if (isPlayoffPhaseType(phaseForRound.phase_type) && !finalRoundId) {
+      throw new Error('Para una fase playoff debes seleccionar una etapa de eliminacion definida.');
+    }
     if (!finalRoundId && data.phaseId && data.roundLabel) {
       console.log(`[FixtureService] Attempting to find/create round for label: ${data.roundLabel}`);
       finalRoundId = await this.findOrCreateRound(data.phaseId, data.roundLabel);
@@ -802,6 +832,7 @@ export class FixtureService {
     }
 
     await this.syncClubRankingsAfterMatchChange(match.id);
+    await this.invalidatePublicMatchesFeed();
     return this.mapMatch(match);
   }
 
@@ -863,14 +894,16 @@ export class FixtureService {
       data.roundLabel !== undefined ||
       data.homeClubId !== undefined ||
       data.awayClubId !== undefined;
+    const nextPhaseIdForRound = data.phaseId ?? existingMatch.phase_id;
+    const targetPhaseForRound = requiresContextValidation && nextPhaseIdForRound
+      ? await this.assertPhaseBelongsToTournament(supabase, existingMatch.tournament_id, nextPhaseIdForRound)
+      : null;
 
     // Automated Round Management for updates
-    if (!data.roundId && data.phaseId && data.roundLabel) {
-      updateData.round_uuid = await this.findOrCreateRound(data.phaseId, data.roundLabel);
-    } else if (data.roundId) {
-      updateData.round_uuid = data.roundId;
-    } else if (data.roundId === null) {
-      updateData.round_uuid = null;
+    if (data.roundId !== undefined) {
+      updateData.round_uuid = data.roundId || null;
+    } else if (data.roundLabel !== undefined && data.roundLabel && nextPhaseIdForRound && !isPlayoffPhaseType(targetPhaseForRound?.phase_type)) {
+      updateData.round_uuid = await this.findOrCreateRound(nextPhaseIdForRound, data.roundLabel);
     }
 
     const nextHomeClubId = data.homeClubId ?? existingMatch.home_club_id;
@@ -883,7 +916,7 @@ export class FixtureService {
     let nextPhaseContext: PhaseContext | null = null;
 
     if (requiresContextValidation) {
-      const nextPhaseId = data.phaseId ?? existingMatch.phase_id;
+      const nextPhaseId = nextPhaseIdForRound;
       if (!nextPhaseId) {
         throw new Error('El partido debe pertenecer a una fase.');
       }
@@ -983,6 +1016,7 @@ export class FixtureService {
     if (shouldSyncRankings) {
       await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
     }
+    await this.invalidatePublicMatchesFeed();
     return this.mapMatch(match);
   }
 
@@ -1001,6 +1035,7 @@ export class FixtureService {
     }
 
     await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
+    await this.invalidatePublicMatchesFeed();
     return true;
   }
 
@@ -1129,9 +1164,50 @@ export class FixtureService {
 
     const { data: phaseContext } = await supabase
       .from('tournament_phases')
-      .select('season_id')
+      .select('tournament_id, season_id, phase_type, settings')
       .eq('id', phaseId)
       .maybeSingle();
+
+    if (isPlayoffPhaseType(phaseContext?.phase_type)) {
+      if (!phaseContext?.tournament_id) {
+        console.error('Error generating playoff bracket: phase has no tournament.');
+        return false;
+      }
+
+      const playoffTeamsCount = getPlayoffTeamsCount(phaseContext?.settings);
+      if (playoffTeamsCount < 2) {
+        console.error('Error generating playoff bracket: phase needs at least 2 teams.');
+        return false;
+      }
+
+      const resolvedStages = resolvePlayoffStagesForTeams(phaseContext?.settings, playoffTeamsCount);
+      const fallbackStages = resolvedStages.length > 0
+        ? resolvedStages
+        : Array.from({ length: numRounds }, (_, index) => ({
+          name: namePattern.replace('{n}', String(index + 1)),
+          matchCount: 1,
+        }));
+      const syncResult = await syncPlayoffStagesToRounds(supabase, phaseId, phaseContext?.season_id ?? null, fallbackStages);
+      if (!syncResult.ok) {
+        console.error('Error generating playoff rounds:', syncResult.error);
+        return false;
+      }
+
+      const bracketResult = await ensurePlayoffBracketMatches(supabase, {
+        tournamentId: phaseContext?.tournament_id,
+        phaseId,
+        seasonId: phaseContext?.season_id ?? null,
+        teamsCount: playoffTeamsCount,
+        stageMatchCounts: fallbackStages.map((stage) => stage.matchCount),
+      });
+
+      if (!bracketResult.ok) {
+        console.error('Error generating playoff bracket:', bracketResult.error);
+        return false;
+      }
+
+      return true;
+    }
 
     const { error } = await supabase.rpc('generate_rounds_for_phase', {
       p_phase_id: phaseId,
@@ -1294,6 +1370,8 @@ export class FixtureService {
       if ((insertedMatches || []).length !== matches.length) {
         throw new Error('No se pudieron persistir todos los partidos generados.');
       }
+
+      await this.invalidatePublicMatchesFeed();
     }
 
     return true;
@@ -1310,6 +1388,9 @@ export class FixtureService {
 
     try {
       phaseContext = await this.assertPhaseBelongsToTournament(supabase, tournamentId, phaseId);
+      if (isPlayoffPhaseType(phaseContext.phase_type) && matchesData.some((match) => !match.roundId)) {
+        throw new Error('Todos los partidos importados en una fase playoff deben indicar una etapa de eliminacion definida.');
+      }
       const roundIds = Array.from(new Set(matchesData.map((match) => match.roundId).filter(Boolean)));
 
       for (const roundId of roundIds) {
@@ -1374,6 +1455,10 @@ export class FixtureService {
           errors.push(`El lote ${Math.floor(i / chunkSize) + 1} se insertó de forma incompleta.`);
         }
       }
+    }
+
+    if (importedCount > 0) {
+      await this.invalidatePublicMatchesFeed();
     }
 
     return {
@@ -1461,6 +1546,10 @@ export class FixtureService {
       }
     }
 
+    if (needsPerRowReschedule || params.newVenue) {
+      await this.invalidatePublicMatchesFeed();
+    }
+
     return true;
   }
 
@@ -1480,6 +1569,8 @@ export class FixtureService {
 
     // Mark round as not completed
     await supabase.from('tournament_rounds').update({ is_completed: false }).eq('id', roundId);
+
+    await this.invalidatePublicMatchesFeed();
 
     return true;
   }
@@ -1540,23 +1631,23 @@ export class FixtureService {
       if (!roundTeams.has(roundId)) roundTeams.set(roundId, new Set());
       const teams = roundTeams.get(roundId)!;
 
-      if (teams.has(m.home_club_id)) {
+      if (m.home_club_id && teams.has(m.home_club_id)) {
         diagnostics.push({
           type: 'error',
           message: `Conflicto: Un equipo tiene más de un partido en la misma jornada.`,
           context: roundId,
         });
       }
-      teams.add(m.home_club_id);
+      if (m.home_club_id) teams.add(m.home_club_id);
 
-      if (teams.has(m.away_club_id)) {
+      if (m.away_club_id && teams.has(m.away_club_id)) {
         diagnostics.push({
           type: 'error',
           message: `Conflicto: Un equipo tiene más de un partido en la misma jornada.`,
           context: roundId,
         });
       }
-      teams.add(m.away_club_id);
+      if (m.away_club_id) teams.add(m.away_club_id);
     });
 
     return {

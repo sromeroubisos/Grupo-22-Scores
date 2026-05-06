@@ -3,8 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import { getTournamentResults } from '@/lib/services/flashscore';
 import {
     getTournamentFlashScoreConfig,
-    isFlashScoreEnabledForSport,
-    RUGBY_FLASHSCORE_DISABLED_MESSAGE,
 } from '@/lib/externalProviderPolicy';
 import type { ExternalMatchWithMapping, MatchConfidence } from '@/lib/types/flashscore-integration';
 
@@ -118,10 +116,6 @@ export async function GET(
 
         if (error || !tournament) {
             return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
-        }
-
-        if (!isFlashScoreEnabledForSport((tournament as any).sport_id ?? (tournament as any).sport ?? null)) {
-            return NextResponse.json({ error: RUGBY_FLASHSCORE_DISABLED_MESSAGE }, { status: 409 });
         }
 
         const fsConfig = getTournamentFlashScoreConfig(tournament as any);

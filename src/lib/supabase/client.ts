@@ -1,21 +1,25 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/perf/supabase'
 import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure'
+import {
+    getSupabaseAuthCookieOptions,
+    getSupabaseAuthStorageKey,
+    getSupabaseSharedCookieDomain,
+    MAX_SUPABASE_AUTH_COOKIE_CHUNKS,
+} from '@/lib/supabase/auth-cookie'
 import type { LooseSupabaseClient } from './loose'
 
 let client: LooseSupabaseClient | undefined
 const SUPABASE_AUTH_TIMEOUT_MS = 15000
 
 function getSupabaseBrowserStorageKey() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    if (!url) return null
+    return getSupabaseAuthStorageKey()
+}
 
-    try {
-        const projectRef = new URL(url).hostname.split('.')[0]
-        return `sb-${projectRef}-auth-token`
-    } catch {
-        return null
-    }
+function expireBrowserCookie(name: string, domain?: string) {
+    const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+    const cookieDomain = domain ? `; Domain=${domain}` : ''
+    document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax${cookieDomain}${secure}`
 }
 
 export function clearSupabaseBrowserSession() {
@@ -28,6 +32,21 @@ export function clearSupabaseBrowserSession() {
     window.sessionStorage.removeItem(storageKey)
     window.localStorage.removeItem(`${storageKey}-code-verifier`)
     window.sessionStorage.removeItem(`${storageKey}-code-verifier`)
+
+    const domain = getSupabaseSharedCookieDomain(window.location.hostname)
+    const cookieNames = [
+        storageKey,
+        `${storageKey}-code-verifier`,
+        `${storageKey}-user`,
+    ]
+    for (let index = 0; index < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; index += 1) {
+        cookieNames.push(`${storageKey}.${index}`)
+    }
+
+    cookieNames.forEach((name) => {
+        expireBrowserCookie(name)
+        if (domain) expireBrowserCookie(name, domain)
+    })
 }
 
 function resolveRequestUrl(input: string | URL | Request): string {
@@ -68,8 +87,20 @@ function buildAuthFailureResponse() {
 // once, autoRefresh ticker firing while a manual refresh is also in flight)
 // would otherwise each hit Supabase Auth simultaneously, with all but one
 // failing with 429 (over_request_rate_limit) due to per-IP /token caps.
-let inFlightRefresh: { promise: Promise<Response>; finishedAt: number } | null = null
+let inFlightRefresh: { promise: Promise<Response>; finishedAt: number; reuseUntil: number } | null = null
 const REFRESH_RESULT_REUSE_WINDOW_MS = 1500
+const REFRESH_RATE_LIMIT_REUSE_WINDOW_MS = 10000
+const REFRESH_ERROR_REUSE_WINDOW_MS = 5000
+
+function shouldReuseRefreshResponse(response: Response) {
+    return response.ok || response.status === 400 || response.status === 429 || response.status >= 500
+}
+
+function getRefreshReuseWindowMs(response: Response) {
+    if (response.status === 429) return REFRESH_RATE_LIMIT_REUSE_WINDOW_MS
+    if (!response.ok) return REFRESH_ERROR_REUSE_WINDOW_MS
+    return REFRESH_RESULT_REUSE_WINDOW_MS
+}
 
 export function createClient() {
     if (client) return client
@@ -125,15 +156,15 @@ export function createClient() {
             if (inFlightRefresh) {
                 const stillFresh =
                     inFlightRefresh.finishedAt === 0 ||
-                    nowMs() - inFlightRefresh.finishedAt < REFRESH_RESULT_REUSE_WINDOW_MS
+                    nowMs() < inFlightRefresh.reuseUntil
                 if (stillFresh) {
                     try {
                         const cached = await inFlightRefresh.promise
-                        if (cached.ok) {
+                        if (shouldReuseRefreshResponse(cached)) {
                             return cached.clone()
                         }
-                        // Non-OK cached response (e.g. 429): fall through and
-                        // attempt a fresh request below.
+                        // Non-OK responses other than rate limits can attempt a
+                        // fresh request below.
                     } catch {
                         // Fall through to a fresh attempt if the cached one failed.
                     }
@@ -149,17 +180,23 @@ export function createClient() {
                 }
             })()
 
-            inFlightRefresh = { promise: attempt, finishedAt: 0 }
+            inFlightRefresh = { promise: attempt, finishedAt: 0, reuseUntil: Number.POSITIVE_INFINITY }
 
             try {
                 const response = await attempt
-                if (response.ok) {
-                    inFlightRefresh = { promise: attempt, finishedAt: nowMs() }
+                if (shouldReuseRefreshResponse(response)) {
+                    const finishedAt = nowMs()
+                    const reuseWindowMs = getRefreshReuseWindowMs(response)
+                    inFlightRefresh = {
+                        promise: attempt,
+                        finishedAt,
+                        reuseUntil: finishedAt + reuseWindowMs,
+                    }
                     setTimeout(() => {
                         if (inFlightRefresh && inFlightRefresh.promise === attempt) {
                             inFlightRefresh = null
                         }
-                    }, REFRESH_RESULT_REUSE_WINDOW_MS)
+                    }, reuseWindowMs)
                 } else {
                     inFlightRefresh = null
                 }
@@ -186,6 +223,9 @@ export function createClient() {
         url || 'https://placeholder.supabase.co',
         key || 'placeholder-key',
         {
+            cookieOptions: getSupabaseAuthCookieOptions(
+                typeof window !== 'undefined' ? window.location.hostname : undefined,
+            ),
             auth: {
                 storageKey,
             },

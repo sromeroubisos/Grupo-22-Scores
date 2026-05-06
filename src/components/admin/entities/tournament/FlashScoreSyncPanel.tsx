@@ -22,24 +22,20 @@ import {
     getEspnAmericanFootballLinkStatus,
     getEspnMotorsportLinkStatus,
     getLinkStatus,
-    getRugbyApiSportsLinkStatus,
     type ExternalMatchWithMapping,
     type EspnAmericanFootballConfig,
     type EspnMotorsportConfig,
     type ExternalStandingsRow,
     type FlashScoreConfig,
     type MatchConfidence,
-    type RugbyApiSportsConfig,
     type SyncResponse,
 } from '@/lib/types/flashscore-integration';
 import {
     getRulesetEspnAmericanFootballConfig,
     getRulesetEspnMotorsportConfig,
     getRulesetFlashScoreConfig,
-    getRulesetRugbyApiSportsConfig,
     isAmericanFootballSport,
     isMotorsportSport,
-    isRugbySport,
 } from '@/lib/externalProviderPolicy';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
@@ -73,21 +69,17 @@ function getExternalMatchId(match: ExternalMatchWithMapping) {
 
 export function FlashScoreSyncPanel({ tournamentId, data, phaseId, phases }: Props) {
     const router = useRouter();
-    const isRugby = isRugbySport((data as any).sport_id ?? (data as any).sport ?? null);
     const isAmericanFootball = isAmericanFootballSport((data as any).sport_id ?? (data as any).sport ?? null);
     const isMotorsport = isMotorsportSport((data as any).sport_id ?? (data as any).sport ?? null);
     const flashScoreConfig: FlashScoreConfig | null = getRulesetFlashScoreConfig((data as any).ruleset);
-    const rugbyConfig: RugbyApiSportsConfig | null = getRulesetRugbyApiSportsConfig((data as any).ruleset);
     const espnConfig: EspnAmericanFootballConfig | null = getRulesetEspnAmericanFootballConfig((data as any).ruleset);
     const espnMotorsportConfig: EspnMotorsportConfig | null = getRulesetEspnMotorsportConfig((data as any).ruleset);
 
-    const provider = isRugby ? 'rugby-api-sports' : (isAmericanFootball || isMotorsport) ? 'espn' : 'flashscore';
-    const providerLabel = isRugby ? 'Rugby API-Sports' : isMotorsport ? 'ESPN Racing' : isAmericanFootball ? 'ESPN' : 'FlashScore';
-    const linkStatus = isRugby
-        ? getRugbyApiSportsLinkStatus(rugbyConfig)
-        : isMotorsport
-            ? getEspnMotorsportLinkStatus(espnMotorsportConfig)
-            : isAmericanFootball
+    const provider = (isAmericanFootball || isMotorsport) ? 'espn' : 'flashscore';
+    const providerLabel = isMotorsport ? 'ESPN Racing' : isAmericanFootball ? 'ESPN' : 'FlashScore';
+    const linkStatus = isMotorsport
+        ? getEspnMotorsportLinkStatus(espnMotorsportConfig)
+        : isAmericanFootball
             ? getEspnAmericanFootballLinkStatus(espnConfig)
             : getLinkStatus(flashScoreConfig);
     const isLinked = linkStatus === 'ids_resolved' || linkStatus === 'synced';
@@ -256,29 +248,17 @@ export function FlashScoreSyncPanel({ tournamentId, data, phaseId, phases }: Pro
             }).length;
     }, [clubOverrides, externalMatches, selectedIds]);
 
-    const syncProviderSummary = isRugby
-        ? `${rugbyConfig?.league_name || 'Liga'} · ${rugbyConfig?.season || '-'}`
-        : isMotorsport
-            ? `${espnMotorsportConfig?.league_name || 'Categoria'} · ${espnMotorsportConfig?.country_name || '-'}`
-            : isAmericanFootball
-                ? `${espnConfig?.league_name || 'Liga'} · ${espnConfig?.country_name || '-'}`
-                : flashScoreConfig?.tournament_url || 'Sin URL';
-
-    const syncLastSync = isRugby
-        ? rugbyConfig?.last_sync_at
-        : isMotorsport
-            ? espnMotorsportConfig?.last_sync_at
-            : isAmericanFootball
-                ? espnConfig?.last_sync_at
-                : flashScoreConfig?.last_sync;
-
-    const providerSummary = isRugby
-        ? `${rugbyConfig?.league_name || 'Liga'} · ${rugbyConfig?.season || '-'}`
+    const syncProviderSummary = isMotorsport
+        ? `${espnMotorsportConfig?.league_name || 'Categoria'} - ${espnMotorsportConfig?.country_name || '-'}`
         : isAmericanFootball
-            ? `${espnConfig?.league_name || 'Liga'} · ${espnConfig?.country_name || '-'}`
+            ? `${espnConfig?.league_name || 'Liga'} - ${espnConfig?.country_name || '-'}`
             : flashScoreConfig?.tournament_url || 'Sin URL';
 
-    const lastSync = isRugby ? rugbyConfig?.last_sync_at : isAmericanFootball ? espnConfig?.last_sync_at : flashScoreConfig?.last_sync;
+    const syncLastSync = isMotorsport
+        ? espnMotorsportConfig?.last_sync_at
+        : isAmericanFootball
+            ? espnConfig?.last_sync_at
+            : flashScoreConfig?.last_sync;
 
     if (!isLinked) {
         return (

@@ -10,14 +10,63 @@ import {
     filterMatchesForGroupScope,
 } from '@/lib/standings/matchScope';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
+import {
+    findCarryOverDependentPhases,
+    resolveStandingsCarryOverRows,
+} from '@/lib/server/standingsCarryOver';
+import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
+
+type RecalculateOptions = {
+    includeDependents?: boolean;
+    visitedPhaseIds?: Set<string>;
+};
+
+async function recalculateCarryOverDependents(
+    tournamentId: string,
+    sourcePhaseId: string,
+    tableType: string,
+    seasonId: string | null,
+    visitedPhaseIds: Set<string>,
+) {
+    const supabase = createAdminClient();
+    const dependents = await findCarryOverDependentPhases({
+        supabase,
+        tournamentId,
+        sourcePhaseId,
+        seasonId,
+    });
+
+    for (const phase of dependents) {
+        if (visitedPhaseIds.has(phase.id)) continue;
+        const result = await recalculatePhaseStandingsScopes(tournamentId, phase.id, tableType, seasonId, {
+            includeDependents: true,
+            visitedPhaseIds,
+        });
+        if (!result.ok) {
+            console.error('[recalculateStandings] Dependent carry-over phase failed', {
+                tournamentId,
+                sourcePhaseId,
+                dependentPhaseId: phase.id,
+            });
+        }
+    }
+}
 
 export async function recalculatePhaseStandingsScopes(
     tournamentId: string,
     phaseId: string,
     tableType = 'general',
     seasonId?: string | null,
+    options: RecalculateOptions = {},
 ): Promise<{ ok: boolean; rows_calculated: number; scopes_recalculated: number }> {
     const supabase = createAdminClient();
+    const includeDependents = options.includeDependents ?? true;
+    const visitedPhaseIds = options.visitedPhaseIds ?? new Set<string>();
+
+    if (visitedPhaseIds.has(phaseId)) {
+        return { ok: true, rows_calculated: 0, scopes_recalculated: 0 };
+    }
+    visitedPhaseIds.add(phaseId);
 
     const { data: phase, error: phaseError } = await supabase
         .from('tournament_phases')
@@ -73,20 +122,44 @@ export async function recalculatePhaseStandingsScopes(
                 )),
             );
 
-            return {
+            const result = {
                 ok: results.every((result) => result.ok),
                 rows_calculated: results.reduce((total, result) => total + result.rows_calculated, 0),
                 scopes_recalculated: results.length,
             };
+
+            if (result.ok && includeDependents) {
+                await recalculateCarryOverDependents(
+                    tournamentId,
+                    phaseId,
+                    tableType,
+                    scopedSeasonId,
+                    visitedPhaseIds,
+                );
+            }
+
+            return result;
         }
     }
 
     const result = await recalculateAndPersistStandings(tournamentId, phaseId, null, tableType, scopedSeasonId);
-    return {
+    const finalResult = {
         ok: result.ok,
         rows_calculated: result.rows_calculated,
         scopes_recalculated: 1,
     };
+
+    if (finalResult.ok && includeDependents) {
+        await recalculateCarryOverDependents(
+            tournamentId,
+            phaseId,
+            tableType,
+            scopedSeasonId,
+            visitedPhaseIds,
+        );
+    }
+
+    return finalResult;
 }
 
 export async function recalculateAndPersistStandings(
@@ -102,7 +175,7 @@ export async function recalculateAndPersistStandings(
     const [{ data: phase, error: phaseError }, { data: tournament }] = await Promise.all([
         supabase
             .from('tournament_phases')
-            .select('id, settings, season_id')
+            .select('id, name, phase_type, order_index, settings, season_id')
             .eq('id', phaseId)
             .eq('tournament_id', tournamentId)
             .single(),
@@ -121,18 +194,19 @@ export async function recalculateAndPersistStandings(
     const resolvedRules = StandingsEngine.resolveRules(phase.settings, tournament?.ruleset);
     const scopedSeasonId = seasonId ?? phase.season_id ?? null;
 
-    // 2. Fetch participants (exclude withdrawn/disqualified)
-    let pQuery = supabase
-        .from('tournament_participants')
-        .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
-        .eq('tournament_id', tournamentId)
-        .not('status', 'in', '("withdrawn","disqualified")');
-
-    if (scopedSeasonId) pQuery = pQuery.eq('season_id', scopedSeasonId);
-    if (groupId) pQuery = pQuery.eq('group_id', groupId);
-    const { data: participants, error: pError } = await pQuery;
-    if (pError) {
-        console.error('[recalculateStandings] Error fetching participants', pError);
+    // 2. Fetch participants scoped to this phase/group. Falls back to the
+    // legacy tournament_participants.group_id model until the migration exists.
+    let participants: Awaited<ReturnType<typeof loadPhaseScopedParticipants>>['participants'];
+    try {
+        const participantScope = await loadPhaseScopedParticipants(supabase, {
+            tournamentId,
+            phaseId,
+            groupId,
+            seasonId: scopedSeasonId,
+        });
+        participants = participantScope.participants;
+    } catch (error) {
+        console.error('[recalculateStandings] Error fetching phase participants', error);
         return { ok: false, rows_calculated: 0 };
     }
 
@@ -164,6 +238,14 @@ export async function recalculateAndPersistStandings(
     }
 
     const scopedMatches = filterMatchesForGroupScope(matches || [], participants || [], groupId);
+    const carryOver = await resolveStandingsCarryOverRows({
+        supabase,
+        tournamentId,
+        currentPhase: phase,
+        tournamentRuleset: tournament?.ruleset,
+        seasonId: scopedSeasonId,
+        tableType,
+    });
 
     // 4. Run engine
     const table = StandingsEngine.generateTable(
@@ -171,6 +253,7 @@ export async function recalculateAndPersistStandings(
         scopedMatches,
         resolvedRules,
         tableType,
+        { carryOverRows: carryOver.rows },
     );
 
     if (table.length === 0) {
@@ -224,6 +307,7 @@ export async function recalculateAndPersistStandings(
             team_logo: row.team?.logo,
             status: row.status,
             table_type: tableType,
+            carry_over: row.carry_over ?? null,
             calculated_at: calculatedAt,
         },
         last_updated: calculatedAt,

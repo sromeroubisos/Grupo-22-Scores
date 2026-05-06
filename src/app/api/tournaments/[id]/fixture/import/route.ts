@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiErrorMessage, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { FixtureImportService } from '@/lib/services/fixtureImportService';
 import { FIXTURE_IMPORT_SCHEMA_MESSAGE, isFixtureImportSchemaError } from '@/lib/utils/fixtureImportErrors';
@@ -12,7 +12,7 @@ export async function POST(
 ) {
     try {
         const tournamentId = (await params).id;
-        const actorUserId = await requireAdminApiUser();
+        const { actorUserId } = await requireTournamentMutationContext(tournamentId);
         const contentType = request.headers.get('content-type') || '';
 
         if (contentType.includes('multipart/form-data')) {
@@ -79,10 +79,6 @@ export async function POST(
             );
         }
 
-        const message = getApiErrorMessage(error);
-        return NextResponse.json(
-            { error: message },
-            { status: getApiErrorStatus(error) }
-        );
+        return tournamentApiErrorResponse(error);
     }
 }

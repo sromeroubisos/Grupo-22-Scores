@@ -19,6 +19,113 @@
     --fixture-shadow-glow: 0 0 0 1px rgba(0, 163, 101, 0.15), 0 22px 50px rgba(0, 0, 0, 0.22);
 }
 
+.operation-playoff-bracket {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    margin-bottom: 18px;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.operation-playoff-bracket-head,
+.operation-playoff-round-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.operation-playoff-bracket-head h4,
+.operation-playoff-bracket-head p {
+    margin: 0;
+}
+
+.operation-playoff-bracket-head p {
+    color: var(--text-dim);
+    font-size: 0.86rem;
+}
+
+.operation-playoff-bracket-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(220px, 1fr);
+    gap: 14px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.operation-playoff-round {
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.operation-playoff-round-head {
+    padding: 0 2px;
+}
+
+.operation-playoff-round-head strong {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.operation-playoff-round-head span {
+    color: var(--text-dim);
+    font-size: 0.75rem;
+}
+
+.operation-playoff-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.operation-playoff-slot,
+.operation-playoff-empty-slot {
+    width: 100%;
+    min-height: 84px;
+    display: grid;
+    gap: 6px;
+    padding: 12px;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.18);
+    color: var(--text-primary);
+    text-align: left;
+}
+
+.operation-playoff-slot {
+    cursor: pointer;
+    transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.operation-playoff-slot:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
+}
+
+.operation-playoff-slot span:not(.operation-playoff-slot-index) {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.operation-playoff-slot-index {
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.operation-playoff-empty-slot {
+    place-items: center;
+    color: var(--text-dim);
+    text-align: center;
+}
+
 .fixture-management-center {
     position: relative;
     display: grid;
@@ -2379,4 +2486,27 @@ select.glass-input option {
         backdrop-filter: blur(10px) saturate(120%);
         -webkit-backdrop-filter: blur(10px) saturate(120%);
     }
+}
+
+/* Light theme: redefine the fixture tokens declared at :root above. */
+:root[data-theme="light"] {
+    --fixture-bg-base: #f4f6fb;
+    --fixture-glass-base: rgba(255, 255, 255, 0.92);
+    --fixture-glass-strong: rgba(255, 255, 255, 0.96);
+    --fixture-glass-border: rgba(15, 23, 42, 0.1);
+    --fixture-text-main: #0f172a;
+    --fixture-text-muted: rgba(15, 23, 42, 0.7);
+    --fixture-text-dim: rgba(15, 23, 42, 0.55);
+    --fixture-accent-primary: #047857;
+    --fixture-accent-secondary: #059669;
+    --fixture-accent-success: #047857;
+    --fixture-accent-info: #047857;
+    --fixture-accent-glow: rgba(4, 120, 87, 0.3);
+    --fixture-shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.1);
+    --fixture-shadow-glow: 0 0 0 1px rgba(4, 120, 87, 0.18), 0 22px 50px rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme="light"] .operation-playoff-bracket {
+    background: rgba(15, 23, 42, 0.04);
+    border-color: rgba(15, 23, 42, 0.1);
 }

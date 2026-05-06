@@ -8,7 +8,7 @@ import { EDIT_MEMBERSHIP_ROLES, isGlobalAdminRole } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
-import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -40,8 +40,8 @@ type PublicClubRow = {
     sport_ref: { name: string } | null;
 };
 
-const PUBLIC_CLUB_SELECT = 'id, name, slug, logo_url, city, country, is_visible, status, sport, sport_id';
-const ADMIN_CLUB_SELECT = 'id, name, slug, logo_url, city, country, is_visible, status, sport, sport_id';
+const PUBLIC_CLUB_SELECT = 'id, name, slug, city, country, is_visible, status, sport, sport_id';
+const ADMIN_CLUB_SELECT = 'id, name, slug, city, country, is_visible, status, sport, sport_id';
 
 function resolveSportFilter(rawSport: string | null) {
     const normalizedSport = canonicalizeSportId(rawSport);
@@ -64,8 +64,8 @@ function requestHasSupabaseSession(request: NextRequest) {
     });
 }
 
-function sanitizePublicLogoUrl(value: unknown, club: { id: string; name: string | null }): string | null {
-    return resolveSerializableLogoUrl(value, {
+function getPublicLogoUrl(club: { id: string; name: string | null }): string | null {
+    return buildTeamLogoProxyUrl({
         key: club.id,
         name: club.name,
     });
@@ -177,6 +177,7 @@ export async function POST(request: NextRequest) {
 
 // Hard caps so a misbehaving client can't request the entire clubs table.
 const DEFAULT_CLUBS_LIMIT = 500;
+const DEFAULT_ADMIN_CLUBS_LIMIT = 2000;
 const MAX_CLUBS_LIMIT = 2000;
 
 export async function GET(request: NextRequest) {
@@ -190,9 +191,10 @@ export async function GET(request: NextRequest) {
 
     const limitParam = parseInt(searchParams.get('limit') || '', 10);
     const offsetParam = parseInt(searchParams.get('offset') || '', 10);
+    const defaultLimit = wantsAdminScope ? DEFAULT_ADMIN_CLUBS_LIMIT : DEFAULT_CLUBS_LIMIT;
     const limit = Number.isFinite(limitParam) && limitParam > 0
         ? Math.min(limitParam, MAX_CLUBS_LIMIT)
-        : DEFAULT_CLUBS_LIMIT;
+        : defaultLimit;
     const offset = Number.isFinite(offsetParam) && offsetParam >= 0 ? offsetParam : 0;
 
     let isSuperAdmin = false;
@@ -243,7 +245,7 @@ export async function GET(request: NextRequest) {
             id: club.id,
             name: club.name,
             slug: club.slug,
-            logo_url: sanitizePublicLogoUrl(club.logo_url, { id: club.id, name: club.name }),
+            logo_url: getPublicLogoUrl({ id: club.id, name: club.name }),
             city: club.city,
             country: club.country,
             is_visible: club.is_visible !== false,

@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getApiErrorStatus, requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
-import { memoryCache } from '@/lib/cache';
 import { MATCH_REVIEW_STATUS } from '@/lib/matchReview';
+import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
-
-const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response:v5';
 
 type ReviewAction = 'approve' | 'reject';
 
@@ -48,19 +46,6 @@ async function writeReviewAuditLog(
     });
   } catch (error) {
     console.error('[super/matches/approval] audit log failed:', error);
-  }
-}
-
-async function invalidateMatchesFeedCache(admin: ReturnType<typeof createAdminClient>) {
-  memoryCache.deleteByPrefix(MATCHES_RESPONSE_CACHE_PREFIX);
-
-  try {
-    await admin
-      .from('matches_feed_cache')
-      .delete()
-      .like('cache_key', `${MATCHES_RESPONSE_CACHE_PREFIX}:%`);
-  } catch (error) {
-    console.error('[super/matches/approval] matches feed cache invalidation failed:', error);
   }
 }
 
@@ -127,7 +112,7 @@ export async function PATCH(
     }
 
     await writeReviewAuditLog(admin, actorUserId, matchId, action, updates);
-    await invalidateMatchesFeedCache(admin);
+    await invalidateMatchesFeedCaches(admin);
     revalidatePath('/admin/super/partidos');
     revalidatePath('/api/matches');
 

@@ -1,6 +1,16 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { buildPhaseSettingsWithSyncedLabels } from '@/lib/server/phaseLabels';
+import { requireTournamentMutationContext, TournamentApiError } from '@/lib/auth/tournamentApi';
+import {
+  DEFAULT_PLAYOFF_STAGE_NAMES,
+  buildPlayoffStages,
+  ensurePlayoffBracketMatches,
+  getPlayoffTeamsCount,
+  isPlayoffPhaseType,
+  resolvePlayoffStagesForTeams,
+  syncPlayoffStagesToRounds,
+} from '@/lib/server/playoffStages';
 import { createApiPerfTracker } from '@/lib/perf/api';
 import { logOverfetchWarning } from '@/lib/perf/measure';
 
@@ -87,8 +97,8 @@ export async function POST(
   const perf = createApiPerfTracker(route);
 
   try {
-    const supabase = await perf.measureStep('create_client', () => createClient(), {
-      bucket: 'client',
+    const { writer: supabase } = await perf.measureStep('authorize_tournament_write', () => requireTournamentMutationContext(tournamentId), {
+      bucket: 'auth',
     });
     const body = await request.json();
     const scopedSeasonId = await resolveSeasonId(
@@ -103,6 +113,12 @@ export async function POST(
         .filter((name: unknown) => typeof name === 'string' && name.trim())
         .map((name: string) => name.trim())
       : [];
+    const playoffTeamsCount = getPlayoffTeamsCount(body.settings);
+    const playoffStages = isPlayoffPhaseType(phaseType)
+      ? resolvePlayoffStagesForTeams(body.settings ?? DEFAULT_PLAYOFF_STAGE_NAMES, playoffTeamsCount)
+      : [];
+    const playoffStageNames = playoffStages.map((stage) => stage.name);
+    const playoffStageMatchCounts = playoffStages.map((stage) => stage.matchCount);
 
     const syncedSettings = await perf.measureStep(
       'sync_phase_labels',
@@ -115,6 +131,9 @@ export async function POST(
 
     if (!phaseName) {
       return perf.json({ error: 'El nombre de la fase es obligatorio.' }, { status: 400 });
+    }
+    if (isPlayoffPhaseType(phaseType) && playoffTeamsCount < 2) {
+      return perf.json({ error: 'La fase playoff necesita definir al menos 2 equipos.' }, { status: 400 });
     }
 
     let countQuery = supabase
@@ -156,6 +175,10 @@ export async function POST(
           settings: {
             ...syncedSettings,
             group_names: groupNames,
+            playoffStages: isPlayoffPhaseType(phaseType) ? buildPlayoffStages(playoffStages) : [],
+            playoff_stage_names: isPlayoffPhaseType(phaseType) ? playoffStageNames : [],
+            playoffStageMatchCounts: isPlayoffPhaseType(phaseType) ? playoffStageMatchCounts : [],
+            playoff_match_counts: isPlayoffPhaseType(phaseType) ? playoffStageMatchCounts : [],
           },
         })
         .select()
@@ -200,6 +223,40 @@ export async function POST(
       }
     }
 
+    if (phase && isPlayoffPhaseType(phaseType)) {
+      const syncResult = await perf.measureStep(
+        'sync_playoff_stages',
+        async () => syncPlayoffStagesToRounds(supabase, phase.id, scopedSeasonId, playoffStages),
+        {
+          bucket: 'query',
+          logQuery: true,
+        },
+      );
+
+      if (!syncResult.ok) {
+        return perf.json({ error: 'La fase se creo pero no se pudieron crear las etapas playoff.' }, { status: 500 });
+      }
+
+      const bracketResult = await perf.measureStep(
+        'ensure_playoff_bracket',
+        async () => ensurePlayoffBracketMatches(supabase, {
+          tournamentId,
+          phaseId: phase.id,
+          seasonId: scopedSeasonId,
+          teamsCount: getPlayoffTeamsCount(phase.settings),
+          stageMatchCounts: playoffStageMatchCounts,
+        }),
+        {
+          bucket: 'query',
+          logQuery: true,
+        },
+      );
+
+      if (!bracketResult.ok) {
+        return perf.json({ error: 'La fase se creo pero no se pudo armar el cuadro playoff.' }, { status: 500 });
+      }
+    }
+
     if (phase && phaseType === 'group_stage' && groupNames.length > 0) {
       const groupInserts = groupNames.map((name, index) => ({
         phase_id: phase.id,
@@ -227,6 +284,9 @@ export async function POST(
     return perf.json({ data: phase }, { status: 201 });
   } catch (error: unknown) {
     console.error('Error in POST /api/tournaments/[id]/phases:', error);
+    if (error instanceof TournamentApiError) {
+      return perf.json({ error: error.message }, { status: error.status });
+    }
     return perf.json({
       error: error instanceof Error ? error.message : String(error),
       location: 'catch_block',

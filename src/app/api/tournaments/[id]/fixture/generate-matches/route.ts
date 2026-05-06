@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiErrorMessage, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { FixtureService } from '@/lib/services/fixtureService';
-import { createClient } from '@/lib/supabase/server';
 
 type GenerateMatchesRequest = {
     phaseId?: string;
@@ -20,7 +19,7 @@ export async function POST(
 ) {
     try {
         const tournamentId = (await params).id;
-        await requireAdminApiUser();
+        const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
         const body = await request.json() as GenerateMatchesRequest;
         const { phaseId, teamIds, ...options } = body;
 
@@ -45,7 +44,6 @@ export async function POST(
             );
         }
 
-        const supabase = await createClient();
         const { data: phase, error: phaseError } = await supabase
             .from('tournament_phases')
             .select('id')
@@ -80,11 +78,7 @@ export async function POST(
             );
         }
     } catch (error: unknown) {
-        const message = getApiErrorMessage(error);
         console.error('Error in POST /api/tournaments/[id]/fixture/generate-matches:', error);
-        return NextResponse.json(
-            { error: message },
-            { status: getApiErrorStatus(error) }
-        );
+        return tournamentApiErrorResponse(error);
     }
 }

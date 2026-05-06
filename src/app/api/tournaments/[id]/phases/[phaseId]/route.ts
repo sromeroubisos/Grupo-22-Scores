@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { buildPhaseSettingsWithSyncedLabels } from '@/lib/server/phaseLabels';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
+import {
+  DEFAULT_PLAYOFF_STAGE_NAMES,
+  buildPlayoffStages,
+  ensurePlayoffBracketMatches,
+  getPlayoffTeamsCount,
+  isPlayoffPhaseType,
+  resolvePlayoffStagesForTeams,
+  syncPlayoffStagesToRounds,
+} from '@/lib/server/playoffStages';
 import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 
 // PATCH update a phase
@@ -9,26 +18,60 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string, phaseId: string }> }
 ) {
   try {
-    const supabase = await createClient();
     const { id: tournamentId, phaseId } = await params;
+    const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
     const body = await request.json();
-    const nextPhaseType = body.phase_type;
+    const { data: currentPhase, error: currentPhaseError } = await supabase
+      .from('tournament_phases')
+      .select('phase_type, season_id, settings')
+      .eq('id', phaseId)
+      .eq('tournament_id', tournamentId)
+      .single();
+
+    if (currentPhaseError || !currentPhase) {
+      console.error('Error loading phase before update:', currentPhaseError);
+      return NextResponse.json({ error: 'Fase no encontrada' }, { status: 404 });
+    }
+
+    const nextPhaseType = body.phase_type ?? currentPhase.phase_type ?? 'league';
     const sanitizedGroupNames: string[] = (body.settings?.group_names || [])
       .filter((n: unknown) => typeof n === 'string' && n.trim())
       .map((name: string) => name.trim());
+    const nextSettings = body.settings ?? currentPhase.settings;
+    const playoffTeamsCount = getPlayoffTeamsCount(nextSettings);
+    const playoffStages = isPlayoffPhaseType(nextPhaseType)
+      ? resolvePlayoffStagesForTeams(nextSettings ?? DEFAULT_PLAYOFF_STAGE_NAMES, playoffTeamsCount)
+      : [];
+    const playoffStageNames = playoffStages.map((stage) => stage.name);
+    const playoffStageMatchCounts = playoffStages.map((stage) => stage.matchCount);
     const syncedSettings = body.settings !== undefined
       ? await buildPhaseSettingsWithSyncedLabels(supabase, body.settings)
       : undefined;
+
+    if (
+      isPlayoffPhaseType(nextPhaseType) &&
+      (body.phase_type !== undefined || body.settings !== undefined) &&
+      playoffTeamsCount < 2
+    ) {
+      return NextResponse.json(
+        { error: 'La fase playoff necesita definir al menos 2 equipos.' },
+        { status: 400 },
+      );
+    }
 
     const updateData: Record<string, unknown> = {};
     if (body.name !== undefined) updateData.name = typeof body.name === 'string' ? body.name.trim() : body.name;
     if (body.phase_type !== undefined) updateData.phase_type = body.phase_type;
     if (body.order_index !== undefined) updateData.order_index = body.order_index;
     if (body.is_active !== undefined) updateData.is_active = body.is_active;
-    if (body.settings !== undefined) {
+    if (body.settings !== undefined || body.phase_type !== undefined) {
       updateData.settings = {
-        ...syncedSettings,
+        ...(syncedSettings ?? (nextSettings && typeof nextSettings === 'object' ? nextSettings as Record<string, unknown> : {})),
         group_names: nextPhaseType === 'group_stage' ? sanitizedGroupNames : [],
+        playoffStages: isPlayoffPhaseType(nextPhaseType) ? buildPlayoffStages(playoffStages) : [],
+        playoff_stage_names: isPlayoffPhaseType(nextPhaseType) ? playoffStageNames : [],
+        playoffStageMatchCounts: isPlayoffPhaseType(nextPhaseType) ? playoffStageMatchCounts : [],
+        playoff_match_counts: isPlayoffPhaseType(nextPhaseType) ? playoffStageMatchCounts : [],
       };
     }
 
@@ -66,7 +109,7 @@ export async function PATCH(
 
     // Sync tournament_groups when updating a group_stage phase
     if (phase && (body.phase_type !== undefined || body.settings?.group_names !== undefined)) {
-      const shouldHaveGroups = (nextPhaseType ?? phase.phase_type) === 'group_stage';
+      const shouldHaveGroups = phase.phase_type === 'group_stage';
       // Delete existing groups for this phase then re-insert
       const { error: deleteError } = await supabase
         .from('tournament_groups')
@@ -91,6 +134,33 @@ export async function PATCH(
       }
     }
 
+    if (phase && isPlayoffPhaseType(phase.phase_type) && (body.phase_type !== undefined || body.settings !== undefined)) {
+      const stageConfigs = resolvePlayoffStagesForTeams(phase.settings ?? DEFAULT_PLAYOFF_STAGE_NAMES, getPlayoffTeamsCount(phase.settings));
+      const syncResult = await syncPlayoffStagesToRounds(supabase, phaseId, phase.season_id ?? null, stageConfigs);
+
+      if (!syncResult.ok) {
+        return NextResponse.json(
+          { error: 'La fase se guardo pero no se pudieron sincronizar las etapas playoff.' },
+          { status: 500 },
+        );
+      }
+
+      const bracketResult = await ensurePlayoffBracketMatches(supabase, {
+        tournamentId,
+        phaseId,
+        seasonId: phase.season_id ?? null,
+        teamsCount: getPlayoffTeamsCount(phase.settings),
+        stageMatchCounts: stageConfigs.map((stage) => stage.matchCount),
+      });
+
+      if (!bracketResult.ok) {
+        return NextResponse.json(
+          { error: 'La fase se guardo pero no se pudo armar el cuadro playoff.' },
+          { status: 500 },
+        );
+      }
+    }
+
     if (phase && (body.phase_type !== undefined || body.settings !== undefined)) {
       const recalcResult = await recalculatePhaseStandingsScopes(tournamentId, phaseId);
       if (!recalcResult.ok) {
@@ -104,7 +174,7 @@ export async function PATCH(
     return NextResponse.json({ data: phase });
   } catch (error: unknown) {
     console.error('Error in PATCH /api/tournaments/[id]/phases/[phaseId]:', error);
-    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return tournamentApiErrorResponse(error);
   }
 }
 
@@ -114,8 +184,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string, phaseId: string }> }
 ) {
   try {
-    const supabase = await createClient();
     const { id: tournamentId, phaseId } = await params;
+    const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
 
     const { data: phaseToDelete, error: phaseLookupError } = await supabase
       .from('tournament_phases')
@@ -176,6 +246,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     console.error('Error in DELETE /api/tournaments/[id]/phases/[phaseId]:', error);
-    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return tournamentApiErrorResponse(error);
   }
 }

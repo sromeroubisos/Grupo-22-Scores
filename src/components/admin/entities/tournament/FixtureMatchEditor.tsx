@@ -22,10 +22,20 @@ interface PhaseOption {
   phase_type: string;
 }
 
+interface RoundOption {
+  id: string;
+  name: string;
+  phaseId: string;
+}
+
 interface ParticipantOption {
   id: string;
   name: string;
   clubId: string;
+}
+
+function isPlayoffPhaseType(phaseType: string | null | undefined) {
+  return phaseType === 'playoff' || phaseType === 'knockout';
 }
 
 const STATUS_OPTIONS: DarkSelectOption[] = [
@@ -58,6 +68,7 @@ export const FixtureMatchEditor = ({
 
   // ─── Direct data loading (independent of fixture context) ──────────────────
   const [phases, setPhases] = useState<PhaseOption[]>([]);
+  const [rounds, setRounds] = useState<RoundOption[]>([]);
   const [participants, setParticipants] = useState<ParticipantOption[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
@@ -72,9 +83,10 @@ export const FixtureMatchEditor = ({
     setDataError(null);
 
     try {
-      const [phasesRes, participantsRes] = await Promise.all([
+      const [phasesRes, participantsRes, fixtureRes] = await Promise.all([
         fetch(`/api/tournaments/${tournamentId}/phases`, { cache: 'no-store' }),
         fetch(`/api/tournaments/${tournamentId}/participants?full=true`, { cache: 'no-store' }),
+        fetch(`/api/tournaments/${tournamentId}/fixture`, { cache: 'no-store' }),
       ]);
 
       // Parse phases
@@ -88,6 +100,26 @@ export const FixtureMatchEditor = ({
         })));
       } else {
         console.error('[MatchEditor] Failed to load phases:', phasesRes.status);
+      }
+
+      if (fixtureRes.ok) {
+        const fixtureJson = await fixtureRes.json();
+        setRounds(Array.isArray(fixtureJson?.phases)
+          ? fixtureJson.phases.flatMap((phase: any) =>
+            Array.isArray(phase?.rounds)
+              ? phase.rounds
+                .filter((round: any) => typeof round?.id === 'string' && !round.id.startsWith('orphaned-'))
+                .map((round: any) => ({
+                  id: String(round.id),
+                  name: String(round.name || 'Jornada'),
+                  phaseId: String(phase.id),
+                }))
+              : []
+          )
+          : []);
+      } else {
+        console.error('[MatchEditor] Failed to load fixture rounds:', fixtureRes.status);
+        setRounds([]);
       }
 
       // Parse participants
@@ -136,6 +168,7 @@ export const FixtureMatchEditor = ({
   // ─── Form state ────────────────────────────────────────────────────────────
   const [formData, setFormData] = useState({
     phaseId: '',
+    roundId: '',
     roundLabel: '',
     homeClubId: '',
     awayClubId: '',
@@ -158,7 +191,8 @@ export const FixtureMatchEditor = ({
     if (editingMatch) {
       setFormData({
         phaseId: editingMatch.phaseId || '',
-        roundLabel: '',
+        roundId: editingMatch.roundId || '',
+        roundLabel: editingMatch.roundLabel || '',
         homeClubId: editingMatch.homeClubId || '',
         awayClubId: editingMatch.awayClubId || '',
         dateTime: editingMatch.dateTime
@@ -180,6 +214,7 @@ export const FixtureMatchEditor = ({
     setFormData(prev => ({
       ...prev,
       phaseId: autoPhaseId,
+      roundId: '',
       roundLabel: '',
       homeClubId: '',
       awayClubId: '',
@@ -197,10 +232,36 @@ export const FixtureMatchEditor = ({
     setValidationErrors({});
   }, [editingMatch, phases, initialPhaseId, selectedPhaseId]);
 
+  const selectedPhase = useMemo(
+    () => phases.find((phase) => phase.id === formData.phaseId) || null,
+    [formData.phaseId, phases]
+  );
+  const selectedPhaseRequiresDefinedStage = isPlayoffPhaseType(selectedPhase?.phase_type);
+  const availableRounds = useMemo(
+    () => rounds.filter((round) => round.phaseId === formData.phaseId),
+    [formData.phaseId, rounds]
+  );
+  const roundOptions: DarkSelectOption[] = useMemo(
+    () => availableRounds.map((round) => ({ value: round.id, label: round.name })),
+    [availableRounds]
+  );
+
+  useEffect(() => {
+    if (dataLoading) return;
+    setFormData((prev) => {
+      const nextRoundId = availableRounds.some((round) => round.id === prev.roundId) ? prev.roundId : '';
+      if (nextRoundId === prev.roundId) return prev;
+      return { ...prev, roundId: nextRoundId };
+    });
+  }, [availableRounds, dataLoading]);
+
   // ─── Validation ────────────────────────────────────────────────────────────
   const validateForm = () => {
     const errors: Record<string, string> = {};
     if (!formData.phaseId) errors.phaseId = 'La fase es obligatoria';
+    if (selectedPhaseRequiresDefinedStage && !formData.roundId) {
+      errors.roundId = 'Selecciona una etapa de eliminacion definida';
+    }
     if (!formData.homeClubId) errors.homeClubId = 'El equipo local es obligatorio';
     if (!formData.awayClubId) errors.awayClubId = 'El equipo visitante es obligatorio';
     if (formData.homeClubId && formData.awayClubId && formData.homeClubId === formData.awayClubId) {
@@ -223,8 +284,8 @@ export const FixtureMatchEditor = ({
         ...(editingMatch || {}),
         phaseId: formData.phaseId,
         groupId: (editingMatch as any)?.groupId || null, // Preserve if exists
-        roundId: editingMatch?.roundId || null,
-        roundLabel: formData.roundLabel || undefined,
+        roundId: formData.roundId || null,
+        roundLabel: selectedPhaseRequiresDefinedStage ? undefined : (formData.roundLabel || undefined),
         homeClubId: formData.homeClubId,
         awayClubId: formData.awayClubId,
         dateTime: formData.dateTime,
@@ -250,11 +311,21 @@ export const FixtureMatchEditor = ({
   };
 
   const update = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (validationErrors[field]) {
+    setFormData(prev => {
+      if (field === 'phaseId') {
+        return { ...prev, phaseId: value, roundId: '', roundLabel: '' };
+      }
+      if (field === 'roundId') {
+        const selectedRound = rounds.find((round) => round.id === value);
+        return { ...prev, roundId: value, roundLabel: selectedRound?.name || prev.roundLabel };
+      }
+      return { ...prev, [field]: value };
+    });
+    if (validationErrors[field] || (field === 'phaseId' && validationErrors.roundId)) {
       setValidationErrors(prev => {
         const next = { ...prev };
         delete (next as any)[field];
+        if (field === 'phaseId') delete next.roundId;
         return next;
       });
     }
@@ -342,15 +413,33 @@ export const FixtureMatchEditor = ({
 
           {/* Round — manual text field */}
           <div className="editor-field editor-field-full">
-            <label>Jornada / Ronda</label>
-            <input
-              type="text"
-              value={formData.roundLabel}
-              onChange={(e) => update('roundLabel', e.target.value)}
-              placeholder="Ej: Fecha 1, Semifinal, Final, Jornada 3..."
-              className="glass-input"
-            />
+            <label>{selectedPhaseRequiresDefinedStage ? 'Etapa de eliminacion' : 'Jornada / Ronda'}</label>
+            {selectedPhaseRequiresDefinedStage ? (
+              <>
+                <DarkSelect
+                  value={formData.roundId}
+                  onChange={(v) => update('roundId', v)}
+                  options={roundOptions}
+                  placeholder={roundOptions.length > 0 ? 'Seleccionar etapa...' : 'Sin etapas definidas'}
+                  error={!!validationErrors.roundId}
+                  disabled={!formData.phaseId || roundOptions.length === 0}
+                />
+                {validationErrors.roundId && (
+                  <span className="field-error"><AlertTriangle size={12} /> {validationErrors.roundId}</span>
+                )}
+              </>
+            ) : (
+              <input
+                type="text"
+                value={formData.roundLabel}
+                onChange={(e) => update('roundLabel', e.target.value)}
+                placeholder="Ej: Fecha 1, Semifinal, Final, Jornada 3..."
+                className="glass-input"
+              />
+            )}
+            {!selectedPhaseRequiresDefinedStage && (
             <span className="field-hint">Campo libre. Escribí el nombre de la fecha o ronda.</span>
+            )}
           </div>
 
           <div className="editor-separator">Participantes</div>

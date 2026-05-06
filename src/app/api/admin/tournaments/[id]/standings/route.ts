@@ -8,6 +8,8 @@ import {
     isFinalStandingsStatus,
 } from '@/lib/standings/matchScope';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
+import { resolveStandingsCarryOverRows } from '@/lib/server/standingsCarryOver';
+import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
 
 // --- Circuit placement points helpers ---
 
@@ -38,6 +40,53 @@ type StandingMatchRow = {
 };
 
 type StandingMatchRowWithoutEvents = Omit<StandingMatchRow, 'events'>;
+
+type ParticipantScopeRow = {
+    id?: unknown;
+    club_id?: unknown;
+};
+
+function normalizeScopeId(value: unknown): string {
+    return String(value ?? '').trim();
+}
+
+function getParticipantTeamId(participant: ParticipantScopeRow): string {
+    return normalizeScopeId(participant.club_id ?? participant.id);
+}
+
+function getMatchTeamId(match: Record<string, unknown>, side: 'home' | 'away'): string {
+    return normalizeScopeId(match[`${side}_club_id`] ?? match[`${side}_participant_id`]);
+}
+
+function buildParticipantTeamIdSet(participants: ParticipantScopeRow[]): Set<string> {
+    return new Set(participants.map(getParticipantTeamId).filter(Boolean));
+}
+
+function filterStandingRowsForParticipantScope<TRow extends { club_id?: unknown }>(
+    rows: TRow[],
+    participants: ParticipantScopeRow[],
+): TRow[] {
+    const allowedTeamIds = buildParticipantTeamIdSet(participants);
+    if (allowedTeamIds.size === 0) return [];
+
+    return rows.filter((row) => allowedTeamIds.has(normalizeScopeId(row.club_id)));
+}
+
+function filterMatchesForParticipantScope<TMatch extends Record<string, unknown>>(
+    matches: TMatch[],
+    participants: ParticipantScopeRow[],
+    groupId?: string | null,
+): TMatch[] {
+    const groupScopedMatches = filterMatchesForGroupScope(matches, participants, groupId);
+    const allowedTeamIds = buildParticipantTeamIdSet(participants);
+    if (allowedTeamIds.size === 0) return [];
+
+    return groupScopedMatches.filter((match) => {
+        const homeId = getMatchTeamId(match, 'home');
+        const awayId = getMatchTeamId(match, 'away');
+        return Boolean(homeId && awayId && allowedTeamIds.has(homeId) && allowedTeamIds.has(awayId));
+    });
+}
 
 function getDefaultCircuitPlacementPoints(): Array<{ position: number; points: number }> {
     return DEFAULT_CIRCUIT_POINTS.map((pts, i) => ({ position: i + 1, points: pts }));
@@ -272,7 +321,7 @@ export async function GET(
         // 1. Fetch phase + tournament rules
         const { data: phase, error: phaseError } = await supabase
             .from('tournament_phases')
-            .select('id, phase_type, settings, tournament_id')
+            .select('id, name, phase_type, order_index, settings, season_id, tournament_id')
             .eq('id', phaseId)
             .eq('tournament_id', tournamentId)
             .single();
@@ -313,19 +362,6 @@ export async function GET(
                 standingsQuery = standingsQuery.eq('season_id', seasonId);
             }
 
-            let participantsQuery = scopedGroupId
-                ? supabase
-                    .from('tournament_participants')
-                    .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
-                    .eq('tournament_id', tournamentId)
-                    .eq('group_id', scopedGroupId)
-                    .not('status', 'in', '("withdrawn","disqualified")')
-                : supabase
-                    .from('tournament_participants')
-                    .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
-                    .eq('tournament_id', tournamentId)
-                    .not('status', 'in', '("withdrawn","disqualified")');
-
             let manualMatchesQuery = scopedGroupId
                 ? supabase
                     .from('matches')
@@ -339,24 +375,34 @@ export async function GET(
                     .eq('phase_id', phaseId);
 
             if (seasonId) {
-                participantsQuery = participantsQuery.eq('season_id', seasonId);
                 manualMatchesQuery = manualMatchesQuery.eq('season_id', seasonId);
             }
 
-            const [{ data: persistedRows, error: persistedError }, { data: participants, error: pError }, { data: matches, error: mError }] = await Promise.all([
+            const [
+                { data: persistedRows, error: persistedError },
+                participantScope,
+                { data: matches, error: mError },
+            ] = await Promise.all([
                 standingsQuery,
-                participantsQuery,
+                loadPhaseScopedParticipants(supabase, {
+                    tournamentId,
+                    phaseId,
+                    groupId: scopedGroupId,
+                    seasonId,
+                }),
                 manualMatchesQuery,
             ]);
 
             if (persistedError) {
                 throw persistedError;
             }
-            if (pError) throw pError;
             if (mError) throw mError;
 
-            const participantRows = (participants || []) as any[];
-            const persistedStandingRows = (persistedRows || []) as any[];
+            const participantRows = (participantScope.participants || []) as any[];
+            const persistedStandingRows = filterStandingRowsForParticipantScope(
+                (persistedRows || []) as any[],
+                participantRows,
+            );
             const matchRows = (matches || []) as any[];
 
             const participantMap = new Map<string, any>(
@@ -395,7 +441,7 @@ export async function GET(
                 };
             });
 
-            const scopedMatches = filterMatchesForGroupScope(matchRows, participantRows, scopedGroupId);
+            const scopedMatches = filterMatchesForParticipantScope(matchRows, participantRows, scopedGroupId);
             const metrics = {
                 counted_matches: scopedMatches.filter((match) => isFinalStandingsStatus(match.status)).length,
                 pending_results: scopedMatches.filter((match) => ['scheduled', 'live', 'suspended', 'delayed', 'postponed'].includes(String(match.status ?? ''))).length,
@@ -411,17 +457,14 @@ export async function GET(
             });
         }
 
-        // 2. Fetch participants (exclude explicitly inactive)
-        let pQuery = supabase
-            .from('tournament_participants')
-            .select('id, club_id, name, group_id, status, clubs(name, logo_url)')
-            .eq('tournament_id', tournamentId)
-            .not('status', 'in', '("withdrawn","disqualified")');
-
-        if (seasonId) pQuery = pQuery.eq('season_id', seasonId);
-        if (scopedGroupId) pQuery = pQuery.eq('group_id', scopedGroupId);
-        const { data: participants, error: pError } = await pQuery;
-        if (pError) throw pError;
+        // 2. Fetch participants scoped to this phase/group. This keeps the
+        // tournament registration intact while letting each phase define its roster.
+        const { participants } = await loadPhaseScopedParticipants(supabase, {
+            tournamentId,
+            phaseId,
+            groupId: scopedGroupId,
+            seasonId,
+        });
 
         // 3. Fetch final matches for this phase
         const fetchMatchesWithEvents = async (): Promise<{ data: StandingMatchRow[] | null; error: QueryError }> => {
@@ -460,7 +503,15 @@ export async function GET(
         );
         if (mError) throw mError;
 
-        const scopedMatches = filterMatchesForGroupScope(matches || [], participants || [], scopedGroupId);
+        const scopedMatches = filterMatchesForParticipantScope(matches || [], participants || [], scopedGroupId);
+        const carryOver = await resolveStandingsCarryOverRows({
+            supabase,
+            tournamentId,
+            currentPhase: phase,
+            tournamentRuleset: tournament?.ruleset,
+            seasonId,
+            tableType,
+        });
 
         // 4. Compute standings
         const table = StandingsEngine.generateTable(
@@ -468,6 +519,7 @@ export async function GET(
             scopedMatches,
             resolvedRules,
             tableType,
+            { carryOverRows: carryOver.rows },
         );
 
         // 5. Metrics
@@ -489,7 +541,7 @@ export async function GET(
         if (seasonId) pendingQuery = pendingQuery.eq('season_id', seasonId);
         const { data: pendingMatches, error: pendingError } = await pendingQuery;
         if (pendingError) throw pendingError;
-        metrics.pending_results = filterMatchesForGroupScope(
+        metrics.pending_results = filterMatchesForParticipantScope(
             pendingMatches || [],
             participants || [],
             scopedGroupId,
@@ -524,6 +576,12 @@ export async function GET(
             table,
             metrics,
             rules: resolvedRules,
+            carry_over: {
+                enabled: carryOver.enabled,
+                source_phase_id: carryOver.sourcePhaseId,
+                source_phase_name: carryOver.sourcePhaseName,
+                rows: carryOver.rows.length,
+            },
             last_calculated_at: lastCalculatedAt,
         });
     } catch (e: unknown) {

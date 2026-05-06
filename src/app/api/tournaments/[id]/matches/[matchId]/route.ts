@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiErrorMessage, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 
@@ -8,12 +8,16 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string, matchId: string }> }
 ) {
     try {
-        await requireAdminApiUser();
-        const { matchId } = await params;
+        const { id: tournamentId, matchId } = await params;
+        const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
         const body = await request.json();
         const previousMatch = await FixtureService.getMatch(matchId);
 
-        const match = await FixtureService.updateMatch(matchId, body);
+        if (!previousMatch || previousMatch.tournamentId !== tournamentId) {
+            return NextResponse.json({ error: 'Match not found in this tournament' }, { status: 404 });
+        }
+
+        const match = await FixtureService.updateMatch(matchId, body, supabase);
 
         if (!match) {
             return NextResponse.json(
@@ -47,12 +51,8 @@ export async function PATCH(
 
         return NextResponse.json(match);
     } catch (error: unknown) {
-        const message = getApiErrorMessage(error);
         console.error('Error in PATCH /api/tournaments/[id]/matches/[matchId]:', error);
-        return NextResponse.json(
-            { error: message },
-            { status: getApiErrorStatus(error) }
-        );
+        return tournamentApiErrorResponse(error);
     }
 }
 
@@ -61,9 +61,14 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string, matchId: string }> }
 ) {
     try {
-        await requireAdminApiUser();
-        const { matchId } = await params;
+        const { id: tournamentId, matchId } = await params;
+        await requireTournamentMutationContext(tournamentId);
         const previousMatch = await FixtureService.getMatch(matchId);
+
+        if (!previousMatch || previousMatch.tournamentId !== tournamentId) {
+            return NextResponse.json({ error: 'Match not found in this tournament' }, { status: 404 });
+        }
+
         const success = await FixtureService.deleteMatch(matchId);
 
         if (!success) {
@@ -85,11 +90,7 @@ export async function DELETE(
 
         return NextResponse.json({ success: true });
     } catch (error: unknown) {
-        const message = getApiErrorMessage(error);
         console.error('Error in DELETE /api/tournaments/[id]/matches/[matchId]:', error);
-        return NextResponse.json(
-            { error: message },
-            { status: getApiErrorStatus(error) }
-        );
+        return tournamentApiErrorResponse(error);
     }
 }

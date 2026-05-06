@@ -475,3 +475,39 @@
 .chartFill {
   background: linear-gradient(90deg, #00a365, #00d688);
 }
+
+/* Light theme: redefines the scoped tokens declared on .page. */
+:root[data-theme="light"] .page {
+  --stats-bg: #f4f6fb;
+  --stats-surface: #ffffff;
+  --stats-surface-2: #f7f9fc;
+  --stats-border: rgba(15, 23, 42, 0.1);
+  --stats-text: #0f172a;
+  --stats-muted: #475569;
+  --stats-accent: #047857;
+  --stats-accent-soft: rgba(4, 120, 87, 0.14);
+  --stats-accent-soft-2: rgba(4, 120, 87, 0.08);
+}
+
+:root[data-theme="light"] .header,
+:root[data-theme="light"] .filters,
+:root[data-theme="light"] .tableSection,
+:root[data-theme="light"] .vizCard {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.02), rgba(15, 23, 42, 0.01)), var(--stats-surface);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme="light"] .header {
+  background:
+    radial-gradient(circle at top right, rgba(4, 120, 87, 0.1), transparent 28%),
+    radial-gradient(circle at left center, rgba(13, 83, 126, 0.08), transparent 30%),
+    var(--stats-bg);
+}
+
+:root[data-theme="light"] .tabActive {
+  background: rgba(4, 120, 87, 0.12);
+}
+
+:root[data-theme="light"] .chartFill {
+  background: linear-gradient(90deg, #047857, #059669);
+}

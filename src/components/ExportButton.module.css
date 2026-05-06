@@ -82,6 +82,12 @@
     overflow: hidden;
 }
 
+@media (min-width: 768px) {
+    .modalOverlay {
+        zoom: 1.42857143;
+    }
+}
+
 .modal {
     width: 100vw;
     height: 100dvh;
@@ -99,7 +105,7 @@
 }
 
 .modalHeader {
-    padding: 26px clamp(24px, 4vw, 52px) 18px;
+    padding: 22px clamp(24px, 4vw, 52px) 16px;
     flex-shrink: 0;
     background: rgba(20, 20, 23, 0.46);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -120,12 +126,112 @@
 
 .modalBody {
     flex: 1;
-    overflow-y: auto;
-    padding: 28px clamp(24px, 4vw, 52px) 18px;
+    min-height: 0;
+    overflow: hidden;
+    padding: 22px clamp(24px, 4vw, 52px) 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 430px);
+    gap: 22px;
+    scroll-behavior: smooth;
+}
+
+.modalControls {
     display: flex;
     flex-direction: column;
-    gap: 28px;
-    scroll-behavior: smooth;
+    gap: 18px;
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+.modalControls::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modalControls::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modalControls::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+}
+
+.modalPreviewPanel {
+    position: sticky;
+    top: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 14px;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    padding: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
+        rgba(10, 10, 14, 0.58);
+}
+
+.modalPreviewHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.modalPreviewHeader div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.modalPreviewHeader span,
+.modalPreviewHeader small {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.48);
+    white-space: nowrap;
+}
+
+.modalPreviewHeader strong {
+    color: #f4f4f5;
+    font-size: 0.92rem;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modalPreviewCanvas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    overflow: hidden;
+    border-radius: 16px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015)),
+        #050507;
+}
+
+.modalPreviewImage {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.42);
 }
 
 .modalTitle {
@@ -175,10 +281,10 @@
 .modalSection {
     margin: 0;
     width: 100%;
-    padding: 20px 22px;
+    padding: 18px 20px;
     background: rgba(18, 18, 24, 0.48);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 20px;
+    border-radius: 16px;
 }
 
 .modalLabel {
@@ -245,6 +351,51 @@
     background: rgba(39, 39, 42, 0.96);
     color: #fff;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+.activeDesignCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    background: rgba(24, 24, 27, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+}
+
+.activeDesignCopy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.activeDesignCopy strong {
+    color: #f8fafc;
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
+.activeDesignCopy span {
+    color: rgba(203, 213, 225, 0.72);
+    font-size: 0.76rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.activeDesignBadge {
+    flex-shrink: 0;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.14);
+    border: 1px solid rgba(59, 130, 246, 0.32);
+    color: #93c5fd;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .compactPresetPanel {
@@ -342,13 +493,14 @@
 }
 
 .modalFooter {
-    padding: 18px clamp(24px, 4vw, 52px) 28px;
+    padding: 14px clamp(24px, 4vw, 52px) 18px;
     background: rgba(20, 20, 23, 0.9);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: minmax(260px, 0.8fr) minmax(360px, 1fr);
+    align-items: end;
+    gap: 20px;
 }
 
 .modalFooterMeta {
@@ -1389,6 +1541,25 @@
     white-space: nowrap;
 }
 
+@media (max-width: 980px) {
+    .modalBody {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+    }
+
+    .modalControls {
+        overflow: visible;
+        padding-right: 0;
+    }
+
+    .modalPreviewPanel {
+        position: relative;
+        order: -1;
+        height: min(54dvh, 560px);
+        min-height: 340px;
+    }
+}
+
 @media (max-width: 640px) {
     .modalOverlay {
         align-items: stretch;
@@ -1407,6 +1578,30 @@
         gap: 12px;
     }
 
+    .modalControls {
+        gap: 12px;
+    }
+
+    .modalPreviewPanel {
+        min-height: 280px;
+        height: min(48dvh, 420px);
+        padding: 12px;
+        border-radius: 14px;
+    }
+
+    .modalPreviewHeader strong {
+        font-size: 0.74rem;
+    }
+
+    .modalPreviewHeader span,
+    .modalPreviewHeader small {
+        font-size: 0.52rem;
+    }
+
+    .modalPreviewCanvas {
+        border-radius: 12px;
+    }
+
     .modalHeader {
         padding: 16px 14px 12px;
     }
@@ -1417,6 +1612,9 @@
 
     .modalFooter {
         padding: 12px 14px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
     }
 
     .modalSection {

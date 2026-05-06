@@ -7,6 +7,8 @@ import {
 } from '@/lib/standings/matchScope';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
+import { resolveStandingsCarryOverRows } from '@/lib/server/standingsCarryOver';
+import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
 
 type PhaseRow = {
     id: string;
@@ -246,16 +248,24 @@ export async function GET(req: NextRequest) {
     const activePhase = phases.find((phase: PhaseRow) => String(phase?.id ?? '') === String(fallbackPhaseId ?? '')) ?? null;
 
     const [participantsRes, matchesRes] = await Promise.all([
-        (() => {
-            let query = supabase
-                .from('tournament_participants')
-                .select('id, club_id, name, group_id, status, clubs:club_id(name, logo_url)')
-                .eq('tournament_id', tournamentId)
-                .not('status', 'in', '("withdrawn","disqualified")');
+        fallbackPhaseId
+            ? loadPhaseScopedParticipants(supabase, {
+                tournamentId,
+                phaseId: fallbackPhaseId,
+                groupId: requestedGroupId,
+            })
+                .then((scope) => ({ data: scope.participants, error: null }))
+                .catch((error) => ({ data: null, error }))
+            : (() => {
+                let query = supabase
+                    .from('tournament_participants')
+                    .select('id, club_id, name, group_id, status, clubs:club_id(name, logo_url)')
+                    .eq('tournament_id', tournamentId)
+                    .not('status', 'in', '("withdrawn","disqualified")');
 
-            if (requestedGroupId) query = query.eq('group_id', requestedGroupId);
-            return query;
-        })(),
+                if (requestedGroupId) query = query.eq('group_id', requestedGroupId);
+                return query;
+            })(),
         queryMatchesWithOptionalEvents<FinalMatchRow>(
             () => {
                 let query = supabase
@@ -319,10 +329,18 @@ export async function GET(req: NextRequest) {
     const shouldUsePersistedStandings = resolvedRules?.calculation_mode === 'fully_manual';
 
     if (!shouldUsePersistedStandings && participants.length > 0) {
+        const carryOver = await resolveStandingsCarryOverRows({
+            supabase,
+            tournamentId,
+            currentPhase: activePhase,
+            tournamentRuleset: tournamentRes.data?.ruleset ?? {},
+        });
         const calculatedRows = StandingsEngine.generateTable(
             participants,
             finalMatches,
             resolvedRules,
+            'general',
+            { carryOverRows: carryOver.rows },
         ).map((row: GeneratedStandingRow) => mapCalculatedStanding(row, participants, fallbackPhaseId, requestedGroupId));
 
         if (calculatedRows.length > 0) {

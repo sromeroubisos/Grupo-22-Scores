@@ -33,24 +33,14 @@ import {
   parseEspnMotorsportMatchId,
 } from '@/lib/services/espnMotorsport';
 import {
-  getRugbyApiSportsGame,
-  getRugbyApiSportsGamesH2H,
-  getRugbyApiSportsStandings,
-  parseRugbyApiSportsMatchId,
-  toRugbyApiSportsTournamentId,
-  type RugbyApiSportsGame,
-} from '@/lib/services/rugbyApiSports';
-import {
-  normalizeRugbyGameForMatchDetail,
-  normalizeRugbyGameForTournamentViews,
-  normalizeRugbyStandingsRows,
-} from '@/lib/services/rugbyApiSportsTransforms';
-import {
   applyExternalTournamentOverride,
   getExternalTournamentOverride,
   type ExternalTournamentOverrideRecord,
 } from '@/lib/server/externalTournamentOverrides';
-import { getExternalMatchLineupOverride } from '@/lib/server/externalMatchLineupOverrides';
+import {
+  getExternalMatchLineupOverride,
+  type ExternalMatchLineupOverrideRecord,
+} from '@/lib/server/externalMatchLineupOverrides';
 
 function jsonNoStore(body: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
@@ -125,6 +115,47 @@ function isFlashScoreMatchId(matchId: string) {
   return /^[A-Za-z0-9]{8}$/.test(matchId);
 }
 
+function serializeLineupOverride(override: ExternalMatchLineupOverrideRecord | null) {
+  return override
+    ? {
+        provider: override.provider,
+        ratedAt: override.rated_at,
+        ratedBy: override.rated_by,
+      }
+    : null;
+}
+
+function mergeLineupOverride(
+  lineups: unknown,
+  override: ExternalMatchLineupOverrideRecord | null,
+) {
+  if (!override) return lineups;
+
+  return {
+    ...(lineups && typeof lineups === 'object' ? lineups as Record<string, unknown> : {}),
+    home: override.lineups.home,
+    away: override.lineups.away,
+  };
+}
+
+async function applyLineupOverrideToExternalMatchBundle<
+  T extends { match?: Record<string, unknown> | null; lineupOverride?: unknown },
+>(matchId: string, bundle: T | null): Promise<T | null> {
+  if (!bundle?.match) return bundle;
+
+  const lineupOverride = await getExternalMatchLineupOverride(matchId).catch(() => null);
+  if (!lineupOverride) return bundle;
+
+  return {
+    ...bundle,
+    match: {
+      ...bundle.match,
+      lineups: mergeLineupOverride(bundle.match.lineups, lineupOverride),
+    },
+    lineupOverride: serializeLineupOverride(lineupOverride),
+  };
+}
+
 async function getWriteClient() {
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return createAdminClient();
@@ -187,13 +218,7 @@ async function getFlashScoreMatchBundle(matchId: string) {
   ] = results.map((result) => (result.status === 'fulfilled' ? result.value : null));
 
   const lineupOverride = await getExternalMatchLineupOverride(matchId).catch(() => null);
-  const lineupsWithOverride = lineupOverride
-    ? {
-        ...(lineups && typeof lineups === 'object' ? lineups as Record<string, unknown> : {}),
-        home: lineupOverride.lineups.home,
-        away: lineupOverride.lineups.away,
-      }
-    : lineups;
+  const lineupsWithOverride = mergeLineupOverride(lineups, lineupOverride);
 
   return {
     source: 'flashscore' as const,
@@ -203,85 +228,13 @@ async function getFlashScoreMatchBundle(matchId: string) {
     h2h,
     form,
     lineups: lineupsWithOverride,
-    lineupOverride: lineupOverride
-      ? {
-          provider: lineupOverride.provider,
-          ratedAt: lineupOverride.rated_at,
-          ratedBy: lineupOverride.rated_by,
-        }
-      : null,
+    lineupOverride: serializeLineupOverride(lineupOverride),
     standings,
     dayMatches,
     playerStats,
     commentary,
     draw,
     topScorers,
-  };
-}
-
-async function getRugbyApiSportsMatchBundle(matchId: string) {
-  const game = await getRugbyApiSportsGame(matchId, 'America/Argentina/Buenos_Aires');
-  if (!game) {
-    return null;
-  }
-
-  const homeId = game.teams?.home?.id;
-  const awayId = game.teams?.away?.id;
-
-  const [h2hResult, standingsResult] = await Promise.allSettled([
-    homeId && awayId
-      ? getRugbyApiSportsGamesH2H({
-        homeTeamId: homeId,
-        awayTeamId: awayId,
-        timezone: 'America/Argentina/Buenos_Aires',
-      })
-      : Promise.resolve([]),
-    game.league?.id && game.league?.season
-      ? getRugbyApiSportsStandings({
-        league: game.league.id,
-        season: game.league.season,
-      })
-      : Promise.resolve([]),
-  ]);
-
-  const tournamentOverride = game.league?.id
-    ? await getExternalTournamentOverride(toRugbyApiSportsTournamentId(game.league.id)).catch(() => null)
-    : null;
-  const resolvedGame: RugbyApiSportsGame = game.league && tournamentOverride
-    ? {
-      ...game,
-      league: applyExternalTournamentOverride(
-        game.league as Record<string, unknown>,
-        tournamentOverride,
-      ) as RugbyApiSportsGame['league'],
-    }
-    : game;
-  const match = normalizeRugbyGameForMatchDetail(resolvedGame);
-  const h2h = h2hResult.status === 'fulfilled'
-    ? h2hResult.value.map((item) => normalizeRugbyGameForTournamentViews(item))
-    : [];
-  const standingsRows = standingsResult.status === 'fulfilled'
-    ? normalizeRugbyStandingsRows(standingsResult.value)
-    : [];
-
-  match.h2h = h2h;
-  match.standings = standingsRows.map((row) => ({
-    rank: row.position,
-    name: row.team_name,
-    team_id: row.team_id,
-    logo: row.team_logo || '',
-    team: row.team_id ? { id: row.team_id, name: row.team_name, logo: row.team_logo || '' } : null,
-    matches_played: row.played,
-    goal_difference: (row.scored ?? 0) - (row.conceded ?? 0),
-    points: row.points,
-    played: row.played,
-  }));
-
-  return {
-    source: 'rugby-api-sports' as const,
-    match,
-    h2h,
-    standings: match.standings,
   };
 }
 
@@ -321,24 +274,14 @@ export async function GET(
 ) {
   try {
     const matchId = (await params).id;
-    const rugbyMatchId = parseRugbyApiSportsMatchId(matchId);
     const espnMatchId = parseEspnAmericanFootballMatchId(matchId);
     const espnMotorsportMatchId = parseEspnMotorsportMatchId(matchId);
 
-    if (rugbyMatchId) {
-      const bundle = await getRugbyApiSportsMatchBundle(rugbyMatchId);
-      if (!bundle) {
-        return jsonNoStore(
-          { error: 'Match not found' },
-          { status: 404 }
-        );
-      }
-
-      return jsonNoStore(bundle);
-    }
-
     if (espnMatchId) {
-      const bundle = await getEspnAmericanFootballMatchBundle(espnMatchId);
+      const bundle = await applyLineupOverrideToExternalMatchBundle(
+        matchId,
+        await getEspnAmericanFootballMatchBundle(espnMatchId),
+      );
       if (!bundle) {
         return jsonNoStore(
           { error: 'Match not found' },

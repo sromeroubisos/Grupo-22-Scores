@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import LoginScreen from './components/LoginScreen';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { hasEditorialAccess, hasFederationAdminAccess, resolveAdminPanel } from '@/lib/auth/roles';
+import { useEffect, useState } from 'react';
 
 function buildReturnTo(pathname: string, searchParams: ReturnType<typeof useSearchParams>): string {
     const qs = searchParams.toString();
@@ -15,6 +16,11 @@ export default function AdminWrapper({ children }: { children: React.ReactNode }
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const [hasMounted, setHasMounted] = useState(false);
+
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
 
     const currentReturnTo = buildReturnTo(pathname ?? '', searchParams);
 
@@ -26,7 +32,7 @@ export default function AdminWrapper({ children }: { children: React.ReactNode }
     const isEditorialUser = hasEditorialAccess(user?.role, user?.memberships);
     const isAllowed = user && (isFederationAdmin || (isEditorialUser && isEditorialRoute));
 
-    if (isLoading) {
+    if (!hasMounted || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#00ff88]/10 rounded-full blur-[100px]" />

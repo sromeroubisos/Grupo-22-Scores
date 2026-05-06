@@ -2,16 +2,17 @@
 
 import { createClient } from '@/lib/supabase/client'
 import styles from '../login.module.css'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { sanitizeReturnTo } from '../redirects'
+import { getAuthErrorMessage } from '@/lib/auth/errors'
 
-export default function OAuthButtons() {
+export default function OAuthButtons({ onError }: { onError?: (msg: string | null) => void }) {
     const [loading, setLoading] = useState<string | null>(null)
+    const loadingRef = useRef(false)
     const searchParams = useSearchParams()
     const roleIntent = searchParams.get('roleIntent')
     const returnTo = sanitizeReturnTo(searchParams.get('returnTo'), roleIntent)
-    const supabase = createClient()
 
     const getCallbackUrl = () => {
         const callbackUrl = new URL('/auth/callback', window.location.origin)
@@ -20,8 +21,12 @@ export default function OAuthButtons() {
     }
 
     const handleLogin = async () => {
+        if (loadingRef.current) return
+        loadingRef.current = true
+        onError?.(null)
         setLoading('google')
         try {
+            const supabase = createClient()
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
@@ -36,7 +41,8 @@ export default function OAuthButtons() {
                 window.location.href = data.url
             }
         } catch (error) {
-            console.error('OAuth error:', error)
+            onError?.(getAuthErrorMessage(error, 'No pudimos iniciar sesion con Google. Intenta nuevamente.'))
+            loadingRef.current = false
             setLoading(null)
         }
     }

@@ -23,6 +23,8 @@ const CACHE_TTL_TOURNAMENTS = 24 * 60 * 60; // 24 hours for tournaments
 const CACHE_TTL_CATALOG = 60;   // 60 seconds for countries and leagues catalog
 const CACHE_TTL_TEAMS = 24 * 60 * 60;       // 24 hours for teams
 const CACHE_TTL_PLAYERS = 24 * 60 * 60;     // 24 hours for player info
+const MATCHES_LIST_DAY_OFFSET_LIMIT = 7;
+const MATCHES_LIST_CACHE_PREFIX = 'matches-list:v3';
 
 // Mapping from our app's sport IDs to FlashScore sport IDs
 // Based on user provided list
@@ -90,13 +92,47 @@ function releaseSlot() {
     }
 }
 
+function delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getDayOffsetForDateKey(targetDateKey: string, timeZone?: string): number {
+    const todayKey = formatDateKey(new Date(), timeZone);
+    const todayMs = new Date(todayKey + 'T00:00:00Z').getTime();
+    const targetMs = new Date(targetDateKey + 'T00:00:00Z').getTime();
+    return Math.round((targetMs - todayMs) / 86400000);
+}
+
+function isMatchesListDayOffsetSupported(dayOffset: number): boolean {
+    return Math.abs(dayOffset) <= MATCHES_LIST_DAY_OFFSET_LIMIT;
+}
+
+export function isFlashScoreMatchesListDateSupported(targetDateKey: string, timeZone?: string): boolean {
+    return isMatchesListDayOffsetSupported(getDayOffsetForDateKey(targetDateKey, timeZone));
+}
+
+function getFlashScoreRawTournamentList(data: any): any[] {
+    if (Array.isArray(data)) return data;
+    if (!data || typeof data !== 'object') return [];
+    if (Array.isArray(data.DATA)) return data.DATA;
+    if (Array.isArray(data.data)) return data.data;
+    return [];
+}
+
+function countFlashScoreRawMatches(data: any): number {
+    return getFlashScoreRawTournamentList(data).reduce((total, tournament) => {
+        return total + (Array.isArray(tournament?.matches) ? tournament.matches.length : 0);
+    }, 0);
+}
+
 // Root is Array of Tournaments: { tournament_id, name, country_name, matches: Array<Match> }
 // Match is: { match_id, is_finished, ... }
 
 export async function getFlashScoreMatchesRaw(
     dayOffset: number,
     sportId: string | number,
-    timeZone?: string
+    timeZone?: string,
+    options: { bypassCache?: boolean } = {}
 ): Promise<any> {
     if (!isFlashScoreEnabledForSport(sportId)) {
         return [];
@@ -110,13 +146,17 @@ export async function getFlashScoreMatchesRaw(
         flashScoreSportId = sportId;
     }
 
-    const safeDay = Math.max(-7, Math.min(7, dayOffset));
+    if (!isMatchesListDayOffsetSupported(dayOffset)) {
+        throw new Error(`FlashScore matches/list only supports day offsets within +/-${MATCHES_LIST_DAY_OFFSET_LIMIT}.`);
+    }
 
     // Check cache first (include timezone in cache key)
-    const cacheKey = `matches-list-${safeDay}-${flashScoreSportId}-${timeZone || 'default'}`;
-    const cached = memoryCache.get<any>(cacheKey);
-    if (cached) {
-        return cached;
+    const cacheKey = `${MATCHES_LIST_CACHE_PREFIX}-${dayOffset}-${flashScoreSportId}-${timeZone || 'default'}`;
+    if (!options.bypassCache) {
+        const cached = memoryCache.get<any>(cacheKey);
+        if (cached) {
+            return cached;
+        }
     }
 
     // Deduplicate: if same request is already in-flight, share the promise
@@ -126,7 +166,7 @@ export async function getFlashScoreMatchesRaw(
     const promise = (async () => {
         await acquireSlot();
         try {
-            let url = `https://${API_HOST}/api/flashscore/v2/matches/list?day=${safeDay}&sport_id=${flashScoreSportId}`;
+            let url = `https://${API_HOST}/api/flashscore/v2/matches/list?day=${dayOffset}&sport_id=${flashScoreSportId}`;
             if (timeZone) {
                 url += `&timezone=${encodeURIComponent(timeZone)}`;
             }
@@ -146,12 +186,14 @@ export async function getFlashScoreMatchesRaw(
                 headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
                 debugTag: 'MatchesListRaw',
                 silent: true,
-                cacheTtl: dynamicTtl
+                cacheTtl: 0
             });
 
-            // Store in cache
             if (data) {
-                memoryCache.set(cacheKey, data, dynamicTtl);
+                const matchCount = countFlashScoreRawMatches(data);
+                if (matchCount > 0) {
+                    memoryCache.set(cacheKey, data, dynamicTtl);
+                }
             }
 
             return data;
@@ -163,6 +205,18 @@ export async function getFlashScoreMatchesRaw(
 
     inflightRequests.set(cacheKey, promise);
     return promise;
+}
+
+async function getFlashScoreMatchesRawWithEmptyRetry(
+    dayOffset: number,
+    sportId: string | number,
+    timeZone?: string,
+): Promise<any> {
+    const first = await getFlashScoreMatchesRaw(dayOffset, sportId, timeZone);
+    if (countFlashScoreRawMatches(first) > 0) return first;
+
+    await delay(150);
+    return getFlashScoreMatchesRaw(dayOffset, sportId, timeZone, { bypassCache: true });
 }
 
 // formatDateKey is now imported from @/lib/timezone
@@ -185,18 +239,15 @@ export async function getFlashScoreMatches(
 
     // Calculate day offset using timezone-aware dates so that "today" is
     // correctly resolved in the user's timezone, not in UTC.
-    const todayKey = formatDateKey(new Date(), timeZone);
-    const todayMs = new Date(todayKey + 'T00:00:00Z').getTime();
-    const targetMs = new Date(targetDateKey + 'T00:00:00Z').getTime();
-    const dayOffset = Math.round((targetMs - todayMs) / 86400000);
+    const dayOffset = getDayOffsetForDateKey(targetDateKey, timeZone);
 
     // Fetch the target day + one adjacent day to catch matches near the
     // UTC midnight boundary that belong to a different local day.
     // e.g. 00:00 UTC = 21:00 UTC-3 (previous day in Argentina).
     const adjacentOffset = getAdjacentDayOffset(timeZone);
-    const offsets = [dayOffset];
+    const offsets = isMatchesListDayOffsetSupported(dayOffset) ? [dayOffset] : [];
     const adj = dayOffset + adjacentOffset;
-    if (adj >= -7 && adj <= 7) offsets.push(adj);
+    if (isMatchesListDayOffsetSupported(adj)) offsets.push(adj);
 
     // When the caller requests generic 'rugby', fetch both Rugby Union (8) and
     // Rugby League (19) in parallel so that both appear on the same page.
@@ -206,7 +257,7 @@ export async function getFlashScoreMatches(
             : offsets.map(o => [o, sportId] as [number, string]);
 
     const results = await Promise.all(
-        rawFetches.map(([o, sid]) => getFlashScoreMatchesRaw(o, sid, timeZone))
+        rawFetches.map(([o, sid]) => getFlashScoreMatchesRawWithEmptyRetry(o, sid, timeZone))
     );
 
     let allMatches: Match[] = [];
@@ -215,7 +266,7 @@ export async function getFlashScoreMatches(
     results.forEach((data, idx) => {
         if (data == null) return;
         const effectiveSportId = rawFetches[idx][1];
-        const tournaments = Array.isArray(data) ? data : (data.DATA || data.data || []);
+        const tournaments = getFlashScoreRawTournamentList(data);
 
         tournaments.forEach((tournament: any) => {
             const leagueName = tournament.name || tournament.league_name || 'Unknown League';

@@ -21,14 +21,12 @@ export default function Header() {
     const router = useRouter();
     const pathname = usePathname();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-    const [hasMounted, setHasMounted] = useState(false);
+    const [hasHydrated, setHasHydrated] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        setHasMounted(true);
+        setHasHydrated(true);
     }, []);
-
-    const displayUser = hasMounted ? user : null;
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -126,6 +124,7 @@ export default function Header() {
         );
     }, [pathname]);
 
+    const displayUser = hasHydrated ? user : null;
     const adminPanel = resolveAdminPanel(displayUser?.role, displayUser?.memberships);
     const canSeeProde = true;
     const isNewsRoute = pathname?.startsWith('/noticias') ?? false;
@@ -142,8 +141,9 @@ export default function Header() {
         return (
             <header className="g22-header">
                 <div className="g22-header-inner">
-                    <Link href="/" className="g22-logo">
-                        G22<span>Scores</span>
+                    <Link href="/" className="g22-logo" aria-label="G22 Scores">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/header-logo.png" alt="G22 Scores" className="g22-logo-img" />
                     </Link>
 
                     <div className="g22-header-center-zone" />
@@ -160,8 +160,9 @@ export default function Header() {
         <header className="g22-header">
             <div className="g22-header-inner">
                 {/* LOGO: Left Zone */}
-                <Link href="/" className="g22-logo">
-                    G22<span>Scores</span>
+                <Link href="/" className="g22-logo" aria-label="G22 Scores">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/header-logo.png" alt="G22 Scores" className="g22-logo-img" />
                 </Link>
 
                 {/* BREADCRUMB: Center Zone (Contextual) */}

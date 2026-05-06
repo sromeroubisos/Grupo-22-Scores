@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Calendar, ArrowLeft } from 'lucide-react';
 import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
@@ -84,6 +84,10 @@ function sportMatchesSelection(clubSport: string | null | undefined, selectedSpo
   const normalizedClubSport = normalizeSportValue(clubSport);
   if (!normalizedClubSport) return false;
   return getSportVariants(selectedSportId).includes(normalizedClubSport);
+}
+
+function isPlayoffPhaseType(phaseType: string | null | undefined) {
+  return phaseType === 'playoff' || phaseType === 'knockout';
 }
 
 // Helpers for date conversion
@@ -196,7 +200,7 @@ export default function CreateMatchPage() {
     }
   };
 
-  const loadTournamentParticipants = async (id: string) => {
+  const loadTournamentParticipants = useCallback(async (id: string) => {
     try {
       const tournament = tournaments.find(t => t.id === id);
       const isExternal = tournament?.type === 'external' || id.startsWith('fs-');
@@ -224,7 +228,7 @@ export default function CreateMatchPage() {
       console.error('Error loading tournament participants:', error);
       setTournamentParticipants([]);
     }
-  };
+  }, [tournaments]);
 
   const loadTournamentStructure = async (id: string) => {
     try {
@@ -369,7 +373,7 @@ export default function CreateMatchPage() {
     } else {
       setTournamentParticipants([]);
     }
-  }, [formData.tournamentId, isFriendly]);
+  }, [formData.tournamentId, isFriendly, loadTournamentParticipants]);
 
   useEffect(() => {
     if (formData.tournamentId && !isFriendly) {
@@ -379,7 +383,7 @@ export default function CreateMatchPage() {
       setTournamentRounds([]);
       setTournamentGroups([]);
       setFormData((prev) => {
-        if (!prev.phase && !prev.roundId && !prev.groupId) {
+        if (!prev.phase && !prev.roundId && !prev.round && !prev.groupId) {
           return prev;
         }
 
@@ -387,6 +391,7 @@ export default function CreateMatchPage() {
           ...prev,
           phase: '',
           roundId: '',
+          round: '',
           groupId: '',
         };
       });
@@ -477,6 +482,8 @@ export default function CreateMatchPage() {
   const availableRounds = tournamentRounds.filter((round) => round.phaseId === formData.phase);
   const availableGroups = tournamentGroups.filter((group) => group.phaseId === formData.phase);
   const selectedTournament = tournaments.find((t) => t.id === formData.tournamentId) || null;
+  const selectedPhase = tournamentPhases.find((phase) => phase.id === formData.phase) || null;
+  const selectedPhaseRequiresDefinedStage = !isFriendly && isPlayoffPhaseType(selectedPhase?.phase_type);
   const selectedFriendlySport = ACTIVE_SPORTS.find((sport) => sport.id === formData.sportId) || null;
   const availableFriendlyClubs = (() => {
     if (!formData.sportId) return [];
@@ -526,6 +533,12 @@ export default function CreateMatchPage() {
         return;
       }
 
+      if (selectedPhaseRequiresDefinedStage && !formData.roundId) {
+        alert('Selecciona una etapa de eliminacion definida para esta fase playoff.');
+        setLoading(false);
+        return;
+      }
+
       const isoDate = formData.date;
       const dateTime = combineLocalDateTimeToUtcIso(isoDate, formData.time, APP_TIMEZONE);
       if (!dateTime) {
@@ -538,7 +551,7 @@ export default function CreateMatchPage() {
         sportId: isFriendly ? formData.sportId : null,
         phaseId: isFriendly ? null : (formData.phase || null),
         roundId: isFriendly ? null : (formData.roundId || null),
-        roundLabel: isFriendly ? null : (formData.round.trim() || null),
+        roundLabel: isFriendly || selectedPhaseRequiresDefinedStage ? null : (formData.round.trim() || null),
         groupId: isFriendly ? null : (formData.groupId || null),
         category: formData.category.trim() || null,
         homeClubId: formData.homeClubId,
@@ -664,7 +677,7 @@ export default function CreateMatchPage() {
             <label>Torneo / Liga</label>
             <CustomSelect
               value={formData.tournamentId}
-              onChange={(val) => setFormData({ ...formData, tournamentId: val, phase: '', roundId: '', groupId: '' })}
+              onChange={(val) => setFormData({ ...formData, tournamentId: val, phase: '', roundId: '', round: '', groupId: '' })}
               disabled={isFriendly}
               placeholder="Seleccionar torneo..."
               options={tournaments.map(t => ({
@@ -689,6 +702,7 @@ export default function CreateMatchPage() {
                         sportId: prev.sportId || selectedTournament?.sportId || '',
                         phase: '',
                         roundId: '',
+                        round: '',
                         groupId: '',
                       }));
                     }
@@ -726,7 +740,7 @@ export default function CreateMatchPage() {
             <label>Fase</label>
             <CustomSelect
               value={formData.phase}
-              onChange={(val) => setFormData({ ...formData, phase: val, roundId: '', groupId: '' })}
+              onChange={(val) => setFormData({ ...formData, phase: val, roundId: '', round: '', groupId: '' })}
               disabled={isFriendly || !formData.tournamentId}
               placeholder={formData.tournamentId ? 'Seleccionar fase...' : 'Selecciona un torneo'}
               options={[
@@ -739,14 +753,19 @@ export default function CreateMatchPage() {
             />
           </div>
           <div className="cell col-4">
-            <label>Jornada existente</label>
+            <label>{selectedPhaseRequiresDefinedStage ? 'Etapa de eliminacion' : 'Jornada existente'}</label>
             <CustomSelect
               value={formData.roundId}
               onChange={(val) => setFormData({ ...formData, roundId: val })}
               disabled={isFriendly || !formData.phase}
-              placeholder={!formData.phase ? 'Selecciona una fase' : 'Crear o usar etiqueta libre'}
+              placeholder={!formData.phase ? 'Selecciona una fase' : selectedPhaseRequiresDefinedStage ? 'Seleccionar etapa...' : 'Crear o usar etiqueta libre'}
               options={[
-                { value: '', label: availableRounds.length > 0 ? 'Crear o usar etiqueta libre' : 'Sin jornadas cargadas' },
+                {
+                  value: '',
+                  label: selectedPhaseRequiresDefinedStage
+                    ? (availableRounds.length > 0 ? 'Seleccionar etapa...' : 'Sin etapas definidas')
+                    : (availableRounds.length > 0 ? 'Crear o usar etiqueta libre' : 'Sin jornadas cargadas'),
+                },
                 ...availableRounds.map((round) => ({
                   value: round.id,
                   label: round.name,
@@ -758,10 +777,10 @@ export default function CreateMatchPage() {
             <label>Jornada / Etiqueta</label>
             <input
               type="text"
-              placeholder="Ej: Fecha 14"
+              placeholder={selectedPhaseRequiresDefinedStage ? 'Se usa la etapa seleccionada' : 'Ej: Fecha 14'}
               value={formData.round}
               onChange={(e) => setFormData({ ...formData, round: e.target.value })}
-              disabled={isFriendly || !formData.phase}
+              disabled={isFriendly || !formData.phase || selectedPhaseRequiresDefinedStage}
             />
           </div>
           <div className="cell col-6">

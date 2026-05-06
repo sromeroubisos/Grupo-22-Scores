@@ -147,6 +147,7 @@ type TournamentMatchRow = Record<string, unknown> & {
     status: string | null;
     score: unknown;
     events: unknown[] | null;
+    lineups: unknown;
     venue: string | null;
     round_label: string | null;
     notes: string | null;
@@ -643,7 +644,7 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
         let matchesQueryWithEvents = supabase
             .from('matches')
             .select(`
-                id, date_time, status, score, events, venue, round_label, notes,
+                id, date_time, status, score, events, lineups, venue, round_label, notes,
                 home_club_id, away_club_id,
                 phase_id, group_id, round_uuid,
                 home_base_points, away_base_points,
@@ -656,7 +657,7 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
         let matchesQueryWithoutEvents = supabase
             .from('matches')
             .select(`
-                id, date_time, status, score, venue, round_label, notes,
+                id, date_time, status, score, lineups, venue, round_label, notes,
                 home_club_id, away_club_id,
                 phase_id, group_id, round_uuid,
                 home_base_points, away_base_points,

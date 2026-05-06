@@ -7,16 +7,7 @@ import {
     getSeasonsByTournament, 
     getFixturesByTournamentOrSeason 
 } from '@/lib/services/flashscore';
-import {
-    getRugbyApiSportsCountries,
-    getRugbyApiSportsGames,
-    getRugbyApiSportsLeagues,
-} from '@/lib/services/rugbyApiSports';
-import {
-    getTournamentRugbyApiSportsConfig,
-    isRugbySport,
-    withRugbyApiSportsRuleset,
-} from '@/lib/externalProviderPolicy';
+import { isRugbySport } from '@/lib/externalProviderPolicy';
 import { resolveTournamentCountryId, resolveTournamentCountryLabel } from '@/lib/data/countries';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
@@ -37,14 +28,6 @@ export interface ExternalTournament {
     url?: string;
     status: 'api_only' | 'available_for_import' | 'linked' | 'stale';
     internal_id?: string;
-}
-
-function parseRugbyLeagueId(value: string | number | null | undefined) {
-    if (value === null || value === undefined) return null;
-    const raw = String(value).trim();
-    const prefixedMatch = /^ras-league-(\d+)$/i.exec(raw);
-    if (prefixedMatch) return prefixedMatch[1];
-    return null;
 }
 
 export class TournamentIngestionService {
@@ -78,20 +61,6 @@ export class TournamentIngestionService {
      * Get entities (countries + continentals 1-8)
      */
     static async getEntities(sportId: string | number) {
-        if (isRugbySport(sportId)) {
-            const countries = await getRugbyApiSportsCountries();
-            const mappedCountries: ExternalEntity[] = countries.map((country: any) => ({
-                id: String(country.id),
-                name: country.name,
-                type: 'country',
-            }));
-
-            return [
-                { id: 'all', name: 'Todos los paises', type: 'continental' },
-                ...mappedCountries,
-            ];
-        }
-
         const countries = await getCountriesBySport(sportId);
         
         // Manual continental entities (IDs 1-8 frequently used by FL for International, Europe, etc.)
@@ -124,64 +93,6 @@ export class TournamentIngestionService {
      * Get tournaments and match them with internal ones
      */
     static async getTournaments(sportId: string | number, entityId: string | number) {
-        if (isRugbySport(sportId)) {
-            const query = String(entityId) === 'all'
-                ? {}
-                : /^\d+$/.test(String(entityId))
-                    ? { country_id: entityId }
-                    : { country: String(entityId) };
-            const externalTournaments = await getRugbyApiSportsLeagues(query as any);
-
-            const supabase = await createClient();
-            const { data: internalTournaments } = await supabase
-                .from('tournaments')
-                .select('id, name, slug, external_id, ruleset, sport_id');
-
-            const slugMap = new Map<string, any>();
-            const nameMap = new Map<string, any>();
-            const externalIdMap = new Map<string, any>();
-
-            (internalTournaments || []).filter((it: any) => isRugbySport(it?.sport_id)).forEach((it: any) => {
-                if (it.slug) slugMap.set(it.slug, it);
-                if (it.external_id) externalIdMap.set(String(it.external_id), it);
-                const linkedConfig = getTournamentRugbyApiSportsConfig(it);
-                if (linkedConfig?.league_id != null) {
-                    externalIdMap.set(String(linkedConfig.league_id), it);
-                }
-                nameMap.set(this.normalizeName(it.name), it);
-            });
-
-            return externalTournaments.map((league: any) => {
-                const matched =
-                    externalIdMap.get(String(league.id)) ||
-                    slugMap.get(normalizeSlug(league.name)) ||
-                    nameMap.get(this.normalizeName(league.name));
-                const seasons = Array.isArray(league.seasons)
-                    ? [...league.seasons].sort((left: any, right: any) => Number(right?.season || 0) - Number(left?.season || 0))
-                    : [];
-                const currentSeason = seasons.find((season: any) => season.current === true)?.season ?? seasons[0]?.season ?? null;
-
-                return {
-                    id: `ras-league-${league.id}`,
-                    name: league.name,
-                    original_name: league.name,
-                    country_id: String(league.country?.id || entityId || ''),
-                    country_name: league.country?.name || '',
-                    sport_id: 'rugby',
-                    logo_url: league.logo || '',
-                    url: null,
-                    current_season: currentSeason,
-                    seasons: seasons.map((season: any) => ({
-                        tournament_stage_id: String(season.season),
-                        tournament_stage_name: String(season.season),
-                        current: season.current === true,
-                    })),
-                    status: matched ? 'linked' : 'available_for_import',
-                    internal_id: matched?.id,
-                };
-            });
-        }
-
         const externalData = await getTournamentsBySportAndEntity(sportId, entityId);
         const externalTournaments = externalData?.data || [];
 
@@ -193,7 +104,6 @@ export class TournamentIngestionService {
             .select('id, name, slug')
             .eq('sport_id', sportId);
 
-        const internalMap = new Map<string, any>();
         const slugMap = new Map<string, any>();
         const nameMap = new Map<string, any>();
         const externalIdMap = new Map<string, any>();
@@ -235,21 +145,6 @@ export class TournamentIngestionService {
      * Get seasons for a tournament
      */
     static async getSeasons(tournamentId: string) {
-        const rugbyLeagueId = parseRugbyLeagueId(tournamentId);
-        if (rugbyLeagueId) {
-            const [league] = await getRugbyApiSportsLeagues({ id: rugbyLeagueId });
-            if (league) {
-                return (league.seasons || [])
-                    .slice()
-                    .sort((left, right) => right.season - left.season)
-                    .map((season) => ({
-                        tournament_stage_id: String(season.season),
-                        tournament_stage_name: String(season.season),
-                        current: season.current === true,
-                    }));
-            }
-        }
-
         const data = await getSeasonsByTournament(tournamentId);
         return data?.data || [];
     }
@@ -258,36 +153,6 @@ export class TournamentIngestionService {
      * Preview fixtures for a tournament/season
      */
     static async previewFixtures(tournamentId: string, seasonId?: string) {
-        const rugbyLeagueId = parseRugbyLeagueId(tournamentId);
-        if (rugbyLeagueId) {
-            let finalSeasonId = seasonId;
-
-            if (!finalSeasonId) {
-                const seasons = await this.getSeasons(tournamentId);
-                if (seasons.length > 0) {
-                    finalSeasonId = String(seasons[0].tournament_stage_id);
-                }
-            }
-
-            if (!finalSeasonId) return [];
-
-            const games = await getRugbyApiSportsGames({
-                league: rugbyLeagueId,
-                season: finalSeasonId,
-                timezone: 'America/Argentina/Buenos_Aires',
-            });
-
-            return games.map((game: any) => ({
-                id: String(game.id),
-                home_team: game.teams?.home?.name || 'Local',
-                away_team: game.teams?.away?.name || 'Visitante',
-                date: game.date,
-                score: game.scores?.home != null && game.scores?.away != null
-                    ? `${game.scores.home}-${game.scores.away}`
-                    : undefined,
-            }));
-        }
-
         let finalSeasonId = seasonId;
 
         // If no seasonId provided, get seasons and take the first (usually current)
@@ -317,21 +182,6 @@ export class TournamentIngestionService {
      */
     static async createFromExternal(externalTournament: any, internalParams: any) {
         const supabase = await createClient();
-        const isRugbyExternalTournament = isRugbySport(externalTournament?.sport_id);
-        const rugbyLeagueId =
-            parseRugbyLeagueId(externalTournament?.id) ||
-            (/^\d+$/.test(String(externalTournament?.id || '')) ? String(externalTournament.id) : null);
-        const rugbyRuleset = isRugbyExternalTournament
-            ? withRugbyApiSportsRuleset(undefined, {
-                league_id: rugbyLeagueId != null ? Number(rugbyLeagueId) : undefined,
-                season: externalTournament.current_season != null ? Number(externalTournament.current_season) : undefined,
-                country_id: externalTournament.country_id != null ? Number(externalTournament.country_id) : undefined,
-                league_name: externalTournament.name || null,
-                country_name: externalTournament.country_name || null,
-                league_logo: externalTournament.logo_url || null,
-                resolved_at: new Date().toISOString(),
-            })
-            : undefined;
         const resolvedCountryId =
             resolveTournamentCountryId(externalTournament.country_name) ||
             resolveTournamentCountryId(externalTournament.country_id);
@@ -365,8 +215,8 @@ export class TournamentIngestionService {
             country_id: resolvedCountryId,
             logo_url: externalTournament.logo_url,
             url: externalTournament.url || null,
-            external_id: rugbyLeagueId || externalTournament.id || null,
-            ruleset: rugbyRuleset,
+            external_id: externalTournament.id || null,
+            ruleset: undefined,
             is_visible: true,
             priority: internalParams.priority ?? 0
         };
@@ -378,7 +228,8 @@ export class TournamentIngestionService {
             .single();
 
         if (error && isMissingColumnError(error, 'priority')) {
-            const { priority: _ignoredPriority, ...payloadWithoutPriority } = payload;
+            const payloadWithoutPriority = { ...payload };
+            delete (payloadWithoutPriority as Partial<typeof payload>).priority;
             ({ data, error } = await supabase
                 .from('tournaments')
                 .insert(payloadWithoutPriority)
@@ -395,28 +246,12 @@ export class TournamentIngestionService {
      */
     static async linkTournament(externalId: string, internalId: string, externalUrl?: string) {
         const supabase = await createClient();
-        const rugbyLeagueId =
-            parseRugbyLeagueId(externalId) ||
-            (/^\d+$/.test(String(externalId || '')) ? String(externalId) : null);
-
-        const { data: existingTournament } = await supabase
-            .from('tournaments')
-            .select('sport_id, ruleset')
-            .eq('id', internalId)
-            .maybeSingle();
-
         const updatePayload: Record<string, unknown> = {
-            external_id: rugbyLeagueId || externalId,
+            external_id: externalId,
             updated_at: new Date().toISOString(),
         };
         if (externalUrl) {
             updatePayload.url = externalUrl;
-        }
-        if (isRugbySport((existingTournament as any)?.sport_id)) {
-            updatePayload.ruleset = withRugbyApiSportsRuleset((existingTournament as any)?.ruleset, {
-                league_id: rugbyLeagueId != null ? Number(rugbyLeagueId) : undefined,
-                resolved_at: new Date().toISOString(),
-            });
         }
 
         const { error } = await supabase

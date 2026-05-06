@@ -12,7 +12,8 @@ export type ExportDesignTypographyContextId =
     | 'standings'
     | 'playerStats'
     | 'playoffBracket'
-    | 'lineups';
+    | 'lineups'
+    | 'teamOfWeek';
 
 export type ExportDesignElementDimensionContextId = Exclude<ExportDesignTypographyContextId, 'global'>;
 export type ExportDesignElementDimensionItemId = 'title' | 'tournamentLogo' | 'teamLogo' | 'teamName' | 'score' | 'rowHeight';
@@ -224,6 +225,17 @@ export const EXPORT_DESIGN_TYPOGRAPHY_CONTEXTS: TypographyContextDefinition[] = 
             { id: 'lineups-display', role: 'Nombre de equipo', usage: 'Nombre del equipo en la pieza.', previewText: 'Club A', slot: 'display' },
         ],
     },
+    {
+        id: 'teamOfWeek',
+        label: 'Equipo de la semana',
+        description: 'Configura el afiche Starting XV con escudos de equipo por jugador.',
+        items: [
+            { id: 'team-week-score', role: 'Titulo principal', usage: 'Titular grande del afiche de seleccion semanal.', previewText: 'Starting XV', slot: 'score' },
+            { id: 'team-week-body', role: 'Nombres de jugadores', usage: 'Rotulos de cada jugador seleccionado.', previewText: '1. Juan Perez', slot: 'body' },
+            { id: 'team-week-mono', role: 'Metadata y clubes', usage: 'Competencia, sede, fecha y clubes dentro de cada bloque.', previewText: 'Fecha 8 // Club A', slot: 'mono' },
+            { id: 'team-week-display', role: 'Escudos y equipos', usage: 'Identidad de equipos y seleccionados destacados.', previewText: 'Club A', slot: 'display' },
+        ],
+    },
 ];
 
 export const EXPORT_DESIGN_ELEMENT_DIMENSION_CONTEXTS: ElementDimensionContextDefinition[] = [
@@ -342,6 +354,19 @@ export const EXPORT_DESIGN_ELEMENT_DIMENSION_CONTEXTS: ElementDimensionContextDe
             { id: 'teamName', label: 'Nombre equipo', width: 30, offsetY: 0, note: 'Tamano proporcional y eje Y del nombre del equipo.' },
             { id: 'score', label: 'Numeros / dorsales', width: 32, offsetY: 0, note: 'Tamano proporcional y eje Y de dorsales y cifras.' },
             { id: 'rowHeight', label: 'Fila de jugadores', width: 32, offsetY: 0, note: 'Escala de filas de jugadores y desplazamiento vertical del bloque.' },
+        ],
+    },
+    {
+        id: 'teamOfWeek',
+        label: 'Equipo de la semana',
+        description: 'Escala y posicion vertical del afiche de equipo semanal.',
+        items: [
+            { id: 'title', label: 'Titulo equipo semanal', width: 86, offsetY: 0, note: 'Tamano proporcional del titulo principal.' },
+            { id: 'tournamentLogo', label: 'Logo competencia', width: 74, offsetY: 0, note: 'Tamano proporcional del logo de la competencia.' },
+            { id: 'teamLogo', label: 'Escudo jugador', width: 124, offsetY: 0, note: 'Tamano proporcional del escudo usado en lugar de foto.' },
+            { id: 'teamName', label: 'Nombre jugador', width: 16, offsetY: 0, note: 'Tamano proporcional de nombres debajo de cada bloque.' },
+            { id: 'score', label: 'Puntaje', width: 16, offsetY: 0, note: 'Tamano proporcional del puntaje dentro de cada bloque.' },
+            { id: 'rowHeight', label: 'Bloque visual', width: 274, offsetY: 0, note: 'Alto proporcional de cada pieza de la grilla.' },
         ],
     },
 ];

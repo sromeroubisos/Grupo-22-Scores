@@ -1,6 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
+import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
+
+type ParticipantScopeRow = {
+    id?: unknown;
+    club_id?: unknown;
+};
+
+function normalizeScopeId(value: unknown): string {
+    return String(value ?? '').trim();
+}
+
+function buildParticipantTeamIdSet(participants: ParticipantScopeRow[]): Set<string> {
+    return new Set(
+        participants
+            .map((participant) => normalizeScopeId(participant.club_id ?? participant.id))
+            .filter(Boolean),
+    );
+}
+
+function filterStandingRowsForParticipantScope<TRow extends { club_id?: unknown }>(
+    rows: TRow[],
+    participants: ParticipantScopeRow[],
+): TRow[] {
+    const allowedTeamIds = buildParticipantTeamIdSet(participants);
+    if (allowedTeamIds.size === 0) return [];
+
+    return rows.filter((row) => allowedTeamIds.has(normalizeScopeId(row.club_id)));
+}
 
 export async function GET(
     request: NextRequest,
@@ -11,6 +39,10 @@ export async function GET(
         const searchParams = request.nextUrl.searchParams;
         const phaseId = searchParams.get('phaseId');
         const groupId = searchParams.get('groupId');
+        const requestedSeasonId =
+            searchParams.get('seasonId') ||
+            searchParams.get('season_id') ||
+            searchParams.get('season');
 
         if (!phaseId) {
             return NextResponse.json({ error: 'phaseId is required' }, { status: 400 });
@@ -18,7 +50,24 @@ export async function GET(
 
         const supabase = await createClient();
 
-        // 1. Fetch persisted standings
+        // 1. Fetch phase/tournament context for season and rules
+        const [{ data: phase }, { data: tournament }] = await Promise.all([
+            supabase
+                .from('tournament_phases')
+                .select('settings, season_id')
+                .eq('id', phaseId)
+                .eq('tournament_id', tournamentId)
+                .single(),
+            supabase
+                .from('tournaments')
+                .select('ruleset, current_season_id')
+                .eq('id', tournamentId)
+                .single(),
+        ]);
+
+        const scopedSeasonId = requestedSeasonId ?? phase?.season_id ?? tournament?.current_season_id ?? null;
+
+        // 2. Fetch persisted standings and the authoritative phase roster
         let query = supabase
             .from('tournament_standings')
             .select(`
@@ -40,33 +89,39 @@ export async function GET(
             .eq('phase_id', phaseId)
             .order('position', { ascending: true });
 
+        if (scopedSeasonId) {
+            query = query.eq('season_id', scopedSeasonId);
+        }
+
         if (groupId) {
             query = query.eq('group_id', groupId);
         } else {
             query = (query as any).is('group_id', null);
         }
 
-        const { data: standings, error: standingsError } = await query;
+        const [
+            { data: standings, error: standingsError },
+            participantScope,
+        ] = await Promise.all([
+            query,
+            loadPhaseScopedParticipants(supabase, {
+                tournamentId,
+                phaseId,
+                groupId,
+                seasonId: scopedSeasonId,
+            }),
+        ]);
 
         if (standingsError) throw standingsError;
 
-        // 2. Fetch phase rules for context (lite version)
-        const { data: phase } = await supabase
-            .from('tournament_phases')
-            .select('settings')
-            .eq('id', phaseId)
-            .single();
-
-        const { data: tournament } = await supabase
-            .from('tournaments')
-            .select('ruleset')
-            .eq('id', tournamentId)
-            .single();
-
         const resolvedRules = StandingsEngine.resolveRules(phase?.settings, tournament?.ruleset);
+        const scopedStandings = filterStandingRowsForParticipantScope(
+            (standings || []) as any[],
+            participantScope.participants || [],
+        );
 
         // 3. Map to expected frontend structure
-        const table = (standings || []).map(row => ({
+        const table = scopedStandings.map(row => ({
             teamId: row.club_id,
             team: {
                 name: row.stats?.team_name || 'Desconocido',
@@ -88,7 +143,7 @@ export async function GET(
             status: row.stats?.status || null
         }));
 
-        const lastCalculatedAt = standings?.[0]?.last_updated ?? null;
+        const lastCalculatedAt = scopedStandings?.[0]?.last_updated ?? null;
 
         return NextResponse.json({
             ok: true,

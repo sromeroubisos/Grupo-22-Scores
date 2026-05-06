@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import styles from '../login.module.css'
 import { sanitizeReturnTo } from '../redirects'
@@ -41,6 +41,7 @@ export default function LocalDevAccessPanel({ onError }: { onError: (msg: string
     const searchParams = useSearchParams()
     const [entries, setEntries] = useState<LocalLoginAccessEntry[]>([])
     const [pendingId, setPendingId] = useState<string | null>(null)
+    const pendingRef = useRef(false)
 
     const fallbackReturnTo = useMemo(
         () => sanitizeReturnTo(searchParams.get('returnTo'), searchParams.get('roleIntent')),
@@ -91,6 +92,7 @@ export default function LocalDevAccessPanel({ onError }: { onError: (msg: string
     }
 
     const handleClick = async (entry: LocalLoginAccessEntry) => {
+        if (pendingRef.current) return
         onError(null)
 
         if (entry.kind === 'href') {
@@ -98,6 +100,7 @@ export default function LocalDevAccessPanel({ onError }: { onError: (msg: string
             return
         }
 
+        pendingRef.current = true
         setPendingId(entry.id)
         try {
             await signInWithPasswordAndRedirect({
@@ -106,9 +109,9 @@ export default function LocalDevAccessPanel({ onError }: { onError: (msg: string
                 returnTo: sanitizeReturnTo(entry.returnTo ?? fallbackReturnTo, entry.roleIntent ?? searchParams.get('roleIntent')),
             })
         } catch (error) {
-            console.error('[LocalDevAccessPanel] Login error:', error)
             onError(error instanceof Error ? error.message : 'Ocurrio un error al iniciar sesion')
         } finally {
+            pendingRef.current = false
             setPendingId(null)
         }
     }

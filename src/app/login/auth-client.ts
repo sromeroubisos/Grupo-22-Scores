@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { getAuthErrorMessage } from '@/lib/auth/errors'
 
 export function normalizeEmail(value: string): string {
     return value.trim().toLowerCase()
@@ -25,23 +26,7 @@ export async function signInWithPasswordAndRedirect(input: {
     })
 
     if (error) {
-        if (
-            error.message.includes('supabase_auth_unreachable')
-            || error.message.includes('Supabase auth request failed')
-            || error.message.includes('Failed to fetch')
-        ) {
-            throw new Error('No pudimos contactar el servicio de autenticacion. Intenta de nuevo en unos segundos.')
-        }
-
-        if (error.message.includes('Invalid login credentials')) {
-            throw new Error('Credenciales incorrectas. Verifica tu email y contrasena.')
-        }
-
-        if (error.message.includes('Email not confirmed')) {
-            throw new Error('Tu email todavia no fue confirmado. Revisa tu correo y abre el enlace de confirmacion antes de iniciar sesion.')
-        }
-
-        throw error
+        throw new Error(getAuthErrorMessage(error, 'No pudimos iniciar sesion. Intenta nuevamente.'))
     }
 
     console.log('[login] Login successful for:', data.user?.email)

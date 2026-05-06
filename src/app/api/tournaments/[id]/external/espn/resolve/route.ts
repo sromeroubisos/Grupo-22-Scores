@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import {
     getTournamentEspnAmericanFootballConfig,
     getTournamentEspnMotorsportConfig,
@@ -30,7 +30,7 @@ export async function POST(
             return NextResponse.json({ error: 'league_slug is required' }, { status: 400 });
         }
 
-        const supabase = await createClient();
+        const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
         const { data: existing, error: readError } = await supabase
             .from('tournaments')
             .select('ruleset, sport_id, sport')
@@ -90,7 +90,7 @@ export async function POST(
                 : getTournamentEspnMotorsportConfig({ ...existing, ruleset: mergedRuleset }),
             league,
         });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    } catch (error: unknown) {
+        return tournamentApiErrorResponse(error);
     }
 }

@@ -1,31 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiErrorMessage, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { FixtureService } from '@/lib/services/fixtureService';
+
+async function assertRoundBelongsToTournament(supabase: any, roundId: string, tournamentId: string) {
+    const { data: round, error: roundError } = await supabase
+        .from('tournament_rounds')
+        .select('id, phase_id')
+        .eq('id', roundId)
+        .single();
+
+    if (roundError || !round) {
+        return false;
+    }
+
+    const { data: phase, error: phaseError } = await supabase
+        .from('tournament_phases')
+        .select('id')
+        .eq('id', round.phase_id)
+        .eq('tournament_id', tournamentId)
+        .single();
+
+    return !phaseError && Boolean(phase);
+}
 
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string, roundId: string }> }
 ) {
     try {
-        await requireAdminApiUser();
-        const { roundId } = await params;
+        void request;
+        const { id: tournamentId, roundId } = await params;
+        const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
 
-        // The FixtureService doesn't have a direct 'resetRound' yet, 
-        // but we can either implement it there or use clearMatchesForRound if it exists.
-        // Looking at the context, we'll need to ensure FixtureService can handle this.
-        // For now, let's assume it has something similar or we'll need to add it.
-
-        // Actually, let's check FixtureService for available methods.
+        const roundBelongsToTournament = await assertRoundBelongsToTournament(supabase, roundId, tournamentId);
+        if (!roundBelongsToTournament) {
+            return NextResponse.json({ error: 'Round not found in this tournament' }, { status: 404 });
+        }
 
         const result = await FixtureService.resetRound(roundId);
 
         return NextResponse.json({ success: result });
     } catch (error: unknown) {
-        const message = getApiErrorMessage(error);
         console.error('Error in POST /api/tournaments/[id]/fixture/rounds/[roundId]/reset:', error);
-        return NextResponse.json(
-            { error: message },
-            { status: getApiErrorStatus(error) }
-        );
+        return tournamentApiErrorResponse(error);
     }
 }
