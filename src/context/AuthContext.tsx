@@ -171,8 +171,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const activeProfileFetchRef = useRef<{ userId: string; startedAt: number } | null>(null);
     const lastAuthEventRef = useRef<{ event: AuthChangeEvent | 'INIT'; userId: string | null }>({
         event: 'INIT',
-        userId: null,
+        userId: initialCachedUser?.id ?? null,
     });
+    const authBootstrapCompleteRef = useRef(false);
 
     const trackAuthDuplicate = useCallback((step: string, metadata: Record<string, unknown> = {}) => {
         return warnIfDuplicateWindow(
@@ -376,6 +377,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (skipAuthBootstrap) {
             activeProfileFetchRef.current = null;
             lastAuthEventRef.current = { event: 'INIT', userId: null };
+            authBootstrapCompleteRef.current = true;
             setUser(null);
             setIsLoading(false);
 
@@ -384,6 +386,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             };
         }
 
+        authBootstrapCompleteRef.current = false;
         const supabase = getSupabaseClient();
         logPerf(
             ['AUTH'],
@@ -418,9 +421,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 if (isMounted.current) {
                     if (session) {
                         console.log('[AuthContext] initAuth: Session found');
+                        lastAuthEventRef.current = { event: 'INITIAL_SESSION', userId: session.user.id };
                         await fetchAndSetUser(session.user);
                     } else {
                         console.log('[AuthContext] initAuth: No session');
+                        lastAuthEventRef.current = { event: 'INITIAL_SESSION', userId: null };
                         setPersistentUser(null);
                         setIsLoading(false);
                     }
@@ -432,6 +437,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     if (isMounted.current) {
                         setIsLoading(false);
                     }
+                    authBootstrapCompleteRef.current = true;
                     return;
                 }
                 console.error('[AuthContext] initAuth error:', err);
@@ -439,6 +445,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     setPersistentUser(null);
                     setIsLoading(false);
                 }
+            } finally {
+                authBootstrapCompleteRef.current = true;
             }
         };
 
@@ -470,24 +478,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             try {
                 if ((event as string) === 'INITIAL_SESSION') {
+                    lastAuthEventRef.current = {
+                        event,
+                        userId: session?.user?.id ?? null,
+                    };
                     return;
                 }
 
                 if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
                     if (session?.user) {
-                        console.log('[AuthContext] Event result: fetching user for event:', event);
                         const previousUserId = lastAuthEventRef.current.userId;
-                        fetchAndSetUser(session.user).catch((backgroundError: unknown) => {
-                            console.error('[AuthContext] Background fetchAndSetUser failed:', backgroundError);
-                        });
-                        // Refresh server-rendered data when the identity actually
-                        // changes (or we sign in for the first time). Skipping
-                        // when the same user is signed in avoids spurious data
-                        // re-fetches on tab focus/`USER_UPDATED` chatter.
-                        if (
+                        const isSameUser = previousUserId === session.user.id;
+                        const shouldFetchProfile = event === 'USER_UPDATED' || !isSameUser;
+                        const shouldRefreshServerData =
                             event === 'SIGNED_IN'
-                            && session.user.id !== previousUserId
-                        ) {
+                            && authBootstrapCompleteRef.current
+                            && !isSameUser;
+
+                        if (shouldFetchProfile) {
+                            console.log('[AuthContext] Event result: fetching user for event:', event);
+                            fetchAndSetUser(session.user).catch((backgroundError: unknown) => {
+                                console.error('[AuthContext] Background fetchAndSetUser failed:', backgroundError);
+                            });
+                        } else {
+                            setPersistentUser((prev) => {
+                                if (!prev || prev.id !== session.user.id) return prev;
+                                const nextAvatar = session.user.user_metadata?.avatar_url ?? prev.avatarUrl;
+                                if (prev.avatarUrl === nextAvatar) return prev;
+                                return { ...prev, avatarUrl: nextAvatar };
+                            });
+                        }
+
+                        // Refresh server-rendered data when the identity actually
+                        // changes after the initial auth bootstrap. Supabase can
+                        // emit SIGNED_IN while hydrating an existing browser
+                        // session, and refreshing during that window creates an
+                        // RSC refresh loop/flicker on desktop loads.
+                        if (shouldRefreshServerData) {
                             try { router.refresh(); } catch { /* router may be unavailable in tests */ }
                         }
                         lastAuthEventRef.current = { event, userId: session.user.id };
