@@ -2,10 +2,13 @@ import { createBrowserClient } from '@supabase/ssr'
 import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/perf/supabase'
 import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure'
 import {
+    createSupabaseAuthCookieChunks,
     getSupabaseAuthCookieOptions,
     getSupabaseAuthStorageKey,
     getSupabaseSharedCookieDomain,
     MAX_SUPABASE_AUTH_COOKIE_CHUNKS,
+    normalizeSupabaseAuthCookies,
+    SUPABASE_AUTH_COOKIE_MAX_AGE_SECONDS,
 } from '@/lib/supabase/auth-cookie'
 import type { LooseSupabaseClient } from './loose'
 
@@ -20,6 +23,12 @@ function expireBrowserCookie(name: string, domain?: string) {
     const secure = window.location.protocol === 'https:' ? '; Secure' : ''
     const cookieDomain = domain ? `; Domain=${domain}` : ''
     document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax${cookieDomain}${secure}`
+}
+
+function setBrowserCookie(name: string, value: string, domain?: string) {
+    const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+    const cookieDomain = domain ? `; Domain=${domain}` : ''
+    document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${SUPABASE_AUTH_COOKIE_MAX_AGE_SECONDS}; Path=/; SameSite=Lax${cookieDomain}${secure}`
 }
 
 export function clearSupabaseBrowserSession() {
@@ -47,6 +56,77 @@ export function clearSupabaseBrowserSession() {
         expireBrowserCookie(name)
         if (domain) expireBrowserCookie(name, domain)
     })
+}
+
+function readBrowserCookies() {
+    if (typeof document === 'undefined' || !document.cookie) return []
+
+    return document.cookie
+        .split(';')
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .map((part) => {
+            const separatorIndex = part.indexOf('=')
+            const name = separatorIndex >= 0 ? part.slice(0, separatorIndex) : part
+            const rawValue = separatorIndex >= 0 ? part.slice(separatorIndex + 1) : ''
+            let value = rawValue
+            try {
+                value = decodeURIComponent(rawValue)
+            } catch {
+                value = rawValue
+            }
+            return { name, value }
+        })
+}
+
+function readRawAuthSessionCookie(cookies: Array<{ name: string; value: string }>, storageKey: string) {
+    const direct = cookies.find((cookie) => cookie.name === storageKey)?.value
+    if (direct) return direct
+
+    const chunks: string[] = []
+    for (let index = 0; index < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; index += 1) {
+        const chunk = cookies.find((cookie) => cookie.name === `${storageKey}.${index}`)?.value
+        if (!chunk) break
+        chunks.push(chunk)
+    }
+
+    return chunks.length ? chunks.join('') : null
+}
+
+function persistNormalizedBrowserSessionCookie(storageKey: string, value: string) {
+    const domain = getSupabaseSharedCookieDomain(window.location.hostname)
+    const cookieNames = [storageKey]
+
+    for (let index = 0; index < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; index += 1) {
+        cookieNames.push(`${storageKey}.${index}`)
+    }
+
+    cookieNames.forEach((name) => {
+        expireBrowserCookie(name)
+        if (domain) expireBrowserCookie(name, domain)
+    })
+
+    const chunks = createSupabaseAuthCookieChunks(storageKey, value)
+    chunks.forEach(({ name, value: chunkValue }) => {
+        setBrowserCookie(name, chunkValue, domain)
+    })
+}
+
+function normalizeSupabaseBrowserSessionCookie() {
+    if (typeof window === 'undefined') return
+
+    const storageKey = getSupabaseBrowserStorageKey()
+    if (!storageKey) return
+
+    const cookies = readBrowserCookies()
+    const rawSessionCookie = readRawAuthSessionCookie(cookies, storageKey)
+    if (!rawSessionCookie) return
+
+    const normalizedCookies = normalizeSupabaseAuthCookies(cookies)
+    const normalizedSessionCookie = readRawAuthSessionCookie(normalizedCookies, storageKey)
+    if (!normalizedSessionCookie || normalizedSessionCookie === rawSessionCookie) return
+
+    persistNormalizedBrowserSessionCookie(storageKey, normalizedSessionCookie)
 }
 
 function resolveRequestUrl(input: string | URL | Request): string {
@@ -104,6 +184,8 @@ function getRefreshReuseWindowMs(response: Response) {
 
 export function createClient() {
     if (client) return client
+
+    normalizeSupabaseBrowserSessionCookie()
 
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY

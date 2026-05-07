@@ -6,6 +6,9 @@ import {
     getSupabaseAuthCookieOptions,
     getSupabaseAuthStorageKey,
     MAX_SUPABASE_AUTH_COOKIE_CHUNKS,
+    normalizeSupabaseAuthCookies,
+    parseSupabaseAuthCookiePayload,
+    readSupabaseAuthSessionCookieValue,
 } from '@/lib/supabase/auth-cookie';
 
 const AUTH_REFRESH_TIMEOUT_MS = 2500;
@@ -180,35 +183,12 @@ function decodeBase64Url(value: string): string | null {
 }
 
 function readAuthCookieValue(request: NextRequest): string | null {
-    const baseName = getSupabaseAuthCookieBaseName();
-    if (!baseName) return null;
-
-    const direct = request.cookies.get(baseName)?.value;
-    if (direct) return direct;
-
-    // The cookie is chunked (.0, .1, ...) when it exceeds the browser's size limit.
-    const chunks: string[] = [];
-    for (let i = 0; i < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; i++) {
-        const chunk = request.cookies.get(`${baseName}.${i}`)?.value;
-        if (!chunk) break;
-        chunks.push(chunk);
-    }
-    return chunks.length ? chunks.join('') : null;
+    return readSupabaseAuthSessionCookieValue(request.cookies.getAll());
 }
 
 function extractAccessTokenFromCookie(cookieValue: string): string | null {
-    let payload = cookieValue;
-    if (payload.startsWith('base64-')) {
-        const decoded = decodeBase64Url(payload.slice('base64-'.length));
-        if (!decoded) return null;
-        payload = decoded;
-    }
-    try {
-        const parsed = JSON.parse(payload) as { access_token?: unknown };
-        return typeof parsed.access_token === 'string' ? parsed.access_token : null;
-    } catch {
-        return null;
-    }
+    const parsed = parseSupabaseAuthCookiePayload(cookieValue);
+    return typeof parsed?.access_token === 'string' ? parsed.access_token : null;
 }
 
 function readAccessTokenExpirySeconds(request: NextRequest): number | null {
@@ -297,7 +277,7 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
             ),
             cookies: {
                 getAll() {
-                    return request.cookies.getAll()
+                    return normalizeSupabaseAuthCookies(request.cookies.getAll())
                 },
                 setAll(cookiesToSet) {
                     if (SHOULD_LOG_PROXY_AUTH) {

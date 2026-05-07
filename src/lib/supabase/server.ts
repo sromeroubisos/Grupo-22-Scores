@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies, headers } from 'next/headers'
 import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/perf/supabase';
 import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure';
-import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie';
+import { getSupabaseAuthCookieOptions, normalizeSupabaseAuthCookies } from '@/lib/supabase/auth-cookie';
 import type { LooseSupabaseClient } from './loose';
 
 export async function createClient() {
@@ -29,7 +29,7 @@ export async function createClient() {
             },
             cookies: {
                 getAll() {
-                    return cookieStore.getAll()
+                    return normalizeSupabaseAuthCookies(cookieStore.getAll())
                 },
                 setAll(cookiesToSet) {
                     try {
