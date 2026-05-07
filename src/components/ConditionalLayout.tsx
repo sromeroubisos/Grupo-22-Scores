@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MobileBottomNav from '@/components/MobileBottomNav';
@@ -16,7 +16,6 @@ interface ConditionalLayoutProps {
 
 export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
     const pathname = usePathname();
-    const searchParams = useSearchParams();
     const router = useRouter();
     const { user, isAuthenticated, isLoading } = useAuth();
     const isManagementPage = pathname?.startsWith('/admin');

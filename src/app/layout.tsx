@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
+import ChunkLoadRecovery from "@/components/ChunkLoadRecovery";
 import ConditionalLayout from "@/components/ConditionalLayout";
 // Force rebuild for ChunkLoadError fix
 import { AuthProvider } from "@/context/AuthContext";
@@ -37,6 +38,46 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
+function AppShellFallback() {
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        background: "#0f1117",
+        color: "#f8fafc",
+        fontFamily: "Inter, system-ui, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          display: "grid",
+          gap: 14,
+          justifyItems: "center",
+        }}
+      >
+        <div
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            display: "grid",
+            placeItems: "center",
+            background: "#f8fafc",
+            color: "#111827",
+            fontWeight: 900,
+            fontSize: 24,
+          }}
+        >
+          G
+        </div>
+        <div style={{ fontSize: 14, opacity: 0.78 }}>Cargando G22 Scores</div>
+      </div>
+    </div>
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -72,8 +113,9 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
+        <ChunkLoadRecovery />
         <AuthProvider>
-          <Suspense fallback={null}>
+          <Suspense fallback={<AppShellFallback />}>
             <ConditionalLayout>{children}</ConditionalLayout>
           </Suspense>
         </AuthProvider>
