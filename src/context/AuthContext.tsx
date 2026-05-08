@@ -734,4 +734,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 'refresh_onboarding_status',
                 async () => fetch('/api/onboarding/preferences?mode=status', {
                     cache: 'no-store',
-                    cr
+                    credentials: 'same-origin',
+                }),
+                {
+                    runtime: 'client',
+                    tags: ['AUTH'],
+                    metadata: {
+                        step: 'refreshOnboardingStatus',
+                        userId: user.id,
+                    },
+                },
+            );
+
+            if (!response.ok) {
+                throw new Error(`Status request failed: ${response.status}`);
+            }
+
+            const data = await response.json() as { onboardingCompleted?: boolean };
+            const storageStatus = getOnboardingStorageStatus(user.id);
+            const onboardingCompleted = !!data.onboardingCompleted || storageStatus.completed;
+
+            if (onboardingCompleted) {
+                setOnboardingStorageStatus(user.id, { skipped: storageStatus.skipped });
+            }
+
+            if (isMounted.current) {
+                setPersistentUser(prev => prev ? { ...prev, onboardingCompleted } : null);
+            }
+        } catch (err) {
+            console.error('[AuthContext] refreshOnboardingStatus error:', err);
+        }
+    };
+
+    return (
+        <AuthContext.Provider value={{
+            user,
+            isAuthenticated: !!user,
+            isLoading,
+            login,
+            logout,
+            refreshOnboardingStatus,
+        }}>
+            {children}
+        </AuthContext.Provider>
+    );
+}
+
+export function useAuth() {
+    const context = useContext(AuthContext);
+    if (context === undefined) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+}
