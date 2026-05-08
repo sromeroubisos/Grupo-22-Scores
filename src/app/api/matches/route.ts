@@ -25,6 +25,7 @@ import {
     readUsableMatchesFeedSnapshot,
     upsertMatchesFeedSnapshot,
 } from '@/lib/server/matchesFeedCache';
+import { MATCHES_RESPONSE_CACHE_PREFIX } from '@/lib/server/cacheKeys';
 import {
     applyExternalTournamentOverride,
     getStoredExternalTournamentOverrides,
@@ -709,9 +710,6 @@ type MatchesTraceContext = {
     parentRequestId?: string;
 };
 
-// Bump the cache namespace when response-shaping logic changes so we don't
-// keep serving stale persisted snapshots for historical dates.
-const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response:v10';
 const EXTERNAL_MATCHES_PERSIST_TTL_MS = 10 * 60 * 1000;
 const MATCHES_DB_SELECT_COLUMNS = [
     'id',

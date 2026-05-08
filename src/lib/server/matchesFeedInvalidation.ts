@@ -1,11 +1,21 @@
 import { memoryCache } from '@/lib/cache';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { clearMatchesFeedSnapshots } from '@/lib/server/matchesFeedCache';
-
-export const MATCHES_RESPONSE_CACHE_PREFIX = 'matches-response:v5';
+import {
+  LEGACY_MATCHES_RESPONSE_CACHE_PREFIXES,
+  MATCHES_RESPONSE_CACHE_PREFIX,
+} from '@/lib/server/cacheKeys';
 
 export async function invalidateMatchesFeedCaches(client?: any) {
-  memoryCache.deleteByPrefix(MATCHES_RESPONSE_CACHE_PREFIX);
+  const prefixesToClear = [
+    MATCHES_RESPONSE_CACHE_PREFIX,
+    // Transitional cleanup for old process-local cache entries.
+    ...LEGACY_MATCHES_RESPONSE_CACHE_PREFIXES,
+  ];
+
+  prefixesToClear.forEach((prefix) => {
+    memoryCache.deleteByPrefix(prefix);
+  });
 
   const supabase = client || (
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY

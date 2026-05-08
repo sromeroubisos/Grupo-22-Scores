@@ -7,7 +7,9 @@ import {
     getSupabaseAuthStorageKey,
     getSupabaseSharedCookieDomain,
     MAX_SUPABASE_AUTH_COOKIE_CHUNKS,
+    normalizeSupabaseAuthCookieValue,
     normalizeSupabaseAuthCookies,
+    parseSupabaseAuthCookiePayload,
     SUPABASE_AUTH_COOKIE_MAX_AGE_SECONDS,
 } from '@/lib/supabase/auth-cookie'
 import type { LooseSupabaseClient } from './loose'
@@ -129,6 +131,70 @@ function normalizeSupabaseBrowserSessionCookie() {
     persistNormalizedBrowserSessionCookie(storageKey, normalizedSessionCookie)
 }
 
+function getBrowserStorageStores() {
+    if (typeof window === 'undefined') return []
+
+    const stores: Storage[] = []
+    try {
+        stores.push(window.localStorage)
+    } catch {
+        // Storage access can throw in strict privacy modes.
+    }
+
+    try {
+        stores.push(window.sessionStorage)
+    } catch {
+        // Storage access can throw in strict privacy modes.
+    }
+
+    return stores
+}
+
+function isUsableSupabaseSessionStorageValue(value: string) {
+    const parsed = parseSupabaseAuthCookiePayload(value)
+    return typeof parsed?.access_token === 'string'
+}
+
+function normalizeSupabaseBrowserSessionStorage() {
+    if (typeof window === 'undefined') return
+
+    const storageKey = getSupabaseBrowserStorageKey()
+    if (!storageKey) return
+
+    for (const storage of getBrowserStorageStores()) {
+        let rawValue: string | null = null
+        try {
+            rawValue = storage.getItem(storageKey)
+        } catch {
+            continue
+        }
+
+        if (!rawValue) continue
+
+        const normalizedValue = normalizeSupabaseAuthCookieValue(rawValue)
+        if (isUsableSupabaseSessionStorageValue(normalizedValue)) {
+            if (normalizedValue !== rawValue) {
+                try {
+                    storage.setItem(storageKey, normalizedValue)
+                } catch {
+                    try {
+                        storage.removeItem(storageKey)
+                    } catch {
+                        // Best effort: avoid letting malformed storage break auth bootstrap.
+                    }
+                }
+            }
+            continue
+        }
+
+        try {
+            storage.removeItem(storageKey)
+        } catch {
+            // Corrupt storage is best-effort cleanup only.
+        }
+    }
+}
+
 function resolveRequestUrl(input: string | URL | Request): string {
     if (typeof input === 'string') return input
     if (input instanceof URL) return input.toString()
@@ -185,6 +251,7 @@ function getRefreshReuseWindowMs(response: Response) {
 export function createClient() {
     if (client) return client
 
+    normalizeSupabaseBrowserSessionStorage()
     normalizeSupabaseBrowserSessionCookie()
 
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL

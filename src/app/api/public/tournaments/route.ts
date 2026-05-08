@@ -13,6 +13,7 @@ import {
     upsertTournamentsFeedSnapshot,
     type TournamentsFeedType,
 } from '@/lib/server/tournamentsFeedCache';
+import { PUBLIC_TOURNAMENTS_RESPONSE_CACHE_PREFIX } from '@/lib/server/cacheKeys';
 import {
     applyExternalTournamentOverride,
     getStoredExternalTournamentOverrides,
@@ -171,7 +172,6 @@ type TournamentsTraceContext = {
     parentRequestId?: string;
 };
 
-const TOURNAMENTS_RESPONSE_CACHE_PREFIX = 'public-tournaments-response:v8';
 const tournamentsRefreshLocks = new Map<string, Promise<void>>();
 const tournamentsInFlightResponses = new Map<string, Promise<PublicTournamentsPayload>>();
 const tournamentsSnapshotPersistLocks = new Map<string, Promise<boolean>>();
@@ -1042,7 +1042,7 @@ function buildCacheKeyPart(value: string | null | undefined, fallback = 'none') 
 
 function buildPublicTournamentsCacheKey(params: PublicTournamentsRequestParams) {
     return [
-        TOURNAMENTS_RESPONSE_CACHE_PREFIX,
+        PUBLIC_TOURNAMENTS_RESPONSE_CACHE_PREFIX,
         buildCacheKeyPart(params.scope, 'default'),
         buildCacheKeyPart(params.sport, 'all'),
         buildCacheKeyPart(params.audience),
