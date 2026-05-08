@@ -35,6 +35,9 @@ const MATCHES_FEED_CACHE_META_COLUMNS_LEGACY = [
     'last_refresh_completed_at',
 ].join(', ');
 
+let cleanupInFlight: Promise<number> | null = null;
+const scopedDeletionInFlight = new Map<string, Promise<number>>();
+
 export type MatchesFeedType = 'daily' | 'live';
 
 export type PersistedMatchesFeedSnapshotMeta = {
@@ -76,6 +79,27 @@ type PersistedMatchesFeedRow = {
     payload_size_bytes: number | null;
     last_refresh_started_at: string | null;
     last_refresh_completed_at: string | null;
+};
+
+type CacheCleanupError = {
+    code?: string | null;
+    message?: string | null;
+    details?: string | null;
+    hint?: string | null;
+};
+
+export type MatchesFeedCacheInvalidationScope = {
+    effectiveDate?: string | null;
+    dateTime?: string | Date | null;
+    sport?: string | null;
+    statusFilter?: string | null;
+};
+
+type NormalizedMatchesFeedCacheInvalidationScope = {
+    effectiveDate: string | null;
+    dateTime: string | null;
+    sport: string | null;
+    statusFilter: string | null;
 };
 
 export type UpsertMatchesFeedSnapshotInput<T> = {
@@ -120,6 +144,92 @@ function mapRowToSnapshot<T>(row: PersistedMatchesFeedRow): PersistedMatchesFeed
         ...mapRowToSnapshotMeta(row),
         payload: row.payload_json as T,
     };
+}
+
+function shouldLogDbDebug() {
+    return process.env.DEBUG_DB_QUERIES === 'true';
+}
+
+function normalizeCleanupLimit(limit: number) {
+    if (!Number.isFinite(limit)) return 500;
+    return Math.max(1, Math.min(Math.floor(limit), 5000));
+}
+
+function normalizeDateOnly(value: string | null | undefined) {
+    if (!value) return null;
+    const trimmed = value.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+
+    const parsed = new Date(trimmed);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed.toISOString().slice(0, 10);
+}
+
+function normalizeDateTime(value: string | Date | null | undefined) {
+    if (!value) return null;
+    const parsed = typeof value === 'string' ? new Date(value) : value;
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed.toISOString();
+}
+
+function normalizeSportScope(value: string | null | undefined) {
+    if (typeof value !== 'string') return null;
+    const normalized = value.trim().toLowerCase();
+    return normalized || null;
+}
+
+function normalizeInvalidationScope(
+    scope: MatchesFeedCacheInvalidationScope,
+): NormalizedMatchesFeedCacheInvalidationScope | null {
+    const effectiveDate = normalizeDateOnly(scope.effectiveDate);
+    const dateTime = normalizeDateTime(scope.dateTime);
+
+    if (!effectiveDate && !dateTime) {
+        return null;
+    }
+
+    return {
+        effectiveDate,
+        dateTime,
+        sport: normalizeSportScope(scope.sport),
+        statusFilter: normalizeSportScope(scope.statusFilter),
+    };
+}
+
+function getScopeFlightKey(scope: NormalizedMatchesFeedCacheInvalidationScope, limit: number) {
+    return [
+        scope.effectiveDate || 'no-date',
+        scope.dateTime || 'no-date-time',
+        scope.sport || 'all-sports',
+        scope.statusFilter || 'all-statuses',
+        normalizeCleanupLimit(limit),
+    ].join('|');
+}
+
+function serializeDbLog(metadata: Record<string, unknown>) {
+    return Object.entries(metadata)
+        .filter(([, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${String(value).replace(/\s+/g, ' ').trim()}`)
+        .join(' ');
+}
+
+function logDbDebug(metadata: Record<string, unknown>) {
+    if (!shouldLogDbDebug()) return;
+    const body = serializeDbLog(metadata);
+    console.log(body ? `[DB] ${body}` : '[DB]');
+}
+
+function isMissingCleanupRpcError(error: CacheCleanupError | null | undefined) {
+    if (!error) return false;
+    const code = String(error.code || '').toUpperCase();
+    const message = String(error.message || '').toLowerCase();
+    return (
+        code === '42883' ||
+        code === 'PGRST202' ||
+        message.includes('delete_expired_matches_feed_cache') ||
+        message.includes('delete_matches_feed_cache_for_scope') ||
+        message.includes('function') && message.includes('not found')
+    );
 }
 
 export async function readMatchesFeedSnapshotMetadata(
@@ -333,22 +443,227 @@ export async function upsertMatchesFeedSnapshot<T>(
     return true;
 }
 
+async function runDeleteExpiredMatchesFeedSnapshots(
+    supabase: SupabaseClient,
+    limit: number,
+): Promise<number> {
+    const safeLimit = normalizeCleanupLimit(limit);
+    const startedAt = Date.now();
+
+    try {
+        const { data, error } = await (supabase as any).rpc('delete_expired_matches_feed_cache', {
+            p_limit: safeLimit,
+        });
+
+        if (error) {
+            if (isMissingTableError(error, MATCHES_FEED_CACHE_TABLE) || isMissingCleanupRpcError(error)) {
+                logDbDebug({
+                    operation: 'deleteExpiredMatchesFeedSnapshots',
+                    table: MATCHES_FEED_CACHE_TABLE,
+                    action: 'rpc',
+                    durationMs: Date.now() - startedAt,
+                    status: 'skipped',
+                    reason: isMissingCleanupRpcError(error) ? 'missing_rpc' : 'missing_table',
+                    limit: safeLimit,
+                });
+                return 0;
+            }
+
+            console.error('[matchesFeedCache] expired cleanup error:', error);
+            logDbDebug({
+                operation: 'deleteExpiredMatchesFeedSnapshots',
+                table: MATCHES_FEED_CACHE_TABLE,
+                action: 'rpc',
+                durationMs: Date.now() - startedAt,
+                status: 'error',
+                errorCode: error.code,
+                errorMessage: error.message,
+                limit: safeLimit,
+            });
+            return 0;
+        }
+
+        const deletedRows = typeof data === 'number' ? data : Number(data || 0);
+        const normalizedDeletedRows = Number.isFinite(deletedRows) ? deletedRows : 0;
+        logDbDebug({
+            operation: 'deleteExpiredMatchesFeedSnapshots',
+            table: MATCHES_FEED_CACHE_TABLE,
+            action: 'rpc',
+            durationMs: Date.now() - startedAt,
+            status: 'ok',
+            rowsDeleted: normalizedDeletedRows,
+            limit: safeLimit,
+        });
+        return normalizedDeletedRows;
+    } catch (error) {
+        console.error('[matchesFeedCache] expired cleanup failed:', error);
+        logDbDebug({
+            operation: 'deleteExpiredMatchesFeedSnapshots',
+            table: MATCHES_FEED_CACHE_TABLE,
+            action: 'rpc',
+            durationMs: Date.now() - startedAt,
+            status: 'error',
+            errorMessage: error instanceof Error ? error.message : String(error),
+            limit: safeLimit,
+        });
+        return 0;
+    }
+}
+
+export async function deleteExpiredMatchesFeedSnapshots(
+    supabase: SupabaseClient,
+    limit = 500,
+): Promise<number> {
+    if (cleanupInFlight) {
+        logDbDebug({
+            operation: 'deleteExpiredMatchesFeedSnapshots',
+            table: MATCHES_FEED_CACHE_TABLE,
+            action: 'rpc',
+            status: 'skipped',
+            reason: 'single_flight',
+        });
+        return cleanupInFlight;
+    }
+
+    cleanupInFlight = runDeleteExpiredMatchesFeedSnapshots(supabase, limit)
+        .finally(() => {
+            cleanupInFlight = null;
+        });
+
+    return cleanupInFlight;
+}
+
+async function runDeleteMatchesFeedSnapshotsForScope(
+    supabase: SupabaseClient,
+    scope: NormalizedMatchesFeedCacheInvalidationScope,
+    limit: number,
+): Promise<number> {
+    const safeLimit = normalizeCleanupLimit(limit);
+    const startedAt = Date.now();
+
+    try {
+        const { data, error } = await (supabase as any).rpc('delete_matches_feed_cache_for_scope', {
+            p_effective_date: scope.effectiveDate,
+            p_date_time: scope.dateTime,
+            p_sport: scope.sport,
+            p_status_filter: scope.statusFilter,
+            p_limit: safeLimit,
+        });
+
+        if (error) {
+            if (isMissingTableError(error, MATCHES_FEED_CACHE_TABLE) || isMissingCleanupRpcError(error)) {
+                logDbDebug({
+                    operation: 'deleteMatchesFeedSnapshotsForScope',
+                    table: MATCHES_FEED_CACHE_TABLE,
+                    action: 'rpc',
+                    durationMs: Date.now() - startedAt,
+                    status: 'skipped',
+                    reason: isMissingCleanupRpcError(error) ? 'missing_rpc' : 'missing_table',
+                    effectiveDate: scope.effectiveDate,
+                    sport: scope.sport,
+                    statusFilter: scope.statusFilter,
+                    limit: safeLimit,
+                });
+                return 0;
+            }
+
+            console.error('[matchesFeedCache] scoped deletion error:', error);
+            logDbDebug({
+                operation: 'deleteMatchesFeedSnapshotsForScope',
+                table: MATCHES_FEED_CACHE_TABLE,
+                action: 'rpc',
+                durationMs: Date.now() - startedAt,
+                status: 'error',
+                errorCode: error.code,
+                errorMessage: error.message,
+                effectiveDate: scope.effectiveDate,
+                sport: scope.sport,
+                statusFilter: scope.statusFilter,
+                limit: safeLimit,
+            });
+            return 0;
+        }
+
+        const deletedRows = typeof data === 'number' ? data : Number(data || 0);
+        const normalizedDeletedRows = Number.isFinite(deletedRows) ? deletedRows : 0;
+        logDbDebug({
+            operation: 'deleteMatchesFeedSnapshotsForScope',
+            table: MATCHES_FEED_CACHE_TABLE,
+            action: 'rpc',
+            durationMs: Date.now() - startedAt,
+            status: 'ok',
+            rowsDeleted: normalizedDeletedRows,
+            effectiveDate: scope.effectiveDate,
+            sport: scope.sport,
+            statusFilter: scope.statusFilter,
+            limit: safeLimit,
+        });
+        return normalizedDeletedRows;
+    } catch (error) {
+        console.error('[matchesFeedCache] scoped deletion failed:', error);
+        logDbDebug({
+            operation: 'deleteMatchesFeedSnapshotsForScope',
+            table: MATCHES_FEED_CACHE_TABLE,
+            action: 'rpc',
+            durationMs: Date.now() - startedAt,
+            status: 'error',
+            errorMessage: error instanceof Error ? error.message : String(error),
+            effectiveDate: scope.effectiveDate,
+            sport: scope.sport,
+            statusFilter: scope.statusFilter,
+            limit: safeLimit,
+        });
+        return 0;
+    }
+}
+
+export async function deleteMatchesFeedSnapshotsForScope(
+    supabase: SupabaseClient,
+    scope: MatchesFeedCacheInvalidationScope,
+    limit = 500,
+): Promise<number> {
+    const normalizedScope = normalizeInvalidationScope(scope);
+
+    if (!normalizedScope) {
+        logDbDebug({
+            operation: 'deleteMatchesFeedSnapshotsForScope',
+            table: MATCHES_FEED_CACHE_TABLE,
+            action: 'rpc',
+            status: 'skipped',
+            reason: 'missing_scope_date',
+        });
+        return 0;
+    }
+
+    const flightKey = getScopeFlightKey(normalizedScope, limit);
+    const existingFlight = scopedDeletionInFlight.get(flightKey);
+
+    if (existingFlight) {
+        logDbDebug({
+            operation: 'deleteMatchesFeedSnapshotsForScope',
+            table: MATCHES_FEED_CACHE_TABLE,
+            action: 'rpc',
+            status: 'skipped',
+            reason: 'single_flight',
+            effectiveDate: normalizedScope.effectiveDate,
+            sport: normalizedScope.sport,
+            statusFilter: normalizedScope.statusFilter,
+        });
+        return existingFlight;
+    }
+
+    const flight = runDeleteMatchesFeedSnapshotsForScope(supabase, normalizedScope, limit)
+        .finally(() => {
+            scopedDeletionInFlight.delete(flightKey);
+        });
+
+    scopedDeletionInFlight.set(flightKey, flight);
+    return flight;
+}
+
 export async function clearMatchesFeedSnapshots(
     supabase: SupabaseClient,
 ): Promise<boolean> {
-    const { error } = await supabase
-        .from(MATCHES_FEED_CACHE_TABLE)
-        .delete()
-        .not('cache_key', 'is', null);
-
-    if (error) {
-        if (isMissingTableError(error, MATCHES_FEED_CACHE_TABLE)) {
-            return false;
-        }
-
-        console.error('[matchesFeedCache] clear error:', error);
-        return false;
-    }
-
+    await deleteExpiredMatchesFeedSnapshots(supabase);
     return true;
 }

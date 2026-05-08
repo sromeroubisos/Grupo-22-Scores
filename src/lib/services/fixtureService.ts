@@ -10,12 +10,16 @@ import {
   getMatchRankingSnapshot,
   syncClubRankingsForMatchUpdate,
 } from '@/lib/server/clubRankings';
-import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
+import {
+  invalidateMatchesFeedCaches,
+  type MatchesFeedInvalidationScope,
+} from '@/lib/server/matchesFeedInvalidation';
 import {
   APP_TIMEZONE,
   addDaysToIsoDate,
   combineLocalDateTimeToUtcIso,
   ensureUtcDateTimeString,
+  formatDateKey,
   toInputDateInTimeZone,
   toInputTimeInTimeZone,
 } from '@/lib/timezone';
@@ -50,6 +54,13 @@ type PhaseContext = {
   phase_type?: string | null;
 };
 
+type MatchFeedInvalidationSource = {
+  effective_date?: string | null;
+  date_time?: string | Date | null;
+  sport_id?: string | null;
+  sport?: string | null;
+};
+
 export class FixtureService {
   private static _supportsRoundLabel: boolean | null = null;
   private static _matchColumnSupport = new Map<string, boolean>();
@@ -59,9 +70,65 @@ export class FixtureService {
     return match.round_uuid ?? match.round_id ?? null;
   }
 
-  private static async invalidatePublicMatchesFeed() {
+  private static normalizeFeedScopeSport(value: string | null | undefined) {
+    if (typeof value !== 'string') return null;
+    const normalized = value.trim().toLowerCase();
+    return normalized || null;
+  }
+
+  private static getEffectiveDateForFeedScope(value: string | Date | null | undefined) {
+    if (!value) return null;
+    const date = typeof value === 'string' ? new Date(value) : value;
+    if (Number.isNaN(date.getTime())) return null;
+    return formatDateKey(date, APP_TIMEZONE);
+  }
+
+  private static getMatchFeedInvalidationScope(
+    match: MatchFeedInvalidationSource | null | undefined,
+  ): MatchesFeedInvalidationScope | null {
+    if (!match) return null;
+
+    const effectiveDate = match.effective_date || this.getEffectiveDateForFeedScope(match.date_time);
+    if (!effectiveDate) return null;
+
+    return {
+      effectiveDate,
+      sport: this.normalizeFeedScopeSport(match.sport_id ?? match.sport ?? null),
+    };
+  }
+
+  private static getMatchFeedInvalidationScopes(
+    matches: Array<MatchFeedInvalidationSource | null | undefined>,
+  ): MatchesFeedInvalidationScope[] {
+    const byKey = new Map<string, MatchesFeedInvalidationScope>();
+
+    for (const match of matches) {
+      const scope = this.getMatchFeedInvalidationScope(match);
+      if (!scope?.effectiveDate) continue;
+
+      const sport = this.normalizeFeedScopeSport(scope.sport ?? null);
+      byKey.set(`${scope.effectiveDate}|${sport || '*'}`, {
+        effectiveDate: scope.effectiveDate,
+        sport,
+      });
+    }
+
+    const dateOnlyScopes = new Set(
+      Array.from(byKey.values())
+        .filter((scope) => !scope.sport)
+        .map((scope) => scope.effectiveDate),
+    );
+
+    return Array.from(byKey.values())
+      .filter((scope) => !scope.sport || !dateOnlyScopes.has(scope.effectiveDate));
+  }
+
+  private static async invalidatePublicMatchesFeed(
+    client?: any,
+    scopes?: MatchesFeedInvalidationScope[],
+  ) {
     try {
-      await invalidateMatchesFeedCaches();
+      await invalidateMatchesFeedCaches(client, scopes);
     } catch (error) {
       console.error('[FixtureService] Failed to invalidate public matches feed cache:', error);
     }
@@ -85,10 +152,12 @@ export class FixtureService {
     matchId: string,
   ) {
     const variants = [
-      'id, tournament_id, season_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, status, score, clock, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason',
-      'id, tournament_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, status, score, clock',
-      'id, tournament_id, phase_id, round_id, group_id, home_club_id, away_club_id, status, score',
-      'id, tournament_id, phase_id, home_club_id, away_club_id, status, score',
+      'id, tournament_id, season_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, date_time, sport_id, sport, status, score, clock, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason',
+      'id, tournament_id, season_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, date_time, sport, status, score, clock, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason',
+      'id, tournament_id, season_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, date_time, status, score, clock, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated, points_override_reason',
+      'id, tournament_id, phase_id, round_uuid, round_id, group_id, home_club_id, away_club_id, date_time, status, score, clock',
+      'id, tournament_id, phase_id, round_id, group_id, home_club_id, away_club_id, date_time, status, score',
+      'id, tournament_id, phase_id, home_club_id, away_club_id, date_time, status, score',
     ];
 
     let lastError: { message?: string | null; details?: string | null; code?: string | null } | null = null;
@@ -114,6 +183,38 @@ export class FixtureService {
     }
 
     return { data: null, error: lastError };
+  }
+
+  private static async selectMatchesForFeedInvalidationByRound(
+    supabase: any,
+    roundId: string,
+  ): Promise<MatchFeedInvalidationSource[]> {
+    const variants = [
+      'id, date_time, sport_id, sport',
+      'id, date_time, sport',
+      'id, date_time',
+    ];
+
+    for (const columns of variants) {
+      const result = await supabase
+        .from('matches')
+        .select(columns)
+        .or(`round_uuid.eq.${roundId},round_id.eq.${roundId}`);
+
+      if (!result.error) {
+        return result.data ?? [];
+      }
+
+      const selectedColumns = columns.split(',').map((value) => value.trim()).filter(Boolean);
+      const hasMissingColumn = selectedColumns.some((column) => isMissingColumnError(result.error, column));
+
+      if (!hasMissingColumn) {
+        console.error('[FixtureService] Error fetching matches for feed invalidation:', result.error);
+        return [];
+      }
+    }
+
+    return [];
   }
 
   private static async syncClubRankingsAfterMatchChange(
@@ -832,7 +933,7 @@ export class FixtureService {
     }
 
     await this.syncClubRankingsAfterMatchChange(match.id);
-    await this.invalidatePublicMatchesFeed();
+    await this.invalidatePublicMatchesFeed(supabase, this.getMatchFeedInvalidationScopes([match]));
     return this.mapMatch(match);
   }
 
@@ -1016,7 +1117,10 @@ export class FixtureService {
     if (shouldSyncRankings) {
       await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
     }
-    await this.invalidatePublicMatchesFeed();
+    await this.invalidatePublicMatchesFeed(
+      supabase,
+      this.getMatchFeedInvalidationScopes([existingMatch, match]),
+    );
     return this.mapMatch(match);
   }
 
@@ -1025,6 +1129,8 @@ export class FixtureService {
    */
   static async deleteMatch(matchId: string): Promise<boolean> {
     const supabase = await this.getWriteClient();
+    const { data: existingMatch } = await this.selectMatchForUpdate(supabase, matchId);
+    const invalidationScopes = this.getMatchFeedInvalidationScopes([existingMatch]);
     const previousRankingSnapshot = await getMatchRankingSnapshot(matchId);
 
     const { error } = await supabase.from('matches').delete().eq('id', matchId);
@@ -1035,7 +1141,7 @@ export class FixtureService {
     }
 
     await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
-    await this.invalidatePublicMatchesFeed();
+    await this.invalidatePublicMatchesFeed(supabase, invalidationScopes);
     return true;
   }
 
@@ -1371,7 +1477,7 @@ export class FixtureService {
         throw new Error('No se pudieron persistir todos los partidos generados.');
       }
 
-      await this.invalidatePublicMatchesFeed();
+      await this.invalidatePublicMatchesFeed(supabase, this.getMatchFeedInvalidationScopes(matches));
     }
 
     return true;
@@ -1439,6 +1545,7 @@ export class FixtureService {
 
     // Chunk size for bulk insert
     const chunkSize = 50;
+    const importedScopeRows: MatchFeedInvalidationSource[] = [];
     for (let i = 0; i < matchesToInsert.length; i += chunkSize) {
       const chunk = matchesToInsert.slice(i, i + chunkSize);
       const { data: insertedMatches, error } = await supabase
@@ -1451,6 +1558,9 @@ export class FixtureService {
         errors.push(`Error al insertar lote ${Math.floor(i / chunkSize) + 1}: ${error.message}`);
       } else {
         importedCount += insertedMatches?.length || 0;
+        if ((insertedMatches?.length || 0) > 0) {
+          importedScopeRows.push(...chunk);
+        }
         if ((insertedMatches?.length || 0) !== chunk.length) {
           errors.push(`El lote ${Math.floor(i / chunkSize) + 1} se insertó de forma incompleta.`);
         }
@@ -1458,7 +1568,7 @@ export class FixtureService {
     }
 
     if (importedCount > 0) {
-      await this.invalidatePublicMatchesFeed();
+      await this.invalidatePublicMatchesFeed(supabase, this.getMatchFeedInvalidationScopes(importedScopeRows));
     }
 
     return {
@@ -1474,6 +1584,7 @@ export class FixtureService {
   static async massRescheduleRound(params: MassRescheduleParams): Promise<boolean> {
     const roundId = assertUuid(params.roundId, 'roundId');
     const supabase = await this.getWriteClient();
+    const invalidationScopeRows: MatchFeedInvalidationSource[] = [];
 
     // When changing the date, each match keeps its own time-of-day unless a
     // new time is also provided, so we must recompute date_time per row.
@@ -1493,6 +1604,7 @@ export class FixtureService {
       }
 
       const rows = matches ?? [];
+      invalidationScopeRows.push(...rows);
       const groups = new Map<string, string[]>();
 
       for (const match of rows) {
@@ -1518,6 +1630,7 @@ export class FixtureService {
         const bucket = groups.get(nextDateTime) ?? [];
         bucket.push(match.id);
         groups.set(nextDateTime, bucket);
+        invalidationScopeRows.push({ date_time: nextDateTime });
       }
 
       // One UPDATE per distinct target datetime instead of one per match.
@@ -1534,6 +1647,10 @@ export class FixtureService {
       }
     }
 
+    if (!needsPerRowReschedule && params.newVenue) {
+      invalidationScopeRows.push(...await this.selectMatchesForFeedInvalidationByRound(supabase, roundId));
+    }
+
     if (params.newVenue) {
       const { error } = await supabase
         .from('matches')
@@ -1547,7 +1664,7 @@ export class FixtureService {
     }
 
     if (needsPerRowReschedule || params.newVenue) {
-      await this.invalidatePublicMatchesFeed();
+      await this.invalidatePublicMatchesFeed(supabase, this.getMatchFeedInvalidationScopes(invalidationScopeRows));
     }
 
     return true;
@@ -1559,6 +1676,8 @@ export class FixtureService {
   static async resetRound(roundId: string): Promise<boolean> {
     if (!isUuid(roundId)) return false;
     const supabase = await this.getWriteClient();
+    const matchesForInvalidation = await this.selectMatchesForFeedInvalidationByRound(supabase, roundId);
+    const invalidationScopes = this.getMatchFeedInvalidationScopes(matchesForInvalidation);
 
     const { error } = await supabase.from('matches').delete().or(`round_uuid.eq.${roundId},round_id.eq.${roundId}`);
 
@@ -1570,7 +1689,7 @@ export class FixtureService {
     // Mark round as not completed
     await supabase.from('tournament_rounds').update({ is_completed: false }).eq('id', roundId);
 
-    await this.invalidatePublicMatchesFeed();
+    await this.invalidatePublicMatchesFeed(supabase, invalidationScopes);
 
     return true;
   }

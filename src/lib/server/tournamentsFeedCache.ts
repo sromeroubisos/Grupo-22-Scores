@@ -34,6 +34,8 @@ const TOURNAMENTS_FEED_CACHE_META_COLUMNS_LEGACY = [
     'last_refresh_completed_at',
 ].join(', ');
 
+let cleanupInFlight: Promise<number> | null = null;
+
 export type TournamentsFeedType = 'list' | 'summary' | 'country' | 'db';
 
 type PersistedTournamentsFeedRow = {
@@ -53,6 +55,13 @@ type PersistedTournamentsFeedRow = {
     source_summary: unknown;
     last_refresh_started_at: string | null;
     last_refresh_completed_at: string | null;
+};
+
+type CacheCleanupError = {
+    code?: string | null;
+    message?: string | null;
+    details?: string | null;
+    hint?: string | null;
 };
 
 export type PersistedTournamentsFeedSnapshotMeta = {
@@ -119,6 +128,40 @@ function mapRowToSnapshot<T>(row: PersistedTournamentsFeedRow): PersistedTournam
         ...mapRowToSnapshotMeta(row),
         payload: row.payload_json as T,
     };
+}
+
+function shouldLogDbDebug() {
+    return process.env.DEBUG_DB_QUERIES === 'true';
+}
+
+function normalizeCleanupLimit(limit: number) {
+    if (!Number.isFinite(limit)) return 500;
+    return Math.max(1, Math.min(Math.floor(limit), 5000));
+}
+
+function serializeDbLog(metadata: Record<string, unknown>) {
+    return Object.entries(metadata)
+        .filter(([, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${String(value).replace(/\s+/g, ' ').trim()}`)
+        .join(' ');
+}
+
+function logDbDebug(metadata: Record<string, unknown>) {
+    if (!shouldLogDbDebug()) return;
+    const body = serializeDbLog(metadata);
+    console.log(body ? `[DB] ${body}` : '[DB]');
+}
+
+function isMissingCleanupRpcError(error: CacheCleanupError | null | undefined) {
+    if (!error) return false;
+    const code = String(error.code || '').toUpperCase();
+    const message = String(error.message || '').toLowerCase();
+    return (
+        code === '42883' ||
+        code === 'PGRST202' ||
+        message.includes('delete_expired_tournaments_feed_cache') ||
+        message.includes('function') && message.includes('not found')
+    );
 }
 
 export async function readTournamentsFeedSnapshotMetadata(
@@ -323,22 +366,99 @@ export async function upsertTournamentsFeedSnapshot<T>(
     return true;
 }
 
+async function runDeleteExpiredTournamentsFeedSnapshots(
+    supabase: SupabaseClient,
+    limit: number,
+): Promise<number> {
+    const safeLimit = normalizeCleanupLimit(limit);
+    const startedAt = Date.now();
+
+    try {
+        const { data, error } = await (supabase as any).rpc('delete_expired_tournaments_feed_cache', {
+            p_limit: safeLimit,
+        });
+
+        if (error) {
+            if (isMissingTableError(error, TOURNAMENTS_FEED_CACHE_TABLE) || isMissingCleanupRpcError(error)) {
+                logDbDebug({
+                    operation: 'deleteExpiredTournamentsFeedSnapshots',
+                    table: TOURNAMENTS_FEED_CACHE_TABLE,
+                    action: 'rpc',
+                    durationMs: Date.now() - startedAt,
+                    status: 'skipped',
+                    reason: isMissingCleanupRpcError(error) ? 'missing_rpc' : 'missing_table',
+                    limit: safeLimit,
+                });
+                return 0;
+            }
+
+            console.error('[tournamentsFeedCache] expired cleanup error:', error);
+            logDbDebug({
+                operation: 'deleteExpiredTournamentsFeedSnapshots',
+                table: TOURNAMENTS_FEED_CACHE_TABLE,
+                action: 'rpc',
+                durationMs: Date.now() - startedAt,
+                status: 'error',
+                errorCode: error.code,
+                errorMessage: error.message,
+                limit: safeLimit,
+            });
+            return 0;
+        }
+
+        const deletedRows = typeof data === 'number' ? data : Number(data || 0);
+        const normalizedDeletedRows = Number.isFinite(deletedRows) ? deletedRows : 0;
+        logDbDebug({
+            operation: 'deleteExpiredTournamentsFeedSnapshots',
+            table: TOURNAMENTS_FEED_CACHE_TABLE,
+            action: 'rpc',
+            durationMs: Date.now() - startedAt,
+            status: 'ok',
+            rowsDeleted: normalizedDeletedRows,
+            limit: safeLimit,
+        });
+        return normalizedDeletedRows;
+    } catch (error) {
+        console.error('[tournamentsFeedCache] expired cleanup failed:', error);
+        logDbDebug({
+            operation: 'deleteExpiredTournamentsFeedSnapshots',
+            table: TOURNAMENTS_FEED_CACHE_TABLE,
+            action: 'rpc',
+            durationMs: Date.now() - startedAt,
+            status: 'error',
+            errorMessage: error instanceof Error ? error.message : String(error),
+            limit: safeLimit,
+        });
+        return 0;
+    }
+}
+
+export async function deleteExpiredTournamentsFeedSnapshots(
+    supabase: SupabaseClient,
+    limit = 500,
+): Promise<number> {
+    if (cleanupInFlight) {
+        logDbDebug({
+            operation: 'deleteExpiredTournamentsFeedSnapshots',
+            table: TOURNAMENTS_FEED_CACHE_TABLE,
+            action: 'rpc',
+            status: 'skipped',
+            reason: 'single_flight',
+        });
+        return cleanupInFlight;
+    }
+
+    cleanupInFlight = runDeleteExpiredTournamentsFeedSnapshots(supabase, limit)
+        .finally(() => {
+            cleanupInFlight = null;
+        });
+
+    return cleanupInFlight;
+}
+
 export async function clearTournamentsFeedSnapshots(
     supabase: SupabaseClient,
 ): Promise<boolean> {
-    const { error } = await supabase
-        .from(TOURNAMENTS_FEED_CACHE_TABLE)
-        .delete()
-        .not('cache_key', 'is', null);
-
-    if (error) {
-        if (isMissingTableError(error, TOURNAMENTS_FEED_CACHE_TABLE)) {
-            return false;
-        }
-
-        console.error('[tournamentsFeedCache] clear error:', error);
-        return false;
-    }
-
+    await deleteExpiredTournamentsFeedSnapshots(supabase);
     return true;
 }
