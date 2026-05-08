@@ -1,11 +1,44 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { getSupabaseAuthStorageKey, getSupabaseSharedCookieDomain } from '@/lib/supabase/auth-cookie'
 import styles from '../login.module.css'
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { sanitizeReturnTo } from '../redirects'
 import { getAuthErrorMessage } from '@/lib/auth/errors'
+
+// Wipe any stale `-code-verifier` cookie/storage entry before starting a
+// fresh PKCE flow. Stuck cookies from an earlier abandoned attempt are the
+// most common cause of "code verifier" errors when the user retries
+// "Continuar con Google".
+function clearStalePkceState() {
+    if (typeof window === 'undefined') return
+    const storageKey = getSupabaseAuthStorageKey()
+    if (!storageKey) return
+
+    const verifierKey = `${storageKey}-code-verifier`
+
+    try {
+        window.localStorage.removeItem(verifierKey)
+    } catch {
+        // Storage access may throw in strict privacy modes — best-effort only.
+    }
+    try {
+        window.sessionStorage.removeItem(verifierKey)
+    } catch {
+        // Same as above.
+    }
+
+    const expire = (domain?: string) => {
+        const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+        const cookieDomain = domain ? `; Domain=${domain}` : ''
+        document.cookie = `${verifierKey}=; Max-Age=0; Path=/; SameSite=Lax${cookieDomain}${secure}`
+    }
+    expire()
+    const sharedDomain = getSupabaseSharedCookieDomain(window.location.hostname)
+    if (sharedDomain) expire(sharedDomain)
+}
 
 export default function OAuthButtons({ onError }: { onError?: (msg: string | null) => void }) {
     const [loading, setLoading] = useState<string | null>(null)
@@ -22,9 +55,7 @@ export default function OAuthButtons({ onError }: { onError?: (msg: string | nul
     const handleLogin = async () => {
         // Guard via state, NOT a ref. A stale `ref.current = true` from a
         // previous failed attempt would otherwise leave the button silently
-        // unclickable forever — that was the symptom the user was seeing on
-        // desktop when this handler hit the no-`data.url` path below without
-        // resetting state.
+        // unclickable forever.
         if (loading) return
         onError?.(null)
         setLoading('google')
@@ -32,6 +63,7 @@ export default function OAuthButtons({ onError }: { onError?: (msg: string | nul
         let navigated = false
         try {
             console.info('[OAuth] starting Google sign-in flow')
+            clearStalePkceState()
             const supabase = createClient()
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
@@ -45,9 +77,6 @@ export default function OAuthButtons({ onError }: { onError?: (msg: string | nul
 
             const targetUrl = data?.url
             if (!targetUrl) {
-                // The Supabase JS SDK normally always returns a URL here. If
-                // it doesn't, surfacing a clear error is much better than
-                // silently doing nothing.
                 throw new Error('Supabase did not return an OAuth redirect URL')
             }
 
@@ -58,10 +87,6 @@ export default function OAuthButtons({ onError }: { onError?: (msg: string | nul
             console.error('[OAuth] Google sign-in failed', error)
             onError?.(getAuthErrorMessage(error, 'No pudimos iniciar sesion con Google. Intenta nuevamente.'))
         } finally {
-            // Only re-enable the button when we did NOT navigate away. If we
-            // did navigate, the page is being unloaded and any setState here
-            // is harmless — but skipping it keeps the spinner visible until
-            // the redirect completes, which is the better UX.
             if (!navigated) {
                 setLoading(null)
             }

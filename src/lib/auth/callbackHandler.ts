@@ -47,18 +47,34 @@ export async function handleAuthCallback(request: NextRequest | Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error || !data.user) {
-        console.error('[AuthCallback] exchangeCodeForSession failed:', error?.message || 'No user');
+        const errorMsg = error?.message || 'No user';
+        console.error('[AuthCallback] exchangeCodeForSession failed:', errorMsg);
+        // Log surrounding state to help diagnose stuck PKCE issues. These
+        // logs go to Vercel function logs (not the user's browser).
+        try {
+            const cookieNames = (request as NextRequest).cookies?.getAll?.()?.map((c: { name: string }) => c.name) ?? [];
+            console.error(
+                '[AuthCallback] cookie names present at callback:',
+                cookieNames.filter((n: string) => n.startsWith('sb-') || n.includes('auth')).join(','),
+            );
+        } catch {
+            // Cookie inspection is best-effort.
+        }
         // Differentiate known error types for better UX
         let errorCode = 'auth-code-error';
-        if (error?.message?.includes('code verifier')) {
+        const lowerMsg = errorMsg.toLowerCase();
+        if (lowerMsg.includes('code verifier') || lowerMsg.includes('code_verifier')) {
             errorCode = 'auth-pkce-error';
-        } else if (error?.message?.includes('expired')) {
+        } else if (lowerMsg.includes('expired')) {
             errorCode = 'auth-expired';
-        } else if (error?.message?.includes('state')) {
+        } else if (lowerMsg.includes('state')) {
             errorCode = 'auth-state-error';
         }
+        // Pass a short sanitized detail so the user (and us) can see WHAT
+        // failed without checking server logs. Capped + URL-encoded.
+        const detail = errorMsg.replace(/[^\x20-\x7E]/g, '').slice(0, 160);
         return NextResponse.redirect(
-            `${origin}/login?error=${errorCode}&next=${encodeURIComponent(next)}`
+            `${origin}/login?error=${errorCode}&detail=${encodeURIComponent(detail)}&next=${encodeURIComponent(next)}`
         );
     }
 

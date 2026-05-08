@@ -13,6 +13,7 @@ import Link from 'next/link'
 function LoginContent() {
     const searchParams = useSearchParams()
     const errorParam = searchParams.get('error')
+    const detailParam = searchParams.get('detail')
     const messageParam = searchParams.get('message')
     const [error, setError] = useState<string | null>(null)
     const errorMessages: Record<string, string> = {
@@ -24,14 +25,15 @@ function LoginContent() {
         'login_provider_error': 'El proveedor de autenticación reportó un error. Intentá más tarde.',
     }
 
-    const derivedError =
-        error ?? (
-            errorParam && errorMessages[errorParam]
-                ? errorMessages[errorParam]
-                : errorParam
-                    ? 'Ocurrió un error de autenticación.'
-                    : null
-        )
+    const baseError = errorParam && errorMessages[errorParam]
+        ? errorMessages[errorParam]
+        : errorParam
+            ? 'Ocurrió un error de autenticación.'
+            : null
+    const detailedError = baseError && detailParam
+        ? `${baseError} (${detailParam.slice(0, 160)})`
+        : baseError
+    const derivedError = error ?? detailedError
     const success =
         messageParam === 'password-updated'
             ? 'Tu contrasena fue actualizada. Ya podes iniciar sesion con la nueva clave.'
