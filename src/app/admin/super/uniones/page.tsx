@@ -69,7 +69,7 @@ export default function UnionesPage() {
                         <RefreshCw size={13} style={{ marginRight: 4, animation: isLoading ? 'spin 1s linear infinite' : 'none' }} />
                         Refrescar
                     </button>
-                    <Link href="/admin/super/uniones/crear" className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>
+                    <Link href="/admin/super/uniones/crear" prefetch={false} className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>
                         <Plus size={13} style={{ marginRight: 4 }} /> Crear Unión
                     </Link>
                 </div>
@@ -150,7 +150,7 @@ export default function UnionesPage() {
                                         </td>
                                         <td style={{ padding: '12px 16px', position: 'relative' }} onClick={e => e.stopPropagation()}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                <Link href={`/admin/super/uniones/${union.id}`} className={styles.actionBtn} style={{ fontSize: 11, padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                                <Link href={`/admin/super/uniones/${union.id}`} prefetch={false} className={styles.actionBtn} style={{ fontSize: 11, padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                                                     <Pencil size={11} /> Gestionar
                                                 </Link>
                                                 <div style={{ position: 'relative' }}>

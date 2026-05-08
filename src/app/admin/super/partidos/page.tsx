@@ -380,7 +380,7 @@ export default function SuperadminPartidosPage() {
                         <RefreshCw size={13} style={{ marginRight: 4, animation: isLoading ? 'spin 1s linear infinite' : 'none' }} />
                         Refrescar
                     </button>
-                    <Link href="/admin/super/partidos/crear" className={`${styles.cardAction} ${styles.cardActionPrimary}`}>
+                    <Link href="/admin/super/partidos/crear" prefetch={false} className={`${styles.cardAction} ${styles.cardActionPrimary}`}>
                         <Plus size={13} style={{ marginRight: 6 }} /> Nuevo Partido
                     </Link>
                 </div>
@@ -482,9 +482,9 @@ export default function SuperadminPartidosPage() {
                                                         </button>
                                                     </>
                                                 )}
-                                                <Link href={`/admin/super/partidos/${match.id}`} className={styles.actionBtn} style={{ fontSize: 11, padding: '4px 10px' }}>Gestionar</Link>
+                                                <Link href={`/admin/super/partidos/${match.id}`} prefetch={false} className={styles.actionBtn} style={{ fontSize: 11, padding: '4px 10px' }}>Gestionar</Link>
                                                 {match.status !== 'final' && (
-                                                    <Link href={`/admin/super/partidos/${match.id}`} className={`${styles.actionBtn} ${styles.actionBtnPrimary}`} style={{ fontSize: 11, padding: '4px 10px' }}>Consola</Link>
+                                                    <Link href={`/admin/super/partidos/${match.id}`} prefetch={false} className={`${styles.actionBtn} ${styles.actionBtnPrimary}`} style={{ fontSize: 11, padding: '4px 10px' }}>Consola</Link>
                                                 )}
                                                 <button
                                                     onClick={() => handleDelete(match.id)}
@@ -580,8 +580,8 @@ export default function SuperadminPartidosPage() {
                                                             </button>
                                                         </>
                                                     )}
-                                                    <Link href={`/admin/super/partidos/${match.id}`} className={styles.actionBtn}>Gestionar</Link>
-                                                    {match.status !== 'final' && <Link href={`/admin/super/partidos/${match.id}`} className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>Consola</Link>}
+                                                    <Link href={`/admin/super/partidos/${match.id}`} prefetch={false} className={styles.actionBtn}>Gestionar</Link>
+                                                    {match.status !== 'final' && <Link href={`/admin/super/partidos/${match.id}`} prefetch={false} className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}>Consola</Link>}
                                                     <button
                                                         onClick={() => handleDelete(match.id)}
                                                         title="Eliminar"

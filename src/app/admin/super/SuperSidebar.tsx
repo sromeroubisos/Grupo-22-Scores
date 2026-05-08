@@ -39,6 +39,7 @@ export default function SuperSidebar({ isOpen, onClose }: { isOpen?: boolean; on
                                 <Link
                                     key={item.id}
                                     href={item.href}
+                                    prefetch={false}
                                     onClick={onClose}
                                     className={`${styles.navItem} ${activeItem?.id === item.id ? styles.navItemActive : ''}`}
                                 >

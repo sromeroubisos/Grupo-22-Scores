@@ -133,6 +133,7 @@ export default function ExternalClubLogoPage() {
                     <div>
                         <Link
                             href={returnTo}
+                            prefetch={false}
                             style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#9aa4b2', marginBottom: 16 }}
                         >
                             <ArrowLeft size={16} />

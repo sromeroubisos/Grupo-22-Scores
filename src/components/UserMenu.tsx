@@ -106,7 +106,7 @@ export default function UserMenu() {
                     {isSuperAdmin && (
                         <>
                             <div className={styles.dropdownDivider} />
-                            <Link href="/admin/super" className={styles.menuItemAdmin} onClick={() => setIsOpen(false)}>
+                            <Link href="/admin/super" prefetch={false} className={styles.menuItemAdmin} onClick={() => setIsOpen(false)}>
                                 <Shield size={16} />
                                 {getRoleLabel(user.role)}
                             </Link>

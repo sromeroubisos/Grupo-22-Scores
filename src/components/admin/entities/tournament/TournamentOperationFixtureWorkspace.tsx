@@ -2103,6 +2103,7 @@ function MatchCard({
     >
       <Link
         href={manageHref}
+        prefetch={false}
         className="fixture-match-link"
         aria-label={`Abrir control de partido de ${matchLabel}`}
         title="Abrir control de partido. También puedes hacer click derecho para abrirlo en otro panel."

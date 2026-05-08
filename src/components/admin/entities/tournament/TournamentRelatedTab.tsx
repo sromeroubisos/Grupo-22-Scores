@@ -343,7 +343,7 @@ export function TournamentRelatedTab({ tournamentId, data }: Props) {
                                     ) : (
                                         <div className={styles.itemList}>
                                             {group.items.map((item) => (
-                                                <Link key={item.id} href={item.href} className={styles.itemRow}>
+                                                <Link key={item.id} href={item.href} prefetch={false} className={styles.itemRow}>
                                                     <div className={styles.itemMain}>
                                                         <div className={styles.itemTitle}>{item.title}</div>
                                                         {item.subtitle ? <div className={styles.itemSubtitle}>{item.subtitle}</div> : null}
@@ -504,10 +504,10 @@ export function TournamentRelatedTab({ tournamentId, data }: Props) {
                                         <article key={item.id} className={styles.linkedCard}>
                                             <div className={styles.linkedIdentity}>
                                                 <div className={styles.linkedTitleRow}>
-                                                    <Link href={item.href} className={styles.linkedTitle}>
+                                                    <Link href={item.href} prefetch={false} className={styles.linkedTitle}>
                                                         {item.linkedTournamentName}
                                                     </Link>
-                                                    <Link href={item.href} className={styles.inlineLink}>
+                                                    <Link href={item.href} prefetch={false} className={styles.inlineLink}>
                                                         <ExternalLink size={14} />
                                                     </Link>
                                                 </div>
@@ -535,7 +535,7 @@ export function TournamentRelatedTab({ tournamentId, data }: Props) {
                                             </div>
 
                                             <div className={styles.linkedActions}>
-                                                <Link href={item.href} className={styles.actionButton}>
+                                                <Link href={item.href} prefetch={false} className={styles.actionButton}>
                                                     <ExternalLink size={14} />
                                                     Ver torneo
                                                 </Link>

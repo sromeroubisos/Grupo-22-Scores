@@ -60,6 +60,7 @@ export function TournamentSummaryTab({ data, unionName, matchCount = 0 }: Summar
 
                         <Link
                             href={`/admin/entities/${data.id}/manage?type=tournament&tab=detalles`}
+                            prefetch={false}
                             className="basalt-btn basalt-btn-primary mt-4 w-full sm:w-auto"
                         >
                             Editar detalles base
@@ -152,13 +153,13 @@ export function TournamentSummaryTab({ data, unionName, matchCount = 0 }: Summar
                     <h3 className="basalt-section-title">Siguientes pasos reales</h3>
 
                     <div className="flex flex-col gap-2">
-                        <Link className="basalt-btn justify-center" href={`/admin/entities/${data.id}/manage?type=tournament&tab=estructura`}>
+                        <Link prefetch={false} className="basalt-btn justify-center" href={`/admin/entities/${data.id}/manage?type=tournament&tab=estructura`}>
                             Definir estructura
                         </Link>
-                        <Link className="basalt-btn justify-center" href={`/admin/entities/${data.id}/manage?type=tournament&tab=participantes`}>
+                        <Link prefetch={false} className="basalt-btn justify-center" href={`/admin/entities/${data.id}/manage?type=tournament&tab=participantes`}>
                             Cargar participantes
                         </Link>
-                        <Link className="basalt-btn justify-center" href={`/admin/entities/${data.id}/manage?type=tournament&tab=operacion`}>
+                        <Link prefetch={false} className="basalt-btn justify-center" href={`/admin/entities/${data.id}/manage?type=tournament&tab=operacion`}>
                             Gestionar fixture y tabla
                         </Link>
                     </div>

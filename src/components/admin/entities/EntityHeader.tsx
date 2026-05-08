@@ -12,7 +12,7 @@ export function EntityHeader({ entity, fromContext }: { entity: ResolvedEntityRe
         <header className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-6 px-4 pt-4 sm:pt-0">
             <div>
                 <nav className="flex text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4 gap-2 items-center italic" aria-label="Breadcrumb">
-                    <Link href="/admin" className="hover:text-primary-accent transition-colors">Admin</Link>
+                    <Link href="/admin" prefetch={false} className="hover:text-primary-accent transition-colors">Admin</Link>
                     <span className="opacity-30">/</span>
                     <span className="cursor-default">Entities</span>
                     <span className="opacity-30">/</span>
@@ -25,6 +25,7 @@ export function EntityHeader({ entity, fromContext }: { entity: ResolvedEntityRe
                     <div className="mb-4">
                         <Link
                             href={`/admin/entities/${fromContext.split(':')[1]}/manage?type=${fromContext.split(':')[0]}&tab=related`}
+                            prefetch={false}
                             className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-blue hover:underline"
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

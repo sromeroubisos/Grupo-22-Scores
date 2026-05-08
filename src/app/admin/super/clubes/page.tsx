@@ -357,7 +357,7 @@ export default function SuperadminClubesPage() {
                     </div>
                 </div>
                 <div className={styles.consoleActions}>
-                    <Link href="/admin/super/familias-clubes" className={styles.cardAction}>
+                    <Link href="/admin/super/familias-clubes" prefetch={false} className={styles.cardAction}>
                         Familias de clubes
                     </Link>
                     <button
@@ -371,6 +371,7 @@ export default function SuperadminClubesPage() {
                     </button>
                     <Link
                         href="/admin/super/clubes/crear"
+                        prefetch={false}
                         className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
                     >
                         <Plus size={13} style={{ marginRight: 4 }} /> Crear Club
@@ -584,6 +585,7 @@ export default function SuperadminClubesPage() {
                                                     </div>
                                                     <Link
                                                         href={`/admin/entities/${member.id}/manage?type=club&tab=relacionados`}
+                                                        prefetch={false}
                                                         className={styles.cardAction}
                                                         style={{ padding: '6px 10px', fontSize: 11 }}
                                                     >
@@ -719,7 +721,7 @@ export default function SuperadminClubesPage() {
                                         </td>
                                         <td style={{ padding: '12px 16px', position: 'relative' }} onClick={e => e.stopPropagation()}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                <Link href={`/admin/entities/${club.id}/manage?type=club`} className={styles.actionBtn} style={{ fontSize: 11, padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                                <Link href={`/admin/entities/${club.id}/manage?type=club`} prefetch={false} className={styles.actionBtn} style={{ fontSize: 11, padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                                                     <Pencil size={11} /> Gestionar
                                                 </Link>
                                                 <div style={{ position: 'relative' }}>

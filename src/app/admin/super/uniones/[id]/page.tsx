@@ -342,9 +342,9 @@ export default function UnionManagePage() {
                 <div className={styles.pageContainer}>
                     <div className={styles.topContext}>
                         <div className={styles.breadcrumb}>
-                            <Link href="/admin/super" className={styles.breadcrumbLink}>Superadmin</Link>
+                            <Link href="/admin/super" prefetch={false} className={styles.breadcrumbLink}>Superadmin</Link>
                             <span>/</span>
-                            <Link href="/admin/super/uniones" className={styles.breadcrumbLink}>Uniones</Link>
+                            <Link href="/admin/super/uniones" prefetch={false} className={styles.breadcrumbLink}>Uniones</Link>
                             <span>/</span>
                             <span>{getUnionOfficialName(unionRecord)}</span>
                         </div>
@@ -358,7 +358,7 @@ export default function UnionManagePage() {
                     <div className={styles.manageShell}>
                     <aside className={styles.navCard}>
                         <div className={styles.navHeader}>
-                            <Link href="/admin/super/uniones" className={styles.buttonGhost}>
+                            <Link href="/admin/super/uniones" prefetch={false} className={styles.buttonGhost}>
                                 <ArrowLeft size={16} />
                                 Uniones
                             </Link>

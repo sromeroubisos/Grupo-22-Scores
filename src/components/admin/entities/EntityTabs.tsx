@@ -41,6 +41,7 @@ export function EntityTabs({ id, type, currentTab }: EntityTabsProps) {
                         <Link
                             key={tab.id}
                             href={href}
+                            prefetch={false}
                             className={`
                                 whitespace-nowrap pb-4 px-1 border-b-2 text-[10px] font-black uppercase tracking-[0.2em] italic transition-all duration-300
                                 ${isActive

@@ -1772,7 +1772,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     </div>
                     <div className={styles.matchActions}>
                         {isSuperAdminUser && !isExternalMatch && (
-                            <Link href={`/admin/super/partidos/${id}`} className={`${styles.btn} ${styles.btnPrimary}`}>
+                            <Link href={`/admin/super/partidos/${id}`} prefetch={false} className={`${styles.btn} ${styles.btnPrimary}`}>
                                 Editar partido
                             </Link>
                         )}

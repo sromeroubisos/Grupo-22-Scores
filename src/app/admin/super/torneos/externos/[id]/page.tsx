@@ -920,7 +920,7 @@ export default function ExternalTournamentOverridePage() {
                     <div style={{ color: '#9aa4b2', lineHeight: 1.6, marginBottom: 20 }}>
                         Este editor esta restringido al rol `super_admin`.
                     </div>
-                    <Link href={returnTo} style={{ color: '#6ee7b7', fontWeight: 800 }}>
+                    <Link href={returnTo} prefetch={false} style={{ color: '#6ee7b7', fontWeight: 800 }}>
                         Volver al torneo
                     </Link>
                 </div>
@@ -1236,7 +1236,7 @@ export default function ExternalTournamentOverridePage() {
             <div style={{ maxWidth: 1320, margin: '0 auto', width: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
                     <div>
-                        <Link href={returnTo} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#9aa4b2', marginBottom: 16 }}>
+                        <Link href={returnTo} prefetch={false} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: '#9aa4b2', marginBottom: 16 }}>
                             <ArrowLeft size={16} />
                             Volver al torneo
                         </Link>

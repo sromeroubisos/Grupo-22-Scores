@@ -136,7 +136,7 @@ export default function AdminPage() {
                         <span className={`${styles.statusIndicator} ${isSyncing ? styles.blink : ''}`}></span>
                         API: {isSyncing ? 'SYNCING...' : 'STABLE'}
                     </div>
-                    <Link href="/admin/super/torneos/crear" className={`${styles.btn} ${styles.btnPrimary}`}>
+                    <Link href="/admin/super/torneos/crear" prefetch={false} className={`${styles.btn} ${styles.btnPrimary}`}>
                         + Nuevo torneo
                     </Link>
                 </div>
@@ -223,7 +223,7 @@ export default function AdminPage() {
                                     </td>
                                     <td className={styles.mono}>{row.sync}</td>
                                     <td>
-                                        <Link href={`/admin/entities/${row.id}/manage?type=tournament`} className={styles.btn}>
+                                        <Link href={`/admin/entities/${row.id}/manage?type=tournament`} prefetch={false} className={styles.btn}>
                                             {row.action}
                                         </Link>
                                     </td>
@@ -235,7 +235,7 @@ export default function AdminPage() {
                     <div className={styles.conflictAlert}>
                         <span className={styles.alertIcon}>!</span>
                         <span className={styles.alertText}>{conflictsMessage}</span>
-                        <Link href={dashboardStats.pendingTournaments > 0 ? '/admin/super/torneos/pendientes' : '/admin/super/clubes'} className={styles.btn}>
+                        <Link href={dashboardStats.pendingTournaments > 0 ? '/admin/super/torneos/pendientes' : '/admin/super/clubes'} prefetch={false} className={styles.btn}>
                             Resolver
                         </Link>
                     </div>
@@ -266,6 +266,7 @@ export default function AdminPage() {
                                         <Link
                                             key={item.id}
                                             href={item.href}
+                                            prefetch={false}
                                             className={styles.cardItem}
                                             style={{ minHeight: 0, padding: 18, textDecoration: 'none', color: 'inherit' }}
                                         >
@@ -302,7 +303,7 @@ export default function AdminPage() {
                     <div className={styles.slabHeader}>
                         <span className={styles.slabLabel}>News CMS</span>
                         {/* Go to news page */}
-                        <Link href="/admin/super/noticias" className={styles.btn}>
+                        <Link href="/admin/super/noticias" prefetch={false} className={styles.btn}>
                             Gestionar Noticias
                         </Link>
                     </div>

@@ -1992,7 +1992,7 @@ export default function ClubMatchWorkspace({
           </button>
 
           <div className={styles.breadcrumb}>
-            <Link href={backHref} className={styles.breadcrumbStrong}>Club Admin</Link>
+            <Link href={backHref} prefetch={false} className={styles.breadcrumbStrong}>Club Admin</Link>
             <span>/</span>
             <span>{matchState.tournament?.sport_id || 'Competencia'}</span>
             <span>/</span>
@@ -4164,7 +4164,7 @@ export default function ClubMatchWorkspace({
                     <div className={styles.card}>
                       <div className={styles.linkGrid}>
                         <Link href={publicHref} className={styles.quickLink}><span>Vista pública</span><Eye size={16} /></Link>
-                        <Link href={`/club-admin?club=${encodeURIComponent(clubId)}&tab=contenido`} className={styles.quickLink}><span>Exports del Club</span><ExternalLink size={16} /></Link>
+                        <Link href={`/club-admin?club=${encodeURIComponent(clubId)}&tab=contenido`} prefetch={false} className={styles.quickLink}><span>Exports del Club</span><ExternalLink size={16} /></Link>
                         <button className={styles.quickLink} type="button" onClick={handleExportMatchSheetPdf}><span>Exportar planilla PDF</span><FileText size={16} /></button>
                         <button className={styles.quickLink} type="button" onClick={() => saveMatch(undefined, 'Contenido interno guardado')}><span>Guardar Material</span><Save size={16} /></button>
                       </div>

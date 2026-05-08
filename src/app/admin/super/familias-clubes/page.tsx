@@ -607,7 +607,7 @@ export default function SuperadminClubFamiliesPage() {
                         <RefreshCw size={13} style={{ marginRight: 4, animation: isLoadingClubs || isLoadingFamilies ? 'spin 1s linear infinite' : 'none' }} />
                         Refrescar
                     </button>
-                    <Link href="/admin/super/clubes" className={styles.cardAction}>
+                    <Link href="/admin/super/clubes" prefetch={false} className={styles.cardAction}>
                         Ver catalogo de clubes
                     </Link>
                 </div>
@@ -718,7 +718,7 @@ export default function SuperadminClubFamiliesPage() {
                                 <Plus size={13} style={{ marginRight: 6 }} />
                                 Crear primera familia
                             </button>
-                            <Link href="/admin/super/clubes" className={styles.cardAction}>
+                            <Link href="/admin/super/clubes" prefetch={false} className={styles.cardAction}>
                                 Ir al panel de clubes
                             </Link>
                         </div>
@@ -846,6 +846,7 @@ export default function SuperadminClubFamiliesPage() {
                                                     )}
                                                     <Link
                                                         href={`/admin/entities/${member.id}/manage?type=club&tab=relacionados`}
+                                                        prefetch={false}
                                                         className={styles.cardAction}
                                                         style={{ padding: '6px 10px', fontSize: 11 }}
                                                     >

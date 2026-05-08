@@ -50,6 +50,7 @@ export default function TournamentAdminSidebar() {
                                     <Link
                                         key={item.href}
                                         href={item.href}
+                                        prefetch={false}
                                         className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
                                         onClick={() => setOpen(false)}
                                     >

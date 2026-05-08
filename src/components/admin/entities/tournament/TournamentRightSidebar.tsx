@@ -55,16 +55,16 @@ export function TournamentRightSidebar({ id, data, onDelete }: RightSidebarProps
                 <div className="basalt-sidebar-section-header">
                     <span className="basalt-sidebar-title">Operation Shortcuts</span>
                 </div>
-                <Link className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=participantes`}>
+                <Link prefetch={false} className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=participantes`}>
                     Edit Participant List
                 </Link>
-                <Link className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=estructura`}>
+                <Link prefetch={false} className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=estructura`}>
                     Define Competitive Structure
                 </Link>
-                <Link className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=operacion`}>
+                <Link prefetch={false} className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=operacion`}>
                     Operate Fixture & Table
                 </Link>
-                <Link className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=audit`}>
+                <Link prefetch={false} className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=audit`}>
                     Review Audit Trail
                 </Link>
             </div>

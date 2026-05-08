@@ -84,7 +84,7 @@ export default async function TournamentAdminHome() {
             </header>
 
             <div className={styles.statsGrid}>
-                <Link href="/admin/torneo/clubes" className={styles.statCard}>
+                <Link href="/admin/torneo/clubes" prefetch={false} className={styles.statCard}>
                     <p className={styles.statEyebrow}>Clubes</p>
                     <h2 className={styles.statValue}>{stats.clubs}</h2>
                     <p className={styles.statLabel}>
@@ -95,7 +95,7 @@ export default async function TournamentAdminHome() {
                     <div className={styles.statCta}>Ir a Clubes →</div>
                 </Link>
 
-                <Link href="/admin/torneo/torneos" className={styles.statCard}>
+                <Link href="/admin/torneo/torneos" prefetch={false} className={styles.statCard}>
                     <p className={styles.statEyebrow}>Torneos</p>
                     <h2 className={styles.statValue}>{stats.tournaments}</h2>
                     <p className={styles.statLabel}>

@@ -21,6 +21,7 @@ export default function AdminBreadcrumbs({ items }: AdminBreadcrumbsProps) {
                     {item.href ? (
                         <Link
                             href={item.href}
+                            prefetch={false}
                             className="hover:text-white hover:underline decoration-[var(--accent)] underline-offset-4 transition-all duration-200"
                         >
                             {item.label}

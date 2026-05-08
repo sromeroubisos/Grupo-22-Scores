@@ -476,7 +476,7 @@ export default function SuperadminTorneosPage() {
                         <RefreshCw size={14} style={{ marginRight: 6, animation: isLoading ? 'spin 2s linear infinite' : 'none' }} />
                         Refrescar
                     </button>
-                    <Link href="/admin/super/torneos/crear" className={`${styles.cardAction} ${styles.cardActionPrimary}`}>
+                    <Link href="/admin/super/torneos/crear" prefetch={false} className={`${styles.cardAction} ${styles.cardActionPrimary}`}>
                         <Plus size={14} style={{ marginRight: 6 }} /> Nuevo Torneo
                     </Link>
                 </div>
@@ -783,7 +783,7 @@ export default function SuperadminTorneosPage() {
 
                                 {/* Actions */}
                                 <div className={styles.cardActions}>
-                                    <Link href={`/admin/entities/${t.id}/manage?type=tournament`} className={styles.actionBtn}>
+                                    <Link href={`/admin/entities/${t.id}/manage?type=tournament`} prefetch={false} className={styles.actionBtn}>
                                         Configurar Detalles
                                     </Link>
                                 </div>

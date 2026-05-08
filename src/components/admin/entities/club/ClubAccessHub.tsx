@@ -117,6 +117,7 @@ export function ClubAccessHub({ clubs }: ClubAccessHubProps) {
                                         derivativeType: 'divisions',
                                         derivedSport: family.sport || '',
                                     })}
+                                    prefetch={false}
                                     className="club-access-create-btn"
                                 >
                                     <Plus className="w-4 h-4" />
@@ -143,6 +144,7 @@ export function ClubAccessHub({ clubs }: ClubAccessHubProps) {
                                     <Link
                                         key={club.id}
                                         href={`/club-admin?club=${encodeURIComponent(club.id)}&tab=general&type=club`}
+                                        prefetch={false}
                                         className="club-access-card"
                                         style={{ animationDelay: `${0.08 + (index * 0.04)}s` }}
                                     >

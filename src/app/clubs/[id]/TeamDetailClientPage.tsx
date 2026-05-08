@@ -633,7 +633,7 @@ function TeamDetailInner({ id }: { id: string }) {
                         </div>
                         <div className={styles.headerActions}>
                             {isSuperAdminUser && adminEditHref ? (
-                                <Link href={adminEditHref} className={styles.adminActionBtn}>
+                                <Link href={adminEditHref} prefetch={false} className={styles.adminActionBtn}>
                                     Editar logo
                                 </Link>
                             ) : null}

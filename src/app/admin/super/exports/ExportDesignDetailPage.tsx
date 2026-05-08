@@ -1111,7 +1111,7 @@ function ExportDesignDetailPageContent({ design }: { design: ExportDesign }) {
 
     return (
         <div className={styles.detailPage}>
-            <Link href="/admin/super/exports" className={styles.backLink}>
+            <Link href="/admin/super/exports" prefetch={false} className={styles.backLink}>
                 <ArrowLeft size={16} />
                 Volver a Exports
             </Link>

@@ -9,7 +9,7 @@ export default function IntegracionesPage() {
                     Acceso directo al panel de integraciones para administradores.
                 </p>
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <Link href="/admin/super/integraciones" className="btn btn-primary">Ir al panel</Link>
+                    <Link href="/admin/super/integraciones" prefetch={false} className="btn btn-primary">Ir al panel</Link>
                     <Link href="/" className="btn btn-secondary">Volver al inicio</Link>
                 </div>
             </div>

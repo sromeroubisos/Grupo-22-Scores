@@ -102,7 +102,7 @@ export default function JugadoresPage() {
                     <div className={styles.consoleSubtitle}>Vista en cartas con metricas</div>
                 </div>
                 <div className={styles.consoleActions}>
-                    <Link href="/admin/super/jugadores" className={`${styles.cardAction} ${styles.cardActionPrimary}`}>
+                    <Link href="/admin/super/jugadores" prefetch={false} className={`${styles.cardAction} ${styles.cardActionPrimary}`}>
                         + Crear
                     </Link>
                 </div>

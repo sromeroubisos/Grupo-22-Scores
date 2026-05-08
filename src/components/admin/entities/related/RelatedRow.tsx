@@ -97,6 +97,7 @@ export function RelatedRow({ item, getIcon, selectable = false, selected = false
 
                 <Link
                     href={item.href}
+                    prefetch={false}
                     className="flex flex-col min-w-0 flex-1 focus:outline-none"
                 >
                     <span className="text-sm font-bold text-foreground truncate max-w-sm sm:max-w-md md:max-w-lg">
@@ -122,7 +123,7 @@ export function RelatedRow({ item, getIcon, selectable = false, selected = false
                             </svg>
                         </button>
                     )}
-                    <Link href={item.href} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-surface border border-divider text-system-secondary capitalize hover:border-accent-blue hover:text-accent-blue transition-colors">
+                    <Link href={item.href} prefetch={false} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-surface border border-divider text-system-secondary capitalize hover:border-accent-blue hover:text-accent-blue transition-colors">
                         <span>{getIcon(item.entityType)}</span>
                         {item.entityType}
                     </Link>

@@ -144,6 +144,7 @@ export function ClubRelatedClubsTab({
                                 {!club.isCurrent && (
                                     <Link
                                         href={buildClubManageHref(club.id, 'equipos', navigationMode)}
+                                        prefetch={false}
                                         className="btn"
                                         style={{ textDecoration: 'none' }}
                                     >

@@ -194,7 +194,7 @@ export default function ExportsCatalogPage({ designs }: { designs: ExportDesign[
                                             >
                                                 {isActiveDesign ? 'Diseno activo' : 'Activar diseno'}
                                             </button>
-                                            <Link href={`/admin/super/exports/${design.slug}`} className={styles.secondaryButton}>
+                                            <Link href={`/admin/super/exports/${design.slug}`} prefetch={false} className={styles.secondaryButton}>
                                                 Abrir diseno
                                                 <ArrowRight size={16} />
                                             </Link>

@@ -373,7 +373,7 @@ export default function NewUnionForm() {
 
                             <div className={styles.footerActions}>
                                 <div className={styles.inlineRow}>
-                                    <Link href="/admin/super/uniones" className={styles.buttonGhost}>
+                                    <Link href="/admin/super/uniones" prefetch={false} className={styles.buttonGhost}>
                                         <ArrowLeft size={16} />
                                         Volver
                                     </Link>

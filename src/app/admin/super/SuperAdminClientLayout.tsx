@@ -59,6 +59,7 @@ function SuperTopbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
                         <Link
                             key={tab.id}
                             href={tab.href}
+                            prefetch={false}
                             ref={activeNavItem?.id === tab.id ? activeTabRef : null}
                             className={`${styles.mobileTab} ${activeNavItem?.id === tab.id ? styles.mobileTabActive : ''}`}
                         >

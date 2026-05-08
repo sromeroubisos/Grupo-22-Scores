@@ -761,6 +761,7 @@ export function ClubFixtureResultsTab({
                             <div className="club-match-actions">
                                 <Link
                                     href={`/club-admin/matches/${entry.match.id}?club=${clubId}`}
+                                    prefetch={false}
                                     className="club-match-action primary"
                                     onClick={(e) => e.stopPropagation()}
                                     title="Abrir ficha"
@@ -770,6 +771,7 @@ export function ClubFixtureResultsTab({
                                 </Link>
                                 <Link
                                     href={`/club-admin/matches/${entry.match.id}?section=lineup&club=${clubId}`}
+                                    prefetch={false}
                                     className="club-match-action"
                                     onClick={(e) => e.stopPropagation()}
                                     title="Alineación"
@@ -845,6 +847,7 @@ export function ClubFixtureResultsTab({
                                                 </div>
                                                 <Link
                                                     href={`/club-admin/matches/${entry.match.id}`}
+                                                    prefetch={false}
                                                     target="_blank"
                                                     className="text-xs px-3 py-1.5 bg-white/10 rounded-lg hover:bg-white/20"
                                                     onClick={(e) => e.stopPropagation()}

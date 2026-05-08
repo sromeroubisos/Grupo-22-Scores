@@ -32,6 +32,20 @@ export const TOURNAMENT_TABS = [
     { id: 'audit', label: 'Auditoria', icon: Shield, description: 'Bitacora y trazabilidad operativa' },
 ];
 
+const DISABLE_ADMIN_PREFETCH = process.env.NEXT_PUBLIC_DISABLE_ADMIN_PREFETCH !== 'false';
+
+function isProtectedAdminHref(href: string) {
+    return href.startsWith('/admin') || href.startsWith('/club-admin');
+}
+
+function shouldPrefetchHref(href: string) {
+    if (DISABLE_ADMIN_PREFETCH && isProtectedAdminHref(href)) {
+        return false;
+    }
+
+    return true;
+}
+
 interface TournamentTabsProps {
     id: string;
     currentTab: string;
@@ -70,8 +84,11 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
 
     const prefetchTab = useCallback((tabId: string) => {
         if (tabId === currentTab || prefetchedTabsRef.current.has(tabId)) return;
+        const href = tabHref(tabId);
         prefetchedTabsRef.current.add(tabId);
-        router.prefetch(tabHref(tabId));
+        if (!shouldPrefetchHref(href)) return;
+
+        router.prefetch(href);
     }, [currentTab, router, tabHref]);
 
     useEffect(() => {

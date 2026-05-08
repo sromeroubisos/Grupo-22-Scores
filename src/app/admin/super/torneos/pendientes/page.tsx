@@ -151,7 +151,7 @@ export default async function PendingTournamentsPage() {
                     </p>
                 </div>
                 <div className={styles.headerRight}>
-                    <Link href="/admin/super/torneos" className={styles.viewSiteBtn}>
+                    <Link href="/admin/super/torneos" prefetch={false} className={styles.viewSiteBtn}>
                         Volver a torneos
                     </Link>
                 </div>

@@ -3560,12 +3560,12 @@ export default function TournamentDetailPage({
                                     {hasDedicatedPlayoffTab || shouldUseIntegratedBracketView ? 'Ver Cuadro' : 'Ver Tabla'}
                                 </button>
                                 {isExactSuperAdmin && externalTournamentEditorHref && (
-                                    <Link href={externalTournamentEditorHref} className={styles.ctaBtnSecondary}>
+                                    <Link href={externalTournamentEditorHref} prefetch={false} className={styles.ctaBtnSecondary}>
                                         Editar API
                                     </Link>
                                 )}
                                 {isSuperAdminUser && adminTournamentId && (
-                                    <Link href={`/admin/entities/${adminTournamentId}/manage?type=tournament`} className={styles.ctaBtnSecondary}>
+                                    <Link href={`/admin/entities/${adminTournamentId}/manage?type=tournament`} prefetch={false} className={styles.ctaBtnSecondary}>
                                         Editar torneo
                                     </Link>
                                 )}

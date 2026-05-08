@@ -105,6 +105,7 @@ export default function Sidebar() {
                             <Link
                                 key={item.id}
                                 href={item.href}
+                                prefetch={false}
                                 className={`
                                     flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group
                                     ${isActive

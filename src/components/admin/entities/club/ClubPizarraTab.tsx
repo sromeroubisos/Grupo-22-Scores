@@ -1542,7 +1542,7 @@ export function ClubPizarraTab({
                             Volver
                         </button>
                     ) : (
-                        <Link href={backHref} className="pizarra-mobile-back">
+                        <Link href={backHref} prefetch={false} className="pizarra-mobile-back">
                             Volver
                         </Link>
                     )}

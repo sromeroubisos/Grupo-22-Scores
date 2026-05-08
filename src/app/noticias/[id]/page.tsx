@@ -120,6 +120,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
                         {canManageNews && (
                             <Link
                                 href={`/admin/super/noticias/editar/${news.id}`}
+                                prefetch={false}
                                 className={`${styles.actionLink} ${styles.primaryLink}`}
                             >
                                 Editar noticia
