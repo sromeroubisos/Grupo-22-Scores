@@ -1,6 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 import { getSupabaseAuthStorageKey, getSupabaseSharedCookieDomain } from '@/lib/supabase/auth-cookie'
 import styles from '../login.module.css'
 import { useState } from 'react'
@@ -9,9 +8,8 @@ import { sanitizeReturnTo } from '../redirects'
 import { getAuthErrorMessage } from '@/lib/auth/errors'
 
 // Wipe any stale `-code-verifier` cookie/storage entry before starting a
-// fresh PKCE flow. Stuck cookies from an earlier abandoned attempt are the
-// most common cause of "code verifier" errors when the user retries
-// "Continuar con Google".
+// fresh PKCE flow. Stuck cookies from an earlier abandoned attempt are a
+// common cause of "code verifier" errors when the user retries Google.
 function clearStalePkceState() {
     if (typeof window === 'undefined') return
     const storageKey = getSupabaseAuthStorageKey()
@@ -19,16 +17,8 @@ function clearStalePkceState() {
 
     const verifierKey = `${storageKey}-code-verifier`
 
-    try {
-        window.localStorage.removeItem(verifierKey)
-    } catch {
-        // Storage access may throw in strict privacy modes — best-effort only.
-    }
-    try {
-        window.sessionStorage.removeItem(verifierKey)
-    } catch {
-        // Same as above.
-    }
+    try { window.localStorage.removeItem(verifierKey) } catch { /* best-effort */ }
+    try { window.sessionStorage.removeItem(verifierKey) } catch { /* best-effort */ }
 
     const expire = (domain?: string) => {
         const secure = window.location.protocol === 'https:' ? '; Secure' : ''
@@ -46,38 +36,37 @@ export default function OAuthButtons({ onError }: { onError?: (msg: string | nul
     const roleIntent = searchParams.get('roleIntent')
     const returnTo = sanitizeReturnTo(searchParams.get('returnTo'), roleIntent)
 
-    const getCallbackUrl = () => {
-        const callbackUrl = new URL('/auth/callback', window.location.origin)
-        callbackUrl.searchParams.set('next', returnTo)
-        return callbackUrl.toString()
-    }
-
     const handleLogin = async () => {
-        // Guard via state, NOT a ref. A stale `ref.current = true` from a
-        // previous failed attempt would otherwise leave the button silently
-        // unclickable forever.
         if (loading) return
         onError?.(null)
         setLoading('google')
 
         let navigated = false
         try {
-            console.info('[OAuth] starting Google sign-in flow')
+            console.info('[OAuth] starting Google sign-in via /api/auth/google-start')
             clearStalePkceState()
-            const supabase = createClient()
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: getCallbackUrl(),
-                    skipBrowserRedirect: true,
-                },
+
+            // Server-side OAuth start. The server creates the PKCE
+            // code_verifier and writes it as a cookie in the response, so
+            // the /auth/callback route handler (which also runs on the
+            // server) can read it back when exchanging the code. Doing
+            // this in the browser caused the verifier to land in
+            // localStorage, where the SSR callback couldn't see it.
+            const response = await fetch('/api/auth/google-start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({ next: returnTo }),
             })
+            const payload = await response.json().catch(() => ({})) as { url?: string; error?: string }
 
-            if (error) throw error
+            if (!response.ok || payload.error) {
+                throw new Error(payload.error || `OAuth start failed (HTTP ${response.status})`)
+            }
 
-            const targetUrl = data?.url
+            const targetUrl = payload.url
             if (!targetUrl) {
-                throw new Error('Supabase did not return an OAuth redirect URL')
+                throw new Error('OAuth start did not return a redirect URL')
             }
 
             console.info('[OAuth] redirecting to provider', targetUrl)
