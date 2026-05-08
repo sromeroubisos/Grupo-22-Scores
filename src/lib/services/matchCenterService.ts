@@ -7,6 +7,12 @@ import {
   resolveMatchPointsRules,
 } from '@/lib/standings/matchPointsPreview';
 import { parseSubstitutionIncomingPlayer } from '@/lib/matchEventStats';
+import {
+  DEFAULT_MATCH_PERIOD,
+  getEventPeriodForType,
+  getNextActivePeriodAfterEvent,
+  normalizeMatchPeriod,
+} from '@/lib/matchPeriods';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { isUuid } from '@/lib/utils/postgrest';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
@@ -112,6 +118,8 @@ export type MatchCenterEventInput = {
   videoTime?: string | null;
   parentEventId?: string | null;
   sequence?: number | null;
+  period?: string | null;
+  order?: number | null;
 };
 
 export type MatchCenterClockInput = {
@@ -308,6 +316,12 @@ function normalizeEventId(value: unknown) {
   return UUID_PATTERN.test(normalized) ? normalized : crypto.randomUUID();
 }
 
+function normalizeEventOrderValue(value: unknown) {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(0, Math.trunc(parsed)) : null;
+}
+
 function getMatchSeason(match: MatchContextRow) {
   const raw = typeof match.date_time === 'string' ? match.date_time.slice(0, 4) : '';
   return /^\d{4}$/.test(raw) ? raw : String(new Date().getFullYear());
@@ -423,6 +437,8 @@ function normalizeEventInput(event: MatchCenterEventInput) {
     videoTime: normalizeText(event.videoTime) || null,
     parentEventId: normalizeText(event.parentEventId) || null,
     sequence: Number.isFinite(event.sequence) ? Math.max(0, Math.trunc(event.sequence as number)) : null,
+    period: normalizeMatchPeriod(source.period),
+    order: normalizeEventOrderValue(source.order),
   };
 }
 
@@ -512,8 +528,13 @@ function buildClockSnapshotRelationalEvent(
   };
 }
 
-function mapStoredEvent(row: any, match: { home_club_id?: string | null; away_club_id?: string | null }) {
+function mapStoredEvent(
+  row: any,
+  match: { home_club_id?: string | null; away_club_id?: string | null },
+  activePeriod: unknown = DEFAULT_MATCH_PERIOD,
+) {
   const details = row?.details && typeof row.details === 'object' ? row.details : {};
+  const type = normalizeText(row?.event_type) || 'note';
   const teamFromDetails = normalizeTeam((details as Record<string, unknown>).team);
   const team =
     row?.club_id && row.club_id === match.home_club_id
@@ -525,7 +546,7 @@ function mapStoredEvent(row: any, match: { home_club_id?: string | null; away_cl
   return {
     id: normalizeEventId(row?.id),
     minute: Number.isFinite(row?.minute) ? Number(row.minute) : 0,
-    type: normalizeText(row?.event_type) || 'note',
+    type,
     team,
     playerId:
       normalizeText(row?.player_id) ||
@@ -546,7 +567,7 @@ function mapStoredEvent(row: any, match: { home_club_id?: string | null; away_cl
       normalizeText((details as Record<string, unknown>).secondary_player_name) ||
       normalizeText((details as Record<string, unknown>).subPlayer) ||
       normalizeText((details as Record<string, unknown>).sub_player) ||
-      (normalizeText(row?.event_type) === 'substitution'
+      (type === 'substitution'
         ? parseSubstitutionIncomingPlayer(normalizeText((details as Record<string, unknown>).detail))
         : ''),
     detail: normalizeText((details as Record<string, unknown>).detail),
@@ -566,15 +587,20 @@ function mapStoredEvent(row: any, match: { home_club_id?: string | null; away_cl
         : Number.isFinite((details as Record<string, unknown>).sequence)
           ? Number((details as Record<string, unknown>).sequence)
           : undefined,
+    period: normalizeText((details as Record<string, unknown>).period)
+      ? normalizeMatchPeriod((details as Record<string, unknown>).period)
+      : getEventPeriodForType(type, activePeriod),
+    order: normalizeEventOrderValue((details as Record<string, unknown>).order) ?? undefined,
   };
 }
 
-function mapJsonEvent(row: unknown) {
+function mapJsonEvent(row: unknown, activePeriod: unknown = DEFAULT_MATCH_PERIOD) {
   const source = row && typeof row === 'object' ? (row as Record<string, unknown>) : {};
+  const type = normalizeText(source.type) || 'note';
   return normalizeEventInput({
     id: normalizeText(source.id) || undefined,
     minute: typeof source.minute === 'number' ? source.minute : Number(source.minute || 0),
-    type: normalizeText(source.type),
+    type,
     team: normalizeTeam(source.team),
     playerId: normalizeText(source.playerId) || normalizeText(source.player_id) || null,
     playerName: normalizeText(source.playerName) || normalizeText(source.player_name),
@@ -598,6 +624,8 @@ function mapJsonEvent(row: unknown) {
         : Number.isFinite(Number(source.sequence))
           ? Number(source.sequence)
           : null,
+    period: normalizeText(source.period) ? normalizeMatchPeriod(source.period) : getEventPeriodForType(type, activePeriod),
+    order: normalizeEventOrderValue(source.order),
   });
 }
 
@@ -700,6 +728,8 @@ function mapEventToInsert(
       videoTime: event.videoTime || null,
       parentEventId: event.parentEventId || null,
       sequence: event.sequence ?? null,
+      period: event.period || DEFAULT_MATCH_PERIOD,
+      order: event.order ?? null,
     },
   };
 }
@@ -1438,12 +1468,13 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
 
   const { data: eventRows, error: eventsError } = await client
     .from('match_events')
-    .select('id, club_id, player_id, player_name, event_type, minute, details, video_time, parent_event_id, sequence')
+    .select('id, club_id, player_id, player_name, event_type, minute, details, video_time, parent_event_id, sequence, created_at')
     .eq('match_id', matchId)
-    .order('minute', { ascending: true });
+    .order('created_at', { ascending: true });
 
   if (!eventsError) {
     loadedFromRelationalTable = true;
+    let activePeriod = normalizeMatchPeriod(null);
     events = (eventRows || []).flatMap((row: any) => {
       const details = row?.details && typeof row.details === 'object' ? row.details as Record<string, unknown> : {};
       if (normalizeText(row?.event_type) === CLOCK_SNAPSHOT_EVENT_TYPE || normalizeText(details.kind) === 'clock_state') {
@@ -1451,7 +1482,9 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
         return [];
       }
 
-      return [mapStoredEvent(row, data)];
+      const event = mapStoredEvent(row, data, activePeriod);
+      activePeriod = getNextActivePeriodAfterEvent(event.type, event.period);
+      return [event];
     });
   } else if (!isMissingMatchEventsTableError(eventsError)) {
     console.error('[matchCenterService] Failed to load match events:', eventsError);
@@ -1459,6 +1492,7 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
 
   if (!loadedFromRelationalTable || events.length === 0) {
     const legacyEvents = await fetchLegacyJsonEvents(client, matchId);
+    let activePeriod = normalizeMatchPeriod(null);
     events = legacyEvents.flatMap((row) => {
       const source = row && typeof row === 'object' ? row as Record<string, unknown> : {};
       if (isClockSnapshotRecord(source)) {
@@ -1466,7 +1500,9 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
         return [];
       }
 
-      return [mapJsonEvent(row)];
+      const event = mapJsonEvent(row, activePeriod);
+      activePeriod = getNextActivePeriodAfterEvent(event.type, event.period);
+      return [event];
     });
   }
 
@@ -1620,7 +1656,14 @@ export async function persistMatchCenterSupplementalData(
     payload.events !== undefined
       ? await resolveEventsForPersistence(client, match as MatchContextRow, mergedIncomingLineups, payload.events)
       : Array.isArray((match as any).events)
-        ? ((match as any).events as unknown[]).map((row) => mapJsonEvent(row))
+        ? (() => {
+            let activePeriod = normalizeMatchPeriod(null);
+            return ((match as any).events as unknown[]).map((row) => {
+              const event = mapJsonEvent(row, activePeriod);
+              activePeriod = getNextActivePeriodAfterEvent(event.type, event.period);
+              return event;
+            });
+          })()
         : [];
   const existingClockSnapshotJsonEvent = Array.isArray((match as any).events)
     ? findClockSnapshotJsonEvent((match as any).events as unknown[])

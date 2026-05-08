@@ -5,6 +5,7 @@ import {
   isGoalKickMade,
   parseKickMetersFromDetail,
 } from '@/lib/matchEventStats';
+import { getEventPeriodForType, getNextActivePeriodAfterEvent, normalizeMatchPeriod } from '@/lib/matchPeriods';
 import type {
   AvailabilityStatus,
   ClubCallup,
@@ -420,17 +421,29 @@ export function ensureLineupsState(source: unknown, clock?: unknown): ClubLineup
 }
 
 export function ensureEvents(source: unknown): ClubLiveEvent[] {
-  return ensureArray(source, (row) => {
+  if (!Array.isArray(source)) return [];
+
+  let activePeriod = normalizeMatchPeriod(null);
+
+  return source.map((entry, index) => {
+    const row = (entry && typeof entry === 'object' ? entry : {}) as Record<string, unknown>;
     const type = ensureString(row.type) || 'note';
     const detail = ensureString(row.detail);
     const secondaryPlayerName =
       ensureString(row.secondaryPlayerName ?? row.secondary_player_name ?? row.subPlayer ?? row.sub_player) ||
       (type === 'substitution' ? parseSubstitutionIncoming(detail) : '');
-    return {
+    const rawOrder = row.order === null || row.order === undefined || row.order === ''
+      ? Number.NaN
+      : Number(row.order);
+    const period = ensureString(row.period)
+      ? normalizeMatchPeriod(row.period)
+      : getEventPeriodForType(type, activePeriod);
+    const team: MatchEventTeam = row.team === 'home' || row.team === 'away' ? row.team : null;
+    const event = {
       id: ensureString(row.id) || crypto.randomUUID(),
       minute: ensureInputString(row.minute),
       type,
-      team: row.team === 'home' || row.team === 'away' ? row.team : null,
+      team,
       playerId: ensureString(row.playerId ?? row.player_id) || null,
       playerName: ensureString(row.playerName ?? row.player_name),
       secondaryPlayerId: ensureString(row.secondaryPlayerId ?? row.secondary_player_id ?? row.subPlayerId ?? row.sub_player_id) || null,
@@ -439,7 +452,11 @@ export function ensureEvents(source: unknown): ClubLiveEvent[] {
       videoTime: ensureString(row.videoTime ?? row.video_time) || '',
       parentEventId: ensureString(row.parentEventId ?? row.parent_event_id) || undefined,
       sequence: typeof row.sequence === 'number' ? row.sequence : undefined,
+      period,
+      order: Number.isFinite(rawOrder) ? rawOrder : index,
     };
+    activePeriod = getNextActivePeriodAfterEvent(type, period);
+    return event;
   });
 }
 
@@ -459,6 +476,8 @@ export function serializeLiveEvent(event: ClubLiveEvent) {
     videoTime: event.videoTime?.trim() || null,
     parentEventId: event.parentEventId,
     sequence: event.sequence,
+    period: normalizeMatchPeriod(event.period),
+    order: event.order ?? null,
   };
 }
 
@@ -540,7 +559,7 @@ export function createEmptyLineupPlayer(): MatchLineupPlayer {
 }
 
 export function createEmptyEvent(): ClubLiveEvent {
-  return { id: crypto.randomUUID(), minute: '', type: 'note', team: null, playerName: '', detail: '' };
+  return { id: crypto.randomUUID(), minute: '', period: '1T', order: null, type: 'note', team: null, playerName: '', detail: '' };
 }
 
 export function createLiveComposer(action: LiveActionType, defaults?: Partial<LiveComposerState>): LiveComposerState {

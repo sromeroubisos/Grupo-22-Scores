@@ -7,6 +7,7 @@ import { type LocalPublicEvent } from '@/lib/localMatchData';
 import { buildMatchEventDefinitionMap, getDefaultMatchEventDefinitions, type MatchEventDefinition } from '@/lib/matchEventCatalog';
 import { getConfiguredEventPoints } from '@/lib/matchStatsFromEvents';
 import { isGoalKickAttemptEvent, parseSubstitutionIncomingPlayer } from '@/lib/matchEventStats';
+import { compareMatchPeriodValues, getMatchPeriodLabel } from '@/lib/matchPeriods';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -149,7 +150,7 @@ const EVENT_COLORS: Record<string, string> = {
 /* ------------------------------------------------------------------ */
 
 function eventKey(evt: TimelineEvent): string {
-  return `${evt.minute}|${evt.type}|${evt.team || '-'}|${evt.player || '-'}|${evt.description || '-'}`;
+  return `${evt.period}|${evt.order}|${evt.minute}|${evt.type}|${evt.team || '-'}|${evt.player || '-'}|${evt.description || '-'}`;
 }
 
 function getEventPoints(
@@ -190,6 +191,28 @@ function getEventCategories(type: string): FilterKey[] {
 
 function labelForType(type: string): string {
   return TYPE_LABELS[type.toLowerCase()] || type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function getTimelineEventOrder(evt: TimelineEvent, fallback: number) {
+  const rawOrder = (evt as unknown as Record<string, unknown>).order;
+  if (rawOrder === null || rawOrder === undefined || rawOrder === '') return fallback;
+  const parsed = Number(rawOrder);
+  return Number.isFinite(parsed) ? Math.max(0, Math.trunc(parsed)) : fallback;
+}
+
+function sortTimelineEvents(events: TimelineEvent[]) {
+  return events
+    .map((event, index) => ({ event, index }))
+    .sort((left, right) => {
+      const periodDiff = compareMatchPeriodValues(left.event.period, right.event.period);
+      if (periodDiff !== 0) return periodDiff;
+
+      const orderDiff = getTimelineEventOrder(left.event, left.index) - getTimelineEventOrder(right.event, right.index);
+      if (orderDiff !== 0) return orderDiff;
+
+      return left.event.minute - right.event.minute || eventKey(left.event).localeCompare(eventKey(right.event));
+    })
+    .map(({ event }) => event);
 }
 
 function cleanDescription(desc: string, type: string): string {
@@ -381,14 +404,14 @@ export default function MatchTimeline({ events, homeTeam, awayTeam, sportId }: P
     () => buildMatchEventDefinitionMap(getDefaultMatchEventDefinitions(String(sportId || 'rugby'))),
     [sportId],
   );
+  const chronologicalEvents = useMemo(() => sortTimelineEvents(events), [events]);
 
   /* ---- Cálculo de marcadores en orden cronológico ---- */
   const scoreMap = useMemo(() => {
     const map = new Map<string, { home: number; away: number; points: number }>();
-    const sorted = [...events].sort((a, b) => a.minute - b.minute || eventKey(a).localeCompare(eventKey(b)));
     let home = 0;
     let away = 0;
-    for (const evt of sorted) {
+    for (const evt of chronologicalEvents) {
       const pts = getEventPoints(evt, definitionMap);
       if (pts > 0 && evt.team) {
         if (evt.team === 'home') home += pts;
@@ -397,13 +420,13 @@ export default function MatchTimeline({ events, homeTeam, awayTeam, sportId }: P
       map.set(eventKey(evt), { home, away, points: pts });
     }
     return map;
-  }, [definitionMap, events]);
+  }, [chronologicalEvents, definitionMap]);
 
   /* ---- Filtrado ---- */
   const filteredEvents = useMemo(() => {
-    if (activeFilter === 'all') return events;
-    return events.filter((evt) => getEventCategories(evt.type).includes(activeFilter));
-  }, [events, activeFilter]);
+    if (activeFilter === 'all') return chronologicalEvents;
+    return chronologicalEvents.filter((evt) => getEventCategories(evt.type).includes(activeFilter));
+  }, [activeFilter, chronologicalEvents]);
 
   /* ---- Resumen según filtro activo ---- */
   const summary = useMemo(() => {
@@ -421,20 +444,32 @@ export default function MatchTimeline({ events, homeTeam, awayTeam, sportId }: P
     return { total, tries, penalties, kicks };
   }, [filteredEvents]);
 
-  /* ---- Agrupación por minuto (descendente) ---- */
+  /* ---- Agrupación por periodo y minuto ---- */
   const minuteGroups = useMemo(() => {
-    const map = new Map<number, { minute: number; home: TimelineEvent[]; away: TimelineEvent[]; neutral: TimelineEvent[] }>();
-    for (const evt of filteredEvents) {
-      const minute = evt.minute;
-      if (!map.has(minute)) {
-        map.set(minute, { minute, home: [], away: [], neutral: [] });
+    const map = new Map<string, { key: string; minute: number; period: string; order: number; home: TimelineEvent[]; away: TimelineEvent[]; neutral: TimelineEvent[] }>();
+    filteredEvents.forEach((evt, index) => {
+      const groupKey = `${evt.period}:${evt.minute}`;
+      if (!map.has(groupKey)) {
+        map.set(groupKey, {
+          key: groupKey,
+          minute: evt.minute,
+          period: evt.period,
+          order: getTimelineEventOrder(evt, index),
+          home: [],
+          away: [],
+          neutral: [],
+        });
       }
-      const g = map.get(minute)!;
+      const g = map.get(groupKey)!;
       if (evt.team === 'home') g.home.push(evt);
       else if (evt.team === 'away') g.away.push(evt);
       else g.neutral.push(evt);
-    }
-    return Array.from(map.values()).sort((a, b) => b.minute - a.minute);
+    });
+    return Array.from(map.values()).sort((a, b) => {
+      const periodDiff = compareMatchPeriodValues(a.period, b.period);
+      if (periodDiff !== 0) return periodDiff;
+      return a.order - b.order || a.minute - b.minute;
+    });
   }, [filteredEvents]);
 
   const hasEvents = filteredEvents.length > 0;
@@ -509,8 +544,11 @@ export default function MatchTimeline({ events, homeTeam, awayTeam, sportId }: P
         <div className={styles.timelineBody}>
           {minuteGroups.map((group) => {
             return (
-              <div key={group.minute} className={styles.minuteGroup}>
-                <div className={styles.minuteBadge}>{group.minute}&apos;</div>
+              <div key={group.key} className={styles.minuteGroup}>
+                <div className={styles.minuteBadge}>
+                  <span>{group.minute}&apos;</span>
+                  <small>{getMatchPeriodLabel(group.period)}</small>
+                </div>
 
                 {/* Home events */}
                 {group.home.length > 0 && (

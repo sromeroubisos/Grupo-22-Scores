@@ -4,7 +4,8 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation';
 import {
     Save, Share2, ChevronLeft, Layout, Users, Clock,
-    BarChart2, Shield, Settings, ImageIcon, Plus, RefreshCw, X, Video, Search, AlertTriangle, CheckCircle
+    BarChart2, Shield, Settings, ImageIcon, Plus, RefreshCw, X, Video, Search, AlertTriangle, CheckCircle,
+    Play, Pause, RotateCcw, FileText
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -28,10 +29,26 @@ import {
     type NormalizedOffensiveBonusRule,
 } from '@/lib/bonusRuleMetrics';
 import {
+    compareMatchPeriodValues,
+    getEventPeriodForType,
+    getMatchPeriodLabel,
+    getNextActivePeriodAfterEvent,
+    normalizeMatchPeriod,
+} from '@/lib/matchPeriods';
+import {
     getConfiguredEventPoints,
     buildCompleteMatchStats,
     buildCompleteStatTabs,
 } from '@/lib/matchStatsFromEvents';
+import { exportMatchSheetPdf } from '@/lib/matchSheetPdf';
+import {
+    buildMatchPlayerSelectionGroups,
+    findMatchPlayerSelectionOption,
+    formatMatchPlayerOptionLabel,
+    preserveMatchPlayerOption,
+    type MatchPlayerSelectionGroups,
+    type MatchPlayerSelectionOption,
+} from '@/lib/matchPlayerSelection';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { calculateBasePointsFromScore } from '@/lib/standings/matchPoints';
 import {
@@ -54,6 +71,8 @@ interface ClubInfo {
 interface TournamentInfo {
     id: string;
     name: string;
+    logo_url?: string | null;
+    logo?: string | null;
     sport_id?: string | null;
     sportId?: string | null;
 }
@@ -68,6 +87,9 @@ interface MatchEvent {
     secondaryPlayerId?: string | null;
     secondaryPlayerName?: string | null;
     detail: string;
+    period?: string | null;
+    order?: number | null;
+    sequence?: number | null;
 }
 
 function toDateTimeLocalInput(value: string | Date | null | undefined) {
@@ -158,6 +180,9 @@ export interface MatchRow {
     tournament?: TournamentInfo | null;
     homeRoster?: MatchRosterPlayer[] | null;
     awayRoster?: MatchRosterPlayer[] | null;
+    category?: string | null;
+    roundLabel?: string | null;
+    referee?: string | null;
     // Points per match
     home_base_points:       number | null;
     away_base_points:       number | null;
@@ -193,19 +218,34 @@ type PersistMatchWarnings = {
 };
 
 function normalizeMatchEvents(events: MatchRow['events']): MatchEvent[] {
-    return Array.isArray(events)
-        ? events.map((event) => {
-            const detail = String(event.detail || '');
-            const secondaryPlayerName = event.secondaryPlayerName
-                || (event.type === 'substitution' ? parseSubstitutionIncomingPlayer(detail) : '');
-            return {
-                ...event,
-                secondaryPlayerId: event.secondaryPlayerId || null,
-                secondaryPlayerName,
-                detail: event.detail || (event.type === 'substitution' && secondaryPlayerName ? `Entra: ${secondaryPlayerName}` : ''),
-            };
-        })
-        : [];
+    if (!Array.isArray(events)) return [];
+
+    let activePeriod = normalizeMatchPeriod(null);
+
+    return events.map((event, index) => {
+        const detail = String(event.detail || '');
+        const type = String(event.type || 'note');
+        const secondaryPlayerName = event.secondaryPlayerName
+            || (type === 'substitution' ? parseSubstitutionIncomingPlayer(detail) : '');
+        const eventOrder = (event as unknown as Record<string, unknown>).order;
+        const rawOrder = eventOrder === null || eventOrder === undefined || eventOrder === ''
+            ? Number.NaN
+            : Number(eventOrder);
+        const period = event.period
+            ? normalizeMatchPeriod(event.period)
+            : getEventPeriodForType(type, activePeriod);
+        const normalizedEvent = {
+            ...event,
+            type,
+            period,
+            order: Number.isFinite(rawOrder) ? rawOrder : index,
+            secondaryPlayerId: event.secondaryPlayerId || null,
+            secondaryPlayerName,
+            detail: event.detail || (type === 'substitution' && secondaryPlayerName ? `Entra: ${secondaryPlayerName}` : ''),
+        };
+        activePeriod = getNextActivePeriodAfterEvent(type, period);
+        return normalizedEvent;
+    });
 }
 
 function normalizeMatchLineups(lineups: MatchRow['lineups']): MatchLineups {
@@ -334,6 +374,25 @@ function formatMatchClock(clock: MatchClock | null | undefined) {
     const period = (normalizedClock.period || '').trim();
 
     return period ? `${minute}:${seconds} - ${period}` : `${minute}:${seconds}`;
+}
+
+function hasMatchClockReference(clock: MatchClock | null | undefined) {
+    const normalizedClock = normalizeMatchClock(clock);
+    return Boolean(
+        normalizedClock.running
+        || normalizedClock.minute
+        || normalizedClock.seconds
+        || normalizedClock.period,
+    );
+}
+
+function resolveEventMinuteFromClock(clock: MatchClock | null | undefined, fallbackMinute: number) {
+    const normalizedClock = normalizeMatchClock(clock);
+    if (hasMatchClockReference(normalizedClock)) {
+        return Math.max(0, normalizedClock.minute || 0);
+    }
+
+    return Math.max(0, fallbackMinute || 0);
 }
 
 function deriveClockFromKickoff(
@@ -541,6 +600,7 @@ type GuidedEventDraft = {
     secondaryPlayerId: string | null;
     secondaryPlayerName: string;
     minute: string;
+    period: string;
     detail: string;
     goalKickResult: GuidedGoalKickResult;
     contestOutcome: GuidedContestOutcome;
@@ -856,6 +916,70 @@ const DEFAULT_POINTS_RULES: PointsRules = {
     defensive: null,
 };
 const COMMON_MATCH_PERIODS = ['Previa', '1T', 'HT', '2T', 'ET', 'Final'];
+const EVENT_PERIOD_OPTIONS = ['1T', '2T', 'ET', 'FT'];
+
+function normalizeEventOrder(value: unknown, fallback: number) {
+    if (value === null || value === undefined || value === '') return fallback;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? Math.max(0, Math.trunc(parsed)) : fallback;
+}
+
+function getEventOrder(event: MatchEvent, fallback: number) {
+    return normalizeEventOrder(event.order, fallback);
+}
+
+function getNextEventOrder(events: MatchEvent[]) {
+    return events.reduce((maxOrder, event, index) => Math.max(maxOrder, getEventOrder(event, index)), -1) + 1;
+}
+
+function compareMatchEventsChronologically(
+    left: MatchEvent,
+    right: MatchEvent,
+    leftIndex: number,
+    rightIndex: number,
+) {
+    const periodDiff = compareMatchPeriodValues(left.period, right.period);
+    if (periodDiff !== 0) return periodDiff;
+
+    const orderDiff = getEventOrder(left, leftIndex) - getEventOrder(right, rightIndex);
+    if (orderDiff !== 0) return orderDiff;
+
+    const minuteDiff = (Number(left.minute) || 0) - (Number(right.minute) || 0);
+    if (minuteDiff !== 0) return minuteDiff;
+
+    const sequenceDiff = Number(left.sequence ?? 0) - Number(right.sequence ?? 0);
+    if (sequenceDiff !== 0) return sequenceDiff;
+
+    return String(left.id).localeCompare(String(right.id));
+}
+
+function sortMatchEventsChronologically(events: MatchEvent[]) {
+    return events
+        .map((event, index) => ({ event, index }))
+        .sort((left, right) => compareMatchEventsChronologically(left.event, right.event, left.index, right.index))
+        .map(({ event }) => event);
+}
+
+function getClockAfterEvent(clock: MatchClock, eventType: string) {
+    const normalized = normalizeMatchClock(clock);
+    const nextPeriod = getNextActivePeriodAfterEvent(eventType, normalized.period);
+
+    if (nextPeriod === normalizeMatchPeriod(normalized.period)) return normalized;
+
+    return {
+        ...normalized,
+        period: nextPeriod,
+        running: eventType === 'match_half' || eventType === 'match_end' || eventType === 'end_period'
+            ? false
+            : normalized.running,
+    };
+}
+
+function getStatusAfterEvent(currentStatus: string, eventType: string) {
+    if (eventType === 'match_start' || eventType === 'match_half' || eventType === 'start_period') return 'live';
+    if (eventType === 'match_end') return 'final';
+    return currentStatus;
+}
 
 function getPositiveInteger(value: string, fallback: number) {
     const parsed = Number.parseInt(value, 10);
@@ -1057,24 +1181,6 @@ function buildLineupSelectionFromRoster(current: LineupPlayer, rosterEntry: Matc
     };
 }
 
-function buildLinkedEventPlayers(players: LineupPlayer[]) {
-    const linked = players
-        .filter((player) => Boolean(player.name.trim()))
-        .map((player) => ({
-            playerId: player.id || null,
-            name: player.name.trim(),
-        }));
-
-    const unique = new Map<string, { playerId: string | null; name: string }>();
-    linked.forEach((entry) => {
-        const key = normalizeLookupKey(entry.name);
-        if (!key || unique.has(key)) return;
-        unique.set(key, entry);
-    });
-
-    return Array.from(unique.values()).sort((left, right) => left.name.localeCompare(right.name, 'es', { sensitivity: 'base' }));
-}
-
 function isEventPlayerAvailable(
     options: Array<{ playerId: string | null; name: string }>,
     value: string | null | undefined,
@@ -1082,6 +1188,74 @@ function isEventPlayerAvailable(
     const key = normalizeLookupKey(value);
     if (!key) return false;
     return options.some((entry) => normalizeLookupKey(entry.name) === key);
+}
+
+type EventPlayerSelectMode = 'active' | 'substitute' | 'activeWithDisabledSubstitutes';
+
+function eventPlayerOptionMatchesName(option: MatchPlayerSelectionOption, value: string | null | undefined) {
+    return normalizeLookupKey(option.name) === normalizeLookupKey(value);
+}
+
+function getEnabledEventPlayerOptions(groups: MatchPlayerSelectionGroups, mode: EventPlayerSelectMode) {
+    return mode === 'substitute' ? groups.substitutes : groups.active;
+}
+
+function renderGroupedEventPlayerOptions({
+    groups,
+    players,
+    mode,
+    selectedValue,
+    placeholder,
+}: {
+    groups: MatchPlayerSelectionGroups;
+    players: LineupPlayer[];
+    mode: EventPlayerSelectMode;
+    selectedValue?: string | null;
+    placeholder: string;
+}) {
+    const enabledOptions = getEnabledEventPlayerOptions(groups, mode);
+    const selectedStillEnabled = enabledOptions.some((option) => eventPlayerOptionMatchesName(option, selectedValue));
+    const selectedOption = !selectedStillEnabled && selectedValue
+        ? findMatchPlayerSelectionOption(groups, selectedValue) || preserveMatchPlayerOption(players, groups, selectedValue)
+        : null;
+
+    return (
+        <>
+            {placeholder ? <option value="">{placeholder}</option> : null}
+            {selectedOption ? (
+                <optgroup label="Seleccionado en este evento">
+                    <option value={selectedOption.name}>{formatMatchPlayerOptionLabel(selectedOption)}</option>
+                </optgroup>
+            ) : null}
+            {mode !== 'substitute' && groups.active.length > 0 ? (
+                <optgroup label="Titulares / activos">
+                    {groups.active.map((player) => (
+                        <option key={`active-${player.key}`} value={player.name}>
+                            {formatMatchPlayerOptionLabel(player)}
+                        </option>
+                    ))}
+                </optgroup>
+            ) : null}
+            {mode === 'substitute' && groups.substitutes.length > 0 ? (
+                <optgroup label="Suplentes disponibles">
+                    {groups.substitutes.map((player) => (
+                        <option key={`sub-${player.key}`} value={player.name}>
+                            {formatMatchPlayerOptionLabel(player)}
+                        </option>
+                    ))}
+                </optgroup>
+            ) : null}
+            {mode === 'activeWithDisabledSubstitutes' && groups.substitutes.length > 0 ? (
+                <optgroup label="Suplentes disponibles">
+                    {groups.substitutes.map((player) => (
+                        <option key={`disabled-sub-${player.key}`} value={player.name} disabled>
+                            {formatMatchPlayerOptionLabel(player)}
+                        </option>
+                    ))}
+                </optgroup>
+            ) : null}
+        </>
+    );
 }
 
 function isStarterLineupPlayer(player: LineupPlayer) {
@@ -1229,6 +1403,18 @@ function toLocalPoints(match: MatchRow): MatchPoints {
     };
 }
 
+function formatPointValue(value: number) {
+    if (!Number.isFinite(value)) return '0';
+    if (Number.isInteger(value)) return String(value);
+    return value.toFixed(2).replace(/\.?0+$/, '');
+}
+
+function formatPointBreakdown(base: number, bonus: number) {
+    const baseText = formatPointValue(base);
+    const bonusText = formatPointValue(bonus);
+    return bonus > 0 ? `Base ${baseText} + bonus ${bonusText}` : `Base ${baseText}`;
+}
+
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ CLIENT COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export default function MatchCenterClient({
     initialMatch,
@@ -1348,10 +1534,50 @@ export default function MatchCenterClient({
         away: normalizeRosterPlayers(match.awayRoster),
     }), [match.awayRoster, match.homeRoster]);
 
+    const eventPlayerSelectionEvents = useMemo(() => sortMatchEventsChronologically(localEvents), [localEvents]);
+    const eventPlayerSelections = useMemo(() => ({
+        home: buildMatchPlayerSelectionGroups(localLineups.home, eventPlayerSelectionEvents, 'home'),
+        away: buildMatchPlayerSelectionGroups(localLineups.away, eventPlayerSelectionEvents, 'away'),
+    }), [eventPlayerSelectionEvents, localLineups.away, localLineups.home]);
+
     const eventPlayerOptions = useMemo(() => ({
-        home: buildLinkedEventPlayers(localLineups.home),
-        away: buildLinkedEventPlayers(localLineups.away),
-    }), [localLineups.away, localLineups.home]);
+        home: [...eventPlayerSelections.home.active, ...eventPlayerSelections.home.substitutes].map((entry) => ({
+            playerId: entry.playerId,
+            name: entry.name,
+        })),
+        away: [...eventPlayerSelections.away.active, ...eventPlayerSelections.away.substitutes].map((entry) => ({
+            playerId: entry.playerId,
+            name: entry.name,
+        })),
+    }), [eventPlayerSelections]);
+
+    const lineupPlayerOptions = useMemo(() => {
+        const homeGroups = buildMatchPlayerSelectionGroups(localLineups.home, [], 'home');
+        const awayGroups = buildMatchPlayerSelectionGroups(localLineups.away, [], 'away');
+        return {
+            home: [...homeGroups.active, ...homeGroups.substitutes].map((entry) => ({
+                playerId: entry.playerId,
+                name: entry.name,
+            })),
+            away: [...awayGroups.active, ...awayGroups.substitutes].map((entry) => ({
+                playerId: entry.playerId,
+                name: entry.name,
+            })),
+        };
+    }, [localLineups.away, localLineups.home]);
+
+    const renderEventPlayerOptions = useCallback((
+        team: 'home' | 'away',
+        mode: EventPlayerSelectMode,
+        selectedValue: string | null | undefined,
+        placeholder: string,
+    ) => renderGroupedEventPlayerOptions({
+        groups: eventPlayerSelections[team],
+        players: localLineups[team],
+        mode,
+        selectedValue,
+        placeholder,
+    }), [eventPlayerSelections, localLineups]);
 
     const updateLineupPlayerValue = useCallback((team: 'home' | 'away', player: LineupPlayer, nextName: string) => {
         setLocalLineups((prev) => {
@@ -2061,9 +2287,49 @@ export default function MatchCenterClient({
         setLocalEvents((prev) => prev.filter((event) => event.id !== eventId));
     }, []);
 
+    const ensureLiveStatus = useCallback(() => {
+        setMatch((prev) => (prev.status === 'live' ? prev : { ...prev, status: 'live' }));
+    }, []);
+
+    const handleStartClock = useCallback(() => {
+        setClockDraft((prev) => {
+            const normalized = normalizeMatchClock(prev);
+            return {
+                ...normalized,
+                period: normalized.period && normalized.period !== 'Previa' ? normalized.period : '1T',
+                running: true,
+            };
+        });
+        ensureLiveStatus();
+    }, [ensureLiveStatus]);
+
+    const handlePauseClock = useCallback(() => {
+        setClockDraft((prev) => ({
+            ...normalizeMatchClock(prev),
+            running: false,
+        }));
+    }, []);
+
+    const handleResumeClock = useCallback(() => {
+        setClockDraft((prev) => {
+            const normalized = normalizeMatchClock(prev);
+            return {
+                ...normalized,
+                period: normalized.period || '1T',
+                running: true,
+            };
+        });
+        ensureLiveStatus();
+    }, [ensureLiveStatus]);
+
+    const handleResetClock = useCallback(() => {
+        setClockDraft({ minute: 0, seconds: 0, period: 'Previa', running: false });
+    }, []);
+
     const openGuidedEvent = useCallback((definition: MatchEventDefinition) => {
         const currentClock = normalizeMatchClock(clockDraftRef.current);
-        const minute = currentClock.minute || getLatestEventMinute(localEventsRef.current) || 0;
+        const minute = resolveEventMinuteFromClock(currentClock, getLatestEventMinute(localEventsRef.current));
+        const period = getEventPeriodForType(definition.type, currentClock.period);
 
         setGuidedEvent({
             definition,
@@ -2074,6 +2340,7 @@ export default function MatchCenterClient({
             secondaryPlayerId: null,
             secondaryPlayerName: '',
             minute: String(minute),
+            period,
             detail: '',
             goalKickResult: 'made',
             contestOutcome: requiresContestOutcome(definition.type) ? 'won' : '',
@@ -2153,10 +2420,18 @@ export default function MatchCenterClient({
             }
         }
 
-        const minute = Math.max(0, Number.parseInt(guidedEvent.minute || '0', 10) || 0);
+        const minute = resolveEventMinuteFromClock(
+            clockDraftRef.current,
+            Number.parseInt(guidedEvent.minute || '0', 10) || 0,
+        );
+        const currentClock = normalizeMatchClock(clockDraftRef.current);
+        const eventPeriod = getEventPeriodForType(guidedEvent.definition.type, currentClock.period || guidedEvent.period);
+        const previousEvents = localEventsRef.current;
         const nextEvent: MatchEvent = {
             id: crypto.randomUUID(),
             minute,
+            period: eventPeriod,
+            order: getNextEventOrder(previousEvents),
             type: guidedEvent.definition.type,
             team: guidedEvent.definition.team === 'none' ? null : guidedEvent.team,
             playerId: guidedEvent.definition.player === 'none' ? null : guidedEvent.playerId,
@@ -2165,17 +2440,32 @@ export default function MatchCenterClient({
             secondaryPlayerName: guidedEvent.secondaryPlayerName.trim(),
             detail: formatGuidedEventDetail(guidedEvent),
         };
-        const previousEvents = localEventsRef.current;
         const nextEvents = [...previousEvents, nextEvent];
+        const nextClock = getClockAfterEvent(currentClock, guidedEvent.definition.type);
+        const previousStatus = matchDraftRef.current.status;
+        const nextStatus = getStatusAfterEvent(previousStatus, guidedEvent.definition.type);
+        const clockChanged = !areMatchClocksEqual(nextClock, currentClock);
+        const statusChanged = nextStatus !== matchDraftRef.current.status;
 
         localEventsRef.current = nextEvents;
         setLocalEvents(nextEvents);
+        if (clockChanged) {
+            clockDraftRef.current = nextClock;
+            setClockDraft(nextClock);
+        }
+        if (statusChanged) {
+            setMatch((current) => ({ ...current, status: nextStatus }));
+        }
         setSaving(true);
         setSaveMsg(null);
 
         try {
             const saveResult = await persistMatchPatch(
-                { eventPatch: { upsert: [nextEvent] } },
+                {
+                    eventPatch: { upsert: [nextEvent] },
+                    ...(clockChanged ? { clock: nextClock } : {}),
+                    ...(statusChanged ? { status: nextStatus } : {}),
+                },
                 { compactResponse: true, eventsOverride: nextEvents },
             );
             setGuidedEvent(null);
@@ -2188,6 +2478,13 @@ export default function MatchCenterClient({
         } catch (err: unknown) {
             localEventsRef.current = previousEvents;
             setLocalEvents(previousEvents);
+            if (clockChanged) {
+                clockDraftRef.current = currentClock;
+                setClockDraft(currentClock);
+            }
+            if (statusChanged) {
+                setMatch((current) => ({ ...current, status: previousStatus }));
+            }
             setSaveMsg({ type: 'err', text: `No se pudo guardar el evento: ${err instanceof Error ? err.message : String(err)}` });
         } finally {
             setSaving(false);
@@ -2208,7 +2505,7 @@ export default function MatchCenterClient({
     const events = localEvents;
     const lineups = localLineups;
     const eventsChronologicalAsc = useMemo(
-        () => [...events].sort((a, b) => a.minute - b.minute || a.id.localeCompare(b.id)),
+        () => sortMatchEventsChronologically(events),
         [events],
     );
     const eventScoreById = useMemo(() => {
@@ -2288,7 +2585,7 @@ export default function MatchCenterClient({
                     return event;
                 }
 
-                const availablePlayers = eventPlayerOptions[event.team];
+                const availablePlayers = lineupPlayerOptions[event.team];
                 let nextEvent = event;
 
                 if (event.playerName.trim() && !isEventPlayerAvailable(availablePlayers, event.playerName)) {
@@ -2315,7 +2612,7 @@ export default function MatchCenterClient({
 
             return changed ? nextEvents : prev;
         });
-    }, [eventPlayerOptions]);
+    }, [lineupPlayerOptions]);
 
     const scoreMismatch = useMemo(() => (
         !areMatchScoresEqual(score, eventDerivedScore)
@@ -2487,7 +2784,7 @@ export default function MatchCenterClient({
                 }))
                 .filter((definition) => definition.homeCount > 0 || definition.awayCount > 0),
             recentEvents: activeTab === 'resumen'
-                ? [...events].sort((a, b) => b.minute - a.minute).slice(0, 8)
+                ? sortMatchEventsChronologically(events).slice(-8)
                 : [],
             totalEvents: events.length,
             winner,
@@ -2627,14 +2924,19 @@ export default function MatchCenterClient({
     const dateTimeDirty = dateTimeDraft !== toDateTimeLocalInput(persistedMatchRef.current.date_time);
     const hasUnsavedMatchParameters = scoreDirty || clockDirty || statusDirty || venueDirty || notesDirty || dateTimeDirty;
     const liveClockLabel = formatMatchClock(clockDraft);
+    const normalizedClockDraft = normalizeMatchClock(clockDraft);
+    const clockHasProgress = Boolean(normalizedClockDraft.minute || normalizedClockDraft.seconds);
+    const canStartClock = !normalizedClockDraft.running && !clockHasProgress;
+    const canPauseClock = normalizedClockDraft.running;
+    const canResumeClock = !normalizedClockDraft.running && clockHasProgress;
+    const guidedEventUsesClockMinute = hasMatchClockReference(clockDraft);
+    const guidedEventClockMinute = guidedEvent
+        ? resolveEventMinuteFromClock(clockDraft, Number.parseInt(guidedEvent.minute || '0', 10) || 0)
+        : 0;
     const sortedEvents = useMemo(
         () => {
             if (activeTab !== 'eventos') return [];
-
-            return events
-                .map((event, index) => ({ event, index }))
-                .sort((a, b) => b.event.minute - a.event.minute || b.index - a.index)
-                .map(({ event }) => event);
+            return sortMatchEventsChronologically(events);
         },
         [activeTab, events],
     );
@@ -2657,8 +2959,145 @@ export default function MatchCenterClient({
             }))
             .filter((group) => group.definitions.length > 0);
     }, [availableEventDefinitions]);
-    const guidedPlayers = guidedEvent?.team ? eventPlayerOptions[guidedEvent.team] : [];
+    const guidedPlayers = guidedEvent?.team ? eventPlayerSelections[guidedEvent.team].active : [];
+    const guidedSecondaryPlayers = guidedEvent?.team
+        ? guidedEvent.definition.type === 'substitution'
+            ? eventPlayerSelections[guidedEvent.team].substitutes
+            : eventPlayerSelections[guidedEvent.team].active
+        : [];
     const guidedTeamName = guidedEvent?.team === 'home' ? homeName : guidedEvent?.team === 'away' ? awayName : '';
+
+    const handleExportMatchSheetPdf = useCallback(() => {
+        const homeFullName = match.homeClub?.name || homeName;
+        const awayFullName = match.awayClub?.name || awayName;
+        const homeBasePoints = Number(localPoints.home_base_points ?? 0);
+        const awayBasePoints = Number(localPoints.away_base_points ?? 0);
+        const homeBonusPoints = Number(localPoints.home_bonus_points ?? 0);
+        const awayBonusPoints = Number(localPoints.away_bonus_points ?? 0);
+        const formattedTime = match.date_time
+            ? formatDateInTimeZone(match.date_time, 'es-AR', { hour: '2-digit', minute: '2-digit' }, APP_TIMEZONE)
+            : '';
+        const mapLineup = (players: LineupPlayer[]) => players.map((player) => ({
+            number: String(player.number ?? '').trim(),
+            name: player.name,
+            position: player.position || '',
+            role: player.role || '',
+            isCaptain: Boolean(player.isCaptain),
+        }));
+        const eventStatsByType = new Map<string, { label: string; home: number; away: number }>();
+        eventsChronologicalAsc.forEach((event) => {
+            if (event.team !== 'home' && event.team !== 'away') return;
+            const label = eventTypeLabel(event.type, availableEventDefinitions);
+            const current = eventStatsByType.get(event.type) || { label, home: 0, away: 0 };
+            current[event.team] += 1;
+            eventStatsByType.set(event.type, current);
+        });
+        const eventStatRows = Array.from(eventStatsByType.values())
+            .sort((left, right) => left.label.localeCompare(right.label, 'es'));
+        const completeStatSections = completeStatTabs.flatMap((tab) => (
+            tab.sections.map((section) => ({
+                title: `${tab.label} - ${section.title}`,
+                rows: section.rows.map((row) => ({
+                    label: row.label,
+                    home: row.valueKind === 'percent'
+                        ? row.home < 0 ? '-' : `${row.home.toFixed(1)}%`
+                        : row.home,
+                    away: row.valueKind === 'percent'
+                        ? row.away < 0 ? '-' : `${row.away.toFixed(1)}%`
+                        : row.away,
+                })),
+            }))
+        ));
+        const timeline = eventsChronologicalAsc.map((event, index) => {
+            const scoreAtEvent = eventScoreById.get(event.id);
+            return {
+                period: getMatchPeriodLabel(event.period),
+                minute: String(event.minute || '--'),
+                summary: eventTypeLabel(event.type, availableEventDefinitions),
+                team: event.team === 'home' ? homeName : event.team === 'away' ? awayName : 'Neutral',
+                detail: formatMatchTimelineEventDescription(event, eventsChronologicalAsc, index, event.playerName || event.detail || 'Sin detalle adicional'),
+                score: scoreAtEvent && scoreAtEvent.points > 0 ? `${scoreAtEvent.home} - ${scoreAtEvent.away}` : undefined,
+            };
+        });
+
+        const opened = exportMatchSheetPdf({
+            title: `Planilla: ${homeFullName} vs ${awayFullName}`,
+            status: match.status,
+            statusLabel: statusLabel(match.status),
+            date: formattedDate,
+            time: formattedTime || 'Hora a confirmar',
+            venue: match.venue || 'Sede a confirmar',
+            referee: match.referee || 'A confirmar',
+            roundLabel: match.roundLabel || match.round_id || 'Sin jornada',
+            category: match.category || 'Sin categoria',
+            accentColor: match.homeClub?.primary_color || '#22c55e',
+            tournament: {
+                name: match.tournament?.name || 'Competicion',
+                logoUrl: match.tournament?.logo_url || match.tournament?.logo || null,
+            },
+            home: {
+                name: homeFullName,
+                shortName: homeName,
+                logoUrl: homeLogo,
+                score: String(score.home ?? 0),
+                points: formatPointValue(homeBasePoints + homeBonusPoints),
+                pointsDetail: formatPointBreakdown(homeBasePoints, homeBonusPoints),
+                lineup: mapLineup(lineups.home),
+            },
+            away: {
+                name: awayFullName,
+                shortName: awayName,
+                logoUrl: awayLogo,
+                score: String(score.away ?? 0),
+                points: formatPointValue(awayBasePoints + awayBonusPoints),
+                pointsDetail: formatPointBreakdown(awayBasePoints, awayBonusPoints),
+                lineup: mapLineup(lineups.away),
+            },
+            timeline,
+            statSections: [
+                { title: 'Resumen de eventos', rows: eventStatRows },
+                ...completeStatSections,
+            ],
+            notes: match.notes || undefined,
+        });
+
+        if (!opened) {
+            setSaveMsg({ type: 'err', text: 'No se pudo abrir la ventana de impresion. Revisa el bloqueo de pop-ups del navegador.' });
+            setTimeout(() => setSaveMsg(null), 3000);
+        }
+    }, [
+        availableEventDefinitions,
+        awayLogo,
+        awayName,
+        completeStatTabs,
+        eventScoreById,
+        eventsChronologicalAsc,
+        formattedDate,
+        homeLogo,
+        homeName,
+        lineups.away,
+        lineups.home,
+        localPoints.away_base_points,
+        localPoints.away_bonus_points,
+        localPoints.home_base_points,
+        localPoints.home_bonus_points,
+        match.awayClub?.name,
+        match.category,
+        match.date_time,
+        match.homeClub?.name,
+        match.homeClub?.primary_color,
+        match.notes,
+        match.referee,
+        match.roundLabel,
+        match.round_id,
+        match.status,
+        match.tournament?.logo,
+        match.tournament?.logo_url,
+        match.tournament?.name,
+        match.venue,
+        score.away,
+        score.home,
+    ]);
 
 
     /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -2727,7 +3166,7 @@ export default function MatchCenterClient({
                         <Share2 size={16} /> <span className="btn-label">Publicar</span>
                     </button>
                     {saveMsg && (
-                        <div style={{
+                        <div className="save-feedback-toast" style={{
                             position: 'absolute',
                             top: '100%',
                             right: 0,
@@ -2754,7 +3193,7 @@ export default function MatchCenterClient({
             </header>
 
             {scoreMismatch && (
-                <section style={{
+                <section className="score-mismatch-banner" style={{
                     margin: '20px 24px 0',
                     padding: '14px 18px',
                     borderRadius: 12,
@@ -2806,23 +3245,23 @@ export default function MatchCenterClient({
                                         {scoreSource === 'manual' ? 'Marcador oficial' : 'Alineado con eventos'}
                                     </span>
                                 </div>
-                                <div className="mc-card-body" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-                                    <div style={{ padding: 16, background: '#111', borderRadius: 8 }}>
+                                <div className="mc-card-body result-summary-grid">
+                                    <div className="result-summary-card">
                                         <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>
                                             Parciales {scoreMismatch ? '(segun eventos)' : ''}
                                         </div>
                                         <div style={{ fontWeight: 800 }}>PT: {ptScore.home} - {ptScore.away}</div>
                                         <div style={{ fontWeight: 800, color: '#888' }}>ST: {stScore.home} - {stScore.away}</div>
                                     </div>
-                                    <div style={{ padding: 16, background: '#111', borderRadius: 8 }}>
+                                    <div className="result-summary-card">
                                         <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Ganador</div>
                                         <div style={{ fontWeight: 800, color: winner === 'EMPATE' || winner === '--' ? '#666' : 'var(--accent)' }}>{winner}</div>
                                     </div>
-                                    <div style={{ padding: 16, background: '#111', borderRadius: 8 }}>
+                                    <div className="result-summary-card">
                                         <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Bonus Ofensivo</div>
                                         <div style={{ fontWeight: 800, color: homeBonusOff || awayBonusOff ? 'var(--accent)' : '#666' }}>{bonusOffText}</div>
                                     </div>
-                                    <div style={{ padding: 16, background: '#111', borderRadius: 8 }}>
+                                    <div className="result-summary-card">
                                         <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', marginBottom: 4 }}>Bonus Defensivo</div>
                                         <div style={{ fontWeight: 800, color: bonusDefText !== 'No' ? '#f59e0b' : '#666' }}>{bonusDefText}</div>
                                     </div>
@@ -2890,7 +3329,10 @@ export default function MatchCenterClient({
                                                         : (ev.playerName || ev.detail);
                                                 return (
                                                 <div key={ev.id || i} className="event-entry" style={{ padding: '8px 12px', marginBottom: 8, background: 'transparent', border: 'none' }}>
-                                                    <div style={{ fontSize: '0.8rem', fontWeight: 900, color: eventTypeColor(ev.type, availableEventDefinitions), width: 40 }}>{ev.minute}&apos;</div>
+                                                    <div style={{ display: 'grid', gap: 3, fontSize: '0.8rem', fontWeight: 900, color: eventTypeColor(ev.type, availableEventDefinitions), width: 64 }}>
+                                                        <span>{ev.minute}&apos;</span>
+                                                        <span style={{ color: '#777', fontSize: '0.62rem', textTransform: 'uppercase' }}>{getMatchPeriodLabel(ev.period)}</span>
+                                                    </div>
                                                     <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>
                                                                 {eventTypeLabel(ev.type, availableEventDefinitions)}{' '}
                                                         <span style={{ opacity: 0.5, fontWeight: 400, marginLeft: 8 }}>
@@ -2913,7 +3355,7 @@ export default function MatchCenterClient({
                             {/* Accesos */}
                             <article className="mc-partition">
                                 <div className="mc-card-header"><h4>Accesos</h4></div>
-                                <div className="mc-card-body" style={{ display: 'flex', gap: 16 }}>
+                                <div className="mc-card-body quick-access-actions" style={{ display: 'flex', gap: 16 }}>
                                     <button
                                         className="mc-btn mc-btn-outline"
                                         style={{ flex: 1, padding: 16, justifyContent: 'center', opacity: watchUrl ? 1 : 0.4 }}
@@ -2938,7 +3380,7 @@ export default function MatchCenterClient({
 
                 {/* â”€â”€ TAB: ALINEACIONES â”€â”€ */}
                 {activeTab === 'alineaciones' && (
-                    <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+                    <div className="lineup-workspace" style={{ maxWidth: 1000, margin: '0 auto' }}>
                         <article className="mc-partition" style={{ marginBottom: 24 }}>
                             <div className="mc-card-body" style={{ display: 'flex', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
                                 <div className="form-group" style={{ margin: 0, flex: '1 1 240px' }}>
@@ -2973,7 +3415,54 @@ export default function MatchCenterClient({
                                 </div>
                             </article>
                         ) : (
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
+                            <>
+                            <div className="quick-lineup-mobile-grid">
+                                {(['home', 'away'] as const).map(team => {
+                                    const club = team === 'home' ? match.homeClub : match.awayClub;
+
+                                    return (
+                                        <article key={`quick-${team}`} className="quick-lineup-card quick-lineup-mobile-card">
+                                            <div className="quick-lineup-team-title">
+                                                {club?.logo_url && <img src={club.logo_url} alt={club.name} width={22} style={{ objectFit: 'contain' }} />}
+                                                <h3>{club?.name || (team === 'home' ? 'Local' : 'Visitante')}</h3>
+                                            </div>
+                                            <div className="quick-lineup-header">
+                                                <div>
+                                                    <strong>Carga r&aacute;pida</strong>
+                                                    <span>Formato: `1 - Nombre Apellido`.</span>
+                                                </div>
+                                                <div className="quick-lineup-actions">
+                                                    <button
+                                                        className="mc-btn mc-btn-outline"
+                                                        type="button"
+                                                        onClick={() => resetQuickLineupDraft(team)}
+                                                    >
+                                                        <RefreshCw size={14} /> Usar actual
+                                                    </button>
+                                                    <button
+                                                        className="mc-btn mc-btn-primary"
+                                                        type="button"
+                                                        onClick={() => applyQuickLineupDraft(team)}
+                                                    >
+                                                        <Plus size={14} /> Aplicar lista
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <textarea
+                                                className="quick-lineup-textarea"
+                                                value={quickLineupDrafts[team]}
+                                                onChange={(event) => handleQuickLineupDraftChange(team, event.target.value)}
+                                                placeholder={`1 - Nombre Apellido\n2 - Nombre Apellido\n3 - Nombre Apellido`}
+                                                rows={8}
+                                            />
+                                            <p className="quick-lineup-hint">
+                                                Se cargan de arriba hacia abajo en las posiciones de la planilla.
+                                            </p>
+                                        </article>
+                                    );
+                                })}
+                            </div>
+                            <div className="lineup-team-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
                                 {(['home', 'away'] as const).map(team => {
                                     const club = team === 'home' ? match.homeClub : match.awayClub;
                                     const players = lineups[team];
@@ -2981,8 +3470,8 @@ export default function MatchCenterClient({
                                     const subs = players.filter(isSubstituteLineupPlayer);
 
                                     return (
-                                        <article key={team} className="mc-partition" style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                                        <article key={team} className="mc-partition lineup-team-panel" style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}>
+                                            <div className="lineup-team-heading" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
                                                 {club?.logo_url && <img src={club.logo_url} alt={club.name} width={24} style={{ objectFit: 'contain' }} />}
                                                 <h3 style={{ fontSize: '1.2rem', fontWeight: 900, margin: 0 }}>{club?.name || (team === 'home' ? 'Local' : 'Visitante')}</h3>
                                             </div>
@@ -3020,11 +3509,11 @@ export default function MatchCenterClient({
                                                     Se cargan de arriba hacia abajo en las posiciones de la planilla. Si el jugador ya existe en el roster, se vincula automáticamente; si no, queda listo para crearse al guardar.
                                                 </p>
                                             </div>
-                                            <div style={{ background: '#111', borderRadius: 8, border: '1px solid #222', overflow: 'hidden' }}>
-                                                <div style={{ background: '#222', padding: '10px 16px', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '0.05em', color: '#888' }}>
+                                            <div className="lineup-roster-card" style={{ background: '#111', borderRadius: 8, border: '1px solid #222', overflow: 'hidden' }}>
+                                                <div className="lineup-section-title" style={{ background: '#222', padding: '10px 16px', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '0.05em', color: '#888' }}>
                                                     TITULARES ({starters.length})
                                                 </div>
-                                                <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                <div className="lineup-section-list" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
                                                     {starters.map((p, idx) => (
                                                         <div key={idx} className="player-row">
                                                             <span className="player-number">{p.number}</span>
@@ -3065,10 +3554,10 @@ export default function MatchCenterClient({
                                                         </div>
                                                     ))}
                                                 </div>
-                                                <div style={{ background: '#222', padding: '10px 16px', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '0.05em', color: '#888' }}>
+                                                <div className="lineup-section-title" style={{ background: '#222', padding: '10px 16px', fontSize: '0.7rem', fontWeight: 900, letterSpacing: '0.05em', color: '#888' }}>
                                                     SUPLENTES ({subs.length})
                                                 </div>
-                                                <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                <div className="lineup-section-list" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
                                                     {subs.map((p, idx) => (
                                                         <div key={idx} className="player-row">
                                                             <span className="player-number" style={{ borderColor: '#555', color: '#555' }}>{p.number}</span>
@@ -3123,6 +3612,7 @@ export default function MatchCenterClient({
                                     );
                                 })}
                             </div>
+                            </>
                         )}
                     </div>
                 )}
@@ -3132,12 +3622,98 @@ export default function MatchCenterClient({
                     <>
                     <div className="event-live-workspace">
                         <article className="mc-partition live-event-console">
-                            <div className="mc-card-header">
-                                <div>
+                            <div className="mc-card-header live-event-console-header">
+                                <div className="live-event-heading">
                                     <h4>Carga rapida de eventos</h4>
-                                    <span className="live-event-header-note">Carga guiada en tres pasos, con estadisticas actualizadas al guardar.</span>
+                                    <span className="live-event-header-note">El tiempo actual se aplica al guardar cada evento.</span>
                                 </div>
-                                <span className="live-event-clock"><Clock size={14} /> {liveClockLabel}</span>
+                                <div className="live-match-clock" data-running={normalizedClockDraft.running ? 'true' : 'false'}>
+                                    <div className="live-match-clock-readout">
+                                        <Clock size={15} />
+                                        <span>{liveClockLabel}</span>
+                                    </div>
+                                    <div className="live-match-clock-actions" role="group" aria-label="Controles del reloj del partido">
+                                        <button
+                                            type="button"
+                                            className="mc-btn live-match-clock-btn"
+                                            onClick={handleStartClock}
+                                            disabled={!canStartClock}
+                                            title="Iniciar reloj"
+                                        >
+                                            <Play size={13} /> Iniciar
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="mc-btn live-match-clock-btn"
+                                            onClick={handlePauseClock}
+                                            disabled={!canPauseClock}
+                                            title="Pausar reloj"
+                                        >
+                                            <Pause size={13} /> Pausar
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="mc-btn live-match-clock-btn"
+                                            onClick={handleResumeClock}
+                                            disabled={!canResumeClock}
+                                            title="Reanudar reloj"
+                                        >
+                                            <Play size={13} /> Reanudar
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="mc-btn live-match-clock-btn live-match-clock-reset"
+                                            onClick={handleResetClock}
+                                            title="Reiniciar reloj"
+                                        >
+                                            <RotateCcw size={13} /> Reiniciar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="live-match-clock-editor">
+                                <label>
+                                    <span>Periodo</span>
+                                    <select
+                                        value={clockDraft.period || ''}
+                                        onChange={(e) => setClockDraft((prev) => ({
+                                            ...normalizeMatchClock(prev),
+                                            period: e.target.value,
+                                        }))}
+                                    >
+                                        {Array.from(new Set([clockDraft.period || '', ...COMMON_MATCH_PERIODS].filter(Boolean))).map((period) => (
+                                            <option key={period} value={period}>{period}</option>
+                                        ))}
+                                    </select>
+                                </label>
+                                <label>
+                                    <span>Min</span>
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        value={clockDraft.minute ?? 0}
+                                        onChange={(e) => setClockDraft((prev) => ({
+                                            ...normalizeMatchClock(prev),
+                                            minute: normalizeClockMinute(e.target.value),
+                                        }))}
+                                    />
+                                </label>
+                                <label>
+                                    <span>Seg</span>
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        max={59}
+                                        value={clockDraft.seconds ?? 0}
+                                        onChange={(e) => setClockDraft((prev) => ({
+                                            ...normalizeMatchClock(prev),
+                                            seconds: normalizeClockSeconds(e.target.value),
+                                        }))}
+                                    />
+                                </label>
+                                {clockDirty ? (
+                                    <span className="live-match-clock-dirty">Reloj sin guardar</span>
+                                ) : null}
                             </div>
                             <div className="live-event-panel">
                                 {eventPanelGroups.map((group) => (
@@ -3153,6 +3729,7 @@ export default function MatchCenterClient({
                                                     type="button"
                                                     className="live-event-button"
                                                     data-tone={getEventButtonTone(definition)}
+                                                    data-event-type={definition.type}
                                                     aria-label={`Cargar ${definition.label}`}
                                                     onClick={() => openGuidedEvent(definition)}
                                                 >
@@ -3182,8 +3759,8 @@ export default function MatchCenterClient({
                                 <p className="empty-msg">Sin eventos. Elegi un boton del panel para iniciar la carga guiada.</p>
                             ) : (
                                 <>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '70px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.7rem', fontWeight: 800, color: '#666', borderBottom: '1px solid #222' }}>
-                                        <div>MIN</div><div>TIPO</div><div>EQUIPO</div><div>JUGADOR / DETALLE</div><div style={{ textAlign: 'right' }}>ACCION</div>
+                                    <div className="event-list-header" style={{ display: 'grid', gridTemplateColumns: '70px 120px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.7rem', fontWeight: 800, color: '#666', borderBottom: '1px solid #222' }}>
+                                        <div>MIN</div><div>PERIODO</div><div>TIPO</div><div>EQUIPO</div><div>JUGADOR / DETALLE</div><div style={{ textAlign: 'right' }}>ACCION</div>
                                     </div>
                                     {sortedEvents.map((ev) => {
                                         const selectedDefinition = eventDefinitionMap[ev.type] || {
@@ -3195,22 +3772,35 @@ export default function MatchCenterClient({
                                             player: 'optional' as const,
                                         };
                                         const availableEventPlayers = ev.team ? eventPlayerOptions[ev.team] : [];
-                                        const selectedPlayerValue = isEventPlayerAvailable(availableEventPlayers, ev.playerName)
-                                            ? ev.playerName
-                                            : '';
-                                        const selectedSecondaryPlayerValue = isEventPlayerAvailable(availableEventPlayers, ev.secondaryPlayerName)
-                                            ? ev.secondaryPlayerName || ''
-                                            : '';
+                                        const availableEventSelection = ev.team ? eventPlayerSelections[ev.team] : null;
+                                        const selectedPlayerValue = ev.playerName || '';
+                                        const selectedSecondaryPlayerValue = ev.secondaryPlayerName || '';
                                         const eventScore = eventScoreById.get(ev.id);
+                                        const eventPeriod = normalizeMatchPeriod(ev.period);
 
                                         return (
-                                        <div key={ev.id} style={{ display: 'grid', gridTemplateColumns: '70px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.85rem', borderBottom: '1px solid #222', alignItems: 'center' }}>
+                                        <div key={ev.id} className="event-list-row" style={{ display: 'grid', gridTemplateColumns: '70px 120px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.85rem', borderBottom: '1px solid #222', alignItems: 'center' }}>
                                             <div>
                                                 <input
                                                     type="number" value={ev.minute} min={0} max={100}
                                                     style={{ width: 50, background: '#222', border: 'none', color: 'var(--accent)', fontWeight: 900, padding: 4, borderRadius: 4 }}
                                                     onChange={(e) => updateLocalEvent(ev.id, { minute: parseInt(e.target.value, 10) || 0 })}
                                                 />
+                                            </div>
+                                            <div>
+                                                <select
+                                                    value={eventPeriod}
+                                                    style={{ background: '#222', border: 'none', color: '#fff', fontSize: '0.8rem', padding: 4, borderRadius: 4, maxWidth: 110 }}
+                                                    title={getMatchPeriodLabel(eventPeriod)}
+                                                    onChange={(e) => updateLocalEvent(ev.id, { period: normalizeMatchPeriod(e.target.value) })}
+                                                >
+                                                    {!EVENT_PERIOD_OPTIONS.includes(eventPeriod) && (
+                                                        <option value={eventPeriod}>{getMatchPeriodLabel(eventPeriod)}</option>
+                                                    )}
+                                                    {EVENT_PERIOD_OPTIONS.map((period) => (
+                                                        <option key={period} value={period}>{getMatchPeriodLabel(period)}</option>
+                                                    ))}
+                                                </select>
                                             </div>
                                             <div>
                                                 <select
@@ -3256,7 +3846,7 @@ export default function MatchCenterClient({
                                                     <option value="away">{awayName}</option>
                                                 </select>
                                             </div>
-                                            <div style={{ display: 'grid', gap: 6 }}>
+                                            <div className="event-list-detail" style={{ display: 'grid', gap: 6 }}>
                                                 {selectedDefinition.player === 'none' ? (
                                                     <input
                                                         type="text"
@@ -3269,7 +3859,7 @@ export default function MatchCenterClient({
                                                 ) : (
                                                     <select
                                                         value={selectedPlayerValue}
-                                                        disabled={!ev.team || availableEventPlayers.length === 0}
+                                                        disabled={!ev.team || (!availableEventSelection?.active.length && !selectedPlayerValue)}
                                                         className="inline-input inline-select"
                                                         style={{ fontSize: '0.85rem' }}
                                                         onChange={(e) => updateLocalEvent(ev.id, resolveEventPlayerSelection(ev.team, e.target.value))}
@@ -3283,17 +3873,20 @@ export default function MatchCenterClient({
                                                                         ? 'Seleccioná un jugador'
                                                                         : 'Sin jugador'}
                                                         </option>
-                                                        {availableEventPlayers.map((entry) => (
-                                                            <option key={`${ev.id}-${entry.playerId || entry.name}`} value={entry.name}>
-                                                                {entry.name}
-                                                            </option>
-                                                        ))}
+                                                        {ev.team && availableEventSelection
+                                                            ? renderEventPlayerOptions(
+                                                                ev.team,
+                                                                ev.type === 'substitution' ? 'active' : 'activeWithDisabledSubstitutes',
+                                                                selectedPlayerValue,
+                                                                '',
+                                                            )
+                                                            : null}
                                                     </select>
                                                 )}
                                                 {selectedDefinition.player !== 'none' && ev.type === 'substitution' && (
                                                     <select
                                                         value={selectedSecondaryPlayerValue}
-                                                        disabled={!ev.team || availableEventPlayers.length === 0}
+                                                        disabled={!ev.team || (!availableEventSelection?.substitutes.length && !selectedSecondaryPlayerValue)}
                                                         className="inline-input inline-select"
                                                         style={{ fontSize: '0.8rem', opacity: 0.85 }}
                                                         onChange={(e) => {
@@ -3312,11 +3905,9 @@ export default function MatchCenterClient({
                                                                     ? 'Sin participantes cargados'
                                                                     : 'Jugador que entra'}
                                                         </option>
-                                                        {availableEventPlayers.map((entry) => (
-                                                            <option key={`${ev.id}-secondary-${entry.playerId || entry.name}`} value={entry.name}>
-                                                                {entry.name}
-                                                            </option>
-                                                        ))}
+                                                        {ev.team && availableEventSelection
+                                                            ? renderEventPlayerOptions(ev.team, 'substitute', selectedSecondaryPlayerValue, '')
+                                                            : null}
                                                     </select>
                                                 )}
                                                 {selectedDefinition.player !== 'none' && ev.type !== 'substitution' && (
@@ -3347,7 +3938,7 @@ export default function MatchCenterClient({
                                                     </span>
                                                 ) : null}
                                             </div>
-                                            <div style={{ textAlign: 'right', display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                                            <div className="event-list-actions" style={{ textAlign: 'right', display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
                                                 <button className="mc-btn mc-btn-outline" style={{ padding: 6, color: '#ef4444', border: '1px solid #333' }} onClick={() => removeLocalEvent(ev.id)}>
                                                     <X size={12} />
                                                 </button>
@@ -3413,7 +4004,7 @@ export default function MatchCenterClient({
                                                     className="guided-player-option"
                                                     onClick={() => selectGuidedPlayer(player)}
                                                 >
-                                                    {player.name}
+                                                    {formatMatchPlayerOptionLabel(player)}
                                                 </button>
                                             ))}
                                         </div>
@@ -3433,8 +4024,21 @@ export default function MatchCenterClient({
                                                 type="number"
                                                 min={0}
                                                 max={160}
-                                                value={guidedEvent.minute}
-                                                onChange={(event) => setGuidedEvent((current) => current ? { ...current, minute: event.target.value } : current)}
+                                                value={guidedEventUsesClockMinute ? guidedEventClockMinute : guidedEvent.minute}
+                                                readOnly={guidedEventUsesClockMinute}
+                                                title={guidedEventUsesClockMinute ? 'Este evento usa el minuto actual del reloj del panel Eventos.' : undefined}
+                                                onChange={(event) => {
+                                                    if (guidedEventUsesClockMinute) return;
+                                                    setGuidedEvent((current) => current ? { ...current, minute: event.target.value } : current);
+                                                }}
+                                            />
+                                        </label>
+                                        <label>
+                                            <span>Periodo</span>
+                                            <input
+                                                value={getMatchPeriodLabel(getEventPeriodForType(guidedEvent.definition.type, clockDraft.period || guidedEvent.period))}
+                                                readOnly
+                                                title="El evento se guarda en el periodo activo del partido."
                                             />
                                         </label>
                                         {guidedEvent.team && (
@@ -3518,9 +4122,9 @@ export default function MatchCenterClient({
                                                 onChange={(event) => selectGuidedSecondaryPlayer(event.target.value)}
                                             >
                                                 <option value="">Sin seleccionar</option>
-                                                {guidedPlayers.map((player) => (
+                                                {guidedSecondaryPlayers.map((player) => (
                                                     <option key={`secondary-${player.playerId || player.name}`} value={player.name}>
-                                                        {player.name}
+                                                        {formatMatchPlayerOptionLabel(player)}
                                                     </option>
                                                 ))}
                                             </select>
@@ -3715,7 +4319,7 @@ export default function MatchCenterClient({
                                         const total = stat.h + stat.a || 1;
                                         const hPct = (stat.h / total) * 100;
                                         return (
-                                            <div key={stat.label} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 200px 1fr 60px', alignItems: 'center', gap: 16 }}>
+                                            <div key={stat.label} className="team-compare-row" style={{ display: 'grid', gridTemplateColumns: '60px 1fr 200px 1fr 60px', alignItems: 'center', gap: 16 }}>
                                                 <div style={{ textAlign: 'right', fontWeight: 900, fontSize: '1.2rem' }}>{stat.h}</div>
                                                 <div style={{ height: 8, background: '#222', borderRadius: 4, display: 'flex', justifyContent: 'flex-end', overflow: 'hidden' }}>
                                                     <div style={{ width: hPct + '%', background: 'var(--accent)', transition: 'width .3s' }}></div>
@@ -3737,7 +4341,7 @@ export default function MatchCenterClient({
                                                 const hW = row.h < 0 ? 0 : Math.min(100, row.h);
                                                 const aW = row.a < 0 ? 0 : Math.min(100, row.a);
                                                 return (
-                                                    <div key={row.key} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 200px 1fr 60px', alignItems: 'center', gap: 16 }}>
+                                                    <div key={row.key} className="team-compare-row" style={{ display: 'grid', gridTemplateColumns: '60px 1fr 200px 1fr 60px', alignItems: 'center', gap: 16 }}>
                                                         <div style={{ textAlign: 'right', fontWeight: 900, fontSize: '1.05rem' }}>{row.h < 0 ? '—' : `${row.h.toFixed(1)}%`}</div>
                                                         <div style={{ height: 8, background: '#222', borderRadius: 4, display: 'flex', justifyContent: 'flex-end', overflow: 'hidden' }}>
                                                             <div style={{ width: `${hW}%`, background: 'var(--accent)', transition: 'width .3s' }} />
@@ -3759,7 +4363,7 @@ export default function MatchCenterClient({
                                 {/* Score breakdown */}
                                 <div className="mc-card-body" style={{ borderTop: '1px solid #222', paddingTop: 24 }}>
                                     <h4 style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', color: '#888', marginBottom: 16 }}>Desglose de Puntos</h4>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                    <div className="score-breakdown-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                         {(['home', 'away'] as const).map(team => {
                                             const rows = scoringBreakdown
                                                 .map((definition) => {
@@ -3795,10 +4399,10 @@ export default function MatchCenterClient({
                                     </div>
                                 </div>
 
-                                <div className="mc-card-body" style={{ borderTop: '1px solid #222', paddingTop: 24 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-                                        <h4 style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', color: '#888', margin: 0 }}>Estadisticas por Jugador</h4>
-                                        <span style={{ fontSize: '0.78rem', color: '#666' }}>
+                                <div className="mc-card-body" style={{ borderTop: '1px solid #222', paddingTop: 18 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+                                        <h4 style={{ fontSize: '0.56rem', fontWeight: 900, textTransform: 'uppercase', color: '#888', margin: 0 }}>Estadisticas por Jugador</h4>
+                                        <span style={{ fontSize: '0.55rem', color: '#666' }}>
                                             Solo se computan eventos con jugador asignado.
                                         </span>
                                     </div>
@@ -3822,61 +4426,59 @@ export default function MatchCenterClient({
                                             </div>
                                         </div>
                                     )}
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+                                    <div className="player-stats-grid">
                                         {([
                                             { team: 'home' as const, label: homeName, rows: playerStatsByTeam.home },
                                             { team: 'away' as const, label: awayName, rows: playerStatsByTeam.away },
                                         ]).map((group) => (
-                                            <div key={group.team} style={{ padding: 16, background: '#1a1a1a', borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                                                    <div style={{ fontWeight: 900, fontSize: '0.9rem' }}>{group.label}</div>
-                                                    <span style={{ fontSize: '0.72rem', color: '#777', textTransform: 'uppercase', fontWeight: 800 }}>
+                                            <section key={group.team} className="player-stats-team">
+                                                <div className="player-stats-team-header">
+                                                    <div>{group.label}</div>
+                                                    <span>
                                                         {group.rows.length} jugador{group.rows.length === 1 ? '' : 'es'}
                                                     </span>
                                                 </div>
                                                 {group.rows.length === 0 ? (
-                                                    <div style={{ color: '#666', fontSize: '0.82rem', lineHeight: 1.5 }}>
+                                                    <div className="player-stats-empty">
                                                         No hay eventos con jugador identificado para este equipo.
                                                     </div>
-                                                ) : group.rows.map((player) => (
-                                                    <div key={player.key} style={{ border: '1px solid #262626', borderRadius: 8, padding: 12, background: '#141414', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-                                                            <div>
-                                                                <div style={{ fontWeight: 800 }}>{player.name}</div>
-                                                                <div style={{ fontSize: '0.75rem', color: '#777', marginTop: 4 }}>
+                                                ) : (
+                                                    <div className="player-stats-card-grid">
+                                                        {group.rows.map((player) => (
+                                                            <article key={player.key} className="player-stat-card">
+                                                                <div className="player-stat-head">
+                                                                    <div className="player-stat-main">
+                                                                        <strong title={player.name}>{player.name}</strong>
+                                                                        <span>
                                                                     {player.totalEvents} evento{player.totalEvents === 1 ? '' : 's'} · ultimo {player.lastMinute}&apos;
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="player-stat-points">
+                                                                        <strong className={player.points > 0 ? 'is-positive' : ''}>{player.points}</strong>
+                                                                        <span>puntos</span>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <div style={{ textAlign: 'right' }}>
-                                                                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: player.points > 0 ? 'var(--accent)' : '#fff' }}>{player.points}</div>
-                                                                <div style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase', fontWeight: 800 }}>puntos</div>
-                                                            </div>
-                                                        </div>
-                                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                                            {player.breakdown.map((entry) => (
-                                                                <span
-                                                                    key={`${player.key}-${entry.type}`}
-                                                                    style={{
-                                                                        display: 'inline-flex',
-                                                                        alignItems: 'center',
-                                                                        gap: 6,
-                                                                        padding: '6px 10px',
-                                                                        borderRadius: 999,
-                                                                        background: `${entry.color}18`,
-                                                                        border: `1px solid ${entry.color}33`,
-                                                                        color: entry.color,
-                                                                        fontSize: '0.74rem',
-                                                                        fontWeight: 800,
-                                                                    }}
-                                                                >
-                                                                    {entry.label} x{entry.count}
-                                                                    {entry.totalPoints > 0 ? <strong style={{ color: '#fff' }}>+{entry.totalPoints}</strong> : null}
-                                                                </span>
-                                                            ))}
-                                                        </div>
+                                                                <div className="player-stat-breakdown">
+                                                                    {player.breakdown.map((entry) => (
+                                                                        <span
+                                                                            className="player-stat-chip"
+                                                                            key={`${player.key}-${entry.type}`}
+                                                                            style={{
+                                                                                background: `${entry.color}18`,
+                                                                                borderColor: `${entry.color}33`,
+                                                                                color: entry.color,
+                                                                            }}
+                                                                        >
+                                                                            {entry.label} x{entry.count}
+                                                                            {entry.totalPoints > 0 ? <strong>+{entry.totalPoints}</strong> : null}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </article>
+                                                        ))}
                                                     </div>
-                                                ))}
-                                            </div>
+                                                )}
+                                            </section>
                                         ))}
                                     </div>
                                 </div>
@@ -3888,8 +4490,23 @@ export default function MatchCenterClient({
 
                 {/* Contenido */}
                 {activeTab === 'contenido' && (
-                    <article className="mc-partition" style={{ maxWidth: 800, margin: '0 auto', background: 'transparent', border: 'none', boxShadow: 'none' }}>
+                    <article className="mc-partition content-workspace" style={{ maxWidth: 800, margin: '0 auto', background: 'transparent', border: 'none', boxShadow: 'none' }}>
                         <div className="mc-grid-2">
+                            <div style={{ background: '#111', padding: 24, borderRadius: 12, border: '1px solid #222', gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#888', marginBottom: 8, textTransform: 'uppercase' }}>Planilla del partido</label>
+                                    <p style={{ margin: 0, color: '#aaa', fontSize: '0.85rem', lineHeight: 1.45 }}>
+                                        Genera un resumen imprimible con logos, resultado, puntos, plantillas, eventos y estadisticas.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="mc-btn mc-btn-primary"
+                                    onClick={handleExportMatchSheetPdf}
+                                >
+                                    <FileText size={14} /> Exportar planilla PDF
+                                </button>
+                            </div>
                             <div style={{ background: '#111', padding: 24, borderRadius: 12, border: '1px solid #222' }}>
                                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#888', marginBottom: 12, textTransform: 'uppercase' }}>Transmision disponible</label>
                                 {watchUrl ? (
@@ -3949,7 +4566,7 @@ export default function MatchCenterClient({
 
                 {/* Oficiales */}
                 {activeTab === 'oficiales' && (
-                    <article className="mc-partition" style={{ maxWidth: 600, margin: '0 auto' }}>
+                    <article className="mc-partition officials-workspace" style={{ maxWidth: 600, margin: '0 auto' }}>
                         <div className="mc-card-header"><h4>Autoridades del Partido</h4></div>
                         <div className="mc-card-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                             <div style={{ background: '#111', border: '1px solid #222', borderRadius: 8, padding: 16 }}>
@@ -3966,10 +4583,21 @@ export default function MatchCenterClient({
 
                 {/* Configuracion */}
                 {activeTab === 'configuracion' && (
-                    <article className="mc-partition" style={{ maxWidth: 600, margin: '0 auto' }}>
-                        <div className="mc-card-header"><h4>Parametros del Partido</h4></div>
-                        <div className="mc-card-body" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                            <div className="form-group">
+                    <article className="mc-partition config-workspace">
+                        <div className="mc-card-header config-parameters-header">
+                            <h4>Parametros del Partido</h4>
+                            <span className={`config-save-note ${hasUnsavedMatchParameters ? 'is-dirty' : ''}`}>
+                                {scoreDirty
+                                    ? 'Cambios sin guardar en marcador.'
+                                    : clockDirty
+                                        ? 'Reloj sin guardar desde Eventos.'
+                                        : hasUnsavedMatchParameters
+                                            ? 'Cambios administrativos sin guardar.'
+                                            : 'El marcador oficial manda sobre la timeline.'}
+                            </span>
+                        </div>
+                        <div className={`mc-card-body config-parameters-grid ${match.status === 'final' && score.home === score.away ? 'has-shootout' : ''}`}>
+                            <div className="form-group config-field-status">
                                 <label>Estado Actual</label>
                                 <select
                                     value={match.status}
@@ -3987,148 +4615,16 @@ export default function MatchCenterClient({
                                     <option value="cancelled">Cancelado</option>
                                 </select>
                             </div>
-                            <div style={{ padding: 20, borderRadius: 12, border: '1px solid rgba(0, 163, 101, 0.28)', background: 'linear-gradient(180deg, rgba(8, 18, 14, 0.98) 0%, rgba(17, 17, 17, 0.98) 100%)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.03)', display: 'flex', flexDirection: 'column', gap: 18 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-                                    <div>
-                                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', marginBottom: 6 }}>Cronometro Oficial</div>
-                                        <div style={{ padding: '10px 14px', borderRadius: 10, border: `1px solid ${clockDraft.running ? 'rgba(16,185,129,0.45)' : 'rgba(255,255,255,0.12)'}`, background: clockDraft.running ? 'rgba(6, 78, 59, 0.26)' : 'rgba(0, 0, 0, 0.34)', display: 'inline-flex', alignItems: 'center', fontSize: '2rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '0.04em', textShadow: '0 1px 10px rgba(0,0,0,0.35)' }}>{liveClockLabel}</div>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                                        <button
-                                            type="button"
-                                            className="mc-btn mc-btn-outline"
-                                            style={{ border: '1px solid rgba(16,185,129,0.35)', background: clockDraft.running ? 'rgba(16,185,129,0.18)' : '#0f172a', color: '#f8fafc' }}
-                                            onClick={() => {
-                                                setClockDraft((prev) => {
-                                                    const normalized = normalizeMatchClock(prev);
-                                                    const nextRunning = !normalized.running;
-                                                    return {
-                                                        ...normalized,
-                                                        running: nextRunning,
-                                                        period: normalized.period || '1T',
-                                                    };
-                                                });
-                                                if (match.status !== 'live') {
-                                                    setMatch((prev) => ({ ...prev, status: 'live' }));
-                                                }
-                                            }}
-                                        >
-                                            {clockDraft.running ? 'Pausar' : 'Iniciar'}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="mc-btn mc-btn-outline"
-                                            style={{ border: '1px solid rgba(255,255,255,0.16)', background: '#111827', color: '#e5e7eb' }}
-                                            onClick={() => {
-                                                const derivedClock = deriveClockFromKickoff(draftKickoffIso, clockDraft.period);
-                                                if (!derivedClock) return;
-                                                setClockDraft(derivedClock);
-                                                if (match.status !== 'live') {
-                                                    setMatch((prev) => ({ ...prev, status: 'live' }));
-                                                }
-                                            }}
-                                        >
-                                            Sincronizar inicio
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="mc-btn mc-btn-outline"
-                                            style={{ border: '1px solid rgba(255,255,255,0.16)', background: '#111827', color: '#e5e7eb' }}
-                                            onClick={() => setClockDraft((prev) => ({
-                                                ...normalizeMatchClock(prev),
-                                                minute: getLatestEventMinute(localEventsRef.current) ?? prev.minute ?? 0,
-                                                seconds: 0,
-                                                running: false,
-                                            }))}
-                                        >
-                                            Tomar ultimo evento
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="mc-btn mc-btn-outline"
-                                            style={{ border: '1px solid rgba(248,113,113,0.26)', background: 'rgba(127,29,29,0.28)', color: '#fecaca' }}
-                                            onClick={() => setClockDraft({ minute: 0, seconds: 0, period: 'Previa', running: false })}
-                                        >
-                                            Reiniciar
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14 }}>
-                                    <label style={{ display: 'grid', gap: 6 }}>
-                                        <span style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Periodo</span>
-                                        <select
-                                            value={clockDraft.period || ''}
-                                            style={{ borderRadius: 8, background: '#020617', border: '1px solid rgba(255,255,255,0.14)', color: '#f8fafc', padding: '10px 12px' }}
-                                            onChange={(e) => setClockDraft((prev) => ({
-                                                ...normalizeMatchClock(prev),
-                                                period: e.target.value,
-                                            }))}
-                                        >
-                                            {Array.from(new Set([clockDraft.period || '', ...COMMON_MATCH_PERIODS].filter(Boolean))).map((period) => (
-                                                <option key={period} value={period}>{period}</option>
-                                            ))}
-                                        </select>
-                                    </label>
-                                    <label style={{ display: 'grid', gap: 6 }}>
-                                        <span style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Minuto</span>
-                                        <input
-                                            type="number"
-                                            min={0}
-                                            value={clockDraft.minute ?? 0}
-                                            style={{ borderRadius: 8, background: '#020617', border: '1px solid rgba(255,255,255,0.14)', color: '#f8fafc', padding: '10px 12px' }}
-                                            onChange={(e) => setClockDraft((prev) => ({
-                                                ...normalizeMatchClock(prev),
-                                                minute: normalizeClockMinute(e.target.value),
-                                            }))}
-                                        />
-                                    </label>
-                                    <label style={{ display: 'grid', gap: 6 }}>
-                                        <span style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Segundos</span>
-                                        <input
-                                            type="number"
-                                            min={0}
-                                            max={59}
-                                            value={clockDraft.seconds ?? 0}
-                                            style={{ borderRadius: 8, background: '#020617', border: '1px solid rgba(255,255,255,0.14)', color: '#f8fafc', padding: '10px 12px' }}
-                                            onChange={(e) => setClockDraft((prev) => ({
-                                                ...normalizeMatchClock(prev),
-                                                seconds: normalizeClockSeconds(e.target.value),
-                                            }))}
-                                        />
-                                    </label>
-                                    <label style={{ display: 'grid', gap: 6 }}>
-                                        <span style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Ajuste rapido</span>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                                            {[
-                                                { label: '-1m', delta: -1 },
-                                                { label: '+1m', delta: 1 },
-                                                { label: '+5m', delta: 5 },
-                                            ].map((action) => (
-                                                <button
-                                                    key={action.label}
-                                                    type="button"
-                                                    className="mc-btn mc-btn-outline"
-                                                    style={{ border: '1px solid rgba(255,255,255,0.14)', background: '#111827', color: '#f8fafc', justifyContent: 'center', paddingInline: 0 }}
-                                                    onClick={() => setClockDraft((prev) => ({
-                                                        ...normalizeMatchClock(prev),
-                                                        minute: Math.max(0, (prev.minute ?? 0) + action.delta),
-                                                    }))}
-                                                >
-                                                    {action.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div style={{ fontSize: '0.78rem', color: clockDirty ? '#fde68a' : '#94a3b8', lineHeight: 1.5 }}>
-                                    {clockDirty
-                                        ? 'Hay cambios del cronometro sin guardar. Se persisten con el boton Guardar del encabezado.'
-                                        : 'El cronometro se guarda en el campo clock del partido y puede convivir con la carga manual de eventos.'}
-                                </div>
+                            <div className="form-group config-field-date">
+                                <label>Fecha y Hora</label>
+                                <input
+                                    type="datetime-local"
+                                    value={dateTimeDraft}
+                                    style={{ borderRadius: 4 }}
+                                    onChange={(e) => setDateTimeDraft(e.target.value)}
+                                />
                             </div>
-                            <div className="form-group">
+                            <div className="form-group config-field-home-score">
                                 <label>Marcador Local</label>
                                 <input
                                     type="number"
@@ -4138,7 +4634,7 @@ export default function MatchCenterClient({
                                     onChange={(e) => handleScoreInputChange('home', e.target.value)}
                                 />
                             </div>
-                            <div className="form-group">
+                            <div className="form-group config-field-away-score">
                                 <label>Marcador Visitante</label>
                                 <input
                                     type="number"
@@ -4150,7 +4646,7 @@ export default function MatchCenterClient({
                             </div>
                             {match.status === 'final' && score.home === score.away ? (
                                 <>
-                                    <div className="form-group">
+                                    <div className="form-group config-field-home-penalty">
                                         <label>Penales / Shootout Local</label>
                                         <input
                                             type="number"
@@ -4161,7 +4657,7 @@ export default function MatchCenterClient({
                                             onChange={(e) => handlePenaltyInputChange('home', e.target.value)}
                                         />
                                     </div>
-                                    <div className="form-group">
+                                    <div className="form-group config-field-away-penalty">
                                         <label>Penales / Shootout Visitante</label>
                                         <input
                                             type="number"
@@ -4174,7 +4670,7 @@ export default function MatchCenterClient({
                                     </div>
                                 </>
                             ) : null}
-                            <div className="form-group">
+                            <div className="form-group config-field-venue">
                                 <label>Estadio / Venue</label>
                                 <input
                                     type="text"
@@ -4183,27 +4679,11 @@ export default function MatchCenterClient({
                                     onChange={(e) => setMatch((prev) => ({ ...prev, venue: e.target.value }))}
                                 />
                             </div>
-                            <div className="form-group">
-                                <label>Fecha y Hora</label>
-                                <input
-                                    type="datetime-local"
-                                    value={dateTimeDraft}
-                                    style={{ borderRadius: 4 }}
-                                    onChange={(e) => setDateTimeDraft(e.target.value)}
-                                />
-                            </div>
-                            <div style={{ marginTop: -8, fontSize: '0.78rem', color: scoreDirty ? '#fcd34d' : '#666', lineHeight: 1.5 }}>
-                                {(scoreDirty || clockDirty)
-                                    ? 'Hay cambios locales sin guardar. Usa el boton Guardar del encabezado para persistir cronometro, marcador, estado, sede, fecha y notas juntos.'
-                                    : hasUnsavedMatchParameters
-                                        ? 'Hay cambios administrativos sin guardar. El guardado ahora evita recalcular datos del partido si solo cambias sede, fecha, reloj o notas.'
-                                        : 'El marcador oficial manda sobre la timeline. Si no coincide con los eventos, la consola lo mostrara como resultado manual.'}
-                            </div>
                         </div>
 
                         {/* â”€â”€ PUNTOS DEL PARTIDO â”€â”€ */}
-                        <div style={{ marginTop: 32, borderTop: '1px solid #222', paddingTop: 24 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                        <div className="config-points-section">
+                            <div className="config-points-header">
                                 <h4 style={{ margin: 0 }}>Puntos del Partido</h4>
                                 <span style={{
                                     fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 12,
@@ -4214,12 +4694,12 @@ export default function MatchCenterClient({
                                     {localPoints.points_autocalculated ? 'Autocalculado' : 'Editado manualmente'}
                                 </span>
                             </div>
-                            <p style={{ fontSize: 13, color: '#888', marginBottom: 20, marginTop: 0 }}>
+                            <p className="config-points-note">
                                 Los puntos base se completan automaticamente segun las reglas del partido. Podes agregar bonus o penalizaciones manuales.
                             </p>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-                                <div className="form-group" style={{ margin: 0 }}>
+                            <div className="points-grid config-points-grid">
+                                <div className="form-group">
                                     <label>Puntos base local</label>
                                     <input
                                         type="number"
@@ -4233,7 +4713,7 @@ export default function MatchCenterClient({
                                         }}
                                     />
                                 </div>
-                                <div className="form-group" style={{ margin: 0 }}>
+                                <div className="form-group">
                                     <label>Puntos base visitante</label>
                                     <input
                                         type="number"
@@ -4247,7 +4727,7 @@ export default function MatchCenterClient({
                                         }}
                                     />
                                 </div>
-                                <div className="form-group" style={{ margin: 0 }}>
+                                <div className="form-group">
                                     <label>Bonus / modificador local</label>
                                     <input
                                         type="number"
@@ -4261,7 +4741,7 @@ export default function MatchCenterClient({
                                     />
                                     <small style={{ color: '#666', fontSize: 11 }}>Permite sumar o restar puntos manualmente.</small>
                                 </div>
-                                <div className="form-group" style={{ margin: 0 }}>
+                                <div className="form-group">
                                     <label>Bonus / modificador visitante</label>
                                     <input
                                         type="number"
@@ -4278,7 +4758,7 @@ export default function MatchCenterClient({
                             </div>
 
                             {/* Totals (read-only) */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                            <div className="points-grid config-points-totals">
                                 {[
                                     { label: 'Total local', value: (localPoints.home_base_points ?? 0) + (localPoints.home_bonus_points ?? 0) },
                                     { label: 'Total visitante', value: (localPoints.away_base_points ?? 0) + (localPoints.away_bonus_points ?? 0) },

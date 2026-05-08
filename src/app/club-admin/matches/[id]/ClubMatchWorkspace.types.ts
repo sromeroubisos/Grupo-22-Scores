@@ -193,6 +193,8 @@ export interface ClubLiveEvent {
   detail: string;
   parentEventId?: string;
   sequence?: number;
+  period?: string | null;
+  order?: number | null;
   videoTime?: string;
 }
 

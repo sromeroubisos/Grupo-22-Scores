@@ -15,6 +15,7 @@ import {
   Clock3,
   ExternalLink,
   Eye,
+  FileText,
   Maximize2,
   MapPin,
   Minimize2,
@@ -29,6 +30,21 @@ import {
 } from 'lucide-react';
 import styles from './ClubMatchWorkspace.module.css';
 import { formatMatchTimelineEventDescription } from '@/lib/matchEventStats';
+import {
+  compareMatchPeriodValues,
+  getEventPeriodForType,
+  getMatchPeriodLabel,
+  getNextActivePeriodAfterEvent,
+  normalizeMatchPeriod,
+} from '@/lib/matchPeriods';
+import {
+  buildMatchPlayerSelectionGroups,
+  findMatchPlayerSelectionOption,
+  formatMatchPlayerOptionLabel,
+  preserveMatchPlayerOption,
+  type MatchPlayerSelectionGroups,
+  type MatchPlayerSelectionOption,
+} from '@/lib/matchPlayerSelection';
 import {
   calculateMatchPointsPreview,
   DEFAULT_MATCH_POINTS_RULES,
@@ -107,6 +123,7 @@ import {
 import { ComparisonBarChart, MiniBarChart, RadarChart } from './ClubMatchWorkspace.charts';
 import { ChartConfigPanel } from '@/components/admin/charts/ChartConfigPanel';
 import { STAT_CATALOG_POSTMATCH } from '@/components/admin/charts/statCatalogs';
+import { exportMatchSheetPdf } from '@/lib/matchSheetPdf';
 
 const PLAYER_SELECTION_ACTIONS = new Set<LiveActionType>([
   'try',
@@ -160,6 +177,131 @@ function formatPointValue(value: number) {
   if (!Number.isFinite(value)) return '0';
   if (Number.isInteger(value)) return String(value);
   return value.toFixed(2).replace(/\.?0+$/, '');
+}
+
+function formatPointBreakdown(base: number, bonus: number) {
+  const baseText = formatPointValue(base);
+  const bonusText = formatPointValue(bonus);
+  return bonus > 0 ? `Base ${baseText} + bonus ${bonusText}` : `Base ${baseText}`;
+}
+
+function normalizeEventOrder(value: unknown, fallback: number) {
+  if (value === null || value === undefined || value === '') return fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(0, Math.trunc(parsed)) : fallback;
+}
+
+function getEventOrder(event: ClubLiveEvent, fallback: number) {
+  return normalizeEventOrder(event.order, fallback);
+}
+
+function getNextEventOrder(events: ClubLiveEvent[]) {
+  return events.reduce((maxOrder, event, index) => Math.max(maxOrder, getEventOrder(event, index)), -1) + 1;
+}
+
+function compareClubEventsChronologically(
+  left: ClubLiveEvent,
+  right: ClubLiveEvent,
+  leftIndex: number,
+  rightIndex: number,
+) {
+  const periodDiff = compareMatchPeriodValues(left.period, right.period);
+  if (periodDiff !== 0) return periodDiff;
+
+  const orderDiff = getEventOrder(left, leftIndex) - getEventOrder(right, rightIndex);
+  if (orderDiff !== 0) return orderDiff;
+
+  const leftMinute = parseNumericInput(left.minute) ?? 0;
+  const rightMinute = parseNumericInput(right.minute) ?? 0;
+  if (leftMinute !== rightMinute) return leftMinute - rightMinute;
+
+  const leftSequence = left.sequence ?? (left.parentEventId ? 1 : 0);
+  const rightSequence = right.sequence ?? (right.parentEventId ? 1 : 0);
+  if (leftSequence !== rightSequence) return leftSequence - rightSequence;
+
+  return String(left.id).localeCompare(String(right.id));
+}
+
+function sortClubEventsChronologically(events: ClubLiveEvent[]) {
+  return events
+    .map((event, index) => ({ event, index }))
+    .sort((left, right) => compareClubEventsChronologically(left.event, right.event, left.index, right.index))
+    .map(({ event }) => event);
+}
+
+function resolveLivePhaseAfterEvent(current: LivePhase, eventType: string): LivePhase {
+  const nextPeriod = getNextActivePeriodAfterEvent(eventType, current);
+  if (nextPeriod === 'HT' || nextPeriod === '2T' || nextPeriod === 'FT') return nextPeriod;
+  return '1T';
+}
+
+type PlayerSelectMode = 'active' | 'substitute' | 'activeWithDisabledSubstitutes';
+
+function playerOptionMatchesName(option: MatchPlayerSelectionOption, value: string | null | undefined) {
+  return option.name.trim().toLowerCase() === String(value || '').trim().toLowerCase();
+}
+
+function getEnabledPlayerOptions(groups: MatchPlayerSelectionGroups, mode: PlayerSelectMode) {
+  if (mode === 'substitute') return groups.substitutes;
+  return groups.active;
+}
+
+function renderPlayerSelectOptions({
+  groups,
+  players,
+  mode,
+  selectedValue,
+  placeholder,
+}: {
+  groups: MatchPlayerSelectionGroups;
+  players: MatchLineupPlayer[];
+  mode: PlayerSelectMode;
+  selectedValue?: string | null;
+  placeholder: string;
+}) {
+  const enabledOptions = getEnabledPlayerOptions(groups, mode);
+  const selectedStillEnabled = enabledOptions.some((option) => playerOptionMatchesName(option, selectedValue));
+  const selectedOption = !selectedStillEnabled && selectedValue
+    ? findMatchPlayerSelectionOption(groups, selectedValue) || preserveMatchPlayerOption(players, groups, selectedValue)
+    : null;
+
+  return (
+    <>
+      <option value="">{placeholder}</option>
+      {selectedOption ? (
+        <optgroup label="Seleccionado en este evento">
+          <option value={selectedOption.name}>{formatMatchPlayerOptionLabel(selectedOption)}</option>
+        </optgroup>
+      ) : null}
+      {mode !== 'substitute' && groups.active.length > 0 ? (
+        <optgroup label="Titulares / activos">
+          {groups.active.map((player) => (
+            <option key={`active-${player.key}`} value={player.name}>
+              {formatMatchPlayerOptionLabel(player)}
+            </option>
+          ))}
+        </optgroup>
+      ) : null}
+      {mode === 'substitute' && groups.substitutes.length > 0 ? (
+        <optgroup label="Suplentes disponibles">
+          {groups.substitutes.map((player) => (
+            <option key={`sub-${player.key}`} value={player.name}>
+              {formatMatchPlayerOptionLabel(player)}
+            </option>
+          ))}
+        </optgroup>
+      ) : null}
+      {mode === 'activeWithDisabledSubstitutes' && groups.substitutes.length > 0 ? (
+        <optgroup label="Suplentes disponibles">
+          {groups.substitutes.map((player) => (
+            <option key={`disabled-sub-${player.key}`} value={player.name} disabled>
+              {formatMatchPlayerOptionLabel(player)}
+            </option>
+          ))}
+        </optgroup>
+      ) : null}
+    </>
+  );
 }
 
 type EventPanelDensity = 'compact' | 'comfortable';
@@ -697,27 +839,34 @@ export default function ClubMatchWorkspace({
     substitutions: countEvents(events, ['substitution']),
   };
   const livePanelGameStats = buildMatchStats(events);
-  const timelineEventsChronological = useMemo(() => [...events].sort((left, right) => {
-    const leftMinute = parseNumericInput(left.minute) ?? 0;
-    const rightMinute = parseNumericInput(right.minute) ?? 0;
-    if (leftMinute !== rightMinute) return leftMinute - rightMinute;
-    return String(left.id).localeCompare(String(right.id));
-  }), [events]);
+  const timelineEventsChronological = useMemo(() => sortClubEventsChronologically(events), [events]);
   const timelineEventIndexById = useMemo(
     () => new Map(timelineEventsChronological.map((event, index) => [event.id, index])),
     [timelineEventsChronological],
   );
-  const timelineEventsRecentFirst = useMemo(() => [...timelineEventsChronological].sort((left, right) => {
-    const leftMinute = parseNumericInput(left.minute) ?? 0;
-    const rightMinute = parseNumericInput(right.minute) ?? 0;
-    if (leftMinute !== rightMinute) return rightMinute - leftMinute;
-
-    const leftSequence = left.sequence ?? (left.parentEventId ? 1 : 0);
-    const rightSequence = right.sequence ?? (right.parentEventId ? 1 : 0);
-    if (leftSequence !== rightSequence) return leftSequence - rightSequence;
-
-    return String(left.id).localeCompare(String(right.id));
-  }), [timelineEventsChronological]);
+  const timelineEventsRecentFirst = timelineEventsChronological;
+  const playerSelectionEvents = useMemo(
+    () => (liveComposer?.mode === 'edit' && liveComposer.eventId
+      ? timelineEventsChronological.filter((event) => event.id !== liveComposer.eventId)
+      : timelineEventsChronological),
+    [liveComposer?.eventId, liveComposer?.mode, timelineEventsChronological],
+  );
+  const playerSelections = useMemo(() => ({
+    home: buildMatchPlayerSelectionGroups(lineupsState.home, playerSelectionEvents, 'home'),
+    away: buildMatchPlayerSelectionGroups(lineupsState.away, playerSelectionEvents, 'away'),
+  }), [lineupsState.away, lineupsState.home, playerSelectionEvents]);
+  const renderTeamPlayerOptions = useCallback((
+    team: 'home' | 'away',
+    mode: PlayerSelectMode,
+    selectedValue: string | null | undefined,
+    placeholder: string,
+  ) => renderPlayerSelectOptions({
+    groups: playerSelections[team],
+    players: lineupsState[team],
+    mode,
+    selectedValue,
+    placeholder,
+  }), [lineupsState, playerSelections]);
   const timelineScoreById = useMemo(() => {
     const map = new Map<string, { home: number; away: number; points: number }>();
     let home = 0;
@@ -763,6 +912,31 @@ export default function ClubMatchWorkspace({
     );
   }, [events, lineupsState.liveControl, matchDraft.status, pointsRules]);
 
+  const buildLineupsPayload = useCallback((
+    liveControl: ClubLiveControl,
+    score: ReturnType<typeof buildScorePayload>,
+    status: MatchStatus,
+    nextEvents: Array<{ type?: unknown; team?: unknown }>,
+  ) => ({
+    ...lineupsState,
+    liveControl: buildLiveControlWithPoints(
+      liveControl,
+      calculateMatchPointsPreview(status, score, nextEvents, pointsRules),
+    ),
+    home: lineupsState.home.map((player) => ({
+      ...player,
+      name: player.name.trim(),
+      position: player.position?.trim() || '',
+      role: player.role?.trim() || 'starter',
+    })),
+    away: lineupsState.away.map((player) => ({
+      ...player,
+      name: player.name.trim(),
+      position: player.position?.trim() || '',
+      role: player.role?.trim() || 'starter',
+    })),
+  }), [lineupsState, pointsRules]);
+
   const kpis = [
     { label: 'Convocatoria', value: callupsCount ? `${callupsCount} / 23` : 'Sin carga', tone: pendingCallups > 0 || callupsCount === 0 ? 'yellow' : 'green' },
     { label: 'Alineación', value: confirmedLineup >= 15 ? 'Lista' : confirmedLineup > 0 ? 'Incompleta' : 'Vacía', tone: confirmedLineup >= 15 ? 'green' : confirmedLineup > 0 ? 'yellow' : 'red' },
@@ -781,6 +955,13 @@ export default function ClubMatchWorkspace({
   const buildPayload = useCallback((overrides?: Partial<Record<string, unknown>>) => {
     const score = buildScorePayload(matchState.score, matchDraft.score);
     const nextDateTime = fromDateTimeLocalInput(matchDraft.dateTime);
+    const serializedEvents = events.map(serializeLiveEvent);
+    const nextStatus = typeof overrides?.status === 'string' ? overrides.status as MatchStatus : matchDraft.status;
+    const nextEvents = Array.isArray(overrides?.events)
+      ? overrides.events as Array<{ type?: unknown; team?: unknown }>
+      : serializedEvents;
+    const nextScore = (overrides?.score ?? score) as ReturnType<typeof buildScorePayload>;
+    const nextLiveControl = getLiveControlForPayload(overrides, score);
     const payload: Record<string, unknown> = {
       status: matchDraft.status,
       venue: matchDraft.venue.trim() || null,
@@ -789,23 +970,8 @@ export default function ClubMatchWorkspace({
       score,
       notes: notes.trim() || null,
       clock: buildClockPayload(lineupsState.liveControl, matchDraft.status, matchState.clock),
-      lineups: {
-        ...lineupsState,
-        liveControl: getLiveControlForPayload(overrides, score),
-        home: lineupsState.home.map((player) => ({
-          ...player,
-          name: player.name.trim(),
-          position: player.position?.trim() || '',
-          role: player.role?.trim() || 'starter',
-        })),
-        away: lineupsState.away.map((player) => ({
-          ...player,
-          name: player.name.trim(),
-          position: player.position?.trim() || '',
-          role: player.role?.trim() || 'starter',
-        })),
-      },
-      events: events.map(serializeLiveEvent),
+      lineups: buildLineupsPayload(nextLiveControl, nextScore, nextStatus, nextEvents),
+      events: serializedEvents,
     };
 
     if (nextDateTime) {
@@ -816,7 +982,7 @@ export default function ClubMatchWorkspace({
       ...payload,
       ...overrides,
     };
-  }, [events, getLiveControlForPayload, lineupsState, matchDraft, matchState.clock, matchState.score, notes]);
+  }, [buildLineupsPayload, events, getLiveControlForPayload, lineupsState.liveControl, matchDraft, matchState.clock, matchState.score, notes]);
 
   const currentPayloadSignature = JSON.stringify(buildPayload());
   const eventAutosaveSignature = JSON.stringify({
@@ -976,7 +1142,11 @@ export default function ClubMatchWorkspace({
       setTimerRunning(false);
       setLineupsState((current) => ({
         ...current,
-        liveControl: { ...current.liveControl, minute: event.minute || current.liveControl.minute },
+        liveControl: {
+          ...current.liveControl,
+          phase: normalizeMatchPeriod(event.period, current.liveControl.phase) as LivePhase,
+          minute: event.minute || current.liveControl.minute,
+        },
       }));
       setLiveComposer(composerFromEvent(event));
       return;
@@ -1007,6 +1177,14 @@ export default function ClubMatchWorkspace({
   const openCustomComposer = useCallback((def: CustomEventDef, existingEvent?: ClubLiveEvent) => {
     if (existingEvent) {
       setTimerRunning(false);
+      setLineupsState((current) => ({
+        ...current,
+        liveControl: {
+          ...current.liveControl,
+          phase: normalizeMatchPeriod(existingEvent.period, current.liveControl.phase) as LivePhase,
+          minute: existingEvent.minute || current.liveControl.minute,
+        },
+      }));
       const causeMatch = existingEvent.detail.match(/Causa:\s*([^|]+)/);
       const outcomeMatch = existingEvent.detail.match(/Resultado:\s*([^|]+)/);
       const cause = causeMatch?.[1]?.trim() || '';
@@ -1049,10 +1227,14 @@ export default function ClubMatchWorkspace({
     const points = computeCustomEventPoints(def, customComposer.outcome);
     const detail = buildCustomEventDetail(def, customComposer.cause.trim(), customComposer.outcome, points);
     const eventId = customComposer.eventId || (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `evt-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    const previous = customComposer.mode === 'edit' ? events.find((entry) => entry.id === eventId) : undefined;
+    const eventPeriod = previous?.period || getEventPeriodForType(def.id, lineupsState.liveControl.phase);
     const newEvent: ClubLiveEvent = {
       id: eventId,
       minute: customComposer.minute,
       videoTime: customComposer.videoTime,
+      period: eventPeriod,
+      order: previous?.order ?? getNextEventOrder(events),
       type: def.id,
       team: customComposer.team,
       playerName: def.hasPlayer ? customComposer.playerName.trim() : '',
@@ -1062,7 +1244,6 @@ export default function ClubMatchWorkspace({
     const scoreDelta = points;
 
     if (customComposer.mode === 'edit') {
-      const previous = events.find((entry) => entry.id === eventId);
       const previousPoints = previous ? parseCustomEventStoredPoints(previous.detail) : 0;
       const previousTeam = previous?.team;
       setEvents((current) => current.map((entry) => (entry.id === eventId ? newEvent : entry)));
@@ -1088,7 +1269,7 @@ export default function ClubMatchWorkspace({
 
     setCustomComposer(null);
     setFeedback({ tone: 'success', message: customComposer.mode === 'edit' ? 'Evento personalizado actualizado.' : 'Evento personalizado registrado.' });
-  }, [customComposer, customEventDefMap, events]);
+  }, [customComposer, customEventDefMap, events, lineupsState.liveControl.phase]);
 
   const openVideoEventComposer = useCallback((event: ClubLiveEvent) => {
     pausePlaybackForComposer(true);
@@ -1098,7 +1279,11 @@ export default function ClubMatchWorkspace({
     setTimerRunning(false);
     setLineupsState((current) => ({
       ...current,
-      liveControl: { ...current.liveControl, minute: event.minute || current.liveControl.minute },
+      liveControl: {
+        ...current.liveControl,
+        phase: normalizeMatchPeriod(event.period, current.liveControl.phase) as LivePhase,
+        minute: event.minute || current.liveControl.minute,
+      },
     }));
     setVideoComposerOverlayOpen(true);
     openLiveComposer(getLiveActionFromEventType(event.type), event);
@@ -1126,8 +1311,15 @@ export default function ClubMatchWorkspace({
       : liveComposer.team === 'away'
         ? lineupsState.away
         : [];
+    const previousEvent = liveComposer.mode === 'edit' && liveComposer.eventId
+      ? events.find((event) => event.id === liveComposer.eventId)
+      : undefined;
+    const nextOrder = previousEvent?.order ?? getNextEventOrder(events);
+    const nextPeriod = previousEvent?.period || getEventPeriodForType(liveComposer.action, lineupsState.liveControl.phase);
     const nextEvent = {
       ...buildEventFromComposer(liveComposer),
+      period: nextPeriod,
+      order: nextOrder,
       playerId: findLineupPlayerId(selectedPlayers, liveComposer.playerName),
       secondaryPlayerId: liveComposer.action === 'substitution'
         ? findLineupPlayerId(selectedPlayers, liveComposer.secondaryPlayerName)
@@ -1137,7 +1329,6 @@ export default function ClubMatchWorkspace({
     const serializeEventsForSave = (nextEvents: ClubLiveEvent[]) => nextEvents.map(serializeLiveEvent);
 
     if (liveComposer.mode === 'edit' && liveComposer.eventId) {
-      const previousEvent = events.find((event) => event.id === liveComposer.eventId);
       const nextEvents = events.map((event) => event.id === liveComposer.eventId ? nextEvent : event);
       let nextScore = matchDraft.score;
       if (previousEvent) {
@@ -1170,6 +1361,8 @@ export default function ClubMatchWorkspace({
           detail: `Scrum (derivado de ${liveComposer.action === 'knock_on' ? 'Knock On' : 'Pase Forward'})`,
           parentEventId: nextEvent.id,
           sequence: 1,
+          period: nextPeriod,
+          order: nextOrder + 1,
         };
       }
       if ((liveComposer.action === 'penalty' || liveComposer.action === 'free_kick') && liveComposer.outcome === 'scrum') {
@@ -1183,6 +1376,8 @@ export default function ClubMatchWorkspace({
           detail: `Scrum (derivado de ${liveComposer.action === 'penalty' ? 'Penal' : 'Free Kick'})`,
           parentEventId: nextEvent.id,
           sequence: 1,
+          period: nextPeriod,
+          order: nextOrder + 1,
         };
       }
       if ((liveComposer.action === 'penalty' || liveComposer.action === 'free_kick') && liveComposer.outcome === 'touch') {
@@ -1196,12 +1391,24 @@ export default function ClubMatchWorkspace({
           detail: `Lineout (derivado de ${liveComposer.action === 'penalty' ? 'Penal' : 'Free Kick'})`,
           parentEventId: nextEvent.id,
           sequence: 1,
+          period: nextPeriod,
+          order: nextOrder + 1,
         };
       }
     }
 
     const nextEvents = [...events, nextEvent, ...(childEvent ? [childEvent] : [])];
     const nextScore = applyScoreDelta(matchDraft.score, nextEvent.team, nextDelta);
+    const nextPhase = resolveLivePhaseAfterEvent(lineupsState.liveControl.phase, nextEvent.type);
+    const liveControlChanged = nextPhase !== lineupsState.liveControl.phase;
+    const nextLiveControl = liveControlChanged
+      ? { ...lineupsState.liveControl, phase: nextPhase }
+      : lineupsState.liveControl;
+    const nextStatus = nextEvent.type === 'match_end'
+      ? 'final'
+      : nextEvent.type === 'match_start' || nextEvent.type === 'match_half'
+        ? 'live'
+        : matchDraft.status;
     const successMessage = childEvent
       ? `${getEventTypeLabel(nextEvent.type)} registrado. ${getEventTypeLabel(childEvent.type)} generado.`
       : liveComposer.action === 'try'
@@ -1209,13 +1416,23 @@ export default function ClubMatchWorkspace({
         : 'Evento agregado al timeline.';
 
     setEvents(nextEvents);
-    setMatchDraft((current) => ({ ...current, score: nextScore }));
+    setMatchDraft((current) => ({ ...current, status: nextStatus, score: nextScore }));
+    if (liveControlChanged) {
+      setLineupsState((current) => ({ ...current, liveControl: nextLiveControl }));
+    }
     closeLiveComposer();
+    const serializedNextEvents = serializeEventsForSave(nextEvents);
+    const nextScorePayload = buildScorePayload(matchState.score, nextScore);
     void saveMatch({
-      score: buildScorePayload(matchState.score, nextScore),
-      events: serializeEventsForSave(nextEvents),
+      status: nextStatus,
+      score: nextScorePayload,
+      events: serializedNextEvents,
+      ...(liveControlChanged ? {
+        clock: buildClockPayload(nextLiveControl, nextStatus, matchState.clock),
+        lineups: buildLineupsPayload(nextLiveControl, nextScorePayload, nextStatus, serializedNextEvents),
+      } : {}),
     }, successMessage, { syncResponse: false });
-  }, [closeLiveComposer, events, lineupsState.away, lineupsState.home, liveComposer, matchDraft.score, matchState.score, saveMatch]);
+  }, [buildLineupsPayload, closeLiveComposer, events, lineupsState.away, lineupsState.home, lineupsState.liveControl, liveComposer, matchDraft.score, matchDraft.status, matchState.clock, matchState.score, saveMatch]);
 
   const removeLiveEvent = useCallback((eventId: string) => {
     const eventIndex = events.findIndex((event) => event.id === eventId);
@@ -1267,6 +1484,160 @@ export default function ClubMatchWorkspace({
     setFeedback({ tone: 'success', message: 'Se restaur\u00f3 el \u00faltimo evento.' });
   }, [lastRemovedEvent]);
 
+  const getLineupTeamLabel = (team: 'home' | 'away') => (
+    team === 'home'
+      ? homeClub?.short_name || homeClub?.name || 'Local'
+      : awayClub?.short_name || awayClub?.name || 'Visitante'
+  );
+
+  const handleExportMatchSheetPdf = useCallback(() => {
+    const homeName = homeClub?.name || homeClub?.short_name || 'Local';
+    const awayName = awayClub?.name || awayClub?.short_name || 'Visitante';
+    const homeShortName = homeClub?.short_name || homeName;
+    const awayShortName = awayClub?.short_name || awayName;
+    const statGroups = buildPostMatchStatGroups(buildMatchStats(events));
+    const eventStatsByType = new Map<string, { label: string; home: number; away: number }>();
+    timelineEventsChronological.forEach((event) => {
+      if (event.team !== 'home' && event.team !== 'away') return;
+      const label = resolveEventTypeLabel(event.type);
+      const current = eventStatsByType.get(event.type) || { label, home: 0, away: 0 };
+      current[event.team] += 1;
+      eventStatsByType.set(event.type, current);
+    });
+    const eventStatRows = Array.from(eventStatsByType.values())
+      .sort((left, right) => left.label.localeCompare(right.label, 'es'));
+    const formatLineup = (players: MatchLineupPlayer[]) => players.map((player) => ({
+      number: String(player.number ?? '').trim(),
+      name: player.name,
+      position: player.position || '',
+      role: player.role || '',
+      isCaptain: Boolean(player.isCaptain),
+    }));
+
+    const opened = exportMatchSheetPdf({
+      title: `Planilla: ${homeName} vs ${awayName}`,
+      status: matchDraft.status,
+      statusLabel: getStatusLabel(matchDraft.status),
+      date: when.date,
+      time: when.time || 'Hora a confirmar',
+      venue: matchDraft.venue || 'Sede a confirmar',
+      referee: matchDraft.referee || 'A confirmar',
+      roundLabel: matchState.roundLabel || matchState.round_id || 'Sin jornada',
+      category: matchState.category || 'Sin categoria',
+      accentColor,
+      tournament: {
+        name: matchState.tournament?.name || 'Competicion',
+        logoUrl: matchState.tournament?.logo_url || null,
+      },
+      home: {
+        name: homeName,
+        shortName: homeShortName,
+        logoUrl: homeClub?.logo_url || null,
+        score: matchDraft.score.home.trim() || '0',
+        points: formatPointValue(totalHomeTablePoints),
+        pointsDetail: formatPointBreakdown(pointsPreview.homeBasePoints, pointsPreview.homeBonusPoints),
+        lineup: formatLineup(lineupsState.home),
+      },
+      away: {
+        name: awayName,
+        shortName: awayShortName,
+        logoUrl: awayClub?.logo_url || null,
+        score: matchDraft.score.away.trim() || '0',
+        points: formatPointValue(totalAwayTablePoints),
+        pointsDetail: formatPointBreakdown(pointsPreview.awayBasePoints, pointsPreview.awayBonusPoints),
+        lineup: formatLineup(lineupsState.away),
+      },
+      timeline: timelineEventsChronological.map((event, index) => {
+        const eventScore = timelineScoreById.get(event.id);
+        return {
+          period: getMatchPeriodLabel(event.period),
+          minute: event.minute || '--',
+          summary: resolveEventSummary(event),
+          team: event.team === 'home' ? homeShortName : event.team === 'away' ? awayShortName : 'Neutral',
+          detail: formatMatchTimelineEventDescription(event, timelineEventsChronological, index, 'Sin detalle adicional'),
+          score: eventScore && eventScore.points > 0 ? `${eventScore.home} - ${eventScore.away}` : undefined,
+        };
+      }),
+      statSections: [
+        { title: 'Resumen de eventos', rows: eventStatRows },
+        { title: 'Puntos y definicion', rows: statGroups.scoring },
+        { title: 'Juego y 22m', rows: statGroups.juego },
+        { title: 'Continuidad', rows: statGroups.continuity },
+        { title: 'Juego fijo', rows: statGroups.setPiece },
+        { title: 'Disciplina y defensa', rows: statGroups.discipline },
+      ],
+      notes,
+    });
+
+    if (!opened) {
+      setFeedback({
+        tone: 'error',
+        message: 'No se pudo abrir la ventana de impresion. Revisá el bloqueo de pop-ups del navegador.',
+      });
+    }
+  }, [
+    accentColor,
+    awayClub,
+    events,
+    homeClub,
+    lineupsState.away,
+    lineupsState.home,
+    matchDraft.referee,
+    matchDraft.score.away,
+    matchDraft.score.home,
+    matchDraft.status,
+    matchDraft.venue,
+    matchState.category,
+    matchState.roundLabel,
+    matchState.round_id,
+    matchState.tournament?.logo_url,
+    matchState.tournament?.name,
+    notes,
+    pointsPreview.awayBasePoints,
+    pointsPreview.awayBonusPoints,
+    pointsPreview.homeBasePoints,
+    pointsPreview.homeBonusPoints,
+    resolveEventTypeLabel,
+    resolveEventSummary,
+    timelineEventsChronological,
+    timelineScoreById,
+    totalAwayTablePoints,
+    totalHomeTablePoints,
+    when.date,
+    when.time,
+  ]);
+
+  const addLineupPlayer = useCallback((team: 'home' | 'away') => {
+    setLineupViewTab(team);
+    setLineupsState((current) => ({
+      ...current,
+      [team]: [...current[team], createEmptyLineupPlayer()],
+    }));
+  }, []);
+
+  const renderLineupRows = (team: 'home' | 'away') => (
+    <div className={styles.playerList}>
+      {lineupsState[team].length === 0 ? <div className={styles.emptyState}>No hay alineacion cargada.</div> : null}
+      {lineupsState[team].map((player, index) => (
+        <div key={`${team}-${player.id || 'lineup'}-${index}`} className={styles.playerFormRow}>
+          <input className={styles.input} value={String(player.number ?? '')} onChange={(event) => updateMyLineupPlayer(setLineupsState, team, index, { number: event.target.value })} placeholder="01" />
+          <input className={styles.input} value={player.name} onChange={(event) => updateMyLineupPlayer(setLineupsState, team, index, { name: event.target.value })} placeholder="Jugador" />
+          <input className={styles.input} value={player.position || ''} onChange={(event) => updateMyLineupPlayer(setLineupsState, team, index, { position: event.target.value })} placeholder="Posicion" />
+          <select className={styles.select} value={player.role || 'starter'} onChange={(event) => updateMyLineupPlayer(setLineupsState, team, index, { role: event.target.value })}>
+            <option value="starter">Titular</option>
+            <option value="substitute">Suplente</option>
+            <option value="reserve">Reserva</option>
+          </select>
+          <select className={styles.select} value={player.isCaptain ? 'captain' : 'none'} onChange={(event) => updateMyLineupPlayer(setLineupsState, team, index, { isCaptain: event.target.value === 'captain' })}>
+            <option value="none">Sin capitania</option>
+            <option value="captain">Capitan</option>
+          </select>
+          <button className={styles.rowMenu} type="button" aria-label="Eliminar jugador" onClick={() => removeLineupPlayer(setLineupsState, team, index)}><X size={14} /></button>
+        </div>
+      ))}
+    </div>
+  );
+
   const renderLiveComposerCard = (extraClassName?: string) => {
     if (!liveComposer) return null;
 
@@ -1286,6 +1657,15 @@ export default function ClubMatchWorkspace({
           <label className={styles.field}>
             <span>Minuto</span>
             <input className={styles.input} value={liveComposer.minute} onChange={(event) => setLiveComposer((current) => current ? { ...current, minute: event.target.value } : current)} placeholder={currentMinute} />
+          </label>
+          <label className={styles.field}>
+            <span>Periodo</span>
+            <input
+              className={styles.input}
+              value={getMatchPeriodLabel(getEventPeriodForType(liveComposer.action, lineupsState.liveControl.phase))}
+              readOnly
+              title="El evento se guarda en el periodo activo."
+            />
           </label>
           <label className={styles.field}>
             <span>Tiempo video</span>
@@ -1309,7 +1689,7 @@ export default function ClubMatchWorkspace({
           </label>
           <label className={styles.field}>
             <span>Equipo</span>
-            <select className={styles.select} value={liveComposer.team} onChange={(event) => setLiveComposer((current) => current ? { ...current, team: event.target.value as 'home' | 'away' } : current)}>
+            <select className={styles.select} value={liveComposer.team} onChange={(event) => setLiveComposer((current) => current ? { ...current, team: event.target.value as 'home' | 'away', playerName: '', secondaryPlayerName: '' } : current)}>
               <option value="home">{homeClub?.short_name || homeClub?.name || 'Local'}</option>
               <option value="away">{awayClub?.short_name || awayClub?.name || 'Visitante'}</option>
             </select>
@@ -1319,12 +1699,7 @@ export default function ClubMatchWorkspace({
             <label className={styles.field}>
               <span>Jugador</span>
               <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
-                <option value="">Seleccionar jugador</option>
-                {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                  <option key={player.id || player.name} value={player.name}>
-                    {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                  </option>
-                ))}
+                {renderTeamPlayerOptions(liveComposer.team, 'activeWithDisabledSubstitutes', liveComposer.playerName, 'Seleccionar jugador')}
               </select>
             </label>
           ) : null}
@@ -1341,23 +1716,13 @@ export default function ClubMatchWorkspace({
               <label className={styles.field}>
                 <span>Sale</span>
                 <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
-                  <option value="">Jugador que sale</option>
-                  {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                    <option key={player.id || player.name} value={player.name}>
-                      {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                    </option>
-                  ))}
+                  {renderTeamPlayerOptions(liveComposer.team, 'active', liveComposer.playerName, 'Jugador que sale')}
                 </select>
               </label>
               <label className={styles.field}>
                 <span>Entra</span>
                 <select className={styles.select} value={liveComposer.secondaryPlayerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, secondaryPlayerName: event.target.value } : current)}>
-                  <option value="">Jugador que entra</option>
-                  {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                    <option key={player.id || player.name} value={player.name}>
-                      {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                    </option>
-                  ))}
+                  {renderTeamPlayerOptions(liveComposer.team, 'substitute', liveComposer.secondaryPlayerName, 'Jugador que entra')}
                 </select>
               </label>
             </>
@@ -1368,12 +1733,7 @@ export default function ClubMatchWorkspace({
               <label className={styles.field}>
                 <span>Jugador</span>
                 <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
-                  <option value="">Referente opcional</option>
-                  {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                    <option key={player.id || player.name} value={player.name}>
-                      {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                    </option>
-                  ))}
+                  {renderTeamPlayerOptions(liveComposer.team, 'activeWithDisabledSubstitutes', liveComposer.playerName, 'Referente opcional')}
                 </select>
               </label>
               <label className={styles.field}>
@@ -1419,12 +1779,7 @@ export default function ClubMatchWorkspace({
               <label className={styles.field}>
                 <span>Pateador / detalle</span>
                 <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
-                  <option value="">Jugador que ejecuta</option>
-                  {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                    <option key={player.id || player.name} value={player.name}>
-                      {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                    </option>
-                  ))}
+                  {renderTeamPlayerOptions(liveComposer.team, 'activeWithDisabledSubstitutes', liveComposer.playerName, 'Jugador que ejecuta')}
                 </select>
               </label>
               <label className={styles.field}>
@@ -1460,12 +1815,7 @@ export default function ClubMatchWorkspace({
               <label className={styles.field}>
                 <span>Jugador</span>
                 <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
-                  <option value="">Jugador que ejecuta</option>
-                  {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                    <option key={player.id || player.name} value={player.name}>
-                      {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                    </option>
-                  ))}
+                  {renderTeamPlayerOptions(liveComposer.team, 'activeWithDisabledSubstitutes', liveComposer.playerName, 'Jugador que ejecuta')}
                 </select>
               </label>
               <label className={styles.field}>
@@ -1526,12 +1876,7 @@ export default function ClubMatchWorkspace({
             <label className={styles.field}>
               <span>Asistencia (opcional)</span>
               <select className={styles.select} value={liveComposer.secondaryPlayerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, secondaryPlayerName: event.target.value } : current)}>
-                <option value="">Sin asistencia</option>
-                {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                  <option key={player.id || player.name} value={player.name}>
-                    {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                  </option>
-                ))}
+                {renderTeamPlayerOptions(liveComposer.team, 'activeWithDisabledSubstitutes', liveComposer.secondaryPlayerName, 'Sin asistencia')}
               </select>
             </label>
           ) : null}
@@ -1600,12 +1945,7 @@ export default function ClubMatchWorkspace({
               <label className={styles.field}>
                 <span>Receptor</span>
                 <select className={styles.select} value={liveComposer.secondaryPlayerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, secondaryPlayerName: event.target.value } : current)}>
-                  <option value="">Seleccionar receptor</option>
-                  {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                    <option key={player.id || player.name} value={player.name}>
-                      {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                    </option>
-                  ))}
+                  {renderTeamPlayerOptions(liveComposer.team, 'activeWithDisabledSubstitutes', liveComposer.secondaryPlayerName, 'Seleccionar receptor')}
                 </select>
               </label>
             </>
@@ -1772,11 +2112,11 @@ export default function ClubMatchWorkspace({
               {activeTab === 'alineacion' && (
                 <>
                   <HeaderBlock title="Alineación y banco" subtitle="Titulares, suplentes y capitán de ambos equipos." action={
-                    <button className={styles.miniPrimary} type="button" onClick={() => setLineupsState((current) => ({ ...current, [lineupViewTab]: [...current[lineupViewTab], createEmptyLineupPlayer()] }))}>
+                    <button className={`${styles.miniPrimary} ${styles.lineupDesktopAction}`} type="button" onClick={() => addLineupPlayer(lineupViewTab)}>
                       + Agregar jugador
                     </button>
                   } />
-                  <div className={styles.postTabs}>
+                  <div className={`${styles.postTabs} ${styles.lineupDesktopOnly}`}>
                     <button
                       type="button"
                       className={`${styles.postTab}${lineupViewTab === 'home' ? ' ' + styles.postTabActive : ''}`}
@@ -1792,7 +2132,7 @@ export default function ClubMatchWorkspace({
                       {awayClub?.short_name || awayClub?.name || 'Visitante'}
                     </button>
                   </div>
-                  <div className={styles.playerList}>
+                  <div className={`${styles.playerList} ${styles.lineupDesktopOnly}`}>
                     {lineupsState[lineupViewTab].length === 0 ? <div className={styles.emptyState}>No hay alineación cargada.</div> : null}
                     {lineupsState[lineupViewTab].map((player, index) => (
                       <div key={`${player.id || 'lineup'}-${index}`} className={styles.playerFormRow}>
@@ -1810,6 +2150,23 @@ export default function ClubMatchWorkspace({
                         </select>
                         <button className={styles.rowMenu} type="button" aria-label="Eliminar jugador" onClick={() => removeLineupPlayer(setLineupsState, lineupViewTab, index)}><X size={14} /></button>
                       </div>
+                    ))}
+                  </div>
+                  <div className={styles.lineupMobileGrid}>
+                    {(['home', 'away'] as const).map((team) => (
+                      <section key={team} className={styles.lineupMobileCard}>
+                        <div className={styles.lineupMobileHeader}>
+                          <div className={styles.lineupMobileTeam}>
+                            <span>{team === 'home' ? 'Local' : 'Visitante'}</span>
+                            <strong>{getLineupTeamLabel(team)}</strong>
+                            <small>{lineupsState[team].filter((player) => player.name.trim()).length} jugadores</small>
+                          </div>
+                          <button className={styles.lineupMobileAdd} type="button" onClick={() => addLineupPlayer(team)}>
+                            + Jugador
+                          </button>
+                        </div>
+                        {renderLineupRows(team)}
+                      </section>
                     ))}
                   </div>
                 </>
@@ -2030,11 +2387,11 @@ export default function ClubMatchWorkspace({
                                       key={event.id}
                                       type="button"
                                       onClick={() => openVideoEventComposer(event)}
-                                      title={`${resolveEventTypeLabel(event.type)} - ${event.minute} min${event.videoTime ? ` - Video: ${event.videoTime}` : ''}`}
+                                      title={`${resolveEventTypeLabel(event.type)} - ${getMatchPeriodLabel(event.period)} - ${event.minute} min${event.videoTime ? ` - Video: ${event.videoTime}` : ''}`}
                                       className={styles.fullscreenEventCard}
                                     >
                                       <span className={styles.fullscreenEventGlyph}>{resolveEventGlyph(event.type)}</span>
-                                      <span className={styles.fullscreenEventMinute}>{event.minute} min</span>
+                                      <span className={styles.fullscreenEventMinute}>{getMatchPeriodLabel(event.period)} - {event.minute} min</span>
                                       {event.videoTime ? <span className={styles.fullscreenEventTime}>Video {event.videoTime}</span> : null}
                                     </button>
                                   ))}
@@ -2185,7 +2542,7 @@ export default function ClubMatchWorkspace({
                             </label>
                             <label className={styles.field}>
                               <span>Equipo</span>
-                              <select className={styles.select} value={liveComposer.team} onChange={(event) => setLiveComposer((current) => current ? { ...current, team: event.target.value as 'home' | 'away' } : current)}>
+                              <select className={styles.select} value={liveComposer.team} onChange={(event) => setLiveComposer((current) => current ? { ...current, team: event.target.value as 'home' | 'away', playerName: '', secondaryPlayerName: '' } : current)}>
                                 <option value="home">{homeClub?.short_name || homeClub?.name || 'Local'}</option>
                                 <option value="away">{awayClub?.short_name || awayClub?.name || 'Visitante'}</option>
                               </select>
@@ -2195,12 +2552,7 @@ export default function ClubMatchWorkspace({
                               <label className={styles.field}>
                                 <span>Jugador</span>
                                 <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
-                                  <option value="">Seleccionar jugador</option>
-                                  {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                                    <option key={player.id || player.name} value={player.name}>
-                                      {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                                    </option>
-                                  ))}
+                                  {renderTeamPlayerOptions(liveComposer.team, 'activeWithDisabledSubstitutes', liveComposer.playerName, 'Seleccionar jugador')}
                                 </select>
                               </label>
                             ) : null}
@@ -2217,23 +2569,13 @@ export default function ClubMatchWorkspace({
                                 <label className={styles.field}>
                                   <span>Sale</span>
                                   <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
-                                    <option value="">Jugador que sale</option>
-                                    {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                                      <option key={player.id || player.name} value={player.name}>
-                                        {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                                      </option>
-                                    ))}
+                                    {renderTeamPlayerOptions(liveComposer.team, 'active', liveComposer.playerName, 'Jugador que sale')}
                                   </select>
                                 </label>
                                 <label className={styles.field}>
                                   <span>Entra</span>
                                   <select className={styles.select} value={liveComposer.secondaryPlayerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, secondaryPlayerName: event.target.value } : current)}>
-                                    <option value="">Jugador que entra</option>
-                                    {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                                      <option key={player.id || player.name} value={player.name}>
-                                        {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                                      </option>
-                                    ))}
+                                    {renderTeamPlayerOptions(liveComposer.team, 'substitute', liveComposer.secondaryPlayerName, 'Jugador que entra')}
                                   </select>
                                 </label>
                               </>
@@ -2244,12 +2586,7 @@ export default function ClubMatchWorkspace({
                                 <label className={styles.field}>
                                   <span>Jugador</span>
                                   <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
-                                    <option value="">Referente opcional</option>
-                                    {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                                      <option key={player.id || player.name} value={player.name}>
-                                        {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                                      </option>
-                                    ))}
+                                    {renderTeamPlayerOptions(liveComposer.team, 'activeWithDisabledSubstitutes', liveComposer.playerName, 'Referente opcional')}
                                   </select>
                                 </label>
                                 <label className={styles.field}>
@@ -2295,12 +2632,7 @@ export default function ClubMatchWorkspace({
                                 <label className={styles.field}>
                                   <span>Pateador / detalle</span>
                                   <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
-                                    <option value="">Jugador que ejecuta</option>
-                                    {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                                      <option key={player.id || player.name} value={player.name}>
-                                        {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                                      </option>
-                                    ))}
+                                    {renderTeamPlayerOptions(liveComposer.team, 'activeWithDisabledSubstitutes', liveComposer.playerName, 'Jugador que ejecuta')}
                                   </select>
                                 </label>
                                 <label className={styles.field}>
@@ -2336,12 +2668,7 @@ export default function ClubMatchWorkspace({
                                 <label className={styles.field}>
                                   <span>Jugador</span>
                                   <select className={styles.select} value={liveComposer.playerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, playerName: event.target.value } : current)}>
-                                    <option value="">Jugador que ejecuta</option>
-                                    {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                                      <option key={player.id || player.name} value={player.name}>
-                                        {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                                      </option>
-                                    ))}
+                                    {renderTeamPlayerOptions(liveComposer.team, 'activeWithDisabledSubstitutes', liveComposer.playerName, 'Jugador que ejecuta')}
                                   </select>
                                 </label>
                                 <label className={styles.field}>
@@ -2402,12 +2729,7 @@ export default function ClubMatchWorkspace({
                               <label className={styles.field}>
                                 <span>Asistencia (opcional)</span>
                                 <select className={styles.select} value={liveComposer.secondaryPlayerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, secondaryPlayerName: event.target.value } : current)}>
-                                  <option value="">Sin asistencia</option>
-                                  {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                                    <option key={player.id || player.name} value={player.name}>
-                                      {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                                    </option>
-                                  ))}
+                                  {renderTeamPlayerOptions(liveComposer.team, 'activeWithDisabledSubstitutes', liveComposer.secondaryPlayerName, 'Sin asistencia')}
                                 </select>
                               </label>
                             ) : null}
@@ -2476,12 +2798,7 @@ export default function ClubMatchWorkspace({
                                 <label className={styles.field}>
                                   <span>Receptor</span>
                                   <select className={styles.select} value={liveComposer.secondaryPlayerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, secondaryPlayerName: event.target.value } : current)}>
-                                    <option value="">Seleccionar receptor</option>
-                                    {(liveComposer.team === 'home' ? lineupsState.home : lineupsState.away).map((player) => (
-                                      <option key={player.id || player.name} value={player.name}>
-                                        {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                                      </option>
-                                    ))}
+                                    {renderTeamPlayerOptions(liveComposer.team, 'activeWithDisabledSubstitutes', liveComposer.secondaryPlayerName, 'Seleccionar receptor')}
                                   </select>
                                 </label>
                               </>
@@ -2514,7 +2831,6 @@ export default function ClubMatchWorkspace({
                       {customComposer ? (() => {
                         const def = customEventDefMap.get(customComposer.defId);
                         if (!def) return null;
-                        const playerOptions = customComposer.team === 'home' ? lineupsState.home : lineupsState.away;
                         const outcomeValues = getOutcomeValuesForDef(def);
                         const previewPoints = computeCustomEventPoints(def, customComposer.outcome);
                         return (
@@ -2533,6 +2849,10 @@ export default function ClubMatchWorkspace({
                               <label className={styles.field}>
                                 <span>Minuto</span>
                                 <input className={styles.input} value={customComposer.minute} onChange={(event) => setCustomComposer((current) => current ? { ...current, minute: event.target.value } : current)} placeholder={currentMinute} />
+                              </label>
+                              <label className={styles.field}>
+                                <span>Periodo</span>
+                                <input className={styles.input} value={getMatchPeriodLabel(lineupsState.liveControl.phase)} readOnly />
                               </label>
                               <label className={styles.field}>
                                 <span>Tiempo video</span>
@@ -2559,7 +2879,7 @@ export default function ClubMatchWorkspace({
                                 <select
                                   className={styles.select}
                                   value={customComposer.team}
-                                  onChange={(event) => setCustomComposer((current) => current ? { ...current, team: event.target.value as 'home' | 'away' } : current)}
+                                  onChange={(event) => setCustomComposer((current) => current ? { ...current, team: event.target.value as 'home' | 'away', playerName: '' } : current)}
                                 >
                                   <option value="home">{homeClub?.short_name || homeClub?.name || 'Local'}</option>
                                   <option value="away">{awayClub?.short_name || awayClub?.name || 'Visitante'}</option>
@@ -2574,12 +2894,7 @@ export default function ClubMatchWorkspace({
                                     value={customComposer.playerName}
                                     onChange={(event) => setCustomComposer((current) => current ? { ...current, playerName: event.target.value } : current)}
                                   >
-                                    <option value="">Seleccionar jugador</option>
-                                    {playerOptions.map((player) => (
-                                      <option key={player.id || player.name} value={player.name}>
-                                        {player.number ? `#${player.number} ` : ''}{player.name}{player.position ? ` (${player.position})` : ''}
-                                      </option>
-                                    ))}
+                                    {renderTeamPlayerOptions(customComposer.team, 'activeWithDisabledSubstitutes', customComposer.playerName, 'Seleccionar jugador')}
                                   </select>
                                 </label>
                               ) : null}
@@ -2670,13 +2985,18 @@ export default function ClubMatchWorkspace({
                                   setTimerRunning(false);
                                   setLineupsState((current) => ({
                                     ...current,
-                                    liveControl: { ...current.liveControl, minute: event.minute || current.liveControl.minute },
+                                    liveControl: {
+                                      ...current.liveControl,
+                                      phase: normalizeMatchPeriod(event.period, current.liveControl.phase) as LivePhase,
+                                      minute: event.minute || current.liveControl.minute,
+                                    },
                                   }));
                                 }}
                                 title="Ajustar timer a este minuto"
                                 style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0, font: 'inherit', color: 'inherit' }}
                               >
-                                {event.minute || '--'}&apos;
+                                <span>{event.minute || '--'}&apos;</span>
+                                <small className={styles.timelinePeriod}>{getMatchPeriodLabel(event.period)}</small>
                               </button>
                               {event.videoTime ? (
                                 <button
@@ -3202,7 +3522,7 @@ export default function ClubMatchWorkspace({
                             </button>
                             <button className={styles.btn} type="button" onClick={() => {
                               setMatchDraft((current) => ({ ...current, status: 'live' }));
-                              setLineupsState((current) => ({ ...current, liveControl: { ...current.liveControl, phase: 'HT' } }));
+                              setLineupsState((current) => ({ ...current, liveControl: { ...current.liveControl, phase: '2T' } }));
                             }}>
                               Marcar entretiempo
                             </button>
@@ -3281,7 +3601,7 @@ export default function ClubMatchWorkspace({
               )}
 
               {activeTab === 'estadisticas' && (() => {
-                const playerStats = buildPlayerStats(events);
+                const playerStats = buildPlayerStats(timelineEventsChronological);
                 const sortOptions =
                   playerStatsTab === 'ataque'
                     ? [
@@ -3740,7 +4060,10 @@ export default function ClubMatchWorkspace({
 
                               return (
                               <div key={event.id} className={`${styles.timelineRow}${event.parentEventId ? ' ' + styles.timelineRowChild : ''}`}>
-                                <div className={styles.timelineMinute}>{event.minute || '--'}&apos;</div>
+                                <div className={styles.timelineMinute}>
+                                  <span>{event.minute || '--'}&apos;</span>
+                                  <small className={styles.timelinePeriod}>{getMatchPeriodLabel(event.period)}</small>
+                                </div>
                                 <div className={`${styles.timelineGlyph} ${resolveEventToneClass(event.type)}`}>{resolveEventGlyph(event.type)}</div>
                                 <div className={styles.timelineBody}>
                                   <div className={styles.timelineTitleRow}>
@@ -3842,6 +4165,7 @@ export default function ClubMatchWorkspace({
                       <div className={styles.linkGrid}>
                         <Link href={publicHref} className={styles.quickLink}><span>Vista pública</span><Eye size={16} /></Link>
                         <Link href={`/club-admin?club=${encodeURIComponent(clubId)}&tab=contenido`} className={styles.quickLink}><span>Exports del Club</span><ExternalLink size={16} /></Link>
+                        <button className={styles.quickLink} type="button" onClick={handleExportMatchSheetPdf}><span>Exportar planilla PDF</span><FileText size={16} /></button>
                         <button className={styles.quickLink} type="button" onClick={() => saveMatch(undefined, 'Contenido interno guardado')}><span>Guardar Material</span><Save size={16} /></button>
                       </div>
                     </div>

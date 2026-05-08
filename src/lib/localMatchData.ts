@@ -1,5 +1,6 @@
 import { getDefaultMatchEventDefinitions, type MatchEventCategory } from './matchEventCatalog';
 import { goalKickOutcomeSuffixSpanish, parseSubstitutionIncomingPlayer } from './matchEventStats';
+import { getEventPeriodForType, getNextActivePeriodAfterEvent, normalizeMatchPeriod } from './matchPeriods';
 
 export type LocalMatchTeam = 'home' | 'away';
 
@@ -25,6 +26,8 @@ export type LocalMatchEvent = {
   subPlayerId?: string | null;
   subPlayer?: string | null;
   detail?: string | null;
+  period?: string | null;
+  order?: number | null;
 };
 
 export type LocalPublicEvent = {
@@ -38,6 +41,8 @@ export type LocalPublicEvent = {
   subPlayer: string | null;
   subPlayerId: string | null;
   description: string;
+  period: string;
+  order: number;
 };
 
 export type LocalPlayerStatsRow = {
@@ -113,6 +118,8 @@ export function normalizeLocalLineups(raw: unknown) {
 
 export function normalizeLocalEvents(raw: unknown): LocalPublicEvent[] {
   const events = Array.isArray(raw) ? raw : [];
+  let activePeriod = normalizeMatchPeriod(null);
+
   return events.map((entry, index) => {
     const source = entry && typeof entry === 'object' ? (entry as Record<string, unknown>) : {};
     const minute =
@@ -121,6 +128,12 @@ export function normalizeLocalEvents(raw: unknown): LocalPublicEvent[] {
         : Number(source.minute || 0);
 
     const type = text(source.type) || 'note';
+    const rawOrder = source.order === null || source.order === undefined || source.order === ''
+      ? Number.NaN
+      : Number(source.order);
+    const period = text(source.period)
+      ? normalizeMatchPeriod(source.period)
+      : getEventPeriodForType(type, activePeriod);
     const rawDescription = text(source.detail) || text(source.description);
     const subPlayer =
       text(source.secondaryPlayerName) ||
@@ -130,13 +143,14 @@ export function normalizeLocalEvents(raw: unknown): LocalPublicEvent[] {
       (type === 'substitution' ? parseSubstitutionIncomingPlayer(rawDescription) : '') ||
       null;
     const description = rawDescription || (type === 'substitution' && subPlayer ? `Entra: ${subPlayer}` : '');
+    const team: LocalMatchTeam | null = source.team === 'home' || source.team === 'away' ? source.team : null;
 
-    return {
+    const normalizedEvent = {
       id: text(source.id) || `local-event-${index}`,
       time: Number.isFinite(minute) ? minute : 0,
       minute: Number.isFinite(minute) ? minute : 0,
       type,
-      team: source.team === 'home' || source.team === 'away' ? source.team : null,
+      team,
       player: text(source.playerName) || text(source.player_name) || 'Jugador',
       playerId: text(source.playerId) || text(source.player_id) || null,
       subPlayer,
@@ -147,7 +161,11 @@ export function normalizeLocalEvents(raw: unknown): LocalPublicEvent[] {
         text(source.sub_player_id) ||
         null,
       description,
+      period,
+      order: Number.isFinite(rawOrder) ? Math.max(0, Math.trunc(rawOrder)) : index,
     };
+    activePeriod = getNextActivePeriodAfterEvent(type, period);
+    return normalizedEvent;
   });
 }
 
