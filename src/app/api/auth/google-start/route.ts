@@ -88,11 +88,19 @@ export async function POST(request: NextRequest) {
 
         const response = NextResponse.json({ url: data.url })
         cookiesToSet.forEach(({ name, value, options }) => {
+            // Strip Domain so the verifier is a host-only cookie. Some
+            // strict browsers (notably Brave Shields on desktop) reject or
+            // drop cookies that combine Domain=.g22scores.com + Secure +
+            // SameSite=Lax for OAuth-style flows. Host-only is also fine
+            // because the callback runs on the same hostname as this
+            // start endpoint.
+            const safeOptions = options ? { ...options, domain: undefined } : undefined
             response.cookies.set(name, value, {
                 path: '/',
                 sameSite: 'lax',
                 secure: process.env.NODE_ENV === 'production',
-                ...options,
+                httpOnly: false,
+                ...safeOptions,
             })
         })
 
