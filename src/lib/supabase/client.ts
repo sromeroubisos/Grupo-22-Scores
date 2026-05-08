@@ -228,11 +228,7 @@ function buildAuthFailureResponse() {
 }
 
 // Coalesces concurrent `/token?grant_type=refresh_token` POSTs originating
-// from the same browser client into a single in-flight HTTP request. Multiple
-// callers (e.g. parallel `getSession()` calls, multiple components mounting at
-// once, autoRefresh ticker firing while a manual refresh is also in flight)
-// would otherwise each hit Supabase Auth simultaneously, with all but one
-// failing with 429 (over_request_rate_limit) due to per-IP /token caps.
+// from the same browser client into a single in-flight HTTP request.
 let inFlightRefresh: { promise: Promise<Response>; finishedAt: number; reuseUntil: number } | null = null
 const REFRESH_RESULT_REUSE_WINDOW_MS = 1500
 const REFRESH_RATE_LIMIT_REUSE_WINDOW_MS = 10000
@@ -297,10 +293,6 @@ export function createClient() {
         withAuthTimeout(input, init).then((response) => response.clone())
 
     const browserFetch = async (input: string | URL | Request, init?: RequestInit) => {
-        // Single-flight refresh_token requests so concurrent callers reuse the
-        // same in-flight HTTP request instead of stampeding Supabase Auth.
-        // We also briefly cache the most recent successful refresh response so
-        // that bursts of `getSession()` calls within ~1.5s share one HTTP roundtrip.
         if (url && isRefreshTokenRequest(input, url)) {
             if (inFlightRefresh) {
                 const stillFresh =
@@ -312,8 +304,6 @@ export function createClient() {
                         if (shouldReuseRefreshResponse(cached)) {
                             return cached.clone()
                         }
-                        // Non-OK responses other than rate limits can attempt a
-                        // fresh request below.
                     } catch {
                         // Fall through to a fresh attempt if the cached one failed.
                     }
@@ -367,6 +357,62 @@ export function createClient() {
         }
     }
 
+    // Explicit cookie handlers — NOT passing these makes supabase-ssr fall
+    // back to localStorage for the PKCE `code_verifier`, which is invisible
+    // to the server route handler that runs `exchangeCodeForSession()` at
+    // `/auth/callback`. Symptom: "PKCE code verifier not found in storage.
+    // ... For SSR" right after Google OAuth. Storing as cookies (with the
+    // shared `.g22scores.com` domain in production) lets the server read
+    // it back.
+    const cookieDomain = typeof window !== 'undefined'
+        ? getSupabaseSharedCookieDomain(window.location.hostname)
+        : undefined
+    const cookieIsSecure = typeof window !== 'undefined' && window.location.protocol === 'https:'
+
+    type CookieToSet = {
+        name: string
+        value: string
+        options?: {
+            maxAge?: number
+            expires?: Date | string
+            path?: string
+            sameSite?: string | boolean
+            domain?: string
+            secure?: boolean
+        }
+    }
+
+    const browserCookies = {
+        getAll() {
+            return readBrowserCookies()
+        },
+        setAll(cookiesToSet: CookieToSet[]) {
+            if (typeof document === 'undefined') return
+            cookiesToSet.forEach(({ name, value, options }) => {
+                const parts: string[] = [`${name}=${encodeURIComponent(value)}`]
+                const path = options?.path ?? '/'
+                parts.push(`Path=${path}`)
+                const sameSite = typeof options?.sameSite === 'string' ? options.sameSite : 'Lax'
+                parts.push(`SameSite=${sameSite}`)
+                if (typeof options?.maxAge === 'number') {
+                    parts.push(`Max-Age=${options.maxAge}`)
+                } else if (!value) {
+                    parts.push('Max-Age=0')
+                }
+                if (options?.expires) {
+                    const expires = options.expires instanceof Date
+                        ? options.expires.toUTCString()
+                        : String(options.expires)
+                    parts.push(`Expires=${expires}`)
+                }
+                const domain = options?.domain ?? cookieDomain
+                if (domain) parts.push(`Domain=${domain}`)
+                if (cookieIsSecure || options?.secure) parts.push('Secure')
+                document.cookie = parts.join('; ')
+            })
+        },
+    }
+
     const startedAt = nowMs()
     client = createBrowserClient(
         url || 'https://placeholder.supabase.co',
@@ -375,8 +421,10 @@ export function createClient() {
             cookieOptions: getSupabaseAuthCookieOptions(
                 typeof window !== 'undefined' ? window.location.hostname : undefined,
             ),
+            cookies: browserCookies,
             auth: {
                 storageKey,
+                flowType: 'pkce',
             },
             global: {
                 fetch: browserFetch,
