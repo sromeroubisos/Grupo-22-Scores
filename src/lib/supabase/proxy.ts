@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { logRefreshFlow } from '@/lib/debug/refreshFlow';
 import { createInstrumentedSupabaseFetch } from '@/lib/perf/supabase';
 import { logPerf, measureAsync } from '@/lib/perf/measure';
 import {
@@ -229,11 +230,16 @@ export function readUserFromCookie(request: NextRequest): { id: string; email: s
 }
 
 export async function updateSession(request: NextRequest): Promise<{ response: NextResponse; user: { id: string; email: string } | null }> {
+    const updateStartedAt = Date.now();
     let response = NextResponse.next({
         request: {
             headers: request.headers,
         },
     })
+
+    logRefreshFlow('proxy_update_session_start', {
+        path: request.nextUrl.pathname,
+    }, 'auth');
 
     // Fast-path: if the access_token cookie has plenty of life left, there is
     // no point in spinning up a Supabase client and (potentially) firing a
@@ -244,6 +250,11 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
         const nowSeconds = Math.floor(Date.now() / 1000);
         const remainingSeconds = accessTokenExp - nowSeconds;
         if (remainingSeconds > ACCESS_TOKEN_REFRESH_MARGIN_SECONDS) {
+            logRefreshFlow('proxy_session_fast_path', {
+                path: request.nextUrl.pathname,
+                remainingSeconds,
+                durationMs: Date.now() - updateStartedAt,
+            }, 'auth');
             logPerf(
                 ['PROXY'],
                 {
@@ -264,6 +275,11 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
 
     if (!supabaseUrl || !supabaseAnonKey) {
         console.error('[Middleware] Missing Supabase auth environment variables');
+        logRefreshFlow('proxy_auth_cookies_cleared', {
+            path: request.nextUrl.pathname,
+            reason: 'missing_supabase_env',
+            durationMs: Date.now() - updateStartedAt,
+        }, 'auth');
         clearAuthCookies(request, response);
         return { response, user: null };
     }
@@ -342,6 +358,9 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
     let authResult: Awaited<ReturnType<typeof supabase.auth.getSession>> | null = null;
 
     try {
+        logRefreshFlow('proxy_get_session_start', {
+            path: request.nextUrl.pathname,
+        }, 'auth');
         authResult = await measureAsync(
             'proxy_get_session',
             async () => withTimeout(supabase.auth.getSession(), AUTH_REFRESH_TIMEOUT_MS, 'proxy_get_session'),
@@ -359,6 +378,11 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
             },
         )
     } catch (error) {
+        logRefreshFlow('proxy_get_session_skipped', {
+            path: request.nextUrl.pathname,
+            reason: 'timeout_or_error',
+            durationMs: Date.now() - updateStartedAt,
+        }, 'auth');
         if (SHOULD_LOG_PROXY_AUTH) {
             console.warn('[Middleware] Session refresh skipped:', error);
         }
@@ -381,6 +405,11 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
 
     if (error) {
         if (isInvalidRefreshTokenError(error)) {
+            logRefreshFlow('proxy_auth_cookies_cleared', {
+                path: request.nextUrl.pathname,
+                reason: 'invalid_refresh_token',
+                durationMs: Date.now() - updateStartedAt,
+            }, 'auth');
             clearAuthCookies(request, response);
         }
 
@@ -407,6 +436,13 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
         },
         'server',
     )
+
+    logRefreshFlow('proxy_get_session_complete', {
+        path: request.nextUrl.pathname,
+        hasUser: Boolean(user),
+        hasError: Boolean(error),
+        durationMs: Date.now() - updateStartedAt,
+    }, 'auth');
 
     return { response, user }
 }

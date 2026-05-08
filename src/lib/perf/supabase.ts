@@ -11,6 +11,7 @@ import {
     normalizeErrorMessage,
     type PerfRuntime,
 } from './measure';
+import { logRefreshFlow } from '@/lib/debug/refreshFlow';
 
 type SupabaseMinimalQueryable = {
     from: (table: string) => {
@@ -375,6 +376,17 @@ export function createInstrumentedSupabaseFetch(
                 );
             }
 
+            if (service === 'AUTH' && (operation === 'token' || operation === 'user')) {
+                logRefreshFlow('supabase_auth_fetch', {
+                    runtime,
+                    operation,
+                    method,
+                    status: response.status,
+                    ok: response.ok,
+                    durationMs: Math.round(durationMs),
+                }, 'auth');
+            }
+
             if (dbQueryDebugEnabled) {
                 logDbQuery({
                     operation: getDbOperationName(operation, table, action),
@@ -447,6 +459,15 @@ export function createInstrumentedSupabaseFetch(
                     },
                     runtime,
                 );
+            }
+            if (service === 'AUTH' && (operation === 'token' || operation === 'user')) {
+                logRefreshFlow('supabase_auth_fetch_error', {
+                    runtime,
+                    operation,
+                    method,
+                    durationMs: Math.round(durationMs),
+                    error: normalizeErrorMessage(error),
+                }, 'auth');
             }
             if (dbQueryDebugEnabled) {
                 logDbQuery({

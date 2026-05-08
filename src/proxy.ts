@@ -4,6 +4,7 @@
 
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { logRefreshFlow } from '@/lib/debug/refreshFlow'
 import { updateSession, readUserFromCookie } from '@/lib/supabase/proxy'
 import { measureAsync } from '@/lib/perf/measure';
 
@@ -82,6 +83,11 @@ export async function proxy(request: NextRequest) {
 
     const needsRefresh = shouldRefreshSession(pathname, searchParams);
     const protectedRoute = isProtectedRoute(pathname);
+    logRefreshFlow('proxy_route_decision', {
+        path: pathname,
+        needsRefresh,
+        protectedRoute,
+    }, 'route');
 
     // 2. Public routes that don't need auth check at all
     if (!needsRefresh && !protectedRoute) {

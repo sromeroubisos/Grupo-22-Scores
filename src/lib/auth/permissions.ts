@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { getReadClient } from '@/lib/supabase/read';
 import { cookies } from 'next/headers';
+import { logRefreshFlow } from '@/lib/debug/refreshFlow';
 import { resolveClubFamilyIds } from '@/lib/club-admin/managedClubFamily';
 import { isUuid } from '@/lib/utils/postgrest';
 import {
@@ -200,7 +201,17 @@ async function getGuestAccessContext(): Promise<UserAccessContext | null> {
 export async function getUserAccessContext(
     supabase: SupabaseServerClient
 ): Promise<UserAccessContext | null> {
+    const startedAt = Date.now();
+    logRefreshFlow('permissions_get_user_start', {
+        operation: 'getUserAccessContext',
+    }, 'auth');
     const { data: { user }, error: userError } = await supabase.auth.getUser();
+    logRefreshFlow('permissions_get_user_complete', {
+        operation: 'getUserAccessContext',
+        hasUser: Boolean(user),
+        hasError: Boolean(userError),
+        durationMs: Date.now() - startedAt,
+    }, 'auth');
 
     if (userError || !user) {
         return getGuestAccessContext();

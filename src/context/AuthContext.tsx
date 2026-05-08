@@ -6,6 +6,7 @@ import { User as SupabaseUser, type AuthChangeEvent, type Session } from '@supab
 import { canUseRestrictedContentActions, normalizeRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
 import { clearFavoritesCache } from '@/lib/favoritesCache';
 import { clearFavoritesLocalCache } from '@/lib/favorites/fetchFavorites';
+import { logRefreshFlow } from '@/lib/debug/refreshFlow';
 import {
     getOnboardingMetadataStatus,
     getOnboardingStorageStatus,
@@ -474,6 +475,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 'client',
             );
             console.log('[AuthContext] onAuthStateChange event:', event, 'Has session:', !!session);
+            logRefreshFlow('auth_state_change', {
+                event,
+                hasSession: Boolean(session),
+                hasUser: Boolean(session?.user),
+                pathname,
+            }, 'auth');
             if (!isMounted.current) return;
 
             try {
@@ -515,6 +522,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         // session, and refreshing during that window creates an
                         // RSC refresh loop/flicker on desktop loads.
                         if (shouldRefreshServerData) {
+                            logRefreshFlow('router_refresh_called', {
+                                source: 'AuthContext',
+                                reason: 'SIGNED_IN_post_bootstrap',
+                                pathname,
+                            }, 'route');
                             try { router.refresh(); } catch { /* router may be unavailable in tests */ }
                         }
                         lastAuthEventRef.current = { event, userId: session.user.id };
@@ -545,6 +557,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     lastAuthEventRef.current = { event, userId: null };
                     // Invalidate any server-rendered user-specific data so the UI
                     // reflects the signed-out state on the next paint.
+                    logRefreshFlow('router_refresh_called', {
+                        source: 'AuthContext',
+                        reason: 'SIGNED_OUT',
+                        pathname,
+                    }, 'route');
                     try { router.refresh(); } catch { /* noop */ }
                 }
 
@@ -582,6 +599,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (returnTo) {
                 url.searchParams.set('returnTo', returnTo);
             }
+            logRefreshFlow('window_location_replace_called', {
+                source: 'AuthContext',
+                reason: 'login',
+                pathname,
+                targetPath: url.pathname,
+            }, 'route');
             window.location.replace(url.toString());
         }
     };
@@ -595,6 +618,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setIsLoading(false);
         }
         clearFavoritesLocalCache();
+        logRefreshFlow('router_refresh_called', {
+            source: 'AuthContext',
+            reason: 'logout',
+            pathname,
+        }, 'route');
         try { router.refresh(); } catch { /* noop */ }
 
         try {
