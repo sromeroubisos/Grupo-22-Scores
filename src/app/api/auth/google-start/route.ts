@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
 import { sanitizeNext } from '@/lib/auth/redirect'
+import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie'
 
 // Start the Google OAuth flow on the SERVER. Why server-side:
 // when the client called supabase.auth.signInWithOAuth() directly,
@@ -8,9 +9,21 @@ import { sanitizeNext } from '@/lib/auth/redirect'
 // callback route handler at /auth/callback runs on the server and only
 // has access to cookies, not localStorage, so exchangeCodeForSession()
 // always failed with "PKCE code verifier not found in storage. ... For
-// SSR". Doing the start here lets supabase write the verifier directly
-// to a cookie that the callback can read back.
+// SSR".
+//
+// IMPORTANT: we manually capture the cookies supabase wants to set and
+// apply them to the NextResponse via `response.cookies.set()`. Going
+// through `cookies()` from `next/headers` + `cookieStore.set()` does NOT
+// reliably attach the cookie to a `NextResponse.json()` body — that's
+// why earlier server-side attempts still failed at the callback.
 export async function POST(request: NextRequest) {
+    type CookieToSet = {
+        name: string
+        value: string
+        options?: Parameters<NextResponse['cookies']['set']>[2]
+    }
+    const cookiesToSet: CookieToSet[] = []
+
     try {
         const body = await request.json().catch(() => ({})) as { next?: unknown }
         const next = sanitizeNext(typeof body.next === 'string' ? body.next : null)
@@ -19,7 +32,38 @@ export async function POST(request: NextRequest) {
         const callbackUrl = new URL('/auth/callback', origin)
         callbackUrl.searchParams.set('next', next)
 
-        const supabase = await createClient()
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        if (!supabaseUrl || !supabaseAnonKey) {
+            return NextResponse.json({ error: 'Supabase env not configured' }, { status: 500 })
+        }
+
+        const requestHost =
+            request.headers.get('x-forwarded-host') ||
+            request.headers.get('host') ||
+            request.nextUrl.hostname
+
+        const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+            cookieOptions: getSupabaseAuthCookieOptions(requestHost),
+            cookies: {
+                getAll() {
+                    return request.cookies.getAll()
+                },
+                setAll(incoming) {
+                    incoming.forEach((cookie) => {
+                        cookiesToSet.push({
+                            name: cookie.name,
+                            value: cookie.value,
+                            options: cookie.options as CookieToSet['options'],
+                        })
+                    })
+                },
+            },
+            auth: {
+                flowType: 'pkce',
+            },
+        })
+
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
@@ -32,16 +76,27 @@ export async function POST(request: NextRequest) {
             console.error('[auth/google-start] signInWithOAuth error:', error.message)
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
-
         if (!data?.url) {
-            console.error('[auth/google-start] supabase returned no redirect URL')
+            console.error('[auth/google-start] no redirect URL returned')
             return NextResponse.json({ error: 'No redirect URL returned by Supabase' }, { status: 500 })
         }
 
-        // The supabase server client's cookies handler has already written
-        // the code_verifier to the response via cookieStore.set(...). We
-        // just need to surface the URL the client should navigate to.
-        return NextResponse.json({ url: data.url })
+        console.info(
+            '[auth/google-start] cookies queued for response:',
+            cookiesToSet.map((c) => c.name).join(',') || '(none)',
+        )
+
+        const response = NextResponse.json({ url: data.url })
+        cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, {
+                path: '/',
+                sameSite: 'lax',
+                secure: process.env.NODE_ENV === 'production',
+                ...options,
+            })
+        })
+
+        return response
     } catch (error) {
         const message = error instanceof Error ? error.message : 'unknown'
         console.error('[auth/google-start] unexpected error:', message)
