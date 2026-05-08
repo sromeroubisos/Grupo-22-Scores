@@ -2,14 +2,13 @@
 
 import { createClient } from '@/lib/supabase/client'
 import styles from '../login.module.css'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { sanitizeReturnTo } from '../redirects'
 import { getAuthErrorMessage } from '@/lib/auth/errors'
 
 export default function OAuthButtons({ onError }: { onError?: (msg: string | null) => void }) {
     const [loading, setLoading] = useState<string | null>(null)
-    const loadingRef = useRef(false)
     const searchParams = useSearchParams()
     const roleIntent = searchParams.get('roleIntent')
     const returnTo = sanitizeReturnTo(searchParams.get('returnTo'), roleIntent)
@@ -21,29 +20,51 @@ export default function OAuthButtons({ onError }: { onError?: (msg: string | nul
     }
 
     const handleLogin = async () => {
-        if (loadingRef.current) return
-        loadingRef.current = true
+        // Guard via state, NOT a ref. A stale `ref.current = true` from a
+        // previous failed attempt would otherwise leave the button silently
+        // unclickable forever — that was the symptom the user was seeing on
+        // desktop when this handler hit the no-`data.url` path below without
+        // resetting state.
+        if (loading) return
         onError?.(null)
         setLoading('google')
+
+        let navigated = false
         try {
+            console.info('[OAuth] starting Google sign-in flow')
             const supabase = createClient()
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo: getCallbackUrl(),
+                    skipBrowserRedirect: true,
                 },
             })
 
             if (error) throw error
 
-            // Defensively handle case where SDK doesn't redirect automatically
-            if (data?.url) {
-                window.location.href = data.url
+            const targetUrl = data?.url
+            if (!targetUrl) {
+                // The Supabase JS SDK normally always returns a URL here. If
+                // it doesn't, surfacing a clear error is much better than
+                // silently doing nothing.
+                throw new Error('Supabase did not return an OAuth redirect URL')
             }
+
+            console.info('[OAuth] redirecting to provider', targetUrl)
+            navigated = true
+            window.location.href = targetUrl
         } catch (error) {
+            console.error('[OAuth] Google sign-in failed', error)
             onError?.(getAuthErrorMessage(error, 'No pudimos iniciar sesion con Google. Intenta nuevamente.'))
-            loadingRef.current = false
-            setLoading(null)
+        } finally {
+            // Only re-enable the button when we did NOT navigate away. If we
+            // did navigate, the page is being unloaded and any setState here
+            // is harmless — but skipping it keeps the spinner visible until
+            // the redirect completes, which is the better UX.
+            if (!navigated) {
+                setLoading(null)
+            }
         }
     }
 
