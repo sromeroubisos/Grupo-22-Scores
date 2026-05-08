@@ -114,8 +114,26 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <ChunkLoadRecovery />
+        {/*
+          Render the boot fallback OUTSIDE the Suspense boundary so it only
+          appears on the very first paint (and gets covered immediately by
+          the hydrated app). Re-using <AppShellFallback /> as the Suspense
+          fallback caused a visible "refresh" effect on desktop: any RSC
+          re-fetch or transient suspension (router.refresh, dynamic imports,
+          etc.) would briefly replace the whole UI with the dark "Cargando
+          G22 Scores" panel and then bring the page back. The Suspense
+          fallback is now `null`, so subsequent suspensions keep the
+          existing UI on screen instead of flashing.
+
+          Stale-chunk recoveries are still handled by <ChunkLoadRecovery />
+          above, which detects real ChunkLoadError exceptions and triggers
+          a cache-busting reload.
+        */}
+        <noscript>
+          <AppShellFallback />
+        </noscript>
         <AuthProvider>
-          <Suspense fallback={<AppShellFallback />}>
+          <Suspense fallback={null}>
             <ConditionalLayout>{children}</ConditionalLayout>
           </Suspense>
         </AuthProvider>

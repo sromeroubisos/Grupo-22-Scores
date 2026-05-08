@@ -7,6 +7,7 @@ import { canUseRestrictedContentActions, normalizeRole, type AppUserRole, type M
 import { clearFavoritesCache } from '@/lib/favoritesCache';
 import { clearFavoritesLocalCache } from '@/lib/favorites/fetchFavorites';
 import { logRefreshFlow } from '@/lib/debug/refreshFlow';
+import { logRefreshLoop } from '@/lib/debug/refreshLoop';
 import {
     getOnboardingMetadataStatus,
     getOnboardingStorageStatus,
@@ -145,6 +146,27 @@ function isAuthEntryPath(pathname: string | null): boolean {
         pathname === '/register' ||
         pathname.startsWith('/auth/')
     );
+}
+
+// Server-rendered, user-dependent surfaces. Only these benefit from a
+// router.refresh() after an identity change, because they read the user
+// during SSR. Calling router.refresh() on purely-client pages (e.g. the
+// home page) just causes an RSC round-trip that suspends the tree and
+// produces a visible "refresh"-like flicker on desktop, with no benefit.
+const RSC_USER_DEPENDENT_PREFIXES = [
+    '/admin',
+    '/club-admin',
+    '/profile',
+    '/favorites',
+    '/onboarding',
+    '/billing',
+    '/notifications',
+    '/prode/ligas',
+];
+
+function isRscUserDependentPath(pathname: string | null): boolean {
+    if (!pathname) return false;
+    return RSC_USER_DEPENDENT_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
 function buildOptimisticUser(sbUser: SupabaseUser, onboardingCompleted: boolean | null): User {
@@ -375,6 +397,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         isMounted.current = true;
 
+        // Temporary: confirm the browser bundle sees NEXT_PUBLIC_DEBUG_REFRESH_LOOP.
+        // If this line never appears in DevTools console after a fresh deploy,
+        // the env var was not present at build time (Next inlines NEXT_PUBLIC_*
+        // at build) — i.e. the deploy needs to be rebuilt with the env set.
+        if (process.env.NEXT_PUBLIC_DEBUG_REFRESH_LOOP === 'true' && typeof window !== 'undefined') {
+            console.info('[REFRESH_LOOP] debug_enabled', {
+                runtime: 'browser',
+                pathname: window.location.pathname,
+            });
+        }
+
         if (skipAuthBootstrap) {
             activeProfileFetchRef.current = null;
             lastAuthEventRef.current = { event: 'INIT', userId: null };
@@ -399,8 +432,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
 
         const initAuth = async () => {
+            const initStartedAt = nowMs();
+            logRefreshLoop('initAuth_start', {
+                pathname,
+                hasCachedUser: Boolean(initialCachedUser),
+            });
             try {
                 trackAuthDuplicate('getSession', { source: 'initAuth' });
+                logRefreshLoop('getSession_called', {
+                    source: 'initAuth',
+                    pathname,
+                });
                 const { data: { session }, error } = await measureAsync(
                     'getSession',
                     async () => supabase.auth.getSession(),
@@ -448,6 +490,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }
             } finally {
                 authBootstrapCompleteRef.current = true;
+                logRefreshLoop('initAuth_end', {
+                    pathname,
+                    durationMs: Math.round(nowMs() - initStartedAt),
+                });
             }
         };
 
@@ -481,6 +527,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 hasUser: Boolean(session?.user),
                 pathname,
             }, 'auth');
+            logRefreshLoop('auth_state_change', {
+                event,
+                hasSession: Boolean(session),
+                hasUser: Boolean(session?.user),
+                previousUserId: lastAuthEventRef.current.userId ? '[present]' : null,
+                bootstrapComplete: authBootstrapCompleteRef.current,
+                pathname,
+            });
             if (!isMounted.current) return;
 
             try {
@@ -521,13 +575,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         // emit SIGNED_IN while hydrating an existing browser
                         // session, and refreshing during that window creates an
                         // RSC refresh loop/flicker on desktop loads.
-                        if (shouldRefreshServerData) {
+                        // We additionally skip the refresh on purely client-side
+                        // routes (e.g. the home) — there are no user-dependent
+                        // Server Components to revalidate there, so refreshing
+                        // only causes a visible Suspense flicker for nothing.
+                        if (shouldRefreshServerData && isRscUserDependentPath(pathname)) {
                             logRefreshFlow('router_refresh_called', {
                                 source: 'AuthContext',
                                 reason: 'SIGNED_IN_post_bootstrap',
                                 pathname,
                             }, 'route');
+                            logRefreshLoop('router_refresh_called', {
+                                source: 'AuthContext',
+                                reason: 'signed_in_post_bootstrap',
+                                pathname,
+                                event,
+                            });
                             try { router.refresh(); } catch { /* router may be unavailable in tests */ }
+                        } else if (shouldRefreshServerData) {
+                            logRefreshLoop('router_refresh_skipped', {
+                                source: 'AuthContext',
+                                reason: 'pathname_not_user_dependent',
+                                pathname,
+                                event,
+                            });
                         }
                         lastAuthEventRef.current = { event, userId: session.user.id };
                     } else {
@@ -562,7 +633,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         reason: 'SIGNED_OUT',
                         pathname,
                     }, 'route');
-                    try { router.refresh(); } catch { /* noop */ }
+                    logRefreshLoop('router_refresh_called', {
+                        source: 'AuthContext',
+                        reason: 'signed_out',
+                        pathname,
+                        event,
+                    });
+                    if (isRscUserDependentPath(pathname)) {
+                        try { router.refresh(); } catch { /* noop */ }
+                    }
                 }
 
                 if (event === 'SIGNED_OUT' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
@@ -605,6 +684,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 pathname,
                 targetPath: url.pathname,
             }, 'route');
+            logRefreshLoop('window_location_called', {
+                method: 'replace',
+                source: 'AuthContext',
+                reason: 'login',
+                pathname,
+                targetPath: url.pathname,
+            });
             window.location.replace(url.toString());
         }
     };
@@ -623,7 +709,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             reason: 'logout',
             pathname,
         }, 'route');
-        try { router.refresh(); } catch { /* noop */ }
+        logRefreshLoop('router_refresh_called', {
+            source: 'AuthContext',
+            reason: 'logout',
+            pathname,
+        });
+        if (isRscUserDependentPath(pathname)) {
+            try { router.refresh(); } catch { /* noop */ }
+        }
 
         try {
             const supabase = getSupabaseClient();
@@ -641,56 +734,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 'refresh_onboarding_status',
                 async () => fetch('/api/onboarding/preferences?mode=status', {
                     cache: 'no-store',
-                    credentials: 'same-origin',
-                }),
-                {
-                    runtime: 'client',
-                    tags: ['AUTH'],
-                    metadata: {
-                        step: 'refreshOnboardingStatus',
-                        userId: user.id,
-                    },
-                },
-            );
-
-            if (!response.ok) {
-                throw new Error(`Status request failed: ${response.status}`);
-            }
-
-            const data = await response.json() as { onboardingCompleted?: boolean };
-            const storageStatus = getOnboardingStorageStatus(user.id);
-            const onboardingCompleted = !!data.onboardingCompleted || storageStatus.completed;
-
-            if (onboardingCompleted) {
-                setOnboardingStorageStatus(user.id, { skipped: storageStatus.skipped });
-            }
-
-            if (isMounted.current) {
-                setPersistentUser(prev => prev ? { ...prev, onboardingCompleted } : null);
-            }
-        } catch (err) {
-            console.error('[AuthContext] refreshOnboardingStatus error:', err);
-        }
-    };
-
-    return (
-        <AuthContext.Provider value={{
-            user,
-            isAuthenticated: !!user,
-            isLoading,
-            login,
-            logout,
-            refreshOnboardingStatus,
-        }}>
-            {children}
-        </AuthContext.Provider>
-    );
-}
-
-export function useAuth() {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
-}
+                    cr
