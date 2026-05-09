@@ -23,7 +23,7 @@ function normalizeText(value: unknown) {
 function slugify(value: string) {
   return value
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
@@ -52,10 +52,15 @@ async function resolveClubReference(admin: ReturnType<typeof createAdminClient>,
   const token = normalizeText(value);
   if (!token) return null;
 
+  // Avoid `.or(id.eq.X,slug.eq.X)` when the token isn't a UUID: Postgres tries
+  // to cast the slug into UUID for the `id` predicate and aborts the query
+  // with "invalid input syntax for type uuid". Pick the matching column instead.
+  const lookupColumn = UUID_RE.test(token) ? 'id' : 'slug';
+
   const { data, error } = await admin
     .from('clubs')
     .select('id')
-    .or(`id.eq.${token},slug.eq.${token}`)
+    .eq(lookupColumn, token)
     .maybeSingle();
 
   if (error) {
@@ -70,7 +75,7 @@ function normalizeRivalName(value: string) {
   return value
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 }

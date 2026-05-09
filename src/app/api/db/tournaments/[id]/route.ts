@@ -23,6 +23,38 @@ type TournamentLookupRow = {
 const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, external_id, logo_url, banner_url, sport_id, legacy_sport:sport, country_id, slug, format, ruleset, is_visible, status';
 const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, external_id, logo_url, banner_url, sport_id, country_id, slug, format, ruleset, is_visible, status';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+type TournamentLookupResult = {
+    data: TournamentLookupRow | null;
+    error: { code?: string | null; message?: string | null; details?: string | null } | null;
+};
+
+// Resolves a tournament by either UUID (id) or slug.
+// We can't use .or(id.eq.X,slug.eq.X) with a non-UUID value because Postgres
+// tries to cast the slug to UUID and aborts the whole statement with
+// "invalid input syntax for type uuid". So we look it up by the matching
+// column only.
+async function lookupTournamentByIdOrSlug(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+    select: string,
+    rawId: string,
+): Promise<TournamentLookupResult> {
+    const value = String(rawId ?? '').trim();
+    if (!value) {
+        return { data: null, error: null };
+    }
+
+    const lookupColumn = UUID_RE.test(value) ? 'id' : 'slug';
+    const result = await supabase
+        .from('tournaments')
+        .select(select)
+        .eq(lookupColumn, value)
+        .maybeSingle();
+
+    return result as TournamentLookupResult;
+}
+
 function sanitizeInlineAssetUrl(
     value: unknown,
     tournament: { id: string; name?: string | null; display_name?: string | null },
@@ -41,38 +73,19 @@ export async function GET(
 
     const supabase = await getReadClient();
 
-    // Try to find a tournament by ID (UUID) or by slug
-    let queryResult: {
-        data: TournamentLookupRow | null;
-        error: { code?: string | null; message?: string | null; details?: string | null } | null;
-    } = await supabase
-        .from('tournaments')
-        .select(SELECT_WITH_LEGACY_SPORT)
-        .or(`id.eq.${id},slug.eq.${id}`)
-        .maybeSingle();
+    // Try to find a tournament by ID (UUID) or by slug.
+    let queryResult = await lookupTournamentByIdOrSlug(supabase, SELECT_WITH_LEGACY_SPORT, id);
 
     if (isMissingColumnError(queryResult.error, 'sport')) {
-        queryResult = await supabase
-            .from('tournaments')
-            .select(SELECT_WITHOUT_LEGACY_SPORT)
-            .or(`id.eq.${id},slug.eq.${id}`)
-            .maybeSingle();
+        queryResult = await lookupTournamentByIdOrSlug(supabase, SELECT_WITHOUT_LEGACY_SPORT, id);
     }
 
     if (isMissingColumnError(queryResult.error, 'banner_url')) {
         const SELECT_LEGACY_NO_BANNER = SELECT_WITH_LEGACY_SPORT.replace(', banner_url', '');
         const SELECT_NO_LEGACY_NO_BANNER = SELECT_WITHOUT_LEGACY_SPORT.replace(', banner_url', '');
-        queryResult = await supabase
-            .from('tournaments')
-            .select(SELECT_LEGACY_NO_BANNER)
-            .or(`id.eq.${id},slug.eq.${id}`)
-            .maybeSingle();
+        queryResult = await lookupTournamentByIdOrSlug(supabase, SELECT_LEGACY_NO_BANNER, id);
         if (isMissingColumnError(queryResult.error, 'sport')) {
-            queryResult = await supabase
-                .from('tournaments')
-                .select(SELECT_NO_LEGACY_NO_BANNER)
-                .or(`id.eq.${id},slug.eq.${id}`)
-                .maybeSingle();
+            queryResult = await lookupTournamentByIdOrSlug(supabase, SELECT_NO_LEGACY_NO_BANNER, id);
         }
     }
 
