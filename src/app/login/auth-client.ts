@@ -1,10 +1,33 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
+import { clearSupabaseBrowserSession, createClient } from '@/lib/supabase/client'
 import { getAuthErrorMessage } from '@/lib/auth/errors'
 
 export function normalizeEmail(value: string): string {
     return value.trim().toLowerCase()
+}
+
+// Errors that are NOT user fault and where a forced session reset + retry
+// is a sensible recovery (covers stale cookies, poisoned local storage,
+// cached client referencing an old session, etc.). Credential errors are
+// explicitly excluded - we should never silently retry "wrong password".
+function shouldRetryAfterReset(error: { message?: string; status?: number; code?: string } | null) {
+    if (!error) return false
+    const msg = (error.message || '').toLowerCase()
+    if (msg.includes('invalid login credentials')) return false
+    if (msg.includes('email not confirmed')) return false
+    if (error.status === 400 && msg.includes('credentials')) return false
+    return (
+        msg.includes('refresh token') ||
+        msg.includes('code verifier') ||
+        msg.includes('code_verifier') ||
+        msg.includes('session') ||
+        msg.includes('jwt') ||
+        msg.includes('token') ||
+        msg.includes('unauthorized') ||
+        error.status === 401 ||
+        error.status === 403
+    )
 }
 
 export async function signInWithPasswordAndRedirect(input: {
@@ -12,7 +35,6 @@ export async function signInWithPasswordAndRedirect(input: {
     password: string
     returnTo: string
 }) {
-    const supabase = createClient()
     const normalizedEmail = normalizeEmail(input.email)
     const trimmedPassword = input.password.trim()
 
@@ -20,10 +42,34 @@ export async function signInWithPasswordAndRedirect(input: {
         throw new Error('Por favor completa todos los campos')
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    // Proactively wipe any stale session/cookie state BEFORE attempting to
+    // sign in. This is the root fix for "works in incognito, fails in
+    // normal browser": stale sb-*-auth-token cookies (especially under the
+    // shared .g22scores.com domain) get sent to Supabase and to our own
+    // SSR routes, where they shadow the new credentials being set.
+    // Password login is a hard reset by definition, so clearing prior
+    // session data is always safe here.
+    clearSupabaseBrowserSession()
+
+    let supabase = createClient()
+    let { data, error } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
         password: trimmedPassword,
     })
+
+    // One automatic retry after a forced reset when the failure smells
+    // like state corruption rather than bad credentials.
+    if (error && shouldRetryAfterReset(error)) {
+        console.warn('[login] first attempt failed with recoverable auth error, retrying after reset:', error.message)
+        clearSupabaseBrowserSession()
+        supabase = createClient()
+        const retry = await supabase.auth.signInWithPassword({
+            email: normalizedEmail,
+            password: trimmedPassword,
+        })
+        data = retry.data
+        error = retry.error
+    }
 
     if (error) {
         throw new Error(getAuthErrorMessage(error, 'No pudimos iniciar sesion. Intenta nuevamente.'))

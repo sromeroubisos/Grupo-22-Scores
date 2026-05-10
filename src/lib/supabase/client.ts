@@ -33,25 +33,71 @@ function setBrowserCookie(name: string, value: string, domain?: string) {
     document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${SUPABASE_AUTH_COOKIE_MAX_AGE_SECONDS}; Path=/; SameSite=Lax${cookieDomain}${secure}`
 }
 
+// Pattern matching ANY supabase auth storage key, including from previous
+// project refs that may still linger in the browser. A stale
+// sb-<oldref>-auth-token cookie scoped to .g22scores.com gets sent
+// alongside the current project's cookie and routinely confuses both
+// middleware and the SSR helpers - that is the classic "works in
+// incognito, fails in normal browser" failure mode.
+const SUPABASE_STORAGE_KEY_PATTERN = /^sb-[a-z0-9]+-auth-token(?:\.\d+|-code-verifier|-user)?$/i
+
+function collectSupabaseStorageKeys(): string[] {
+    if (typeof window === 'undefined') return []
+    const keys = new Set<string>()
+    for (const storage of [window.localStorage, window.sessionStorage]) {
+        try {
+            for (let i = 0; i < storage.length; i += 1) {
+                const key = storage.key(i)
+                if (key && SUPABASE_STORAGE_KEY_PATTERN.test(key)) keys.add(key)
+            }
+        } catch {
+            // best effort
+        }
+    }
+    return Array.from(keys)
+}
+
+function collectSupabaseCookieNames(): string[] {
+    if (typeof document === 'undefined' || !document.cookie) return []
+    const names = new Set<string>()
+    document.cookie.split(';').forEach((part) => {
+        const trimmed = part.trim()
+        if (!trimmed) return
+        const eq = trimmed.indexOf('=')
+        const name = eq >= 0 ? trimmed.slice(0, eq) : trimmed
+        if (SUPABASE_STORAGE_KEY_PATTERN.test(name)) names.add(name)
+    })
+    return Array.from(names)
+}
+
 export function clearSupabaseBrowserSession() {
     if (typeof window === 'undefined') return
 
-    const storageKey = getSupabaseBrowserStorageKey()
-    if (!storageKey) return
+    // Drop the in-memory client singleton so the next createClient() call
+    // rebuilds it against the freshly cleaned storage. Without this, the
+    // cached client still carries the poisoned session in memory.
+    client = undefined
 
-    window.localStorage.removeItem(storageKey)
-    window.sessionStorage.removeItem(storageKey)
-    window.localStorage.removeItem(`${storageKey}-code-verifier`)
-    window.sessionStorage.removeItem(`${storageKey}-code-verifier`)
+    const storageKey = getSupabaseBrowserStorageKey()
+    const baseStorageKeys = storageKey
+        ? [storageKey, `${storageKey}-code-verifier`, `${storageKey}-user`]
+        : []
+
+    // Union: current-project keys + ANY sb-*-auth-token* keys still in
+    // storage/cookies (covers leftovers from previous Supabase projects
+    // or older builds where the storage key changed).
+    const storageKeysToClear = new Set<string>([...baseStorageKeys, ...collectSupabaseStorageKeys()])
+    storageKeysToClear.forEach((key) => {
+        try { window.localStorage.removeItem(key) } catch { /* best effort */ }
+        try { window.sessionStorage.removeItem(key) } catch { /* best effort */ }
+    })
 
     const domain = getSupabaseSharedCookieDomain(window.location.hostname)
-    const cookieNames = [
-        storageKey,
-        `${storageKey}-code-verifier`,
-        `${storageKey}-user`,
-    ]
-    for (let index = 0; index < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; index += 1) {
-        cookieNames.push(`${storageKey}.${index}`)
+    const cookieNames = new Set<string>([...baseStorageKeys, ...collectSupabaseCookieNames()])
+    if (storageKey) {
+        for (let index = 0; index < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; index += 1) {
+            cookieNames.add(`${storageKey}.${index}`)
+        }
     }
 
     cookieNames.forEach((name) => {
@@ -227,7 +273,7 @@ function buildAuthFailureResponse() {
     )
 }
 
-// Coalesces concurrent `/token?grant_type=refresh_token` POSTs originating
+// Coalesces concurrent /token?grant_type=refresh_token POSTs originating
 // from the same browser client into a single in-flight HTTP request.
 let inFlightRefresh: { promise: Promise<Response>; finishedAt: number; reuseUntil: number } | null = null
 const REFRESH_RESULT_REUSE_WINDOW_MS = 1500
@@ -357,13 +403,13 @@ export function createClient() {
         }
     }
 
-    // Explicit cookie handlers — NOT passing these makes supabase-ssr fall
-    // back to localStorage for the PKCE `code_verifier`, which is invisible
-    // to the server route handler that runs `exchangeCodeForSession()` at
-    // `/auth/callback`. Symptom: "PKCE code verifier not found in storage.
+    // Explicit cookie handlers - NOT passing these makes supabase-ssr fall
+    // back to localStorage for the PKCE code_verifier, which is invisible
+    // to the server route handler that runs exchangeCodeForSession() at
+    // /auth/callback. Symptom: "PKCE code verifier not found in storage.
     // ... For SSR" right after Google OAuth. Storing as cookies (with the
-    // shared `.g22scores.com` domain in production) lets the server read
-    // it back.
+    // shared .g22scores.com domain in production) lets the server read it
+    // back.
     const cookieDomain = typeof window !== 'undefined'
         ? getSupabaseSharedCookieDomain(window.location.hostname)
         : undefined

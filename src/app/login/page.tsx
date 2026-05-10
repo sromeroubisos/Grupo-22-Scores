@@ -6,9 +6,17 @@ import EmailLoginForm from './components/EmailLoginForm'
 import AuthErrorBanner from './components/AuthErrorBanner'
 import AuthSuccessBanner from './components/AuthSuccessBanner'
 import LocalDevAccessPanel from './components/LocalDevAccessPanel'
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { clearSupabaseBrowserSession } from '@/lib/supabase/client'
+
+const RECOVERABLE_ERROR_PARAMS = new Set([
+    'auth-code-error',
+    'auth-pkce-error',
+    'auth-state-error',
+    'auth-expired',
+])
 
 function LoginContent() {
     const searchParams = useSearchParams()
@@ -16,19 +24,36 @@ function LoginContent() {
     const detailParam = searchParams.get('detail')
     const messageParam = searchParams.get('message')
     const [error, setError] = useState<string | null>(null)
+
+    // When the user lands back on /login after a failed callback (PKCE
+    // mismatch, expired link, bad state, etc.), the stale cookie or local
+    // storage that caused the failure is still there. Wipe it once on
+    // mount so the next attempt starts clean instead of inheriting the
+    // same broken state.
+    useEffect(() => {
+        if (errorParam && RECOVERABLE_ERROR_PARAMS.has(errorParam)) {
+            try {
+                clearSupabaseBrowserSession()
+                console.info('[login] cleared stale supabase session after recoverable error:', errorParam)
+            } catch (cleanupError) {
+                console.warn('[login] failed to clear stale session:', cleanupError)
+            }
+        }
+    }, [errorParam])
+
     const errorMessages: Record<string, string> = {
-        'auth-code-error': 'No pudimos verificar tu sesión. Intentá nuevamente.',
-        'auth-pkce-error': 'La sesión de inicio de sesión no es válida. Intentá de nuevo.',
-        'auth-expired': 'El enlace de inicio de sesión expiró. Solicitá uno nuevo.',
-        'auth-state-error': 'La solicitud de autenticación fue alterada. Intentá nuevamente.',
-        'login_cancelled': 'Inicio de sesión cancelado.',
-        'login_provider_error': 'El proveedor de autenticación reportó un error. Intentá más tarde.',
+        'auth-code-error': 'No pudimos verificar tu sesion. Intenta nuevamente.',
+        'auth-pkce-error': 'La sesion de inicio de sesion no es valida. Intenta de nuevo.',
+        'auth-expired': 'El enlace de inicio de sesion expiro. Solicita uno nuevo.',
+        'auth-state-error': 'La solicitud de autenticacion fue alterada. Intenta nuevamente.',
+        'login_cancelled': 'Inicio de sesion cancelado.',
+        'login_provider_error': 'El proveedor de autenticacion reporto un error. Intenta mas tarde.',
     }
 
     const baseError = errorParam && errorMessages[errorParam]
         ? errorMessages[errorParam]
         : errorParam
-            ? 'Ocurrió un error de autenticación.'
+            ? 'Ocurrio un error de autenticacion.'
             : null
     const detailedError = baseError && detailParam
         ? `${baseError} (${detailParam.slice(0, 160)})`
@@ -45,7 +70,7 @@ function LoginContent() {
         <div className={styles.loginCard}>
             {configError ? (
                 <div className={styles.configWarning}>
-                    Configuracion incompleta: revisa `.env.local`
+                    Configuracion incompleta: revisa .env.local
                 </div>
             ) : null}
 

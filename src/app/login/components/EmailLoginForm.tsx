@@ -6,6 +6,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import styles from '../login.module.css'
 import { sanitizeReturnTo } from '../redirects'
 import { normalizeEmail, signInWithPasswordAndRedirect } from '../auth-client'
+import { clearSupabaseBrowserSession } from '@/lib/supabase/client'
 
 export default function EmailLoginForm({ onError }: { onError: (msg: string | null) => void }) {
     const [email, setEmail] = useState('')
@@ -45,6 +46,15 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
         }
     }
 
+    const handleClearSession = () => {
+        try {
+            clearSupabaseBrowserSession()
+            onError('Sesion guardada limpiada. Proba ingresar de nuevo.')
+        } catch {
+            onError('No pudimos limpiar la sesion guardada. Borra cookies del sitio y reintenta.')
+        }
+    }
+
     return (
         <form onSubmit={handleSubmit} className={styles.emailForm}>
             <div className={styles.inputGroup}>
@@ -71,7 +81,7 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
                         className={styles.input}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
+                        placeholder="********"
                         autoComplete="current-password"
                         required
                         suppressHydrationWarning
@@ -89,6 +99,23 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
 
             <button type="submit" className={styles.submitBtn} disabled={loading}>
                 {loading ? 'Ingresando...' : 'Ingresar'}
+            </button>
+
+            <button
+                type="button"
+                className={styles.link}
+                style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '6px 0 0',
+                    fontSize: 12,
+                    alignSelf: 'center',
+                    textDecoration: 'underline',
+                }}
+                onClick={handleClearSession}
+            >
+                No podes ingresar? Limpiar sesion guardada
             </button>
         </form>
     )
