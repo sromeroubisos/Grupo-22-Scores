@@ -117,6 +117,8 @@ export interface MatchStatsData {
     homeLogo?: string;
     awayLogo?: string;
     tournament: string;
+    tournamentId?: string | number | null;
+    tournamentUrl?: string | null;
     tournamentLogo?: string;
     date: string;
     time?: string;
@@ -4570,6 +4572,36 @@ function buildProxyUrl(url: string): string {
     return proxyUrl.toString();
 }
 
+type TournamentLogoSourceData = {
+    tournamentLogo?: string | null;
+    tournamentId?: string | number | null;
+    tournamentUrl?: string | null;
+    tournament?: string | null;
+    title?: string | null;
+};
+
+function getTournamentLogoImageSource(data: TournamentLogoSourceData): string {
+    const directLogo = typeof data.tournamentLogo === 'string' ? data.tournamentLogo.trim() : '';
+    if (directLogo) return directLogo;
+    if (typeof window === 'undefined') return '';
+
+    const tournamentKey = [data.tournamentId, data.tournamentUrl]
+        .map((value) => (value == null ? '' : String(value).trim()))
+        .find(Boolean);
+    if (!tournamentKey) return '';
+
+    const proxyUrl = new URL('/api/assets/team-logo', window.location.origin);
+    proxyUrl.searchParams.set('key', tournamentKey);
+    proxyUrl.searchParams.set('entity', 'tournament');
+
+    const label = (data.tournament || data.title || '').trim();
+    if (label) {
+        proxyUrl.searchParams.set('name', label);
+    }
+
+    return proxyUrl.toString();
+}
+
 async function loadImage(url: string): Promise<HTMLImageElement | null> {
     if (!isImageSource(url)) return null;
     const normalized = normalizeImageSource(url);
@@ -5728,7 +5760,7 @@ async function drawMatchEditorialScheduleSplitHero(
         loadImage(backgroundImageSrc || ''),
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
     ]);
     const kickoffDate = toExportDate(data.kickoffAt);
     const scaleX = canvas.width / 1080;
@@ -6235,7 +6267,7 @@ async function drawMatchEditorialResult(
         loadImage(backgroundImageSrc),
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         loadImage(EDITORIAL_TEXTURE_SOURCE),
         loadImage(data.editorialGradientImage || ''),
         ...sponsors.map((sponsor) => loadImage(sponsor.logo || '')),
@@ -6536,7 +6568,7 @@ async function drawLegacyClassicMatchPanel(
     const [homeLogo, awayLogo, tournamentLogo, mediaImage] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         loadImage(data.backgroundImage || ''),
     ]);
 
@@ -6870,7 +6902,7 @@ async function drawMatchScheduleConfrontation(
     const [homeLogo, awayLogo, tournamentLogo] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
     ]);
     const baseBg = normalizeHexColor(bgColor) || DEFAULT_PALETTE.bg;
     const accent = normalizeHexColor(accentColor) || BRAND_ACCENT;
@@ -7326,7 +7358,7 @@ async function drawMatchResult(
     const [homeLogo, awayLogo, tournamentLogo, textureImage] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         loadImage(EDITORIAL_TEXTURE_SOURCE),
     ]);
 
@@ -7640,7 +7672,7 @@ async function drawStandings(
     const slideRows = slide.groups.flatMap((group) => group.rows);
     const legendItems = collectStandingsLegendEntries(slideRows, accentColor);
     const [tournamentLogo, ...teamLogos] = await Promise.all([
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         ...slideRows.map((row) => loadImage(row.teamLogo || '')),
     ]);
     const subtitleText = buildStandingsSlideSubtitle(data.subtitle, slide);
@@ -7943,7 +7975,7 @@ async function drawDailyMatches(
             ? 'FIXTURE'
             : 'PARTIDOS';
     const logoLoads = await Promise.all([
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         ...matches.flatMap((match) => [loadImage(match.homeLogo || ''), loadImage(match.awayLogo || '')]),
     ]);
     const tournamentLogo = logoLoads[0];
@@ -8777,7 +8809,7 @@ async function drawLineups(
     const isSingleTeam = selectedTeams.length === 1;
     const totalPlayers = selectedTeams.reduce((sum, team) => sum + team.starters.length, 0);
     const [tournamentLogo, homeLogo, awayLogo] = await Promise.all([
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         loadImage(data.homeTeam.logo || ''),
         loadImage(data.awayTeam.logo || ''),
     ]);
@@ -9096,7 +9128,7 @@ async function drawG22BaseLineups(
     const roundText = data.subtitle?.trim().toUpperCase() || '';
     const metaLabel = getLineupMetaLabel(data);
     const [tournamentLogo, homeLogo, awayLogo] = await Promise.all([
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         loadImage(data.homeTeam.logo || ''),
         loadImage(data.awayTeam.logo || ''),
     ]);
@@ -9794,7 +9826,7 @@ async function drawG22BaseTeamOfWeek(
         : allPlayers.slice(15, 23);
     const [textureImage, tournamentLogo, ...starterLogos] = await Promise.all([
         loadImage(EDITORIAL_TEXTURE_SOURCE),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         ...starters.map((player) => loadImage(player.teamLogo || '')),
     ]);
     const requestedAccent = normalizeHexColor(accentColor);
@@ -10160,7 +10192,7 @@ async function drawPlayoffBracket(
     const safe = getSafeArea(canvas);
     const isStory = format.height > format.width;
     const logoLoads = await Promise.all([
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         ...rounds.flatMap((round) =>
             round.matches.flatMap((match) => [
                 loadImage(getBracketParticipantLogo(match.home_team || null, match.home_participant || null)),
@@ -10686,7 +10718,7 @@ async function drawMomentumMatchDayClassicSchedule(
     const [homeLogo, awayLogo, tournamentLogo, textureImage] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         loadImage(EDITORIAL_TEXTURE_SOURCE),
     ]);
 
@@ -10952,7 +10984,7 @@ async function drawMomentumMatchDayClassicScheduleRevised(
     const [homeLogo, awayLogo, tournamentLogo, textureImage] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         loadImage(EDITORIAL_TEXTURE_SOURCE),
     ]);
 
@@ -11315,7 +11347,7 @@ async function drawMomentumMatchEditorial(
     const homeLogo = await loadImage(data.homeLogo || '');
     const awayLogo = await loadImage(data.awayLogo || '');
     const photo = await loadImage(backgroundImage);
-    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
     const headlineColor = mixHexColors(accentColor, '#e8c07a', 0.6);
     const sidePanelWidth = isStory ? 446 : 424;
     const photoX = sidePanelWidth + 96;
@@ -11434,7 +11466,7 @@ async function drawMomentumMatchResult(
     const homeLogo = await loadImage(data.homeLogo || '');
     const awayLogo = await loadImage(data.awayLogo || '');
     const background = await loadImage(data.backgroundImage || '');
-    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
     const supportColor = mixHexColors(accentColor, '#ef4444', 0.48);
     const isTallStory = format.height >= 1600;
     const photoY = isTallStory ? 164 : 144;
@@ -11650,7 +11682,7 @@ async function drawMomentumStandings(
 ) {
     const isStory = format.height > format.width;
     const rows = slide.groups.flatMap((group) => group.rows);
-    const [tournamentLogo, ...logos] = await Promise.all([loadImage(data.tournamentLogo || ''), ...rows.map((row) => loadImage(row.teamLogo || ''))]);
+    const [tournamentLogo, ...logos] = await Promise.all([loadImage(getTournamentLogoImageSource(data)), ...rows.map((row) => loadImage(row.teamLogo || ''))]);
     const legendItems = collectStandingsLegendEntries(rows, accentColor);
     const title = data.title?.trim() || 'Tabla de posiciones';
     const subtitle = buildStandingsSlideSubtitle(data.subtitle, slide);
@@ -11940,7 +11972,7 @@ async function drawMomentumDailyMatches(
     brandLogo: HTMLImageElement | null
 ) {
     void format;
-    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
     const matches = data.matches.slice(0, 10);
     const logos = await Promise.all(
         matches.flatMap((match) => [loadImage(match.homeLogo || ''), loadImage(match.awayLogo || '')]),
@@ -12163,7 +12195,7 @@ async function drawMomentumLineups(
     brandLogo: HTMLImageElement | null,
     mode: LineupExportMode
 ) {
-    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
     const homeLogo = await loadImage(data.homeTeam.logo || '');
     const awayLogo = await loadImage(data.awayTeam.logo || '');
     const isStory = format.height > format.width;
@@ -12419,7 +12451,7 @@ async function drawMomentumPlayoffBracket(
     brandLogo: HTMLImageElement | null
 ) {
     const rounds = Array.isArray(data.rounds) ? data.rounds.filter((round) => round.matches?.length) : [];
-    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
     const logos = await Promise.all(
         rounds.flatMap((round) =>
             round.matches.flatMap((match) => [
@@ -12878,7 +12910,7 @@ async function drawPosterV3SchedulePoster(
     const [homeLogo, awayLogo, tournamentLogo, textureImage, ...broadcastLogos] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         loadImage(EDITORIAL_TEXTURE_SOURCE),
         ...sponsors.map((sponsor) => loadImage(sponsor.logo || '')),
     ]);
@@ -13388,7 +13420,7 @@ async function drawPosterV3MatchEditorialLegacy(
         loadImage(backgroundImageSrc || data.backgroundImage || ''),
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         ...sponsors.map((sponsor) => loadImage(sponsor.logo || '')),
     ]);
     const neonAccent = mixHexColors(accentColor, '#d7ff00', 0.68);
@@ -13472,7 +13504,7 @@ async function drawPosterV3MatchEditorial(
         loadImage(backgroundImageSrc || data.backgroundImage || ''),
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         loadImage(leadSponsor?.logo || ''),
     ]);
     const photoHeight = 792;
@@ -13742,7 +13774,7 @@ async function drawPosterV3MatchResultLegacy(
         loadImage(data.backgroundImage || ''),
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
     ]);
     const neonAccent = mixHexColors(accentColor, '#d7ff00', 0.68);
     const hotAccent = mixHexColors(accentColor, '#ff5fa2', 0.42);
@@ -13805,7 +13837,7 @@ async function drawPosterV3MatchResult(
         loadImage(data.backgroundImage || ''),
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
     ]);
     const isStory = canvas.height > canvas.width * 1.45;
     const isScheduled = data.status === 'scheduled';
@@ -14173,7 +14205,7 @@ async function drawPosterV3StandingsRedesign(
     const isStory = format.height > format.width;
     const rows = slide.groups.flatMap((group) => group.rows);
     const [tournamentLogo, ...logos] = await Promise.all([
-        loadImage(data.tournamentLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
         ...rows.map((row) => loadImage(row.teamLogo || '')),
     ]);
     const title = (data.title?.trim() || 'Standings').toUpperCase();
@@ -14663,7 +14695,7 @@ async function drawPosterV3DailyMatchesLegacyUnused(
     brandLogo: HTMLImageElement | null
 ) {
     const isStory = format.height > format.width;
-    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
     const matches = data.matches.slice(0, 10);
     const logos = await Promise.all(matches.flatMap((match) => [loadImage(match.homeLogo || ''), loadImage(match.awayLogo || '')]));
     const allFinished = matches.length > 0 && matches.every((match) => match.status === 'finished');
@@ -14930,7 +14962,7 @@ async function drawPosterV3DailyMatches(
     bgColor: string,
     brandLogo: HTMLImageElement | null
 ) {
-    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
     const isPost = format.height >= format.width;
     const assets = await Promise.all(data.matches.slice(0, 10).map(async (match, rowIndex) => {
         const [homeLogo, awayLogo] = await Promise.all([
@@ -15307,7 +15339,7 @@ async function drawPosterV3LineupsLegacy(
     brandLogo: HTMLImageElement | null,
     mode: LineupExportMode
 ) {
-    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
     const homeLogo = await loadImage(data.homeTeam.logo || '');
     const awayLogo = await loadImage(data.awayTeam.logo || '');
     const isStory = format.height > format.width;
@@ -15484,7 +15516,7 @@ async function drawPosterV3Lineups(
     brandLogo: HTMLImageElement | null,
     mode: LineupExportMode
 ) {
-    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
     const homeLogo = await loadImage(data.homeTeam.logo || '');
     const awayLogo = await loadImage(data.awayTeam.logo || '');
     const teams = getSelectedLineupTeams(data, mode).map((team) => ({
@@ -16112,7 +16144,7 @@ async function drawPosterV3PlayoffBracket(
     brandLogo: HTMLImageElement | null
 ) {
     const rounds = Array.isArray(data.rounds) ? data.rounds.filter((round) => round.matches?.length) : [];
-    const tournamentLogo = await loadImage(data.tournamentLogo || '');
+    const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
     const logos = await Promise.all(
         rounds.flatMap((round) =>
             round.matches.flatMap((match) => [
