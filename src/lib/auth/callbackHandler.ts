@@ -138,11 +138,17 @@ export async function handleAuthCallback(request: NextRequest | Request) {
         cookiesToSet.map((c) => c.name).join(',') || '(none)',
     );
 
-    // Build the redirect response and APPLY the captured cookies onto
-    // it. Without this, the access_token / refresh_token cookies set by
-    // exchangeCodeForSession() never reach the browser and the user
-    // arrives at the destination unauthenticated.
-    const response = NextResponse.redirect(`${origin}${next}`);
+    // Redirect to the client-side finalize bridge instead of straight to
+    // `next`. The bridge mounts a client component that explicitly waits
+    // for supabase.auth.getSession() to see the freshly-set cookies before
+    // navigating onward. Going directly to `next` previously raced with
+    // the AuthContext mount: by the time AuthContext called getSession(),
+    // the browser had committed the cookies but the in-memory supabase
+    // client had already cached a no-session result, leaving the user as
+    // a guest on the destination page.
+    const finalizeUrl = new URL('/auth/callback/finalize', origin)
+    finalizeUrl.searchParams.set('next', next)
+    const response = NextResponse.redirect(finalizeUrl);
 
     cookiesToSet.forEach(({ name, value, options }) => {
         const safeOptions = options ? { ...options, domain: undefined } : undefined
