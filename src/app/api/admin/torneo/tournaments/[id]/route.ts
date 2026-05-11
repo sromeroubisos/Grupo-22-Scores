@@ -19,6 +19,16 @@ const UPDATABLE_FIELDS = [
     'sport_id',
 ] as const;
 
+function getDefaultTournamentVisibilityForStatus(status: unknown): boolean | null {
+    if (typeof status !== 'string') return null;
+
+    const normalizedStatus = status.trim().toLowerCase();
+    if (normalizedStatus === 'published' || normalizedStatus === 'active') return true;
+    if (normalizedStatus === 'draft' || normalizedStatus === 'archived') return false;
+
+    return null;
+}
+
 export async function PATCH(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -58,8 +68,11 @@ export async function PATCH(
         return err('No hay campos para actualizar', 400);
     }
 
-    if (updates.status === 'published' && body.is_visible === undefined) {
-        updates.is_visible = true;
+    if (body.is_visible === undefined) {
+        const defaultVisibility = getDefaultTournamentVisibilityForStatus(updates.status);
+        if (defaultVisibility !== null) {
+            updates.is_visible = defaultVisibility;
+        }
     }
 
     const { data, error } = await supabase

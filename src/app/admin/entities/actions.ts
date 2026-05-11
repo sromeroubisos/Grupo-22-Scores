@@ -39,6 +39,7 @@ const SCHEMAS: Record<EntityType, z.ZodObject<any>> = {
         region: z.string().optional().nullable(),
         status: z.enum(['draft', 'published', 'active', 'archived']).optional().nullable(),
         is_visible: z.boolean().optional().nullable(),
+        is_popular: z.boolean().optional().nullable(),
         logo_url: z.string().optional().nullable(),
         priority: z.number().int().optional().nullable(),
         format: z.string().optional().nullable(),
@@ -172,7 +173,37 @@ function sanitizeFields(
         throw new Error('Validation Error: no hay campos validos para actualizar');
     }
 
+    if (type === 'tournament') {
+        return normalizeTournamentLifecyclePayload(result.data);
+    }
+
     return result.data;
+}
+
+function getDefaultTournamentVisibilityForStatus(status: unknown): boolean | null {
+    if (typeof status !== 'string') return null;
+
+    const normalizedStatus = status.trim().toLowerCase();
+    if (normalizedStatus === 'published' || normalizedStatus === 'active') return true;
+    if (normalizedStatus === 'draft' || normalizedStatus === 'archived') return false;
+
+    return null;
+}
+
+function normalizeTournamentLifecyclePayload<T extends Record<string, any>>(payload: T): T {
+    if (Object.prototype.hasOwnProperty.call(payload, 'is_visible')) {
+        return payload;
+    }
+
+    const defaultVisibility = getDefaultTournamentVisibilityForStatus(payload.status);
+    if (defaultVisibility === null) {
+        return payload;
+    }
+
+    return {
+        ...payload,
+        is_visible: defaultVisibility,
+    } as T;
 }
 
 async function writeAuditLog(

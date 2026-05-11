@@ -30,6 +30,11 @@ function slugify(value: string): string {
         .slice(0, 80);
 }
 
+function isPublicTournamentStatus(status: string): boolean {
+    const normalizedStatus = status.trim().toLowerCase();
+    return normalizedStatus === 'published' || normalizedStatus === 'active';
+}
+
 export async function GET(request: NextRequest) {
     const supabase = await createClient();
 
@@ -127,7 +132,7 @@ export async function POST(request: NextRequest) {
         sport_id: sport,
         season_id: season,
         status,
-        is_visible: status === 'published',
+        is_visible: isPublicTournamentStatus(status),
         is_popular: false,
         created_by_user_id: context.userId,
     };

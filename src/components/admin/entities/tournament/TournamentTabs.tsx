@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     ChevronDown,
+    Eye,
     FileText,
     Layers,
     LayoutDashboard,
@@ -29,6 +30,7 @@ export const TOURNAMENT_TABS = [
     { id: 'participantes', label: 'Participantes', icon: Users, description: 'Altas, filtros y control de equipos' },
     { id: 'operacion', label: 'Operacion', icon: Zap, description: 'Fixture, resultados y tabla operativa' },
     { id: 'related', label: 'Relacionados', icon: Link2, description: 'Cruces y torneos vinculados' },
+    { id: 'publicacion', label: 'Publicacion', icon: Eye, description: 'Estado, visibilidad y destacados' },
     { id: 'audit', label: 'Auditoria', icon: Shield, description: 'Bitacora y trazabilidad operativa' },
 ];
 

@@ -47,6 +47,10 @@ const NEXT_STATUS: Record<string, string> = {
     archived: 'draft',
 };
 
+function getVisibilityForStatus(status: string): boolean {
+    return status === 'published' || status === 'active';
+}
+
 interface ShellProps {
     id: string;
     data: TournamentRow;
@@ -335,7 +339,10 @@ function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null
             targetStatus,
         });
         try {
-            await updateEntity('tournament', id, { status: targetStatus });
+            await updateEntity('tournament', id, {
+                status: targetStatus,
+                is_visible: getVisibilityForStatus(targetStatus),
+            });
             statusRequest.end({
                 error: false,
             });

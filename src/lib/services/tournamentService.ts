@@ -104,7 +104,7 @@ export const tournamentService = {
 
       if (!options.includeHidden) {
         // is_active was dropped, use status and is_visible
-        query = query.eq('status', 'published').or('is_visible.eq.true,is_visible.is.null');
+        query = query.in('status', ['published', 'active']).or('is_visible.eq.true,is_visible.is.null');
       }
 
       return query;
@@ -157,7 +157,7 @@ export const tournamentService = {
       organization_id: t.union_id || null,
       organization_name: (t.union as any)?.name || null,
       logo_url: t.logo_url || null,
-      is_active: t.status === 'published' && t.is_visible !== false,
+      is_active: (t.status === 'published' || t.status === 'active') && t.is_visible !== false,
       is_popular: t.is_popular === true,
       display_order: 0,
       priority: typeof t.priority === 'number' ? t.priority : 0,

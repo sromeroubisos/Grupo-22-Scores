@@ -77,6 +77,8 @@ const TOURNAMENT_OPERATION_SUBTABS = new Set(['fixture', 'tabla', 'estadisticas'
 const TOURNAMENT_TAB_ALIASES: Record<string, string> = {
     overview: 'resumen',
     edit: 'detalles',
+    publish: 'publicacion',
+    publication: 'publicacion',
     fixture: 'operacion',
     tabla: 'operacion',
     estadisticas: 'operacion',

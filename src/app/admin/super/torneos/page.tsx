@@ -25,6 +25,17 @@ const STATUS_STYLES: Record<string, string> = {
     active: styles.badgeActive, archived: styles.badgeArchived,
 };
 
+function isPublicTournamentStatus(status: string | null | undefined) {
+    return status === 'published' || status === 'active';
+}
+
+function buildTournamentStatusUpdate(status: string): Partial<TournamentUpdate> {
+    return {
+        status,
+        is_visible: isPublicTournamentStatus(status),
+    };
+}
+
 const countryFlags: Record<string, string> = {
     Argentina: '🇦🇷', Uruguay: '🇺🇾', Chile: '🇨🇱', Paraguay: '🇵🇾', Brazil: '🇧🇷',
     'South Africa': '🇿🇦', England: '🏴󠁧󠁢󠁿', France: '🇫🇷', Italy: '🇮🇹', Scotland: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', Wales: '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
@@ -570,14 +581,14 @@ export default function SuperadminTorneosPage() {
                     <div className={styles.consoleActions}>
                         <button
                             className={styles.cardAction}
-                            onClick={() => handleBulkUpdate({ status: 'published' }, 'Activando torneos', 'Torneos activados correctamente.')}
+                            onClick={() => handleBulkUpdate(buildTournamentStatusUpdate('active'), 'Activando torneos', 'Torneos activados correctamente.')}
                             disabled={isBulkBusy || selectedCount === 0}
                         >
                             <Eye size={14} /> Activar
                         </button>
                         <button
                             className={styles.cardAction}
-                            onClick={() => handleBulkUpdate({ status: 'draft' }, 'Desactivando torneos', 'Torneos desactivados correctamente.')}
+                            onClick={() => handleBulkUpdate(buildTournamentStatusUpdate('draft'), 'Desactivando torneos', 'Torneos desactivados correctamente.')}
                             disabled={isBulkBusy || selectedCount === 0}
                         >
                             <EyeOff size={14} /> Desactivar
@@ -706,12 +717,12 @@ export default function SuperadminTorneosPage() {
                                                     <button
                                                         className={styles.menuItem}
                                                         onClick={() => { 
-                                                            const newStatus = t.status === 'published' ? 'draft' : 'published';
-                                                            handleUpdateMeta(t.id, { status: newStatus }); 
+                                                            const newStatus = isPublicTournamentStatus(t.status) ? 'draft' : 'active';
+                                                            handleUpdateMeta(t.id, buildTournamentStatusUpdate(newStatus));
                                                             setActionMenuOpenId(null); 
                                                         }}
                                                     >
-                                                        {t.status === 'published'
+                                                        {isPublicTournamentStatus(t.status)
                                                             ? <><EyeOff size={14} style={{ marginRight: 8 }} /> Desactivar</>
                                                             : <><Eye size={14} style={{ marginRight: 8 }} /> Activar</>}
                                                     </button>

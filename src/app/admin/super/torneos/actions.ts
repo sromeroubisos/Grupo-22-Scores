@@ -33,6 +33,32 @@ function sanitizeTournamentUpdates(updates: Partial<TournamentUpdate>) {
     return filteredUpdates;
 }
 
+function getDefaultTournamentVisibilityForStatus(status: unknown): boolean | null {
+    if (typeof status !== 'string') return null;
+
+    const normalizedStatus = status.trim().toLowerCase();
+    if (normalizedStatus === 'published' || normalizedStatus === 'active') return true;
+    if (normalizedStatus === 'draft' || normalizedStatus === 'archived') return false;
+
+    return null;
+}
+
+function normalizeTournamentLifecycleUpdates<T extends Partial<Pick<TournamentUpdate, AllowedTournamentColumn>>>(updates: T): T {
+    if (Object.prototype.hasOwnProperty.call(updates, 'is_visible')) {
+        return updates;
+    }
+
+    const defaultVisibility = getDefaultTournamentVisibilityForStatus(updates.status);
+    if (defaultVisibility === null) {
+        return updates;
+    }
+
+    return {
+        ...updates,
+        is_visible: defaultVisibility,
+    } as T;
+}
+
 function sanitizeTournamentIds(ids: string[]) {
     const uniqueIds = Array.from(new Set(ids.map((id) => String(id).trim())));
     const validIds = uniqueIds.filter((id) => UUID_REGEX.test(id));
@@ -122,7 +148,7 @@ export async function updateSuperTournamentMeta(
     const context = await requireGlobalAdminContext(supabase);
     const admin = createAdminClient();
 
-    const filteredUpdates = sanitizeTournamentUpdates(updates);
+    const filteredUpdates = normalizeTournamentLifecycleUpdates(sanitizeTournamentUpdates(updates));
     if (Object.keys(filteredUpdates).length === 0) {
         throw new Error('No se enviaron campos validos para actualizar el torneo.');
     }
@@ -170,7 +196,7 @@ export async function updateManySuperTournamentsMeta(
     updates: Partial<TournamentUpdate>
 ): Promise<{ success: true; ids: string[]; count: number }> {
     const tournamentIds = sanitizeTournamentIds(ids);
-    const filteredUpdates = sanitizeTournamentUpdates(updates);
+    const filteredUpdates = normalizeTournamentLifecycleUpdates(sanitizeTournamentUpdates(updates));
 
     if (Object.keys(filteredUpdates).length === 0) {
         throw new Error('No se enviaron campos validos para actualizar los torneos.');
