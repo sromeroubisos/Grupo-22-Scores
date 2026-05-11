@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-    ChevronLeft, Trophy, Globe, Shield, Settings, CheckCircle,
-    LayoutGrid, ListOrdered, GitMerge, Search, Loader2, Plus, RefreshCw
+    ChevronLeft, Trophy, Globe, Search, Loader2, Plus, RefreshCw,
+    LayoutGrid, ListOrdered, GitMerge, Flag, Settings2, CheckCircle2,
 } from 'lucide-react';
 import PhaseCreator, { type PhaseConfiguration, type Team as PhaseTeam } from '@/app/admin/components/PhaseCreator';
 import LogoUploader from '@/components/LogoUploader';
@@ -61,19 +61,75 @@ const sportDefaults: Record<string, { duration: number; win: number; draw: numbe
     'kabaddi': { duration: 40, win: 2, draw: 0, loss: 0 },
 };
 
-const steps = [
-    { id: 1, name: 'Configuración', icon: <Settings size={14} /> },
-    { id: 2, name: 'Fases', icon: <Trophy size={14} /> },
-    { id: 3, name: 'Participantes', icon: <Shield size={14} /> },
-    { id: 4, name: 'Reglas', icon: <CheckCircle size={14} /> },
-    { id: 5, name: 'Publicar', icon: <Globe size={14} /> },
-] as const;
+/* =========================================================
+   Templates (Paso 0). Cada plantilla pre-configura formato +
+   defaults razonables para que el usuario solo confirme
+   nombre, deporte y participantes.
+   ========================================================= */
+
+type TemplateId = 'league' | 'knockout' | 'groups' | 'circuit' | 'custom';
+
+interface TournamentTemplate {
+    id: TemplateId;
+    icon: string;
+    title: string;
+    description: string;
+    format: string;                        // se traduce a phaseType internamente
+    advanced: boolean;                     // true → abre directo el modo avanzado
+    popular?: boolean;
+    dashed?: boolean;
+}
+
+const TOURNAMENT_TEMPLATES: TournamentTemplate[] = [
+    {
+        id: 'league',
+        icon: '🏆',
+        title: 'Liga · todos contra todos',
+        description: 'Round-robin. Sumás puntos por victoria, empate y derrota. Ida o ida y vuelta.',
+        format: 'league',
+        advanced: false,
+        popular: true,
+    },
+    {
+        id: 'knockout',
+        icon: '🥊',
+        title: 'Eliminación directa',
+        description: 'Llaves. Cuartos → semis → final. Sin segunda chance.',
+        format: 'knockout',
+        advanced: false,
+    },
+    {
+        id: 'groups',
+        icon: '🎯',
+        title: 'Grupos + Playoff',
+        description: 'Fase de grupos seguida de eliminación. Ideal con muchos equipos.',
+        format: 'groups',
+        advanced: false,
+    },
+    {
+        id: 'circuit',
+        icon: '🏁',
+        title: 'Circuito por eventos',
+        description: 'Varias paradas en la temporada con tabla acumulada o final decisiva.',
+        format: 'circuit',
+        advanced: false,
+    },
+    {
+        id: 'custom',
+        icon: '⚙️',
+        title: 'Personalizado · multi-fase',
+        description: 'Wizard avanzado. Definí cada fase, criterios y bonus desde cero.',
+        format: 'groups',
+        advanced: true,
+        dashed: true,
+    },
+];
 
 function slugify(value: string) {
     return value
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[̀-ͯ]/g, '')
         .replace(/[^a-z0-9\s-]/g, '')
         .trim()
         .replace(/\s+/g, '-')
@@ -175,6 +231,8 @@ type ParticipantRow = {
     division?: SquadRecord | null;
 };
 
+type EntityFilter = 'all' | 'club' | 'seleccion' | 'franquicia' | 'academia';
+
 function formatSquadLabel(squad: SquadRecord): string {
     const suffix = [squad.sport, squad.gender, squad.category]
         .map((value) => String(value || '').trim())
@@ -239,17 +297,20 @@ function getClubShortName(club: Pick<ClubRecord, 'name' | 'short_name' | 'shortN
 
 function getClubEntityTypeLabel(value: string | null | undefined): string {
     const normalized = String(value || 'club').trim().toLowerCase();
-
     switch (normalized) {
-        case 'seleccion':
-            return 'Seleccion';
-        case 'academia':
-            return 'Academia';
-        case 'franquicia':
-            return 'Franquicia';
-        default:
-            return 'Club';
+        case 'seleccion': return 'Selección';
+        case 'academia': return 'Academia';
+        case 'franquicia': return 'Franquicia';
+        default: return 'Club';
     }
+}
+
+function getClubEntityTypeSlug(value: string | null | undefined): EntityFilter {
+    const normalized = String(value || 'club').trim().toLowerCase();
+    if (normalized === 'seleccion') return 'seleccion';
+    if (normalized === 'academia') return 'academia';
+    if (normalized === 'franquicia') return 'franquicia';
+    return 'club';
 }
 
 const ADMIN_CLUB_PAGE_SIZE = 1000;
@@ -270,14 +331,10 @@ async function fetchAdminClubPage(offset: number): Promise<ClubRecord[]> {
 
 async function fetchAllAdminClubs(): Promise<ClubRecord[]> {
     const allClubs: ClubRecord[] = [];
-
     for (let offset = 0; ; offset += ADMIN_CLUB_PAGE_SIZE) {
         const page = await fetchAdminClubPage(offset);
         allClubs.push(...page);
-
-        if (page.length < ADMIN_CLUB_PAGE_SIZE) {
-            return allClubs;
-        }
+        if (page.length < ADMIN_CLUB_PAGE_SIZE) return allClubs;
     }
 }
 
@@ -359,6 +416,28 @@ function buildQuickPhasePayload(config: PhaseConfiguration) {
     };
 }
 
+/* =========================================================
+   COMPONENTE PRINCIPAL
+   ========================================================= */
+
+type WizardStage =
+    | 'template'      // Paso 0: elegir plantilla
+    | 'basics'        // Paso 1: nombre, deporte, audiencia, temporada
+    | 'structure'     // Paso 2: cantidad equipos, modalidad, puntos
+    | 'participants'  // Paso 3: catálogo de clubes + planteles
+    | 'advanced';     // Modo avanzado: PhaseCreator completo
+
+const STAGE_ORDER: WizardStage[] = ['template', 'basics', 'structure', 'participants'];
+
+const DRAFT_STORAGE_KEY = 'g22.tournament.create.draft.v1';
+
+interface DraftPayload {
+    formData: unknown;
+    selectedTemplate: TemplateId | null;
+    stage: WizardStage;
+    savedAt: string;
+}
+
 export default function SuperCreateTournament() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -366,8 +445,14 @@ export default function SuperCreateTournament() {
     const supabase = createClient();
     const { unions: cachedUnions, loading: superConsoleLoading, refresh } = useSuperConsole();
 
-    const [currentStep, setCurrentStep] = useState(1);
+    /* ============== Estado del wizard ============== */
+    const [stage, setStage] = useState<WizardStage>('template');
+    const [selectedTemplate, setSelectedTemplate] = useState<TemplateId | null>(null);
     const [isEdit, setIsEdit] = useState(false);
+    const [autosaveState, setAutosaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+    const [autosaveLabel, setAutosaveLabel] = useState<string>('');
+
+    /* ============== Estado heredado del wizard original ============== */
     const [availableUnions, setAvailableUnions] = useState<UnionOption[]>([]);
     const [clubs, setClubs] = useState<ClubRecord[]>([]);
     const [loadingClubs, setLoadingClubs] = useState(true);
@@ -377,6 +462,7 @@ export default function SuperCreateTournament() {
     const [clubSquadsByClub, setClubSquadsByClub] = useState<Record<string, SquadRecord[]>>({});
     const [loadingSquadsByClub, setLoadingSquadsByClub] = useState<Record<string, boolean>>({});
     const [searchTerm, setSearchTerm] = useState('');
+    const [entityFilter, setEntityFilter] = useState<EntityFilter>('all');
     const [saving, setSaving] = useState(false);
     const [countryOptions, setCountryOptions] = useState<TournamentCountryOption[]>(() => getTournamentCountryOptions());
     const [phaseConfig, setPhaseConfig] = useState<PhaseConfiguration | null>(null);
@@ -395,7 +481,7 @@ export default function SuperCreateTournament() {
     const [formData, setFormData] = useState({
         name: '',
         sport: 'rugby',
-        visibility: 'public',
+        visibility: 'private',                  // por defecto borrador
         season: '2026',
         format: 'league',
         circuitChampionMode: 'accumulation' as CircuitChampionMode,
@@ -405,6 +491,8 @@ export default function SuperCreateTournament() {
         country: '',
         unionId: '',
         logoUrl: '',
+        teamCount: 8,
+        leagueRounds: 1,
         rules: {
             pointsWin: 4,
             pointsDraw: 2,
@@ -414,25 +502,26 @@ export default function SuperCreateTournament() {
         }
     });
 
-    const setClubSelection = (clubId: string, isSelected: boolean) => {
-        setSelectedClubs((prev) => {
-            if (isSelected) {
-                return prev.includes(clubId) ? prev : [...prev, clubId];
-            }
+    /* ============== Carga catálogo de clubes ============== */
+    useEffect(() => {
+        let isCancelled = false;
+        setLoadingClubs(true);
+        setClubsError(null);
 
-            return prev.filter((id) => id !== clubId);
-        });
+        fetchAllAdminClubs()
+            .then((data) => { if (!isCancelled) setClubs(data); })
+            .catch((error) => {
+                if (isCancelled) return;
+                console.error('Error loading admin club catalog:', error);
+                setClubs([]);
+                setClubsError(error instanceof Error ? error.message : 'No se pudieron cargar los equipos.');
+            })
+            .finally(() => { if (!isCancelled) setLoadingClubs(false); });
 
-        if (!isSelected) {
-            setSelectedDivisionByClub((prev) => {
-                if (!(clubId in prev)) return prev;
-                const next = { ...prev };
-                delete next[clubId];
-                return next;
-            });
-        }
-    };
+        return () => { isCancelled = true; };
+    }, []);
 
+    /* ============== Uniones ============== */
     useEffect(() => {
         setAvailableUnions(sortUnionOptions(
             cachedUnions.map((union) => ({
@@ -445,144 +534,18 @@ export default function SuperCreateTournament() {
 
     useEffect(() => {
         if (!unionCreateForm.slugManuallyEdited) {
-            setUnionCreateForm((prev) => ({
-                ...prev,
-                slug: slugify(prev.name),
-            }));
+            setUnionCreateForm((prev) => ({ ...prev, slug: slugify(prev.name) }));
         }
     }, [unionCreateForm.name, unionCreateForm.slugManuallyEdited]);
 
-    const toggleAllClubs = () => {
-        if (selectedClubs.length === clubs.length) {
-            setSelectedClubs([]);
-            setSelectedDivisionByClub({});
-            return;
-        }
-
-        setSelectedClubs(clubs.map((club) => club.id));
-    };
-
-    // Load complete admin club catalog. This intentionally includes every entity_type.
-    useEffect(() => {
-        let isCancelled = false;
-
-        setLoadingClubs(true);
-        setClubsError(null);
-
-        fetchAllAdminClubs()
-            .then((data) => {
-                if (isCancelled) return;
-                setClubs(data);
-            })
-            .catch((error) => {
-                if (isCancelled) return;
-                console.error('Error loading admin club catalog:', error);
-                setClubs([]);
-                setClubsError(error instanceof Error ? error.message : 'No se pudieron cargar los equipos.');
-            })
-            .finally(() => {
-                if (isCancelled) return;
-                setLoadingClubs(false);
-            });
-
-        return () => {
-            isCancelled = true;
-        };
-    }, []);
-
-    // Load reference data
+    /* ============== Países ============== */
     useEffect(() => {
         supabase.from('countries').select('id, name, code, flag_emoji').order('name').then(({ data }) => {
             setCountryOptions(getTournamentCountryOptions(data || []));
         });
     }, [supabase]);
 
-    const handleUnionCreateSlugChange = (value: string) => {
-        setUnionCreateForm((prev) => ({
-            ...prev,
-            slug: slugify(value),
-            slugManuallyEdited: true,
-        }));
-    };
-
-    const handleToggleUnionCreator = () => {
-        setUnionCreateError(null);
-        setUnionCreateSuccess(null);
-
-        setShowUnionCreator((prev) => {
-            const nextOpen = !prev;
-            if (nextOpen) {
-                setUnionCreateForm((current) => ({
-                    ...current,
-                    country: current.country || selectedCountryOption?.label || formData.country || 'Argentina',
-                }));
-            }
-            return nextOpen;
-        });
-    };
-
-    const handleCreateUnion = async () => {
-        const unionName = unionCreateForm.name.trim();
-        const unionSlug = slugify(unionCreateForm.slug || unionName);
-
-        if (unionName.length < 2) {
-            setUnionCreateError('Ingresa un nombre valido para la union.');
-            return;
-        }
-
-        if (!unionSlug) {
-            setUnionCreateError('Ingresa un slug valido para la union.');
-            return;
-        }
-
-        setCreatingUnion(true);
-        setUnionCreateError(null);
-        setUnionCreateSuccess(null);
-
-        try {
-            const result = await createUnion({
-                name: unionName,
-                slug: unionSlug,
-                country: unionCreateForm.country || selectedCountryOption?.label || formData.country || null,
-                sport: formData.sport || null,
-                union_level: unionCreateForm.unionLevel || 'regional',
-            });
-
-            if (!result.success || !result.union) {
-                setUnionCreateError(result.error || 'No se pudo crear la union.');
-                return;
-            }
-
-            const createdUnion: UnionOption = {
-                id: result.union.id,
-                name: result.union.name,
-                country: result.union.country || unionCreateForm.country || null,
-            };
-
-            setAvailableUnions((prev) => sortUnionOptions([
-                ...prev.filter((union) => union.id !== createdUnion.id),
-                createdUnion,
-            ]));
-            setFormData((prev) => ({ ...prev, unionId: createdUnion.id }));
-            invalidateCache('unions_list');
-            refresh('unions');
-            setUnionCreateSuccess('Union creada y seleccionada.');
-            setShowUnionCreator(false);
-            setUnionCreateForm({
-                name: '',
-                slug: '',
-                country: selectedCountryOption?.label || formData.country || 'Argentina',
-                unionLevel: 'regional',
-                slugManuallyEdited: false,
-            });
-        } catch (error) {
-            setUnionCreateError(error instanceof Error ? error.message : 'No se pudo crear la union.');
-        } finally {
-            setCreatingUnion(false);
-        }
-    };
-
-    // Load tournament data when editing
+    /* ============== Edición de torneo existente ============== */
     useEffect(() => {
         if (!tournamentId) return;
 
@@ -593,6 +556,8 @@ export default function SuperCreateTournament() {
             .then(({ data }: { data: TournamentRecord | null }) => {
                 if (!data) return;
                 setIsEdit(true);
+                setStage('basics');
+                setSelectedTemplate(null);
 
                 const sportVal = data.sport_id ? mapExternalSportToInternalSport(data.sport_id) : 'rugby';
                 const defaults = sportDefaults[sportVal as string] || { duration: 60, win: 1, draw: 0, loss: 0 };
@@ -624,22 +589,17 @@ export default function SuperCreateTournament() {
                 }));
             });
 
-        // Load existing participants
+        // Participantes existentes
         fetch(`/api/tournaments/${tournamentId}/participants?full=true`, { cache: 'no-store' })
-            .then(async (response) => {
-                if (!response.ok) return null;
-                return response.json();
-            })
+            .then(async (response) => response.ok ? response.json() : null)
             .then((participants: ParticipantRow[] | null) => {
                 if (!participants) return;
 
-                const nextSelectedClubs = Array.from(
-                    new Set(
-                        participants
-                            .map((participant) => participant.club_id)
-                            .filter((clubId): clubId is string => Boolean(clubId))
-                    )
-                );
+                const nextSelectedClubs = Array.from(new Set(
+                    participants
+                        .map((participant) => participant.club_id)
+                        .filter((clubId): clubId is string => Boolean(clubId))
+                ));
 
                 const nextSelectedDivisions = participants.reduce<Record<string, string>>((accumulator, participant) => {
                     if (participant.club_id && participant.division_id) {
@@ -651,15 +611,11 @@ export default function SuperCreateTournament() {
                 setSelectedClubs(nextSelectedClubs);
                 setSelectedDivisionByClub(nextSelectedDivisions);
             })
-            .catch((error) => {
-                console.error('Error loading tournament participants:', error);
-            });
+            .catch((error) => console.error('Error loading tournament participants:', error));
 
+        // Configuración guardada de fase
         fetch(`/api/tournaments/${tournamentId}/phases`)
-            .then(async (response) => {
-                if (!response.ok) return null;
-                return response.json();
-            })
+            .then(async (response) => response.ok ? response.json() : null)
             .then((payload) => {
                 const firstPhase = payload?.data?.[0];
                 const savedQuickConfig = firstPhase?.settings?.quickCreator || firstPhase?.settings?.quick_creator;
@@ -671,10 +627,85 @@ export default function SuperCreateTournament() {
                     }
                 }
             })
-            .catch((error) => {
-                console.error('Error loading phase config:', error);
-            });
+            .catch((error) => console.error('Error loading phase config:', error));
     }, [countryOptions, supabase, tournamentId]);
+
+    /* ============== Autosave a localStorage (solo en creación) ============== */
+    useEffect(() => {
+        if (isEdit || stage === 'template') return;
+        if (typeof window === 'undefined') return;
+
+        setAutosaveState('saving');
+        const handle = window.setTimeout(() => {
+            try {
+                const payload: DraftPayload = {
+                    formData,
+                    selectedTemplate,
+                    stage,
+                    savedAt: new Date().toISOString(),
+                };
+                window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(payload));
+                setAutosaveState('saved');
+                setAutosaveLabel('Borrador guardado');
+            } catch (error) {
+                console.warn('No se pudo guardar borrador local:', error);
+                setAutosaveState('idle');
+            }
+        }, 600);
+
+        return () => window.clearTimeout(handle);
+    }, [formData, selectedTemplate, stage, isEdit]);
+
+    /* ============== Restaurar borrador al cargar (en create) ============== */
+    useEffect(() => {
+        if (isEdit || tournamentId) return;
+        if (typeof window === 'undefined') return;
+
+        try {
+            const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+            if (!raw) return;
+            const payload = JSON.parse(raw) as DraftPayload;
+            if (!payload || !payload.formData) return;
+
+            const ok = window.confirm('Encontramos un borrador sin terminar. ¿Querés continuar donde lo dejaste?');
+            if (ok) {
+                setFormData((prev) => ({ ...prev, ...(payload.formData as object) }));
+                setSelectedTemplate(payload.selectedTemplate);
+                setStage(payload.stage || 'basics');
+            } else {
+                window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+            }
+        } catch (error) {
+            console.warn('No se pudo restaurar borrador local:', error);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    /* ============== Helpers de cambio ============== */
+    const setClubSelection = (clubId: string, isSelected: boolean) => {
+        setSelectedClubs((prev) => {
+            if (isSelected) return prev.includes(clubId) ? prev : [...prev, clubId];
+            return prev.filter((id) => id !== clubId);
+        });
+
+        if (!isSelected) {
+            setSelectedDivisionByClub((prev) => {
+                if (!(clubId in prev)) return prev;
+                const next = { ...prev };
+                delete next[clubId];
+                return next;
+            });
+        }
+    };
+
+    const toggleAllClubs = () => {
+        if (selectedClubs.length === clubs.length) {
+            setSelectedClubs([]);
+            setSelectedDivisionByClub({});
+            return;
+        }
+        setSelectedClubs(clubs.map((club) => club.id));
+    };
 
     const handleSportChange = (sportId: string) => {
         const d = sportDefaults[sportId] || { duration: 60, win: 1, draw: 0, loss: 0 };
@@ -704,50 +735,26 @@ export default function SuperCreateTournament() {
         }));
     };
 
-    const phaseTeams: PhaseTeam[] = clubs.map((club) => ({
-        id: club.id,
-        name: club.name,
-        short: getClubShortName(club),
-        color: club.primary_color || '#00A365',
-    }));
+    const handleFormatChange = (format: string) => {
+        const normalizedFormat = normalizeTournamentFormat(format);
+        const nextPhaseType = mapFormatToPhaseType(normalizedFormat);
 
-    const resolvedPhaseType = phaseConfig?.phaseType || mapFormatToPhaseType(formData.format);
-    const effectivePhaseConfig = phaseConfig || createDefaultPhaseConfig(resolvedPhaseType, selectedClubs, formData.rules);
-    const phaseConfigToPersist: PhaseConfiguration = {
-        ...effectivePhaseConfig,
-        selectedTeamIds: selectedClubs,
+        setFormData((prev) => ({ ...prev, format: normalizedFormat }));
+        setPhaseConfig((current) => {
+            const baseConfig = current || createDefaultPhaseConfig(nextPhaseType, selectedClubs, formData.rules);
+            return { ...baseConfig, phaseType: nextPhaseType };
+        });
     };
-    const selectedSport = sportsCatalog.find((sport) => sport.id === formData.sport);
-    const selectedCountryOption = countryOptions.find((option) => option.id === formData.country) || null;
-    const heroTitle = formData.name.trim() || 'Nuevo torneo';
-    const heroStatus = formData.visibility === 'public' ? 'READY' : 'DRAFT';
-    const normalizedClubSearch = searchTerm.trim().toLowerCase();
-    const filteredClubs = normalizedClubSearch
-        ? clubs.filter((club) => [
-            club.name,
-            club.short_name,
-            club.shortName,
-            club.slug,
-            club.city,
-            club.region,
-            club.country,
-            getClubEntityTypeLabel(club.entity_type),
-        ].some((value) => String(value || '').toLowerCase().includes(normalizedClubSearch)))
-        : clubs;
 
+    /* ============== Mantener phaseConfig sincronizado con equipos seleccionados ============== */
     useEffect(() => {
         setPhaseConfig((current) => {
-            if (!current || sameIdList(current.selectedTeamIds, selectedClubs)) {
-                return current;
-            }
-
-            return {
-                ...current,
-                selectedTeamIds: selectedClubs,
-            };
+            if (!current || sameIdList(current.selectedTeamIds, selectedClubs)) return current;
+            return { ...current, selectedTeamIds: selectedClubs };
         });
     }, [selectedClubs]);
 
+    /* ============== Cargar planteles por club seleccionado ============== */
     useEffect(() => {
         let isCancelled = false;
         const missingClubIds = selectedClubs.filter(
@@ -762,9 +769,7 @@ export default function SuperCreateTournament() {
             fetch(`/api/admin/clubs/${clubId}/squads`, { cache: 'no-store' })
                 .then(async (response) => {
                     const payload = await response.json().catch(() => []);
-                    if (!response.ok) {
-                        throw new Error(payload?.error || 'No se pudieron cargar los planteles del club');
-                    }
+                    if (!response.ok) throw new Error(payload?.error || 'No se pudieron cargar los planteles del club');
                     return Array.isArray(payload) ? payload as SquadRecord[] : [];
                 })
                 .then((squads) => {
@@ -782,11 +787,10 @@ export default function SuperCreateTournament() {
                 });
         });
 
-        return () => {
-            isCancelled = true;
-        };
+        return () => { isCancelled = true; };
     }, [clubSquadsByClub, loadingSquadsByClub, selectedClubs]);
 
+    /* ============== Auto-seleccionar plantel único ============== */
     useEffect(() => {
         setSelectedDivisionByClub((current) => {
             let changed = false;
@@ -807,7 +811,6 @@ export default function SuperCreateTournament() {
                     delete next[clubId];
                     changed = true;
                 }
-
                 if (!next[clubId] && squads.length === 1) {
                     next[clubId] = squads[0].id;
                     changed = true;
@@ -818,35 +821,192 @@ export default function SuperCreateTournament() {
         });
     }, [clubSquadsByClub, selectedClubs]);
 
+    /* ============== PhaseCreator integration ============== */
+    const phaseTeams: PhaseTeam[] = clubs
+        .filter((club) => selectedClubs.includes(club.id))
+        .map((club) => ({
+            id: club.id,
+            name: club.name,
+            short: getClubShortName(club),
+            color: club.primary_color || '#00A365',
+        }));
+
+    const resolvedPhaseType = phaseConfig?.phaseType || mapFormatToPhaseType(formData.format);
+    const effectivePhaseConfig = phaseConfig || createDefaultPhaseConfig(resolvedPhaseType, selectedClubs, formData.rules);
+    const phaseConfigToPersist: PhaseConfiguration = { ...effectivePhaseConfig, selectedTeamIds: selectedClubs };
+
+    const selectedSport = sportsCatalog.find((sport) => sport.id === formData.sport);
+    const selectedCountryOption = countryOptions.find((option) => option.id === formData.country) || null;
+
     const applyPhaseConfig = (nextConfig: PhaseConfiguration) => {
         setPhaseConfig(nextConfig);
-
         const nextFormat = mapPhaseTypeToFormat(nextConfig.phaseType, formData.format);
-        setFormData((prev) => (
-            prev.format === nextFormat
-                ? prev
-                : { ...prev, format: nextFormat }
-        ));
-
+        setFormData((prev) => prev.format === nextFormat ? prev : { ...prev, format: nextFormat });
         if (!sameIdList(selectedClubs, nextConfig.selectedTeamIds)) {
             setSelectedClubs(nextConfig.selectedTeamIds);
         }
     };
 
-    const handleFormatChange = (format: string) => {
-        const normalizedFormat = normalizeTournamentFormat(format);
-        const nextPhaseType = mapFormatToPhaseType(normalizedFormat);
+    /* ============== Inline union creator ============== */
+    const handleUnionCreateSlugChange = (value: string) => {
+        setUnionCreateForm((prev) => ({ ...prev, slug: slugify(value), slugManuallyEdited: true }));
+    };
 
-        setFormData((prev) => ({ ...prev, format: normalizedFormat }));
-        setPhaseConfig((current) => {
-            const baseConfig = current || createDefaultPhaseConfig(nextPhaseType, selectedClubs, formData.rules);
-            return {
-                ...baseConfig,
-                phaseType: nextPhaseType,
-            };
+    const handleToggleUnionCreator = () => {
+        setUnionCreateError(null);
+        setUnionCreateSuccess(null);
+        setShowUnionCreator((prev) => {
+            const nextOpen = !prev;
+            if (nextOpen) {
+                setUnionCreateForm((current) => ({
+                    ...current,
+                    country: current.country || selectedCountryOption?.label || formData.country || 'Argentina',
+                }));
+            }
+            return nextOpen;
         });
     };
 
+    const handleCreateUnion = async () => {
+        const unionName = unionCreateForm.name.trim();
+        const unionSlug = slugify(unionCreateForm.slug || unionName);
+
+        if (unionName.length < 2) { setUnionCreateError('Ingresá un nombre válido para la unión.'); return; }
+        if (!unionSlug) { setUnionCreateError('Ingresá un slug válido para la unión.'); return; }
+
+        setCreatingUnion(true);
+        setUnionCreateError(null);
+        setUnionCreateSuccess(null);
+
+        try {
+            const result = await createUnion({
+                name: unionName,
+                slug: unionSlug,
+                country: unionCreateForm.country || selectedCountryOption?.label || formData.country || null,
+                sport: formData.sport || null,
+                union_level: unionCreateForm.unionLevel || 'regional',
+            });
+
+            if (!result.success || !result.union) {
+                setUnionCreateError(result.error || 'No se pudo crear la unión.');
+                return;
+            }
+
+            const createdUnion: UnionOption = {
+                id: result.union.id,
+                name: result.union.name,
+                country: result.union.country || unionCreateForm.country || null,
+            };
+
+            setAvailableUnions((prev) => sortUnionOptions([
+                ...prev.filter((union) => union.id !== createdUnion.id),
+                createdUnion,
+            ]));
+            setFormData((prev) => ({ ...prev, unionId: createdUnion.id }));
+            invalidateCache('unions_list');
+            refresh('unions');
+            setUnionCreateSuccess('Unión creada y seleccionada.');
+            setShowUnionCreator(false);
+            setUnionCreateForm({
+                name: '',
+                slug: '',
+                country: selectedCountryOption?.label || formData.country || 'Argentina',
+                unionLevel: 'regional',
+                slugManuallyEdited: false,
+            });
+        } catch (error) {
+            setUnionCreateError(error instanceof Error ? error.message : 'No se pudo crear la unión.');
+        } finally {
+            setCreatingUnion(false);
+        }
+    };
+
+    /* ============== Plantilla → defaults ============== */
+    const handleTemplateSelect = (template: TournamentTemplate) => {
+        setSelectedTemplate(template.id);
+        const nextPhaseType = mapFormatToPhaseType(template.format);
+
+        setFormData((prev) => ({
+            ...prev,
+            format: template.format,
+        }));
+
+        setPhaseConfig((current) => {
+            const baseConfig = current || createDefaultPhaseConfig(nextPhaseType, selectedClubs, formData.rules);
+            return { ...baseConfig, phaseType: nextPhaseType };
+        });
+
+        if (template.advanced) {
+            setStage('advanced');
+        } else {
+            setStage('basics');
+        }
+    };
+
+    /* ============== Validación inline del nombre ============== */
+    const trimmedName = formData.name.trim();
+    const nameStatus: 'idle' | 'too-short' | 'ok' = useMemo(() => {
+        if (!trimmedName) return 'idle';
+        if (trimmedName.length < 3) return 'too-short';
+        return 'ok';
+    }, [trimmedName]);
+
+    const computedSlug = useMemo(() => trimmedName ? slugify(trimmedName) : '', [trimmedName]);
+
+    /* ============== Filtro de catálogo de clubes ============== */
+    const normalizedClubSearch = searchTerm.trim().toLowerCase();
+    const filteredClubs = useMemo(() => {
+        return clubs.filter((club) => {
+            if (entityFilter !== 'all' && getClubEntityTypeSlug(club.entity_type) !== entityFilter) return false;
+            if (!normalizedClubSearch) return true;
+            return [
+                club.name, club.short_name, club.shortName, club.slug,
+                club.city, club.region, club.country,
+                getClubEntityTypeLabel(club.entity_type),
+            ].some((value) => String(value || '').toLowerCase().includes(normalizedClubSearch));
+        });
+    }, [clubs, entityFilter, normalizedClubSearch]);
+
+    const entityCounts = useMemo(() => {
+        const counts: Record<EntityFilter, number> = { all: clubs.length, club: 0, seleccion: 0, franquicia: 0, academia: 0 };
+        clubs.forEach((club) => {
+            const slug = getClubEntityTypeSlug(club.entity_type);
+            counts[slug]++;
+        });
+        return counts;
+    }, [clubs]);
+
+    /* ============== Navegación entre stages ============== */
+    const canAdvanceFromBasics = nameStatus === 'ok' && Boolean(formData.sport);
+    const canAdvanceFromStructure = formData.teamCount >= 2;
+
+    const goNext = async () => {
+        if (stage === 'basics') {
+            if (!canAdvanceFromBasics) return;
+            setStage('structure');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+        if (stage === 'structure') {
+            if (!canAdvanceFromStructure) return;
+            setStage('participants');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+        if (stage === 'participants' || stage === 'advanced') {
+            await handleFinalize();
+        }
+    };
+
+    const goPrev = () => {
+        if (stage === 'basics') setStage('template');
+        else if (stage === 'structure') setStage('basics');
+        else if (stage === 'participants') setStage('structure');
+        else if (stage === 'advanced') setStage('participants');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    /* ============== Persistir la fase (idéntico al wizard original) ============== */
     const saveQuickPhase = async (savedId: string, config: PhaseConfiguration) => {
         const existingPhasesResponse = await fetch(`/api/tournaments/${savedId}/phases`);
         let existingPhaseId: string | null = null;
@@ -873,13 +1033,8 @@ export default function SuperCreateTournament() {
         }
     };
 
-    const handleNext = async () => {
-        if (currentStep < 5) {
-            setCurrentStep(prev => prev + 1);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            return;
-        }
-
+    /* ============== Finalizar (crear o actualizar) ============== */
+    const handleFinalize = async () => {
         setSaving(true);
         try {
             const ruleset = {
@@ -899,12 +1054,8 @@ export default function SuperCreateTournament() {
                 category: formData.category || null,
                 age_grade: formData.ageGrade || null,
                 format: mapPhaseTypeToFormat(phaseConfigToPersist.phaseType, formData.format) || null,
-                country: formData.country
-                    ? (selectedCountryOption?.label || formData.country)
-                    : null,
-                country_id: formData.country
-                    ? (selectedCountryOption?.id || formData.country)
-                    : null,
+                country: formData.country ? (selectedCountryOption?.label || formData.country) : null,
+                country_id: formData.country ? (selectedCountryOption?.id || formData.country) : null,
                 union_id: formData.unionId || null,
                 logo_url: formData.logoUrl || null,
                 status: formData.visibility === 'public' ? 'published' : 'draft',
@@ -920,19 +1071,13 @@ export default function SuperCreateTournament() {
             let savedId: string;
 
             if (isEdit && tournamentId) {
-                // On edit: don't touch the slug
                 const result = await updateEntitySafe('tournament', tournamentId, payload);
-                if (result.success === false) {
-                    throw new Error(result.error);
-                }
+                if (result.success === false) throw new Error(result.error);
                 savedId = tournamentId;
             } else {
-                // On create: generate a unique slug
                 payload.slug = `${slugify(formData.name)}-${Date.now()}`;
                 const result = await createEntitySafe('tournament', payload);
-                if (result.success === false) {
-                    throw new Error(result.error);
-                }
+                if (result.success === false) throw new Error(result.error);
                 savedId = result.id;
             }
 
@@ -948,11 +1093,10 @@ export default function SuperCreateTournament() {
                     .map((club) => club.name)
                     .slice(0, 3)
                     .join(', ');
-
-                throw new Error(`Selecciona el plantel participante para: ${missingClubNames}`);
+                throw new Error(`Seleccioná el plantel participante para: ${missingClubNames}`);
             }
 
-            // Persist participants
+            // Persistir participantes
             if (isEdit) {
                 await supabase.from('tournament_participants').delete().eq('tournament_id', savedId);
             }
@@ -981,6 +1125,11 @@ export default function SuperCreateTournament() {
 
             await saveQuickPhase(savedId, phaseConfigToPersist);
 
+            // Limpiar borrador
+            if (typeof window !== 'undefined') {
+                try { window.localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* noop */ }
+            }
+
             router.push('/admin/super/torneos');
         } catch (err: unknown) {
             alert('Error al guardar el torneo: ' + (err instanceof Error ? err.message : String(err)));
@@ -989,131 +1138,157 @@ export default function SuperCreateTournament() {
         }
     };
 
+    /* =====================================================
+       RENDER: switch por stage
+       ===================================================== */
+
+    const stageIndex = STAGE_ORDER.indexOf(stage);
+    const progress = stageIndex >= 0 ? ((stageIndex) / (STAGE_ORDER.length - 1)) * 100 : 0;
+
     return (
         <div className="creation-body">
             <div className="creation-container">
-                {/* Header */}
-                <header className="creation-header">
-                    <button
-                        onClick={() => router.push('/admin/super/torneos')}
-                        className="btn btn-outline"
-                        style={{ padding: '8px 16px', marginBottom: '24px', height: 'auto', width: 'auto' }}
-                    >
-                        <ChevronLeft size={16} /> Volver a Torneos
-                    </button>
-                    <h1>{isEdit ? 'Editar Torneo' : 'Inaugurar Torneo'}</h1>
-                    <p>Define los parámetros globales y la estructura de tu competencia.</p>
+
+                {/* ===================== Header ===================== */}
+                <header className="creation-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+                    <div>
+                        <button
+                            onClick={() => router.push('/admin/super/torneos')}
+                            className="btn btn-outline"
+                            style={{ padding: '8px 16px', marginBottom: '16px', height: 'auto', width: 'auto' }}
+                        >
+                            <ChevronLeft size={16} /> Volver a torneos
+                        </button>
+                        <h1>{isEdit ? 'Editar torneo' : 'Crear torneo'}</h1>
+                        <p>
+                            {stage === 'template' && 'Elegí una plantilla para empezar rápido o configurá todo desde cero.'}
+                            {stage === 'basics' && 'Lo básico: identidad y categorización.'}
+                            {stage === 'structure' && 'Cantidad de equipos, formato y reglas.'}
+                            {stage === 'participants' && 'Buscá clubes y planteles del catálogo.'}
+                            {stage === 'advanced' && 'Modo avanzado: configurador completo de fases.'}
+                        </p>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        {!isEdit && stage !== 'template' && (
+                            <div className="mode-switch">
+                                <button
+                                    className={stage !== 'advanced' ? 'active' : ''}
+                                    onClick={() => stage === 'advanced' && setStage('participants')}
+                                    disabled={stage === 'advanced' && false}
+                                >Rápido</button>
+                                <button
+                                    className={stage === 'advanced' ? 'active' : ''}
+                                    onClick={() => setStage('advanced')}
+                                >Avanzado</button>
+                            </div>
+                        )}
+                        {!isEdit && stage !== 'template' && autosaveLabel && (
+                            <span className={`autosave-pill ${autosaveState === 'saving' ? 'saving' : 'saved'}`}>
+                                {autosaveState === 'saving' ? 'Guardando...' : autosaveLabel}
+                            </span>
+                        )}
+                    </div>
                 </header>
 
-                <section className="creation-hero">
-                    <div className="creation-hero-card">
-                        <div className="creation-hero-logo">
-                            {formData.logoUrl ? (
-                                <img src={formData.logoUrl} alt={heroTitle} />
-                            ) : (
-                                <span className="creation-hero-logo-placeholder">Logo</span>
-                            )}
+                {/* ===================== Stepper ===================== */}
+                {stage !== 'template' && stage !== 'advanced' && (
+                    <div className="stepper-bar">
+                        <div className="stepper-progress-row">
+                            <span>Paso <strong>{stageIndex} de {STAGE_ORDER.length - 1}</strong></span>
+                            <span>
+                                {stage === 'basics' && 'Lo básico'}
+                                {stage === 'structure' && 'Estructura'}
+                                {stage === 'participants' && 'Participantes'}
+                            </span>
                         </div>
-
-                        <div className="creation-hero-copy">
-                            <h2>{heroTitle}</h2>
-                            <p className="creation-hero-subline">
-                                El logo se actualiza en vivo aqui arriba y se guarda junto al torneo.
-                            </p>
-
-                            <div className="creation-hero-meta">
-                                <span className="creation-hero-pill is-accent">Status: <strong>{heroStatus}</strong></span>
-                                <span className="creation-hero-pill">Season: <strong>{formData.season || '2026'}</strong></span>
-                                <span className="creation-hero-pill">Sport: <strong>{selectedSport?.nameEs || formData.sport}</strong></span>
-                                <span className="creation-hero-pill">Fase base: <strong>{getPhaseTypeLabel(phaseConfigToPersist.phaseType)}</strong></span>
-                                <span className="creation-hero-pill">ID: <strong>{isEdit ? 'EDIT' : 'NEW'}</strong></span>
-                            </div>
+                        <div className="stepper-progress-bar">
+                            <span className="stepper-progress-fill" style={{ width: `${progress}%` }} />
                         </div>
                     </div>
-                </section>
+                )}
 
-                {/* Stepper */}
-                <nav className="stepper-nav">
-                    {steps.map(step => (
-                        <button
-                            key={step.id}
-                            className={`step-pill ${currentStep === step.id ? 'active' : ''} ${step.id < currentStep ? 'done' : ''}`}
-                            onClick={() => {
-                                if (step.id < currentStep) setCurrentStep(step.id);
-                            }}
-                        >
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                                {step.id < currentStep ? '✓' : step.icon}
-                                {step.name}
-                            </span>
-                        </button>
-                    ))}
-                </nav>
+                {/* ===================== STAGE 0 · TEMPLATE PICKER ===================== */}
+                {stage === 'template' && !isEdit && (
+                    <section className="tplpick-wrap">
+                        <h2 style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '-0.01em', marginBottom: '6px' }}>
+                            ¿Qué tipo de torneo querés crear?
+                        </h2>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+                            Elegí una plantilla y completá lo esencial. Después podés ajustar cualquier detalle.
+                        </p>
 
-                {/* STEP 1: CONFIGURACIÓN */}
-                {currentStep === 1 && (
+                        <div className="tplpick-grid">
+                            {TOURNAMENT_TEMPLATES.map((tpl) => (
+                                <button
+                                    key={tpl.id}
+                                    type="button"
+                                    className={`tplpick-card ${tpl.popular ? 'popular' : ''} ${tpl.dashed ? 'dashed' : ''}`}
+                                    onClick={() => handleTemplateSelect(tpl)}
+                                >
+                                    <div className="tplpick-icon">{tpl.icon}</div>
+                                    <h3>{tpl.title}</h3>
+                                    <p>{tpl.description}</p>
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="tplpick-callout">
+                            💡 <strong>Tip:</strong> 8 de cada 10 torneos usan "Liga · todos contra todos". Si no estás seguro, empezá ahí — podés cambiar el formato más tarde sin perder participantes ni partidos cargados.
+                        </div>
+                    </section>
+                )}
+
+                {/* ===================== STAGE 1 · LO BÁSICO ===================== */}
+                {stage === 'basics' && (
                     <>
                         <article className="partition">
                             <div className="partition-header">
-                                <h2>Configuración General</h2>
-                                <p>Información de identidad y categorización.</p>
+                                <h2>Información del torneo</h2>
+                                <p>Solo lo imprescindible. Logo y publicación se configuran después.</p>
                             </div>
                             <div className="partition-body">
                                 <div className="form-grid">
                                     <div className="field-group">
-                                        <label>NOMBRE DEL TORNEO *</label>
+                                        <label>Nombre del torneo *</label>
                                         <input
-                                            className="form-input"
+                                            className={`form-input ${nameStatus === 'ok' ? 'is-ok' : nameStatus === 'too-short' ? 'is-error' : ''}`}
                                             type="text"
                                             value={formData.name}
                                             onChange={e => setFormData({ ...formData, name: e.target.value })}
                                             placeholder="Ej: Torneo del Interior A 2026"
+                                            autoFocus
                                         />
+                                        {nameStatus === 'ok' && (
+                                            <div className="field-help-ok">
+                                                <CheckCircle2 size={14} />
+                                                URL: <code style={{ fontFamily: 'ui-monospace, monospace', marginLeft: 4 }}>/torneos/{computedSlug}</code>
+                                            </div>
+                                        )}
+                                        {nameStatus === 'too-short' && (
+                                            <div className="field-help-error">Ingresá al menos 3 caracteres.</div>
+                                        )}
                                     </div>
 
                                     <div className="field-group">
-                                        <label>DEPORTE</label>
-                                        <div className="choice-grid">
+                                        <label>Deporte *</label>
+                                        <div className="sport-pick-grid">
                                             {sportsCatalog.map(sport => (
                                                 <button
                                                     key={sport.id}
                                                     type="button"
-                                                    className={`choice-btn ${formData.sport === sport.id ? 'selected' : ''}`}
+                                                    className={formData.sport === sport.id ? 'selected' : ''}
                                                     onClick={() => handleSportChange(sport.id)}
                                                 >
-                                                    <span className="choice-icon">{sport.icon}</span>
-                                                    <span className="choice-label">{sport.nameEs}</span>
-                                                    <span className="choice-status">{sport.isActive ? 'Activo' : 'Catalogo web'}</span>
+                                                    <span className="emo">{sport.icon}</span>
+                                                    <span>{sport.nameEs}</span>
                                                 </button>
                                             ))}
                                         </div>
-                                        <p className="field-help">Se muestran todos los deportes soportados por la web, no solo los activos.</p>
-                                    </div>
-
-                                    <div className="field-group">
-                                        <label>SECCION PUBLICA</label>
-                                        <div className="choice-grid" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
-                                            {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
-                                                <button
-                                                    key={audience}
-                                                    type="button"
-                                                    className={`choice-btn ${formData.publicAudience === audience ? 'selected' : ''}`}
-                                                    onClick={() => handlePublicAudienceChange(audience)}
-                                                >
-                                                    <span className="choice-icon">{audience === 'mayores' ? 'A' : 'U'}</span>
-                                                    <span className="choice-label">{audience === 'mayores' ? 'Mayores' : 'Juveniles'}</span>
-                                                    <span className="choice-status">
-                                                        {audience === 'mayores' ? 'Portada principal' : 'Pagina juvenil'}
-                                                    </span>
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <p className="field-help">Esta seleccion define en que vista publica aparece el torneo local.</p>
                                     </div>
 
                                     <div className="grid-2">
                                         <div className="field-group">
-                                            <label>TEMPORADA</label>
+                                            <label>Temporada</label>
                                             <select
                                                 className="form-select"
                                                 value={formData.season}
@@ -1125,248 +1300,188 @@ export default function SuperCreateTournament() {
                                             </select>
                                         </div>
                                         <div className="field-group">
-                                            <label>CATEGORÍA</label>
+                                            <label>Categoría</label>
                                             <input
                                                 className="form-input"
                                                 type="text"
                                                 value={formData.category}
                                                 onChange={e => setFormData({ ...formData, category: e.target.value })}
-                                                placeholder="Ej: Primera, Juveniles, etc."
+                                                placeholder="Ej: Primera, Juveniles, Reserva..."
                                             />
                                         </div>
                                     </div>
 
                                     <div className="field-group">
-                                        <label>CLASIFICACION DE EDAD</label>
-                                        <select
-                                            className="form-select"
-                                            value={formData.ageGrade}
-                                            onChange={e => handleAgeGradeChange(e.target.value)}
-                                        >
-                                            {AGE_GRADE_OPTIONS.map((option) => (
-                                                <option key={option} value={option}>{option}</option>
+                                        <label>Audiencia pública</label>
+                                        <div className="choice-pair">
+                                            {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
+                                                <button
+                                                    key={audience}
+                                                    type="button"
+                                                    className={formData.publicAudience === audience ? 'selected' : ''}
+                                                    onClick={() => handlePublicAudienceChange(audience)}
+                                                >
+                                                    {audience === 'mayores' ? 'Mayores' : 'Juveniles'}
+                                                    <span className="small">
+                                                        {audience === 'mayores' ? 'Aparece en la portada principal' : 'Sección juvenil'}
+                                                    </span>
+                                                </button>
                                             ))}
-                                        </select>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        </article>
 
-                        <article className="partition">
-                            <div className="partition-header">
-                                <h2>Jurisdicción y Alcance</h2>
-                                <p>Define dónde se desarrolla y quién lo rige.</p>
-                            </div>
-                            <div className="partition-body">
-                                <div className="grid-2">
-                                    <div className="field-group">
-                                        <label>PAÍS / REGIÓN</label>
-                                        <select
-                                            className="form-select"
-                                            value={formData.country}
-                                            onChange={e => setFormData({ ...formData, country: e.target.value })}
-                                        >
-                                            <option value="">No especificado</option>
-                                            {countryOptions.map((country) => (
-                                                <option key={country.id} value={country.id}>{country.label}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="field-group">
-                                        <label>UNIÓN VINCULADA</label>
-                                        <select
-                                            className="form-select"
-                                            value={formData.unionId}
-                                            onChange={e => setFormData({ ...formData, unionId: e.target.value })}
-                                        >
-                                            <option value="">Independiente (Sin vínculo)</option>
-                                            {availableUnions.map(u => (
-                                                <option key={u.id} value={u.id}>{u.name}</option>
-                                            ))}
-                                        </select>
-                                        <div className="inline-union-toolbar">
-                                            <p className="field-help">
-                                                {superConsoleLoading.unions && availableUnions.length === 0
-                                                    ? 'Cargando uniones...'
-                                                    : availableUnions.length > 0
-                                                        ? `${availableUnions.length} uniones disponibles para vincular este torneo.`
-                                                        : 'No hay uniones cargadas todavia.'}
-                                            </p>
-                                            <div className="inline-union-actions">
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-outline btn-inline"
-                                                    onClick={() => refresh('unions')}
+                                    <details className="tg-disclosure">
+                                        <summary>Más opciones · país, unión, clasificación de edad y logo</summary>
+                                        <div className="tg-disclosure-body">
+                                            <div className="grid-2">
+                                                <div className="field-group">
+                                                    <label>País / Región</label>
+                                                    <select
+                                                        className="form-select"
+                                                        value={formData.country}
+                                                        onChange={e => setFormData({ ...formData, country: e.target.value })}
+                                                    >
+                                                        <option value="">No especificado</option>
+                                                        {countryOptions.map((country) => (
+                                                            <option key={country.id} value={country.id}>{country.label}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="field-group">
+                                                    <label>Unión vinculada</label>
+                                                    <select
+                                                        className="form-select"
+                                                        value={formData.unionId}
+                                                        onChange={e => setFormData({ ...formData, unionId: e.target.value })}
+                                                    >
+                                                        <option value="">Independiente (sin vínculo)</option>
+                                                        {availableUnions.map(u => (
+                                                            <option key={u.id} value={u.id}>{u.name}</option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="inline-union-toolbar">
+                                                        <p className="field-help">
+                                                            {superConsoleLoading.unions && availableUnions.length === 0
+                                                                ? 'Cargando uniones...'
+                                                                : availableUnions.length > 0
+                                                                    ? `${availableUnions.length} uniones disponibles.`
+                                                                    : 'No hay uniones cargadas todavía.'}
+                                                        </p>
+                                                        <div className="inline-union-actions">
+                                                            <button type="button" className="btn btn-outline btn-inline" onClick={() => refresh('unions')}>
+                                                                <RefreshCw size={14} /> Refrescar
+                                                            </button>
+                                                            <button type="button" className="btn btn-outline btn-inline" onClick={handleToggleUnionCreator}>
+                                                                <Plus size={14} /> {showUnionCreator ? 'Cancelar' : 'Crear unión'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    {showUnionCreator && (
+                                                        <div className="inline-union-form">
+                                                            <div className="grid-2">
+                                                                <div className="field-group">
+                                                                    <label>Nombre</label>
+                                                                    <input
+                                                                        className="form-input"
+                                                                        type="text"
+                                                                        value={unionCreateForm.name}
+                                                                        onChange={(e) => setUnionCreateForm((prev) => ({ ...prev, name: e.target.value, slugManuallyEdited: prev.slugManuallyEdited }))}
+                                                                        placeholder="Ej: Unión de Rugby de Buenos Aires"
+                                                                    />
+                                                                </div>
+                                                                <div className="field-group">
+                                                                    <label>Slug</label>
+                                                                    <input
+                                                                        className="form-input"
+                                                                        type="text"
+                                                                        value={unionCreateForm.slug}
+                                                                        onChange={(e) => handleUnionCreateSlugChange(e.target.value)}
+                                                                        placeholder="union-rugby-buenos-aires"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                            <div className="grid-2">
+                                                                <div className="field-group">
+                                                                    <label>País</label>
+                                                                    <input
+                                                                        className="form-input"
+                                                                        type="text"
+                                                                        value={unionCreateForm.country}
+                                                                        onChange={(e) => setUnionCreateForm((prev) => ({ ...prev, country: e.target.value }))}
+                                                                    />
+                                                                </div>
+                                                                <div className="field-group">
+                                                                    <label>Nivel</label>
+                                                                    <select
+                                                                        className="form-select"
+                                                                        value={unionCreateForm.unionLevel}
+                                                                        onChange={(e) => setUnionCreateForm((prev) => ({ ...prev, unionLevel: e.target.value }))}
+                                                                    >
+                                                                        <option value="regional">Regional</option>
+                                                                        <option value="provincial">Provincial</option>
+                                                                        <option value="nacional">Nacional</option>
+                                                                        <option value="internacional">Internacional</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            {unionCreateError && <p className="field-error">{unionCreateError}</p>}
+                                                            {unionCreateSuccess && <p className="field-success">{unionCreateSuccess}</p>}
+                                                            <button type="button" className="btn btn-primary btn-inline" onClick={handleCreateUnion} disabled={creatingUnion}>
+                                                                {creatingUnion ? <><Loader2 className="spinning" size={14} /> Creando...</> : 'Crear unión'}
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="field-group">
+                                                <label>Clasificación de edad</label>
+                                                <select
+                                                    className="form-select"
+                                                    value={formData.ageGrade}
+                                                    onChange={e => handleAgeGradeChange(e.target.value)}
                                                 >
-                                                    <RefreshCw size={14} />
-                                                    Recargar
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-secondary btn-inline"
-                                                    onClick={handleToggleUnionCreator}
-                                                >
-                                                    <Plus size={14} />
-                                                    {showUnionCreator ? 'Cancelar' : 'Nueva union'}
-                                                </button>
+                                                    {AGE_GRADE_OPTIONS.map((option) => (
+                                                        <option key={option} value={option}>{option}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div className="field-group">
+                                                <label>Logo del torneo</label>
+                                                <LogoUploader
+                                                    value={formData.logoUrl || ''}
+                                                    onChange={(url) => setFormData({ ...formData, logoUrl: url })}
+                                                />
                                             </div>
                                         </div>
-                                        {unionCreateSuccess && (
-                                            <p className="field-help field-help-success">{unionCreateSuccess}</p>
-                                        )}
-                                        {showUnionCreator && (
-                                            <div className="inline-union-creator">
-                                                <div className="grid-2">
-                                                    <div className="field-group">
-                                                        <label>NOMBRE DE LA UNION</label>
-                                                        <input
-                                                            className="form-input"
-                                                            type="text"
-                                                            value={unionCreateForm.name}
-                                                            onChange={(e) => setUnionCreateForm((prev) => ({ ...prev, name: e.target.value }))}
-                                                            placeholder="Ej: Union Cordobesa de Rugby"
-                                                        />
-                                                    </div>
-                                                    <div className="field-group">
-                                                        <label>SLUG</label>
-                                                        <input
-                                                            className="form-input"
-                                                            type="text"
-                                                            value={unionCreateForm.slug}
-                                                            onChange={(e) => handleUnionCreateSlugChange(e.target.value)}
-                                                            placeholder="union-cordobesa-rugby"
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div className="grid-2">
-                                                    <div className="field-group">
-                                                        <label>PAIS</label>
-                                                        <select
-                                                            className="form-select"
-                                                            value={unionCreateForm.country}
-                                                            onChange={(e) => setUnionCreateForm((prev) => ({ ...prev, country: e.target.value }))}
-                                                        >
-                                                            <option value="">No especificado</option>
-                                                            {countryOptions.map((country) => (
-                                                                <option key={country.id} value={country.label}>{country.label}</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                    <div className="field-group">
-                                                        <label>NIVEL</label>
-                                                        <select
-                                                            className="form-select"
-                                                            value={unionCreateForm.unionLevel}
-                                                            onChange={(e) => setUnionCreateForm((prev) => ({ ...prev, unionLevel: e.target.value }))}
-                                                        >
-                                                            <option value="local">Local</option>
-                                                            <option value="regional">Regional</option>
-                                                            <option value="provincial">Provincial</option>
-                                                            <option value="national">Nacional</option>
-                                                            <option value="international">Internacional</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                {unionCreateError && (
-                                                    <p className="field-help field-help-danger">{unionCreateError}</p>
-                                                )}
-                                                <div className="inline-union-actions">
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-outline btn-inline"
-                                                        onClick={handleToggleUnionCreator}
-                                                        disabled={creatingUnion}
-                                                    >
-                                                        Cancelar
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-primary btn-inline"
-                                                        onClick={handleCreateUnion}
-                                                        disabled={creatingUnion}
-                                                    >
-                                                        {creatingUnion ? <Loader2 size={14} className="spin" /> : <Plus size={14} />}
-                                                        {creatingUnion ? 'Creando...' : 'Crear y vincular'}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </article>
-
-                        <article className="partition">
-                            <div className="partition-header">
-                                <h2>Identidad Visual</h2>
-                                <p>Sube el logo y valida al instante como queda en el banner superior.</p>
-                            </div>
-                            <div className="partition-body">
-                                <div className="grid-2">
-                                    <div className="field-group">
-                                        <label>URL DEL LOGO</label>
-                                        <input
-                                            className="form-input"
-                                            type="text"
-                                            value={formData.logoUrl}
-                                            onChange={e => setFormData({ ...formData, logoUrl: e.target.value })}
-                                            placeholder="https://.../logo.png"
-                                        />
-                                        <p className="field-help">
-                                            Puedes pegar una URL o subir un archivo. El banner de arriba usa exactamente este mismo logo.
-                                        </p>
-                                        {formData.logoUrl && (
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline"
-                                                style={{ alignSelf: 'flex-start', padding: '10px 16px', height: 'auto', width: 'auto' }}
-                                                onClick={() => setFormData({ ...formData, logoUrl: '' })}
-                                            >
-                                                Limpiar Logo
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    <div className="logo-card">
-                                        <LogoUploader
-                                            onUpload={(logoData) => setFormData((prev) => ({ ...prev, logoUrl: logoData }))}
-                                            currentLogo={formData.logoUrl}
-                                            label="Logo del torneo"
-                                            accentColor="var(--accent)"
-                                        />
-                                    </div>
+                                    </details>
                                 </div>
                             </div>
                         </article>
                     </>
                 )}
 
-                {/* STEP 2: FASES */}
-                {currentStep === 2 && (
+                {/* ===================== STAGE 2 · ESTRUCTURA ===================== */}
+                {stage === 'structure' && (
                     <article className="partition">
                         <div className="partition-header">
-                            <h2>Estructura de Fases</h2>
-                            <p>Configura cómo se organiza la competencia.</p>
+                            <h2>¿Cómo se juega?</h2>
+                            <p>Confirmá formato, cantidad de equipos y reglas. Tu plantilla ya viene precargada.</p>
                         </div>
                         <div className="partition-body">
+
                             <div className="field-group">
-                                <label>TIPO DE FORMATO</label>
+                                <label>Formato</label>
                                 <div className="choice-grid">
-                                    <button
-                                        type="button"
-                                        className={`choice-btn ${formData.format === 'groups' ? 'selected' : ''}`}
-                                        onClick={() => handleFormatChange('groups')}
-                                    >
-                                        <LayoutGrid className="choice-icon" />
-                                        <span className="choice-label">Fase de Grupos + Playoffs</span>
-                                    </button>
                                     <button
                                         type="button"
                                         className={`choice-btn ${formData.format === 'league' ? 'selected' : ''}`}
                                         onClick={() => handleFormatChange('league')}
                                     >
                                         <ListOrdered className="choice-icon" />
-                                        <span className="choice-label">Liga (Todos contra todos)</span>
+                                        <span className="choice-label">Liga (todos contra todos)</span>
                                     </button>
                                     <button
                                         type="button"
@@ -1374,7 +1489,15 @@ export default function SuperCreateTournament() {
                                         onClick={() => handleFormatChange('knockout')}
                                     >
                                         <GitMerge className="choice-icon" />
-                                        <span className="choice-label">Eliminación Directa</span>
+                                        <span className="choice-label">Eliminación directa</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`choice-btn ${formData.format === 'groups' ? 'selected' : ''}`}
+                                        onClick={() => handleFormatChange('groups')}
+                                    >
+                                        <LayoutGrid className="choice-icon" />
+                                        <span className="choice-label">Grupos + Playoff</span>
                                     </button>
                                     <button
                                         type="button"
@@ -1386,379 +1509,401 @@ export default function SuperCreateTournament() {
                                     </button>
                                 </div>
                             </div>
+
                             {formData.format === 'circuit' && (
-                                <div className="sub-partition" style={{ border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: '12px', padding: '20px', background: 'rgba(245, 158, 11, 0.08)', marginTop: '24px' }}>
-                                    <div style={{ display: 'grid', gap: '16px' }}>
-                                        <div>
-                                            <h3 style={{ margin: 0, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--accent)' }}>Modo Circuito</h3>
-                                            <p style={{ margin: '10px 0 0', color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.6 }}>
-                                                El circuito usa varias paradas durante la temporada y una tabla acumulada por puntos obtenidos en cada evento.
-                                            </p>
-                                        </div>
-                                        <div className="field-group" style={{ marginBottom: 0 }}>
-                                            <label>DEFINICION DEL CAMPEON</label>
-                                            <select
-                                                className="form-select"
-                                                value={formData.circuitChampionMode}
-                                                onChange={(e) => setFormData((prev) => ({
-                                                    ...prev,
-                                                    circuitChampionMode: e.target.value as CircuitChampionMode,
-                                                }))}
-                                            >
-                                                <option value="accumulation">Por acumulacion de puntos</option>
-                                                <option value="final">Con final / playoff decisivo</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                                <div className="field-group">
+                                    <label>Modo del circuito</label>
+                                    <select
+                                        className="form-select"
+                                        value={formData.circuitChampionMode}
+                                        onChange={(e) => setFormData((prev) => ({ ...prev, circuitChampionMode: e.target.value as CircuitChampionMode }))}
+                                    >
+                                        <option value="accumulation">Acumulación de puntos (tabla agregada)</option>
+                                        <option value="final">Final / playoff decisivo</option>
+                                    </select>
                                 </div>
                             )}
-                            <div className="sub-partition" style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '20px', background: 'rgba(0,0,0,0.2)', marginTop: '30px' }}>
-                                <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <Trophy size={18} color="var(--accent)" />
-                                    <h3 style={{ margin: 0, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Configurador de Fases</h3>
-                                </div>
-                                <PhaseCreator
-                                    key={`quick-phase-${formData.format}-${effectivePhaseConfig.phaseType}`}
-                                    phaseIndex={1}
-                                    totalPhases={1}
-                                    teams={phaseTeams}
-                                    initialConfig={effectivePhaseConfig}
-                                    onPrev={() => setCurrentStep(1)}
-                                    onChange={applyPhaseConfig}
-                                    onSaveDraft={applyPhaseConfig}
-                                    onNext={(config) => {
-                                        applyPhaseConfig(config);
-                                        setCurrentStep(3);
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </article>
-                )}
 
-                {/* STEP 3: PARTICIPANTES */}
-                {currentStep === 3 && (
-                    <article className="partition">
-                        <div className="partition-header">
-                            <h2>Equipos Participantes</h2>
-                            <p>Selecciona los clubes, selecciones, franquicias o academias que formaran parte de este torneo.</p>
-                        </div>
-                        <div className="partition-body">
-                            <div className="form-grid">
-                                <div className="field-group">
-                                    <label>BUSCAR Y AGREGAR EQUIPOS</label>
-                                    <div className="search-box">
-                                        <Search className="icon" size={18} />
-                                        <input
-                                            type="text"
-                                            placeholder="Escribe el nombre, tipo o ubicacion..."
-                                            className="form-input"
-                                            value={searchTerm}
-                                            onChange={e => setSearchTerm(e.target.value)}
-                                        />
-                                    </div>
-                                    <p className="field-help">
-                                        {loadingClubs
-                                            ? 'Cargando catalogo completo...'
-                                            : clubsError
-                                                ? clubsError
-                                                : `${filteredClubs.length} de ${clubs.length} equipos disponibles.`}
-                                    </p>
-                                </div>
-
-                                <div className="table-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                    <table className="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th style={{ width: '40px' }}>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={clubs.length > 0 && selectedClubs.length === clubs.length}
-                                                        onChange={toggleAllClubs}
-                                                    />
-                                                </th>
-                                                <th>EQUIPO</th>
-                                                <th>PLANTEL</th>
-                                                <th>UBICACIÓN</th>
-                                                <th style={{ width: '100px' }}>ACCIÓN</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {loadingClubs ? (
-                                                <tr>
-                                                    <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
-                                                        Cargando equipos...
-                                                    </td>
-                                                </tr>
-                                            ) : clubsError ? (
-                                                <tr>
-                                                    <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: '#fca5a5' }}>
-                                                        {clubsError}
-                                                    </td>
-                                                </tr>
-                                            ) : filteredClubs.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
-                                                        No hay equipos que coincidan con la busqueda.
-                                                    </td>
-                                                </tr>
-                                            ) : filteredClubs.map(club => (
-                                                <tr key={club.id} className={selectedClubs.includes(club.id) ? 'active' : ''}>
-                                                    <td>
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedClubs.includes(club.id)}
-                                                            onChange={() => setClubSelection(club.id, !selectedClubs.includes(club.id))}
-                                                        />
-                                                    </td>
-                                                    <td>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                            {club.logo_url && <img src={club.logo_url} alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />}
-                                                            <span>{club.name}</span>
-                                                            <span style={{
-                                                                border: '1px solid var(--border)',
-                                                                borderRadius: '999px',
-                                                                color: 'var(--text-dim)',
-                                                                fontSize: '10px',
-                                                                fontWeight: 800,
-                                                                lineHeight: 1,
-                                                                padding: '4px 7px',
-                                                                textTransform: 'uppercase',
-                                                            }}>
-                                                                {getClubEntityTypeLabel(club.entity_type)}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        {selectedClubs.includes(club.id) ? (
-                                                            <div style={{ display: 'grid', gap: '6px' }}>
-                                                                <select
-                                                                    className="form-select"
-                                                                    value={selectedDivisionByClub[club.id] || ''}
-                                                                    onChange={(e) => setSelectedDivisionByClub((prev) => ({
-                                                                        ...prev,
-                                                                        [club.id]: e.target.value,
-                                                                    }))}
-                                                                    disabled={Boolean(loadingSquadsByClub[club.id])}
-                                                                >
-                                                                    <option value="">
-                                                                        {loadingSquadsByClub[club.id]
-                                                                            ? 'Cargando planteles...'
-                                                                            : (clubSquadsByClub[club.id] || []).length === 0
-                                                                                ? 'Sin planteles vinculados'
-                                                                                : (clubSquadsByClub[club.id] || []).length === 1
-                                                                                    ? 'Plantel detectado automaticamente'
-                                                                                    : 'Selecciona el plantel'}
-                                                                    </option>
-                                                                    {(clubSquadsByClub[club.id] || []).map((squad) => (
-                                                                        <option key={squad.id} value={squad.id}>
-                                                                            {formatSquadLabel(squad)}
-                                                                        </option>
-                                                                    ))}
-                                                                </select>
-                                                                {(clubSquadsByClub[club.id] || []).length === 0 && (
-                                                                    <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-                                                                        Este club competira en modo legacy hasta que tenga planteles vinculados.
-                                                                    </span>
-                                                                )}
-                                                                {(clubSquadsByClub[club.id] || []).length > 1 && !selectedDivisionByClub[club.id] && (
-                                                                    <span style={{ fontSize: '11px', color: 'var(--accent)' }}>
-                                                                        Elige que plantel quieres inscribir.
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        ) : (
-                                                            <span style={{ color: 'var(--text-dim)' }}>Selecciona el equipo</span>
-                                                        )}
-                                                    </td>
-                                                    <td>{club.city || club.region || club.country || club.short_name || 'Sede Central'}</td>
-                                                    <td>
-                                                        <button
-                                                            type="button"
-                                                            className={`btn ${selectedClubs.includes(club.id) ? 'btn-primary' : 'btn-outline'}`}
-                                                            style={{ padding: '4px 12px', fontSize: '11px', height: 'auto', minHeight: 'unset' }}
-                                                            onClick={() => setClubSelection(club.id, !selectedClubs.includes(club.id))}
-                                                        >
-                                                            {selectedClubs.includes(club.id) ? '✓ Añadido' : '+ Añadir'}
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                )}
-
-                {/* STEP 4: REGLAS */}
-                {currentStep === 4 && (
-                    <article className="partition">
-                        <div className="partition-header">
-                            <h2>Sistema de Puntuación</h2>
-                            <p>Define los puntos que se otorgarán por cada resultado.</p>
-                        </div>
-                        <div className="partition-body">
                             <div className="grid-2">
                                 <div className="field-group">
-                                    <label>PUNTOS POR GANAR</label>
-                                    <input
-                                        className="form-input"
-                                        type="number"
-                                        value={formData.rules.pointsWin}
-                                        onChange={e => setFormData({
-                                            ...formData,
-                                            rules: { ...formData.rules, pointsWin: parseInt(e.target.value) }
-                                        })}
-                                    />
-                                </div>
-                                <div className="field-group">
-                                    <label>PUNTOS POR EMPATAR</label>
-                                    <input
-                                        className="form-input"
-                                        type="number"
-                                        value={formData.rules.pointsDraw}
-                                        onChange={e => setFormData({
-                                            ...formData,
-                                            rules: { ...formData.rules, pointsDraw: parseInt(e.target.value) }
-                                        })}
-                                    />
-                                </div>
-                            </div>
-
-                            {formData.sport === 'rugby' && (
-                                <div className="sub-partition" style={{ marginTop: '20px', padding: '15px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
-                                    <h4 style={{ marginBottom: '15px', color: 'var(--accent)', fontSize: '13px', textTransform: 'uppercase' }}>Puntos Bonus (Rugby)</h4>
-                                    <div className="grid-2">
-                                        <div className="field-group">
-                                            <label>POR 4 O MÁS TRIES</label>
-                                            <input
-                                                className="form-input"
-                                                type="number"
-                                                value={formData.rules.pointsBonusTry}
-                                                onChange={e => setFormData({
-                                                    ...formData,
-                                                    rules: { ...formData.rules, pointsBonusTry: parseInt(e.target.value) }
-                                                })}
-                                            />
-                                        </div>
-                                        <div className="field-group">
-                                            <label>POR PERDER POR {'<'} 7</label>
-                                            <input
-                                                className="form-input"
-                                                type="number"
-                                                value={formData.rules.pointsBonusLoss}
-                                                onChange={e => setFormData({
-                                                    ...formData,
-                                                    rules: { ...formData.rules, pointsBonusLoss: parseInt(e.target.value) }
-                                                })}
-                                            />
-                                        </div>
+                                    <label>Cantidad de equipos</label>
+                                    <div className="tg-counter">
+                                        <button type="button" onClick={() => setFormData((p) => ({ ...p, teamCount: Math.max(2, p.teamCount - 1) }))}>−</button>
+                                        <input
+                                            type="number"
+                                            min={2}
+                                            max={64}
+                                            value={formData.teamCount}
+                                            onChange={(e) => setFormData((p) => ({ ...p, teamCount: Math.max(2, Math.min(64, Number(e.target.value) || 2)) }))}
+                                        />
+                                        <button type="button" onClick={() => setFormData((p) => ({ ...p, teamCount: Math.min(64, p.teamCount + 1) }))}>+</button>
                                     </div>
+                                    <p className="field-help">Podés agregar o quitar después.</p>
                                 </div>
-                            )}
-                        </div>
-                    </article>
-                )}
 
-                {/* STEP 5: REVISIÓN */}
-                {currentStep === 5 && (
-                    <article className="partition">
-                        <div className="partition-header">
-                            <h2>Resumen y Confirmación</h2>
-                            <p>Revisa que toda la información sea correcta antes de finalizar.</p>
-                        </div>
-                        <div className="partition-body">
-                            <div className="summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
-                                <div className="summary-item">
-                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Nombre</strong>
-                                    <span style={{ fontSize: '16px', color: 'white' }}>{formData.name}</span>
-                                </div>
-                                <div className="summary-item">
-                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Deporte</strong>
-                                    <span style={{ fontSize: '16px', color: 'white' }}>{selectedSport?.nameEs || formData.sport.toUpperCase()}</span>
-                                </div>
-                                <div className="summary-item">
-                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Temporada</strong>
-                                    <span style={{ fontSize: '16px', color: 'white' }}>{formData.season}</span>
-                                </div>
-                                <div className="summary-item">
-                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Categoría</strong>
-                                    <span style={{ fontSize: '16px', color: 'white' }}>{formData.category || 'N/A'}</span>
-                                </div>
-                                <div className="summary-item">
-                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Edad</strong>
-                                    <span style={{ fontSize: '16px', color: 'white' }}>{formData.ageGrade || 'N/A'}</span>
-                                </div>
-                                <div className="summary-item">
-                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Participantes</strong>
-                                    <span style={{ fontSize: '16px', color: 'white' }}>{selectedClubs.length} equipo{selectedClubs.length !== 1 ? 's' : ''}</span>
-                                </div>
-                                <div className="summary-item">
-                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Formato</strong>
-                                    <span style={{ fontSize: '16px', color: 'white' }}>{getTournamentFormatLabel(formData.format)}</span>
-                                </div>
-                                <div className="summary-item">
-                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Puntos (G/E/P)</strong>
-                                    <span style={{ fontSize: '16px', color: 'white' }}>{formData.rules.pointsWin} / {formData.rules.pointsDraw} / {formData.rules.pointsLoss}</span>
-                                </div>
-                                <div className="summary-item">
-                                    <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Fase inicial</strong>
-                                    <span style={{ fontSize: '16px', color: 'white' }}>{getPhaseTypeLabel(phaseConfigToPersist.phaseType)}</span>
-                                </div>
-                                {formData.format === 'circuit' && (
-                                    <div className="summary-item">
-                                        <strong style={{ display: 'block', textTransform: 'uppercase', fontSize: '10px', color: 'var(--text-dim)' }}>Campeon del circuito</strong>
-                                        <span style={{ fontSize: '16px', color: 'white' }}>
-                                            {formData.circuitChampionMode === 'final' ? 'Final / playoff' : 'Tabla acumulada'}
-                                        </span>
+                                {formData.format === 'league' && (
+                                    <div className="field-group">
+                                        <label>Modalidad</label>
+                                        <div className="choice-pair">
+                                            <button
+                                                type="button"
+                                                className={formData.leagueRounds === 1 ? 'selected' : ''}
+                                                onClick={() => setFormData((p) => ({ ...p, leagueRounds: 1 }))}
+                                            >
+                                                Solo ida
+                                                <span className="small">{Math.max(0, formData.teamCount - 1)} fechas</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={formData.leagueRounds === 2 ? 'selected' : ''}
+                                                onClick={() => setFormData((p) => ({ ...p, leagueRounds: 2 }))}
+                                            >
+                                                Ida y vuelta
+                                                <span className="small">{Math.max(0, (formData.teamCount - 1) * 2)} fechas</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
 
-                            <article className="partition" style={{ marginTop: '30px', border: '1px dashed var(--border)' }}>
-                                <div className="partition-header">
-                                    <h3>Visibilidad Final</h3>
+                            {/* Live preview */}
+                            {formData.format === 'league' && (
+                                <div className="live-preview-chip">
+                                    <div className="kicker">Vista previa</div>
+                                    <strong>
+                                        {formData.teamCount} equipos · {Math.max(0, (formData.teamCount - 1) * formData.leagueRounds)} fechas · {Math.max(0, (formData.teamCount * (formData.teamCount - 1) / 2) * formData.leagueRounds)} partidos
+                                    </strong>
+                                    <div className="meta">Editable después. Las fechas se generan al crear el torneo.</div>
                                 </div>
-                                <div className="partition-body">
-                                    <select
-                                        className="form-select"
-                                        value={formData.visibility}
-                                        onChange={e => setFormData({ ...formData, visibility: e.target.value })}
-                                    >
-                                        <option value="public">🌍 Público (Vivo en la app)</option>
-                                        <option value="private">🔒 Privado (Borrador interno)</option>
-                                    </select>
+                            )}
+
+                            <details className="tg-disclosure">
+                                <summary>Puntos por partido</summary>
+                                <div className="tg-disclosure-body">
+                                    <div className="grid-2">
+                                        <div className="field-group">
+                                            <label>Victoria</label>
+                                            <input
+                                                className="form-input"
+                                                type="number"
+                                                value={formData.rules.pointsWin}
+                                                onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsWin: parseInt(e.target.value) || 0 } }))}
+                                            />
+                                        </div>
+                                        <div className="field-group">
+                                            <label>Empate</label>
+                                            <input
+                                                className="form-input"
+                                                type="number"
+                                                value={formData.rules.pointsDraw}
+                                                onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsDraw: parseInt(e.target.value) || 0 } }))}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid-2">
+                                        <div className="field-group">
+                                            <label>Derrota</label>
+                                            <input
+                                                className="form-input"
+                                                type="number"
+                                                value={formData.rules.pointsLoss}
+                                                onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsLoss: parseInt(e.target.value) || 0 } }))}
+                                            />
+                                        </div>
+                                        {formData.sport === 'rugby' && (
+                                            <div className="field-group">
+                                                <label>Bonus try (4 o más)</label>
+                                                <input
+                                                    className="form-input"
+                                                    type="number"
+                                                    value={formData.rules.pointsBonusTry}
+                                                    onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsBonusTry: parseInt(e.target.value) || 0 } }))}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                    {formData.sport === 'rugby' && (
+                                        <div className="field-group">
+                                            <label>Bonus defensivo (perder por ≤7)</label>
+                                            <input
+                                                className="form-input"
+                                                type="number"
+                                                value={formData.rules.pointsBonusLoss}
+                                                onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsBonusLoss: parseInt(e.target.value) || 0 } }))}
+                                            />
+                                            <p className="field-help">El editor profesional de bonus (con reglas evaluables) llega en la próxima versión. Por ahora estos campos siguen escribiendo a <code style={{ fontFamily: 'ui-monospace, monospace' }}>ruleset.pointsBonusTry / pointsBonusLoss</code>.</p>
+                                        </div>
+                                    )}
                                 </div>
-                            </article>
+                            </details>
+
+                            <div className="tplpick-callout" style={{ marginTop: '14px' }}>
+                                <Settings2 size={16} style={{ color: 'var(--info)', flexShrink: 0 }} />
+                                <div>
+                                    Para multi-fase (ej: clasificación + playoff), criterios de desempate funcionales, tags por posición y fixture importado, usá el botón <strong>"Avanzado"</strong> arriba a la derecha. Toda tu configuración se preserva.
+                                </div>
+                            </div>
                         </div>
                     </article>
                 )}
 
-                {/* Footer Actions */}
-                <footer className="actions-footer">
-                    <button
-                        className="btn btn-outline"
-                        disabled={currentStep === 1 || saving}
-                        onClick={() => setCurrentStep(p => p - 1)}
-                    >
-                        Paso Anterior
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={handleNext}
-                        disabled={saving || (currentStep === 1 && !formData.name)}
-                    >
-                        {saving ? (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Loader2 className="spinning" size={18} />
-                                {isEdit ? 'Guardando...' : 'Creando...'}
-                            </span>
-                        ) : currentStep === 5 ? (isEdit ? 'Guardar Cambios' : 'Finalizar Torneo') : 'Siguiente Paso'}
-                    </button>
-                </footer>
+                {/* ===================== STAGE 3 · PARTICIPANTES ===================== */}
+                {stage === 'participants' && (
+                    <article className="partition">
+                        <div className="partition-header">
+                            <h2>Participantes</h2>
+                            <p>Buscá clubes, selecciones, franquicias o academias en el catálogo y elegí su plantel.</p>
+                        </div>
+                        <div className="partition-body">
+
+                            <div className="club-search-wrap">
+                                <div className="club-summary-bar">
+                                    <div>
+                                        <strong>{selectedClubs.length}</strong> equipos seleccionados
+                                        {formData.teamCount > 0 && (
+                                            <> · objetivo de la plantilla: <strong>{formData.teamCount}</strong></>
+                                        )}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline btn-inline"
+                                        onClick={toggleAllClubs}
+                                        style={{ padding: '4px 10px', fontSize: '11px' }}
+                                    >
+                                        {selectedClubs.length === clubs.length && clubs.length > 0 ? 'Limpiar selección' : 'Seleccionar todos'}
+                                    </button>
+                                </div>
+
+                                <div className="search-box" style={{ position: 'relative' }}>
+                                    <Search className="icon" size={18} />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar por nombre, tipo o ubicación..."
+                                        className="form-input"
+                                        value={searchTerm}
+                                        onChange={e => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="club-filter-chips">
+                                    {(['all', 'club', 'seleccion', 'franquicia', 'academia'] as EntityFilter[]).map((f) => (
+                                        <button
+                                            key={f}
+                                            type="button"
+                                            className={`club-filter-chip ${entityFilter === f ? 'active' : ''}`}
+                                            onClick={() => setEntityFilter(f)}
+                                        >
+                                            {f === 'all' && 'Todos'}
+                                            {f === 'club' && 'Clubes'}
+                                            {f === 'seleccion' && 'Selecciones'}
+                                            {f === 'franquicia' && 'Franquicias'}
+                                            {f === 'academia' && 'Academias'}
+                                            <span className="count">{entityCounts[f]}</span>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="club-meta-row">
+                                    <span>
+                                        {loadingClubs
+                                            ? 'Cargando catálogo...'
+                                            : clubsError
+                                                ? clubsError
+                                                : `${filteredClubs.length} de ${clubs.length} equipos disponibles`}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="club-list-grid">
+                                {loadingClubs && (
+                                    <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-dim)' }}>
+                                        <Loader2 className="spinning" size={24} style={{ marginBottom: '8px' }} />
+                                        <div>Cargando catálogo completo...</div>
+                                    </div>
+                                )}
+
+                                {!loadingClubs && filteredClubs.length === 0 && (
+                                    <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-dim)' }}>
+                                        No hay equipos que coincidan con la búsqueda.
+                                    </div>
+                                )}
+
+                                {!loadingClubs && filteredClubs.map((club) => {
+                                    const added = selectedClubs.includes(club.id);
+                                    const squads = clubSquadsByClub[club.id] || [];
+                                    const isLoadingSquads = Boolean(loadingSquadsByClub[club.id]);
+                                    const selectedDivisionId = selectedDivisionByClub[club.id] || '';
+                                    const entitySlug = getClubEntityTypeSlug(club.entity_type);
+
+                                    return (
+                                        <div key={club.id} className={`club-row ${added ? 'added' : ''}`}>
+                                            <div className="row-check" onClick={() => setClubSelection(club.id, !added)}>
+                                                {added ? '✓' : ''}
+                                            </div>
+                                            <div className="row-logo">
+                                                {club.logo_url ? (
+                                                    <img src={club.logo_url} alt="" />
+                                                ) : (
+                                                    <span>{getClubShortName(club)}</span>
+                                                )}
+                                            </div>
+                                            <div className="row-info">
+                                                <div className="row-name">
+                                                    {club.name}
+                                                    <span className={`entity-pill ${entitySlug}`}>
+                                                        {getClubEntityTypeLabel(club.entity_type)}
+                                                    </span>
+                                                </div>
+                                                <div className="row-meta">
+                                                    <Flag size={11} style={{ display: 'inline', marginRight: 4 }} />
+                                                    {[club.city, club.region, club.country].filter(Boolean).join(' · ') || 'Sin ubicación'}
+                                                </div>
+
+                                                {added && (
+                                                    <div className="squad-picker-row">
+                                                        <label>Plantel a inscribir</label>
+                                                        <select
+                                                            value={selectedDivisionId}
+                                                            onChange={(e) => setSelectedDivisionByClub((prev) => ({ ...prev, [club.id]: e.target.value }))}
+                                                            disabled={isLoadingSquads}
+                                                        >
+                                                            <option value="">
+                                                                {isLoadingSquads
+                                                                    ? 'Cargando planteles...'
+                                                                    : squads.length === 0
+                                                                        ? 'Sin planteles vinculados'
+                                                                        : squads.length === 1
+                                                                            ? 'Plantel detectado automáticamente'
+                                                                            : 'Seleccioná un plantel'}
+                                                            </option>
+                                                            {squads.map((squad) => (
+                                                                <option key={squad.id} value={squad.id}>
+                                                                    {formatSquadLabel(squad)}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        {!isLoadingSquads && squads.length === 0 && (
+                                                            <span className="squad-hint legacy">
+                                                                Competirá en modo legacy hasta que tenga planteles vinculados.
+                                                            </span>
+                                                        )}
+                                                        {squads.length > 1 && !selectedDivisionId && (
+                                                            <span className="squad-hint warn">
+                                                                Elegí cuál plantel querés inscribir.
+                                                            </span>
+                                                        )}
+                                                        {squads.length === 1 && selectedDivisionId && (
+                                                            <span className="squad-hint info">
+                                                                ✓ Plantel único · {formatSquadLabel(squads[0])}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="row-action"
+                                                onClick={() => setClubSelection(club.id, !added)}
+                                            >
+                                                {added ? 'Quitar' : 'Añadir'}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="tplpick-callout" style={{ marginTop: '14px' }}>
+                                💡 <div>
+                                    Si el equipo no está en el catálogo, podés crearlo desde la sección de Clubes y volver a este wizard. El borrador se guarda automáticamente.
+                                </div>
+                            </div>
+
+                            {/* Visibilidad final + acciones */}
+                            <div className="field-group" style={{ marginTop: '24px' }}>
+                                <label>Al crear</label>
+                                <div className="choice-pair">
+                                    <button
+                                        type="button"
+                                        className={formData.visibility === 'private' ? 'selected' : ''}
+                                        onClick={() => setFormData((p) => ({ ...p, visibility: 'private' }))}
+                                    >
+                                        Borrador
+                                        <span className="small">Solo visible para admins</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={formData.visibility === 'public' ? 'selected' : ''}
+                                        onClick={() => setFormData((p) => ({ ...p, visibility: 'public' }))}
+                                    >
+                                        Público
+                                        <span className="small">Visible en la app al instante</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                )}
+
+                {/* ===================== ADVANCED · PhaseCreator ===================== */}
+                {stage === 'advanced' && (
+                    <article className="partition">
+                        <div className="partition-header">
+                            <h2>Configurador avanzado de fases</h2>
+                            <p>Multi-fase, criterios de desempate, tags y fixture. Toda tu configuración previa se preserva.</p>
+                        </div>
+                        <div className="partition-body" style={{ padding: 0 }}>
+                            <PhaseCreator
+                                key={`adv-phase-${formData.format}-${effectivePhaseConfig.phaseType}`}
+                                phaseIndex={1}
+                                totalPhases={1}
+                                teams={phaseTeams}
+                                initialConfig={effectivePhaseConfig}
+                                onPrev={() => setStage('participants')}
+                                onChange={applyPhaseConfig}
+                                onSaveDraft={applyPhaseConfig}
+                                onNext={(config) => {
+                                    applyPhaseConfig(config);
+                                    handleFinalize();
+                                }}
+                            />
+                        </div>
+                    </article>
+                )}
+
+                {/* ===================== Footer actions ===================== */}
+                {stage !== 'template' && stage !== 'advanced' && (
+                    <footer className="actions-footer">
+                        <button
+                            className="btn btn-outline"
+                            disabled={saving}
+                            onClick={goPrev}
+                        >
+                            Atrás
+                        </button>
+                        <button
+                            className="btn btn-primary"
+                            onClick={goNext}
+                            disabled={
+                                saving ||
+                                (stage === 'basics' && !canAdvanceFromBasics) ||
+                                (stage === 'structure' && !canAdvanceFromStructure)
+                            }
+                        >
+                            {saving ? (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Loader2 className="spinning" size={18} />
+                                    {isEdit ? 'Guardando...' : 'Creando...'}
+                                </span>
+                            ) : stage === 'participants' ? (
+                                isEdit ? 'Guardar cambios' : `Crear torneo${selectedClubs.length > 0 ? ` con ${selectedClubs.length} equipos` : ''}`
+                            ) : (
+                                <>Siguiente <Globe size={14} style={{ marginLeft: 4 }} /></>
+                            )}
+                        </button>
+                    </footer>
+                )}
             </div>
         </div>
     );
 }
+             
