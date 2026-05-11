@@ -376,6 +376,17 @@ type LogoBadgeOptions = {
     label: string;
     rawLogo?: string;
     isDark: boolean;
+    showFrame?: boolean;
+};
+
+type TournamentRibbonOptions = {
+    maxWidth?: number;
+    titleDefaultSize?: number;
+    logoDefaultSize?: number;
+    maxFontSize?: number;
+    minFontSize?: number;
+    maxLogoSize?: number;
+    showLogoFrame?: boolean;
 };
 
 type OverflowCrestOptions = {
@@ -4985,22 +4996,28 @@ function getContainedOpaquePlacement(
 }
 
 function drawLogoBadge(ctx: CanvasRenderingContext2D, options: LogoBadgeOptions) {
-    const { x, y, size, img, label, rawLogo, isDark } = options;
+    const { x, y, size, img, label, rawLogo, isDark, showFrame = true } = options;
+    const shouldDrawFrame = showFrame || !img;
     ctx.save();
-    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.05)';
-    ctx.beginPath();
-    ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.08)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
 
-    if (img) {
-        const inset = Math.max(6, size * 0.18);
-        const placement = getContainedImagePlacement(img, x, y, size, size, inset);
+    if (shouldDrawFrame) {
+        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.05)';
         ctx.beginPath();
         ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-        ctx.clip();
+        ctx.fill();
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.08)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+
+    if (img) {
+        const inset = showFrame ? Math.max(6, size * 0.18) : Math.max(2, size * 0.06);
+        const placement = getContainedImagePlacement(img, x, y, size, size, inset);
+        if (showFrame) {
+            ctx.beginPath();
+            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+            ctx.clip();
+        }
         ctx.drawImage(img, placement.x, placement.y, placement.width, placement.height);
     } else {
         const isGlyph = rawLogo?.trim() && !isImageSource(rawLogo) && rawLogo.trim().length <= 4;
@@ -5116,8 +5133,8 @@ function drawCenteredPill(
     ctx.save();
     ctx.font = font;
     const width = ctx.measureText(text).width + horizontalPadding * 2;
-    const resolvedWidth = scaleElementSize('title', width, width);
-    const resolvedHeight = scaleElementSize('title', height, height);
+    const resolvedWidth = Math.max(width, scaleElementSize('title', width, width));
+    const resolvedHeight = Math.max(height, Math.min(scaleElementSize('title', height, height), height * 1.5));
     const resolvedY = offsetElementY('title', y);
     ctx.fillStyle = fill;
     ctx.beginPath();
@@ -5304,30 +5321,54 @@ function drawTournamentRibbon(
     accentColor: string,
     isDark: boolean,
     y: number,
-    fontSize: number
+    fontSize: number,
+    options: TournamentRibbonOptions = {}
 ) {
     if (!label && !logoImg) return;
     const baseLogoSize = logoImg ? fontSize + 12 : 0;
-    const logoSize = logoImg ? scaleElementSize('tournamentLogo', baseLogoSize, baseLogoSize) : 0;
+    const scaledLogoSize = logoImg ? scaleElementSize('tournamentLogo', baseLogoSize, options.logoDefaultSize ?? baseLogoSize) : 0;
+    const maxWidth = Math.max(80, Math.min(options.maxWidth ?? canvas.width - 96, canvas.width - 48));
+    const logoSize = logoImg
+        ? Math.max(18, Math.min(scaledLogoSize, options.maxLogoSize ?? scaledLogoSize, maxWidth * 0.24))
+        : 0;
     const resolvedLogoY = offsetElementY('tournamentLogo', y);
     const resolvedLabelY = y;
     const gap = logoImg ? 12 : 0;
     ctx.save();
-    const resolvedFontSize = scaleElementSize('title', fontSize, fontSize);
-    ctx.font = `700 ${resolvedFontSize}px ${FONT_BODY}`;
+    const scaledFontSize = scaleElementSize('title', fontSize, options.titleDefaultSize ?? fontSize);
+    const resolvedFontSize = Math.max(
+        options.minFontSize ?? 10,
+        Math.min(scaledFontSize, options.maxFontSize ?? scaledFontSize)
+    );
     const labelText = label ? label.toUpperCase() : '';
-    const labelWidth = labelText ? ctx.measureText(labelText).width : 0;
+    const maxLabelWidth = Math.max(32, maxWidth - logoSize - gap);
+    if (labelText) {
+        setFittedFont(ctx, labelText, maxLabelWidth, '700', resolvedFontSize, FONT_BODY, options.minFontSize ?? 10);
+    } else {
+        ctx.font = `700 ${resolvedFontSize}px ${FONT_BODY}`;
+    }
+    const safeLabelText = labelText ? truncateTextToWidth(ctx, labelText, maxLabelWidth) : '';
+    const labelWidth = safeLabelText ? ctx.measureText(safeLabelText).width : 0;
     const totalWidth = logoSize + gap + labelWidth;
     let currentX = canvas.width / 2 - totalWidth / 2;
     if (logoImg) {
-        drawLogoBadge(ctx, { x: currentX + logoSize / 2, y: resolvedLogoY - 4, size: logoSize, img: logoImg, label: label || 'Torneo', rawLogo, isDark });
+        drawLogoBadge(ctx, {
+            x: currentX + logoSize / 2,
+            y: resolvedLogoY - 4,
+            size: logoSize,
+            img: logoImg,
+            label: label || 'Torneo',
+            rawLogo,
+            isDark,
+            showFrame: options.showLogoFrame,
+        });
         currentX += logoSize + gap;
     }
-    if (labelText) {
+    if (safeLabelText) {
         ctx.fillStyle = accentColor;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'alphabetic';
-        ctx.fillText(labelText, currentX, resolvedLabelY);
+        ctx.fillText(safeLabelText, currentX, resolvedLabelY);
     }
     ctx.restore();
 }
@@ -10214,14 +10255,21 @@ async function drawPlayoffBracket(
         26,
         isStory ? 48 : 42,
     );
-    drawTournamentRibbon(ctx, canvas, data.title, tournamentLogo, data.tournamentLogo, accentColor, isDark, isStory ? 166 : 138, isStory ? 26 : 22);
+    drawTournamentRibbon(ctx, canvas, data.title, tournamentLogo, data.tournamentLogo, accentColor, isDark, isStory ? 166 : 138, isStory ? 34 : 30, {
+        maxWidth: canvas.width - (isStory ? 120 : 112),
+        titleDefaultSize: 102,
+        logoDefaultSize: 58,
+        maxFontSize: isStory ? 38 : 34,
+        minFontSize: isStory ? 18 : 16,
+        maxLogoSize: isStory ? 58 : 50,
+    });
 
     if (data.subtitle) {
         ctx.save();
         ctx.textAlign = 'center';
         ctx.fillStyle = mutedColor;
         ctx.font = `600 ${isStory ? 22 : 18}px ${FONT_BODY}`;
-        ctx.fillText(data.subtitle, safe.centerX, isStory ? 208 : 178);
+        ctx.fillText(truncateTextToWidth(ctx, data.subtitle, canvas.width - 120), safe.centerX, isStory ? 208 : 178);
         ctx.restore();
     }
 
@@ -10320,6 +10368,7 @@ async function drawPlayoffBracket(
                 score: string | number | null | undefined,
                 winner: boolean,
             ) => {
+                const logoSize = Math.max(20, Math.min(32, scaleElementSize('teamLogo', Math.max(22, Math.min(28, teamRowHeight - 10)), 28)));
                 ctx.save();
                 if (winner) {
                     ctx.fillStyle = hexToRGBA(accentColor, isDark ? 0.14 : 0.1);
@@ -10330,11 +10379,12 @@ async function drawPlayoffBracket(
                 drawLogoBadge(ctx, {
                     x: columnX + 24,
                     y: y + (teamRowHeight - 4) / 2,
-                    size: Math.max(22, Math.min(28, teamRowHeight - 10)),
+                    size: logoSize,
                     img: logo,
                     label: name,
                     rawLogo,
                     isDark,
+                    showFrame: false,
                 });
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
@@ -12522,8 +12572,8 @@ async function drawMomentumPlayoffBracket(
             ctx.stroke();
             ctx.restore();
 
-            drawLogoBadge(ctx, { x: x + 28, y: y + 40, size: 28, img: homeLogo, label: homeName, rawLogo: getBracketParticipantLogo(match.home_team || null, match.home_participant || null), isDark: true });
-            drawLogoBadge(ctx, { x: x + 28, y: y + matchHeight - 40, size: 28, img: awayLogo, label: awayName, rawLogo: getBracketParticipantLogo(match.away_team || null, match.away_participant || null), isDark: true });
+            drawLogoBadge(ctx, { x: x + 28, y: y + 40, size: 28, img: homeLogo, label: homeName, rawLogo: getBracketParticipantLogo(match.home_team || null, match.home_participant || null), isDark: true, showFrame: false });
+            drawLogoBadge(ctx, { x: x + 28, y: y + matchHeight - 40, size: 28, img: awayLogo, label: awayName, rawLogo: getBracketParticipantLogo(match.away_team || null, match.away_participant || null), isDark: true, showFrame: false });
 
             ctx.save();
             ctx.fillStyle = '#ffffff';
@@ -16209,8 +16259,8 @@ async function drawPosterV3PlayoffBracket(
 
             drawPosterV3Panel(ctx, x, y, columnWidth, matchHeight, hexToRGBA(mixHexColors(bgColor, '#04080f', 0.78), 0.9), hexToRGBA(accentSoft, 0.28), 16, 1.5);
 
-            drawLogoBadge(ctx, { x: x + 28, y: y + 34, size: 28, img: homeLogo, label: homeName, rawLogo: getBracketParticipantLogo(match.home_team || null, match.home_participant || null), isDark: true });
-            drawLogoBadge(ctx, { x: x + 28, y: y + matchHeight - 34, size: 28, img: awayLogo, label: awayName, rawLogo: getBracketParticipantLogo(match.away_team || null, match.away_participant || null), isDark: true });
+            drawLogoBadge(ctx, { x: x + 28, y: y + 34, size: 28, img: homeLogo, label: homeName, rawLogo: getBracketParticipantLogo(match.home_team || null, match.home_participant || null), isDark: true, showFrame: false });
+            drawLogoBadge(ctx, { x: x + 28, y: y + matchHeight - 34, size: 28, img: awayLogo, label: awayName, rawLogo: getBracketParticipantLogo(match.away_team || null, match.away_participant || null), isDark: true, showFrame: false });
 
             ctx.save();
             ctx.fillStyle = primaryText;
