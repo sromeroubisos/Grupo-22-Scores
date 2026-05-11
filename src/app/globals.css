@@ -217,14 +217,10 @@ html {
     overflow-x: hidden;
     min-height: 100%;
     background-color: #0a0a0b;
+    zoom: 0.7;
 }
 
-/* Escala global al 70% solo en tablet/desktop. Mobile (<768px) queda al 100%. */
-@media (min-width: 768px) {
-    html {
-        zoom: 0.7;
-    }
-}
+/* Escala global al 70% en todos los viewports, incluida la version mobile. */
 
 /*
   Gradiente en `html`, no en `body`: Tailwind Preflight suele asignar un fondo sólido al `body`
