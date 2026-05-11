@@ -1130,6 +1130,11 @@ export default function SuperCreateTournament() {
                 try { window.localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* noop */ }
             }
 
+            // Forzar re-fetch del listado para que el torneo recién guardado aparezca.
+            // El SuperConsole cache es client-side, revalidatePath del server action no lo limpia.
+            invalidateCache('tournaments_list');
+            refresh('tournaments');
+
             router.push('/admin/super/torneos');
         } catch (err: unknown) {
             alert('Error al guardar el torneo: ' + (err instanceof Error ? err.message : String(err)));
