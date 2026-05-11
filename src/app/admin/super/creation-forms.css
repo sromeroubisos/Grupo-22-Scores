@@ -1117,4 +1117,230 @@ textarea:focus {
 .sport-pick-grid button.selected {
     background: var(--accent-soft);
     border-color: var(--accent);
-    colo
+    color: var(--accent-2);
+}
+.sport-pick-grid button .emo {
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* ===== Disclosure (más opciones) ===== */
+.tg-disclosure {
+    margin-top: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--surface-1);
+    overflow: hidden;
+}
+.tg-disclosure summary {
+    list-style: none;
+    padding: 13px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+.tg-disclosure summary::-webkit-details-marker { display: none; }
+.tg-disclosure summary::after {
+    content: '+';
+    font-size: 18px;
+    color: var(--text-dim);
+    transition: transform .15s;
+}
+.tg-disclosure[open] summary::after { content: '−'; }
+.tg-disclosure[open] summary {
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+}
+.tg-disclosure-body { padding: 14px 16px 16px; }
+
+/* ===== Counter (cantidad de equipos, etc.) ===== */
+.tg-counter {
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    width: max-content;
+}
+.tg-counter button {
+    background: transparent;
+    border: 0;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 700;
+    transition: background .12s;
+    min-height: 44px;
+    cursor: pointer;
+}
+.tg-counter button:hover { background: var(--surface-2); }
+.tg-counter input {
+    background: transparent;
+    border: 0;
+    text-align: center;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 700;
+    min-width: 64px;
+    padding: 0;
+}
+.tg-counter input:focus { outline: none; }
+
+/* Live preview chip */
+.live-preview-chip {
+    background: linear-gradient(135deg, var(--accent-soft), transparent);
+    border: 1px solid rgba(0, 163, 101, 0.3);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    margin-top: 18px;
+}
+.live-preview-chip .kicker {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent-2);
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+.live-preview-chip strong { font-size: 15px; }
+.live-preview-chip .meta {
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    margin-top: 4px;
+}
+
+/* =========================================================
+   REDISEÑO 2026 — flujo nuevo de creación de torneo
+   ========================================================= */
+
+:root {
+    --r-md: 10px;
+    --r-lg: 14px;
+    --surface-1: #11151c;
+    --surface-2: #181d26;
+    --surface-3: #232934;
+    --text-secondary: #b6bdcc;
+    --accent-soft: rgba(0, 163, 101, 0.14);
+    --accent-2: #00c47a;
+    --success: #34d399;
+    --warning: #facc15;
+    --danger: #f87171;
+    --info: #60a5fa;
+    --border-strong: rgba(255, 255, 255, 0.14);
+}
+
+/* ===== Template picker (paso 0) ===== */
+.tplpick-wrap { margin: 24px 0 8px; }
+.tplpick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 24px; }
+.tplpick-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 22px 18px; text-align: left; cursor: pointer; transition: all .15s; color: var(--text-primary); display: grid; gap: 10px; position: relative; }
+.tplpick-card:hover { background: var(--surface-2); border-color: var(--accent); transform: translateY(-2px); }
+.tplpick-card.popular { border-color: rgba(0, 163, 101, 0.45); }
+.tplpick-card.popular::after { content: 'Más usado'; position: absolute; top: -8px; right: 14px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.04em; text-transform: uppercase; }
+.tplpick-card.dashed { border-style: dashed; }
+.tplpick-icon { width: 56px; height: 56px; border-radius: 14px; background: var(--surface-2); display: grid; place-items: center; font-size: 24px; border: 1px solid var(--border); }
+.tplpick-card.popular .tplpick-icon { background: var(--accent-soft); border-color: rgba(0, 163, 101, 0.4); }
+.tplpick-card h3 { font-size: 15px; font-weight: 700; margin: 0; }
+.tplpick-card p { font-size: 12.5px; color: var(--text-dim); line-height: 1.45; }
+.tplpick-callout { background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.25); border-radius: var(--r-md); padding: 12px 14px; margin-top: 18px; color: var(--text-secondary); font-size: 13px; display: flex; gap: 8px; }
+.tplpick-callout strong { color: var(--info); }
+
+/* ===== Stepper minimalista ===== */
+.stepper-bar { margin: 16px 0 28px; padding: 14px 18px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-lg); }
+.stepper-progress-row { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 0.06em; color: var(--text-dim); text-transform: uppercase; font-weight: 600; margin-bottom: 8px; }
+.stepper-progress-row strong { color: var(--text-primary); text-transform: none; font-weight: 700; font-size: 14px; letter-spacing: 0; }
+.stepper-progress-bar { height: 4px; background: var(--surface-3); border-radius: 999px; overflow: hidden; }
+.stepper-progress-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .3s ease; }
+
+/* ===== Validación inline ===== */
+.field-help-ok { font-size: 12px; color: var(--success); margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+.field-help-error { font-size: 12px; color: var(--danger); margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+.form-input.is-ok, .form-select.is-ok { border-color: rgba(52, 211, 153, 0.45) !important; }
+.form-input.is-error, .form-select.is-error { border-color: var(--danger) !important; box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.16); }
+
+/* ===== Audience / mini choice ===== */
+.choice-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 480px) { .choice-pair { grid-template-columns: 1fr; } }
+.choice-pair button { background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); padding: 14px 16px; border-radius: var(--r-md); font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; line-height: 1.35; transition: all .15s; }
+.choice-pair button:hover { background: var(--surface-mid); color: var(--text-primary); }
+.choice-pair button.selected { background: var(--accent-soft); border-color: var(--accent); color: var(--text-primary); }
+.choice-pair button .small { display: block; font-size: 11px; color: var(--text-dim); font-weight: 500; margin-top: 3px; }
+
+/* ===== Auto-save ===== */
+.autosave-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-dim); padding: 4px 10px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 999px; }
+.autosave-pill.saved::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+.autosave-pill.saving::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--warning); animation: pulse 1s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* ===== Club catalog (paso 3) ===== */
+.club-search-wrap { display: grid; gap: 10px; margin-bottom: 14px; }
+.club-summary-bar { background: var(--accent-soft); border: 1px solid rgba(0, 163, 101, 0.3); border-radius: var(--r-md); padding: 10px 14px; font-size: 13px; display: flex; align-items: center; justify-content: space-between; }
+.club-summary-bar strong { font-size: 14px; }
+.club-filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.club-filter-chip { background: var(--surface-1); border: 1px solid var(--border); color: var(--text-secondary); padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.club-filter-chip:hover { color: var(--text-primary); }
+.club-filter-chip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--text-primary); }
+.club-filter-chip .count { font-size: 10px; color: var(--text-dim); }
+.club-meta-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-dim); margin: 6px 2px 6px; }
+.club-list-grid { display: grid; gap: 8px; max-height: 460px; overflow-y: auto; padding-right: 4px; }
+.club-row { display: grid; grid-template-columns: 22px 36px 1fr auto; align-items: center; gap: 12px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px 12px; transition: all .15s; }
+.club-row.added { border-color: rgba(0, 163, 101, 0.45); background: rgba(0, 163, 101, 0.06); }
+.club-row .row-check { width: 18px; height: 18px; border: 1.5px solid var(--border-strong); border-radius: 4px; display: grid; place-items: center; color: #fff; font-size: 11px; background: var(--surface-2); cursor: pointer; }
+.club-row.added .row-check { background: var(--accent); border-color: var(--accent); }
+.club-row .row-logo { width: 36px; height: 36px; border-radius: 8px; background: var(--surface-3); display: grid; place-items: center; color: var(--text-secondary); font-weight: 800; font-size: 11px; overflow: hidden; }
+.club-row .row-logo img { width: 100%; height: 100%; object-fit: contain; }
+.club-row .row-info { min-width: 0; }
+.club-row .row-name { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.club-row .row-meta { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.entity-pill { font-size: 9.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--border-strong); color: var(--text-dim); flex-shrink: 0; }
+.entity-pill.club { color: var(--accent-2); border-color: rgba(0, 163, 101, 0.3); background: var(--accent-soft); }
+.entity-pill.seleccion { color: var(--info); border-color: rgba(96, 165, 250, 0.3); background: rgba(96, 165, 250, 0.1); }
+.entity-pill.franquicia { color: #c084fc; border-color: rgba(192, 132, 252, 0.3); background: rgba(192, 132, 252, 0.1); }
+.entity-pill.academia { color: var(--warning); border-color: rgba(250, 204, 21, 0.3); background: rgba(250, 204, 21, 0.1); }
+.row-action { background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text-secondary); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap; transition: all .12s; }
+.row-action:hover { color: var(--text-primary); }
+.club-row.added .row-action { background: var(--accent); color: #fff; border-color: var(--accent); }
+.squad-picker-row { grid-column: 1 / -1; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); display: grid; gap: 6px; }
+.squad-picker-row label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; color: var(--text-dim); }
+.squad-picker-row select { background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text-primary); padding: 9px 12px; border-radius: 6px; font-size: 12.5px; width: 100%; }
+.squad-hint { font-size: 11.5px; }
+.squad-hint.info { color: var(--accent-2); }
+.squad-hint.legacy { color: var(--text-dim); }
+.squad-hint.warn { color: var(--warning); }
+
+/* ===== Mode switch rápido/avanzado ===== */
+.mode-switch { display: inline-flex; background: var(--surface-1); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
+.mode-switch button { background: transparent; border: 0; color: var(--text-secondary); padding: 8px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.mode-switch button.active { background: var(--accent); color: #fff; }
+
+/* ===== Sport quick picker ===== */
+.sport-pick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
+.sport-pick-grid button { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-md); color: var(--text-secondary); padding: 12px 6px; font-size: 11.5px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all .12s; }
+.sport-pick-grid button:hover { background: var(--surface-2); color: var(--text-primary); }
+.sport-pick-grid button.selected { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-2); }
+.sport-pick-grid button .emo { font-size: 20px; line-height: 1; }
+
+/* ===== Disclosure (más opciones) ===== */
+.tg-disclosure { margin-top: 14px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-1); overflow: hidden; }
+.tg-disclosure summary { list-style: none; padding: 13px 16px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.tg-disclosure summary::-webkit-details-marker { display: none; }
+.tg-disclosure summary::after { content: '+'; font-size: 18px; color: var(--text-dim); transition: transform .15s; }
+.tg-disclosure[open] summary::after { content: '−'; }
+.tg-disclosure[open] summary { border-bottom: 1px solid var(--border); color: var(--text-primary); }
+.tg-disclosure-body { padding: 14px 16px 16px; }
+
+/* ===== Counter ===== */
+.tg-counter { display: grid; grid-template-columns: 44px 1fr 44px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--r-md); overflow: hidden; width: max-content; }
+.tg-counter button { background: transparent; border: 0; color: var(--text-primary); font-size: 18px; font-weight: 700; transition: background .12s; min-height: 44px; cursor: pointer; }
+.tg-counter button:hover { background: var(--surface-2); }
+.tg-counter input { background: transparent; border: 0; text-align: center; color: var(--text-primary); font-size: 16px; font-weight: 700; min-width: 64px; padding: 0; }
+.tg-counter input:focus { outline: none; }
+
+/* ===== Live preview chip ===== */
+.live-preview-chip { background: linear-gradient(135deg, var(--accent-soft), transparent); border: 1px solid rgba(0, 163, 101, 0.3); border-radius: var(--r-md); padding: 14px 16px; margin-top: 18px; }
+.live-preview-chip .kicker { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-2); font-weight: 800; margin-bottom: 4px; }
+.live-preview-chip strong { font-size: 15px; }
+.live-preview-chip .meta { color: var(--text-secondary); font-size: 12.5px; margin-top: 4px; }

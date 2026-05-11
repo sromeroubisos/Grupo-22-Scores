@@ -1449,10 +1449,10 @@ export default function SuperCreateTournament() {
                                             </div>
 
                                             <div className="field-group">
-                                                <label>Logo del torneo</label>
                                                 <LogoUploader
-                                                    value={formData.logoUrl || ''}
-                                                    onChange={(url) => setFormData({ ...formData, logoUrl: url })}
+                                                    currentLogo={formData.logoUrl || ''}
+                                                    label="Logo del torneo"
+                                                    onUpload={(url) => setFormData((prev) => ({ ...prev, logoUrl: url }))}
                                                 />
                                             </div>
                                         </div>
@@ -1906,4 +1906,3 @@ export default function SuperCreateTournament() {
         </div>
     );
 }
-             
