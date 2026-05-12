@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies, headers } from 'next/headers'
 import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/perf/supabase';
 import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure';
+import { createRetryableRefreshFetch } from '@/lib/supabase/auth-fetch';
 import { getSupabaseAuthCookieOptions, normalizeSupabaseAuthCookies } from '@/lib/supabase/auth-cookie';
 import type { LooseSupabaseClient } from './loose';
 
@@ -15,6 +16,7 @@ export async function createClient() {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
     const instrumentedFetch = createInstrumentedSupabaseFetch('server', url, fetch)
+    const authFetch = createRetryableRefreshFetch(url, instrumentedFetch)
 
     const client = createServerClient(
         url,
@@ -46,7 +48,7 @@ export async function createClient() {
                 },
             },
             global: {
-                fetch: instrumentedFetch,
+                fetch: authFetch,
             },
         }
     ) as LooseSupabaseClient

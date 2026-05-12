@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { logRefreshFlow } from '@/lib/debug/refreshFlow';
 import { createInstrumentedSupabaseFetch } from '@/lib/perf/supabase';
 import { logPerf, measureAsync } from '@/lib/perf/measure';
+import { createRetryableRefreshFetch, isRetryableAuthRefreshError } from '@/lib/supabase/auth-fetch';
 import {
     getSupabaseAuthCookieOptions,
     getSupabaseAuthStorageKey,
@@ -344,7 +345,10 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                 },
             },
             global: {
-                fetch: createInstrumentedSupabaseFetch('server', supabaseUrl, fetch),
+                fetch: createRetryableRefreshFetch(
+                    supabaseUrl,
+                    createInstrumentedSupabaseFetch('server', supabaseUrl, fetch),
+                ),
             },
         }
     )
@@ -386,16 +390,18 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
         if (SHOULD_LOG_PROXY_AUTH) {
             console.warn('[Middleware] Session refresh skipped:', error);
         }
+        const fallbackUser = readUserFromCookie(request);
         logPerf(
             ['PROXY', 'WARN'],
             {
                 path: request.nextUrl.pathname,
                 authChecked: false,
                 skipped: 'timeout_or_error',
+                preservedCookieUser: Boolean(fallbackUser),
             },
             'server',
         )
-        return { response, user: null }
+        return { response, user: fallbackUser }
     }
 
     const { data: { session }, error } = authResult
@@ -404,6 +410,16 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
         : null;
 
     if (error) {
+        if (isRetryableAuthRefreshError(error)) {
+            const fallbackUser = readUserFromCookie(request);
+            logRefreshFlow('proxy_session_preserved_after_retryable_auth_error', {
+                path: request.nextUrl.pathname,
+                hasFallbackUser: Boolean(fallbackUser),
+                durationMs: Date.now() - updateStartedAt,
+            }, 'auth');
+            return { response, user: fallbackUser };
+        }
+
         if (isInvalidRefreshTokenError(error)) {
             logRefreshFlow('proxy_auth_cookies_cleared', {
                 path: request.nextUrl.pathname,

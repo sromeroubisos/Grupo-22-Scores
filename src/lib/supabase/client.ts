@@ -1,4 +1,9 @@
 import { createBrowserClient } from '@supabase/ssr'
+import {
+    coerceRefreshRateLimitToRetryable,
+    isSupabaseAuthRequest,
+    isSupabaseRefreshTokenRequest,
+} from '@/lib/supabase/auth-fetch'
 import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/perf/supabase'
 import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure'
 import {
@@ -241,23 +246,6 @@ function normalizeSupabaseBrowserSessionStorage() {
     }
 }
 
-function resolveRequestUrl(input: string | URL | Request): string {
-    if (typeof input === 'string') return input
-    if (input instanceof URL) return input.toString()
-    return input.url
-}
-
-function isSupabaseAuthRequest(input: string | URL | Request, supabaseUrl: string) {
-    const requestUrl = resolveRequestUrl(input)
-    return requestUrl.startsWith(`${supabaseUrl}/auth/v1`)
-}
-
-function isRefreshTokenRequest(input: string | URL | Request, supabaseUrl: string) {
-    const requestUrl = resolveRequestUrl(input)
-    if (!requestUrl.startsWith(`${supabaseUrl}/auth/v1/token`)) return false
-    return requestUrl.includes('grant_type=refresh_token')
-}
-
 function buildAuthFailureResponse() {
     return new Response(
         JSON.stringify({
@@ -335,11 +323,17 @@ export function createClient() {
         }
     }
 
-    const performAuthFetch = (input: string | URL | Request, init?: RequestInit) =>
-        withAuthTimeout(input, init).then((response) => response.clone())
+    const performAuthFetch = async (input: string | URL | Request, init?: RequestInit) => {
+        const response = await withAuthTimeout(input, init)
+        const normalizedResponse = url
+            ? coerceRefreshRateLimitToRetryable(input, url, response)
+            : response
+
+        return normalizedResponse.clone()
+    }
 
     const browserFetch = async (input: string | URL | Request, init?: RequestInit) => {
-        if (url && isRefreshTokenRequest(input, url)) {
+        if (url && isSupabaseRefreshTokenRequest(input, url)) {
             if (inFlightRefresh) {
                 const stillFresh =
                     inFlightRefresh.finishedAt === 0 ||
@@ -464,6 +458,9 @@ export function createClient() {
         url || 'https://placeholder.supabase.co',
         key || 'placeholder-key',
         {
+            // We keep our own module-level singleton so clearSupabaseBrowserSession()
+            // can actually force a clean GoTrue client after wiping stale storage.
+            isSingleton: false,
             cookieOptions: getSupabaseAuthCookieOptions(
                 typeof window !== 'undefined' ? window.location.hostname : undefined,
             ),

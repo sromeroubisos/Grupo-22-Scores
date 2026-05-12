@@ -47,6 +47,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const AUTH_LOCAL_USER_KEY = 'g22_user';
+const PUBLIC_AUTH_BOOTSTRAP_TIMEOUT_MS = 3500;
+const AUTH_BOOTSTRAP_TIMEOUT_NAME = 'AuthBootstrapTimeoutError';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -129,6 +131,7 @@ const isSupabaseNetworkError = (err: unknown) => {
     return (
         err.name === 'AuthRetryableFetchError' ||
         status === 0 ||
+        status === 429 ||
         (typeof status === 'number' && status >= 500) ||
         message.includes('failed to fetch') ||
         message.includes('networkerror') ||
@@ -138,6 +141,25 @@ const isSupabaseNetworkError = (err: unknown) => {
         message.includes('temporarily unavailable')
     );
 };
+
+function withPublicAuthBootstrapTimeout<T>(promise: Promise<T>, enabled: boolean): Promise<T> {
+    if (!enabled || typeof window === 'undefined') return promise;
+
+    return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => {
+            window.setTimeout(() => {
+                const error = new Error(`Auth bootstrap timed out after ${PUBLIC_AUTH_BOOTSTRAP_TIMEOUT_MS}ms`);
+                error.name = AUTH_BOOTSTRAP_TIMEOUT_NAME;
+                reject(error);
+            }, PUBLIC_AUTH_BOOTSTRAP_TIMEOUT_MS);
+        }),
+    ]);
+}
+
+function isAuthBootstrapTimeout(err: unknown) {
+    return err instanceof Error && err.name === AUTH_BOOTSTRAP_TIMEOUT_NAME;
+}
 
 function isAuthEntryPath(pathname: string | null): boolean {
     if (!pathname) return false;
@@ -437,13 +459,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 pathname,
                 hasCachedUser: Boolean(initialCachedUser),
             });
+            let sessionRequest: Promise<any> | null = null;
+            const applySessionResult = async ({ data: { session }, error }: any) => {
+                if (error) throw error;
+
+                if (isMounted.current) {
+                    if (session) {
+                        console.log('[AuthContext] initAuth: Session found');
+                        lastAuthEventRef.current = { event: 'INITIAL_SESSION', userId: session.user.id };
+                        await fetchAndSetUser(session.user);
+                    } else {
+                        console.log('[AuthContext] initAuth: No session');
+                        lastAuthEventRef.current = { event: 'INITIAL_SESSION', userId: null };
+                        setPersistentUser(null);
+                        setIsLoading(false);
+                    }
+                }
+            };
+
             try {
                 trackAuthDuplicate('getSession', { source: 'initAuth' });
                 logRefreshLoop('getSession_called', {
                     source: 'initAuth',
                     pathname,
                 });
-                const { data: { session }, error } = await measureAsync(
+                sessionRequest = measureAsync(
                     'getSession',
                     async () => supabase.auth.getSession(),
                     {
@@ -459,22 +499,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         }),
                     },
                 );
-                if (error) throw error;
-
-                if (isMounted.current) {
-                    if (session) {
-                        console.log('[AuthContext] initAuth: Session found');
-                        lastAuthEventRef.current = { event: 'INITIAL_SESSION', userId: session.user.id };
-                        await fetchAndSetUser(session.user);
-                    } else {
-                        console.log('[AuthContext] initAuth: No session');
-                        lastAuthEventRef.current = { event: 'INITIAL_SESSION', userId: null };
-                        setPersistentUser(null);
-                        setIsLoading(false);
-                    }
-                }
+                await applySessionResult(await withPublicAuthBootstrapTimeout(
+                    sessionRequest,
+                    !isRscUserDependentPath(pathname),
+                ));
             } catch (err: unknown) {
                 if (isAbortError(err)) return;
+                if (isAuthBootstrapTimeout(err) && sessionRequest) {
+                    console.warn('[AuthContext] initAuth timed out on a public route; continuing while auth resolves in background');
+                    sessionRequest
+                        .then((result) => applySessionResult(result))
+                        .catch((backgroundError: unknown) => {
+                            if (isSupabaseNetworkError(backgroundError) || isAuthRateLimitError(backgroundError)) {
+                                console.warn('[AuthContext] background initAuth skipped because Supabase Auth is temporarily unavailable');
+                                return;
+                            }
+                            console.error('[AuthContext] background initAuth error:', backgroundError);
+                        });
+                    if (isMounted.current) {
+                        setIsLoading(false);
+                    }
+                    authBootstrapCompleteRef.current = true;
+                    return;
+                }
                 if (isSupabaseNetworkError(err) || isAuthRateLimitError(err)) {
                     console.warn('[AuthContext] initAuth skipped because Supabase Auth is temporarily unavailable');
                     if (isMounted.current) {
@@ -669,6 +716,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isMounted.current = false;
             subscription.unsubscribe();
         };
+        // Auth bootstrap is intentionally mounted once per provider lifetime;
+        // route-specific auth gating is handled by proxy/route guards.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fetchAndSetUser, getSupabaseClient, router, setPersistentUser, skipAuthBootstrap, trackAuthDuplicate]);
 
     const login = (_role: AppUserRole = 'fan', returnTo?: string) => {
