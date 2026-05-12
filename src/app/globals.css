@@ -222,7 +222,7 @@ html {
 
 @media (max-width: 900px) {
     html {
-        zoom: 0.85;
+        zoom: 1;
     }
 }
 
