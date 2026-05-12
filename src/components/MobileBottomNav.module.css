@@ -91,5 +91,29 @@
 @media (max-width: 900px) {
     .nav {
         display: flex;
+        padding: 7.6px max(11.4px, env(safe-area-inset-right)) calc(7.6px + env(safe-area-inset-bottom)) max(11.4px, env(safe-area-inset-left));
+    }
+
+    .navList {
+        gap: 5.7px;
+        max-width: 608px;
+    }
+
+    .navItem {
+        gap: 4.75px;
+        font-size: 0.646rem;
+        padding: 7.6px 0 5.7px;
+        border-radius: 13.3px;
+    }
+
+    .navItem svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .navDot {
+        width: 3.8px;
+        height: 3.8px;
+        margin-top: 1.9px;
     }
 }

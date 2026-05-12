@@ -29,6 +29,6 @@
 
 @media (max-width: 900px) {
     .mainContent {
-        padding: var(--spacing-sm) var(--spacing-sm) calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
+        padding: 0.475rem 0.475rem calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
     }
 }

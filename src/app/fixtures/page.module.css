@@ -427,7 +427,7 @@
     .dateSelector {
         order: 3;
         width: 100%;
-        margin: var(--spacing-md) 0 0;
+        margin: 0.95rem 0 0;
     }
 
     .headerActions {
@@ -441,8 +441,8 @@
     }
 
     .matchCard {
-        grid-template-columns: 60px 1fr;
-        gap: var(--spacing-md);
+        grid-template-columns: 57px 1fr;
+        gap: 0.95rem;
     }
 
     .matchMeta,

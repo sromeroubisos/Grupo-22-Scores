@@ -1355,58 +1355,60 @@ a {
 /* ===== GLOBAL MOBILE ADAPTATION ===== */
 @media (max-width: 900px) {
     :root {
-        --g22-global-h: 56px;
+        --mobile-ui-scale: 0.95;
+        --mobile-nav-height: 74px;
+        --g22-global-h: 53px;
     }
 
     .container {
-        padding: 0 var(--spacing-md);
+        padding: 0 0.95rem;
     }
 
     .card,
     .card-glass {
-        padding: var(--spacing-lg);
-        border-radius: var(--radius-lg);
+        padding: 1.425rem;
+        border-radius: 0.7125rem;
     }
 
     .btn {
-        padding: var(--spacing-sm) var(--spacing-md);
-        font-size: 0.875rem;
+        padding: 0.475rem 0.95rem;
+        font-size: 0.83125rem;
     }
 
     .btn-lg {
-        padding: var(--spacing-md) var(--spacing-lg);
-        font-size: 0.95rem;
+        padding: 0.95rem 1.425rem;
+        font-size: 0.9025rem;
     }
 
     .btn-icon {
-        width: 2.25rem;
-        height: 2.25rem;
+        width: 2.1375rem;
+        height: 2.1375rem;
     }
 
     .g22-header-inner {
-        padding: 0 16px;
+        padding: 0 15.2px;
     }
 
     .g22-header {
-        height: 56px;
+        height: var(--g22-global-h);
     }
 
     .g22-header-actions {
-        gap: 8px;
+        gap: 7.6px;
     }
 
     .g22-user {
-        padding: 4px 10px 4px 4px;
+        padding: 3.8px 9.5px 3.8px 3.8px;
     }
 
     .g22-user .avatar {
-        width: 28px;
-        height: 28px;
+        width: 26.6px;
+        height: 26.6px;
     }
 
     .tectonic-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 15.2px;
     }
 
     .col-4,
@@ -1416,13 +1418,108 @@ a {
     }
 
     .slab {
-        padding: 16px;
+        padding: 15.2px;
     }
 
     .status-sync {
         flex-direction: column;
         align-items: flex-start;
-        gap: 10px;
+        gap: 9.5px;
+    }
+
+    .g22-listHeader {
+        padding-top: 11.4px;
+    }
+
+    .g22-listHeaderTop {
+        padding: 0 15.2px 1.9px;
+        gap: 7.6px;
+    }
+
+    .g22-listSearch {
+        height: 28.5px;
+        border-radius: 15.2px;
+        padding: 0 7.6px;
+    }
+
+    .g22-listSearch svg {
+        margin-right: 5.7px;
+    }
+
+    .g22-listSearch input {
+        font-size: 0.76rem;
+    }
+
+    .g22-sportSelector {
+        gap: 1.9px;
+        padding: 0 3.8px;
+    }
+
+    .g22-audienceSelector {
+        gap: 7.6px;
+        padding: 9.5px 11.4px 0;
+    }
+
+    .g22-audienceChip {
+        height: 32.3px;
+        font-size: 0.741rem;
+    }
+
+    .g22-sportChip {
+        min-width: 45.6px;
+        padding: 5.7px 1.9px;
+    }
+
+    .g22-sportChip .icon {
+        font-size: 1.1875rem;
+    }
+
+    .g22-list {
+        gap: 7.6px;
+        padding: 0 11.4px;
+    }
+
+    .g22-listItem {
+        border-radius: 11.4px;
+        padding: 11.4px 13.3px;
+        gap: 11.4px;
+    }
+
+    .g22-listIcon {
+        width: 26.6px;
+        height: 26.6px;
+        border-radius: 5.7px;
+    }
+
+    .g22-listIcon img {
+        width: 19px;
+        height: 19px;
+    }
+
+    .g22-listLabel {
+        font-size: 0.9025rem;
+    }
+
+    .g22-listSection {
+        margin-top: 15.2px;
+    }
+
+    .g22-listSectionHeader {
+        padding: 0 15.2px;
+        margin-bottom: 7.6px;
+    }
+
+    .g22-listSectionTitle {
+        font-size: 0.7125rem;
+    }
+
+    .g22-countryItem {
+        padding: 11.4px 15.2px;
+    }
+
+    .g22-countryName {
+        font-size: 0.9025rem;
+        gap: 9.5px;
     }
 
     .tectonic-table {

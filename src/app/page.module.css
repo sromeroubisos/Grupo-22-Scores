@@ -2013,3 +2013,161 @@
         font-size: 0.92rem;
     }
 }
+
+/* Mobile 95% block compaction: real dimensions, no page zoom or transforms. */
+@media (max-width: 768px) {
+    .mobileTopControls {
+        gap: 17.1px;
+    }
+
+    .mobileSportSelector {
+        gap: 9.5px;
+        padding-bottom: 3.8px;
+    }
+
+    .mobileAudienceSwitch {
+        gap: 7.6px;
+        padding: 1.9px 3.8px 0;
+    }
+
+    .mobileAudienceSwitchBtn {
+        height: 38px;
+        font-size: 0.741rem;
+    }
+
+    .sportChip {
+        width: 68.4px;
+        height: 49.4px;
+        gap: 5.7px;
+        border-radius: 17.1px;
+    }
+
+    .sportIcon {
+        font-size: 1.2825rem;
+    }
+
+    .sportName {
+        font-size: 0.665rem;
+    }
+
+    .dateSelector {
+        padding: 11.4px 0;
+        border-radius: 17.1px;
+        margin-top: 3.8px;
+    }
+
+    .dateSelectorInner {
+        padding: 0 7.6px;
+    }
+
+    .mobileDateNav {
+        padding: 0 3.8px;
+    }
+
+    .mobileNavArrow {
+        width: 30.4px;
+        height: 30.4px;
+        border-radius: 7.6px;
+    }
+
+    .mobileCurrentDate {
+        font-size: 0.9025rem;
+    }
+
+    .matchesSection {
+        gap: 19px;
+    }
+
+    .leagueSection {
+        border-radius: 11.4px;
+        margin-bottom: 22.8px;
+    }
+
+    .leagueSectionHeader {
+        padding: 7.6px 11.4px;
+        gap: 11.4px;
+        height: 45.6px;
+    }
+
+    .leagueSectionName {
+        font-size: 0.798rem;
+    }
+
+    .matchRow {
+        padding: 7.6px 11.4px;
+        gap: 11.4px;
+        min-height: 60.8px;
+    }
+
+    .matchTime {
+        width: 36.1px;
+        font-size: 0.684rem;
+    }
+
+    .matchTeams {
+        gap: 2.85px;
+    }
+
+    .matchTeam {
+        grid-template-columns: minmax(0, 1fr) 24.7px;
+        gap: 5.7px;
+        min-height: 20px;
+    }
+
+    .matchTeamIdentity {
+        gap: 5.7px;
+    }
+
+    .teamLogo,
+    .teamLogoRound {
+        width: 17.1px;
+        height: 17.1px;
+    }
+
+    .logoImgSquare,
+    .logoImgRound,
+    .logoFallback {
+        width: 15.2px;
+        height: 15.2px;
+    }
+
+    .teamName {
+        font-size: 0.817rem;
+    }
+
+    .teamScore {
+        min-width: 24.7px;
+        font-size: 0.874rem;
+    }
+}
+
+@media (max-width: 500px) {
+    .mainLayout {
+        padding: 0 7.6px;
+    }
+
+    .mobileTopControls {
+        gap: 15.2px;
+    }
+
+    .sportChip {
+        width: 60.8px;
+        height: 45.6px;
+    }
+
+    .matchesContainer {
+        gap: 9.5px;
+    }
+
+    .leagueSectionHeader {
+        padding: 5.7px 9.5px;
+        gap: 7.6px;
+        min-height: 39.9px;
+    }
+
+    .matchRow {
+        padding: 6.65px 9.5px;
+        gap: 9.5px;
+        min-height: 55.1px;
+    }
+}

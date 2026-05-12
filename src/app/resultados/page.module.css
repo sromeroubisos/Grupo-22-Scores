@@ -289,7 +289,7 @@
 
     .resultContent {
         flex-direction: column;
-        gap: var(--spacing-sm);
+        gap: 0.475rem;
     }
 
     .resultTeam {
@@ -298,6 +298,6 @@
 
     .resultDivider {
         width: 100%;
-        padding: var(--spacing-sm) 0;
+        padding: 0.475rem 0;
     }
 }
