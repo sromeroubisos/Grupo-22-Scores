@@ -220,7 +220,11 @@ html {
     zoom: 0.7;
 }
 
-/* Escala global al 70% en todos los viewports, incluida la version mobile. */
+@media (max-width: 900px) {
+    html {
+        zoom: 1;
+    }
+}
 
 /*
   Gradiente en `html`, no en `body`: Tailwind Preflight suele asignar un fondo sólido al `body`
