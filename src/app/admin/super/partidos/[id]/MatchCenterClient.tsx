@@ -604,6 +604,7 @@ type GuidedEventDraft = {
     detail: string;
     goalKickResult: GuidedGoalKickResult;
     contestOutcome: GuidedContestOutcome;
+    isTemporary: boolean;
 };
 
 interface MatchCenterClientProps {
@@ -870,7 +871,8 @@ function formatGuidedEventDetail(draft: GuidedEventDraft) {
     }
 
     if (eventType === 'substitution' && draft.secondaryPlayerName.trim()) {
-        return `Entra: ${draft.secondaryPlayerName.trim()}`;
+        const temporalPrefix = draft.isTemporary ? '[temporal] ' : '';
+        return `${temporalPrefix}Entra: ${draft.secondaryPlayerName.trim()}`;
     }
 
     if (eventType === 'try') {
@@ -1445,6 +1447,26 @@ export default function MatchCenterClient({
     const [statsPanelTab, setStatsPanelTab] = useState<string>('marcador');
     const [saving, setSaving] = useState(false);
     const [saveMsg, setSaveMsg] = useState<{ type: 'ok' | 'warn' | 'err'; text: string } | null>(null);
+    // Track the toast-clear timeout so we can cancel it on unmount and avoid
+    // setState-after-unmount warnings (and a small memory leak per re-render).
+    const saveMsgTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const scheduleSaveMsgClear = useCallback((delayMs: number) => {
+        if (saveMsgTimeoutRef.current) {
+            clearTimeout(saveMsgTimeoutRef.current);
+        }
+        saveMsgTimeoutRef.current = setTimeout(() => {
+            saveMsgTimeoutRef.current = null;
+            setSaveMsg(null);
+        }, delayMs);
+    }, []);
+    useEffect(() => {
+        return () => {
+            if (saveMsgTimeoutRef.current) {
+                clearTimeout(saveMsgTimeoutRef.current);
+                saveMsgTimeoutRef.current = null;
+            }
+        };
+    }, []);
     const [scoreDraft, setScoreDraft] = useState<MatchScore>(initialScore);
     const [clockDraft, setClockDraft] = useState<MatchClock>(initialClock);
 
@@ -2167,7 +2189,7 @@ export default function MatchCenterClient({
         }
         if (Object.keys(payload).length === 0) {
             setSaveMsg({ type: 'ok', text: 'No hay cambios para guardar' });
-            setTimeout(() => setSaveMsg(null), 2500);
+            scheduleSaveMsgClear(2500);
             return;
         }
 
@@ -2187,7 +2209,7 @@ export default function MatchCenterClient({
                     ? { type: 'warn', text: 'Se guardó el partido, pero este entorno no tiene almacenamiento para alineaciones.' }
                     : { type: 'ok', text: 'Guardado correctamente' },
             );
-            setTimeout(() => setSaveMsg(null), 3000);
+            scheduleSaveMsgClear(3000);
         } catch (err: unknown) {
             console.error('[MatchCenter] Save error:', err);
             setSaveMsg({ type: 'err', text: `Error de red: ${err instanceof Error ? err.message : String(err)}` });
@@ -2344,6 +2366,7 @@ export default function MatchCenterClient({
             detail: '',
             goalKickResult: 'made',
             contestOutcome: requiresContestOutcome(definition.type) ? 'won' : '',
+            isTemporary: false,
         });
     }, []);
 
@@ -2474,7 +2497,7 @@ export default function MatchCenterClient({
                     ? { type: 'warn', text: 'Evento guardado. Las alineaciones no se persistieron en este entorno.' }
                     : { type: 'ok', text: 'Evento guardado y estadisticas recalculadas.' },
             );
-            setTimeout(() => setSaveMsg(null), 3000);
+            scheduleSaveMsgClear(3000);
         } catch (err: unknown) {
             localEventsRef.current = previousEvents;
             setLocalEvents(previousEvents);
@@ -2784,7 +2807,8 @@ export default function MatchCenterClient({
                 }))
                 .filter((definition) => definition.homeCount > 0 || definition.awayCount > 0),
             recentEvents: activeTab === 'resumen'
-                ? sortMatchEventsChronologically(events).slice(-8)
+                // Take the last 8 chronologically and flip so the most recent is at the top.
+                ? sortMatchEventsChronologically(events).slice(-8).reverse()
                 : [],
             totalEvents: events.length,
             winner,
@@ -3063,7 +3087,7 @@ export default function MatchCenterClient({
 
         if (!opened) {
             setSaveMsg({ type: 'err', text: 'No se pudo abrir la ventana de impresion. Revisa el bloqueo de pop-ups del navegador.' });
-            setTimeout(() => setSaveMsg(null), 3000);
+            scheduleSaveMsgClear(3000);
         }
     }, [
         availableEventDefinitions,
@@ -3891,10 +3915,11 @@ export default function MatchCenterClient({
                                                         style={{ fontSize: '0.8rem', opacity: 0.85 }}
                                                         onChange={(e) => {
                                                             const selected = resolveEventPlayerSelection(ev.team, e.target.value);
+                                                            const temporalPrefix = /\[temporal\]/i.test(ev.detail) ? '[temporal] ' : '';
                                                             updateLocalEvent(ev.id, {
                                                                 secondaryPlayerId: selected.playerId,
                                                                 secondaryPlayerName: selected.playerName,
-                                                                detail: selected.playerName ? `Entra: ${selected.playerName}` : '',
+                                                                detail: selected.playerName ? `${temporalPrefix}Entra: ${selected.playerName}` : '',
                                                             });
                                                         }}
                                                     >
@@ -4128,6 +4153,16 @@ export default function MatchCenterClient({
                                                     </option>
                                                 ))}
                                             </select>
+                                        </label>
+                                    )}
+                                    {guidedEvent.definition.type === 'substitution' && (
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={guidedEvent.isTemporary}
+                                                onChange={(event) => setGuidedEvent((current) => current ? { ...current, isTemporary: event.target.checked } : current)}
+                                            />
+                                            <span>Cambio temporal</span>
                                         </label>
                                     )}
 

@@ -1725,6 +1725,10 @@ export default function ClubMatchWorkspace({
                   {renderTeamPlayerOptions(liveComposer.team, 'substitute', liveComposer.secondaryPlayerName, 'Jugador que entra')}
                 </select>
               </label>
+              <label className={styles.field} style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem' }}>
+                <input type="checkbox" checked={liveComposer.isTemporary} onChange={(event) => setLiveComposer((current) => current ? { ...current, isTemporary: event.target.checked } : current)} />
+                <span>Cambio temporal</span>
+              </label>
             </>
           ) : null}
 
@@ -2577,6 +2581,10 @@ export default function ClubMatchWorkspace({
                                   <select className={styles.select} value={liveComposer.secondaryPlayerName} onChange={(event) => setLiveComposer((current) => current ? { ...current, secondaryPlayerName: event.target.value } : current)}>
                                     {renderTeamPlayerOptions(liveComposer.team, 'substitute', liveComposer.secondaryPlayerName, 'Jugador que entra')}
                                   </select>
+                                </label>
+                                <label className={styles.field} style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem' }}>
+                                  <input type="checkbox" checked={liveComposer.isTemporary} onChange={(event) => setLiveComposer((current) => current ? { ...current, isTemporary: event.target.checked } : current)} />
+                                  <span>Cambio temporal</span>
                                 </label>
                               </>
                             ) : null}

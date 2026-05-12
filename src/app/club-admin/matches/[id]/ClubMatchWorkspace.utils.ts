@@ -581,6 +581,7 @@ export function createLiveComposer(action: LiveActionType, defaults?: Partial<Li
     kickType: '',
     videoTime: '',
     passType: '',
+    isTemporary: false,
     ...defaults,
   };
 }
@@ -848,6 +849,7 @@ export function buildEventFromComposer(composer: LiveComposerState): ClubLiveEve
   }
 
   if (composer.action === 'substitution') {
+    const temporalPrefix = composer.isTemporary ? '[temporal] ' : '';
     return {
       id: composer.eventId || crypto.randomUUID(),
       minute: composer.minute,
@@ -856,7 +858,7 @@ export function buildEventFromComposer(composer: LiveComposerState): ClubLiveEve
       team: composer.team,
       playerName: composer.playerName.trim(),
       secondaryPlayerName: composer.secondaryPlayerName.trim(),
-      detail: composer.secondaryPlayerName.trim() ? `Entra: ${composer.secondaryPlayerName.trim()}` : '',
+      detail: composer.secondaryPlayerName.trim() ? `${temporalPrefix}Entra: ${composer.secondaryPlayerName.trim()}` : '',
     };
   }
 
@@ -1166,6 +1168,7 @@ export function composerFromEvent(event: ClubLiveEvent): LiveComposerState {
       team: event.team || 'home',
       playerName: event.playerName,
       secondaryPlayerName: event.secondaryPlayerName || parseSubstitutionIncoming(event.detail),
+      isTemporary: /\[temporal\]/i.test(event.detail),
     });
   }
 

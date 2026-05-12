@@ -302,4 +302,5 @@ export interface LiveComposerState {
   kickType: '' | 'touch' | '50_22' | 'drop_ingoal' | '22_exit' | 'clearance' | 'box_kick' | 'up_and_under' | 'cross_kick';
   videoTime: string;
   passType: '' | 'long' | 'short' | 'inside' | 'outside' | 'miss' | 'offload';
+  isTemporary: boolean;
 }

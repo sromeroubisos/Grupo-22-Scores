@@ -218,8 +218,9 @@ export function buildMatchPlayerSelectionGroups(
       starterSlots[outgoingIndex] = { player: incomingPlayer };
     }
 
+    const isTemporary = /\[temporal\]/i.test(String(event.detail || ''));
     const outgoingKey = getSelectionKey(outgoingId, outgoingName);
-    if (outgoingKey) unavailableKeys.add(outgoingKey);
+    if (outgoingKey && !isTemporary) unavailableKeys.add(outgoingKey);
   }
 
   const active = starterSlots.map(({ player }) => player);

@@ -215,18 +215,26 @@ export function minutesPlayedWhenSubstitutedOut(
   return Math.max(0, offMin - kickoffMin);
 }
 
+/** Detecta si un evento de cambio es temporal (marcado con `[temporal]`). */
+export function isTemporarySubstitution(detail: string | null | undefined): boolean {
+  return /\[temporal\]/i.test(String(detail || ''));
+}
+
 /** Texto de línea de timeline para cambios: sale, minutos jugados, detalle (Entra: …). */
 export function formatSubstitutionTimelineDescription(
   event: Pick<SubstitutionMinuteEvent, 'playerName' | 'secondaryPlayerName' | 'detail'>,
   minutesPlayed: number | null,
 ): string {
   const parts: string[] = [];
+  const isTemporal = isTemporarySubstitution(event.detail);
+  if (isTemporal) parts.push('Cambio temporal');
   const name = String(event.playerName || '').trim();
   if (name) parts.push(`Sale: ${name}`);
   if (minutesPlayed != null) parts.push(`${minutesPlayed} min jugados`);
-  const entr = String(
+  const rawDetail = String(
     event.detail || (event.secondaryPlayerName ? `Entra: ${event.secondaryPlayerName}` : ''),
   ).trim();
+  const entr = rawDetail.replace(/\[temporal\]\s*/gi, '');
   if (entr) parts.push(entr);
   return parts.join(' · ');
 }

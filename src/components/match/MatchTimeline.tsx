@@ -218,6 +218,7 @@ function sortTimelineEvents(events: TimelineEvent[]) {
 function cleanDescription(desc: string, type: string): string {
   let cleaned = String(desc || '')
     .replace(/\[palos:(ok|miss)\]/gi, '')
+    .replace(/\[temporal\]\s*/gi, '')
     .replace(/^Dist:\s*/i, '')
     .trim();
 
@@ -465,11 +466,15 @@ export default function MatchTimeline({ events, homeTeam, awayTeam, sportId }: P
       else if (evt.team === 'away') g.away.push(evt);
       else g.neutral.push(evt);
     });
-    return Array.from(map.values()).sort((a, b) => {
-      const periodDiff = compareMatchPeriodValues(a.period, b.period);
-      if (periodDiff !== 0) return periodDiff;
-      return a.order - b.order || a.minute - b.minute;
-    });
+    return Array.from(map.values())
+      .sort((a, b) => {
+        const periodDiff = compareMatchPeriodValues(a.period, b.period);
+        if (periodDiff !== 0) return periodDiff;
+        return a.order - b.order || a.minute - b.minute;
+      })
+      // Show the most recent events first; the cumulative score in `scoreMap`
+      // is computed from chronological order and therefore stays consistent.
+      .reverse();
   }, [filteredEvents]);
 
   const hasEvents = filteredEvents.length > 0;
@@ -606,6 +611,7 @@ function EventCard({
   const detail = cleanDescription(evt.description, evt.type);
   const isScoreEvent = (score?.points ?? 0) > 0;
   const isSubstitution = evt.type.toLowerCase().includes('subst');
+  const isTemporarySub = isSubstitution && /\[temporal\]/i.test(String(evt.description || ''));
   const incomingPlayer = evt.subPlayer || parseSubstitutionIncomingPlayer(evt.description);
   const incomingPlayerId = evt.subPlayer ? evt.subPlayerId : null;
 
@@ -633,7 +639,7 @@ function EventCard({
           </div>
           <div className={styles.eventTypeRow}>
             <EventTypeIcon type={evt.type} className={styles.eventIconSvg} />
-            <span style={{ color }}>{label}</span>
+            <span style={{ color }}>{isTemporarySub ? 'Cambio temporal' : label}</span>
           </div>
           {incomingPlayer && (
             <div className={styles.eventSubDetail}>
