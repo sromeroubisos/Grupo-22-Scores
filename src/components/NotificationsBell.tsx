@@ -58,14 +58,18 @@ export default function NotificationsBell() {
     const latestNotifications = useMemo(() => notifications.slice(0, 8), [notifications]);
 
     useEffect(() => {
-        const handleOutsideClick = (event: MouseEvent) => {
+        const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
         };
 
         document.addEventListener('mousedown', handleOutsideClick);
-        return () => document.removeEventListener('mousedown', handleOutsideClick);
+        document.addEventListener('touchstart', handleOutsideClick, { passive: true });
+        return () => {
+            document.removeEventListener('mousedown', handleOutsideClick);
+            document.removeEventListener('touchstart', handleOutsideClick);
+        };
     }, []);
 
     if (!user) {

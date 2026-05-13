@@ -14,6 +14,7 @@ const NotificationsBell = dynamic(() => import('@/components/NotificationsBell')
 const GlobalSearch = dynamic(() => import('@/components/GlobalSearch'), { ssr: false });
 import { getRoleLabel, resolveAdminPanel } from '@/lib/auth/roles';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
+import { logRefreshLoop } from '@/lib/debug/refreshLoop';
 
 export default function Header() {
     const { user, logout } = useAuth();
@@ -30,20 +31,28 @@ export default function Header() {
 
     // Close menu when clicking outside
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
+        const handleClickOutside = (event: MouseEvent | TouchEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setIsUserMenuOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside, { passive: true });
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
         };
     }, []);
 
     const handleLogout = () => {
         logout();
         setIsUserMenuOpen(false);
+        logRefreshLoop('router_navigation_called', {
+            source: 'Header.handleLogout',
+            method: 'push',
+            href: '/',
+            reason: 'logout',
+        });
         router.push('/');
     };
 

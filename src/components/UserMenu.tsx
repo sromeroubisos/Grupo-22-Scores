@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { getRoleLabel, isGlobalAdminRole } from '@/lib/auth/roles'
 import { FAVORITES_ENABLED } from '@/lib/favorites/config'
+import { logRefreshLoop } from '@/lib/debug/refreshLoop'
 import styles from './UserMenu.module.css'
 
 export default function UserMenu() {
@@ -17,7 +18,7 @@ export default function UserMenu() {
     const isSuperAdmin = isGlobalAdminRole(user?.role)
 
     useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
+        function handleClickOutside(event: MouseEvent | TouchEvent) {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setIsOpen(false)
             }
@@ -25,10 +26,12 @@ export default function UserMenu() {
 
         if (isOpen) {
             document.addEventListener('mousedown', handleClickOutside)
+            document.addEventListener('touchstart', handleClickOutside, { passive: true })
         }
 
         return () => {
             document.removeEventListener('mousedown', handleClickOutside)
+            document.removeEventListener('touchstart', handleClickOutside)
         }
     }, [isOpen])
 
@@ -37,7 +40,17 @@ export default function UserMenu() {
             await logout()
         } finally {
             setIsOpen(false)
+            logRefreshLoop('router_navigation_called', {
+                source: 'UserMenu.handleSignOut',
+                method: 'push',
+                href: '/',
+                reason: 'post_logout',
+            })
             router.push('/')
+            logRefreshLoop('router_refresh_called', {
+                source: 'UserMenu.handleSignOut',
+                reason: 'post_logout',
+            })
             router.refresh()
         }
     }

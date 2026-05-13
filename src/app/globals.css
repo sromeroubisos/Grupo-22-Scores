@@ -217,13 +217,6 @@ html {
     overflow-x: hidden;
     min-height: 100%;
     background-color: #0a0a0b;
-    zoom: 0.7;
-}
-
-@media (max-width: 900px) {
-    html {
-        zoom: 1;
-    }
 }
 
 /*
