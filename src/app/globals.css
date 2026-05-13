@@ -1675,3 +1675,12 @@ body:not([data-theme="light"]) .match-center-container select option:checked {
         padding: 0 12px;
     }
 }
+
+/* ===== DESKTOP DEFAULT ZOOM =====
+   Reduce el contenido al 70% solo en desktop (≥1024px). Mobile y tablet
+   conservan su escala propia, ya ajustada en hojas dedicadas. */
+@media (min-width: 1024px) {
+    html {
+        zoom: 0.7;
+    }
+}
