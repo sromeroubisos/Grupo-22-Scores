@@ -5,6 +5,7 @@ import { Bell, CheckCheck, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import type { UserNotification } from '@/lib/notifications/types';
+import SystemNotificationsControl from '@/components/SystemNotificationsControl';
 import styles from './notifications.module.css';
 
 function formatFullDate(value: string) {
@@ -121,6 +122,8 @@ export default function NotificationsPage() {
                     <strong>{schemaReady ? 'Activo' : 'Pendiente'}</strong>
                 </article>
             </section>
+
+            <SystemNotificationsControl />
 
             {!schemaReady ? (
                 <section className={styles.notice}>

@@ -1,4 +1,4 @@
-const SW_VERSION = '2026-05-04-1';
+const SW_VERSION = '2026-05-12-1';
 const LOGO_CACHE = `g22-logo-cache-${SW_VERSION}`;
 const STATIC_CACHE = `g22-static-cache-${SW_VERSION}`;
 const OWNED_CACHE_PREFIXES = ['g22-logo-cache-', 'g22-static-cache-', 'g22-runtime-cache-', 'g22-app-cache-'];
@@ -98,4 +98,103 @@ self.addEventListener('fetch', (event) => {
   if (!target) return;
 
   event.respondWith(staleWhileRevalidate(event.request, target.cacheName, target.maxEntries));
+});
+
+async function getLatestUnreadNotification() {
+  const response = await fetch('/api/notifications?limit=1&unread=true', {
+    cache: 'no-store',
+    credentials: 'include',
+  });
+
+  if (!response.ok) return null;
+
+  const payload = await response.json().catch(() => null);
+  const notification = payload && Array.isArray(payload.notifications)
+    ? payload.notifications[0]
+    : null;
+
+  if (!notification || typeof notification.title !== 'string') {
+    return null;
+  }
+
+  return notification;
+}
+
+function getNotificationTarget(notification) {
+  if (notification && notification.match_id) {
+    return `/matches/${notification.match_id}`;
+  }
+
+  if (notification && notification.entity_type === 'club') {
+    return `/clubs/${notification.entity_id}`;
+  }
+
+  if (notification && notification.entity_type === 'tournament') {
+    return `/tournaments/${notification.entity_id}`;
+  }
+
+  return '/notifications';
+}
+
+self.addEventListener('push', (event) => {
+  event.waitUntil((async () => {
+    let notification = null;
+
+    if (event.data) {
+      try {
+        notification = event.data.json();
+      } catch {
+        notification = null;
+      }
+    }
+
+    if (!notification) {
+      notification = await getLatestUnreadNotification();
+    }
+
+    if (!notification) return;
+
+    const targetUrl = getNotificationTarget(notification);
+    await self.registration.showNotification(notification.title || 'G22 Scores', {
+      body: notification.body || 'Hay novedades de tus equipos favoritos.',
+      icon: '/icon.png',
+      badge: '/icon.png',
+      tag: notification.id ? `g22-${notification.id}` : 'g22-notification',
+      data: {
+        url: targetUrl,
+        notificationId: notification.id || null,
+      },
+    });
+  })());
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const data = event.notification && event.notification.data ? event.notification.data : {};
+  const targetPath = typeof data.url === 'string' && data.url ? data.url : '/notifications';
+  const targetUrl = new URL(targetPath, self.location.origin).href;
+
+  event.waitUntil((async () => {
+    const windowClients = await self.clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true,
+    });
+
+    for (const client of windowClients) {
+      if (!client.url.startsWith(self.location.origin)) continue;
+
+      await client.focus();
+      if ('navigate' in client) {
+        return client.navigate(targetUrl);
+      }
+      return undefined;
+    }
+
+    if (self.clients.openWindow) {
+      return self.clients.openWindow(targetUrl);
+    }
+
+    return undefined;
+  })());
 });

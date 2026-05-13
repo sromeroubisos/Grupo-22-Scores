@@ -5,6 +5,10 @@
       "schedule": "* * * * *"
     },
     {
+      "path": "/api/cron/push-notifications",
+      "schedule": "* * * * *"
+    },
+    {
       "path": "/api/cron/fixture-sync",
       "schedule": "0 * * * *"
     }
