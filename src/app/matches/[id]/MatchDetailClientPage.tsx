@@ -106,6 +106,10 @@ function isEspnAmericanFootballMatchId(value: string) {
     return /^espn-game-\d+$/i.test(value);
 }
 
+function isEspnSoccerMatchId(value: string) {
+    return /^espn-soccer-game-[a-z0-9._-]+$/i.test(value);
+}
+
 function isEspnMotorsportMatchId(value: string) {
     return /^espn-race-[a-z0-9-]+--.+$/i.test(value);
 }
@@ -595,8 +599,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isFlashScore = /^[A-Za-z0-9]{8}$/.test(id);
     const isRugbyExternal = isRugbyApiSportsMatchId(id);
     const isEspnExternal = isEspnAmericanFootballMatchId(id);
+    const isEspnSoccerExternal = isEspnSoccerMatchId(id);
     const isEspnMotorsportExternal = isEspnMotorsportMatchId(id);
-    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnMotorsportExternal;
+    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal;
 
     const publicCompleteStatTabs = useMemo(() => {
         if (state.kind !== 'ok' || !state.matchData) return [];
@@ -623,7 +628,12 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         state.matchData?.sportId === 'motorsport' ||
         isEspnMotorsportExternal ||
         String(state.matchData?.tournamentId || '').startsWith('espn-racing-league-');
-    const isLimitedExternalSource = isRugbyApiSportsSource || (isEspnSource && !isMotorsportSource);
+    const isEspnSoccerSource = isEspnSource && (
+        state.matchData?.sportId === 'football' ||
+        isEspnSoccerExternal ||
+        String(state.matchData?.tournamentId || '').startsWith('espn-soccer-league-')
+    );
+    const isLimitedExternalSource = isRugbyApiSportsSource || (isEspnSource && !isMotorsportSource && !isEspnSoccerSource);
     const visibleTabs = useMemo(() => (
         isMotorsportSource
             ? [
@@ -632,6 +642,15 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                 { id: 'sessions', label: 'Sesiones' },
                 { id: 'championship', label: 'Campeonato' },
                 { id: 'circuit', label: 'Circuito' },
+            ]
+            : isEspnSoccerSource
+            ? [
+                { id: 'summary', label: 'Resumen' },
+                { id: 'timeline', label: 'Cronologia' },
+                { id: 'lineups', label: 'Alineaciones' },
+                { id: 'stats', label: 'Estadisticas' },
+                { id: 'h2h', label: 'H2H' },
+                { id: 'standings', label: 'Clasificacion' },
             ]
             : isLimitedExternalSource
             ? [
@@ -650,7 +669,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                 { id: 'standings', label: 'Clasificacion' },
                 { id: 'commentary', label: 'Comentarios' },
             ]
-    ), [isLimitedExternalSource, isMotorsportSource]);
+    ), [isLimitedExternalSource, isMotorsportSource, isEspnSoccerSource]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -719,8 +738,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         setState({
                             kind: 'ok',
                             matchData: espnMatch,
-                            eventsData: [],
-                            statsData: [],
+                            eventsData: Array.isArray(payload.events) ? payload.events : (Array.isArray(payload.match.events) ? payload.match.events : []),
+                            statsData: Array.isArray(payload.stats) ? payload.stats : (Array.isArray(payload.match.stats) ? payload.match.stats : []),
                             playerStats: null,
                             localPlayerRows: [],
                             commentaryData: [],
@@ -792,6 +811,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             round: evt.tournament?.stage_id || evt.ROUND_NAME || 'General',
                             category: evt.country?.name || evt.COUNTRY_NAME || baseMatch.category || 'Internacional',
                             tournamentId: evt.tournament?.tournament_stage_id || evt.tournament?.tournament_id || evt.TOURNAMENT_STAGE_ID || '',
+                            tournamentUrl: evt.tournament?.tournament_url || evt.tournament?.url || evt.TOURNAMENT_URL || '',
                             tournamentLogo: resolveTournamentLogo(evt, (baseMatch as any)?.tournamentLogo || null),
                             home: {
                                 ...baseMatch.home,
@@ -978,6 +998,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             matchData: {
                                 ...prev.matchData,
                                 status: listMatchEvt?.match_status ? mapMatchStatus(listMatchEvt.match_status) : fsStatus,
+                                tournamentUrl: evt.tournament?.tournament_url || evt.tournament?.url || evt.TOURNAMENT_URL || prev.matchData.tournamentUrl || '',
                                 tournamentLogo: resolveTournamentLogo(evt, prev.matchData.tournamentLogo || null),
                                 home: {
                                     ...prev.matchData.home,
@@ -1063,6 +1084,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 tournament: matchData.tournament?.name || 'Partido Local',
                                 tournamentLogo: resolveTournamentLogo(matchData.tournament),
                                 tournamentId,
+                                tournamentUrl: matchData.tournament?.url || null,
                                 category: matchData.category || 'General',
                                 round: matchData.roundLabel || matchData.roundId || '',
                                 venue: matchData.venue || 'Por definir',
@@ -1153,6 +1175,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 tournament: matchData.tournament?.name || 'Partido Local',
                                 tournamentLogo: resolveTournamentLogo(matchData.tournament),
                                 tournamentId,
+                                tournamentUrl: matchData.tournament?.url || null,
                                 category: matchData.category || 'General',
                                 round: matchData.roundLabel || matchData.roundId || '',
                                 venue: matchData.venue || 'Por definir',
@@ -1843,6 +1866,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                             homeLogo: matchData.home.logo,
                                             awayLogo: matchData.away.logo,
                                             tournament: matchData.tournament,
+                                            tournamentId: matchData.tournamentId,
+                                            tournamentUrl: matchData.tournamentUrl,
                                             tournamentLogo: matchData.tournamentLogo,
                                             date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
                                             time: matchTimerText,
@@ -2251,7 +2276,57 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             </div>
                         )}
 
-                        {activeTab === 'stats' && (
+                        {activeTab === 'stats' && isEspnSoccerSource && (
+                            <div className={styles.publicStatsPanel}>
+                                <div className={styles.panelTitle}>Estadísticas del partido</div>
+                                {statsData.length === 0 ? (
+                                    <p className={styles.placeholderText}>No hay estadísticas disponibles para este partido.</p>
+                                ) : (
+                                    <div className={styles.publicStatsSectionGrid}>
+                                        <section className={styles.publicStatsSection}>
+                                            <div className={styles.publicStatsSectionHeader}>
+                                                <h5>{matchData.home?.name || 'Local'} vs {matchData.away?.name || 'Visitante'}</h5>
+                                                <span>{statsData.length}</span>
+                                            </div>
+                                            <div className={styles.publicStatsRows}>
+                                                {statsData.map((stat: any, i: number) => {
+                                                    const hStr = String(stat.home ?? '');
+                                                    const aStr = String(stat.away ?? '');
+                                                    const hVal = parseFloat(hStr.replace(/[^0-9.]/g, '')) || 0;
+                                                    const aVal = parseFloat(aStr.replace(/[^0-9.]/g, '')) || 0;
+                                                    const isPercent = hStr.includes('%') || aStr.includes('%');
+                                                    let hPct: number;
+                                                    let aPct: number;
+                                                    if (isPercent) {
+                                                        hPct = Math.min(100, hVal);
+                                                        aPct = Math.min(100, aVal);
+                                                    } else {
+                                                        const total = hVal + aVal;
+                                                        hPct = total > 0 ? (hVal / total) * 100 : 0;
+                                                        aPct = total > 0 ? (aVal / total) * 100 : 0;
+                                                    }
+                                                    return (
+                                                        <div className={styles.publicStatsRow} key={`${stat.label || stat.type}-${i}`}>
+                                                            <strong className={`${styles.publicStatsRowValue} ${styles.publicStatsRowValueHome}`}>{hStr || '—'}</strong>
+                                                            <div className={`${styles.publicStatsRowBar} ${styles.publicStatsRowBarHome}`} aria-hidden="true">
+                                                                <span style={{ width: `${hPct}%` }} />
+                                                            </div>
+                                                            <span className={styles.publicStatsRowLabel}>{stat.label || stat.type}</span>
+                                                            <div className={`${styles.publicStatsRowBar} ${styles.publicStatsRowBarAway}`} aria-hidden="true">
+                                                                <span style={{ width: `${aPct}%` }} />
+                                                            </div>
+                                                            <strong className={`${styles.publicStatsRowValue} ${styles.publicStatsRowValueAway}`}>{aStr || '—'}</strong>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </section>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === 'stats' && !isEspnSoccerSource && (
                             <div className={styles.publicStatsPanel}>
                                 <div className={styles.panelTitle}>Estadísticas completas</div>
                                 {publicCompleteStatTabs.length === 0 ? (
@@ -2469,54 +2544,75 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     </div>
                                 )}
 
-                                {/* Standings Table */}
-                                {matchData.standings && matchData.standings.length > 0 && (
-                                    <>
-                                        <div className={styles.panelTitle} style={matchData.draw?.length > 0 ? { marginTop: '32px' } : {}}>Tabla de Posiciones</div>
-                                        <table className={styles.standingsTable}>
-                                            <thead>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Equipo</th>
-                                                    <th>PJ</th>
-                                                    <th>DG</th>
-                                                    <th>PTS</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {matchData.standings.slice(0, 20).map((row: any, i: number) => {
-                                                    const rowName = row.name || row.team?.name || row.TEAM_NAME || row.team_name;
-                                                    const rowId = row.team_id || row.team?.id || row.team?.team_id || null;
-                                                    const rowLogo = row.logo || row.team?.logo || row.team_logo || '';
-                                                    const teamHref = rowId
-                                                        ? buildTeamHref({ id: rowId, name: rowName, league: row.team?.league || row.participant?.league || null }, matchData.sportId)
-                                                        : null;
-                                                    const isCurrent = rowName === matchData.home.name || rowName === matchData.away.name ||
-                                                        rowId === matchData.home.id || rowId === matchData.away.id;
+                                {/* Standings Table — agrupa por group_name si el torneo es por grupos */}
+                                {matchData.standings && matchData.standings.length > 0 && (() => {
+                                    const groupNames = Array.from(new Set(
+                                        matchData.standings.map((r: any) => r.group_name || r.GROUP_NAME || r.group?.name || null).filter(Boolean)
+                                    )) as string[];
+                                    const groups = groupNames.length > 0
+                                        ? groupNames.map((name) => ({
+                                            name,
+                                            rows: matchData.standings.filter((r: any) => (r.group_name || r.GROUP_NAME || r.group?.name) === name),
+                                        }))
+                                        : [{ name: null as string | null, rows: matchData.standings.slice(0, 20) }];
 
-                                                    return (
-                                                        <tr key={i} className={isCurrent ? styles.currentTeam : ''}>
-                                                            <td><span className={styles.rankBadge}>{row.rank || i + 1}</span></td>
-                                                            <td style={isCurrent ? { color: 'var(--accent)', fontWeight: '700' } : {}}>
-                                                                <div className={styles.standingsTeamCell}>
-                                                                    {rowLogo
-                                                                        ? <img src={rowLogo} alt="" className={styles.standingsTeamLogo} />
-                                                                        : <div className={styles.standingsTeamLogoPlaceholder} />}
-                                                                    {teamHref
-                                                                        ? <Link href={teamHref} className={styles.standingsTeamLink}>{rowName}</Link>
-                                                                        : <span>{rowName}</span>}
-                                                                </div>
-                                                            </td>
-                                                            <td>{row.matches_played || row.PLAYED || row.played || 0}</td>
-                                                            <td>{row.goal_difference || row.GOAL_DIFF || row.goal_diff || 0}</td>
-                                                            <td><strong>{row.points || row.POINTS || 0}</strong></td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    </>
-                                )}
+                                    return (
+                                        <>
+                                            <div className={styles.panelTitle} style={matchData.draw?.length > 0 ? { marginTop: '32px' } : {}}>Tabla de Posiciones</div>
+                                            {groups.map((group, gi) => (
+                                                <div key={`${group.name || 'all'}-${gi}`} style={gi > 0 ? { marginTop: 24 } : {}}>
+                                                    {group.name && (
+                                                        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+                                                            {group.name}
+                                                        </div>
+                                                    )}
+                                                    <table className={styles.standingsTable}>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>#</th>
+                                                                <th>Equipo</th>
+                                                                <th>PJ</th>
+                                                                <th>DG</th>
+                                                                <th>PTS</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {group.rows.map((row: any, i: number) => {
+                                                                const rowName = row.name || row.team?.name || row.TEAM_NAME || row.team_name;
+                                                                const rowId = row.team_id || row.team?.id || row.team?.team_id || null;
+                                                                const rowLogo = row.logo || row.team?.logo || row.team_logo || '';
+                                                                const teamHref = rowId
+                                                                    ? buildTeamHref({ id: rowId, name: rowName, league: row.team?.league || row.participant?.league || null }, matchData.sportId)
+                                                                    : null;
+                                                                const isCurrent = rowName === matchData.home.name || rowName === matchData.away.name ||
+                                                                    rowId === matchData.home.id || rowId === matchData.away.id;
+
+                                                                return (
+                                                                    <tr key={i} className={isCurrent ? styles.currentTeam : ''}>
+                                                                        <td><span className={styles.rankBadge}>{row.rank || i + 1}</span></td>
+                                                                        <td style={isCurrent ? { color: 'var(--accent)', fontWeight: '700' } : {}}>
+                                                                            <div className={styles.standingsTeamCell}>
+                                                                                {rowLogo
+                                                                                    ? <img src={rowLogo} alt="" className={styles.standingsTeamLogo} />
+                                                                                    : <div className={styles.standingsTeamLogoPlaceholder} />}
+                                                                                {teamHref
+                                                                                    ? <Link href={teamHref} className={styles.standingsTeamLink}>{rowName}</Link>
+                                                                                    : <span>{rowName}</span>}
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>{row.matches_played || row.PLAYED || row.played || 0}</td>
+                                                                        <td>{row.goal_difference || row.GOAL_DIFF || row.goal_diff || 0}</td>
+                                                                        <td><strong>{row.points || row.POINTS || 0}</strong></td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            ))}
+                                        </>
+                                    );
+                                })()}
 
                                 {(!matchData.standings || matchData.standings.length === 0) && (!matchData.draw || matchData.draw.length === 0) && (
                                     <p className={styles.placeholderText}>Clasificación no disponible.</p>
@@ -2607,6 +2703,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     homeLogo: matchData.home.logo,
                                     awayLogo: matchData.away.logo,
                                     tournament: matchData.tournament,
+                                    tournamentId: matchData.tournamentId,
+                                    tournamentUrl: matchData.tournamentUrl,
                                     tournamentLogo: matchData.tournamentLogo,
                                     date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
                                     time: matchTimerText,

@@ -35,8 +35,14 @@ import {
     getTournamentFlashScoreConfig,
     isAmericanFootballSport,
     isFlashScoreEnabledForSport,
+    isFootballSport,
     isMotorsportSport,
 } from '@/lib/externalProviderPolicy';
+import {
+    getEspnFootballTournamentBundle,
+    inferEspnFootballLeague,
+    parseEspnFootballTournamentId,
+} from '@/lib/services/espnFootball';
 import {
     isBlockedTournamentId,
 } from '@/lib/utils/blockedTournaments';
@@ -938,8 +944,62 @@ export async function GET(request: Request) {
             ruleset: dbTournamentMeta?.ruleset || localTournament?.ruleset,
         })
         : null;
+    const espnSoccerLeague =
+        parseEspnFootballTournamentId(id) ||
+        parseEspnFootballTournamentId(dbTournamentMeta?.external_id) ||
+        (isFootballSport(resolvedSportId)
+            ? inferEspnFootballLeague({
+                id,
+                externalId: dbTournamentMeta?.external_id,
+                tournamentUrl: url || dbTournamentMeta?.url || localTournament?.url,
+                name: dbTournamentMeta?.display_name || dbTournamentMeta?.name || localTournament?.name,
+            })
+            : null);
 
     try {
+        if (espnSoccerLeague) {
+            const seasonYear = (() => {
+                const raw = String(requestedSeason ?? '').trim();
+                if (!raw) return undefined;
+                const num = Number(raw);
+                return Number.isFinite(num) && num >= 1900 && num <= 2200 ? num : undefined;
+            })();
+            const bundle = await getEspnFootballTournamentBundle(espnSoccerLeague, { season: seasonYear, routeId: id });
+            return perf.json({
+                ok: true,
+                _debug: {
+                    query: { id, url, sport, requestedSeason },
+                    resolvedIds: bundle.ids,
+                    provider: 'espn',
+                    league: espnSoccerLeague,
+                    counts: {
+                        results: Array.isArray(bundle.results) ? bundle.results.length : 0,
+                        fixtures: Array.isArray(bundle.fixtures) ? bundle.fixtures.length : 0,
+                        standings: Array.isArray(bundle.standings) ? bundle.standings.length : 0,
+                    },
+                },
+                ids: {
+                    ...bundle.ids,
+                    drawStageId: bundle.ids?.stageId,
+                },
+                details: bundle.details,
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                standings: bundle.standings,
+                standingsForm: bundle.standingsForm,
+                standingsHtFt: bundle.standingsHtFt,
+                standingsOverUnder: bundle.standingsOverUnder,
+                teamLabels: bundle.teamLabels,
+                standingsFormTeamLabels: [],
+                standingsHtFtTeamLabels: [],
+                standingsOverUnderTeamLabels: [],
+                customStandingsTables: [],
+                topScorers: bundle.topScorers,
+                draw: bundle.draw,
+                archives: bundle.archives,
+            });
+        }
+
         if (espnLeague) {
             const bundle = await getEspnAmericanFootballTournamentBundle(espnLeague);
             externalOverrideId = resolveExternalTournamentId({

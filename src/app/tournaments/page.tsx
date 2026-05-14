@@ -6,6 +6,7 @@ import { Star } from 'lucide-react';
 import pageStyles from '../page.module.css';
 import { useSport } from '@/context/SportContext';
 import { getTournamentsBySport, getInternationalTournamentsBySport } from '@/lib/data/tournaments';
+import { buildEspnFootballTournaments, getEspnFootballInternationalTournaments } from '@/lib/data/tournaments/espnFootballCatalog';
 import { findCountryRecord, getAllCountries, resolveCountryId } from '@/lib/data/countries';
 import type { Tournament } from '@/lib/types';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -321,8 +322,14 @@ export default function TorneosPage() {
         });
     }, [activeSports, favoriteSportIds]);
 
-    const allTournaments = useMemo(() => getTournamentsBySport(selectedSport.id), [selectedSport.id]);
-    const internationalTournaments = useMemo(() => getInternationalTournamentsBySport(selectedSport.id), [selectedSport.id]);
+    const allTournaments = useMemo(() => {
+        if (selectedSport.id === 'football') return buildEspnFootballTournaments();
+        return getTournamentsBySport(selectedSport.id);
+    }, [selectedSport.id]);
+    const internationalTournaments = useMemo(() => {
+        if (selectedSport.id === 'football') return getEspnFootballInternationalTournaments();
+        return getInternationalTournamentsBySport(selectedSport.id);
+    }, [selectedSport.id]);
     const loadedRugbyPublicTournaments = useMemo(
         () => Object.values(rugbyCountryGroups).flatMap((group) => group.tournaments),
         [rugbyCountryGroups],

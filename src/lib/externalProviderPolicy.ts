@@ -29,8 +29,19 @@ const MOTORSPORT_SPORT_KEYS = new Set([
     '/racing/',
 ]);
 
+const FOOTBALL_SPORT_KEYS = new Set([
+    'football',
+    'soccer',
+    'futbol',
+    'fútbol',
+    '1',
+    '/football/',
+    '/soccer/',
+]);
+
 export const FLASHSCORE_PROVIDER = 'flashscore';
 export const ESPN_PROVIDER = 'espn';
+export const SOFASCORE_PROVIDER = 'sofascore';
 
 export function normalizeSportKey(value: unknown): string | null {
     if (value === null || value === undefined) return null;
@@ -63,7 +74,18 @@ export function isMotorsportSport(value: unknown): boolean {
     return MOTORSPORT_SPORT_KEYS.has(normalized);
 }
 
+export function isFootballSport(value: unknown): boolean {
+    const normalized = normalizeSportKey(value);
+    if (!normalized) return false;
+    return FOOTBALL_SPORT_KEYS.has(normalized);
+}
+
 export function isFlashScoreEnabledForSport(value?: unknown): boolean {
+    // Despite the name, this gates whether an *external* listing should run
+    // for the sport. Football still passes because the football path inside
+    // flashscore.ts delegates to the SofaScore microservice (or short-circuits
+    // to an empty payload when the bridge is unavailable — it never falls
+    // back to a real FlashScore HTTP call).
     void value;
     return true;
 }
@@ -71,6 +93,7 @@ export function isFlashScoreEnabledForSport(value?: unknown): boolean {
 export function getPreferredExternalProviderForSport(value: unknown) {
     if (isAmericanFootballSport(value)) return ESPN_PROVIDER;
     if (isMotorsportSport(value)) return ESPN_PROVIDER;
+    if (isFootballSport(value)) return ESPN_PROVIDER;
     return FLASHSCORE_PROVIDER;
 }
 

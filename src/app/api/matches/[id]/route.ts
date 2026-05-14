@@ -33,6 +33,10 @@ import {
   parseEspnMotorsportMatchId,
 } from '@/lib/services/espnMotorsport';
 import {
+  getEspnFootballMatchBundle,
+  parseEspnFootballMatchId,
+} from '@/lib/services/espnFootball';
+import {
   applyExternalTournamentOverride,
   getExternalTournamentOverride,
   type ExternalTournamentOverrideRecord,
@@ -276,6 +280,22 @@ export async function GET(
     const matchId = (await params).id;
     const espnMatchId = parseEspnAmericanFootballMatchId(matchId);
     const espnMotorsportMatchId = parseEspnMotorsportMatchId(matchId);
+    const espnFootballMatchId = parseEspnFootballMatchId(matchId);
+
+    if (espnFootballMatchId) {
+      const bundle = await applyLineupOverrideToExternalMatchBundle(
+        matchId,
+        await getEspnFootballMatchBundle(espnFootballMatchId.eventId, espnFootballMatchId.leagueSlug),
+      );
+      if (!bundle) {
+        return jsonNoStore(
+          { error: 'Match not found' },
+          { status: 404 }
+        );
+      }
+
+      return jsonNoStore(bundle);
+    }
 
     if (espnMatchId) {
       const bundle = await applyLineupOverrideToExternalMatchBundle(
@@ -318,7 +338,13 @@ export async function GET(
     }
 
     const readClient = await getReadClient();
-    const { data: match, error: matchError } = await fetchMatchCenterMatch(readClient, matchId);
+    // Public viewer never renders rosters or points rules — skip the heavy
+    // roster/phase queries to keep this endpoint snappy.
+    const { data: match, error: matchError } = await fetchMatchCenterMatch(
+      readClient,
+      matchId,
+      { includeRosters: false, includePointsRules: false },
+    );
 
     if (matchError || !match) {
       return jsonNoStore(

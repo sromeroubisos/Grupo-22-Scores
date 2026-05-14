@@ -2,15 +2,30 @@ import { Match, MatchStatus } from '@/types/match';
 import { apiFetch } from '@/lib/apiFetch';
 import { memoryCache } from '@/lib/cache';
 import { formatDateKey } from '@/lib/timezone';
-import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
+import { isFlashScoreEnabledForSport, isFootballSport } from '@/lib/externalProviderPolicy';
 import {
     getEspnAmericanFootballLiveMatches,
     getEspnAmericanFootballMatches,
 } from '@/lib/services/espnAmericanFootball';
 import {
+    getEspnFootballLiveMatches,
+    getEspnFootballMatches,
+} from '@/lib/services/espnFootball';
+import {
     getEspnMotorsportLiveMatches,
     getEspnMotorsportMatches,
 } from '@/lib/services/espnMotorsport';
+import {
+    getSofaScoreFootballLiveMatches,
+    getSofaScoreFootballMatches,
+    getSofaScoreFootballMatchesRaw,
+    getSofaScoreMatchDetails,
+    getSofaScoreMatchH2H,
+    getSofaScoreMatchLineups,
+    getSofaScoreMatchStats,
+    isSofaScoreServiceConfigured,
+    SOFASCORE_MATCH_PREFIX,
+} from '@/lib/services/sofascore';
 
 const API_KEY = process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '';
 const API_HOST = process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com';
@@ -134,6 +149,19 @@ export async function getFlashScoreMatchesRaw(
     timeZone?: string,
     options: { bypassCache?: boolean } = {}
 ): Promise<any> {
+    if (isFootballSport(sportId)) {
+        if (isSofaScoreServiceConfigured()) {
+            const target = new Date(Date.now() + dayOffset * 86400000);
+            const targetDateKey = formatDateKey(target, timeZone);
+            const raw = await getSofaScoreFootballMatchesRaw(target, { timeZone, targetDateKey });
+            return raw ?? { DATA: [] };
+        }
+        // SofaScore is the sole football provider — never fall through to
+        // FlashScore. Returning an empty payload keeps the contract of
+        // getFlashScoreMatchesRaw stable for downstream code.
+        return { DATA: [] };
+    }
+
     if (!isFlashScoreEnabledForSport(sportId)) {
         return [];
     }
@@ -234,6 +262,10 @@ export async function getFlashScoreMatches(
         return getEspnMotorsportMatches(date, options);
     }
 
+    if (isFootballSport(sportId)) {
+        return getEspnFootballMatches(date, options);
+    }
+
     const timeZone = options?.timeZone;
     const targetDateKey = options?.targetDateKey || formatDateKey(date, timeZone);
 
@@ -327,6 +359,10 @@ export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]
 
     if (sportId === 'motorsport') {
         return getEspnMotorsportLiveMatches();
+    }
+
+    if (isFootballSport(sportId)) {
+        return getEspnFootballLiveMatches();
     }
 
     if (!isFlashScoreEnabledForSport(sportId)) {
@@ -557,7 +593,15 @@ export function mapStatus(matchStatusObj: any, simpleStatus?: string): MatchStat
 
 // --- New Detail Endpoints ---
 
+function isSofaScoreMatchId(matchId: string): boolean {
+    return typeof matchId === 'string' && matchId.startsWith(SOFASCORE_MATCH_PREFIX);
+}
+
 export async function getFlashScoreMatchDetails(matchId: string) {
+    if (isSofaScoreMatchId(matchId) && isSofaScoreServiceConfigured()) {
+        return getSofaScoreMatchDetails(matchId);
+    }
+
     const cacheKey = `match-details-${matchId}`;
     const cached = memoryCache.get<any>(cacheKey);
     if (cached) return cached;
@@ -594,6 +638,10 @@ export async function getFlashScoreMatchSummary(matchId: string) {
 }
 
 export async function getFlashScoreMatchStats(matchId: string) {
+    if (isSofaScoreMatchId(matchId) && isSofaScoreServiceConfigured()) {
+        return getSofaScoreMatchStats(matchId);
+    }
+
     const cacheKey = `match-stats-${matchId}`;
     const cached = memoryCache.get<any>(cacheKey);
     if (cached) return cached;
@@ -611,6 +659,10 @@ export async function getFlashScoreMatchStats(matchId: string) {
 }
 
 export async function getFlashScoreMatchLineups(matchId: string) {
+    if (isSofaScoreMatchId(matchId) && isSofaScoreServiceConfigured()) {
+        return getSofaScoreMatchLineups(matchId);
+    }
+
     const cacheKey = `match-lineups-${matchId}`;
     const cached = memoryCache.get<any>(cacheKey);
     if (cached) return cached;
@@ -628,6 +680,10 @@ export async function getFlashScoreMatchLineups(matchId: string) {
 }
 
 export async function getFlashScoreMatchH2H(matchId: string) {
+    if (isSofaScoreMatchId(matchId) && isSofaScoreServiceConfigured()) {
+        return getSofaScoreMatchH2H(matchId);
+    }
+
     const cacheKey = `match-h2h-${matchId}`;
     const cached = memoryCache.get<any>(cacheKey);
     if (cached) return cached;

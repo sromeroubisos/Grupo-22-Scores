@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useSport } from '@/context/SportContext';
 import { getTournamentsBySport, getInternationalTournamentsBySport } from '@/lib/data/tournaments/index';
+import { buildEspnFootballTournaments } from '@/lib/data/tournaments/espnFootballCatalog';
 import { getCountryById } from '@/lib/data/countries';
 import type { Tournament } from '@/lib/types';
 import styles from './Sidebar.module.css';
@@ -38,8 +39,14 @@ export default function Sidebar() {
     const [searchQuery, setSearchQuery] = useState('');
 
     // Get tournaments for selected sport
-    const allTournaments = useMemo(() => getTournamentsBySport(selectedSport.id), [selectedSport.id]);
-    const internationalTournaments = useMemo(() => getInternationalTournamentsBySport(selectedSport.id), [selectedSport.id]);
+    const allTournaments = useMemo(() => {
+        if (selectedSport.id === 'football') return buildEspnFootballTournaments();
+        return getTournamentsBySport(selectedSport.id);
+    }, [selectedSport.id]);
+    const internationalTournaments = useMemo(() => {
+        if (selectedSport.id === 'football') return allTournaments.filter(t => t.type === 'international');
+        return getInternationalTournamentsBySport(selectedSport.id);
+    }, [selectedSport.id, allTournaments]);
 
     // Group local tournaments by country
     const localTournaments = useMemo(() => {
