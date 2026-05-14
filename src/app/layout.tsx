@@ -5,6 +5,7 @@ import ChunkLoadRecovery from "@/components/ChunkLoadRecovery";
 import ConditionalLayout from "@/components/ConditionalLayout";
 // Force rebuild for ChunkLoadError fix
 import { AuthProvider } from "@/context/AuthContext";
+import { appIconHref } from "@/lib/appBranding";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -13,30 +14,34 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-export const metadata: Metadata = {
-  title: "G22 Scores - Plataforma Oficial de Torneos Deportivos",
-  description: "La plataforma oficial para torneos deportivos. Resultados en tiempo real, estadísticas confiables y experiencia profesional para fans, clubes y federaciones.",
-  keywords: ["torneos", "deportes", "resultados", "fixtures", "rugby", "fútbol", "rankings", "estadísticas"],
-  authors: [{ name: "G22 Scores" }],
-  openGraph: {
+export async function generateMetadata(): Promise<Metadata> {
+  const iconHref = appIconHref();
+
+  return {
     title: "G22 Scores - Plataforma Oficial de Torneos Deportivos",
-    description: "Resultados en tiempo real, estadísticas confiables y experiencia profesional para fans, clubes y federaciones.",
-    type: "website",
-    locale: "es_AR",
-    siteName: "G22 Scores",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "G22 Scores - Plataforma Oficial de Torneos Deportivos",
-    description: "Resultados en tiempo real, estadísticas confiables y experiencia profesional.",
-  },
-  icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
-    apple: "/icon.png",
-  },
-  manifest: "/manifest.json",
-};
+    description: "La plataforma oficial para torneos deportivos. Resultados en tiempo real, estadísticas confiables y experiencia profesional para fans, clubes y federaciones.",
+    keywords: ["torneos", "deportes", "resultados", "fixtures", "rugby", "fútbol", "rankings", "estadísticas"],
+    authors: [{ name: "G22 Scores" }],
+    openGraph: {
+      title: "G22 Scores - Plataforma Oficial de Torneos Deportivos",
+      description: "Resultados en tiempo real, estadísticas confiables y experiencia profesional para fans, clubes y federaciones.",
+      type: "website",
+      locale: "es_AR",
+      siteName: "G22 Scores",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "G22 Scores - Plataforma Oficial de Torneos Deportivos",
+      description: "Resultados en tiempo real, estadísticas confiables y experiencia profesional.",
+    },
+    icons: {
+      icon: iconHref,
+      shortcut: iconHref,
+      apple: iconHref,
+    },
+    manifest: "/manifest.webmanifest",
+  };
+}
 
 function AppShellFallback() {
   return (
@@ -89,7 +94,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://use.typekit.net" />
         <link rel="preconnect" href="https://p.typekit.net" crossOrigin="" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Tangerine:wght@400;700&family=Inconsolata:wght@200..900&family=Cantarell:wght@400;700&family=Roboto+Mono:wght@400;500;700&family=Rancho&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Tangerine:wght@400;700&family=Inconsolata:wght@200..900&family=Cantarell:wght@400;700&family=Roboto+Mono:wght@400;500;700&family=Rancho&display=swap"
           rel="stylesheet"
         />
         <link href="https://use.typekit.net/zkk5abl.css" rel="stylesheet" />

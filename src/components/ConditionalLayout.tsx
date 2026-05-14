@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import WorldCupTicker from '@/components/WorldCupTicker';
 import { SportProvider } from '@/context/SportContext';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect } from 'react';
@@ -64,6 +65,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
         return (
             <SportProvider>
                 <Header />
+                <WorldCupTicker />
                 <div className={styles.layoutContainer}>
                     <main className={styles.mainContent}>{children}</main>
                 </div>
@@ -75,6 +77,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     return (
         <SportProvider>
             <Header />
+            <WorldCupTicker />
             <div className={styles.layoutContainer}>
                 {/* Sidebar removed as per user request to move it to page level */}
                 <main className={styles.mainContent}>{children}</main>

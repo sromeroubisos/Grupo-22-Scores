@@ -855,6 +855,31 @@
     text-align: center;
 }
 
+/* Kick-off date+time display shown when the match has not been played */
+.featuredKickoff {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    min-width: 130px;
+}
+.featuredKickoffDate {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--fl-text);
+    letter-spacing: 0.01em;
+    line-height: 1;
+    font-family: var(--fl-mono);
+}
+.featuredKickoffTime {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--fl-text-muted);
+    letter-spacing: 0.04em;
+    font-family: var(--fl-mono);
+}
+
 /* Mobile-only short date shown when VS is hidden */
 .featuredMobileDate {
     display: none;
@@ -1761,6 +1786,16 @@
     font-weight: 600;
     color: var(--fl-text-dim);
     letter-spacing: 0.1em;
+}
+
+/* Kick-off time shown in the score slot for upcoming matches */
+.matchKickoffTime {
+    font-family: var(--fl-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--fl-text-soft);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
 }
 
 /* Schedule text shown on mobile instead of VS */
@@ -2731,33 +2766,86 @@
 /* ── Mobile ──────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
 
-    /* ── Hero — compact above-the-fold priority ── */
-    .heroCard { padding: 12px 14px; gap: 8px; }
-    .heroLeft { align-items: center; gap: 10px; }
-    .heroLogoWrap { width: 40px; height: 40px; border-radius: 10px; }
-    .heroLogoPlaceholder { font-size: 1.1rem; }
-    .heroTitle {
-        font-size: 1.55rem;
-        letter-spacing: -0.035em;
-        line-height: 0.98;
-        margin-bottom: 6px;
+    /* ── Hero — Apple-clean look: big logo + bold title + subtitle ── */
+    .heroSection { padding-top: 6px; }
+    .breadcrumb { display: none; }
+    .heroCard {
+        background: transparent;
+        border: none;
+        border-top: none;
+        box-shadow: none;
+        padding: 8px 0 0;
+        gap: 12px;
+        margin-bottom: 0;
+        border-radius: 0;
+        overflow: visible;
     }
-    .heroMeta { gap: 3px; }
-    .heroMetaItem { font-size: 0.65rem; }
-    .heroRight { gap: 6px; }
-    .statusBadge { font-size: 0.58rem; padding: 2px 8px; }
-    .heroCTAs { gap: 5px; }
-    .ctaBtnSecondary { padding: 5px 10px; font-size: 0.66rem; }
-    .followBtn { padding: 5px 11px; font-size: 0.66rem; }
+    .heroCard::after { display: none; }
+    .heroLeft { align-items: center; gap: 14px; }
+    .heroLogoWrap {
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+    .heroLogoWrap::before { display: none; }
+    .heroLogoImg { padding: 0; }
+    .heroLogoPlaceholder { font-size: 1.6rem; }
+    .heroTitle {
+        font-size: 1.75rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        line-height: 1;
+        margin-bottom: 2px;
+        color: var(--fl-text);
+    }
+    .heroMeta { gap: 4px; }
+    .heroMetaItem {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--fl-text-muted);
+        text-transform: none;
+        letter-spacing: 0;
+    }
+    .heroMetaDot { display: none; }
+    .heroMeta > *:not(.heroMetaItem):not(.seasonSwitcher) { display: none; }
+    /* Hide secondary chrome that cluttered the old hero */
+    .statusBadge { display: none; }
+    /* CTA row sits below the title in a tighter line */
+    .heroRight {
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        justify-content: flex-end;
+    }
+    .heroCTAs { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .ctaBtnSecondary { padding: 7px 14px; font-size: 0.72rem; border-radius: 999px; }
+    .followBtn { padding: 7px 14px; font-size: 0.72rem; }
 
-    /* ── Quick stats — compact horizontal scroll ── */
-    .statCard { flex: 0 0 110px; min-width: 110px; padding: 10px 12px; gap: 4px; }
-    .statCardValue { font-size: 1.25rem; }
-    .statCardValueSm { font-size: 0.78rem; }
-    .statCardLabel { font-size: 0.57rem; }
+    /* ── Quick stats hidden on phone — page leads with the tabs ── */
+    .quickStatsRow { display: none; }
 
     /* ── Tabs ── */
-    .tabButton { padding: 13px 13px; font-size: 0.78rem; }
+    .tabsBar {
+        margin-top: 8px;
+        background: var(--fl-bg);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border-bottom-color: rgba(255, 255, 255, 0.06);
+    }
+    .tabButton { padding: 13px 13px; font-size: 0.85rem; font-weight: 700; }
+
+    /* ── Standings toolbar (General + Exportar) hidden on mobile ── */
+    .standingsToolbar { display: none; }
+    .standingsScopeBar { display: none; }
+
+    /* ── Unified background — remove section-level variations ── */
+    .heroSection { background: var(--fl-bg); }
+    main.g22-container,
+    .page > main { background: var(--fl-bg); }
 
     /* ── Featured match ── */
     .featuredMatchCard { padding: 14px 14px 12px; }
@@ -2958,4 +3046,804 @@
 
     /* Tabs */
     .tabButton { padding: 12px 11px; font-size: 0.74rem; }
+}
+
+/* ================================================================
+   FIFA WORLD CUP 26 — Brand Identity Theme
+   Scoped via .fwc26 — only applied to ESPN soccer FIFA WC.
+   Visual language: Anton display type, 3D title shadow,
+   4-color conic badge, vibrant accent stat cards.
+   ================================================================ */
+
+.fwc26 {
+    --fwc-red:        #F52935;
+    --fwc-blue:       #3F6FFF;
+    --fwc-sky:        #7EB6FF;
+    --fwc-green:      #00C978;
+    --fwc-lime:       #B5EF2E;
+    --fwc-yellow:     #F4D84A;
+    --fwc-purple:     #6B55D9;
+    --fwc-teal:       #4ED7C5;
+    --fwc-gold:       #D9B45F;
+    --fwc-ink:        #05070A;
+    --fwc-panel:      #0B111A;
+    --fwc-card:       #101823;
+    --fwc-card-soft:  #131D2A;
+    --fwc-text-soft:  #C7D2E5;
+    --fwc-text-muted: #8EA0BD;
+    --fwc-border-soft:   rgba(255, 255, 255, 0.08);
+    --fwc-border-strong: rgba(255, 255, 255, 0.16);
+    --fwc-display: 'Anton', 'Bebas Neue', 'Impact', 'Arial Narrow', sans-serif;
+
+    /* Re-skin Flash UI tokens */
+    --fl-bg:           var(--fwc-ink);
+    --fl-surface:      var(--fwc-card);
+    --fl-surface-alt:  var(--fwc-card-soft);
+    --fl-surface-hov:  #1a2330;
+    --fl-primary:      var(--fwc-red);
+    --fl-primary-glow: rgba(245, 41, 53, 0.28);
+    --fl-text:         #ffffff;
+    --fl-text-soft:    var(--fwc-text-soft);
+    --fl-text-muted:   var(--fwc-text-muted);
+    --fl-text-dim:     rgba(199, 210, 229, 0.55);
+    --fl-border:       var(--fwc-border-soft);
+    --fl-border-sub:   rgba(255, 255, 255, 0.05);
+    --fl-tabs-bg:      rgba(5, 7, 10, 0.86);
+
+    /* Page-wide background with radial glows */
+    background:
+        radial-gradient(circle at 15% 10%, rgba(63, 111, 255, 0.14), transparent 28%),
+        radial-gradient(circle at 85% 20%, rgba(245, 41, 53, 0.12), transparent 26%),
+        radial-gradient(circle at 50% 90%, rgba(0, 201, 120, 0.08), transparent 30%),
+        var(--fwc-ink);
+    position: relative;
+}
+
+/* Grid pattern overlay on the page */
+.fwc26 > * { position: relative; z-index: 1; }
+.fwc26::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 56px 56px;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Top palette strip — continuous gradient (mirrors the mockup) */
+.fwc26TopBar {
+    display: block;
+    height: 4px;
+    width: 100%;
+    background: linear-gradient(
+        90deg,
+        #F52935 0%,
+        #6B55D9 20%,
+        #3F6FFF 40%,
+        #4ED7C5 60%,
+        #B5EF2E 80%,
+        #F4D84A 100%
+    );
+    position: relative;
+    z-index: 5;
+}
+
+/* ── Hero ───────────────────────────────────────────────────────── */
+.fwc26 .heroSection { padding-top: 22px; }
+
+.fwc26 .heroCard {
+    background:
+        radial-gradient(circle at 80% 20%, rgba(245, 41, 53, 0.22), transparent 40%),
+        radial-gradient(circle at 20% 10%, rgba(63, 111, 255, 0.18), transparent 40%),
+        linear-gradient(135deg, #0B111A 0%, #111C2B 55%, #17101D 100%);
+    border: 1px solid var(--fwc-border-soft);
+    border-top: 1px solid var(--fwc-border-soft);
+    border-radius: 24px;
+    padding: 48px 52px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+/* Soften the original green glow */
+.fwc26 .heroCard::after {
+    background: radial-gradient(circle, rgba(245, 41, 53, 0.16) 0%, transparent 70%);
+}
+
+/* Hero title — Anton display with 3D blue/red shadow stack */
+.fwc26 .heroTitle {
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    font-size: clamp(2.4rem, 6.2vw, 5.2rem);
+    line-height: 0.86;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
+    color: #ffffff;
+    text-shadow: 3px 3px 0 var(--fwc-blue), 6px 6px 0 var(--fwc-red);
+}
+[data-theme="light"] .fwc26 .heroTitle {
+    color: var(--fwc-ink);
+}
+
+.fwc26 .heroMetaItem {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--fwc-text-soft);
+}
+.fwc26 .heroMetaDot {
+    width: 4px;
+    height: 4px;
+    background: var(--fwc-text-muted);
+    opacity: 0.45;
+}
+
+/* Hero logo plate — transparent backdrop so the official emblem reads cleanly */
+.fwc26 .heroLogoWrap {
+    width: 160px;
+    height: 160px;
+    border-radius: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+}
+.fwc26 .heroLogoWrap::before {
+    background: none;
+    box-shadow: none;
+}
+.fwc26 .heroLogoImg {
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 24px rgba(245, 41, 53, 0.32));
+}
+.fwc26Badge {
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    font-size: 5.6rem;
+    line-height: 1;
+    color: #ffffff;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.28);
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 2;
+}
+
+/* Status badges — pill style with crimson live pulse */
+.fwc26 .statusBadge {
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    font-weight: 900;
+}
+.fwc26 .statusActive {
+    background: rgba(245, 41, 53, 0.12);
+    color: #FF6B72;
+    border-color: rgba(245, 41, 53, 0.35);
+}
+.fwc26 .statusActive::before {
+    background: var(--fwc-red);
+    box-shadow: 0 0 12px var(--fwc-red);
+    width: 8px;
+    height: 8px;
+}
+.fwc26 .statusUpcoming {
+    background: rgba(244, 216, 74, 0.12);
+    color: var(--fwc-yellow);
+    border-color: rgba(244, 216, 74, 0.32);
+}
+.fwc26 .statusFinished {
+    background: rgba(126, 182, 255, 0.08);
+    color: var(--fwc-sky);
+    border-color: rgba(126, 182, 255, 0.26);
+}
+
+/* CTA buttons — glass secondary, green→teal primary (follow) */
+.fwc26 .ctaBtnSecondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    border: 1px solid var(--fwc-border-strong);
+    border-radius: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 800;
+    font-size: 0.78rem;
+    padding: 12px 22px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.fwc26 .ctaBtnSecondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+.fwc26 .followBtn {
+    border-radius: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 800;
+    font-size: 0.78rem;
+    padding: 12px 22px;
+    background: linear-gradient(135deg, #00C978, #4ED7C5);
+    color: #04100B;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 201, 120, 0.28);
+}
+.fwc26 .followBtn:hover {
+    background: linear-gradient(135deg, #00C978, #4ED7C5);
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(0, 201, 120, 0.4);
+}
+.fwc26 .followBtnActive {
+    background: linear-gradient(135deg, #F52935, #6B55D9);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 10px 30px rgba(245, 41, 53, 0.3);
+}
+
+/* ── Quick stats — accent border-top per card ────────────────────── */
+.fwc26 .quickStatsRow {
+    gap: 16px;
+}
+.fwc26 .statCard {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)),
+        var(--fwc-card);
+    border: 1px solid var(--fwc-border-soft);
+    border-radius: 20px;
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s ease, transform 0.25s ease;
+}
+.fwc26 .statCard:hover {
+    border-color: var(--fwc-border-strong);
+    transform: translateY(-2px);
+}
+.fwc26 .statCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--fwc-blue);
+    opacity: 1;
+}
+.fwc26 .quickStatsRow > .statCard:nth-child(1)::before { background: var(--fwc-blue); }
+.fwc26 .quickStatsRow > .statCard:nth-child(2)::before { background: var(--fwc-green); }
+.fwc26 .quickStatsRow > .statCard:nth-child(3)::before { background: var(--fwc-red); }
+.fwc26 .quickStatsRow > .statCard:nth-child(4)::before { background: var(--fwc-purple); }
+.fwc26 .quickStatsRow > .statCard:nth-child(5)::before { background: var(--fwc-yellow); }
+
+.fwc26 .statCardValue,
+.fwc26 .statCardValueSm {
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    letter-spacing: 0;
+    color: #ffffff;
+}
+.fwc26 .statCardValue { font-size: 2.3rem; line-height: 1; }
+.fwc26 .statCardValueSm { font-size: 1.15rem; line-height: 1.1; }
+.fwc26 .statCardLabel {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--fwc-text-muted);
+}
+
+/* ── Tabs — red underline + soft red gradient bg on active ───────── */
+.fwc26 .tabsBar {
+    border-bottom: 1px solid var(--fwc-border-soft);
+}
+.fwc26 .tabButton {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 800;
+    font-size: 0.78rem;
+    padding: 16px 22px;
+}
+.fwc26 .activeTab {
+    color: #ffffff;
+    background: linear-gradient(180deg, rgba(245, 41, 53, 0.12), rgba(245, 41, 53, 0));
+}
+.fwc26 .activeTab::after {
+    height: 3px;
+    left: 0;
+    right: 0;
+    background: var(--fwc-red);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* ── Section cards / titles in Anton display ─────────────────────── */
+.fwc26 .sectionCard,
+.fwc26 .monolithCard {
+    background: var(--fwc-card);
+    border: 1px solid var(--fwc-border-soft);
+    border-radius: 22px;
+}
+.fwc26 .sectionTitle,
+.fwc26 .pageTitle {
+    font-family: var(--fwc-display);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-weight: 400;
+    color: #ffffff;
+}
+
+/* ── Match rows — Anton scores, sky-blue FT, red live ───────────── */
+.fwc26 .matchScore,
+.fwc26 .matchVS {
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    color: #ffffff;
+    letter-spacing: 0;
+}
+.fwc26 .matchScore { font-size: 1.35rem; }
+.fwc26 .matchKickoffTime {
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    font-size: 1.4rem;
+    color: var(--fwc-sky);
+    letter-spacing: 0.02em;
+}
+.fwc26 .matchLive {
+    color: var(--fwc-red);
+    font-weight: 800;
+}
+.fwc26 .matchLiveDot {
+    background: var(--fwc-red);
+    box-shadow: 0 0 8px var(--fwc-red);
+}
+.fwc26 .ftBadge {
+    background: rgba(126, 182, 255, 0.12);
+    color: var(--fwc-sky);
+    border: 1px solid rgba(126, 182, 255, 0.3);
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 800;
+}
+
+/* ── Breadcrumb ──────────────────────────────────────────────────── */
+.fwc26 .breadcrumb {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--fwc-text-muted);
+}
+
+/* ── Section cards (sidebar + content) ───────────────────────────── */
+.fwc26 .sectionCard {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent),
+        var(--fwc-card);
+    border: 1px solid var(--fwc-border-soft);
+    border-radius: 22px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+}
+.fwc26 .sectionCard::before {
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(245, 41, 53, 0.45) 50%,
+        transparent 100%
+    );
+    height: 1px;
+}
+.fwc26 .sectionHeader {
+    padding: 18px 22px;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--fwc-border-soft);
+}
+.fwc26 .sectionTitle {
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    font-size: 1rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fwc-sky);
+}
+.fwc26 .linkButton {
+    color: var(--fwc-red);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 800;
+    font-size: 0.7rem;
+}
+.fwc26 .linkButton:hover { color: #FF6B72; }
+
+/* ── Featured match card — dual radial glow (red + green) ────────── */
+.fwc26 .featuredMatchCard {
+    background:
+        radial-gradient(circle at 92% 20%, rgba(245, 41, 53, 0.18), transparent 38%),
+        radial-gradient(circle at 8% 88%, rgba(0, 201, 120, 0.12), transparent 34%),
+        linear-gradient(135deg, var(--fwc-card) 0%, #0B111A 100%);
+    border: 1px solid rgba(245, 41, 53, 0.28);
+    border-left: 3px solid var(--fwc-red);
+    border-radius: 26px;
+    padding: 36px 36px 28px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+.fwc26 .featuredMatchCard::after {
+    background: radial-gradient(circle, rgba(245, 41, 53, 0.18) 0%, transparent 70%);
+}
+
+.fwc26 .featuredBadge {
+    background: rgba(0, 201, 120, 0.12);
+    color: var(--fwc-green);
+    border: 1px solid rgba(0, 201, 120, 0.32);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.66rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.fwc26 .featuredTeamName {
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    font-size: 1.15rem;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.fwc26 .featuredScoreNum {
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    font-size: 4.5rem;
+    color: #ffffff;
+    letter-spacing: 0;
+}
+.fwc26 .featuredScoreSep {
+    font-family: var(--fwc-display);
+    font-size: 2.2rem;
+    color: var(--fwc-text-muted);
+    opacity: 0.5;
+}
+.fwc26 .featuredScoreTime {
+    font-family: var(--fwc-display);
+    font-size: 1.3rem;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+}
+.fwc26 .featuredVS {
+    font-family: var(--fwc-display);
+    font-size: 2rem;
+    color: var(--fwc-text-muted);
+}
+
+.fwc26 .featuredKickoff {
+    gap: 6px;
+    min-width: 180px;
+}
+.fwc26 .featuredKickoffDate {
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    font-size: 3.2rem;
+    line-height: 0.95;
+    color: #ffffff;
+    letter-spacing: -0.005em;
+    text-shadow: 2px 2px 0 var(--fwc-blue), 4px 4px 0 var(--fwc-red);
+}
+.fwc26 .featuredKickoffTime {
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    font-size: 1.5rem;
+    color: var(--fwc-sky);
+    letter-spacing: 0.04em;
+}
+
+.fwc26 .featuredMatchMeta {
+    color: var(--fwc-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-top: 1px solid var(--fwc-border-soft);
+    margin-top: 24px;
+    padding-top: 18px;
+}
+
+/* ── Match list rows — Anton scores ──────────────────────────────── */
+.fwc26 .matchRow {
+    border-bottom-color: var(--fwc-border-soft);
+}
+.fwc26 .matchRow:hover {
+    background: rgba(245, 41, 53, 0.04);
+}
+.fwc26 .matchScoreBox {
+    background: rgba(0, 0, 0, 0.32);
+    border-color: rgba(126, 182, 255, 0.18);
+    border-radius: 6px;
+}
+.fwc26 .matchTeamName {
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-weight: 700;
+    font-size: 0.84rem;
+}
+.fwc26 .matchWinner .matchTeamName {
+    color: #ffffff;
+    font-weight: 900;
+}
+
+/* ── Standings tables — colored left border by status ────────────── */
+.fwc26 .tableHeader {
+    background: rgba(255, 255, 255, 0.025);
+    color: var(--fwc-text-muted);
+    letter-spacing: 0.12em;
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    font-size: 0.72rem;
+}
+.fwc26 .tableRow {
+    border-bottom-color: var(--fwc-border-soft);
+}
+.fwc26 .tableRow:hover {
+    background: rgba(245, 41, 53, 0.04);
+}
+.fwc26 .borderGreen {
+    border-left-color: var(--fwc-green);
+    background: rgba(0, 201, 120, 0.045);
+}
+.fwc26 .borderYellow {
+    border-left-color: var(--fwc-yellow);
+    background: rgba(244, 216, 74, 0.045);
+}
+.fwc26 .borderRed {
+    border-left-color: var(--fwc-red);
+    background: rgba(245, 41, 53, 0.045);
+}
+.fwc26 .groupHeader {
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    color: var(--fwc-sky);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.85rem;
+}
+
+/* ── Standings preview card on summary tab ───────────────────────── */
+.fwc26 .standingsPreviewCard {
+    border-radius: 22px;
+    border: 1px solid var(--fwc-border-soft);
+    background: var(--fwc-card);
+}
+
+/* ── Standings legend chips ──────────────────────────────────────── */
+.fwc26 .standingsLegend {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--fwc-border-soft);
+    border-radius: 14px;
+}
+.fwc26 .standingsLegendTitle {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 800;
+    color: var(--fwc-text-muted);
+}
+
+/* ── Sidebar gap ─────────────────────────────────────────────────── */
+.fwc26 .sidebar { gap: 18px; }
+
+/* ── Responsive: tablet ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .fwc26 .heroCard {
+        padding: 28px 24px;
+        border-radius: 20px;
+        gap: 18px;
+    }
+    .fwc26 .heroTitle {
+        font-size: clamp(2rem, 5vw, 2.8rem);
+        text-shadow: 2px 2px 0 var(--fwc-blue), 4px 4px 0 var(--fwc-red);
+    }
+    .fwc26 .heroLogoWrap {
+        width: 110px;
+        height: 110px;
+    }
+    .fwc26 .statCardValue { font-size: 1.9rem; }
+    .fwc26 .statCard { padding: 18px 20px; }
+    .fwc26 .featuredMatchCard {
+        padding: 24px 22px 20px;
+        border-radius: 22px;
+    }
+    .fwc26 .featuredScoreNum { font-size: 3.5rem; }
+    .fwc26 .featuredKickoffDate { font-size: 2.4rem; }
+    .fwc26 .sectionCard { border-radius: 18px; }
+    .fwc26 .sectionHeader { padding: 14px 18px; }
+    .fwc26 .tabButton { padding: 14px 14px; font-size: 0.74rem; letter-spacing: 0.06em; }
+}
+
+/* ── Responsive: phones ─────────────────────────────────────────── */
+@media (max-width: 600px) {
+    /* FWC26 inherits the clean global hero on phones — strip the heavy chrome */
+    .fwc26 .heroCard {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 8px 0 0;
+        border-radius: 0;
+        margin-bottom: 0;
+        gap: 12px;
+    }
+    .fwc26 .heroCard::after { display: none; }
+    .fwc26 .heroLogoWrap {
+        width: 64px;
+        height: 64px;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+    .fwc26 .heroLogoImg {
+        filter: drop-shadow(0 3px 8px rgba(245, 41, 53, 0.22));
+    }
+    .fwc26 .heroTitle {
+        font-size: 1.75rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 2px;
+        color: #ffffff;
+        text-shadow: none;
+        letter-spacing: -0.025em;
+        font-family: 'Inter', sans-serif;
+        text-transform: none;
+    }
+    .fwc26 .heroMetaItem {
+        font-size: 0.85rem;
+        color: var(--fwc-text-muted);
+        text-transform: none;
+        letter-spacing: 0;
+        font-weight: 500;
+    }
+    .fwc26 .statusBadge { display: none; }
+    .fwc26 .heroCTAs { gap: 6px; }
+    .fwc26 .ctaBtnSecondary {
+        padding: 7px 14px;
+        font-size: 0.72rem;
+        border-radius: 999px;
+        letter-spacing: 0;
+    }
+    .fwc26 .followBtn {
+        padding: 7px 14px;
+        font-size: 0.72rem;
+        border-radius: 999px;
+        letter-spacing: 0;
+    }
+
+    /* Quick stats stays hidden via the global rule above */
+    .fwc26 .quickStatsRow { display: none; }
+
+    /* Unify backgrounds — no gradients, no grid pattern, no glow */
+    .fwc26 {
+        background: var(--fl-bg);
+    }
+    .fwc26::after { display: none; }
+    .fwc26 .heroSection { background: var(--fl-bg); }
+    .fwc26 .tabsBar {
+        background: var(--fl-bg);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border-bottom-color: rgba(255, 255, 255, 0.06);
+    }
+    .fwc26 .heroCard::after { display: none; }
+
+    /* Tabs: tighter spacing */
+    .fwc26 .tabButton {
+        padding: 10px 10px;
+        font-size: 0.7rem;
+        letter-spacing: 0.04em;
+    }
+    .fwc26 .activeTab::after { height: 2px; }
+    .fwc26 .tabsBar { margin-bottom: 14px; }
+
+    /* Section cards: less padding */
+    .fwc26 .sectionCard { border-radius: 12px; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22); }
+    .fwc26 .sectionHeader { padding: 10px 12px; }
+    .fwc26 .sectionTitle { font-size: 0.82rem; letter-spacing: 0.04em; }
+    .fwc26 .linkButton { font-size: 0.58rem; letter-spacing: 0.06em; }
+
+    /* Featured match — compact */
+    .fwc26 .featuredMatchCard {
+        padding: 14px 12px 10px;
+        border-radius: 14px;
+        border-left-width: 2px;
+    }
+    .fwc26 .featuredBadge {
+        font-size: 0.56rem;
+        padding: 3px 8px;
+        letter-spacing: 0.08em;
+        margin-bottom: 12px;
+    }
+    .fwc26 .featuredTeams { gap: 8px; }
+    .fwc26 .featuredTeam { gap: 6px; }
+    .fwc26 .featuredTeamLogo { width: 40px; height: 40px; }
+    .fwc26 .featuredTeamLogoPlaceholder { width: 40px; height: 40px; font-size: 1rem; }
+    .fwc26 .featuredTeamName { font-size: 0.78rem; }
+    .fwc26 .featuredScoreNum { font-size: 1.9rem; }
+    .fwc26 .featuredScoreSep { font-size: 1.1rem; }
+    .fwc26 .featuredScoreTime { font-size: 0.85rem; }
+    .fwc26 .featuredVS { font-size: 1.2rem; }
+    .fwc26 .featuredKickoff { min-width: 110px; gap: 2px; }
+    .fwc26 .featuredKickoffDate {
+        font-size: 1.15rem;
+        text-shadow: 1px 1px 0 var(--fwc-blue), 2px 2px 0 var(--fwc-red);
+    }
+    .fwc26 .featuredKickoffTime { font-size: 0.78rem; }
+    .fwc26 .featuredMatchMeta {
+        font-size: 0.55rem;
+        letter-spacing: 0.04em;
+        margin-top: 10px;
+        padding-top: 10px;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+
+    /* ── Match list rows: drop duplicate left date col, compact ── */
+    .fwc26 .matchRow {
+        grid-template-columns: 1fr minmax(72px, auto) 1fr;
+        padding: 8px 10px;
+        gap: 6px;
+    }
+    .fwc26 .matchDate { display: none; }
+    .fwc26 .matchStatus { display: none; }
+    .fwc26 .matchScoreBox {
+        padding: 3px 7px;
+        min-height: 28px;
+        border-radius: 5px;
+    }
+    .fwc26 .matchScore { font-size: 0.95rem; }
+    .fwc26 .matchVS { font-size: 0.72rem; }
+    .fwc26 .matchScheduled { font-size: 0.6rem; }
+    .fwc26 .matchTeamName { font-size: 0.74rem; letter-spacing: 0; }
+    .fwc26 .matchTeamLogo,
+    .fwc26 .matchTeamLogoEmpty { width: 16px; height: 16px; }
+
+    /* ── Standings rows: tighter padding ── */
+    .fwc26 .tableRow { padding: 7px 12px; }
+    .fwc26 .tableHeader { padding: 7px 12px; font-size: 0.62rem; letter-spacing: 0.08em; }
+    .fwc26 .groupHeader { padding: 8px 12px; font-size: 0.7rem; letter-spacing: 0.04em; }
+
+    /* ── Legend: collapse onto a single compact line ── */
+    .fwc26 .standingsLegend {
+        padding: 8px 10px;
+        border-radius: 10px;
+    }
+    .fwc26 .standingsLegendTitle {
+        display: none;
+    }
+    .fwc26 .standingsLegendItems { gap: 8px; flex-wrap: wrap; }
+    .fwc26 .standingsLegendItem { gap: 5px; }
+    .fwc26 .standingsLegendSwatch { width: 8px; height: 8px; }
+    .fwc26 .standingsLegendText { font-size: 0.55rem; letter-spacing: 0.04em; }
+
+    /* Sidebar collapses to inline gap */
+    .fwc26 .sidebar { gap: 12px; }
+
+    /* Disable the heavy grid pattern on phones to reduce visual noise */
+    .fwc26::after { background-size: 38px 38px; opacity: 0.18; }
+}
+
+/* ── Extra narrow phones ────────────────────────────────────────── */
+@media (max-width: 380px) {
+    .fwc26 .heroLogoWrap { width: 44px; height: 44px; }
+    .fwc26 .heroTitle { font-size: 1.2rem; }
+    .fwc26 .heroCTAs { gap: 4px; }
+    .fwc26 .ctaBtnSecondary,
+    .fwc26 .followBtn { padding: 5px 8px; font-size: 0.56rem; }
+    .fwc26 .featuredKickoffDate { font-size: 1rem; }
+    .fwc26 .featuredScoreNum { font-size: 1.6rem; }
+    .fwc26 .statCard { flex: 0 0 96px; min-width: 96px; padding: 8px 10px; }
+    .fwc26 .statCardValue { font-size: 0.95rem; }
+    .fwc26 .tabButton { padding: 9px 8px; font-size: 0.65rem; }
 }

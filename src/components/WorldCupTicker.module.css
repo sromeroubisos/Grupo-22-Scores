@@ -1,0 +1,302 @@
+/* ================================================================
+   FIFA WORLD CUP 2026 — Global Ticker
+   Desktop: horizontal bar below header.
+   Mobile (<900px): fixed at bottom, above MobileBottomNav.
+   ================================================================ */
+
+.ticker {
+    --fwc-red: #F52935;
+    --fwc-blue: #3F6FFF;
+    --fwc-sky: #7EB6FF;
+    --fwc-text-muted: #8EA0BD;
+    --fwc-border-soft: rgba(255, 255, 255, 0.08);
+    --fwc-display: 'Anton', 'Bebas Neue', 'Impact', 'Arial Narrow', sans-serif;
+
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 32px;
+    padding: 14px 32px;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: filter 0.2s ease;
+    background:
+        linear-gradient(135deg, rgba(245, 41, 53, 0.16) 0%, transparent 35%),
+        linear-gradient(225deg, rgba(63, 111, 255, 0.18) 0%, transparent 35%),
+        linear-gradient(180deg, #0B111A 0%, #0A0E16 100%);
+    border-top: 4px solid;
+    border-image: linear-gradient(
+        90deg,
+        #F52935 0%, #6B55D9 20%, #3F6FFF 40%, #4ED7C5 60%, #B5EF2E 80%, #F4D84A 100%
+    ) 1;
+    border-bottom: 1px solid var(--fwc-border-soft);
+    position: relative;
+    z-index: 50;
+    overflow: hidden;
+}
+
+.ticker::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 32px 32px;
+    opacity: 0.4;
+    pointer-events: none;
+}
+.ticker:hover { filter: brightness(1.08); }
+
+/* Brand */
+.brand {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+.brandLogo {
+    height: 56px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+}
+.brandLine1,
+.brandLine2 { display: none; }
+
+/* Countdown */
+.countdown {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+}
+.label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fwc-sky);
+}
+.timer {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+.cell {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--fwc-border-soft);
+    border-radius: 8px;
+    padding: 6px 10px;
+    min-width: 58px;
+    justify-content: center;
+}
+.cell b {
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    font-size: 1.6rem;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+    line-height: 1;
+}
+.cell em {
+    font-style: normal;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--fwc-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+.colon {
+    font-family: var(--fwc-display);
+    font-size: 1.4rem;
+    color: var(--fwc-text-muted);
+    opacity: 0.5;
+    line-height: 1;
+}
+
+/* Next match */
+.nextLink {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    z-index: 1;
+    padding: 4px 0;
+    border-radius: 10px;
+    transition: transform 0.18s ease;
+}
+.nextLink:hover { transform: translateY(-1px); }
+.nextLabel {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fwc-sky);
+}
+.nextMatch {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--fwc-display);
+    font-weight: 400;
+    font-size: 1.1rem;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+.vs {
+    color: var(--fwc-red);
+    font-size: 0.88rem;
+    padding: 0 2px;
+}
+.team {
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.flag {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+/* Mobile: compact single row docked above the bottom nav */
+@media (max-width: 900px) {
+    .ticker {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: calc(var(--mobile-nav-height, 78px) + env(safe-area-inset-bottom));
+        z-index: 950;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 9px 14px;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        background:
+            linear-gradient(135deg, rgba(245, 41, 53, 0.18) 0%, transparent 40%),
+            linear-gradient(225deg, rgba(63, 111, 255, 0.20) 0%, transparent 40%),
+            rgba(11, 17, 26, 0.96);
+        border-top: 2px solid;
+        border-image: linear-gradient(
+            90deg,
+            #F52935 0%, #6B55D9 20%, #3F6FFF 40%, #4ED7C5 60%, #B5EF2E 80%, #F4D84A 100%
+        ) 1;
+        border-bottom: none;
+        box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.3);
+    }
+    .ticker::before { background-size: 24px 24px; opacity: 0.25; }
+
+    /* Brand: logo only, separated from countdown */
+    .brand {
+        align-items: center;
+        flex-shrink: 0;
+        padding-right: 10px;
+        border-right: 1px solid var(--fwc-border-soft);
+    }
+    .brandLogo { height: 38px; }
+
+    /* Countdown: stacked cells with label below number */
+    .countdown {
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        flex: 1;
+        min-width: 0;
+        justify-content: center;
+    }
+    .label { display: none; }
+    .timer { gap: 4px; align-items: center; }
+    .cell {
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        padding: 0 4px;
+        min-width: 32px;
+        background: none;
+        border: none;
+        border-radius: 0;
+        line-height: 1;
+    }
+    .cell b {
+        font-size: 1.2rem;
+        letter-spacing: 0.01em;
+        line-height: 1;
+        display: block;
+    }
+    .cell em {
+        display: block;
+        font-size: 0.5rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        line-height: 1;
+        margin-top: 1px;
+        color: var(--fwc-text-muted);
+    }
+    .colon {
+        font-size: 0.95rem;
+        align-self: center;
+        padding-bottom: 8px; /* align to the number row, ignore the em label */
+    }
+
+    /* Next match: flags separated by red "VS" */
+    .nextLink {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        padding: 0 0 0 8px;
+        border-left: 1px solid var(--fwc-border-soft);
+        flex-shrink: 0;
+    }
+    .nextLabel { display: none; }
+    .nextMatch {
+        font-size: 0.7rem;
+        gap: 6px;
+        font-weight: 800;
+    }
+    .team { display: none; }
+    .vs {
+        display: inline-block;
+        font-size: 0.7rem;
+        color: var(--fwc-red);
+        font-weight: 900;
+        font-family: 'Inter', sans-serif;
+        letter-spacing: 0.08em;
+    }
+    .flag {
+        width: 26px;
+        height: 26px;
+        border-radius: 4px;
+    }
+}
+
+/* Extra narrow phones (<380px): drop separators to save space */
+@media (max-width: 380px) {
+    .ticker { gap: 10px; padding: 8px 10px; }
+    .brand { padding-right: 8px; }
+    .brandLogo { height: 32px; }
+    .cell { padding: 0 3px; min-width: 28px; }
+    .cell b { font-size: 1.05rem; }
+    .cell em { font-size: 0.45rem; }
+    .colon { display: none; }
+    .nextLink { padding-left: 6px; gap: 5px; }
+    .flag { width: 22px; height: 22px; }
+}

@@ -26,6 +26,7 @@ type ResolveExternalTournamentIdInput = {
 const FLASHSCORE_TOURNAMENT_ID_RE = /^fs-/i;
 const ESPN_TOURNAMENT_ID_RE = /^espn-league-[a-z0-9-]+$/i;
 const ESPN_MOTORSPORT_TOURNAMENT_ID_RE = /^espn-racing-league-[a-z0-9-]+$/i;
+const ESPN_SOCCER_TOURNAMENT_ID_RE = /^espn-soccer-league-[a-z0-9._-]+$/i;
 
 function normalizeString(value: unknown): string | null {
     if (typeof value === 'number' && Number.isFinite(value)) {
@@ -70,7 +71,8 @@ export function isExternalTournamentId(value: unknown): boolean {
     return (
         FLASHSCORE_TOURNAMENT_ID_RE.test(normalized) ||
         ESPN_TOURNAMENT_ID_RE.test(normalized) ||
-        ESPN_MOTORSPORT_TOURNAMENT_ID_RE.test(normalized)
+        ESPN_MOTORSPORT_TOURNAMENT_ID_RE.test(normalized) ||
+        ESPN_SOCCER_TOURNAMENT_ID_RE.test(normalized)
     );
 }
 

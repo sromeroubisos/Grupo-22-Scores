@@ -13,6 +13,8 @@ import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
 import TournamentPublicStats from './TournamentPublicStats';
 import TournamentScoresPanel from './TournamentScoresPanel';
+import TournamentSofascoreStats from './TournamentSofascoreStats';
+import { resolveSofascoreLeague } from '@/lib/sofascoreLeagueMap';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { getAllCountries, getCountryById } from '@/lib/data/countries';
 import { normalizeTeamLabelAssignments, resolveStandingsRowLabel } from '@/lib/teamLabels';
@@ -111,6 +113,10 @@ function isRugbyApiSportsTournamentId(value: string) {
 
 function isEspnAmericanFootballTournamentId(value: string) {
     return /^espn-league-[a-z0-9-]+$/i.test(value);
+}
+
+function isEspnSoccerTournamentId(value: string) {
+    return /^espn-soccer-league-[a-z0-9._-]+$/i.test(value);
 }
 
 function isEspnMotorsportTournamentId(value: string) {
@@ -1649,6 +1655,20 @@ export default function TournamentDetailPage({
     const { isLeagueFavorite, toggleLeagueFavorite } = useFavorites();
     const { user, isLoading: authLoading } = useAuth();
 
+    // FIFA World Cup 26 visual identity — applied only for the ESPN soccer FIFA World Cup tournament.
+    const isFifaWorldCup = (id || '').toLowerCase() === 'espn-soccer-league-fifa.world';
+
+    // Detect phone viewport so the FWC26 layout can drop the stats row + reorder tabs.
+    const [isPhoneViewport, setIsPhoneViewport] = useState(false);
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const mq = window.matchMedia('(max-width: 600px)');
+        const update = () => setIsPhoneViewport(mq.matches);
+        update();
+        mq.addEventListener('change', update);
+        return () => mq.removeEventListener('change', update);
+    }, []);
+
     // Pre-process initialData once (synchronously) so SSR renders full content
     const [preloaded] = useState<ReturnType<typeof processDbData> | null>(() =>
         initialData?.ok ? processDbData(initialData, id) : null
@@ -1782,13 +1802,13 @@ export default function TournamentDetailPage({
                 }
 
                 if (!localTournament) {
-                    if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id) || isEspnAmericanFootballTournamentId(id)) {
+                    if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id) || isEspnAmericanFootballTournamentId(id) || isEspnSoccerTournamentId(id)) {
                         localTournament = {
                             id,
                             name: nameParam || 'Cargando...',
                             url: '',
-                            type: 'cup' as any,
-                            sportId: (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : 'rugby')) as any,
+                            type: 'league' as any,
+                            sportId: (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : isEspnSoccerTournamentId(id) ? 'football' : 'rugby')) as any,
                             countryId: 'international',
                             categories: [],
                             priority: 0,
@@ -1806,12 +1826,12 @@ export default function TournamentDetailPage({
                             name: 'Cargando...',
                             url: dbStoredUrl,
                             type: 'league' as any,
-                            sportId: (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : 'rugby')) as any,
+                            sportId: (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : isEspnSoccerTournamentId(id) ? 'football' : 'rugby')) as any,
                             countryId: 'international',
                             categories: [],
                             priority: 0,
-                            __isDbOnly: !dbStoredUrl && !hasRugbyExternalConfig && !hasFlashScoreExternalConfig,
-                            __dbLookupCandidate: !UUID_RE.test(id),
+                            __isDbOnly: !isEspnSoccerTournamentId(id) && !dbStoredUrl && !hasRugbyExternalConfig && !hasFlashScoreExternalConfig,
+                            __dbLookupCandidate: !UUID_RE.test(id) && !isEspnSoccerTournamentId(id),
                         } as any;
                     }
                 }
@@ -1936,7 +1956,8 @@ export default function TournamentDetailPage({
                     shouldFetchDbMeta &&
                     !id.toLowerCase().startsWith('fs-') &&
                     !isRugbyApiSportsTournamentId(id) &&
-                    !isEspnAmericanFootballTournamentId(id)
+                    !isEspnAmericanFootballTournamentId(id) &&
+                    !isEspnSoccerTournamentId(id)
                 ) {
                     try {
                         const metaRes = await fetch(`/api/db/tournaments/${encodeURIComponent(id)}`, {
@@ -2152,19 +2173,26 @@ export default function TournamentDetailPage({
         standingsOverUnder.length > 0 ||
         customStandingsTables.length > 0
     ));
+    const isEspnSoccerSourceForTabs = isEspnSoccerTournamentId(id);
     const shouldUseIntegratedBracketView = !hasDbKnockoutPhase && !hasVisibleStandingsData && (
         Boolean(details?.current_stage_has_cup_trees) || isKnockoutPhaseType(activeDbPhase?.phase_type)
     );
-    const hasDedicatedPlayoffTab = hasDbKnockoutPhase || (!shouldUseIntegratedBracketView && draw.length > 0);
+    // Any source that returns a non-empty draw exposes a dedicated Playoff tab so
+    // "Ver cuadro" always lands on real bracket content. The integrated standings
+    // view may also render the bracket, but the dedicated tab guarantees access.
+    const hasDedicatedPlayoffTab = hasDbKnockoutPhase || draw.length > 0;
 
     useEffect(() => {
-        if (shouldUseIntegratedBracketView && activeTab === 'playoff') {
+        // Only bounce playoff -> standings when there's no dedicated playoff tab.
+        // ESPN soccer (and any source with a real draw) keeps its own Playoff tab.
+        if (shouldUseIntegratedBracketView && !hasDedicatedPlayoffTab && activeTab === 'playoff') {
             setActiveTab('standings');
         }
-    }, [activeTab, shouldUseIntegratedBracketView]);
+    }, [activeTab, shouldUseIntegratedBracketView, hasDedicatedPlayoffTab]);
 
     // ── Loading / Error ────────────────────────────────────────────────────
 
+    const isEspnSoccerSource = isEspnSoccerSourceForTabs;
     const isLimitedExternalProvider =
         details?.provider === 'rugby-api-sports' ||
         details?.externalProvider === 'rugby-api-sports' ||
@@ -2172,6 +2200,7 @@ export default function TournamentDetailPage({
         details?.externalProvider === 'espn' ||
         isRugbyApiSportsTournamentId(id) ||
         isEspnAmericanFootballTournamentId(id) ||
+        isEspnSoccerTournamentId(id) ||
         isEspnMotorsportTournamentId(id);
     const isMotorsportTournament = Boolean(
         tournamentData?.sportId === 'motorsport' ||
@@ -2181,14 +2210,19 @@ export default function TournamentDetailPage({
         isEspnMotorsportTournamentId(String(details?.tournament_id || ''))
     );
     const shouldForceStandingsTabVisible = tournamentData?.sportId === 'basketball';
-    const navigationTabs = useMemo(() => (
-        BASE_TABS
-            .filter((tab: { id: string; label: string }) => !(isLimitedExternalProvider && (tab.id === 'stats' || tab.id === 'playoff')))
+    const hasEspnSoccerTopScorers = isEspnSoccerSource && topScorers.length > 0;
+    const navigationTabs = useMemo(() => {
+        let tabs = BASE_TABS
+            .filter((tab: { id: string; label: string }) => !(isLimitedExternalProvider && !hasEspnSoccerTopScorers && tab.id === 'stats'))
+            .filter((tab: { id: string; label: string }) => !(isLimitedExternalProvider && !isEspnSoccerSource && tab.id === 'playoff'))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'standings' && !shouldUseIntegratedBracketView && !hasVisibleStandingsData && !shouldForceStandingsTabVisible))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'playoff' && !hasDedicatedPlayoffTab))
             .map((tab: { id: string; label: string }) => {
                 if (tab.id === 'standings' && shouldUseIntegratedBracketView) {
                     return { ...tab, label: 'Cuadro' };
+                }
+                if (tab.id === 'stats' && hasEspnSoccerTopScorers) {
+                    return { ...tab, label: 'Goleadores' };
                 }
                 if (!isMotorsportTournament) return tab;
                 if (tab.id === 'results') return { ...tab, label: 'Calendario' };
@@ -2196,12 +2230,25 @@ export default function TournamentDetailPage({
                 if (tab.id === 'standings') return { ...tab, label: 'Clasificacion' };
                 if (tab.id === 'teams') return { ...tab, label: 'Equipos' };
                 return tab;
-            })
-    ), [hasDedicatedPlayoffTab, hasVisibleStandingsData, isLimitedExternalProvider, isMotorsportTournament, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView]);
+            });
+
+        // FWC26 mobile: drop the Summary tab and surface Standings first so users
+        // land on the classification table directly.
+        if (isFifaWorldCup && isPhoneViewport) {
+            tabs = tabs.filter((t) => t.id !== 'summary');
+            const idx = tabs.findIndex((t) => t.id === 'standings');
+            if (idx > 0) {
+                const [standings] = tabs.splice(idx, 1);
+                tabs.unshift(standings);
+            }
+        }
+
+        return tabs;
+    }, [hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
 
     useEffect(() => {
         if (navigationTabs.some((tab: { id: string; label: string }) => tab.id === activeTab)) return;
-        setActiveTab('summary');
+        setActiveTab(navigationTabs[0]?.id || 'summary');
     }, [activeTab, navigationTabs]);
 
     useEffect(() => {
@@ -2609,6 +2656,22 @@ export default function TournamentDetailPage({
                 ? motorsportOverallGroups.drivers.slice(0, 8)
                 : (motorsportOverallGroups?.ungrouped || []).slice(0, 8))
             : overallRows.slice(0, 8);
+    // For grouped standings (e.g. World Cup), keep group separation in the sidebar preview.
+    const standingsPreviewGroups: Array<{ name: string | null; rows: any[] }> = (() => {
+        if (shouldUseIntegratedBracketView || isMotorsportTournament) return [];
+        if (!isGroupedStandingsData(standings)) return [];
+        const out: Array<{ name: string | null; rows: any[] }> = [];
+        let remaining = 8;
+        for (const group of standings) {
+            if (remaining <= 0) break;
+            const rows = Array.isArray(group?.rows) ? group.rows : [];
+            if (rows.length === 0) continue;
+            const slice = rows.slice(0, remaining);
+            out.push({ name: group?.group_name || group?.name || null, rows: slice });
+            remaining -= slice.length;
+        }
+        return out;
+    })();
     const motorsportStandingsRows = isMotorsportTournament
         ? (motorsportDriverRows.length > 0 ? motorsportDriverRows : activeFlatRows)
         : [];
@@ -2713,17 +2776,20 @@ export default function TournamentDetailPage({
 
         const scoreHome = match.scores?.home ?? match.scores?.home_score ?? match.home_score;
         const scoreAway = match.scores?.away ?? match.scores?.away_score ?? match.away_score;
-        const hasScore = scoreHome !== undefined && scoreHome !== null;
 
         const homeName = match.home_team?.name || match.event_home_team || match.home_team_name || 'Local';
         const awayName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Visitante';
         const homeLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
         const awayLogo = getTeamLogo(match.away_team) || match.away_team_logo || '';
 
-        const homeWon = hasScore && typeof scoreHome === 'number' && typeof scoreAway === 'number' && scoreHome > scoreAway;
-        const awayWon = hasScore && typeof scoreHome === 'number' && typeof scoreAway === 'number' && scoreAway > scoreHome;
         const isLive = match.status === 'live' || match.status === 'in_play';
         const isFinished = match.status === 'finished' || match.status === 'ft' || isResult;
+        // Only treat as scored when the match was actually played — otherwise a default 0
+        // from the API renders "0 - 0" on upcoming fixtures.
+        const hasScore = (isFinished || isLive) && scoreHome !== undefined && scoreHome !== null;
+
+        const homeWon = hasScore && typeof scoreHome === 'number' && typeof scoreAway === 'number' && scoreHome > scoreAway;
+        const awayWon = hasScore && typeof scoreHome === 'number' && typeof scoreAway === 'number' && scoreAway > scoreHome;
 
         return (
             <Link
@@ -2762,19 +2828,17 @@ export default function TournamentDetailPage({
                     }
                 </div>
 
-                {/* Score / VS box */}
+                {/* Score / time box */}
                 <div className={styles.matchScoreBox}>
-                    {hasScore
-                        ? <span className={styles.matchScore}>{scoreHome} - {scoreAway}</span>
-                        : <>
-                            <span className={styles.matchVS}>VS</span>
-                            {!isLive && (
-                                <span className={styles.matchScheduled}>
-                                    {formatMatchSchedule(date, renderTodayKey)}
-                                </span>
-                            )}
-                          </>
-                    }
+                    {hasScore ? (
+                        <span className={styles.matchScore}>{scoreHome} - {scoreAway}</span>
+                    ) : isLive ? (
+                        <span className={styles.matchVS}>VS</span>
+                    ) : timeStr ? (
+                        <span className={styles.matchKickoffTime}>{timeStr}</span>
+                    ) : (
+                        <span className={styles.matchVS}>VS</span>
+                    )}
                 </div>
 
                 {/* Away Team (left-aligned) */}
@@ -3041,6 +3105,7 @@ export default function TournamentDetailPage({
         const date = timestamp ? new Date(timestamp * 1000) : null;
         const timeStr = date ? formatArgentinaDate(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
         const dateStr = date ? formatArgentinaDate(date, { weekday: 'long', day: '2-digit', month: 'long' }) : '';
+        const shortDateStr = date ? formatArgentinaDate(date, { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
 
         const scoreHome = match.scores?.home ?? match.scores?.home_score ?? match.home_score;
         const scoreAway = match.scores?.away ?? match.scores?.away_score ?? match.away_score;
@@ -3049,7 +3114,10 @@ export default function TournamentDetailPage({
         const homeLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
         const awayLogo = getTeamLogo(match.away_team) || match.away_team_logo || '';
         const isLive = match.status === 'live' || match.status === 'in_play';
-        const hasScore = scoreHome !== undefined && scoreHome !== null && scoreHome !== '-';
+        // Only treat as scored when the match is actually played/live — otherwise a default 0 from the
+        // API renders "0 - 0" on an upcoming fixture.
+        const hasScore = (isResult || isLive)
+            && scoreHome !== undefined && scoreHome !== null && scoreHome !== '-';
 
         const badgeLabel = isLive ? '🔴 En vivo' : isResult ? 'Último resultado' : 'Próximo partido';
 
@@ -3081,18 +3149,21 @@ export default function TournamentDetailPage({
                                     <span className={styles.featuredScoreNum}>{scoreAway}</span>
                                 </>
                             ) : (
-                                <>
-                                    <span className={styles.featuredVS}>VS</span>
-                                </>
+                                <div className={styles.featuredKickoff}>
+                                    {shortDateStr && (
+                                        <span className={styles.featuredKickoffDate}>{shortDateStr}</span>
+                                    )}
+                                    {timeStr && (
+                                        <span className={styles.featuredKickoffTime}>{timeStr} hs</span>
+                                    )}
+                                    {!shortDateStr && !timeStr && (
+                                        <span className={styles.featuredVS}>VS</span>
+                                    )}
+                                </div>
                             )}
                         </div>
-                        {!hasScore && !isLive && dateStr && (
-                            <span className={styles.featuredMobileDate}>{dateStr}</span>
-                        )}
-                        {!isLive && (
-                            <span className={styles.featuredScoreTime}>
-                                {isResult ? 'FT' : timeStr}
-                            </span>
+                        {hasScore && !isLive && (
+                            <span className={styles.featuredScoreTime}>FT</span>
                         )}
                     </div>
 
@@ -3438,7 +3509,11 @@ export default function TournamentDetailPage({
     };
 
     return (
-        <div className={styles.page}>
+        <div className={`${styles.page}${isFifaWorldCup ? ` ${styles.fwc26}` : ''}`}>
+
+            {isFifaWorldCup && (
+                <div className={styles.fwc26TopBar} aria-hidden="true" />
+            )}
 
             {/* ── Hero Section ───────────────────────────────────────── */}
             <div
@@ -3463,9 +3538,11 @@ export default function TournamentDetailPage({
                         <div className={styles.heroLeft}>
                             {/* Logo */}
                             <div className={styles.heroLogoWrap}>
-                                {shouldShowTournamentLogo
-                                    ? <img src={tournamentLogo} alt={tournamentName} className={styles.heroLogoImg} onError={() => setTournamentLogoFailed(true)} />
-                                    : <span className={styles.heroLogoPlaceholder}>{tournamentName[0]}</span>}
+                                {isFifaWorldCup
+                                    ? <img src="/FIFA%20WC.PNG" alt="FIFA World Cup 2026" className={styles.heroLogoImg} />
+                                    : shouldShowTournamentLogo
+                                        ? <img src={tournamentLogo} alt={tournamentName} className={styles.heroLogoImg} onError={() => setTournamentLogoFailed(true)} />
+                                        : <span className={styles.heroLogoPlaceholder}>{tournamentName[0]}</span>}
                             </div>
 
                             {/* Info */}
@@ -3800,7 +3877,31 @@ export default function TournamentDetailPage({
                                     </div>
                                     <div className={styles.tableCard}>
                                         {renderStandingsHeader(previewStandingsColumns)}
-                                        {standingsPreviewRows.map((row: any, idx: number) => renderStandingsRow(row, idx, previewStandingsColumns))}
+                                        {(() => {
+                                            const groups: Array<{ name: string | null; rows: any[] }> = [];
+                                            for (const row of standingsPreviewRows) {
+                                                const groupName = (row?.group_name as string | null | undefined) ?? null;
+                                                const last = groups[groups.length - 1];
+                                                if (last && last.name === groupName) {
+                                                    last.rows.push(row);
+                                                } else {
+                                                    groups.push({ name: groupName, rows: [row] });
+                                                }
+                                            }
+                                            const showHeaders = groups.length > 1 || groups.some((g) => g.name);
+                                            let renderedIdx = 0;
+                                            return groups.map((group, gIdx) => (
+                                                <div key={`preview-group-${gIdx}-${group.name ?? 'none'}`}>
+                                                    {showHeaders && group.name && (
+                                                        <div className={styles.groupHeader}>{group.name}</div>
+                                                    )}
+                                                    {group.rows.map((row: any) => {
+                                                        const idx = renderedIdx++;
+                                                        return renderStandingsRow(row, idx, previewStandingsColumns);
+                                                    })}
+                                                </div>
+                                            ));
+                                        })()}
                                     </div>
                                     {renderStandingsLegend(standingsPreviewLegendItems)}
                                 </div>
@@ -4209,9 +4310,16 @@ export default function TournamentDetailPage({
                 )}
 
                 {/* ── STATS TAB ─────────────────────────────────────────── */}
-                {activeTab === 'stats' && (
-                    <TournamentPublicStats matches={initialData?.matches || []} topScorers={topScorers} />
-                )}
+                {activeTab === 'stats' && (() => {
+                    const sofascoreLeague = resolveSofascoreLeague(
+                        tournamentData?.name,
+                        tournamentData?.sportId,
+                    );
+                    if (sofascoreLeague) {
+                        return <TournamentSofascoreStats sofascoreLeague={sofascoreLeague} />;
+                    }
+                    return <TournamentPublicStats matches={initialData?.matches || []} topScorers={topScorers} />;
+                })()}
 
                 {activeTab === 'scores' && (
                     <TournamentScoresPanel
