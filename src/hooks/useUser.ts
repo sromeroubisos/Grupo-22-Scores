@@ -18,8 +18,13 @@ export function useUser() {
         // Subscribe to auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
             if (event === 'SIGNED_IN' && session) {
-                // Sync user with database
-                await fetch('/api/auth/sync-user', { method: 'POST' })
+                // Swallow sync errors so they don't surface as unhandled
+                // promise rejections; loadUser() runs regardless.
+                try {
+                    await fetch('/api/auth/sync-user', { method: 'POST' })
+                } catch (syncError) {
+                    console.warn('[useUser] sync-user failed:', syncError)
+                }
                 loadUser()
             } else if (event === 'SIGNED_OUT') {
                 setUser(null)

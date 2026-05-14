@@ -180,7 +180,7 @@ const MATCH_CENTER_MATCH_SELECT = `
   away_team_id,
   homeClub:home_club_id (id, name, short_name, primary_color),
   awayClub:away_club_id (id, name, short_name, primary_color),
-  tournament:tournament_id (id, name, sport_id, external_id)
+  tournament:tournament_id (id, name, display_name, slug, sport_id, external_id, logo_url, banner_url)
 `;
 const PERSIST_MATCH_SELECT_BASE = `
   id,
@@ -228,28 +228,44 @@ async function fetchMatchPointsRules(client: SupabaseLike, match: MatchPointsRul
       phaseId = round?.phase_id ?? null;
     }
 
-    let phaseSettings: Record<string, unknown> | null = null;
-    let tournamentId = match.tournament_id ?? null;
+    // When phaseId is known, fetch the phase and the tournament concurrently:
+    // most of the time tournamentId comes from match.tournament_id, so we don't
+    // need to wait for the phase row before kicking off the tournament read.
+    const tournamentIdHint = match.tournament_id ?? null;
+    const [phaseResult, tournamentByMatchResult] = await Promise.all([
+      phaseId
+        ? client
+            .from('tournament_phases')
+            .select('settings, tournament_id')
+            .eq('id', phaseId)
+            .single()
+        : Promise.resolve({ data: null as { settings?: Record<string, unknown> | null; tournament_id?: string | null } | null }),
+      tournamentIdHint
+        ? client
+            .from('tournaments')
+            .select('id, ruleset')
+            .eq('id', tournamentIdHint)
+            .single()
+        : Promise.resolve({ data: null as { id?: string | null; ruleset?: Record<string, unknown> | null } | null }),
+    ]);
 
-    if (phaseId) {
-      const { data: phase } = await client
-        .from('tournament_phases')
-        .select('settings, tournament_id')
-        .eq('id', phaseId)
-        .single();
+    const phaseSettings = (phaseResult?.data?.settings as Record<string, unknown> | null) ?? null;
+    const phaseTournamentId = phaseResult?.data?.tournament_id ?? null;
+    let tournamentRuleset: Record<string, unknown> | null =
+      (tournamentByMatchResult?.data?.ruleset as Record<string, unknown> | null) ?? null;
 
-      phaseSettings = (phase?.settings as Record<string, unknown> | null) ?? null;
-      tournamentId = phase?.tournament_id ?? tournamentId;
-    }
-
-    let tournamentRuleset: Record<string, unknown> | null = null;
-    if (tournamentId) {
+    // Rare case: phase points to a different tournament than the match row claims.
+    // Re-fetch only when needed.
+    if (
+      phaseTournamentId &&
+      phaseTournamentId !== tournamentIdHint
+    ) {
       const { data: tournament } = await client
         .from('tournaments')
         .select('ruleset')
-        .eq('id', tournamentId)
+        .eq('id', phaseTournamentId)
         .single();
-      tournamentRuleset = (tournament?.ruleset as Record<string, unknown> | null) ?? null;
+      tournamentRuleset = (tournament?.ruleset as Record<string, unknown> | null) ?? tournamentRuleset;
     }
 
     return resolveMatchPointsRules(phaseSettings, tournamentRuleset);
@@ -787,7 +803,6 @@ async function fetchClubRosterCache(
         division_id,
         position,
         role,
-        status,
         people:person_id (
           id,
           first_name,
@@ -795,17 +810,18 @@ async function fetchClubRosterCache(
           full_name,
           name,
           position,
-          club_id,
-          role,
-          status
+          role
         )
       `)
       .eq('club_id', clubId)
       .eq('role', 'player'),
+    // Only need players (or rows with no role yet); skip coaches/staff at the DB
+    // level so we don't ship their names back over the wire.
     client
       .from('people')
-      .select('id, first_name, last_name, full_name, name, position, club_id, role, status')
-      .eq('club_id', clubId),
+      .select('id, first_name, last_name, full_name, name, position, role')
+      .eq('club_id', clubId)
+      .or('role.is.null,role.eq.player'),
     divisionId
       ? client
         .from('squad_members')
@@ -1445,7 +1461,29 @@ async function resolvePersistedEvents(
   return resolved;
 }
 
-export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: string) {
+export type FetchMatchCenterMatchOptions = {
+  /**
+   * When false, skip loading the home/away club rosters and any related
+   * `club_person_roles` / `people` / `squad_members` queries. Public viewers
+   * (e.g. /api/matches/[id]) don't need rosters; only admin / club-admin
+   * Match Center editors do. Defaults to true for backwards compatibility.
+   */
+  includeRosters?: boolean;
+  /**
+   * When false, skip loading scoring rules (tournament_phases + tournaments).
+   * Public viewers don't display them.
+   */
+  includePointsRules?: boolean;
+};
+
+export async function fetchMatchCenterMatch(
+  client: SupabaseLike,
+  matchId: string,
+  options: FetchMatchCenterMatchOptions = {},
+) {
+  const includeRosters = options.includeRosters !== false;
+  const includePointsRules = options.includePointsRules !== false;
+
   // `matches.id` is UUID; bail out for external/provider IDs (FlashScore, ESPN, Rugby API)
   // so we don't spam Postgres with `invalid input syntax for type uuid` errors.
   if (!isUuid(matchId)) {
@@ -1462,15 +1500,27 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
     return { data: null, error };
   }
 
+  // Fire all match-dependent queries concurrently. Previously match_events ran
+  // sequentially before division/rosters/pointsRules, costing one extra RTT.
+  // Rosters depend on resolved division IDs, so they stay in a second wave.
+  const [eventsRes, homeDivisionId, awayDivisionId, pointsRules] = await Promise.all([
+    client
+      .from('match_events')
+      .select('id, club_id, player_id, player_name, event_type, minute, details, video_time, parent_event_id, sequence, created_at')
+      .eq('match_id', matchId)
+      .order('created_at', { ascending: true }),
+    resolveTeamDivisionId(client, data as MatchContextRow, 'home'),
+    resolveTeamDivisionId(client, data as MatchContextRow, 'away'),
+    includePointsRules
+      ? fetchMatchPointsRules(client, data as MatchPointsRulesContext)
+      : Promise.resolve(DEFAULT_MATCH_POINTS_RULES),
+  ]);
+
   let events: ReturnType<typeof normalizeEventInput>[] = [];
   let supplementalClock: ReturnType<typeof extractClockSnapshotFromDetails> = null;
   let loadedFromRelationalTable = false;
 
-  const { data: eventRows, error: eventsError } = await client
-    .from('match_events')
-    .select('id, club_id, player_id, player_name, event_type, minute, details, video_time, parent_event_id, sequence, created_at')
-    .eq('match_id', matchId)
-    .order('created_at', { ascending: true });
+  const { data: eventRows, error: eventsError } = eventsRes as { data: any[] | null; error: any };
 
   if (!eventsError) {
     loadedFromRelationalTable = true;
@@ -1523,15 +1573,24 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
   const tournamentLogoUrl = resolvedTournament
     ? buildMatchCenterLogoUrl(resolvedTournament, tournamentOverrideId)
     : null;
-  const [homeDivisionId, awayDivisionId, pointsRules] = await Promise.all([
-    resolveTeamDivisionId(client, data as MatchContextRow, 'home'),
-    resolveTeamDivisionId(client, data as MatchContextRow, 'away'),
-    fetchMatchPointsRules(client, data as MatchPointsRulesContext),
-  ]);
-  const [homeRoster, awayRoster] = await Promise.all([
-    fetchClubRosterCache(client, normalizeText((data as any).home_club_id) || null, homeDivisionId),
-    fetchClubRosterCache(client, normalizeText((data as any).away_club_id) || null, awayDivisionId),
-  ]);
+  // Prefer the direct logo URL (from the tournaments row or external override)
+  // over the proxy URL so PDF / popup contexts that bypass our /api proxy can
+  // still load the tournament logo. The proxy URL stays as a fallback.
+  const directTournamentLogoUrl = resolvedTournament
+    ? normalizeText((resolvedTournament as Record<string, unknown>).logo_url)
+      || normalizeText((resolvedTournament as Record<string, unknown>).banner_url)
+      || null
+    : null;
+  const effectiveTournamentLogoUrl = directTournamentLogoUrl || tournamentLogoUrl;
+
+  // Rosters are heavy (3 inner queries per club). Skip them entirely for
+  // public callers that don't render them - saves ~6 supabase round-trips.
+  const [homeRoster, awayRoster] = includeRosters
+    ? await Promise.all([
+        fetchClubRosterCache(client, normalizeText((data as any).home_club_id) || null, homeDivisionId),
+        fetchClubRosterCache(client, normalizeText((data as any).away_club_id) || null, awayDivisionId),
+      ])
+    : [createRosterCache([], homeDivisionId), createRosterCache([], awayDivisionId)];
 
   return {
     data: {
@@ -1552,8 +1611,8 @@ export async function fetchMatchCenterMatch(client: SupabaseLike, matchId: strin
       tournament: resolvedTournament
         ? {
             ...resolvedTournament,
-            logo_url: tournamentLogoUrl,
-            logo: tournamentLogoUrl,
+            logo_url: effectiveTournamentLogoUrl,
+            logo: effectiveTournamentLogoUrl,
             sportId: resolvedTournament.sport_id ?? null,
           }
         : null,
