@@ -218,6 +218,29 @@ function groupTournamentsByCountry(tournaments: Tournament[]) {
     return groups;
 }
 
+function getTournamentUniqueKey(tournament: Tournament): string {
+    const id = String(tournament.id || '').trim();
+    if (id) return id;
+
+    return [
+        normalizeLookupValue(tournament.sportId),
+        normalizeLookupValue(tournament.countryId),
+        normalizeLookupValue(tournament.name || tournament.displayName || tournament.nameEs),
+    ].join('::');
+}
+
+function uniqueTournamentsByIdentity(tournaments: Tournament[]) {
+    const unique = new Map<string, Tournament>();
+
+    tournaments.forEach((tournament) => {
+        const key = getTournamentUniqueKey(tournament);
+        if (!key || unique.has(key)) return;
+        unique.set(key, tournament);
+    });
+
+    return [...unique.values()];
+}
+
 function isFlashScoreTournamentId(value: string): boolean {
     return /^fs-/i.test(value);
 }
@@ -343,7 +366,7 @@ export default function TorneosPage() {
         const externalRugbyTournaments = selectedSport.id === 'rugby' ? loadedRugbyPublicTournaments : [];
         const combined = [...sportManualTournaments, ...allTournaments, ...externalRugbyTournaments];
 
-        return combined.filter((tournament) => {
+        return uniqueTournamentsByIdentity(combined).filter((tournament) => {
             if (tournament.type !== 'local' && tournament.type !== 'cup') {
                 return false;
             }
