@@ -1,0 +1,63 @@
+name: Sofascore Stats Scrape
+
+on:
+  schedule:
+    # Daily at 06:00 ART (09:00 UTC). Adjust as needed.
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      league:
+        description: 'Sofascore league name (e.g. "Argentina Liga Profesional")'
+        required: false
+        default: 'Argentina Liga Profesional'
+      season:
+        description: 'Season year (e.g. "2026")'
+        required: false
+        default: ''
+      skip_players:
+        description: 'Skip player stats (faster)'
+        required: false
+        default: 'false'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        league:
+          - 'Argentina Liga Profesional'
+          # Add more leagues here, e.g.:
+          # - 'Spain La Liga'
+          # - 'England Premier League'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: scripts/sofascore/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r scripts/sofascore/requirements.txt
+
+      - name: Scrape ${{ matrix.league }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+        run: |
+          LEAGUE="${{ github.event.inputs.league || matrix.league }}"
+          SEASON_FLAG=""
+          if [ -n "${{ github.event.inputs.season }}" ]; then
+            SEASON_FLAG="--season ${{ github.event.inputs.season }}"
+          fi
+          SKIP_FLAG=""
+          if [ "${{ github.event.inputs.skip_players }}" = "true" ]; then
+            SKIP_FLAG="--skip-players"
+          fi
+          python scripts/sofascore/scrape_stats.py --league "$LEAGUE" $SEASON_FLAG $SKIP_FLAG

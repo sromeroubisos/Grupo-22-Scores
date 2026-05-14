@@ -1238,7 +1238,7 @@ export default function SuperCreateTournament() {
                         </div>
 
                         <div className="tplpick-callout">
-                            💡 <strong>Tip:</strong> 8 de cada 10 torneos usan "Liga · todos contra todos". Si no estás seguro, empezá ahí — podés cambiar el formato más tarde sin perder participantes ni partidos cargados.
+                            💡 <strong>Tip:</strong> 8 de cada 10 torneos usan &quot;Liga · todos contra todos&quot;. Si no estás seguro, empezá ahí — podés cambiar el formato más tarde sin perder participantes ni partidos cargados.
                         </div>
                     </section>
                 )}
@@ -1645,7 +1645,7 @@ export default function SuperCreateTournament() {
                             <div className="tplpick-callout" style={{ marginTop: '14px' }}>
                                 <Settings2 size={16} style={{ color: 'var(--info)', flexShrink: 0 }} />
                                 <div>
-                                    Para multi-fase (ej: clasificación + playoff), criterios de desempate funcionales, tags por posición y fixture importado, usá el botón <strong>"Avanzado"</strong> arriba a la derecha. Toda tu configuración se preserva.
+                                    Para multi-fase (ej: clasificación + playoff), criterios de desempate funcionales, tags por posición y fixture importado, usá el botón <strong>&quot;Avanzado&quot;</strong> arriba a la derecha. Toda tu configuración se preserva.
                                 </div>
                             </div>
                         </div>

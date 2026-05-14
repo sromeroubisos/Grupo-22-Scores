@@ -669,29 +669,43 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
     background: var(--accent-cyan);
     color: #fff;
-    font-size: 0.75rem;
+    font-size: 11px;
     font-weight: 900;
-    box-shadow: 0 0 10px rgba(0, 163, 101, 0.2);
+    box-shadow: 0 0 6px rgba(0, 163, 101, 0.18);
     flex-shrink: 0;
 }
 
 .tiebreaker-info {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
+    margin-right: auto;
 }
 
+/* Name should not show an ellipsis cue — clip cleanly if it overflows so
+   the row keeps a single visual line without "…" noise. Realistic
+   Spanish labels ("Diferencia de Puntos", "Enfrentamiento Directo")
+   fit within ~150px after the badge/toggle/X reservation at 380px. */
 .tiebreaker-name {
     color: #fff;
-    font-size: 0.875rem;
+    font-size: 14px;
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: clip;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1.15;
+}
+
+.tiebreaker-warning-icon {
+    flex-shrink: 0;
+    display: inline-flex;
 }
 
 .tiebreaker-desc {
@@ -703,28 +717,32 @@
     margin-top: 2px;
 }
 
-/* Segmented Pill for Order (Asc/Desc) */
+/* Segmented Pill for Order (Asc/Desc) — 24px tall, tight padding */
 .order-pill-wrapper {
     display: inline-flex;
+    align-self: center;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 5px;
     overflow: hidden;
-    padding: 2px;
+    padding: 1px;
+    flex-shrink: 0;
 }
 
 .order-pill-btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.65rem;
+    padding: 4px 8px;
+    height: 22px;
+    font-size: 11px;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    text-transform: none;
+    letter-spacing: 0;
     color: #888;
     background: transparent;
     border: none;
-    border-radius: 4px;
+    border-radius: 3px;
     cursor: pointer;
     transition: all 0.2s;
+    line-height: 1;
 }
 
 .order-pill-btn:hover:not(.active) {
@@ -734,8 +752,222 @@
 
 .order-pill-btn.active {
     color: #fff;
-    background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    background: var(--accent-primary, #00a365);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+/* List of active tiebreaker cards — 6px gap between cards. */
+.tiebreaker-active-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Tiebreaker card — ultra compact single-row layout (~46px tall). */
+.tiebreaker-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    min-height: 46px;
+    border-radius: 8px;
+}
+
+/* Reorder buttons stacked vertically, icon-only, tightly packed */
+.tiebreaker-reorder {
+    display: inline-flex;
+    flex-direction: column;
+    align-self: center;
+    gap: 1px;
+    flex-shrink: 0;
+}
+
+.tiebreaker-reorder-btn {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #cfd6dd;
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease, transform 100ms ease;
+    padding: 0;
+}
+
+.tiebreaker-reorder-btn:hover:not(:disabled) {
+    background: rgba(0, 163, 101, 0.16);
+    border-color: rgba(0, 163, 101, 0.4);
+    color: #fff;
+}
+
+.tiebreaker-reorder-btn:active:not(:disabled) {
+    transform: scale(0.94);
+}
+
+.tiebreaker-reorder-btn:disabled {
+    opacity: 0.28;
+    cursor: not-allowed;
+}
+
+/* Section header with inline tooltip */
+.tiebreaker-section-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tiebreaker-info-tooltip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: #98a6b3;
+    background: transparent;
+    cursor: help;
+    transition: color 140ms ease, background 140ms ease;
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+
+.tiebreaker-info-tooltip:hover,
+.tiebreaker-info-tooltip:focus-visible {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    outline: none;
+}
+
+.tiebreaker-info-tooltip-content {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    width: max-content;
+    max-width: 260px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #1a212a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(238, 244, 247, 0.92);
+    font-size: 11px;
+    line-height: 1.4;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms ease, transform 160ms ease;
+    z-index: 30;
+    white-space: normal;
+    text-align: left;
+}
+
+.tiebreaker-info-tooltip:hover .tiebreaker-info-tooltip-content,
+.tiebreaker-info-tooltip:focus-visible .tiebreaker-info-tooltip-content,
+.tiebreaker-info-tooltip:focus-within .tiebreaker-info-tooltip-content {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+.tiebreaker-section-heading-text {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Disclosure for "Configurar columnas visibles" */
+.structure-disclosure {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+}
+
+.structure-disclosure[open] {
+    border-color: rgba(0, 163, 101, 0.28);
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.structure-disclosure-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    color: #fff;
+    font-weight: 700;
+}
+
+.structure-disclosure-summary::-webkit-details-marker {
+    display: none;
+}
+
+.structure-disclosure-summary::marker {
+    display: none;
+    content: '';
+}
+
+.structure-disclosure-summary:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.structure-disclosure-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.structure-disclosure-meta {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(223, 232, 237, 0.65);
+    letter-spacing: 0.04em;
+}
+
+.structure-disclosure-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: rgba(223, 232, 237, 0.6);
+    transition: transform 200ms ease;
+}
+
+.structure-disclosure[open] .structure-disclosure-chevron {
+    transform: rotate(90deg);
+    color: #fff;
+}
+
+.structure-disclosure-body {
+    padding: 0 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.structure-disclosure-help {
+    margin: 0;
+    font-size: 12px;
+    color: rgba(223, 232, 237, 0.7);
+    line-height: 1.4;
+}
+
+/* Higher-contrast placeholder so the search inputs are legible on dark bg */
+.tournament-structure-shell .manager-url-input::placeholder,
+.tournament-structure-shell input[placeholder]::placeholder {
+    color: rgba(223, 232, 237, 0.55);
 }
 
 /* Custom Switch for Enabled */
@@ -793,25 +1025,27 @@
     box-shadow: 0 0 5px var(--accent-cyan);
 }
 
-/* Remove Button */
+/* Remove Button — ghost icon, 20×20, no border */
 .tiebreaker-remove-btn {
-    color: #666;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
+    color: #888;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: transparent;
-    border: none;
+    border: 0;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: color 140ms ease, background 140ms ease;
     flex-shrink: 0;
+    align-self: center;
 }
 
 .tiebreaker-remove-btn:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.12);
 }
 
 /* Available items list */
@@ -948,4 +1182,895 @@
 :root[data-theme="light"] .glossary-badge.partial {
     background: rgba(15, 23, 42, 0.08);
     color: #0f172a;
+}
+
+/* =========================================================================
+   STEP 3 · DESEMPATE — UX/UI refresh
+   Header card · split alerts · richer cards · cascade preview
+   ========================================================================= */
+
+/* ---- Step head: icon + title + subtitle + stat ---- */
+.structure-step-head-tiebreakers {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 163, 101, 0.18);
+    background:
+        linear-gradient(135deg, rgba(0, 163, 101, 0.10), transparent 55%),
+        rgba(255, 255, 255, 0.03);
+}
+
+.structure-step-head-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+}
+
+.structure-step-head-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: rgba(0, 163, 101, 0.18);
+    color: var(--accent-cyan, #00a365);
+    box-shadow: inset 0 0 0 1px rgba(0, 163, 101, 0.3);
+}
+
+.structure-step-head-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.structure-step-head-title {
+    margin: 0;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+}
+
+.structure-step-head-subtitle {
+    margin: 0;
+    color: rgba(223, 232, 237, 0.78);
+    font-size: 12.5px;
+    line-height: 1.45;
+    max-width: 60ch;
+}
+
+.structure-step-head-stat {
+    flex-shrink: 0;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 84px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.32);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+}
+
+.structure-step-head-stat-value {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.structure-step-head-stat-label {
+    margin-top: 4px;
+    color: rgba(223, 232, 237, 0.65);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* ---- Inline alert variants ---- */
+.structure-inline-alert {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.structure-inline-alert-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.structure-inline-alert-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.structure-inline-alert-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.structure-inline-alert.structure-inline-alert-error {
+    border: 1px solid rgba(239, 68, 68, 0.32);
+    background: rgba(239, 68, 68, 0.10);
+    color: #fecaca;
+}
+
+.structure-inline-alert.structure-inline-alert-error .structure-inline-alert-icon {
+    color: #f87171;
+}
+
+.structure-inline-alert.structure-inline-alert-warning {
+    border: 1px solid rgba(245, 158, 11, 0.28);
+    background: rgba(245, 158, 11, 0.08);
+    color: rgba(254, 215, 170, 0.92);
+}
+
+.structure-inline-alert.structure-inline-alert-warning .structure-inline-alert-icon {
+    color: #fbbf24;
+}
+
+/* ---- Flush field panel (no extra padding around the list grid) ---- */
+.structure-field-panel.structure-field-panel-flush {
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+/* ---- Active priority badge ---- */
+.tiebreaker-priority-badge {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 8px;
+    background: linear-gradient(140deg, var(--accent-cyan, #00a365), #0d8453);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1;
+    box-shadow: 0 2px 6px rgba(0, 163, 101, 0.32);
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
+}
+
+.tiebreaker-priority-number {
+    display: inline-block;
+    line-height: 1;
+}
+
+/* ---- Active card: a touch more breathing room ---- */
+.structure-step-panel .tiebreaker-card {
+    min-height: 54px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    gap: 10px;
+}
+
+.tiebreaker-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.tiebreaker-desc-line {
+    display: none;
+    color: rgba(223, 232, 237, 0.55);
+    font-size: 11px;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (min-width: 1280px) {
+    .tiebreaker-desc-line {
+        display: block;
+    }
+    .structure-step-panel .tiebreaker-card {
+        min-height: 60px;
+    }
+}
+
+/* ---- Order pill: arrow icon + label ---- */
+.order-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 9px;
+    height: 24px;
+}
+
+.order-pill-btn svg {
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+.order-pill-btn.active svg {
+    opacity: 1;
+}
+
+/* ---- Direct (head-to-head) tag ---- */
+.tiebreaker-mode-tag {
+    flex-shrink: 0;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.14);
+    border: 1px solid rgba(56, 189, 248, 0.32);
+    color: #7dd3fc;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* ---- Empty state for active tiebreakers ---- */
+.tiebreaker-empty-state {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 18px;
+    border: 1px dashed rgba(255, 255, 255, 0.14);
+    border-radius: 14px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(0, 0, 0, 0.0)),
+        rgba(255, 255, 255, 0.015);
+}
+
+.tiebreaker-empty-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    color: rgba(0, 163, 101, 0.95);
+    background: rgba(0, 163, 101, 0.12);
+    border: 1px solid rgba(0, 163, 101, 0.22);
+}
+
+.tiebreaker-empty-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.tiebreaker-empty-title {
+    color: rgba(238, 244, 247, 0.92);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.tiebreaker-empty-help {
+    color: rgba(223, 232, 237, 0.65);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.tiebreaker-empty-help strong {
+    color: var(--accent-cyan, #00a365);
+    font-weight: 700;
+}
+
+/* ---- Cascade preview (desktop styling — was only mobile-styled before) ---- */
+.tiebreaker-cascade-summary {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 163, 101, 0.22);
+    background: rgba(0, 163, 101, 0.07);
+    color: rgba(238, 244, 247, 0.88);
+    font-size: 12.5px;
+    line-height: 1.5;
+    position: relative;
+    padding-left: 36px;
+}
+
+.tiebreaker-cascade-summary::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    background-color: var(--accent-cyan, #00a365);
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2v20'/><path d='m17 7-5-5-5 5'/><path d='m17 17-5 5-5-5'/></svg>") center / contain no-repeat;
+    mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2v20'/><path d='m17 7-5-5-5 5'/><path d='m17 17-5 5-5-5'/></svg>") center / contain no-repeat;
+}
+
+.tiebreaker-cascade-summary strong {
+    color: #fff;
+    font-weight: 700;
+}
+
+/* ---- Available items: clearer affordance ---- */
+.structure-step-panel .available-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 12px 9px 14px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, transform 100ms ease;
+    color: inherit;
+    font: inherit;
+}
+
+.structure-step-panel .available-item:hover {
+    background: rgba(0, 163, 101, 0.08);
+    border-color: rgba(0, 163, 101, 0.32);
+}
+
+.structure-step-panel .available-item:active {
+    transform: scale(0.99);
+}
+
+.structure-step-panel .available-item:focus-visible {
+    outline: 2px solid rgba(0, 163, 101, 0.6);
+    outline-offset: 1px;
+}
+
+.available-item-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.available-item-label {
+    color: rgba(238, 244, 247, 0.94);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.available-item:hover .available-item-label {
+    color: #fff;
+}
+
+.available-item-desc {
+    color: rgba(223, 232, 237, 0.6);
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.available-item-add {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(223, 232, 237, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.available-item:hover .available-item-add {
+    background: var(--accent-cyan, #00a365);
+    border-color: var(--accent-cyan, #00a365);
+    color: #fff;
+    transform: scale(1.06);
+}
+
+/* ---- Available list "empty" message ---- */
+.tiebreaker-available-empty {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 18px 14px;
+    text-align: center;
+    border: 1px dashed rgba(255, 255, 255, 0.10);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.tiebreaker-available-empty-title {
+    color: rgba(238, 244, 247, 0.85);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.tiebreaker-available-empty-help {
+    color: rgba(223, 232, 237, 0.6);
+    font-size: 11.5px;
+    line-height: 1.4;
+}
+
+/* ---- Disclosure (Configurar columnas visibles) refinements ---- */
+.structure-disclosure-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(223, 232, 237, 0.85);
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.structure-disclosure-title-group {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.structure-disclosure-subtitle {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: rgba(223, 232, 237, 0.6);
+    line-height: 1.35;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.structure-disclosure[open] .structure-disclosure-icon {
+    background: rgba(0, 163, 101, 0.16);
+    color: var(--accent-cyan, #00a365);
+    border-color: rgba(0, 163, 101, 0.3);
+}
+
+.structure-disclosure-meta {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* ---- Light theme overrides for new pieces ---- */
+:root[data-theme="light"] .structure-step-head-tiebreakers {
+    background:
+        linear-gradient(135deg, rgba(0, 163, 101, 0.12), transparent 55%),
+        #ffffff;
+    border-color: rgba(0, 163, 101, 0.2);
+}
+
+:root[data-theme="light"] .structure-step-head-title {
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .structure-step-head-subtitle {
+    color: rgba(15, 23, 42, 0.72);
+}
+
+:root[data-theme="light"] .structure-step-head-stat {
+    background: rgba(15, 23, 42, 0.04);
+    border-color: rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme="light"] .structure-step-head-stat-value {
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .structure-step-head-stat-label {
+    color: rgba(15, 23, 42, 0.6);
+}
+
+:root[data-theme="light"] .structure-inline-alert.structure-inline-alert-error {
+    background: rgba(239, 68, 68, 0.08);
+    color: #b91c1c;
+}
+
+:root[data-theme="light"] .structure-inline-alert.structure-inline-alert-warning {
+    background: rgba(245, 158, 11, 0.10);
+    color: #92400e;
+}
+
+:root[data-theme="light"] .tiebreaker-empty-state {
+    background: #ffffff;
+    border-color: rgba(15, 23, 42, 0.12);
+}
+
+:root[data-theme="light"] .tiebreaker-empty-title {
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .tiebreaker-empty-help {
+    color: rgba(15, 23, 42, 0.65);
+}
+
+:root[data-theme="light"] .tiebreaker-cascade-summary {
+    background: rgba(0, 163, 101, 0.08);
+    color: rgba(15, 23, 42, 0.82);
+}
+
+:root[data-theme="light"] .tiebreaker-cascade-summary strong {
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .structure-step-panel .available-item {
+    background: #ffffff;
+    border-color: rgba(15, 23, 42, 0.10);
+}
+
+:root[data-theme="light"] .structure-step-panel .available-item:hover {
+    background: rgba(0, 163, 101, 0.06);
+    border-color: rgba(0, 163, 101, 0.32);
+}
+
+:root[data-theme="light"] .available-item-label {
+    color: #0f172a;
+}
+
+:root[data-theme="light"] .available-item-desc {
+    color: rgba(15, 23, 42, 0.6);
+}
+
+:root[data-theme="light"] .tiebreaker-available-empty {
+    background: rgba(15, 23, 42, 0.02);
+    border-color: rgba(15, 23, 42, 0.10);
+}
+
+:root[data-theme="light"] .tiebreaker-mode-tag {
+    background: rgba(56, 189, 248, 0.14);
+    color: #0369a1;
+    border-color: rgba(56, 189, 248, 0.32);
+}
+
+:root[data-theme="light"] .structure-disclosure-icon {
+    background: rgba(15, 23, 42, 0.05);
+    color: rgba(15, 23, 42, 0.75);
+    border-color: rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme="light"] .structure-disclosure-subtitle {
+    color: rgba(15, 23, 42, 0.6);
+}
+
+/* ---- Mobile fine-tunes ---- */
+@media (max-width: 640px) {
+    .structure-step-head-tiebreakers {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        padding: 12px;
+    }
+    .structure-step-head-stat {
+        flex-direction: row;
+        gap: 8px;
+        justify-content: flex-start;
+        min-width: 0;
+        padding: 8px 12px;
+    }
+    .structure-step-head-stat-label {
+        margin-top: 0;
+    }
+    .structure-step-head-icon {
+        width: 34px;
+        height: 34px;
+    }
+    .tiebreaker-empty-state {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+}
+
+/* =========================================================================
+   STEP 3 · LAYOUT HARDENING (final, brute-force)
+   Single column always. Grid-based card. !important to win over mobile CSS.
+   ========================================================================= */
+
+/* Always one column — Active list on top, Available below. Eliminates the
+   horizontal overflow we had inside narrow modals. */
+.structure-step-panel .wizard-content-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    gap: 18px !important;
+    align-items: stretch !important;
+    min-width: 0 !important;
+}
+
+.structure-step-panel .wizard-content-grid > * {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.structure-step-panel .wizard-right-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+}
+
+.structure-step-panel .wizard-right-panel > .flex {
+    min-width: 0 !important;
+    max-height: none !important;
+}
+
+/* ---- Tiebreaker active CARD — grid layout, never wrap ---- */
+/* Specificity: 4 classes (matches the mobile CSS rule) and !important so
+   neither display:flex nor flex-wrap can break the layout. */
+.basalt-body .tournament-structure-shell .structure-step-panel .tiebreaker-card,
+.tournament-structure-shell .structure-step-panel .tiebreaker-card,
+.structure-step-panel .tiebreaker-card {
+    display: grid !important;
+    grid-template-columns: 24px 26px minmax(0, 1fr) auto auto !important;
+    grid-template-areas: "reorder badge info pill remove" !important;
+    align-items: center !important;
+    column-gap: 8px !important;
+    row-gap: 0 !important;
+    padding: 8px 10px !important;
+    min-height: 50px !important;
+    height: auto !important;
+    border-radius: 12px !important;
+    flex-wrap: nowrap !important;
+    overflow: hidden !important;
+}
+
+/* Slot mapping for every direct child of the card. */
+.structure-step-panel .tiebreaker-card > .tiebreaker-reorder {
+    grid-area: reorder !important;
+    align-self: center !important;
+    justify-self: center !important;
+}
+.structure-step-panel .tiebreaker-card > .tiebreaker-drag-handle {
+    display: none !important;
+}
+.structure-step-panel .tiebreaker-card > .tiebreaker-priority-badge {
+    grid-area: badge !important;
+    align-self: center !important;
+    justify-self: center !important;
+    margin: 0 !important;
+}
+.structure-step-panel .tiebreaker-card > .tiebreaker-info {
+    grid-area: info !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-direction: row !important;
+    gap: 6px !important;
+}
+.structure-step-panel .tiebreaker-card > .order-pill-wrapper,
+.structure-step-panel .tiebreaker-card > .tiebreaker-mode-tag {
+    grid-area: pill !important;
+    justify-self: end !important;
+    align-self: center !important;
+}
+.structure-step-panel .tiebreaker-card > .tiebreaker-remove-btn {
+    grid-area: remove !important;
+    justify-self: end !important;
+    align-self: center !important;
+}
+
+/* Reorder column: keep ▲▼ tiny and stacked, never push the row apart. */
+.structure-step-panel .tiebreaker-card .tiebreaker-reorder {
+    width: 24px !important;
+    display: inline-flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+}
+.structure-step-panel .tiebreaker-card .tiebreaker-reorder-btn {
+    width: 22px !important;
+    height: 18px !important;
+    padding: 0 !important;
+    border-radius: 4px !important;
+}
+
+/* Label clamps to one line. */
+.structure-step-panel .tiebreaker-name {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+.structure-step-panel .tiebreaker-desc-line {
+    display: none !important;
+}
+
+/* ---- Order pill — icon-only on narrow, label appears at ≥640px viewport ---- */
+.structure-step-panel .order-pill-wrapper {
+    flex-shrink: 0 !important;
+}
+
+.structure-step-panel .order-pill-btn {
+    height: 24px !important;
+    min-height: 24px !important;
+    padding: 4px 6px !important;
+    gap: 3px !important;
+    font-size: 11px !important;
+}
+
+.structure-step-panel .order-pill-btn span {
+    display: none !important;
+}
+
+@media (min-width: 640px) {
+    .structure-step-panel .order-pill-btn {
+        padding: 4px 9px !important;
+    }
+    .structure-step-panel .order-pill-btn span {
+        display: inline !important;
+    }
+}
+
+/* ---- Mode tag (Directo) ---- */
+.structure-step-panel .tiebreaker-mode-tag {
+    flex-shrink: 0 !important;
+}
+
+/* ---- Remove button ---- */
+.structure-step-panel .tiebreaker-card .tiebreaker-remove-btn {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+}
+
+/* ---- Available items — keep them inside the panel ---- */
+.structure-step-panel .available-items-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding-right: 4px !important;
+    max-height: 320px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-width: 0 !important;
+}
+
+.structure-step-panel .available-item {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.structure-step-panel .available-item-text {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+}
+
+.structure-step-panel .available-item-label,
+.structure-step-panel .available-item-desc {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* ---- Section heading row — title + count + tooltip on a single line ---- */
+.structure-step-panel .tiebreaker-section-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+}
+
+/* ---- Cascade summary — slimmer ---- */
+.structure-step-panel .tiebreaker-cascade-summary {
+    padding: 9px 12px 9px 34px !important;
+    font-size: 12.5px !important;
+    line-height: 1.45 !important;
+}
+
+/* =========================================================================
+   STEP 5 · ESTADÍSTICAS — option cards must render as visible cards
+   The base .structure-field-panel is intentionally flat. Step 5 uses
+   <label class="structure-field-panel structure-stats-card">…</label> for
+   each toggle, but without chrome they look invisible and the wizard footer
+   appears to overlap them. Give the stats variant proper card treatment.
+   ========================================================================= */
+.structure-step-panel-stats .structure-stats-card,
+.tournament-structure-shell .structure-step-panel-stats .structure-stats-card {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 14px 16px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 50%),
+        rgba(15, 21, 28, 0.85) !important;
+    transition: border-color 160ms ease, background 160ms ease, transform 100ms ease !important;
+}
+
+.structure-step-panel-stats .structure-stats-card:hover {
+    border-color: rgba(0, 163, 101, 0.32) !important;
+    background:
+        linear-gradient(180deg, rgba(0, 163, 101, 0.08), transparent 60%),
+        rgba(15, 21, 28, 0.92) !important;
+}
+
+.structure-step-panel-stats .structure-stats-card:has(input:checked) {
+    border-color: rgba(0, 163, 101, 0.55) !important;
+    background:
+        linear-gradient(180deg, rgba(0, 163, 101, 0.12), transparent 60%),
+        rgba(10, 24, 18, 0.92) !important;
+}
+
+.structure-step-panel-stats .structure-stats-card.cursor-not-allowed {
+    background: rgba(15, 21, 28, 0.5) !important;
+}
+
+/* Light theme variants */
+:root[data-theme="light"] .structure-step-panel-stats .structure-stats-card {
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+:root[data-theme="light"] .structure-step-panel-stats .structure-stats-card:has(input:checked) {
+    background: rgba(0, 163, 101, 0.06) !important;
+    border-color: rgba(0, 163, 101, 0.35) !important;
+}
+
+/* =========================================================================
+   WIZARD FOOTER — guarantee it never visually overlaps the form above
+   ========================================================================= */
+/* Solid background, real top border, generous spacing from content above. */
+.tournament-structure-shell .phase-wizard-footer,
+.tournament-structure-shell .structure-wizard-footer,
+.basalt-body .tournament-structure-shell .phase-wizard-footer,
+.basalt-body .tournament-structure-shell .structure-wizard-footer {
+    margin-top: 28px !important;
+    padding-top: 20px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.10) !important;
+    background: transparent !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+/* Wizard content gets bottom padding so the footer can't sit too close
+   to the last form field. */
+.tournament-structure-shell .phase-wizard-content,
+.tournament-structure-shell .structure-wizard-content,
+.basalt-body .tournament-structure-shell .phase-wizard-content,
+.basalt-body .tournament-structure-shell .structure-wizard-content {
+    padding-bottom: 20px !important;
+}
+
+/* Step panels: ensure all step panels have a small bottom margin so their
+   last child doesn't visually butt against the footer's border. */
+.tournament-structure-shell .phase-wizard-step-panel,
+.tournament-structure-shell .structure-step-panel {
+    padding-bottom: 8px !important;
+}
+
+/* Light theme footer border */
+:root[data-theme="light"] .tournament-structure-shell .phase-wizard-footer,
+:root[data-theme="light"] .tournament-structure-shell .structure-wizard-footer {
+    border-top-color: rgba(15, 23, 42, 0.10) !important;
 }

@@ -62,6 +62,21 @@ interface ShellProps {
     seasonMenuItems?: TournamentSeasonMenuItem[];
 }
 
+function TournamentTabPendingState({ label }: { label: string }) {
+    return (
+        <div className="basalt-tab-pending" role="status" aria-live="polite">
+            <div className="basalt-tab-pending-orb" aria-hidden="true" />
+            <span className="basalt-tab-pending-kicker">Cargando modulo</span>
+            <strong>{label}</strong>
+            <div className="basalt-tab-pending-lines" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+            </div>
+        </div>
+    );
+}
+
 function sanitizeMatchEventDefinitions(draft: TournamentFormatDraft) {
     return draft.definitions
         .map((definition, index) => ({
@@ -142,6 +157,7 @@ function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null
     const [historicalImportOpen, setHistoricalImportOpen] = useState(false);
     const [seasonCreationOpen, setSeasonCreationOpen] = useState(false);
     const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const [pendingTab, setPendingTab] = useState<{ id: string; label: string } | null>(null);
 
     useEffect(() => {
         const shell = shellRef.current;
@@ -181,6 +197,20 @@ function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null
         const timeout = window.setTimeout(() => setActionMessage(null), 5000);
         return () => window.clearTimeout(timeout);
     }, [actionMessage]);
+
+    useEffect(() => {
+        setPendingTab(null);
+    }, [currentTab, currentSubtab]);
+
+    useEffect(() => {
+        if (!pendingTab) return;
+
+        const timeout = window.setTimeout(() => {
+            setPendingTab((current) => (current?.id === pendingTab.id ? null : current));
+        }, 12000);
+
+        return () => window.clearTimeout(timeout);
+    }, [pendingTab]);
 
     const hasDirtyDetails = useMemo(
         () => Boolean(dirtySections.details && drafts.details),
@@ -527,12 +557,19 @@ function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null
                 onSeasonNavigate={handleSeasonNavigate}
             />
 
-            <TournamentTabs id={id} currentTab={currentTab} data={data} />
+            <TournamentTabs
+                id={id}
+                currentTab={currentTab}
+                data={data}
+                onPendingTabChange={(tabId, tabLabel) => setPendingTab({ id: tabId, label: tabLabel })}
+            />
 
             <div className="basalt-shell-stage">
                 <div className={`basalt-shell-layout ${useWideWorkspace ? 'basalt-shell-layout-wide' : ''} ${!hasSidebar ? 'basalt-shell-layout-no-sidebar' : ''}`}>
                     <main className={`basalt-shell-main ${useWideWorkspace ? 'basalt-shell-main-wide' : ''} ${!hasSidebar ? 'basalt-shell-main-full' : ''}`}>
-                        {children}
+                        {pendingTab && pendingTab.id !== currentTab ? (
+                            <TournamentTabPendingState label={pendingTab.label} />
+                        ) : children}
                     </main>
 
                     {hasSidebar && (

@@ -240,13 +240,17 @@ function renderInfoGrid(input: MatchSheetPdfInput) {
   `).join('');
 }
 
-function renderTimeline(events: MatchSheetPdfEvent[]) {
-  if (events.length === 0) {
-    return '<p class="emptyText">Todavia no hay eventos cargados en el partido.</p>';
-  }
+// How many timeline rows fit comfortably on one A4 page once headers, padding,
+// and the section title are accounted for. Tweak if layout changes.
+const TIMELINE_ROWS_PER_TABLE = 22;
 
+function renderTimelineChunk(chunk: MatchSheetPdfEvent[], chunkIndex: number, totalChunks: number) {
+  const captionAttr = totalChunks > 1
+    ? `<caption>Cronologia (parte ${chunkIndex + 1} de ${totalChunks})</caption>`
+    : '';
   return `
     <table class="timelineTable">
+      ${captionAttr}
       <thead>
         <tr>
           <th>Periodo</th>
@@ -258,7 +262,7 @@ function renderTimeline(events: MatchSheetPdfEvent[]) {
         </tr>
       </thead>
       <tbody>
-        ${events.map((event) => `
+        ${chunk.map((event) => `
           <tr>
             <td>${escapeHtml(event.period || '-')}</td>
             <td class="numCell">${escapeHtml(event.minute || '--')}</td>
@@ -271,6 +275,28 @@ function renderTimeline(events: MatchSheetPdfEvent[]) {
       </tbody>
     </table>
   `;
+}
+
+function renderTimeline(events: MatchSheetPdfEvent[]) {
+  if (events.length === 0) {
+    return '<p class="emptyText">Todavia no hay eventos cargados en el partido.</p>';
+  }
+
+  // Split long timelines into multiple tables so the print engine can keep
+  // each one on a single page (combined with `page-break-inside: avoid` on
+  // `.timelineTable`). The overall PDF grows pages as needed.
+  const chunks: MatchSheetPdfEvent[][] = [];
+  for (let i = 0; i < events.length; i += TIMELINE_ROWS_PER_TABLE) {
+    chunks.push(events.slice(i, i + TIMELINE_ROWS_PER_TABLE));
+  }
+
+  return chunks
+    .map((chunk, index) => `
+      <div class="timelineChunk">
+        ${renderTimelineChunk(chunk, index, chunks.length)}
+      </div>
+    `)
+    .join('');
 }
 
 function renderStats(input: MatchSheetPdfInput) {
@@ -321,6 +347,12 @@ function buildMatchSheetHtml(input: MatchSheetPdfInput, origin: string) {
     @page { size: A4; margin: 14mm; }
     * { box-sizing: border-box; }
     html { background: #f3f4f6; }
+    img,
+    table,
+    .sheet,
+    .sheet * {
+      max-width: 100%;
+    }
     body {
       margin: 0;
       background: #f3f4f6;
@@ -337,6 +369,7 @@ function buildMatchSheetHtml(input: MatchSheetPdfInput, origin: string) {
       box-shadow: 0 18px 60px rgba(15, 23, 42, 0.12);
       padding: 34px;
       --accent: ${accent};
+      overflow-wrap: anywhere;
     }
     .topbar {
       display: flex;
@@ -351,6 +384,7 @@ function buildMatchSheetHtml(input: MatchSheetPdfInput, origin: string) {
       display: flex;
       align-items: center;
       gap: 12px;
+      min-width: 0;
     }
     .tournamentLogo {
       justify-content: flex-end;
@@ -389,6 +423,7 @@ function buildMatchSheetHtml(input: MatchSheetPdfInput, origin: string) {
       display: grid;
       gap: 3px;
       max-width: 230px;
+      min-width: 0;
     }
     .tournamentName span,
     .eyebrow {
@@ -423,6 +458,7 @@ function buildMatchSheetHtml(input: MatchSheetPdfInput, origin: string) {
       border: 1px solid #d1d5db;
       border-radius: 10px;
       background: #f9fafb;
+      min-width: 0;
     }
     .matchState strong {
       display: block;
@@ -441,9 +477,9 @@ function buildMatchSheetHtml(input: MatchSheetPdfInput, origin: string) {
     }
     .pointsGrid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
-      min-width: 320px;
+      min-width: min(320px, 100%);
     }
     .pointsGrid div {
       border: 1px solid #d1d5db;
@@ -550,6 +586,7 @@ function buildMatchSheetHtml(input: MatchSheetPdfInput, origin: string) {
       width: 100%;
       border-collapse: collapse;
       font-size: 11px;
+      table-layout: fixed;
     }
     th {
       background: #f3f4f6;
@@ -565,6 +602,8 @@ function buildMatchSheetHtml(input: MatchSheetPdfInput, origin: string) {
       border-bottom: 1px solid #e5e7eb;
       padding: 8px 7px;
       vertical-align: top;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
     tbody tr:last-child td { border-bottom: 0; }
     .timelineTable th:nth-child(5),
@@ -618,19 +657,197 @@ function buildMatchSheetHtml(input: MatchSheetPdfInput, origin: string) {
       font-size: 10px;
     }
     @media print {
+      @page { size: A4 portrait; margin: 14mm; }
+
       html,
       body {
         background: #fff;
+        width: 100%;
+        min-width: 0;
       }
+
       .sheet {
         width: 100%;
+        max-width: 182mm;
         margin: 0;
         border: 0;
         box-shadow: none;
         padding: 0;
+        overflow: visible;
       }
-      .section {
+
+      .topbar,
+      .matchState,
+      .footer {
         break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .topbar,
+      .matchState {
+        gap: 12px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .tournamentLogo {
+        flex: 1 1 42%;
+      }
+
+      .teamsLogos {
+        flex: 1 1 42%;
+      }
+
+      .tournamentName {
+        max-width: none;
+      }
+
+      h1 {
+        margin-top: 16px;
+        font-size: 22px;
+      }
+
+      .subtitle {
+        margin-bottom: 12px;
+      }
+
+      .logoBox {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+      }
+
+      .logoTournament {
+        width: 50px;
+        height: 50px;
+      }
+
+      .matchState {
+        flex-wrap: wrap;
+        margin: 14px 0;
+        padding: 12px;
+      }
+
+      .matchState > div {
+        flex: 1 1 220px;
+        min-width: 0;
+      }
+
+      .matchState strong {
+        font-size: 16px;
+      }
+
+      .scoreLine {
+        font-size: 28px !important;
+      }
+
+      .pointsBlock > .eyebrow {
+        text-align: left;
+      }
+
+      .infoGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .section {
+        margin-top: 18px;
+        break-inside: auto;
+        page-break-inside: auto;
+      }
+
+      .sectionHeader {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      .lineupGrid,
+      .statsGrid,
+      .officialsGrid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .teamBlock,
+      .statBlock,
+      .officialsGrid > div {
+        padding: 10px;
+        /* Each lineup / stat block holds exactly one table — keep it whole
+           on a single page. If it doesn't fit, the print engine will move
+           the entire block to a new page (and the PDF gains pages as needed). */
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .timelineChunk {
+        /* Each timeline chunk is sized to fit on one page. */
+        break-inside: avoid;
+        page-break-inside: avoid;
+        margin-bottom: 12px;
+      }
+
+      table {
+        table-layout: fixed;
+        font-size: 9.5px;
+        /* Tables must NOT split across pages. We keep timelines short by
+           chunking them into multiple tables on the JS side. */
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      caption {
+        caption-side: top;
+        text-align: left;
+        padding: 4px 0 6px;
+        color: #6b7280;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      thead {
+        display: table-header-group;
+      }
+
+      tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      th,
+      td {
+        padding: 5px 4px;
+        white-space: normal;
+      }
+
+      .timelineTable th:nth-child(1),
+      .timelineTable td:nth-child(1) {
+        width: 15%;
+      }
+
+      .timelineTable th:nth-child(2),
+      .timelineTable td:nth-child(2),
+      .timelineTable th:nth-child(6),
+      .timelineTable td:nth-child(6) {
+        width: 10%;
+      }
+
+      .timelineTable th:nth-child(5),
+      .timelineTable td:nth-child(5) {
+        width: auto;
+      }
+
+      .captainTag {
+        margin: 3px 0 0;
+      }
+
+      .footer {
+        margin-top: 18px;
+        flex-wrap: wrap;
       }
     }
   </style>
@@ -728,14 +945,56 @@ function buildMatchSheetHtml(input: MatchSheetPdfInput, origin: string) {
 </html>`;
 }
 
-export function exportMatchSheetPdf(input: MatchSheetPdfInput) {
+async function fetchAsDataUri(url: string | null | undefined, origin: string): Promise<string | null> {
+  const resolved = resolveAssetUrl(url, origin);
+  if (!resolved) return null;
+  if (resolved.startsWith('data:')) return resolved;
+
+  try {
+    const response = await fetch(resolved, { credentials: 'same-origin' });
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    return await new Promise<string | null>((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(typeof reader.result === 'string' ? reader.result : null);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function inlineLogosAsDataUris(input: MatchSheetPdfInput, origin: string): Promise<MatchSheetPdfInput> {
+  // Inline every logo as a base64 data URI before writing the print document.
+  // External hosts (Supabase storage, FlashScore, etc.) sometimes fail in the
+  // popup's print pipeline — auth, CORS taint, redirects, or transient errors
+  // can all leave the <img> broken. Embedding the bytes sidesteps all of it.
+  const [homeLogo, awayLogo, tournamentLogo] = await Promise.all([
+    fetchAsDataUri(input.home.logoUrl, origin),
+    fetchAsDataUri(input.away.logoUrl, origin),
+    fetchAsDataUri(input.tournament.logoUrl, origin),
+  ]);
+
+  return {
+    ...input,
+    home: { ...input.home, logoUrl: homeLogo ?? input.home.logoUrl },
+    away: { ...input.away, logoUrl: awayLogo ?? input.away.logoUrl },
+    tournament: { ...input.tournament, logoUrl: tournamentLogo ?? input.tournament.logoUrl },
+  };
+}
+
+export async function exportMatchSheetPdf(input: MatchSheetPdfInput) {
   if (typeof window === 'undefined') return false;
 
   const printWindow = window.open('', '_blank', 'width=920,height=1100');
   if (!printWindow) return false;
 
+  const origin = window.location.origin;
+  const inlinedInput = await inlineLogosAsDataUris(input, origin);
+
   printWindow.document.open();
-  printWindow.document.write(buildMatchSheetHtml(input, window.location.origin));
+  printWindow.document.write(buildMatchSheetHtml(inlinedInput, origin));
   printWindow.document.close();
 
   const triggerPrint = () => {

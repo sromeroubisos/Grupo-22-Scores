@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { logRefreshFlow } from '@/lib/debug/refreshFlow';
+import { logRefreshLoop } from '@/lib/debug/refreshLoop';
 import { createInstrumentedSupabaseFetch } from '@/lib/perf/supabase';
 import { logPerf, measureAsync } from '@/lib/perf/measure';
 import { createRetryableRefreshFetch, isRetryableAuthRefreshError } from '@/lib/supabase/auth-fetch';
@@ -241,6 +242,10 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
     logRefreshFlow('proxy_update_session_start', {
         path: request.nextUrl.pathname,
     }, 'auth');
+    logRefreshLoop('proxy_update_session_start', {
+        path: request.nextUrl.pathname,
+        method: request.method,
+    });
 
     // Fast-path: if the access_token cookie has plenty of life left, there is
     // no point in spinning up a Supabase client and (potentially) firing a
@@ -256,6 +261,12 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                 remainingSeconds,
                 durationMs: Date.now() - updateStartedAt,
             }, 'auth');
+            logRefreshLoop('proxy_fast_path', {
+                path: request.nextUrl.pathname,
+                reason: 'access_token_fresh',
+                remainingSeconds,
+                durationMs: Date.now() - updateStartedAt,
+            });
             logPerf(
                 ['PROXY'],
                 {
@@ -281,6 +292,12 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
             reason: 'missing_supabase_env',
             durationMs: Date.now() - updateStartedAt,
         }, 'auth');
+        logRefreshLoop('proxy_session_invalid', {
+            path: request.nextUrl.pathname,
+            action: 'clear_cookies',
+            reason: 'missing_supabase_env',
+            durationMs: Date.now() - updateStartedAt,
+        });
         clearAuthCookies(request, response);
         return { response, user: null };
     }
@@ -361,10 +378,15 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
     // getUser() approach was the source of repeated 429 rate-limit responses.
     let authResult: Awaited<ReturnType<typeof supabase.auth.getSession>> | null = null;
 
+    const getSessionStartedAt = Date.now();
     try {
         logRefreshFlow('proxy_get_session_start', {
             path: request.nextUrl.pathname,
         }, 'auth');
+        logRefreshLoop('proxy_getSession_start', {
+            path: request.nextUrl.pathname,
+            reason: 'access_token_expiring_or_unknown',
+        });
         authResult = await measureAsync(
             'proxy_get_session',
             async () => withTimeout(supabase.auth.getSession(), AUTH_REFRESH_TIMEOUT_MS, 'proxy_get_session'),
@@ -387,6 +409,13 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
             reason: 'timeout_or_error',
             durationMs: Date.now() - updateStartedAt,
         }, 'auth');
+        logRefreshLoop('proxy_getSession_end', {
+            path: request.nextUrl.pathname,
+            durationMs: Date.now() - getSessionStartedAt,
+            hasSession: false,
+            errorCode: error instanceof Error ? error.name : 'unknown_error',
+            outcome: 'timeout_or_error',
+        });
         if (SHOULD_LOG_PROXY_AUTH) {
             console.warn('[Middleware] Session refresh skipped:', error);
         }
@@ -426,6 +455,13 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                 reason: 'invalid_refresh_token',
                 durationMs: Date.now() - updateStartedAt,
             }, 'auth');
+            logRefreshLoop('proxy_session_invalid', {
+                path: request.nextUrl.pathname,
+                action: 'clear_cookies',
+                reason: 'invalid_refresh_token',
+                errorCode: 'code' in error && typeof error.code === 'string' ? error.code : null,
+                durationMs: Date.now() - updateStartedAt,
+            });
             clearAuthCookies(request, response);
         }
 
@@ -459,6 +495,14 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
         hasError: Boolean(error),
         durationMs: Date.now() - updateStartedAt,
     }, 'auth');
+    logRefreshLoop('proxy_getSession_end', {
+        path: request.nextUrl.pathname,
+        durationMs: Date.now() - getSessionStartedAt,
+        hasSession: Boolean(session),
+        hasUser: Boolean(user),
+        errorCode: error && 'code' in error && typeof error.code === 'string' ? error.code : null,
+        outcome: error ? 'error' : (user ? 'session_ok' : 'no_session'),
+    });
 
     return { response, user }
 }

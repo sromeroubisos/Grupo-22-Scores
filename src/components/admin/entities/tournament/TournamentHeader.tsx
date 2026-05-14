@@ -1,6 +1,8 @@
 'use client';
 
-import { ArchiveRestore, CalendarPlus, ChevronDown, MoreHorizontal } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { ArchiveRestore, CalendarPlus, ChevronDown, MoreHorizontal, X } from 'lucide-react';
 import { Database } from '@/lib/database.types';
 import { getTournamentFormatLabel } from '@/lib/utils/tournamentFormat';
 import './basalt.css';
@@ -61,7 +63,36 @@ export function TournamentHeader({
     const { shouldRender, isVisible: menuVisible } = useAnimatedDisclosure(menuOpen, 180);
     const { shouldRender: shouldRenderSeasonMenu, isVisible: seasonMenuVisible } = useAnimatedDisclosure(seasonMenuOpen, 180);
 
+    // Floating menus (3-dot + season) live inside `.basalt-header`, which
+    // has `backdrop-filter: blur(...)` on desktop. That property creates a
+    // containing block, so the menu's `position: fixed` ends up resolving
+    // against the header rather than the viewport — on mobile the panel
+    // gets pinned right under the header instead of the bottom of the
+    // screen. Portaling to <body> sidesteps the issue entirely.
+    const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+    useEffect(() => {
+        setPortalTarget(document.body);
+    }, []);
+
     const menuActions = [
+        {
+            // Mobile-only: surfaces the lifecycle change action that lives as a
+            // prominent button on desktop. On phones we collapse the primary
+            // action strip so this needs to be reachable from the overflow menu.
+            id: 'status-transition',
+            label: isTransitioning ? 'Procesando...' : 'Cambiar estado',
+            onClick: onStatusTransition,
+            hiddenDesktop: true,
+        },
+        {
+            // Mobile-only: same rationale as the lifecycle action above. The
+            // Season chip menu already exposes "Nueva temporada", but adding it
+            // here keeps both paths discoverable from the same overflow menu.
+            id: 'new-season',
+            label: 'Nueva temporada',
+            onClick: onOpenSeasonCreation,
+            hiddenDesktop: true,
+        },
         {
             id: 'recalculate',
             label: 'Recalcular',
@@ -162,7 +193,7 @@ export function TournamentHeader({
                             <ChevronDown size={14} />
                         </button>
 
-                        {shouldRenderSeasonMenu ? (
+                        {shouldRenderSeasonMenu && portalTarget ? createPortal(
                             <>
                                 <div
                                     className={`basalt-floating-backdrop ${seasonMenuVisible ? 'is-open' : ''}`}
@@ -243,7 +274,8 @@ export function TournamentHeader({
                                         </button>
                                     </div>
                                 </div>
-                            </>
+                            </>,
+                            portalTarget,
                         ) : null}
                     </div>
                 </div>
@@ -295,7 +327,7 @@ export function TournamentHeader({
                             <MoreHorizontal size={18} />
                         </button>
 
-                        {shouldRender && (
+                        {shouldRender && portalTarget && createPortal(
                             <>
                                 <div
                                     className={`basalt-floating-backdrop ${menuVisible ? 'is-open' : ''}`}
@@ -306,9 +338,19 @@ export function TournamentHeader({
                                     role="menu"
                                     aria-label="Mas acciones del torneo"
                                 >
-                                    <div className="basalt-overflow-menu-header">
-                                        <span className="basalt-overflow-menu-kicker">Acciones rapidas</span>
-                                        <strong className="basalt-overflow-menu-title">Panel de torneo</strong>
+                                    <div className="basalt-overflow-menu-header basalt-overflow-menu-header--with-close">
+                                        <div className="basalt-overflow-menu-header-copy">
+                                            <span className="basalt-overflow-menu-kicker">Acciones rapidas</span>
+                                            <strong className="basalt-overflow-menu-title">Panel de torneo</strong>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="basalt-overflow-menu-close"
+                                            onClick={onMenuClose}
+                                            aria-label="Cerrar menu"
+                                        >
+                                            <X size={16} />
+                                        </button>
                                     </div>
 
                                     <div className="basalt-overflow-menu-list">
@@ -357,7 +399,8 @@ export function TournamentHeader({
                                         })}
                                     </div>
                                 </div>
-                            </>
+                            </>,
+                            portalTarget,
                         )}
                     </div>
                 </div>

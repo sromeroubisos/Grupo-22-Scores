@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { generateLocalDateKeys, getTodayKey } from '@/lib/timezone';
+import { logRefreshLoop } from '@/lib/debug/refreshLoop';
 
 export type SourceErrorScenario = 'fs_down_db_ok' | 'db_down_fs_ok' | 'both_down' | 'fs_cache' | null;
 
@@ -104,10 +105,27 @@ export function useMatchesStore(
     if (typeof document === 'undefined' || typeof window === 'undefined') return;
 
     const handleVisibilityChange = () => {
-      setIsPageVisible(document.visibilityState === 'visible');
+      const visible = document.visibilityState === 'visible';
+      logRefreshLoop('visibilitychange', {
+        source: 'useMatchesStore',
+        visible,
+      });
+      setIsPageVisible(visible);
     };
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const handleOnline = () => {
+      logRefreshLoop('online_change', {
+        source: 'useMatchesStore',
+        online: true,
+      });
+      setIsOnline(true);
+    };
+    const handleOffline = () => {
+      logRefreshLoop('online_change', {
+        source: 'useMatchesStore',
+        online: false,
+      });
+      setIsOnline(false);
+    };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('online', handleOnline);
@@ -158,12 +176,35 @@ export function useMatchesStore(
   // Fetch a single date, update cache, return data + sources metadata
   const fetchDate = useCallback(
     async (date: string, signal?: AbortSignal): Promise<{ matches: any[]; sources?: any; ok: boolean }> => {
+      const startedAt = Date.now();
       try {
         const url = `/api/matches?date=${date}&sport=${sportId}&external=true&tz=${encodeURIComponent(timeZone)}`;
+        logRefreshLoop('fetch_matches_start', {
+          source: 'useMatchesStore.fetchDate',
+          date,
+          sport: sportId,
+        });
         const res = await fetch(url, {
           signal,
         });
-        if (!res.ok) return { matches: [], ok: false };
+        if (res.status === 401 || res.status === 403) {
+          logRefreshLoop('api_401_403', {
+            source: 'useMatchesStore.fetchDate',
+            status: res.status,
+            endpoint: '/api/matches',
+            date,
+          });
+        }
+        if (!res.ok) {
+          logRefreshLoop('fetch_matches_end', {
+            source: 'useMatchesStore.fetchDate',
+            date,
+            status: res.status,
+            ok: false,
+            durationMs: Date.now() - startedAt,
+          });
+          return { matches: [], ok: false };
+        }
         const data = await res.json();
         const arr = Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
         const sources = data.sources || null;
@@ -175,10 +216,26 @@ export function useMatchesStore(
         matchesCache.set(cacheKey(date, sportId), arr);
         lastFetchedAt.set(cacheKey(date, sportId), hasError ? Date.now() - SHORT_MISS : Date.now());
 
+        logRefreshLoop('fetch_matches_end', {
+          source: 'useMatchesStore.fetchDate',
+          date,
+          sport: sportId,
+          ok: true,
+          rows: arr.length,
+          hasSourceError: Boolean(hasError),
+          durationMs: Date.now() - startedAt,
+        });
+
         return { matches: arr, sources, ok: true };
       } catch (e: any) {
         if (e?.name === 'AbortError') return { matches: [], ok: false };
         console.error('fetchDate error:', e);
+        logRefreshLoop('fetch_matches_error', {
+          source: 'useMatchesStore.fetchDate',
+          date,
+          error: e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+          durationMs: Date.now() - startedAt,
+        });
         return { matches: [], ok: false };
       }
     },
@@ -327,6 +384,12 @@ export function useMatchesStore(
     // ── Core polling tick ─────────────────────────────────────────────────
     async function pollLiveMatches(): Promise<void> {
       if (controller.signal.aborted) return;
+      logRefreshLoop('live_poll_tick', {
+        source: 'useMatchesStore',
+        date: selectedDate,
+        sport: sportId,
+        intervalMs: livePollIntervalMs,
+      });
       try {
         const key = cacheKey(selectedDate, sportId);
 

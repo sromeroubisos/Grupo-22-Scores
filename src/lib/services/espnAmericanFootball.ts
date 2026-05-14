@@ -344,22 +344,34 @@ export function inferEspnAmericanFootballLeague(input: {
     return null;
 }
 
+const inflightEspnAmFootRequests = new Map<string, Promise<unknown>>();
+
 async function fetchEspnJson<T>(url: string, debugTag: string, cacheTtl: number) {
     const cacheKey = `espn-amfoot:${url}`;
     const cached = memoryCache.get<T>(cacheKey);
     if (cached) return cached;
 
-    const { data } = await apiFetch<T>(url, {
-        debugTag,
-        silent: true,
-        cacheTtl,
-    });
+    const existing = inflightEspnAmFootRequests.get(cacheKey) as Promise<T | null> | undefined;
+    if (existing) return existing;
 
-    if (data) {
-        memoryCache.set(cacheKey, data, cacheTtl);
-    }
+    const promise = (async () => {
+        try {
+            const { data } = await apiFetch<T>(url, {
+                debugTag,
+                silent: true,
+                cacheTtl,
+            });
+            if (data) {
+                memoryCache.set(cacheKey, data, cacheTtl);
+            }
+            return data;
+        } finally {
+            inflightEspnAmFootRequests.delete(cacheKey);
+        }
+    })();
 
-    return data;
+    inflightEspnAmFootRequests.set(cacheKey, promise);
+    return promise;
 }
 
 async function fetchScoreboardRangeEvents(

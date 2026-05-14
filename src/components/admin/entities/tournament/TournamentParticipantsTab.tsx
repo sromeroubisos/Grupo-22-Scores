@@ -22,7 +22,8 @@ import { useSearchParams } from 'next/navigation';
 import {
     Users, Search, Plus, Download, FileUp, History,
     Pencil, Trash2, IdCard, Hash, ChevronDown, ChevronUp,
-    AlertCircle, CheckCircle2, X
+    AlertCircle, CheckCircle2, X, MoreHorizontal, SlidersHorizontal,
+    CheckSquare, Square, ArrowUpDown, Layers
 } from 'lucide-react';
 import './tournament-participants-flash.css';
 import { Database } from '@/lib/database.types';
@@ -162,8 +163,27 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
     const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
     const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
 
+    // Mobile-only UI state
+    const [mobileVisibleCount, setMobileVisibleCount] = useState(50);
+    const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+    const [isMobileMoreMenuOpen, setIsMobileMoreMenuOpen] = useState(false);
+    const [isMobilePhaseSheetOpen, setIsMobilePhaseSheetOpen] = useState(false);
+    const [mobilePhaseFilter, setMobilePhaseFilter] = useState<string>('all');
+
     // Toast
     const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+    // Reset visible cap when filters/search change
+    useEffect(() => {
+        setMobileVisibleCount(50);
+    }, [searchQuery, typeFilter, statusFilter, groupFilter, sortBy, mobilePhaseFilter]);
+
+    // Close phase-assign sheet automatically when selection becomes empty
+    useEffect(() => {
+        if (selectedIds.size === 0 && isMobilePhaseSheetOpen) {
+            setIsMobilePhaseSheetOpen(false);
+        }
+    }, [selectedIds, isMobilePhaseSheetOpen]);
 
     const getErrorMessage = (err: unknown, fallback: string) =>
         err instanceof Error && err.message ? err.message : fallback;
@@ -469,6 +489,15 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
 
         return result;
     }, [participants, searchQuery, typeFilter, statusFilter, groupFilter, sortBy, phaseAssignmentsByParticipant]);
+
+    const visibleMobileParticipants = useMemo(() => {
+        if (mobilePhaseFilter === 'all') return filteredParticipants;
+        return filteredParticipants.filter((p) =>
+            (phaseAssignmentsByParticipant.get(p.id) ?? []).some((item) =>
+                item.assignment.phase_id === mobilePhaseFilter
+            )
+        );
+    }, [filteredParticipants, mobilePhaseFilter, phaseAssignmentsByParticipant]);
 
     const phasesWithGroups = useMemo(
         () => phases.filter((phase) => groups.some((group) => group.phase_id === phase.id)),
@@ -910,6 +939,571 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
 
     return (
         <div className="participants-flash-container">
+            {/* =====================================================
+                Mobile (<= 767px) - completamente rediseñado.
+                Oculto en desktop via CSS (.participants-flash-container).
+                ===================================================== */}
+            <section className="tournament-participants-mobile" aria-label="Participantes del torneo">
+                {/* ===== HERO compacto: total + estado del torneo ===== */}
+                <header className="tsm-hero">
+                    <div className="tsm-hero-line">
+                        <div className="tsm-hero-title">
+                            <span className="tsm-hero-eyebrow">Participantes</span>
+                            <strong className="tsm-hero-total-value">{stats.total}</strong>
+                            <span className="tsm-hero-total-suffix">
+                                equipo{stats.total === 1 ? '' : 's'}
+                            </span>
+                        </div>
+                        <button
+                            type="button"
+                            className="tsm-hero-history"
+                            onClick={() => setIsHistoryDrawerOpen(true)}
+                            aria-label="Ver historial"
+                        >
+                            <History size={14} />
+                        </button>
+                    </div>
+                </header>
+
+                {/* ===== Phase tabs (si hay fases configuradas) ===== */}
+                {assignmentPhases.length > 0 && (
+                    <div className="tsm-phase-tabs" role="tablist" aria-label="Filtrar por fase">
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={mobilePhaseFilter === 'all'}
+                            className={`tsm-phase-tab ${mobilePhaseFilter === 'all' ? 'is-on' : ''}`}
+                            onClick={() => setMobilePhaseFilter('all')}
+                        >
+                            <span className="tsm-phase-tab-name">Todas</span>
+                            <span className="tsm-phase-tab-count">{participants.length}</span>
+                        </button>
+                        {assignmentPhases.map((phase) => {
+                            const count = participantCountByPhase.get(phase.id) ?? 0;
+                            const active = mobilePhaseFilter === phase.id;
+                            return (
+                                <button
+                                    key={phase.id}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={active}
+                                    className={`tsm-phase-tab ${active ? 'is-on' : ''}`}
+                                    onClick={() => {
+                                        setMobilePhaseFilter(active ? 'all' : phase.id);
+                                        setAssignmentPhaseId(phase.id);
+                                    }}
+                                >
+                                    <span className="tsm-phase-tab-name">{phase.name}</span>
+                                    <span className="tsm-phase-tab-count">{count}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {/* ===== Toolbar: search + filter trigger (sticky) ===== */}
+                <div className="tsm-toolbar">
+                    <div className="tsm-search">
+                        <Search size={16} aria-hidden="true" />
+                        <input
+                            type="search"
+                            className="tsm-search-input"
+                            placeholder="Buscar nombre o codigo..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            aria-label="Buscar participante"
+                        />
+                        {searchQuery && (
+                            <button
+                                type="button"
+                                className="tsm-search-clear"
+                                onClick={() => setSearchQuery('')}
+                                aria-label="Limpiar busqueda"
+                            >
+                                <X size={14} />
+                            </button>
+                        )}
+                    </div>
+                    <button
+                        type="button"
+                        className={`tsm-filter-trigger ${(typeFilter !== 'all' || groupFilter !== 'all' || sortBy !== 'recent' || statusFilter !== 'all') ? 'is-on' : ''}`}
+                        onClick={() => setIsMobileFiltersOpen(true)}
+                        aria-label="Mas filtros"
+                    >
+                        <SlidersHorizontal size={16} />
+                        {(typeFilter !== 'all' || groupFilter !== 'all' || sortBy !== 'recent' || statusFilter !== 'all') && (
+                            <span className="tsm-filter-trigger-dot" aria-hidden="true" />
+                        )}
+                    </button>
+                </div>
+
+                {/* ===== Status filter chips (horizontal scroll) ===== */}
+                <div className="tsm-status-chips" role="group" aria-label="Filtrar por estado">
+                    {[
+                        { v: 'all', l: 'Todos', count: stats.total },
+                        { v: 'active', l: 'Activos', count: stats.active },
+                        { v: 'pending', l: 'Pendientes', count: stats.pending },
+                        { v: 'inactive', l: 'Inactivos', count: stats.inactive },
+                        { v: 'disqualified', l: 'Descalif.', count: stats.disqualified },
+                    ].map((opt) => (
+                        <button
+                            key={opt.v}
+                            type="button"
+                            className={`tsm-status-chip is-${opt.v} ${statusFilter === opt.v ? 'is-on' : ''} ${opt.count === 0 && opt.v !== 'all' ? 'is-empty' : ''}`}
+                            onClick={() => setStatusFilter(opt.v)}
+                        >
+                            <span className="tsm-status-chip-label">{opt.l}</span>
+                            <span className="tsm-status-chip-count">{opt.count}</span>
+                        </button>
+                    ))}
+                </div>
+
+                {/* ===== Active filter chips (resumen + clear all) ===== */}
+                {(typeFilter !== 'all' || groupFilter !== 'all' || sortBy !== 'recent' || mobilePhaseFilter !== 'all') && (
+                    <div className="tsm-active-chips">
+                        {typeFilter !== 'all' && (
+                            <button type="button" className="tsm-active-chip" onClick={() => setTypeFilter('all')}>
+                                {typeFilter === 'club' ? 'Club' : typeFilter === 'national_team' ? 'Seleccion' : 'Individual'}
+                                <X size={12} />
+                            </button>
+                        )}
+                        {groupFilter !== 'all' && (
+                            <button type="button" className="tsm-active-chip" onClick={() => setGroupFilter('all')}>
+                                {groupById.get(groupFilter)?.name || 'Grupo'}
+                                <X size={12} />
+                            </button>
+                        )}
+                        {mobilePhaseFilter !== 'all' && (
+                            <button type="button" className="tsm-active-chip" onClick={() => setMobilePhaseFilter('all')}>
+                                {phaseNameById.get(mobilePhaseFilter) || 'Fase'}
+                                <X size={12} />
+                            </button>
+                        )}
+                        {sortBy !== 'recent' && (
+                            <button type="button" className="tsm-active-chip" onClick={() => setSortBy('recent')}>
+                                <ArrowUpDown size={12} />
+                                {sortBy === 'name-asc' ? 'A->Z' : sortBy === 'name-desc' ? 'Z->A' : 'Seed'}
+                                <X size={12} />
+                            </button>
+                        )}
+                        <button
+                            type="button"
+                            className="tsm-active-clear"
+                            onClick={() => {
+                                setTypeFilter('all');
+                                setGroupFilter('all');
+                                setSortBy('recent');
+                                setMobilePhaseFilter('all');
+                            }}
+                        >
+                            Limpiar
+                        </button>
+                    </div>
+                )}
+
+                {/* ===== Meta linea (resultados + hint de selección) ===== */}
+                <div className="tsm-list-meta">
+                    <span>
+                        <strong>{visibleMobileParticipants.length}</strong>
+                        {visibleMobileParticipants.length !== participants.length ? ` de ${participants.length}` : ''}
+                        {' '}equipos
+                    </span>
+                    {selectedIds.size === 0 && visibleMobileParticipants.length > 0 && (
+                        <span className="tsm-list-meta-hint" aria-hidden="true">
+                            Tap logo = seleccionar
+                        </span>
+                    )}
+                </div>
+
+                {/* ===== Lista ===== */}
+                {visibleMobileParticipants.length === 0 ? (
+                    <div className="tsm-empty">
+                        <Users size={28} aria-hidden="true" />
+                        <strong>{participants.length === 0 ? 'Sin participantes' : 'Sin resultados'}</strong>
+                        <small>
+                            {participants.length === 0
+                                ? 'Agrega tu primer equipo para empezar a configurar el torneo.'
+                                : 'No hay equipos con los filtros actuales. Ajusta o limpia filtros.'}
+                        </small>
+                        {participants.length === 0 ? (
+                            <button
+                                type="button"
+                                className="tsm-empty-cta primary"
+                                onClick={() => setIsAddDrawerOpen(true)}
+                            >
+                                <Plus size={16} /> Agregar participante
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                className="tsm-empty-cta"
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setTypeFilter('all');
+                                    setStatusFilter('all');
+                                    setGroupFilter('all');
+                                    setMobilePhaseFilter('all');
+                                }}
+                            >
+                                Limpiar filtros
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    <ul className="tsm-participant-list" role="list">
+                        {visibleMobileParticipants.slice(0, mobileVisibleCount).map((p, idx) => {
+                            const isChecked = selectedIds.has(p.id);
+                            const phaseChips = phaseAssignmentsByParticipant.get(p.id) ?? [];
+                            // section letter (only when sorted alpha)
+                            const sectionLetter = (sortBy === 'name-asc' || sortBy === 'name-desc')
+                                ? (p.name?.charAt(0).toUpperCase() || '#')
+                                : null;
+                            const prevLetter = (sortBy === 'name-asc' || sortBy === 'name-desc') && idx > 0
+                                ? (visibleMobileParticipants[idx - 1]?.name?.charAt(0).toUpperCase() || '#')
+                                : null;
+                            const showLetter = sectionLetter && sectionLetter !== prevLetter;
+                            return (
+                                <React.Fragment key={p.id}>
+                                    {showLetter && (
+                                        <li className="tsm-section-letter" aria-hidden="true">{sectionLetter}</li>
+                                    )}
+                                    <li className={`tsm-participant-item is-${p.status} ${isChecked ? 'is-selected' : ''}`}>
+                                        <button
+                                            type="button"
+                                            className="tsm-participant-logo-btn"
+                                            onClick={(e) => { e.stopPropagation(); toggleSelect(p.id); }}
+                                            aria-label={isChecked ? 'Quitar seleccion' : 'Seleccionar'}
+                                            aria-pressed={isChecked}
+                                        >
+                                            <span className="tsm-participant-logo">
+                                                {isChecked ? (
+                                                    <CheckSquare size={18} />
+                                                ) : p.clubs?.logo_url ? (
+                                                    <img src={p.clubs.logo_url} alt="" />
+                                                ) : (
+                                                    <IdCard size={18} aria-hidden="true" />
+                                                )}
+                                            </span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="tsm-participant-main"
+                                            onClick={() => setEditingParticipant(p)}
+                                        >
+                                            <span className="tsm-participant-text">
+                                                <strong>{p.name}</strong>
+                                                <small>
+                                                    {p.short_code ? `${p.short_code}` : '---'}
+                                                    {' . '}
+                                                    {p.type === 'club' ? 'Club' : p.type === 'national_team' ? 'Seleccion' : 'Individual'}
+                                                    {p.seed ? ` . seed ${p.seed}` : ''}
+                                                </small>
+                                                {phaseChips.length > 0 && (
+                                                    <span className="tsm-participant-phases">
+                                                        {phaseChips.slice(0, 2).map((item) => (
+                                                            <span key={`${item.assignment.phase_id}-${item.assignment.group_id || 'p'}`} className="tsm-mini-chip">
+                                                                {phaseNameById.get(item.assignment.phase_id) || 'Fase'}
+                                                                {item.group ? ` . ${item.group.name}` : ''}
+                                                            </span>
+                                                        ))}
+                                                        {phaseChips.length > 2 && (
+                                                            <span className="tsm-mini-chip is-more">+{phaseChips.length - 2}</span>
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </span>
+                                        </button>
+
+                                        <span className={`tsm-status-rail is-${p.status}`} aria-hidden="true" />
+                                    </li>
+                                </React.Fragment>
+                            );
+                        })}
+                    </ul>
+                )}
+
+                {visibleMobileParticipants.length > mobileVisibleCount && (
+                    <button
+                        type="button"
+                        className="tsm-load-more"
+                        onClick={() => setMobileVisibleCount((c) => c + 50)}
+                    >
+                        Cargar 50 mas ({visibleMobileParticipants.length - mobileVisibleCount} restantes)
+                    </button>
+                )}
+
+                {/* ===== Bottom action bar (sticky, contextual) ===== */}
+                <div className="tsm-bottom-bar" role="toolbar" aria-label="Acciones">
+                    {selectedIds.size > 0 ? (
+                        <>
+                            <button
+                                type="button"
+                                className="tsm-bottom-bar-icon"
+                                onClick={() => setSelectedIds(new Set())}
+                                aria-label="Limpiar seleccion"
+                            >
+                                <X size={18} />
+                            </button>
+                            <span className="tsm-bottom-bar-info">
+                                {selectedIds.size} sel.
+                            </span>
+                            {assignmentPhases.length > 0 && (
+                                <button
+                                    type="button"
+                                    className="tsm-bottom-bar-btn is-primary"
+                                    onClick={() => setIsMobilePhaseSheetOpen(true)}
+                                >
+                                    <Layers size={16} /> Asignar
+                                </button>
+                            )}
+                            <button
+                                type="button"
+                                className="tsm-bottom-bar-btn is-danger"
+                                onClick={handleBulkDelete}
+                                aria-label="Eliminar seleccionados"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                type="button"
+                                className="tsm-bottom-bar-fab"
+                                onClick={() => setIsAddDrawerOpen(true)}
+                                aria-label="Nuevo participante"
+                            >
+                                <Plus size={18} />
+                                <span>Nuevo participante</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="tsm-bottom-bar-icon"
+                                onClick={() => setIsMobileMoreMenuOpen(true)}
+                                aria-label="Mas acciones"
+                            >
+                                <MoreHorizontal size={18} />
+                            </button>
+                        </>
+                    )}
+                </div>
+
+                {/* ===== Sheet: filtros ===== */}
+                {isMobileFiltersOpen && (
+                    <div className="tsm-sheet-backdrop" onClick={() => setIsMobileFiltersOpen(false)}>
+                        <div className="tsm-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Filtros">
+                            <div className="tsm-sheet-handle" aria-hidden="true" />
+                            <div className="tsm-sheet-head">
+                                <h3>Filtros y orden</h3>
+                                <button type="button" className="tsm-sheet-close" onClick={() => setIsMobileFiltersOpen(false)} aria-label="Cerrar"><X size={16} /></button>
+                            </div>
+                            <div className="tsm-sheet-body">
+                                <div className="tsm-sheet-section">
+                                    <label>Tipo de participante</label>
+                                    <div className="tsm-chip-row">
+                                        {[
+                                            { v: 'all', l: 'Todos' },
+                                            { v: 'club', l: 'Club' },
+                                            { v: 'national_team', l: 'Seleccion' },
+                                            { v: 'individual', l: 'Individual' },
+                                        ].map((opt) => (
+                                            <button
+                                                key={opt.v}
+                                                type="button"
+                                                className={`tsm-chip ${typeFilter === opt.v ? 'is-on' : ''}`}
+                                                onClick={() => setTypeFilter(opt.v)}
+                                            >
+                                                {opt.l}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {groups.length > 0 && (
+                                    <div className="tsm-sheet-section">
+                                        <label>Grupo</label>
+                                        <div className="tsm-chip-row">
+                                            <button
+                                                type="button"
+                                                className={`tsm-chip ${groupFilter === 'all' ? 'is-on' : ''}`}
+                                                onClick={() => setGroupFilter('all')}
+                                            >
+                                                Todos
+                                            </button>
+                                            {groups.map((g) => (
+                                                <button
+                                                    key={g.id}
+                                                    type="button"
+                                                    className={`tsm-chip ${groupFilter === g.id ? 'is-on' : ''}`}
+                                                    onClick={() => setGroupFilter(g.id)}
+                                                >
+                                                    {g.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="tsm-sheet-section">
+                                    <label>Orden</label>
+                                    <div className="tsm-chip-row">
+                                        {[
+                                            { v: 'recent', l: 'Mas recientes' },
+                                            { v: 'name-asc', l: 'A -> Z' },
+                                            { v: 'name-desc', l: 'Z -> A' },
+                                            { v: 'seed', l: 'Seed' },
+                                        ].map((opt) => (
+                                            <button
+                                                key={opt.v}
+                                                type="button"
+                                                className={`tsm-chip ${sortBy === opt.v ? 'is-on' : ''}`}
+                                                onClick={() => setSortBy(opt.v)}
+                                            >
+                                                {opt.l}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="tsm-sheet-foot">
+                                <button
+                                    type="button"
+                                    className="tsm-sheet-clear"
+                                    onClick={() => {
+                                        setTypeFilter('all');
+                                        setStatusFilter('all');
+                                        setGroupFilter('all');
+                                        setSortBy('recent');
+                                        setMobilePhaseFilter('all');
+                                    }}
+                                >
+                                    Limpiar
+                                </button>
+                                <button
+                                    type="button"
+                                    className="tsm-sheet-apply"
+                                    onClick={() => setIsMobileFiltersOpen(false)}
+                                >
+                                    Ver {visibleMobileParticipants.length} resultado{visibleMobileParticipants.length === 1 ? '' : 's'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* ===== Sheet: mas acciones ===== */}
+                {isMobileMoreMenuOpen && (
+                    <div className="tsm-sheet-backdrop" onClick={() => setIsMobileMoreMenuOpen(false)}>
+                        <div className="tsm-sheet is-compact" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Mas acciones">
+                            <div className="tsm-sheet-handle" aria-hidden="true" />
+                            <div className="tsm-sheet-actions">
+                                <button
+                                    type="button"
+                                    className="tsm-sheet-action"
+                                    onClick={() => { setIsMobileMoreMenuOpen(false); setIsImportDrawerOpen(true); }}
+                                >
+                                    <FileUp size={18} />
+                                    <span><strong>Importar</strong><small>CSV o lista de clubes</small></span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className="tsm-sheet-action"
+                                    onClick={() => { setIsMobileMoreMenuOpen(false); handleExport(); }}
+                                >
+                                    <Download size={18} />
+                                    <span><strong>Exportar CSV</strong><small>Descargar listado</small></span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className="tsm-sheet-action"
+                                    onClick={() => { setIsMobileMoreMenuOpen(false); setIsHistoryDrawerOpen(true); }}
+                                >
+                                    <History size={18} />
+                                    <span><strong>Historial</strong><small>Auditoria de cambios</small></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* ===== Sheet: asignar a fase (solo cuando hay seleccion) ===== */}
+                {isMobilePhaseSheetOpen && (
+                    <div className="tsm-sheet-backdrop" onClick={() => setIsMobilePhaseSheetOpen(false)}>
+                        <div className="tsm-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Asignar a fase">
+                            <div className="tsm-sheet-handle" aria-hidden="true" />
+                            <div className="tsm-sheet-head">
+                                <h3>Asignar {selectedIds.size} a fase</h3>
+                                <button type="button" className="tsm-sheet-close" onClick={() => setIsMobilePhaseSheetOpen(false)} aria-label="Cerrar"><X size={16} /></button>
+                            </div>
+                            <div className="tsm-sheet-body">
+                                <div className="tsm-sheet-section">
+                                    <label>Fase destino</label>
+                                    <div className="tsm-chip-row">
+                                        {assignmentPhases.map((phase) => (
+                                            <button
+                                                key={phase.id}
+                                                type="button"
+                                                className={`tsm-chip ${assignmentPhaseId === phase.id ? 'is-on' : ''}`}
+                                                onClick={() => setAssignmentPhaseId(phase.id)}
+                                            >
+                                                {phase.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                {assignableGroups.length > 0 && (
+                                    <div className="tsm-sheet-section">
+                                        <label>Grupo (opcional)</label>
+                                        <div className="tsm-chip-row">
+                                            {assignableGroups.map((group) => (
+                                                <button
+                                                    key={group.id}
+                                                    type="button"
+                                                    className="tsm-chip"
+                                                    onClick={async () => {
+                                                        await handleBulkAssignPhase(group.phase_id || assignmentPhaseId, group.id);
+                                                        setIsMobilePhaseSheetOpen(false);
+                                                    }}
+                                                    disabled={groupAssignmentLoading || selectedIds.size === 0}
+                                                >
+                                                    {group.name}
+                                                    <small style={{ marginLeft: 6, opacity: 0.7 }}>{participantCountByGroup.get(group.id) ?? 0}</small>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="tsm-sheet-foot tsm-sheet-foot-stack">
+                                <button
+                                    type="button"
+                                    className="tsm-sheet-apply"
+                                    onClick={async () => {
+                                        await handleBulkAssignPhase(assignmentPhaseId, null);
+                                        setIsMobilePhaseSheetOpen(false);
+                                    }}
+                                    disabled={groupAssignmentLoading || selectedIds.size === 0 || !assignmentPhaseId}
+                                >
+                                    Agregar a {phaseNameById.get(assignmentPhaseId) || 'fase'}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="tsm-sheet-clear is-danger"
+                                    onClick={async () => {
+                                        await handleBulkRemoveFromPhase(assignmentPhaseId);
+                                        setIsMobilePhaseSheetOpen(false);
+                                    }}
+                                    disabled={groupAssignmentLoading || selectedIds.size === 0 || !assignmentPhaseId}
+                                >
+                                    Quitar de la fase
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </section>
+
             {/* Header */}
             <header className="participants-header">
                 <div className="participants-header-left">

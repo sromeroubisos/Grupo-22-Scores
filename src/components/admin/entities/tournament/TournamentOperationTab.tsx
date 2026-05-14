@@ -306,6 +306,58 @@ function OperationContent({
 
     return (
         <div className="operation-console-shell flex flex-col gap-6 animate-in fade-in duration-500">
+            {/* Mobile-only redesigned overview. Hidden on desktop via CSS.
+                Replaces the verbose "OPERACION DE TORNEO" context card with a
+                compact summary + quick subtab segmented control. */}
+            <section className="tournament-operation-mobile" aria-label="Operacion del torneo">
+                <article className="tsm-card tsm-card-state">
+                    <div className="tsm-card-eyebrow">Fase activa</div>
+                    <div className="tsm-state-row">
+                        <strong className="tsm-state-status" style={{ fontSize: 18, letterSpacing: 0 }}>
+                            {isGlobalSelected ? 'Tabla Global' : selectedPhase?.name || 'Sin fase'}
+                        </strong>
+                        <span className={`tsm-state-pill ${isGlobalSelected || selectedPhase?.is_active ? 'is-public' : 'is-internal'}`}>
+                            {isGlobalSelected ? 'Global' : selectedPhase?.is_active ? 'Activa' : 'Pendiente'}
+                        </span>
+                    </div>
+                    <div className="tsm-state-meta">
+                        <span>{isGlobalSelected ? 'Circuito' : selectedPhase?.phase_type || '--'}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>Submodulo: {activeSubTab.label}</span>
+                    </div>
+                    <button
+                        type="button"
+                        className="tsm-next-cta"
+                        onClick={() => setMobilePhasePickerOpen(true)}
+                        style={{ marginTop: 12 }}
+                    >
+                        Cambiar fase
+                    </button>
+                </article>
+
+                <article className="tsm-card" style={{ padding: 6 }}>
+                    <div role="tablist" aria-label="Submodulo" className="tsm-segments">
+                        {OPERATION_SUB_TABS.map((tab) => {
+                            const Icon = tab.icon;
+                            const isActive = optimisticSubTab === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={isActive}
+                                    className={`tsm-segment ${isActive ? 'active' : ''}`}
+                                    onClick={() => switchSubTab(tab.id)}
+                                >
+                                    <Icon size={15} aria-hidden="true" />
+                                    <span>{tab.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </article>
+            </section>
+
             <div className="basalt-card operation-context-card p-4 sm:p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-l-4 border-l-accent-primary bg-gradient-to-r from-surface-basalt to-transparent">
                 <div className="flex flex-col gap-2 min-w-0">
                     <span className="text-[10px] font-bold text-accent-primary uppercase tracking-widest">Contexto competitivo</span>

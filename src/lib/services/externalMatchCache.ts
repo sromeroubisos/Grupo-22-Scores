@@ -251,6 +251,29 @@ export async function getMatchesForDate(
 }
 
 /**
+ * One-shot helper to clear out football cache rows that were ingested under
+ * the previous provider prefixes (sofa-, fs-) so the next ESPN sync pass
+ * repopulates from scratch with espn-soccer- ids. Safe to call repeatedly.
+ */
+export async function purgeNonEspnFootballCache(
+    supabase: SupabaseClient
+): Promise<{ deleted: number }> {
+    const { data, error } = await supabase
+        .from('external_match_cache')
+        .delete()
+        .eq('sport', 'football')
+        .not('id', 'like', 'espn-soccer-%')
+        .select('id');
+
+    if (error) {
+        console.error('[externalMatchCache] purgeNonEspnFootballCache error:', error.message);
+        return { deleted: 0 };
+    }
+
+    return { deleted: Array.isArray(data) ? data.length : 0 };
+}
+
+/**
  * Get live matches for a sport, filtered to rows updated within the last 5 minutes.
  * Returns empty array if no fresh live data — the caller treats this as a total fallback miss.
  */

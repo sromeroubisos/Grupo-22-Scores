@@ -34,12 +34,31 @@ import {
     Eye, // Keep existing
     FileSpreadsheet // Keep existing
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
-import * as pdfjsLib from 'pdfjs-dist';
 import styles from './PhaseCreator.module.css';
 
-// Configurar worker de PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Lazy-loaded heavy libraries (xlsx ~500KB, pdfjs-dist ~2MB).
+// Importing them top-level pulls them into the admin route bundle on every visit;
+// loading them on demand keeps the initial bundle slim.
+type XLSXModule = typeof import('xlsx');
+type PdfJsModule = typeof import('pdfjs-dist');
+
+let xlsxPromise: Promise<XLSXModule> | null = null;
+let pdfJsPromise: Promise<PdfJsModule> | null = null;
+
+const loadXLSX = (): Promise<XLSXModule> => {
+    if (!xlsxPromise) xlsxPromise = import('xlsx');
+    return xlsxPromise;
+};
+
+const loadPdfJs = (): Promise<PdfJsModule> => {
+    if (!pdfJsPromise) {
+        pdfJsPromise = import('pdfjs-dist').then((mod) => {
+            mod.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${mod.version}/pdf.worker.min.js`;
+            return mod;
+        });
+    }
+    return pdfJsPromise;
+};
 
 
 interface Criterion {
@@ -253,6 +272,7 @@ export default function PhaseCreator({
 
     const parseExcel = async (file: File) => {
         try {
+            const XLSX = await loadXLSX();
             const buffer = await file.arrayBuffer();
             const workbook = XLSX.read(buffer, { type: 'array' });
             const sheetName = workbook.SheetNames[0];
@@ -301,6 +321,7 @@ export default function PhaseCreator({
 
     const parsePDF = async (file: File) => {
         try {
+            const pdfjsLib = await loadPdfJs();
             const buffer = await file.arrayBuffer();
             const loadingTask = pdfjsLib.getDocument({ data: buffer });
             const pdf = await loadingTask.promise;

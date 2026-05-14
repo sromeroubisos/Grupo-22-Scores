@@ -6,6 +6,7 @@ import {
     findExternalTeamLogoOverride,
     mergeExternalTeamLogoOverrideRecords,
 } from '@/lib/server/externalTeamLogoOverrides';
+import { getExternalTournamentOverride } from '@/lib/server/externalTournamentOverrides';
 import { getPlayerDetails, getTeamDetails } from '@/lib/services/flashscore';
 
 const LOGO_DIR = path.join(process.cwd(), 'public', 'logos', 'clubs');
@@ -138,6 +139,24 @@ function hasExternalCandidatePrefix(value: string): boolean {
     );
 }
 
+function inferSportFromKey(value: string): string | null {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return null;
+    if (normalized.startsWith('espn-soccer-team-')) return 'football';
+    if (normalized.startsWith('espn-team-')) return 'american-football';
+    if (normalized.startsWith('espn-racing-team-')) return 'motorsport';
+    if (normalized.startsWith('ras-team-')) return 'rugby';
+    return null;
+}
+
+function normalizeSportHint(value: string | null | undefined): string | null {
+    const normalized = String(value || '').trim().toLowerCase();
+    if (!normalized) return null;
+    if (normalized === 'soccer') return 'football';
+    if (normalized === 'rugby-union' || normalized === 'rugby-sevens') return 'rugby';
+    return normalized;
+}
+
 function extractTeamDetailsLogo(details: any): string {
     return normalizeSourceUrl(firstNonEmptyString(
         details?.image_path,
@@ -218,12 +237,32 @@ async function findLogoFile(key: string): Promise<string | null> {
     return null;
 }
 
-async function findCachedLogo(key: string, teamUrl: string, teamName: string): Promise<string | null> {
+async function findExternalTournamentLogo(candidates: string[], tournamentName: string): Promise<string | null> {
+    for (const candidate of candidates) {
+        const override = await getExternalTournamentOverride(candidate).catch(() => null);
+        if (override?.logo_url) {
+            return override.logo_url;
+        }
+    }
+
+    if (tournamentName) {
+        const override = await getExternalTournamentOverride(tournamentName).catch(() => null);
+        if (override?.logo_url) {
+            return override.logo_url;
+        }
+    }
+
+    return null;
+}
+
+async function findCachedLogo(key: string, teamUrl: string, teamName: string, entity: string, sport: string | null): Promise<string | null> {
     const candidateSet = new Set<string>();
     addCandidate(candidateSet, key);
     if (teamUrl) addCandidate(candidateSet, teamUrl);
     if (teamName) addCandidate(candidateSet, teamName);
     const candidates = Array.from(candidateSet);
+    const isTournamentLookup = entity === 'tournament';
+    const effectiveSport = sport || inferSportFromKey(key);
     let databaseRecord: Record<string, unknown> | null = null;
 
     try {
@@ -231,11 +270,13 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
         const clubIdCandidates = candidates.filter((candidate) => /^[a-z0-9-]+$/i.test(candidate) && !hasExternalCandidatePrefix(candidate));
         const allowClubNameLookup = !teamUrl && !candidates.some((candidate) => hasExternalCandidatePrefix(candidate));
 
-        if (clubIdCandidates.length > 0) {
-            const { data } = await (readClient as any)
+        if (!isTournamentLookup && clubIdCandidates.length > 0) {
+            let byIdQuery = (readClient as any)
                 .from('clubs')
-                .select('id, name, short_name, logo_url')
+                .select('id, name, short_name, sport, sport_id, logo_url')
                 .in('id', clubIdCandidates);
+            if (effectiveSport) byIdQuery = byIdQuery.eq('sport', effectiveSport);
+            const { data } = await byIdQuery;
 
             const byId = new Map<string, Record<string, unknown>>();
             for (const row of data || []) {
@@ -251,10 +292,12 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
                 }
             }
 
-            const { data: bySlug } = await (readClient as any)
+            let bySlugQuery = (readClient as any)
                 .from('clubs')
-                .select('id, name, short_name, slug, logo_url')
+                .select('id, name, short_name, slug, sport, sport_id, logo_url')
                 .in('slug', clubIdCandidates);
+            if (effectiveSport) bySlugQuery = bySlugQuery.eq('sport', effectiveSport);
+            const { data: bySlug } = await bySlugQuery;
 
             const slugMap = new Map<string, Record<string, unknown>>();
             for (const row of bySlug || []) {
@@ -271,22 +314,24 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
             }
         }
 
-        if (allowClubNameLookup && teamName) {
-            const { data: byName } = await (readClient as any)
+        if (!isTournamentLookup && allowClubNameLookup && teamName) {
+            let byNameQuery = (readClient as any)
                 .from('clubs')
-                .select('id, name, short_name, logo_url')
-                .eq('name', teamName)
-                .maybeSingle();
+                .select('id, name, short_name, sport, sport_id, logo_url')
+                .eq('name', teamName);
+            if (effectiveSport) byNameQuery = byNameQuery.eq('sport', effectiveSport);
+            const { data: byName } = await byNameQuery.maybeSingle();
 
             if (byName?.logo_url) {
                 return String(byName.logo_url);
             }
 
-            const { data: byShortName } = await (readClient as any)
+            let byShortNameQuery = (readClient as any)
                 .from('clubs')
-                .select('id, name, short_name, logo_url')
-                .eq('short_name', teamName)
-                .maybeSingle();
+                .select('id, name, short_name, sport, sport_id, logo_url')
+                .eq('short_name', teamName);
+            if (effectiveSport) byShortNameQuery = byShortNameQuery.eq('sport', effectiveSport);
+            const { data: byShortName } = await byShortNameQuery.maybeSingle();
 
             if (byShortName?.logo_url) {
                 return String(byShortName.logo_url);
@@ -352,14 +397,48 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
                     return String(logoUrl);
                 }
             }
+
+            if (isTournamentLookup && teamName) {
+                const { data: byName } = await (readClient as any)
+                    .from('tournaments')
+                    .select('id, name, display_name, logo_url, banner_url')
+                    .eq('name', teamName)
+                    .limit(1);
+
+                let record = Array.isArray(byName) ? byName[0] : null;
+                if (!record) {
+                    const { data: byDisplayName } = await (readClient as any)
+                        .from('tournaments')
+                        .select('id, name, display_name, logo_url, banner_url')
+                        .eq('display_name', teamName)
+                        .limit(1);
+
+                    record = Array.isArray(byDisplayName) ? byDisplayName[0] : null;
+                }
+                const logoUrl = record?.logo_url || record?.banner_url;
+                if (logoUrl) {
+                    return String(logoUrl);
+                }
+            }
+        }
+
+        if (isTournamentLookup) {
+            const externalTournamentLogo = await findExternalTournamentLogo(candidates, teamName);
+            if (externalTournamentLogo) {
+                return externalTournamentLogo;
+            }
+
+            return null;
         }
 
         const idCandidates = candidates.filter((candidate) => /^[a-z0-9-]+$/i.test(candidate));
         if (idCandidates.length > 0) {
-            const { data } = await (readClient as any)
+            let byIdQuery = (readClient as any)
                 .from('external_teams')
                 .select('id, name, short_name, logo_url, sport, country, team_url, updated_at')
                 .in('id', idCandidates);
+            if (effectiveSport) byIdQuery = byIdQuery.eq('sport', effectiveSport);
+            const { data } = await byIdQuery;
 
             const byId = new Map<string, Record<string, unknown>>();
             for (const row of data || []) {
@@ -378,11 +457,12 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
         }
 
         if (!databaseRecord && teamUrl) {
-            const { data } = await (readClient as any)
+            let teamUrlQuery = (readClient as any)
                 .from('external_teams')
                 .select('id, name, short_name, logo_url, sport, country, team_url, updated_at')
-                .eq('team_url', teamUrl)
-                .maybeSingle();
+                .eq('team_url', teamUrl);
+            if (effectiveSport) teamUrlQuery = teamUrlQuery.eq('sport', effectiveSport);
+            const { data } = await teamUrlQuery.maybeSingle();
 
             if (data) {
                 databaseRecord = data;
@@ -390,22 +470,24 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
         }
 
         if (!databaseRecord && teamName) {
-            const { data: byName } = await (readClient as any)
+            let byNameQuery = (readClient as any)
                 .from('external_teams')
                 .select('id, name, short_name, logo_url, sport, country, team_url, updated_at')
-                .eq('name', teamName)
-                .maybeSingle();
+                .eq('name', teamName);
+            if (effectiveSport) byNameQuery = byNameQuery.eq('sport', effectiveSport);
+            const { data: byName } = await byNameQuery.maybeSingle();
 
             if (byName) {
                 databaseRecord = byName;
             }
 
             if (!databaseRecord) {
-                const { data: byShortName } = await (readClient as any)
+                let byShortNameQuery = (readClient as any)
                     .from('external_teams')
                     .select('id, name, short_name, logo_url, sport, country, team_url, updated_at')
-                    .eq('short_name', teamName)
-                    .maybeSingle();
+                    .eq('short_name', teamName);
+                if (effectiveSport) byShortNameQuery = byShortNameQuery.eq('sport', effectiveSport);
+                const { data: byShortName } = await byShortNameQuery.maybeSingle();
 
                 if (byShortName) {
                     databaseRecord = byShortName;
@@ -414,6 +496,15 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string): P
         }
     } catch {
         // Ignore missing table/schema issues and fall back to the original logo.
+    }
+
+    if (isTournamentLookup) {
+        const externalTournamentLogo = await findExternalTournamentLogo(candidates, teamName);
+        if (externalTournamentLogo) {
+            return externalTournamentLogo;
+        }
+
+        return null;
     }
 
     const storedOverride = await findExternalTeamLogoOverride(key, teamUrl, teamName, ...candidates);
@@ -511,6 +602,8 @@ export async function GET(request: Request) {
     const fallback = url.searchParams.get('fallback')?.trim() || '';
     const teamUrl = url.searchParams.get('team_url')?.trim() || '';
     const teamName = url.searchParams.get('name')?.trim() || '';
+    const entity = url.searchParams.get('entity')?.trim().toLowerCase() || '';
+    const sport = normalizeSportHint(url.searchParams.get('sport'));
 
     if (!key) {
         return NextResponse.json({ ok: false, error: 'key is required' }, { status: 400 });
@@ -521,7 +614,7 @@ export async function GET(request: Request) {
         return buildImageResponse(localLogo, url);
     }
 
-    const cachedLogo = await findCachedLogo(key, teamUrl, teamName);
+    const cachedLogo = await findCachedLogo(key, teamUrl, teamName, entity, sport);
     if (cachedLogo) {
         return buildImageResponse(cachedLogo, url);
     }

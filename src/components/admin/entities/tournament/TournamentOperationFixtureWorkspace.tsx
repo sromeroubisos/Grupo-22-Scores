@@ -1740,10 +1740,16 @@ export function TournamentOperationFixtureWorkspace({
                 <input type="search" value={manageSearch} onChange={(event) => setManageSearch(event.target.value)} placeholder="Buscar por equipo, sede o estado..." />
               </label>
 
-              <button type="button" className="operation-manage-mobile-toggle" onClick={() => setShowMobileFilters((current) => !current)} aria-expanded={showMobileFilters}>
-                <span>Filtros</span>
-                <small>{activeFilterCount > 0 ? `${activeFilterCount} activos` : 'Compactos'}</small>
-              </button>
+              <div className="operation-manage-mobile-row">
+                <button type="button" className="operation-manage-mobile-toggle" onClick={() => setShowMobileFilters((current) => !current)} aria-expanded={showMobileFilters}>
+                  <span>Filtros</span>
+                  <small>{activeFilterCount > 0 ? `${activeFilterCount} activos` : 'Compactos'}</small>
+                </button>
+                <button type="button" className="basalt-btn basalt-btn-primary operation-manage-create-mobile" onClick={() => openManualCreate()}>
+                  <Plus size={15} />
+                  Crear partido
+                </button>
+              </div>
 
               <div className={`operation-manage-toolbar-grid ${showMobileFilters ? 'is-open' : ''}`}>
                 <label className="operation-form-field">

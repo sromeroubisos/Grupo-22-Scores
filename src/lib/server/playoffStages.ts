@@ -199,6 +199,11 @@ export async function ensurePlayoffBracketMatches(
     const missingCount = targetCount - nextExistingCount;
     if (missingCount <= 0) continue;
 
+    // Bracket slots no tienen fecha real (TBD vs TBD). La columna matches.date_time
+    // es NOT NULL en la DB, asi que usamos la fecha actual como placeholder.
+    // El slot esta marcado con is_visible:false y notes:"Playoff bracket slot",
+    // los flujos publicos lo ocultan; al asignar equipos el usuario sobrescribe la fecha.
+    const placeholderDateTime = new Date().toISOString();
     const rows = Array.from({ length: missingCount }, (_, slotIndex) => ({
       tournament_id: params.tournamentId,
       season_id: params.seasonId ?? null,
@@ -206,7 +211,7 @@ export async function ensurePlayoffBracketMatches(
       round_uuid: round.id,
       home_club_id: null,
       away_club_id: null,
-      date_time: null,
+      date_time: placeholderDateTime,
       venue: null,
       status: 'scheduled',
       score: { home: 0, away: 0 },

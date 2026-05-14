@@ -254,8 +254,169 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
 
     handleSaveRef.current = handleSave;
 
+    // Mobile-only computed labels for the summary card.
+    const mobileSportLabel = SPORT_OPTIONS.find((s) => s.id === form.sport_id)?.nameEs
+        || SPORT_OPTIONS.find((s) => s.id === form.sport_id)?.name
+        || form.sport_id || '--';
+    const mobileUnionLabel = unions.find((u) => u.id === form.union_id)?.name || 'Sin organizador';
+    const mobileCountryLabel = selectedCountryLabel || 'Sin pais asignado';
+
     return (
         <div className="flash-ui-container dark bg-transparent details-console-shell" style={{ '--accent': '#00a365', minHeight: 'auto' } as React.CSSProperties}>
+            {/* Mobile-only redesigned summary + key inline editor. Hidden on
+                desktop via CSS. The legacy manager-card sections below are
+                also hidden on mobile (see tournament-details-mobile rules in
+                tournament-mobile.css). */}
+            <section className="tournament-details-mobile" aria-label="Detalles del torneo">
+                <article className="tsm-card tsm-card-state">
+                    <div className="tsm-card-eyebrow">Identidad</div>
+                    <div className="tsm-state-row">
+                        <strong className="tsm-state-status" style={{ fontSize: 18, letterSpacing: 0 }}>
+                            {form.name || 'Sin nombre'}
+                        </strong>
+                        {isDirty ? (
+                            <span className="tsm-state-pill is-internal">Sin guardar</span>
+                        ) : (
+                            <span className="tsm-state-pill is-public">Guardado</span>
+                        )}
+                    </div>
+                    <div className="tsm-state-meta">
+                        <span>{mobileSportLabel}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{form.season_id || '----'}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>/{form.slug || 'sin-slug'}</span>
+                    </div>
+                    <div className="tsm-state-meta" style={{ marginTop: 6 }}>
+                        <span>{mobileCountryLabel}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{mobileUnionLabel}</span>
+                    </div>
+                </article>
+
+                <article className="tsm-card">
+                    <div className="tsm-card-eyebrow">Identidad basica</div>
+                    <div className="tsm-form-stack">
+                        <label className="tsm-field">
+                            <span>Nombre del torneo</span>
+                            <input
+                                type="text"
+                                className="tsm-input"
+                                placeholder="Ej: Top 12 Primera"
+                                value={form.name}
+                                onChange={(e) => update('name', e.target.value)}
+                                disabled={false}
+                            />
+                        </label>
+                        <label className="tsm-field">
+                            <span>Slug (URL)</span>
+                            <input
+                                type="text"
+                                className="tsm-input"
+                                placeholder="auto desde el nombre"
+                                value={form.slug}
+                                onChange={(e) => { setSlugEdited(true); update('slug', e.target.value); }}
+                                disabled={isApiManaged}
+                            />
+                        </label>
+                        <div className="tsm-field-row">
+                            <label className="tsm-field">
+                                <span>Temporada</span>
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    className="tsm-input"
+                                    placeholder="2026"
+                                    value={form.season_id}
+                                    onChange={(e) => update('season_id', e.target.value)}
+                                    disabled={isApiManaged}
+                                />
+                            </label>
+                            <label className="tsm-field">
+                                <span>Prioridad</span>
+                                <input
+                                    type="number"
+                                    inputMode="numeric"
+                                    className="tsm-input"
+                                    placeholder="0"
+                                    value={String(form.priority ?? 0)}
+                                    onChange={(e) => update('priority', Number.parseInt(e.target.value, 10) || 0)}
+                                    min={0}
+                                />
+                            </label>
+                        </div>
+                        <label className="tsm-field">
+                            <span>Deporte</span>
+                            <select
+                                className="tsm-input"
+                                value={form.sport_id}
+                                onChange={(e) => update('sport_id', e.target.value)}
+                                disabled={isApiManaged}
+                            >
+                                <option value="">Seleccionar</option>
+                                {SPORT_OPTIONS.map((sport) => (
+                                    <option key={sport.id} value={sport.id}>{sport.nameEs || sport.name || sport.id}</option>
+                                ))}
+                            </select>
+                        </label>
+                        <label className="tsm-field">
+                            <span>Organizador (Union/Liga)</span>
+                            <select
+                                className="tsm-input"
+                                value={form.union_id}
+                                onChange={(e) => update('union_id', e.target.value)}
+                                disabled={isApiManaged}
+                            >
+                                <option value="">Sin vinculo</option>
+                                {unions.map((u) => (
+                                    <option key={u.id} value={u.id}>{u.name}</option>
+                                ))}
+                            </select>
+                        </label>
+                        <label className="tsm-field">
+                            <span>Pais</span>
+                            <select
+                                className="tsm-input"
+                                value={form.country_id}
+                                onChange={(e) => update('country_id', e.target.value)}
+                                disabled={isApiManaged}
+                            >
+                                <option value="">No especificado</option>
+                                {countryOptions.map((option) => (
+                                    <option key={option.id} value={option.id}>{option.label}</option>
+                                ))}
+                            </select>
+                        </label>
+                    </div>
+                </article>
+
+                <article className="tsm-card">
+                    <div className="tsm-card-eyebrow">Logo del torneo</div>
+                    <div className="tsm-logo-row">
+                        <div className="tsm-logo-preview">
+                            {form.logo_url ? (
+                                <img src={form.logo_url} alt="Logo" />
+                            ) : (
+                                <ImageIcon size={28} aria-hidden="true" />
+                            )}
+                        </div>
+                        <div className="tsm-logo-meta">
+                            <strong>{form.logo_url ? 'Logo cargado' : 'Sin logo'}</strong>
+                            <small>{form.logo_url ? 'Tap para cambiar' : 'Subi una imagen 256x256 o mas grande.'}</small>
+                        </div>
+                    </div>
+                </article>
+
+                {isApiManaged && (
+                    <article className="tsm-card" style={{ borderColor: 'rgba(96, 165, 250, 0.4)', background: 'rgba(96, 165, 250, 0.06)' }}>
+                        <div className="tsm-card-eyebrow" style={{ color: '#60a5fa' }}>API · Sincronizado</div>
+                        <p style={{ fontSize: 12, color: 'var(--text-secondary, #b6bdcc)', lineHeight: 1.5, margin: 0 }}>
+                            Este torneo se sincroniza automaticamente. Solo podes editar el <strong>nombre publico</strong>, la <strong>prioridad</strong> y el <strong>logo</strong>.
+                        </p>
+                    </article>
+                )}
+            </section>
+
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-28 md:pb-20">
                 {message && (
                     <div className={`p-4 mb-6 text-sm border ${message.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'}`}>

@@ -723,6 +723,10 @@ async function getRankingEntryByClubId(
     return (data || null) as RankingEntryRow | null;
 }
 
+// Hard cap to prevent OOM on rankings with very large entry counts.
+// If a ranking ever exceeds this, the caller should paginate instead of loading all rows.
+const RANKING_ENTRIES_HARD_LIMIT = 5000;
+
 async function getRankingEntries(
     supabase: ReturnType<typeof getAdminClient>,
     rankingId: string,
@@ -732,7 +736,8 @@ async function getRankingEntries(
         .select('*')
         .eq('ranking_id', rankingId)
         .order('current_position', { ascending: true, nullsFirst: false })
-        .order('current_rating', { ascending: false });
+        .order('current_rating', { ascending: false })
+        .limit(RANKING_ENTRIES_HARD_LIMIT);
 
     if (error) {
         throw createClubRankingQueryError(error, 'No se pudieron cargar los clubes del ranking.');

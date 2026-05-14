@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AlertTriangle, CheckCircle2, ClipboardList, Layers, ListChecks, Trophy, Users, XCircle } from 'lucide-react';
 import { Database } from '@/lib/database.types';
 import './basalt.css';
 
@@ -13,7 +14,7 @@ interface SummaryTabProps {
     matchCount?: number;
 }
 
-export function TournamentSummaryTab({ data, unionName, matchCount = 0 }: SummaryTabProps) {
+export function TournamentSummaryTab({ data, id, unionName, matchCount = 0 }: SummaryTabProps) {
     const progressSteps = [
         Boolean(data.name && data.slug),
         Boolean(data.format),
@@ -24,9 +25,147 @@ export function TournamentSummaryTab({ data, unionName, matchCount = 0 }: Summar
     ];
     const completionPercent = Math.round((progressSteps.filter(Boolean).length / progressSteps.length) * 100);
 
+    const stateLabel = (data.status || 'draft').toUpperCase();
+    const visibilityLabel = data.is_visible ? 'Publico' : 'Interno';
+    const seasonLabel = data.season_id || '--';
+    const sportLabel = data.sport_id?.toUpperCase() || '--';
+
+    const healthIssues: Array<{ tone: 'warn' | 'err'; label: string; href: string; cta: string }> = [];
+    if (!data.slug) {
+        healthIssues.push({ tone: 'warn', label: 'Falta identificador (slug)', href: `/admin/entities/${id}/manage?type=tournament&tab=detalles`, cta: 'Asignar' });
+    }
+    if (!data.union_id) {
+        healthIssues.push({ tone: 'err', label: 'Falta organizador asignado', href: `/admin/entities/${id}/manage?type=tournament&tab=detalles`, cta: 'Vincular' });
+    }
+    if (!data.format) {
+        healthIssues.push({ tone: 'warn', label: 'Sin formato definido', href: `/admin/entities/${id}/manage?type=tournament&tab=formato`, cta: 'Configurar' });
+    }
+    const everythingHealthy = healthIssues.length === 0;
+
     return (
         <div className="tab-content active transition-all">
-            <div className="basalt-grid">
+            {/* Mobile-only redesigned summary. Hidden on desktop via CSS. */}
+            <section className="tournament-summary-mobile" aria-label="Resumen del torneo">
+                <article className="tsm-card tsm-card-state">
+                    <div className="tsm-card-eyebrow">Estado actual</div>
+                    <div className="tsm-state-row">
+                        <strong className="tsm-state-status">{stateLabel}</strong>
+                        <span className={`tsm-state-pill ${data.is_visible ? 'is-public' : 'is-internal'}`}>
+                            {visibilityLabel}
+                        </span>
+                    </div>
+                    <div className="tsm-state-meta">
+                        <span><Trophy size={14} /> {sportLabel}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{seasonLabel}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{matchCount} partidos</span>
+                    </div>
+                    <div className="tsm-state-progress" aria-label={`Configuracion ${completionPercent}%`}>
+                        <div className="tsm-state-progress-bar">
+                            <div className="tsm-state-progress-fill" style={{ width: `${completionPercent}%` }} />
+                        </div>
+                        <span className="tsm-state-progress-label">{completionPercent}% configurado</span>
+                    </div>
+                </article>
+
+                <article className="tsm-card">
+                    <div className="tsm-card-eyebrow">Acciones rapidas</div>
+                    <div className="tsm-quick-grid">
+                        <Link
+                            prefetch={false}
+                            className="tsm-quick"
+                            href={`/admin/entities/${id}/manage?type=tournament&tab=operacion`}
+                        >
+                            <span className="tsm-quick-glyph"><ListChecks size={18} /></span>
+                            <span className="tsm-quick-text">
+                                <strong>Cargar resultados</strong>
+                                <small>Fixture y partidos</small>
+                            </span>
+                        </Link>
+                        <Link
+                            prefetch={false}
+                            className="tsm-quick"
+                            href={`/admin/entities/${id}/manage?type=tournament&tab=participantes`}
+                        >
+                            <span className="tsm-quick-glyph"><Users size={18} /></span>
+                            <span className="tsm-quick-text">
+                                <strong>Equipos</strong>
+                                <small>Altas y plantel</small>
+                            </span>
+                        </Link>
+                        <Link
+                            prefetch={false}
+                            className="tsm-quick"
+                            href={`/admin/entities/${id}/manage?type=tournament&tab=estructura`}
+                        >
+                            <span className="tsm-quick-glyph"><Layers size={18} /></span>
+                            <span className="tsm-quick-text">
+                                <strong>Estructura</strong>
+                                <small>Fases y formato</small>
+                            </span>
+                        </Link>
+                        <Link
+                            prefetch={false}
+                            className="tsm-quick"
+                            href={`/admin/entities/${id}/manage?type=tournament&tab=detalles`}
+                        >
+                            <span className="tsm-quick-glyph"><ClipboardList size={18} /></span>
+                            <span className="tsm-quick-text">
+                                <strong>Detalles</strong>
+                                <small>Identidad y reglas</small>
+                            </span>
+                        </Link>
+                    </div>
+                </article>
+
+                <article className="tsm-card">
+                    <div className="tsm-card-eyebrow">
+                        <span>Salud del torneo</span>
+                        <span className={`tsm-card-eyebrow-badge ${everythingHealthy ? 'is-ok' : 'is-warn'}`}>
+                            {everythingHealthy ? 'Todo OK' : `${healthIssues.length} pendiente${healthIssues.length === 1 ? '' : 's'}`}
+                        </span>
+                    </div>
+                    {everythingHealthy ? (
+                        <div className="tsm-health-empty">
+                            <CheckCircle2 size={18} aria-hidden="true" />
+                            <span>Toda la informacion basica esta completa.</span>
+                        </div>
+                    ) : (
+                        <ul className="tsm-health-list">
+                            {healthIssues.map((issue) => (
+                                <li key={issue.label} className={`tsm-health-item ${issue.tone}`}>
+                                    <span className="tsm-health-icon" aria-hidden="true">
+                                        {issue.tone === 'err' ? <XCircle size={16} /> : <AlertTriangle size={16} />}
+                                    </span>
+                                    <span className="tsm-health-label">{issue.label}</span>
+                                    <Link prefetch={false} className="tsm-health-cta" href={issue.href}>
+                                        {issue.cta}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </article>
+
+                <article className="tsm-card">
+                    <div className="tsm-card-eyebrow">Proximo evento</div>
+                    <div className="tsm-next-empty">
+                        <strong>Sin partidos programados</strong>
+                        <small>Cuando publiques una fecha aparecera aca con el horario de los partidos.</small>
+                        <Link
+                            prefetch={false}
+                            className="tsm-next-cta"
+                            href={`/admin/entities/${id}/manage?type=tournament&tab=operacion`}
+                        >
+                            Ir a operacion
+                        </Link>
+                    </div>
+                </article>
+            </section>
+
+            {/* Desktop layout. Hidden on mobile via CSS to avoid duplicate render. */}
+            <div className="basalt-grid tournament-summary-desktop">
                 <div className="basalt-card basalt-hero">
                     <div className="basalt-logo-placeholder">
                         {data.logo_url ? (

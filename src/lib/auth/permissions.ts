@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getReadClient } from '@/lib/supabase/read';
 import { cookies } from 'next/headers';
 import { logRefreshFlow } from '@/lib/debug/refreshFlow';
+import { logRefreshLoop } from '@/lib/debug/refreshLoop';
 import { resolveClubFamilyIds } from '@/lib/club-admin/managedClubFamily';
 import { isUuid } from '@/lib/utils/postgrest';
 import {
@@ -205,6 +206,12 @@ export async function getUserAccessContext(
     logRefreshFlow('permissions_get_user_start', {
         operation: 'getUserAccessContext',
     }, 'auth');
+    logRefreshLoop('getUserAccessContext_start', {
+        operation: 'getUserAccessContext',
+    });
+    logRefreshLoop('getUser_called', {
+        source: 'permissions.getUserAccessContext',
+    });
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     logRefreshFlow('permissions_get_user_complete', {
         operation: 'getUserAccessContext',
@@ -212,6 +219,14 @@ export async function getUserAccessContext(
         hasError: Boolean(userError),
         durationMs: Date.now() - startedAt,
     }, 'auth');
+    logRefreshLoop('getUserAccessContext_end', {
+        operation: 'getUserAccessContext',
+        hasUser: Boolean(user),
+        errorCode: userError && 'code' in userError && typeof (userError as { code?: unknown }).code === 'string'
+            ? (userError as { code?: string }).code
+            : (userError ? 'auth_error' : null),
+        durationMs: Date.now() - startedAt,
+    });
 
     if (userError || !user) {
         return getGuestAccessContext();

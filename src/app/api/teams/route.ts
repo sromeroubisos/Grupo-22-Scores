@@ -6,12 +6,21 @@ import {
     parseEspnAmericanFootballTeamId,
 } from '@/lib/services/espnAmericanFootball';
 import {
+    getEspnFootballTeamBundle,
+    parseEspnFootballTeamId,
+} from '@/lib/services/espnFootball';
+import {
     getTeamDetails,
     getTeamSquad,
     getTeamResults,
     getTeamFixtures,
     getTeamTransfers,
 } from '@/lib/services/flashscore';
+import {
+    getSofaScoreTeamBundle,
+    isSofaScoreServiceConfigured,
+    SOFASCORE_TEAM_PREFIX,
+} from '@/lib/services/sofascore';
 import { canonicalizeSportId, getClubSportValue } from '@/lib/clubDerivatives';
 import { fetchPeopleByClub, type PersonWithRole } from '@/lib/services/personService';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
@@ -293,6 +302,13 @@ function enrichMatchesWithExternalTeamCache(
 function parseRugbyApiSportsTeamId(val: string): string | null {
     const match = /^ras-team-(\d+)$/i.exec(val.trim());
     return match?.[1] || null;
+}
+
+function parseSofaScoreTeamId(val: string): string | null {
+    const trimmed = val.trim();
+    if (!trimmed.toLowerCase().startsWith(SOFASCORE_TEAM_PREFIX)) return null;
+    const id = trimmed.slice(SOFASCORE_TEAM_PREFIX.length);
+    return /^\d+$/.test(id) ? id : null;
 }
 
 function slugify(name: string): string {
@@ -1037,6 +1053,45 @@ export async function GET(request: Request) {
         return Response.json({ ok: false, error: 'team_id is required' }, { status: 400 });
     }
 
+    const espnFootballTeamId = parseEspnFootballTeamId(rawTeamId);
+    if (espnFootballTeamId) {
+        try {
+            const bundle = await getEspnFootballTeamBundle(
+                espnFootballTeamId.teamId,
+                espnFootballTeamId.leagueSlug || leagueHint || null,
+            );
+            if (!bundle) {
+                return Response.json({ ok: false, error: 'Team not found' }, { status: 404 });
+            }
+
+            const details = {
+                ...bundle.details,
+                supported_tabs: buildSupportedTabs({
+                    supportedTabs: bundle.details?.supported_tabs,
+                    hasSquad: Array.isArray(bundle.squad) && bundle.squad.length > 0,
+                    hasTransfers: false,
+                }),
+            };
+
+            return Response.json({
+                ok: true,
+                resolvedClubId: null,
+                details,
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                squad: skipSquad ? [] : bundle.squad,
+                transfers: [],
+            });
+        } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : String(e);
+            console.error('Teams API ESPN Soccer error', e);
+            return Response.json(
+                { ok: false, error: 'Failed to load ESPN soccer team data', details: message },
+                { status: 500 }
+            );
+        }
+    }
+
     const espnTeamId = parseEspnAmericanFootballTeamId(rawTeamId);
     if (espnTeamId) {
         try {
@@ -1078,6 +1133,58 @@ export async function GET(request: Request) {
         (canonicalizeSportId(preferredSport) === 'rugby' && /^\d+$/.test(rawTeamId) ? rawTeamId : null);
     if (rugbyTeamId) {
         return Response.json({ ok: false, error: 'Team not found' }, { status: 404 });
+    }
+
+    if (parseSofaScoreTeamId(rawTeamId) && isSofaScoreServiceConfigured()) {
+        try {
+            const bundle = await getSofaScoreTeamBundle(rawTeamId) as {
+                details?: { DATA?: TeamDetailsPayload | null } | null;
+                squad?: { DATA?: unknown } | null;
+                results?: unknown;
+                fixtures?: unknown;
+            } | null;
+
+            if (!bundle) {
+                return Response.json({ ok: false, error: 'Team not found' }, { status: 404 });
+            }
+
+            const remoteDetails = bundle.details?.DATA ?? null;
+            const squadData = bundle.squad?.DATA ?? [];
+            const flatResults = flattenFsMatches(bundle.results);
+            const flatFixtures = flattenFsMatches(bundle.fixtures);
+            const finalResults = sortMatchesByDate(flatResults, 'desc');
+            const finalFixtures = sortMatchesByDate(flatFixtures, 'asc');
+
+            const detailsWithTabs = remoteDetails
+                ? {
+                    ...remoteDetails,
+                    supported_tabs: buildSupportedTabs({
+                        supportedTabs: (remoteDetails as Record<string, unknown>).supported_tabs,
+                        hasSquad: Array.isArray(squadData)
+                            ? squadData.length > 0
+                            : Boolean(squadData),
+                        hasTransfers: false,
+                    }),
+                }
+                : null;
+
+            return Response.json({
+                ok: true,
+                resolvedClubId: null,
+                details: detailsWithTabs,
+                results: finalResults,
+                fixtures: finalFixtures,
+                squad: skipSquad ? [] : squadData,
+                transfers: [],
+            });
+        } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : String(e);
+            console.error('Teams API SofaScore error', e);
+            return Response.json(
+                { ok: false, error: 'Failed to load SofaScore team data', details: message },
+                { status: 502 },
+            );
+        }
     }
 
     // 1. Check Supabase for internal club info first

@@ -397,17 +397,26 @@ function buildVariantCategories(
 
 async function ensureUniqueClubSlug(supabase: any, baseSlug: string): Promise<string> {
   const normalizedBase = normalizeSlug(baseSlug) || `club-${Date.now()}`;
-  let candidate = normalizedBase;
 
-  for (let attempt = 0; attempt < 24; attempt += 1) {
-    const { data: existingClub } = await supabase
-      .from('clubs')
-      .select('id')
-      .eq('id', candidate)
-      .maybeSingle();
+  // Build all candidate slugs upfront and resolve them in a single query
+  // (was: up to 24 sequential round-trips; now 1 round-trip).
+  const candidates: string[] = [normalizedBase];
+  for (let attempt = 1; attempt < 24; attempt += 1) {
+    candidates.push(`${normalizedBase}-${attempt + 1}`);
+  }
 
-    if (!existingClub) return candidate;
-    candidate = `${normalizedBase}-${attempt + 2}`;
+  const { data: existingClubs, error } = await supabase
+    .from('clubs')
+    .select('id')
+    .in('id', candidates);
+
+  if (error) {
+    return `${normalizedBase}-${Date.now()}`;
+  }
+
+  const taken = new Set<string>((existingClubs ?? []).map((row: { id: string }) => row.id));
+  for (const candidate of candidates) {
+    if (!taken.has(candidate)) return candidate;
   }
 
   return `${normalizedBase}-${Date.now()}`;
@@ -431,6 +440,7 @@ async function loadClubFamily(
   let baseClubId = getCategoryValue(currentClub.categories, 'base_club') || clubId;
   let relationRows: ClubDerivativeRelationRow[] = [];
 
+  // Step 1: resolve baseClubId via incoming relation (subsequent queries depend on it).
   const { data: incomingRelation, error: incomingError } = await supabase
     .from('club_derivatives')
     .select('base_club_id')
@@ -443,11 +453,20 @@ async function loadClubFamily(
     throw new Error(incomingError.message);
   }
 
-  const { data: outgoingRelations, error: outgoingError } = await supabase
-    .from('club_derivatives')
-    .select('base_club_id, derived_club_id, derivative_type')
-    .eq('base_club_id', baseClubId);
+  // Step 2: outgoing relations and category-derived clubs are independent;
+  // run them in parallel to halve round-trip latency.
+  const shouldFetchCategoryDerived = Array.isArray(currentClub.categories) && currentClub.categories.length > 0;
+  const [outgoingResult, categoryDerivedResult] = await Promise.all([
+    supabase
+      .from('club_derivatives')
+      .select('base_club_id, derived_club_id, derivative_type')
+      .eq('base_club_id', baseClubId),
+    shouldFetchCategoryDerived
+      ? supabase.from('clubs').select('*').contains('categories', [`base_club:${baseClubId}`])
+      : Promise.resolve({ data: [] as ClubContextRow[], error: null }),
+  ]);
 
+  const { data: outgoingRelations, error: outgoingError } = outgoingResult;
   if (!outgoingError) {
     relationRows = (outgoingRelations ?? []) as ClubDerivativeRelationRow[];
   } else if (!isMissingClubDerivativesTableError(outgoingError)) {
@@ -455,12 +474,8 @@ async function loadClubFamily(
   }
 
   let categoryDerivedRows: ClubContextRow[] = [];
-  if (Array.isArray(currentClub.categories) && currentClub.categories.length > 0) {
-    const { data: categoryDerivedClubs, error: categoryDerivedError } = await supabase
-      .from('clubs')
-      .select('*')
-      .contains('categories', [`base_club:${baseClubId}`]);
-
+  if (shouldFetchCategoryDerived) {
+    const { data: categoryDerivedClubs, error: categoryDerivedError } = categoryDerivedResult;
     if (!categoryDerivedError) {
       categoryDerivedRows = (categoryDerivedClubs ?? []) as ClubContextRow[];
     } else if (!isMissingClubCategoriesColumnError(categoryDerivedError)) {

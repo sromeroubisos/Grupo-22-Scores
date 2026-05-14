@@ -40,6 +40,8 @@ const LOGO_FIELDS = [
 const EXTERNAL_CONTEXT_FIELDS = ['team_url', 'teamUrl'] as const;
 const EXTERNAL_PROVIDER_FIELDS = ['provider', 'source', 'dataSource', 'data_source'] as const;
 const NAME_FIELDS = ['team_name', 'teamName', 'name', 'short_name', 'shortName'] as const;
+const SPORT_FIELDS = ['sport', 'sport_id', 'sportId'] as const;
+const LEAGUE_FIELDS = ['league', 'league_slug', 'leagueSlug'] as const;
 const VERSION_FIELDS = [
     'logo_updated_at',
     'logoUpdatedAt',
@@ -214,6 +216,53 @@ function normalizeVersionToken(value: unknown): string {
     return trimmed;
 }
 
+function normalizeSportToken(value: unknown): string {
+    if (typeof value !== 'string') return '';
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return '';
+    if (normalized === 'soccer') return 'football';
+    if (normalized === 'rugby-union' || normalized === 'rugby-sevens') return 'rugby';
+    return normalized;
+}
+
+function inferSportFromIdValue(value: unknown): string {
+    if (typeof value !== 'string') return '';
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return '';
+    if (normalized.startsWith('espn-soccer-team-') || normalized.startsWith('espn-soccer-')) return 'football';
+    if (normalized.startsWith('espn-racing-team-') || normalized.startsWith('espn-racing-')) return 'motorsport';
+    if (normalized.startsWith('espn-team-') || normalized.startsWith('espn-league-')) return 'american-football';
+    if (normalized.startsWith('ras-team-') || normalized.startsWith('ras-league-')) return 'rugby';
+    return '';
+}
+
+function getFirstSport(...sources: TeamLogoSource[]): string {
+    for (const source of sources) {
+        if (!isRecord(source)) continue;
+
+        for (const field of SPORT_FIELDS) {
+            const normalized = normalizeSportToken(source[field]);
+            if (normalized) return normalized;
+        }
+
+        for (const field of LEAGUE_FIELDS) {
+            const value = source[field];
+            if (typeof value !== 'string') continue;
+            const trimmed = value.trim().toLowerCase();
+            if (!trimmed) continue;
+            const inferred = inferSportFromIdValue(`espn-soccer-${trimmed}`);
+            if (inferred) return inferred;
+        }
+
+        for (const field of ID_FIELDS) {
+            const inferred = inferSportFromIdValue(source[field]);
+            if (inferred) return inferred;
+        }
+    }
+
+    return '';
+}
+
 function getFirstLogoVersion(...sources: TeamLogoSource[]): string {
     for (const source of sources) {
         if (!isRecord(source)) continue;
@@ -315,13 +364,14 @@ function hasExternalContext(...sources: TeamLogoSource[]): boolean {
     return false;
 }
 
-function buildProxyLogoUrl(key: string, fallbackLogo: string, teamUrl: string, teamName: string, version: string): string {
+function buildProxyLogoUrl(key: string, fallbackLogo: string, teamUrl: string, teamName: string, version: string, sport: string): string {
     const params = new URLSearchParams();
     params.set('key', key);
     if (fallbackLogo) params.set('fallback', fallbackLogo);
     if (teamUrl) params.set('team_url', teamUrl);
     if (teamName) params.set('name', teamName);
     if (version) params.set('v', version);
+    if (sport) params.set('sport', sport);
     return `${TEAM_LOGO_PROXY_PATH}?${params.toString()}`;
 }
 
@@ -332,6 +382,7 @@ function extendProxyLogoUrl(
     teamUrl: string,
     teamName: string,
     version: string,
+    sport: string,
 ): string {
     try {
         const parsed = new URL(proxyLogoUrl, 'http://localhost');
@@ -342,6 +393,7 @@ function extendProxyLogoUrl(
         if (teamUrl && !parsed.searchParams.get('team_url')) parsed.searchParams.set('team_url', teamUrl);
         if (teamName && !parsed.searchParams.get('name')) parsed.searchParams.set('name', teamName);
         if (version && parsed.searchParams.get('v') !== version) parsed.searchParams.set('v', version);
+        if (sport && !parsed.searchParams.get('sport')) parsed.searchParams.set('sport', sport);
         return `${TEAM_LOGO_PROXY_PATH}?${parsed.searchParams.toString()}`;
     } catch {
         return proxyLogoUrl;
@@ -379,17 +431,18 @@ export function resolveTeamLogo(...sources: TeamLogoSource[]): string {
     const teamUrl = getFirstExternalTeamUrl(...sources);
     const teamName = getFirstExternalTeamName(...sources);
     const version = getFirstLogoVersion(...sources);
+    const sport = getFirstSport(...sources);
     const fallbackLogo = sources.map(getSourceLogo).find(Boolean) || '';
     if (fallbackLogo.startsWith(`${TEAM_LOGO_PROXY_PATH}?`)) {
-        return extendProxyLogoUrl(fallbackLogo, candidateKey || '', '', teamUrl, teamName, version);
+        return extendProxyLogoUrl(fallbackLogo, candidateKey || '', '', teamUrl, teamName, version, sport);
     }
 
     if (candidateKey && fallbackLogo.startsWith('data:')) {
-        return buildProxyLogoUrl(candidateKey, '', teamUrl, teamName, version);
+        return buildProxyLogoUrl(candidateKey, '', teamUrl, teamName, version, sport);
     }
 
     if (candidateKey && (hasExternalContext(...sources) || hasExternalKeyPrefix(candidateKey))) {
-        return buildProxyLogoUrl(candidateKey, fallbackLogo, teamUrl, teamName, version);
+        return buildProxyLogoUrl(candidateKey, fallbackLogo, teamUrl, teamName, version, sport);
     }
 
     for (const source of sources) {

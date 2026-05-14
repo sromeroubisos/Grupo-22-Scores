@@ -12,6 +12,7 @@ import {
     type PerfRuntime,
 } from './measure';
 import { logRefreshFlow } from '@/lib/debug/refreshFlow';
+import { logRefreshLoop } from '@/lib/debug/refreshLoop';
 
 type SupabaseMinimalQueryable = {
     from: (table: string) => {
@@ -385,6 +386,23 @@ export function createInstrumentedSupabaseFetch(
                     ok: response.ok,
                     durationMs: Math.round(durationMs),
                 }, 'auth');
+                logRefreshLoop('supabase_auth_request', {
+                    runtime,
+                    endpoint: operation,
+                    method,
+                    status: response.status,
+                    ok: response.ok,
+                    durationMs: Math.round(durationMs),
+                });
+            }
+            if (service === 'AUTH' && (response.status === 401 || response.status === 403)) {
+                logRefreshLoop('supabase_auth_401_403', {
+                    runtime,
+                    endpoint: operation,
+                    method,
+                    status: response.status,
+                    durationMs: Math.round(durationMs),
+                });
             }
 
             if (dbQueryDebugEnabled) {
@@ -468,6 +486,13 @@ export function createInstrumentedSupabaseFetch(
                     durationMs: Math.round(durationMs),
                     error: normalizeErrorMessage(error),
                 }, 'auth');
+                logRefreshLoop('supabase_auth_request_error', {
+                    runtime,
+                    endpoint: operation,
+                    method,
+                    durationMs: Math.round(durationMs),
+                    error: normalizeErrorMessage(error),
+                });
             }
             if (dbQueryDebugEnabled) {
                 logDbQuery({

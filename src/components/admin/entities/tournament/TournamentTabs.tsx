@@ -9,6 +9,7 @@ import {
     Layers,
     LayoutDashboard,
     Link2,
+    MoreHorizontal,
     Palette,
     Shield,
     Users,
@@ -34,6 +35,13 @@ export const TOURNAMENT_TABS = [
     { id: 'audit', label: 'Auditoria', icon: Shield, description: 'Bitacora y trazabilidad operativa' },
 ];
 
+// Mobile-only: 4 primary tabs always visible in the bottom bar.
+// The remaining tabs are reachable via the "Mas" button which opens the existing sheet.
+const MOBILE_PRIMARY_TAB_IDS = ['resumen', 'estructura', 'participantes', 'operacion'] as const;
+const MOBILE_PRIMARY_TABS = MOBILE_PRIMARY_TAB_IDS
+    .map((id) => TOURNAMENT_TABS.find((tab) => tab.id === id))
+    .filter((tab): tab is (typeof TOURNAMENT_TABS)[number] => Boolean(tab));
+
 const DISABLE_ADMIN_PREFETCH = process.env.NEXT_PUBLIC_DISABLE_ADMIN_PREFETCH !== 'false';
 
 function isProtectedAdminHref(href: string) {
@@ -48,13 +56,18 @@ function shouldPrefetchHref(href: string) {
     return true;
 }
 
+function isSameTournamentManageHref(href: string, tournamentId: string) {
+    return href.startsWith(`/admin/entities/${tournamentId}/manage?type=tournament`);
+}
+
 interface TournamentTabsProps {
     id: string;
     currentTab: string;
     data: TournamentRow;
+    onPendingTabChange?: (tabId: string, tabLabel: string) => void;
 }
 
-export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
+export function TournamentTabs({ id, currentTab, onPendingTabChange }: TournamentTabsProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const { hasDirtySection, hasRecentlySavedSection } = useTournamentDirty();
@@ -87,11 +100,31 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
     const prefetchTab = useCallback((tabId: string) => {
         if (tabId === currentTab || prefetchedTabsRef.current.has(tabId)) return;
         const href = tabHref(tabId);
-        prefetchedTabsRef.current.add(tabId);
-        if (!shouldPrefetchHref(href)) return;
+        if (!isSameTournamentManageHref(href, id) && !shouldPrefetchHref(href)) return;
 
+        prefetchedTabsRef.current.add(tabId);
         router.prefetch(href);
-    }, [currentTab, router, tabHref]);
+    }, [currentTab, id, router, tabHref]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const prefetchPrimaryTabs = () => {
+            MOBILE_PRIMARY_TAB_IDS.forEach((tabId) => prefetchTab(tabId));
+        };
+        const idleWindow = window as Window & {
+            requestIdleCallback?: (callback: () => void, options?: { timeout?: number }) => number;
+            cancelIdleCallback?: (handle: number) => void;
+        };
+
+        if (idleWindow.requestIdleCallback && idleWindow.cancelIdleCallback) {
+            const idleId = idleWindow.requestIdleCallback(prefetchPrimaryTabs, { timeout: 2500 });
+            return () => idleWindow.cancelIdleCallback?.(idleId);
+        }
+
+        const timeout = window.setTimeout(prefetchPrimaryTabs, 900);
+        return () => window.clearTimeout(timeout);
+    }, [prefetchTab]);
 
     useEffect(() => {
         if (!mobileSelectorOpen) return;
@@ -115,8 +148,12 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
 
     const switchTab = (tabId: string) => {
         if (tabId === visualTabId) return;
+        const nextTab = TOURNAMENT_TABS.find((tab) => tab.id === tabId);
         setMobileSelectorOpen(false);
         setOptimisticTab(tabId);
+        if (nextTab) {
+            onPendingTabChange?.(nextTab.id, nextTab.label);
+        }
         prefetchTab(tabId);
         startTransition(() => {
             router.push(tabHref(tabId), { scroll: false });
@@ -267,6 +304,49 @@ export function TournamentTabs({ id, currentTab }: TournamentTabsProps) {
             </div>
 
             {isTabNavigationPending ? <span className="basalt-tabs-progress" aria-hidden="true" /> : null}
+
+            {/* Mobile-only bottom-tab-bar: visible only on phones via CSS (.basalt-tabs-bottom). */}
+            <div className="basalt-tabs-bottom" role="tablist" aria-label="Navegacion principal del torneo">
+                {MOBILE_PRIMARY_TABS.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab.id === tab.id;
+                    const hasDraft = tabHasDraft(tab.id);
+                    return (
+                        <button
+                            key={tab.id}
+                            type="button"
+                            role="tab"
+                            aria-selected={isActive}
+                            aria-current={currentTab === tab.id ? 'page' : undefined}
+                            className={`basalt-tabs-bottom-item ${isActive ? 'active' : ''}`}
+                            onFocus={() => prefetchTab(tab.id)}
+                            onPointerDown={() => prefetchTab(tab.id)}
+                            onClick={() => switchTab(tab.id)}
+                        >
+                            <span className="basalt-tabs-bottom-glyph">
+                                <Icon size={20} />
+                                {hasDraft ? <span className="basalt-tabs-bottom-dot" aria-hidden="true" /> : null}
+                            </span>
+                            <span className="basalt-tabs-bottom-label">{tab.label}</span>
+                        </button>
+                    );
+                })}
+                <button
+                    type="button"
+                    className={`basalt-tabs-bottom-item ${MOBILE_PRIMARY_TAB_IDS.includes(activeTab.id as typeof MOBILE_PRIMARY_TAB_IDS[number]) ? '' : 'active'}`}
+                    onFocus={() => TOURNAMENT_TABS.forEach((tab) => prefetchTab(tab.id))}
+                    onPointerDown={() => TOURNAMENT_TABS.forEach((tab) => prefetchTab(tab.id))}
+                    onClick={() => setMobileSelectorOpen(true)}
+                    aria-haspopup="dialog"
+                    aria-expanded={mobileSelectorOpen}
+                    aria-label="Abrir mas modulos del torneo"
+                >
+                    <span className="basalt-tabs-bottom-glyph">
+                        <MoreHorizontal size={20} />
+                    </span>
+                    <span className="basalt-tabs-bottom-label">Mas</span>
+                </button>
+            </div>
 
             {shouldRender && (
                 <>

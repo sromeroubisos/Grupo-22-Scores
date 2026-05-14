@@ -2991,7 +2991,7 @@ export default function MatchCenterClient({
         : [];
     const guidedTeamName = guidedEvent?.team === 'home' ? homeName : guidedEvent?.team === 'away' ? awayName : '';
 
-    const handleExportMatchSheetPdf = useCallback(() => {
+    const handleExportMatchSheetPdf = useCallback(async () => {
         const homeFullName = match.homeClub?.name || homeName;
         const awayFullName = match.awayClub?.name || awayName;
         const homeBasePoints = Number(localPoints.home_base_points ?? 0);
@@ -3044,7 +3044,7 @@ export default function MatchCenterClient({
             };
         });
 
-        const opened = exportMatchSheetPdf({
+        const opened = await exportMatchSheetPdf({
             title: `Planilla: ${homeFullName} vs ${awayFullName}`,
             status: match.status,
             statusLabel: statusLabel(match.status),

@@ -1,9 +1,20 @@
 import { getPlayerDetails, getPlayerCareer } from '@/lib/services/flashscore';
+import {
+    getSofaScorePlayerBundle,
+    isSofaScoreServiceConfigured,
+    SOFASCORE_PLAYER_PREFIX,
+} from '@/lib/services/sofascore';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
 function isUuidLike(value: string) {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function isSofaScorePlayerId(value: string): boolean {
+    const v = value.trim().toLowerCase();
+    if (!v.startsWith(SOFASCORE_PLAYER_PREFIX)) return false;
+    return /^\d+$/.test(v.slice(SOFASCORE_PLAYER_PREFIX.length));
 }
 
 export async function GET(request: Request) {
@@ -18,6 +29,23 @@ export async function GET(request: Request) {
     const playerUrl = searchParams.get('player_url') || `/player/p/${playerId}/`;
 
     try {
+        if (isSofaScorePlayerId(playerId) && isSofaScoreServiceConfigured()) {
+            const bundle = await getSofaScorePlayerBundle(playerId) as {
+                details?: { DATA?: unknown } | null;
+                career?: { DATA?: unknown } | null;
+            } | null;
+
+            if (!bundle) {
+                return Response.json({ ok: false, error: 'Player not found' }, { status: 404 });
+            }
+
+            const details = bundle.details?.DATA ?? null;
+            const careerRaw = bundle.career?.DATA;
+            const career = Array.isArray(careerRaw) ? careerRaw : (careerRaw ? [careerRaw] : []);
+
+            return Response.json({ ok: true, details, career });
+        }
+
         if (isUuidLike(playerId)) {
             const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
                 ? createAdminClient()

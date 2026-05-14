@@ -1560,3 +1560,1283 @@ tr:hover .participant-name {
     background-color: var(--void-bg);
     color: var(--text-primary);
 }
+
+/* ============================================================================
+   MOBILE PARTICIPANTS — rediseño 2026-05
+   Visible solo en <=767px. Oculta los bloques desktop redundantes para
+   evitar duplicación visual y scroll horizontal. Diseñado mobile-first con
+   touch targets >= 44px, sticky toolbar y bottom action bar con FAB.
+   ============================================================================ */
+
+.tournament-participants-mobile {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .participants-flash-container > .participants-header,
+    .participants-flash-container > .participants-filter-bar,
+    .participants-flash-container > .phase-assignment-panel,
+    .participants-flash-container > .participants-table-container {
+        display: none !important;
+    }
+
+    .participants-flash-container {
+        padding: 0 !important;
+        background: transparent;
+    }
+
+    .tournament-participants-mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        /* 64px tab-bar + 64px FAB + 24px aire + safe-area */
+        padding: 10px 12px calc(64px + 64px + 24px + env(safe-area-inset-bottom, 0px));
+        position: relative;
+    }
+
+    .tournament-participants-mobile .tsm-card {
+        background: var(--lattice-elevated, #1c1c21);
+        border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.08));
+        border-radius: 14px;
+        padding: 14px 14px 16px;
+    }
+
+    .tournament-participants-mobile .tsm-card-eyebrow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-dim, rgba(244, 244, 245, 0.45));
+        margin-bottom: 10px;
+        font-family: var(--font-mono);
+    }
+    .tournament-participants-mobile .tsm-card-eyebrow > span:first-child {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .tournament-participants-mobile .tsm-hero {
+        background:
+            linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(59, 130, 246, 0.02) 60%),
+            var(--lattice-elevated, #1c1c21);
+        border-color: rgba(59, 130, 246, 0.25);
+        padding: 14px;
+    }
+    .tournament-participants-mobile .tsm-hero-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+    .tournament-participants-mobile .tsm-hero-eyebrow {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(191, 219, 254, 0.85);
+        font-family: var(--font-mono);
+    }
+    .tournament-participants-mobile .tsm-hero-history {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        min-height: 32px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text-secondary);
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-hero-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .tournament-participants-mobile .tsm-hero-total {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        line-height: 1;
+        padding-right: 12px;
+        border-right: 1px solid var(--border-medium);
+    }
+    .tournament-participants-mobile .tsm-hero-total-value {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: #fff;
+        font-family: var(--font-mono);
+    }
+    .tournament-participants-mobile .tsm-hero-total-label {
+        margin-top: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+    }
+    .tournament-participants-mobile .tsm-hero-stats {
+        flex: 1 1 auto;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+    .tournament-participants-mobile .tsm-hero-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 8px 6px;
+        min-height: 48px;
+        border-radius: 10px;
+        border: 1px solid var(--border-medium);
+        background: rgba(255, 255, 255, 0.02);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+    }
+    .tournament-participants-mobile .tsm-hero-stat:active { transform: scale(0.97); }
+    .tournament-participants-mobile .tsm-hero-stat span {
+        font-size: 16px;
+        font-weight: 800;
+        line-height: 1;
+        font-family: var(--font-mono);
+        color: var(--text-primary);
+    }
+    .tournament-participants-mobile .tsm-hero-stat small {
+        font-size: 9px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+    }
+    .tournament-participants-mobile .tsm-hero-stat.is-active span { color: var(--status-active, #10b981); }
+    .tournament-participants-mobile .tsm-hero-stat.is-pending span { color: var(--status-pending, #f59e0b); }
+    .tournament-participants-mobile .tsm-hero-stat.is-inactive span { color: var(--status-inactive, #71717a); }
+    .tournament-participants-mobile .tsm-hero-stat.is-on {
+        border-color: rgba(59, 130, 246, 0.55);
+        background: rgba(59, 130, 246, 0.10);
+    }
+
+    .tournament-participants-mobile .tsm-toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0;
+        background: var(--void-bg, #0a0a0c);
+        backdrop-filter: blur(8px);
+    }
+    .tournament-participants-mobile .tsm-search {
+        position: relative;
+        flex: 1 1 auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 12px 0 36px;
+        height: 44px;
+        border-radius: 999px;
+        border: 1px solid var(--border-medium);
+        background: var(--lattice-elevated, #1c1c21);
+    }
+    .tournament-participants-mobile .tsm-search > svg:first-child {
+        position: absolute;
+        left: 12px;
+        color: var(--text-dim);
+    }
+    .tournament-participants-mobile .tsm-search-input {
+        flex: 1 1 auto;
+        height: 100%;
+        background: transparent;
+        border: 0;
+        outline: 0;
+        color: var(--text-primary);
+        font-size: 14px;
+        font-family: inherit;
+    }
+    .tournament-participants-mobile .tsm-search-input::placeholder {
+        color: var(--text-dim);
+    }
+    .tournament-participants-mobile .tsm-search-clear {
+        flex: 0 0 auto;
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        border: 0;
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text-secondary);
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-filter-trigger {
+        position: relative;
+        flex: 0 0 auto;
+        width: 44px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        border: 1px solid var(--border-medium);
+        background: var(--lattice-elevated, #1c1c21);
+        color: var(--text-secondary);
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-filter-trigger.is-on {
+        border-color: rgba(59, 130, 246, 0.55);
+        color: #93c5fd;
+    }
+    .tournament-participants-mobile .tsm-filter-trigger-dot {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #3b82f6;
+    }
+
+    .tournament-participants-mobile .tsm-active-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 0 2px;
+    }
+    .tournament-participants-mobile .tsm-active-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        height: 28px;
+        border-radius: 999px;
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        background: rgba(59, 130, 246, 0.12);
+        color: #bfdbfe;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-active-clear {
+        margin-left: auto;
+        height: 28px;
+        padding: 0 10px;
+        border: 0;
+        background: transparent;
+        color: var(--text-dim);
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    .tournament-participants-mobile .tsm-list-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 4px 0;
+        font-size: 12px;
+        color: var(--text-dim);
+    }
+    .tournament-participants-mobile .tsm-list-meta strong {
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+        font-weight: 700;
+    }
+    .tournament-participants-mobile .tsm-select-toggle {
+        height: 32px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid var(--border-medium);
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-select-toggle[aria-pressed="true"] {
+        border-color: rgba(59, 130, 246, 0.55);
+        background: rgba(59, 130, 246, 0.12);
+        color: #bfdbfe;
+    }
+
+    .tournament-participants-mobile .tsm-participant-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .tournament-participants-mobile .tsm-participant-item {
+        display: flex;
+        align-items: stretch;
+        gap: 4px;
+        background: var(--lattice-elevated, #1c1c21);
+        border: 1px solid var(--border-medium);
+        border-radius: 14px;
+        overflow: hidden;
+        transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .tournament-participants-mobile .tsm-participant-item.is-selected {
+        border-color: rgba(59, 130, 246, 0.55);
+        background: rgba(59, 130, 246, 0.08);
+    }
+    .tournament-participants-mobile .tsm-participant-check {
+        flex: 0 0 auto;
+        width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 0;
+        color: var(--text-secondary);
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-participant-item.is-selected .tsm-participant-check { color: #60a5fa; }
+    .tournament-participants-mobile .tsm-participant-main {
+        flex: 1 1 auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 8px 10px 12px;
+        background: transparent;
+        border: 0;
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+        min-height: 60px;
+        min-width: 0;
+    }
+    .tournament-participants-mobile .tsm-participant-logo {
+        flex: 0 0 auto;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-dim);
+        overflow: hidden;
+    }
+    .tournament-participants-mobile .tsm-participant-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .tournament-participants-mobile .tsm-participant-text {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .tournament-participants-mobile .tsm-participant-text strong {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .tournament-participants-mobile .tsm-participant-text small {
+        font-size: 11px;
+        color: var(--text-dim);
+        font-family: var(--font-mono);
+        letter-spacing: 0.02em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .tournament-participants-mobile .tsm-participant-phases {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 4px;
+    }
+    .tournament-participants-mobile .tsm-mini-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 6px;
+        font-size: 10px;
+        line-height: 1.2;
+        border-radius: 999px;
+        background: rgba(59, 130, 246, 0.08);
+        border: 1px solid rgba(59, 130, 246, 0.18);
+        color: #bfdbfe;
+        font-family: var(--font-mono);
+    }
+    .tournament-participants-mobile .tsm-mini-chip.is-more {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--border-medium);
+        color: var(--text-dim);
+    }
+    .tournament-participants-mobile .tsm-status-pill {
+        flex: 0 0 auto;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.05);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .tournament-participants-mobile .tsm-status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--text-dim);
+    }
+    .tournament-participants-mobile .tsm-status-pill.is-active .tsm-status-dot { background: var(--status-active); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18); }
+    .tournament-participants-mobile .tsm-status-pill.is-pending .tsm-status-dot { background: var(--status-pending); box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18); }
+    .tournament-participants-mobile .tsm-status-pill.is-inactive .tsm-status-dot { background: var(--status-inactive); }
+    .tournament-participants-mobile .tsm-status-pill.is-disqualified .tsm-status-dot { background: var(--status-disqualified); box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18); }
+
+    .tournament-participants-mobile .tsm-participant-edit {
+        flex: 0 0 auto;
+        width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 0;
+        border-left: 1px solid var(--border-medium);
+        color: var(--text-secondary);
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-participant-edit:active { background: rgba(255, 255, 255, 0.04); }
+
+    .tournament-participants-mobile .tsm-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 28px 16px;
+        text-align: center;
+        background: var(--lattice-elevated, #1c1c21);
+        border: 1px dashed var(--border-medium);
+        border-radius: 14px;
+        color: var(--text-secondary);
+    }
+    .tournament-participants-mobile .tsm-empty svg { color: var(--text-dim); }
+    .tournament-participants-mobile .tsm-empty strong {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .tournament-participants-mobile .tsm-empty small {
+        font-size: 12px;
+        color: var(--text-dim);
+        max-width: 260px;
+    }
+    .tournament-participants-mobile .tsm-empty-cta {
+        margin-top: 6px;
+        height: 40px;
+        padding: 0 16px;
+        border-radius: 999px;
+        border: 1px solid var(--border-medium);
+        background: transparent;
+        color: var(--text-primary);
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-empty-cta.primary {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+    }
+
+    .tournament-participants-mobile .tsm-load-more {
+        width: 100%;
+        height: 44px;
+        border-radius: 12px;
+        border: 1px solid var(--border-medium);
+        background: rgba(255, 255, 255, 0.02);
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .tournament-participants-mobile .tsm-phase-quick-help {
+        margin: 0 0 10px 0;
+        font-size: 12px;
+        color: var(--text-dim);
+        line-height: 1.45;
+    }
+    .tournament-participants-mobile .tsm-phase-quick-controls {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .tournament-participants-mobile .tsm-phase-quick-select {
+        height: 44px;
+        padding: 0 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border-medium);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-family: inherit;
+    }
+    .tournament-participants-mobile .tsm-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        height: 44px;
+        padding: 0 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border-medium);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-action-btn.primary {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+    }
+    .tournament-participants-mobile .tsm-action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .tournament-participants-mobile .tsm-phase-quick-add {
+        min-width: 96px;
+    }
+    .tournament-participants-mobile .tsm-phase-group-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 10px;
+    }
+    .tournament-participants-mobile .tsm-phase-group-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 36px;
+        padding: 0 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border-medium);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-phase-group-chip small {
+        font-size: 10px;
+        font-family: var(--font-mono);
+        color: var(--text-dim);
+    }
+    .tournament-participants-mobile .tsm-phase-group-chip:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .tournament-participants-mobile .tsm-phase-quick-remove {
+        width: 100%;
+        background: transparent;
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.25);
+    }
+
+    .tournament-participants-mobile .tsm-bottom-bar {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        /* La tab bar inferior del shell mide 64px — sumamos 12px de aire */
+        bottom: calc(64px + 12px + env(safe-area-inset-bottom, 0px));
+        z-index: 30;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        border-radius: 16px;
+        background: rgba(20, 20, 23, 0.92);
+        border: 1px solid var(--border-medium);
+        backdrop-filter: blur(14px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    }
+    .tournament-participants-mobile .tsm-bottom-bar-fab {
+        flex: 1 1 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 48px;
+        border-radius: 12px;
+        border: 0;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+    }
+    .tournament-participants-mobile .tsm-bottom-bar-icon {
+        flex: 0 0 auto;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        border: 1px solid var(--border-medium);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text-secondary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-bottom-bar-info {
+        flex: 0 0 auto;
+        padding: 0 10px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+    }
+    .tournament-participants-mobile .tsm-bottom-bar-btn {
+        flex: 1 1 auto;
+        height: 44px;
+        border-radius: 12px;
+        border: 1px solid var(--border-medium);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+    .tournament-participants-mobile .tsm-bottom-bar-btn.is-danger {
+        background: rgba(239, 68, 68, 0.14);
+        border-color: rgba(239, 68, 68, 0.4);
+        color: #fca5a5;
+    }
+
+    .tournament-participants-mobile .tsm-sheet-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 1000;
+        display: flex;
+        align-items: flex-end;
+        justify-content: stretch;
+        animation: tsm-fade-in 0.18s ease;
+    }
+    .tournament-participants-mobile .tsm-sheet {
+        width: 100%;
+        max-height: 84vh;
+        background: var(--lattice-elevated, #1c1c21);
+        border-top-left-radius: 22px;
+        border-top-right-radius: 22px;
+        border: 1px solid var(--border-medium);
+        border-bottom: 0;
+        padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+        display: flex;
+        flex-direction: column;
+        animation: tsm-sheet-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    @keyframes tsm-fade-in { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes tsm-sheet-in {
+        from { transform: translateY(20px); opacity: 0.6; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    .tournament-participants-mobile .tsm-sheet-handle {
+        width: 40px;
+        height: 4px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.18);
+        margin: 4px auto 8px;
+    }
+    .tournament-participants-mobile .tsm-sheet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 4px 12px;
+    }
+    .tournament-participants-mobile .tsm-sheet-head h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--text-primary);
+    }
+    .tournament-participants-mobile .tsm-sheet-close {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 0;
+        color: var(--text-secondary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-sheet-body {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding-bottom: 12px;
+    }
+    .tournament-participants-mobile .tsm-sheet-section label {
+        display: block;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 8px;
+        font-family: var(--font-mono);
+    }
+    .tournament-participants-mobile .tsm-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .tournament-participants-mobile .tsm-chip {
+        display: inline-flex;
+        align-items: center;
+        height: 36px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 1px solid var(--border-medium);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .tournament-participants-mobile .tsm-chip.is-on {
+        border-color: #3b82f6;
+        background: rgba(59, 130, 246, 0.16);
+        color: #bfdbfe;
+    }
+    .tournament-participants-mobile .tsm-sheet-foot {
+        display: flex;
+        gap: 8px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-medium);
+        margin-top: 8px;
+    }
+    .tournament-participants-mobile .tsm-sheet-clear {
+        flex: 0 0 auto;
+        height: 48px;
+        padding: 0 18px;
+        border-radius: 12px;
+        border: 1px solid var(--border-medium);
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-sheet-apply {
+        flex: 1 1 auto;
+        height: 48px;
+        border-radius: 12px;
+        border: 0;
+        background: #3b82f6;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .tournament-participants-mobile .tsm-sheet.is-compact { max-height: 50vh; }
+    .tournament-participants-mobile .tsm-sheet-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 4px 0 8px;
+    }
+    .tournament-participants-mobile .tsm-sheet-action {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--border-medium);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-primary);
+        text-align: left;
+        cursor: pointer;
+    }
+    .tournament-participants-mobile .tsm-sheet-action svg {
+        flex: 0 0 auto;
+        color: #93c5fd;
+    }
+    .tournament-participants-mobile .tsm-sheet-action span {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+    .tournament-participants-mobile .tsm-sheet-action strong {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .tournament-participants-mobile .tsm-sheet-action small {
+        font-size: 11px;
+        color: var(--text-dim);
+    }
+}
+
+@media (max-width: 379px) {
+    .tournament-participants-mobile .tsm-hero-total-value { font-size: 28px; }
+    .tournament-participants-mobile .tsm-hero-stat span { font-size: 14px; }
+    .tournament-participants-mobile .tsm-bottom-bar-fab span { font-size: 13px; }
+    .tournament-participants-mobile .tsm-participant-text strong { font-size: 13px; }
+    .tournament-participants-mobile .tsm-search-input { font-size: 13px; }
+}
+
+:root[data-theme="light"] .tournament-participants-mobile .tsm-card {
+    background: #ffffff;
+    border-color: rgba(15, 23, 42, 0.10);
+}
+:root[data-theme="light"] .tournament-participants-mobile .tsm-hero {
+    background:
+        linear-gradient(135deg, rgba(59, 130, 246, 0.10), rgba(59, 130, 246, 0.02) 60%),
+        #ffffff;
+}
+:root[data-theme="light"] .tournament-participants-mobile .tsm-toolbar {
+    background: var(--void-bg, #f4f6fb);
+}
+:root[data-theme="light"] .tournament-participants-mobile .tsm-search,
+:root[data-theme="light"] .tournament-participants-mobile .tsm-filter-trigger,
+:root[data-theme="light"] .tournament-participants-mobile .tsm-participant-item {
+    background: #ffffff;
+}
+:root[data-theme="light"] .tournament-participants-mobile .tsm-bottom-bar {
+    background: rgba(255, 255, 255, 0.96);
+}
+
+/* ============================================================================
+   MOBILE PARTICIPANTS — iteración 2 (2026-05)
+   - Hero slim con summary pills
+   - Phase tabs horizontales
+   - Status chips con count
+   - Color rail lateral por status
+   - Section letters al ordenar A-Z
+   - Sheet "Asignar a fase" integrado
+   ============================================================================ */
+@media (max-width: 767px) {
+    /* HERO redesign (slim) — reemplaza el card grande */
+    .tournament-participants-mobile .tsm-hero {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 4px 4px 0;
+        border: 0;
+        background: transparent;
+        border-radius: 0;
+    }
+    .tournament-participants-mobile .tsm-hero-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .tournament-participants-mobile .tsm-hero-title {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+    .tournament-participants-mobile .tsm-hero-eyebrow {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        font-family: var(--font-mono);
+    }
+    .tournament-participants-mobile .tsm-hero-total-value {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+        line-height: 1;
+    }
+    .tournament-participants-mobile .tsm-hero-total-suffix {
+        font-size: 12px;
+        color: var(--text-dim);
+        font-weight: 600;
+    }
+    .tournament-participants-mobile .tsm-hero-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .tournament-participants-mobile .tsm-hero-summary-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 9px;
+        font-size: 11px;
+        font-weight: 600;
+        border-radius: 999px;
+        border: 1px solid var(--border-medium);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-secondary);
+        font-family: var(--font-mono);
+    }
+    .tournament-participants-mobile .tsm-hero-summary-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--text-dim);
+    }
+    .tournament-participants-mobile .tsm-hero-summary-pill.is-active .tsm-hero-summary-dot { background: var(--status-active); }
+    .tournament-participants-mobile .tsm-hero-summary-pill.is-pending .tsm-hero-summary-dot { background: var(--status-pending); }
+    .tournament-participants-mobile .tsm-hero-summary-pill.is-inactive .tsm-hero-summary-dot { background: var(--status-inactive); }
+    .tournament-participants-mobile .tsm-hero-summary-pill.is-disq .tsm-hero-summary-dot { background: var(--status-disqualified); }
+
+    /* Phase tabs horizontales */
+    .tournament-participants-mobile .tsm-phase-tabs {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 4px 4px 6px;
+        margin: 0 -4px;
+    }
+    .tournament-participants-mobile .tsm-phase-tabs::-webkit-scrollbar { display: none; }
+    .tournament-participants-mobile .tsm-phase-tab {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 12px;
+        height: 36px;
+        border-radius: 999px;
+        border: 1px solid var(--border-medium);
+        background: var(--lattice-elevated, #1c1c21);
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .tournament-participants-mobile .tsm-phase-tab.is-on {
+        border-color: #3b82f6;
+        background: rgba(59, 130, 246, 0.16);
+        color: #bfdbfe;
+    }
+    .tournament-participants-mobile .tsm-phase-tab-name {
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .tournament-participants-mobile .tsm-phase-tab-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 22px;
+        padding: 0 6px;
+        height: 18px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text-secondary);
+        font-size: 10px;
+        font-family: var(--font-mono);
+        font-weight: 700;
+    }
+    .tournament-participants-mobile .tsm-phase-tab.is-on .tsm-phase-tab-count {
+        background: rgba(59, 130, 246, 0.3);
+        color: #fff;
+    }
+
+    /* Status filter chips horizontal scroll */
+    .tournament-participants-mobile .tsm-status-chips {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding: 0 4px 4px;
+        margin: 0 -4px;
+    }
+    .tournament-participants-mobile .tsm-status-chips::-webkit-scrollbar { display: none; }
+    .tournament-participants-mobile .tsm-status-chip {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 12px;
+        height: 36px;
+        border-radius: 999px;
+        border: 1px solid var(--border-medium);
+        background: var(--lattice-elevated, #1c1c21);
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        position: relative;
+    }
+    .tournament-participants-mobile .tsm-status-chip-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 18px;
+        padding: 0 6px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        font-size: 10px;
+        font-family: var(--font-mono);
+        font-weight: 700;
+    }
+    .tournament-participants-mobile .tsm-status-chip.is-on {
+        border-color: var(--status-active);
+        background: rgba(16, 185, 129, 0.14);
+        color: #d1fae5;
+    }
+    .tournament-participants-mobile .tsm-status-chip.is-pending.is-on {
+        border-color: var(--status-pending);
+        background: rgba(245, 158, 11, 0.14);
+        color: #fef3c7;
+    }
+    .tournament-participants-mobile .tsm-status-chip.is-inactive.is-on {
+        border-color: var(--status-inactive);
+        background: rgba(113, 113, 122, 0.18);
+        color: var(--text-primary);
+    }
+    .tournament-participants-mobile .tsm-status-chip.is-disqualified.is-on {
+        border-color: var(--status-disqualified);
+        background: rgba(239, 68, 68, 0.14);
+        color: #fecaca;
+    }
+    .tournament-participants-mobile .tsm-status-chip.is-all.is-on {
+        border-color: #3b82f6;
+        background: rgba(59, 130, 246, 0.16);
+        color: #bfdbfe;
+    }
+
+    /* Meta line hint */
+    .tournament-participants-mobile .tsm-list-meta-hint {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text-dim);
+        font-style: italic;
+    }
+
+    /* Participant item: nuevo layout con color rail + logo button + main */
+    .tournament-participants-mobile .tsm-participant-item {
+        position: relative;
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        padding: 0;
+    }
+    .tournament-participants-mobile .tsm-participant-logo-btn {
+        flex: 0 0 auto;
+        width: 56px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 0;
+        border-right: 1px solid var(--border-medium);
+        cursor: pointer;
+        padding: 0;
+    }
+    .tournament-participants-mobile .tsm-participant-logo-btn:active {
+        background: rgba(255, 255, 255, 0.04);
+    }
+    .tournament-participants-mobile .tsm-participant-logo-btn .tsm-participant-logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-dim);
+        overflow: hidden;
+        position: relative;
+    }
+    .tournament-participants-mobile .tsm-participant-item.is-selected .tsm-participant-logo-btn {
+        background: rgba(59, 130, 246, 0.16);
+    }
+    .tournament-participants-mobile .tsm-participant-item.is-selected .tsm-participant-logo {
+        background: #3b82f6;
+        color: #fff;
+    }
+    .tournament-participants-mobile .tsm-participant-main {
+        flex: 1 1 auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        background: transparent;
+        border: 0;
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+        min-height: 64px;
+        min-width: 0;
+    }
+    .tournament-participants-mobile .tsm-participant-main:active {
+        background: rgba(255, 255, 255, 0.03);
+    }
+    /* Color rail (right side, indica status) */
+    .tournament-participants-mobile .tsm-status-rail {
+        flex: 0 0 auto;
+        width: 4px;
+        background: transparent;
+    }
+    .tournament-participants-mobile .tsm-status-rail.is-active { background: var(--status-active); }
+    .tournament-participants-mobile .tsm-status-rail.is-pending { background: var(--status-pending); }
+    .tournament-participants-mobile .tsm-status-rail.is-inactive { background: var(--status-inactive); }
+    .tournament-participants-mobile .tsm-status-rail.is-disqualified { background: var(--status-disqualified); }
+
+    /* Section letter divider */
+    .tournament-participants-mobile .tsm-section-letter {
+        list-style: none;
+        padding: 14px 6px 4px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        font-family: var(--font-mono);
+        background: transparent;
+        border: 0;
+        margin-top: 4px;
+    }
+
+    /* Bottom bar: bulk actions con primary */
+    .tournament-participants-mobile .tsm-bottom-bar-btn.is-primary {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        border-color: transparent;
+        color: #fff;
+        flex: 1 1 auto;
+        gap: 6px;
+    }
+
+    /* Sheet foot stack (asignar a fase) */
+    .tournament-participants-mobile .tsm-sheet-foot-stack {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+    .tournament-participants-mobile .tsm-sheet-foot-stack .tsm-sheet-apply,
+    .tournament-participants-mobile .tsm-sheet-foot-stack .tsm-sheet-clear {
+        width: 100%;
+    }
+    .tournament-participants-mobile .tsm-sheet-clear.is-danger {
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+    .tournament-participants-mobile .tsm-sheet-clear:disabled,
+    .tournament-participants-mobile .tsm-sheet-apply:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+/* Light theme tweaks para iteración 2 */
+:root[data-theme="light"] .tournament-participants-mobile .tsm-phase-tab,
+:root[data-theme="light"] .tournament-participants-mobile .tsm-status-chip {
+    background: #ffffff;
+}
+:root[data-theme="light"] .tournament-participants-mobile .tsm-phase-tab-count,
+:root[data-theme="light"] .tournament-participants-mobile .tsm-status-chip-count {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+/* ============================================================================
+   MOBILE PARTICIPANTS — polish 2026-05 (post screenshot feedback)
+   - Status chips con count 0 atenuados
+   - Hint más chico
+   - Indicador de fade-out en scrolls horizontales
+   ============================================================================ */
+@media (max-width: 767px) {
+    .tournament-participants-mobile .tsm-status-chip.is-empty {
+        opacity: 0.4;
+    }
+    .tournament-participants-mobile .tsm-status-chip.is-empty:hover {
+        opacity: 0.6;
+    }
+
+    .tournament-participants-mobile .tsm-list-meta-hint {
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--text-ghost);
+        font-style: normal;
+        font-family: var(--font-mono);
+        letter-spacing: 0.02em;
+    }
+
+    /* Wrapper común para los scrolls horizontales con fade derecho */
+    .tournament-participants-mobile .tsm-phase-tabs,
+    .tournament-participants-mobile .tsm-status-chips {
+        position: relative;
+        scroll-snap-type: x proximity;
+    }
+    .tournament-participants-mobile .tsm-phase-tab,
+    .tournament-participants-mobile .tsm-status-chip {
+        scroll-snap-align: start;
+    }
+    /* Fade-out a la derecha (señal "hay más") */
+    .tournament-participants-mobile .tsm-phase-tabs::after,
+    .tournament-participants-mobile .tsm-status-chips::after {
+        content: '';
+        position: sticky;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        flex: 0 0 16px;
+        margin-left: -16px;
+        background: linear-gradient(90deg, transparent, var(--void-bg, #0a0a0c) 80%);
+        pointer-events: none;
+    }
+
+    /* Hero más prieto (dejamos sólo eyebrow + total + history) */
+    .tournament-participants-mobile .tsm-hero {
+        padding: 6px 4px 0;
+    }
+
+    /* Garantizar que el último item NO quede tapado por bottom-bar + tab-bar */
+    .tournament-participants-mobile .tsm-participant-list {
+        margin-bottom: 0;
+    }
+}
+
+/* Light theme: fade derecho usando token de fondo claro */
+:root[data-theme="light"] .tournament-participants-mobile .tsm-phase-tabs::after,
+:root[data-theme="light"] .tournament-participants-mobile .tsm-status-chips::after {
+    background: linear-gradient(90deg, transparent, var(--void-bg, #f4f6fb) 80%);
+}

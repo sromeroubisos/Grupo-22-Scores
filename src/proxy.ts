@@ -5,6 +5,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { logRefreshFlow } from '@/lib/debug/refreshFlow'
+import { logRefreshLoop } from '@/lib/debug/refreshLoop'
 import { updateSession, readUserFromCookie } from '@/lib/supabase/proxy'
 import { measureAsync } from '@/lib/perf/measure';
 
@@ -83,14 +84,29 @@ export async function proxy(request: NextRequest) {
 
     const needsRefresh = shouldRefreshSession(pathname, searchParams);
     const protectedRoute = isProtectedRoute(pathname);
+    const isApiPath = pathname.startsWith('/api');
+    const isAdminPath = pathname.startsWith('/admin') || pathname.startsWith('/club-admin');
     logRefreshFlow('proxy_route_decision', {
         path: pathname,
         needsRefresh,
         protectedRoute,
     }, 'route');
+    logRefreshLoop('proxy_request', {
+        path: pathname,
+        method: request.method,
+        isAdminPath,
+        isApiPath,
+        protectedRoute,
+        needsSessionRefresh: needsRefresh,
+        reason: needsRefresh ? 'matched_session_refresh_prefix' : (protectedRoute ? 'protected_no_refresh' : 'public'),
+    });
 
     // 2. Public routes that don't need auth check at all
     if (!needsRefresh && !protectedRoute) {
+        logRefreshLoop('proxy_fast_path', {
+            path: pathname,
+            reason: 'public_route',
+        });
         return measureAsync(
             'proxy_bypass',
             async () => NextResponse.next(),
@@ -106,6 +122,10 @@ export async function proxy(request: NextRequest) {
     }
 
     if (protectedRoute && pathname.startsWith('/club-admin') && hasGuestClubAccess(request)) {
+        logRefreshLoop('proxy_fast_path', {
+            path: pathname,
+            reason: 'guest_club_access_cookie',
+        });
         return measureAsync(
             'proxy_guest_club_bypass',
             async () => NextResponse.next(),
@@ -126,8 +146,17 @@ export async function proxy(request: NextRequest) {
     if (protectedRoute && !needsRefresh) {
         const user = readUserFromCookie(request);
         if (!user) {
+            logRefreshLoop('proxy_session_invalid', {
+                path: pathname,
+                action: 'redirect_login',
+                reason: 'cookie_user_missing_protected_no_refresh',
+            });
             return redirectToLogin(request);
         }
+        logRefreshLoop('proxy_fast_path', {
+            path: pathname,
+            reason: 'cookie_user_present_no_refresh_needed',
+        });
         return NextResponse.next();
     }
 
@@ -138,6 +167,11 @@ export async function proxy(request: NextRequest) {
             const { response, user } = await updateSession(request);
 
             if (protectedRoute && !user) {
+                logRefreshLoop('proxy_session_invalid', {
+                    path: pathname,
+                    action: 'redirect_login',
+                    reason: 'no_user_after_update_session',
+                });
                 return redirectToLogin(request);
             }
 

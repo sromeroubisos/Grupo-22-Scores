@@ -2510,3 +2510,539 @@ select.glass-input option {
     background: rgba(15, 23, 42, 0.04);
     border-color: rgba(15, 23, 42, 0.1);
 }
+
+/* ==========================================================================
+   FIXTURE WORKSPACE — MOBILE/TABLET REDESIGN (additive overrides)
+   --------------------------------------------------------------------------
+   Reglas que sólo aplican en mobile y tablet vertical. Resuelven los pain
+   points detectados en el subtab "Fixture": hero redundante, subtabs muy
+   altos, carrusel de métodos poco accesible, toolbar sin sticky y sin CTA
+   visible, acciones de card que wrappean, bulk bar amontonado.
+   ========================================================================== */
+
+/* Wrapper mobile-only de [Filtros] [+ Crear partido]: oculto por defecto
+   y visible recién en el breakpoint mobile. */
+.operation-manage-mobile-row {
+    display: none;
+}
+
+/* TABLET VERTICAL (768–1023px): suavizar paddings y permitir 2 cards de
+   partido por fila aunque el workspace ya esté en 1 columna. */
+@media (max-width: 1023px) {
+    .operation-fixture-workspace {
+        gap: 16px;
+    }
+
+    .operation-fixture-hero {
+        padding: 18px;
+        gap: 12px;
+    }
+
+    .operation-fixture-hero-copy h3 {
+        font-size: 18px;
+    }
+
+    .operation-fixture-hero-meta {
+        min-width: 0;
+        padding: 12px 14px;
+    }
+
+    .fixture-matches-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 14px;
+    }
+
+    .operation-method-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .operation-fixture-subtab {
+        padding: 14px;
+    }
+
+    .operation-fixture-subtab small {
+        font-size: 12px;
+    }
+
+    .operation-manage-toolbar-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* MOBILE (≤767px): rediseño focalizado del subtab fixture. */
+@media (max-width: 767px) {
+    /* 1) HERO REDUNDANTE — el wrapper ya muestra título y kicker arriba.
+          Lo ocultamos para ganar ~140px verticales en pantallas chicas. */
+    .operation-fixture-workspace .operation-fixture-hero {
+        display: none;
+    }
+
+    /* 2) PANEL DE FASE compacto — bajamos padding y tipografía. */
+    .operation-mobile-side-trigger {
+        padding: 12px 14px !important;
+        gap: 10px !important;
+    }
+
+    .operation-mobile-side-trigger-copy strong {
+        font-size: 14px !important;
+    }
+
+    .operation-mobile-side-trigger-copy small {
+        font-size: 11px !important;
+        line-height: 1.4;
+    }
+
+    .operation-mobile-side-trigger .basalt-btn {
+        min-height: 36px !important;
+        font-size: 12px;
+        padding-inline: 12px;
+    }
+
+    /* 3) SUBTABS DEL WORKSPACE — de cards altas a segmented control. */
+    .operation-fixture-workspace .operation-fixture-subtabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+        padding: 4px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .operation-fixture-workspace .operation-fixture-subtabs .operation-fixture-subtab {
+        min-block-size: 0 !important;
+        flex-basis: 0 !important;
+        min-inline-size: 0 !important;
+        max-inline-size: none !important;
+        padding: 9px 10px !important;
+        border-radius: 10px;
+        background: transparent;
+        border: 1px solid transparent;
+        text-align: center;
+        gap: 0 !important;
+    }
+
+    .operation-fixture-workspace .operation-fixture-subtabs .operation-fixture-subtab span {
+        font-size: 13px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    /* La descripción del subtab se vuelve invisible en mobile (la
+       describimos arriba con la propia tab activa). */
+    .operation-fixture-workspace .operation-fixture-subtabs .operation-fixture-subtab small {
+        display: none;
+    }
+
+    .operation-fixture-workspace .operation-fixture-subtabs .operation-fixture-subtab.active {
+        background: rgba(0, 163, 101, 0.18);
+        border-color: rgba(0, 214, 136, 0.45);
+        box-shadow: none;
+    }
+
+    /* 4) MÉTODOS — pasamos del carrusel horizontal a una lista vertical
+          compacta. Cada método es un row tappable de altura cómoda. */
+    .operation-method-grid {
+        display: grid !important;
+        grid-auto-flow: row !important;
+        grid-auto-columns: auto !important;
+        grid-template-columns: 1fr !important;
+        overflow: visible !important;
+        scroll-snap-type: none !important;
+        gap: 8px !important;
+        padding-bottom: 0 !important;
+    }
+
+    .operation-method-card {
+        grid-template-columns: 40px minmax(0, 1fr);
+        align-items: center;
+        gap: 12px !important;
+        padding: 12px 14px !important;
+        border-radius: 14px;
+        scroll-snap-align: none !important;
+    }
+
+    .operation-method-card .operation-method-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+    }
+
+    .operation-method-card .operation-method-copy {
+        gap: 2px;
+    }
+
+    .operation-method-card strong {
+        font-size: 14px;
+    }
+
+    .operation-method-card p {
+        font-size: 12px;
+        line-height: 1.35;
+        color: rgba(228, 233, 241, 0.6);
+    }
+
+    /* Fila mobile que combina [Filtros] [+ Crear partido] arriba del
+       grid colapsable. */
+    .operation-manage-mobile-row {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+        order: 2;
+    }
+
+    .operation-manage-mobile-row .operation-manage-mobile-toggle {
+        flex: 1 1 50%;
+        min-height: 40px;
+        margin: 0;
+    }
+
+    .operation-manage-mobile-row .operation-manage-create-mobile {
+        flex: 1 1 50%;
+        min-height: 40px;
+        padding: 0 12px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    /* En mobile el botón "Crear partido" original (dentro del grid de
+       filtros) se oculta para evitar duplicar el CTA. */
+    .operation-manage-toolbar-grid .operation-manage-create {
+        display: none;
+    }
+
+    /* 5) TOOLBAR DE GESTIÓN — sticky bajo el header de la tab, mantiene
+          buscador siempre visible y saca el CTA "Crear partido" del grid
+          colapsado para que sea accesible siempre. */
+    .operation-manage-panel .operation-manage-toolbar {
+        position: sticky !important;
+        top: calc(var(--basalt-header-offset, 116px) + 4px) !important;
+        z-index: 9 !important;
+        gap: 8px !important;
+        padding: 10px !important;
+        border-radius: 14px;
+    }
+
+    .operation-manage-panel .operation-manage-search {
+        min-height: 42px;
+        border-radius: 10px;
+    }
+
+    .operation-manage-panel .operation-manage-search input {
+        font-size: 14px;
+    }
+
+    .operation-manage-panel .operation-manage-mobile-toggle {
+        order: 2;
+        flex: 1;
+        min-height: 38px;
+        border-radius: 10px;
+    }
+
+    /* Wrapper en flex para alinear toggle de filtros + CTA. Cuando los
+       filtros están cerrados, el grid de filtros desaparece y solo queda
+       esta fila con [Filtros] [+ Crear partido]. */
+    .operation-manage-panel .operation-manage-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .operation-manage-panel .operation-manage-search {
+        flex: 1 1 100%;
+        order: 1;
+    }
+
+    .operation-manage-panel .operation-manage-toolbar-grid {
+        flex: 1 1 100%;
+        order: 3;
+    }
+
+    /* CTA "Crear partido": lo sacamos visualmente del grid de filtros en
+       mobile usando un fixed mini-FAB sobre el shell del workspace. */
+    .operation-manage-panel .operation-manage-toolbar-grid .operation-manage-create {
+        order: 99;
+    }
+
+    /* 6) ROUND HEADER — reorden para evitar wrap caótico. */
+    .fixture-round-section .fixture-round-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .fixture-round-section .fixture-round-title {
+        flex: 1 1 100%;
+        align-items: center;
+    }
+
+    .fixture-round-section .fixture-round-title h3 {
+        font-size: 0.96rem;
+        line-height: 1.2;
+    }
+
+    .fixture-round-section .fixture-round-title p {
+        font-size: 0.74rem;
+        margin-top: 2px;
+    }
+
+    .fixture-round-section .fixture-round-meta {
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .fixture-round-section .fixture-round-count {
+        font-size: 0.72rem;
+    }
+
+    .fixture-round-section .operation-manage-round-actions {
+        margin-left: auto;
+        width: auto;
+        gap: 6px;
+    }
+
+    .fixture-round-section .operation-manage-round-actions .fixture-icon-btn {
+        min-width: 36px;
+        min-height: 36px;
+    }
+
+    /* 7) MATCH CARD — actions ordenadas en 2 filas:
+          Fila A: [Editar] [Resultado rápido] (full-width)
+          Fila B: [Mover] [Duplicar] [Eliminar] (3 col iguales). */
+    .fixture-match-card .fixture-match-footer {
+        gap: 12px;
+        padding-top: 12px;
+    }
+
+    .fixture-match-card .fixture-match-actions {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        width: 100%;
+    }
+
+    .fixture-match-card .fixture-match-actions .fixture-mini-btn {
+        width: 100%;
+        min-height: 40px;
+        padding: 0 10px;
+        font-size: 12px;
+        justify-content: center;
+    }
+
+    /* La fila de iconos (Mover / Duplicar / Eliminar) ocupa los 2 col
+       enteros como sub-grid de 3 columnas. */
+    .fixture-match-card .fixture-match-actions .fixture-icon-btn {
+        min-height: 40px;
+        min-width: 0;
+    }
+
+    .fixture-match-card .fixture-match-actions .fixture-icon-btn:nth-of-type(1) {
+        grid-column: 1 / 2;
+    }
+
+    .fixture-match-card .fixture-match-actions .fixture-icon-btn:nth-of-type(2) {
+        grid-column: 2 / 3;
+    }
+
+    .fixture-match-card .fixture-match-actions .fixture-icon-btn:nth-of-type(3) {
+        grid-column: 1 / -1;
+    }
+
+    /* Center del versus más compacto en 360px. */
+    .fixture-match-card .fixture-match-teams {
+        grid-template-columns: 1fr 52px 1fr;
+        gap: 8px;
+    }
+
+    .fixture-match-card .fixture-team-logo {
+        width: 44px;
+        height: 44px;
+    }
+
+    .fixture-match-card .fixture-team-name {
+        font-size: 0.82rem;
+        max-width: 100%;
+    }
+
+    .fixture-match-card .fixture-match-center {
+        padding: 10px 6px;
+    }
+
+    .fixture-match-card .fixture-match-center strong {
+        font-size: 1.08rem;
+    }
+
+    .fixture-match-card .fixture-match-meta span {
+        font-size: 0.74rem;
+    }
+
+    /* 8) QUICK EDITOR — score en una fila horizontal (Estado arriba,
+          Local | Visitante lado a lado), no en columna vertical. */
+    .fixture-match-card .fixture-quick-grid-score {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px;
+    }
+
+    .fixture-match-card .fixture-quick-grid-score .fixture-quick-field:first-child {
+        grid-column: 1 / -1;
+    }
+
+    .fixture-match-card .fixture-quick-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px;
+    }
+
+    .fixture-match-card .fixture-quick-grid-schedule {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .fixture-match-card .fixture-quick-totals {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px;
+    }
+
+    .fixture-match-card .fixture-quick-action-btns {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .fixture-match-card .fixture-quick-action-btns .basalt-btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 40px;
+    }
+
+    /* "Editar horario" en el header del quick-editor está duplicado con
+       el botón de la fila de acciones; ocultamos el toggle inferior. */
+    .fixture-match-card .fixture-quick-schedule-toggle {
+        display: none;
+    }
+
+    /* 9) BULK ACTIONS BAR — una sola fila compacta con scroll horizontal
+          interno cuando hace falta, en lugar de 3 filas apiladas. */
+    .operation-manage-bulkbar {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 10px;
+        padding: 10px 12px;
+        scrollbar-width: none;
+    }
+
+    .operation-manage-bulkbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .operation-manage-bulkselect {
+        flex: 0 0 auto;
+        width: auto !important;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .operation-manage-bulkactions {
+        flex: 0 0 auto;
+        width: auto !important;
+        flex-wrap: nowrap;
+    }
+
+    .operation-manage-bulkactions .btn-secondary,
+    .operation-manage-bulkactions .btn-danger-outline {
+        white-space: nowrap;
+        min-height: 36px;
+    }
+
+    /* 10) LIST VIEW ROW — más jerarquía y mejor tap target. */
+    .operation-manage-list-row {
+        gap: 10px !important;
+        padding: 12px !important;
+        border-radius: 16px;
+    }
+
+    .operation-manage-list-row .operation-manage-check {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+    }
+
+    .operation-manage-list-main strong {
+        font-size: 14px;
+    }
+
+    .operation-manage-list-main small {
+        font-size: 11px;
+    }
+
+    .operation-manage-list-meta {
+        gap: 6px;
+    }
+
+    .operation-manage-list-meta > span:first-child {
+        font-size: 12px;
+    }
+
+    .operation-match-actions {
+        gap: 6px;
+    }
+
+    .operation-match-actions .operation-match-action {
+        min-height: 38px;
+        border-radius: 10px;
+    }
+
+    /* 11) PADDING-BOTTOM — el bottom-tab-bar mide 64px, el shell ya
+          reserva 72px. Sumamos 12px más al final del workspace para que
+          el último card no quede pegado al navbar. */
+    .operation-fixture-workspace {
+        padding-bottom: 12px;
+    }
+
+    /* 12) FEEDBACK BANNER — más legible en 360. */
+    .operation-feedback {
+        padding: 10px 12px;
+        font-size: 13px;
+        gap: 8px;
+        align-items: flex-start;
+    }
+}
+
+/* MOBILE CHICO (≤390px): apretar un poco más donde aún sobre. */
+@media (max-width: 390px) {
+    .fixture-match-card .fixture-match-teams {
+        grid-template-columns: 1fr 44px 1fr;
+        gap: 6px;
+    }
+
+    .fixture-match-card .fixture-team-logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+    }
+
+    .fixture-match-card .fixture-team-name {
+        font-size: 0.78rem;
+    }
+
+    .fixture-match-card .fixture-match-actions {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .fixture-match-card .fixture-match-actions .fixture-mini-btn {
+        font-size: 11px;
+        padding: 0 8px;
+    }
+
+    .operation-method-card {
+        padding: 10px 12px !important;
+    }
+
+    .operation-method-card strong {
+        font-size: 13px;
+    }
+
+    .operation-method-card p {
+        font-size: 11px;
+    }
+}

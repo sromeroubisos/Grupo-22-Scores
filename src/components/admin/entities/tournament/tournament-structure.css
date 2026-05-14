@@ -416,6 +416,13 @@
 
 .structure-field-panel {
     position: relative;
+}
+
+/* Card chrome (border + background + decorative top rule) ONLY applies to the
+ * accent variant (group / playoff stage editor). All informational and form
+ * panels across the wizard render flat — the user explicitly asked to remove
+ * unnecessary recuadros across every tab of the phase wizard. */
+.structure-field-panel.structure-field-panel-accent {
     padding: 18px;
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -424,7 +431,7 @@
         rgba(255, 255, 255, 0.025);
 }
 
-.structure-field-panel::before {
+.structure-field-panel.structure-field-panel-accent::before {
     content: '';
     position: absolute;
     left: 18px;
@@ -515,13 +522,13 @@
     background: transparent !important;
 }
 
+/* Score panel (Victoria / Empate / Derrota) renders flat — the number input
+ * inside has its own border so a wrapping card is unnecessary. */
 .structure-score-panel {
-    padding: 14px !important;
-    border-radius: 18px !important;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 36%),
-        rgba(255, 255, 255, 0.02);
+    padding: 0 !important;
+    border-radius: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
 }
 
 .structure-label-stack {
@@ -799,14 +806,192 @@
 }
 
 .structure-wizard-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     margin-top: 36px;
     padding-top: 22px;
-    border-top-color: rgba(255, 255, 255, 0.08) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
     justify-content: space-between;
+}
+
+.structure-wizard-back-placeholder {
+    display: block;
+    width: 1px;
+    height: 1px;
+}
+
+.structure-wizard-back,
+.structure-wizard-next {
+    text-transform: none;
+    letter-spacing: 0;
 }
 
 .structure-wizard-footer-actions {
     margin-left: auto;
+}
+
+/* --- Step 4 (Etiquetas) — global color-mode toggle --- */
+.structure-label-global-mode {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.structure-label-global-mode-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(223, 232, 237, 0.78);
+    letter-spacing: 0.04em;
+}
+
+.structure-label-global-mode-toggle {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.28);
+}
+
+.structure-label-global-mode-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: rgba(223, 232, 237, 0.7);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.structure-label-global-mode-btn:hover:not(.is-active) {
+    color: #fff;
+}
+
+.structure-label-global-mode-btn.is-active {
+    background: rgba(0, 163, 101, 0.22);
+    color: #fff;
+}
+
+/* --- Compact label rows (collapsed by default) --- */
+.structure-label-row-compact {
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+}
+
+.structure-label-row-toggle {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.structure-label-row-toggle:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.structure-label-swatch-dot {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
+}
+
+.structure-label-row-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.structure-label-row-menu {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    color: rgba(223, 232, 237, 0.55);
+    transition: color 140ms ease, background 140ms ease;
+}
+
+.structure-label-row-toggle:hover .structure-label-row-menu {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.structure-label-row-compact.is-expanded .structure-label-row-menu {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.structure-label-row-expanded {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 14px 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 12px;
+    margin-top: 0;
+}
+
+.structure-label-empty-hint {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    color: rgba(223, 232, 237, 0.7);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* CTA secondary (Crear etiqueta) — outline verde, sin competir con SIGUIENTE */
+.structure-label-submit-cta {
+    background: transparent;
+    border: 1px solid rgba(0, 163, 101, 0.45);
+    color: #34d399;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.structure-label-submit-cta:hover:not(:disabled) {
+    background: rgba(0, 163, 101, 0.12);
+    border-color: rgba(0, 163, 101, 0.6);
+    color: #fff;
+}
+
+.structure-label-form-cancel {
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* Mobile-only progress (hidden on desktop where the sidebar already shows it) */
+.structure-mobile-progress {
+    display: none;
 }
 
 @media (max-width: 1279px) {
@@ -1244,7 +1429,9 @@
     font-size: 1rem;
 }
 
-.structure-field-panel {
+/* Console refinement — same scoping as the base rule: only the accent
+ * variant gets card chrome. */
+.structure-field-panel.structure-field-panel-accent {
     padding: 20px;
     border-radius: 28px !important;
     border-color: rgba(148, 163, 184, 0.14);
@@ -1253,7 +1440,7 @@
         rgba(18, 24, 30, 0.96) !important;
 }
 
-.structure-field-panel::before {
+.structure-field-panel.structure-field-panel-accent::before {
     left: 20px;
     right: 20px;
     top: 20px;
@@ -2138,7 +2325,6 @@
 /* ---- Mobile collapse ---- */
 @media (max-width: 768px) {
     .tournament-structure-shell .structure-option-grid,
-    .tournament-structure-shell .structure-summary-grid,
     .tournament-structure-shell .structure-basic-type-grid {
         grid-template-columns: 1fr !important;
     }
@@ -2149,5 +2335,2061 @@
     .tournament-structure-shell .structure-module-title,
     .tournament-structure-shell .basalt-h1.structure-module-title {
         font-size: 1.5rem !important;
+    }
+}
+
+/* ===========================================================================
+ * PHASE WIZARD — UNIVERSAL FLATTEN + TYPOGRAPHIC HIERARCHY
+ * Applies to ALL steps of the phase wizard:
+ *   step 1: Configuración Básica
+ *   step 2: Sistema de Puntos
+ *   step 3: Criterios de Desempate
+ *   step 4: Etiquetas de Clasificación
+ *   step 5: Estadísticas
+ *   step 6: Puntos de circuito (only renders for circuit-mode tournaments)
+ *
+ * Two concerns:
+ *   1. FLATTEN — strip card chrome (border, background, padding, ::before)
+ *      from .structure-field-panel and related wrapper panels so the wizard
+ *      reads as a clean list of labeled sections rather than a stack of
+ *      cards. Functional control borders (inputs, option cards, counter
+ *      shells, footer buttons) are preserved. The accent variant
+ *      (.structure-field-panel-accent — group / playoff stage editor)
+ *      keeps its highlight.
+ *   2. TYPOGRAPHY — apply a consistent mobile-first hierarchy across every
+ *      step (kicker → title → subtitle → labels → controls → numerics).
+ *
+ * Specificity strategy: tournament-mobile.css aggressively shrinks fonts at
+ * narrow widths via `.basalt-body .tournament-structure-shell .X` (3-class).
+ * Our selectors use `.basalt-body .tournament-structure-shell
+ * .structure-step-panel .X` (4-class) or compound class to win consistently.
+ * ========================================================================= */
+
+/* --- 1.A FLATTEN — base field panels across every step --- */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel:not(.structure-field-panel-accent),
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .structure-field-panel:not(.structure-field-panel-accent) {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel:not(.structure-field-panel-accent)::before,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel:not(.structure-field-panel-accent)::after,
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .structure-field-panel:not(.structure-field-panel-accent)::before,
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .structure-field-panel:not(.structure-field-panel-accent)::after {
+    content: none !important;
+    display: none !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+}
+
+/* --- 1.B FLATTEN — score panels (step 2: Victoria / Empate / Derrota) --- */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-score-panel {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+/* --- 1.C FLATTEN — labels list / form panels (step 4) --- */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-labels-list-panel,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-labels-form-panel,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-label-list-panel {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+/* --- 1.D Drop the extra label padding-top that balanced the old ::before. --- */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel:not(.structure-field-panel-accent) > .structure-field-label,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-label::before,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-label::after {
+    padding-top: 0 !important;
+}
+
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-label::before,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-label::after {
+    content: none !important;
+    display: none !important;
+    background: transparent !important;
+    border: 0 !important;
+}
+
+/* --- 1.E NAMED step-1 panels (belt-and-suspenders against any inline rule). --- */
+html body .tournament-structure-shell .structure-basic-name-panel,
+html body .tournament-structure-shell .structure-basic-type-panel,
+html body .tournament-structure-shell .structure-basic-format-panel,
+html body .tournament-structure-shell .structure-single-table-note,
+html body .tournament-structure-shell .structure-split-grid > .structure-field-panel {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+html body .tournament-structure-shell .structure-basic-name-panel::before,
+html body .tournament-structure-shell .structure-basic-type-panel::before,
+html body .tournament-structure-shell .structure-basic-format-panel::before,
+html body .tournament-structure-shell .structure-single-table-note::before,
+html body .tournament-structure-shell .structure-split-grid > .structure-field-panel::before,
+html body .tournament-structure-shell .structure-basic-name-panel::after,
+html body .tournament-structure-shell .structure-basic-type-panel::after,
+html body .tournament-structure-shell .structure-basic-format-panel::after,
+html body .tournament-structure-shell .structure-single-table-note::after,
+html body .tournament-structure-shell .structure-split-grid > .structure-field-panel::after {
+    content: none !important;
+    display: none !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. TYPOGRAPHIC HIERARCHY (universal — every step of the phase wizard)
+ *
+ * Hierarchy (top → bottom of section):
+ *   PASO N kicker          → 10.5px / 700 / uppercase / 0.06em
+ *   Section title          → 19px   / 700 / line-height 24px
+ *   subtitle               → 12.5px / 400 / line-height 17px / muted
+ *   field labels           → 11.5px / 700 / uppercase / 0.05em
+ *   inputs / option cards  → 14.5px / 600
+ *   card secondary text    → 11.5px / 450 / line-height 15px / softer
+ *   block copy             → 15px   / 500 / line-height 21px / readable
+ *   numeric values 8/4/3   → 15.5px / 700
+ *   segmented buttons      → 14px   / 700
+ *   footer CTAs            → 13.5px / 700 / uppercase / 0.03em / 48px tall
+ *
+ * Greys avoid pure white: primary text rgba(248,250,252,0.96); secondary
+ * rgba(203,213,225,0.92); muted rgba(148,163,184,0.78).
+ *
+ * The kicker / title / subtitle are matched two ways: by class
+ * (.phase-wizard-kicker / .phase-wizard-step-heading / .phase-wizard-step-
+ * subtitle, used in step 1) AND by structural position inside
+ * .structure-step-head > p:first-child / > h3 / > p:last-child (used in
+ * steps 2-6 which only have bare Tailwind utilities).
+ * ------------------------------------------------------------------------- */
+
+/* PASO N kicker */
+.basalt-body .tournament-structure-shell .structure-step-panel .phase-wizard-kicker,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-step-head > p:first-child {
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: rgba(148, 163, 184, 0.78) !important;
+    line-height: 1.2 !important;
+    margin: 0 0 6px !important;
+}
+
+/* Section title (Configuración Básica / Sistema de Puntos / etc.) */
+.basalt-body .tournament-structure-shell .structure-step-panel .phase-wizard-step-heading,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-step-heading-main,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-step-head > h3 {
+    font-size: 19px !important;
+    font-weight: 700 !important;
+    line-height: 24px !important;
+    letter-spacing: -0.01em !important;
+    text-transform: none !important;
+    color: rgba(248, 250, 252, 0.96) !important;
+    margin: 0 0 4px !important;
+}
+
+/* Subtitle */
+.basalt-body .tournament-structure-shell .structure-step-panel .phase-wizard-step-subtitle,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-step-head > p:last-child:not(:first-child) {
+    font-size: 12.5px !important;
+    font-weight: 400 !important;
+    line-height: 17px !important;
+    color: rgba(148, 163, 184, 0.78) !important;
+    letter-spacing: 0 !important;
+    margin: 0 !important;
+}
+
+/* Field labels (NOMBRE DE LA FASE / VICTORIA / etc.) */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-label {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    line-height: 1.3 !important;
+    color: rgba(203, 213, 225, 0.92) !important;
+    margin: 0 0 8px !important;
+    padding-top: 0 !important;
+}
+
+/* Text/number inputs (NOT the counter — counter has its own size). */
+.basalt-body .tournament-structure-shell .structure-step-panel .basalt-input,
+.basalt-body .tournament-structure-shell .structure-step-panel input[type="text"]:not(.structure-counter-input),
+.basalt-body .tournament-structure-shell .structure-step-panel input[type="number"]:not(.structure-counter-input) {
+    font-size: 14.5px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    color: rgba(248, 250, 252, 0.96) !important;
+    min-height: 48px !important;
+}
+
+/* Score panel inputs (Victoria/Empate/Derrota) — these have inline `text-2xl
+ * font-black` Tailwind utilities. Treat them as numeric values per spec. */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-score-panel input.basalt-input {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    padding: 12px !important;
+}
+
+/* Option card primary label */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-option-card > span:first-child {
+    font-size: 14.5px !important;
+    font-weight: 600 !important;
+    line-height: 18px !important;
+    color: rgba(248, 250, 252, 0.96) !important;
+    margin-bottom: 2px !important;
+}
+
+/* Option card secondary description */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-option-card > span:not(:first-child),
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-option-card > span:last-child {
+    font-size: 11.5px !important;
+    font-weight: 450 !important;
+    line-height: 15px !important;
+    letter-spacing: 0 !important;
+    color: rgba(148, 163, 184, 0.78) !important;
+    opacity: 1 !important;
+    margin-top: 2px !important;
+}
+
+/* Block-level explanatory copy (Tabla competitiva paragraph + similar). */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-single-table-copy {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    line-height: 21px !important;
+    color: rgba(203, 213, 225, 0.78) !important;
+    letter-spacing: 0 !important;
+}
+
+/* Counter numeric values (8 / 4) */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-counter-input,
+.basalt-body .tournament-structure-shell .structure-step-panel input.structure-counter-input {
+    font-size: 15.5px !important;
+    font-weight: 700 !important;
+    color: rgba(248, 250, 252, 0.96) !important;
+    line-height: 1 !important;
+}
+
+/* Counter shell + buttons (tap target ≥48px). */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-counter-shell {
+    min-height: 48px !important;
+    height: 48px !important;
+    max-height: 48px !important;
+}
+
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-counter-shell .structure-counter-button {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    min-width: 48px !important;
+    width: 48px !important;
+    height: 48px !important;
+    flex: 0 0 48px !important;
+}
+
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-counter-shell .structure-counter-input {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+}
+
+/* Format selector segmented buttons (Partido único / Ida y vuelta) */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-basic-format-panel .structure-option-card {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    min-height: 52px !important;
+    padding: 14px 16px !important;
+}
+
+/* Checkbox row title (step 2 "Puntos diferentes por prórroga", step 5
+ * "Asignar estadísticas solo a titulares" + "Arrastrar estadisticas"). */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel label.cursor-pointer > div > span,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel label > div > span:first-child {
+    font-size: 14.5px !important;
+    font-weight: 600 !important;
+    line-height: 19px !important;
+    color: rgba(248, 250, 252, 0.96) !important;
+}
+
+/* Checkbox row helper copy (the <p> below the title) */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel label > div > p {
+    font-size: 12.5px !important;
+    font-weight: 400 !important;
+    line-height: 17px !important;
+    color: rgba(148, 163, 184, 0.78) !important;
+    margin-top: 2px !important;
+}
+
+/* Wizard footer buttons (Cancelar + Siguiente / Crear / Guardar). */
+.basalt-body .tournament-structure-shell .phase-wizard-footer .basalt-btn,
+.basalt-body .tournament-structure-shell .structure-wizard-footer .basalt-btn {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.03em !important;
+    min-height: 48px !important;
+    line-height: 1 !important;
+    padding: 12px 18px !important;
+}
+
+/* Tighter rhythm between sections — compact but breathable. */
+.basalt-body .tournament-structure-shell .structure-step-panel .phase-wizard-fields {
+    gap: 18px !important;
+}
+
+.basalt-body .tournament-structure-shell .structure-step-panel .phase-wizard-step-head,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-step-head {
+    margin-bottom: 4px !important;
+}
+
+/* Step root (vertical rhythm between hero, sections, footer). */
+.basalt-body .tournament-structure-shell .structure-step-panel {
+    gap: 20px !important;
+}
+
+/* Checkbox sizing — tournament-mobile.css forces width:100% on every input
+ * inside .structure-field-panel which destroys checkboxes. Reset them. */
+.basalt-body .tournament-structure-shell .structure-step-panel input[type="checkbox"],
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+    max-width: 18px !important;
+    max-height: 18px !important;
+    flex: 0 0 18px !important;
+    margin: 0 !important;
+    appearance: auto !important;
+    -webkit-appearance: checkbox !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * NUCLEAR — kill the Tailwind arbitrary-value border/background utilities
+ * applied inline to step-2/5/6 field-panels. Even if some bundling/layering
+ * issue causes the namespaced selector to lose, these direct utility-class
+ * overrides at 5-class specificity should beat any inline Tailwind class. */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel.rounded-xl,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel.border,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel.p-5,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel.p-4,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel.p-6,
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .structure-field-panel.rounded-xl,
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .structure-field-panel.border,
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .structure-field-panel.p-5 {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-width: 0 !important;
+    border-style: none !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+
+/* Also kill the basalt.css rule that paints background on
+ * `.phase-wizard-step-panel .rounded-xl` and `.phase-wizard-step-panel
+ * .bg-[var(--surface-basalt)]`. This rule is in basalt.css line ~4201 with
+ * !important and 2-class specificity (`.phase-wizard-step-panel .rounded-xl`).
+ * Override with 4-class specificity inside structure shell. */
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .rounded-xl,
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .bg-\[var\(--surface-basalt\)\],
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .bg-\[var\(--accent-primary\)\]\/5,
+.basalt-body .tournament-structure-shell .structure-step-panel .rounded-xl,
+.basalt-body .tournament-structure-shell .structure-step-panel .bg-\[var\(--surface-basalt\)\] {
+    background: transparent !important;
+    background-image: none !important;
+    border-color: transparent !important;
+}
+
+/* But preserve chrome on the accent variant (Grupos / Etapas de eliminación). */
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel.structure-field-panel-accent,
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .structure-field-panel.structure-field-panel-accent {
+    background:
+        linear-gradient(135deg, rgba(0, 163, 101, 0.12), transparent 52%),
+        rgba(255, 255, 255, 0.028) !important;
+    border: 1px solid rgba(0, 214, 136, 0.22) !important;
+    border-radius: 20px !important;
+    padding: 18px !important;
+}
+
+/* ===========================================================================
+ * STRUCTURE / PHASES — UX REDESIGN (additive)
+ * Sticky wizard footer, in-card delete confirmation, accessible focus rings,
+ * inline feedback toast, smarter mobile stepper, clearer "active" cue.
+ * Reglas adicionales — no modifican las existentes; sólo agregan capa.
+ * ======================================================================== */
+
+/* ---- Inline feedback (replaces alert() / confirm()) -------------------- */
+.tournament-structure-shell .structure-feedback {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(248, 250, 252, 0.96);
+    font-size: 13px;
+    line-height: 1.45;
+    animation: tournament-structure-feedback-in 200ms ease-out;
+}
+
+@keyframes tournament-structure-feedback-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.tournament-structure-shell .structure-feedback--ok {
+    border-color: rgba(34, 197, 94, 0.32);
+    background: rgba(34, 197, 94, 0.08);
+    color: #bbf7d0;
+}
+
+.tournament-structure-shell .structure-feedback--error {
+    border-color: rgba(239, 68, 68, 0.36);
+    background: rgba(239, 68, 68, 0.08);
+    color: #fecaca;
+}
+
+.tournament-structure-shell .structure-feedback-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.tournament-structure-shell .structure-feedback-message {
+    flex: 1;
+    margin: 0;
+}
+
+.tournament-structure-shell .structure-feedback-dismiss {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.tournament-structure-shell .structure-feedback-dismiss:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.tournament-structure-shell .structure-feedback-dismiss:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+    opacity: 1;
+}
+
+/* ---- Active phase: corner ribbon + accent border (más explícito) ------- */
+.tournament-structure-shell .structure-phase-card[aria-current="true"],
+.tournament-structure-shell .structure-phase-card.structure-phase-card--active {
+    border-color: rgba(34, 197, 94, 0.42) !important;
+    background:
+        radial-gradient(circle at top left, rgba(34, 197, 94, 0.08), transparent 36%),
+        rgba(18, 24, 30, 0.96) !important;
+    box-shadow: inset 4px 0 0 0 rgba(34, 197, 94, 0.85) !important;
+}
+
+/* ---- Trash button: visible always (no más opacity:0 + group-hover) ----- */
+.tournament-structure-shell .structure-phase-delete {
+    opacity: 0.7 !important;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+.tournament-structure-shell .structure-phase-delete:hover,
+.tournament-structure-shell .structure-phase-delete:focus-visible {
+    opacity: 1 !important;
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #fca5a5 !important;
+}
+
+.tournament-structure-shell .structure-phase-delete:focus-visible {
+    outline: 2px solid rgba(239, 68, 68, 0.5);
+    outline-offset: 2px;
+}
+
+/* MoreVertical menu: redundante con la trash visible, lo ocultamos. */
+.tournament-structure-shell .structure-phase-menu {
+    display: none;
+}
+
+/* ---- Inline delete confirmation banner --------------------------------- */
+.tournament-structure-shell .structure-phase-card--pending-delete {
+    border-color: rgba(239, 68, 68, 0.45) !important;
+    background:
+        radial-gradient(circle at top right, rgba(239, 68, 68, 0.08), transparent 38%),
+        rgba(18, 24, 30, 0.98) !important;
+}
+
+.tournament-structure-shell .structure-phase-delete-confirm {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    background: rgba(239, 68, 68, 0.08);
+    color: #fecaca;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.tournament-structure-shell .structure-phase-delete-confirm-text {
+    padding: 0 4px;
+    white-space: nowrap;
+}
+
+.tournament-structure-shell .structure-phase-delete-confirm-cancel,
+.tournament-structure-shell .structure-phase-delete-confirm-go {
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.tournament-structure-shell .structure-phase-delete-confirm-cancel {
+    background: transparent;
+    color: rgba(248, 250, 252, 0.86);
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.tournament-structure-shell .structure-phase-delete-confirm-cancel:hover,
+.tournament-structure-shell .structure-phase-delete-confirm-cancel:focus-visible {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.24);
+    outline: none;
+}
+
+.tournament-structure-shell .structure-phase-delete-confirm-go {
+    background: rgba(239, 68, 68, 0.85);
+    color: #fff;
+    border-color: rgba(239, 68, 68, 0.85);
+}
+
+.tournament-structure-shell .structure-phase-delete-confirm-go:hover:not(:disabled) {
+    background: rgba(220, 38, 38, 0.95);
+    border-color: rgba(220, 38, 38, 0.95);
+}
+
+.tournament-structure-shell .structure-phase-delete-confirm-go:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.tournament-structure-shell .structure-phase-delete-confirm-go:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+/* ---- Activar pill: bigger tap target, mejor jerarquía ----------------- */
+.tournament-structure-shell .structure-phase-actions > button[title="Marcar como fase activa"] {
+    min-height: 36px !important;
+    padding: 0 14px !important;
+    font-size: 11px !important;
+    border-radius: 999px !important;
+}
+
+/* ---- Focus-visible ring system (homogéneo en todo el shell) ----------- */
+.tournament-structure-shell .structure-phase-card:focus-visible,
+.tournament-structure-shell .structure-option-card:focus-visible,
+.tournament-structure-shell .structure-wizard-step:focus-visible,
+.tournament-structure-shell .basalt-input:focus-visible,
+.tournament-structure-shell input:focus-visible,
+.tournament-structure-shell select:focus-visible,
+.tournament-structure-shell textarea:focus-visible,
+.tournament-structure-shell .basalt-btn:focus-visible {
+    outline: 2px solid rgba(56, 189, 248, 0.65);
+    outline-offset: 2px;
+}
+
+/* aria-invalid en inputs con errores */
+.tournament-structure-shell input[aria-invalid="true"],
+.tournament-structure-shell select[aria-invalid="true"] {
+    border-color: rgba(239, 68, 68, 0.55) !important;
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25);
+}
+
+/* ---- Sticky wizard footer (desktop) ----------------------------------- */
+.tournament-structure-shell .structure-wizard-content .structure-wizard-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    margin-inline: -26px;
+    margin-bottom: -24px;
+    padding: 16px 26px;
+    background: rgba(15, 20, 26, 0.96);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ---- Hide desktop hero on mobile (mobile already shows tsm-card-state) - */
+@media (max-width: 767px) {
+    .tournament-structure-shell .structure-hero-panel {
+        display: none !important;
+    }
+}
+
+/* ---- Wizard sidebar → progress bar collapsable on tablet & mobile ----- */
+@media (max-width: 1099px) {
+    .tournament-structure-shell .structure-wizard-sidebar {
+        padding: 16px !important;
+        gap: 10px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .tournament-structure-shell .structure-wizard-sidebar-head {
+        margin-bottom: 6px !important;
+    }
+
+    .tournament-structure-shell .structure-wizard-sidebar-title {
+        font-size: 16px !important;
+    }
+
+    .tournament-structure-shell .structure-wizard-sidebar-copy {
+        display: none;
+    }
+
+    /* Stepper: horizontal scroll para no perder altura. */
+    .tournament-structure-shell .structure-wizard-stepper {
+        flex-direction: row !important;
+        gap: 8px !important;
+        overflow-x: auto;
+        padding: 4px 4px 8px;
+        scrollbar-width: none;
+        scroll-snap-type: x proximity;
+    }
+
+    .tournament-structure-shell .structure-wizard-stepper::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tournament-structure-shell .structure-wizard-step {
+        flex: 0 0 auto;
+        min-height: 44px !important;
+        min-width: 124px;
+        scroll-snap-align: start;
+        padding: 8px 12px !important;
+    }
+
+    .tournament-structure-shell .structure-wizard-step .phase-wizard-step-desc {
+        display: none;
+    }
+
+    .tournament-structure-shell .structure-wizard-step-index {
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 10px !important;
+    }
+
+    /* Hide the inline facts chip strip — redundant en mobile. */
+    .tournament-structure-shell .structure-sidebar-facts-inline {
+        display: none;
+    }
+}
+
+/* ---- Mobile: sticky bottom action bar with primary CTA ---------------- */
+@media (max-width: 767px) {
+    .tournament-structure-shell .structure-wizard-content {
+        padding: 16px !important;
+        padding-bottom: 92px !important; /* leave room for sticky footer */
+    }
+
+    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: 0;
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+        z-index: 50;
+        background: rgba(10, 13, 18, 0.96);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
+        display: grid !important;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer > .basalt-btn:first-child {
+        grid-column: 1;
+        min-height: 44px !important;
+        padding-inline: 16px !important;
+        font-size: 12px !important;
+    }
+
+    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer-actions {
+        grid-column: 2;
+        margin-left: 0 !important;
+        display: grid !important;
+        grid-auto-flow: column;
+        grid-auto-columns: 1fr;
+        gap: 8px;
+    }
+
+    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer-actions .basalt-btn {
+        min-height: 44px !important;
+        padding-inline: 12px !important;
+        font-size: 12px !important;
+    }
+
+    /* Phase card en mobile: el confirm de eliminar pasa abajo en su propia
+       fila para no chocar con el chevron. */
+    .tournament-structure-shell .structure-phase-card--pending-delete .structure-phase-actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .tournament-structure-shell .structure-phase-delete-confirm {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .tournament-structure-shell .structure-phase-delete-confirm-cancel,
+    .tournament-structure-shell .structure-phase-delete-confirm-go {
+        flex: 1;
+        text-align: center;
+    }
+
+    /* Deja respirar al feedback toast y el aviso isApiManaged. */
+    .tournament-structure-shell .structure-feedback {
+        margin-inline: 12px;
+    }
+}
+
+/* ---- Tablet (768–1023px) — 2-col forma natural en wizard step 1 ------- */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .tournament-structure-shell .structure-step-panel .phase-wizard-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .tournament-structure-shell .structure-basic-name-panel,
+    .tournament-structure-shell .structure-basic-type-panel,
+    .tournament-structure-shell .structure-basic-format-panel,
+    .tournament-structure-shell .structure-basic-groups-panel,
+    .tournament-structure-shell .structure-split-grid {
+        grid-column: 1 / -1 !important;
+    }
+
+    .tournament-structure-shell .structure-split-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+/* ---- Smart-default hint copy (cuando ofrecemos un valor) -------------- */
+.tournament-structure-shell .structure-smart-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 11.5px;
+    color: rgba(56, 189, 248, 0.85);
+    font-weight: 500;
+}
+
+.tournament-structure-shell .structure-smart-hint::before {
+    content: '✦';
+    font-size: 11px;
+}
+
+/* ---- Mobile phase list (tsm-phase-item now a <button>) --------------- */
+/* The list item wrapper just holds the button; the button takes full width
+   and inherits the visual treatment of the previous <li>. */
+.tsm-phase-item-wrap {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+button.tsm-phase-item {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button.tsm-phase-item:hover:not(:disabled),
+button.tsm-phase-item:focus-visible:not(:disabled) {
+    background: rgba(56, 189, 248, 0.08);
+    border-color: rgba(56, 189, 248, 0.32);
+}
+
+button.tsm-phase-item:focus-visible {
+    outline: 2px solid rgba(56, 189, 248, 0.65);
+    outline-offset: 2px;
+}
+
+button.tsm-phase-item:active:not(:disabled) {
+    transform: scale(0.99);
+    background: rgba(56, 189, 248, 0.12);
+}
+
+button.tsm-phase-item:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Active phase keeps the green accent on tap as well */
+button.tsm-phase-item.is-active:hover:not(:disabled),
+button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
+    background: rgba(0, 163, 101, 0.18);
+    border-color: rgba(0, 163, 101, 0.55);
+}
+
+/* ===========================================================================
+ * WIZARD STEPS — refinement: typed icons, live previews, error indicators
+ * Reglas adicionales para los nuevos elementos UI agregados al wizard.
+ * ======================================================================== */
+
+/* ---- Phase type cards: ahora con icono + nombre + descripción --------- */
+.tournament-structure-shell .structure-phase-type-card {
+    flex-direction: column !important;
+    gap: 8px !important;
+    align-items: flex-start !important;
+    min-height: 120px !important;
+}
+
+.tournament-structure-shell .structure-phase-type-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    color: rgba(56, 189, 248, 0.95);
+    flex-shrink: 0;
+    margin-bottom: 4px;
+}
+
+.tournament-structure-shell .structure-phase-type-card.is-active .structure-phase-type-icon {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: rgba(56, 189, 248, 0.45);
+}
+
+@media (max-width: 480px) {
+    .tournament-structure-shell .structure-phase-type-card {
+        min-height: 96px !important;
+        padding: 12px !important;
+    }
+    .tournament-structure-shell .structure-phase-type-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+    }
+}
+
+/* ---- Field-level inline error (rojo, mismo patrón en todo el wizard) -- */
+.tournament-structure-shell .structure-field-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    margin-bottom: 0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.22);
+    color: #fca5a5;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+/* ---- Live preview at end of step 1 ------------------------------------ */
+.tournament-structure-shell .structure-step-preview {
+    margin-top: 4px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px dashed rgba(56, 189, 248, 0.32);
+    background: rgba(56, 189, 248, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tournament-structure-shell .structure-step-preview-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(56, 189, 248, 0.85);
+}
+
+.tournament-structure-shell .structure-step-preview-line {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: rgba(248, 250, 252, 0.96);
+}
+
+.tournament-structure-shell .structure-step-preview-line strong {
+    color: #fff;
+    font-weight: 700;
+}
+
+/* ---- Step 2: live points example ------------------------------------- */
+.tournament-structure-shell .structure-points-example {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(34, 197, 94, 0.22);
+    background:
+        radial-gradient(circle at top left, rgba(34, 197, 94, 0.08), transparent 50%),
+        rgba(34, 197, 94, 0.04);
+}
+
+.tournament-structure-shell .structure-points-example-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(34, 197, 94, 0.95);
+}
+
+.tournament-structure-shell .structure-points-example-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+}
+
+.tournament-structure-shell .structure-points-example-team {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 11px;
+    color: rgba(203, 213, 225, 0.85);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.tournament-structure-shell .structure-points-example-team strong {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.02em;
+}
+
+.tournament-structure-shell .structure-points-example-vs {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.7);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.tournament-structure-shell .structure-points-example-foot {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: rgba(203, 213, 225, 0.85);
+}
+
+.tournament-structure-shell .structure-points-example-foot strong {
+    color: #fff;
+    font-weight: 700;
+}
+
+/* ---- Step 3: helper above tiebreaker list ---------------------------- */
+.tournament-structure-shell .structure-tiebreaker-helper {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(56, 189, 248, 0.06);
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    color: rgba(186, 230, 253, 0.95);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.tournament-structure-shell .structure-tiebreaker-helper svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: rgba(56, 189, 248, 0.85);
+}
+
+/* ---- Step 4: empty-state hint cards (ejemplos típicos) ---------------- */
+.tournament-structure-shell .structure-label-examples {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    margin: 8px 0 4px;
+}
+
+.tournament-structure-shell .structure-label-example-chip {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.025);
+    color: rgba(203, 213, 225, 0.78);
+    font-size: 11.5px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tournament-structure-shell .structure-label-example-chip:hover {
+    border-color: rgba(56, 189, 248, 0.4);
+    background: rgba(56, 189, 248, 0.06);
+    color: rgba(186, 230, 253, 0.95);
+}
+
+/* ---- Step 6: preset selector ----------------------------------------- */
+.tournament-structure-shell .structure-circuit-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tournament-structure-shell .structure-circuit-presets-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(148, 163, 184, 0.85);
+    align-self: center;
+    margin-right: 4px;
+}
+
+.tournament-structure-shell .structure-circuit-preset-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(248, 250, 252, 0.92);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tournament-structure-shell .structure-circuit-preset-btn:hover,
+.tournament-structure-shell .structure-circuit-preset-btn:focus-visible {
+    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(56, 189, 248, 0.1);
+    color: #fff;
+    outline: none;
+}
+
+/* ---- Step 5: enriched checkbox cards (más descubribilidad) ----------- */
+.tournament-structure-shell .structure-stats-card {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 12px;
+    padding: 14px 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-radius: 12px !important;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.tournament-structure-shell .structure-stats-card:has(input:checked) {
+    border-color: rgba(56, 189, 248, 0.4) !important;
+    background: rgba(56, 189, 248, 0.06) !important;
+}
+
+/* Mobile adjust step 1 type cards: 2-col grid is fine but ensure icon
+   doesn't push content off-screen on 360px. */
+@media (max-width: 480px) {
+    .tournament-structure-shell .structure-points-example-row {
+        gap: 6px;
+    }
+    .tournament-structure-shell .structure-points-example-team {
+        padding: 6px 8px;
+    }
+    .tournament-structure-shell .structure-points-example-team strong {
+        font-size: 18px;
+    }
+}
+
+/* ==========================================================================
+   FIX-PASS — issues vistos en screenshots reales (mobile)
+   1. Punto cyan legacy sobre los nuevos íconos de tipo de fase.
+   2. Footer mobile rompe "SIGUIENTE →" en dos líneas + tapa último campo.
+   3. Labels uppercase + tracking gritan demasiado.
+   4. "Tabla competitiva" parece sección, es un hint.
+   ========================================================================== */
+
+/* 1) Matar el ::before pseudo del radio-dot SOLO en las cards de tipo de
+      fase del paso 1 — donde ya tengo mi propio ícono. La regla original
+      (.structure-option-card > span:first-child::before) sigue aplicando
+      al selector "Torneo estándar / Circuito" que sí lo necesita.
+      Mi nuevo .structure-phase-type-icon ES el primer child, así que la
+      pseudo-clase se está pintando ahí. La quitamos. */
+.tournament-structure-shell .structure-phase-type-card > .structure-phase-type-icon::before,
+.tournament-structure-shell .structure-phase-type-card > span.structure-phase-type-icon::before,
+.tournament-structure-shell .structure-phase-type-card > span:first-child::before,
+.tournament-structure-shell .structure-phase-type-card > span:not(.structure-phase-type-icon)::before {
+    content: none !important;
+    display: none !important;
+    background: transparent !important;
+    border: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* Mejor color y contraste de los íconos de tipo, en activo e inactivo */
+.tournament-structure-shell .structure-phase-type-card .structure-phase-type-icon svg {
+    color: rgba(186, 230, 253, 0.95);
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+}
+
+.tournament-structure-shell .structure-phase-type-card:not(.is-active) .structure-phase-type-icon {
+    background: rgba(148, 163, 184, 0.08);
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+.tournament-structure-shell .structure-phase-type-card:not(.is-active) .structure-phase-type-icon svg {
+    color: rgba(203, 213, 225, 0.78);
+}
+
+/* Forzar tipografía sentence-case dentro de las phase-type cards (en lugar
+   de heredar las reglas globales en mayúsculas) */
+.tournament-structure-shell .structure-phase-type-card > span.text-sm,
+.tournament-structure-shell .structure-phase-type-card > span.text-sm.font-bold {
+    text-transform: none !important;
+    letter-spacing: -0.01em !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: rgba(248, 250, 252, 0.96) !important;
+}
+
+.tournament-structure-shell .structure-phase-type-card > span.text-\[11px\] {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 12px !important;
+    color: rgba(148, 163, 184, 0.78) !important;
+    opacity: 1 !important;
+}
+
+/* 2) Footer mobile: layout 3-cols flexibles, Siguiente con espacio */
+@media (max-width: 767px) {
+    /* Reservar más espacio bajo el contenido del wizard para el sticky bar
+       (footer ~76px + safe-area + 12px breathing). Era 92px, faltaba poco. */
+    .tournament-structure-shell .structure-wizard-content {
+        padding-bottom: 132px !important;
+    }
+
+    /* Footer: pasamos de grid 2-col a flex con anchos adaptativos.
+       Cancelar = auto, Atrás = auto, Siguiente = flex:1 (toma lo que sobre). */
+    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer {
+        display: flex !important;
+        grid-template-columns: none !important;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 8px;
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    }
+
+    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer > .basalt-btn:first-child {
+        flex: 0 0 auto;
+        min-width: 0;
+        padding-inline: 14px !important;
+        font-size: 11.5px !important;
+    }
+
+    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer-actions {
+        flex: 1 1 auto;
+        margin-left: 0 !important;
+        display: flex !important;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer-actions .basalt-btn {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding-inline: 8px !important;
+        font-size: 11.5px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.1 !important;
+    }
+
+    /* Cuando hay un solo botón en el footer-actions (paso 1 sin Atrás), que
+       ocupe todo el ancho disponible. */
+    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer-actions:has(> button:only-child) .basalt-btn {
+        flex: 1 1 100%;
+    }
+}
+
+/* En 360px reducimos un toque más para que entre todo */
+@media (max-width: 380px) {
+    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer > .basalt-btn:first-child {
+        padding-inline: 10px !important;
+        font-size: 11px !important;
+    }
+
+    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer-actions .basalt-btn {
+        font-size: 11px !important;
+        padding-inline: 6px !important;
+    }
+}
+
+/* 3) Domar el uppercase: dentro del wizard mantenemos eyebrows (PASO N)
+      en uppercase pero los headings y descripciones en sentence-case.
+      Las labels de campo bajan su font-weight y letter-spacing para
+      quitarles el grito. */
+.tournament-structure-shell .structure-step-panel .structure-field-label {
+    text-transform: uppercase;
+    font-size: 10.5px !important;
+    letter-spacing: 0.04em !important;
+    font-weight: 700 !important;
+    color: rgba(148, 163, 184, 0.85) !important;
+    margin-bottom: 8px !important;
+}
+
+/* Subtítulos secundarios (Si está inactivo, ...) sentence-case */
+.tournament-structure-shell .structure-stats-card p,
+.tournament-structure-shell .structure-stats-card small {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 12.5px !important;
+    color: rgba(148, 163, 184, 0.85) !important;
+    line-height: 1.5 !important;
+}
+
+/* "Tabla competitiva" no debería leer como sección — bajamos el peso del
+   eyebrow y le damos un tratamiento de hint discreto. */
+.tournament-structure-shell .structure-single-table-note {
+    padding: 12px 14px !important;
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tournament-structure-shell .structure-single-table-note .structure-field-label {
+    margin-bottom: 0 !important;
+    font-size: 9.5px !important;
+    letter-spacing: 0.08em !important;
+    color: rgba(148, 163, 184, 0.65) !important;
+}
+
+.tournament-structure-shell .structure-single-table-note .structure-single-table-copy {
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    color: rgba(203, 213, 225, 0.92) !important;
+    margin: 0 !important;
+}
+
+/* 4) Step 2: el ejemplo en vivo es informativo, no debe pesar más que los
+      inputs. Bajamos un toque su contraste y compactamos en mobile. */
+.tournament-structure-shell .structure-points-example {
+    border-color: rgba(34, 197, 94, 0.18);
+    padding: 10px 12px;
+}
+
+.tournament-structure-shell .structure-points-example-row {
+    padding: 4px 0;
+}
+
+.tournament-structure-shell .structure-points-example-team {
+    padding: 6px 10px;
+}
+
+.tournament-structure-shell .structure-points-example-team strong {
+    font-size: 19px;
+}
+
+.tournament-structure-shell .structure-points-example-foot {
+    font-size: 12px;
+    color: rgba(203, 213, 225, 0.78);
+}
+
+/* Step 2 score panels: en mobile el grid 3-col con números 18px+padding
+   queda muy estrecho. Mantenemos 3-col pero compactamos. */
+@media (max-width: 480px) {
+    .tournament-structure-shell .structure-step-panel .structure-score-grid {
+        gap: 8px !important;
+    }
+
+    .tournament-structure-shell .structure-step-panel .structure-score-panel input.basalt-input {
+        font-size: 22px !important;
+        padding: 14px 4px !important;
+        min-height: 56px !important;
+    }
+
+    .tournament-structure-shell .structure-step-panel .structure-score-panel .structure-field-label {
+        font-size: 9.5px !important;
+        text-align: center;
+    }
+}
+
+/* 5) Spacing entre secciones del step más coherente */
+.tournament-structure-shell .structure-step-panel .phase-wizard-fields {
+    gap: 20px !important;
+}
+
+.tournament-structure-shell .structure-step-panel {
+    gap: 18px !important;
+}
+
+/* 6) Step 5 stats cards: el highlight cuando está checked debería ser obvio
+      pero no estridente */
+.tournament-structure-shell .structure-stats-card {
+    align-items: flex-start;
+    gap: 14px !important;
+}
+
+.tournament-structure-shell .structure-stats-card span {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: rgba(248, 250, 252, 0.96) !important;
+}
+
+/* 7) Sticky footer del wizard en desktop (no mobile): asegurar que el
+      contenedor padre permita el sticky. La regla actual usa
+      mt-auto + position:sticky pero algunos flex parents lo rompen. */
+@media (min-width: 768px) {
+    .tournament-structure-shell .structure-wizard-content {
+        position: relative;
+    }
+
+    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer {
+        bottom: -24px;
+    }
+}
+
+/* ===========================================================================
+   STEP 2 — Toggle cards dedicadas para Prórroga / Bonus
+   --------------------------------------------------------------------------
+   El wrapper genérico .structure-field-panel quedaba "flatten" por reglas
+   anteriores (padding/border 0). Estas cards usan su propia clase y
+   estilan checkbox grande, copy clara y body expansible cuando is-on.
+   ========================================================================= */
+
+.tournament-structure-shell .structure-toggle-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.tournament-structure-shell .structure-toggle-card.is-on {
+    border-color: rgba(56, 189, 248, 0.38);
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.08), transparent 50%),
+        rgba(56, 189, 248, 0.04);
+}
+
+.tournament-structure-shell .structure-toggle-card-label {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 12px;
+    align-items: flex-start;
+    cursor: pointer;
+    margin: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tournament-structure-shell .structure-toggle-card-input {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    margin: 2px 0 0 0 !important;
+    flex: 0 0 22px !important;
+    accent-color: #38BDF8;
+    cursor: pointer;
+}
+
+.tournament-structure-shell .structure-toggle-card-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.tournament-structure-shell .structure-toggle-card-title {
+    font-size: 14.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    color: rgba(248, 250, 252, 0.96) !important;
+    text-transform: none !important;
+    letter-spacing: -0.005em !important;
+}
+
+.tournament-structure-shell .structure-toggle-card-help {
+    font-size: 12.5px !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+    color: rgba(148, 163, 184, 0.85) !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+/* Body expansible cuando el toggle está activo: grid de 3 inputs (extra) */
+.tournament-structure-shell .structure-toggle-card-body {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(56, 189, 248, 0.22);
+}
+
+.tournament-structure-shell .structure-toggle-card-body .structure-score-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+}
+
+.tournament-structure-shell .structure-toggle-card-body .structure-score-panel .structure-field-label {
+    text-align: center;
+    font-size: 9.5px !important;
+    margin-bottom: 0 !important;
+}
+
+.tournament-structure-shell .structure-toggle-card-body .structure-score-panel input.basalt-input {
+    text-align: center;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    min-height: 50px !important;
+    padding: 10px 4px !important;
+}
+
+/* Mobile chico: el body de extra queda 3 inputs apretados; bajamos un poco
+   más y damos padding chico a inputs */
+@media (max-width: 480px) {
+    .tournament-structure-shell .structure-toggle-card {
+        padding: 12px 14px;
+    }
+
+    .tournament-structure-shell .structure-toggle-card-body {
+        gap: 6px !important;
+    }
+
+    .tournament-structure-shell .structure-toggle-card-body .structure-score-panel input.basalt-input {
+        font-size: 16px !important;
+        padding: 8px 2px !important;
+        min-height: 46px !important;
+    }
+}
+
+/* === Score grid principal (Victoria/Empate/Derrota) más robusto en mobile === */
+.tournament-structure-shell .structure-step-panel-points .structure-score-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+}
+
+.tournament-structure-shell .structure-step-panel-points .structure-score-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    min-width: 0;
+}
+
+.tournament-structure-shell .structure-step-panel-points .structure-score-panel input.basalt-input {
+    width: 100%;
+    text-align: center;
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    min-height: 64px !important;
+    padding: 14px 4px !important;
+    background: rgba(7, 10, 14, 0.94) !important;
+    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+    border-radius: 14px !important;
+    color: #fff !important;
+}
+
+.tournament-structure-shell .structure-step-panel-points .structure-score-panel .structure-field-label {
+    text-align: center;
+    font-size: 10px !important;
+    letter-spacing: 0.06em !important;
+    margin-bottom: 0 !important;
+}
+
+@media (max-width: 480px) {
+    .tournament-structure-shell .structure-step-panel-points .structure-score-grid {
+        gap: 8px !important;
+    }
+    .tournament-structure-shell .structure-step-panel-points .structure-score-panel input.basalt-input {
+        font-size: 22px !important;
+        min-height: 56px !important;
+        padding: 10px 2px !important;
+    }
+}
+
+/* ===========================================================================
+   STEP 3 — Criterios de Desempate (legibilidad redux)
+   --------------------------------------------------------------------------
+   Problemas: cards apretados, controles superpuestos, jerarquía perdida,
+   tipografía muy chica, layout 2-col forzado en pantallas que no aguantan.
+   Esta capa rediseña el paso para ser legible en mobile, tablet y desktop.
+   ========================================================================= */
+
+/* --- Layout principal: 1-col en <1100px, 2-col solo desktop ancho ----- */
+.tournament-structure-shell .structure-step-panel-rules .wizard-content-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    align-items: start;
+}
+
+@media (min-width: 1100px) {
+    .tournament-structure-shell .structure-step-panel-rules .wizard-content-grid {
+        grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr) !important;
+        gap: 24px !important;
+    }
+}
+
+/* --- Section heading: "Criterios activos" / "Disponibles" más claro -- */
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-section-heading,
+.tournament-structure-shell .structure-step-panel-rules .wizard-section-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin: 0 0 14px !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: rgba(248, 250, 252, 0.96) !important;
+    text-transform: none !important;
+    letter-spacing: -0.005em !important;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-section-heading-text {
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    color: inherit !important;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-section-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    color: rgba(186, 230, 253, 0.95);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+/* Tooltip-info "?" alineado a la derecha del title */
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-info-tooltip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-left: auto;
+    border-radius: 50%;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(148, 163, 184, 0.08);
+    color: rgba(186, 230, 253, 0.85);
+    cursor: help;
+    flex-shrink: 0;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-info-tooltip:hover,
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-info-tooltip:focus-visible {
+    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(56, 189, 248, 0.12);
+    color: #fff;
+    outline: none;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-info-tooltip-content {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    z-index: 5;
+    width: 240px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(18, 24, 30, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(203, 213, 225, 0.95);
+    font-size: 12px;
+    line-height: 1.5;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    pointer-events: none;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-info-tooltip:hover .tiebreaker-info-tooltip-content,
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-info-tooltip:focus-visible .tiebreaker-info-tooltip-content,
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-info-tooltip:focus .tiebreaker-info-tooltip-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* --- Active list container ------------------------------------------- */
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-active-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+}
+
+/* --- Tiebreaker card: layout claro [▲▼ | badge | nombre | menor/mayor | ✕] */
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-card {
+    display: grid !important;
+    grid-template-columns: 36px 36px 1fr auto auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-height: 64px !important;
+    padding: 10px 12px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)) !important;
+    transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-card:hover {
+    border-color: rgba(56, 189, 248, 0.35) !important;
+    background:
+        linear-gradient(180deg, rgba(56, 189, 248, 0.05), rgba(255, 255, 255, 0.02)) !important;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-card.is-dragging {
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+    border-color: rgba(56, 189, 248, 0.55) !important;
+}
+
+/* Reorder column (▲▼) */
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-reorder {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-reorder-btn {
+    width: 32px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(203, 213, 225, 0.78);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-reorder-btn:hover:not(:disabled),
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-reorder-btn:focus-visible:not(:disabled) {
+    border-color: rgba(56, 189, 248, 0.45);
+    background: rgba(56, 189, 248, 0.12);
+    color: #fff;
+    outline: none;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-reorder-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+/* Drag handle ocultar en mobile (las flechas alcanzan) */
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-drag-handle {
+    display: none !important;
+}
+
+@media (min-width: 1024px) {
+    .tournament-structure-shell .structure-step-panel-rules .tiebreaker-card {
+        grid-template-columns: 36px 24px 36px 1fr auto auto !important;
+    }
+
+    .tournament-structure-shell .structure-step-panel-rules .tiebreaker-drag-handle {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 32px;
+        color: rgba(148, 163, 184, 0.5);
+        cursor: grab;
+    }
+
+    .tournament-structure-shell .structure-step-panel-rules .tiebreaker-drag-handle:hover {
+        color: rgba(186, 230, 253, 0.95);
+    }
+
+    .tournament-structure-shell .structure-step-panel-rules .tiebreaker-drag-handle:active {
+        cursor: grabbing;
+    }
+}
+
+/* Priority badge (01, 02, …) */
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-priority-badge {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    color: rgba(186, 230, 253, 0.95);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* Info column: nombre + warning */
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: rgba(248, 250, 252, 0.96) !important;
+    line-height: 1.3 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-warning-icon {
+    display: inline-flex;
+    align-items: center;
+    color: #facc15;
+    flex-shrink: 0;
+}
+
+/* Order pill (Menor / Mayor) */
+.tournament-structure-shell .structure-step-panel-rules .order-pill-wrapper {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: rgba(255, 255, 255, 0.03);
+    gap: 2px;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .order-pill-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 0;
+    background: transparent;
+    color: rgba(148, 163, 184, 0.78);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .order-pill-btn:hover,
+.tournament-structure-shell .structure-step-panel-rules .order-pill-btn:focus-visible {
+    color: rgba(248, 250, 252, 0.92);
+    background: rgba(255, 255, 255, 0.06);
+    outline: none;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .order-pill-btn.active {
+    background: rgba(56, 189, 248, 0.85);
+    color: #052339;
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+}
+
+/* Remove button (✕) */
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-remove-btn {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: rgba(148, 163, 184, 0.62);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-remove-btn:hover,
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-remove-btn:focus-visible {
+    border-color: rgba(239, 68, 68, 0.4);
+    background: rgba(239, 68, 68, 0.12);
+    color: #fca5a5;
+    outline: none;
+}
+
+/* --- Cascade summary text -------------------------------------------- */
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-cascade-summary {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(34, 197, 94, 0.06);
+    border: 1px solid rgba(34, 197, 94, 0.22);
+    color: rgba(187, 247, 208, 0.95);
+    font-size: 13px;
+    line-height: 1.55;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .tiebreaker-cascade-summary strong {
+    color: #fff;
+    font-weight: 700;
+}
+
+/* --- Right panel: "Disponibles" -------------------------------------- */
+.tournament-structure-shell .structure-step-panel-rules .wizard-right-panel {
+    padding: 16px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(148, 163, 184, 0.14) !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 50%),
+        rgba(18, 24, 30, 0.94) !important;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .wizard-right-panel .available-items-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    max-height: 360px !important;
+    padding-right: 4px;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .available-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    min-height: 52px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(148, 163, 184, 0.14) !important;
+    background: rgba(255, 255, 255, 0.025) !important;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .available-item:hover,
+.tournament-structure-shell .structure-step-panel-rules .available-item:focus-visible {
+    border-color: rgba(56, 189, 248, 0.42) !important;
+    background: rgba(56, 189, 248, 0.06) !important;
+    transform: translateY(-1px);
+    outline: none;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .available-item > div:first-child {
+    min-width: 0;
+    flex: 1;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .available-item > div:first-child > div:first-child {
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: rgba(248, 250, 252, 0.92) !important;
+    line-height: 1.3 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .available-item > div:first-child > div:not(:first-child) {
+    font-size: 11.5px !important;
+    color: rgba(148, 163, 184, 0.85) !important;
+    line-height: 1.4 !important;
+    margin-top: 2px;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+/* + button on the right of available item */
+.tournament-structure-shell .structure-step-panel-rules .available-item > div:last-child {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 999px !important;
+    flex-shrink: 0;
+    background: rgba(56, 189, 248, 0.12) !important;
+    color: rgba(186, 230, 253, 0.95) !important;
+    border: 1px solid rgba(56, 189, 248, 0.28) !important;
+    transition: all 0.15s ease !important;
+    transform: none !important;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .available-item:hover > div:last-child {
+    background: rgba(56, 189, 248, 0.85) !important;
+    color: #052339 !important;
+    border-color: rgba(56, 189, 248, 0.85) !important;
+    transform: scale(1.08) !important;
+}
+
+/* Search input in disponibles panel */
+.tournament-structure-shell .structure-step-panel-rules .wizard-right-panel input.manager-url-input {
+    min-height: 44px !important;
+    padding: 10px 12px 10px 38px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+    background: rgba(7, 10, 14, 0.84) !important;
+    color: rgba(248, 250, 252, 0.96) !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+}
+
+.tournament-structure-shell .structure-step-panel-rules .wizard-right-panel input.manager-url-input::placeholder {
+    color: rgba(148, 163, 184, 0.6);
+}
+
+.tournament-structure-shell .structure-step-panel-rules .wizard-right-panel input.manager-url-input:focus-visible {
+    border-color: rgba(56, 189, 248, 0.5) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15) !important;
+}
+
+/* Empty state (no active criteria) */
+.tournament-structure-shell .structure-step-panel-rules .space-y-4 > div:nth-child(2):not(.tiebreaker-active-list) {
+    border-radius: 14px !important;
+}
+
+/* Tiebreaker helper hint del paso 3 (lo agregué en TSX) — refinar copy */
+.tournament-structure-shell .structure-step-panel-rules .structure-tiebreaker-helper {
+    margin-bottom: 6px;
+}
+
+/* Mobile (≤480px): apretar paddings y achicar la grilla del card */
+@media (max-width: 480px) {
+    .tournament-structure-shell .structure-step-panel-rules .tiebreaker-card {
+        grid-template-columns: 28px 32px 1fr auto !important;
+        gap: 8px !important;
+        padding: 8px 10px !important;
+        min-height: 56px !important;
+    }
+
+    .tournament-structure-shell .structure-step-panel-rules .tiebreaker-priority-badge {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+    .tournament-structure-shell .structure-step-panel-rules .tiebreaker-reorder-btn {
+        width: 28px;
+        height: 22px;
+    }
+
+    .tournament-structure-shell .structure-step-panel-rules .tiebreaker-name {
+        font-size: 13px !important;
+    }
+
+    /* En móvil chico el order-pill pasa a fila debajo del nombre */
+    .tournament-structure-shell .structure-step-panel-rules .order-pill-wrapper {
+        grid-column: 1 / -1;
+        justify-self: end;
+        margin-top: 4px;
+    }
+
+    .tournament-structure-shell .structure-step-panel-rules .tiebreaker-remove-btn {
+        width: 28px;
+        height: 28px;
+    }
+
+    .tournament-structure-shell .structure-step-panel-rules .available-items-list {
+        max-height: 280px !important;
     }
 }

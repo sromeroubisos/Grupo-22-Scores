@@ -12,12 +12,16 @@ interface TableColumnSelectorProps {
   categories: ColumnCategory[];
   selectedColumns: Record<string, boolean>;
   onChange: (columns: Record<string, boolean>) => void;
+  /** Hide the inner "Glosario de columnas" heading + counter when the selector
+      is rendered inside an already-titled disclosure / panel. */
+  hideHeader?: boolean;
 }
 
 export function TableColumnSelector({
   categories,
   selectedColumns,
   onChange,
+  hideHeader = false,
 }: TableColumnSelectorProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -56,15 +60,16 @@ export function TableColumnSelector({
     <div className="flex flex-col relative px-[24px] py-[20px] rounded-sm bg-[#151B22] border border-[#26313B] overflow-hidden">
       {/* Content wrapper */}
       <div className="relative z-10 flex flex-col h-full">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-[20px]">
-          <h3 className="text-[0.85rem] font-mono font-semibold text-[#98A6B3] m-0 leading-none uppercase tracking-[0.14em]">
-            Glosario de columnas
-          </h3>
-          <span className="text-[0.75rem] font-mono text-[#98A6B3]">
-            {selectedCount} de {totalCount} seleccionadas
-          </span>
-        </div>
+        {!hideHeader && (
+          <div className="flex items-center justify-between mb-[20px]">
+            <h3 className="text-[0.85rem] font-mono font-semibold text-[#98A6B3] m-0 leading-none uppercase tracking-[0.14em]">
+              Glosario de columnas
+            </h3>
+            <span className="text-[0.75rem] font-mono text-[#98A6B3]">
+              {selectedCount} de {totalCount} seleccionadas
+            </span>
+          </div>
+        )}
 
         {/* Search bar */}
         <div className="relative mb-5 group shrink-0">

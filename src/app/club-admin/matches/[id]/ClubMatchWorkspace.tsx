@@ -1490,7 +1490,7 @@ export default function ClubMatchWorkspace({
       : awayClub?.short_name || awayClub?.name || 'Visitante'
   );
 
-  const handleExportMatchSheetPdf = useCallback(() => {
+  const handleExportMatchSheetPdf = useCallback(async () => {
     const homeName = homeClub?.name || homeClub?.short_name || 'Local';
     const awayName = awayClub?.name || awayClub?.short_name || 'Visitante';
     const homeShortName = homeClub?.short_name || homeName;
@@ -1514,7 +1514,7 @@ export default function ClubMatchWorkspace({
       isCaptain: Boolean(player.isCaptain),
     }));
 
-    const opened = exportMatchSheetPdf({
+    const opened = await exportMatchSheetPdf({
       title: `Planilla: ${homeName} vs ${awayName}`,
       status: matchDraft.status,
       statusLabel: getStatusLabel(matchDraft.status),

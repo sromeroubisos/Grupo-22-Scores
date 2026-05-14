@@ -517,22 +517,34 @@ export function inferEspnMotorsportLeague(input: {
     return null;
 }
 
+const inflightEspnMotorsportRequests = new Map<string, Promise<unknown>>();
+
 async function fetchEspnJson<T>(url: string, debugTag: string, cacheTtl: number) {
     const cacheKey = `espn-motorsport:${url}`;
     const cached = memoryCache.get<T>(cacheKey);
     if (cached) return cached;
 
-    const { data } = await apiFetch<T>(url, {
-        debugTag,
-        silent: true,
-        cacheTtl,
-    });
+    const existing = inflightEspnMotorsportRequests.get(cacheKey) as Promise<T | null> | undefined;
+    if (existing) return existing;
 
-    if (data) {
-        memoryCache.set(cacheKey, data, cacheTtl);
-    }
+    const promise = (async () => {
+        try {
+            const { data } = await apiFetch<T>(url, {
+                debugTag,
+                silent: true,
+                cacheTtl,
+            });
+            if (data) {
+                memoryCache.set(cacheKey, data, cacheTtl);
+            }
+            return data;
+        } finally {
+            inflightEspnMotorsportRequests.delete(cacheKey);
+        }
+    })();
 
-    return data;
+    inflightEspnMotorsportRequests.set(cacheKey, promise);
+    return promise;
 }
 
 async function fetchEspnCoreJson<T>(urlOrRef: unknown, debugTag: string, cacheTtl: number) {

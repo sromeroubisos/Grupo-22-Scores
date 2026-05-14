@@ -320,12 +320,28 @@ export async function copyTournamentSeason(
                 if (sourceEntryId) entryIdBySourceId.set(sourceEntryId, inserted.id);
             }
 
-            await Promise.all((insertedEntries ?? []).map(async (entry: any) => {
-                const { data: club } = await db
+            // Batch-fetch all clubs in a single query to avoid N+1.
+            const clubIdsForLookup = Array.from(new Set(
+                (insertedEntries ?? [])
+                    .map((entry: any) => entry.club_id)
+                    .filter((id: any): id is string => typeof id === 'string' && id.length > 0)
+            ));
+            const clubByIdMap = new Map<string, { name: string | null; short_name: string | null }>();
+            if (clubIdsForLookup.length > 0) {
+                const { data: clubsBatch, error: clubsBatchError } = await db
                     .from('clubs')
-                    .select('name, short_name')
-                    .eq('id', entry.club_id)
-                    .maybeSingle();
+                    .select('id, name, short_name')
+                    .in('id', clubIdsForLookup);
+                if (clubsBatchError) {
+                    throw new Error(clubsBatchError.message || 'No se pudieron cargar los clubes para los participantes copiados.');
+                }
+                for (const c of clubsBatch ?? []) {
+                    clubByIdMap.set(c.id, { name: c.name ?? null, short_name: c.short_name ?? null });
+                }
+            }
+
+            await Promise.all((insertedEntries ?? []).map(async (entry: any) => {
+                const club = entry.club_id ? clubByIdMap.get(entry.club_id) ?? null : null;
                 const participantStatus = entry.status === 'archived' ? 'inactive' : entry.status;
                 const { data: participant, error: participantError } = await db
                     .from('tournament_participants')

@@ -263,6 +263,48 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.basalt-overflow-menu-header--with-close {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.basalt-overflow-menu-header-copy {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.basalt-overflow-menu-close {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.basalt-overflow-menu-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+:root[data-theme="light"] .basalt-body .basalt-overflow-menu-close {
+    border-color: rgba(15, 23, 42, 0.12);
+    background: rgba(15, 23, 42, 0.04);
+}
+
+:root[data-theme="light"] .basalt-body .basalt-overflow-menu-close:hover {
+    background: rgba(15, 23, 42, 0.08);
+}
+
 .basalt-overflow-menu-kicker {
     color: var(--text-dim);
     font-size: 10px;

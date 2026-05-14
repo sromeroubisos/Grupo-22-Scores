@@ -43,8 +43,23 @@ export default async function ClubMatchPage({ params, searchParams }: PageProps)
   const { id: matchId } = await params;
   const { section, club: clubIdFromQuery } = await searchParams;
 
-  // Use club from query param if provided (from club admin panel), otherwise let checkClubMatchAccess resolve it
-  const access = await checkClubMatchAccess(matchId, clubIdFromQuery || null);
+  // Run the access check in parallel with the heavy match fetch. Most of
+  // these requests succeed, so overlapping the auth + the data load shaves
+  // ~one round-trip off the time-to-first-byte. If access is denied we
+  // discard the match data and render the EmptyState as before.
+  const accessPromise = checkClubMatchAccess(matchId, clubIdFromQuery || null);
+  const readClientPromise = getReadClient();
+
+  type MatchReadResult = Awaited<ReturnType<typeof fetchMatchCenterMatch>>;
+  const matchPromise: Promise<MatchReadResult | { data: null; error: Error }> =
+    readClientPromise
+      .then((client) => fetchMatchCenterMatch(client, matchId))
+      .catch((err: unknown) => ({
+        data: null,
+        error: err instanceof Error ? err : new Error('Failed to load match.'),
+      }));
+
+  const access = await accessPromise;
 
   if (!access.allowed) {
     return (
@@ -58,9 +73,7 @@ export default async function ClubMatchPage({ params, searchParams }: PageProps)
     );
   }
 
-  const readClient = await getReadClient();
-
-  const { data: match, error } = await fetchMatchCenterMatch(readClient, matchId);
+  const { data: match, error } = await matchPromise;
 
   if (error || !match) {
     notFound();
