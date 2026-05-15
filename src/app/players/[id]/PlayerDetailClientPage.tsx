@@ -20,7 +20,15 @@ const getTeamLogo = (team: any) => {
 
 const buildTeamHref = (teamId?: string | null) => {
     if (!teamId) return '/clubs';
-    if (teamId.startsWith('fs-team-') || teamId.startsWith('ras-team-')) return `/clubs/${teamId}`;
+    if (
+        teamId.startsWith('fs-team-') ||
+        teamId.startsWith('ras-team-') ||
+        teamId.startsWith('espn-soccer-team-') ||
+        teamId.startsWith('espn-team-') ||
+        teamId.startsWith('sofa-team-')
+    ) {
+        return `/clubs/${teamId}`;
+    }
     if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(teamId)) {
         return `/clubs/${teamId}`;
     }
@@ -115,6 +123,11 @@ export default function PlayerDetailClientPage({ id }: { id: string }) {
     const birthDate = details?.birth_date || details?.birthday || '';
     const currentTeam = details?.team || details?.current_team || null;
     const currentTeamName = currentTeam?.name || currentTeam?.team_name || '';
+    const seasonStats: Array<{
+        display_name?: string;
+        league_slug?: string;
+        stats?: Array<{ key?: string; label?: string; short_label?: string; value?: string | number }>;
+    }> = Array.isArray(details?.season_stats) ? details.season_stats : [];
     const currentTeamId = currentTeam?.team_id || currentTeam?.id || '';
     const currentTeamLogo = getTeamLogo(currentTeam);
     const jerseyNumber = details?.jersey_number || details?.shirt_number || '';
@@ -254,6 +267,36 @@ export default function PlayerDetailClientPage({ id }: { id: string }) {
                                         </div>
                                     )}
                                 </div>
+
+                                {seasonStats.length > 0 && (
+                                    <div style={{ marginTop: 24 }}>
+                                        <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Estadisticas por temporada</h3>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                            {seasonStats.map((split, idx) => {
+                                                const items = (split.stats || []).filter(s => {
+                                                    const raw = String(s?.value ?? '').trim();
+                                                    return raw !== '' && raw !== '0' && raw !== '-';
+                                                });
+                                                if (items.length === 0) return null;
+                                                return (
+                                                    <div key={idx} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: 12 }}>
+                                                        <div style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 8 }}>
+                                                            {split.display_name || 'Temporada'}
+                                                        </div>
+                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                                                            {items.map((s, sidx) => (
+                                                                <div key={sidx} style={{ minWidth: 64 }}>
+                                                                    <div style={{ fontSize: 11, color: 'var(--color-text-secondary)' }} title={s.label || ''}>{s.short_label || s.label || s.key}</div>
+                                                                    <div style={{ fontSize: 18, fontWeight: 700 }}>{s.value}</div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {!age && !position && !countryName && (
                                     <p className={styles.emptyState}>No hay informacion disponible del jugador.</p>

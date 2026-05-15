@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import styles from './MobileBottomNav.module.css';
 
 const hiddenPrefixes = ['/login', '/terminos', '/privacidad', '/contacto', '/ayuda'];
@@ -73,15 +74,26 @@ function NavIcon({ name, active }: { name: string; active?: boolean }) {
 
 export default function MobileBottomNav() {
     const pathname = usePathname();
+    const { isAuthenticated } = useAuth();
 
     if (hiddenPrefixes.some((prefix) => pathname?.startsWith(prefix))) {
         return null;
     }
 
+    const resolvedNavItems = navItems.map((item) => {
+        if (item.icon !== 'user') return item;
+
+        return {
+            ...item,
+            href: isAuthenticated ? '/profile' : '/login?returnTo=%2Fprofile',
+            label: isAuthenticated ? 'Usuario' : 'Ingresar',
+        };
+    });
+
     return (
         <nav className={styles.nav} aria-label="Navegacion principal">
             <div className={styles.navList}>
-                {navItems.map((item) => {
+                {resolvedNavItems.map((item) => {
                     const active = isActive(pathname, item.href, item.matchPrefixes);
                     return (
                         <Link

@@ -4,6 +4,10 @@ import {
     isSofaScoreServiceConfigured,
     SOFASCORE_PLAYER_PREFIX,
 } from '@/lib/services/sofascore';
+import {
+    getEspnFootballPlayerBundle,
+    parseEspnFootballPlayerId,
+} from '@/lib/services/espnFootball';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
@@ -20,6 +24,7 @@ function isSofaScorePlayerId(value: string): boolean {
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const rawPlayerId = searchParams.get('player_id') || '';
+    const leagueHint = searchParams.get('league') || '';
 
     if (!rawPlayerId) {
         return Response.json({ ok: false, error: 'player_id is required' }, { status: 400 });
@@ -29,6 +34,18 @@ export async function GET(request: Request) {
     const playerUrl = searchParams.get('player_url') || `/player/p/${playerId}/`;
 
     try {
+        const espnFootballPlayer = parseEspnFootballPlayerId(playerId);
+        if (espnFootballPlayer) {
+            const bundle = await getEspnFootballPlayerBundle(
+                espnFootballPlayer.playerId,
+                espnFootballPlayer.leagueSlug || leagueHint || null,
+            );
+            if (!bundle) {
+                return Response.json({ ok: false, error: 'Player not found' }, { status: 404 });
+            }
+            return Response.json({ ok: true, details: bundle.details, career: bundle.career });
+        }
+
         if (isSofaScorePlayerId(playerId) && isSofaScoreServiceConfigured()) {
             const bundle = await getSofaScorePlayerBundle(playerId) as {
                 details?: { DATA?: unknown } | null;

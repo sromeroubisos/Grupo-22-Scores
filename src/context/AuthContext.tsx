@@ -40,6 +40,7 @@ interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
+    isSessionVerified: boolean;
     login: (role?: AppUserRole, returnTo?: string) => void;
     logout: () => void;
     refreshOnboardingStatus: () => Promise<void>;
@@ -209,7 +210,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const skipAuthBootstrap = isAuthEntryPath(pathname);
     const initialCachedUser = skipAuthBootstrap ? null : readCachedAuthUser();
     const [user, setUser] = useState<User | null>(() => initialCachedUser);
-    const [isLoading, setIsLoading] = useState(() => !initialCachedUser);
+    const [isLoading, setIsLoading] = useState(() => !skipAuthBootstrap);
+    const [verifiedSessionUserId, setVerifiedSessionUserId] = useState<string | null | undefined>(() => (
+        skipAuthBootstrap ? null : undefined
+    ));
     const supabaseRef = useRef<LooseSupabaseClient | null>(null);
     const isMounted = useRef(true);
     const authProviderStartedAt = useRef(nowMs());
@@ -434,6 +438,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             activeProfileFetchRef.current = null;
             lastAuthEventRef.current = { event: 'INIT', userId: null };
             authBootstrapCompleteRef.current = true;
+            setVerifiedSessionUserId(null);
             setUser(null);
             setIsLoading(false);
 
@@ -467,10 +472,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     if (session) {
                         console.log('[AuthContext] initAuth: Session found');
                         lastAuthEventRef.current = { event: 'INITIAL_SESSION', userId: session.user.id };
+                        setVerifiedSessionUserId(session.user.id);
                         await fetchAndSetUser(session.user);
                     } else {
                         console.log('[AuthContext] initAuth: No session');
                         lastAuthEventRef.current = { event: 'INITIAL_SESSION', userId: null };
+                        setVerifiedSessionUserId(null);
                         setPersistentUser(null);
                         setIsLoading(false);
                     }
@@ -532,6 +539,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }
                 console.error('[AuthContext] initAuth error:', err);
                 if (isMounted.current) {
+                    setVerifiedSessionUserId(null);
                     setPersistentUser(null);
                     setIsLoading(false);
                 }
@@ -605,10 +613,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                         if (shouldFetchProfile) {
                             console.log('[AuthContext] Event result: fetching user for event:', event);
+                            setVerifiedSessionUserId(session.user.id);
                             fetchAndSetUser(session.user).catch((backgroundError: unknown) => {
                                 console.error('[AuthContext] Background fetchAndSetUser failed:', backgroundError);
                             });
                         } else {
+                            setVerifiedSessionUserId(session.user.id);
                             setPersistentUser((prev) => {
                                 if (!prev || prev.id !== session.user.id) return prev;
                                 const nextAvatar = session.user.user_metadata?.avatar_url ?? prev.avatarUrl;
@@ -650,6 +660,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         lastAuthEventRef.current = { event, userId: session.user.id };
                     } else {
                         console.warn('[AuthContext] SIGNED_IN event received but no user present in session');
+                        setVerifiedSessionUserId(null);
                         setPersistentUser(null);
                         setIsLoading(false);
                     }
@@ -661,6 +672,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     if (!session?.user) {
                         return;
                     }
+                    setVerifiedSessionUserId(session.user.id);
                     setPersistentUser((prev) => {
                         if (!prev) return prev;
                         if (prev.id !== session.user.id) return prev;
@@ -670,6 +682,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     });
                 } else if (event === 'SIGNED_OUT') {
                     console.log('[AuthContext] Event result: signing out');
+                    setVerifiedSessionUserId(null);
                     setPersistentUser(null);
                     setIsLoading(false);
                     lastAuthEventRef.current = { event, userId: null };
@@ -750,6 +763,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // flips to signed-out without waiting on the Supabase round trip
         // (the auth `/logout` endpoint occasionally takes seconds on slow auth).
         if (isMounted.current) {
+            setVerifiedSessionUserId(null);
             setPersistentUser(null);
             setIsLoading(false);
         }
@@ -816,11 +830,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const exposedUser = verifiedSessionUserId && user?.id === verifiedSessionUserId
+        ? user
+        : null;
+    const isSessionVerified = verifiedSessionUserId !== undefined;
+
     return (
         <AuthContext.Provider value={{
-            user,
-            isAuthenticated: !!user,
+            user: exposedUser,
+            isAuthenticated: !!exposedUser,
             isLoading,
+            isSessionVerified,
             login,
             logout,
             refreshOnboardingStatus,

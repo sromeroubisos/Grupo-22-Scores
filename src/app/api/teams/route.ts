@@ -7,6 +7,7 @@ import {
 } from '@/lib/services/espnAmericanFootball';
 import {
     getEspnFootballTeamBundle,
+    getEspnFootballTeamSquad,
     parseEspnFootballTeamId,
 } from '@/lib/services/espnFootball';
 import {
@@ -559,6 +560,32 @@ function buildSupportedTabs(options: {
     );
 }
 
+// For national teams mapped to a FIFA / CONMEBOL league, the team's schedule
+// in ESPN is split across multiple competitions (Mundial, Eliminatorias, Amistosos).
+// We fetch each one so the fixture list isn't truncated to a single tournament.
+function computeEspnSoccerExtraScheduleLeagues(primarySlug: string | null | undefined) {
+    if (!primarySlug) return [] as string[];
+    const slug = primarySlug.toLowerCase();
+    const nationalTeamSlugs = new Set([
+        'fifa.world',
+        'fifa.cwc',
+        'fifa.confederations',
+        'fifa.friendly',
+        'fifa.olympics',
+        'conmebol.america',
+        'conmebol.fifa.worldq',
+        'uefa.euro',
+        'uefa.euro_q',
+        'uefa.nations',
+        'concacaf.gold',
+        'concacaf.nations.league',
+        'caf.nations',
+        'afc.asian',
+    ]);
+    if (!nationalTeamSlugs.has(slug)) return [];
+    return ['fifa.world', 'conmebol.fifa.worldq', 'fifa.friendly'].filter((s) => s !== slug);
+}
+
 async function fetchInternalClubSquad(
     readClient: ReadClient,
     clubId: string,
@@ -1047,6 +1074,7 @@ export async function GET(request: Request) {
     const preferredSport = searchParams.get('preferred_sport') || searchParams.get('sport') || '';
     const leagueHint = searchParams.get('league') || '';
     const skipSquad = searchParams.get('skip_squad') === 'true';
+    const onlySquad = searchParams.get('only') === 'squad';
     const debugMode = searchParams.get('_debug') === '1';
 
     if (!rawTeamId) {
@@ -1056,9 +1084,33 @@ export async function GET(request: Request) {
     const espnFootballTeamId = parseEspnFootballTeamId(rawTeamId);
     if (espnFootballTeamId) {
         try {
+            // Fast path used when the client opens the "Plantilla" tab: skip the
+            // schedule/scoreboard/standings work and only hit the roster endpoints.
+            if (onlySquad) {
+                const squad = await getEspnFootballTeamSquad(
+                    espnFootballTeamId.teamId,
+                    espnFootballTeamId.leagueSlug || leagueHint || null,
+                );
+                return Response.json({
+                    ok: true,
+                    resolvedClubId: null,
+                    details: null,
+                    results: [],
+                    fixtures: [],
+                    squad,
+                    transfers: [],
+                });
+            }
+
+            const primarySlug = espnFootballTeamId.leagueSlug || leagueHint || null;
+            // National teams split their calendar across Mundial + Eliminatorias + Amistosos;
+            // pass them as extras so the page shows the full team agenda, not just one comp.
+            const extraSlugs = computeEspnSoccerExtraScheduleLeagues(primarySlug);
             const bundle = await getEspnFootballTeamBundle(
                 espnFootballTeamId.teamId,
-                espnFootballTeamId.leagueSlug || leagueHint || null,
+                primarySlug,
+                extraSlugs,
+                { skipSquad },
             );
             if (!bundle) {
                 return Response.json({ ok: false, error: 'Team not found' }, { status: 404 });
@@ -1299,6 +1351,96 @@ export async function GET(request: Request) {
         }
     } catch {
         // Silently continue if not found or DB error
+    }
+
+    // If the local club is mapped to an ESPN soccer team via external_id
+    // (format: espn-soccer-team-{leagueSlug}-{id}), surface ESPN fixtures/results/squad
+    // alongside the local club identity (keeps "Editar logo" + local matches working).
+    if (details && internalExternalId) {
+        const espnSoccerRef = parseEspnFootballTeamId(internalExternalId);
+        if (espnSoccerRef && espnSoccerRef.teamId) {
+            try {
+                if (onlySquad) {
+                    const squadOnly = await getEspnFootballTeamSquad(
+                        espnSoccerRef.teamId,
+                        espnSoccerRef.leagueSlug || leagueHint || null,
+                    );
+                    return Response.json({
+                        ok: true,
+                        resolvedClubId,
+                        details: null,
+                        results: [],
+                        fixtures: [],
+                        squad: hasInternalSquad ? internalSquad : squadOnly,
+                        transfers: [],
+                    });
+                }
+
+                const primarySlug = espnSoccerRef.leagueSlug || leagueHint || null;
+                const extraSlugs = computeEspnSoccerExtraScheduleLeagues(primarySlug);
+                const bundle = await getEspnFootballTeamBundle(
+                    espnSoccerRef.teamId,
+                    primarySlug,
+                    extraSlugs,
+                    { skipSquad: skipSquad || hasInternalSquad },
+                );
+                if (bundle) {
+                    const espnSquad = Array.isArray(bundle.squad) ? bundle.squad : [];
+                    const espnResults = Array.isArray(bundle.results) ? bundle.results : [];
+                    const espnFixtures = Array.isArray(bundle.fixtures) ? bundle.fixtures : [];
+
+                    const mergedResults = internalResults.length > 0
+                        ? sortMatchesByDate(internalResults, 'desc')
+                        : sortMatchesByDate(espnResults, 'desc');
+                    const mergedFixtures = internalFixtures.length > 0
+                        ? sortMatchesByDate(internalFixtures, 'asc')
+                        : sortMatchesByDate(espnFixtures, 'asc');
+
+                    const squadForResponse = hasInternalSquad
+                        ? internalSquad
+                        : (skipSquad ? [] : espnSquad);
+                    const hasAnySquad = hasInternalSquad || espnSquad.length > 0;
+
+                    const mergedDetails = applyExternalTeamLogoOverride({
+                        ...details,
+                        // Prefer local id (UUID) so admin actions and family links work.
+                        id: details.id,
+                        // Surface ESPN metadata (league, season, standing, etc.) but keep local name/logo.
+                        country: details.country || bundle.details?.country || null,
+                        venue: details.venue || bundle.details?.venue || null,
+                        city: details.city || bundle.details?.city || null,
+                        region: details.region || bundle.details?.region || null,
+                        short_code: details.short_code || bundle.details?.short_code || null,
+                        current_league: bundle.details?.current_league || null,
+                        current_league_logo: bundle.details?.current_league_logo || null,
+                        current_season: bundle.details?.current_season || null,
+                        standing: bundle.details?.standing || null,
+                        statistics: bundle.details?.statistics || null,
+                        provider: 'espn',
+                        external_id: internalExternalId,
+                        league_slug: espnSoccerRef.leagueSlug || null,
+                        supported_tabs: buildSupportedTabs({
+                            hasSquad: hasAnySquad,
+                            hasTransfers: false,
+                        }),
+                    });
+
+                    return Response.json({
+                        ok: true,
+                        resolvedClubId,
+                        details: mergedDetails,
+                        results: mergedResults,
+                        fixtures: mergedFixtures,
+                        squad: squadForResponse,
+                        transfers: [],
+                    });
+                }
+            } catch (e: unknown) {
+                const message = e instanceof Error ? e.message : String(e);
+                console.error('Teams API ESPN soccer (local club mapping) error', e, message);
+                // Fall through to the FlashScore path so the page still renders local data.
+            }
+        }
     }
 
     const teamId = stripFsTeamPrefix(rawTeamId);

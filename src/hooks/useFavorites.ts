@@ -135,7 +135,7 @@ function applyClubDetail(rows: ClubFollowRow[], detail: FavoriteUpdatedDetail): 
 
 export function useFavorites() {
     const pathname = usePathname();
-    const { login, user } = useAuth();
+    const { login, user, isLoading: authLoading, isSessionVerified } = useAuth();
     const supabase = useMemo(() => createClient(), []);
 
     const [leagueRows, setLeagueRows] = useState<LeagueFollowRow[]>([]);
@@ -144,7 +144,7 @@ export function useFavorites() {
     const [error, setError] = useState<string | null>(null);
 
     const refresh = useCallback(async () => {
-        if (!FAVORITES_ENABLED || !user?.id) {
+        if (!FAVORITES_ENABLED || authLoading || !isSessionVerified || !user?.id) {
             setLeagueRows([]);
             setClubRows([]);
             setError(null);
@@ -154,6 +154,18 @@ export function useFavorites() {
 
         setLoading(true);
         try {
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            if (sessionError) {
+                throw sessionError;
+            }
+
+            if (session?.user?.id !== user.id) {
+                setLeagueRows([]);
+                setClubRows([]);
+                setError(null);
+                return;
+            }
+
             const [leagues, clubs] = await Promise.all([
                 FAVORITE_LEAGUES_ENABLED ? getFollowedLeagues(supabase, user.id) : Promise.resolve([]),
                 FAVORITE_CLUBS_ENABLED ? getFollowedClubs(supabase, user.id) : Promise.resolve([]),
@@ -179,7 +191,7 @@ export function useFavorites() {
         } finally {
             setLoading(false);
         }
-    }, [supabase, user?.id]);
+    }, [authLoading, isSessionVerified, supabase, user?.id]);
 
     useEffect(() => {
         void refresh();
@@ -219,13 +231,14 @@ export function useFavorites() {
 
     const ensureAuthenticated = useCallback(() => {
         if (user) return true;
+        if (authLoading || !isSessionVerified) return false;
 
         const returnTo = typeof window !== 'undefined'
             ? `${window.location.pathname}${window.location.search}`
             : pathname || undefined;
         login('fan', returnTo);
         return false;
-    }, [login, pathname, user]);
+    }, [authLoading, isSessionVerified, login, pathname, user]);
 
     const isLeagueFavorite = useCallback((entityId: string) => {
         if (!FAVORITES_ENABLED || !FAVORITE_LEAGUES_ENABLED) return false;

@@ -286,7 +286,9 @@ function TeamDetailInner({ id }: { id: string }) {
         return [];
     }, [squad]);
 
-    // Lazy-load squad when the squad tab is first selected
+    // Lazy-load squad when the squad tab is first selected. Uses `?only=squad`
+    // so the API skips the schedule/scoreboard/standings work and only hits the
+    // roster endpoints (typically ~300ms vs ~3s+ for the full bundle).
     useEffect(() => {
         if (activeTab !== 'squad' || squadFetched || loading) return;
 
@@ -295,6 +297,7 @@ function TeamDetailInner({ id }: { id: string }) {
             try {
                 const query = new URLSearchParams();
                 query.set('team_id', rawId);
+                query.set('only', 'squad');
                 if (hintName) query.set('team_name', hintName);
                 if (hintTeamUrl) query.set('team_url', hintTeamUrl);
                 if (hintLeague) query.set('league', hintLeague);

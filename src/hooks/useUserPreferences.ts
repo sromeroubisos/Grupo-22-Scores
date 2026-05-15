@@ -13,17 +13,17 @@ interface UserPreferences {
 }
 
 export function useUserPreferences(): UserPreferences {
-    const { user } = useAuth()
+    const { user, isLoading: authLoading, isSessionVerified } = useAuth()
     const userId = user?.id
     const [favoriteSportIds, setFavoriteSportIds] = useState<string[]>([])
     const [favoriteLeagueIds, setFavoriteLeagueIds] = useState<string[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        if (!userId) {
+        if (authLoading || !isSessionVerified || !userId) {
             setFavoriteSportIds([])
             setFavoriteLeagueIds([])
-            setIsLoading(false)
+            setIsLoading(authLoading || !isSessionVerified)
             return
         }
 
@@ -58,7 +58,7 @@ export function useUserPreferences(): UserPreferences {
         return () => {
             cancelled = true
         }
-    }, [userId])
+    }, [authLoading, isSessionVerified, userId])
 
     return {
         favoriteSportIds,

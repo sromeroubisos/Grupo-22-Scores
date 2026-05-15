@@ -22,12 +22,13 @@ const MATCH_CACHE_TTL = 60;
 const TEAM_CACHE_TTL = 1800;
 const STANDINGS_CACHE_TTL = 1800;
 const ESPN_FETCH_CONCURRENCY = 24;
-const TEAM_SCHEDULE_RANGE_DAYS = 240;
+const TEAM_SCHEDULE_RANGE_DAYS = 120;
 const SOCCER_PREFIX = 'espn-soccer-';
 
 export const ESPN_SOCCER_MATCH_PREFIX = 'espn-soccer-game-';
 export const ESPN_SOCCER_TEAM_PREFIX = 'espn-soccer-team-';
 export const ESPN_SOCCER_LEAGUE_PREFIX = 'espn-soccer-league-';
+export const ESPN_SOCCER_PLAYER_PREFIX = 'espn-soccer-player-';
 
 const LEAGUES: Record<string, EspnFootballLeague> = {
     'arg.1': { slug: 'arg.1', name: 'Liga Profesional Argentina', shortName: 'LPF', countryName: 'Argentina', tournamentUrl: '/soccer/argentina/lpf/', aliases: ['liga profesional', 'lpf', 'primera division argentina', 'liga argentina'] },
@@ -188,6 +189,17 @@ function getEspnTeamAbbreviation(competitor: any) {
 }
 
 function parseScore(value: unknown) {
+    if (isRecord(value)) {
+        // ESPN's team schedule endpoint returns scores as { value, displayValue }
+        // while the scoreboard endpoint returns them as strings.
+        if (typeof value.value === 'number' && Number.isFinite(value.value)) return value.value;
+        const inner = normalizeString(value.displayValue);
+        if (inner) {
+            const numeric = Number(inner);
+            if (Number.isFinite(numeric)) return numeric;
+        }
+        return null;
+    }
     const raw = normalizeString(value);
     if (!raw) return null;
     const numeric = Number(raw);
@@ -325,6 +337,28 @@ export function parseEspnFootballMatchId(value: unknown): ParsedEspnFootballMatc
     return null;
 }
 
+export function toEspnFootballPlayerId(playerId: string | number, leagueSlug: string) {
+    return `${ESPN_SOCCER_PLAYER_PREFIX}${leagueSlug}-${String(playerId)}`;
+}
+
+export type ParsedEspnFootballPlayerId = { leagueSlug: EspnFootballLeagueSlug | null; playerId: string };
+
+export function parseEspnFootballPlayerId(value: unknown): ParsedEspnFootballPlayerId | null {
+    const normalized = normalizeString(value);
+    if (!normalized) return null;
+    const prefixed = new RegExp(`^${ESPN_SOCCER_PLAYER_PREFIX}(.+)-(\\d+)$`, 'i').exec(normalized);
+    if (prefixed) {
+        const slugRaw = prefixed[1];
+        return {
+            leagueSlug: isEspnFootballLeagueSlug(slugRaw) ? slugRaw : null,
+            playerId: prefixed[2],
+        };
+    }
+    const legacy = new RegExp(`^${ESPN_SOCCER_PLAYER_PREFIX}(\\d+)$`, 'i').exec(normalized);
+    if (legacy) return { leagueSlug: null, playerId: legacy[1] };
+    return null;
+}
+
 export function isEspnFootballAnyId(value: unknown) {
     const normalized = normalizeString(value);
     if (!normalized) return false;
@@ -384,24 +418,46 @@ async function fetchScoreboardForDate(leagueSlug: EspnFootballLeagueSlug, date: 
     return fetchEspnJson<Record<string, any>>(url, 'EspnSoccerScoreboard', SCOREBOARD_CACHE_TTL);
 }
 
+// Past scoreboard data never changes once a match is final, so we can cache
+// it for an order-of-magnitude longer than upcoming events. Today's cutoff
+// uses the live-events TTL so live scores stay current.
+const SCOREBOARD_HISTORICAL_CACHE_TTL = 24 * 60 * 60; // 24h
+const SCOREBOARD_CHUNK_CONCURRENCY = 16;
+
 async function fetchScoreboardRangeEvents(leagueSlug: EspnFootballLeagueSlug, startDate: Date, endDate: Date) {
     const safeStart = toDateOnly(startDate);
     const safeEnd = toDateOnly(endDate);
-    const eventsById = new Map<string, EspnScoreboardEvent>();
+    const todayStart = toDateOnly(new Date());
 
+    // Pre-compute the chunk windows so we can hit them in parallel.
+    const chunks: Array<{ start: Date; end: Date }> = [];
     let cursor = safeStart;
     while (cursor <= safeEnd) {
         const chunkEnd = addDays(cursor, 9);
         const boundedEnd = chunkEnd <= safeEnd ? chunkEnd : safeEnd;
-        const datesParam = `${formatEspnDate(cursor)}-${formatEspnDate(boundedEnd)}`;
-        const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueSlug}/scoreboard?dates=${datesParam}`;
-        const payload = await fetchEspnJson<Record<string, any>>(url, 'EspnSoccerScoreboard', SCOREBOARD_CACHE_TTL);
+        chunks.push({ start: cursor, end: boundedEnd });
+        cursor = addDays(boundedEnd, 1);
+    }
+
+    const payloads = await mapWithConcurrency(chunks, SCOREBOARD_CHUNK_CONCURRENCY, async (chunk) => {
+        const datesParam = `${formatEspnDate(chunk.start)}-${formatEspnDate(chunk.end)}`;
+        // ESPN defaults to ~100 events per scoreboard response. High-volume
+        // competitions like fifa.friendly easily exceed that in a 10-day window
+        // (~50 internationals/day), so events at the end of the chunk get
+        // dropped silently. Asking for a larger limit avoids that.
+        const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueSlug}/scoreboard?dates=${datesParam}&limit=500`;
+        const isHistorical = chunk.end < todayStart;
+        const ttl = isHistorical ? SCOREBOARD_HISTORICAL_CACHE_TTL : SCOREBOARD_CACHE_TTL;
+        return fetchEspnJson<Record<string, any>>(url, 'EspnSoccerScoreboard', ttl);
+    });
+
+    const eventsById = new Map<string, EspnScoreboardEvent>();
+    for (const payload of payloads) {
         const events = Array.isArray(payload?.events) ? payload.events : [];
         for (const event of events) {
             const eventId = normalizeString(event?.id);
             if (eventId) eventsById.set(eventId, event);
         }
-        cursor = addDays(boundedEnd, 1);
     }
 
     return Array.from(eventsById.values()).sort((l, r) => {
@@ -1592,13 +1648,12 @@ function findEventInScoreboard(events: EspnScoreboardEvent[], eventId: string) {
 }
 
 async function findEspnSoccerEvent(leagueSlug: EspnFootballLeagueSlug, eventId: string) {
+    // Single parallel scan over a wide window. The chunk fetches inside
+    // fetchScoreboardRangeEvents now run with concurrency, so doing one wide
+    // scan is faster than the old "close then wider" sequential fallback.
     const today = toDateOnly(new Date());
-    const close = await fetchScoreboardRangeEvents(leagueSlug, addDays(today, -30), addDays(today, 30));
-    const closeMatch = findEventInScoreboard(close, eventId);
-    if (closeMatch) return closeMatch;
-
-    const wider = await fetchScoreboardRangeEvents(leagueSlug, addDays(today, -200), addDays(today, 90));
-    return findEventInScoreboard(wider, eventId);
+    const events = await fetchScoreboardRangeEvents(leagueSlug, addDays(today, -200), addDays(today, 90));
+    return findEventInScoreboard(events, eventId);
 }
 
 function buildH2HFromSummary(summary: EspnSummaryPayload, leagueSlug: EspnFootballLeagueSlug) {
@@ -1716,6 +1771,28 @@ function buildTeamStatsFromSummary(summary: EspnSummaryPayload) {
         }));
 }
 
+// ESPN's `summary?event={id}` endpoint returns the full event under
+// `header.competitions[0]` with the same shape as a scoreboard event. Using
+// this as the primary lookup makes the match bundle O(1) HTTP calls instead
+// of needing to scan ~20+ scoreboard chunks. The scoreboard scan only fires
+// as a last resort.
+function extractEventFromSummary(summary: EspnSummaryPayload | null): EspnScoreboardEvent | null {
+    const header = isRecord(summary?.header) ? summary.header : null;
+    if (!header) return null;
+    const competitions = Array.isArray(header.competitions) ? header.competitions : [];
+    if (competitions.length === 0) return null;
+    return {
+        id: normalizeString(header.id) || normalizeString(competitions[0]?.id) || '',
+        date: normalizeString(competitions[0]?.date) || normalizeString(header.date),
+        name: normalizeString(header.name) || '',
+        shortName: normalizeString(header.shortName) || '',
+        season: header.season,
+        competitions,
+        links: header.links,
+        league: header.league,
+    } as EspnScoreboardEvent;
+}
+
 export async function getEspnFootballMatchBundle(eventId: string, leagueHint?: EspnFootballLeagueSlug | null) {
     let league: EspnFootballLeague | null = null;
     let scoreboardEvent: EspnScoreboardEvent | null = null;
@@ -1723,34 +1800,36 @@ export async function getEspnFootballMatchBundle(eventId: string, leagueHint?: E
 
     if (leagueHint && isEspnFootballLeagueSlug(leagueHint)) {
         const candidate = LEAGUES[leagueHint];
-        const [eventFromScoreboard, summaryPayload] = await Promise.all([
-            findEspnSoccerEvent(candidate.slug, eventId),
-            fetchMatchSummaryForLeague(candidate.slug, eventId),
-        ]);
-        if (eventFromScoreboard) {
+        const summaryPayload = await fetchMatchSummaryForLeague(candidate.slug, eventId);
+        const summaryEvent = extractEventFromSummary(summaryPayload);
+        if (summaryEvent) {
             league = candidate;
-            scoreboardEvent = eventFromScoreboard;
+            scoreboardEvent = summaryEvent;
             summary = summaryPayload;
         }
     }
 
     if (!league || !scoreboardEvent) {
+        // Fan out by summary endpoint (one HTTP call per league) instead of by
+        // scoreboard scan (many HTTP calls per league). 70 parallel summary
+        // fetches finish in ~1s; the old scoreboard fan-out took ~20s+.
         const fanoutResults = await Promise.allSettled(
             SUPPORTED_ESPN_FOOTBALL_LEAGUES.map(async (candidate) => {
-                const event = await findEspnSoccerEvent(candidate.slug, eventId);
+                const summaryPayload = await fetchMatchSummaryForLeague(candidate.slug, eventId);
+                const event = extractEventFromSummary(summaryPayload);
                 if (!event) throw new Error('not found');
-                return { candidate, event };
+                return { candidate, event, summary: summaryPayload };
             }),
         );
         for (const r of fanoutResults) {
             if (r.status === 'fulfilled') {
                 league = r.value.candidate;
                 scoreboardEvent = r.value.event;
+                summary = r.value.summary;
                 break;
             }
         }
         if (!league || !scoreboardEvent) return null;
-        summary = await fetchMatchSummaryForLeague(league.slug, eventId);
     }
 
     const normalized = normalizeEspnEventCore(scoreboardEvent, league);
@@ -1841,35 +1920,80 @@ export async function getEspnFootballMatchBundle(eventId: string, leagueHint?: E
     };
 }
 
-function buildRosterPlayers(payload: Record<string, any> | null | undefined) {
-    const groups = Array.isArray(payload?.athletes) ? payload.athletes : [];
-    if (groups.length === 0) {
-        const flat = Array.isArray(payload?.roster) ? payload.roster : [];
-        return flat.map((p: any) => ({
-            name: p?.displayName || p?.fullName || 'Jugador',
-            number: p?.jersey || '',
-            jersey_number: p?.jersey || '',
-            age: p?.age || '',
-            nationality: p?.birthPlace?.country || p?.flag?.alt || '',
-            position: p?.position?.displayName || p?.position?.name || 'other',
-            position_name: p?.position?.displayName || p?.position?.name || 'other',
-            image_path: p?.headshot?.href || '',
-        }));
-    }
+function buildRosterPlayers(
+    payload: Record<string, any> | null | undefined,
+    leagueSlug: EspnFootballLeagueSlug,
+    teamId: string,
+) {
+    const teamPrefixed = toEspnFootballTeamId(teamId, leagueSlug);
+    const mapPlayer = (raw: any, fallbackPosition: string) => {
+        const espnId = normalizeString(raw?.id);
+        const prefixedPlayerId = espnId ? toEspnFootballPlayerId(espnId, leagueSlug) : '';
+        return {
+            id: prefixedPlayerId,
+            player_id: prefixedPlayerId,
+            team_id: teamPrefixed,
+            name: raw?.displayName || raw?.fullName || 'Jugador',
+            number: raw?.jersey || '',
+            jersey_number: raw?.jersey || '',
+            age: raw?.age || '',
+            nationality: raw?.birthPlace?.country || raw?.flag?.alt || '',
+            position: raw?.position?.displayName || raw?.position?.name || fallbackPosition,
+            position_name: raw?.position?.displayName || raw?.position?.name || fallbackPosition,
+            image_path: raw?.headshot?.href || '',
+        };
+    };
 
-    return groups.flatMap((group: any) => {
+    const groups = Array.isArray(payload?.athletes) ? payload.athletes : [];
+    const fromGroups = groups.flatMap((group: any) => {
         const positionName = normalizeString(group?.position) || 'other';
         const items = Array.isArray(group?.items) ? group.items : [];
-        return items.map((item: any) => ({
-            name: item?.displayName || item?.fullName || 'Jugador',
-            number: item?.jersey || '',
-            jersey_number: item?.jersey || '',
-            age: item?.age || '',
-            nationality: item?.birthPlace?.country || '',
-            position: item?.position?.displayName || item?.position?.name || positionName,
-            position_name: item?.position?.displayName || item?.position?.name || positionName,
-            image_path: item?.headshot?.href || '',
-        }));
+        return items.map((item: any) => mapPlayer(item, positionName));
+    });
+    if (fromGroups.length > 0) return fromGroups;
+
+    const flat = Array.isArray(payload?.roster) ? payload.roster : [];
+    return flat.map((p: any) => mapPlayer(p, 'other'));
+}
+
+// ESPN's site/v2 roster endpoint returns no athletes for national teams.
+// The common/v3 endpoint exposes the same data under a different shape:
+// { positionGroups: [{ type, displayName, athletes: [...] }] }.
+function buildRosterPlayersFromCommonV3(
+    payload: Record<string, any> | null | undefined,
+    leagueSlug: EspnFootballLeagueSlug,
+    teamId: string,
+) {
+    const teamPrefixed = toEspnFootballTeamId(teamId, leagueSlug);
+    const positionGroups = Array.isArray(payload?.positionGroups) ? payload.positionGroups : [];
+    return positionGroups.flatMap((group: any) => {
+        const fallbackPosition = normalizeString(group?.displayName) || normalizeString(group?.type) || 'other';
+        const items = Array.isArray(group?.athletes) ? group.athletes : [];
+        return items.map((item: any) => {
+            const espnId = normalizeString(item?.id);
+            const prefixedPlayerId = espnId ? toEspnFootballPlayerId(espnId, leagueSlug) : '';
+            const heightDisplay = normalizeString(item?.displayHeight);
+            const weightDisplay = normalizeString(item?.displayWeight);
+            const dob = normalizeString(item?.displayDOB);
+            return {
+                id: prefixedPlayerId,
+                player_id: prefixedPlayerId,
+                team_id: teamPrefixed,
+                name: item?.displayName || item?.fullName || 'Jugador',
+                first_name: item?.firstName || '',
+                last_name: item?.lastName || '',
+                number: normalizeString(item?.jersey) || '',
+                jersey_number: normalizeString(item?.jersey) || '',
+                age: item?.age || '',
+                height: heightDisplay || '',
+                weight: weightDisplay || '',
+                birth_date: dob ? dob.slice(0, 10) : '',
+                nationality: item?.birthPlace?.country || item?.citizenship || '',
+                position: item?.position?.displayName || item?.position?.name || fallbackPosition,
+                position_name: item?.position?.displayName || item?.position?.name || fallbackPosition,
+                image_path: item?.headshot?.href || '',
+            };
+        });
     });
 }
 
@@ -1881,7 +2005,13 @@ async function fetchTeamDetailsForLeague(leagueSlug: EspnFootballLeagueSlug, tea
     );
 }
 
-export async function getEspnFootballTeamBundle(teamId: string, preferredLeague?: string | null) {
+export async function getEspnFootballTeamBundle(
+    teamId: string,
+    preferredLeague?: string | null,
+    extraLeagueSlugs?: readonly string[] | null,
+    options?: { skipSquad?: boolean },
+) {
+    const skipSquad = options?.skipSquad === true;
     let league: EspnFootballLeague | null = null;
     let details: Record<string, any> | null = null;
 
@@ -1902,24 +2032,96 @@ export async function getEspnFootballTeamBundle(teamId: string, preferredLeague?
     }
 
     if (!league || !details) return null;
-    const [schedulePayload, rosterPayload, standingsPayload] = await Promise.all([
-        fetchEspnJson<Record<string, any>>(
-            `https://site.api.espn.com/apis/site/v2/sports/soccer/${league.slug}/teams/${teamId}/schedule`,
-            'EspnSoccerTeamSchedule',
-            TEAM_CACHE_TTL,
+    const resolvedLeague = league;
+
+    const scheduleLeagueSlugs: EspnFootballLeagueSlug[] = [resolvedLeague.slug];
+    if (Array.isArray(extraLeagueSlugs)) {
+        for (const slug of extraLeagueSlugs) {
+            if (isEspnFootballLeagueSlug(slug) && !scheduleLeagueSlugs.includes(slug)) {
+                scheduleLeagueSlugs.push(slug);
+            }
+        }
+    }
+
+    // ESPN's team-schedule endpoint is sparse for national teams (only returns
+    // a narrow window of recent + a few future events; future World Cup games
+    // don't appear until very close to the date). For FIFA-affiliated leagues
+    // we additionally scan the league scoreboard and keep events involving
+    // this team so the user sees upcoming Mundial fixtures.
+    const fifaScoreboardScanSlugs = scheduleLeagueSlugs.filter((slug) =>
+        slug.startsWith('fifa.') || slug === 'conmebol.fifa.worldq',
+    );
+    const scoreboardScanWindow = fifaScoreboardScanSlugs.length > 0
+        ? (() => {
+            const today = new Date();
+            return {
+                start: addDays(today, -TEAM_SCHEDULE_RANGE_DAYS),
+                end: addDays(today, TEAM_SCHEDULE_RANGE_DAYS),
+            };
+        })()
+        : null;
+
+    const [schedulePayloads, rosterPayload, standingsPayload, scoreboardScans] = await Promise.all([
+        Promise.all(
+            scheduleLeagueSlugs.map((slug) =>
+                fetchEspnJson<Record<string, any>>(
+                    `https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/teams/${teamId}/schedule`,
+                    'EspnSoccerTeamSchedule',
+                    TEAM_CACHE_TTL,
+                ),
+            ),
         ),
-        fetchEspnJson<Record<string, any>>(
-            `https://site.api.espn.com/apis/site/v2/sports/soccer/${league.slug}/teams/${teamId}/roster`,
-            'EspnSoccerTeamRoster',
-            TEAM_CACHE_TTL,
-        ),
-        fetchLeagueStandingsRaw(league.slug),
+        skipSquad
+            ? Promise.resolve(null)
+            : fetchEspnJson<Record<string, any>>(
+                `https://site.api.espn.com/apis/site/v2/sports/soccer/${resolvedLeague.slug}/teams/${teamId}/roster`,
+                'EspnSoccerTeamRoster',
+                TEAM_CACHE_TTL,
+            ),
+        fetchLeagueStandingsRaw(resolvedLeague.slug),
+        scoreboardScanWindow
+            ? Promise.all(
+                fifaScoreboardScanSlugs.map(async (slug) => ({
+                    slug,
+                    events: await fetchScoreboardRangeEvents(slug, scoreboardScanWindow.start, scoreboardScanWindow.end),
+                })),
+            )
+            : Promise.resolve(null),
     ]);
 
-    const resolvedLeague = league;
-    const events = Array.isArray(schedulePayload?.events) ? schedulePayload.events : [];
+    const eventMap = new Map<string, Record<string, any>>();
+    schedulePayloads.forEach((payload, idx) => {
+        const events = Array.isArray(payload?.events) ? payload.events : [];
+        const slug = scheduleLeagueSlugs[idx];
+        for (const event of events) {
+            const eventId = normalizeString(event?.id);
+            if (!eventId || eventMap.has(eventId)) continue;
+            const tagged = { ...event, __sourceLeagueSlug: slug };
+            eventMap.set(eventId, tagged);
+        }
+    });
+
+    if (Array.isArray(scoreboardScans)) {
+        for (const scan of scoreboardScans) {
+            for (const event of scan.events) {
+                const eventId = normalizeString(event?.id);
+                if (!eventId || eventMap.has(eventId)) continue;
+                const competitors = Array.isArray(event?.competitions?.[0]?.competitors)
+                    ? event.competitions[0].competitors
+                    : [];
+                const involvesTeam = competitors.some((c: any) => normalizeString(c?.team?.id) === teamId || normalizeString(c?.id) === teamId);
+                if (!involvesTeam) continue;
+                eventMap.set(eventId, { ...event, __sourceLeagueSlug: scan.slug });
+            }
+        }
+    }
+    const events = Array.from(eventMap.values());
     const normalizedEvents = events
-        .map((e) => normalizeEspnEventForTournamentViews(e, resolvedLeague))
+        .map((event) => {
+            const slug = normalizeString(event?.__sourceLeagueSlug);
+            const eventLeague = (slug && isEspnFootballLeagueSlug(slug) ? LEAGUES[slug] : null) || resolvedLeague;
+            return normalizeEspnEventForTournamentViews(event, eventLeague);
+        })
         .filter(isEspnTournamentViewEvent);
     const standingsRows = normalizeStandingsRows(standingsPayload, resolvedLeague.slug);
     const standingRow = standingsRows.find((row) => row.team_id === toEspnFootballTeamId(teamId, resolvedLeague.slug)) || null;
@@ -1943,7 +2145,7 @@ export async function getEspnFootballTeamBundle(teamId: string, preferredLeague?
             supported_tabs: ['summary', 'results', 'fixtures', 'squad'],
             current_league: league.shortName,
             current_league_logo: getLeagueLogo(standingsPayload),
-            current_season: getLeagueSeason(schedulePayload) || getLeagueSeason(standingsPayload),
+            current_season: getLeagueSeason(schedulePayloads[0]) || getLeagueSeason(standingsPayload),
             standing: standingRow ? {
                 position: standingRow.position,
                 points: standingRow.points,
@@ -1970,9 +2172,287 @@ export async function getEspnFootballTeamBundle(teamId: string, preferredLeague?
         fixtures: normalizedEvents
             .filter((e) => e.status !== 'final')
             .sort((l, r) => (l.timestamp || 0) - (r.timestamp || 0)),
-        squad: buildRosterPlayers(rosterPayload),
+        squad: skipSquad ? [] : await resolveEspnSoccerSquad(rosterPayload, resolvedLeague.slug, teamId),
         transfers: [],
     };
+}
+
+// ESPN's site/v2 roster is empty for national teams. Falls back to the
+// common/v3 endpoint which exposes positionGroups[].athletes[] with full
+// athlete data (name, age, height, weight, headshot, position).
+async function resolveEspnSoccerSquad(
+    primaryRosterPayload: Record<string, any> | null,
+    leagueSlug: EspnFootballLeagueSlug,
+    teamId: string,
+) {
+    const primary = buildRosterPlayers(primaryRosterPayload, leagueSlug, teamId);
+    if (primary.length > 0) return primary;
+
+    const fallbackPayload = await fetchEspnJson<Record<string, any>>(
+        `https://site.web.api.espn.com/apis/common/v3/sports/soccer/${leagueSlug}/teams/${teamId}/roster`,
+        'EspnSoccerTeamRosterCommonV3',
+        TEAM_CACHE_TTL,
+    );
+    return buildRosterPlayersFromCommonV3(fallbackPayload, leagueSlug, teamId);
+}
+
+// Fast path: fetch only the roster (and fallback) without the schedule /
+// scoreboard / standings work the full bundle does. Used when the user opens
+// the "Plantilla" tab and we already have the rest of the team details cached
+// from the initial page load.
+export async function getEspnFootballTeamSquad(teamId: string, preferredLeague?: string | null) {
+    let leagueSlug: EspnFootballLeagueSlug | null = null;
+
+    if (preferredLeague && isEspnFootballLeagueSlug(preferredLeague)) {
+        leagueSlug = preferredLeague;
+    } else {
+        const resolved = await resolveTeamLeague(teamId, preferredLeague);
+        if (resolved?.league) leagueSlug = resolved.league.slug;
+    }
+
+    if (!leagueSlug) return [];
+
+    const rosterPayload = await fetchEspnJson<Record<string, any>>(
+        `https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueSlug}/teams/${teamId}/roster`,
+        'EspnSoccerTeamRoster',
+        TEAM_CACHE_TTL,
+    );
+    return resolveEspnSoccerSquad(rosterPayload, leagueSlug, teamId);
+}
+
+function inferEspnFootballLeagueFromTeamSlug(teamSlug: string | null): EspnFootballLeagueSlug | null {
+    if (!teamSlug) return null;
+    const lower = teamSlug.toLowerCase();
+    if (isEspnFootballLeagueSlug(lower)) return lower;
+    // Team slugs look like "eng.aston_villa" or "esp.barcelona"; the country
+    // prefix maps to the top-flight league slug (e.g., "eng" -> "eng.1").
+    const rawSlug: string = String(lower);
+    const dotIdx = rawSlug.indexOf('.');
+    if (dotIdx <= 0) return null;
+    const countryPrefix = rawSlug.slice(0, dotIdx);
+    const topFlight = `${countryPrefix}.1`;
+    if (isEspnFootballLeagueSlug(topFlight)) return topFlight;
+    return null;
+}
+
+export async function getEspnFootballPlayerBundle(playerId: string, preferredLeague?: string | null) {
+    const candidates: EspnFootballLeagueSlug[] = [];
+    const seen = new Set<EspnFootballLeagueSlug>();
+    const pushCandidate = (slug: string | null | undefined) => {
+        if (!slug || !isEspnFootballLeagueSlug(slug)) return;
+        if (seen.has(slug)) return;
+        seen.add(slug);
+        candidates.push(slug);
+    };
+
+    pushCandidate(preferredLeague || null);
+    for (const slug of SUPPORTED_ESPN_FOOTBALL_LEAGUE_SLUGS) pushCandidate(slug);
+
+    let resolvedLeague: EspnFootballLeague | null = null;
+    let athletePayload: Record<string, any> | null = null;
+
+    for (const slug of candidates) {
+        // common/v3 is the working endpoint for soccer athletes
+        // (site/v2/.../athletes/{id} returns only an error code).
+        const payload = await fetchEspnJson<Record<string, any>>(
+            `https://site.web.api.espn.com/apis/common/v3/sports/soccer/${slug}/athletes/${playerId}`,
+            'EspnSoccerAthleteCommonV3',
+            TEAM_CACHE_TTL,
+        );
+        const athleteId = normalizeString(payload?.athlete?.id) || normalizeString(payload?.id);
+        if (payload && athleteId === playerId) {
+            resolvedLeague = LEAGUES[slug];
+            athletePayload = payload;
+            break;
+        }
+    }
+
+    if (!resolvedLeague || !athletePayload) return null;
+
+    const athlete = isRecord(athletePayload.athlete) ? athletePayload.athlete : athletePayload;
+    const teamRef = isRecord(athlete?.team) ? athlete.team : null;
+    const teamIdRaw = normalizeString(teamRef?.id);
+    // The team object inside the athlete payload includes its own `slug` (e.g.,
+    // "eng.aston_villa" for Aston Villa). Use that slug instead of the resolved
+    // league so the team link routes to the player's actual club.
+    const teamSlugRaw = normalizeString(teamRef?.slug);
+    const teamLeagueSlug =
+        teamSlugRaw && isEspnFootballLeagueSlug(teamSlugRaw)
+            ? teamSlugRaw
+            : inferEspnFootballLeagueFromTeamSlug(teamSlugRaw) || resolvedLeague.slug;
+    const teamLogo = teamRef ? getEspnLogo(teamRef) : '';
+    const teamName =
+        normalizeString(teamRef?.displayName) ||
+        normalizeString(teamRef?.name) ||
+        normalizeString(teamRef?.location) ||
+        '';
+    const headshot = normalizeString(athlete?.headshot?.href) || normalizeString(athlete?.headshot);
+    const flag = normalizeString(athlete?.flag?.href) || normalizeString(athlete?.citizenshipFlag?.href);
+    const country =
+        normalizeString(athlete?.citizenship) ||
+        normalizeString(athlete?.birthPlace?.country) ||
+        normalizeString(athlete?.nationality);
+    const heightRaw = normalizeString(athlete?.displayHeight) || normalizeString(athlete?.height);
+    const weightRaw = normalizeString(athlete?.displayWeight) || normalizeString(athlete?.weight);
+    const dateOfBirth = normalizeString(athlete?.dateOfBirth) || normalizeString(athlete?.displayDOB);
+    const birthDate = dateOfBirth ? dateOfBirth.slice(0, 10) : '';
+
+    // Fetch bio (teamHistory) + overview (statistics) in parallel so the page
+    // can render the full career table.
+    const [bioPayload, overviewPayload] = await Promise.all([
+        fetchEspnJson<Record<string, any>>(
+            `https://site.web.api.espn.com/apis/common/v3/sports/soccer/${resolvedLeague.slug}/athletes/${playerId}/bio`,
+            'EspnSoccerAthleteBio',
+            TEAM_CACHE_TTL,
+        ).catch(() => null),
+        fetchEspnJson<Record<string, any>>(
+            `https://site.web.api.espn.com/apis/common/v3/sports/soccer/${resolvedLeague.slug}/athletes/${playerId}/overview`,
+            'EspnSoccerAthleteOverview',
+            TEAM_CACHE_TTL,
+        ).catch(() => null),
+    ]);
+
+    const career = buildEspnFootballPlayerCareer(bioPayload, overviewPayload);
+    const seasonStats = buildEspnFootballPlayerSeasonStats(overviewPayload);
+
+    return {
+        details: {
+            id: toEspnFootballPlayerId(playerId, resolvedLeague.slug),
+            name: normalizeString(athlete?.displayName) || normalizeString(athlete?.fullName) || 'Jugador',
+            image_path: headshot || '',
+            photo: headshot || '',
+            small_image_path: headshot || '',
+            country: country ? { name: country, image_path: flag || '', small_image_path: flag || '' } : null,
+            nationality: country || '',
+            position:
+                normalizeString(athlete?.position?.displayName) ||
+                normalizeString(athlete?.position?.name) ||
+                normalizeString(athlete?.position?.abbreviation) ||
+                '',
+            age: typeof athlete?.age === 'number' ? athlete.age : normalizeString(athlete?.age) || '',
+            height: heightRaw || '',
+            weight: weightRaw || '',
+            birth_date: birthDate,
+            jersey_number: normalizeString(athlete?.jersey) || normalizeString(athlete?.displayJersey) || '',
+            preferred_foot: '',
+            provider: 'espn',
+            team: teamRef && teamIdRaw
+                ? {
+                    id: toEspnFootballTeamId(teamIdRaw, teamLeagueSlug),
+                    team_id: toEspnFootballTeamId(teamIdRaw, teamLeagueSlug),
+                    name: teamName || 'Equipo',
+                    team_name: teamName || 'Equipo',
+                    logo_url: teamLogo,
+                    image_path: teamLogo,
+                }
+                : null,
+            league_slug: resolvedLeague.slug,
+            league_name: resolvedLeague.name,
+            season_stats: seasonStats,
+        },
+        career,
+    };
+}
+
+// Builds the per-season/per-competition stats grid the player page shows on
+// the Resumen tab. ESPN exposes them as parallel `names` + `splits[i].stats`
+// arrays so we zip them together with displayNames as headers.
+function buildEspnFootballPlayerSeasonStats(overviewPayload: Record<string, any> | null) {
+    if (!overviewPayload) return [];
+    const stats = isRecord(overviewPayload.statistics) ? overviewPayload.statistics : null;
+    if (!stats) return [];
+    const labels: string[] = Array.isArray(stats.labels) ? stats.labels : [];
+    const names: string[] = Array.isArray(stats.names) ? stats.names : [];
+    const displayNames: string[] = Array.isArray(stats.displayNames) ? stats.displayNames : [];
+    const splits = isRecord(stats.splits) ? stats.splits : null;
+    if (!splits) return [];
+
+    return Object.values(splits)
+        .filter(isRecord)
+        .map((split: any) => {
+            const numbers: string[] = Array.isArray(split?.stats) ? split.stats : [];
+            const items = numbers.map((value, idx) => ({
+                key: names[idx] || labels[idx] || `stat_${idx}`,
+                label: displayNames[idx] || labels[idx] || names[idx] || '',
+                short_label: labels[idx] || names[idx] || '',
+                value: value,
+            }));
+            return {
+                display_name: normalizeString(split?.displayName) || '',
+                team_id: normalizeString(split?.teamId) || '',
+                team_slug: normalizeString(split?.teamSlug) || '',
+                league_id: normalizeString(split?.leagueId) || '',
+                league_slug: normalizeString(split?.leagueSlug) || '',
+                stats: items,
+            };
+        });
+}
+
+// Builds the career trajectory list (one entry per team-season block) for the
+// Carrera tab. Merges teamHistory (`/bio`) with aggregated per-competition
+// stats from `/overview` so each row shows the team + seasons + stat totals.
+function buildEspnFootballPlayerCareer(
+    bioPayload: Record<string, any> | null,
+    overviewPayload: Record<string, any> | null,
+) {
+    const teamHistory: any[] = Array.isArray(bioPayload?.teamHistory) ? bioPayload.teamHistory : [];
+    if (teamHistory.length === 0) return [];
+
+    const overviewStats = isRecord(overviewPayload?.statistics) ? overviewPayload.statistics : null;
+    const splits: any[] = overviewStats && isRecord(overviewStats.splits)
+        ? Object.values(overviewStats.splits)
+        : [];
+    const statNames: string[] = Array.isArray(overviewStats?.names) ? overviewStats.names : [];
+    const indexOfStat = (key: string) => statNames.indexOf(key);
+    const statsByTeam = new Map<string, { played: number; goals: number; assists: number; yellow: number; red: number }>();
+    for (const split of splits) {
+        if (!isRecord(split)) continue;
+        const teamId = normalizeString(split.teamId);
+        if (!teamId) continue;
+        const values: string[] = Array.isArray(split.stats) ? split.stats : [];
+        const read = (key: string) => {
+            const idx = indexOfStat(key);
+            const raw = idx >= 0 ? Number(values[idx]) : NaN;
+            return Number.isFinite(raw) ? raw : 0;
+        };
+        const acc = statsByTeam.get(teamId) || { played: 0, goals: 0, assists: 0, yellow: 0, red: 0 };
+        acc.played += read('starts');
+        acc.goals += read('totalGoals');
+        acc.assists += read('goalAssists');
+        acc.yellow += read('yellowCards');
+        acc.red += read('redCards');
+        statsByTeam.set(teamId, acc);
+    }
+
+    return teamHistory.map((team: any) => {
+        const teamId = normalizeString(team?.id);
+        const teamSlug = normalizeString(team?.slug);
+        const teamLeagueSlug = (teamSlug && isEspnFootballLeagueSlug(teamSlug))
+            ? teamSlug
+            : inferEspnFootballLeagueFromTeamSlug(teamSlug) || null;
+        const prefixedTeamId = teamId && teamLeagueSlug
+            ? toEspnFootballTeamId(teamId, teamLeagueSlug)
+            : (teamId || '');
+        const totals = teamId ? statsByTeam.get(teamId) : null;
+        return {
+            team: {
+                id: prefixedTeamId,
+                team_id: prefixedTeamId,
+                name: normalizeString(team?.displayName) || normalizeString(team?.name) || 'Equipo',
+                logo_url: normalizeString(team?.logo) || '',
+                image_path: normalizeString(team?.logo) || '',
+            },
+            season: normalizeString(team?.seasons) || '',
+            season_name: normalizeString(team?.seasons) || '',
+            appearances: totals ? totals.played : null,
+            matches_played: totals ? totals.played : null,
+            games: totals ? totals.played : null,
+            goals: totals ? totals.goals : null,
+            assists: totals ? totals.assists : null,
+            yellow_cards: totals ? totals.yellow : null,
+            red_cards: totals ? totals.red : null,
+        };
+    });
 }
 
 export function inferEspnFootballLeague(input: {
