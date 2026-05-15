@@ -450,19 +450,21 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
         }
 
         if (isInvalidRefreshTokenError(error)) {
-            logRefreshFlow('proxy_auth_cookies_cleared', {
+            const fallbackUser = readUserFromCookie(request);
+            logRefreshFlow('proxy_session_preserved_after_invalid_refresh_token', {
                 path: request.nextUrl.pathname,
                 reason: 'invalid_refresh_token',
+                hasFallbackUser: Boolean(fallbackUser),
                 durationMs: Date.now() - updateStartedAt,
             }, 'auth');
             logRefreshLoop('proxy_session_invalid', {
                 path: request.nextUrl.pathname,
-                action: 'clear_cookies',
+                action: 'preserve_cookies',
                 reason: 'invalid_refresh_token',
                 errorCode: 'code' in error && typeof error.code === 'string' ? error.code : null,
                 durationMs: Date.now() - updateStartedAt,
             });
-            clearAuthCookies(request, response);
+            return { response, user: fallbackUser };
         }
 
         // Only log if it's not a common "no session" state

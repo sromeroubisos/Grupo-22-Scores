@@ -18,7 +18,7 @@ import {
     getOnboardingStatus,
 } from '@/lib/services/preferencesService';
 import { isAuthRateLimitError } from '@/lib/auth/errors';
-import { clearSupabaseBrowserSession, createClient } from '@/lib/supabase/client';
+import { clearSupabaseBrowserSession, createClient, getSupabaseBrowserSessionHint } from '@/lib/supabase/client';
 import type { LooseSupabaseClient } from '@/lib/supabase/loose';
 import { logPerf, measureAsync, nowMs, warnIfDuplicateWindow } from '@/lib/perf/measure';
 import { getReservedAdminRole } from '@/lib/types/user';
@@ -223,6 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userId: initialCachedUser?.id ?? null,
     });
     const authBootstrapCompleteRef = useRef(false);
+    const logoutRequestedRef = useRef(false);
 
     const trackAuthDuplicate = useCallback((step: string, metadata: Record<string, unknown> = {}) => {
         return warnIfDuplicateWindow(
@@ -447,6 +448,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             };
         }
 
+        const sessionHint = getSupabaseBrowserSessionHint();
+        const skipPublicAnonymousAuth =
+            !initialCachedUser &&
+            !isRscUserDependentPath(pathname) &&
+            !sessionHint.isAccessTokenFresh;
+
+        if (skipPublicAnonymousAuth) {
+            activeProfileFetchRef.current = null;
+            lastAuthEventRef.current = { event: 'INIT', userId: null };
+            authBootstrapCompleteRef.current = true;
+            setVerifiedSessionUserId(null);
+            setPersistentUser(null);
+            setIsLoading(false);
+            logRefreshLoop('initAuth_skipped', {
+                pathname,
+                reason: sessionHint.hasSession ? 'public_stale_or_expired_session_hint' : 'public_no_session_hint',
+            });
+
+            return () => {
+                isMounted.current = false;
+            };
+        }
+
         authBootstrapCompleteRef.current = false;
         const supabase = getSupabaseClient();
         logPerf(
@@ -465,6 +489,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 hasCachedUser: Boolean(initialCachedUser),
             });
             let sessionRequest: Promise<any> | null = null;
+            const preserveOrClearAfterRetryableAuthIssue = () => {
+                if (!isMounted.current) return;
+
+                if (initialCachedUser) {
+                    setVerifiedSessionUserId(initialCachedUser.id);
+                    setPersistentUser((prev) => prev ?? initialCachedUser);
+                } else {
+                    setVerifiedSessionUserId(null);
+                    setPersistentUser(null);
+                }
+
+                setIsLoading(false);
+            };
+
             const applySessionResult = async ({ data: { session }, error }: any) => {
                 if (error) throw error;
 
@@ -524,16 +562,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             console.error('[AuthContext] background initAuth error:', backgroundError);
                         });
                     if (isMounted.current) {
-                        setIsLoading(false);
+                        preserveOrClearAfterRetryableAuthIssue();
                     }
                     authBootstrapCompleteRef.current = true;
                     return;
                 }
                 if (isSupabaseNetworkError(err) || isAuthRateLimitError(err)) {
                     console.warn('[AuthContext] initAuth skipped because Supabase Auth is temporarily unavailable');
-                    if (isMounted.current) {
-                        setIsLoading(false);
-                    }
+                    preserveOrClearAfterRetryableAuthIssue();
                     authBootstrapCompleteRef.current = true;
                     return;
                 }
@@ -681,6 +717,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         return { ...prev, avatarUrl: nextAvatar };
                     });
                 } else if (event === 'SIGNED_OUT') {
+                    const explicitLogout = logoutRequestedRef.current;
+                    logoutRequestedRef.current = false;
+                    const cachedUser = readCachedAuthUser();
+
+                    if (!explicitLogout && cachedUser) {
+                        console.warn('[AuthContext] Ignoring non-explicit SIGNED_OUT to preserve the local session');
+                        setVerifiedSessionUserId(cachedUser.id);
+                        setPersistentUser((prev) => prev ?? cachedUser);
+                        setIsLoading(false);
+                        lastAuthEventRef.current = { event: 'USER_UPDATED', userId: cachedUser.id };
+                        return;
+                    }
+
                     console.log('[AuthContext] Event result: signing out');
                     setVerifiedSessionUserId(null);
                     setPersistentUser(null);
@@ -759,6 +808,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const logout = async () => {
+        logoutRequestedRef.current = true;
+
         // Optimistic UI: clear local user state immediately so the header/menu
         // flips to signed-out without waiting on the Supabase round trip
         // (the auth `/logout` endpoint occasionally takes seconds on slow auth).
@@ -787,6 +838,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await supabase.auth.signOut();
         } catch (error) {
             console.error('Error logging out:', error);
+            logoutRequestedRef.current = false;
             clearSupabaseBrowserSession();
         }
     };

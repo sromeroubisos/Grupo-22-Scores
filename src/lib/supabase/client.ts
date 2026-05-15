@@ -1,6 +1,6 @@
 import { createBrowserClient } from '@supabase/ssr'
 import {
-    coerceRefreshRateLimitToRetryable,
+    coerceRefreshFailureToRetryable,
     isSupabaseAuthRequest,
     isSupabaseRefreshTokenRequest,
 } from '@/lib/supabase/auth-fetch'
@@ -21,6 +21,7 @@ import type { LooseSupabaseClient } from './loose'
 
 let client: LooseSupabaseClient | undefined
 const SUPABASE_AUTH_TIMEOUT_MS = 15000
+const APP_AUTH_LOCAL_USER_KEY = 'g22_user'
 
 function getSupabaseBrowserStorageKey() {
     return getSupabaseAuthStorageKey()
@@ -206,6 +207,87 @@ function isUsableSupabaseSessionStorageValue(value: string) {
     return typeof parsed?.access_token === 'string'
 }
 
+function readBrowserSessionStorageValue(storageKey: string): string | null {
+    for (const storage of getBrowserStorageStores()) {
+        try {
+            const rawValue = storage.getItem(storageKey)
+            if (rawValue) return normalizeSupabaseAuthCookieValue(rawValue)
+        } catch {
+            // Best effort only.
+        }
+    }
+
+    return null
+}
+
+function readBrowserSessionCookieValue(storageKey: string): string | null {
+    const rawValue = readRawAuthSessionCookie(readBrowserCookies(), storageKey)
+    return rawValue ? normalizeSupabaseAuthCookieValue(rawValue) : null
+}
+
+function readBrowserSessionValue(storageKey: string): string | null {
+    return readBrowserSessionStorageValue(storageKey) || readBrowserSessionCookieValue(storageKey)
+}
+
+function readAccessTokenExpirySeconds(accessToken: unknown): number | null {
+    if (typeof accessToken !== 'string') return null
+    const segments = accessToken.split('.')
+    if (segments.length < 2) return null
+
+    try {
+        let payloadSegment = segments[1].replace(/-/g, '+').replace(/_/g, '/')
+        const padding = payloadSegment.length % 4
+        if (padding) payloadSegment += '='.repeat(4 - padding)
+        const payload = JSON.parse(atob(payloadSegment)) as { exp?: unknown }
+        return typeof payload.exp === 'number' ? payload.exp : null
+    } catch {
+        return null
+    }
+}
+
+export function getSupabaseBrowserSessionHint() {
+    const fallback = {
+        hasSession: false,
+        hasRefreshToken: false,
+        accessTokenExpiresAt: null as number | null,
+        isAccessTokenFresh: false,
+    }
+
+    if (typeof window === 'undefined') return fallback
+
+    const storageKey = getSupabaseBrowserStorageKey()
+    if (!storageKey) return fallback
+
+    const sessionValue = readBrowserSessionValue(storageKey)
+    if (!sessionValue) return fallback
+
+    const parsed = parseSupabaseAuthCookiePayload(sessionValue)
+    if (!parsed) return fallback
+
+    const accessTokenExpiresAt = readAccessTokenExpirySeconds(parsed.access_token)
+    const nowSeconds = Math.floor(Date.now() / 1000)
+
+    return {
+        hasSession: typeof parsed.access_token === 'string',
+        hasRefreshToken: typeof parsed.refresh_token === 'string',
+        accessTokenExpiresAt,
+        isAccessTokenFresh: typeof accessTokenExpiresAt === 'number' && accessTokenExpiresAt > nowSeconds + 30,
+    }
+}
+
+function hasCachedAppAuthUser() {
+    if (typeof window === 'undefined') return false
+
+    try {
+        const raw = window.localStorage.getItem(APP_AUTH_LOCAL_USER_KEY)
+        if (!raw) return false
+        const parsed = JSON.parse(raw) as { id?: unknown; email?: unknown }
+        return typeof parsed.id === 'string' && typeof parsed.email === 'string'
+    } catch {
+        return false
+    }
+}
+
 function normalizeSupabaseBrowserSessionStorage() {
     if (typeof window === 'undefined') return
 
@@ -283,11 +365,22 @@ export function createClient() {
 
     normalizeSupabaseBrowserSessionStorage()
     normalizeSupabaseBrowserSessionCookie()
+    let sessionHint = getSupabaseBrowserSessionHint()
+    const hasCachedUser = hasCachedAppAuthUser()
+
+    if (sessionHint.hasSession && !sessionHint.isAccessTokenFresh && !hasCachedUser) {
+        clearSupabaseBrowserSession()
+        sessionHint = getSupabaseBrowserSessionHint()
+    }
 
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     const storageKey = getSupabaseBrowserStorageKey() || undefined
     const instrumentedFetch = createInstrumentedSupabaseFetch('client', url, fetch)
+    const shouldAutoRefreshToken =
+        !sessionHint.hasSession ||
+        sessionHint.isAccessTokenFresh ||
+        hasCachedUser
 
     const withAuthTimeout = async (input: string | URL | Request, init?: RequestInit) => {
         if (typeof window === 'undefined' || !url || !isSupabaseAuthRequest(input, url)) {
@@ -326,7 +419,7 @@ export function createClient() {
     const performAuthFetch = async (input: string | URL | Request, init?: RequestInit) => {
         const response = await withAuthTimeout(input, init)
         const normalizedResponse = url
-            ? coerceRefreshRateLimitToRetryable(input, url, response)
+            ? await coerceRefreshFailureToRetryable(input, url, response)
             : response
 
         return normalizedResponse.clone()
@@ -468,6 +561,7 @@ export function createClient() {
             auth: {
                 storageKey,
                 flowType: 'pkce',
+                autoRefreshToken: shouldAutoRefreshToken,
             },
             global: {
                 fetch: browserFetch,
@@ -480,6 +574,7 @@ export function createClient() {
         {
             operation: 'create_browser_client',
             storageKey: storageKey || 'none',
+            autoRefreshToken: shouldAutoRefreshToken,
             duration: formatDurationMs(nowMs() - startedAt),
         },
         'client',
