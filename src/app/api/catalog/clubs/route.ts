@@ -1,16 +1,29 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { escapePostgrestLike } from '@/lib/utils/postgrest';
+
+const DEFAULT_LIMIT = 10;
+const MAX_LIMIT = 50;
+const MAX_SEARCH_LENGTH = 80;
+
+function parseLimit(value: string | null) {
+    const parsed = Number.parseInt(value || String(DEFAULT_LIMIT), 10);
+    if (!Number.isFinite(parsed)) return DEFAULT_LIMIT;
+    return Math.min(Math.max(parsed, 1), MAX_LIMIT);
+}
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('search') || '';
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const search = (searchParams.get('search') || '').trim().slice(0, MAX_SEARCH_LENGTH);
+    const limit = parseLimit(searchParams.get('limit'));
 
     const supabase = await createClient();
-    let query = supabase.from('clubs').select('id, name');
+    let query = supabase.from('clubs').select('id, name').order('name', { ascending: true });
 
-    if (search) {
-        query = query.ilike('name', `%${search}%`);
+    if (search.length >= 2) {
+        query = query.ilike('name', `%${escapePostgrestLike(search)}%`);
+    } else if (search.length > 0) {
+        return NextResponse.json({ data: [] });
     }
 
     query = query.limit(limit);

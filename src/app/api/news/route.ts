@@ -23,6 +23,15 @@ type NewsRequestBody = {
 };
 
 const MISSING_NEWS_COLUMN_REGEX = /Could not find the '([^']+)' column of 'news' in the schema cache/i;
+const DEFAULT_NEWS_LIMIT = 50;
+const PUBLIC_NEWS_LIMIT = 10;
+const MAX_NEWS_LIMIT = 100;
+
+function parseNewsLimit(value: string | null, fallback: number) {
+    const parsed = Number.parseInt(value || String(fallback), 10);
+    if (!Number.isFinite(parsed)) return fallback;
+    return Math.min(Math.max(parsed, 1), MAX_NEWS_LIMIT);
+}
 
 function getErrorMessage(error: unknown) {
     if (error instanceof Error) {
@@ -116,6 +125,7 @@ async function updateNewsWithSchemaFallback(
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
+    const requestedLimit = parseNewsLimit(searchParams.get('limit'), DEFAULT_NEWS_LIMIT);
 
     try {
         const { supabase, role } = await getServerAuthRole();
@@ -136,9 +146,11 @@ export async function GET(req: Request) {
 
         let query = supabase.from('news').select('*').order('published_at', { ascending: false });
 
-        // Public users only see published news, limited to 10 for pagination/performance.
+        // Public users only see published news, limited for pagination/performance.
         if (!canManageNews) {
-            query = query.eq('status', 'published').limit(10);
+            query = query.eq('status', 'published').limit(PUBLIC_NEWS_LIMIT);
+        } else {
+            query = query.limit(requestedLimit);
         }
 
         const { data, error } = await query;

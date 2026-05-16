@@ -558,13 +558,17 @@ async function fetchPublicSupabaseMatches(options: {
                 const query = supabase.from('matches').select(columns);
 
                 if (options.liveOnly) {
-                    return await query.eq('status', 'live');
+                    return await query
+                        .eq('status', 'live')
+                        .order('date_time', { ascending: true })
+                        .limit(MAX_PUBLIC_DB_LIVE_MATCH_ROWS);
                 }
 
                 return await query
                     .gte('date_time', utcStart as string)
                     .lt('date_time', utcNextDayStart as string)
-                    .order('date_time', { ascending: true });
+                    .order('date_time', { ascending: true })
+                    .limit(MAX_PUBLIC_DB_MATCH_ROWS);
             },
         );
 
@@ -584,6 +588,13 @@ async function fetchPublicSupabaseMatches(options: {
         }
 
         const rows = (dbMatches || []) as PublicDbMatchRow[];
+        const rowCap = options.liveOnly ? MAX_PUBLIC_DB_LIVE_MATCH_ROWS : MAX_PUBLIC_DB_MATCH_ROWS;
+        if (rows.length >= rowCap && options.trace) {
+            logMatchesEvent('warn', 'matches_supabase_row_cap_reached', options.trace, {
+                row_cap: rowCap,
+                live_only: options.liveOnly,
+            });
+        }
         const tournamentIds = [...new Set(rows.map((match) => match.tournament_id).filter(Boolean))] as string[];
         const clubIds = [...new Set(rows.flatMap((match) => [match.home_club_id, match.away_club_id]).filter(Boolean))] as string[];
         const { tournamentMap, clubMap } = await fetchDbLookupMaps(supabase, tournamentIds, clubIds);
@@ -745,6 +756,8 @@ const MATCHES_DB_SELECT_VARIANTS = [
     'id, tournament_id, date_time, status, home_club_id, away_club_id, sport',
     'id, tournament_id, date_time, status, home_club_id, away_club_id',
 ];
+const MAX_PUBLIC_DB_MATCH_ROWS = 1500;
+const MAX_PUBLIC_DB_LIVE_MATCH_ROWS = 500;
 const MATCHES_DB_SCHEMA_FALLBACK_COLUMNS = [
     'id',
     'tournament_id',

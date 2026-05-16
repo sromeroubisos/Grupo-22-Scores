@@ -156,6 +156,10 @@ type ExternalTeamCacheRow = {
     updated_at?: string | null;
 };
 
+const EXTERNAL_TEAM_CACHE_WRITE_BACKOFF_MS = 10 * 60 * 1000;
+const externalTeamCacheWriteLocks = new Map<string, Promise<void>>();
+const externalTeamCacheWriteNextAllowedAt = new Map<string, number>();
+
 function getExternalTeamCacheWriteClient() {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
         return null;
@@ -171,7 +175,17 @@ function getExternalTeamCacheWriteClient() {
     }
 }
 
-async function persistExternalTeamUrlCache(input: {
+function buildExternalTeamCacheWriteKey(input: {
+    id: string;
+    teamUrl: string;
+    source: string;
+}) {
+    return [input.source, input.id, input.teamUrl]
+        .map((value) => value.trim().toLowerCase())
+        .join('|');
+}
+
+async function runExternalTeamUrlCacheWrite(input: {
     id: string;
     teamUrl: string;
     name: string;
@@ -209,6 +223,36 @@ async function persistExternalTeamUrlCache(input: {
             message: error.message,
         });
     }
+}
+
+async function persistExternalTeamUrlCache(input: {
+    id: string;
+    teamUrl: string;
+    name: string;
+    source: string;
+}) {
+    const writeKey = buildExternalTeamCacheWriteKey(input);
+    const now = Date.now();
+    const nextAllowedAt = externalTeamCacheWriteNextAllowedAt.get(writeKey) || 0;
+    if (nextAllowedAt > now) return;
+
+    const existing = externalTeamCacheWriteLocks.get(writeKey);
+    if (existing) {
+        await existing;
+        return;
+    }
+
+    const writePromise = (async () => {
+        try {
+            externalTeamCacheWriteNextAllowedAt.set(writeKey, Date.now() + EXTERNAL_TEAM_CACHE_WRITE_BACKOFF_MS);
+            await runExternalTeamUrlCacheWrite(input);
+        } finally {
+            externalTeamCacheWriteLocks.delete(writeKey);
+        }
+    })();
+
+    externalTeamCacheWriteLocks.set(writeKey, writePromise);
+    await writePromise;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

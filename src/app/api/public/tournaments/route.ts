@@ -39,6 +39,7 @@ const SELECT_WITH_LEGACY_SPORT_REVIEW = `${SELECT_WITH_LEGACY_SPORT}, review_sta
 const SELECT_WITHOUT_LEGACY_SPORT_REVIEW = `${SELECT_WITHOUT_LEGACY_SPORT}, review_status`;
 const FLAT_CACHE_CONTROL = 'public, max-age=300, stale-while-revalidate=600';
 const CATALOG_CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300';
+const PUBLIC_TOURNAMENTS_DB_QUERY_LIMIT = 3000;
 
 type PublicTournamentRow = {
     id: string;
@@ -939,7 +940,8 @@ async function queryVisiblePublicTournaments(
 
         const result = await query
             .order('display_name', { ascending: true })
-            .order('name', { ascending: true }) as unknown as PublicTournamentQueryResult;
+            .order('name', { ascending: true })
+            .limit(PUBLIC_TOURNAMENTS_DB_QUERY_LIMIT) as unknown as PublicTournamentQueryResult;
 
         if (!result.error) {
             return result;
@@ -974,6 +976,11 @@ async function queryPublicDbTournamentsForRequest(
     const queryResult = await queryVisiblePublicTournaments(supabase);
     if (trace) {
         trackDuration(trace.metrics, 'supabase_tournaments_read_ms', supabaseReadStartedAt);
+        if ((queryResult.data?.length || 0) >= PUBLIC_TOURNAMENTS_DB_QUERY_LIMIT) {
+            logTournamentsEvent('warn', 'tournaments_db_row_cap_reached', trace, {
+                row_cap: PUBLIC_TOURNAMENTS_DB_QUERY_LIMIT,
+            });
+        }
     }
 
     const buildDbPayloadStartedAt = Date.now();

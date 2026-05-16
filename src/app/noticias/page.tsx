@@ -10,6 +10,9 @@ export const metadata: Metadata = {
     description: 'Últimas noticias y actualizaciones',
 };
 
+const INITIAL_NEWS_LIMIT = 50;
+const PUBLIC_INITIAL_NEWS_LIMIT = 10;
+
 export default async function NoticiasPage() {
     const { supabase, role } = await getServerAuthRole();
     const canManageNews = hasNewsManagementAccess(role);
@@ -18,7 +21,9 @@ export default async function NoticiasPage() {
     let query = supabase.from('news').select('*').order('published_at', { ascending: false });
 
     if (!canManageNews) {
-        query = query.eq('status', 'published');
+        query = query.eq('status', 'published').limit(PUBLIC_INITIAL_NEWS_LIMIT);
+    } else {
+        query = query.limit(INITIAL_NEWS_LIMIT);
     }
 
     const { data: initialNews } = await query;

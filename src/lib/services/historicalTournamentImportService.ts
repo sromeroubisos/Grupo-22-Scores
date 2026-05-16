@@ -37,6 +37,8 @@ type UntypedSupabaseClient = {
   from: <T = unknown>(table: string) => UntypedFilterBuilder<T>;
 };
 
+const MAX_HISTORICAL_SLUG_COLLISIONS = 500;
+
 type TournamentContext = {
   tournament: {
     id: string;
@@ -1604,12 +1606,14 @@ export class HistoricalTournamentImportService {
     let candidate = normalizedBase;
     let suffix = 1;
 
-    while (true) {
+    while (suffix <= MAX_HISTORICAL_SLUG_COLLISIONS) {
       const { data } = await db.from<{ id: string }>('tournaments').select('id').eq('slug', candidate).maybeSingle();
       if (!data) return candidate;
       suffix += 1;
       candidate = `${normalizedBase}-${suffix}`;
     }
+
+    throw new Error(`No se pudo generar un slug unico despues de ${MAX_HISTORICAL_SLUG_COLLISIONS} intentos.`);
   }
 
   private static async createSeasonRecord(

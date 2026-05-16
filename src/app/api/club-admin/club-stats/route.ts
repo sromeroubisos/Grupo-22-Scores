@@ -19,9 +19,11 @@ function err(message: string, status: number) {
 }
 
 const FINAL_MATCH_STATUSES = ['final', 'finished', 'ft'] as const;
-const MATCHES_PAGE_SIZE = 1000;
-const MATCH_EVENTS_PAGE_SIZE = 1000;
+const MATCHES_PAGE_SIZE = 500;
+const MATCH_EVENTS_PAGE_SIZE = 500;
 const MATCH_EVENT_ID_CHUNK_SIZE = 80;
+const MAX_MATCH_ROWS_PER_SIDE = 1500;
+const MAX_RELATIONAL_EVENT_ROWS = 10000;
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -262,7 +264,8 @@ async function fetchFinalizedClubMatchesForSide(
     const rows: MatchRow[] = [];
     let from = 0;
 
-    while (true) {
+    while (rows.length < MAX_MATCH_ROWS_PER_SIDE) {
+        const pageLimit = Math.min(MATCHES_PAGE_SIZE, MAX_MATCH_ROWS_PER_SIDE - rows.length);
         let query = supabase
             .from('matches')
             .select('id, home_club_id, away_club_id, sport_id, sport, score, events')
@@ -277,7 +280,7 @@ async function fetchFinalizedClubMatchesForSide(
 
         const { data, error } = await query
             .order('date_time', { ascending: false, nullsFirst: false })
-            .range(from, from + MATCHES_PAGE_SIZE - 1);
+            .range(from, from + pageLimit - 1);
 
         if (error) {
             throw error;
@@ -286,11 +289,20 @@ async function fetchFinalizedClubMatchesForSide(
         const page = (data ?? []) as MatchRow[];
         rows.push(...page);
 
-        if (page.length < MATCHES_PAGE_SIZE) {
+        if (page.length < pageLimit) {
             break;
         }
 
-        from += MATCHES_PAGE_SIZE;
+        from += pageLimit;
+    }
+
+    if (rows.length >= MAX_MATCH_ROWS_PER_SIDE) {
+        console.warn('[api/club-admin/club-stats] match row cap reached:', {
+            sideColumn,
+            clubIds: clubIds.length,
+            season,
+            rowCap: MAX_MATCH_ROWS_PER_SIDE,
+        });
     }
 
     return rows;
@@ -318,17 +330,19 @@ async function fetchRelationalEventsByMatch(
     matchIds: string[],
 ) {
     const relationalEventsByMatch = new Map<string, MatchEventRow[]>();
+    let totalRows = 0;
 
     for (const chunk of chunkArray(matchIds, MATCH_EVENT_ID_CHUNK_SIZE)) {
         let from = 0;
 
-        while (true) {
+        while (totalRows < MAX_RELATIONAL_EVENT_ROWS) {
+            const pageLimit = Math.min(MATCH_EVENTS_PAGE_SIZE, MAX_RELATIONAL_EVENT_ROWS - totalRows);
             const { data, error } = await supabase
                 .from('match_events')
                 .select('id, match_id, club_id, event_type, minute, details')
                 .in('match_id', chunk)
                 .order('minute', { ascending: true })
-                .range(from, from + MATCH_EVENTS_PAGE_SIZE - 1);
+                .range(from, from + pageLimit - 1);
 
             if (error) {
                 console.warn('[api/club-admin/club-stats] relational events unavailable:', error);
@@ -336,17 +350,26 @@ async function fetchRelationalEventsByMatch(
             }
 
             const page = (data ?? []) as MatchEventRow[];
+            totalRows += page.length;
             for (const row of page) {
                 const list = relationalEventsByMatch.get(row.match_id) ?? [];
                 list.push(row);
                 relationalEventsByMatch.set(row.match_id, list);
             }
 
-            if (page.length < MATCH_EVENTS_PAGE_SIZE) {
+            if (page.length < pageLimit) {
                 break;
             }
 
-            from += MATCH_EVENTS_PAGE_SIZE;
+            from += pageLimit;
+        }
+
+        if (totalRows >= MAX_RELATIONAL_EVENT_ROWS) {
+            console.warn('[api/club-admin/club-stats] relational event row cap reached:', {
+                matchIds: matchIds.length,
+                rowCap: MAX_RELATIONAL_EVENT_ROWS,
+            });
+            break;
         }
     }
 

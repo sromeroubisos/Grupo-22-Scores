@@ -7,6 +7,7 @@ import {
 import { buildTeamLogoProxyUrl, resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 
 const MISSING_TABLE_CODES = new Set(['PGRST204', '42P01']);
+const MAX_CLUB_FAMILY_TRAVERSAL = 100;
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 type ClubLogoDeliveryMode = 'source' | 'proxy';
 
@@ -221,8 +222,9 @@ export async function resolveClubFamilyIds(supabase: SupabaseServerClient, clubI
     const visitedParents = new Set<string>([clubId]);
     let rootClubId = clubId;
     let currentClubId = clubId;
+    let parentDepth = 0;
 
-    while (true) {
+    while (parentDepth < MAX_CLUB_FAMILY_TRAVERSAL) {
         const parentClubId = await findParentClubId(supabase, currentClubId);
         if (!parentClubId || visitedParents.has(parentClubId)) {
             break;
@@ -231,13 +233,21 @@ export async function resolveClubFamilyIds(supabase: SupabaseServerClient, clubI
         visitedParents.add(parentClubId);
         rootClubId = parentClubId;
         currentClubId = parentClubId;
+        parentDepth += 1;
+    }
+
+    if (parentDepth >= MAX_CLUB_FAMILY_TRAVERSAL) {
+        console.warn('[managedClubFamily] parent traversal cap reached:', {
+            clubId,
+            traversalCap: MAX_CLUB_FAMILY_TRAVERSAL,
+        });
     }
 
     const familyIds = new Set<string>([rootClubId]);
     const queue = [rootClubId];
     const visitedDescendants = new Set<string>();
 
-    while (queue.length > 0) {
+    while (queue.length > 0 && visitedDescendants.size < MAX_CLUB_FAMILY_TRAVERSAL) {
         const nextClubId = queue.shift();
         if (!nextClubId || visitedDescendants.has(nextClubId)) {
             continue;
@@ -252,6 +262,14 @@ export async function resolveClubFamilyIds(supabase: SupabaseServerClient, clubI
                 queue.push(derivedClubId);
             }
         }
+    }
+
+    if (visitedDescendants.size >= MAX_CLUB_FAMILY_TRAVERSAL) {
+        console.warn('[managedClubFamily] descendant traversal cap reached:', {
+            clubId,
+            rootClubId,
+            traversalCap: MAX_CLUB_FAMILY_TRAVERSAL,
+        });
     }
 
     return {
