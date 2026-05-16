@@ -1,6 +1,7 @@
 import type { User as AuthUser } from '@supabase/supabase-js'
 import type { Database } from '@/lib/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isDefaultRoleValue, resolveBestUserRole } from '@/lib/auth/roles'
 import { getReservedAdminRole } from '@/lib/types/user'
 
 type UserInsert = Database['public']['Tables']['users']['Insert']
@@ -35,27 +36,43 @@ export async function syncUserProfile(user: AuthUser) {
 
     const admin = createAdminClient()
     const reservedRole = getReservedAdminRole(email)
+    const metadataRole = resolveBestUserRole({
+        reservedRole,
+        appMetadata: user.app_metadata,
+        userMetadata: user.user_metadata,
+    })
     const now = new Date().toISOString()
-    const updates: { last_login_at: string; role?: 'super_admin' | 'admin_general' } = {
+
+    const { data: existingUser, error: lookupError } = await admin
+        .from('users')
+        .select('id, role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+    if (lookupError) {
+        throw lookupError
+    }
+
+    const updates: { last_login_at: string; role?: string } = {
         last_login_at: now,
     }
 
     if (reservedRole) {
         updates.role = reservedRole
+    } else if (existingUser && isDefaultRoleValue(existingUser.role) && metadataRole !== 'fan') {
+        updates.role = metadataRole
     }
 
-    const { data: updatedUser, error: updateError } = await admin
-        .from('users')
-        .update(updates)
-        .eq('id', user.id)
-        .select('id')
-        .maybeSingle()
+    if (existingUser) {
+        const { error: updateError } = await admin
+            .from('users')
+            .update(updates)
+            .eq('id', user.id)
 
-    if (updateError) {
-        throw updateError
-    }
+        if (updateError) {
+            throw updateError
+        }
 
-    if (updatedUser) {
         return { created: false as const }
     }
 
@@ -64,7 +81,7 @@ export async function syncUserProfile(user: AuthUser) {
         email,
         name: resolveDisplayName(user, email),
         last_login_at: now,
-        role: reservedRole ?? 'fan',
+        role: reservedRole ?? metadataRole,
     }
 
     const avatarUrl = resolveAvatarUrl(user)

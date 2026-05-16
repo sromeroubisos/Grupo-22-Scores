@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { User } from '@/lib/types/user'
-import { isGlobalAdminRole } from '@/lib/auth/roles'
+import { getReservedAdminRole, User } from '@/lib/types/user'
+import { isGlobalAdminRole, resolveBestUserRole } from '@/lib/auth/roles'
 
 /**
  * Get the current authenticated user from the session
@@ -26,7 +26,15 @@ export async function getCurrentUser(): Promise<User | null> {
         return null
     }
 
-    return user as User
+    return {
+        ...user,
+        role: resolveBestUserRole({
+            reservedRole: getReservedAdminRole(session.user.email),
+            profileRole: user.role,
+            appMetadata: session.user.app_metadata,
+            userMetadata: session.user.user_metadata,
+        }),
+    } as User
 }
 
 /**

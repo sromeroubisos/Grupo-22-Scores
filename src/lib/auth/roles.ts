@@ -48,13 +48,18 @@ export const APP_ROLES: AppUserRole[] = [
 ];
 
 const ROLE_ALIASES: Record<string, AppUserRole> = {
+    admin: 'admin_general',
+    global_admin: 'admin_general',
     super_admin: 'super_admin',
+    superadmin: 'super_admin',
     admin_general: 'admin_general',
     redactor: 'redactor',
     editor_noticias: 'redactor',
     editorial: 'redactor',
     admin_union: 'admin_union',
     admin_torneo: 'admin_torneo',
+    tournament_admin: 'admin_torneo',
+    admin_tournament: 'admin_torneo',
     admin_club: 'admin_club',
     club_admin: 'admin_club',
     familia_club: 'familia_club',
@@ -149,25 +154,102 @@ function hasClubPanelMembershipAccess(memberships?: MembershipLike[] | null) {
 }
 
 export function normalizeRole(rawRole?: string | null): AppUserRole {
-    if (!rawRole) {
+    const normalizedRawRole = rawRole?.trim();
+
+    if (!normalizedRawRole) {
         return 'fan';
     }
 
-    const direct = ROLE_ALIASES[rawRole];
+    const direct = ROLE_ALIASES[normalizedRawRole];
     if (direct) {
         return direct;
     }
 
-    const lower = rawRole.toLowerCase?.() ?? rawRole;
-    if (lower !== rawRole && ROLE_ALIASES[lower]) {
+    const lower = normalizedRawRole.toLowerCase();
+    if (lower !== normalizedRawRole && ROLE_ALIASES[lower]) {
         return ROLE_ALIASES[lower];
     }
 
-    if ((APP_ROLES as string[]).includes(rawRole)) {
-        return rawRole as AppUserRole;
+    if ((APP_ROLES as string[]).includes(normalizedRawRole)) {
+        return normalizedRawRole as AppUserRole;
     }
 
     return 'fan';
+}
+
+export function isDefaultRoleValue(rawRole?: string | null): boolean {
+    const normalizedRawRole = rawRole?.trim().toLowerCase();
+    return !normalizedRawRole || normalizedRawRole === 'fan' || normalizedRawRole === 'user';
+}
+
+export function normalizeStoredRole(rawRole?: string | null): AppUserRole | null {
+    const normalizedRawRole = rawRole?.trim();
+    if (!normalizedRawRole) return null;
+
+    const role = normalizeRole(normalizedRawRole);
+    if (role === 'fan' && !isDefaultRoleValue(normalizedRawRole)) {
+        return null;
+    }
+
+    return role;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+export function getRoleFromMetadata(metadata?: Record<string, unknown> | null): AppUserRole | null {
+    if (!isRecord(metadata)) return null;
+
+    const directRole = normalizeStoredRole(typeof metadata.role === 'string' ? metadata.role : null);
+    if (directRole) return directRole;
+
+    const roles = metadata.roles;
+    if (Array.isArray(roles)) {
+        for (const role of roles) {
+            if (typeof role !== 'string') continue;
+            const normalized = normalizeStoredRole(role);
+            if (normalized) return normalized;
+        }
+    }
+
+    if (isRecord(roles)) {
+        for (const [role, enabled] of Object.entries(roles)) {
+            if (enabled !== true) continue;
+            const normalized = normalizeStoredRole(role);
+            if (normalized) return normalized;
+        }
+    }
+
+    return null;
+}
+
+export function resolveBestUserRole({
+    reservedRole,
+    profileRole,
+    appMetadata,
+    userMetadata,
+    fallback = 'fan',
+}: {
+    reservedRole?: string | null;
+    profileRole?: string | null;
+    appMetadata?: Record<string, unknown> | null;
+    userMetadata?: Record<string, unknown> | null;
+    fallback?: AppUserRole;
+}): AppUserRole {
+    const reserved = normalizeStoredRole(reservedRole);
+    if (reserved) return reserved;
+
+    const profile = normalizeStoredRole(profileRole);
+    if (profile && !isDefaultRoleValue(profileRole)) return profile;
+
+    const appMetadataRole = getRoleFromMetadata(appMetadata);
+    if (appMetadataRole) return appMetadataRole;
+
+    const userMetadataRole = getRoleFromMetadata(userMetadata);
+    if (userMetadataRole) return userMetadataRole;
+
+    return profile ?? fallback;
 }
 
 export function isAppRole(value: string): value is AppUserRole {

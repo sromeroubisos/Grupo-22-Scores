@@ -11,7 +11,7 @@ import {
     VIEW_MEMBERSHIP_ROLES,
     isGlobalAdminRole,
     isTournamentAdminRole,
-    normalizeRole,
+    resolveBestUserRole,
     type AppUserRole,
     type MembershipLike,
     type MembershipRole,
@@ -249,12 +249,17 @@ export async function getUserAccessContext(
         ? []
         : normalizeMembershipRows(membershipsResult.data);
 
-    const rawRole = getReservedAdminRole(user.email) || profileData?.role || user.user_metadata?.role || null;
+    const role = resolveBestUserRole({
+        reservedRole: getReservedAdminRole(user.email),
+        profileRole: profileData?.role ?? null,
+        appMetadata: user.app_metadata,
+        userMetadata: user.user_metadata,
+    });
 
     return {
         userId: user.id,
-        rawRole,
-        role: normalizeRole(rawRole),
+        rawRole: role,
+        role,
         memberships,
     };
 }

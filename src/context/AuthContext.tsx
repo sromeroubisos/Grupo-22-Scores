@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { User as SupabaseUser, type AuthChangeEvent, type Session } from '@supabase/supabase-js';
-import { canUseRestrictedContentActions, normalizeRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
+import { normalizeRole, resolveBestUserRole, type AppUserRole, type MembershipLike } from '@/lib/auth/roles';
 import { clearFavoritesCache } from '@/lib/favoritesCache';
 import { clearFavoritesLocalCache } from '@/lib/favorites/fetchFavorites';
 import { logRefreshFlow } from '@/lib/debug/refreshFlow';
@@ -75,12 +75,13 @@ function readCachedAuthUser(): User | null {
                 : null;
 
         const cachedRole = normalizeRole(typeof parsed.role === 'string' ? parsed.role : null);
+        const reservedRole = getReservedAdminRole(parsed.email);
 
         return {
             id: parsed.id,
             name,
             email: parsed.email,
-            role: canUseRestrictedContentActions(cachedRole) ? 'fan' : cachedRole,
+            role: reservedRole ?? cachedRole,
             avatarUrl: typeof parsed.avatarUrl === 'string' ? parsed.avatarUrl : undefined,
             unionId: typeof parsed.unionId === 'string' ? parsed.unionId : undefined,
             tournamentId: typeof parsed.tournamentId === 'string' ? parsed.tournamentId : undefined,
@@ -91,6 +92,32 @@ function readCachedAuthUser(): User | null {
     } catch {
         return null;
     }
+}
+
+function normalizeAuthMembershipRows(rows: unknown): MembershipLike[] {
+    if (!Array.isArray(rows)) return [];
+
+    return rows
+        .map((row) => {
+            if (!isRecord(row)) return null;
+            const scopeType = typeof row.scope_type === 'string' ? row.scope_type : '';
+            const scopeId = typeof row.scope_id === 'string' ? row.scope_id : undefined;
+            const role = typeof row.role === 'string' ? row.role : '';
+
+            if (!scopeType || !role) return null;
+
+            const membership: MembershipLike = {
+                scopeType: scopeType as MembershipLike['scopeType'],
+                role,
+            };
+
+            if (scopeId) {
+                membership.scopeId = scopeId;
+            }
+
+            return membership;
+        })
+        .filter((row): row is MembershipLike => Boolean(row));
 }
 
 function writeCachedAuthUser(user: User | null) {
@@ -198,7 +225,11 @@ function buildOptimisticUser(sbUser: SupabaseUser, onboardingCompleted: boolean 
         id: sbUser.id,
         name: sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
         email: sbUser.email || '',
-        role: reservedRole ?? 'fan',
+        role: resolveBestUserRole({
+            reservedRole,
+            appMetadata: sbUser.app_metadata,
+            userMetadata: sbUser.user_metadata,
+        }),
         avatarUrl: sbUser.user_metadata?.avatar_url,
         onboardingCompleted,
     };
@@ -287,6 +318,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('[AuthContext] fetchAndSetUser start for:', sbUser.email);
         const fallbackOnboarding = resolveFallbackOnboarding(sbUser);
         const reservedRole = getReservedAdminRole(sbUser.email);
+        const sessionRole = resolveBestUserRole({
+            reservedRole,
+            appMetadata: sbUser.app_metadata,
+            userMetadata: sbUser.user_metadata,
+        });
 
         // Optimistic UI: surface the authenticated user immediately from the
         // session metadata so the UI flips out of the loading state without
@@ -295,14 +331,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isMounted.current) {
             setPersistentUser((prev) => {
                 if (prev && prev.id === sbUser.id) {
-                    return reservedRole && prev.role !== reservedRole
-                        ? {
-                            ...prev,
-                            email: sbUser.email || prev.email,
-                            role: reservedRole,
-                            onboardingCompleted: fallbackOnboarding.completed ? true : prev.onboardingCompleted,
-                        }
-                        : prev;
+                    const nextRole = sessionRole === 'fan' ? prev.role : sessionRole;
+                    return {
+                        ...prev,
+                        email: sbUser.email || prev.email,
+                        role: nextRole,
+                        onboardingCompleted: fallbackOnboarding.completed ? true : prev.onboardingCompleted,
+                    };
                 }
                 return buildOptimisticUser(
                     sbUser,
@@ -313,7 +348,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         try {
-            const { data: profile, error: profileError } = await measureAsync(
+            const [{ data: profile, error: profileError }, membershipsResult] = await Promise.all([
+                measureAsync(
                 'restore_user_profile',
                 async () => supabase
                     .from('users')
@@ -332,7 +368,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         hasProfile: Boolean(result.data),
                     }),
                 },
-            );
+                ),
+                measureAsync(
+                    'restore_user_memberships',
+                    async () => supabase
+                        .from('memberships')
+                        .select('scope_type, scope_id, role')
+                        .eq('user_id', sbUser.id),
+                    {
+                        runtime: 'client',
+                        tags: ['AUTH'],
+                        metadata: {
+                            step: 'restoreUserMemberships',
+                            userId: sbUser.id,
+                        },
+                        describeResult: (result) => ({
+                            success: !result.error,
+                            count: Array.isArray(result.data) ? result.data.length : 0,
+                        }),
+                    },
+                ).catch((error: unknown) => {
+                    console.warn('[AuthContext] Membership fetch error:', error);
+                    return { data: [], error } as { data: unknown[]; error: unknown };
+                }),
+            ]);
 
             if (!isMounted.current) return;
 
@@ -381,16 +440,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     id: profile.id,
                     name: profile.name || sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
                     email: profile.email || sbUser.email || '',
-                    role: reservedRole ?? normalizeRole(profile.role),
+                    role: resolveBestUserRole({
+                        reservedRole,
+                        profileRole: profile.role,
+                        appMetadata: sbUser.app_metadata,
+                        userMetadata: sbUser.user_metadata,
+                    }),
                     avatarUrl: profile.avatar_url || sbUser.user_metadata?.avatar_url,
-                    memberships: [],
+                    memberships: normalizeAuthMembershipRows(membershipsResult.data),
                     onboardingCompleted,
                 };
 
                 console.log('[AuthContext] Setting user with profile:', finalUser.email, 'role:', finalUser.role, 'onboardingCompleted:', onboardingCompleted);
                 setPersistentUser(finalUser);
             } else {
-                const fallbackRole = reservedRole ?? 'fan';
+                const fallbackRole = sessionRole;
 
                 if (fallbackOnboarding.completed) {
                     setOnboardingStorageStatus(sbUser.id, { skipped: fallbackOnboarding.skipped });
@@ -410,6 +474,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     email: sbUser.email || '',
                     role: fallbackRole,
                     avatarUrl: sbUser.user_metadata?.avatar_url,
+                    memberships: normalizeAuthMembershipRows(membershipsResult.data),
                     onboardingCompleted: fallbackOnboarding.completed,
                 });
             }
@@ -420,7 +485,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 id: sbUser.id,
                 name: sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
                 email: sbUser.email || '',
-                role: reservedRole ?? 'fan',
+                role: sessionRole,
                 avatarUrl: sbUser.user_metadata?.avatar_url,
                 onboardingCompleted: true,
             });

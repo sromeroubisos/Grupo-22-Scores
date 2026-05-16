@@ -8,6 +8,7 @@ import {
     FAVORITE_CLUBS_ENABLED,
     FAVORITE_LEAGUES_ENABLED,
 } from '@/lib/favorites/config';
+import { fetchResolvedFavorites, type ResolvedFavorite } from '@/lib/favorites/fetchFavorites';
 import {
     dispatchFavoriteUpdated,
     FAVORITES_UPDATED_EVENT,
@@ -27,6 +28,7 @@ import {
     type ClubFollowRow,
     type LeagueFollowRow,
 } from '@/lib/services/followingService';
+import { persistFavoriteState } from '@/lib/favorites/persistence';
 import type { EntityType } from '@/lib/types/user';
 
 export type FavoriteItem = {
@@ -91,6 +93,80 @@ function isClubEntityType(entityType: EntityType): boolean {
 
 function isLeagueEntityType(entityType: EntityType): boolean {
     return entityType === 'league' || entityType === 'tournament';
+}
+
+function toLegacyLeagueRow(favorite: ResolvedFavorite): LeagueFollowRow | null {
+    if (!isLeagueEntityType(favorite.entity_type)) return null;
+
+    return {
+        league_id: favorite.id,
+        canonical_league_id: favorite.entity_type === 'tournament' ? favorite.id : null,
+        sport_id: null,
+        display_name: favorite.name,
+        logo_url: favorite.logo_url || null,
+        created_at: favorite.created_at,
+    };
+}
+
+function toLegacyClubRow(favorite: ResolvedFavorite): ClubFollowRow | null {
+    if (!isClubEntityType(favorite.entity_type)) return null;
+
+    return {
+        club_id: favorite.id,
+        canonical_club_id: favorite.entity_type === 'club' ? favorite.id : null,
+        sport_id: null,
+        display_name: favorite.name,
+        logo_url: favorite.logo_url || null,
+        created_at: favorite.created_at,
+    };
+}
+
+function mergeLeagueRows(primaryRows: LeagueFollowRow[], legacyRows: LeagueFollowRow[]): LeagueFollowRow[] {
+    const merged = [...primaryRows];
+
+    for (const legacyRow of legacyRows) {
+        if (!merged.some((row) => matchesLeagueFollow(row, legacyRow.league_id))) {
+            merged.push(legacyRow);
+        }
+    }
+
+    return merged.sort((left, right) => right.created_at.localeCompare(left.created_at));
+}
+
+function mergeClubRows(primaryRows: ClubFollowRow[], legacyRows: ClubFollowRow[]): ClubFollowRow[] {
+    const merged = [...primaryRows];
+
+    for (const legacyRow of legacyRows) {
+        if (!merged.some((row) => matchesClubFollow(row, legacyRow.club_id))) {
+            merged.push(legacyRow);
+        }
+    }
+
+    return merged.sort((left, right) => right.created_at.localeCompare(left.created_at));
+}
+
+async function settleFollowing<T>(promise: Promise<T>): Promise<{ data: T | null; error: unknown }> {
+    try {
+        return { data: await promise, error: null };
+    } catch (error) {
+        return { data: null, error };
+    }
+}
+
+function getActionError(results: PromiseSettledResult<unknown>[]): unknown {
+    const rejected = results
+        .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+        .map((result) => result.reason);
+
+    if (rejected.length === 0) return null;
+    if (rejected.length === results.length) return rejected[0];
+
+    const blockingError = rejected.find((error) => !isFollowingSchemaMissingError(error));
+    if (blockingError) {
+        console.warn('[useFavorites] Secondary favorites persistence failed:', blockingError);
+    }
+
+    return null;
 }
 
 function buildLeagueRowFromDetail(detail: FavoriteUpdatedDetail): LeagueFollowRow {
@@ -166,13 +242,36 @@ export function useFavorites() {
                 return;
             }
 
-            const [leagues, clubs] = await Promise.all([
-                FAVORITE_LEAGUES_ENABLED ? getFollowedLeagues(supabase, user.id) : Promise.resolve([]),
-                FAVORITE_CLUBS_ENABLED ? getFollowedClubs(supabase, user.id) : Promise.resolve([]),
+            const [leaguesResult, clubsResult, legacyFavorites] = await Promise.all([
+                FAVORITE_LEAGUES_ENABLED
+                    ? settleFollowing(getFollowedLeagues(supabase, user.id))
+                    : Promise.resolve({ data: [] as LeagueFollowRow[], error: null }),
+                FAVORITE_CLUBS_ENABLED
+                    ? settleFollowing(getFollowedClubs(supabase, user.id))
+                    : Promise.resolve({ data: [] as ClubFollowRow[], error: null }),
+                fetchResolvedFavorites(supabase, user.id).catch((legacyError: unknown) => {
+                    console.warn('[useFavorites] legacy favorites fallback failed:', legacyError);
+                    return [] as ResolvedFavorite[];
+                }),
             ]);
 
-            setLeagueRows(leagues);
-            setClubRows(clubs);
+            const blockingError = [leaguesResult.error, clubsResult.error]
+                .filter(Boolean)
+                .find((err) => !isFollowingSchemaMissingError(err));
+
+            if (blockingError) {
+                throw blockingError;
+            }
+
+            const legacyLeagueRows = legacyFavorites
+                .map(toLegacyLeagueRow)
+                .filter((row): row is LeagueFollowRow => Boolean(row));
+            const legacyClubRows = legacyFavorites
+                .map(toLegacyClubRow)
+                .filter((row): row is ClubFollowRow => Boolean(row));
+
+            setLeagueRows(mergeLeagueRows(leaguesResult.data ?? [], legacyLeagueRows));
+            setClubRows(mergeClubRows(clubsResult.data ?? [], legacyClubRows));
             setError(null);
         } catch (err) {
             const message = isFollowingSchemaMissingError(err)
@@ -289,15 +388,24 @@ export function useFavorites() {
         setLeagueRows((current) => applyLeagueDetail(current, optimisticDetail));
 
         try {
-            const result = await toggleLeagueFollow(supabase, user.id, {
-                entityId,
-                name: options.name,
-                logoUrl: options.logo_url,
-                sportId: options.sportId,
-                canonicalLeagueId: options.followerTournamentId || null,
-                forceIsFavorite: options.forceIsFavorite,
-                existingRows: matchedRows,
-            });
+            const [followResult, legacyResult] = await Promise.allSettled([
+                toggleLeagueFollow(supabase, user.id, {
+                    entityId,
+                    name: options.name,
+                    logoUrl: options.logo_url,
+                    sportId: options.sportId,
+                    canonicalLeagueId: options.followerTournamentId || null,
+                    forceIsFavorite: options.forceIsFavorite,
+                    existingRows: matchedRows,
+                }),
+                persistFavoriteState(supabase, user.id, entityId, 'league', nextIsFavorite),
+            ]);
+            const actionError = getActionError([followResult, legacyResult]);
+            if (actionError) throw actionError;
+
+            const result = followResult.status === 'fulfilled'
+                ? followResult.value
+                : { isFollowing: nextIsFavorite };
 
             dispatchFavoriteUpdated({
                 userId: user.id,
@@ -345,15 +453,24 @@ export function useFavorites() {
             setClubRows((current) => applyClubDetail(current, optimisticDetail));
 
             try {
-                const result = await toggleClubFollow(supabase, user.id, {
-                    entityId: item.id,
-                    name: item.name,
-                    logoUrl: item.logo_url,
-                    sportId: item.sport_id,
-                    canonicalClubId: item.canonical_id || null,
-                    forceIsFavorite: item.forceIsFavorite,
-                    existingRows: matchedRows,
-                });
+                const [followResult, legacyResult] = await Promise.allSettled([
+                    toggleClubFollow(supabase, user.id, {
+                        entityId: item.id,
+                        name: item.name,
+                        logoUrl: item.logo_url,
+                        sportId: item.sport_id,
+                        canonicalClubId: item.canonical_id || null,
+                        forceIsFavorite: item.forceIsFavorite,
+                        existingRows: matchedRows,
+                    }),
+                    persistFavoriteState(supabase, user.id, item.id, 'club', nextIsFavorite),
+                ]);
+                const actionError = getActionError([followResult, legacyResult]);
+                if (actionError) throw actionError;
+
+                const result = followResult.status === 'fulfilled'
+                    ? followResult.value
+                    : { isFollowing: nextIsFavorite };
 
                 dispatchFavoriteUpdated({
                     userId: user.id,

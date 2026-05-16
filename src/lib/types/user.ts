@@ -1,8 +1,13 @@
 // User types for G22 Scores
 
 import { Database } from "../database.types";
+import type { AppUserRole } from "@/lib/auth/roles";
 
 export type UserRole =
+    | AppUserRole
+    | 'admin'
+    | 'operator'
+    | 'club_admin'
     | 'admin_general'
     | 'admin_club'
     | 'fan'

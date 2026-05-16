@@ -2,7 +2,8 @@ import type { Session } from '@supabase/supabase-js';
 
 import { createClient } from '@/lib/supabase/server';
 import { getReadClient } from '@/lib/supabase/read';
-import { hasNewsManagementAccess } from '@/lib/auth/roles';
+import { hasNewsManagementAccess, resolveBestUserRole } from '@/lib/auth/roles';
+import { getReservedAdminRole } from '@/lib/types/user';
 import type { LooseSupabaseClient } from '@/lib/supabase/loose';
 
 type ServerAuthContext = {
@@ -49,7 +50,12 @@ export async function getServerAuthRole(): Promise<ServerAuthContext> {
     return {
         supabase: authClient,
         session,
-        role: userData?.role || session.user.user_metadata?.role || null,
+        role: resolveBestUserRole({
+            reservedRole: getReservedAdminRole(session.user.email),
+            profileRole: userData?.role ?? null,
+            appMetadata: session.user.app_metadata,
+            userMetadata: session.user.user_metadata,
+        }),
     };
 }
 
