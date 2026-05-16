@@ -2689,6 +2689,7 @@ export default function TournamentDetailPage({
             points: 'PTS',
         }
         : undefined;
+
     const mapStandingsRowForExport = (row: any, idx: number) => {
         const fallbackTeam = resolveTeamFallback(row);
         const rowLabel = resolveStandingsRowLabel(row, activeStandingsTeamLabels);
@@ -2765,6 +2766,103 @@ export default function TournamentDetailPage({
             }))
             .filter((group: any) => group.rows.length > 0)
         : undefined;
+
+    const buildDailyMatchesExportData = (mode: 'results' | 'fixtures') => {
+        const sourceMatches = mode === 'results' ? results : fixtures;
+        const dateLabel = mode === 'results' ? details?.season || 'Resultados' : 'Proximos Partidos';
+
+        return {
+            date: dateLabel,
+            tournament: tournamentData?.name || 'Torneo',
+            tournamentLogo,
+            matches: sourceMatches.map((match: any) => {
+                const timestamp = match.timestamp || match.start_time || match.time;
+                const matchDate = timestamp ? new Date(timestamp * 1000) : null;
+                const dateOnlyLabel = matchDate
+                    ? formatArgentinaDate(matchDate, { day: '2-digit', month: '2-digit' })
+                    : '';
+                const kickoffTimeLabel = matchDate
+                    ? formatArgentinaDate(matchDate, { hour: '2-digit', minute: '2-digit', hour12: false })
+                    : '';
+
+                return {
+                    homeTeam: getMatchExportTeamName(match, 'home'),
+                    awayTeam: getMatchExportTeamName(match, 'away'),
+                    homeLogo: getTeamLogo(match.home_team) || match.home_team_logo || '',
+                    awayLogo: getTeamLogo(match.away_team) || match.away_team_logo || '',
+                    homeScore: mode === 'results'
+                        ? match.scores?.home ?? match.scores?.home_score ?? match.home_score
+                        : undefined,
+                    awayScore: mode === 'results'
+                        ? match.scores?.away ?? match.scores?.away_score ?? match.away_score
+                        : undefined,
+                    time: mode === 'results' ? dateOnlyLabel : `${kickoffTimeLabel} ${dateOnlyLabel}`.trim(),
+                    status: mode === 'results' ? 'finished' as const : 'scheduled' as const,
+                    dateLabel: matchDate
+                        ? formatArgentinaDate(matchDate, { weekday: 'short', day: '2-digit', month: '2-digit' })
+                        : '',
+                    kickoffAt: matchDate ? matchDate.toISOString() : undefined,
+                };
+            }),
+        };
+    };
+
+    const renderMobileHeroExport = () => {
+        if (activeTab === 'results') {
+            return (
+                <ExportImage
+                    className={styles.mobileHeroExportAction}
+                    template="dailyMatches"
+                    filename={`resultados-${tournamentData?.name}`}
+                    data={buildDailyMatchesExportData('results')}
+                />
+            );
+        }
+
+        if (activeTab === 'fixtures') {
+            return (
+                <ExportImage
+                    className={styles.mobileHeroExportAction}
+                    template="dailyMatches"
+                    filename={`fixture-${tournamentData?.name}`}
+                    data={buildDailyMatchesExportData('fixtures')}
+                />
+            );
+        }
+
+        if ((activeTab === 'playoff' && hasDedicatedPlayoffTab) || (activeTab === 'standings' && shouldUseIntegratedBracketView)) {
+            return (
+                <ExportImage
+                    className={styles.mobileHeroExportAction}
+                    template="playoffBracket"
+                    filename={`cuadro-${tournamentData?.name}`}
+                    data={bracketExportData}
+                />
+            );
+        }
+
+        if (activeTab === 'standings') {
+            return (
+                <ExportImage
+                    className={styles.mobileHeroExportAction}
+                    template="standings"
+                    filename={`tabla-${tournamentData?.name}`}
+                    data={{
+                        title: tournamentData?.name || 'Tabla de Posiciones',
+                        subtitle: selectedStandingsScopeView?.subtitle || details?.season || 'Clasificacion',
+                        tournamentLogo,
+                        rows: isMotorsportTournament ? motorsportStandingsExportRows : standingsExportRows,
+                        groups: isMotorsportTournament ? [] : standingsExportGroups,
+                        columnLabels: standingsExportColumnLabels,
+                        plainDiff: standingsColumnMode === 'circuit-global',
+                        showPositionDelta: false,
+                    }}
+                />
+            );
+        }
+
+        return null;
+    };
 
     // ── Render helpers ────────────────────────────────────────────────────
 
@@ -3636,6 +3734,7 @@ export default function TournamentDetailPage({
                                 >
                                     {hasDedicatedPlayoffTab || shouldUseIntegratedBracketView ? 'Ver Cuadro' : 'Ver Tabla'}
                                 </button>
+                                {renderMobileHeroExport()}
                                 {isExactSuperAdmin && externalTournamentEditorHref && (
                                     <Link href={externalTournamentEditorHref} prefetch={false} className={styles.ctaBtnSecondary}>
                                         Editar API
