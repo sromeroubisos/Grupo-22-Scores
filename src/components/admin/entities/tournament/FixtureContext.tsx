@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type {
   TournamentFixture,
   Match,
@@ -134,6 +134,10 @@ interface FixtureProviderProps {
 }
 
 export function FixtureProvider({ children, initialFixture, tournamentId, seasonId }: FixtureProviderProps) {
+  const activeRefreshRef = useRef<{ id: number; controller: AbortController } | null>(null);
+  const refreshSequenceRef = useRef(0);
+  const mountedRef = useRef(true);
+
   // Data state
   const [fixture, setFixture] = useState<TournamentFixture | null>(initialFixture);
   const [isLoadingFixture, setIsLoadingFixture] = useState(false);
@@ -173,14 +177,34 @@ export function FixtureProvider({ children, initialFixture, tournamentId, season
     setEditingMatch(null);
   }, []);
 
+  useEffect(() => {
+    mountedRef.current = true;
+
+    return () => {
+      mountedRef.current = false;
+      activeRefreshRef.current?.controller.abort(
+        new DOMException('Fixture provider unmounted', 'AbortError')
+      );
+      activeRefreshRef.current = null;
+    };
+  }, []);
+
   const refreshFixture = useCallback(async () => {
+    activeRefreshRef.current?.controller.abort(
+      new DOMException('Superseded fixture refresh', 'AbortError')
+    );
+
     const abortController = new AbortController();
+    const requestId = ++refreshSequenceRef.current;
     const timeoutReason = new DOMException('Fixture request timed out', 'AbortError');
     const timeoutId = window.setTimeout(() => {
       if (!abortController.signal.aborted) {
         abortController.abort(timeoutReason);
       }
     }, FIXTURE_REQUEST_TIMEOUT_MS);
+    activeRefreshRef.current = { id: requestId, controller: abortController };
+
+    const isActiveRequest = () => activeRefreshRef.current?.id === requestId;
 
     setIsLoadingFixture(true);
     setFixtureError(null);
@@ -217,15 +241,19 @@ export function FixtureProvider({ children, initialFixture, tournamentId, season
         throw new Error('El endpoint devolvio una respuesta invalida al cargar el fixture.');
       }
 
-      setFixture(payload as TournamentFixture);
+      if (mountedRef.current && isActiveRequest()) {
+        setFixture(payload as TournamentFixture);
+      }
     } catch (error) {
       const isTimeoutAbort =
         abortController.signal.aborted && abortController.signal.reason === timeoutReason;
 
       if (isTimeoutAbort) {
-        setFixtureError(
-          'La carga del workspace excedio los 20 segundos. Esto suele indicar una consulta pesada o un problema de RLS en la base.'
-        );
+        if (mountedRef.current && isActiveRequest()) {
+          setFixtureError(
+            'La carga del workspace excedio los 20 segundos. Esto suele indicar una consulta pesada o un problema de RLS en la base.'
+          );
+        }
         return;
       }
 
@@ -234,12 +262,17 @@ export function FixtureProvider({ children, initialFixture, tournamentId, season
       }
 
       console.error('Error refreshing fixture:', error);
-      setFixtureError(
-        error instanceof Error ? error.message : 'No se pudo cargar el fixture.'
-      );
+      if (mountedRef.current && isActiveRequest()) {
+        setFixtureError(
+          error instanceof Error ? error.message : 'No se pudo cargar el fixture.'
+        );
+      }
     } finally {
       window.clearTimeout(timeoutId);
-      setIsLoadingFixture(false);
+      if (mountedRef.current && isActiveRequest()) {
+        activeRefreshRef.current = null;
+        setIsLoadingFixture(false);
+      }
     }
   }, [seasonId, tournamentId]);
 

@@ -946,7 +946,6 @@ export function TournamentOperationFixtureWorkspace({
   };
 
   const afterMutation = async (message: string, tone: 'ok' | 'warn' | 'error' = 'ok') => {
-    await refreshFixture();
     setValidationData((await validateFixture()) as ValidationResult);
     setFeedback({ tone, message });
   };
