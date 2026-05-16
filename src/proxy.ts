@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { logRefreshFlow } from '@/lib/debug/refreshFlow'
 import { logRefreshLoop } from '@/lib/debug/refreshLoop'
-import { updateSession, readUserFromCookie } from '@/lib/supabase/proxy'
+import { updateSession, readUserFromCookie, PROTECTED_AUTH_REFRESH_TIMEOUT_MS } from '@/lib/supabase/proxy'
 import { measureAsync } from '@/lib/perf/measure';
 
 // Only refresh the Supabase session on routes that genuinely depend on auth.
@@ -164,7 +164,10 @@ export async function proxy(request: NextRequest) {
     return measureAsync(
         'proxy',
         async () => {
-            const { response, user } = await updateSession(request);
+            const { response, user } = await updateSession(
+                request,
+                protectedRoute ? { refreshTimeoutMs: PROTECTED_AUTH_REFRESH_TIMEOUT_MS } : undefined,
+            );
 
             if (protectedRoute && !user) {
                 logRefreshLoop('proxy_session_invalid', {

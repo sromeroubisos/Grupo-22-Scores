@@ -255,20 +255,28 @@ export function useFavorites() {
                 }),
             ]);
 
-            const blockingError = [leaguesResult.error, clubsResult.error]
-                .filter(Boolean)
-                .find((err) => !isFollowingSchemaMissingError(err));
-
-            if (blockingError) {
-                throw blockingError;
-            }
-
             const legacyLeagueRows = legacyFavorites
                 .map(toLegacyLeagueRow)
                 .filter((row): row is LeagueFollowRow => Boolean(row));
             const legacyClubRows = legacyFavorites
                 .map(toLegacyClubRow)
                 .filter((row): row is ClubFollowRow => Boolean(row));
+
+            const blockingError = [leaguesResult.error, clubsResult.error]
+                .filter(Boolean)
+                .find((err) => !isFollowingSchemaMissingError(err));
+
+            // A transient failure of the primary following tables (common on
+            // mobile when the auth cookie is mid-refresh) must not wipe
+            // favorites the legacy RPC/fallback could still resolve. Only
+            // surface the error when we genuinely have nothing to show.
+            if (blockingError && legacyLeagueRows.length === 0 && legacyClubRows.length === 0) {
+                throw blockingError;
+            }
+
+            if (blockingError) {
+                console.warn('[useFavorites] primary following tables failed; serving legacy favorites fallback:', blockingError);
+            }
 
             setLeagueRows(mergeLeagueRows(leaguesResult.data ?? [], legacyLeagueRows));
             setClubRows(mergeClubRows(clubsResult.data ?? [], legacyClubRows));
@@ -295,6 +303,28 @@ export function useFavorites() {
     useEffect(() => {
         void refresh();
     }, [refresh]);
+
+    // On mobile the public auth bootstrap can time out and surface a cached
+    // user (so the role/UI appears) before the real Supabase session is
+    // established. `refresh`'s dependencies don't change when that background
+    // session finally resolves, so favorites would stay empty forever.
+    // Re-run the fetch whenever the session is (re)established or its token
+    // is refreshed so the list recovers without a manual reload.
+    useEffect(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+            if (
+                event === 'SIGNED_IN' ||
+                event === 'TOKEN_REFRESHED' ||
+                event === 'USER_UPDATED'
+            ) {
+                void refresh();
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [refresh, supabase]);
 
     useEffect(() => {
         if (typeof window === 'undefined' || !user?.id) return;

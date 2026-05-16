@@ -15,6 +15,14 @@ import {
 } from '@/lib/supabase/auth-cookie';
 
 const AUTH_REFRESH_TIMEOUT_MS = 2500;
+// Protected/admin routes are low-traffic compared to public pages, so the
+// "avoid a refresh storm" reasoning behind the tight public timeout does not
+// apply. On mobile networks a single `/token` round-trip can take several
+// seconds; abandoning it at 2.5s leaves the proxy forwarding a stale cookie
+// (readUserFromCookie ignores expiry), and the protected Server Component
+// then fails `getUser()` and bounces the user to `/`. Give these requests
+// enough room to actually complete the refresh.
+export const PROTECTED_AUTH_REFRESH_TIMEOUT_MS = 9000;
 const SHOULD_LOG_PROXY_AUTH = process.env.ENABLE_SERVER_PERF_LOGS === 'true' || process.env.NODE_ENV !== 'production';
 // Margin before access_token expiry where the proxy will trigger a refresh.
 // Anything fresher than this window is treated as valid and the entire auth
@@ -231,11 +239,19 @@ export function readUserFromCookie(request: NextRequest): { id: string; email: s
     }
 }
 
-export async function updateSession(request: NextRequest): Promise<{ response: NextResponse; user: { id: string; email: string } | null }> {
+export async function updateSession(
+    request: NextRequest,
+    options?: { refreshTimeoutMs?: number },
+): Promise<{ response: NextResponse; user: { id: string; email: string } | null }> {
+    const refreshTimeoutMs = options?.refreshTimeoutMs ?? AUTH_REFRESH_TIMEOUT_MS;
     const updateStartedAt = Date.now();
+    // Forward the resolved pathname so protected Server Component layouts can
+    // build an accurate `returnTo` when a stale session forces a login bounce.
+    const forwardedHeaders = new Headers(request.headers)
+    forwardedHeaders.set('x-pathname', request.nextUrl.pathname)
     let response = NextResponse.next({
         request: {
-            headers: request.headers,
+            headers: forwardedHeaders,
         },
     })
 
@@ -326,7 +342,7 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
                         request.cookies.delete(name)
                     })
 
-                    const requestHeaders = new Headers(request.headers)
+                    const requestHeaders = new Headers(forwardedHeaders)
                     let currentCookie = requestHeaders.get('Cookie') || '';
                     cookiesToSet.forEach(({ name, value }) => {
                         currentCookie = upsertCookieHeaderValue(currentCookie, name, value);
@@ -389,7 +405,7 @@ export async function updateSession(request: NextRequest): Promise<{ response: N
         });
         authResult = await measureAsync(
             'proxy_get_session',
-            async () => withTimeout(supabase.auth.getSession(), AUTH_REFRESH_TIMEOUT_MS, 'proxy_get_session'),
+            async () => withTimeout(supabase.auth.getSession(), refreshTimeoutMs, 'proxy_get_session'),
             {
                 runtime: 'server',
                 tags: ['PROXY'],

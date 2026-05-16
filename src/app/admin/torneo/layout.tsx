@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
+import { resolveAdminGuardRedirect } from '@/lib/auth/adminGuardRedirect';
 import { jakarta, mono } from './fonts';
 import TournamentAdminSidebar from './components/TournamentAdminSidebar';
 import styles from './tournament-admin.module.css';
@@ -20,8 +21,8 @@ export default async function TournamentAdminLayout({
 
     try {
         await requireTournamentAdminContext(supabase);
-    } catch {
-        redirect('/');
+    } catch (error) {
+        redirect(await resolveAdminGuardRedirect(error));
     }
 
     return (

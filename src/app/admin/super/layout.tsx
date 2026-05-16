@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { requireGlobalAdminContext } from '@/lib/auth/permissions';
+import { resolveAdminGuardRedirect } from '@/lib/auth/adminGuardRedirect';
 import { createClient } from '@/lib/supabase/server';
 import SuperAdminClientLayout from './SuperAdminClientLayout';
 
@@ -8,8 +9,8 @@ export default async function GlobalAdminLayout({ children }: { children: React.
 
     try {
         await requireGlobalAdminContext(supabase);
-    } catch {
-        redirect('/');
+    } catch (error) {
+        redirect(await resolveAdminGuardRedirect(error));
     }
 
     return (
