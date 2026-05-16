@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import ProtectedLink from '@/components/ProtectedLink';
 import ExportImage from '@/components/ExportImage';
 import FavoriteButton from '@/components/FavoriteButton';
 import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
@@ -1799,9 +1800,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     </div>
                     <div className={styles.matchActions}>
                         {isSuperAdminUser && !isExternalMatch && (
-                            <Link href={adminMatchHref} prefetch={false} className={`${styles.btn} ${styles.btnPrimary}`}>
+                            <ProtectedLink href={adminMatchHref} className={`${styles.btn} ${styles.btnPrimary}`}>
                                 Editar partido
-                            </Link>
+                            </ProtectedLink>
                         )}
                         <button className={styles.btn}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>

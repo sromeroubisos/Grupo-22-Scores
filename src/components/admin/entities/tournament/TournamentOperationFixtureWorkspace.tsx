@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import ProtectedLink from '@/components/ProtectedLink';
 import {
   AlertTriangle,
   Calendar,
@@ -2103,9 +2103,8 @@ function MatchCard({
       className={`fixture-match-card fixture-glass ${getMatchTone(match.status)}`}
       style={{ cursor: 'pointer' }}
     >
-      <Link
+      <ProtectedLink
         href={manageHref}
-        prefetch={false}
         className="fixture-match-link"
         aria-label={`Abrir control de partido de ${matchLabel}`}
         title="Abrir control de partido. También puedes hacer click derecho para abrirlo en otro panel."
@@ -2137,10 +2136,10 @@ function MatchCard({
         </div>
 
         <div className="fixture-match-actions" onClick={(e) => e.stopPropagation()}>
-          <Link href={manageHref} prefetch={false} className="fixture-mini-btn">
+          <ProtectedLink href={manageHref} className="fixture-mini-btn">
             <Pencil size={14} />
             <span>Editar</span>
-          </Link>
+          </ProtectedLink>
           <button className={`fixture-mini-btn ${quickResultOpen ? 'is-active' : ''}`} onClick={handleQuickResultToggle}>
             <Zap size={14} />
             <span>Resultado rapido</span>

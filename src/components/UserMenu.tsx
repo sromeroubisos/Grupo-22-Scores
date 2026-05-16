@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { User, Settings, Star, LogOut, Shield } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import ProtectedLink from '@/components/ProtectedLink'
 import { useAuth } from '@/context/AuthContext'
 import { getRoleLabel, isGlobalAdminRole } from '@/lib/auth/roles'
 import { FAVORITES_ENABLED } from '@/lib/favorites/config'
@@ -119,10 +120,10 @@ export default function UserMenu() {
                     {isSuperAdmin && (
                         <>
                             <div className={styles.dropdownDivider} />
-                            <Link href="/admin/super" prefetch={false} className={styles.menuItemAdmin} onClick={() => setIsOpen(false)}>
+                            <ProtectedLink href="/admin/super" className={styles.menuItemAdmin} onClick={() => setIsOpen(false)}>
                                 <Shield size={16} />
                                 {getRoleLabel(user.role)}
-                            </Link>
+                            </ProtectedLink>
                         </>
                     )}
 

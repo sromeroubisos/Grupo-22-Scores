@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useDeferredValue, useEffect, useMemo, useState, useRef } from 'react';
-import Link from 'next/link';
+import ProtectedLink from '@/components/ProtectedLink';
 import {
     AlertCircle,
     AlertTriangle,
@@ -827,10 +827,10 @@ function FixtureOverflowMenu({
                     <strong>Gestion rapida</strong>
                 </div>
                 {editHref ? (
-                    <Link href={editHref} prefetch={false} className="fixture-action-item" onClick={onClose}>
+                    <ProtectedLink href={editHref} className="fixture-action-item" onClick={onClose}>
                         <Edit2 size={14} />
                         <span>Editar partido</span>
-                    </Link>
+                    </ProtectedLink>
                 ) : (
                     <button type="button" className="fixture-action-item" onClick={() => { onEdit(); onClose(); }}>
                         <Edit2 size={14} />
