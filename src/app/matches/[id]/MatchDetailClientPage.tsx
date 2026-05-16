@@ -1338,6 +1338,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     }
 
     const { matchData, eventsData, statsData, issues } = state;
+    const adminMatchId = typeof matchData.id === 'string' && matchData.id.trim()
+        ? matchData.id.trim()
+        : id;
+    const adminMatchHref = `/admin/super/partidos/${encodeURIComponent(adminMatchId)}`;
     const firstPublicStatTabId = publicCompleteStatTabs[0]?.id ?? 'marcador';
     const effectivePublicStatTab = publicCompleteStatTabs.some((t) => t.id === publicStatsTab)
         ? publicStatsTab
@@ -1795,7 +1799,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     </div>
                     <div className={styles.matchActions}>
                         {isSuperAdminUser && !isExternalMatch && (
-                            <Link href={`/admin/super/partidos/${id}`} prefetch={false} className={`${styles.btn} ${styles.btnPrimary}`}>
+                            <Link href={adminMatchHref} prefetch={false} className={`${styles.btn} ${styles.btnPrimary}`}>
                                 Editar partido
                             </Link>
                         )}
@@ -2721,7 +2725,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
             {isSuperAdminUser && (
                 <LineupRatingEditorModal
                     open={lineupModalOpen}
-                    matchId={id}
+                    matchId={adminMatchId}
                     homeTeamName={matchData.home.name}
                     awayTeamName={matchData.away.name}
                     homePlayers={displayHomeLineup}
