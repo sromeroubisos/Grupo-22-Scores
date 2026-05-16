@@ -91,6 +91,47 @@ function clearAuthCookies(request: NextRequest, response: NextResponse) {
     }
 }
 
+function buildExpiredAuthCookieHeader(name: string, domain?: string): string {
+    const parts = [
+        `${name}=`,
+        'Path=/',
+        'Max-Age=0',
+        'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        'SameSite=Lax',
+    ];
+    if (domain) parts.push(`Domain=${domain}`);
+    if (process.env.NODE_ENV === 'production') parts.push('Secure');
+    return parts.join('; ');
+}
+
+/**
+ * Expire every Supabase auth cookie variant in BOTH the host-only scope and
+ * the shared `.g22scores.com` scope.
+ *
+ * For a long time different code paths wrote the session cookie at different
+ * scopes (OAuth callback was host-only, email login + proxy refresh were
+ * domain-scoped). On the apex domain that leaves duplicate `sb-<ref>-auth-
+ * token` cookies that permanently shadow each other and break server-side
+ * session recognition -> infinite /login loop. `clearAuthCookies` only
+ * expires the domain-scoped variant, so a stale host-only cookie survives
+ * and re-poisons every fresh login. Clearing both scopes on the login
+ * bounce flushes already-poisoned browsers so the next login is clean.
+ *
+ * We append raw Set-Cookie headers because `NextResponse.cookies.set`
+ * de-duplicates by name and cannot emit the same cookie name twice (once
+ * per scope) in one response.
+ */
+export function clearAllAuthCookieScopes(request: NextRequest, response: NextResponse) {
+    const sharedDomain = getSupabaseAuthCookieOptions(getRequestHost(request)).domain;
+    for (const name of getAuthCookieNames()) {
+        request.cookies.delete(name);
+        response.headers.append('Set-Cookie', buildExpiredAuthCookieHeader(name));
+        if (sharedDomain) {
+            response.headers.append('Set-Cookie', buildExpiredAuthCookieHeader(name, sharedDomain));
+        }
+    }
+}
+
 function isInvalidRefreshTokenError(error: unknown) {
     if (!error || typeof error !== 'object') {
         return false;

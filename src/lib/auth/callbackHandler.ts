@@ -150,14 +150,25 @@ export async function handleAuthCallback(request: NextRequest | Request) {
     finalizeUrl.searchParams.set('next', next)
     const response = NextResponse.redirect(finalizeUrl);
 
+    // The session cookie MUST be written with the exact same scope the rest
+    // of the app uses (browser client on email login + proxy on refresh both
+    // use getSupabaseAuthCookieOptions -> Domain=.g22scores.com in prod).
+    // Previously this stripped the Domain (`domain: undefined`), making the
+    // OAuth-login cookie host-only while every other path was domain-scoped.
+    // On g22scores.com that produced TWO `sb-<ref>-auth-token` cookies at
+    // different scopes that shadow each other: the server reads the stale
+    // one, fails to see the fresh session, and bounces to /login -> infinite
+    // login loop (and "works in incognito only"). Keep it consistent so
+    // there is exactly one cookie scope.
+    const sharedCookieOptions = getSupabaseAuthCookieOptions(requestHost)
     cookiesToSet.forEach(({ name, value, options }) => {
-        const safeOptions = options ? { ...options, domain: undefined } : undefined
         response.cookies.set(name, value, {
+            ...options,
             path: '/',
             sameSite: 'lax',
             secure: process.env.NODE_ENV === 'production',
             httpOnly: false,
-            ...safeOptions,
+            ...(sharedCookieOptions.domain ? { domain: sharedCookieOptions.domain } : {}),
         })
     })
 
