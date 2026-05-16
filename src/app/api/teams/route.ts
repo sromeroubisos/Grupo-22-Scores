@@ -1,5 +1,5 @@
 import { getReadClient } from '@/lib/supabase/read';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import type { Database } from '@/lib/database.types';
 import {
     getEspnAmericanFootballTeamBundle,
@@ -26,7 +26,7 @@ import { canonicalizeSportId, getClubSportValue } from '@/lib/clubDerivatives';
 import { fetchPeopleByClub, type PersonWithRole } from '@/lib/services/personService';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { applyExternalTeamLogoOverride } from '@/lib/utils/teamLogoOverrides';
-import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 
 type ReadClient = Awaited<ReturnType<typeof getReadClient>>;
 type InternalClubRow = Database['public']['Tables']['clubs']['Row'] & {
@@ -155,6 +155,61 @@ type ExternalTeamCacheRow = {
     team_url?: string | null;
     updated_at?: string | null;
 };
+
+function getExternalTeamCacheWriteClient() {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        return null;
+    }
+
+    try {
+        return createAdminClient();
+    } catch (error) {
+        console.warn('[teams] External team cache write skipped: admin client unavailable.', {
+            error: error instanceof Error ? error.message : String(error),
+        });
+        return null;
+    }
+}
+
+async function persistExternalTeamUrlCache(input: {
+    id: string;
+    teamUrl: string;
+    name: string;
+    source: string;
+}) {
+    const writeClient = getExternalTeamCacheWriteClient();
+    if (!writeClient) return;
+
+    const payload = {
+        id: input.id,
+        team_url: input.teamUrl,
+        source: input.source,
+        name: input.name,
+    };
+
+    let { error } = await (writeClient as any)
+        .from('external_teams')
+        .upsert(payload, { onConflict: 'id' });
+
+    if (error && isMissingColumnError(error, 'team_url')) {
+        const legacyPayload = {
+            id: payload.id,
+            source: payload.source,
+            name: payload.name,
+        };
+        const legacyResult = await (writeClient as any)
+            .from('external_teams')
+            .upsert(legacyPayload, { onConflict: 'id' });
+        error = legacyResult.error;
+    }
+
+    if (error && !isMissingTableError(error, 'external_teams')) {
+        console.warn('[teams] External team cache write failed.', {
+            code: error.code,
+            message: error.message,
+        });
+    }
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
@@ -1538,10 +1593,12 @@ export async function GET(request: Request) {
             // Persist the working team_url to external_teams cache if not already stored
             if (teamUrl && !cachedTeamUrl && remoteDetails && isRecord(remoteDetails) && !Array.isArray(remoteDetails)) {
                 try {
-                    const writeClient = await createClient();
-                    await writeClient
-                        .from('external_teams' as any)
-                        .upsert({ id: resolvedExternalId, team_url: teamUrl, source: 'flashscore', name: String((remoteDetails as any).name || extractedName || resolvedExternalId) }, { onConflict: 'id' });
+                    await persistExternalTeamUrlCache({
+                        id: resolvedExternalId,
+                        teamUrl,
+                        source: 'flashscore',
+                        name: String((remoteDetails as any).name || extractedName || resolvedExternalId),
+                    });
                 } catch {
                     // Non-critical — ignore write failures
                 }

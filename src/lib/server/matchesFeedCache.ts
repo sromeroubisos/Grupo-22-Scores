@@ -3,6 +3,9 @@ import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseS
 
 const MATCHES_FEED_CACHE_TABLE = 'matches_feed_cache';
 const MAX_PERSISTED_MATCHES_FEED_PAYLOAD_BYTES = 750_000;
+const DEFAULT_CLEANUP_LIMIT = 100;
+const CLEANUP_MIN_INTERVAL_MS = 60_000;
+const CLEANUP_TIMEOUT_BACKOFF_MS = 5 * 60_000;
 const MATCHES_FEED_CACHE_META_COLUMNS = [
     'cache_key',
     'feed_type',
@@ -36,6 +39,7 @@ const MATCHES_FEED_CACHE_META_COLUMNS_LEGACY = [
 ].join(', ');
 
 let cleanupInFlight: Promise<number> | null = null;
+let cleanupNextAllowedAt = 0;
 const scopedDeletionInFlight = new Map<string, Promise<number>>();
 
 export type MatchesFeedType = 'daily' | 'live';
@@ -151,8 +155,15 @@ function shouldLogDbDebug() {
 }
 
 function normalizeCleanupLimit(limit: number) {
-    if (!Number.isFinite(limit)) return 500;
-    return Math.max(1, Math.min(Math.floor(limit), 5000));
+    if (!Number.isFinite(limit)) return DEFAULT_CLEANUP_LIMIT;
+    return Math.max(1, Math.min(Math.floor(limit), 1000));
+}
+
+function isStatementTimeoutError(error: CacheCleanupError | null | undefined) {
+    if (!error) return false;
+    const code = String(error.code || '').toUpperCase();
+    const message = String(error.message || '').toLowerCase();
+    return code === '57014' || message.includes('statement timeout');
 }
 
 function normalizeDateOnly(value: string | null | undefined) {
@@ -470,6 +481,9 @@ async function runDeleteExpiredMatchesFeedSnapshots(
             }
 
             console.error('[matchesFeedCache] expired cleanup error:', error);
+            if (isStatementTimeoutError(error)) {
+                cleanupNextAllowedAt = Date.now() + CLEANUP_TIMEOUT_BACKOFF_MS;
+            }
             logDbDebug({
                 operation: 'deleteExpiredMatchesFeedSnapshots',
                 table: MATCHES_FEED_CACHE_TABLE,
@@ -497,6 +511,7 @@ async function runDeleteExpiredMatchesFeedSnapshots(
         return normalizedDeletedRows;
     } catch (error) {
         console.error('[matchesFeedCache] expired cleanup failed:', error);
+        cleanupNextAllowedAt = Date.now() + CLEANUP_TIMEOUT_BACKOFF_MS;
         logDbDebug({
             operation: 'deleteExpiredMatchesFeedSnapshots',
             table: MATCHES_FEED_CACHE_TABLE,
@@ -512,7 +527,7 @@ async function runDeleteExpiredMatchesFeedSnapshots(
 
 export async function deleteExpiredMatchesFeedSnapshots(
     supabase: SupabaseClient,
-    limit = 500,
+    limit = DEFAULT_CLEANUP_LIMIT,
 ): Promise<number> {
     if (cleanupInFlight) {
         logDbDebug({
@@ -525,6 +540,20 @@ export async function deleteExpiredMatchesFeedSnapshots(
         return cleanupInFlight;
     }
 
+    const now = Date.now();
+    if (now < cleanupNextAllowedAt) {
+        logDbDebug({
+            operation: 'deleteExpiredMatchesFeedSnapshots',
+            table: MATCHES_FEED_CACHE_TABLE,
+            action: 'rpc',
+            status: 'skipped',
+            reason: 'throttled',
+            nextAllowedInMs: cleanupNextAllowedAt - now,
+        });
+        return 0;
+    }
+
+    cleanupNextAllowedAt = now + CLEANUP_MIN_INTERVAL_MS;
     cleanupInFlight = runDeleteExpiredMatchesFeedSnapshots(supabase, limit)
         .finally(() => {
             cleanupInFlight = null;
