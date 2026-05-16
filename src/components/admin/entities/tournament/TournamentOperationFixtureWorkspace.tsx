@@ -1905,7 +1905,6 @@ export function TournamentOperationFixtureWorkspace({
                                   quickResultForm={quickResultMatchId === entry.match.id ? quickResultForm : null}
                                   quickResultErrors={quickResultMatchId === entry.match.id ? quickResultErrors : {}}
                                   quickResultOpen={quickResultMatchId === entry.match.id}
-                                  onEdit={() => openEditMatch(entry.match, 'edit')}
                                   onQuickResult={() => openQuickResultEditor(entry.match)}
                                   onQuickResultFieldChange={setQuickResultField}
                                   onQuickPointsFieldChange={setQuickPointsField}
@@ -2054,7 +2053,6 @@ function MatchCard({
   quickResultForm,
   quickResultErrors,
   quickResultOpen,
-  onEdit,
   onQuickResult,
   onQuickResultFieldChange,
   onQuickPointsFieldChange,
@@ -2070,7 +2068,6 @@ function MatchCard({
   quickResultForm: QuickResultFormState | null;
   quickResultErrors: Record<string, string>;
   quickResultOpen: boolean;
-  onEdit: () => void;
   onQuickResult: () => void;
   onQuickResultFieldChange: <K extends keyof QuickResultFormState>(field: K, value: QuickResultFormState[K]) => void;
   onQuickPointsFieldChange: (
@@ -2140,10 +2137,10 @@ function MatchCard({
         </div>
 
         <div className="fixture-match-actions" onClick={(e) => e.stopPropagation()}>
-          <button className="fixture-mini-btn" onClick={onEdit}>
+          <Link href={manageHref} prefetch={false} className="fixture-mini-btn">
             <Pencil size={14} />
             <span>Editar</span>
-          </button>
+          </Link>
           <button className={`fixture-mini-btn ${quickResultOpen ? 'is-active' : ''}`} onClick={handleQuickResultToggle}>
             <Zap size={14} />
             <span>Resultado rapido</span>

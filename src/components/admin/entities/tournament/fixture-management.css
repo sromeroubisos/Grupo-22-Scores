@@ -955,7 +955,10 @@
     border-radius: 12px;
     background: transparent;
     color: var(--fixture-text-main);
+    cursor: pointer;
+    font: inherit;
     text-align: left;
+    text-decoration: none;
     transition: background 0.18s ease, transform 0.18s ease, color 0.18s ease;
 }
 
@@ -1022,8 +1025,10 @@
     border: 1px solid rgba(0, 242, 255, 0.18);
     background: rgba(0, 242, 255, 0.08);
     color: var(--fixture-text-main);
+    cursor: pointer;
     font-size: 0.8rem;
     font-weight: 700;
+    text-decoration: none;
 }
 
 .fixture-mini-btn.is-active {

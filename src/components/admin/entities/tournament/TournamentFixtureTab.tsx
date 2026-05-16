@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useDeferredValue, useEffect, useMemo, useState, useRef } from 'react';
+import Link from 'next/link';
 import {
     AlertCircle,
     AlertTriangle,
@@ -156,6 +157,10 @@ function buildExportFileName(name: string | null | undefined) {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
     return `${base || 'fixture'}-${new Date().toISOString().slice(0, 10)}.json`;
+}
+
+function buildAdminMatchHref(matchId: string) {
+    return `/admin/super/partidos/${encodeURIComponent(matchId)}`;
 }
 
 
@@ -796,11 +801,13 @@ function FixtureOverflowMenu({
     onClose,
     onEdit,
     onDelete,
+    editHref,
 }: {
     isOpen: boolean;
     onClose: () => void;
     onEdit: () => void;
     onDelete: () => void;
+    editHref?: string;
 }) {
     const { shouldRender, isVisible } = useAnimatedDisclosure(isOpen, 180);
 
@@ -819,10 +826,17 @@ function FixtureOverflowMenu({
                     <span className="fixture-action-menu-kicker">Acciones</span>
                     <strong>Gestion rapida</strong>
                 </div>
-                <button type="button" className="fixture-action-item" onClick={() => { onEdit(); onClose(); }}>
-                    <Edit2 size={14} />
-                    <span>Editar partido</span>
-                </button>
+                {editHref ? (
+                    <Link href={editHref} prefetch={false} className="fixture-action-item" onClick={onClose}>
+                        <Edit2 size={14} />
+                        <span>Editar partido</span>
+                    </Link>
+                ) : (
+                    <button type="button" className="fixture-action-item" onClick={() => { onEdit(); onClose(); }}>
+                        <Edit2 size={14} />
+                        <span>Editar partido</span>
+                    </button>
+                )}
                 <div className="fixture-action-divider" />
                 <button type="button" className="fixture-action-item danger" onClick={() => { onDelete(); onClose(); }}>
                     <Trash2 size={14} />
@@ -949,6 +963,7 @@ function MatchCard({
     const scoreVisible = match.status === 'live' || match.status === 'final';
     const [showMenu, setShowMenu] = useState(false);
     const hasExtraMeta = Boolean(match.pitch || match.referee);
+    const adminMatchHref = buildAdminMatchHref(match.id);
 
     return (
         <article className={`fixture-match-card fixture-glass ${getStatusTone(match.status)}`}>
@@ -1018,6 +1033,7 @@ function MatchCard({
                             onClose={() => setShowMenu(false)}
                             onEdit={() => onEdit(match)}
                             onDelete={() => onDelete(match.id)}
+                            editHref={adminMatchHref}
                         />
                     </div>
                 </div>
@@ -1238,6 +1254,7 @@ function TechnicalTableView({
                                         onClose={() => setOpenMenuId(null)}
                                         onEdit={() => onEditMatch(match)}
                                         onDelete={() => onDeleteMatch(match.id)}
+                                        editHref={buildAdminMatchHref(match.id)}
                                     />
                                 </div>
                             </div>
@@ -1303,6 +1320,7 @@ function TechnicalTableView({
                                             onClose={() => setOpenMenuId(null)}
                                             onEdit={() => onEditMatch(match)}
                                             onDelete={() => onDeleteMatch(match.id)}
+                                            editHref={buildAdminMatchHref(match.id)}
                                         />
                                     </div>
                                 </div>
