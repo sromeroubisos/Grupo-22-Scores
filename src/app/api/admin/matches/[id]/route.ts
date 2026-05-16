@@ -8,6 +8,39 @@ import {
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { ensureMatchManagementAccess } from '@/lib/server/matchCenterAdmin';
+import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
+
+/**
+ * Fire-and-forget standings recalculation for every phase touched by a
+ * Match Center edit. `recalculatePhaseStandingsScopes` defaults to
+ * `includeDependents: true`, so this also re-runs any phase that carries
+ * points over from the edited match's phase. Without this, results entered
+ * from the Match Center never propagated to standings or carry-over phases
+ * (only the /api/tournaments/[id]/matches/[matchId] path did the recalc).
+ */
+function recalcAffectedPhases(
+  scopes: Array<{ tournamentId?: string | null; phaseId?: string | null } | null | undefined>,
+) {
+  const affected = new Map<string, { tournamentId: string; phaseId: string }>();
+  for (const scope of scopes) {
+    if (scope?.tournamentId && scope?.phaseId) {
+      affected.set(`${scope.tournamentId}:${scope.phaseId}`, {
+        tournamentId: scope.tournamentId,
+        phaseId: scope.phaseId,
+      });
+    }
+  }
+
+  if (affected.size === 0) return;
+
+  Promise.all(
+    [...affected.values()].map((scope) =>
+      recalculatePhaseStandingsScopes(scope.tournamentId, scope.phaseId, 'general'),
+    ),
+  ).catch((err) =>
+    console.error('[admin/matches PATCH|DELETE] Auto-recalculate standings failed:', err),
+  );
+}
 
 async function getWriteClient() {
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -59,6 +92,7 @@ export async function PATCH(
     const { events, eventPatch, lineups, ...rawMatchFields } = body as Record<string, unknown>;
     const matchFields = { ...rawMatchFields };
     const writeClient = await getWriteClient();
+    const previousMatch = await FixtureService.getMatch(matchId);
 
     if (Object.prototype.hasOwnProperty.call(matchFields, 'clock')) {
       const supportsClock = await FixtureService.checkMatchColumnSupport('clock', writeClient);
@@ -90,6 +124,12 @@ export async function PATCH(
         : !supplemental.persistedClock
           ? { clockNotPersisted: true }
           : null;
+
+    // Recalc standings (and carry-over dependents) for the phase before and
+    // after the edit — covers score/status changes and the rare case where
+    // the match was moved to a different phase.
+    const nextMatch = await FixtureService.getMatch(matchId);
+    recalcAffectedPhases([previousMatch, nextMatch]);
 
     if (compactResponse) {
       return NextResponse.json({
@@ -123,11 +163,14 @@ export async function DELETE(
   try {
     const matchId = (await params).id;
     await ensureMatchManagementAccess(matchId, EDIT_MEMBERSHIP_ROLES);
+    const previousMatch = await FixtureService.getMatch(matchId);
     const success = await FixtureService.deleteMatch(matchId);
 
     if (!success) {
       return jsonError('Failed to delete match', 500);
     }
+
+    recalcAffectedPhases([previousMatch]);
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

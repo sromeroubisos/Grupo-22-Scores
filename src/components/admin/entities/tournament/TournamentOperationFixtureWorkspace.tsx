@@ -1328,7 +1328,7 @@ export function TournamentOperationFixtureWorkspace({
   );
 
   return (
-    <div className="operation-fixture-workspace">
+    <div className={`operation-fixture-workspace${activeSubtab === 'manage_fixture' ? ' is-manage-full' : ''}`}>
       <div className="operation-fixture-main">
         <section className="operation-fixture-hero basalt-card">
           <div className="operation-fixture-hero-copy">

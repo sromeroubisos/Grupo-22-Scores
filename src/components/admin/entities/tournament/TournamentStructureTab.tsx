@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState, useEffect, useMemo } from 'react';
-import { AlertCircle, ArrowDownUp, Award, CheckCircle, ChevronRight, Eye, Globe, Grid3x3, Info, Layers, MoreVertical, Plus, Swords, Trash2, Trophy } from 'lucide-react';
+import { AlertCircle, ArrowDownUp, Award, CheckCircle, ChevronRight, Eye, Globe, Grid3x3, Info, Layers, MoreVertical, Plus, Trash2, Trophy } from 'lucide-react';
 import './basalt.css';
 import './phase-wizard.css';
 import './tournament-structure.css';
@@ -21,6 +21,7 @@ import {
     resolvePlayoffStagesForTeams,
 } from '@/lib/utils/playoffStages';
 import { useTournamentDirty } from './TournamentContext';
+import PlayoffBuilderPanel from './PlayoffBuilderPanel';
 
 interface Phase {
     id: string;
@@ -36,8 +37,8 @@ interface Phase {
 const PHASE_TYPE_LABELS: Record<string, string> = {
     league: 'Liga · Round-robin',
     group_stage: 'Fase de Grupos',
-    knockout: 'Eliminación Directa',
-    playoff: 'Playoffs',
+    knockout: 'Playoff · Eliminación directa',
+    playoff: 'Eliminación directa · Llaves',
 };
 
 const PHASE_TYPE_BADGE: Record<string, string> = {
@@ -1405,8 +1406,8 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
                     <div className="structure-phase-list flex flex-col gap-4">
                         {phases.map((phase, index) => (
+                            <div key={phase.id} className="structure-phase-entry flex flex-col gap-3">
                             <div
-                                key={phase.id}
                                 role="button"
                                 tabIndex={isApiManaged ? -1 : 0}
                                 aria-disabled={isApiManaged || undefined}
@@ -1588,6 +1589,16 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                     )}
                                 </div>
                             </div>
+                            {!!id && (phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && (
+                                <PlayoffBuilderPanel
+                                    tournamentId={id}
+                                    phaseId={phase.id}
+                                    phaseName={phase.name}
+                                    settings={phase.settings}
+                                    onChanged={() => { loadPhases(); }}
+                                />
+                            )}
+                            </div>
                         ))}
                     </div>
 
@@ -1754,7 +1765,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                     Tipo de fase
                                                 </label>
                                                 <div className="structure-option-grid grid grid-cols-2 gap-3">
-                                                    {(['league', 'group_stage', 'knockout', 'playoff'] as const).map(type => (
+                                                    {(['league', 'group_stage', 'playoff'] as const).map(type => (
                                                         <button
                                                             key={type}
                                                             type="button"
@@ -1765,7 +1776,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                                 } else if (type !== 'group_stage') {
                                                                     setGroupNames([]);
                                                                 }
-                                                    if (type === 'playoff' || type === 'knockout') {
+                                                    if (type === 'playoff') {
                                                         const defaultNames = getDefaultPlayoffStageNames(formPlayoffTeamsCount);
                                                         setPlayoffStageNames(defaultNames);
                                                         setPlayoffStageMatchCounts(normalizePlayoffStageMatchCounts(defaultNames, [], formPlayoffTeamsCount));
@@ -1784,14 +1795,12 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                             <span className="structure-phase-type-icon" aria-hidden="true">
                                                                 {type === 'league' && <Layers size={18} />}
                                                                 {type === 'group_stage' && <Grid3x3 size={18} />}
-                                                                {type === 'knockout' && <Swords size={18} />}
                                                                 {type === 'playoff' && <Trophy size={18} />}
                                                             </span>
                                                             <span className="text-sm font-bold">
                                                                 {type === 'league' && 'Liga'}
                                                                 {type === 'group_stage' && 'Grupos'}
-                                                                {type === 'knockout' && 'Llaves'}
-                                                                {type === 'playoff' && 'Playoff'}
+                                                                {type === 'playoff' && 'Playoff / Llaves'}
                                                             </span>
                                                             <span className="text-[11px] mt-0.5 opacity-70">
                                                                 {PHASE_TYPE_LABELS[type]}
@@ -1818,6 +1827,11 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                             {' · '}
                                                             {normalizePlayoffStageMatchCounts(playoffStageNames, playoffStageMatchCounts, formPlayoffTeamsCount).reduce((total, count) => total + count, 0)} partido{normalizePlayoffStageMatchCounts(playoffStageNames, playoffStageMatchCounts, formPlayoffTeamsCount).reduce((total, count) => total + count, 0) !== 1 ? 's' : ''}
                                                         </span>
+                                                    </div>
+
+                                                    <div className="mb-4 rounded-lg border border-[var(--accent-primary)]/40 bg-[var(--accent-primary)]/10 px-3 py-2.5 text-xs text-white/85">
+                                                        <strong>¿Querés copas derivadas (Oro / Plata / Bronce / Estímulo), cruces aleatorios u horarios automáticos?</strong>{' '}
+                                                        Esto define solo un cuadro lineal simple. Para subcopas y avance automático: poné un nombre a la fase y guardala; después, en la lista de fases, abrí el panel <strong>“Constructor de Playoff”</strong> de esta fase.
                                                     </div>
 
                                                     <div className="flex flex-col gap-2 mb-4">

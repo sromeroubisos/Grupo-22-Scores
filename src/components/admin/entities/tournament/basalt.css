@@ -2855,6 +2855,116 @@ select.basalt-input {
     }
 }
 
+/* Subtab "Gestionar fixture": contencion de ancho.
+   .operation-fixture-main / .operation-manage-panel son display:grid sin
+   grid-template-columns, asi que su columna implicita se dimensiona al
+   max-content del hijo mas ancho (toolbar, lista y sobre todo el bracket
+   playoff de N x 220px). Eso reventaba el ancho (~2000-3500px) y como el
+   panel tiene overflow-x:hidden el contenido quedaba recortado e
+   inaccesible. Forzamos columna unica + min-width:0 en toda la cadena para
+   que el contenido se ajuste al viewport y el bracket use su propio
+   overflow-x:auto (scroll horizontal interno). Aplica a cualquier ancho. */
+.operation-fixture-workspace.is-manage-full .operation-fixture-main,
+.operation-fixture-workspace.is-manage-full .operation-manage-panel,
+.operation-fixture-workspace.is-manage-full .operation-manage-toolbar,
+.operation-fixture-workspace.is-manage-full .operation-manage-list,
+.operation-fixture-workspace.is-manage-full .operation-manage-cards-stack {
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+}
+
+.operation-fixture-workspace.is-manage-full .operation-manage-panel > *,
+.operation-fixture-workspace.is-manage-full .operation-manage-toolbar-grid,
+.operation-fixture-workspace.is-manage-full .operation-playoff-bracket,
+.operation-fixture-workspace.is-manage-full .operation-playoff-bracket-grid {
+    min-width: 0;
+}
+
+/* Subtab "Gestionar fixture": ancho completo + panel de fase en cajon.
+   La lista y los filtros usan todo el ancho; el panel Resumen/Validacion
+   se abre como drawer lateral desde el boton "Ver panel". */
+@media (min-width: 1181px) {
+    .operation-fixture-workspace.is-manage-full {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .operation-fixture-workspace.is-manage-full .operation-fixture-side-desktop {
+        display: none;
+    }
+
+    .operation-fixture-workspace.is-manage-full .operation-mobile-side-trigger {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+    }
+
+    .operation-fixture-workspace.is-manage-full .operation-mobile-side-trigger .basalt-btn {
+        min-height: 40px;
+        white-space: nowrap;
+    }
+
+    .operation-fixture-workspace.is-manage-full .operation-fixture-side-sheet {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: auto;
+        z-index: 117;
+        display: flex;
+        width: min(420px, 92vw);
+        max-height: 100vh;
+        flex-direction: column;
+        gap: 14px;
+        padding: 22px;
+        border-left: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 0;
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+            rgba(7, 12, 20, 0.97);
+        box-shadow: -24px 0 60px rgba(0, 0, 0, 0.46);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(24px);
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        backdrop-filter: blur(20px);
+    }
+
+    .operation-fixture-workspace.is-manage-full .operation-fixture-side-sheet.is-open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(0);
+    }
+
+    .operation-fixture-workspace.is-manage-full .operation-fixture-side-sheet-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .operation-fixture-workspace.is-manage-full .operation-fixture-side-sheet-head strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.96);
+    }
+
+    .operation-fixture-workspace.is-manage-full .operation-fixture-side-sheet-close {
+        min-width: 40px;
+        width: 40px;
+        padding-inline: 0;
+    }
+
+    .operation-fixture-workspace.is-manage-full .operation-fixture-side-sheet-body {
+        display: grid;
+        gap: 14px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+}
+
 @media (max-width: 1023px) {
     .basalt-body {
         --basalt-header-offset: 148px;

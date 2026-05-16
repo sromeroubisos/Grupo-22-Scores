@@ -9,6 +9,38 @@ import {
 import { deriveClubAdminPointsPatch } from '@/lib/services/matchPointsSync';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
+
+/**
+ * Fire-and-forget standings recalculation for the phases touched by a
+ * club-admin result edit. `recalculatePhaseStandingsScopes` defaults to
+ * `includeDependents: true`, so carry-over dependent phases are refreshed
+ * too. Without this, results entered by club admins never propagated to
+ * standings or carry-over phases.
+ */
+function recalcAffectedPhases(
+  scopes: Array<{ tournamentId?: string | null; phaseId?: string | null } | null | undefined>,
+) {
+  const affected = new Map<string, { tournamentId: string; phaseId: string }>();
+  for (const scope of scopes) {
+    if (scope?.tournamentId && scope?.phaseId) {
+      affected.set(`${scope.tournamentId}:${scope.phaseId}`, {
+        tournamentId: scope.tournamentId,
+        phaseId: scope.phaseId,
+      });
+    }
+  }
+
+  if (affected.size === 0) return;
+
+  Promise.all(
+    [...affected.values()].map((scope) =>
+      recalculatePhaseStandingsScopes(scope.tournamentId, scope.phaseId, 'general'),
+    ),
+  ).catch((err) =>
+    console.error('[club-admin/matches PATCH] Auto-recalculate standings failed:', err),
+  );
+}
 
 async function getWriteClient() {
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -100,6 +132,7 @@ export async function PATCH(
     const { events, lineups, ...rawMatchFields } = body as Record<string, unknown>;
     const matchFields = normalizeMatchUpdateFields(rawMatchFields);
     const writeClient = await getWriteClient();
+    const previousMatch = await FixtureService.getMatch(matchId);
 
     if (Object.prototype.hasOwnProperty.call(matchFields, 'clock')) {
       const supportsClock = await FixtureService.checkMatchColumnSupport('clock', writeClient);
@@ -149,6 +182,9 @@ export async function PATCH(
     if (error || !data) {
       return jsonError('Failed to update match. Check server logs for Supabase error details.', 500);
     }
+
+    const nextMatch = await FixtureService.getMatch(matchId);
+    recalcAffectedPhases([previousMatch, nextMatch]);
 
     const matchCenterWarnings =
       lineups !== undefined && !supplemental.persistedLineups

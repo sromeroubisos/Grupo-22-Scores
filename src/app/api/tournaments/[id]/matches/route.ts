@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { requireTournamentMutationContext, TournamentApiError } from '@/lib/auth/tournamentApi';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
@@ -78,5 +78,106 @@ export async function POST(
             { error: message },
             { status: 500 }
         );
+    }
+}
+
+/**
+ * Bulk delete matches in a single request.
+ *
+ * Previously the client fired one DELETE fetch per match via Promise.all.
+ * With dozens of matches that produced a thundering herd against the dev
+ * server (browser caps ~6 connections/host, every request re-runs auth and
+ * triggered a standings recalc), surfacing as `TypeError: Failed to fetch`.
+ * This collapses it into one request: authorize once, delete with bounded
+ * concurrency, and recalculate standings once per affected phase.
+ */
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const tournamentId = (await params).id;
+
+    try {
+        await requireTournamentMutationContext(tournamentId);
+
+        const body = await request.json().catch(() => null);
+        const rawIds: unknown[] = Array.isArray(body?.matchIds) ? body.matchIds : [];
+        const ids: string[] = Array.from(
+            new Set(
+                rawIds.filter((value): value is string =>
+                    typeof value === 'string' && value.length > 0,
+                ),
+            ),
+        );
+
+        if (ids.length === 0) {
+            return NextResponse.json(
+                { error: 'No match ids provided' },
+                { status: 400 },
+            );
+        }
+
+        const deleted: string[] = [];
+        const failures: { id: string; error: string }[] = [];
+        const affectedPhaseIds = new Set<string>();
+
+        const CONCURRENCY = 6;
+        let cursor = 0;
+        const worker = async () => {
+            while (cursor < ids.length) {
+                const matchId = ids[cursor++];
+                try {
+                    const match = await FixtureService.getMatch(matchId);
+                    if (!match || match.tournamentId !== tournamentId) {
+                        failures.push({ id: matchId, error: 'Match not found in this tournament' });
+                        continue;
+                    }
+
+                    const ok = await FixtureService.deleteMatch(matchId);
+                    if (ok) {
+                        deleted.push(matchId);
+                        if (match.phaseId) affectedPhaseIds.add(match.phaseId);
+                    } else {
+                        failures.push({ id: matchId, error: 'Failed to delete match' });
+                    }
+                } catch (err) {
+                    failures.push({
+                        id: matchId,
+                        error: err instanceof Error ? err.message : 'Delete failed',
+                    });
+                }
+            }
+        };
+
+        await Promise.all(
+            Array.from({ length: Math.min(CONCURRENCY, ids.length) }, () => worker()),
+        );
+
+        if (affectedPhaseIds.size > 0) {
+            await Promise.all(
+                [...affectedPhaseIds].map((phaseId) =>
+                    recalculatePhaseStandingsScopes(tournamentId, phaseId, 'general').catch(
+                        (err) =>
+                            console.error(
+                                '[DELETE /api/tournaments/[id]/matches] Auto-recalculate standings failed:',
+                                err,
+                            ),
+                    ),
+                ),
+            );
+        }
+
+        return NextResponse.json({
+            success: failures.length === 0,
+            deleted: deleted.length,
+            failures,
+        });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Internal server error';
+        console.error('Error in DELETE /api/tournaments/[id]/matches:', error);
+        if (error instanceof TournamentApiError) {
+            return NextResponse.json({ error: message }, { status: error.status });
+        }
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }

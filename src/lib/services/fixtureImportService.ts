@@ -244,6 +244,11 @@ export class FixtureImportService {
       const matchPayload = {
         tournament_id: params.tournamentId,
         phase_id: params.phaseId,
+        // Mirror FixtureService.createMatch: scope the match to the phase's
+        // season so it surfaces in the season-filtered fixture/tournament
+        // views. Without this, imported matches land with season_id = NULL
+        // and only show in the unscoped global feed (`/`).
+        ...(context.phase?.season_id ? { season_id: context.phase.season_id } : {}),
         round_uuid: roundId,
         group_id: groupId,
         home_club_id: homeClubId,

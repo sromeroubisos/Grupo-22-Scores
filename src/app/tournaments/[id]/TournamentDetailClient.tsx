@@ -961,6 +961,23 @@ function getPreferredKnockoutPhase(phases: any[], rounds: any[] = [], matches: a
     return latestKnockoutWithData ?? knockoutPhases[knockoutPhases.length - 1] ?? null;
 }
 
+// Mirrors readPhaseCarryOverConfig() in @/lib/server/standingsCarryOver.
+// When a phase carries points from a previous phase, the carried totals only
+// exist in the server-persisted tournament_standings (computed via
+// resolveStandingsCarryOverRows). The client-side StandingsEngine recompute
+// here has no access to the source phase, so for carry-over phases we must
+// trust the persisted rows instead of the local recompute.
+function isPhaseCarryOverEnabled(settings: any): boolean {
+    const carryOver = settings?.carryOver ?? settings?.carry_over ?? settings?.statisticsCarryOver ?? null;
+    return Boolean(
+        carryOver?.enabled ??
+        carryOver?.fromPreviousPhase ??
+        settings?.carryOverPreviousPhase ??
+        settings?.carry_over_previous_phase ??
+        false,
+    );
+}
+
 function getDbStandingsContext(dbData: TournamentInitialData, preferredPhaseId?: string | null) {
     const participants = Array.isArray(dbData.participants) ? (dbData.participants as any[]) : [];
     const matches = Array.isArray(dbData.matches) ? (dbData.matches as any[]) : [];
@@ -1159,7 +1176,7 @@ function buildCalculatedStandings(dbData: TournamentInitialData, preferredPhaseI
 }
 
 function buildStandingsSnapshot(dbData: TournamentInitialData, preferredPhaseId?: string | null) {
-    const { participants, activeGroups, activePhaseId, resolvedRules } = getDbStandingsContext(dbData, preferredPhaseId);
+    const { participants, activeGroups, activePhase, activePhaseId, resolvedRules } = getDbStandingsContext(dbData, preferredPhaseId);
     const persistedStandings = filterStandingsToActivePhase(
         (Array.isArray(dbData.standings) ? dbData.standings : []).map(mapPersistedDbStanding),
         activePhaseId,
@@ -1168,7 +1185,14 @@ function buildStandingsSnapshot(dbData: TournamentInitialData, preferredPhaseId?
     const canSafelyCalculate =
         !dbData.queryErrors?.matches &&
         !dbData.queryErrors?.participants;
-    const shouldUsePersistedStandings = resolvedRules?.calculation_mode === 'fully_manual';
+    // Carry-over phases: the local recompute can't see the source phase, so
+    // it would drop the carried points. Use the server-persisted rows, which
+    // already fold in carry-over. Only do this when persisted rows exist for
+    // the phase (otherwise fall back to the recompute so the table isn't blank).
+    const carryOverPhaseWithPersistedRows =
+        isPhaseCarryOverEnabled(activePhase?.settings) && persistedStandings.length > 0;
+    const shouldUsePersistedStandings =
+        resolvedRules?.calculation_mode === 'fully_manual' || carryOverPhaseWithPersistedRows;
 
     if (!shouldUsePersistedStandings && canSafelyCalculate) {
         const calculatedStandings = buildCalculatedStandings(dbData, preferredPhaseId);

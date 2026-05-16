@@ -26,7 +26,7 @@ export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'play
 type ExportDateValue = string | number | Date;
 export type MatchExportMode = 'schedule' | 'result';
 export type MatchExportLayout = 'classic' | 'editorial4x5';
-export type StandingsExportMode = 'table' | 'groups';
+export type StandingsExportMode = 'table' | 'groups' | 'singleGroup';
 export type LineupExportMode = 'both' | 'home' | 'away';
 type DensityMode = 'comfortable' | 'compact' | 'ultra-compact';
 
@@ -770,6 +770,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     );
     const preferredStandingsExportMode: StandingsExportMode = groupedStandings.length > 0 ? 'groups' : 'table';
     const [standingsExportMode, setStandingsExportMode] = useState<StandingsExportMode>(preferredStandingsExportMode);
+    const [selectedStandingsGroupIndex, setSelectedStandingsGroupIndex] = useState(0);
     const [detectedUserOffsetMinutes, setDetectedUserOffsetMinutes] = useState(DEFAULT_TIMEZONE_OFFSET_MINUTES);
     const [selectedPaletteId, setSelectedPaletteId] = useState(DEFAULT_PALETTE.id);
     const [accentColor, setAccentColor] = useState(DEFAULT_PALETTE.accent);
@@ -847,6 +848,21 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     useEffect(() => {
         setStandingsExportMode(preferredStandingsExportMode);
     }, [preferredStandingsExportMode]);
+
+    useEffect(() => {
+        if (template !== 'standings') return;
+        if (groupedStandings.length === 0) {
+            setSelectedStandingsGroupIndex(0);
+            if (standingsExportMode !== 'table') {
+                setStandingsExportMode('table');
+            }
+            return;
+        }
+
+        if (selectedStandingsGroupIndex >= groupedStandings.length) {
+            setSelectedStandingsGroupIndex(0);
+        }
+    }, [groupedStandings.length, selectedStandingsGroupIndex, standingsExportMode, template]);
 
     useEffect(() => {
         const syncActiveVisualFamily = () => {
@@ -1087,14 +1103,22 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         () => buildDetectedTimeZoneLabel(detectedUserOffsetMinutes),
         [detectedUserOffsetMinutes]
     );
+    const selectedStandingsGroup = groupedStandings[getSafeStandingsGroupIndex(groupedStandings, selectedStandingsGroupIndex)] ?? null;
+    const selectedStandingsGroupLabel = selectedStandingsGroup
+        ? selectedStandingsGroup.name || `Grupo ${getSafeStandingsGroupIndex(groupedStandings, selectedStandingsGroupIndex) + 1}`
+        : '';
     const standingsExportData = useMemo(
         () => template === 'standings'
-            ? buildExportData(template, data, customTournamentName, selectedTimeZonePreset) as StandingsData
+            ? scopeStandingsDataForExport(
+                buildExportData(template, data, customTournamentName, selectedTimeZonePreset) as StandingsData,
+                standingsExportMode,
+                selectedStandingsGroupIndex
+            )
             : null,
-        [customTournamentName, data, selectedTimeZonePreset, template]
+        [customTournamentName, data, selectedStandingsGroupIndex, selectedTimeZonePreset, standingsExportMode, template]
     );
     const standingsSlides = useMemo(
-        () => standingsExportData ? buildStandingsSlides(standingsExportData, standingsExportMode) : [],
+        () => standingsExportData ? buildStandingsSlides(standingsExportData, getStandingsSlideMode(standingsExportMode)) : [],
         [standingsExportData, standingsExportMode]
     );
     const activeEditorialSponsors = useMemo(
@@ -1152,20 +1176,27 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
             return `${getMatchExportModeLabel(matchExportMode)} · ${getMatchExportLayoutLabel(matchExportLayout)}`;
         }
         if (template === 'dailyMatches') return 'Agenda del dia · Seleccion multiple';
-        if (template === 'standings') return standingsExportMode === 'groups' ? 'Tabla por grupos' : 'Tabla corrida';
+        if (template === 'standings') {
+            if (standingsExportMode === 'singleGroup') return selectedStandingsGroupLabel || 'Grupo especifico';
+            return standingsExportMode === 'groups' ? 'Tabla por grupos' : 'Tabla corrida';
+        }
         if (template === 'playoffBracket') return 'Cuadro eliminatorio';
         if (template === 'lineups') return `Alineaciones · ${getLineupExportModeLabel(lineupExportMode)}`;
         if (template === 'squad') return 'Plantel completo';
         if (template === 'teamOfWeek') return 'Equipo de la semana';
         return 'Configuracion de exportacion';
-    }, [lineupExportMode, matchExportLayout, matchExportMode, standingsExportMode, template]);
+    }, [lineupExportMode, matchExportLayout, matchExportMode, selectedStandingsGroupLabel, standingsExportMode, template]);
     const exportSummaryChips = useMemo(() => {
         const chips = [selectedFormatConfig.label];
         chips.push(getExportVisualFamilyLabel(visualFamily));
         if (template === 'matchStats') {
             chips.push(getMatchExportLayoutLabel(matchExportLayout));
         } else if (template === 'standings') {
-            chips.push(standingsExportMode === 'groups' ? 'Grupos' : 'Tabla');
+            if (standingsExportMode === 'singleGroup') {
+                chips.push(selectedStandingsGroupLabel || 'Grupo');
+            } else {
+                chips.push(standingsExportMode === 'groups' ? 'Grupos' : 'Tabla');
+            }
         } else if (template === 'dailyMatches') {
             chips.push(`Partidos ${selectedMatchIndices.size}/10`);
         } else if (template === 'lineups') {
@@ -1191,6 +1222,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         selectedFormatConfig.label,
         selectedMatchIndices.size,
         selectedPaletteName,
+        selectedStandingsGroupLabel,
         standingsExportMode,
         template,
         visualFamily,
@@ -1636,8 +1668,8 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                     }
                 }
             } else if (template === 'standings') {
-                const standingsData = exportData as StandingsData;
-                const slides = buildStandingsSlides(standingsData, standingsExportMode);
+                const standingsData = scopeStandingsDataForExport(exportData as StandingsData, standingsExportMode, selectedStandingsGroupIndex);
+                const slides = buildStandingsSlides(standingsData, getStandingsSlideMode(standingsExportMode));
                 if (slides.length === 0) throw new Error('No hay filas para exportar');
 
                 for (const [index, slide] of slides.entries()) {
@@ -1769,6 +1801,10 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
             };
         }
 
+        if (template === 'standings') {
+            return scopeStandingsDataForExport(exportData as StandingsData, standingsExportMode, selectedStandingsGroupIndex);
+        }
+
         return exportData;
     }, [
         activeEditorialSponsors,
@@ -1785,8 +1821,10 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         matchBackgroundUpload?.src,
         matchExportLayout,
         matchExportMode,
+        selectedStandingsGroupIndex,
         selectedMatchIndices,
         selectedTimeZonePreset,
+        standingsExportMode,
         template,
     ]);
     const modalPreviewColors = useMemo<ExportPreviewColorOverrides>(() => ({

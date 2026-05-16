@@ -30,6 +30,9 @@ import {
   resolvePlayoffStagesForTeams,
   syncPlayoffStagesToRounds,
 } from '@/lib/server/playoffStages';
+import { generatePlayoffBracket } from '@/lib/server/playoffBracket';
+import { resolveMatchAdvancement } from '@/lib/server/resolveMatchAdvancement';
+import type { PlayoffBuilderConfig } from '@/lib/playoff/templates';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { assertUuid, isUuid } from '@/lib/utils/postgrest';
 import type {
@@ -1117,6 +1120,50 @@ export class FixtureService {
     if (shouldSyncRankings) {
       await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
     }
+
+    // Automatic playoff advancement: when a bracket match's result or
+    // participants change, push winner/loser into the next matches. No-op
+    // (and never throws) for non-bracket matches or if the migration is
+    // not applied yet, so regular match editing is unaffected.
+    const resultAffecting =
+      'status' in updateData ||
+      'score' in updateData ||
+      'home_club_id' in updateData ||
+      'away_club_id' in updateData;
+    if (resultAffecting) {
+      try {
+        const advancement = await resolveMatchAdvancement(supabase, matchId);
+        if (advancement.ok && advancement.changed > 0) {
+          await invalidateMatchesFeedCaches();
+        }
+        if (advancement.warnings.length > 0) {
+          console.warn('[FixtureService] Playoff advancement warnings:', advancement.warnings);
+        }
+        if (!advancement.ok) {
+          console.error('[FixtureService] Playoff advancement failed:', advancement.error);
+        }
+      } catch (advancementError) {
+        console.error('[FixtureService] Playoff advancement threw:', advancementError);
+      }
+    }
+
+    // A manual date/venue edit on a bracket match marks it 'manual' so a
+    // full-phase auto-reschedule won't overwrite the admin's choice.
+    // Best-effort: a no-op for non-bracket matches and silently skipped
+    // until the scheduling migration is applied.
+    const scheduleEdited = 'date_time' in updateData || 'venue' in updateData;
+    if (scheduleEdited) {
+      try {
+        await supabase
+          .from('matches')
+          .update({ scheduling_status: 'manual', auto_scheduled: false })
+          .eq('id', matchId)
+          .not('bracket_match_code', 'is', null);
+      } catch {
+        /* columns not present yet — ignore */
+      }
+    }
+
     await this.invalidatePublicMatchesFeed(
       supabase,
       this.getMatchFeedInvalidationScopes([existingMatch, match]),
@@ -1278,6 +1325,34 @@ export class FixtureService {
       if (!phaseContext?.tournament_id) {
         console.error('Error generating playoff bracket: phase has no tournament.');
         return false;
+      }
+
+      // Builder-managed multi-cup bracket: generate from the saved
+      // template instead of the legacy linear single-elimination flow.
+      const builderConfig = (phaseContext?.settings as any)?.bracketBuilder as
+        | (PlayoffBuilderConfig & { generatedAt?: string })
+        | undefined;
+      if (builderConfig?.templateId) {
+        const result = await generatePlayoffBracket(supabase, {
+          tournamentId: phaseContext.tournament_id,
+          phaseId,
+          seasonId: phaseContext?.season_id ?? null,
+          config: {
+            templateId: builderConfig.templateId,
+            teamCount: builderConfig.teamCount,
+            cupNames: builderConfig.cupNames,
+            thirdPlace: builderConfig.thirdPlace,
+            seedMode: builderConfig.seedMode,
+            customSpec: builderConfig.customSpec,
+          },
+          schedule: (phaseContext?.settings as any)?.bracketSchedule ?? { mode: 'manual' },
+          force: true,
+        });
+        if (!result.ok) {
+          console.error('Error generating playoff bracket (builder):', result.error);
+          return false;
+        }
+        return true;
       }
 
       const playoffTeamsCount = getPlayoffTeamsCount(phaseContext?.settings);

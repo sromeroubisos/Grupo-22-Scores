@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import styles from './MobileBottomNav.module.css';
 
@@ -75,18 +76,24 @@ function NavIcon({ name, active }: { name: string; active?: boolean }) {
 export default function MobileBottomNav() {
     const pathname = usePathname();
     const { isAuthenticated } = useAuth();
+    const [hasHydrated, setHasHydrated] = useState(false);
+
+    useEffect(() => {
+        setHasHydrated(true);
+    }, []);
 
     if (hiddenPrefixes.some((prefix) => pathname?.startsWith(prefix))) {
         return null;
     }
 
+    const showAuthenticatedUserItem = hasHydrated && isAuthenticated;
     const resolvedNavItems = navItems.map((item) => {
         if (item.icon !== 'user') return item;
 
         return {
             ...item,
-            href: isAuthenticated ? '/profile' : '/login?returnTo=%2Fprofile',
-            label: isAuthenticated ? 'Usuario' : 'Ingresar',
+            href: showAuthenticatedUserItem ? '/profile' : '/login?returnTo=%2Fprofile',
+            label: showAuthenticatedUserItem ? 'Usuario' : 'Ingresar',
         };
     });
 

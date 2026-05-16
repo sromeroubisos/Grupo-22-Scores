@@ -544,25 +544,23 @@ export function FixtureProvider({ children, initialFixture, tournamentId, season
     if (ids.length === 0) return;
 
     try {
-      const responses = await Promise.all(
-        ids.map((matchId) =>
-          fetch(`/api/tournaments/${tournamentId}/matches/${matchId}`, {
-            method: 'DELETE',
-          })
-        )
-      );
+      const response = await fetch(`/api/tournaments/${tournamentId}/matches`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matchIds: ids }),
+      });
 
-      const failures: string[] = [];
-      for (let index = 0; index < responses.length; index += 1) {
-        const response = responses[index];
-        if (!response.ok) {
-          const errorPayload = await response.json().catch(() => null);
-          failures.push(errorPayload?.error || `No se pudo eliminar el partido ${ids[index]}.`);
-        }
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'No se pudieron eliminar los partidos seleccionados.');
       }
 
+      const failures: Array<{ id: string; error: string }> = Array.isArray(payload?.failures)
+        ? payload.failures
+        : [];
       if (failures.length > 0) {
-        throw new Error(failures[0]);
+        throw new Error(failures[0]?.error || `No se pudieron eliminar ${failures.length} partidos.`);
       }
 
       await refreshFixture();
