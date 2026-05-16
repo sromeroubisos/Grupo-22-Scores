@@ -534,6 +534,10 @@ function FixtureManagementCenter({
                         <RefreshCw size={16} />
                         <span>Actualizar</span>
                     </button>
+                    <button className="fixture-btn fixture-btn-secondary" onClick={handleExportFixture} type="button">
+                        <Download size={16} />
+                        <span>Exportar</span>
+                    </button>
                     <button className="fixture-btn fixture-btn-primary" onClick={() => setShowWizard(true)}>
                         <Zap size={16} />
                         <span>Generar fixture</span>

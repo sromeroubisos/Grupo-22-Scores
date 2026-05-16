@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ArchiveRestore, CalendarPlus, ChevronDown, MoreHorizontal, X } from 'lucide-react';
+import { ArchiveRestore, CalendarPlus, ChevronDown, Download, MoreHorizontal, X } from 'lucide-react';
 import { Database } from '@/lib/database.types';
 import { getTournamentFormatLabel } from '@/lib/utils/tournamentFormat';
 import './basalt.css';
@@ -313,6 +313,17 @@ export function TournamentHeader({
 
                     <button className="basalt-btn basalt-btn-primary" onClick={onStatusTransition} disabled={isTransitioning} type="button">
                         {isTransitioning ? 'Procesando...' : 'Cambiar estado'}
+                    </button>
+
+                    <button
+                        className="basalt-btn basalt-btn-primary basalt-mobile-export-btn"
+                        onClick={onExport}
+                        disabled={isTransitioning}
+                        type="button"
+                        aria-label="Exportar datos del torneo"
+                    >
+                        <Download size={15} />
+                        Exportar
                     </button>
 
                     <div className="basalt-header-menu">

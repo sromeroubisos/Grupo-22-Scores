@@ -1279,6 +1279,15 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                             </button>
                             <button
                                 type="button"
+                                className="tsm-bottom-bar-btn is-export"
+                                onClick={handleExport}
+                                aria-label="Exportar participantes"
+                            >
+                                <Download size={16} />
+                                <span>Exportar</span>
+                            </button>
+                            <button
+                                type="button"
                                 className="tsm-bottom-bar-icon"
                                 onClick={() => setIsMobileMoreMenuOpen(true)}
                                 aria-label="Mas acciones"

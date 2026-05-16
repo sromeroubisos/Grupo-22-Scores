@@ -4904,6 +4904,10 @@
     display: none;
 }
 
+.basalt-mobile-export-btn {
+    display: none;
+}
+
 @media (max-width: 767px) {
     /* --- 18a) Hide the legacy dropdown trigger (we replace with bottom-tabs) --- */
     .basalt-tabs-mobile,
@@ -5416,7 +5420,7 @@
     /* Hide the two inline primary action buttons on mobile. They live in
        the overflow menu instead. We target them by their accessible label
        so we don't need a class name change. */
-    .basalt-header-primary > .basalt-btn-primary:not(:first-child):not(.basalt-overflow-trigger) {
+    .basalt-header-primary > .basalt-btn-primary:not(:first-child):not(.basalt-overflow-trigger):not(.basalt-mobile-export-btn) {
         display: none !important;
     }
 
@@ -5427,6 +5431,18 @@
         flex: 1 1 auto !important;
         min-height: 40px !important;
         grid-column: auto !important;
+    }
+
+    .basalt-header-primary > .basalt-mobile-export-btn {
+        display: inline-flex !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        min-height: 40px !important;
+        grid-column: auto !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 0 12px !important;
+        white-space: nowrap !important;
     }
 
     /* Overflow ⋯ trigger: prominent, square, 44pt. */

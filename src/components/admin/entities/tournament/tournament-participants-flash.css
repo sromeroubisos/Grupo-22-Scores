@@ -2232,6 +2232,13 @@ tr:hover .participant-name {
         justify-content: center;
         gap: 6px;
     }
+    .tournament-participants-mobile .tsm-bottom-bar-btn.is-export {
+        flex: 0 1 116px;
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.14);
+        color: var(--text-primary);
+        white-space: nowrap;
+    }
     .tournament-participants-mobile .tsm-bottom-bar-btn.is-danger {
         background: rgba(239, 68, 68, 0.14);
         border-color: rgba(239, 68, 68, 0.4);
@@ -2414,6 +2421,13 @@ tr:hover .participant-name {
     .tournament-participants-mobile .tsm-hero-total-value { font-size: 28px; }
     .tournament-participants-mobile .tsm-hero-stat span { font-size: 14px; }
     .tournament-participants-mobile .tsm-bottom-bar-fab span { font-size: 13px; }
+    .tournament-participants-mobile .tsm-bottom-bar-btn.is-export {
+        flex-basis: 48px;
+        padding: 0;
+    }
+    .tournament-participants-mobile .tsm-bottom-bar-btn.is-export span {
+        display: none;
+    }
     .tournament-participants-mobile .tsm-participant-text strong { font-size: 13px; }
     .tournament-participants-mobile .tsm-search-input { font-size: 13px; }
 }
