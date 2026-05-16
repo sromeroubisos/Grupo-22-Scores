@@ -17,6 +17,7 @@ import {
     type MembershipRole,
     type MembershipScope,
 } from '@/lib/auth/roles';
+import { getReservedAdminRole } from '@/lib/types/user';
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 type AllowedMembershipRoles = ReadonlySet<string>;
@@ -248,7 +249,7 @@ export async function getUserAccessContext(
         ? []
         : normalizeMembershipRows(membershipsResult.data);
 
-    const rawRole = profileData?.role || user.user_metadata?.role || null;
+    const rawRole = getReservedAdminRole(user.email) || profileData?.role || user.user_metadata?.role || null;
 
     return {
         userId: user.id,

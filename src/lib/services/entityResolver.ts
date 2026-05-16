@@ -42,7 +42,9 @@ function getPaths(type: EntityType, id: string) {
         case 'match': canonicalPath = `/matches/${id}`; break;
         case 'union': canonicalPath = `/unions/${id}`; break;
     }
-    const adminPath = `/admin/entities/${id}/manage?type=${type}`;
+    const adminPath = type === 'match'
+        ? `/admin/super/partidos/${id}`
+        : `/admin/entities/${id}/manage?type=${type}`;
     return { canonicalPath, adminPath };
 }
 

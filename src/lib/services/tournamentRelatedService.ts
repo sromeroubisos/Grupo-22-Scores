@@ -287,7 +287,7 @@ export async function getTournamentRelatedTabData(
                 title: `${match.home?.name ?? 'Local'} vs ${match.away?.name ?? 'Visitante'}`,
                 subtitle: formatDateTime(match.date_time),
                 meta: match.status ? String(match.status) : 'Pendiente',
-                href: `/admin/entities/${match.id}/manage?type=match&from=tournament:${tournamentId}`,
+                href: `/admin/super/partidos/${match.id}`,
             })),
         },
         {

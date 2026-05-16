@@ -23,6 +23,10 @@ export type RelatedResult = {
     totalApprox?: number;
 };
 
+function getMatchAdminHref(matchId: string) {
+    return `/admin/super/partidos/${matchId}`;
+}
+
 export type RelatedSectionData = {
     title: string;
     result: RelatedResult;
@@ -113,7 +117,7 @@ export async function getRelatedItems(
                             id: m.id,
                             label: `${homeName} vs ${awayName}`,
                             entityType: 'match',
-                            href: `/admin/entities/${m.id}/manage?type=match&from=tournament:${id}`,
+                            href: getMatchAdminHref(m.id),
                             meta: `${dateStr}${statusStr}`,
                             raw: { status: m.status, date_time: m.date_time },
                             context: { fromType: 'tournament', fromId: id }
@@ -167,7 +171,7 @@ export async function getRelatedItems(
                             id: m.id,
                             label: `${isHome ? 'vs' : '@'} ${opponentName}`,
                             entityType: 'match',
-                            href: `/admin/entities/${m.id}/manage?type=match&from=club:${id}`,
+                            href: getMatchAdminHref(m.id),
                             meta: `${formatDate(m.date_time)}${m.status ? ` — ${m.status}` : ''}`,
                             raw: { status: m.status, date_time: m.date_time },
                             context: { fromType: 'club', fromId: id }
@@ -293,7 +297,7 @@ export async function getRelatedItems(
                             id: m.id,
                             label: `${getClubName(m.home, m.home_club_id)} vs ${getClubName(m.away, m.away_club_id)}`,
                             entityType: 'match',
-                            href: `/admin/entities/${m.id}/manage?type=match&from=player:${id}`,
+                            href: getMatchAdminHref(m.id),
                             meta: formatDate(m.date_time)
                         }))
                     }

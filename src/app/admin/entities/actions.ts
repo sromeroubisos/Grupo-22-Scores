@@ -530,7 +530,7 @@ export async function updateMatchLive(
 
     await writeAuditLog(user.id, 'match', id, 'update', { live_update: payload });
 
-    revalidatePath(`/admin/matches/${id}`);
+    revalidatePath(`/admin/super/partidos/${id}`);
     revalidatePath(`/admin/entities/${id}/manage`);
     return { success: true };
 }
