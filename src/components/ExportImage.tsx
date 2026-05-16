@@ -2698,18 +2698,43 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                             Tabla corrida
                                         </button>
                                         {groupedStandings.length > 0 && (
-                                            <button
-                                                className={`${styles.formatBtn} ${standingsExportMode === 'groups' ? styles.active : ''}`}
-                                                onClick={() => setStandingsExportMode('groups')}
-                                                type="button"
-                                            >
-                                                Dividir por grupos
-                                            </button>
+                                            <>
+                                                <button
+                                                    className={`${styles.formatBtn} ${standingsExportMode === 'groups' ? styles.active : ''}`}
+                                                    onClick={() => setStandingsExportMode('groups')}
+                                                    type="button"
+                                                >
+                                                    Dividir por grupos
+                                                </button>
+                                                <button
+                                                    className={`${styles.formatBtn} ${standingsExportMode === 'singleGroup' ? styles.active : ''}`}
+                                                    onClick={() => setStandingsExportMode('singleGroup')}
+                                                    type="button"
+                                                >
+                                                    Grupo especifico
+                                                </button>
+                                            </>
                                         )}
                                     </div>
+                                    {standingsExportMode === 'singleGroup' && groupedStandings.length > 0 && (
+                                        <select
+                                            aria-label="Grupo a exportar"
+                                            className={`${styles.modalSelect} ${styles.standingsGroupSelect}`}
+                                            value={getSafeStandingsGroupIndex(groupedStandings, selectedStandingsGroupIndex)}
+                                            onChange={(event) => setSelectedStandingsGroupIndex(Number(event.target.value))}
+                                        >
+                                            {groupedStandings.map((group, index) => (
+                                                <option key={`${group.name || 'grupo'}-${index}`} value={index}>
+                                                    {group.name || `Grupo ${index + 1}`}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
                                     <p className={styles.modalHint}>
                                         Maximo 20 equipos por imagen.
-                                        {standingsExportMode === 'groups' && groupedStandings.length > 0
+                                        {standingsExportMode === 'singleGroup' && groupedStandings.length > 0
+                                            ? ' Se exporta solamente el grupo seleccionado.'
+                                            : standingsExportMode === 'groups' && groupedStandings.length > 0
                                             ? ' Los grupos se mantienen separados y continuan en otra imagen cuando hace falta.'
                                             : ' Si la tabla supera el limite, se reparte automaticamente en varias imagenes.'}
                                     </p>
@@ -4167,8 +4192,36 @@ function getExportableStandingsGroups(data: StandingsData): StandingsGroupData[]
         .filter((group) => group.rows.length > 0);
 }
 
+function getStandingsSlideMode(mode: StandingsExportMode): 'table' | 'groups' {
+    return mode === 'table' ? 'table' : 'groups';
+}
+
+function getSafeStandingsGroupIndex(groups: StandingsGroupData[], selectedIndex: number): number {
+    if (groups.length === 0) return 0;
+    if (!Number.isInteger(selectedIndex) || selectedIndex < 0 || selectedIndex >= groups.length) return 0;
+    return selectedIndex;
+}
+
+function scopeStandingsDataForExport(data: StandingsData, mode: StandingsExportMode, selectedGroupIndex: number): StandingsData {
+    if (mode !== 'singleGroup') return data;
+
+    const groups = getExportableStandingsGroups(data);
+    const group = groups[getSafeStandingsGroupIndex(groups, selectedGroupIndex)];
+    if (!group) return data;
+
+    const groupName = group.name.trim();
+    const subtitleParts = [data.subtitle?.trim(), groupName].filter(Boolean);
+
+    return {
+        ...data,
+        subtitle: subtitleParts.join(' - '),
+        rows: group.rows,
+        groups: [group],
+    };
+}
+
 function buildStandingsSlides(data: StandingsData, mode: StandingsExportMode): StandingsSlideData[] {
-    if (mode === 'groups') {
+    if (getStandingsSlideMode(mode) === 'groups') {
         const groups = getExportableStandingsGroups(data);
         if (groups.length > 0) {
             const draftSlides: Array<{ groups: StandingsSlideGroupData[]; totalRows: number }> = [];
