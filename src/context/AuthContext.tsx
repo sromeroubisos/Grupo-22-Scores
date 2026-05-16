@@ -286,6 +286,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         trackAuthDuplicate('restoreUser', { userId: sbUser.id });
         console.log('[AuthContext] fetchAndSetUser start for:', sbUser.email);
         const fallbackOnboarding = resolveFallbackOnboarding(sbUser);
+        const reservedRole = getReservedAdminRole(sbUser.email);
 
         // Optimistic UI: surface the authenticated user immediately from the
         // session metadata so the UI flips out of the loading state without
@@ -293,7 +294,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // The profile fetch below will refine name/role/avatar once it arrives.
         if (isMounted.current) {
             setPersistentUser((prev) => {
-                if (prev && prev.id === sbUser.id) return prev;
+                if (prev && prev.id === sbUser.id) {
+                    return reservedRole && prev.role !== reservedRole
+                        ? {
+                            ...prev,
+                            email: sbUser.email || prev.email,
+                            role: reservedRole,
+                            onboardingCompleted: fallbackOnboarding.completed ? true : prev.onboardingCompleted,
+                        }
+                        : prev;
+                }
                 return buildOptimisticUser(
                     sbUser,
                     fallbackOnboarding.completed ? true : null,
@@ -371,7 +381,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     id: profile.id,
                     name: profile.name || sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
                     email: profile.email || sbUser.email || '',
-                    role: normalizeRole(profile.role),
+                    role: reservedRole ?? normalizeRole(profile.role),
                     avatarUrl: profile.avatar_url || sbUser.user_metadata?.avatar_url,
                     memberships: [],
                     onboardingCompleted,
@@ -380,7 +390,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 console.log('[AuthContext] Setting user with profile:', finalUser.email, 'role:', finalUser.role, 'onboardingCompleted:', onboardingCompleted);
                 setPersistentUser(finalUser);
             } else {
-                const fallbackRole = getReservedAdminRole(sbUser.email) ?? 'fan';
+                const fallbackRole = reservedRole ?? 'fan';
 
                 if (fallbackOnboarding.completed) {
                     setOnboardingStorageStatus(sbUser.id, { skipped: fallbackOnboarding.skipped });
@@ -410,7 +420,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 id: sbUser.id,
                 name: sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0] || 'Usuario',
                 email: sbUser.email || '',
-                role: 'fan',
+                role: reservedRole ?? 'fan',
                 avatarUrl: sbUser.user_metadata?.avatar_url,
                 onboardingCompleted: true,
             });
