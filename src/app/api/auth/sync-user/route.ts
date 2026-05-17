@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { isSameOriginRequest } from '@/lib/auth/requestOrigin'
+import { getRequestOriginDebugInfo, isSameOriginRequest } from '@/lib/auth/requestOrigin'
 import { syncUserProfile } from '@/lib/auth/syncUserProfile'
 import { createClient } from '@/lib/supabase/server'
 import { rateLimitByIp } from '@/lib/rateLimit'
@@ -21,6 +21,9 @@ export async function POST(request: Request) {
     }
 
     if (!isSameOriginRequest(request)) {
+        if (process.env.DEBUG_AUTH_FLOW === 'true') {
+            console.warn('[auth/sync-user] invalid origin', getRequestOriginDebugInfo(request))
+        }
         return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
     }
 

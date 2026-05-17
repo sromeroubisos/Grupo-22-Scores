@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { sanitizeNext } from '@/lib/auth/redirect'
-import { isSameOriginRequest } from '@/lib/auth/requestOrigin'
+import { getAuthCookieHost, getRequestOriginDebugInfo, isSameOriginRequest } from '@/lib/auth/requestOrigin'
 import { syncUserProfile } from '@/lib/auth/syncUserProfile'
 import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie'
 import { clearAllAuthCookieScopes } from '@/lib/supabase/proxy'
@@ -14,6 +14,9 @@ type CookieToSet = {
 
 export async function POST(request: NextRequest) {
     if (!isSameOriginRequest(request)) {
+        if (process.env.DEBUG_AUTH_FLOW === 'true') {
+            console.warn('[auth/commit-session] invalid origin', getRequestOriginDebugInfo(request))
+        }
         return NextResponse.json({ error: 'Invalid origin' }, { status: 403 })
     }
 
@@ -37,10 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     const cookiesToSet: CookieToSet[] = []
-    const requestHost =
-        request.headers.get('x-forwarded-host') ||
-        request.headers.get('host') ||
-        request.nextUrl.hostname
+    const requestHost = getAuthCookieHost(request)
 
     const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
         cookieOptions: getSupabaseAuthCookieOptions(requestHost),

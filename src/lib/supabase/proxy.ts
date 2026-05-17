@@ -5,6 +5,7 @@ import { logRefreshLoop } from '@/lib/debug/refreshLoop';
 import { createInstrumentedSupabaseFetch } from '@/lib/perf/supabase';
 import { logPerf, measureAsync } from '@/lib/perf/measure';
 import { createRetryableRefreshFetch, isRetryableAuthRefreshError } from '@/lib/supabase/auth-fetch';
+import { getAuthCookieHost } from '@/lib/auth/requestOrigin';
 import {
     getSupabaseAuthCookieOptions,
     getSupabaseAuthStorageKey,
@@ -53,7 +54,7 @@ function getSupabaseAuthCookieBaseName(): string | null {
 }
 
 function getRequestHost(request: NextRequest) {
-    return request.headers.get('x-forwarded-host') || request.headers.get('host') || request.nextUrl.hostname;
+    return getAuthCookieHost(request);
 }
 
 function buildResponseAuthCookieOptions(request: NextRequest, options?: NonNullable<Parameters<NextResponse['cookies']['set']>[2]>) {

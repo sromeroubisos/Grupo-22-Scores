@@ -6,13 +6,23 @@ import { createInstrumentedSupabaseFetch, runSupabaseLatencyProbe } from '@/lib/
 import { formatDurationMs, logPerf, nowMs } from '@/lib/perf/measure';
 import { createRetryableRefreshFetch } from '@/lib/supabase/auth-fetch';
 import { getSupabaseAuthCookieOptions, normalizeSupabaseAuthCookies } from '@/lib/supabase/auth-cookie';
+import { getAuthCookieHost } from '@/lib/auth/requestOrigin';
 import type { LooseSupabaseClient } from './loose';
 
 export async function createClient() {
     const startedAt = nowMs()
     const cookieStore = await cookies()
     const headerStore = await headers()
-    const requestHost = headerStore.get('x-forwarded-host') || headerStore.get('host')
+    const requestHeaders = new Headers()
+    const forwardedHost = headerStore.get('x-forwarded-host')
+    const host = headerStore.get('host')
+    if (forwardedHost) requestHeaders.set('x-forwarded-host', forwardedHost)
+    if (host) requestHeaders.set('host', host)
+    const requestHost = getAuthCookieHost(
+        new Request(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', {
+            headers: requestHeaders,
+        }),
+    )
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
     const instrumentedFetch = createInstrumentedSupabaseFetch('server', url, fetch)

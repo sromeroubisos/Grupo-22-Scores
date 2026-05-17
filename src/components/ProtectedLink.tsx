@@ -23,6 +23,18 @@ const FRESH_ACCESS_TOKEN_MARGIN_SECONDS = 90
 
 type SessionOutcome = 'navigate' | 'login'
 
+async function commitCurrentSessionForServer(href: string): Promise<boolean> {
+    try {
+        const supabase = createClient()
+        const { data, error } = await supabase.auth.getSession()
+        if (error || !data.session) return false
+        await commitSupabaseSessionForServer(data.session, href)
+        return true
+    } catch {
+        return false
+    }
+}
+
 /**
  * Make sure the auth cookie carries a non-expired access token BEFORE we hand
  * off to a server-guarded route.
@@ -50,19 +62,7 @@ async function ensureFreshSession(href: string): Promise<SessionOutcome> {
         typeof hint.accessTokenExpiresAt === 'number' &&
         hint.accessTokenExpiresAt > nowSeconds + FRESH_ACCESS_TOKEN_MARGIN_SECONDS
     ) {
-        try {
-            const supabase = createClient()
-            const { data, error } = await supabase.auth.getSession()
-            if (!error && data.session) {
-                await commitSupabaseSessionForServer(data.session, href)
-                return 'navigate'
-            }
-        } catch {
-            // Fall through to login. A client-only session that the server
-            // cannot commit is not usable for server-guarded admin routes.
-        }
-
-        return 'login'
+        return await commitCurrentSessionForServer(href) ? 'navigate' : 'login'
     }
 
     // No session material at all — go straight to login, no point navigating
@@ -88,13 +88,17 @@ async function ensureFreshSession(href: string): Promise<SessionOutcome> {
 
         // The browser auth fetch turns transient network failures into a
         // synthetic error while preserving local session state, so re-check
-        // the local hint: if a usable, non-expired token survived, let the
-        // server (which gets its own 9s refresh budget) make the final call.
+        // the local hint. Even in this fallback, only navigate after the
+        // server bridge accepts the current session.
         hint = getSupabaseBrowserSessionHint()
-        return hint.isAccessTokenFresh ? 'navigate' : 'login'
+        return hint.isAccessTokenFresh && await commitCurrentSessionForServer(href)
+            ? 'navigate'
+            : 'login'
     } catch {
         hint = getSupabaseBrowserSessionHint()
-        return hint.isAccessTokenFresh ? 'navigate' : 'login'
+        return hint.isAccessTokenFresh && await commitCurrentSessionForServer(href)
+            ? 'navigate'
+            : 'login'
     }
 }
 

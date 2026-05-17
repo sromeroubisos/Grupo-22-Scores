@@ -83,7 +83,13 @@ export async function signInWithPasswordAndRedirect(input: {
         throw new Error('No pudimos confirmar la sesion. Intenta nuevamente.')
     }
 
-    await commitSupabaseSessionForServer(data.session, input.returnTo)
+    try {
+        await commitSupabaseSessionForServer(data.session, input.returnTo)
+    } catch (commitError) {
+        console.warn('[login] server session commit failed:', commitError)
+        clearSupabaseBrowserSession()
+        throw new Error('No pudimos confirmar la sesion en el servidor. Intenta nuevamente.')
+    }
 
     try {
         await fetch('/api/auth/guest-club-family', {

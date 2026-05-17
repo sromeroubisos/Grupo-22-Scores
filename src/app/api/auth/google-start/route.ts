@@ -1,6 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { getRequestOrigin } from '@/lib/auth/requestOrigin'
+import {
+    getAuthCookieHost,
+    getRequestOrigin,
+    getRequestOriginDebugInfo,
+    isSameOriginRequest,
+} from '@/lib/auth/requestOrigin'
 import { sanitizeNext } from '@/lib/auth/redirect'
 import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie'
 
@@ -18,6 +23,13 @@ import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie'
 // reliably attach the cookie to a `NextResponse.json()` body — that's
 // why earlier server-side attempts still failed at the callback.
 export async function POST(request: NextRequest) {
+    if (!isSameOriginRequest(request)) {
+        if (process.env.DEBUG_AUTH_FLOW === 'true') {
+            console.warn('[auth/google-start] invalid origin', getRequestOriginDebugInfo(request))
+        }
+        return NextResponse.json({ error: 'Invalid origin' }, { status: 403 })
+    }
+
     type CookieToSet = {
         name: string
         value: string
@@ -39,10 +51,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Supabase env not configured' }, { status: 500 })
         }
 
-        const requestHost =
-            request.headers.get('x-forwarded-host') ||
-            request.headers.get('host') ||
-            request.nextUrl.hostname
+        const requestHost = getAuthCookieHost(request)
 
         const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
             cookieOptions: getSupabaseAuthCookieOptions(requestHost),
