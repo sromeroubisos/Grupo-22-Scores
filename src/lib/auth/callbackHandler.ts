@@ -171,7 +171,7 @@ export async function handleAuthCallback(request: NextRequest | Request) {
     // login loop (and "works in incognito only"). Keep it consistent so
     // there is exactly one cookie scope.
     const sharedCookieOptions = getSupabaseAuthCookieOptions(requestHost)
-    cookiesToSet.forEach(({ name, value, options }) => {
+    cookiesToSet.filter(({ value }) => value).forEach(({ name, value, options }) => {
         appendAuthSetCookieHeader(response, name, value, {
             ...options,
             path: '/',

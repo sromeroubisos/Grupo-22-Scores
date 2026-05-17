@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
         // browser data.
         clearAllAuthCookieScopes(request, response)
 
-        cookiesToSet.forEach(({ name, value, options }) => {
+        cookiesToSet.filter(({ value }) => value).forEach(({ name, value, options }) => {
             // Strip Domain so the verifier is a host-only cookie. Some
             // strict browsers (notably Brave Shields on desktop) reject or
             // drop cookies that combine Domain=.g22scores.com + Secure +

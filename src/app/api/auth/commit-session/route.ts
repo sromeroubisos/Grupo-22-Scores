@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     clearAllAuthCookieScopes(request, response)
 
     const sharedCookieOptions = getSupabaseAuthCookieOptions(requestHost)
-    cookiesToSet.forEach(({ name, value, options }) => {
+    cookiesToSet.filter(({ value }) => value).forEach(({ name, value, options }) => {
         appendAuthSetCookieHeader(response, name, value, {
             ...options,
             path: '/',
