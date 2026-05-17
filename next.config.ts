@@ -30,7 +30,34 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    const authNoStoreHeaders = [
+      {
+        key: 'Cache-Control',
+        value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      },
+      {
+        key: 'Pragma',
+        value: 'no-cache',
+      },
+      {
+        key: 'Expires',
+        value: '0',
+      },
+    ];
+
     return [
+      {
+        source: '/login',
+        headers: authNoStoreHeaders,
+      },
+      {
+        source: '/auth/:path*',
+        headers: authNoStoreHeaders,
+      },
+      {
+        source: '/api/auth/:path*',
+        headers: authNoStoreHeaders,
+      },
       {
         source: '/sw.js',
         headers: [
