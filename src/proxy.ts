@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { logRefreshFlow } from '@/lib/debug/refreshFlow'
 import { logRefreshLoop } from '@/lib/debug/refreshLoop'
-import { updateSession, readUserFromCookie, clearAllAuthCookieScopes, PROTECTED_AUTH_REFRESH_TIMEOUT_MS } from '@/lib/supabase/proxy'
+import { updateSession, readUserFromCookie, PROTECTED_AUTH_REFRESH_TIMEOUT_MS } from '@/lib/supabase/proxy'
 import { measureAsync } from '@/lib/perf/measure';
 
 // Only refresh the Supabase session on routes that genuinely depend on auth.
@@ -68,15 +68,12 @@ function hasGuestClubAccess(request: NextRequest): boolean {
 function redirectToLogin(request: NextRequest) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('returnTo', `${request.nextUrl.pathname}${request.nextUrl.search}`);
-    const response = NextResponse.redirect(loginUrl);
-    // Flush every auth cookie variant in both scopes. If we reached here for
-    // a protected route the session is unusable for this request anyway, and
-    // a stale host-only duplicate left over from the old inconsistent cookie
-    // scoping is exactly what keeps the user trapped in a /login loop. Wiping
-    // it guarantees the next login writes a single, clean, consistently
-    // scoped cookie instead of layering on top of the poisoned one.
-    clearAllAuthCookieScopes(request, response);
-    return response;
+    // Do not clear Supabase auth cookies here. Protected-route guards can see
+    // false negatives during mobile/RSC navigation or transient Supabase auth
+    // latency; deleting cookies at this layer turns a recoverable redirect
+    // into a destructive logout. Login/OAuth start already perform an explicit
+    // cleanup before creating a fresh session, where it is safe and intended.
+    return NextResponse.redirect(loginUrl);
 }
 
 export async function proxy(request: NextRequest) {
