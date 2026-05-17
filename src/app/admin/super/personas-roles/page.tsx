@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pencil, Search, User as UserIcon, X } from 'lucide-react';
+import Link from 'next/link';
+import { Pencil, Search, User as UserIcon, UserPlus, X } from 'lucide-react';
 import styles from '../page.module.css';
 import { getRoleLabel, normalizeRole, ROLE_LABELS, type AppUserRole } from '@/lib/auth/roles';
 import { getReservedAdminRole } from '@/lib/types/user';
@@ -627,8 +628,11 @@ export default function PersonasRolesPage() {
                         <p>Gestion de Accesos</p>
                         <h1>Personas y Roles</h1>
                     </div>
-                    <div className={styles.statusSync}>
-                        <button className={`${styles.btn} ${styles.btnPrimary}`} type="button" onClick={() => void fetchUsers()}>
+                    <div className={styles.statusSync} style={{ display: 'flex', gap: 10 }}>
+                        <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/admin/super/personas-roles/crear">
+                            <UserPlus size={16} /> Crear trabajador
+                        </Link>
+                        <button className={styles.btn} type="button" onClick={() => void fetchUsers()}>
                             <UserIcon size={16} /> Recargar
                         </button>
                     </div>

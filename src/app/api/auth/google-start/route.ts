@@ -7,7 +7,7 @@ import {
     isSameOriginRequest,
 } from '@/lib/auth/requestOrigin'
 import { sanitizeNext } from '@/lib/auth/redirect'
-import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie'
+import { getSupabaseAuthCookieOptions, getSupabaseSharedCookieDomain } from '@/lib/supabase/auth-cookie'
 import { appendAuthSetCookieHeader, clearAllAuthCookieScopes } from '@/lib/supabase/proxy'
 
 // Start the Google OAuth flow on the SERVER. Why server-side:
@@ -106,20 +106,30 @@ export async function POST(request: NextRequest) {
         // browser data.
         clearAllAuthCookieScopes(request, response)
 
+        // The PKCE `code_verifier` cookie MUST be written with the SAME
+        // scope the session cookie uses everywhere else
+        // (getSupabaseAuthCookieOptions -> Domain=.g22scores.com in prod).
+        // It was previously forced host-only (`domain: undefined`) to dodge
+        // a niche desktop Brave-Shields edge case, but that broke Google
+        // login for everyone whose OAuth round-trip crossed the apex/www
+        // boundary: this start endpoint may run on `www.g22scores.com`
+        // while Supabase's configured redirect lands the callback on the
+        // apex `g22scores.com` (or vice versa). A host-only verifier set on
+        // one host is simply not sent to the other, so
+        // exchangeCodeForSession() always failed with "code verifier not
+        // found" -> /login?error=auth-pkce-error (this is why ZERO accounts
+        // had a Google identity and mobile users "never got past Google").
+        // Domain-scoping it to `.g22scores.com` makes the verifier valid on
+        // both hosts, exactly like the rest of the auth cookies.
+        const sharedVerifierDomain = getSupabaseSharedCookieDomain(requestHost)
         cookiesToSet.filter(({ value }) => value).forEach(({ name, value, options }) => {
-            // Strip Domain so the verifier is a host-only cookie. Some
-            // strict browsers (notably Brave Shields on desktop) reject or
-            // drop cookies that combine Domain=.g22scores.com + Secure +
-            // SameSite=Lax for OAuth-style flows. Host-only is also fine
-            // because the callback runs on the same hostname as this
-            // start endpoint.
-            const safeOptions = options ? { ...options, domain: undefined } : undefined
             appendAuthSetCookieHeader(response, name, value, {
+                ...options,
                 path: '/',
                 sameSite: 'lax',
                 secure: process.env.NODE_ENV === 'production',
                 httpOnly: false,
-                ...safeOptions,
+                ...(sharedVerifierDomain ? { domain: sharedVerifierDomain } : { domain: undefined }),
             })
         })
 
