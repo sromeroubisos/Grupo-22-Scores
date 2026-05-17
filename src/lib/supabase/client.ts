@@ -113,6 +113,41 @@ export function clearSupabaseBrowserSession() {
     })
 }
 
+// Persist the minimal app-auth user hint (the `g22_user` key AuthContext
+// reads via readCachedAuthUser). After OAuth finalize / email login the
+// browser session cookie is valid, but the destination is often a public
+// page where AuthContext's `skipPublicAnonymousAuth` gate bails to guest
+// when (a) there is no cached user AND (b) the bespoke session-cookie
+// freshness hint misses (chunked Google sessions are read less reliably
+// here than by supabase-ssr itself). Writing this hint guarantees
+// `initialCachedUser` is non-null so AuthContext always runs its real
+// getSession() bootstrap and recognizes the just-established session.
+export function persistAppAuthUserHint(input: {
+    id: string
+    email: string
+    name?: string | null
+    role?: string | null
+    avatarUrl?: string | null
+}) {
+    if (typeof window === 'undefined') return
+    if (!input.id || !input.email) return
+
+    try {
+        const payload: Record<string, unknown> = {
+            id: input.id,
+            email: input.email,
+            name: input.name && input.name.trim()
+                ? input.name
+                : (input.email.split('@')[0] || 'Usuario'),
+            role: input.role || 'fan',
+        }
+        if (input.avatarUrl) payload.avatarUrl = input.avatarUrl
+        window.localStorage.setItem(APP_AUTH_LOCAL_USER_KEY, JSON.stringify(payload))
+    } catch {
+        // Best-effort only: AuthContext still bootstraps from the session cookie.
+    }
+}
+
 function readBrowserCookies() {
     if (typeof document === 'undefined' || !document.cookie) return []
 

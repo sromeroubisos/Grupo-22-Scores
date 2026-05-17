@@ -1,8 +1,10 @@
 'use client'
 
-import { clearSupabaseBrowserSession, createClient } from '@/lib/supabase/client'
+import { clearSupabaseBrowserSession, createClient, persistAppAuthUserHint } from '@/lib/supabase/client'
 import { getAuthErrorMessage } from '@/lib/auth/errors'
 import { commitSupabaseSessionForServer } from '@/lib/supabase/sessionBridge'
+import { resolveBestUserRole } from '@/lib/auth/roles'
+import { getReservedAdminRole } from '@/lib/types/user'
 
 export function normalizeEmail(value: string): string {
     return value.trim().toLowerCase()
@@ -107,6 +109,35 @@ export async function signInWithPasswordAndRedirect(input: {
         })
     } catch (syncError) {
         console.warn('[login] sync-user failed, continuing with redirect:', syncError)
+    }
+
+    // Persist the app-auth user hint before the full-page redirect.
+    // clearSupabaseBrowserSession() at the top wiped g22_user; without
+    // restoring it, landing on a public returnTo can make AuthContext bail
+    // to guest via skipPublicAnonymousAuth before getSession() even runs.
+    try {
+        const sb = data.user
+        if (sb) {
+            persistAppAuthUserHint({
+                id: sb.id,
+                email: sb.email || normalizedEmail,
+                name:
+                    (typeof sb.user_metadata?.full_name === 'string' && sb.user_metadata.full_name) ||
+                    (typeof sb.user_metadata?.name === 'string' && sb.user_metadata.name) ||
+                    null,
+                role: resolveBestUserRole({
+                    reservedRole: getReservedAdminRole(sb.email || normalizedEmail),
+                    appMetadata: sb.app_metadata,
+                    userMetadata: sb.user_metadata,
+                }),
+                avatarUrl:
+                    typeof sb.user_metadata?.avatar_url === 'string'
+                        ? sb.user_metadata.avatar_url
+                        : null,
+            })
+        }
+    } catch (hintError) {
+        console.warn('[login] persist user hint failed, continuing:', hintError)
     }
 
     window.location.assign(input.returnTo)

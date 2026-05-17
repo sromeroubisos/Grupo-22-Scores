@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, persistAppAuthUserHint } from '@/lib/supabase/client'
 import { sanitizeNext } from '@/lib/auth/redirect'
+import { resolveBestUserRole } from '@/lib/auth/roles'
+import { getReservedAdminRole } from '@/lib/types/user'
 
 const POLL_INTERVAL_MS = 200
 const MAX_WAIT_MS = 4000
@@ -31,6 +33,33 @@ function FinalizeContent() {
                 const { data: { session } } = await supabase.auth.getSession()
                 if (cancelled) return
                 if (session?.user) {
+                    // Persist the app-auth user hint BEFORE navigating. The
+                    // destination (often the public home) would otherwise see
+                    // an empty g22_user cache and AuthContext could bail to
+                    // guest via its skipPublicAnonymousAuth gate without ever
+                    // calling getSession(). This makes the bootstrap run.
+                    try {
+                        const sb = session.user
+                        persistAppAuthUserHint({
+                            id: sb.id,
+                            email: sb.email || '',
+                            name:
+                                (typeof sb.user_metadata?.full_name === 'string' && sb.user_metadata.full_name) ||
+                                (typeof sb.user_metadata?.name === 'string' && sb.user_metadata.name) ||
+                                null,
+                            role: resolveBestUserRole({
+                                reservedRole: getReservedAdminRole(sb.email),
+                                appMetadata: sb.app_metadata,
+                                userMetadata: sb.user_metadata,
+                            }),
+                            avatarUrl:
+                                typeof sb.user_metadata?.avatar_url === 'string'
+                                    ? sb.user_metadata.avatar_url
+                                    : null,
+                        })
+                    } catch (hintError) {
+                        console.warn('[auth/finalize] persist user hint failed:', hintError)
+                    }
                     // Persist a server-side profile sync (parity with password login flow).
                     try {
                         await fetch('/api/auth/sync-user', {
