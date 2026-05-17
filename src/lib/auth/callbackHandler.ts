@@ -2,6 +2,7 @@ import 'server-only'
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { getRequestOrigin } from '@/lib/auth/requestOrigin'
 import { syncUserProfile } from '@/lib/auth/syncUserProfile';
 import { sanitizeNext } from '@/lib/auth/redirect'
 import { rateLimitAuthCallback } from '@/lib/rateLimit';
@@ -32,7 +33,7 @@ export async function handleAuthCallback(request: NextRequest | Request) {
     const code = searchParams.get('code');
     const rawNext = searchParams.get('next');
     const next = sanitizeNext(rawNext);
-    const origin = new URL(request.url).origin;
+    const origin = getRequestOrigin(request);
 
     // If user cancelled or provider returned an error
     const providerError = searchParams.get('error');

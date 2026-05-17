@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { getRequestOrigin } from '@/lib/auth/requestOrigin'
 import { sanitizeNext } from '@/lib/auth/redirect'
 import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie'
 
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json().catch(() => ({})) as { next?: unknown }
         const next = sanitizeNext(typeof body.next === 'string' ? body.next : null)
 
-        const origin = new URL(request.url).origin
+        const origin = getRequestOrigin(request)
         const callbackUrl = new URL('/auth/callback', origin)
         callbackUrl.searchParams.set('next', next)
 

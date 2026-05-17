@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { getRequestOrigin } from '@/lib/auth/requestOrigin';
 
 /**
  * Legacy Google callback — permanently redirects to the unified auth callback.
@@ -9,7 +10,7 @@ import { type NextRequest, NextResponse } from 'next/server';
  */
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
-    const target = new URL('/auth/callback', request.url);
+    const target = new URL('/auth/callback', getRequestOrigin(request));
     searchParams.forEach((value, key) => {
         target.searchParams.set(key, value);
     });

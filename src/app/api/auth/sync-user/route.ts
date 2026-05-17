@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { isSameOriginRequest } from '@/lib/auth/requestOrigin'
 import { syncUserProfile } from '@/lib/auth/syncUserProfile'
 import { createClient } from '@/lib/supabase/server'
 import { rateLimitByIp } from '@/lib/rateLimit'
@@ -7,17 +8,6 @@ function getClientIp(request: Request): string {
     const forwarded = (request as any).headers?.get?.('x-forwarded-for');
     if (forwarded) return forwarded.split(',')[0].trim();
     return 'unknown';
-}
-
-function isValidOrigin(request: Request): boolean {
-    const origin = request.headers.get('origin');
-    const host = new URL(request.url).host;
-    if (!origin) return true; // Same-origin direct fetch may omit origin
-    try {
-        return new URL(origin).host === host;
-    } catch {
-        return false;
-    }
 }
 
 export async function POST(request: Request) {
@@ -30,7 +20,7 @@ export async function POST(request: Request) {
         );
     }
 
-    if (!isValidOrigin(request)) {
+    if (!isSameOriginRequest(request)) {
         return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
     }
 

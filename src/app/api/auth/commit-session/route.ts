@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { sanitizeNext } from '@/lib/auth/redirect'
+import { isSameOriginRequest } from '@/lib/auth/requestOrigin'
 import { syncUserProfile } from '@/lib/auth/syncUserProfile'
 import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie'
 import { clearAllAuthCookieScopes } from '@/lib/supabase/proxy'
@@ -11,20 +12,8 @@ type CookieToSet = {
     options?: Parameters<NextResponse['cookies']['set']>[2]
 }
 
-function isValidOrigin(request: NextRequest): boolean {
-    const origin = request.headers.get('origin')
-    const host = new URL(request.url).host
-    if (!origin) return true
-
-    try {
-        return new URL(origin).host === host
-    } catch {
-        return false
-    }
-}
-
 export async function POST(request: NextRequest) {
-    if (!isValidOrigin(request)) {
+    if (!isSameOriginRequest(request)) {
         return NextResponse.json({ error: 'Invalid origin' }, { status: 403 })
     }
 
