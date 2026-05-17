@@ -404,7 +404,19 @@ export function createClient() {
     let sessionHint = getSupabaseBrowserSessionHint()
     const hasCachedUser = hasCachedAppAuthUser()
 
-    if (sessionHint.hasSession && !sessionHint.isAccessTokenFresh && !hasCachedUser) {
+    // An expired access token is NOT a dead session: as long as a refresh
+    // token is present, supabase-ssr can silently mint a fresh one. Wiping
+    // here logged out users that returned after the access token TTL (e.g.
+    // a backgrounded mobile tab, or > 1h away) on devices where the
+    // localStorage `g22_user` hint was lost but the auth cookie survived.
+    // Only nuke a session that is genuinely unrecoverable: stale access
+    // token, NO refresh token, and no cached app-auth user hint.
+    if (
+        sessionHint.hasSession &&
+        !sessionHint.isAccessTokenFresh &&
+        !sessionHint.hasRefreshToken &&
+        !hasCachedUser
+    ) {
         clearSupabaseBrowserSession()
         sessionHint = getSupabaseBrowserSessionHint()
     }
@@ -413,9 +425,15 @@ export function createClient() {
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     const storageKey = getSupabaseBrowserStorageKey() || undefined
     const instrumentedFetch = createInstrumentedSupabaseFetch('client', url, fetch)
+    // Keep auto-refresh enabled whenever there is a recovery path: no
+    // session at all, a fresh access token, a refresh token to spend, or a
+    // cached app-auth user. Disabling it only for the truly-dead case keeps
+    // the original anti refresh-storm intent without stranding a session
+    // whose access token simply expired (the case fixed above).
     const shouldAutoRefreshToken =
         !sessionHint.hasSession ||
         sessionHint.isAccessTokenFresh ||
+        sessionHint.hasRefreshToken ||
         hasCachedUser
 
     const withAuthTimeout = async (input: string | URL | Request, init?: RequestInit) => {

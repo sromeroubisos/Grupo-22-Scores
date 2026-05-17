@@ -37,11 +37,9 @@ const AUTH_CALLBACK_PATHS = new Set([
 const PROTECTED_ROUTE_PREFIXES = ['/admin', '/club-admin', '/profile', '/prode/ligas/crear'];
 const GUEST_CLUB_ACCESS_COOKIE = 'g22_guest_club_access';
 
-function shouldRefreshSession(pathname: string, searchParams: URLSearchParams): boolean {
-    if (pathname === '/' && searchParams.has('code')) {
-        return true
-    }
-
+function shouldRefreshSession(pathname: string): boolean {
+    // Note: the `/?code=...` OAuth-landing case is handled earlier in proxy()
+    // with an explicit redirect, so it never reaches this function.
     if (AUTH_CALLBACK_PATHS.has(pathname)) {
         return false
     }
@@ -89,7 +87,7 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(callbackUrl)
     }
 
-    const needsRefresh = shouldRefreshSession(pathname, searchParams);
+    const needsRefresh = shouldRefreshSession(pathname);
     const protectedRoute = isProtectedRoute(pathname);
     const isApiPath = pathname.startsWith('/api');
     const isAdminPath = pathname.startsWith('/admin') || pathname.startsWith('/club-admin');

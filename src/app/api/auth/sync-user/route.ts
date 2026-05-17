@@ -12,7 +12,12 @@ function getClientIp(request: Request): string {
 
 export async function POST(request: Request) {
     const ip = getClientIp(request);
-    const limit = rateLimitByIp(ip);
+    // Namespaced key (parity with commit-session) so this never shares a
+    // bucket with another bare-IP caller, plus a higher cap: sync-user is
+    // idempotent/best-effort and legitimately fires several times per login
+    // (login + finalize + AuthContext profile miss). 30/min/IP absorbs a few
+    // users behind a shared NAT/CGNAT IP without false 429s.
+    const limit = rateLimitByIp(`sync-user:${ip}`, 30);
     if (!limit.allowed) {
         return NextResponse.json(
             { error: 'Too many requests' },

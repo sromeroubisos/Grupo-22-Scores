@@ -167,6 +167,19 @@ export function getTrustedRequestHost(request: Request): string | null {
     return getRequestHostCandidates(request).find(isTrustedAppHost) || null;
 }
 
+// Origins built from the request's OWN resolved host (x-forwarded-host >
+// host > url). Used purely for the same-origin (CSRF) check: a request whose
+// Origin equals the host actually serving it is same-origin by definition,
+// regardless of whether that host is in the static trusted allowlist. This
+// is what lets login work on preview/staging deploys (Vercel preview URLs,
+// new domains) without weakening CSRF protection — a cross-site attacker's
+// Origin still will not equal the victim host.
+function getRequestSelfOrigins(request: Request): string[] {
+    return getRequestHostCandidates(request).map(
+        (host) => `${getProtocolForHost(request, host)}://${host}`,
+    );
+}
+
 export function getAuthCookieHost(request: Request): string {
     const configuredHosts = [
         getUrlHost(process.env.NEXT_PUBLIC_SITE_URL),
@@ -179,6 +192,15 @@ export function getAuthCookieHost(request: Request): string {
 
     return (
         getTrustedRequestHost(request) ||
+        // On preview/staging (host not in the trusted allowlist) prefer the
+        // request's REAL host over the static configured host. Otherwise the
+        // auth cookie is scoped to g22scores.com (Domain=.g22scores.com) and
+        // the browser rejects it on a *.vercel.app preview, so login never
+        // persists. A non-g22scores host yields a host-only cookie
+        // (getSupabaseSharedCookieDomain → undefined), which is correct.
+        // Prod (g22scores.com) and localhost are already trusted hosts, so
+        // this branch never changes their behaviour.
+        getRequestHostCandidates(request)[0] ||
         configuredHost ||
         getUrlHost(DEFAULT_PUBLIC_ORIGINS[0]) ||
         getUrlHost(request.url) ||
@@ -212,16 +234,25 @@ export function getAllowedRequestOrigins(request: Request): string[] {
 }
 
 export function isSameOriginRequest(request: Request): boolean {
-    const allowedOrigins = getAllowedRequestOrigins(request);
+    // Configured/trusted origins PLUS the request's own resolved origin. The
+    // latter makes a request that genuinely originates from the host serving
+    // it pass on any deploy domain (preview/staging), while a cross-site
+    // attacker's Origin still fails to match the serving host.
+    const candidateOrigins = [
+        ...new Set([
+            ...getAllowedRequestOrigins(request),
+            ...getRequestSelfOrigins(request),
+        ]),
+    ];
     const origin = normalizeOrigin(request.headers.get('origin'));
 
     if (origin) {
-        return allowedOrigins.some((allowedOrigin) => areEquivalentOrigins(origin, allowedOrigin));
+        return candidateOrigins.some((allowedOrigin) => areEquivalentOrigins(origin, allowedOrigin));
     }
 
     const refererOrigin = normalizeOrigin(request.headers.get('referer'));
     if (refererOrigin) {
-        return allowedOrigins.some((allowedOrigin) => areEquivalentOrigins(refererOrigin, allowedOrigin));
+        return candidateOrigins.some((allowedOrigin) => areEquivalentOrigins(refererOrigin, allowedOrigin));
     }
 
     const secFetchSite = request.headers.get('sec-fetch-site');

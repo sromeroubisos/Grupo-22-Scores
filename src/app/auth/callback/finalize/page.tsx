@@ -8,7 +8,10 @@ import { resolveBestUserRole } from '@/lib/auth/roles'
 import { getReservedAdminRole } from '@/lib/types/user'
 
 const POLL_INTERVAL_MS = 200
-const MAX_WAIT_MS = 4000
+// Slow mobile devices committing a large, chunked Google session cookie
+// (up to 12 chunks) can take well over 4s before getSession() sees it.
+// 10s avoids a false "no pudimos finalizar" on an otherwise valid session.
+const MAX_WAIT_MS = 10000
 
 function FinalizeContent() {
     const router = useRouter()

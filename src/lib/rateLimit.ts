@@ -7,7 +7,10 @@ const store = new Map<string, LimitEntry>();
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 10;
 
-export function rateLimitByIp(ip: string): { allowed: boolean; retryAfter?: number } {
+export function rateLimitByIp(
+    ip: string,
+    maxRequests: number = MAX_REQUESTS,
+): { allowed: boolean; retryAfter?: number } {
     const now = Date.now();
     const entry = store.get(ip);
 
@@ -16,7 +19,7 @@ export function rateLimitByIp(ip: string): { allowed: boolean; retryAfter?: numb
         return { allowed: true };
     }
 
-    if (entry.count >= MAX_REQUESTS) {
+    if (entry.count >= maxRequests) {
         const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
         return { allowed: false, retryAfter };
     }
