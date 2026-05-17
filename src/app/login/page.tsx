@@ -5,6 +5,7 @@ import OAuthButtons from './components/OAuthButtons'
 import EmailLoginForm from './components/EmailLoginForm'
 import AuthErrorBanner from './components/AuthErrorBanner'
 import AuthSuccessBanner from './components/AuthSuccessBanner'
+import EmbeddedBrowserNotice from './components/EmbeddedBrowserNotice'
 import LocalDevAccessPanel from './components/LocalDevAccessPanel'
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -76,6 +77,7 @@ function LoginContent() {
 
             <AuthErrorBanner message={derivedError} />
             <AuthSuccessBanner message={success} />
+            <EmbeddedBrowserNotice />
 
             <div className={styles.cardHeader}>
                 <span className={styles.logo}>G22SCORES</span>
