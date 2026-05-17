@@ -20,6 +20,27 @@ type SessionOutcome = 'navigate' | 'login'
 type SessionLike = {
     access_token?: string | null
     refresh_token?: string | null
+    expires_at?: number | null
+}
+
+// Authoritative access-token expiry (unix seconds): prefer the session's own
+// expires_at, fall back to decoding the JWT. Never the bespoke cookie hint.
+function readSessionExpirySeconds(session: SessionLike): number | null {
+    if (typeof session.expires_at === 'number' && Number.isFinite(session.expires_at)) {
+        return session.expires_at
+    }
+    const token = typeof session.access_token === 'string' ? session.access_token : ''
+    const segments = token.split('.')
+    if (segments.length < 2) return null
+    try {
+        let payload = segments[1].replace(/-/g, '+').replace(/_/g, '/')
+        const padding = payload.length % 4
+        if (padding) payload += '='.repeat(4 - padding)
+        const parsed = JSON.parse(atob(payload)) as { exp?: unknown }
+        return typeof parsed.exp === 'number' ? parsed.exp : null
+    } catch {
+        return null
+    }
 }
 
 async function commitAndNavigate(session: SessionLike | null, href: string): Promise<SessionOutcome> {
@@ -78,6 +99,19 @@ async function ensureFreshSession(href: string): Promise<SessionOutcome> {
     const session = await readSession()
 
     if (session?.access_token && session?.refresh_token) {
+        // 0. Fast path: the access token is comfortably fresh. This component
+        //    does a full-document navigation, which already carries the valid
+        //    cookie, and the server proxy fast-paths anything with >120s left
+        //    — so re-committing would only add a Supabase Auth setSession + a
+        //    users write per click for no benefit. 300s margin guarantees the
+        //    token survives the nav + server roundtrip. (Expired tokens — the
+        //    mobile frozen-tab case — skip this and go commit-first below.)
+        const expSeconds = readSessionExpirySeconds(session)
+        const nowSeconds = Math.floor(Date.now() / 1000)
+        if (typeof expSeconds === 'number' && expSeconds > nowSeconds + 300) {
+            return 'navigate'
+        }
+
         // 1. Commit as-is. Server-side setSession() refreshes it if the
         //    access token is expired (the mobile case).
         if ((await commitAndNavigate(session, href)) === 'navigate') return 'navigate'

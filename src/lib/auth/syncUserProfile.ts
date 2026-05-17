@@ -27,6 +27,18 @@ function isDuplicateKeyError(error: unknown) {
     )
 }
 
+// ProtectedLink commits the session on protected navigations, so without a
+// guard every admin click would issue a `users` UPDATE just to bump
+// last_login_at. Only write when the row is genuinely stale.
+const LAST_LOGIN_THROTTLE_MS = 10 * 60 * 1000
+
+function isLastLoginStale(lastLoginAt: unknown, nowIso: string): boolean {
+    if (typeof lastLoginAt !== 'string' || !lastLoginAt) return true
+    const last = Date.parse(lastLoginAt)
+    if (Number.isNaN(last)) return true
+    return Date.parse(nowIso) - last > LAST_LOGIN_THROTTLE_MS
+}
+
 export async function syncUserProfile(user: AuthUser) {
     const email = user.email
 
@@ -45,7 +57,7 @@ export async function syncUserProfile(user: AuthUser) {
 
     const { data: existingUser, error: lookupError } = await admin
         .from('users')
-        .select('id, role')
+        .select('id, role, last_login_at')
         .eq('id', user.id)
         .maybeSingle()
 
@@ -64,6 +76,14 @@ export async function syncUserProfile(user: AuthUser) {
     }
 
     if (existingUser) {
+        // Skip the UPDATE entirely when the only thing that would change is
+        // last_login_at and it was touched recently. A role change (reserved
+        // admin / default->metadata upgrade) always goes through.
+        const roleChanging = typeof updates.role === 'string'
+        if (!roleChanging && !isLastLoginStale(existingUser.last_login_at, now)) {
+            return { created: false as const }
+        }
+
         const { error: updateError } = await admin
             .from('users')
             .update(updates)
