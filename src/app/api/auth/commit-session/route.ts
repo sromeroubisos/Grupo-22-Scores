@@ -4,7 +4,7 @@ import { sanitizeNext } from '@/lib/auth/redirect'
 import { getAuthCookieHost, getRequestOriginDebugInfo, isSameOriginRequest } from '@/lib/auth/requestOrigin'
 import { syncUserProfile } from '@/lib/auth/syncUserProfile'
 import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie'
-import { clearAllAuthCookieScopes } from '@/lib/supabase/proxy'
+import { appendAuthSetCookieHeader, clearAllAuthCookieScopes } from '@/lib/supabase/proxy'
 
 type CookieToSet = {
     name: string
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
 
     const sharedCookieOptions = getSupabaseAuthCookieOptions(requestHost)
     cookiesToSet.forEach(({ name, value, options }) => {
-        response.cookies.set(name, value, {
+        appendAuthSetCookieHeader(response, name, value, {
             ...options,
             path: '/',
             sameSite: 'lax',

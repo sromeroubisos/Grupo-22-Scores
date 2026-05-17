@@ -7,7 +7,7 @@ import { syncUserProfile } from '@/lib/auth/syncUserProfile';
 import { sanitizeNext } from '@/lib/auth/redirect'
 import { rateLimitAuthCallback } from '@/lib/rateLimit';
 import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie';
-import { clearAllAuthCookieScopes } from '@/lib/supabase/proxy';
+import { appendAuthSetCookieHeader, clearAllAuthCookieScopes } from '@/lib/supabase/proxy';
 
 function getClientIp(request: NextRequest | Request): string {
     const req = request as any;
@@ -172,7 +172,7 @@ export async function handleAuthCallback(request: NextRequest | Request) {
     // there is exactly one cookie scope.
     const sharedCookieOptions = getSupabaseAuthCookieOptions(requestHost)
     cookiesToSet.forEach(({ name, value, options }) => {
-        response.cookies.set(name, value, {
+        appendAuthSetCookieHeader(response, name, value, {
             ...options,
             path: '/',
             sameSite: 'lax',

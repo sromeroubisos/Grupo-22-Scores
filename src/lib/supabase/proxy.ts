@@ -124,6 +124,52 @@ function buildExpiredAuthCookieHeader(name: string, domain?: string): string {
     return parts.join('; ');
 }
 
+type AuthSetCookieOptions = {
+    maxAge?: number;
+    expires?: Date | string | number;
+    path?: string;
+    sameSite?: string | boolean;
+    domain?: string;
+    secure?: boolean;
+    httpOnly?: boolean;
+};
+
+function buildAuthCookieHeader(name: string, value: string, options: AuthSetCookieOptions = {}): string {
+    const parts = [`${name}=${encodeURIComponent(value)}`];
+    parts.push(`Path=${options.path || '/'}`);
+
+    const sameSite = typeof options.sameSite === 'string' ? options.sameSite : 'Lax';
+    parts.push(`SameSite=${sameSite}`);
+
+    if (typeof options.maxAge === 'number') {
+        parts.push(`Max-Age=${options.maxAge}`);
+    }
+
+    if (options.expires) {
+        const expires = options.expires instanceof Date
+            ? options.expires.toUTCString()
+            : typeof options.expires === 'number'
+                ? new Date(options.expires).toUTCString()
+                : String(options.expires);
+        parts.push(`Expires=${expires}`);
+    }
+
+    if (options.domain) parts.push(`Domain=${options.domain}`);
+    if (options.httpOnly) parts.push('HttpOnly');
+    if (options.secure || process.env.NODE_ENV === 'production') parts.push('Secure');
+
+    return parts.join('; ');
+}
+
+export function appendAuthSetCookieHeader(
+    response: NextResponse,
+    name: string,
+    value: string,
+    options: AuthSetCookieOptions = {},
+) {
+    response.headers.append('Set-Cookie', buildAuthCookieHeader(name, value, options));
+}
+
 /**
  * Expire every Supabase auth cookie variant in BOTH the host-only scope and
  * the shared `.g22scores.com` scope.

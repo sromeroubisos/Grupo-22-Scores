@@ -8,7 +8,7 @@ import {
 } from '@/lib/auth/requestOrigin'
 import { sanitizeNext } from '@/lib/auth/redirect'
 import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie'
-import { clearAllAuthCookieScopes } from '@/lib/supabase/proxy'
+import { appendAuthSetCookieHeader, clearAllAuthCookieScopes } from '@/lib/supabase/proxy'
 
 // Start the Google OAuth flow on the SERVER. Why server-side:
 // when the client called supabase.auth.signInWithOAuth() directly,
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
             // because the callback runs on the same hostname as this
             // start endpoint.
             const safeOptions = options ? { ...options, domain: undefined } : undefined
-            response.cookies.set(name, value, {
+            appendAuthSetCookieHeader(response, name, value, {
                 path: '/',
                 sameSite: 'lax',
                 secure: process.env.NODE_ENV === 'production',
