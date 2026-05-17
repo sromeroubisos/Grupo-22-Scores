@@ -8,7 +8,7 @@ import {
     type AnchorHTMLAttributes,
     type MouseEvent,
 } from 'react'
-import { createClient, getSupabaseBrowserSessionHint } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import { commitSupabaseSessionForServer } from '@/lib/supabase/sessionBridge'
 
 type ProtectedLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
@@ -23,15 +23,45 @@ const FRESH_ACCESS_TOKEN_MARGIN_SECONDS = 90
 
 type SessionOutcome = 'navigate' | 'login'
 
-async function commitCurrentSessionForServer(href: string): Promise<boolean> {
+type SessionLike = {
+    access_token?: string | null
+    refresh_token?: string | null
+    expires_at?: number | null
+}
+
+// Resolve the access-token expiry (unix seconds) from the real Supabase
+// session. Prefer the session's own `expires_at`; fall back to decoding the
+// JWT only if it is absent.
+function readSessionExpirySeconds(session: SessionLike): number | null {
+    if (typeof session.expires_at === 'number' && Number.isFinite(session.expires_at)) {
+        return session.expires_at
+    }
+
+    const token = typeof session.access_token === 'string' ? session.access_token : ''
+    const segments = token.split('.')
+    if (segments.length < 2) return null
+
     try {
-        const supabase = createClient()
-        const { data, error } = await supabase.auth.getSession()
-        if (error || !data.session) return false
-        await commitSupabaseSessionForServer(data.session, href)
-        return true
+        let payload = segments[1].replace(/-/g, '+').replace(/_/g, '/')
+        const padding = payload.length % 4
+        if (padding) payload += '='.repeat(4 - padding)
+        const parsed = JSON.parse(atob(payload)) as { exp?: unknown }
+        return typeof parsed.exp === 'number' ? parsed.exp : null
     } catch {
-        return false
+        return null
+    }
+}
+
+async function commitAndNavigate(session: SessionLike, href: string): Promise<SessionOutcome> {
+    if (!session.access_token || !session.refresh_token) return 'login'
+    try {
+        await commitSupabaseSessionForServer(
+            { access_token: session.access_token, refresh_token: session.refresh_token },
+            href,
+        )
+        return 'navigate'
+    } catch {
+        return 'login'
     }
 }
 
@@ -39,67 +69,69 @@ async function commitCurrentSessionForServer(href: string): Promise<boolean> {
  * Make sure the auth cookie carries a non-expired access token BEFORE we hand
  * off to a server-guarded route.
  *
- * The previous implementation raced `getSession()` against a 4s timeout and
- * then navigated regardless. On mobile (backgrounded tabs let the access token
- * expire; slow networks make `/token` take >4s) the timeout won the race and
- * the full-document navigation aborted the in-flight refresh — consuming the
- * refresh token without persisting the rotated session. Both tokens ended up
- * unusable, so the server guard bounced the user to `/login` ~4s later.
- *
- * This version never abandons an in-flight refresh: it either confirms a fresh
- * token locally (instant navigation, the common case) or awaits a real
- * `refreshSession()` to settle. If the session is genuinely gone it routes to
- * `/login` immediately instead of dead-ending there after a doomed navigation.
+ * The SOURCE OF TRUTH is the real Supabase client (`supabase.auth.getSession`)
+ * — supabase-ssr reliably reassembles chunked/Google session cookies. The
+ * previous implementation gated this decision on the bespoke
+ * `getSupabaseBrowserSessionHint()` parser, which misreads large chunked
+ * OAuth session cookies and was therefore routing fully logged-in users to
+ * `/login` on every "Super Admin" / "Editar partido" click ("me saca de la
+ * sesion"). We only fall back to `/login` when a real `getSession()` AND a
+ * real `refreshSession()` both yield nothing — and we never race a timeout or
+ * abandon an in-flight refresh (that is what previously consumed the refresh
+ * token and broke the session).
  */
 async function ensureFreshSession(href: string): Promise<SessionOutcome> {
-    let hint = getSupabaseBrowserSessionHint()
+    const supabase = createClient()
+
+    let session: SessionLike | null = null
+    try {
+        const { data } = await supabase.auth.getSession()
+        session = (data?.session as SessionLike | null) ?? null
+    } catch {
+        session = null
+    }
+
     const nowSeconds = Math.floor(Date.now() / 1000)
 
-    // Fast path: local cookie/storage already has a comfortably-fresh access
-    // token. Confirm it through the server bridge before entering admin routes.
-    if (
-        hint.hasSession &&
-        typeof hint.accessTokenExpiresAt === 'number' &&
-        hint.accessTokenExpiresAt > nowSeconds + FRESH_ACCESS_TOKEN_MARGIN_SECONDS
-    ) {
-        return await commitCurrentSessionForServer(href) ? 'navigate' : 'login'
-    }
+    if (session?.access_token && session?.refresh_token) {
+        const expSeconds = readSessionExpirySeconds(session)
+        const isFresh =
+            typeof expSeconds === 'number' &&
+            expSeconds > nowSeconds + FRESH_ACCESS_TOKEN_MARGIN_SECONDS
 
-    // No session material at all — go straight to login, no point navigating
-    // into a guarded route.
-    if (!hint.hasSession && !hint.hasRefreshToken) {
-        return 'login'
-    }
-
-    // Slow path: the access token is missing/expiring. Deterministically
-    // refresh and WAIT for it to fully settle so the rotated session is
-    // written to `document.cookie` before the server reads it. We do NOT race
-    // a timeout here: the app's auth fetch already caps the request
-    // (SUPABASE_AUTH_TIMEOUT_MS) and coalesces concurrent refreshes, so this
-    // resolves on its own — and never gets aborted by an early navigation.
-    try {
-        const supabase = createClient()
-        const { data, error } = await supabase.auth.refreshSession()
-
-        if (!error && data.session) {
-            await commitSupabaseSessionForServer(data.session, href)
-            return 'navigate'
+        if (isFresh) {
+            return commitAndNavigate(session, href)
         }
 
-        // The browser auth fetch turns transient network failures into a
-        // synthetic error while preserving local session state, so re-check
-        // the local hint. Even in this fallback, only navigate after the
-        // server bridge accepts the current session.
-        hint = getSupabaseBrowserSessionHint()
-        return hint.isAccessTokenFresh && await commitCurrentSessionForServer(href)
-            ? 'navigate'
-            : 'login'
-    } catch {
-        hint = getSupabaseBrowserSessionHint()
-        return hint.isAccessTokenFresh && await commitCurrentSessionForServer(href)
-            ? 'navigate'
-            : 'login'
+        // Token missing/expiring: refresh and WAIT for it to settle (never
+        // race a timeout, never abandon an in-flight refresh).
+        try {
+            const { data, error } = await supabase.auth.refreshSession()
+            if (!error && data?.session?.access_token && data.session.refresh_token) {
+                return commitAndNavigate(data.session as SessionLike, href)
+            }
+        } catch {
+            // fall through and try the session we already hold
+        }
+
+        // Refresh failed but we still hold a session locally. Commit it and
+        // let the server validate it, instead of nuking a recoverable session.
+        return commitAndNavigate(session, href)
     }
+
+    // No session from getSession — the refresh-token cookie may still be
+    // present (e.g. only the access token was dropped). Attempt one real
+    // refresh before giving up.
+    try {
+        const { data, error } = await supabase.auth.refreshSession()
+        if (!error && data?.session?.access_token && data.session.refresh_token) {
+            return commitAndNavigate(data.session as SessionLike, href)
+        }
+    } catch {
+        // genuinely no session
+    }
+
+    return 'login'
 }
 
 /**
