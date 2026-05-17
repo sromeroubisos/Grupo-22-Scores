@@ -182,12 +182,20 @@ export async function handleAuthCallback(request: NextRequest | Request) {
         })
     })
 
-    // Clean up guest cookie after successful OAuth login (parity with email login).
-    response.cookies.set('g22_guest_club_access', '', {
-        httpOnly: true,
+    // Clean up guest cookie after successful OAuth login (parity with email
+    // login). CRITICAL: this MUST be a raw Set-Cookie append, not
+    // `response.cookies.set(...)`. The first access to `response.cookies`
+    // lazily builds a ResponseCookies that parses every existing Set-Cookie
+    // header into a name-keyed Map and then `.set()` runs `replace()` which
+    // deletes the whole Set-Cookie header and re-emits one cookie per name —
+    // collapsing the dual-scope clears and corrupting the freshly-written
+    // (often chunked) session cookie, so OAuth login never persisted a
+    // usable session. Keep every cookie on this response raw-header only.
+    appendAuthSetCookieHeader(response, 'g22_guest_club_access', '', {
+        path: '/',
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',
-        path: '/',
+        httpOnly: true,
         maxAge: 0,
     });
 

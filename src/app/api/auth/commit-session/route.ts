@@ -94,11 +94,22 @@ export async function POST(request: NextRequest) {
         })
     })
 
-    response.cookies.set('g22_guest_club_access', '', {
-        httpOnly: true,
+    // CRITICAL: do NOT use `response.cookies.set(...)` here. The session
+    // cookies above were written as raw `Set-Cookie` headers (clearAll +
+    // appendAuthSetCookieHeader). The FIRST access to `response.cookies`
+    // lazily constructs a ResponseCookies that parses every existing
+    // Set-Cookie header into a Map keyed by cookie name (collapsing the
+    // dual-scope clears and any chunked session cookies) and then `.set()`
+    // calls `replace()` -> `headers.delete('set-cookie')` and re-emits one
+    // cookie per name from that collapsed Map. That silently destroyed the
+    // freshly-written auth cookie on every login. Append the guest-cookie
+    // expiry as a raw header too so the auth Set-Cookie headers survive
+    // untouched.
+    appendAuthSetCookieHeader(response, 'g22_guest_club_access', '', {
+        path: '/',
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',
-        path: '/',
+        httpOnly: true,
         maxAge: 0,
     })
 
