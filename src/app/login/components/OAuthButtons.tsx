@@ -1,6 +1,7 @@
 'use client'
 
 import { getSupabaseAuthStorageKey, getSupabaseSharedCookieDomain } from '@/lib/supabase/auth-cookie'
+import { clearSupabaseBrowserSession } from '@/lib/supabase/client'
 import styles from '../login.module.css'
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -44,6 +45,7 @@ export default function OAuthButtons({ onError }: { onError?: (msg: string | nul
         let navigated = false
         try {
             console.info('[OAuth] starting Google sign-in via /api/auth/google-start')
+            clearSupabaseBrowserSession()
             clearStalePkceState()
 
             // Server-side OAuth start. The server creates the PKCE

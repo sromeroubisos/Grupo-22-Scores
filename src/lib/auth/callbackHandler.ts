@@ -6,6 +6,7 @@ import { syncUserProfile } from '@/lib/auth/syncUserProfile';
 import { sanitizeNext } from '@/lib/auth/redirect'
 import { rateLimitAuthCallback } from '@/lib/rateLimit';
 import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie';
+import { clearAllAuthCookieScopes } from '@/lib/supabase/proxy';
 
 function getClientIp(request: NextRequest | Request): string {
     const req = request as any;
@@ -149,6 +150,9 @@ export async function handleAuthCallback(request: NextRequest | Request) {
     const finalizeUrl = new URL('/auth/callback/finalize', origin)
     finalizeUrl.searchParams.set('next', next)
     const response = NextResponse.redirect(finalizeUrl);
+    if (requestNext.cookies?.getAll) {
+        clearAllAuthCookieScopes(requestNext, response);
+    }
 
     // The session cookie MUST be written with the exact same scope the rest
     // of the app uses (browser client on email login + proxy on refresh both

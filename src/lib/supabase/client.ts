@@ -93,6 +93,7 @@ export function clearSupabaseBrowserSession() {
     // storage/cookies (covers leftovers from previous Supabase projects
     // or older builds where the storage key changed).
     const storageKeysToClear = new Set<string>([...baseStorageKeys, ...collectSupabaseStorageKeys()])
+    storageKeysToClear.add(APP_AUTH_LOCAL_USER_KEY)
     storageKeysToClear.forEach((key) => {
         try { window.localStorage.removeItem(key) } catch { /* best effort */ }
         try { window.sessionStorage.removeItem(key) } catch { /* best effort */ }

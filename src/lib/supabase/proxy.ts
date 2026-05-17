@@ -71,17 +71,36 @@ function buildResponseAuthCookieOptions(request: NextRequest, options?: NonNulla
 
 function getAuthCookieNames(): string[] {
     const baseName = getSupabaseAuthCookieBaseName();
-    if (!baseName) return [];
+    const names = new Set<string>();
 
-    const names = [baseName, `${baseName}-code-verifier`, `${baseName}-user`];
-    for (let index = 0; index < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; index += 1) {
-        names.push(`${baseName}.${index}`);
+    if (baseName) {
+        names.add(baseName);
+        names.add(`${baseName}-code-verifier`);
+        names.add(`${baseName}-user`);
+        for (let index = 0; index < MAX_SUPABASE_AUTH_COOKIE_CHUNKS; index += 1) {
+            names.add(`${baseName}.${index}`);
+        }
     }
-    return names;
+
+    return [...names];
+}
+
+const SUPABASE_AUTH_COOKIE_NAME_PATTERN = /^sb-[a-z0-9]+-auth-token(?:\.\d+|-code-verifier|-user)?$/i;
+
+function getRequestSupabaseAuthCookieNames(request: NextRequest): string[] {
+    const names = new Set(getAuthCookieNames());
+
+    request.cookies.getAll().forEach((cookie) => {
+        if (SUPABASE_AUTH_COOKIE_NAME_PATTERN.test(cookie.name)) {
+            names.add(cookie.name);
+        }
+    });
+
+    return [...names];
 }
 
 function clearAuthCookies(request: NextRequest, response: NextResponse) {
-    for (const name of getAuthCookieNames()) {
+    for (const name of getRequestSupabaseAuthCookieNames(request)) {
         request.cookies.delete(name);
         response.cookies.set(name, '', {
             ...buildResponseAuthCookieOptions(request),
@@ -123,7 +142,7 @@ function buildExpiredAuthCookieHeader(name: string, domain?: string): string {
  */
 export function clearAllAuthCookieScopes(request: NextRequest, response: NextResponse) {
     const sharedDomain = getSupabaseAuthCookieOptions(getRequestHost(request)).domain;
-    for (const name of getAuthCookieNames()) {
+    for (const name of getRequestSupabaseAuthCookieNames(request)) {
         request.cookies.delete(name);
         response.headers.append('Set-Cookie', buildExpiredAuthCookieHeader(name));
         if (sharedDomain) {
