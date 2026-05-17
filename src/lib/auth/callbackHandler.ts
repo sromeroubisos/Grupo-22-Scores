@@ -41,9 +41,13 @@ export async function handleAuthCallback(request: NextRequest | Request) {
         const errorMessage = providerError
             ? 'login_provider_error'
             : 'login_cancelled';
-        return NextResponse.redirect(
+        const response = NextResponse.redirect(
             `${origin}/login?error=${errorMessage}&next=${encodeURIComponent(next)}`
         );
+        if ((request as NextRequest).cookies?.getAll) {
+            clearAllAuthCookieScopes(request as NextRequest, response);
+        }
+        return response;
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -119,9 +123,13 @@ export async function handleAuthCallback(request: NextRequest | Request) {
             errorCode = 'auth-state-error';
         }
         const detail = errorMsg.replace(/[^\x20-\x7E]/g, '').slice(0, 160);
-        return NextResponse.redirect(
+        const response = NextResponse.redirect(
             `${origin}/login?error=${errorCode}&detail=${encodeURIComponent(detail)}&next=${encodeURIComponent(next)}`
         );
+        if (requestNext.cookies?.getAll) {
+            clearAllAuthCookieScopes(requestNext, response);
+        }
+        return response;
     }
 
     // Sync user profile in database (best effort).

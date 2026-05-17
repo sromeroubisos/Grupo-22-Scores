@@ -58,6 +58,7 @@ export default function OAuthButtons({ onError }: { onError?: (msg: string | nul
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'same-origin',
+                cache: 'no-store',
                 body: JSON.stringify({ next: returnTo }),
             })
             const payload = await response.json().catch(() => ({})) as { url?: string; error?: string }

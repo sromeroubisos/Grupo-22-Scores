@@ -8,6 +8,7 @@ import {
 } from '@/lib/auth/requestOrigin'
 import { sanitizeNext } from '@/lib/auth/redirect'
 import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie'
+import { clearAllAuthCookieScopes } from '@/lib/supabase/proxy'
 
 // Start the Google OAuth flow on the SERVER. Why server-side:
 // when the client called supabase.auth.signInWithOAuth() directly,
@@ -97,6 +98,14 @@ export async function POST(request: NextRequest) {
         )
 
         const response = NextResponse.json({ url: data.url })
+
+        // Starting a new OAuth flow is a hard auth reset. Clear every old
+        // Supabase auth cookie scope before writing the fresh PKCE verifier,
+        // otherwise a stale host-only/domain-scoped verifier can shadow the
+        // new one and make every retry fail until the user manually clears
+        // browser data.
+        clearAllAuthCookieScopes(request, response)
+
         cookiesToSet.forEach(({ name, value, options }) => {
             // Strip Domain so the verifier is a host-only cookie. Some
             // strict browsers (notably Brave Shields on desktop) reject or
