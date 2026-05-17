@@ -29,6 +29,8 @@ const SESSION_REFRESH_REQUIRED_PREFIXES = [
 
 const AUTH_CALLBACK_PATHS = new Set([
     '/api/auth/callback/google',
+    '/api/auth/commit-session',
+    '/api/auth/google-start',
     '/auth/callback',
 ])
 

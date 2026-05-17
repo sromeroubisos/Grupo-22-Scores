@@ -2,6 +2,7 @@
 
 import { clearSupabaseBrowserSession, createClient } from '@/lib/supabase/client'
 import { getAuthErrorMessage } from '@/lib/auth/errors'
+import { commitSupabaseSessionForServer } from '@/lib/supabase/sessionBridge'
 
 export function normalizeEmail(value: string): string {
     return value.trim().toLowerCase()
@@ -77,6 +78,12 @@ export async function signInWithPasswordAndRedirect(input: {
 
     console.log('[login] Login successful for:', data.user?.email)
     console.log('[login] Session present:', !!data.session)
+
+    if (!data.session) {
+        throw new Error('No pudimos confirmar la sesion. Intenta nuevamente.')
+    }
+
+    await commitSupabaseSessionForServer(data.session, input.returnTo)
 
     try {
         await fetch('/api/auth/guest-club-family', {

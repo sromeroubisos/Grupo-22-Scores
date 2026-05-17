@@ -9,6 +9,7 @@ import {
     type MouseEvent,
 } from 'react'
 import { createClient, getSupabaseBrowserSessionHint } from '@/lib/supabase/client'
+import { commitSupabaseSessionForServer } from '@/lib/supabase/sessionBridge'
 
 type ProtectedLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
     href: string
@@ -38,20 +39,30 @@ type SessionOutcome = 'navigate' | 'login'
  * `refreshSession()` to settle. If the session is genuinely gone it routes to
  * `/login` immediately instead of dead-ending there after a doomed navigation.
  */
-async function ensureFreshSession(): Promise<SessionOutcome> {
+async function ensureFreshSession(href: string): Promise<SessionOutcome> {
     let hint = getSupabaseBrowserSessionHint()
     const nowSeconds = Math.floor(Date.now() / 1000)
 
     // Fast path: local cookie/storage already has a comfortably-fresh access
-    // token. The server will validate it without a refresh — navigate now and
-    // skip the slow path entirely (this is what removes the perceived delay
-    // when the token is actually fine).
+    // token. Confirm it through the server bridge before entering admin routes.
     if (
         hint.hasSession &&
         typeof hint.accessTokenExpiresAt === 'number' &&
         hint.accessTokenExpiresAt > nowSeconds + FRESH_ACCESS_TOKEN_MARGIN_SECONDS
     ) {
-        return 'navigate'
+        try {
+            const supabase = createClient()
+            const { data, error } = await supabase.auth.getSession()
+            if (!error && data.session) {
+                await commitSupabaseSessionForServer(data.session, href)
+                return 'navigate'
+            }
+        } catch {
+            // Fall through to login. A client-only session that the server
+            // cannot commit is not usable for server-guarded admin routes.
+        }
+
+        return 'login'
     }
 
     // No session material at all — go straight to login, no point navigating
@@ -71,6 +82,7 @@ async function ensureFreshSession(): Promise<SessionOutcome> {
         const { data, error } = await supabase.auth.refreshSession()
 
         if (!error && data.session) {
+            await commitSupabaseSessionForServer(data.session, href)
             return 'navigate'
         }
 
@@ -126,7 +138,7 @@ const ProtectedLink = forwardRef<HTMLAnchorElement, ProtectedLinkProps>(
                 navigatingRef.current = true
                 setPending(true)
 
-                void ensureFreshSession().then((outcome) => {
+                void ensureFreshSession(href).then((outcome) => {
                     if (outcome === 'login') {
                         const loginUrl = `/login?returnTo=${encodeURIComponent(href)}`
                         window.location.assign(loginUrl)
