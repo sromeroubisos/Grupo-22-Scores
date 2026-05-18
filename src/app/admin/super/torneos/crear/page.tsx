@@ -1244,7 +1244,18 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                 );
             }
 
-            await saveQuickPhase(savedId, phaseConfigToPersist);
+            // La fase inicial es opcional: el torneo ya está creado. Sin
+            // participantes (o con formato playoff que exige >=2 equipos) la
+            // fase no se puede generar todavía. No bloqueamos la creación:
+            // avisamos y se completa luego en el gestor, igual que hace el
+            // camino del panel de gestor con sus warnings.
+            let phaseWarning: string | null = null;
+            try {
+                await saveQuickPhase(savedId, phaseConfigToPersist);
+            } catch (phaseError: unknown) {
+                phaseWarning = phaseError instanceof Error ? phaseError.message : String(phaseError);
+                console.warn('[torneos/crear] fase inicial pendiente:', phaseWarning);
+            }
 
             // Limpiar borrador
             if (typeof window !== 'undefined') {
@@ -1255,6 +1266,13 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
             // El SuperConsole cache es client-side, revalidatePath del server action no lo limpia.
             invalidateCache('tournaments_list');
             refresh('tournaments');
+
+            if (phaseWarning && typeof window !== 'undefined') {
+                window.alert(
+                    `El torneo se creó, pero la fase inicial quedó pendiente:\n\n- ${phaseWarning}\n\n` +
+                    'Agregá participantes y configurá la fase desde el gestor.',
+                );
+            }
 
             router.push(tournamentsHomeHref);
         } catch (err: unknown) {
