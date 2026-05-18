@@ -3,23 +3,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ChevronDown,
-  Wand2,
   RefreshCw,
   Trash2,
   AlertTriangle,
   Plus,
   Check,
-  Trophy,
-  Swords,
-  Award,
-  SlidersHorizontal,
-  ListOrdered,
-  Shuffle,
-  CalendarClock,
-  PencilLine,
 } from 'lucide-react';
 import PlayoffBracketBoard, { type PlayoffBracketBoardData } from './PlayoffBracketBoard';
 import { buildBracketTemplate, resolveCupName } from '@/lib/playoff/templates';
+import styles from './PlayoffBuilderPanel.module.css';
 
 const CUP_DOT: Record<number, string> = {
   0: '#f5c542',
@@ -93,7 +85,7 @@ function SlotEditor({
   onChange: (s: Slot) => void;
 }) {
   return (
-    <div className="flex gap-1.5 items-center">
+    <div className={styles.customRow}>
       <select
         value={value.type}
         onChange={(e) => {
@@ -104,7 +96,7 @@ function SlotEditor({
               : { type, ref: sources[0]?.code ?? '' },
           );
         }}
-        className="bg-[#1b232c] border border-white/15 px-1.5 py-1 text-[11px] text-white"
+        className={styles.miniSelect}
       >
         <option value="seed">Sembrado</option>
         <option value="winner">Ganador de</option>
@@ -116,13 +108,13 @@ function SlotEditor({
           min={1}
           value={Number(value.ref) || 1}
           onChange={(e) => onChange({ type: 'seed', ref: Number(e.target.value) || 1 })}
-          className="w-14 bg-[#1b232c] border border-white/15 px-1.5 py-1 text-[11px] text-white"
+          className={`${styles.miniInput} ${styles.codeInput}`}
         />
       ) : (
         <select
           value={String(value.ref)}
           onChange={(e) => onChange({ type: value.type, ref: e.target.value })}
-          className="bg-[#1b232c] border border-white/15 px-1.5 py-1 text-[11px] text-white max-w-[160px]"
+          className={styles.miniSelect}
         >
           {sources.length === 0 && <option value="">(sin rondas previas)</option>}
           {sources.map((s) => (
@@ -144,20 +136,18 @@ function toLocalInput(iso: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-/** A selectable card with a clear checked state. */
+/** A selectable card with a top-right check + animated active border. */
 function OptionCard({
   selected,
   disabled,
   title,
   desc,
-  icon,
   onClick,
 }: {
   selected: boolean;
   disabled?: boolean;
   title: string;
   desc?: string;
-  icon?: React.ReactNode;
   onClick: () => void;
 }) {
   return (
@@ -166,46 +156,18 @@ function OptionCard({
       disabled={disabled}
       onClick={onClick}
       aria-pressed={selected}
-      className={`group flex items-start gap-3.5 px-4 py-4 text-left transition-colors duration-150 ${
-        selected
-          ? 'border border-[#38BDF8] bg-[#13304a]'
-          : 'border border-transparent bg-white/[0.03] hover:bg-white/[0.06]'
-      } ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+      className={`${styles.optionCard} ${selected ? styles.active : ''} ${
+        disabled ? styles.disabled : ''
+      }`}
     >
-      {/* Radio indicator — at the left, next to the title */}
-      <span
-        className={`mt-0.5 flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-          selected ? 'border-[#38BDF8] bg-[#38BDF8] text-[#06222e]' : 'border-white/35 text-transparent'
-        }`}
-        aria-hidden
-      >
+      <span className={styles.checkIcon} aria-hidden>
         <Check size={11} strokeWidth={3.5} />
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2">
-          {icon && (
-            <span className={selected ? 'text-[#7fd4f8]' : 'text-white/40'} aria-hidden>
-              {React.isValidElement(icon)
-                ? React.cloneElement(icon as React.ReactElement<{ size?: number }>, { size: 15 })
-                : icon}
-            </span>
-          )}
-          <span className="text-[14px] font-bold leading-tight text-white">{title}</span>
-        </span>
-        {desc && (
-          <span className="mt-1.5 block text-[12px] leading-relaxed text-white/55">{desc}</span>
-        )}
-      </span>
+      <span className={styles.cardLabel}>{title}</span>
+      {desc && <span className={styles.cardDesc}>{desc}</span>}
     </button>
   );
 }
-
-const TEMPLATE_ICON: Record<string, React.ReactNode> = {
-  single_elimination: <Swords size={18} />,
-  oro_plata: <Trophy size={18} />,
-  oro_plata_bronce_estimulo: <Award size={18} />,
-  custom: <SlidersHorizontal size={18} />,
-};
 
 const TEMPLATE_SHORT: Record<string, string> = {
   single_elimination: 'Eliminación simple',
@@ -214,7 +176,7 @@ const TEMPLATE_SHORT: Record<string, string> = {
   custom: 'Personalizada',
 };
 
-/** A numbered step block — gives the panel a structured, guided rhythm. */
+/** A numbered step on the connector line. */
 function StepBlock({
   n,
   title,
@@ -227,20 +189,14 @@ function StepBlock({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-white/12 border-l-[3px] border-l-[#38BDF8] bg-[#161d27]">
-      <div className="flex items-center gap-3.5 border-b border-white/10 bg-white/[0.03] px-6 py-4">
-        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center bg-[#38BDF8] text-[14px] font-extrabold text-[#06222e]">
-          {n}
-        </span>
-        <div className="flex min-w-0 flex-col gap-1">
-          <span className="text-[13px] font-bold uppercase tracking-[0.1em] text-white">
-            {title}
-          </span>
-          {hint && <span className="text-[12px] leading-snug text-white/55">{hint}</span>}
-        </div>
+    <div className={styles.step}>
+      <div className={styles.stepNumber}>{n}</div>
+      <div className={styles.stepTitle}>
+        <h3>{title}</h3>
+        {hint && <span>{hint}</span>}
       </div>
-      <div className="p-6">{children}</div>
-    </section>
+      {children}
+    </div>
   );
 }
 
@@ -521,552 +477,534 @@ export default function PlayoffBuilderPanel({
     }
   }
 
+  const cupsCount = templateId === 'custom' ? customCups.length : cupFields.length || 1;
+
   return (
-    <div className="overflow-hidden border border-white/12 bg-[#10151c]">
+    <div className={styles.wrap}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-3 border-b border-white/10 bg-[#131922] px-5 py-4 text-left transition-colors hover:bg-[#1a212c]"
+        className={`${styles.header} ${open ? styles.headerOpen : ''}`}
       >
-        <span className="flex min-w-0 items-center gap-3">
-          <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center bg-[#38BDF8] text-[#06222e]">
-            <Wand2 size={17} />
-          </span>
-          <span className="flex min-w-0 flex-col">
-            <span className="text-sm font-bold text-white">Constructor de Playoff</span>
-            <span className="truncate text-xs text-white/55">{phaseName}</span>
+        <span className={styles.titleGroup}>
+          <span>
+            <span className={styles.title}>Constructor de Playoff</span>
+            <span className={styles.sub}>{phaseName}</span>
           </span>
         </span>
-        <span className="flex flex-shrink-0 items-center gap-3">
+        <span className={styles.headerRight}>
           <span
-            className={`border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
-              board.hasBracket
-                ? 'border-[#22C55E]/50 bg-[#22C55E]/15 text-[#4ade80]'
-                : 'border-white/25 bg-white/5 text-white/65'
-            }`}
+            className={`${styles.badge} ${board.hasBracket ? styles.badgeGenerated : ''}`}
           >
             {board.hasBracket ? 'Cuadro generado' : 'Sin generar'}
           </span>
           <ChevronDown
-            size={16}
-            className={`text-white/55 transition-transform ${open ? 'rotate-180' : ''}`}
+            size={18}
+            className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`}
           />
         </span>
       </button>
 
       {open && (
-        <div className="flex flex-col gap-8 bg-[#0e131a] px-7 pb-7 pt-7">
-          <p className="border-l-[3px] border-[#38BDF8] bg-[#38BDF8]/[0.10] px-4 py-3.5 text-[13px] leading-relaxed text-white/90">
-            Elegí una plantilla y el sistema crea todas las rondas, copas y reglas de avance.
-            Al cargar resultados, los equipos avanzan solos a la copa que corresponde.
-          </p>
-
-          {/* Template selector */}
-          <StepBlock n={1} title="Plantilla" hint="Estructura del cuadro. Podés regenerarla cuando quieras.">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {(templates.length
-                ? templates
-                : ([
-                    { id: 'oro_plata_bronce_estimulo', label: 'Oro / Plata / Bronce / Estímulo', description: '16 equipos, 4 copas.', teamCounts: [16], defaultTeamCount: 16, available: true },
-                  ] as TemplateMeta[])
-              ).map((t) => (
-                <OptionCard
-                  key={t.id}
-                  selected={templateId === t.id}
-                  disabled={!t.available}
-                  icon={TEMPLATE_ICON[t.id]}
-                  title={t.label}
-                  desc={t.description}
-                  onClick={() => {
-                    setTemplateId(t.id);
-                    if (t.id === 'oro_plata_bronce_estimulo') setTeamCount(16);
-                    else if (t.defaultTeamCount) setTeamCount(t.defaultTeamCount);
-                  }}
-                />
-              ))}
+        <div className={styles.body}>
+          {/* Top summary bar */}
+          <div className={styles.summaryBar}>
+            <div className={styles.summaryItem}>
+              <strong>{templateId === 'custom' ? customCups.length : teamCount}</strong>{' '}
+              {templateId === 'custom' ? 'COPAS' : 'EQUIPOS'}
             </div>
-          </StepBlock>
-
-          {/* Crossings: by seed or random draw */}
-          <StepBlock n={2} title="Cruces de la primera ronda" hint="Cómo se arman los enfrentamientos de la ronda inicial.">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <OptionCard
-                selected={seedMode === 'seed'}
-                icon={<ListOrdered size={18} />}
-                title="Por seed"
-                desc="1 vs 16, 2 vs 15, 3 vs 14…"
-                onClick={() => setSeedMode('seed')}
-              />
-              <OptionCard
-                selected={seedMode === 'random'}
-                icon={<Shuffle size={18} />}
-                title="Aleatorios"
-                desc="Sorteo al azar (se re-sortea al regenerar)"
-                onClick={() => setSeedMode('random')}
-              />
+            <div className={styles.dot} />
+            <div className={styles.summaryItem}>PARTIDO ÚNICO</div>
+            <div className={styles.dot} />
+            <div className={styles.summaryItem}>
+              CRUCES: {seedMode === 'random' ? 'ALEATORIOS' : 'POR SEED'}
             </div>
-          </StepBlock>
-
-          {/* Config: teams, 3rd place, cup names — not for the custom builder */}
-          {templateId !== 'custom' && (
-            <StepBlock n={3} title="Configuración" hint="Equipos, definición de puestos y nombres de las copas.">
-              <div className="flex flex-col gap-7">
-              <div className="flex flex-wrap items-end gap-x-8 gap-y-5">
-                <label className="flex flex-col gap-2">
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-white/60">Equipos</span>
-                  <select
-                    value={teamCount}
-                    disabled={teamCountLocked}
-                    onChange={(e) => setTeamCount(Number(e.target.value))}
-                    className="border border-white/15 bg-[#1b232c] px-3 py-2 text-sm font-medium text-white disabled:opacity-70"
-                  >
-                    {(teamCountLocked ? [16] : teamCountOptions).map((n) => (
-                      <option key={n} value={n}>
-                        {n} equipos
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="flex cursor-pointer items-center gap-2 pb-1.5 text-[13px] text-white/85">
-                  <input
-                    type="checkbox"
-                    checked={thirdPlace}
-                    onChange={(e) => setThirdPlace(e.target.checked)}
-                    className="h-4 w-4 accent-[#38BDF8]"
-                  />
-                  Incluir partido por el 3.º y 4.º puesto
-                </label>
-              </div>
-              {cupFields.length > 0 && (
-                <div className="flex flex-col gap-2.5">
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-white/60">
-                    Nombres de las copas
-                  </span>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {cupFields.map((cup) => (
-                      <label key={cup.key} className="flex flex-col gap-1.5">
-                        <span className="text-[12px] text-white/55">{cup.label}</span>
-                        <input
-                          type="text"
-                          value={cupNames[cup.key] ?? ''}
-                          placeholder={cup.label}
-                          onChange={(e) =>
-                            setCupNames((prev) => ({ ...prev, [cup.key]: e.target.value }))
-                          }
-                          className="border border-white/15 bg-[#1b232c] px-3 py-2.5 text-sm font-medium text-white placeholder:text-white/40 focus:border-[#38BDF8] focus:outline-none focus:ring-1 focus:ring-[#38BDF8]/50"
-                        />
-                      </label>
-                    ))}
-                  </div>
+            <div className={styles.dot} />
+            <div className={styles.summaryItem}>
+              <strong>{cupsCount}</strong> {cupsCount === 1 ? 'COPA' : 'COPAS'}
+            </div>
+            <div className={styles.dot} />
+            <div className={styles.summaryItem}>
+              HORARIOS: {schedMode === 'auto' ? 'AUTOMÁTICOS' : 'MANUALES'}
+            </div>
+            {preview.ok && (
+              <>
+                <div className={styles.dot} />
+                <div className={styles.summaryItem}>
+                  <strong>{preview.total}</strong> PARTIDOS DE CUADRO
                 </div>
-              )}
-            </div>
-            </StepBlock>
-          )}
+              </>
+            )}
+          </div>
 
-          {/* Custom builder */}
-          {templateId === 'custom' && (
-            <div className="flex flex-col gap-4 border border-white/12 border-l-[3px] border-l-[#38BDF8] bg-[#161d27] p-5">
-              <p className="text-[12px] text-white/70">
-                Definí copas, rondas y partidos. En cada slot elegí un sembrado o el
-                ganador/perdedor de un partido de una <strong>ronda anterior</strong>; las reglas de
-                avance se crean solas.
-              </p>
+          {/* Main builder card */}
+          <div className={styles.builderCard}>
+            <p className={styles.introText}>
+              Elegí una plantilla y el sistema crea todas las rondas, copas y reglas de avance.
+              Al cargar resultados, los equipos avanzan solos a la copa que corresponde.
+            </p>
 
-              {/* Cups */}
-              <div className="flex flex-col gap-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-dim">
-                  Copas
-                </span>
-                {customCups.map((c, i) => (
-                  <div key={i} className="flex gap-2 items-center">
-                    <input
-                      value={c.name}
-                      onChange={(e) => updateCupName(i, e.target.value)}
-                      placeholder={`Copa ${i + 1}`}
-                      className="flex-1 bg-[#1b232c] border border-white/15 px-2 py-1 text-sm text-white"
+            <div className={styles.steps}>
+              {/* Step 1 — template selector */}
+              <StepBlock n={1} title="Plantilla" hint="Estructura del cuadro. Podés regenerarla cuando quieras.">
+                <div className={styles.cardGrid}>
+                  {(templates.length
+                    ? templates
+                    : ([
+                        { id: 'oro_plata_bronce_estimulo', label: 'Oro / Plata / Bronce / Estímulo', description: '16 equipos, 4 copas.', teamCounts: [16], defaultTeamCount: 16, available: true },
+                      ] as TemplateMeta[])
+                  ).map((t) => (
+                    <OptionCard
+                      key={t.id}
+                      selected={templateId === t.id}
+                      disabled={!t.available}
+                      title={t.label}
+                      desc={t.description}
+                      onClick={() => {
+                        setTemplateId(t.id);
+                        if (t.id === 'oro_plata_bronce_estimulo') setTeamCount(16);
+                        else if (t.defaultTeamCount) setTeamCount(t.defaultTeamCount);
+                      }}
                     />
-                    <button
-                      type="button"
-                      onClick={() => removeCup(i)}
-                      className="text-dim hover:text-red-400 p-1"
-                      aria-label="Quitar copa"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={addCup}
-                  className="self-start text-[11px] text-[var(--accent-primary)] inline-flex items-center gap-1"
-                >
-                  <Plus size={12} />
-                  Agregar copa
-                </button>
-              </div>
+                  ))}
+                </div>
+              </StepBlock>
 
-              {/* Rounds */}
-              <div className="flex flex-col gap-3">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-dim">
-                  Rondas
-                </span>
-                {customRounds.map((r, rIdx) => (
-                  <div
-                    key={rIdx}
-                    className="border border-white/12 p-3 flex flex-col gap-2"
-                  >
-                    <div className="flex gap-2 items-center flex-wrap">
-                      <input
-                        value={r.name}
-                        onChange={(e) => patchRound(rIdx, { name: e.target.value })}
-                        placeholder="Nombre de la ronda"
-                        className="bg-[#1b232c] border border-white/15 px-2 py-1 text-sm text-white"
-                      />
-                      <select
-                        value={r.cupKey ?? ''}
-                        onChange={(e) => patchRound(rIdx, { cupKey: e.target.value || null })}
-                        className="bg-[#1b232c] border border-white/15 px-2 py-1 text-xs text-white"
-                      >
-                        <option value="">Sin copa (clasificación)</option>
-                        {customCups.map((c) => (
-                          <option key={c.key} value={c.key}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        type="button"
-                        onClick={() => removeRound(rIdx)}
-                        className="ml-auto text-dim hover:text-red-400 p-1"
-                        aria-label="Quitar ronda"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      {r.matches.map((m, mIdx) => (
-                        <div
-                          key={mIdx}
-                          className="flex gap-2 items-center flex-wrap bg-white/[0.04] p-2"
-                        >
+              {/* Step 2 — crossings */}
+              <StepBlock n={2} title="Cruces de la primera ronda" hint="Cómo se arman los enfrentamientos de la ronda inicial.">
+                <div className={styles.cardGrid}>
+                  <OptionCard
+                    selected={seedMode === 'seed'}
+                    title="Por seed"
+                    desc="1 vs 16, 2 vs 15, 3 vs 14…"
+                    onClick={() => setSeedMode('seed')}
+                  />
+                  <OptionCard
+                    selected={seedMode === 'random'}
+                    title="Aleatorios"
+                    desc="Sorteo al azar (se re-sortea al regenerar)"
+                    onClick={() => setSeedMode('random')}
+                  />
+                </div>
+              </StepBlock>
+
+              {/* Step 3 — config or custom builder */}
+              <StepBlock n={3} title="Configuración" hint="Equipos, definición de puestos y nombres de las copas.">
+                {templateId !== 'custom' ? (
+                  <div className={styles.configRow}>
+                    <div>
+                      <span className={styles.inputGroupLabel}>Equipos</span>
+                      <div className={styles.teamsBlock}>
+                        {teamCountLocked ? (
+                          <span className={styles.chip}>{teamCount} equipos</span>
+                        ) : (
+                          <select
+                            value={teamCount}
+                            onChange={(e) => setTeamCount(Number(e.target.value))}
+                            className={styles.selectInput}
+                            style={{ width: 'auto' }}
+                          >
+                            {teamCountOptions.map((n) => (
+                              <option key={n} value={n}>
+                                {n} equipos
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                        <label className={styles.checkboxWrapper}>
                           <input
-                            value={m.code}
-                            onChange={(e) => patchMatch(rIdx, mIdx, { code: e.target.value })}
-                            className="w-20 bg-[#1b232c] border border-white/15 px-1.5 py-1 text-[11px] text-white"
+                            type="checkbox"
+                            className={styles.nativeCheckbox}
+                            checked={thirdPlace}
+                            onChange={(e) => setThirdPlace(e.target.checked)}
                           />
-                          <SlotEditor
-                            value={m.home}
-                            sources={earlierMatches(rIdx)}
-                            onChange={(s) => patchMatch(rIdx, mIdx, { home: s })}
-                          />
-                          <span className="text-[10px] text-dim">vs</span>
-                          <SlotEditor
-                            value={m.away}
-                            sources={earlierMatches(rIdx)}
-                            onChange={(s) => patchMatch(rIdx, mIdx, { away: s })}
+                          <span className={styles.checkboxCustom} aria-hidden>
+                            <Check size={11} strokeWidth={3.5} />
+                          </span>
+                          Incluir partido por el 3.º y 4.º puesto
+                        </label>
+                      </div>
+                    </div>
+                    {cupFields.length > 0 && (
+                      <div>
+                        <span className={styles.inputGroupLabel}>Nombres de las copas</span>
+                        <div className={styles.cupsGrid}>
+                          {cupFields.map((cup) => (
+                            <label key={cup.key} className={styles.fieldLabel}>
+                              {cup.label}
+                              <input
+                                type="text"
+                                value={cupNames[cup.key] ?? ''}
+                                placeholder={cup.label}
+                                onChange={(e) =>
+                                  setCupNames((prev) => ({ ...prev, [cup.key]: e.target.value }))
+                                }
+                                className={styles.cupInput}
+                              />
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className={styles.customBox}>
+                    <p className={styles.customNote}>
+                      Definí copas, rondas y partidos. En cada slot elegí un sembrado o el
+                      ganador/perdedor de un partido de una <strong>ronda anterior</strong>; las
+                      reglas de avance se crean solas.
+                    </p>
+
+                    {/* Cups */}
+                    <div className={styles.customGroup}>
+                      <span className={styles.inputGroupLabel}>Copas</span>
+                      {customCups.map((c, i) => (
+                        <div key={i} className={styles.customRow}>
+                          <input
+                            value={c.name}
+                            onChange={(e) => updateCupName(i, e.target.value)}
+                            placeholder={`Copa ${i + 1}`}
+                            className={styles.cupInput}
+                            style={{ flex: 1 }}
                           />
                           <button
                             type="button"
-                            onClick={() => removeMatch(rIdx, mIdx)}
-                            className="text-dim hover:text-red-400 p-1"
-                            aria-label="Quitar partido"
+                            onClick={() => removeCup(i)}
+                            className={styles.iconBtn}
+                            aria-label="Quitar copa"
                           >
-                            <Trash2 size={12} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       ))}
-                      <button
-                        type="button"
-                        onClick={() => addMatch(rIdx)}
-                        className="self-start text-[11px] text-[var(--accent-primary)] inline-flex items-center gap-1"
-                      >
-                        <Plus size={12} />
-                        Agregar partido
+                      <button type="button" onClick={addCup} className={styles.addBtn}>
+                        <Plus size={13} />
+                        Agregar copa
+                      </button>
+                    </div>
+
+                    {/* Rounds */}
+                    <div className={styles.customGroup}>
+                      <span className={styles.inputGroupLabel}>Rondas</span>
+                      {customRounds.map((r, rIdx) => (
+                        <div key={rIdx} className={styles.roundBox}>
+                          <div className={styles.customRow}>
+                            <input
+                              value={r.name}
+                              onChange={(e) => patchRound(rIdx, { name: e.target.value })}
+                              placeholder="Nombre de la ronda"
+                              className={styles.miniInput}
+                            />
+                            <select
+                              value={r.cupKey ?? ''}
+                              onChange={(e) => patchRound(rIdx, { cupKey: e.target.value || null })}
+                              className={styles.miniSelect}
+                            >
+                              <option value="">Sin copa (clasificación)</option>
+                              {customCups.map((c) => (
+                                <option key={c.key} value={c.key}>
+                                  {c.name}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              type="button"
+                              onClick={() => removeRound(rIdx)}
+                              className={styles.iconBtn}
+                              style={{ marginLeft: 'auto' }}
+                              aria-label="Quitar ronda"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                          <div className={styles.customGroup}>
+                            {r.matches.map((m, mIdx) => (
+                              <div key={mIdx} className={styles.matchRow}>
+                                <input
+                                  value={m.code}
+                                  onChange={(e) => patchMatch(rIdx, mIdx, { code: e.target.value })}
+                                  className={`${styles.miniInput} ${styles.codeInput}`}
+                                />
+                                <SlotEditor
+                                  value={m.home}
+                                  sources={earlierMatches(rIdx)}
+                                  onChange={(s) => patchMatch(rIdx, mIdx, { home: s })}
+                                />
+                                <span className={styles.vs}>vs</span>
+                                <SlotEditor
+                                  value={m.away}
+                                  sources={earlierMatches(rIdx)}
+                                  onChange={(s) => patchMatch(rIdx, mIdx, { away: s })}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeMatch(rIdx, mIdx)}
+                                  className={styles.iconBtn}
+                                  aria-label="Quitar partido"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => addMatch(rIdx)}
+                              className={styles.addBtn}
+                            >
+                              <Plus size={12} />
+                              Agregar partido
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      <button type="button" onClick={addRound} className={styles.addBtn}>
+                        <Plus size={13} />
+                        Agregar ronda
                       </button>
                     </div>
                   </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={addRound}
-                  className="self-start text-xs text-[var(--accent-primary)] inline-flex items-center gap-1"
-                >
-                  <Plus size={13} />
-                  Agregar ronda
-                </button>
-              </div>
-            </div>
-          )}
+                )}
+              </StepBlock>
 
-          {/* Scheduling */}
-          <StepBlock n={4} title="Programación de horarios" hint="Manual o automática para todas las rondas.">
-            <div className="flex flex-col gap-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <OptionCard
-                selected={schedMode === 'manual'}
-                icon={<PencilLine size={18} />}
-                title="Manual"
-                desc="Cargás vos fecha, hora y cancha"
-                onClick={() => setSchedMode('manual')}
-              />
-              <OptionCard
-                selected={schedMode === 'auto'}
-                icon={<CalendarClock size={18} />}
-                title="Automática"
-                desc="Todas las rondas con horario asignado"
-                onClick={() => setSchedMode('auto')}
-              />
-            </div>
-
-            {schedMode === 'auto' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <label className="flex flex-col gap-2 text-[11px] font-medium text-white/65">
-                  Inicio de la primera ronda
-                  <input
-                    type="datetime-local"
-                    value={firstRoundStart}
-                    onChange={(e) => setFirstRoundStart(e.target.value)}
-                    className="border border-white/15 bg-[#1b232c] px-2.5 py-1.5 text-sm font-medium text-white focus:border-[#38BDF8] focus:outline-none"
-                  />
-                </label>
-                <label className="flex flex-col gap-2 text-[11px] font-medium text-white/65">
-                  Días entre rondas
-                  <input
-                    type="number"
-                    min={0}
-                    value={daysBetweenRounds}
-                    onChange={(e) => setDaysBetweenRounds(Number(e.target.value))}
-                    className="border border-white/15 bg-[#1b232c] px-2.5 py-1.5 text-sm font-medium text-white focus:border-[#38BDF8] focus:outline-none"
-                  />
-                </label>
-                <label className="flex flex-col gap-2 text-[11px] font-medium text-white/65">
-                  Duración del partido (min)
-                  <input
-                    type="number"
-                    min={1}
-                    value={matchDuration}
-                    onChange={(e) => setMatchDuration(Number(e.target.value))}
-                    className="border border-white/15 bg-[#1b232c] px-2.5 py-1.5 text-sm font-medium text-white focus:border-[#38BDF8] focus:outline-none"
-                  />
-                </label>
-                <label className="flex flex-col gap-2 text-[11px] font-medium text-white/65">
-                  Descanso entre partidos (min)
-                  <input
-                    type="number"
-                    min={0}
-                    value={breakBetween}
-                    onChange={(e) => setBreakBetween(Number(e.target.value))}
-                    className="border border-white/15 bg-[#1b232c] px-2.5 py-1.5 text-sm font-medium text-white focus:border-[#38BDF8] focus:outline-none"
-                  />
-                </label>
-                <label className="flex flex-col gap-1 text-[11px] font-medium text-white/65 sm:col-span-2">
-                  Canchas / sedes (separadas por coma, opcional)
-                  <input
-                    type="text"
-                    value={venuesText}
-                    placeholder="Cancha 1, Cancha 2"
-                    onChange={(e) => setVenuesText(e.target.value)}
-                    className="border border-white/15 bg-[#1b232c] px-2.5 py-1.5 text-sm font-medium text-white focus:border-[#38BDF8] focus:outline-none"
-                  />
-                </label>
-                <p className="text-[10.5px] text-white/55 sm:col-span-2">
-                  Los partidos editados manualmente no se sobrescriben al reprogramar la fase.
-                </p>
-              </div>
-            )}
-
-            {board.hasBracket && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => runAction('reschedule')}
-                className="basalt-btn !rounded-none text-xs inline-flex items-center gap-1.5 self-start"
-              >
-                <RefreshCw size={13} />
-                Reprogramar fase
-              </button>
-            )}
-            </div>
-          </StepBlock>
-
-          {/* Live preview of what will be generated */}
-          <section className="border border-white/12 bg-[#161d27]">
-            <div className="border-b border-white/10 bg-white/[0.03] px-6 py-4">
-              <span className="block text-[13px] font-bold uppercase tracking-[0.1em] text-white">
-                Vista previa
-              </span>
-              <span className="block text-[12px] leading-snug text-white/55">
-                Qué se genera con esta configuración (antes de crear el cuadro).
-              </span>
-            </div>
-            <div className="p-6">
-              {preview.ok ? (
-                <div className="flex flex-col gap-7 lg:flex-row lg:gap-10">
-                  <div className="flex-1">
-                    <span className="mb-2.5 block text-[11px] font-semibold uppercase tracking-wide text-white/55">
-                      Copas generadas
-                    </span>
-                    <ul className="flex flex-col gap-2">
-                      {preview.cups.length === 0 && (
-                        <li className="text-[13px] text-white/55">Una sola copa.</li>
-                      )}
-                      {preview.cups.map((c) => (
-                        <li key={c.name} className="flex items-center gap-2.5 text-[13px] text-white/90">
-                          <span
-                            className="h-2.5 w-2.5 flex-shrink-0"
-                            style={{ background: c.color }}
-                            aria-hidden
-                          />
-                          {c.name}
-                        </li>
-                      ))}
-                    </ul>
+              {/* Step 4 — scheduling */}
+              <StepBlock n={4} title="Programación de horarios" hint="Manual o automática para todas las rondas.">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <div className={styles.cardGrid}>
+                    <OptionCard
+                      selected={schedMode === 'manual'}
+                      title="Manual"
+                      desc="Cargás vos fecha, hora y cancha"
+                      onClick={() => setSchedMode('manual')}
+                    />
+                    <OptionCard
+                      selected={schedMode === 'auto'}
+                      title="Automática"
+                      desc="Todas las rondas con horario asignado"
+                      onClick={() => setSchedMode('auto')}
+                    />
                   </div>
-                  <div className="flex-1">
-                    <span className="mb-2.5 block text-[11px] font-semibold uppercase tracking-wide text-white/55">
+
+                  {schedMode === 'auto' && (
+                    <div className={styles.cupsGrid}>
+                      <label className={styles.fieldLabel}>
+                        Inicio de la primera ronda
+                        <input
+                          type="datetime-local"
+                          value={firstRoundStart}
+                          onChange={(e) => setFirstRoundStart(e.target.value)}
+                          className={styles.cupInput}
+                        />
+                      </label>
+                      <label className={styles.fieldLabel}>
+                        Días entre rondas
+                        <input
+                          type="number"
+                          min={0}
+                          value={daysBetweenRounds}
+                          onChange={(e) => setDaysBetweenRounds(Number(e.target.value))}
+                          className={styles.cupInput}
+                        />
+                      </label>
+                      <label className={styles.fieldLabel}>
+                        Duración del partido (min)
+                        <input
+                          type="number"
+                          min={1}
+                          value={matchDuration}
+                          onChange={(e) => setMatchDuration(Number(e.target.value))}
+                          className={styles.cupInput}
+                        />
+                      </label>
+                      <label className={styles.fieldLabel}>
+                        Descanso entre partidos (min)
+                        <input
+                          type="number"
+                          min={0}
+                          value={breakBetween}
+                          onChange={(e) => setBreakBetween(Number(e.target.value))}
+                          className={styles.cupInput}
+                        />
+                      </label>
+                      <label
+                        className={styles.fieldLabel}
+                        style={{ gridColumn: '1 / -1' }}
+                      >
+                        Canchas / sedes (separadas por coma, opcional)
+                        <input
+                          type="text"
+                          value={venuesText}
+                          placeholder="Cancha 1, Cancha 2"
+                          onChange={(e) => setVenuesText(e.target.value)}
+                          className={styles.cupInput}
+                        />
+                      </label>
+                      <p
+                        className={styles.customNote}
+                        style={{ gridColumn: '1 / -1' }}
+                      >
+                        Los partidos editados manualmente no se sobrescriben al reprogramar la fase.
+                      </p>
+                    </div>
+                  )}
+
+                  {board.hasBracket && (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => runAction('reschedule')}
+                      className={`${styles.secondaryBtn} ${busy ? styles.btnDisabled : ''}`}
+                      style={{ alignSelf: 'flex-start' }}
+                    >
+                      <RefreshCw size={13} />
+                      Reprogramar fase
+                    </button>
+                  )}
+                </div>
+              </StepBlock>
+            </div>
+
+            {/* Live preview */}
+            <div className={styles.previewPanel} style={{ marginTop: 48 }}>
+              <div className={styles.previewHead}>
+                <span className={styles.previewTitle}>Vista previa</span>
+                <span className={styles.previewSub}>
+                  Qué se genera con esta configuración (antes de crear el cuadro).
+                </span>
+              </div>
+              {preview.ok ? (
+                <div className={styles.previewBody}>
+                  <div className={styles.previewCol}>
+                    <span className={styles.previewColLabel}>Copas generadas</span>
+                    {preview.cups.length === 0 && (
+                      <div className={styles.cupRow}>Una sola copa.</div>
+                    )}
+                    {preview.cups.map((c) => (
+                      <div key={c.name} className={styles.cupRow}>
+                        <span
+                          className={styles.cupDot}
+                          style={{ background: c.color }}
+                          aria-hidden
+                        />
+                        {c.name}
+                      </div>
+                    ))}
+                  </div>
+                  <div className={styles.previewCol}>
+                    <span className={styles.previewColLabel}>
                       {preview.stage} · primeros cruces
                     </span>
                     {preview.random ? (
-                      <p className="text-[13px] leading-relaxed text-white/70">
+                      <p className={styles.cardDesc}>
                         Los enfrentamientos se sortean al azar al generar el cuadro.
                       </p>
                     ) : (
-                      <div className="flex flex-col gap-1.5 font-mono text-[12.5px] text-white/85">
+                      <div className={styles.pairList}>
                         {preview.pairs.slice(0, 8).map((p, i) => (
                           <span key={i}>{p}</span>
                         ))}
                         {preview.pairs.length > 8 && (
-                          <span className="text-white/45">
+                          <span className={styles.pairMore}>
                             +{preview.pairs.length - 8} cruces más…
                           </span>
                         )}
                       </div>
                     )}
                   </div>
-                  <div className="lg:w-44">
-                    <span className="mb-2.5 block text-[11px] font-semibold uppercase tracking-wide text-white/55">
-                      Total
-                    </span>
-                    <p className="text-[13px] text-white/90">
-                      <span className="text-2xl font-bold text-white">{preview.total}</span>
-                      <span className="ml-1.5 text-white/60">partidos en el cuadro</span>
+                  <div className={styles.previewColNarrow}>
+                    <span className={styles.previewColLabel}>Total</span>
+                    <p>
+                      <span className={styles.totalNum}>{preview.total}</span>
+                      <span className={styles.totalLabel}>partidos en el cuadro</span>
                     </p>
                   </div>
                 </div>
               ) : (
-                <p className="text-[13px] text-amber-300/90">{preview.error}</p>
+                <p className={styles.previewError}>{preview.error}</p>
               )}
             </div>
-          </section>
 
-          {error && (
-            <div className="flex items-start gap-2 border-l-2 border-amber-500/60 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-200">
-              <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </div>
-          )}
+            {error && (
+              <div className={styles.errorBanner} style={{ marginTop: 24 }}>
+                <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+                <span>{error}</span>
+              </div>
+            )}
+          </div>
 
-          {/* Action bar with live config summary */}
-          <div className="mt-1 border border-white/12 border-t-2 border-t-[#38BDF8] bg-[#131922] p-6">
-            <div className="mb-5 flex flex-wrap items-center gap-x-2.5 gap-y-2 text-[12px]">
-              <span className="font-bold uppercase tracking-wider text-white/65">Resumen</span>
-              <span className="bg-[#1b232c] px-2 py-1 font-medium text-white/90">
-                {TEMPLATE_SHORT[templateId] ?? templateId}
-              </span>
-              <span className="text-white/40">·</span>
-              <span className="bg-[#1b232c] px-2 py-1 font-medium text-white/90">
-                Cruces: {seedMode === 'random' ? 'Aleatorios' : 'Por seed'}
-              </span>
-              {templateId !== 'custom' && (
-                <>
-                  <span className="text-white/40">·</span>
-                  <span className="bg-[#1b232c] px-2 py-1 font-medium text-white/90">
-                    {teamCount} equipos
-                  </span>
-                </>
-              )}
-              {cupFields.length > 0 && (
-                <>
-                  <span className="text-white/40">·</span>
-                  <span className="bg-[#1b232c] px-2 py-1 font-medium text-white/90">
-                    {cupFields.length} copas
-                  </span>
-                </>
-              )}
-              <span className="text-white/40">·</span>
-              <span className="bg-[#1b232c] px-2 py-1 font-medium text-white/90">
-                Horarios: {schedMode === 'auto' ? 'Automáticos' : 'Manuales'}
-              </span>
-            </div>
+          {/* Footer action bar */}
+          <div className={styles.footer}>
             {confirmForce === 'generate' ? (
-              <div className="flex flex-wrap items-center gap-2">
+              <div className={styles.confirmRow}>
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => runAction('regenerate', true)}
-                  className="basalt-btn !rounded-none basalt-btn-primary text-xs"
+                  className={`${styles.generateBtn} ${busy ? styles.btnDisabled : ''}`}
                 >
                   Sí, regenerar y borrar resultados
                 </button>
                 <button
                   type="button"
                   disabled={busy}
-                  onClick={() => { setConfirmForce(null); setError(null); }}
-                  className="basalt-btn !rounded-none text-xs"
+                  onClick={() => {
+                    setConfirmForce(null);
+                    setError(null);
+                  }}
+                  className={styles.secondaryBtn}
                 >
                   Cancelar
                 </button>
               </div>
             ) : confirmForce === 'clear' ? (
-              <div className="flex flex-wrap items-center gap-2">
+              <div className={styles.confirmRow}>
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => runAction('clear', true)}
-                  className="basalt-btn !rounded-none text-xs text-red-400 border-red-500/40"
+                  className={`${styles.secondaryBtn} ${styles.dangerBtn} ${busy ? styles.btnDisabled : ''}`}
                 >
                   Sí, borrar el cuadro
                 </button>
                 <button
                   type="button"
                   disabled={busy}
-                  onClick={() => { setConfirmForce(null); setError(null); }}
-                  className="basalt-btn !rounded-none text-xs"
+                  onClick={() => {
+                    setConfirmForce(null);
+                    setError(null);
+                  }}
+                  className={styles.secondaryBtn}
                 >
                   Cancelar
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-2.5">
+              <>
+                <div className={styles.footerInfo}>
                   <span
-                    className={`h-2.5 w-2.5 flex-shrink-0 ${
-                      board.hasBracket ? 'bg-[#22C55E]' : 'bg-white/30'
+                    className={`${styles.footerStatusDot} ${
+                      board.hasBracket ? styles.footerStatusDotOn : ''
                     }`}
                     aria-hidden
                   />
-                  <span className="text-[13px] text-white/75">
+                  <span className={styles.footerLabel}>
                     {board.hasBracket ? (
                       <>
-                        <span className="font-semibold text-white">Cuadro generado.</span>{' '}
-                        Podés regenerarlo o borrarlo.
+                        <strong>Cuadro generado</strong> · {TEMPLATE_SHORT[templateId] ?? templateId}
                       </>
                     ) : (
                       <>
-                        <span className="font-semibold text-white">Sin generar.</span>{' '}
-                        Revisá la configuración y generá el cuadro.
+                        <strong>Vista previa del cuadro</strong> · Etapa de diseño
                       </>
                     )}
                   </span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className={styles.footerActions}>
                   {board.hasBracket && (
                     <button
                       type="button"
                       disabled={busy}
                       onClick={() => setConfirmForce('clear')}
-                      className="basalt-btn !rounded-none inline-flex items-center gap-1.5 border-red-500/40 px-3 py-2.5 text-xs text-red-400"
+                      className={`${styles.secondaryBtn} ${styles.dangerBtn} ${busy ? styles.btnDisabled : ''}`}
                     >
                       <Trash2 size={14} />
                       Borrar
@@ -1076,22 +1014,22 @@ export default function PlayoffBuilderPanel({
                     type="button"
                     disabled={busy}
                     onClick={() => runAction(board.hasBracket ? 'regenerate' : 'generate')}
-                    className="basalt-btn !rounded-none basalt-btn-primary inline-flex items-center justify-center gap-2.5 px-7 py-3.5 text-[15px] font-bold"
+                    className={`${styles.generateBtn} ${busy ? styles.btnDisabled : ''}`}
                   >
-                    {board.hasBracket ? <RefreshCw size={17} /> : <Wand2 size={17} />}
+                    {board.hasBracket && <RefreshCw size={15} />}
                     {busy
                       ? 'Procesando…'
                       : board.hasBracket
                         ? 'Regenerar cuadro'
-                        : 'Generar playoff'}
+                        : 'Generar cuadro'}
                   </button>
                 </div>
-              </div>
+              </>
             )}
           </div>
 
           {/* Bracket visual */}
-          <div className="border-t border-white/10 pt-6">
+          <div className={styles.boardWrap}>
             <PlayoffBracketBoard data={board} />
           </div>
         </div>
