@@ -870,6 +870,7 @@ export default function PersonasRolesPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         padding: 16,
+                        overflowY: 'auto',
                     }}
                     onClick={(event) => { if (event.target === event.currentTarget) closeEdit(); }}
                 >
@@ -880,9 +881,13 @@ export default function PersonasRolesPage() {
                         padding: 28,
                         width: '100%',
                         maxWidth: 440,
+                        maxHeight: 'calc(100dvh - 32px)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        margin: 'auto',
                         boxShadow: '0 24px 48px rgba(0,0,0,0.6)',
                     }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexShrink: 0 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                 <div style={{
                                     width: 40,
@@ -918,7 +923,7 @@ export default function PersonasRolesPage() {
                             </button>
                         </div>
 
-                        <div style={{ marginBottom: 24 }}>
+                        <div style={{ marginBottom: 24, flex: 1, minHeight: 0, overflowY: 'auto' }}>
                             <label style={{ display: 'block', fontSize: 12, color: 'var(--basalt-400)', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                 Rol base
                             </label>
@@ -1146,12 +1151,12 @@ export default function PersonasRolesPage() {
                         </div>
 
                         {saveError && (
-                            <div style={{ color: '#f87171', fontSize: 13, marginBottom: 16, padding: '8px 12px', background: 'rgba(239,68,68,0.1)', borderRadius: 8 }}>
+                            <div style={{ color: '#f87171', fontSize: 13, marginBottom: 16, padding: '8px 12px', background: 'rgba(239,68,68,0.1)', borderRadius: 8, flexShrink: 0 }}>
                                 {saveError}
                             </div>
                         )}
 
-                        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexShrink: 0, paddingTop: 4 }}>
                             <button className={styles.btn} type="button" onClick={closeEdit} disabled={saving}>
                                 Cancelar
                             </button>
