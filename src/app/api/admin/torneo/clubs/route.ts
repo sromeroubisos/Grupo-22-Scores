@@ -1,7 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
+import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
+
+type JsonObject = Record<string, unknown>;
+
+type ClubDivisionInput = {
+    name?: unknown;
+    sport?: unknown;
+    gender?: unknown;
+    category?: unknown;
+    season?: unknown;
+    status?: unknown;
+};
+
+const OPTIONAL_CLUB_COLUMNS = [
+    'categories',
+    'city',
+    'country',
+    'is_visible',
+    'logo_url',
+    'primary_color',
+    'region',
+    'short_name',
+    'slug',
+    'sport',
+    'sport_id',
+    'union_id',
+];
 
 function err(message: string, status = 400, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
@@ -11,10 +40,120 @@ function slugify(value: string): string {
     return value
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[̀-ͯ]/g, '')
+        .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '')
         .slice(0, 60);
+}
+
+function readText(value: unknown): string {
+    return typeof value === 'string' ? value.trim() : '';
+}
+
+function readNullableText(value: unknown): string | null {
+    const text = readText(value);
+    return text.length > 0 ? text : null;
+}
+
+function readPositiveInt(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') return null;
+    const parsed = Number.parseInt(String(value), 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function readStringList(value: unknown): string[] {
+    if (Array.isArray(value)) {
+        return Array.from(new Set(
+            value
+                .map((item) => readText(item))
+                .filter(Boolean),
+        ));
+    }
+
+    if (typeof value === 'string') {
+        return Array.from(new Set(
+            value
+                .split(',')
+                .map((item) => item.trim())
+                .filter(Boolean),
+        ));
+    }
+
+    return [];
+}
+
+function buildCategories(body: JsonObject): string[] | null {
+    const categories = new Set(readStringList(body.categories));
+    const entityType = readText(body.entity_type) || 'club';
+    const gender = readText(body.gender);
+    const ageGrade = readText(body.age_grade);
+
+    if (entityType) categories.add(`entity:${slugify(entityType) || entityType}`);
+    if (gender) categories.add(`gender:${slugify(gender) || gender}`);
+    if (ageGrade) categories.add(`age_grade:${slugify(ageGrade) || ageGrade}`);
+
+    return categories.size > 0 ? Array.from(categories) : null;
+}
+
+function buildProfilePayload(body: JsonObject): JsonObject {
+    const profile = body.profile && typeof body.profile === 'object' && !Array.isArray(body.profile)
+        ? body.profile as JsonObject
+        : {};
+
+    const payload: JsonObject = {
+        admin_contact_name: readNullableText(body.admin_contact_name ?? profile.admin_contact_name),
+        admin_contact_email: readNullableText(body.admin_contact_email ?? profile.admin_contact_email),
+        admin_contact_phone: readNullableText(body.admin_contact_phone ?? profile.admin_contact_phone),
+        website: readNullableText(body.website ?? profile.website),
+        instagram: readNullableText(body.instagram ?? profile.instagram),
+        x_url: readNullableText(body.x_url ?? profile.x_url),
+        youtube: readNullableText(body.youtube ?? profile.youtube),
+        tiktok: readNullableText(body.tiktok ?? profile.tiktok),
+        venue_name: readNullableText(body.venue_name ?? profile.venue_name),
+        venue_address: readNullableText(body.venue_address ?? profile.venue_address),
+        venue_capacity: readPositiveInt(body.venue_capacity ?? profile.venue_capacity),
+        venue_notes: readNullableText(body.venue_notes ?? profile.venue_notes),
+    };
+
+    return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null));
+}
+
+function buildDivisions(body: JsonObject, clubId: string, fallbackSport: string, fallbackSeason: string) {
+    if (!Array.isArray(body.divisions)) return [];
+
+    return body.divisions
+        .map((item): ClubDivisionInput | null => (
+            item && typeof item === 'object' && !Array.isArray(item) ? item as ClubDivisionInput : null
+        ))
+        .filter((item): item is ClubDivisionInput => Boolean(item))
+        .map((division) => ({
+            club_id: clubId,
+            name: readText(division.name),
+            sport: readNullableText(division.sport) ?? fallbackSport,
+            gender: readNullableText(division.gender),
+            category: readNullableText(division.category),
+            season: readNullableText(division.season) ?? fallbackSeason,
+            status: readNullableText(division.status) ?? 'active',
+        }))
+        .filter((division) => division.name.length >= 2);
+}
+
+async function insertClubWithFallback(writer: any, payload: JsonObject) {
+    let result = await writer.from('clubs').insert([payload]).select('*').single();
+
+    if (!result.error) return result;
+
+    const missingColumns = OPTIONAL_CLUB_COLUMNS.filter((column) => isMissingColumnError(result.error, column));
+    if (missingColumns.length === 0) return result;
+
+    const reducedPayload = { ...payload };
+    for (const column of missingColumns) {
+        delete reducedPayload[column];
+    }
+
+    console.warn('[admin/torneo/clubs] Retrying club insert without optional columns:', missingColumns);
+    result = await writer.from('clubs').insert([reducedPayload]).select('*').single();
+    return result;
 }
 
 export async function GET(request: NextRequest) {
@@ -37,9 +176,13 @@ export async function GET(request: NextRequest) {
     const search = (searchParams.get('search') || '').trim();
     const limit = Math.min(Number.parseInt(searchParams.get('limit') || '500', 10) || 500, 2000);
 
-    let query = supabase
+    // Service-role read: results are constrained to scope.clubIds below, but the
+    // RLS SELECT policy (public read = is_visible only) would hide the caller's
+    // own draft/hidden clubs.
+    const reader = getServiceWriter(supabase, 'admin/torneo/clubs');
+    let query = reader
         .from('clubs')
-        .select('id, name, slug, sport, sport_id, city, country, is_visible, union_id')
+        .select('id, name, short_name, slug, sport, sport_id, city, region, country, is_visible, union_id, logo_url, primary_color, categories')
         .order('name', { ascending: true })
         .limit(limit);
 
@@ -49,7 +192,7 @@ export async function GET(request: NextRequest) {
 
     if (search) {
         const escaped = search.replace(/[%_]/g, (m) => `\\${m}`);
-        query = query.or(`name.ilike.%${escaped}%,slug.ilike.%${escaped}%`);
+        query = query.or(`name.ilike.%${escaped}%,slug.ilike.%${escaped}%,short_name.ilike.%${escaped}%`);
     }
 
     const { data, error } = await query;
@@ -57,7 +200,31 @@ export async function GET(request: NextRequest) {
         return err('No se pudieron cargar los clubes', 500, error.message);
     }
 
-    return NextResponse.json({ data: data ?? [] });
+    const clubIds = (data ?? []).map((club) => club.id).filter(Boolean);
+    const divisionsByClub = new Map<string, unknown[]>();
+
+    if (clubIds.length > 0) {
+        const { data: divisions, error: divisionsError } = await reader
+            .from('club_divisions')
+            .select('id, club_id, name, sport, gender, category, season, status')
+            .in('club_id', clubIds)
+            .order('name', { ascending: true });
+
+        if (!divisionsError) {
+            for (const division of divisions ?? []) {
+                const current = divisionsByClub.get(division.club_id) ?? [];
+                current.push(division);
+                divisionsByClub.set(division.club_id, current);
+            }
+        }
+    }
+
+    return NextResponse.json({
+        data: (data ?? []).map((club) => ({
+            ...club,
+            divisions: divisionsByClub.get(club.id) ?? [],
+        })),
+    });
 }
 
 export async function POST(request: NextRequest) {
@@ -70,29 +237,39 @@ export async function POST(request: NextRequest) {
         return err('Unauthorized', 401);
     }
 
-    let body: Record<string, unknown>;
+    let body: JsonObject;
     try {
-        body = (await request.json()) as Record<string, unknown>;
+        body = (await request.json()) as JsonObject;
     } catch {
-        return err('Payload JSON inválido', 400);
+        return err('Payload JSON invalido', 400);
     }
 
-    const name = String(body.name ?? '').trim();
-    const sport = String(body.sport ?? body.sport_id ?? 'rugby').trim();
-    const city = body.city ? String(body.city).trim() : null;
-    const country = body.country ? String(body.country).trim() : null;
-    const unionId = body.union_id ? String(body.union_id).trim() : null;
+    const name = readText(body.name);
+    const shortName = readNullableText(body.short_name);
+    const sport = readText(body.sport ?? body.sport_id) || 'rugby';
+    const city = readNullableText(body.city);
+    const region = readNullableText(body.region);
+    const country = readNullableText(body.country);
+    const unionId = readNullableText(body.union_id);
+    const logoUrl = readNullableText(body.logo_url);
+    const primaryColor = readNullableText(body.primary_color);
+    const visibility = readText(body.visibility);
+    const isVisible = typeof body.is_visible === 'boolean'
+        ? body.is_visible
+        : ['visible', 'public', 'published', 'active'].includes(visibility);
+    const requestedSlug = readText(body.slug);
 
     if (name.length < 2) {
         return err('El nombre del club debe tener al menos 2 caracteres', 400);
     }
 
-    const slug = slugify(name);
+    const slug = slugify(requestedSlug || name);
     if (!slug) {
-        return err('El nombre genera un slug inválido', 400);
+        return err('El nombre genera un slug invalido', 400);
     }
 
-    const { data: existing } = await supabase
+    const writer = getServiceWriter(supabase, 'admin/torneo/clubs') as any;
+    const { data: existing } = await writer
         .from('clubs')
         .select('id')
         .eq('id', slug)
@@ -102,24 +279,30 @@ export async function POST(request: NextRequest) {
         return err('Ya existe un club con ese nombre/slug', 409, { slug });
     }
 
-    const payload: Record<string, unknown> = {
+    const payload: JsonObject = {
         id: slug,
         slug,
         name,
+        short_name: shortName,
         sport,
         sport_id: sport,
-        is_visible: false,
+        city,
+        region,
+        country,
+        union_id: unionId,
+        logo_url: logoUrl,
+        primary_color: primaryColor,
+        categories: buildCategories(body),
+        is_visible: isVisible,
     };
 
-    if (city) payload.city = city;
-    if (country) payload.country = country;
-    if (unionId) payload.union_id = unionId;
+    for (const [key, value] of Object.entries(payload)) {
+        if (value === null || value === undefined || value === '') {
+            delete payload[key];
+        }
+    }
 
-    const { data, error } = await supabase
-        .from('clubs')
-        .insert([payload])
-        .select('id, name, slug, sport, is_visible')
-        .single();
+    const { data, error } = await insertClubWithFallback(writer, payload);
 
     if (error) {
         if (error.code === '23505') {
@@ -128,19 +311,96 @@ export async function POST(request: NextRequest) {
         return err('No se pudo crear el club', 500, error.message);
     }
 
-    // Auto-grant admin membership so the creator can manage their own clubs.
-    const { error: membershipError } = await supabase
-        .from('memberships')
-        .insert([{
-            user_id: context.userId,
-            scope_type: 'club',
-            scope_id: data.id,
-            role: 'admin',
-        }]);
+    const warnings: string[] = [];
 
-    if (membershipError) {
-        console.warn('[admin/torneo/clubs] Could not grant membership for creator:', membershipError.message);
+    // El creador obtiene acceso automatico (membership admin con scope=club).
+    // Asi el club queda guardado en la DB y aparece en el panel sin tener que
+    // solicitar acceso. La concesion se intenta con el admin client (service
+    // role) para que RLS nunca la bloquee, con reintento ante fallos transitorios.
+    const membershipRow = {
+        user_id: context.userId,
+        scope_type: 'club',
+        scope_id: data.id,
+        role: 'admin',
+    };
+
+    const grantMembership = async (client: any) =>
+        client.from('memberships').insert([membershipRow]);
+
+    let membershipResult = await grantMembership(writer);
+
+    if (membershipResult.error && membershipResult.error.code !== '23505') {
+        // Reintento explicito con admin client garantizado.
+        let adminClient: any = null;
+        try {
+            adminClient = createAdminClient();
+        } catch {
+            adminClient = null;
+        }
+        membershipResult = await grantMembership(adminClient ?? writer);
     }
 
-    return NextResponse.json({ data }, { status: 201 });
+    const membershipError = membershipResult.error;
+    if (membershipError && membershipError.code !== '23505') {
+        // 23505 = ya existe (idempotente). Cualquier otro error real significa
+        // que el club quedaria sin acceso. Hacemos rollback del club para que
+        // sea todo-o-nada y un reintento no choque con el slug existente.
+        console.error('[admin/torneo/clubs] Could not grant creator membership, rolling back club:', membershipError.message);
+        await writer.from('clubs').delete().eq('id', data.id);
+        return err(
+            'No se pudo conceder el acceso automatico al club. No se creo nada, podes reintentar.',
+            500,
+            { membershipError: membershipError.message },
+        );
+    }
+
+    const profilePayload = buildProfilePayload(body);
+    if (Object.keys(profilePayload).length > 0) {
+        const { error: profileError } = await writer
+            .from('club_profile')
+            .upsert({ club_id: data.id, ...profilePayload }, { onConflict: 'club_id' });
+
+        if (profileError && !isMissingTableError(profileError, 'club_profile')) {
+            warnings.push('No se pudo guardar el perfil extendido del club.');
+            console.warn('[admin/torneo/clubs] profile warning:', profileError.message);
+        }
+    }
+
+    const aliases = readStringList(body.aliases);
+    if (aliases.length > 0) {
+        const { error: aliasesError } = await writer
+            .from('club_aliases')
+            .insert(aliases.map((alias) => ({ club_id: data.id, alias })));
+
+        if (aliasesError && aliasesError.code !== '23505' && !isMissingTableError(aliasesError, 'club_aliases')) {
+            warnings.push('No se pudieron guardar los aliases.');
+            console.warn('[admin/torneo/clubs] aliases warning:', aliasesError.message);
+        }
+    }
+
+    const secondaryUnions = readStringList(body.secondary_unions);
+    if (secondaryUnions.length > 0) {
+        const { error: secondaryError } = await writer
+            .from('club_secondary_unions')
+            .insert(secondaryUnions.map((union_id) => ({ club_id: data.id, union_id })));
+
+        if (secondaryError && secondaryError.code !== '23505' && !isMissingTableError(secondaryError, 'club_secondary_unions')) {
+            warnings.push('No se pudieron guardar las uniones secundarias.');
+            console.warn('[admin/torneo/clubs] secondary unions warning:', secondaryError.message);
+        }
+    }
+
+    const divisions = buildDivisions(body, data.id, sport, String(new Date().getFullYear()));
+    if (divisions.length > 0) {
+        const { error: divisionsError } = await writer
+            .from('club_divisions')
+            .insert(divisions);
+
+        if (divisionsError && !isMissingTableError(divisionsError, 'club_divisions')) {
+            warnings.push('No se pudieron crear los planteles/divisiones iniciales.');
+            console.warn('[admin/torneo/clubs] divisions warning:', divisionsError.message);
+        }
+    }
+
+    return NextResponse.json({ data, warnings }, { status: 201 });
 }

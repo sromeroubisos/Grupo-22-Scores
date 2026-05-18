@@ -595,6 +595,36 @@ export default function NewClubForm({
     setSaving(true);
 
     try {
+      if (navigationMode === 'tournament-admin') {
+        // Admin de torneos: el alta pasa por la API scoped, que inserta con
+        // service-role y otorga al creador el acceso (membership) al club.
+        const response = await fetch('/api/admin/torneo/clubs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            ...payload,
+            gender: form.gender || null,
+            age_grade: form.age_grade || null,
+          }),
+        });
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          alert(`Error: ${result?.error || 'No se pudo crear el club.'}`);
+          return;
+        }
+
+        const warnings = Array.isArray(result?.warnings) ? result.warnings as string[] : [];
+        if (warnings.length > 0) {
+          alert(`El club se creó con observaciones:\n${warnings.map((w) => `- ${w}`).join('\n')}`);
+        }
+
+        setCreatedClubId(result?.data?.id ?? null);
+        setShowSuccessModal(true);
+        return;
+      }
+
       const result = await createClub(payload);
       if (!result.success) {
         alert(`Error: ${result.error}`);
@@ -683,7 +713,7 @@ export default function NewClubForm({
                 onClick={() => createdClubId && router.push(buildClubManageHref(createdClubId, 'general', navigationMode))}
                 disabled={!createdClubId}
               >
-                Ir al panel
+                {navigationMode === 'tournament-admin' ? 'Ir a mis clubes' : 'Ir al panel'}
               </button>
             </div>
           </div>

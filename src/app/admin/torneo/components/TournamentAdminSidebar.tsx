@@ -9,6 +9,7 @@ const NAV_ITEMS = [
     { href: '/admin/torneo', label: 'Inicio', match: (p: string) => p === '/admin/torneo' },
     { href: '/admin/torneo/clubes', label: 'Clubes', match: (p: string) => p.startsWith('/admin/torneo/clubes') },
     { href: '/admin/torneo/torneos', label: 'Torneos', match: (p: string) => p.startsWith('/admin/torneo/torneos') },
+    { href: '/admin/torneo/usuarios', label: 'Usuarios', match: (p: string) => p.startsWith('/admin/torneo/usuarios') },
 ];
 
 export default function TournamentAdminSidebar() {
@@ -19,12 +20,12 @@ export default function TournamentAdminSidebar() {
         <>
             <header className={styles.mobileHeader}>
                 <h1 className={styles.mobileBrand}>
-                    Panel <span style={{ color: '#00f2ff' }}>Torneos</span>
+                    Panel <span className={styles.mobileBrandAccent}>Torneos</span>
                 </h1>
                 <button
                     type="button"
                     onClick={() => setOpen((v) => !v)}
-                    style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}
+                    className={styles.mobileMenuBtn}
                     aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
                 >
                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>

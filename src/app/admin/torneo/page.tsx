@@ -1,25 +1,25 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
-import { getUserPlanContext } from '@/lib/billing/subscriptions';
 import styles from './tournament-admin.module.css';
 
 export const dynamic = 'force-dynamic';
 
-function fmtLimit(n: number): string {
-    return n >= Number.MAX_SAFE_INTEGER ? '∞' : String(n);
-}
-
 async function loadStats(scope: Awaited<ReturnType<typeof resolveTournamentAdminScope>>) {
     const supabase = await createClient();
+    // Service-role: the RLS SELECT policy hides drafts, which would make the
+    // "X en borrador" / totals read 0 for a gestor. Scope is enforced by the
+    // .in(scope.*Ids) filter below; unlimited = global admin (sees all anyway).
+    const reader = getServiceWriter(supabase, 'admin/torneo (home stats)');
 
     if (!scope.isUnlimited) {
         const tournamentIds = Array.from(scope.tournamentIds);
         const clubIds = Array.from(scope.clubIds);
 
         const tournamentsResult = tournamentIds.length > 0
-            ? await supabase.from('tournaments').select('id, status').in('id', tournamentIds)
+            ? await reader.from('tournaments').select('id, status').in('id', tournamentIds)
             : { data: [] as Array<{ id: string; status: string | null }>, error: null };
 
         const tournaments = tournamentsResult.data ?? [];
@@ -31,9 +31,9 @@ async function loadStats(scope: Awaited<ReturnType<typeof resolveTournamentAdmin
     }
 
     const [clubsCount, tournamentsCount, draftCount] = await Promise.all([
-        supabase.from('clubs').select('id', { count: 'exact', head: true }),
-        supabase.from('tournaments').select('id', { count: 'exact', head: true }),
-        supabase.from('tournaments').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
+        reader.from('clubs').select('id', { count: 'exact', head: true }),
+        reader.from('tournaments').select('id', { count: 'exact', head: true }),
+        reader.from('tournaments').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
     ]);
 
     return {
@@ -43,31 +43,14 @@ async function loadStats(scope: Awaited<ReturnType<typeof resolveTournamentAdmin
     };
 }
 
-async function loadOwnedActiveTournaments(userId: string): Promise<number> {
-    const supabase = await createClient();
-    const { count } = await supabase
-        .from('tournaments')
-        .select('id', { count: 'exact', head: true })
-        .eq('created_by_user_id', userId)
-        .neq('status', 'archived');
-    return count ?? 0;
-}
-
 export default async function TournamentAdminHome() {
     const supabase = await createClient();
     const ctx = await requireTournamentAdminContext(supabase).catch(() => null);
     if (!ctx) return null;
 
     const scope = await resolveTournamentAdminScope(supabase, ctx);
-    const [stats, planCtx, ownedActive] = await Promise.all([
-        loadStats(scope).catch(() => ({ clubs: 0, tournaments: 0, drafts: 0 })),
-        getUserPlanContext(supabase, ctx.userId, ctx.rawRole),
-        loadOwnedActiveTournaments(ctx.userId).catch(() => 0),
-    ]);
+    const stats = await loadStats(scope).catch(() => ({ clubs: 0, tournaments: 0, drafts: 0 }));
     const isUnlimited = scope.isUnlimited;
-    const planLimits = planCtx.plan.limits;
-    const atTournamentLimit = !planCtx.isUnlimited && ownedActive >= planLimits.maxActiveTournaments;
-    const showUpgrade = !planCtx.isUnlimited && planCtx.tier !== 'organizacion';
 
     return (
         <div>
@@ -106,41 +89,7 @@ export default async function TournamentAdminHome() {
                     </p>
                     <div className={styles.statCta}>Ir a Torneos →</div>
                 </Link>
-
-                <Link
-                    href={planCtx.subscriptionId ? '/billing' : '/contacto#precios'}
-                    className={styles.statCard}
-                >
-                    <p className={styles.statEyebrow}>Plan</p>
-                    <h2 className={styles.statValue}>{planCtx.plan.name}</h2>
-                    <p className={styles.statLabel}>
-                        {planCtx.isUnlimited
-                            ? 'Acceso ilimitado (admin global).'
-                            : `${ownedActive} / ${fmtLimit(planLimits.maxActiveTournaments)} torneos activos · hasta ${fmtLimit(planLimits.maxTeamsPerTournament)} equipos por torneo`}
-                    </p>
-                    <div className={styles.statCta}>
-                        {planCtx.subscriptionId
-                            ? 'Ver suscripción →'
-                            : showUpgrade
-                                ? 'Mejorar plan →'
-                                : 'Ver planes →'}
-                    </div>
-                </Link>
             </div>
-
-            {atTournamentLimit && (
-                <section className={`${styles.dashboardSection}`} style={{ marginBottom: 16 }}>
-                    <p className={styles.dashboardSectionTitle}>Llegaste al límite de tu plan</p>
-                    <p className={styles.dashboardSectionBody}>
-                        Tu plan <strong>{planCtx.plan.name}</strong> permite hasta {fmtLimit(planLimits.maxActiveTournaments)}{' '}
-                        {planLimits.maxActiveTournaments === 1 ? 'torneo activo' : 'torneos activos'}.{' '}
-                        <Link href="/contacto#precios" style={{ color: 'var(--accent-cyan)' }}>
-                            Pasate a un plan superior
-                        </Link>{' '}
-                        para crear más.
-                    </p>
-                </section>
-            )}
 
             <section className={styles.dashboardSection}>
                 <p className={styles.dashboardSectionTitle}>Sobre este panel</p>

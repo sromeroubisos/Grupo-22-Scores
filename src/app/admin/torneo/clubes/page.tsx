@@ -1,17 +1,49 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Plus, Search, ShieldQuestion } from 'lucide-react';
 import styles from '../tournament-admin.module.css';
+
+type Division = {
+    id?: string;
+    name: string;
+    sport: string;
+    gender: string;
+    category: string;
+    season: string;
+    status: string;
+};
 
 type Club = {
     id: string;
     name: string;
+    short_name: string | null;
     slug: string | null;
     sport: string | null;
     sport_id: string | null;
     city: string | null;
+    region: string | null;
     country: string | null;
     is_visible: boolean | null;
+    logo_url: string | null;
+    primary_color: string | null;
+    divisions?: Division[];
+};
+
+type AvailableClub = {
+    id: string;
+    name: string;
+    short_name: string | null;
+    slug: string | null;
+    sport: string | null;
+    sport_id: string | null;
+    city: string | null;
+    region: string | null;
+    country: string | null;
+    logo_url: string | null;
+    primary_color: string | null;
 };
 
 type Tournament = {
@@ -21,13 +53,15 @@ type Tournament = {
     season_id: string | null;
 };
 
-const SPORT_OPTIONS = [
-    { value: 'rugby', label: 'Rugby' },
-    { value: 'football', label: 'Fútbol' },
-    { value: 'hockey', label: 'Hockey' },
-    { value: 'basketball', label: 'Básquet' },
-    { value: 'volleyball', label: 'Vóley' },
-];
+function getClubInitial(club: { short_name?: string | null; name?: string | null }) {
+    return (club.short_name || club.name || '?')
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase();
+}
 
 export default function TournamentAdminClubsPage() {
     const [clubs, setClubs] = useState<Club[]>([]);
@@ -37,24 +71,24 @@ export default function TournamentAdminClubsPage() {
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [okMsg, setOkMsg] = useState<string | null>(null);
 
-    const [creating, setCreating] = useState(false);
-    const [newClub, setNewClub] = useState({
-        name: '',
-        sport: 'rugby',
-        city: '',
-        country: '',
-    });
-
     const [linkingClubId, setLinkingClubId] = useState<string | null>(null);
     const [selectedTournamentId, setSelectedTournamentId] = useState('');
     const [linking, setLinking] = useState(false);
+
+    const [requestOpen, setRequestOpen] = useState(false);
+    const [availableClubs, setAvailableClubs] = useState<AvailableClub[]>([]);
+    const [availableLoading, setAvailableLoading] = useState(false);
+    const [availableSearch, setAvailableSearch] = useState('');
+    const [requestedIds, setRequestedIds] = useState<string[]>([]);
+    const [requestNote, setRequestNote] = useState('');
+    const [sendingRequest, setSendingRequest] = useState(false);
 
     const refresh = useCallback(async () => {
         setLoading(true);
         setErrorMsg(null);
         try {
             const [clubsRes, tournamentsRes] = await Promise.all([
-                fetch('/api/admin/torneo/clubs', { cache: 'no-store', credentials: 'include' }),
+                fetch('/api/admin/torneo/clubs?limit=800', { cache: 'no-store', credentials: 'include' }),
                 fetch('/api/admin/torneo/tournaments?limit=300', { cache: 'no-store', credentials: 'include' }),
             ]);
 
@@ -77,46 +111,42 @@ export default function TournamentAdminClubsPage() {
         void refresh();
     }, [refresh]);
 
-    const filtered = useMemo(() => {
-        const q = search.trim().toLowerCase();
-        if (!q) return clubs;
-        return clubs.filter((c) =>
-            c.name.toLowerCase().includes(q) ||
-            (c.slug || '').toLowerCase().includes(q) ||
-            (c.city || '').toLowerCase().includes(q) ||
-            (c.country || '').toLowerCase().includes(q),
-        );
-    }, [clubs, search]);
-
-    const handleCreate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!newClub.name.trim()) return;
-        setCreating(true);
-        setErrorMsg(null);
-        setOkMsg(null);
+    const loadAvailable = useCallback(async (query: string) => {
+        setAvailableLoading(true);
         try {
-            const res = await fetch('/api/admin/torneo/clubs', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const params = new URLSearchParams({ limit: '200' });
+            if (query.trim()) params.set('search', query.trim());
+            const res = await fetch(`/api/admin/torneo/clubs/available?${params.toString()}`, {
+                cache: 'no-store',
                 credentials: 'include',
-                body: JSON.stringify({
-                    name: newClub.name.trim(),
-                    sport: newClub.sport,
-                    city: newClub.city.trim() || null,
-                    country: newClub.country.trim() || null,
-                }),
             });
             const payload = await res.json();
-            if (!res.ok) throw new Error(payload.error || 'No se pudo crear el club');
-            setOkMsg(`Club "${payload.data.name}" creado.`);
-            setNewClub({ name: '', sport: newClub.sport, city: '', country: '' });
-            await refresh();
+            if (!res.ok) throw new Error(payload.error || 'No se pudieron cargar los clubes');
+            setAvailableClubs(Array.isArray(payload.data) ? payload.data : []);
         } catch (e) {
             setErrorMsg(e instanceof Error ? e.message : 'Error inesperado');
         } finally {
-            setCreating(false);
+            setAvailableLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (!requestOpen) return;
+        const handle = setTimeout(() => { void loadAvailable(availableSearch); }, 250);
+        return () => clearTimeout(handle);
+    }, [requestOpen, availableSearch, loadAvailable]);
+
+    const filtered = useMemo(() => {
+        const q = search.trim().toLowerCase();
+        if (!q) return clubs;
+        return clubs.filter((club) =>
+            club.name.toLowerCase().includes(q) ||
+            (club.slug || '').toLowerCase().includes(q) ||
+            (club.short_name || '').toLowerCase().includes(q) ||
+            (club.city || '').toLowerCase().includes(q) ||
+            (club.country || '').toLowerCase().includes(q),
+        );
+    }, [clubs, search]);
 
     const openLinkModal = (clubId: string) => {
         setLinkingClubId(clubId);
@@ -152,6 +182,56 @@ export default function TournamentAdminClubsPage() {
         }
     };
 
+    const openRequestModal = () => {
+        setRequestOpen(true);
+        setRequestedIds([]);
+        setRequestNote('');
+        setAvailableSearch('');
+        setErrorMsg(null);
+        setOkMsg(null);
+    };
+
+    const closeRequestModal = () => {
+        setRequestOpen(false);
+        setRequestedIds([]);
+        setRequestNote('');
+    };
+
+    const toggleRequested = (clubId: string) => {
+        setRequestedIds((current) => (
+            current.includes(clubId)
+                ? current.filter((id) => id !== clubId)
+                : [...current, clubId]
+        ));
+    };
+
+    const handleSendRequest = async () => {
+        if (requestedIds.length === 0) return;
+        setSendingRequest(true);
+        setErrorMsg(null);
+        setOkMsg(null);
+        try {
+            const res = await fetch('/api/admin/torneo/clubs/access-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ clubIds: requestedIds, note: requestNote }),
+            });
+            const payload = await res.json();
+            if (!res.ok) throw new Error(payload.error || 'No se pudo enviar la solicitud');
+
+            if (payload.delivery === 'mailto' && payload.mailtoUrl) {
+                window.location.href = payload.mailtoUrl;
+            }
+            setOkMsg(payload.message || 'Solicitud enviada al Super Admin.');
+            closeRequestModal();
+        } catch (e) {
+            setErrorMsg(e instanceof Error ? e.message : 'Error inesperado');
+        } finally {
+            setSendingRequest(false);
+        }
+    };
+
     return (
         <div>
             <header className={styles.pageHeader}>
@@ -159,139 +239,95 @@ export default function TournamentAdminClubsPage() {
                     <div className={styles.eyebrowDash} />
                     <span className={styles.eyebrowLabel}>Admin View</span>
                 </div>
-                <h1 className={styles.pageTitle}>Clubes</h1>
+                <h1 className={styles.pageTitle}>Mis clubes</h1>
                 <p className={styles.pageSubtitle}>
-                    Crea clubes nuevos o vincula clubes existentes a un torneo. Solo ves los clubes
-                    que creaste o que el Super Admin te concedió.
+                    Clubes que creaste o sobre los que un Super Admin te concedió acceso. Podés
+                    crear clubes nuevos o solicitar acceso a otros que ya existen.
                 </p>
             </header>
 
             {errorMsg && <div className={`${styles.alert} ${styles.alertError}`}>{errorMsg}</div>}
             {okMsg && <div className={`${styles.alert} ${styles.alertSuccess}`}>{okMsg}</div>}
 
-            <div className={styles.layoutGrid}>
-                <section className={styles.colLeft}>
-                    <div className={`${styles.cardStatic} ${styles.formCard}`}>
-                        <p className={styles.formEyebrow}>Nuevo registro</p>
-                        <form className={styles.form} onSubmit={handleCreate}>
-                            <div className={styles.field}>
-                                <label className={styles.fieldLabel} htmlFor="club-name">Nombre del club</label>
-                                <input
-                                    id="club-name"
-                                    className={styles.input}
-                                    placeholder="Ej: Club Atlético Nórdico"
-                                    value={newClub.name}
-                                    onChange={(e) => setNewClub((s) => ({ ...s, name: e.target.value }))}
-                                    required
-                                    minLength={2}
-                                />
-                            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
+                <Link
+                    href="/admin/torneo/clubes/crear"
+                    prefetch={false}
+                    className={styles.btnPrimaryCompact}
+                    style={{ textDecoration: 'none' }}
+                >
+                    <Plus size={16} aria-hidden />
+                    Crear club
+                </Link>
+                <button
+                    type="button"
+                    className={styles.btnGhost}
+                    onClick={openRequestModal}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                >
+                    <ShieldQuestion size={16} aria-hidden />
+                    Solicitar acceso a otros clubes
+                </button>
+            </div>
 
-                            <div className={styles.formGrid2}>
-                                <div className={styles.field}>
-                                    <label className={styles.fieldLabel} htmlFor="club-sport">Deporte</label>
-                                    <select
-                                        id="club-sport"
-                                        className={styles.select}
-                                        value={newClub.sport}
-                                        onChange={(e) => setNewClub((s) => ({ ...s, sport: e.target.value }))}
-                                    >
-                                        {SPORT_OPTIONS.map((opt) => (
-                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className={styles.field}>
-                                    <label className={styles.fieldLabel} htmlFor="club-country">País</label>
-                                    <input
-                                        id="club-country"
-                                        className={styles.input}
-                                        placeholder="Argentina"
-                                        value={newClub.country}
-                                        onChange={(e) => setNewClub((s) => ({ ...s, country: e.target.value }))}
-                                    />
-                                </div>
-                            </div>
+            <div className={`${styles.cardStatic} ${styles.searchBar}`}>
+                <div className={styles.searchWrap}>
+                    <Search className={styles.searchIcon} aria-hidden />
+                    <input
+                        type="text"
+                        className={styles.searchInput}
+                        placeholder="Buscar club por nombre, ciudad, país o slug..."
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                    />
+                </div>
+            </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.fieldLabel} htmlFor="club-city">Ciudad</label>
-                                <input
-                                    id="club-city"
-                                    className={styles.input}
-                                    placeholder="Buenos Aires"
-                                    value={newClub.city}
-                                    onChange={(e) => setNewClub((s) => ({ ...s, city: e.target.value }))}
-                                />
-                            </div>
-
-                            <button type="submit" className={styles.btnPrimary} disabled={creating}>
-                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
-                                </svg>
-                                {creating ? 'Creando…' : 'Crear club'}
-                            </button>
-                        </form>
+            <div className={styles.listStack}>
+                {loading ? (
+                    <div className={`${styles.cardStatic} ${styles.empty}`}>Cargando...</div>
+                ) : filtered.length === 0 ? (
+                    <div className={`${styles.cardStatic} ${styles.empty}`}>
+                        No tenés clubes accesibles todavía. Creá uno nuevo o solicitá acceso a clubes existentes.
                     </div>
-                </section>
-
-                <section className={styles.colRight}>
-                    <div className={`${styles.cardStatic} ${styles.searchBar}`}>
-                        <div className={styles.searchWrap}>
-                            <svg className={styles.searchIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            <input
-                                type="text"
-                                className={styles.searchInput}
-                                placeholder="Buscar club por nombre, ciudad o país…"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    <div className={styles.listStack}>
-                        {loading ? (
-                            <div className={`${styles.cardStatic} ${styles.empty}`}>Cargando…</div>
-                        ) : filtered.length === 0 ? (
-                            <div className={`${styles.cardStatic} ${styles.empty}`}>
-                                No tenés clubes accesibles todavía.
-                            </div>
-                        ) : (
-                            filtered.map((club) => (
-                                <article key={club.id} className={`${styles.card} ${styles.listItem}`}>
-                                    <div className={styles.listItemRow}>
-                                        <div className={styles.listItemBody}>
-                                            <div className={styles.listItemMetaRow}>
-                                                <span className={`${styles.badge} ${club.is_visible ? styles.badgePublicado : styles.badgeBorrador}`}>
-                                                    {club.is_visible ? 'Visible' : 'Oculto'}
-                                                </span>
-                                                <span className={styles.idTag}>{club.id}</span>
-                                            </div>
-                                            <h4 className={styles.listItemTitle}>{club.name}</h4>
-                                            <div className={styles.metaRow}>
-                                                <span>{club.sport_id || club.sport || '—'}</span>
-                                                <span className={styles.metaDot} />
-                                                <span>{club.city || 'Sin ciudad'}</span>
-                                                <span className={styles.metaDot} />
-                                                <span>{club.country || 'Sin país'}</span>
-                                            </div>
-                                        </div>
-                                        <div className={styles.actions}>
-                                            <button
-                                                type="button"
-                                                className={styles.btnGhost}
-                                                onClick={() => openLinkModal(club.id)}
-                                            >
-                                                Vincular a torneo
-                                            </button>
-                                        </div>
+                ) : (
+                    filtered.map((club) => (
+                        <article key={club.id} className={`${styles.card} ${styles.listItem}`}>
+                            <div className={styles.listItemRow}>
+                                <div className={styles.listAvatar} style={{ background: club.primary_color || undefined }}>
+                                    {club.logo_url ? (
+                                        <Image src={club.logo_url} alt="" width={42} height={42} unoptimized />
+                                    ) : getClubInitial(club)}
+                                </div>
+                                <div className={styles.listItemBody}>
+                                    <div className={styles.listItemMetaRow}>
+                                        <span className={`${styles.badge} ${club.is_visible ? styles.badgePublicado : styles.badgeBorrador}`}>
+                                            {club.is_visible ? 'Visible' : 'Borrador'}
+                                        </span>
+                                        <span className={styles.idTag}>{club.slug || club.id}</span>
                                     </div>
-                                </article>
-                            ))
-                        )}
-                    </div>
-                </section>
+                                    <h4 className={styles.listItemTitle}>{club.name}</h4>
+                                    <div className={styles.metaRow}>
+                                        <span>{club.sport_id || club.sport || '-'}</span>
+                                        <span className={styles.metaDot} />
+                                        <span>{[club.city, club.region, club.country].filter(Boolean).join(' · ') || 'Sin ubicación'}</span>
+                                        <span className={styles.metaDot} />
+                                        <span>{club.divisions?.length || 0} planteles</span>
+                                    </div>
+                                </div>
+                                <div className={styles.actions}>
+                                    <button
+                                        type="button"
+                                        className={styles.btnGhost}
+                                        onClick={() => openLinkModal(club.id)}
+                                    >
+                                        Vincular
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    ))
+                )}
             </div>
 
             {linkingClubId && (
@@ -299,12 +335,12 @@ export default function TournamentAdminClubsPage() {
                     className={styles.modalBackdrop}
                     role="dialog"
                     aria-modal="true"
-                    onClick={(e) => { if (e.target === e.currentTarget) closeLinkModal(); }}
+                    onClick={(event) => { if (event.target === event.currentTarget) closeLinkModal(); }}
                 >
                     <div className={styles.modal}>
                         <h3 className={styles.modalTitle}>Vincular club a un torneo</h3>
                         <p className={styles.modalDesc}>
-                            El club aparecerá como participante del torneo seleccionado.
+                            El club quedará como participante activo del torneo seleccionado.
                         </p>
                         <div className={styles.field}>
                             <label className={styles.fieldLabel} htmlFor="link-tournament">Torneo</label>
@@ -312,12 +348,12 @@ export default function TournamentAdminClubsPage() {
                                 id="link-tournament"
                                 className={styles.select}
                                 value={selectedTournamentId}
-                                onChange={(e) => setSelectedTournamentId(e.target.value)}
+                                onChange={(event) => setSelectedTournamentId(event.target.value)}
                             >
-                                <option value="">Seleccionar torneo…</option>
-                                {tournaments.map((t) => (
-                                    <option key={t.id} value={t.id}>
-                                        {t.display_name || t.name}{t.season_id ? ` · ${t.season_id}` : ''}
+                                <option value="">Seleccionar torneo...</option>
+                                {tournaments.map((tournament) => (
+                                    <option key={tournament.id} value={tournament.id}>
+                                        {tournament.display_name || tournament.name}{tournament.season_id ? ` · ${tournament.season_id}` : ''}
                                     </option>
                                 ))}
                             </select>
@@ -328,12 +364,97 @@ export default function TournamentAdminClubsPage() {
                             </button>
                             <button
                                 type="button"
-                                className={styles.btnPrimary}
-                                style={{ width: 'auto', margin: 0, padding: '12px 18px' }}
+                                className={styles.btnPrimaryCompact}
                                 onClick={handleLink}
                                 disabled={!selectedTournamentId || linking}
                             >
-                                {linking ? 'Vinculando…' : 'Vincular'}
+                                {linking ? 'Vinculando...' : 'Vincular'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {requestOpen && (
+                <div
+                    className={styles.modalBackdrop}
+                    role="dialog"
+                    aria-modal="true"
+                    onClick={(event) => { if (event.target === event.currentTarget) closeRequestModal(); }}
+                >
+                    <div className={styles.modal}>
+                        <h3 className={styles.modalTitle}>Solicitar acceso a otros clubes</h3>
+                        <p className={styles.modalDesc}>
+                            Elegí uno o varios clubes existentes. Se enviará una solicitud al Super
+                            Admin para que te conceda el acceso.
+                        </p>
+
+                        <div className={styles.searchWrap}>
+                            <Search className={styles.searchIcon} aria-hidden />
+                            <input
+                                className={styles.searchInput}
+                                placeholder="Buscar clubes por nombre, ciudad o slug..."
+                                value={availableSearch}
+                                onChange={(event) => setAvailableSearch(event.target.value)}
+                            />
+                        </div>
+
+                        <div className={styles.clubPickGrid}>
+                            {availableLoading ? (
+                                <div className={styles.emptyInline}>Cargando clubes...</div>
+                            ) : availableClubs.length === 0 ? (
+                                <div className={styles.emptyInline}>No hay clubes disponibles para solicitar.</div>
+                            ) : (
+                                availableClubs.map((club) => {
+                                    const selected = requestedIds.includes(club.id);
+                                    return (
+                                        <button
+                                            key={club.id}
+                                            type="button"
+                                            className={`${styles.clubPick} ${selected ? styles.clubPickSelected : ''}`}
+                                            onClick={() => toggleRequested(club.id)}
+                                        >
+                                            <span className={styles.clubPickAvatar} style={{ background: club.primary_color || undefined }}>
+                                                {club.logo_url ? (
+                                                    <Image src={club.logo_url} alt="" width={34} height={34} unoptimized />
+                                                ) : getClubInitial(club)}
+                                            </span>
+                                            <span className={styles.clubPickBody}>
+                                                <strong>{club.name}</strong>
+                                                <small>{[club.city, club.country].filter(Boolean).join(' · ') || club.sport_id || club.sport || 'Club'}</small>
+                                            </span>
+                                            <span className={styles.clubPickCheck}>{selected ? 'ON' : 'ADD'}</span>
+                                        </button>
+                                    );
+                                })
+                            )}
+                        </div>
+
+                        <div className={styles.field}>
+                            <label className={styles.fieldLabel} htmlFor="request-note">Nota para el Super Admin (opcional)</label>
+                            <textarea
+                                id="request-note"
+                                className={styles.textarea}
+                                rows={3}
+                                placeholder="Contá por qué necesitás acceso a estos clubes..."
+                                value={requestNote}
+                                onChange={(event) => setRequestNote(event.target.value)}
+                            />
+                        </div>
+
+                        <div className={styles.modalActions}>
+                            <button type="button" className={styles.btnGhost} onClick={closeRequestModal} disabled={sendingRequest}>
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                className={styles.btnPrimaryCompact}
+                                onClick={handleSendRequest}
+                                disabled={requestedIds.length === 0 || sendingRequest}
+                            >
+                                {sendingRequest
+                                    ? 'Enviando...'
+                                    : `Solicitar acceso${requestedIds.length > 0 ? ` (${requestedIds.length})` : ''}`}
                             </button>
                         </div>
                     </div>

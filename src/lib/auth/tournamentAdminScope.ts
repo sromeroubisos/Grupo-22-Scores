@@ -1,5 +1,6 @@
 import type { createClient } from '@/lib/supabase/server';
 import { isGlobalAdminRole } from '@/lib/auth/roles';
+import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import type { UserAccessContext } from '@/lib/auth/permissions';
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -25,6 +26,9 @@ const UNLIMITED_SCOPE: TournamentAdminScope = {
  * Sources of access for non-global admins:
  *   - Memberships granted by super admin (scope_type IN ('tournament', 'club'))
  *   - Tournaments where created_by_user_id matches the current user
+ *   - Every club participating in any tournament the user can access
+ *     (tournament access cascades to its clubs, resolved dynamically so it
+ *     stays in sync as participants change — no re-granting needed)
  */
 export async function resolveTournamentAdminScope(
     supabase: SupabaseServerClient,
@@ -44,13 +48,36 @@ export async function resolveTournamentAdminScope(
         if (membership.scopeType === 'club') clubIds.add(membership.scopeId);
     }
 
-    const { data: ownedTournaments } = await supabase
+    // Service-role: a gestor_torneos owns drafts that the RLS SELECT policy
+    // (public read = published+visible only) would hide, so the request client
+    // would silently drop them from scope. Filtered by created_by_user_id.
+    const reader = getServiceWriter(supabase, 'resolveTournamentAdminScope');
+    const { data: ownedTournaments } = await reader
         .from('tournaments')
         .select('id')
         .eq('created_by_user_id', context.userId);
 
     for (const row of ownedTournaments ?? []) {
         if (typeof row.id === 'string') tournamentIds.add(row.id);
+    }
+
+    // Cascade: access to a tournament implies access to all of its clubs.
+    // When a Super Admin grants tournament access (or the gestor owns the
+    // tournament), the gestor must be able to manage its participating clubs.
+    // Resolved here from tournament_participants so clubs added/removed later
+    // are reflected automatically. Service-role read (already RLS-safe above);
+    // tournament_participants is public-read anyway.
+    if (tournamentIds.size > 0) {
+        const { data: participantClubs } = await reader
+            .from('tournament_participants')
+            .select('club_id')
+            .in('tournament_id', Array.from(tournamentIds));
+
+        for (const row of participantClubs ?? []) {
+            if (typeof row.club_id === 'string' && row.club_id.length > 0) {
+                clubIds.add(row.club_id);
+            }
+        }
     }
 
     return {

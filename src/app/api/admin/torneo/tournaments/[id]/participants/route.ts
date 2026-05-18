@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import {
     isScopeAllowedClub,
@@ -33,7 +34,10 @@ export async function GET(
         return err('No tenés acceso a este torneo', 403);
     }
 
-    const { data, error } = await supabase
+    // Service-role: scope already enforced. Reading via the request client would
+    // drop the joined club row for draft/hidden clubs (clubs RLS = is_visible).
+    const reader = getServiceWriter(supabase, 'admin/torneo/participants');
+    const { data, error } = await reader
         .from('tournament_participants')
         .select('id, tournament_id, club_id, name, status, clubs:club_id (id, name, slug, logo_url)')
         .eq('tournament_id', id)
@@ -80,7 +84,11 @@ export async function POST(
         return err('No tenés acceso a este club', 403);
     }
 
-    const { data: club, error: clubError } = await supabase
+    // Service-role: scope already enforced (isScopeAllowedTournament/Club).
+    // RLS would hide draft clubs/tournaments and block the participant insert.
+    const writer = getServiceWriter(supabase, 'admin/torneo/participants');
+
+    const { data: club, error: clubError } = await writer
         .from('clubs')
         .select('id, name, short_name')
         .eq('id', clubId)
@@ -90,7 +98,7 @@ export async function POST(
         return err('Club no encontrado', 404);
     }
 
-    const { data: existing } = await supabase
+    const { data: existing } = await writer
         .from('tournament_participants')
         .select('id')
         .eq('tournament_id', tournamentId)
@@ -101,7 +109,7 @@ export async function POST(
         return err('El club ya está vinculado a este torneo', 409);
     }
 
-    const { data: tournamentRow } = await supabase
+    const { data: tournamentRow } = await writer
         .from('tournaments')
         .select('created_by_user_id')
         .eq('id', tournamentId)
@@ -111,7 +119,7 @@ export async function POST(
         ? await getUserPlanContext(supabase, context.userId, context.rawRole)
         : await getUserPlanContext(supabase, ownerId);
 
-    const { count: currentParticipantsCount } = await supabase
+    const { count: currentParticipantsCount } = await writer
         .from('tournament_participants')
         .select('id', { count: 'exact', head: true })
         .eq('tournament_id', tournamentId);
@@ -126,7 +134,7 @@ export async function POST(
         });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await writer
         .from('tournament_participants')
         .insert([{
             tournament_id: tournamentId,
@@ -171,7 +179,10 @@ export async function DELETE(
         return err('No tenés acceso a este torneo', 403);
     }
 
-    const { error } = await supabase
+    // Service-role: scope already enforced. RLS on tournament_participants
+    // delete is is_admin()-only, so the request client cannot unlink.
+    const writer = getServiceWriter(supabase, 'admin/torneo/participants');
+    const { error } = await writer
         .from('tournament_participants')
         .delete()
         .eq('id', participantId)

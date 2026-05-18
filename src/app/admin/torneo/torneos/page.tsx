@@ -1,6 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Eye, EyeOff, Plus, Search, ShieldQuestion, SlidersHorizontal, Trash2, Trophy } from 'lucide-react';
 import styles from '../tournament-admin.module.css';
 
 type Tournament = {
@@ -11,11 +14,18 @@ type Tournament = {
     sport_id: string | null;
     season_id: string | null;
     country: string | null;
+    region: string | null;
+    format: string | null;
     status: string | null;
     is_visible: boolean | null;
-    is_popular: boolean | null;
-    union_id: string | null;
+    logo_url: string | null;
+    primary_color: string | null;
     created_at: string | null;
+};
+
+type Club = {
+    id: string;
+    name: string;
 };
 
 type Participant = {
@@ -26,27 +36,18 @@ type Participant = {
     clubs?: { id: string; name: string; slug: string | null; logo_url: string | null } | null;
 };
 
-const SPORT_OPTIONS = [
-    { value: 'football', label: 'Fútbol' },
-    { value: 'rugby', label: 'Rugby' },
-    { value: 'hockey', label: 'Hockey' },
-    { value: 'basketball', label: 'Básquet' },
-    { value: 'volleyball', label: 'Vóley' },
-];
-
-const SEASONS = ['2026', '2025', '2024'];
-
 const STATUS_LABELS: Record<string, string> = {
     draft: 'Borrador',
     published: 'Publicado',
+    active: 'Activo',
     archived: 'Archivado',
 };
 
-function badgeClass(status: string | null, styles: Record<string, string>) {
+function badgeClass(status: string | null, stylesMap: Record<string, string>) {
     const key = status || 'draft';
-    if (key === 'published') return styles.badgePublicado;
-    if (key === 'archived') return styles.badgeArchivado;
-    return styles.badgeBorrador;
+    if (key === 'published' || key === 'active') return stylesMap.badgePublicado;
+    if (key === 'archived') return stylesMap.badgeArchivado;
+    return stylesMap.badgeBorrador;
 }
 
 function shortId(id: string, sport: string | null, season: string | null): string {
@@ -58,40 +59,43 @@ function shortId(id: string, sport: string | null, season: string | null): strin
 
 export default function TournamentAdminTournamentsPage() {
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
+    const [clubs, setClubs] = useState<Club[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [okMsg, setOkMsg] = useState<string | null>(null);
-
-    const [creating, setCreating] = useState(false);
-    const [newT, setNewT] = useState({
-        name: '',
-        sport_id: 'football',
-        season_id: '2026',
-        country: 'Argentina',
-        status: 'draft',
-    });
 
     const [managingId, setManagingId] = useState<string | null>(null);
     const [participants, setParticipants] = useState<Record<string, Participant[]>>({});
     const [participantLoading, setParticipantLoading] = useState<string | null>(null);
 
     const [linkingTournamentId, setLinkingTournamentId] = useState<string | null>(null);
-    const [accessibleClubs, setAccessibleClubs] = useState<Array<{ id: string; name: string }>>([]);
     const [selectedClubId, setSelectedClubId] = useState('');
     const [linking, setLinking] = useState(false);
+
+    const [requestOpen, setRequestOpen] = useState(false);
+    const [availableTournaments, setAvailableTournaments] = useState<Tournament[]>([]);
+    const [availableLoading, setAvailableLoading] = useState(false);
+    const [availableSearch, setAvailableSearch] = useState('');
+    const [requestedIds, setRequestedIds] = useState<string[]>([]);
+    const [requestNote, setRequestNote] = useState('');
+    const [sendingRequest, setSendingRequest] = useState(false);
 
     const refresh = useCallback(async () => {
         setLoading(true);
         setErrorMsg(null);
         try {
-            const res = await fetch('/api/admin/torneo/tournaments?limit=300', {
-                cache: 'no-store',
-                credentials: 'include',
-            });
-            const payload = await res.json();
-            if (!res.ok) throw new Error(payload.error || 'Error al cargar torneos');
-            setTournaments(Array.isArray(payload.data) ? payload.data : []);
+            const [tournamentsRes, clubsRes] = await Promise.all([
+                fetch('/api/admin/torneo/tournaments?limit=300', { cache: 'no-store', credentials: 'include' }),
+                fetch('/api/admin/torneo/clubs?limit=1000', { cache: 'no-store', credentials: 'include' }),
+            ]);
+            const tournamentsPayload = await tournamentsRes.json();
+            const clubsPayload = await clubsRes.json();
+            if (!tournamentsRes.ok) throw new Error(tournamentsPayload.error || 'Error al cargar torneos');
+            if (!clubsRes.ok) throw new Error(clubsPayload.error || 'Error al cargar clubes');
+
+            setTournaments(Array.isArray(tournamentsPayload.data) ? tournamentsPayload.data : []);
+            setClubs(Array.isArray(clubsPayload.data) ? clubsPayload.data : []);
         } catch (e) {
             setErrorMsg(e instanceof Error ? e.message : 'Error inesperado');
         } finally {
@@ -103,50 +107,42 @@ export default function TournamentAdminTournamentsPage() {
         void refresh();
     }, [refresh]);
 
-    const filtered = useMemo(() => {
-        const q = search.trim().toLowerCase();
-        if (!q) return tournaments;
-        return tournaments.filter((t) =>
-            t.name.toLowerCase().includes(q) ||
-            (t.display_name || '').toLowerCase().includes(q) ||
-            (t.slug || '').toLowerCase().includes(q) ||
-            (t.sport_id || '').toLowerCase().includes(q),
-        );
-    }, [tournaments, search]);
-
-    const handleCreate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (newT.name.trim().length < 3) {
-            setErrorMsg('El nombre del torneo debe tener al menos 3 caracteres');
-            return;
-        }
-        setCreating(true);
-        setErrorMsg(null);
-        setOkMsg(null);
+    const loadAvailable = useCallback(async (query: string) => {
+        setAvailableLoading(true);
         try {
-            const res = await fetch('/api/admin/torneo/tournaments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const params = new URLSearchParams({ limit: '200' });
+            if (query.trim()) params.set('search', query.trim());
+            const res = await fetch(`/api/admin/torneo/tournaments/available?${params.toString()}`, {
+                cache: 'no-store',
                 credentials: 'include',
-                body: JSON.stringify({
-                    name: newT.name.trim(),
-                    sport_id: newT.sport_id,
-                    season_id: newT.season_id,
-                    country: newT.country.trim() || null,
-                    status: newT.status,
-                }),
             });
             const payload = await res.json();
-            if (!res.ok) throw new Error(payload.error || 'No se pudo crear el torneo');
-            setOkMsg(`Torneo "${payload.data.name}" creado.`);
-            setNewT({ ...newT, name: '' });
-            await refresh();
+            if (!res.ok) throw new Error(payload.error || 'No se pudieron cargar los torneos');
+            setAvailableTournaments(Array.isArray(payload.data) ? payload.data : []);
         } catch (e) {
             setErrorMsg(e instanceof Error ? e.message : 'Error inesperado');
         } finally {
-            setCreating(false);
+            setAvailableLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (!requestOpen) return;
+        const handle = setTimeout(() => { void loadAvailable(availableSearch); }, 250);
+        return () => clearTimeout(handle);
+    }, [requestOpen, availableSearch, loadAvailable]);
+
+    const filtered = useMemo(() => {
+        const q = search.trim().toLowerCase();
+        if (!q) return tournaments;
+        return tournaments.filter((tournament) =>
+            tournament.name.toLowerCase().includes(q) ||
+            (tournament.display_name || '').toLowerCase().includes(q) ||
+            (tournament.slug || '').toLowerCase().includes(q) ||
+            (tournament.sport_id || '').toLowerCase().includes(q) ||
+            (tournament.country || '').toLowerCase().includes(q),
+        );
+    }, [tournaments, search]);
 
     const updateStatus = async (id: string, status: string) => {
         setErrorMsg(null);
@@ -160,7 +156,7 @@ export default function TournamentAdminTournamentsPage() {
             });
             const payload = await res.json();
             if (!res.ok) throw new Error(payload.error || 'No se pudo actualizar');
-            setTournaments((current) => current.map((t) => (t.id === id ? { ...t, ...payload.data } : t)));
+            setTournaments((current) => current.map((tournament) => (tournament.id === id ? { ...tournament, ...payload.data } : tournament)));
             setOkMsg(status === 'published' ? 'Torneo publicado.' : 'Torneo despublicado.');
         } catch (e) {
             setErrorMsg(e instanceof Error ? e.message : 'Error inesperado');
@@ -168,7 +164,7 @@ export default function TournamentAdminTournamentsPage() {
     };
 
     const handleDelete = async (id: string, name: string) => {
-        if (!confirm(`¿Eliminar el torneo "${name}"? Esta acción no se puede deshacer.`)) return;
+        if (!confirm(`Eliminar el torneo "${name}"? Esta accion no se puede deshacer.`)) return;
         setErrorMsg(null);
         setOkMsg(null);
         try {
@@ -178,7 +174,7 @@ export default function TournamentAdminTournamentsPage() {
             });
             const payload = await res.json();
             if (!res.ok) throw new Error(payload.error || 'No se pudo eliminar');
-            setTournaments((current) => current.filter((t) => t.id !== id));
+            setTournaments((current) => current.filter((tournament) => tournament.id !== id));
             setOkMsg('Torneo eliminado.');
             if (managingId === id) setManagingId(null);
         } catch (e) {
@@ -201,7 +197,7 @@ export default function TournamentAdminTournamentsPage() {
                 });
                 const payload = await res.json();
                 if (res.ok) {
-                    setParticipants((curr) => ({ ...curr, [id]: payload.data || [] }));
+                    setParticipants((current) => ({ ...current, [id]: payload.data || [] }));
                 }
             } finally {
                 setParticipantLoading(null);
@@ -210,7 +206,7 @@ export default function TournamentAdminTournamentsPage() {
     };
 
     const removeParticipant = async (tournamentId: string, participantId: string) => {
-        if (!confirm('¿Desvincular este club del torneo?')) return;
+        if (!confirm('Desvincular este club del torneo?')) return;
         try {
             const res = await fetch(
                 `/api/admin/torneo/tournaments/${tournamentId}/participants?participantId=${encodeURIComponent(participantId)}`,
@@ -218,30 +214,18 @@ export default function TournamentAdminTournamentsPage() {
             );
             const payload = await res.json();
             if (!res.ok) throw new Error(payload.error || 'No se pudo desvincular');
-            setParticipants((curr) => ({
-                ...curr,
-                [tournamentId]: (curr[tournamentId] || []).filter((p) => p.id !== participantId),
+            setParticipants((current) => ({
+                ...current,
+                [tournamentId]: (current[tournamentId] || []).filter((participant) => participant.id !== participantId),
             }));
         } catch (e) {
             setErrorMsg(e instanceof Error ? e.message : 'Error inesperado');
         }
     };
 
-    const openLinkClub = async (tournamentId: string) => {
+    const openLinkClub = (tournamentId: string) => {
         setLinkingTournamentId(tournamentId);
         setSelectedClubId('');
-        try {
-            const res = await fetch('/api/admin/torneo/clubs?limit=500', {
-                cache: 'no-store',
-                credentials: 'include',
-            });
-            const payload = await res.json();
-            if (res.ok && Array.isArray(payload.data)) {
-                setAccessibleClubs(payload.data.map((c: { id: string; name: string }) => ({ id: c.id, name: c.name })));
-            }
-        } catch {
-            setAccessibleClubs([]);
-        }
     };
 
     const closeLinkClub = () => {
@@ -262,14 +246,13 @@ export default function TournamentAdminTournamentsPage() {
             const payload = await res.json();
             if (!res.ok) throw new Error(payload.error || 'No se pudo vincular');
 
-            // Reload participants of the modified tournament
             const partsRes = await fetch(`/api/admin/torneo/tournaments/${linkingTournamentId}/participants`, {
                 cache: 'no-store',
                 credentials: 'include',
             });
             const partsPayload = await partsRes.json();
             if (partsRes.ok) {
-                setParticipants((curr) => ({ ...curr, [linkingTournamentId]: partsPayload.data || [] }));
+                setParticipants((current) => ({ ...current, [linkingTournamentId]: partsPayload.data || [] }));
             }
             closeLinkClub();
             setOkMsg('Club vinculado.');
@@ -280,6 +263,56 @@ export default function TournamentAdminTournamentsPage() {
         }
     };
 
+    const openRequestModal = () => {
+        setRequestOpen(true);
+        setRequestedIds([]);
+        setRequestNote('');
+        setAvailableSearch('');
+        setErrorMsg(null);
+        setOkMsg(null);
+    };
+
+    const closeRequestModal = () => {
+        setRequestOpen(false);
+        setRequestedIds([]);
+        setRequestNote('');
+    };
+
+    const toggleRequested = (tournamentId: string) => {
+        setRequestedIds((current) => (
+            current.includes(tournamentId)
+                ? current.filter((id) => id !== tournamentId)
+                : [...current, tournamentId]
+        ));
+    };
+
+    const handleSendRequest = async () => {
+        if (requestedIds.length === 0) return;
+        setSendingRequest(true);
+        setErrorMsg(null);
+        setOkMsg(null);
+        try {
+            const res = await fetch('/api/admin/torneo/tournaments/access-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ tournamentIds: requestedIds, note: requestNote }),
+            });
+            const payload = await res.json();
+            if (!res.ok) throw new Error(payload.error || 'No se pudo enviar la solicitud');
+
+            if (payload.delivery === 'mailto' && payload.mailtoUrl) {
+                window.location.href = payload.mailtoUrl;
+            }
+            setOkMsg(payload.message || 'Solicitud enviada al Super Admin.');
+            closeRequestModal();
+        } catch (e) {
+            setErrorMsg(e instanceof Error ? e.message : 'Error inesperado');
+        } finally {
+            setSendingRequest(false);
+        }
+    };
+
     return (
         <div>
             <header className={styles.pageHeader}>
@@ -287,278 +320,190 @@ export default function TournamentAdminTournamentsPage() {
                     <div className={styles.eyebrowDash} />
                     <span className={styles.eyebrowLabel}>Admin View</span>
                 </div>
-                <h1 className={styles.pageTitle}>Torneos</h1>
+                <h1 className={styles.pageTitle}>Mis torneos</h1>
                 <p className={styles.pageSubtitle}>
-                    Centro de mando operativo. Crea nuevas competiciones, gestiona el estado de
-                    publicación y audita los clubes participantes vinculados.
+                    Torneos que creaste o sobre los que un Super Admin te concedió acceso. Podés
+                    crear torneos nuevos (quedan a tu nombre) o solicitar acceso a otros.
                 </p>
             </header>
 
             {errorMsg && <div className={`${styles.alert} ${styles.alertError}`}>{errorMsg}</div>}
             {okMsg && <div className={`${styles.alert} ${styles.alertSuccess}`}>{okMsg}</div>}
 
-            <div className={styles.layoutGrid}>
-                <section className={styles.colLeft}>
-                    <div className={`${styles.cardStatic} ${styles.formCard}`}>
-                        <p className={styles.formEyebrow}>Nuevo registro</p>
-                        <form className={styles.form} onSubmit={handleCreate}>
-                            <div className={styles.field}>
-                                <label className={styles.fieldLabel} htmlFor="t-name">Nombre del torneo</label>
-                                <input
-                                    id="t-name"
-                                    className={styles.input}
-                                    placeholder="Ej: Apertura Regional"
-                                    value={newT.name}
-                                    onChange={(e) => setNewT((s) => ({ ...s, name: e.target.value }))}
-                                    required
-                                    minLength={3}
-                                />
-                            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
+                <Link
+                    href="/admin/torneo/torneos/crear"
+                    prefetch={false}
+                    className={styles.btnPrimaryCompact}
+                    style={{ textDecoration: 'none' }}
+                >
+                    <Plus size={16} aria-hidden />
+                    Crear torneo
+                </Link>
+                <button
+                    type="button"
+                    className={styles.btnGhost}
+                    onClick={openRequestModal}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                >
+                    <ShieldQuestion size={16} aria-hidden />
+                    Solicitar acceso a otros torneos
+                </button>
+            </div>
 
-                            <div className={styles.formGrid2}>
-                                <div className={styles.field}>
-                                    <label className={styles.fieldLabel} htmlFor="t-sport">Deporte</label>
-                                    <select
-                                        id="t-sport"
-                                        className={styles.select}
-                                        value={newT.sport_id}
-                                        onChange={(e) => setNewT((s) => ({ ...s, sport_id: e.target.value }))}
-                                    >
-                                        {SPORT_OPTIONS.map((opt) => (
-                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className={styles.field}>
-                                    <label className={styles.fieldLabel} htmlFor="t-season">Temporada</label>
-                                    <select
-                                        id="t-season"
-                                        className={styles.select}
-                                        value={newT.season_id}
-                                        onChange={(e) => setNewT((s) => ({ ...s, season_id: e.target.value }))}
-                                    >
-                                        {SEASONS.map((season) => (
-                                            <option key={season} value={season}>{season}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
+            <div className={`${styles.cardStatic} ${styles.searchBar}`}>
+                <div className={styles.searchWrap}>
+                    <Search className={styles.searchIcon} aria-hidden />
+                    <input
+                        type="text"
+                        className={styles.searchInput}
+                        placeholder="Buscar torneo por nombre, país o deporte..."
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                    />
+                </div>
+            </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.fieldLabel} htmlFor="t-country">País</label>
-                                <input
-                                    id="t-country"
-                                    className={styles.input}
-                                    placeholder="Argentina"
-                                    value={newT.country}
-                                    onChange={(e) => setNewT((s) => ({ ...s, country: e.target.value }))}
-                                />
-                            </div>
-
-                            <div className={styles.field}>
-                                <span className={styles.fieldLabel}>Estado inicial</span>
-                                <div className={styles.radioGroup}>
-                                    <label className={styles.radioLabel}>
-                                        <input
-                                            type="radio"
-                                            name="status"
-                                            className={styles.radioInput}
-                                            checked={newT.status === 'draft'}
-                                            onChange={() => setNewT((s) => ({ ...s, status: 'draft' }))}
-                                        />
-                                        <span className={styles.radioBox} aria-hidden />
-                                        <span className={styles.radioText}>Borrador</span>
-                                    </label>
-                                    <label className={styles.radioLabel}>
-                                        <input
-                                            type="radio"
-                                            name="status"
-                                            className={styles.radioInput}
-                                            checked={newT.status === 'published'}
-                                            onChange={() => setNewT((s) => ({ ...s, status: 'published' }))}
-                                        />
-                                        <span className={styles.radioBox} aria-hidden />
-                                        <span className={styles.radioText}>Publicado</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <button type="submit" className={styles.btnPrimary} disabled={creating}>
-                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
-                                </svg>
-                                {creating ? 'Creando…' : 'Crear torneo'}
-                            </button>
-                        </form>
+            <div className={styles.listStack}>
+                {loading ? (
+                    <div className={`${styles.cardStatic} ${styles.empty}`}>Cargando...</div>
+                ) : filtered.length === 0 ? (
+                    <div className={`${styles.cardStatic} ${styles.empty}`}>
+                        No tenés torneos accesibles todavía. Creá uno nuevo o solicitá acceso a torneos existentes.
                     </div>
-                </section>
+                ) : (
+                    filtered.map((tournament) => {
+                        const isOpen = managingId === tournament.id;
+                        const tournamentParticipants = participants[tournament.id] || [];
+                        const isPublished = tournament.status === 'published' || tournament.status === 'active';
+                        const tag = shortId(tournament.id, tournament.sport_id, tournament.season_id);
 
-                <section className={styles.colRight}>
-                    <div className={`${styles.cardStatic} ${styles.searchBar}`}>
-                        <div className={styles.searchWrap}>
-                            <svg className={styles.searchIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            <input
-                                type="text"
-                                className={styles.searchInput}
-                                placeholder="Buscar torneo por nombre o deporte…"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    <div className={styles.listStack}>
-                        {loading ? (
-                            <div className={`${styles.cardStatic} ${styles.empty}`}>Cargando…</div>
-                        ) : filtered.length === 0 ? (
-                            <div className={`${styles.cardStatic} ${styles.empty}`}>
-                                No tenés torneos accesibles todavía.
-                            </div>
-                        ) : (
-                            filtered.map((t) => {
-                                const isOpen = managingId === t.id;
-                                const tParticipants = participants[t.id] || [];
-                                const isPublished = t.status === 'published';
-                                const tag = shortId(t.id, t.sport_id, t.season_id);
-
-                                return (
-                                    <article key={t.id} className={`${styles.card} ${styles.listItem}`}>
-                                        <div className={styles.listItemRow}>
-                                            <div className={styles.listItemBody}>
-                                                <div className={styles.listItemMetaRow}>
-                                                    <span className={`${styles.badge} ${badgeClass(t.status, styles)}`}>
-                                                        {STATUS_LABELS[t.status || 'draft'] || t.status}
-                                                    </span>
-                                                    <span className={styles.idTag}>{tag}</span>
-                                                </div>
-                                                <h4 className={`${styles.listItemTitle} ${!isPublished ? styles.listItemTitleDim : ''}`}>
-                                                    {t.display_name || t.name}
-                                                </h4>
-                                                <div className={styles.metaRow}>
-                                                    <span>{t.sport_id || '—'}</span>
-                                                    <span className={styles.metaDot} />
-                                                    <span>Temporada {t.season_id || '—'}</span>
-                                                    <span className={styles.metaDot} />
-                                                    <span>{t.country || 'Sin país'}</span>
-                                                </div>
-                                            </div>
-
-                                            <div className={styles.actions}>
-                                                <button
-                                                    type="button"
-                                                    className={styles.btnGhost}
-                                                    onClick={() => toggleManage(t.id)}
-                                                >
-                                                    {isOpen ? 'Cerrar' : 'Gestionar'}
-                                                </button>
-                                                {isPublished ? (
-                                                    <button
-                                                        type="button"
-                                                        className={styles.iconBtn}
-                                                        title="Despublicar"
-                                                        onClick={() => updateStatus(t.id, 'draft')}
-                                                    >
-                                                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                                                        </svg>
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        className={`${styles.iconBtn} ${styles.iconBtnAccent}`}
-                                                        title="Publicar"
-                                                        onClick={() => updateStatus(t.id, 'published')}
-                                                    >
-                                                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                        </svg>
-                                                    </button>
-                                                )}
-                                                <button
-                                                    type="button"
-                                                    className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
-                                                    title="Eliminar"
-                                                    onClick={() => handleDelete(t.id, t.display_name || t.name)}
-                                                >
-                                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
-                                            </div>
+                        return (
+                            <article key={tournament.id} className={`${styles.card} ${styles.listItem}`}>
+                                <div className={styles.listItemRow}>
+                                    <div className={styles.listAvatar} style={{ background: tournament.primary_color || undefined }}>
+                                        {tournament.logo_url ? (
+                                            <Image src={tournament.logo_url} alt="" width={42} height={42} unoptimized />
+                                        ) : <Trophy size={18} aria-hidden />}
+                                    </div>
+                                    <div className={styles.listItemBody}>
+                                        <div className={styles.listItemMetaRow}>
+                                            <span className={`${styles.badge} ${badgeClass(tournament.status, styles)}`}>
+                                                {STATUS_LABELS[tournament.status || 'draft'] || tournament.status}
+                                            </span>
+                                            <span className={styles.idTag}>{tag}</span>
                                         </div>
+                                        <h4 className={`${styles.listItemTitle} ${!isPublished ? styles.listItemTitleDim : ''}`}>
+                                            {tournament.display_name || tournament.name}
+                                        </h4>
+                                        <div className={styles.metaRow}>
+                                            <span>{tournament.sport_id || '-'}</span>
+                                            <span className={styles.metaDot} />
+                                            <span>{tournament.format || 'sin formato'}</span>
+                                            <span className={styles.metaDot} />
+                                            <span>{tournament.country || 'Sin pais'}</span>
+                                        </div>
+                                    </div>
 
-                                        {isOpen && (
-                                            participantLoading === t.id ? (
-                                                <div className={styles.emptyManage}>
-                                                    <p className={styles.emptyMono}>Cargando clubes…</p>
-                                                </div>
-                                            ) : tParticipants.length === 0 ? (
-                                                <div className={styles.manageBlock}>
-                                                    <div className={styles.manageHeader}>
-                                                        <div>
-                                                            <p className={styles.manageEyebrow}>Clubes Participantes</p>
-                                                            <p className={styles.manageHelp}>Sin clubes vinculados todavía.</p>
-                                                        </div>
-                                                        <button
-                                                            type="button"
-                                                            className={styles.linkAccent}
-                                                            onClick={() => openLinkClub(t.id)}
-                                                        >
-                                                            + Vincular nuevo club
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className={styles.manageBlock}>
-                                                    <div className={styles.manageHeader}>
-                                                        <div>
-                                                            <p className={styles.manageEyebrow}>Clubes Participantes</p>
-                                                            <p className={styles.manageHelp}>
-                                                                Entidades vinculadas a este torneo específico.
-                                                            </p>
-                                                        </div>
-                                                        <button
-                                                            type="button"
-                                                            className={styles.linkAccent}
-                                                            onClick={() => openLinkClub(t.id)}
-                                                        >
-                                                            + Vincular nuevo club
-                                                        </button>
-                                                    </div>
-
-                                                    <div className={styles.clubsGrid}>
-                                                        {tParticipants.map((p) => {
-                                                            const displayName = p.clubs?.name || p.name || p.club_id || '—';
-                                                            const initial = (displayName || '?').trim().charAt(0).toUpperCase();
-                                                            return (
-                                                                <div key={p.id} className={styles.clubChip}>
-                                                                    <div className={styles.clubChipLeft}>
-                                                                        <div className={styles.clubAvatar}>{initial}</div>
-                                                                        <span className={styles.clubName}>{displayName}</span>
-                                                                    </div>
-                                                                    <button
-                                                                        type="button"
-                                                                        className={styles.clubChipRemove}
-                                                                        onClick={() => removeParticipant(t.id, p.id)}
-                                                                    >
-                                                                        Quitar
-                                                                    </button>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            )
+                                    <div className={styles.actions}>
+                                        <Link
+                                            href={`/admin/entities/${tournament.id}/manage?type=tournament&tab=estructura`}
+                                            prefetch={false}
+                                            className={styles.btnGhost}
+                                            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}
+                                            title="Abrir el gestor: fases, zonas, reglas de puntos y fixture"
+                                        >
+                                            <SlidersHorizontal size={15} aria-hidden />
+                                            Abrir en gestor
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            className={styles.btnGhost}
+                                            onClick={() => toggleManage(tournament.id)}
+                                        >
+                                            {isOpen ? 'Cerrar' : 'Clubes'}
+                                        </button>
+                                        {isPublished ? (
+                                            <button
+                                                type="button"
+                                                className={styles.iconBtn}
+                                                title="Despublicar"
+                                                onClick={() => updateStatus(tournament.id, 'draft')}
+                                            >
+                                                <EyeOff size={18} aria-hidden />
+                                            </button>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                className={`${styles.iconBtn} ${styles.iconBtnAccent}`}
+                                                title="Publicar"
+                                                onClick={() => updateStatus(tournament.id, 'published')}
+                                            >
+                                                <Eye size={18} aria-hidden />
+                                            </button>
                                         )}
-                                    </article>
-                                );
-                            })
-                        )}
-                    </div>
-                </section>
+                                        <button
+                                            type="button"
+                                            className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
+                                            title="Eliminar"
+                                            onClick={() => handleDelete(tournament.id, tournament.display_name || tournament.name)}
+                                        >
+                                            <Trash2 size={18} aria-hidden />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {isOpen && (
+                                    participantLoading === tournament.id ? (
+                                        <div className={styles.emptyManage}>
+                                            <p className={styles.emptyMono}>Cargando clubes...</p>
+                                        </div>
+                                    ) : (
+                                        <div className={styles.manageBlock}>
+                                            <div className={styles.manageHeader}>
+                                                <div>
+                                                    <p className={styles.manageEyebrow}>Clubes participantes</p>
+                                                    <p className={styles.manageHelp}>
+                                                        {tournamentParticipants.length === 0
+                                                            ? 'Sin clubes vinculados todavia.'
+                                                            : 'Entidades vinculadas a este torneo.'}
+                                                    </p>
+                                                </div>
+                                                <button type="button" className={styles.linkAccent} onClick={() => openLinkClub(tournament.id)}>
+                                                    + Vincular club
+                                                </button>
+                                            </div>
+
+                                            {tournamentParticipants.length > 0 && (
+                                                <div className={styles.clubsGrid}>
+                                                    {tournamentParticipants.map((participant) => {
+                                                        const displayName = participant.clubs?.name || participant.name || participant.club_id || '-';
+                                                        const initial = (displayName || '?').trim().charAt(0).toUpperCase();
+                                                        return (
+                                                            <div key={participant.id} className={styles.clubChip}>
+                                                                <div className={styles.clubChipLeft}>
+                                                                    <div className={styles.clubAvatar}>{initial}</div>
+                                                                    <span className={styles.clubName}>{displayName}</span>
+                                                                </div>
+                                                                <button
+                                                                    type="button"
+                                                                    className={styles.clubChipRemove}
+                                                                    onClick={() => removeParticipant(tournament.id, participant.id)}
+                                                                >
+                                                                    Quitar
+                                                                </button>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                )}
+                            </article>
+                        );
+                    })
+                )}
             </div>
 
             {linkingTournamentId && (
@@ -566,12 +511,12 @@ export default function TournamentAdminTournamentsPage() {
                     className={styles.modalBackdrop}
                     role="dialog"
                     aria-modal="true"
-                    onClick={(e) => { if (e.target === e.currentTarget) closeLinkClub(); }}
+                    onClick={(event) => { if (event.target === event.currentTarget) closeLinkClub(); }}
                 >
                     <div className={styles.modal}>
                         <h3 className={styles.modalTitle}>Vincular club a torneo</h3>
                         <p className={styles.modalDesc}>
-                            Solo aparecen los clubes a los que tenés acceso.
+                            Solo aparecen clubes accesibles para tu usuario.
                         </p>
                         <div className={styles.field}>
                             <label className={styles.fieldLabel} htmlFor="t-link-club">Club</label>
@@ -579,11 +524,11 @@ export default function TournamentAdminTournamentsPage() {
                                 id="t-link-club"
                                 className={styles.select}
                                 value={selectedClubId}
-                                onChange={(e) => setSelectedClubId(e.target.value)}
+                                onChange={(event) => setSelectedClubId(event.target.value)}
                             >
-                                <option value="">Seleccionar club…</option>
-                                {accessibleClubs.map((c) => (
-                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                <option value="">Seleccionar club...</option>
+                                {clubs.map((club) => (
+                                    <option key={club.id} value={club.id}>{club.name}</option>
                                 ))}
                             </select>
                         </div>
@@ -593,12 +538,97 @@ export default function TournamentAdminTournamentsPage() {
                             </button>
                             <button
                                 type="button"
-                                className={styles.btnPrimary}
-                                style={{ width: 'auto', margin: 0, padding: '12px 18px' }}
+                                className={styles.btnPrimaryCompact}
                                 onClick={handleLinkClub}
                                 disabled={!selectedClubId || linking}
                             >
-                                {linking ? 'Vinculando…' : 'Vincular'}
+                                {linking ? 'Vinculando...' : 'Vincular'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {requestOpen && (
+                <div
+                    className={styles.modalBackdrop}
+                    role="dialog"
+                    aria-modal="true"
+                    onClick={(event) => { if (event.target === event.currentTarget) closeRequestModal(); }}
+                >
+                    <div className={styles.modal}>
+                        <h3 className={styles.modalTitle}>Solicitar acceso a otros torneos</h3>
+                        <p className={styles.modalDesc}>
+                            Elegí uno o varios torneos existentes. Se enviará una solicitud al Super
+                            Admin para que te conceda el acceso.
+                        </p>
+
+                        <div className={styles.searchWrap}>
+                            <Search className={styles.searchIcon} aria-hidden />
+                            <input
+                                className={styles.searchInput}
+                                placeholder="Buscar torneos por nombre o slug..."
+                                value={availableSearch}
+                                onChange={(event) => setAvailableSearch(event.target.value)}
+                            />
+                        </div>
+
+                        <div className={styles.clubPickGrid}>
+                            {availableLoading ? (
+                                <div className={styles.emptyInline}>Cargando torneos...</div>
+                            ) : availableTournaments.length === 0 ? (
+                                <div className={styles.emptyInline}>No hay torneos disponibles para solicitar.</div>
+                            ) : (
+                                availableTournaments.map((tournament) => {
+                                    const selected = requestedIds.includes(tournament.id);
+                                    return (
+                                        <button
+                                            key={tournament.id}
+                                            type="button"
+                                            className={`${styles.clubPick} ${selected ? styles.clubPickSelected : ''}`}
+                                            onClick={() => toggleRequested(tournament.id)}
+                                        >
+                                            <span className={styles.clubPickAvatar} style={{ background: tournament.primary_color || undefined }}>
+                                                {tournament.logo_url ? (
+                                                    <Image src={tournament.logo_url} alt="" width={34} height={34} unoptimized />
+                                                ) : <Trophy size={16} aria-hidden />}
+                                            </span>
+                                            <span className={styles.clubPickBody}>
+                                                <strong>{tournament.display_name || tournament.name}</strong>
+                                                <small>{[tournament.sport_id, tournament.season_id, tournament.country].filter(Boolean).join(' · ') || 'Torneo'}</small>
+                                            </span>
+                                            <span className={styles.clubPickCheck}>{selected ? 'ON' : 'ADD'}</span>
+                                        </button>
+                                    );
+                                })
+                            )}
+                        </div>
+
+                        <div className={styles.field}>
+                            <label className={styles.fieldLabel} htmlFor="t-request-note">Nota para el Super Admin (opcional)</label>
+                            <textarea
+                                id="t-request-note"
+                                className={styles.textarea}
+                                rows={3}
+                                placeholder="Contá por qué necesitás acceso a estos torneos..."
+                                value={requestNote}
+                                onChange={(event) => setRequestNote(event.target.value)}
+                            />
+                        </div>
+
+                        <div className={styles.modalActions}>
+                            <button type="button" className={styles.btnGhost} onClick={closeRequestModal} disabled={sendingRequest}>
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                className={styles.btnPrimaryCompact}
+                                onClick={handleSendRequest}
+                                disabled={requestedIds.length === 0 || sendingRequest}
+                            >
+                                {sendingRequest
+                                    ? 'Enviando...'
+                                    : `Solicitar acceso${requestedIds.length > 0 ? ` (${requestedIds.length})` : ''}`}
                             </button>
                         </div>
                     </div>

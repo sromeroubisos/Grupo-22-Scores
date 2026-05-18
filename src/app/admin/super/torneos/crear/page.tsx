@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import PhaseCreator, { type PhaseConfiguration, type Team as PhaseTeam } from '@/app/admin/components/PhaseCreator';
 import LogoUploader from '@/components/LogoUploader';
-import { useSuperConsole } from '../../SuperConsoleContext';
+import { useOptionalSuperConsole } from '../../SuperConsoleContext';
 import { createClient } from '@/lib/supabase/client';
 import { createEntitySafe, updateEntitySafe } from '@/app/admin/entities/actions';
 import { invalidateCache } from '@/lib/cache/superAdminCache';
@@ -338,6 +338,23 @@ async function fetchAllAdminClubs(): Promise<ClubRecord[]> {
     }
 }
 
+// En el panel de Admin de Torneos los clubes vienen scopeados (solo los que
+// creó o tiene concedidos). Mismo shape que ClubRecord.
+async function fetchTournamentAdminClubs(): Promise<ClubRecord[]> {
+    const response = await fetch('/api/admin/torneo/clubs?limit=1000', {
+        cache: 'no-store',
+        credentials: 'include',
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+        const message = payload && typeof payload === 'object' && 'error' in payload
+            ? String(payload.error || '')
+            : '';
+        throw new Error(message || 'No se pudieron cargar los equipos.');
+    }
+    return Array.isArray(payload?.data) ? payload.data as ClubRecord[] : [];
+}
+
 function createDefaultPhaseConfig(
     phaseType: PhaseConfiguration['phaseType'],
     selectedTeamIds: string[],
@@ -438,12 +455,29 @@ interface DraftPayload {
     savedAt: string;
 }
 
-export default function SuperCreateTournament() {
+type SuperCreateTournamentProps = {
+    navigationMode?: 'admin' | 'tournament-admin';
+};
+
+export default function SuperCreateTournament({ navigationMode = 'admin' }: SuperCreateTournamentProps = {}) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const tournamentId = searchParams?.get('tournamentId');
     const supabase = createClient();
-    const { unions: cachedUnions, loading: superConsoleLoading, refresh } = useSuperConsole();
+    const isTournamentAdmin = navigationMode === 'tournament-admin';
+    const tournamentsHomeHref = isTournamentAdmin ? '/admin/torneo/torneos' : '/admin/super/torneos';
+
+    // En el panel de Admin de Torneos no hay SuperConsoleProvider: usamos la
+    // variante opcional y caemos a valores neutros (unions se cargan aparte).
+    const superConsole = useOptionalSuperConsole();
+    const superConsoleLoading = superConsole?.loading ?? {
+        clubs: false,
+        matches: false,
+        tournaments: false,
+        unions: false,
+        news: false,
+    };
+    const refresh = superConsole?.refresh ?? (() => {});
 
     /* ============== Estado del wizard ============== */
     const [stage, setStage] = useState<WizardStage>('template');
@@ -508,7 +542,8 @@ export default function SuperCreateTournament() {
         setLoadingClubs(true);
         setClubsError(null);
 
-        fetchAllAdminClubs()
+        const loader = isTournamentAdmin ? fetchTournamentAdminClubs : fetchAllAdminClubs;
+        loader()
             .then((data) => { if (!isCancelled) setClubs(data); })
             .catch((error) => {
                 if (isCancelled) return;
@@ -519,18 +554,38 @@ export default function SuperCreateTournament() {
             .finally(() => { if (!isCancelled) setLoadingClubs(false); });
 
         return () => { isCancelled = true; };
-    }, []);
+    }, [isTournamentAdmin]);
 
     /* ============== Uniones ============== */
     useEffect(() => {
+        if (isTournamentAdmin) {
+            // Sin SuperConsole: las uniones vienen del catálogo del panel de torneos.
+            let cancelled = false;
+            fetch('/api/admin/torneo/meta', { cache: 'no-store', credentials: 'include' })
+                .then((response) => response.json())
+                .then((payload) => {
+                    if (cancelled) return;
+                    const unions = Array.isArray(payload?.unions) ? payload.unions : [];
+                    setAvailableUnions(sortUnionOptions(
+                        unions.map((union: { id: string; name: string; country?: string | null }) => ({
+                            id: union.id,
+                            name: union.name,
+                            country: union.country ?? null,
+                        })),
+                    ));
+                })
+                .catch(() => { if (!cancelled) setAvailableUnions([]); });
+            return () => { cancelled = true; };
+        }
+
         setAvailableUnions(sortUnionOptions(
-            cachedUnions.map((union) => ({
+            (superConsole?.unions ?? []).map((union) => ({
                 id: union.id,
                 name: union.name,
                 country: union.country,
             })),
         ));
-    }, [cachedUnions]);
+    }, [isTournamentAdmin, superConsole?.unions]);
 
     useEffect(() => {
         if (!unionCreateForm.slugManuallyEdited) {
@@ -764,6 +819,13 @@ export default function SuperCreateTournament() {
         if (missingClubIds.length === 0) return;
 
         missingClubIds.forEach((clubId) => {
+            if (isTournamentAdmin) {
+                // El alta por panel de torneos inscribe por club (sin división);
+                // evitamos el endpoint super y tratamos como "sin planteles".
+                setClubSquadsByClub((prev) => ({ ...prev, [clubId]: [] }));
+                return;
+            }
+
             setLoadingSquadsByClub((prev) => ({ ...prev, [clubId]: true }));
 
             fetch(`/api/admin/clubs/${clubId}/squads`, { cache: 'no-store' })
@@ -788,7 +850,7 @@ export default function SuperCreateTournament() {
         });
 
         return () => { isCancelled = true; };
-    }, [clubSquadsByClub, loadingSquadsByClub, selectedClubs]);
+    }, [clubSquadsByClub, loadingSquadsByClub, selectedClubs, isTournamentAdmin]);
 
     /* ============== Auto-seleccionar plantel único ============== */
     useEffect(() => {
@@ -1047,6 +1109,65 @@ export default function SuperCreateTournament() {
                 } : {})
             };
 
+            if (isTournamentAdmin) {
+                // Panel de Admin de Torneos: una sola llamada a la API scoped, que
+                // crea el torneo (con created_by + membership), temporada,
+                // participantes y fase inicial, y lo deja a tu nombre.
+                const participantClubIds = Array.from(new Set(selectedClubs.filter(Boolean)));
+                const response = await fetch('/api/admin/torneo/tournaments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        name: formData.name,
+                        display_name: formData.name,
+                        sport_id: formData.sport,
+                        season_id: formData.season || '2026',
+                        category: formData.category || null,
+                        age_grade: formData.ageGrade || null,
+                        format: mapPhaseTypeToFormat(phaseConfigToPersist.phaseType, formData.format) || 'league',
+                        country: formData.country ? (selectedCountryOption?.label || formData.country) : null,
+                        country_id: formData.country ? (selectedCountryOption?.id || formData.country) : null,
+                        union_id: formData.unionId || null,
+                        logo_url: formData.logoUrl || null,
+                        primary_color: null,
+                        status: formData.visibility === 'public' ? 'published' : 'draft',
+                        is_visible: formData.visibility === 'public',
+                        ruleset,
+                        team_count: formData.teamCount || participantClubIds.length || 2,
+                        league_rounds: formData.leagueRounds || 1,
+                        participant_club_ids: participantClubIds,
+                        create_phase: true,
+                        create_season: true,
+                    }),
+                });
+                const result = await response.json().catch(() => null);
+                if (!response.ok) {
+                    throw new Error(result?.error || 'No se pudo crear el torneo.');
+                }
+
+                if (typeof window !== 'undefined') {
+                    try { window.localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* noop */ }
+                }
+
+                // The API creates the tournament even when sub-steps (season,
+                // participants, phases, membership) only partially succeed. Don't
+                // swallow those warnings — the user must know the tournament may
+                // need manual completion in the gestor.
+                const warnings: string[] = Array.isArray(result?.warnings)
+                    ? result.warnings.filter((w: unknown): w is string => typeof w === 'string' && w.trim().length > 0)
+                    : [];
+                if (warnings.length > 0 && typeof window !== 'undefined') {
+                    window.alert(
+                        `El torneo se creó, pero con avisos:\n\n- ${warnings.join('\n- ')}\n\n` +
+                        'Revisalo en el gestor para completar lo que falte.',
+                    );
+                }
+
+                router.push(tournamentsHomeHref);
+                return;
+            }
+
             const payload: Record<string, unknown> = {
                 name: formData.name,
                 sport_id: formData.sport,
@@ -1135,7 +1256,7 @@ export default function SuperCreateTournament() {
             invalidateCache('tournaments_list');
             refresh('tournaments');
 
-            router.push('/admin/super/torneos');
+            router.push(tournamentsHomeHref);
         } catch (err: unknown) {
             alert('Error al guardar el torneo: ' + (err instanceof Error ? err.message : String(err)));
         } finally {
@@ -1158,7 +1279,7 @@ export default function SuperCreateTournament() {
                 <header className="creation-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
                     <div>
                         <button
-                            onClick={() => router.push('/admin/super/torneos')}
+                            onClick={() => router.push(tournamentsHomeHref)}
                             className="btn btn-outline"
                             style={{ padding: '8px 16px', marginBottom: '16px', height: 'auto', width: 'auto' }}
                         >

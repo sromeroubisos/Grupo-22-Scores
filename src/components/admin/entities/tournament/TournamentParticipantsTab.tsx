@@ -300,7 +300,18 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
             const request = beginClientRequest('clubs:catalog', 'mount', {
                 component: 'TournamentParticipantsTab',
             });
-            const response = await fetch('/api/clubs?include_hidden=true', { cache: 'no-store' });
+            // A tournament admin (gestor_torneos) must only be offered clubs
+            // within their access scope. /api/admin/torneo/clubs returns that
+            // scoped set for them and the full catalog for global admins
+            // (unlimited scope). Other admin roles can't use that panel and get
+            // 401/403 — fall back to the global catalog so nothing regresses.
+            let response = await fetch('/api/admin/torneo/clubs?limit=2000', {
+                cache: 'no-store',
+                credentials: 'include',
+            });
+            if (response.status === 401 || response.status === 403) {
+                response = await fetch('/api/clubs?include_hidden=true', { cache: 'no-store' });
+            }
             request.end({
                 status: response.status,
                 error: !response.ok,

@@ -1,4 +1,4 @@
-export type ClubConsoleMode = 'admin' | 'club-admin';
+export type ClubConsoleMode = 'admin' | 'club-admin' | 'tournament-admin';
 export const CLUB_ADMIN_TAB_STATE_EVENT = 'club-admin:tab-state-change';
 
 function withQuery(pathname: string, searchParams: URLSearchParams) {
@@ -11,6 +11,11 @@ export function buildClubManageHref(
     tab = 'general',
     mode: ClubConsoleMode = 'admin'
 ) {
+    if (mode === 'tournament-admin') {
+        // El panel de torneos no tiene gestor por club: volvemos al listado.
+        return '/admin/torneo/clubes';
+    }
+
     if (mode === 'club-admin') {
         const searchParams = new URLSearchParams({
             club: clubId,
@@ -60,6 +65,10 @@ export function buildClubRosterHref(
         return `/club-admin/clubes/${encodeURIComponent(clubId)}/planteles/${encodeURIComponent(squadId)}`;
     }
 
+    if (mode === 'tournament-admin') {
+        return '/admin/torneo/clubes';
+    }
+
     return `/admin/super/clubes/${encodeURIComponent(clubId)}/planteles/${encodeURIComponent(squadId)}`;
 }
 
@@ -71,7 +80,11 @@ export function buildClubCreateHref(
         derivedSport?: string | null;
     }
 ) {
-    const pathname = mode === 'club-admin' ? '/club-admin/clubes/crear' : '/admin/super/clubes/crear';
+    const pathname = mode === 'club-admin'
+        ? '/club-admin/clubes/crear'
+        : mode === 'tournament-admin'
+            ? '/admin/torneo/clubes/crear'
+            : '/admin/super/clubes/crear';
     const searchParams = new URLSearchParams();
 
     if (options?.derivedFrom) searchParams.set('derivedFrom', options.derivedFrom);

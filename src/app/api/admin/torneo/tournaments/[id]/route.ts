@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import { isScopeAllowedTournament, resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
 
@@ -75,7 +76,11 @@ export async function PATCH(
         }
     }
 
-    const { data, error } = await supabase
+    // Service-role: scope is already enforced above (isScopeAllowedTournament).
+    // The only RLS write policy on tournaments is is_admin(), which excludes
+    // gestor_torneos, so the request client would silently fail this update.
+    const writer = getServiceWriter(supabase, 'admin/torneo/tournaments/[id]');
+    const { data, error } = await writer
         .from('tournaments')
         .update(updates)
         .eq('id', id)
@@ -110,13 +115,17 @@ export async function DELETE(
         return err('No tenés acceso a este torneo', 403);
     }
 
-    const { error } = await supabase.from('tournaments').delete().eq('id', id);
+    // Service-role: scope already enforced above. RLS on tournaments/memberships
+    // is is_admin()-only, so the request client cannot delete the tournament nor
+    // the memberships of other assigned users (would orphan them).
+    const writer = getServiceWriter(supabase, 'admin/torneo/tournaments/[id]');
+    const { error } = await writer.from('tournaments').delete().eq('id', id);
     if (error) {
         return err('No se pudo eliminar el torneo', 500, error.message);
     }
 
-    // Clean up the creator membership.
-    await supabase
+    // Clean up every membership scoped to this tournament (creator + assigned users).
+    await writer
         .from('memberships')
         .delete()
         .eq('scope_type', 'tournament')

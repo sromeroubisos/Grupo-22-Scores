@@ -350,3 +350,12 @@ export function useSuperConsole() {
     if (!context) throw new Error('useSuperConsole must be used within SuperConsoleProvider');
     return context;
 }
+
+/**
+ * Variante que NO lanza si no hay provider. Útil para reutilizar componentes
+ * del super console (p. ej. el creador de torneos) fuera de su layout, como
+ * en el panel del Administrador de Torneos.
+ */
+export function useOptionalSuperConsole(): ContextValue | undefined {
+    return useContext(SuperConsoleContext);
+}
