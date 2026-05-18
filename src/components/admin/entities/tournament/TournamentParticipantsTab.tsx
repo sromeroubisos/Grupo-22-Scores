@@ -17,7 +17,7 @@
  * - All buttons functional, no placebo elements
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
     Users, Search, Plus, Download, FileUp, History,
@@ -144,6 +144,12 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
     const [clubCatalog, setClubCatalog] = useState<ClubCatalogItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [clubsLoading, setClubsLoading] = useState(false);
+    // Whether a catalog fetch was already attempted for the current drawer
+    // session. Prevents the loader effect from re-firing forever when the
+    // scoped endpoint legitimately returns an empty list (or errors): without
+    // this, clubsLoading flips back to false + clubCatalog stays empty, so the
+    // effect's guard re-opens and loadClubs() loops, flickering the spinner.
+    const clubsAttemptedRef = useRef(false);
     const [groupAssignmentLoading, setGroupAssignmentLoading] = useState(false);
     // Filters
     const [searchQuery, setSearchQuery] = useState('');
@@ -297,6 +303,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
     const loadClubs = async () => {
         try {
             setClubsLoading(true);
+            clubsAttemptedRef.current = true;
             const request = beginClientRequest('clubs:catalog', 'mount', {
                 component: 'TournamentParticipantsTab',
             });
@@ -336,8 +343,13 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
     };
 
     useEffect(() => {
-        if (!isAddDrawerOpen && !editingParticipant) return;
-        if (clubCatalog.length > 0 || clubsLoading) return;
+        if (!isAddDrawerOpen && !editingParticipant) {
+            // Drawer fully closed: allow a fresh fetch (and error retry) the
+            // next time it opens.
+            clubsAttemptedRef.current = false;
+            return;
+        }
+        if (clubCatalog.length > 0 || clubsLoading || clubsAttemptedRef.current) return;
         void loadClubs();
     }, [clubCatalog.length, clubsLoading, editingParticipant, isAddDrawerOpen]);
 
