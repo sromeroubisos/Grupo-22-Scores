@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState, useEffect, useMemo } from 'react';
-import { AlertCircle, ArrowDownUp, Award, CheckCircle, ChevronRight, Eye, Globe, Grid3x3, Info, Layers, MoreVertical, Plus, Trash2, Trophy } from 'lucide-react';
+import { AlertCircle, ArrowDownUp, Award, CheckCircle, ChevronRight, Edit3, Eye, Globe, Grid3x3, Info, Layers, MoreVertical, Plus, Trash2, TrendingUp, Trophy, Users, X } from 'lucide-react';
 import './basalt.css';
 import './phase-wizard.css';
 import './tournament-structure.css';
@@ -177,6 +177,42 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const [savingFormat, setSavingFormat] = useState(false);
     const [formatSaved, setFormatSaved] = useState(false);
     const [formatError, setFormatError] = useState<string | null>(null);
+
+    // Plantel fijo por equipo (fixed roster per tournament). Stored in
+    // tournaments.ruleset.fixedRoster; getFixedRosterConfig() reads it.
+    const initialFixedRoster = (data as any)?.ruleset?.fixedRoster ?? {};
+    const [fixedRosterEnabled, setFixedRosterEnabled] = useState<boolean>(Boolean(initialFixedRoster.enabled));
+    const [fixedRosterSize, setFixedRosterSize] = useState<number>(
+        typeof initialFixedRoster.rosterSize === 'number' ? initialFixedRoster.rosterSize : 23,
+    );
+    const [fixedRosterLockPhaseId, setFixedRosterLockPhaseId] = useState<string>(
+        typeof initialFixedRoster.lockPhaseId === 'string' ? initialFixedRoster.lockPhaseId : '',
+    );
+    const [savingFixedRoster, setSavingFixedRoster] = useState(false);
+    const [fixedRosterSaved, setFixedRosterSaved] = useState(false);
+    const [fixedRosterError, setFixedRosterError] = useState<string | null>(null);
+
+    // Mobile-only: 'Modelo competitivo' and 'Plantel fijo' collapse into a
+    // 'Configuración del torneo' panel with two drilldown rows; tapping a row
+    // opens the original section as a bottom sheet. Desktop is untouched
+    // (CSS hides the trigger panel and ignores the open state at >= 768px).
+    const [mobileConfigSheet, setMobileConfigSheet] = useState<'model' | 'roster' | null>(null);
+
+    useEffect(() => {
+        if (!mobileConfigSheet) return;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = previousOverflow; };
+    }, [mobileConfigSheet]);
+
+    useEffect(() => {
+        if (!mobileConfigSheet) return;
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setMobileConfigSheet(null);
+        };
+        document.addEventListener('keydown', handleKey);
+        return () => document.removeEventListener('keydown', handleKey);
+    }, [mobileConfigSheet]);
 
     const isCircuit = tournamentFormat === 'circuit';
 
@@ -595,6 +631,38 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         }
     };
 
+    const handleSaveFixedRoster = async () => {
+        if (!id || isApiManaged) return;
+        setSavingFixedRoster(true);
+        setFixedRosterSaved(false);
+        setFixedRosterError(null);
+        try {
+            const lockPhase = fixedRosterLockPhaseId
+                ? phases.find((p) => p.id === fixedRosterLockPhaseId) ?? null
+                : null;
+            const currentRuleset = (data as any)?.ruleset ?? {};
+            await updateEntity('tournament', id, {
+                ruleset: {
+                    ...currentRuleset,
+                    fixedRoster: {
+                        enabled: fixedRosterEnabled,
+                        rosterSize: Math.min(40, Math.max(1, Math.trunc(fixedRosterSize) || 23)),
+                        enforceExactSize: false,
+                        lockPhaseId: lockPhase ? lockPhase.id : null,
+                        lockOrderIndex: lockPhase ? lockPhase.order_index : null,
+                    },
+                },
+            });
+            setFixedRosterSaved(true);
+            triggerSectionSavedFlash('structure');
+            setTimeout(() => setFixedRosterSaved(false), 3000);
+        } catch (error: unknown) {
+            setFixedRosterError(error instanceof Error ? error.message : 'No se pudo guardar el plantel fijo.');
+        } finally {
+            setSavingFixedRoster(false);
+        }
+    };
+
     // Mirror local wizard / model edits into the shared dirty tracker so the
     // shell can warn before navigation, paint the tab dot, and block accidental
     // tab swaps. We deliberately do NOT instrument every input — instead we
@@ -657,6 +725,10 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const loadPhaseIntoForm = (phase: Phase) => {
         if (isApiManaged) return;
         setEditingPhaseId(phase.id);
+        // Editar una fase existente: respetar el advanceCount guardado. Sin
+        // esto, la heurística de "equipos que avanzan" (efecto) lo pisaría
+        // al abrir la fase porque advanceTouched seguiría en false.
+        setAdvanceTouched(true);
         setPhaseName(phase.name);
         setPhaseType(phase.phase_type as any);
         setPlayoffStageNames(DEFAULT_PLAYOFF_STAGE_NAMES);
@@ -1108,99 +1180,15 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         );
     }
 
-    // Be honest about whether there's an active phase. If none is marked
-    // is_active, we DON'T fall back to phases[0] (that misled users into
-    // thinking the first phase was active when it wasn't).
-    const mobileActivePhase = phases.find((p) => p.is_active) ?? null;
-    const mobilePhaseTotal = phases.length;
-    const mobileFormatLabel = tournamentFormat === 'circuit' ? 'Circuito por eventos' : 'Torneo estandar';
-
     return (
         <div className="tournament-structure-shell flex flex-col gap-8 animate-in fade-in duration-500 pb-24">
-
-            {/* Mobile-only summary (hidden on desktop via CSS). Gives a one-glance
-                view of the current structure and surfaces the most-used CTAs. */}
-            <section className="tournament-structure-mobile" aria-label="Resumen de estructura">
-                <article className="tsm-card tsm-card-state">
-                    <div className="tsm-card-eyebrow">Modelo competitivo</div>
-                    <div className="tsm-state-row">
-                        <strong className="tsm-state-status" style={{ fontSize: 18, letterSpacing: 0 }}>
-                            {mobileFormatLabel}
-                        </strong>
-                        <span className={`tsm-state-pill ${tournamentFormat === 'league' ? 'is-public' : 'is-internal'}`}>
-                            {mobilePhaseTotal} {mobilePhaseTotal === 1 ? 'fase' : 'fases'}
-                        </span>
-                    </div>
-                    {mobileActivePhase ? (
-                        <div className="tsm-state-meta">
-                            <span><Layers size={14} /> Fase activa</span>
-                            <span aria-hidden="true">·</span>
-                            <strong style={{ color: 'var(--text-primary, #f4f6fa)' }}>{mobileActivePhase.name}</strong>
-                            <span aria-hidden="true">·</span>
-                            <span>{PHASE_TYPE_LABELS[mobileActivePhase.phase_type] || mobileActivePhase.phase_type}</span>
-                        </div>
-                    ) : phases.length > 0 ? (
-                        <div className="tsm-state-meta">
-                            <Layers size={14} aria-hidden="true" />
-                            <span>Ninguna fase esta marcada como activa todavia.</span>
-                        </div>
-                    ) : (
-                        <div className="tsm-state-meta">
-                            <span>Sin fases configuradas todavia.</span>
-                        </div>
-                    )}
-                </article>
-
-                {phases.length > 0 ? (
-                    <article className="tsm-card">
-                        <div className="tsm-card-eyebrow">
-                            <span>Fases</span>
-                            <span className="tsm-card-eyebrow-badge is-ok">{phases.length}</span>
-                        </div>
-                        <ul className="tsm-phase-list">
-                            {phases.map((phase, index) => (
-                                <li key={phase.id} className="tsm-phase-item-wrap">
-                                    <button
-                                        type="button"
-                                        className={`tsm-phase-item ${phase.is_active ? 'is-active' : ''}`}
-                                        onClick={() => loadPhaseIntoForm(phase)}
-                                        disabled={isApiManaged}
-                                        aria-current={phase.is_active ? 'true' : undefined}
-                                        aria-label={`Editar fase ${phase.name}`}
-                                    >
-                                        <span className="tsm-phase-index">{String(index + 1).padStart(2, '0')}</span>
-                                        <div className="tsm-phase-text">
-                                            <strong>{phase.name}</strong>
-                                            <small>{PHASE_TYPE_LABELS[phase.phase_type] || phase.phase_type}</small>
-                                        </div>
-                                        {phase.is_active ? (
-                                            <span className="tsm-phase-pill">Activa</span>
-                                        ) : (
-                                            <ChevronRight size={16} aria-hidden="true" />
-                                        )}
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </article>
-                ) : null}
-
-                <article className="tsm-card">
-                    <div className="tsm-card-eyebrow">Acciones</div>
-                    <button
-                        type="button"
-                        className="tsm-next-cta"
-                        onClick={() => setShowPhaseForm(true)}
-                        disabled={isApiManaged}
-                    >
-                        <Plus size={18} /> Crear nueva fase
-                    </button>
-                    <p style={{ fontSize: 12, color: 'var(--text-dim, #6b7280)', marginTop: 10, lineHeight: 1.45 }}>
-                        Las fases definen como avanzan los equipos: liga, grupos, eliminacion directa o playoffs.
-                    </p>
-                </article>
-            </section>
-
+            {mobileConfigSheet && (
+                <div
+                    className="structure-mobile-sheet-backdrop"
+                    onClick={() => setMobileConfigSheet(null)}
+                    aria-hidden="true"
+                />
+            )}
             {feedback && (
                 <div
                     role={feedback.tone === 'error' ? 'alert' : 'status'}
@@ -1224,7 +1212,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             {isApiManaged && (
                 <div
                     role="status"
-                    className="flex items-start gap-4 rounded-xl border border-blue-500/30 bg-blue-500/10 px-5 py-4 text-blue-100"
+                    className="structure-api-notice flex items-start gap-4 rounded-xl border border-blue-500/30 bg-blue-500/10 px-5 py-4 text-blue-100"
                 >
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/20 text-blue-300">
                         <Globe size={20} />
@@ -1243,7 +1231,18 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
             {/* ── Tournament model selector ── */}
             {!showPhaseForm && (
-                <section className="basalt-card structure-module p-6" data-disabled={isApiManaged || undefined}>
+                <section
+                    className={`basalt-card structure-module structure-module-modelo p-6 ${mobileConfigSheet === 'model' ? 'is-mobile-sheet-open' : ''}`}
+                    data-disabled={isApiManaged || undefined}
+                >
+                    <button
+                        type="button"
+                        className="structure-mobile-sheet-close"
+                        onClick={() => setMobileConfigSheet(null)}
+                        aria-label="Cerrar"
+                    >
+                        <X size={20} />
+                    </button>
                     <div className="structure-module-header mb-5">
                         <p className="basalt-section-kicker mb-1">Modelo competitivo</p>
                         <h2 className="basalt-h1 structure-module-title">Rol del torneo</h2>
@@ -1327,6 +1326,98 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             )}
 
             {!showPhaseForm && (
+                <section
+                    className={`basalt-card structure-module structure-module-plantel p-6 ${mobileConfigSheet === 'roster' ? 'is-mobile-sheet-open' : ''}`}
+                    data-disabled={isApiManaged || undefined}
+                >
+                    <button
+                        type="button"
+                        className="structure-mobile-sheet-close"
+                        onClick={() => setMobileConfigSheet(null)}
+                        aria-label="Cerrar"
+                    >
+                        <X size={20} />
+                    </button>
+                    <p className="basalt-section-kicker">Inscripción de equipos</p>
+                    <h2 className="structure-hero-title" style={{ marginBottom: 4 }}>Plantel fijo por equipo</h2>
+                    <p className="structure-hero-text" style={{ marginBottom: 16 }}>
+                        Cada equipo inscribe una sola vez su plantel/delegación en el torneo y esos jugadores
+                        se cargan automáticamente en todos sus partidos. Otros torneos siguen con la carga
+                        manual de titulares/suplentes por partido.
+                    </p>
+
+                    <label className="flex items-center gap-2 mb-4" style={{ cursor: isApiManaged ? 'default' : 'pointer' }}>
+                        <input
+                            type="checkbox"
+                            checked={fixedRosterEnabled}
+                            disabled={isApiManaged}
+                            onChange={(e) => setFixedRosterEnabled(e.target.checked)}
+                        />
+                        <span className="text-sm font-semibold">Usar plantel fijo en este torneo</span>
+                    </label>
+
+                    {fixedRosterEnabled && (
+                        <div className="grid grid-cols-2 gap-4 mb-4" style={{ maxWidth: 560 }}>
+                            <div>
+                                <label className="text-[12px] font-semibold block mb-1">Jugadores por equipo</label>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    max={40}
+                                    value={fixedRosterSize}
+                                    disabled={isApiManaged}
+                                    onChange={(e) => setFixedRosterSize(Number(e.target.value))}
+                                    className="basalt-input"
+                                    style={{ width: '100%' }}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[12px] font-semibold block mb-1">Congelar plantel desde la fase</label>
+                                <select
+                                    value={fixedRosterLockPhaseId}
+                                    disabled={isApiManaged}
+                                    onChange={(e) => setFixedRosterLockPhaseId(e.target.value)}
+                                    className="basalt-input"
+                                    style={{ width: '100%' }}
+                                >
+                                    <option value="">No congelar (siempre propaga a futuros)</option>
+                                    {phases.map((p) => (
+                                        <option key={p.id} value={p.id}>{p.name}</option>
+                                    ))}
+                                </select>
+                                <span className="text-[11px] opacity-70 block mt-1">
+                                    Desde esa fase en adelante, los cambios de plantel dejan de impactar partidos.
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-3 flex-wrap">
+                        <button
+                            type="button"
+                            className="basalt-btn basalt-btn-primary"
+                            onClick={handleSaveFixedRoster}
+                            disabled={savingFixedRoster || isApiManaged}
+                        >
+                            {savingFixedRoster ? 'Guardando...' : 'Guardar plantel fijo'}
+                        </button>
+                        {fixedRosterError && (
+                            <span className="flex items-center gap-1.5 text-sm text-[var(--status-error)] font-semibold">
+                                <AlertCircle size={15} />
+                                {fixedRosterError}
+                            </span>
+                        )}
+                        {fixedRosterSaved && (
+                            <span className="flex items-center gap-1.5 text-sm text-[var(--status-active)] font-semibold">
+                                <CheckCircle size={15} />
+                                Guardado
+                            </span>
+                        )}
+                    </div>
+                </section>
+            )}
+
+            {!showPhaseForm && (
                 <section className="basalt-card basalt-hero structure-hero-panel">
                     <div className="structure-hero-copy">
                         <p className="basalt-section-kicker">Consola competitiva</p>
@@ -1386,7 +1477,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
             {/* ── Phase list ── */}
             {phases.length > 0 && !showPhaseForm && (
-                <div className="basalt-card structure-module p-6">
+                <div className="basalt-card structure-module structure-phase-list-module p-6">
                     <div className="structure-module-header flex items-center justify-between gap-4 mb-6">
                         <div>
                             <p className="basalt-section-kicker mb-1">Mapa competitivo</p>
@@ -1496,10 +1587,52 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                 );
                                             })()}
                                         </div>
+                                        <div className="structure-phase-mobile-meta" aria-hidden="true">
+                                            {((phase.settings?.teamsCount ?? 0) > 0 || phase.settings?.legs) && (
+                                                <div className="structure-phase-mobile-meta-row">
+                                                    <Users size={18} />
+                                                    <span>
+                                                        {(phase.settings?.teamsCount ?? 0) > 0 && (
+                                                            <strong>{phase.settings!.teamsCount} equipos</strong>
+                                                        )}
+                                                        {(phase.settings?.teamsCount ?? 0) > 0 && phase.settings?.legs ? ' · ' : ''}
+                                                        {phase.settings?.legs
+                                                            ? (phase.settings.legs === 2 ? 'Ida y vuelta' : 'Partido único')
+                                                            : null}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {((phase.settings?.advanceCount ?? 0) > 0 || (phase.settings as any)?.group_names?.length > 0 || phase.phase_type !== 'group_stage') && (
+                                                <div className="structure-phase-mobile-meta-row">
+                                                    <TrendingUp size={18} />
+                                                    <span>
+                                                        {(phase.settings?.advanceCount ?? 0) > 0 && (
+                                                            <strong>Avanzan {phase.settings!.advanceCount} equipos</strong>
+                                                        )}
+                                                        {(phase.settings?.advanceCount ?? 0) > 0 && ((phase.settings as any)?.group_names?.length > 0 || phase.phase_type !== 'group_stage') ? ' · ' : ''}
+                                                        {(phase.settings as any)?.group_names?.length > 0
+                                                            ? `${(phase.settings as any).group_names.length} grupos`
+                                                            : phase.phase_type !== 'group_stage'
+                                                                ? 'Una sola tabla'
+                                                                : null}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div className="structure-phase-actions flex items-center gap-2 flex-shrink-0">
+                                    {!isApiManaged && (
+                                        <button
+                                            type="button"
+                                            onClick={e => { e.stopPropagation(); loadPhaseIntoForm(phase); }}
+                                            className="structure-phase-mobile-edit"
+                                        >
+                                            <Edit3 size={16} aria-hidden="true" />
+                                            <span>Editar</span>
+                                        </button>
+                                    )}
                                     {!phase.is_active && !isApiManaged && (
                                         <button
                                             type="button"
@@ -1570,6 +1703,22 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                             </button>
                                             {openMenuPhaseId === phase.id && (
                                                 <div className="structure-phase-menu-panel" role="menu">
+                                                    {!phase.is_active && (
+                                                        <button
+                                                            type="button"
+                                                            role="menuitem"
+                                                            onClick={e => {
+                                                                e.stopPropagation();
+                                                                setOpenMenuPhaseId(null);
+                                                                handleSetActivePhase(phase.id);
+                                                            }}
+                                                            disabled={activatingPhaseId === phase.id}
+                                                            className="structure-phase-menu-item"
+                                                        >
+                                                            <CheckCircle size={14} />
+                                                            {activatingPhaseId === phase.id ? 'Activando…' : 'Activar fase'}
+                                                        </button>
+                                                    )}
                                                     <button
                                                         type="button"
                                                         role="menuitem"
@@ -1613,6 +1762,54 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                         </button>
                     </div>
                 </div>
+            )}
+
+            {/* ── Mobile-only: 'Configuración del torneo' drilldown ──
+                 Collapses the Modelo competitivo + Plantel fijo modules into two
+                 compact rows. Tapping a row opens the original section as a
+                 bottom sheet (see is-mobile-sheet-open). Hidden on desktop via CSS. */}
+            {!showPhaseForm && (
+                <section className="structure-mobile-config" aria-label="Configuración del torneo">
+                    <div className="structure-mobile-config-header">
+                        <h3>Configuración del torneo</h3>
+                    </div>
+                    <div className="structure-mobile-config-list">
+                        <button
+                            type="button"
+                            className="structure-mobile-config-row"
+                            onClick={() => setMobileConfigSheet('model')}
+                            disabled={isApiManaged}
+                        >
+                            <span className="structure-mobile-config-row-icon">
+                                <Trophy size={18} aria-hidden="true" />
+                            </span>
+                            <span className="structure-mobile-config-row-text">
+                                <span className="structure-mobile-config-row-kicker">Modelo competitivo</span>
+                                <span className="structure-mobile-config-row-value">
+                                    {savedFormat === 'circuit' ? 'Circuito por eventos' : 'Torneo estándar'}
+                                </span>
+                            </span>
+                            <ChevronRight size={18} className="structure-mobile-config-row-chev" aria-hidden="true" />
+                        </button>
+                        <button
+                            type="button"
+                            className="structure-mobile-config-row"
+                            onClick={() => setMobileConfigSheet('roster')}
+                            disabled={isApiManaged}
+                        >
+                            <span className="structure-mobile-config-row-icon">
+                                <Users size={18} aria-hidden="true" />
+                            </span>
+                            <span className="structure-mobile-config-row-text">
+                                <span className="structure-mobile-config-row-kicker">Plantel fijo</span>
+                                <span className={`structure-mobile-config-row-value${fixedRosterEnabled ? '' : ' is-muted'}`}>
+                                    {fixedRosterEnabled ? `${fixedRosterSize} jugadores por equipo` : 'No habilitado'}
+                                </span>
+                            </span>
+                            <ChevronRight size={18} className="structure-mobile-config-row-chev" aria-hidden="true" />
+                        </button>
+                    </div>
+                </section>
             )}
 
             {/* ── Empty state ── */}

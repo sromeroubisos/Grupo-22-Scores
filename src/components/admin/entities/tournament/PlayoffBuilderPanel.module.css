@@ -17,6 +17,17 @@
   gap: 2px;
   color: var(--text-primary);
   font-family: 'Inter', system-ui, sans-serif;
+  /* Never push the page wider than its container (kills the
+     flexbox min-content blow-out from the scrollable summary bar). */
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.wrap *,
+.wrap *::before,
+.wrap *::after {
+  box-sizing: border-box;
 }
 
 /* ── Collapsible header (accordion handle = mockup panel header) ── */
@@ -46,6 +57,10 @@
   align-items: center;
   gap: 14px;
   min-width: 0;
+}
+.titleText {
+  min-width: 0;
+  flex: 1;
 }
 .title {
   text-transform: uppercase;
@@ -291,6 +306,12 @@
   opacity: 0.5;
 }
 
+.cardText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
 .cardLabel {
   font-weight: 600;
   font-size: 14px;
@@ -707,6 +728,12 @@
 .generateBtn:hover {
   filter: brightness(1.08);
 }
+/* Rocket shows on mobile only (Material-3 layout). */
+.rocketIcon {
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
 .secondaryBtn {
   background: transparent;
   color: var(--text-secondary);
@@ -755,4 +782,453 @@
   border-top: 1px solid var(--obsidian-edge);
   padding-top: 24px;
   margin-top: 2px;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   MOBILE ONLY — Material-3 "Obsidian Builder" layout.
+   Scoped strictly to this section + ≤640px. Desktop is untouched.
+   ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .wrap {
+    /* Re-map tokens to the Material-3 dark palette */
+    --obsidian-base: #050507;
+    --obsidian-surface: #131316;
+    --obsidian-edge: #424754;
+    --circuit-blue: #adc6ff;
+    --circuit-glow: rgba(173, 198, 255, 0.3);
+    --text-primary: #e5e1e5;
+    --text-secondary: #c2c6d6;
+    --m3-primary-container: #4d8eff;
+    --m3-on-primary: #002e6a;
+    --m3-surf-low: #1c1b1e;
+    --m3-surf-container: #201f22;
+    --m3-surf-highest: #353438;
+    --m3-err-c: #93000a;
+    --m3-on-err-c: #ffdad6;
+
+    /* Never wider than the screen, even if an ancestor blows out. */
+    max-width: 100vw;
+    overflow-x: clip;
+  }
+
+  /* Header / accordion toggle ── M3 top app bar feel */
+  .header {
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+  }
+  .headerOpen {
+    border-radius: 0;
+  }
+  .titleGroup {
+    flex: 1;
+    min-width: 0;
+  }
+  .title {
+    font-size: 15px;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .sub {
+    font-size: 11px;
+    max-width: 100%;
+  }
+  .headerRight {
+    gap: 8px;
+  }
+  .badge {
+    font-size: 9px;
+    padding: 2px 7px;
+  }
+  .badge {
+    background: var(--m3-err-c);
+    color: var(--m3-on-err-c);
+    border-color: rgba(255, 180, 171, 0.25);
+    border-radius: 0.25rem;
+  }
+  .badgeGenerated {
+    background: rgba(34, 197, 94, 0.18);
+    color: #86efac;
+    border-color: rgba(134, 239, 172, 0.3);
+  }
+
+  /* Open body ── plain bg, tight padding (no dotted grid, no card) */
+  .body {
+    background-image: none;
+    padding: 12px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    gap: 0;
+    overflow-x: hidden;
+  }
+  .builderCard {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+  /* Hard overflow guard: nothing here may exceed the viewport. */
+  .body,
+  .builderCard,
+  .summaryBar,
+  .steps,
+  .step,
+  .stepTitle,
+  .cardGrid,
+  .optionCard,
+  .cardText,
+  .configRow,
+  .cupsGrid,
+  .previewPanel,
+  .previewBody,
+  .footer {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .introText {
+    font-size: 12.5px;
+    line-height: 1.55;
+    margin: 6px 0 16px;
+    max-width: 100%;
+    color: var(--text-secondary);
+  }
+
+  /* Top stats strip (horizontal scroll, M3 TopAppBar style) */
+  .summaryBar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 14px;
+    padding: 0 0 12px;
+    margin-bottom: 16px;
+    border: none;
+    border-radius: 0;
+    text-transform: none;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .summaryBar::-webkit-scrollbar {
+    display: none;
+  }
+  .summaryBar::after {
+    display: none;
+  }
+  .dot {
+    display: none;
+  }
+  .summaryItem {
+    flex: 0 0 auto;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 1px;
+    border-left: 1px solid var(--obsidian-edge);
+    padding-left: 10px;
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .summaryItem:first-child {
+    border-left-color: rgba(173, 198, 255, 0.3);
+  }
+  .summaryItem strong {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--circuit-blue);
+  }
+
+  /* Steps ── circular numbered badges on the progress line */
+  .steps {
+    gap: 20px;
+  }
+  .steps::before {
+    left: 13px;
+    top: 14px;
+    background: linear-gradient(to bottom, var(--m3-primary-container) 0%, var(--m3-surf-container) 100%);
+    opacity: 0.2;
+  }
+  .step {
+    padding-left: 36px;
+  }
+  .stepNumber {
+    top: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    background: var(--m3-surf-highest);
+    border: 2px solid var(--obsidian-base);
+    color: var(--text-primary);
+    box-shadow: none;
+    font-size: 13px;
+  }
+  .stepTitle {
+    margin-bottom: 10px;
+    align-items: center;
+  }
+  .stepTitle h3 {
+    font-size: 16px;
+    text-transform: none;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+  .stepTitle span {
+    display: none; /* hints hidden on mobile, like the mockup */
+  }
+
+  /* Selectable cards ── full-width rows with a left radio */
+  .cardGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .optionCard {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 0.5rem;
+    background: var(--obsidian-surface);
+    border: 1px solid var(--obsidian-edge);
+    min-height: 40px;
+  }
+  .optionCard:not(.active) {
+    opacity: 0.7;
+  }
+  .optionCard:hover {
+    background: var(--obsidian-surface);
+    border-color: var(--obsidian-edge);
+  }
+  .optionCard.active {
+    opacity: 1;
+    background: rgba(77, 142, 255, 0.1);
+    border-color: rgba(173, 198, 255, 0.4);
+    box-shadow: 0 0 16px 0 var(--circuit-glow);
+  }
+  .optionCard.active::before {
+    display: none; /* kill the flowing-border animation on mobile */
+  }
+  .optionCard .checkIcon {
+    display: flex;
+    position: static;
+    order: -1;
+    top: auto;
+    right: auto;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    border: 2px solid var(--obsidian-edge);
+    background: transparent;
+  }
+  .optionCard .checkIcon svg {
+    display: none;
+  }
+  .optionCard.active .checkIcon {
+    border-color: var(--circuit-blue);
+  }
+  .optionCard.active .checkIcon::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: var(--circuit-blue);
+  }
+  .cardText {
+    flex: 1;
+    gap: 4px;
+  }
+  .cardText {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .cardLabel {
+    font-size: 13.5px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .cardDesc {
+    font-size: 11.5px;
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    color: var(--text-secondary);
+  }
+
+  /* Step 3 ── chip + M3 checkbox + underline cup inputs */
+  .configRow {
+    gap: 14px;
+  }
+  .inputGroupLabel {
+    font-size: 10px;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+  }
+  .teamsBlock {
+    background: transparent;
+    border: none;
+    padding: 0;
+    gap: 12px;
+  }
+  .chip {
+    background: rgba(173, 198, 255, 0.1);
+    border: 1px solid rgba(173, 198, 255, 0.3);
+    color: var(--circuit-blue);
+    border-radius: 0.5rem;
+    padding: 6px 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+  .checkboxWrapper {
+    gap: 10px;
+    min-height: 40px;
+    font-size: 12.5px;
+    color: var(--text-primary);
+  }
+  .checkboxCustom {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border-radius: 0.25rem;
+    border: 2px solid var(--circuit-blue);
+    background: var(--m3-surf-container);
+  }
+  .checkboxWrapper input:checked + .checkboxCustom {
+    background: var(--m3-surf-container);
+    color: var(--circuit-blue);
+  }
+  .cupsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 12px;
+  }
+  .fieldLabel {
+    gap: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .cupInput,
+  .selectInput,
+  .miniInput,
+  .miniSelect {
+    background: var(--m3-surf-container);
+    border: none;
+    border-bottom: 2px solid var(--obsidian-edge);
+    border-radius: 0;
+    padding: 8px 0;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+  }
+  .cupInput:focus,
+  .selectInput:focus,
+  .miniInput:focus,
+  .miniSelect:focus {
+    border-bottom-color: var(--circuit-blue);
+    box-shadow: none;
+  }
+  .selectInput {
+    padding-right: 16px;
+  }
+
+  /* Custom builder rows stay usable */
+  .roundBox,
+  .matchRow {
+    background: var(--m3-surf-low);
+    border-color: var(--obsidian-edge);
+  }
+  .addBtn {
+    color: var(--circuit-blue);
+  }
+
+  /* Preview ── simple M3 surface card */
+  .previewPanel {
+    background: var(--m3-surf-low);
+    border-radius: 0.5rem;
+    margin-top: 20px !important;
+  }
+  .previewHead {
+    background: transparent;
+    padding: 12px 14px;
+  }
+  .previewTitle {
+    font-size: 12px;
+  }
+  .previewSub {
+    font-size: 11px;
+  }
+  .previewBody {
+    padding: 14px;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .totalNum {
+    font-size: 24px;
+  }
+
+  /* Footer ── prominent full-width primary action (in-flow, not fixed) */
+  .footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    background: var(--m3-surf-low);
+    border: none;
+    border-top: 1px solid var(--obsidian-edge);
+    border-radius: 0;
+    padding: 14px 12px;
+    margin: 14px -12px -12px;
+  }
+  .footerInfo {
+    justify-content: center;
+  }
+  .footerLabel {
+    font-size: 10px;
+  }
+  .footerActions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+  }
+  .generateBtn {
+    width: 100%;
+    justify-content: center;
+    height: 46px;
+    padding: 0 18px;
+    border-radius: 0.5rem;
+    font-size: 12px;
+    background: var(--circuit-blue);
+    color: var(--m3-on-primary);
+    box-shadow: 0 0 16px 0 var(--circuit-glow);
+    letter-spacing: 0.04em;
+  }
+  .rocketIcon {
+    display: inline-flex;
+  }
+  .secondaryBtn,
+  .dangerBtn {
+    width: 100%;
+    justify-content: center;
+    height: 44px;
+    border-radius: 0.5rem;
+  }
+  .confirmRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .confirmRow .generateBtn,
+  .confirmRow .secondaryBtn {
+    width: 100%;
+  }
+
+  .boardWrap {
+    padding-top: 16px;
+  }
 }

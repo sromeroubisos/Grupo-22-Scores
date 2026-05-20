@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Plus, Search, ShieldQuestion } from 'lucide-react';
+import { ChevronRight, Plus, Search, ShieldQuestion } from 'lucide-react';
 import styles from '../tournament-admin.module.css';
 
 type Division = {
@@ -148,12 +148,6 @@ export default function TournamentAdminClubsPage() {
         );
     }, [clubs, search]);
 
-    const openLinkModal = (clubId: string) => {
-        setLinkingClubId(clubId);
-        setSelectedTournamentId('');
-        setErrorMsg(null);
-    };
-
     const closeLinkModal = () => {
         setLinkingClubId(null);
         setSelectedTournamentId('');
@@ -292,38 +286,56 @@ export default function TournamentAdminClubsPage() {
                     </div>
                 ) : (
                     filtered.map((club) => (
-                        <article key={club.id} className={`${styles.card} ${styles.listItem}`}>
-                            <div className={styles.listItemRow}>
-                                <div className={styles.listAvatar} style={{ background: club.primary_color || undefined }}>
+                        <article key={club.id} className={`${styles.card} ${styles.listItem} ${styles.clubCard}`}>
+                            {/* Mobile: the whole card is a button to load the
+                                roster the club fields for its tournaments. */}
+                            <Link
+                                href={`/admin/torneo/clubes/${encodeURIComponent(club.id)}/plantel`}
+                                prefetch={false}
+                                className={styles.clubCompactLink}
+                                aria-label={`Armar el plantel de ${club.name}`}
+                            >
+                                <span
+                                    className={styles.clubCompactAvatar}
+                                    style={{ background: club.primary_color || undefined }}
+                                >
                                     {club.logo_url ? (
-                                        <Image src={club.logo_url} alt="" width={42} height={42} unoptimized />
+                                        <Image src={club.logo_url} alt="" width={44} height={44} unoptimized />
                                     ) : getClubInitial(club)}
-                                </div>
-                                <div className={styles.listItemBody}>
-                                    <div className={styles.listItemMetaRow}>
-                                        <span className={`${styles.badge} ${club.is_visible ? styles.badgePublicado : styles.badgeBorrador}`}>
-                                            {club.is_visible ? 'Visible' : 'Borrador'}
-                                        </span>
-                                        <span className={styles.idTag}>{club.slug || club.id}</span>
+                                </span>
+                                <span className={styles.clubCompactName}>{club.name}</span>
+                                <ChevronRight className={styles.clubCompactChevron} size={20} aria-hidden />
+                            </Link>
+
+                            <div className={styles.listItemRow}>
+                                <Link
+                                    href={`/admin/torneo/clubes/${encodeURIComponent(club.id)}/plantel`}
+                                    prefetch={false}
+                                    className={styles.clubRowLink}
+                                    aria-label={`Armar el plantel de ${club.name}`}
+                                >
+                                    <div className={styles.listAvatar} style={{ background: club.primary_color || undefined }}>
+                                        {club.logo_url ? (
+                                            <Image src={club.logo_url} alt="" width={42} height={42} unoptimized />
+                                        ) : getClubInitial(club)}
                                     </div>
-                                    <h4 className={styles.listItemTitle}>{club.name}</h4>
-                                    <div className={styles.metaRow}>
-                                        <span>{club.sport_id || club.sport || '-'}</span>
-                                        <span className={styles.metaDot} />
-                                        <span>{[club.city, club.region, club.country].filter(Boolean).join(' · ') || 'Sin ubicación'}</span>
-                                        <span className={styles.metaDot} />
-                                        <span>{club.divisions?.length || 0} planteles</span>
+                                    <div className={styles.listItemBody}>
+                                        <div className={styles.listItemMetaRow}>
+                                            <span className={`${styles.badge} ${club.is_visible ? styles.badgePublicado : styles.badgeBorrador}`}>
+                                                {club.is_visible ? 'Visible' : 'Borrador'}
+                                            </span>
+                                            <span className={styles.idTag}>{club.slug || club.id}</span>
+                                        </div>
+                                        <h4 className={styles.listItemTitle}>{club.name}</h4>
+                                        <div className={styles.metaRow}>
+                                            <span>{club.sport_id || club.sport || '-'}</span>
+                                            <span className={styles.metaDot} />
+                                            <span>{[club.city, club.region, club.country].filter(Boolean).join(' · ') || 'Sin ubicación'}</span>
+                                            <span className={styles.metaDot} />
+                                            <span>{club.divisions?.length || 0} planteles</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className={styles.actions}>
-                                    <button
-                                        type="button"
-                                        className={styles.btnGhost}
-                                        onClick={() => openLinkModal(club.id)}
-                                    >
-                                        Vincular
-                                    </button>
-                                </div>
+                                </Link>
                             </div>
                         </article>
                     ))

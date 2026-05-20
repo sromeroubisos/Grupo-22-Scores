@@ -329,7 +329,11 @@
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--t-border-soft);
     position: sticky;
-    top: var(--panel-header-offset);
+    /* The shell is its own scroll/sticky context (overflow-x:hidden makes
+       overflow-y computed `auto`) and already starts below the global
+       header, so this must stick at 0 — not the global header height, which
+       would reserve an empty band above the sub-bar. */
+    top: 0;
     z-index: 35;
 }
 
@@ -444,6 +448,98 @@
 .card:hover {
     border-color: var(--accent-hover-border);
     box-shadow: var(--t-shadow-strong), 0 0 15px var(--accent-glow);
+}
+
+/* Default interior padding lives in the module instead of being repeated
+   inline on every card. Scoped out of composed variants whose spacing comes
+   from a child (.listItem -> .listItemRow) or their own rule (.rosterEmpty),
+   so the list pages don't get double padding. */
+.card:not(.listItem):not(.rosterEmpty) {
+    padding: 24px;
+}
+
+@media (max-width: 768px) {
+    .card:not(.listItem):not(.rosterEmpty) {
+        padding: 18px;
+    }
+}
+
+/* ── Fixture preview: table on desktop, stacked match cards on mobile ─────── */
+
+.fixtureTable {
+    width: 100%;
+}
+
+.fixtureCards {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .fixtureTable {
+        display: none;
+    }
+
+    .fixtureCards {
+        display: grid;
+        gap: 10px;
+    }
+}
+
+.fixtureMatch {
+    border: 1px solid var(--t-border);
+    background: var(--t-input-bg);
+}
+
+.fixtureMatchHead {
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--t-text-4);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--t-border-soft);
+}
+
+.fixtureMatchTeams {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--t-text-strong);
+}
+
+.fixtureMatchTeams > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fixtureMatchTeams > span:first-child {
+    flex: 1;
+    text-align: right;
+}
+
+.fixtureMatchTeams > span:last-child {
+    flex: 1;
+    text-align: left;
+}
+
+.fixtureVs {
+    flex: 0 0 auto;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--t-text-4);
+    text-transform: uppercase;
+}
+
+.fixtureMatchMeta {
+    padding: 0 12px 10px;
+    font-size: 11px;
+    color: var(--t-text-4);
+    text-align: center;
 }
 
 .cardStatic {
@@ -1173,8 +1269,27 @@
 }
 
 .listItem {
+    position: relative;
     overflow: hidden;
     transition: opacity 0.2s ease;
+}
+
+/* Franja de acento a la izquierda de la tarjeta (mockup): neutra y se
+   ilumina al hover/activo. Recortada por el overflow:hidden de .listItem. */
+.cardAccent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--t-border-strong);
+    transition: background 0.25s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.listItem:hover .cardAccent {
+    background: var(--accent-cyan);
 }
 
 .listItemRow {
@@ -1184,6 +1299,13 @@
     align-items: center;
     justify-content: space-between;
     gap: 24px;
+}
+
+@media (max-width: 767px) {
+    .listItemRow {
+        padding: 18px;
+        gap: 16px;
+    }
 }
 
 @media (min-width: 1024px) {
@@ -1244,9 +1366,24 @@
 }
 
 .actions {
-    display: inline-flex;
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
+}
+
+/* Mobile: the action cluster gets its own full-width row and the text
+   buttons share the width instead of overflowing past the viewport. */
+@media (max-width: 767px) {
+    .actions {
+        flex: 1 0 100%;
+    }
+
+    .actions .btnGhost {
+        flex: 1 1 140px;
+        justify-content: center;
+        text-align: center;
+    }
 }
 
 /* ── Badges ──────────────────────────────────────────────────────────────── */
@@ -1469,28 +1606,51 @@
 
 /* ── Stats / dashboard ───────────────────────────────────────────────────── */
 
+/* Mockup: stats compactas, 2 columnas también en mobile, toda la card
+   es un <Link> tappable con flecha "salir" arriba a la derecha. */
 .statsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
     margin-bottom: 32px;
+    max-width: 64rem;
 }
 
 .statCard {
-    padding: 24px;
+    position: relative;
+    padding: 16px;
     border: 1px solid var(--t-border);
     background: var(--t-surface);
     backdrop-filter: blur(12px) saturate(180%);
     box-shadow: var(--t-shadow);
     text-decoration: none;
     color: inherit;
-    display: block;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.12s ease;
 }
 
 .statCard:hover {
     border-color: var(--accent-hover-border);
     box-shadow: var(--t-shadow-strong), 0 0 15px var(--accent-glow-strong);
+}
+
+.statCard:active {
+    transform: scale(0.985);
+}
+
+.statArrow {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    color: var(--accent-cyan);
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+.statCard:hover .statArrow {
+    opacity: 1;
 }
 
 .statEyebrow {
@@ -1499,21 +1659,22 @@
     text-transform: uppercase;
     letter-spacing: 0.2em;
     color: var(--accent-cyan);
-    margin: 0 0 12px;
+    margin: 0 0 16px;
 }
 
 .statValue {
     font-size: 36px;
     font-weight: 800;
     color: var(--t-text-strong);
-    margin: 0 0 6px;
+    margin: 0 0 4px;
+    line-height: 1;
     letter-spacing: -0.02em;
 }
 
 .statLabel {
-    font-size: 13px;
-    color: var(--t-text-3);
-    line-height: 1.5;
+    font-size: 11px;
+    color: var(--t-text-4);
+    line-height: 1.3;
     margin: 0;
 }
 
@@ -1550,6 +1711,177 @@
     margin: 0;
 }
 
+/* ── Inicio: accesos rápidos + "Sobre este panel" colapsable (mockup) ─────── */
+
+@media (max-width: 768px) {
+    .pageHeader {
+        margin-bottom: 28px;
+    }
+}
+
+.quickAccess {
+    max-width: 64rem;
+    margin-bottom: 40px;
+}
+
+.quickAccessTitle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--t-text-4);
+    margin: 0 0 16px;
+}
+
+.quickAccessRule {
+    flex: 1;
+    height: 1px;
+    background: var(--t-border-soft);
+}
+
+.quickAccessList {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+@media (min-width: 768px) {
+    .quickAccessList {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.quickAction {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--t-border-strong);
+    background: var(--t-soft-bg);
+    color: var(--t-text-strong);
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.12s ease, border-color 0.2s ease;
+}
+
+.quickAction:hover {
+    background: var(--t-soft-bg-hover);
+}
+
+.quickAction:active {
+    transform: scale(0.985);
+}
+
+.quickActionMain {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 0;
+}
+
+.quickActionIconAccent {
+    color: var(--accent-cyan);
+}
+
+.quickActionChevron {
+    flex-shrink: 0;
+    color: var(--t-text-4);
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.quickAction:hover .quickActionChevron {
+    transform: translateX(2px);
+    color: var(--t-text-2);
+}
+
+.quickActionPrimary {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-fg);
+    border-color: transparent;
+    font-weight: 800;
+    box-shadow: 0 0 16px var(--accent-glow-strong);
+}
+
+.quickActionPrimary:hover {
+    background: var(--accent-cyan);
+    color: var(--accent-on);
+}
+
+.quickActionPrimary .quickActionChevron {
+    color: currentColor;
+    opacity: 0.55;
+}
+
+.quickActionPrimary:hover .quickActionChevron {
+    color: currentColor;
+}
+
+.aboutPanel {
+    max-width: 64rem;
+    border: 1px solid var(--t-border-soft);
+    background: var(--t-surface);
+    margin-bottom: 8px;
+}
+
+.aboutPanelSummary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.aboutPanelSummary::-webkit-details-marker {
+    display: none;
+}
+
+.aboutPanelSummaryLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--t-text-3);
+}
+
+.aboutPanelChevron {
+    color: var(--t-text-4);
+    transition: transform 0.2s ease;
+}
+
+.aboutPanel[open] .aboutPanelChevron {
+    transform: rotate(180deg);
+}
+
+.aboutPanelBody {
+    margin: 0;
+    padding: 0 16px 14px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--t-text-4);
+}
+
+.versionTag {
+    text-align: center;
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--t-text-5);
+    margin: 28px 0 0;
+}
+
 .empty {
     padding: 32px;
     text-align: center;
@@ -1570,7 +1902,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    /* Must sit above the sticky global header (.g22-header, z-index 1000) and
+       the mobile sub-header / bottom nav, otherwise those bars paint over the
+       dialog and clip its title. A modal is a top-level overlay. */
+    z-index: 1200;
     padding: 16px;
 }
 
@@ -1581,6 +1916,20 @@
     width: 100%;
     max-width: 440px;
     box-shadow: var(--t-shadow-modal);
+    /* Never taller than the viewport (minus the backdrop's 16px padding on
+       each side); scroll inside instead so the title and the action buttons
+       stay reachable on short screens / with the soft keyboard open.
+       dvh tracks the dynamic mobile viewport; vh is the fallback. */
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+/* Stacked fields inside a modal had no vertical separation (the modal is
+   block flow and .field carries no margin). */
+.modal .field {
+    margin-bottom: 16px;
 }
 
 .modalTitle {
@@ -1601,4 +1950,1120 @@
     gap: 10px;
     justify-content: flex-end;
     margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    /* On phones use the full width (the 440px cap wastes side space) and
+       keep the inner tournament picker from eating the whole sheet so the
+       rest of the form + actions stay within one screen of scroll. */
+    .modal {
+        max-width: none;
+    }
+
+    .clubPickGrid {
+        max-height: 38vh;
+    }
+
+    .modalActions {
+        flex-wrap: wrap;
+    }
+}
+
+/* Top actions row (Crear torneo / Solicitar acceso). Desktop = inline row,
+   identical to the previous inline styles. */
+.topActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+/* Desktop: wrapper is transparent to layout so the publish/delete icon
+   buttons stay inline flex children of .actions exactly as before. On
+   mobile it collapses into the overflow menu (display:none below). */
+.iconActions {
+    display: contents;
+}
+
+/* Club card row → plantel link. Transparent to layout (avatar + body stay
+   direct flex children of .listItemRow) so the desktop card is unchanged;
+   the whole row becomes a single click target to the club's plantel. */
+/* Club card row → plantel. With "Vincular" removed, the whole row is a
+   single click target that opens the club's plantel. */
+.clubRowLink {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex: 1;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   MOBILE REDESIGN — applies ONLY below 1024px. Desktop (>= 1024px) is left
+   completely unchanged. Keeps the Vitreous Basalt cyan theme; only the
+   layout is restructured (minimal sub-bar, app drawer, bottom nav, vertical
+   tournament cards with an overflow menu).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* New mobile-only nodes: hidden everywhere by default, re-shown < 1024px. */
+.drawerUser,
+.navIcon,
+.bottomNav,
+.drawerBackdrop,
+.mobileHeaderRight,
+.overflowWrap,
+.overflowMenu,
+.overflowScrim,
+.clubCompactLink {
+    display: none;
+}
+
+/* Roster editor — base (desktop) styles. The mobile redesign overrides
+   these below; on desktop they keep the previous inline-equivalent look. */
+.rosterActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.tournamentLine {
+    color: var(--t-text-4);
+    font-size: 14px;
+    margin: -8px 0 16px;
+}
+
+.tournamentLine strong {
+    color: var(--t-text-strong);
+}
+
+.rosterEmptyTitle {
+    margin: 0;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--t-text-4);
+}
+
+.breadcrumbLink {
+    color: var(--t-text-4);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumbLink:hover {
+    color: var(--accent-cyan);
+}
+
+.breadcrumbSep {
+    color: var(--t-text-5);
+}
+
+.breadcrumbCurrent {
+    color: var(--accent-cyan);
+}
+
+@media (max-width: 1023px) {
+    /* ── Sub-bar (sits below the global app header) ─────────────────────── */
+    .mobileHeaderRight {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .mobileAvatar,
+    .drawerAvatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+        font-weight: 800;
+        color: var(--accent-cyan);
+        background: var(--accent-tint);
+        border: 1px solid var(--accent-tint-border);
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .mobileAvatar {
+        width: 30px;
+        height: 30px;
+        font-size: 11px;
+    }
+
+    /* ── Drawer ─────────────────────────────────────────────────────────── */
+    .sidebar {
+        width: min(86vw, 320px);
+        z-index: 60;
+    }
+
+    .sidebarInner {
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .sidebarBrandBlock {
+        /* desktop eyebrow + brand: not shown inside the mobile drawer */
+        display: none;
+    }
+
+    .drawerUser {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--t-border-soft);
+    }
+
+    .drawerUserLeft {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .drawerAvatar {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .drawerUserName {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--t-text-strong);
+    }
+
+    .drawerUserMeta {
+        margin: 2px 0 0;
+        font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 9px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--t-text-4);
+    }
+
+    .drawerClose {
+        background: transparent;
+        border: 1px solid var(--t-border);
+        color: var(--t-text-2);
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .drawerClose:hover {
+        color: var(--t-text-strong);
+        border-color: var(--t-border-strong);
+    }
+
+    /* nav: tighter rows, icon instead of dot, pill active state */
+    .nav {
+        gap: 4px;
+    }
+
+    .navItem {
+        padding: 12px 14px;
+        gap: 14px;
+    }
+
+    .navDot {
+        display: none;
+    }
+
+    .navIcon {
+        display: inline-block;
+        flex-shrink: 0;
+        color: currentColor;
+    }
+
+    .navItemActive {
+        background: var(--accent-tint);
+        color: var(--accent-cyan) !important;
+        text-decoration: none;
+        border: 1px solid var(--accent-tint-border);
+    }
+
+    .navItemActive .navLabel {
+        text-transform: none;
+    }
+
+    /* ── Drawer backdrop ────────────────────────────────────────────────── */
+    .drawerBackdrop {
+        display: block;
+        position: fixed;
+        inset: var(--panel-header-offset) 0 0 0;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+        z-index: 55;
+    }
+
+    .drawerBackdropOpen {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* ── Bottom navigation ──────────────────────────────────────────────── */
+    .bottomNav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        padding-bottom: env(safe-area-inset-bottom);
+        background: var(--t-bar-bg);
+        backdrop-filter: blur(12px);
+        border-top: 1px solid var(--t-border-soft);
+        z-index: 45;
+    }
+
+    .bottomNavItem {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: var(--t-text-3);
+        text-decoration: none;
+        font-family: inherit;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        padding: 8px 0;
+        transition: color 0.2s ease;
+    }
+
+    .bottomNavItem:hover {
+        color: var(--t-text-strong);
+    }
+
+    .bottomNavItemActive {
+        color: var(--accent-cyan);
+    }
+
+    /* keep content clear of the fixed bottom nav */
+    .main {
+        padding-bottom: calc(60px + env(safe-area-inset-bottom) + 24px);
+    }
+
+    /* decorative corner collides with the bottom nav — hide it on mobile */
+    .scaffoldCorner {
+        display: none;
+    }
+
+    /* ── Tournament cards: vertical layout ──────────────────────────────── */
+    .listItemRow {
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap: nowrap;
+        gap: 0;
+        padding: 0;
+    }
+
+    .listAvatar {
+        display: none;
+    }
+
+    .listItemBody {
+        width: 100%;
+        padding: 0;
+    }
+
+    .listItemMetaRow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 0;
+        padding: 10px 16px;
+        background: var(--t-soft-bg);
+        border-bottom: 1px solid var(--t-border-soft);
+    }
+
+    .listItemTitle {
+        padding: 14px 16px 0;
+        font-size: 18px;
+    }
+
+    .metaRow {
+        padding: 8px 16px 0;
+        margin-top: 0;
+    }
+
+    /* Mockup: "Abrir en gestor" en su propia fila full-width y, debajo,
+       "Clubes" (estira) + ⋯ a la derecha. Grid sobre el DOM existente:
+       el Link del gestor es el primer hijo; .iconActions queda en
+       display:none (se omite del grid); .overflowWrap cae a la derecha. */
+    .actions {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        padding: 16px;
+        position: relative;
+    }
+
+    .actions > .btnGhost {
+        justify-content: center;
+        text-align: center;
+        min-width: 0;
+    }
+
+    .actions > .btnGhost:first-child {
+        grid-column: 1 / -1;
+    }
+
+    /* desktop publish/delete icon buttons collapse into the overflow menu */
+    .iconActions {
+        display: none;
+    }
+
+    .overflowWrap {
+        display: block;
+        position: relative;
+        flex: 0 0 auto;
+    }
+
+    .overflowBtn {
+        padding: 10px;
+        background: var(--t-soft-bg);
+        border: 1px solid var(--t-border-strong);
+        color: var(--t-text-2);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .overflowBtn:hover {
+        color: var(--t-text-strong);
+        background: var(--t-soft-bg-hover);
+    }
+
+    .overflowMenu {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        position: absolute;
+        left: 0;
+        bottom: calc(100% + 6px);
+        min-width: 190px;
+        padding: 6px;
+        background: var(--t-modal-bg);
+        border: 1px solid var(--t-border);
+        box-shadow: var(--t-shadow-modal);
+        z-index: 70;
+    }
+
+    .overflowItem {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 12px;
+        background: transparent;
+        border: none;
+        color: var(--t-text-1);
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        cursor: pointer;
+        text-align: left;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .overflowItem:hover {
+        background: var(--t-soft-bg);
+        color: var(--t-text-strong);
+    }
+
+    .overflowItemDanger {
+        color: var(--danger-soft);
+    }
+
+    .overflowItemDanger:hover {
+        background: rgba(239, 68, 68, 0.12);
+        color: var(--danger-soft);
+    }
+
+    .overflowScrim {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 65;
+        background: transparent;
+    }
+
+    /* ── Club cards: collapse to a single tappable row ──────────────────────
+       On mobile a club card is just logo + name + chevron, and the whole
+       card links to the tournament roster builder. The full desktop row
+       (badge, meta, "Vincular") is hidden here. */
+    .clubCard .listItemRow {
+        display: none;
+    }
+
+    .clubCompactLink {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px 16px;
+        text-decoration: none;
+        color: inherit;
+        transition: background 0.2s ease;
+    }
+
+    .clubCompactLink:active {
+        background: var(--t-soft-bg);
+    }
+
+    .clubCompactAvatar {
+        width: 44px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+        color: var(--accent-on);
+        background: var(--accent-cyan);
+        font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+        font-weight: 800;
+        font-size: 13px;
+    }
+
+    .clubCompactAvatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .clubCompactName {
+        flex: 1;
+        min-width: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--t-text-strong);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .clubCompactChevron {
+        flex-shrink: 0;
+        color: var(--t-text-3);
+    }
+
+    .clubCompactLink:active .clubCompactChevron {
+        color: var(--accent-cyan);
+    }
+
+    /* ── Roster editor / plantel page (mobile) ──────────────────────────── */
+    .tournamentLine {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 4px;
+        padding: 9px 12px;
+        background: var(--t-soft-bg);
+        border-left: 3px solid var(--accent-cyan);
+        font-size: 13px;
+    }
+
+    .tournamentLineLabel {
+        font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--t-text-4);
+    }
+
+    .tournamentLine strong {
+        color: var(--accent-cyan);
+    }
+
+    .rosterActions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .rosterActions > button {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 16px;
+    }
+
+    .rosterListHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid var(--t-border-soft);
+        padding-bottom: 10px;
+        margin: 4px 0 12px;
+    }
+
+    .rosterListTitle {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--t-text-strong);
+    }
+
+    .rosterCount {
+        font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--t-text-3);
+        background: var(--t-soft-bg);
+        border: 1px solid var(--t-border);
+        padding: 4px 8px;
+        flex-shrink: 0;
+    }
+
+    .rosterEmpty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 8px;
+        padding: 32px 20px;
+    }
+
+    .rosterEmptyIcon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: var(--t-soft-bg);
+        border: 1px solid var(--t-border);
+        color: var(--t-text-3);
+        margin-bottom: 6px;
+    }
+
+    .rosterEmptyTitle {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--t-text-strong);
+    }
+
+    .rosterEmptyHint {
+        display: block;
+        font-size: 12px;
+        color: var(--t-text-4);
+        max-width: 280px;
+        line-height: 1.5;
+    }
+
+    /* Mobile: inline add/bulk panels are replaced by the bottom-sheet. */
+    .rosterInlinePanels {
+        display: none;
+    }
+
+    /* ── Add / bulk bottom-sheet (mobile) ───────────────────────────────── */
+    .sheetOverlay {
+        display: flex;
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(2px);
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .sheet {
+        background: var(--t-surface-solid);
+        border-top: 1px solid var(--t-border-strong);
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.65);
+        display: flex;
+        flex-direction: column;
+        max-height: 92vh;
+        animation: sheetUp 0.25s ease;
+    }
+
+    @keyframes sheetUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
+
+    .sheetGrabber {
+        width: 48px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--t-border-strong);
+        margin: 10px auto 2px;
+        flex-shrink: 0;
+    }
+
+    .sheetHeader {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 16px 14px;
+        border-bottom: 1px solid var(--t-border-soft);
+        flex-shrink: 0;
+    }
+
+    .sheetTitle {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--t-text-strong);
+    }
+
+    .sheetSubtitle {
+        margin: 6px 0 0;
+        font-size: 14px;
+        line-height: 1.45;
+        color: var(--t-text-3);
+    }
+
+    .sheetClose {
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--t-soft-bg);
+        border: 1px solid var(--t-border);
+        border-radius: 50%;
+        color: var(--t-text-2);
+        cursor: pointer;
+        transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .sheetClose:hover {
+        color: var(--t-text-strong);
+        border-color: var(--t-border-strong);
+    }
+
+    .sheetBody {
+        padding: 18px 16px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+    }
+
+    .sheetMono {
+        font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+        letter-spacing: 0.02em;
+    }
+
+    .sheetFooter {
+        padding: 14px 16px;
+        border-top: 1px solid var(--t-border-soft);
+        background: var(--t-surface-solid);
+        flex-shrink: 0;
+    }
+
+    .sheetSubmit {
+        width: 100%;
+        padding: 15px 16px;
+        background: var(--accent-cyan);
+        color: var(--accent-on);
+        border: none;
+        border-radius: 0;
+        font-family: inherit;
+        font-weight: 800;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: filter 0.2s ease, transform 0.12s ease;
+    }
+
+    .sheetSubmit:hover:not(:disabled) {
+        filter: brightness(1.1);
+    }
+
+    .sheetSubmit:active:not(:disabled) {
+        transform: scale(0.985);
+    }
+
+    .sheetSubmit:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    .sheetField {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .sheetLabel {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--t-text-2);
+    }
+
+    .sheetLabelTick {
+        width: 4px;
+        height: 13px;
+        border-radius: 2px;
+        background: var(--accent-cyan);
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .sheetRow {
+        display: flex;
+        gap: 12px;
+    }
+
+    .sheetRow > .sheetField {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .sheetDateWrap {
+        position: relative;
+    }
+
+    .sheetDateIcon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--t-text-3);
+        pointer-events: none;
+    }
+
+    .sheetDateWrap .input {
+        padding-left: 40px;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   DESKTOP (>= 1024px) — the add/bulk form opens as a right-side slide-in
+   drawer (not inline); empty state + list header styled. Cyan theme.
+   ════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+    .sheetOverlay {
+        display: flex;
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(3px);
+        justify-content: flex-end;
+        align-items: stretch;
+    }
+
+    .sheet {
+        background: var(--t-surface-solid);
+        border-left: 1px solid var(--t-border-strong);
+        box-shadow: -8px 0 32px rgba(0, 0, 0, 0.6);
+        width: 100%;
+        max-width: 460px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        animation: sheetSlideIn 0.28s ease;
+    }
+
+    @keyframes sheetSlideIn {
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
+    }
+
+    .sheetGrabber {
+        display: none;
+    }
+
+    .sheetHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 22px 24px;
+        border-bottom: 1px solid var(--t-border-soft);
+        background: var(--t-soft-bg);
+        flex-shrink: 0;
+    }
+
+    .sheetTitle {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        color: var(--t-text-strong);
+    }
+
+    .sheetSubtitle {
+        margin: 6px 0 0;
+        font-size: 13px;
+        line-height: 1.45;
+        color: var(--t-text-3);
+    }
+
+    .sheetClose {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 1px solid var(--t-border);
+        border-radius: 50%;
+        color: var(--t-text-2);
+        cursor: pointer;
+        transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .sheetClose:hover {
+        color: var(--accent-cyan);
+        border-color: var(--accent-hover-border);
+    }
+
+    .sheetBody {
+        padding: 24px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+    }
+
+    .sheetMono {
+        font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+        letter-spacing: 0.02em;
+    }
+
+    .sheetField {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .sheetLabel {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--t-text-2);
+    }
+
+    .sheetLabelTick {
+        width: 4px;
+        height: 13px;
+        border-radius: 2px;
+        background: var(--accent-cyan);
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .sheetRow {
+        display: flex;
+        gap: 12px;
+    }
+
+    .sheetRow > .sheetField {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .sheetDateWrap {
+        position: relative;
+    }
+
+    .sheetDateIcon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--t-text-3);
+        pointer-events: none;
+    }
+
+    .sheetDateWrap .input {
+        padding-left: 40px;
+    }
+
+    .sheetFooter {
+        padding: 20px 24px;
+        border-top: 1px solid var(--t-border-soft);
+        background: var(--t-soft-bg);
+        flex-shrink: 0;
+        margin-top: auto;
+    }
+
+    .sheetSubmit {
+        width: 100%;
+        padding: 15px 16px;
+        background: var(--accent-cyan);
+        color: var(--accent-on);
+        border: none;
+        font-family: inherit;
+        font-weight: 800;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: filter 0.2s ease, transform 0.12s ease;
+    }
+
+    .sheetSubmit:hover:not(:disabled) {
+        filter: brightness(1.1);
+    }
+
+    .sheetSubmit:active:not(:disabled) {
+        transform: scale(0.99);
+    }
+
+    .sheetSubmit:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    /* List header */
+    .rosterListHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid var(--t-border-soft);
+        padding-bottom: 12px;
+        margin: 24px 0 16px;
+    }
+
+    .rosterListTitle {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--t-text-strong);
+    }
+
+    .rosterCount {
+        font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--t-text-3);
+        background: var(--t-soft-bg);
+        border: 1px solid var(--t-border);
+        padding: 5px 10px;
+        flex-shrink: 0;
+    }
+
+    /* Empty state */
+    .rosterEmpty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 12px;
+        padding: 64px 24px;
+        min-height: 460px;
+        margin-top: 16px;
+    }
+
+    .rosterEmptyIcon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        background: var(--t-soft-bg);
+        border: 1px solid var(--t-border);
+        color: var(--t-text-3);
+        box-shadow: 0 0 18px var(--accent-glow);
+        margin-bottom: 8px;
+    }
+
+    .rosterEmptyTitle {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--t-text-strong);
+    }
+
+    .rosterEmptyHint {
+        display: block;
+        font-size: 15px;
+        color: var(--t-text-3);
+        max-width: 420px;
+        line-height: 1.6;
+    }
+
+    /* Tournament chip */
+    .tournamentLine {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 16px;
+        padding: 10px 14px;
+        background: var(--t-soft-bg);
+        border: 1px solid var(--t-border);
+        border-left: 4px solid var(--accent-cyan);
+        font-size: 13px;
+    }
+
+    .tournamentLineLabel {
+        font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--t-text-4);
+    }
+
+    .tournamentLine strong {
+        color: var(--accent-cyan);
+    }
 }

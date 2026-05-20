@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   Plus,
   Check,
+  Rocket,
 } from 'lucide-react';
 import PlayoffBracketBoard, { type PlayoffBracketBoardData } from './PlayoffBracketBoard';
 import { buildBracketTemplate, resolveCupName } from '@/lib/playoff/templates';
@@ -163,8 +164,10 @@ function OptionCard({
       <span className={styles.checkIcon} aria-hidden>
         <Check size={11} strokeWidth={3.5} />
       </span>
-      <span className={styles.cardLabel}>{title}</span>
-      {desc && <span className={styles.cardDesc}>{desc}</span>}
+      <span className={styles.cardText}>
+        <span className={styles.cardLabel}>{title}</span>
+        {desc && <span className={styles.cardDesc}>{desc}</span>}
+      </span>
     </button>
   );
 }
@@ -241,6 +244,13 @@ export default function PlayoffBuilderPanel({
   const [thirdPlace, setThirdPlace] = useState<boolean>(saved?.thirdPlace ?? true);
   const [seedMode, setSeedMode] = useState<'seed' | 'random'>(saved?.seedMode ?? 'seed');
   const [cupNames, setCupNames] = useState<Record<string, string>>(saved?.cupNames ?? {});
+
+  // ── Clasificación desde zonas (seeding from group-stage standings) ────
+  type SeedingCfg = { sourcePhaseId: string; format: 'overall' | 'zone_rank'; locked: boolean };
+  const [sourcePhases, setSourcePhases] = useState<{ id: string; name: string }[]>([]);
+  const [seeding, setSeeding] = useState<SeedingCfg | null>(null);
+  const [seedSourceId, setSeedSourceId] = useState<string>('');
+  const [seedFormat, setSeedFormat] = useState<'overall' | 'zone_rank'>('overall');
 
   // ── Custom builder state ──────────────────────────────────────────────
   const [customCups, setCustomCups] = useState<CCup[]>(
@@ -412,6 +422,14 @@ export default function PlayoffBuilderPanel({
       const json = await res.json();
       if (json.templates) setTemplates(json.templates);
       if (json.board) setBoard(json.board);
+      if (Array.isArray(json.sourcePhases)) setSourcePhases(json.sourcePhases);
+      if ('seeding' in json) {
+        setSeeding(json.seeding ?? null);
+        if (json.seeding) {
+          setSeedSourceId(json.seeding.sourcePhaseId);
+          setSeedFormat(json.seeding.format);
+        }
+      }
     } catch {
       /* non-fatal: panel still usable to (re)generate */
     } finally {
@@ -477,6 +495,38 @@ export default function PlayoffBuilderPanel({
     }
   }
 
+  async function seedingPost(
+    payload: Record<string, unknown>,
+  ): Promise<void> {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/tournaments/${tournamentId}/playoff`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phaseId, ...payload }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        setError(json.error || 'No se pudo actualizar la clasificación.');
+        return;
+      }
+      if ('seeding' in json) {
+        setSeeding(json.seeding ?? null);
+        if (json.seeding) {
+          setSeedSourceId(json.seeding.sourcePhaseId);
+          setSeedFormat(json.seeding.format);
+        }
+      }
+      if (json.board) setBoard(json.board);
+      onChanged();
+    } catch (e: any) {
+      setError(e?.message || 'Error de red.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const cupsCount = templateId === 'custom' ? customCups.length : cupFields.length || 1;
 
   return (
@@ -487,7 +537,7 @@ export default function PlayoffBuilderPanel({
         className={`${styles.header} ${open ? styles.headerOpen : ''}`}
       >
         <span className={styles.titleGroup}>
-          <span>
+          <span className={styles.titleText}>
             <span className={styles.title}>Constructor de Playoff</span>
             <span className={styles.sub}>{phaseName}</span>
           </span>
@@ -534,6 +584,84 @@ export default function PlayoffBuilderPanel({
                   <strong>{preview.total}</strong> PARTIDOS DE CUADRO
                 </div>
               </>
+            )}
+          </div>
+
+          {/* Clasificación automática desde zonas */}
+          <div className={styles.builderCard}>
+            <p className={styles.introText}>
+              <strong>Clasificación desde zonas.</strong> Si elegís una fase de grupos como origen,
+              el cuadro se siembra automáticamente con la tabla de posiciones de esas zonas. Al
+              corregir un resultado de zona, los cruces se recalculan solos hasta que cierres la fase.
+            </p>
+            {sourcePhases.length === 0 ? (
+              <p className={styles.introText} style={{ opacity: 0.7 }}>
+                No hay fases de grupos en este torneo. Sembrá el cuadro por seed manual o aleatorio.
+              </p>
+            ) : (
+              <div className={styles.customRow} style={{ flexWrap: 'wrap', gap: 10 }}>
+                <select
+                  className={styles.miniSelect}
+                  value={seedSourceId}
+                  disabled={busy || seeding?.locked}
+                  onChange={(e) => setSeedSourceId(e.target.value)}
+                >
+                  <option value="">— Sin clasificación automática —</option>
+                  {sourcePhases.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+                <select
+                  className={styles.miniSelect}
+                  value={seedFormat}
+                  disabled={busy || seeding?.locked || !seedSourceId}
+                  onChange={(e) => setSeedFormat(e.target.value as 'overall' | 'zone_rank')}
+                >
+                  <option value="overall">Tabla general (puesto 1..N)</option>
+                  <option value="zone_rank">Cruce entre zonas (1.º A vs 2.º B…)</option>
+                </select>
+                <button
+                  type="button"
+                  className={`${styles.secondaryBtn} ${busy ? styles.btnDisabled : ''}`}
+                  disabled={busy || seeding?.locked}
+                  onClick={() =>
+                    seedingPost({
+                      action: 'setSeeding',
+                      sourcePhaseId: seedSourceId,
+                      format: seedFormat,
+                    })
+                  }
+                >
+                  Guardar clasificación
+                </button>
+                {seeding && !seeding.locked && (
+                  <button
+                    type="button"
+                    className={`${styles.secondaryBtn} ${busy ? styles.btnDisabled : ''}`}
+                    disabled={busy}
+                    onClick={() => seedingPost({ action: 'reseed' })}
+                  >
+                    Recalcular cruces ahora
+                  </button>
+                )}
+                {seeding && (
+                  <button
+                    type="button"
+                    className={`${styles.secondaryBtn} ${seeding.locked ? '' : styles.dangerBtn} ${busy ? styles.btnDisabled : ''}`}
+                    disabled={busy}
+                    onClick={() =>
+                      seedingPost({ action: seeding.locked ? 'reopenZones' : 'closeZones' })
+                    }
+                  >
+                    {seeding.locked ? 'Reabrir fase de zonas' : 'Cerrar fase de zonas'}
+                  </button>
+                )}
+                {seeding?.locked && (
+                  <span className={styles.summaryItem} style={{ color: 'var(--status-active)' }}>
+                    Zonas cerradas · cuadro congelado
+                  </span>
+                )}
+              </div>
             )}
           </div>
 
@@ -1016,7 +1144,13 @@ export default function PlayoffBuilderPanel({
                     onClick={() => runAction(board.hasBracket ? 'regenerate' : 'generate')}
                     className={`${styles.generateBtn} ${busy ? styles.btnDisabled : ''}`}
                   >
-                    {board.hasBracket && <RefreshCw size={15} />}
+                    {board.hasBracket ? (
+                      <RefreshCw size={15} />
+                    ) : (
+                      <span className={styles.rocketIcon} aria-hidden>
+                        <Rocket size={18} />
+                      </span>
+                    )}
                     {busy
                       ? 'Procesando…'
                       : board.hasBracket

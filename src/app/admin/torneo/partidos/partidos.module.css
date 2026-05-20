@@ -1,0 +1,843 @@
+/* ════════════════════════════════════════════════════════════════════════
+   Editar partidos — list + create.
+   Uses the shared Vitreous Basalt tokens defined on .shell
+   (--accent-cyan, --t-surface, --t-text-*, …). Structure/density follow
+   the redesign mockups; palette stays consistent with the rest of the
+   tournament-admin panel (cyan accent, not the mockup's lime).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Filter / actions row ────────────────────────────────────────────────── */
+
+.filterRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tabGroup {
+    display: inline-flex;
+    background: var(--t-soft-bg);
+    border: 1px solid var(--t-border);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+}
+
+.tab {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--t-text-2);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 8px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.tab:hover {
+    color: var(--t-text-strong);
+}
+
+.tabActive {
+    background: var(--accent-cyan);
+    color: var(--accent-on);
+    box-shadow: 0 0 15px var(--accent-glow-strong);
+}
+
+.tabActive:hover {
+    color: var(--accent-on);
+}
+
+.crearBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--t-soft-bg);
+    border: 1px solid var(--accent-tint-border);
+    color: var(--accent-cyan);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 9px 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.crearBtn:hover {
+    background: var(--accent-tint);
+    border-color: var(--accent-cyan);
+}
+
+.filterSelect {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--t-soft-bg);
+    border: 1px solid var(--t-border-strong);
+    color: var(--t-text-strong);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 9px 34px 9px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    max-width: 240px;
+    text-overflow: ellipsis;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23999' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 1.1em 1.1em;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.filterSelect:hover {
+    border-color: var(--accent-tint-border);
+}
+
+.filterSelect:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 1px var(--accent-cyan);
+}
+
+.filterSelect option {
+    background: var(--t-surface-solid);
+    color: var(--t-text-strong);
+}
+
+/* On desktop the filter row sits to the right of the title. */
+@media (min-width: 1024px) {
+    .headerBar {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+    }
+
+    .filterRow {
+        margin-bottom: 0;
+        flex-wrap: nowrap;
+    }
+}
+
+/* ── Bento (desktop only — no fabricated data, all computed) ──────────────── */
+
+.bento {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .bento {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        gap: 16px;
+        margin: 24px 0 32px;
+    }
+}
+
+.bentoMain,
+.bentoSide {
+    border: 1px solid var(--t-border);
+    background: var(--t-surface);
+    backdrop-filter: blur(12px) saturate(180%);
+    padding: 24px;
+    border-radius: 12px;
+}
+
+.bentoSide {
+    border-color: var(--accent-tint-border);
+    background: var(--accent-tint);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.bentoTitle {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--t-text-strong);
+}
+
+.bentoTitleAccent {
+    color: var(--accent-cyan);
+}
+
+.bentoBody {
+    margin: 0;
+    color: var(--t-text-2);
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 38rem;
+}
+
+.statRow {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.statLabel {
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--t-text-4);
+}
+
+.statValue {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--t-text-strong);
+}
+
+.statValueAccent {
+    color: var(--accent-cyan);
+}
+
+.statDivider {
+    width: 1px;
+    height: 40px;
+    background: var(--t-border-strong);
+}
+
+.nextMatchMeta {
+    margin: 4px 0 0;
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--t-text-2);
+}
+
+.nextMatchTeams {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.nextMatchTeam {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+}
+
+.nextMatchTeam span {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--t-text-strong);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.nextMatchVs {
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 800;
+    color: var(--accent-cyan);
+}
+
+.crestImg,
+.crestFallback {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--t-border-strong);
+    background: var(--t-soft-bg);
+    flex-shrink: 0;
+}
+
+.crestFallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--t-text-2);
+}
+
+/* ── Tournament group ────────────────────────────────────────────────────── */
+
+.group {
+    margin-bottom: 28px;
+}
+
+.groupHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 18px 0 10px;
+}
+
+.groupLabel {
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--t-text-3);
+    margin: 0;
+}
+
+.groupCount {
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--accent-cyan);
+    white-space: nowrap;
+}
+
+/* ── Mobile: dense clickable cards ───────────────────────────────────────── */
+
+.mobileView {
+    display: block;
+}
+
+@media (min-width: 1024px) {
+    .mobileView {
+        display: none;
+    }
+}
+
+.matchList {
+    display: grid;
+    gap: 6px;
+}
+
+.matchCard {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: var(--t-soft-bg);
+    border: 1px solid var(--t-border);
+    border-radius: 10px;
+    padding: 12px;
+    transition: border-color 0.2s ease, transform 0.12s ease;
+}
+
+.matchCard:hover {
+    border-color: var(--accent-hover-border);
+}
+
+.matchCard:active {
+    transform: scale(0.985);
+}
+
+.matchCardTop {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.matchTeams {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--t-text-strong);
+    min-width: 0;
+}
+
+.vs {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--t-text-4);
+}
+
+.score {
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-cyan);
+}
+
+.matchMeta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--t-text-2);
+}
+
+.matchCardBottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--t-border-soft);
+}
+
+.chevron {
+    color: var(--accent-cyan);
+    opacity: 0.55;
+    flex-shrink: 0;
+}
+
+.matchCard:hover .chevron {
+    opacity: 1;
+}
+
+/* ── Status badge ────────────────────────────────────────────────────────── */
+
+.statusBadge {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.statusScheduled {
+    color: var(--accent-cyan);
+    background: var(--accent-tint);
+    border-color: var(--accent-tint-border);
+}
+
+.statusLive {
+    color: #7ce5ee;
+    background: rgba(124, 229, 238, 0.12);
+    border-color: rgba(124, 229, 238, 0.3);
+}
+
+.statusFinal {
+    color: var(--t-text-2);
+    background: var(--t-soft-bg);
+    border-color: var(--t-border-strong);
+}
+
+.statusOther {
+    color: #fda4af;
+    background: rgba(253, 164, 175, 0.12);
+    border-color: rgba(253, 164, 175, 0.3);
+}
+
+/* ── Add-new dashed card ─────────────────────────────────────────────────── */
+
+.addCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px;
+    margin-top: 6px;
+    border: 2px dashed var(--t-border-strong);
+    border-radius: 10px;
+    color: var(--t-text-3);
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.addCard:hover {
+    opacity: 1;
+    border-color: var(--accent-tint-border);
+    color: var(--accent-cyan);
+}
+
+.addCardLabel {
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+}
+
+/* ── Desktop: data table ─────────────────────────────────────────────────── */
+
+.tableWrap {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .tableWrap {
+        display: block;
+        border: 1px solid var(--t-border);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--t-surface);
+        backdrop-filter: blur(12px) saturate(180%);
+    }
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table thead tr {
+    background: var(--t-inset-bg);
+    border-bottom: 1px solid var(--t-border);
+}
+
+.table th {
+    text-align: left;
+    padding: 14px 20px;
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--t-text-3);
+    font-weight: 600;
+}
+
+.table th:last-child {
+    text-align: right;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid var(--t-border-soft);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background: var(--t-soft-bg);
+}
+
+.table td {
+    padding: 16px 20px;
+    vertical-align: middle;
+}
+
+.cellMatch {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.cellTeam {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 76px;
+}
+
+.cellTeam span {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--t-text-2);
+    text-align: center;
+}
+
+.cellVs {
+    font-size: 13px;
+    font-style: italic;
+    font-weight: 800;
+    color: var(--accent-cyan);
+}
+
+.cellDateStrong {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--t-text-strong);
+}
+
+.cellDateSub {
+    display: block;
+    font-size: 11px;
+    color: var(--t-text-3);
+    margin-top: 2px;
+}
+
+.cellVenue {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--t-text-2);
+    font-size: 13px;
+}
+
+.cellActions {
+    text-align: right;
+}
+
+.editBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--t-soft-bg);
+    border: 1px solid var(--t-border-strong);
+    color: var(--t-text-strong);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.table tbody tr:hover .editBtn {
+    background: var(--accent-cyan);
+    color: var(--accent-on);
+    border-color: transparent;
+}
+
+/* ── States ──────────────────────────────────────────────────────────────── */
+
+.stateCard {
+    border: 1px solid var(--t-border);
+    background: var(--t-surface);
+    border-radius: 12px;
+    padding: 24px;
+    color: var(--t-text-2);
+}
+
+.stateError {
+    border-color: var(--danger-soft);
+    color: var(--alert-err-fg);
+    margin-bottom: 16px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Crear partido — form
+   ════════════════════════════════════════════════════════════════════════ */
+
+.formWrap {
+    max-width: 56rem;
+}
+
+.formCard {
+    border: 1px solid var(--t-border);
+    background: var(--t-surface);
+    backdrop-filter: blur(12px) saturate(180%);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+}
+
+.formCardAccent {
+    border-left: 3px solid var(--accent-cyan);
+}
+
+.formSectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--accent-cyan);
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media (min-width: 768px) {
+    .formGrid3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .formGrid2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label {
+    font-family: var(--font-mono-vitreous), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--t-text-3);
+}
+
+.input,
+.select {
+    width: 100%;
+    height: 44px;
+    background: var(--t-input-bg);
+    border: 1px solid var(--t-border-strong);
+    border-radius: 8px;
+    color: var(--t-text-strong);
+    font: inherit;
+    font-size: 14px;
+    padding: 0 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus,
+.select:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 1px var(--accent-cyan);
+}
+
+.input:disabled,
+.select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.teamsRow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    align-items: end;
+}
+
+@media (min-width: 768px) {
+    .teamsRow {
+        grid-template-columns: 1fr auto 1fr;
+    }
+}
+
+.teamsVs {
+    align-self: center;
+    justify-self: center;
+    font-size: 13px;
+    font-weight: 800;
+    font-style: italic;
+    color: var(--t-text-4);
+    padding: 0 8px;
+}
+
+.statusToggle {
+    display: flex;
+    gap: 8px;
+}
+
+.statusOption {
+    flex: 1;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--t-input-bg);
+    border: 1px solid var(--t-border-strong);
+    border-radius: 8px;
+    color: var(--t-text-2);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.statusOptionActive {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    background: var(--accent-tint);
+}
+
+.formActions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 8px;
+}
+
+.btnSecondary {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--t-border-strong);
+    color: var(--t-text-2);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 12px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btnSecondary:hover {
+    background: var(--t-soft-bg);
+    color: var(--t-text-strong);
+}
+
+.btnSubmit {
+    appearance: none;
+    border: none;
+    background: var(--accent-cyan);
+    color: var(--accent-on);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 13px 26px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: filter 0.2s ease, transform 0.12s ease;
+}
+
+.btnSubmit:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+.btnSubmit:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.btnSubmit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.formError {
+    border: 1px solid var(--danger-soft);
+    color: var(--alert-err-fg);
+    background: rgba(248, 113, 113, 0.08);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}

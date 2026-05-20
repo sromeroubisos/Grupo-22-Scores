@@ -9,9 +9,23 @@ import {
   generatePlayoffBracket,
   loadPlayoffBracket,
   reschedulePlayoffBracket,
+  reseedPlayoffBracket,
 } from '@/lib/server/playoffBracket';
 import { listPlayoffTemplates, type PlayoffTemplateId } from '@/lib/playoff/templates';
+import { readPlayoffSeedingConfig } from '@/lib/playoff/seedingFromStandings';
 import { createClient } from '@/lib/supabase/server';
+
+/** Group-stage phases of a tournament that can seed a playoff bracket. */
+async function loadSourcePhases(supabase: any, tournamentId: string) {
+  const { data } = await supabase
+    .from('tournament_phases')
+    .select('id, name, phase_type, order_index')
+    .eq('tournament_id', tournamentId)
+    .order('order_index', { ascending: true });
+  return (data ?? [])
+    .filter((p: any) => p.phase_type === 'group_stage')
+    .map((p: any) => ({ id: p.id, name: p.name }));
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +38,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await params;
+    const { id: tournamentId } = await params;
     const phaseId = request.nextUrl.searchParams.get('phaseId');
     const templates = listPlayoffTemplates();
 
@@ -33,8 +47,13 @@ export async function GET(
     }
 
     const supabase = await createClient();
-    const board = await loadPlayoffBracket(supabase, phaseId);
-    return NextResponse.json({ ok: true, templates, board });
+    const [board, sourcePhases, { data: phaseRow }] = await Promise.all([
+      loadPlayoffBracket(supabase, phaseId),
+      loadSourcePhases(supabase, tournamentId),
+      supabase.from('tournament_phases').select('settings').eq('id', phaseId).maybeSingle(),
+    ]);
+    const seeding = readPlayoffSeedingConfig(phaseRow?.settings);
+    return NextResponse.json({ ok: true, templates, board, seeding, sourcePhases });
   } catch (error: unknown) {
     return tournamentApiErrorResponse(error);
   }
@@ -59,13 +78,73 @@ export async function POST(
     // Verify the phase belongs to this tournament.
     const { data: phase, error: phaseError } = await supabase
       .from('tournament_phases')
-      .select('id, tournament_id, season_id, phase_type')
+      .select('id, tournament_id, season_id, phase_type, settings')
       .eq('id', phaseId)
       .eq('tournament_id', tournamentId)
       .maybeSingle();
 
     if (phaseError || !phase) {
       return NextResponse.json({ ok: false, error: 'Fase no encontrada.' }, { status: 404 });
+    }
+
+    const baseSettings =
+      phase.settings && typeof phase.settings === 'object' ? phase.settings : {};
+
+    // Persist / clear the zone-stage classification source for this playoff.
+    if (action === 'setSeeding') {
+      const sourcePhaseId = String(body.sourcePhaseId ?? '').trim();
+      const format = body.format === 'zone_rank' ? 'zone_rank' : 'overall';
+      const nextSettings = sourcePhaseId
+        ? { ...baseSettings, playoffSeeding: { sourcePhaseId, format, locked: false } }
+        : (() => {
+            const s = { ...baseSettings } as Record<string, unknown>;
+            delete s.playoffSeeding;
+            return s;
+          })();
+      const { error } = await supabase
+        .from('tournament_phases')
+        .update({ settings: nextSettings })
+        .eq('id', phaseId);
+      if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 400 });
+      return NextResponse.json({ ok: true, seeding: readPlayoffSeedingConfig(nextSettings) });
+    }
+
+    if (action === 'reseed') {
+      const result = await reseedPlayoffBracket(supabase, { phaseId });
+      if (!result.ok) {
+        const status = result.code === 'missing_migration' ? 503 : 400;
+        return NextResponse.json({ ok: false, ...result }, { status });
+      }
+      await invalidateMatchesFeedCaches();
+      const board = await loadPlayoffBracket(supabase, phaseId);
+      return NextResponse.json({ ok: true, reseeded: result.reseeded, board });
+    }
+
+    if (action === 'closeZones' || action === 'reopenZones') {
+      const current = readPlayoffSeedingConfig(baseSettings);
+      if (!current) {
+        return NextResponse.json(
+          { ok: false, error: 'Esta fase no tiene configurada una clasificación desde zonas.' },
+          { status: 400 },
+        );
+      }
+      // Closing does a final reseed first so the bracket reflects the final
+      // standings before it is frozen.
+      if (action === 'closeZones') {
+        await reseedPlayoffBracket(supabase, { phaseId });
+      }
+      const nextSettings = {
+        ...baseSettings,
+        playoffSeeding: { ...current, locked: action === 'closeZones' },
+      };
+      const { error } = await supabase
+        .from('tournament_phases')
+        .update({ settings: nextSettings })
+        .eq('id', phaseId);
+      if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 400 });
+      await invalidateMatchesFeedCaches();
+      const board = await loadPlayoffBracket(supabase, phaseId);
+      return NextResponse.json({ ok: true, seeding: readPlayoffSeedingConfig(nextSettings), board });
     }
 
     if (action === 'reschedule') {

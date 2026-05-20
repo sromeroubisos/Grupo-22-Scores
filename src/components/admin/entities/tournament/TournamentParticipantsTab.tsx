@@ -22,7 +22,7 @@ import { useSearchParams } from 'next/navigation';
 import {
     Users, Search, Plus, Download, FileUp, History,
     Pencil, Trash2, IdCard, Hash, ChevronDown, ChevronUp,
-    AlertCircle, CheckCircle2, X, MoreHorizontal, SlidersHorizontal,
+    AlertCircle, CheckCircle2, X, MoreHorizontal, MoreVertical, SlidersHorizontal,
     CheckSquare, Square, ArrowUpDown, Layers
 } from 'lucide-react';
 import './tournament-participants-flash.css';
@@ -175,6 +175,15 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
     const [isMobileMoreMenuOpen, setIsMobileMoreMenuOpen] = useState(false);
     const [isMobilePhaseSheetOpen, setIsMobilePhaseSheetOpen] = useState(false);
     const [mobilePhaseFilter, setMobilePhaseFilter] = useState<string>('all');
+    // Per-card action sheet: stores the id of the participant whose ⋯ was tapped.
+    // Renders a bottom sheet with Editar / Cambiar estado / Asignar a fase / Eliminar.
+    const [cardActionParticipantId, setCardActionParticipantId] = useState<string | null>(null);
+    // True once the user scrolls past the hero. Used to fade a compact count
+    // chip into the sticky toolbar so the user keeps context when the hero
+    // is offscreen. Driven by IntersectionObserver on a 1px sentinel after
+    // the hero.
+    const [isHeroOffscreen, setIsHeroOffscreen] = useState(false);
+    const heroSentinelRef = useRef<HTMLDivElement | null>(null);
 
     // Toast
     const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -190,6 +199,19 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
             setIsMobilePhaseSheetOpen(false);
         }
     }, [selectedIds, isMobilePhaseSheetOpen]);
+
+    // Observe a sentinel placed after the hero; flag offscreen when it leaves
+    // viewport. Used to reveal the compact count chip in the sticky toolbar.
+    useEffect(() => {
+        const node = heroSentinelRef.current;
+        if (!node || typeof IntersectionObserver === 'undefined') return;
+        const observer = new IntersectionObserver(
+            ([entry]) => setIsHeroOffscreen(!entry.isIntersecting),
+            { threshold: 0 },
+        );
+        observer.observe(node);
+        return () => observer.disconnect();
+    }, []);
 
     const getErrorMessage = (err: unknown, fallback: string) =>
         err instanceof Error && err.message ? err.message : fallback;
@@ -698,19 +720,23 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
     const handleBulkDelete = async () => {
         if (!confirm(`¿Seguro que quieres eliminar ${selectedIds.size} participantes?`)) return;
         try {
-            await Promise.all(
+            const responses = await Promise.all(
                 Array.from(selectedIds).map(id =>
                     fetch(`/api/tournaments/${tournamentId}/participants?id=${id}`, {
                         method: 'DELETE',
                     })
                 )
             );
+            const failed = responses.filter(response => !response.ok).length;
+            if (failed > 0) {
+                throw new Error(`No se pudieron eliminar ${failed} de ${responses.length} participantes`);
+            }
             setParticipants(prev => prev.filter(p => !selectedIds.has(p.id)));
             setPhaseAssignments((prev) => prev.filter((assignment) => !selectedIds.has(assignment.participant_id)));
             setSelectedIds(new Set());
             showToast('success', `${selectedIds.size} participantes eliminados correctamente`);
-        } catch {
-            showToast('error', 'Error al eliminar participantes');
+        } catch (err) {
+            showToast('error', getErrorMessage(err, 'Error al eliminar participantes'));
         }
     };
 
@@ -794,7 +820,13 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ...p, seasonId: currentSeasonId }),
-                }).then(res => res.json())
+                }).then(async res => {
+                    if (!res.ok) {
+                        const payload = await res.json().catch(() => null);
+                        throw new Error(payload?.error || 'Error al importar participante');
+                    }
+                    return res.json();
+                })
             );
             const results = await Promise.all(promises);
             setParticipants(prev => [...results, ...prev]);
@@ -808,8 +840,8 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
             ));
             setIsImportDrawerOpen(false);
             showToast('success', `${newList.length} participantes importados correctamente`);
-        } catch {
-            showToast('error', 'Error en la importación');
+        } catch (err) {
+            showToast('error', getErrorMessage(err, 'Error en la importación'));
         }
     };
 
@@ -967,26 +999,36 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                 Oculto en desktop via CSS (.participants-flash-container).
                 ===================================================== */}
             <section className="tournament-participants-mobile" aria-label="Participantes del torneo">
-                {/* ===== HERO compacto: total + estado del torneo ===== */}
+                {/* ===== Counter strip 5-col: Total / Activos / Inact. / Pend. / Desc. ===== */}
                 <header className="tsm-hero">
-                    <div className="tsm-hero-line">
-                        <div className="tsm-hero-title">
-                            <span className="tsm-hero-eyebrow">Participantes</span>
-                            <strong className="tsm-hero-total-value">{stats.total}</strong>
-                            <span className="tsm-hero-total-suffix">
-                                equipo{stats.total === 1 ? '' : 's'}
-                            </span>
+                    <div className="tsm-counter-strip">
+                        <div className="tsm-counter-box">
+                            <span className="tsm-counter-label">Total</span>
+                            <span className="tsm-counter-value">{stats.total}</span>
                         </div>
-                        <button
-                            type="button"
-                            className="tsm-hero-history"
-                            onClick={() => setIsHistoryDrawerOpen(true)}
-                            aria-label="Ver historial"
-                        >
-                            <History size={14} />
-                        </button>
+                        <div className="tsm-counter-box is-active">
+                            <span className="tsm-counter-label">Activos</span>
+                            <span className="tsm-counter-value">{stats.active}</span>
+                        </div>
+                        <div className="tsm-counter-box">
+                            <span className="tsm-counter-label">Inact.</span>
+                            <span className="tsm-counter-value">{stats.inactive}</span>
+                        </div>
+                        <div className="tsm-counter-box is-pending">
+                            <span className="tsm-counter-label">Pend.</span>
+                            <span className="tsm-counter-value">{stats.pending}</span>
+                        </div>
+                        <div className="tsm-counter-box is-error">
+                            <span className="tsm-counter-label">Desc.</span>
+                            <span className="tsm-counter-value">{stats.disqualified}</span>
+                        </div>
                     </div>
                 </header>
+
+                {/* Sentinel for IntersectionObserver — when this 1px element
+                     leaves the viewport, the toolbar reveals a compact count
+                     chip so users keep context after the hero scrolls away. */}
+                <div ref={heroSentinelRef} className="tsm-hero-sentinel" aria-hidden="true" />
 
                 {/* ===== Phase tabs (si hay fases configuradas) ===== */}
                 {assignmentPhases.length > 0 && (
@@ -1026,6 +1068,12 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
 
                 {/* ===== Toolbar: search + filter trigger (sticky) ===== */}
                 <div className="tsm-toolbar">
+                    <span
+                        className={`tsm-toolbar-count ${isHeroOffscreen ? 'is-visible' : ''}`}
+                        aria-hidden={!isHeroOffscreen}
+                    >
+                        {visibleMobileParticipants.length}
+                    </span>
                     <div className="tsm-search">
                         <Search size={16} aria-hidden="true" />
                         <input
@@ -1060,25 +1108,49 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                     </button>
                 </div>
 
-                {/* ===== Status filter chips (horizontal scroll) ===== */}
-                <div className="tsm-status-chips" role="group" aria-label="Filtrar por estado">
-                    {[
-                        { v: 'all', l: 'Todos', count: stats.total },
-                        { v: 'active', l: 'Activos', count: stats.active },
-                        { v: 'pending', l: 'Pendientes', count: stats.pending },
-                        { v: 'inactive', l: 'Inactivos', count: stats.inactive },
-                        { v: 'disqualified', l: 'Descalif.', count: stats.disqualified },
-                    ].map((opt) => (
-                        <button
-                            key={opt.v}
-                            type="button"
-                            className={`tsm-status-chip is-${opt.v} ${statusFilter === opt.v ? 'is-on' : ''} ${opt.count === 0 && opt.v !== 'all' ? 'is-empty' : ''}`}
-                            onClick={() => setStatusFilter(opt.v)}
-                        >
-                            <span className="tsm-status-chip-label">{opt.l}</span>
-                            <span className="tsm-status-chip-count">{opt.count}</span>
-                        </button>
-                    ))}
+                {/* ===== Quick filter chips (horizontal scroll). Mockup spec:
+                     Todos / Activos / Clubs / Pendientes — mezcla estados y
+                     tipo en la misma fila. El resto de los filtros (Inactivos,
+                     Descalif., Selecciones, etc.) están en el sheet de filtros. */}
+                <div className="tsm-status-chips" role="group" aria-label="Filtros rápidos">
+                    {([
+                        { v: 'all', l: 'Todos', kind: 'reset' as const, count: stats.total, showCount: true },
+                        { v: 'active', l: 'Activos', kind: 'status' as const, count: stats.active, showCount: true },
+                        { v: 'club', l: 'Clubs', kind: 'type' as const, count: participants.filter((p) => p.type === 'club').length, showCount: false },
+                        { v: 'pending', l: 'Pendientes', kind: 'status' as const, count: stats.pending, showCount: false },
+                    ]).map((opt) => {
+                        const isActive = opt.kind === 'reset'
+                            ? (statusFilter === 'all' && typeFilter === 'all' && groupFilter === 'all' && mobilePhaseFilter === 'all' && sortBy === 'recent')
+                            : opt.kind === 'status'
+                                ? statusFilter === opt.v
+                                : typeFilter === opt.v;
+                        const isEmpty = opt.count === 0 && opt.kind !== 'reset';
+                        return (
+                            <button
+                                key={`${opt.kind}-${opt.v}`}
+                                type="button"
+                                className={`tsm-status-chip ${isActive ? 'is-on' : ''} ${isEmpty ? 'is-empty' : ''}`}
+                                onClick={() => {
+                                    if (opt.kind === 'reset') {
+                                        setStatusFilter('all');
+                                        setTypeFilter('all');
+                                        setGroupFilter('all');
+                                        setMobilePhaseFilter('all');
+                                        setSortBy('recent');
+                                    } else if (opt.kind === 'status') {
+                                        setStatusFilter(opt.v);
+                                    } else {
+                                        setTypeFilter(typeFilter === opt.v ? 'all' : opt.v);
+                                    }
+                                }}
+                            >
+                                <span className="tsm-status-chip-label">{opt.l}</span>
+                                {opt.showCount && (
+                                    <span className="tsm-status-chip-count">{opt.count}</span>
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
 
                 {/* ===== Active filter chips (resumen + clear all) ===== */}
@@ -1124,19 +1196,18 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                     </div>
                 )}
 
-                {/* ===== Meta linea (resultados + hint de selección) ===== */}
-                <div className="tsm-list-meta">
-                    <span>
-                        <strong>{visibleMobileParticipants.length}</strong>
-                        {visibleMobileParticipants.length !== participants.length ? ` de ${participants.length}` : ''}
-                        {' '}equipos
-                    </span>
-                    {selectedIds.size === 0 && visibleMobileParticipants.length > 0 && (
-                        <span className="tsm-list-meta-hint" aria-hidden="true">
-                            Tap logo = seleccionar
+                {/* ===== Meta linea — solo cuando hay filtros aplicados.
+                     El total sin filtros ya aparece en el hero; mostrar
+                     "X equipos" repetido era ruido. El hint "tap logo = seleccionar"
+                     se retira: la affordance se descubre al usar la app. ===== */}
+                {visibleMobileParticipants.length !== participants.length && (
+                    <div className="tsm-list-meta">
+                        <span>
+                            <strong>{visibleMobileParticipants.length}</strong>
+                            {` de ${participants.length} equipos`}
                         </span>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 {/* ===== Lista ===== */}
                 {visibleMobileParticipants.length === 0 ? (
@@ -1193,6 +1264,15 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                                     <li className={`tsm-participant-item is-${p.status} ${isChecked ? 'is-selected' : ''}`}>
                                         <button
                                             type="button"
+                                            className="tsm-participant-menu-btn"
+                                            onClick={(e) => { e.stopPropagation(); setCardActionParticipantId(p.id); }}
+                                            aria-label={`Acciones para ${p.name}`}
+                                        >
+                                            <MoreVertical size={16} />
+                                        </button>
+
+                                        <button
+                                            type="button"
                                             className="tsm-participant-logo-btn"
                                             onClick={(e) => { e.stopPropagation(); toggleSelect(p.id); }}
                                             aria-label={isChecked ? 'Quitar seleccion' : 'Seleccionar'}
@@ -1200,11 +1280,11 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                                         >
                                             <span className="tsm-participant-logo">
                                                 {isChecked ? (
-                                                    <CheckSquare size={18} />
+                                                    <CheckSquare size={16} />
                                                 ) : p.clubs?.logo_url ? (
                                                     <img src={p.clubs.logo_url} alt="" />
                                                 ) : (
-                                                    <IdCard size={18} aria-hidden="true" />
+                                                    <IdCard size={16} aria-hidden="true" />
                                                 )}
                                             </span>
                                         </button>
@@ -1214,31 +1294,16 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                                             className="tsm-participant-main"
                                             onClick={() => setEditingParticipant(p)}
                                         >
-                                            <span className="tsm-participant-text">
-                                                <strong>{p.name}</strong>
-                                                <small>
-                                                    {p.short_code ? `${p.short_code}` : '---'}
-                                                    {' . '}
-                                                    {p.type === 'club' ? 'Club' : p.type === 'national_team' ? 'Seleccion' : 'Individual'}
-                                                    {p.seed ? ` . seed ${p.seed}` : ''}
-                                                </small>
-                                                {phaseChips.length > 0 && (
-                                                    <span className="tsm-participant-phases">
-                                                        {phaseChips.slice(0, 2).map((item) => (
-                                                            <span key={`${item.assignment.phase_id}-${item.assignment.group_id || 'p'}`} className="tsm-mini-chip">
-                                                                {phaseNameById.get(item.assignment.phase_id) || 'Fase'}
-                                                                {item.group ? ` . ${item.group.name}` : ''}
-                                                            </span>
-                                                        ))}
-                                                        {phaseChips.length > 2 && (
-                                                            <span className="tsm-mini-chip is-more">+{phaseChips.length - 2}</span>
-                                                        )}
-                                                    </span>
-                                                )}
+                                            <strong className="tsm-participant-name">{p.name}</strong>
+                                            <span className={`tsm-participant-status is-${p.status}`}>
+                                                <span className="tsm-participant-status-dot" aria-hidden="true" />
+                                                {p.status === 'active' ? 'Activo'
+                                                    : p.status === 'inactive' ? 'Inact.'
+                                                    : p.status === 'pending' ? 'Pend.'
+                                                    : p.status === 'disqualified' ? 'Desc.'
+                                                    : p.status}
                                             </span>
                                         </button>
-
-                                        <span className={`tsm-status-rail is-${p.status}`} aria-hidden="true" />
                                     </li>
                                 </React.Fragment>
                             );
@@ -1458,6 +1523,88 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                         </div>
                     </div>
                 )}
+
+                {/* ===== Sheet: acciones por participante (⋯ per-card) ===== */}
+                {cardActionParticipantId && (() => {
+                    const p = participants.find((it) => it.id === cardActionParticipantId);
+                    if (!p) return null;
+                    return (
+                        <div className="tsm-sheet-backdrop" onClick={() => setCardActionParticipantId(null)}>
+                            <div className="tsm-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={`Acciones para ${p.name}`}>
+                                <div className="tsm-sheet-handle" aria-hidden="true" />
+                                <div className="tsm-sheet-head">
+                                    <h3 style={{ maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</h3>
+                                    <button type="button" className="tsm-sheet-close" onClick={() => setCardActionParticipantId(null)} aria-label="Cerrar"><X size={16} /></button>
+                                </div>
+                                <div className="tsm-sheet-body">
+                                    <div className="tsm-sheet-actions">
+                                        <button
+                                            type="button"
+                                            className="tsm-sheet-action"
+                                            onClick={() => { setCardActionParticipantId(null); setEditingParticipant(p); }}
+                                        >
+                                            <Pencil size={18} />
+                                            <span><strong>Editar participante</strong><small>Nombre, tipo, código, seed</small></span>
+                                        </button>
+                                        {assignmentPhases.length > 0 && (
+                                            <button
+                                                type="button"
+                                                className="tsm-sheet-action"
+                                                onClick={() => {
+                                                    setSelectedIds(new Set([p.id]));
+                                                    setCardActionParticipantId(null);
+                                                    setIsMobilePhaseSheetOpen(true);
+                                                }}
+                                            >
+                                                <Layers size={18} />
+                                                <span><strong>Asignar a fase</strong><small>Elegir fase y grupo destino</small></span>
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <div className="tsm-sheet-section">
+                                        <label>Cambiar estado</label>
+                                        <div className="tsm-chip-row">
+                                            {([
+                                                { v: 'active' as const, l: 'Activo' },
+                                                { v: 'pending' as const, l: 'Pendiente' },
+                                                { v: 'inactive' as const, l: 'Inactivo' },
+                                                { v: 'disqualified' as const, l: 'Descalificado' },
+                                            ]).map((opt) => (
+                                                <button
+                                                    key={opt.v}
+                                                    type="button"
+                                                    className={`tsm-chip ${p.status === opt.v ? 'is-on' : ''}`}
+                                                    onClick={async () => {
+                                                        if (p.status === opt.v) {
+                                                            setCardActionParticipantId(null);
+                                                            return;
+                                                        }
+                                                        await handleUpdate(p.id, { status: opt.v });
+                                                        setCardActionParticipantId(null);
+                                                    }}
+                                                >
+                                                    {opt.l}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="tsm-sheet-actions">
+                                        <button
+                                            type="button"
+                                            className="tsm-sheet-action is-danger"
+                                            onClick={() => { setCardActionParticipantId(null); handleDelete(p.id); }}
+                                        >
+                                            <Trash2 size={18} />
+                                            <span><strong>Eliminar participante</strong><small>Saca al equipo del torneo</small></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {/* ===== Sheet: asignar a fase (solo cuando hay seleccion) ===== */}
                 {isMobilePhaseSheetOpen && (

@@ -16,6 +16,12 @@ import {
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { isUuid } from '@/lib/utils/postgrest';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
+import { isMatchRosterLocked } from '@/lib/tournament/fixedRoster';
+import {
+  deriveFixedRosterLineups,
+  loadFixedRosterConfigForMatch,
+  resolveMatchPhaseOrderIndex,
+} from '@/lib/services/fixedRosterLineups';
 
 type SupabaseLike = {
   from: (table: string) => any;
@@ -187,6 +193,7 @@ const PERSIST_MATCH_SELECT_BASE = `
   season_id,
   category,
   date_time,
+  status,
   tournament_id,
   phase_id,
   round_id,
@@ -203,6 +210,7 @@ const PERSIST_MATCH_SELECT_EVENT_PATCH = `
   season_id,
   category,
   date_time,
+  status,
   tournament_id,
   phase_id,
   round_id,
@@ -1592,6 +1600,59 @@ export async function fetchMatchCenterMatch(
       ])
     : [createRosterCache([], homeDivisionId), createRosterCache([], awayDivisionId)];
 
+  // Fixed roster ("plantel fijo por equipo"): when the tournament opts in, the
+  // team's 23 registered players are derived into the lineups instead of the
+  // manual per-match snapshot. Future/unplayed/unlocked matches always reflect
+  // the latest roster; live/played or post-lock-instance matches keep their
+  // stored snapshot (falling back to derived only when no snapshot exists).
+  // Gated on includeRosters so public viewers keep the cheap path unchanged.
+  let resolvedLineups: ReturnType<typeof normalizeLineups> = normalizeLineups((data as any).lineups);
+  if (includeRosters) {
+    try {
+      const fixedCfg = await loadFixedRosterConfigForMatch(
+        client,
+        normalizeText((data as any).tournament_id) || null,
+        normalizeText((data as any).season_id) || null,
+      );
+      if (fixedCfg.enabled) {
+        const statusLocked = isMatchRosterLocked({ status: (data as any).status });
+        let locked = statusLocked;
+        if (!statusLocked && fixedCfg.lockOrderIndex !== null) {
+          const matchPhaseOrderIndex = await resolveMatchPhaseOrderIndex(
+            client,
+            normalizeText((data as any).phase_id) || null,
+            normalizeText((data as any).round_id) || null,
+          );
+          locked = isMatchRosterLocked({
+            status: (data as any).status,
+            matchPhaseOrderIndex,
+            lockOrderIndex: fixedCfg.lockOrderIndex,
+          });
+        }
+        const storedHasPlayers =
+          resolvedLineups.home.length > 0 || resolvedLineups.away.length > 0;
+        if (!locked || !storedHasPlayers) {
+          const derived = await deriveFixedRosterLineups(
+            client,
+            {
+              seasonId: normalizeText((data as any).season_id) || null,
+              homeClubId: normalizeText((data as any).home_club_id) || null,
+              homeTeamId: normalizeText((data as any).home_team_id) || null,
+              awayClubId: normalizeText((data as any).away_club_id) || null,
+              awayTeamId: normalizeText((data as any).away_team_id) || null,
+            },
+            fixedCfg,
+          );
+          if (derived) {
+            resolvedLineups = normalizeLineups(derived);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[matchCenterService] fixed-roster derivation failed:', error);
+    }
+  }
+
   return {
     data: {
       ...data,
@@ -1620,7 +1681,7 @@ export async function fetchMatchCenterMatch(
       awayRoster: toPublicRosterEntries(awayRoster),
       pointsRules,
       events,
-      lineups: normalizeLineups((data as any).lineups),
+      lineups: resolvedLineups,
       replay_url: (data as any).replay_url ?? null,
       broadcast_url: (data as any).broadcast_url ?? null,
       stream_url: (data as any).stream_url ?? null,
@@ -1701,19 +1762,72 @@ export async function persistMatchCenterSupplementalData(
         away: normalizedIncomingLineups.away,
       }
     : normalizedExistingLineups;
+
+  // Fixed roster: while the tournament uses "plantel fijo" and this match is
+  // not yet live/played/locked, the registered roster is authoritative — the
+  // incoming free-form lineup edit is replaced by the derived roster so the
+  // stored snapshot stays coherent with it (this also "freezes" the snapshot
+  // once the match becomes played/locked, since later reads return the row).
+  // When not enabled, effectiveIncomingLineups === mergedIncomingLineups
+  // (zero behavior change).
+  let effectiveIncomingLineups = mergedIncomingLineups;
+  if (payload.lineups !== undefined) {
+    try {
+      const fixedCfg = await loadFixedRosterConfigForMatch(
+        client,
+        normalizeText((match as any).tournament_id) || null,
+        normalizeText((match as any).season_id) || null,
+      );
+      if (fixedCfg.enabled) {
+        const statusLocked = isMatchRosterLocked({ status: (match as any).status });
+        let locked = statusLocked;
+        if (!statusLocked && fixedCfg.lockOrderIndex !== null) {
+          const matchPhaseOrderIndex = await resolveMatchPhaseOrderIndex(
+            client,
+            normalizeText((match as any).phase_id) || null,
+            normalizeText((match as any).round_id) || null,
+          );
+          locked = isMatchRosterLocked({
+            status: (match as any).status,
+            matchPhaseOrderIndex,
+            lockOrderIndex: fixedCfg.lockOrderIndex,
+          });
+        }
+        if (!locked) {
+          const derived = await deriveFixedRosterLineups(
+            client,
+            {
+              seasonId: normalizeText((match as any).season_id) || null,
+              homeClubId: normalizeText((match as any).home_club_id) || null,
+              homeTeamId: normalizeText((match as any).home_team_id) || null,
+              awayClubId: normalizeText((match as any).away_club_id) || null,
+              awayTeamId: normalizeText((match as any).away_team_id) || null,
+            },
+            fixedCfg,
+          );
+          if (derived) {
+            effectiveIncomingLineups = normalizeLineups(derived);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[matchCenterService] fixed-roster persist override failed:', error);
+    }
+  }
+
   const needsLineupResolution = payload.lineups !== undefined;
   const contexts = needsLineupResolution
-    ? await buildTeamContexts(client, match as MatchContextRow, mergedIncomingLineups)
+    ? await buildTeamContexts(client, match as MatchContextRow, effectiveIncomingLineups)
     : null;
 
   const resolvedLineups =
     payload.lineups !== undefined
-      ? await resolvePersistedLineups(client, contexts!, mergedIncomingLineups)
+      ? await resolvePersistedLineups(client, contexts!, effectiveIncomingLineups)
       : normalizedExistingLineups;
 
   const resolvedEvents =
     payload.events !== undefined
-      ? await resolveEventsForPersistence(client, match as MatchContextRow, mergedIncomingLineups, payload.events)
+      ? await resolveEventsForPersistence(client, match as MatchContextRow, effectiveIncomingLineups, payload.events)
       : Array.isArray((match as any).events)
         ? (() => {
             let activePeriod = normalizeMatchPeriod(null);
@@ -1829,7 +1943,7 @@ export async function persistMatchCenterSupplementalData(
       const resolvedUpsertEvents = await resolveEventsForPersistence(
         client,
         match as MatchContextRow,
-        mergedIncomingLineups,
+        effectiveIncomingLineups,
         upsertEvents,
       );
       const eventRows = resolvedUpsertEvents.map((event) => mapEventToInsert(match, event));

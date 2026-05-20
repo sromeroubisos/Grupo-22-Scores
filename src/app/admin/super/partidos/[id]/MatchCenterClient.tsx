@@ -1192,14 +1192,16 @@ function isEventPlayerAvailable(
     return options.some((entry) => normalizeLookupKey(entry.name) === key);
 }
 
-type EventPlayerSelectMode = 'active' | 'substitute' | 'activeWithDisabledSubstitutes';
+type EventPlayerSelectMode = 'active' | 'substitute' | 'activeWithDisabledSubstitutes' | 'all';
 
 function eventPlayerOptionMatchesName(option: MatchPlayerSelectionOption, value: string | null | undefined) {
     return normalizeLookupKey(option.name) === normalizeLookupKey(value);
 }
 
 function getEnabledEventPlayerOptions(groups: MatchPlayerSelectionGroups, mode: EventPlayerSelectMode) {
-    return mode === 'substitute' ? groups.substitutes : groups.active;
+    if (mode === 'substitute') return groups.substitutes;
+    if (mode === 'all') return [...groups.active, ...groups.substitutes];
+    return groups.active;
 }
 
 function renderGroupedEventPlayerOptions({
@@ -1238,7 +1240,7 @@ function renderGroupedEventPlayerOptions({
                     ))}
                 </optgroup>
             ) : null}
-            {mode === 'substitute' && groups.substitutes.length > 0 ? (
+            {(mode === 'substitute' || mode === 'all') && groups.substitutes.length > 0 ? (
                 <optgroup label="Suplentes disponibles">
                     {groups.substitutes.map((player) => (
                         <option key={`sub-${player.key}`} value={player.name}>
@@ -2523,6 +2525,106 @@ export default function MatchCenterClient({
         }));
     }, [lineupSizeInput, localLineups]);
 
+    // Fill a team's planilla straight from its tournament roster (the fixed
+    // 23 when the tournament uses plantel fijo, or the full squad otherwise).
+    const importTeamRoster = useCallback((team: 'home' | 'away') => {
+        const roster = teamRosters[team];
+        const teamLabel = team === 'home' ? 'local' : 'visitante';
+        if (roster.length === 0) {
+            setSaveMsg({
+                type: 'warn',
+                text: `No hay plantel cargado para el ${teamLabel}. Cargá el plantel del torneo primero.`,
+            });
+            return;
+        }
+
+        const nextSize = Math.max(
+            getLineupSize(localLineupsRef.current),
+            roster.length,
+            DEFAULT_LINEUP_SIZE,
+        );
+        setLineupSizeInput(String(nextSize));
+        setLocalLineups((prev) => {
+            const updatedTeam = buildLineupTemplate(nextSize, []);
+            roster.forEach((rosterEntry, index) => {
+                updatedTeam[index] = {
+                    ...buildLineupSelectionFromRoster(updatedTeam[index], rosterEntry),
+                    number: rosterEntry.jerseyNumber ?? index + 1,
+                    role: index < 15 ? 'starter' : 'substitute',
+                };
+            });
+            const nextLineups = {
+                home: team === 'home' ? updatedTeam : buildLineupTemplate(nextSize, prev.home),
+                away: team === 'away' ? updatedTeam : buildLineupTemplate(nextSize, prev.away),
+            };
+            setQuickLineupDrafts((currentDrafts) => ({
+                ...currentDrafts,
+                [team]: formatQuickLineupDraft(nextLineups[team]),
+            }));
+            setQuickLineupDraftDirty((currentDirty) => ({ ...currentDirty, [team]: false }));
+            return nextLineups;
+        });
+
+        setSaveMsg({
+            type: 'ok',
+            text: `Plantel del ${teamLabel} importado (${roster.length} jugadores). Guardá para persistir.`,
+        });
+    }, [teamRosters]);
+
+    // Import both teams' rosters in a single update.
+    const importAllRosters = useCallback(() => {
+        const homeRoster = teamRosters.home;
+        const awayRoster = teamRosters.away;
+        if (homeRoster.length === 0 && awayRoster.length === 0) {
+            setSaveMsg({
+                type: 'warn',
+                text: 'No hay plantel cargado para ninguno de los equipos. Cargá los planteles del torneo primero.',
+            });
+            return;
+        }
+
+        const nextSize = Math.max(
+            getLineupSize(localLineupsRef.current),
+            homeRoster.length,
+            awayRoster.length,
+            DEFAULT_LINEUP_SIZE,
+        );
+        setLineupSizeInput(String(nextSize));
+
+        const fillFromRoster = (roster: MatchRosterPlayer[]) => {
+            const template = buildLineupTemplate(nextSize, []);
+            roster.forEach((rosterEntry, index) => {
+                template[index] = {
+                    ...buildLineupSelectionFromRoster(template[index], rosterEntry),
+                    number: rosterEntry.jerseyNumber ?? index + 1,
+                    role: index < 15 ? 'starter' : 'substitute',
+                };
+            });
+            return template;
+        };
+
+        setLocalLineups((prev) => {
+            const nextLineups = {
+                home: homeRoster.length > 0 ? fillFromRoster(homeRoster) : buildLineupTemplate(nextSize, prev.home),
+                away: awayRoster.length > 0 ? fillFromRoster(awayRoster) : buildLineupTemplate(nextSize, prev.away),
+            };
+            setQuickLineupDrafts({
+                home: formatQuickLineupDraft(nextLineups.home),
+                away: formatQuickLineupDraft(nextLineups.away),
+            });
+            setQuickLineupDraftDirty({ home: false, away: false });
+            return nextLineups;
+        });
+
+        const parts: string[] = [];
+        if (homeRoster.length > 0) parts.push(`local (${homeRoster.length})`);
+        if (awayRoster.length > 0) parts.push(`visitante (${awayRoster.length})`);
+        setSaveMsg({
+            type: 'ok',
+            text: `Plantel importado: ${parts.join(' y ')}. Guardá para persistir.`,
+        });
+    }, [teamRosters]);
+
     const score = useMemo(() => resolveOfficialScore(scoreDraft, localEvents), [localEvents, resolveOfficialScore, scoreDraft]);
     const eventDerivedScore = useMemo(() => resolveEventDerivedScore(localEvents, score), [localEvents, resolveEventDerivedScore, score]);
     const events = localEvents;
@@ -3430,12 +3532,33 @@ export default function MatchCenterClient({
                         {lineups.home.length === 0 && lineups.away.length === 0 ? (
                             <article className="mc-partition">
                                 <div className="mc-card-body">
-                                    <p className="empty-msg">No hay alineaciones cargadas. Agrega jugadores para cada equipo.</p>
-                                    <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 16 }}>
-                                        <button className="mc-btn mc-btn-primary" onClick={() => applyLineupSize()}>
-                                            <Plus size={14} /> Generar plantilla
+                                    <p className="empty-msg">No hay alineaciones cargadas. Elegí cómo armar las planillas.</p>
+                                    <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
+                                        <button
+                                            className="mc-btn mc-btn-outline"
+                                            type="button"
+                                            onClick={() => applyLineupSize(DEFAULT_LINEUP_SIZE)}
+                                        >
+                                            <Plus size={14} /> Generar plantilla (23)
+                                        </button>
+                                        <button
+                                            className="mc-btn mc-btn-primary"
+                                            type="button"
+                                            onClick={() => importAllRosters()}
+                                            disabled={teamRosters.home.length === 0 && teamRosters.away.length === 0}
+                                            title={
+                                                teamRosters.home.length === 0 && teamRosters.away.length === 0
+                                                    ? 'No hay plantel cargado en el torneo'
+                                                    : undefined
+                                            }
+                                        >
+                                            <Users size={14} /> Importar todo el plantel
                                         </button>
                                     </div>
+                                    <p className="quick-lineup-hint" style={{ textAlign: 'center', marginTop: 12 }}>
+                                        “Generar plantilla (23)” crea las planillas vacías para completar a mano.
+                                        “Importar todo el plantel” precarga los jugadores del plantel del torneo.
+                                    </p>
                                 </div>
                             </article>
                         ) : (
@@ -3456,6 +3579,15 @@ export default function MatchCenterClient({
                                                     <span>Formato: `1 - Nombre Apellido`.</span>
                                                 </div>
                                                 <div className="quick-lineup-actions">
+                                                    <button
+                                                        className="mc-btn mc-btn-outline"
+                                                        type="button"
+                                                        onClick={() => importTeamRoster(team)}
+                                                        disabled={teamRosters[team].length === 0}
+                                                        title={teamRosters[team].length === 0 ? 'Sin plantel cargado en el torneo' : undefined}
+                                                    >
+                                                        <Users size={14} /> Importar plantel
+                                                    </button>
                                                     <button
                                                         className="mc-btn mc-btn-outline"
                                                         type="button"
@@ -3506,6 +3638,15 @@ export default function MatchCenterClient({
                                                         <span>Pegá una lista ordenada. Formato sugerido: `1 - Nombre Apellido`.</span>
                                                     </div>
                                                     <div className="quick-lineup-actions">
+                                                        <button
+                                                            className="mc-btn mc-btn-outline"
+                                                            type="button"
+                                                            onClick={() => importTeamRoster(team)}
+                                                            disabled={teamRosters[team].length === 0}
+                                                            title={teamRosters[team].length === 0 ? 'Sin plantel cargado en el torneo' : undefined}
+                                                        >
+                                                            <Users size={14} /> Importar plantel
+                                                        </button>
                                                         <button
                                                             className="mc-btn mc-btn-outline"
                                                             type="button"
@@ -3900,7 +4041,7 @@ export default function MatchCenterClient({
                                                         {ev.team && availableEventSelection
                                                             ? renderEventPlayerOptions(
                                                                 ev.team,
-                                                                ev.type === 'substitution' ? 'active' : 'activeWithDisabledSubstitutes',
+                                                                ev.type === 'substitution' ? 'active' : 'all',
                                                                 selectedPlayerValue,
                                                                 '',
                                                             )

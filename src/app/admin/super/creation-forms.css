@@ -1248,6 +1248,67 @@ textarea:focus {
 .tplpick-callout { background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.25); border-radius: var(--r-md); padding: 12px 14px; margin-top: 18px; color: var(--text-secondary); font-size: 13px; display: flex; gap: 8px; }
 .tplpick-callout strong { color: var(--info); }
 
+/* Badge inline (mockup mobile). En desktop se usa .tplpick-card.popular::after. */
+.tplpick-tag { display: none; }
+/* Selección explícita: el click ahora selecciona y "Siguiente" confirma. */
+.tplpick-card.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: var(--surface-2); }
+
+/* ── Template picker — layout mobile (mockup): tarjeta horizontal compacta,
+   1 columna, badge inline a la derecha y footer "Siguiente" sticky.
+   Desktop (> 768px) queda intacto. ───────────────────────────────────── */
+@media (max-width: 768px) {
+    .tplpick-wrap { margin: 4px 0 0; }
+    .tplpick-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+
+    .tplpick-card {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas:
+            "icon title tag"
+            "icon desc  tag";
+        align-items: center;
+        column-gap: 14px;
+        row-gap: 2px;
+        padding: 14px;
+    }
+    .tplpick-card:hover { transform: none; }
+
+    .tplpick-icon {
+        grid-area: icon;
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        border-radius: 12px;
+        align-self: center;
+    }
+    .tplpick-card h3 { grid-area: title; font-size: 15px; line-height: 1.2; align-self: end; }
+    .tplpick-card p {
+        grid-area: desc;
+        font-size: 12px;
+        align-self: start;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .tplpick-card.popular::after { display: none; }
+    .tplpick-tag {
+        grid-area: tag;
+        display: inline-flex;
+        align-items: center;
+        background: var(--accent);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 4px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+    }
+}
+
 /* ===== Stepper minimalista ===== */
 .stepper-bar { margin: 16px 0 28px; padding: 14px 18px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-lg); }
 .stepper-progress-row { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 0.06em; color: var(--text-dim); text-transform: uppercase; font-weight: 600; margin-bottom: 8px; }

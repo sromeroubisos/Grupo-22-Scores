@@ -20,7 +20,9 @@ import { TournamentOperationTab } from '@/components/admin/entities/tournament/T
 import { TournamentRelatedTab } from '@/components/admin/entities/tournament/TournamentRelatedTab';
 import { Database } from '@/lib/database.types';
 import { getTournamentRelatedTabData } from '@/lib/services/tournamentRelatedService';
-import { requireUserAccessContext } from '@/lib/auth/permissions';
+import { requireTournamentAdminContext, requireUserAccessContext } from '@/lib/auth/permissions';
+import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
+import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { getManagedClubSummaries } from '@/lib/club-admin/managedClubFamily';
 import { normalizeClubManageTab } from '@/lib/club-admin/manageTabs';
 import {
@@ -280,10 +282,47 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
         redirect('/login');
     }
 
-    const result = await resolveEntity({
+    let result = await resolveEntity({
         id,
         type: type as EntityType | undefined
     });
+
+    // Tournament-admin fallback. The /admin/torneo panel lists a gestor's
+    // tournaments via service-role queries scoped by resolveTournamentAdminScope
+    // (RLS won't surface them through .single() on the user client), so the
+    // resolveEntity call above returns not_found here even for tournaments the
+    // user manages. Re-resolve through the same scope-aware path so
+    // "Abrir en gestor" actually lands on the manager. Global admins are
+    // unaffected — resolveEntity already succeeds for them.
+    if ((result.kind === 'not_found' || result.kind === 'forbidden')
+        && (type === 'tournament' || !type)) {
+        try {
+            const tournamentAdminContext = await requireTournamentAdminContext(supabase);
+            const scope = await resolveTournamentAdminScope(supabase, tournamentAdminContext);
+            if (scope.isUnlimited || scope.tournamentIds.has(id)) {
+                const reader = getServiceWriter(supabase, 'admin/entities/manage:tournament-admin');
+                const { data: tData } = await reader
+                    .from('tournaments')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+                if (tData) {
+                    result = {
+                        kind: 'ok',
+                        entityType: 'tournament',
+                        source: 'db',
+                        data: tData as unknown as TournamentRow,
+                        canonicalPath: `/tournaments/${id}`,
+                        adminPath: `/admin/entities/${id}/manage?type=tournament`,
+                    };
+                }
+            }
+        } catch {
+            // User is not a tournament admin (or token check failed); leave
+            // the original not_found / forbidden result so the existing UI
+            // renders the standard message.
+        }
+    }
 
     // 2. Specialized Redirects: matches use the new dedicated Match Center
     if (result.kind === 'ok' && result.entityType === 'match') {

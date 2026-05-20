@@ -34,6 +34,38 @@ export async function resolveTournamentAdminScope(
     supabase: SupabaseServerClient,
     context: UserAccessContext
 ): Promise<TournamentAdminScope> {
+    // Local preview override: PREVIEW_TOURNAMENT_IDS restringe TODO el gestor
+    // de torneos a un set fijo de torneos, sin importar el rol (incluido
+    // admin global). Se setea solo en .env.local para previews; en
+    // producción/Vercel la variable no existe → comportamiento normal.
+    const previewTournamentIds = (process.env.PREVIEW_TOURNAMENT_IDS || '')
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+    if (previewTournamentIds.length > 0) {
+        const tournamentIds = new Set(previewTournamentIds);
+        const clubIds = new Set<string>();
+        const previewReader = getServiceWriter(supabase, 'resolveTournamentAdminScope:preview');
+        const { data: previewClubs } = await previewReader
+            .from('tournament_participants')
+            .select('club_id')
+            .in('tournament_id', Array.from(tournamentIds));
+
+        for (const row of previewClubs ?? []) {
+            if (typeof row.club_id === 'string' && row.club_id.length > 0) {
+                clubIds.add(row.club_id);
+            }
+        }
+
+        return {
+            isUnlimited: false,
+            tournamentIds,
+            clubIds,
+            createdByUserId: context.userId,
+        };
+    }
+
     if (isGlobalAdminRole(context.role)) {
         return UNLIMITED_SCOPE;
     }

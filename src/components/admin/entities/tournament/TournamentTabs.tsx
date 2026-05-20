@@ -36,11 +36,21 @@ export const TOURNAMENT_TABS = [
 ];
 
 // Mobile-only: 4 primary tabs always visible in the bottom bar.
-// The remaining tabs are reachable via the "Mas" button which opens the existing sheet.
+// The remaining tabs are reachable via the "Más" button which opens the existing sheet.
 const MOBILE_PRIMARY_TAB_IDS = ['resumen', 'estructura', 'participantes', 'operacion'] as const;
 const MOBILE_PRIMARY_TABS = MOBILE_PRIMARY_TAB_IDS
     .map((id) => TOURNAMENT_TABS.find((tab) => tab.id === id))
     .filter((tab): tab is (typeof TOURNAMENT_TABS)[number] => Boolean(tab));
+
+// Mobile bottom-nav labels per spec — `tab.label` keeps the desktop wording
+// (used in the sheet + desktop rail); the bottom-nav surfaces shorter
+// action-oriented labels for the thumb zone.
+const MOBILE_BOTTOM_NAV_LABELS: Record<string, string> = {
+    resumen: 'Resumen',
+    estructura: 'Fases',
+    participantes: 'Equipos',
+    operacion: 'Operar',
+};
 
 const DISABLE_ADMIN_PREFETCH = process.env.NEXT_PUBLIC_DISABLE_ADMIN_PREFETCH !== 'false';
 
@@ -327,7 +337,9 @@ export function TournamentTabs({ id, currentTab, onPendingTabChange }: Tournamen
                                 <Icon size={20} />
                                 {hasDraft ? <span className="basalt-tabs-bottom-dot" aria-hidden="true" /> : null}
                             </span>
-                            <span className="basalt-tabs-bottom-label">{tab.label}</span>
+                            <span className="basalt-tabs-bottom-label">
+                                {MOBILE_BOTTOM_NAV_LABELS[tab.id] || tab.label}
+                            </span>
                         </button>
                     );
                 })}
@@ -344,7 +356,7 @@ export function TournamentTabs({ id, currentTab, onPendingTabChange }: Tournamen
                     <span className="basalt-tabs-bottom-glyph">
                         <MoreHorizontal size={20} />
                     </span>
-                    <span className="basalt-tabs-bottom-label">Mas</span>
+                    <span className="basalt-tabs-bottom-label">Más</span>
                 </button>
             </div>
 

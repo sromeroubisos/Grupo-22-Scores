@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, UserPlus, X } from 'lucide-react';
 import styles from '../tournament-admin.module.css';
 
@@ -39,6 +40,12 @@ export default function TournamentAdminUsersPage() {
     const [membershipRole, setMembershipRole] = useState<'admin' | 'editor'>('admin');
     const [selectedTournamentIds, setSelectedTournamentIds] = useState<string[]>([]);
     const [submitting, setSubmitting] = useState(false);
+    // The modal must portal to <body>: it lives inside .main, which is a
+    // stacking context (position:relative;z-index:10) sitting below the
+    // sticky global header (.g22-header, z-index:1000). Rendered in place no
+    // z-index can lift it above the header — only escaping .main can.
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => { setMounted(true); }, []);
 
     const refresh = useCallback(async () => {
         setLoading(true);
@@ -266,7 +273,7 @@ export default function TournamentAdminUsersPage() {
                 )}
             </div>
 
-            {formOpen && (
+            {formOpen && mounted && createPortal(
                 <div
                     className={styles.modalBackdrop}
                     role="dialog"
@@ -372,7 +379,8 @@ export default function TournamentAdminUsersPage() {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.getElementById('torneo-overlay-root') ?? document.body,
             )}
         </div>
     );

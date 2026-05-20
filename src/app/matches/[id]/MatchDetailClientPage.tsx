@@ -596,6 +596,11 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const [publicStatsTab, setPublicStatsTab] = useState('marcador');
     const [lineupModalOpen, setLineupModalOpen] = useState(false);
     const [lineupReloadKey, setLineupReloadKey] = useState(0);
+    // Whether the current user can edit THIS match (super/global/federation
+    // admin OR an admin of this match's tournament). Resolved server-side via
+    // the same gate the editor page enforces, so it never leaks other
+    // tournaments and stays in sync with the backend.
+    const [canManageMatch, setCanManageMatch] = useState(false);
     const statusRef = useRef<string>('scheduled');
     const isFlashScore = /^[A-Za-z0-9]{8}$/.test(id);
     const isRugbyExternal = isRugbyApiSportsMatchId(id);
@@ -603,6 +608,27 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isEspnSoccerExternal = isEspnSoccerMatchId(id);
     const isEspnMotorsportExternal = isEspnMotorsportMatchId(id);
     const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal;
+
+    const resolvedMatchId =
+        typeof state.matchData?.id === 'string' && state.matchData.id.trim()
+            ? state.matchData.id.trim()
+            : '';
+    const currentUserId = user?.id ?? null;
+    useEffect(() => {
+        if (isExternalMatch || state.kind !== 'ok' || !resolvedMatchId || !currentUserId) {
+            setCanManageMatch(false);
+            return;
+        }
+        let cancelled = false;
+        fetch(`/api/matches/${encodeURIComponent(resolvedMatchId)}/can-edit`, {
+            credentials: 'include',
+            cache: 'no-store',
+        })
+            .then((r) => (r.ok ? r.json() : { canEdit: false }))
+            .then((j) => { if (!cancelled) setCanManageMatch(Boolean(j?.canEdit)); })
+            .catch(() => { if (!cancelled) setCanManageMatch(false); });
+        return () => { cancelled = true; };
+    }, [state.kind, resolvedMatchId, isExternalMatch, currentUserId]);
 
     const publicCompleteStatTabs = useMemo(() => {
         if (state.kind !== 'ok' || !state.matchData) return [];
@@ -1799,7 +1825,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         </div>
                     </div>
                     <div className={styles.matchActions}>
-                        {isSuperAdminUser && !isExternalMatch && (
+                        {(isSuperAdminUser || canManageMatch) && !isExternalMatch && (
                             <ProtectedLink href={adminMatchHref} className={`${styles.btn} ${styles.btnPrimary}`}>
                                 Editar partido
                             </ProtectedLink>

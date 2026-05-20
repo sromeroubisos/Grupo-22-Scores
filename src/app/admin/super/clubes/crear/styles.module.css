@@ -783,7 +783,7 @@
 
 @media (max-width: 760px) {
     .formWrapper {
-        padding: 28px 14px 110px;
+        padding: 14px 14px 80px;
     }
 
     .derivedNotice,
@@ -822,5 +822,210 @@
     .btnConfirmModal,
     .btnCancelModal {
         width: 100%;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   MOBILE — alta corta de club (≤ 760px). SOLO capa visual: oculta el
+   sidebar, las secciones administrativas y los campos no esenciales para
+   dejar un formulario rápido (logo, nombre, nombre corto, color, país,
+   ciudad) con CTA full-width. Desktop / Super Admin quedan intactos.
+   ════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 760px) {
+    /* Header: sin eyebrow ni meta técnica; título plano (sin skew/uppercase). */
+    .eyebrow,
+    .headerMeta {
+        display: none;
+    }
+
+    .header {
+        padding-bottom: 8px;
+        margin-bottom: 14px;
+    }
+
+    /* ── Tipografía / dimensiones del mockup ─────────────────────────── */
+    .title {
+        transform: none;
+        text-transform: none;
+        font-size: 26px;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+    }
+
+    .headerText {
+        margin-top: 6px;
+        font-size: 0.8125rem;
+        line-height: 1.45;
+    }
+
+    .label {
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .field {
+        gap: 5px;
+    }
+
+    /* font-size 16px evita el zoom automático de iOS al enfocar. */
+    .input,
+    .select,
+    .textarea {
+        padding: 8px 12px;
+        font-size: 16px;
+        border-radius: 8px;
+    }
+
+    /* ── Quitar secciones admin (2 Sport, 4 Org, 5 Venue, 6 Social,
+       7 Lifecycle). Quedan 1 Identity y 3 Geo. ───────────────────────── */
+    .form > section:nth-of-type(2),
+    .form > section:nth-of-type(4),
+    .form > section:nth-of-type(5),
+    .form > section:nth-of-type(6),
+    .form > section:nth-of-type(7) {
+        display: none;
+    }
+
+    /* ── Aplanar el form para reordenar a la secuencia del mockup SIN
+       tocar el DOM (desktop intacto). Las secciones 1 y 3 y los grupos
+       de inputs de identity se vuelven transparentes al layout
+       (display:contents); sus .field pasan a ser hijos flex directos de
+       .form y se ordenan con `order`. ──────────────────────────────── */
+    .form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .form > section:nth-of-type(1),
+    .form > section:nth-of-type(3),
+    .form > section:nth-of-type(1) > .inputGroup:nth-child(2),
+    .form > section:nth-of-type(1) > .inputGroup:nth-child(3) {
+        display: contents;
+    }
+
+    /* Sin cabeceras de sección, chips de requerido ni tags de warning. */
+    .sectionTitleRow,
+    .req,
+    .warningTag {
+        display: none;
+    }
+
+    /* Logo: solo el uploader (sin tabs Upload / URL). */
+    .logoTabs {
+        display: none;
+    }
+
+    /* Identity IG1 (.field): 1 Nombre, 2 Slug·oculto, 3 Entity·oculto,
+       4 Corto.  IG2: 1 Logo, 2 Color. */
+    .form > section:nth-of-type(1) > .inputGroup:nth-child(2) > .field:nth-child(2),
+    .form > section:nth-of-type(1) > .inputGroup:nth-child(2) > .field:nth-child(3) {
+        display: none;
+    }
+
+    /* Geo: ocultar Region/Address/Lat/Lng; quedan País (1) y Ciudad (2). */
+    .form > section:nth-of-type(3) > .inputGroup > .field:nth-child(n+3) {
+        display: none;
+    }
+
+    /* Secuencia: Logo → Nombre largo → Nombre corto → (Ciudad|País) →
+       Color → CTA. */
+    .form > section:nth-of-type(1) > .inputGroup:nth-child(3) > .field:nth-child(1) {
+        order: 1; /* Logo */
+    }
+    .form > section:nth-of-type(1) > .inputGroup:nth-child(2) > .field:nth-child(1) {
+        order: 2; /* Nombre largo */
+    }
+    .form > section:nth-of-type(1) > .inputGroup:nth-child(2) > .field:nth-child(4) {
+        order: 3; /* Nombre corto */
+    }
+    .form > section:nth-of-type(1) > .inputGroup:nth-child(3) > .field:nth-child(2) {
+        order: 5; /* Color principal */
+    }
+    .form > .actionsBar {
+        order: 6;
+    }
+
+    /* Ciudad | País en dos columnas (Ciudad a la izquierda), como bloque
+       único ordenado entre Nombre corto y Color. */
+    .form > section:nth-of-type(3) > .inputGroup {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        order: 4;
+    }
+    .form > section:nth-of-type(3) > .inputGroup > .field:nth-child(1) {
+        order: 2; /* País a la derecha */
+    }
+    .form > section:nth-of-type(3) > .inputGroup > .field:nth-child(2) {
+        order: 1; /* Ciudad a la izquierda */
+    }
+
+    /* Logo → SIN doble borde: .logoZone pasa a ser solo un wrapper
+       transparente; el dropzone visible es el del propio LogoUploader
+       (compactado en LogoUploader.module.css). Anula el .logoZone base
+       (min-height 156 + borde dashed + padding 20 + fondo). */
+    .logoZone {
+        min-height: 0;
+        border: none;
+        padding: 0;
+        background: none;
+        display: block;
+    }
+
+    .logoPanel {
+        gap: 8px;
+    }
+
+    /* Quitar duplicados del bloque de logo: label interno del uploader
+       ("Logo o Escudo" — ya hay "Logo del equipo"), el helper redundante
+       y el preview-wrap (el uploader ya muestra su propio preview). */
+    .logoZone > div > label,
+    .logoZone > .helper,
+    .logoPreviewWrap {
+        display: none;
+    }
+
+    /* El tag "MISSING BRANDING ASSET" reaparecía por
+       .hasWarning .warningTag (especificidad 0,2,0 > mi 0,1,0).
+       Se anula con igual especificidad y orden posterior. */
+    .hasWarning .warningTag {
+        display: none;
+    }
+
+    /* Color → tarjeta contenedora como el mockup. */
+    .form > section:nth-of-type(1) > .inputGroup:nth-child(3) > .field:nth-child(2) {
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface-soft);
+    }
+
+    /* Barra de acciones → solo el CTA, full-width, en flujo
+       (no fijo: el panel ya tiene su bottom-nav). */
+    .actionsBar {
+        margin-top: 2px;
+        padding: 0;
+        border: none;
+        background: none;
+        gap: 0;
+    }
+
+    .btnGhost,
+    .saveStatus {
+        display: none;
+    }
+
+    .actionsRight {
+        width: 100%;
+        margin: 0;
+    }
+
+    .btnPrimary {
+        width: 100%;
+        padding: 12px;
+        font-size: 0.95rem;
+        border-radius: 8px;
     }
 }

@@ -14,6 +14,12 @@ import {
   invalidateMatchesFeedCaches,
   type MatchesFeedInvalidationScope,
 } from '@/lib/server/matchesFeedInvalidation';
+import { isMatchRosterLocked } from '@/lib/tournament/fixedRoster';
+import {
+  deriveFixedRosterLineups,
+  loadFixedRosterConfigForMatch,
+  resolveMatchPhaseOrderIndex,
+} from '@/lib/services/fixedRosterLineups';
 import {
   APP_TIMEZONE,
   addDaysToIsoDate,
@@ -32,6 +38,8 @@ import {
 } from '@/lib/server/playoffStages';
 import { generatePlayoffBracket } from '@/lib/server/playoffBracket';
 import { resolveMatchAdvancement } from '@/lib/server/resolveMatchAdvancement';
+import { reseedPlayoffBracket } from '@/lib/server/playoffBracket';
+import { readPlayoffSeedingConfig } from '@/lib/playoff/seedingFromStandings';
 import type { PlayoffBuilderConfig } from '@/lib/playoff/templates';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { assertUuid, isUuid } from '@/lib/utils/postgrest';
@@ -919,6 +927,57 @@ export class FixtureService {
       insertData.replay_url = data.replayUrl || null;
     }
 
+    // Fixed roster: pre-seed the lineup from the team's registered roster so the
+    // new match opens with the 23 already loaded. Best-effort — on any failure
+    // we skip it and the match-center read path derives it lazily instead.
+    if (phaseContext.season_id) {
+      try {
+        const fixedCfg = await loadFixedRosterConfigForMatch(
+          supabase,
+          data.tournamentId,
+          phaseContext.season_id,
+        );
+        if (fixedCfg.enabled) {
+          const statusLocked = isMatchRosterLocked({ status: data.status });
+          let locked = statusLocked;
+          if (!statusLocked && fixedCfg.lockOrderIndex !== null) {
+            const matchPhaseOrderIndex = await resolveMatchPhaseOrderIndex(
+              supabase,
+              data.phaseId || null,
+              finalRoundId || null,
+            );
+            locked = isMatchRosterLocked({
+              status: data.status,
+              matchPhaseOrderIndex,
+              lockOrderIndex: fixedCfg.lockOrderIndex,
+            });
+          }
+          if (!locked && (await this.checkMatchColumnSupport('lineups'))) {
+            const derived = await deriveFixedRosterLineups(
+              supabase,
+              {
+                seasonId: phaseContext.season_id,
+                homeClubId: data.homeClubId || null,
+                homeTeamId: null,
+                awayClubId: data.awayClubId || null,
+                awayTeamId: null,
+              },
+              fixedCfg,
+            );
+            if (derived) {
+              insertData.lineups = {
+                fixedRosterDerived: true,
+                home: derived.home,
+                away: derived.away,
+              };
+            }
+          }
+        }
+      } catch (seedError) {
+        console.error('[FixtureService] fixed-roster lineup seed skipped:', seedError);
+      }
+    }
+
     const { data: match, error } = await supabase
       .from('matches')
       .insert(insertData)
@@ -1144,6 +1203,36 @@ export class FixtureService {
         }
       } catch (advancementError) {
         console.error('[FixtureService] Playoff advancement threw:', advancementError);
+      }
+
+      // Zone-stage result changed: re-derive playoff crossings for any
+      // playoff phase seeded from this phase's standings, unless that zone
+      // phase has been officially "closed" (playoffSeeding.locked). The
+      // standings are recalculated elsewhere on result change; here we only
+      // re-resolve the bracket's seed slots. Best-effort, never throws.
+      try {
+        const { data: editedMatch } = await supabase
+          .from('matches')
+          .select('tournament_id, phase_id')
+          .eq('id', matchId)
+          .maybeSingle();
+        if (editedMatch?.tournament_id && editedMatch?.phase_id) {
+          const { data: phaseRows } = await supabase
+            .from('tournament_phases')
+            .select('id, settings')
+            .eq('tournament_id', editedMatch.tournament_id);
+          for (const phaseRow of phaseRows ?? []) {
+            const cfg = readPlayoffSeedingConfig((phaseRow as any).settings);
+            if (cfg && !cfg.locked && cfg.sourcePhaseId === editedMatch.phase_id) {
+              const r = await reseedPlayoffBracket(supabase, { phaseId: (phaseRow as any).id });
+              if (r.ok && (r.reseeded ?? 0) > 0) {
+                await invalidateMatchesFeedCaches();
+              }
+            }
+          }
+        }
+      } catch (reseedError) {
+        console.error('[FixtureService] Playoff reseed-from-zones threw:', reseedError);
       }
     }
 

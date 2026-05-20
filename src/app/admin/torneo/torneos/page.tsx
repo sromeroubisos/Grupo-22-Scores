@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Eye, EyeOff, Plus, Search, ShieldQuestion, SlidersHorizontal, Trash2, Trophy } from 'lucide-react';
+import { Eye, EyeOff, MoreHorizontal, Plus, Search, ShieldQuestion, SlidersHorizontal, Trash2, Trophy } from 'lucide-react';
 import styles from '../tournament-admin.module.css';
 
 type Tournament = {
@@ -65,6 +65,7 @@ export default function TournamentAdminTournamentsPage() {
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [okMsg, setOkMsg] = useState<string | null>(null);
 
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [managingId, setManagingId] = useState<string | null>(null);
     const [participants, setParticipants] = useState<Record<string, Participant[]>>({});
     const [participantLoading, setParticipantLoading] = useState<string | null>(null);
@@ -330,7 +331,7 @@ export default function TournamentAdminTournamentsPage() {
             {errorMsg && <div className={`${styles.alert} ${styles.alertError}`}>{errorMsg}</div>}
             {okMsg && <div className={`${styles.alert} ${styles.alertSuccess}`}>{okMsg}</div>}
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
+            <div className={styles.topActions}>
                 <Link
                     href="/admin/torneo/torneos/crear"
                     prefetch={false}
@@ -380,6 +381,7 @@ export default function TournamentAdminTournamentsPage() {
 
                         return (
                             <article key={tournament.id} className={`${styles.card} ${styles.listItem}`}>
+                                <span className={styles.cardAccent} aria-hidden />
                                 <div className={styles.listItemRow}>
                                     <div className={styles.listAvatar} style={{ background: tournament.primary_color || undefined }}>
                                         {tournament.logo_url ? (
@@ -423,33 +425,83 @@ export default function TournamentAdminTournamentsPage() {
                                         >
                                             {isOpen ? 'Cerrar' : 'Clubes'}
                                         </button>
-                                        {isPublished ? (
+                                        <div className={styles.iconActions}>
+                                            {isPublished ? (
+                                                <button
+                                                    type="button"
+                                                    className={styles.iconBtn}
+                                                    title="Despublicar"
+                                                    onClick={() => updateStatus(tournament.id, 'draft')}
+                                                >
+                                                    <EyeOff size={18} aria-hidden />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    className={`${styles.iconBtn} ${styles.iconBtnAccent}`}
+                                                    title="Publicar"
+                                                    onClick={() => updateStatus(tournament.id, 'published')}
+                                                >
+                                                    <Eye size={18} aria-hidden />
+                                                </button>
+                                            )}
                                             <button
                                                 type="button"
-                                                className={styles.iconBtn}
-                                                title="Despublicar"
-                                                onClick={() => updateStatus(tournament.id, 'draft')}
+                                                className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
+                                                title="Eliminar"
+                                                onClick={() => handleDelete(tournament.id, tournament.display_name || tournament.name)}
                                             >
-                                                <EyeOff size={18} aria-hidden />
+                                                <Trash2 size={18} aria-hidden />
                                             </button>
-                                        ) : (
+                                        </div>
+
+                                        <div className={styles.overflowWrap}>
                                             <button
                                                 type="button"
-                                                className={`${styles.iconBtn} ${styles.iconBtnAccent}`}
-                                                title="Publicar"
-                                                onClick={() => updateStatus(tournament.id, 'published')}
+                                                className={styles.overflowBtn}
+                                                aria-label="Más acciones"
+                                                aria-haspopup="menu"
+                                                aria-expanded={openMenuId === tournament.id}
+                                                onClick={() => setOpenMenuId((current) => (current === tournament.id ? null : tournament.id))}
                                             >
-                                                <Eye size={18} aria-hidden />
+                                                <MoreHorizontal size={18} aria-hidden />
                                             </button>
-                                        )}
-                                        <button
-                                            type="button"
-                                            className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
-                                            title="Eliminar"
-                                            onClick={() => handleDelete(tournament.id, tournament.display_name || tournament.name)}
-                                        >
-                                            <Trash2 size={18} aria-hidden />
-                                        </button>
+                                            {openMenuId === tournament.id && (
+                                                <>
+                                                    <div
+                                                        className={styles.overflowScrim}
+                                                        onClick={() => setOpenMenuId(null)}
+                                                        aria-hidden
+                                                    />
+                                                    <div className={styles.overflowMenu} role="menu">
+                                                        <button
+                                                            type="button"
+                                                            role="menuitem"
+                                                            className={styles.overflowItem}
+                                                            onClick={() => {
+                                                                setOpenMenuId(null);
+                                                                updateStatus(tournament.id, isPublished ? 'draft' : 'published');
+                                                            }}
+                                                        >
+                                                            {isPublished ? <EyeOff size={15} aria-hidden /> : <Eye size={15} aria-hidden />}
+                                                            {isPublished ? 'Despublicar' : 'Publicar'}
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            role="menuitem"
+                                                            className={`${styles.overflowItem} ${styles.overflowItemDanger}`}
+                                                            onClick={() => {
+                                                                setOpenMenuId(null);
+                                                                handleDelete(tournament.id, tournament.display_name || tournament.name);
+                                                            }}
+                                                        >
+                                                            <Trash2 size={15} aria-hidden />
+                                                            Eliminar
+                                                        </button>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 

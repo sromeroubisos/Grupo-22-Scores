@@ -49,6 +49,7 @@ export type AddPlayerToRosterInput = {
     playerId?: string | null;
     firstName?: string | null;
     lastName?: string | null;
+    birthDate?: string | null;
     joinedAt?: string | null;
     leftAt?: string | null;
     status?: string | null;
@@ -653,7 +654,7 @@ export async function listSeasonRosters(db: DbClient, seasonId: string, includeM
     const rosterIds = rosters.map((roster: any) => roster.id);
     const { data: memberships, error: membershipError } = await db
         .from('roster_memberships')
-        .select('*, player:people(id, first_name, last_name, full_name, name, photo_url, avatar_url, position)')
+        .select('*, player:people(id, first_name, last_name, full_name, name, birth_date, photo_url, avatar_url, position)')
         .in('roster_id', rosterIds)
         .order('jersey_number', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: true });
@@ -671,6 +672,73 @@ export async function listSeasonRosters(db: DbClient, seasonId: string, includeM
     return rosters.map((roster: any) => ({
         ...roster,
         memberships: membershipsByRoster.get(roster.id) ?? [],
+    }));
+}
+
+/**
+ * Lists every roster a club has across all seasons/tournaments, enriched with
+ * tournament info and (optionally) memberships. Caller is responsible for
+ * filtering down to the tournaments/clubs allowed by the admin's scope.
+ */
+export async function listClubRosters(db: DbClient, clubId: string, includeMemberships = true) {
+    const cleanId = cleanText(clubId);
+    if (!cleanId) return [];
+
+    const { data: rosters, error } = await db
+        .from('season_rosters')
+        .select('*, club:clubs(id, name, short_name, logo_url), team:club_teams(id, name, category, gender, sport)')
+        .eq('club_id', cleanId)
+        .order('created_at', { ascending: false });
+
+    if (error) throw new Error(error.message || 'No se pudieron cargar los planteles del club.');
+    if (!rosters?.length) return [];
+
+    // Resolve tournament info via a separate query rather than an embedded FK
+    // relationship, which is not guaranteed to be exposed by PostgREST.
+    const tournamentIds = Array.from(
+        new Set(rosters.map((r: any) => r.tournament_id).filter(Boolean).map(String)),
+    );
+    const tournamentById = new Map<string, any>();
+    if (tournamentIds.length) {
+        const { data: tournaments } = await db
+            .from('tournaments')
+            .select('id, name, display_name, sport_id, current_season_id')
+            .in('id', tournamentIds);
+        for (const t of tournaments ?? []) {
+            tournamentById.set(String(t.id), t);
+        }
+    }
+
+    let enriched: any[] = rosters;
+    if (includeMemberships) {
+        const rosterIds = rosters.map((roster: any) => roster.id);
+        const { data: memberships, error: membershipError } = await db
+            .from('roster_memberships')
+            .select('*, player:people(id, first_name, last_name, full_name, name, birth_date, photo_url, avatar_url, position)')
+            .in('roster_id', rosterIds)
+            .order('jersey_number', { ascending: true, nullsFirst: false })
+            .order('created_at', { ascending: true });
+
+        if (membershipError) throw new Error(membershipError.message || 'No se pudieron cargar los jugadores.');
+
+        const byRoster = new Map<string, any[]>();
+        for (const membership of memberships ?? []) {
+            byRoster.set(membership.roster_id, [
+                ...(byRoster.get(membership.roster_id) ?? []),
+                membership,
+            ]);
+        }
+        enriched = rosters.map((roster: any) => ({
+            ...roster,
+            memberships: byRoster.get(roster.id) ?? [],
+        }));
+    }
+
+    return enriched.map((roster: any) => ({
+        ...roster,
+        tournament: roster.tournament_id
+            ? tournamentById.get(String(roster.tournament_id)) ?? null
+            : null,
     }));
 }
 
@@ -693,6 +761,7 @@ async function ensurePlayer(db: DbClient, roster: any, input: AddPlayerToRosterI
             last_name: lastName,
             full_name: fullName,
             name: fullName,
+            birth_date: asDateOnly(input.birthDate),
             role: 'player',
             status: 'active',
         })
@@ -748,7 +817,7 @@ export async function addPlayerToSeasonRoster(db: DbClient, rosterId: string, in
     const { data, error } = await db
         .from('roster_memberships')
         .insert(payload)
-        .select('*, player:people(id, first_name, last_name, full_name, name, photo_url, avatar_url, position)')
+        .select('*, player:people(id, first_name, last_name, full_name, name, birth_date, photo_url, avatar_url, position)')
         .single();
 
     if (error) {
@@ -764,4 +833,138 @@ export async function addPlayerToSeasonRoster(db: DbClient, rosterId: string, in
             ? [{ code: 'player_active_elsewhere', memberships: activeElsewhere }]
             : [],
     };
+}
+
+export type UpdateRosterMembershipInput = {
+    jerseyNumber?: number | null;
+    position?: string | null;
+    role?: string | null;
+    status?: string | null;
+    notes?: string | null;
+    leftAt?: string | null;
+    eligibility?: Record<string, unknown> | null;
+};
+
+const EDITABLE_ROSTER_STATUSES = new Set(['draft', 'active']);
+
+async function loadEditableMembership(db: DbClient, membershipId: string) {
+    const id = cleanText(membershipId);
+    if (!id) throw new Error('membershipId es requerido.');
+
+    const { data: membership, error } = await db
+        .from('roster_memberships')
+        .select('*, roster:season_rosters(id, status, season:tournament_seasons(id, status))')
+        .eq('id', id)
+        .maybeSingle();
+
+    if (error) throw new Error(error.message || 'No se pudo cargar la inscripcion del jugador.');
+    if (!membership) throw new Error('Inscripcion de jugador no encontrada.');
+
+    const roster = Array.isArray(membership.roster) ? membership.roster[0] : membership.roster;
+    const season = roster
+        ? (Array.isArray(roster.season) ? roster.season[0] : roster.season)
+        : null;
+
+    if (season && LOCKED_SEASON_STATUSES.has(season.status)) {
+        throw new Error('La temporada esta finalizada o archivada y no se puede editar sin reabrirla.');
+    }
+    if (roster && !EDITABLE_ROSTER_STATUSES.has(String(roster.status))) {
+        throw new Error('El plantel esta bloqueado o archivado y no se puede editar.');
+    }
+
+    return membership;
+}
+
+export async function updateRosterMembership(
+    db: DbClient,
+    membershipId: string,
+    input: UpdateRosterMembershipInput,
+) {
+    const membership = await loadEditableMembership(db, membershipId);
+
+    const payload: Record<string, unknown> = {};
+    if (input.jerseyNumber !== undefined) {
+        payload.jersey_number =
+            typeof input.jerseyNumber === 'number' ? input.jerseyNumber : null;
+    }
+    if (input.position !== undefined) payload.position = cleanText(input.position);
+    if (input.role !== undefined) payload.role = cleanText(input.role);
+    if (input.notes !== undefined) payload.notes = cleanText(input.notes);
+    if (input.leftAt !== undefined) payload.left_at = asDateOnly(input.leftAt);
+    if (input.eligibility !== undefined) payload.eligibility = input.eligibility ?? {};
+    if (input.status !== undefined) payload.status = normalizeMembershipStatus(input.status);
+
+    if (Object.keys(payload).length === 0) {
+        return { membership };
+    }
+
+    // Jersey uniqueness is not a DB constraint — enforce it within the roster.
+    if (typeof payload.jersey_number === 'number') {
+        const { data: clash } = await db
+            .from('roster_memberships')
+            .select('id')
+            .eq('roster_id', membership.roster_id)
+            .eq('jersey_number', payload.jersey_number)
+            .neq('id', membership.id)
+            .limit(1);
+        if (Array.isArray(clash) && clash.length > 0) {
+            throw new Error(`El dorsal ${payload.jersey_number} ya esta asignado en este plantel.`);
+        }
+    }
+
+    payload.updated_at = new Date().toISOString();
+
+    const { data, error } = await db
+        .from('roster_memberships')
+        .update(payload)
+        .eq('id', membership.id)
+        .select('*, player:people(id, first_name, last_name, full_name, name, birth_date, photo_url, avatar_url, position)')
+        .single();
+
+    if (error) throw new Error(error.message || 'No se pudo actualizar la inscripcion del jugador.');
+    return { membership: data };
+}
+
+/**
+ * Resolves the season id used for a tournament's rosters: the explicit
+ * `current_season_id`, otherwise the most recent season row. Returns null when
+ * the tournament has no season yet (caller should ensure one first).
+ */
+export async function resolveSeasonIdForTournament(
+    db: DbClient,
+    tournamentId: string,
+): Promise<string | null> {
+    const id = cleanText(tournamentId);
+    if (!id) return null;
+
+    const { data: tournament } = await db
+        .from('tournaments')
+        .select('current_season_id')
+        .eq('id', id)
+        .maybeSingle();
+
+    const current = cleanText(tournament?.current_season_id);
+    if (current) return current;
+
+    const { data: seasons } = await db
+        .from('tournament_seasons')
+        .select('id, status, created_at')
+        .eq('tournament_id', id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+    const latest = Array.isArray(seasons) && seasons.length > 0 ? seasons[0] : null;
+    return latest ? String(latest.id) : null;
+}
+
+export async function removeRosterMembership(db: DbClient, membershipId: string) {
+    const membership = await loadEditableMembership(db, membershipId);
+
+    const { error } = await db
+        .from('roster_memberships')
+        .delete()
+        .eq('id', membership.id);
+
+    if (error) throw new Error(error.message || 'No se pudo quitar al jugador del plantel.');
+    return { ok: true, membershipId: membership.id };
 }

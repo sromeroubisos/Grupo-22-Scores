@@ -1012,22 +1012,42 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
 
     useEffect(() => {
         let isMounted = true;
+        let hydrateInFlight = false;
+        let hydrateQueued = false;
 
         const hydrateSavedPresets = async () => {
-            const { editorialPresets, gradientPresets, storageMode } = await hydrateSavedPresetCollections(supabase);
+            // Coalesce overlapping invocations (mount + rapid auth events).
+            // Concurrent hydrate/upsert batches for the same user were the
+            // root cause of the connection-pool exhaustion: at most one runs
+            // at a time, and a burst collapses to a single trailing re-run.
+            if (hydrateInFlight) {
+                hydrateQueued = true;
+                return;
+            }
+            hydrateInFlight = true;
+            try {
+                do {
+                    hydrateQueued = false;
+                    const { editorialPresets, gradientPresets, storageMode } =
+                        await hydrateSavedPresetCollections(supabase);
 
-            if (!isMounted) return;
-            setSavedEditorialPresets(editorialPresets);
-            setSavedGradientPresets(gradientPresets);
-            setPresetStorageMode(storageMode);
+                    if (!isMounted) return;
+                    setSavedEditorialPresets(editorialPresets);
+                    setSavedGradientPresets(gradientPresets);
+                    setPresetStorageMode(storageMode);
+                } while (hydrateQueued && isMounted);
+            } finally {
+                hydrateInFlight = false;
+            }
         };
 
         void hydrateSavedPresets();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-            // Token refresh keeps the same identity; re-hydrating presets on
-            // every TOKEN_REFRESHED tick was a multiplier on /token storms.
-            if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return;
+            // These events keep the same identity (same user.id), so presets
+            // keyed by user_id don't need re-hydration; re-running on every
+            // tick was a multiplier on the preset-sync / token storms.
+            if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') return;
             void hydrateSavedPresets();
         });
 
@@ -3598,8 +3618,29 @@ function mergeSavedGradientPresetCollections(
     );
 }
 
+function buildStablePresetSignatureEntry(value: unknown): string {
+    const preset = asPresetPayload(value);
+    const name = typeof preset.name === 'string' ? preset.name : '';
+    // Key by persisted-relevant fields only. `id` is intentionally excluded:
+    // local-origin presets carry ids like "preset-1" while their remote twins
+    // use "export_preset:..." ids, so comparing ids reported spurious drift on
+    // every hydrate and re-upserted all rows. Names are the conflict key anyway.
+    return JSON.stringify([
+        normalizePresetName(name),
+        preset.layoutPresetId ?? null,
+        preset.gradientLeftColor ?? null,
+        preset.gradientRightColor ?? null,
+        preset.gradientImage ?? null,
+        preset.sponsors ?? null,
+    ]);
+}
+
 function getPresetComparableSignature(value: unknown): string {
-    return JSON.stringify(value);
+    if (!Array.isArray(value)) return JSON.stringify(value);
+    // Order-independent: merge prepends local presets (reordering the array),
+    // so a raw JSON.stringify always differed from the remote array even when
+    // the content was identical. Sort the per-entry signatures instead.
+    return JSON.stringify(value.map(buildStablePresetSignatureEntry).sort());
 }
 
 function getPresetSyncErrorMetadata(error: unknown): {
@@ -3643,11 +3684,15 @@ function isExpectedPresetSyncFailure(error: unknown): boolean {
         return true;
     }
 
-    if (code === '42P01' || code === 'PGRST301') {
+    // 57014 = statement_timeout cancellation under pool pressure. Treat it as
+    // a transient: fall back to local quietly instead of feeding the loop.
+    if (code === '42P01' || code === 'PGRST301' || code === '57014') {
         return true;
     }
 
-    return normalizedMessage.includes('failed to fetch')
+    return normalizedMessage.includes('statement timeout')
+        || normalizedMessage.includes('canceling statement')
+        || normalizedMessage.includes('failed to fetch')
         || normalizedMessage.includes('fetch failed')
         || normalizedMessage.includes('load failed')
         || normalizedMessage.includes('networkerror')
@@ -3765,14 +3810,28 @@ async function upsertRemotePresetRows(
     supabase: SupabaseBrowserClient,
     rows: RemoteExportPresetRow[],
 ): Promise<void> {
-    for (const row of [...rows].sort(compareRemotePresetRows)) {
-        const { error } = await supabase
-            .from(EXPORT_PRESETS_TABLE)
-            .upsert(row, { onConflict: 'user_id,preset_type,name_normalized' });
+    if (rows.length === 0) return;
 
-        if (error) {
-            throw error;
-        }
+    // Collapse the per-row loop into a single batched upsert. One PostgREST
+    // request + one transaction with a deterministic row order removes the
+    // connection-pool exhaustion and 40P01 deadlock vector that was timing
+    // out even trivial reads. Dedupe by the conflict key first (last wins,
+    // matching the old loop) so a batched upsert can't hit ON CONFLICT twice.
+    const dedupedByConflictKey = new Map<string, RemoteExportPresetRow>();
+    for (const row of rows) {
+        dedupedByConflictKey.set(
+            `${row.user_id} ${row.preset_type} ${row.name_normalized}`,
+            row,
+        );
+    }
+    const orderedRows = [...dedupedByConflictKey.values()].sort(compareRemotePresetRows);
+
+    const { error } = await supabase
+        .from(EXPORT_PRESETS_TABLE)
+        .upsert(orderedRows, { onConflict: 'user_id,preset_type,name_normalized' });
+
+    if (error) {
+        throw error;
     }
 }
 

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ArrowUpRight, ChevronDown, ChevronRight, Info, Plus, Shield, Upload } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
@@ -60,45 +61,77 @@ export default async function TournamentAdminHome() {
                     <span className={styles.eyebrowLabel}>Admin View</span>
                 </div>
                 <h1 className={styles.pageTitle}>Inicio</h1>
-                <p className={styles.pageSubtitle}>
-                    Centro de mando del Administrador de Torneos. Operás solo sobre los clubes y
-                    torneos que creás vos o que el Super Admin te concedió.
-                </p>
+                <p className={styles.pageSubtitle}>Gestioná tus clubes y torneos asignados.</p>
             </header>
 
             <div className={styles.statsGrid}>
                 <Link href="/admin/torneo/clubes" prefetch={false} className={styles.statCard}>
+                    <ArrowUpRight className={styles.statArrow} size={16} aria-hidden />
                     <p className={styles.statEyebrow}>Clubes</p>
                     <h2 className={styles.statValue}>{stats.clubs}</h2>
                     <p className={styles.statLabel}>
-                        {isUnlimited
-                            ? 'Total de clubes registrados en el sistema.'
-                            : 'Clubes que creaste o sobre los que tenés acceso concedido.'}
+                        {isUnlimited ? 'Total del sistema' : 'Con acceso concedido'}
                     </p>
-                    <div className={styles.statCta}>Ir a Clubes →</div>
                 </Link>
 
                 <Link href="/admin/torneo/torneos" prefetch={false} className={styles.statCard}>
+                    <ArrowUpRight className={styles.statArrow} size={16} aria-hidden />
                     <p className={styles.statEyebrow}>Torneos</p>
                     <h2 className={styles.statValue}>{stats.tournaments}</h2>
-                    <p className={styles.statLabel}>
-                        {stats.drafts} en borrador ·{' '}
-                        {isUnlimited
-                            ? 'Total de torneos registrados.'
-                            : 'Solo torneos accesibles para tu cuenta.'}
-                    </p>
-                    <div className={styles.statCta}>Ir a Torneos →</div>
+                    <p className={styles.statLabel}>{stats.drafts} en borrador</p>
                 </Link>
             </div>
 
-            <section className={styles.dashboardSection}>
-                <p className={styles.dashboardSectionTitle}>Sobre este panel</p>
-                <p className={styles.dashboardSectionBody}>
+            <section className={styles.quickAccess}>
+                <h2 className={styles.quickAccessTitle}>
+                    Accesos rápidos
+                    <span className={styles.quickAccessRule} aria-hidden />
+                </h2>
+                <div className={styles.quickAccessList}>
+                    <Link
+                        href="/admin/torneo/torneos/crear"
+                        prefetch={false}
+                        className={`${styles.quickAction} ${styles.quickActionPrimary}`}
+                    >
+                        <span className={styles.quickActionMain}>
+                            <Plus size={20} aria-hidden />
+                            <span>Crear torneo</span>
+                        </span>
+                        <ChevronRight size={18} aria-hidden className={styles.quickActionChevron} />
+                    </Link>
+                    <Link href="/admin/torneo/clubes/crear" prefetch={false} className={styles.quickAction}>
+                        <span className={styles.quickActionMain}>
+                            <Shield size={20} aria-hidden className={styles.quickActionIconAccent} />
+                            <span>Crear club</span>
+                        </span>
+                        <ChevronRight size={18} aria-hidden className={styles.quickActionChevron} />
+                    </Link>
+                    <Link href="/admin/torneo/importar" prefetch={false} className={styles.quickAction}>
+                        <span className={styles.quickActionMain}>
+                            <Upload size={20} aria-hidden />
+                            <span>Importar Excel</span>
+                        </span>
+                        <ChevronRight size={18} aria-hidden className={styles.quickActionChevron} />
+                    </Link>
+                </div>
+            </section>
+
+            <details className={styles.aboutPanel}>
+                <summary className={styles.aboutPanelSummary}>
+                    <span className={styles.aboutPanelSummaryLabel}>
+                        <Info size={15} aria-hidden />
+                        Sobre este panel
+                    </span>
+                    <ChevronDown size={16} aria-hidden className={styles.aboutPanelChevron} />
+                </summary>
+                <p className={styles.aboutPanelBody}>
                     {isUnlimited
                         ? 'Tu sesión actual ve absolutamente todo (super admin / admin general).'
                         : 'Ves únicamente los clubes y torneos que creaste o que un Super Admin te concedió desde Personas y Roles. Pedí acceso adicional al equipo central si necesitás más alcance.'}
                 </p>
-            </section>
+            </details>
+
+            <p className={styles.versionTag}>G22 Scores</p>
         </div>
     );
 }

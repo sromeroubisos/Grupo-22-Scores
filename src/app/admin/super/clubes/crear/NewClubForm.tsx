@@ -740,12 +740,12 @@ export default function NewClubForm({
       <div className={styles.container}>
         <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ''}`}>
           <div className={styles.headerMain}>
-            <span className={styles.eyebrow}>Admin / Club Management</span>
+            <span className={styles.eyebrow}>Admin / Gestión de clubes</span>
             <h1 className={styles.title}>
-              {derivedPrefill ? 'New Club Variant' : 'New Club Registration'}
+              {derivedPrefill ? 'Nueva variante de club' : 'Crear club'}
             </h1>
             <p className={styles.headerText}>
-              Formulario completo para identidad, afiliacion, ubicacion, infraestructura y ciclo de vida del club.
+              Agregá los datos básicos del club. Esta información se usará para identificarlo en torneos, partidos y tablas.
             </p>
           </div>
           <div className={styles.headerMeta}>
@@ -818,7 +818,7 @@ export default function NewClubForm({
                 <div className={styles.inputGroup}>
                   <div className={`${styles.field} ${styles.fieldFull}`}>
                     <div className={styles.labelRow}>
-                      <label htmlFor="name" className={styles.label}>Official Name</label>
+                      <label htmlFor="name" className={styles.label}>Nombre largo</label>
                       <span className={styles.req}>REQUIRED</span>
                     </div>
                     <input
@@ -827,7 +827,7 @@ export default function NewClubForm({
                       className={styles.input}
                       value={form.name}
                       onChange={(event) => updateField('name', event.target.value)}
-                      placeholder="e.g. Tala Rugby Club"
+                      placeholder="Ej: Club Deportivo Universidad Católica"
                       required
                     />
                   </div>
@@ -866,22 +866,23 @@ export default function NewClubForm({
                     </select>
                   </div>
                   <div className={styles.field}>
-                    <label htmlFor="short_name" className={styles.label}>Short Name</label>
+                    <label htmlFor="short_name" className={styles.label}>Nombre corto</label>
                     <input
                       id="short_name"
                       type="text"
                       className={styles.input}
                       value={form.short_name || ''}
                       onChange={(event) => updateField('short_name', event.target.value)}
-                      placeholder="e.g. Tala R.C."
+                      placeholder="Ej: Católica"
                     />
+                    <span className={styles.helper}>Se usará en tablas, tarjetas y fixtures.</span>
                   </div>
                 </div>
 
                 <div className={styles.inputGroup}>
                   <div className={`${styles.field} ${!form.logo_url ? styles.hasWarning : ''}`}>
                     <div className={styles.labelRow}>
-                      <label className={styles.label}>Club Logo</label>
+                      <label className={styles.label}>Logo del equipo</label>
                     </div>
                     <div className={styles.logoPanel}>
                       <div className={styles.logoTabs}>
@@ -940,7 +941,7 @@ export default function NewClubForm({
                   </div>
 
                   <div className={styles.field}>
-                    <label htmlFor="primary_color" className={styles.label}>Primary Brand Color</label>
+                    <label htmlFor="primary_color" className={styles.label}>Color principal</label>
                     <div className={styles.colorRow}>
                       <input
                         type="color"
@@ -1035,7 +1036,7 @@ export default function NewClubForm({
                 <div className={styles.inputGroup}>
                   <div className={styles.field}>
                     <div className={styles.labelRow}>
-                      <label htmlFor="country" className={styles.label}>Country</label>
+                      <label htmlFor="country" className={styles.label}>País</label>
                       <span className={styles.req}>REQUIRED</span>
                     </div>
                     <select
@@ -1050,14 +1051,14 @@ export default function NewClubForm({
                     </select>
                   </div>
                   <div className={`${styles.field} ${!form.city ? styles.hasWarning : ''}`}>
-                    <label htmlFor="city" className={styles.label}>City</label>
+                    <label htmlFor="city" className={styles.label}>Ciudad</label>
                     <input
                       id="city"
                       type="text"
                       className={styles.input}
                       value={form.city || ''}
                       onChange={(event) => updateField('city', event.target.value)}
-                      placeholder="Buenos Aires"
+                      placeholder="Ej: Santiago"
                     />
                     <div className={styles.warningTag}>City is recommended for search indexing</div>
                   </div>
@@ -1538,12 +1539,12 @@ export default function NewClubForm({
 
               <div className={styles.actionsBar}>
                 <button type="button" className={styles.btnGhost} onClick={handleDiscard}>
-                  Discard Changes
+                  Descartar cambios
                 </button>
                 <div className={styles.actionsRight}>
                   <span className={styles.saveStatus}>{systemStatus}</span>
                   <button type="submit" className={styles.btnPrimary} disabled={saving || !isDirty}>
-                    {saving ? 'Uploading...' : 'Deploy Club'}
+                    {saving ? 'Creando...' : 'Crear club'}
                   </button>
                 </div>
               </div>

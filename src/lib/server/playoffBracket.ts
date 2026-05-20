@@ -26,6 +26,10 @@ import {
   type BracketScheduleConfig,
   type ScheduleRoundInput,
 } from '@/lib/playoff/scheduling';
+import {
+  computeSeedOrderFromStandings,
+  readPlayoffSeedingConfig,
+} from '@/lib/playoff/seedingFromStandings';
 
 type Supa = SupabaseClient<any, any, any>;
 
@@ -239,9 +243,27 @@ export async function generatePlayoffBracket(
   if (!cleared.ok) return cleared;
 
   // 3. Resolve seeded clubs (best effort — bracket still generates without).
+  //    Priority: zone-stage standings (playoffSeeding) -> manual seed column.
   //    'seed'   -> club with seed #1 vs seed #N, #2 vs #N-1, …
   //    'random' -> a fresh random draw (each generate reshuffles).
-  const seededClubIds = await loadSeededClubIds(supabase, { tournamentId, phaseId, seasonId });
+  const { data: seedingPhaseRow } = await supabase
+    .from('tournament_phases')
+    .select('settings')
+    .eq('id', phaseId)
+    .maybeSingle();
+  const seedingCfg = readPlayoffSeedingConfig(seedingPhaseRow?.settings);
+  let seededClubIds: string[] = [];
+  if (seedingCfg) {
+    seededClubIds = await computeSeedOrderFromStandings(supabase, {
+      tournamentId,
+      sourcePhaseId: seedingCfg.sourcePhaseId,
+      seasonId,
+      format: seedingCfg.format,
+    });
+  }
+  if (seededClubIds.length === 0) {
+    seededClubIds = await loadSeededClubIds(supabase, { tournamentId, phaseId, seasonId });
+  }
   const orderedClubIds =
     config.seedMode === 'random' ? shuffle(seededClubIds) : seededClubIds;
   const seedToClub = new Map<number, string>();
@@ -452,6 +474,105 @@ export async function generatePlayoffBracket(
   await supabase.from('tournament_phases').update({ settings: nextSettings }).eq('id', phaseId);
 
   return { ok: true, matchesCreated, rulesCreated };
+}
+
+/**
+ * Re-resolve the bracket's `seed`-sourced slots from the current zone-stage
+ * standings (playoffSeeding config). Only unplayed bracket matches are
+ * touched, so correcting a zone result before the zone phase is "closed"
+ * re-derives the crossings without disturbing any loaded playoff results.
+ *
+ * No-op (ok:true) when the phase has no seeding config, is locked/closed,
+ * or the source standings are not available yet.
+ */
+export async function reseedPlayoffBracket(
+  supabase: Supa,
+  params: { phaseId: string },
+): Promise<PlayoffBracketResult & { reseeded?: number }> {
+  const { phaseId } = params;
+
+  const { data: phaseRow } = await supabase
+    .from('tournament_phases')
+    .select('tournament_id, season_id, settings')
+    .eq('id', phaseId)
+    .maybeSingle();
+  if (!phaseRow) return { ok: true, reseeded: 0 };
+
+  const seedingCfg = readPlayoffSeedingConfig(phaseRow.settings);
+  if (!seedingCfg || seedingCfg.locked) return { ok: true, reseeded: 0 };
+
+  const orderedClubIds = await computeSeedOrderFromStandings(supabase, {
+    tournamentId: phaseRow.tournament_id,
+    sourcePhaseId: seedingCfg.sourcePhaseId,
+    seasonId: phaseRow.season_id ?? null,
+    format: seedingCfg.format,
+  });
+  if (orderedClubIds.length === 0) return { ok: true, reseeded: 0 };
+
+  const seedToClub = new Map<number, string>();
+  orderedClubIds.forEach((clubId, idx) => seedToClub.set(idx + 1, clubId));
+
+  const { data: bracketMatches, error: matchesError } = await supabase
+    .from('matches')
+    .select(
+      'id, status, score, home_club_id, away_club_id, participant_source, ' +
+        'home_source_label, away_source_label',
+    )
+    .eq('phase_id', phaseId)
+    .not('bracket_match_code', 'is', null);
+
+  if (matchesError) {
+    if (missingMigration(matchesError)) {
+      return { ok: false, code: 'missing_migration', error: 'Falta aplicar la migración del constructor de playoff.' };
+    }
+    return { ok: false, code: 'db_error', error: matchesError.message };
+  }
+
+  let reseeded = 0;
+  for (const m of (bracketMatches ?? []) as any[]) {
+    const score = m.score || {};
+    const played =
+      m.status === 'final' ||
+      m.status === 'live' ||
+      Number(score.home ?? 0) > 0 ||
+      Number(score.away ?? 0) > 0;
+    if (played) continue;
+
+    const src = m.participant_source && typeof m.participant_source === 'object'
+      ? m.participant_source
+      : null;
+    if (!src) continue;
+
+    const patch: Record<string, unknown> = {};
+    let homeClub = m.home_club_id as string | null;
+    let awayClub = m.away_club_id as string | null;
+
+    if (src.home?.type === 'seed') {
+      const desired = seedToClub.get(Number(src.home.ref)) ?? null;
+      if (desired !== m.home_club_id) {
+        patch.home_club_id = desired;
+        patch.home_source_label = desired ? null : `Sembrado #${src.home.ref}`;
+        homeClub = desired;
+      }
+    }
+    if (src.away?.type === 'seed') {
+      const desired = seedToClub.get(Number(src.away.ref)) ?? null;
+      if (desired !== m.away_club_id) {
+        patch.away_club_id = desired;
+        patch.away_source_label = desired ? null : `Sembrado #${src.away.ref}`;
+        awayClub = desired;
+      }
+    }
+
+    if (Object.keys(patch).length === 0) continue;
+    patch.is_visible = Boolean(homeClub) && Boolean(awayClub);
+
+    const { error: updError } = await supabase.from('matches').update(patch).eq('id', m.id);
+    if (updError) return { ok: false, code: 'db_error', error: updError.message };
+    reseeded += 1;
+  }
+
+  return { ok: true, reseeded };
 }
 
 // ─── scheduling ─────────────────────────────────────────────────────────

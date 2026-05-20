@@ -1,5 +1,9 @@
 import { canManageMatchContext, getMatchManagementTarget, requireUserAccessContext, type UserAccessContext } from '@/lib/auth/permissions';
-import { MANAGEMENT_MEMBERSHIP_ROLES, hasFederationAdminAccess } from '@/lib/auth/roles';
+import { MANAGEMENT_MEMBERSHIP_ROLES, isGlobalAdminRole } from '@/lib/auth/roles';
+import {
+    isScopeAllowedTournament,
+    resolveTournamentAdminScope,
+} from '@/lib/auth/tournamentAdminScope';
 import { fetchMatchCenterMatch } from '@/lib/services/matchCenterService';
 import { getReadClient } from '@/lib/supabase/read';
 import { createClient } from '@/lib/supabase/server';
@@ -13,16 +17,36 @@ export async function ensureMatchManagementAccess(
     const supabase = await createClient();
     const context = await requireUserAccessContext(supabase);
 
-    if (hasFederationAdminAccess(context.rawRole, context.memberships)) {
+    // Truly global admins (super_admin / admin_general) manage any match.
+    if (isGlobalAdminRole(context.role)) {
         return context;
     }
 
+    // Everyone else must be scoped to THIS match's tournament. We deliberately
+    // do NOT grant blanket access by role (a tournament/federation admin role
+    // alone is tournament-agnostic): a tournament admin may only manage matches
+    // of the tournaments they are enabled on.
     const target = await getMatchManagementTarget(supabase, matchId);
-    if (!target || !canManageMatchContext(context, target, allowedRoles)) {
+    if (!target) {
         throw new Error('Forbidden');
     }
 
-    return context;
+    // Scoped membership on the match's tournament / sport / union.
+    if (canManageMatchContext(context, target, allowedRoles)) {
+        return context;
+    }
+
+    // Tournaments the user created / has tournament-scoped access to (this
+    // also covers the participant→club cascade), still bound to THIS match's
+    // tournament — never another one.
+    if (target.tournamentId) {
+        const scope = await resolveTournamentAdminScope(supabase, context);
+        if (isScopeAllowedTournament(scope, target.tournamentId)) {
+            return context;
+        }
+    }
+
+    throw new Error('Forbidden');
 }
 
 export async function loadManagedMatchCenterMatch(

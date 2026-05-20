@@ -141,3 +141,45 @@
         transform: rotate(360deg);
     }
 }
+
+/* Mobile: dropzone compacto (mucho menos alto). Desktop intacto. */
+@media (max-width: 760px) {
+    .dropZone {
+        min-height: 88px;
+    }
+
+    .placeholder {
+        padding: 12px;
+        gap: 6px;
+    }
+
+    .iconCircle {
+        width: 38px;
+        height: 38px;
+    }
+
+    .iconCircle svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .textMain {
+        font-size: 0.82rem;
+    }
+
+    .textSub {
+        font-size: 0.68rem;
+    }
+
+    .label {
+        font-size: 0.75rem;
+    }
+
+    .previewContainer {
+        padding: 8px;
+    }
+
+    .preview {
+        max-height: 64px;
+    }
+}

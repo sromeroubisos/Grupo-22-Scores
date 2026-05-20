@@ -33,6 +33,12 @@ export default async function TournamentAdminLayout({
             <main className={styles.main}>
                 {children}
             </main>
+            {/* Portal target for modals/overlays. Child of .shell so it
+                inherits the theme CSS variables, but a sibling of .main so
+                it escapes .main's stacking context (position:relative;
+                z-index:10) that otherwise traps fixed dialogs below the
+                global header. .shell itself is not a stacking context. */}
+            <div id="torneo-overlay-root" />
         </div>
     );
 }

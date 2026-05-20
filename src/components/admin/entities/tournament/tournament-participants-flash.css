@@ -1337,9 +1337,9 @@ tr:hover .participant-name {
     max-width: 100%;
     padding: 5px 8px;
     border-radius: 4px;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    color: #bfdbfe;
+    background: rgba(75, 226, 119, 0.1);
+    border: 1px solid rgba(75, 226, 119, 0.2);
+    color: #bbf7d0;
     font-size: 11px;
     font-family: var(--font-mono);
     overflow: hidden;
@@ -1432,7 +1432,7 @@ tr:hover .participant-name {
     position: absolute;
     inset: 0 0 auto 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+    background: linear-gradient(90deg, transparent, #4be277, transparent);
 }
 
 .participants-section-label,
@@ -1474,8 +1474,8 @@ tr:hover .participant-name {
 }
 
 .btn-flash.primary {
-    background: #3b82f6;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.18);
+    background: #4be277;
+    box-shadow: 0 0 20px rgba(75, 226, 119, 0.18);
 }
 
 .btn-flash.primary:hover:not(:disabled) {
@@ -1513,7 +1513,7 @@ tr:hover .participant-name {
     position: absolute;
     inset: 0 0 auto 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+    background: linear-gradient(90deg, transparent, #4be277, transparent);
 }
 
 @media (max-width: 1023px) {
@@ -1588,9 +1588,13 @@ tr:hover .participant-name {
     .tournament-participants-mobile {
         display: flex;
         flex-direction: column;
-        gap: 10px;
-        /* 64px tab-bar + 64px FAB + 24px aire + safe-area */
-        padding: 10px 12px calc(64px + 64px + 24px + env(safe-area-inset-bottom, 0px));
+        gap: 8px;
+        /* Margin negativo para anular los 12px de padding lateral del
+           basalt-shell-main y dejar las cards más cerca del borde del viewport.
+           Luego aplicamos solo 8px de padding propio. Result: ~8px efectivo
+           cada lado en vez de 24px. */
+        margin: 0 -12px;
+        padding: 10px 8px calc(156px + env(safe-area-inset-bottom, 0px));
         position: relative;
     }
 
@@ -1622,9 +1626,9 @@ tr:hover .participant-name {
 
     .tournament-participants-mobile .tsm-hero {
         background:
-            linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(59, 130, 246, 0.02) 60%),
+            linear-gradient(135deg, rgba(75, 226, 119, 0.12), rgba(75, 226, 119, 0.02) 60%),
             var(--lattice-elevated, #1c1c21);
-        border-color: rgba(59, 130, 246, 0.25);
+        border-color: rgba(75, 226, 119, 0.25);
         padding: 14px;
     }
     .tournament-participants-mobile .tsm-hero-top {
@@ -1723,20 +1727,36 @@ tr:hover .participant-name {
     .tournament-participants-mobile .tsm-hero-stat.is-pending span { color: var(--status-pending, #f59e0b); }
     .tournament-participants-mobile .tsm-hero-stat.is-inactive span { color: var(--status-inactive, #71717a); }
     .tournament-participants-mobile .tsm-hero-stat.is-on {
-        border-color: rgba(59, 130, 246, 0.55);
-        background: rgba(59, 130, 246, 0.10);
+        border-color: rgba(75, 226, 119, 0.55);
+        background: rgba(75, 226, 119, 0.10);
     }
 
     .tournament-participants-mobile .tsm-toolbar {
-        position: sticky;
-        top: 0;
-        z-index: 5;
+        /* Mockup: search + filter NO es sticky, scrollea con el resto del
+           contenido. Si la toolbar se queda pegada, tapa los status chips
+           y el layout se rompe (chips desaparecen detrás de la toolbar). */
+        position: relative;
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 0;
-        background: var(--void-bg, #0a0a0c);
-        backdrop-filter: blur(8px);
+        padding: 0;
+    }
+
+    /* 1px sentinel placed right after the hero — IntersectionObserver watches
+       it; when it leaves the viewport the toolbar reveals .tsm-toolbar-count. */
+    .tournament-participants-mobile .tsm-hero-sentinel {
+        height: 1px;
+        flex-shrink: 0;
+        margin: 0;
+        padding: 0;
+        pointer-events: none;
+    }
+
+    /* Toolbar count chip — DESACTIVADO. Era contexto cuando la toolbar era
+       sticky y el hero quedaba off-screen. Ahora toda la cabecera scrollea
+       junto, así que el count siempre está visible en el counter strip. */
+    .tournament-participants-mobile .tsm-toolbar-count {
+        display: none;
     }
     .tournament-participants-mobile .tsm-search {
         position: relative;
@@ -1745,10 +1765,11 @@ tr:hover .participant-name {
         align-items: center;
         gap: 8px;
         padding: 0 12px 0 36px;
-        height: 44px;
-        border-radius: 999px;
+        height: 40px;
+        /* rounded-lg per mockup */
+        border-radius: 8px;
         border: 1px solid var(--border-medium);
-        background: var(--lattice-elevated, #1c1c21);
+        background: var(--surface-container-low, #1c1b1d);
     }
     .tournament-participants-mobile .tsm-search > svg:first-child {
         position: absolute;
@@ -1784,20 +1805,21 @@ tr:hover .participant-name {
     .tournament-participants-mobile .tsm-filter-trigger {
         position: relative;
         flex: 0 0 auto;
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 12px;
+        /* rounded-lg per mockup */
+        border-radius: 8px;
         border: 1px solid var(--border-medium);
-        background: var(--lattice-elevated, #1c1c21);
-        color: var(--text-secondary);
+        background: var(--surface-variant, #353437);
+        color: var(--text-primary);
         cursor: pointer;
     }
     .tournament-participants-mobile .tsm-filter-trigger.is-on {
-        border-color: rgba(59, 130, 246, 0.55);
-        color: #93c5fd;
+        border-color: rgba(75, 226, 119, 0.55);
+        color: #86efac;
     }
     .tournament-participants-mobile .tsm-filter-trigger-dot {
         position: absolute;
@@ -1806,7 +1828,7 @@ tr:hover .participant-name {
         width: 7px;
         height: 7px;
         border-radius: 50%;
-        background: #3b82f6;
+        background: #4be277;
     }
 
     .tournament-participants-mobile .tsm-active-chips {
@@ -1822,9 +1844,9 @@ tr:hover .participant-name {
         padding: 4px 10px;
         height: 28px;
         border-radius: 999px;
-        border: 1px solid rgba(59, 130, 246, 0.4);
-        background: rgba(59, 130, 246, 0.12);
-        color: #bfdbfe;
+        border: 1px solid rgba(75, 226, 119, 0.4);
+        background: rgba(75, 226, 119, 0.12);
+        color: #bbf7d0;
         font-size: 11px;
         font-weight: 600;
         cursor: pointer;
@@ -1867,18 +1889,22 @@ tr:hover .participant-name {
         cursor: pointer;
     }
     .tournament-participants-mobile .tsm-select-toggle[aria-pressed="true"] {
-        border-color: rgba(59, 130, 246, 0.55);
-        background: rgba(59, 130, 246, 0.12);
-        color: #bfdbfe;
+        border-color: rgba(75, 226, 119, 0.55);
+        background: rgba(75, 226, 119, 0.12);
+        color: #bbf7d0;
     }
 
     .tournament-participants-mobile .tsm-participant-list {
         list-style: none;
         margin: 0;
         padding: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+        /* 2-col grid per mockup spec (gap-3 = 12px). Section letters span both columns. */
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+    .tournament-participants-mobile .tsm-section-letter {
+        grid-column: 1 / -1;
     }
     .tournament-participants-mobile .tsm-participant-item {
         display: flex;
@@ -1891,8 +1917,8 @@ tr:hover .participant-name {
         transition: border-color 0.15s ease, background 0.15s ease;
     }
     .tournament-participants-mobile .tsm-participant-item.is-selected {
-        border-color: rgba(59, 130, 246, 0.55);
-        background: rgba(59, 130, 246, 0.08);
+        border-color: rgba(75, 226, 119, 0.55);
+        background: rgba(75, 226, 119, 0.08);
     }
     .tournament-participants-mobile .tsm-participant-check {
         flex: 0 0 auto;
@@ -1942,11 +1968,11 @@ tr:hover .participant-name {
         min-width: 0;
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 1px;
     }
     .tournament-participants-mobile .tsm-participant-text strong {
-        font-size: 14px;
-        font-weight: 700;
+        font-size: 11px;
+        font-weight: 600;
         color: var(--text-primary);
         line-height: 1.2;
         overflow: hidden;
@@ -1954,10 +1980,9 @@ tr:hover .participant-name {
         white-space: nowrap;
     }
     .tournament-participants-mobile .tsm-participant-text small {
-        font-size: 11px;
+        font-size: 9px;
         color: var(--text-dim);
-        font-family: var(--font-mono);
-        letter-spacing: 0.02em;
+        line-height: 1.3;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -1966,24 +1991,30 @@ tr:hover .participant-name {
         display: flex;
         flex-wrap: wrap;
         gap: 4px;
-        margin-top: 4px;
+        margin-top: auto;
     }
     .tournament-participants-mobile .tsm-mini-chip {
         display: inline-flex;
         align-items: center;
         padding: 2px 6px;
-        font-size: 10px;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
         line-height: 1.2;
-        border-radius: 999px;
-        background: rgba(59, 130, 246, 0.08);
-        border: 1px solid rgba(59, 130, 246, 0.18);
-        color: #bfdbfe;
-        font-family: var(--font-mono);
+        /* rounded per mockup tailwind config (0.125rem). */
+        border-radius: 2px;
+        background: rgba(3, 181, 211, 0.2);
+        color: #4cd7f6;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
     }
     .tournament-participants-mobile .tsm-mini-chip.is-more {
         background: rgba(255, 255, 255, 0.05);
-        border-color: var(--border-medium);
         color: var(--text-dim);
+    }
+    .tournament-participants-mobile .tsm-mini-chip.is-muted {
+        background: var(--surface-container-highest, #353437);
+        color: var(--text-dim, #bccbb9);
     }
     .tournament-participants-mobile .tsm-status-pill {
         flex: 0 0 auto;
@@ -2059,8 +2090,8 @@ tr:hover .participant-name {
         cursor: pointer;
     }
     .tournament-participants-mobile .tsm-empty-cta.primary {
-        background: #3b82f6;
-        border-color: #3b82f6;
+        background: #4be277;
+        border-color: #4be277;
         color: #fff;
     }
 
@@ -2114,10 +2145,10 @@ tr:hover .participant-name {
         cursor: pointer;
     }
     .tournament-participants-mobile .tsm-action-btn.primary {
-        background: #3b82f6;
-        border-color: #3b82f6;
+        background: #4be277;
+        border-color: #4be277;
         color: #fff;
-        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+        box-shadow: 0 8px 24px rgba(75, 226, 119, 0.25);
     }
     .tournament-participants-mobile .tsm-action-btn:disabled {
         opacity: 0.5;
@@ -2164,19 +2195,21 @@ tr:hover .participant-name {
 
     .tournament-participants-mobile .tsm-bottom-bar {
         position: fixed;
-        left: 12px;
-        right: 12px;
-        /* La tab bar inferior del shell mide 64px — sumamos 12px de aire */
-        bottom: calc(64px + 12px + env(safe-area-inset-bottom, 0px));
+        left: 16px;
+        right: 16px;
+        /* Mockup spec: bottom-24 (96px). Nav del shell mide 80px → 16px de aire. */
+        bottom: calc(80px + 16px + env(safe-area-inset-bottom, 0px));
         z-index: 30;
         display: flex;
         align-items: center;
         gap: 8px;
         padding: 8px;
-        border-radius: 16px;
-        background: rgba(20, 20, 23, 0.92);
+        /* Pill wrapper to match the mockup spec (glass-overlay + rounded-full) */
+        border-radius: 999px;
+        background: rgba(19, 19, 21, 0.85);
         border: 1px solid var(--border-medium);
-        backdrop-filter: blur(14px);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
     }
     .tournament-participants-mobile .tsm-bottom-bar-fab {
@@ -2185,24 +2218,28 @@ tr:hover .participant-name {
         align-items: center;
         justify-content: center;
         gap: 8px;
-        height: 48px;
-        border-radius: 12px;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: 999px;
         border: 0;
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        background: #006e2f;
         color: #fff;
-        font-size: 14px;
-        font-weight: 700;
+        font-size: 13px;
+        font-weight: 600;
         letter-spacing: 0.01em;
         cursor: pointer;
-        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+        box-shadow: 0 6px 18px rgba(0, 110, 47, 0.4);
+    }
+    .tournament-participants-mobile .tsm-bottom-bar-fab:active {
+        background: #00591f;
     }
     .tournament-participants-mobile .tsm-bottom-bar-icon {
         flex: 0 0 auto;
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
         border: 1px solid var(--border-medium);
-        background: rgba(255, 255, 255, 0.04);
+        background: var(--surface-container-highest, #353437);
         color: var(--text-secondary);
         display: inline-flex;
         align-items: center;
@@ -2219,10 +2256,11 @@ tr:hover .participant-name {
     }
     .tournament-participants-mobile .tsm-bottom-bar-btn {
         flex: 1 1 auto;
-        height: 44px;
-        border-radius: 12px;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: 999px;
         border: 1px solid var(--border-medium);
-        background: rgba(255, 255, 255, 0.04);
+        background: var(--surface-container-highest, #353437);
         color: var(--text-primary);
         font-size: 13px;
         font-weight: 600;
@@ -2233,9 +2271,9 @@ tr:hover .participant-name {
         gap: 6px;
     }
     .tournament-participants-mobile .tsm-bottom-bar-btn.is-export {
-        flex: 0 1 116px;
-        background: rgba(255, 255, 255, 0.06);
-        border-color: rgba(255, 255, 255, 0.14);
+        flex: 0 1 124px;
+        background: var(--surface-container-highest, #353437);
+        border-color: var(--border-medium);
         color: var(--text-primary);
         white-space: nowrap;
     }
@@ -2341,9 +2379,9 @@ tr:hover .participant-name {
         white-space: nowrap;
     }
     .tournament-participants-mobile .tsm-chip.is-on {
-        border-color: #3b82f6;
-        background: rgba(59, 130, 246, 0.16);
-        color: #bfdbfe;
+        border-color: #4be277;
+        background: rgba(75, 226, 119, 0.16);
+        color: #bbf7d0;
     }
     .tournament-participants-mobile .tsm-sheet-foot {
         display: flex;
@@ -2369,7 +2407,7 @@ tr:hover .participant-name {
         height: 48px;
         border-radius: 12px;
         border: 0;
-        background: #3b82f6;
+        background: #4be277;
         color: #fff;
         font-size: 14px;
         font-weight: 700;
@@ -2397,7 +2435,7 @@ tr:hover .participant-name {
     }
     .tournament-participants-mobile .tsm-sheet-action svg {
         flex: 0 0 auto;
-        color: #93c5fd;
+        color: #86efac;
     }
     .tournament-participants-mobile .tsm-sheet-action span {
         flex: 1 1 auto;
@@ -2438,7 +2476,7 @@ tr:hover .participant-name {
 }
 :root[data-theme="light"] .tournament-participants-mobile .tsm-hero {
     background:
-        linear-gradient(135deg, rgba(59, 130, 246, 0.10), rgba(59, 130, 246, 0.02) 60%),
+        linear-gradient(135deg, rgba(75, 226, 119, 0.10), rgba(75, 226, 119, 0.02) 60%),
         #ffffff;
 }
 :root[data-theme="light"] .tournament-participants-mobile .tsm-toolbar {
@@ -2463,15 +2501,66 @@ tr:hover .participant-name {
    - Sheet "Asignar a fase" integrado
    ============================================================================ */
 @media (max-width: 767px) {
-    /* HERO redesign (slim) — reemplaza el card grande */
+    /* HERO redesign (slim) — reemplaza el card grande.
+       Now wraps the 5-col counter strip (Total/Activos/Inact./Pend./Desc.). */
     .tournament-participants-mobile .tsm-hero {
         display: flex;
         flex-direction: column;
         gap: 8px;
-        padding: 4px 4px 0;
+        padding: 4px 0 0;
         border: 0;
         background: transparent;
         border-radius: 0;
+    }
+
+    /* 5-col counter strip — matches mockup grid-cols-5 gap-2 with small boxes
+       (label + monospace value). Scrolls horizontally on very narrow phones. */
+    .tournament-participants-mobile .tsm-counter-strip {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .tournament-participants-mobile .tsm-counter-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        min-width: 0;
+        padding: 6px 4px;
+        background: rgba(32, 31, 34, 0.5);
+        border: 1px solid rgba(61, 74, 61, 0.3);
+        border-radius: 2px;
+        text-align: center;
+    }
+    .tournament-participants-mobile .tsm-counter-label {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        line-height: 1.2;
+        color: var(--text-dim, #bccbb9);
+    }
+    .tournament-participants-mobile .tsm-counter-value {
+        font-family: 'Hanken Grotesk', system-ui, sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.2;
+        color: var(--text-primary, #e5e1e4);
+    }
+    /* Colour the active/pending/error variants per mockup */
+    .tournament-participants-mobile .tsm-counter-box.is-active .tsm-counter-label,
+    .tournament-participants-mobile .tsm-counter-box.is-active .tsm-counter-value {
+        color: #4be277;
+    }
+    .tournament-participants-mobile .tsm-counter-box.is-pending .tsm-counter-label,
+    .tournament-participants-mobile .tsm-counter-box.is-pending .tsm-counter-value {
+        color: #4cd7f6;
+    }
+    .tournament-participants-mobile .tsm-counter-box.is-error .tsm-counter-label,
+    .tournament-participants-mobile .tsm-counter-box.is-error .tsm-counter-value {
+        color: #ffb4ab;
     }
     .tournament-participants-mobile .tsm-hero-line {
         display: flex;
@@ -2536,8 +2625,14 @@ tr:hover .participant-name {
     .tournament-participants-mobile .tsm-hero-summary-pill.is-inactive .tsm-hero-summary-dot { background: var(--status-inactive); }
     .tournament-participants-mobile .tsm-hero-summary-pill.is-disq .tsm-hero-summary-dot { background: var(--status-disqualified); }
 
-    /* Phase tabs horizontales */
+    /* Phase tabs horizontales — DESACTIVADAS en mobile. El filtro por fase
+       ahora vive sólo en el bottom sheet de filtros (se accede vía el botón
+       tune); duplicarlo arriba del toolbar como una segunda fila de chips
+       saturaba el chrome pre-lista y rompía la jerarquía del mockup. */
     .tournament-participants-mobile .tsm-phase-tabs {
+        display: none !important;
+    }
+    .tournament-participants-mobile .tsm-phase-tabs--legacy {
         display: flex;
         gap: 6px;
         overflow-x: auto;
@@ -2564,9 +2659,9 @@ tr:hover .participant-name {
         white-space: nowrap;
     }
     .tournament-participants-mobile .tsm-phase-tab.is-on {
-        border-color: #3b82f6;
-        background: rgba(59, 130, 246, 0.16);
-        color: #bfdbfe;
+        border-color: #4be277;
+        background: rgba(75, 226, 119, 0.16);
+        color: #bbf7d0;
     }
     .tournament-participants-mobile .tsm-phase-tab-name {
         max-width: 140px;
@@ -2588,17 +2683,20 @@ tr:hover .participant-name {
         font-weight: 700;
     }
     .tournament-participants-mobile .tsm-phase-tab.is-on .tsm-phase-tab-count {
-        background: rgba(59, 130, 246, 0.3);
+        background: rgba(75, 226, 119, 0.3);
         color: #fff;
     }
 
-    /* Status filter chips horizontal scroll */
+    /* Status filter chips horizontal scroll. Extra right padding so the last
+       chip (CLUBS / PENDIENTES) doesn't get clipped against the viewport edge
+       when overflowing; matching left negative margin keeps the first chip
+       flush with the toolbar above. */
     .tournament-participants-mobile .tsm-status-chips {
         display: flex;
-        gap: 6px;
+        gap: 8px;
         overflow-x: auto;
         scrollbar-width: none;
-        padding: 0 4px 4px;
+        padding: 4px 16px 4px 4px;
         margin: 0 -4px;
     }
     .tournament-participants-mobile .tsm-status-chips::-webkit-scrollbar { display: none; }
@@ -2608,13 +2706,17 @@ tr:hover .participant-name {
         align-items: center;
         gap: 6px;
         padding: 0 12px;
-        height: 36px;
+        height: 28px;
         border-radius: 999px;
         border: 1px solid var(--border-medium);
-        background: var(--lattice-elevated, #1c1c21);
-        color: var(--text-secondary);
-        font-size: 12px;
-        font-weight: 600;
+        background: var(--surface-container, #201f22);
+        color: var(--text-primary);
+        /* Mockup pills smaller: text-[10px], px-3 py-1.5 */
+        font-size: 10px;
+        font-weight: 700;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
         cursor: pointer;
         white-space: nowrap;
         position: relative;
@@ -2625,37 +2727,33 @@ tr:hover .participant-name {
         justify-content: center;
         min-width: 20px;
         height: 18px;
-        padding: 0 6px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.06);
+        /* Mockup: px-1 rounded (4px x-padding, 2px radius) */
+        padding: 0 4px;
+        border-radius: 2px;
+        background: var(--surface-container-highest, #353437);
+        color: inherit;
         font-size: 10px;
-        font-family: var(--font-mono);
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
         font-weight: 700;
+        letter-spacing: 0;
     }
+    /* Empty chip (count === 0 except "Todos") fades to 50% per mockup spec. */
+    .tournament-participants-mobile .tsm-status-chip.is-empty {
+        opacity: 0.5;
+    }
+    /* Uniform active state — matches mockup `bg-primary-container text-on-primary-container`.
+       The selected chip is solid green regardless of which status it represents;
+       status-specific tints (pending amber, disqualified red) are NOT applied
+       in the mockup. */
     .tournament-participants-mobile .tsm-status-chip.is-on {
-        border-color: var(--status-active);
-        background: rgba(16, 185, 129, 0.14);
-        color: #d1fae5;
+        border-color: #22c55e;
+        background: #22c55e;
+        color: #004b1e;
     }
-    .tournament-participants-mobile .tsm-status-chip.is-pending.is-on {
-        border-color: var(--status-pending);
-        background: rgba(245, 158, 11, 0.14);
-        color: #fef3c7;
-    }
-    .tournament-participants-mobile .tsm-status-chip.is-inactive.is-on {
-        border-color: var(--status-inactive);
-        background: rgba(113, 113, 122, 0.18);
-        color: var(--text-primary);
-    }
-    .tournament-participants-mobile .tsm-status-chip.is-disqualified.is-on {
-        border-color: var(--status-disqualified);
-        background: rgba(239, 68, 68, 0.14);
-        color: #fecaca;
-    }
-    .tournament-participants-mobile .tsm-status-chip.is-all.is-on {
-        border-color: #3b82f6;
-        background: rgba(59, 130, 246, 0.16);
-        color: #bfdbfe;
+    .tournament-participants-mobile .tsm-status-chip.is-on .tsm-status-chip-count {
+        /* on-primary-container/20 → semi-transparent dark green */
+        background: rgba(0, 75, 30, 0.25);
+        color: #004b1e;
     }
 
     /* Meta line hint */
@@ -2666,34 +2764,73 @@ tr:hover .participant-name {
         font-style: italic;
     }
 
-    /* Participant item: nuevo layout con color rail + logo button + main */
+    /* Participant item — 2-col mobile redesign (mockup 2026-05-19):
+       - Vertical compact card: 8px padding, gap 8, rounded-lg (4px per
+         palette), 2px neon-green LEFT border (static brand accent).
+       - Layout: [logo 32×32 + code/status block] / title + subtitle / phase chip.
+       - ⋯ button absolute top-right. */
     .tournament-participants-mobile .tsm-participant-item {
         position: relative;
+        /* Layout vertical: logo arriba + nombre + status. Solo esos 3 elementos.
+           Padding generoso para que el contenido respire (decisión usuario:
+           "todo muy colapsado"). */
         display: flex;
-        align-items: stretch;
-        gap: 0;
-        padding: 0;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px;
+        background: var(--surface-container, #201f22);
+        border: 1px solid var(--border-medium);
+        border-radius: 6px;
+        border-left-width: 2px;
+        border-left-color: var(--status-inactive, #71717a);
+        min-width: 0;
+        overflow: hidden;
+    }
+    .tournament-participants-mobile .tsm-participant-item.is-active { border-left-color: #4be277; }
+    .tournament-participants-mobile .tsm-participant-item.is-pending { border-left-color: var(--status-pending, #f59e0b); }
+    .tournament-participants-mobile .tsm-participant-item.is-inactive { border-left-color: var(--status-inactive, #71717a); }
+    .tournament-participants-mobile .tsm-participant-item.is-disqualified { border-left-color: var(--status-disqualified, #ef4444); }
+    .tournament-participants-mobile .tsm-participant-item.is-selected {
+        background: rgba(75, 226, 119, 0.08);
+        border-color: rgba(75, 226, 119, 0.5);
+        border-left-color: #4be277;
+    }
+    .tournament-participants-mobile .tsm-participant-item:active {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Top row: logo box + code chip + status pill */
+    .tournament-participants-mobile .tsm-participant-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        /* leave room for the absolute ⋯ button on the top-right */
+        padding-right: 24px;
     }
     .tournament-participants-mobile .tsm-participant-logo-btn {
         flex: 0 0 auto;
-        width: 56px;
+        /* Logo más compacto (28 en vez de 32) para reducir altura total del card. */
+        width: 28px;
+        height: 28px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: transparent;
-        border: 0;
-        border-right: 1px solid var(--border-medium);
+        background: var(--surface-container-highest, #353437);
+        border: 1px solid rgba(61, 74, 61, 0.4);
+        border-radius: 2px;
         cursor: pointer;
         padding: 0;
+        overflow: hidden;
     }
     .tournament-participants-mobile .tsm-participant-logo-btn:active {
-        background: rgba(255, 255, 255, 0.04);
+        background: rgba(255, 255, 255, 0.06);
     }
     .tournament-participants-mobile .tsm-participant-logo-btn .tsm-participant-logo {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.04);
+        width: 20px;
+        height: 20px;
+        background: transparent;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -2701,40 +2838,134 @@ tr:hover .participant-name {
         overflow: hidden;
         position: relative;
     }
+    .tournament-participants-mobile .tsm-participant-logo-btn .tsm-participant-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
     .tournament-participants-mobile .tsm-participant-item.is-selected .tsm-participant-logo-btn {
-        background: rgba(59, 130, 246, 0.16);
+        background: rgba(75, 226, 119, 0.2);
+        border-color: rgba(75, 226, 119, 0.5);
     }
     .tournament-participants-mobile .tsm-participant-item.is-selected .tsm-participant-logo {
-        background: #3b82f6;
-        color: #fff;
+        color: #4be277;
     }
-    .tournament-participants-mobile .tsm-participant-main {
-        flex: 1 1 auto;
+
+    /* Code (e.g. "SF-R") + inline status pill stack tightly under the logo */
+    .tournament-participants-mobile .tsm-participant-code-block {
         display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+    .tournament-participants-mobile .tsm-participant-code {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1;
+        color: #4cd7f6;
+        letter-spacing: 0.04em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .tournament-participants-mobile .tsm-participant-status {
+        display: inline-flex;
         align-items: center;
-        gap: 10px;
-        padding: 12px 14px;
+        gap: 4px;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        line-height: 1.2;
+    }
+    .tournament-participants-mobile .tsm-participant-status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        background: currentColor;
+    }
+    .tournament-participants-mobile .tsm-participant-status.is-active { color: #4be277; }
+    .tournament-participants-mobile .tsm-participant-status.is-pending { color: #f59e0b; }
+    .tournament-participants-mobile .tsm-participant-status.is-inactive { color: var(--text-dim, #bccbb9); }
+    .tournament-participants-mobile .tsm-participant-status.is-disqualified { color: #ef4444; }
+
+    /* Main = name (strong) + status indicator. Toma todo el ancho de la card
+       (debajo del logo en layout vertical). Tap-target para abrir el editor. */
+    .tournament-participants-mobile .tsm-participant-main {
+        width: 100%;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 0;
         background: transparent;
         border: 0;
         color: inherit;
         text-align: left;
         cursor: pointer;
-        min-height: 64px;
-        min-width: 0;
     }
     .tournament-participants-mobile .tsm-participant-main:active {
-        background: rgba(255, 255, 255, 0.03);
+        opacity: 0.7;
     }
-    /* Color rail (right side, indica status) */
-    .tournament-participants-mobile .tsm-status-rail {
-        flex: 0 0 auto;
-        width: 4px;
+    .tournament-participants-mobile .tsm-participant-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.25;
+        /* Permite hasta 2 líneas para nombres largos como "Universidad Católica". */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        word-break: break-word;
+    }
+
+    /* Per-card ⋯ button — pinned at top-right of the card per mockup
+       (`absolute top-1 right-1`). Small tap target inside the compact card. */
+    .tournament-participants-mobile .tsm-participant-menu-btn {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         background: transparent;
+        border: 0;
+        border-radius: 4px;
+        color: var(--text-dim);
+        cursor: pointer;
+        z-index: 2;
     }
-    .tournament-participants-mobile .tsm-status-rail.is-active { background: var(--status-active); }
-    .tournament-participants-mobile .tsm-status-rail.is-pending { background: var(--status-pending); }
-    .tournament-participants-mobile .tsm-status-rail.is-inactive { background: var(--status-inactive); }
-    .tournament-participants-mobile .tsm-status-rail.is-disqualified { background: var(--status-disqualified); }
+    .tournament-participants-mobile .tsm-participant-menu-btn:active {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text-primary);
+    }
+
+    /* Danger variant of .tsm-sheet-action (Eliminar) — red icon + red border
+       on press to communicate the destructive intent. */
+    .tournament-participants-mobile .tsm-sheet-action.is-danger {
+        border-color: rgba(239, 68, 68, 0.25);
+    }
+    .tournament-participants-mobile .tsm-sheet-action.is-danger svg {
+        color: #f87171;
+    }
+    .tournament-participants-mobile .tsm-sheet-action.is-danger:active {
+        background: rgba(239, 68, 68, 0.08);
+        border-color: rgba(239, 68, 68, 0.55);
+    }
+
+    /* The right-side status rail is replaced by the left border on
+       .tsm-participant-item; hide the legacy element so it doesn't take up
+       horizontal space inside the card. */
+    .tournament-participants-mobile .tsm-status-rail {
+        display: none;
+    }
 
     /* Section letter divider */
     .tournament-participants-mobile .tsm-section-letter {
@@ -2753,7 +2984,7 @@ tr:hover .participant-name {
 
     /* Bottom bar: bulk actions con primary */
     .tournament-participants-mobile .tsm-bottom-bar-btn.is-primary {
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        background: linear-gradient(135deg, #4be277, #16a34a);
         border-color: transparent;
         color: #fff;
         flex: 1 1 auto;

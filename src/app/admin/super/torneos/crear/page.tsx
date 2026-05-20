@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
     ChevronLeft, Trophy, Globe, Search, Loader2, Plus, RefreshCw,
     LayoutGrid, ListOrdered, GitMerge, Flag, Settings2, CheckCircle2,
+    ArrowRight,
 } from 'lucide-react';
 import PhaseCreator, { type PhaseConfiguration, type Team as PhaseTeam } from '@/app/admin/components/PhaseCreator';
 import LogoUploader from '@/components/LogoUploader';
@@ -1366,12 +1367,15 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                 <button
                                     key={tpl.id}
                                     type="button"
-                                    className={`tplpick-card ${tpl.popular ? 'popular' : ''} ${tpl.dashed ? 'dashed' : ''}`}
-                                    onClick={() => handleTemplateSelect(tpl)}
+                                    className={`tplpick-card ${tpl.popular ? 'popular' : ''} ${tpl.dashed ? 'dashed' : ''} ${selectedTemplate === tpl.id ? 'selected' : ''}`}
+                                    aria-pressed={selectedTemplate === tpl.id}
+                                    onClick={() => setSelectedTemplate(tpl.id)}
+                                    onDoubleClick={() => handleTemplateSelect(tpl)}
                                 >
                                     <div className="tplpick-icon">{tpl.icon}</div>
                                     <h3>{tpl.title}</h3>
                                     <p>{tpl.description}</p>
+                                    {tpl.popular && <span className="tplpick-tag">Más usado</span>}
                                 </button>
                             ))}
                         </div>
@@ -1380,6 +1384,23 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                             💡 <strong>Tip:</strong> 8 de cada 10 torneos usan &quot;Liga · todos contra todos&quot;. Si no estás seguro, empezá ahí — podés cambiar el formato más tarde sin perder participantes ni partidos cargados.
                         </div>
                     </section>
+                )}
+
+                {/* Footer sticky del paso de plantillas (mockup) */}
+                {stage === 'template' && !isEdit && (
+                    <footer className="actions-footer tplpick-footer">
+                        <button
+                            className="btn btn-primary"
+                            disabled={!selectedTemplate}
+                            onClick={() => {
+                                const tpl = TOURNAMENT_TEMPLATES.find((t) => t.id === selectedTemplate);
+                                if (tpl) handleTemplateSelect(tpl);
+                            }}
+                        >
+                            Siguiente
+                            <ArrowRight size={16} aria-hidden />
+                        </button>
+                    </footer>
                 )}
 
                 {/* ===================== STAGE 1 · LO BÁSICO ===================== */}

@@ -159,6 +159,52 @@
     }
 
     /* Action footer is hidden in section 1 — no width clamp needed here */
+
+    /* ----------------------------------------------------------------------
+       Flatten the section "recuadros" on phones. The boxed .basalt-card
+       chrome (distinct surface, border, rounded corners, hero gradient +
+       accent bar) makes "Rol del torneo" and "Estructura y creación de
+       fases" look like narrow floating cards. On mobile we let them blend
+       into the page background and use the full width. Mobile-only; these
+       two sections only; desktop untouched.
+       ---------------------------------------------------------------------- */
+    .basalt-body .tournament-structure-shell .basalt-card.structure-module,
+    .basalt-body .tournament-structure-shell .basalt-card.structure-hero-panel {
+        background: transparent !important;
+        border: 0 !important;
+        border-left: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* ----------------------------------------------------------------------
+       Adapt-to-screen guard. A flex item defaults to min-width:auto, so any
+       wide descendant (the playoff builder, a long label) makes the section
+       expand past the viewport and shell-main's overflow-x:hidden then clips
+       it. Force the whole subtree to be shrinkable and never exceed its
+       parent so content WRAPS instead of being cut. Mobile-only, these
+       sections only, desktop untouched.
+       ---------------------------------------------------------------------- */
+    .basalt-body .tournament-structure-shell,
+    .basalt-body .tournament-structure-shell > *,
+    .basalt-body .tournament-structure-shell .structure-hero-panel *,
+    .basalt-body .tournament-structure-shell .structure-module * {
+        min-width: 0 !important;
+    }
+    .basalt-body .tournament-structure-shell .structure-hero-panel *:not(input):not(select):not(textarea):not(svg):not(path),
+    .basalt-body .tournament-structure-shell .structure-module *:not(input):not(select):not(textarea):not(svg):not(path) {
+        max-width: 100% !important;
+    }
+    /* Long words / unbroken strings in those sections must wrap. */
+    .basalt-body .tournament-structure-shell .structure-hero-panel p,
+    .basalt-body .tournament-structure-shell .structure-hero-panel span,
+    .basalt-body .tournament-structure-shell .structure-hero-panel h1,
+    .basalt-body .tournament-structure-shell .structure-hero-panel h2,
+    .basalt-body .tournament-structure-shell .structure-hero-panel h3 {
+        overflow-wrap: anywhere;
+    }
 }
 
 /* ---------------------------------------------------------------------------
@@ -4924,12 +4970,13 @@
         bottom: 0;
         z-index: 60;
         align-items: stretch;
-        height: 64px;
-        padding: 4px 4px calc(4px + env(safe-area-inset-bottom)) 4px;
-        background: rgba(10, 13, 18, 0.92);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        justify-content: space-around;
+        height: 80px;
+        padding: 8px 8px calc(8px + env(safe-area-inset-bottom)) 8px;
+        /* surface-container-lowest from the mockup palette */
+        background: #0e0e10;
         border-top: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px 12px 0 0;
         box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
     }
 
@@ -4940,39 +4987,44 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 3px;
+        gap: 4px;
         padding: 6px 4px;
         background: transparent;
         border: none;
-        color: var(--text-dim, #6b7280);
+        color: var(--text-dim, #bccbb9);
         font: inherit;
-        font-size: 10px;
-        font-weight: 500;
+        font-size: 11px;
+        font-weight: 700;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        letter-spacing: 0.06em;
         cursor: pointer;
         text-decoration: none;
         border-radius: 12px;
-        transition: color 140ms ease, background 140ms ease;
+        transition: color 140ms ease, transform 140ms ease;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
+        transform: scale(0.95);
     }
 
     .basalt-tabs-bottom-item:active {
-        background: rgba(255, 255, 255, 0.04);
+        transform: scale(0.9);
     }
 
+    /* Active item: primary green, bolder, scale up to 1.1 (matches mockup) */
     .basalt-tabs-bottom-item.active {
-        color: var(--accent, #00a365);
+        color: var(--primary, #4be277);
+        transform: scale(1.1);
     }
 
     .basalt-tabs-bottom-item.active .basalt-tabs-bottom-glyph {
-        background: rgba(0, 163, 101, 0.14);
+        background: transparent;
     }
 
     .basalt-tabs-bottom-glyph {
         position: relative;
-        width: 36px;
-        height: 28px;
-        border-radius: 14px;
+        width: auto;
+        height: auto;
+        border-radius: 0;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -4980,9 +5032,16 @@
     }
 
     .basalt-tabs-bottom-glyph svg {
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
         stroke-width: 2;
+    }
+
+    /* Active icon gets a stronger stroke + slight glow to mimic the filled
+       Material Symbol used in the mockup spec (FILL=1). */
+    .basalt-tabs-bottom-item.active .basalt-tabs-bottom-glyph svg {
+        stroke-width: 2.5;
+        filter: drop-shadow(0 0 6px rgba(75, 226, 119, 0.45));
     }
 
     .basalt-tabs-bottom-label {
@@ -4992,8 +5051,9 @@
         max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
-        font-size: 10px;
-        letter-spacing: 0.01em;
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        font-weight: 700;
     }
 
     /* Pending-changes dot on the icon */
@@ -5103,12 +5163,12 @@
     }
 
     /* --- 18c) Reserve space at the bottom of the shell so content isn't
-                  covered by the fixed bottom-tabs ---------------------------- */
+                  covered by the fixed bottom-tabs (now 80px tall + safe-area) - */
     .basalt-shell-stage,
     .basalt-shell-main,
     .basalt-shell-main-full,
     .basalt-body {
-        padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
+        padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important;
     }
 
     /* --- 18d) Resumen tab: swap desktop grid for the new mobile stack ------ */
@@ -5433,16 +5493,13 @@
         grid-column: auto !important;
     }
 
+    /* Mobile EXPORT button removed from the basalt-header on mobile —
+       Participantes already exposes Exportar via its floating bottom-bar,
+       and every tab keeps it reachable through the overflow ⋯ menu. Having
+       it as a full-width mega-button above the content was eating viewport
+       and duplicating actions. */
     .basalt-header-primary > .basalt-mobile-export-btn {
-        display: inline-flex !important;
-        flex: 1 1 auto !important;
-        min-width: 0 !important;
-        min-height: 40px !important;
-        grid-column: auto !important;
-        justify-content: center !important;
-        gap: 6px !important;
-        padding: 0 12px !important;
-        white-space: nowrap !important;
+        display: none !important;
     }
 
     /* Overflow ⋯ trigger: prominent, square, 44pt. */
@@ -5975,29 +6032,45 @@
        ----------------------------------------------------------------------- */
     .tournament-structure-mobile,
     .tournament-participants-mobile,
-    .tournament-operation-mobile,
-    .tournament-details-mobile,
-    .tournament-format-mobile {
+    .tournament-operation-mobile {
         display: flex;
         flex-direction: column;
         gap: 12px;
         padding: 0 0 4px;
     }
 
-    /* --- DETALLES: hide all the legacy manager-card sections (logo,
-       identity, location, bonus rules) when the new mobile block renders.
-       The user edits everything from the new block instead. */
-    .tournament-details-mobile + div .manager-card,
-    .tournament-details-mobile + div .details-card,
-    .tournament-details-mobile ~ div .manager-card {
+    /* Participants tab: tighter inter-block rhythm so the chrome above the
+       list (hero + phase-tabs + toolbar + status-chips + active-chips) eats
+       less viewport before the first card. Drops from 12 → 8px. */
+    .tournament-participants-mobile {
+        gap: 8px;
+        /* Reserve room at the bottom of the participants list so the last
+           cards aren't covered by the floating `.tsm-bottom-bar` (sits at
+           bottom: 80+12 + safe-area, ~64px tall ⇒ occupies ~156px above the
+           viewport bottom). The shell already reserves 88px for the bottom
+           nav; we add the floating bar height + breathing room. */
+        padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    /* --- DETALLES / FORMATO: "adapt the current flow" directive — we do NOT
+       substitute a reduced mobile block. Hide the reduced parallel block and
+       let the real legacy form render. Both consoles already collapse
+       responsively in basalt.css; here we force a single full-width column up
+       to 767px so the real form isn't a cramped two-column layout on phones. */
+    .tournament-details-mobile,
+    .tournament-format-mobile {
         display: none !important;
     }
 
-    /* --- FORMATO: hide the legacy manager-card / format console layout.
-       The mobile block surfaces the events list + actions. */
-    .tournament-format-mobile + div .manager-card,
-    .tournament-format-mobile ~ div .manager-card {
-        display: none !important;
+    .basalt-body .details-console-shell .manager-main-layout,
+    .basalt-body .format-console-shell .manager-main-layout {
+        grid-template-columns: 1fr !important;
+    }
+
+    .basalt-body .details-console-shell .manager-preview-zone,
+    .basalt-body .format-console-shell .manager-preview-zone {
+        position: static !important;
+        max-width: 100% !important;
     }
 
     /* When the new mobile blocks are present we hide the redundant desktop
@@ -6412,5 +6485,391 @@
     }
     .tsm-segment {
         min-height: 44px;
+    }
+}
+
+/* ============================================================================
+   ESTRUCTURA TAB — Mobile redesign (spec 2026-05-19)
+   ----------------------------------------------------------------------------
+   Reframes the tab on phones around three goals from the redesign brief:
+     (a) Hero + 3-col chip summary visible without scroll, "Fase activa" feature
+         card removed because the active phase is already prominent below.
+     (b) Phase card becomes the visual focus — single inline CTA "Editar" plus
+         compact icon meta rows; the inline chevron/trash/Activar are hidden
+         and rolled into the existing ⋯ menu so the card stops feeling like a
+         dashboard tile.
+     (c) "Modelo competitivo" + "Plantel fijo" collapse into a single
+         "Configuración del torneo" panel with drilldown rows; tapping a row
+         opens the original section as a bottom sheet, so the existing inline
+         logic (radio selectors, Guardar buttons) is reused without duplication.
+   All rules scoped to <=767px; desktop is untouched.
+   ============================================================================ */
+
+/* By default (desktop) the mobile-only artifacts are not rendered. */
+.structure-mobile-config,
+.structure-mobile-sheet-backdrop,
+.structure-mobile-sheet-close,
+.structure-phase-mobile-meta,
+.structure-phase-mobile-edit {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    /* ── 1. Reorder sections in the structure tab ──────────────────────────
+       Source order in the JSX is: API notice → Modelo → Plantel → Hero+Summary
+       → Phase list → Mobile config → Empty → Wizard. On phones we want the
+       user flow: Hero → Phase list (with CTA) → Mobile config. Modelo/Plantel
+       overlay the viewport when their sheet is open, so their order does not
+       matter for layout. */
+    .basalt-body .tournament-structure-shell {
+        display: flex !important;
+        flex-direction: column;
+    }
+    .basalt-body .tournament-structure-shell > .structure-api-notice { order: 0; }
+    .basalt-body .tournament-structure-shell > .structure-hero-panel { order: 10; }
+    .basalt-body .tournament-structure-shell > .structure-empty-panel { order: 15; }
+    .basalt-body .tournament-structure-shell > .structure-phase-list-module { order: 20; }
+    .basalt-body .tournament-structure-shell > .structure-mobile-config { order: 30; }
+    .basalt-body .tournament-structure-shell > .structure-module-modelo,
+    .basalt-body .tournament-structure-shell > .structure-module-plantel { order: 90; }
+    .basalt-body .tournament-structure-shell > .structure-wizard-card,
+    .basalt-body .tournament-structure-shell > .phase-wizard-card { order: 99; }
+
+    /* ── 2. Modelo / Plantel inline hidden; open as bottom sheet ───────────
+       The original <section> bodies stay mounted (so their state and logic
+       are unchanged) but are display:none until their drilldown row triggers
+       the sheet. When .is-mobile-sheet-open is applied they cover the
+       viewport below the global g22-header (h: 56px, z: 1000). */
+    .basalt-body .structure-module-modelo,
+    .basalt-body .structure-module-plantel {
+        display: none !important;
+    }
+    .basalt-body .structure-module-modelo.is-mobile-sheet-open,
+    .basalt-body .structure-module-plantel.is-mobile-sheet-open {
+        display: block !important;
+        position: fixed !important;
+        inset: var(--h-header, 56px) 0 0 0 !important;
+        z-index: 998 !important;
+        overflow-y: auto !important;
+        background: var(--surface-basalt, #1a1a1c) !important;
+        border: 0 !important;
+        border-radius: 16px 16px 0 0 !important;
+        padding: 56px 16px calc(32px + env(safe-area-inset-bottom, 0)) !important;
+        margin: 0 !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        min-height: 0 !important;
+        animation: structure-sheet-rise 220ms ease-out;
+    }
+    @keyframes structure-sheet-rise {
+        from { transform: translateY(24px); opacity: 0; }
+        to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    .structure-mobile-sheet-backdrop {
+        display: block;
+        position: fixed;
+        inset: var(--h-header, 56px) 0 0 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 997;
+        animation: structure-sheet-fade 180ms ease-out;
+    }
+    @keyframes structure-sheet-fade {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    .basalt-body .is-mobile-sheet-open .structure-mobile-sheet-close {
+        display: flex;
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        background: var(--surface-elevated, #28272b);
+        border: 1px solid var(--border-basalt);
+        color: var(--text-strong, #fff);
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+    }
+
+    /* ── 3. Summary chips — drop "Fase activa" feature card, 3-col layout ── */
+    .basalt-body .tournament-structure-shell .structure-summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+    }
+    .basalt-body .tournament-structure-shell .structure-summary-card--feature {
+        display: none !important;
+    }
+    .basalt-body .tournament-structure-shell .structure-summary-card {
+        padding: 12px 8px !important;
+        border-radius: 12px !important;
+        align-items: center !important;
+        text-align: center;
+        gap: 4px !important;
+        min-height: 0 !important;
+    }
+    .basalt-body .tournament-structure-shell .structure-summary-label {
+        text-align: center;
+        font-size: 9px !important;
+        letter-spacing: 0.1em !important;
+        line-height: 1.2 !important;
+    }
+    .basalt-body .tournament-structure-shell .structure-summary-value {
+        font-size: 22px !important;
+        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+        font-variant-numeric: tabular-nums;
+        line-height: 1 !important;
+    }
+    .basalt-body .tournament-structure-shell .structure-summary-foot {
+        display: none !important;
+    }
+
+    /* ── 4. Hero panel — hide "Consola competitiva" kicker + meta footer ── */
+    .basalt-body .structure-hero-panel .basalt-section-kicker,
+    .basalt-body .structure-hero-panel .structure-hero-meta {
+        display: none !important;
+    }
+    .basalt-body .structure-hero-panel .structure-hero-title {
+        font-size: clamp(20px, 5.6vw, 24px) !important;
+        margin-bottom: 6px !important;
+    }
+    .basalt-body .structure-hero-panel .structure-hero-text {
+        font-size: 13px !important;
+        line-height: 1.45 !important;
+        margin-bottom: 14px !important;
+    }
+
+    /* ── 5. Phase list module — hide kicker/copy/count badge; full-width CTA ── */
+    .basalt-body .structure-phase-list-module .structure-module-header .basalt-section-kicker,
+    .basalt-body .structure-phase-list-module .structure-module-header .structure-module-copy,
+    .basalt-body .structure-phase-list-module .structure-phase-count-desktop,
+    .basalt-body .structure-phase-list-module .structure-phase-count-mobile {
+        display: none !important;
+    }
+    .basalt-body .structure-phase-list-module .structure-module-header {
+        margin-bottom: 12px !important;
+        padding-bottom: 10px !important;
+    }
+    .basalt-body .structure-phase-list-module .structure-module-title {
+        font-size: 16px !important;
+    }
+    .basalt-body .structure-phase-list-module .structure-module-footer {
+        margin-top: 16px !important;
+        padding-top: 14px !important;
+    }
+    .basalt-body .structure-phase-list-module .structure-module-footer .basalt-btn-primary {
+        width: 100% !important;
+        min-height: 48px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.04em !important;
+    }
+
+    /* ── 6. Phase card redesign ────────────────────────────────────────────
+       Card stacks: badges (with Activa pushed right) → title → mobile meta
+       (icon rows) → action row [Editar | ⋯]. The inline desktop Activar /
+       chevron / trash buttons are hidden; the existing ⋯ menu now exposes
+       Activar so the activation flow stays reachable on phones. */
+    .basalt-body .tournament-structure-shell .structure-phase-card {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        padding: 14px !important;
+        cursor: default !important;
+    }
+    .basalt-body .tournament-structure-shell .structure-phase-card .structure-phase-icon {
+        display: none !important;
+    }
+    .basalt-body .tournament-structure-shell .structure-phase-card .structure-phase-main {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        width: 100%;
+    }
+    .basalt-body .tournament-structure-shell .structure-phase-card .structure-phase-copy {
+        width: 100%;
+    }
+    /* Activa badge slides to the right end of the badges row */
+    .basalt-body .tournament-structure-shell .structure-phase-badges {
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+    .basalt-body .tournament-structure-shell .structure-phase-badges .badge-ok {
+        margin-left: auto !important;
+    }
+    /* Hide the desktop meta wall of chips — replaced by mobile meta below */
+    .basalt-body .tournament-structure-shell .structure-phase-card .structure-phase-meta {
+        display: none !important;
+    }
+
+    /* Mobile-only icon meta rows */
+    .basalt-body .structure-phase-mobile-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 6px;
+    }
+    .basalt-body .structure-phase-mobile-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text-dim, #94a3a4);
+        font-size: 13px;
+        line-height: 1.35;
+    }
+    .basalt-body .structure-phase-mobile-meta-row svg {
+        flex-shrink: 0;
+        opacity: 0.85;
+    }
+    .basalt-body .structure-phase-mobile-meta-row strong {
+        color: var(--text-strong, #fff);
+        font-weight: 600;
+    }
+
+    /* Action row: hide desktop buttons inside .structure-phase-actions
+       (Activar inline, chevron, trash) — keep the ⋯ menu and the new
+       mobile Editar button. */
+    .basalt-body .tournament-structure-shell .structure-phase-card .structure-phase-actions {
+        width: 100%;
+        gap: 8px !important;
+        align-self: stretch;
+    }
+    .basalt-body .tournament-structure-shell .structure-phase-card .structure-phase-actions > button[class*='border-[var(--status-active)]'],
+    .basalt-body .tournament-structure-shell .structure-phase-card .structure-phase-chevron,
+    .basalt-body .tournament-structure-shell .structure-phase-card .structure-phase-delete {
+        display: none !important;
+    }
+
+    .basalt-body .structure-phase-mobile-edit {
+        display: inline-flex;
+        flex: 1 1 0;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 0 14px;
+        border-radius: 10px;
+        background: var(--surface-elevated, #28272b);
+        border: 1px solid var(--border-basalt);
+        color: var(--text-strong, #fff);
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+    .basalt-body .structure-phase-mobile-edit:hover,
+    .basalt-body .structure-phase-mobile-edit:active {
+        background: var(--surface-basalt, #1a1a1c);
+    }
+
+    .basalt-body .tournament-structure-shell .structure-phase-card .structure-phase-menu {
+        flex: 0 0 48px;
+    }
+    .basalt-body .tournament-structure-shell .structure-phase-card .structure-phase-menu-trigger {
+        width: 48px !important;
+        height: 44px !important;
+        border-radius: 10px !important;
+        background: var(--surface-elevated, #28272b) !important;
+        border: 1px solid var(--border-basalt) !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ── 7. Mobile configuración del torneo (drilldown card) ──────────────── */
+    .structure-mobile-config {
+        display: block;
+        border: 1px solid var(--border-basalt);
+        background: rgba(32, 31, 34, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 14px;
+        padding: 14px;
+        border-style: dashed;
+    }
+    .structure-mobile-config-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 4px;
+    }
+    .structure-mobile-config-header h3 {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-dim, #94a3a4);
+        margin: 0;
+    }
+    .structure-mobile-config-list {
+        display: flex;
+        flex-direction: column;
+    }
+    .structure-mobile-config-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        width: 100%;
+        background: transparent;
+        border: 0;
+        border-top: 1px solid var(--border-basalt);
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+    .structure-mobile-config-row:first-child {
+        border-top: 0;
+    }
+    .structure-mobile-config-row:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+    .structure-mobile-config-row-icon {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: var(--surface-container, #1c1b1d);
+        border: 1px solid var(--border-basalt);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-strong, #fff);
+    }
+    .structure-mobile-config-row-text {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .structure-mobile-config-row-kicker {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-dim, #94a3a4);
+    }
+    .structure-mobile-config-row-value {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-strong, #fff);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .structure-mobile-config-row-value.is-muted {
+        color: var(--text-dim, #94a3a4);
+        font-weight: 600;
+    }
+    .structure-mobile-config-row-chev {
+        flex-shrink: 0;
+        color: var(--text-dim, #94a3a4);
     }
 }
