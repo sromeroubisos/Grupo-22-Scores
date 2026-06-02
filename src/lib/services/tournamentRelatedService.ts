@@ -213,6 +213,11 @@ export async function getTournamentRelatedTabData(
         .eq('tournament_id', tournamentId)
         .order('order_index', { ascending: true });
 
+    // No `count: 'exact'` here: this query has no `.limit()`, so it already
+    // returns every participant row. The downstream badge uses
+    // `participantsRes.count ?? participants.length`, so `participants.length`
+    // yields the identical number without making Postgres compute a redundant
+    // COUNT(*) over the result set.
     const participantsPromise = (supabase as any)
         .from('tournament_participants')
         .select(`
@@ -222,7 +227,7 @@ export async function getTournamentRelatedTabData(
             seed,
             club_id,
             clubs:club_id(id, name, short_name)
-        `, { count: 'exact' })
+        `)
         .eq('tournament_id', tournamentId)
         .order('created_at', { ascending: false });
 
