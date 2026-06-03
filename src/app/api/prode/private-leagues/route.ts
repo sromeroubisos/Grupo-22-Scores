@@ -92,6 +92,10 @@ type UpdateLeaguePayload = {
     leagueId?: string;
     action?: 'update_rules' | 'set_member_role' | 'archive_league' | 'delete_league';
     rules?: LeagueRulesPayload;
+    // El admin elige al cambiar reglas: true = "cambiar todo" (recalcula la tabla
+    // entera, incluidos partidos ya jugados); false = "mantener" (los partidos ya
+    // cerrados conservan su puntaje, las reglas nuevas aplican desde los próximos).
+    retroactive?: boolean;
     targetUserId?: string;
     role?: 'admin' | 'member';
 };
@@ -120,30 +124,46 @@ function ensureObject(value: unknown) {
         : {};
 }
 
+// `oneTeamExact` NO es parte del sistema de reglas del wizard (que expone solo
+// ganador/diferencia/exacto). Antes se forzaba un default de 1, lo que inyectaba
+// una regla fantasma que el creador nunca configuró y que además divergía de la
+// liga global de la misma competencia (que la resuelve como null = 0 pts). Ahora
+// solo se incluye cuando se envía explícitamente, manteniendo consistencia.
+function ensureOptionalRulePoints(value: unknown): number | null {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) ? numericValue : null;
+}
+
 function normalizeLeagueRules(rules: LeagueRulesPayload | undefined) {
-    return {
+    const base = {
         templateId: ensureString(rules?.templateId) || 'classic',
         exact: ensureFiniteNumber(rules?.exact, 5),
         winner: ensureFiniteNumber(rules?.winner, 3),
         diff: ensureFiniteNumber(rules?.diff, 2),
-        oneTeamExact: ensureFiniteNumber(rules?.oneTeamExact, 1),
         minutes: ensureFiniteNumber(rules?.minutes, 15),
         doubleFinals: Boolean(rules?.doubleFinals),
     };
+
+    const oneTeamExact = ensureOptionalRulePoints(rules?.oneTeamExact);
+    return oneTeamExact !== null ? { ...base, oneTeamExact } : base;
 }
 
 function mergeLeagueRules(base: Record<string, unknown>, overrides: LeagueRulesPayload | undefined) {
-    return {
+    const merged = {
         templateId: ensureString(overrides?.templateId) || ensureString(base.templateId) || 'classic',
         exact: ensureFiniteNumber(overrides?.exact ?? base.exact, 5),
         winner: ensureFiniteNumber(overrides?.winner ?? base.winner, 3),
         diff: ensureFiniteNumber(overrides?.diff ?? base.diff, 2),
-        oneTeamExact: ensureFiniteNumber(overrides?.oneTeamExact ?? base.oneTeamExact, 1),
         minutes: ensureFiniteNumber(overrides?.minutes ?? base.minutes, 15),
         doubleFinals: typeof overrides?.doubleFinals === 'boolean'
             ? overrides.doubleFinals
             : Boolean(base.doubleFinals),
     };
+
+    // Preserva el valor existente (ligas legacy que ya lo tengan) o el enviado,
+    // pero no inyecta un default si nunca existió.
+    const oneTeamExact = ensureOptionalRulePoints(overrides?.oneTeamExact ?? base.oneTeamExact);
+    return oneTeamExact !== null ? { ...merged, oneTeamExact } : merged;
 }
 
 function getLeagueLifecycle(metadata: Record<string, unknown>) {
@@ -622,6 +642,9 @@ export async function PATCH(request: Request) {
             const currentRules = ensureObject(currentMetadata.rules);
             const currentVersion = ensureFiniteNumber(currentMetadata.rulesVersion, 1);
             const nextRules = mergeLeagueRules(currentRules, payload.rules);
+            // Si el cliente no manda la elección, default a true (recalcular todo):
+            // preserva el comportamiento de-facto histórico del motor.
+            const retroactive = typeof payload.retroactive === 'boolean' ? payload.retroactive : true;
 
             const currentHistory = Array.isArray(currentMetadata.rulesHistory)
                 ? currentMetadata.rulesHistory.filter((entry) => entry && typeof entry === 'object')
@@ -640,7 +663,7 @@ export async function PATCH(request: Request) {
                         version: nextVersion,
                         appliedAt: new Date().toISOString(),
                         appliedBy: session.user.id,
-                        retroactive: false,
+                        retroactive,
                         rules: nextRules,
                     },
                 ],
@@ -661,8 +684,10 @@ export async function PATCH(request: Request) {
                 ok: true,
                 rules: nextRules,
                 rulesVersion: nextVersion,
-                retroactive: false,
-                message: 'Las nuevas reglas aplican solo a futuros puntajes. Los puntos ya obtenidos no se recalculan.',
+                retroactive,
+                message: retroactive
+                    ? 'Reglas actualizadas. Se recalculó toda la tabla con las nuevas reglas, incluidos los partidos ya jugados.'
+                    : 'Reglas actualizadas. Los partidos ya jugados conservan su puntaje; las nuevas reglas aplican desde los próximos.',
             });
         }
 

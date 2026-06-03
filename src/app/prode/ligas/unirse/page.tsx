@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -18,7 +18,7 @@ function normalizeInviteCode(value: string) {
     return value.replace(/\s+/g, '').toUpperCase();
 }
 
-export default function ProdeJoinLeaguePage() {
+function ProdeJoinLeagueContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user, login } = useAuth();
@@ -178,5 +178,15 @@ export default function ProdeJoinLeaguePage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+// useSearchParams exige un límite de Suspense en Next (App Router); sin él, el
+// build de esta página falla. Igual que invitacion-club y onboarding/preferences.
+export default function ProdeJoinLeaguePage() {
+    return (
+        <Suspense fallback={<div className={styles.page}><div className="container" /></div>}>
+            <ProdeJoinLeagueContent />
+        </Suspense>
     );
 }

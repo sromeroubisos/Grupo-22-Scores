@@ -34,7 +34,11 @@ const AUTH_CALLBACK_PATHS = new Set([
     '/auth/callback',
 ])
 
-const PROTECTED_ROUTE_PREFIXES = ['/admin', '/club-admin', '/profile', '/prode/ligas/crear'];
+// La página de creación de liga es /prode/ligas/nueva (antes apuntaba a
+// '/prode/ligas/crear', ruta inexistente tras el rename → protección muerta).
+// Se mantiene específica a "nueva" para no romper el flujo de /prode/ligas/unirse,
+// que muestra el formulario de código y recién pide login al enviar.
+const PROTECTED_ROUTE_PREFIXES = ['/admin', '/club-admin', '/profile', '/prode/ligas/nueva'];
 const GUEST_CLUB_ACCESS_COOKIE = 'g22_guest_club_access';
 
 function shouldRefreshSession(pathname: string): boolean {

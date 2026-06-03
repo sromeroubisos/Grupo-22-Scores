@@ -99,7 +99,13 @@ export default function CreatePrivateLeagueWizard({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [copiedTarget, setCopiedTarget] = useState<'code' | 'link' | null>(null);
-    const [createdState, setCreatedState] = useState<null | { inviteCode: string; shareUrl: string; leagueUrl: string }>(null);
+    const [createdState, setCreatedState] = useState<null | {
+        inviteCode: string;
+        shareUrl: string;
+        leagueUrl: string;
+        competition: ProdeBaseCompetitionOption;
+        name: string;
+    }>(null);
 
     const sportOptions = useMemo(() => {
         const uniqueSports = new Map<string, string>();
@@ -276,6 +282,11 @@ export default function CreatePrivateLeagueWizard({
                 inviteCode: result.inviteCode,
                 shareUrl: result.shareUrl,
                 leagueUrl: result.leagueUrl,
+                // Capturamos la competencia y el nombre usados al crear, para que la
+                // pantalla de éxito no dependa del estado vivo de selección (que
+                // podría cambiar o quedar vacío y ocultar la confirmación).
+                competition: payload.selectedCompetition,
+                name: payload.name,
             });
         } catch (error) {
             const message = error instanceof Error ? error.message : 'No se pudo crear la liga.';
@@ -334,25 +345,26 @@ export default function CreatePrivateLeagueWizard({
         );
     }
 
-    if (createdState && selectedCompetition) {
+    if (createdState) {
+        const createdCompetition = createdState.competition;
         return (
             <div className={styles.createPageShell}>
                 <div className={styles.createSuccessShell}>
                     <div className={styles.createSuccessCopy}>
                         <p className={styles.privateLeagueEyebrow}>Tu liga esta lista</p>
-                        <h1 className={styles.privateLeagueTitle}>{previewName}</h1>
+                        <h1 className={styles.privateLeagueTitle}>{createdState.name}</h1>
                         <p className={styles.privateLeagueText}>
-                            Ya quedo creada dentro de {selectedCompetition.displayName}. Desde aca podes copiar el acceso y entrar directo a jugar.
+                            Ya quedo creada dentro de {createdCompetition.displayName}. Desde aca podes copiar el acceso y entrar directo a jugar.
                         </p>
                     </div>
 
                     <div className={styles.previewCard}>
                         <p className={styles.previewEyebrow}>Resumen</p>
-                        <h2 className={styles.previewTitle}>{selectedCompetition.displayName}</h2>
+                        <h2 className={styles.previewTitle}>{createdCompetition.displayName}</h2>
                         <div className={styles.previewPills}>
                             <span className={styles.metaTag}>{visibility === 'private' ? 'Privada con codigo' : 'Publica'}</span>
                             <span className={styles.metaTag}>{previewRules.mode}</span>
-                            {selectedCompetition.sportLabel ? <span className={styles.metaTag}>{selectedCompetition.sportLabel}</span> : null}
+                            {createdCompetition.sportLabel ? <span className={styles.metaTag}>{createdCompetition.sportLabel}</span> : null}
                         </div>
                         <div className={styles.previewRuleList}>
                             <div className={styles.previewRuleRow}><span>Resultado correcto</span><strong>{previewRules.winner} pts</strong></div>
@@ -382,7 +394,7 @@ export default function CreatePrivateLeagueWizard({
                                 {copiedTarget === 'link' ? 'Link copiado' : 'Copiar link'}
                             </button>
                             <a
-                                href={`https://wa.me/?text=${encodeURIComponent(`Sumate a ${previewName}: ${createdState.shareUrl}`)}`}
+                                href={`https://wa.me/?text=${encodeURIComponent(`Sumate a ${createdState.name}: ${createdState.shareUrl}`)}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className={styles.posterSecondaryCta}

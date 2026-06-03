@@ -3,6 +3,8 @@ import { getAllTournaments } from '@/lib/data/tournaments';
 import { normalizeProdeSourceBinding } from '@/lib/prode/source';
 import { applyScoringRulesToPredictionRows, refreshCompetitionScoreboards, resolveProdeScoringRules } from '@/lib/server/prodeScoring';
 import { getTournamentFixtures, getTournamentIds } from '@/lib/services/flashscore';
+import { getEspnFootballProdeEvents, inferEspnFootballLeague } from '@/lib/services/espnFootball';
+import { isFootballSport } from '@/lib/externalProviderPolicy';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import type {
     ProdeCompetitionStatus,
@@ -69,9 +71,29 @@ type BaseMatchRow = {
 };
 
 const EVENT_SYNC_TTL_MS = 30_000;
+// Techo de espera para CUALQUIER llamada a un proveedor externo (ESPN /
+// FlashScore) dentro del render. Sin esto, un proveedor lento o caído cuelga
+// el SSR de /prode/[slug] hasta el timeout de la plataforma. Ante timeout
+// degradamos al fallback (cache local) en vez de bloquear.
+const EXTERNAL_FETCH_TIMEOUT_MS = 6_000;
 
 const eventSyncInFlight = new Map<string, Promise<void>>();
 const eventSyncCompletedAt = new Map<string, number>();
+
+async function withExternalTimeout<T>(operation: Promise<T>, fallback: T): Promise<T> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeoutGuard = new Promise<T>((resolve) => {
+        timer = setTimeout(() => resolve(fallback), EXTERNAL_FETCH_TIMEOUT_MS);
+    });
+
+    try {
+        return await Promise.race([operation, timeoutGuard]);
+    } catch {
+        return fallback;
+    } finally {
+        if (timer) clearTimeout(timer);
+    }
+}
 
 function toSafeString(value: unknown) {
     return typeof value === 'string' ? value : '';
@@ -142,17 +164,51 @@ function normalizeCompetitionStatus(value: unknown): ProdeCompetitionStatus {
 }
 
 function normalizeEventStatus(value: unknown): ProdePlayEvent['status'] {
-    switch (toSafeString(value)) {
+    // Normalizamos mayúsculas/espacios/guiones para tolerar literales de distintos
+    // proveedores ('FT', 'In Progress', 'after-penalties', etc.). Si un partido
+    // terminado quedara como 'scheduled', el motor no lo puntuaría nunca y la UI
+    // podría reabrir picks, así que cubrimos los estados finales/en-juego conocidos.
+    const key = toSafeString(value).trim().toLowerCase().replace(/[\s-]+/g, '_');
+    switch (key) {
         case 'live':
         case 'in_progress':
+        case 'inprogress':
+        case 'playing':
+        case 'halftime':
+        case 'half_time':
+        case 'ht':
+        case '1h':
+        case '2h':
+        case 'first_half':
+        case 'second_half':
+        case 'extra_time':
+        case 'et':
             return 'live';
         case 'final':
         case 'finished':
         case 'completed':
+        case 'ft':
+        case 'full_time':
+        case 'fulltime':
+        case 'aet':
+        case 'pen':
+        case 'after_extra_time':
+        case 'after_penalties':
+        case 'ended':
+        case 'awarded':
+        case 'walkover':
+        case 'wo':
             return 'final';
         case 'cancelled':
+        case 'canceled':
+        case 'abandoned':
+        case 'aborted':
             return 'cancelled';
         case 'postponed':
+        case 'suspended':
+        case 'susp':
+        case 'interrupted':
+        case 'delayed':
             return 'postponed';
         case 'scored':
             return 'scored';
@@ -562,18 +618,27 @@ function buildPersonalSummary(
     currentUserId: string | null,
 ): ProdePlayPersonalSummary {
     const currentEntry = leaderboard.find((entry) => entry.userId === currentUserId) || null;
-    const latestScoredPrediction = currentUserId
-        ? [...events]
-            .filter((event) => event.prediction?.status === 'scored' || event.prediction?.scoredAt)
-            .sort((left, right) => right.startsAt.localeCompare(left.startsAt))[0]
-        : null;
+    const scoredEvents = currentUserId
+        ? events.filter((event) => event.prediction?.status === 'scored' || event.prediction?.scoredAt)
+        : [];
+    // "Ultima fecha" = la jornada más reciente, no un único partido. Sumamos los
+    // puntos de todos los eventos puntuados que comparten la fecha (día) más nueva.
+    const latestDateKey = scoredEvents
+        .map((event) => event.startsAt.slice(0, 10))
+        .sort()
+        .pop() ?? null;
+    const latestPoints = latestDateKey
+        ? scoredEvents
+            .filter((event) => event.startsAt.slice(0, 10) === latestDateKey)
+            .reduce((sum, event) => sum + (event.prediction?.pointsAwarded ?? 0), 0)
+        : 0;
 
     return {
         position: currentEntry?.position ?? null,
         totalPoints: currentEntry?.totalPoints ?? 0,
         exactHits: currentEntry?.exactHits ?? 0,
         correctOutcomes: currentEntry?.correctOutcomes ?? 0,
-        latestPoints: latestScoredPrediction?.prediction?.pointsAwarded ?? 0,
+        latestPoints,
     };
 }
 
@@ -699,11 +764,106 @@ async function getLocalBaseMatches(admin: LooseMutationClient, tournamentId: str
     }).filter((row) => Boolean(row.localMatchId && row.startsAt));
 }
 
+function mapEspnEventToBaseMatch(event: AnyRow, tournamentId: string): BaseMatchRow {
+    const homeTeam = toRecord(event.home_team);
+    const awayTeam = toRecord(event.away_team);
+    const score = toRecord(event.scores ?? event.score);
+    const homeScore = toNullableNumber(score.home);
+    const awayScore = toNullableNumber(score.away);
+    const status = toSafeString(event.status || event.match_status);
+    const normalizedStatus = normalizeEventStatus(status);
+    const roundNumber = toNullableNumber(event.round);
+
+    // ESPN devuelve score "0" para partidos NO jugados (scheduled), así que solo
+    // tomamos el marcador como resultado oficial cuando el partido finalizó. De lo
+    // contrario el motor puntuaría picks contra un 0-0 inexistente y la UI mostraría
+    // un "resultado" para un partido que todavía no se jugó.
+    const isFinalized = normalizedStatus === 'final' || normalizedStatus === 'scored';
+
+    return {
+        sourceType: 'external',
+        localMatchId: null,
+        externalProvider: 'espn',
+        externalMatchId: toSafeString(event.match_id || event.event_key),
+        tournamentId,
+        homeLabel: toSafeString(homeTeam.short_name) || toSafeString(event.home_team_name) || toSafeString(homeTeam.name) || 'Local',
+        awayLabel: toSafeString(awayTeam.short_name) || toSafeString(event.away_team_name) || toSafeString(awayTeam.name) || 'Visitante',
+        startsAt: toSafeString(event.date),
+        status: normalizedStatus,
+        officialResult: isFinalized ? buildOfficialResultFromScores(homeScore, awayScore) : null,
+        matchSnapshot: {
+            tournamentName: toNullableString(event.tournament_name),
+            countryName: toNullableString(event.country_name),
+            roundLabel: roundNumber !== null ? `Fecha ${roundNumber}` : null,
+            sport: 'football',
+            homeLogoUrl: toNullableString(event.home_team_logo) || toNullableString(homeTeam.logo),
+            awayLogoUrl: toNullableString(event.away_team_logo) || toNullableString(awayTeam.logo),
+            score,
+            sourceMatchStatus: status || 'scheduled',
+        },
+    } satisfies BaseMatchRow;
+}
+
+async function getEspnFootballBaseMatches(leagueSlug: string, tournamentId: string): Promise<BaseMatchRow[]> {
+    const events = await withExternalTimeout(
+        getEspnFootballProdeEvents(leagueSlug as Parameters<typeof getEspnFootballProdeEvents>[0]),
+        [] as AnyRow[],
+    );
+
+    return events
+        .map((event) => mapEspnEventToBaseMatch(event as AnyRow, tournamentId))
+        .filter((row) => Boolean(row.externalMatchId && row.startsAt));
+}
+
+/**
+ * Resuelve el slug de liga ESPN para un torneo del prode. La web usa ESPN como
+ * fuente de fútbol, así que el prode debe hacer lo mismo. Cubre tanto los
+ * vínculos ya bindeados a ESPN (id `espn-soccer-league-*`) como los de fútbol
+ * con otro proveedor, resolviendo por nombre/alias desde external_tournaments.
+ */
+async function resolveEspnFootballLeagueSlug(
+    admin: LooseMutationClient,
+    tournamentId: string,
+    sportId: string | null,
+): Promise<string | null> {
+    const direct = inferEspnFootballLeague({ id: tournamentId, externalId: tournamentId });
+    if (direct) return direct;
+
+    if (!isFootballSport(sportId)) return null;
+
+    const externalTournamentResult = await admin
+        .from('external_tournaments')
+        .select('id, name, display_name')
+        .eq('id', tournamentId)
+        .maybeSingle();
+
+    if (externalTournamentResult.error || !externalTournamentResult.data) {
+        return null;
+    }
+
+    return inferEspnFootballLeague({
+        id: tournamentId,
+        name: toNullableString(externalTournamentResult.data.display_name)
+            || toNullableString(externalTournamentResult.data.name),
+    });
+}
+
 async function getExternalBaseMatches(
     admin: LooseMutationClient,
     provider: string,
     tournamentId: string,
+    sportId: string | null = null,
 ): Promise<BaseMatchRow[]> {
+    // Fútbol = ESPN, igual que el resto de la web. Si ESPN responde con
+    // partidos los usamos; si falla o viene vacío, caemos al cache local.
+    const espnLeagueSlug = await resolveEspnFootballLeagueSlug(admin, tournamentId, sportId);
+    if (espnLeagueSlug) {
+        const espnMatches = await getEspnFootballBaseMatches(espnLeagueSlug, tournamentId);
+        if (espnMatches.length) {
+            return espnMatches;
+        }
+    }
+
     const result = await admin
         .from('external_match_cache')
         .select('id, tournament_id, tournament_name, country_name, home_team, away_team, score, status, date_time, round_label, sport')
@@ -877,7 +1037,7 @@ async function getFlashscoreExternalBaseMatches(
         return [];
     }
 
-    const tournamentIds = toRecord(await getTournamentIds(tournamentUrl));
+    const tournamentIds = toRecord(await withExternalTimeout(getTournamentIds(tournamentUrl), {}));
     const tournamentTemplateId = toNullableString(
         tournamentIds.tournament_template_id
         ?? tournamentIds.tournamentTemplateId
@@ -893,7 +1053,10 @@ async function getFlashscoreExternalBaseMatches(
         return [];
     }
 
-    const fixturePayload = await getTournamentFixtures(tournamentTemplateId, seasonId, 1);
+    const fixturePayload = await withExternalTimeout(
+        getTournamentFixtures(tournamentTemplateId, seasonId, 1),
+        [] as unknown,
+    );
     const matches = extractExternalFixtureMatches(fixturePayload);
 
     return matches.map((match) => {
@@ -965,7 +1128,12 @@ async function syncCompetitionBaseEvents(admin: LooseMutationClient, competition
         if (sourceBinding.sourceType === 'local' && sourceBinding.localTournamentId) {
             baseMatches = await getLocalBaseMatches(admin, sourceBinding.localTournamentId);
         } else if (sourceBinding.sourceType === 'external' && sourceBinding.externalProvider && sourceBinding.externalTournamentId) {
-            baseMatches = await getExternalBaseMatches(admin, sourceBinding.externalProvider, sourceBinding.externalTournamentId);
+            baseMatches = await getExternalBaseMatches(
+                admin,
+                sourceBinding.externalProvider,
+                sourceBinding.externalTournamentId,
+                toNullableString(competitionRow.sport_id),
+            );
         } else {
             return;
         }
@@ -1116,6 +1284,45 @@ function getLeagueLifecycle(leagueRow: AnyRow) {
     return lifecycle === 'archived' || lifecycle === 'deleted' ? lifecycle : 'active';
 }
 
+/**
+ * Sincroniza los eventos base (partidos) de todas las competencias en curso desde
+ * sus proveedores (ESPN para fútbol, FlashScore/cache para el resto). Pensado para
+ * ejecutarse desde el cron, no en el render: así las páginas leen datos ya frescos
+ * sin disparar llamadas a proveedores externos en cada request. Best-effort por
+ * competencia y con concurrencia acotada para no saturar el pool ni los proveedores.
+ */
+export async function syncActiveProdeCompetitionsBaseEvents(): Promise<{ total: number; synced: number; errors: number }> {
+    const admin = createAdminClient() as unknown as LooseMutationClient;
+    const competitionResult = await admin
+        .from('prode_competitions')
+        .select('id, prediction_lead_minutes, source_type, local_tournament_id, external_provider, external_tournament_id, sport_id, status')
+        .in('status', ['active', 'published']);
+
+    if (competitionResult.error) {
+        throw new Error(competitionResult.error.message || 'No se pudieron cargar las competencias activas del prode.');
+    }
+
+    const rows = competitionResult.data || [];
+    let synced = 0;
+    let errors = 0;
+    const SYNC_CONCURRENCY = 2;
+
+    for (let i = 0; i < rows.length; i += SYNC_CONCURRENCY) {
+        const batch = rows.slice(i, i + SYNC_CONCURRENCY);
+        const results = await Promise.allSettled(batch.map((row) => syncCompetitionBaseEvents(admin, row)));
+        results.forEach((result) => {
+            if (result.status === 'fulfilled') {
+                synced += 1;
+            } else {
+                errors += 1;
+                console.error('[prode/cron] sync de eventos base fallido', result.reason);
+            }
+        });
+    }
+
+    return { total: rows.length, synced, errors };
+}
+
 export async function getPublicCompetitionPlayView(slug: string, currentUserId: string | null): Promise<ProdePlayView | null> {
     const admin = createAdminClient() as unknown as LooseMutationClient;
     const competitionResult = await admin
@@ -1132,11 +1339,19 @@ export async function getPublicCompetitionPlayView(slug: string, currentUserId: 
         return null;
     }
 
-    await syncCompetitionBaseEvents(admin, competitionResult.data);
-
     const competitionId = toSafeString(competitionResult.data.id);
     const activeRulesetId = toSafeString(competitionResult.data.active_ruleset_id);
-    await refreshCompetitionScoreboards(competitionId);
+
+    // Sync y refresh son de mejor esfuerzo: si un proveedor externo o el motor de
+    // scoring fallan, igual renderizamos la vista con los datos ya persistidos en
+    // lugar de devolver un 500 que tira toda la página del prode.
+    try {
+        await syncCompetitionBaseEvents(admin, competitionResult.data);
+        await refreshCompetitionScoreboards(competitionId);
+    } catch (error) {
+        console.error('[prode/play] sync/scoring skipped for competition', competitionId, error);
+    }
+
     const [{ eventRows, memberRows, rankingRows, errors }, predictionResult, rulesetResult] = await Promise.all([
         getCompetitionRows(admin, competitionId),
         currentUserId
@@ -1285,11 +1500,17 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
         return null;
     }
 
-    await syncCompetitionBaseEvents(admin, competitionResult.data);
-
     const competitionId = toSafeString(competitionResult.data.id);
     const activeRulesetId = toSafeString(competitionResult.data.active_ruleset_id);
-    await refreshCompetitionScoreboards(competitionId);
+
+    // Best-effort: un fallo de sync/scoring no debe tumbar la página de la liga.
+    try {
+        await syncCompetitionBaseEvents(admin, competitionResult.data);
+        await refreshCompetitionScoreboards(competitionId);
+    } catch (error) {
+        console.error('[prode/play] sync/scoring skipped for league competition', competitionId, error);
+    }
+
     const [{ eventRows, errors }, rankingResult, predictionResult, rulesetResult] = await Promise.all([
         getCompetitionEventRows(admin, competitionId),
         admin
