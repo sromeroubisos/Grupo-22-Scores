@@ -31,6 +31,26 @@ function getSportLabel(sportId: string | null) {
     }
 }
 
+// Ícono de deporte para escanear más rápido la tarjeta en mobile. Usa currentColor
+// para heredar el color del chip (sin introducir colores nuevos).
+function SportIcon({ sportId }: { sportId: string | null }) {
+    if (sportId === 'rugby') {
+        return (
+            <svg className={styles.leagueSportIcon} viewBox="0 0 24 24" aria-hidden="true">
+                <ellipse cx="12" cy="12" rx="10" ry="6.4" fill="none" stroke="currentColor" strokeWidth="1.6" />
+                <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" strokeWidth="1.6" />
+            </svg>
+        );
+    }
+
+    return (
+        <svg className={styles.leagueSportIcon} viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.6" />
+            <path d="M12 6.8l3.2 2.3-1.2 3.7h-4L8.8 9.1z" fill="currentColor" />
+        </svg>
+    );
+}
+
 function getTypeLabel(competition: PublicProdeCompetition) {
     if (competition.metadata?.featured === true) return 'Destacada';
     if (competition.visibility === 'unlisted') return 'Especial';
@@ -152,8 +172,8 @@ export default function ProdeLobby({ competitions, totals, privateLeagues = [], 
                                 que permite seguir el rendimiento de los mejores en toda la plataforma.
                             </p>
                             <div className={styles.posterActions}>
-                                <a href="#ligas" className={styles.posterPrimaryCta}>Ver ligas disponibles</a>
-                                <Link href="/prode/ligas/nueva" className={styles.posterSecondaryCta}>
+                                <a href="#ligas" className={styles.posterSecondaryCta}>Ver ligas disponibles</a>
+                                <Link href="/prode/ligas/nueva" className={styles.posterPrimaryCta}>
                                     Crear liga privada
                                 </Link>
                             </div>
@@ -162,7 +182,7 @@ export default function ProdeLobby({ competitions, totals, privateLeagues = [], 
                         <div className={styles.posterRail}>
                             <article className={styles.posterStat}>
                                 <strong>{competitions.length}</strong>
-                                <span>Ligas abiertas</span>
+                                <span>Competencias</span>
                             </article>
                             <article className={styles.posterStat}>
                                 <strong>{activeCount}</strong>
@@ -289,23 +309,34 @@ export default function ProdeLobby({ competitions, totals, privateLeagues = [], 
                                         <Link
                                             key={competition.id}
                                             href={`/prode/${competition.slug}`}
-                                            className={`${styles.leagueCard} ${featured ? styles.leagueCardFeatured : ''}`}
+                                            className={`${styles.leagueCard} ${styles.leagueCardPublic} ${featured ? styles.leagueCardFeatured : ''}`}
                                         >
                                             <div className={styles.leagueTopline}>
                                                 <span className={styles.leagueType}>{getTypeLabel(competition)}</span>
                                                 <span className={styles.leagueSport}>{getSportLabel(competition.sportId)}</span>
                                             </div>
 
-                                            <div className={styles.leagueCompactBody}>
-                                                <h3 className={styles.leagueTitle}>{competition.name}</h3>
-                                                <p className={styles.leagueSubtitle}>
-                                                    {competition.description || 'PRODE NO OFICIAL'}
-                                                </p>
+                                            {/* Wrapper display:contents → en desktop es transparente (el grid
+                                                de la tarjeta queda igual); en mobile se vuelve la columna izquierda
+                                                de la fila (nombre → deporte → participantes) junto al CTA. */}
+                                            <div className={styles.leagueCardContent}>
+                                                <div className={styles.leagueCompactBody}>
+                                                    <h3 className={styles.leagueTitle}>{competition.name}</h3>
+                                                    <p className={styles.leagueSubtitle}>
+                                                        {competition.description || 'PRODE NO OFICIAL'}
+                                                    </p>
+                                                </div>
+
+                                                <div className={styles.leagueCompactMeta}>
+                                                    <span className={styles.leagueSportInline}>
+                                                        <SportIcon sportId={competition.sportId} />
+                                                        {getSportLabel(competition.sportId)}
+                                                    </span>
+                                                    <span>{competition.members.totalMembers} participantes</span>
+                                                </div>
                                             </div>
 
-                                            <div className={styles.leagueCompactMeta}>
-                                                <span>{competition.members.totalMembers} participantes</span>
-                                            </div>
+                                            <span className={styles.leagueJoinCta}>Unirse</span>
                                         </Link>
                                     );
                                 })}

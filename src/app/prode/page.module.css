@@ -2605,3 +2605,159 @@
         flex-shrink: 0;
     }
 }
+
+/* ==========================================================================
+   Lobby mobile — reestructura de las tarjetas públicas del prode.
+   Reglas base: NO afectan el desktop (el wrapper queda transparente y los
+   elementos nuevos arrancan ocultos). El layout de fila + CTA se activa solo
+   en el bloque @media (max-width: 560px) de más abajo, scopeado a
+   .leagueCardPublic y excluyendo el lobby embebido (que usa grilla de 2 cols).
+   No se introducen colores ni texturas nuevas: el pill reusa el verde tenue
+   ya presente en .leagueSport / .filterChipActive.
+   ========================================================================== */
+.leagueCardContent {
+    display: contents;
+}
+
+.leagueCardPublic .leagueJoinCta,
+.leagueCardPublic .leagueSportInline {
+    display: none;
+}
+
+.leagueSportIcon {
+    width: 12px;
+    height: 12px;
+    flex: 0 0 auto;
+}
+
+@media (max-width: 560px) {
+    .shell:not(.embeddedShell) .leagueCardPublic {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 13px;
+    }
+
+    .shell:not(.embeddedShell) .leagueCardPublic .leagueCardContent {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    /* Sacamos los chips de arriba (incluido el "OFICIAL" ruidoso): el deporte se
+       muestra abajo con su ícono, junto a los participantes. */
+    .shell:not(.embeddedShell) .leagueCardPublic .leagueTopline {
+        display: none;
+    }
+
+    .shell:not(.embeddedShell) .leagueCardPublic .leagueTitle {
+        font-size: 0.84rem;
+        line-height: 1.15;
+    }
+
+    /* "PRODE NO OFICIAL" pasa a ser un detalle discreto, no una línea con el
+       mismo peso que el nombre. */
+    .shell:not(.embeddedShell) .leagueCardPublic .leagueSubtitle {
+        font-size: 0.56rem;
+        letter-spacing: 0.03em;
+        opacity: 0.55;
+    }
+
+    .shell:not(.embeddedShell) .leagueCardPublic .leagueCompactMeta {
+        align-items: center;
+        gap: 6px;
+    }
+
+    .shell:not(.embeddedShell) .leagueCardPublic .leagueCompactMeta span {
+        min-height: 21px;
+        padding: 0 7px;
+        font-size: 0.62rem;
+    }
+
+    .shell:not(.embeddedShell) .leagueCardPublic .leagueSportInline {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .shell:not(.embeddedShell) .leagueCardPublic .leagueJoinCta {
+        display: inline-flex;
+        align-items: center;
+        align-self: center;
+        flex: 0 0 auto;
+        min-height: 30px;
+        padding: 0 13px;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        white-space: nowrap;
+        background: rgba(0, 200, 83, 0.16);
+        color: #86f6b6;
+        border: 1px solid rgba(0, 200, 83, 0.45);
+    }
+
+    /* Jerarquía: el verde queda para acciones primarias. Los links de sección
+       ("Ingresar con codigo", "Ver ranking completo") pasan a blanco. */
+    .joinLink {
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    /* Hero compacto: ocupaba casi toda la primera pantalla. Achicamos kicker,
+       título, CTAs y stats, y recortamos el párrafo de intro a 3 líneas. */
+    .shell:not(.embeddedShell) .posterHero {
+        padding: 12px;
+    }
+
+    .shell:not(.embeddedShell) .posterCopy {
+        gap: 6px;
+    }
+
+    .shell:not(.embeddedShell) .posterKicker {
+        font-size: 0.58rem;
+    }
+
+    .shell:not(.embeddedShell) .posterTitle {
+        font-size: 1.05rem;
+        line-height: 1.05;
+    }
+
+    .shell:not(.embeddedShell) .posterLead {
+        font-size: 0.68rem;
+        line-height: 1.38;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .shell:not(.embeddedShell) .posterActions {
+        gap: 6px;
+    }
+
+    .shell:not(.embeddedShell) .posterPrimaryCta,
+    .shell:not(.embeddedShell) .posterSecondaryCta {
+        min-height: 34px;
+        padding: 0 14px;
+        font-size: 0.78rem;
+    }
+
+    .shell:not(.embeddedShell) .posterRail {
+        gap: 6px;
+    }
+
+    .shell:not(.embeddedShell) .posterStat {
+        padding: 6px 8px;
+        border-radius: 10px;
+    }
+
+    .shell:not(.embeddedShell) .posterStat strong {
+        font-size: 0.82rem;
+    }
+
+    .shell:not(.embeddedShell) .posterStat span {
+        font-size: 0.5rem;
+    }
+}
