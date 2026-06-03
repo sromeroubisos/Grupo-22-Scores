@@ -1,6 +1,9 @@
 import { getReadClient } from '@/lib/supabase/read';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getProdeSourceSummary, normalizeProdeSourceBinding } from '@/lib/prode/source';
+import { isFootballSport } from '@/lib/externalProviderPolicy';
+import { SUPPORTED_ESPN_FOOTBALL_LEAGUES, toEspnFootballTournamentId } from '@/lib/services/espnFootball';
+import { buildEspnFootballTournaments } from '@/lib/data/tournaments/espnFootballCatalog';
 import type {
     ProdeBaseCompetitionOption,
     ProdeCompetitionEventStats,
@@ -339,6 +342,49 @@ function mapBaseCompetitionFromExternalTournament(row: AnyRow): ProdeBaseCompeti
     };
 }
 
+/**
+ * Catálogo base de fútbol del prode: SIEMPRE ESPN, igual que el resto de la web
+ * (ver getPreferredExternalProviderForSport y prodePlay.getExternalBaseMatches).
+ * El id externo `espn-soccer-league-<slug>` es el que prodePlay sabe resolver a
+ * partidos vía getEspnFootballProdeEvents, así que catálogo y eventos quedan
+ * consistentes en ESPN.
+ */
+function buildEspnFootballBaseCompetitions(): Array<{ option: ProdeBaseCompetitionOption; priority: number }> {
+    const priorityByTournamentId = new Map(
+        buildEspnFootballTournaments().map((tournament) => [
+            tournament.id,
+            toFinitePriority((tournament as { priority?: unknown }).priority),
+        ]),
+    );
+
+    return SUPPORTED_ESPN_FOOTBALL_LEAGUES.map((league) => {
+        const externalId = toEspnFootballTournamentId(league.slug);
+        return {
+            priority: priorityByTournamentId.get(externalId) ?? -1,
+            option: {
+                id: `external:espn:${externalId}`,
+                name: league.name,
+                displayName: league.name,
+                sportId: 'football',
+                sportLabel: 'Fútbol',
+                countryLabel: league.countryName,
+                logoUrl: null,
+                status: 'available',
+                catalogSource: 'api',
+                catalogLabel: 'API - ESPN',
+                isVisible: true,
+                isApiManaged: true,
+                dataSource: 'espn',
+                sourceBinding: normalizeProdeSourceBinding({
+                    source_type: 'external',
+                    external_provider: 'espn',
+                    external_tournament_id: externalId,
+                }),
+            } satisfies ProdeBaseCompetitionOption,
+        };
+    });
+}
+
 async function getAllTournamentCatalogRows() {
     const supabase = await getReadClient() as unknown as SupabaseRpcClientLike;
 
@@ -408,7 +454,18 @@ export async function listProdeBaseCompetitions(): Promise<SchemaStatus<ProdeBas
         return { schemaReady: false, data: [] };
     }
 
-    const normalizedTournaments = tournamentRows.map((row) => ({
+    // Fútbol = ESPN siempre. Descartamos el fútbol gestionado por API/externos
+    // (flashscore, etc.) tanto de `tournaments` como de `external_tournaments` y
+    // lo reemplazamos por el catálogo ESPN. Los torneos de fútbol 100%
+    // locales/manuales (is_api_managed=false) se conservan para poder agregarlos.
+    const isFootballTournamentRow = (row: AnyRow) =>
+        isFootballSport(row.sport_id) || isFootballSport(row.sport_name) || isFootballSport(row.sport);
+    const footballFilteredTournamentRows = tournamentRows.filter(
+        (row) => !isFootballTournamentRow(row) || !toBoolean(row.is_api_managed),
+    );
+    const footballFilteredExternalRows = externalRows.filter((row) => !isFootballSport(row.sport));
+
+    const normalizedTournaments = footballFilteredTournamentRows.map((row) => ({
         row,
         mapped: mapBaseCompetitionFromTournament(row),
         priority: toFinitePriority(row.priority),
@@ -421,14 +478,20 @@ export async function listProdeBaseCompetitions(): Promise<SchemaStatus<ProdeBas
             .filter((candidate): candidate is string => Boolean(candidate)),
     );
 
+    const espnFootballCompetitions = buildEspnFootballBaseCompetitions();
+    for (const { option, priority } of espnFootballCompetitions) {
+        priorityMap.set(option.id, priority);
+    }
+
     const catalog = [
         ...normalizedTournaments.map(({ mapped }) => mapped),
-        ...externalRows
+        ...footballFilteredExternalRows
             .filter((row) => {
                 const externalId = toSafeString(row.id);
                 return Boolean(externalId) && !coveredExternalIds.has(externalId);
             })
             .map((row) => mapBaseCompetitionFromExternalTournament(row)),
+        ...espnFootballCompetitions.map(({ option }) => option),
     ];
 
     catalog.sort((left, right) => {
