@@ -229,7 +229,12 @@ function scorePredictionRow(eventRow: AnyRow, predictionRow: AnyRow, rules: Prod
         } satisfies AnyRow;
     }
 
-    if (!officialResult) {
+    // Solo puntuamos cuando el partido finalizó. Algunos proveedores (ESPN) envían
+    // marcador 0 para partidos no jugados; sin esta guarda se puntuarían picks contra
+    // un resultado inexistente apenas aparece un official_result.
+    const isFinalized = eventStatus === 'final' || eventStatus === 'scored';
+
+    if (!officialResult || !isFinalized) {
         const eventLockTime = new Date(toSafeString(eventRow.locks_at)).getTime();
         const isLocked = Number.isFinite(eventLockTime) && eventLockTime <= Date.now();
 
@@ -299,6 +304,102 @@ export function applyScoringRulesToPredictionRows(
             return row;
         }
 
+        return scorePredictionRow(eventRow, row, rules);
+    });
+}
+
+type ProdeRuleEpoch = {
+    // Momento en que esta versión de reglas tomó efecto. La base (v1) arranca en
+    // -Infinity, así aplica desde el origen de la liga.
+    appliedAtMs: number;
+    // Si el admin eligió "cambiar todo", el cambio aplica a TODO partido sin importar
+    // cuándo se jugó. Si eligió "mantener", solo a los partidos que cierran después.
+    retroactive: boolean;
+    rules: ProdeScoringRules;
+};
+
+function parseTimeMs(value: unknown): number | null {
+    const parsed = new Date(toSafeString(value)).getTime();
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+// Reconstruye la línea de tiempo de reglas de una liga privada desde
+// metadata.rulesHistory. La v1 (sembrada al crear la liga) es la base. Cada cambio
+// posterior conserva su flag `retroactive`, lo que permite puntuar cada partido con
+// las reglas que correspondían a su momento sin tener que persistir el puntaje por
+// liga: se recalcula desde el resultado oficial con las reglas correctas de época.
+export function resolveLeagueRuleEpochs(
+    competitionRow: AnyRow,
+    rulesetRow: AnyRow | null | undefined,
+    privateLeagueRow: AnyRow,
+): ProdeRuleEpoch[] {
+    const metadata = toRecord(privateLeagueRow.metadata);
+    const history = Array.isArray(metadata.rulesHistory)
+        ? metadata.rulesHistory.filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === 'object')
+        : [];
+
+    if (!history.length) {
+        // Liga legacy sin historial: una sola época retroactiva con las reglas
+        // vigentes. Equivale al comportamiento previo (recálculo total).
+        return [{
+            appliedAtMs: Number.NEGATIVE_INFINITY,
+            retroactive: true,
+            rules: resolveProdeScoringRules(competitionRow, rulesetRow, privateLeagueRow),
+        }];
+    }
+
+    const ordered = [...history].sort((left, right) => {
+        const versionDiff = toFiniteNumber(left.version) - toFiniteNumber(right.version);
+        if (versionDiff !== 0) return versionDiff;
+        return (parseTimeMs(left.appliedAt) ?? 0) - (parseTimeMs(right.appliedAt) ?? 0);
+    });
+
+    return ordered.map((entry, index) => ({
+        appliedAtMs: index === 0
+            ? Number.NEGATIVE_INFINITY
+            : (parseTimeMs(entry.appliedAt) ?? Number.NEGATIVE_INFINITY),
+        retroactive: index === 0 ? true : toBoolean(entry.retroactive),
+        rules: resolveProdeScoringRules(
+            competitionRow,
+            rulesetRow,
+            { metadata: { rules: toRecord(entry.rules) } },
+        ),
+    }));
+}
+
+function selectEpochRules(epochs: ProdeRuleEpoch[], eventBoundaryMs: number | null): ProdeScoringRules {
+    let effective = epochs[0].rules;
+    for (let i = 1; i < epochs.length; i += 1) {
+        const epoch = epochs[i];
+        // Retroactivo → pisa siempre. No retroactivo → solo afecta partidos cuyo
+        // cierre (locks_at) cae en/después del cambio, o que todavía no se jugaron.
+        if (epoch.retroactive || eventBoundaryMs === null || eventBoundaryMs >= epoch.appliedAtMs) {
+            effective = epoch.rules;
+        }
+    }
+    return effective;
+}
+
+export function applyLeagueScoringEpochs(
+    eventRows: AnyRow[],
+    predictionRows: AnyRow[],
+    epochs: ProdeRuleEpoch[],
+): AnyRow[] {
+    const eventMap = new Map(
+        eventRows.map((row) => [toSafeString(row.id), row]),
+    );
+
+    return predictionRows.map((row) => {
+        const eventRow = eventMap.get(toSafeString(row.event_id));
+        if (!eventRow) {
+            return row;
+        }
+
+        // locks_at (≈ inicio del partido) es el límite estable para decidir si un
+        // partido "ya se jugó" frente a un cambio de reglas. scored_at no sirve: el
+        // motor lo reescribe a now() en cada corrida.
+        const boundaryMs = parseTimeMs(eventRow.locks_at);
+        const rules = selectEpochRules(epochs, boundaryMs);
         return scorePredictionRow(eventRow, row, rules);
     });
 }
@@ -378,75 +479,38 @@ async function upsertCompetitionRankingScope(
     rankingPayloads: AnyRow[],
     scope: { scopeType: 'global' | 'private_league'; privateLeagueId?: string | null },
 ) {
+    // Upsert atómico sobre la clave única de scope. Antes esto hacía
+    // read-then-insert/update en la app, lo que bajo refresh concurrente (cron +
+    // render de /prode/[slug] en lambdas distintos, sin lock compartido) podía
+    // insertar la misma fila dos veces → rankings duplicados que refreshUserTotals
+    // suma por usuario. Con el constraint prode_rankings_scope_unique
+    // (NULLS NOT DISTINCT) el ON CONFLICT converge a una sola fila por scope.
+    if (rankingPayloads.length) {
+        const upsertResult = await admin
+            .from('prode_rankings')
+            .upsert(rankingPayloads, {
+                onConflict: 'competition_id,user_id,scope_type,round_key,private_league_id',
+            });
+
+        if (upsertResult.error && !isMissingRelationError(upsertResult.error)) {
+            throw new Error(upsertResult.error.message || 'No se pudieron persistir los rankings.');
+        }
+    }
+
+    // Limpieza de filas obsoletas: usuarios que ya no pertenecen a este scope
+    // (salieron de la liga/competencia o quedaron sin predicciones) deben dejar de
+    // figurar en la tabla. El upsert no las toca, así que las borramos aparte.
     const existingRowsResult = await admin
         .from('prode_rankings')
         .select('id, user_id, scope_type, private_league_id, round_key')
         .eq('competition_id', competitionId);
 
-    if (existingRowsResult.error && !isMissingRelationError(existingRowsResult.error)) {
-        throw new Error(existingRowsResult.error.message || 'No se pudieron cargar los rankings previos.');
-    }
-
-    const existingRows = existingRowsResult.data || [];
-    const existingMap = new Map<string, AnyRow>();
-
-    existingRows.forEach((row) => {
-        const key = [
-            toSafeString(row.scope_type),
-            toSafeString(row.user_id),
-            toSafeString(row.private_league_id),
-            toSafeString(row.round_key),
-        ].join('::');
-
-        if (!existingMap.has(key)) {
-            existingMap.set(key, row);
-        }
-    });
-
-    const inserts: AnyRow[] = [];
-    const updates: Array<{ id: string; payload: AnyRow }> = [];
-
-    rankingPayloads.forEach((row) => {
-        const key = [
-            toSafeString(row.scope_type),
-            toSafeString(row.user_id),
-            toSafeString(row.private_league_id),
-            toSafeString(row.round_key),
-        ].join('::');
-        const existingRow = existingMap.get(key);
-
-        if (existingRow?.id) {
-            updates.push({
-                id: toSafeString(existingRow.id),
-                payload: {
-                    total_points: row.total_points,
-                    exact_hits: row.exact_hits,
-                    correct_outcomes: row.correct_outcomes,
-                    position: row.position,
-                    tie_break_payload: row.tie_break_payload,
-                    computed_at: row.computed_at,
-                },
-            });
+    if (existingRowsResult.error) {
+        if (isMissingRelationError(existingRowsResult.error)) {
             return;
         }
-
-        inserts.push(row);
-    });
-
-    const operations: Array<PromiseLike<MutationResult>> = [];
-
-    if (inserts.length) {
-        operations.push(admin.from('prode_rankings').insert(inserts));
+        throw new Error(existingRowsResult.error.message || 'No se pudieron cargar los rankings previos.');
     }
-
-    updates.forEach((updateRow) => {
-        operations.push(
-            admin
-                .from('prode_rankings')
-                .update(updateRow.payload)
-                .eq('id', updateRow.id),
-        );
-    });
 
     const desiredKeys = new Set(
         rankingPayloads.map((row) => [
@@ -456,10 +520,10 @@ async function upsertCompetitionRankingScope(
             toSafeString(row.round_key),
         ].join('::')),
     );
-    const staleIds = existingRows
+
+    const staleIds = (existingRowsResult.data || [])
         .filter((row) => {
-            const scopeMatches = toSafeString(row.scope_type) === scope.scopeType;
-            if (!scopeMatches) {
+            if (toSafeString(row.scope_type) !== scope.scopeType) {
                 return false;
             }
 
@@ -482,19 +546,14 @@ async function upsertCompetitionRankingScope(
         .filter(Boolean);
 
     if (staleIds.length) {
-        operations.push(
-            admin
-                .from('prode_rankings')
-                .delete()
-                .in('id', staleIds),
-        );
-    }
+        const deleteResult = await admin
+            .from('prode_rankings')
+            .delete()
+            .in('id', staleIds);
 
-    const results = operations.length ? await Promise.all(operations) : [];
-    const failedResult = results.find((result) => result.error);
-
-    if (failedResult?.error) {
-        throw new Error(failedResult.error.message || 'No se pudieron persistir los rankings.');
+        if (deleteResult.error) {
+            throw new Error(deleteResult.error.message || 'No se pudieron limpiar rankings obsoletos.');
+        }
     }
 }
 
@@ -567,25 +626,12 @@ async function refreshUserTotals(admin: LooseMutationClient, userIds: string[]) 
         } satisfies AnyRow;
     });
 
-    totalsPayload.sort((left, right) => {
-        const pointDiff = toFiniteNumber(right.total_points) - toFiniteNumber(left.total_points);
-        if (pointDiff !== 0) return pointDiff;
-
-        const exactDiff = toFiniteNumber(right.exact_hits) - toFiniteNumber(left.exact_hits);
-        if (exactDiff !== 0) return exactDiff;
-
-        const outcomeDiff = toFiniteNumber(right.correct_outcomes) - toFiniteNumber(left.correct_outcomes);
-        if (outcomeDiff !== 0) return outcomeDiff;
-
-        return toSafeString(left.user_id).localeCompare(toSafeString(right.user_id), 'es');
-    });
-
-    const finalPayload = totalsPayload.map((row, index) => ({
-        ...row,
-        position: index + 1,
-    }));
-
-    const result = await admin.from('prode_user_totals').upsert(finalPayload, { onConflict: 'user_id' });
+    // OJO: este refresh solo conoce a los usuarios de UNA competencia (userIds), así
+    // que NO se puede asignar una posición global acá — hacerlo daba posiciones 1..N
+    // dentro de cada subset y el ranking global terminaba intercalado sin orden real
+    // de puntos. La posición global se deriva en la lectura (listPublicProdeUserTotals),
+    // que ordena sobre TODOS los usuarios. Persistimos position = null a propósito.
+    const result = await admin.from('prode_user_totals').upsert(totalsPayload, { onConflict: 'user_id' });
     if (result.error) {
         throw new Error(result.error.message || 'No se pudieron actualizar los totales del prode.');
     }
@@ -784,8 +830,8 @@ export async function refreshCompetitionScoreboards(competitionId: string) {
 
             const privateLeagueRankings = activeLeagueRows.flatMap((leagueRow) => {
                 const leagueId = toSafeString(leagueRow.id);
-                const scopedRules = resolveProdeScoringRules(competitionRow, rulesetResult.data, leagueRow);
-                const scopedPredictions = applyScoringRulesToPredictionRows(eventRows, predictionRows, scopedRules);
+                const leagueEpochs = resolveLeagueRuleEpochs(competitionRow, rulesetResult.data, leagueRow);
+                const scopedPredictions = applyLeagueScoringEpochs(eventRows, predictionRows, leagueEpochs);
                 const leagueUserIds = Array.from(leagueMembershipMap.get(leagueId) || []);
 
                 return buildRankingPayload(
@@ -837,10 +883,16 @@ export async function refreshStoredProdeScoreboards() {
 
     const refreshPromise = (async () => {
         const admin = createAdminClient() as unknown as LooseMutationClient;
+        // Solo competencias en curso. Las 'finished' ya no reciben picks ni
+        // cambian de puntaje, así que recalcularlas en cada corrida del cron sería
+        // trabajo perpetuo e inútil que crecería con cada torneo terminado. Su
+        // scoreboard final se sigue calculando cuando alguien abre su página
+        // (/prode/[slug] llama a refreshCompetitionScoreboards sin filtrar por
+        // estado), y prode_user_totals persiste una vez computado.
         const competitionResult = await admin
             .from('prode_competitions')
             .select('id')
-            .in('status', ['active', 'published', 'finished']);
+            .in('status', ['active', 'published']);
 
         if (competitionResult.error) {
             if (isMissingRelationError(competitionResult.error)) {

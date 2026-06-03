@@ -1042,6 +1042,24 @@ async function fetchSeasonEvents(leagueSlug: EspnFootballLeagueSlug, season?: nu
     return fetchScoreboardRangeEvents(leagueSlug, range.start, range.end);
 }
 
+/**
+ * Conjunto completo de partidos (fixtures futuros + resultados ya jugados) de
+ * una liga ESPN, normalizado para vistas de torneo. A diferencia de
+ * getEspnFootballLeague{Fixtures,Results}, NO pagina a 20: devuelve todos los
+ * eventos de la ventana, ordenados por fecha ascendente. Pensado para que el
+ * Prode arme su lista de eventos desde la misma fuente que usa la web.
+ */
+export async function getEspnFootballProdeEvents(
+    leagueSlug: EspnFootballLeagueSlug,
+    season?: number,
+): Promise<EspnTournamentViewEvent[]> {
+    const events = await fetchSeasonEvents(leagueSlug, season);
+    return events
+        .map((event) => normalizeEspnEventForTournamentViews(event, LEAGUES[leagueSlug]))
+        .filter(isEspnTournamentViewEvent)
+        .sort((left, right) => (left.timestamp || 0) - (right.timestamp || 0));
+}
+
 function extractStandingNotes(entry: any): Array<{ description: string; color: string; rank?: number }> {
     const out: Array<{ description: string; color: string; rank?: number }> = [];
     const seen = new Set<string>();

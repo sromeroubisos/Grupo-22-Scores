@@ -1,17 +1,15 @@
 import ProdeLobby from '@/components/prode/ProdeLobby';
 import { createClient } from '@/lib/supabase/server';
 import { listPublicProdeCompetitions, listPublicProdeUserTotals, listUserPrivateLeagues } from '@/lib/server/prodeCompetitions';
-import { refreshStoredProdeScoreboards } from '@/lib/server/prodeScoring';
 
 export default async function ProdePage() {
+    // El recálculo de scoreboards lo hace el cron /api/cron/prode-scoring fuera del
+    // render. Acá solo leemos datos ya persistidos para que el lobby sea liviano y
+    // no dispare escrituras/llamadas externas en cada visita.
     const supabase = await createClient();
-    const [, sessionResult] = await Promise.all([
-        refreshStoredProdeScoreboards(),
-        supabase.auth.getSession(),
-    ]);
     const {
         data: { session },
-    } = sessionResult;
+    } = await supabase.auth.getSession();
     const [
         { schemaReady: competitionsReady, data: competitions },
         { schemaReady: totalsReady, data: totals },

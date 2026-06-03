@@ -607,9 +607,7 @@ export async function listPublicProdeUserTotals(): Promise<SchemaStatus<PublicPr
             'correct_outcomes',
             'competitions_joined',
             'competitions_scored',
-            'position',
-        ].join(','))
-        .order('position', { ascending: true });
+        ].join(','));
 
     if (error) {
         if (isMissingRelationError(error)) {
@@ -618,7 +616,24 @@ export async function listPublicProdeUserTotals(): Promise<SchemaStatus<PublicPr
         throw new Error(error.message || 'No se pudo cargar la tabla total del prode.');
     }
 
-    const totalsRows = (rows || []) as AnyRow[];
+    // La posición global se calcula acá, sobre TODOS los usuarios. La columna
+    // `position` de prode_user_totals no sirve para esto: el cron solo conoce a los
+    // usuarios de una competencia por vez, así que su position quedaba relativa al
+    // subset y el ranking global salía intercalado sin orden real de puntos. Mismo
+    // desempate que el motor: puntos → exactos → aciertos → user_id.
+    const totalsRows = ((rows || []) as AnyRow[]).slice().sort((left, right) => {
+        const pointDiff = toFiniteNumber(right.total_points) - toFiniteNumber(left.total_points);
+        if (pointDiff !== 0) return pointDiff;
+
+        const exactDiff = toFiniteNumber(right.exact_hits) - toFiniteNumber(left.exact_hits);
+        if (exactDiff !== 0) return exactDiff;
+
+        const outcomeDiff = toFiniteNumber(right.correct_outcomes) - toFiniteNumber(left.correct_outcomes);
+        if (outcomeDiff !== 0) return outcomeDiff;
+
+        return toSafeString(left.user_id).localeCompare(toSafeString(right.user_id), 'es');
+    });
+
     const userIdentityMap = await loadUserIdentityMap(
         supabase,
         totalsRows.map((row) => toSafeString(row.user_id)),
@@ -626,7 +641,7 @@ export async function listPublicProdeUserTotals(): Promise<SchemaStatus<PublicPr
 
     return {
         schemaReady: true,
-        data: totalsRows.map((row) => {
+        data: totalsRows.map((row, index) => {
             const userIdentity = resolveUserIdentity(row.users, userIdentityMap.get(toSafeString(row.user_id)));
             return {
                 userId: toSafeString(row.user_id),
@@ -637,7 +652,7 @@ export async function listPublicProdeUserTotals(): Promise<SchemaStatus<PublicPr
                 correctOutcomes: toFiniteNumber(row.correct_outcomes),
                 competitionsJoined: toFiniteNumber(row.competitions_joined),
                 competitionsScored: toFiniteNumber(row.competitions_scored),
-                position: Number.isFinite(Number(row.position)) ? Number(row.position) : null,
+                position: index + 1,
             };
         }),
     };

@@ -167,6 +167,9 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
     ));
     const [lockMinutesDraft, setLockMinutesDraft] = useState(view.rules.lockMinutes?.toString() ?? '');
     const [doubleFinalsDraft, setDoubleFinalsDraft] = useState(view.rules.doubleFinals);
+    // false = "mantener" (congela partidos ya jugados); true = "cambiar todo".
+    // Default conservador: no reescribir la historia salvo que el admin lo pida.
+    const [retroactiveDraft, setRetroactiveDraft] = useState(false);
     const [scoreDrafts, setScoreDrafts] = useState<Record<string, { home: string; away: string }>>(() => Object.fromEntries(
         view.events.map((event) => [
             event.id,
@@ -206,10 +209,14 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
         return groups;
     }, [openEvents]);
 
-    const latestClosedEvents = useMemo(
-        () => [...closedEvents].sort((left, right) => right.startsAt.localeCompare(left.startsAt)).slice(0, 6),
-        [closedEvents],
-    );
+    const latestClosedEvents = useMemo(() => {
+        // El historial dice "tus últimos cierres, con resultado y puntos": prioriza
+        // eventos que ya tienen resultado o donde el usuario jugó, para no llenar la
+        // lista de partidos cerrados todavía sin marcador ("Resultado pendiente").
+        const withSignal = closedEvents.filter((event) => event.officialResult || event.prediction);
+        const source = withSignal.length ? withSignal : closedEvents;
+        return [...source].sort((left, right) => right.startsAt.localeCompare(left.startsAt)).slice(0, 6);
+    }, [closedEvents]);
 
     const highlightedLeaderboard = useMemo(() => {
         const rows = view.leaderboard.slice(0, 8);
@@ -366,6 +373,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                         minutes: lockMinutesDraft ? Number(lockMinutesDraft) : view.rules.lockMinutes,
                         doubleFinals: doubleFinalsDraft,
                     },
+                    retroactive: retroactiveDraft,
                 }),
             });
 
@@ -375,7 +383,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                 throw new Error(result.error || 'No se pudieron actualizar las reglas.');
             }
 
-            setRulesFeedback(result.message || 'Reglas actualizadas. Los puntos ya obtenidos no se recalculan.');
+            setRulesFeedback(result.message || 'Reglas actualizadas.');
             setIsEditingRules(false);
         } catch (error) {
             const message = error instanceof Error ? error.message : 'No se pudieron actualizar las reglas.';
@@ -683,7 +691,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                 </div>
                             </section>
 
-                            <section id="tabla" className={styles.summaryCard}>
+                            <section className={styles.summaryCard}>
                                 <p className={styles.previewEyebrow}>Tabla</p>
                                 <div className={styles.leaderboardCompact}>
                                     {highlightedLeaderboard.length ? highlightedLeaderboard.map((row) => (
@@ -741,7 +749,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                         >
                                             {isEditingRules ? 'Cancelar edicion' : 'Editar puntos'}
                                         </button>
-                                        <span className={styles.pickFeedback}>Solo aplica a futuros puntajes.</span>
+                                        <span className={styles.pickFeedback}>Al guardar elegís si recalcula lo ya jugado.</span>
                                     </div>
                                 ) : null}
 
@@ -792,6 +800,22 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                                 disabled={isSavingRules}
                                             />
                                             <span>Doble puntaje en finales</span>
+                                        </label>
+                                        <label className={styles.checkboxRow}>
+                                            <input
+                                                type="checkbox"
+                                                checked={retroactiveDraft}
+                                                onChange={(event) => setRetroactiveDraft(event.target.checked)}
+                                                disabled={isSavingRules}
+                                            />
+                                            <span>
+                                                Recalcular partidos ya jugados con las nuevas reglas
+                                                <small className={styles.checkboxHint}>
+                                                    {retroactiveDraft
+                                                        ? 'Se reescribe toda la tabla, incluida la historia.'
+                                                        : 'Los partidos ya cerrados conservan su puntaje actual.'}
+                                                </small>
+                                            </span>
                                         </label>
                                         <div className={styles.rulesEditorActions}>
                                             <button

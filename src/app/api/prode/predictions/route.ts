@@ -87,7 +87,14 @@ async function ensureUserProfile(admin: LooseAdminClient, authUser: { id: string
         .single();
 
     if (insertUserError) {
-        throw new Error(insertUserError.message || 'No se pudo crear el perfil del usuario.');
+        // Dos picks concurrentes de un usuario nuevo pueden carrear el select+insert:
+        // el segundo choca con la PK. Tratamos el duplicado como éxito (el perfil ya
+        // existe) en vez de devolver un 500 en el primer pronóstico del usuario.
+        const message = insertUserError.message || '';
+        const isDuplicate = /duplicate key|already exists|23505/i.test(message);
+        if (!isDuplicate) {
+            throw new Error(message || 'No se pudo crear el perfil del usuario.');
+        }
     }
 }
 
@@ -134,7 +141,10 @@ export async function POST(request: Request) {
         }
 
         const status = toSafeString(eventRow.status);
-        if (status === 'final' || status === 'scored' || status === 'cancelled') {
+        // 'live'/'in_progress' también cierran la edición: un partido en juego no
+        // admite picks aunque su locks_at no se haya computado (locks_at nulo no
+        // debe dejar pasar un pronóstico sobre un partido ya empezado).
+        if (status === 'final' || status === 'scored' || status === 'cancelled' || status === 'live' || status === 'in_progress') {
             return NextResponse.json({ error: 'Este partido ya no admite edicion.' }, { status: 409 });
         }
 

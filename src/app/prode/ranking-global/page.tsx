@@ -1,15 +1,12 @@
 import Link from 'next/link';
 import styles from '../page.module.css';
 import { listPublicProdeUserTotals } from '@/lib/server/prodeCompetitions';
-import { refreshStoredProdeScoreboards } from '@/lib/server/prodeScoring';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ProdeGlobalRankingPage() {
-    await refreshStoredProdeScoreboards().catch((error) => {
-        console.error('[prode/ranking-global] scoreboard refresh skipped:', error);
-    });
-
+    // La tabla total la mantiene fresca el cron /api/cron/prode-scoring; acá solo
+    // leemos los totales ya computados.
     const { schemaReady, data } = await listPublicProdeUserTotals().catch((error) => {
         console.error('[prode/ranking-global] totals read failed:', error);
         return { schemaReady: false, data: [] };

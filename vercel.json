@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/fixture-sync",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/prode-scoring",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
