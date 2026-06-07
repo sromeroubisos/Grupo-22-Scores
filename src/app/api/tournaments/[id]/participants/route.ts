@@ -886,6 +886,20 @@ export async function GET(
       }, 'server');
     }
 
+    // Optional pagination (additive, backward-compatible).
+    // If neither `limit` nor `offset` is provided, behavior is unchanged: returns all rows.
+    // Pagination only activates when a valid `limit` (positive integer) is present;
+    // `offset` defaults to 0. Invalid values are ignored (fall back to returning all).
+    const rawLimit = searchParams.get('limit');
+    const rawOffset = searchParams.get('offset');
+    const parsedLimit = rawLimit !== null ? Number(rawLimit) : null;
+    const parsedOffset = rawOffset !== null ? Number(rawOffset) : null;
+    const hasValidLimit = parsedLimit !== null && Number.isInteger(parsedLimit) && parsedLimit > 0;
+    const paginationOffset =
+      parsedOffset !== null && Number.isInteger(parsedOffset) && parsedOffset >= 0
+        ? parsedOffset
+        : 0;
+
     let participantListQuery = supabase
       .from('tournament_participants')
       .select(getTournamentParticipantSelectColumns(supportsDivisionId))
@@ -893,6 +907,13 @@ export async function GET(
 
     if (scopedSeasonId) {
       participantListQuery = participantListQuery.eq('season_id', scopedSeasonId);
+    }
+
+    if (hasValidLimit) {
+      participantListQuery = participantListQuery.range(
+        paginationOffset,
+        paginationOffset + parsedLimit - 1,
+      );
     }
 
     const { data: participants, error } = await perf.measureStep(
