@@ -138,41 +138,35 @@ export default function ProfilePage() {
 
     return (
         <div className={styles.page}>
-            <div className={styles.container}>
-                <div className={styles.mainColumn}>
-                    <nav className={styles.tabsContainer} aria-label="Secciones del perfil">
-                        {topTabs.map(({ key, label }) => (
-                            <button
-                                key={key}
-                                className={`${styles.tab} ${activeTab === key ? styles.active : ''}`}
-                                onClick={() => setActiveTab(key)}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </nav>
+            <div className={`${styles.container} ${activeTab === 'prode' ? styles.containerWide : ''}`}>
+                <nav className={styles.tabsContainer} aria-label="Secciones del perfil">
+                    {topTabs.map(({ key, label }) => (
+                        <button
+                            key={key}
+                            className={`${styles.tab} ${activeTab === key ? styles.active : ''}`}
+                            onClick={() => setActiveTab(key)}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </nav>
 
-                    <div className={`${styles.mainContent} ${activeTab === 'prode' ? styles.mainContentProde : ''}`}>
-                        {activeTab === 'prode' && (
-                            <ProdePanel />
-                        )}
+                {activeTab === 'prode' && (
+                    <ProdePanel />
+                )}
 
-                        {activeTab === 'perfil' && (
-                            <div className={styles.profileStack}>
-                                <ProfileHeader user={user} stats={stats} />
-                                <ProfileActionHub
-                                    user={user}
-                                    activeRequestForm={activeRequestForm}
-                                    onSelectForm={(kind) => setActiveRequestForm(current => current === kind ? null : kind)}
-                                    onCloseForm={() => setActiveRequestForm(null)}
-                                />
-                                <section className={styles.inlineSettingsShell}>
-                                    <SettingsPanel logout={logout} />
-                                </section>
-                            </div>
-                        )}
+                {activeTab === 'perfil' && (
+                    <div className={styles.profileStack}>
+                        <ProfileHeader user={user} stats={stats} />
+                        <ProfileActionHub
+                            user={user}
+                            activeRequestForm={activeRequestForm}
+                            onSelectForm={(kind) => setActiveRequestForm(current => current === kind ? null : kind)}
+                            onCloseForm={() => setActiveRequestForm(null)}
+                        />
+                        <SettingsPanel logout={logout} />
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );
@@ -939,130 +933,135 @@ function SettingsPanel({ logout }: { logout: () => void }) {
                 : 'No se esta mostrando en el inicio.';
 
     return (
-        <div className={styles.settingsList}>
+        <section className={styles.settingsCard}>
             <h3 className={styles.sidebarSectionTitle}>Configuracion</h3>
 
-            <div className={styles.preferenceCard}>
-                <div className={styles.preferenceHeader}>
-                    <div className={styles.preferenceLabel}>
-                        <Heart size={15} className={styles.preferenceIcon} />
-                        <span>Preferencias deportivas</span>
-                    </div>
-                    <button
-                        onClick={() => router.push('/onboarding/preferences?edit=true')}
-                        className={styles.preferenceEditBtn}
-                    >
-                        Editar
-                    </button>
-                </div>
-
-                {favoriteSports.length > 0 ? (
-                    <div className={styles.preferenceChips}>
-                        {favoriteSports.map(sport => (
-                            <span key={sport.id} className={styles.preferenceChip}>
-                                {sport.icon} {sport.nameEs}
-                            </span>
-                        ))}
-                    </div>
-                ) : (
-                    <p className={styles.preferenceEmptyText}>
-                        Todavia no elegiste deportes favoritos.
-                    </p>
-                )}
-            </div>
-
-            <div className={styles.preferenceCard}>
-                <div className={styles.preferenceHeader}>
-                    <div className={styles.preferenceLabel}>
-                        <Trophy size={15} className={styles.preferenceIcon} />
-                        <span>Panel G22 Scores</span>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={handleEnableHireCta}
-                        className={styles.preferenceEditBtn}
-                        disabled={!user?.id}
-                    >
-                        Mostrar una vez
-                    </button>
-                </div>
-                <p className={styles.preferenceEmptyText}>
-                    Controla el panel de contratacion de la home. Los invitados lo ven siempre.
-                </p>
-                <div className={styles.preferenceControlRow}>
-                    <span className={styles.preferenceStatus}>{hireCtaStatus}</span>
-                    {hireCtaPreference?.enabled && !hireCtaPreference.seen && (
+            <div className={styles.preferenceGrid}>
+                <div className={styles.preferenceCard}>
+                    <div className={styles.preferenceHeader}>
+                        <div className={styles.preferenceLabel}>
+                            <Heart size={15} className={styles.preferenceIcon} />
+                            <span>Preferencias deportivas</span>
+                        </div>
                         <button
-                            type="button"
-                            className={styles.preferenceSecondaryBtn}
-                            onClick={handleDisableHireCta}
+                            onClick={() => router.push('/onboarding/preferences?edit=true')}
+                            className={styles.preferenceEditBtn}
                         >
-                            No mostrar
+                            Editar
                         </button>
+                    </div>
+
+                    {favoriteSports.length > 0 ? (
+                        <div className={styles.preferenceChips}>
+                            {favoriteSports.map(sport => (
+                                <span key={sport.id} className={styles.preferenceChip}>
+                                    {sport.icon} {sport.nameEs}
+                                </span>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className={styles.preferenceEmptyText}>
+                            Todavia no elegiste deportes favoritos.
+                        </p>
                     )}
                 </div>
+
+                <div className={styles.preferenceCard}>
+                    <div className={styles.preferenceHeader}>
+                        <div className={styles.preferenceLabel}>
+                            <Trophy size={15} className={styles.preferenceIcon} />
+                            <span>Panel G22 Scores</span>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleEnableHireCta}
+                            className={styles.preferenceEditBtn}
+                            disabled={!user?.id}
+                        >
+                            Mostrar una vez
+                        </button>
+                    </div>
+                    <p className={styles.preferenceEmptyText}>
+                        Controla el panel de contratacion de la home. Los invitados lo ven siempre.
+                    </p>
+                    <div className={styles.preferenceControlRow}>
+                        <span className={styles.preferenceStatus}>{hireCtaStatus}</span>
+                        {hireCtaPreference?.enabled && !hireCtaPreference.seen && (
+                            <button
+                                type="button"
+                                className={styles.preferenceSecondaryBtn}
+                                onClick={handleDisableHireCta}
+                            >
+                                No mostrar
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            <Link href="/favorites" className={styles.settingItem}>
-                <div className={styles.settingInfo}>
-                    <h4>Siguiendo</h4>
-                    <p>Clubes y torneos guardados</p>
-                </div>
-                <ChevronRight size={16} color="var(--color-text-tertiary)" />
-            </Link>
+            <div className={styles.settingsGrid}>
+                <Link href="/favorites" className={`${styles.settingTile} ${styles.settingTileLink}`}>
+                    <div className={styles.settingInfo}>
+                        <h4>Siguiendo</h4>
+                        <p>Clubes y torneos guardados</p>
+                    </div>
+                    <ChevronRight size={16} color="var(--color-text-tertiary)" />
+                </Link>
 
-            <div className={styles.settingItem}>
-                <div className={styles.settingInfo}>
-                    <h4>Idioma</h4>
-                    <p>Espanol (Argentina)</p>
+                <div className={styles.settingTile}>
+                    <div className={styles.settingInfo}>
+                        <h4>Idioma</h4>
+                        <p>Espanol (Argentina)</p>
+                    </div>
+                    <Globe size={16} color="var(--color-text-tertiary)" />
                 </div>
-                <ChevronRight size={16} color="var(--color-text-tertiary)" />
+
+                <div className={styles.settingTile}>
+                    <div className={styles.settingInfo}>
+                        <h4>Zona Horaria</h4>
+                        <p>UTC-3 (Buenos Aires)</p>
+                    </div>
+                    <ChevronRight size={16} color="var(--color-text-tertiary)" />
+                </div>
+
+                <div className={styles.settingTile}>
+                    <div className={styles.settingInfo}>
+                        <h4>Notificaciones</h4>
+                        <p>Resultados en vivo</p>
+                    </div>
+                    <Bell size={16} color="var(--color-text-tertiary)" />
+                </div>
+
+                <div className={styles.settingTile}>
+                    <div className={styles.settingInfo}>
+                        <h4>Privacidad</h4>
+                        <p>Publico</p>
+                    </div>
+                    <Globe size={16} color="var(--color-text-tertiary)" />
+                </div>
+
+                <div className={styles.settingTile}>
+                    <div className={styles.settingInfo}>
+                        <h4>Cambiar contrasena</h4>
+                        <p>Actualiza tus credenciales</p>
+                    </div>
+                    <Lock size={16} color="var(--color-text-tertiary)" />
+                </div>
             </div>
 
-            <div className={styles.settingItem}>
-                <div className={styles.settingInfo}>
-                    <h4>Zona Horaria</h4>
-                    <p>UTC-3 (Buenos Aires)</p>
-                </div>
-                <ChevronRight size={16} color="var(--color-text-tertiary)" />
+            <div className={styles.settingsFooter}>
+                <button className={styles.btnLogout} onClick={logout}>
+                    <LogOut size={18} />
+                    Cerrar sesion
+                </button>
+
+                <button
+                    className={styles.btnDanger}
+                    onClick={() => alert('Para eliminar tu cuenta, contacta a soporte.')}
+                >
+                    Eliminar cuenta
+                </button>
             </div>
-
-            <div className={styles.settingItem}>
-                <div className={styles.settingInfo}>
-                    <h4>Notificaciones</h4>
-                    <p>Resultados en vivo</p>
-                </div>
-                <Bell size={16} color="var(--color-text-tertiary)" />
-            </div>
-
-            <div className={styles.settingItem}>
-                <div className={styles.settingInfo}>
-                    <h4>Privacidad</h4>
-                    <p>Publico</p>
-                </div>
-                <Globe size={16} color="var(--color-text-tertiary)" />
-            </div>
-
-            <div className={styles.settingItem}>
-                <div className={styles.settingInfo}>
-                    <h4>Cambiar contrasena</h4>
-                </div>
-                <Lock size={16} color="var(--color-text-tertiary)" />
-            </div>
-
-            <div className={styles.settingsDivider} />
-
-            <button className={styles.btnLogout} onClick={logout}>
-                <LogOut size={18} />
-                Cerrar sesion
-            </button>
-
-            <button
-                className={styles.btnDanger}
-                onClick={() => alert('Para eliminar tu cuenta, contacta a soporte.')}
-            >
-                Eliminar cuenta
-            </button>
-        </div>
+        </section>
     );
 }

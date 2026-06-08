@@ -8,6 +8,40 @@
     gap: 32px;
 }
 
+/* Animación de entrada al prode: el hero y cada sección caen en cascada
+   cuando se monta el lobby (solo en la pantalla full /prode, no en el embed
+   del perfil). Respeta prefers-reduced-motion. */
+@keyframes prodeEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.shell:not(.embeddedShell) > * {
+    animation: prodeEntrance 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    will-change: transform, opacity;
+}
+
+.shell:not(.embeddedShell) > *:nth-child(1) { animation-delay: 0.04s; }
+.shell:not(.embeddedShell) > *:nth-child(2) { animation-delay: 0.11s; }
+.shell:not(.embeddedShell) > *:nth-child(3) { animation-delay: 0.18s; }
+.shell:not(.embeddedShell) > *:nth-child(4) { animation-delay: 0.25s; }
+.shell:not(.embeddedShell) > *:nth-child(5) { animation-delay: 0.32s; }
+.shell:not(.embeddedShell) > *:nth-child(6) { animation-delay: 0.39s; }
+.shell:not(.embeddedShell) > *:nth-child(n + 7) { animation-delay: 0.46s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .shell:not(.embeddedShell) > * {
+        animation: none;
+        will-change: auto;
+    }
+}
+
 .embeddedShell {
     gap: 24px;
 }
@@ -1690,6 +1724,288 @@
     color: #ff9f9f;
 }
 
+/* === Play view: distribución tipo mockup (date picker + banner + cards) === */
+.datePicker {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+}
+
+.datePicker::-webkit-scrollbar {
+    display: none;
+}
+
+.dateChip {
+    flex-shrink: 0;
+    min-height: 38px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 800;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.dateChip:hover {
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.dateChipActive {
+    border-color: rgba(0, 200, 83, 0.5);
+    background: rgba(0, 200, 83, 0.16);
+    color: #86f6b6;
+}
+
+.loginBanner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 200, 83, 0.28);
+    background: linear-gradient(180deg, rgba(0, 200, 83, 0.12), rgba(0, 200, 83, 0.04));
+}
+
+.loginBannerCopy {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.loginBannerCopy strong {
+    font-size: 0.98rem;
+    font-weight: 800;
+}
+
+.loginBannerCopy p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
+.loginBannerBtn {
+    flex-shrink: 0;
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: none;
+    background: #00c853;
+    color: #04130a;
+    font-weight: 800;
+    font-size: 0.86rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.loginBannerBtn:hover {
+    filter: brightness(1.05);
+}
+
+.loginBannerBtn:active {
+    transform: scale(0.96);
+}
+
+.cardStatusRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.cardStatus {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.cardStatusDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.cardStatusDotOpen {
+    background: #00e676;
+    box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.18);
+}
+
+.cardTime {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.matchScoreRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+}
+
+.teamSide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    min-width: 0;
+}
+
+.teamName {
+    font-size: 0.92rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.scoreInputs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.scoreInputBox {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.scoreInputBox:focus {
+    outline: none;
+    border-color: rgba(0, 200, 83, 0.6);
+    box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.16);
+}
+
+.scoreInputBox::placeholder {
+    color: rgba(255, 255, 255, 0.28);
+}
+
+.scoreColon {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--color-text-secondary);
+}
+
+.scoreTeamCrestLg,
+.scoreTeamCrestFallbackLg {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.scoreTeamCrestLg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 8px;
+}
+
+.scoreTeamCrestFallbackLg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.saveBtnFull {
+    width: 100%;
+    min-height: 46px;
+    border-radius: 16px;
+    border: none;
+    background: #00c853;
+    color: #04130a;
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.saveBtnFull:hover {
+    filter: brightness(1.05);
+}
+
+.saveBtnFull:active {
+    transform: scale(0.985);
+}
+
+.saveBtnFull:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.saveBtnFullSaved {
+    background: rgba(0, 200, 83, 0.14);
+    color: #86f6b6;
+    border: 1px solid rgba(0, 200, 83, 0.34);
+}
+
+.quickRules {
+    display: grid;
+    gap: 12px;
+    padding: 16px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent), var(--color-bg-secondary);
+}
+
+.quickRulesHead {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.quickRulesHead h3 {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 800;
+}
+
+.quickRulesList {
+    display: grid;
+    gap: 8px;
+}
+
+.quickRulesRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    font-size: 0.86rem;
+    color: var(--color-text-secondary);
+}
+
 .backLink {
     display: inline-flex;
     align-items: center;
@@ -2223,6 +2539,37 @@
     .scoreTeamCrestFallback {
         width: 26px;
         height: 26px;
+    }
+
+    .matchScoreRow {
+        gap: 6px;
+    }
+
+    .scoreInputBox {
+        width: 44px;
+        height: 44px;
+        font-size: 1.25rem;
+        border-radius: 13px;
+    }
+
+    .scoreTeamCrestLg,
+    .scoreTeamCrestFallbackLg {
+        width: 42px;
+        height: 42px;
+    }
+
+    .teamName {
+        font-size: 0.82rem;
+    }
+
+    .loginBanner {
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .saveBtnFull {
+        min-height: 42px;
+        font-size: 0.84rem;
     }
 
     .pickSaveBtn,

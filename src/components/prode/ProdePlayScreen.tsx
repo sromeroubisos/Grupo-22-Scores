@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Shield } from 'lucide-react';
+import { Shield, Gavel } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import styles from '@/app/prode/page.module.css';
 import type { ProdePlayEvent, ProdePlayPrediction, ProdePlayView, ProdePredictionOutcome } from '@/lib/prode/types';
@@ -41,6 +41,25 @@ function formatDateDivider(value: string) {
     }
 }
 
+function formatKickoffTime(value: string) {
+    try {
+        return new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
+    } catch {
+        return '';
+    }
+}
+
+function formatDayChip(value: string) {
+    try {
+        const date = new Date(value);
+        const weekday = new Intl.DateTimeFormat('es-AR', { weekday: 'short' }).format(date).replace('.', '');
+        const day = new Intl.DateTimeFormat('es-AR', { day: 'numeric' }).format(date);
+        return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)} ${day}`;
+    } catch {
+        return value;
+    }
+}
+
 function formatTimeUntil(value: string | null) {
     if (!value) return 'Sin cierre inmediato';
 
@@ -73,12 +92,15 @@ function formatScorePair(homeScore: number | null, awayScore: number | null) {
     return `${homeScore} - ${awayScore}`;
 }
 
-function TeamCrest({ label, logoUrl }: { label: string; logoUrl: string | null }) {
+function TeamCrest({ label, logoUrl, size = 'sm' }: { label: string; logoUrl: string | null; size?: 'sm' | 'lg' }) {
     const [imageFailed, setImageFailed] = useState(false);
+    const isLarge = size === 'lg';
+    const wrapClass = isLarge ? styles.scoreTeamCrestLg : styles.scoreTeamCrest;
+    const fallbackClass = isLarge ? styles.scoreTeamCrestFallbackLg : styles.scoreTeamCrestFallback;
 
     if (logoUrl && !imageFailed) {
         return (
-            <span className={styles.scoreTeamCrest} aria-hidden="true">
+            <span className={wrapClass} aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     src={logoUrl}
@@ -92,8 +114,8 @@ function TeamCrest({ label, logoUrl }: { label: string; logoUrl: string | null }
     }
 
     return (
-        <span className={styles.scoreTeamCrestFallback} aria-hidden="true" title={label}>
-            <Shield size={16} strokeWidth={2.1} />
+        <span className={fallbackClass} aria-hidden="true" title={label}>
+            <Shield size={isLarge ? 22 : 16} strokeWidth={2.1} />
         </span>
     );
 }
@@ -157,6 +179,8 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
     const [feedback, setFeedback] = useState<Record<string, string>>({});
     const [copiedTarget, setCopiedTarget] = useState<'code' | 'link' | null>(null);
     const [activeTab, setActiveTab] = useState<'play' | 'table' | 'rules'>('play');
+    // Día seleccionado en el date picker del play (null = aún sin elegir → cae al primero abierto).
+    const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
     const [isEditingRules, setIsEditingRules] = useState(false);
     const [isSavingRules, setIsSavingRules] = useState(false);
     const [rulesFeedback, setRulesFeedback] = useState<string | null>(null);
@@ -208,6 +232,16 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
 
         return groups;
     }, [openEvents]);
+
+    // El date picker filtra por día: el chip elegido (o el primer día abierto por defecto)
+    // define qué grupo se muestra. Si el día seleccionado ya no existe, cae al primero.
+    const activeDayKey = openEventGroups.some((group) => group.key === selectedDayKey)
+        ? selectedDayKey
+        : openEventGroups[0]?.key ?? null;
+    const visibleGroups = useMemo(
+        () => (activeDayKey ? openEventGroups.filter((group) => group.key === activeDayKey) : openEventGroups),
+        [activeDayKey, openEventGroups],
+    );
 
     const latestClosedEvents = useMemo(() => {
         // El historial dice "tus últimos cierres, con resultado y puntos": prioriza
@@ -547,15 +581,41 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                     </div>
                                 </div>
 
-                                {!user ? (
-                                    <div className={styles.warning}>
-                                        Para guardar picks tenes que iniciar sesion. Apenas elijas un resultado te llevamos directo al login.
+                                {openEventGroups.length > 1 ? (
+                                    <nav className={styles.datePicker} aria-label="Elegir fecha">
+                                        {openEventGroups.map((group) => (
+                                            <button
+                                                key={group.key}
+                                                type="button"
+                                                className={`${styles.dateChip} ${group.key === activeDayKey ? styles.dateChipActive : ''}`}
+                                                aria-pressed={group.key === activeDayKey}
+                                                onClick={() => setSelectedDayKey(group.key)}
+                                            >
+                                                {formatDayChip(group.events[0]?.startsAt ?? group.key)}
+                                            </button>
+                                        ))}
+                                    </nav>
+                                ) : null}
+
+                                {!user && openEvents.length ? (
+                                    <div className={styles.loginBanner}>
+                                        <div className={styles.loginBannerCopy}>
+                                            <strong>Inicia sesion para guardar</strong>
+                                            <p>Apenas elijas un resultado te llevamos directo al login.</p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className={styles.loginBannerBtn}
+                                            onClick={() => login('fan', typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/prode')}
+                                        >
+                                            Ingresar
+                                        </button>
                                     </div>
                                 ) : null}
 
                                 {openEvents.length ? (
                                     <div className={styles.pickList}>
-                                        {openEventGroups.map((group) => (
+                                        {visibleGroups.map((group) => (
                                             <div key={group.key} className={styles.pickGroup}>
                                                 <div className={styles.dateDivider}>
                                                     <span>{group.label}</span>
@@ -565,65 +625,62 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                                     const currentPrediction = event.prediction;
                                                     return (
                                                         <article key={event.id} className={styles.pickCard}>
-                                                            <div className={styles.pickCardTop}>
-                                                                <div>
-                                                                    <h3 className={styles.pickMatchTitle}>{event.homeLabel} vs {event.awayLabel}</h3>
-                                                                    <p className={styles.pickMatchMeta}>{formatDate(event.startsAt)}</p>
+                                                            <div className={styles.cardStatusRow}>
+                                                                <span className={styles.cardStatus}>
+                                                                    <span className={`${styles.cardStatusDot} ${event.isOpen ? styles.cardStatusDotOpen : ''}`} />
+                                                                    {getEventStatusLabel(event)}
+                                                                </span>
+                                                                <span className={styles.cardTime}>{formatKickoffTime(event.startsAt)}</span>
+                                                            </div>
+
+                                                            <div className={styles.matchScoreRow}>
+                                                                <div className={styles.teamSide}>
+                                                                    <TeamCrest label={event.homeLabel} logoUrl={event.homeLogoUrl} size="lg" />
+                                                                    <span className={styles.teamName}>{event.homeLabel}</span>
                                                                 </div>
-                                                                <span className={styles.leagueStatus}>{getEventStatusLabel(event)}</span>
-                                                            </div>
 
-                                                            <div className={styles.scoreEntryRow}>
-                                                                <label className={styles.scoreInputGroup}>
-                                                                    <span>{event.homeLabel}</span>
-                                                                    <div className={styles.scoreInputShell}>
-                                                                        <TeamCrest label={event.homeLabel} logoUrl={event.homeLogoUrl} />
-                                                                        <input
-                                                                            type="text"
-                                                                            inputMode="numeric"
-                                                                            className={styles.scoreInput}
-                                                                            value={scoreDrafts[event.id]?.home ?? ''}
-                                                                            onChange={(eventInput) => updateScoreDraft(event.id, 'home', eventInput.target.value)}
-                                                                            placeholder="0"
-                                                                            disabled={savingEventId === event.id}
-                                                                        />
-                                                                    </div>
-                                                                </label>
-
-                                                                <span className={styles.scoreDivider}>-</span>
-
-                                                                <label className={`${styles.scoreInputGroup} ${styles.scoreInputGroupAway}`}>
-                                                                    <span>{event.awayLabel}</span>
-                                                                    <div className={`${styles.scoreInputShell} ${styles.scoreInputShellReverse}`}>
-                                                                        <input
-                                                                            type="text"
-                                                                            inputMode="numeric"
-                                                                            className={styles.scoreInput}
-                                                                            value={scoreDrafts[event.id]?.away ?? ''}
-                                                                            onChange={(eventInput) => updateScoreDraft(event.id, 'away', eventInput.target.value)}
-                                                                            placeholder="0"
-                                                                            disabled={savingEventId === event.id}
-                                                                        />
-                                                                        <TeamCrest label={event.awayLabel} logoUrl={event.awayLogoUrl} />
-                                                                    </div>
-                                                                </label>
-                                                            </div>
-
-                                                            <div className={styles.pickFooter}>
-                                                                <div className={styles.pickFooterActions}>
-                                                                    <span className={styles.pickFeedback}>
-                                                                        {feedback[event.id] || (currentPrediction ? 'Guardado' : `Cierra: ${formatDate(event.locksAt)}`)}
-                                                                    </span>
-                                                                    <button
-                                                                        type="button"
-                                                                        className={`${styles.pickSaveBtn} ${currentPrediction ? styles.pickSaveBtnSaved : styles.pickSaveBtnPending}`}
-                                                                        onClick={() => void savePrediction(event)}
+                                                                <div className={styles.scoreInputs}>
+                                                                    <input
+                                                                        type="text"
+                                                                        inputMode="numeric"
+                                                                        aria-label={`Goles ${event.homeLabel}`}
+                                                                        className={styles.scoreInputBox}
+                                                                        value={scoreDrafts[event.id]?.home ?? ''}
+                                                                        onChange={(eventInput) => updateScoreDraft(event.id, 'home', eventInput.target.value)}
+                                                                        placeholder="-"
                                                                         disabled={savingEventId === event.id}
-                                                                    >
-                                                                        {savingEventId === event.id ? 'Guardando...' : currentPrediction ? 'Actualizar pick' : 'Guardar pronostico'}
-                                                                    </button>
+                                                                    />
+                                                                    <span className={styles.scoreColon}>:</span>
+                                                                    <input
+                                                                        type="text"
+                                                                        inputMode="numeric"
+                                                                        aria-label={`Goles ${event.awayLabel}`}
+                                                                        className={styles.scoreInputBox}
+                                                                        value={scoreDrafts[event.id]?.away ?? ''}
+                                                                        onChange={(eventInput) => updateScoreDraft(event.id, 'away', eventInput.target.value)}
+                                                                        placeholder="-"
+                                                                        disabled={savingEventId === event.id}
+                                                                    />
+                                                                </div>
+
+                                                                <div className={styles.teamSide}>
+                                                                    <TeamCrest label={event.awayLabel} logoUrl={event.awayLogoUrl} size="lg" />
+                                                                    <span className={styles.teamName}>{event.awayLabel}</span>
                                                                 </div>
                                                             </div>
+
+                                                            <button
+                                                                type="button"
+                                                                className={`${styles.saveBtnFull} ${currentPrediction ? styles.saveBtnFullSaved : ''}`}
+                                                                onClick={() => void savePrediction(event)}
+                                                                disabled={savingEventId === event.id}
+                                                            >
+                                                                {savingEventId === event.id ? 'Guardando...' : currentPrediction ? 'Actualizar pronostico' : 'Guardar pronostico'}
+                                                            </button>
+
+                                                            <span className={styles.pickFeedback}>
+                                                                {feedback[event.id] || (currentPrediction ? 'Pronostico guardado' : `Cierra: ${formatDate(event.locksAt)}`)}
+                                                            </span>
                                                         </article>
                                                     );
                                                 })}
@@ -636,6 +693,23 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                     </div>
                                 )}
                             </section>
+
+                            {openEvents.length && view.rules.items.length ? (
+                                <section className={styles.quickRules}>
+                                    <div className={styles.quickRulesHead}>
+                                        <Gavel size={16} color="#86f6b6" />
+                                        <h3>Reglas rapidas</h3>
+                                    </div>
+                                    <div className={styles.quickRulesList}>
+                                        {view.rules.items.map((rule) => (
+                                            <div key={rule.key} className={styles.quickRulesRow}>
+                                                <span>{rule.label}</span>
+                                                <span className={styles.rulesPoints}>+{rule.points} pts</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            ) : null}
 
                             <section className={styles.section}>
                                 <div className={styles.sectionHeader}>

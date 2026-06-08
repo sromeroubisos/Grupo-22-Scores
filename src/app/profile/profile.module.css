@@ -7,36 +7,23 @@
 /* ── Layout grid ──────────────────────────────────────────────────────────── */
 
 .container {
-    max-width: 1200px;
+    max-width: 920px;
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-}
-
-@media (min-width: 1024px) {
-    .container {
-        /* Header spans full width; col 1 = main content, col 2 = sidebar */
-        grid-template-columns: 2fr 1fr;
-    }
-}
-
-.mainColumn {
     display: flex;
     flex-direction: column;
+    gap: 20px;
     min-width: 0;
+}
+
+/* Prode lobby is a dense multi-column hub — let it breathe full width. */
+.containerWide {
+    max-width: 1200px;
 }
 
 .profileStack {
     display: grid;
     gap: 20px;
-}
-
-.inlineSettingsShell {
-    background: var(--color-bg-primary);
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    padding: 20px;
+    min-width: 0;
 }
 
 /* ── Profile Header ───────────────────────────────────────────────────────── */
@@ -206,24 +193,6 @@
 
 /* ── Main content area ────────────────────────────────────────────────────── */
 
-.mainContent {
-    display: grid;
-    gap: 20px;
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: 20px;
-    padding: 24px;
-    min-height: 360px;
-}
-
-.mainContentProde {
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    padding: 0;
-    min-height: 0;
-}
-
 .embeddedProdeShell {
     min-width: 0;
 }
@@ -387,43 +356,63 @@
 
 /* ── Settings list (sidebar / mobile tab) ─────────────────────────────────── */
 
-.settingsList {
+.settingsCard {
     display: flex;
     flex-direction: column;
+    gap: 16px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    padding: 24px;
+    min-width: 0;
 }
 
 .sidebarSectionTitle {
     font-size: 15px;
     font-weight: 700;
     color: var(--color-text-primary);
-    margin: 0 0 12px 0;
+    margin: 0;
 }
 
-.settingItem {
+/* Two preference cards share a row on desktop */
+.preferenceGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+}
+
+/* Compact settings rows tiled across the available width */
+.settingsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.settingTile {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 13px 0;
-    border-bottom: 1px solid var(--color-border);
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-surface-2, rgba(255, 255, 255, 0.03));
+    text-decoration: none;
     cursor: default;
+    transition: border-color 0.15s, background 0.15s;
 }
 
-.settingItemBtn {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 13px 0;
-    border-bottom: 1px solid var(--color-border);
-    width: 100%;
-    background: transparent;
-    border-left: none;
-    border-right: none;
-    border-top: none;
+.settingTileLink {
     cursor: pointer;
-    text-align: left;
 }
 
-.settingItemBtn:hover .settingInfo h4 {
+.settingTileLink:hover {
+    border-color: rgba(0, 200, 83, 0.4);
+    background: rgba(0, 200, 83, 0.05);
+}
+
+.settingTileLink:hover .settingInfo h4 {
     color: var(--color-accent);
 }
 
@@ -441,35 +430,47 @@
     color: var(--color-text-secondary);
 }
 
-.settingsDivider {
-    height: 1px;
-    background: var(--color-border);
-    margin: 8px 0;
+.settingsFooter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border);
+    margin-top: 4px;
 }
 
 .btnLogout {
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 14px 0;
+    padding: 11px 18px;
     color: #ef4444;
     font-weight: 600;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--color-border);
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 10px;
     cursor: pointer;
-    width: 100%;
     font-size: 14px;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.btnLogout:hover {
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.4);
 }
 
 .btnDanger {
-    padding: 10px 0;
+    margin-left: auto;
+    padding: 10px 8px;
     color: var(--color-text-tertiary);
     background: transparent;
     border: none;
     cursor: pointer;
     font-size: 12px;
     text-align: left;
+    transition: color 0.15s;
 }
 
 .btnDanger:hover {
@@ -1076,9 +1077,9 @@
     border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 14px 16px;
-    margin-bottom: 12px;
     display: grid;
     gap: 10px;
+    align-content: start;
 }
 
 .preferenceHeader {
@@ -1283,19 +1284,18 @@
         text-align: center;
     }
 
-    .mainContent {
+    .settingsCard {
+        padding: 18px 16px;
         border-radius: 16px;
-        padding: 20px 16px;
+        gap: 14px;
     }
 
-    .mainContentProde {
-        border-radius: 0;
-        padding: 0;
+    .preferenceGrid {
+        grid-template-columns: 1fr;
     }
 
-    .inlineSettingsShell {
-        padding: 16px;
-        border-radius: 14px;
+    .settingsGrid {
+        grid-template-columns: 1fr;
     }
 
     .seguridosGrid {
