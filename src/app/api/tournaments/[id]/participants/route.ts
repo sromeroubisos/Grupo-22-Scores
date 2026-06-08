@@ -18,6 +18,7 @@ import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/
 import { normalizeSlug } from '@/lib/utils/normalize';
 import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { isUuid } from '@/lib/utils/postgrest';
 import { createApiPerfTracker } from '@/lib/perf/api';
 import { logOverfetchWarning } from '@/lib/perf/measure';
 
@@ -696,7 +697,11 @@ export async function GET(
       searchParams.get('season_id') ||
       searchParams.get('season');
     let scopedSeasonId = requestedSeasonId?.trim() || null;
-    if (!scopedSeasonId) {
+    // External competition ids (FlashScore/ESPN) are not UUIDs and have no local
+    // season to scope to. Skip the lookup so we don't pass a non-UUID into the
+    // `tournaments.id` (uuid) column — those requests are served by the external
+    // branches below.
+    if (!scopedSeasonId && isUuid(tournamentId)) {
       const { data: tournamentSeason } = await supabase
         .from('tournaments')
         .select('current_season_id')
@@ -871,6 +876,12 @@ export async function GET(
     }
 
     // ─── REGULAR SUPABASE SUPPORT ─────────────────────────────────────────────
+    // Past this point we query local tables by `tournament_id` (uuid). Any id that
+    // is neither a UUID nor a recognized external id (handled above) has no local
+    // participants — return empty instead of passing a non-UUID into a uuid column.
+    if (!isUuid(tournamentId)) {
+      return perf.json([]);
+    }
     const supportsDivisionId = await perf.measureStep(
       'check_division_id_support',
       async () => supportsTournamentParticipantDivisionId(supabase),

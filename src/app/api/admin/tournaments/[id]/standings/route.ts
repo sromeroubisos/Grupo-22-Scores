@@ -10,6 +10,7 @@ import {
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 import { resolveStandingsCarryOverRows } from '@/lib/server/standingsCarryOver';
 import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
+import { isUuid } from '@/lib/utils/postgrest';
 
 // --- Circuit placement points helpers ---
 
@@ -291,6 +292,12 @@ export async function GET(
 ) {
     try {
         const { id: tournamentId } = await params;
+        // Admin standings only exist for internal (UUID) tournaments. A non-UUID id
+        // would be passed straight into the `tournaments.id` / `tournament_phases.tournament_id`
+        // uuid columns below, so reject it up front instead of spamming Postgres.
+        if (!isUuid(tournamentId)) {
+            return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
+        }
         const searchParams = request.nextUrl.searchParams;
         const phaseId = searchParams.get('phaseId');
         const groupId = searchParams.get('groupId');

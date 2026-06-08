@@ -13,6 +13,7 @@ import {
 } from '@/lib/server/playoffStages';
 import { createApiPerfTracker } from '@/lib/perf/api';
 import { logOverfetchWarning } from '@/lib/perf/measure';
+import { isUuid } from '@/lib/utils/postgrest';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +43,12 @@ export async function GET(
   const perf = createApiPerfTracker(route);
 
   try {
+    // Local-only route: a non-UUID tournament id (e.g. an external FlashScore/ESPN
+    // competition) has no local phases. Bail out before any query passes a non-UUID
+    // into the `tournaments.id` / `tournament_phases.tournament_id` uuid columns.
+    if (!isUuid(tournamentId)) {
+      return perf.json({ data: [] });
+    }
     const supabase = await perf.measureStep('create_client', () => createClient(), {
       bucket: 'client',
     });

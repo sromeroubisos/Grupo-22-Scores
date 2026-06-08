@@ -396,6 +396,14 @@ export async function getTournamentManagementTarget(
     supabase: SupabaseServerClient,
     tournamentId: string
 ): Promise<TournamentManagementTarget | null> {
+    // External provider IDs (FlashScore, ESPN) are not UUIDs and have no local
+    // tournament target. Skip the lookup so we don't pass a non-UUID into the
+    // `tournaments.id` (uuid) column — mirrors getMatchManagementTarget below.
+    // This guards every tournament mutation route via requireTournamentMutationContext.
+    if (!isUuid(tournamentId)) {
+        return null;
+    }
+
     const { data, error } = await supabase
         .from('tournaments')
         .select('id, sport_id, union_id')

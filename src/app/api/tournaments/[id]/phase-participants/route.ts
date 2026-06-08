@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { isUuid } from '@/lib/utils/postgrest';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,6 +95,13 @@ export async function GET(
 ) {
   try {
     const tournamentId = (await params).id;
+    // Local-only route: a non-UUID tournament id (e.g. an external FlashScore/ESPN
+    // competition) has no local phase participants. Bail out before any query passes
+    // a non-UUID into the `tournaments.id` / `tournament_phase_participants.tournament_id`
+    // uuid columns.
+    if (!isUuid(tournamentId)) {
+      return NextResponse.json({ ok: true, tableReady: true, assignments: [] });
+    }
     const supabase = await createClient();
     const requestedSeasonId =
       request.nextUrl.searchParams.get('seasonId') ||
