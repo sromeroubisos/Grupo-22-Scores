@@ -116,6 +116,7 @@ function buildResolvedMatchTeam(
         source?: string | null;
         team_url?: string | null;
         teamUrl?: string | null;
+        updated_at?: string | null;
     } | null | undefined,
     fallbackName: string,
     fallbackShortName: string
@@ -136,6 +137,7 @@ function buildResolvedMatchTeam(
         small_image_path: team?.small_image_path || '',
         source: team?.source || '',
         team_url: team?.team_url || team?.teamUrl || '',
+        logo_updated_at: team?.updated_at || '',
     }));
     const imagePath = resolvedLogo || sanitizeInlineAssetUrl(team?.image_path || team?.small_image_path || team?.logo || team?.logo_url || null);
     const smallImagePath = resolvedLogo || sanitizeInlineAssetUrl(team?.small_image_path || team?.image_path || team?.logo || team?.logo_url || null);
@@ -294,6 +296,7 @@ type DbClubLite = {
     primary_color?: string | null;
     sport?: string | null;
     sport_id?: string | null;
+    updated_at?: string | null;
 };
 
 function resolveClubSport(club?: DbClubLite | null) {
@@ -374,6 +377,7 @@ async function fetchDbLookupMaps(
             'id',
             clubIds,
             [
+                'id, name, short_name, logo_url, primary_color, sport_id, sport, updated_at',
                 'id, name, short_name, logo_url, primary_color, sport_id, sport',
                 'id, name, short_name, logo_url, primary_color, sport_id',
                 'id, name, short_name, logo_url, primary_color, sport',
@@ -490,6 +494,7 @@ function mapDbMatchToPublicFeed(
             name: homeTeam.name,
             logo_url: homeTeam.logo_url || '',
             shortName: homeTeam.short_name || homeTeam.name?.substring(0, 3).toUpperCase() || 'LOC',
+            updated_at: homeTeam.updated_at || '',
         } : {
             id: match.home_club_id,
             name: 'Local',
@@ -501,6 +506,7 @@ function mapDbMatchToPublicFeed(
             name: awayTeam.name,
             logo_url: awayTeam.logo_url || '',
             shortName: awayTeam.short_name || awayTeam.name?.substring(0, 3).toUpperCase() || 'VIS',
+            updated_at: awayTeam.updated_at || '',
         } : {
             id: match.away_club_id,
             name: 'Visitante',
