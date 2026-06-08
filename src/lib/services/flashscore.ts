@@ -34,7 +34,16 @@ const API_HOST = process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidap
 const CACHE_TTL_MATCHES = 60;   // 60 seconds for match lists default
 const CACHE_TTL_LIVE = 5;       // 5 seconds for live matches
 const CACHE_TTL_DETAILS = 30;   // 30 seconds for match details
-const CACHE_TTL_TOURNAMENTS = 24 * 60 * 60; // 24 hours for tournaments
+const CACHE_TTL_TOURNAMENTS = 24 * 60 * 60; // 24 hours for tournaments (metadata: details/archives/ids)
+// Tournament endpoints that reflect live match state (results/fixtures/standings/...)
+// use a dynamic TTL: short while the tournament has live/today matches (state changes
+// fast), long (CACHE_TTL_TOURNAMENTS) for past/idle seasons. Mirrors the dynamic-TTL
+// approach in getFlashScoreMatchesRaw.
+const CACHE_TTL_TOURNAMENT_LIVE = 60;            // tournament has live/today matches → refresh fast
+const CACHE_TTL_TOURNAMENT_ACTIVITY_UNKNOWN = 120; // standings/top-scorers before the tournament is classified
+const TOURNAMENT_ACTIVE_WINDOW_PAST_MS = 12 * 60 * 60 * 1000;   // a match counts as "active" up to 12h after kickoff
+const TOURNAMENT_ACTIVE_WINDOW_FUTURE_MS = 36 * 60 * 60 * 1000; // ...and up to 36h before kickoff
+const TOURNAMENT_ACTIVITY_MARKER_PREFIX = 'tournament-activity-';
 const CACHE_TTL_CATALOG = 60;   // 60 seconds for countries and leagues catalog
 const CACHE_TTL_TEAMS = 24 * 60 * 60;       // 24 hours for teams
 const CACHE_TTL_PLAYERS = 24 * 60 * 60;     // 24 hours for player info
@@ -138,6 +147,65 @@ function countFlashScoreRawMatches(data: any): number {
     return getFlashScoreRawTournamentList(data).reduce((total, tournament) => {
         return total + (Array.isArray(tournament?.matches) ? tournament.matches.length : 0);
     }, 0);
+}
+
+// ─── Dynamic tournament cache TTL ────────────────────────────────────────────
+// A tournament is "active" when it has a live match, or a match starting/finishing
+// inside the active window around now. Active tournaments change state fast, so we
+// cache results/fixtures/standings briefly; idle/past seasons keep the long 24h TTL.
+// Returns the FlashScore tournament_id(s) found so sibling endpoints whose payload
+// has no per-match timestamps (standings/top-scorers) can reuse the classification.
+function resolveTournamentActivity(data: any): { isActive: boolean; tournamentIds: string[] } {
+    const groups = getFlashScoreRawTournamentList(data);
+    const now = Date.now();
+    let isActive = false;
+    const tournamentIds: string[] = [];
+
+    for (const group of groups) {
+        const tid = group?.tournament_id != null ? String(group.tournament_id).trim() : '';
+        if (tid && !tournamentIds.includes(tid)) tournamentIds.push(tid);
+
+        const matches = Array.isArray(group?.matches) ? group.matches : [];
+        for (const evt of matches) {
+            if (mapStatus(evt?.match_status, evt?.status) === 'live') {
+                isActive = true;
+                continue;
+            }
+            const tsSec = Number(evt?.timestamp || evt?.start_time || evt?.time || evt?.event_timestamp || 0);
+            if (tsSec > 0) {
+                const tsMs = tsSec * 1000;
+                if (tsMs >= now - TOURNAMENT_ACTIVE_WINDOW_PAST_MS && tsMs <= now + TOURNAMENT_ACTIVE_WINDOW_FUTURE_MS) {
+                    isActive = true;
+                }
+            }
+        }
+    }
+
+    return { isActive, tournamentIds };
+}
+
+// Publish the active/idle classification per FlashScore tournament_id so that
+// standings/top-scorers (fetched in the same request, with no match timestamps in
+// their own payload) can pick the matching TTL. "true" is sticky within a request:
+// an idle signal never downgrades a tournament another endpoint just marked active.
+function publishTournamentActivity(tournamentIds: string[], isActive: boolean): void {
+    for (const tid of tournamentIds) {
+        const key = `${TOURNAMENT_ACTIVITY_MARKER_PREFIX}${tid}`;
+        if (isActive) {
+            memoryCache.set(key, true, CACHE_TTL_TOURNAMENTS);
+        } else if (memoryCache.get<boolean>(key) !== true) {
+            memoryCache.set(key, false, CACHE_TTL_TOURNAMENTS);
+        }
+    }
+}
+
+// TTL for endpoints whose payload has no match timestamps (standings/top-scorers):
+// reuse the classification published by results/fixtures for the same tournament_id.
+function resolveSiblingTournamentTtl(tournamentId: string): number {
+    const marker = memoryCache.get<boolean>(`${TOURNAMENT_ACTIVITY_MARKER_PREFIX}${tournamentId}`);
+    if (marker === true) return CACHE_TTL_TOURNAMENT_LIVE;
+    if (marker === false) return CACHE_TTL_TOURNAMENTS;
+    return CACHE_TTL_TOURNAMENT_ACTIVITY_UNKNOWN; // not yet classified → re-check soon
 }
 
 // Root is Array of Tournaments: { tournament_id, name, country_name, matches: Array<Match> }
@@ -873,10 +941,14 @@ export async function getTournamentResults(tournamentTemplateId: string, seasonI
         headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
         debugTag: 'TournamentResults',
         silent: true,
-        cacheTtl: CACHE_TTL_TOURNAMENTS
+        cacheTtl: 0
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
+    if (data) {
+        const { isActive, tournamentIds } = resolveTournamentActivity(data);
+        publishTournamentActivity(tournamentIds, isActive);
+        memoryCache.set(cacheKey, data, isActive ? CACHE_TTL_TOURNAMENT_LIVE : CACHE_TTL_TOURNAMENTS);
+    }
     return data;
 }
 
@@ -890,10 +962,14 @@ export async function getTournamentFixtures(tournamentTemplateId: string, season
         headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
         debugTag: 'TournamentFixtures',
         silent: true,
-        cacheTtl: CACHE_TTL_TOURNAMENTS
+        cacheTtl: 0
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
+    if (data) {
+        const { isActive, tournamentIds } = resolveTournamentActivity(data);
+        publishTournamentActivity(tournamentIds, isActive);
+        memoryCache.set(cacheKey, data, isActive ? CACHE_TTL_TOURNAMENT_LIVE : CACHE_TTL_TOURNAMENTS);
+    }
     return data;
 }
 
@@ -907,10 +983,10 @@ export async function getTournamentStandings(tournamentId: string, stageId: stri
         headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
         debugTag: 'TournamentStandings',
         silent: true,
-        cacheTtl: CACHE_TTL_TOURNAMENTS
+        cacheTtl: 0
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
+    if (data) memoryCache.set(cacheKey, data, resolveSiblingTournamentTtl(tournamentId));
     return data;
 }
 
@@ -924,10 +1000,10 @@ export async function getTournamentTopScorers(tournamentId: string, stageId: str
         headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
         debugTag: 'TournamentTopScorers',
         silent: true,
-        cacheTtl: CACHE_TTL_TOURNAMENTS
+        cacheTtl: 0
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
+    if (data) memoryCache.set(cacheKey, data, resolveSiblingTournamentTtl(tournamentId));
     return data;
 }
 
@@ -941,10 +1017,10 @@ export async function getTournamentStandingsForm(tournamentId: string, stageId: 
         headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
         debugTag: 'TournamentStandingsForm',
         silent: true,
-        cacheTtl: CACHE_TTL_TOURNAMENTS
+        cacheTtl: 0
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
+    if (data) memoryCache.set(cacheKey, data, resolveSiblingTournamentTtl(tournamentId));
     return data;
 }
 
@@ -958,10 +1034,10 @@ export async function getTournamentStandingsHtFt(tournamentId: string, stageId: 
         headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
         debugTag: 'TournamentStandingsHtFt',
         silent: true,
-        cacheTtl: CACHE_TTL_TOURNAMENTS
+        cacheTtl: 0
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
+    if (data) memoryCache.set(cacheKey, data, resolveSiblingTournamentTtl(tournamentId));
     return data;
 }
 
@@ -980,10 +1056,10 @@ export async function getTournamentStandingsOverUnder(
         headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
         debugTag: 'TournamentStandingsOverUnder',
         silent: true,
-        cacheTtl: CACHE_TTL_TOURNAMENTS
+        cacheTtl: 0
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
+    if (data) memoryCache.set(cacheKey, data, resolveSiblingTournamentTtl(tournamentId));
     return data;
 }
 
@@ -1014,10 +1090,15 @@ export async function getTournamentDraw(tournamentId: string, stageId: string) {
         headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
         debugTag: 'TournamentDraw',
         silent: true,
-        cacheTtl: CACHE_TTL_TOURNAMENTS
+        cacheTtl: 0
     });
 
-    if (data) memoryCache.set(cacheKey, data, CACHE_TTL_TOURNAMENTS);
+    if (data) {
+        // Self-classify from the bracket payload; don't publish the activity marker so
+        // a draw with an unparseable shape can't downgrade results/fixtures' signal.
+        const { isActive } = resolveTournamentActivity(data);
+        memoryCache.set(cacheKey, data, isActive ? CACHE_TTL_TOURNAMENT_LIVE : CACHE_TTL_TOURNAMENTS);
+    }
     return data;
 }
 

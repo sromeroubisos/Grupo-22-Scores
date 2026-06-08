@@ -33,6 +33,26 @@ function groupTournamentsByCountry(tournaments: Tournament[]) {
     return groups;
 }
 
+function isExternalTournamentRouteId(id: string): boolean {
+    return /^(fs-|ras-league-|espn-league-|espn-soccer-league-|espn-racing-league-)/i.test(id);
+}
+
+// External (FlashScore/ESPN) tournaments have no durable DB name on the public
+// page, so pass the catalog name/sport/url to avoid the "Cargando…" fallback.
+function buildSidebarTournamentHref(tournament: Tournament): string {
+    const base = `/tournaments/${tournament.id}`;
+    if (!isExternalTournamentRouteId(tournament.id)) return base;
+
+    const query = new URLSearchParams();
+    if (tournament.sportId) query.set('sport', String(tournament.sportId));
+    if (tournament.name) query.set('name', tournament.displayName || tournament.name);
+    const rawUrl = String(tournament.url || '').trim();
+    if (rawUrl && !rawUrl.startsWith('/tournaments/')) query.set('url', rawUrl);
+
+    const qs = query.toString();
+    return qs ? `${base}?${qs}` : base;
+}
+
 export default function Sidebar() {
     const { selectedSport } = useSport();
     const [expandedCountries, setExpandedCountries] = useState<Set<string>>(new Set(['international']));
@@ -147,7 +167,7 @@ export default function Sidebar() {
                                 {filteredInternational.map(tournament => (
                                     <Link
                                         key={tournament.id}
-                                        href={`/tournaments/${tournament.id}`}
+                                        href={buildSidebarTournamentHref(tournament)}
                                         className={styles.tournamentLink}
                                     >
                                         <span className={styles.tournamentName}>{tournament.name}</span>
@@ -182,7 +202,7 @@ export default function Sidebar() {
                                     {group.tournaments.map(tournament => (
                                         <Link
                                             key={tournament.id}
-                                            href={`/tournaments/${tournament.id}`}
+                                            href={buildSidebarTournamentHref(tournament)}
                                             className={styles.tournamentLink}
                                         >
                                             <span className={styles.tournamentName}>{tournament.name}</span>

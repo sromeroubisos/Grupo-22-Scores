@@ -2185,7 +2185,7 @@ export default function HomePage() {
                       style={{ cursor: 'pointer' }}
                     >
                       <Link
-                        href={`/tournaments/${league.leagueId}?sport=${selectedSport.id}`}
+                        href={`/tournaments/${league.leagueId}?sport=${selectedSport.id}${league.league ? `&name=${encodeURIComponent(league.league)}` : ''}`}
                         className={styles.leagueHeaderLink}
                         onClick={(e) => e.stopPropagation()}
                       >

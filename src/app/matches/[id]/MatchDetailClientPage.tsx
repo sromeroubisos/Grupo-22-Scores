@@ -172,7 +172,7 @@ function buildTeamHref(
     return `/clubs/${id}${qs ? `?${qs}` : ''}`;
 }
 
-function buildTournamentHref(tournamentId?: string, season?: string | number | null) {
+function buildTournamentHref(tournamentId?: string, season?: string | number | null, name?: string | null) {
     if (!tournamentId) return null;
 
     const id = tournamentId.startsWith('fs-') || tournamentId.startsWith('ras-league-') || tournamentId.startsWith('espn-league-') || tournamentId.startsWith('espn-racing-league-')
@@ -191,6 +191,13 @@ function buildTournamentHref(tournamentId?: string, season?: string | number | n
     }
     if ((tournamentId.startsWith('ras-league-') || tournamentId.startsWith('espn-league-') || tournamentId.startsWith('espn-racing-league-')) && season != null && season !== '') {
         params.set('season', String(season));
+    }
+    // Carry the known name so external (FlashScore/ESPN) tournaments show their
+    // title immediately on the destination page instead of "Cargando…". Harmless
+    // for local tournaments (the DB name takes precedence on the public page).
+    const trimmedName = String(name || '').trim();
+    if (trimmedName) {
+        params.set('name', trimmedName);
     }
 
     const qs = params.toString();
@@ -1446,7 +1453,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
             },
         })
         : null;
-    const motorsportTournamentHref = buildTournamentHref(matchData.tournamentId, matchData.tournamentSeason);
+    const motorsportTournamentHref = buildTournamentHref(matchData.tournamentId, matchData.tournamentSeason, matchData.tournament);
     const motorsportStatusLabel = getMotorsportStatusLabel(matchData.status);
     const motorsportTitle = matchData.round || matchData.tournament || 'Evento Motorsport';
     const motorsportVenue = matchData.venue || 'Circuito por confirmar';
@@ -1814,7 +1821,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         <div className={styles.breadcrumbs}>
                             <span className={styles.breadcrumbItem}>{matchData.category}</span>
                             {matchData.tournamentId ? (
-                                <Link href={buildTournamentHref(matchData.tournamentId, matchData.tournamentSeason) || '#'} className={styles.breadcrumbItem} style={{ color: 'var(--color-accent, var(--accent))', textDecoration: 'none' }}>
+                                <Link href={buildTournamentHref(matchData.tournamentId, matchData.tournamentSeason, matchData.tournament) || '#'} className={styles.breadcrumbItem} style={{ color: 'var(--color-accent, var(--accent))', textDecoration: 'none' }}>
                                     {matchData.tournament}
                                 </Link>
                             ) : (
