@@ -184,8 +184,8 @@ const MATCH_CENTER_MATCH_SELECT = `
   season_id,
   home_team_id,
   away_team_id,
-  homeClub:home_club_id (id, name, short_name, primary_color),
-  awayClub:away_club_id (id, name, short_name, primary_color),
+  homeClub:home_club_id (id, name, short_name, primary_color, updated_at),
+  awayClub:away_club_id (id, name, short_name, primary_color, updated_at),
   tournament:tournament_id (id, name, display_name, slug, sport_id, external_id, logo_url, banner_url)
 `;
 const PERSIST_MATCH_SELECT_BASE = `
@@ -677,6 +677,9 @@ function buildMatchCenterLogoUrl(entity: unknown, fallbackKey?: string | null) {
   return buildTeamLogoProxyUrl({
     key: normalizeText(source.id) || normalizeText(fallbackKey) || null,
     name: normalizeText(source.name) || normalizeText(source.display_name) || null,
+    // Cache-bust by the entity's last update so a new logo isn't masked by a previously
+    // cached proxy response (including the fallback "initials" SVG served before any logo existed).
+    version: normalizeText(source.updated_at) || normalizeText(source.logo_updated_at) || null,
   });
 }
 
