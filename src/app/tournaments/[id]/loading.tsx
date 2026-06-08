@@ -1,10 +1,11 @@
 export default function TournamentLoading() {
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--bg-primary, #0f1117)', color: '#fff' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-primary, #05070a)', color: '#fff' }}>
             {/* Header skeleton */}
             <div style={{
-                background: 'linear-gradient(135deg, #1a1f2e 0%, #16213e 100%)',
+                background: 'linear-gradient(135deg, #151d27 0%, #0f141b 60%)',
                 padding: '24px 16px 32px',
+                borderTop: '3px solid #00a365',
                 borderBottom: '1px solid rgba(255,255,255,0.06)',
             }}>
                 {/* Back button */}
@@ -30,7 +31,7 @@ export default function TournamentLoading() {
             {/* Tabs skeleton */}
             <div style={{ display: 'flex', gap: 4, padding: '12px 16px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)', overflowX: 'auto' }}>
                 {[72, 88, 64, 104, 64, 72, 88].map((w, i) => (
-                    <div key={i} style={{ width: w, height: 32, borderRadius: 6, background: i === 0 ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.06)', flexShrink: 0, animation: 'pulse 1.5s ease-in-out infinite' }} />
+                    <div key={i} style={{ width: w, height: 32, borderRadius: 6, background: i === 0 ? 'rgba(0,163,101,0.25)' : 'rgba(255,255,255,0.06)', flexShrink: 0, animation: 'pulse 1.5s ease-in-out infinite' }} />
                 ))}
             </div>
 

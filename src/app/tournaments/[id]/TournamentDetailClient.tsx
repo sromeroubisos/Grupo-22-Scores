@@ -2309,9 +2309,46 @@ export default function TournamentDetailPage({
 
     if (loading) {
         return (
-            <div className={styles.loadingContainer}>
-                <div className={styles.spinner}></div>
-                <p>Cargando torneo...</p>
+            <div className={styles.page}>
+                <div className="g22-container">
+                    <div className={styles.skeletonWrap} aria-busy="true" aria-label="Cargando torneo">
+                        {/* Hero */}
+                        <div className={styles.skeletonHero}>
+                            <div className={`${styles.skeleton} ${styles.skLogo}`} />
+                            <div className={styles.skHeroText}>
+                                <div className={`${styles.skeleton} ${styles.skTitle}`} />
+                                <div className={`${styles.skeleton} ${styles.skMeta}`} />
+                            </div>
+                        </div>
+                        {/* Quick stats */}
+                        <div className={styles.skeletonStats}>
+                            {[0, 1, 2, 3, 4].map((i) => (
+                                <div key={i} className={`${styles.skeleton} ${styles.skStat}`} />
+                            ))}
+                        </div>
+                        {/* Tabs */}
+                        <div className={styles.skeletonTabs}>
+                            {[64, 80, 72, 96, 64, 72].map((w, i) => (
+                                <div key={i} className={`${styles.skeleton} ${styles.skTab}`} style={{ width: w }} />
+                            ))}
+                        </div>
+                        {/* Content */}
+                        <div className={styles.skeletonContent}>
+                            <div className={styles.skeletonMain}>
+                                <div className={`${styles.skeleton} ${styles.skFeatured}`} />
+                                {[0, 1, 2, 3, 4, 5].map((i) => (
+                                    <div key={i} className={`${styles.skeleton} ${styles.skRow}`} />
+                                ))}
+                            </div>
+                            <div className={styles.skeletonSide}>
+                                <div className={`${styles.skeleton} ${styles.skSideHead}`} />
+                                {[0, 1, 2, 3, 4, 5].map((i) => (
+                                    <div key={i} className={`${styles.skeleton} ${styles.skSideRow}`} />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -3832,6 +3869,8 @@ export default function TournamentDetailPage({
 
             {/* ── Main Content ─────────────────────────────────────────── */}
             <main className="g22-container" style={{ paddingBottom: '24px' }}>
+              {/* Keyed wrapper: re-mounts on tab switch so the entrance animation re-fires */}
+              <div key={activeTab} className={styles.tabPanel}>
 
                 {/* ── SUMMARY TAB ──────────────────────────────────────── */}
                 {activeTab === 'summary' && (
@@ -4476,6 +4515,7 @@ export default function TournamentDetailPage({
                     </div>
                 )}
 
+              </div>
             </main>
         </div>
     );
