@@ -3411,3 +3411,235 @@
         grid-template-columns: repeat(3, 1fr);
     }
 }
+
+/* ================================================================
+   MOTION — entrances, stagger, micro-interactions
+   Purposeful only: state feedback + content reveals. Mirrors the
+   tournament view's motion language. Disabled entirely under
+   prefers-reduced-motion (block at the bottom).
+   ================================================================ */
+.page {
+    --mo-ease-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --mo-ease-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+    --mo-fast: 140ms;
+    --mo-mid:  240ms;
+    --mo-slow: 480ms;
+}
+
+@keyframes mo-rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: none; }
+}
+@keyframes mo-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+@keyframes mo-indicator-in {
+    from { opacity: 0.3; transform: scaleX(0.35); }
+    to   { opacity: 1;   transform: scaleX(1); }
+}
+
+/* Entrances use `backwards`: every keyframe ends at the element's natural
+   resting state, so once finished the element reverts to base styles and no
+   held transform overrides :hover lifts. */
+
+/* Scoreboard rises once on load; info chips fade in just after */
+.scoreboardCard {
+    animation: mo-rise var(--mo-slow) var(--mo-ease-expo) backwards;
+}
+.infoChip {
+    animation: mo-fade var(--mo-mid) var(--mo-ease-quart) 120ms backwards;
+}
+
+/* Animated underline on the active tab */
+.tabItem.active::after {
+    transform-origin: center;
+    animation: mo-indicator-in var(--mo-mid) var(--mo-ease-expo);
+}
+.tabItem { transition: color var(--mo-fast) var(--mo-ease-quart), transform var(--mo-fast) var(--mo-ease-quart); }
+.tabItem:active { transform: scale(0.96); }
+
+/* Tab content fades on mount and on every tab switch (keyed remount) */
+.tabContent {
+    animation: mo-fade var(--mo-mid) var(--mo-ease-quart) backwards;
+}
+
+/* Panels stagger in as the tab reveals */
+.panelBlock {
+    animation: mo-rise var(--mo-mid) var(--mo-ease-quart) backwards;
+}
+.tabContent > .panelBlock:nth-child(2) { animation-delay: 70ms; }
+
+/* List rows: stagger, capped at ~9 items so long lists don't crawl in */
+.statItem,
+.timelineItem,
+.playerItem,
+.h2hItem,
+.commentaryItem,
+.bracketMatch,
+.playerStatRow,
+.standingsTable tbody tr {
+    animation: mo-rise 300ms var(--mo-ease-quart) backwards;
+}
+.statItem:nth-child(1), .timelineItem:nth-child(1), .playerItem:nth-child(1),
+.h2hItem:nth-child(1), .commentaryItem:nth-child(1), .bracketMatch:nth-child(1),
+.playerStatRow:nth-child(1), .standingsTable tbody tr:nth-child(1) { animation-delay: 0ms; }
+.statItem:nth-child(2), .timelineItem:nth-child(2), .playerItem:nth-child(2),
+.h2hItem:nth-child(2), .commentaryItem:nth-child(2), .bracketMatch:nth-child(2),
+.playerStatRow:nth-child(2), .standingsTable tbody tr:nth-child(2) { animation-delay: 40ms; }
+.statItem:nth-child(3), .timelineItem:nth-child(3), .playerItem:nth-child(3),
+.h2hItem:nth-child(3), .commentaryItem:nth-child(3), .bracketMatch:nth-child(3),
+.playerStatRow:nth-child(3), .standingsTable tbody tr:nth-child(3) { animation-delay: 80ms; }
+.statItem:nth-child(4), .timelineItem:nth-child(4), .playerItem:nth-child(4),
+.h2hItem:nth-child(4), .commentaryItem:nth-child(4), .bracketMatch:nth-child(4),
+.playerStatRow:nth-child(4), .standingsTable tbody tr:nth-child(4) { animation-delay: 120ms; }
+.statItem:nth-child(5), .timelineItem:nth-child(5), .playerItem:nth-child(5),
+.h2hItem:nth-child(5), .commentaryItem:nth-child(5), .bracketMatch:nth-child(5),
+.playerStatRow:nth-child(5), .standingsTable tbody tr:nth-child(5) { animation-delay: 160ms; }
+.statItem:nth-child(6), .timelineItem:nth-child(6), .playerItem:nth-child(6),
+.h2hItem:nth-child(6), .commentaryItem:nth-child(6), .bracketMatch:nth-child(6),
+.playerStatRow:nth-child(6), .standingsTable tbody tr:nth-child(6) { animation-delay: 200ms; }
+.statItem:nth-child(7), .timelineItem:nth-child(7), .playerItem:nth-child(7),
+.h2hItem:nth-child(7), .commentaryItem:nth-child(7), .bracketMatch:nth-child(7),
+.playerStatRow:nth-child(7), .standingsTable tbody tr:nth-child(7) { animation-delay: 240ms; }
+.statItem:nth-child(n+8), .timelineItem:nth-child(n+8), .playerItem:nth-child(n+8),
+.h2hItem:nth-child(n+8), .commentaryItem:nth-child(n+8), .bracketMatch:nth-child(n+8),
+.playerStatRow:nth-child(n+8), .standingsTable tbody tr:nth-child(n+8) { animation-delay: 280ms; }
+
+/* Cleaner hover affordances + press feedback */
+.playerItem {
+    transition: background var(--mo-fast) var(--mo-ease-quart),
+                transform var(--mo-fast) var(--mo-ease-quart);
+}
+.playerItem:hover { background: rgba(255, 255, 255, 0.05); transform: translateX(2px); }
+.h2hItem {
+    transition: border-color var(--mo-fast) var(--mo-ease-quart),
+                background var(--mo-fast) var(--mo-ease-quart),
+                transform var(--mo-fast) var(--mo-ease-quart);
+}
+.h2hItem:hover {
+    border-color: var(--stroke-bright);
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateY(-1px);
+}
+.btn:active,
+.btnPrimary:active,
+.publicStatsTab:active,
+.timelineToggleBtn:active,
+.playerMetricSortButton:active { transform: scale(0.97); }
+
+/* ================================================================
+   LOADING SKELETON — mirrors the real layout so content swaps in
+   without a jump. Branded shimmer sweep instead of a flat pulse.
+   ================================================================ */
+.skeleton {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+.skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 50%, transparent 100%);
+    animation: mo-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes mo-shimmer { to { transform: translateX(100%); } }
+
+.skLoadingWrap {
+    animation: mo-fade var(--mo-mid) var(--mo-ease-quart) backwards;
+}
+
+.skBreadcrumb { width: 220px; height: 12px; margin-bottom: 20px; }
+
+.skScoreboard {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 340px 1fr;
+    align-items: center;
+    gap: 40px;
+    background: linear-gradient(145deg, rgba(20, 24, 28, 0.8), rgba(10, 12, 14, 0.8));
+    border: 1px solid var(--stroke);
+    border-radius: 40px;
+    padding: 64px 48px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), var(--shadow-neon);
+    margin-bottom: 32px;
+}
+.skScoreboard::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--stroke-bright), transparent);
+}
+.skTeamCol {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+.skTeamCol:last-child { flex-direction: row-reverse; }
+.skCrest { width: 100px; height: 100px; border-radius: 50%; flex-shrink: 0; }
+.skTeamName { width: 140px; height: 26px; }
+.skCenterCol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+.skStatus { width: 90px; height: 24px; border-radius: 99px; }
+.skScore { width: 180px; height: 80px; border-radius: 16px; }
+
+.skTabs {
+    display: flex;
+    gap: 32px;
+    padding: 0 8px 16px;
+    border-bottom: 1px solid var(--stroke);
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+.skTab { width: 80px; height: 16px; flex-shrink: 0; border-radius: 6px; }
+
+.skContent {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+.skPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: 20px;
+    padding: 24px;
+}
+.skRow { height: 52px; border-radius: 12px; }
+
+@media (max-width: 1024px) {
+    .skScoreboard { grid-template-columns: 1fr; gap: 24px; justify-items: center; }
+    .skTeamCol:last-child { flex-direction: row; }
+    .skCenterCol { order: -1; }
+    .skContent { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+    .skScoreboard { padding: 32px 20px; border-radius: 28px; }
+    .skCrest { width: 80px; height: 80px; }
+    .skScore { width: 140px; height: 60px; }
+}
+
+/* ── Reduced motion: collapse all motion to an instant state ────── */
+@media (prefers-reduced-motion: reduce) {
+    .page *,
+    .page *::before,
+    .page *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

@@ -1320,33 +1320,41 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     }), [state.localPlayerRows, state.matchData?.away?.name, state.matchData?.home?.name, state.playerStats]);
 
     if (state.kind === 'loading') return (
-        <div className={styles.page} style={{ minHeight: '100vh', background: 'var(--bg-primary, #0f1117)' }}>
-            <div style={{ background: 'linear-gradient(135deg, #1a1f2e 0%, #16213e 100%)', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', marginBottom: 20, animation: 'pulse 1.5s ease-in-out infinite' }} />
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                    {[0, 1].map(i => (
-                        <div key={i} style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 8, flex: 1 }}>
-                            <div style={{ width: 56, height: 56, borderRadius: 8, background: 'rgba(255,255,255,0.08)', animation: 'pulse 1.5s ease-in-out infinite' }} />
-                            <div style={{ width: '60%', height: 14, borderRadius: 4, background: 'rgba(255,255,255,0.07)', animation: 'pulse 1.5s ease-in-out infinite' }} />
-                        </div>
+        <div className={styles.page}>
+            <div className={`${styles.appContainer} ${styles.skLoadingWrap}`}>
+                <div className={`${styles.skeleton} ${styles.skBreadcrumb}`} />
+                <div className={styles.skScoreboard}>
+                    <div className={styles.skTeamCol}>
+                        <div className={`${styles.skeleton} ${styles.skCrest}`} />
+                        <div className={`${styles.skeleton} ${styles.skTeamName}`} />
+                    </div>
+                    <div className={styles.skCenterCol}>
+                        <div className={`${styles.skeleton} ${styles.skStatus}`} />
+                        <div className={`${styles.skeleton} ${styles.skScore}`} />
+                    </div>
+                    <div className={styles.skTeamCol}>
+                        <div className={`${styles.skeleton} ${styles.skCrest}`} />
+                        <div className={`${styles.skeleton} ${styles.skTeamName}`} />
+                    </div>
+                </div>
+                <div className={styles.skTabs}>
+                    {[0, 1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className={`${styles.skeleton} ${styles.skTab}`} />
                     ))}
-                    <div style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 80, height: 36, borderRadius: 8, background: 'rgba(255,255,255,0.10)', animation: 'pulse 1.5s ease-in-out infinite' }} />
-                        <div style={{ width: 60, height: 20, borderRadius: 12, background: 'rgba(255,255,255,0.06)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                </div>
+                <div className={styles.skContent}>
+                    <div className={styles.skPanel}>
+                        {[0, 1, 2, 3, 4].map(i => (
+                            <div key={i} className={`${styles.skeleton} ${styles.skRow}`} />
+                        ))}
+                    </div>
+                    <div className={styles.skPanel}>
+                        {[0, 1, 2].map(i => (
+                            <div key={i} className={`${styles.skeleton} ${styles.skRow}`} />
+                        ))}
                     </div>
                 </div>
             </div>
-            <div style={{ display: 'flex', gap: 4, padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                {[80, 64, 72, 96, 64].map((w, i) => (
-                    <div key={i} style={{ width: w, height: 32, borderRadius: 6, flexShrink: 0, background: i === 0 ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.06)', animation: 'pulse 1.5s ease-in-out infinite' }} />
-                ))}
-            </div>
-            <div style={{ padding: '16px', maxWidth: 700, margin: '0 auto' }}>
-                {[1, 2, 3, 4, 5].map(i => (
-                    <div key={i} style={{ height: 52, borderRadius: 8, background: 'rgba(255,255,255,0.04)', marginBottom: 8, animation: 'pulse 1.5s ease-in-out infinite' }} />
-                ))}
-            </div>
-            <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
         </div>
     );
 
@@ -2022,7 +2030,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                 </nav>
                 )}
 
-                <main className={styles.tabContent}>
+                <main key={activeTab} className={styles.tabContent}>
                     <section className={styles.panelBlock}>
                         {activeTab === 'summary' && (
                             <div className={styles.summaryView}>

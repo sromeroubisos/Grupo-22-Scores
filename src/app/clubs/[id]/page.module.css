@@ -747,3 +747,176 @@
         flex-wrap: wrap;
     }
 }
+
+/* ================================================================
+   MOTION — entrances, stagger, micro-interactions
+   Mirrors the match + tournament views' motion language. Disabled
+   entirely under prefers-reduced-motion (block at the bottom).
+   ================================================================ */
+.page {
+    --mo-ease-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --mo-ease-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+    --mo-fast: 140ms;
+    --mo-mid:  240ms;
+    --mo-slow: 480ms;
+}
+
+@keyframes mo-rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: none; }
+}
+@keyframes mo-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+@keyframes mo-indicator-in {
+    from { opacity: 0.3; transform: scaleX(0.35); }
+    to   { opacity: 1;   transform: scaleX(1); }
+}
+
+/* Entrances use `backwards` so they settle at the natural resting state. */
+
+/* Header rises once on load */
+.headerContent {
+    animation: mo-rise var(--mo-slow) var(--mo-ease-expo) backwards;
+}
+
+/* Animated underline on the active tab + press feedback */
+.activeTab::after {
+    transform-origin: center;
+    animation: mo-indicator-in var(--mo-mid) var(--mo-ease-expo);
+}
+.tabButton { transition: color var(--mo-fast) var(--mo-ease-quart), transform var(--mo-fast) var(--mo-ease-quart); }
+.tabButton:active,
+.followBtn:active,
+.linkButton:active,
+.backButton:active,
+.adminActionBtn:active { transform: scale(0.96); }
+
+/* Sections fade/rise on mount and on every tab switch (keyed remount) */
+.section {
+    animation: mo-rise var(--mo-mid) var(--mo-ease-quart) backwards;
+}
+.section:nth-child(2) { animation-delay: 60ms; }
+.section:nth-child(3) { animation-delay: 110ms; }
+
+/* Sidebar cards rise in slightly after the main column */
+.sidebarRight .card {
+    animation: mo-rise var(--mo-mid) var(--mo-ease-quart) 120ms backwards;
+}
+
+/* List rows: stagger, capped at ~9 items so long lists don't crawl in */
+.matchItem,
+.tableRow,
+.playerRow,
+.transferRow {
+    animation: mo-rise 300ms var(--mo-ease-quart) backwards;
+}
+.matchItem:nth-child(1), .tableRow:nth-child(1), .playerRow:nth-child(1), .transferRow:nth-child(1) { animation-delay: 0ms; }
+.matchItem:nth-child(2), .tableRow:nth-child(2), .playerRow:nth-child(2), .transferRow:nth-child(2) { animation-delay: 36ms; }
+.matchItem:nth-child(3), .tableRow:nth-child(3), .playerRow:nth-child(3), .transferRow:nth-child(3) { animation-delay: 72ms; }
+.matchItem:nth-child(4), .tableRow:nth-child(4), .playerRow:nth-child(4), .transferRow:nth-child(4) { animation-delay: 108ms; }
+.matchItem:nth-child(5), .tableRow:nth-child(5), .playerRow:nth-child(5), .transferRow:nth-child(5) { animation-delay: 144ms; }
+.matchItem:nth-child(6), .tableRow:nth-child(6), .playerRow:nth-child(6), .transferRow:nth-child(6) { animation-delay: 180ms; }
+.matchItem:nth-child(7), .tableRow:nth-child(7), .playerRow:nth-child(7), .transferRow:nth-child(7) { animation-delay: 216ms; }
+.matchItem:nth-child(8), .tableRow:nth-child(8), .playerRow:nth-child(8), .transferRow:nth-child(8) { animation-delay: 252ms; }
+.matchItem:nth-child(n+9), .tableRow:nth-child(n+9), .playerRow:nth-child(n+9), .transferRow:nth-child(n+9) { animation-delay: 288ms; }
+
+/* Cleaner hover affordance on match rows: lift + accent tint + shadow */
+.matchItem {
+    transition: border-color var(--mo-fast) var(--mo-ease-quart),
+                transform var(--mo-fast) var(--mo-ease-quart),
+                box-shadow var(--mo-fast) var(--mo-ease-quart);
+}
+.matchItem:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px -8px rgba(var(--color-accent-rgb), 0.4);
+}
+
+/* ================================================================
+   LOADING SKELETON — mirrors the real layout (header banner, tabs,
+   match list + sidebar). Branded shimmer sweep instead of a flat pulse.
+   ================================================================ */
+.skeleton {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-sm);
+}
+.skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.07) 50%, transparent 100%);
+    animation: mo-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes mo-shimmer { to { transform: translateX(100%); } }
+
+.skLoadingWrap { animation: mo-fade var(--mo-mid) var(--mo-ease-quart) backwards; }
+
+.skHeaderBanner {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent);
+    border-bottom: 1px solid var(--color-border);
+    padding: 24px 0 16px;
+}
+.skBreadcrumb { width: 200px; height: 12px; margin-bottom: 24px; }
+.skHeaderRow {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+.skLogo { width: 80px; height: 80px; border-radius: 12px; flex-shrink: 0; }
+.skHeaderText { display: flex; flex-direction: column; gap: 12px; flex: 1; min-width: 0; }
+.skTitle { width: min(320px, 60%); height: 30px; }
+.skMetaRow { display: flex; gap: 12px; }
+.skMeta { width: 110px; height: 16px; }
+.skMetaSm { width: 70px; height: 16px; }
+
+.skTabs {
+    display: flex;
+    gap: 24px;
+    overflow: hidden;
+}
+.skTab { width: 84px; height: 18px; flex-shrink: 0; border-radius: 6px; margin-bottom: 12px; }
+
+.skContent {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 32px;
+}
+.skMain { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.skSectionTitle { width: 180px; height: 20px; margin-bottom: 4px; }
+.skMatchRow { height: 64px; border-radius: var(--radius-md); }
+.skSidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    align-self: start;
+}
+.skSidebarTitle { width: 60%; height: 18px; margin-bottom: 6px; }
+.skSidebarRow { height: 28px; }
+
+@media (max-width: 1024px) {
+    .skContent { grid-template-columns: 1fr; }
+    .skSidebar { display: none; }
+}
+
+/* ── Reduced motion: collapse all motion to an instant state ────── */
+@media (prefers-reduced-motion: reduce) {
+    .page *,
+    .page *::before,
+    .page *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
