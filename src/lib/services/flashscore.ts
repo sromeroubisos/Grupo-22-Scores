@@ -96,23 +96,35 @@ const SPORT_MAPPING: Record<string, number> = {
 const inflightRequests = new Map<string, Promise<any>>();
 let flashScoreSearchSupported: boolean | null = null;
 
-const MAX_CONCURRENT_API = 3;
-let activeApiCalls = 0;
-const waitQueue: Array<() => void> = [];
+// Two concurrency lanes against RapidAPI:
+//  - 'default' (3): browser-facing match-list fetches (main + 7-day prefetch + live
+//    polling). Kept small to avoid a thundering-herd from a single client.
+//  - 'resolution' (10): server-side tournament ID-resolution sweep, which fans out
+//    ~22 day-offset reads at once. Measured safe: a 12-concurrent burst returned
+//    12x200, no 429, and the plan exposes no per-second rate limit (only a 10k/period
+//    quota). The old 3-wide lane was adding ~4.6s of pure serialization to the sweep.
+type ApiLane = 'default' | 'resolution';
+const LANE_LIMITS: Record<ApiLane, number> = { default: 3, resolution: 10 };
+const laneState: Record<ApiLane, { active: number; queue: Array<() => void> }> = {
+    default: { active: 0, queue: [] },
+    resolution: { active: 0, queue: [] },
+};
 
-function acquireSlot(): Promise<void> {
-    if (activeApiCalls < MAX_CONCURRENT_API) {
-        activeApiCalls++;
+function acquireSlot(lane: ApiLane = 'default'): Promise<void> {
+    const state = laneState[lane];
+    if (state.active < LANE_LIMITS[lane]) {
+        state.active++;
         return Promise.resolve();
     }
-    return new Promise(resolve => waitQueue.push(resolve));
+    return new Promise(resolve => state.queue.push(resolve));
 }
 
-function releaseSlot() {
-    activeApiCalls--;
-    if (waitQueue.length > 0) {
-        activeApiCalls++;
-        waitQueue.shift()!();
+function releaseSlot(lane: ApiLane = 'default') {
+    const state = laneState[lane];
+    state.active--;
+    if (state.queue.length > 0) {
+        state.active++;
+        state.queue.shift()!();
     }
 }
 
@@ -215,7 +227,7 @@ export async function getFlashScoreMatchesRaw(
     dayOffset: number,
     sportId: string | number,
     timeZone?: string,
-    options: { bypassCache?: boolean } = {}
+    options: { bypassCache?: boolean; lane?: ApiLane } = {}
 ): Promise<any> {
     if (isFootballSport(sportId)) {
         if (isSofaScoreServiceConfigured()) {
@@ -260,7 +272,7 @@ export async function getFlashScoreMatchesRaw(
     if (inflight) return inflight;
 
     const promise = (async () => {
-        await acquireSlot();
+        await acquireSlot(options.lane);
         try {
             let url = `https://${API_HOST}/api/flashscore/v2/matches/list?day=${dayOffset}&sport_id=${flashScoreSportId}`;
             if (timeZone) {
@@ -294,7 +306,7 @@ export async function getFlashScoreMatchesRaw(
 
             return data;
         } finally {
-            releaseSlot();
+            releaseSlot(options.lane);
             inflightRequests.delete(cacheKey);
         }
     })();

@@ -58,6 +58,7 @@ import {
     applyExternalTournamentStandingsOverrideSet,
     getExternalTournamentStandingsOverride,
 } from '@/lib/server/externalTournamentStandingsOverrides';
+import { readResolvedTournamentIds, persistResolvedTournamentIds } from '@/lib/server/resolvedTournamentIds';
 import { createApiPerfTracker } from '@/lib/perf/api';
 import { formatDurationMs, logPerf, measureAsync, nowMs } from '@/lib/perf/measure';
 
@@ -661,7 +662,7 @@ async function fetchAndExtractFromOffset(
     offset: number,
 ): Promise<ResolvedIds> {
     try {
-        const raw = await getFlashScoreMatchesRaw(offset, sportId);
+        const raw = await getFlashScoreMatchesRaw(offset, sportId, undefined, { lane: 'resolution' });
         const tournaments = Array.isArray(raw) ? raw : (raw?.DATA || raw?.data || []);
 
         const matchTournament = tournaments.find((t: any) => {
@@ -859,6 +860,19 @@ export async function GET(request: Request) {
     seasonId = seasonId || (dbFlashScoreConfig?.season_id != null ? String(dbFlashScoreConfig.season_id) : undefined);
     if (!url && dbFlashScoreConfig?.tournament_url) {
         url = dbFlashScoreConfig.tournament_url;
+    }
+
+    // Warm-path short-circuit: si ya resolvimos estos IDs antes (esta instancia, o un
+    // request previo que los guardó en el ruleset), salteamos el sweep por completo.
+    if (flashScoreEnabledForSport && (!stageId || !templateId || !seasonId || !tournamentId)) {
+        const cachedIds = readResolvedTournamentIds(id, url);
+        if (cachedIds) {
+            tournamentId = tournamentId || cachedIds.tournamentId;
+            stageId = stageId || cachedIds.stageId;
+            templateId = templateId || cachedIds.templateId;
+            seasonId = seasonId || cachedIds.seasonId;
+            if (!url && cachedIds.url) url = cachedIds.url;
+        }
     }
 
     const hasFsPrefix = id.toLowerCase().startsWith('fs-');
@@ -1696,6 +1710,22 @@ export async function GET(request: Request) {
             },
             'server',
         );
+
+        // Fire-and-forget: recordar los IDs resueltos para no volver a barrer nunca.
+        // Gateado a un set COMPLETO + prueba de que los IDs trajeron datos reales
+        // (nunca cacheamos una resolución vacía/rota).
+        const resolutionProducedData =
+            hasMeaningfulPayload(detailsPayload) ||
+            (Array.isArray(resultsPayload) && resultsPayload.length > 0) ||
+            (Array.isArray(fixturesPayload) && fixturesPayload.length > 0) ||
+            hasMeaningfulPayload(finalStandings);
+        if (flashScoreEnabledForSport && resolutionProducedData) {
+            persistResolvedTournamentIds({
+                routeId: id,
+                ids: { tournamentId, stageId, templateId, seasonId, url },
+                dbTournamentMeta,
+            });
+        }
 
         return perf.json({
             ok: true,
