@@ -979,35 +979,96 @@ export async function GET(request: Request) {
                 return Number.isFinite(num) && num >= 1900 && num <= 2200 ? num : undefined;
             })();
             const bundle = await getEspnFootballTournamentBundle(espnSoccerLeague, { season: seasonYear, routeId: id });
+            externalOverrideId = resolveExternalTournamentId({
+                routeId: id,
+                externalId: dbTournamentMeta?.external_id,
+                sportId: resolvedSportId,
+                ruleset: dbTournamentMeta?.ruleset || localTournament?.ruleset,
+                flashScoreIds: {
+                    tournamentId: bundle.ids?.tournamentId,
+                    tournamentStageId: bundle.ids?.stageId,
+                    tournamentTemplateId: bundle.ids?.templateId,
+                    seasonId: bundle.ids?.seasonId,
+                },
+            });
+
+            let detailsPayload: any = bundle.details;
+            let standingsPayload: any = bundle.standings;
+            let standingsFormPayload: any = bundle.standingsForm;
+            let standingsHtFtPayload: any = bundle.standingsHtFt;
+            let standingsOverUnderPayload: any = bundle.standingsOverUnder;
+            let externalStandingsTeamLabels: any[] = Array.isArray(bundle.teamLabels) ? bundle.teamLabels : [];
+            let externalStandingsFormTeamLabels: any[] = [];
+            let externalStandingsHtFtTeamLabels: any[] = [];
+            let externalStandingsOverUnderTeamLabels: any[] = [];
+            let customStandingsTables: any[] = [];
+
+            if (externalOverrideId) {
+                const externalTournamentOverride = await getExternalTournamentOverride(externalOverrideId);
+                if (externalTournamentOverride) {
+                    detailsPayload = applyExternalTournamentOverride(
+                        (detailsPayload && typeof detailsPayload === 'object')
+                            ? detailsPayload
+                            : {},
+                        externalTournamentOverride,
+                    );
+                }
+
+                const externalStandingsOverride = await getExternalTournamentStandingsOverride(externalOverrideId);
+                if (externalStandingsOverride) {
+                    const overriddenStandings = applyExternalTournamentStandingsOverrideSet(
+                        {
+                            standings: standingsPayload,
+                            standingsForm: standingsFormPayload,
+                            standingsHtFt: standingsHtFtPayload,
+                            standingsOverUnder: standingsOverUnderPayload,
+                        },
+                        externalStandingsOverride,
+                    );
+                    standingsPayload = overriddenStandings.standings;
+                    standingsFormPayload = overriddenStandings.standingsForm;
+                    standingsHtFtPayload = overriddenStandings.standingsHtFt;
+                    standingsOverUnderPayload = overriddenStandings.standingsOverUnder;
+                    externalStandingsTeamLabels = overriddenStandings.teamLabels;
+                    externalStandingsFormTeamLabels = overriddenStandings.standingsFormTeamLabels;
+                    externalStandingsHtFtTeamLabels = overriddenStandings.standingsHtFtTeamLabels;
+                    externalStandingsOverUnderTeamLabels = overriddenStandings.standingsOverUnderTeamLabels;
+                    customStandingsTables = overriddenStandings.customTables;
+                }
+            }
+
+            detailsPayload = applyDbTournamentPresentationOverrides(detailsPayload, dbTournamentMeta);
+
             return perf.json({
                 ok: true,
                 _debug: {
                     query: { id, url, sport, requestedSeason },
                     resolvedIds: bundle.ids,
+                    externalOverrideId,
                     provider: 'espn',
                     league: espnSoccerLeague,
                     counts: {
                         results: Array.isArray(bundle.results) ? bundle.results.length : 0,
                         fixtures: Array.isArray(bundle.fixtures) ? bundle.fixtures.length : 0,
-                        standings: Array.isArray(bundle.standings) ? bundle.standings.length : 0,
+                        standings: Array.isArray(standingsPayload) ? standingsPayload.length : 0,
                     },
                 },
                 ids: {
                     ...bundle.ids,
                     drawStageId: bundle.ids?.stageId,
                 },
-                details: bundle.details,
+                details: detailsPayload,
                 results: bundle.results,
                 fixtures: bundle.fixtures,
-                standings: bundle.standings,
-                standingsForm: bundle.standingsForm,
-                standingsHtFt: bundle.standingsHtFt,
-                standingsOverUnder: bundle.standingsOverUnder,
-                teamLabels: bundle.teamLabels,
-                standingsFormTeamLabels: [],
-                standingsHtFtTeamLabels: [],
-                standingsOverUnderTeamLabels: [],
-                customStandingsTables: [],
+                standings: standingsPayload,
+                standingsForm: standingsFormPayload,
+                standingsHtFt: standingsHtFtPayload,
+                standingsOverUnder: standingsOverUnderPayload,
+                teamLabels: externalStandingsTeamLabels,
+                standingsFormTeamLabels: externalStandingsFormTeamLabels,
+                standingsHtFtTeamLabels: externalStandingsHtFtTeamLabels,
+                standingsOverUnderTeamLabels: externalStandingsOverUnderTeamLabels,
+                customStandingsTables,
                 topScorers: bundle.topScorers,
                 draw: bundle.draw,
                 archives: bundle.archives,

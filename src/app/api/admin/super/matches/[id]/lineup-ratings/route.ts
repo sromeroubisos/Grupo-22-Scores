@@ -11,6 +11,7 @@ import {
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { parseEspnAmericanFootballMatchId } from '@/lib/services/espnAmericanFootball';
 import { parseEspnMotorsportMatchId } from '@/lib/services/espnMotorsport';
+import { parseEspnFootballMatchId } from '@/lib/services/espnFootball';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const FLASHSCORE_ID_PATTERN = /^[A-Za-z0-9]{8}$/;
@@ -45,9 +46,10 @@ const PayloadSchema = z.object({
 
 type ParsedPlayer = z.infer<typeof PlayerSchema>;
 
-function detectMatchKind(matchId: string): 'local' | 'flashscore' | 'espn-football' | 'espn-motorsport' | 'unknown' {
+function detectMatchKind(matchId: string): 'local' | 'flashscore' | 'espn-soccer' | 'espn-football' | 'espn-motorsport' | 'unknown' {
   if (UUID_PATTERN.test(matchId)) return 'local';
   if (FLASHSCORE_ID_PATTERN.test(matchId)) return 'flashscore';
+  if (parseEspnFootballMatchId(matchId)) return 'espn-soccer';
   if (parseEspnAmericanFootballMatchId(matchId)) return 'espn-football';
   if (parseEspnMotorsportMatchId(matchId)) return 'espn-motorsport';
   return 'unknown';
