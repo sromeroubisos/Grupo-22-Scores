@@ -8,12 +8,16 @@ import { FAVORITES_DISABLED_MESSAGE, FAVORITES_ENABLED } from '@/lib/favorites/c
 
 import styles from './favorites.module.css';
 
-function getFavoriteHref(entityType: string, entityId: string): string {
+function getFavoriteHref(entityType: string, entityId: string, name?: string): string {
     if (entityType === 'club') {
         return `/clubs/${entityId}`;
     }
 
-    return `/tournaments/${entityId}`;
+    // Pass the known name so external (FlashScore/ESPN) tournaments render their
+    // title immediately instead of falling back to "Cargando…" when the upstream
+    // details fetch is cold/slow. Harmless for local tournaments (DB name wins).
+    const query = name ? `?name=${encodeURIComponent(name)}` : '';
+    return `/tournaments/${entityId}${query}`;
 }
 
 function FavoriteIcon({ entityType }: { entityType: string }) {
@@ -77,7 +81,7 @@ export default function FavoritesPage() {
                             {favorites.map((favorite) => (
                                 <div key={`${favorite.entity_type}:${favorite.id}`} className={styles.favoriteCard}>
                                     <Link
-                                        href={getFavoriteHref(favorite.entity_type, favorite.id)}
+                                        href={getFavoriteHref(favorite.entity_type, favorite.id, favorite.name)}
                                         className={styles.favoriteContent}
                                     >
                                         {favorite.entity_type === 'club' ? (
