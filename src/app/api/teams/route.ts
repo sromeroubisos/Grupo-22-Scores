@@ -1219,7 +1219,10 @@ export async function GET(request: Request) {
                 ...bundle.details,
                 supported_tabs: buildSupportedTabs({
                     supportedTabs: bundle.details?.supported_tabs,
-                    hasSquad: Array.isArray(bundle.squad) && bundle.squad.length > 0,
+                    // On the initial load the squad fetch is skipped (lazy-loaded via
+                    // `only=squad`), so bundle.squad is empty. ESPN soccer teams always
+                    // expose a roster, so keep advertising the tab instead of dropping it.
+                    hasSquad: skipSquad ? true : (Array.isArray(bundle.squad) && bundle.squad.length > 0),
                     hasTransfers: false,
                 }),
             };
@@ -1498,7 +1501,10 @@ export async function GET(request: Request) {
                     const squadForResponse = hasInternalSquad
                         ? internalSquad
                         : (skipSquad ? [] : espnSquad);
-                    const hasAnySquad = hasInternalSquad || espnSquad.length > 0;
+                    // When skipSquad is set the ESPN roster isn't fetched yet (lazy-loaded
+                    // via `only=squad`), so espnSquad is empty. The ESPN mapping still
+                    // exposes a roster, so keep the squad tab available in that case.
+                    const hasAnySquad = hasInternalSquad || (skipSquad ? true : espnSquad.length > 0);
 
                     const mergedDetails = applyExternalTeamLogoOverride({
                         ...details,
