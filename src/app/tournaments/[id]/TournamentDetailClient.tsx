@@ -712,12 +712,29 @@ function getPreferredExportTeamName(
     return getExplicitExportShortName(explicitShortName) || fallbackName || 'Equipo';
 }
 
-function getMatchExportTeamName(match: any, side: 'home' | 'away') {
+function isEspnSourcedMatch(match: any, teamLike: any, clubLike: any) {
+    const candidates = [
+        match?.provider, match?.source,
+        teamLike?.provider, teamLike?.source,
+        clubLike?.provider, clubLike?.source,
+    ];
+    return candidates.some(
+        (value) => typeof value === 'string' && value.trim().toLowerCase() === 'espn',
+    );
+}
+
+function getMatchExportTeamName(match: any, side: 'home' | 'away', forceFullName = false) {
     const teamLike = side === 'home' ? match?.home_team : match?.away_team;
     const clubLike = side === 'home' ? match?.home : match?.away;
     const fallbackName = side === 'home'
         ? (teamLike?.name || clubLike?.name || match?.event_home_team || match?.home_team_name || 'Home')
         : (teamLike?.name || clubLike?.name || match?.event_away_team || match?.away_team_name || 'Away');
+
+    // ESPN (fútbol, fútbol americano y automovilismo): exportar siempre el nombre
+    // completo del equipo, nunca la abreviatura/nombre corto.
+    if (forceFullName || isEspnSourcedMatch(match, teamLike, clubLike)) {
+        return fallbackName;
+    }
 
     return getPreferredExportTeamName(
         fallbackName,
@@ -2227,6 +2244,16 @@ export default function TournamentDetailPage({
     // ── Loading / Error ────────────────────────────────────────────────────
 
     const isEspnSoccerSource = isEspnSoccerSourceForTabs;
+    // Torneo cuya fuente de partidos es la API de ESPN (fútbol, fútbol americano
+    // o automovilismo): en el export de imagen debe usarse el nombre completo del
+    // equipo, no la abreviatura.
+    const isEspnTournament = Boolean(
+        details?.provider === 'espn' ||
+        details?.externalProvider === 'espn' ||
+        isEspnAmericanFootballTournamentId(id) ||
+        isEspnSoccerTournamentId(id) ||
+        isEspnMotorsportTournamentId(id)
+    );
     const isLimitedExternalProvider =
         details?.provider === 'rugby-api-sports' ||
         details?.externalProvider === 'rugby-api-sports' ||
@@ -2857,8 +2884,8 @@ export default function TournamentDetailPage({
                     : '';
 
                 return {
-                    homeTeam: getMatchExportTeamName(match, 'home'),
-                    awayTeam: getMatchExportTeamName(match, 'away'),
+                    homeTeam: getMatchExportTeamName(match, 'home', isEspnTournament),
+                    awayTeam: getMatchExportTeamName(match, 'away', isEspnTournament),
                     homeLogo: getTeamLogo(match.home_team) || match.home_team_logo || '',
                     awayLogo: getTeamLogo(match.away_team) || match.away_team_logo || '',
                     homeScore: mode === 'results'
@@ -4135,8 +4162,8 @@ export default function TournamentDetailPage({
                                     tournament: tournamentData?.name || 'Torneo',
                                     tournamentLogo,
                                     matches: results.map(m => ({
-                                        homeTeam: getMatchExportTeamName(m, 'home'),
-                                        awayTeam: getMatchExportTeamName(m, 'away'),
+                                        homeTeam: getMatchExportTeamName(m, 'home', isEspnTournament),
+                                        awayTeam: getMatchExportTeamName(m, 'away', isEspnTournament),
                                         homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
                                         awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
                                         homeScore: m.scores?.home ?? m.scores?.home_score ?? m.home_score,
@@ -4182,8 +4209,8 @@ export default function TournamentDetailPage({
                                     tournament: tournamentData?.name || 'Torneo',
                                     tournamentLogo,
                                     matches: fixtures.map(m => ({
-                                        homeTeam: getMatchExportTeamName(m, 'home'),
-                                        awayTeam: getMatchExportTeamName(m, 'away'),
+                                        homeTeam: getMatchExportTeamName(m, 'home', isEspnTournament),
+                                        awayTeam: getMatchExportTeamName(m, 'away', isEspnTournament),
                                         homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
                                         awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
                                         time: formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { hour: '2-digit', minute: '2-digit', hour12: false }) + ' ' +
