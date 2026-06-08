@@ -178,6 +178,7 @@ export function buildTeamLogoProxyUrl(params: {
     key?: string | null;
     name?: string | null;
     fallback?: string | null;
+    version?: string | number | null;
 }): string | null {
     const key = normalizeText(params.key);
     if (!key) return null;
@@ -192,6 +193,14 @@ export function buildTeamLogoProxyUrl(params: {
 
     if (fallback && !isOversizedInlineLogoUrl(fallback)) {
         searchParams.set('fallback', fallback);
+    }
+
+    // Cache-busting token: when the entity's logo changes (e.g. updated_at moves),
+    // the proxy URL changes too, so browser/CDN caches don't keep serving the old image.
+    const version = normalizeText(params.version != null ? String(params.version) : null);
+    if (version) {
+        // Keep it short and URL-safe; the route ignores the param, it only differentiates cache entries.
+        searchParams.set('v', version.replace(/[^a-zA-Z0-9._-]/g, '').slice(0, 32));
     }
 
     return `/api/assets/team-logo?${searchParams.toString()}`;

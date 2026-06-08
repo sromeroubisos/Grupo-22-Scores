@@ -10,6 +10,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import type { ClubUpdateInput } from '@/lib/types/clubs';
 import { fetchClubFull, updateClub } from '@/lib/services/clubService';
+import { syncClubLogoToExternalSources } from '@/lib/server/clubLogoExternalSync';
 
 function err(message: string, status: number, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
@@ -70,9 +71,16 @@ export async function PATCH(
         return err('No se enviaron cambios válidos', 400);
     }
 
-    const result = await updateClub(id, body, { supabaseClient: createAdminClient() });
+    const adminClient = createAdminClient();
+    const result = await updateClub(id, body, { supabaseClient: adminClient });
     if (!result.success || !result.club) {
         return err(result.error || 'Error al actualizar club', 400, result.validationErrors);
+    }
+
+    // When the logo changed, propagate it to the external feed sources (external_teams + override
+    // store) so the new escudo also shows in matches/standings/team pages, not just the club panel.
+    if (body.core && Object.prototype.hasOwnProperty.call(body.core, 'logo_url')) {
+        await syncClubLogoToExternalSources(result.club.core, { supabaseClient: adminClient });
     }
 
     const updatedSlug = result.club.core.slug || id;

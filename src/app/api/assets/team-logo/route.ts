@@ -11,7 +11,17 @@ import { getPlayerDetails, getTeamDetails } from '@/lib/services/flashscore';
 
 const LOGO_DIR = path.join(process.cwd(), 'public', 'logos', 'clubs');
 const EXTENSIONS = ['.png', '.svg', '.webp', '.jpg', '.jpeg', '.avif'];
-const PROXY_CACHE_CONTROL = 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=604800';
+// Versioned URLs (carry a `v` cache-busting token) are immutable: the token changes when the
+// logo changes, so we can cache hard. Non-versioned URLs refresh quickly in the browser so an
+// updated logo shows up without waiting a day, while the CDN keeps a long copy to protect quota.
+const PROXY_CACHE_CONTROL_VERSIONED = 'public, max-age=604800, s-maxage=604800, immutable';
+const PROXY_CACHE_CONTROL_VOLATILE = 'public, max-age=300, s-maxage=604800, stale-while-revalidate=86400';
+
+function resolveProxyCacheControl(url: URL): string {
+    return url.searchParams.has('v')
+        ? PROXY_CACHE_CONTROL_VERSIONED
+        : PROXY_CACHE_CONTROL_VOLATILE;
+}
 
 function normalizeSourceUrl(source: string): string {
     const trimmed = source.trim();
@@ -190,7 +200,7 @@ function getFallbackInitials(teamName: string, key: string): string {
     return `${parts[0][0] || ''}${parts[1][0] || ''}`.toUpperCase() || 'CL';
 }
 
-function buildFallbackLogoResponse(teamName: string, key: string) {
+function buildFallbackLogoResponse(teamName: string, key: string, url: URL) {
     const initials = getFallbackInitials(teamName, key);
     const title = teamName || key || 'Club';
     const svg = `
@@ -210,7 +220,7 @@ function buildFallbackLogoResponse(teamName: string, key: string) {
     return new NextResponse(svg, {
         headers: {
             'Content-Type': 'image/svg+xml; charset=utf-8',
-            'Cache-Control': PROXY_CACHE_CONTROL,
+            'Cache-Control': resolveProxyCacheControl(url),
             'Access-Control-Allow-Origin': '*',
         },
     });
@@ -532,6 +542,7 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string, en
 
 async function buildImageResponse(source: string, url: URL) {
     const normalizedSource = normalizeSourceUrl(source);
+    const cacheControl = resolveProxyCacheControl(url);
 
     if (normalizedSource.startsWith('data:')) {
         const commaIndex = normalizedSource.indexOf(',');
@@ -548,7 +559,7 @@ async function buildImageResponse(source: string, url: URL) {
         return new NextResponse(payload, {
             headers: {
                 'Content-Type': mimeType,
-                'Cache-Control': PROXY_CACHE_CONTROL,
+                'Cache-Control': cacheControl,
                 'Access-Control-Allow-Origin': '*',
             },
         });
@@ -572,7 +583,7 @@ async function buildImageResponse(source: string, url: URL) {
                 return new NextResponse(Buffer.from(buffer), {
                     headers: {
                         'Content-Type': contentType,
-                        'Cache-Control': PROXY_CACHE_CONTROL,
+                        'Cache-Control': cacheControl,
                         'Access-Control-Allow-Origin': '*',
                     },
                 });
@@ -590,7 +601,7 @@ async function buildImageResponse(source: string, url: URL) {
         status: 307,
         headers: {
             Location: target.toString(),
-            'Cache-Control': PROXY_CACHE_CONTROL,
+            'Cache-Control': cacheControl,
             'Access-Control-Allow-Origin': '*',
         },
     });
@@ -623,5 +634,5 @@ export async function GET(request: Request) {
         return buildImageResponse(fallback, url);
     }
 
-    return buildFallbackLogoResponse(teamName, key);
+    return buildFallbackLogoResponse(teamName, key, url);
 }

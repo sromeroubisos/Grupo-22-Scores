@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { startTransition, useState, useEffect, Suspense, useEffectEvent, type CSSProperties } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { ShieldCheck, PenLine, Radio } from 'lucide-react';
 import { Database } from '@/lib/database.types';
 import {
     getClubDashboardModeForTab,
@@ -248,6 +249,7 @@ function prepareClubFormForClient(data: ClubRow | null): ClubFormState {
     }) ?? buildTeamLogoProxyUrl({
         key: initialForm.id,
         name: clubName,
+        version: initialForm.updated_at,
     });
 
     return {
@@ -915,41 +917,68 @@ export function ClubManageShell({
                                     ) : null}
 
                                     {currentTab === 'configuracion' || mountedTabs.includes('configuracion') ? (
-                                        <div hidden={currentTab !== 'configuracion'}>
-                                            <div className="card col-12">
+                                        <div className="col-12 club-config-layout" hidden={currentTab !== 'configuracion'}>
+                                            <header className="club-config-intro" style={{ '--reveal-i': 0 } as CSSProperties}>
+                                                <span className="club-ui-pill">Configuración del club</span>
+                                                <h2 className="club-config-intro-title">Identidad, equipo y acuerdos en un mismo tablero</h2>
+                                                <p className="club-config-intro-copy">
+                                                    Define cómo se ve el club, quién lo gestiona y qué marcas lo acompañan.
+                                                    Cada cambio viaja al sitio público y a los exports sociales.
+                                                </p>
+                                            </header>
+
+                                            <section className="club-config-block" style={{ '--reveal-i': 1 } as CSSProperties}>
                                                 <ClubIdentityTab id={id} data={form as ClubRow} unions={unions} />
-                                            </div>
+                                            </section>
 
-                                            <div className="card col-8">
-                                                <ClubStaffTab
-                                                    clubId={id}
-                                                    initialPeople={initialStaff}
-                                                    initialPeopleLoaded={initialStaffLoaded}
-                                                />
-                                            </div>
+                                            <div className="club-config-split">
+                                                <section className="club-config-block" style={{ '--reveal-i': 2 } as CSSProperties}>
+                                                    <ClubStaffTab
+                                                        clubId={id}
+                                                        initialPeople={initialStaff}
+                                                        initialPeopleLoaded={initialStaffLoaded}
+                                                    />
+                                                </section>
 
-                                            <div className="card col-4">
-                                                <div className="club-tab-stack">
-                                                    <div className="card-title">Permisos y roles</div>
+                                                <aside className="club-config-block club-roles-aside" style={{ '--reveal-i': 3 } as CSSProperties}>
+                                                    <span className="club-ui-pill">Permisos y roles</span>
                                                     <h3 className="club-tab-heading">Accesos para escalar sin caos</h3>
                                                     <p className="club-tab-copy">
-                                                        Admin del club, editor y operador trabajan sobre el mismo sistema con responsabilidades separadas.
+                                                        Cada perfil trabaja sobre el mismo sistema con responsabilidades separadas.
                                                     </p>
-                                                    <div className="club-role-list">
-                                                        <div><strong>Administrador</strong><span>Identidad, equipos, sponsors y publicacion.</span></div>
-                                                        <div><strong>Editor</strong><span>Planteles, contenido y ajustes de partido.</span></div>
-                                                        <div><strong>Operador</strong><span>Resultado, live y validaciones de campo.</span></div>
-                                                    </div>
-                                                </div>
+                                                    <ul className="club-roles-grid">
+                                                        <li className="club-role-card">
+                                                            <span className="club-role-icon"><ShieldCheck size={16} strokeWidth={2.2} /></span>
+                                                            <div>
+                                                                <strong>Administrador</strong>
+                                                                <span>Identidad, equipos, sponsors y publicación.</span>
+                                                            </div>
+                                                        </li>
+                                                        <li className="club-role-card">
+                                                            <span className="club-role-icon"><PenLine size={16} strokeWidth={2.2} /></span>
+                                                            <div>
+                                                                <strong>Editor</strong>
+                                                                <span>Planteles, contenido y ajustes de partido.</span>
+                                                            </div>
+                                                        </li>
+                                                        <li className="club-role-card">
+                                                            <span className="club-role-icon"><Radio size={16} strokeWidth={2.2} /></span>
+                                                            <div>
+                                                                <strong>Operador</strong>
+                                                                <span>Resultado, vivo y validaciones de campo.</span>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
+                                                </aside>
                                             </div>
 
-                                            <div className="card col-12">
+                                            <section className="club-config-block" style={{ '--reveal-i': 4 } as CSSProperties}>
                                                 <ClubSponsorsTab
                                                     clubId={id}
                                                     initialSponsors={initialSponsors}
                                                     initialSponsorsLoaded={initialSponsorsLoaded}
                                                 />
-                                            </div>
+                                            </section>
                                         </div>
                                     ) : null}
                                 </div>
