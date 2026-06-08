@@ -66,9 +66,11 @@ type InternalMatchSource = {
     status: string | null;
     home_name?: string | null;
     home_logo?: string | null;
+    home_logo_updated_at?: string | null;
     home_club_id?: string | null;
     away_name?: string | null;
     away_logo?: string | null;
+    away_logo_updated_at?: string | null;
     away_club_id?: string | null;
     tournament_name?: string | null;
     sport_id?: string | null;
@@ -76,6 +78,7 @@ type InternalMatchSource = {
 type ClubMatchRelation = {
     name: string | null;
     logo_url: string | null;
+    updated_at?: string | null;
 };
 type TournamentMatchRelation = {
     name: string | null;
@@ -99,11 +102,13 @@ type NormalizedInternalMatch = {
         name: string;
         small_image_path: string;
         team_id: string;
+        logo_updated_at?: string;
     };
     away_team: {
         name: string;
         small_image_path: string;
         team_id: string;
+        logo_updated_at?: string;
     };
     scores: {
         home: number | null;
@@ -505,11 +510,13 @@ function normalizeInternalMatch(m: InternalMatchSource): NormalizedInternalMatch
             name: m.home_name || m.home_club_id || '',
             small_image_path: m.home_logo || '',
             team_id: m.home_club_id || '',
+            logo_updated_at: m.home_logo_updated_at || '',
         },
         away_team: {
             name: m.away_name || m.away_club_id || '',
             small_image_path: m.away_logo || '',
             team_id: m.away_club_id || '',
+            logo_updated_at: m.away_logo_updated_at || '',
         },
         scores: { home: scoreHome, away: scoreAway },
         match_status: m.status || 'NS',
@@ -1395,8 +1402,8 @@ export async function GET(request: Request) {
                 .select(`
                     id, date_time, status, score,
                     home_club_id, away_club_id, tournament_id,
-                    home_club:clubs!matches_home_club_id_fkey(name, logo_url),
-                    away_club:clubs!matches_away_club_id_fkey(name, logo_url),
+                    home_club:clubs!matches_home_club_id_fkey(name, logo_url, updated_at),
+                    away_club:clubs!matches_away_club_id_fkey(name, logo_url, updated_at),
                     tournament:tournaments(name, sport_id)
                 `);
             const [homeMatchesResult, awayMatchesResult] = await Promise.all([
@@ -1434,8 +1441,10 @@ export async function GET(request: Request) {
                         ...row,
                         home_name: homeClub?.name,
                         home_logo: homeClub?.logo_url,
+                        home_logo_updated_at: homeClub?.updated_at,
                         away_name: awayClub?.name,
                         away_logo: awayClub?.logo_url,
+                        away_logo_updated_at: awayClub?.updated_at,
                         tournament_name: tournament?.name,
                         sport_id: tournament?.sport_id,
                     });
