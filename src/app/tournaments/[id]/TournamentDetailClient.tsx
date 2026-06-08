@@ -809,6 +809,16 @@ function handleTeamLogoLoad(
     }
 }
 
+// Bracket placeholders coming from FlashScore knockout fixtures (e.g.
+// "Group A Winner", "Group B 2nd Place", "Quarterfinal 1 Winner",
+// "Round of 16 1 Winner", "Semifinal Winner"). These are slot labels, not
+// actual teams, so they must not appear in the "Equipos" list.
+function isBracketPlaceholderTeamName(name: string | null | undefined): boolean {
+    const n = String(name ?? '').trim();
+    if (!n) return false;
+    return /\b(winner|2nd place|3rd place|runner[- ]?up|loser|best (?:third|\w+ placed)|tbd)\b/i.test(n);
+}
+
 function buildGroupedStandings(dbStandings: any[], dbGroups: any[], participants: any[]) {
     if (!Array.isArray(dbGroups) || dbGroups.length === 0) return [];
 
@@ -4420,11 +4430,12 @@ export default function TournamentDetailPage({
                                 })
                                 .filter((t: any) => t.name);
                             // For DB-only tournaments, participants are the authoritative source
-                            const displayTeams = isDbOnly && participantTeams.length > 0
+                            const displayTeams = (isDbOnly && participantTeams.length > 0
                                 ? participantTeams
                                 : teamsList.length > 0
                                     ? teamsList
-                                    : participantTeams;
+                                    : participantTeams
+                            ).filter((t: any) => !isBracketPlaceholderTeamName(t.name));
                             return displayTeams.length > 0 ? (
                                 <div className={styles.teamsGrid}>
                                     {displayTeams.map((team: any) => {
