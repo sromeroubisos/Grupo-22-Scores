@@ -18,6 +18,12 @@ function normalizeInviteCode(value: string) {
     return value.replace(/\s+/g, '').toUpperCase();
 }
 
+// Tras ingresar, mandamos al usuario directo al panel de cargar resultados de la
+// liga (la pantalla lee ?jugar=1 para abrir ese tab y scrollear hasta él).
+function withJugarMarker(leagueUrl: string) {
+    return `${leagueUrl}${leagueUrl.includes('?') ? '&' : '?'}jugar=1`;
+}
+
 function ProdeJoinLeagueContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -69,7 +75,7 @@ function ProdeJoinLeagueContent() {
             }
 
             setFeedback(result.message || 'Ingreso confirmado. Redirigiendo...');
-            router.replace(result.leagueUrl);
+            router.replace(withJugarMarker(result.leagueUrl));
             router.refresh();
         } catch (error) {
             setFeedback(error instanceof Error ? error.message : 'No se pudo ingresar a la liga privada.');
@@ -112,7 +118,7 @@ function ProdeJoinLeagueContent() {
                 }
 
                 setFeedback(result.message || 'Ingreso confirmado. Redirigiendo...');
-                router.replace(result.leagueUrl);
+                router.replace(withJugarMarker(result.leagueUrl));
                 router.refresh();
             } catch (error) {
                 setFeedback(error instanceof Error ? error.message : 'No se pudo ingresar a la liga privada.');

@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Shield, Gavel } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import styles from '@/app/prode/page.module.css';
@@ -173,7 +173,9 @@ function getPredictionBreakdown(event: ProdePlayEvent, prediction: ProdePlayPred
 
 export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlayScreenProps) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { user, login } = useAuth();
+    const playPanelRef = useRef<HTMLDivElement | null>(null);
     const [events, setEvents] = useState(view.events);
     const [savingEventId, setSavingEventId] = useState<string | null>(null);
     const [feedback, setFeedback] = useState<Record<string, string>>({});
@@ -206,6 +208,24 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
             },
         ]),
     ));
+
+    // Cuando alguien llega recién ingresado desde el link de invitación
+    // (?jugar=1), lo dejamos directo en el panel de cargar resultados: forzamos
+    // el tab 'play' y scrolleamos hasta la sección, en vez de que tenga que
+    // buscarla entre el hero y las pestañas.
+    useEffect(() => {
+        if (searchParams.get('jugar') !== '1') {
+            return;
+        }
+
+        setActiveTab('play');
+
+        const timer = window.setTimeout(() => {
+            playPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 80);
+
+        return () => window.clearTimeout(timer);
+    }, [searchParams]);
 
     const openEvents = useMemo(() => events.filter((event) => event.isOpen), [events]);
     const lockedOrLiveEvents = useMemo(
@@ -621,7 +641,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                     </div>
 
                     <section className={styles.playGrid}>
-                        <div className={`${styles.playMainColumn} ${activeTab === 'table' || activeTab === 'rules' ? styles.mobileTabHidden : ''}`}>
+                        <div ref={playPanelRef} className={`${styles.playMainColumn} ${activeTab === 'table' || activeTab === 'rules' ? styles.mobileTabHidden : ''}`}>
                             <section className={styles.section}>
                                 <div className={styles.sectionHeader}>
                                     <div>
