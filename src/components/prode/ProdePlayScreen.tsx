@@ -186,6 +186,9 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
     const [rulesFeedback, setRulesFeedback] = useState<string | null>(null);
     const [leagueActionFeedback, setLeagueActionFeedback] = useState<string | null>(null);
     const [runningLeagueAction, setRunningLeagueAction] = useState<'archive_league' | 'delete_league' | null>(null);
+    const [nameDraft, setNameDraft] = useState(view.title);
+    const [isRenamingLeague, setIsRenamingLeague] = useState(false);
+    const [renameFeedback, setRenameFeedback] = useState<string | null>(null);
     const [ruleDrafts, setRuleDrafts] = useState<Record<string, string>>(() => Object.fromEntries(
         view.rules.items.map((rule) => [rule.key, rule.points.toString()]),
     ));
@@ -424,6 +427,54 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
             setRulesFeedback(message);
         } finally {
             setIsSavingRules(false);
+        }
+    }
+
+    async function handleRenameLeague() {
+        if (!view.canManage || !view.privateLeagueId) {
+            return;
+        }
+
+        const trimmedName = nameDraft.trim();
+
+        if (!trimmedName) {
+            setRenameFeedback('El nombre de la liga es obligatorio.');
+            return;
+        }
+
+        if (trimmedName === view.title) {
+            setRenameFeedback('Ese ya es el nombre actual de la liga.');
+            return;
+        }
+
+        setIsRenamingLeague(true);
+        setRenameFeedback('Guardando nombre...');
+
+        try {
+            const response = await fetch('/api/prode/private-leagues', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    leagueId: view.privateLeagueId,
+                    action: 'rename_league',
+                    name: trimmedName,
+                }),
+            });
+
+            const result = await response.json() as { error?: string; message?: string; name?: string };
+
+            if (!response.ok) {
+                throw new Error(result.error || 'No se pudo renombrar la liga.');
+            }
+
+            setRenameFeedback(result.message || 'El nombre de la liga se actualizó.');
+            router.refresh();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'No se pudo renombrar la liga.';
+            setRenameFeedback(message);
+        } finally {
+            setIsRenamingLeague(false);
         }
     }
 
@@ -918,6 +969,30 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                             {view.canManage && view.privateLeagueId ? (
                                 <section className={styles.summaryCard}>
                                     <p className={styles.previewEyebrow}>Administracion</p>
+
+                                    <label className={styles.formField}>
+                                        <span className={styles.formLabel}>Nombre de la liga</span>
+                                        <input
+                                            type="text"
+                                            className={styles.formInput}
+                                            value={nameDraft}
+                                            maxLength={80}
+                                            onChange={(event) => setNameDraft(event.target.value)}
+                                            disabled={isRenamingLeague}
+                                        />
+                                    </label>
+                                    <div className={styles.leagueAdminActions}>
+                                        <button
+                                            type="button"
+                                            className={styles.posterSecondaryCta}
+                                            onClick={() => void handleRenameLeague()}
+                                            disabled={isRenamingLeague || !nameDraft.trim() || nameDraft.trim() === view.title}
+                                        >
+                                            {isRenamingLeague ? 'Guardando...' : 'Guardar nombre'}
+                                        </button>
+                                    </div>
+                                    {renameFeedback ? <div className={styles.warning}>{renameFeedback}</div> : null}
+
                                     <p className={styles.leagueAdminCopy}>
                                         Si esta liga ya no va a seguir, podes archivarla o borrarla sin tocar la competencia base.
                                     </p>

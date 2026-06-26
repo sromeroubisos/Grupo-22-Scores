@@ -90,7 +90,8 @@ type JoinLeaguePayload = {
 
 type UpdateLeaguePayload = {
     leagueId?: string;
-    action?: 'update_rules' | 'set_member_role' | 'archive_league' | 'delete_league';
+    action?: 'update_rules' | 'set_member_role' | 'archive_league' | 'delete_league' | 'rename_league';
+    name?: string;
     rules?: LeagueRulesPayload;
     // El admin elige al cambiar reglas: true = "cambiar todo" (recalcula la tabla
     // entera, incluidos partidos ya jugados); false = "mantener" (los partidos ya
@@ -102,6 +103,22 @@ type UpdateLeaguePayload = {
 
 function makeInviteCode() {
     return Math.random().toString(36).slice(2, 8).toUpperCase();
+}
+
+// El link de difusión debe apuntar al dominio desde donde el usuario está creando
+// la liga. Priorizamos el host real del request (sirve en producción y también con
+// túneles tipo ngrok aunque NEXT_PUBLIC_SITE_URL esté fijado a localhost en dev) y
+// recién después caemos a la env o al origin del request.
+function resolveShareBaseUrl(request: Request) {
+    const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host');
+
+    if (forwardedHost) {
+        const isLocalHost = forwardedHost.startsWith('localhost') || forwardedHost.startsWith('127.0.0.1');
+        const forwardedProto = request.headers.get('x-forwarded-proto') || (isLocalHost ? 'http' : 'https');
+        return `${forwardedProto}://${forwardedHost}`;
+    }
+
+    return process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
 }
 
 function ensureString(value: unknown) {
@@ -573,8 +590,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
-        const normalizedBaseUrl = baseUrl.replace(/\/$/, '');
+        const normalizedBaseUrl = resolveShareBaseUrl(request).replace(/\/$/, '');
         const inviteCode = ensureString(createdLeague.invite_code);
         const createdSlug = ensureString(createdLeague.slug);
         const shareUrl = `${normalizedBaseUrl}/prode/ligas/unirse?codigo=${encodeURIComponent(inviteCode)}`;
@@ -797,6 +813,38 @@ export async function PATCH(request: Request) {
                 message: nextRole === 'admin'
                     ? 'El miembro ahora puede administrar la liga y editar las reglas.'
                     : 'El miembro volvio a rol comun.',
+            });
+        }
+
+        if (action === 'rename_league') {
+            const nextName = ensureString(payload.name);
+
+            if (!nextName) {
+                return NextResponse.json({ error: 'El nombre de la liga es obligatorio.' }, { status: 400 });
+            }
+
+            if (nextName.length > 80) {
+                return NextResponse.json({ error: 'El nombre de la liga es demasiado largo (máximo 80 caracteres).' }, { status: 400 });
+            }
+
+            // Solo cambiamos el nombre visible: el slug (y por ende el link de
+            // difusión y la URL de la liga) se mantiene estable para no romper
+            // invitaciones ya compartidas.
+            const { error: renameError } = await admin
+                .from('prode_private_leagues')
+                .update({ name: nextName })
+                .eq('id', leagueId);
+
+            if (renameError) {
+                return NextResponse.json({ error: renameError.message || 'No se pudo renombrar la liga.' }, { status: 500 });
+            }
+
+            invalidateProdeRefresh(ensureString(league.competition_id));
+
+            return NextResponse.json({
+                ok: true,
+                name: nextName,
+                message: 'El nombre de la liga se actualizó.',
             });
         }
 
