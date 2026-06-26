@@ -1,6 +1,8 @@
+import { headers } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getPrivateLeaguePlayView } from '@/lib/server/prodePlay';
+import { getPublicShareOriginFromHeaders } from '@/lib/auth/requestOrigin';
 import ProdePlayScreen from '@/components/prode/ProdePlayScreen';
 
 export default async function ProdePrivateLeaguePage({
@@ -18,10 +20,11 @@ export default async function ProdePrivateLeaguePage({
         redirect(`/login?returnTo=${encodeURIComponent(`/prode/ligas/${slug}`)}`);
     }
 
+    const requestHeaders = await headers();
     const view = await getPrivateLeaguePlayView(
         slug,
         session.user.id,
-        process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+        getPublicShareOriginFromHeaders(requestHeaders),
     );
 
     if (!view) {

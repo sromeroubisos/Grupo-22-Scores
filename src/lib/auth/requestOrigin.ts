@@ -1,5 +1,9 @@
 const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '0.0.0.0', '[::1]', '::1']);
 const DEFAULT_PUBLIC_ORIGINS = ['https://g22scores.com', 'https://www.g22scores.com'];
+// Dominio público canónico para links que se comparten hacia afuera (invitaciones
+// a ligas del prode, etc.). Debe ser shareable siempre, incluso cuando la liga se
+// crea desde localhost en desarrollo, donde el host del request no sirve.
+const CANONICAL_PUBLIC_ORIGIN = 'https://www.g22scores.com';
 
 function firstHeaderValue(value: string | null | undefined): string | null {
     const first = value?.split(',')[0]?.trim();
@@ -268,6 +272,54 @@ export function isSameOriginRequest(request: Request): boolean {
 export function getRequestOrigin(request: Request): string {
     const host = getAuthCookieHost(request);
     return `${getProtocolForHost(request, host)}://${host}`;
+}
+
+// Fallback público cuando el host del request es local (dev): primera env pública
+// configurada (ignorando valores localhost) o el dominio canónico. Así el link de
+// difusión nunca queda apuntando a localhost.
+function resolveConfiguredPublicOrigin(): string {
+    const envOrigin = [
+        process.env.NEXT_PUBLIC_SITE_URL,
+        process.env.NEXT_PUBLIC_BASE_URL,
+        process.env.SITE_URL,
+    ]
+        .map((value) => normalizeOrigin(value))
+        .find((origin) => Boolean(origin) && !isLocalHost(getUrlHost(origin) || ''));
+
+    return envOrigin || CANONICAL_PUBLIC_ORIGIN;
+}
+
+// Origin para construir links que se difunden públicamente (ej.: invitación a una
+// liga del prode). A diferencia de getRequestOrigin, NUNCA devuelve localhost: si
+// la request viene de un host público (prod o preview) lo usa; si viene de
+// localhost/dev, cae a NEXT_PUBLIC_SITE_URL (cuando es público) o al dominio
+// canónico, para que el link sea siempre compartible.
+export function getPublicShareOrigin(request: Request): string {
+    const requestHost = getRequestHostCandidates(request).find((host) => !isLocalHost(host));
+    if (requestHost) {
+        return `${getProtocolForHost(request, requestHost)}://${requestHost}`;
+    }
+
+    return resolveConfiguredPublicOrigin();
+}
+
+// Igual que getPublicShareOrigin pero para Server Components / contextos donde solo
+// tenemos los headers (vía next/headers) y no un objeto Request completo. Usamos
+// solo x-forwarded-host/host (no la URL) para evitar tomar hosts placeholder.
+export function getPublicShareOriginFromHeaders(headerStore: { get(name: string): string | null }): string {
+    const candidates = [
+        normalizeHost(headerStore.get('x-forwarded-host')),
+        normalizeHost(headerStore.get('host')),
+    ].filter((host): host is string => Boolean(host));
+
+    const publicHost = candidates.find((host) => !isLocalHost(host));
+    if (publicHost) {
+        const forwardedProto = firstHeaderValue(headerStore.get('x-forwarded-proto'));
+        const proto = forwardedProto === 'http' || forwardedProto === 'https' ? forwardedProto : 'https';
+        return `${proto}://${publicHost}`;
+    }
+
+    return resolveConfiguredPublicOrigin();
 }
 
 export function getRequestOriginDebugInfo(request: Request) {

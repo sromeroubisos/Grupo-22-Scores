@@ -53,12 +53,22 @@ function makeInviteCode() {
     return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
+// Dominio público canónico para los links de invitación que se comparten hacia
+// afuera. En dev `window.location.origin` es localhost (no compartible), así que
+// solo usamos el origin real cuando NO es local.
+const CANONICAL_PUBLIC_ORIGIN = 'https://www.g22scores.com';
+
 function makeShareUrl(code: string) {
+    const path = `/prode/ligas/unirse?codigo=${encodeURIComponent(code)}`;
+
     if (typeof window === 'undefined') {
-        return `g22scores.com/prode/ligas/unirse?codigo=${code}`;
+        return `${CANONICAL_PUBLIC_ORIGIN}${path}`;
     }
 
-    return `${window.location.origin}/prode/ligas/unirse?codigo=${encodeURIComponent(code)}`;
+    const origin = window.location.origin;
+    const isLocalOrigin = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:|$)/i.test(origin);
+
+    return `${isLocalOrigin ? CANONICAL_PUBLIC_ORIGIN : origin}${path}`;
 }
 
 function getTemplateById(id: RuleTemplate) {

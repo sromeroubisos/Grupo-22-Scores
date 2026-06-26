@@ -5,6 +5,7 @@ import { listUserPrivateLeagues } from '@/lib/server/prodeCompetitions';
 import { invalidateProdeRefresh } from '@/lib/server/prodeScoring';
 import { normalizeSlug } from '@/lib/utils/normalize';
 import { normalizeProdeSourceBinding } from '@/lib/prode/source';
+import { getPublicShareOrigin } from '@/lib/auth/requestOrigin';
 import type { ProdeSourceBinding } from '@/lib/prode/types';
 
 export const dynamic = 'force-dynamic';
@@ -103,22 +104,6 @@ type UpdateLeaguePayload = {
 
 function makeInviteCode() {
     return Math.random().toString(36).slice(2, 8).toUpperCase();
-}
-
-// El link de difusión debe apuntar al dominio desde donde el usuario está creando
-// la liga. Priorizamos el host real del request (sirve en producción y también con
-// túneles tipo ngrok aunque NEXT_PUBLIC_SITE_URL esté fijado a localhost en dev) y
-// recién después caemos a la env o al origin del request.
-function resolveShareBaseUrl(request: Request) {
-    const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host');
-
-    if (forwardedHost) {
-        const isLocalHost = forwardedHost.startsWith('localhost') || forwardedHost.startsWith('127.0.0.1');
-        const forwardedProto = request.headers.get('x-forwarded-proto') || (isLocalHost ? 'http' : 'https');
-        return `${forwardedProto}://${forwardedHost}`;
-    }
-
-    return process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
 }
 
 function ensureString(value: unknown) {
@@ -590,7 +575,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const normalizedBaseUrl = resolveShareBaseUrl(request).replace(/\/$/, '');
+        const normalizedBaseUrl = getPublicShareOrigin(request).replace(/\/$/, '');
         const inviteCode = ensureString(createdLeague.invite_code);
         const createdSlug = ensureString(createdLeague.slug);
         const shareUrl = `${normalizedBaseUrl}/prode/ligas/unirse?codigo=${encodeURIComponent(inviteCode)}`;
