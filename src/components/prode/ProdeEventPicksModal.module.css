@@ -1,0 +1,260 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(3, 8, 14, 0.72);
+    backdrop-filter: blur(6px);
+    animation: fadeIn 140ms ease-out;
+}
+
+@media (min-width: 640px) {
+    .overlay {
+        align-items: center;
+    }
+}
+
+.modal {
+    width: 100%;
+    max-width: 460px;
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #0f1b22 0%, #0b141a 100%);
+    border: 1px solid rgba(134, 246, 182, 0.18);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+    animation: slideUp 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 18px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.headerTitles {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #86f6b6;
+}
+
+.matchTitle {
+    font-size: 15px;
+    color: #eef6f2;
+    line-height: 1.3;
+}
+
+.closeBtn {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #cfe6da;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.closeBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.scoreboard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 18px;
+    background: rgba(134, 246, 182, 0.06);
+}
+
+.scoreboardScore {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #f4fbf7;
+}
+
+.liveBadge {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #cfe6da;
+}
+
+.liveBadgeOn {
+    background: #ff4d4f;
+    color: #fff;
+}
+
+.body {
+    padding: 14px 16px 4px;
+    overflow-y: auto;
+}
+
+.muted {
+    color: #8fa6a0;
+    font-size: 13px;
+    margin: 0;
+}
+
+.errorText {
+    color: #ff9a9a;
+    font-size: 13px;
+    margin: 4px 0;
+}
+
+.lockedBox {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.lockedTitle {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #eef6f2;
+}
+
+.ownPickRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color: #cfe6da;
+    font-size: 14px;
+}
+
+.pickList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pickRow {
+    display: grid;
+    grid-template-columns: 30px 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.pickRowMe {
+    background: rgba(134, 246, 182, 0.1);
+    border: 1px solid rgba(134, 246, 182, 0.25);
+}
+
+.avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(134, 246, 182, 0.16);
+    color: #86f6b6;
+    font-size: 11px;
+    font-weight: 700;
+    overflow: hidden;
+}
+
+.avatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pickName {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    color: #eef6f2;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.meTag {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: #86f6b6;
+    color: #06281a;
+}
+
+.pickScore {
+    font-variant-numeric: tabular-nums;
+    font-size: 14px;
+    font-weight: 700;
+    color: #f4fbf7;
+}
+
+.pickPoints {
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    font-weight: 700;
+    color: #8fa6a0;
+    min-width: 56px;
+    text-align: right;
+}
+
+.pickPointsOn {
+    color: #86f6b6;
+}
+
+.footerNote {
+    margin: 0;
+    padding: 10px 16px 16px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #7f968f;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

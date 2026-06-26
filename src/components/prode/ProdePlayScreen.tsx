@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Shield, Gavel } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import styles from '@/app/prode/page.module.css';
+import ProdeEventPicksModal from './ProdeEventPicksModal';
 import type { ProdePlayEvent, ProdePlayPrediction, ProdePlayView, ProdePredictionOutcome } from '@/lib/prode/types';
 
 type ProdePlayScreenProps = {
@@ -191,6 +192,9 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
     const [nameDraft, setNameDraft] = useState(view.title);
     const [isRenamingLeague, setIsRenamingLeague] = useState(false);
     const [renameFeedback, setRenameFeedback] = useState<string | null>(null);
+    // Partido cuyo detalle de pronósticos del grupo se está mirando (modal).
+    const [picksEvent, setPicksEvent] = useState<{ id: string; homeLabel: string; awayLabel: string } | null>(null);
+    const canSeeGroupPicks = view.scope === 'private_league' && Boolean(view.privateLeagueId);
     const [ruleDrafts, setRuleDrafts] = useState<Record<string, string>>(() => Object.fromEntries(
         view.rules.items.map((rule) => [rule.key, rule.points.toString()]),
     ));
@@ -752,6 +756,16 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                                             <span className={styles.pickFeedback}>
                                                                 {feedback[event.id] || (currentPrediction ? 'Pronostico guardado' : `Cierra: ${formatDate(event.locksAt)}`)}
                                                             </span>
+
+                                                            {canSeeGroupPicks ? (
+                                                                <button
+                                                                    type="button"
+                                                                    className={styles.metaTag}
+                                                                    onClick={() => setPicksEvent({ id: event.id, homeLabel: event.homeLabel, awayLabel: event.awayLabel })}
+                                                                >
+                                                                    Ver pronósticos del grupo
+                                                                </button>
+                                                            ) : null}
                                                         </article>
                                                     );
                                                 })}
@@ -812,6 +826,15 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                                         <span className={`${styles.metaTag} ${correct === true ? styles.metaTagSuccess : correct === false ? styles.metaTagDanger : ''}`}>
                                                             {prediction ? `${prediction.pointsAwarded > 0 ? '+' : ''}${prediction.pointsAwarded} pts` : 'Sin puntos'}
                                                         </span>
+                                                        {canSeeGroupPicks ? (
+                                                            <button
+                                                                type="button"
+                                                                className={styles.metaTag}
+                                                                onClick={() => setPicksEvent({ id: event.id, homeLabel: event.homeLabel, awayLabel: event.awayLabel })}
+                                                            >
+                                                                Ver pronósticos del grupo
+                                                            </button>
+                                                        ) : null}
                                                     </div>
                                                 </article>
                                             );
@@ -1041,6 +1064,16 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                     </section>
                 </div>
             </div>
+
+            {canSeeGroupPicks && picksEvent && view.privateLeagueId ? (
+                <ProdeEventPicksModal
+                    leagueId={view.privateLeagueId}
+                    eventId={picksEvent.id}
+                    homeLabel={picksEvent.homeLabel}
+                    awayLabel={picksEvent.awayLabel}
+                    onClose={() => setPicksEvent(null)}
+                />
+            ) : null}
         </div>
     );
 }

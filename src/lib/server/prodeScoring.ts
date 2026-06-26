@@ -248,17 +248,55 @@ function scorePredictionRow(eventRow: AnyRow, predictionRow: AnyRow, rules: Prod
         } satisfies AnyRow;
     }
 
-    const exactHome = predictedHomeScore !== null && predictedHomeScore === officialResult.homeScore;
-    const exactAway = predictedAwayScore !== null && predictedAwayScore === officialResult.awayScore;
+    const multiplier = rules.doubleFinals && isFinalStage(eventRow) ? 2 : 1;
+    const breakdown = computePredictionPoints(
+        { predictedHomeScore, predictedAwayScore, predictedOutcome },
+        officialResult,
+        rules,
+        multiplier,
+    );
+
+    return {
+        ...predictionRow,
+        points_awarded: breakdown.totalPoints,
+        status: 'scored',
+        locked_at: lockedAt,
+        scored_at: nowIso,
+        scoring_breakdown: breakdown,
+    } satisfies AnyRow;
+}
+
+type ProdePredictionInput = {
+    predictedHomeScore: number | null;
+    predictedAwayScore: number | null;
+    predictedOutcome: string | null;
+};
+
+type ProdeOfficialScore = {
+    homeScore: number;
+    awayScore: number;
+    outcome: string;
+};
+
+// Núcleo del puntaje: compara un pronóstico contra un marcador (oficial o en vivo)
+// y devuelve el desglose. Fuente única usada tanto por el scoring persistido como
+// por el cálculo provisorio en vivo, para que ambos den exactamente lo mismo.
+export function computePredictionPoints(
+    predicted: ProdePredictionInput,
+    official: ProdeOfficialScore,
+    rules: ProdeScoringRules,
+    multiplier: number,
+) {
+    const exactHome = predicted.predictedHomeScore !== null && predicted.predictedHomeScore === official.homeScore;
+    const exactAway = predicted.predictedAwayScore !== null && predicted.predictedAwayScore === official.awayScore;
     const exactScore = exactHome && exactAway;
-    const predictedDiff = predictedHomeScore !== null && predictedAwayScore !== null
-        ? predictedHomeScore - predictedAwayScore
+    const predictedDiff = predicted.predictedHomeScore !== null && predicted.predictedAwayScore !== null
+        ? predicted.predictedHomeScore - predicted.predictedAwayScore
         : null;
-    const officialDiff = officialResult.homeScore - officialResult.awayScore;
-    const winnerHit = predictedOutcome === officialResult.outcome;
+    const officialDiff = official.homeScore - official.awayScore;
+    const winnerHit = predicted.predictedOutcome === official.outcome;
     const diffHit = predictedDiff !== null && predictedDiff === officialDiff;
     const oneTeamExactHit = !exactScore && (exactHome || exactAway);
-    const multiplier = rules.doubleFinals && isFinalStage(eventRow) ? 2 : 1;
 
     const basePoints = {
         winner: winnerHit ? rules.winner : 0,
@@ -269,24 +307,47 @@ function scorePredictionRow(eventRow: AnyRow, predictionRow: AnyRow, rules: Prod
 
     const totalPoints = Object.values(basePoints).reduce((sum, value) => sum + value, 0) * multiplier;
 
+    return { winnerHit, diffHit, exactHome, exactAway, exactScore, oneTeamExactHit, multiplier, totalPoints, basePoints };
+}
+
+// Marcador oficial/en vivo de un evento, o null si todavía no hay (partido sin
+// empezar). Expuesto para que las vistas en vivo lean el score con la misma
+// lógica de parseo que el motor de scoring.
+export function readEventOfficialScore(eventRow: AnyRow) {
+    return parseOfficialResult(eventRow.official_result);
+}
+
+// Puntaje PROVISORIO en vivo: igual que scorePredictionRow pero sin exigir que el
+// partido esté finalizado. Sirve para mostrar, mientras el partido va en curso,
+// cuántos puntos lleva cada pronóstico con el marcador actual (que luego, al
+// cerrarse el partido, el motor persiste como definitivo). No escribe nada.
+export function scoreLivePrediction(eventRow: AnyRow, predictionRow: AnyRow, rules: ProdeScoringRules) {
+    const status = toSafeString(eventRow.status);
+    const official = parseOfficialResult(eventRow.official_result);
+
+    if (status === 'cancelled' || !official) {
+        return { hasScore: false, isFinal: false, points: 0, breakdown: null, official };
+    }
+
+    const predictedHomeScore = toNullableNumber(predictionRow.predicted_home_score);
+    const predictedAwayScore = toNullableNumber(predictionRow.predicted_away_score);
+    const predictedOutcome = toSafeString(predictionRow.predicted_outcome)
+        || buildPredictionOutcome(predictedHomeScore, predictedAwayScore);
+    const multiplier = rules.doubleFinals && isFinalStage(eventRow) ? 2 : 1;
+    const breakdown = computePredictionPoints(
+        { predictedHomeScore, predictedAwayScore, predictedOutcome },
+        official,
+        rules,
+        multiplier,
+    );
+
     return {
-        ...predictionRow,
-        points_awarded: totalPoints,
-        status: 'scored',
-        locked_at: lockedAt,
-        scored_at: nowIso,
-        scoring_breakdown: {
-            winnerHit,
-            diffHit,
-            exactHome,
-            exactAway,
-            exactScore,
-            oneTeamExactHit,
-            multiplier,
-            totalPoints,
-            basePoints,
-        },
-    } satisfies AnyRow;
+        hasScore: true,
+        isFinal: status === 'final' || status === 'scored',
+        points: breakdown.totalPoints,
+        breakdown,
+        official,
+    };
 }
 
 export function applyScoringRulesToPredictionRows(
