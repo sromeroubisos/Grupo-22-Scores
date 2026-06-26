@@ -2,8 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
 import styles from './MobileBottomNav.module.css';
 
 const hiddenPrefixes = ['/login', '/terminos', '/privacidad', '/contacto', '/ayuda'];
@@ -12,7 +10,7 @@ const navItems = [
     { href: '/', label: 'Partidos', icon: 'matches', matchPrefixes: ['/', '/matches'] },
     { href: '/noticias', label: 'Noticias', icon: 'news', matchPrefixes: ['/noticias'] },
     { href: '/tournaments', label: 'Ligas', icon: 'trophy', matchPrefixes: ['/tournaments'] },
-    { href: '/profile', label: 'Usuario', icon: 'user', matchPrefixes: ['/profile', '/favorites', '/notifications', '/prode'] },
+    { href: '/prode', label: 'Prode', icon: 'prode', matchPrefixes: ['/prode'] },
     { href: '/search', label: 'Buscar', icon: 'search', matchPrefixes: ['/search'] },
 ];
 
@@ -54,11 +52,12 @@ function NavIcon({ name, active }: { name: string; active?: boolean }) {
                     <path d="M8 20h8" />
                 </svg>
             );
-        case 'user':
+        case 'prode':
             return (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth}>
-                    <circle cx="12" cy="8" r="3.5" />
-                    <path d="M5 19c1.8-3.3 4.3-5 7-5s5.2 1.7 7 5" />
+                    <rect x="5" y="4" width="14" height="16" rx="2" />
+                    <path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" />
+                    <path d="M8.5 12.5l2 2 4-4.5" />
                 </svg>
             );
         case 'search':
@@ -75,32 +74,15 @@ function NavIcon({ name, active }: { name: string; active?: boolean }) {
 
 export default function MobileBottomNav() {
     const pathname = usePathname();
-    const { isAuthenticated } = useAuth();
-    const [hasHydrated, setHasHydrated] = useState(false);
-
-    useEffect(() => {
-        setHasHydrated(true);
-    }, []);
 
     if (hiddenPrefixes.some((prefix) => pathname?.startsWith(prefix))) {
         return null;
     }
 
-    const showAuthenticatedUserItem = hasHydrated && isAuthenticated;
-    const resolvedNavItems = navItems.map((item) => {
-        if (item.icon !== 'user') return item;
-
-        return {
-            ...item,
-            href: showAuthenticatedUserItem ? '/profile' : '/login?returnTo=%2Fprofile',
-            label: showAuthenticatedUserItem ? 'Usuario' : 'Ingresar',
-        };
-    });
-
     return (
         <nav className={styles.nav} aria-label="Navegacion principal">
             <div className={styles.navList}>
-                {resolvedNavItems.map((item) => {
+                {navItems.map((item) => {
                     const active = isActive(pathname, item.href, item.matchPrefixes);
                     return (
                         <Link
