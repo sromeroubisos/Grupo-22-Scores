@@ -277,6 +277,31 @@ async function ensureBaseCompetition(admin: LooseAdminClient, selection: NonNull
         external_tournament_id: selection.sourceBinding?.externalTournamentId,
     });
 
+    // El `local_tournament_id` viene del catálogo que rendea el cliente. Si esa
+    // página quedó cacheada o el torneo fue borrado/recreado (nuevo UUID), el id
+    // que llega ya no existe en `tournaments` y el INSERT explota con el FK
+    // `prode_competitions_local_tournament_id_fkey`. Validamos antes para devolver
+    // un error entendible en vez del crudo de Postgres.
+    if (sourceBinding.sourceType === 'local') {
+        if (!sourceBinding.localTournamentId) {
+            throw new Error('La competencia seleccionada no tiene un torneo local válido. Volvé a elegirla desde el catálogo.');
+        }
+
+        const { data: tournamentRow, error: tournamentError } = await admin
+            .from('tournaments')
+            .select('id')
+            .eq('id', sourceBinding.localTournamentId)
+            .maybeSingle();
+
+        if (tournamentError) {
+            throw new Error(tournamentError.message || 'No se pudo validar el torneo local de la competencia.');
+        }
+
+        if (!tournamentRow?.id) {
+            throw new Error('El torneo de la competencia seleccionada ya no está disponible (pudo haber sido eliminado). Actualizá la página y elegí la competencia de nuevo.');
+        }
+    }
+
     if (sourceBinding.sourceType === 'local' && sourceBinding.localTournamentId) {
         const { data, error } = await admin
             .from('prode_competitions')
