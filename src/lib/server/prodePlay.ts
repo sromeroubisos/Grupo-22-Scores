@@ -1323,6 +1323,36 @@ export async function syncActiveProdeCompetitionsBaseEvents(): Promise<{ total: 
     return { total: rows.length, synced, errors };
 }
 
+// Presupuesto máximo (ms) que el render de una vista del prode espera por el sync
+// de eventos + refresh de scoring. Si un proveedor externo (ESPN/FlashScore) está
+// lento, no bloqueamos la página: renderizamos con lo ya persistido y el cron
+// `/api/cron/prode-scoring` (más el sync en vuelo, que sigue por su cuenta) ponen
+// los datos al día. El TTL interno del sync evita repegar al proveedor en cada visita.
+const PLAY_SYNC_BUDGET_MS = 1800;
+
+async function syncPlayDataWithinBudget(
+    admin: LooseMutationClient,
+    competitionRow: AnyRow,
+    competitionId: string,
+) {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    try {
+        await Promise.race([
+            (async () => {
+                await syncCompetitionBaseEvents(admin, competitionRow);
+                await refreshCompetitionScoreboards(competitionId);
+            })(),
+            new Promise<void>((resolve) => {
+                timer = setTimeout(resolve, PLAY_SYNC_BUDGET_MS);
+            }),
+        ]);
+    } catch (error) {
+        console.error('[prode/play] sync/scoring skipped for competition', competitionId, error);
+    } finally {
+        if (timer) clearTimeout(timer);
+    }
+}
+
 export async function getPublicCompetitionPlayView(slug: string, currentUserId: string | null): Promise<ProdePlayView | null> {
     const admin = createAdminClient() as unknown as LooseMutationClient;
     const competitionResult = await admin
@@ -1342,15 +1372,10 @@ export async function getPublicCompetitionPlayView(slug: string, currentUserId: 
     const competitionId = toSafeString(competitionResult.data.id);
     const activeRulesetId = toSafeString(competitionResult.data.active_ruleset_id);
 
-    // Sync y refresh son de mejor esfuerzo: si un proveedor externo o el motor de
-    // scoring fallan, igual renderizamos la vista con los datos ya persistidos en
-    // lugar de devolver un 500 que tira toda la página del prode.
-    try {
-        await syncCompetitionBaseEvents(admin, competitionResult.data);
-        await refreshCompetitionScoreboards(competitionId);
-    } catch (error) {
-        console.error('[prode/play] sync/scoring skipped for competition', competitionId, error);
-    }
+    // Sync y refresh acotados por tiempo: si un proveedor externo o el motor de
+    // scoring están lentos, igual renderizamos con los datos ya persistidos en vez
+    // de bloquear (o devolver un 500 que tira toda la página del prode).
+    await syncPlayDataWithinBudget(admin, competitionResult.data, competitionId);
 
     const [{ eventRows, memberRows, rankingRows, errors }, predictionResult, rulesetResult] = await Promise.all([
         getCompetitionRows(admin, competitionId),
@@ -1503,13 +1528,9 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
     const competitionId = toSafeString(competitionResult.data.id);
     const activeRulesetId = toSafeString(competitionResult.data.active_ruleset_id);
 
-    // Best-effort: un fallo de sync/scoring no debe tumbar la página de la liga.
-    try {
-        await syncCompetitionBaseEvents(admin, competitionResult.data);
-        await refreshCompetitionScoreboards(competitionId);
-    } catch (error) {
-        console.error('[prode/play] sync/scoring skipped for league competition', competitionId, error);
-    }
+    // Best-effort acotado por tiempo: un fallo o lentitud del sync/scoring no debe
+    // tumbar ni colgar la página de la liga (ver syncPlayDataWithinBudget).
+    await syncPlayDataWithinBudget(admin, competitionResult.data, competitionId);
 
     const [{ eventRows, errors }, rankingResult, predictionResult, rulesetResult] = await Promise.all([
         getCompetitionEventRows(admin, competitionId),

@@ -7,6 +7,7 @@ import { Shield, Gavel } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import styles from '@/app/prode/page.module.css';
 import ProdeEventPicksModal from './ProdeEventPicksModal';
+import enterStyles from './ProdePlaySkeleton.module.css';
 import type { ProdePlayEvent, ProdePlayPrediction, ProdePlayView, ProdePredictionOutcome } from '@/lib/prode/types';
 
 type ProdePlayScreenProps = {
@@ -550,7 +551,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
     }
 
     return (
-        <div className={styles.page}>
+        <div className={`${styles.page} ${enterStyles.enter}`}>
             <div className="container">
                 <div className={styles.detailShell}>
                     <Link href={backHref} className={styles.backLink}>{backLabel}</Link>

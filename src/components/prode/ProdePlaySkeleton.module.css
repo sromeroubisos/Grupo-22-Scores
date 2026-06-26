@@ -1,0 +1,151 @@
+.shell {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 16px 0 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    animation: fadeIn 160ms ease-out;
+}
+
+.backLink {
+    width: 120px;
+    height: 16px;
+    border-radius: 8px;
+}
+
+.hero {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+    padding: 22px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #0f1b22 0%, #0b141a 100%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.heroCopy {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.eyebrow { width: 90px; height: 12px; border-radius: 6px; }
+.title { width: min(70%, 320px); height: 26px; border-radius: 8px; }
+.subtitle { width: min(85%, 420px); height: 14px; border-radius: 7px; }
+
+.metaRow {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+
+.metaTag { width: 84px; height: 22px; border-radius: 999px; }
+
+.rail {
+    display: flex;
+    gap: 12px;
+    flex: 0 0 auto;
+}
+
+.stat {
+    width: 84px;
+    height: 70px;
+    border-radius: 14px;
+}
+
+.tabs {
+    display: flex;
+    gap: 8px;
+}
+
+.tab { flex: 1; height: 38px; border-radius: 11px; }
+
+.cardList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card {
+    height: 132px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #0f1b22 0%, #0b141a 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Bloques con shimmer (excepto los que ya tienen fondo de card) */
+.backLink,
+.eyebrow,
+.title,
+.subtitle,
+.metaTag,
+.stat,
+.tab {
+    background: linear-gradient(
+        100deg,
+        rgba(255, 255, 255, 0.04) 30%,
+        rgba(134, 246, 182, 0.10) 50%,
+        rgba(255, 255, 255, 0.04) 70%
+    );
+    background-size: 220% 100%;
+    animation: shimmer 1.25s ease-in-out infinite;
+}
+
+.card {
+    position: relative;
+    overflow: hidden;
+}
+
+.card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        100deg,
+        transparent 30%,
+        rgba(134, 246, 182, 0.08) 50%,
+        transparent 70%
+    );
+    background-size: 220% 100%;
+    animation: shimmer 1.25s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 180% 0; }
+    100% { background-position: -80% 0; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animación de entrada para el contenido real (cuando reemplaza al skeleton). */
+.enter {
+    animation: contentEnter 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes contentEnter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shell,
+    .enter,
+    .backLink,
+    .eyebrow,
+    .title,
+    .subtitle,
+    .metaTag,
+    .stat,
+    .tab,
+    .card::after {
+        animation: none;
+    }
+}
