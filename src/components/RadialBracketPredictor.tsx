@@ -407,12 +407,15 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
         ctx.fillStyle = '#f4f1ea';
         ctx.fillRect(0, 0, W, H);
 
-        // Title
+        // Title + call-to-action underneath it
         ctx.fillStyle = '#16181d';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = '800 44px system-ui, "Segoe UI", sans-serif';
-        ctx.fillText(title || 'Mi predicción', W / 2, TITLE_H / 2 + 8);
+        ctx.fillText((title || 'Mi predicción').toUpperCase(), W / 2, TITLE_H / 2 - 18);
+        ctx.fillStyle = 'rgba(22,24,29,0.72)';
+        ctx.font = '700 26px system-ui, "Segoe UI", sans-serif';
+        ctx.fillText('ENTRA EN G22SCORES.COM Y ARMÁ TU BRACKET!', W / 2, TITLE_H / 2 + 30);
 
         // Preload crests
         const [brandImg, cupImg, champImg] = await Promise.all([
@@ -530,7 +533,7 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
             ctx.fillText(champion.name, startX + crestR * 2 + gap, rowY);
         }
 
-        // G22 Scores brand
+        // G22 Scores brand at the very bottom
         if (brandImg) {
             const bh = 44;
             const bw = (brandImg.naturalWidth / brandImg.naturalHeight) * bh || 130;
