@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styles from './RadialBracketPredictor.module.css';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -76,7 +76,7 @@ const PLACEHOLDER_NAME_RE = /\b(winner|2nd place|3rd place|runner[- ]?up|loser|t
 // Real bracket structure from the server linkage (matchNumber-derived slot + the
 // "Round of X N Winner" feeder refs). Returns null when that metadata is absent so
 // the caller can fall back to adjacency pairing.
-function buildFeederStructure(rounds: PredictorRoundLike[]): { root: BNode; nodes: BNode[] } | null {
+function buildFeederStructure(rounds: PredictorRoundLike[]): { root: BNode; nodes: BNode[]; matchByNode: Map<string, any> } | null {
     const bySlot = new Map<string, any>();
     const byRound = new Map<string, any[]>();
     const roundOrder: string[] = [];
@@ -146,9 +146,11 @@ function buildFeederStructure(rounds: PredictorRoundLike[]): { root: BNode; node
         }
         return makeLeaf(team);
     };
+    const matchByNode = new Map<string, any>();
     const buildNode = (match: any): BNode => {
         const node = makeBNode(nextId(), 'match', null);
         nodes.push(node);
+        matchByNode.set(node.id, match);
         visiting.add(match);
         (['home', 'away'] as const).forEach((side) => {
             const child = resolveSide(match, side);
@@ -160,7 +162,7 @@ function buildFeederStructure(rounds: PredictorRoundLike[]): { root: BNode; node
     };
 
     const root = buildNode(finalMatch);
-    return { root, nodes };
+    return { root, nodes, matchByNode };
 }
 
 // Fallback when there's no bracket linkage: pair the first round's matches by
@@ -294,10 +296,24 @@ function layoutRadialTree(root: BNode, nodes: BNode[]): { root: BNode; maxLevel:
     return { root, maxLevel, nodes, teamRadius };
 }
 
-function buildPredictorTree(rounds: PredictorRoundLike[]): { root: BNode | null; maxLevel: number; nodes: BNode[]; teamRadius: number } {
-    const built = buildFeederStructure(rounds) ?? buildNaiveStructure(rounds);
-    if (!built) return { root: null, maxLevel: 0, nodes: [], teamRadius: TEAM_RADIUS };
-    return layoutRadialTree(built.root, built.nodes);
+function buildPredictorTree(rounds: PredictorRoundLike[]): {
+    root: BNode | null;
+    maxLevel: number;
+    nodes: BNode[];
+    teamRadius: number;
+    seedWinners: Record<string, string>;
+    lockedIds: Set<string>;
+} {
+    const feeder = buildFeederStructure(rounds);
+    const built = feeder ?? buildNaiveStructure(rounds);
+    if (!built) {
+        return { root: null, maxLevel: 0, nodes: [], teamRadius: TEAM_RADIUS, seedWinners: {}, lockedIds: new Set() };
+    }
+    const laid = layoutRadialTree(built.root, built.nodes);
+    const { seed, locked } = feeder
+        ? computeSeedWinners(laid.nodes, feeder.matchByNode)
+        : { seed: {} as Record<string, string>, locked: new Set<string>() };
+    return { ...laid, seedWinners: seed, lockedIds: locked };
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -308,6 +324,64 @@ function teamAtNode(node: BNode, winners: Record<string, string>): BracketTeam |
     if (!chosenId) return null;
     const child = node.children.find((c) => c.id === chosenId);
     return child ? teamAtNode(child, winners) : null;
+}
+
+function teamNameKey(value: unknown): string {
+    return String(value ?? '').trim().toLowerCase();
+}
+
+// The winning team's name for a match that has already finished, else null.
+function decidedWinnerName(match: any): string | null {
+    const status = teamNameKey(match?.status ?? match?.match_status ?? match?.result);
+    if (status !== 'final' && status !== 'finished' && status !== 'ft') return null;
+
+    const homeName = match?.home_team?.name ?? match?.home_team_name ?? null;
+    const awayName = match?.away_team?.name ?? match?.away_team_name ?? null;
+
+    const winnerId = match?.winner_id;
+    if (winnerId != null) {
+        if (match?.home_team?.id != null && String(match.home_team.id) === String(winnerId)) return homeName;
+        if (match?.away_team?.id != null && String(match.away_team.id) === String(winnerId)) return awayName;
+    }
+
+    const hs = Number(match?.score_home ?? match?.scores?.home);
+    const as = Number(match?.score_away ?? match?.scores?.away);
+    if (Number.isFinite(hs) && Number.isFinite(as)) {
+        if (hs > as) return homeName;
+        if (as > hs) return awayName;
+        const ph = Number(match?.scores?.penalties?.home);
+        const pa = Number(match?.scores?.penalties?.away);
+        if (Number.isFinite(ph) && Number.isFinite(pa)) {
+            if (ph > pa) return homeName;
+            if (pa > ph) return awayName;
+        }
+    }
+    return null;
+}
+
+// Pre-fill (and lock) the winners of matches already finished, so the bracket
+// reflects real results as crossings complete. Processed bottom-up so each round's
+// winners resolve before the round that depends on them.
+function computeSeedWinners(
+    nodes: BNode[],
+    matchByNode: Map<string, any>,
+): { seed: Record<string, string>; locked: Set<string> } {
+    const seed: Record<string, string> = {};
+    const locked = new Set<string>();
+    const matchNodes = nodes.filter((n) => n.kind === 'match').sort((a, b) => b.level - a.level);
+    for (const node of matchNodes) {
+        const winnerName = decidedWinnerName(matchByNode.get(node.id));
+        if (!winnerName) continue;
+        const child = node.children.find((c) => {
+            const team = teamAtNode(c, seed);
+            return team && teamNameKey(team.name) === teamNameKey(winnerName);
+        });
+        if (child) {
+            seed[node.id] = child.id;
+            locked.add(node.id);
+        }
+    }
+    return { seed, locked };
 }
 
 function getInitials(name: string) {
@@ -345,21 +419,29 @@ function drawImageContain(ctx: CanvasRenderingContext2D, img: HTMLImageElement, 
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function RadialBracketPredictor({ rounds, title, logo, onClose }: RadialBracketPredictorProps) {
-    const { root, nodes, teamRadius } = useMemo(() => buildPredictorTree(rounds), [rounds]);
-    const [winners, setWinners] = useState<Record<string, string>>({});
+    const { root, nodes, teamRadius, seedWinners, lockedIds } = useMemo(() => buildPredictorTree(rounds), [rounds]);
+    const [winners, setWinners] = useState<Record<string, string>>(seedWinners);
+
+    // As real matches finish, fold the freshly-decided results into the picks (real
+    // results win), while keeping the user's predictions for the undecided crossings.
+    useEffect(() => {
+        setWinners((prev) => ({ ...prev, ...seedWinners }));
+    }, [seedWinners]);
 
     const champion = root ? teamAtNode(root, winners) : null;
 
     const handlePick = (node: BNode) => {
         const parent = node.parent;
         if (!parent) return; // champion node — nothing further to advance to
+        if (lockedIds.has(parent.id)) return; // already settled by a real result
         setWinners((prev) => {
             const next = { ...prev };
             const wasChosen = next[parent.id] === node.id;
-            // Clear this choice and every ancestor choice (downstream changed).
+            // Clear this choice and every ancestor choice (downstream changed), but
+            // never wipe a locked (real) result along the way.
             let walker: BNode | null = parent;
             while (walker) {
-                delete next[walker.id];
+                if (!lockedIds.has(walker.id)) delete next[walker.id];
                 walker = walker.parent;
             }
             if (!wasChosen) next[parent.id] = node.id; // toggle off when re-clicking
@@ -367,7 +449,8 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
         });
     };
 
-    const reset = () => setWinners({});
+    // Reset clears predictions but keeps the real, already-decided results.
+    const reset = () => setWinners(seedWinners);
 
     const [shareNote, setShareNote] = useState('');
     const [shareMenuOpen, setShareMenuOpen] = useState(false);
@@ -386,17 +469,31 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
     // G22 logo and the champion called out at the bottom.
     const buildShareImageBlob = async (shareFormat: 'post' | 'story'): Promise<Blob | null> => {
         if (!root) return null;
+        const isStory = shareFormat === 'story';
         const W = 1080;
-        const H = shareFormat === 'story' ? 1920 : 1350;
-        const TITLE_H = shareFormat === 'story' ? 200 : 130;
-        const FOOTER_H = (champion ? 300 : 180) + (shareFormat === 'story' ? 120 : 0);
-        const margin = 60;
+        const H = isStory ? 1920 : 1350;
+
+        // Premium dark-framed poster: cool near-white sheet, navy bands, gold accents.
+        const INK = '#0E1424';
+        const INK_DEEP = '#070B16';
+        const BODY = '#F3F4F7';
+        const LINE = 'rgba(14,20,36,0.30)';
+        const GOLD = '#E7B24A';
+        const GOLD_DEEP = '#B9852A';
+        const GREEN = '#13B981';
+        const FAMILY = 'system-ui, "Segoe UI", sans-serif';
+
+        const HEADER_H = isStory ? 250 : 190;
+        const LOGO_BAND_H = isStory ? 150 : 118;
+        const CHAMP_H = champion ? (isStory ? 230 : 200) : 60;
+        const FOOTER_H = CHAMP_H + LOGO_BAND_H;
+        const margin = 70;
         const availW = W - margin * 2;
-        const availH = H - TITLE_H - FOOTER_H;
+        const availH = H - HEADER_H - FOOTER_H;
         const scale = Math.min(availW / VIEW, availH / VIEW);
         const drawnBR = VIEW * scale;
         const bracketLeft = (W - drawnBR) / 2;
-        const bracketTop = TITLE_H + Math.max(0, (availH - drawnBR) / 2);
+        const bracketTop = HEADER_H + Math.max(0, (availH - drawnBR) / 2);
 
         const canvas = document.createElement('canvas');
         canvas.width = W;
@@ -404,18 +501,56 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
         const ctx = canvas.getContext('2d');
         if (!ctx) return null;
 
-        ctx.fillStyle = '#f4f1ea';
-        ctx.fillRect(0, 0, W, H);
+        const fitFont = (text: string, maxW: number, weight: number, startPx: number) => {
+            let px = startPx;
+            ctx.font = `${weight} ${px}px ${FAMILY}`;
+            while (px > 22 && ctx.measureText(text).width > maxW) {
+                px -= 2;
+                ctx.font = `${weight} ${px}px ${FAMILY}`;
+            }
+            return px;
+        };
+        const setTracking = (v: number) => {
+            try { (ctx as unknown as { letterSpacing: string }).letterSpacing = `${v}px`; } catch { /* unsupported */ }
+        };
 
-        // Title + call-to-action underneath it
-        ctx.fillStyle = '#16181d';
+        // Background: cool sheet + soft brand glow behind the bracket.
+        ctx.fillStyle = BODY;
+        ctx.fillRect(0, 0, W, H);
+        const glowCx = W / 2;
+        const glowCy = bracketTop + drawnBR / 2;
+        const glow = ctx.createRadialGradient(glowCx, glowCy, 0, glowCx, glowCy, drawnBR * 0.6);
+        glow.addColorStop(0, 'rgba(19,185,129,0.12)');
+        glow.addColorStop(1, 'rgba(19,185,129,0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, HEADER_H, W, availH);
+
+        // Header band: title + call-to-action.
+        const headGrad = ctx.createLinearGradient(0, 0, 0, HEADER_H);
+        headGrad.addColorStop(0, INK);
+        headGrad.addColorStop(1, INK_DEEP);
+        ctx.fillStyle = headGrad;
+        ctx.fillRect(0, 0, W, HEADER_H);
+        ctx.fillStyle = GOLD;
+        ctx.fillRect(0, HEADER_H - 4, W, 4);
+
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = '800 44px system-ui, "Segoe UI", sans-serif';
-        ctx.fillText((title || 'Mi predicción').toUpperCase(), W / 2, TITLE_H / 2 - 18);
-        ctx.fillStyle = 'rgba(22,24,29,0.72)';
-        ctx.font = '700 26px system-ui, "Segoe UI", sans-serif';
-        ctx.fillText('ENTRA EN G22SCORES.COM Y ARMÁ TU BRACKET!', W / 2, TITLE_H / 2 + 30);
+        const titleText = (title || 'Mi predicción').toUpperCase();
+        const titlePx = fitFont(titleText, availW, 800, isStory ? 60 : 52);
+        ctx.fillStyle = '#FFFFFF';
+        setTracking(titlePx * 0.01);
+        ctx.font = `800 ${titlePx}px ${FAMILY}`;
+        ctx.fillText(titleText, W / 2, HEADER_H * 0.42);
+        setTracking(0);
+
+        const ctaText = 'ENTRA EN G22SCORES.COM Y ARMÁ TU BRACKET!';
+        const ctaPx = fitFont(ctaText, availW, 700, isStory ? 26 : 24);
+        ctx.fillStyle = GOLD;
+        setTracking(1.5);
+        ctx.font = `700 ${ctaPx}px ${FAMILY}`;
+        ctx.fillText(ctaText, W / 2, HEADER_H * 0.72);
+        setTracking(0);
 
         // Preload crests
         const [brandImg, cupImg, champImg] = await Promise.all([
@@ -431,7 +566,7 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
         ctx.translate(bracketLeft, bracketTop);
         ctx.scale(scale, scale);
 
-        ctx.strokeStyle = 'rgba(22,24,29,0.55)';
+        ctx.strokeStyle = LINE;
         ctx.lineWidth = 1.8 / scale;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
@@ -464,7 +599,7 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
         teamNodes.forEach((node, i) => {
             const team = teamAtNode(node, winners);
             if (!team) {
-                ctx.strokeStyle = 'rgba(22,24,29,0.5)';
+                ctx.strokeStyle = LINE;
                 ctx.lineWidth = 1.6 / scale;
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, node.kind === 'leaf' ? 6 : 5, 0, Math.PI * 2);
@@ -477,18 +612,18 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
             if (img) {
                 drawImageContain(ctx, img, node.x, node.y, r);
             } else {
-                ctx.fillStyle = '#d9d4c8';
+                ctx.fillStyle = '#E6E8EE';
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#16181d';
-                ctx.font = `800 ${r * 0.82}px system-ui, sans-serif`;
+                ctx.fillStyle = INK;
+                ctx.font = `800 ${r * 0.82}px ${FAMILY}`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(getInitials(team.name), node.x, node.y);
             }
             if (isChampion) {
-                ctx.strokeStyle = '#d4a017';
+                ctx.strokeStyle = GOLD;
                 ctx.lineWidth = 4 / scale;
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, r + 3, 0, Math.PI * 2);
@@ -496,11 +631,18 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
             }
         });
 
-        // Centre cup = tournament logo
+        // Centre = competition logo on a soft gold halo
+        const halo = ctx.createRadialGradient(CENTER, CENTER, 0, CENTER, CENTER, CUP_RADIUS * 1.95);
+        halo.addColorStop(0, 'rgba(231,178,74,0.30)');
+        halo.addColorStop(1, 'rgba(231,178,74,0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(CENTER, CENTER, CUP_RADIUS * 1.95, 0, Math.PI * 2);
+        ctx.fill();
         if (cupImg) {
             drawImageContain(ctx, cupImg, CENTER, CENTER, CUP_RADIUS);
         } else {
-            ctx.fillStyle = '#16181d';
+            ctx.fillStyle = INK;
             ctx.font = '52px serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -508,44 +650,53 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
         }
         ctx.restore();
 
-        // ── Footer — champion call-out + brand (absolute coords) ──
+        // ── Champion call-out ──
         const footerTop = H - FOOTER_H;
         if (champion) {
-            ctx.fillStyle = '#d4a017';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.font = '900 56px system-ui, "Segoe UI", sans-serif';
-            ctx.fillText('¡Campeón!', W / 2, footerTop + 70);
+            ctx.fillStyle = GOLD_DEEP;
+            setTracking(6);
+            ctx.font = `800 ${isStory ? 30 : 26}px ${FAMILY}`;
+            ctx.fillText('CAMPEÓN', W / 2, footerTop + (isStory ? 56 : 50));
+            setTracking(0);
 
-            ctx.font = '800 42px system-ui, "Segoe UI", sans-serif';
+            const namePx = fitFont(champion.name, availW - 120, 800, isStory ? 50 : 44);
+            ctx.font = `800 ${namePx}px ${FAMILY}`;
             const nameWidth = ctx.measureText(champion.name).width;
-            const crestR = 36;
-            const gap = 18;
+            const crestR = isStory ? 42 : 38;
+            const gap = 20;
             const blockWidth = crestR * 2 + gap + nameWidth;
             const startX = W / 2 - blockWidth / 2;
-            const rowY = footerTop + 160;
+            const rowY = footerTop + (isStory ? 140 : 128);
             if (champImg) {
                 drawImageContain(ctx, champImg, startX + crestR, rowY, crestR);
             }
-            ctx.fillStyle = '#d4a017';
+            ctx.fillStyle = INK;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
             ctx.fillText(champion.name, startX + crestR * 2 + gap, rowY);
         }
 
-        // G22 Scores brand at the very bottom
+        // ── Bottom band: G22 Scores logo ──
+        const bandTop = H - LOGO_BAND_H;
+        const footGrad = ctx.createLinearGradient(0, bandTop, 0, H);
+        footGrad.addColorStop(0, INK);
+        footGrad.addColorStop(1, INK_DEEP);
+        ctx.fillStyle = footGrad;
+        ctx.fillRect(0, bandTop, W, LOGO_BAND_H);
+        ctx.fillStyle = GOLD;
+        ctx.fillRect(0, bandTop, W, 3);
         if (brandImg) {
-            const bh = 44;
-            const bw = (brandImg.naturalWidth / brandImg.naturalHeight) * bh || 130;
-            ctx.globalAlpha = 0.92;
-            ctx.drawImage(brandImg, W / 2 - bw / 2, H - bh - 34, bw, bh);
-            ctx.globalAlpha = 1;
+            const bh = isStory ? 56 : 50;
+            const bw = (brandImg.naturalWidth / brandImg.naturalHeight) * bh || 150;
+            ctx.drawImage(brandImg, W / 2 - bw / 2, bandTop + (LOGO_BAND_H - bh) / 2, bw, bh);
         } else {
-            ctx.fillStyle = 'rgba(22,24,29,0.7)';
+            ctx.fillStyle = GREEN;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.font = '800 28px system-ui, sans-serif';
-            ctx.fillText('G22 Scores', W / 2, H - 44);
+            ctx.font = `800 30px ${FAMILY}`;
+            ctx.fillText('G22 SCORES', W / 2, bandTop + LOGO_BAND_H / 2);
         }
 
         return await new Promise<Blob | null>((resolve) => {
@@ -715,6 +866,8 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
                                     }
                                     // Champion = the finalist that wins the final (root's chosen child).
                                     const isChampion = node.parent === root && winners[root!.id] === node.id;
+                                    // A crossing already settled by a real result is locked (not pickable).
+                                    const clickable = !node.parent || !lockedIds.has(node.parent.id);
                                     return (
                                         <TeamCircle
                                             key={`${node.id}-${team.id}`}
@@ -722,7 +875,7 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
                                             team={team}
                                             radius={isChampion ? r + 4 : r}
                                             isChampion={isChampion}
-                                            clickable
+                                            clickable={clickable}
                                             onPick={handlePick}
                                         />
                                     );
