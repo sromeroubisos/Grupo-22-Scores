@@ -377,10 +377,16 @@ async function fetchEspnJson<T>(url: string, debugTag: string, cacheTtl: number)
 
     const promise = (async () => {
         try {
+            // Freshness is governed solely by the in-process memoryCache below.
+            // We must NOT let Next.js persist this response in its fetch Data
+            // Cache: during a live tournament that persistent layer keeps serving
+            // a pre-match snapshot (matches as scheduled/0-0, knockout slots still
+            // labelled "Group A 2nd Place") far longer than our intended TTL via
+            // stale-while-revalidate, even after ESPN has the final result.
             const { data } = await apiFetch<T>(url, {
                 debugTag,
                 silent: true,
-                cacheTtl,
+                cache: 'no-store',
             });
             if (data) {
                 memoryCache.set(cacheKey, data, cacheTtl);
@@ -423,6 +429,12 @@ async function fetchScoreboardForDate(leagueSlug: EspnFootballLeagueSlug, date: 
 // uses the live-events TTL so live scores stay current.
 const SCOREBOARD_HISTORICAL_CACHE_TTL = 24 * 60 * 60; // 24h
 const SCOREBOARD_CHUNK_CONCURRENCY = 16;
+// During a live tournament, matches that finished today/yesterday — and knockout
+// slots that just received their teams — are still settling on ESPN's side. Only
+// treat a chunk as long-cacheable "history" once it ended at least this many days
+// ago; anything inside the recent window keeps the short, live TTL so the bracket
+// and results reflect freshly-played matches instead of a stale pre-match snapshot.
+const SCOREBOARD_RECENT_DAYS = 3;
 
 async function fetchScoreboardRangeEvents(leagueSlug: EspnFootballLeagueSlug, startDate: Date, endDate: Date) {
     const safeStart = toDateOnly(startDate);
@@ -446,7 +458,8 @@ async function fetchScoreboardRangeEvents(leagueSlug: EspnFootballLeagueSlug, st
         // (~50 internationals/day), so events at the end of the chunk get
         // dropped silently. Asking for a larger limit avoids that.
         const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueSlug}/scoreboard?dates=${datesParam}&limit=500`;
-        const isHistorical = chunk.end < todayStart;
+        const historicalCutoff = addDays(todayStart, -SCOREBOARD_RECENT_DAYS);
+        const isHistorical = chunk.end < historicalCutoff;
         const ttl = isHistorical ? SCOREBOARD_HISTORICAL_CACHE_TTL : SCOREBOARD_CACHE_TTL;
         return fetchEspnJson<Record<string, any>>(url, 'EspnSoccerScoreboard', ttl);
     });
@@ -647,6 +660,78 @@ function decorateBracketMatch(view: EspnTournamentViewEvent) {
         score_away: awayScore,
         match_start_iso: view.date,
     };
+}
+
+// ── Real bracket linkage ─────────────────────────────────────────────────────
+// ESPN's scoreboard does not expose which match feeds which, but two signals let
+// us reconstruct the true crossings: (1) each event's `matchNumber` (only on the
+// core API) gives a stable within-round ordering, and (2) undecided slots are
+// labelled "Round of 32 N Winner" / "Quarterfinal N Winner", where N is that
+// within-round index. We attach both so the predictor can mirror the real bracket
+// instead of pairing matches by adjacency.
+type BracketFeederRef = { round_key: string; slot: number };
+
+function parseBracketFeederRef(name: string | null | undefined): BracketFeederRef | null {
+    const s = String(name || '').trim().toLowerCase();
+    if (!s) return null;
+    let m = /round of (\d+)\D+(\d+)\s+winner/.exec(s);
+    if (m) return { round_key: `round-of-${m[1]}`, slot: Number(m[2]) };
+    m = /quarter[\s-]?final\s+(\d+)\s+winner/.exec(s);
+    if (m) return { round_key: 'quarterfinals', slot: Number(m[1]) };
+    m = /semi[\s-]?final\s+(\d+)\s+winner/.exec(s);
+    if (m) return { round_key: 'semifinals', slot: Number(m[1]) };
+    return null;
+}
+
+const ESPN_CORE_BASE = 'https://sports.core.api.espn.com/v2/sports/soccer/leagues';
+const MATCH_NUMBER_CACHE_TTL = 6 * 60 * 60; // bracket numbering is static within a season
+
+async function fetchEspnEventMatchNumber(leagueSlug: EspnFootballLeagueSlug, eventId: string): Promise<number | null> {
+    const url = `${ESPN_CORE_BASE}/${leagueSlug}/events/${eventId}/competitions/${eventId}?lang=en`;
+    const data = await fetchEspnJson<Record<string, any>>(url, 'EspnSoccerMatchNumber', MATCH_NUMBER_CACHE_TTL).catch(() => null);
+    const n = Number(data?.matchNumber);
+    return Number.isFinite(n) ? n : null;
+}
+
+async function attachBracketLinkage(
+    draw: Array<{ round_id: string; matches: any[] }>,
+    leagueSlug: EspnFootballLeagueSlug,
+): Promise<void> {
+    if (!Array.isArray(draw) || draw.length === 0) return;
+
+    const rawIdOf = (m: any): string | null => parseEspnFootballMatchId(m?.match_id)?.eventId ?? null;
+    const rawIds = Array.from(new Set(
+        draw.flatMap((r) => (r.matches || []).map(rawIdOf)).filter((x): x is string => Boolean(x)),
+    ));
+    if (rawIds.length === 0) return;
+
+    const numberEntries = await mapWithConcurrency(
+        rawIds,
+        12,
+        async (rid) => [rid, await fetchEspnEventMatchNumber(leagueSlug, rid)] as const,
+    );
+    const numberById = new Map<string, number | null>(numberEntries);
+
+    // The within-round slot (1-based, ordered by matchNumber) is exactly the N that
+    // ESPN's "Round of X N Winner" references point at.
+    for (const round of draw) {
+        const ranked = (round.matches || [])
+            .map((m) => ({ m, num: numberById.get(rawIdOf(m) ?? '') ?? null }))
+            .filter((x): x is { m: any; num: number } => x.num != null)
+            .sort((a, b) => a.num - b.num);
+        ranked.forEach((x, i) => {
+            x.m.round_key = round.round_id;
+            x.m.match_number = x.num;
+            x.m.slot = i + 1;
+        });
+    }
+
+    for (const round of draw) {
+        for (const m of round.matches || []) {
+            m.home_source = parseBracketFeederRef(m.home_team_name);
+            m.away_source = parseBracketFeederRef(m.away_team_name);
+        }
+    }
 }
 
 function buildPlayoffBracket(events: EspnScoreboardEvent[], league: EspnFootballLeague, referenceDate: Date = new Date()) {
@@ -1349,6 +1434,16 @@ export async function getEspnFootballLeagueStandings(leagueSlug: EspnFootballLea
     return { raw, rows, enrichedRows: enrichStandingsForUi(rows, leagueSlug) };
 }
 
+async function fetchEspnLeagueLogo(leagueSlug: EspnFootballLeagueSlug): Promise<string> {
+    // The league crest lives in the scoreboard payload's `leagues[]`, which the
+    // range fetch discards. One light call (cached) gives us the real logo instead
+    // of guessing a `leagues/500/<slug>.png` URL that 404s for some competitions
+    // (e.g. fifa.world, whose real crest is .../leaguelogos/soccer/500/4.png).
+    const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueSlug}/scoreboard?limit=1`;
+    const payload = await fetchEspnJson<Record<string, any>>(url, 'EspnSoccerLeagueLogo', STANDINGS_CACHE_TTL).catch(() => null);
+    return getLeagueLogo(payload) || '';
+}
+
 function buildTournamentDetails(league: EspnFootballLeague, standingsPayload: EspnStandingsPayload | null | undefined) {
     const season = getLeagueSeason(standingsPayload);
     return {
@@ -1437,6 +1532,9 @@ export async function getEspnFootballTournamentBundle(
         }
     }
     if (!details.logo) {
+        details.logo = await fetchEspnLeagueLogo(leagueSlug);
+    }
+    if (!details.logo) {
         details.logo = `https://a.espncdn.com/i/teamlogos/leagues/500/${leagueSlug}.png`;
     }
     const seasonIdFromPayload = getLeagueSeason(standingsRaw);
@@ -1445,6 +1543,14 @@ export async function getEspnFootballTournamentBundle(
     // si no, usamos "hoy" para que el bracket cargado sea el del torneo en curso o más cercano.
     const referenceDate = season ? new Date(Date.UTC(season, 5, 30)) : new Date();
     const draw = buildPlayoffBracket(seasonEvents, league, referenceDate);
+    // Best-effort: attach the real bracket linkage (matchNumber + feeder refs) so the
+    // predictor reproduces the actual crossings. If ESPN's core API is unavailable the
+    // draw still renders; the predictor just falls back to adjacency pairing.
+    try {
+        await attachBracketLinkage(draw, leagueSlug);
+    } catch {
+        /* linkage is optional */
+    }
 
     return {
         ids: {

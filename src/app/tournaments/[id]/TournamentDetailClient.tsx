@@ -2664,6 +2664,9 @@ export default function TournamentDetailPage({
 
     const countryName = resolveCountryName(details, tournamentData);
     const tournamentLogo = getTournamentLogo(details, tournamentData);
+    // FIFA World Cup 26 uses the official branded emblem (local asset) instead of the
+    // generic ESPN crest, matching the hero header.
+    const bracketLogo = isFifaWorldCup ? '/FIFA%20WC.PNG' : tournamentLogo;
     const tournamentName = details?.name || details?.tournament?.name || tournamentData?.name || 'Torneo';
     const shouldShowTournamentLogo = Boolean(tournamentLogo) && !tournamentLogoFailed;
     const sportLabel = tournamentData?.sportId ? tournamentData.sportId.charAt(0).toUpperCase() + tournamentData.sportId.slice(1) : '';
@@ -4626,7 +4629,7 @@ export default function TournamentDetailPage({
                 <RadialBracketPredictor
                     rounds={draw}
                     title={`${getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName)}`}
-                    logo={tournamentLogo}
+                    logo={bracketLogo}
                     onClose={() => setShowPredictor(false)}
                 />
             )}

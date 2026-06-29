@@ -67,45 +67,131 @@ function polar(radius: number, angleDeg: number) {
     };
 }
 
-function buildPredictorTree(rounds: PredictorRoundLike[]): { root: BNode | null; maxLevel: number; nodes: BNode[] } {
+function makeBNode(id: string, kind: 'leaf' | 'match', team: BracketTeam | null): BNode {
+    return { id, kind, team, children: [], parent: null, level: 0, angle: 0, radius: 0, x: 0, y: 0 };
+}
+
+const PLACEHOLDER_NAME_RE = /\b(winner|2nd place|3rd place|runner[- ]?up|loser|tbd)\b/i;
+
+// Real bracket structure from the server linkage (matchNumber-derived slot + the
+// "Round of X N Winner" feeder refs). Returns null when that metadata is absent so
+// the caller can fall back to adjacency pairing.
+function buildFeederStructure(rounds: PredictorRoundLike[]): { root: BNode; nodes: BNode[] } | null {
+    const bySlot = new Map<string, any>();
+    const byRound = new Map<string, any[]>();
+    const roundOrder: string[] = [];
+    const seenRound = new Set<string>();
+    let haveLinkage = false;
+
+    for (const r of rounds) {
+        for (const m of (r?.matches ?? [])) {
+            const rk = m?.round_key;
+            const slot = m?.slot;
+            if (!rk || slot == null) continue;
+            bySlot.set(`${rk}#${slot}`, m);
+            if (!byRound.has(rk)) byRound.set(rk, []);
+            byRound.get(rk)!.push(m);
+            if (!seenRound.has(rk)) { seenRound.add(rk); roundOrder.push(rk); }
+            if (m.home_source || m.away_source) haveLinkage = true;
+        }
+    }
+    if (!haveLinkage) return null;
+
+    // roundOrder is outer → inner (first round first), so "below" = toward the leaves.
+    const roundIdx = new Map(roundOrder.map((rk, i) => [rk, i]));
+    const roundBelow = (rk: string): string | null => {
+        const i = roundIdx.get(rk);
+        return i != null && i > 0 ? roundOrder[i - 1] : null;
+    };
+
+    const finalMatch =
+        [...roundOrder].reverse().map((rk) => (!/third/i.test(rk) && rk.toLowerCase() === 'final' ? (byRound.get(rk) || [])[0] : null)).find(Boolean) ||
+        [...roundOrder].reverse().map((rk) => (!/third/i.test(rk) && (byRound.get(rk) || []).length === 1 ? byRound.get(rk)![0] : null)).find(Boolean) ||
+        null;
+    if (!finalMatch) return null;
+
+    let counter = 0;
+    const nextId = () => `n${counter++}`;
+    const nodes: BNode[] = [];
+    const makeLeaf = (team: BracketTeam | null): BNode => {
+        const node = makeBNode(nextId(), 'leaf', team);
+        nodes.push(node);
+        return node;
+    };
+
+    const nameKey = (s: any) => String(s ?? '').trim().toLowerCase();
+    const realTeamOf = (m: any, side: 'home' | 'away'): BracketTeam | null => {
+        const team = extractTeam(m?.[`${side}_team`] ?? null, m?.[`${side}_participant`] ?? null);
+        return team && !PLACEHOLDER_NAME_RE.test(team.name) ? team : null;
+    };
+    const findChildByTeam = (childRoundKey: string, teamName: string): any =>
+        (byRound.get(childRoundKey) || []).find(
+            (m) => nameKey(m.home_team_name) === nameKey(teamName) || nameKey(m.away_team_name) === nameKey(teamName),
+        ) || null;
+
+    const visiting = new Set<any>();
+    const resolveSide = (match: any, side: 'home' | 'away'): BNode => {
+        const src = match?.[`${side}_source`];
+        if (src && src.round_key && src.slot != null) {
+            const child = bySlot.get(`${src.round_key}#${src.slot}`);
+            if (child && child !== match && !visiting.has(child)) return buildNode(child);
+        }
+        // A decided team is shown in place of its feeder ref — recurse into the match
+        // it came from so the first round still forms the leaves.
+        const team = realTeamOf(match, side);
+        const below = roundBelow(match.round_key);
+        if (team && below) {
+            const child = findChildByTeam(below, team.name);
+            if (child && child !== match && !visiting.has(child)) return buildNode(child);
+        }
+        return makeLeaf(team);
+    };
+    const buildNode = (match: any): BNode => {
+        const node = makeBNode(nextId(), 'match', null);
+        nodes.push(node);
+        visiting.add(match);
+        (['home', 'away'] as const).forEach((side) => {
+            const child = resolveSide(match, side);
+            node.children.push(child);
+            child.parent = node;
+        });
+        visiting.delete(match);
+        return node;
+    };
+
+    const root = buildNode(finalMatch);
+    return { root, nodes };
+}
+
+// Fallback when there's no bracket linkage: pair the first round's matches by
+// adjacency (does not reflect the real crossings, but keeps older data renderable).
+function buildNaiveStructure(rounds: PredictorRoundLike[]): { root: BNode; nodes: BNode[] } | null {
     const firstRound = rounds.find((r) => Array.isArray(r?.matches) && r.matches!.length > 0);
     const matches = firstRound?.matches ?? [];
-    if (matches.length === 0) return { root: null, maxLevel: 0, nodes: [] };
+    if (matches.length === 0) return null;
 
     let counter = 0;
     const nextId = () => `n${counter++}`;
     const nodes: BNode[] = [];
 
     const makeLeaf = (team: BracketTeam | null): BNode => {
-        const node: BNode = { id: nextId(), kind: 'leaf', team, children: [], parent: null, level: 0, angle: 0, radius: 0, x: 0, y: 0 };
+        const node = makeBNode(nextId(), 'leaf', team);
         nodes.push(node);
         return node;
     };
-
     const leavesFor = (slice: any[]): BNode[] =>
         slice.flatMap((m) => [
             makeLeaf(extractTeam(m?.home_team ?? null, m?.home_participant ?? null)),
             makeLeaf(extractTeam(m?.away_team ?? null, m?.away_participant ?? null)),
         ]);
 
-    // Pair adjacent subtrees into match nodes until a single root remains.
     const pairUp = (subtrees: BNode[]): BNode => {
         if (subtrees.length === 1) return subtrees[0];
         const next: BNode[] = [];
         for (let i = 0; i < subtrees.length; i += 2) {
             if (i + 1 < subtrees.length) {
-                const node: BNode = {
-                    id: nextId(),
-                    kind: 'match',
-                    team: null,
-                    children: [subtrees[i], subtrees[i + 1]],
-                    parent: null,
-                    level: 0,
-                    angle: 0,
-                    radius: 0,
-                    x: 0,
-                    y: 0,
-                };
+                const node = makeBNode(nextId(), 'match', null);
+                node.children = [subtrees[i], subtrees[i + 1]];
                 subtrees[i].parent = node;
                 subtrees[i + 1].parent = node;
                 nodes.push(node);
@@ -118,35 +204,24 @@ function buildPredictorTree(rounds: PredictorRoundLike[]): { root: BNode | null;
     };
 
     const half = Math.ceil(matches.length / 2);
-    const leftLeaves = leavesFor(matches.slice(0, half));
+    const leftRoot = pairUp(leavesFor(matches.slice(0, half)));
     const rightLeaves = leavesFor(matches.slice(half));
-
-    const leftRoot = pairUp(leftLeaves);
     const rightRoot = rightLeaves.length > 0 ? pairUp(rightLeaves) : null;
 
-    let root: BNode;
-    if (rightRoot) {
-        root = {
-            id: nextId(),
-            kind: 'match',
-            team: null,
-            children: [leftRoot, rightRoot],
-            parent: null,
-            level: 0,
-            angle: 0,
-            radius: 0,
-            x: 0,
-            y: 0,
-        };
-        leftRoot.parent = root;
-        rightRoot.parent = root;
-        nodes.push(root);
-    } else {
-        root = leftRoot;
-    }
+    if (!rightRoot) return { root: leftRoot, nodes };
 
-    // ── Layout ──────────────────────────────────────────────────────────────
-    // Levels: distance from root (root = 0). Deeper = further out.
+    const root = makeBNode(nextId(), 'match', null);
+    root.children = [leftRoot, rightRoot];
+    leftRoot.parent = root;
+    rightRoot.parent = root;
+    nodes.push(root);
+    return { root, nodes };
+}
+
+// Even angular layout shared by both structure builders. Crests live on the outer
+// ring, so the first round (the most teams) is the tightest: we spread the leaves
+// evenly across each side's arc and size the crest so neighbours can never overlap.
+function layoutRadialTree(root: BNode, nodes: BNode[]): { root: BNode; maxLevel: number; nodes: BNode[]; teamRadius: number } {
     const assignLevels = (node: BNode, level: number) => {
         node.level = level;
         node.children.forEach((c) => assignLevels(c, level + 1));
@@ -154,46 +229,56 @@ function buildPredictorTree(rounds: PredictorRoundLike[]): { root: BNode | null;
     assignLevels(root, 0);
     const maxLevel = Math.max(1, ...nodes.map((n) => n.level));
 
-    // Hierarchical (dendrogram) layout: each subtree gets an arc, split between its
-    // two children with a gap in the middle. Because the gap is a fixed fraction of
-    // each node's own (shrinking) span, sibling groups that meet sooner in the tree
-    // end up closer together — i.e. two matches that cross into the same next round
-    // sit nearer each other than matches that only meet much later. The two teams of
-    // a first-round match are placed tight around their match center.
-    const GROUP_GAP_FRACTION = 0.28;
-    const PAIR_HALF_GAP = 7; // degrees on each side of a first-round match center
+    // The root's two children are the two halves of the bracket (left / right).
+    const leftRoot = root.children[0] ?? root;
+    const rightRoot = root.children[1] ?? null;
 
-    const layoutSubtree = (node: BNode, start: number, end: number) => {
-        if (node.kind === 'leaf') {
-            node.angle = (start + end) / 2;
-            return;
-        }
-        const center = (start + end) / 2;
-        // First-round match (both children are teams) → tight pair around the center.
-        if (node.children.length === 2 && node.children.every((c) => c.kind === 'leaf')) {
-            const half = Math.min(Math.abs(end - start) * 0.22, PAIR_HALF_GAP);
-            const dir = end >= start ? 1 : -1;
-            node.children[0].angle = center - dir * half;
-            node.children[1].angle = center + dir * half;
-            node.angle = center;
-            return;
-        }
-        if (node.children.length === 2) {
-            const span = end - start;
-            const gap = span * GROUP_GAP_FRACTION;
-            const childSpan = (span - gap) / 2;
-            layoutSubtree(node.children[0], start, start + childSpan);
-            layoutSubtree(node.children[1], end - childSpan, end);
-            node.angle = (node.children[0].angle + node.children[1].angle) / 2;
-            return;
-        }
-        // Bye / single child — pass the arc straight through.
-        layoutSubtree(node.children[0], start, end);
-        node.angle = node.children[0].angle;
+    const PAD_PX = 12; // minimum empty gap (in viewBox px) we want between two crests
+
+    const orderedLeaves = (node: BNode): BNode[] =>
+        node.kind === 'leaf' ? [node] : node.children.flatMap(orderedLeaves);
+
+    const leftLeafCount = orderedLeaves(leftRoot).length;
+    const rightLeafCount = rightRoot ? orderedLeaves(rightRoot).length : 0;
+    const leavesPerSide = Math.max(1, leftLeafCount, rightLeafCount);
+
+    // Adaptive crest radius: keep the default size unless a side is crowded enough
+    // that it would overlap, in which case shrink to fit the even per-leaf step.
+    const evenStepDeg = (2 * ARC_HALF) / leavesPerSide;
+    const radiusFromStep = (OUTER_RADIUS * deg2rad(evenStepDeg) - PAD_PX) / 2;
+    const teamRadius = Math.max(15, Math.min(TEAM_RADIUS, radiusFromStep));
+
+    // Smallest angular separation (deg) that still keeps two crests from touching.
+    const minSepDeg = ((2 * teamRadius + PAD_PX) / OUTER_RADIUS) * (180 / Math.PI);
+
+    const placeSideLeaves = (sideRoot: BNode, startDeg: number, endDeg: number) => {
+        const leaves = orderedLeaves(sideRoot);
+        const n = leaves.length;
+        if (n === 0) return;
+        const step = (endDeg - startDeg) / n;
+        // Pull each (home, away) pair together a touch, but never closer than minSep.
+        const wantPairPull = step * 0.32;
+        const maxPairPull = Math.max(0, (step - minSepDeg) / 2);
+        const pull = Math.min(wantPairPull, maxPairPull);
+        leaves.forEach((leaf, i) => {
+            const slotCenter = startDeg + step * (i + 0.5);
+            leaf.angle = slotCenter + (i % 2 === 0 ? pull : -pull);
+        });
     };
 
-    layoutSubtree(leftRoot, 180 - ARC_HALF, 180 + ARC_HALF);
-    if (rightRoot) layoutSubtree(rightRoot, -ARC_HALF, ARC_HALF);
+    placeSideLeaves(leftRoot, 180 - ARC_HALF, 180 + ARC_HALF);
+    if (rightRoot) placeSideLeaves(rightRoot, -ARC_HALF, ARC_HALF);
+
+    // Inner (match) nodes follow the average of their children so the connectors
+    // stay centred between the two crests they join.
+    const setBranchAngle = (node: BNode): number => {
+        if (node.kind === 'leaf') return node.angle;
+        const childAngles = node.children.map(setBranchAngle);
+        node.angle = childAngles.reduce((sum, a) => sum + a, 0) / childAngles.length;
+        return node.angle;
+    };
+    setBranchAngle(leftRoot);
+    if (rightRoot) setBranchAngle(rightRoot);
     root.angle = (leftRoot.angle + (rightRoot?.angle ?? leftRoot.angle)) / 2;
 
     // Radius from level, then cartesian position. Root sits at the exact center.
@@ -206,7 +291,13 @@ function buildPredictorTree(rounds: PredictorRoundLike[]): { root: BNode | null;
     root.y = CENTER;
     root.radius = 0;
 
-    return { root, maxLevel, nodes };
+    return { root, maxLevel, nodes, teamRadius };
+}
+
+function buildPredictorTree(rounds: PredictorRoundLike[]): { root: BNode | null; maxLevel: number; nodes: BNode[]; teamRadius: number } {
+    const built = buildFeederStructure(rounds) ?? buildNaiveStructure(rounds);
+    if (!built) return { root: null, maxLevel: 0, nodes: [], teamRadius: TEAM_RADIUS };
+    return layoutRadialTree(built.root, built.nodes);
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -254,7 +345,7 @@ function drawImageContain(ctx: CanvasRenderingContext2D, img: HTMLImageElement, 
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function RadialBracketPredictor({ rounds, title, logo, onClose }: RadialBracketPredictorProps) {
-    const { root, nodes } = useMemo(() => buildPredictorTree(rounds), [rounds]);
+    const { root, nodes, teamRadius } = useMemo(() => buildPredictorTree(rounds), [rounds]);
     const [winners, setWinners] = useState<Record<string, string>>({});
 
     const champion = root ? teamAtNode(root, winners) : null;
@@ -378,7 +469,7 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
                 return;
             }
             const isChampion = node.parent === root && winners[root.id] === node.id;
-            const r = isChampion ? TEAM_RADIUS + 3 : TEAM_RADIUS;
+            const r = isChampion ? teamRadius + 3 : teamRadius;
             const img = teamImgs[i];
             if (img) {
                 drawImageContain(ctx, img, node.x, node.y, r);
@@ -516,7 +607,7 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
         window.setTimeout(() => setShareNote(''), 1800);
     };
 
-    const nodeVisualRadius = (_node: BNode) => TEAM_RADIUS;
+    const nodeVisualRadius = (_node: BNode) => teamRadius;
 
     return (
         <div className={styles.overlay} role="dialog" aria-modal="true" onClick={onClose}>
