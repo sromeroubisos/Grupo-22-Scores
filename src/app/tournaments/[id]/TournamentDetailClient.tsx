@@ -11,6 +11,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
+import RadialBracketPredictor from '@/components/RadialBracketPredictor';
 import TournamentPublicStats from './TournamentPublicStats';
 import TournamentScoresPanel from './TournamentScoresPanel';
 import TournamentSofascoreStats from './TournamentSofascoreStats';
@@ -1623,6 +1624,18 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
     );
     const draw = buildDbPlayoffDraw(dbData, preferredKnockoutPhase?.id ?? activePhase?.id ?? null);
 
+    // Every knockout phase that has a real draw exposes its own bracket so the UI
+    // can render a selector when a playoff has more than one stage (e.g. Cuadro
+    // principal + Reválida).
+    const knockoutBrackets = sortTournamentPhases(phases)
+        .filter((phase: any) => isKnockoutPhaseType(phase?.phase_type))
+        .map((phase: any) => ({
+            phaseId: String(phase.id),
+            phase,
+            draw: buildDbPlayoffDraw(dbData, phase.id),
+        }))
+        .filter((entry) => Array.isArray(entry.draw) && entry.draw.length > 0);
+
     return {
         tournamentMeta: tournament ? {
             id: tournament.id || id,
@@ -1654,6 +1667,7 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
         defaultStandingsScope,
         isCircuitCompetition,
         preferredKnockoutPhase: preferredKnockoutPhase ?? null,
+        knockoutBrackets,
     };
 }
 
@@ -1752,6 +1766,8 @@ export default function TournamentDetailPage({
     const [activeDbPhase, setActiveDbPhase] = useState<any>(preloaded?.activePhase ?? null);
     const [dbTeamLabels, setDbTeamLabels] = useState<any[]>(preloaded?.dbTeamLabels ?? []);
     const [preferredKnockoutPhase, setPreferredKnockoutPhase] = useState<any>(preloaded?.preferredKnockoutPhase ?? null);
+    const [knockoutBrackets, setKnockoutBrackets] = useState<any[]>(preloaded?.knockoutBrackets ?? []);
+    const [showPredictor, setShowPredictor] = useState(false);
     const [standingsScopeViews, setStandingsScopeViews] = useState<StandingsScopeView[]>(preloaded?.standingsScopeViews ?? []);
     const [activeStandingsScope, setActiveStandingsScope] = useState<string>(
         preloaded?.defaultStandingsScope ?? preloaded?.standingsScopeViews?.[0]?.id ?? CIRCUIT_GLOBAL_SCOPE,
@@ -1979,6 +1995,7 @@ export default function TournamentDetailPage({
                             setActiveDbPhase(snapshot.activePhase ?? null);
                             setDbTeamLabels(snapshot.dbTeamLabels);
                             setPreferredKnockoutPhase(snapshot.preferredKnockoutPhase ?? null);
+                            setKnockoutBrackets(snapshot.knockoutBrackets ?? []);
                             setStandingsScopeViews(snapshot.standingsScopeViews ?? []);
                             setActiveStandingsScope(
                                 snapshot.defaultStandingsScope ?? snapshot.standingsScopeViews?.[0]?.id ?? CIRCUIT_GLOBAL_SCOPE,
@@ -2694,6 +2711,31 @@ export default function TournamentDetailPage({
     })();
     const bracketPhase = preferredKnockoutPhase ?? activeDbPhase;
     const bracketTitle = `${getKnockoutPhaseDisplayTitle(bracketPhase)} - ${tournamentName}`;
+    // When a playoff has more than one bracket (e.g. Cuadro principal + Reválida),
+    // surface a selector so the user can switch which bracket is on screen.
+    const selectKnockoutBracket = (phaseId: string) => {
+        const entry = knockoutBrackets.find((bracket: any) => bracket.phaseId === phaseId);
+        if (!entry) return;
+        setDraw(entry.draw);
+        setPreferredKnockoutPhase(entry.phase);
+    };
+    const bracketPhaseSelector = knockoutBrackets.length > 1 ? (
+        <div className={styles.standingsScopeBar}>
+            <span className={styles.standingsScopeLabel}>Cuadro</span>
+            <div className={styles.pillsGroup}>
+                {knockoutBrackets.map((entry: any) => (
+                    <button
+                        key={entry.phaseId}
+                        type="button"
+                        className={`${styles.pillBtn} ${String(bracketPhase?.id ?? '') === entry.phaseId ? styles.pillBtnActive : ''}`}
+                        onClick={() => selectKnockoutBracket(entry.phaseId)}
+                    >
+                        {getKnockoutPhaseDisplayTitle(entry.phase)}
+                    </button>
+                ))}
+            </div>
+        </div>
+    ) : null;
     const bracketExportData = {
         title: bracketTitle,
         subtitle: bracketPhase?.name || details?.season || 'Cuadro eliminatorio',
@@ -4247,14 +4289,26 @@ export default function TournamentDetailPage({
                     <div className={styles.section}>
                         {shouldUseIntegratedBracketView ? (
                             <>
-                                <div className={styles.standingsToolbar}>
+                                <div className={`${styles.standingsToolbar} ${styles.bracketToolbar}`}>
                                     <div />
-                                    <ExportImage
-                                        template="playoffBracket"
-                                        filename={`cuadro-${tournamentData?.name}`}
-                                        data={bracketExportData}
-                                    />
+                                    <div className={styles.bracketToolbarActions}>
+                                        {draw.length > 0 && (
+                                            <button
+                                                type="button"
+                                                className={styles.predictorBtn}
+                                                onClick={() => setShowPredictor(true)}
+                                            >
+                                                Predictor
+                                            </button>
+                                        )}
+                                        <ExportImage
+                                            template="playoffBracket"
+                                            filename={`cuadro-${tournamentData?.name}`}
+                                            data={bracketExportData}
+                                        />
+                                    </div>
                                 </div>
+                                {bracketPhaseSelector}
                                 <PlayoffBracket data={draw} title={bracketTitle} />
                             </>
                         ) : (
@@ -4497,14 +4551,26 @@ export default function TournamentDetailPage({
                 {/* ── PLAYOFF TAB ───────────────────────────────────────── */}
                 {activeTab === 'playoff' && (
                     <div className={styles.section}>
-                        <div className={styles.standingsToolbar}>
+                        <div className={`${styles.standingsToolbar} ${styles.bracketToolbar}`}>
                             <div />
-                            <ExportImage
-                                template="playoffBracket"
-                                filename={`cuadro-${tournamentData?.name}`}
-                                data={bracketExportData}
-                            />
+                            <div className={styles.bracketToolbarActions}>
+                                {draw.length > 0 && (
+                                    <button
+                                        type="button"
+                                        className={styles.predictorBtn}
+                                        onClick={() => setShowPredictor(true)}
+                                    >
+                                        Predictor
+                                    </button>
+                                )}
+                                <ExportImage
+                                    template="playoffBracket"
+                                    filename={`cuadro-${tournamentData?.name}`}
+                                    data={bracketExportData}
+                                />
+                            </div>
                         </div>
+                        {bracketPhaseSelector}
                         <PlayoffBracket data={draw} title={`Cuadro - ${getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName)}`} />
                     </div>
                 )}
@@ -4555,6 +4621,15 @@ export default function TournamentDetailPage({
 
               </div>
             </main>
+
+            {showPredictor && draw.length > 0 && (
+                <RadialBracketPredictor
+                    rounds={draw}
+                    title={`${getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName)}`}
+                    logo={tournamentLogo}
+                    onClose={() => setShowPredictor(false)}
+                />
+            )}
         </div>
     );
 }

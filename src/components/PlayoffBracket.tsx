@@ -99,7 +99,11 @@ export default function PlayoffBracket({ data, title = 'Cuadro Final' }: Playoff
                                             : isFinished && homeScore !== '-' && awayScore !== '-' && Number(awayScore) > Number(homeScore);
 
                                         return (
-                                            <div key={m.match_id || matchIdx} className={styles.matchCard}>
+                                            <div
+                                                key={m.match_id || matchIdx}
+                                                className={styles.matchCard}
+                                                style={{ animationDelay: `${Math.min(roundIdx * 90 + matchIdx * 45, 600)}ms` }}
+                                            >
                                                 <div className={styles.matchDate}>
                                                     {matchDate
                                                         ? new Date(matchDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })

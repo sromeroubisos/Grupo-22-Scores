@@ -262,8 +262,12 @@ export const FixtureMatchEditor = ({
     if (selectedPhaseRequiresDefinedStage && !formData.roundId) {
       errors.roundId = 'Selecciona una etapa de eliminacion definida';
     }
-    if (!formData.homeClubId) errors.homeClubId = 'El equipo local es obligatorio';
-    if (!formData.awayClubId) errors.awayClubId = 'El equipo visitante es obligatorio';
+    // Playoff/knockout matches can be scheduled with TBD slots (teams resolved
+    // by previous rounds), so teams are optional there. League matches require both.
+    if (!selectedPhaseRequiresDefinedStage) {
+      if (!formData.homeClubId) errors.homeClubId = 'El equipo local es obligatorio';
+      if (!formData.awayClubId) errors.awayClubId = 'El equipo visitante es obligatorio';
+    }
     if (formData.homeClubId && formData.awayClubId && formData.homeClubId === formData.awayClubId) {
       errors.awayClubId = 'El equipo local y visitante no pueden ser el mismo';
     }
@@ -286,8 +290,8 @@ export const FixtureMatchEditor = ({
         groupId: (editingMatch as any)?.groupId || null, // Preserve if exists
         roundId: formData.roundId || null,
         roundLabel: selectedPhaseRequiresDefinedStage ? undefined : (formData.roundLabel || undefined),
-        homeClubId: formData.homeClubId,
-        awayClubId: formData.awayClubId,
+        homeClubId: formData.homeClubId || null,
+        awayClubId: formData.awayClubId || null,
         dateTime: formData.dateTime,
         venue: formData.venue,
         referee: formData.referee,
@@ -454,11 +458,11 @@ export const FixtureMatchEditor = ({
           ) : (
             <>
               <div className="editor-field">
-                <label>Local</label>
+                <label>Local {selectedPhaseRequiresDefinedStage && <span style={{ opacity: 0.6, fontSize: '0.8em' }}>(opcional)</span>}</label>
                 <DarkSelect
                   value={formData.homeClubId}
                   onChange={(v) => update('homeClubId', v)}
-                  options={participantOptions}
+                  options={selectedPhaseRequiresDefinedStage ? [{ value: '', label: 'Sin definir (TBD)' }, ...participantOptions] : participantOptions}
                   placeholder="Seleccionar local..."
                   error={!!validationErrors.homeClubId}
                 />
@@ -468,11 +472,11 @@ export const FixtureMatchEditor = ({
               </div>
 
               <div className="editor-field">
-                <label>Visitante</label>
+                <label>Visitante {selectedPhaseRequiresDefinedStage && <span style={{ opacity: 0.6, fontSize: '0.8em' }}>(opcional)</span>}</label>
                 <DarkSelect
                   value={formData.awayClubId}
                   onChange={(v) => update('awayClubId', v)}
-                  options={participantOptions}
+                  options={selectedPhaseRequiresDefinedStage ? [{ value: '', label: 'Sin definir (TBD)' }, ...participantOptions] : participantOptions}
                   placeholder="Seleccionar visitante..."
                   error={!!validationErrors.awayClubId}
                 />

@@ -793,13 +793,13 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     ));
     const [editorialShowTopBadge, setEditorialShowTopBadge] = useState(() => (
         template === 'matchStats'
-            ? (data as MatchStatsData).editorialShowTopBadge !== false
-            : true
+            ? (data as MatchStatsData).editorialShowTopBadge === true
+            : false
     ));
     const [editorialShowHeaderArrows, setEditorialShowHeaderArrows] = useState(() => (
         template === 'matchStats'
-            ? (data as MatchStatsData).editorialShowHeaderArrows !== false
-            : true
+            ? (data as MatchStatsData).editorialShowHeaderArrows === true
+            : false
     ));
     const [savedEditorialPresets, setSavedEditorialPresets] = useState<SavedMatchEditorialPreset[]>([]);
     const [savedGradientPresets, setSavedGradientPresets] = useState<SavedMatchGradientPreset[]>([]);
@@ -1062,8 +1062,8 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         const matchData = data as MatchStatsData;
         setEditorialLayoutPresetId(getEditorialLayoutPreset(matchData.editorialLayoutPresetId).id);
         setEditorialContextLabel(matchData.editorialContextLabel || '');
-        setEditorialShowTopBadge(matchData.editorialShowTopBadge !== false);
-        setEditorialShowHeaderArrows(matchData.editorialShowHeaderArrows !== false);
+        setEditorialShowTopBadge(matchData.editorialShowTopBadge === true);
+        setEditorialShowHeaderArrows(matchData.editorialShowHeaderArrows === true);
         setEditorialSponsors(buildEditorialSponsorSlots(matchData.sponsors));
         setManualHomeScore(formatExportScoreInput(matchData.homeScore));
         setManualAwayScore(formatExportScoreInput(matchData.awayScore));
@@ -10442,22 +10442,105 @@ async function drawPlayoffBracket(
 
     const contentTop = panelY + 30;
     const contentBottom = panelY + panelHeight - 24;
-    const columnGap = isStory ? 14 : 12;
-    const columnWidth = (panelWidth - 32 - columnGap * Math.max(rounds.length - 1, 0)) / rounds.length;
     const innerHeight = contentBottom - contentTop;
-    let logoIndex = 1;
+    const titleHeight = isStory ? 34 : 30;
+    const listTop = contentTop + titleHeight + 18;
+    const listHeight = innerHeight - titleHeight - 18;
+    const rowGap = isStory ? 16 : 12;
+    // Wider gaps between rounds leave room for the bracket connector elbows.
+    const columnGap = isStory ? 26 : 38;
+    const columnWidth = (panelWidth - 32 - columnGap * Math.max(rounds.length - 1, 0)) / rounds.length;
+    const columnXFor = (roundIndex: number) => panelX + 16 + roundIndex * (columnWidth + columnGap);
 
+    // One uniform card height, sized to the densest round so every card matches.
+    // Taller cap on story (1080x1920) so cards fill the much taller canvas
+    // instead of floating as a tiny block.
+    const maxMatchCount = Math.max(...rounds.map((round) => round.matches.length));
+    const cardHeight = Math.max(
+        64,
+        Math.min(
+            isStory ? 168 : 116,
+            (listHeight - rowGap * Math.max(maxMatchCount - 1, 0)) / Math.max(maxMatchCount, 1),
+        ),
+    );
+
+    // Vertical center of every match. Round 0 (and any irregular round) is spread
+    // evenly across the FULL panel height — like a real bracket whose first round
+    // fills the column top-to-bottom — so there are no big empty bands. Each later
+    // round is centered between the pair of matches that feed it, which makes the
+    // columns line up as a tree. When a round is not exactly half of the previous
+    // one (byes, reválida, third place...) it falls back to this even spread.
+    const evenCenters = (count: number): number[] => {
+        if (count <= 0) return [];
+        if (count === 1) return [listTop + listHeight / 2];
+        const first = listTop + cardHeight / 2;
+        const last = listTop + listHeight - cardHeight / 2;
+        const step = (last - first) / (count - 1);
+        return Array.from({ length: count }, (_, i) => first + i * step);
+    };
+    const isTreeStep = (roundIndex: number, prevCount: number) =>
+        roundIndex > 0 && rounds[roundIndex].matches.length === Math.ceil(prevCount / 2);
+
+    const centersByRound: number[][] = [];
     rounds.forEach((round, roundIndex) => {
-        const columnX = panelX + 16 + roundIndex * (columnWidth + columnGap);
-        const roundMatches = round.matches;
-        const titleHeight = isStory ? 34 : 30;
-        const listTop = contentTop + titleHeight + 18;
-        const listHeight = innerHeight - titleHeight - 18;
-        const rowGap = isStory ? 16 : 12;
-        const matchHeight = Math.min(
-            isStory ? 124 : 112,
-            (listHeight - rowGap * Math.max(roundMatches.length - 1, 0)) / Math.max(roundMatches.length, 1),
+        const count = round.matches.length;
+        if (roundIndex === 0 || !isTreeStep(roundIndex, centersByRound[roundIndex - 1].length)) {
+            centersByRound.push(evenCenters(count));
+            return;
+        }
+        const prev = centersByRound[roundIndex - 1];
+        const fallback = evenCenters(count);
+        centersByRound.push(
+            round.matches.map((_match, j) => {
+                const f1 = prev[2 * j];
+                const f2 = prev[2 * j + 1];
+                if (f1 != null && f2 != null) return (f1 + f2) / 2;
+                return f1 ?? f2 ?? fallback[j];
+            }),
         );
+    });
+
+    // Pass 1 — connector elbows, drawn behind the cards.
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(accentColor, isDark ? 0.34 : 0.26);
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    for (let roundIndex = 1; roundIndex < rounds.length; roundIndex += 1) {
+        const prev = centersByRound[roundIndex - 1];
+        const curr = centersByRound[roundIndex];
+        if (!isTreeStep(roundIndex, prev.length)) continue;
+        const xPrevRight = columnXFor(roundIndex - 1) + columnWidth;
+        const xCurrLeft = columnXFor(roundIndex);
+        const midX = (xPrevRight + xCurrLeft) / 2;
+        curr.forEach((cardCenter, j) => {
+            const f1 = prev[2 * j];
+            const f2 = prev[2 * j + 1];
+            ctx.beginPath();
+            if (f1 != null && f2 != null) {
+                ctx.moveTo(xPrevRight, f1);
+                ctx.lineTo(midX, f1);
+                ctx.moveTo(xPrevRight, f2);
+                ctx.lineTo(midX, f2);
+                ctx.moveTo(midX, f1);
+                ctx.lineTo(midX, f2);
+                ctx.moveTo(midX, cardCenter);
+                ctx.lineTo(xCurrLeft, cardCenter);
+            } else if (f1 != null) {
+                ctx.moveTo(xPrevRight, f1);
+                ctx.lineTo(xCurrLeft, cardCenter);
+            }
+            ctx.stroke();
+        });
+    }
+    ctx.restore();
+
+    // Pass 2 — round titles + match cards.
+    let logoIndex = 1;
+    rounds.forEach((round, roundIndex) => {
+        const columnX = columnXFor(roundIndex);
+        const roundMatches = round.matches;
+        const centers = centersByRound[roundIndex];
 
         ctx.save();
         ctx.fillStyle = hexToRGBA(accentColor, isDark ? 0.14 : 0.09);
@@ -10472,8 +10555,7 @@ async function drawPlayoffBracket(
         ctx.restore();
 
         roundMatches.forEach((match, matchIndex) => {
-            const cardY = listTop + matchIndex * (matchHeight + rowGap);
-            const cardHeight = matchHeight;
+            const cardY = centers[matchIndex] - cardHeight / 2;
             const cardRadius = 24;
             const homeName = getBracketParticipantName(match.home_team || null, match.home_participant || null);
             const awayName = getBracketParticipantName(match.away_team || null, match.away_participant || null);

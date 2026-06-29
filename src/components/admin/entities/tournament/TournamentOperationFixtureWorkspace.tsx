@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import ProtectedLink from '@/components/ProtectedLink';
 import {
   AlertTriangle,
@@ -173,6 +173,107 @@ function defaultManualForm(): ManualFormState {
     venue: '',
     status: 'scheduled',
   };
+}
+
+// Native <input type="date"> shows its value using the browser/OS locale, which
+// renders MM/DD/YYYY on English systems regardless of the page lang. These helpers
+// back a custom field that always displays dd/mm/aaaa while storing the ISO value.
+function isoToDdMmYyyy(iso: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : '';
+}
+
+function ddMmYyyyToIso(value: string): string | null {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+  if (!match) return null;
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1000) return null;
+  const probe = new Date(Date.UTC(year, month - 1, day));
+  if (probe.getUTCFullYear() !== year || probe.getUTCMonth() !== month - 1 || probe.getUTCDate() !== day) {
+    return null;
+  }
+  return `${match[3]}-${match[2]}-${match[1]}`;
+}
+
+/**
+ * Date field that always shows dd/mm/aaaa (typed or via the native calendar
+ * picker), independent of the browser locale. `value`/`onChange` use the ISO
+ * yyyy-mm-dd format expected by the rest of the form.
+ */
+function DdMmYyyyDateField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (iso: string) => void;
+}) {
+  const nativeRef = useRef<HTMLInputElement>(null);
+  const [text, setText] = useState<string>(() => isoToDdMmYyyy(value));
+
+  useEffect(() => {
+    setText(isoToDdMmYyyy(value));
+  }, [value]);
+
+  const handleText = (raw: string) => {
+    const digits = raw.replace(/\D/g, '').slice(0, 8);
+    let formatted = digits;
+    if (digits.length > 4) formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+    else if (digits.length > 2) formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    setText(formatted);
+    if (formatted === '') {
+      onChange('');
+      return;
+    }
+    const iso = ddMmYyyyToIso(formatted);
+    if (iso) onChange(iso);
+  };
+
+  const openPicker = () => {
+    const el = nativeRef.current;
+    if (!el) return;
+    if (typeof el.showPicker === 'function') {
+      try {
+        el.showPicker();
+        return;
+      } catch {
+        /* showPicker not allowed here — fall back to focus/click */
+      }
+    }
+    el.focus();
+    el.click();
+  };
+
+  return (
+    <div className="fixture-quick-datefield">
+      <input
+        type="text"
+        inputMode="numeric"
+        placeholder="dd/mm/aaaa"
+        value={text}
+        maxLength={10}
+        onChange={(event) => handleText(event.target.value)}
+      />
+      <button
+        type="button"
+        className="fixture-quick-date-trigger"
+        onClick={openPicker}
+        aria-label="Abrir calendario"
+      >
+        <Calendar size={15} />
+      </button>
+      <input
+        ref={nativeRef}
+        type="date"
+        className="fixture-quick-date-native"
+        value={value || ''}
+        onChange={(event) => onChange(event.target.value)}
+        tabIndex={-1}
+        aria-hidden="true"
+      />
+    </div>
+  );
 }
 
 function formatDateLabel(value: string | null | undefined) {
@@ -2274,7 +2375,7 @@ function MatchCard({
             <div className="fixture-quick-grid fixture-quick-grid-schedule">
               <label className="fixture-quick-field">
                 <span>Fecha</span>
-                <input type="date" value={quickResultForm.scheduledDate} onChange={(event) => onQuickResultFieldChange('scheduledDate', event.target.value)} />
+                <DdMmYyyyDateField value={quickResultForm.scheduledDate} onChange={(iso) => onQuickResultFieldChange('scheduledDate', iso)} />
               </label>
               <label className="fixture-quick-field">
                 <span>Hora</span>

@@ -1,0 +1,345 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(6, 8, 12, 0.72);
+    backdrop-filter: blur(8px);
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    width: min(760px, 100%);
+    max-height: calc(100dvh - 32px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #f4f1ea;
+    color: #16181d;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(22, 24, 29, 0.08);
+}
+
+.headerText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.kicker {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #00a365;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.resetBtn {
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(22, 24, 29, 0.14);
+    background: transparent;
+    color: #16181d;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.resetBtn:hover {
+    background: rgba(22, 24, 29, 0.06);
+}
+
+.shareBtn {
+    height: 34px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: none;
+    background: #00a365;
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.shareBtn:hover {
+    background: #00b873;
+}
+
+.shareBtn:active {
+    transform: scale(0.96);
+}
+
+.shareWrap {
+    position: relative;
+}
+
+.shareMenu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    min-width: 184px;
+    padding: 6px;
+    border-radius: 14px;
+    border: 1px solid rgba(22, 24, 29, 0.12);
+    background: #ffffff;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
+}
+
+.shareMenu button {
+    text-align: left;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #16181d;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.shareMenu button:hover {
+    background: rgba(0, 163, 101, 0.1);
+    color: #00a365;
+}
+
+.closeBtn {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid rgba(22, 24, 29, 0.14);
+    background: transparent;
+    color: #16181d;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.closeBtn:hover {
+    background: rgba(22, 24, 29, 0.06);
+}
+
+.stage {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+}
+
+.canvas {
+    width: 100%;
+    height: auto;
+    max-height: 72dvh;
+    display: block;
+}
+
+.empty {
+    padding: 60px 20px;
+    text-align: center;
+    color: rgba(22, 24, 29, 0.6);
+    font-weight: 600;
+}
+
+.connectors line,
+.connectors path {
+    stroke: rgba(22, 24, 29, 0.55);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    fill: none;
+}
+
+.placeholder {
+    fill: none;
+    stroke: rgba(22, 24, 29, 0.55);
+    stroke-width: 1.6;
+}
+
+.trophy {
+    font-size: 56px;
+}
+
+.centerBg {
+    fill: #ffffff;
+}
+
+.centerRing {
+    fill: none;
+    stroke: rgba(22, 24, 29, 0.2);
+    stroke-width: 2;
+}
+
+.centerRingDecided {
+    stroke: #d4a017;
+    stroke-width: 5;
+}
+
+.centerDecided {
+    animation: centerPulse 0.55s ease;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+@keyframes centerPulse {
+    0% { transform: scale(0.85); }
+    55% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+}
+
+/* Pop-in animation for any team flag entering a slot */
+.teamAnim {
+    animation: bracketPop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+@keyframes bracketPop {
+    0% { transform: scale(0.2); opacity: 0; }
+    60% { transform: scale(1.12); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .teamAnim,
+    .centerDecided {
+        animation: none;
+    }
+}
+
+/* No container/border around the logos by default — only state rings show. */
+.teamRing {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 2;
+    transition: stroke 0.15s ease;
+}
+
+.teamRingAdvanced {
+    fill: none;
+    stroke: #00a365;
+    stroke-width: 3;
+}
+
+.teamRingChampion {
+    fill: none;
+    stroke: #d4a017;
+    stroke-width: 4;
+}
+
+.crown {
+    font-size: 26px;
+}
+
+.fallbackFill {
+    fill: #d9d4c8;
+}
+
+.fallbackText {
+    fill: #16181d;
+    font-weight: 800;
+}
+
+.teamClickable {
+    cursor: pointer;
+    transition: transform 0.12s ease;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.teamClickable:hover {
+    transform: scale(1.14);
+}
+
+.footer {
+    padding: 14px 22px;
+    border-top: 1px solid rgba(22, 24, 29, 0.08);
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.hint {
+    color: rgba(22, 24, 29, 0.6);
+    font-weight: 600;
+}
+
+.championBanner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.championTitle {
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: #d4a017;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.championTeam {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.championLogo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.championName {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #d4a017;
+}
+
+@media (max-width: 560px) {
+    .title {
+        font-size: 0.98rem;
+    }
+
+    .canvas {
+        max-height: 64dvh;
+    }
+}

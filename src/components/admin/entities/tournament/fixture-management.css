@@ -1160,6 +1160,54 @@
     grid-template-columns: 1fr 1fr;
 }
 
+/* Custom dd/mm/aaaa date field (text input + native calendar picker behind it) */
+.fixture-quick-datefield {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.fixture-quick-datefield input[type="text"] {
+    width: 100%;
+    padding-right: 40px;
+}
+
+.fixture-quick-date-trigger {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    color: var(--fixture-text-dim);
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.fixture-quick-date-trigger:hover {
+    color: var(--fixture-text-main);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.fixture-quick-date-native {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    opacity: 0;
+    pointer-events: none;
+}
+
 .fixture-quick-totals {
     display: grid;
     gap: 12px;

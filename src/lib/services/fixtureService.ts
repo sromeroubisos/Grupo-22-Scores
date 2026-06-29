@@ -369,16 +369,25 @@ export class FixtureService {
       awayClubId: string | null;
     }
   ): Promise<PhaseContext> {
-    if (!context.homeClubId || !context.awayClubId) {
+    const phase = await this.assertPhaseBelongsToTournament(supabase, context.tournamentId, context.phaseId);
+    const isPlayoff = isPlayoffPhaseType(phase.phase_type);
+
+    // Playoff/knockout brackets legitimately hold placeholder matches (TBD slots)
+    // whose teams are only known once previous rounds resolve. Those can be
+    // scheduled/edited without teams; league matches still require both.
+    if (!isPlayoff && (!context.homeClubId || !context.awayClubId)) {
       throw new Error('Debes seleccionar ambos equipos del partido.');
     }
-
-    const phase = await this.assertPhaseBelongsToTournament(supabase, context.tournamentId, context.phaseId);
-    if (isPlayoffPhaseType(phase.phase_type) && !context.roundId) {
+    if (isPlayoff && !context.roundId) {
       throw new Error('Para una fase playoff debes seleccionar una etapa de eliminacion definida.');
     }
     await this.assertRoundBelongsToPhase(supabase, context.phaseId, context.roundId);
-    await this.assertClubReferences(supabase, [context.homeClubId, context.awayClubId]);
+    const clubReferences = [context.homeClubId, context.awayClubId].filter(
+      (clubId): clubId is string => Boolean(clubId),
+    );
+    if (clubReferences.length > 0) {
+      await this.assertClubReferences(supabase, clubReferences);
+    }
 
     return phase;
   }
@@ -811,8 +820,9 @@ export class FixtureService {
       throw new Error('La fecha del partido no es valida.');
     }
 
-    // Validation: teams must be different
-    if (data.homeClubId === data.awayClubId) {
+    // Validation: teams must be different (only when both are defined; playoff
+    // placeholder matches may have one or both sides still TBD).
+    if (data.homeClubId && data.awayClubId && data.homeClubId === data.awayClubId) {
       throw new Error('El equipo local y el visitante no pueden ser el mismo.');
     }
 
@@ -1072,7 +1082,9 @@ export class FixtureService {
     const nextHomeClubId = data.homeClubId ?? existingMatch.home_club_id;
     const nextAwayClubId = data.awayClubId ?? existingMatch.away_club_id;
 
-    if (nextHomeClubId === nextAwayClubId) {
+    // Only enforce distinct teams when both sides are set. Playoff placeholder
+    // matches can keep one or both sides empty (TBD) while editing the schedule.
+    if (nextHomeClubId && nextAwayClubId && nextHomeClubId === nextAwayClubId) {
       throw new Error('El equipo local y el visitante no pueden ser el mismo.');
     }
 

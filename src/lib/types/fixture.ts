@@ -161,8 +161,10 @@ export interface MatchFormData {
   roundId: string | null;
   roundLabel?: string;
   groupId?: string | null; // Persistence column: group_id
-  homeClubId: string;
-  awayClubId: string;
+  // Nullable so playoff/knockout placeholder matches (TBD slots) can be saved
+  // with only a schedule, before the qualifying teams are known.
+  homeClubId: string | null;
+  awayClubId: string | null;
   homeSquadId?: string | null;
   awaySquadId?: string | null;
   category?: string | null;
