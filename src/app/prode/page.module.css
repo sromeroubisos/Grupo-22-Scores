@@ -1202,6 +1202,13 @@
     padding: 22px;
 }
 
+.tableCardHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
 .previewEyebrow {
     margin: 0;
     color: #7ff4ae;
@@ -1453,6 +1460,24 @@
 .socialActions {
     display: grid;
     gap: 10px;
+}
+
+/* La tabla lista a TODOS los participantes; con muchos jugadores se vuelve
+   scrolleable para no estirar la tarjeta indefinidamente. */
+.leaderboardCompact {
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+}
+
+.leaderboardCompact::-webkit-scrollbar {
+    width: 6px;
+}
+
+.leaderboardCompact::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
 }
 
 .pickGroup {

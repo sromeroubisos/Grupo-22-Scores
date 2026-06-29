@@ -36,7 +36,16 @@ export type ProdeScoringRules = {
     oneTeamExact: number | null;
     exact: number;
     doubleFinals: boolean;
+    // Bonus RELATIVO entre participantes, SOLO rugby: quien más cerca quedó de la
+    // diferencia real del partido suma este puntaje. 0 cuando no aplica (otros
+    // deportes). Se resuelve aparte del scoring por-pronóstico porque depende de
+    // comparar a todos los participantes del scope, no de un pick aislado.
+    closestMargin: number;
 };
+
+function isRugbySport(sportId: string | null) {
+    return toSafeString(sportId).toLowerCase().includes('rugby');
+}
 
 const COMPETITION_REFRESH_TTL_MS = 15_000;
 const GLOBAL_REFRESH_TTL_MS = 15_000;
@@ -195,13 +204,119 @@ export function resolveProdeScoringRules(
         || toBoolean(defaultPrivateLeagueRules.doubleFinals)
         || toBoolean(rulesetModel.doubleFinals);
 
+    // SOLO rugby: el más cercano a la diferencia real suma 1 punto. No es
+    // configurable; va atado al deporte de la competencia.
+    const closestMargin = isRugbySport(toNullableString(competitionRow.sport_id)) ? 1 : 0;
+
     return {
         winner,
         diff,
         oneTeamExact,
         exact,
         doubleFinals,
+        closestMargin,
     };
+}
+
+function isClosestMarginEligibleEvent(eventRow: AnyRow): boolean {
+    const status = toSafeString(eventRow.status);
+    if (status !== 'final' && status !== 'scored') {
+        return false;
+    }
+    return parseOfficialResult(eventRow.official_result) !== null;
+}
+
+// Distancia entre la diferencia pronosticada y la real. null si el pronóstico no
+// tiene marcador cargado para ambos equipos (no compite por el bonus).
+function predictionMarginDistance(eventRow: AnyRow, predictionRow: AnyRow): number | null {
+    const official = parseOfficialResult(eventRow.official_result);
+    if (!official) {
+        return null;
+    }
+
+    const predictedHome = toNullableNumber(predictionRow.predicted_home_score);
+    const predictedAway = toNullableNumber(predictionRow.predicted_away_score);
+    if (predictedHome === null || predictedAway === null) {
+        return null;
+    }
+
+    const predictedDiff = predictedHome - predictedAway;
+    const officialDiff = official.homeScore - official.awayScore;
+    return Math.abs(predictedDiff - officialDiff);
+}
+
+// Aplica el bonus de "diferencia más cercana" (solo rugby). Es RELATIVO al scope:
+// por cada partido finalizado, busca la menor distancia entre el margen pronosticado
+// y el real entre TODOS los pronósticos recibidos, y suma `rules.closestMargin` a
+// quien(es) la igualan (empate ⇒ todos los más cercanos suman). Recibe las filas ya
+// puntuadas de forma independiente y devuelve copias con el bonus incorporado.
+export function applyClosestMarginBonus(
+    eventRows: AnyRow[],
+    scoredRows: AnyRow[],
+    rules: ProdeScoringRules,
+): AnyRow[] {
+    if (!rules.closestMargin) {
+        return scoredRows;
+    }
+
+    const eventMap = new Map(eventRows.map((row) => [toSafeString(row.id), row]));
+    const closestDistanceByEvent = new Map<string, number>();
+
+    for (const row of scoredRows) {
+        const eventId = toSafeString(row.event_id);
+        const eventRow = eventMap.get(eventId);
+        if (!eventRow || !isClosestMarginEligibleEvent(eventRow)) {
+            continue;
+        }
+
+        const distance = predictionMarginDistance(eventRow, row);
+        if (distance === null) {
+            continue;
+        }
+
+        const current = closestDistanceByEvent.get(eventId);
+        if (current === undefined || distance < current) {
+            closestDistanceByEvent.set(eventId, distance);
+        }
+    }
+
+    if (!closestDistanceByEvent.size) {
+        return scoredRows;
+    }
+
+    return scoredRows.map((row) => {
+        const eventId = toSafeString(row.event_id);
+        const best = closestDistanceByEvent.get(eventId);
+        if (best === undefined) {
+            return row;
+        }
+
+        const eventRow = eventMap.get(eventId);
+        if (!eventRow) {
+            return row;
+        }
+
+        const distance = predictionMarginDistance(eventRow, row);
+        if (distance === null || distance !== best) {
+            return row;
+        }
+
+        // Bonus plano (1 punto, tal como se pidió): no se multiplica por finales.
+        const bonus = rules.closestMargin;
+        const breakdown = toRecord(row.scoring_breakdown);
+        const basePoints = toRecord(breakdown.basePoints);
+
+        return {
+            ...row,
+            points_awarded: toFiniteNumber(row.points_awarded) + bonus,
+            scoring_breakdown: {
+                ...breakdown,
+                basePoints: { ...basePoints, closestMargin: bonus },
+                closestMarginHit: true,
+                totalPoints: toFiniteNumber(breakdown.totalPoints) + bonus,
+            },
+        } satisfies AnyRow;
+    });
 }
 
 function scorePredictionRow(eventRow: AnyRow, predictionRow: AnyRow, rules: ProdeScoringRules): AnyRow {
@@ -717,7 +832,7 @@ export async function refreshCompetitionScoreboards(competitionId: string) {
         const admin = createAdminClient() as unknown as LooseMutationClient;
         const competitionResult = await admin
             .from('prode_competitions')
-            .select('id, active_ruleset_id, metadata')
+            .select('id, active_ruleset_id, sport_id, metadata')
             .eq('id', competitionId)
             .maybeSingle();
 
@@ -787,7 +902,14 @@ export async function refreshCompetitionScoreboards(competitionId: string) {
         });
 
         const globalRules = resolveProdeScoringRules(competitionRow, rulesetResult.data);
-        const scoredPredictions = applyScoringRulesToPredictionRows(eventRows, predictionRows, globalRules);
+        // Bonus de diferencia más cercana (solo rugby): se calcula entre TODOS los
+        // participantes de la competencia para el scope global y se persiste en los
+        // pronósticos, así el total de cada usuario ya lo incluye.
+        const scoredPredictions = applyClosestMarginBonus(
+            eventRows,
+            applyScoringRulesToPredictionRows(eventRows, predictionRows, globalRules),
+            globalRules,
+        );
 
         // Bulk upsert all changed predictions instead of firing one UPDATE per
         // row. With 1k users x 50 events that's the difference between 50k
@@ -892,13 +1014,23 @@ export async function refreshCompetitionScoreboards(competitionId: string) {
             const privateLeagueRankings = activeLeagueRows.flatMap((leagueRow) => {
                 const leagueId = toSafeString(leagueRow.id);
                 const leagueEpochs = resolveLeagueRuleEpochs(competitionRow, rulesetResult.data, leagueRow);
-                const scopedPredictions = applyLeagueScoringEpochs(eventRows, predictionRows, leagueEpochs);
+                const leagueRules = resolveProdeScoringRules(competitionRow, rulesetResult.data, leagueRow);
                 const leagueUserIds = Array.from(leagueMembershipMap.get(leagueId) || []);
+
+                // El bonus de diferencia más cercana (rugby) es relativo al scope:
+                // primero acotamos a los miembros de la liga, después calculamos el
+                // más cercano entre ELLOS (no contra toda la competencia).
+                const scopedPredictions = applyClosestMarginBonus(
+                    eventRows,
+                    applyLeagueScoringEpochs(eventRows, predictionRows, leagueEpochs)
+                        .filter((row) => leagueUserIds.includes(toSafeString(row.user_id))),
+                    leagueRules,
+                );
 
                 return buildRankingPayload(
                     competitionId,
                     leagueUserIds,
-                    scopedPredictions.filter((row) => leagueUserIds.includes(toSafeString(row.user_id))),
+                    scopedPredictions,
                     { scopeType: 'private_league', privateLeagueId: leagueId },
                 );
             });

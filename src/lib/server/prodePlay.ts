@@ -427,6 +427,13 @@ function resolveRulesSummary(
                 ? 'Clavas el marcador completo de ambos equipos.'
                 : 'Acertas el resultado exacto del partido.',
         },
+        // Solo rugby: bonus relativo a quien más cerca quede de la diferencia real.
+        ...(toSafeString(competitionRow.sport_id).toLowerCase().includes('rugby') ? [{
+            key: 'closest-margin',
+            label: 'Diferencia mas cercana',
+            points: 1,
+            description: 'Si sos el que mas cerca queda de la diferencia real del partido, sumas 1 punto.',
+        }] : []),
     ];
 
     const notes = [
@@ -610,6 +617,43 @@ function buildFallbackLeaderboard(
             isCurrentUser: Boolean(currentUserId) && userId === currentUserId,
         } satisfies ProdePlayLeaderboardEntry;
     });
+}
+
+/**
+ * Une el ranking real (filas de `prode_rankings`, solo usuarios ya puntuados) con
+ * la lista COMPLETA de participantes (miembros). Los miembros que todavía no
+ * tienen puntaje aparecen en 0, de modo que la tabla siempre muestra a TODOS los
+ * participantes del prode, no solo a los que ya jugaron. El ranking pisa a la fila
+ * base del miembro (trae puntos/aciertos reales) y se renumeran las posiciones.
+ */
+function mergeRankingWithAllMembers(
+    rankingEntries: ProdePlayLeaderboardEntry[],
+    memberEntries: ProdePlayLeaderboardEntry[],
+): ProdePlayLeaderboardEntry[] {
+    const byUserId = new Map<string, ProdePlayLeaderboardEntry>();
+
+    for (const entry of memberEntries) {
+        if (entry.userId) {
+            byUserId.set(entry.userId, entry);
+        }
+    }
+
+    for (const entry of rankingEntries) {
+        if (entry.userId) {
+            byUserId.set(entry.userId, entry);
+        }
+    }
+
+    const merged = Array.from(byUserId.values());
+
+    merged.sort((left, right) => {
+        if (right.totalPoints !== left.totalPoints) return right.totalPoints - left.totalPoints;
+        if (right.exactHits !== left.exactHits) return right.exactHits - left.exactHits;
+        if (right.correctOutcomes !== left.correctOutcomes) return right.correctOutcomes - left.correctOutcomes;
+        return left.userName.localeCompare(right.userName);
+    });
+
+    return merged.map((entry, index) => ({ ...entry, position: index + 1 }));
 }
 
 function buildPersonalSummary(
@@ -1403,16 +1447,21 @@ export async function getPublicCompetitionPlayView(slug: string, currentUserId: 
     const scoringRules = resolveProdeScoringRules(competitionResult.data, rulesetResult.data);
     const scopedPredictionRows = applyScoringRulesToPredictionRows(eventRows, predictionResult.data || [], scoringRules);
     const events = mapEvents(eventRows, scopedPredictionRows);
-    const leaderboardSourceRows = rankingRows.length ? rankingRows : memberRows;
+    // La tabla debe listar a TODOS los participantes: unimos el ranking (solo
+    // usuarios ya puntuados) con la lista completa de miembros (los que faltan van
+    // en 0). Antes solo se mostraba uno u otro, así que los miembros sin puntaje
+    // todavía no aparecían cuando ya había ranking.
+    const leaderboardSourceRows = [...rankingRows, ...memberRows];
     const leaderboardUserIds = leaderboardSourceRows
         .map((row) => toSafeString(row.user_id))
         .filter(Boolean);
     const userIdentityMap = leaderboardSourceRows.some((row) => !hasEmbeddedUserIdentity(row))
         ? await loadUserIdentityMap(admin, leaderboardUserIds)
         : undefined;
-    const leaderboardRows = rankingRows.length
-        ? rankingRows.map((row) => mapLeaderboardEntry(row, currentUserId, userIdentityMap))
-        : buildFallbackLeaderboard(memberRows, currentUserId, userIdentityMap);
+    const leaderboardRows = mergeRankingWithAllMembers(
+        rankingRows.map((row) => mapLeaderboardEntry(row, currentUserId, userIdentityMap)),
+        buildFallbackLeaderboard(memberRows, currentUserId, userIdentityMap),
+    );
     const nextLockAt = events.filter((event) => event.isOpen).map((event) => event.locksAt)[0] || null;
 
     return {
@@ -1565,27 +1614,22 @@ export async function getPrivateLeaguePlayView(slug: string, currentUserId: stri
     const scoringRules = resolveProdeScoringRules(competitionResult.data, rulesetResult.data, leagueRow);
     const scopedPredictionRows = applyScoringRulesToPredictionRows(eventRows, predictionResult.data || [], scoringRules);
     const events = mapEvents(eventRows, scopedPredictionRows);
-    const rankingSourceRows = rankingResult.data?.length ? rankingResult.data : leagueMembershipRows;
-    const rankingUserIds = rankingSourceRows.map((row) => toSafeString(row.user_id)).filter(Boolean);
-    const userIdentityMap = rankingSourceRows.some((row) => !hasEmbeddedUserIdentity(row))
-        ? await loadUserIdentityMap(admin, rankingUserIds)
+    // La tabla debe listar a TODOS los participantes de la liga: unimos el ranking
+    // (solo usuarios ya puntuados) con la membresía completa (los que faltan van en
+    // 0). Las filas de ranking traen `users` embebido, pero las de membresía no, así
+    // que cargamos identidades para poder nombrar a cada miembro sin puntaje.
+    const rankingRows = rankingResult.data || [];
+    const identityUserIds = [
+        ...rankingRows.map((row) => toSafeString(row.user_id)),
+        ...leagueMembershipRows.map((row) => toSafeString(row.user_id)),
+    ].filter(Boolean);
+    const userIdentityMap = (rankingRows.some((row) => !hasEmbeddedUserIdentity(row)) || leagueMembershipRows.length)
+        ? await loadUserIdentityMap(admin, identityUserIds)
         : undefined;
-    let leaderboardRows = rankingResult.data?.length
-        ? rankingResult.data.map((row) => mapLeaderboardEntry(row, currentUserId, userIdentityMap))
-        : [];
-
-    if (!leaderboardRows.length) {
-        const fallbackMemberResult = await admin
-            .from('prode_private_league_members')
-            .select('user_id, role, users(name, avatar_url)')
-            .eq('private_league_id', leagueId);
-
-        if (fallbackMemberResult.error) {
-            throw new Error(fallbackMemberResult.error.message || 'No se pudo cargar el ranking base de la liga.');
-        }
-
-        leaderboardRows = buildFallbackLeaderboard(fallbackMemberResult.data || [], currentUserId, userIdentityMap);
-    }
+    const leaderboardRows = mergeRankingWithAllMembers(
+        rankingRows.map((row) => mapLeaderboardEntry(row, currentUserId, userIdentityMap)),
+        buildFallbackLeaderboard(leagueMembershipRows, currentUserId, userIdentityMap),
+    );
 
     const nextLockAt = events.filter((event) => event.isOpen).map((event) => event.locksAt)[0] || null;
 

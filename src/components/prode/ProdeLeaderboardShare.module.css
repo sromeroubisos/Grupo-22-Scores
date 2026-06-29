@@ -1,0 +1,57 @@
+.shareWrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.shareBtn {
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 200, 83, 0.34);
+    background: rgba(19, 185, 129, 0.12);
+    color: #7ff4ae;
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.shareBtn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(0, 200, 83, 0.6);
+    background: rgba(19, 185, 129, 0.18);
+}
+
+.shareMenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    min-width: 196px;
+    padding: 6px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #0e1424;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.shareMenu button {
+    appearance: none;
+    text-align: left;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #f3f4f7;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.shareMenu button:hover {
+    background: rgba(19, 185, 129, 0.16);
+}

@@ -7,6 +7,7 @@ import { Shield, Gavel } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import styles from '@/app/prode/page.module.css';
 import ProdeEventPicksModal from './ProdeEventPicksModal';
+import ProdeLeaderboardShare from './ProdeLeaderboardShare';
 import enterStyles from './ProdePlaySkeleton.module.css';
 import type { ProdePlayEvent, ProdePlayPrediction, ProdePlayView, ProdePredictionOutcome } from '@/lib/prode/types';
 
@@ -280,16 +281,9 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
         return [...source].sort((left, right) => right.startsAt.localeCompare(left.startsAt)).slice(0, 6);
     }, [closedEvents]);
 
-    const highlightedLeaderboard = useMemo(() => {
-        const rows = view.leaderboard.slice(0, 8);
-        if (user && !rows.some((row) => row.userId === user.id)) {
-            const currentRow = view.leaderboard.find((row) => row.userId === user.id);
-            if (currentRow) {
-                return [...rows, currentRow];
-            }
-        }
-        return rows;
-    }, [user, view.leaderboard]);
+    // Mostramos a TODOS los participantes en la tabla (la lista se hace scrolleable
+    // cuando hay muchos). Antes cortábamos a 8 y, con 22 jugadores, faltaban 14.
+    const highlightedLeaderboard = view.leaderboard;
 
     const playEmptyMessage = useMemo(() => {
         if (openEvents.length) return null;
@@ -861,7 +855,14 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                             </section>
 
                             <section className={styles.summaryCard}>
-                                <p className={styles.previewEyebrow}>Tabla</p>
+                                <div className={styles.tableCardHead}>
+                                    <p className={styles.previewEyebrow}>Tabla</p>
+                                    <ProdeLeaderboardShare
+                                        leaderboard={view.leaderboard}
+                                        title={view.title}
+                                        subtitle={view.competitionName}
+                                    />
+                                </div>
                                 <div className={styles.leaderboardCompact}>
                                     {highlightedLeaderboard.length ? highlightedLeaderboard.map((row) => (
                                         <article key={`${row.userId}-${row.position ?? 'x'}`} className={`${styles.leaderboardCompactRow} ${row.isCurrentUser ? styles.leaderboardCompactRowCurrent : ''}`}>
