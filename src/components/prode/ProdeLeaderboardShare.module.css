@@ -38,6 +38,27 @@
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
 }
 
+.shareToggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 10px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #cdd2dc;
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+}
+
+.shareToggle input {
+    width: 16px;
+    height: 16px;
+    accent-color: #13b981;
+    cursor: pointer;
+}
+
 .shareMenu button {
     appearance: none;
     text-align: left;

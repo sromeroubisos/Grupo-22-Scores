@@ -67,6 +67,9 @@ export default function ProdeLeaderboardShare({
 }: ProdeLeaderboardShareProps) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [note, setNote] = useState('');
+    // Quien exporta elige si su propia fila va resaltada (verde + "(vos)") o no.
+    const [highlightCurrent, setHighlightCurrent] = useState(true);
+    const hasCurrentUser = leaderboard.some((entry) => entry.isCurrentUser);
 
     // Render the full standings table to a social-ready PNG (square post or vertical
     // story) with the title + CTA on top and the G22 logo band at the bottom.
@@ -183,7 +186,7 @@ export default function ProdeLeaderboardShare({
             const rank = entry.position ?? index + 1;
             const y = tableTop + index * (rowH + rowGap);
             const accent = rankAccent(rank);
-            const isCurrent = entry.isCurrentUser;
+            const isCurrent = entry.isCurrentUser && highlightCurrent;
 
             // Row card.
             roundRect(ctx, tableX, y, tableW, rowH, 18);
@@ -332,6 +335,16 @@ export default function ProdeLeaderboardShare({
             </button>
             {menuOpen && (
                 <div className={styles.shareMenu} role="menu">
+                    {hasCurrentUser && (
+                        <label className={styles.shareToggle}>
+                            <input
+                                type="checkbox"
+                                checked={highlightCurrent}
+                                onChange={(event) => setHighlightCurrent(event.target.checked)}
+                            />
+                            Resaltar mi nombre
+                        </label>
+                    )}
                     <button type="button" role="menuitem" onClick={() => handleShare('post')}>
                         Post (cuadrado)
                     </button>
