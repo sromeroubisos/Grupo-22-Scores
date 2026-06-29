@@ -1107,6 +1107,20 @@ export class FixtureService {
 
     if (data.homeClubId !== undefined) updateData.home_club_id = data.homeClubId;
     if (data.awayClubId !== undefined) updateData.away_club_id = data.awayClubId;
+
+    // Playoff matches start hidden as TBD placeholders: both the bracket
+    // builder (playoffBracket) and the stage-slot generator (playoffStages)
+    // create them with is_visible=false until both opponents are known. The
+    // automatic advancement path keeps this in sync, but a *manual* edit that
+    // fills in both teams must flip it too — otherwise the fixture stays
+    // invisible on the home page despite having a real date and both clubs.
+    if (
+      (data.homeClubId !== undefined || data.awayClubId !== undefined) &&
+      isPlayoffPhaseType(targetPhaseForRound?.phase_type)
+    ) {
+      updateData.is_visible = Boolean(nextHomeClubId) && Boolean(nextAwayClubId);
+    }
+
     if (data.dateTime !== undefined) {
       const normalizedDateTime = ensureUtcDateTimeString(data.dateTime, APP_TIMEZONE);
       if (!normalizedDateTime) {
