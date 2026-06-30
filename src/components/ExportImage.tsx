@@ -6112,13 +6112,16 @@ function g22pItalic(
     shadow: boolean,
     font?: string,
     maxWidth?: number,
+    fillWidth = false,
 ) {
     const family = font || FONT_EDITORIAL_SCORE;
     let fontSize = size;
     if (maxWidth) {
         ctx.font = `900 ${fontSize}px ${family}`;
-        const measured = ctx.measureText(text).width;
-        if (measured > maxWidth) fontSize = Math.max(1, Math.floor(fontSize * (maxWidth / measured)));
+        const measured = ctx.measureText(text).width || 1;
+        // fillWidth: escala el tamaño para que el texto OCUPE el ancho objetivo (crece o achica).
+        // Sin fillWidth: solo achica si se pasa de largo.
+        if (fillWidth || measured > maxWidth) fontSize = Math.max(1, Math.floor(fontSize * (maxWidth / measured)));
     }
     ctx.save();
     ctx.translate(cx, y);
@@ -6136,7 +6139,48 @@ function g22pItalic(
     ctx.restore();
 }
 
-// escudo real (imagen) encajado en un recuadro maxW×maxH; sin imagen => silueta neutra (jamás texto)
+// Bounding box del contenido OPACO de la imagen (en coords naturales), cacheado en el elemento.
+// Permite recortar el padding transparente que traen muchos escudos/banderas antes del cover-fit.
+function g22pImageBounds(img: HTMLImageElement): { x: number; y: number; w: number; h: number } {
+    const cached = (img as HTMLImageElement & { __g22bounds?: { x: number; y: number; w: number; h: number } }).__g22bounds;
+    if (cached) return cached;
+    let bounds = { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
+    try {
+        if (typeof document !== 'undefined') {
+            const maxDim = 160;
+            const sc = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+            const cw = Math.max(1, Math.round(img.naturalWidth * sc));
+            const ch = Math.max(1, Math.round(img.naturalHeight * sc));
+            const c = document.createElement('canvas');
+            c.width = cw;
+            c.height = ch;
+            const x = c.getContext('2d');
+            if (x) {
+                x.drawImage(img, 0, 0, cw, ch);
+                const d = x.getImageData(0, 0, cw, ch).data;
+                let minX = cw, minY = ch, maxX = -1, maxY = -1;
+                for (let yy = 0; yy < ch; yy += 1) {
+                    for (let xx = 0; xx < cw; xx += 1) {
+                        if (d[(yy * cw + xx) * 4 + 3] > 12) {
+                            if (xx < minX) minX = xx;
+                            if (xx > maxX) maxX = xx;
+                            if (yy < minY) minY = yy;
+                            if (yy > maxY) maxY = yy;
+                        }
+                    }
+                }
+                if (maxX >= minX && maxY >= minY) {
+                    bounds = { x: minX / sc, y: minY / sc, w: (maxX - minX + 1) / sc, h: (maxY - minY + 1) / sc };
+                }
+            }
+        }
+    } catch {
+        // Imagen tainted (CORS) u otro error: caemos al recuadro completo.
+    }
+    (img as HTMLImageElement & { __g22bounds?: { x: number; y: number; w: number; h: number } }).__g22bounds = bounds;
+    return bounds;
+}
+
 function g22pRoundRectSides(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, tl: number, tr: number, br: number, bl: number) {
     ctx.beginPath();
     ctx.moveTo(x + tl, y);
@@ -6151,17 +6195,20 @@ function g22pRoundRectSides(ctx: CanvasRenderingContext2D, x: number, y: number,
     ctx.closePath();
 }
 
-// Escudo recortado por una máscara redondeada que LLENA su ventana (cover-fit).
-// Imagen transparente => deja ver el blanco de la tarjeta; sin imagen => relleno neutro.
+// Escudo recortado por una máscara redondeada que LLENA su ventana (cover-fit sobre el
+// CONTENIDO opaco, ignorando el padding transparente). Sin imagen => relleno neutro.
 function g22pCrestWindow(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, radii: [number, number, number, number], img: HTMLImageElement | null) {
     ctx.save();
     g22pRoundRectSides(ctx, x, y, w, h, radii[0], radii[1], radii[2], radii[3]);
     ctx.clip();
     if (img && img.naturalWidth && img.naturalHeight) {
-        const s = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+        const b = g22pImageBounds(img);
+        const s = Math.max(w / b.w, h / b.h);
         const dw = img.naturalWidth * s;
         const dh = img.naturalHeight * s;
-        ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+        const dx = x + w / 2 - (b.x + b.w / 2) * s;
+        const dy = y + h / 2 - (b.y + b.h / 2) * s;
+        ctx.drawImage(img, dx, dy, dw, dh);
     } else {
         ctx.fillStyle = '#eef1f4';
         ctx.fillRect(x, y, w, h);
@@ -6249,15 +6296,16 @@ async function drawG22Poster(
 
     const isLive = data.status === 'live';
 
-    // Titular en Dharma Gothic C Heavy Oblique (itálica sintética por skew), una sola fila.
-    const titleText = opts.mode === 'result' ? (isLive ? 'EN VIVO' : 'RESULTADO FINAL') : '¿QUIÉN GANA?';
-    g22pItalic(ctx, titleText, W / 2, H * 0.150, u(170), '#ffffff', true, DHARMA_GOTHIC_C_FAMILY, W - u(110));
-
     // Tarjeta blanca con los dos escudos recortados (máscara), mitad/mitad.
     const cardW = W - u(110);
     const cardX = (W - cardW) / 2;
     const cardH = u(600);
     const cardY = H * 0.250;
+
+    // Titular en Dharma Gothic C Heavy Oblique, escalado para ENTRAR en el ancho de la tarjeta.
+    const titleText = opts.mode === 'result' ? (isLive ? 'EN VIVO' : 'RESULTADO FINAL') : '¿QUIÉN GANA?';
+    g22pItalic(ctx, titleText, W / 2, cardY - u(64), u(150), '#ffffff', true, DHARMA_GOTHIC_C_FAMILY, cardW - u(46), true);
+
     g22pCrestCard(ctx, cardX, cardY, cardW, cardH, u, homeLogo, awayLogo);
 
     if (opts.mode === 'result') {
