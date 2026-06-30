@@ -517,6 +517,14 @@ const LOCAL_EXPORT_FONTS: LocalExportFont[] = [
             '/fonts/dharma-gothic-heavy.woff',
         ],
     },
+    {
+        // Titular del póster de partido (RESULTADO FINAL / ¿QUIÉN GANA?). Es una itálica
+        // pesada de fábrica: se registra como style normal para NO duplicar la inclinación.
+        family: 'Articulat CF',
+        weight: '900',
+        style: 'normal',
+        sources: ['/fonts/ArticulatCF-HeavyOblique.otf'],
+    },
 ];
 const EXPORT_PALETTES: ExportPalette[] = [
     { id: 'g22-dark', name: 'G22 Dark', description: 'Carbono y verde marca', bg: '#0a0a0b', accent: '#00a365' },
@@ -4617,7 +4625,8 @@ function shouldAppendDateToMatchTime(value: string): boolean {
 
 async function loadLocalExportFonts(): Promise<void> {
     if (typeof document === 'undefined' || typeof FontFace === 'undefined' || !('fonts' in document)) return;
-    if (document.fonts.check('900 24px "dharma-gothic-e"') || document.fonts.check('800 24px "dharma-gothic-e"')) return;
+    if ((document.fonts.check('900 24px "dharma-gothic-e"') || document.fonts.check('800 24px "dharma-gothic-e"'))
+        && document.fonts.check('900 24px "Articulat CF"')) return;
     if (localExportFontsPromise) {
         await localExportFontsPromise;
         return;
@@ -4656,6 +4665,7 @@ async function ensureExportFonts(): Promise<void> {
             document.fonts.load('900 24px "dharma-gothic-c"'),
             document.fonts.load('900 24px "dharma-gothic-m"'),
             document.fonts.load('800 24px "G22 Dharma Gothic"'),
+            document.fonts.load('900 24px "Articulat CF"'),
             document.fonts.load('800 24px "Dharma Gothic Expanded Heavy"'),
             document.fonts.load('800 24px "Dharma Gothic E Heavy"'),
             document.fonts.load('700 24px "Dharma Gothic Expanded"'),
@@ -5935,6 +5945,371 @@ function getStatusColor(status: string | undefined, accentColor: string, isDark:
     return isDark ? '#cbd5e1' : '#475569';
 }
 
+// ============================================================================
+// G22 Base — póster de historia (estilo split por equipos) para resultado y horario.
+// Regla dura: SIEMPRE escudos reales y logo de torneo (imágenes); nunca iniciales.
+// Colores de fondo: override (selectores editoriales) o auto-detectados del escudo.
+// ============================================================================
+
+// Articulat CF para el título de resultado (dejar el archivo en public/fonts para que cargue;
+// si no está, cae a Outfit/Inter sin romper el render).
+const FONT_ARTICULAT = '"Articulat CF", "Outfit", "Inter", system-ui, sans-serif';
+
+function g22pRoundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+    const rr = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.lineTo(x + w - rr, y);
+    ctx.arcTo(x + w, y, x + w, y + rr, rr);
+    ctx.lineTo(x + w, y + h - rr);
+    ctx.arcTo(x + w, y + h, x + w - rr, y + h, rr);
+    ctx.lineTo(x + rr, y + h);
+    ctx.arcTo(x, y + h, x, y + h - rr, rr);
+    ctx.lineTo(x, y + rr);
+    ctx.arcTo(x, y, x + rr, y, rr);
+    ctx.closePath();
+}
+
+function g22pNoise(seed: number) {
+    const v = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+    return v - Math.floor(v);
+}
+
+// Color dominante (más saturado) del escudo; null si no se puede leer (taint/sin imagen).
+function g22pExtractColor(img: HTMLImageElement | null): string | null {
+    try {
+        if (!img || !img.naturalWidth || typeof document === 'undefined') return null;
+        const n = 40;
+        const c = document.createElement('canvas');
+        c.width = n;
+        c.height = n;
+        const x = c.getContext('2d');
+        if (!x) return null;
+        x.drawImage(img, 0, 0, n, n);
+        const d = x.getImageData(0, 0, n, n).data;
+        let br = 0, bg = 0, bb = 0, bs = -1;
+        let sr = 0, sg = 0, sb = 0, cnt = 0;
+        for (let i = 0; i < d.length; i += 4) {
+            if (d[i + 3] < 128) continue;
+            const r = d[i], g = d[i + 1], b = d[i + 2];
+            const lum = (r + g + b) / 3;
+            if (lum > 238 || lum < 14) continue;
+            const sat = Math.max(r, g, b) - Math.min(r, g, b);
+            sr += r; sg += g; sb += b; cnt += 1;
+            if (sat > bs) { bs = sat; br = r; bg = g; bb = b; }
+        }
+        if (!cnt) return null;
+        const ar = sr / cnt, ag = sg / cnt, ab = sb / cnt;
+        const toHex = (v: number) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0');
+        return `#${toHex(br * 0.7 + ar * 0.3)}${toHex(bg * 0.7 + ag * 0.3)}${toHex(bb * 0.7 + ab * 0.3)}`;
+    } catch {
+        return null;
+    }
+}
+
+function g22pSplitBackground(ctx: CanvasRenderingContext2D, W: number, H: number, homeColor: string, awayColor: string) {
+    // Cada lado lleva el color real de su equipo (oscurecido apenas para legibilidad).
+    const homeBase = mixHexColors(homeColor, '#0a0b0d', 0.26);
+    const awayBase = mixHexColors(awayColor, '#0a0b0d', 0.26);
+    ctx.fillStyle = homeBase;
+    ctx.fillRect(0, 0, Math.ceil(W / 2) + 2, H);
+    ctx.fillStyle = awayBase;
+    ctx.fillRect(Math.floor(W / 2) - 2, 0, Math.ceil(W / 2) + 2, H);
+
+    // Levante suave por lado (da volumen sin ensuciar el color).
+    let g = ctx.createRadialGradient(W * 0.25, H * 0.40, 40, W * 0.25, H * 0.40, W * 0.85);
+    g.addColorStop(0, hexToRGBA(mixHexColors(homeColor, '#ffffff', 0.18), 0.16));
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W / 2, H);
+    g = ctx.createRadialGradient(W * 0.75, H * 0.40, 40, W * 0.75, H * 0.40, W * 0.85);
+    g.addColorStop(0, hexToRGBA(mixHexColors(awayColor, '#ffffff', 0.18), 0.16));
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(W / 2, 0, W / 2, H);
+
+    // Textura de arcos concéntricos (muy tenue) arriba y abajo.
+    ctx.save();
+    ctx.globalAlpha = 0.05;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 6; i += 1) {
+        ctx.beginPath();
+        ctx.arc(W * 0.5, H * 1.05, W * (0.55 + i * 0.18), Math.PI, 2 * Math.PI);
+        ctx.stroke();
+    }
+    for (let i = 0; i < 5; i += 1) {
+        ctx.beginPath();
+        ctx.arc(W * 0.5, -H * 0.05, W * (0.45 + i * 0.18), 0, Math.PI);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    // (Sin sombra de costura central: el corte entre colores queda limpio.)
+
+    ctx.save();
+    for (let i = 0; i < 2200; i += 1) {
+        const x = g22pNoise(i * 1.7) * W;
+        const y = g22pNoise(i * 3.3 + 2) * H;
+        const a = g22pNoise(i * 5.1 + 7) * 0.045;
+        ctx.fillStyle = g22pNoise(i * 2.2) > 0.5 ? `rgba(255,255,255,${a})` : `rgba(0,0,0,${a * 1.7})`;
+        const s = 1 + g22pNoise(i * 4.4) * 2.2;
+        ctx.fillRect(x, y, s, s);
+    }
+    ctx.restore();
+
+    g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, 'rgba(0,0,0,0.42)');
+    g.addColorStop(0.16, 'rgba(0,0,0,0.08)');
+    g.addColorStop(0.55, 'rgba(0,0,0,0)');
+    g.addColorStop(0.86, 'rgba(0,0,0,0.12)');
+    g.addColorStop(1, 'rgba(0,0,0,0.5)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+}
+
+// Titular del póster en Articulat CF (itálica de fábrica → sin skew sintético).
+// Ajusta tamaño y tracking para no pasarse del ancho disponible.
+function g22pTitle(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    cx: number,
+    y: number,
+    size: number,
+    fill: string,
+    maxWidth: number,
+    tracking = 0,
+) {
+    ctx.save();
+    ctx.font = `900 ${size}px ${FONT_ARTICULAT}`;
+    const supportsTracking = 'letterSpacing' in ctx;
+    if (supportsTracking) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${tracking}px`;
+    let measured = ctx.measureText(text).width + tracking * Math.max(text.length - 1, 0);
+    if (measured > maxWidth && measured > 0) {
+        const f = maxWidth / measured;
+        size = Math.max(1, Math.floor(size * f));
+        tracking *= f;
+        ctx.font = `900 ${size}px ${FONT_ARTICULAT}`;
+        if (supportsTracking) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${tracking}px`;
+    }
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowBlur = size * 0.10;
+    ctx.shadowOffsetY = size * 0.04;
+    ctx.fillStyle = fill;
+    ctx.fillText(text, cx, y);
+    ctx.restore();
+}
+
+function g22pItalic(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    cx: number,
+    y: number,
+    size: number,
+    fill: string,
+    shadow: boolean,
+    font?: string,
+    maxWidth?: number,
+) {
+    const family = font || FONT_EDITORIAL_SCORE;
+    let fontSize = size;
+    if (maxWidth) {
+        ctx.font = `900 ${fontSize}px ${family}`;
+        const measured = ctx.measureText(text).width;
+        if (measured > maxWidth) fontSize = Math.max(1, Math.floor(fontSize * (maxWidth / measured)));
+    }
+    ctx.save();
+    ctx.translate(cx, y);
+    ctx.transform(1, 0, -0.16, 1, 0, 0);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = `900 ${fontSize}px ${family}`;
+    if (shadow) {
+        ctx.shadowColor = 'rgba(0,0,0,0.45)';
+        ctx.shadowBlur = fontSize * 0.12;
+        ctx.shadowOffsetY = fontSize * 0.05;
+    }
+    ctx.fillStyle = fill;
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
+}
+
+// escudo real (imagen) encajado en un recuadro maxW×maxH; sin imagen => silueta neutra (jamás texto)
+function g22pRoundRectSides(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, tl: number, tr: number, br: number, bl: number) {
+    ctx.beginPath();
+    ctx.moveTo(x + tl, y);
+    ctx.lineTo(x + w - tr, y);
+    ctx.arcTo(x + w, y, x + w, y + tr, tr);
+    ctx.lineTo(x + w, y + h - br);
+    ctx.arcTo(x + w, y + h, x + w - br, y + h, br);
+    ctx.lineTo(x + bl, y + h);
+    ctx.arcTo(x, y + h, x, y + h - bl, bl);
+    ctx.lineTo(x, y + tl);
+    ctx.arcTo(x, y, x + tl, y, tl);
+    ctx.closePath();
+}
+
+// Escudo recortado por una máscara redondeada que LLENA su ventana (cover-fit).
+// Imagen transparente => deja ver el blanco de la tarjeta; sin imagen => relleno neutro.
+function g22pCrestWindow(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, radii: [number, number, number, number], img: HTMLImageElement | null) {
+    ctx.save();
+    g22pRoundRectSides(ctx, x, y, w, h, radii[0], radii[1], radii[2], radii[3]);
+    ctx.clip();
+    if (img && img.naturalWidth && img.naturalHeight) {
+        const s = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+        const dw = img.naturalWidth * s;
+        const dh = img.naturalHeight * s;
+        ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+    } else {
+        ctx.fillStyle = '#eef1f4';
+        ctx.fillRect(x, y, w, h);
+    }
+    ctx.restore();
+}
+
+// Tarjeta blanca con dos ventanas recortadas (una por equipo), divididas al medio.
+function g22pCrestCard(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, u: (v: number) => number, homeLogo: HTMLImageElement | null, awayLogo: HTMLImageElement | null) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = u(44);
+    ctx.shadowOffsetY = u(22);
+    ctx.fillStyle = '#ffffff';
+    g22pRoundRect(ctx, x, y, w, h, u(40));
+    ctx.fill();
+    ctx.restore();
+
+    const b = u(16);        // marco blanco alrededor
+    const gapMid = u(10);   // divisor central
+    const r = u(28);        // radio de las esquinas exteriores de cada ventana
+    const innerY = y + b;
+    const innerH = h - b * 2;
+    const winW = (w - b * 2 - gapMid) / 2;
+    const leftX = x + b;
+    const rightX = x + b + winW + gapMid;
+    g22pCrestWindow(ctx, leftX, innerY, winW, innerH, [r, 0, 0, r], homeLogo);
+    g22pCrestWindow(ctx, rightX, innerY, winW, innerH, [0, r, r, 0], awayLogo);
+}
+
+// sello inferior: logo de liga (opcional, slot mascota) arriba + wordmark verde G22 SCORES debajo
+function g22pBrand(ctx: CanvasRenderingContext2D, W: number, y: number, u: (v: number) => number, wordmark: HTMLImageElement | null, league: HTMLImageElement | null) {
+    if (league && league.naturalWidth && league.naturalHeight) {
+        const h = u(120);
+        const s = h / league.naturalHeight;
+        const w = league.naturalWidth * s;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        ctx.shadowBlur = u(22);
+        ctx.shadowOffsetY = u(8);
+        ctx.drawImage(league, W / 2 - w / 2, y - h, w, h);
+        ctx.restore();
+    }
+    if (wordmark && wordmark.naturalWidth && wordmark.naturalHeight) {
+        const w = u(360);
+        const s = w / wordmark.naturalWidth;
+        const h = wordmark.naturalHeight * s;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.35)';
+        ctx.shadowBlur = u(14);
+        ctx.shadowOffsetY = u(5);
+        ctx.drawImage(wordmark, W / 2 - w / 2, y + u(34), w, h);
+        ctx.restore();
+        return;
+    }
+    g22pItalic(ctx, 'G22 SCORES', W / 2, y + u(70), u(58), BRAND_ACCENT, true);
+}
+
+async function drawG22Poster(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    opts: {
+        accentColor: string;
+        bgColor: string;
+        mode: 'result' | 'schedule';
+        homeColorOverride?: string;
+        awayColorOverride?: string;
+    },
+) {
+    const [homeLogo, awayLogo, tournamentLogo, wordmark] = await Promise.all([
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
+        loadImage('/g22-scores-wordmark.png'),
+    ]);
+
+    const W = canvas.width;
+    const H = canvas.height;
+    const u = (v: number) => Math.round((v * H) / 1920);
+    const homeColor = normalizeHexColor(opts.homeColorOverride || '') || g22pExtractColor(homeLogo) || '#3b2630';
+    const awayColor = normalizeHexColor(opts.awayColorOverride || '') || g22pExtractColor(awayLogo) || '#26323f';
+
+    g22pSplitBackground(ctx, W, H, homeColor, awayColor);
+
+    const isLive = data.status === 'live';
+
+    // Titular en Dharma Gothic C Heavy Oblique (itálica sintética por skew), una sola fila.
+    const titleText = opts.mode === 'result' ? (isLive ? 'EN VIVO' : 'RESULTADO FINAL') : '¿QUIÉN GANA?';
+    g22pItalic(ctx, titleText, W / 2, H * 0.150, u(170), '#ffffff', true, DHARMA_GOTHIC_C_FAMILY, W - u(110));
+
+    // Tarjeta blanca con los dos escudos recortados (máscara), mitad/mitad.
+    const cardW = W - u(110);
+    const cardX = (W - cardW) / 2;
+    const cardH = u(600);
+    const cardY = H * 0.250;
+    g22pCrestCard(ctx, cardX, cardY, cardW, cardH, u, homeLogo, awayLogo);
+
+    if (opts.mode === 'result') {
+        // Barra de marcador DEBAJO de la tarjeta: un solo texto consecutivo y centrado.
+        const bw = u(640), bh = u(212), bx = W / 2 - bw / 2, byy = cardY + cardH + u(8);
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.55)';
+        ctx.shadowBlur = u(46);
+        ctx.shadowOffsetY = u(22);
+        ctx.fillStyle = '#0b0c0e';
+        g22pRoundRect(ctx, bx, byy, bw, bh, u(32));
+        ctx.fill();
+        ctx.restore();
+        ctx.save();
+        ctx.font = `900 ${u(134)}px ${FONT_ARTICULAT}`;
+        if ('letterSpacing' in ctx) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${u(6)}px`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(`${data.homeScore ?? '-'} - ${data.awayScore ?? '-'}`, W / 2, byy + bh / 2);
+        ctx.restore();
+
+        // Sello: liga (slot mascota) + wordmark verde.
+        g22pBrand(ctx, W, H * 0.90, u, wordmark, tournamentLogo);
+    } else {
+        // Texto en Articulat CF debajo de los escudos (fecha/hora del partido).
+        const kickoffDate = toExportDate(data.kickoffAt);
+        const dateline = (() => {
+            const parts: string[] = [];
+            if (kickoffDate) {
+                const wd = new Intl.DateTimeFormat('es-AR', { weekday: 'short' }).format(kickoffDate).replace('.', '').toUpperCase();
+                const day = new Intl.DateTimeFormat('es-AR', { day: '2-digit' }).format(kickoffDate);
+                const mon = new Intl.DateTimeFormat('es-AR', { month: 'short' }).format(kickoffDate).replace('.', '').toUpperCase();
+                const time = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }).format(kickoffDate);
+                parts.push(`${wd} ${day} ${mon}`, time);
+            } else {
+                if (data.date) parts.push(data.date.toUpperCase());
+                if (data.time) parts.push(data.time);
+            }
+            if (data.venue) parts.push(data.venue.toUpperCase());
+            return parts.join('  ·  ');
+        })();
+        if (dateline) {
+            g22pTitle(ctx, dateline, W / 2, cardY + cardH + u(150), u(78), 'rgba(255,255,255,0.97)', W - u(220), u(1));
+        }
+
+        // Debajo se deja LIBRE para el sticker de encuesta de Instagram.
+        // Horario: sin logo de liga, solo wordmark.
+        g22pBrand(ctx, W, H * 0.905, u, wordmark, null);
+    }
+}
+
 async function drawMatchEditorialScheduleSplitHero(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
@@ -5942,795 +6317,39 @@ async function drawMatchEditorialScheduleSplitHero(
     _format: CanvasFormat,
     accentColor: string,
     bgColor: string,
-    brandLogo: HTMLImageElement | null,
-    backgroundImageSrc: string,
+    _brandLogo: HTMLImageElement | null,
+    _backgroundImageSrc: string,
     editorialGradientLeftColor?: string,
-    editorialGradientRightColor?: string
+    editorialGradientRightColor?: string,
 ) {
-    const [backgroundImage, homeLogo, awayLogo, tournamentLogo] = await Promise.all([
-        loadImage(backgroundImageSrc || ''),
-        loadImage(data.homeLogo || ''),
-        loadImage(data.awayLogo || ''),
-        loadImage(getTournamentLogoImageSource(data)),
-    ]);
-    const kickoffDate = toExportDate(data.kickoffAt);
-    const scaleX = canvas.width / 1080;
-    const scaleY = canvas.height / 1350;
-    const sx = (value: number) => Math.round(value * scaleX);
-    const sy = (value: number) => Math.round(value * scaleY);
-    const bgIsDark = getContrastColor(bgColor) === '#ffffff';
-    const requestedGradientLeft = editorialGradientLeftColor || mixHexColors(accentColor, bgColor, bgIsDark ? 0.24 : 0.16);
-    const requestedGradientRight = editorialGradientRightColor || accentColor;
-    // Keep the G22 Base schedule anchored to the brand accent so saved presets do not
-    // push the split hero into the colder "hardened" blues.
-    const gradientLeft = requestedGradientLeft;
-    const gradientRight = mixHexColors(accentColor, requestedGradientRight, bgIsDark ? 0.12 : 0.1);
-    const posterBase = bgIsDark
-        ? mixHexColors(bgColor, '#030712', 0.3)
-        : mixHexColors(bgColor, '#101828', 0.78);
-    const posterTint = mixHexColors(posterBase, gradientLeft, 0.16);
-    const posterShade = mixHexColors(posterBase, '#000000', 0.28);
-    const accentPrimary = getContrastColor(gradientRight) === '#ffffff'
-        ? mixHexColors(gradientRight, '#ffffff', 0.08)
-        : mixHexColors(gradientRight, '#0f172a', 0.08);
-    const accentSecondary = getContrastColor(gradientLeft) === '#ffffff'
-        ? mixHexColors(gradientLeft, '#ffffff', 0.08)
-        : mixHexColors(gradientLeft, '#0f172a', 0.14);
-    const accentSoft = mixHexColors(accentPrimary, '#ffffff', bgIsDark ? 0.18 : 0.28);
-    const accentDeep = mixHexColors(accentSecondary, '#020617', 0.36);
-    const frameColor = mixHexColors(posterBase, '#ffffff', bgIsDark ? 0.06 : 0.12);
-    const headlineColor = getContrastColor(posterBase);
-    const mutedHeadline = hexToRGBA(headlineColor, 0.72);
-    const accentStroke = hexToRGBA(mixHexColors(headlineColor === '#ffffff' ? '#ffffff' : '#0f172a', accentPrimary, 0.18), 0.24);
-    const leftInfoFill = accentPrimary;
-    const leftInfoText = getContrastColor(leftInfoFill);
-    const neutralLogoPlate = mixHexColors(posterBase, '#000000', 0.18);
-    const neutralLogoText = getContrastColor(neutralLogoPlate);
-    const accentLogoPlate = mixHexColors(accentPrimary, accentDeep, 0.22);
-    const accentLogoText = getContrastColor(accentLogoPlate);
-    const fallbackLogo = tournamentLogo || brandLogo;
-    const kickerText = (
-        data.editorialContextLabel?.trim()
-        || ((data.mainTitle || '').trim().toLowerCase() !== 'horario' ? (data.mainTitle || '').trim() : '')
-        || buildEditorialScheduleCampaignLabel(data)
-    ).toUpperCase();
-    const competitionText = (data.tournament || 'TOURNAMENT').trim().toUpperCase();
-    const dateText = kickoffDate
-        ? new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(kickoffDate).replace(',', '').toUpperCase()
-        : (data.date || 'DATE TBC').trim().toUpperCase();
-    const timeText = kickoffDate
-        ? new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }).format(kickoffDate).toUpperCase()
-        : (data.time || '--:--').trim().toUpperCase();
-    const venueText = (data.venue || '').trim().toUpperCase();
-    const matchupText = `${(data.homeTeam || 'HOME').trim().toUpperCase()} V ${(data.awayTeam || 'AWAY').trim().toUpperCase()}`;
-    const photoX = sx(566);
-    const photoY = sy(110);
-    const photoWidth = sx(392);
-    const photoHeight = scaleElementSize('rowHeight', sy(980), 304);
-    const heroLeftX = sx(90);
-    const heroMaxWidth = sx(466);
-    const heroTopY = offsetElementY('title', sy(382));
-    const heroBottomY = offsetElementY('title', sy(590));
-    const infoBlockX = sx(92);
-    const infoBlockY = sy(912);
-    const infoBlockWidth = sx(452);
-    const infoBlockHeight = sy(128);
-    const metaLeftX = sx(92);
-    const metaDateY = sy(1106);
-    const metaVenueY = sy(1184);
-    const logoPlateY = sy(1098);
-    const logoPlateWidth = sx(148);
-    const logoPlateHeight = sy(124);
-    const homeLogoPlateX = sx(646);
-    const awayLogoPlateX = homeLogoPlateX + logoPlateWidth;
-
-    const drawCoverInRect = (image: HTMLImageElement | null, x: number, y: number, width: number, height: number, focusX = 0.56, focusY = 0.34) => {
-        if (!image) return false;
-        const sourceWidth = image.naturalWidth || image.width || width;
-        const sourceHeight = image.naturalHeight || image.height || height;
-        const scale = Math.max(width / sourceWidth, height / sourceHeight);
-        const drawWidth = sourceWidth * scale;
-        const drawHeight = sourceHeight * scale;
-        const offsetX = x + Math.min(0, Math.max(width - drawWidth, width / 2 - drawWidth * focusX));
-        const offsetY = y + Math.min(0, Math.max(height - drawHeight, height / 2 - drawHeight * focusY));
-        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-        return true;
-    };
-
-    const drawCondensedHeroWord = (word: string, x: number, baselineY: number, maxWidth: number, size: number) => {
-        const scaleWordX = 0.66;
-        const scaleWordY = 1.08;
-        const adjustedWidth = maxWidth / scaleWordX;
-
-        ctx.save();
-        ctx.translate(x, baselineY);
-        ctx.scale(scaleWordX, scaleWordY);
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillStyle = headlineColor;
-        ctx.shadowColor = 'rgba(0,0,0,0.28)';
-        ctx.shadowBlur = sy(14);
-        ctx.shadowOffsetY = sy(6);
-        setFittedFont(ctx, word, adjustedWidth, '900', size, FONT_EDITORIAL_SCORE, 86);
-        ctx.fillText(truncateTextToWidth(ctx, word, adjustedWidth), 0, 0);
-        ctx.restore();
-    };
-
-    const drawLogoPlate = (
-        x: number,
-        fill: string,
-        textColor: string,
-        logo: HTMLImageElement | null,
-        label: string,
-        rawLogo: string | undefined,
-        innerLabel: string
-    ) => {
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,0.18)';
-        ctx.shadowBlur = sy(20);
-        ctx.shadowOffsetY = sy(12);
-        ctx.fillStyle = fill;
-        ctx.fillRect(x, logoPlateY, logoPlateWidth, logoPlateHeight);
-        ctx.restore();
-
-        ctx.save();
-        ctx.strokeStyle = hexToRGBA(textColor === '#ffffff' ? '#ffffff' : '#0f172a', 0.12);
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(x + 0.75, logoPlateY + 0.75, logoPlateWidth - 1.5, logoPlateHeight - 1.5);
-        ctx.restore();
-
-        drawOverflowCrest(ctx, {
-            x: x + logoPlateWidth / 2,
-            y: logoPlateY + sy(50),
-            width: scaleElementSize('teamLogo', sx(72), 188),
-            height: scaleElementSize('teamLogo', sy(72), 188),
-            img: logo,
-            label,
-            rawLogo,
-            isDark: textColor === '#ffffff',
-            showFrame: false,
-        });
-
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillStyle = hexToRGBA(textColor, 0.8);
-        ctx.font = `800 ${sy(14)}px ${FONT_MONO}`;
-        ctx.fillText(truncateTextToWidth(ctx, innerLabel, logoPlateWidth - sx(20)), x + logoPlateWidth / 2, logoPlateY + logoPlateHeight - sy(18));
-        ctx.restore();
-    };
-
-    const textureSeed = (seed: number) => {
-        const value = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
-        return value - Math.floor(value);
-    };
-
-    const drawAdaptedBackgroundTexture = () => {
-        const diagonalAngle = -Math.PI * (56 / 180);
-        const dx = Math.cos(diagonalAngle);
-        const dy = Math.sin(diagonalAngle);
-        const px = -dy;
-        const py = dx;
-        const wideStroke = hexToRGBA(mixHexColors(accentSecondary, '#60a5fa', 0.26), bgIsDark ? 0.17 : 0.12);
-        const thinStroke = hexToRGBA(mixHexColors(accentPrimary, '#93c5fd', 0.22), bgIsDark ? 0.12 : 0.08);
-        const dustColor = hexToRGBA(mixHexColors(accentSoft, '#dbeafe', 0.2), bgIsDark ? 0.11 : 0.07);
-
-        ctx.save();
-        ctx.lineCap = 'butt';
-
-        for (let lane = -4; lane < 22; lane += 1) {
-            const laneSeed = lane + 1;
-            const originX = -canvas.height * 0.64 + lane * sx(82);
-            const originY = canvas.height + sy(180) - lane * sy(10);
-            let travel = sx(10 + textureSeed(laneSeed * 4.1) * 40);
-            const segments = 5 + Math.floor(textureSeed(laneSeed * 2.7) * 4);
-
-            for (let segment = 0; segment < segments; segment += 1) {
-                const segmentSeed = laneSeed * 19 + segment * 7;
-                const length = sx(84 + textureSeed(segmentSeed) * 228);
-                const gap = sx(28 + textureSeed(segmentSeed + 1.3) * 74);
-                const thickness = sx(6 + textureSeed(segmentSeed + 2.1) * 22);
-                const crossOffset = (textureSeed(segmentSeed + 3.7) - 0.5) * sx(20);
-                const x1 = originX + dx * travel + px * crossOffset;
-                const y1 = originY + dy * travel + py * crossOffset;
-                const x2 = originX + dx * (travel + length) + px * crossOffset;
-                const y2 = originY + dy * (travel + length) + py * crossOffset;
-
-                ctx.strokeStyle = segment % 3 === 0 ? wideStroke : thinStroke;
-                ctx.lineWidth = thickness;
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.stroke();
-
-                if (textureSeed(segmentSeed + 5.2) > 0.46) {
-                    const scratchTravel = travel + sx(18 + textureSeed(segmentSeed + 6.4) * 36);
-                    const scratchLength = length * (0.18 + textureSeed(segmentSeed + 7.1) * 0.22);
-                    const scratchOffset = crossOffset + (textureSeed(segmentSeed + 8.6) - 0.5) * sx(34);
-                    ctx.strokeStyle = dustColor;
-                    ctx.lineWidth = Math.max(1, thickness * 0.22);
-                    ctx.beginPath();
-                    ctx.moveTo(
-                        originX + dx * scratchTravel + px * scratchOffset,
-                        originY + dy * scratchTravel + py * scratchOffset,
-                    );
-                    ctx.lineTo(
-                        originX + dx * (scratchTravel + scratchLength) + px * scratchOffset,
-                        originY + dy * (scratchTravel + scratchLength) + py * scratchOffset,
-                    );
-                    ctx.stroke();
-                }
-
-                travel += length + gap;
-            }
-        }
-
-        ctx.fillStyle = dustColor;
-        for (let index = 0; index < 340; index += 1) {
-            const x = textureSeed(index * 3.17) * canvas.width;
-            const y = textureSeed(index * 7.91 + 4.2) * canvas.height;
-            const width = sx(1 + textureSeed(index * 11.4 + 2.8) * 3.2);
-            const height = sy(1 + textureSeed(index * 5.6 + 1.4) * 2.2);
-            ctx.fillRect(x, y, width, height);
-        }
-        ctx.restore();
-    };
-
-    ctx.fillStyle = posterBase;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const backgroundGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    backgroundGradient.addColorStop(0, posterTint);
-    backgroundGradient.addColorStop(0.46, posterBase);
-    backgroundGradient.addColorStop(1, posterShade);
-    ctx.fillStyle = backgroundGradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    drawAdaptedBackgroundTexture();
-
-    ctx.save();
-    ctx.fillStyle = hexToRGBA(posterBase, 0.72);
-    ctx.fillRect(sx(18), sy(14), sx(332), sy(56));
-    ctx.restore();
-
-    ctx.save();
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = hexToRGBA(headlineColor, 0.54);
-    ctx.font = `800 ${sy(14)}px ${FONT_MONO}`;
-    ctx.fillText('POWERED BY G22 SCORES', sx(28), sy(50));
-    ctx.restore();
-
-    ctx.save();
-    const topGlow = ctx.createRadialGradient(sx(226), sy(182), sx(18), sx(226), sy(182), sx(540));
-    topGlow.addColorStop(0, hexToRGBA(accentSoft, 0.3));
-    topGlow.addColorStop(0.44, hexToRGBA(accentPrimary, 0.12));
-    topGlow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = topGlow;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.restore();
-
-    ctx.save();
-    ctx.fillStyle = hexToRGBA(accentPrimary, 0.18);
-    ctx.beginPath();
-    ctx.moveTo(photoX - sx(56), sy(40));
-    ctx.lineTo(photoX + sx(196), sy(40));
-    ctx.lineTo(photoX + sx(262), sy(100));
-    ctx.lineTo(photoX + sx(178), sy(150));
-    ctx.lineTo(photoX - sx(56), sy(150));
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-
-    ctx.save();
-    ctx.fillStyle = hexToRGBA(accentSecondary, 0.16);
-    ctx.beginPath();
-    ctx.moveTo(photoX + photoWidth - sx(12), canvas.height - sy(210));
-    ctx.lineTo(canvas.width - sx(52), canvas.height - sy(146));
-    ctx.lineTo(canvas.width - sx(52), canvas.height);
-    ctx.lineTo(photoX + sx(108), canvas.height);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-
-    if (backgroundImage) {
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,0.26)';
-        ctx.shadowBlur = sy(28);
-        ctx.shadowOffsetY = sy(18);
-        ctx.fillStyle = frameColor;
-        ctx.fillRect(photoX, photoY, photoWidth, photoHeight);
-        ctx.restore();
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(photoX, photoY, photoWidth, photoHeight);
-        ctx.clip();
-        drawCoverInRect(backgroundImage, photoX, photoY, photoWidth, photoHeight, 0.58, 0.24);
-        const photoOverlay = ctx.createLinearGradient(photoX, photoY, photoX, photoY + photoHeight);
-        photoOverlay.addColorStop(0, hexToRGBA(posterBase, 0.14));
-        photoOverlay.addColorStop(0.68, 'rgba(0,0,0,0)');
-        photoOverlay.addColorStop(1, hexToRGBA(accentDeep, 0.22));
-        ctx.fillStyle = photoOverlay;
-        ctx.fillRect(photoX, photoY, photoWidth, photoHeight);
-        ctx.restore();
-    } else {
-        const fallbackPhotoGradient = ctx.createLinearGradient(photoX, photoY, photoX + photoWidth, photoY + photoHeight);
-        fallbackPhotoGradient.addColorStop(0, accentSecondary);
-        fallbackPhotoGradient.addColorStop(0.48, mixHexColors(accentPrimary, posterBase, 0.34));
-        fallbackPhotoGradient.addColorStop(1, accentDeep);
-        ctx.fillStyle = fallbackPhotoGradient;
-        ctx.fillRect(photoX, photoY, photoWidth, photoHeight);
-
-        ctx.save();
-        ctx.strokeStyle = hexToRGBA(headlineColor, 0.12);
-        ctx.lineWidth = 2;
-        for (let x = photoX - photoHeight; x < photoX + photoWidth + photoHeight; x += sx(62)) {
-            ctx.beginPath();
-            ctx.moveTo(x, photoY);
-            ctx.lineTo(x + photoHeight * 0.56, photoY + photoHeight);
-            ctx.stroke();
-        }
-        ctx.restore();
-
-        if (fallbackLogo) {
-            drawNeutralizedBackdropMark(
-                ctx,
-                fallbackLogo,
-                photoX + photoWidth / 2,
-                offsetElementY('tournamentLogo', photoY + photoHeight / 2),
-                sx(244),
-                sy(244),
-                headlineColor === '#ffffff' ? '#ffffff' : '#0f172a',
-                0.12
-            );
-        }
-    }
-
-    ctx.save();
-    ctx.strokeStyle = hexToRGBA(headlineColor === '#ffffff' ? '#ffffff' : '#0f172a', 0.14);
-    ctx.lineWidth = 2;
-    ctx.strokeRect(photoX + 1, photoY + 1, photoWidth - 2, photoHeight - 2);
-    ctx.restore();
-
-    if (tournamentLogo) {
-        drawOverflowCrest(ctx, {
-            x: photoX + sx(44),
-            y: offsetElementY('tournamentLogo', photoY + sy(58)),
-            width: sx(54),
-            height: sy(54),
-            img: tournamentLogo,
-            label: data.tournament || 'Tournament',
-            rawLogo: data.tournamentLogo,
-            isDark: getContrastColor(frameColor) === '#ffffff',
-            showFrame: false,
-        });
-    }
-
-    ctx.save();
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = mutedHeadline;
-    ctx.font = `800 ${sy(18)}px ${FONT_MONO}`;
-    ctx.fillText(truncateTextToWidth(ctx, kickerText || competitionText, heroMaxWidth), heroLeftX, offsetElementY('title', sy(112)));
-    ctx.restore();
-
-    ctx.save();
-    ctx.fillStyle = hexToRGBA(headlineColor, 0.12);
-    ctx.fillRect(heroLeftX, sy(128), sx(84), sy(4));
-    ctx.restore();
-
-    drawCondensedHeroWord('PROXIMO', heroLeftX, heroTopY, heroMaxWidth, scaleElementSize('title', sy(246), 118));
-    drawCondensedHeroWord('PARTIDO', heroLeftX, heroBottomY, heroMaxWidth, scaleElementSize('title', sy(246), 118));
-
-    if (competitionText) {
-        ctx.save();
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillStyle = hexToRGBA(headlineColor, 0.64);
-        ctx.font = `800 ${sy(18)}px ${FONT_MONO}`;
-        ctx.fillText(truncateTextToWidth(ctx, competitionText, heroMaxWidth), heroLeftX, sy(846));
-        ctx.restore();
-    }
-
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.18)';
-    ctx.shadowBlur = sy(20);
-    ctx.shadowOffsetY = sy(12);
-    ctx.fillStyle = leftInfoFill;
-    ctx.fillRect(infoBlockX, infoBlockY, infoBlockWidth, infoBlockHeight);
-    ctx.restore();
-
-    const matchupLayout = fitTextLinesToWidth(
-        ctx,
-        matchupText,
-        infoBlockWidth - sx(34),
-        '900',
-        scaleElementSize('teamName', sy(44), 34),
-        FONT_EDITORIAL_SCORE,
-        sy(26),
-        2
-    );
-
-    ctx.save();
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = leftInfoText;
-    ctx.font = `900 ${matchupLayout.size}px ${FONT_EDITORIAL_SCORE}`;
-    matchupLayout.lines.forEach((line, index) => {
-        ctx.fillText(line, infoBlockX + sx(18), offsetElementY('teamName', infoBlockY + sy(56) + index * (matchupLayout.size + sy(6))));
+    await drawG22Poster(ctx, canvas, data, {
+        accentColor,
+        bgColor,
+        mode: 'schedule',
+        homeColorOverride: editorialGradientLeftColor,
+        awayColorOverride: editorialGradientRightColor,
     });
-    ctx.restore();
-
-    ctx.save();
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = mutedHeadline;
-    ctx.font = `800 ${sy(16)}px ${FONT_MONO}`;
-    ctx.fillText(truncateTextToWidth(ctx, dateText, sx(250)), metaLeftX, metaDateY);
-    ctx.restore();
-
-    const koPillX = metaLeftX;
-    const koPillY = sy(1128);
-    const koPillWidth = sx(68);
-    const koPillHeight = sy(38);
-
-    ctx.save();
-    ctx.fillStyle = accentPrimary;
-    ctx.fillRect(koPillX, koPillY, koPillWidth, koPillHeight);
-    ctx.restore();
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = getContrastColor(accentPrimary);
-    ctx.font = `900 ${sy(18)}px ${FONT_MONO}`;
-    ctx.fillText('KO', koPillX + koPillWidth / 2, koPillY + koPillHeight / 2 + 1);
-    ctx.restore();
-
-    ctx.save();
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = headlineColor;
-    ctx.font = `900 ${scaleElementSize('score', sy(42), 212)}px ${FONT_EDITORIAL_SCORE}`;
-    ctx.fillText(truncateTextToWidth(ctx, timeText, sx(250)), koPillX + koPillWidth + sx(20), sy(1158));
-    ctx.restore();
-
-    if (venueText) {
-        ctx.save();
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillStyle = mutedHeadline;
-        ctx.font = `800 ${sy(18)}px ${FONT_BODY}`;
-        ctx.fillText(truncateTextToWidth(ctx, venueText, sx(430)), metaLeftX, metaVenueY);
-        ctx.restore();
-    }
-
-    drawLogoPlate(homeLogoPlateX, neutralLogoPlate, neutralLogoText, homeLogo, data.homeTeam, data.homeLogo, 'HOME');
-    drawLogoPlate(awayLogoPlateX, accentLogoPlate, accentLogoText, awayLogo, data.awayTeam, data.awayLogo, 'AWAY');
-
-    const footerLineY = sy(1264);
-    const footerLogoSize = scaleElementSize('tournamentLogo', sx(86), 323);
-    const footerLineGap = Math.max(sx(122), Math.round(footerLogoSize * 0.9));
-
-    ctx.save();
-    ctx.strokeStyle = accentStroke;
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(sx(26), footerLineY);
-    ctx.lineTo(canvas.width / 2 - footerLineGap, footerLineY);
-    ctx.moveTo(canvas.width / 2 + footerLineGap, footerLineY);
-    ctx.lineTo(canvas.width - sx(26), footerLineY);
-    ctx.stroke();
-    ctx.restore();
-
-    if (fallbackLogo) {
-        drawOverflowCrest(ctx, {
-            x: canvas.width / 2,
-            y: offsetElementY('tournamentLogo', footerLineY),
-            width: footerLogoSize,
-            height: footerLogoSize,
-            img: fallbackLogo,
-            label: data.tournament || 'G22 Scores',
-            rawLogo: tournamentLogo ? data.tournamentLogo : '/icon.png',
-            isDark: headlineColor === '#ffffff',
-            showFrame: false,
-        });
-    }
 }
 
 async function drawMatchEditorialResult(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     data: MatchStatsData,
-    format: CanvasFormat,
+    _format: CanvasFormat,
     accentColor: string,
     bgColor: string,
-    brandLogo: HTMLImageElement | null,
-    backgroundImageSrc: string,
+    _brandLogo: HTMLImageElement | null,
+    _backgroundImageSrc: string,
     gradientLeftColor: string,
-    gradientRightColor: string
+    gradientRightColor: string,
 ) {
-    const editorialPreset = getEditorialLayoutPreset(data.editorialLayoutPresetId);
-    const sponsors = getActiveEditorialSponsors(buildEditorialSponsorSlots(data.sponsors));
-    const [backgroundImage, homeLogo, awayLogo, tournamentLogo, textureImage, gradientImage, ...sponsorImages] = await Promise.all([
-        loadImage(backgroundImageSrc),
-        loadImage(data.homeLogo || ''),
-        loadImage(data.awayLogo || ''),
-        loadImage(getTournamentLogoImageSource(data)),
-        loadImage(EDITORIAL_TEXTURE_SOURCE),
-        loadImage(data.editorialGradientImage || ''),
-        ...sponsors.map((sponsor) => loadImage(sponsor.logo || '')),
-    ]);
-
-    if (!backgroundImage) {
-        throw new Error('No se pudo cargar la foto de fondo');
-    }
-
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawCoverImage(ctx, canvas, backgroundImage, { focusX: 0.56, focusY: 0.4 });
-    const overlayTop = canvas.height * (format.height > format.width ? 0.61 : 0.58);
-
-    ctx.save();
-    ctx.font = `900 ${editorialPreset.scoreFontSize}px ${FONT_EDITORIAL_SCORE}`;
-    const scoreMetrics = ctx.measureText('88');
-    ctx.restore();
-
-    const scoreAscent = scoreMetrics.actualBoundingBoxAscent || 196;
-    const scoreDescent = scoreMetrics.actualBoundingBoxDescent || 22;
-    const scoreHeight = scoreAscent + scoreDescent;
-    const lineColor = 'rgba(255, 255, 255, 0.88)';
-    const sidePadding = 72;
-    const leftColumnX = editorialPreset.scoreInset;
-    const rightColumnX = canvas.width - editorialPreset.scoreInset;
-    const lineHalfWidth = editorialPreset.lineWidth / 2;
-    const leftLineStartX = leftColumnX - lineHalfWidth;
-    const leftLineEndX = leftColumnX + lineHalfWidth;
-    const rightLineStartX = rightColumnX - lineHalfWidth;
-    const rightLineEndX = rightColumnX + lineHalfWidth;
-    const bottomRuleY = canvas.height - editorialPreset.bottomRuleInset;
-    const topRuleY = bottomRuleY - editorialPreset.scoreBottomGap - scoreHeight - editorialPreset.scoreTopGap;
-    const scoreTopY = topRuleY + editorialPreset.scoreTopGap;
-    const scoreBaselineY = scoreTopY + scoreAscent;
-    const scoreCenterY = scoreTopY + scoreHeight / 2;
-    const titleY = topRuleY;
-    const tournamentLogoY = scoreCenterY + editorialPreset.tournamentLogoOffsetY;
-    const teamLogoWidth = Math.round(editorialPreset.logoWidth * 1.25);
-    const teamLogoHeight = Math.round(editorialPreset.logoHeight * 1.25);
-    const teamLogoBottomGap = 15;
-    const crestStrokeWidth = 5;
-    const crestInset = Math.max(crestStrokeWidth + 4, Math.min(teamLogoWidth, teamLogoHeight) * 0.08);
-    const defaultTeamLogoY = topRuleY - editorialPreset.logoOffsetY;
-    const resolveTeamLogoY = (logo: HTMLImageElement | null) => {
-        if (!logo) return defaultTeamLogoY;
-
-        const placement = getContainedOpaquePlacement(
-            logo,
-            0,
-            0,
-            teamLogoWidth,
-            teamLogoHeight,
-            crestInset
-        );
-        const visibleBottomWithStroke = placement.visibleBottom + crestStrokeWidth;
-        return topRuleY - teamLogoBottomGap - visibleBottomWithStroke;
-    };
-    const homeLogoY = resolveTeamLogoY(homeLogo);
-    const awayLogoY = resolveTeamLogoY(awayLogo);
-    const gradientStartY = Math.max(Math.round(titleY - editorialPreset.titleFontSize * 0.95), Math.round(overlayTop - 16));
-    const usesUploadedGradientImage = Boolean(gradientImage);
-
-    if (!usesUploadedGradientImage) {
-        const topShade = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.24);
-        topShade.addColorStop(0, 'rgba(0, 0, 0, 0.78)');
-        topShade.addColorStop(0.54, 'rgba(0, 0, 0, 0.18)');
-        ctx.fillStyle = topShade;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    if (!usesUploadedGradientImage) {
-        const bottomShade = ctx.createLinearGradient(0, gradientStartY - 24, 0, canvas.height);
-        bottomShade.addColorStop(0, 'rgba(2, 6, 10, 0)');
-        bottomShade.addColorStop(0.16, 'rgba(2, 6, 10, 0.46)');
-        bottomShade.addColorStop(0.56, 'rgba(2, 6, 10, 0.6)');
-        bottomShade.addColorStop(1, `rgba(2, 6, 10, ${editorialPreset.gradientBottomOpacity})`);
-        ctx.fillStyle = bottomShade;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    if (usesUploadedGradientImage) {
-        drawEditorialGradientImage(ctx, canvas, gradientImage);
-    } else {
-        const gradientHeight = canvas.height - gradientStartY;
-        const gradientLayer = typeof document !== 'undefined' ? document.createElement('canvas') : null;
-        if (gradientLayer) {
-            gradientLayer.width = canvas.width;
-            gradientLayer.height = gradientHeight;
-            const gradientLayerCtx = gradientLayer.getContext('2d');
-
-            if (gradientLayerCtx) {
-                const centerBlendColor = mixHexColors(gradientLeftColor, gradientRightColor, 0.5);
-                const horizontalBlend = gradientLayerCtx.createLinearGradient(0, 0, gradientLayer.width, 0);
-                horizontalBlend.addColorStop(0, hexToRGBA(gradientLeftColor, 1));
-                horizontalBlend.addColorStop(0.2, hexToRGBA(gradientLeftColor, 1));
-                horizontalBlend.addColorStop(0.5, hexToRGBA(centerBlendColor, 1));
-                horizontalBlend.addColorStop(0.8, hexToRGBA(gradientRightColor, 1));
-                horizontalBlend.addColorStop(1, hexToRGBA(gradientRightColor, 1));
-                gradientLayerCtx.fillStyle = horizontalBlend;
-                gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
-
-                const leftBloom = gradientLayerCtx.createRadialGradient(
-                    gradientLayer.width * 0.14,
-                    gradientLayer.height * 0.9,
-                    12,
-                    gradientLayer.width * 0.14,
-                    gradientLayer.height * 0.9,
-                    gradientLayer.width * 0.34
-                );
-                leftBloom.addColorStop(0, hexToRGBA(gradientLeftColor, 0.68));
-                leftBloom.addColorStop(0.64, hexToRGBA(gradientLeftColor, 0.3));
-                leftBloom.addColorStop(1, 'rgba(255, 41, 84, 0)');
-                gradientLayerCtx.fillStyle = leftBloom;
-                gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
-
-                const rightBloom = gradientLayerCtx.createRadialGradient(
-                    gradientLayer.width * 0.86,
-                    gradientLayer.height * 0.9,
-                    12,
-                    gradientLayer.width * 0.86,
-                    gradientLayer.height * 0.9,
-                    gradientLayer.width * 0.34
-                );
-                rightBloom.addColorStop(0, hexToRGBA(gradientRightColor, 0.68));
-                rightBloom.addColorStop(0.64, hexToRGBA(gradientRightColor, 0.3));
-                rightBloom.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                gradientLayerCtx.fillStyle = rightBloom;
-                gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
-
-                gradientLayerCtx.globalCompositeOperation = 'destination-in';
-                const verticalFade = gradientLayerCtx.createLinearGradient(0, 0, 0, gradientLayer.height);
-                verticalFade.addColorStop(0, 'rgba(0,0,0,0)');
-                verticalFade.addColorStop(0.16, 'rgba(0,0,0,0.16)');
-                verticalFade.addColorStop(0.42, 'rgba(0,0,0,0.58)');
-                verticalFade.addColorStop(0.72, 'rgba(0,0,0,0.94)');
-                verticalFade.addColorStop(1, 'rgba(0,0,0,1)');
-                gradientLayerCtx.fillStyle = verticalFade;
-                gradientLayerCtx.fillRect(0, 0, gradientLayer.width, gradientLayer.height);
-
-                ctx.save();
-                ctx.globalCompositeOperation = 'soft-light';
-                ctx.globalAlpha = 0.6;
-                ctx.drawImage(gradientLayer, 0, gradientStartY);
-                ctx.restore();
-
-                ctx.save();
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.globalAlpha = 0.55;
-                ctx.drawImage(gradientLayer, 0, gradientStartY);
-                ctx.restore();
-            }
-        }
-
-        drawEditorialGradientTexture(ctx, canvas, textureImage, gradientStartY);
-    }
-
-    if (!usesUploadedGradientImage) {
-        const centerVignette = ctx.createRadialGradient(canvas.width / 2, canvas.height * 0.46, 110, canvas.width / 2, canvas.height * 0.66, canvas.width * 0.88);
-        centerVignette.addColorStop(0, 'rgba(255,255,255,0)');
-        centerVignette.addColorStop(1, 'rgba(2, 6, 10, 0.22)');
-        ctx.fillStyle = centerVignette;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    if (data.editorialShowTopBadge !== false) {
-        drawEditorialTopBadge(ctx, (data.mainTitle || getStatusLabel(data.status)).replace('PROGRAMADO', 'FIXTURE'));
-    }
-    if (data.editorialShowHeaderArrows !== false) {
-        drawEditorialHeaderArrows(ctx, canvas);
-    }
-
-    drawEditorialCrestStroke(ctx, leftColumnX, homeLogoY, teamLogoWidth, teamLogoHeight, homeLogo, crestStrokeWidth);
-    drawOverflowCrest(ctx, {
-        x: leftColumnX,
-        y: homeLogoY,
-        width: teamLogoWidth,
-        height: teamLogoHeight,
-        img: homeLogo,
-        label: data.homeTeam,
-        rawLogo: data.homeLogo,
-        isDark: true,
-        showFrame: false,
+    await drawG22Poster(ctx, canvas, data, {
+        accentColor,
+        bgColor,
+        mode: data.status === 'scheduled' ? 'schedule' : 'result',
+        homeColorOverride: gradientLeftColor,
+        awayColorOverride: gradientRightColor,
     });
-    drawEditorialCrestStroke(ctx, rightColumnX, awayLogoY, teamLogoWidth, teamLogoHeight, awayLogo, crestStrokeWidth);
-    drawOverflowCrest(ctx, {
-        x: rightColumnX,
-        y: awayLogoY,
-        width: teamLogoWidth,
-        height: teamLogoHeight,
-        img: awayLogo,
-        label: data.awayTeam,
-        rawLogo: data.awayLogo,
-        isDark: true,
-        showFrame: false,
-    });
-
-    const contextLabel = buildEditorialContextLabel(data);
-    ctx.save();
-    ctx.strokeStyle = lineColor;
-    ctx.lineWidth = 6;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(leftLineStartX, topRuleY);
-    ctx.lineTo(leftLineEndX, topRuleY);
-    ctx.moveTo(rightLineStartX, topRuleY);
-    ctx.lineTo(rightLineEndX, topRuleY);
-    ctx.moveTo(sidePadding, bottomRuleY);
-    ctx.lineTo(canvas.width - sidePadding, bottomRuleY);
-    ctx.stroke();
-    ctx.restore();
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#ffffff';
-    ctx.font = `800 ${editorialPreset.titleFontSize}px ${FONT_BODY}`;
-    ctx.fillText(contextLabel, canvas.width / 2, titleY + 1);
-    ctx.restore();
-
-    if (tournamentLogo) {
-        drawEditorialCrestStroke(
-            ctx,
-            canvas.width / 2,
-            tournamentLogoY,
-            editorialPreset.tournamentLogoSize,
-            editorialPreset.tournamentLogoSize,
-            tournamentLogo,
-            5,
-        );
-        drawOverflowCrest(ctx, {
-            x: canvas.width / 2,
-            y: tournamentLogoY,
-            width: editorialPreset.tournamentLogoSize,
-            height: editorialPreset.tournamentLogoSize,
-            img: tournamentLogo,
-            label: data.tournament || 'Torneo',
-            rawLogo: data.tournamentLogo,
-            isDark: true,
-        });
-    } else {
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'rgba(255,255,255,0.94)';
-        ctx.font = `900 40px ${FONT_EDITORIAL}`;
-        ctx.fillText(getFallbackLogoText(data.tournamentLogo, data.tournament || 'Torneo'), canvas.width / 2, tournamentLogoY);
-        ctx.restore();
-    }
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = '#ffffff';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.32)';
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetY = 10;
-    ctx.font = `900 ${editorialPreset.scoreFontSize}px ${FONT_EDITORIAL_SCORE}`;
-    ctx.fillText(String(data.homeScore ?? '-'), leftColumnX, scoreBaselineY);
-    ctx.fillText(String(data.awayScore ?? '-'), rightColumnX, scoreBaselineY);
-    ctx.restore();
-
-    const sponsorBandCenterY = bottomRuleY + Math.round(editorialPreset.sponsorLogoHeight * 0.5) + 12;
-    drawEditorialSponsorsRow(
-        ctx,
-        canvas,
-        sponsors,
-        sponsorImages,
-        brandLogo,
-        sponsorBandCenterY,
-        editorialPreset.sponsorLogoHeight,
-        editorialPreset.sponsorGap
-    );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -7081,419 +6700,12 @@ async function drawMatchScheduleConfrontation(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     data: MatchStatsData,
-    format: CanvasFormat,
+    _format: CanvasFormat,
     accentColor: string,
     bgColor: string,
-    brandLogo: HTMLImageElement | null
+    _brandLogo: HTMLImageElement | null,
 ) {
-    const scaleX = canvas.width / 1080;
-    const scaleY = canvas.height / 1350;
-    const sx = (value: number) => Math.round(value * scaleX);
-    const sy = (value: number) => Math.round(value * scaleY);
-    const [homeLogo, awayLogo, tournamentLogo] = await Promise.all([
-        loadImage(data.homeLogo || ''),
-        loadImage(data.awayLogo || ''),
-        loadImage(getTournamentLogoImageSource(data)),
-    ]);
-    const baseBg = normalizeHexColor(bgColor) || DEFAULT_PALETTE.bg;
-    const accent = normalizeHexColor(accentColor) || BRAND_ACCENT;
-    const isDark = getContrastColor(baseBg) === '#ffffff';
-    const posterBase = isDark ? mixHexColors(baseBg, '#02060a', 0.24) : mixHexColors(baseBg, '#eff4fa', 0.18);
-    const posterTop = isDark ? mixHexColors(posterBase, accent, 0.08) : mixHexColors(posterBase, '#ffffff', 0.12);
-    const posterBottom = isDark ? mixHexColors(posterBase, '#010203', 0.34) : mixHexColors(posterBase, '#dbe3ee', 0.24);
-    const panelFill = isDark ? mixHexColors(baseBg, '#02060a', 0.48) : mixHexColors(baseBg, '#ffffff', 0.22);
-    const panelStroke = hexToRGBA(mixHexColors(accent, '#ffffff', isDark ? 0.18 : 0.34), isDark ? 0.22 : 0.16);
-    const panelText = getContrastColor(panelFill) === '#ffffff' ? '#ffffff' : '#0f172a';
-    const subtitleColor = hexToRGBA(panelText, 0.82);
-    const infoColor = hexToRGBA(panelText, 0.94);
-    const accentMist = mixHexColors(accent, '#ffffff', isDark ? 0.18 : 0.34);
-    const accentSoft = mixHexColors(accent, '#ffffff', isDark ? 0.3 : 0.18);
-    const neutralTile = isDark ? '#ffffff' : mixHexColors('#ffffff', baseBg, 0.06);
-    const neutralTileText = getContrastColor(neutralTile);
-    const competitionLabel = buildEditorialContextLabel(data).toUpperCase();
-    const titleLabel = 'PROXIMO PARTIDO';
-    const kickoffDate = toExportDate(data.kickoffAt);
-    const dateLabel = kickoffDate
-        ? new Intl.DateTimeFormat('es-AR', { weekday: 'long', day: '2-digit', month: 'short' }).format(kickoffDate).replace('.', '').toUpperCase()
-        : (data.date || 'FECHA A CONFIRMAR').toUpperCase();
-    const timeLabel = kickoffDate
-        ? new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }).format(kickoffDate)
-        : (data.time || '--:--');
-    const sanitizedDateLabel = dateLabel.replace(/,\s*/g, ' ').replace(/\s+/g, ' ').trim();
-    const mainPanelLeft = sx(72);
-    const mainPanelTop = sy(82);
-    const mainPanelRight = canvas.width - sx(72);
-    const mainPanelBottom = canvas.height - sy(96);
-    const tileY = sy(472);
-    const sideTileSize = sx(286);
-    const middleTileWidth = sx(176);
-    const middleTileHeight = sy(204);
-    const tileGap = sx(24);
-    const groupWidth = sideTileSize * 2 + middleTileWidth + tileGap * 2;
-    const startX = Math.round((canvas.width - groupWidth) / 2);
-    const homeTileX = startX;
-    const middleTileX = homeTileX + sideTileSize + tileGap;
-    const awayTileX = middleTileX + middleTileWidth + tileGap;
-    const bottomInfoY = sy(944);
-
-    const getColorDistance = (left: string, right: string) => {
-        if (!/^#[0-9a-f]{6}$/i.test(left) || !/^#[0-9a-f]{6}$/i.test(right)) return 999;
-        const lr = parseInt(left.slice(1, 3), 16);
-        const lg = parseInt(left.slice(3, 5), 16);
-        const lb = parseInt(left.slice(5, 7), 16);
-        const rr = parseInt(right.slice(1, 3), 16);
-        const rg = parseInt(right.slice(3, 5), 16);
-        const rb = parseInt(right.slice(5, 7), 16);
-        return Math.abs(lr - rr) + Math.abs(lg - rg) + Math.abs(lb - rb);
-    };
-
-    const deriveTileColor = (image: HTMLImageElement | null, fallback: string) => {
-        const fallbackHex = normalizeHexColor(fallback) || accent;
-        if (!image || typeof document === 'undefined') {
-            return mixHexColors(fallbackHex, accent, 0.12);
-        }
-
-        try {
-            const sampleCanvas = document.createElement('canvas');
-            const sampleSize = 28;
-            sampleCanvas.width = sampleSize;
-            sampleCanvas.height = sampleSize;
-            const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
-            if (!sampleCtx) return fallbackHex;
-
-            sampleCtx.drawImage(image, 0, 0, sampleSize, sampleSize);
-            const imageData = sampleCtx.getImageData(0, 0, sampleSize, sampleSize).data;
-            let redTotal = 0;
-            let greenTotal = 0;
-            let blueTotal = 0;
-            let weightTotal = 0;
-
-            for (let index = 0; index < imageData.length; index += 4) {
-                const alpha = imageData[index + 3] / 255;
-                if (alpha <= 0.08) continue;
-
-                const red = imageData[index];
-                const green = imageData[index + 1];
-                const blue = imageData[index + 2];
-                const max = Math.max(red, green, blue) / 255;
-                const min = Math.min(red, green, blue) / 255;
-                const saturation = max <= 0 ? 0 : (max - min) / max;
-                const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
-                const weight = alpha * (0.3 + saturation * 1.35 + (luminance > 0.1 && luminance < 0.92 ? 0.25 : 0));
-
-                redTotal += red * weight;
-                greenTotal += green * weight;
-                blueTotal += blue * weight;
-                weightTotal += weight;
-            }
-
-            if (weightTotal <= 0) return fallbackHex;
-
-            const toHex = (value: number) => Math.round(value).toString(16).padStart(2, '0');
-            const sampled = `#${toHex(redTotal / weightTotal)}${toHex(greenTotal / weightTotal)}${toHex(blueTotal / weightTotal)}`;
-            const refined = mixHexColors(sampled, accent, 0.14);
-            return getColorDistance(refined, baseBg) < 52
-                ? mixHexColors(refined, accentMist, 0.4)
-                : refined;
-        } catch {
-            return fallbackHex;
-        }
-    };
-
-    const homeTileColor = deriveTileColor(homeLogo, mixHexColors(accent, '#7dd3fc', 0.44));
-    const awayTileColor = deriveTileColor(awayLogo, mixHexColors(accent, '#1d4ed8', 0.42));
-
-    const drawPosterShape = (
-        points: Array<[number, number]>,
-        fillStyle: string,
-        strokeStyle?: string
-    ) => {
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(points[0][0], points[0][1]);
-        points.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
-        ctx.closePath();
-        ctx.fillStyle = fillStyle;
-        ctx.fill();
-        if (strokeStyle) {
-            ctx.strokeStyle = strokeStyle;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        }
-        ctx.restore();
-    };
-
-    const drawTile = (
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-        fillStyle: string,
-        logo: HTMLImageElement | null,
-        label: string,
-        rawLogo: string | undefined,
-        logoSize: number
-    ) => {
-        ctx.save();
-        ctx.shadowColor = isDark ? 'rgba(0,0,0,0.3)' : 'rgba(15,23,42,0.16)';
-        ctx.shadowBlur = sy(30);
-        ctx.shadowOffsetY = sy(12);
-        ctx.fillStyle = fillStyle;
-        ctx.fillRect(x, y, width, height);
-        ctx.restore();
-
-        ctx.save();
-        ctx.strokeStyle = hexToRGBA(mixHexColors(fillStyle, panelText === '#ffffff' ? '#ffffff' : '#0f172a', 0.28), 0.24);
-        ctx.lineWidth = 1;
-        ctx.strokeRect(x, y, width, height);
-        ctx.restore();
-
-        drawOverflowCrest(ctx, {
-            x: x + width / 2,
-            y: y + height / 2,
-            width: logoSize,
-            height: logoSize,
-            img: logo,
-            label,
-            rawLogo,
-            isDark: getContrastColor(fillStyle) === '#ffffff',
-            showFrame: false,
-        });
-    };
-
-    ctx.fillStyle = posterBase;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const backgroundGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    backgroundGradient.addColorStop(0, posterTop);
-    backgroundGradient.addColorStop(0.48, posterBase);
-    backgroundGradient.addColorStop(1, posterBottom);
-    ctx.fillStyle = backgroundGradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const topGlow = ctx.createRadialGradient(canvas.width * 0.24, sy(124), 0, canvas.width * 0.24, sy(124), sx(360));
-    topGlow.addColorStop(0, hexToRGBA(accentSoft, isDark ? 0.26 : 0.18));
-    topGlow.addColorStop(0.42, hexToRGBA(accentSoft, isDark ? 0.1 : 0.08));
-    topGlow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = topGlow;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const bottomGlow = ctx.createRadialGradient(canvas.width * 0.82, canvas.height, 0, canvas.width * 0.82, canvas.height, sx(440));
-    bottomGlow.addColorStop(0, hexToRGBA(accentMist, isDark ? 0.18 : 0.12));
-    bottomGlow.addColorStop(0.44, hexToRGBA(accentMist, isDark ? 0.08 : 0.06));
-    bottomGlow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = bottomGlow;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    drawPosterShape(
-        [
-            [0, sy(0)],
-            [sx(220), sy(0)],
-            [sx(148), sy(84)],
-            [sx(206), sy(106)],
-            [0, sy(274)],
-        ],
-        hexToRGBA(accentSoft, isDark ? 0.5 : 0.22)
-    );
-    drawPosterShape(
-        [
-            [canvas.width, sy(0)],
-            [canvas.width - sx(156), sy(0)],
-            [canvas.width - sx(228), sy(94)],
-            [canvas.width - sx(162), sy(174)],
-            [canvas.width, sy(272)],
-        ],
-        hexToRGBA(accent, isDark ? 0.28 : 0.14)
-    );
-    drawPosterShape(
-        [
-            [0, canvas.height - sy(0)],
-            [sx(188), canvas.height - sy(0)],
-            [sx(124), canvas.height - sy(88)],
-            [sx(160), canvas.height - sy(210)],
-            [0, canvas.height - sy(298)],
-        ],
-        hexToRGBA(accent, isDark ? 0.24 : 0.14)
-    );
-    drawPosterShape(
-        [
-            [canvas.width, canvas.height - sy(0)],
-            [canvas.width - sx(190), canvas.height - sy(0)],
-            [canvas.width - sx(248), canvas.height - sy(88)],
-            [canvas.width - sx(140), canvas.height - sy(132)],
-            [canvas.width - sx(194), canvas.height - sy(210)],
-            [canvas.width, canvas.height - sy(278)],
-        ],
-        hexToRGBA(accentSoft, isDark ? 0.48 : 0.24)
-    );
-
-    drawPosterShape(
-        [
-            [mainPanelLeft + sx(44), mainPanelTop],
-            [mainPanelRight, mainPanelTop + sy(8)],
-            [mainPanelRight - sx(84), mainPanelTop + sy(142)],
-            [mainPanelRight - sx(104), mainPanelTop + sy(192)],
-            [mainPanelRight - sx(36), mainPanelBottom - sy(124)],
-            [mainPanelRight - sx(86), mainPanelBottom],
-            [mainPanelLeft + sx(28), mainPanelBottom],
-            [mainPanelLeft + sx(74), mainPanelBottom - sy(126)],
-            [mainPanelLeft - sx(12), mainPanelTop + sy(520)],
-            [mainPanelLeft + sx(22), mainPanelTop + sy(140)],
-        ],
-        panelFill,
-        panelStroke
-    );
-
-    if (tournamentLogo || brandLogo) {
-        drawOverflowCrest(ctx, {
-            x: canvas.width - sx(88),
-            y: sy(72),
-            width: sx(68),
-            height: sy(68),
-            img: tournamentLogo || brandLogo,
-            label: data.tournament || 'Tournament',
-            rawLogo: tournamentLogo ? data.tournamentLogo : '/icon.png',
-            isDark: true,
-            showFrame: false,
-        });
-    }
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = panelText;
-    setFittedFont(ctx, titleLabel, canvas.width - sx(180), '900', sy(94), FONT_EDITORIAL_SCORE, sy(48));
-    ctx.fillText(truncateTextToWidth(ctx, titleLabel, canvas.width - sx(180)), canvas.width / 2, sy(248));
-    ctx.fillStyle = subtitleColor;
-    ctx.font = `italic 700 ${sy(30)}px ${FONT_BODY}`;
-    ctx.fillText(truncateTextToWidth(ctx, competitionLabel, canvas.width - sx(260)), canvas.width / 2, sy(302));
-    ctx.restore();
-
-    drawTile(
-        homeTileX,
-        tileY,
-        sideTileSize,
-        sideTileSize,
-        homeTileColor,
-        homeLogo,
-        data.homeTeam,
-        data.homeLogo,
-        sx(176)
-    );
-    drawTile(
-        awayTileX,
-        tileY,
-        sideTileSize,
-        sideTileSize,
-        awayTileColor,
-        awayLogo,
-        data.awayTeam,
-        data.awayLogo,
-        sx(176)
-    );
-    drawTile(
-        middleTileX,
-        tileY + sy(42),
-        middleTileWidth,
-        middleTileHeight,
-        neutralTile,
-        tournamentLogo || brandLogo,
-        data.tournament || 'Tournament',
-        tournamentLogo ? data.tournamentLogo : '/icon.png',
-        sx(96)
-    );
-
-    const sideTeamLabelY = tileY + sideTileSize + sy(52);
-    const sideTeamLabelWidth = sideTileSize + sx(28);
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = panelText;
-    setFittedFont(ctx, data.homeTeam.toUpperCase(), sideTeamLabelWidth, '900', sy(30), FONT_BODY, sy(16));
-    ctx.fillText(
-        truncateTextToWidth(ctx, data.homeTeam.toUpperCase(), sideTeamLabelWidth),
-        homeTileX + sideTileSize / 2,
-        sideTeamLabelY
-    );
-    setFittedFont(ctx, data.awayTeam.toUpperCase(), sideTeamLabelWidth, '900', sy(30), FONT_BODY, sy(16));
-    ctx.fillText(
-        truncateTextToWidth(ctx, data.awayTeam.toUpperCase(), sideTeamLabelWidth),
-        awayTileX + sideTileSize / 2,
-        sideTeamLabelY
-    );
-    ctx.restore();
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = neutralTileText;
-    ctx.font = `900 ${sy(18)}px ${FONT_BODY}`;
-    ctx.fillText(
-        truncateTextToWidth(ctx, (data.tournament || 'LEAGUE').toUpperCase(), middleTileWidth - sx(24)),
-        middleTileX + middleTileWidth / 2,
-        tileY + sy(268)
-    );
-    ctx.restore();
-
-    if (tournamentLogo) {
-        drawNeutralizedBackdropMark(
-            ctx,
-            tournamentLogo,
-            canvas.width / 2,
-            tileY + sideTileSize / 2 + sy(12),
-            sx(360),
-            sy(360),
-            panelText,
-            isDark ? 0.045 : 0.035
-        );
-    }
-
-    const infoBlockWidth = canvas.width - sx(180);
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = infoColor;
-    setFittedFont(ctx, sanitizedDateLabel, infoBlockWidth, '900', sy(72), FONT_BODY, sy(36));
-    ctx.fillText(truncateTextToWidth(ctx, sanitizedDateLabel, infoBlockWidth), canvas.width / 2, bottomInfoY);
-    setFittedFont(ctx, timeLabel.toUpperCase(), infoBlockWidth, '900', sy(105), FONT_EDITORIAL_SCORE, sy(51));
-    ctx.fillText(truncateTextToWidth(ctx, timeLabel.toUpperCase(), infoBlockWidth), canvas.width / 2, bottomInfoY + sy(108));
-    ctx.restore();
-
-    const footerBlockWidth = sx(332);
-    const footerBlockHeight = sy(42);
-    const footerBlockX = Math.round((canvas.width - footerBlockWidth) / 2);
-    const footerBlockY = canvas.height - sy(86);
-    const footerMaskWidth = footerBlockWidth + sx(84);
-    const footerMaskHeight = footerBlockHeight + sy(16);
-    const footerMaskX = Math.round((canvas.width - footerMaskWidth) / 2);
-    const footerMaskY = footerBlockY - sy(8);
-
-    ctx.save();
-    ctx.fillStyle = hexToRGBA(mixHexColors(baseBg, '#000000', 0.18), isDark ? 0.98 : 0.94);
-    ctx.beginPath();
-    ctx.roundRect(footerMaskX, footerMaskY, footerMaskWidth, footerMaskHeight, sy(10));
-    ctx.fill();
-    ctx.restore();
-
-    ctx.save();
-    ctx.fillStyle = hexToRGBA(mixHexColors(baseBg, accent, 0.16), isDark ? 0.92 : 0.88);
-    ctx.beginPath();
-    ctx.roundRect(footerBlockX, footerBlockY, footerBlockWidth, footerBlockHeight, sy(8));
-    ctx.fill();
-    ctx.strokeStyle = hexToRGBA(mixHexColors(accent, '#ffffff', isDark ? 0.16 : 0.28), isDark ? 0.18 : 0.14);
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.restore();
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = panelText;
-    ctx.font = `800 ${sy(15)}px ${FONT_BODY}`;
-    ctx.fillText('POWERED BY G22 SCORES', footerBlockX + footerBlockWidth / 2, footerBlockY + footerBlockHeight / 2 + 1);
-    ctx.restore();
+    await drawG22Poster(ctx, canvas, data, { accentColor, bgColor, mode: 'schedule' });
 }
 
 function drawClassicResultAccentShape(
@@ -7516,331 +6728,16 @@ async function drawMatchResult(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     data: MatchStatsData,
-    format: CanvasFormat,
+    _format: CanvasFormat,
     accentColor: string,
     bgColor: string,
-    brandLogo: HTMLImageElement | null
+    _brandLogo: HTMLImageElement | null,
 ) {
-    if (data.status === 'scheduled') {
-        await drawMatchScheduleConfrontation(ctx, canvas, data, format, accentColor, bgColor, brandLogo);
-        return;
-    }
-
-    const isDark = getContrastColor(bgColor) === '#ffffff';
-    const textColor = getTextColor(isDark);
-    const mutedColor = getMutedColor(isDark, 0.72);
-    const textureOpacity = isDark ? 0.08 : 0.16;
-    const scorePanelColor = isDark ? 'rgba(248,250,252,0.94)' : '#050505';
-    const scorePanelTextColor = getContrastColor(scorePanelColor);
-    const plateInnerColor = isDark ? 'rgba(10,12,16,0.9)' : 'rgba(255,255,255,0.94)';
-    const badgeTextColor = getContrastColor(accentColor);
-    const scaleX = canvas.width / 1080;
-    const scaleY = canvas.height / 1350;
-    const sx = (value: number) => Math.round(value * scaleX);
-    const sy = (value: number) => Math.round(value * scaleY);
-    const primaryColor = accentColor;
-    const statusText = getStatusLabel(data.status).toUpperCase();
-    const modeBadgeText = (data.mainTitle || 'RESULTADO').toUpperCase();
-    const footerMeta = [data.time, data.venue].filter(Boolean).join('  //  ').toUpperCase();
-    const bottomBadgeText = (data.date || data.time || modeBadgeText).toUpperCase();
-    const topMetaText = [data.date, data.time].filter(Boolean).join('  //  ').toUpperCase();
-    const homeTeamName = data.homeTeam.trim().toUpperCase() || 'LOCAL';
-    const awayTeamName = data.awayTeam.trim().toUpperCase() || 'VISITANTE';
-    const [homeLogo, awayLogo, tournamentLogo, textureImage] = await Promise.all([
-        loadImage(data.homeLogo || ''),
-        loadImage(data.awayLogo || ''),
-        loadImage(getTournamentLogoImageSource(data)),
-        loadImage(EDITORIAL_TEXTURE_SOURCE),
-    ]);
-
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const glow = ctx.createRadialGradient(canvas.width / 2, sy(300), sx(90), canvas.width / 2, sy(300), sx(760));
-    glow.addColorStop(0, hexToRGBA(primaryColor, isDark ? 0.12 : 0.1));
-    glow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    if (textureImage) {
-        ctx.save();
-        ctx.globalAlpha = textureOpacity;
-        ctx.globalCompositeOperation = isDark ? 'soft-light' : 'multiply';
-        ctx.drawImage(textureImage, 0, 0, canvas.width, canvas.height);
-        ctx.restore();
-    }
-
-    drawClassicResultAccentShape(ctx, [
-        [-sx(70), sy(220)],
-        [sx(208), sy(118)],
-        [sx(154), sy(226)],
-        [sx(378), sy(112)],
-        [sx(222), sy(324)],
-        [sx(266), sy(326)],
-        [sx(86), sy(646)],
-        [-sx(38), sy(552)],
-        [sx(70), sy(410)],
-        [sx(18), sy(398)],
-    ], hexToRGBA(primaryColor, isDark ? 0.92 : 0.98));
-    drawClassicResultAccentShape(ctx, [
-        [canvas.width + sx(38), sy(820)],
-        [canvas.width - sx(238), sy(958)],
-        [canvas.width - sx(162), sy(1036)],
-        [canvas.width + sx(84), sy(896)],
-        [canvas.width + sx(84), sy(1048)],
-        [canvas.width - sx(102), sy(1128)],
-        [canvas.width + sx(38), sy(1242)],
-        [canvas.width + sx(38), sy(1350)],
-        [canvas.width - sx(158), sy(1212)],
-        [canvas.width - sx(92), sy(1146)],
-    ], hexToRGBA(primaryColor, isDark ? 0.92 : 0.98));
-
-    if (tournamentLogo) {
-        drawLogoBadge(ctx, {
-            x: sx(80),
-            y: offsetElementY('tournamentLogo', sy(82)),
-            size: scaleElementSize('tournamentLogo', sx(56), sx(56)),
-            img: tournamentLogo,
-            label: data.tournament || 'Torneo',
-            rawLogo: data.tournamentLogo,
-            isDark,
-        });
-    }
-
-    const headerTextLayout = fitTextLinesToWidth(
-        ctx,
-        (data.tournament || 'TORNEO').trim().toUpperCase(),
-        sx(300),
-        '900',
-        scaleElementSize('title', sy(34), sy(34)),
-        FONT_EDITORIAL_SCORE,
-        sy(20),
-        2
-    );
-    const headerTextX = tournamentLogo ? sx(122) : sx(54);
-    const headerTextY = offsetElementY('title', sy(46));
-
-    ctx.save();
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = primaryColor;
-    ctx.font = `900 ${headerTextLayout.size}px ${FONT_EDITORIAL_SCORE}`;
-    headerTextLayout.lines.forEach((line, index) => {
-        ctx.fillText(line, headerTextX, headerTextY + index * (headerTextLayout.size + sy(4)));
+    await drawG22Poster(ctx, canvas, data, {
+        accentColor,
+        bgColor,
+        mode: data.status === 'scheduled' ? 'schedule' : 'result',
     });
-    if (topMetaText) {
-        ctx.fillStyle = mutedColor;
-        ctx.font = `700 ${sy(14)}px ${FONT_BODY}`;
-        ctx.fillText(
-            truncateTextToWidth(ctx, topMetaText, sx(320)),
-            headerTextX,
-            headerTextY + headerTextLayout.lines.length * (headerTextLayout.size + sy(4)) + sy(8)
-        );
-    }
-    ctx.restore();
-
-    ctx.save();
-    ctx.font = `900 ${sy(24)}px ${FONT_EDITORIAL_SCORE}`;
-    const topBadgeWidth = Math.max(sx(170), Math.ceil(ctx.measureText(modeBadgeText).width + sx(44)));
-    const topBadgeX = canvas.width - sx(54) - topBadgeWidth;
-    const topBadgeY = sy(48);
-    ctx.fillStyle = primaryColor;
-    ctx.beginPath();
-    ctx.roundRect(topBadgeX, topBadgeY, topBadgeWidth, sy(54), 0);
-    ctx.fill();
-    ctx.fillStyle = badgeTextColor;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(modeBadgeText, topBadgeX + topBadgeWidth / 2, topBadgeY + sy(28) + 1);
-    ctx.restore();
-
-    const statusFontSize = getSharedFittedFontSize(
-        ctx,
-        [{ text: statusText, maxWidth: sx(520) }],
-        '900',
-        sy(116),
-        FONT_EDITORIAL_SCORE,
-        sy(72),
-    );
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = primaryColor;
-    ctx.font = `900 ${statusFontSize}px ${FONT_EDITORIAL_SCORE}`;
-    ctx.fillText(statusText, canvas.width / 2, sy(292));
-    ctx.restore();
-
-    const scoreBoxSize = scaleElementSize('score', sx(372), sx(372));
-    const scoreBoxX = Math.round((canvas.width - scoreBoxSize) / 2);
-    const scoreBoxY = offsetElementY('score', sy(454));
-    const logoPlateSize = scaleElementSize('teamLogo', sx(186), sx(186));
-    const logoPlateGap = sx(8);
-    const leftPlateX = scoreBoxX - logoPlateSize - logoPlateGap;
-    const rightPlateX = scoreBoxX + scoreBoxSize + logoPlateGap;
-    const plateY = Math.round(scoreBoxY + (scoreBoxSize - logoPlateSize) / 2);
-    const plateInnerInset = sx(12);
-    const crestSize = scaleElementSize('teamLogo', sx(154), sx(154));
-
-    const drawLogoPlate = (x: number, label: string, rawLogo: string | undefined, img: HTMLImageElement | null) => {
-        ctx.save();
-        ctx.fillStyle = primaryColor;
-        ctx.fillRect(x, plateY, logoPlateSize, logoPlateSize);
-        ctx.fillStyle = plateInnerColor;
-        ctx.fillRect(x + plateInnerInset, plateY + plateInnerInset, logoPlateSize - plateInnerInset * 2, logoPlateSize - plateInnerInset * 2);
-        ctx.restore();
-
-        drawOverflowCrest(ctx, {
-            x: x + logoPlateSize / 2,
-            y: plateY + logoPlateSize / 2,
-            width: crestSize,
-            height: crestSize,
-            img,
-            label,
-            rawLogo,
-            isDark,
-            showFrame: false,
-        });
-    };
-
-    drawLogoPlate(leftPlateX, data.homeTeam, data.homeLogo, homeLogo);
-    drawLogoPlate(rightPlateX, data.awayTeam, data.awayLogo, awayLogo);
-
-    ctx.save();
-    ctx.shadowColor = isDark ? 'rgba(0,0,0,0.32)' : 'rgba(15,23,42,0.14)';
-    ctx.shadowBlur = sx(42);
-    ctx.shadowOffsetY = sy(16);
-    ctx.fillStyle = scorePanelColor;
-    ctx.fillRect(scoreBoxX, scoreBoxY, scoreBoxSize, scoreBoxSize);
-    ctx.restore();
-
-    ctx.save();
-    ctx.strokeStyle = hexToRGBA(primaryColor, isDark ? 0.18 : 0.24);
-    ctx.lineWidth = Math.max(2, sx(2));
-    ctx.strokeRect(scoreBoxX, scoreBoxY, scoreBoxSize, scoreBoxSize);
-    ctx.restore();
-
-    const scoreText = `${data.homeScore ?? '-'}-${data.awayScore ?? '-'}`;
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    setFittedFont(ctx, scoreText, scoreBoxSize - sx(64), '900', scaleElementSize('score', sy(232), sy(232)), FONT_CLASSIC_MATCH_SCORE, sy(164));
-    ctx.fillStyle = scorePanelTextColor;
-    ctx.fillText(scoreText, scoreBoxX + scoreBoxSize / 2, scoreBoxY + scoreBoxSize / 2 + sy(12));
-    ctx.restore();
-
-    const verticalNameMaxWidth = sy(388);
-    const verticalNameFontSize = getSharedFittedFontSize(
-        ctx,
-        [
-            { text: homeTeamName, maxWidth: verticalNameMaxWidth },
-            { text: awayTeamName, maxWidth: verticalNameMaxWidth },
-        ],
-        '900',
-        sy(62),
-        FONT_EDITORIAL_SCORE,
-        sy(30),
-    );
-    const verticalCenterY = scoreBoxY + scoreBoxSize / 2;
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = isDark ? textColor : '#090909';
-    ctx.font = `900 ${verticalNameFontSize}px ${FONT_EDITORIAL_SCORE}`;
-    ctx.translate(leftPlateX - sx(36), verticalCenterY);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillText(truncateTextToWidth(ctx, homeTeamName, verticalNameMaxWidth), 0, 0);
-    ctx.restore();
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = isDark ? textColor : '#090909';
-    ctx.font = `900 ${verticalNameFontSize}px ${FONT_EDITORIAL_SCORE}`;
-    ctx.translate(rightPlateX + logoPlateSize + sx(36), verticalCenterY);
-    ctx.rotate(Math.PI / 2);
-    ctx.fillText(truncateTextToWidth(ctx, awayTeamName, verticalNameMaxWidth), 0, 0);
-    ctx.restore();
-
-    const sideFacts = data.stats.slice(0, 2);
-    if (sideFacts.length > 0) {
-        const formatFact = (value: string | number, label: string) => `${String(value ?? '-')}${label ? ` ${label}` : ''}`.trim().toUpperCase();
-        ctx.save();
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = primaryColor;
-        sideFacts.forEach((stat, index) => {
-            const factY = plateY + logoPlateSize + sy(16) + index * sy(36);
-
-            ctx.textAlign = 'left';
-            setFittedFont(ctx, formatFact(stat.home, stat.label), logoPlateSize, '900', sy(30), FONT_EDITORIAL_SCORE, sy(18));
-            ctx.fillText(truncateTextToWidth(ctx, formatFact(stat.home, stat.label), logoPlateSize), leftPlateX, factY);
-
-            ctx.textAlign = 'right';
-            setFittedFont(ctx, formatFact(stat.away, stat.label), logoPlateSize, '900', sy(30), FONT_EDITORIAL_SCORE, sy(18));
-            ctx.fillText(truncateTextToWidth(ctx, formatFact(stat.away, stat.label), logoPlateSize), rightPlateX + logoPlateSize, factY);
-        });
-        ctx.restore();
-    }
-
-    const bottomBadgeY = sy(900);
-    ctx.save();
-    ctx.font = `900 ${sy(34)}px ${FONT_EDITORIAL_SCORE}`;
-    const bottomBadgeWidth = Math.min(sx(480), Math.max(sx(220), Math.ceil(ctx.measureText(bottomBadgeText).width + sx(56))));
-    ctx.fillStyle = primaryColor;
-    ctx.beginPath();
-    ctx.roundRect(canvas.width / 2 - bottomBadgeWidth / 2, bottomBadgeY, bottomBadgeWidth, sy(80), 0);
-    ctx.fill();
-    ctx.fillStyle = badgeTextColor;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(truncateTextToWidth(ctx, bottomBadgeText, bottomBadgeWidth - sx(40)), canvas.width / 2, bottomBadgeY + sy(42));
-    ctx.restore();
-
-    const tournamentLayout = fitTextLinesToWidth(
-        ctx,
-        (data.tournament || 'TORNEO').trim().toUpperCase(),
-        sx(640),
-        '900',
-        sy(66),
-        FONT_EDITORIAL_SCORE,
-        sy(30),
-        2
-    );
-    const tournamentTop = bottomBadgeY + sy(96);
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = isDark ? textColor : '#090909';
-    ctx.font = `900 ${tournamentLayout.size}px ${FONT_EDITORIAL_SCORE}`;
-    tournamentLayout.lines.forEach((line, index) => {
-        ctx.fillText(line, canvas.width / 2, tournamentTop + index * (tournamentLayout.size + sy(2)));
-    });
-    ctx.restore();
-
-    if (footerMeta) {
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = mutedColor;
-        setFittedFont(ctx, footerMeta, sx(760), '700', sy(22), FONT_BODY, sy(14));
-        ctx.fillText(
-            truncateTextToWidth(ctx, footerMeta, sx(760)),
-            canvas.width / 2,
-            tournamentTop + tournamentLayout.lines.length * (tournamentLayout.size + sy(2)) + sy(18)
-        );
-        ctx.restore();
-    }
-
-    ctx.save();
-    ctx.strokeStyle = hexToRGBA(isDark ? '#ffffff' : '#0f172a', isDark ? 0.14 : 0.12);
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(sx(96), sy(1218));
-    ctx.lineTo(canvas.width - sx(96), sy(1218));
-    ctx.stroke();
-    ctx.restore();
-
-    drawBrandFooter(ctx, canvas, brandLogo, isDark);
 }
 
 async function drawStandings(
