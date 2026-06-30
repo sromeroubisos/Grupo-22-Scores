@@ -355,6 +355,8 @@ type ExportPreviewColorOverrides = {
     bgColor: string;
     editorialGradientLeftColor?: string;
     editorialGradientRightColor?: string;
+    classicHomeColor?: string;
+    classicAwayColor?: string;
 };
 
 type ExportImagePreviewProps = {
@@ -784,6 +786,9 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     const defaultExportColorsRef = useRef(defaultExportColors);
     const [editorialGradientLeftColor, setEditorialGradientLeftColor] = useState('#df255c');
     const [editorialGradientRightColor, setEditorialGradientRightColor] = useState(DEFAULT_PALETTE.accent);
+    // Override de colores por equipo para el layout clasico. '' = automatico (se deriva del escudo).
+    const [classicHomeColor, setClassicHomeColor] = useState('');
+    const [classicAwayColor, setClassicAwayColor] = useState('');
     const [editorialLayoutPresetId, setEditorialLayoutPresetId] = useState<MatchEditorialPresetId>(() => (
         template === 'matchStats'
             ? getEditorialLayoutPreset((data as MatchStatsData).editorialLayoutPresetId).id
@@ -1687,7 +1692,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                             await drawMomentumMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
                         }
                     } else {
-                        await drawMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
+                        await drawMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo, classicHomeColor, classicAwayColor);
                     }
                 }
             } else if (template === 'standings') {
@@ -1855,7 +1860,9 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         bgColor,
         editorialGradientLeftColor,
         editorialGradientRightColor,
-    }), [accentColor, bgColor, editorialGradientLeftColor, editorialGradientRightColor]);
+        classicHomeColor,
+        classicAwayColor,
+    }), [accentColor, bgColor, editorialGradientLeftColor, editorialGradientRightColor, classicHomeColor, classicAwayColor]);
 
     return (
         <div className={`${styles.container} ${className}`}>
@@ -2807,6 +2814,50 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                         <input type="color" value={accentColor} onChange={(event) => handleAccentColorChange(event.target.value)} />
                                     </div>
                                 </div>
+                                {template === 'matchStats' && matchExportLayout === 'classic' && (
+                                    <div style={{ marginTop: 16 }}>
+                                        <label className={styles.modalLabel}>Colores de los equipos</label>
+                                        <div className={styles.customColors}>
+                                            <div className={styles.colorInp}>
+                                                <span>{(data as MatchStatsData).homeTeam || 'Local'}</span>
+                                                <input
+                                                    type="color"
+                                                    value={classicHomeColor || '#3b2630'}
+                                                    onChange={(event) => setClassicHomeColor(event.target.value)}
+                                                />
+                                                <button
+                                                    className={styles.ghostBtn}
+                                                    type="button"
+                                                    onClick={() => setClassicHomeColor('')}
+                                                    disabled={!classicHomeColor}
+                                                    title="Volver al color automatico del escudo"
+                                                >
+                                                    Auto
+                                                </button>
+                                            </div>
+                                            <div className={styles.colorInp}>
+                                                <span>{(data as MatchStatsData).awayTeam || 'Visitante'}</span>
+                                                <input
+                                                    type="color"
+                                                    value={classicAwayColor || '#26323f'}
+                                                    onChange={(event) => setClassicAwayColor(event.target.value)}
+                                                />
+                                                <button
+                                                    className={styles.ghostBtn}
+                                                    type="button"
+                                                    onClick={() => setClassicAwayColor('')}
+                                                    disabled={!classicAwayColor}
+                                                    title="Volver al color automatico del escudo"
+                                                >
+                                                    Auto
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <p className={styles.modalHint}>
+                                            Por defecto cada lado usa el color dominante del escudo. Eleg&iacute; un color para forzar el fondo de ese equipo, o tocá &quot;Auto&quot; para volver al autom&aacute;tico.
+                                        </p>
+                                    </div>
+                                )}
                                 {!isEditorialGradientMode && (
                                     <div className={styles.presetLibraryCard}>
                                         <div className={styles.presetLibrarySection}>
@@ -4072,6 +4123,8 @@ async function renderMatchExportPreviewDataUrl(options: {
             bgColor: previewColors.bgColor || DEFAULT_PALETTE.bg,
             editorialGradientLeftColor: previewColors.editorialGradientLeftColor || '#df255c',
             editorialGradientRightColor: previewColors.editorialGradientRightColor || previewColors.accentColor || DEFAULT_PALETTE.accent,
+            classicHomeColor: previewColors.classicHomeColor || '',
+            classicAwayColor: previewColors.classicAwayColor || '',
         }
         : customizationState
         ? {
@@ -4079,8 +4132,10 @@ async function renderMatchExportPreviewDataUrl(options: {
             bgColor: customizationState.previewSurface || DEFAULT_PALETTE.bg,
             editorialGradientLeftColor: customizationState.previewGradientFrom || '#df255c',
             editorialGradientRightColor: customizationState.previewGradientTo || customizationState.previewAccent || DEFAULT_PALETTE.accent,
+            classicHomeColor: '',
+            classicAwayColor: '',
         }
-        : DEFAULT_EXPORT_COLOR_DEFAULTS;
+        : { ...DEFAULT_EXPORT_COLOR_DEFAULTS, classicHomeColor: '', classicAwayColor: '' };
 
     const canvas = document.createElement('canvas');
     canvas.width = config.width;
@@ -4161,7 +4216,7 @@ async function renderMatchExportPreviewDataUrl(options: {
                 await drawMomentumMatchResult(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
             }
         } else {
-            await drawMatchResult(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+            await drawMatchResult(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, previewDefaults.classicHomeColor, previewDefaults.classicAwayColor);
         }
     } else if (template === 'dailyMatches') {
         if (visualFamily === 'posterV3') {
@@ -7568,8 +7623,10 @@ async function drawMatchScheduleConfrontation(
     accentColor: string,
     bgColor: string,
     _brandLogo: HTMLImageElement | null,
+    homeColorOverride?: string,
+    awayColorOverride?: string,
 ) {
-    await drawG22Poster(ctx, canvas, data, { accentColor, bgColor, mode: 'schedule' });
+    await drawG22Poster(ctx, canvas, data, { accentColor, bgColor, mode: 'schedule', homeColorOverride, awayColorOverride });
 }
 
 function drawClassicResultAccentShape(
@@ -7596,11 +7653,15 @@ async function drawMatchResult(
     accentColor: string,
     bgColor: string,
     _brandLogo: HTMLImageElement | null,
+    homeColorOverride?: string,
+    awayColorOverride?: string,
 ) {
     await drawG22Poster(ctx, canvas, data, {
         accentColor,
         bgColor,
         mode: data.status === 'scheduled' ? 'schedule' : 'result',
+        homeColorOverride,
+        awayColorOverride,
     });
 }
 
