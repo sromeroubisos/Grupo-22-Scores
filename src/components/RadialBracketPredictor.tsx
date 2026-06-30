@@ -3,6 +3,45 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styles from './RadialBracketPredictor.module.css';
 
+// ── Social proof GLOBAL: contador de exportes + votos de campeón ──────────────
+// El estado vive en la DB (vía /api/predictor/stats) y es compartido por todos los
+// usuarios. Los seeds son solo el fallback/piso inicial mientras carga o si la
+// migración aún no se aplicó.
+const SEED_BRACKETS_EXPORTED = 127;
+const SEED_CHAMPION_VOTES: Array<{ name: string; count: number }> = [
+    { name: 'Argentina', count: 40 },
+    { name: 'España', count: 36 },
+    { name: 'Francia', count: 30 },
+    { name: 'Portugal', count: 20 },
+    { name: 'Brasil', count: 1 },
+];
+
+type ChampionVote = { name: string; count: number };
+
+function normalizeChampionKey(name: string) {
+    return name
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .trim();
+}
+
+function seedChampionList(): ChampionVote[] {
+    return [...SEED_CHAMPION_VOTES].sort((a, b) => b.count - a.count);
+}
+
+// Sanitiza la respuesta del API a {name, count} válidos.
+function normalizeChampionList(raw: unknown): ChampionVote[] {
+    if (!Array.isArray(raw)) return seedChampionList();
+    const list = raw
+        .map((item) => ({
+            name: String((item as { name?: unknown })?.name ?? '').trim(),
+            count: Number((item as { count?: unknown })?.count) || 0,
+        }))
+        .filter((item) => item.name);
+    return list.length ? list : seedChampionList();
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────
 
 interface BracketTeam {
@@ -452,6 +491,58 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
     // Reset clears predictions but keeps the real, already-decided results.
     const reset = () => setWinners(seedWinners);
 
+    // ── Social proof GLOBAL (compartido por todos los usuarios, vía /api/predictor/stats) ──
+    const [bracketsExported, setBracketsExported] = useState<number>(SEED_BRACKETS_EXPORTED);
+    const [championVotes, setChampionVotes] = useState<ChampionVote[]>(() => seedChampionList());
+
+    // Lee el estado global al montar (contador + tabla de campeones más elegidos).
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch('/api/predictor/stats', { cache: 'no-store' });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (cancelled) return;
+                if (typeof data?.bracketsExported === 'number') setBracketsExported(data.bracketsExported);
+                if (Array.isArray(data?.champions)) setChampionVotes(normalizeChampionList(data.champions));
+            } catch {
+                /* sin red: dejamos los seeds */
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
+    // Export exitoso: incrementa el contador GLOBAL y suma el voto del campeón actual.
+    // Optimista en el cliente y luego reconcilia con la respuesta autoritativa.
+    const registerBracketExport = (championName: string | null) => {
+        setBracketsExported((prev) => prev + 1);
+        (async () => {
+            try {
+                const res = await fetch('/api/predictor/stats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ champion: championName }),
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (typeof data?.bracketsExported === 'number') setBracketsExported(data.bracketsExported);
+                if (Array.isArray(data?.champions)) setChampionVotes(normalizeChampionList(data.champions));
+            } catch {
+                /* el incremento optimista ya se ve; el server reconcilia al recargar */
+            }
+        })();
+    };
+
+    // Tabla de campeones más elegidos (desc), con la elección actual resaltada.
+    const championLeaderboard = useMemo(() => (
+        [...championVotes]
+            .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'es'))
+            .slice(0, 8)
+            .map((vote) => ({ ...vote, key: normalizeChampionKey(vote.name) }))
+    ), [championVotes]);
+    const currentChampionKey = champion ? normalizeChampionKey(champion.name) : null;
+
     const [shareNote, setShareNote] = useState('');
     const [shareMenuOpen, setShareMenuOpen] = useState(false);
     const buildShareText = () => {
@@ -719,6 +810,8 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
         }
 
         if (blob) {
+            // Export exitoso: sumamos al contador global y al voto del campeón.
+            registerBracketExport(champion?.name ?? null);
             const file = new File([blob], `prediccion-g22-${shareFormat}.png`, { type: 'image/png' });
             const nav = navigator as Navigator & { canShare?: (data: any) => boolean };
             if (nav.share && nav.canShare && nav.canShare({ files: [file] })) {
@@ -886,19 +979,41 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
 
                 <footer className={styles.footer}>
                     {champion ? (
-                        <div className={styles.championBanner}>
-                            <span className={styles.championTitle}>¡Campeón!</span>
-                            <div className={styles.championTeam}>
-                                {champion.logo ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={champion.logo} alt="" className={styles.championLogo} />
-                                ) : null}
-                                <span className={styles.championName}>{champion.name}</span>
+                        <>
+                            <div className={styles.championBanner}>
+                                <span className={styles.championTitle}>¡Campeón!</span>
+                                <div className={styles.championTeam}>
+                                    {champion.logo ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={champion.logo} alt="" className={styles.championLogo} />
+                                    ) : null}
+                                    <span className={styles.championName}>{champion.name}</span>
+                                </div>
                             </div>
-                        </div>
+
+                            <div className={styles.championsTable}>
+                                <span className={styles.championsTableTitle}>Campeones más elegidos</span>
+                                <ol className={styles.championsList}>
+                                    {championLeaderboard.map((entry, index) => (
+                                        <li
+                                            key={entry.key}
+                                            className={`${styles.championRow} ${entry.key === currentChampionKey ? styles.championRowCurrent : ''}`.trim()}
+                                        >
+                                            <span className={styles.championRank}>{index + 1}.</span>
+                                            <span className={styles.championRowName}>{entry.name}</span>
+                                            <span className={styles.championCount}>{entry.count.toLocaleString('es-AR')}</span>
+                                        </li>
+                                    ))}
+                                </ol>
+                            </div>
+                        </>
                     ) : (
                         <span className={styles.hint}>Tocá un equipo para hacerlo avanzar hacia el centro.</span>
                     )}
+
+                    <p className={styles.exportCounter}>
+                        Brackets exportadas: <strong>{bracketsExported.toLocaleString('es-AR')}</strong>
+                    </p>
                 </footer>
             </div>
         </div>
