@@ -6418,6 +6418,258 @@ async function drawG22Poster(
     }
 }
 
+// ============================================================================
+// Versión EDITORIAL (layout 4:5) del póster — diseño PREVIO al rediseño G22 Base.
+// Separada a propósito de drawG22Poster: el rediseño nuevo aplica SOLO al póster
+// clásico; el export editorial conserva su estética anterior (a pedido del usuario).
+// ============================================================================
+function g22peSplitBackground(ctx: CanvasRenderingContext2D, W: number, H: number, homeColor: string, awayColor: string) {
+    const homeBase = mixHexColors(homeColor, '#08090b', 0.4);
+    const awayBase = mixHexColors(awayColor, '#08090b', 0.4);
+    ctx.fillStyle = homeBase;
+    ctx.fillRect(0, 0, Math.ceil(W / 2) + 2, H);
+    ctx.fillStyle = awayBase;
+    ctx.fillRect(Math.floor(W / 2) - 2, 0, Math.ceil(W / 2) + 2, H);
+
+    let g = ctx.createRadialGradient(W * 0.26, H * 0.42, 40, W * 0.26, H * 0.42, W * 0.72);
+    g.addColorStop(0, hexToRGBA(mixHexColors(homeColor, '#000000', 0.12), 0.55));
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W / 2, H);
+    g = ctx.createRadialGradient(W * 0.74, H * 0.42, 40, W * 0.74, H * 0.42, W * 0.72);
+    g.addColorStop(0, hexToRGBA(mixHexColors(awayColor, '#000000', 0.12), 0.55));
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(W / 2, 0, W / 2, H);
+
+    g = ctx.createLinearGradient(W / 2 - 90, 0, W / 2 + 90, 0);
+    g.addColorStop(0, 'rgba(0,0,0,0)');
+    g.addColorStop(0.5, 'rgba(0,0,0,0.3)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(W / 2 - 90, 0, 180, H);
+
+    ctx.save();
+    for (let i = 0; i < 2400; i += 1) {
+        const x = g22pNoise(i * 1.7) * W;
+        const y = g22pNoise(i * 3.3 + 2) * H;
+        const a = g22pNoise(i * 5.1 + 7) * 0.05;
+        ctx.fillStyle = g22pNoise(i * 2.2) > 0.5 ? `rgba(255,255,255,${a})` : `rgba(0,0,0,${a * 1.6})`;
+        const s = 1 + g22pNoise(i * 4.4) * 2.4;
+        ctx.fillRect(x, y, s, s);
+    }
+    ctx.restore();
+
+    g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, 'rgba(0,0,0,0.5)');
+    g.addColorStop(0.18, 'rgba(0,0,0,0.12)');
+    g.addColorStop(0.5, 'rgba(0,0,0,0)');
+    g.addColorStop(0.84, 'rgba(0,0,0,0.16)');
+    g.addColorStop(1, 'rgba(0,0,0,0.62)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+}
+
+function g22peCrest(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, img: HTMLImageElement | null) {
+    if (img && img.naturalWidth && img.naturalHeight) {
+        const s = Math.min(size / img.naturalWidth, size / img.naturalHeight);
+        const dw = img.naturalWidth * s;
+        const dh = img.naturalHeight * s;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.55)';
+        ctx.shadowBlur = size * 0.12;
+        ctx.shadowOffsetY = size * 0.06;
+        ctx.drawImage(img, cx - dw / 2, cy - dh / 2, dw, dh);
+        ctx.restore();
+        return;
+    }
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    const s = size * 0.34;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - s);
+    ctx.lineTo(cx + s, cy - s * 0.55);
+    ctx.lineTo(cx + s, cy + s * 0.2);
+    ctx.quadraticCurveTo(cx + s, cy + s, cx, cy + s * 1.2);
+    ctx.quadraticCurveTo(cx - s, cy + s, cx - s, cy + s * 0.2);
+    ctx.lineTo(cx - s, cy - s * 0.55);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+}
+
+function g22peTournamentBadge(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, u: (v: number) => number, img: HTMLImageElement | null, accent: string) {
+    const pad = u(18);
+    const box = size + pad * 2;
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowBlur = u(22);
+    ctx.shadowOffsetY = u(10);
+    ctx.fillStyle = 'rgba(8,9,12,0.5)';
+    g22pRoundRect(ctx, cx - box / 2, cy - box / 2, box, box, u(22));
+    ctx.fill();
+    ctx.restore();
+    ctx.save();
+    g22pRoundRect(ctx, cx - box / 2 + 1.5, cy - box / 2 + 1.5, box - 3, box - 3, u(22));
+    ctx.lineWidth = u(4);
+    ctx.strokeStyle = hexToRGBA(mixHexColors(accent, '#ffffff', 0.35), 0.7);
+    ctx.stroke();
+    ctx.restore();
+    if (img && img.naturalWidth && img.naturalHeight) {
+        const s = Math.min(size / img.naturalWidth, size / img.naturalHeight);
+        const dw = img.naturalWidth * s;
+        const dh = img.naturalHeight * s;
+        ctx.drawImage(img, cx - dw / 2, cy - dh / 2, dw, dh);
+    }
+}
+
+function g22peBrand(ctx: CanvasRenderingContext2D, W: number, y: number, u: (v: number) => number, logo: HTMLImageElement | null) {
+    if (logo && logo.naturalWidth && logo.naturalHeight) {
+        const h = u(76);
+        const s = h / logo.naturalHeight;
+        const w = logo.naturalWidth * s;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        ctx.shadowBlur = u(16);
+        ctx.shadowOffsetY = u(6);
+        ctx.drawImage(logo, W / 2 - w / 2, y - h, w, h);
+        ctx.restore();
+        return;
+    }
+    g22pItalic(ctx, 'G22 SCORES', W / 2, y, u(46), '#ffffff', true);
+}
+
+async function drawG22PosterEditorial(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    opts: {
+        accentColor: string;
+        bgColor: string;
+        mode: 'result' | 'schedule';
+        homeColorOverride?: string;
+        awayColorOverride?: string;
+    },
+) {
+    const [homeLogo, awayLogo, tournamentLogo, brandLogo] = await Promise.all([
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
+        loadImage('/icon.png'),
+    ]);
+
+    const W = canvas.width;
+    const H = canvas.height;
+    const u = (v: number) => Math.round((v * H) / 1920);
+    const accent = normalizeHexColor(opts.accentColor) || BRAND_ACCENT;
+    const homeColor = normalizeHexColor(opts.homeColorOverride || '') || g22pExtractColor(homeLogo) || '#3b2630';
+    const awayColor = normalizeHexColor(opts.awayColorOverride || '') || g22pExtractColor(awayLogo) || '#26323f';
+
+    g22peSplitBackground(ctx, W, H, homeColor, awayColor);
+
+    const isLive = data.status === 'live';
+    const crestSize = u(300);
+    const gap = W * 0.235;
+    const homeX = W / 2 - gap;
+    const awayX = W / 2 + gap;
+
+    if (opts.mode === 'result') {
+        g22pItalic(ctx, isLive ? 'EN VIVO' : 'RESULTADO FINAL', W / 2, H * 0.175, u(118), '#ffffff', true, FONT_ARTICULAT, W - u(120));
+
+        const crestY = H * 0.45;
+        const frameW = W - u(140);
+        const frameH = crestSize * 1.16;
+        const frameX = W / 2 - frameW / 2;
+        const frameY = crestY - frameH / 2;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.45)';
+        ctx.shadowBlur = u(34);
+        ctx.shadowOffsetY = u(16);
+        ctx.fillStyle = 'rgba(8,9,12,0.46)';
+        g22pRoundRect(ctx, frameX, frameY, frameW, frameH, u(26));
+        ctx.fill();
+        ctx.restore();
+        ctx.save();
+        g22pRoundRect(ctx, frameX + 1.5, frameY + 1.5, frameW - 3, frameH - 3, u(26));
+        ctx.lineWidth = u(4);
+        ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+        ctx.stroke();
+        ctx.restore();
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(W / 2, frameY + u(26));
+        ctx.lineTo(W / 2, frameY + frameH - u(26));
+        ctx.stroke();
+        ctx.restore();
+
+        g22peCrest(ctx, homeX, crestY, crestSize, homeLogo);
+        g22peCrest(ctx, awayX, crestY, crestSize, awayLogo);
+
+        const bw = u(520), bh = u(190), bx = W / 2 - bw / 2, byy = frameY + frameH + u(48);
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = u(40);
+        ctx.shadowOffsetY = u(18);
+        ctx.fillStyle = '#0b0c0e';
+        g22pRoundRect(ctx, bx, byy, bw, bh, u(28));
+        ctx.fill();
+        ctx.restore();
+        ctx.save();
+        g22pRoundRect(ctx, bx + 1, byy + 1, bw - 2, bh - 2, u(28));
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.stroke();
+        ctx.restore();
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `900 ${u(120)}px ${FONT_EDITORIAL_SCORE}`;
+        ctx.fillText(String(data.homeScore ?? '-'), W / 2 - u(150), byy + bh / 2);
+        ctx.fillText(String(data.awayScore ?? '-'), W / 2 + u(150), byy + bh / 2);
+        ctx.fillStyle = hexToRGBA(mixHexColors(accent, '#ffffff', 0.4), 0.9);
+        ctx.font = `900 ${u(70)}px ${FONT_EDITORIAL_SCORE}`;
+        ctx.fillText('-', W / 2, byy + bh / 2 - u(6));
+        ctx.textBaseline = 'alphabetic';
+
+        g22peTournamentBadge(ctx, W / 2, byy + bh + u(150), u(150), u, tournamentLogo, accent);
+    } else {
+        g22pItalic(ctx, '¿QUIÉN GANA?', W / 2, H * 0.2, u(118), '#ffffff', true, undefined, W - u(120));
+
+        const kickoffDate = toExportDate(data.kickoffAt);
+        const dateline = (() => {
+            const parts: string[] = [];
+            if (kickoffDate) {
+                const wd = new Intl.DateTimeFormat('es-AR', { weekday: 'short' }).format(kickoffDate).replace('.', '').toUpperCase();
+                const day = new Intl.DateTimeFormat('es-AR', { day: '2-digit' }).format(kickoffDate);
+                const mon = new Intl.DateTimeFormat('es-AR', { month: 'short' }).format(kickoffDate).replace('.', '').toUpperCase();
+                const time = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }).format(kickoffDate);
+                parts.push(`${wd} ${day} ${mon}`, time);
+            } else {
+                if (data.date) parts.push(data.date.toUpperCase());
+                if (data.time) parts.push(data.time);
+            }
+            if (data.venue) parts.push(data.venue.toUpperCase());
+            return parts.join('  ·  ');
+        })();
+        if (dateline) {
+            ctx.fillStyle = 'rgba(255,255,255,0.92)';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+            ctx.font = `800 ${u(30)}px ${FONT_MONO}`;
+            ctx.fillText(truncateTextToWidth(ctx, dateline, W - u(120)), W / 2, H * 0.255);
+        }
+
+        const crestY = H * 0.44;
+        g22peCrest(ctx, homeX, crestY, crestSize, homeLogo);
+        g22peCrest(ctx, awayX, crestY, crestSize, awayLogo);
+        g22pItalic(ctx, 'VS', W / 2, crestY + u(28), u(96), 'rgba(255,255,255,0.92)', false);
+    }
+
+    g22peBrand(ctx, W, H * 0.92, u, brandLogo);
+}
+
 async function drawMatchEditorialScheduleSplitHero(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
@@ -6430,7 +6682,7 @@ async function drawMatchEditorialScheduleSplitHero(
     editorialGradientLeftColor?: string,
     editorialGradientRightColor?: string,
 ) {
-    await drawG22Poster(ctx, canvas, data, {
+    await drawG22PosterEditorial(ctx, canvas, data, {
         accentColor,
         bgColor,
         mode: 'schedule',
@@ -6451,7 +6703,7 @@ async function drawMatchEditorialResult(
     gradientLeftColor: string,
     gradientRightColor: string,
 ) {
-    await drawG22Poster(ctx, canvas, data, {
+    await drawG22PosterEditorial(ctx, canvas, data, {
         accentColor,
         bgColor,
         mode: data.status === 'scheduled' ? 'schedule' : 'result',
