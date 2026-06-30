@@ -114,6 +114,9 @@ export interface MatchStatsData {
     awayTeam: string;
     homeScore: number | null;
     awayScore: number | null;
+    // Penales (definición por tanda). Si ambos vienen, se muestran entre paréntesis a los costados del marcador.
+    homePenalties?: number | null;
+    awayPenalties?: number | null;
     homeLogo?: string;
     awayLogo?: string;
     tournament: string;
@@ -516,14 +519,6 @@ const LOCAL_EXPORT_FONTS: LocalExportFont[] = [
             '/fonts/dharma-gothic-e-heavy.woff2',
             '/fonts/dharma-gothic-heavy.woff',
         ],
-    },
-    {
-        // Titular del póster de partido (RESULTADO FINAL / ¿QUIÉN GANA?). Es una itálica
-        // pesada de fábrica: se registra como style normal para NO duplicar la inclinación.
-        family: 'Articulat CF',
-        weight: '900',
-        style: 'normal',
-        sources: ['/fonts/ArticulatCF-HeavyOblique.otf'],
     },
 ];
 const EXPORT_PALETTES: ExportPalette[] = [
@@ -4625,8 +4620,7 @@ function shouldAppendDateToMatchTime(value: string): boolean {
 
 async function loadLocalExportFonts(): Promise<void> {
     if (typeof document === 'undefined' || typeof FontFace === 'undefined' || !('fonts' in document)) return;
-    if ((document.fonts.check('900 24px "dharma-gothic-e"') || document.fonts.check('800 24px "dharma-gothic-e"'))
-        && document.fonts.check('900 24px "Articulat CF"')) return;
+    if (document.fonts.check('900 24px "dharma-gothic-e"') || document.fonts.check('800 24px "dharma-gothic-e"')) return;
     if (localExportFontsPromise) {
         await localExportFontsPromise;
         return;
@@ -4655,10 +4649,37 @@ async function tryLoadLocalExportFont(font: LocalExportFont): Promise<void> {
     }
 }
 
+// Registro robusto de Articulat CF (no hay versión Typekit; SOLO el .otf local).
+// No se puede usar document.fonts.check() como guarda: para una familia aún NO registrada
+// devuelve true (asume fallback del sistema) y el cargador genérico haría early-return.
+// Por eso se verifica iterando los FontFace ya agregados.
+let articulatFontPromise: Promise<void> | null = null;
+async function ensureArticulatFont(): Promise<void> {
+    if (typeof document === 'undefined' || typeof FontFace === 'undefined' || !('fonts' in document)) return;
+    let already = false;
+    document.fonts.forEach((face) => { if (face.family === 'Articulat CF') already = true; });
+    if (already) return;
+    if (articulatFontPromise) {
+        await articulatFontPromise;
+        return;
+    }
+    articulatFontPromise = (async () => {
+        try {
+            const face = new FontFace('Articulat CF', 'url("/fonts/ArticulatCF-HeavyOblique.otf")', { weight: '900', style: 'normal' });
+            await face.load();
+            document.fonts.add(face);
+        } catch {
+            // Si falla la carga, el render cae al fallback de FONT_ARTICULAT sin romper.
+        }
+    })();
+    await articulatFontPromise;
+}
+
 async function ensureExportFonts(): Promise<void> {
     if (typeof document === 'undefined' || !('fonts' in document)) return;
     try {
         await loadLocalExportFonts();
+        await ensureArticulatFont();
         await Promise.allSettled([
             document.fonts.load('900 24px "dharma-gothic-e"'),
             document.fonts.load('800 24px "dharma-gothic-e"'),
@@ -6309,8 +6330,36 @@ async function drawG22Poster(
     g22pCrestCard(ctx, cardX, cardY, cardW, cardH, u, homeLogo, awayLogo);
 
     if (opts.mode === 'result') {
-        // Barra de marcador DEBAJO de la tarjeta: un solo texto consecutivo y centrado.
-        const bw = u(640), bh = u(212), bx = W / 2 - bw / 2, byy = cardY + cardH + u(8);
+        // Barra de marcador DEBAJO de la tarjeta: marcador centrado en Articulat.
+        // Si hubo penales, el resultado de cada equipo va entre paréntesis a los costados,
+        // al 50% del tamaño del marcador.
+        const scoreStr = `${data.homeScore ?? '-'} - ${data.awayScore ?? '-'}`;
+        const hasPk = data.homePenalties != null && data.awayPenalties != null;
+        const homePk = `(${data.homePenalties})`;
+        const awayPk = `(${data.awayPenalties})`;
+        const scoreSize = u(134);
+        const penSize = Math.round(scoreSize * 0.5);
+        const scoreTrack = u(6);
+        const sideGap = u(24);
+        const setLS = (v: number) => { if ('letterSpacing' in ctx) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${v}px`; };
+
+        // Medir para dimensionar el bloque.
+        ctx.save();
+        ctx.font = `900 ${scoreSize}px ${FONT_ARTICULAT}`;
+        setLS(scoreTrack);
+        const scoreW = ctx.measureText(scoreStr).width;
+        let homePkW = 0, awayPkW = 0;
+        if (hasPk) {
+            ctx.font = `900 ${penSize}px ${FONT_ARTICULAT}`;
+            setLS(0);
+            homePkW = ctx.measureText(homePk).width;
+            awayPkW = ctx.measureText(awayPk).width;
+        }
+        ctx.restore();
+
+        const contentW = scoreW + (hasPk ? homePkW + awayPkW + sideGap * 2 : 0);
+        const bw = Math.max(u(640), Math.round(contentW + u(110)));
+        const bh = u(212), bx = W / 2 - bw / 2, byy = cardY + cardH + u(8);
         ctx.save();
         ctx.shadowColor = 'rgba(0,0,0,0.55)';
         ctx.shadowBlur = u(46);
@@ -6319,13 +6368,24 @@ async function drawG22Poster(
         g22pRoundRect(ctx, bx, byy, bw, bh, u(32));
         ctx.fill();
         ctx.restore();
+
+        const midY = byy + bh / 2;
         ctx.save();
-        ctx.font = `900 ${u(134)}px ${FONT_ARTICULAT}`;
-        if ('letterSpacing' in ctx) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${u(6)}px`;
-        ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+        ctx.font = `900 ${scoreSize}px ${FONT_ARTICULAT}`;
+        setLS(scoreTrack);
+        ctx.textAlign = 'center';
         ctx.fillStyle = '#ffffff';
-        ctx.fillText(`${data.homeScore ?? '-'} - ${data.awayScore ?? '-'}`, W / 2, byy + bh / 2);
+        ctx.fillText(scoreStr, W / 2, midY);
+        if (hasPk) {
+            ctx.font = `900 ${penSize}px ${FONT_ARTICULAT}`;
+            setLS(0);
+            ctx.fillStyle = 'rgba(255,255,255,0.82)';
+            ctx.textAlign = 'right';
+            ctx.fillText(homePk, W / 2 - scoreW / 2 - sideGap, midY);
+            ctx.textAlign = 'left';
+            ctx.fillText(awayPk, W / 2 + scoreW / 2 + sideGap, midY);
+        }
         ctx.restore();
 
         // Sello: liga (slot mascota) + wordmark verde.
