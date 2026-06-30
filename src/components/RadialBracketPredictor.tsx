@@ -929,6 +929,18 @@ function TeamCircle({
             onClick={clickable ? () => onPick(node) : undefined}
         >
             <title>{team.name}</title>
+            {/* Área de toque ampliada (invisible): en mobile el escudo renderiza a
+                ~18px, demasiado chico para el dedo. Este círculo agranda el blanco
+                de tap sin cambiar el tamaño visual. Solo en nodos pickeables. */}
+            {clickable && (
+                <circle
+                    cx={node.x}
+                    cy={node.y}
+                    r={radius + 11}
+                    fill="transparent"
+                    pointerEvents="all"
+                />
+            )}
             {team.logo ? (
                 <image
                     href={team.logo}

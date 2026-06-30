@@ -171,6 +171,8 @@
     height: auto;
     max-height: 72dvh;
     display: block;
+    /* Sin delay de 300ms ni zoom por doble-tap al pickear en mobile. */
+    touch-action: manipulation;
 }
 
 .empty {
@@ -283,10 +285,20 @@
     transition: transform 0.12s ease;
     transform-box: fill-box;
     transform-origin: center;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.teamClickable:hover {
-    transform: scale(1.14);
+/* El realce por hover solo en dispositivos con puntero real: en touch el :hover
+   queda "pegado" tras el tap y dejaba escudos agrandados sin querer. */
+@media (hover: hover) {
+    .teamClickable:hover {
+        transform: scale(1.14);
+    }
+}
+
+/* Feedback táctil al pickear en mobile (el hover no dispara en touch). */
+.teamClickable:active {
+    transform: scale(0.92);
 }
 
 .footer {
@@ -335,11 +347,53 @@
 }
 
 @media (max-width: 560px) {
+    .overlay {
+        padding: 8px;
+    }
+
+    .panel {
+        max-height: calc(100dvh - 16px);
+        border-radius: 20px;
+    }
+
     .title {
         font-size: 0.98rem;
     }
 
+    .header {
+        padding: 14px 14px;
+        gap: 8px;
+    }
+
+    .headerActions {
+        gap: 6px;
+    }
+
+    /* Botones de texto más compactos para que entren título + acciones sin
+       desbordar en pantallas angostas. */
+    .resetBtn,
+    .shareBtn {
+        padding: 0 11px;
+        font-size: 0.74rem;
+    }
+
+    .footer {
+        padding: 12px 14px;
+    }
+
     .canvas {
         max-height: 64dvh;
+    }
+}
+
+/* Teléfonos muy angostos: "Reiniciar" ocupa demasiado, lo dejamos como ícono
+   acotado y priorizamos Compartir + cerrar. */
+@media (max-width: 380px) {
+    .resetBtn {
+        padding: 0 9px;
+    }
+
+    .shareMenu {
+        min-width: 168px;
     }
 }
