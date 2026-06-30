@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './RadialBracketPredictor.module.css';
 
 // ── Social proof GLOBAL: contador de exportes + votos de campeón ──────────────
 // El estado vive en la DB (vía /api/predictor/stats) y es compartido por todos los
 // usuarios. Los seeds son solo el fallback/piso inicial mientras carga o si la
 // migración aún no se aplicó.
-const SEED_BRACKETS_EXPORTED = 127;
+const SEED_TIMES_PLAYED = 127;
 const SEED_CHAMPION_VOTES: Array<{ name: string; count: number }> = [
     { name: 'Argentina', count: 40 },
     { name: 'España', count: 36 },
@@ -40,6 +40,33 @@ function normalizeChampionList(raw: unknown): ChampionVote[] {
         }))
         .filter((item) => item.name);
     return list.length ? list : seedChampionList();
+}
+
+// Caché local del último estado global conocido. Evita el flash a 127 al reabrir:
+// pintamos al instante el último valor visto y luego reconciliamos con el server.
+const STATS_CACHE_KEY = 'g22-predictor-stats-cache';
+
+function readCachedStats(): { timesPlayed: number; champions: ChampionVote[] } | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        const raw = window.localStorage.getItem(STATS_CACHE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        const timesPlayed = Number(parsed?.timesPlayed);
+        if (!Number.isFinite(timesPlayed)) return null;
+        return { timesPlayed, champions: normalizeChampionList(parsed?.champions) };
+    } catch {
+        return null;
+    }
+}
+
+function writeCachedStats(timesPlayed: number, champions: ChampionVote[]) {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.setItem(STATS_CACHE_KEY, JSON.stringify({ timesPlayed, champions }));
+    } catch {
+        /* sin persistencia local: no pasa nada */
+    }
 }
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -492,8 +519,17 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
     const reset = () => setWinners(seedWinners);
 
     // ── Social proof GLOBAL (compartido por todos los usuarios, vía /api/predictor/stats) ──
-    const [bracketsExported, setBracketsExported] = useState<number>(SEED_BRACKETS_EXPORTED);
-    const [championVotes, setChampionVotes] = useState<ChampionVote[]>(() => seedChampionList());
+    // Arrancamos con el último valor cacheado (si existe) para no parpadear a 127 al
+    // reabrir; si no hay caché, usamos los seeds.
+    const [timesPlayed, setTimesPlayed] = useState<number>(() => readCachedStats()?.timesPlayed ?? SEED_TIMES_PLAYED);
+    const [championVotes, setChampionVotes] = useState<ChampionVote[]>(() => readCachedStats()?.champions ?? seedChampionList());
+    // Campeón ya contado en esta sesión: evita re-contar al re-renderizar y no cuenta
+    // el campeón sembrado por resultados reales (solo cuando el usuario juega/elige).
+    const initialChampionKey = useMemo(() => {
+        const seeded = root ? teamAtNode(root, seedWinners) : null;
+        return seeded ? normalizeChampionKey(seeded.name) : null;
+    }, [root, seedWinners]);
+    const countedChampionKeyRef = useRef<string | null>(initialChampionKey);
 
     // Lee el estado global al montar (contador + tabla de campeones más elegidos).
     useEffect(() => {
@@ -504,19 +540,31 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
                 if (!res.ok) return;
                 const data = await res.json();
                 if (cancelled) return;
-                if (typeof data?.bracketsExported === 'number') setBracketsExported(data.bracketsExported);
-                if (Array.isArray(data?.champions)) setChampionVotes(normalizeChampionList(data.champions));
+                const nextTimesPlayed = typeof data?.timesPlayed === 'number' ? data.timesPlayed : null;
+                const nextChampions = Array.isArray(data?.champions) ? normalizeChampionList(data.champions) : null;
+                if (nextTimesPlayed !== null) setTimesPlayed(nextTimesPlayed);
+                if (nextChampions) setChampionVotes(nextChampions);
+                if (nextTimesPlayed !== null && nextChampions) writeCachedStats(nextTimesPlayed, nextChampions);
             } catch {
-                /* sin red: dejamos los seeds */
+                /* sin red: dejamos el último valor cacheado / los seeds */
             }
         })();
         return () => { cancelled = true; };
     }, []);
 
-    // Export exitoso: incrementa el contador GLOBAL y suma el voto del campeón actual.
-    // Optimista en el cliente y luego reconcilia con la respuesta autoritativa.
-    const registerBracketExport = (championName: string | null) => {
-        setBracketsExported((prev) => prev + 1);
+    // Registra una jugada: +1 al contador GLOBAL "Veces jugadas" y +1 al campeón
+    // elegido. Optimista en el cliente; reconcilia con el server SOLO si éste
+    // confirma persistencia (si la migración aún no se aplicó, mantenemos el
+    // incremento local para que igual se vea moverse).
+    const registerPlay = (championName: string) => {
+        const key = normalizeChampionKey(championName);
+        setTimesPlayed((prev) => prev + 1);
+        setChampionVotes((prev) => {
+            const exists = prev.some((vote) => normalizeChampionKey(vote.name) === key);
+            return exists
+                ? prev.map((vote) => (normalizeChampionKey(vote.name) === key ? { ...vote, count: vote.count + 1 } : vote))
+                : [...prev, { name: championName, count: 1 }];
+        });
         (async () => {
             try {
                 const res = await fetch('/api/predictor/stats', {
@@ -526,13 +574,27 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
                 });
                 if (!res.ok) return;
                 const data = await res.json();
-                if (typeof data?.bracketsExported === 'number') setBracketsExported(data.bracketsExported);
-                if (Array.isArray(data?.champions)) setChampionVotes(normalizeChampionList(data.champions));
+                if (data?.persisted !== true) return; // sin migración: dejamos lo optimista
+                const nextTimesPlayed = typeof data?.timesPlayed === 'number' ? data.timesPlayed : null;
+                const nextChampions = Array.isArray(data?.champions) ? normalizeChampionList(data.champions) : null;
+                if (nextTimesPlayed !== null) setTimesPlayed(nextTimesPlayed);
+                if (nextChampions) setChampionVotes(nextChampions);
+                if (nextTimesPlayed !== null && nextChampions) writeCachedStats(nextTimesPlayed, nextChampions);
             } catch {
                 /* el incremento optimista ya se ve; el server reconcilia al recargar */
             }
         })();
     };
+
+    // Una "jugada" se cuenta cuando el usuario llega a un campeón (o lo cambia por
+    // otro). El campeón sembrado por resultados reales no cuenta (ref inicializada).
+    useEffect(() => {
+        if (!champion) return;
+        const key = normalizeChampionKey(champion.name);
+        if (countedChampionKeyRef.current === key) return;
+        countedChampionKeyRef.current = key;
+        registerPlay(champion.name);
+    }, [champion]);
 
     // Tabla de campeones más elegidos (desc), con la elección actual resaltada.
     const championLeaderboard = useMemo(() => (
@@ -810,8 +872,6 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
         }
 
         if (blob) {
-            // Export exitoso: sumamos al contador global y al voto del campeón.
-            registerBracketExport(champion?.name ?? null);
             const file = new File([blob], `prediccion-g22-${shareFormat}.png`, { type: 'image/png' });
             const nav = navigator as Navigator & { canShare?: (data: any) => boolean };
             if (nav.share && nav.canShare && nav.canShare({ files: [file] })) {
@@ -1012,7 +1072,7 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
                     )}
 
                     <p className={styles.exportCounter}>
-                        Brackets exportadas: <strong>{bracketsExported.toLocaleString('es-AR')}</strong>
+                        Veces jugadas: <strong>{timesPlayed.toLocaleString('es-AR')}</strong>
                     </p>
                 </footer>
             </div>
