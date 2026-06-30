@@ -829,6 +829,17 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
                     const initialHomeScore = evt.scores?.home ?? evt.HOME_SCORE_CURRENT ?? baseMatch.scoreHome;
                     const initialAwayScore = evt.scores?.away ?? evt.AWAY_SCORE_CURRENT ?? baseMatch.scoreAway;
+                    // FlashScore details put the shootout result inside `scores` as
+                    // home_penalties / away_penalties. Surface it so the public score
+                    // can render "1 (3) : 1 (4)" for matches decided on penalties.
+                    const detailsPenalties = (() => {
+                        const sc = evt.scores as Record<string, unknown> | undefined;
+                        const ph = sc?.home_penalties;
+                        const pa = sc?.away_penalties;
+                        return typeof ph === 'number' && typeof pa === 'number'
+                            ? { home: ph, away: pa }
+                            : null;
+                    })();
                     const initialHomeCountryName = getDrawParticipantCountryName(drawRes, String(evt.match_id || evt.EVENT_ID || id), 'home');
                     const initialAwayCountryName = getDrawParticipantCountryName(drawRes, String(evt.match_id || evt.EVENT_ID || id), 'away');
 
@@ -847,6 +858,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             tournamentId: evt.tournament?.tournament_stage_id || evt.tournament?.tournament_id || evt.TOURNAMENT_STAGE_ID || '',
                             tournamentUrl: evt.tournament?.tournament_url || evt.tournament?.url || evt.TOURNAMENT_URL || '',
                             tournamentLogo: resolveTournamentLogo(evt, (baseMatch as any)?.tournamentLogo || null),
+                            penalties: detailsPenalties,
                             home: {
                                 ...baseMatch.home,
                                 logo: resolvedHomeLogo,
@@ -1032,6 +1044,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             matchData: {
                                 ...prev.matchData,
                                 status: listMatchEvt?.match_status ? mapMatchStatus(listMatchEvt.match_status) : fsStatus,
+                                penalties: detailsPenalties ?? prev.matchData.penalties ?? null,
                                 tournamentUrl: evt.tournament?.tournament_url || evt.tournament?.url || evt.TOURNAMENT_URL || prev.matchData.tournamentUrl || '',
                                 tournamentLogo: resolveTournamentLogo(evt, prev.matchData.tournamentLogo || null),
                                 home: {
@@ -1446,20 +1459,17 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     );
     void liveClockTick;
     const matchTimerText = liveDisplayTime || matchTimeText;
-    const publicPenaltyScore = hasMatchPenaltyShootout({
+    // Penalties may sit at the top level (DB/FlashScore branches) or inside
+    // `score` (ESPN bundle) — accept either so every provider renders the shootout.
+    const penaltyScoreInput = {
         score: {
             home: typeof matchData.home?.score === 'number' ? matchData.home.score : null,
             away: typeof matchData.away?.score === 'number' ? matchData.away.score : null,
-            penalties: matchData.penalties || null,
+            penalties: matchData.penalties || matchData.score?.penalties || null,
         },
-    })
-        ? getMatchPenaltyScore({
-            score: {
-                home: typeof matchData.home?.score === 'number' ? matchData.home.score : null,
-                away: typeof matchData.away?.score === 'number' ? matchData.away.score : null,
-                penalties: matchData.penalties || null,
-            },
-        })
+    };
+    const publicPenaltyScore = hasMatchPenaltyShootout(penaltyScoreInput)
+        ? getMatchPenaltyScore(penaltyScoreInput)
         : null;
     const motorsportTournamentHref = buildTournamentHref(matchData.tournamentId, matchData.tournamentSeason, matchData.tournament);
     const motorsportStatusLabel = getMotorsportStatusLabel(matchData.status);

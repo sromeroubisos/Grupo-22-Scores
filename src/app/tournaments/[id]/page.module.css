@@ -1886,6 +1886,12 @@
     letter-spacing: 0.08em;
     white-space: nowrap;
 }
+.matchPenaltyScore {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--fl-text-muted, #8a8f98);
+    letter-spacing: 0;
+}
 .matchVS {
     font-family: var(--fl-mono);
     font-size: 0.72rem;

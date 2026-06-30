@@ -2009,6 +2009,7 @@ export async function getEspnFootballMatchBundle(eventId: string, leagueHint?: E
             venue,
             referee: null,
             attendance: normalizeString(summary?.gameInfo?.attendance) || null,
+            penalties: normalized.score.penalties ?? null,
             home: {
                 id: normalized.home.id,
                 name: normalized.home.name,

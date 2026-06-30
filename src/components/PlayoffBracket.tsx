@@ -85,18 +85,28 @@ export default function PlayoffBracket({ data, title = 'Cuadro Final' }: Playoff
                                         const homeScore = isScheduled || rawHomeScore == null ? '-' : rawHomeScore;
                                         const awayScore = isScheduled || rawAwayScore == null ? '-' : rawAwayScore;
 
+                                        // Penalty shootout (when the match was decided on penalties)
+                                        const penaltiesRaw = m.scores?.penalties ?? m.score?.penalties ?? null;
+                                        const penHome = penaltiesRaw?.home;
+                                        const penAway = penaltiesRaw?.away;
+                                        const hasPenalties = !isScheduled && typeof penHome === 'number' && typeof penAway === 'number';
+
                                         const homeLogo = m.home_participant?.image_path || m.home_team?.image_path || m.home_team?.small_image_path || m.home_team?.logo || '';
                                         const awayLogo = m.away_participant?.image_path || m.away_team?.image_path || m.away_team?.small_image_path || m.away_team?.logo || '';
 
                                         // Winner logic
                                         const isFinished = status === 'finished' || status === 'Final' || !!m.winner_id;
+                                        // Penalty winner when regulation ended level
+                                        const homePensWon = hasPenalties && Number(homeScore) === Number(awayScore) && Number(penHome) > Number(penAway);
+                                        const awayPensWon = hasPenalties && Number(homeScore) === Number(awayScore) && Number(penAway) > Number(penHome);
+
                                         const homeWon = m.winner_id
                                             ? (m.home_participant && m.winner_id == m.home_participant.participant_id) || (m.home_team && m.winner_id == m.home_team.id)
-                                            : isFinished && homeScore !== '-' && awayScore !== '-' && Number(homeScore) > Number(awayScore);
+                                            : m.winner === 'home' || homePensWon || (isFinished && homeScore !== '-' && awayScore !== '-' && Number(homeScore) > Number(awayScore));
 
                                         const awayWon = m.winner_id
                                             ? (m.away_participant && m.winner_id == m.away_participant.participant_id) || (m.away_team && m.winner_id == m.away_team.id)
-                                            : isFinished && homeScore !== '-' && awayScore !== '-' && Number(awayScore) > Number(homeScore);
+                                            : m.winner === 'away' || awayPensWon || (isFinished && homeScore !== '-' && awayScore !== '-' && Number(awayScore) > Number(homeScore));
 
                                         return (
                                             <div
@@ -124,7 +134,9 @@ export default function PlayoffBracket({ data, title = 'Cuadro Final' }: Playoff
                                                         )}
                                                         <span className={styles.name}>{homeName}</span>
                                                     </div>
-                                                    <span className={styles.score}>{homeScore}</span>
+                                                    <span className={styles.score}>
+                                                        {homeScore}{hasPenalties ? <span className={styles.penaltyScore}> ({penHome})</span> : null}
+                                                    </span>
                                                 </div>
 
                                                 <div className={`${styles.participant} ${awayWon ? styles.winner : ''}`}>
@@ -136,7 +148,9 @@ export default function PlayoffBracket({ data, title = 'Cuadro Final' }: Playoff
                                                         )}
                                                         <span className={styles.name}>{awayName}</span>
                                                     </div>
-                                                    <span className={styles.score}>{awayScore}</span>
+                                                    <span className={styles.score}>
+                                                        {awayScore}{hasPenalties ? <span className={styles.penaltyScore}> ({penAway})</span> : null}
+                                                    </span>
                                                 </div>
                                             </div>
                                         );

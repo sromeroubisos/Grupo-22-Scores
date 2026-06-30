@@ -1,6 +1,7 @@
 import {
     getFlashScoreMatchDetails,
     getFlashScoreMatchesRaw,
+    fetchPenaltyInfoForMatchIds,
     getTournamentDetails,
     getTournamentIds,
     getTournamentResults,
@@ -1594,6 +1595,63 @@ export async function GET(request: Request) {
         const topScorersPayload = resolveTab('topScorers', topScorersRes?.DATA || topScorersRes || [], topScorersFetchOk);
         const drawPayload = resolveTab('draw', drawRes?.DATA || drawRes || [], drawFetchOk);
         const archivesPayload = resolveTab('archives', archivesRes?.DATA || archivesRes || [], archivesFetchOk);
+        // Penalty-shootout enrichment. Results/draw payloads carry only the
+        // regulation score; the shootout lives in match details. Detect the
+        // candidates from RESULTS (a finished knockout that ended level went to
+        // penalties), pull the shootout once, then splice it into both the
+        // results rows and the bracket (whose `draw` scores are aggregates, so we
+        // also correct them back to the regulation score).
+        try {
+            const resultsArr = Array.isArray(resultsPayload) ? resultsPayload : [];
+            const drawRounds = Array.isArray(drawPayload) ? drawPayload : [];
+            const matchKey = (m: any) => String(m?.match_id ?? m?.id ?? m?.event_key ?? '');
+            // Only knockout matches can go to penalties. Restrict candidates to
+            // matches that are in the bracket (draw) AND ended level in results —
+            // this skips group-stage / league draws so leagues pay no extra cost.
+            const drawIds = new Set<string>();
+            for (const round of drawRounds) {
+                const roundMatches = (round as any)?.matches;
+                if (Array.isArray(roundMatches)) {
+                    for (const m of roundMatches) {
+                        const k = matchKey(m);
+                        if (k) drawIds.add(k);
+                    }
+                }
+            }
+            const candidateIds: string[] = [];
+            for (const m of resultsArr) {
+                const sc = (m as any)?.scores;
+                const k = matchKey(m);
+                if (k && drawIds.has(k) && sc && typeof sc.home === 'number' && typeof sc.away === 'number' && sc.home === sc.away) {
+                    candidateIds.push(k);
+                }
+            }
+            if (candidateIds.length > 0) {
+                const penaltyMap = await fetchPenaltyInfoForMatchIds(candidateIds);
+                if (penaltyMap.size > 0) {
+                    const applyPenalties = (m: any, overrideRegulationScore: boolean) => {
+                        const info = penaltyMap.get(matchKey(m));
+                        if (!info) return;
+                        if (!m.scores || typeof m.scores !== 'object') m.scores = {};
+                        m.scores.penalties = info.penalties;
+                        if (overrideRegulationScore) {
+                            if (typeof info.regHome === 'number') m.scores.home = info.regHome;
+                            if (typeof info.regAway === 'number') m.scores.away = info.regAway;
+                        }
+                    };
+                    for (const m of resultsArr) applyPenalties(m, false);
+                    for (const round of drawRounds) {
+                        const roundMatches = (round as any)?.matches;
+                        if (Array.isArray(roundMatches)) {
+                            for (const m of roundMatches) applyPenalties(m, true);
+                        }
+                    }
+                }
+            }
+        } catch (penaltyEnrichError) {
+            console.error('[tournaments] penalty enrichment failed:', penaltyEnrichError);
+        }
+
         const teamAssets = buildStandingsTeamAssetMap(
             Array.isArray(resultsPayload) ? resultsPayload : [],
             Array.isArray(fixturesPayload) ? fixturesPayload : [],

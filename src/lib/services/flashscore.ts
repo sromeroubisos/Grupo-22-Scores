@@ -519,6 +519,13 @@ function mapEventToMatch(evt: any, sportId: string, context: { leagueName: strin
 
     const homeScore = evt.scores?.home ?? null;
     const awayScore = evt.scores?.away ?? null;
+    // Penalty shootout result, when the feed provides it (present in match
+    // details `scores`, absent from the lighter list payload).
+    const homePenalties = evt.scores?.home_penalties;
+    const awayPenalties = evt.scores?.away_penalties;
+    const penalties = typeof homePenalties === 'number' && typeof awayPenalties === 'number'
+        ? { home: homePenalties, away: awayPenalties }
+        : null;
 
     const timestamp = evt.timestamp || evt.start_time || evt.time || evt.event_timestamp;
     const scheduledAt = timestamp ? new Date(timestamp * 1000) : new Date();
@@ -559,7 +566,8 @@ function mapEventToMatch(evt: any, sportId: string, context: { leagueName: strin
         status: status,
         score: {
             home: typeof homeScore === 'number' ? homeScore : null,
-            away: typeof awayScore === 'number' ? awayScore : null
+            away: typeof awayScore === 'number' ? awayScore : null,
+            penalties
         },
         result: { isComplete: status === 'final', updatedAt: new Date(), updatedBy: 'flashscore', version: 1 },
         createdFrom: 'generator',
@@ -698,6 +706,56 @@ export async function getFlashScoreMatchDetails(matchId: string) {
     }
 
     return data;
+}
+
+// Hard cap on how many match-details lookups a single penalty-enrichment pass
+// may trigger. Keeps the tournament route bounded; the shared `default` API lane
+// (3-wide) throttles the burst and results are cached for CACHE_TTL_DETAILS.
+const MAX_PENALTY_ENRICHMENT = 16;
+
+export type PenaltyInfo = {
+    regHome: number | null;
+    regAway: number | null;
+    penalties: { home: number; away: number };
+};
+
+/**
+ * The lighter results / fixtures / draw payloads carry only the regulation
+ * score — never the shootout. For a set of match IDs (caller pre-filters to the
+ * level/finished ones that could have gone to penalties), pull each match's
+ * details and return the regulation score + penalties for those actually decided
+ * on penalties. Best-effort: matches that error or had no shootout are omitted.
+ */
+export async function fetchPenaltyInfoForMatchIds(
+    matchIds: Array<string | number | null | undefined>,
+): Promise<Map<string, PenaltyInfo>> {
+    const out = new Map<string, PenaltyInfo>();
+    const ids = Array.from(
+        new Set(matchIds.map((v) => (v == null ? '' : String(v))).filter(Boolean)),
+    ).slice(0, MAX_PENALTY_ENRICHMENT);
+
+    if (ids.length === 0) return out;
+
+    await Promise.all(ids.map(async (id) => {
+        try {
+            const details = await getFlashScoreMatchDetails(id);
+            const evt = details?.DATA?.EVENT || details;
+            const sc = evt?.scores as Record<string, unknown> | undefined;
+            const ph = sc?.home_penalties;
+            const pa = sc?.away_penalties;
+            if (typeof ph === 'number' && typeof pa === 'number') {
+                out.set(id, {
+                    regHome: typeof sc?.home === 'number' ? sc.home as number : null,
+                    regAway: typeof sc?.away === 'number' ? sc.away as number : null,
+                    penalties: { home: ph, away: pa },
+                });
+            }
+        } catch {
+            /* best-effort: skip matches we couldn't enrich */
+        }
+    }));
+
+    return out;
 }
 
 export async function getFlashScoreMatchSummary(matchId: string) {

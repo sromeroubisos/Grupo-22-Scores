@@ -22,6 +22,7 @@ import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { compareTournamentsByPriority, getTournamentPriority } from '@/lib/utils/tournamentOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
+import { getMatchPenaltyScore, hasMatchPenaltyShootout, getMatchWinnerByScore } from '@/lib/matchUtils';
 
 // Individual sports use player faces instead of team shields
 const INDIVIDUAL_SPORTS = new Set([
@@ -148,9 +149,12 @@ interface Match {
   home: string;
   homeLogo: string;
   homeScore?: number;
+  homePenaltyScore?: number | null;
   away: string;
   awayLogo: string;
   awayScore?: number;
+  awayPenaltyScore?: number | null;
+  winner?: 'home' | 'away' | null;
   status: 'live' | 'scheduled' | 'finished';
   minute?: string;
   homeClubId?: string;
@@ -556,7 +560,7 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
       </div>
 
       <div className={styles.matchTeams}>
-        <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.homeScore >= match.awayScore ? styles.winner : ''}`}>
+        <div className={`${styles.matchTeam} ${match.winner ? (match.winner === 'home' ? styles.winner : '') : (match.homeScore != null && match.awayScore != null && match.homeScore >= match.awayScore ? styles.winner : '')}`}>
           <div className={styles.matchTeamIdentity}>
             <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
               {shouldEnhanceIndividualAvatar ? (
@@ -606,9 +610,14 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
               </button>
             ) : null}
           </div>
-          <span className={styles.teamScore}>{match.homeScore ?? '-'}</span>
+          <span className={styles.teamScoreGroup}>
+            <span className={styles.teamScore}>{match.homeScore ?? '-'}</span>
+            {match.homePenaltyScore != null ? (
+              <span className={styles.teamPenaltyScore} title="Penales">({match.homePenaltyScore})</span>
+            ) : null}
+          </span>
         </div>
-        <div className={`${styles.matchTeam} ${match.homeScore != null && match.awayScore != null && match.awayScore >= match.homeScore ? styles.winner : ''}`}>
+        <div className={`${styles.matchTeam} ${match.winner ? (match.winner === 'away' ? styles.winner : '') : (match.homeScore != null && match.awayScore != null && match.awayScore >= match.homeScore ? styles.winner : '')}`}>
           <div className={styles.matchTeamIdentity}>
             <span className={`${styles.teamLogo} ${isIndividualSport ? styles.teamLogoRound : ''}`}>
               {shouldEnhanceIndividualAvatar ? (
@@ -658,7 +667,12 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
               </button>
             ) : null}
           </div>
-          <span className={styles.teamScore}>{match.awayScore ?? '-'}</span>
+          <span className={styles.teamScoreGroup}>
+            <span className={styles.teamScore}>{match.awayScore ?? '-'}</span>
+            {match.awayPenaltyScore != null ? (
+              <span className={styles.teamPenaltyScore} title="Penales">({match.awayPenaltyScore})</span>
+            ) : null}
+          </span>
         </div>
       </div>
     </Link>
@@ -1142,9 +1156,12 @@ export default function HomePage() {
           home: String(match.homeTeam?.name || 'Local'),
           homeLogo: resolveTeamLogo(match.homeTeam),
           homeScore: typeof match.score?.home === 'number' ? match.score.home : (status === 'scheduled' ? null : 0),
+          homePenaltyScore: hasMatchPenaltyShootout(match) ? (getMatchPenaltyScore(match)?.home ?? null) : null,
           away: String(match.awayTeam?.name || 'Visita'),
           awayLogo: resolveTeamLogo(match.awayTeam),
           awayScore: typeof match.score?.away === 'number' ? match.score.away : (status === 'scheduled' ? null : 0),
+          awayPenaltyScore: hasMatchPenaltyShootout(match) ? (getMatchPenaltyScore(match)?.away ?? null) : null,
+          winner: getMatchWinnerByScore(match),
           status: status,
           // minutes will be calculated by the MatchRow component using the original dateTime
           minute: (match.clock?.period === 'HT' || match.clock?.period === 'ET' || match.clock?.period === 'Final') ? match.clock.period : undefined,

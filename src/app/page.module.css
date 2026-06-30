@@ -1162,9 +1162,27 @@
     flex-shrink: 0;
 }
 
+.teamScoreGroup {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.teamPenaltyScore {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
 .winner .teamScore {
     color: var(--color-accent);
     /* Highlight score */
+}
+
+.winner .teamPenaltyScore {
+    color: var(--color-accent);
 }
 
 /* Live specific */

@@ -217,6 +217,16 @@
     color: var(--color-text-tertiary);
 }
 
+.penaltyScore {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-text-muted, #8a8f98);
+}
+
+.winner .penaltyScore {
+    color: inherit;
+}
+
 .emptyState {
     padding: 3rem;
     text-align: center;

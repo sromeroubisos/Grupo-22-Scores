@@ -3018,6 +3018,11 @@ export default function TournamentDetailPage({
         const scoreHome = match.scores?.home ?? match.scores?.home_score ?? match.home_score;
         const scoreAway = match.scores?.away ?? match.scores?.away_score ?? match.away_score;
 
+        const penaltiesRaw = match.scores?.penalties ?? match.score?.penalties ?? null;
+        const penHome = penaltiesRaw?.home;
+        const penAway = penaltiesRaw?.away;
+        const hasPenalties = typeof penHome === 'number' && typeof penAway === 'number';
+
         const homeName = match.home_team?.name || match.event_home_team || match.home_team_name || 'Local';
         const awayName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Visitante';
         const homeLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
@@ -3072,7 +3077,9 @@ export default function TournamentDetailPage({
                 {/* Score / time box */}
                 <div className={styles.matchScoreBox}>
                     {hasScore ? (
-                        <span className={styles.matchScore}>{scoreHome} - {scoreAway}</span>
+                        <span className={styles.matchScore}>
+                            {scoreHome}{hasPenalties ? <span className={styles.matchPenaltyScore}> ({penHome})</span> : null} - {scoreAway}{hasPenalties ? <span className={styles.matchPenaltyScore}> ({penAway})</span> : null}
+                        </span>
                     ) : isLive ? (
                         <span className={styles.matchVS}>VS</span>
                     ) : timeStr ? (
