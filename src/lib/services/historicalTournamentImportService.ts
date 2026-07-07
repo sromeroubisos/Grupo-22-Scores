@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
+import { assertTournamentNotSyncLocked } from '@/lib/services/tournamentSyncLock';
 import { ensureChronologicalSeasonEdgesForCluster } from '@/lib/tournamentSeasonChain';
 import { normalizeSlug } from '@/lib/utils/normalize';
 import type {
@@ -581,6 +582,9 @@ export class HistoricalTournamentImportService {
     const supabase = createAdminClient();
     const db = supabase as unknown as UntypedSupabaseClient;
     const typedDb = supabase as any;
+    // Candado por torneo: si el torneo base esta lockeado contra sincronizacion
+    // automatica, no se pueden importar temporadas historicas sobre el.
+    await assertTournamentNotSyncLocked(supabase, params.baseTournamentId);
     const context = await this.loadContext(supabase, params.baseTournamentId);
     const model = this.buildModel(context, params.rawText, params.overrides || {}, params.phaseOverrides || {});
     const warnings = model.issues
@@ -643,6 +647,21 @@ export class HistoricalTournamentImportService {
     let seasonId: string | null = null;
 
     try {
+      // M14(a): abort early if this season was already imported — a retry after a
+      // partial failure (or a double click) must not create a duplicate season.
+      const { data: existingSeason } = await typedDb
+        .from('tournament_seasons')
+        .select('id')
+        .eq('tournament_id', params.baseTournamentId)
+        .eq('season_code', model.seasonId)
+        .maybeSingle();
+      if (existingSeason?.id) {
+        throw new Error(
+          `Ya existe una temporada con codigo "${model.seasonId}" para este torneo (id ${existingSeason.id}). ` +
+          'Elimina la temporada existente antes de reimportar.'
+        );
+      }
+
       const { data: season, error: seasonError } = await typedDb
         .from('tournament_seasons')
         .insert({
@@ -734,16 +753,28 @@ export class HistoricalTournamentImportService {
         };
       });
 
+      // team_season_entries.source_participant_id y tournament_participants.season_entry_id
+      // se referencian mutuamente. Para evitar violar las FKs se inserta en 3 pasos:
+      // 1) participantes SIN season_entry_id, 2) entries (con source_participant_id ya valido),
+      // 3) backfill de season_entry_id en los participantes.
+      const participantInserts = participantRows.map((row) => ({ ...row.participant, season_entry_id: null }));
+      if (participantInserts.length > 0) {
+        const { error: participantError } = await typedDb.from('tournament_participants').insert(participantInserts);
+        if (participantError) throw new Error(participantError.message || 'No se pudieron crear los participantes compatibles.');
+      }
+
       const teamEntryInserts = participantRows.map((row) => row.entry);
       if (teamEntryInserts.length > 0) {
         const { error: entryError } = await typedDb.from('team_season_entries').insert(teamEntryInserts);
         if (entryError) throw new Error(entryError.message || 'No se pudieron crear los participantes historicos.');
       }
 
-      const participantInserts = participantRows.map((row) => row.participant);
-      if (participantInserts.length > 0) {
-        const { error: participantError } = await typedDb.from('tournament_participants').insert(participantInserts);
-        if (participantError) throw new Error(participantError.message || 'No se pudieron crear los participantes compatibles.');
+      for (const row of participantRows) {
+        const { error: linkError } = await typedDb
+          .from('tournament_participants')
+          .update({ season_entry_id: row.participant.season_entry_id })
+          .eq('id', row.participant.id);
+        if (linkError) throw new Error(linkError.message || 'No se pudo vincular el participante con su entrada de temporada.');
       }
 
       const rosterInserts = teamEntryInserts.map((entry) => ({
@@ -992,6 +1023,40 @@ export class HistoricalTournamentImportService {
       };
     } catch (error) {
       if (seasonId) {
+        // M14(b): compensate the child rows inserted before the failure, in
+        // reverse insertion order, so a failed import doesn't leave orphans.
+        // Best-effort: log and continue on cleanup errors.
+        const childTables = [
+          'tournament_standings',
+          'matches',
+          'tournament_rounds',
+          'tournament_phases',
+          'season_rosters',
+          'tournament_participants',
+          'team_season_entries',
+        ];
+        for (const table of childTables) {
+          try {
+            const { error: cleanupError } = await typedDb.from(table).delete().eq('season_id', seasonId);
+            if (cleanupError) {
+              console.error(`[HistoricalImport] Rollback: no se pudo limpiar ${table} (season ${seasonId}):`, cleanupError);
+            }
+          } catch (cleanupError) {
+            console.error(`[HistoricalImport] Rollback: no se pudo limpiar ${table} (season ${seasonId}):`, cleanupError);
+          }
+        }
+        try {
+          const { error: currentSeasonCleanupError } = await typedDb
+            .from('tournaments')
+            .update({ current_season_id: null })
+            .eq('id', params.baseTournamentId)
+            .eq('current_season_id', seasonId);
+          if (currentSeasonCleanupError) {
+            console.error('[HistoricalImport] Rollback: no se pudo revertir current_season_id:', currentSeasonCleanupError);
+          }
+        } catch (cleanupError) {
+          console.error('[HistoricalImport] Rollback: no se pudo revertir current_season_id:', cleanupError);
+        }
         await typedDb.from('tournament_seasons').delete().eq('id', seasonId);
       }
       throw error;
