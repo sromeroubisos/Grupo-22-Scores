@@ -53,7 +53,9 @@ export default function ProdeWorldCupScreen({
     onPlay,
 }: ProdeWorldCupScreenProps) {
     const isModal = mode === 'modal';
-    const targetMs = nextMatch ? new Date(nextMatch.startsAt).getTime() : 0;
+    // Guard: startsAt puede venir inválido de la fuente externa; NaN rompería el contador.
+    const parsedStartMs = nextMatch ? new Date(nextMatch.startsAt).getTime() : NaN;
+    const targetMs = Number.isNaN(parsedStartMs) ? 0 : parsedStartMs;
     const [cd, setCd] = useState<Countdown>({ d: 0, h: 0, m: 0, s: 0 });
     // La fecha formateada se calcula tras montar para evitar desajustes de hidratación
     // (la zona horaria del server puede diferir de la del cliente).
@@ -69,6 +71,13 @@ export default function ProdeWorldCupScreen({
 
     useEffect(() => {
         if (!nextMatch) return;
+        const startsAt = new Date(nextMatch.startsAt);
+        // Guard: Intl.DateTimeFormat.format lanza RangeError con fecha inválida y este
+        // componente se monta globalmente. Si la fecha es inválida, no mostramos el texto.
+        if (Number.isNaN(startsAt.getTime())) {
+            setKickoffLabel('');
+            return;
+        }
         setKickoffLabel(
             new Intl.DateTimeFormat('es-AR', {
                 weekday: 'long',
@@ -76,7 +85,7 @@ export default function ProdeWorldCupScreen({
                 month: 'short',
                 hour: '2-digit',
                 minute: '2-digit',
-            }).format(new Date(nextMatch.startsAt)),
+            }).format(startsAt),
         );
     }, [nextMatch]);
 

@@ -978,10 +978,16 @@ export async function POST(
 ) {
   try {
     const tournamentId = (await params).id;
+    if (!isUuid(tournamentId)) {
+      return NextResponse.json({ error: 'El id del torneo no es un UUID válido' }, { status: 400 });
+    }
     const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
     const body = await request.json();
     const supportsDivisionId = await supportsTournamentParticipantDivisionId(supabase);
     let scopedSeasonId = String(body?.seasonId || body?.season_id || body?.season || '').trim() || null;
+    if (scopedSeasonId && !isUuid(scopedSeasonId)) {
+      return NextResponse.json({ error: 'season_id no es un UUID válido' }, { status: 400 });
+    }
     if (!scopedSeasonId) {
       const { data: tournamentSeason } = await supabase
         .from('tournaments')
@@ -989,6 +995,10 @@ export async function POST(
         .eq('id', tournamentId)
         .maybeSingle();
       scopedSeasonId = tournamentSeason?.current_season_id ?? null;
+    }
+
+    if (body.group_id !== undefined && body.group_id !== null && body.group_id !== '' && !isUuid(body.group_id)) {
+      return NextResponse.json({ error: 'group_id no es un UUID válido' }, { status: 400 });
     }
 
     // Validate required fields
@@ -1133,6 +1143,9 @@ export async function PATCH(
 ) {
   try {
     const tournamentId = (await params).id;
+    if (!isUuid(tournamentId)) {
+      return NextResponse.json({ error: 'El id del torneo no es un UUID válido' }, { status: 400 });
+    }
     const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
     const { searchParams } = new URL(request.url);
     const participantId = searchParams.get('id');
@@ -1243,6 +1256,15 @@ export async function PATCH(
         );
       }
 
+      // Los ids de clubes (slugs) se interpolan en un filtro `.or(...)` de
+      // PostgREST, que no es parametrizado: validar el formato antes de usarlos.
+      if (!/^[a-z0-9][a-z0-9-]*$/i.test(targetClubId)) {
+        return NextResponse.json(
+          { error: 'El identificador del club nuevo no es válido' },
+          { status: 400 },
+        );
+      }
+
       const replacementSeasonId = existingParticipant.season_id ?? null;
       let duplicateParticipantQuery = supabase
         .from('tournament_participants')
@@ -1348,23 +1370,21 @@ export async function PATCH(
     const participantsTable = supabase
       .from('tournament_participants') as unknown as TournamentParticipantsTableClient;
 
-    const { data, error } = await participantsTable
-      .update(updateData)
-      .eq('id', participantId)
-      .select(getTournamentParticipantSelectColumns(supportsDivisionId))
-      .single();
-
-    if (error) {
-      console.error('Error updating participant:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    if (shouldReplaceAcrossTournament && existingParticipant?.club_id && data?.club_id) {
+    // NOTA: idealmente este reemplazo multi-tabla sería un único RPC transaccional
+    // en Postgres. Mientras tanto, propagamos primero standings/matches/disciplina
+    // (verificando cada error) y dejamos la mutación del participante como ÚLTIMO
+    // paso, para no dejar datos inconsistentes si algo falla a mitad de camino.
+    if (
+      shouldReplaceAcrossTournament &&
+      existingParticipant?.club_id &&
+      typeof updateData.club_id === 'string' &&
+      updateData.club_id
+    ) {
       const sourceClubId = existingParticipant.club_id;
-      const targetClubId = data.club_id;
+      const targetClubId = updateData.club_id;
       const replacementSeasonId = existingParticipant.season_id ?? null;
-      const replacementTeamName = replacementClubForStats?.name ?? data.name ?? 'Equipo';
-      const replacementTeamLogo = replacementClubForStats?.logo_url ?? data.clubs?.logo_url ?? null;
+      const replacementTeamName = replacementClubForStats?.name ?? String(updateData.name ?? 'Equipo');
+      const replacementTeamLogo = replacementClubForStats?.logo_url ?? null;
       const standingsUpdates = standingsToReplace.map((row) =>
         supabase
           .from('tournament_standings')
@@ -1412,13 +1432,30 @@ export async function PATCH(
       const propagationError = [homeUpdate.error, awayUpdate.error, standingUpdateError].find(Boolean);
       if (propagationError) {
         console.error('[Participants API] Error propagating club replacement:', propagationError);
-        return NextResponse.json({ error: propagationError.message }, { status: 500 });
+        return NextResponse.json(
+          { error: 'No se pudo propagar el reemplazo del club en el torneo' },
+          { status: 500 },
+        );
       }
 
       if (incidentsUpdate.error && !isMissingTableError(incidentsUpdate.error, 'discipline_incidents')) {
         console.error('[Participants API] Error propagating discipline incidents replacement:', incidentsUpdate.error);
-        return NextResponse.json({ error: incidentsUpdate.error.message }, { status: 500 });
+        return NextResponse.json(
+          { error: 'No se pudo propagar el reemplazo en los incidentes disciplinarios' },
+          { status: 500 },
+        );
       }
+    }
+
+    const { data, error } = await participantsTable
+      .update(updateData)
+      .eq('id', participantId)
+      .select(getTournamentParticipantSelectColumns(supportsDivisionId))
+      .single();
+
+    if (error) {
+      console.error('Error updating participant:', error);
+      return NextResponse.json({ error: 'No se pudo actualizar el participante' }, { status: 500 });
     }
 
     return NextResponse.json(data);
@@ -1433,6 +1470,9 @@ export async function DELETE(
 ) {
   try {
     const tournamentId = (await params).id;
+    if (!isUuid(tournamentId)) {
+      return NextResponse.json({ error: 'El id del torneo no es un UUID válido' }, { status: 400 });
+    }
     const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

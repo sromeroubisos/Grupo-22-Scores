@@ -34,6 +34,24 @@ function normKey(value: string): string {
   return value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
 }
 
+/**
+ * M14b: true when two club names plausibly refer to the same club — normalized
+ * equality, containment, or high token overlap. Used to avoid silently adopting
+ * an existing club whose slug collides but whose name is a different club.
+ */
+function clubNamesLookAlike(a: string, b: string | null | undefined): boolean {
+  if (!b) return false;
+  const na = normKey(a);
+  const nb = normKey(String(b));
+  if (!na || !nb) return false;
+  if (na === nb || na.includes(nb) || nb.includes(na)) return true;
+  const ta = na.split(' ').filter(Boolean);
+  const tb = new Set(nb.split(' ').filter(Boolean));
+  if (ta.length === 0 || tb.size === 0) return false;
+  const shared = ta.filter((token) => tb.has(token)).length;
+  return shared / Math.max(ta.length, tb.size) >= 0.6;
+}
+
 /** Parse "dd/mm/yyyy" | "yyyy-mm-dd" (+ optional "HH:mm") → ISO, else null. */
 function toIso(date: string | null, time: string | null): string | null {
   if (!date) return null;
@@ -206,18 +224,31 @@ export async function commitInterpretedTournament(
     const name = rawName.trim();
     const key = normKey(name);
     if (teamToClubId.has(key)) return teamToClubId.get(key)!;
-    const id = slugify(name);
-    if (!id) return null;
-    const { data: existing } = await writer.from('clubs').select('id').eq('id', id).maybeSingle();
-    if (!existing) {
+    const baseId = slugify(name);
+    if (!baseId) return null;
+    // M14b: if the slug is taken by a club with a substantially different name,
+    // do NOT adopt it silently — try suffixed slugs to create a distinct club.
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const id = attempt === 0 ? baseId : `${baseId}-${attempt + 1}`;
+      const { data: existing } = await writer.from('clubs').select('id, name').eq('id', id).maybeSingle();
+      if (existing) {
+        if (clubNamesLookAlike(name, existing.name)) {
+          teamToClubId.set(key, id);
+          return id;
+        }
+        continue; // slug collision with a different club → try next suffix
+      }
       const { error } = await writer.from('clubs').insert([{
         id, slug: id, name, sport: 'rugby', status: 'active', is_visible: false,
       }]);
-      if (error && error.code !== '23505') { warnings.push(`No se pudo crear el club "${name}".`); return null; }
-      if (!error) created.clubs += 1;
+      if (error && error.code === '23505') continue; // raced with another writer → try next suffix
+      if (error) { warnings.push(`No se pudo crear el club "${name}".`); return null; }
+      created.clubs += 1;
+      teamToClubId.set(key, id);
+      return id;
     }
-    teamToClubId.set(key, id);
-    return id;
+    warnings.push(`No se pudo crear el club "${name}": el slug "${baseId}" ya pertenece a otro club distinto.`);
+    return null;
   };
 
   const clubIdToParticipantId = new Map<string, string>();

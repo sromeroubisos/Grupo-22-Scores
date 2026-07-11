@@ -11,11 +11,15 @@ interface ClubStandingsOverviewTabProps {
 function formatUpdatedAt(value: string | null) {
     if (!value) return 'Sin fecha';
 
+    const parsed = new Date(value);
+    // Guard: Intl.DateTimeFormat.format lanza RangeError con fecha inválida.
+    if (Number.isNaN(parsed.getTime())) return 'Sin fecha';
+
     return new Intl.DateTimeFormat('es-AR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
-    }).format(new Date(value));
+    }).format(parsed);
 }
 
 export function ClubStandingsOverviewTab({

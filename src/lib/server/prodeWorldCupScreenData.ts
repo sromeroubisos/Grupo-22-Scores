@@ -59,7 +59,10 @@ export async function getProdeWorldCupScreenData(userId: string | null): Promise
         .filter((e) => e.status !== 'final' && e.status !== 'scored' && e.status !== 'cancelled')
         .filter((e) => new Date(e.startsAt).getTime() > now)
         .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
-    const next = upcoming[0] || view.events.find((e) => e.isOpen) || null;
+    const next =
+        upcoming[0] ||
+        view.events.find((e) => e.isOpen && !Number.isNaN(new Date(e.startsAt).getTime())) ||
+        null;
 
     const openEvents = view.events.filter((e) => e.isOpen).length;
 

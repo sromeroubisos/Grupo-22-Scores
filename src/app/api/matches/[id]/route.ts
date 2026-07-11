@@ -6,6 +6,7 @@ import { FixtureService } from '@/lib/services/fixtureService';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
 import { createClient } from '@/lib/supabase/server';
+import { isUuid } from '@/lib/utils/postgrest';
 import {
   fetchMatchCenterMatch,
   persistMatchCenterSupplementalData,
@@ -376,6 +377,9 @@ export async function PATCH(
 ) {
   try {
     const matchId = (await params).id;
+    if (!isUuid(matchId)) {
+      return NextResponse.json({ error: 'Invalid match id' }, { status: 400 });
+    }
     await ensureMatchAccess(matchId, MANAGEMENT_MEMBERSHIP_ROLES);
     const body = await request.json();
 
@@ -409,9 +413,13 @@ export async function PATCH(
     const { data: match, error: matchError } = await fetchMatchCenterMatch(writeClient, matchId);
 
     if (matchError || !match) {
+      const isNotFound = !match && (!matchError || (matchError as { code?: string }).code === 'PGRST116');
+      if (!isNotFound) {
+        console.error('Error refetching match after PATCH:', matchError);
+      }
       return NextResponse.json(
-        { error: 'Failed to update match. Check server logs for Supabase error details.' },
-        { status: 500 }
+        { error: isNotFound ? 'Match not found' : 'Failed to update match. Check server logs for Supabase error details.' },
+        { status: isNotFound ? 404 : 500 }
       );
     }
 
@@ -430,9 +438,11 @@ export async function PATCH(
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';
     console.error('Error in PATCH /api/matches/[id]:', error);
+    const status = message === 'Unauthorized' ? 401 : message === 'Forbidden' ? 403 : 500;
+    // No exponer mensajes crudos de Postgres/Supabase en errores internos.
     return NextResponse.json(
-      { error: message },
-      { status: message === 'Unauthorized' ? 401 : message === 'Forbidden' ? 403 : 500 }
+      { error: status === 500 ? 'Internal server error' : message },
+      { status }
     );
   }
 }

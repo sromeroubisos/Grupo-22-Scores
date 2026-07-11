@@ -202,6 +202,13 @@ function toFamilyDivisionId(rosterOwnerClubId: string, groupName: string | null)
 }
 
 async function fetchFamilyDivisions(supabase: any, clubId: string): Promise<Division[]> {
+    // clubId se interpola en filtros `.or(...)` de PostgREST (no parametrizados):
+    // validar el formato slug antes de armar la query para evitar inyección de filtros.
+    if (!/^[a-z0-9][a-z0-9-]*$/i.test(clubId)) {
+        console.warn('[divisionService] clubId con formato inválido; se omite fetchFamilyDivisions.', { clubId });
+        return [];
+    }
+
     let supportsGroupName = true;
     let seedLinks: any[] = [];
 

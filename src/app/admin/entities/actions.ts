@@ -40,6 +40,7 @@ const SCHEMAS: Record<EntityType, z.ZodObject<any>> = {
         status: z.enum(['draft', 'published', 'active', 'archived']).optional().nullable(),
         is_visible: z.boolean().optional().nullable(),
         is_popular: z.boolean().optional().nullable(),
+        sync_locked: z.boolean().optional().nullable(),
         logo_url: z.string().optional().nullable(),
         priority: z.number().int().optional().nullable(),
         format: z.string().optional().nullable(),

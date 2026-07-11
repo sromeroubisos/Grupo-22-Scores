@@ -88,12 +88,17 @@ export async function POST(
       return perf.json({ error: 'phase_id and name are required' }, { status: 400 });
     }
 
-    const { data: phase } = await supabase
+    const { data: phase, error: phaseError } = await supabase
       .from('tournament_phases')
       .select('id, tournament_id, season_id')
       .eq('id', body.phase_id)
       .eq('tournament_id', tournamentId)
       .maybeSingle();
+
+    if (phaseError) {
+      console.error('Error fetching phase for group creation:', phaseError);
+      return perf.json({ error: 'Error validating phase' }, { status: 500 });
+    }
 
     if (!phase) {
       return perf.json({ error: 'Phase not found' }, { status: 404 });
@@ -119,7 +124,7 @@ export async function POST(
 
     if (error) {
       console.error('Error creating group:', error);
-      return perf.json({ error: error.message }, { status: 500 });
+      return perf.json({ error: 'Error creating group' }, { status: 500 });
     }
 
     return perf.json({ data: group }, { status: 201 });

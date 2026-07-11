@@ -15,6 +15,17 @@ export async function POST(
 
     const namePattern = body.name_pattern || 'Fecha {n}';
 
+    if (
+      body.num_rounds !== undefined &&
+      body.num_rounds !== null &&
+      (!Number.isInteger(body.num_rounds) || body.num_rounds < 1 || body.num_rounds > 60)
+    ) {
+      return NextResponse.json(
+        { error: 'num_rounds must be an integer between 1 and 60' },
+        { status: 400 }
+      );
+    }
+
     // 1. Fetch phase details
     const { data: phase, error: phaseError } = await supabase
       .from('tournament_phases')
@@ -111,6 +122,7 @@ export async function POST(
       // Create Rounds & Matches
       let createdRoundsCount = 0;
       const createdRounds = [];
+      const generationErrors: string[] = [];
 
       for (let r = 1; r <= totalRounds; r++) {
         // Create Round
@@ -126,6 +138,7 @@ export async function POST(
 
         if (roundError || !round) {
           console.error(`Error creating round ${r}:`, roundError);
+          generationErrors.push(`Round ${r}: could not be created`);
           continue;
         }
 
@@ -153,11 +166,24 @@ export async function POST(
 
           if (matchInsertError) {
             console.error(`Error inserting matches for round ${r}:`, matchInsertError);
+            generationErrors.push(`Round ${r}: matches could not be inserted`);
           }
         }
       }
 
       await invalidateMatchesFeedCaches();
+
+      if (generationErrors.length > 0) {
+        return NextResponse.json(
+          {
+            error: 'Some rounds or matches could not be generated',
+            details: generationErrors,
+            data: createdRounds,
+            count: createdRoundsCount,
+          },
+          { status: 500 }
+        );
+      }
 
       return NextResponse.json({ data: createdRounds, count: createdRoundsCount }, { status: 201 });
 

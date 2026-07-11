@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Radio, Star, StarOff } from 'lucide-react';
+import { Eye, EyeOff, Lock, LockOpen, Radio, Star, StarOff } from 'lucide-react';
 import { updateEntity } from '@/app/admin/entities/actions';
 import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
 import { Database } from '@/lib/database.types';
@@ -14,6 +14,7 @@ type PublicationState = {
     status: TournamentStatus;
     is_visible: boolean;
     is_popular: boolean;
+    sync_locked: boolean;
 };
 
 const STATUS_OPTIONS: Array<{
@@ -62,6 +63,7 @@ function getInitialState(data: TournamentRow): PublicationState {
         status,
         is_visible: typeof data.is_visible === 'boolean' ? data.is_visible : isPublicStatus(status),
         is_popular: data.is_popular === true,
+        sync_locked: data.sync_locked === true,
     };
 }
 
@@ -74,6 +76,7 @@ export function TournamentPublishTab({ data, id }: { data: TournamentRow; id: st
     const dataStatus = normalizeStatus(data.status);
     const dataIsVisible = typeof data.is_visible === 'boolean' ? data.is_visible : isPublicStatus(dataStatus);
     const dataIsPopular = data.is_popular === true;
+    const dataSyncLocked = data.sync_locked === true;
     const [savedState, setSavedState] = useState<PublicationState>(() => getInitialState(data));
     const [form, setForm] = useState<PublicationState>(() => getInitialState(data));
     const [isSaving, setIsSaving] = useState(false);
@@ -84,15 +87,17 @@ export function TournamentPublishTab({ data, id }: { data: TournamentRow; id: st
             status: dataStatus,
             is_visible: dataIsVisible,
             is_popular: dataIsPopular,
+            sync_locked: dataSyncLocked,
         };
         setSavedState(initialState);
         setForm(initialState);
-    }, [dataStatus, dataIsVisible, dataIsPopular]);
+    }, [dataStatus, dataIsVisible, dataIsPopular, dataSyncLocked]);
 
     const isDirty =
         form.status !== savedState.status ||
         form.is_visible !== savedState.is_visible ||
-        form.is_popular !== savedState.is_popular;
+        form.is_popular !== savedState.is_popular ||
+        form.sync_locked !== savedState.sync_locked;
 
     useLeaveConfirm(isDirty);
 
@@ -127,7 +132,13 @@ export function TournamentPublishTab({ data, id }: { data: TournamentRow; id: st
 
         try {
             const nextState = { ...form };
-            await updateEntity('tournament', id, nextState);
+            // No enviar sync_locked si no cambio: evita fallar el guardado si la
+            // migracion de tournaments.sync_locked todavia no esta aplicada.
+            const { sync_locked: nextSyncLocked, ...baseUpdates } = nextState;
+            const updates: Record<string, unknown> = nextSyncLocked !== savedState.sync_locked
+                ? { ...baseUpdates, sync_locked: nextSyncLocked }
+                : baseUpdates;
+            await updateEntity('tournament', id, updates);
             setSavedState(nextState);
             setForm(nextState);
             setMessage({ type: 'success', text: 'Publicacion actualizada.' });
@@ -235,6 +246,21 @@ export function TournamentPublishTab({ data, id }: { data: TournamentRow; id: st
                                 Destacado
                             </span>
                             <span>{form.is_popular ? 'ON' : 'OFF'}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            className={`basalt-btn ${form.sync_locked ? 'basalt-btn-primary' : ''}`}
+                            onClick={() => updateForm('sync_locked', !form.sync_locked)}
+                            aria-pressed={form.sync_locked}
+                            style={{ justifyContent: 'space-between' }}
+                            title="Si esta activo, los procesos automaticos (syncs externos, webhook WhatsApp, imports) no pueden modificar este torneo. La edicion manual sigue permitida."
+                        >
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                                {form.sync_locked ? <Lock size={16} /> : <LockOpen size={16} />}
+                                Bloquear sincronizacion automatica
+                            </span>
+                            <span>{form.sync_locked ? 'ON' : 'OFF'}</span>
                         </button>
                     </div>
                 </aside>

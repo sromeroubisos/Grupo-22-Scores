@@ -1,3 +1,4 @@
+// NOTA: regenerar con supabase gen types typescript — editado a mano el 2026-07-01 para columnas de matches faltantes y tournaments.sync_locked
 export type Json =
   | string
   | number
@@ -402,6 +403,11 @@ export type Database = {
           away_bonus_points: number
           points_autocalculated: boolean
           points_override_reason: string | null
+          season_id: string | null
+          home_team_id: string | null
+          away_team_id: string | null
+          home_season_entry_id: string | null
+          away_season_entry_id: string | null
         }
         Insert: {
           attendance?: number | null
@@ -445,6 +451,11 @@ export type Database = {
           away_bonus_points?: number
           points_autocalculated?: boolean
           points_override_reason?: string | null
+          season_id?: string | null
+          home_team_id?: string | null
+          away_team_id?: string | null
+          home_season_entry_id?: string | null
+          away_season_entry_id?: string | null
         }
         Update: {
           attendance?: number | null
@@ -488,6 +499,11 @@ export type Database = {
           away_bonus_points?: number
           points_autocalculated?: boolean
           points_override_reason?: string | null
+          season_id?: string | null
+          home_team_id?: string | null
+          away_team_id?: string | null
+          home_season_entry_id?: string | null
+          away_season_entry_id?: string | null
         }
         Relationships: [
           { foreignKeyName: "matches_away_division_id_fkey"; columns: ["away_division_id"]; referencedRelation: "club_divisions"; referencedColumns: ["id"] },
@@ -1063,6 +1079,7 @@ export type Database = {
           slug: string | null
           sport_id: string | null
           status: string
+          sync_locked: boolean
           union_id: string | null
           updated_at: string
           url: string | null
@@ -1098,6 +1115,7 @@ export type Database = {
           slug?: string | null
           sport_id?: string | null
           status?: string
+          sync_locked?: boolean
           union_id?: string | null
           updated_at?: string
           url?: string | null
@@ -1133,6 +1151,7 @@ export type Database = {
           slug?: string | null
           sport_id?: string | null
           status?: string
+          sync_locked?: boolean
           union_id?: string | null
           updated_at?: string
           url?: string | null

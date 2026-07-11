@@ -1341,8 +1341,18 @@ export class FixtureImportService {
     }
   }
 
+  // M11: only trust exact/alias resolutions (score >= 0.95 maps to confidence
+  // 'alta'). Persisting an alias learned from a fuzzy match would poison the
+  // alias table and silently re-route future imports to the wrong entity.
+  private static isTrustedAliasSource(candidate: any): boolean {
+    if (!candidate?.id) return false;
+    return candidate.matchType === 'exact_match'
+      || candidate.matchType === 'alias_match'
+      || candidate.confidence === 'alta';
+  }
+
   private static async learnAliases(supabase: any, tournamentId: string, normalized: Record<string, unknown>, matched: any, context: TournamentContext) {
-    if (normalized.homeTeam && matched.homeClub?.id) {
+    if (normalized.homeTeam && this.isTrustedAliasSource(matched.homeClub)) {
       await this.safeUpsert(
         supabase,
         'club_aliases',
@@ -1350,7 +1360,7 @@ export class FixtureImportService {
         'club_id,alias'
       );
     }
-    if (normalized.awayTeam && matched.awayClub?.id) {
+    if (normalized.awayTeam && this.isTrustedAliasSource(matched.awayClub)) {
       await this.safeUpsert(
         supabase,
         'club_aliases',
@@ -1361,7 +1371,7 @@ export class FixtureImportService {
     if (normalized.competitionName && this.normalizeKey(String(normalized.competitionName)) !== this.normalizeKey(context.tournament.display_name || context.tournament.name)) {
       await this.safeUpsert(supabase, 'competition_aliases', { tournament_id: tournamentId, alias: this.normalizeKey(String(normalized.competitionName)) }, 'tournament_id,alias');
     }
-    if (normalized.venue && matched.venue?.label) {
+    if (normalized.venue && matched.venue?.label && this.isTrustedAliasSource(matched.venue)) {
       await this.safeUpsert(supabase, 'venue_aliases', {
         tournament_id: tournamentId,
         canonical_name: matched.venue.label,

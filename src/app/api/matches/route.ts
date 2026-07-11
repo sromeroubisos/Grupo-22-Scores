@@ -1933,6 +1933,23 @@ export async function POST(request: Request) {
             notes,
         } = body;
         const normalizedRoundId = isUuidLike(roundId) ? roundId : null;
+
+        // These values end up in uuid columns / filters: reject malformed ids early.
+        const uuidFields: Array<[string, unknown]> = [
+            ['tournamentId', tournamentId],
+            ['phaseId', phaseId],
+            ['homeSquadId', homeSquadId],
+            ['awaySquadId', awaySquadId],
+        ];
+        for (const [fieldName, fieldValue] of uuidFields) {
+            if (fieldValue !== undefined && fieldValue !== null && fieldValue !== '' && !isUuidLike(fieldValue)) {
+                return NextResponse.json(
+                    { error: `${fieldName} must be a valid UUID` },
+                    { status: 400 }
+                );
+            }
+        }
+
         const normalizedSportId = normalizeSportValue(sportId ?? body.sport ?? null);
         const normalizedRoundLabel = typeof body.roundLabel === 'string' && body.roundLabel.trim()
             ? body.roundLabel.trim()
@@ -1974,7 +1991,20 @@ export async function POST(request: Request) {
                 .single();
 
             if (round && round.tournament_phases) {
-                finalTournamentId = (round.tournament_phases as any).tournament_id;
+                const rawPhase = Array.isArray(round.tournament_phases)
+                    ? round.tournament_phases[0]
+                    : round.tournament_phases;
+                const resolvedTournamentId = (rawPhase as { tournament_id?: unknown } | undefined)?.tournament_id;
+                if (isUuidLike(resolvedTournamentId)) {
+                    finalTournamentId = resolvedTournamentId;
+                }
+            }
+
+            if (!finalTournamentId) {
+                return NextResponse.json(
+                    { error: 'Could not resolve a valid tournament for the provided round' },
+                    { status: 400 }
+                );
             }
         }
 
@@ -2071,7 +2101,7 @@ export async function POST(request: Request) {
         if (insertError) {
             console.error('Error creating match:', insertError);
             return NextResponse.json(
-                { error: 'Failed to create match', details: insertError.message },
+                { error: 'Failed to create match' },
                 { status: 500 }
             );
         }

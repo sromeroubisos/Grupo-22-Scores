@@ -1,8 +1,8 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
-import { Activity, Dumbbell, Layout, Radio, Settings2, Shield, Sparkles, Trophy, UserCog, Users } from 'lucide-react';
-import { Select } from '@/components/admin/ui';
+import { Activity, Boxes, ChevronsUpDown, Dumbbell, Layout, Radio, Settings2, Shield, Sparkles, Trophy, UserCog, Users } from 'lucide-react';
 import type { ManagedClubSummary } from '@/lib/club-admin/managedClubFamily';
 import type { ClubManageTabId } from '@/lib/club-admin/manageTabs';
 import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
@@ -43,12 +43,17 @@ export function ClubManageTabs({
     onTabChange,
 }: ClubManageTabsProps) {
     const currentClub = managedClubs.find((club) => club.id === currentClubId) ?? null;
+    const clubLabel = currentClub?.shortName || currentClub?.name || 'Club';
+    const clubInitial = clubLabel.trim().charAt(0).toUpperCase() || 'C';
 
     return (
         <div className="club-nav-panel">
             <div className="club-nav-brand">
-                <div className="club-nav-brand-mark" />
-                <div>
+                <span className="club-nav-brand-mark">
+                    <Boxes className="w-[18px] h-[18px]" strokeWidth={2.2} />
+                    <span className="club-nav-brand-pulse" aria-hidden="true" />
+                </span>
+                <div className="club-nav-brand-copy">
                     <strong>G22 CORE</strong>
                     <span>Sistema operativo de clubes</span>
                 </div>
@@ -56,28 +61,36 @@ export function ClubManageTabs({
 
             <div className="club-nav-dropdown-shell">
                 <span className="club-nav-label">Club activo</span>
-                <div className="club-selector-block sidebar">
-                    <div className="club-selector-meta">
-                        <strong>{currentClub?.shortName || currentClub?.name || 'Club'}</strong>
+                <label className="club-switcher">
+                    <span className="club-switcher-mark">{clubInitial}</span>
+                    <span className="club-switcher-meta">
+                        <strong>{clubLabel}</strong>
                         <span>{primarySportLabel || 'Deporte'}</span>
-                    </div>
-                    <Select
-                        className="club-selector-pill"
+                    </span>
+                    <ChevronsUpDown className="club-switcher-caret w-4 h-4" aria-hidden="true" />
+                    <select
+                        className="club-switcher-select"
+                        aria-label="Cambiar club activo"
                         value={currentClubId}
                         onChange={(event) => {
                             window.location.assign(buildClubManageHref(event.target.value, currentTab, navigationMode));
                         }}
-                        options={managedClubs.map((club) => ({
-                            value: club.id,
-                            label: club.shortName || club.name,
-                        }))}
-                    />
-                </div>
+                    >
+                        {managedClubs.length === 0 ? (
+                            <option value={currentClubId}>{clubLabel}</option>
+                        ) : null}
+                        {managedClubs.map((club) => (
+                            <option key={club.id} value={club.id}>
+                                {club.shortName || club.name}
+                            </option>
+                        ))}
+                    </select>
+                </label>
             </div>
 
             <nav className="club-side-nav">
                 <span className="club-nav-label">Modulos</span>
-                {CLUB_MANAGE_VISIBLE_TABS.map((tab) => {
+                {CLUB_MANAGE_VISIBLE_TABS.map((tab, index) => {
                     const isActive = currentTab === tab.id;
                     const href = buildClubManageHref(currentClubId, tab.id, navigationMode);
 
@@ -86,6 +99,7 @@ export function ClubManageTabs({
                             key={tab.id}
                             href={href}
                             prefetch={false}
+                            style={{ '--nav-i': index } as CSSProperties}
                             className={`club-side-link ${isActive ? 'active' : ''}`}
                             aria-current={isActive ? 'page' : undefined}
                             onClick={(event) => {

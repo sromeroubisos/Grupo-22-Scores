@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
+import { validateClubCreate } from '@/lib/validation/clubValidation';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -127,6 +128,19 @@ export async function POST(request: NextRequest) {
     const slug = rawSlug ? slugify(rawSlug) : slugify(name);
     if (!slug) return err('El slug generado es inválido', 400);
 
+    // Validación compartida (src/lib/validation/clubValidation). Esta route crea
+    // clubes mínimos en draft, por lo que entity_type se completa con su default.
+    const validation = validateClubCreate({
+        name: name.trim(),
+        slug,
+        entity_type: 'club',
+        sport: normalizedSport ?? undefined,
+        union_id,
+    });
+    if (!validation.valid) {
+        return err('Datos de club inválidos', 400, validation.errors);
+    }
+
     // Verificar unicidad del slug
     const { data: existing } = await supabase
         .from('clubs')
@@ -185,6 +199,12 @@ export async function GET(request: NextRequest) {
     const unionId = searchParams.get('union_id');
     const sport = searchParams.get('sport');
     const sportFilter = resolveSportFilter(sport);
+
+    // `canonicalizeSportId` devuelve el valor crudo si no reconoce el deporte y
+    // luego se interpola en `.or(...)` (no parametrizado): validar el formato.
+    if (sport && !sportFilter.every((value) => /^[a-z0-9-]+$/.test(value))) {
+        return err('Parámetro sport inválido', 400);
+    }
     const wantsAdminScope = searchParams.get('include_hidden') === 'true' || searchParams.get('admin') === 'true';
     const shouldCheckAdmin = wantsAdminScope && requestHasSupabaseSession(request);
     const supabase = shouldCheckAdmin ? await createClient() : null;

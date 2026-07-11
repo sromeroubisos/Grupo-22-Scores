@@ -15,6 +15,7 @@ import {
     resolveStandingsCarryOverRows,
 } from '@/lib/server/standingsCarryOver';
 import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
+import { isUuid } from '@/lib/utils/postgrest';
 
 type RecalculateOptions = {
     includeDependents?: boolean;
@@ -59,6 +60,11 @@ export async function recalculatePhaseStandingsScopes(
     seasonId?: string | null,
     options: RecalculateOptions = {},
 ): Promise<{ ok: boolean; rows_calculated: number; scopes_recalculated: number }> {
+    if (seasonId && !isUuid(seasonId)) {
+        console.error('[recalculatePhaseStandingsScopes] seasonId inválido (se esperaba UUID)', { tournamentId, phaseId, seasonId });
+        return { ok: false, rows_calculated: 0, scopes_recalculated: 0 };
+    }
+
     const supabase = createAdminClient();
     const includeDependents = options.includeDependents ?? true;
     const visitedPhaseIds = options.visitedPhaseIds ?? new Set<string>();
@@ -82,22 +88,9 @@ export async function recalculatePhaseStandingsScopes(
 
     const scopedSeasonId = seasonId ?? phase.season_id ?? null;
 
-    let deleteQuery = supabase
-        .from('tournament_standings')
-        .delete()
-        .eq('tournament_id', tournamentId)
-        .eq('phase_id', phaseId);
-
-    if (scopedSeasonId) {
-        deleteQuery = deleteQuery.eq('season_id', scopedSeasonId);
-    }
-
-    const { error: deleteError } = await deleteQuery;
-
-    if (deleteError) {
-        console.error('[recalculatePhaseStandingsScopes] Error clearing stale standings', deleteError);
-        return { ok: false, rows_calculated: 0, scopes_recalculated: 0 };
-    }
+    // NOTE: stale rows are cleared per-scope inside recalculateAndPersistStandings,
+    // only after the new table was computed successfully (avoids wiping standings
+    // when the recalculation fails mid-way).
 
     if (phase.phase_type === 'group_stage') {
         const { data: groups, error: groupsError } = await supabase
@@ -169,6 +162,11 @@ export async function recalculateAndPersistStandings(
     tableType = 'general',
     seasonId?: string | null,
 ): Promise<{ ok: boolean; rows_calculated: number }> {
+    if (seasonId && !isUuid(seasonId)) {
+        console.error('[recalculateStandings] seasonId inválido (se esperaba UUID)', { tournamentId, phaseId, seasonId });
+        return { ok: false, rows_calculated: 0 };
+    }
+
     const supabase = createAdminClient();
 
     // 1. Fetch phase + tournament rules
@@ -256,11 +254,8 @@ export async function recalculateAndPersistStandings(
         { carryOverRows: carryOver.rows },
     );
 
-    if (table.length === 0) {
-        return { ok: true, rows_calculated: 0 };
-    }
-
-    // 5. Persist to tournament_standings
+    // 5. Persist to tournament_standings. The new table was computed successfully
+    // above, so only now clear the stale rows for this scope before inserting.
     const calculatedAt = new Date().toISOString();
 
     let delQuery = supabase
@@ -280,7 +275,15 @@ export async function recalculateAndPersistStandings(
             is: (column: string, value: null) => typeof delQuery;
         }).is('group_id', null);
     }
-    await delQuery;
+    const { error: deleteError } = await delQuery;
+    if (deleteError) {
+        console.error('[recalculateStandings] Error clearing stale standings', deleteError);
+        return { ok: false, rows_calculated: 0 };
+    }
+
+    if (table.length === 0) {
+        return { ok: true, rows_calculated: 0 };
+    }
 
     const rows = table.map((row) => ({
         tournament_id: tournamentId,

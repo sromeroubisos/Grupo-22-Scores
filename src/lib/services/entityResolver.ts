@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { Database } from '@/lib/database.types';
+import { isMissingTableError } from '@/lib/utils/supabaseSchema';
 
 export type EntityType = 'club' | 'tournament' | 'player' | 'match' | 'union';
 
@@ -75,6 +76,9 @@ export async function resolveEntity(params: { id: string; type?: EntityType, inc
 
             if (error) {
                 if (error.code === 'PGRST116') return { kind: 'not_found' };
+                // e.g. `players` no existe como tabla en el esquema actual (42P01):
+                // tratarlo como not_found en vez de error duro.
+                if (error.code === '42P01' || isMissingTableError(error, table)) return { kind: 'not_found' };
                 console.error(`Error resolving entity ${id} of type ${type}:`, error);
                 return { kind: 'error', message: error.message };
             }

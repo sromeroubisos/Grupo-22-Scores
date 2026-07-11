@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { FixtureService } from '@/lib/services/fixtureService';
+import { isTournamentSyncLocked, TOURNAMENT_SYNC_LOCKED_MESSAGE } from '@/lib/services/tournamentSyncLock';
 import {
     getTournamentEspnAmericanFootballConfig,
     getTournamentEspnMotorsportConfig,
@@ -18,6 +19,10 @@ export async function POST(
     try {
         const tournamentId = (await params).id;
         const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
+
+        if (await isTournamentSyncLocked(supabase, tournamentId)) {
+            return NextResponse.json({ error: TOURNAMENT_SYNC_LOCKED_MESSAGE }, { status: 409 });
+        }
 
         const body: SyncRequest = await request.json();
         const { phase_id, round_id, matches } = body;

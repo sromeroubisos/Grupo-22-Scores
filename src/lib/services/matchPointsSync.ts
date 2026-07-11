@@ -4,6 +4,7 @@ import {
   type MatchPointsRules,
 } from '@/lib/standings/matchPointsPreview';
 import { fetchMatchCenterMatch, type MatchCenterEventInput } from '@/lib/services/matchCenterService';
+import { isUuid } from '@/lib/utils/postgrest';
 
 type SupabaseLike = {
   from: (table: string) => any;
@@ -65,16 +66,26 @@ function calculateAutocalculatedPoints(
   };
 }
 
+let warnedLegacyRoundId = false;
+
 async function resolvePointsRules(client: SupabaseLike, match: { phase_id?: string | null; round_id?: string | null; tournament_id?: string | null }) {
   let phaseId = match.phase_id ?? null;
 
   if (!phaseId && match.round_id) {
-    const { data: round } = await client
-      .from('tournament_rounds')
-      .select('phase_id')
-      .eq('id', match.round_id)
-      .single();
-    phaseId = round?.phase_id ?? null;
+    // Legacy matches store TEXT round ids (e.g. "Fecha 1"); tournament_rounds.id is UUID.
+    if (!isUuid(match.round_id)) {
+      if (!warnedLegacyRoundId) {
+        warnedLegacyRoundId = true;
+        console.warn('[matchPointsSync] round_id legado no-UUID detectado; se omite el lookup de tournament_rounds.', { roundId: match.round_id });
+      }
+    } else {
+      const { data: round } = await client
+        .from('tournament_rounds')
+        .select('phase_id')
+        .eq('id', match.round_id)
+        .single();
+      phaseId = round?.phase_id ?? null;
+    }
   }
 
   let phaseSettings: Record<string, unknown> | null = null;

@@ -264,7 +264,7 @@ export class StandingsEngine {
       };
     }
     if (Array.isArray(score) && score.length >= 2) {
-      return { home: Number(score[0]), away: Number(score[1]) };
+      return { home: Number(score[0]) || 0, away: Number(score[1]) || 0 };
     }
     return { home: 0, away: 0 };
   }

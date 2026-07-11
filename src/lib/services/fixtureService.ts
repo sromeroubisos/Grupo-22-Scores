@@ -42,6 +42,7 @@ import { reseedPlayoffBracket } from '@/lib/server/playoffBracket';
 import { readPlayoffSeedingConfig } from '@/lib/playoff/seedingFromStandings';
 import type { PlayoffBuilderConfig } from '@/lib/playoff/templates';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { assertTournamentNotSyncLocked } from '@/lib/services/tournamentSyncLock';
 import { assertUuid, isUuid } from '@/lib/utils/postgrest';
 import type {
   TournamentFixture,
@@ -785,19 +786,33 @@ export class FixtureService {
 
     const nextOrder = (maxRound?.order_index || 0) + 1;
 
-    const { data: newRound, error: createError } = await supabase
+    const roundPayload = {
+      phase_id: phaseId,
+      season_id: phaseContext?.season_id ?? null,
+      name: roundLabel,
+      order_index: nextOrder,
+      status: 'draft'
+    };
+
+    // B2: atomic upsert on (phase_id, name) so two concurrent imports can't
+    // create duplicate rounds between the SELECT above and this write. If the
+    // unique index migration hasn't been applied yet, Postgres rejects the
+    // ON CONFLICT target (42P10) — fall back to the previous plain insert.
+    let { data: newRound, error: createError } = await supabase
       .from('tournament_rounds')
-      .insert({
-        phase_id: phaseId,
-        season_id: phaseContext?.season_id ?? null,
-        name: roundLabel,
-        order_index: nextOrder,
-        status: 'draft'
-      })
+      .upsert(roundPayload, { onConflict: 'phase_id,name' })
       .select('id')
       .single();
 
-    if (createError) {
+    if (createError && (createError.code === '42P10' || /no unique or exclusion constraint/i.test(createError.message || ''))) {
+      ({ data: newRound, error: createError } = await supabase
+        .from('tournament_rounds')
+        .insert(roundPayload)
+        .select('id')
+        .single());
+    }
+
+    if (createError || !newRound) {
       console.error('[FixtureService] Error creating round automatically:', createError);
       return null;
     }
@@ -1676,13 +1691,15 @@ export class FixtureService {
   /**
    * Import matches from external data
    */
-  static async importMatches(tournamentId: string, phaseId: string, matchesData: any[]): Promise<{ success: boolean, imported: number, errors: string[] }> {
+  static async importMatches(tournamentId: string, phaseId: string, matchesData: any[]): Promise<{ success: boolean, imported: number, skipped: number, errors: string[] }> {
     const supabase = await this.getWriteClient();
     const errors: string[] = [];
     let importedCount = 0;
+    let skippedCount = 0;
     let phaseContext: PhaseContext | null = null;
 
     try {
+      await assertTournamentNotSyncLocked(supabase, tournamentId);
       phaseContext = await this.assertPhaseBelongsToTournament(supabase, tournamentId, phaseId);
       if (isPlayoffPhaseType(phaseContext.phase_type) && matchesData.some((match) => !match.roundId)) {
         throw new Error('Todos los partidos importados en una fase playoff deben indicar una etapa de eliminacion definida.');
@@ -1715,11 +1732,50 @@ export class FixtureService {
       return {
         success: false,
         imported: 0,
+        skipped: 0,
         errors: [message],
       };
     }
 
-    const matchesToInsert = matchesData.map(m => ({
+    // M8: idempotency — skip rows that already exist for this tournament/phase.
+    // Same dedup criterion as FixtureImportService.findDuplicate: home club +
+    // away club + calendar date (date_time truncated to yyyy-mm-dd).
+    const dedupKey = (home: string, away: string, dateTime: unknown) =>
+      `${home}|${away}|${dateTime ? String(dateTime).slice(0, 10) : ''}`;
+
+    const existingKeys = new Set<string>();
+    {
+      const { data: existingMatches, error: existingError } = await supabase
+        .from('matches')
+        .select('home_club_id, away_club_id, date_time')
+        .eq('tournament_id', tournamentId)
+        .eq('phase_id', phaseId);
+
+      if (existingError) {
+        console.error('[FixtureService] Could not load existing matches for dedup:', existingError);
+        return {
+          success: false,
+          imported: 0,
+          skipped: 0,
+          errors: [`No se pudieron consultar los partidos existentes para deduplicar: ${existingError.message}`],
+        };
+      }
+      for (const row of existingMatches || []) {
+        existingKeys.add(dedupKey(row.home_club_id, row.away_club_id, row.date_time));
+      }
+    }
+
+    const matchesToInsert = matchesData
+      .filter((m) => {
+        const key = dedupKey(m.homeClubId, m.awayClubId, m.dateTime);
+        if (existingKeys.has(key)) {
+          skippedCount += 1;
+          return false;
+        }
+        existingKeys.add(key); // also dedup within the incoming payload
+        return true;
+      })
+      .map(m => ({
       tournament_id: tournamentId,
       season_id: phaseContext?.season_id ?? null,
       phase_id: phaseId,
@@ -1744,8 +1800,14 @@ export class FixtureService {
         .select('id');
 
       if (error) {
+        // M8: abort on the first failed chunk instead of continuing silently;
+        // report how many rows were persisted and how many were left pending.
         console.error('[FixtureService] Error importing match chunk:', { error, chunk });
-        errors.push(`Error al insertar lote ${Math.floor(i / chunkSize) + 1}: ${error.message}`);
+        errors.push(
+          `Error al insertar lote ${Math.floor(i / chunkSize) + 1}: ${error.message}. ` +
+          `Importación abortada: ${importedCount} partidos insertados, ${matchesToInsert.length - importedCount} pendientes.`
+        );
+        break;
       } else {
         importedCount += insertedMatches?.length || 0;
         if ((insertedMatches?.length || 0) > 0) {
@@ -1764,6 +1826,7 @@ export class FixtureService {
     return {
       success: errors.length === 0,
       imported: importedCount,
+      skipped: skippedCount,
       errors
     };
   }

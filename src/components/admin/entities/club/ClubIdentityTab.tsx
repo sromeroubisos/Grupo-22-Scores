@@ -61,7 +61,7 @@ export function ClubIdentityTab({ data, unions }: ClubIdentityTabProps) {
     };
 
     return (
-        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
+        <div className="space-y-10 pb-20">
             <div className="manager-card">
                 <header className="manager-header">
                     <div className="manager-header-titles">

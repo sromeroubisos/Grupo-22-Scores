@@ -188,6 +188,42 @@ const MATCH_CENTER_MATCH_SELECT = `
   awayClub:away_club_id (id, name, short_name, primary_color, updated_at),
   tournament:tournament_id (id, name, display_name, slug, sport_id, external_id, logo_url, banner_url)
 `;
+// Columns that historically may be missing depending on schema version / PostgREST cache.
+const MATCH_CENTER_FRAGILE_COLUMNS = ['clock', 'lineups', 'broadcast_url', 'stream_url', 'replay_url'] as const;
+// Fallback variant without the fragile columns (mirrors fixtureService.selectMatchForUpdate).
+const MATCH_CENTER_MATCH_SELECT_REDUCED = `
+  id,
+  tournament_id,
+  phase_id,
+  round_id,
+  date_time,
+  venue,
+  notes,
+  home_club_id,
+  away_club_id,
+  home_division_id,
+  away_division_id,
+  status,
+  score,
+  created_at,
+  updated_at,
+  home_base_points,
+  away_base_points,
+  home_bonus_points,
+  away_bonus_points,
+  points_autocalculated,
+  points_override_reason,
+  category,
+  round_label,
+  sport_id,
+  sport,
+  season_id,
+  home_team_id,
+  away_team_id,
+  homeClub:home_club_id (id, name, short_name, primary_color, updated_at),
+  awayClub:away_club_id (id, name, short_name, primary_color, updated_at),
+  tournament:tournament_id (id, name, display_name, slug, sport_id, external_id, logo_url, banner_url)
+`;
 const PERSIST_MATCH_SELECT_BASE = `
   id,
   season_id,
@@ -223,17 +259,27 @@ const PERSIST_MATCH_SELECT_EVENT_PATCH = `
 `;
 const PERSIST_MATCH_SELECT_WITH_EVENTS = `${PERSIST_MATCH_SELECT_BASE}, events`;
 
+let warnedLegacyRoundIdLookup = false;
+
 async function fetchMatchPointsRules(client: SupabaseLike, match: MatchPointsRulesContext) {
   try {
     let phaseId = match.phase_id ?? null;
 
     if (!phaseId && match.round_id) {
-      const { data: round } = await client
-        .from('tournament_rounds')
-        .select('phase_id')
-        .eq('id', match.round_id)
-        .single();
-      phaseId = round?.phase_id ?? null;
+      // Legacy matches store TEXT round ids (e.g. "Fecha 1"); tournament_rounds.id is UUID.
+      if (!isUuid(match.round_id)) {
+        if (!warnedLegacyRoundIdLookup) {
+          warnedLegacyRoundIdLookup = true;
+          console.warn('[matchCenterService] round_id legado no-UUID detectado; se omite el lookup de tournament_rounds.', { roundId: match.round_id });
+        }
+      } else {
+        const { data: round } = await client
+          .from('tournament_rounds')
+          .select('phase_id')
+          .eq('id', match.round_id)
+          .single();
+        phaseId = round?.phase_id ?? null;
+      }
     }
 
     // When phaseId is known, fetch the phase and the tournament concurrently:
@@ -1501,11 +1547,38 @@ export async function fetchMatchCenterMatch(
     return { data: null, error: null };
   }
 
-  const { data, error } = await client
+  let { data, error } = await client
     .from('matches')
     .select(MATCH_CENTER_MATCH_SELECT)
     .eq('id', matchId)
     .single();
+
+  if (
+    error &&
+    (error.code === 'PGRST204' || error.code === '42703' ||
+      MATCH_CENTER_FRAGILE_COLUMNS.some((column) => isMissingColumnError(error, column)))
+  ) {
+    const retry = await client
+      .from('matches')
+      .select(MATCH_CENTER_MATCH_SELECT_REDUCED)
+      .eq('id', matchId)
+      .single();
+
+    if (!retry.error && retry.data) {
+      data = {
+        ...retry.data,
+        clock: null,
+        lineups: null,
+        broadcast_url: null,
+        stream_url: null,
+        replay_url: null,
+      };
+      error = null;
+    } else {
+      data = retry.data;
+      error = retry.error;
+    }
+  }
 
   if (error || !data) {
     return { data: null, error };

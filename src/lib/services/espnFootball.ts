@@ -367,10 +367,16 @@ export function isEspnFootballAnyId(value: unknown) {
 
 const inflightEspnRequests = new Map<string, Promise<unknown>>();
 
+// M9: short negative cache for failed ESPN requests so an outage doesn't get
+// hammered with a retry on every incoming request.
+const ESPN_FETCH_FAILURE_TTL = 60; // seconds
+
 async function fetchEspnJson<T>(url: string, debugTag: string, cacheTtl: number) {
     const cacheKey = `espn-soccer:${url}`;
+    const failKey = `espn-soccer:fail:${url}`;
     const cached = memoryCache.get<T>(cacheKey);
     if (cached) return cached;
+    if (memoryCache.get<boolean>(failKey)) return null;
 
     const existing = inflightEspnRequests.get(cacheKey) as Promise<T | null> | undefined;
     if (existing) return existing;
@@ -383,13 +389,16 @@ async function fetchEspnJson<T>(url: string, debugTag: string, cacheTtl: number)
             // a pre-match snapshot (matches as scheduled/0-0, knockout slots still
             // labelled "Group A 2nd Place") far longer than our intended TTL via
             // stale-while-revalidate, even after ESPN has the final result.
-            const { data } = await apiFetch<T>(url, {
+            const { data, ok } = await apiFetch<T>(url, {
                 debugTag,
                 silent: true,
                 cache: 'no-store',
             });
             if (data) {
                 memoryCache.set(cacheKey, data, cacheTtl);
+            }
+            if (!ok) {
+                memoryCache.set(failKey, true, ESPN_FETCH_FAILURE_TTL);
             }
             return data;
         } finally {
@@ -834,7 +843,16 @@ async function fetchMatchSummaryForLeague(leagueSlug: EspnFootballLeagueSlug, ma
     return fetchEspnJson<EspnSummaryPayload>(url, 'EspnSoccerSummary', MATCH_CACHE_TTL);
 }
 
+// B11: negative cache for the all-leagues fan-outs. An invalid event/team ID
+// would otherwise re-trigger ~70 HTTP calls on every lookup; remember the miss
+// for a few minutes instead (same in-process memoryCache pattern as fetchEspnJson).
+const FANOUT_MISS_TTL = 5 * 60; // seconds
+const eventFanoutMissKey = (eventId: string) => `espn-soccer:fanout-miss:event:${eventId}`;
+const teamFanoutMissKey = (teamId: string) => `espn-soccer:fanout-miss:team:${teamId}`;
+
 async function resolveMatchLeagueAndSummary(matchId: string) {
+    if (memoryCache.get<boolean>(eventFanoutMissKey(matchId))) return null;
+
     const results = await Promise.allSettled(
         SUPPORTED_ESPN_FOOTBALL_LEAGUES.map(async (league) => ({
             league,
@@ -848,10 +866,13 @@ async function resolveMatchLeagueAndSummary(matchId: string) {
         const headerId = normalizeString(summary?.header?.id);
         if (headerId === matchId) return r.value;
     }
+    memoryCache.set(eventFanoutMissKey(matchId), true, FANOUT_MISS_TTL);
     return null;
 }
 
 async function resolveTeamLeague(teamId: string, preferredLeague?: string | null) {
+    if (memoryCache.get<boolean>(teamFanoutMissKey(teamId))) return null;
+
     const preferred = isEspnFootballLeagueSlug(preferredLeague) ? preferredLeague : null;
     const ordered = preferred
         ? [LEAGUES[preferred], ...SUPPORTED_ESPN_FOOTBALL_LEAGUES.filter((l) => l.slug !== preferred)]
@@ -873,6 +894,7 @@ async function resolveTeamLeague(teamId: string, preferredLeague?: string | null
         const details = r.value.details;
         if (normalizeString(details?.team?.id) === teamId) return r.value;
     }
+    memoryCache.set(teamFanoutMissKey(teamId), true, FANOUT_MISS_TTL);
     return null;
 }
 
@@ -1046,23 +1068,32 @@ function buildMatchFromNormalized(n: NonNullable<ReturnType<typeof normalizeEspn
     };
 }
 
-export async function getEspnFootballMatches(
+// C2: internal fetch that, besides the matches, reports how many league fetches
+// failed so callers can tell an ESPN outage ("everything failed → empty list")
+// apart from a legitimately quiet day. `fetchScoreboardForDate` resolves to null
+// on fetch failure (apiFetch swallows errors), so null counts as a failure too.
+async function fetchEspnFootballMatchesWithStats(
     date: Date,
-    _options?: { timeZone?: string; targetDateKey?: string },
-): Promise<Match[]> {
+): Promise<{ matches: Match[]; failedLeagues: number; totalLeagues: number }> {
     const target = toDateOnly(date);
+    let failedLeagues = 0;
     const perLeague = await mapWithConcurrency(
         SUPPORTED_ESPN_FOOTBALL_LEAGUES,
         ESPN_FETCH_CONCURRENCY,
         async (league) => {
             try {
                 const payload = await fetchScoreboardForDate(league.slug, target);
+                if (!payload) {
+                    failedLeagues += 1;
+                    return [] as Match[];
+                }
                 const events = Array.isArray(payload?.events) ? payload.events : [];
                 return events
                     .map((event) => normalizeEspnEventCore(event, getEventLeague(event, league)))
                     .filter((e): e is NonNullable<ReturnType<typeof normalizeEspnEventCore>> => Boolean(e))
                     .map(buildMatchFromNormalized);
             } catch {
+                failedLeagues += 1;
                 return [] as Match[];
             }
         },
@@ -1074,12 +1105,27 @@ export async function getEspnFootballMatches(
             if (!merged.has(m.id)) merged.set(m.id, m);
         }
     }
-    return Array.from(merged.values());
+    return { matches: Array.from(merged.values()), failedLeagues, totalLeagues: SUPPORTED_ESPN_FOOTBALL_LEAGUES.length };
+}
+
+export async function getEspnFootballMatches(
+    date: Date,
+    _options?: { timeZone?: string; targetDateKey?: string },
+): Promise<Match[]> {
+    const { matches } = await fetchEspnFootballMatchesWithStats(date);
+    return matches;
 }
 
 export async function getEspnFootballLiveMatches(): Promise<Match[]> {
     const today = toDateOnly(new Date());
-    const matches = await getEspnFootballMatches(today);
+    const { matches, failedLeagues, totalLeagues } = await fetchEspnFootballMatchesWithStats(today);
+    // C2: if (nearly) all league fetches failed this is a provider outage, not
+    // "no live matches right now". Throw so the live-sync cron marks the run as
+    // apiFailed and does NOT run resetStaleLiveMatches (which would flip live
+    // matches to final based on an empty list).
+    if (totalLeagues > 0 && failedLeagues >= Math.ceil(totalLeagues * 0.8)) {
+        throw new Error(`ESPN football outage suspected: ${failedLeagues}/${totalLeagues} league fetches failed`);
+    }
     return matches.filter((m) => m.status === 'live');
 }
 
@@ -1934,6 +1980,9 @@ export async function getEspnFootballMatchBundle(eventId: string, leagueHint?: E
     }
 
     if (!league || !scoreboardEvent) {
+        // B11: skip the fan-out entirely if this event ID already missed recently.
+        if (memoryCache.get<boolean>(eventFanoutMissKey(eventId))) return null;
+
         // Fan out by summary endpoint (one HTTP call per league) instead of by
         // scoreboard scan (many HTTP calls per league). 70 parallel summary
         // fetches finish in ~1s; the old scoreboard fan-out took ~20s+.
@@ -1953,7 +2002,10 @@ export async function getEspnFootballMatchBundle(eventId: string, leagueHint?: E
                 break;
             }
         }
-        if (!league || !scoreboardEvent) return null;
+        if (!league || !scoreboardEvent) {
+            memoryCache.set(eventFanoutMissKey(eventId), true, FANOUT_MISS_TTL);
+            return null;
+        }
     }
 
     const normalized = normalizeEspnEventCore(scoreboardEvent, league);

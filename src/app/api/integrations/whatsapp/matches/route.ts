@@ -6,7 +6,9 @@ import {
 } from '@/lib/integrations/whatsappMatchSync';
 import { deriveClubAdminPointsPatch } from '@/lib/services/matchPointsSync';
 import { FixtureService } from '@/lib/services/fixtureService';
+import { isTournamentSyncLocked, TOURNAMENT_SYNC_LOCKED_MESSAGE } from '@/lib/services/tournamentSyncLock';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isUuid } from '@/lib/utils/postgrest';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -120,6 +122,10 @@ function normalizeBonusTarget(value: unknown): MatchWebhookRequest['bonusTarget'
   return null;
 }
 
+// Debe coincidir con el CHECK matches_status_check de la DB
+// (ver supabase/migrations/20260701090300_matches_status_allow_cancelled.sql).
+const ALLOWED_MATCH_STATUSES = new Set(['scheduled', 'live', 'final', 'postponed', 'suspended', 'cancelled']);
+
 function normalizeStatus(value: unknown) {
   const normalized = readText(value).toLowerCase();
 
@@ -128,7 +134,14 @@ function normalizeStatus(value: unknown) {
   if (['scheduled', 'programado', 'pendiente'].includes(normalized)) return 'scheduled';
   if (['final', 'finished', 'completed', 'scored', 'ft'].includes(normalized)) return 'final';
   if (['postponed', 'aplazado'].includes(normalized)) return 'postponed';
+  if (['suspended', 'suspendido'].includes(normalized)) return 'suspended';
   if (['cancelled', 'cancelado'].includes(normalized)) return 'cancelled';
+
+  if (!ALLOWED_MATCH_STATUSES.has(normalized)) {
+    throw new Error(
+      `El estado "${normalized}" no es valido. Estados permitidos: scheduled, live, final, postponed, suspended, cancelled.`,
+    );
+  }
 
   return normalized;
 }
@@ -317,8 +330,18 @@ export async function POST(request: NextRequest) {
     return jsonError('Unauthorized', 401);
   }
 
+  let payload: MatchWebhookRequest;
   try {
-    const payload = resolveRequestPayload(await request.json());
+    payload = resolveRequestPayload(await request.json());
+  } catch (error: unknown) {
+    return jsonError(error instanceof Error ? error.message : 'Payload invalido.', 400);
+  }
+
+  if (payload.matchId && !isUuid(payload.matchId)) {
+    return jsonError('matchId debe ser un UUID valido.', 400);
+  }
+
+  try {
     const adminClient = createAdminClient();
     const matchResolution = await resolveMatchId(adminClient, payload);
 
@@ -337,6 +360,19 @@ export async function POST(request: NextRequest) {
             : null,
         },
       );
+    }
+
+    // Candado por torneo: si el torneo del partido esta lockeado contra
+    // sincronizacion automatica, el webhook no debe pisarlo.
+    const { data: matchTournamentRow } = await adminClient
+      .from('matches')
+      .select('tournament_id')
+      .eq('id', matchResolution.matchId)
+      .maybeSingle();
+
+    const matchTournamentId = (matchTournamentRow as { tournament_id?: string | null } | null)?.tournament_id ?? null;
+    if (matchTournamentId && await isTournamentSyncLocked(adminClient, matchTournamentId)) {
+      return jsonError(TOURNAMENT_SYNC_LOCKED_MESSAGE, 409, { tournamentId: matchTournamentId });
     }
 
     const score = {

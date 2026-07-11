@@ -34,6 +34,7 @@ import {
 } from '../utils/normalize';
 import { normalizeLogoUrl } from '../utils/logoUrl';
 import { validateClubCreate, validateClubCoreUpdate, validateClubProfileUpdate } from '../validation/clubValidation';
+import { isMissingColumnError } from '../utils/supabaseSchema';
 import { isPatchEmpty } from '../utils/buildPatch';
 
 type ClubDerivativeUpsertClient = {
@@ -95,9 +96,8 @@ export async function createClub(
     union_id: normalizeText(input.union_id),
     logo_url: normalizeLogoUrl(input.logo_url),
     primary_color: normalizeText(input.primary_color),
-    categories: Array.isArray(input.categories)
-      ? input.categories.map(normalizeText).filter((category): category is string => Boolean(category))
-      : null,
+    // NOTE: `categories` fue dropeada de `clubs` en la migración 20260318100000;
+    // no se envía en el payload base.
     is_visible: input.visibility !== 'hidden',
   };
 
@@ -119,10 +119,23 @@ export async function createClub(
       } else {
         // Generamos un ID amigable si se crea por primera vez
         const newUnionId = normalizedData.union_id.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-        await supabase.from('unions').upsert([{
+        const { error: unionUpsertError } = await supabase.from('unions').upsert([{
           id: newUnionId,
           name: normalizedData.union_id.trim()
         }], { onConflict: 'id', ignoreDuplicates: true });
+        if (unionUpsertError) {
+          return {
+            success: false,
+            error: `No se pudo crear la Unión / Liga "${normalizedData.union_id.trim()}": ${unionUpsertError.message}`,
+            validationErrors: [
+              {
+                field: 'union_id',
+                message: 'No se pudo crear la Unión / Liga asociada',
+                level: 'error',
+              },
+            ],
+          };
+        }
         normalizedData.union_id = newUnionId;
       }
     }
@@ -135,40 +148,25 @@ export async function createClub(
       .single();
 
     // Si falla porque falta la columna 'is_visible' o 'sport' (o la caché está vieja), reintentamos sin ellas
+    // (chequeo por código de error 42703/PGRST204 vía isMissingColumnError, no por string matching).
     if (error && (
-      error.message.includes('column "is_visible"') ||
-      error.message.includes('column "sport"') ||
-      error.message.includes('column "sport_id"') ||
-      error.message.includes('column "categories"') ||
-      (error.message.includes('categories') && error.message.includes('does not exist')) ||
-      error.message.includes("'is_visible' column") ||
-      error.message.includes("'sport' column") ||
-      error.message.includes("'sport_id' column") ||
-      error.message.includes("'categories' column") ||
-      error.message.includes("schema cache")
+      isMissingColumnError(error, 'is_visible') ||
+      isMissingColumnError(error, 'sport') ||
+      isMissingColumnError(error, 'sport_id')
     )) {
       console.warn('⚠️ Detectada discrepancia de esquema en "clubs", reintentando operación reducida...');
       const fallbackData: Partial<typeof normalizedData> = { ...normalizedData };
-      const isSchemaCacheError = error.message.includes("schema cache");
 
-      if (isSchemaCacheError || error.message.includes('column "sport"') || error.message.includes("'sport' column")) {
+      if (isMissingColumnError(error, 'sport')) {
         delete fallbackData.sport;
       }
 
-        if (isSchemaCacheError || error.message.includes('column "sport_id"') || error.message.includes("'sport_id' column")) {
-          delete fallbackData.sport_id;
-        }
-        if (
-          isSchemaCacheError ||
-          error.message.includes('column "categories"') ||
-          error.message.includes("'categories' column") ||
-          (error.message.includes('categories') && error.message.includes('does not exist'))
-        ) {
-          delete fallbackData.categories;
-        }
-      
+      if (isMissingColumnError(error, 'sport_id')) {
+        delete fallbackData.sport_id;
+      }
+
       // Si la columna 'is_visible' realmente no existe aún (esquema muy viejo) o falla la caché
-      if (isSchemaCacheError || error.message.includes('column "is_visible"') || error.message.includes("'is_visible' column")) {
+      if (isMissingColumnError(error, 'is_visible')) {
         delete fallbackData.is_visible;
       }
 

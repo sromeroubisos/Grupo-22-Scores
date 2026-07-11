@@ -300,7 +300,21 @@ export function useMatchesStore(
         if (!controller.signal.aborted) {
           setMatches(data);
           setLoading(false);
-          if (ok) setSourceError(buildSourceError(sources));
+          if (ok) {
+            // Clear any stale error from a previous failed fetch
+            setSourceError(buildSourceError(sources));
+          } else {
+            // The fetch itself failed: surface an explicit error instead of an empty list
+            setSourceError({
+              flashscore: true,
+              supabase: true,
+              flashscoreFromCache: false,
+              flashscoreReason: null,
+              supabaseReason: null,
+              message: 'No pudimos cargar los partidos. Reintentá en unos minutos.',
+              scenario: 'both_down',
+            });
+          }
         }
       });
     }

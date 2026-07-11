@@ -1,4 +1,5 @@
 import logging
+import os
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,7 +18,32 @@ logging.basicConfig(
 logger = logging.getLogger("sofascore-bridge")
 
 
+def _enforce_service_token() -> None:
+    """B4: without SERVICE_TOKEN every endpoint is publicly reachable.
+
+    In production, refuse to start. In dev, keep the current behaviour but log
+    a loud warning at startup.
+    """
+    if settings.service_token:
+        return
+    env = (os.getenv("ENV") or os.getenv("ENVIRONMENT") or "").strip().lower()
+    if env in {"production", "prod"}:
+        raise RuntimeError(
+            "SERVICE_TOKEN is not set — refusing to start in production: "
+            "all endpoints would be publicly accessible without authentication. "
+            "Set SERVICE_TOKEN and restart."
+        )
+    logger.warning(
+        "%s\nSERVICE_TOKEN is NOT set — all endpoints are UNAUTHENTICATED. "
+        "This is only acceptable in local development. Set SERVICE_TOKEN before deploying.\n%s",
+        "=" * 72,
+        "=" * 72,
+    )
+
+
 def create_app() -> FastAPI:
+    _enforce_service_token()
+
     app = FastAPI(title="SofaScore Bridge", version="0.1.0")
 
     app.add_middleware(

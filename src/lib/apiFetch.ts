@@ -14,7 +14,10 @@ export async function apiFetch<T = unknown>(
         silent?: boolean;
         cacheTtl?: number; // Cache TTL in seconds, 0 = no cache
     } = {}
-): Promise<{ data: T | null; debug: ApiDebug }> {
+    // M9: `ok`/`status` let callers distinguish a failed request (network error,
+    // timeout, non-2xx) from a legitimately empty payload without breaking the
+    // existing `{ data, debug }` destructuring.
+): Promise<{ data: T | null; ok: boolean; status: number; debug: ApiDebug }> {
     const t0 = Date.now();
 
     // Default headers
@@ -75,14 +78,18 @@ export async function apiFetch<T = unknown>(
         console.log(`[API Call] ${opts.debugTag || 'Fetch'} - Status: ${res.status} - ${url} (${ms}ms)`);
         if (!res.ok) {
             if (!opts.silent) console.error(`[API Error] Details:`, debug);
-            return { data: null, debug };
+            return { data: null, ok: false, status: res.status, debug };
         }
 
-        return { data: json as T, debug };
+        return { data: json as T, ok: true, status: res.status, debug };
     } catch (error: any) {
         clearTimeout(timeoutId);
         const ms = Date.now() - t0;
-        const isTimeout = error.name === 'AbortError';
+        // The timeout above aborts with `new Error("Request timeout")`, which does
+        // NOT surface as error.name === 'AbortError' - match the message too.
+        const isTimeout = error?.name === 'AbortError'
+            || error?.name === 'TimeoutError'
+            || /request timeout/i.test(String(error?.message ?? error));
 
         const debug: ApiDebug = {
             url,
@@ -93,7 +100,6 @@ export async function apiFetch<T = unknown>(
         };
 
         console.error(`[API Fetch Failed] ${opts.debugTag || 'Fetch'} - ${url} - Error: ${error.message} (${ms}ms)`);
-        return { data: null, debug };
+        return { data: null, ok: false, status: isTimeout ? 408 : 500, debug };
     }
 }
-

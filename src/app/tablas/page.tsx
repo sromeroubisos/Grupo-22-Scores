@@ -5,6 +5,7 @@ import Link from 'next/link';
 import ExportImage from '@/components/ExportImage';
 import styles from './page.module.css';
 
+// TODO: datos mock — conectar a standings reales
 // Mock data
 const tournaments = [
     { id: 'apertura-2026', name: 'Torneo Apertura 2026', categories: ['Primera División', 'Reserva', 'M21'] },
@@ -118,6 +119,11 @@ export default function TablasPage() {
                             <span className={styles.tableCategory}>{selectedCategory}</span>
                         </div>
 
+                        {standings.length === 0 ? (
+                            <div style={{ padding: '3rem 1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                Todavía no hay tabla de posiciones para este torneo
+                            </div>
+                        ) : (
                         <div className={styles.tableWrapper}>
                             <table className={styles.table}>
                                 <thead>
@@ -185,6 +191,7 @@ export default function TablasPage() {
                                 </tbody>
                             </table>
                         </div>
+                        )}
 
                         <div className={styles.tableLegend}>
                             <div className={styles.legendItem}>

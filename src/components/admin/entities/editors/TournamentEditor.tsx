@@ -783,6 +783,7 @@ export function TournamentEditor({
         age_grade: data.age_grade ?? 'Mayores',
         status: data.status === 'published' || data.status === 'active' ? 'live' : (data.status ?? 'draft'),
         is_visible: data.is_visible ?? true,
+        sync_locked: data.sync_locked ?? false,
         priority: data.priority ?? 0,
         country_id: normalizeCountryId(data.country_id ?? data.country ?? '', baseCountryOptions),
         region: data.region ?? '',
@@ -1684,6 +1685,41 @@ export function TournamentEditor({
                                                 borderRadius: '50%',
                                                 transition: '0.4s',
                                                 transform: form.is_visible ? 'translateX(20px)' : 'translateX(0)',
+                                            }}
+                                        />
+                                    </div>
+                                </label>
+                            </div>
+
+                            {/* Sync lock */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <label style={{ ...S.label, marginBottom: 0 }} title="Si está activo, los procesos automáticos (syncs externos, webhook WhatsApp, imports) no pueden modificar este torneo. La edición manual sigue permitida.">Bloquear sincronización automática</label>
+                                <label style={{ position: 'relative', display: 'inline-block', width: 40, height: 20 }}>
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={form.sync_locked}
+                                        onChange={e => handleChange('sync_locked', e.target.checked)}
+                                    />
+                                    <div className="peer-checked:bg-[rgba(0,255,102,0.1)] peer-checked:border-[#00FF66] after:peer-checked:translate-x-5 after:peer-checked:bg-[#00FF66]"
+                                        style={{
+                                            position: 'absolute', inset: 0,
+                                            backgroundColor: T.bgSurface,
+                                            border: `1px solid ${T.border}`,
+                                            borderRadius: 20,
+                                            transition: '0.4s',
+                                            cursor: 'pointer',
+                                        }}>
+                                        <div
+                                            className="peer-checked:translate-x-5 peer-checked:bg-[#00FF66]"
+                                            style={{
+                                                position: 'absolute',
+                                                height: 14, width: 14,
+                                                left: 2, bottom: 2,
+                                                backgroundColor: form.sync_locked ? T.neon : T.textDim,
+                                                borderRadius: '50%',
+                                                transition: '0.4s',
+                                                transform: form.sync_locked ? 'translateX(20px)' : 'translateX(0)',
                                             }}
                                         />
                                     </div>

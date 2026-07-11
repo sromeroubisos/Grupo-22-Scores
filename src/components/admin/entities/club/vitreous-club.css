@@ -154,12 +154,54 @@
 }
 
 .club-nav-brand-mark {
-    width: 12px;
-    height: 12px;
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
     flex-shrink: 0;
+    border-radius: 13px;
+    color: #fff;
+    background: linear-gradient(140deg, var(--accent), var(--accent-tertiary));
+    box-shadow:
+        0 12px 26px -12px color-mix(in srgb, var(--accent) 75%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.club-nav-brand-pulse {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 10px;
+    height: 10px;
     border-radius: 999px;
-    background: var(--accent-tertiary);
-    box-shadow: 0 0 18px rgba(244, 63, 94, 0.8);
+    background: var(--success);
+    border: 2px solid var(--bg);
+    animation: club-nav-pulse 2.4s ease-out infinite;
+}
+
+@keyframes club-nav-pulse {
+    0% {
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 55%, transparent);
+    }
+
+    70% {
+        box-shadow: 0 0 0 7px transparent;
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 transparent;
+    }
+}
+
+.club-nav-brand-copy {
+    min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .club-nav-brand-pulse {
+        animation: none;
+    }
 }
 
 .club-nav-label {
@@ -240,23 +282,20 @@
 
 .club-nav-club-link:hover,
 .club-side-link:hover,
-.club-nav-club-link.active,
-.club-side-link.active {
+.club-nav-club-link.active {
     color: var(--text);
     border-color: rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.045);
 }
 
-.club-side-link.active::before {
-    content: "";
-    position: absolute;
-    left: -1px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 20px;
-    border-radius: 0 999px 999px 0;
-    background: var(--accent);
+.club-side-link.active {
+    color: var(--text);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--accent) 16%, transparent),
+        color-mix(in srgb, var(--accent) 5%, transparent) 72%
+    );
 }
 
 .club-nav-club-link-mark,
@@ -294,6 +333,48 @@
     border: 1px solid var(--border);
     background: rgba(255, 255, 255, 0.035);
     flex-shrink: 0;
+    transition:
+        border-color 0.22s ease,
+        background 0.22s ease,
+        color 0.22s ease,
+        transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.flash-ui-container .club-side-link:hover .club-side-link-icon {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+    transform: scale(1.06);
+}
+
+.flash-ui-container .club-side-link.active .club-side-link-icon {
+    color: #fff;
+    border-color: transparent;
+    background: linear-gradient(140deg, var(--accent), color-mix(in srgb, var(--accent) 62%, var(--accent-tertiary)));
+    box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--accent) 75%, transparent);
+}
+
+/* Staggered entrance for the module list (plays once on mount). */
+@keyframes club-nav-link-in {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.club-side-nav .club-side-link {
+    animation: club-nav-link-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--nav-i, 0) * 32ms + 60ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .club-side-nav .club-side-link {
+        animation: none;
+    }
 }
 
 .club-nav-club-link-copy,
@@ -583,6 +664,109 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+}
+
+/* Club switcher: fixed-height card with a transparent native select on top.
+   Visible content drives the height, so it can never balloon. */
+.club-switcher {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+    padding: 0.6rem 0.7rem;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+        var(--surface);
+    box-shadow: var(--panel-shadow);
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+}
+
+[data-theme="light"] .flash-ui-container .club-switcher {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.84)),
+        var(--surface);
+}
+
+.club-switcher:hover {
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+
+.club-switcher:focus-within {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.club-switcher-select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    opacity: 0;
+    cursor: pointer;
+    appearance: none;
+    font-size: 16px;
+}
+
+.club-switcher-mark {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    background: linear-gradient(140deg, var(--accent), color-mix(in srgb, var(--accent) 60%, var(--accent-tertiary)));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.club-switcher-meta {
+    display: grid;
+    gap: 0.1rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.club-switcher-meta strong {
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.club-switcher-meta span {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.club-switcher-caret {
+    flex-shrink: 0;
+    color: var(--text-muted);
+    transition: color 0.22s ease;
+}
+
+.club-switcher:hover .club-switcher-caret {
+    color: var(--accent);
 }
 
 .btn {
@@ -4610,6 +4794,168 @@
     margin-top: 0.2rem;
     color: var(--text-muted);
     font-size: 0.82rem;
+}
+
+/* --- CLUB · CONFIGURACIÓN TAB --- */
+.club-config-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    min-width: 0;
+}
+
+.club-config-intro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    max-width: 62ch;
+}
+
+.club-config-intro-title {
+    font-size: clamp(1.5rem, 1.05rem + 1.5vw, 2rem);
+    font-weight: 900;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    text-wrap: balance;
+    color: var(--text);
+}
+
+.club-config-intro-copy {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    text-wrap: pretty;
+}
+
+.club-config-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.9fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 1180px) {
+    .club-config-split {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Layout-only wrappers: each child tab carries its own surface, so these
+   stay transparent to avoid nesting a card inside a card. */
+.club-config-block {
+    min-width: 0;
+}
+
+/* The roles sidebar is raw content, so it owns its surface. */
+.club-roles-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1.75rem;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--accent) 6%, transparent), transparent 62%),
+        var(--surface-panel);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--panel-shadow);
+    position: sticky;
+    top: 1.5rem;
+}
+
+.club-roles-grid {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 0.35rem;
+    padding: 0;
+    list-style: none;
+}
+
+.club-role-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface-soft);
+    transition:
+        border-color 0.25s ease,
+        background 0.25s ease,
+        transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.club-role-card:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+    background: color-mix(in srgb, var(--accent) 7%, var(--surface-soft));
+    transform: translateY(-2px);
+}
+
+.club-role-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.club-role-card strong {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--text);
+}
+
+.club-role-card span {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+/* Staggered entrance. Toggling the tab flips display:none on the wrapper,
+   which restarts these animations every time the panel returns to view. */
+.club-config-intro,
+.club-config-block {
+    animation: club-config-reveal 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--reveal-i, 0) * 70ms);
+}
+
+@keyframes club-config-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .club-config-intro,
+    .club-config-block {
+        animation: club-config-fade 0.35s ease both;
+        animation-delay: 0ms;
+    }
+}
+
+@keyframes club-config-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .club-ops-grid {

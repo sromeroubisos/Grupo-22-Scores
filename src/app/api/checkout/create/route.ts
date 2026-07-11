@@ -48,16 +48,20 @@ export async function POST(request: NextRequest) {
     const admin = createAdminClient();
 
     // Si ya tiene una pendiente o activa al MISMO plan, devolverle esa.
-    const { data: existing, error: existingError } = await admin
+    const { data: existingRows, error: existingError } = await admin
         .from('subscriptions')
         .select('id, plan, status, provider_subscription_id, metadata')
         .eq('user_id', user.id)
         .in('status', ['pending', 'active'])
-        .maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-    if (existingError && existingError.code !== 'PGRST116') {
+    if (existingError) {
+        console.error('[checkout/create] Error consultando suscripciones existentes:', existingError);
         return err('No pudimos consultar tus suscripciones existentes.', 500);
     }
+
+    const existing = existingRows?.[0] ?? null;
 
     if (existing && existing.status === 'active') {
         return err('Ya tenés una suscripción activa. Cancelá la actual desde /billing antes de cambiar de plan.', 409);
@@ -127,13 +131,22 @@ export async function POST(request: NextRequest) {
         return err('No pudimos iniciar el pago en MercadoPago. Verificá la configuración del integrador.', 502);
     }
 
-    await admin
+    const { error: linkError } = await admin
         .from('subscriptions')
         .update({
             provider_subscription_id: preapproval.id,
             metadata: { preapproval_status: preapproval.status },
         })
         .eq('id', subscriptionId);
+
+    if (linkError) {
+        console.error('[checkout/create] Error guardando provider_subscription_id:', {
+            preapprovalId: preapproval.id,
+            subscriptionId,
+            error: linkError,
+        });
+        return err('No pudimos vincular la suscripción con el pago de MercadoPago. Contactá a soporte antes de reintentar.', 500);
+    }
 
     return NextResponse.json({
         subscriptionId,

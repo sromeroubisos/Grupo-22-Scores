@@ -1285,7 +1285,16 @@ async function syncCompetitionBaseEvents(admin: LooseMutationClient, competition
         const operations: Array<PromiseLike<MutationResult>> = [];
 
         if (inserts.length) {
-            operations.push(admin.from('prode_events').insert(inserts));
+            // Upsert en vez de insert: dos syncs concurrentes podían insertar el mismo
+            // evento externo dos veces. El índice único
+            // prode_events_competition_external_unique (migración 20260701090300)
+            // respalda el onConflict; para eventos locales las columnas externas son NULL
+            // y nunca conflictúan, así que se comportan como insert normal.
+            operations.push(
+                admin.from('prode_events').upsert(inserts, {
+                    onConflict: 'competition_id,external_provider,external_match_id',
+                }),
+            );
         }
 
         for (const updateOperation of updates) {

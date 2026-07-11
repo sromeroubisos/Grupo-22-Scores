@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient as createServerClient } from '@/lib/supabase/server';
@@ -102,8 +103,16 @@ type UpdateLeaguePayload = {
     role?: 'admin' | 'member';
 };
 
+const INVITE_CODE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const INVITE_CODE_LENGTH = 8;
+
 function makeInviteCode() {
-    return Math.random().toString(36).slice(2, 8).toUpperCase();
+    const bytes = randomBytes(INVITE_CODE_LENGTH);
+    let code = '';
+    for (let i = 0; i < INVITE_CODE_LENGTH; i += 1) {
+        code += INVITE_CODE_ALPHABET[bytes[i] % INVITE_CODE_ALPHABET.length];
+    }
+    return code;
 }
 
 function ensureString(value: unknown) {
@@ -544,8 +553,9 @@ export async function POST(request: Request) {
             .single();
 
         if (createLeagueError || !createdLeague?.id) {
+            console.error('[prode/private-leagues] Error insertando la liga privada:', createLeagueError);
             return NextResponse.json(
-                { error: createLeagueError?.message || 'No se pudo crear la liga privada.' },
+                { error: 'No se pudo crear la liga privada.' },
                 { status: 500 },
             );
         }

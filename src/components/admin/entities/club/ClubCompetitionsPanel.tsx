@@ -112,7 +112,8 @@ function getTimestamp(value: string | null | undefined) {
 }
 
 function formatMatchSlot(value: string | null | undefined) {
-    if (!value) return 'Fecha a confirmar';
+    const timestamp = getTimestamp(value);
+    if (timestamp == null) return 'Fecha a confirmar';
 
     return new Intl.DateTimeFormat('es-AR', {
         weekday: 'short',
@@ -120,17 +121,18 @@ function formatMatchSlot(value: string | null | undefined) {
         month: 'short',
         hour: '2-digit',
         minute: '2-digit',
-    }).format(new Date(value));
+    }).format(new Date(timestamp));
 }
 
 function formatUpdatedAt(value: string | null | undefined) {
-    if (!value) return 'Sin sincronizar';
+    const timestamp = getTimestamp(value);
+    if (timestamp == null) return 'Sin sincronizar';
 
     return new Intl.DateTimeFormat('es-AR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
-    }).format(new Date(value));
+    }).format(new Date(timestamp));
 }
 
 function formatPosition(position: number | null | undefined) {

@@ -11,6 +11,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Match } from '@/types/match';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
+import { isMissingTableError } from '@/lib/utils/supabaseSchema';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -185,6 +186,10 @@ export async function upsertMatches(
         .upsert(matches, { onConflict: 'id' });
 
     if (error) {
+        if (error.code === '42P01' || isMissingTableError(error, 'external_match_cache')) {
+            console.warn('[externalMatchCache] upsertMatches skipped: la tabla external_match_cache no existe. Aplicar la migración 20260701090000_restore_external_match_cache.sql.');
+            return;
+        }
         console.error('[externalMatchCache] upsertMatches error:', error.message);
         throw error;
     }

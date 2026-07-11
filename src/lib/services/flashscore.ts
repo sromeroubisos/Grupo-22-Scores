@@ -27,7 +27,13 @@ import {
     SOFASCORE_MATCH_PREFIX,
 } from '@/lib/services/sofascore';
 
-const API_KEY = process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '';
+// M10: prefer the server-only RAPIDAPI_KEY; NEXT_PUBLIC_* vars are embedded in
+// the client bundle and expose the key publicly. The fallback keeps the current
+// deploy working until RAPIDAPI_KEY is created in Vercel and the public var removed.
+const API_KEY = process.env.RAPIDAPI_KEY || process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '';
+if (!process.env.RAPIDAPI_KEY && process.env.NEXT_PUBLIC_RAPIDAPI_KEY) {
+    console.warn('[FlashScore] Using NEXT_PUBLIC_RAPIDAPI_KEY (exposed in the client bundle). Create the server-only env var RAPIDAPI_KEY and remove NEXT_PUBLIC_RAPIDAPI_KEY.');
+}
 const API_HOST = process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com';
 
 // Cache configuration
@@ -387,6 +393,8 @@ export async function getFlashScoreMatches(
 
             if (tournament.matches && Array.isArray(tournament.matches)) {
                 const tournamentMatches = tournament.matches
+                    // C5: drop events without a stable provider ID — never invent one.
+                    .filter((evt: any) => hasStableEventId(evt))
                     .map((evt: any) => mapEventToMatch(evt, effectiveSportId, { leagueName, countryName, leagueId }))
                     .filter((match: Match) => {
                         // Skip duplicates
@@ -498,9 +506,12 @@ export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]
         const leagueId = tournament.tournament_id;
 
         if (tournament.matches && Array.isArray(tournament.matches)) {
-            const tournamentMatches = tournament.matches.map((evt: any) => {
-                return mapEventToMatch(evt, sportId, { leagueName, countryName, leagueId });
-            });
+            const tournamentMatches = tournament.matches
+                // C5: drop events without a stable provider ID — never invent one.
+                .filter((evt: any) => hasStableEventId(evt))
+                .map((evt: any) => {
+                    return mapEventToMatch(evt, sportId, { leagueName, countryName, leagueId });
+                });
             liveMatches = liveMatches.concat(tournamentMatches);
         }
     });
@@ -509,6 +520,34 @@ export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]
     memoryCache.set(cacheKey, liveMatches, CACHE_TTL_LIVE);
 
     return liveMatches;
+}
+
+// C5: an event without match_id/event_key cannot be persisted or deduplicated;
+// callers must filter these out instead of inventing a random ID.
+function hasStableEventId(evt: any): boolean {
+    return Boolean(evt?.match_id || evt?.event_key);
+}
+
+// B12: explicit API states that mean "not playing" (suspended / interrupted /
+// postponed / abandoned / delayed). mapStatus maps some of these to a fallback
+// 'scheduled', so the time-based heuristics below must check the raw tokens and
+// never override them.
+function hasExplicitHaltedStatusToken(evt: any): boolean {
+    const tokens = [
+        evt?.match_status?.type,
+        evt?.match_status?.stage,
+        evt?.match_status?.code,
+        evt?.status,
+    ].map(normalizeStatusToken);
+    return tokens.some((token) =>
+        token.includes('susp')
+        || token.includes('interrup')
+        || token.includes('postpon')
+        || token.includes('abandon')
+        || token.includes('delay')
+        || token.includes('aplazado')
+        || token.includes('suspendido')
+    );
 }
 
 function mapEventToMatch(evt: any, sportId: string, context: { leagueName: string, countryName: string, leagueId: string }): Match {
@@ -537,7 +576,8 @@ function mapEventToMatch(evt: any, sportId: string, context: { leagueName: strin
     const awayTeamId = `fs-team-${evt.away_team?.team_id || evt.away_team?.id || 'a'}`;
 
     const finalMatch: Match = {
-        id: evt.match_id || evt.event_key || `fs-${Math.random()}`,
+        // C5: callers pre-filter with hasStableEventId — never invent a random ID here.
+        id: evt.match_id || evt.event_key,
         tournamentId: `fs-${context.leagueId || 'unknown'}`,
         leagueName: context.leagueName,
         countryName: context.countryName,
@@ -575,9 +615,13 @@ function mapEventToMatch(evt: any, sportId: string, context: { leagueName: strin
         updatedAt: new Date()
     };
 
+    // B12: both heuristics below only apply when the API state is unknown/absent —
+    // an explicit suspended/interrupted/postponed/abandoned token must win.
+    const apiReportsHaltedState = hasExplicitHaltedStatusToken(evt);
+
     // Fix for matches that have scores but bad status flags (API list view often lacks live flags)
     // If we have scores, no finish flag, and match started recently (< 5 hours), force LIVE.
-    if (finalMatch.status === 'scheduled' && typeof homeScore === 'number' && typeof awayScore === 'number') {
+    if (!apiReportsHaltedState && finalMatch.status === 'scheduled' && typeof homeScore === 'number' && typeof awayScore === 'number') {
         const isFinished = evt.match_status?.is_finished || false;
         const now = Date.now();
         const matchTime = scheduledAt.getTime();
@@ -591,7 +635,7 @@ function mapEventToMatch(evt: any, sportId: string, context: { leagueName: strin
     // New Request: If Rugby match > 100 minutes since start, force finalize as 'pending result'
     const flashScoreSportId = SPORT_MAPPING[sportId] || parseInt(sportId) || 1;
     const isRugbyVariant = flashScoreSportId === 8 || flashScoreSportId === 19;
-    if (isRugbyVariant && finalMatch.status !== 'final' && finalMatch.status !== 'postponed' && finalMatch.status !== 'cancelled') {
+    if (isRugbyVariant && !apiReportsHaltedState && finalMatch.status !== 'final' && finalMatch.status !== 'postponed' && finalMatch.status !== 'cancelled') {
         const now = Date.now();
         const matchTime = scheduledAt.getTime();
         const minutesSinceStart = (now - matchTime) / (1000 * 60);

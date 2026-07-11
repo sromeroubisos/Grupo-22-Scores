@@ -509,7 +509,9 @@ function getQuickStats(
     if (fixtures.length > 0) {
         const ts = fixtures[0].timestamp || fixtures[0].start_time || fixtures[0].time;
         if (ts) {
-            nextDate = formatArgentinaDate(new Date(ts * 1000), { day: '2-digit', month: '2-digit' });
+            // ts puede ser epoch en segundos (number) o string ISO; * 1000 sobre ISO da NaN.
+            const parsed = typeof ts === 'number' ? new Date(ts * 1000) : new Date(ts);
+            nextDate = formatArgentinaDate(parsed, { day: '2-digit', month: '2-digit' }) || '—';
         }
     }
 
@@ -1117,8 +1119,8 @@ function mapCalculatedDbStanding(row: any, participants: any[], phaseId: string 
     return {
         position: row.position,
         team: {
-            name: row.team.name,
-            logo: row.team.logo,
+            name: row.team?.name ?? '',
+            logo: row.team?.logo ?? null,
             id: row.teamId,
         },
         matches_total: row.played,

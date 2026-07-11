@@ -3,11 +3,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './RadialBracketPredictor.module.css';
 
-// ── Social proof GLOBAL: contador de exportes + votos de campeón ──────────────
+// ── Social proof GLOBAL: veces jugadas + votos de campeón ─────────────────────
 // El estado vive en la DB (vía /api/predictor/stats) y es compartido por todos los
-// usuarios. Los seeds son solo el fallback/piso inicial mientras carga o si la
-// migración aún no se aplicó.
-const SEED_TIMES_PLAYED = 127;
+// usuarios. Los seeds son el fallback/piso inicial; suman 127, que es el arranque
+// de "Veces jugadas" (= suma de votos de campeón).
 const SEED_CHAMPION_VOTES: Array<{ name: string; count: number }> = [
     { name: 'Argentina', count: 40 },
     { name: 'España', count: 36 },
@@ -42,28 +41,27 @@ function normalizeChampionList(raw: unknown): ChampionVote[] {
     return list.length ? list : seedChampionList();
 }
 
-// Caché local del último estado global conocido. Evita el flash a 127 al reabrir:
-// pintamos al instante el último valor visto y luego reconciliamos con el server.
-const STATS_CACHE_KEY = 'g22-predictor-stats-cache';
+// Caché local de los últimos votos de campeón conocidos. Evita el flash a 127 al
+// reabrir: pintamos al instante el último estado visto y luego reconciliamos con el
+// server. "Veces jugadas" se deriva como la suma de estos votos.
+const CHAMPIONS_CACHE_KEY = 'g22-predictor-champions-cache';
 
-function readCachedStats(): { timesPlayed: number; champions: ChampionVote[] } | null {
+function readCachedChampions(): ChampionVote[] | null {
     if (typeof window === 'undefined') return null;
     try {
-        const raw = window.localStorage.getItem(STATS_CACHE_KEY);
+        const raw = window.localStorage.getItem(CHAMPIONS_CACHE_KEY);
         if (!raw) return null;
         const parsed = JSON.parse(raw);
-        const timesPlayed = Number(parsed?.timesPlayed);
-        if (!Number.isFinite(timesPlayed)) return null;
-        return { timesPlayed, champions: normalizeChampionList(parsed?.champions) };
+        return Array.isArray(parsed) ? normalizeChampionList(parsed) : null;
     } catch {
         return null;
     }
 }
 
-function writeCachedStats(timesPlayed: number, champions: ChampionVote[]) {
+function writeCachedChampions(champions: ChampionVote[]) {
     if (typeof window === 'undefined') return;
     try {
-        window.localStorage.setItem(STATS_CACHE_KEY, JSON.stringify({ timesPlayed, champions }));
+        window.localStorage.setItem(CHAMPIONS_CACHE_KEY, JSON.stringify(champions));
     } catch {
         /* sin persistencia local: no pasa nada */
     }
@@ -519,10 +517,12 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
     const reset = () => setWinners(seedWinners);
 
     // ── Social proof GLOBAL (compartido por todos los usuarios, vía /api/predictor/stats) ──
-    // Arrancamos con el último valor cacheado (si existe) para no parpadear a 127 al
-    // reabrir; si no hay caché, usamos los seeds.
-    const [timesPlayed, setTimesPlayed] = useState<number>(() => readCachedStats()?.timesPlayed ?? SEED_TIMES_PLAYED);
-    const [championVotes, setChampionVotes] = useState<ChampionVote[]>(() => readCachedStats()?.champions ?? seedChampionList());
+    // Arrancamos con los últimos votos cacheados (si existen) para no parpadear a 127
+    // al reabrir; si no hay caché, usamos los seeds.
+    const [championVotes, setChampionVotes] = useState<ChampionVote[]>(() => readCachedChampions() ?? seedChampionList());
+    // "Veces jugadas" = suma de todos los votos de campeón (cada jugada suma un voto;
+    // los seeds suman 127). Así el contador SIEMPRE sigue a los votos, que persisten.
+    const timesPlayed = useMemo(() => championVotes.reduce((sum, vote) => sum + vote.count, 0), [championVotes]);
     // Campeón ya contado en esta sesión: evita re-contar al re-renderizar y no cuenta
     // el campeón sembrado por resultados reales (solo cuando el usuario juega/elige).
     const initialChampionKey = useMemo(() => {
@@ -540,11 +540,11 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
                 if (!res.ok) return;
                 const data = await res.json();
                 if (cancelled) return;
-                const nextTimesPlayed = typeof data?.timesPlayed === 'number' ? data.timesPlayed : null;
-                const nextChampions = Array.isArray(data?.champions) ? normalizeChampionList(data.champions) : null;
-                if (nextTimesPlayed !== null) setTimesPlayed(nextTimesPlayed);
-                if (nextChampions) setChampionVotes(nextChampions);
-                if (nextTimesPlayed !== null && nextChampions) writeCachedStats(nextTimesPlayed, nextChampions);
+                if (Array.isArray(data?.champions)) {
+                    const nextChampions = normalizeChampionList(data.champions);
+                    setChampionVotes(nextChampions);
+                    writeCachedChampions(nextChampions);
+                }
             } catch {
                 /* sin red: dejamos el último valor cacheado / los seeds */
             }
@@ -552,13 +552,12 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
         return () => { cancelled = true; };
     }, []);
 
-    // Registra una jugada: +1 al contador GLOBAL "Veces jugadas" y +1 al campeón
-    // elegido. Optimista en el cliente; reconcilia con el server SOLO si éste
-    // confirma persistencia (si la migración aún no se aplicó, mantenemos el
+    // Registra una jugada: suma +1 al campeón elegido (y, por derivación, +1 a
+    // "Veces jugadas"). Optimista en el cliente; reconcilia con el server SOLO si
+    // éste confirma persistencia (si la migración aún no se aplicó, mantenemos el
     // incremento local para que igual se vea moverse).
     const registerPlay = (championName: string) => {
         const key = normalizeChampionKey(championName);
-        setTimesPlayed((prev) => prev + 1);
         setChampionVotes((prev) => {
             const exists = prev.some((vote) => normalizeChampionKey(vote.name) === key);
             return exists
@@ -575,11 +574,11 @@ export default function RadialBracketPredictor({ rounds, title, logo, onClose }:
                 if (!res.ok) return;
                 const data = await res.json();
                 if (data?.persisted !== true) return; // sin migración: dejamos lo optimista
-                const nextTimesPlayed = typeof data?.timesPlayed === 'number' ? data.timesPlayed : null;
-                const nextChampions = Array.isArray(data?.champions) ? normalizeChampionList(data.champions) : null;
-                if (nextTimesPlayed !== null) setTimesPlayed(nextTimesPlayed);
-                if (nextChampions) setChampionVotes(nextChampions);
-                if (nextTimesPlayed !== null && nextChampions) writeCachedStats(nextTimesPlayed, nextChampions);
+                if (Array.isArray(data?.champions)) {
+                    const nextChampions = normalizeChampionList(data.champions);
+                    setChampionVotes(nextChampions);
+                    writeCachedChampions(nextChampions);
+                }
             } catch {
                 /* el incremento optimista ya se ve; el server reconcilia al recargar */
             }
