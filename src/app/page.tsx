@@ -206,6 +206,7 @@ const individualMatchAssetCache = new Map<string, {
 interface LeagueMatches {
   league: string;
   leagueId: string;
+  leagueUrl?: string;
   logoUrl?: string | null;
   favoriteLeagueId?: string;
   favoriteLeagueIds?: string[];
@@ -1106,7 +1107,14 @@ export default function HomePage() {
         );
         const cleanedName = cleanLeagueName(tournamentName, countryName) || 'Competencia';
         const isMotorsportGroup = selectedSport.id === 'motorsport';
-        const dedupKey = `${countryName.toLowerCase()}::${cleanedName.toLowerCase()}`;
+        // Providers split a competition into one "tournament" per stage (Play Offs,
+        // 9th-12th places, ...), each with its own id and a stage-suffixed name. The
+        // tournament URL is the only identifier they share, so it wins as the dedup
+        // key; without one we fall back to country+name.
+        const tournamentUrl = typeof (tournament as any)?.url === 'string' ? (tournament as any).url.trim() : '';
+        const dedupKey = tournamentUrl
+          ? `url::${tournamentUrl.toLowerCase()}`
+          : `${countryName.toLowerCase()}::${cleanedName.toLowerCase()}`;
 
         const existingId = dedupByKey.get(dedupKey);
         const fallbackGroupKey = `${countryName.toLowerCase()}::${cleanedName.toLowerCase()}`;
@@ -1119,6 +1127,7 @@ export default function HomePage() {
           groups[groupKey] = {
             league: `${countryName}: ${cleanedName}`,
             leagueId: groupKey,
+            leagueUrl: tournamentUrl || undefined,
             logoUrl: overriddenTournament?.logoUrl || (tournament as any)?.logoUrl || (tournament as any)?.logo_url || null,
             favoriteLeagueId,
             favoriteLeagueIds: favoriteLeagueId ? [favoriteLeagueId] : [],
@@ -1131,8 +1140,18 @@ export default function HomePage() {
           if (!isMotorsportGroup) {
             dedupByKey.set(dedupKey, groupKey);
           }
-        } else if (tournamentPriority > groups[groupKey].priority) {
-          groups[groupKey].priority = tournamentPriority;
+        } else {
+          if (tournamentPriority > groups[groupKey].priority) {
+            groups[groupKey].priority = tournamentPriority;
+          }
+          // Stages merged under one URL can arrive in any order, and a stage name always
+          // extends the competition name ("Mineiro U20" → "Mineiro U20 - Losers stage").
+          // Keeping the shortest one makes the header the competition, not whichever
+          // stage happened to be listed first.
+          const groupTitle = `${countryName}: ${cleanedName}`;
+          if (groupTitle.length < groups[groupKey].league.length) {
+            groups[groupKey].league = groupTitle;
+          }
         }
 
         if (favoriteLeagueId) {
@@ -2202,7 +2221,7 @@ export default function HomePage() {
                       style={{ cursor: 'pointer' }}
                     >
                       <Link
-                        href={`/tournaments/${league.leagueId}?sport=${selectedSport.id}${league.league ? `&name=${encodeURIComponent(league.league)}` : ''}`}
+                        href={`/tournaments/${league.leagueId}?sport=${selectedSport.id}${league.league ? `&name=${encodeURIComponent(league.league)}` : ''}${league.leagueUrl ? `&url=${encodeURIComponent(league.leagueUrl)}` : ''}`}
                         className={styles.leagueHeaderLink}
                         onClick={(e) => e.stopPropagation()}
                       >

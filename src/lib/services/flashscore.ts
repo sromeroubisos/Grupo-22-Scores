@@ -387,15 +387,13 @@ export async function getFlashScoreMatches(
         const tournaments = getFlashScoreRawTournamentList(data);
 
         tournaments.forEach((tournament: any) => {
-            const leagueName = tournament.name || tournament.league_name || 'Unknown League';
-            const countryName = tournament.country_name || 'International';
-            const leagueId = tournament.tournament_id;
+            const context = buildTournamentContext(tournament);
 
             if (tournament.matches && Array.isArray(tournament.matches)) {
                 const tournamentMatches = tournament.matches
                     // C5: drop events without a stable provider ID — never invent one.
                     .filter((evt: any) => hasStableEventId(evt))
-                    .map((evt: any) => mapEventToMatch(evt, effectiveSportId, { leagueName, countryName, leagueId }))
+                    .map((evt: any) => mapEventToMatch(evt, effectiveSportId, context))
                     .filter((match: Match) => {
                         // Skip duplicates
                         if (seenMatchIds.has(match.id.toString())) return false;
@@ -501,17 +499,13 @@ export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]
     let liveMatches: Match[] = [];
 
     tournaments.forEach((tournament: any) => {
-        const leagueName = tournament.name || tournament.league_name || 'Unknown League';
-        const countryName = tournament.country_name || 'International';
-        const leagueId = tournament.tournament_id;
+        const context = buildTournamentContext(tournament);
 
         if (tournament.matches && Array.isArray(tournament.matches)) {
             const tournamentMatches = tournament.matches
                 // C5: drop events without a stable provider ID — never invent one.
                 .filter((evt: any) => hasStableEventId(evt))
-                .map((evt: any) => {
-                    return mapEventToMatch(evt, sportId, { leagueName, countryName, leagueId });
-                });
+                .map((evt: any) => mapEventToMatch(evt, sportId, context));
             liveMatches = liveMatches.concat(tournamentMatches);
         }
     });
@@ -550,7 +544,58 @@ function hasExplicitHaltedStatusToken(evt: any): boolean {
     );
 }
 
-function mapEventToMatch(evt: any, sportId: string, context: { leagueName: string, countryName: string, leagueId: string }): Match {
+// matches/list emits one group per STAGE, and the `tournament_id` it reports there
+// is really the tournament_stage_id (lowercased). The only field every stage of a
+// competition shares is `tournament_url`, so that URL — not the id — is the
+// canonical tournament identity. See splitFlashScoreStageName for the display side.
+const STAGE_QUALIFIER = 'losers|winners|championship|relegation|promotion|placement|classification|qualification|main|regular|final';
+const STAGE_KIND = 'stage|group|round|season|phase|play[\\s-]?(?:offs?|in|out)';
+const STAGE_SUFFIX_RE = new RegExp(
+    `\\s*[-–]\\s*(\\d+(?:st|nd|rd|th)-\\d+(?:st|nd|rd|th)\\s+places?|(?:${STAGE_QUALIFIER})(?:\\s+(?:${STAGE_KIND}))?|${STAGE_KIND})\\s*$`,
+    'i',
+);
+
+/**
+ * Splits "WORLD: World Championship U20 - Play Offs" into the competition name and
+ * its stage. Only strips suffixes that match FlashScore's stage vocabulary, so a
+ * competition whose real name contains a dash is left untouched.
+ */
+export function splitFlashScoreStageName(name: string): { baseName: string; stageName: string } {
+    const raw = String(name || '').trim();
+    const match = raw.match(STAGE_SUFFIX_RE);
+    if (!match || match.index == null) return { baseName: raw, stageName: '' };
+    const baseName = raw.slice(0, match.index).trim();
+    if (!baseName) return { baseName: raw, stageName: '' };
+    return { baseName, stageName: match[1].trim() };
+}
+
+function readTournamentUrl(tournament: any): string {
+    const raw = tournament?.tournament_url || tournament?.url || tournament?.link || '';
+    return typeof raw === 'string' ? raw.trim() : '';
+}
+
+type TournamentContext = {
+    leagueName: string;
+    countryName: string;
+    leagueId: string;
+    leagueUrl?: string;
+    leagueStageName?: string;
+};
+
+/** Builds the per-tournament context shared by the list and live mappers. */
+function buildTournamentContext(tournament: any): TournamentContext {
+    const rawName = tournament?.name || tournament?.league_name || 'Unknown League';
+    const { baseName, stageName } = splitFlashScoreStageName(rawName);
+    return {
+        leagueName: baseName || rawName,
+        countryName: tournament?.country_name || 'International',
+        leagueId: tournament?.tournament_id,
+        leagueUrl: readTournamentUrl(tournament) || undefined,
+        leagueStageName: stageName || undefined,
+    };
+}
+
+function mapEventToMatch(evt: any, sportId: string, context: TournamentContext): Match {
     // Structure based on provided User JSON:
     // evt = { match_id: "...", match_status: { is_finished: bool, is_started: bool, ... }, timestamp: 123456, home_team: { name: "...", short_name: "..." }, away_team: { name: "..." }, scores: { home: 1, away: 2 } }
 
@@ -581,6 +626,8 @@ function mapEventToMatch(evt: any, sportId: string, context: { leagueName: strin
         tournamentId: `fs-${context.leagueId || 'unknown'}`,
         leagueName: context.leagueName,
         countryName: context.countryName,
+        leagueUrl: context.leagueUrl,
+        leagueStageName: context.leagueStageName,
 
         phaseId: 'group',
         round: 1,

@@ -39,6 +39,13 @@ export interface Match {
     /** Denormalized from external providers (e.g. Flashscore) for API responses */
     leagueName?: string;
     countryName?: string;
+    /**
+     * Provider tournament URL. Shared by every stage of the same competition, so it —
+     * not tournamentId, which is really a per-stage id — identifies the tournament.
+     */
+    leagueUrl?: string;
+    /** Stage this match belongs to ("Play Offs", "9th-12th places"), when the provider splits them. */
+    leagueStageName?: string;
     phaseId: string;
     stageId?: string;             // opcional si ten----s sub-etapas
     groupId?: string;             // para grupos

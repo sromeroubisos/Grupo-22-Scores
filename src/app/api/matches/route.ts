@@ -1302,7 +1302,9 @@ async function computeMatchesPayload(
                             name: (m as any).leagueName || 'Liga',
                             sport: sport as any,
                             status: 'published' as const,
-                            country: (m as any).countryName || 'Internacional'
+                            country: (m as any).countryName || 'Internacional',
+                            url: (m as any).leagueUrl || undefined,
+                            stageName: (m as any).leagueStageName || undefined
                         },
                         liveEnabled: true,
                         source: 'flashscore' as const
@@ -1631,7 +1633,9 @@ async function computeMatchesPayload(
                             name: (m as any).leagueName || 'Liga (EXT)',
                             sport: (sport || 'rugby') as any,
                             status: 'published' as const,
-                            country: (m as any).countryName || 'Internacional'
+                            country: (m as any).countryName || 'Internacional',
+                            url: (m as any).leagueUrl || undefined,
+                            stageName: (m as any).leagueStageName || undefined
                         },
                         liveEnabled: false,
                         source: 'flashscore' as const

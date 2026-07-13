@@ -258,6 +258,36 @@ type ResolvedIds = {
     tournamentUrl?: string;
 };
 
+type TournamentStage = { id: string; name: string };
+
+/** Every stage of a competition, read from the id bundle its shared URL resolves to. */
+async function resolveTournamentStages(tournamentUrl: string): Promise<TournamentStage[]> {
+    try {
+        const idsRes = await getTournamentIds(tournamentUrl); // memoized per URL
+        const idsData = idsRes?.DATA || idsRes;
+        const source = Array.isArray(idsData) ? idsData[0] : idsData;
+        const rawStages = source?.tournament_stages;
+        if (!Array.isArray(rawStages)) return [];
+        return rawStages
+            .map((stage: any) => ({
+                id: normalizeId(stage?.tournament_stage_id) || normalizeId(stage?.stage_id) || '',
+                name: String(stage?.name || '').trim(),
+            }))
+            .filter((stage: TournamentStage) => Boolean(stage.id));
+    } catch (error) {
+        console.warn('[Tournament API] Could not resolve tournament stages:', error);
+        return [];
+    }
+}
+
+// The stage that holds the league table. Knockout/placement stages have none.
+const MAIN_STAGE_NAME_RE = /^(main|regular season|group stage|league stage|round robin)$/i;
+
+function pickStandingsStageId(stages: TournamentStage[], currentStageId?: string): string | undefined {
+    const mainStage = stages.find((stage) => MAIN_STAGE_NAME_RE.test(stage.name));
+    return mainStage?.id || currentStageId;
+}
+
 function mergeResolvedIds(base: ResolvedIds, next: ResolvedIds): ResolvedIds {
     return {
         tournamentId: base.tournamentId || next.tournamentId,
@@ -371,6 +401,53 @@ function buildStandingsTeamAssetMap(...matchGroups: any[][]) {
         });
 
     return teamAssets;
+}
+
+type TeamAssetMap = Map<string, { id?: string; name?: string; logo?: string; teamUrl?: string }>;
+
+// The bracket feed appends an internal seed number to the team name ("France U20_165")
+// and ships no crest at all — unlike results/fixtures, which carry the real name and
+// image for the same team_id. Repair the bracket from that index.
+const BRACKET_SEED_SUFFIX_RE = /_\d+$/;
+
+function repairBracketTeam(team: any, teamAssets: TeamAssetMap) {
+    if (!team || typeof team !== 'object') return team;
+
+    const id = getMatchTeamId(team);
+    const rawName = getMatchTeamName(team);
+    const cleanedName = rawName.replace(BRACKET_SEED_SUFFIX_RE, '').trim();
+    const known =
+        (id ? teamAssets.get(`id:${id}`) : undefined) ||
+        (cleanedName ? teamAssets.get(`name:${cleanedName.toLowerCase()}`) : undefined);
+
+    const logo = getMatchTeamLogo(team) || known?.logo || '';
+
+    return {
+        ...team,
+        name: known?.name || cleanedName || rawName,
+        logo,
+        image_path: team.image_path || logo,
+        small_image_path: team.small_image_path || logo,
+        team_url: getMatchTeamUrl(team) || known?.teamUrl || '',
+    };
+}
+
+function repairBracketRounds(rounds: any, teamAssets: TeamAssetMap): any[] {
+    if (!Array.isArray(rounds)) return [];
+    return rounds.map((round: any) => ({
+        ...round,
+        matches: Array.isArray(round?.matches)
+            ? round.matches.map((match: any) => ({
+                ...match,
+                home_team: repairBracketTeam(match?.home_team, teamAssets),
+                away_team: repairBracketTeam(match?.away_team, teamAssets),
+            }))
+            : [],
+    }));
+}
+
+function roundsHaveMatches(rounds: any[]): boolean {
+    return rounds.some((round) => Array.isArray(round?.matches) && round.matches.length > 0);
 }
 
 function enrichStandingsRowsWithTeamAssets(
@@ -1502,8 +1579,19 @@ export async function GET(request: Request) {
         tournamentId = stripFsPrefix(tournamentId);
         stageId = stripFsPrefix(stageId);
 
+        // FlashScore splits a competition into stages and only one of them carries the
+        // standings table (the "Main" stage). `stageId` here is the provider's *current*
+        // stage — for a tournament in its knockout phase that's "Play Offs", which has a
+        // bracket but no table. Resolve the full stage list from the shared tournament URL
+        // so standings can come from the stage that actually holds them, while the bracket
+        // keeps using the current stage.
+        const tournamentStages = flashScoreEnabledForSport && url
+            ? await resolveTournamentStages(url)
+            : [];
+        const standingsStageId = pickStandingsStageId(tournamentStages, stageId);
+
         const canFetchMatches = flashScoreEnabledForSport && !!(templateId && seasonId);
-        const canFetchStandings = flashScoreEnabledForSport && !!(tournamentId && stageId);
+        const canFetchStandings = flashScoreEnabledForSport && !!(tournamentId && standingsStageId);
         const canFetchDraw = flashScoreEnabledForSport && !!(tournamentId && stageId); // Use stageId instead of drawStageId
         const canFetchArchives = flashScoreEnabledForSport && !!stageId;
         externalOverrideId = resolveExternalTournamentId({
@@ -1548,11 +1636,11 @@ export async function GET(request: Request) {
         const settled = await Promise.allSettled([
             canFetchMatches ? timedTab('results', getTournamentResults(templateId!, seasonId!)) : Promise.resolve([]),
             canFetchMatches ? timedTab('fixtures', getTournamentFixtures(templateId!, seasonId!)) : Promise.resolve([]),
-            canFetchStandings ? timedTab('standings', getTournamentStandings(tournamentId!, stageId!)) : Promise.resolve([]),
-            canFetchStandings ? timedTab('topScorers', getTournamentTopScorers(tournamentId!, stageId!)) : Promise.resolve([]),
-            canFetchStandings ? timedTab('standingsForm', getTournamentStandingsForm(tournamentId!, stageId!)) : Promise.resolve([]),
-            canFetchStandings ? timedTab('standingsHtFt', getTournamentStandingsHtFt(tournamentId!, stageId!)) : Promise.resolve([]),
-            canFetchStandings ? timedTab('standingsOverUnder', getTournamentStandingsOverUnder(tournamentId!, stageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('standings', getTournamentStandings(tournamentId!, standingsStageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('topScorers', getTournamentTopScorers(tournamentId!, standingsStageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('standingsForm', getTournamentStandingsForm(tournamentId!, standingsStageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('standingsHtFt', getTournamentStandingsHtFt(tournamentId!, standingsStageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('standingsOverUnder', getTournamentStandingsOverUnder(tournamentId!, standingsStageId!)) : Promise.resolve([]),
             timedTab('details', detailsPromise),
             canFetchDraw ? timedTab('draw', getTournamentDraw(tournamentId!, stageId!)) : Promise.resolve([]),
             canFetchArchives ? timedTab('archives', getTournamentArchives(stageId!)) : Promise.resolve([])
@@ -1656,6 +1744,32 @@ export async function GET(request: Request) {
             Array.isArray(resultsPayload) ? resultsPayload : [],
             Array.isArray(fixturesPayload) ? fixturesPayload : [],
         );
+
+        // A tournament runs several brackets side by side — Play Offs, 5th-8th places,
+        // 9th-12th places… — and the draw endpoint only ever returns the one for the stage
+        // it is asked about. Fetch every non-league stage so the UI can switch between them
+        // instead of showing whichever one happens to be active.
+        const bracketStages = tournamentStages.filter((stage) => !MAIN_STAGE_NAME_RE.test(stage.name));
+        const brackets = canFetchDraw && bracketStages.length > 0
+            ? (await Promise.all(
+                bracketStages.map(async (stage) => {
+                    const rounds = stage.id === stageId
+                        ? drawPayload
+                        : await getTournamentDraw(tournamentId!, stage.id)
+                            .then((res: any) => res?.DATA || res || [])
+                            .catch(() => []);
+                    return {
+                        stageId: stage.id,
+                        name: stage.name,
+                        active: stage.id === stageId,
+                        rounds: repairBracketRounds(rounds, teamAssets),
+                    };
+                }),
+            )).filter((bracket) => roundsHaveMatches(bracket.rounds))
+            : [];
+
+        const bracketDrawPayload = brackets.find((bracket) => bracket.stageId === stageId)?.rounds
+            ?? repairBracketRounds(drawPayload, teamAssets);
 
         const standingsSnapshot = getTabSnapshot({ ...snapshotKey, tab: 'standings' });
         const rawStandings = standingsFetchOk ? (standingsRes?.DATA || standingsRes || []) : null;
@@ -1877,7 +1991,8 @@ export async function GET(request: Request) {
             standingsOverUnderTeamLabels: externalStandingsOverUnderTeamLabels,
             customStandingsTables,
             topScorers: topScorersPayload,
-            draw: drawPayload,
+            draw: bracketDrawPayload,
+            brackets,
             archives: archivesPayload
         });
     } catch (e: any) {

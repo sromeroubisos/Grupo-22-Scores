@@ -2154,6 +2154,21 @@ export default function TournamentDetailPage({
                         : [],
                 );
                 setDraw((current) => Array.isArray(payload.draw) ? payload.draw : current);
+                // An external tournament runs several brackets at once (Play Offs, 5th-8th
+                // places, …). They arrive as stages, so map them onto the knockout-bracket
+                // shape the phase selector already speaks and open on the active one.
+                if (Array.isArray(payload.brackets) && payload.brackets.length > 0) {
+                    const externalBrackets = payload.brackets.map((bracket: any) => ({
+                        phaseId: String(bracket.stageId),
+                        phase: { id: String(bracket.stageId), name: String(bracket.name || 'Cuadro') },
+                        draw: Array.isArray(bracket.rounds) ? bracket.rounds : [],
+                        active: Boolean(bracket.active),
+                    }));
+                    const initialBracket = externalBrackets.find((bracket: any) => bracket.active) ?? externalBrackets[0];
+                    setKnockoutBrackets(externalBrackets);
+                    setPreferredKnockoutPhase(initialBracket.phase);
+                    setDraw(initialBracket.draw);
+                }
                 setTopScorers(payload.topScorers || []);
                 setArchives(payload.archives || []);
             } catch (err: any) {
