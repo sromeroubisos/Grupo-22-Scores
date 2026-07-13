@@ -6,6 +6,7 @@ import {
     isFlashScoreMatchesListDateSupported,
 } from '@/lib/services/flashscore';
 import { persistFromExternalMatches } from '@/lib/sync/catalog';
+import { recordExternalTournamentsFromMatches } from '@/lib/server/externalTournamentCatalog';
 import {
     addDaysToIsoDate,
     combineLocalDateTimeToUtcIso,
@@ -1317,6 +1318,7 @@ async function computeMatchesPayload(
                     const persistKey = buildExternalPersistKey(params, 'live');
                     if (shouldPersistExternalCatalog(persistKey)) {
                         persistFromExternalMatches(liveMatches, sport);
+                        void recordExternalTournamentsFromMatches(liveMatches, sport);
                     }
                 }
 
@@ -1668,6 +1670,9 @@ async function computeMatchesPayload(
                     const persistKey = buildExternalPersistKey(params, 'daily');
                     if (shouldPersistExternalCatalog(persistKey)) {
                         persistFromExternalMatches(mergedExternalMatches, sport || 'rugby');
+                        // The provider has no search endpoint, so this feed is where the
+                        // searchable catalog of external tournaments comes from.
+                        void recordExternalTournamentsFromMatches(mergedExternalMatches, sport || 'rugby');
                     }
                 }
                 } // end if (!fsFetchFailed)

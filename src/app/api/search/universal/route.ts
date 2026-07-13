@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { searchFlashScore } from '@/lib/services/flashscore';
 import { getReadClient } from '@/lib/supabase/read';
 import { escapePostgrestLike } from '@/lib/utils/postgrest';
+import { searchExternalTournamentCatalog } from '@/lib/server/externalTournamentCatalog';
 
 type SearchResult = {
     id: string;
@@ -39,6 +39,16 @@ type ClubSearchRow = {
     is_visible: boolean | null;
 };
 
+type ExternalTeamSearchRow = {
+    id: string;
+    name: string | null;
+    short_name: string | null;
+    sport: string | null;
+    country: string | null;
+    team_url: string | null;
+    logo_url: string | null;
+};
+
 function sanitizeSearchLogoUrl(value: unknown, proxyKey: string): string | null {
     if (typeof value !== 'string') return null;
     const trimmed = value.trim();
@@ -69,7 +79,11 @@ export async function GET(request: Request) {
     };
 
     try {
-        const [tournamentsRes, clubsRes, fsSearchRaw] = await Promise.all([
+        // Four sources: local tournaments and clubs, plus their external counterparts.
+        // The provider offers no search endpoint (/search 404s), so external results come
+        // from our own indexes: the tournament catalog fed by the matches feed, and the
+        // external_teams cache filled by team lookups.
+        const [tournamentsRes, clubsRes, externalTournaments, externalTeamsRes] = await Promise.all([
             supabase.from('tournaments')
                 .select('id, name, display_name, slug, sport_id, country_id, logo_url, is_visible, status, review_status, sport:sports(name), country:countries(name)')
                 .or(`name.ilike.%${escapedSearch}%,display_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`)
@@ -80,7 +94,11 @@ export async function GET(request: Request) {
                 .or(`name.ilike.%${escapedSearch}%,short_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`)
                 .neq('is_visible', false)
                 .limit(limit),
-            searchFlashScore(search).catch(() => null),
+            searchExternalTournamentCatalog(search, limit).catch(() => []),
+            supabase.from('external_teams')
+                .select('id, name, short_name, sport, country, team_url, logo_url')
+                .or(`name.ilike.%${escapedSearch}%,short_name.ilike.%${escapedSearch}%`)
+                .limit(limit),
         ]);
 
         debugInfo = {
@@ -134,33 +152,48 @@ export async function GET(request: Request) {
             })));
         }
 
-        // Merge FlashScore API results (teams only), avoiding duplicates with DB results
+        // External results are additive: a competition or club we already hold locally is
+        // the better record (curated name, logo, slug), so the local one wins on a name clash.
+        const dbTournamentNames = new Set(rawResults.filter(r => r.type === 'tournament').map(r => r.title.toLowerCase()));
         const dbClubNames = new Set(rawResults.filter(r => r.type === 'club').map(r => r.title.toLowerCase()));
-        if (fsSearchRaw) {
-            const fsItems: any[] = Array.isArray(fsSearchRaw)
-                ? fsSearchRaw
-                : (fsSearchRaw?.teams || fsSearchRaw?.data || []);
 
-            for (const item of fsItems) {
-                const name: string = item.name || item.team_name || '';
-                if (!name) continue;
-                if (dbClubNames.has(name.toLowerCase())) continue; // skip if already in DB results
+        for (const hit of externalTournaments) {
+            if (dbTournamentNames.has(hit.name.toLowerCase())) continue;
 
-                const teamUrl: string = item.team_url || '';
-                const teamId: string = item.team_id || item.id || '';
-                const clubUrl = teamId
-                    ? `/clubs/${teamId}?name=${encodeURIComponent(name)}&team_url=${encodeURIComponent(teamUrl)}`
-                    : '';
-                if (!clubUrl) continue;
+            // The detail page resolves an external tournament from its provider URL, so
+            // carry it through — without it the page has to guess which stage to open.
+            const params = new URLSearchParams();
+            if (hit.sport) params.set('sport', hit.sport);
+            params.set('url', hit.url);
+
+            rawResults.push({
+                id: hit.routeId,
+                type: 'tournament' as const,
+                title: hit.name,
+                subtitle: `${hit.sport || 'Torneo'} · ${hit.country || 'Internacional'}`,
+                url: `/tournaments/${hit.routeId}?${params.toString()}`,
+                logo_url: hit.logoUrl,
+                searchWeight: calculateWeight(hit.name, null, null, lSearch, 2),
+            });
+        }
+
+        if (externalTeamsRes.data) {
+            for (const team of externalTeamsRes.data as ExternalTeamSearchRow[]) {
+                const name = team.name || team.short_name || '';
+                if (!name || !team.id) continue;
+                if (dbClubNames.has(name.toLowerCase())) continue;
+
+                const params = new URLSearchParams({ name });
+                if (team.team_url) params.set('team_url', team.team_url);
 
                 rawResults.push({
-                    id: `fs-${teamId}`,
+                    id: `fs-team-${team.id}`,
                     type: 'club' as const,
                     title: name,
-                    subtitle: `Club · FlashScore`,
-                    url: clubUrl,
-                    logo_url: item.image_path || item.logo || null,
-                    searchWeight: calculateWeight(name, null, null, lSearch, 2)
+                    subtitle: `Club · ${team.country || team.sport || 'Internacional'}`,
+                    url: `/clubs/${team.id}?${params.toString()}`,
+                    logo_url: sanitizeSearchLogoUrl(team.logo_url, team.id),
+                    searchWeight: calculateWeight(name, team.short_name, null, lSearch, 3),
                 });
             }
         }

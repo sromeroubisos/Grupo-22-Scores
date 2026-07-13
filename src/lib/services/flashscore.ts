@@ -100,7 +100,6 @@ const SPORT_MAPPING: Record<string, number> = {
 // Prevents thundering-herd when the browser fires many concurrent requests
 // (main fetch + prefetch for 7 days + live polling) that all miss the cache.
 const inflightRequests = new Map<string, Promise<any>>();
-let flashScoreSearchSupported: boolean | null = null;
 
 // Two concurrency lanes against RapidAPI:
 //  - 'default' (3): browser-facing match-list fetches (main + 7-day prefetch + live
@@ -580,6 +579,7 @@ type TournamentContext = {
     leagueId: string;
     leagueUrl?: string;
     leagueStageName?: string;
+    leagueLogo?: string;
 };
 
 /** Builds the per-tournament context shared by the list and live mappers. */
@@ -592,6 +592,7 @@ function buildTournamentContext(tournament: any): TournamentContext {
         leagueId: tournament?.tournament_id,
         leagueUrl: readTournamentUrl(tournament) || undefined,
         leagueStageName: stageName || undefined,
+        leagueLogo: tournament?.image_path || tournament?.logo || tournament?.image || undefined,
     };
 }
 
@@ -628,6 +629,7 @@ function mapEventToMatch(evt: any, sportId: string, context: TournamentContext):
         countryName: context.countryName,
         leagueUrl: context.leagueUrl,
         leagueStageName: context.leagueStageName,
+        leagueLogo: context.leagueLogo,
 
         phaseId: 'group',
         round: 1,
@@ -1676,33 +1678,7 @@ export async function getFixturesByTournamentOrSeason(tournamentTemplateId: stri
     return getTournamentFixtures(tournamentTemplateId, seasonId, page);
 }
 
-export async function searchFlashScore(query: string) {
-    if (flashScoreSearchSupported === false) {
-        return null;
-    }
-
-    const cacheKey = `search-${query.toLowerCase()}`;
-    const cached = memoryCache.get<any>(cacheKey);
-    if (cached) return cached;
-
-    const url = `https://${API_HOST}/api/flashscore/v2/search?query=${encodeURIComponent(query)}`;
-    const { data, debug } = await apiFetch<any>(url, {
-        headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
-        debugTag: 'Search',
-        silent: true,
-        cacheTtl: 60
-    });
-
-    if (!data && debug.status === 404) {
-        flashScoreSearchSupported = false;
-        console.warn('[FlashScore] Search endpoint unavailable (404). Disabling provider search fallback.');
-        return null;
-    }
-
-    if (data) {
-        flashScoreSearchSupported = true;
-        memoryCache.set(cacheKey, data, 60);
-    }
-
-    return data;
-}
+// The provider exposes no search endpoint — /api/flashscore/v2/search answers
+// "Endpoint does not exist" (404) — so there is nothing to call here. External
+// tournaments and clubs are searched through our own indexes instead: see
+// `externalTournamentCatalog` and the `external_teams` cache.

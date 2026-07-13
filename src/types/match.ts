@@ -46,6 +46,8 @@ export interface Match {
     leagueUrl?: string;
     /** Stage this match belongs to ("Play Offs", "9th-12th places"), when the provider splits them. */
     leagueStageName?: string;
+    /** Tournament crest as served by the provider. */
+    leagueLogo?: string;
     phaseId: string;
     stageId?: string;             // opcional si ten----s sub-etapas
     groupId?: string;             // para grupos
