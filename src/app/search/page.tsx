@@ -149,27 +149,37 @@ export default function SearchPage() {
     const { history, saveItem, removeItem, clearAll } = useSearchHistory();
 
     useEffect(() => {
-        const fetchResults = async () => {
-            if (debouncedQuery.length < 2) {
-                setResults([]);
-                return;
-            }
+        if (debouncedQuery.length < 2) {
+            setResults([]);
+            setIsLoading(false);
+            return;
+        }
 
+        // Abort the in-flight request when the query moves on, so a slow response for an
+        // earlier prefix cannot land last and repaint results for a stale query.
+        const controller = new AbortController();
+
+        const fetchResults = async () => {
             setIsLoading(true);
             try {
-                const res = await fetch(`/api/search/universal?q=${encodeURIComponent(debouncedQuery)}`);
+                const res = await fetch(`/api/search/universal?q=${encodeURIComponent(debouncedQuery)}`, {
+                    signal: controller.signal,
+                });
                 if (!res.ok) throw new Error('Search failed');
                 const data = await res.json();
                 setResults(data.data || []);
             } catch (err) {
+                if ((err as Error)?.name === 'AbortError') return;
                 console.error('Search error:', err);
                 setResults([]);
             } finally {
-                setIsLoading(false);
+                if (!controller.signal.aborted) setIsLoading(false);
             }
         };
 
         void fetchResults();
+
+        return () => controller.abort();
     }, [debouncedQuery]);
 
     const handleSave = useCallback((row: ResultRow | HistoryItem) => {

@@ -1,3 +1,8 @@
+import {
+    getCountriesBySport,
+    getTournamentIds,
+    getTournamentsBySportAndEntity,
+} from '@/lib/services/flashscore';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
 import { escapePostgrestLike } from '@/lib/utils/postgrest';
@@ -84,11 +89,8 @@ export async function recordExternalTournamentsFromMatches(matches: any[], sport
     const entries = collectCatalogEntries(matches, sport);
     if (entries.length === 0) return;
 
-    const client = getWriteClient();
-    if (!client) return;
-
     const nowIso = new Date().toISOString();
-    const rows = entries.map((entry) => ({
+    await upsertCatalogRows(entries.map((entry) => ({
         url: entry.url,
         route_id: entry.routeId,
         provider: 'flashscore',
@@ -97,21 +99,97 @@ export async function recordExternalTournamentsFromMatches(matches: any[], sport
         sport: entry.sport,
         logo_url: entry.logoUrl,
         last_seen_at: nowIso,
-    }));
+    })));
+}
+
+async function upsertCatalogRows(rows: any[]): Promise<number> {
+    if (rows.length === 0) return 0;
+
+    const client = getWriteClient();
+    if (!client) return 0;
 
     const { error } = await (client as any).from(TABLE).upsert(rows, { onConflict: 'url' });
 
     if (error) {
         if (isMissingTableError(error)) {
             tableMissing = true;
-            console.warn(`[catalog] ${TABLE} is missing — run the migration to make external tournaments searchable.`);
-            return;
+            console.warn(`[catalog] ${TABLE} is missing — run the migration.`);
+            return 0;
         }
-        console.warn('[catalog] External tournament catalog write failed.', {
-            code: error.code,
-            message: error.message,
-        });
+        console.warn('[catalog] Catalog upsert failed.', { code: error.code, message: error.message });
+        return 0;
     }
+
+    return rows.length;
+}
+
+/**
+ * Rebuilds the catalog from the provider's own country/tournament directory.
+ *
+ * The matches feed alone is not enough: it only shows competitions playing within its
+ * ±7-day window, so anything out of season — Spain's División de Honor in July, say —
+ * would never be indexed and never be findable. The directory lists every competition a
+ * country has, in or out of season, which is what makes the search complete.
+ */
+export async function syncExternalTournamentCatalog(
+    sports: string[],
+): Promise<Array<{ sport: string; countries: number; tournaments: number; written: number }>> {
+    const summary: Array<{ sport: string; countries: number; tournaments: number; written: number }> = [];
+
+    for (const sport of sports) {
+        if (tableMissing) break;
+
+        const countriesPayload = await getCountriesBySport(sport).catch(() => null);
+        const countries: any[] = countriesPayload?.data || [];
+
+        // One row per competition URL — the same competition never appears twice.
+        const byUrl = new Map<string, { name: string; country: string | null }>();
+
+        for (const country of countries) {
+            const countryId = country?.country_id ?? country?.id;
+            if (countryId == null) continue;
+
+            const payload = await getTournamentsBySportAndEntity(sport, countryId).catch(() => null);
+            for (const tournament of payload?.data || []) {
+                const url = String(tournament?.url || tournament?.tournament_url || '').trim();
+                const name = String(tournament?.name || '').trim();
+                if (!url || !name || byUrl.has(url)) continue;
+                byUrl.set(url, { name, country: String(country?.name || '').trim() || null });
+            }
+        }
+
+        // The route id is the stage id the tournament page opens on. Resolving it here
+        // (cached per URL) keeps the search result linking exactly like a home-page card.
+        const entries = [...byUrl.entries()];
+        const rows: any[] = [];
+        const CONCURRENCY = 5;
+
+        for (let i = 0; i < entries.length; i += CONCURRENCY) {
+            const batch = entries.slice(i, i + CONCURRENCY);
+            const resolved = await Promise.all(batch.map(async ([url, meta]) => {
+                const ids = await getTournamentIds(url).catch(() => null);
+                const source = Array.isArray(ids) ? ids[0] : ids;
+                const stageId = source?.tournament_stage_id;
+                if (!stageId) return null;
+                return {
+                    url,
+                    route_id: `fs-${String(stageId).toLowerCase()}`,
+                    provider: 'flashscore',
+                    name: meta.name,
+                    country: meta.country,
+                    sport,
+                    logo_url: null,
+                    last_seen_at: new Date().toISOString(),
+                };
+            }));
+            rows.push(...resolved.filter(Boolean));
+        }
+
+        const written = await upsertCatalogRows(rows);
+        summary.push({ sport, countries: countries.length, tournaments: byUrl.size, written });
+    }
+
+    return summary;
 }
 
 export type ExternalTournamentSearchHit = {

@@ -38,21 +38,27 @@ export default function GlobalSearch() {
     }, []);
 
     useEffect(() => {
-        const fetchResults = async () => {
-            if (query.length < 2) {
-                setResults([]);
-                return;
-            }
+        if (query.length < 2) {
+            setResults([]);
+            setLoading(false);
+            return;
+        }
 
+        const controller = new AbortController();
+
+        const fetchResults = async () => {
             setLoading(true);
             try {
-                const res = await fetch(`/api/search/universal?q=${encodeURIComponent(query)}`);
+                const res = await fetch(`/api/search/universal?q=${encodeURIComponent(query)}`, {
+                    signal: controller.signal,
+                });
                 const data = await res.json();
                 setResults(data.data || []);
             } catch (error) {
+                if ((error as Error)?.name === 'AbortError') return;
                 console.error(error);
             } finally {
-                setLoading(false);
+                if (!controller.signal.aborted) setLoading(false);
             }
         };
 
@@ -60,7 +66,13 @@ export default function GlobalSearch() {
             void fetchResults();
         }, 300);
 
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(timer);
+            // Without aborting, a slow response for an earlier prefix can land after the
+            // one the user actually finished typing and repaint the dropdown with results
+            // for a query that is no longer on screen.
+            controller.abort();
+        };
     }, [query]);
 
     const handleSelect = (url: string) => {
