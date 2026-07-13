@@ -450,6 +450,33 @@ function roundsHaveMatches(rounds: any[]): boolean {
     return rounds.some((round) => Array.isArray(round?.matches) && round.matches.length > 0);
 }
 
+// A group stage arrives as ONE flat array with the group name on each row
+// ({ group: "Group A", ... }), so a 16-team tournament renders as a single 1–16 table in
+// which a group winner can sit below a team that lost every match. DB tournaments already
+// ship the grouped shape the UI knows ({ group_name, rows }); reshape into it.
+function groupFlatStandings(standings: any): any {
+    if (!Array.isArray(standings) || standings.length === 0) return standings;
+    // Already grouped (DB tournaments, or a provider that nests them).
+    if (standings.some((row: any) => Array.isArray(row?.rows))) return standings;
+
+    const groups = new Map<string, any[]>();
+    for (const row of standings) {
+        const groupName = String(row?.group ?? row?.group_name ?? '').trim();
+        // A league has no groups — leave its single table alone.
+        if (!groupName) return standings;
+        if (!groups.has(groupName)) groups.set(groupName, []);
+        groups.get(groupName)!.push(row);
+    }
+
+    if (groups.size < 2) return standings;
+
+    return [...groups.entries()].map(([groupName, rows]) => ({
+        group_name: groupName,
+        name: groupName,
+        rows,
+    }));
+}
+
 function enrichStandingsRowsWithTeamAssets(
     rows: any,
     teamAssets: Map<string, { id?: string; name?: string; logo?: string; teamUrl?: string }>
@@ -1791,12 +1818,14 @@ export async function GET(request: Request) {
                     dbTournamentMeta?.ruleset || localTournament?.ruleset,
                 )
                 : [];
-        const standingsBasePayload = hasMeaningfulPayload(baseStandings) ? baseStandings : fallbackCalculatedStandings;
+        const standingsBasePayload = groupFlatStandings(
+            hasMeaningfulPayload(baseStandings) ? baseStandings : fallbackCalculatedStandings,
+        );
         const preparedStandings = enrichStandingsRowsWithTeamAssets(standingsBasePayload, teamAssets);
         let finalStandings = preparedStandings;
-        let finalStandingsForm = enrichStandingsRowsWithTeamAssets(standingsFormPayload, teamAssets);
-        let finalStandingsHtFt = enrichStandingsRowsWithTeamAssets(standingsHtFtPayload, teamAssets);
-        let finalStandingsOverUnder = enrichStandingsRowsWithTeamAssets(standingsOverUnderPayload, teamAssets);
+        let finalStandingsForm = enrichStandingsRowsWithTeamAssets(groupFlatStandings(standingsFormPayload), teamAssets);
+        let finalStandingsHtFt = enrichStandingsRowsWithTeamAssets(groupFlatStandings(standingsHtFtPayload), teamAssets);
+        let finalStandingsOverUnder = enrichStandingsRowsWithTeamAssets(groupFlatStandings(standingsOverUnderPayload), teamAssets);
         let externalStandingsTeamLabels: any[] = [];
         let externalStandingsFormTeamLabels: any[] = [];
         let externalStandingsHtFtTeamLabels: any[] = [];
