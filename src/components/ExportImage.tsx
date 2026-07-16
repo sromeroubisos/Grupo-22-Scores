@@ -257,7 +257,10 @@ export interface PlayoffBracketMatchData {
 
 export interface PlayoffBracketRoundData {
     round_id?: string | number;
-    name: string;
+    /** Local brackets emit `name`; the external feed emits `round_name`. */
+    name?: string;
+    round_name?: string;
+    ROUND_NAME?: string;
     matches: PlayoffBracketMatchData[];
 }
 
@@ -10162,6 +10165,16 @@ async function drawG22BaseTeamOfWeek(
     }
 }
 
+/**
+ * Round titles come in under different keys depending on the source: a local bracket
+ * builds `name`, while the external feed sends `round_name`. PlayoffBracket resolves the
+ * same way — keep both in step, and never hand `undefined` to the canvas.
+ */
+function getBracketRoundName(round: PlayoffBracketRoundData, index: number): string {
+    const name = round?.name || round?.round_name || round?.ROUND_NAME;
+    return String(name || `Ronda ${index + 1}`);
+}
+
 function getBracketParticipantName(side: PlayoffBracketMatchData['home_team'], participant: PlayoffBracketMatchData['home_participant']) {
     return participant?.participant_name || side?.name || 'TBD';
 }
@@ -10373,7 +10386,7 @@ async function drawPlayoffBracket(
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = `800 ${isStory ? 16 : 14}px ${FONT_BODY}`;
-        ctx.fillText(truncateTextToWidth(ctx, round.name.toUpperCase(), columnWidth - 26), columnX + columnWidth / 2, contentTop + titleHeight / 2 + 1);
+        ctx.fillText(truncateTextToWidth(ctx, getBracketRoundName(round, roundIndex).toUpperCase(), columnWidth - 26), columnX + columnWidth / 2, contentTop + titleHeight / 2 + 1);
         ctx.restore();
 
         roundMatches.forEach((match, matchIndex) => {
@@ -12605,7 +12618,7 @@ async function drawMomentumPlayoffBracket(
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
         ctx.font = `800 16px ${FONT_BODY}`;
-        ctx.fillText(round.name.toUpperCase(), x + columnWidth / 2, top + 27);
+        ctx.fillText(getBracketRoundName(round, roundIndex).toUpperCase(), x + columnWidth / 2, top + 27);
         ctx.restore();
 
         round.matches.forEach((match, matchIndex) => {
@@ -16300,7 +16313,7 @@ async function drawPosterV3PlayoffBracket(
         ctx.fillStyle = getContrastColor(accentPrimary) === '#ffffff' ? '#05101d' : '#ffffff';
         ctx.textAlign = 'center';
         ctx.font = `900 14px ${FONT_MONO}`;
-        ctx.fillText(round.name.toUpperCase(), x + columnWidth / 2, top + 27);
+        ctx.fillText(getBracketRoundName(round, roundIndex).toUpperCase(), x + columnWidth / 2, top + 27);
         ctx.restore();
 
         round.matches.forEach((match, matchIndex) => {
