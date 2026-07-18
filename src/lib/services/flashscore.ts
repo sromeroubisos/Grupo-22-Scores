@@ -103,7 +103,10 @@ const inflightRequests = new Map<string, Promise<any>>();
 
 // Two concurrency lanes against RapidAPI:
 //  - 'default' (3): browser-facing match-list fetches (main + 7-day prefetch + live
-//    polling). Kept small to avoid a thundering-herd from a single client.
+//    polling). Kept small to avoid a thundering-herd from a single client. NOTE:
+//    RapidAPI DOES throttle aggressively (a burst of 2 unsubscribed calls already
+//    returned 429 "Too many requests"), so do not raise this without measuring the
+//    live plan's real rate limit first.
 //  - 'resolution' (10): server-side tournament ID-resolution sweep, which fans out
 //    ~22 day-offset reads at once. Measured safe: a 12-concurrent burst returned
 //    12x200, no 429, and the plan exposes no per-second rate limit (only a 10k/period
@@ -376,6 +379,18 @@ export async function getFlashScoreMatches(
     const results = await Promise.all(
         rawFetches.map(([o, sid]) => getFlashScoreMatchesRawWithEmptyRetry(o, sid, timeZone))
     );
+
+    // Tell a real "no matches" day apart from an upstream failure. apiFetch never
+    // throws (it returns data:null on timeout/5xx), so getFlashScoreMatchesRaw
+    // surfaces a failed request as `null` here. If EVERY underlying request failed
+    // we must throw so the caller treats it as a FlashScore outage — cache fallback
+    // + explicit error — instead of silently rendering (and caching) an empty list
+    // as if the provider legitimately had zero matches. This hit rugby hardest: it
+    // fans out to union + league × 2 days, so the odds of the whole batch failing
+    // (or the function timing out) are much higher than for single-endpoint sports.
+    if (rawFetches.length > 0 && results.every((data) => data == null)) {
+        throw new Error('FlashScore matches/list failed for all requests');
+    }
 
     let allMatches: Match[] = [];
     const seenMatchIds = new Set<string>();

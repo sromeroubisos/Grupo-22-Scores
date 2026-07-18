@@ -177,67 +177,111 @@ export function useMatchesStore(
   const fetchDate = useCallback(
     async (date: string, signal?: AbortSignal): Promise<{ matches: any[]; sources?: any; ok: boolean }> => {
       const startedAt = Date.now();
-      try {
-        const url = `/api/matches?date=${date}&sport=${sportId}&external=true&tz=${encodeURIComponent(timeZone)}`;
-        logRefreshLoop('fetch_matches_start', {
-          source: 'useMatchesStore.fetchDate',
-          date,
-          sport: sportId,
-        });
-        const res = await fetch(url, {
-          signal,
-        });
-        if (res.status === 401 || res.status === 403) {
-          logRefreshLoop('api_401_403', {
+      const url = `/api/matches?date=${date}&sport=${sportId}&external=true&tz=${encodeURIComponent(timeZone)}`;
+
+      // Mobile networks drop or switch mid-request, and rugby's multi-endpoint
+      // fan-out can make the server slow enough that a single attempt gives up and
+      // leaves an empty list stuck on screen. Give each attempt its own timeout and
+      // retry once on a transient failure — while bailing immediately when the
+      // CALLER aborts (date/sport change or unmount), which must never retry.
+      const MAX_ATTEMPTS = 2;
+      const ATTEMPT_TIMEOUT_MS = 15_000;
+
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        if (signal?.aborted) return { matches: [], ok: false };
+
+        const attemptController = new AbortController();
+        const abortAttempt = () => attemptController.abort();
+        signal?.addEventListener('abort', abortAttempt, { once: true });
+        const timeoutId = setTimeout(abortAttempt, ATTEMPT_TIMEOUT_MS);
+        const isLastAttempt = attempt >= MAX_ATTEMPTS;
+
+        try {
+          logRefreshLoop('fetch_matches_start', {
             source: 'useMatchesStore.fetchDate',
-            status: res.status,
-            endpoint: '/api/matches',
             date,
+            sport: sportId,
+            attempt,
           });
-        }
-        if (!res.ok) {
+          const res = await fetch(url, { signal: attemptController.signal });
+          clearTimeout(timeoutId);
+          signal?.removeEventListener('abort', abortAttempt);
+
+          if (res.status === 401 || res.status === 403) {
+            logRefreshLoop('api_401_403', {
+              source: 'useMatchesStore.fetchDate',
+              status: res.status,
+              endpoint: '/api/matches',
+              date,
+            });
+          }
+          if (!res.ok) {
+            // 5xx / 408 / 429 are transient (server timeout, upstream hiccup) →
+            // worth one retry; a 4xx is a real client error → give up now.
+            const isTransient = res.status >= 500 || res.status === 408 || res.status === 429;
+            logRefreshLoop('fetch_matches_end', {
+              source: 'useMatchesStore.fetchDate',
+              date,
+              status: res.status,
+              ok: false,
+              attempt,
+              durationMs: Date.now() - startedAt,
+            });
+            if (isTransient && !isLastAttempt && !signal?.aborted) {
+              await new Promise((r) => setTimeout(r, 500 * attempt));
+              continue;
+            }
+            return { matches: [], ok: false };
+          }
+
+          const data = await res.json();
+          const arr = Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
+          const sources = data.sources || null;
+
+          // Use a shorter retry window when a source failed so errors self-correct quickly;
+          // normal 5 minute TTL when everything is healthy.
+          const hasError = sources && (!sources.flashscore?.ok || !sources.supabase?.ok);
+          const SHORT_MISS = PUBLIC_STALE_TTL - ERROR_RECOVERY_TTL; // shift timestamp back so cache is stale in ~1m
+          matchesCache.set(cacheKey(date, sportId), arr);
+          lastFetchedAt.set(cacheKey(date, sportId), hasError ? Date.now() - SHORT_MISS : Date.now());
+
           logRefreshLoop('fetch_matches_end', {
             source: 'useMatchesStore.fetchDate',
             date,
-            status: res.status,
-            ok: false,
+            sport: sportId,
+            ok: true,
+            rows: arr.length,
+            hasSourceError: Boolean(hasError),
+            attempt,
             durationMs: Date.now() - startedAt,
           });
+
+          return { matches: arr, sources, ok: true };
+        } catch (e: any) {
+          clearTimeout(timeoutId);
+          signal?.removeEventListener('abort', abortAttempt);
+
+          // The caller aborted (date/sport change or unmount): stop, never retry.
+          if (signal?.aborted) return { matches: [], ok: false };
+
+          // Otherwise this attempt timed out or hit a network error → retry if we can.
+          logRefreshLoop('fetch_matches_error', {
+            source: 'useMatchesStore.fetchDate',
+            date,
+            error: e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+            attempt,
+            durationMs: Date.now() - startedAt,
+          });
+          if (!isLastAttempt) {
+            await new Promise((r) => setTimeout(r, 500 * attempt));
+            continue;
+          }
+          console.error('fetchDate error:', e);
           return { matches: [], ok: false };
         }
-        const data = await res.json();
-        const arr = Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
-        const sources = data.sources || null;
-
-        // Use a shorter retry window when a source failed so errors self-correct quickly;
-        // normal 5 minute TTL when everything is healthy.
-        const hasError = sources && (!sources.flashscore?.ok || !sources.supabase?.ok);
-        const SHORT_MISS = PUBLIC_STALE_TTL - ERROR_RECOVERY_TTL; // shift timestamp back so cache is stale in ~1m
-        matchesCache.set(cacheKey(date, sportId), arr);
-        lastFetchedAt.set(cacheKey(date, sportId), hasError ? Date.now() - SHORT_MISS : Date.now());
-
-        logRefreshLoop('fetch_matches_end', {
-          source: 'useMatchesStore.fetchDate',
-          date,
-          sport: sportId,
-          ok: true,
-          rows: arr.length,
-          hasSourceError: Boolean(hasError),
-          durationMs: Date.now() - startedAt,
-        });
-
-        return { matches: arr, sources, ok: true };
-      } catch (e: any) {
-        if (e?.name === 'AbortError') return { matches: [], ok: false };
-        console.error('fetchDate error:', e);
-        logRefreshLoop('fetch_matches_error', {
-          source: 'useMatchesStore.fetchDate',
-          date,
-          error: e instanceof Error ? `${e.name}: ${e.message}` : String(e),
-          durationMs: Date.now() - startedAt,
-        });
-        return { matches: [], ok: false };
       }
+
+      return { matches: [], ok: false };
     },
     [sportId, timeZone]
   );
