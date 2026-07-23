@@ -546,6 +546,32 @@ function areDraftValuesEqual(left: unknown, right: unknown) {
     return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
 }
 
+/**
+ * Diff incremental de eventos contra el último set persistido, para mandar
+ * `eventPatch` (upsert de lo cambiado + deleteIds) en vez del array completo
+ * —que fuerza el reemplazo destructivo (select-all + upsert-all + delete-diff) y
+ * la resolución de plantel sobre TODOS los eventos en el server—. Devuelve null
+ * si algún evento no tiene id estable → el llamador cae al array completo.
+ */
+function buildEventsPatch(
+    current: MatchEvent[],
+    baseline: MatchEvent[],
+): { upsert: MatchEvent[]; deleteIds: string[] } | null {
+    const prev = new Map<string, string>();
+    for (const event of baseline) {
+        if (!event.id) return null;
+        prev.set(event.id, JSON.stringify(event));
+    }
+    const currentIds = new Set<string>();
+    for (const event of current) {
+        if (!event.id) return null;
+        currentIds.add(event.id);
+    }
+    const upsert = current.filter((event) => prev.get(event.id) !== JSON.stringify(event));
+    const deleteIds = [...prev.keys()].filter((id) => !currentIds.has(id));
+    return { upsert, deleteIds };
+}
+
 function areMatchPointsEqual(left: MatchPoints | null | undefined, right: MatchPoints | null | undefined) {
     return (
         Number(left?.home_base_points ?? 0) === Number(right?.home_base_points ?? 0)
@@ -2058,10 +2084,11 @@ export default function MatchCenterClient({
                     { includePoints: false },
                 );
             } else {
+                const eventsPatch = buildEventsPatch(localEvents, persistedEventsRef.current);
                 await persistMatchPatch({
                     status: match.status,
                     score: resolveOfficialScore(),
-                    events: localEvents,
+                    ...(eventsPatch ? { eventPatch: eventsPatch } : { events: localEvents }),
                 });
             }
         } finally {
@@ -2184,7 +2211,17 @@ export default function MatchCenterClient({
                 return;
             }
 
-            payload.events = localEvents;
+            // Diff incremental: mandamos solo lo cambiado/borrado (eventPatch) en
+            // vez del array completo, que en el server fuerza el reemplazo
+            // destructivo (select-all + upsert-all + delete-diff) y la resolución
+            // de plantel sobre todos los eventos. Fallback al array completo solo
+            // si algún evento no tiene id estable.
+            const eventsPatch = buildEventsPatch(localEvents, persistedEventsRef.current);
+            if (eventsPatch) {
+                payload.eventPatch = eventsPatch;
+            } else {
+                payload.events = localEvents;
+            }
         }
         if (lineupsDirty) {
             payload.lineups = localLineups;
@@ -2412,7 +2449,9 @@ export default function MatchCenterClient({
         });
     }, [eventPlayerOptions]);
 
-    const saveGuidedEvent = useCallback(async () => {
+    const guidedSaveQueueRef = useRef<Promise<unknown>>(Promise.resolve());
+
+    const saveGuidedEvent = useCallback(() => {
         if (!guidedEvent) return;
 
         if (guidedEvent.definition.team === 'required' && !guidedEvent.team) {
@@ -2481,39 +2520,36 @@ export default function MatchCenterClient({
         if (statusChanged) {
             setMatch((current) => ({ ...current, status: nextStatus }));
         }
-        setSaving(true);
-        setSaveMsg(null);
+        // Optimista: el composer se cierra y se muestra éxito AL INSTANTE; el
+        // guardado va en background (no bloquea), serializado para no pisar
+        // saves concurrentes. Rollback por-id si falla.
+        setGuidedEvent(null);
+        setSaveMsg({ type: 'ok', text: 'Evento guardado.' });
+        scheduleSaveMsgClear(3000);
 
-        try {
-            const saveResult = await persistMatchPatch(
-                {
-                    eventPatch: { upsert: [nextEvent] },
-                    ...(clockChanged ? { clock: nextClock } : {}),
-                    ...(statusChanged ? { status: nextStatus } : {}),
-                },
-                { compactResponse: true, eventsOverride: nextEvents },
-            );
-            setGuidedEvent(null);
-            setSaveMsg(
-                saveResult.warnings.lineupsNotPersisted
-                    ? { type: 'warn', text: 'Evento guardado. Las alineaciones no se persistieron en este entorno.' }
-                    : { type: 'ok', text: 'Evento guardado y estadisticas recalculadas.' },
-            );
-            scheduleSaveMsgClear(3000);
-        } catch (err: unknown) {
-            localEventsRef.current = previousEvents;
-            setLocalEvents(previousEvents);
-            if (clockChanged) {
-                clockDraftRef.current = currentClock;
-                setClockDraft(currentClock);
-            }
-            if (statusChanged) {
-                setMatch((current) => ({ ...current, status: previousStatus }));
-            }
-            setSaveMsg({ type: 'err', text: `No se pudo guardar el evento: ${err instanceof Error ? err.message : String(err)}` });
-        } finally {
-            setSaving(false);
-        }
+        const payload = {
+            eventPatch: { upsert: [nextEvent] },
+            ...(clockChanged ? { clock: nextClock } : {}),
+            ...(statusChanged ? { status: nextStatus } : {}),
+        };
+        guidedSaveQueueRef.current = guidedSaveQueueRef.current
+            .catch(() => {})
+            .then(async () => {
+                try {
+                    const saveResult = await persistMatchPatch(
+                        payload,
+                        { compactResponse: true, eventsOverride: nextEvents, preserveUnsavedEvents: true },
+                    );
+                    if (saveResult.warnings.lineupsNotPersisted) {
+                        setSaveMsg({ type: 'warn', text: 'Evento guardado. Las alineaciones no se persistieron en este entorno.' });
+                        scheduleSaveMsgClear(3000);
+                    }
+                } catch (err: unknown) {
+                    localEventsRef.current = localEventsRef.current.filter((event) => event.id !== nextEvent.id);
+                    setLocalEvents(localEventsRef.current);
+                    setSaveMsg({ type: 'err', text: `No se pudo guardar el evento: ${err instanceof Error ? err.message : String(err)}` });
+                }
+            });
     }, [guidedEvent, persistMatchPatch]);
 
     const applyLineupSize = useCallback((requestedSize?: number) => {
@@ -2633,6 +2669,16 @@ export default function MatchCenterClient({
         () => sortMatchEventsChronologically(events),
         [events],
     );
+    // Indice por id para no hacer findIndex dentro del map de eventos al
+    // renderizar (era una busqueda lineal por cada cambio y por cada fila
+    // del timeline).
+    const chronologicalIndexById = useMemo(() => {
+        const map = new Map<string, number>();
+        eventsChronologicalAsc.forEach((event, index) => {
+            map.set(event.id, index);
+        });
+        return map;
+    }, [eventsChronologicalAsc]);
     const eventScoreById = useMemo(() => {
         const map = new Map<string, { home: number; away: number; points: number }>();
         const normalizedScore = normalizeMatchScore(scoreDraft);
@@ -3447,7 +3493,7 @@ export default function MatchCenterClient({
                                     ) : (
                                         <div className="event-timeline" style={{ paddingLeft: 16 }}>
                                             {recentEvents.map((ev, i) => {
-                                                const chronIdx = eventsChronologicalAsc.findIndex((e) => e.id === ev.id);
+                                                const chronIdx = chronologicalIndexById.get(ev.id) ?? -1;
                                                 const eventScore = eventScoreById.get(ev.id);
                                                 const detailLine =
                                                     ev.type === 'substitution' && chronIdx >= 0
@@ -4087,7 +4133,7 @@ export default function MatchCenterClient({
                                                     />
                                                 )}
                                                 {ev.type === 'substitution' ? (() => {
-                                                    const chronologicalIndex = eventsChronologicalAsc.findIndex((event) => event.id === ev.id);
+                                                    const chronologicalIndex = chronologicalIndexById.get(ev.id) ?? -1;
                                                     const mins = chronologicalIndex >= 0
                                                         ? minutesPlayedWhenSubstitutedOut(eventsChronologicalAsc, chronologicalIndex)
                                                         : null;

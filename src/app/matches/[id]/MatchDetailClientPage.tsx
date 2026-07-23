@@ -1293,14 +1293,45 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
         fetchData();
 
-        const interval = setInterval(() => {
-            if (statusRef.current === 'live') {
-                fetchData();
+        // Poll con conciencia de visibilidad (mismo criterio que useMatchesStore):
+        // no consultamos la red mientras la pestaña está en background y, al volver
+        // a foco, refrescamos de inmediato lo que no se pidió.
+        let interval: ReturnType<typeof setInterval> | null = null;
+
+        const startPolling = () => {
+            if (interval != null) return;
+            interval = setInterval(() => {
+                if (statusRef.current === 'live') {
+                    fetchData();
+                }
+            }, 60000);
+        };
+
+        const stopPolling = () => {
+            if (interval == null) return;
+            clearInterval(interval);
+            interval = null;
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                if (statusRef.current === 'live') {
+                    fetchData(); // catch-up al reanudar
+                }
+                startPolling();
+            } else {
+                stopPolling(); // pausa real en background
             }
-        }, 60000);
+        };
+
+        if (document.visibilityState === 'visible') {
+            startPolling();
+        }
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {
-            clearInterval(interval);
+            stopPolling();
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
 
             if (!controller.signal.aborted) {
                 controller.abort(new DOMException('Match detail effect cleanup', 'AbortError'));
@@ -1331,6 +1362,17 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         homeName: state.matchData?.home?.name || 'Local',
         awayName: state.matchData?.away?.name || 'Visitante',
     }), [state.localPlayerRows, state.matchData?.away?.name, state.matchData?.home?.name, state.playerStats]);
+
+    // Props estables para MatchTimeline: construidas inline en el JSX cambiaban
+    // de identidad en cada tick del reloj y anulaban su React.memo.
+    const timelineHomeTeam = useMemo(() => ({
+        name: state.matchData?.home?.name || 'Local',
+        logo: state.matchData?.home?.logo || '',
+    }), [state.matchData?.home?.name, state.matchData?.home?.logo]);
+    const timelineAwayTeam = useMemo(() => ({
+        name: state.matchData?.away?.name || 'Visitante',
+        logo: state.matchData?.away?.logo || '',
+    }), [state.matchData?.away?.name, state.matchData?.away?.logo]);
 
     if (state.kind === 'loading') return (
         <div className={styles.page}>
@@ -2098,8 +2140,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         {activeTab === 'timeline' && (
                             <MatchTimeline
                                 events={eventsData}
-                                homeTeam={{ name: matchData.home?.name || 'Local', logo: matchData.home?.logo || '' }}
-                                awayTeam={{ name: matchData.away?.name || 'Visitante', logo: matchData.away?.logo || '' }}
+                                homeTeam={timelineHomeTeam}
+                                awayTeam={timelineAwayTeam}
                                 sportId={matchData.sportId}
                             />
                         )}

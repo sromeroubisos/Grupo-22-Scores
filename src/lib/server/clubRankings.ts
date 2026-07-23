@@ -2,6 +2,8 @@ import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { isUuid } from '@/lib/utils/postgrest';
+import { markEditTrace } from '@/lib/perf/editTrace';
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 
@@ -556,6 +558,7 @@ async function listRankingRows(
 }
 
 async function getMatchSnapshot(matchId: string) {
+    if (!isUuid(matchId)) return null;
     const supabase = getAdminClient();
     const { data, error } = await supabase
         .from('matches')
@@ -1241,27 +1244,54 @@ async function markRankingStale(
     }
 }
 
-async function rebuildRankingAfterInvalidIncremental(
-    supabase: ReturnType<typeof getAdminClient>,
-    ranking: RankingRow,
-    match: MatchSnapshot,
-    reason: string,
-) {
-    try {
-        await rebuildRankingInternal(ranking.id);
-        const refreshedRanking = await getRankingRow(supabase, ranking.id);
-        Object.assign(ranking, refreshedRanking);
-        return true;
-    } catch (error) {
-        console.error('[clubRankings] Automatic rebuild failed, keeping ranking stale:', {
-            rankingId: ranking.id,
-            matchId: match.id,
-            reason,
-            error,
-        });
-        await markRankingStale(supabase, ranking, match, reason);
-        return false;
+/**
+ * Reconstruye los rankings de club marcados como "stale" (pendientes de recalculo),
+ * FUERA del request de edicion. El rebuild completo es O(clubes + partidos) con
+ * escrituras seriales; correrlo dentro de POST /api/results/update o del editor de
+ * partidos hacia caer la app por timeout. Ahora la edicion solo marca el ranking
+ * stale (1 write barato via markRankingStale) y este helper —llamado por el cron
+ * /api/cron/rebuild-stale-rankings— hace el trabajo pesado.
+ *
+ * `rebuildRankingInternal` limpia `stale_from_match_id` al terminar con exito, asi
+ * que un ranking reconstruido deja de aparecer aca; si falla, queda stale para el
+ * proximo tick. Procesa de a `limit` (el mas antiguo primero) para no pasarse del
+ * maxDuration del cron. Ver [[perf_edit_bottleneck_rootcause]].
+ */
+export async function rebuildStaleClubRankings(
+    options: { limit?: number } = {},
+): Promise<{ pending: number; rebuilt: number; failed: number }> {
+    const supabase = getAdminClient();
+    const limit = Math.max(1, Math.min(options.limit ?? 25, 100));
+
+    const { data, error } = await supabase
+        .from('club_rankings')
+        .select('id')
+        .not('stale_from_match_id', 'is', null)
+        .order('stale_from_match_date', { ascending: true, nullsFirst: true })
+        .limit(limit);
+
+    if (error) {
+        throw createClubRankingQueryError(error, 'No se pudieron listar los rankings pendientes de recalculo.');
     }
+
+    const pendingRankings = (data ?? []) as Array<{ id: string }>;
+    let rebuilt = 0;
+    let failed = 0;
+
+    for (const row of pendingRankings) {
+        try {
+            await rebuildRankingInternal(row.id);
+            rebuilt += 1;
+        } catch (rebuildError) {
+            failed += 1;
+            console.error('[clubRankings] Rebuild de ranking stale fallo, queda pendiente:', {
+                rankingId: row.id,
+                error: rebuildError,
+            });
+        }
+    }
+
+    return { pending: pendingRankings.length, rebuilt, failed };
 }
 
 async function applyManualAdjustments(
@@ -1546,6 +1576,13 @@ async function rebuildRankingInternal(
         ranking,
         activeEntries.map((entry) => entry.club_id),
     );
+
+    // Etapa 0 (medición): magnitud del rebuild completo (clubes × partidos).
+    markEditTrace({
+        rankingRebuildClubs: entries.length,
+        rankingRebuildActiveClubs: activeEntries.length,
+        rankingRebuildSeasonMatches: seasonMatches.length,
+    });
 
     let lastAppliedMatchId: string | null = null;
     for (const match of seasonMatches) {
@@ -2286,8 +2323,10 @@ export async function syncClubRankingsForMatchUpdate(
     );
 
     if (candidateRankings.length === 0) {
+        markEditTrace({ rankingPath: 'skipped_no_ranking', rankingCandidates: 0 });
         return { processedRankings: 0 };
     }
+    markEditTrace({ rankingCandidates: candidateRankings.length, rankingHasKnownChange: hasKnownMatchChange });
     let processedRankings = 0;
 
     for (const ranking of candidateRankings) {
@@ -2300,7 +2339,12 @@ export async function syncClubRankingsForMatchUpdate(
 
         if (application) {
             if (hasKnownMatchChange) {
-                await rebuildRankingAfterInvalidIncremental(
+                // Diferido: el rebuild completo (O(clubes + partidos), cientos de
+                // round-trips seriales) NO corre en el request. Marcamos el ranking
+                // stale y el cron /api/cron/rebuild-stale-rankings lo reconstruye
+                // fuera del camino de edición. Ver [[perf_edit_bottleneck_rootcause]].
+                markEditTrace({ rankingDeferredRebuild: true, rankingRebuildReason: 'applied_match_changed' });
+                await markRankingStale(
                     supabase,
                     ranking,
                     currentMatch ?? normalizedPreviousMatch ?? {
@@ -2318,7 +2362,7 @@ export async function syncClubRankingsForMatchUpdate(
                         round_uuid: null,
                         updated_at: null,
                     },
-                    'El partido ya aplicado cambio y requiere recálculo desde ese punto.',
+                    'El partido ya aplicado cambio y requiere recalculo (diferido al cron de rankings).',
                 );
             }
             processedRankings += 1;
@@ -2330,11 +2374,14 @@ export async function syncClubRankingsForMatchUpdate(
         }
 
         if (ranking.stale_from_match_id) {
-            await rebuildRankingAfterInvalidIncremental(
+            // Ya estaba stale: refrescamos el punto de partida mas antiguo (por si
+            // este partido es anterior) y dejamos que el cron lo reconstruya.
+            markEditTrace({ rankingDeferredRebuild: true, rankingRebuildReason: 'stale_pending' });
+            await markRankingStale(
                 supabase,
                 ranking,
                 currentMatch,
-                ranking.stale_reason || 'El ranking estaba pendiente de recalculo y se reconstruyo automaticamente.',
+                ranking.stale_reason || 'El ranking esta pendiente de recalculo (diferido al cron de rankings).',
             );
             processedRankings += 1;
             continue;
@@ -2348,23 +2395,28 @@ export async function syncClubRankingsForMatchUpdate(
         if (ranking.last_incremental_match_id) {
             const lastAppliedMatch = await getMatchSnapshot(ranking.last_incremental_match_id);
             if (lastAppliedMatch && compareMatchOrder(currentMatch, lastAppliedMatch) < 0) {
-                await rebuildRankingAfterInvalidIncremental(
+                // Partido fuera de orden cronologico: invalida el calculo incremental
+                // y exige rebuild completo. Diferido al cron (no en el request).
+                markEditTrace({ rankingDeferredRebuild: true, rankingRebuildReason: 'out_of_order' });
+                await markRankingStale(
                     supabase,
                     ranking,
                     currentMatch,
-                    'Se guardo un partido anterior al ultimo resultado aplicado. Recalcula desde ese punto para mantener el orden cronologico.',
+                    'Se guardo un partido anterior al ultimo resultado aplicado; requiere recalculo (diferido al cron de rankings).',
                 );
                 processedRankings += 1;
                 continue;
             }
         }
 
+        markEditTrace({ rankingIncremental: true });
         await applyMatchToRanking(supabase, ranking, entryMap, currentMatch, 'incremental');
         await recomputeEntryPositions(supabase, ranking.id);
         await rebuildLeadershipHistory(supabase, ranking.id);
         processedRankings += 1;
     }
 
+    markEditTrace({ rankingProcessed: processedRankings });
     return { processedRankings };
 }
 

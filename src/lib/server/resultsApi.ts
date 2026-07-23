@@ -200,7 +200,7 @@ const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Usa el formato YYYY-
 const normalizedUpdatePayloadSchema = z.object({
   tournament: z.string().min(1).max(160).optional(),
   category: z.string().min(1).max(160).optional(),
-  match_id: z.string().min(1).max(120).optional(),
+  match_id: z.string().uuid('match_id debe ser un identificador valido (UUID).').optional(),
   home_team: z.string().min(1).max(160).optional(),
   away_team: z.string().min(1).max(160).optional(),
   home_score: z.number().int().min(0),
@@ -228,7 +228,7 @@ const normalizedUpdatePayloadSchema = z.object({
 const normalizedSearchPayloadSchema = z.object({
   tournament: z.string().min(1).max(160).optional(),
   category: z.string().min(1).max(160).optional(),
-  match_id: z.string().min(1).max(120).optional(),
+  match_id: z.string().uuid('match_id debe ser un identificador valido (UUID).').optional(),
   home_team: z.string().min(1).max(160).optional(),
   away_team: z.string().min(1).max(160).optional(),
   match_date: dateSchema.optional(),
@@ -268,7 +268,7 @@ const normalizedMatchesByDatePayloadSchema = z.object({
 const publishingPieceTypeSchema = z.enum(['match_result', 'match_schedule', 'daily_matches', 'standings']);
 
 const normalizedPublishingPiecesPayloadSchema = z.object({
-  match_id: z.string().min(1).max(120).optional(),
+  match_id: z.string().uuid('match_id debe ser un identificador valido (UUID).').optional(),
   date: dateSchema.optional(),
   timezone: z.string().min(1).max(120).optional(),
   tournament: z.string().min(1).max(160).optional(),

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { isUuid } from '@/lib/utils/postgrest';
 import { requireUserAccessContext } from '@/lib/auth/permissions';
 import { MANAGEMENT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import type { UserAccessContext } from '@/lib/auth/permissions';
@@ -54,6 +55,10 @@ export async function checkClubMatchAccess(
 
   if (!hasClubManagement) {
     console.log('[matchAccess] User has no club management memberships');
+    return { allowed: false, context, clubId: null, isHome: false, isAway: false, isCreator: false, role: null };
+  }
+
+  if (!isUuid(matchId)) {
     return { allowed: false, context, clubId: null, isHome: false, isAway: false, isCreator: false, role: null };
   }
 

@@ -44,6 +44,9 @@ import type { PlayoffBuilderConfig } from '@/lib/playoff/templates';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { assertTournamentNotSyncLocked } from '@/lib/services/tournamentSyncLock';
 import { assertUuid, isUuid } from '@/lib/utils/postgrest';
+import { isFinalStandingsStatus } from '@/lib/standings/matchScope';
+import { traceStageStart, traceStageEnd, markEditTrace, appendEditTraceFact } from '@/lib/perf/editTrace';
+import { isDerivedRecalcSkipped } from '@/lib/perf/labFlags';
 import type {
   TournamentFixture,
   TournamentPhase,
@@ -698,6 +701,7 @@ export class FixtureService {
    * Get a specific match by ID with club details
    */
   static async getMatch(matchId: string): Promise<MatchWithClubs | null> {
+    if (!isUuid(matchId)) return null;
     const supabase = await getReadClient();
 
     const { data: match, error: matchError } = await supabase
@@ -717,6 +721,48 @@ export class FixtureService {
     }
 
     return this.mapMatchWithClubs(match);
+  }
+
+  /**
+   * Slim scope read para el path de escritura por evento: SOLO las columnas que
+   * consumen recalcAffectedPhases (tournamentId/phaseId), el gate de standings
+   * por status y la invalidación por date/sport. Evita el select('*') + 3 joins
+   * (con los JSONB events/lineups/clock) de getMatch en el prev/next.
+   * Devuelve las claves en camelCase para ser drop-in de getMatch en esos usos.
+   */
+  static async getMatchScope(matchId: string): Promise<{
+    id: string;
+    tournamentId: string | null;
+    phaseId: string | null;
+    dateTime: string | null;
+    sportId: string | null;
+    status: string | null;
+    seasonId: string | null;
+  } | null> {
+    if (!isUuid(matchId)) return null;
+    const supabase = await getReadClient();
+
+    const { data, error } = await supabase
+      .from('matches')
+      .select('id, tournament_id, phase_id, date_time, sport_id, status, season_id')
+      .eq('id', matchId)
+      .single();
+
+    if (error || !data) {
+      console.error('Error fetching match scope:', error);
+      return null;
+    }
+
+    const row = data as any;
+    return {
+      id: row.id,
+      tournamentId: row.tournament_id ?? null,
+      phaseId: row.phase_id ?? null,
+      dateTime: row.date_time ?? null,
+      sportId: row.sport_id ?? null,
+      status: row.status ?? null,
+      seasonId: row.season_id ?? null,
+    };
   }
 
   /**
@@ -1032,7 +1078,13 @@ export class FixtureService {
     data: Partial<MatchFormData>,
     providedClient?: any,
   ): Promise<Match | null> {
+    if (!isUuid(matchId)) {
+      throw new Error('El partido que intentás actualizar no existe.');
+    }
     const supabase = providedClient ?? await this.getWriteClient();
+
+    // Etapa 0 (medición): mide la validación + lecturas de snapshots.
+    traceStageStart('validate_snapshots');
 
     const [
       supportsRoundLabel,
@@ -1200,25 +1252,44 @@ export class FixtureService {
       return this.mapMatch(fullMatch);
     }
 
-    const shouldSyncRankings = this.shouldSyncRankingsAfterUpdate(existingMatch, updateData);
+    // Gate por status final: advancement, reseed y ranking-sync solo pueden
+    // cambiar algo cuando el partido es (o era) final — un evento en vivo no
+    // avanza bracket, no reseedea ni afecta rankings (cuentan solo finales).
+    // Mismo criterio que el gate de standings (#1b). Ahorra ~6-10 round-trips
+    // sincrónicos por evento en vivo.
+    const prevStatus = existingMatch.status ?? null;
+    const nextStatus = data.status !== undefined ? data.status : (existingMatch.status ?? null);
+    const finalRelevant = isFinalStandingsStatus(prevStatus) || isFinalStandingsStatus(nextStatus);
+
+    const shouldSyncRankings = this.shouldSyncRankingsAfterUpdate(existingMatch, updateData) && finalRelevant;
     const previousRankingSnapshot = shouldSyncRankings
       ? await getMatchRankingSnapshot(matchId)
       : null;
 
+    traceStageEnd('validate_snapshots');
+    traceStageStart('match_update');
     const { data: match, error } = await supabase
       .from('matches')
       .update(updateData)
       .eq('id', matchId)
       .select()
       .single();
+    traceStageEnd('match_update');
 
     if (error) {
       console.error('[FixtureService] Error updating match:', { error, matchId, updateData });
       throw new Error(error.message);
     }
 
+    markEditTrace({ shouldSyncRankings });
     if (shouldSyncRankings) {
-      await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
+      if (isDerivedRecalcSkipped('ranking')) {
+        appendEditTraceFact('skippedDerived', 'ranking');
+      } else {
+        traceStageStart('ranking_sync');
+        await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
+        traceStageEnd('ranking_sync');
+      }
     }
 
     // Automatic playoff advancement: when a bracket match's result or
@@ -1230,10 +1301,16 @@ export class FixtureService {
       'score' in updateData ||
       'home_club_id' in updateData ||
       'away_club_id' in updateData;
-    if (resultAffecting) {
+    markEditTrace({ resultAffecting, finalRelevant });
+    if (resultAffecting && finalRelevant) {
+      const skipAdvancement = isDerivedRecalcSkipped('advancement');
+      if (skipAdvancement) appendEditTraceFact('skippedDerived', 'advancement');
+      if (!skipAdvancement) {
+      traceStageStart('advancement');
       try {
         const advancement = await resolveMatchAdvancement(supabase, matchId);
         if (advancement.ok && advancement.changed > 0) {
+          markEditTrace({ advancementChanged: advancement.changed });
           await invalidateMatchesFeedCaches();
         }
         if (advancement.warnings.length > 0) {
@@ -1245,12 +1322,18 @@ export class FixtureService {
       } catch (advancementError) {
         console.error('[FixtureService] Playoff advancement threw:', advancementError);
       }
+      traceStageEnd('advancement');
+      }
 
       // Zone-stage result changed: re-derive playoff crossings for any
       // playoff phase seeded from this phase's standings, unless that zone
       // phase has been officially "closed" (playoffSeeding.locked). The
       // standings are recalculated elsewhere on result change; here we only
       // re-resolve the bracket's seed slots. Best-effort, never throws.
+      const skipReseed = isDerivedRecalcSkipped('reseed');
+      if (skipReseed) appendEditTraceFact('skippedDerived', 'reseed');
+      if (!skipReseed) {
+      traceStageStart('reseed');
       try {
         const { data: editedMatch } = await supabase
           .from('matches')
@@ -1275,6 +1358,8 @@ export class FixtureService {
       } catch (reseedError) {
         console.error('[FixtureService] Playoff reseed-from-zones threw:', reseedError);
       }
+      traceStageEnd('reseed');
+      }
     }
 
     // A manual date/venue edit on a bracket match marks it 'manual' so a
@@ -1294,10 +1379,16 @@ export class FixtureService {
       }
     }
 
-    await this.invalidatePublicMatchesFeed(
-      supabase,
-      this.getMatchFeedInvalidationScopes([existingMatch, match]),
-    );
+    if (isDerivedRecalcSkipped('cache')) {
+      appendEditTraceFact('skippedDerived', 'cache');
+    } else {
+      traceStageStart('cache_invalidation');
+      await this.invalidatePublicMatchesFeed(
+        supabase,
+        this.getMatchFeedInvalidationScopes([existingMatch, match]),
+      );
+      traceStageEnd('cache_invalidation');
+    }
     return this.mapMatch(match);
   }
 
@@ -1305,6 +1396,7 @@ export class FixtureService {
    * Delete a match
    */
   static async deleteMatch(matchId: string): Promise<boolean> {
+    if (!isUuid(matchId)) return false;
     const supabase = await this.getWriteClient();
     const { data: existingMatch } = await this.selectMatchForUpdate(supabase, matchId);
     const invalidationScopes = this.getMatchFeedInvalidationScopes([existingMatch]);

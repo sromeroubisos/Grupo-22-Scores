@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
 import { createClient } from '@/lib/supabase/server';
 import { isUuid } from '@/lib/utils/postgrest';
+import { traceEditRoute, markEditTrace } from '@/lib/perf/editTrace';
 import {
   fetchMatchCenterMatch,
   persistMatchCenterSupplementalData,
@@ -50,6 +51,18 @@ import {
 function jsonNoStore(body: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
   headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  return NextResponse.json(body, {
+    ...init,
+    headers,
+  });
+}
+
+// Cache compartido corto para el partido EN VIVO: colapsa el poll de 60s de
+// muchos viewers en el CDN de Vercel sin exceder ~15s de desfase. El resto de
+// los estados sigue con no-store (jsonNoStore).
+function jsonLiveCached(body: unknown, init?: ResponseInit) {
+  const headers = new Headers(init?.headers);
+  headers.set('Cache-Control', 'public, s-maxage=15, stale-while-revalidate=30');
   return NextResponse.json(body, {
     ...init,
     headers,
@@ -361,7 +374,8 @@ export async function GET(
       );
     }
 
-    return jsonNoStore(match);
+    const isLiveMatch = (match as { status?: unknown }).status === 'live';
+    return isLiveMatch ? jsonLiveCached(match) : jsonNoStore(match);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';
     console.error('Error in GET /api/matches/[id]:', error);
@@ -375,8 +389,13 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return traceEditRoute(
+    request,
+    { routeName: 'PATCH /api/matches/[id]', routeType: 'public_match', actorType: 'match_manager' },
+    async () => {
   try {
     const matchId = (await params).id;
+    markEditTrace({ matchId, responseBeforeDerived: false });
     if (!isUuid(matchId)) {
       return NextResponse.json({ error: 'Invalid match id' }, { status: 400 });
     }
@@ -445,6 +464,8 @@ export async function PATCH(
       { status }
     );
   }
+    },
+  );
 }
 
 export async function DELETE(
@@ -453,6 +474,9 @@ export async function DELETE(
 ) {
   try {
     const matchId = (await params).id;
+    if (!isUuid(matchId)) {
+      return NextResponse.json({ error: 'Invalid match id' }, { status: 400 });
+    }
     await ensureMatchAccess(matchId, EDIT_MEMBERSHIP_ROLES);
     const success = await FixtureService.deleteMatch(matchId);
 

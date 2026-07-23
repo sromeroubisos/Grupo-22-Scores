@@ -1776,6 +1776,9 @@ export async function persistMatchCenterSupplementalData(
     clock?: MatchCenterClockInput;
   },
 ) {
+  if (!isUuid(matchId)) {
+    throw new Error('El partido que intentas actualizar no existe.');
+  }
   const eventPatchUpserts = Array.isArray(payload.eventPatch?.upsert) ? payload.eventPatch.upsert : [];
   const canUseResolvedEventPatch =
     payload.eventPatch !== undefined
@@ -1808,7 +1811,13 @@ export async function persistMatchCenterSupplementalData(
   const touchesEvents = hasEventReplacement || hasEventPatch;
   const touchesEventStorage = touchesEvents || payload.clock !== undefined;
 
-  const supportsRelationalEvents = hasEventPatch
+  // Cuando viene SOLO eventPatch asumimos la tabla relacional y nos ahorramos
+  // el probe (el patch no tiene otra forma de persistirse). Si ademas viene el
+  // array completo hay fallback posible, asi que conviene chequear de verdad:
+  // en un entorno sin `match_events` se guarda por la columna JSONB en vez de
+  // fallar.
+  const canFallBackToEventsArray = hasEventPatch && hasEventReplacement;
+  const supportsRelationalEvents = hasEventPatch && !canFallBackToEventsArray
     ? true
     : touchesEventStorage
     ? await supportsMatchEventsTable(client)
@@ -1821,7 +1830,7 @@ export async function persistMatchCenterSupplementalData(
     throw new Error('No hay almacenamiento disponible para los eventos del partido.');
   }
 
-  if (hasEventPatch && !supportsRelationalEvents) {
+  if (hasEventPatch && !supportsRelationalEvents && !canFallBackToEventsArray) {
     throw new Error('El guardado incremental de eventos requiere la tabla match_events.');
   }
 
@@ -1970,7 +1979,11 @@ export async function persistMatchCenterSupplementalData(
     }
   }
 
-  if (payload.events !== undefined && supportsRelationalEvents) {
+  // Con eventPatch presente el reemplazo completo NO corre: `events` viaja solo
+  // como snapshot de lectura (recalculo de puntos) y la escritura la hace el
+  // patch. Correr ambos duplicaria el trabajo y reintroduciria el delete
+  // destructivo que el patch justamente evita.
+  if (payload.events !== undefined && !hasEventPatch && supportsRelationalEvents) {
     const { data: existingRows, error: existingRowsError } = await client
       .from('match_events')
       .select('id, event_type')

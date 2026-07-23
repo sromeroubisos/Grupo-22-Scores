@@ -5,6 +5,7 @@ import { MATCH_REVIEW_STATUS } from '@/lib/matchReview';
 import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { isUuid } from '@/lib/utils/postgrest';
 
 type ReviewAction = 'approve' | 'reject';
 
@@ -62,6 +63,9 @@ export async function PATCH(
 
   try {
     const matchId = (await params).id;
+    if (!isUuid(matchId)) {
+      return jsonError('Identificador de partido invalido.', 400);
+    }
     const body = await request.json().catch(() => ({}));
     const action = normalizeReviewAction((body as { action?: unknown }).action);
 
