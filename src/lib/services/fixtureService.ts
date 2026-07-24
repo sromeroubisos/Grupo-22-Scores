@@ -78,8 +78,17 @@ type MatchFeedInvalidationSource = {
 
 export class FixtureService {
   private static _supportsRoundLabel: boolean | null = null;
-  private static _matchColumnSupport = new Map<string, boolean>();
+  private static _matchColumnSupport = new Map<string, { value: boolean; at: number; ttl?: number }>();
+  private static _matchColumnInFlight = new Map<string, Promise<boolean>>();
+  private static _matchColumnFailOpen = new Map<string, { streak: number; total: number }>();
   private static _warnedWriteFallback = false;
+
+  /** Vida por defecto del cache de introspección de schema por instancia. Escape
+   *  hatch: bajá FIXTURE_SCHEMA_CACHE_TTL_MS para forzar re-sondeo sin redeploy. */
+  private static schemaCacheTtlMs(): number {
+    const v = Number(process.env.FIXTURE_SCHEMA_CACHE_TTL_MS);
+    return Number.isFinite(v) && v > 0 ? v : 6 * 60 * 60 * 1000; // 6h
+  }
 
   private static getMatchRoundId(match: { round_uuid?: string | null; round_id?: string | null }) {
     return match.round_uuid ?? match.round_id ?? null;
@@ -400,11 +409,11 @@ export class FixtureService {
    * Check if the round_label column exists in the matches table.
    * Caches the result to avoid redundant queries.
    */
-  static async checkRoundLabelSupport(): Promise<boolean> {
+  static async checkRoundLabelSupport(providedClient?: any): Promise<boolean> {
     if (this._supportsRoundLabel !== null) return this._supportsRoundLabel;
 
     try {
-      const supabase = await createClient();
+      const supabase = providedClient ?? await createClient();
       console.log('[FixtureService] Checking round_label support in schema...');
 
       const { error } = await supabase
@@ -433,24 +442,97 @@ export class FixtureService {
   }
 
   static async checkMatchColumnSupport(column: string, providedClient?: any): Promise<boolean> {
-    if (this._matchColumnSupport.has(column)) {
-      return this._matchColumnSupport.get(column) ?? false;
+    const cached = this._matchColumnSupport.get(column);
+    if (cached && Date.now() - cached.at < (cached.ttl ?? this.schemaCacheTtlMs())) {
+      return cached.value;
     }
 
-    try {
-      const supabase = providedClient ?? await createClient();
-      const { error } = await supabase
-        .from('matches')
-        .select(column)
-        .limit(0);
+    // Dedup in-flight: requests concurrentes en la misma instancia comparten un
+    // único sondeo (incluido su retry). El sondeo es de SCHEMA (existencia de
+    // columna), invariante al scope del cliente, así que compartir el
+    // providedClient del primer caller no cambia el resultado.
+    const inFlight = this._matchColumnInFlight.get(column);
+    if (inFlight) return inFlight;
 
-      const supported = !error && !isMissingColumnError(error, column);
-      this._matchColumnSupport.set(column, supported);
-      return supported;
-    } catch {
-      this._matchColumnSupport.set(column, false);
-      return false;
-    }
+    const probe = (async (): Promise<boolean> => {
+      const runSelect = async (): Promise<{ error: any }> => {
+        try {
+          const supabase = providedClient ?? await createClient();
+          const { error } = await supabase.from('matches').select(column).limit(0);
+          return { error };
+        } catch (e) {
+          return { error: e };
+        }
+      };
+
+      // Cachea un resultado DEFINITIVO y resetea el estado del breaker.
+      const cacheDefinitive = (value: boolean) => {
+        this._matchColumnSupport.set(column, { value, at: Date.now() });
+        this._matchColumnFailOpen.delete(column);
+      };
+
+      try {
+        let { error } = await runSelect();
+
+        // Missing-column real → definitivo: cachear false, sin retry.
+        if (error && isMissingColumnError(error, column)) {
+          cacheDefinitive(false);
+          return false;
+        }
+
+        // Error NO-missing-column (incluye excepción) → UN retry, backoff corto.
+        if (error) {
+          await new Promise((r) => setTimeout(r, 150));
+          ({ error } = await runSelect());
+        }
+
+        if (!error) {
+          cacheDefinitive(true);
+          return true;
+        }
+        if (isMissingColumnError(error, column)) {
+          cacheDefinitive(false);
+          return false;
+        }
+
+        // Sondeo + retry fallaron por causa no-missing-column → FAIL-OPEN (asumir
+        // presente) SIN cachear, para no enmascarar un false legítimo: el próximo
+        // save re-sondea. Circuit breaker: si la columna cae en fail-open N veces
+        // seguidas (degradación sostenida de PostgREST), cacheamos true con TTL
+        // CORTO (60s) para dejar de martillar; el TTL garantiza re-sondeo, así un
+        // false real se detecta apenas PostgREST se recupera.
+        const errMsg = (error && (error.message ?? String(error))) || 'desconocido';
+        const fo = this._matchColumnFailOpen.get(column) ?? { streak: 0, total: 0 };
+        fo.streak += 1;
+        fo.total += 1;
+        this._matchColumnFailOpen.set(column, fo);
+
+        const BREAKER_THRESHOLD = 3;
+        const BREAKER_TTL_MS = 60_000;
+        if (fo.streak >= BREAKER_THRESHOLD) {
+          // Engancha el breaker: mientras dure el TTL corto no se vuelve a sondear
+          // (el warn no se repite por-save porque el cache corta antes del probe).
+          this._matchColumnSupport.set(column, { value: true, at: Date.now(), ttl: BREAKER_TTL_MS });
+          console.warn(
+            `[SCHEMA_PROBE_FALLBACK] columna="${column}" breaker ENGAGED ~${BREAKER_TTL_MS / 1000}s ` +
+              `(fail-opens seguidos=${fo.streak}, total_instancia=${fo.total}); asumida presente:`,
+            errMsg,
+          );
+        } else {
+          console.warn(
+            `[SCHEMA_PROBE_FALLBACK] columna="${column}" fail-open ` +
+              `(seguidos=${fo.streak}, total_instancia=${fo.total}); asumida presente:`,
+            errMsg,
+          );
+        }
+        return true;
+      } finally {
+        this._matchColumnInFlight.delete(column);
+      }
+    })();
+
+    this._matchColumnInFlight.set(column, probe);
+    return probe;
   }
 
   /**
@@ -459,10 +541,13 @@ export class FixtureService {
   static async getTournamentFixture(tournamentId: string, seasonId?: string | null): Promise<TournamentFixture | null> {
     const supabase = await getReadClient();
     const scopedSeasonId = seasonId?.trim() || null;
+    // Cota dura de partidos por fixture: un torneo/temporada real no la alcanza.
+    // +1 detecta el exceso sin un COUNT extra (evita corte silencioso).
+    const FIXTURE_MATCH_CAP = 1000;
 
     let phasesQuery = supabase
       .from('tournament_phases')
-      .select('*')
+      .select('id, tournament_id, name, phase_type, order_index, start_date, end_date, is_active, settings, created_at, updated_at')
       .eq('tournament_id', tournamentId)
       .order('order_index', { ascending: true });
 
@@ -524,7 +609,8 @@ export class FixtureService {
           away_club:clubs!matches_away_club_id_fkey(id, name, short_name)
         `)
       .eq('tournament_id', tournamentId)
-      .order('date_time', { ascending: true });
+      .order('date_time', { ascending: true })
+      .limit(FIXTURE_MATCH_CAP + 1);
 
     let participantsQuery = supabase
       .from('tournament_participants')
@@ -573,7 +659,12 @@ export class FixtureService {
         )
         .map((participant) => [participant.clubId, participant.logo ?? null] as [string, string | null]),
     );
-    const mappedMatches = (allMatches || []).map(m => this.mapMatchWithClubs(m, clubLogos));
+    const rawMatches = allMatches || [];
+    const matchesTruncated = rawMatches.length > FIXTURE_MATCH_CAP;
+    if (matchesTruncated) {
+      console.warn(`[FixtureService] Fixture de ${tournamentId} supera ${FIXTURE_MATCH_CAP} partidos; devuelvo los primeros ${FIXTURE_MATCH_CAP}. La UI debe paginar/avisar (matchesTruncated).`);
+    }
+    const mappedMatches = rawMatches.slice(0, FIXTURE_MATCH_CAP).map(m => this.mapMatchWithClubs(m, clubLogos));
     const mappedRounds = (allRounds || []).map(r => this.mapRound(r));
 
     const phasesWithRounds: PhaseWithRounds[] = (phases || []).map((phase, index) => {
@@ -633,6 +724,7 @@ export class FixtureService {
       currentRoundId: currentRound?.id || null,
       phases: phasesWithRounds,
       participants: mappedParticipants,
+      matchesTruncated,
     };
   }
 
@@ -903,20 +995,20 @@ export class FixtureService {
       supportsPointsAutocalculated,
       supportsPointsOverrideReason,
     ] = await Promise.all([
-      this.checkRoundLabelSupport(),
-      data.homeSquadId ? this.checkMatchColumnSupport('home_division_id') : Promise.resolve(false),
-      data.awaySquadId ? this.checkMatchColumnSupport('away_division_id') : Promise.resolve(false),
-      data.category ? this.checkMatchColumnSupport('category') : Promise.resolve(false),
-      data.referee !== undefined ? this.checkMatchColumnSupport('referee') : Promise.resolve(false),
-      data.pitch !== undefined ? this.checkMatchColumnSupport('pitch') : Promise.resolve(false),
-      data.streamUrl !== undefined ? this.checkMatchColumnSupport('broadcast_url') : Promise.resolve(false),
-      data.replayUrl !== undefined ? this.checkMatchColumnSupport('replay_url') : Promise.resolve(false),
-      data.homeBasePoints !== undefined ? this.checkMatchColumnSupport('home_base_points') : Promise.resolve(false),
-      data.awayBasePoints !== undefined ? this.checkMatchColumnSupport('away_base_points') : Promise.resolve(false),
-      data.homeBonusPoints !== undefined ? this.checkMatchColumnSupport('home_bonus_points') : Promise.resolve(false),
-      data.awayBonusPoints !== undefined ? this.checkMatchColumnSupport('away_bonus_points') : Promise.resolve(false),
-      data.pointsAutocalculated !== undefined ? this.checkMatchColumnSupport('points_autocalculated') : Promise.resolve(false),
-      data.pointsOverrideReason !== undefined ? this.checkMatchColumnSupport('points_override_reason') : Promise.resolve(false),
+      this.checkRoundLabelSupport(supabase),
+      data.homeSquadId ? this.checkMatchColumnSupport('home_division_id', supabase) : Promise.resolve(false),
+      data.awaySquadId ? this.checkMatchColumnSupport('away_division_id', supabase) : Promise.resolve(false),
+      data.category ? this.checkMatchColumnSupport('category', supabase) : Promise.resolve(false),
+      data.referee !== undefined ? this.checkMatchColumnSupport('referee', supabase) : Promise.resolve(false),
+      data.pitch !== undefined ? this.checkMatchColumnSupport('pitch', supabase) : Promise.resolve(false),
+      data.streamUrl !== undefined ? this.checkMatchColumnSupport('broadcast_url', supabase) : Promise.resolve(false),
+      data.replayUrl !== undefined ? this.checkMatchColumnSupport('replay_url', supabase) : Promise.resolve(false),
+      data.homeBasePoints !== undefined ? this.checkMatchColumnSupport('home_base_points', supabase) : Promise.resolve(false),
+      data.awayBasePoints !== undefined ? this.checkMatchColumnSupport('away_base_points', supabase) : Promise.resolve(false),
+      data.homeBonusPoints !== undefined ? this.checkMatchColumnSupport('home_bonus_points', supabase) : Promise.resolve(false),
+      data.awayBonusPoints !== undefined ? this.checkMatchColumnSupport('away_bonus_points', supabase) : Promise.resolve(false),
+      data.pointsAutocalculated !== undefined ? this.checkMatchColumnSupport('points_autocalculated', supabase) : Promise.resolve(false),
+      data.pointsOverrideReason !== undefined ? this.checkMatchColumnSupport('points_override_reason', supabase) : Promise.resolve(false),
     ]);
     console.log(`[FixtureService] createMatch - round_label: ${supportsRoundLabel}`);
 
@@ -1023,7 +1115,7 @@ export class FixtureService {
               lockOrderIndex: fixedCfg.lockOrderIndex,
             });
           }
-          if (!locked && (await this.checkMatchColumnSupport('lineups'))) {
+          if (!locked && (await this.checkMatchColumnSupport('lineups', supabase))) {
             const derived = await deriveFixedRosterLineups(
               supabase,
               {
@@ -1103,7 +1195,7 @@ export class FixtureService {
       supportsPointsAutocalculated,
       supportsPointsOverrideReason,
     ] = await Promise.all([
-      this.checkRoundLabelSupport(),
+      this.checkRoundLabelSupport(supabase),
       data.homeSquadId !== undefined ? this.checkMatchColumnSupport('home_division_id', supabase) : Promise.resolve(false),
       data.awaySquadId !== undefined ? this.checkMatchColumnSupport('away_division_id', supabase) : Promise.resolve(false),
       data.category !== undefined ? this.checkMatchColumnSupport('category', supabase) : Promise.resolve(false),
