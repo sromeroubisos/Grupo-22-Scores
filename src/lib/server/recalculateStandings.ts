@@ -16,6 +16,7 @@ import {
 } from '@/lib/server/standingsCarryOver';
 import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
 import { isUuid } from '@/lib/utils/postgrest';
+import { markEditTrace } from '@/lib/perf/editTrace';
 
 type RecalculateOptions = {
     includeDependents?: boolean;
@@ -105,6 +106,7 @@ export async function recalculatePhaseStandingsScopes(
         }
 
         if (Array.isArray(groups) && groups.length > 0) {
+            markEditTrace({ standingsRan: true, standingsPhaseType: 'group_stage', standingsGroups: groups.length });
             const results = await Promise.all(
                 groups.map((group) => recalculateAndPersistStandings(
                     tournamentId,
@@ -135,6 +137,7 @@ export async function recalculatePhaseStandingsScopes(
         }
     }
 
+    markEditTrace({ standingsRan: true, standingsPhaseType: phase.phase_type, standingsGroups: 1 });
     const result = await recalculateAndPersistStandings(tournamentId, phaseId, null, tableType, scopedSeasonId);
     const finalResult = {
         ok: result.ok,

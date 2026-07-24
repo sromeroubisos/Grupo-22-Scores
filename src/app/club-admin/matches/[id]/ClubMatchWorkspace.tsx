@@ -119,6 +119,10 @@ import {
   getPlayerDefenseTotal,
   resolvePlayerStatsName,
   serializeLiveEvent,
+  buildEventSnapshot,
+  buildEventPatch,
+  type SerializedEvent,
+  type EventSnapshot,
 } from './ClubMatchWorkspace.utils';
 import { ComparisonBarChart, MiniBarChart, RadarChart } from './ClubMatchWorkspace.charts';
 import { ChartConfigPanel } from '@/components/admin/charts/ChartConfigPanel';
@@ -679,6 +683,14 @@ export default function ClubMatchWorkspace({
   const saveRequestSeqRef = useRef(0);
   const eventAutosaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastEventAutosaveSignatureRef = useRef('');
+  // Set de eventos tal como quedo en el servidor tras el ultimo guardado
+  // exitoso. `undefined` = todavia sin inicializar (se llena abajo con lo que
+  // vino del server); `null` = no se puede diffear y hay que mandar el array
+  // completo.
+  const lastPersistedEventsRef = useRef<EventSnapshot | null | undefined>(undefined);
+  if (lastPersistedEventsRef.current === undefined) {
+    lastPersistedEventsRef.current = buildEventSnapshot(ensureEvents(match.events).map(serializeLiveEvent));
+  }
 
   useEffect(() => {
     const handler = () => {
@@ -949,7 +961,11 @@ export default function ClubMatchWorkspace({
     setMatchDraft(buildDraftState(nextMatch));
     setNotes(nextMatch.notes || '');
     setLineupsState(ensureLineupsState(nextMatch.lineups, nextMatch.clock));
-    setEvents(ensureEvents(nextMatch.events));
+    const nextEvents = ensureEvents(nextMatch.events);
+    setEvents(nextEvents);
+    // El server acaba de decirnos cual es el set real: rebasamos el snapshot
+    // para que el proximo diff parta de ahi y no de un estado local viejo.
+    lastPersistedEventsRef.current = buildEventSnapshot(nextEvents.map(serializeLiveEvent));
   }, []);
 
   const buildPayload = useCallback((overrides?: Partial<Record<string, unknown>>) => {
@@ -1032,7 +1048,7 @@ export default function ClubMatchWorkspace({
     }
   }, []);
 
-  const saveMatch = useCallback(async (
+  const performSave = useCallback(async (
     overrides?: Partial<Record<string, unknown>>,
     successMessage = 'Cambios guardados',
     options?: { syncResponse?: boolean; quietSuccess?: boolean }
@@ -1053,11 +1069,27 @@ export default function ClubMatchWorkspace({
     setFeedback(null);
     const requestSeq = ++saveRequestSeqRef.current;
     try {
-      const savedPayloadSignature = JSON.stringify(buildPayload(overrides));
+      const requestPayload = buildPayload(overrides);
+      const savedPayloadSignature = JSON.stringify(requestPayload);
+
+      // Patch incremental: `events` sigue viajando como snapshot (el server lo
+      // usa para recalcular puntos) pero la ESCRITURA la hace el eventPatch,
+      // que solo toca los eventos que cambiaron. Sin esto, cada guardado
+      // reemplazaba el set completo y borraba lo que otro operador acababa de
+      // cargar. Si no hay snapshot previo o falta algun id, `eventPatch` queda
+      // en null y el server cae al reemplazo completo de siempre.
+      const sentEvents = Array.isArray(requestPayload.events)
+        ? requestPayload.events as SerializedEvent[]
+        : null;
+      const eventPatch = sentEvents ? buildEventPatch(lastPersistedEventsRef.current, sentEvents) : null;
+      if (eventPatch) {
+        requestPayload.eventPatch = eventPatch;
+      }
+
       const response = await fetch(`/api/club-admin/matches/${matchState.id}?club=${encodeURIComponent(clubId)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(buildPayload(overrides)),
+        body: JSON.stringify(requestPayload),
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
@@ -1071,6 +1103,12 @@ export default function ClubMatchWorkspace({
         return true;
       }
       lastSavedPayloadRef.current = savedPayloadSignature;
+      // El set persistido es exactamente el snapshot que acabamos de mandar.
+      // Si no se puede snapshotear (algun evento sin id), queda null y el
+      // proximo guardado vuelve al reemplazo completo.
+      if (sentEvents) {
+        lastPersistedEventsRef.current = buildEventSnapshot(sentEvents);
+      }
       setLastSavedAt(new Date().toISOString());
       setSaveUiState('saved');
       if (!options?.quietSuccess) {
@@ -1093,6 +1131,24 @@ export default function ClubMatchWorkspace({
       }
     }
   }, [buildPayload, clubId, hasUnsavedChanges, matchState.id, syncFromServer]);
+
+  // Los guardados se encolan en vez de dispararse en paralelo. Cargar dos
+  // eventos rapido mandaba dos PATCH concurrentes y, como el server reemplaza
+  // el set completo de eventos (upsert + delete de lo que no vino en el
+  // payload), el request mas viejo llegando ultimo borraba el evento del mas
+  // nuevo. Serializarlos garantiza que cada payload sea superset del anterior.
+  const saveQueueRef = useRef<Promise<boolean>>(Promise.resolve(true));
+  const saveMatch = useCallback((
+    overrides?: Partial<Record<string, unknown>>,
+    successMessage = 'Cambios guardados',
+    options?: { syncResponse?: boolean; quietSuccess?: boolean }
+  ) => {
+    const queued = saveQueueRef.current
+      .catch(() => false)
+      .then(() => performSave(overrides, successMessage, options));
+    saveQueueRef.current = queued;
+    return queued;
+  }, [performSave]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) {

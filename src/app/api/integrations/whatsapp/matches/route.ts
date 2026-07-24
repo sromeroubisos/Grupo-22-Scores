@@ -9,6 +9,7 @@ import { FixtureService } from '@/lib/services/fixtureService';
 import { isTournamentSyncLocked, TOURNAMENT_SYNC_LOCKED_MESSAGE } from '@/lib/services/tournamentSyncLock';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isUuid } from '@/lib/utils/postgrest';
+import { traceEditRoute, markEditTrace } from '@/lib/perf/editTrace';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -321,6 +322,16 @@ async function resolveMatchId(adminClient: ReturnType<typeof createAdminClient>,
 }
 
 export async function POST(request: NextRequest) {
+  // Etapa 0: wrapper de instrumentación común (no-op salvo PERF_EDIT_TRACE=true).
+  return traceEditRoute(
+    request,
+    { routeName: 'POST /api/integrations/whatsapp/matches', routeType: 'whatsapp_integration', actorType: 'whatsapp_integration' },
+    () => handleWhatsappMatchPost(request),
+  );
+}
+
+async function handleWhatsappMatchPost(request: NextRequest): Promise<Response> {
+  markEditTrace({ responseBeforeDerived: false });
   const auth = isAuthorized(request);
   if (!auth.ok) {
     if (auth.reason === 'missing_secret') {

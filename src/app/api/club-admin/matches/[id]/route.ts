@@ -9,40 +9,10 @@ import {
 import { deriveClubAdminPointsPatch } from '@/lib/services/matchPointsSync';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
-import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
+import { recalcAffectedPhases } from '@/lib/server/recalcAffectedPhasesTraced';
+import { traceEditRoute, markEditTrace } from '@/lib/perf/editTrace';
 
 export const maxDuration = 30;
-
-/**
- * Fire-and-forget standings recalculation for the phases touched by a
- * club-admin result edit. `recalculatePhaseStandingsScopes` defaults to
- * `includeDependents: true`, so carry-over dependent phases are refreshed
- * too. Without this, results entered by club admins never propagated to
- * standings or carry-over phases.
- */
-function recalcAffectedPhases(
-  scopes: Array<{ tournamentId?: string | null; phaseId?: string | null } | null | undefined>,
-) {
-  const affected = new Map<string, { tournamentId: string; phaseId: string }>();
-  for (const scope of scopes) {
-    if (scope?.tournamentId && scope?.phaseId) {
-      affected.set(`${scope.tournamentId}:${scope.phaseId}`, {
-        tournamentId: scope.tournamentId,
-        phaseId: scope.phaseId,
-      });
-    }
-  }
-
-  if (affected.size === 0) return;
-
-  Promise.all(
-    [...affected.values()].map((scope) =>
-      recalculatePhaseStandingsScopes(scope.tournamentId, scope.phaseId, 'general'),
-    ),
-  ).catch((err) =>
-    console.error('[club-admin/matches PATCH] Auto-recalculate standings failed:', err),
-  );
-}
 
 async function getWriteClient() {
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -122,8 +92,13 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return traceEditRoute(
+    request,
+    { routeName: 'PATCH /api/club-admin/matches/[id]', routeType: 'club_admin_match', actorType: 'club_admin' },
+    async () => {
   try {
     const matchId = (await params).id;
+    markEditTrace({ matchId, responseBeforeDerived: true });
     const access = await checkClubMatchAccess(matchId, resolveRequestedClub(request));
 
     if (!access.allowed) {
@@ -131,10 +106,21 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { events, lineups, ...rawMatchFields } = body as Record<string, unknown>;
+    const { events, eventPatch, lineups, ...rawMatchFields } = body as Record<string, unknown>;
+    // `eventPatch` (alta/baja incremental) manda sobre `events` para la
+    // ESCRITURA: el reemplazo completo hace upsert + delete de todo lo que no
+    // venga en el array, asi que dos operadores concurrentes se borran eventos
+    // entre si. `events` se sigue aceptando por compatibilidad (guardado
+    // explicito / autosave) y como snapshot de solo lectura para los puntos.
+    const normalizedEventPatch = eventPatch && typeof eventPatch === 'object'
+      ? eventPatch as { upsert?: unknown[]; deleteIds?: string[] }
+      : undefined;
     const matchFields = normalizeMatchUpdateFields(rawMatchFields);
     const writeClient = await getWriteClient();
     const previousMatch = await FixtureService.getMatch(matchId);
+    markEditTrace({
+      tournamentId: (previousMatch as { tournamentId?: string | null } | null)?.tournamentId ?? null,
+    });
 
     if (Object.prototype.hasOwnProperty.call(matchFields, 'clock')) {
       const supportsClock = await FixtureService.checkMatchColumnSupport('clock', writeClient);
@@ -155,7 +141,19 @@ export async function PATCH(
         Array.isArray(events)
       );
 
-    if (shouldAutoSyncPoints) {
+    // OJO (orden): el calculo de puntos corre ANTES de persistir los eventos.
+    // Si `events` no viene, deriveClubAdminPointsPatch los lee de la DB y en un
+    // request con `eventPatch` esa lectura todavia no incluye el evento nuevo,
+    // dando puntos viejos. Por eso el cliente manda SIEMPRE el snapshot
+    // completo en `events` (solo lectura) junto con el `eventPatch` de
+    // escritura. Si alguien manda solo eventPatch, avisamos en vez de guardar
+    // puntos silenciosamente desactualizados.
+    if (shouldAutoSyncPoints && normalizedEventPatch && !Array.isArray(events)) {
+      console.warn(
+        '[club-admin/matches] eventPatch sin snapshot `events`: se omite el auto-calculo de puntos para no persistir valores previos al patch.',
+        { matchId },
+      );
+    } else if (shouldAutoSyncPoints) {
       const pointsPatch = await deriveClubAdminPointsPatch(writeClient, matchId, {
         status: matchFields.status,
         score: matchFields.score,
@@ -172,7 +170,11 @@ export async function PATCH(
     }
 
     const supplemental = await persistMatchCenterSupplementalData(writeClient, matchId, {
+      // Van los dos a proposito: con `match_events` disponible el servicio usa
+      // el patch e ignora el array; si la tabla no existe cae al reemplazo
+      // completo sobre la columna JSONB.
       events: Array.isArray(events) ? events : undefined,
+      eventPatch: normalizedEventPatch,
       lineups: lineups as { home?: unknown[]; away?: unknown[] } | null | undefined,
       clock: Object.prototype.hasOwnProperty.call(rawMatchFields, 'clock')
         ? rawMatchFields.clock as MatchCenterClockInput
@@ -200,4 +202,6 @@ export async function PATCH(
     const message = error instanceof Error ? error.message : 'Internal server error';
     return jsonError(message, message === 'Forbidden' ? 403 : 500);
   }
+    },
+  );
 }

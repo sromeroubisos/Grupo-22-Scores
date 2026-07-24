@@ -481,6 +481,43 @@ export function serializeLiveEvent(event: ClubLiveEvent) {
   };
 }
 
+export type SerializedEvent = ReturnType<typeof serializeLiveEvent>;
+export type EventSnapshot = Map<string, string>;
+
+/**
+ * Snapshot id -> JSON del set de eventos tal como quedo persistido. Es la base
+ * para mandar un patch incremental en vez del array completo. Devuelve null si
+ * algun evento no tiene id estable: sin id no hay diff confiable y hay que caer
+ * al reemplazo completo.
+ */
+export function buildEventSnapshot(serialized: SerializedEvent[]): EventSnapshot | null {
+  const snapshot: EventSnapshot = new Map();
+  for (const event of serialized) {
+    const id = typeof event?.id === 'string' && event.id ? event.id : null;
+    if (!id) return null;
+    snapshot.set(id, JSON.stringify(event));
+  }
+  return snapshot;
+}
+
+/**
+ * Diff contra el ultimo estado persistido: que eventos hay que crear/actualizar
+ * y cuales borrar. Null = no se puede diffear (sin snapshot previo o sin ids
+ * estables), y el llamador manda `events` completo como antes.
+ */
+export function buildEventPatch(
+  previous: EventSnapshot | null | undefined,
+  serialized: SerializedEvent[],
+): { upsert: SerializedEvent[]; deleteIds: string[] } | null {
+  if (!previous) return null;
+  const next = buildEventSnapshot(serialized);
+  if (!next) return null;
+
+  const upsert = serialized.filter((event) => previous.get(String(event.id)) !== JSON.stringify(event));
+  const deleteIds = [...previous.keys()].filter((id) => !next.has(id));
+  return { upsert, deleteIds };
+}
+
 export function ensureScoreValue(value: number | null | undefined) {
   if (value === null || value === undefined) return '';
   return String(value);

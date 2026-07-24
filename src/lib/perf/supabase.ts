@@ -13,6 +13,7 @@ import {
 } from './measure';
 import { logRefreshFlow } from '@/lib/debug/refreshFlow';
 import { logRefreshLoop } from '@/lib/debug/refreshLoop';
+import { getEditStore, recordEditQuery } from './editTrace';
 
 type SupabaseMinimalQueryable = {
     from: (table: string) => {
@@ -339,6 +340,10 @@ export function createInstrumentedSupabaseFetch(
         const timeoutMs = getSupabaseFetchTimeoutMs(runtime);
         const perfEnabled = isPerfEnabled(runtime);
         const dbQueryDebugEnabled = isDbQueryDebugEnabled(runtime) && shouldDebugLogDbQuery(parsedUrl.pathname);
+        // Edit-path tracing (Etapa 0): count this query against the active
+        // request trace, if any. No-op unless PERF_EDIT_TRACE=true and we are
+        // inside a runWithEditTrace() context. Additive; does not alter fetch.
+        const editStore = getEditStore();
         const startedAtIso = new Date().toISOString();
         const filters = getSafeDbFilters(parsedUrl.searchParams);
         const requestId = getRequestCorrelationId(input, init);
@@ -350,7 +355,7 @@ export function createInstrumentedSupabaseFetch(
             `${runtime}:${service}:${operation}`,
         );
 
-        if (!perfEnabled && !dbQueryDebugEnabled) {
+        if (!perfEnabled && !dbQueryDebugEnabled && !editStore) {
             return timedFetch();
         }
 
@@ -360,6 +365,10 @@ export function createInstrumentedSupabaseFetch(
             const response = await timedFetch();
             const durationMs = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt;
             const inspection = await inspectSupabaseResponse(response);
+
+            if (editStore) {
+                recordEditQuery({ action, table, durationMs, rows: inspection.rows, ok: response.ok });
+            }
 
             if (perfEnabled) {
                 logPerf(
@@ -465,6 +474,9 @@ export function createInstrumentedSupabaseFetch(
             return response;
         } catch (error) {
             const durationMs = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt;
+            if (editStore) {
+                recordEditQuery({ action, table, durationMs, rows: 0, ok: false });
+            }
             if (perfEnabled) {
                 logPerf(
                     [runtime.toUpperCase(), service, 'ERROR'],

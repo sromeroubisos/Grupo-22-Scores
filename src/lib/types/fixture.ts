@@ -152,6 +152,8 @@ export interface TournamentFixture {
   currentRoundId: string | null;
   phases: PhaseWithRounds[];
   participants: TournamentParticipantInfo[];
+  /** true si el fixture superó la cota de partidos y se truncó (la UI debe paginar/avisar). Ver GESTOR_TORNEOS_HALLAZGOS.md H4. */
+  matchesTruncated?: boolean;
 }
 
 // ─── EDITOR TYPES ───────────────────────────────────────────────────────────────
