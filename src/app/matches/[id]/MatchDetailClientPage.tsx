@@ -1438,7 +1438,14 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const adminMatchId = typeof matchData.id === 'string' && matchData.id.trim()
         ? matchData.id.trim()
         : id;
-    const adminMatchHref = `/admin/super/partidos/${encodeURIComponent(adminMatchId)}`;
+    // Global admins get the super console; tournament admins (canManageMatch
+    // but not global) must use the /admin/torneo mirror — the /admin/super
+    // layout is gated by requireGlobalAdminContext and would bounce them out
+    // before the match control panel ever renders. Both routes mount the same
+    // MatchCenterClient, and per-match tournament scope is enforced server-side.
+    const adminMatchHref = isSuperAdminUser
+        ? `/admin/super/partidos/${encodeURIComponent(adminMatchId)}`
+        : `/admin/torneo/partidos/${encodeURIComponent(adminMatchId)}`;
     const firstPublicStatTabId = publicCompleteStatTabs[0]?.id ?? 'marcador';
     const effectivePublicStatTab = publicCompleteStatTabs.some((t) => t.id === publicStatsTab)
         ? publicStatsTab
