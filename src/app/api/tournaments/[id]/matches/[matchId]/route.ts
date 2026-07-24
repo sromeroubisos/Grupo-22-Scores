@@ -3,6 +3,8 @@ import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/
 import { FixtureService } from '@/lib/services/fixtureService';
 import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 
+export const maxDuration = 30;
+
 export async function PATCH(
     request: NextRequest,
     { params }: { params: Promise<{ id: string, matchId: string }> }

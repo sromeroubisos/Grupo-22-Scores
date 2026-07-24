@@ -11,6 +11,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 
+export const maxDuration = 30;
+
 /**
  * Fire-and-forget standings recalculation for the phases touched by a
  * club-admin result edit. `recalculatePhaseStandingsScopes` defaults to
