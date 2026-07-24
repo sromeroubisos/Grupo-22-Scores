@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/prode-scoring",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/rebuild-stale-rankings",
+      "schedule": "*/2 * * * *"
     }
   ]
 }
