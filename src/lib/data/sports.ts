@@ -113,7 +113,10 @@ export const SPORTS: Record<SportId, Sport> = {
     'field-hockey': {
         id: 'field-hockey',
         name: 'Field Hockey',
-        nameEs: 'Hockey C.',
+        // El 100% del hockey de la plataforma es sobre cesped (sport_id
+        // 'field-hockey': 23 torneos, 105 partidos; 'hockey' no tiene ninguno),
+        // asi que el rotulo corto es este y no el de hielo.
+        nameEs: 'Hockey',
         icon: '🏑',
         isActive: true,
         priority: 10,
