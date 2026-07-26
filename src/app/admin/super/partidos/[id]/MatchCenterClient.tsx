@@ -35,6 +35,8 @@ import {
     getNextActivePeriodAfterEvent,
     normalizeMatchPeriod,
 } from '@/lib/matchPeriods';
+import { formatClockSeconds, getPeriodOffsetSeconds, type MatchClockTransition } from '@/lib/matchClock';
+import { useMatchClock } from '@/hooks/useMatchClock';
 import {
     getConfiguredEventPoints,
     buildCompleteMatchStats,
@@ -192,10 +194,12 @@ export interface MatchRow {
     points_override_reason: string | null;
 }
 
+// preserveUnsavedClock era la curita del modelo snapshot: reinyectaba el draft
+// vivo para que la respuesta del PATCH no rebobinara el reloj. Con el reloj
+// derivado sobra: applyMatchResponse ya no toca el reloj.
 type ApplyMatchResponseOptions = {
     preserveLineupsIfIncomingEmpty?: boolean;
     preserveUnsavedScore?: boolean;
-    preserveUnsavedClock?: boolean;
     preserveUnsavedEvents?: boolean;
     preserveUnsavedLineups?: boolean;
 };
@@ -206,7 +210,6 @@ type PersistMatchPatchOptions = {
     eventsOverride?: MatchEvent[];
     preserveLineupsIfIncomingEmpty?: boolean;
     preserveUnsavedScore?: boolean;
-    preserveUnsavedClock?: boolean;
     preserveUnsavedEvents?: boolean;
     preserveUnsavedLineups?: boolean;
     syncDirtyEvents?: boolean;
@@ -299,120 +302,10 @@ function normalizeMatchScore(score: MatchScore | null | undefined): MatchScore {
     };
 }
 
-function normalizeClockMinute(value: unknown) {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? Math.max(0, Math.trunc(parsed)) : 0;
-}
-
-function normalizeClockSeconds(
-    value: unknown,
-) {
-    const parsed = Number(value);
-    if (!Number.isFinite(parsed)) return 0;
-
-    if (parsed >= 60) {
-        return Math.max(0, Math.trunc(parsed % 60));
-    }
-
-    if (parsed < 0) return 0;
-    return Math.min(59, Math.trunc(parsed));
-}
-
-function normalizeMatchClock(clock: MatchClock | null | undefined): MatchClock {
-    const normalizedMinute = normalizeClockMinute(clock?.minute);
-    const normalizedSeconds = normalizeClockSeconds(clock?.seconds);
-    const rawSeconds = Number(clock?.seconds);
-    const hasOnlyLegacyTotalSeconds =
-        !Number.isFinite(Number(clock?.minute))
-        && Number.isFinite(rawSeconds)
-        && rawSeconds >= 60;
-
-    if (hasOnlyLegacyTotalSeconds) {
-        return {
-            minute: Math.max(0, Math.trunc(rawSeconds / 60)),
-            seconds: Math.max(0, Math.trunc(rawSeconds % 60)),
-            period: typeof clock?.period === 'string' ? clock.period : '',
-            running: Boolean(clock?.running),
-        };
-    }
-
-    return {
-        minute: normalizedMinute,
-        seconds: normalizedSeconds,
-        period: typeof clock?.period === 'string' ? clock.period : '',
-        running: Boolean(clock?.running),
-    };
-}
-
-function areMatchClocksEqual(left: MatchClock | null | undefined, right: MatchClock | null | undefined) {
-    const normalizedLeft = normalizeMatchClock(left);
-    const normalizedRight = normalizeMatchClock(right);
-
-    return (
-        normalizedLeft.minute === normalizedRight.minute
-        && normalizedLeft.seconds === normalizedRight.seconds
-        && (normalizedLeft.period || '') === (normalizedRight.period || '')
-        && Boolean(normalizedLeft.running) === Boolean(normalizedRight.running)
-    );
-}
-
-function incrementMatchClock(clock: MatchClock) {
-    const normalizedClock = normalizeMatchClock(clock);
-    const totalSeconds = (normalizedClock.minute || 0) * 60 + (normalizedClock.seconds || 0) + 1;
-
-    return {
-        ...normalizedClock,
-        minute: Math.floor(totalSeconds / 60),
-        seconds: totalSeconds % 60,
-    };
-}
-
-function formatMatchClock(clock: MatchClock | null | undefined) {
-    const normalizedClock = normalizeMatchClock(clock);
-    const minute = String(normalizedClock.minute || 0).padStart(2, '0');
-    const seconds = String(normalizedClock.seconds || 0).padStart(2, '0');
-    const period = (normalizedClock.period || '').trim();
-
-    return period ? `${minute}:${seconds} - ${period}` : `${minute}:${seconds}`;
-}
-
-function hasMatchClockReference(clock: MatchClock | null | undefined) {
-    const normalizedClock = normalizeMatchClock(clock);
-    return Boolean(
-        normalizedClock.running
-        || normalizedClock.minute
-        || normalizedClock.seconds
-        || normalizedClock.period,
-    );
-}
-
-function resolveEventMinuteFromClock(clock: MatchClock | null | undefined, fallbackMinute: number) {
-    const normalizedClock = normalizeMatchClock(clock);
-    if (hasMatchClockReference(normalizedClock)) {
-        return Math.max(0, normalizedClock.minute || 0);
-    }
-
-    return Math.max(0, fallbackMinute || 0);
-}
-
-function deriveClockFromKickoff(
-    dateTime: string | null | undefined,
-    fallbackPeriod?: string | null,
-): MatchClock | null {
-    if (!dateTime) return null;
-
-    const kickoff = new Date(dateTime);
-    if (Number.isNaN(kickoff.getTime())) return null;
-
-    const elapsedSeconds = Math.max(0, Math.floor((Date.now() - kickoff.getTime()) / 1000));
-
-    return {
-        minute: Math.floor(elapsedSeconds / 60),
-        seconds: elapsedSeconds % 60,
-        period: (fallbackPeriod || '').trim() || '1T',
-        running: true,
-    };
-}
+// El reloj dejo de vivir aca. Todo lo que era snapshot (normalizeMatchClock,
+// incrementMatchClock, areMatchClocksEqual, deriveClockFromKickoff...) se fue a
+// @/lib/matchClock y useMatchClock, donde el valor se DERIVA contra el ancla del
+// server en vez de incrementarse a mano cada segundo.
 
 function normalizeTextValue(value: string | null | undefined) {
     return value?.trim() || '';
@@ -988,20 +881,10 @@ function sortMatchEventsChronologically(events: MatchEvent[]) {
         .map(({ event }) => event);
 }
 
-function getClockAfterEvent(clock: MatchClock, eventType: string) {
-    const normalized = normalizeMatchClock(clock);
-    const nextPeriod = getNextActivePeriodAfterEvent(eventType, normalized.period);
-
-    if (nextPeriod === normalizeMatchPeriod(normalized.period)) return normalized;
-
-    return {
-        ...normalized,
-        period: nextPeriod,
-        running: eventType === 'match_half' || eventType === 'match_end' || eventType === 'end_period'
-            ? false
-            : normalized.running,
-    };
-}
+// getClockAfterEvent se fue a resolveClockTransitionForEvent (@/lib/matchClock).
+// Ahora ramifica por TIPO DE EVENTO, no por cambio de periodo: el rebase se
+// engancha al evento de arranque (INICIO 2T -> 40:00) y los de cierre pausan
+// conservando el tiempo real corrido (FIN 1T a los 41:30 queda 41:30).
 
 function getStatusAfterEvent(currentStatus: string, eventType: string) {
     if (eventType === 'match_start' || eventType === 'match_half' || eventType === 'start_period') return 'live';
@@ -1461,15 +1344,6 @@ export default function MatchCenterClient({
     const initialEvents = normalizeMatchEvents(initialMatch.events);
     const initialLineups = normalizeMatchLineups(initialMatch.lineups);
     const initialScore = normalizeMatchScore(initialMatch.score);
-    const kickoffClock = initialMatch.status === 'live'
-        ? deriveClockFromKickoff(initialMatch.date_time, initialMatch.clock?.period)
-        : null;
-    const initialClock = normalizeMatchClock(
-        initialMatch.clock?.minute || initialMatch.clock?.seconds || initialMatch.clock?.period
-            ? initialMatch.clock
-            : kickoffClock,
-    );
-
     const [match, setMatch] = useState<MatchRow>(initialMatch);
     const [activeTab, setActiveTab] = useState<string>(resolvedInitialTab);
     const [statsPanelTab, setStatsPanelTab] = useState<string>('marcador');
@@ -1496,7 +1370,6 @@ export default function MatchCenterClient({
         };
     }, []);
     const [scoreDraft, setScoreDraft] = useState<MatchScore>(initialScore);
-    const [clockDraft, setClockDraft] = useState<MatchClock>(initialClock);
 
     // Editable state for events & lineups (local mirrors of DB JSONB)
     const [localEvents, setLocalEvents] = useState<MatchEvent[]>(initialEvents);
@@ -1506,9 +1379,7 @@ export default function MatchCenterClient({
     const persistedEventsRef = useRef<MatchEvent[]>(initialEvents);
     const persistedLineupsRef = useRef<MatchLineups>(initialLineups);
     const persistedScoreRef = useRef<MatchScore>(initialScore);
-    const persistedClockRef = useRef<MatchClock>(initialClock);
     const scoreDraftRef = useRef<MatchScore>(initialScore);
-    const clockDraftRef = useRef<MatchClock>(initialClock);
     const localEventsRef = useRef<MatchEvent[]>(initialEvents);
     const localLineupsRef = useRef<MatchLineups>(initialLineups);
     // Cola unica para todos los PATCH optimistas (evento + status en vivo). Si
@@ -1522,6 +1393,49 @@ export default function MatchCenterClient({
     const [matchSportId, setMatchSportId] = useState<string | null>(
         initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null,
     );
+
+    /* ─── RELOJ (aislado: no comparte estado con match ni con los eventos) ─── */
+
+    // Va por la misma cola que el resto de los PATCH optimistas, pero NO pasa
+    // por persistMatchPatch: una transicion de reloj no recalcula puntos, ni
+    // resuelve score, ni sincroniza eventos. Es el path caliente del partido en
+    // vivo y tiene que ser lo mas corto posible.
+    const persistClockTransition = useCallback(async (transition: MatchClockTransition) => {
+        const endpoint = `${resolvedMatchEndpoint}${resolvedMatchEndpoint.includes('?') ? '&' : '?'}response=compact`;
+        const run = matchPatchQueueRef.current
+            .catch(() => {})
+            .then(async () => {
+                const res = await fetch(endpoint, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ clockTransition: transition }),
+                });
+                const result = await res.json();
+                if (!res.ok) {
+                    throw new Error(result?.error || `HTTP ${res.status}`);
+                }
+                if (result?.matchCenterWarnings?.clockNotPersisted) {
+                    setSaveMsg({ type: 'warn', text: 'El reloj no se pudo guardar en este entorno.' });
+                    scheduleSaveMsgClear(4000);
+                }
+                return result?.clock ?? null;
+            });
+
+        matchPatchQueueRef.current = run.catch(() => {});
+        return run;
+    }, [resolvedMatchEndpoint, scheduleSaveMsgClear]);
+
+    const clock = useMatchClock({
+        initialClock: initialMatch.clock,
+        sportId: matchSportId,
+        kickoffIso: initialMatch.date_time,
+        initialStatus: initialMatch.status,
+        persistTransition: persistClockTransition,
+    });
+    // Para leer el controlador desde efectos de larga vida (realtime) sin
+    // meterlo en sus deps ni recrear la suscripcion.
+    const clockRef = useRef(clock);
+    clockRef.current = clock;
     const [eventDefinitions, setEventDefinitions] = useState<MatchEventDefinition[]>(
         () => getDefaultMatchEventDefinitions(initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null),
     );
@@ -1541,12 +1455,6 @@ export default function MatchCenterClient({
         [eventDefinitions, matchSportId],
     );
     const eventDefinitionMap = useMemo(() => buildMatchEventDefinitionMap(availableEventDefinitions), [availableEventDefinitions]);
-    const draftKickoffIso = useMemo(() => {
-        if (!dateTimeDraft) return match.date_time;
-        const [date, time] = dateTimeDraft.split('T');
-        return combineLocalDateTimeToUtcIso(date, time || '00:00', APP_TIMEZONE) || match.date_time;
-    }, [dateTimeDraft, match.date_time]);
-
     useEffect(() => {
         persistedEventsRef.current = normalizeMatchEvents(match.events);
     }, [match.events]);
@@ -1570,10 +1478,6 @@ export default function MatchCenterClient({
     useEffect(() => {
         scoreDraftRef.current = scoreDraft;
     }, [scoreDraft]);
-
-    useEffect(() => {
-        clockDraftRef.current = clockDraft;
-    }, [clockDraft]);
 
     useEffect(() => {
         setQuickLineupDrafts((prev) => ({
@@ -1767,17 +1671,12 @@ export default function MatchCenterClient({
         const nextEvents = normalizeMatchEvents(nextMatch.events);
         const nextLineups = normalizeMatchLineups(nextMatch.lineups);
         const nextScore = normalizeMatchScore(nextMatch.score);
-        const nextClock = normalizeMatchClock(nextMatch.clock);
         const currentLocalEvents = localEventsRef.current;
         const currentLocalLineups = localLineupsRef.current;
         const currentScoreDraft = scoreDraftRef.current;
-        const currentClockDraft = clockDraftRef.current;
         const hasUnsavedScore =
             options?.preserveUnsavedScore === true &&
             !areMatchScoresEqual(currentScoreDraft, persistedScoreRef.current);
-        const hasUnsavedClock =
-            options?.preserveUnsavedClock === true &&
-            !areMatchClocksEqual(currentClockDraft, persistedClockRef.current);
         const hasUnsavedEvents =
             options?.preserveUnsavedEvents === true &&
             !areDraftValuesEqual(currentLocalEvents, persistedEventsRef.current);
@@ -1794,18 +1693,18 @@ export default function MatchCenterClient({
                 ? currentLocalLineups
                 : nextLineups;
         const resolvedScore = hasUnsavedScore ? currentScoreDraft : nextScore;
-        const resolvedClock = hasUnsavedClock ? currentClockDraft : nextClock;
 
+        // El reloj NO se toca aca. Vive en useMatchClock y solo cambia por un
+        // handler explicito o por una respuesta de server mas nueva. Guardar un
+        // evento ya no puede rebobinarlo ni frenarlo.
         persistedMatchRef.current = nextMatch;
         persistedEventsRef.current = nextEvents;
         persistedLineupsRef.current = nextLineups;
         persistedScoreRef.current = nextScore;
-        persistedClockRef.current = nextClock;
         localEventsRef.current = resolvedEvents;
         localLineupsRef.current = resolvedLineups;
         setMatch(nextMatch);
         setScoreDraft(resolvedScore);
-        setClockDraft(resolvedClock);
         setLocalEvents(resolvedEvents);
         setLocalLineups(resolvedLineups);
         setLocalPoints(toLocalPoints(nextMatch));
@@ -1877,10 +1776,8 @@ export default function MatchCenterClient({
             payload.score = officialScore;
         }
 
-        if (!areMatchClocksEqual(clockDraftRef.current, persistedClockRef.current)) {
-            payload.clock = normalizeMatchClock(clockDraftRef.current);
-        }
-
+        // El reloj ya no viaja en este payload: se persiste solo, por intencion
+        // (clockTransition), en el momento en que el operador lo toca.
         if ((match.venue || '') !== (persistedMatch.venue || '')) {
             payload.venue = match.venue || '';
         }
@@ -1927,7 +1824,6 @@ export default function MatchCenterClient({
         const payloadUpdatesEvents = payloadIncludesEvents || payloadIncludesEventPatch;
         const payloadIncludesLineups = Object.prototype.hasOwnProperty.call(effectivePayload, 'lineups');
         const payloadIncludesScore = Object.prototype.hasOwnProperty.call(effectivePayload, 'score');
-        const payloadIncludesClock = Object.prototype.hasOwnProperty.call(effectivePayload, 'clock');
         const effectiveScore = resolveOfficialScore(
             payloadIncludesScore ? effectivePayload.score as MatchScore : undefined,
             effectiveEvents,
@@ -1998,7 +1894,6 @@ export default function MatchCenterClient({
                 ...(Object.prototype.hasOwnProperty.call(payloadWithScore, 'notes') ? { notes: payloadWithScore.notes as string | null } : {}),
                 ...(typeof payloadWithScore.dateTime === 'string' ? { date_time: payloadWithScore.dateTime } : {}),
                 ...(payloadIncludesScore || payloadUpdatesEvents ? { score: effectiveScore } : {}),
-                ...(payloadIncludesClock ? { clock: normalizeMatchClock(payloadWithScore.clock as MatchClock) } : {}),
                 ...(payloadUpdatesEvents ? { events: effectiveEvents } : {}),
                 ...(payloadIncludesLineups ? { lineups: effectivePayload.lineups as MatchLineups } : {}),
                 ...(typeof finalPayload.homeBasePoints === 'number' ? { home_base_points: finalPayload.homeBasePoints } : {}),
@@ -2016,10 +1911,6 @@ export default function MatchCenterClient({
                 ?? warnings.lineupsNotPersisted
                 ?? false,
             preserveUnsavedScore: options?.preserveUnsavedScore ?? !payloadIncludesScore,
-            preserveUnsavedClock:
-                options?.preserveUnsavedClock
-                ?? warnings.clockNotPersisted
-                ?? !payloadIncludesClock,
             preserveUnsavedEvents: options?.preserveUnsavedEvents ?? !payloadUpdatesEvents,
             preserveUnsavedLineups:
                 options?.preserveUnsavedLineups
@@ -2126,7 +2017,6 @@ export default function MatchCenterClient({
                 const hasUnsavedEvents = !areDraftValuesEqual(localEventsRef.current, persistedEventsRef.current);
                 const hasUnsavedLineups = !areDraftValuesEqual(localLineupsRef.current, persistedLineupsRef.current);
                 const hasUnsavedScore = !areMatchScoresEqual(scoreDraftRef.current, persistedScoreRef.current);
-                const hasUnsavedClock = !areMatchClocksEqual(clockDraftRef.current, persistedClockRef.current);
                 const hasUnsavedStatus = currentDraftMatch.status !== currentPersistedMatch.status;
                 const hasUnsavedVenue = (currentDraftMatch.venue || '') !== (currentPersistedMatch.venue || '');
                 const hasUnsavedNotes = !areTextValuesEqual(currentDraftMatch.notes, currentPersistedMatch.notes);
@@ -2153,11 +2043,10 @@ export default function MatchCenterClient({
                     }
                 }
                 if (incomingClock !== undefined) {
-                    const normalizedIncomingClock = normalizeMatchClock(incomingClock);
-                    persistedClockRef.current = normalizedIncomingClock;
-                    if (!hasUnsavedClock) {
-                        setClockDraft(normalizedIncomingClock);
-                    }
+                    // El hook decide: si hay transiciones en vuelo lo ignora, y
+                    // si no, compara updated_at de server contra updated_at de
+                    // server. Nunca contra una marca del dispositivo.
+                    clockRef.current.applyServerClock(incomingClock);
                 }
                 if (incomingEvents) {
                     persistedEventsRef.current = incomingEvents;
@@ -2261,38 +2150,18 @@ export default function MatchCenterClient({
     };
 
     /* â”€â”€â”€ DERIVED DATA (all computed, zero hardcode) â”€â”€â”€ */
-    useEffect(() => {
-        if (match.status === 'live' || !clockDraft.running) return;
-        setClockDraft((prev) => ({ ...normalizeMatchClock(prev), running: false }));
-    }, [clockDraft.running, match.status]);
-
-    useEffect(() => {
-        const persistedClock = normalizeMatchClock(persistedClockRef.current);
-        const currentClock = normalizeMatchClock(clockDraftRef.current);
-        const hasManualClock =
-            Boolean(persistedClock.minute || persistedClock.seconds || persistedClock.period)
-            || Boolean(currentClock.minute || currentClock.seconds || currentClock.period);
-
-        if (match.status !== 'live' || hasManualClock) return;
-
-        const derivedClock = deriveClockFromKickoff(draftKickoffIso, currentClock.period || persistedClock.period);
-        if (!derivedClock) return;
-
-        setClockDraft((prev) => {
-            const normalizedPrev = normalizeMatchClock(prev);
-            return areMatchClocksEqual(normalizedPrev, derivedClock) ? normalizedPrev : derivedClock;
-        });
-    }, [draftKickoffIso, match.status]);
-
-    useEffect(() => {
-        if (!clockDraft.running) return;
-
-        const intervalId = window.setInterval(() => {
-            setClockDraft((prev) => incrementMatchClock(prev));
-        }, 1000);
-
-        return () => window.clearInterval(intervalId);
-    }, [clockDraft.running]);
+    // Aca vivian tres efectos del reloj, los tres borrados:
+    //
+    //  1. EL MATACABLE: forzaba running=false cada vez que match.status !== 'live'.
+    //     Como cada guardado re-sincroniza `match` desde el server, un partido
+    //     cuya fila no quedo 'live' apagaba el reloj al primer evento cargado.
+    //     Si el reloj tiene que parar, ahora lo decide un handler explicito y no
+    //     un efecto reactivo sobre el estado del partido.
+    //  2. deriveClockFromKickoff reactivo -> ahora es semilla de MONTAJE dentro
+    //     del hook, sin efecto que pueda volver a dispararse.
+    //  3. el setInterval que incrementaba el snapshot -> el tick de render vive
+    //     en useMatchClock y no muta nada: solo fuerza el recalculo contra el
+    //     ancla del server.
 
     const handleScoreInputChange = useCallback((team: 'home' | 'away', value: string) => {
         const parsedValue = Math.max(0, Number.parseInt(value || '0', 10) || 0);
@@ -2376,45 +2245,36 @@ export default function MatchCenterClient({
             });
     }, [persistMatchPatch, scheduleSaveMsgClear]);
 
-    const handleStartClock = useCallback(() => {
-        setClockDraft((prev) => {
-            const normalized = normalizeMatchClock(prev);
-            return {
-                ...normalized,
-                period: normalized.period && normalized.period !== 'Previa' ? normalized.period : '1T',
-                running: true,
-            };
+    const reportClockError = useCallback((err: unknown) => {
+        setSaveMsg({
+            type: 'err',
+            text: `No se pudo actualizar el reloj: ${err instanceof Error ? err.message : String(err)}`,
         });
+        scheduleSaveMsgClear(5000);
+    }, [scheduleSaveMsgClear]);
+
+    const handleStartClock = useCallback(() => {
         ensureLiveStatus();
-    }, [ensureLiveStatus]);
+        clock.start().catch(reportClockError);
+    }, [clock, ensureLiveStatus, reportClockError]);
 
     const handlePauseClock = useCallback(() => {
-        setClockDraft((prev) => ({
-            ...normalizeMatchClock(prev),
-            running: false,
-        }));
-    }, []);
+        clock.pause().catch(reportClockError);
+    }, [clock, reportClockError]);
 
     const handleResumeClock = useCallback(() => {
-        setClockDraft((prev) => {
-            const normalized = normalizeMatchClock(prev);
-            return {
-                ...normalized,
-                period: normalized.period || '1T',
-                running: true,
-            };
-        });
         ensureLiveStatus();
-    }, [ensureLiveStatus]);
+        clock.start().catch(reportClockError);
+    }, [clock, ensureLiveStatus, reportClockError]);
 
     const handleResetClock = useCallback(() => {
-        setClockDraft({ minute: 0, seconds: 0, period: 'Previa', running: false });
-    }, []);
+        clock.reset().catch(reportClockError);
+    }, [clock, reportClockError]);
 
     const openGuidedEvent = useCallback((definition: MatchEventDefinition) => {
-        const currentClock = normalizeMatchClock(clockDraftRef.current);
-        const minute = resolveEventMinuteFromClock(currentClock, getLatestEventMinute(localEventsRef.current));
-        const period = getEventPeriodForType(definition.type, currentClock.period);
+        // Minuto CALCULADO contra el ancla, no leido de un snapshot.
+        const minute = clock.readEventMinute();
+        const period = getEventPeriodForType(definition.type, clock.period);
 
         setGuidedEvent({
             definition,
@@ -2431,7 +2291,7 @@ export default function MatchCenterClient({
             contestOutcome: requiresContestOutcome(definition.type) ? 'won' : '',
             isTemporary: false,
         });
-    }, []);
+    }, [clock]);
 
     const selectGuidedTeam = useCallback((team: 'home' | 'away') => {
         setGuidedEvent((current) => {
@@ -2506,12 +2366,10 @@ export default function MatchCenterClient({
             }
         }
 
-        const minute = resolveEventMinuteFromClock(
-            clockDraftRef.current,
-            Number.parseInt(guidedEvent.minute || '0', 10) || 0,
-        );
-        const currentClock = normalizeMatchClock(clockDraftRef.current);
-        const eventPeriod = getEventPeriodForType(guidedEvent.definition.type, currentClock.period || guidedEvent.period);
+        // El minuto que se persiste es el CALCULADO al momento del click contra
+        // el ancla del server, no el estado del reloj ni lo que quedo en el form.
+        const minute = clock.readEventMinute();
+        const eventPeriod = getEventPeriodForType(guidedEvent.definition.type, clock.period || guidedEvent.period);
         const previousEvents = localEventsRef.current;
         const nextEvent: MatchEvent = {
             id: crypto.randomUUID(),
@@ -2527,18 +2385,16 @@ export default function MatchCenterClient({
             detail: formatGuidedEventDetail(guidedEvent),
         };
         const nextEvents = [...previousEvents, nextEvent];
-        const nextClock = getClockAfterEvent(currentClock, guidedEvent.definition.type);
         const previousStatus = matchDraftRef.current.status;
         const nextStatus = getStatusAfterEvent(previousStatus, guidedEvent.definition.type);
-        const clockChanged = !areMatchClocksEqual(nextClock, currentClock);
         const statusChanged = nextStatus !== matchDraftRef.current.status;
+        // Los eventos de reloj (FIN 1T, INICIO 2T, FINAL) disparan su propia
+        // transicion, por su propio canal. El guardado del evento no toca el
+        // reloj ni de casualidad.
+        const clockTransition = clock.resolveEventTransition(guidedEvent.definition.type);
 
         localEventsRef.current = nextEvents;
         setLocalEvents(nextEvents);
-        if (clockChanged) {
-            clockDraftRef.current = nextClock;
-            setClockDraft(nextClock);
-        }
         if (statusChanged) {
             setMatch((current) => ({ ...current, status: nextStatus }));
         }
@@ -2549,9 +2405,12 @@ export default function MatchCenterClient({
         setSaveMsg({ type: 'ok', text: 'Evento guardado.' });
         scheduleSaveMsgClear(3000);
 
+        if (clockTransition) {
+            clock.runTransition(clockTransition).catch(reportClockError);
+        }
+
         const payload = {
             eventPatch: { upsert: [nextEvent] },
-            ...(clockChanged ? { clock: nextClock } : {}),
             ...(statusChanged ? { status: nextStatus } : {}),
         };
         matchPatchQueueRef.current = matchPatchQueueRef.current
@@ -2572,7 +2431,7 @@ export default function MatchCenterClient({
                     setSaveMsg({ type: 'err', text: `No se pudo guardar el evento: ${err instanceof Error ? err.message : String(err)}` });
                 }
             });
-    }, [guidedEvent, persistMatchPatch]);
+    }, [clock, guidedEvent, persistMatchPatch, reportClockError, scheduleSaveMsgClear]);
 
     const applyLineupSize = useCallback((requestedSize?: number) => {
         const nextSize = requestedSize ?? getPositiveInteger(lineupSizeInput, getLineupSize(localLineups));
@@ -3109,24 +2968,21 @@ export default function MatchCenterClient({
             .slice(0, 6)
     ), [playerStatsByTeam]);
     const scoreDirty = !areMatchScoresEqual(score, persistedScoreRef.current);
-    const clockDirty = !areMatchClocksEqual(clockDraft, persistedClockRef.current);
     const eventsDirty = !areDraftValuesEqual(events, persistedEventsRef.current);
     const lineupsDirty = !areDraftValuesEqual(lineups, persistedLineupsRef.current);
     const statusDirty = match.status !== persistedMatchRef.current.status;
     const venueDirty = (match.venue || '') !== (persistedMatchRef.current.venue || '');
     const notesDirty = !areTextValuesEqual(match.notes, persistedMatchRef.current.notes);
     const dateTimeDirty = dateTimeDraft !== toDateTimeLocalInput(persistedMatchRef.current.date_time);
-    const hasUnsavedMatchParameters = scoreDirty || clockDirty || statusDirty || venueDirty || notesDirty || dateTimeDirty;
-    const liveClockLabel = formatMatchClock(clockDraft);
-    const normalizedClockDraft = normalizeMatchClock(clockDraft);
-    const clockHasProgress = Boolean(normalizedClockDraft.minute || normalizedClockDraft.seconds);
-    const canStartClock = !normalizedClockDraft.running && !clockHasProgress;
-    const canPauseClock = normalizedClockDraft.running;
-    const canResumeClock = !normalizedClockDraft.running && clockHasProgress;
-    const guidedEventUsesClockMinute = hasMatchClockReference(clockDraft);
-    const guidedEventClockMinute = guidedEvent
-        ? resolveEventMinuteFromClock(clockDraft, Number.parseInt(guidedEvent.minute || '0', 10) || 0)
-        : 0;
+    const hasUnsavedMatchParameters = scoreDirty || statusDirty || venueDirty || notesDirty || dateTimeDirty;
+    const liveClockLabel = clock.label;
+    const canStartClock = !clock.isRunning && !clock.hasProgress;
+    const canPauseClock = clock.isRunning;
+    const canResumeClock = !clock.isRunning && clock.hasProgress;
+    // El reloj ya no tiene estado "sin guardar": cada transicion se persiste sola
+    // en el momento. Lo que se muestra es si hay alguna todavia en vuelo.
+    const guidedEventUsesClockMinute = clock.isRunning || clock.hasProgress;
+    const guidedEventClockMinute = guidedEvent ? clock.elapsedMinute : 0;
     const sortedEvents = useMemo(
         () => {
             if (activeTab !== 'eventos') return [];
@@ -3860,7 +3716,7 @@ export default function MatchCenterClient({
                                     <h4>Carga rapida de eventos</h4>
                                     <span className="live-event-header-note">El tiempo actual se aplica al guardar cada evento.</span>
                                 </div>
-                                <div className="live-match-clock" data-running={normalizedClockDraft.running ? 'true' : 'false'}>
+                                <div className="live-match-clock" data-running={clock.isRunning ? 'true' : 'false'}>
                                     <div className="live-match-clock-readout">
                                         <Clock size={15} />
                                         <span>{liveClockLabel}</span>
@@ -3904,18 +3760,29 @@ export default function MatchCenterClient({
                                     </div>
                                 </div>
                             </div>
+                            {/*
+                              * MIN/SEG son OVERRIDE MANUAL: escribir ajusta el
+                              * acumulado, nunca al reves. Mientras el input tiene
+                              * foco el tick no lo pisa (el hook mantiene un draft
+                              * aparte); al salir del campo se persiste como una
+                              * transicion 'set' anclada igual que el resto.
+                              */}
                             <div className="live-match-clock-editor">
                                 <label>
                                     <span>Periodo</span>
                                     <select
-                                        value={clockDraft.period || ''}
-                                        onChange={(e) => setClockDraft((prev) => ({
-                                            ...normalizeMatchClock(prev),
-                                            period: e.target.value,
-                                        }))}
+                                        value={clock.period || ''}
+                                        onChange={(e) => clock.changePeriod(e.target.value).catch(reportClockError)}
                                     >
-                                        {Array.from(new Set([clockDraft.period || '', ...COMMON_MATCH_PERIODS].filter(Boolean))).map((period) => (
-                                            <option key={period} value={period}>{period}</option>
+                                        {/* Codigos canonicos con rotulo legible: el hook guarda
+                                          * 'PRE'/'FT', no 'Previa'/'Final', y sin normalizar el
+                                          * select mostraba las dos formas del mismo periodo. */}
+                                        {Array.from(new Set(
+                                            [clock.period, ...COMMON_MATCH_PERIODS]
+                                                .filter(Boolean)
+                                                .map((period) => normalizeMatchPeriod(period)),
+                                        )).map((period) => (
+                                            <option key={period} value={period}>{getMatchPeriodLabel(period)}</option>
                                         ))}
                                     </select>
                                 </label>
@@ -3924,11 +3791,10 @@ export default function MatchCenterClient({
                                     <input
                                         type="number"
                                         min={0}
-                                        value={clockDraft.minute ?? 0}
-                                        onChange={(e) => setClockDraft((prev) => ({
-                                            ...normalizeMatchClock(prev),
-                                            minute: normalizeClockMinute(e.target.value),
-                                        }))}
+                                        value={clock.manual.minute}
+                                        onFocus={clock.beginManualEdit}
+                                        onChange={(e) => clock.changeManualField('minute', e.target.value)}
+                                        onBlur={() => clock.commitManualEdit().catch(reportClockError)}
                                     />
                                 </label>
                                 <label>
@@ -3937,15 +3803,22 @@ export default function MatchCenterClient({
                                         type="number"
                                         min={0}
                                         max={59}
-                                        value={clockDraft.seconds ?? 0}
-                                        onChange={(e) => setClockDraft((prev) => ({
-                                            ...normalizeMatchClock(prev),
-                                            seconds: normalizeClockSeconds(e.target.value),
-                                        }))}
+                                        value={clock.manual.seconds}
+                                        onFocus={clock.beginManualEdit}
+                                        onChange={(e) => clock.changeManualField('seconds', e.target.value)}
+                                        onBlur={() => clock.commitManualEdit().catch(reportClockError)}
                                     />
                                 </label>
-                                {clockDirty ? (
-                                    <span className="live-match-clock-dirty">Reloj sin guardar</span>
+                                <button
+                                    type="button"
+                                    className="mc-btn live-match-clock-btn"
+                                    onClick={() => clock.rebaseToPeriodStart(clock.period).catch(reportClockError)}
+                                    title={`Llevar el reloj al inicio del periodo (${formatClockSeconds(getPeriodOffsetSeconds(matchSportId, clock.period))})`}
+                                >
+                                    Ir al inicio del periodo
+                                </button>
+                                {clock.manual.isEditing ? (
+                                    <span className="live-match-clock-dirty">Editando (se aplica al salir del campo)</span>
                                 ) : null}
                             </div>
                             <div className="live-event-panel">
@@ -4270,7 +4143,7 @@ export default function MatchCenterClient({
                                         <label>
                                             <span>Periodo</span>
                                             <input
-                                                value={getMatchPeriodLabel(getEventPeriodForType(guidedEvent.definition.type, clockDraft.period || guidedEvent.period))}
+                                                value={getMatchPeriodLabel(getEventPeriodForType(guidedEvent.definition.type, clock.period || guidedEvent.period))}
                                                 readOnly
                                                 title="El evento se guarda en el periodo activo del partido."
                                             />
@@ -4833,11 +4706,9 @@ export default function MatchCenterClient({
                             <span className={`config-save-note ${hasUnsavedMatchParameters ? 'is-dirty' : ''}`}>
                                 {scoreDirty
                                     ? 'Cambios sin guardar en marcador.'
-                                    : clockDirty
-                                        ? 'Reloj sin guardar desde Eventos.'
-                                        : hasUnsavedMatchParameters
-                                            ? 'Cambios administrativos sin guardar.'
-                                            : 'El marcador oficial manda sobre la timeline.'}
+                                    : hasUnsavedMatchParameters
+                                        ? 'Cambios administrativos sin guardar.'
+                                        : 'El marcador oficial manda sobre la timeline.'}
                             </span>
                         </div>
                         <div className={`mc-card-body config-parameters-grid ${match.status === 'final' && score.home === score.away ? 'has-shootout' : ''}`}>

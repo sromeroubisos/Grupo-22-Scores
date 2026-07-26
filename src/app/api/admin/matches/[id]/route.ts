@@ -11,6 +11,12 @@ import { ensureMatchManagementAccess } from '@/lib/server/matchCenterAdmin';
 import { recalcAffectedPhases } from '@/lib/server/recalcAffectedPhasesTraced';
 import { traceEditRoute, markEditTrace } from '@/lib/perf/editTrace';
 import { isUuid } from '@/lib/utils/postgrest';
+import type { StoredMatchClock } from '@/lib/matchClock';
+import {
+  parseClockTransition,
+  resolveClockWithoutColumn,
+  runMatchClockTransition,
+} from '@/lib/server/matchClockTransition';
 
 async function getWriteClient() {
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -69,7 +75,7 @@ export async function PATCH(
         const compactResponse = request.nextUrl.searchParams.get('response') === 'compact';
         await ensureMatchManagementAccess(matchId, MANAGEMENT_MEMBERSHIP_ROLES);
         const body = await request.json();
-        const { events, eventPatch, lineups, ...rawMatchFields } = body as Record<string, unknown>;
+        const { events, eventPatch, lineups, clockTransition, ...rawMatchFields } = body as Record<string, unknown>;
         const matchFields = { ...rawMatchFields };
         const writeClient = await getWriteClient();
         const previousMatch = await FixtureService.getMatchScope(matchId);
@@ -81,6 +87,27 @@ export async function PATCH(
           const supportsClock = await FixtureService.checkMatchColumnSupport('clock', writeClient);
           if (!supportsClock) {
             delete matchFields.clock;
+          }
+        }
+
+        // Reloj derivado: el cliente manda INTENCION (start/pause/set/keep) y el
+        // server resuelve los numeros contra el ancla guardada con su propio
+        // now(). Nunca se confia en un minuto calculado por el navegador.
+        const parsedClockTransition = parseClockTransition(clockTransition);
+        let resolvedClock: StoredMatchClock | null = null;
+        let clockTransitionPersisted = true;
+
+        if (parsedClockTransition) {
+          const supportsClock = await FixtureService.checkMatchColumnSupport('clock', writeClient);
+
+          if (supportsClock) {
+            const result = await runMatchClockTransition(writeClient, matchId, parsedClockTransition);
+            resolvedClock = result.clock;
+            clockTransitionPersisted = result.persisted;
+          } else {
+            // Sin columna clock el estado vive en el snapshot dentro de events.
+            resolvedClock = resolveClockWithoutColumn(parsedClockTransition);
+            clockTransitionPersisted = false;
           }
         }
 
@@ -96,15 +123,29 @@ export async function PATCH(
             ? eventPatch as { upsert?: unknown[]; deleteIds?: string[] }
             : undefined,
           lineups: lineups as { home?: unknown[]; away?: unknown[] } | null | undefined,
-          clock: Object.prototype.hasOwnProperty.call(rawMatchFields, 'clock')
-            ? rawMatchFields.clock as { minute?: unknown; seconds?: unknown; period?: unknown; running?: unknown; syncedAt?: unknown } | null | undefined
-            : undefined,
+          // El espejo legacy del reloj resuelto tambien va al snapshot en
+          // eventos: es el fallback cuando la columna clock degrada.
+          clock: resolvedClock
+            ? {
+                minute: resolvedClock.minute,
+                seconds: resolvedClock.seconds,
+                period: resolvedClock.period,
+                running: resolvedClock.running,
+                syncedAt: resolvedClock.syncedAt,
+              }
+            : Object.prototype.hasOwnProperty.call(rawMatchFields, 'clock')
+              ? rawMatchFields.clock as { minute?: unknown; seconds?: unknown; period?: unknown; running?: unknown; syncedAt?: unknown } | null | undefined
+              : undefined,
         });
+
+        const clockDegraded =
+          (parsedClockTransition !== null && !clockTransitionPersisted)
+          || !supplemental.persistedClock;
 
         const matchCenterWarnings =
           lineups !== undefined && !supplemental.persistedLineups
-            ? { lineupsNotPersisted: true, ...(!supplemental.persistedClock ? { clockNotPersisted: true } : {}) }
-            : !supplemental.persistedClock
+            ? { lineupsNotPersisted: true, ...(clockDegraded ? { clockNotPersisted: true } : {}) }
+            : clockDegraded
               ? { clockNotPersisted: true }
               : null;
 
@@ -118,6 +159,9 @@ export async function PATCH(
           return NextResponse.json({
             id: matchId,
             compact: true,
+            // El clock resuelto vuelve siempre: el hook lo usa para recalibrar
+            // la deriva del dispositivo contra updated_at del server.
+            ...(resolvedClock ? { clock: resolvedClock } : {}),
             ...(matchCenterWarnings ? { matchCenterWarnings } : {}),
           });
         }
