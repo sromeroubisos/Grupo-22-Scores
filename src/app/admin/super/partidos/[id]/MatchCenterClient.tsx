@@ -1511,6 +1511,9 @@ export default function MatchCenterClient({
     const clockDraftRef = useRef<MatchClock>(initialClock);
     const localEventsRef = useRef<MatchEvent[]>(initialEvents);
     const localLineupsRef = useRef<MatchLineups>(initialLineups);
+    // Cola unica para todos los PATCH optimistas (evento + status en vivo). Si
+    // corren en paralelo, la respuesta mas lenta pisa el estado de la mas rapida.
+    const matchPatchQueueRef = useRef<Promise<unknown>>(Promise.resolve());
 
     // Editable state for per-match points
     const [localPoints, setLocalPoints] = useState<MatchPoints>(() => toLocalPoints(initialMatch));
@@ -2348,9 +2351,30 @@ export default function MatchCenterClient({
         setLocalEvents((prev) => prev.filter((event) => event.id !== eventId));
     }, []);
 
+    // INICIAR/REANUDAR ponen el partido en vivo. Antes esto vivia SOLO en estado
+    // local: la fila quedaba 'scheduled' en DB, con lo cual el partido no entraba
+    // al feed liveOnly de /api/matches ni activaba el guard de status del prode.
     const ensureLiveStatus = useCallback(() => {
         setMatch((prev) => (prev.status === 'live' ? prev : { ...prev, status: 'live' }));
-    }, []);
+
+        if (persistedMatchRef.current.status === 'live') return;
+        matchDraftRef.current = { ...matchDraftRef.current, status: 'live' };
+
+        matchPatchQueueRef.current = matchPatchQueueRef.current
+            .catch(() => {})
+            .then(async () => {
+                if (persistedMatchRef.current.status === 'live') return;
+                try {
+                    await persistMatchPatch({ status: 'live' }, { compactResponse: true });
+                } catch (err: unknown) {
+                    setSaveMsg({
+                        type: 'err',
+                        text: `No se pudo marcar el partido en vivo: ${err instanceof Error ? err.message : String(err)}`,
+                    });
+                    scheduleSaveMsgClear(5000);
+                }
+            });
+    }, [persistMatchPatch, scheduleSaveMsgClear]);
 
     const handleStartClock = useCallback(() => {
         setClockDraft((prev) => {
@@ -2449,8 +2473,6 @@ export default function MatchCenterClient({
         });
     }, [eventPlayerOptions]);
 
-    const guidedSaveQueueRef = useRef<Promise<unknown>>(Promise.resolve());
-
     const saveGuidedEvent = useCallback(() => {
         if (!guidedEvent) return;
 
@@ -2532,7 +2554,7 @@ export default function MatchCenterClient({
             ...(clockChanged ? { clock: nextClock } : {}),
             ...(statusChanged ? { status: nextStatus } : {}),
         };
-        guidedSaveQueueRef.current = guidedSaveQueueRef.current
+        matchPatchQueueRef.current = matchPatchQueueRef.current
             .catch(() => {})
             .then(async () => {
                 try {
