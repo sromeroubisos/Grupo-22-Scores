@@ -78,10 +78,22 @@ export function getMatchPeriodOrder(value: unknown) {
   return PERIOD_ORDER[period] ?? 1000;
 }
 
+// 'start_period' es el arranque generico de periodo: abre tanto el 1T como el 2T.
+// Devolver '1T' fijo hacia RETROCEDER el periodo, porque el 'match_half' previo
+// ya lo habia adelantado a '2T': la carga en vivo quedaba clavada en el primer
+// tiempo despues del entretiempo. Ahora abre el periodo PENDIENTE.
+// 'match_start' (saque inicial) si es siempre 1T y no cambia.
+function resolveStartedPeriod(period: string) {
+  if (period === 'PRE') return '1T';
+  if (period === 'HT') return '2T';
+  return period;
+}
+
 export function getEventPeriodForType(eventType: string, activePeriod: unknown) {
   const period = normalizeMatchPeriod(activePeriod);
 
-  if (eventType === 'match_start' || eventType === 'start_period') return '1T';
+  if (eventType === 'match_start') return '1T';
+  if (eventType === 'start_period') return resolveStartedPeriod(period);
   if (eventType === 'match_half') {
     return period === 'PRE' || period === 'HT' || period === 'FT' ? '1T' : period;
   }
@@ -93,7 +105,8 @@ export function getEventPeriodForType(eventType: string, activePeriod: unknown) 
 export function getNextActivePeriodAfterEvent(eventType: string, activePeriod: unknown) {
   const period = normalizeMatchPeriod(activePeriod);
 
-  if (eventType === 'match_start' || eventType === 'start_period') return '1T';
+  if (eventType === 'match_start') return '1T';
+  if (eventType === 'start_period') return resolveStartedPeriod(period);
   if (eventType === 'match_half') return '2T';
   if (eventType === 'match_end') return 'FT';
   if (eventType === 'end_period') {
