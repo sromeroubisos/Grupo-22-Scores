@@ -51,7 +51,7 @@ export default function PlayerHeader({ career }: { career: CareerState }) {
                 <div className={styles.cbWho}>
                     <p className={styles.cbPos}>{posLabel}<span className={styles.cbAge}><span className={styles.num}>{p.age}</span> años</span></p>
                     <p className={styles.cbClub}>
-                        <ClubBadge clubId={club.id} clubName={club.labelEs} size={24} />
+                        <ClubBadge clubId={club.id} clubName={club.labelEs} size={28} />
                         <span className={styles.cbClubName}>{club.labelEs}</span>
                     </p>
                     <p className={styles.cbContext}>

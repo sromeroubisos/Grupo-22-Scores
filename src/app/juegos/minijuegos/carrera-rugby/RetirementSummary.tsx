@@ -3,6 +3,7 @@
 import type { CareerState, CareerSummary } from '@/features/career';
 import { buildCareerSummary, getClub, getPosition, kickAccuracy, secondaryStatOf } from '@/features/career';
 import Flag from './Flag';
+import ClubBadge from './ClubBadge';
 import styles from './carrera.module.css';
 
 // Titular generado para la carrera, según lo más destacado que logró.
@@ -61,6 +62,7 @@ export default function RetirementSummary({ career, onReplay }: { career: Career
                 <div className={styles.summaryClubs}>
                     {summary.byClub.slice(0, 3).map((c) => (
                         <span key={c.club} className={styles.clubChip}>
+                            <ClubBadge clubId={c.club} clubName={getClub(c.club).labelEs} size={40} />
                             {getClub(c.club).labelEs} <span className={styles.num}>· {c.seasons}</span>
                         </span>
                     ))}

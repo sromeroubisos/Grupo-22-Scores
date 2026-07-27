@@ -929,9 +929,12 @@
 }
 
 .clubChip {
-    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 0.86rem;
     font-weight: 600;
-    padding: 5px 11px;
+    padding: 6px 14px 6px 6px;
     border-radius: 999px;
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
@@ -1249,16 +1252,20 @@
 
 .clubBadge { flex: none; object-fit: contain; }
 
+/* Monograma: iniciales blancas sobre el color derivado del id del club. El
+   color lo pone el componente (inline) porque es por club; acá va todo lo demás.
+   Sin borde gris: con fondo propio, el borde lo apagaba. */
 .clubBadgeFallback {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--color-border);
     border-radius: 50%;
-    font-size: 0.58rem;
-    font-weight: 700;
-    color: var(--color-text-secondary);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #ffffff;
     flex: none;
+    line-height: 1;
+    user-select: none;
 }
 
 .playerClubName,
@@ -1844,4 +1851,4 @@
 .tlCaps .num { font-weight: 700; color: var(--color-text-primary); }
 
 /* Escudo mínimo legible: el fallback nunca por debajo de 32×32 en trayectoria. */
-.tlClub .clubBadgeFallback, .tlClub .clubBadge { min-width: 22px; min-height: 22px; }
+.tlClub .clubBadgeFallback, .tlClub .clubBadge { min-width: 40px; min-height: 40px; }

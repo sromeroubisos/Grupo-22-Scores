@@ -1,52 +1,62 @@
 'use client';
 
 import { useState } from 'react';
-import { getClub } from '@/features/career';
+import { crestKeyOf, initialsOf, monogramColor } from './clubCrest';
 import styles from './carrera.module.css';
 
 interface Props {
     clubId: string;
     clubName: string;
     size?: number;
-}
-
-function initials(name: string): string {
-    const words = name.split(/[^A-Za-zÀ-ÿ0-9]+/).filter(Boolean);
-    if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
-    return name.slice(0, 2).toUpperCase();
+    /**
+     * true (default) cuando el escudo va PEGADO al nombre del club: ahí es
+     * decorativo y repetir el nombre en el `alt` solo agrega ruido al lector de
+     * pantalla. false cuando va solo y es la única forma de saber de qué club se
+     * trata.
+     */
+    decorative?: boolean;
 }
 
 /**
- * Escudo REAL del club. Reutiliza el proxy de logos de la app
- * (`/api/assets/team-logo`), que resuelve el escudo del club (los clubes AR/UY/CL
- * traen `logo_url` real vía su id de origen; el resto cae en un escudo genérico
- * con forma de crest, nunca una imagen rota). Si el proxy no responde (offline),
- * cae en iniciales sin romper el layout.
+ * Escudo del club.
+ *
+ * Los 214 clubes AR/UY/CL del snapshot tienen escudo REAL: llevan `sourceId` y
+ * el proxy de la app (`/api/assets/team-logo`) lo resuelve. Los clubes estáticos
+ * internacionales NO tienen con qué pedirlo — no hay `sourceId` ni clave de logo
+ * en el catálogo — así que ni siquiera se intenta la petición: con una clave
+ * inexistente el endpoint devuelve 404 CON EL HTML DE LA PÁGINA DE ERROR (~102 KB),
+ * que además dejaría la imagen rota. Para ellos se dibuja el monograma directo.
  */
-export default function ClubBadge({ clubId, clubName, size = 22 }: Props) {
+export default function ClubBadge({ clubId, clubName, size = 22, decorative = true }: Props) {
     const [broken, setBroken] = useState(false);
-    const fallbackSize = Math.max(20, size);
 
-    if (broken) {
+    // Sin clave no hay escudo que pedir: se evita el 404 en vez de curarlo.
+    const crestKey = crestKeyOf(clubId);
+    const showMonogram = broken || crestKey === null;
+
+    if (showMonogram) {
         return (
-            <span className={styles.clubBadgeFallback} style={{ width: fallbackSize, height: fallbackSize }} aria-hidden="true">
-                {initials(clubName)}
+            <span
+                className={styles.clubBadgeFallback}
+                style={{ width: size, height: size, background: monogramColor(clubId), fontSize: Math.max(9, Math.round(size * 0.38)) }}
+                role={decorative ? undefined : 'img'}
+                aria-label={decorative ? undefined : clubName}
+                aria-hidden={decorative ? true : undefined}
+                title={clubName}
+            >
+                {initialsOf(clubName)}
             </span>
         );
     }
 
-    // Clave para el proxy: los clubes del snapshot AR/UY/CL llevan su id real de
-    // origen (`sourceId`) → escudo real; los estáticos usan su slug + nombre.
-    const club = getClub(clubId);
-    const key = club.sourceId ?? clubId;
-    const src = `/api/assets/team-logo?entity=team&sport=rugby&key=${encodeURIComponent(key)}&name=${encodeURIComponent(clubName)}`;
+    const src = `/api/assets/team-logo?entity=team&sport=rugby&key=${encodeURIComponent(crestKey)}&name=${encodeURIComponent(clubName)}`;
 
     return (
         // eslint-disable-next-line @next/next/no-img-element -- proxy de imágenes de la app
         <img
             src={src}
-            alt=""
-            aria-hidden="true"
+            alt={decorative ? '' : clubName}
+            aria-hidden={decorative ? true : undefined}
             width={size}
             height={size}
             className={styles.clubBadge}

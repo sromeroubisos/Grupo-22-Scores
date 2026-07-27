@@ -64,7 +64,7 @@ export default function CareerTimeline({ history, highlight = null }: Props) {
 
                         <div className={styles.tlBody}>
                             <p className={styles.tlClub}>
-                                <ClubBadge clubId={entry.clubId} clubName={entry.clubName} size={22} />
+                                <ClubBadge clubId={entry.clubId} clubName={entry.clubName} size={40} />
                                 <span className={styles.tlClubName}>{entry.clubName}</span>
                             </p>
                             <p className={styles.tlMeta}>
