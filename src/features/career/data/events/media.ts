@@ -1,5 +1,10 @@
 import type { GameEvent } from '../../types/event.ts';
 
+// La cobertura mediática necesita que haya prensa cubriendo tu liga. Abajo de la
+// banda 3 el rugby de clubes no tiene diarios encima, así que los eventos de
+// medios que dan por sentado un aparato de prensa quedan gateados por banda.
+const NEEDS_PRESS = { minSportingBand: 3 } as const;
+
 export const MEDIA_EVENTS: GameEvent[] = [
     {
         id: 'med-sponsor',
@@ -10,6 +15,7 @@ export const MEDIA_EVENTS: GameEvent[] = [
         repeatable: true,
         cooldown: 4,
         minOvr: 62,
+        requires: NEEDS_PRESS,
         options: [
             {
                 id: 'sign',
@@ -94,6 +100,7 @@ export const MEDIA_EVENTS: GameEvent[] = [
         weight: 8,
         repeatable: false,
         minAge: 30,
+        requires: NEEDS_PRESS,
         options: [
             {
                 id: 'write',
@@ -149,6 +156,7 @@ export const MEDIA_EVENTS: GameEvent[] = [
         weight: 10,
         repeatable: true,
         cooldown: 3,
+        requires: NEEDS_PRESS,
         options: [
             {
                 id: 'deny',
@@ -177,6 +185,7 @@ export const MEDIA_EVENTS: GameEvent[] = [
         weight: 8,
         repeatable: true,
         cooldown: 5,
+        requires: NEEDS_PRESS,
         options: [
             {
                 id: 'lead',

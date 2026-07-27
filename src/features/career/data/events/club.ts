@@ -42,6 +42,8 @@ export const CLUB_EVENTS: GameEvent[] = [
         repeatable: true,
         cooldown: 3,
         minAge: 21,
+        // Habla de sueldo y de cláusula: no existe para el que juega sin contrato.
+        requires: { employment: ['semi-professional', 'full-time-professional'] },
         options: [
             {
                 id: 'renew-long',
@@ -216,6 +218,8 @@ export const CLUB_EVENTS: GameEvent[] = [
         repeatable: true,
         cooldown: 5,
         minAge: 25,
+        // Mismo motivo: no se le puede pedir un recorte a quien no cobra.
+        requires: { employment: ['semi-professional', 'full-time-professional'] },
         options: [
             {
                 id: 'accept-cut',
