@@ -99,7 +99,11 @@ export function applyAging(
         const delta = attributeDelta(key, age, group, rng, growthScale);
         const after = clampAttr(before + delta);
         attributes[key] = after;
-        deltas[key] = Math.round((after - before) * 10) / 10;
+        // El `+ 0` normaliza el -0 que devuelve Math.round con negativos chicos
+        // (Math.round(-0.2) === -0). Aritméticamente da igual, pero -0 se muestra
+        // como "-0" y sobrevive a structuredClone mientras JSON lo colapsa a 0:
+        // sin esto, una partida recargada no es byte-idéntica a la original.
+        deltas[key] = Math.round((after - before) * 10) / 10 + 0;
     }
     return deltas;
 }
