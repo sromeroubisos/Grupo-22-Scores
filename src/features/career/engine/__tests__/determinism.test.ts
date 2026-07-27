@@ -80,7 +80,12 @@ function digest(state: CareerState): Digest {
     };
 }
 
-// Línea de base del motor 1.7.0 — ver docs/career-engine.md §9.
+// Línea de base del motor 1.8.0 — ver docs/career-engine.md §9.
+// Cambió respecto de 1.7.0 porque la Fase 4 mueve la FRECUENCIA de los eventos
+// según el entorno (`familyBoost`), suma seis eventos de vida amateur y gatea
+// por `requires` los eventos que hablaban de sueldo o de prensa en contextos
+// donde no existen. El pool y los pesos cambian ⇒ cambia qué sale con la misma
+// semilla. Los tests de autoconsistencia de arriba NO se tocaron.
 const EXPECTED: Record<string, Digest> = {
     "apertura argentino": {
         seasons: 15,
@@ -88,38 +93,38 @@ const EXPECTED: Record<string, Digest> = {
         peakOvr: 58,
         caps: 0,
         titles: 0,
-        clubs: 4,
+        clubs: 3,
         firstClub: 'sb-st-brendan-s',
-        lastClub: 'sb-cardenales-r-c',
+        lastClub: 'sb-hurling',
         employment: 'amateur-compensated',
-        decisions: 13,
-        stateHash: 1699284462,
+        decisions: 14,
+        stateHash: 4227518476,
     },
     "pilar neozelandés": {
         seasons: 19,
         retirementAge: 37,
         peakOvr: 80,
-        caps: 59,
-        titles: 7,
+        caps: 64,
+        titles: 6,
         clubs: 1,
         firstClub: 'chiefs',
         lastClub: 'chiefs',
         employment: 'full-time-professional',
         decisions: 13,
-        stateHash: 3391389064,
+        stateHash: 407438123,
     },
     "wing francés": {
-        seasons: 13,
-        retirementAge: 32,
+        seasons: 15,
+        retirementAge: 34,
         peakOvr: 65,
-        caps: 6,
-        titles: 1,
-        clubs: 4,
+        caps: 9,
+        titles: 2,
+        clubs: 2,
         firstClub: 'ealing-trailfinders',
-        lastClub: 'us-bressane',
-        employment: 'semi-professional',
-        decisions: 11,
-        stateHash: 3262642186,
+        lastClub: 'us-montauban',
+        employment: 'full-time-professional',
+        decisions: 12,
+        stateHash: 2986076747,
     },
 };
 

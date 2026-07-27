@@ -9,7 +9,7 @@ Versiones selladas en este momento:
 
 | Constante | Valor | Dónde |
 |---|---|---|
-| `ENGINE_VERSION` | `1.6.0` | `types/career.ts` |
+| `ENGINE_VERSION` | `1.8.0` | `types/career.ts` |
 | `SCHEMA` (guardado) | `6` | `carrera-rugby/careerStorage.ts` |
 | `CLUB_CATALOG_VERSION` | `2026-27.6` | `data/clubs.ts` |
 | `SA_SNAPSHOT_VERSION` | `464399ffada4` | `data/clubs2026/saClubs.generated.ts` |
@@ -19,7 +19,7 @@ Versiones selladas en este momento:
 | `TRANSFER_RULES_VERSION` | `2026-07.3` | `engine/market-routes.ts` |
 | `CAREER_MARKET_VERSION` | `2026-27.1` | `engine/event-selector.ts` |
 
-Contenido: **61 eventos** declarativos (club 8, entorno 10, lesiones 6, medios 7,
+Contenido: **67 eventos** declarativos (club 8, entorno 16, lesiones 6, medios 7,
 hitos 8, selección 7, personal 8, táctica 7).
 
 ---
@@ -297,20 +297,20 @@ motor ya no sabe interpretar. Todo va envuelto en `try/catch`: sin acceso a
 
 Correr con `npm test` (runner nativo `node --test`, **no** Vitest).
 
-### Digest congelado — línea de base del motor 1.6.0
+### Digest congelado — línea de base del motor 1.8.0
 
 Con el `rotatingChooser` del test (opción elegida por
 `hashSeed(eventId:temporada) % nOpciones`), una ruta distinta en cada caso:
 
-| Caso | Ruta | Semilla | Temporadas | Retiro | OVR pico | Caps | Clubes | Empleo final |
-|---|---|---|---|---|---|---|---|---|
-| Apertura argentino | amateur | 20260726 | 16 | 36 | **55** | 0 | 4 | Compensado |
-| Pilar neozelandés | profesional | 424242 | 19 | 37 | **80** | 59 | 1 | Profesional |
-| Wing francés | desarrollo | 7919 | 14 | 33 | **66** | 11 | 4 | Profesional |
+| Caso | Ruta | Semilla | Temporadas | Retiro | OVR pico | Caps | Clubes | Empleo final | Arquetipo |
+|---|---|---|---|---|---|---|---|---|---|
+| Apertura argentino | amateur | 20260726 | 15 | 35 | **58** | 0 | 3 | Compensado | Amateur de ley |
+| Pilar neozelandés | profesional | 424242 | 19 | 37 | **80** | 64 | 1 | Profesional | Un club, toda la vida |
+| Wing francés | desarrollo | 7919 | 15 | 34 | **65** | 9 | 2 | Profesional | Guerrero |
 
-> Sirve además como **calibración real del techo de OVR** para las bandas de
-> color de la Fase 4: una carrera amateur pica cerca de 55-60 y una profesional
-> cerca de 75-80. Las bandas de Copero (85+ dorado) no aplican acá.
+> Sirve además como **calibración real del techo de OVR**: una carrera amateur
+> pica cerca de 55-60 y una profesional cerca de 75-80. Las bandas de color de
+> Copero (85+ dorado) no aplican acá.
 
 ### La técnica que protege el stream del RNG
 
@@ -331,3 +331,116 @@ cambio buscado del daño colateral.
 **Si un cambio de motor rompe el digest**: es esperado cuando el cambio es
 intencional. Verificá que el resto de los tests pase, actualizá la tabla de
 `EXPECTED` en `determinism.test.ts` y subí `ENGINE_VERSION`.
+
+---
+
+## 10. Rutas diferenciadas y arquetipos (Fase 4)
+
+### El problema que resuelve
+
+De los 61 eventos del catálogo, **solo los 10 de `environment-events.ts`
+declaraban `requires`**. Los otros 51 no tenían ningún filtro de entorno, así que
+un amateur de Federale 2 era elegible para casi el mismo pool que un profesional
+del Top 14: elegir la ruta cambiaba los números de arranque y nada más.
+
+### `familyBoost` — mover la frecuencia, no filtrar
+
+`engine/event-selector.ts` multiplica el peso de cada evento por un factor que
+sale del entorno del jugador. La familia se deduce del prefijo del id
+(`env-amateur-derby` → `env`).
+
+```
+peso efectivo = weight × penalizaciónPorRepetición × familyBoost(id, state)
+
+familyBoost = BOOST_BY_EMPLOYMENT[employment][familia]
+            × BOOST_BY_SQUAD_TRACK[squadTrack][familia]
+            × lerp(BOOST_BY_ROUTE[startRoute][familia] → 1, seasonsPlayed / 5)
+```
+
+El eje principal es el **entorno vivo** (`employment` + `squadTrack`), no la ruta
+sellada: el que arrancó amateur y llegó a profesional a los 26 tiene que empezar
+a ver el mundo profesional. La ruta inicial aporta un empujón extra que **se
+diluye hacia la temporada 5**, que es cuando de verdad define cómo se siente la
+carrera.
+
+**Ningún multiplicador puede ser 0.** Es una regla, no una casualidad: hay un
+test (`route-weighting.test.ts`) que recorre todas las combinaciones de empleo ×
+ruta × track × antigüedad y falla si alguna familia queda anulada. Un amateur
+tiene que poder recibir un evento de club — solo que mucho menos seguido.
+
+Reparto medido sobre 300 carreras por ruta:
+
+| Familia | Amateur | Desarrollo | Profesional |
+|---|---|---|---|
+| `env` | **25,6 %** | 5,3 % | 4,7 % |
+| `per` | **16,7 %** | 10,9 % | 10,5 % |
+| `med` | 1,8 % | 12,0 % | **14,0 %** |
+| `nt` | 0,6 % | 5,1 % | **6,9 %** |
+
+### `requires` en eventos que daban por sentado un contrato
+
+Cuatro eventos hablaban de sueldo o de prensa en contextos donde no existen:
+
+| Evento | Gate | Por qué |
+|---|---|---|
+| `club-contract-renewal` | `employment` semipro+ | Habla de sueldo y de cláusula |
+| `club-salary-cap` | `employment` semipro+ | No se le pide un recorte a quien no cobra |
+| `med-sponsor`, `med-punditry`, `med-charity`, `med-transfer-rumor` | `minSportingBand: 3` | Abajo de la banda 3 no hay prensa cubriendo la liga |
+
+### Seis eventos de vida amateur
+
+`env-amateur-commute` (dos horas de viaje), `env-amateur-no-physio` (el club sin
+kinesiólogo), `env-amateur-tour-leave` (el laburo que no da franco para la gira),
+`env-amateur-no-cover` (jugar lastimado porque no hay recambio),
+`env-amateur-club-dues` (la cuota social), `env-amateur-teammate-quits` (el
+compañero que deja por el trabajo).
+
+Dos de ellos otorgan la flag `leal`, que es la base del arquetipo "Un club, toda
+la vida".
+
+### `engine/archetypes.ts` — el titular del retiro
+
+Antes era una función de nueve líneas dentro de `RetirementSummary.tsx`. Ahora
+vive en el motor: es testeable, determinística y la va a reusar el resumen
+compartible. `CareerSummary.archetype` es **derivado** (no se guarda en
+`CareerState`), así que agregarlo **no invalida ninguna partida guardada**.
+
+**El orden de la tabla ES la regla: gana el primero que se cumple.** Los
+arquetipos de la ruta amateur se ubican alto a propósito — debajo de
+"Multicampeón" no se verían nunca.
+
+| # | Arquetipo | Condición |
+|---|---|---|
+| 1 | Campeón del Mundo | flag `campeon_mundo` |
+| 2 | Miembro del Salón de la Fama | honor `Salón de la Fama` |
+| 3 | **De la quinta al seleccionado** | ruta amateur + ≥ 8 caps |
+| 4 | Un club, toda la vida | 1 club + ≥ 12 temporadas |
+| 5 | Multicampeón | ≥ 4 títulos |
+| 6 | Emblema de la selección | ≥ 30 caps |
+| 7 | **El que llegó tarde** | ruta ≠ profesional + primer contrato a los 27+ |
+| 8 | **Se hizo solo** | ruta amateur + llegó a profesional |
+| 9 | Crack de su generación | OVR pico ≥ 80 |
+| 10 | Un jugador de jerarquía | OVR pico ≥ 72 |
+| 11 | **El que estuvo cerca** | ruta amateur + techo semipro |
+| 12 | **Amateur de ley** | ruta amateur + nunca profesional + ≥ 8 temporadas |
+| 13 | Un guerrero de mil batallas | ≥ 12 temporadas |
+| 14 | Una carrera de pura entrega | fallback |
+
+Los cinco en negrita **solo se desbloquean desde la ruta amateur** (salvo "El que
+llegó tarde", que también admite desarrollo). Hay un test que verifica que las
+rutas de desarrollo y profesional nunca los saquen.
+
+`peakEmployment` mira **toda la trayectoria**, no el empleo final: el escalafón
+puede bajar al retirarse, así que el último valor no dice hasta dónde llegó.
+
+Distribución medida sobre 300 carreras por ruta con el `rotatingChooser`:
+
+| Ruta | Reparto |
+|---|---|
+| Amateur | Amateur de ley 67 % · De la quinta 13,3 % · Estuvo cerca 9 % · Llegó tarde 4,3 % · Un club 3,7 % · Multicampeón 1,7 % · Se hizo solo 1 % |
+| Desarrollo | Guerrero 41,7 % · Emblema 30,3 % · Llegó tarde 11 % · Un club 9,3 % · resto 7,6 % |
+| Profesional | Emblema 35,3 % · Guerrero 35 % · Un club 15 % · Multicampeón 6 % · resto 8,6 % |
+
+> El `rotatingChooser` es una estrategia mecánica, no un jugador. Un jugador
+> ambicioso asciende bastante más (ver la tabla de balance), así que en juego
+> real la ruta amateur reparte más hacia los arquetipos de ascenso.
