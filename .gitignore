@@ -36,6 +36,9 @@ yarn-error.log*
 !python-service/.env.example
 !scripts/sofascore/.env.example
 
+# Etapa 0 — resultados locales de medición (nunca commitear)
+.perf-results/
+
 # python
 __pycache__/
 *.py[cod]
@@ -63,3 +66,8 @@ tmp_*
 # local-only admin login shortcuts
 /public/local-dev/
 
+carrera-capturas/
+
+# Capturas de verificación sueltas en la raíz. Las imágenes que SÍ se publican
+# viven en public/, así que un .png en la raíz siempre es una captura de trabajo.
+/*.png
