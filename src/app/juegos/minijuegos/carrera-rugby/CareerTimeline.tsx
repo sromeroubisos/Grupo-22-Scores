@@ -88,8 +88,14 @@ export default function CareerTimeline({ history, highlight = null }: Props) {
                                 <span className={styles.num}>{entry.ovr}</span>
                                 <span className={styles.tlOvrLabel}>OVR</span>
                             </span>
-                            <span className={styles.tlStat}>
-                                <span className={styles.num}>{entry.appearances}</span> PJ
+                            {/* Planilla de la temporada. Los ceros van tenues: un
+                                pilar no anota, y eso no es un dato faltante. */}
+                            <span className={styles.tlLine}>
+                                <Stat value={entry.appearances} label="PJ" />
+                                <Stat value={entry.points} label="pts" />
+                                <Stat value={entry.tries} label="tries" />
+                                <Stat value={entry.tackles} label="tackles" />
+                                <Stat value={entry.secondaryStat} label={entry.secondaryStatLabel.toLowerCase()} />
                             </span>
                             {entry.caps > 0 && (
                                 <span className={styles.tlCaps}>
@@ -101,6 +107,16 @@ export default function CareerTimeline({ history, highlight = null }: Props) {
                 );
             })}
         </ol>
+    );
+}
+
+/** Una celda de la planilla. El cero (o el guion del que no patea) va tenue. */
+function Stat({ value, label }: { value: number | string; label: string }) {
+    const zero = value === 0 || value === '0' || value === '—';
+    return (
+        <span className={`${styles.tlStat} ${zero ? styles.tlStatZero : ''}`}>
+            <span className={styles.num}>{value}</span> {label}
+        </span>
     );
 }
 

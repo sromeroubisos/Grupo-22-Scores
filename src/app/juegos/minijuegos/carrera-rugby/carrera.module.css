@@ -1304,17 +1304,40 @@
     color: var(--color-text-secondary); margin-top: 3px;
 }
 
-.cbStats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px 16px; margin: 0; }
-.cbStat { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-.cbStat dt { font-size: 0.62rem; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.03em; }
+.cbHonours { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; margin: 0; }
+.cbStat { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; }
+.cbStat dt {
+    font-size: 0.62rem; font-weight: 700; color: var(--color-text-secondary);
+    text-transform: uppercase; letter-spacing: 0.03em; text-align: center;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;
+}
 .cbStatValue { margin: 0; font-size: 1.12rem; font-weight: 800; color: var(--color-text-primary); }
+
+/* Un cero no es un dato: es la ausencia de uno. Un pilar termina la carrera con
+   0 puntos y 0 tries, y si pesan visualmente lo mismo que el resto la planilla
+   se lee como que el juego esta roto. */
+.cbZero { color: var(--color-text-tertiary); opacity: 0.55; font-weight: 700; }
+
+/* Planilla fija: partidos, puntos, tries, tackles + la metrica del puesto. */
+.cbStatline {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px 10px;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+}
 
 @media (max-width: 620px) {
     .cbTop { gap: 12px 14px; }
     .cbScore { width: 100%; justify-content: flex-start; gap: 14px; }
     .cbOvrValue { font-size: 2.1rem; }
-    .cbStats { flex: 1; gap: 6px 10px; }
+    .cbHonours { flex: 1; gap: 6px 10px; }
     .cbStatValue { font-size: 1rem; }
+    /* Cinco columnas no entran a 390 px sin partir las etiquetas: pasan a dos
+       filas, con partidos y puntos arriba, que es lo que se mira primero. */
+    .cbStatline { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .cbStat dt { font-size: 0.56rem; letter-spacing: 0; }
 }
 
 /* ---- Escalafón de empleo (amateur → profesional) ---- */
@@ -1720,8 +1743,21 @@
 .tlOvr { display: flex; align-items: baseline; gap: 3px; }
 .tlOvr .num { font-size: 1rem; font-weight: 800; color: var(--color-text-primary); }
 .tlOvrLabel { font-size: 0.58rem; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase; }
-.tlStat { font-size: 0.72rem; color: var(--color-text-secondary); }
+/* Planilla de la temporada: cinco datos chicos, que envuelven si no entran. */
+.tlLine {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 2px 8px;
+    max-width: 100%;
+}
+.tlStat { font-size: 0.72rem; color: var(--color-text-secondary); white-space: nowrap; }
 .tlStat .num { font-weight: 700; color: var(--color-text-primary); }
+/* El cero del pilar que no anota no es un dato faltante, pero tampoco compite
+   visualmente con los que sí lo son. */
+.tlStatZero { opacity: 0.45; }
+.tlStatZero .num { font-weight: 600; color: var(--color-text-tertiary); }
 .tlIcons { display: flex; align-items: center; gap: 6px; }
 .tlCaps { font-size: 0.66rem; color: var(--color-text-secondary); }
 .tlCaps .num { font-weight: 700; color: var(--color-text-primary); }

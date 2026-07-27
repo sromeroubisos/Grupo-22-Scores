@@ -12,10 +12,43 @@ export interface SeasonStats {
     assists: number; // asistencias de try
     lineBreaks: number; // quiebres
     turnovers: number; // pelotas robadas
-    kicksAtGoal: number; // patadas a los palos intentadas
-    kicksMade: number; // patadas convertidas
+    kicksAtGoal: number; // patadas a los palos intentadas (conversiones + penales)
+    kicksMade: number; // patadas a los palos convertidas
     lineoutsWon: number; // lines ganados (hooker/lock)
     metresKicked: number; // metros pateados (apertura/fullback)
+    scrumsWon: number; // scrums ganados (pilar/hooker/segunda línea)
+
+    // Desglose del pie. `kicksAtGoal` y `kicksMade` quedan como AGREGADOS: sirven
+    // para el porcentaje al palo, que es LA métrica del apertura. El desglose
+    // existe porque una conversión vale 2 y un penal 3: sin separarlos no se
+    // pueden calcular los puntos.
+    conversionsMade: number; // 2 puntos cada una
+    penaltiesMade: number; // 3 puntos cada uno
+    /**
+     * Drops convertidos, 3 puntos. Van FUERA de `kicksAtGoal`: no son patadas a
+     * los palos desde un tiro fijo, se patean en juego.
+     */
+    dropGoals: number;
+
+    /**
+     * Puntos de la temporada, CALCULADOS Y GUARDADOS, no derivados al renderizar.
+     * Si mañana cambia la regla de puntuación, una carrera vieja tiene que seguir
+     * mostrando lo que mostraba.
+     */
+    points: number;
+}
+
+/** Invariante del desglose del pie. Vale siempre; hay un test que lo vigila. */
+export const POINTS_PER = { try: 5, conversion: 2, penalty: 3, dropGoal: 3 } as const;
+
+/** Puntos a partir del desglose. Fuente única de la fórmula. */
+export function computePoints(stats: Pick<SeasonStats, 'tries' | 'conversionsMade' | 'penaltiesMade' | 'dropGoals'>): number {
+    return (
+        stats.tries * POINTS_PER.try
+        + stats.conversionsMade * POINTS_PER.conversion
+        + stats.penaltiesMade * POINTS_PER.penalty
+        + stats.dropGoals * POINTS_PER.dropGoal
+    );
 }
 
 /**
@@ -88,5 +121,10 @@ export function emptyStats(): SeasonStats {
         kicksMade: 0,
         lineoutsWon: 0,
         metresKicked: 0,
+        scrumsWon: 0,
+        conversionsMade: 0,
+        penaltiesMade: 0,
+        dropGoals: 0,
+        points: 0,
     };
 }

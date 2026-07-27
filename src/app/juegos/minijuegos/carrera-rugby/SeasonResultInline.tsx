@@ -1,7 +1,7 @@
 'use client';
 
 import type { CareerState } from '@/features/career';
-import { contractLabel, describePosition, getClub, MILESTONE_LABELS } from '@/features/career';
+import { contractLabel, getClub, MILESTONE_LABELS } from '@/features/career';
 import ClubBadge from './ClubBadge';
 import styles from './carrera.module.css';
 
@@ -17,7 +17,6 @@ export default function SeasonResultInline({ career }: { career: CareerState }) 
     const previous = career.history[career.history.length - 2];
 
     const club = getClub(entry.clubId);
-    const primary = describePosition(career.player.position).stats[0];
     const delta = entry.ovrDelta;
     const contractChanged = !previous
         || previous.employment !== entry.employment
@@ -44,7 +43,9 @@ export default function SeasonResultInline({ career }: { career: CareerState }) 
 
             <ul className={styles.resultStats}>
                 <li><span className={styles.num}>{entry.appearances}</span> partidos</li>
-                <li><span className={styles.num}>{entry.primaryStat}</span> {primary.label.toLowerCase()}</li>
+                {entry.points > 0 && <li><span className={styles.num}>{entry.points}</span> puntos</li>}
+                {entry.tries > 0 && <li><span className={styles.num}>{entry.tries}</span> tries</li>}
+                <li><span className={styles.num}>{entry.secondaryStat}</span> {entry.secondaryStatLabel.toLowerCase()}</li>
                 {entry.caps > 0 && <li><span className={styles.num}>{entry.caps}</span> caps</li>}
                 <li className={delta === 0 ? styles.deltaFlat : delta > 0 ? styles.deltaUp : styles.deltaDown}>
                     OVR <span className={styles.num}>{entry.ovr}</span>

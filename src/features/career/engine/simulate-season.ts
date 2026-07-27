@@ -4,7 +4,7 @@ import type { SeasonCompetitionParticipation, SeasonResult } from '../types/seas
 import { getPosition } from '../data/positions.ts';
 import type { ClubDef } from '../data/clubs.ts';
 import { getClub } from '../data/clubs.ts';
-import { describePosition } from '../data/guides.ts';
+import { secondaryStatOf } from '../data/guides.ts';
 import { economicModelOf, sportingBandOf } from '../data/competition-levels2026.ts';
 import { renewContract } from './contracts.ts';
 import { marketValue } from './club-offers.ts';
@@ -96,7 +96,9 @@ export function simulateSeason(state: CareerState, rng: Rng, movedFrom: string |
 
     // 4) OVR efectivo + rendimiento (planilla, partidos, minutos, rating).
     const effectiveOvr = computeEffectiveOvr(p);
-    const perf = simulatePerformance(p, effectiveOvr, seasonsOutFraction, rng, environment, cupCount);
+    // `state.seed` y la temporada siembran el rng de detalle de planilla, que va
+    // aparte para no correr el stream principal (ver statistics.ts).
+    const perf = simulatePerformance(p, effectiveOvr, seasonsOutFraction, rng, environment, cupCount, state.seed, p.seasonsPlayed);
 
     // 4b) Registro y presencia de la temporada en la unión del país del club
     //     (Reg. 8.1(c)/(d)). Las franquicias multinacionales ('multi') no
@@ -302,7 +304,7 @@ export function simulateSeason(state: CareerState, rng: Rng, movedFrom: string |
     // Snapshot HISTÓRICO congelado. Empleo/track/banda disputada son los de
     // ESTA temporada (ya renovados). `competitiveBand` y `normalizedLoad` se
     // pasan explícitos porque se computaron con datos locales.
-    const primary = describePosition(result.position).stats[0];
+    const secondary = secondaryStatOf(result.position, result.stats);
     const milestones = detectMilestones(state, result, club, competitiveBand);
     state.history.push({
         season: result.seasonIndex + 1,
@@ -319,8 +321,11 @@ export function simulateSeason(state: CareerState, rng: Rng, movedFrom: string |
         ovr: result.ovrEnd,
         ovrDelta: result.ovrEnd - result.ovrStart,
         appearances: result.matches,
-        primaryStatKey: primary.key,
-        primaryStat: result.stats[primary.key] as number,
+        points: result.stats.points,
+        tries: result.stats.tries,
+        tackles: result.stats.tackles,
+        secondaryStatLabel: secondary.label,
+        secondaryStat: secondary.display,
         caps: result.capsGained,
         titlesWon: result.titlesWon,
         clubTitlesWon: result.clubTitlesWon,

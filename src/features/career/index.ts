@@ -6,6 +6,7 @@ export type {
     EligibilityClaim, EligibilityRoute,
 } from './types/player.ts';
 export type { SeasonResult, SeasonStats, LeagueStanding, SeasonCompetitionParticipation } from './types/season.ts';
+export { POINTS_PER, computePoints, emptyStats } from './types/season.ts';
 export type { GameEvent, EventOption, EventCategory } from './types/event.ts';
 export type { CareerState, CareerSummary, CareerPhase, ClubOffer, ClubSpell, MovementKind } from './types/career.ts';
 export { ENGINE_VERSION, MILESTONE_LABELS } from './types/career.ts';
@@ -39,6 +40,9 @@ export {
     describeAllOrigins,
     ATTRIBUTE_LABELS,
     STAT_LABELS,
+    kickAccuracy,
+    secondaryStatOf,
+    type SecondaryStat,
     type PositionGuide,
     type OriginGuide,
     type OriginPerk,

@@ -92,7 +92,7 @@ const EXPECTED: Record<string, Digest> = {
         lastClub: 'sb-carlos-paz-rugby-club',
         employment: 'amateur-compensated',
         decisions: 13,
-        stateHash: 2482833737,
+        stateHash: 554642059,
     },
     'pilar neozelandés': {
         seasons: 19,
@@ -105,7 +105,7 @@ const EXPECTED: Record<string, Digest> = {
         lastClub: 'cornish-pirates',
         employment: 'full-time-professional',
         decisions: 18,
-        stateHash: 3257293365,
+        stateHash: 3487571112,
     },
     'wing francés': {
         seasons: 13,
@@ -118,11 +118,24 @@ const EXPECTED: Record<string, Digest> = {
         lastClub: 'el-toro',
         employment: 'amateur-compensated',
         decisions: 10,
-        stateHash: 2470330281,
+        stateHash: 804874618,
     },
 };
 
-// ── 1. Reproducibilidad ──────────────────────────────────────────────────────
+// ── 1. AUTOCONSISTENCIA — estos tests NO se actualizan NUNCA ─────────────────
+//
+// No dependen de ningún valor esperado, así que sobreviven a cualquier cambio
+// intencional del motor. Lo que atrapan es no-determinismo REAL: un Math.random
+// que se escapó, una iteración sobre un Set sin ordenar, un Date. Si alguno de
+// estos falla, no hay que actualizar nada: hay que arreglar el motor.
+
+test('misma semilla + mismas decisiones ⇒ mismo digest', () => {
+    for (const { name, input, seed } of CASES) {
+        const a = digest(runCareer(input, seed, rotatingChooser));
+        const b = digest(runCareer(input, seed, rotatingChooser));
+        assert.deepEqual(b, a, `${name}: el digest cambió entre dos corridas de la misma semilla`);
+    }
+});
 
 test('misma semilla + mismas decisiones ⇒ carrera idéntica', () => {
     for (const { name, input, seed } of CASES) {
@@ -211,7 +224,7 @@ test('CareerState es JSON puro (sin Date, Map, Set ni funciones)', () => {
     }
 });
 
-// ── 3. Digest congelado ──────────────────────────────────────────────────────
+// ── 3. Digest congelado — este SÍ se actualiza en cada cambio intencional ────
 
 test('digest congelado: el comportamiento del motor no cambió sin querer', () => {
     for (const { name, input, seed } of CASES) {

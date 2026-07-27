@@ -1,7 +1,7 @@
 'use client';
 
 import type { CareerState } from '@/features/career';
-import { clubLeagueIdentity, computeOvr, contractLabel, describePosition, getClub, getPosition } from '@/features/career';
+import { clubLeagueIdentity, computeOvr, contractLabel, emptyStats, getClub, getPosition, secondaryStatOf } from '@/features/career';
 import Flag from './Flag';
 import ClubBadge from './ClubBadge';
 import EmploymentLadder from './EmploymentLadder';
@@ -21,13 +21,27 @@ export default function PlayerHeader({ career }: { career: CareerState }) {
     const p = career.player;
     const club = getClub(p.club);
     const posLabel = getPosition(p.position).labelEs;
-    const primary = describePosition(p.position).stats[0];
     const division = clubLeagueIdentity(club).name;
 
     const matches = career.seasons.reduce((sum, s) => sum + s.matches, 0);
-    const primaryTotal = career.seasons.reduce((sum, s) => sum + (s.stats[primary.key] as number), 0);
     const ovr = computeOvr(p.attributes, p.position);
     const countryCode = p.eligibility.nationalityCountryCode;
+
+    // Acumulado de TODA la carrera. Puntos, tries y tackles se muestran siempre;
+    // la cuarta ranura depende del puesto (scrums, lineouts, % al palo…).
+    const totals = career.seasons.reduce((acc, s) => {
+        for (const key of Object.keys(acc) as (keyof typeof acc)[]) acc[key] += s.stats[key];
+        return acc;
+    }, emptyStats());
+    const secondary = secondaryStatOf(p.position, totals);
+
+    const cells: { label: string; value: string; zero: boolean }[] = [
+        { label: 'Partidos', value: String(matches), zero: matches === 0 },
+        { label: 'Puntos', value: String(totals.points), zero: totals.points === 0 },
+        { label: 'Tries', value: String(totals.tries), zero: totals.tries === 0 },
+        { label: 'Tackles', value: String(totals.tackles), zero: totals.tackles === 0 },
+        { label: secondary.label, value: secondary.display, zero: secondary.isZero },
+    ];
 
     return (
         <header className={styles.careerBar}>
@@ -47,31 +61,37 @@ export default function PlayerHeader({ career }: { career: CareerState }) {
                 </div>
             </div>
 
+            {/* OVR + honores. Los caps van acá y no en la planilla: en rugby
+                pesan más que los títulos, y la selección va antes que la vitrina. */}
             <div className={styles.cbScore}>
                 <div className={styles.cbOvr}>
                     <span className={`${styles.cbOvrValue} ${styles.num}`}>{ovr}</span>
                     <span className={styles.cbOvrLabel}>OVR</span>
                 </div>
-                <dl className={styles.cbStats}>
+                <dl className={styles.cbHonours}>
                     <div className={styles.cbStat}>
-                        <dd className={`${styles.cbStatValue} ${styles.num}`}>{matches}</dd>
-                        <dt>Partidos</dt>
-                    </div>
-                    <div className={styles.cbStat}>
-                        <dd className={`${styles.cbStatValue} ${styles.num}`}>{primaryTotal}</dd>
-                        <dt>{primary.label}</dt>
-                    </div>
-                    <div className={styles.cbStat}>
-                        <dd className={`${styles.cbStatValue} ${styles.num}`}>{p.caps}</dd>
+                        <dd className={`${styles.cbStatValue} ${styles.num} ${p.caps === 0 ? styles.cbZero : ''}`}>{p.caps}</dd>
                         <dt>Caps</dt>
                     </div>
                     <div className={styles.cbStat}>
-                        <dd className={`${styles.cbStatValue} ${styles.num}`}>{p.titles}</dd>
+                        <dd className={`${styles.cbStatValue} ${styles.num} ${p.titles === 0 ? styles.cbZero : ''}`}>{p.titles}</dd>
                         <dt>Títulos</dt>
                     </div>
                 </dl>
             </div>
             </div>
+
+            {/* Planilla: partidos, puntos, tries y tackles SIEMPRE, más la
+                métrica del puesto. Un pilar termina con 0 puntos y 0 tries: esos
+                ceros van en gris tenue para que no se lean como un error. */}
+            <dl className={styles.cbStatline}>
+                {cells.map((cell) => (
+                    <div key={cell.label} className={styles.cbStat}>
+                        <dd className={`${styles.cbStatValue} ${styles.num} ${cell.zero ? styles.cbZero : ''}`}>{cell.value}</dd>
+                        <dt>{cell.label}</dt>
+                    </div>
+                ))}
+            </dl>
 
             <EmploymentLadder employment={p.employment} squadTrack={p.squadTrack} history={career.history} />
         </header>

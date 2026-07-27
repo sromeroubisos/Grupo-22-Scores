@@ -74,8 +74,18 @@ export interface CareerSeasonEntry {
     ovr: number;
     ovrDelta: number;
     appearances: number;
-    primaryStatKey: string;
-    primaryStat: number;
+    /** Planilla fija de la temporada: se muestra para todos los puestos. */
+    points: number;
+    tries: number;
+    tackles: number;
+    /**
+     * La CUARTA ranura de la planilla, ya resuelta y congelada. Se guarda el
+     * texto y no la clave porque el apertura no tiene un contador sino un
+     * porcentaje: si se guardara solo la clave habría que recalcularlo al
+     * renderizar, y una temporada vieja podría mostrar otra cosa.
+     */
+    secondaryStatLabel: string;
+    secondaryStat: string;
     caps: number;
     /** Títulos DEL JUGADOR (club campeón + apariciones senior). */
     titlesWon: TitleWon[];

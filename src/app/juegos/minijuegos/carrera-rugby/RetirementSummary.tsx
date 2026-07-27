@@ -1,7 +1,7 @@
 'use client';
 
 import type { CareerState, CareerSummary } from '@/features/career';
-import { buildCareerSummary, describePosition, getClub, getPosition } from '@/features/career';
+import { buildCareerSummary, getClub, getPosition, kickAccuracy, secondaryStatOf } from '@/features/career';
 import Flag from './Flag';
 import styles from './carrera.module.css';
 
@@ -19,17 +19,26 @@ function careerHeadline(summary: CareerSummary, flags: Record<string, number>): 
 
 export default function RetirementSummary({ career, onReplay }: { career: CareerState; onReplay: () => void }) {
     const summary = buildCareerSummary(career);
-    const primary = describePosition(summary.position).stats[0];
-    const primaryTotal = summary.totals[primary.key];
+    const secondary = secondaryStatOf(summary.position, summary.totals);
     const headline = careerHeadline(summary, career.player.flags);
     const posLabel = getPosition(summary.position).labelEs;
     const countryCode = career.player.eligibility.nationalityCountryCode;
 
-    const stats: { label: string; value: number | string }[] = [
-        { label: 'Partidos', value: summary.totalMatches },
-        { label: primary.label, value: primaryTotal },
-        { label: 'Caps', value: summary.caps },
-        { label: 'Títulos', value: summary.titles },
+    // El % al palo es LA métrica del que patea, así que se muestra aparte además
+    // de la ranura del puesto (para el fullback, cuya ranura son los metros).
+    const accuracy = getPosition(summary.position).stats.goalKicker ? kickAccuracy(summary.totals) : null;
+
+    const stats: { label: string; value: number | string; zero?: boolean }[] = [
+        { label: 'Partidos', value: summary.totalMatches, zero: summary.totalMatches === 0 },
+        { label: 'Puntos', value: summary.totals.points, zero: summary.totals.points === 0 },
+        { label: 'Tries', value: summary.totals.tries, zero: summary.totals.tries === 0 },
+        { label: 'Tackles', value: summary.totals.tackles, zero: summary.totals.tackles === 0 },
+        { label: secondary.label, value: secondary.display, zero: secondary.isZero },
+        ...(accuracy !== null && secondary.kind !== 'kick-accuracy'
+            ? [{ label: '% al palo', value: `${accuracy}%` }]
+            : []),
+        { label: 'Caps', value: summary.caps, zero: summary.caps === 0 },
+        { label: 'Títulos', value: summary.titles, zero: summary.titles === 0 },
         { label: 'Mejor OVR', value: summary.peakOvr },
         { label: 'Temporadas', value: summary.seasons },
     ];
@@ -61,7 +70,7 @@ export default function RetirementSummary({ career, onReplay }: { career: Career
             <div className={styles.summaryStats}>
                 {stats.map((s) => (
                     <div key={s.label} className={styles.statItem}>
-                        <span className={styles.statValue}>{s.value}</span>
+                        <span className={`${styles.statValue} ${s.zero ? styles.cbZero : ''}`}>{s.value}</span>
                         <span className={styles.statLabel}>{s.label}</span>
                     </div>
                 ))}

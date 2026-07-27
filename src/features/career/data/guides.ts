@@ -22,11 +22,16 @@ export const STAT_LABELS: Record<keyof SeasonStats, string> = {
     metres: 'Metros',
     assists: 'Asistencias',
     lineBreaks: 'Quiebres',
-    turnovers: 'Robos',
+    turnovers: 'Turnovers',
     kicksAtGoal: 'Palos (int.)',
     kicksMade: 'Palos',
-    lineoutsWon: 'Lines',
+    lineoutsWon: 'Lineouts',
     metresKicked: 'Metros pateados',
+    scrumsWon: 'Scrums',
+    conversionsMade: 'Conversiones',
+    penaltiesMade: 'Penales',
+    dropGoals: 'Drops',
+    points: 'Puntos',
 };
 
 const PHYSICAL_KEYS: AttributeKey[] = ['power', 'speed', 'technique', 'tackle', 'kick', 'stamina'];
@@ -44,19 +49,56 @@ const CAREER_STYLE: Record<Position, string> = {
     fullback: 'El último hombre: contraataque, patada y aire. Elegante y polivalente.',
 };
 
-// Stats destacadas por posición: fuente ÚNICA para lo que se muestra en la
-// partida (cabecera/temporada). Derivadas del rol real del puesto.
-const PRIMARY_STATS: Record<Position, (keyof SeasonStats)[]> = {
-    prop: ['tackles', 'metres', 'turnovers'],
-    hooker: ['tackles', 'lineoutsWon', 'metres'],
-    lock: ['tackles', 'lineoutsWon', 'metres'],
-    backrow: ['tackles', 'turnovers', 'metres'],
-    scrumhalf: ['assists', 'metres', 'lineBreaks'],
-    flyhalf: ['kicksMade', 'assists', 'metresKicked'],
-    centre: ['tries', 'metres', 'lineBreaks'],
-    wing: ['tries', 'lineBreaks', 'metres'],
-    fullback: ['tries', 'metresKicked', 'lineBreaks'],
+/**
+ * La CUARTA ranura de la planilla. Partidos, puntos, tries y tackles se muestran
+ * SIEMPRE, para todos los puestos; esta es la única que cambia, y es la métrica
+ * que de verdad define el trabajo de cada uno.
+ *
+ * Antes existía `PRIMARY_STATS`, una lista de tres de la que la UI mostraba solo
+ * la primera. Con las tres primeras ahora fijas, ese nombre pasó a significar lo
+ * contrario de lo que decía, así que se reemplaza entero en vez de convivir.
+ */
+export type SecondaryStat =
+    | { kind: 'stat'; key: keyof SeasonStats; label: string }
+    /** El apertura no tiene un contador: tiene un PORCENTAJE (kicksMade/kicksAtGoal). */
+    | { kind: 'kick-accuracy'; label: string };
+
+const SECONDARY_STAT: Record<Position, SecondaryStat> = {
+    prop: { kind: 'stat', key: 'scrumsWon', label: 'Scrums' },
+    hooker: { kind: 'stat', key: 'lineoutsWon', label: 'Lineouts' },
+    lock: { kind: 'stat', key: 'lineoutsWon', label: 'Lineouts' },
+    backrow: { kind: 'stat', key: 'turnovers', label: 'Turnovers' },
+    scrumhalf: { kind: 'stat', key: 'assists', label: 'Asistencias' },
+    flyhalf: { kind: 'kick-accuracy', label: '% al palo' },
+    centre: { kind: 'stat', key: 'lineBreaks', label: 'Quiebres' },
+    wing: { kind: 'stat', key: 'metres', label: 'Metros' },
+    fullback: { kind: 'stat', key: 'metres', label: 'Metros' },
 };
+
+/** Porcentaje al palo. Sin intentos NO es 0%: es un guion, porque no pateó. */
+export function kickAccuracy(stats: Pick<SeasonStats, 'kicksAtGoal' | 'kicksMade'>): number | null {
+    if (stats.kicksAtGoal <= 0) return null;
+    return Math.round((stats.kicksMade / stats.kicksAtGoal) * 100);
+}
+
+/**
+ * Valor ya formateado de la cuarta ranura, para que la UI no repita la regla del
+ * guion en tres componentes. `isZero` deja marcar el cero en gris tenue: un pilar
+ * termina con 0 puntos y 0 tries, y dos ceros con el mismo peso visual que el
+ * resto se leen como que el juego está roto.
+ */
+export function secondaryStatOf(
+    id: Position,
+    stats: SeasonStats,
+): { kind: SecondaryStat['kind']; label: string; display: string; isZero: boolean } {
+    const secondary = SECONDARY_STAT[id];
+    if (secondary.kind === 'kick-accuracy') {
+        const accuracy = kickAccuracy(stats);
+        return { kind: secondary.kind, label: secondary.label, display: accuracy === null ? '—' : `${accuracy}%`, isZero: accuracy === null };
+    }
+    const value = stats[secondary.key];
+    return { kind: secondary.kind, label: secondary.label, display: String(value), isZero: value === 0 };
+}
 
 export interface DominantAttribute {
     key: AttributeKey;
@@ -74,7 +116,8 @@ export interface PositionGuide {
     style: string;
     peakAge: number;
     retirement: { soft: number; hard: number };
-    stats: { key: keyof SeasonStats; label: string }[];
+    /** La cuarta ranura de la planilla; las tres primeras son fijas para todos. */
+    secondary: SecondaryStat;
     goalKicker: boolean;
 }
 
@@ -99,7 +142,7 @@ export function describePosition(id: Position): PositionGuide {
         style: CAREER_STYLE[id],
         peakAge: attributePeakAge(topPhysical, pos.group),
         retirement: pos.retirement,
-        stats: PRIMARY_STATS[id].map((key) => ({ key, label: STAT_LABELS[key] })),
+        secondary: SECONDARY_STAT[id],
         goalKicker: pos.stats.goalKicker,
     };
 }

@@ -1,9 +1,10 @@
 import type { Player, PlayerRole } from '../types/player.ts';
 import type { SeasonStats } from '../types/season.ts';
-import { emptyStats } from '../types/season.ts';
+import { computePoints, emptyStats } from '../types/season.ts';
 import type { CareerState, CareerSummary, ClubSpell } from '../types/career.ts';
 import { getPosition } from '../data/positions.ts';
 import type { Rng } from './random.ts';
+import { hashSeed, rngFromState } from './random.ts';
 import type { EmploymentStatus, SquadTrack } from './contracts.ts';
 import type { SeasonEnvironment } from './environment.ts';
 
@@ -48,6 +49,9 @@ export function simulateSeason(
     rng: Rng,
     environment: SeasonEnvironment,
     cupCount = 0,
+    /** Semilla de la carrera + índice de temporada: siembran el rng de detalle. */
+    careerSeed = 0,
+    seasonIndex = 0,
 ): SeasonPerformance {
     const pos = getPosition(player.position);
     const role = player.role;
@@ -98,6 +102,33 @@ export function simulateSeason(
     const base = 5.4 + (effectiveOvr - 55) * 0.045 + player.dynamics.form * 0.006;
     const rating = Math.max(4.8, Math.min(9.9, Math.round(rng.normal(base, 0.4) * 10) / 10));
 
+    // ── Detalle de planilla, en un RNG APARTE ───────────────────────────────
+    // Todo lo de abajo se sortea con un rng RE-SEMBRADO desde una clave
+    // descriptiva, NO con el rng principal. El motivo es concreto: si estas
+    // tiradas salieran del stream principal, correrían todo lo que viene
+    // después (clubes, lesiones, convocatorias) y una carrera vieja dejaría de
+    // reproducirse. Así el desglose es igual de determinístico y el stream
+    // principal queda intacto.
+    const detailRng = rngFromState(hashSeed(`${careerSeed}:stats-detail:${seasonIndex}`));
+
+    stats.scrumsWon = sampleTotal(pos.stats.scrumsWon, matches, Math.max(0.7, ovrFactor * 0.9), detailRng);
+
+    // Desglose del pie. Una conversión vale 2 y un penal 3, así que sin separar
+    // no hay forma de contar los puntos. La partición es EXACTA por
+    // construcción: penales = lo que queda, nunca se pierde ni se inventa una.
+    // Un pilar tiene kicksMade 0 y las tres salen 0 solas: no hay piso artificial.
+    const conversionShare = detailRng.float(0.48, 0.68);
+    stats.conversionsMade = Math.round(stats.kicksMade * conversionShare);
+    stats.penaltiesMade = stats.kicksMade - stats.conversionsMade;
+
+    // Los drops van FUERA de kicksAtGoal: se patean en juego, no desde un tiro
+    // fijo. Son raros incluso para un apertura titular de toda la temporada.
+    stats.dropGoals = pos.stats.goalKicker
+        ? Math.max(0, Math.round(detailRng.normal(matches * 0.035, 0.85, 0)))
+        : 0;
+
+    stats.points = computePoints(stats);
+
     return { matches, minutes, rating, stats };
 }
 
@@ -112,6 +143,13 @@ export function accumulateStats(into: SeasonStats, from: SeasonStats): void {
     into.kicksMade += from.kicksMade;
     into.lineoutsWon += from.lineoutsWon;
     into.metresKicked += from.metresKicked;
+    into.scrumsWon += from.scrumsWon;
+    into.conversionsMade += from.conversionsMade;
+    into.penaltiesMade += from.penaltiesMade;
+    into.dropGoals += from.dropGoals;
+    // Los puntos se ACUMULAN, no se recalculan: una carrera vieja tiene que
+    // seguir sumando lo que sumaba aunque cambie la regla de puntuación.
+    into.points += from.points;
 }
 
 /** Agrega toda la carrera en un resumen compartible (con score para leaderboard). */
