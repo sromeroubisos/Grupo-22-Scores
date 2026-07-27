@@ -12,7 +12,9 @@ export type { CareerState, CareerSummary, CareerPhase, ClubOffer, ClubSpell, Mov
 export { ENGINE_VERSION, MILESTONE_LABELS, START_ROUTES } from './types/career.ts';
 export type { StartRouteId } from './types/career.ts';
 export type { CareerSeasonEntry, CareerMilestone } from './types/career.ts';
-export { MOVEMENT_LABELS, movementOptionCopy, movementResultText } from './data/movement-copy.ts';
+export { MOVEMENT_LABELS, DIRECTION_LABELS, movementOptionCopy, movementResultText, offerReason } from './data/movement-copy.ts';
+export type { OfferSignals } from './data/movement-copy.ts';
+export type { OfferPresentation } from './types/event.ts';
 export { clubLeagueIdentity, isUmbrellaSystem, CAREER_COMPETITION_VERSION, type CompetitionIdentity } from './engine/competition-identity.ts';
 export { domesticSystemKey, sameDomesticSystem } from './engine/domestic-system.ts';
 export { CAREER_MARKET_VERSION, familyBoost } from './engine/event-selector.ts';

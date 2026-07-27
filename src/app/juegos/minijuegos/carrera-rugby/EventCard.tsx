@@ -1,6 +1,8 @@
 'use client';
 
 import type { GameEvent } from '@/features/career';
+import { DIRECTION_LABELS } from '@/features/career';
+import ClubBadge from './ClubBadge';
 import styles from './carrera.module.css';
 
 interface Props {
@@ -21,9 +23,25 @@ export default function EventCard({ event, onChoose }: Props) {
             <div className={`${styles.options} ${two ? styles.optionsTwo : ''}`}>
                 {event.options.map((opt) => (
                     <button key={opt.id} type="button" className={styles.optionBtn} onClick={() => onChoose(opt.id)}>
+                        {opt.offer && (
+                            <ClubBadge clubId={opt.offer.clubId} clubName={opt.offer.clubName} size={40} />
+                        )}
                         <span className={styles.optionBody}>
                             <span className={styles.optionLabel}>{opt.label}</span>
                             {opt.hint && <span className={styles.optionHint}>{opt.hint}</span>}
+                            {opt.offer && (
+                                <>
+                                    <span className={styles.offerMeta}>
+                                        <span className={styles.offerLeague}>{opt.offer.league}</span>
+                                        <span className={`${styles.offerDir} ${styles[`dir_${opt.offer.direction}`]}`}>
+                                            {DIRECTION_LABELS[opt.offer.direction]}
+                                        </span>
+                                    </span>
+                                    {opt.offer.reason && (
+                                        <span className={styles.offerReason}>{opt.offer.reason}</span>
+                                    )}
+                                </>
+                            )}
                         </span>
                         <svg className={styles.optionChevron} viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
                     </button>

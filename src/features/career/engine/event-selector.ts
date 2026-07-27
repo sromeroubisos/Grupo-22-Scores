@@ -1,14 +1,14 @@
 import type { CareerState, ClubOffer, StartRouteId } from '../types/career.ts';
 import type { EventContext, EventRequirements, GameEvent } from '../types/event.ts';
 import { ALL_EVENTS, getEvent, TRANSFER_EVENT_ID } from '../data/events/index.ts';
-import { movementOptionCopy, movementResultText } from '../data/movement-copy.ts';
+import { movementOptionCopy, movementResultText, offerReason, type OfferSignals } from '../data/movement-copy.ts';
 import { getClub, clubTier } from '../data/clubs.ts';
 import { getPosition } from '../data/positions.ts';
-import { economicModelOf, sportingBandOf } from '../data/competition-levels2026.ts';
+import { competitionLabelOf, economicModelOf, sportingBandOf } from '../data/competition-levels2026.ts';
 import { canRepresent, targetUnion } from './eligibility.ts';
 import { computeEffectiveOvr, computeOvr } from './scoring.ts';
 import { generateOffers } from './club-offers.ts';
-import { marketRung } from './market-routes.ts';
+import { marketRung, movementBetween } from './market-routes.ts';
 import { isProfessionalEmployment, type EmploymentStatus, type SquadTrack } from './contracts.ts';
 import type { Rng } from './random.ts';
 
@@ -187,11 +187,40 @@ function surfaceMarketProbability(state: CareerState, offers: ClubOffer[]): numb
     return Math.min(0.85, Math.max(0.05, prob));
 }
 
+/** Temporadas consecutivas de titular, contando hacia atrás desde la última. */
+function consecutiveStarterSeasons(state: CareerState): number {
+    let n = 0;
+    for (let i = state.seasons.length - 1; i >= 0; i--) {
+        if (state.seasons[i].role !== 'starter') break;
+        n++;
+    }
+    return n;
+}
+
+/**
+ * Señales que explican la oferta. Son las MISMAS que pesa
+ * `scorePathwayCandidate` para decidir si la oferta existe — acá solo se leen
+ * para poder mostrarlas.
+ */
+function signalsFor(state: CareerState, offer: ClubOffer, effectiveOvr: number): OfferSignals {
+    const p = state.player;
+    const currentClub = getClub(p.club);
+    return {
+        outperformsClub: effectiveOvr - currentClub.rating >= 3,
+        starterSeasons: consecutiveStarterSeasons(state),
+        hot: p.dynamics.form >= 65,
+        homecoming: offer.via === 'homecoming',
+        pathway: offer.via === 'pathway',
+        youngProspect: p.age <= 21 && p.potential - computeOvr(p.attributes, p.position) >= 8,
+    };
+}
+
 /** Reconstruye el evento de transferencia a partir de las ofertas guardadas. */
 export function buildTransferEvent(state: CareerState, offers: ClubOffer[]): GameEvent {
     const p = state.player;
     const currentClub = getClub(p.club);
     const currentTier = clubTier(p.club);
+    const effectiveOvr = computeEffectiveOvr(p);
 
     const roleLabel: Record<string, string> = { starter: 'titular', rotation: 'rotación', fringe: 'suplente' };
 
@@ -214,6 +243,15 @@ export function buildTransferEvent(state: CareerState, offers: ClubOffer[]): Gam
                 id: `move-${offer.club}`,
                 label: copy.label,
                 hint: copy.hint,
+                // Sin esta ficha, dos ofertas del mismo tipo y rol se leen
+                // idénticas y el jugador elige entre dos nombres a ciegas.
+                offer: {
+                    clubId: offer.club,
+                    clubName: club.labelEs,
+                    league: competitionLabelOf(club.competitionId),
+                    direction: movementBetween(currentClub, club),
+                    reason: offerReason(signalsFor(state, offer, effectiveOvr)),
+                },
                 outcomes: [
                     { weight: 1, effect: { moveToOffer: offer, morale: moraleDelta, fame: Math.max(-6, fameDelta), form: -3 }, resultText: movementResultText(offer.movementKind, club.labelEs) },
                 ],

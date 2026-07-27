@@ -65,11 +65,30 @@ export interface Outcome {
     resultText: string; // narración del desenlace
 }
 
+/**
+ * Ficha del club que hay detrás de una opción de mercado. Sin esto, dos ofertas
+ * de "Contrato profesional · titular" son indistinguibles y el jugador elige a
+ * ciegas entre dos nombres. Es SOLO presentación: se reconstruye desde
+ * `state.offers` en cada render, no se guarda en `CareerState`.
+ */
+export interface OfferPresentation {
+    clubId: string;
+    clubName: string;
+    /** Competición del club destino, ya resuelta a nombre mostrable. */
+    league: string;
+    /** Hacia dónde te mueve el pase, según el escalafón de mercado. */
+    direction: 'up' | 'down' | 'lateral';
+    /** Por qué te llegó esta oferta. null si no hay una señal clara. */
+    reason: string | null;
+}
+
 export interface EventOption {
     id: string;
     label: string;
     hint?: string; // descripción corta de la consecuencia esperada
     outcomes: Outcome[]; // >=1; si es 1, es determinístico
+    /** Solo en el mercado de pases: el club concreto detrás de la opción. */
+    offer?: OfferPresentation;
 }
 
 // Contexto que reciben las condiciones de aparición.

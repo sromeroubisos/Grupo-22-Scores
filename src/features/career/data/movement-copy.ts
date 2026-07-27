@@ -46,6 +46,47 @@ export function movementOptionCopy(
     }
 }
 
+/** Etiqueta del movimiento en el escalafón de mercado. */
+export const DIRECTION_LABELS: Readonly<Record<'up' | 'down' | 'lateral', string>> = {
+    up: 'Subís un escalón',
+    down: 'Bajás un escalón',
+    lateral: 'Mismo escalón',
+};
+
+/**
+ * Señales que explican POR QUÉ llegó una oferta. El motor ya las calcula
+ * (`scorePathwayCandidate`: rendís por encima de tu club, titularidad, forma,
+ * proyección) pero nunca las mostraba: el mérito relativo era una caja negra.
+ */
+export interface OfferSignals {
+    /** Rinde por encima del nivel de su propio club. */
+    outperformsClub: boolean;
+    /** Temporadas consecutivas como titular. */
+    starterSeasons: number;
+    /** Viene en racha. */
+    hot: boolean;
+    /** El club de su país lo quiere de vuelta. */
+    homecoming: boolean;
+    /** Entró por una vía migratoria: lo vienen siguiendo de afuera. */
+    pathway: boolean;
+    /** Joven con techo por delante. */
+    youngProspect: boolean;
+}
+
+/**
+ * La razón MÁS FUERTE, en una línea. Se muestra una sola: dos o tres motivos
+ * juntos convierten la tarjeta en un informe y dejan de leerse.
+ */
+export function offerReason(s: OfferSignals): string | null {
+    if (s.outperformsClub) return 'Venís rindiendo por encima de tu club';
+    if (s.starterSeasons >= 2) return `Sos titular hace ${s.starterSeasons} temporadas`;
+    if (s.homecoming) return 'Te quieren de vuelta en casa';
+    if (s.pathway) return 'Te vienen siguiendo desde afuera';
+    if (s.hot) return 'Venís en racha';
+    if (s.youngProspect) return 'Les interesa tu proyección';
+    return null;
+}
+
 /** Frase de resultado al concretar el movimiento (para el revelado). */
 export function movementResultText(kind: MovementKind, clubName: string): string {
     switch (kind) {
