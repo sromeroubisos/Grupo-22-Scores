@@ -80,51 +80,54 @@ function digest(state: CareerState): Digest {
     };
 }
 
-// Línea de base del motor 1.8.0 — ver docs/career-engine.md §9.
-// Cambió respecto de 1.7.0 porque la Fase 4 mueve la FRECUENCIA de los eventos
-// según el entorno (`familyBoost`), suma seis eventos de vida amateur y gatea
-// por `requires` los eventos que hablaban de sueldo o de prensa en contextos
-// donde no existen. El pool y los pesos cambian ⇒ cambia qué sale con la misma
-// semilla. Los tests de autoconsistencia de arriba NO se tocaron.
+// Línea de base del motor 1.9.0 — ver docs/career-engine.md §9 y §11.
+// Cambió respecto de 1.8.0 por la revisión de la PROGRESIÓN: el rendimiento de
+// la temporada anterior ahora empuja el desarrollo (`meritDrive`), la curva de
+// envejecimiento se recalibró para atravesar el pico en vez de sentarse encima
+// (pisos de `attributeDelta`) y `potential` pasó a ser el techo REAL alcanzable
+// en vez de un objetivo interno 10-15 puntos más alto.
+// Los tests de autoconsistencia de arriba NO se tocaron y siguen en verde.
 const EXPECTED: Record<string, Digest> = {
+    // El pilar llega a peakOvr 77 con techo declarado 77: el potencial dejó de
+    // ser decorativo y ahora se alcanza.
     "apertura argentino": {
-        seasons: 15,
-        retirementAge: 35,
-        peakOvr: 58,
+        seasons: 14,
+        retirementAge: 34,
+        peakOvr: 57,
         caps: 0,
         titles: 0,
         clubs: 3,
         firstClub: 'sb-st-brendan-s',
         lastClub: 'sb-hurling',
         employment: 'amateur-compensated',
-        decisions: 14,
-        stateHash: 4227518476,
+        decisions: 13,
+        stateHash: 2971117379,
     },
     "pilar neozelandés": {
-        seasons: 19,
-        retirementAge: 37,
-        peakOvr: 80,
-        caps: 64,
-        titles: 6,
-        clubs: 1,
+        seasons: 21,
+        retirementAge: 39,
+        peakOvr: 77,
+        caps: 76,
+        titles: 3,
+        clubs: 2,
         firstClub: 'chiefs',
-        lastClub: 'chiefs',
-        employment: 'full-time-professional',
-        decisions: 13,
-        stateHash: 407438123,
+        lastClub: 'exeter-chiefs',
+        employment: 'amateur-compensated',
+        decisions: 18,
+        stateHash: 2632455460,
     },
     "wing francés": {
-        seasons: 15,
-        retirementAge: 34,
-        peakOvr: 65,
-        caps: 9,
+        seasons: 14,
+        retirementAge: 33,
+        peakOvr: 63,
+        caps: 11,
         titles: 2,
-        clubs: 2,
+        clubs: 4,
         firstClub: 'ealing-trailfinders',
-        lastClub: 'us-montauban',
-        employment: 'full-time-professional',
-        decisions: 12,
-        stateHash: 2986076747,
+        lastClub: 'bourgoin',
+        employment: 'semi-professional',
+        decisions: 11,
+        stateHash: 3874873568,
     },
 };
 

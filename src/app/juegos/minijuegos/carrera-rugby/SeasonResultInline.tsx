@@ -1,6 +1,6 @@
 'use client';
 
-import type { CareerState } from '@/features/career';
+import type { CareerSeasonEntry, CareerState } from '@/features/career';
 import { contractLabel, getClub, MILESTONE_LABELS } from '@/features/career';
 import ClubBadge from './ClubBadge';
 import styles from './carrera.module.css';
@@ -27,6 +27,11 @@ export default function SeasonResultInline({ career }: { career: CareerState }) 
     const playerTitles = entry.participations.filter((c) => c.playerCredited);
     const clubOnlyTitles = entry.participations.filter((c) => c.clubWon && !c.playerCredited);
 
+    // Una temporada quieta en el techo se cuenta distinto de una quieta a mitad
+    // de camino: la primera es el pico de la carrera, la segunda es un año perdido.
+    const atCeiling = delta === 0 && entry.ovr >= career.player.potential - 1;
+    const flatNote = delta === 0 ? flatSeasonNote(career.history, entry) : null;
+
     return (
         <section className={styles.result} aria-live="polite" aria-label="Resultado de la temporada">
             <p className={styles.resultHeadline}>{entry.milestones.length > 0 ? headlineFromEntry(entry) : seasonHeadline(entry)}</p>
@@ -50,9 +55,11 @@ export default function SeasonResultInline({ career }: { career: CareerState }) 
                 <li className={delta === 0 ? styles.deltaFlat : delta > 0 ? styles.deltaUp : styles.deltaDown}>
                     OVR <span className={styles.num}>{entry.ovr}</span>
                     <span className={styles.deltaSep} aria-hidden="true"> · </span>
-                    {delta === 0 ? 'sin cambios' : `${delta > 0 ? '+' : '−'}${Math.abs(delta)}`}
+                    {delta !== 0 ? `${delta > 0 ? '+' : '−'}${Math.abs(delta)}` : atCeiling ? 'en tu techo' : 'sin cambios'}
                 </li>
             </ul>
+
+            {flatNote && <p className={styles.flatNote}>{flatNote}</p>}
 
             {(playerTitles.length > 0 || clubOnlyTitles.length > 0 || contractChanged || clubChanged || entry.milestones.length > 0) && (
                 <p className={styles.resultBadges}>
@@ -78,6 +85,29 @@ function seasonHeadline(entry: { appearances: number; ovrDelta: number; clubName
     if (entry.ovrDelta <= -2) return `Temporada difícil en ${entry.clubName}`;
     if (entry.appearances >= 18) return `Temporada de mucho rodaje en ${entry.clubName}`;
     return `Otra temporada en ${entry.clubName}`;
+}
+
+/**
+ * Qué SÍ se movió cuando el OVR no se movió.
+ *
+ * Una temporada de pico no es una temporada vacía: se siguen jugando partidos,
+ * sumando caps y anotando. Sin esta línea, las tres o cuatro temporadas que el
+ * jugador pasa en su techo se leen como tiempo muerto — que es exactamente lo
+ * que pasaba antes de 1.9.0, con "OVR 63 · sin cambios" repetido y nada más.
+ *
+ * Se muestra un solo récord personal, el más significativo que haya.
+ */
+function flatSeasonNote(history: CareerSeasonEntry[], entry: CareerSeasonEntry): string | null {
+    const past = history.slice(0, -1);
+    if (past.length === 0) return null;
+    const bestBefore = (pick: (h: CareerSeasonEntry) => number) => Math.max(...past.map(pick));
+
+    if (entry.caps > 0 && entry.caps >= bestBefore((h) => h.caps)) return 'Tu mejor temporada con el seleccionado';
+    if (entry.points > 0 && entry.points >= bestBefore((h) => h.points)) return 'Tu mejor cosecha de puntos';
+    if (entry.tries > 0 && entry.tries >= bestBefore((h) => h.tries)) return 'Tu mejor temporada de tries';
+    if (entry.tackles > 0 && entry.tackles >= bestBefore((h) => h.tackles)) return 'Tu mejor temporada de tackles';
+    if (entry.appearances > 0 && entry.appearances >= bestBefore((h) => h.appearances)) return 'Tu temporada de más rodaje';
+    return null;
 }
 
 function headlineFromEntry(entry: { milestones: (keyof typeof MILESTONE_LABELS)[]; clubName: string }): string {

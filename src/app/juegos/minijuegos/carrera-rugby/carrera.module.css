@@ -1812,6 +1812,15 @@
     margin-top: 2px;
 }
 .resultComp { font-weight: 600; }
+
+/* Lo que sí se movió en una temporada de OVR quieto. */
+.flatNote {
+    margin: 6px 0 0;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    color: var(--color-accent);
+    font-weight: 600;
+}
 .deltaSep { opacity: 0.6; }
 
 .badgeContract, .badgeMilestone {

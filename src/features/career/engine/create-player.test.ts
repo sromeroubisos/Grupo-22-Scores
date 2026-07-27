@@ -74,8 +74,13 @@ test('el potencial es OCULTO, existe y deja margen real de crecimiento', () => {
     for (const [position, { ovr, potential }] of samples) {
         assert.ok(Math.min(...potential) >= POTENTIAL_MIN, `${position}: potencial por debajo del piso`);
         assert.ok(Math.max(...potential) <= POTENTIAL_MAX, `${position}: potencial por encima del techo`);
+        // El umbral bajó de 30 a 20 en 1.9.0 porque cambió lo que MIDE. Antes
+        // `potential` era el objetivo interno del crecimiento y quedaba 10-15
+        // puntos por encima de lo alcanzable: de esos 30 de "margen", un tercio
+        // no existía. Ahora `potential` es el techo real, así que estos 20 son
+        // 20 puntos que la carrera recorre de verdad.
         assert.ok(
-            median(potential) - median(ovr) >= 30,
+            median(potential) - median(ovr) >= 20,
             `${position}: sin margen de crecimiento (${median(ovr)} → ${median(potential)})`,
         );
     }

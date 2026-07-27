@@ -14,7 +14,7 @@ import type { Rng } from './random.ts';
 import { MIN_LEAGUE_FIELD, cupField, resolveCupWinner, resolveLeagueFinish, standingFor } from './competition-results.ts';
 import { clubLeagueIdentity } from './competition-identity.ts';
 import { computeOvr, computeEffectiveOvr } from './scoring.ts';
-import { applyAging, growthScaleFor } from './aging.ts';
+import { applyAging, growthScaleFor, meritDrive } from './aging.ts';
 import { advanceRegistration } from './eligibility.ts';
 import { computeSeasonLoad, deriveEnvironment, seasonInjuryRisk } from './environment.ts';
 import { rollInjury } from './injuries.ts';
@@ -71,8 +71,12 @@ export function simulateSeason(state: CareerState, rng: Rng, movedFrom: string |
     // seedeado): dos jugadores iguales NO tienen la misma curva, y un mismo
     // jugador no repite +0 mecánicamente todos los años.
     const developmentRoll = rng.normal(1, 0.22, 0.6, 1.5);
-    const growthScale = growthScaleFor(ovrStart, p.potential)
-        * environmentSupport * loadPenaltyFactor * youthDrive * developmentRoll;
+    // Rendir IMPORTA para crecer: la temporada pasada empuja o frena el
+    // desarrollo. Antes de 1.9.0 el titular con gran rating y el suplente
+    // crecían igual, que es justo lo contrario de cómo funciona el deporte.
+    const merit = meritDrive(state.seasons[state.seasons.length - 1]);
+    const growthScale = growthScaleFor(ovrStart, p.potential, p.position)
+        * environmentSupport * loadPenaltyFactor * youthDrive * developmentRoll * merit;
     const attributeDeltas = applyAging(p.attributes, p.age, group, rng, growthScale);
 
     // 2) Rol de la temporada según nivel actual vs club.

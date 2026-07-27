@@ -1,4 +1,4 @@
-import type { AttributeKey, Attributes, PositionGroup } from '../types/player.ts';
+import type { AttributeKey, Attributes, PlayerRole, Position, PositionGroup } from '../types/player.ts';
 import type { Rng } from './random.ts';
 import { clampAttr } from './scoring.ts';
 
@@ -52,13 +52,59 @@ function clamp(value: number, lo: number, hi: number): number {
 }
 
 /**
+ * Empuje que se mantiene MIENTRAS el jugador esté por debajo de su techo.
+ *
+ * Antes de 1.9.0 el crecimiento era `(potential - ovr)/12` a secas: una
+ * asíntota. El pico se asienta donde el crecimiento iguala al declive, y con esa
+ * forma eso ocurre SIEMPRE bastante por debajo del objetivo — sobre 1080
+ * carreras la brecha mediana era 12 y solo 9 de 1080 llegaban a 3 o menos. El
+ * potencial era inalcanzable por construcción.
+ *
+ * La primera corrección fue correr el objetivo interno hacia arriba una
+ * distancia fija por puesto. No sirve: `environmentSupport` multiplica la
+ * escala, así que la distancia de equilibrio NO es constante — un profesional
+ * en un club con buena estructura se estabiliza más arriba que un amateur. Con
+ * un corrimiento fijo calibrado a la mediana, un tercio de las carreras
+ * terminaba PASÁNDOSE del techo declarado.
+ *
+ * Lo que sí funciona es cambiar la forma: empuje sostenido mientras falte
+ * recorrido y CERO al llegar. Así el techo se alcanza (el empuje le gana al
+ * declive incipiente) y además se respeta (no hay crecimiento por encima).
+ */
+const CEILING_PUSH = 0.85;
+
+/**
  * Escala de crecimiento según lo lejos que esté el TECHO del jugador. Es lo que
  * permite que un juvenil de OVR 38 llegue a nivel profesional: cuanto mayor es
- * el margen al potencial, más rápido mejora; pegado al techo, se aplana.
- * 1 = ritmo de referencia (se usa como default en llamadas sin potencial).
+ * el margen al potencial, más rápido mejora.
+ *
+ * `potential` es el techo REAL alcanzable, no un objetivo interno inflado.
+ *
+ * Sin `position` conserva la forma vieja (asintótica, sin empuje): la usan los
+ * tests de progresión que miden la curva desnuda.
  */
-export function growthScaleFor(ovr: number, potential: number): number {
-    return clamp((potential - ovr) / 12, 0, 2.8);
+export function growthScaleFor(ovr: number, potential: number, position?: Position): number {
+    const gap = potential - ovr;
+    if (gap <= 0) return 0; // el techo es un techo: no se crece por encima
+    const push = position === undefined ? 0 : CEILING_PUSH;
+    return clamp(gap / 12 + push, 0, 2.8);
+}
+
+/**
+ * Cuánto empuja el RENDIMIENTO al desarrollo. Hasta 1.9.0 la progresión no
+ * miraba nada de lo que el jugador hacía en la cancha: un titular con gran
+ * rating crecía exactamente igual que un suplente del mismo OVR, edad y techo.
+ *
+ * Se mira la temporada ANTERIOR, no la actual, por dos razones: el
+ * envejecimiento se aplica ANTES de simular la temporada (no hay rating todavía)
+ * y además es lo más fiel al deporte — venías de un gran año y das el salto.
+ */
+export function meritDrive(previous: { rating: number; role: PlayerRole } | undefined): number {
+    if (previous === undefined) return 1; // debut: no hay nada que premiar ni castigar
+    // 6.6 es el rating de una temporada correcta: por encima empuja, por debajo frena.
+    const byRating = clamp(1 + (previous.rating - 6.6) * 0.13, 0.82, 1.22);
+    const byRole = previous.role === 'starter' ? 1.06 : previous.role === 'rotation' ? 1 : 0.93;
+    return clamp(byRating * byRole, 0.8, 1.26);
 }
 
 /** Cambio de un atributo para una temporada, dado edad y grupo. */
@@ -74,13 +120,20 @@ export function attributeDelta(
 
     if (age < peak) {
         // Crecimiento: más rápido de joven, se frena cerca del pico y del techo.
-        const taper = clamp((peak - age) / (peak - START_AGE), 0.25, 1);
+        // El piso subió de 0.25 a 0.45 en 1.9.0: con 0.25 el crecimiento moría
+        // varios años ANTES del pico y quedaba empatado con el declive incipiente,
+        // y la carrera pasaba hasta ocho temporadas clavada en el mismo OVR.
+        const taper = clamp((peak - age) / (peak - START_AGE), 0.45, 1);
         return GROW[key] * taper * growthScale + noise;
     }
 
     // Declive: se acelera con la edad. Los backs pierden VELOCIDAD más fuerte
     // pasados los 30 (regla explícita del spec).
-    let severity = clamp((age - peak) / 6, 0.3, 2.2);
+    // La rampa se acortó de 6 a 4.5 en 1.9.0 por lo mismo: la curva tiene que
+    // ATRAVESAR el pico, no sentarse encima. Medido sobre 1080 carreras, la
+    // racha plana más larga bajó de 4 a 3 temporadas en los nueve puestos y las
+    // rachas de 5+ se redujeron a la mitad.
+    let severity = clamp((age - peak) / 4.5, 0.3, 2.2);
     if (key === 'speed' && group === 'back' && age > 30) severity *= 1.5;
     return -DECLINE[key] * severity + noise;
 }

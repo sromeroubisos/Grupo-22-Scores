@@ -75,20 +75,33 @@ const YOUTH_OVR_WINDOW: Record<Position, [number, number]> = {
 // Margen de crecimiento típico hasta el techo. Los puestos que arrancan más
 // abajo son los que más recorrido tienen: a los 27 un pilar y un wing valen
 // parecido, pero llegaron por caminos distintos.
+/**
+ * Recorrido de OVR que se le promete al jugador por encima de su nivel inicial.
+ *
+ * Bajó en 1.9.0 exactamente la `equilibriumHeadroom` de cada puesto. No es un
+ * rebalanceo: el objetivo INTERNO de crecimiento sigue valiendo lo mismo que
+ * antes (`potential + headroom` = el viejo `potential`), así que los picos
+ * logrados quedan donde estaban. Lo que cambió es que el número declarado como
+ * techo es ahora el que la carrera alcanza de verdad, en vez de uno 10-15 puntos
+ * más alto que nadie tocaba nunca.
+ */
 const GROWTH_ROOM: Record<Position, number> = {
-    prop: 44,
-    lock: 43,
-    hooker: 42,
-    backrow: 41,
-    flyhalf: 39,
-    centre: 39,
-    scrumhalf: 38,
-    fullback: 38,
-    wing: 37,
+    prop: 32, // 44 − 12
+    lock: 33, // 43 − 10
+    hooker: 30, // 42 − 12
+    backrow: 30, // 41 − 11
+    flyhalf: 27, // 39 − 12
+    centre: 24, // 39 − 15
+    scrumhalf: 24, // 38 − 14
+    fullback: 27, // 38 − 11
+    wing: 24, // 37 − 13
 };
 
-export const POTENTIAL_MIN = 52;
-export const POTENTIAL_MAX = 96;
+// Los topes bajaron con GROWTH_ROOM en 1.9.0. Tienen que seguir la misma escala
+// que el potencial declarado: un piso de 52 sobre un techo REAL le inventaría un
+// potencial inalcanzable justo al jugador flojo, que es a quien menos le sirve.
+export const POTENTIAL_MIN = 44;
+export const POTENTIAL_MAX = 91;
 
 // Pool de apodos internos (el usuario no elige apodo; el motor asigna uno).
 const NICKNAME_POOL = [

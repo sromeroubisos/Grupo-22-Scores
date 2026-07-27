@@ -9,7 +9,7 @@ Versiones selladas en este momento:
 
 | Constante | Valor | Dónde |
 |---|---|---|
-| `ENGINE_VERSION` | `1.8.0` | `types/career.ts` |
+| `ENGINE_VERSION` | `1.9.0` | `types/career.ts` |
 | `SCHEMA` (guardado) | `6` | `carrera-rugby/careerStorage.ts` |
 | `CLUB_CATALOG_VERSION` | `2026-27.6` | `data/clubs.ts` |
 | `SA_SNAPSHOT_VERSION` | `464399ffada4` | `data/clubs2026/saClubs.generated.ts` |
@@ -297,19 +297,22 @@ motor ya no sabe interpretar. Todo va envuelto en `try/catch`: sin acceso a
 
 Correr con `npm test` (runner nativo `node --test`, **no** Vitest).
 
-### Digest congelado — línea de base del motor 1.8.0
+### Digest congelado — línea de base del motor 1.9.0
 
 Con el `rotatingChooser` del test (opción elegida por
 `hashSeed(eventId:temporada) % nOpciones`), una ruta distinta en cada caso:
 
-| Caso | Ruta | Semilla | Temporadas | Retiro | OVR pico | Caps | Clubes | Empleo final | Arquetipo |
+| Caso | Ruta | Semilla | Temporadas | Retiro | OVR pico | Techo | Caps | Clubes | Arquetipo |
 |---|---|---|---|---|---|---|---|---|---|
-| Apertura argentino | amateur | 20260726 | 15 | 35 | **58** | 0 | 3 | Compensado | Amateur de ley |
-| Pilar neozelandés | profesional | 424242 | 19 | 37 | **80** | 64 | 1 | Profesional | Un club, toda la vida |
-| Wing francés | desarrollo | 7919 | 15 | 34 | **65** | 9 | 2 | Profesional | Guerrero |
+| Apertura argentino | amateur | 20260726 | 14 | 34 | **57** | 63 | 0 | 3 | Amateur de ley |
+| Pilar neozelandés | profesional | 424242 | 21 | 39 | **77** | **77** | 76 | 2 | Emblema de la selección |
+| Wing francés | desarrollo | 7919 | 14 | 33 | **63** | 63 | 11 | 4 | Guerrero |
+
+> El pilar cierra con OVR pico 77 y techo declarado 77, y el wing 63 sobre 63:
+> desde 1.9.0 el potencial es un número que la carrera **alcanza** (ver §11).
 
 > Sirve además como **calibración real del techo de OVR**: una carrera amateur
-> pica cerca de 55-60 y una profesional cerca de 75-80. Las bandas de color de
+> pica cerca de 55-60 y una profesional cerca de 70-77. Las bandas de color de
 > Copero (85+ dorado) no aplican acá.
 
 ### La técnica que protege el stream del RNG
@@ -444,3 +447,96 @@ Distribución medida sobre 300 carreras por ruta con el `rotatingChooser`:
 > El `rotatingChooser` es una estrategia mecánica, no un jugador. Un jugador
 > ambicioso asciende bastante más (ver la tabla de balance), así que en juego
 > real la ruta amateur reparte más hacia los arquetipos de ascenso.
+
+---
+
+## 11. Progresión: el techo alcanzable (1.9.0)
+
+### El bug
+
+Jugando una carrera completa aparecieron dos síntomas que resultaron ser el
+mismo problema:
+
+- el OVR se congelaba a mitad de carrera, hasta **ocho temporadas** seguidas con
+  el mismo número;
+- el `potential` **nunca se alcanzaba**. Medido sobre 1080 carreras de los nueve
+  puestos y las tres rutas: brecha mediana **12**, media 13,7, máxima 35, y solo
+  **9 de 1080** llegaban a 3 puntos o menos de su techo.
+
+### La causa
+
+No era redondeo. Los atributos son `number` y `clampAttr` solo recorta a [1,99],
+así que los incrementos fraccionarios **sí** se acumulan — durante una meseta el
+OVR interno se movía de 63,0 a 63,8, y el redondeo lo volvía invisible.
+
+La causa es la **forma** de la curva. El crecimiento era `(potential − ovr)/12`:
+una asíntota. El pico se asienta donde el crecimiento iguala al declive y, con
+esa forma, eso ocurre a una distancia **constante** por debajo del objetivo,
+*independiente de cuánto valga el objetivo*. Con `GROWTH_ROOM` de 37-44 puntos y
+una ventana de edad que entrega 15-25, el potencial era inalcanzable por
+construcción.
+
+### Lo que no funcionó
+
+Vale dejarlo escrito para no volver a intentarlo:
+
+| Intento | Resultado medido |
+|---|---|
+| Brecha con `sqrt` (menos asintótica) | No mueve el pico y **alarga** la meseta en un caso |
+| Bajar `GROWTH_ROOM` a secas | El pico baja lo mismo que el techo: desinfla la escala, no cierra la brecha |
+| Correr el objetivo interno una distancia fija por puesto | `environmentSupport` multiplica la escala ⇒ la distancia de equilibrio **no** es constante, y un tercio de las carreras terminaba **pasándose** del techo |
+
+### La solución
+
+Cambiar la forma: **empuje sostenido mientras falte recorrido, cero al llegar.**
+
+```ts
+export function growthScaleFor(ovr, potential, position?) {
+    const gap = potential - ovr;
+    if (gap <= 0) return 0;              // el techo es un techo
+    const push = position === undefined ? 0 : CEILING_PUSH; // 0.85
+    return clamp(gap / 12 + push, 0, 2.8);
+}
+```
+
+Así el techo **se alcanza** (el empuje le gana al declive incipiente) y además
+**se respeta** (no hay crecimiento por encima). `GROWTH_ROOM` bajó en paralelo
+para que el pico logrado no se moviera: lo que cambia es que el número declarado
+es ahora el que se toca.
+
+Acompañan dos cambios más:
+
+- **`meritDrive`** — el rendimiento de la temporada ANTERIOR (rating + rol)
+  empuja o frena el desarrollo, entre 0,80 y 1,26. Hasta 1.8.0 la progresión no
+  miraba nada de lo que el jugador hacía en la cancha: un titular con gran rating
+  crecía exactamente igual que un suplente del mismo OVR, edad y techo.
+- **Pisos de `attributeDelta`** — taper 0,25 → **0,45** y rampa de declive 6 →
+  **4,5**, para que la curva *atraviese* el pico en vez de sentarse encima.
+
+### Resultado medido (1080 carreras)
+
+| Métrica | 1.8.0 | 1.9.0 |
+|---|---|---|
+| Brecha mediana techo − pico | 12 | **1** |
+| Carreras a ≤3 del techo | <1 % | **64 %** |
+| Carreras que se pasan del techo | — | 1 % |
+| Racha plana mediana | 4 | **3** |
+| Carreras con 5+ temporadas planas | 28 % | **20 %** |
+
+Los picos por ruta y la duración de las carreras no se movieron.
+
+### La meseta que queda es correcta
+
+**El 82 % de las mesetas largas que sobreviven ocurre EN el techo**: son los años
+de plenitud, no un desarrollo trabado. Un pilar sostiene su pico una temporada
+más que un wing porque sus atributos pican más tarde (potencia 30, tackle 30,
+resistencia 31 contra la velocidad 25 de un back), y eso es biología del modelo.
+
+Para que esos años no se lean como tiempo muerto, la UI dejó de decir
+"sin cambios": ahora dice **"en tu techo"** y agrega el récord personal de la
+temporada ("Tu mejor temporada con el seleccionado", "Tu mejor cosecha de
+puntos"). El OVR no se mueve, la carrera sí.
+
+`progression-ceiling.test.ts` congela todo esto como propiedades estadísticas,
+incluida la que de verdad importa: que una meseta larga sea un pico y no un
+estancamiento.

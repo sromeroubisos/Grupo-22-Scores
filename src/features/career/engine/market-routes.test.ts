@@ -477,7 +477,12 @@ test('las apariciones de DESARROLLO son plausibles (mediana 5-9, mayoría <10)',
     const breakout = Math.max(...dev);
     assert.ok(dev.length > 20, 'debería haber temporadas de desarrollo');
     assert.ok(median >= 4 && median <= 10, `mediana de desarrollo fuera de rango: ${median}`);
-    assert.ok(below10 >= 0.6, `pocas por debajo de 10: ${Math.round(below10 * 100)}%`);
+    // 0.6 → 0.55 en 1.9.0: con el desarrollo empujado por el RENDIMIENTO
+    // (`meritDrive`), el juvenil que rinde se gana minutos antes, así que las
+    // temporadas de academia con muchas apariciones dejaron de ser rarísimas.
+    // Es consecuencia buscada, no una regresión: lo que el test cuida sigue en
+    // pie — la MAYORÍA de las temporadas de academia son de pocos partidos.
+    assert.ok(below10 >= 0.55, `pocas por debajo de 10: ${Math.round(below10 * 100)}%`);
     assert.ok(breakout >= 10, `debe existir alguna temporada de irrupción (máx ${breakout})`);
 });
 
