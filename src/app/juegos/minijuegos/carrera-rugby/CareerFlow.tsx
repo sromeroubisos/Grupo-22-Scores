@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { CareerState, Position, StartRouteId } from '@/features/career';
-import { createInitialCareer, getPendingEvent } from '@/features/career';
+import { computeOvr, createInitialCareer, getClub, getPendingEvent, getPosition } from '@/features/career';
+import ClubBadge from './ClubBadge';
 import styles from './carrera.module.css';
 import CreatePlayer from './CreatePlayer';
 import PlayerHeader from './PlayerHeader';
@@ -14,10 +15,19 @@ import RetirementSummary from './RetirementSummary';
 import { advanceCareerToNextDecision } from './advanceCareer';
 import { saveCareer, loadCareer, clearCareer } from './careerStorage';
 
-type Step = 'intro' | 'create' | 'career';
+/**
+ * `loading` existe para que la portada NUNCA muestre "Comenzar carrera" mientras
+ * todavía no se sabe si hay una partida guardada. Es la peor versión posible del
+ * bug: el juego hace lo correcto (la carrera está en disco y se retoma entera) y
+ * mientras tanto el único botón visible propone tirarla.
+ */
+type Step = 'loading' | 'intro' | 'create' | 'career';
 
 export default function CareerFlow() {
-    const [step, setStep] = useState<Step>('intro');
+    const [step, setStep] = useState<Step>('loading');
+    /** Partida encontrada en disco, a la espera de que el jugador la retome. */
+    const [saved, setSaved] = useState<CareerState | null>(null);
+    const [confirmingReset, setConfirmingReset] = useState(false);
     const [countryCode, setCountryCode] = useState<string | null>(null);
     const [position, setPosition] = useState<Position | null>(null);
     const [startRoute, setStartRoute] = useState<StartRouteId | null>(null);
@@ -34,13 +44,31 @@ export default function CareerFlow() {
     useEffect(() => {
         const result = loadCareer();
         if (result.kind === 'ok') {
-            setCareer(result.state);
-            setLastSeason(result.state.seasons.length > 0 ? result.state.seasons.length - 1 : null);
-            setStep('career');
+            // NO se entra solo a la carrera: la portada ofrece retomarla. Así
+            // "Empezar de nuevo" tiene dónde vivir sin esconderse detrás del
+            // retiro, y el jugador ve qué partida está por continuar.
+            setSaved(result.state);
         } else if (result.kind === 'outdated') {
             setOutdatedNotice(true);
         }
+        setStep('intro');
     }, []);
+
+    /** Retoma la partida guardada tal cual quedó: no avanza nada ni toca el RNG. */
+    function continueCareer() {
+        if (!saved) return;
+        setCareer(saved);
+        setLastSeason(saved.seasons.length > 0 ? saved.seasons.length - 1 : null);
+        setStep('career');
+    }
+
+    /** Destruye la partida guardada. Va detrás de una confirmación explícita. */
+    function discardSaved() {
+        clearCareer();
+        setSaved(null);
+        setConfirmingReset(false);
+        setStep('create');
+    }
 
     function startCareer() {
         if (countryCode === null || position === null || startRoute === null) return;
@@ -83,6 +111,8 @@ export default function CareerFlow() {
     function replay() {
         clearCareer();
         setCareer(null);
+        setSaved(null);
+        setConfirmingReset(false);
         setCountryCode(null);
         setPosition(null);
         setStartRoute(null);
@@ -106,8 +136,17 @@ export default function CareerFlow() {
 
             {outdatedNotice && step !== 'career' && (
                 <p className={styles.notice} role="status">
-                    Tu partida anterior era de una versión vieja del juego y no se pudo continuar. Podés empezar una nueva.
+                    El juego se actualizó y tu partida anterior no se puede seguir. Podés empezar una nueva.
                 </p>
+            )}
+
+            {/* Mientras se lee el disco no se propone nada: ni continuar (no se
+                sabe si hay qué) ni empezar de cero (sería tirar una carrera). */}
+            {step === 'loading' && (
+                <div className={styles.hydrating} role="status" aria-live="polite">
+                    <span className={styles.hydratingBar} aria-hidden="true" />
+                    <p className={styles.hydratingText}>Retomando tu carrera…</p>
+                </div>
             )}
 
             {/* El h1 NO puede desaparecer al entrar a la carrera: la página sigue
@@ -123,12 +162,45 @@ export default function CareerFlow() {
                         <h1 className={styles.title}>Carrera de Rugby</h1>
                         <p className={styles.lead}>Creá un jugador y llevá su carrera del debut al retiro.</p>
                     </div>
-                    <div className={styles.btnRow}>
-                        <button type="button" className={styles.primaryBtn} onClick={() => setStep('create')}>
-                            Comenzar carrera
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
-                        </button>
-                    </div>
+                    {saved ? (
+                        <>
+                            {/* El resumen es lo que convierte "Continuar" en una
+                                promesa concreta: se ve QUÉ carrera se retoma. */}
+                            <SavedCareerCard state={saved} />
+                            <div className={styles.btnRow}>
+                                <button type="button" className={styles.primaryBtn} onClick={continueCareer}>
+                                    Continuar carrera
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+                                </button>
+                            </div>
+                            {confirmingReset ? (
+                                <div className={styles.confirmBox} role="alertdialog" aria-label="Confirmar empezar de nuevo">
+                                    <p className={styles.confirmText}>
+                                        Empezar de nuevo borra la carrera guardada. No se puede deshacer.
+                                    </p>
+                                    <div className={styles.btnRow}>
+                                        <button type="button" className={styles.dangerBtn} onClick={discardSaved}>
+                                            Borrar y empezar de nuevo
+                                        </button>
+                                        <button type="button" className={styles.ghostBtn} onClick={() => setConfirmingReset(false)}>
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <button type="button" className={styles.linkBtn} onClick={() => setConfirmingReset(true)}>
+                                    Empezar de nuevo
+                                </button>
+                            )}
+                        </>
+                    ) : (
+                        <div className={styles.btnRow}>
+                            <button type="button" className={styles.primaryBtn} onClick={() => setStep('create')}>
+                                Comenzar carrera
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+                            </button>
+                        </div>
+                    )}
                 </>
             )}
 
@@ -202,6 +274,45 @@ export default function CareerFlow() {
                     </div>
                 </>
             )}
+        </div>
+    );
+}
+
+/**
+ * Resumen de la partida guardada. Sin esto, "Continuar carrera" es un botón que
+ * pide fe: el jugador no sabe a qué vuelve. Con esto es una promesa concreta.
+ */
+function SavedCareerCard({ state }: { state: CareerState }) {
+    const p = state.player;
+    const club = getClub(p.club);
+    const ovr = computeOvr(p.attributes, p.position);
+
+    return (
+        <div className={styles.savedCard}>
+            <div className={styles.savedIdentity}>
+                <span className={styles.savedNumber}>{p.number}</span>
+                <div className={styles.savedWho}>
+                    <p className={styles.savedName}>{p.surname}</p>
+                    <p className={styles.savedMeta}>
+                        {getPosition(p.position).labelEs} · <span className={styles.num}>{p.age}</span> años
+                    </p>
+                </div>
+            </div>
+            <div className={styles.savedClub}>
+                <ClubBadge clubId={club.id} clubName={club.labelEs} size={32} />
+                <div className={styles.savedWho}>
+                    <p className={styles.savedName}>{club.labelEs}</p>
+                    <p className={styles.savedMeta}>
+                        {state.history.length === 0
+                            ? 'Sin temporadas jugadas'
+                            : `${state.history.length} ${state.history.length === 1 ? 'temporada' : 'temporadas'}`}
+                    </p>
+                </div>
+            </div>
+            <div className={styles.savedOvr}>
+                <span className={`${styles.savedOvrValue} ${styles.num}`}>{ovr}</span>
+                <span className={styles.savedOvrLabel}>OVR</span>
+            </div>
         </div>
     );
 }

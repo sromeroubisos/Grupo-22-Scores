@@ -294,6 +294,143 @@
     .routeText { flex: 1 1 100%; }
 }
 
+/* ---- Retomar la partida guardada ---- */
+/* Mientras se lee el disco: ni "Continuar" (no se sabe si hay qué) ni "Comenzar"
+   (seria proponer tirar una carrera). Solo la promesa de que se esta buscando. */
+.hydrating {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px 0;
+}
+
+.hydratingBar {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg,
+        var(--color-border) 0%,
+        rgba(var(--color-accent-rgb), 0.45) 50%,
+        var(--color-border) 100%);
+    background-size: 200% 100%;
+    animation: hydratingSweep 1.15s ease-in-out infinite;
+}
+
+@keyframes hydratingSweep {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+.hydratingText {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hydratingBar { animation: none; }
+}
+
+/* Tarjeta de la partida guardada: qué carrera se está por retomar. */
+.savedCard {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 20px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.07);
+}
+
+.savedIdentity, .savedClub { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.savedClub { flex: 1; }
+.savedWho { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+
+.savedNumber {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--color-accent);
+    color: #ffffff;
+    font-size: 0.92rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+.savedName {
+    margin: 0;
+    font-size: 0.94rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.savedMeta { margin: 0; font-size: 0.76rem; color: var(--color-text-secondary); }
+
+.savedOvr { display: flex; flex-direction: column; align-items: center; line-height: 1; flex: none; }
+.savedOvrValue { font-size: 1.8rem; font-weight: 900; letter-spacing: -0.03em; color: var(--color-accent); }
+.savedOvrLabel {
+    font-size: 0.58rem; font-weight: 800; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--color-text-secondary); margin-top: 3px;
+}
+
+/* "Empezar de nuevo": secundaria de verdad, no compite con Continuar. */
+.linkBtn {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    padding: 4px 2px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.linkBtn:hover { color: var(--color-text-primary); }
+.linkBtn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 4px; }
+
+/* Confirmación: borrar una carrera de 28 años no puede ser un clic distraído. */
+.confirmBox {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border-light);
+    background: var(--color-bg-secondary);
+}
+
+.confirmText { margin: 0; font-size: 0.86rem; line-height: 1.5; color: var(--color-text-primary); }
+
+.dangerBtn {
+    flex: 1;
+    padding: 12px 18px;
+    border-radius: 12px;
+    border: 1px solid #b91c1c;
+    background: transparent;
+    color: #b91c1c;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.dangerBtn:hover { background: rgba(185, 28, 28, 0.08); }
+.dangerBtn:focus-visible { outline: 2px solid #b91c1c; outline-offset: 2px; }
+
+@media (max-width: 620px) {
+    .savedCard { gap: 12px 14px; }
+    .savedOvrValue { font-size: 1.5rem; }
+}
+
 /* ---- Botones ---- */
 .btnRow {
     display: flex;
