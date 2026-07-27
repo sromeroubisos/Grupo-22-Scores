@@ -33,6 +33,90 @@ export const ENVIRONMENT_EVENTS: GameEvent[] = [
             { id: 'team', label: 'Jugar para el equipo', hint: 'Sin sobreexponerte.', outcomes: [{ weight: 1, effect: { tackle: 1, morale: 3, flags: { corazon: 1 } }, resultText: 'Aportás desde el laburo silencioso. El vestuario lo valora.' }] },
         ],
     },
+    {
+        id: 'env-amateur-commute',
+        category: 'personal',
+        title: 'Dos horas hasta la cancha',
+        text: 'El club te queda lejos. Entre ida y vuelta se te va media tarde, tres veces por semana.',
+        weight: 9, repeatable: true, cooldown: 4,
+        requires: { employment: ['amateur', 'amateur-compensated'] },
+        options: [
+            { id: 'commute', label: 'Bancarte el viaje', hint: 'No faltás nunca, dormís menos.', outcomes: [{ weight: 1, effect: { stamina: 1, mental: 2, fatigue: 7, flags: { corazon: 1 } }, resultText: 'No te perdés un entrenamiento. Llegás a tu casa siempre de noche.' }] },
+            { id: 'solo', label: 'Entrenar por tu cuenta', hint: 'Ganás descanso, perdés el grupo.', outcomes: [{ weight: 1, effect: { power: 2, stamina: 1, morale: -3, form: -3 }, resultText: 'Entrenás solo cerca de tu casa. El equipo se arma sin vos.' }] },
+        ],
+    },
+    {
+        id: 'env-amateur-no-physio',
+        category: 'injury',
+        title: 'El club no tiene kinesiólogo',
+        text: 'Arrastrás una molestia hace semanas. En el club no hay quien te la trate.',
+        weight: 8, repeatable: true, cooldown: 4,
+        requires: { employment: ['amateur', 'amateur-compensated'] },
+        options: [
+            { id: 'pay', label: 'Pagarte la kinesiología', hint: 'Sale de tu bolsillo, todos los meses.', outcomes: [{ weight: 1, effect: { injuryRisk: -6, stamina: 1, morale: -2 }, resultText: 'Te la arreglás por afuera. El cuerpo responde, la billetera no.' }] },
+            { id: 'ice', label: 'Aguantar con hielo', hint: 'Gratis, y el cuerpo lo paga.', outcomes: [
+                { weight: 0.55, effect: { injuryRisk: 7, fatigue: 5 }, resultText: 'Tirás con hielo y voluntad. La molestia se queda a vivir.' },
+                { weight: 0.45, effect: { injuryRisk: 3, mental: 2 }, resultText: 'Le encontrás la vuelta y la molestia afloja sola.' },
+            ] },
+        ],
+    },
+    {
+        id: 'env-amateur-tour-leave',
+        category: 'club',
+        title: 'La gira y el laburo',
+        text: 'El club viaja una semana. En el trabajo te dicen que no hay franco.',
+        weight: 8, repeatable: true, cooldown: 5,
+        requires: { employment: ['amateur', 'amateur-compensated'] },
+        options: [
+            { id: 'go', label: 'Irte igual a la gira', hint: 'Jugás todo, ponés en riesgo el puesto.', outcomes: [
+                { weight: 0.6, effect: { technique: 1, morale: 6, fame: 3, flags: { corazon: 1 } }, resultText: 'Te tomás los días y jugás la gira entera. Volvés distinto.' },
+                { weight: 0.4, effect: { morale: -5, mental: 2 }, resultText: 'Vas a la gira y a la vuelta te encontrás sin trabajo.' },
+            ] },
+            { id: 'work', label: 'Quedarte a trabajar', hint: 'Cuidás el sueldo, te perdés la semana.', outcomes: [{ weight: 1, effect: { mental: 2, form: -4, morale: -3 }, resultText: 'Los seguís por el teléfono desde la oficina. No es lo mismo.' }] },
+        ],
+    },
+    {
+        id: 'env-amateur-no-cover',
+        category: 'injury',
+        title: 'No hay recambio',
+        text: 'Estás golpeado y en tu puesto no hay nadie más. El técnico te mira sin decirte nada.',
+        weight: 8, repeatable: true, cooldown: 4,
+        requires: { employment: ['amateur', 'amateur-compensated'] },
+        options: [
+            { id: 'play', label: 'Jugar lastimado', hint: 'El equipo sale a la cancha, vos lo pagás.', outcomes: [
+                { weight: 0.55, effect: { tackle: 1, mental: 2, morale: 4, fatigue: 8, flags: { corazon: 1 } }, resultText: 'Aguantás los ochenta minutos. El vestuario no se olvida.' },
+                { weight: 0.45, effect: { forceInjury: { name: 'Desgarro por sobrecarga', severity: 'moderada', seasonsOut: 0 }, morale: -4 }, resultText: 'La molestia se rompe del todo a los veinte minutos.' },
+            ] },
+            { id: 'rest', label: 'Parar a tiempo', hint: 'Te cuidás, el club se arregla como puede.', outcomes: [{ weight: 1, effect: { injuryRisk: -5, fatigue: -4, morale: -3 }, resultText: 'Avisás que no llegás. Juegan con catorce y te queda la espina.' }] },
+        ],
+    },
+    {
+        id: 'env-amateur-club-dues',
+        category: 'club',
+        title: 'La cuota social',
+        text: 'El club se sostiene con las cuotas de los socios. Este mes no te alcanza.',
+        weight: 7, repeatable: true, cooldown: 5,
+        requires: { employment: ['amateur', 'amateur-compensated'] },
+        options: [
+            { id: 'pay', label: 'Poner la cuota igual', hint: 'Sale del sueldo del mes.', outcomes: [{ weight: 1, effect: { morale: 3, mental: 1, flags: { leal: 1 } }, resultText: 'Ponés la cuota antes que cualquier otra cosa. El club sigue de pie.' }] },
+            { id: 'work', label: 'Devolverlo con laburo', hint: 'Sábados en la cantina, menos descanso.', outcomes: [{ weight: 1, effect: { fatigue: 6, morale: 2, flags: { leal: 1, corazon: 1 } }, resultText: 'Arreglás con la comisión y atendés la cantina los sábados.' }] },
+        ],
+    },
+    {
+        id: 'env-amateur-teammate-quits',
+        category: 'personal',
+        title: 'El que deja',
+        text: 'Tu compañero de toda la vida deja el rugby para dedicarse al trabajo. El plantel queda más corto.',
+        weight: 7, repeatable: true, cooldown: 5,
+        requires: { employment: ['amateur', 'amateur-compensated'] },
+        options: [
+            { id: 'convince', label: 'Convencerlo de seguir', hint: 'Le das tu tiempo y tu energía.', outcomes: [
+                { weight: 0.5, effect: { morale: 5, mental: 2, fatigue: 3 }, resultText: 'Lo bancás hasta que vuelve. Siguen jugando juntos.' },
+                { weight: 0.5, effect: { morale: -4, mental: 3 }, resultText: 'Insistís, pero ya lo tenía decidido. Se va igual.' },
+            ] },
+            { id: 'accept', label: 'Entenderlo y seguir', hint: 'Menos plantel, más minutos para vos.', outcomes: [{ weight: 1, effect: { form: 3, technique: 1, morale: -2 }, resultText: 'Lo entendés sin discutir. Su lugar en la línea queda para vos.' }] },
+        ],
+    },
     // ── Compensado ───────────────────────────────────────────────────────────
     {
         id: 'env-compensated-semi-offer',
