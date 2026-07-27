@@ -14,7 +14,7 @@ import { marketRung } from '../engine/market-routes.ts';
 const bandOf = (clubName: string) => sportingBandOf(CLUBS.find((c) => c.name === clubName)!);
 
 test('la versión de la tabla de niveles está sellada', () => {
-    assert.equal(COMPETITION_LEVELS_VERSION, '2026-27.1');
+    assert.equal(COMPETITION_LEVELS_VERSION, '2026-27.2');
     assert.ok(COMPETITION_LEVELS.length >= 20);
 });
 

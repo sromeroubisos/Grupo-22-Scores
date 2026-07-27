@@ -199,11 +199,18 @@ le aparecen nunca (verificado sobre 200 carreras completas).
 Escaleras domésticas modeladas: `fr`, `gb-eng`, `es`, `jp`, `nz`, `za` (estáticas)
 y `ar`/`uy`/`cl` (derivadas del snapshot de Supabase, por `divisionTier`).
 
-> **Limitación conocida y documentada**: Francia y Nueva Zelanda no tienen
-> modelada ninguna categoría por debajo de Nationale (banda 5) y NPC (6) — no
-> existen en el catálogo la Fédérale ni el rugby de clubes neozelandés. En esos
-> dos países el debut ocurre en el peldaño más bajo disponible, que ya es
-> profesional.
+> **Esa limitación está RESUELTA (catálogo 2026-27.7).** La pirámide se cortaba
+> en Nationale, Championship, NPC, Currie Cup First y League One D3, que ya son
+> competiciones profesionales o mixtas: elegir la ruta amateur en esos países
+> degradaba en silencio a un club profesional. Se agregó el **piso amateur** de
+> cada una — Fédérale 1 y 2, National League 1 y 2, Heartland Championship,
+> Community Cup y las ligas regionales japonesas: **74 clubes**. Son
+> competiciones reales; los rosters cargados son representativos y no la lista
+> oficial de la temporada, y por eso llevan `evidence: 'game-calibration'`.
+>
+> Efecto medido: la tabla de degradaciones nacionalidad × ruta pasó de **6 casos
+> a 1** — España + profesional, que no es un hueco del catálogo sino un hecho
+> del rugby español (no tiene liga profesional).
 
 El **escalafón de mercado** (`marketRung`) es exactamente la `sportingBand` de
 `competition-levels2026.ts`: una sola tabla, para que competiciones paralelas no

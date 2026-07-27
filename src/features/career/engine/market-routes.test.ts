@@ -259,8 +259,35 @@ test('fuera de una vía profesional no se salta más de un escalón', () => {
 
 test('toda oferta declara por qué puerta entró', () => {
     const seen = new Set<string>();
-    for (const nationality of ['Argentina', 'Nueva Zelanda', 'Sudáfrica']) {
-        for (const { player, offers } of offersAcross(nationality, SEEDS)) {
+
+    // Un recién creado arranca en el PISO de su pirámide (Heartland, Community
+    // Cup, Fédérale 2…), y desde ahí las vías profesionales todavía no están
+    // abiertas: hay que subir primero. Para ejercitar la puerta `pathway` hay
+    // que poner al jugador donde la vía nace, que es justamente lo que la vía
+    // significa. Antes esto salía por accidente porque el catálogo no tenía
+    // piso amateur y un juvenil neozelandés debutaba directo en el NPC.
+    // El caso REAL de la vía: no un pibe de 18, sino el destacado del NPC al que
+    // una franquicia mira. Una vía profesional no es un regalo — exige nivel.
+    const destacadoDelNpc = (p: ReturnType<typeof createPlayer>) => {
+        p.club = 'auckland';
+        p.league = 'npc';
+        p.role = 'starter';
+        p.age = 24;
+        p.dynamics.form = 84;
+        for (const key of Object.keys(p.attributes) as (keyof typeof p.attributes)[]) {
+            p.attributes[key] = 78;
+        }
+    };
+
+    const casos = [
+        ...offersAcross('Argentina', SEEDS),
+        ...offersAcross('Nueva Zelanda', SEEDS),
+        ...offersAcross('Sudáfrica', SEEDS),
+                ...offersAcross('Nueva Zelanda', SEEDS, destacadoDelNpc),
+    ];
+
+    {
+        for (const { player, offers } of casos) {
             for (const offer of offers) {
                 assert.ok(['window', 'pathway', 'homecoming'].includes(offer.via), `via inválida: ${offer.via}`);
                 if (offer.via === 'pathway') {

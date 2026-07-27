@@ -12,7 +12,7 @@ import { SA_CLUBS, SA_SNAPSHOT_VERSION } from './clubs2026/saClubs.generated.ts'
 
 // 2026-27.6: se elimina la copa ficticia "Copa Sudamericana" y entra la
 // competición REAL de la región (Super Rugby Americas, 8 franquicias).
-export const CLUB_CATALOG_VERSION = '2026-27.6';
+export const CLUB_CATALOG_VERSION = '2026-27.7';
 
 /**
  * Versión del catálogo NORMALIZADO completo = estático internacional + snapshot

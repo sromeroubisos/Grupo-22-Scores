@@ -88,12 +88,12 @@ export function movementBetween(from: ClubDef, to: ClubDef): MovementDirection {
 // rugby de clubes vive en una liga regional (Irlanda, Gales, Escocia, Australia)
 // NO tienen escalera doméstica propia: se resuelven por ruta migratoria.
 const STATIC_LADDER: Record<CountryCode, string[]> = {
-    fr: ['nationale', 'prod2', 'top14'],
-    'gb-eng': ['championship', 'prem'],
+    fr: ['fr-federale2', 'fr-federale1', 'nationale', 'prod2', 'top14'],
+    'gb-eng': ['eng-national2', 'eng-national1', 'championship', 'prem'],
     es: ['esp-dhb', 'esp-dhelite', 'esp-dh'],
-    jp: ['jpn-d3', 'jpn-d2', 'jpn-d1'],
-    nz: ['npc'],
-    za: ['currie-first', 'currie-premier'],
+    jp: ['jpn-regional', 'jpn-d3', 'jpn-d2', 'jpn-d1'],
+    nz: ['nz-heartland', 'npc'],
+    za: ['za-community', 'currie-first', 'currie-premier'],
 };
 
 const SA_COUNTRIES: CountryCode[] = ['ar', 'uy', 'cl'];

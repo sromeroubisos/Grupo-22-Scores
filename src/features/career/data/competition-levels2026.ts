@@ -18,7 +18,7 @@
 
 import type { ClubDef } from './clubs.ts';
 
-export const COMPETITION_LEVELS_VERSION = '2026-27.1';
+export const COMPETITION_LEVELS_VERSION = '2026-27.2';
 
 export type SportingBand = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type EconomicModel = 'amateur' | 'mixed' | 'professional';
@@ -62,6 +62,7 @@ const FER = 'https://ferugby.es/';
 const SRA = 'https://www.superrugbyamericas.com/';
 const REU = 'https://www.rugbyeurope.eu/';
 const FFR = 'https://www.ffr.fr/';
+const RFU = 'https://www.englandrugby.com/';
 
 // Escalera doméstica AR/UY/CL: la banda depende de la división real.
 const SA_BANDS: Readonly<Record<number, SportingBand>> = { 1: 3, 2: 2, 3: 1, 4: 0 };
@@ -98,6 +99,24 @@ export const COMPETITION_LEVELS: readonly CompetitionLevelProfile[] = [
 
     // ── Banda 2 ──────────────────────────────────────────────────────────────
     { competitionId: 'esp-dhb', sportingBand: 2, economicModel: 'amateur', label: 'División de Honor B', sourceUrls: [FER], evidence: 'official-structure-inferred-status', regularSeasonMatches: 14, matchesEvidence: 'official-structure-inferred-status' },
+    // Tercer escalón francés e inglés: estructura oficial, plantel amateur con
+    // algún jugador compensado. Es el techo REALISTA de una carrera amateur.
+    { competitionId: 'fr-federale1', sportingBand: 2, economicModel: 'amateur', label: 'Fédérale 1', sourceUrls: [FFR], evidence: 'game-calibration', regularSeasonMatches: 18, matchesEvidence: 'game-calibration' },
+    { competitionId: 'eng-national1', sportingBand: 2, economicModel: 'amateur', label: 'National League 1', sourceUrls: [RFU], evidence: 'game-calibration', regularSeasonMatches: 26, matchesEvidence: 'game-calibration' },
+
+    // ── Banda 1 · el piso amateur de cada pirámide ───────────────────────────
+    // Sin estos escalones, elegir la ruta AMATEUR en Francia, Inglaterra, Nueva
+    // Zelanda, Sudáfrica o Japón degradaba a un club profesional: el catálogo se
+    // cortaba por arriba y no había dónde empezar de abajo.
+    //
+    // Evidencia 'game-calibration': las competiciones son reales y su lugar en
+    // la pirámide es oficial, pero los rosters cargados son REPRESENTATIVOS —
+    // no la lista publicada de la temporada. Se documenta en vez de disfrazarlo.
+    { competitionId: 'fr-federale2', sportingBand: 1, economicModel: 'amateur', label: 'Fédérale 2', sourceUrls: [FFR], evidence: 'game-calibration', regularSeasonMatches: 18, matchesEvidence: 'game-calibration' },
+    { competitionId: 'eng-national2', sportingBand: 1, economicModel: 'amateur', label: 'National League 2', sourceUrls: [RFU], evidence: 'game-calibration', regularSeasonMatches: 26, matchesEvidence: 'game-calibration' },
+    { competitionId: 'nz-heartland', sportingBand: 1, economicModel: 'amateur', label: 'Heartland Championship', sourceUrls: [NZR], evidence: 'game-calibration', regularSeasonMatches: 8, matchesEvidence: 'game-calibration' },
+    { competitionId: 'za-community', sportingBand: 1, economicModel: 'amateur', label: 'Community Cup', sourceUrls: [SARU], evidence: 'game-calibration', regularSeasonMatches: 10, matchesEvidence: 'game-calibration' },
+    { competitionId: 'jpn-regional', sportingBand: 1, economicModel: 'amateur', label: 'Ligas regionales japonesas', sourceUrls: [JRLO], evidence: 'game-calibration', regularSeasonMatches: 10, matchesEvidence: 'game-calibration' },
 
     // ── Ligas domésticas AR/UY/CL · banda por división ───────────────────────
     // Argentina: el rugby de clubes es amateur por regulación de la UAR.

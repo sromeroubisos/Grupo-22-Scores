@@ -140,6 +140,57 @@ export const ROSTERS_2026_27: RosterGroup[] = [
         competitionId: 'jpn-d3', label: 'Japan League One D3', countryCode: 'jp', region: 'asia', level: 'semipro', kind: 'domestic-league',
         clubs: ['Kurita Water Gush Akishima', 'Sayama Secom Rugguts', 'Chugoku Red Regulions', 'Skyactivs Hiroshima', 'Yakult Levins Toda', 'LeRIRO Fukuoka', "AZ-COM MARUWA Momotaro's"],
     },
+
+    // ── PISO AMATEUR DE CADA PIRÁMIDE ────────────────────────────────────────
+    //
+    // Antes el catálogo se cortaba en Nationale (Francia), Championship
+    // (Inglaterra), NPC (Nueva Zelanda), Currie Cup First (Sudáfrica) y League
+    // One D3 (Japón), que ya son competiciones profesionales o mixtas. La
+    // consecuencia era concreta y estaba documentada como limitación: elegir la
+    // ruta AMATEUR en esos países no daba una carrera amateur — degradaba en
+    // silencio a un club profesional.
+    //
+    // Estos escalones existen para que la ruta amateur tenga de dónde elegir en
+    // todos lados. Son competiciones REALES; los rosters son representativos y
+    // no la lista oficial publicada de la temporada (evidencia
+    // 'game-calibration' en competition-levels2026.ts). No se inventan
+    // competiciones: se modela el piso que ya existe en el rugby de cada país.
+
+    {
+        // Heartland Championship: las uniones provinciales de NZ que no están en
+        // el NPC. Rugby de club amateur, con jugadores que trabajan.
+        competitionId: 'nz-heartland', label: 'Heartland Championship', countryCode: 'nz', region: 'pacific', level: 'amateur', kind: 'domestic-league',
+        clubs: ['Wanganui', 'South Canterbury', 'Thames Valley', 'North Otago', 'Mid Canterbury', 'King Country', 'Wairarapa Bush', 'Horowhenua Kapiti', 'Poverty Bay', 'East Coast', 'Buller', 'West Coast'],
+    },
+    {
+        // Fédérale 1: el tercer escalón francés, mayoritariamente amateur.
+        competitionId: 'fr-federale1', label: 'Fédérale 1', countryCode: 'fr', region: 'europe', level: 'development', kind: 'domestic-league',
+        clubs: ['Tarbes', 'Blagnac', 'Cognac', 'Dijon', 'Mâcon', 'Nîmes', 'Auch', 'Langon', 'Saint-Jean-de-Luz', 'Hyères Carqueiranne', 'Bagnères', 'Villefranche-de-Lauragais'],
+    },
+    {
+        competitionId: 'fr-federale2', label: 'Fédérale 2', countryCode: 'fr', region: 'europe', level: 'amateur', kind: 'domestic-league',
+        clubs: ['Lourdes', 'Anglet', 'Céret', 'Trélissac', 'Objat', 'La Voulte', 'Lavaur', 'Millau', 'Gujan-Mestras', 'Saint-Sulpice'],
+    },
+    {
+        competitionId: 'eng-national1', label: 'National League 1', countryCode: 'gb-eng', region: 'europe', level: 'development', kind: 'domestic-league',
+        clubs: ['Sale FC', 'Rosslyn Park', 'Plymouth Albion', 'Birmingham Moseley', 'Rams RFC', 'Leeds Tykes', 'Blackheath', 'Esher', 'Cinderford', 'Darlington Mowden Park', "Bishop's Stortford", 'Taunton Titans'],
+    },
+    {
+        competitionId: 'eng-national2', label: 'National League 2', countryCode: 'gb-eng', region: 'europe', level: 'amateur', kind: 'domestic-league',
+        clubs: ['Sedgley Park', 'Fylde', 'Hull Ionians', 'Luctonians', 'Rotherham Titans', 'Sheffield Tigers', 'Bournville', 'Old Albanian', 'Tonbridge Juddians', 'Westcliff'],
+    },
+    {
+        // Community Cup: el rugby de clubes sudafricano por debajo de las
+        // uniones provinciales. Amateur, con clubes históricos.
+        competitionId: 'za-community', label: 'Community Cup', countryCode: 'za', region: 'africa', level: 'amateur', kind: 'domestic-league',
+        clubs: ['Maties', 'Tuks', 'College Rovers', 'Durbanville-Bellville', 'False Bay', 'Hamiltons', 'Old Selbornians', 'Pretoria Police', 'Rustenburg Impala', 'Wanderers'],
+    },
+    {
+        // Ligas regionales japonesas (Top East / West / Kyushu): el rugby de
+        // empresa por debajo de League One. Los jugadores tienen trabajo.
+        competitionId: 'jpn-regional', label: 'Top Regional Leagues', countryCode: 'jp', region: 'asia', level: 'amateur', kind: 'domestic-league',
+        clubs: ['Tokyo Gas', 'Nippon Express', 'Fukuoka Sanix Blues', 'Chugoku Electric Power', 'Kansai Electric Power', 'Toyota Boshoku Blue Tornado', 'Meiji Yasuda', 'Setouchi Ohki'],
+    },
 ];
 
 // Temporada del catálogo. Todo club/competición debe ser de ESTA temporada; no
@@ -155,6 +206,10 @@ export const EXPECTED_COUNTS: Record<string, number> = {
     'currie-premier': 8, 'currie-first': 6, 'super-cup': 6, sra: 8,
     'esp-dh': 10, 'esp-dhelite': 10, 'esp-dhb': 24, // DHB A+B+C cargados; Grupo D pendiente
     'jpn-d1': 12, 'jpn-d2': 8, 'jpn-d3': 7, // Japón total = 27
+    // Piso amateur de cada pirámide (rosters representativos, ver el comentario
+    // de la sección en ROSTERS_2026_27).
+    'nz-heartland': 12, 'fr-federale1': 12, 'fr-federale2': 10,
+    'eng-national1': 12, 'eng-national2': 10, 'za-community': 10, 'jpn-regional': 8,
 };
 
 // DHB objetivo 2026/27 = 32 (4 grupos de 8). Cargados A/B/C (24) desde iSquad.

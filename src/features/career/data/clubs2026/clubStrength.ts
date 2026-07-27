@@ -256,4 +256,97 @@ export const CLUB_STRENGTH: Record<string, ClubStrength> = {
     'Yakult Levins Toda': { rating: 53, prestige: 38, marketBand: 3 },
     'LeRIRO Fukuoka': { rating: 52, prestige: 38, marketBand: 3 },
     "AZ-COM MARUWA Momotaro's": { rating: 50, prestige: 34, marketBand: 3 }, // nuevo 2026/27
+
+    // ── Piso amateur de cada pirámide ───────────────────────────────────────
+    // marketBand 1: son clubes sin estructura profesional detrás. El rating los
+    // ordena dentro de su división; el prestigio distingue al club histórico
+    // venido a menos (Lourdes, Maties) del que nunca estuvo arriba.
+
+    // Heartland Championship (NZ) · nivel amateur
+    'Wanganui': { rating: 44, prestige: 34, marketBand: 1 },
+    'South Canterbury': { rating: 43, prestige: 32, marketBand: 1 },
+    'Thames Valley': { rating: 41, prestige: 28, marketBand: 1 },
+    'North Otago': { rating: 40, prestige: 30, marketBand: 1 },
+    'Mid Canterbury': { rating: 39, prestige: 27, marketBand: 1 },
+    'King Country': { rating: 38, prestige: 33, marketBand: 1 }, // cuna de Colin Meads
+    'Wairarapa Bush': { rating: 37, prestige: 28, marketBand: 1 },
+    'Horowhenua Kapiti': { rating: 35, prestige: 24, marketBand: 1 },
+    'Poverty Bay': { rating: 34, prestige: 26, marketBand: 1 },
+    'East Coast': { rating: 31, prestige: 20, marketBand: 1 },
+    'Buller': { rating: 30, prestige: 22, marketBand: 1 },
+    'West Coast': { rating: 28, prestige: 21, marketBand: 1 },
+
+    // Fédérale 1 (FR) · nivel development
+    'Tarbes': { rating: 49, prestige: 46, marketBand: 2 },
+    'Blagnac': { rating: 48, prestige: 34, marketBand: 2 },
+    'Cognac': { rating: 47, prestige: 32, marketBand: 2 },
+    'Dijon': { rating: 46, prestige: 33, marketBand: 2 },
+    'Mâcon': { rating: 45, prestige: 30, marketBand: 2 },
+    'Nîmes': { rating: 45, prestige: 36, marketBand: 2 },
+    'Auch': { rating: 44, prestige: 38, marketBand: 2 },
+    'Langon': { rating: 43, prestige: 28, marketBand: 2 },
+    'Saint-Jean-de-Luz': { rating: 42, prestige: 32, marketBand: 2 },
+    'Hyères Carqueiranne': { rating: 42, prestige: 27, marketBand: 2 },
+    'Bagnères': { rating: 41, prestige: 35, marketBand: 2 },
+    'Villefranche-de-Lauragais': { rating: 40, prestige: 26, marketBand: 2 },
+
+    // Fédérale 2 (FR) · nivel amateur
+    'Lourdes': { rating: 43, prestige: 44, marketBand: 1 }, // 8 veces campeón de Francia
+    'Anglet': { rating: 40, prestige: 28, marketBand: 1 },
+    'Céret': { rating: 38, prestige: 26, marketBand: 1 },
+    'Trélissac': { rating: 37, prestige: 22, marketBand: 1 },
+    'Objat': { rating: 36, prestige: 24, marketBand: 1 },
+    'La Voulte': { rating: 35, prestige: 30, marketBand: 1 },
+    'Lavaur': { rating: 34, prestige: 23, marketBand: 1 },
+    'Millau': { rating: 33, prestige: 22, marketBand: 1 },
+    'Gujan-Mestras': { rating: 31, prestige: 20, marketBand: 1 },
+    'Saint-Sulpice': { rating: 29, prestige: 19, marketBand: 1 },
+
+    // National League 1 (ENG) · nivel development
+    'Sale FC': { rating: 49, prestige: 42, marketBand: 2 },
+    'Rosslyn Park': { rating: 48, prestige: 40, marketBand: 2 },
+    'Plymouth Albion': { rating: 47, prestige: 36, marketBand: 2 },
+    'Birmingham Moseley': { rating: 46, prestige: 38, marketBand: 2 },
+    'Rams RFC': { rating: 45, prestige: 28, marketBand: 2 },
+    'Leeds Tykes': { rating: 45, prestige: 40, marketBand: 2 },
+    'Blackheath': { rating: 44, prestige: 44, marketBand: 2 }, // el club más antiguo del mundo
+    'Esher': { rating: 43, prestige: 30, marketBand: 2 },
+    'Cinderford': { rating: 42, prestige: 27, marketBand: 2 },
+    'Darlington Mowden Park': { rating: 42, prestige: 29, marketBand: 2 },
+    "Bishop's Stortford": { rating: 41, prestige: 26, marketBand: 2 },
+    'Taunton Titans': { rating: 40, prestige: 25, marketBand: 2 },
+
+    // National League 2 (ENG) · nivel amateur
+    'Sedgley Park': { rating: 42, prestige: 28, marketBand: 1 },
+    'Fylde': { rating: 41, prestige: 32, marketBand: 1 },
+    'Hull Ionians': { rating: 39, prestige: 25, marketBand: 1 },
+    'Luctonians': { rating: 38, prestige: 24, marketBand: 1 },
+    'Rotherham Titans': { rating: 37, prestige: 34, marketBand: 1 },
+    'Sheffield Tigers': { rating: 35, prestige: 26, marketBand: 1 },
+    'Bournville': { rating: 33, prestige: 20, marketBand: 1 },
+    'Old Albanian': { rating: 32, prestige: 22, marketBand: 1 },
+    'Tonbridge Juddians': { rating: 31, prestige: 21, marketBand: 1 },
+    'Westcliff': { rating: 29, prestige: 19, marketBand: 1 },
+
+    // Community Cup (ZA) · nivel amateur
+    'Maties': { rating: 44, prestige: 42, marketBand: 1 }, // Stellenbosch, cantera histórica
+    'Tuks': { rating: 43, prestige: 40, marketBand: 1 },
+    'College Rovers': { rating: 40, prestige: 30, marketBand: 1 },
+    'Durbanville-Bellville': { rating: 38, prestige: 28, marketBand: 1 },
+    'False Bay': { rating: 37, prestige: 27, marketBand: 1 },
+    'Hamiltons': { rating: 36, prestige: 32, marketBand: 1 },
+    'Old Selbornians': { rating: 34, prestige: 24, marketBand: 1 },
+    'Pretoria Police': { rating: 33, prestige: 26, marketBand: 1 },
+    'Rustenburg Impala': { rating: 31, prestige: 22, marketBand: 1 },
+    'Wanderers': { rating: 29, prestige: 25, marketBand: 1 },
+
+    // Top Regional Leagues (JP) · nivel amateur
+    'Tokyo Gas': { rating: 42, prestige: 30, marketBand: 1 },
+    'Nippon Express': { rating: 40, prestige: 28, marketBand: 1 },
+    'Fukuoka Sanix Blues': { rating: 39, prestige: 36, marketBand: 1 }, // ex Top League
+    'Chugoku Electric Power': { rating: 37, prestige: 25, marketBand: 1 },
+    'Kansai Electric Power': { rating: 35, prestige: 24, marketBand: 1 },
+    'Toyota Boshoku Blue Tornado': { rating: 34, prestige: 26, marketBand: 1 },
+    'Meiji Yasuda': { rating: 32, prestige: 22, marketBand: 1 },
+    'Setouchi Ohki': { rating: 30, prestige: 20, marketBand: 1 },
 };
