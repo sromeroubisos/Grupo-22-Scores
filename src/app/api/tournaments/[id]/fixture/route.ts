@@ -12,8 +12,6 @@ type TournamentPhaseRow = {
   name: string;
   phase_type: string | null;
   order_index: number | null;
-  start_date: string | null;
-  end_date: string | null;
   is_active: boolean | null;
   settings: Record<string, unknown> | null;
   created_at: string | null;
@@ -120,8 +118,10 @@ export async function GET(
       name: phase.name,
       phaseType: phase.phase_type,
       orderIndex: phase.order_index,
-      startDate: phase.start_date,
-      endDate: phase.end_date,
+      // La fase no tiene fechas propias en la base (start_date/end_date viven en
+      // tournament_rounds); el rango real sale de sus jornadas.
+      startDate: null,
+      endDate: null,
       isActive: phase.is_active,
       settings: phase.settings || {},
       createdAt: phase.created_at,
@@ -130,17 +130,34 @@ export async function GET(
       roundCount: 0,
     }));
 
-    const currentPhase = mappedPhases.find((phase) => phase.isActive) || mappedPhases[0] || null;
+    // El torneo EXISTE (lo acabamos de leer) pero el camino principal fallo: este
+    // payload nunca trae jornadas ni partidos. Devolverlo con 200 hacia el gestor
+    // hace indistinguible "la consulta se rompio" de "el torneo no tiene partidos",
+    // que es exactamente como se enmascaro el 42703 de tournament_phases. Preferimos
+    // el error explicito: la UI muestra el card con Reintentar en vez de un fixture
+    // vacio mentiroso.
+    if (mappedPhases.length > 0 || phasesError) {
+      console.error(
+        `[fixture/route] Camino principal caido para ${tournamentId}; el fallback solo puede devolver ${mappedPhases.length} fases sin jornadas ni partidos. Respondo 500 en vez de un fixture vacio.`,
+      );
+      return perf.json(
+        {
+          error:
+            'No se pudo cargar el fixture completo del torneo (fallo la consulta de estructura). Reintenta; si persiste, revisa los logs del servidor.',
+        },
+        { status: 500 },
+      );
+    }
 
-    console.log(`[fixture/route] Fallback found ${mappedPhases.length} phases`);
+    console.log('[fixture/route] Fallback: el torneo no tiene fases cargadas');
 
     return perf.json({
       tournamentId: tournament.id,
       tournamentName: tournament.name,
       tournamentSeason: seasonId,
-      currentPhaseId: currentPhase?.id || null,
+      currentPhaseId: null,
       currentRoundId: null,
-      phases: mappedPhases,
+      phases: [],
       participants: [],
     }, { status: 200 });
   } catch (error: unknown) {
