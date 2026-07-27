@@ -4,6 +4,7 @@ import type { CareerState } from '@/features/career';
 import { clubLeagueIdentity, computeOvr, contractLabel, describePosition, getClub, getPosition } from '@/features/career';
 import Flag from './Flag';
 import ClubBadge from './ClubBadge';
+import EmploymentLadder from './EmploymentLadder';
 import styles from './carrera.module.css';
 
 /**
@@ -12,6 +13,9 @@ import styles from './carrera.module.css';
  * la DIVISIÓN REAL que disputa (no el sistema paraguas) y la condición
  * amateur/desarrollo/semipro/profesional. NO muestra apodo, atributos, potencial,
  * moral, forma, fatiga, fama, OVR efectivo, valor de mercado ni rating del club.
+ *
+ * Debajo, con el mismo peso, el ESCALAFÓN DE EMPLEO: la otra forma de medir la
+ * carrera, y la que de verdad importa cuando se arranca de amateur.
  */
 export default function PlayerHeader({ career }: { career: CareerState }) {
     const p = career.player;
@@ -27,6 +31,7 @@ export default function PlayerHeader({ career }: { career: CareerState }) {
 
     return (
         <header className={styles.careerBar}>
+            <div className={styles.cbTop}>
             <div className={styles.cbIdentity}>
                 {countryCode && <Flag code={countryCode} name={p.nationality} size={34} className={styles.cbFlag} />}
                 <div className={styles.cbWho}>
@@ -66,6 +71,9 @@ export default function PlayerHeader({ career }: { career: CareerState }) {
                     </div>
                 </dl>
             </div>
+            </div>
+
+            <EmploymentLadder employment={p.employment} squadTrack={p.squadTrack} history={career.history} />
         </header>
     );
 }

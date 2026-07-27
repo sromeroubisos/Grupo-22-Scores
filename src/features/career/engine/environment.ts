@@ -46,8 +46,21 @@ export interface SeasonEnvironment {
 
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 
+/**
+ * Las cinco dimensiones del día a día que dependen SOLO del escalón de empleo.
+ * Se expone para que la UI pueda mostrar el escalafón (qué cambia al subir de
+ * amateur a profesional) sin duplicar la tabla ni inventar números.
+ */
+export interface EmploymentProfile {
+    trainingQuality: number;
+    trainingLoad: number;
+    recoverySupport: number;
+    medicalSupport: number;
+    lifeLoad: number;
+}
+
 // Perfil base por EMPLEO. Es el eje que más manda sobre el día a día.
-const BY_EMPLOYMENT: Record<EmploymentStatus, Partial<SeasonEnvironment>> = {
+export const BY_EMPLOYMENT: Record<EmploymentStatus, EmploymentProfile> = {
     // Entrena poco y mal, trabaja o estudia, casi sin soporte.
     amateur: { trainingQuality: 0.32, trainingLoad: 0.34, recoverySupport: 0.22, medicalSupport: 0.20, lifeLoad: 0.82 },
     // Algo más de disponibilidad y algo de estructura, pero sigue trabajando.
@@ -60,7 +73,7 @@ const BY_EMPLOYMENT: Record<EmploymentStatus, Partial<SeasonEnvironment>> = {
 
 // El TRACK de desarrollo sube el entrenamiento (academia) sin cambiar el empleo:
 // entrena como un profesional aunque su vínculo sea semipro.
-const DEVELOPMENT_TRACK: Partial<SeasonEnvironment> = {
+export const DEVELOPMENT_TRACK: Pick<EmploymentProfile, 'trainingQuality' | 'trainingLoad'> = {
     trainingQuality: 0.84, trainingLoad: 0.90,
 };
 

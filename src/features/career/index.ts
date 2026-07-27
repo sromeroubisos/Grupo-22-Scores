@@ -20,7 +20,8 @@ export {
     isProfessionalEmployment, renewContract, resolveContract,
 } from './engine/contracts.ts';
 export type { EntryMode } from './types/career.ts';
-export { CAREER_ENVIRONMENT_VERSION } from './engine/environment.ts';
+export { CAREER_ENVIRONMENT_VERSION, BY_EMPLOYMENT, DEVELOPMENT_TRACK } from './engine/environment.ts';
+export type { EmploymentProfile } from './engine/environment.ts';
 export type { CompetitionLevelProfile, EconomicModel, SportingBand } from './data/competition-levels2026.ts';
 export {
     COMPETITION_LEVELS, COMPETITION_LEVELS_VERSION, competitionLabelOf, economicModelOf,
