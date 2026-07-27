@@ -80,20 +80,20 @@ function digest(state: CareerState): Digest {
     };
 }
 
-// Línea de base del motor 1.6.0 — ver docs/career-engine.md §9.
+// Línea de base del motor 1.7.0 — ver docs/career-engine.md §9.
 const EXPECTED: Record<string, Digest> = {
     "apertura argentino": {
-        seasons: 16,
-        retirementAge: 36,
-        peakOvr: 55,
+        seasons: 15,
+        retirementAge: 35,
+        peakOvr: 58,
         caps: 0,
         titles: 0,
         clubs: 4,
         firstClub: 'sb-st-brendan-s',
-        lastClub: 'sb-club-champagnat',
+        lastClub: 'sb-cardenales-r-c',
         employment: 'amateur-compensated',
-        decisions: 14,
-        stateHash: 3812144363,
+        decisions: 13,
+        stateHash: 1699284462,
     },
     "pilar neozelandés": {
         seasons: 19,
@@ -106,20 +106,20 @@ const EXPECTED: Record<string, Digest> = {
         lastClub: 'chiefs',
         employment: 'full-time-professional',
         decisions: 13,
-        stateHash: 1776385315,
+        stateHash: 3391389064,
     },
     "wing francés": {
-        seasons: 14,
-        retirementAge: 33,
-        peakOvr: 66,
-        caps: 11,
-        titles: 0,
+        seasons: 13,
+        retirementAge: 32,
+        peakOvr: 65,
+        caps: 6,
+        titles: 1,
         clubs: 4,
-        firstClub: 'la-vila',
-        lastClub: 'ampthill',
-        employment: 'full-time-professional',
-        decisions: 13,
-        stateHash: 3396800502,
+        firstClub: 'ealing-trailfinders',
+        lastClub: 'us-bressane',
+        employment: 'semi-professional',
+        decisions: 11,
+        stateHash: 3262642186,
     },
 };
 

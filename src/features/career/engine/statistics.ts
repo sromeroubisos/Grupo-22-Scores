@@ -90,8 +90,11 @@ export function simulateSeason(
 
     if (pos.stats.goalKicker) {
         stats.kicksAtGoal = sampleTotal(pos.stats.kicksAtGoal, matches, 1, rng);
-        // Éxito según técnica + patada del jugador.
-        const acc = 0.55 + (player.attributes.kick + player.attributes.technique) / 2 / 100 * 0.35;
+        // Éxito según técnica + patada del jugador. Calibrado sobre lo real: los
+        // mejores pateadores de test andan en 75-80% a lo largo de una carrera,
+        // así que el techo del apertura de élite queda ahí y no en 85%. Un
+        // pateador medio ronda 68-70%.
+        const acc = 0.50 + (player.attributes.kick + player.attributes.technique) / 2 / 100 * 0.32;
         stats.kicksMade = Math.min(stats.kicksAtGoal, Math.round(stats.kicksAtGoal * rng.float(acc - 0.08, acc + 0.06)));
         stats.metresKicked = sampleTotal(pos.stats.metresKicked, matches, ovrFactor, rng);
     } else {
