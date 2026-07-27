@@ -96,6 +96,12 @@ export default function CareerFlow() {
                 </p>
             )}
 
+            {/* El h1 NO puede desaparecer al entrar a la carrera: la página sigue
+                siendo la misma y sin él queda sin encabezado de nivel 1. En la
+                intro es el título grande; después acompaña en silencio, para no
+                empujar el layout de la consola. Siempre hay exactamente uno. */}
+            {step !== 'intro' && <h1 className={styles.srOnly}>Carrera de Rugby</h1>}
+
             {step === 'intro' && (
                 <>
                     <div>
