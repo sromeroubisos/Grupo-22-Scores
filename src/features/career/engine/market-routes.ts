@@ -16,7 +16,8 @@ import { CLUBS } from '../data/clubs.ts';
 import { countryCodeOfNationality, regionOfCountry } from '../data/nations.ts';
 import { economicModelOf, sportingBandOf } from '../data/competition-levels2026.ts';
 import type { EmploymentStatus, SquadTrack } from './contracts.ts';
-import type { MovementKind } from '../types/career.ts';
+import type { EconomicModel } from '../data/competition-levels2026.ts';
+import type { MovementKind, StartRouteId } from '../types/career.ts';
 import { sameDomesticSystem } from './domestic-system.ts';
 import type { Rng } from './random.ts';
 
@@ -304,6 +305,20 @@ const SRA_BY_COUNTRY: Record<CountryCode, string[]> = {
     cl: ['selknam'],
 };
 
+/**
+ * Franquicias que REPRESENTAN a un país aunque el catálogo las marque como
+ * `countryCode: 'multi'` (juegan una liga multinacional). Es lo que permite que
+ * la ruta profesional de un argentino exista: su profesionalismo doméstico no
+ * está en la pirámide de clubes, está en Super Rugby Americas.
+ */
+const NATIONAL_FRANCHISES: Record<CountryCode, string[]> = {
+    ar: SRA_BY_COUNTRY.ar,
+    uy: SRA_BY_COUNTRY.uy,
+    cl: SRA_BY_COUNTRY.cl,
+    nz: NZ_SUPER_FRANCHISES,
+    za: SA_URC_FRANCHISES,
+};
+
 export const TRANSFER_PATHWAYS: TransferPathway[] = [
     {
         id: 'npc-to-super-rugby-nz',
@@ -425,24 +440,117 @@ function rungHeight(rung: LadderRung): number {
 export interface InitialPlacement {
     club: ClubDef;
     entryMode: EntryMode;
+    /**
+     * Modelo económico REALMENTE conseguido. Puede no ser el que pedía la ruta:
+     * en Chile no hay clubes profesionales, así que un "profesional chileno"
+     * degrada al modelo más cercano disponible. Se registra para poder
+     * explicárselo al jugador en vez de mentirle.
+     */
+    resolvedModel: EconomicModel;
+    /** true si hubo que degradar el modelo pedido por la ruta. */
+    routeDowngraded: boolean;
 }
 
-export function pickInitialClub(nationality: string, originId: string, startTier: number, rng: Rng): InitialPlacement {
+/** Modelos económicos que acepta cada ruta de arranque. */
+const MODELS_BY_ROUTE: Record<StartRouteId, EconomicModel[]> = {
+    amateur: ['amateur'],
+    development: ['mixed', 'professional'],
+    professional: ['professional'],
+};
+
+/** Orden económico, para medir "cuán lejos" quedó una degradación. */
+const MODEL_ORDER: EconomicModel[] = ['amateur', 'mixed', 'professional'];
+
+/**
+ * TODOS los clubes del país, no solo los de su escalera doméstica.
+ *
+ * La distinción importa y es la que hacía fracasar la ruta profesional en
+ * Sudamérica: la escalera `sa-ar` es ÍNTEGRAMENTE amateur, y las franquicias
+ * profesionales argentinas (Dogos, Pampas, Tarucas) viven en Super Rugby
+ * Americas, que el catálogo marca como `countryCode: 'multi'`. Mirando solo la
+ * escalera, un "profesional argentino" no tenía dónde arrancar y degradaba a
+ * amateur — igual que un chileno, cuando el caso argentino sí tiene solución.
+ */
+function clubsOfCountry(countryCode: CountryCode): ClubDef[] {
+    const propios = CLUBS.filter((c) => c.countryCode === countryCode);
+    const franquicias = new Set(NATIONAL_FRANCHISES[countryCode] ?? []);
+    const multinacionales = CLUBS.filter((c) => franquicias.has(c.id));
+    return [...propios, ...multinacionales];
+}
+
+/**
+ * Clubes que sirven para la ruta pedida. Si no hay ninguno, se degrada al modelo
+ * DISPONIBLE más cercano (por distancia en `MODEL_ORDER`), sin fallar nunca: una
+ * nacionalidad sin liga profesional propia tiene que poder empezar igual.
+ */
+function clubsForRoute(
+    ladder: LadderRung[],
+    countryCode: CountryCode,
+    route: StartRouteId,
+): { clubs: ClubDef[]; model: EconomicModel; downgraded: boolean } {
+    // La ruta amateur se queda en la escalera (tiene techo de debut); las otras
+    // dos miran el país entero, porque el profesionalismo puede estar fuera de
+    // la pirámide doméstica.
+    const all = route === 'amateur' ? ladder.flatMap((rung) => rung.clubs) : clubsOfCountry(countryCode);
+    const wanted = MODELS_BY_ROUTE[route];
+
+    const direct = all.filter((c) => wanted.includes(economicModelOf(c)));
+    if (direct.length > 0) {
+        // Dentro de lo pedido, el modelo más bajo: se entra por abajo, no por
+        // la puerta grande. La ruta acota el universo; el rng elige el club.
+        const model = MODEL_ORDER.find((m) => wanted.includes(m) && direct.some((c) => economicModelOf(c) === m))!;
+        return { clubs: direct.filter((c) => economicModelOf(c) === model), model, downgraded: false };
+    }
+
+    // Degradación: el modelo disponible más cercano al que pedía la ruta.
+    const target = MODEL_ORDER.indexOf(wanted[0]);
+    const available = MODEL_ORDER
+        .filter((m) => all.some((c) => economicModelOf(c) === m))
+        .sort((a, b) => Math.abs(MODEL_ORDER.indexOf(a) - target) - Math.abs(MODEL_ORDER.indexOf(b) - target));
+
+    if (available.length === 0) return { clubs: all, model: 'amateur', downgraded: true };
+    const model = available[0];
+    return { clubs: all.filter((c) => economicModelOf(c) === model), model, downgraded: true };
+}
+
+export function pickInitialClub(
+    nationality: string,
+    originId: string,
+    startTier: number,
+    rng: Rng,
+    startRoute: StartRouteId = 'amateur',
+): InitialPlacement {
     const route = resolveStartRoute(nationality, originId, rng);
     const ladder = domesticLadder(route.countryCode);
     if (ladder.length === 0) {
-        return { club: [...CLUBS].sort((a, b) => a.rating - b.rating)[0], entryMode: route.entryMode };
+        const club = [...CLUBS].sort((a, b) => a.rating - b.rating)[0];
+        return { club, entryMode: route.entryMode, resolvedModel: economicModelOf(club), routeDowngraded: true };
     }
 
+    const { clubs, model, downgraded } = clubsForRoute(ladder, route.countryCode, startRoute);
+
+    // La ruta amateur conserva el techo de debut: un pibe no arranca en la
+    // categoría más alta del amateurismo solo porque exista. Las otras dos ya
+    // están acotadas por el modelo económico, que es más restrictivo.
+    const pool = startRoute === 'amateur'
+        ? restrictToEntryRungs(ladder, clubs, startTier)
+        : clubs;
+
+    const strongest = Math.max(...pool.map((c) => c.rating));
+    const ordered = [...pool].sort((a, b) => a.id.localeCompare(b.id));
+    const club = rng.weighted(ordered, (c) => strongest - c.rating + 4);
+    return { club, entryMode: route.entryMode, resolvedModel: model, routeDowngraded: downgraded };
+}
+
+/** Acota a los escalones de entrada (comportamiento histórico de la ruta amateur). */
+function restrictToEntryRungs(ladder: LadderRung[], clubs: ClubDef[], startTier: number): ClubDef[] {
     const offset = startTier <= 2 ? 1 : 0;
     let index = Math.min(offset, ladder.length - 1);
     while (index > 0 && rungHeight(ladder[index]) > MAX_ENTRY_RUNG) index--;
 
-    const rung = ladder[index];
-    const strongest = Math.max(...rung.clubs.map((c) => c.rating));
-    const ordered = [...rung.clubs].sort((a, b) => a.id.localeCompare(b.id));
-    const club = rng.weighted(ordered, (c) => strongest - c.rating + 4);
-    return { club, entryMode: route.entryMode };
+    const allowed = new Set(ladder[index].clubs.map((c) => c.id));
+    const restricted = clubs.filter((c) => allowed.has(c.id));
+    return restricted.length > 0 ? restricted : clubs;
 }
 
 /**

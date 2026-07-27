@@ -63,6 +63,7 @@ function meetsRequirements(req: EventRequirements, ctx: EventContext): boolean {
     if (req.employment && !req.employment.includes(p.employment)) return false;
     if (req.squadTrack && !req.squadTrack.includes(p.squadTrack)) return false;
     if (req.economicModels && !req.economicModels.includes(economicModelOf(club))) return false;
+    if (req.startRoutes && !req.startRoutes.includes(ctx.state.startRoute)) return false;
     if (req.minSportingBand !== undefined && band < req.minSportingBand) return false;
     if (req.maxSportingBand !== undefined && band > req.maxSportingBand) return false;
     if (req.minAge !== undefined && p.age < req.minAge) return false;

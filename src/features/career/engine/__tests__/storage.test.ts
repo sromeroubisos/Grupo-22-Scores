@@ -168,6 +168,35 @@ test('cualquiera de los seis campos de versión invalida el guardado', () => {
     }
 });
 
+test('una partida del schema 5 (antes de la ruta inicial) se resuelve como outdated', () => {
+    // Primer bump de schema del proyecto. Un guardado viejo NO tiene `startRoute`
+    // ni el desglose del pie, y no hay forma honesta de inventárselos: se
+    // descarta con el aviso no técnico en vez de intentar una migración que
+    // mentiría sobre cómo empezó esa carrera.
+    const store = installLocalStorage();
+    try {
+        const state = createInitialCareer(INPUT, 20260726);
+        saveCareer(state);
+        const payload = JSON.parse(store.get(KEY)!);
+
+        // Se reconstruye un guardado tal como lo dejaba la versión anterior.
+        payload.schema = 5;
+        payload.engineVersion = '1.5.0';
+        delete payload.state.startRoute;
+        for (const season of payload.state.seasons) {
+            for (const clave of ['points', 'conversionsMade', 'penaltiesMade', 'dropGoals', 'scrumsWon']) {
+                delete season.stats[clave];
+            }
+        }
+        store.set(KEY, JSON.stringify(payload));
+
+        assert.doesNotThrow(() => loadCareer(), 'una partida vieja no puede tirar');
+        assert.equal(loadCareer().kind, 'none', 'y después de limpiarla ya no queda nada');
+    } finally {
+        uninstallLocalStorage();
+    }
+});
+
 test('un guardado corrupto devuelve outdated en vez de explotar', () => {
     const store = installLocalStorage();
     try {

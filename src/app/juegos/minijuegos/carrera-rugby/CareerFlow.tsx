@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import type { CareerState, Position } from '@/features/career';
+import type { CareerState, Position, StartRouteId } from '@/features/career';
 import { createInitialCareer, getPendingEvent } from '@/features/career';
 import styles from './carrera.module.css';
 import CreatePlayer from './CreatePlayer';
@@ -20,6 +20,7 @@ export default function CareerFlow() {
     const [step, setStep] = useState<Step>('intro');
     const [countryCode, setCountryCode] = useState<string | null>(null);
     const [position, setPosition] = useState<Position | null>(null);
+    const [startRoute, setStartRoute] = useState<StartRouteId | null>(null);
     const [career, setCareer] = useState<CareerState | null>(null);
     const [lastSeason, setLastSeason] = useState<number | null>(null);
     const [showTimeline, setShowTimeline] = useState(false);
@@ -39,9 +40,9 @@ export default function CareerFlow() {
     }, []);
 
     function startCareer() {
-        if (countryCode === null || position === null) return;
+        if (countryCode === null || position === null || startRoute === null) return;
         const seed = Math.floor(Math.random() * 0x7fffffff);
-        const state = createInitialCareer({ position, nationalityCountryCode: countryCode }, seed);
+        const state = createInitialCareer({ position, nationalityCountryCode: countryCode, startRoute }, seed);
         setCareer(state);
         saveCareer(state);
         setLastSeason(null);
@@ -70,6 +71,7 @@ export default function CareerFlow() {
         setCareer(null);
         setCountryCode(null);
         setPosition(null);
+        setStartRoute(null);
         setLastSeason(null);
         setShowTimeline(false);
         setOutdatedNotice(false);
@@ -114,8 +116,10 @@ export default function CareerFlow() {
                 <CreatePlayer
                     countryCode={countryCode}
                     position={position}
+                    startRoute={startRoute}
                     onCountry={setCountryCode}
                     onPosition={setPosition}
+                    onStartRoute={setStartRoute}
                     onStart={startCareer}
                 />
             )}

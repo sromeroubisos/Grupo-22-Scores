@@ -4,6 +4,22 @@ import type { TitleWon } from '../data/clubs2026/competitions2026.ts';
 import type { EconomicModel } from '../data/competition-levels2026.ts';
 import type { EmploymentStatus, SquadTrack } from '../engine/contracts.ts';
 
+/**
+ * DESDE DÓNDE arranca la carrera. Es la primera decisión del juego, antes de que
+ * la carrera empiece — no un evento que el motor sortea a los 25 años.
+ *
+ * Fija los dos ejes que ya modelaba el motor y que son INDEPENDIENTES entre sí
+ * (ver engine/contracts.ts): el vínculo económico (`EmploymentStatus`, ordinal) y
+ * dónde está en el plantel (`SquadTrack`, que no es un escalón económico).
+ *
+ *   amateur      → amateur / senior      / club de modelo `amateur`
+ *   development  → compensado / desarrollo / club `mixed` o `professional`
+ *   professional → semipro / senior      / club `professional`
+ */
+export type StartRouteId = 'amateur' | 'development' | 'professional';
+
+export const START_ROUTES: readonly StartRouteId[] = ['amateur', 'development', 'professional'];
+
 /** Cómo entró el jugador al rugby profesional/senior. Se sella en la historia. */
 export type EntryMode =
     | 'domestic-senior' // debuta en el plantel senior de su liga doméstica
@@ -29,7 +45,16 @@ export type MovementKind =
 // terminología amateur por movementKind, mercado como fase explícita y curva de
 // OVR recalibrada. Cambia historial/títulos/mercado ⇒ los guardados < 1.5.0 se
 // descartan con el aviso no técnico existente.
-export const ENGINE_VERSION = '1.5.0';
+//
+// 1.6.0: planilla completa (puntos guardados + desglose del pie + scrums) y
+// ELECCIÓN DE RUTA INICIAL (amateur / desarrollo / profesional), que fija empleo,
+// track, modelo económico del club de arranque, edad de debut y OVR inicial.
+//
+// Las estadísticas por sí solas NO habrían cambiado los resultados: su desglose
+// sale de un rng re-sembrado aparte, y se verificó que las carreras de la línea
+// de base quedan byte-idénticas. Lo que sí cambia todo es la ruta: el club de
+// arranque ahora depende de ella, y con él la carrera entera.
+export const ENGINE_VERSION = '1.6.0';
 
 export type CareerPhase = 'setup' | 'season' | 'event' | 'retired';
 
@@ -134,6 +159,9 @@ export interface CareerState {
     clubCatalogVersion: string; // catálogo congelado al empezar (determinismo)
     seed: number;
     rngState: number;
+
+    /** Ruta elegida al crear el jugador. Se sella: define cómo se juega la carrera. */
+    startRoute: StartRouteId;
 
     player: Player;
     seasons: SeasonResult[];

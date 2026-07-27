@@ -35,7 +35,7 @@ export default function RetirementSummary({ career, onReplay }: { career: Career
         { label: 'Tackles', value: summary.totals.tackles, zero: summary.totals.tackles === 0 },
         { label: secondary.label, value: secondary.display, zero: secondary.isZero },
         ...(accuracy !== null && secondary.kind !== 'kick-accuracy'
-            ? [{ label: '% al palo', value: `${accuracy}%` }]
+            ? [{ label: 'Al palo', value: `${accuracy}%` }]
             : []),
         { label: 'Caps', value: summary.caps, zero: summary.caps === 0 },
         { label: 'Títulos', value: summary.titles, zero: summary.titles === 0 },

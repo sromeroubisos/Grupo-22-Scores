@@ -69,7 +69,9 @@ const SECONDARY_STAT: Record<Position, SecondaryStat> = {
     lock: { kind: 'stat', key: 'lineoutsWon', label: 'Lineouts' },
     backrow: { kind: 'stat', key: 'turnovers', label: 'Turnovers' },
     scrumhalf: { kind: 'stat', key: 'assists', label: 'Asistencias' },
-    flyhalf: { kind: 'kick-accuracy', label: '% al palo' },
+    // "Al palo" y no "% al palo": el valor ya trae el signo, y con la etiqueta
+    // completa se leía "69% % al palo" en la trayectoria y en el resultado.
+    flyhalf: { kind: 'kick-accuracy', label: 'Al palo' },
     centre: { kind: 'stat', key: 'lineBreaks', label: 'Quiebres' },
     wing: { kind: 'stat', key: 'metres', label: 'Metros' },
     fullback: { kind: 'stat', key: 'metres', label: 'Metros' },

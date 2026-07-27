@@ -20,13 +20,20 @@ function median(values: number[]): number {
     return sorted[Math.floor(sorted.length / 2)];
 }
 
+// El espacio de creación tiene TRES dimensiones desde la elección de ruta: la
+// muestra recorre las tres, porque el amateur arranca más abajo de la banda y el
+// profesional más arriba. Muestrear una sola ruta mide media banda y no toda.
+const ROUTES = ['amateur', 'development', 'professional'] as const;
+
 function sample(position: Position): { ovr: number[]; potential: number[] } {
     const ovr: number[] = [];
     const potential: number[] = [];
     for (const seed of SEEDS) {
-        const player = createPlayer({ position }, createRng(seed));
-        ovr.push(computeOvr(player.attributes, player.position));
-        potential.push(player.potential);
+        for (const startRoute of ROUTES) {
+            const player = createPlayer({ position, startRoute }, createRng(seed));
+            ovr.push(computeOvr(player.attributes, player.position));
+            potential.push(player.potential);
+        }
     }
     return { ovr, potential };
 }
@@ -139,7 +146,10 @@ test('un juvenil NUNCA arranca en nivel de estrella y el profesional consolidado
     const peaks: number[] = [];
     for (const seed of SEEDS.slice(0, 25)) {
         for (const position of ['prop', 'flyhalf', 'wing'] as const) {
-            peaks.push(buildCareerSummary(runCareer({ position, origin: 'seleccionado-juvenil' }, seed)).peakOvr);
+            // Ruta profesional a propósito: lo que se mide es que un PROFESIONAL
+            // CONSOLIDADO quede muy por encima de cualquier debut. Por la ruta
+            // amateur el techo es más bajo, y eso es el diseño, no una falla.
+            peaks.push(buildCareerSummary(runCareer({ position, origin: 'seleccionado-juvenil', startRoute: 'professional' }, seed)).peakOvr);
         }
     }
     assert.ok(best <= YOUTH_OVR_MAX, `el mejor debut (${best}) sigue siendo juvenil`);

@@ -9,8 +9,8 @@ Versiones selladas en este momento:
 
 | Constante | Valor | Dónde |
 |---|---|---|
-| `ENGINE_VERSION` | `1.5.0` | `types/career.ts` |
-| `SCHEMA` (guardado) | `5` | `carrera-rugby/careerStorage.ts` |
+| `ENGINE_VERSION` | `1.6.0` | `types/career.ts` |
+| `SCHEMA` (guardado) | `6` | `carrera-rugby/careerStorage.ts` |
 | `CLUB_CATALOG_VERSION` | `2026-27.6` | `data/clubs.ts` |
 | `SA_SNAPSHOT_VERSION` | `464399ffada4` | `data/clubs2026/saClubs.generated.ts` |
 | `NATIONS_VERSION` | `2026-07.2` | `data/nations.ts` |
@@ -147,6 +147,36 @@ requiresInternationalLoad, requiresEligibleUnion }`.
 
 ---
 
+## 4b. La elección inicial: amateur, desarrollo o profesional
+
+`CareerState.startRoute` (1.6.0) es la **primera decisión del juego**, antes de
+que la carrera empiece. Fija los dos ejes independientes de `contracts.ts`:
+
+| Ruta | `employment` | `squadTrack` | Modelo del club | Debut | OVR inicial (mediana) |
+|---|---|---|---|---|---|
+| `amateur` | `amateur` | `senior` | `amateur` | +1 año | 37 |
+| `development` | `amateur-compensated` | `development` | `mixed`/`professional` | — | 40 |
+| `professional` | `semi-professional` | `senior` | `professional` | — | 43 |
+
+La ruta **acota el universo** de clubes por `economicModelOf`; el `rng` sigue
+eligiendo el club concreto dentro de ese universo, ponderado a la inversa del
+rating. Si la ruta pide un modelo que el país no tiene, se **degrada** al modelo
+disponible más cercano y queda registrado en `player.startRouteModel` +
+`player.routeDowngraded` — nunca falla.
+
+> **Las rutas pro miran el país entero, no solo la escalera doméstica.** La
+> pirámide `sa-ar` es íntegramente amateur: el profesionalismo argentino vive en
+> Super Rugby Americas, que el catálogo marca como `countryCode: 'multi'`.
+> `NATIONAL_FRANCHISES` (market-routes.ts) declara qué franquicias representan a
+> qué país. Sin eso, un "profesional argentino" degradaba a amateur.
+
+Los eventos `env-semi-pro-offer` y `env-compensated-semi-offer` llevan
+`requires.startRoutes: ['amateur', 'development']`: son el ascenso **dentro** de
+la ruta amateur, no el origen del profesionalismo. Al que arrancó con contrato no
+le aparecen nunca (verificado sobre 200 carreras completas).
+
+---
+
 ## 5. Cómo se asigna el club inicial
 
 `createPlayer` → `pickInitialClub(nacionalidad, origen, startTier, rng)`
@@ -260,20 +290,36 @@ motor ya no sabe interpretar. Todo va envuelto en `try/catch`: sin acceso a
 
 Correr con `npm test` (runner nativo `node --test`, **no** Vitest).
 
-### Digest congelado — línea de base del motor 1.5.0
+### Digest congelado — línea de base del motor 1.6.0
 
 Con el `rotatingChooser` del test (opción elegida por
-`hashSeed(eventId:temporada) % nOpciones`):
+`hashSeed(eventId:temporada) % nOpciones`), una ruta distinta en cada caso:
 
-| Caso | Semilla | Temporadas | Retiro | OVR pico | Caps | Clubes | Empleo final |
-|---|---|---|---|---|---|---|---|
-| Apertura argentino | 20260726 | 16 | 35 | **61** | 0 | 4 | Compensado |
-| Pilar neozelandés | 424242 | 19 | 37 | **77** | 65 | 3 | Profesional |
-| Wing francés | 7919 | 13 | 32 | **63** | 2 | 1 | Compensado |
+| Caso | Ruta | Semilla | Temporadas | Retiro | OVR pico | Caps | Clubes | Empleo final |
+|---|---|---|---|---|---|---|---|---|
+| Apertura argentino | amateur | 20260726 | 16 | 36 | **55** | 0 | 4 | Compensado |
+| Pilar neozelandés | profesional | 424242 | 19 | 37 | **80** | 59 | 1 | Profesional |
+| Wing francés | desarrollo | 7919 | 14 | 33 | **66** | 11 | 4 | Profesional |
 
 > Sirve además como **calibración real del techo de OVR** para las bandas de
-> color de la Fase 4: una carrera amateur pica cerca de 60-65 y una profesional
+> color de la Fase 4: una carrera amateur pica cerca de 55-60 y una profesional
 > cerca de 75-80. Las bandas de Copero (85+ dorado) no aplican acá.
+
+### La técnica que protege el stream del RNG
+
+Cuando un cambio necesita tiradas nuevas pero **no** debe alterar el resto de la
+carrera, se re-siembra un RNG local con una clave descriptiva en vez de tocar el
+principal:
+
+```ts
+const detailRng = rngFromState(hashSeed(`${careerSeed}:stats-detail:${seasonIndex}`));
+```
+
+Así se hizo el desglose del pie y los scrums (1.6.0): las tres carreras de la
+línea de base quedaron **byte-idénticas** ignorando solo las claves nuevas, con
+el mismo `rngState` final. Si hubieran salido del stream principal, habrían
+corrido clubes, lesiones y convocatorias, y no habría forma de distinguir el
+cambio buscado del daño colateral.
 
 **Si un cambio de motor rompe el digest**: es esperado cuando el cambio es
 intencional. Verificá que el resto de los tests pase, actualizá la tabla de

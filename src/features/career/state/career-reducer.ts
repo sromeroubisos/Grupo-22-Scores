@@ -68,6 +68,7 @@ export function createInitialCareer(input: CreatePlayerInput, seed: number): Car
         clubCatalogVersion: CLUB_CATALOG_VERSION,
         seed: seed >>> 0,
         rngState: rng.state,
+        startRoute: input.startRoute ?? 'amateur',
         player,
         seasons: [],
         phase: 'setup',

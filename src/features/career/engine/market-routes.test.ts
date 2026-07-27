@@ -434,7 +434,10 @@ test('las apariciones de DESARROLLO son plausibles (mediana 5-9, mayoría <10)',
     const dev: number[] = [];
     for (const nationality of ['nz', 'fr', 'jp', 'za']) {
         for (let i = 0; i < 40; i++) {
-            const state = runCareer({ position: 'centre', nationalityCountryCode: nationality, origin: 'academia-club' }, (i + 1) * 7919, acceptsOffers);
+            // Ruta de DESARROLLO explícita: desde que el jugador elige cómo
+            // arranca, la academia es una de las tres puertas y ya no algo que
+            // el motor sortea. Sin declararla, esta muestra no tendría academias.
+            const state = runCareer({ position: 'centre', nationalityCountryCode: nationality, origin: 'academia-club', startRoute: 'development' }, (i + 1) * 7919, acceptsOffers);
             for (const entry of state.history) {
                 if (entry.squadTrack === 'development') dev.push(entry.appearances);
             }

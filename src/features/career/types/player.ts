@@ -1,4 +1,5 @@
 import type { EmploymentStatus, SquadTrack } from '../engine/contracts.ts';
+import type { EconomicModel } from '../data/competition-levels2026.ts';
 import type { EntryMode } from './career.ts';
 // Modelo del jugador. Todo el motor de Carrera de Rugby gira alrededor de esto.
 // Atributos y variables dinámicas se guardan como números flotantes (0..100) y
@@ -106,6 +107,18 @@ export interface Player {
     squadTrack: SquadTrack;
     /** Cómo entró al rugby senior/profesional. Se sella al crear. */
     entryMode: EntryMode;
+    /**
+     * Modelo económico del club de arranque, sellado al crear. NO se mete en
+     * `entryMode` a propósito: ese eje describe de dónde vino (doméstico,
+     * extranjero, academia) y son dos cosas distintas.
+     */
+    startRouteModel: EconomicModel;
+    /**
+     * true si la ruta elegida no tenía clubes disponibles y hubo que degradar.
+     * En Chile no hay clubes profesionales: un "profesional chileno" arranca en
+     * lo más cercano que exista, y el juego se lo puede explicar en vez de mentir.
+     */
+    routeDowngraded: boolean;
     /**
      * Mayor banda deportiva DISPUTADA (con aparición senior real), no la del
      * club al que pertenece. Un juvenil de desarrollo en Toulouse no "jugó Top 14".

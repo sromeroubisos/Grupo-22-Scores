@@ -6,9 +6,13 @@ import { CAREER_ENVIRONMENT_VERSION, CLUB_CATALOG_VERSION, COMPETITION_LEVELS_VE
 // migrar parcialmente un estado que el motor ya no sabe interpretar.
 const KEY = 'g22-carrera-rugby';
 // Schema 5: identidad real de competición, ledger de participación, honores
-// club/jugador, movementKind y curva de OVR (Fase 1.5). Los guardados < 5 se
-// descartan con el aviso no técnico existente.
-const SCHEMA = 5;
+// club/jugador, movementKind y curva de OVR (Fase 1.5).
+// Schema 6: `startRoute` en CareerState; `points`, desglose del pie y `scrumsWon`
+// en SeasonStats; `secondaryStat` reemplaza a `primaryStat` en la trayectoria;
+// `startRouteModel` y `routeDowngraded` en Player. Los guardados < 6 se descartan
+// con el aviso no técnico existente: no hay forma honesta de inventarle una ruta
+// a una partida que se creó sin elegir ninguna.
+const SCHEMA = 6;
 
 interface SavedCareer {
     schema: number;

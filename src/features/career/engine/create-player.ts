@@ -3,7 +3,10 @@ import { getPosition } from '../data/positions.ts';
 import { getOrigin, ALL_ORIGINS } from '../data/origins.ts';
 import { computeEffectiveOvr, computeOvr, clampAttr, ovrExact } from './scoring.ts';
 import { marketValue, roleAtClub } from './club-offers.ts';
-import { resolveContract } from './contracts.ts';
+import type { EmploymentStatus, SquadTrack } from './contracts.ts';
+import { employmentCeiling, employmentRank, resolveContract } from './contracts.ts';
+import { economicModelOf } from '../data/competition-levels2026.ts';
+import type { StartRouteId } from '../types/career.ts';
 import { pickInitialClub } from './market-routes.ts';
 import { createEligibility } from './eligibility.ts';
 import { countryCodeOfNationality, findCountry } from '../data/nations.ts';
@@ -20,7 +23,33 @@ export interface CreatePlayerInput {
     origin?: string; // opcional: si no viene, lo elige el motor
     nickname?: string; // opcional: si no viene, lo genera el motor
     number?: number;
+    /** Desde dónde arranca. Si no viene, la ruta más dura (y la histórica). */
+    startRoute?: StartRouteId;
 }
+
+/**
+ * Qué fija cada ruta. Los dos ejes son INDEPENDIENTES: `employment` es el vínculo
+ * económico y `squadTrack` es dónde está en el plantel. Un juvenil de academia
+ * puede tener mejor vínculo que un semipro de una liga menor, y por eso no se
+ * modelan como un único escalón.
+ *
+ * `ovrBonus` mueve el NIVEL de arranque dentro de la ventana juvenil del puesto:
+ * el que entra por la puerta profesional ya es mejor que el que entrena dos veces
+ * por semana después del trabajo.
+ */
+const ROUTE_SETUP: Record<StartRouteId, {
+    employment: EmploymentStatus;
+    squadTrack: SquadTrack;
+    ovrBonus: number;
+    ageShift: number;
+}> = {
+    // Trabaja o estudia, entrena cuando puede: debuta más tarde y más abajo.
+    amateur: { employment: 'amateur', squadTrack: 'senior', ovrBonus: -3, ageShift: 1 },
+    // Entra por la formación: entrena como profesional antes de serlo.
+    development: { employment: 'amateur-compensated', squadTrack: 'development', ovrBonus: 0, ageShift: 0 },
+    // Contrato desde el arranque: menos épica, más exigencia.
+    professional: { employment: 'semi-professional', squadTrack: 'senior', ovrBonus: 3, ageShift: 0 },
+};
 
 const ATTR_KEYS: AttributeKey[] = ['power', 'speed', 'technique', 'tackle', 'kick', 'vision', 'mental', 'stamina'];
 
@@ -88,6 +117,8 @@ function shiftToTargetOvr(attributes: Attributes, position: Position, targetOvr:
 
 export function createPlayer(input: CreatePlayerInput, rng: Rng): Player {
     const pos = getPosition(input.position);
+    const startRoute: StartRouteId = input.startRoute ?? 'amateur';
+    const setup = ROUTE_SETUP[startRoute];
     // Origen automático por seed cuando no se especifica (flujo simplificado).
     const origin = getOrigin(input.origin ?? rng.pick(ALL_ORIGINS));
 
@@ -103,7 +134,12 @@ export function createPlayer(input: CreatePlayerInput, rng: Rng): Player {
     // Talento juvenil: dónde cae dentro de la ventana de su posición.
     const [lo, hi] = YOUTH_OVR_WINDOW[input.position];
     const talent = rng.normal(0.5, 0.18, 0, 1);
-    const targetOvr = Math.max(YOUTH_OVR_MIN, Math.min(YOUTH_OVR_MAX, Math.round(lo + (hi - lo) * talent)));
+    // La ruta desplaza el NIVEL de arranque, no la ventana del puesto: un wing
+    // sigue arrancando por encima de un pilar, venga de donde venga.
+    const targetOvr = Math.max(
+        YOUTH_OVR_MIN,
+        Math.min(YOUTH_OVR_MAX, Math.round(lo + (hi - lo) * talent) + setup.ovrBonus),
+    );
     shiftToTargetOvr(attributes, input.position, targetOvr);
 
     // Potencial OCULTO: techo alcanzable. Correlaciona con el talento juvenil
@@ -122,7 +158,10 @@ export function createPlayer(input: CreatePlayerInput, rng: Rng): Player {
     // Primer club por RUTA: nacionalidad → país → escalón de entrada de esa
     // escalera. Nunca un sorteo global por tier (así no aparece un argentino
     // de 18 debutando en Wellington porque cayó ese tier).
-    const placement = pickInitialClub(nationality, origin.id, origin.startTier, rng);
+    // La ruta ACOTA el universo de clubes por modelo económico; el rng sigue
+    // eligiendo el club concreto dentro de ese universo, que es lo que hace que
+    // dos carreras de la misma ruta no sean la misma carrera.
+    const placement = pickInitialClub(nationality, origin.id, origin.startTier, rng, startRoute);
     const club = placement.club;
 
     // La UI solo pregunta nacionalidad: el país de nacimiento sale de ahí
@@ -137,7 +176,7 @@ export function createPlayer(input: CreatePlayerInput, rng: Rng): Player {
         nationality,
         origin: origin.id,
 
-        age: origin.startAge,
+        age: origin.startAge + setup.ageShift,
         club: club.id,
         league: club.league,
         role: 'fringe',
@@ -150,6 +189,8 @@ export function createPlayer(input: CreatePlayerInput, rng: Rng): Player {
         employment: 'amateur',
         squadTrack: 'senior',
         entryMode: 'domestic-senior',
+        startRouteModel: 'amateur',
+        routeDowngraded: false,
         competitiveBandReached: 0,
         milestonesReached: [],
 
@@ -187,12 +228,22 @@ export function createPlayer(input: CreatePlayerInput, rng: Rng): Player {
     player.employment = contract.employment;
     player.squadTrack = contract.track;
 
+    // LA RUTA MANDA sobre el contrato derivado: el jugador eligió en qué mundo
+    // quiere jugar, y esa elección no puede quedar pisada por el cálculo de
+    // valor de mercado. El techo del club sigue siendo un techo real, eso sí:
+    // un club amateur no puede sostener un vínculo semiprofesional.
+    const ceiling = employmentCeiling(economicModelOf(club));
+    player.employment = employmentRank(setup.employment) > employmentRank(ceiling) ? ceiling : setup.employment;
+    player.squadTrack = setup.squadTrack;
+
     // Un migrante a una liga cuyo piso ya es profesional entra por academia:
     // no debuta como senior full-time (regla de países sin liga propia).
     if (placement.entryMode === 'external-development') {
         player.squadTrack = 'development';
     }
     player.entryMode = placement.entryMode;
+    player.startRouteModel = placement.resolvedModel;
+    player.routeDowngraded = placement.routeDowngraded;
 
     return player;
 }

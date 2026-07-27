@@ -129,7 +129,7 @@ test('cada puesto tiene su propia cuarta ranura', () => {
         lock: 'Lineouts',
         backrow: 'Turnovers',
         scrumhalf: 'Asistencias',
-        flyhalf: '% al palo',
+        flyhalf: 'Al palo',
         centre: 'Quiebres',
         wing: 'Metros',
         fullback: 'Metros',

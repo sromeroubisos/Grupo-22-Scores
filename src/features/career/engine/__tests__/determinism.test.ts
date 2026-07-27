@@ -38,13 +38,14 @@ interface Case {
     seed: number;
 }
 
-// Tres rutas distintas a propósito: un país del circuito rioplatense (escalera
+// Tres países distintos a propósito: uno del circuito rioplatense (escalera
 // derivada del snapshot), uno con liga doméstica propia y piso profesional, y
-// uno europeo. Cubren las tres formas de asignar club inicial.
+// uno europeo. Y una RUTA distinta en cada uno, para que el digest congelado
+// cubra las tres puertas de entrada y no solo la amateur.
 const CASES: Case[] = [
-    { name: 'apertura argentino', input: { position: 'flyhalf', nationalityCountryCode: 'ar' }, seed: 20260726 },
-    { name: 'pilar neozelandés', input: { position: 'prop', nationalityCountryCode: 'nz' }, seed: 424242 },
-    { name: 'wing francés', input: { position: 'wing', nationalityCountryCode: 'fr' }, seed: 7919 },
+    { name: 'apertura argentino', input: { position: 'flyhalf', nationalityCountryCode: 'ar', startRoute: 'amateur' }, seed: 20260726 },
+    { name: 'pilar neozelandés', input: { position: 'prop', nationalityCountryCode: 'nz', startRoute: 'professional' }, seed: 424242 },
+    { name: 'wing francés', input: { position: 'wing', nationalityCountryCode: 'fr', startRoute: 'development' }, seed: 7919 },
 ];
 
 interface Digest {
@@ -79,46 +80,46 @@ function digest(state: CareerState): Digest {
     };
 }
 
-// Línea de base del motor 1.5.0 — ver docs/career-engine.md §9.
+// Línea de base del motor 1.6.0 — ver docs/career-engine.md §9.
 const EXPECTED: Record<string, Digest> = {
-    'apertura argentino': {
+    "apertura argentino": {
         seasons: 16,
-        retirementAge: 35,
-        peakOvr: 61,
+        retirementAge: 36,
+        peakOvr: 55,
         caps: 0,
         titles: 0,
         clubs: 4,
         firstClub: 'sb-st-brendan-s',
-        lastClub: 'sb-carlos-paz-rugby-club',
+        lastClub: 'sb-club-champagnat',
         employment: 'amateur-compensated',
-        decisions: 13,
-        stateHash: 554642059,
+        decisions: 14,
+        stateHash: 3812144363,
     },
-    'pilar neozelandés': {
+    "pilar neozelandés": {
         seasons: 19,
         retirementAge: 37,
-        peakOvr: 77,
-        caps: 65,
-        titles: 1,
-        clubs: 3,
-        firstClub: 'counties-manukau',
-        lastClub: 'cornish-pirates',
-        employment: 'full-time-professional',
-        decisions: 18,
-        stateHash: 3487571112,
-    },
-    'wing francés': {
-        seasons: 13,
-        retirementAge: 32,
-        peakOvr: 63,
-        caps: 2,
-        titles: 0,
+        peakOvr: 80,
+        caps: 59,
+        titles: 7,
         clubs: 1,
-        firstClub: 'el-toro',
-        lastClub: 'el-toro',
-        employment: 'amateur-compensated',
-        decisions: 10,
-        stateHash: 804874618,
+        firstClub: 'chiefs',
+        lastClub: 'chiefs',
+        employment: 'full-time-professional',
+        decisions: 13,
+        stateHash: 1776385315,
+    },
+    "wing francés": {
+        seasons: 14,
+        retirementAge: 33,
+        peakOvr: 66,
+        caps: 11,
+        titles: 0,
+        clubs: 4,
+        firstClub: 'la-vila',
+        lastClub: 'ampthill',
+        employment: 'full-time-professional',
+        decisions: 13,
+        stateHash: 3396800502,
     },
 };
 

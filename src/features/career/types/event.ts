@@ -1,5 +1,5 @@
 import type { AttributeKey, Position } from './player.ts';
-import type { CareerState, ClubOffer } from './career.ts';
+import type { CareerState, ClubOffer, StartRouteId } from './career.ts';
 import type { EmploymentStatus, SquadTrack } from '../engine/contracts.ts';
 import type { EconomicModel } from '../data/competition-levels2026.ts';
 
@@ -21,6 +21,12 @@ export interface EventRequirements {
     employment?: EmploymentStatus[];
     squadTrack?: SquadTrack[];
     economicModels?: EconomicModel[];
+    /**
+     * Rutas de arranque en las que el evento puede aparecer. Es lo que impide
+     * que al que ya empezó con contrato le ofrezcan "dar el salto al
+     * profesionalismo": para él eso no es una oportunidad, ya pasó.
+     */
+    startRoutes?: StartRouteId[];
     minSportingBand?: number;
     maxSportingBand?: number;
     minAge?: number;

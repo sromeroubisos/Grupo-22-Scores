@@ -9,7 +9,8 @@ export type { SeasonResult, SeasonStats, LeagueStanding, SeasonCompetitionPartic
 export { POINTS_PER, computePoints, emptyStats } from './types/season.ts';
 export type { GameEvent, EventOption, EventCategory } from './types/event.ts';
 export type { CareerState, CareerSummary, CareerPhase, ClubOffer, ClubSpell, MovementKind } from './types/career.ts';
-export { ENGINE_VERSION, MILESTONE_LABELS } from './types/career.ts';
+export { ENGINE_VERSION, MILESTONE_LABELS, START_ROUTES } from './types/career.ts';
+export type { StartRouteId } from './types/career.ts';
 export type { CareerSeasonEntry, CareerMilestone } from './types/career.ts';
 export { MOVEMENT_LABELS, movementOptionCopy, movementResultText } from './data/movement-copy.ts';
 export { clubLeagueIdentity, isUmbrellaSystem, CAREER_COMPETITION_VERSION, type CompetitionIdentity } from './engine/competition-identity.ts';
