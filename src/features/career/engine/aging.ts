@@ -107,15 +107,22 @@ export function meritDrive(previous: { rating: number; role: PlayerRole } | unde
     return clamp(byRating * byRole, 0.8, 1.26);
 }
 
-/** Cambio de un atributo para una temporada, dado edad y grupo. */
+/**
+ * Cambio de un atributo para una temporada, dado edad y grupo.
+ *
+ * `peakShift` desplaza la edad de pico según el PERFIL DE DESARROLLO del jugador
+ * (ver `development-profile.ts`). Por defecto 0: los tests que miden la curva
+ * desnuda y las llamadas viejas no cambian.
+ */
 export function attributeDelta(
     key: AttributeKey,
     age: number,
     group: PositionGroup,
     rng: Rng,
     growthScale = 1,
+    peakShift = 0,
 ): number {
-    const peak = PEAKS[key][group];
+    const peak = PEAKS[key][group] + peakShift;
     const noise = rng.float(-0.4, 0.4);
 
     if (age < peak) {
@@ -145,11 +152,12 @@ export function applyAging(
     group: PositionGroup,
     rng: Rng,
     growthScale = 1,
+    peakShift = 0,
 ): Partial<Record<AttributeKey, number>> {
     const deltas: Partial<Record<AttributeKey, number>> = {};
     for (const key of ATTR_KEYS) {
         const before = attributes[key];
-        const delta = attributeDelta(key, age, group, rng, growthScale);
+        const delta = attributeDelta(key, age, group, rng, growthScale, peakShift);
         const after = clampAttr(before + delta);
         attributes[key] = after;
         // El `+ 0` normaliza el -0 que devuelve Math.round con negativos chicos

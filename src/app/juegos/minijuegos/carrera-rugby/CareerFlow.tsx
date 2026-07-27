@@ -21,6 +21,9 @@ export default function CareerFlow() {
     const [countryCode, setCountryCode] = useState<string | null>(null);
     const [position, setPosition] = useState<Position | null>(null);
     const [startRoute, setStartRoute] = useState<StartRouteId | null>(null);
+    const [surname, setSurname] = useState('');
+    // null = todavía no eligió: el motor pone el canónico del puesto.
+    const [number, setNumber] = useState<number | null>(null);
     const [career, setCareer] = useState<CareerState | null>(null);
     const [lastSeason, setLastSeason] = useState<number | null>(null);
     const [showTimeline, setShowTimeline] = useState(false);
@@ -42,7 +45,18 @@ export default function CareerFlow() {
     function startCareer() {
         if (countryCode === null || position === null || startRoute === null) return;
         const seed = Math.floor(Math.random() * 0x7fffffff);
-        const state = createInitialCareer({ position, nationalityCountryCode: countryCode, startRoute }, seed);
+        const state = createInitialCareer(
+            {
+                position,
+                nationalityCountryCode: countryCode,
+                startRoute,
+                surname,
+                // `undefined` y no `null`: que el motor aplique su propio default
+                // (el número canónico del puesto) en vez de recibir un no-valor.
+                ...(number !== null ? { number } : {}),
+            },
+            seed,
+        );
         setCareer(state);
         saveCareer(state);
         setLastSeason(null);
@@ -123,8 +137,14 @@ export default function CareerFlow() {
                     countryCode={countryCode}
                     position={position}
                     startRoute={startRoute}
+                    surname={surname}
+                    number={number}
+                    onSurname={setSurname}
+                    onNumber={setNumber}
                     onCountry={setCountryCode}
-                    onPosition={setPosition}
+                    // Cambiar de puesto invalida el número elegido: el 10 no
+                    // existe para un pilar. Vuelve al canónico del puesto nuevo.
+                    onPosition={(pos) => { setPosition(pos); setNumber(null); }}
                     onStartRoute={setStartRoute}
                     onStart={startCareer}
                 />

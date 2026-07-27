@@ -49,6 +49,12 @@ export default function PlayerHeader({ career }: { career: CareerState }) {
             <div className={styles.cbIdentity}>
                 {countryCode && <Flag code={countryCode} name={p.nationality} size={34} className={styles.cbFlag} />}
                 <div className={styles.cbWho}>
+                    {/* La identidad primero: el jugador tiene nombre y número, no
+                        es solo un puesto. El apodo interno sigue sin mostrarse. */}
+                    <p className={styles.cbName}>
+                        <span className={styles.cbNumber}>{p.number}</span>
+                        {p.surname}
+                    </p>
                     <p className={styles.cbPos}>{posLabel}<span className={styles.cbAge}><span className={styles.num}>{p.age}</span> años</span></p>
                     <p className={styles.cbClub}>
                         <ClubBadge clubId={club.id} clubName={club.labelEs} size={28} />

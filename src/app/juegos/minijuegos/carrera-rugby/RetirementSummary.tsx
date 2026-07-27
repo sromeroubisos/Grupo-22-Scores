@@ -1,7 +1,7 @@
 'use client';
 
 import type { CareerState } from '@/features/career';
-import { buildCareerSummary, getClub, getPosition, kickAccuracy, secondaryStatOf } from '@/features/career';
+import { buildCareerSummary, getClub, getPosition, kickAccuracy, profileRevealText, secondaryStatOf } from '@/features/career';
 import Flag from './Flag';
 import ClubBadge from './ClubBadge';
 import styles from './carrera.module.css';
@@ -42,8 +42,12 @@ export default function RetirementSummary({ career, onReplay }: { career: Career
                 <p className={styles.summaryBlurb}>{blurb}</p>
                 <div className={styles.summaryId}>
                     {countryCode && <Flag code={countryCode} name={summary.nationality} size={24} decorative />}
-                    <span>{posLabel} · {summary.nationality}</span>
+                    <span>{career.player.surname} · {posLabel} · {summary.nationality}</span>
                 </div>
+                {/* REVELADO: el perfil estuvo oculto toda la partida, como el
+                    techo. Recién acá se nombra — y es lo que explica por qué la
+                    carrera tuvo la forma que tuvo. */}
+                <p className={styles.summaryReveal}>{profileRevealText(career.player.developmentProfile)}</p>
                 <p className={styles.summaryReason}>
                     Debut a los {summary.debutAge} · Retiro a los {summary.retirementAge}. {summary.retirementReason}.
                 </p>

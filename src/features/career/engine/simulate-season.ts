@@ -15,6 +15,7 @@ import { MIN_LEAGUE_FIELD, cupField, resolveCupWinner, resolveLeagueFinish, stan
 import { clubLeagueIdentity } from './competition-identity.ts';
 import { computeOvr, computeEffectiveOvr } from './scoring.ts';
 import { applyAging, growthScaleFor, meritDrive } from './aging.ts';
+import { peakShiftOf, profileGrowthFactor } from './development-profile.ts';
 import { advanceRegistration } from './eligibility.ts';
 import { computeSeasonLoad, deriveEnvironment, seasonInjuryRisk } from './environment.ts';
 import { rollInjury } from './injuries.ts';
@@ -75,9 +76,14 @@ export function simulateSeason(state: CareerState, rng: Rng, movedFrom: string |
     // desarrollo. Antes de 1.9.0 el titular con gran rating y el suplente
     // crecían igual, que es justo lo contrario de cómo funciona el deporte.
     const merit = meritDrive(state.seasons[state.seasons.length - 1]);
+    // PERFIL: el `early` explota de pibe y el `late` recién arranca a los 27.
+    // Cambia el CUÁNDO de la curva, no el techo — eso sigue siendo `potential`.
+    const profileFactor = profileGrowthFactor(p.developmentProfile, p.age);
     const growthScale = growthScaleFor(ovrStart, p.potential, p.position)
-        * environmentSupport * loadPenaltyFactor * youthDrive * developmentRoll * merit;
-    const attributeDeltas = applyAging(p.attributes, p.age, group, rng, growthScale);
+        * environmentSupport * loadPenaltyFactor * youthDrive * developmentRoll * merit * profileFactor;
+    const attributeDeltas = applyAging(
+        p.attributes, p.age, group, rng, growthScale, peakShiftOf(p.developmentProfile),
+    );
 
     // 2) Rol de la temporada según nivel actual vs club.
     p.role = roleAtClub(computeEffectiveOvr(p), clubPrestige);

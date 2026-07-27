@@ -12,7 +12,11 @@ const KEY = 'g22-carrera-rugby';
 // `startRouteModel` y `routeDowngraded` en Player. Los guardados < 6 se descartan
 // con el aviso no técnico existente: no hay forma honesta de inventarle una ruta
 // a una partida que se creó sin elegir ninguna.
-const SCHEMA = 6;
+// Schema 7: identidad del jugador (`surname`) y `developmentProfile` en Player.
+// Los dos son campos nuevos del estado, así que un guardado 6 no se puede
+// interpretar — no hay forma honesta de inventarle un perfil de desarrollo a una
+// carrera que ya se jugó con una curva distinta. Se resuelve como 'outdated'.
+const SCHEMA = 7;
 
 interface SavedCareer {
     schema: number;

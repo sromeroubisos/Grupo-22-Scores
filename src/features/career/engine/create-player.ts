@@ -11,6 +11,7 @@ import { pickInitialClub } from './market-routes.ts';
 import { createEligibility } from './eligibility.ts';
 import { countryCodeOfNationality, findCountry } from '../data/nations.ts';
 import type { Rng } from './random.ts';
+import { rollDevelopmentProfile } from './development-profile.ts';
 
 // El usuario solo elige posición y nacionalidad. El origen (y con él el primer
 // club y la edad de debut) los resuelve el motor por debajo, según la seed.
@@ -22,6 +23,8 @@ export interface CreatePlayerInput {
     nationality?: string;
     origin?: string; // opcional: si no viene, lo elige el motor
     nickname?: string; // opcional: si no viene, lo genera el motor
+    /** Apellido libre. Se sanea y se acota; si no viene, queda el apodo. */
+    surname?: string;
     number?: number;
     /** Desde dónde arranca. Si no viene, la ruta más dura (y la histórica). */
     startRoute?: StartRouteId;
@@ -113,6 +116,40 @@ function generateNickname(rng: Rng): string {
     return rng.pick(NICKNAME_POOL);
 }
 
+/** Largo máximo del apellido. Más que esto no entra en la cabecera ni en el póster. */
+export const SURNAME_MAX = 15;
+
+/**
+ * Sanea el apellido que escribe el usuario. Entra texto libre, así que no se
+ * guarda crudo: React escapa al renderizar, pero este valor termina también en
+ * `localStorage` y —más adelante— en la tarjeta compartible, donde se dibuja en
+ * un canvas sin ningún escapado de por medio.
+ *
+ * Se quitan los caracteres de control y los de formato bidireccional (que pueden
+ * dar vuelta el texto que los rodea), se colapsan los espacios y se corta a 15.
+ * Devuelve '' si no queda nada usable: el llamador decide el reemplazo.
+ */
+export function sanitizeSurname(raw: string): string {
+    return [...raw.normalize('NFC')]
+        .filter((ch) => {
+            const code = ch.codePointAt(0) ?? 0;
+            if (code < 0x20 || code === 0x7f) return false; // control
+            if (code >= 0x200b && code <= 0x200f) return false; // zero-width / marcas RTL
+            if (code >= 0x202a && code <= 0x202e) return false; // overrides bidi
+            if (code >= 0x2066 && code <= 0x2069) return false; // aislantes bidi
+            return true;
+        })
+        .join('')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, SURNAME_MAX);
+}
+
+/** Número canónico del puesto: el primero de su lista (10 apertura, 2 hooker…). */
+export function defaultNumberFor(position: Position): number {
+    return getPosition(position).numbers[0];
+}
+
 /**
  * Lleva el OVR del prospecto EXACTAMENTE al objetivo desplazando por igual los
  * atributos que puntúan en esa posición. Como esos pesos suman 100, el OVR se
@@ -163,7 +200,13 @@ export function createPlayer(input: CreatePlayerInput, rng: Rng): Player {
         Math.min(POTENTIAL_MAX, Math.round(targetOvr + GROWTH_ROOM[input.position] * roomFactor)),
     );
 
-    const number = input.number ?? rng.pick(pos.numbers);
+    // El número POR DEFECTO es el canónico del puesto (10 apertura, 2 hooker,
+    // 15 fullback), no uno sorteado: la camiseta de un puesto no es azarosa.
+    // Para los puestos que comparten varios números (pilar 1/3, segunda 4/5,
+    // tercera 6/7/8, centro 12/13, wing 11/14) el jugador puede elegir otro.
+    const number = input.number !== undefined && pos.numbers.includes(input.number)
+        ? input.number
+        : defaultNumberFor(input.position);
     // La UI manda el CÓDIGO; el nombre queda para mostrar y para compatibilidad.
     const fromCode = input.nationalityCountryCode ? findCountry(input.nationalityCountryCode) : null;
     const nationality = fromCode?.nameEs ?? input.nationality ?? origin.defaultNationality;
@@ -182,12 +225,22 @@ export function createPlayer(input: CreatePlayerInput, rng: Rng): Player {
     // modela sigue siendo identidad válida, pero no genera selección ficticia.
     const nationalityCountryCode = fromCode?.code ?? countryCodeOfNationality(nationality);
 
+    // Las dos tiradas del rng se sacan ACÁ y en este orden, no dentro del objeto
+    // literal: el orden de evaluación de las propiedades es el del código y
+    // dejarlo implícito hace que reordenar campos cambie la carrera entera.
+    const nickname = input.nickname ?? generateNickname(rng);
+    const developmentProfile = rollDevelopmentProfile(input.position, rng);
+
     const player: Player = {
-        nickname: input.nickname ?? generateNickname(rng),
+        nickname,
+        // Si no eligió apellido (o escribió solo basura), se usa el apodo que ya
+        // genera el motor: el jugador siempre tiene con qué ser nombrado.
+        surname: sanitizeSurname(input.surname ?? '') || nickname,
         position: input.position,
         number,
         nationality,
         origin: origin.id,
+        developmentProfile,
 
         age: origin.startAge + setup.ageShift,
         club: club.id,

@@ -80,54 +80,51 @@ function digest(state: CareerState): Digest {
     };
 }
 
-// Línea de base del motor 1.9.0 — ver docs/career-engine.md §9 y §11.
-// Cambió respecto de 1.8.0 por la revisión de la PROGRESIÓN: el rendimiento de
-// la temporada anterior ahora empuja el desarrollo (`meritDrive`), la curva de
-// envejecimiento se recalibró para atravesar el pico en vez de sentarse encima
-// (pisos de `attributeDelta`) y `potential` pasó a ser el techo REAL alcanzable
-// en vez de un objetivo interno 10-15 puntos más alto.
-// Los tests de autoconsistencia de arriba NO se tocaron y siguen en verde.
+// Línea de base del motor 1.10.0 — ver docs/career-engine.md §9, §11 y §12.
+// Cambió respecto de 1.9.0 por el PERFIL DE DESARROLLO: cada jugador saca uno
+// (early/normal/late) al crearse, y esa tirada corre el stream del rng, así que
+// las tres carreras de referencia son otras aunque la semilla sea la misma.
+// El club de arranque cambia por el mismo motivo, no porque se haya tocado el
+// catálogo. Los tests de autoconsistencia de arriba NO se tocaron.
 const EXPECTED: Record<string, Digest> = {
-    // El pilar llega a peakOvr 77 con techo declarado 77: el potencial dejó de
-    // ser decorativo y ahora se alcanza.
     "apertura argentino": {
-        seasons: 14,
-        retirementAge: 34,
-        peakOvr: 57,
+        seasons: 17,
+        retirementAge: 37,
+        peakOvr: 59,
         caps: 0,
         titles: 0,
         clubs: 3,
-        firstClub: 'sb-st-brendan-s',
+        firstClub: 'sb-sitas',
         lastClub: 'sb-hurling',
         employment: 'amateur-compensated',
-        decisions: 13,
-        stateHash: 2971117379,
+        decisions: 16,
+        stateHash: 1928823597,
     },
     "pilar neozelandés": {
         seasons: 21,
         retirementAge: 39,
-        peakOvr: 77,
-        caps: 76,
-        titles: 3,
-        clubs: 2,
-        firstClub: 'chiefs',
-        lastClub: 'exeter-chiefs',
-        employment: 'amateur-compensated',
-        decisions: 18,
-        stateHash: 2632455460,
+        peakOvr: 78,
+        caps: 77,
+        titles: 0,
+        clubs: 3,
+        firstClub: 'richmond',
+        lastClub: 'counties-manukau',
+        employment: 'full-time-professional',
+        decisions: 19,
+        stateHash: 3338457893,
     },
     "wing francés": {
-        seasons: 14,
-        retirementAge: 33,
-        peakOvr: 63,
-        caps: 11,
-        titles: 2,
-        clubs: 4,
-        firstClub: 'ealing-trailfinders',
-        lastClub: 'bourgoin',
-        employment: 'semi-professional',
-        decisions: 11,
-        stateHash: 3874873568,
+        seasons: 16,
+        retirementAge: 35,
+        peakOvr: 64,
+        caps: 18,
+        titles: 1,
+        clubs: 3,
+        firstClub: 'cornish-pirates',
+        lastClub: 'bagneres',
+        employment: 'amateur-compensated',
+        decisions: 13,
+        stateHash: 2319560447,
     },
 };
 

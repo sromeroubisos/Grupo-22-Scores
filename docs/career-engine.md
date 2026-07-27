@@ -9,8 +9,8 @@ Versiones selladas en este momento:
 
 | Constante | Valor | Dónde |
 |---|---|---|
-| `ENGINE_VERSION` | `1.9.0` | `types/career.ts` |
-| `SCHEMA` (guardado) | `6` | `carrera-rugby/careerStorage.ts` |
+| `ENGINE_VERSION` | `1.10.0` | `types/career.ts` |
+| `SCHEMA` (guardado) | `7` | `carrera-rugby/careerStorage.ts` |
 | `CLUB_CATALOG_VERSION` | `2026-27.6` | `data/clubs.ts` |
 | `SA_SNAPSHOT_VERSION` | `464399ffada4` | `data/clubs2026/saClubs.generated.ts` |
 | `NATIONS_VERSION` | `2026-07.2` | `data/nations.ts` |
@@ -297,7 +297,7 @@ motor ya no sabe interpretar. Todo va envuelto en `try/catch`: sin acceso a
 
 Correr con `npm test` (runner nativo `node --test`, **no** Vitest).
 
-### Digest congelado — línea de base del motor 1.9.0
+### Digest congelado — línea de base del motor 1.10.0
 
 Con el `rotatingChooser` del test (opción elegida por
 `hashSeed(eventId:temporada) % nOpciones`), una ruta distinta en cada caso:
@@ -540,3 +540,94 @@ puntos"). El OVR no se mueve, la carrera sí.
 `progression-ceiling.test.ts` congela todo esto como propiedades estadísticas,
 incluida la que de verdad importa: que una meseta larga sea un pico y no un
 estancamiento.
+
+---
+
+## 12. Perfiles de desarrollo e identidad (1.10.0)
+
+### Por qué todas las carreras se parecían
+
+Los `PEAKS` de `aging.ts` son fijos por grupo: todos los wings picaban en
+velocidad a los 25 exactamente. Con el techo ya alcanzable (§11), lo único que
+distinguía dos partidas era el número sorteado — no la **forma** de la carrera.
+
+### `engine/development-profile.ts`
+
+Cada jugador saca un perfil al crearse, oculto como el techo:
+
+| | `early` | `normal` | `late` |
+|---|---|---|---|
+| Crecimiento ≤23 | **1,30** | 1,0 | 0,72 (≤22) |
+| Crecimiento 24-26 | 0,92 | 1,0 | 1,05 |
+| Crecimiento 27+ | 0,70 | 1,0 | **1,45** |
+| Desplazamiento del pico | 0 | 0 | **+2** |
+
+**Al `early` no se le adelanta el pico.** Se probó con −1 y quedaba a 3 puntos de
+su techo mientras el `late` llegaba a 1: con la ventana recortada no le alcanzaba
+para cerrar la brecha — el bug de §11 reapareciendo por perfil. `early` significa
+llegar antes, no romperse antes. Y el `late` suma 2 y no 3 porque con 3 llegaba
+más arriba que los otros dos y dejaba de ser una forma distinta de carrera para
+ser sencillamente la mejor.
+
+### El reparto NO es plano
+
+| Grupo | early | normal | late |
+|---|---|---|---|
+| Backs | **35** | 50 | 15 |
+| Forwards | 15 | 50 | **35** |
+
+Los backs viven de la velocidad, que pica joven; los forwards de la fuerza y la
+técnica de scrum, que maduran cerca de los 30. Elegir pilar o wing cambia la
+forma esperable de la carrera, no solo la edad del pico.
+
+### Resultado medido (1080 carreras, controlado por grupo)
+
+| Grupo · perfil | Pico | Edad del pico | OVR a los 22 | OVR a los 30 |
+|---|---|---|---|---|
+| Back · early | 63 | 25 | **60** | 62 |
+| Back · normal | 63 | 26 | 59 | 62 |
+| Back · late | 66 | **29** | 55 | **66** |
+| Forward · early | 67 | 27 | **63** | 67 |
+| Forward · normal | 67 | 29 | 56 | 67 |
+| Forward · late | 68 | **30** | 53 | 67 |
+
+Los picos quedan dentro de 1-3 puntos entre perfiles: cambia el **cuándo**, no el
+**cuánto**. Hay que comparar SIEMPRE dentro del grupo — los forwards tienen más
+recorrido de OVR y además tiran a `late`, así que mezclarlos hace parecer que el
+`late` es mejor cuando lo que pasa es que hay más pilares entre los `late`.
+
+> Un residuo honesto: en los backs, `early` y `normal` terminan pareciéndose (a
+> los 22 los separa un punto). No es falta de calibración sino del deporte — un
+> back ya pica joven por su puesto, así que "madurar temprano" le agrega poco. El
+> perfil se nota en los forwards y en el contraste contra `late` en todos lados.
+
+### Revelado al retiro
+
+El perfil está oculto toda la partida y se nombra recién en el resumen final
+("Maduró tarde: siguió creciendo pasados los 30"). Convierte un número escondido
+en un descubrimiento y le da respaldo al arquetipo *El que llegó tarde*, que
+hasta ahora se sostenía solo en la edad del primer contrato.
+
+### Identidad del jugador
+
+- **`surname`** — texto libre, saneado en `sanitizeSurname` y acotado a 15. Se
+  sanea al CREAR y no al mostrar: React escapa al renderizar, pero el valor
+  también va a `localStorage` y —cuando exista la tarjeta compartible— a un
+  canvas, donde no hay escapado. Se quitan controles, marcas de ancho cero y
+  overrides bidi (que pueden dar vuelta el texto que los rodean). Si no queda
+  nada usable, cae al apodo que el motor ya generaba.
+- **`number`** — deja de sortearse: el default es el canónico del puesto
+  (`numbers[0]`, o sea 10 el apertura, 2 el hooker, 15 el fullback). Los puestos
+  que comparten varios (pilar 1/3, segunda 4/5, tercera 6/7/8, centro 12/13,
+  wing 11/14) dejan elegir; un número que no es del puesto se ignora.
+
+### Una lección sobre los tests de balance
+
+El guard de apariciones de academia bajó de 60% a 48% y parecía una regresión.
+No lo era: la muestra eran **46 temporadas**, y la tirada del perfil corre el
+stream del rng, así que las mismas semillas producen otras carreras. Con la
+muestra ampliada a n≈250 el valor real es 60-64%.
+
+**Un test de balance con muestra chica no mide balance: mide el stream del rng.**
+Antes de aflojar un umbral, agrandá la muestra — el umbral que se había relajado
+a 0,55 volvió a 0,60 al medirlo bien.

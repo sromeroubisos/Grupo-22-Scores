@@ -55,7 +55,7 @@ export type MovementKind =
 // sale de un rng re-sembrado aparte, y se verificó que las carreras de la línea
 // de base quedan byte-idénticas. Lo que sí cambia todo es la ruta: el club de
 // arranque ahora depende de ella, y con él la carrera entera.
-export const ENGINE_VERSION = '1.9.0';
+export const ENGINE_VERSION = '1.10.0';
 
 export type CareerPhase = 'setup' | 'season' | 'event' | 'retired';
 

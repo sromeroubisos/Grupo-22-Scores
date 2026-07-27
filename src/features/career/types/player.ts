@@ -1,6 +1,7 @@
 import type { EmploymentStatus, SquadTrack } from '../engine/contracts.ts';
 import type { EconomicModel } from '../data/competition-levels2026.ts';
 import type { EntryMode } from './career.ts';
+import type { DevelopmentProfile } from '../engine/development-profile.ts';
 // Modelo del jugador. Todo el motor de Carrera de Rugby gira alrededor de esto.
 // Atributos y variables dinámicas se guardan como números flotantes (0..100) y
 // se redondean solo para mostrar; así el envejecimiento no destruye técnica de golpe.
@@ -86,10 +87,22 @@ export interface Injury {
 export interface Player {
     // Identidad
     nickname: string;
+    /**
+     * Apellido elegido por el usuario. Es el nombre con el que se lo nombra en
+     * la cabecera y en el retiro. Saneado y acotado a 15 caracteres al crear
+     * (ver `sanitizeSurname`): entra texto libre, así que no se guarda crudo.
+     */
+    surname: string;
     position: Position;
     number: number;
     nationality: string; // la ÚNICA que elige el usuario (nombre, para mostrar)
     origin: string; // id de origen (data/origins)
+
+    /**
+     * Forma de la curva de desarrollo. OCULTO durante la partida —como
+     * `potential`— y revelado recién en el resumen de retiro.
+     */
+    developmentProfile: DevelopmentProfile;
 
     // Estado
     age: number;

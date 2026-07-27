@@ -460,7 +460,11 @@ test('en una carrera completa TODO salto grande tiene un motivo identificable', 
 test('las apariciones de DESARROLLO son plausibles (mediana 5-9, mayoría <10)', () => {
     const dev: number[] = [];
     for (const nationality of ['nz', 'fr', 'jp', 'za']) {
-        for (let i = 0; i < 40; i++) {
+        // 250 y no 40: con 40 la muestra quedaba en ~46 temporadas de academia y
+        // el porcentaje se movía 15 puntos ante cualquier cambio que corriera el
+        // stream del rng, sin que el balance real se hubiera movido. Medido con
+        // n≈250 el valor se estabiliza en 60-64%.
+        for (let i = 0; i < 250; i++) {
             // Ruta de DESARROLLO explícita: desde que el jugador elige cómo
             // arranca, la academia es una de las tres puertas y ya no algo que
             // el motor sortea. Sin declararla, esta muestra no tendría academias.
@@ -477,12 +481,9 @@ test('las apariciones de DESARROLLO son plausibles (mediana 5-9, mayoría <10)',
     const breakout = Math.max(...dev);
     assert.ok(dev.length > 20, 'debería haber temporadas de desarrollo');
     assert.ok(median >= 4 && median <= 10, `mediana de desarrollo fuera de rango: ${median}`);
-    // 0.6 → 0.55 en 1.9.0: con el desarrollo empujado por el RENDIMIENTO
-    // (`meritDrive`), el juvenil que rinde se gana minutos antes, así que las
-    // temporadas de academia con muchas apariciones dejaron de ser rarísimas.
-    // Es consecuencia buscada, no una regresión: lo que el test cuida sigue en
-    // pie — la MAYORÍA de las temporadas de academia son de pocos partidos.
-    assert.ok(below10 >= 0.55, `pocas por debajo de 10: ${Math.round(below10 * 100)}%`);
+    // Vuelve a 0.6 (había bajado a 0.55 en 1.9.0 persiguiendo lo que resultó ser
+    // ruido de una muestra de 46). Con la muestra ampliada el valor real es 60-64%.
+    assert.ok(below10 >= 0.6, `pocas por debajo de 10: ${Math.round(below10 * 100)}%`);
     assert.ok(breakout >= 10, `debe existir alguna temporada de irrupción (máx ${breakout})`);
 });
 

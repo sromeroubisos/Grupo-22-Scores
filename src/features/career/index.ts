@@ -91,3 +91,9 @@ export {
 
 export { createInitialCareer, careerReducer } from './state/career-reducer.ts';
 export * from './state/career-actions.ts';
+export {
+    DEVELOPMENT_PROFILES, peakShiftOf, profileDistribution, profileGrowthFactor,
+    profileRevealText, rollDevelopmentProfile,
+} from './engine/development-profile.ts';
+export type { DevelopmentProfile } from './engine/development-profile.ts';
+export { SURNAME_MAX, sanitizeSurname, defaultNumberFor } from './engine/create-player.ts';
