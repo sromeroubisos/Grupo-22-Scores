@@ -922,6 +922,16 @@
     margin: 0;
 }
 
+/* Línea de crónica que explica por qué le tocó ese arquetipo de retiro. */
+.summaryBlurb {
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+    max-width: 46ch;
+    margin: 0;
+    text-wrap: balance;
+}
+
 .summaryClubs {
     display: flex;
     flex-wrap: wrap;

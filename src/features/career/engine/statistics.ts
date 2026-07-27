@@ -6,7 +6,9 @@ import { getPosition } from '../data/positions.ts';
 import type { Rng } from './random.ts';
 import { hashSeed, rngFromState } from './random.ts';
 import type { EmploymentStatus, SquadTrack } from './contracts.ts';
+import { employmentRank } from './contracts.ts';
 import type { SeasonEnvironment } from './environment.ts';
+import { careerArchetype } from './archetypes.ts';
 
 // Fracción de las fechas DEL EQUIPO que el jugador llega a disputar según su
 // rol. No son partidos garantizados: después pesan lesiones y contrato.
@@ -170,6 +172,21 @@ export function buildCareerSummary(state: CareerState): CareerSummary {
     const spellByClub = new Map<string, ClubSpell>();
     const honours = new Set<string>();
 
+    // Edad del primer contrato profesional: es lo que separa al que llegó tarde
+    // del que ya nació adentro. Sale de la trayectoria congelada, que guarda el
+    // `employment` de cada temporada — no se recalcula desde el catálogo.
+    const firstProfessionalAge = state.history.find(
+        (h) => h.employment === 'full-time-professional',
+    )?.age ?? null;
+
+    // Techo de empleo alcanzado. El escalafón puede BAJAR al final de la carrera
+    // (se pierde el profesionalismo de a un escalón), así que el retiro no dice
+    // hasta dónde llegó: hay que mirar toda la trayectoria.
+    const peakEmployment = state.history.reduce<EmploymentStatus>(
+        (peak, h) => (employmentRank(h.employment) > employmentRank(peak) ? h.employment : peak),
+        player.employment,
+    );
+
     for (const s of seasons) {
         accumulateStats(totals, s.stats);
         peakOvr = Math.max(peakOvr, s.ovrEnd);
@@ -213,6 +230,9 @@ export function buildCareerSummary(state: CareerState): CareerSummary {
     const finalXI = (player.flags['capitan_nacional'] ?? 0) > 0
         || (player.nationalTeam !== null && seasons.slice(-3).some((s) => s.calledUp) && peakOvr >= 74);
 
+    const byClub = [...spellByClub.values()].sort((a, b) => b.seasons - a.seasons);
+    const honourList = [...honours];
+
     return {
         nickname: player.nickname,
         position: player.position,
@@ -227,10 +247,22 @@ export function buildCareerSummary(state: CareerState): CareerSummary {
         peakOvr,
         avgRating,
         totals,
-        byClub: [...spellByClub.values()].sort((a, b) => b.seasons - a.seasons),
-        honours: [...honours],
+        byClub,
+        honours: honourList,
         retirementReason: player.retirementReason,
         careerScore,
         finalXI,
+        archetype: careerArchetype({
+            startRoute: state.startRoute,
+            flags: player.flags,
+            honours: honourList,
+            seasons: seasons.length,
+            caps: player.caps,
+            titles: player.titles,
+            peakOvr,
+            clubsPlayed: byClub.length,
+            firstProfessionalAge,
+            peakEmployment,
+        }),
     };
 }

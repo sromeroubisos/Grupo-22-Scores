@@ -3,6 +3,7 @@ import type { LeagueStanding, SeasonCompetitionParticipation, SeasonResult, Seas
 import type { TitleWon } from '../data/clubs2026/competitions2026.ts';
 import type { EconomicModel } from '../data/competition-levels2026.ts';
 import type { EmploymentStatus, SquadTrack } from '../engine/contracts.ts';
+import type { CareerArchetype } from '../engine/archetypes.ts';
 
 /**
  * DESDE DÓNDE arranca la carrera. Es la primera decisión del juego, antes de que
@@ -54,7 +55,7 @@ export type MovementKind =
 // sale de un rng re-sembrado aparte, y se verificó que las carreras de la línea
 // de base quedan byte-idénticas. Lo que sí cambia todo es la ruta: el club de
 // arranque ahora depende de ella, y con él la carrera entera.
-export const ENGINE_VERSION = '1.7.0';
+export const ENGINE_VERSION = '1.8.0';
 
 export type CareerPhase = 'setup' | 'season' | 'event' | 'retired';
 
@@ -237,4 +238,10 @@ export interface CareerSummary {
 
     careerScore: number; // puntaje para leaderboard
     finalXI: boolean; // si terminó siendo titular indiscutido de la selección
+
+    /**
+     * Titular con el que se cierra la carrera. Es DERIVADO (no se guarda en
+     * `CareerState`), así que agregarlo no invalida ninguna partida guardada.
+     */
+    archetype: CareerArchetype;
 }

@@ -1,27 +1,17 @@
 'use client';
 
-import type { CareerState, CareerSummary } from '@/features/career';
+import type { CareerState } from '@/features/career';
 import { buildCareerSummary, getClub, getPosition, kickAccuracy, secondaryStatOf } from '@/features/career';
 import Flag from './Flag';
 import ClubBadge from './ClubBadge';
 import styles from './carrera.module.css';
 
-// Titular generado para la carrera, según lo más destacado que logró.
-function careerHeadline(summary: CareerSummary, flags: Record<string, number>): string {
-    if ((flags['campeon_mundo'] ?? 0) > 0) return 'Campeón del Mundo';
-    if (summary.honours.includes('Salón de la Fama')) return 'Miembro del Salón de la Fama';
-    if (summary.titles >= 4) return 'Multicampeón';
-    if (summary.caps >= 30) return 'Emblema de la selección';
-    if (summary.peakOvr >= 80) return 'Crack de su generación';
-    if (summary.peakOvr >= 72) return 'Un jugador de jerarquía';
-    if (summary.seasons >= 12) return 'Un guerrero de mil batallas';
-    return 'Una carrera de pura entrega';
-}
-
 export default function RetirementSummary({ career, onReplay }: { career: CareerState; onReplay: () => void }) {
     const summary = buildCareerSummary(career);
     const secondary = secondaryStatOf(summary.position, summary.totals);
-    const headline = careerHeadline(summary, career.player.flags);
+    // El titular de la carrera lo decide el motor (engine/archetypes.ts): acá
+    // solo se pinta.
+    const { label: headline, blurb } = summary.archetype;
     const posLabel = getPosition(summary.position).labelEs;
     const countryCode = career.player.eligibility.nationalityCountryCode;
 
@@ -49,6 +39,7 @@ export default function RetirementSummary({ career, onReplay }: { career: Career
             <div className={styles.summaryHero}>
                 <span className={styles.eyebrow}>Fin de la carrera</span>
                 <h2 className={styles.summaryTitle}>{headline}</h2>
+                <p className={styles.summaryBlurb}>{blurb}</p>
                 <div className={styles.summaryId}>
                     {countryCode && <Flag code={countryCode} name={summary.nationality} size={24} decorative />}
                     <span>{posLabel} · {summary.nationality}</span>
