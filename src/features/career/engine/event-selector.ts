@@ -1,4 +1,4 @@
-import type { CareerState, ClubOffer } from '../types/career.ts';
+import type { CareerState, ClubOffer, StartRouteId } from '../types/career.ts';
 import type { EventContext, EventRequirements, GameEvent } from '../types/event.ts';
 import { ALL_EVENTS, getEvent, TRANSFER_EVENT_ID } from '../data/events/index.ts';
 import { movementOptionCopy, movementResultText } from '../data/movement-copy.ts';
@@ -9,7 +9,7 @@ import { canRepresent, targetUnion } from './eligibility.ts';
 import { computeEffectiveOvr, computeOvr } from './scoring.ts';
 import { generateOffers } from './club-offers.ts';
 import { marketRung } from './market-routes.ts';
-import { isProfessionalEmployment } from './contracts.ts';
+import { isProfessionalEmployment, type EmploymentStatus, type SquadTrack } from './contracts.ts';
 import type { Rng } from './random.ts';
 
 /** Contrato del mercado como FASE explícita (Fase 1.5). */
@@ -23,6 +23,80 @@ const MARKET_COOLDOWN_SEASONS = 2;
 export interface Selection {
     event: GameEvent;
     offers: ClubOffer[] | null; // presente solo en el mercado de pases
+}
+
+// ---- Peso por entorno y ruta (Fase 4) ----------------------------------------
+//
+// El pool está casi sin gatear a propósito: 51 de los 61 eventos no declaran
+// `requires`, así que la elegibilidad sola no distingue a un amateur de un
+// profesional. La diferenciación por ruta se hace acá, MOVIENDO LA FRECUENCIA,
+// nunca filtrando duro: un amateur puede recibir un evento de club, solo que le
+// sale menos seguido que uno de entorno o de vida personal.
+//
+// El eje principal es el ENTORNO VIVO (`employment` + `squadTrack`), no la ruta
+// sellada: el que arrancó amateur y llegó a profesional a los 26 tiene que
+// empezar a ver el mundo profesional, no seguir diez temporadas en el amateur.
+// La ruta inicial aporta un empujón extra que SE DILUYE en las primeras
+// temporadas, que es cuando de verdad define cómo se siente la carrera.
+
+/** Familia del evento, deducida del prefijo del id (`env-amateur-derby` → `env`). */
+export type EventFamily = 'env' | 'club' | 'per' | 'mil' | 'nt' | 'tac' | 'med' | 'inj';
+
+const FAMILIES: readonly EventFamily[] = ['env', 'club', 'per', 'mil', 'nt', 'tac', 'med', 'inj'];
+
+function familyOf(eventId: string): EventFamily | null {
+    const prefix = eventId.slice(0, eventId.indexOf('-'));
+    return (FAMILIES as readonly string[]).includes(prefix) ? (prefix as EventFamily) : null;
+}
+
+type FamilyBoost = Partial<Record<EventFamily, number>>;
+
+/** Multiplicadores por escalón de empleo. Lo que no figura vale 1. */
+const BOOST_BY_EMPLOYMENT: Readonly<Record<EmploymentStatus, FamilyBoost>> = {
+    // El amateur vive la tensión rugby/sueldo: entorno y vida personal mandan.
+    // La prensa y la selección casi no existen en su mundo.
+    amateur: { env: 1.8, per: 1.6, inj: 1.15, tac: 0.9, med: 0.4, nt: 0.5 },
+    'amateur-compensated': { env: 1.6, per: 1.4, med: 0.55, nt: 0.65 },
+    'semi-professional': { env: 1.2, club: 1.25, tac: 1.15, per: 0.9, med: 0.9 },
+    // El profesional ya resolvió el sustento: pesa el calendario, la selección
+    // y la exposición.
+    'full-time-professional': { nt: 1.4, med: 1.35, tac: 1.2, club: 1.1, env: 0.8, per: 0.7 },
+};
+
+/** El plantel de desarrollo empuja lo formativo por encima del empleo. */
+const BOOST_BY_SQUAD_TRACK: Readonly<Record<SquadTrack, FamilyBoost>> = {
+    development: { tac: 1.35, club: 1.3, env: 1.2, nt: 0.7, med: 0.6 },
+    senior: {},
+};
+
+/** Empujón de la ruta elegida al crear. Se diluye (ver ROUTE_FADE_SEASONS). */
+const BOOST_BY_ROUTE: Readonly<Record<StartRouteId, FamilyBoost>> = {
+    amateur: { env: 1.5, per: 1.4, med: 0.7 },
+    development: { club: 1.35, tac: 1.3, mil: 1.15, med: 0.8 },
+    professional: { nt: 1.3, med: 1.25, club: 1.1, per: 0.85 },
+};
+
+/** Temporadas en las que el empujón de la ruta inicial se apaga hasta 1. */
+const ROUTE_FADE_SEASONS = 5;
+
+/**
+ * Multiplicador de frecuencia del evento según el entorno del jugador. Es una
+ * función PURA del estado (no toca el rng): mueve el peso, no el azar.
+ */
+export function familyBoost(eventId: string, state: CareerState): number {
+    const family = familyOf(eventId);
+    if (family === null) return 1;
+
+    const p = state.player;
+    const employment = BOOST_BY_EMPLOYMENT[p.employment][family] ?? 1;
+    const track = BOOST_BY_SQUAD_TRACK[p.squadTrack][family] ?? 1;
+
+    // La ruta inicial arranca pesando completo y se apaga hacia la temporada 5.
+    const routeRaw = BOOST_BY_ROUTE[state.startRoute][family] ?? 1;
+    const fade = Math.min(1, p.seasonsPlayed / ROUTE_FADE_SEASONS);
+    const route = routeRaw + (1 - routeRaw) * fade;
+
+    return employment * track * route;
 }
 
 function makeContext(state: CareerState): EventContext {
@@ -193,7 +267,8 @@ export function selectEvent(state: CareerState, rng: Rng): Selection | null {
     const chosen = rng.weighted(pool, (e) => {
         // Penaliza lo visto recientemente para dar variedad.
         const seenPenalty = state.recentEventIds.includes(e.id) ? 0.35 : 1;
-        return e.weight * seenPenalty;
+        // Y ajusta la frecuencia al entorno: el amateur ve más vida y menos prensa.
+        return e.weight * seenPenalty * familyBoost(e.id, state);
     });
 
     return { event: chosen, offers: null };

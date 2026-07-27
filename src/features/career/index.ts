@@ -15,7 +15,10 @@ export type { CareerSeasonEntry, CareerMilestone } from './types/career.ts';
 export { MOVEMENT_LABELS, movementOptionCopy, movementResultText } from './data/movement-copy.ts';
 export { clubLeagueIdentity, isUmbrellaSystem, CAREER_COMPETITION_VERSION, type CompetitionIdentity } from './engine/competition-identity.ts';
 export { domesticSystemKey, sameDomesticSystem } from './engine/domestic-system.ts';
-export { CAREER_MARKET_VERSION } from './engine/event-selector.ts';
+export { CAREER_MARKET_VERSION, familyBoost } from './engine/event-selector.ts';
+export type { EventFamily } from './engine/event-selector.ts';
+export { careerArchetype, allArchetypeIds } from './engine/archetypes.ts';
+export type { CareerArchetype, CareerArchetypeId, ArchetypeInput } from './engine/archetypes.ts';
 export type { EmploymentStatus, SquadTrack } from './engine/contracts.ts';
 export {
     EMPLOYMENT_LABELS, EMPLOYMENT_ORDER, contractLabel, employmentCeiling, employmentRank,
