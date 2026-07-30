@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import { isScopeAllowedTournament, resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
+import { invalidatePublicTournamentListCaches } from '@/lib/server/externalTournamentCacheInvalidation';
 
 function err(message: string, status = 400, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
@@ -91,6 +92,10 @@ export async function PATCH(
         return err('No se pudo actualizar el torneo', 500, error.message);
     }
 
+    // Cambiar el nombre o la visibilidad tiene que verse ya en el listado
+    // publico, sin esperar a que venzan los TTL.
+    invalidatePublicTournamentListCaches();
+
     return NextResponse.json({ data });
 }
 
@@ -130,6 +135,8 @@ export async function DELETE(
         .delete()
         .eq('scope_type', 'tournament')
         .eq('scope_id', id);
+
+    invalidatePublicTournamentListCaches();
 
     return NextResponse.json({ data: { id } });
 }

@@ -1,8 +1,26 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { memoryCache } from '@/lib/cache';
+import { HOME_MANUAL_TOURNAMENTS_CACHE_PREFIX } from '@/lib/server/cacheKeys';
 import { getReadClient } from '@/lib/supabase/read';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
+
+// Rugby se guarda con tres sport_id distintos y los tres son el mismo deporte
+// para quien mira la pagina.
+const RUGBY_SPORT_IDS = ['rugby', 'rugby-union', 'rugby-league'];
+// Bajo el prefijo compartido: asi la invalidacion por prefijo tambien lo limpia
+// cuando se crea o se edita un torneo.
+const MANUAL_TOURNAMENTS_ROWS_CACHE_KEY = `${HOME_MANUAL_TOURNAMENTS_CACHE_PREFIX}:rows`;
+const MANUAL_TOURNAMENTS_ROWS_TTL_SECONDS = 60;
+const MANUAL_TOURNAMENTS_QUERY_LIMIT = 3000;
+
+export function resolveManualSportFilter(rawSport: string | null): string[] | null {
+    const sport = rawSport?.trim().toLowerCase();
+    if (!sport) return null;
+    if (RUGBY_SPORT_IDS.includes(sport)) return RUGBY_SPORT_IDS;
+    return [sport];
+}
 
 type ManualTournamentRow = {
     id: string;
@@ -115,7 +133,9 @@ async function queryVisibleManualTournaments(
             query = query.order('priority', { ascending: false, nullsFirst: false });
         }
 
-        const result = await query.order('display_name', { ascending: true }) as unknown as ManualTournamentQueryResult;
+        const result = await query
+            .order('display_name', { ascending: true })
+            .limit(MANUAL_TOURNAMENTS_QUERY_LIMIT) as unknown as ManualTournamentQueryResult;
 
         if (!result.error) {
             return result;
@@ -137,10 +157,42 @@ async function queryVisibleManualTournaments(
     };
 }
 
-export async function GET() {
+let manualTournamentRowsInFlight: Promise<ManualTournamentQueryResult> | null = null;
+
+// Una sola lectura compartida entre pedidos: el recorte por deporte se hace
+// despues, en memoria, asi que pedir rugby y hockey no son dos consultas.
+async function readManualTournamentRows(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+): Promise<ManualTournamentQueryResult> {
+    const cachedRows = memoryCache.get<ManualTournamentRow[]>(MANUAL_TOURNAMENTS_ROWS_CACHE_KEY);
+    if (cachedRows) {
+        return { data: cachedRows, error: null };
+    }
+
+    if (manualTournamentRowsInFlight) {
+        return manualTournamentRowsInFlight;
+    }
+
+    manualTournamentRowsInFlight = (async () => {
+        try {
+            const result = await queryVisibleManualTournaments(supabase);
+            if (!result.error && result.data) {
+                memoryCache.set(MANUAL_TOURNAMENTS_ROWS_CACHE_KEY, result.data, MANUAL_TOURNAMENTS_ROWS_TTL_SECONDS);
+            }
+            return result;
+        } finally {
+            manualTournamentRowsInFlight = null;
+        }
+    })();
+
+    return manualTournamentRowsInFlight;
+}
+
+export async function GET(request: NextRequest) {
     try {
+        const sportFilter = resolveManualSportFilter(new URL(request.url).searchParams.get('sport'));
         const supabase = await getReadClient();
-        const queryResult = await queryVisibleManualTournaments(supabase);
+        const queryResult = await readManualTournamentRows(supabase);
 
         const { data, error } = queryResult;
 
@@ -154,7 +206,12 @@ export async function GET() {
 
         const visibleTournaments = sortTournamentsByPriority((data || []).filter((tournament) => {
             const status = tournament.status?.toLowerCase?.() || null;
-            return status !== 'archived' && status !== 'deleted';
+            if (status === 'archived' || status === 'deleted') return false;
+
+            if (!sportFilter) return true;
+
+            const sportId = tournament.sport_id || tournament.legacy_sport || 'rugby';
+            return sportFilter.includes(sportId);
         }).map((tournament) => ({
             ...tournament,
             sport_id: tournament.sport_id || tournament.legacy_sport || 'rugby',

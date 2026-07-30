@@ -5,6 +5,7 @@ import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { invalidatePublicTournamentListCaches } from '@/lib/server/externalTournamentCacheInvalidation';
 
 type JsonObject = Record<string, unknown>;
 type ClubLookup = { id: string; name: string; short_name?: string | null };
@@ -724,6 +725,10 @@ export async function POST(request: NextRequest) {
         });
         warnings.push(...phaseResult.warnings);
     }
+
+    // Un torneo recien creado aparece en el listado publico en el proximo
+    // pedido, no cuando vence el TTL.
+    invalidatePublicTournamentListCaches();
 
     return NextResponse.json({
         data: {

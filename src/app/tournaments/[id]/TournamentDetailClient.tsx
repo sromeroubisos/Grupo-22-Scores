@@ -60,6 +60,17 @@ type SeasonOption = {
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Un torneo del catalogo (`rugby-six-nations`) no esta en Supabase: preguntarle
+// a la base por el devuelve 404 y ensucia la consola. La prueba de que es
+// externo es el parametro `url`, que apunta a la ruta del proveedor; el id con
+// forma de UUID, en cambio, siempre puede estar en base.
+function isExternalCatalogRoute(id: string, search: string): boolean {
+    if (UUID_RE.test(id)) return false;
+
+    const sourceUrl = new URLSearchParams(search).get('url') || '';
+    return Boolean(sourceUrl) && !sourceUrl.startsWith('/tournaments/');
+}
 const DEFAULT_CIRCUIT_PLACEMENT_POINTS = [25, 18, 15, 12, 10, 8, 6, 4];
 const CIRCUIT_GLOBAL_SCOPE = '__circuit_global__';
 const COUNTRY_FLAG_BY_NAME = (() => {
@@ -2027,7 +2038,8 @@ export default function TournamentDetailPage({
                     !id.toLowerCase().startsWith('fs-') &&
                     !isRugbyApiSportsTournamentId(id) &&
                     !isEspnAmericanFootballTournamentId(id) &&
-                    !isEspnSoccerTournamentId(id)
+                    !isEspnSoccerTournamentId(id) &&
+                    !isExternalCatalogRoute(id, routeSearch)
                 ) {
                     try {
                         const metaRes = await fetch(`/api/db/tournaments/${encodeURIComponent(id)}`, {
@@ -2192,6 +2204,12 @@ export default function TournamentDetailPage({
     }, [details, tournamentData]);
 
     useEffect(() => {
+        // Un torneo externo no tiene temporadas en base: el selector no aplica.
+        if (id.toLowerCase().startsWith('fs-') || isExternalCatalogRoute(id, routeSearch)) {
+            setSeasonOptions([]);
+            return;
+        }
+
         const controller = new AbortController();
         (async () => {
             try {
@@ -3080,7 +3098,7 @@ export default function TournamentDetailPage({
                     <span className={styles.matchTeamName}>{homeName}</span>
                     {homeLogo
                         ? <>
-                            <img src={homeLogo} alt={homeName} className={styles.matchTeamLogo}
+                            <img src={homeLogo} alt={homeName} className={styles.matchTeamLogo} loading="lazy"
                                 onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                     (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
@@ -3110,7 +3128,7 @@ export default function TournamentDetailPage({
                 <div className={`${styles.matchSideTeam} ${styles.matchAwayTeam} ${awayWon ? styles.matchWinner : ''}`}>
                     {awayLogo
                         ? <>
-                            <img src={awayLogo} alt={awayName} className={styles.matchTeamLogo}
+                            <img src={awayLogo} alt={awayName} className={styles.matchTeamLogo} loading="lazy"
                                 onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                     (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
@@ -3169,14 +3187,14 @@ export default function TournamentDetailPage({
                 <div className={styles.motorsportEventCompetitors}>
                     <div className={styles.motorsportEventCompetitor}>
                         {primaryLogo
-                            ? <img src={primaryLogo} alt={primaryName} className={styles.motorsportEventCompetitorLogo} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                            ? <img src={primaryLogo} alt={primaryName} className={styles.motorsportEventCompetitorLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
                             : <div className={styles.motorsportEventCompetitorPlaceholder}>{primaryName[0]}</div>}
                         <span className={styles.motorsportEventCompetitorName}>{primaryName}</span>
                     </div>
                     <div className={styles.motorsportEventCompetitorDivider}>•</div>
                     <div className={styles.motorsportEventCompetitor}>
                         {secondaryLogo
-                            ? <img src={secondaryLogo} alt={secondaryName} className={styles.motorsportEventCompetitorLogo} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                            ? <img src={secondaryLogo} alt={secondaryName} className={styles.motorsportEventCompetitorLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
                             : <div className={styles.motorsportEventCompetitorPlaceholder}>{secondaryName[0]}</div>}
                         <span className={styles.motorsportEventCompetitorName}>{secondaryName}</span>
                     </div>
@@ -3246,7 +3264,7 @@ export default function TournamentDetailPage({
                                 </span>
                                 <div className={styles.motorsportPodiumIdentity}>
                                     {driverLogo
-                                        ? <img src={driverLogo} alt={driverName} className={styles.motorsportEventCompetitorLogo} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                                        ? <img src={driverLogo} alt={driverName} className={styles.motorsportEventCompetitorLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
                                         : <div className={styles.motorsportEventCompetitorPlaceholder}>{driverName[0]}</div>}
                                     <div className={styles.motorsportPodiumMeta}>
                                         <span className={styles.motorsportEventCompetitorName}>{driverName}</span>
@@ -3311,6 +3329,7 @@ export default function TournamentDetailPage({
                                 src={logo}
                                 alt={teamName}
                                 className={styles.teamLogo}
+                                loading="lazy"
                                 onLoad={handleTeamLogoLoad}
                                 onError={handleTeamLogoError}
                             />
@@ -3393,7 +3412,7 @@ export default function TournamentDetailPage({
                     {/* Home */}
                     <div className={styles.featuredTeam}>
                         {homeLogo
-                            ? <img src={homeLogo} alt={homeName} className={styles.featuredTeamLogo} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                            ? <img src={homeLogo} alt={homeName} className={styles.featuredTeamLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
                             : <div className={styles.featuredTeamLogoPlaceholder}>{homeName[0]}</div>}
                         <span className={styles.featuredTeamName}>{homeName}</span>
                     </div>
@@ -3435,7 +3454,7 @@ export default function TournamentDetailPage({
                     {/* Away */}
                     <div className={styles.featuredTeam}>
                         {awayLogo
-                            ? <img src={awayLogo} alt={awayName} className={styles.featuredTeamLogo} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                            ? <img src={awayLogo} alt={awayName} className={styles.featuredTeamLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
                             : <div className={styles.featuredTeamLogoPlaceholder}>{awayName[0]}</div>}
                         <span className={styles.featuredTeamName}>{awayName}</span>
                     </div>
@@ -3545,7 +3564,7 @@ export default function TournamentDetailPage({
                                         <span className={posClassName}>{String(row.position).padStart(2, '0')}</span>
                                         <div className={styles.motorsportTelemetryDriver}>
                                             {row.logo
-                                                ? <img src={row.logo} alt={row.name} className={styles.motorsportTelemetryLogo} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                                                ? <img src={row.logo} alt={row.name} className={styles.motorsportTelemetryLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
                                                 : <div className={styles.motorsportTelemetryLogoFallback}>{row.name[0]}</div>}
                                             <span className={styles.motorsportTelemetryName}>{row.name}</span>
                                         </div>
@@ -3622,13 +3641,13 @@ export default function TournamentDetailPage({
                             <span className={styles.motorsportStandingsPos}>{position}</span>
                             <div className={styles.motorsportStandingsIdentity}>
                                 {logo
-                                    ? <img src={logo} alt={getStandingsTeamName(row)} className={styles.motorsportStandingsLogo} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                                    ? <img src={logo} alt={getStandingsTeamName(row)} className={styles.motorsportStandingsLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
                                     : <div className={styles.motorsportStandingsLogoFallback}>{getStandingsTeamName(row)[0]}</div>}
                                 <div className={styles.motorsportStandingsIdentityMeta}>
                                     <div className={styles.motorsportStandingsIdentityTop}>
                                         <span className={styles.motorsportStandingsName}>{getStandingsTeamName(row)}</span>
                                         {flagAsset
-                                            ? <img src={flagAsset} alt={row.country_name || 'Bandera'} className={styles.motorsportStandingsFlagIcon} />
+                                            ? <img src={flagAsset} alt={row.country_name || 'Bandera'} className={styles.motorsportStandingsFlagIcon} loading="lazy" />
                                             : flag
                                                 ? <span className={styles.motorsportStandingsFlag}>{flag}</span>
                                                 : null}
@@ -4207,7 +4226,7 @@ export default function TournamentDetailPage({
                                         <div className={styles.infoRow}>
                                             <span className={styles.infoLabel}>Campeón Vigente</span>
                                             <span className={styles.infoValue}>
-                                                {details.winner.image_path && <img src={details.winner.image_path} alt="" width={16} height={16} />}
+                                                {details.winner.image_path && <img src={details.winner.image_path} alt="" width={16} height={16} loading="lazy" />}
                                                 {details.winner.name}
                                             </span>
                                         </div>
@@ -4551,7 +4570,7 @@ export default function TournamentDetailPage({
                                         const content = (
                                             <>
                                                 {team.logo
-                                                    ? <img src={team.logo} alt={team.name} className={styles.teamCardLogo} onError={(e) => (e.currentTarget.style.display = 'none')} />
+                                                    ? <img src={team.logo} alt={team.name} className={styles.teamCardLogo} loading="lazy" onError={(e) => (e.currentTarget.style.display = 'none')} />
                                                     : <div className={styles.teamCardLogoPlaceholder}>{team.name[0]}</div>}
                                                 <span className={styles.teamCardName}>{team.name}</span>
                                             </>

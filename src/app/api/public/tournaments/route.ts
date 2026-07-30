@@ -9,6 +9,7 @@ import {
 } from '@/lib/services/flashscore';
 import {
     readTournamentsFeedSnapshotMetadata,
+    readTournamentsFeedSnapshotPayload,
     readUsableTournamentsFeedSnapshot,
     upsertTournamentsFeedSnapshot,
     type TournamentsFeedType,
@@ -40,6 +41,23 @@ const SELECT_WITHOUT_LEGACY_SPORT_REVIEW = `${SELECT_WITHOUT_LEGACY_SPORT}, revi
 const FLAT_CACHE_CONTROL = 'public, max-age=300, stale-while-revalidate=600';
 const CATALOG_CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300';
 const PUBLIC_TOURNAMENTS_DB_QUERY_LIMIT = 3000;
+
+// La lectura de `tournaments` es la MISMA para todos los scopes y para todos los
+// paises: el recorte por deporte, audiencia y pais se hace despues, en memoria.
+// Sin este cache, abrir cinco paises son cinco lecturas completas de la tabla.
+const PUBLIC_TOURNAMENTS_ROWS_CACHE_KEY = `${PUBLIC_TOURNAMENTS_RESPONSE_CACHE_PREFIX}:rows:visible`;
+const PUBLIC_TOURNAMENTS_ROWS_TTL_SECONDS = 60;
+
+// El catalogo externo cambia poco —una liga nueva por pais cada tanto— y cuesta
+// 33 paises x 2 llamadas al proveedor. Con 10 minutos se rehacia ~144 veces por
+// dia (unas 9.500 llamadas, casi la cuota entera); con 6 horas son 4.
+const EXTERNAL_CATALOG_FRESH_TTL_SECONDS = 6 * 60 * 60;
+const EXTERNAL_CATALOG_STALE_TTL_SECONDS = 24 * 60 * 60;
+
+// Un payload degradado (el proveedor externo no contesto) no se guarda en el
+// snapshot durable y vive poco en memoria, para reintentar pronto.
+const DEGRADED_PAYLOAD_FRESH_TTL_SEC = 15;
+const DEGRADED_PAYLOAD_STALE_TTL_SEC = 60;
 
 type PublicTournamentRow = {
     id: string;
@@ -119,6 +137,12 @@ type PublicRugbyCountrySummary = {
 
 type PublicTournamentsPayload = {
     data: unknown;
+    // Presente solo cuando la fuente externa no respondio: lo que va en `data`
+    // es lo que hay en base de datos, no el catalogo completo. La UI lo usa para
+    // avisar en vez de mostrar un pais vacio como si no tuviera ligas.
+    meta?: {
+        externalUnavailable: true;
+    };
 };
 
 type PublicDbTournamentListItem = {
@@ -328,10 +352,23 @@ function slugifyCountryId(value: string): string {
         .replace(/^-+|-+$/g, '');
 }
 
+// Ojo con el castellano: en base los torneos sin pais figuran como
+// 'Internacional', y sin este alias quedaban en un pais propio, separado del
+// 'World' del proveedor. Sintoma: dos acordeones "Internacional" en la pantalla.
+const INTERNATIONAL_COUNTRY_SLUGS = new Set([
+    'world',
+    'worldwide',
+    'global',
+    'international',
+    'internacional',
+    'mundial',
+    'mundo',
+]);
+
 function resolveRugbyCountryId(countryName: string): string {
     const slug = slugifyCountryId(countryName);
 
-    if (!slug || slug === 'world' || slug === 'worldwide' || slug === 'global' || slug === 'international') {
+    if (!slug || INTERNATIONAL_COUNTRY_SLUGS.has(slug)) {
         return 'international';
     }
 
@@ -529,8 +566,11 @@ async function queryRugbyCountryTournaments(args: {
     const results = await Promise.allSettled(requests.map((request) => request.promise));
     const fulfilledCount = results.filter((result) => result.status === 'fulfilled').length;
 
+    // Si NO contesto ninguna, el pais no esta vacio: la fuente esta caida. Lanzar
+    // es lo que permite distinguir "no hay ligas" de "no pudimos preguntar".
     if (fulfilledCount === 0) {
-        return [];
+        const firstError = results.find((result): result is PromiseRejectedResult => result.status === 'rejected');
+        throw firstError?.reason || new Error('FlashScore rugby tournaments are unavailable.');
     }
 
     const mapped = results.flatMap((result, index) => {
@@ -623,6 +663,9 @@ async function queryPublicRugbyFlashScoreTournaments(args: {
         throw new Error('FlashScore rugby catalog is unavailable.');
     }
 
+    // En el catalogo completo un pais caido no puede tumbar a los otros 32: acá
+    // sí se absorbe el fallo. La honestidad va en el scope por pais, que es el
+    // que la UI usa para decidir si avisa.
     const grouped = await mapWithConcurrency(countries, 6, (country) =>
         queryRugbyCountryTournaments({
             externalCountryId: country.external_country_id,
@@ -631,7 +674,7 @@ async function queryPublicRugbyFlashScoreTournaments(args: {
             flag: country.flag,
             search: args.search,
             audience: args.audience,
-        }),
+        }).catch(() => [] as PublicExternalTournament[]),
     );
 
     const uniqueById = new Map<string, PublicExternalTournament>();
@@ -654,6 +697,7 @@ async function queryPublicFlashScoreTournaments(args: {
         throw new Error(`FlashScore catalog is unavailable for ${args.sportKey}.`);
     }
 
+    // Mismo criterio que en rugby: un pais caido no invalida el catalogo entero.
     const grouped = await mapWithConcurrency(countries, 6, (country) =>
         queryFlashScoreCountryTournaments({
             sportKey: args.sportKey,
@@ -662,7 +706,7 @@ async function queryPublicFlashScoreTournaments(args: {
             flag: country.flag,
             search: args.search,
             audience: args.audience,
-        }),
+        }).catch(() => [] as PublicExternalTournament[]),
     );
 
     const uniqueById = new Map<string, PublicExternalTournament>();
@@ -673,6 +717,154 @@ async function queryPublicFlashScoreTournaments(args: {
     }
 
     return sortTournamentsByPriority([...uniqueById.values()]);
+}
+
+function matchesExternalTournamentSearch(tournament: PublicExternalTournament, search: string) {
+    if (!search) return true;
+
+    return tournament.name.toLowerCase().includes(search)
+        || tournament.display_name.toLowerCase().includes(search)
+        || tournament.country.toLowerCase().includes(search);
+}
+
+const externalCatalogInFlight = new Map<string, Promise<PublicExternalTournament[]>>();
+
+type ExternalCatalogArgs = {
+    sportKey: string;
+    shouldAggregateRugby: boolean;
+    audience: TournamentAudience;
+};
+
+function buildExternalCatalogCacheKey(args: ExternalCatalogArgs) {
+    return [
+        PUBLIC_TOURNAMENTS_RESPONSE_CACHE_PREFIX,
+        'catalog',
+        buildCacheKeyPart(args.sportKey),
+        buildCacheKeyPart(args.audience),
+    ].join(':');
+}
+
+async function computeExternalTournamentCatalog(args: ExternalCatalogArgs) {
+    return args.shouldAggregateRugby
+        ? queryPublicRugbyFlashScoreTournaments({ search: '', audience: args.audience })
+        : queryPublicFlashScoreTournaments({
+            sportKey: args.sportKey,
+            search: '',
+            audience: args.audience,
+        });
+}
+
+async function persistExternalTournamentCatalog(
+    cacheKey: string,
+    args: ExternalCatalogArgs,
+    catalog: PublicExternalTournament[],
+) {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return;
+
+    try {
+        await upsertTournamentsFeedSnapshot(createAdminClient(), {
+            cacheKey,
+            feedType: 'catalog',
+            sport: args.sportKey,
+            scope: 'catalog',
+            audience: args.audience,
+            payload: { data: catalog },
+            generatedAt: new Date(),
+            freshTtlSeconds: EXTERNAL_CATALOG_FRESH_TTL_SECONDS,
+            staleTtlSeconds: EXTERNAL_CATALOG_STALE_TTL_SECONDS,
+        });
+    } catch (error) {
+        console.error('[public-tournaments] catalog snapshot persist failed:', error);
+    }
+}
+
+function refreshExternalTournamentCatalog(cacheKey: string, args: ExternalCatalogArgs) {
+    if (externalCatalogInFlight.has(cacheKey)) return;
+
+    const promise = (async () => {
+        try {
+            const catalog = await computeExternalTournamentCatalog(args);
+            memoryCache.set(cacheKey, catalog, EXTERNAL_CATALOG_FRESH_TTL_SECONDS);
+            await persistExternalTournamentCatalog(cacheKey, args, catalog);
+            return catalog;
+        } finally {
+            externalCatalogInFlight.delete(cacheKey);
+        }
+    })();
+
+    externalCatalogInFlight.set(cacheKey, promise);
+    void promise.catch(() => { /* el fallo ya se registra donde importa */ });
+}
+
+// El catalogo externo completo, sin filtrar, por deporte y audiencia. Vive en
+// tres niveles: memoria del proceso, snapshot durable en Supabase (compartido
+// entre instancias y sobrevive a los reinicios) y, ultimo recurso, el barrido de
+// 33 paises x 2 llamadas al proveedor.
+//
+// Con `allowStale` el pedido nunca espera el barrido: devuelve lo que hay —o
+// nada— y refresca de fondo. Es lo que usan los contadores por pais, que no
+// justifican 12 s de espera.
+async function getExternalTournamentCatalog(
+    args: ExternalCatalogArgs,
+    options: { allowStale?: boolean } = {},
+): Promise<PublicExternalTournament[] | null> {
+    const cacheKey = buildExternalCatalogCacheKey(args);
+
+    const cached = memoryCache.get<PublicExternalTournament[]>(cacheKey);
+    if (cached) return cached;
+
+    const inFlight = externalCatalogInFlight.get(cacheKey);
+    if (inFlight && !options.allowStale) return inFlight;
+
+    try {
+        const snapshot = await readTournamentsFeedSnapshotPayload<{ data: PublicExternalTournament[] }>(
+            await getReadClient(),
+            cacheKey,
+        );
+
+        if (snapshot && Array.isArray(snapshot.payload?.data)) {
+            const state = getTournamentsFeedState(
+                snapshot.generatedAt,
+                snapshot.expiresAt,
+                snapshot.staleUntil,
+            );
+
+            if (state.state === 'fresh') {
+                memoryCache.set(cacheKey, snapshot.payload.data, EXTERNAL_CATALOG_FRESH_TTL_SECONDS);
+                return snapshot.payload.data;
+            }
+
+            if (state.state === 'stale') {
+                // Sirve lo viejo ya y renueva atras: nadie espera el barrido.
+                refreshExternalTournamentCatalog(cacheKey, args);
+                return snapshot.payload.data;
+            }
+        }
+    } catch (error) {
+        console.error('[public-tournaments] catalog snapshot read failed:', error);
+    }
+
+    if (options.allowStale) {
+        refreshExternalTournamentCatalog(cacheKey, args);
+        return null;
+    }
+
+    const existing = externalCatalogInFlight.get(cacheKey);
+    if (existing) return existing;
+
+    const promise = (async () => {
+        try {
+            const catalog = await computeExternalTournamentCatalog(args);
+            memoryCache.set(cacheKey, catalog, EXTERNAL_CATALOG_FRESH_TTL_SECONDS);
+            void persistExternalTournamentCatalog(cacheKey, args, catalog);
+            return catalog;
+        } finally {
+            externalCatalogInFlight.delete(cacheKey);
+        }
+    })();
+
+    externalCatalogInFlight.set(cacheKey, promise);
+    return promise;
 }
 
 function filterPublicDbTournaments(args: {
@@ -768,6 +960,50 @@ function tournamentMatchesCountryFilter(tournament: PublicTournamentRow, country
     return false;
 }
 
+function tournamentMatchesCountryKeys(
+    tournament: { country?: string | null; country_id?: string | null },
+    countryKeys: Set<string>,
+) {
+    const values = new Set<string>();
+    addCountryLookupValue(values, tournament.country_id);
+    addCountryLookupValue(values, tournament.country);
+
+    for (const value of values) {
+        if (countryKeys.has(value)) return true;
+    }
+
+    return false;
+}
+
+// Cuenta por pais SIN salir a la red: cruza lo de base con el catalogo externo ya
+// cacheado, con la MISMA funcion de merge y el MISMO criterio de coincidencia que
+// usa el scope por pais. Por eso el numero del encabezado coincide con la lista
+// que se abre debajo.
+//
+// Coincidir por nombre no alcanza: en base, Estados Unidos figura como
+// country='Estados Unidos' con country_id='usa', y el resumen lo llama 'USA'.
+// Hay que mirar el conjunto de valores, no uno solo.
+function buildCountryTournamentCounts(
+    countries: PublicRugbyCountrySummary[],
+    dbTournaments: PublicDbTournamentListItem[],
+    externalCatalog: PublicExternalTournament[],
+) {
+    const counts = new Map<string, number>();
+
+    countries.forEach((country) => {
+        const countryKeys = new Set<string>();
+        addCountryLookupValue(countryKeys, country.id);
+        addCountryLookupValue(countryKeys, country.name);
+
+        const db = dbTournaments.filter((tournament) => tournamentMatchesCountryKeys(tournament, countryKeys));
+        const external = externalCatalog.filter((tournament) => tournamentMatchesCountryKeys(tournament, countryKeys));
+
+        counts.set(country.id, mergePublicTournamentLists(db, external).length);
+    });
+
+    return counts;
+}
+
 function buildDbCountrySummaries(tournaments: PublicDbTournamentListItem[]) {
     const summaries = new Map<string, PublicRugbyCountrySummary>();
 
@@ -800,8 +1036,12 @@ function buildDbCountrySummaries(tournaments: PublicDbTournamentListItem[]) {
     return [...summaries.values()].sort((left, right) => left.name.localeCompare(right.name));
 }
 
+// Se agrupa por el id YA resuelto, no por el nombre: es lo unico que hace que
+// "World" del proveedor e "Internacional" de base sean el mismo pais.
 function buildCountrySummaryMergeKey(summary: PublicRugbyCountrySummary) {
-    return slugifyCountryId(summary.name) || normalizeLookupValue(summary.external_country_id || summary.id);
+    return normalizeLookupValue(summary.id)
+        || slugifyCountryId(summary.name)
+        || normalizeLookupValue(summary.external_country_id);
 }
 
 function collectSummaryExternalCountryIds(...summaries: PublicRugbyCountrySummary[]) {
@@ -963,6 +1203,38 @@ async function queryVisiblePublicTournaments(
     };
 }
 
+let visiblePublicTournamentRowsInFlight: Promise<PublicTournamentQueryResult> | null = null;
+
+// Comparte una sola lectura de la tabla entre todos los pedidos en vuelo y la
+// deja cacheada un minuto. La clave usa el prefijo de respuestas publicas, asi
+// que la invalidacion existente (`deleteByPrefix`) tambien la limpia.
+async function readVisiblePublicTournamentRows(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+): Promise<{ result: PublicTournamentQueryResult; cached: boolean }> {
+    const cachedRows = memoryCache.get<PublicTournamentRow[]>(PUBLIC_TOURNAMENTS_ROWS_CACHE_KEY);
+    if (cachedRows) {
+        return { result: { data: cachedRows, error: null }, cached: true };
+    }
+
+    if (visiblePublicTournamentRowsInFlight) {
+        return { result: await visiblePublicTournamentRowsInFlight, cached: true };
+    }
+
+    visiblePublicTournamentRowsInFlight = (async () => {
+        try {
+            const result = await queryVisiblePublicTournaments(supabase);
+            if (!result.error && result.data) {
+                memoryCache.set(PUBLIC_TOURNAMENTS_ROWS_CACHE_KEY, result.data, PUBLIC_TOURNAMENTS_ROWS_TTL_SECONDS);
+            }
+            return result;
+        } finally {
+            visiblePublicTournamentRowsInFlight = null;
+        }
+    })();
+
+    return { result: await visiblePublicTournamentRowsInFlight, cached: false };
+}
+
 async function queryPublicDbTournamentsForRequest(
     params: PublicTournamentsRequestParams,
     trace: TournamentsTraceContext | undefined,
@@ -973,9 +1245,10 @@ async function queryPublicDbTournamentsForRequest(
 ) {
     const supabase = await getReadClient();
     const supabaseReadStartedAt = Date.now();
-    const queryResult = await queryVisiblePublicTournaments(supabase);
+    const { result: queryResult, cached: rowsFromCache } = await readVisiblePublicTournamentRows(supabase);
     if (trace) {
         trackDuration(trace.metrics, 'supabase_tournaments_read_ms', supabaseReadStartedAt);
+        trace.metrics.supabase_tournaments_rows_cached = rowsFromCache ? 1 : 0;
         if ((queryResult.data?.length || 0) >= PUBLIC_TOURNAMENTS_DB_QUERY_LIMIT) {
             logTournamentsEvent('warn', 'tournaments_db_row_cap_reached', trace, {
                 row_cap: PUBLIC_TOURNAMENTS_DB_QUERY_LIMIT,
@@ -1101,13 +1374,19 @@ function readTournamentsResponseCache(key: string) {
     return { state: 'miss' as const, entry: null };
 }
 
+function isDegradedPayload(payload: PublicTournamentsPayload) {
+    return payload.meta?.externalUnavailable === true;
+}
+
 function writeTournamentsResponseCache(
     key: string,
     payload: PublicTournamentsPayload,
     params: PublicTournamentsRequestParams,
     createdAt: number = Date.now(),
 ) {
-    const policy = getPublicTournamentsCachePolicy(params);
+    const policy = isDegradedPayload(payload)
+        ? { freshTtlSec: DEGRADED_PAYLOAD_FRESH_TTL_SEC, staleTtlSec: DEGRADED_PAYLOAD_STALE_TTL_SEC }
+        : getPublicTournamentsCachePolicy(params);
     const entry: TournamentsResponseCacheEntry = {
         payload,
         createdAt,
@@ -1151,6 +1430,12 @@ async function persistTournamentsFeedSnapshot(
     trace?: TournamentsTraceContext,
 ) {
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        return false;
+    }
+
+    // Un payload sin la fuente externa no merece la ventana larga del snapshot
+    // durable: se serviria degradado durante horas.
+    if (isDegradedPayload(payload)) {
         return false;
     }
 
@@ -1249,6 +1534,7 @@ async function computePublicTournamentsPayload(
             dbItemsCount = dbTournaments.length;
             const dbCountries = error ? [] : buildDbCountrySummaries(dbTournaments);
             let countries = dbCountries;
+            let externalUnavailable = false;
             const externalFetchStartedAt = Date.now();
             try {
                 const externalCountries = params.shouldAggregateRugby
@@ -1266,9 +1552,34 @@ async function computePublicTournamentsPayload(
                 }
             } catch (error) {
                 console.error('[GET /api/public/tournaments] catalog summary failed:', error);
+                externalUnavailable = true;
                 if (trace) {
                     trackDuration(trace.metrics, 'external_tournaments_fetch_ms', externalFetchStartedAt);
                 }
+            }
+
+            // Contadores exactos por pais, solo si el catalogo ya esta cacheado.
+            // Si no lo esta, se dispara el barrido de fondo y esta respuesta sale
+            // sin numeros: nadie espera 12 s por un contador.
+            const catalog = await getExternalTournamentCatalog({
+                sportKey: params.flashScoreSportKey,
+                shouldAggregateRugby: params.shouldAggregateRugby,
+                audience: params.audience,
+            }, { allowStale: true });
+
+            if (catalog) {
+                const { dbTournaments: audienceDbTournaments } = await queryPublicDbTournamentsForRequest(params, trace, {
+                    audience: params.audience,
+                });
+                const counts = buildCountryTournamentCounts(countries, audienceDbTournaments, catalog);
+
+                countries = countries.map((country) => ({
+                    ...country,
+                    tournament_count: counts.get(country.id) ?? 0,
+                }));
+            } else {
+                // Sin catalogo no hay numero honesto que dar.
+                countries = countries.map((country) => ({ ...country, tournament_count: null }));
             }
 
             finalItemsCount = countries.length;
@@ -1280,9 +1591,13 @@ async function computePublicTournamentsPayload(
                     external_items_count: externalItemsCount,
                     final_items_count: finalItemsCount,
                     fallback_path: externalItemsCount === 0 && dbCountries.length > 0 ? 'db_country_summary' : undefined,
+                    external_unavailable: externalUnavailable,
+                    catalog_counts: catalog ? 'ready' : 'warming',
                 });
             }
-            return { data: { countries } };
+            return externalUnavailable
+                ? { data: { countries }, meta: { externalUnavailable: true } }
+                : { data: { countries } };
         }
 
         if (params.flashScoreCatalogEnabled && params.scope === 'country') {
@@ -1296,6 +1611,7 @@ async function computePublicTournamentsPayload(
             });
             dbItemsCount = dbTournaments.length;
             let externalTournaments: PublicExternalTournament[] = [];
+            let externalUnavailable = false;
             const externalFetchStartedAt = Date.now();
             try {
                 externalTournaments = params.shouldAggregateRugby
@@ -1318,6 +1634,7 @@ async function computePublicTournamentsPayload(
                 externalItemsCount = externalTournaments.length;
             } catch (externalError) {
                 console.error('[GET /api/public/tournaments] catalog country failed, using DB fallback:', externalError);
+                externalUnavailable = true;
             }
 
             if (trace) {
@@ -1336,6 +1653,7 @@ async function computePublicTournamentsPayload(
                     external_items_count: externalItemsCount,
                     final_items_count: finalItemsCount,
                     fallback_path: externalItemsCount === 0 && dbItemsCount > 0 ? 'db_country' : undefined,
+                    external_unavailable: externalUnavailable,
                 });
             }
 
@@ -1343,7 +1661,9 @@ async function computePublicTournamentsPayload(
                 throw error;
             }
 
-            return { data: tournaments };
+            return externalUnavailable
+                ? { data: tournaments, meta: { externalUnavailable: true } }
+                : { data: tournaments };
         }
 
         const { dbTournaments, error } = await queryPublicDbTournamentsForRequest(params, trace);
@@ -1378,13 +1698,16 @@ async function computePublicTournamentsPayload(
         if (shouldLoadExternalCatalog) {
             const externalFetchStartedAt = Date.now();
             try {
-                const flashScoreTournaments = params.shouldAggregateRugby
-                    ? await queryPublicRugbyFlashScoreTournaments({ search: params.search, audience: params.audience })
-                    : await queryPublicFlashScoreTournaments({
-                        sportKey: params.flashScoreSportKey,
-                        search: params.search,
-                        audience: params.audience,
-                    });
+                // El catalogo se pide sin termino y se filtra aca: asi la segunda
+                // busqueda distinta tampoco vuelve a salir a la red.
+                const catalog = await getExternalTournamentCatalog({
+                    sportKey: params.flashScoreSportKey,
+                    shouldAggregateRugby: params.shouldAggregateRugby,
+                    audience: params.audience,
+                }) || [];
+                const flashScoreTournaments = params.search
+                    ? catalog.filter((tournament) => matchesExternalTournamentSearch(tournament, params.search))
+                    : catalog;
                 externalItemsCount = flashScoreTournaments.length;
                 if (trace) {
                     trackDuration(trace.metrics, 'external_tournaments_fetch_ms', externalFetchStartedAt);
@@ -1541,17 +1864,29 @@ export async function GET(request: NextRequest) {
         metrics: {},
     };
 
-    if (
-        params.flashScoreCatalogEnabled &&
-        params.scope === 'country' &&
-        ((!params.externalCountryId && params.externalCountryIds.length === 0) || !params.countryName)
-    ) {
-        const response = NextResponse.json(
-            { error: 'Faltan external_country_id o country_name.' },
-            { status: 400 },
-        );
-        attachObservabilityHeaders(response, trace, 'BYPASS');
-        return response;
+    // La validacion NO puede colgar de flashScoreCatalogEnabled: sin `sport` ese
+    // flag es false y el pedido se caia al listado plano, devolviendo 200 con un
+    // catalogo entero cuando lo que se pidio era un pais.
+    if (params.scope === 'country') {
+        const missingCountry = (!params.externalCountryId && params.externalCountryIds.length === 0) || !params.countryName;
+
+        if (!params.sport) {
+            const response = NextResponse.json(
+                { error: 'Falta sport para pedir un pais.' },
+                { status: 400 },
+            );
+            attachObservabilityHeaders(response, trace, 'BYPASS');
+            return response;
+        }
+
+        if (missingCountry) {
+            const response = NextResponse.json(
+                { error: 'Faltan external_country_id o country_name.' },
+                { status: 400 },
+            );
+            attachObservabilityHeaders(response, trace, 'BYPASS');
+            return response;
+        }
     }
 
     const memoryLookupStartedAt = Date.now();

@@ -44,7 +44,10 @@ export const SPORTS: Record<SportId, Sport> = {
     'hockey': {
         id: 'hockey',
         name: 'Ice Hockey',
-        nameEs: 'Hockey',
+        // 'field-hockey' se queda con el rotulo corto "Hockey" porque es el que
+        // tiene todos los torneos de la plataforma; este necesita apellido para
+        // que el menu no muestre dos deportes con el mismo nombre.
+        nameEs: 'Hockey sobre hielo',
         icon: '🏒',
         isActive: true,
         priority: 4,

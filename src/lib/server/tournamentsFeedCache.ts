@@ -40,7 +40,11 @@ const TOURNAMENTS_FEED_CACHE_META_COLUMNS_LEGACY = [
 let cleanupInFlight: Promise<number> | null = null;
 let cleanupNextAllowedAt = 0;
 
-export type TournamentsFeedType = 'list' | 'summary' | 'country' | 'db';
+// 'catalog' guarda el catalogo externo COMPLETO de un deporte, ya normalizado y
+// sin filtrar. No es una respuesta de la API: es el insumo del que salen la
+// busqueda y los contadores por pais, y evita rehacer 33 paises x 2 llamadas.
+// La columna feed_type es TEXT sin constraint, asi que no necesita migracion.
+export type TournamentsFeedType = 'list' | 'summary' | 'country' | 'db' | 'catalog';
 
 type PersistedTournamentsFeedRow = {
     cache_key: string;
