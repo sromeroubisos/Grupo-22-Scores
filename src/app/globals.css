@@ -104,6 +104,14 @@
     --color-accent-glow: rgba(0, 163, 101, 0.4);
     --color-accent-rgb: 0, 163, 101;
 
+    /* EL ACENTO CUANDO PINTA TEXTO. `--color-accent` está calibrado para
+       FONDOS —con blanco encima da 5,5:1— pero como color de texto sobre el
+       fondo claro da 3,05:1, por debajo del 4,5:1 que pide AA para texto
+       normal. Este es el mismo verde corrido a un tono que sí llega, para las
+       etiquetas, los rótulos y los números chicos. En oscuro se corre para el
+       otro lado, que es donde el verde saturado es el que se lee. */
+    --color-accent-ink: #22c55e;
+
     /* Default Dark Tokens (Tectonic) */
     --color-bg-primary: #0a0a0b;
     --color-bg-secondary: #121214;
@@ -159,6 +167,8 @@
     --color-text-tertiary: #71717a;
     --color-text-muted: #52525b;
 
+    --color-accent-ink: #22c55e;
+
     --color-glass: rgba(18, 18, 20, 0.7);
     --color-glass-border: rgba(255, 255, 255, 0.08);
 
@@ -187,6 +197,10 @@
     --color-text-secondary: #4b5563;
     --color-text-tertiary: #6b7280;
     --color-text-muted: #9ca3af;
+
+    /* 5,1:1 sobre el fondo claro del sitio. El `--color-accent` de marca da
+       3,05:1 y no llega. */
+    --color-accent-ink: #00794a;
 
     --color-glass: rgba(255, 255, 255, 0.8);
     --color-glass-border: rgba(0, 0, 0, 0.08);
@@ -1683,4 +1697,37 @@ body:not([data-theme="light"]) .match-center-container select option:checked {
     html {
         zoom: 0.7;
     }
+}
+
+/* ===== SHELL DE ALTO REAL (juego a pantalla completa) =====
+   `body { min-height: 100vh }` + `html { zoom: 0.7 }` no se llevan bien: dentro
+   de un root con zoom, `vh` resuelve contra el viewport SIN zoom, así que body
+   queda ~30% más corto que html. En una página que scrollea no se nota porque
+   el contenido define el alto; en una pantalla de alto fijo deja cientos de
+   píxeles muertos abajo. Medido: html 1545 px, body 1081,6 px.
+
+   Se corrige SÓLO donde hace falta, colgado del `data-full-height` que pone
+   ConditionalLayout, para no tocar el alto del resto del sitio.
+
+   Vale en los dos tamaños: el juego es una PANTALLA, no una página. Lo que
+   cambia abajo de 900 px es cómo se reparte ese alto entre las tres zonas
+   —cabecera, carrera y decisión—, y eso lo resuelve carrera.module.css. */
+html:has(main[data-full-height]),
+html:has(main[data-full-height]) body {
+    height: 100%;
+    min-height: 100%;
+}
+
+html:has(main[data-full-height]) body {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* El shell se queda con lo que sobra después del header, sin adivinar cuánto
+   mide el header con un `calc` hardcodeado. */
+html:has(main[data-full-height]) main[data-full-height] {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
 }

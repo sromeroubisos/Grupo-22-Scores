@@ -162,6 +162,9 @@ export default function ProdeLobby({ competitions, totals, privateLeagues = [], 
         <div className={`${styles.shell} ${embedded ? styles.embeddedShell : ''}`}>
                     <section className={styles.posterHero}>
                         <div className={styles.posterCopy}>
+                            {!embedded ? (
+                                <Link href="/juegos" className={styles.backLink}>← Juegos</Link>
+                            ) : null}
                             <p className={styles.posterKicker}>G22 Prode Lobby</p>
                             <h1 className={styles.posterTitle}>Elegi una competencia y entra a jugar.</h1>
                             <p className={styles.posterLead}>

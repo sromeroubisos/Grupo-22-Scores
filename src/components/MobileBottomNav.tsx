@@ -10,7 +10,9 @@ const navItems = [
     { href: '/', label: 'Partidos', icon: 'matches', matchPrefixes: ['/', '/matches'] },
     { href: '/noticias', label: 'Noticias', icon: 'news', matchPrefixes: ['/noticias'] },
     { href: '/tournaments', label: 'Ligas', icon: 'trophy', matchPrefixes: ['/tournaments'] },
-    { href: '/prode', label: 'Prode', icon: 'prode', matchPrefixes: ['/prode'] },
+    // El Prode entra por Juegos: no tiene pestaña propia, pero la de Juegos
+    // queda activa mientras se navega el prode.
+    { href: '/juegos', label: 'Juegos', icon: 'games', matchPrefixes: ['/juegos', '/prode'] },
     { href: '/search', label: 'Buscar', icon: 'search', matchPrefixes: ['/search'] },
 ];
 
@@ -52,12 +54,13 @@ function NavIcon({ name, active }: { name: string; active?: boolean }) {
                     <path d="M8 20h8" />
                 </svg>
             );
-        case 'prode':
+        case 'games':
             return (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth}>
-                    <rect x="5" y="4" width="14" height="16" rx="2" />
-                    <path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" />
-                    <path d="M8.5 12.5l2 2 4-4.5" />
+                    <path d="M6 12h4M8 10v4" />
+                    <circle cx="15.5" cy="11" r="0.9" fill="currentColor" stroke="none" />
+                    <circle cx="17" cy="13" r="0.9" fill="currentColor" stroke="none" />
+                    <path d="M17.5 6H6.5A4.5 4.5 0 0 0 2 10.5v3A4.5 4.5 0 0 0 6.5 18c1.3 0 2-.6 2.8-1.4l.4-.6h4.6l.4.6c.8.8 1.5 1.4 2.8 1.4a4.5 4.5 0 0 0 4.5-4.5v-3A4.5 4.5 0 0 0 17.5 6Z" />
                 </svg>
             );
         case 'search':

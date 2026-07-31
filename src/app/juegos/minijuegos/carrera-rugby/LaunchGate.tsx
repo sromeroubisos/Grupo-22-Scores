@@ -20,6 +20,15 @@ import styles from './carrera.module.css';
  */
 const APERTURA = Date.parse('2026-07-31T13:00:00.000Z'); // 31/7/2026, 10:00 en Argentina
 
+/**
+ * EN DESARROLLO LA PUERTA NO EXISTE.
+ *
+ * Una cuenta regresiva que también corre en `npm run dev` impide probar el juego
+ * justo cuando más falta hace probarlo. `NODE_ENV` vale lo mismo en el servidor
+ * y en el cliente, así que apagarla acá no puede desincronizar la hidratación.
+ */
+const SIN_PUERTA = process.env.NODE_ENV !== 'production';
+
 interface Resto {
     dias: number;
     horas: number;
@@ -53,11 +62,13 @@ export default function LaunchGate({ children }: { children: ReactNode }) {
     const [ahora, setAhora] = useState<number | null>(null);
 
     useEffect(() => {
+        if (SIN_PUERTA) return;
         setAhora(Date.now());
         const id = window.setInterval(() => setAhora(Date.now()), 1000);
         return () => window.clearInterval(id);
     }, []);
 
+    if (SIN_PUERTA) return <>{children}</>;
     if (ahora === null) return null;
 
     const resto = restoHasta(APERTURA, ahora);

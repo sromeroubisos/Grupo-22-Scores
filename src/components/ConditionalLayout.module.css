@@ -32,3 +32,23 @@
         padding: 0.475rem 0.475rem calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
     }
 }
+
+/* ===== JUEGO DE ALTO FIJO (Carrera de Rugby) =====
+   En ESCRITORIO la pantalla de juego ocupa exactamente lo que queda debajo del
+   header y no scrollea: lo que no entre, scrollea dentro de su propio panel.
+   Sin padding: el shell del juego maneja su propio espaciado, y acá cada píxel
+   que se regala sale de la tarjeta de decisión.
+
+   En el teléfono NO: ahí la columna es una sola y el contenido no entra en una
+   pantalla, así que el alto fijo dejaba la decisión adentro de una caja con
+   barra propia. El corte está en 900 px, el mismo que usa la consola para
+   pasar de dos columnas a una. */
+.gameContent {
+    /* El alto REAL lo fija globals.css vía `data-full-height`: el `calc` con
+       `dvh` que había acá quedaba corto dentro del root con `zoom: 0.7` y
+       además adivinaba cuánto mide el header. */
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}

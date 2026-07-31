@@ -26,6 +26,15 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     // Pantalla full-screen del Prode Mundial: trae su propio fondo y bottom nav,
     // así que va sin el chrome global (header/ticker/nav/footer).
     const isProdeFullScreen = pathname === '/prode/mundial';
+    /**
+     * Carrera de Rugby: la pantalla de juego entra ENTERA en el viewport y no
+     * scrollea. Conserva el header (la navegación del sitio sigue disponible)
+     * pero va sin footer ni nav inferior: son 246 px de pie institucional y 78
+     * de barra fija que, debajo de un juego, sólo empujan la decisión fuera de
+     * pantalla. No es full-screen como el Prode Mundial — es una rama propia
+     * porque el header se queda.
+     */
+    const isFullHeightGame = pathname?.startsWith('/juegos/minijuegos/carrera-rugby') ?? false;
     const returnTo = pathname || '/';
 
     useEffect(() => {
@@ -74,6 +83,20 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
                     <main className={styles.mainContent}>{children}</main>
                 </div>
                 <MobileBottomNav />
+            </SportProvider>
+        );
+    }
+
+    if (isFullHeightGame) {
+        return (
+            <SportProvider>
+                <Header />
+                {/* `data-full-height` es el gancho para que globals.css le dé
+                    alto REAL a html y body SÓLO en esta ruta. Sin eso el shell
+                    hereda `min-height: 100vh` del body, que dentro de un root
+                    con `zoom: 0.7` resuelve al viewport SIN zoom y deja el
+                    contenedor un 30% corto. */}
+                <main className={styles.gameContent} data-full-height="">{children}</main>
             </SportProvider>
         );
     }

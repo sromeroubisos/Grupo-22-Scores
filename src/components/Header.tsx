@@ -135,10 +135,11 @@ export default function Header() {
 
     const displayUser = hasHydrated ? user : null;
     const adminPanel = resolveAdminPanel(displayUser?.role, displayUser?.memberships);
-    const canSeeProde = true;
     const isNewsRoute = pathname?.startsWith('/noticias') ?? false;
     const isRankingsRoute = pathname?.startsWith('/rankings') ?? false;
-    const isProdeRoute = pathname?.startsWith('/prode') ?? false;
+    // El Prode dejó de ser una pestaña de primera plana: vive dentro de Juegos.
+    // La pestaña queda marcada también mientras se navega el prode.
+    const isGamesRoute = Boolean(pathname && (pathname.startsWith('/juegos') || pathname.startsWith('/prode')));
     const isNotificationsRoute = pathname?.startsWith('/notifications') ?? false;
     const isAuthRoute =
         pathname?.startsWith('/login')
@@ -196,22 +197,19 @@ export default function Header() {
                         <span>Noticias</span>
                     </Link>
 
-                    {canSeeProde ? (
-                        <Link
-                            href="/prode"
-                            className={`g22-desktop-link ${isProdeRoute ? 'active' : ''}`}
-                            aria-current={isProdeRoute ? 'page' : undefined}
-                        >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                <path d="M4 6h16" />
-                                <path d="M7 12h10" />
-                                <path d="M10 18h4" />
-                                <circle cx="7" cy="12" r="1.2" fill="currentColor" stroke="none" />
-                                <circle cx="17" cy="12" r="1.2" fill="currentColor" stroke="none" />
-                            </svg>
-                            <span>Prode</span>
-                        </Link>
-                    ) : null}
+                    <Link
+                        href="/juegos"
+                        className={`g22-desktop-link ${isGamesRoute ? 'active' : ''}`}
+                        aria-current={isGamesRoute ? 'page' : undefined}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M6 12h4M8 10v4" />
+                            <circle cx="15.5" cy="11" r="0.9" fill="currentColor" stroke="none" />
+                            <circle cx="17" cy="13" r="0.9" fill="currentColor" stroke="none" />
+                            <path d="M17.5 6H6.5A4.5 4.5 0 0 0 2 10.5v3A4.5 4.5 0 0 0 6.5 18c1.3 0 2-.6 2.8-1.4l.4-.6h4.6l.4.6c.8.8 1.5 1.4 2.8 1.4a4.5 4.5 0 0 0 4.5-4.5v-3A4.5 4.5 0 0 0 17.5 6Z" />
+                        </svg>
+                        <span>Juegos</span>
+                    </Link>
 
                     <Link
                         href={rankingsHref}

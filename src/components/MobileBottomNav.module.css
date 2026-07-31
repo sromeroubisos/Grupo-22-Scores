@@ -21,7 +21,7 @@
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 6px;
     width: 100%;
-    max-width: 640px;
+    max-width: 560px;
     margin: 0 auto;
 }
 
@@ -95,20 +95,22 @@
     }
 
     .navList {
-        gap: 5.7px;
-        max-width: 608px;
+        gap: 4px;
+        max-width: 532px;
     }
 
     .navItem {
-        gap: 4.75px;
-        font-size: 0.646rem;
+        gap: 4.5px;
+        font-size: 0.58rem;
+        letter-spacing: 0.01em;
         padding: 7.6px 0 5.7px;
-        border-radius: 13.3px;
+        border-radius: 12px;
+        white-space: nowrap;
     }
 
     .navItem svg {
-        width: 20px;
-        height: 20px;
+        width: 19px;
+        height: 19px;
     }
 
     .navDot {
