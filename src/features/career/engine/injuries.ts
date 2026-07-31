@@ -17,7 +17,12 @@ const CATALOG: { name: string; severity: Injury['severity']; seasonsOut: number;
  */
 export function seasonInjuryChance(player: Player): number {
     const { fatigue, injuryRisk } = player.dynamics;
-    const ageFactor = Math.max(0, player.age - 28) * 0.010;
+    // Dos rampas: la del desgaste normal desde los 28 y una SEGUNDA, más
+    // empinada, desde los 34. Es el precio de estirar la carrera: a partir de
+    // que el retiro es una elección, seguir un año más tiene que costar algo
+    // concreto, y en rugby ese algo es la lesión, no el aburrimiento.
+    const ageFactor = Math.max(0, player.age - 28) * 0.010
+        + Math.max(0, player.age - 33) * 0.022;
     const severePast = player.injuries.filter((i) => i.severity === 'grave').length * 0.03;
     const base = 0.10 + injuryRisk * 0.0035 + fatigue * 0.0025 + ageFactor + severePast;
     return Math.min(0.75, base);

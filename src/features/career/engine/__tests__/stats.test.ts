@@ -112,7 +112,7 @@ test('el porcentaje al palo sin intentos es un guion, no 0% ni NaN', () => {
 
     const stats = { ...vacio(), kicksAtGoal: 0, kicksMade: 0 };
     const pilar = secondaryStatOf('prop', stats);
-    assert.equal(pilar.label, 'Scrums');
+    assert.equal(pilar.label, 'Tackles');
 
     const apertura = secondaryStatOf('flyhalf', stats);
     assert.equal(apertura.display, '—', 'sin intentos el apertura muestra un guion');
@@ -124,18 +124,33 @@ test('el porcentaje al palo sin intentos es un guion, no 0% ni NaN', () => {
 
 test('cada puesto tiene su propia cuarta ranura', () => {
     const esperado: Record<Position, string> = {
-        prop: 'Scrums',
-        hooker: 'Lineouts',
-        lock: 'Lineouts',
-        backrow: 'Turnovers',
-        scrumhalf: 'Asistencias',
+        // 1.16.0: la tabla quedó en CUATRO columnas (OVR + PJ + PTS + TRIES +
+        // la del puesto), así que el tackle dejó de ser columna fija y pasó a
+        // ser la del puesto de la mayoría. El pateador ve su porcentaje al
+        // palo, que de su temporada dice más que la cantidad de tackles.
+        prop: 'Tackles',
+        hooker: 'Tackles',
+        lock: 'Tackles',
+        backrow: 'Tackles',
+        scrumhalf: 'Tackles',
         flyhalf: 'Al palo',
-        centre: 'Quiebres',
+        centre: 'Metros',
         wing: 'Metros',
-        fullback: 'Metros',
+        fullback: 'Al palo',
     };
     for (const position of ALL_POSITIONS) {
         assert.equal(secondaryStatOf(position, vacio()).label, esperado[position], `${position}: ranura equivocada`);
+    }
+});
+
+test('ningún puesto gasta la ranura variable en una estadística fija', () => {
+    // Partidos, puntos y tries se muestran SIEMPRE. Si un puesto los repitiera
+    // en su columna variable, perdería la única que lo distingue de los demás.
+    // El tackle NO está en la lista desde 1.16.0: dejó de ser columna fija.
+    const fijas = new Set(['Partidos', 'Puntos', 'Tries']);
+    for (const position of ALL_POSITIONS) {
+        const { label } = secondaryStatOf(position, vacio());
+        assert.ok(!fijas.has(label), `${position}: la ranura variable repite "${label}", que ya es columna fija`);
     }
 });
 

@@ -349,4 +349,125 @@ export const CLUB_STRENGTH: Record<string, ClubStrength> = {
     'Toyota Boshoku Blue Tornado': { rating: 34, prestige: 26, marketBand: 1 },
     'Meiji Yasuda': { rating: 32, prestige: 22, marketBand: 1 },
     'Setouchi Ohki': { rating: 30, prestige: 20, marketBand: 1 },
+
+    // ── Major League Rugby (EE.UU.) · nivel pro-regional ─────────────────────
+    // El rating cuenta 2026 y el PRESTIGIO cuenta la historia, que en esta liga
+    // dicen cosas distintas: Chicago hizo la primera temporada regular perfecta
+    // de la historia (10-0 con bonus de try en los diez partidos, 50 de 50 puntos
+    // posibles) y ganó la final 35-17 a California Legion en su propio SeatGeek
+    // Stadium; New England venía del tricampeonato 2023-24-25 y terminó 5º. Uno
+    // tiene el título nuevo, el otro la vitrina.
+    //
+    // `marketBand` 2-3 y no más: el tope salarial reportado ronda los 500.000 USD
+    // por club. Es una liga profesional de mercado chico, y las dos cosas son
+    // ciertas a la vez.
+    'Chicago Hounds': { rating: 68, prestige: 56, marketBand: 3 },
+    'California Legion': { rating: 65, prestige: 48, marketBand: 3 }, // fusión San Diego + LA, finalista en su debut
+    'New England Free Jacks': { rating: 64, prestige: 64, marketBand: 3 }, // tricampeón 2023-24-25
+    'Old Glory DC': { rating: 61, prestige: 44, marketBand: 2 },
+    'Seattle Seawolves': { rating: 59, prestige: 58, marketBand: 2 }, // campeón 2018 y 2019
+    'Anthem RC': { rating: 57, prestige: 34, marketBand: 2 }, // Charlotte, franquicia nueva
+
+    // ── D1A universitaria (CRAA) · nivel development ─────────────────────────
+    // California está sola arriba y no es una opinión: campeón 2025 y 2026,
+    // invicto, ~65 puntos por partido y 30 títulos nacionales. El prestigio
+    // separa al programa histórico (Cal, Navy, Army, Saint Mary's) del que está
+    // subiendo rápido (Grand Canyon).
+    //
+    // `marketBand` 2 para todos: una universidad tiene estructura —cancha,
+    // preparador, viajes— que un club amateur no tiene, pero las becas se
+    // articulan caso por caso y no hay salario.
+    'California': { rating: 54, prestige: 62, marketBand: 2 },
+    'Navy': { rating: 51, prestige: 48, marketBand: 2 }, // finalista 2026 (13-1), campeón 2023 invicto
+    "Saint Mary's": { rating: 50, prestige: 46, marketBand: 2 }, // campeón 2024 y 2021, 4 títulos
+    'Life University': { rating: 50, prestige: 44, marketBand: 2 }, // finalista 2025, programa con becas
+    'Lindenwood': { rating: 48, prestige: 36, marketBand: 2 },
+    'Army': { rating: 47, prestige: 42, marketBand: 2 }, // campeón 2022
+    'BYU': { rating: 46, prestige: 44, marketBand: 2 }, // potencia histórica de la era Varsity Cup
+    'Arizona': { rating: 45, prestige: 34, marketBand: 2 },
+    'Cal Poly': { rating: 44, prestige: 34, marketBand: 2 },
+    'Penn State': { rating: 43, prestige: 32, marketBand: 2 },
+    'Grand Canyon': { rating: 42, prestige: 26, marketBand: 2 }, // programa en ascenso rápido
+    'Arkansas State': { rating: 41, prestige: 26, marketBand: 2 },
+
+    // ── DI universitaria (NCR) · nivel amateur ───────────────────────────────
+    // La Ivy League entera, en la pirámide que corona en diciembre. Brown va
+    // primero por los títulos Ivy de 2021, 2023 y 2024.
+    'Brown': { rating: 42, prestige: 40, marketBand: 1 },
+    'Dartmouth': { rating: 40, prestige: 34, marketBand: 1 },
+    'Harvard': { rating: 39, prestige: 34, marketBand: 1 },
+    'Yale': { rating: 38, prestige: 32, marketBand: 1 },
+    'Princeton': { rating: 37, prestige: 32, marketBand: 1 },
+    'Cornell': { rating: 36, prestige: 28, marketBand: 1 },
+    'Penn': { rating: 35, prestige: 28, marketBand: 1 },
+    'Columbia': { rating: 34, prestige: 24, marketBand: 1 },
+
+    // ── Portugal · Divisão de Honra · nivel semipro ──────────────────────────
+    // Rating por 2025-26 y prestigio por palmarés, que acá se separan mucho:
+    // CDUL tiene 20 títulos y hoy no pelea el campeonato; Benfica acaba de ganar
+    // el 10º, el primero desde 2001. Cascais va segundo en rating porque llegó a
+    // la última jornada con el título en la mano y se le escapó por un bonus.
+    'Benfica': { rating: 58, prestige: 58, marketBand: 3 }, // campeón 2025-26, 10 títulos
+    'Cascais': { rating: 57, prestige: 44, marketBand: 2 },
+    'Belenenses': { rating: 56, prestige: 54, marketBand: 2 }, // bicampeón 2024 y 2025, 10 títulos
+    'Direito': { rating: 54, prestige: 56, marketBand: 2 }, // 12 títulos, campeón 2023
+    'CDUL': { rating: 53, prestige: 62, marketBand: 2 }, // 20 títulos: el más ganador
+    'Agronomia': { rating: 52, prestige: 46, marketBand: 2 },
+    'Técnico': { rating: 50, prestige: 40, marketBand: 2 },
+    'São Miguel': { rating: 49, prestige: 34, marketBand: 1 }, // Azores: el único de fuera del continente
+    'CDUP': { rating: 48, prestige: 38, marketBand: 1 },
+    'Académica': { rating: 47, prestige: 42, marketBand: 1 },
+    'Santarém': { rating: 45, prestige: 30, marketBand: 1 },
+    'Montemor-o-Novo': { rating: 44, prestige: 26, marketBand: 1 },
+
+    // ── Italia · Serie A Élite · nivel semipro ───────────────────────────────
+    // Cinco equipos competitivos y una cola muy débil, que es lo que hace a esta
+    // liga distinta de las otras cuatro: Valorugby le ganó 518-209 el agregado a
+    // Biella, que cerró con una victoria y 833 puntos en contra. El rating tiene
+    // que poder contar eso.
+    'Valorugby Emilia': { rating: 60, prestige: 52, marketBand: 3 }, // primer Scudetto + Coppa Italia
+    'Petrarca': { rating: 59, prestige: 66, marketBand: 3 }, // campeón 2022 y 2024
+    'Rugby Rovigo Delta': { rating: 58, prestige: 64, marketBand: 3 }, // campeón 2023 y 2025 (triplete)
+    'Viadana': { rating: 54, prestige: 44, marketBand: 2 },
+    'Lyons Piacenza': { rating: 53, prestige: 40, marketBand: 2 },
+    'Mogliano': { rating: 52, prestige: 46, marketBand: 2 },
+    'Rangers Vicenza': { rating: 51, prestige: 40, marketBand: 2 },
+    'Fiamme Oro': { rating: 50, prestige: 42, marketBand: 2 },
+    'Parabiago': { rating: 46, prestige: 30, marketBand: 1 }, // sube de Serie A
+    'Biella': { rating: 44, prestige: 34, marketBand: 1 },
+
+    // ── Italia · Serie A · nivel amateur ─────────────────────────────────────
+    // El prestigio hace acá el trabajo que el rating no puede: Calvisano fue
+    // cinco veces campeón de Italia y Roma Olimpic es de 1930. Están abajo, no
+    // son cualquiera.
+    'Rugby Calvisano': { rating: 46, prestige: 52, marketBand: 2 },
+    'ASR Milano': { rating: 44, prestige: 40, marketBand: 2 },
+    'Rugby Parma': { rating: 43, prestige: 38, marketBand: 1 },
+    'Valsugana': { rating: 42, prestige: 34, marketBand: 1 },
+    'Rugby San Donà': { rating: 41, prestige: 36, marketBand: 1 },
+    'CUS Torino': { rating: 40, prestige: 34, marketBand: 1 },
+    'Rugby Noceto': { rating: 39, prestige: 30, marketBand: 1 },
+    'Verona Rugby': { rating: 38, prestige: 30, marketBand: 1 },
+    'Rugby Roma Olimpic': { rating: 37, prestige: 40, marketBand: 1 },
+    'Rugby Bologna 1928': { rating: 36, prestige: 32, marketBand: 1 },
+    'Amatori Alghero': { rating: 34, prestige: 28, marketBand: 1 },
+    'Rugby Lecco': { rating: 32, prestige: 26, marketBand: 1 },
+
+    // ── Brasil · Super 12 · nivel amateur ────────────────────────────────────
+    // Rating por 2026 (tres jornadas jugadas al 30/7: invictos Jacareí, Poli y
+    // Farrapos; SPAC 104-12 a Nova Lima y Joaca 0-60 con Farrapos) y prestigio por
+    // historia, donde manda otra cosa: SPAC tiene ~12 títulos y São José ~9, y
+    // Farrapos es el finalista perenne —2017, 2018, 2024, 2025— sin ninguno.
+    'Jacareí': { rating: 46, prestige: 48, marketBand: 2 }, // bicampeón 2024 y 2025
+    'SPAC': { rating: 45, prestige: 54, marketBand: 2 }, // ~12 títulos históricos
+    'Farrapos': { rating: 45, prestige: 46, marketBand: 2 }, // cuatro finales, cero títulos
+    'Poli': { rating: 44, prestige: 42, marketBand: 2 }, // campeón 2022
+    'São José': { rating: 43, prestige: 50, marketBand: 2 }, // ~9 títulos
+    'Pasteur': { rating: 42, prestige: 40, marketBand: 2 }, // campeón 2023 invicto
+    'Charrua': { rating: 40, prestige: 30, marketBand: 1 },
+    'Desterro': { rating: 38, prestige: 32, marketBand: 1 },
+    'Tornados Indaiatuba': { rating: 36, prestige: 24, marketBand: 1 },
+    'Rio Branco': { rating: 34, prestige: 24, marketBand: 1 },
+    'Nova Lima': { rating: 30, prestige: 20, marketBand: 1 }, // primer club de Minas Gerais en primera
+    'Joaca': { rating: 28, prestige: 20, marketBand: 1 },
 };

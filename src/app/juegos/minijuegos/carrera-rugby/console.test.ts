@@ -9,6 +9,7 @@ import {
     getPendingEvent,
     marketRung,
     CUPS,
+    RETIRE_OPTION_ID,
 } from '../../../../features/career/index.ts';
 import { advanceCareerToNextDecision } from './advanceCareer.ts';
 import { economicModelOf } from '../../../../features/career/index.ts';
@@ -42,8 +43,22 @@ test('el motor asigna el club inicial: la UI nunca lo elige', () => {
     for (const seed of SEEDS) {
         const state = createInitialCareer({ position: 'centre', nationalityCountryCode: 'ar', origin: 'academia-club' }, seed);
         assert.ok(state.player.club.length > 0, 'siempre hay club inicial');
-        assert.equal(getClub(state.player.club).countryCode, 'ar', 'y sale de la ruta, no de la UI');
-        assert.ok(marketRung(getClub(state.player.club)) <= 4, 'debuta como proyecto, no en la élite');
+        // 'multi' TAMBIÉN es de su ruta, y por eso el país esperado son dos.
+        //
+        // Desde 1.28.0 el argentino que saca la rama de academia puede arrancar en
+        // una franquicia de la SRA —Dogos, Pampas, Peñarol, Selknam—, y ésas
+        // llevan `countryCode: 'multi'` porque son de Sudamérica y no de un país.
+        // Exigir 'ar' a secas leía ese arranque como si la UI hubiera elegido el
+        // club, que es justo lo contrario de lo que pasó: lo eligió el motor,
+        // desde las vías que salen de la escalera argentina.
+        const club = getClub(state.player.club);
+        assert.ok(
+            club.countryCode === 'ar' || club.countryCode === 'multi',
+            `y sale de la ruta, no de la UI (arrancó en ${club.name}, país ${club.countryCode})`,
+        );
+        // El techo del debut depende de por dónde entró: 4 para la escalera
+        // doméstica, 6 para la academia de un club pago (MAX_PRO_ENTRY_RUNG).
+        assert.ok(marketRung(club) <= 6, 'debuta como proyecto, no en la élite');
     }
 });
 
@@ -147,29 +162,94 @@ test('"Volver a jugar" borra SOLO la clave de la carrera', async () => {
     assert.equal(store.has('g22-carrera-rugby'), false);
 });
 
-test('el mercado nunca ofrece más de tres opciones ni una copa', () => {
+test('el mercado nunca ofrece más de tres opciones de club ni una copa', () => {
     const cupIds = new Set(CUPS.map((c) => c.id));
     let sawMarket = false;
 
     for (const seed of [11, 22, 33, 44, 55, 66, 77, 88]) {
         let state = createInitialCareer({ position: 'wing', nationalityCountryCode: 'ar' }, seed);
-        for (let i = 0; i < 18 && state.phase !== 'retired'; i++) {
+        for (let i = 0; i < 24 && state.phase !== 'retired'; i++) {
             const event = getPendingEvent(state);
             if (event && state.offers.length > 0) {
                 sawMarket = true;
-                assert.ok(event.options.length <= 3, `mercado con ${event.options.length} opciones`);
+                // Las opciones de CLUB siguen siendo tres como mucho (quedarse +
+                // dos ofertas). Desde 1.15.0 el veterano puede tener una cuarta,
+                // la de retirarse, que no es una opción de mercado.
+                const clubOptions = event.options.filter((o) => o.id !== RETIRE_OPTION_ID);
+                assert.ok(clubOptions.length <= 3, `mercado con ${clubOptions.length} opciones de club`);
                 for (const offer of state.offers) {
                     assert.ok(!cupIds.has(offer.league), `oferta de una copa: ${offer.league}`);
                     assert.ok(getClub(offer.club).id === offer.club, 'club inexistente');
                 }
             }
+            // Elige siempre la última opción que NO sea retirarse: si no, el
+            // veterano colgaría los botines en la primera vuelta y el test
+            // dejaría de mirar el mercado justo cuando más ofertas hay.
+            const playable = event?.options.filter((o) => o.id !== RETIRE_OPTION_ID) ?? [];
             const action = event
-                ? ({ type: 'CHOOSE', optionId: event.options[event.options.length - 1].id } as const)
+                ? ({ type: 'CHOOSE', optionId: playable[playable.length - 1].id } as const)
                 : ({ type: 'ADVANCE' } as const);
             state = advanceCareerToNextDecision(state, action).state;
         }
     }
     assert.ok(sawMarket, 'debería haberse abierto el mercado alguna vez');
+});
+
+test('el retiro es una decisión: se ofrece de 34 a 38 y se fuerza a los 39', () => {
+    let vioOpcion = false;
+    let carrerasLargas = 0;
+
+    for (const seed of [11, 22, 33, 44, 55]) {
+        let state = createInitialCareer({ position: 'lock', nationalityCountryCode: 'ar', startRoute: 'professional' }, seed);
+        for (let i = 0; i < 40 && state.phase !== 'retired'; i++) {
+            const event = getPendingEvent(state);
+            const edad = state.player.age;
+            if (event) {
+                const tieneRetiro = event.options.some((o) => o.id === RETIRE_OPTION_ID);
+                if (edad >= 34 && edad < 39) {
+                    assert.ok(tieneRetiro, `a los ${edad} la decisión tiene que ofrecer el retiro`);
+                    vioOpcion = true;
+                } else {
+                    assert.ok(!tieneRetiro, `a los ${edad} no se puede ofrecer el retiro`);
+                }
+                // Nunca una decisión de una sola opción, tampoco las del veterano.
+                assert.ok(event.options.length >= 2, `decisión de una sola opción a los ${edad}`);
+            }
+            const playable = event?.options.filter((o) => o.id !== RETIRE_OPTION_ID) ?? [];
+            const action = event
+                ? ({ type: 'CHOOSE', optionId: playable[0].id } as const)
+                : ({ type: 'ADVANCE' } as const);
+            state = advanceCareerToNextDecision(state, action).state;
+        }
+        // Sin lesión grave que lo corte, el que nunca elige retirarse llega a 39.
+        if (state.player.age >= 39) carrerasLargas++;
+        assert.ok(state.player.age <= 39, `se pasó de los 39: ${state.player.age}`);
+    }
+
+    assert.ok(vioOpcion, 'nunca apareció la opción de retirarse');
+    assert.ok(carrerasLargas >= 3, `sólo ${carrerasLargas}/5 llegaron a los 39 sin elegir retirarse`);
+});
+
+test('elegir retirarse cierra la carrera sin jugar la temporada', () => {
+    let state = createInitialCareer({ position: 'prop', nationalityCountryCode: 'ar', startRoute: 'professional' }, 4242);
+    while (state.phase !== 'retired' && state.player.age < 35) {
+        const event = getPendingEvent(state);
+        const playable = event?.options.filter((o) => o.id !== RETIRE_OPTION_ID) ?? [];
+        state = advanceCareerToNextDecision(
+            state,
+            event ? { type: 'CHOOSE', optionId: playable[0].id } : { type: 'ADVANCE' },
+        ).state;
+    }
+
+    const event = getPendingEvent(state);
+    assert.ok(event?.options.some((o) => o.id === RETIRE_OPTION_ID), 'a los 34+ tiene que estar la opción');
+
+    const temporadasAntes = state.history.length;
+    const retirado = advanceCareerToNextDecision(state, { type: 'CHOOSE', optionId: RETIRE_OPTION_ID }).state;
+
+    assert.equal(retirado.phase, 'retired');
+    assert.ok(retirado.player.retired);
+    assert.equal(retirado.history.length, temporadasAntes, 'retirarse NO juega una temporada más');
 });
 
 test('los títulos de la trayectoria salen de titlesWon, no de un contador de React', () => {

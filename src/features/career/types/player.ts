@@ -75,6 +75,57 @@ export interface EligibilityState {
     capturedBy: string | null;
 }
 
+/**
+ * Planilla con LA SELECCIÓN, por unión.
+ *
+ * Es un diccionario y no un total plano porque la elegibilidad puede cambiar
+ * (`nt-eligibility-switch`): los caps de Gales no se suman con los de Argentina,
+ * y un total único mentiría en cuanto alguien cambia de camiseta.
+ *
+ * Guarda los ingredientes crudos de la columna del puesto —tackles, metros y el
+ * par de patadas— para que la fila de selección se dibuje con las MISMAS
+ * columnas que las de club sin recalcular nada al renderizar.
+ */
+/**
+ * Dónde está el jugador respecto de la selección.
+ *
+ * `dropped` NO es lo mismo que `uncapped`: el que perdió la camiseta conserva
+ * sus caps, la fila de selección los sigue mostrando, y puede volver — pero para
+ * volver tiene que pasar el umbral COMPLETO otra vez, sin el descuento que
+ * protege al que está adentro.
+ *
+ * `starter` vs `squad` no es un segundo corte para seguir convocado: decide si
+ * arranca de titular o entra del banco, y con eso cuántos tests juega.
+ *
+ * `trial` es el que cruzó el umbral por poco: lo llevaron de gira y juega SÓLO
+ * partidos secundarios. Nadie debuta en la primera fecha del Seis Naciones — se
+ * debuta en una gira de julio contra un rival menor, con medio plantel
+ * descansando. Para pasar a `squad` hay que volver a cruzar el umbral con
+ * margen; si no lo logra en dos temporadas, sale.
+ */
+export type NationalStatus = 'uncapped' | 'trial' | 'squad' | 'starter' | 'dropped';
+
+export interface NationalTeamStats {
+    caps: number;
+    /**
+     * Caps ganados ESTANDO en el plantel principal (`squad` o `starter`).
+     *
+     * Va aparte del total porque los caps de gira NO COMPRAN TITULARIDAD: si el
+     * descuento se ganara con caps de `trial`, el debutante acumularía caps
+     * baratos y se protegería solo, que es exactamente el agujero que el estado
+     * `trial` vino a cerrar.
+     */
+    squadCaps: number;
+    points: number;
+    tries: number;
+    tackles: number;
+    metres: number;
+    kicksAtGoal: number;
+    kicksMade: number;
+    /** Tests ganados. La selección es lo único donde el resultado se registra. */
+    wins: number;
+}
+
 export interface Injury {
     season: number; // índice de temporada en que ocurrió
     age: number;
@@ -82,6 +133,31 @@ export interface Injury {
     severity: 'leve' | 'moderada' | 'grave';
     seasonsOut: number; // temporadas perdidas (fracción de la temporada)
     ovrImpact: number; // penalización temporal al OVR efectivo
+}
+
+/**
+ * SANCIÓN DISCIPLINARIA. Es el quinto eje de una decisión, junto con valoración,
+ * tiempo de juego, lesión y reputación.
+ *
+ * Va GUARDADA y no derivada por el mismo motivo que las lesiones: es un hecho de
+ * una temporada concreta —la fecha en que te echaron y los partidos que te
+ * comiste— y no se puede recalcular después desde el estado actual.
+ *
+ * La tarjeta y la suspensión son campos SEPARADOS porque en rugby no van
+ * siempre juntos: una amarilla son diez minutos afuera y ningún partido, una
+ * roja puede quedar en nada si la comisión no cita, y una citación puede
+ * suspenderte sin que hayas visto una tarjeta en la cancha.
+ */
+export interface Sanction {
+    /** Índice de la temporada sobre la que cae la suspensión. */
+    season: number;
+    age: number;
+    /** Tarjeta que la originó. null = citación o sanción administrativa. */
+    card: 'amarilla' | 'roja' | null;
+    /** Partidos de suspensión. 0 = tarjeta sin partidos. */
+    matches: number;
+    /** Motivo, para el relato y la trayectoria. */
+    reason: string;
 }
 
 export interface Player {
@@ -110,6 +186,13 @@ export interface Player {
     league: string; // id de liga derivado del club
     role: PlayerRole;
     nationalTeam: string | null; // unión efectivamente representada, o null
+    /**
+     * Situación actual en la selección. Se guarda porque NO es derivable: el
+     * umbral con el que se lo midió depende del club, la forma y la edad que
+     * tenía en cada temporada, y nada de eso queda registrado con el detalle
+     * necesario para recalcularlo.
+     */
+    nationalStatus: NationalStatus;
 
     /** Estado completo de la Regulación 8. Serializable y determinístico. */
     eligibility: EligibilityState;
@@ -147,10 +230,20 @@ export interface Player {
     dynamics: Dynamics;
 
     // Acumuladores de carrera
-    caps: number; // partidos con la selección
+    /**
+     * Caps con la unión que representa HOY. Es un DERIVADO de `nationalStats`:
+     * lo sincroniza `simulate-season` en cada temporada. Se conserva como campo
+     * porque medio motor lo lee (arquetipos, resumen, cabecera) y porque el
+     * jugador tiene una sola camiseta por vez.
+     */
+    caps: number;
+    /** Planilla con cada selección que representó. Ver `NationalTeamStats`. */
+    nationalStats: Record<string, NationalTeamStats>;
     titles: number; // títulos ganados
     seasonsPlayed: number;
     injuries: Injury[];
+    /** Historial disciplinario. Una entrada por tarjeta o citación. */
+    sanctions: Sanction[];
     usedEventIds: string[]; // eventos únicos ya vistos
     flags: Record<string, number>; // banderas narrativas (leal, mercenario, capitán, etc.)
     retired: boolean;

@@ -126,7 +126,7 @@ export const ENVIRONMENT_EVENTS: GameEvent[] = [
         weight: 7, repeatable: true, cooldown: 5,
         // El ascenso DENTRO de la ruta amateur/desarrollo. Al que arrancó con
         // contrato no le aparece: para él esto no es una oportunidad, ya pasó.
-        requires: { employment: ['amateur-compensated'], maxAge: 30, startRoutes: ['amateur', 'development'] },
+        requires: { employment: ['amateur-compensated'], maxAge: 30 },
         options: [
             { id: 'commit', label: 'Comprometerte más', hint: 'Más rugby, menos margen.', outcomes: [{ weight: 1, effect: { technique: 2, stamina: 2, morale: 4, flags: { ambicioso: 1 } }, resultText: 'Aceptás el paso adelante y reorganizás tu vida alrededor del rugby.' }] },
             { id: 'keep', label: 'Mantener el equilibrio', hint: 'Trabajo y rugby a la par.', outcomes: [{ weight: 1, effect: { mental: 2, morale: 1 }, resultText: 'Preferís no arriesgar la estabilidad. Seguís como estás.' }] },
@@ -166,7 +166,7 @@ export const ENVIRONMENT_EVENTS: GameEvent[] = [
         weight: 7, repeatable: true, cooldown: 5,
         // Igual que el anterior: es el salto al profesionalismo, y solo tiene
         // sentido para quien NO arrancó ya dentro de él.
-        requires: { employment: ['semi-professional'], maxAge: 31, startRoutes: ['amateur', 'development'] },
+        requires: { employment: ['semi-professional'], maxAge: 31 },
         options: [
             { id: 'jump', label: 'Ir por el contrato', hint: 'Dedicarte por completo.', outcomes: [{ weight: 1, effect: { morale: 6, form: 3, flags: { ambicioso: 1 } }, resultText: 'Firmás tu primer contrato full-time. Ahora es tu trabajo.' }] },
             { id: 'weigh', label: 'Pensarlo con calma', hint: 'No dejar lo seguro.', outcomes: [{ weight: 1, effect: { mental: 3, morale: -1 }, resultText: 'Evaluás los riesgos antes de dejar tu vida actual.' }] },

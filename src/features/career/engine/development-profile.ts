@@ -62,6 +62,16 @@ export function profileGrowthFactor(profile: DevelopmentProfile, age: number): n
     if (profile === 'early') {
         if (age <= 23) return 1.30;
         if (age <= 26) return 0.92;
+        // PROBADO Y DESCARTADO EN 1.28.0: bajarlo a 0,55 para que el `late` pasara
+        // al `early` a los 30 no movió el número ni un décimo (77 contra 79 antes
+        // y después). El motivo es que a los 27 el precoz YA ESTÁ EN SU TECHO, y
+        // `growthScaleFor` devuelve 0 con brecha 0: multiplicar cero por menos
+        // sigue siendo cero. Este factor sólo puede mover al que todavía crece.
+        //
+        // Lo que separa a los dos perfiles a los 30 no es el crecimiento sino el
+        // DECLIVE, y ése lo maneja `PEAK_SHIFT`. Adelantarle el pico al precoz
+        // (−1) tampoco funcionó: no movió la mediana y rompió el invariante de
+        // arriba. Queda anotado como pendiente con las dos hipótesis descartadas.
         return 0.7;
     }
     if (profile === 'late') {

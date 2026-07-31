@@ -6,7 +6,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CLUBS, getClub } from '../../index.ts';
-import { crestKeyOf, initialsOf, monogramColor } from '../../../../app/juegos/minijuegos/carrera-rugby/clubCrest.ts';
+import { crestKeyOf, initialsOf, monogramColor, monogramContrast, MONOGRAM_MIN_CONTRAST } from '../../../../app/juegos/minijuegos/carrera-rugby/clubCrest.ts';
 
 test('solo se pide escudo a los clubes que tienen clave: ninguna petición al vacío', () => {
     let conEscudo = 0;
@@ -45,7 +45,29 @@ test('el color del monograma es estable entre sesiones', () => {
 
     for (const club of CLUBS) {
         const color = monogramColor(club.id);
-        assert.match(color, /^hsl\(\d{1,3} 52% 38%\)$/, `${club.name}: color con formato inesperado (${color})`);
+        // El brillo ya no es fijo: se baja por tono hasta llegar al contraste.
+        assert.match(color, /^hsl\(\d{1,3} 52% \d{2}%\)$/, `${club.name}: color con formato inesperado (${color})`);
+    }
+});
+
+test('las iniciales blancas SIEMPRE llegan al contraste mínimo, en los 360 tonos', () => {
+    // La versión vieja fijaba el brillo en 38 % dando por hecho que alcanzaba.
+    // No alcanzaba: la luminosidad de HSL no es luminancia percibida, así que al
+    // mismo 38 % un azul daba 8,5:1 y un cian 4,24:1. Se verifica tono por tono
+    // y no club por club, porque lo que se protege es la REGLA, no el catálogo
+    // de hoy: un club nuevo puede caer en cualquier hue.
+    for (let hue = 0; hue < 360; hue++) {
+        const color = monogramColor(`tono-${hue}`);
+        const [, light] = /52% (\d+)%/.exec(color)!;
+        assert.ok(Number(light) >= 20, `hue ${hue}: brillo fuera de rango (${color})`);
+    }
+
+    for (const club of CLUBS) {
+        const ratio = monogramContrast(club.id);
+        assert.ok(
+            ratio >= MONOGRAM_MIN_CONTRAST,
+            `${club.name}: iniciales a ${ratio.toFixed(2)}:1, por debajo de ${MONOGRAM_MIN_CONTRAST}:1`,
+        );
     }
 });
 

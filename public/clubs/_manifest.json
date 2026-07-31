@@ -1,0 +1,4279 @@
+[
+  {
+    "id": "stade-toulousain",
+    "name": "Stade Toulousain",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/stade-toulousain.svg"
+  },
+  {
+    "id": "union-bordeaux-begles",
+    "name": "Union Bordeaux-Bègles",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/union-bordeaux-begles.svg"
+  },
+  {
+    "id": "stade-rochelais",
+    "name": "Stade Rochelais",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/stade-rochelais.svg"
+  },
+  {
+    "id": "racing-92",
+    "name": "Racing 92",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/racing-92.svg"
+  },
+  {
+    "id": "stade-francais",
+    "name": "Stade Français",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/stade-francais.svg"
+  },
+  {
+    "id": "asm-clermont",
+    "name": "ASM Clermont",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/asm-clermont.svg"
+  },
+  {
+    "id": "section-paloise",
+    "name": "Section Paloise",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/section-paloise.svg"
+  },
+  {
+    "id": "montpellier",
+    "name": "Montpellier",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/montpellier.svg"
+  },
+  {
+    "id": "rc-toulon",
+    "name": "RC Toulon",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/rc-toulon.svg"
+  },
+  {
+    "id": "castres-olympique",
+    "name": "Castres Olympique",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/castres-olympique.svg"
+  },
+  {
+    "id": "lou-rugby",
+    "name": "LOU Rugby",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/lou-rugby.svg"
+  },
+  {
+    "id": "aviron-bayonnais",
+    "name": "Aviron Bayonnais",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/aviron-bayonnais.svg"
+  },
+  {
+    "id": "usa-perpignan",
+    "name": "USA Perpignan",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/usa-perpignan.svg"
+  },
+  {
+    "id": "rc-vannes",
+    "name": "RC Vannes",
+    "competition": "top14",
+    "level": "elite-world",
+    "file": "public/clubs/rc-vannes.svg"
+  },
+  {
+    "id": "colomiers-rugby",
+    "name": "Colomiers Rugby",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/colomiers-rugby.svg"
+  },
+  {
+    "id": "provence-rugby",
+    "name": "Provence Rugby",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/provence-rugby.svg"
+  },
+  {
+    "id": "oyonnax",
+    "name": "Oyonnax",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/oyonnax.svg"
+  },
+  {
+    "id": "valence-romans",
+    "name": "Valence Romans",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/valence-romans.svg"
+  },
+  {
+    "id": "ca-brive",
+    "name": "CA Brive",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/ca-brive.svg"
+  },
+  {
+    "id": "su-agen",
+    "name": "SU Agen",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/su-agen.svg"
+  },
+  {
+    "id": "fc-grenoble",
+    "name": "FC Grenoble",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/fc-grenoble.svg"
+  },
+  {
+    "id": "soyaux-angouleme-xv",
+    "name": "Soyaux-Angoulême XV",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/soyaux-angouleme-xv.svg"
+  },
+  {
+    "id": "biarritz-olympique",
+    "name": "Biarritz Olympique",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/biarritz-olympique.svg"
+  },
+  {
+    "id": "us-dax",
+    "name": "US Dax",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/us-dax.svg"
+  },
+  {
+    "id": "as-beziers",
+    "name": "AS Béziers",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/as-beziers.svg"
+  },
+  {
+    "id": "uson-nevers",
+    "name": "USON Nevers",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/uson-nevers.svg"
+  },
+  {
+    "id": "stade-aurillacois",
+    "name": "Stade Aurillacois",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/stade-aurillacois.svg"
+  },
+  {
+    "id": "nissa-rugby",
+    "name": "Nissa Rugby",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/nissa-rugby.svg"
+  },
+  {
+    "id": "rc-narbonnais",
+    "name": "RC Narbonnais",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/rc-narbonnais.svg"
+  },
+  {
+    "id": "us-montauban",
+    "name": "US Montauban",
+    "competition": "prod2",
+    "level": "pro-second",
+    "file": "public/clubs/us-montauban.svg"
+  },
+  {
+    "id": "albi",
+    "name": "Albi",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/albi.svg"
+  },
+  {
+    "id": "perigueux",
+    "name": "Périgueux",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/perigueux.svg"
+  },
+  {
+    "id": "bourgoin",
+    "name": "Bourgoin",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/bourgoin.svg"
+  },
+  {
+    "id": "vienne",
+    "name": "Vienne",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/vienne.svg"
+  },
+  {
+    "id": "marcq",
+    "name": "Marcq",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/marcq.svg"
+  },
+  {
+    "id": "orleans",
+    "name": "Orléans",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/orleans.svg"
+  },
+  {
+    "id": "rennes",
+    "name": "Rennes",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/rennes.svg"
+  },
+  {
+    "id": "rouen",
+    "name": "Rouen",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/rouen.svg"
+  },
+  {
+    "id": "massy",
+    "name": "Massy",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/massy.svg"
+  },
+  {
+    "id": "suresnes",
+    "name": "Suresnes",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/suresnes.svg"
+  },
+  {
+    "id": "us-bressane",
+    "name": "US Bressane",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/us-bressane.svg"
+  },
+  {
+    "id": "carcassonne",
+    "name": "Carcassonne",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/carcassonne.svg"
+  },
+  {
+    "id": "chambery",
+    "name": "Chambéry",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/chambery.svg"
+  },
+  {
+    "id": "stade-montois",
+    "name": "Stade Montois",
+    "competition": "nationale",
+    "level": "pro-regional",
+    "file": "public/clubs/stade-montois.svg"
+  },
+  {
+    "id": "bath",
+    "name": "Bath",
+    "competition": "prem",
+    "level": "elite-world",
+    "file": "public/clubs/bath.svg"
+  },
+  {
+    "id": "bristol-bears",
+    "name": "Bristol Bears",
+    "competition": "prem",
+    "level": "elite-world",
+    "file": "public/clubs/bristol-bears.svg"
+  },
+  {
+    "id": "exeter-chiefs",
+    "name": "Exeter Chiefs",
+    "competition": "prem",
+    "level": "elite-world",
+    "file": "public/clubs/exeter-chiefs.svg"
+  },
+  {
+    "id": "gloucester",
+    "name": "Gloucester",
+    "competition": "prem",
+    "level": "elite-world",
+    "file": "public/clubs/gloucester.svg"
+  },
+  {
+    "id": "harlequins",
+    "name": "Harlequins",
+    "competition": "prem",
+    "level": "elite-world",
+    "file": "public/clubs/harlequins.svg"
+  },
+  {
+    "id": "leicester-tigers",
+    "name": "Leicester Tigers",
+    "competition": "prem",
+    "level": "elite-world",
+    "file": "public/clubs/leicester-tigers.svg"
+  },
+  {
+    "id": "newcastle-red-bulls",
+    "name": "Newcastle Red Bulls",
+    "competition": "prem",
+    "level": "elite-world",
+    "file": "public/clubs/newcastle-red-bulls.svg"
+  },
+  {
+    "id": "northampton-saints",
+    "name": "Northampton Saints",
+    "competition": "prem",
+    "level": "elite-world",
+    "file": "public/clubs/northampton-saints.svg"
+  },
+  {
+    "id": "sale-sharks",
+    "name": "Sale Sharks",
+    "competition": "prem",
+    "level": "elite-world",
+    "file": "public/clubs/sale-sharks.svg"
+  },
+  {
+    "id": "saracens",
+    "name": "Saracens",
+    "competition": "prem",
+    "level": "elite-world",
+    "file": "public/clubs/saracens.svg"
+  },
+  {
+    "id": "ealing-trailfinders",
+    "name": "Ealing Trailfinders",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/ealing-trailfinders.svg"
+  },
+  {
+    "id": "bedford-blues",
+    "name": "Bedford Blues",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/bedford-blues.svg"
+  },
+  {
+    "id": "coventry",
+    "name": "Coventry",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/coventry.svg"
+  },
+  {
+    "id": "worcester-warriors",
+    "name": "Worcester Warriors",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/worcester-warriors.svg"
+  },
+  {
+    "id": "chinnor",
+    "name": "Chinnor",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/chinnor.svg"
+  },
+  {
+    "id": "hartpury-university",
+    "name": "Hartpury University",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/hartpury-university.svg"
+  },
+  {
+    "id": "cornish-pirates",
+    "name": "Cornish Pirates",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/cornish-pirates.svg"
+  },
+  {
+    "id": "doncaster-knights",
+    "name": "Doncaster Knights",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/doncaster-knights.svg"
+  },
+  {
+    "id": "nottingham",
+    "name": "Nottingham",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/nottingham.svg"
+  },
+  {
+    "id": "ampthill",
+    "name": "Ampthill",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/ampthill.svg"
+  },
+  {
+    "id": "caldy",
+    "name": "Caldy",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/caldy.svg"
+  },
+  {
+    "id": "richmond",
+    "name": "Richmond",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/richmond.svg"
+  },
+  {
+    "id": "london-scottish",
+    "name": "London Scottish",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/london-scottish.svg"
+  },
+  {
+    "id": "cambridge",
+    "name": "Cambridge",
+    "competition": "championship",
+    "level": "pro-second",
+    "file": "public/clubs/cambridge.svg"
+  },
+  {
+    "id": "leinster",
+    "name": "Leinster",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/leinster.svg"
+  },
+  {
+    "id": "munster",
+    "name": "Munster",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/munster.svg"
+  },
+  {
+    "id": "ulster",
+    "name": "Ulster",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/ulster.svg"
+  },
+  {
+    "id": "connacht",
+    "name": "Connacht",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/connacht.svg"
+  },
+  {
+    "id": "glasgow-warriors",
+    "name": "Glasgow Warriors",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/glasgow-warriors.svg"
+  },
+  {
+    "id": "edinburgh-rugby",
+    "name": "Edinburgh Rugby",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/edinburgh-rugby.svg"
+  },
+  {
+    "id": "ospreys",
+    "name": "Ospreys",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/ospreys.svg"
+  },
+  {
+    "id": "scarlets",
+    "name": "Scarlets",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/scarlets.svg"
+  },
+  {
+    "id": "cardiff-rugby",
+    "name": "Cardiff Rugby",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/cardiff-rugby.svg"
+  },
+  {
+    "id": "dragons",
+    "name": "Dragons",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/dragons.svg"
+  },
+  {
+    "id": "benetton-treviso",
+    "name": "Benetton Treviso",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/benetton-treviso.svg"
+  },
+  {
+    "id": "zebre-parma",
+    "name": "Zebre Parma",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/zebre-parma.svg"
+  },
+  {
+    "id": "bulls",
+    "name": "Bulls",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/bulls.svg"
+  },
+  {
+    "id": "stormers",
+    "name": "Stormers",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/stormers.svg"
+  },
+  {
+    "id": "sharks",
+    "name": "Sharks",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/sharks.svg"
+  },
+  {
+    "id": "lions",
+    "name": "Lions",
+    "competition": "urc",
+    "level": "elite-world",
+    "file": "public/clubs/lions.svg"
+  },
+  {
+    "id": "hurricanes",
+    "name": "Hurricanes",
+    "competition": "super-rugby",
+    "level": "elite-world",
+    "file": "public/clubs/hurricanes.svg"
+  },
+  {
+    "id": "chiefs",
+    "name": "Chiefs",
+    "competition": "super-rugby",
+    "level": "elite-world",
+    "file": "public/clubs/chiefs.svg"
+  },
+  {
+    "id": "crusaders",
+    "name": "Crusaders",
+    "competition": "super-rugby",
+    "level": "elite-world",
+    "file": "public/clubs/crusaders.svg"
+  },
+  {
+    "id": "blues",
+    "name": "Blues",
+    "competition": "super-rugby",
+    "level": "elite-world",
+    "file": "public/clubs/blues.svg"
+  },
+  {
+    "id": "reds",
+    "name": "Reds",
+    "competition": "super-rugby",
+    "level": "elite-world",
+    "file": "public/clubs/reds.svg"
+  },
+  {
+    "id": "brumbies",
+    "name": "Brumbies",
+    "competition": "super-rugby",
+    "level": "elite-world",
+    "file": "public/clubs/brumbies.svg"
+  },
+  {
+    "id": "western-force",
+    "name": "Western Force",
+    "competition": "super-rugby",
+    "level": "elite-world",
+    "file": "public/clubs/western-force.svg"
+  },
+  {
+    "id": "waratahs",
+    "name": "Waratahs",
+    "competition": "super-rugby",
+    "level": "elite-world",
+    "file": "public/clubs/waratahs.svg"
+  },
+  {
+    "id": "highlanders",
+    "name": "Highlanders",
+    "competition": "super-rugby",
+    "level": "elite-world",
+    "file": "public/clubs/highlanders.svg"
+  },
+  {
+    "id": "fijian-drua",
+    "name": "Fijian Drua",
+    "competition": "super-rugby",
+    "level": "elite-world",
+    "file": "public/clubs/fijian-drua.svg"
+  },
+  {
+    "id": "moana-pasifika",
+    "name": "Moana Pasifika",
+    "competition": "super-rugby",
+    "level": "elite-world",
+    "file": "public/clubs/moana-pasifika.svg"
+  },
+  {
+    "id": "auckland",
+    "name": "Auckland",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/auckland.svg"
+  },
+  {
+    "id": "bay-of-plenty",
+    "name": "Bay of Plenty",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/bay-of-plenty.svg"
+  },
+  {
+    "id": "canterbury",
+    "name": "Canterbury",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/canterbury.svg"
+  },
+  {
+    "id": "counties-manukau",
+    "name": "Counties Manukau",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/counties-manukau.svg"
+  },
+  {
+    "id": "hawke-s-bay",
+    "name": "Hawke's Bay",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/hawke-s-bay.svg"
+  },
+  {
+    "id": "manawatu",
+    "name": "Manawatu",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/manawatu.svg"
+  },
+  {
+    "id": "north-harbour",
+    "name": "North Harbour",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/north-harbour.svg"
+  },
+  {
+    "id": "northland",
+    "name": "Northland",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/northland.svg"
+  },
+  {
+    "id": "otago",
+    "name": "Otago",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/otago.svg"
+  },
+  {
+    "id": "southland",
+    "name": "Southland",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/southland.svg"
+  },
+  {
+    "id": "taranaki",
+    "name": "Taranaki",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/taranaki.svg"
+  },
+  {
+    "id": "tasman",
+    "name": "Tasman",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/tasman.svg"
+  },
+  {
+    "id": "waikato",
+    "name": "Waikato",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/waikato.svg"
+  },
+  {
+    "id": "wellington",
+    "name": "Wellington",
+    "competition": "npc",
+    "level": "pro-second",
+    "file": "public/clubs/wellington.svg"
+  },
+  {
+    "id": "free-state-cheetahs",
+    "name": "Free State Cheetahs",
+    "competition": "currie-premier",
+    "level": "pro-regional",
+    "file": "public/clubs/free-state-cheetahs.svg"
+  },
+  {
+    "id": "natal-sharks",
+    "name": "Natal Sharks",
+    "competition": "currie-premier",
+    "level": "pro-regional",
+    "file": "public/clubs/natal-sharks.svg"
+  },
+  {
+    "id": "boland-kavaliers",
+    "name": "Boland Kavaliers",
+    "competition": "currie-premier",
+    "level": "pro-regional",
+    "file": "public/clubs/boland-kavaliers.svg"
+  },
+  {
+    "id": "western-province",
+    "name": "Western Province",
+    "competition": "currie-premier",
+    "level": "pro-regional",
+    "file": "public/clubs/western-province.svg"
+  },
+  {
+    "id": "golden-lions",
+    "name": "Golden Lions",
+    "competition": "currie-premier",
+    "level": "pro-regional",
+    "file": "public/clubs/golden-lions.svg"
+  },
+  {
+    "id": "pumas",
+    "name": "Pumas",
+    "competition": "currie-premier",
+    "level": "pro-regional",
+    "file": "public/clubs/pumas.svg"
+  },
+  {
+    "id": "griquas",
+    "name": "Griquas",
+    "competition": "currie-premier",
+    "level": "pro-regional",
+    "file": "public/clubs/griquas.svg"
+  },
+  {
+    "id": "blue-bulls",
+    "name": "Blue Bulls",
+    "competition": "currie-premier",
+    "level": "pro-regional",
+    "file": "public/clubs/blue-bulls.svg"
+  },
+  {
+    "id": "swd-eagles",
+    "name": "SWD Eagles",
+    "competition": "currie-first",
+    "level": "development",
+    "file": "public/clubs/swd-eagles.svg"
+  },
+  {
+    "id": "ep-elephants",
+    "name": "EP Elephants",
+    "competition": "currie-first",
+    "level": "development",
+    "file": "public/clubs/ep-elephants.svg"
+  },
+  {
+    "id": "valke",
+    "name": "Valke",
+    "competition": "currie-first",
+    "level": "development",
+    "file": "public/clubs/valke.svg"
+  },
+  {
+    "id": "leopards",
+    "name": "Leopards",
+    "competition": "currie-first",
+    "level": "development",
+    "file": "public/clubs/leopards.svg"
+  },
+  {
+    "id": "griffons",
+    "name": "Griffons",
+    "competition": "currie-first",
+    "level": "development",
+    "file": "public/clubs/griffons.svg"
+  },
+  {
+    "id": "border-bulldogs",
+    "name": "Border Bulldogs",
+    "competition": "currie-first",
+    "level": "development",
+    "file": "public/clubs/border-bulldogs.svg"
+  },
+  {
+    "id": "castilla-y-leon-iberians",
+    "name": "Castilla y León Iberians",
+    "competition": "super-cup",
+    "level": "semipro",
+    "file": "public/clubs/castilla-y-leon-iberians.svg"
+  },
+  {
+    "id": "lusitanos-xv",
+    "name": "Lusitanos XV",
+    "competition": "super-cup",
+    "level": "semipro",
+    "file": "public/clubs/lusitanos-xv.svg"
+  },
+  {
+    "id": "brussels-devils",
+    "name": "Brussels Devils",
+    "competition": "super-cup",
+    "level": "semipro",
+    "file": "public/clubs/brussels-devils.svg"
+  },
+  {
+    "id": "delta",
+    "name": "Delta",
+    "competition": "super-cup",
+    "level": "semipro",
+    "file": "public/clubs/delta.svg"
+  },
+  {
+    "id": "bohemia-rugby-warriors",
+    "name": "Bohemia Rugby Warriors",
+    "competition": "super-cup",
+    "level": "semipro",
+    "file": "public/clubs/bohemia-rugby-warriors.svg"
+  },
+  {
+    "id": "romanian-wolves",
+    "name": "Romanian Wolves",
+    "competition": "super-cup",
+    "level": "semipro",
+    "file": "public/clubs/romanian-wolves.svg"
+  },
+  {
+    "id": "dogos-xv",
+    "name": "Dogos XV",
+    "competition": "sra",
+    "level": "pro-regional",
+    "file": "public/clubs/dogos-xv.svg"
+  },
+  {
+    "id": "penarol-rugby",
+    "name": "Peñarol Rugby",
+    "competition": "sra",
+    "level": "pro-regional",
+    "file": "public/clubs/penarol-rugby.svg"
+  },
+  {
+    "id": "pampas",
+    "name": "Pampas",
+    "competition": "sra",
+    "level": "pro-regional",
+    "file": "public/clubs/pampas.svg"
+  },
+  {
+    "id": "selknam",
+    "name": "Selknam",
+    "competition": "sra",
+    "level": "pro-regional",
+    "file": "public/clubs/selknam.svg"
+  },
+  {
+    "id": "cobras-brasil-rugby",
+    "name": "Cobras Brasil Rugby",
+    "competition": "sra",
+    "level": "pro-regional",
+    "file": "public/clubs/cobras-brasil-rugby.svg"
+  },
+  {
+    "id": "tarucas",
+    "name": "Tarucas",
+    "competition": "sra",
+    "level": "pro-regional",
+    "file": "public/clubs/tarucas.svg"
+  },
+  {
+    "id": "yacare-xv",
+    "name": "Yacaré XV",
+    "competition": "sra",
+    "level": "pro-regional",
+    "file": "public/clubs/yacare-xv.svg"
+  },
+  {
+    "id": "capibaras-xv",
+    "name": "Capibaras XV",
+    "competition": "sra",
+    "level": "pro-regional",
+    "file": "public/clubs/capibaras-xv.svg"
+  },
+  {
+    "id": "vrac-valladolid",
+    "name": "VRAC Valladolid",
+    "competition": "esp-dh",
+    "level": "semipro",
+    "file": "public/clubs/vrac-valladolid.svg"
+  },
+  {
+    "id": "aparejadores-burgos",
+    "name": "Aparejadores Burgos",
+    "competition": "esp-dh",
+    "level": "semipro",
+    "file": "public/clubs/aparejadores-burgos.svg"
+  },
+  {
+    "id": "alcobendas",
+    "name": "Alcobendas",
+    "competition": "esp-dh",
+    "level": "semipro",
+    "file": "public/clubs/alcobendas.svg"
+  },
+  {
+    "id": "complutense-cisneros",
+    "name": "Complutense Cisneros",
+    "competition": "esp-dh",
+    "level": "semipro",
+    "file": "public/clubs/complutense-cisneros.svg"
+  },
+  {
+    "id": "pozuelo",
+    "name": "Pozuelo",
+    "competition": "esp-dh",
+    "level": "semipro",
+    "file": "public/clubs/pozuelo.svg"
+  },
+  {
+    "id": "la-vila",
+    "name": "La Vila",
+    "competition": "esp-dh",
+    "level": "semipro",
+    "file": "public/clubs/la-vila.svg"
+  },
+  {
+    "id": "liceo-frances",
+    "name": "Liceo Francés",
+    "competition": "esp-dh",
+    "level": "semipro",
+    "file": "public/clubs/liceo-frances.svg"
+  },
+  {
+    "id": "ordizia",
+    "name": "Ordizia",
+    "competition": "esp-dh",
+    "level": "semipro",
+    "file": "public/clubs/ordizia.svg"
+  },
+  {
+    "id": "santboiana",
+    "name": "Santboiana",
+    "competition": "esp-dh",
+    "level": "semipro",
+    "file": "public/clubs/santboiana.svg"
+  },
+  {
+    "id": "el-salvador",
+    "name": "El Salvador",
+    "competition": "esp-dh",
+    "level": "semipro",
+    "file": "public/clubs/el-salvador.svg"
+  },
+  {
+    "id": "barca-rugby",
+    "name": "Barça Rugby",
+    "competition": "esp-dhelite",
+    "level": "development",
+    "file": "public/clubs/barca-rugby.svg"
+  },
+  {
+    "id": "sant-cugat",
+    "name": "Sant Cugat",
+    "competition": "esp-dhelite",
+    "level": "development",
+    "file": "public/clubs/sant-cugat.svg"
+  },
+  {
+    "id": "getxo",
+    "name": "Getxo",
+    "competition": "esp-dhelite",
+    "level": "development",
+    "file": "public/clubs/getxo.svg"
+  },
+  {
+    "id": "hernani",
+    "name": "Hernani",
+    "competition": "esp-dhelite",
+    "level": "development",
+    "file": "public/clubs/hernani.svg"
+  },
+  {
+    "id": "gernika",
+    "name": "Gernika",
+    "competition": "esp-dhelite",
+    "level": "development",
+    "file": "public/clubs/gernika.svg"
+  },
+  {
+    "id": "real-ciencias-sevilla",
+    "name": "Real Ciencias Sevilla",
+    "competition": "esp-dhelite",
+    "level": "development",
+    "file": "public/clubs/real-ciencias-sevilla.svg"
+  },
+  {
+    "id": "fenix-zaragoza",
+    "name": "Fénix Zaragoza",
+    "competition": "esp-dhelite",
+    "level": "development",
+    "file": "public/clubs/fenix-zaragoza.svg"
+  },
+  {
+    "id": "les-abelles",
+    "name": "Les Abelles",
+    "competition": "esp-dhelite",
+    "level": "development",
+    "file": "public/clubs/les-abelles.svg"
+  },
+  {
+    "id": "rc-valencia",
+    "name": "RC Valencia",
+    "competition": "esp-dhelite",
+    "level": "development",
+    "file": "public/clubs/rc-valencia.svg"
+  },
+  {
+    "id": "industriales",
+    "name": "Industriales",
+    "competition": "esp-dhelite",
+    "level": "development",
+    "file": "public/clubs/industriales.svg"
+  },
+  {
+    "id": "aranda",
+    "name": "Aranda",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/aranda.svg"
+  },
+  {
+    "id": "cormoran-santander",
+    "name": "Cormorán Santander",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/cormoran-santander.svg"
+  },
+  {
+    "id": "belenos",
+    "name": "Belenos",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/belenos.svg"
+  },
+  {
+    "id": "universitario-bilbao",
+    "name": "Universitario Bilbao",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/universitario-bilbao.svg"
+  },
+  {
+    "id": "la-unica",
+    "name": "La Única",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/la-unica.svg"
+  },
+  {
+    "id": "gaztedi",
+    "name": "Gaztedi",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/gaztedi.svg"
+  },
+  {
+    "id": "arrasate",
+    "name": "Arrasate",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/arrasate.svg"
+  },
+  {
+    "id": "gipuzkoa-sortzen",
+    "name": "Gipuzkoa Sortzen",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/gipuzkoa-sortzen.svg"
+  },
+  {
+    "id": "akra-barbara",
+    "name": "Akra Bárbara",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/akra-barbara.svg"
+  },
+  {
+    "id": "barcelona-universitari",
+    "name": "Barcelona Universitari",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/barcelona-universitari.svg"
+  },
+  {
+    "id": "natacio-poble-nou",
+    "name": "Natació Poble Nou",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/natacio-poble-nou.svg"
+  },
+  {
+    "id": "cau-valencia",
+    "name": "CAU Valencia",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/cau-valencia.svg"
+  },
+  {
+    "id": "el-toro",
+    "name": "El Toro",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/el-toro.svg"
+  },
+  {
+    "id": "l-hospitalet",
+    "name": "L'Hospitalet",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/l-hospitalet.svg"
+  },
+  {
+    "id": "sitges",
+    "name": "Sitges",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/sitges.svg"
+  },
+  {
+    "id": "vpc-andorra",
+    "name": "VPC Andorra",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/vpc-andorra.svg"
+  },
+  {
+    "id": "car-sevilla",
+    "name": "CAR Sevilla",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/car-sevilla.svg"
+  },
+  {
+    "id": "soto-del-real",
+    "name": "Soto del Real",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/soto-del-real.svg"
+  },
+  {
+    "id": "cisneros-zeta",
+    "name": "Cisneros Zeta",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/cisneros-zeta.svg"
+  },
+  {
+    "id": "jaen",
+    "name": "Jaén",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/jaen.svg"
+  },
+  {
+    "id": "alcobendas-b",
+    "name": "Alcobendas B",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/alcobendas-b.svg"
+  },
+  {
+    "id": "alcala",
+    "name": "Alcalá",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/alcala.svg"
+  },
+  {
+    "id": "car-caceres",
+    "name": "CAR Cáceres",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/car-caceres.svg"
+  },
+  {
+    "id": "majadahonda",
+    "name": "Majadahonda",
+    "competition": "esp-dhb",
+    "level": "development",
+    "file": "public/clubs/majadahonda.svg"
+  },
+  {
+    "id": "saitama-wild-knights",
+    "name": "Saitama Wild Knights",
+    "competition": "jpn-d1",
+    "level": "elite-pro",
+    "file": "public/clubs/saitama-wild-knights.svg"
+  },
+  {
+    "id": "toshiba-brave-lupus-tokyo",
+    "name": "Toshiba Brave Lupus Tokyo",
+    "competition": "jpn-d1",
+    "level": "elite-pro",
+    "file": "public/clubs/toshiba-brave-lupus-tokyo.svg"
+  },
+  {
+    "id": "kubota-spears",
+    "name": "Kubota Spears",
+    "competition": "jpn-d1",
+    "level": "elite-pro",
+    "file": "public/clubs/kubota-spears.svg"
+  },
+  {
+    "id": "yokohama-canon-eagles",
+    "name": "Yokohama Canon Eagles",
+    "competition": "jpn-d1",
+    "level": "elite-pro",
+    "file": "public/clubs/yokohama-canon-eagles.svg"
+  },
+  {
+    "id": "tokyo-sungoliath",
+    "name": "Tokyo Sungoliath",
+    "competition": "jpn-d1",
+    "level": "elite-pro",
+    "file": "public/clubs/tokyo-sungoliath.svg"
+  },
+  {
+    "id": "kobelco-kobe-steelers",
+    "name": "Kobelco Kobe Steelers",
+    "competition": "jpn-d1",
+    "level": "elite-pro",
+    "file": "public/clubs/kobelco-kobe-steelers.svg"
+  },
+  {
+    "id": "toyota-verblitz",
+    "name": "Toyota Verblitz",
+    "competition": "jpn-d1",
+    "level": "elite-pro",
+    "file": "public/clubs/toyota-verblitz.svg"
+  },
+  {
+    "id": "shizuoka-bluerevs",
+    "name": "Shizuoka BlueRevs",
+    "competition": "jpn-d1",
+    "level": "elite-pro",
+    "file": "public/clubs/shizuoka-bluerevs.svg"
+  },
+  {
+    "id": "urayasu-d-rocks",
+    "name": "Urayasu D-Rocks",
+    "competition": "jpn-d1",
+    "level": "elite-pro",
+    "file": "public/clubs/urayasu-d-rocks.svg"
+  },
+  {
+    "id": "mie-honda-heat",
+    "name": "Mie Honda Heat",
+    "competition": "jpn-d1",
+    "level": "elite-pro",
+    "file": "public/clubs/mie-honda-heat.svg"
+  },
+  {
+    "id": "mitsubishi-sagamihara-dynaboars",
+    "name": "Mitsubishi Sagamihara Dynaboars",
+    "competition": "jpn-d1",
+    "level": "elite-pro",
+    "file": "public/clubs/mitsubishi-sagamihara-dynaboars.svg"
+  },
+  {
+    "id": "blackrams-tokyo",
+    "name": "BlackRams Tokyo",
+    "competition": "jpn-d1",
+    "level": "elite-pro",
+    "file": "public/clubs/blackrams-tokyo.svg"
+  },
+  {
+    "id": "green-rockets-tokatsu",
+    "name": "Green Rockets Tokatsu",
+    "competition": "jpn-d2",
+    "level": "pro-second",
+    "file": "public/clubs/green-rockets-tokatsu.svg"
+  },
+  {
+    "id": "kyuden-voltex",
+    "name": "Kyuden Voltex",
+    "competition": "jpn-d2",
+    "level": "pro-second",
+    "file": "public/clubs/kyuden-voltex.svg"
+  },
+  {
+    "id": "shimizu-koto-blue-sharks",
+    "name": "Shimizu Koto Blue Sharks",
+    "competition": "jpn-d2",
+    "level": "pro-second",
+    "file": "public/clubs/shimizu-koto-blue-sharks.svg"
+  },
+  {
+    "id": "toyota-industries-shuttles-aichi",
+    "name": "Toyota Industries Shuttles Aichi",
+    "competition": "jpn-d2",
+    "level": "pro-second",
+    "file": "public/clubs/toyota-industries-shuttles-aichi.svg"
+  },
+  {
+    "id": "kamaishi-seawaves",
+    "name": "Kamaishi Seawaves",
+    "competition": "jpn-d2",
+    "level": "pro-second",
+    "file": "public/clubs/kamaishi-seawaves.svg"
+  },
+  {
+    "id": "hanazono-kintetsu-liners",
+    "name": "Hanazono Kintetsu Liners",
+    "competition": "jpn-d2",
+    "level": "pro-second",
+    "file": "public/clubs/hanazono-kintetsu-liners.svg"
+  },
+  {
+    "id": "hino-red-dolphins",
+    "name": "Hino Red Dolphins",
+    "competition": "jpn-d2",
+    "level": "pro-second",
+    "file": "public/clubs/hino-red-dolphins.svg"
+  },
+  {
+    "id": "redhurricanes-osaka",
+    "name": "RedHurricanes Osaka",
+    "competition": "jpn-d2",
+    "level": "pro-second",
+    "file": "public/clubs/redhurricanes-osaka.svg"
+  },
+  {
+    "id": "kurita-water-gush-akishima",
+    "name": "Kurita Water Gush Akishima",
+    "competition": "jpn-d3",
+    "level": "semipro",
+    "file": "public/clubs/kurita-water-gush-akishima.svg"
+  },
+  {
+    "id": "sayama-secom-rugguts",
+    "name": "Sayama Secom Rugguts",
+    "competition": "jpn-d3",
+    "level": "semipro",
+    "file": "public/clubs/sayama-secom-rugguts.svg"
+  },
+  {
+    "id": "chugoku-red-regulions",
+    "name": "Chugoku Red Regulions",
+    "competition": "jpn-d3",
+    "level": "semipro",
+    "file": "public/clubs/chugoku-red-regulions.svg"
+  },
+  {
+    "id": "skyactivs-hiroshima",
+    "name": "Skyactivs Hiroshima",
+    "competition": "jpn-d3",
+    "level": "semipro",
+    "file": "public/clubs/skyactivs-hiroshima.svg"
+  },
+  {
+    "id": "yakult-levins-toda",
+    "name": "Yakult Levins Toda",
+    "competition": "jpn-d3",
+    "level": "semipro",
+    "file": "public/clubs/yakult-levins-toda.svg"
+  },
+  {
+    "id": "leriro-fukuoka",
+    "name": "LeRIRO Fukuoka",
+    "competition": "jpn-d3",
+    "level": "semipro",
+    "file": "public/clubs/leriro-fukuoka.svg"
+  },
+  {
+    "id": "az-com-maruwa-momotaro-s",
+    "name": "AZ-COM MARUWA Momotaro's",
+    "competition": "jpn-d3",
+    "level": "semipro",
+    "file": "public/clubs/az-com-maruwa-momotaro-s.svg"
+  },
+  {
+    "id": "wanganui",
+    "name": "Wanganui",
+    "competition": "nz-heartland",
+    "level": "amateur",
+    "file": "public/clubs/wanganui.svg"
+  },
+  {
+    "id": "south-canterbury",
+    "name": "South Canterbury",
+    "competition": "nz-heartland",
+    "level": "amateur",
+    "file": "public/clubs/south-canterbury.svg"
+  },
+  {
+    "id": "thames-valley",
+    "name": "Thames Valley",
+    "competition": "nz-heartland",
+    "level": "amateur",
+    "file": "public/clubs/thames-valley.svg"
+  },
+  {
+    "id": "north-otago",
+    "name": "North Otago",
+    "competition": "nz-heartland",
+    "level": "amateur",
+    "file": "public/clubs/north-otago.svg"
+  },
+  {
+    "id": "mid-canterbury",
+    "name": "Mid Canterbury",
+    "competition": "nz-heartland",
+    "level": "amateur",
+    "file": "public/clubs/mid-canterbury.svg"
+  },
+  {
+    "id": "king-country",
+    "name": "King Country",
+    "competition": "nz-heartland",
+    "level": "amateur",
+    "file": "public/clubs/king-country.svg"
+  },
+  {
+    "id": "wairarapa-bush",
+    "name": "Wairarapa Bush",
+    "competition": "nz-heartland",
+    "level": "amateur",
+    "file": "public/clubs/wairarapa-bush.svg"
+  },
+  {
+    "id": "horowhenua-kapiti",
+    "name": "Horowhenua Kapiti",
+    "competition": "nz-heartland",
+    "level": "amateur",
+    "file": "public/clubs/horowhenua-kapiti.svg"
+  },
+  {
+    "id": "poverty-bay",
+    "name": "Poverty Bay",
+    "competition": "nz-heartland",
+    "level": "amateur",
+    "file": "public/clubs/poverty-bay.svg"
+  },
+  {
+    "id": "east-coast",
+    "name": "East Coast",
+    "competition": "nz-heartland",
+    "level": "amateur",
+    "file": "public/clubs/east-coast.svg"
+  },
+  {
+    "id": "buller",
+    "name": "Buller",
+    "competition": "nz-heartland",
+    "level": "amateur",
+    "file": "public/clubs/buller.svg"
+  },
+  {
+    "id": "west-coast",
+    "name": "West Coast",
+    "competition": "nz-heartland",
+    "level": "amateur",
+    "file": "public/clubs/west-coast.svg"
+  },
+  {
+    "id": "tarbes",
+    "name": "Tarbes",
+    "competition": "fr-federale1",
+    "level": "development",
+    "file": "public/clubs/tarbes.svg"
+  },
+  {
+    "id": "blagnac",
+    "name": "Blagnac",
+    "competition": "fr-federale1",
+    "level": "development",
+    "file": "public/clubs/blagnac.svg"
+  },
+  {
+    "id": "cognac",
+    "name": "Cognac",
+    "competition": "fr-federale1",
+    "level": "development",
+    "file": "public/clubs/cognac.svg"
+  },
+  {
+    "id": "dijon",
+    "name": "Dijon",
+    "competition": "fr-federale1",
+    "level": "development",
+    "file": "public/clubs/dijon.svg"
+  },
+  {
+    "id": "macon",
+    "name": "Mâcon",
+    "competition": "fr-federale1",
+    "level": "development",
+    "file": "public/clubs/macon.svg"
+  },
+  {
+    "id": "nimes",
+    "name": "Nîmes",
+    "competition": "fr-federale1",
+    "level": "development",
+    "file": "public/clubs/nimes.svg"
+  },
+  {
+    "id": "auch",
+    "name": "Auch",
+    "competition": "fr-federale1",
+    "level": "development",
+    "file": "public/clubs/auch.svg"
+  },
+  {
+    "id": "langon",
+    "name": "Langon",
+    "competition": "fr-federale1",
+    "level": "development",
+    "file": "public/clubs/langon.svg"
+  },
+  {
+    "id": "saint-jean-de-luz",
+    "name": "Saint-Jean-de-Luz",
+    "competition": "fr-federale1",
+    "level": "development",
+    "file": "public/clubs/saint-jean-de-luz.svg"
+  },
+  {
+    "id": "hyeres-carqueiranne",
+    "name": "Hyères Carqueiranne",
+    "competition": "fr-federale1",
+    "level": "development",
+    "file": "public/clubs/hyeres-carqueiranne.svg"
+  },
+  {
+    "id": "bagneres",
+    "name": "Bagnères",
+    "competition": "fr-federale1",
+    "level": "development",
+    "file": "public/clubs/bagneres.svg"
+  },
+  {
+    "id": "villefranche-de-lauragais",
+    "name": "Villefranche-de-Lauragais",
+    "competition": "fr-federale1",
+    "level": "development",
+    "file": "public/clubs/villefranche-de-lauragais.svg"
+  },
+  {
+    "id": "lourdes",
+    "name": "Lourdes",
+    "competition": "fr-federale2",
+    "level": "amateur",
+    "file": "public/clubs/lourdes.svg"
+  },
+  {
+    "id": "anglet",
+    "name": "Anglet",
+    "competition": "fr-federale2",
+    "level": "amateur",
+    "file": "public/clubs/anglet.svg"
+  },
+  {
+    "id": "ceret",
+    "name": "Céret",
+    "competition": "fr-federale2",
+    "level": "amateur",
+    "file": "public/clubs/ceret.svg"
+  },
+  {
+    "id": "trelissac",
+    "name": "Trélissac",
+    "competition": "fr-federale2",
+    "level": "amateur",
+    "file": "public/clubs/trelissac.svg"
+  },
+  {
+    "id": "objat",
+    "name": "Objat",
+    "competition": "fr-federale2",
+    "level": "amateur",
+    "file": "public/clubs/objat.svg"
+  },
+  {
+    "id": "la-voulte",
+    "name": "La Voulte",
+    "competition": "fr-federale2",
+    "level": "amateur",
+    "file": "public/clubs/la-voulte.svg"
+  },
+  {
+    "id": "lavaur",
+    "name": "Lavaur",
+    "competition": "fr-federale2",
+    "level": "amateur",
+    "file": "public/clubs/lavaur.svg"
+  },
+  {
+    "id": "millau",
+    "name": "Millau",
+    "competition": "fr-federale2",
+    "level": "amateur",
+    "file": "public/clubs/millau.svg"
+  },
+  {
+    "id": "gujan-mestras",
+    "name": "Gujan-Mestras",
+    "competition": "fr-federale2",
+    "level": "amateur",
+    "file": "public/clubs/gujan-mestras.svg"
+  },
+  {
+    "id": "saint-sulpice",
+    "name": "Saint-Sulpice",
+    "competition": "fr-federale2",
+    "level": "amateur",
+    "file": "public/clubs/saint-sulpice.svg"
+  },
+  {
+    "id": "sale-fc",
+    "name": "Sale FC",
+    "competition": "eng-national1",
+    "level": "development",
+    "file": "public/clubs/sale-fc.svg"
+  },
+  {
+    "id": "rosslyn-park",
+    "name": "Rosslyn Park",
+    "competition": "eng-national1",
+    "level": "development",
+    "file": "public/clubs/rosslyn-park.svg"
+  },
+  {
+    "id": "plymouth-albion",
+    "name": "Plymouth Albion",
+    "competition": "eng-national1",
+    "level": "development",
+    "file": "public/clubs/plymouth-albion.svg"
+  },
+  {
+    "id": "birmingham-moseley",
+    "name": "Birmingham Moseley",
+    "competition": "eng-national1",
+    "level": "development",
+    "file": "public/clubs/birmingham-moseley.svg"
+  },
+  {
+    "id": "rams-rfc",
+    "name": "Rams RFC",
+    "competition": "eng-national1",
+    "level": "development",
+    "file": "public/clubs/rams-rfc.svg"
+  },
+  {
+    "id": "leeds-tykes",
+    "name": "Leeds Tykes",
+    "competition": "eng-national1",
+    "level": "development",
+    "file": "public/clubs/leeds-tykes.svg"
+  },
+  {
+    "id": "blackheath",
+    "name": "Blackheath",
+    "competition": "eng-national1",
+    "level": "development",
+    "file": "public/clubs/blackheath.svg"
+  },
+  {
+    "id": "esher",
+    "name": "Esher",
+    "competition": "eng-national1",
+    "level": "development",
+    "file": "public/clubs/esher.svg"
+  },
+  {
+    "id": "cinderford",
+    "name": "Cinderford",
+    "competition": "eng-national1",
+    "level": "development",
+    "file": "public/clubs/cinderford.svg"
+  },
+  {
+    "id": "darlington-mowden-park",
+    "name": "Darlington Mowden Park",
+    "competition": "eng-national1",
+    "level": "development",
+    "file": "public/clubs/darlington-mowden-park.svg"
+  },
+  {
+    "id": "bishop-s-stortford",
+    "name": "Bishop's Stortford",
+    "competition": "eng-national1",
+    "level": "development",
+    "file": "public/clubs/bishop-s-stortford.svg"
+  },
+  {
+    "id": "taunton-titans",
+    "name": "Taunton Titans",
+    "competition": "eng-national1",
+    "level": "development",
+    "file": "public/clubs/taunton-titans.svg"
+  },
+  {
+    "id": "sedgley-park",
+    "name": "Sedgley Park",
+    "competition": "eng-national2",
+    "level": "amateur",
+    "file": "public/clubs/sedgley-park.svg"
+  },
+  {
+    "id": "fylde",
+    "name": "Fylde",
+    "competition": "eng-national2",
+    "level": "amateur",
+    "file": "public/clubs/fylde.svg"
+  },
+  {
+    "id": "hull-ionians",
+    "name": "Hull Ionians",
+    "competition": "eng-national2",
+    "level": "amateur",
+    "file": "public/clubs/hull-ionians.svg"
+  },
+  {
+    "id": "luctonians",
+    "name": "Luctonians",
+    "competition": "eng-national2",
+    "level": "amateur",
+    "file": "public/clubs/luctonians.svg"
+  },
+  {
+    "id": "rotherham-titans",
+    "name": "Rotherham Titans",
+    "competition": "eng-national2",
+    "level": "amateur",
+    "file": "public/clubs/rotherham-titans.svg"
+  },
+  {
+    "id": "sheffield-tigers",
+    "name": "Sheffield Tigers",
+    "competition": "eng-national2",
+    "level": "amateur",
+    "file": "public/clubs/sheffield-tigers.svg"
+  },
+  {
+    "id": "bournville",
+    "name": "Bournville",
+    "competition": "eng-national2",
+    "level": "amateur",
+    "file": "public/clubs/bournville.svg"
+  },
+  {
+    "id": "old-albanian",
+    "name": "Old Albanian",
+    "competition": "eng-national2",
+    "level": "amateur",
+    "file": "public/clubs/old-albanian.svg"
+  },
+  {
+    "id": "tonbridge-juddians",
+    "name": "Tonbridge Juddians",
+    "competition": "eng-national2",
+    "level": "amateur",
+    "file": "public/clubs/tonbridge-juddians.svg"
+  },
+  {
+    "id": "westcliff",
+    "name": "Westcliff",
+    "competition": "eng-national2",
+    "level": "amateur",
+    "file": "public/clubs/westcliff.svg"
+  },
+  {
+    "id": "maties",
+    "name": "Maties",
+    "competition": "za-community",
+    "level": "amateur",
+    "file": "public/clubs/maties.svg"
+  },
+  {
+    "id": "tuks",
+    "name": "Tuks",
+    "competition": "za-community",
+    "level": "amateur",
+    "file": "public/clubs/tuks.svg"
+  },
+  {
+    "id": "college-rovers",
+    "name": "College Rovers",
+    "competition": "za-community",
+    "level": "amateur",
+    "file": "public/clubs/college-rovers.svg"
+  },
+  {
+    "id": "durbanville-bellville",
+    "name": "Durbanville-Bellville",
+    "competition": "za-community",
+    "level": "amateur",
+    "file": "public/clubs/durbanville-bellville.svg"
+  },
+  {
+    "id": "false-bay",
+    "name": "False Bay",
+    "competition": "za-community",
+    "level": "amateur",
+    "file": "public/clubs/false-bay.svg"
+  },
+  {
+    "id": "hamiltons",
+    "name": "Hamiltons",
+    "competition": "za-community",
+    "level": "amateur",
+    "file": "public/clubs/hamiltons.svg"
+  },
+  {
+    "id": "old-selbornians",
+    "name": "Old Selbornians",
+    "competition": "za-community",
+    "level": "amateur",
+    "file": "public/clubs/old-selbornians.svg"
+  },
+  {
+    "id": "pretoria-police",
+    "name": "Pretoria Police",
+    "competition": "za-community",
+    "level": "amateur",
+    "file": "public/clubs/pretoria-police.svg"
+  },
+  {
+    "id": "rustenburg-impala",
+    "name": "Rustenburg Impala",
+    "competition": "za-community",
+    "level": "amateur",
+    "file": "public/clubs/rustenburg-impala.svg"
+  },
+  {
+    "id": "wanderers",
+    "name": "Wanderers",
+    "competition": "za-community",
+    "level": "amateur",
+    "file": "public/clubs/wanderers.svg"
+  },
+  {
+    "id": "tokyo-gas",
+    "name": "Tokyo Gas",
+    "competition": "jpn-regional",
+    "level": "amateur",
+    "file": "public/clubs/tokyo-gas.svg"
+  },
+  {
+    "id": "nippon-express",
+    "name": "Nippon Express",
+    "competition": "jpn-regional",
+    "level": "amateur",
+    "file": "public/clubs/nippon-express.svg"
+  },
+  {
+    "id": "fukuoka-sanix-blues",
+    "name": "Fukuoka Sanix Blues",
+    "competition": "jpn-regional",
+    "level": "amateur",
+    "file": "public/clubs/fukuoka-sanix-blues.svg"
+  },
+  {
+    "id": "chugoku-electric-power",
+    "name": "Chugoku Electric Power",
+    "competition": "jpn-regional",
+    "level": "amateur",
+    "file": "public/clubs/chugoku-electric-power.svg"
+  },
+  {
+    "id": "kansai-electric-power",
+    "name": "Kansai Electric Power",
+    "competition": "jpn-regional",
+    "level": "amateur",
+    "file": "public/clubs/kansai-electric-power.svg"
+  },
+  {
+    "id": "toyota-boshoku-blue-tornado",
+    "name": "Toyota Boshoku Blue Tornado",
+    "competition": "jpn-regional",
+    "level": "amateur",
+    "file": "public/clubs/toyota-boshoku-blue-tornado.svg"
+  },
+  {
+    "id": "meiji-yasuda",
+    "name": "Meiji Yasuda",
+    "competition": "jpn-regional",
+    "level": "amateur",
+    "file": "public/clubs/meiji-yasuda.svg"
+  },
+  {
+    "id": "setouchi-ohki",
+    "name": "Setouchi Ohki",
+    "competition": "jpn-regional",
+    "level": "amateur",
+    "file": "public/clubs/setouchi-ohki.svg"
+  },
+  {
+    "id": "chicago-hounds",
+    "name": "Chicago Hounds",
+    "competition": "us-mlr",
+    "level": "pro-regional",
+    "file": "public/clubs/chicago-hounds.svg"
+  },
+  {
+    "id": "new-england-free-jacks",
+    "name": "New England Free Jacks",
+    "competition": "us-mlr",
+    "level": "pro-regional",
+    "file": "public/clubs/new-england-free-jacks.svg"
+  },
+  {
+    "id": "old-glory-dc",
+    "name": "Old Glory DC",
+    "competition": "us-mlr",
+    "level": "pro-regional",
+    "file": "public/clubs/old-glory-dc.svg"
+  },
+  {
+    "id": "seattle-seawolves",
+    "name": "Seattle Seawolves",
+    "competition": "us-mlr",
+    "level": "pro-regional",
+    "file": "public/clubs/seattle-seawolves.svg"
+  },
+  {
+    "id": "anthem-rc",
+    "name": "Anthem RC",
+    "competition": "us-mlr",
+    "level": "pro-regional",
+    "file": "public/clubs/anthem-rc.svg"
+  },
+  {
+    "id": "california-legion",
+    "name": "California Legion",
+    "competition": "us-mlr",
+    "level": "pro-regional",
+    "file": "public/clubs/california-legion.svg"
+  },
+  {
+    "id": "california",
+    "name": "California",
+    "competition": "us-d1a",
+    "level": "development",
+    "file": "public/clubs/california.svg"
+  },
+  {
+    "id": "navy",
+    "name": "Navy",
+    "competition": "us-d1a",
+    "level": "development",
+    "file": "public/clubs/navy.svg"
+  },
+  {
+    "id": "saint-mary-s",
+    "name": "Saint Mary's",
+    "competition": "us-d1a",
+    "level": "development",
+    "file": "public/clubs/saint-mary-s.svg"
+  },
+  {
+    "id": "life-university",
+    "name": "Life University",
+    "competition": "us-d1a",
+    "level": "development",
+    "file": "public/clubs/life-university.svg"
+  },
+  {
+    "id": "lindenwood",
+    "name": "Lindenwood",
+    "competition": "us-d1a",
+    "level": "development",
+    "file": "public/clubs/lindenwood.svg"
+  },
+  {
+    "id": "army",
+    "name": "Army",
+    "competition": "us-d1a",
+    "level": "development",
+    "file": "public/clubs/army.svg"
+  },
+  {
+    "id": "byu",
+    "name": "BYU",
+    "competition": "us-d1a",
+    "level": "development",
+    "file": "public/clubs/byu.svg"
+  },
+  {
+    "id": "arizona",
+    "name": "Arizona",
+    "competition": "us-d1a",
+    "level": "development",
+    "file": "public/clubs/arizona.svg"
+  },
+  {
+    "id": "cal-poly",
+    "name": "Cal Poly",
+    "competition": "us-d1a",
+    "level": "development",
+    "file": "public/clubs/cal-poly.svg"
+  },
+  {
+    "id": "penn-state",
+    "name": "Penn State",
+    "competition": "us-d1a",
+    "level": "development",
+    "file": "public/clubs/penn-state.svg"
+  },
+  {
+    "id": "grand-canyon",
+    "name": "Grand Canyon",
+    "competition": "us-d1a",
+    "level": "development",
+    "file": "public/clubs/grand-canyon.svg"
+  },
+  {
+    "id": "arkansas-state",
+    "name": "Arkansas State",
+    "competition": "us-d1a",
+    "level": "development",
+    "file": "public/clubs/arkansas-state.svg"
+  },
+  {
+    "id": "brown",
+    "name": "Brown",
+    "competition": "us-ncr-d1",
+    "level": "amateur",
+    "file": "public/clubs/brown.svg"
+  },
+  {
+    "id": "dartmouth",
+    "name": "Dartmouth",
+    "competition": "us-ncr-d1",
+    "level": "amateur",
+    "file": "public/clubs/dartmouth.svg"
+  },
+  {
+    "id": "harvard",
+    "name": "Harvard",
+    "competition": "us-ncr-d1",
+    "level": "amateur",
+    "file": "public/clubs/harvard.svg"
+  },
+  {
+    "id": "yale",
+    "name": "Yale",
+    "competition": "us-ncr-d1",
+    "level": "amateur",
+    "file": "public/clubs/yale.svg"
+  },
+  {
+    "id": "princeton",
+    "name": "Princeton",
+    "competition": "us-ncr-d1",
+    "level": "amateur",
+    "file": "public/clubs/princeton.svg"
+  },
+  {
+    "id": "cornell",
+    "name": "Cornell",
+    "competition": "us-ncr-d1",
+    "level": "amateur",
+    "file": "public/clubs/cornell.svg"
+  },
+  {
+    "id": "penn",
+    "name": "Penn",
+    "competition": "us-ncr-d1",
+    "level": "amateur",
+    "file": "public/clubs/penn.svg"
+  },
+  {
+    "id": "columbia",
+    "name": "Columbia",
+    "competition": "us-ncr-d1",
+    "level": "amateur",
+    "file": "public/clubs/columbia.svg"
+  },
+  {
+    "id": "benfica",
+    "name": "Benfica",
+    "competition": "pt-honra",
+    "level": "semipro",
+    "file": "public/clubs/benfica.svg"
+  },
+  {
+    "id": "cascais",
+    "name": "Cascais",
+    "competition": "pt-honra",
+    "level": "semipro",
+    "file": "public/clubs/cascais.svg"
+  },
+  {
+    "id": "belenenses",
+    "name": "Belenenses",
+    "competition": "pt-honra",
+    "level": "semipro",
+    "file": "public/clubs/belenenses.svg"
+  },
+  {
+    "id": "direito",
+    "name": "Direito",
+    "competition": "pt-honra",
+    "level": "semipro",
+    "file": "public/clubs/direito.svg"
+  },
+  {
+    "id": "cdul",
+    "name": "CDUL",
+    "competition": "pt-honra",
+    "level": "semipro",
+    "file": "public/clubs/cdul.svg"
+  },
+  {
+    "id": "agronomia",
+    "name": "Agronomia",
+    "competition": "pt-honra",
+    "level": "semipro",
+    "file": "public/clubs/agronomia.svg"
+  },
+  {
+    "id": "tecnico",
+    "name": "Técnico",
+    "competition": "pt-honra",
+    "level": "semipro",
+    "file": "public/clubs/tecnico.svg"
+  },
+  {
+    "id": "sao-miguel",
+    "name": "São Miguel",
+    "competition": "pt-honra",
+    "level": "semipro",
+    "file": "public/clubs/sao-miguel.svg"
+  },
+  {
+    "id": "cdup",
+    "name": "CDUP",
+    "competition": "pt-honra",
+    "level": "semipro",
+    "file": "public/clubs/cdup.svg"
+  },
+  {
+    "id": "academica",
+    "name": "Académica",
+    "competition": "pt-honra",
+    "level": "semipro",
+    "file": "public/clubs/academica.svg"
+  },
+  {
+    "id": "santarem",
+    "name": "Santarém",
+    "competition": "pt-honra",
+    "level": "semipro",
+    "file": "public/clubs/santarem.svg"
+  },
+  {
+    "id": "montemor-o-novo",
+    "name": "Montemor o Novo",
+    "competition": "pt-honra",
+    "level": "semipro",
+    "file": "public/clubs/montemor-o-novo.svg"
+  },
+  {
+    "id": "valorugby-emilia",
+    "name": "Valorugby Emilia",
+    "competition": "ita-serie-a-elite",
+    "level": "semipro",
+    "file": "public/clubs/valorugby-emilia.svg"
+  },
+  {
+    "id": "petrarca",
+    "name": "Petrarca",
+    "competition": "ita-serie-a-elite",
+    "level": "semipro",
+    "file": "public/clubs/petrarca.svg"
+  },
+  {
+    "id": "rugby-rovigo-delta",
+    "name": "Rugby Rovigo Delta",
+    "competition": "ita-serie-a-elite",
+    "level": "semipro",
+    "file": "public/clubs/rugby-rovigo-delta.svg"
+  },
+  {
+    "id": "viadana",
+    "name": "Viadana",
+    "competition": "ita-serie-a-elite",
+    "level": "semipro",
+    "file": "public/clubs/viadana.svg"
+  },
+  {
+    "id": "lyons-piacenza",
+    "name": "Lyons Piacenza",
+    "competition": "ita-serie-a-elite",
+    "level": "semipro",
+    "file": "public/clubs/lyons-piacenza.svg"
+  },
+  {
+    "id": "mogliano",
+    "name": "Mogliano",
+    "competition": "ita-serie-a-elite",
+    "level": "semipro",
+    "file": "public/clubs/mogliano.svg"
+  },
+  {
+    "id": "rangers-vicenza",
+    "name": "Rangers Vicenza",
+    "competition": "ita-serie-a-elite",
+    "level": "semipro",
+    "file": "public/clubs/rangers-vicenza.svg"
+  },
+  {
+    "id": "fiamme-oro",
+    "name": "Fiamme Oro",
+    "competition": "ita-serie-a-elite",
+    "level": "semipro",
+    "file": "public/clubs/fiamme-oro.svg"
+  },
+  {
+    "id": "parabiago",
+    "name": "Parabiago",
+    "competition": "ita-serie-a-elite",
+    "level": "semipro",
+    "file": "public/clubs/parabiago.svg"
+  },
+  {
+    "id": "biella",
+    "name": "Biella",
+    "competition": "ita-serie-a-elite",
+    "level": "semipro",
+    "file": "public/clubs/biella.svg"
+  },
+  {
+    "id": "rugby-calvisano",
+    "name": "Rugby Calvisano",
+    "competition": "ita-serie-a",
+    "level": "amateur",
+    "file": "public/clubs/rugby-calvisano.svg"
+  },
+  {
+    "id": "asr-milano",
+    "name": "ASR Milano",
+    "competition": "ita-serie-a",
+    "level": "amateur",
+    "file": "public/clubs/asr-milano.svg"
+  },
+  {
+    "id": "rugby-parma",
+    "name": "Rugby Parma",
+    "competition": "ita-serie-a",
+    "level": "amateur",
+    "file": "public/clubs/rugby-parma.svg"
+  },
+  {
+    "id": "valsugana",
+    "name": "Valsugana",
+    "competition": "ita-serie-a",
+    "level": "amateur",
+    "file": "public/clubs/valsugana.svg"
+  },
+  {
+    "id": "rugby-san-dona",
+    "name": "Rugby San Donà",
+    "competition": "ita-serie-a",
+    "level": "amateur",
+    "file": "public/clubs/rugby-san-dona.svg"
+  },
+  {
+    "id": "cus-torino",
+    "name": "CUS Torino",
+    "competition": "ita-serie-a",
+    "level": "amateur",
+    "file": "public/clubs/cus-torino.svg"
+  },
+  {
+    "id": "rugby-noceto",
+    "name": "Rugby Noceto",
+    "competition": "ita-serie-a",
+    "level": "amateur",
+    "file": "public/clubs/rugby-noceto.svg"
+  },
+  {
+    "id": "lazio-rugby",
+    "name": "Lazio Rugby",
+    "competition": "ita-serie-a",
+    "level": "amateur",
+    "file": "public/clubs/verona-rugby.svg"
+  },
+  {
+    "id": "rugby-roma-olimpic",
+    "name": "Rugby Roma Olimpic",
+    "competition": "ita-serie-a",
+    "level": "amateur",
+    "file": "public/clubs/rugby-roma-olimpic.svg"
+  },
+  {
+    "id": "rugby-bologna-1928",
+    "name": "Rugby Bologna 1928",
+    "competition": "ita-serie-a",
+    "level": "amateur",
+    "file": "public/clubs/rugby-bologna-1928.svg"
+  },
+  {
+    "id": "amatori-alghero",
+    "name": "Amatori Alghero",
+    "competition": "ita-serie-a",
+    "level": "amateur",
+    "file": "public/clubs/amatori-alghero.svg"
+  },
+  {
+    "id": "rugby-lecco",
+    "name": "Rugby Lecco",
+    "competition": "ita-serie-a",
+    "level": "amateur",
+    "file": "public/clubs/rugby-lecco.svg"
+  },
+  {
+    "id": "farrapos",
+    "name": "Farrapos",
+    "competition": "br-super12",
+    "level": "amateur",
+    "file": "public/clubs/farrapos.svg"
+  },
+  {
+    "id": "charrua",
+    "name": "Charrua",
+    "competition": "br-super12",
+    "level": "amateur",
+    "file": "public/clubs/charrua.svg"
+  },
+  {
+    "id": "desterro",
+    "name": "Desterro",
+    "competition": "br-super12",
+    "level": "amateur",
+    "file": "public/clubs/desterro.svg"
+  },
+  {
+    "id": "joaca",
+    "name": "Joaca",
+    "competition": "br-super12",
+    "level": "amateur",
+    "file": "public/clubs/joaca.svg"
+  },
+  {
+    "id": "poli",
+    "name": "Poli",
+    "competition": "br-super12",
+    "level": "amateur",
+    "file": "public/clubs/poli.svg"
+  },
+  {
+    "id": "sao-jose",
+    "name": "São José",
+    "competition": "br-super12",
+    "level": "amateur",
+    "file": "public/clubs/sao-jose.svg"
+  },
+  {
+    "id": "tornados-indaiatuba",
+    "name": "Tornados Indaiatuba",
+    "competition": "br-super12",
+    "level": "amateur",
+    "file": "public/clubs/tornados-indaiatuba.svg"
+  },
+  {
+    "id": "rio-branco",
+    "name": "Rio Branco",
+    "competition": "br-super12",
+    "level": "amateur",
+    "file": "public/clubs/rio-branco.svg"
+  },
+  {
+    "id": "jacarei",
+    "name": "Jacareí",
+    "competition": "br-super12",
+    "level": "amateur",
+    "file": "public/clubs/jacarei.svg"
+  },
+  {
+    "id": "spac",
+    "name": "SPAC",
+    "competition": "br-super12",
+    "level": "amateur",
+    "file": "public/clubs/spac.svg"
+  },
+  {
+    "id": "pasteur",
+    "name": "Pasteur",
+    "competition": "br-super12",
+    "level": "amateur",
+    "file": "public/clubs/pasteur.svg"
+  },
+  {
+    "id": "nova-lima",
+    "name": "Nova Lima",
+    "competition": "br-super12",
+    "level": "amateur",
+    "file": "public/clubs/nova-lima.svg"
+  },
+  {
+    "id": "ar-albatros",
+    "name": "Albatros",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-albatros.svg"
+  },
+  {
+    "id": "ar-almafuerte",
+    "name": "Almafuerte",
+    "competition": "ar-urba-tercera",
+    "level": "amateur",
+    "file": "public/clubs/ar-almafuerte.svg"
+  },
+  {
+    "id": "ar-arsenal-zarate",
+    "name": "Arsenal Zárate",
+    "competition": "ar-urba-tercera",
+    "level": "amateur",
+    "file": "public/clubs/ar-arsenal-zarate.svg"
+  },
+  {
+    "id": "ar-atletico-chascomus",
+    "name": "Atlético Chascomús",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-atletico-chascomus.svg"
+  },
+  {
+    "id": "ar-atletico-san-andres",
+    "name": "Atlético San Andrés",
+    "competition": "ar-urba-desarrollo",
+    "level": "amateur",
+    "file": "public/clubs/ar-atletico-san-andres.svg"
+  },
+  {
+    "id": "ar-atletico-y-progreso",
+    "name": "Atlético y Progreso",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-atletico-y-progreso.svg"
+  },
+  {
+    "id": "ar-banco-hipotecario",
+    "name": "Banco Hipotecario",
+    "competition": "ar-urba-tercera",
+    "level": "amateur",
+    "file": "public/clubs/ar-banco-hipotecario.svg"
+  },
+  {
+    "id": "ar-berazategui",
+    "name": "Berazategui",
+    "competition": "ar-urba-desarrollo",
+    "level": "amateur",
+    "file": "public/clubs/ar-berazategui.svg"
+  },
+  {
+    "id": "ar-berisso",
+    "name": "Berisso",
+    "competition": "ar-urba-tercera",
+    "level": "amateur",
+    "file": "public/clubs/ar-berisso.svg"
+  },
+  {
+    "id": "ar-beromama",
+    "name": "Beromama",
+    "competition": "ar-urba-tercera",
+    "level": "amateur",
+    "file": "public/clubs/ar-beromama.svg"
+  },
+  {
+    "id": "ar-bigua",
+    "name": "Biguá",
+    "competition": "ar-pampeana-b",
+    "level": "amateur",
+    "file": "public/clubs/ar-bigua.svg"
+  },
+  {
+    "id": "ar-ciudad-de-campana",
+    "name": "Ciudad de Campana",
+    "competition": "ar-urba-tercera",
+    "level": "amateur",
+    "file": "public/clubs/ar-ciudad-de-campana.svg"
+  },
+  {
+    "id": "ar-curda",
+    "name": "CURDA",
+    "competition": "ar-nea-a",
+    "level": "amateur",
+    "file": "public/clubs/ar-curda.svg"
+  },
+  {
+    "id": "ar-defensores-de-glew",
+    "name": "Defensores de Glew",
+    "competition": "ar-urba-desarrollo",
+    "level": "amateur",
+    "file": "public/clubs/ar-defensores-de-glew.svg"
+  },
+  {
+    "id": "ar-el-retiro",
+    "name": "El Retiro",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-el-retiro.svg"
+  },
+  {
+    "id": "ar-estudiantes-de-olavarria",
+    "name": "Estudiantes de Olavarría",
+    "competition": "ar-pampeana-b",
+    "level": "amateur",
+    "file": "public/clubs/ar-estudiantes-de-olavarria.svg"
+  },
+  {
+    "id": "ar-ezeiza",
+    "name": "Ezeiza",
+    "competition": "ar-urba-desarrollo",
+    "level": "amateur",
+    "file": "public/clubs/ar-ezeiza.svg"
+  },
+  {
+    "id": "ar-floresta",
+    "name": "Floresta",
+    "competition": "ar-urba-desarrollo",
+    "level": "amateur",
+    "file": "public/clubs/ar-floresta.svg"
+  },
+  {
+    "id": "ar-gimnasia-y-esgrima-de-ituzaingo",
+    "name": "Gimnasia y Esgrima de Ituzaingó",
+    "competition": "ar-urba-tercera",
+    "level": "amateur",
+    "file": "public/clubs/ar-gimnasia-y-esgrima-de-ituzaingo.svg"
+  },
+  {
+    "id": "ar-jockey-club-villa-maria",
+    "name": "Jockey Club Villa María",
+    "competition": "ar-centro-top10",
+    "level": "amateur",
+    "file": "public/clubs/ar-jockey-club-villa-maria.svg"
+  },
+  {
+    "id": "ar-la-salle",
+    "name": "La Salle",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-la-salle.svg"
+  },
+  {
+    "id": "ar-las-canas",
+    "name": "Las Cañas",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-las-canas.svg"
+  },
+  {
+    "id": "ar-los-cedros",
+    "name": "Los Cedros",
+    "competition": "ar-urba-tercera",
+    "level": "amateur",
+    "file": "public/clubs/ar-los-cedros.svg"
+  },
+  {
+    "id": "ar-los-pinos",
+    "name": "Los Pinos",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-los-pinos.svg"
+  },
+  {
+    "id": "ar-marcos-paz",
+    "name": "Marcos Paz",
+    "competition": "ar-urba-desarrollo",
+    "level": "amateur",
+    "file": "public/clubs/ar-marcos-paz.svg"
+  },
+  {
+    "id": "ar-mercedes",
+    "name": "Mercedes",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-mercedes.svg"
+  },
+  {
+    "id": "ar-obras-sanitarias",
+    "name": "Obras Sanitarias",
+    "competition": "ar-urba-desarrollo",
+    "level": "amateur",
+    "file": "public/clubs/ar-obras-sanitarias.svg"
+  },
+  {
+    "id": "ar-old-georgian",
+    "name": "Old Georgian",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-old-georgian.svg"
+  },
+  {
+    "id": "ar-pac-general-rodriguez",
+    "name": "PAC General Rodríguez",
+    "competition": "ar-urba-tercera",
+    "level": "amateur",
+    "file": "public/clubs/ar-pac-general-rodriguez.svg"
+  },
+  {
+    "id": "ar-porteno",
+    "name": "Porteño",
+    "competition": "ar-urba-tercera",
+    "level": "amateur",
+    "file": "public/clubs/ar-porteno.svg"
+  },
+  {
+    "id": "ar-pueyrredon-de-mar-del-plata",
+    "name": "Pueyrredón de Mar del Plata",
+    "competition": "ar-pampeana-b",
+    "level": "amateur",
+    "file": "public/clubs/ar-pueyrredon-de-mar-del-plata.svg"
+  },
+  {
+    "id": "ar-rivadavia-de-lobos",
+    "name": "Rivadavia de Lobos",
+    "competition": "ar-urba-desarrollo",
+    "level": "amateur",
+    "file": "public/clubs/ar-rivadavia-de-lobos.svg"
+  },
+  {
+    "id": "ar-san-jose",
+    "name": "San José",
+    "competition": "ar-urba-desarrollo",
+    "level": "amateur",
+    "file": "public/clubs/ar-san-jose.svg"
+  },
+  {
+    "id": "ar-san-jose-de-paraguay",
+    "name": "San José de Paraguay",
+    "competition": "ar-nea-a",
+    "level": "amateur",
+    "file": "public/clubs/ar-san-jose-de-paraguay.svg"
+  },
+  {
+    "id": "ar-san-marcos",
+    "name": "San Marcos",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-san-marcos.svg"
+  },
+  {
+    "id": "ar-san-martin-de-villa-maria",
+    "name": "San Martín de Villa María",
+    "competition": "ar-centro-top10",
+    "level": "amateur",
+    "file": "public/clubs/ar-san-martin-de-villa-maria.svg"
+  },
+  {
+    "id": "ar-santa-rosa-de-cordoba",
+    "name": "Santa Rosa de Córdoba",
+    "competition": "ar-centro-super9b",
+    "level": "amateur",
+    "file": "public/clubs/ar-santa-rosa-de-cordoba.svg"
+  },
+  {
+    "id": "ar-sociedad-hebraica",
+    "name": "Sociedad Hebraica",
+    "competition": "ar-urba-desarrollo",
+    "level": "amateur",
+    "file": "public/clubs/ar-sociedad-hebraica.svg"
+  },
+  {
+    "id": "ar-tigre",
+    "name": "Tigre",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-tigre.svg"
+  },
+  {
+    "id": "ar-tiro-federal-de-baradero",
+    "name": "Tiro Federal de Baradero",
+    "competition": "ar-urba-tercera",
+    "level": "amateur",
+    "file": "public/clubs/ar-tiro-federal-de-baradero.svg"
+  },
+  {
+    "id": "ar-tiro-federal-de-san-pedro",
+    "name": "Tiro Federal de San Pedro",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-tiro-federal-de-san-pedro.svg"
+  },
+  {
+    "id": "ar-uncas",
+    "name": "Uncas",
+    "competition": "ar-pampeana-b",
+    "level": "amateur",
+    "file": "public/clubs/ar-uncas.svg"
+  },
+  {
+    "id": "ar-varela-jr",
+    "name": "Varela Jr.",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-varela-jr.svg"
+  },
+  {
+    "id": "ar-vicente-lopez",
+    "name": "Vicente López",
+    "competition": "ar-urba-segunda",
+    "level": "amateur",
+    "file": "public/clubs/ar-vicente-lopez.svg"
+  },
+  {
+    "id": "sb-abipones",
+    "name": "Abipones",
+    "competition": "ar-nea-ascenso",
+    "level": "amateur",
+    "file": "public/clubs/sb-abipones.svg"
+  },
+  {
+    "id": "sb-aero-club-rio-iv",
+    "name": "Aero Club Río Cuarto",
+    "competition": "ar-centro-super9b",
+    "level": "amateur",
+    "file": "public/clubs/sb-aero-club-rio-iv.svg"
+  },
+  {
+    "id": "sb-aguara",
+    "name": "Aguará",
+    "competition": "ar-nea-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-aguara.svg"
+  },
+  {
+    "id": "sb-aguara-guazu",
+    "name": "Aguará Guazú",
+    "competition": "ar-noa-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-aguara-guazu.svg"
+  },
+  {
+    "id": "sb-alfiles-s-c",
+    "name": "Alfiles",
+    "competition": "ar-oeste-plata",
+    "level": "amateur",
+    "file": "public/clubs/sb-alfiles-s-c.svg"
+  },
+  {
+    "id": "sb-alma-juniors",
+    "name": "Alma Juniors",
+    "competition": "ar-litoral-segunda",
+    "level": "amateur",
+    "file": "public/clubs/sb-alma-juniors.svg"
+  },
+  {
+    "id": "sb-alta-gracia-r-c",
+    "name": "Alta Gracia",
+    "competition": "ar-centro-super9b",
+    "level": "amateur",
+    "file": "public/clubs/sb-alta-gracia-r-c.svg"
+  },
+  {
+    "id": "sb-aranduroga-r-c",
+    "name": "Aranduroga",
+    "competition": "ar-nea-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-aranduroga-r-c.svg"
+  },
+  {
+    "id": "sb-argentino-de-bahia-blanca",
+    "name": "Argentino de Bahía Blanca",
+    "competition": "ar-pampeana-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-argentino-de-bahia-blanca.svg"
+  },
+  {
+    "id": "sb-argentino-r-c",
+    "name": "Argentino",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-argentino-r-c.svg"
+  },
+  {
+    "id": "sb-asoc-alumni",
+    "name": "Alumni",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-asoc-alumni.svg"
+  },
+  {
+    "id": "sb-asoc-del-sur",
+    "name": "Del Sur",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-asoc-del-sur.svg"
+  },
+  {
+    "id": "sb-atletico-del-rosario",
+    "name": "Atlético del Rosario",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-atletico-del-rosario.svg"
+  },
+  {
+    "id": "sb-baguales-r-c",
+    "name": "Baguales",
+    "competition": "ar-centro-super9b",
+    "level": "amateur",
+    "file": "public/clubs/sb-baguales-r-c.svg"
+  },
+  {
+    "id": "sb-banco-nacion",
+    "name": "Banco Nación",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-banco-nacion.svg"
+  },
+  {
+    "id": "sb-banco-rugby-club",
+    "name": "Banco Mendoza",
+    "competition": "ar-oeste-plata",
+    "level": "amateur",
+    "file": "public/clubs/sb-banco-rugby-club.svg"
+  },
+  {
+    "id": "sb-belgrano-athletic",
+    "name": "Belgrano Athletic",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-belgrano-athletic.svg"
+  },
+  {
+    "id": "sb-belgrano-rugby-club",
+    "name": "Belgrano de Paraná",
+    "competition": "ar-litoral-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-belgrano-rugby-club.svg"
+  },
+  {
+    "id": "sb-bigornia-r-c",
+    "name": "Bigornia",
+    "competition": "ar-patagonia-regional",
+    "level": "amateur",
+    "file": "public/clubs/sb-bigornia-r-c.svg"
+  },
+  {
+    "id": "sb-buenos-aires-crc",
+    "name": "Buenos Aires",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-buenos-aires-crc.svg"
+  },
+  {
+    "id": "sb-c-a-provincial",
+    "name": "Provincial",
+    "competition": "ar-litoral-segunda",
+    "level": "amateur",
+    "file": "public/clubs/sb-c-a-provincial.svg"
+  },
+  {
+    "id": "sb-c-p-b-m",
+    "name": "CPBM",
+    "competition": "ar-oeste-oro",
+    "level": "amateur",
+    "file": "public/clubs/sb-c-p-b-m.svg"
+  },
+  {
+    "id": "sb-c-s-la-carlota",
+    "name": "Social Carlota",
+    "competition": "ar-centro-super9b",
+    "level": "amateur",
+    "file": "public/clubs/sb-c-s-la-carlota.svg"
+  },
+  {
+    "id": "sb-calafate-r-c",
+    "name": "Calafate",
+    "competition": "ar-patagonia-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-calafate-r-c.svg"
+  },
+  {
+    "id": "sb-capri",
+    "name": "CAPRI",
+    "competition": "ar-nea-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-capri.svg"
+  },
+  {
+    "id": "sb-caraya",
+    "name": "Carayá",
+    "competition": "ar-nea-ascenso",
+    "level": "amateur",
+    "file": "public/clubs/sb-caraya.svg"
+  },
+  {
+    "id": "sb-cardenales-r-c",
+    "name": "Cardenales",
+    "competition": "ar-noa-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-cardenales-r-c.svg"
+  },
+  {
+    "id": "sb-carlos-paz-rugby-club",
+    "name": "Carlos Paz",
+    "competition": "ar-centro-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-carlos-paz-rugby-club.svg"
+  },
+  {
+    "id": "sb-casa-de-padua",
+    "name": "CASA de Padua",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-casa-de-padua.svg"
+  },
+  {
+    "id": "sb-casi",
+    "name": "CASI",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-casi.svg"
+  },
+  {
+    "id": "sb-caza-y-pesca",
+    "name": "Caza y Pesca",
+    "competition": "ar-nea-ascenso",
+    "level": "amateur",
+    "file": "public/clubs/sb-caza-y-pesca.svg"
+  },
+  {
+    "id": "sb-cazones-r-c",
+    "name": "Cazones",
+    "competition": "ar-patagonia-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-cazones-r-c.svg"
+  },
+  {
+    "id": "sb-centro-cazadores",
+    "name": "Centro Cazadores",
+    "competition": "ar-litoral-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-centro-cazadores.svg"
+  },
+  {
+    "id": "sb-centro-naval",
+    "name": "Centro Naval",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-centro-naval.svg"
+  },
+  {
+    "id": "sb-cha-roga-r-c",
+    "name": "Cha Roga",
+    "competition": "ar-litoral-segunda",
+    "level": "amateur",
+    "file": "public/clubs/sb-cha-roga-r-c.svg"
+  },
+  {
+    "id": "sb-chaja",
+    "name": "Chaja",
+    "competition": "ar-nea-ascenso",
+    "level": "amateur",
+    "file": "public/clubs/sb-chaja.svg"
+  },
+  {
+    "id": "sb-chenque-r-c",
+    "name": "Chenque",
+    "competition": "ar-patagonia-regional",
+    "level": "amateur",
+    "file": "public/clubs/sb-chenque-r-c.svg"
+  },
+  {
+    "id": "sb-ciudad-de-buenos-aires",
+    "name": "Ciudad de Buenos Aires",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-ciudad-de-buenos-aires.svg"
+  },
+  {
+    "id": "sb-club-areco",
+    "name": "Areco",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-areco.svg"
+  },
+  {
+    "id": "sb-club-champagnat",
+    "name": "Champagnat",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-champagnat.svg"
+  },
+  {
+    "id": "sb-club-daom",
+    "name": "Daom",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-daom.svg"
+  },
+  {
+    "id": "sb-club-el-nacional",
+    "name": "El Nacional",
+    "competition": "ar-pampeana-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-el-nacional.svg"
+  },
+  {
+    "id": "sb-club-italiano",
+    "name": "Italiano",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-italiano.svg"
+  },
+  {
+    "id": "sb-club-la-tablada",
+    "name": "La Tablada",
+    "competition": "ar-centro-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-la-tablada.svg"
+  },
+  {
+    "id": "sb-club-las-aguilas",
+    "name": "CL Águilas",
+    "competition": "ar-patagonia-regional",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-las-aguilas.svg"
+  },
+  {
+    "id": "sb-club-los-50",
+    "name": "Los 50",
+    "competition": "ar-pampeana-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-los-50.svg"
+  },
+  {
+    "id": "sb-club-newman",
+    "name": "Newman",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-newman.svg"
+  },
+  {
+    "id": "sb-club-palermo-bajo",
+    "name": "Palermo Bajo",
+    "competition": "ar-centro-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-palermo-bajo.svg"
+  },
+  {
+    "id": "sb-club-pucara",
+    "name": "Pucará",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-pucara.svg"
+  },
+  {
+    "id": "sb-club-san-patricio",
+    "name": "San Patricio",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-san-patricio.svg"
+  },
+  {
+    "id": "sb-club-tilcara",
+    "name": "Tilcara",
+    "competition": "ar-litoral-segunda",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-tilcara.svg"
+  },
+  {
+    "id": "sb-club-universitario-de-cordoba",
+    "name": "Universitario de Córdoba",
+    "competition": "ar-centro-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-universitario-de-cordoba.svg"
+  },
+  {
+    "id": "sb-comercial-r-c",
+    "name": "Comercial",
+    "competition": "ar-pampeana-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-comercial-r-c.svg"
+  },
+  {
+    "id": "sb-comodoro-r-c",
+    "name": "Comodoro",
+    "competition": "ar-patagonia-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-comodoro-r-c.svg"
+  },
+  {
+    "id": "sb-cordoba-athletic-club",
+    "name": "Córdoba Athletic",
+    "competition": "ar-centro-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-cordoba-athletic-club.svg"
+  },
+  {
+    "id": "sb-cordoba-rugby-club",
+    "name": "Córdoba Rugby Club",
+    "competition": "ar-centro-super9b",
+    "level": "amateur",
+    "file": "public/clubs/sb-cordoba-rugby-club.svg"
+  },
+  {
+    "id": "sb-crai",
+    "name": "CRAI",
+    "competition": "ar-litoral-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-crai.svg"
+  },
+  {
+    "id": "sb-crar",
+    "name": "CRAR",
+    "competition": "ar-litoral-segunda",
+    "level": "amateur",
+    "file": "public/clubs/sb-crar.svg"
+  },
+  {
+    "id": "sb-cuba",
+    "name": "CUBA",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-cuba.svg"
+  },
+  {
+    "id": "sb-cuq",
+    "name": "Universitario de Quilmes",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-cuq.svg"
+  },
+  {
+    "id": "sb-curne",
+    "name": "CURNE",
+    "competition": "ar-nea-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-curne.svg"
+  },
+  {
+    "id": "sb-curupayti",
+    "name": "Curupaytí",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-curupayti.svg"
+  },
+  {
+    "id": "sb-delta-r-c",
+    "name": "Delta",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-delta-r-c.svg"
+  },
+  {
+    "id": "sb-deportiva-francesa",
+    "name": "Deportiva Francesa",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-deportiva-francesa.svg"
+  },
+  {
+    "id": "sb-deportivo-portugues",
+    "name": "Deportivo Portugués",
+    "competition": "ar-patagonia-regional",
+    "level": "amateur",
+    "file": "public/clubs/sb-deportivo-portugues.svg"
+  },
+  {
+    "id": "sb-don-bosco",
+    "name": "Don Bosco",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-don-bosco.svg"
+  },
+  {
+    "id": "sb-draig-goch-r-c",
+    "name": "Draig Goch",
+    "competition": "ar-patagonia-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-draig-goch-r-c.svg"
+  },
+  {
+    "id": "sb-duendes-r-c",
+    "name": "Duendes",
+    "competition": "ar-litoral-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-duendes-r-c.svg"
+  },
+  {
+    "id": "sb-estudiantes-de-parana",
+    "name": "Estudiantes de Paraná",
+    "competition": "ar-litoral-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-estudiantes-de-parana.svg"
+  },
+  {
+    "id": "sb-geba",
+    "name": "GEBA",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-geba.svg"
+  },
+  {
+    "id": "sb-gimnasia-y-esgrima-de-pergamino",
+    "name": "Gimnasia y Esgrima de Pergamino",
+    "competition": "ar-litoral-segunda",
+    "level": "amateur",
+    "file": "public/clubs/sb-gimnasia-y-esgrima-de-pergamino.svg"
+  },
+  {
+    "id": "sb-gimnasia-y-esgrima-de-rosario",
+    "name": "Gimnasia y Esgrima de Rosario",
+    "competition": "ar-litoral-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-gimnasia-y-esgrima-de-rosario.svg"
+  },
+  {
+    "id": "sb-gimnasia-y-tiro",
+    "name": "Gimnasia y Tiro",
+    "competition": "ar-noa-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-gimnasia-y-tiro.svg"
+  },
+  {
+    "id": "sb-hindu-club",
+    "name": "Hindú Club",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-hindu-club.svg"
+  },
+  {
+    "id": "sb-huazihul",
+    "name": "Huazihul",
+    "competition": "ar-oeste-plata",
+    "level": "amateur",
+    "file": "public/clubs/sb-huazihul.svg"
+  },
+  {
+    "id": "sb-huirapuca",
+    "name": "Huirapuca",
+    "competition": "ar-noa-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-huirapuca.svg"
+  },
+  {
+    "id": "sb-hurling",
+    "name": "Hurling",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-hurling.svg"
+  },
+  {
+    "id": "sb-ipr-sporting",
+    "name": "Sporting",
+    "competition": "ar-pampeana-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-ipr-sporting.svg"
+  },
+  {
+    "id": "sb-italiana-de-charata",
+    "name": "Italiana de Charata",
+    "competition": "ar-nea-ascenso",
+    "level": "amateur",
+    "file": "public/clubs/sb-italiana-de-charata.svg"
+  },
+  {
+    "id": "sb-jockey-club-cordoba",
+    "name": "Jockey Club Córdoba",
+    "competition": "ar-centro-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-jockey-club-cordoba.svg"
+  },
+  {
+    "id": "sb-jockey-club-cordoba-caballeros",
+    "name": "Jockey Club Córdoba Caballeros",
+    "competition": "ar-centro-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-jockey-club-cordoba-caballeros.svg"
+  },
+  {
+    "id": "sb-jockey-club-de-rosario",
+    "name": "Jockey Club de Rosario",
+    "competition": "ar-litoral-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-jockey-club-de-rosario.svg"
+  },
+  {
+    "id": "sb-jockey-club-de-tucuman",
+    "name": "Jockey Club de Tucumán",
+    "competition": "ar-noa-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-jockey-club-de-tucuman.svg"
+  },
+  {
+    "id": "sb-jockey-club-de-venado-tuerto",
+    "name": "Jockey Club de Venado Tuerto",
+    "competition": "ar-litoral-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-jockey-club-de-venado-tuerto.svg"
+  },
+  {
+    "id": "sb-jockey-club-salta",
+    "name": "Jockey Club de Salta",
+    "competition": "ar-noa-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-jockey-club-salta.svg"
+  },
+  {
+    "id": "sb-jockey-club-san-juan",
+    "name": "Jockey Club de San Juan",
+    "competition": "ar-oeste-plata",
+    "level": "amateur",
+    "file": "public/clubs/sb-jockey-club-san-juan.svg"
+  },
+  {
+    "id": "sb-la-plata",
+    "name": "La Plata",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-la-plata.svg"
+  },
+  {
+    "id": "sb-la-querencia",
+    "name": "La Querencia",
+    "competition": "ar-centro-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-la-querencia.svg"
+  },
+  {
+    "id": "sb-la-salle-jobson",
+    "name": "La Salle Jobson",
+    "competition": "ar-litoral-segunda",
+    "level": "amateur",
+    "file": "public/clubs/sb-la-salle-jobson.svg"
+  },
+  {
+    "id": "sb-lanus-r-c",
+    "name": "Lanús",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-lanus-r-c.svg"
+  },
+  {
+    "id": "sb-liceo-militar",
+    "name": "Liceo Militar",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-liceo-militar.svg"
+  },
+  {
+    "id": "sb-liceo-naval",
+    "name": "Liceo Naval",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-liceo-naval.svg"
+  },
+  {
+    "id": "sb-liceo-rugby-club",
+    "name": "Liceo",
+    "competition": "ar-oeste-oro",
+    "level": "amateur",
+    "file": "public/clubs/sb-liceo-rugby-club.svg"
+  },
+  {
+    "id": "sb-lince-rugby-club",
+    "name": "Lince",
+    "competition": "ar-noa-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-lince-rugby-club.svg"
+  },
+  {
+    "id": "sb-logaritmo-rugby-club",
+    "name": "Logaritmo",
+    "competition": "ar-litoral-segunda",
+    "level": "amateur",
+    "file": "public/clubs/sb-logaritmo-rugby-club.svg"
+  },
+  {
+    "id": "sb-lomas-athletic",
+    "name": "Lomas Athletic",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-lomas-athletic.svg"
+  },
+  {
+    "id": "sb-los-caranchos",
+    "name": "Los Caranchos",
+    "competition": "ar-litoral-segunda",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-caranchos.svg"
+  },
+  {
+    "id": "sb-los-cardos-r-c",
+    "name": "Los Cardos",
+    "competition": "ar-pampeana-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-cardos-r-c.svg"
+  },
+  {
+    "id": "sb-los-chelcos",
+    "name": "Los Chelcos",
+    "competition": "ar-centro-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-chelcos.svg"
+  },
+  {
+    "id": "sb-los-cuervos-r-c",
+    "name": "Los Cuervos",
+    "competition": "ar-centro-super9b",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-cuervos-r-c.svg"
+  },
+  {
+    "id": "sb-los-hurones",
+    "name": "Los Hurones",
+    "competition": "ar-nea-ascenso",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-hurones.svg"
+  },
+  {
+    "id": "sb-los-matreros",
+    "name": "Los Matreros",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-matreros.svg"
+  },
+  {
+    "id": "sb-los-miuras",
+    "name": "Los Miuras",
+    "competition": "ar-pampeana-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-miuras.svg"
+  },
+  {
+    "id": "sb-los-molinos",
+    "name": "Los Molinos",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-molinos.svg"
+  },
+  {
+    "id": "sb-los-tarcos",
+    "name": "Los Tarcos",
+    "competition": "ar-noa-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-tarcos.svg"
+  },
+  {
+    "id": "sb-los-teros-r-c",
+    "name": "Los Teros",
+    "competition": "ar-litoral-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-teros-r-c.svg"
+  },
+  {
+    "id": "sb-los-tilos",
+    "name": "Los Tilos",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-tilos.svg"
+  },
+  {
+    "id": "sb-los-tordos-rugby-club",
+    "name": "Los Tordos",
+    "competition": "ar-oeste-oro",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-tordos-rugby-club.svg"
+  },
+  {
+    "id": "sb-lujan-r-c",
+    "name": "Luján",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-lujan-r-c.svg"
+  },
+  {
+    "id": "sb-manuel-belgrano",
+    "name": "Manuel Belgrano",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-manuel-belgrano.svg"
+  },
+  {
+    "id": "sb-mar-del-plata-club",
+    "name": "Mar del Plata Club",
+    "competition": "ar-pampeana-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-mar-del-plata-club.svg"
+  },
+  {
+    "id": "sb-marabunta-r-c",
+    "name": "Marabunta",
+    "competition": "ar-patagonia-regional",
+    "level": "amateur",
+    "file": "public/clubs/sb-marabunta-r-c.svg"
+  },
+  {
+    "id": "sb-mariano-moreno",
+    "name": "Mariano Moreno",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-mariano-moreno.svg"
+  },
+  {
+    "id": "sb-marista-rugby-club",
+    "name": "Marista",
+    "competition": "ar-oeste-oro",
+    "level": "amateur",
+    "file": "public/clubs/sb-marista-rugby-club.svg"
+  },
+  {
+    "id": "sb-mendoza-rugby-club",
+    "name": "Mendoza Rugby Club",
+    "competition": "ar-oeste-oro",
+    "level": "amateur",
+    "file": "public/clubs/sb-mendoza-rugby-club.svg"
+  },
+  {
+    "id": "sb-monte-grande",
+    "name": "Monte Grande",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-monte-grande.svg"
+  },
+  {
+    "id": "sb-natacion-y-gimnasia",
+    "name": "Natación y Gimnasia",
+    "competition": "ar-noa-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-natacion-y-gimnasia.svg"
+  },
+  {
+    "id": "sb-neuquen-r-c",
+    "name": "Neuquén",
+    "competition": "ar-patagonia-regional",
+    "level": "amateur",
+    "file": "public/clubs/sb-neuquen-r-c.svg"
+  },
+  {
+    "id": "sb-old-lions-r-c",
+    "name": "Old Lions",
+    "competition": "ar-noa-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-lions-r-c.svg"
+  },
+  {
+    "id": "sb-old-resian-club",
+    "name": "Old Resian",
+    "competition": "ar-litoral-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-resian-club.svg"
+  },
+  {
+    "id": "sb-olivos-r-c",
+    "name": "Olivos",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-olivos-r-c.svg"
+  },
+  {
+    "id": "sb-pampas-de-rufino",
+    "name": "Los Pampas de Rufino",
+    "competition": "ar-litoral-segunda",
+    "level": "amateur",
+    "file": "public/clubs/sb-pampas-de-rufino.svg"
+  },
+  {
+    "id": "sb-parana-rowing",
+    "name": "Paraná Rowing Club",
+    "competition": "ar-litoral-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-parana-rowing.svg"
+  },
+  {
+    "id": "sb-patoruzu-r-c",
+    "name": "Patoruzú",
+    "competition": "ar-patagonia-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-patoruzu-r-c.svg"
+  },
+  {
+    "id": "sb-pay-ubre",
+    "name": "Pay Ubre",
+    "competition": "ar-nea-ascenso",
+    "level": "amateur",
+    "file": "public/clubs/sb-pay-ubre.svg"
+  },
+  {
+    "id": "sb-peumayen-rugby-club",
+    "name": "Peumayén",
+    "competition": "ar-oeste-plata",
+    "level": "amateur",
+    "file": "public/clubs/sb-peumayen-rugby-club.svg"
+  },
+  {
+    "id": "sb-puerto-madryn-r-c",
+    "name": "Puerto Madryn",
+    "competition": "ar-patagonia-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-puerto-madryn-r-c.svg"
+  },
+  {
+    "id": "sb-pueyrredon",
+    "name": "Pueyrredón",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-pueyrredon.svg"
+  },
+  {
+    "id": "sb-regatas-belgrano-san-nicolas",
+    "name": "Regatas y Belgrano de San Nicolás",
+    "competition": "ar-litoral-segunda",
+    "level": "amateur",
+    "file": "public/clubs/sb-regatas-belgrano-san-nicolas.svg"
+  },
+  {
+    "id": "sb-regatas-de-bella-vista",
+    "name": "Regatas Bella Vista",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-regatas-de-bella-vista.svg"
+  },
+  {
+    "id": "sb-regatas-de-resistencia",
+    "name": "Regatas Resistencia",
+    "competition": "ar-nea-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-regatas-de-resistencia.svg"
+  },
+  {
+    "id": "sb-rio-tercero-r-c",
+    "name": "Río Tercero",
+    "competition": "ar-centro-super9b",
+    "level": "amateur",
+    "file": "public/clubs/sb-rio-tercero-r-c.svg"
+  },
+  {
+    "id": "sb-rivadavia-rugby-club",
+    "name": "Rivadavia",
+    "competition": "ar-oeste-plata",
+    "level": "amateur",
+    "file": "public/clubs/sb-rivadavia-rugby-club.svg"
+  },
+  {
+    "id": "sb-roca-r-c",
+    "name": "Roca",
+    "competition": "ar-patagonia-regional",
+    "level": "amateur",
+    "file": "public/clubs/sb-roca-r-c.svg"
+  },
+  {
+    "id": "sb-san-albano",
+    "name": "San Albano",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-albano.svg"
+  },
+  {
+    "id": "sb-san-andres",
+    "name": "San Andrés",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-andres.svg"
+  },
+  {
+    "id": "sb-san-carlos",
+    "name": "San Carlos",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-carlos.svg"
+  },
+  {
+    "id": "sb-san-cirano",
+    "name": "San Cirano",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-cirano.svg"
+  },
+  {
+    "id": "sb-san-fernando",
+    "name": "San Fernando",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-fernando.svg"
+  },
+  {
+    "id": "sb-san-francisco-r-c",
+    "name": "San Francisco",
+    "competition": "ar-centro-super9b",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-francisco-r-c.svg"
+  },
+  {
+    "id": "sb-san-ignacio-r-c",
+    "name": "San Ignacio",
+    "competition": "ar-pampeana-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-ignacio-r-c.svg"
+  },
+  {
+    "id": "sb-san-isidro-club",
+    "name": "SIC",
+    "competition": "ar-urba-top14",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-isidro-club.svg"
+  },
+  {
+    "id": "sb-san-jorge-r-c",
+    "name": "San Jorge de Mendoza",
+    "competition": "ar-oeste-plata",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-jorge-r-c.svg"
+  },
+  {
+    "id": "sb-san-jorge-r-c-ua",
+    "name": "San Jorge de la Austral",
+    "competition": "ar-patagonia-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-jorge-r-c-ua.svg"
+  },
+  {
+    "id": "sb-san-juan-rugby-club",
+    "name": "San Juan Rugby Club",
+    "competition": "ar-oeste-oro",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-juan-rugby-club.svg"
+  },
+  {
+    "id": "sb-san-luis",
+    "name": "San Luis",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-luis.svg"
+  },
+  {
+    "id": "sb-san-martin",
+    "name": "San Martín",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-martin.svg"
+  },
+  {
+    "id": "sb-san-miguel-r-c",
+    "name": "San Miguel",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-miguel-r-c.svg"
+  },
+  {
+    "id": "sb-san-patricio",
+    "name": "San Patricio de Corrientes",
+    "competition": "ar-nea-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-san-patricio.svg"
+  },
+  {
+    "id": "sb-santa-fe-r-c",
+    "name": "Santa Fe Rugby Club",
+    "competition": "ar-litoral-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-santa-fe-r-c.svg"
+  },
+  {
+    "id": "sb-santa-rosa-r-c",
+    "name": "Santa Rosa de Bahía Blanca",
+    "competition": "ar-pampeana-local",
+    "level": "amateur",
+    "file": "public/clubs/sb-santa-rosa-r-c.svg"
+  },
+  {
+    "id": "sb-santiago-lawn-tennis-club",
+    "name": "Santiago Lawn Tennis",
+    "competition": "ar-noa-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-santiago-lawn-tennis-club.svg"
+  },
+  {
+    "id": "sb-santiago-rugby-club",
+    "name": "Santiago Rugby",
+    "competition": "ar-noa-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-santiago-rugby-club.svg"
+  },
+  {
+    "id": "sb-sitas",
+    "name": "SITAS",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-sitas.svg"
+  },
+  {
+    "id": "sb-sixty-r-c",
+    "name": "Sixty",
+    "competition": "ar-nea-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-sixty-r-c.svg"
+  },
+  {
+    "id": "sb-sociedad-sportiva-de-bahia-blanca",
+    "name": "Sociedad Sportiva de Bahía Blanca",
+    "competition": "ar-pampeana-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-sociedad-sportiva-de-bahia-blanca.svg"
+  },
+  {
+    "id": "sb-st-brendan-s",
+    "name": "St. Brendan's",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-st-brendan-s.svg"
+  },
+  {
+    "id": "sb-tacuru-rugby-hockey-club",
+    "name": "Tacurú",
+    "competition": "ar-oeste-plata",
+    "level": "amateur",
+    "file": "public/clubs/sb-tacuru-rugby-hockey-club.svg"
+  },
+  {
+    "id": "sb-tala-rugby-club",
+    "name": "Tala",
+    "competition": "ar-centro-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-tala-rugby-club.svg"
+  },
+  {
+    "id": "sb-taraguy-r-c",
+    "name": "Taragüy",
+    "competition": "ar-nea-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-taraguy-r-c.svg"
+  },
+  {
+    "id": "sb-teque-r-c",
+    "name": "Teqüé",
+    "competition": "ar-oeste-oro",
+    "level": "amateur",
+    "file": "public/clubs/sb-teque-r-c.svg"
+  },
+  {
+    "id": "sb-tigres-r-c",
+    "name": "Tigres",
+    "competition": "ar-noa-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-tigres-r-c.svg"
+  },
+  {
+    "id": "sb-tiro-federal-salta",
+    "name": "Tiro Federal de Salta",
+    "competition": "ar-noa-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-tiro-federal-salta.svg"
+  },
+  {
+    "id": "sb-trelew-r-c",
+    "name": "Trelew",
+    "competition": "ar-patagonia-regional",
+    "level": "amateur",
+    "file": "public/clubs/sb-trelew-r-c.svg"
+  },
+  {
+    "id": "sb-tucuman-lawn-tennis",
+    "name": "Tucumán Lawn Tennis",
+    "competition": "ar-noa-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-tucuman-lawn-tennis.svg"
+  },
+  {
+    "id": "sb-tucuman-rugby-club",
+    "name": "Tucumán Rugby",
+    "competition": "ar-noa-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-tucuman-rugby-club.svg"
+  },
+  {
+    "id": "sb-uncaus",
+    "name": "UNCAUS",
+    "competition": "ar-nea-ascenso",
+    "level": "amateur",
+    "file": "public/clubs/sb-uncaus.svg"
+  },
+  {
+    "id": "sb-union-del-sur",
+    "name": "Unión del Sur",
+    "competition": "ar-pampeana-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-union-del-sur.svg"
+  },
+  {
+    "id": "sb-universitario-de-bahia-blanca",
+    "name": "Universitario de Bahía Blanca",
+    "competition": "ar-pampeana-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-universitario-de-bahia-blanca.svg"
+  },
+  {
+    "id": "sb-universitario-de-la-plata",
+    "name": "Universitario de La Plata",
+    "competition": "ar-urba-primera-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-universitario-de-la-plata.svg"
+  },
+  {
+    "id": "sb-universitario-de-mar-del-plata",
+    "name": "Universitario de Mar del Plata",
+    "competition": "ar-pampeana-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-universitario-de-mar-del-plata.svg"
+  },
+  {
+    "id": "sb-universitario-de-mendoza",
+    "name": "Universitario de Mendoza",
+    "competition": "ar-oeste-plata",
+    "level": "amateur",
+    "file": "public/clubs/sb-universitario-de-mendoza.svg"
+  },
+  {
+    "id": "sb-universitario-de-rosario",
+    "name": "Universitario de Rosario",
+    "competition": "ar-litoral-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-universitario-de-rosario.svg"
+  },
+  {
+    "id": "sb-universitario-de-salta",
+    "name": "Universitario de Salta",
+    "competition": "ar-noa-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-universitario-de-salta.svg"
+  },
+  {
+    "id": "sb-universitario-de-san-juan",
+    "name": "Universitario de San Juan",
+    "competition": "ar-oeste-oro",
+    "level": "amateur",
+    "file": "public/clubs/sb-universitario-de-san-juan.svg"
+  },
+  {
+    "id": "sb-universitario-de-santa-fe",
+    "name": "Universitario de Santa Fe",
+    "competition": "ar-litoral-segunda",
+    "level": "amateur",
+    "file": "public/clubs/sb-universitario-de-santa-fe.svg"
+  },
+  {
+    "id": "sb-universitario-de-tucuman",
+    "name": "Universitario de Tucumán",
+    "competition": "ar-noa-a",
+    "level": "amateur",
+    "file": "public/clubs/sb-universitario-de-tucuman.svg"
+  },
+  {
+    "id": "sb-uru-cure-rugby-club",
+    "name": "Urú Curé",
+    "competition": "ar-centro-top10",
+    "level": "amateur",
+    "file": "public/clubs/sb-uru-cure-rugby-club.svg"
+  },
+  {
+    "id": "sb-vicentinos",
+    "name": "Vicentinos",
+    "competition": "ar-urba-primera-b",
+    "level": "amateur",
+    "file": "public/clubs/sb-vicentinos.svg"
+  },
+  {
+    "id": "sb-virreyes-r-c",
+    "name": "Virreyes",
+    "competition": "ar-urba-primera-c",
+    "level": "amateur",
+    "file": "public/clubs/sb-virreyes-r-c.svg"
+  },
+  {
+    "id": "sb-carrasco-polo",
+    "name": "Carrasco Polo",
+    "competition": "sa-uy",
+    "level": "amateur",
+    "file": "public/clubs/sb-carrasco-polo.svg"
+  },
+  {
+    "id": "sb-ceibos-club",
+    "name": "Ceibos Club",
+    "competition": "sa-uy",
+    "level": "amateur",
+    "file": "public/clubs/sb-ceibos-club.svg"
+  },
+  {
+    "id": "sb-champagnat",
+    "name": "Champagnat",
+    "competition": "sa-uy",
+    "level": "amateur",
+    "file": "public/clubs/sb-champagnat.svg"
+  },
+  {
+    "id": "sb-circulo-de-tenis",
+    "name": "Círculo de Tenis",
+    "competition": "sa-uy",
+    "level": "amateur",
+    "file": "public/clubs/sb-circulo-de-tenis.svg"
+  },
+  {
+    "id": "sb-club-seminario",
+    "name": "Club Seminario",
+    "competition": "sa-uy",
+    "level": "amateur",
+    "file": "public/clubs/sb-club-seminario.svg"
+  },
+  {
+    "id": "sb-lobos-pde",
+    "name": "Lobos PdE",
+    "competition": "sa-uy",
+    "level": "amateur",
+    "file": "public/clubs/sb-lobos-pde.svg"
+  },
+  {
+    "id": "sb-los-cuervos",
+    "name": "Los Cuervos",
+    "competition": "sa-uy",
+    "level": "amateur",
+    "file": "public/clubs/sb-los-cuervos.svg"
+  },
+  {
+    "id": "sb-montevideo-c-c",
+    "name": "Montevideo C.C.",
+    "competition": "sa-uy",
+    "level": "amateur",
+    "file": "public/clubs/sb-montevideo-c-c.svg"
+  },
+  {
+    "id": "sb-old-boys-girls-club",
+    "name": "Old Boys & Girls Club",
+    "competition": "sa-uy",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-boys-girls-club.svg"
+  },
+  {
+    "id": "sb-old-christians-club",
+    "name": "Old Christians Club",
+    "competition": "sa-uy",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-christians-club.svg"
+  },
+  {
+    "id": "sb-psg",
+    "name": "PSG",
+    "competition": "sa-uy",
+    "level": "amateur",
+    "file": "public/clubs/sb-psg.svg"
+  },
+  {
+    "id": "sb-trebol-de-paysandu",
+    "name": "Trébol de Paysandú",
+    "competition": "sa-uy",
+    "level": "amateur",
+    "file": "public/clubs/sb-trebol-de-paysandu.svg"
+  },
+  {
+    "id": "sb-academia-selknam",
+    "name": "Academia Selknam",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-academia-selknam.svg"
+  },
+  {
+    "id": "sb-all-brads",
+    "name": "All Brads",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-all-brads.svg"
+  },
+  {
+    "id": "sb-cd-alumni",
+    "name": "CD Alumni",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-cd-alumni.svg"
+  },
+  {
+    "id": "sb-cobs",
+    "name": "COBS",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-cobs.svg"
+  },
+  {
+    "id": "sb-dobs",
+    "name": "DOBS",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-dobs.svg"
+  },
+  {
+    "id": "sb-gauchos-rc",
+    "name": "Gauchos RC",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-gauchos-rc.svg"
+  },
+  {
+    "id": "sb-lagartos-rc",
+    "name": "Lagartos RC",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-lagartos-rc.svg"
+  },
+  {
+    "id": "sb-old-anglonians",
+    "name": "Old Anglonians",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-anglonians.svg"
+  },
+  {
+    "id": "sb-old-boys-r-c",
+    "name": "Old Boys R.C.",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-boys-r-c.svg"
+  },
+  {
+    "id": "sb-old-gabs",
+    "name": "Old Gabs",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-gabs.svg"
+  },
+  {
+    "id": "sb-old-georgians",
+    "name": "Old Georgians",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-georgians.svg"
+  },
+  {
+    "id": "sb-old-johns",
+    "name": "Old Johns",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-johns.svg"
+  },
+  {
+    "id": "sb-old-locks",
+    "name": "Old Locks",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-locks.svg"
+  },
+  {
+    "id": "sb-old-mackayans",
+    "name": "Old Mackayans",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-mackayans.svg"
+  },
+  {
+    "id": "sb-old-newlanders",
+    "name": "Old Newlanders",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-newlanders.svg"
+  },
+  {
+    "id": "sb-old-reds",
+    "name": "Old Reds",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-old-reds.svg"
+  },
+  {
+    "id": "sb-pwcc",
+    "name": "PWCC",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-pwcc.svg"
+  },
+  {
+    "id": "sb-sporting-r-c",
+    "name": "Sporting R.C.",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-sporting-r-c.svg"
+  },
+  {
+    "id": "sb-stade-francais",
+    "name": "Stade Francais",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-stade-francais.svg"
+  },
+  {
+    "id": "sb-tabancura-rc",
+    "name": "Tabancura RC",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-tabancura-rc.svg"
+  },
+  {
+    "id": "sb-universidad-catolica",
+    "name": "Universidad Católica",
+    "competition": "sa-cl",
+    "level": "amateur",
+    "file": "public/clubs/sb-universidad-catolica.svg"
+  }
+]

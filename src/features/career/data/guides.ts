@@ -50,9 +50,16 @@ const CAREER_STYLE: Record<Position, string> = {
 };
 
 /**
- * La CUARTA ranura de la planilla. Partidos, puntos, tries y tackles se muestran
- * SIEMPRE, para todos los puestos; esta es la única que cambia, y es la métrica
- * que de verdad define el trabajo de cada uno.
+ * LA COLUMNA DEL PUESTO. La planilla muestra siempre partidos, puntos y tries;
+ * esta es la cuarta y última, la que cambia, y es la métrica que de verdad
+ * define el trabajo de cada uno.
+ *
+ * Son cuatro columnas y no seis a propósito: con OVR + PJ + PTS + TRIES +
+ * TACKLES + la del puesto, la tabla se leía apretada y la última quedaba pegada
+ * al borde. Por eso el TACKLE dejó de ser columna fija y pasó a ser la del
+ * puesto de la mayoría —los cinco forwards y el medio-scrum—, que es donde
+ * cuenta. El apertura y el fullback ven AL PALO, que para un pateador dice más
+ * de su temporada que la cantidad de tackles; el wing y el centro, METROS.
  *
  * Antes existía `PRIMARY_STATS`, una lista de tres de la que la UI mostraba solo
  * la primera. Con las tres primeras ahora fijas, ese nombre pasó a significar lo
@@ -64,17 +71,17 @@ export type SecondaryStat =
     | { kind: 'kick-accuracy'; label: string };
 
 const SECONDARY_STAT: Record<Position, SecondaryStat> = {
-    prop: { kind: 'stat', key: 'scrumsWon', label: 'Scrums' },
-    hooker: { kind: 'stat', key: 'lineoutsWon', label: 'Lineouts' },
-    lock: { kind: 'stat', key: 'lineoutsWon', label: 'Lineouts' },
-    backrow: { kind: 'stat', key: 'turnovers', label: 'Turnovers' },
-    scrumhalf: { kind: 'stat', key: 'assists', label: 'Asistencias' },
+    prop: { kind: 'stat', key: 'tackles', label: 'Tackles' },
+    hooker: { kind: 'stat', key: 'tackles', label: 'Tackles' },
+    lock: { kind: 'stat', key: 'tackles', label: 'Tackles' },
+    backrow: { kind: 'stat', key: 'tackles', label: 'Tackles' },
+    scrumhalf: { kind: 'stat', key: 'tackles', label: 'Tackles' },
     // "Al palo" y no "% al palo": el valor ya trae el signo, y con la etiqueta
     // completa se leía "69% % al palo" en la trayectoria y en el resultado.
     flyhalf: { kind: 'kick-accuracy', label: 'Al palo' },
-    centre: { kind: 'stat', key: 'lineBreaks', label: 'Quiebres' },
+    centre: { kind: 'stat', key: 'metres', label: 'Metros' },
     wing: { kind: 'stat', key: 'metres', label: 'Metros' },
-    fullback: { kind: 'stat', key: 'metres', label: 'Metros' },
+    fullback: { kind: 'kick-accuracy', label: 'Al palo' },
 };
 
 /** Porcentaje al palo. Sin intentos NO es 0%: es un guion, porque no pateó. */
@@ -92,14 +99,18 @@ export function kickAccuracy(stats: Pick<SeasonStats, 'kicksAtGoal' | 'kicksMade
 export function secondaryStatOf(
     id: Position,
     stats: SeasonStats,
-): { kind: SecondaryStat['kind']; label: string; display: string; isZero: boolean } {
+): { kind: SecondaryStat['kind']; statKey: keyof SeasonStats | null; label: string; display: string; isZero: boolean } {
     const secondary = SECONDARY_STAT[id];
     if (secondary.kind === 'kick-accuracy') {
         const accuracy = kickAccuracy(stats);
-        return { kind: secondary.kind, label: secondary.label, display: accuracy === null ? '—' : `${accuracy}%`, isZero: accuracy === null };
+        return { kind: secondary.kind, statKey: null, label: secondary.label, display: accuracy === null ? '—' : `${accuracy}%`, isZero: accuracy === null };
     }
     const value = stats[secondary.key];
-    return { kind: secondary.kind, label: secondary.label, display: String(value), isZero: value === 0 };
+    // `statKey` se expone porque quien arma una planilla necesita saber CUÁL de
+    // las estadísticas ocupa la ranura del puesto: sin eso, listar "Tackles"
+    // fijo y además la del puesto dibujaba la celda dos veces en cinco de los
+    // nueve puestos, con la misma `key` de React.
+    return { kind: secondary.kind, statKey: secondary.key, label: secondary.label, display: String(value), isZero: value === 0 };
 }
 
 export interface DominantAttribute {
@@ -188,8 +199,11 @@ export function describeOrigin(id: string): OriginGuide {
     if (origin.fameStart >= 30) perks.push({ label: 'Llegás con vidriera', tone: 'good' });
     if (origin.fameStart <= 10) perks.push({ label: 'Nadie te conoce todavía', tone: 'bad' });
     if (origin.moraleStart >= 68) perks.push({ label: 'Mucha confianza inicial', tone: 'good' });
-    if (origin.startAge >= 21) perks.push({ label: `Debut tardío (${origin.startAge})`, tone: 'bad' });
-    else perks.push({ label: `Debut a los ${origin.startAge}`, tone: 'good' });
+    // El debut es a los 18 para todos (1.26.0), así que anunciarlo dejó de ser un
+    // rasgo: era la misma píldora en las cinco fichas. Lo que sí sigue siendo un
+    // rasgo es haber llegado tarde al rugby organizado, que es de dónde viene el
+    // `startAge` alto del universitario.
+    if (origin.startAge >= 21) perks.push({ label: 'Llegaste tarde al rugby organizado', tone: 'bad' });
 
     return {
         id: origin.id,

@@ -1,48 +1,53 @@
 // Sistema doméstico (UNIÓN / región) de un club AR/UY/CL. Puro y determinístico.
 //
-// El motor agrupa el rugby sudamericano en tres ligas paraguas (sa-ar/uy/cl),
-// pero dentro de cada país conviven DECENAS de uniones cuyos torneos son
-// PARALELOS: la URBA, Córdoba, Cuyo, el Litoral, el NOA, etc. Cambiar de una a
-// otra es un PASE INTERUNIONES (mudanza / oportunidad), nunca "ascender de
-// división": no hay ascenso institucional entre sistemas paralelos.
+// Cambiar de un sistema a otro es un PASE INTERUNIONES (mudanza / oportunidad),
+// nunca "ascender de división": entre sistemas paralelos no hay ascenso
+// institucional. Es lo que decide el TEXTO del movimiento.
 //
-// La unión no viene como columna en el snapshot; se deriva del NOMBRE del torneo
-// real (`divisionName`), que sí la nombra ("... de la URBA", "... Tucumano").
-// Es una derivación versionada y explícita, no un hash.
+// ── ARGENTINA: LOOKUP EXPLÍCITO, NO REGEX ───────────────────────────────────
+//
+// Antes la unión se adivinaba con expresiones regulares sobre el NOMBRE del
+// torneo ("… de la URBA", "… Tucumano"). Con el sistema real declarado en
+// `arSystem2026.ts` la región es un dato del canon, así que se lee de ahí.
+//
+// No es solo prolijidad. La regex se equivocaba: `/URS\b/` caía en la rama de
+// Cuyo, y la URS es la Unión de Rugby del Sur —Bahía Blanca, región Pampeana—,
+// así que un pase de Sociedad Sportiva a Los Tordos se leía como "pase amateur,
+// misma unión" cuando son dos regiones a 1.100 km. Y `/Interior/` inventaba una
+// unión `ar-interior` que no existe: el Torneo del Interior es una competencia
+// federal, no una unión, y sus clubes son de cuatro provincias distintas.
+//
+// Uruguay y Chile siguen con la derivación por nombre porque su catálogo sigue
+// siendo un sistema paraguas sin divisiones declaradas.
 
 import type { ClubDef } from '../data/clubs.ts';
+import { arRegionOf, isArDivision } from '../data/clubs2026/arSystem2026.ts';
 import { isUmbrellaSystem } from './competition-identity.ts';
 
-/** Palabras clave del nombre del torneo → clave de sistema/unión. Orden importa. */
+/** Palabras clave del nombre del torneo → clave de sistema/unión (solo UY/CL). */
 const UNION_KEYWORDS: readonly (readonly [RegExp, string])[] = [
-    [/URBA/i, 'ar-urba'],
-    [/del Centro|Cordob|Súper 9|Super 9/i, 'ar-cordoba'],
-    [/Tucuman|Tucumán/i, 'ar-tucuman'],
-    [/Norte Grande|NOA|Salt|Juju/i, 'ar-noa'],
-    [/Mendoza|Cuyo|del Oeste|URS\b/i, 'ar-cuyo'],
-    [/Litoral|Rosario|Santa\s?Fe/i, 'ar-litoral'],
-    [/URNE|Nordeste|Corrientes|Chaco|Misiones/i, 'ar-urne'],
-    [/Pampeano|Pampa/i, 'ar-pampeana'],
-    [/Mar del Plata|Marplatense/i, 'ar-mdp'],
-    [/Chubut|Patag[oó]nico|Austral|Comahue|Valle/i, 'ar-patagonia'],
-    [/ARUSA|del Sur\b/i, 'ar-sur'],
-    [/Interior/i, 'ar-interior'],
     [/Uru|Uruguay/i, 'uy-nacional'],
     [/Chile|Santiago|ARUSA/i, 'cl-nacional'],
 ];
 
 /**
- * Clave del sistema doméstico (unión/región) del club. Para clubes
- * internacionales es su propia competición. Para AR/UY/CL sale del torneo real;
- * si no se puede resolver la unión, cae al país (sa-ar/uy/cl) como sistema único.
+ * Clave del sistema doméstico (unión/región) del club.
+ *
+ * · División argentina → su región del canon (`ar-urba`, `ar-centro`, …).
+ * · Club de un sistema paraguas (UY/CL) → se deriva del nombre del torneo; si no
+ *   se puede resolver, el país entero hace de sistema (no se inventa unión).
+ * · Club internacional → su propia competición.
  */
 export function domesticSystemKey(club: ClubDef): string {
+    if (isArDivision(club.competitionId)) {
+        const region = arRegionOf(club.competitionId);
+        return region !== null ? `ar-${region}` : club.competitionId;
+    }
     if (!isUmbrellaSystem(club.competitionId)) return club.competitionId;
     const name = club.divisionName ?? '';
     for (const [re, key] of UNION_KEYWORDS) {
         if (re.test(name)) return key;
     }
-    // Sin unión resoluble: el país entero hace de sistema (no se inventa unión).
     return club.competitionId;
 }
 

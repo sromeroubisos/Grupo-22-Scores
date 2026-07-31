@@ -1,4 +1,5 @@
-import type { AttributeKey, Injury, PlayerRole, Position } from './player.ts';
+import type { AttributeKey, Injury, NationalStatus, PlayerRole, Position } from './player.ts';
+import type { SquadRole } from '../engine/squad-role.ts';
 import type { LeagueStanding, TitleWon } from '../data/clubs2026/competitions2026.ts';
 
 export type { LeagueStanding };
@@ -78,6 +79,28 @@ export interface SeasonResult {
     club: string;
     league: string;
     role: PlayerRole;
+    /**
+     * LUGAR EN EL PLANTEL de esa temporada, en las cinco bandas.
+     *
+     * Se CONGELA y no se re-deriva al renderizar, por el mismo motivo que
+     * `secondaryStatLabel`: sale de `valor − rating del club`, y el rating del club
+     * va a derivar entre temporadas. Recalcularlo dentro de cinco años mostraría
+     * "Titular" en una temporada que se jugó de suplente porque el club se
+     * debilitó, que es exactamente la clase de mentira que un historial no puede
+     * decir.
+     *
+     * LA REGLA COMPLETA, porque este campo parece violar la de "derivado no se
+     * guarda" y no la viola: **derivá cuando las entradas de la derivación son
+     * estables, guardá cuando van a derivar.** La antigüedad en el plantel se
+     * cuenta desde `seasons[]` porque `seasons[]` es inmutable; el lugar en el
+     * plantel se guarda porque el rating del club no lo es.
+     *
+     * Si alguien viene a "simplificar" borrando este campo, ésa es la razón por la
+     * que está.
+     *
+     * `role` es el mismo dato en tres valores, para el entorno y los eventos.
+     */
+    squadRole: SquadRole;
     position: Position;
 
     ovrStart: number;
@@ -99,6 +122,29 @@ export interface SeasonResult {
 
     capsGained: number;
     calledUp: boolean; // convocado a la selección
+    /**
+     * Situación en la selección AL CIERRE de esta temporada.
+     *
+     * Es el snapshot congelado que hace derivable la salida del plantel: dos
+     * temporadas seguidas con `nationalStatus` de plantel y `calledUp` en false
+     * significan que se perdió la camiseta, sin necesidad de guardar un contador
+     * que pueda desincronizarse.
+     */
+    nationalStatus: NationalStatus;
+    /**
+     * true si en ESTA temporada se quedó sin la camiseta. Dispara su tarjeta.
+     *
+     * CUIDADO AL LEER UNA TASA DE CAÍDAS: su denominador se mueve con cualquier
+     * cambio en la PUERTA DE ENTRADA, no sólo con las reglas de salida. Medido:
+     * al bajar el descuento por edad, las caídas tempranas pasaron de 60 casos a
+     * 25 — no porque cayera menos gente, sino porque el jugador marginal dejó de
+     * entrar al plantel y se quedó en `trial`, y una prueba fallida no es una
+     * caída. La métrica mejoró por el motivo equivocado.
+     *
+     * Sólo se enciende saliendo de `squad`/`starter`. Un `trial` al que se le
+     * acaba el tiempo NO perdió la camiseta: nunca la tuvo.
+     */
+    lostShirt: boolean;
 
     injuries: Injury[]; // lesiones sufridas esta temporada
     stats: SeasonStats;

@@ -1,4 +1,5 @@
 import type { GameEvent } from '../../types/event.ts';
+import { isWorldCupYear } from '../international-calendar.ts';
 
 // Hitos: escenas especiales, muchas gateadas por logros de la carrera.
 export const MILESTONE_EVENTS: GameEvent[] = [
@@ -43,9 +44,17 @@ export const MILESTONE_EVENTS: GameEvent[] = [
             {
                 id: 'celebrate',
                 label: 'Disfrutar el homenaje',
-                hint: 'Moral y arraigo.',
+                hint: 'Una semana de actos. La cabeza queda lejos del partido.',
                 outcomes: [
-                    { weight: 1, effect: { morale: 8, fame: 5, mental: 1, flags: { emblema: 1 } }, resultText: 'La gente te ovaciona. Ya sos parte de la historia del club.' },
+                    { weight: 1, effect: { morale: 8, fame: 5, mental: 1, form: -3, flags: { emblema: 1 } }, resultText: 'La gente te ovaciona. Ya sos parte de la historia del club.' },
+                ],
+            },
+            {
+                id: 'keep-working',
+                label: 'Agradecer y seguir',
+                hint: 'Menos homenaje y más entrenamiento. El club lo va a notar menos.',
+                outcomes: [
+                    { weight: 1, effect: { form: 5, mental: 2, morale: 2 }, resultText: 'Saludás, agradecés y volvés al campo de entrenamiento. El lunes hay que jugar.' },
                 ],
             },
         ],
@@ -88,15 +97,21 @@ export const MILESTONE_EVENTS: GameEvent[] = [
         repeatable: true,
         cooldown: 3,
         minOvr: 72,
-        condition: (ctx) => ctx.state.player.nationalTeam !== null && ctx.state.player.age >= 22,
+        // Sólo en un año de Mundial. Antes salía cada tres temporadas, cayera
+        // donde cayera: era un SEGUNDO calendario que contradecía al primero, con
+        // convocatorias al Mundial en 2029 y en 2030. El año lo dice el
+        // calendario internacional y nadie más.
+        condition: (ctx) => ctx.state.player.nationalTeam !== null
+            && ctx.state.player.age >= 22
+            && isWorldCupYear(ctx.state.player.seasonsPlayed),
         options: [
             {
                 id: 'go-star',
                 label: 'Ir a ser protagonista',
                 hint: 'Vidriera mundial.',
                 outcomes: [
-                    { weight: 0.5, effect: { fame: 18, capBoost: 4, morale: 8, form: 4, flags: { mundialista: 1 } }, resultText: 'Brillás en el Mundial. El mundo entero te conoce.' },
-                    { weight: 0.5, effect: { fame: 10, capBoost: 3, morale: 4, flags: { mundialista: 1 } }, resultText: 'Vivís tu Mundial. Experiencia imborrable, con altibajos.' },
+                    { weight: 0.5, effect: { fame: 18, testShare: 1.2, morale: 8, form: 4, flags: { mundialista: 1 } }, resultText: 'Brillás en el Mundial. El mundo entero te conoce.' },
+                    { weight: 0.5, effect: { fame: 10, morale: 4, flags: { mundialista: 1 } }, resultText: 'Vivís tu Mundial. Experiencia imborrable, con altibajos.' },
                 ],
             },
             {
@@ -104,7 +119,7 @@ export const MILESTONE_EVENTS: GameEvent[] = [
                 label: 'Aportar desde donde toque',
                 hint: 'Rol de equipo.',
                 outcomes: [
-                    { weight: 1, effect: { fame: 8, capBoost: 2, mental: 3, morale: 5, flags: { mundialista: 1 } }, resultText: 'Sumás al grupo en el Mundial, dentro y fuera de la cancha.' },
+                    { weight: 1, effect: { fame: 8, mental: 3, morale: 5, flags: { mundialista: 1 } }, resultText: 'Sumás al grupo en el Mundial, dentro y fuera de la cancha.' },
                 ],
             },
         ],
@@ -117,15 +132,28 @@ export const MILESTONE_EVENTS: GameEvent[] = [
         weight: 10,
         repeatable: false,
         minOvr: 74,
-        condition: (ctx) => (ctx.state.player.flags['mundialista'] ?? 0) > 0,
+        // Una final del Mundial se juega en un año de Mundial. Con `mundialista`
+        // de una edición anterior: al que ya fue a uno le puede tocar la final en
+        // el siguiente, cuatro años después. Es raro, y así tiene que ser.
+        condition: (ctx) => (ctx.state.player.flags['mundialista'] ?? 0) > 0
+            && isWorldCupYear(ctx.state.player.seasonsPlayed),
         options: [
             {
                 id: 'immortal',
-                label: 'Ir por la gloria eterna',
-                hint: 'La escena más grande.',
+                label: 'Jugarla a todo o nada',
+                hint: 'Si sale, sos eterno. Si no, la final te la vas a acordar toda la vida.',
                 outcomes: [
-                    { weight: 0.5, effect: { fame: 25, morale: 12, mental: 3, flags: { campeon_mundo: 1, leyenda: 1 } }, resultText: '¡Campeones del mundo! Tu nombre queda tallado para siempre.' },
-                    { weight: 0.5, effect: { fame: 18, morale: -6, mental: 4, flags: { finalista_mundial: 1, leyenda: 1 } }, resultText: 'Subcampeones. La final duele, pero llegaste a lo más alto.' },
+                    { weight: 0.5, effect: { fame: 25, morale: 12, mental: 3, flags: { campeon_mundo: 1, leyenda: 1 } }, resultText: 'Campeones del mundo. Tu nombre queda tallado para siempre.' },
+                    { weight: 0.5, effect: { fame: 18, morale: -12, mental: 4, flags: { finalista_mundial: 1, leyenda: 1 } }, resultText: 'Subcampeones. La final duele, pero llegaste a lo más alto.' },
+                ],
+            },
+            {
+                id: 'keep-shape',
+                label: 'Jugar tu partido, sin heroísmos',
+                hint: 'Menos riesgo y menos gloria personal: el título se define igual.',
+                outcomes: [
+                    { weight: 0.5, effect: { fame: 14, morale: 10, mental: 5, flags: { campeon_mundo: 1, leyenda: 1 } }, resultText: 'Campeones del mundo. No fuiste la figura y no te importa: la copa está.' },
+                    { weight: 0.5, effect: { fame: 9, morale: -6, mental: 5, flags: { finalista_mundial: 1 } }, resultText: 'Subcampeones. Hiciste tu partido y alcanzó para llegar, no para ganarla.' },
                 ],
             },
         ],
@@ -172,9 +200,17 @@ export const MILESTONE_EVENTS: GameEvent[] = [
             {
                 id: 'enjoy',
                 label: 'Disfrutarlo a pleno',
-                hint: 'Cierre emotivo.',
+                hint: 'Una despedida entera. Al cuerpo le cuesta volver después.',
                 outcomes: [
-                    { weight: 1, effect: { morale: 12, fame: 8, flags: { leyenda_club: 1 } }, resultText: 'Un estadio lleno te despide entre lágrimas y aplausos.' },
+                    { weight: 1, effect: { morale: 12, fame: 8, fatigue: 6, flags: { leyenda_club: 1 } }, resultText: 'Un estadio lleno te despide entre lágrimas y aplausos.' },
+                ],
+            },
+            {
+                id: 'postpone',
+                label: 'Pedir que sea al final de todo',
+                hint: 'No te despedís todavía. Te da menos cariño ahora y más si seguís.',
+                outcomes: [
+                    { weight: 1, effect: { morale: 4, mental: 3, form: 3 }, resultText: 'Agradecés y pedís que el homenaje espere: todavía te queda rugby adentro.' },
                 ],
             },
         ],
@@ -193,9 +229,17 @@ export const MILESTONE_EVENTS: GameEvent[] = [
             {
                 id: 'accept',
                 label: 'Aceptar con orgullo',
-                hint: 'Legado sellado.',
+                hint: 'Legado sellado. También te ponen en el lugar del que ya terminó.',
                 outcomes: [
                     { weight: 1, effect: { fame: 15, morale: 8, mental: 2, flags: { salon_fama: 1, leyenda: 1 } }, resultText: 'Entrás al salón de la fama. Tu carrera ya es leyenda.' },
+                ],
+            },
+            {
+                id: 'not-yet',
+                label: 'Pedir que esperen a que te retires',
+                hint: 'Renunciás al reconocimiento ahora. Seguís siendo un jugador y no una estatua.',
+                outcomes: [
+                    { weight: 1, effect: { morale: 5, mental: 4, form: 4 }, resultText: 'Les pedís que esperen: mientras juegues, preferís que te midan por lo que hacés el domingo.' },
                 ],
             },
         ],

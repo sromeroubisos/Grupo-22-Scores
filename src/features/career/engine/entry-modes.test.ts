@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { SELECTABLE_COUNTRIES, hasUnion } from '../data/nations.ts';
-import { hasDomesticCompetition } from './market-routes.ts';
+import { MIGRATION_ROUTES, hasDomesticCompetition } from './market-routes.ts';
 import { sportingBandOf } from '../data/competition-levels2026.ts';
 import { createInitialCareer, careerReducer } from '../state/career-reducer.ts';
 import { getPendingEvent } from './event-selector.ts';
@@ -95,7 +95,14 @@ test('Groenlandia separa su geografía de su ruta rugbística: no arranca en la 
 });
 
 test('el club de un país sin liga pertenece a una ruta migratoria documentada', () => {
-    const routeCountries = new Set(['fr', 'gb-eng', 'jp', 'es', 'nz', 'za', 'ar', 'uy', 'cl']);
+    // DERIVADO de `MIGRATION_ROUTES` y no transcrito. La lista estaba escrita a mano
+    // con nueve países y se quedó vieja en cuanto entró un destino nuevo (Estados
+    // Unidos, con el catálogo `2026-27.9`): el test fallaba por estar desactualizado
+    // y no porque el motor mandara a nadie fuera de ruta, que es el peor modo de
+    // fallar que tiene un test. Ahora la única fuente es la tabla de rutas.
+    const routeCountries = new Set(
+        Object.values(MIGRATION_ROUTES).flatMap((route) => route.map((r) => r.countryCode)),
+    );
     for (const country of SAMPLE) {
         for (let seed = 1; seed <= 20; seed++) {
             const state = createInitialCareer({ position: 'lock', nationalityCountryCode: country.code, origin: 'academia-club' }, seed * 7919);

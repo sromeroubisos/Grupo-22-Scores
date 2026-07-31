@@ -101,8 +101,12 @@ test('la secuencia de empleo+track es determinística con la misma seed', () => 
 
 test('existen carreras amateur, semipro y profesionales', () => {
     const reached = new Set<string>();
+    // 30 por país y no 12 desde 1.13.0: el sorteo de techo agregó una tirada de
+    // rng, y con muestra chica la COBERTURA de escalones depende de qué semillas
+    // caen dónde. La propiedad que se testea es de existencia, así que lo que
+    // hay que agrandar es la muestra, no aflojar la condición.
     for (const [nationality, base] of [['ar', 1], ['fr', 2], ['nz', 3], ['es', 4]] as const) {
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 30; i++) {
             let state = createInitialCareer({ position: 'centre', nationalityCountryCode: nationality, origin: 'academia-club' }, (base * 100 + i) * 7919);
             let guard = 0;
             let best = state.player.employment;

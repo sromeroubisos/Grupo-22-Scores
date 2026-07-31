@@ -10,9 +10,15 @@ import { employmentRank } from './contracts.ts';
 import type { SeasonEnvironment } from './environment.ts';
 import { careerArchetype } from './archetypes.ts';
 
-// Fracción de las fechas DEL EQUIPO que el jugador llega a disputar según su
-// rol. No son partidos garantizados: después pesan lesiones y contrato.
-const ROLE_SHARE: Record<PlayerRole, number> = { starter: 0.82, rotation: 0.58, fringe: 0.28 };
+// LA FRACCIÓN DE FECHAS YA NO SALE DE UNA TABLA POR ROL.
+//
+// Acá vivía `ROLE_SHARE = { starter: 0.82, rotation: 0.58, fringe: 0.28 }`: tres
+// números fijos que hacían que el jugador jugara casi lo mismo estuviera donde
+// estuviera, y con eso apagaban la decisión más importante del juego — si aceptar
+// la oferta del club grande no cuesta partidos, no es una decisión.
+//
+// Ahora sale de `valor − rating del club` (`engine/squad-role.ts`), en cinco
+// bandas, y el llamador lo pasa resuelto.
 const ROLE_AVG_MIN: Record<PlayerRole, number> = { starter: 72, rotation: 48, fringe: 28 };
 
 // El contrato de DESARROLLO es el caso clave: entrena en entorno profesional
@@ -54,21 +60,34 @@ export function simulateSeason(
     /** Semilla de la carrera + índice de temporada: siembran el rng de detalle. */
     careerSeed = 0,
     seasonIndex = 0,
+    /**
+     * Fracción de las fechas del equipo que le toca por su lugar en el plantel,
+     * ya resuelta desde `valor − rating del club` (`engine/squad-role.ts`). Se
+     * pasa en vez de derivarse acá porque acá no está el club.
+     *
+     * El default es la banda de rotación: es lo que usan los tests que llaman a
+     * esta función sin club, y deja el comportamiento explícito en vez de
+     * escondido en un `?? 0.58`.
+     */
+    matchShare: readonly [number, number] = [0.40, 0.60],
 ): SeasonPerformance {
     const pos = getPosition(player.position);
     const role = player.role;
 
-    // Apariciones = fechas DEL EQUIPO × rol × contrato × disponibilidad.
-    // Las copas suman algunos partidos, no se cuentan como fechas de liga.
+    // Apariciones = fechas DEL EQUIPO × lugar en el plantel × contrato ×
+    // disponibilidad. Las copas suman algunos partidos, no fechas de liga.
     const availability = Math.max(0.1, 1 - seasonsOutFraction);
     const leagueSlots = environment.teamMatchesAvailable;
-    const cupSlots = Math.round(cupCount * 4 * ROLE_SHARE[role]);
+    // La fracción concreta de la banda sale del rng: dos temporadas en el mismo
+    // club con el mismo valor no dan exactamente los mismos partidos.
+    const roleShare = rng.float(matchShare[0], matchShare[1]);
+    const cupSlots = Math.round(cupCount * 4 * roleShare);
 
     // IRRUPCIÓN del juvenil de desarrollo: la mayoría de sus temporadas son de
     // pocas apariciones, pero de vez en cuando un pibe se gana minutos y tiene
     // una temporada de 10-16 partidos. Determinístico (sale del RNG seedeado).
     const breakout = player.squadTrack === 'development' && rng.chance(0.18) ? 2.6 : 1;
-    const share = ROLE_SHARE[role] * EMPLOYMENT_SHARE[player.employment] * TRACK_SHARE[player.squadTrack] * breakout;
+    const share = roleShare * EMPLOYMENT_SHARE[player.employment] * TRACK_SHARE[player.squadTrack] * breakout;
     const matches = Math.max(
         1,
         Math.min(
@@ -171,6 +190,10 @@ export function buildCareerSummary(state: CareerState): CareerSummary {
 
     const spellByClub = new Map<string, ClubSpell>();
     const honours = new Set<string>();
+    // Cuántas veces se ganó CADA torneo. Sin esto, tres Super Rugby Americas se
+    // colapsaban en una sola ficha y la vitrina contradecía al contador de
+    // títulos, que decía 3.
+    const titleCount = new Map<string, number>();
 
     // Edad del primer contrato profesional: es lo que separa al que llegó tarde
     // del que ya nació adentro. Sale de la trayectoria congelada, que guarda el
@@ -187,6 +210,28 @@ export function buildCareerSummary(state: CareerState): CareerSummary {
         player.employment,
     );
 
+    // Caps ganados MIENTRAS el tipo laburaba de otra cosa, y sólo si DEBUTÓ así.
+    //
+    // Las dos condiciones son necesarias y la segunda se descubrió midiendo: sin
+    // ella entraba el veterano que llegó a la selección siendo profesional y
+    // termina la carrera en un club amateur, que sigue siendo internacional
+    // porque la unión ya lo capturó. Esa es una historia real —y correcta— pero
+    // es la opuesta a la que el arquetipo quiere contar: no es el que llegó
+    // desde abajo, es el que bajó desde arriba.
+    //
+    // Es DERIVADO: se cruza la temporada con el vínculo que tenía esa temporada,
+    // así que no invalida ninguna partida guardada.
+    const esAmateur = (i: number) => {
+        const employment = state.history[i]?.employment;
+        return employment === 'amateur' || employment === 'amateur-compensated';
+    };
+    const primerCap = state.seasons.findIndex((s) => s.capsGained > 0);
+    const debutoAmateur = primerCap >= 0 && esAmateur(primerCap);
+    const capsAsAmateur = !debutoAmateur ? 0 : state.seasons.reduce(
+        (sum, s, i) => (esAmateur(i) ? sum + s.capsGained : sum),
+        0,
+    );
+
     for (const s of seasons) {
         accumulateStats(totals, s.stats);
         peakOvr = Math.max(peakOvr, s.ovrEnd);
@@ -198,17 +243,36 @@ export function buildCareerSummary(state: CareerState): CareerSummary {
         const spell = spellByClub.get(s.club) ?? { club: s.club, league: s.league, seasons: 0, matches: 0, titles: 0, tries: 0 };
         spell.seasons += 1;
         spell.matches += s.matches;
-        spell.titles += s.titles.length;
+        // SÓLO LOS DE CLUB. Una etapa es "lo que hiciste en ese club", y desde que
+        // existen los títulos de selección `s.titles` mezcla las dos cosas: un Seis
+        // Naciones ganado mientras jugabas en Benfica se leería como un título de
+        // Benfica. El torneo de tu selección no es mérito de tu club.
+        spell.titles += s.titlesWon.filter((t) => t.scope !== 'national-team').length;
         spell.tries += s.stats.tries;
         spellByClub.set(s.club, spell);
 
-        for (const title of s.titles) honours.add(title);
+        for (const title of s.titles) {
+            honours.add(title);
+            titleCount.set(title, (titleCount.get(title) ?? 0) + 1);
+        }
     }
 
-    if ((player.flags['campeon_mundo'] ?? 0) > 0) honours.add('Campeón del Mundo');
-    else if ((player.flags['finalista_mundial'] ?? 0) > 0) honours.add('Finalista del Mundial');
-    if ((player.flags['salon_fama'] ?? 0) > 0) honours.add('Salón de la Fama');
-    if ((player.flags['capitan_nacional'] ?? 0) > 0) honours.add('Capitán de la selección');
+    // DISTINCIONES ≠ TÍTULOS. Un título es un torneo ganado y lo cuenta el
+    // contador de títulos; ser capitán de la selección o entrar al salón de la
+    // fama son logros y no salen de ninguna final. Mezclados, la vitrina
+    // mostraba tres fichas debajo de un contador que decía 1.
+    const distinctions = new Set<string>();
+    if ((player.flags['campeon_mundo'] ?? 0) > 0) distinctions.add('Campeón del Mundo');
+    else if ((player.flags['finalista_mundial'] ?? 0) > 0) distinctions.add('Finalista del Mundial');
+    if ((player.flags['salon_fama'] ?? 0) > 0) distinctions.add('Salón de la Fama');
+    if ((player.flags['capitan_nacional'] ?? 0) > 0) distinctions.add('Capitán de la selección');
+    // Los tres de temporada. Las etiquetas van LITERALES y no armadas con el
+    // contador, porque `premios.test.ts` las lee de este archivo con una regex
+    // para verificar que cada una tenga ícono: un template literal la dejaría
+    // ciega y el premio se dibujaría sin escudo sin que nada falle.
+    if ((player.flags['mejor_jugador_mundo'] ?? 0) > 0) distinctions.add('Mejor jugador del mundo');
+    if ((player.flags['xv_ideal'] ?? 0) > 0) distinctions.add('XV ideal del año');
+    if ((player.flags['mejor_temporada_local'] ?? 0) > 0) distinctions.add('Mejor de la temporada local');
 
     const debutAge = seasons.length > 0 ? seasons[0].age : player.age;
     const retirementAge = player.age;
@@ -231,7 +295,13 @@ export function buildCareerSummary(state: CareerState): CareerSummary {
         || (player.nationalTeam !== null && seasons.slice(-3).some((s) => s.calledUp) && peakOvr >= 74);
 
     const byClub = [...spellByClub.values()].sort((a, b) => b.seasons - a.seasons);
-    const honourList = [...honours];
+    // "Super Rugby Americas ×3": la ficha dice cuántas veces, así la suma de la
+    // vitrina cierra con el contador de títulos.
+    const honourList = [...honours].map((title) => {
+        const n = titleCount.get(title) ?? 1;
+        return n > 1 ? `${title} ×${n}` : title;
+    });
+    const distinctionList = [...distinctions];
 
     return {
         nickname: player.nickname,
@@ -249,13 +319,18 @@ export function buildCareerSummary(state: CareerState): CareerSummary {
         totals,
         byClub,
         honours: honourList,
+        distinctions: distinctionList,
         retirementReason: player.retirementReason,
         careerScore,
         finalXI,
         archetype: careerArchetype({
             startRoute: state.startRoute,
             flags: player.flags,
-            honours: honourList,
+            // Al arquetipo le llegan las dos listas juntas y SIN el "×3": para
+            // decidir el titular de la carrera da lo mismo si el Salón de la
+            // Fama es un título o una distinción, pero la regla lo busca por
+            // nombre exacto. La separación y el contador son de la vitrina.
+            honours: [...honours, ...distinctionList],
             seasons: seasons.length,
             caps: player.caps,
             titles: player.titles,
@@ -263,6 +338,13 @@ export function buildCareerSummary(state: CareerState): CareerSummary {
             clubsPlayed: byClub.length,
             firstProfessionalAge,
             peakEmployment,
+            capsAsAmateur,
+            retirementAge,
+            // "Volver" exige haberse ido: el que nunca se movió ya tiene su
+            // propio arquetipo y no puede quedarse también con este.
+            finishedWhereStarted: state.history.length > 1
+                && state.history[0].clubId === state.history[state.history.length - 1].clubId
+                && byClub.length >= 2,
         }),
     };
 }

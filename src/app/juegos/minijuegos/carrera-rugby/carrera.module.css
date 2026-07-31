@@ -49,6 +49,48 @@
     height: 16px;
 }
 
+/* ---- Selector de idioma (ES / EN) ----
+   Vive en la barra de arriba, del lado opuesto a "Volver a Juegos". Es un
+   segmentado chico: tiene que estar siempre disponible sin competir con nada,
+   porque cambiar de idioma es una decisión de una sola vez por jugador. */
+.langSwitch {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px;
+    border-radius: 999px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.langOption {
+    appearance: none;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+    transition: background 0.16s, color 0.16s;
+}
+
+.langOption:hover {
+    color: var(--color-text-primary);
+}
+
+.langOptionOn {
+    background: var(--color-accent);
+    color: #fff;
+}
+
+.langOption:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
 .steps {
     display: flex;
     gap: 6px;
@@ -796,6 +838,11 @@
     outline-offset: 2px;
 }
 
+/* El nombre corto del club en la ficha del mercado. Sólo se muestra en el
+   teléfono, donde la opción es una ficha y no un renglón de texto. */
+.optionClubShort,
+.optionKicker { display: none; }
+
 .optionLabel {
     font-size: 0.98rem;
     font-weight: 700;
@@ -888,6 +935,33 @@
     flex-wrap: wrap;
     gap: 6px;
     justify-content: center;
+}
+
+/* ---- Vitrina: títulos y logros, en grupos separados ---- */
+.honourGroup { display: flex; flex-direction: column; gap: 6px; }
+
+.honourLabel {
+    margin: 0;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+/* El logro pesa MENOS que el título a propósito: el título se ganó en una
+   final, el logro es un reconocimiento. Mismo tamaño, distinto peso. */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
+    background: transparent;
 }
 
 /* ---- Badges (título / convocatoria / lesión) ---- */
@@ -1123,12 +1197,51 @@
    ============================================================ */
 
 .wrapConsole {
+    /* Ancla de la capa de festejo (ver `.celebration`). */
+    position: relative;
     /* La app aplica `html { zoom: 0.7 }` en desktop, así que el ancho CSS se ve
        al 70%. Para NO dejar media pantalla vacía la consola se CENTRA y usa un
-       max-width compensado (≈1050px visuales). No se toca ConditionalLayout. */
+       max-width compensado (≈1050px visuales). */
     max-width: 1520px;
     width: 100%;
     margin-inline: auto;
+
+    /* SHELL DE ALTO FIJO. La pantalla de juego ocupa lo que le da `.gameContent`
+       y no scrollea: lo que no entre scrollea dentro de su panel. Un juego que
+       obliga a bajar la página para ver la decisión que está tomando no se
+       siente un juego, se siente una planilla.
+       El padding inferior grande de `.wrap` era para el nav inferior del sitio,
+       que en esta ruta ya no está: acá cada píxel sale de la tarjeta de decisión. */
+    /* `flex: 1` y no `height: 100%`, por lo mismo que la tarjeta de creación:
+       el porcentaje se resolvía contra `.wrap`, que además tiene el link de
+       volver, y el flex encogía la consola a lo que sobrara. */
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 12px 16px 14px;
+    gap: 12px;
+    overflow: hidden;
+}
+
+/* La consola es lo único que estira; la cabecera mide lo que mide. */
+.wrapConsole .console {
+    flex: 1 1 auto;
+    min-height: 0;
+    /* Y SCROLLEA POR DENTRO. En desktop esto ya lo hacían las dos columnas
+       (`.consoleMain`/`.consoleAside`, ver la media query de 900px); en mobile no
+       lo hacía nadie, y como `.wrapConsole` recorta con `overflow: hidden`, todo
+       lo que no entraba en el alto del shell quedaba cortado Y SIN FORMA DE
+       LLEGAR: en la pantalla de retiro —la más larga del juego, con planilla,
+       títulos y logros— eso se comía la fila de botones entera.
+       Sigue sin haber scroll de PÁGINA, que es la regla: scrollea la consola
+       dentro de un shell de alto fijo, igual que en desktop. */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+/* Un hijo de flex no encoge por debajo de su contenido sin esto, así que sin
+   `min-height: 0` la columna empuja y el scroll de arriba nunca aparece. */
+.wrapConsole .consoleMain {
+    min-height: 0;
 }
 
 .console {
@@ -1160,22 +1273,34 @@
 .timelinePanelOpen { display: block; }
 
 @media (min-width: 900px) {
+    /* Acá el scroll vuelve a ser de cada columna, no de la consola entera: la
+       decisión y la trayectoria se recorren por separado. */
+    .wrapConsole .console { overflow-y: visible; }
+
     .console {
         flex-direction: row;
-        align-items: flex-start;
+        /* `stretch` y no `flex-start`: las dos columnas ocupan todo el alto del
+           shell para poder scrollear por dentro. Con `flex-start` medían lo que
+           medía su contenido y volvía el scroll de página. */
+        align-items: stretch;
         gap: 26px;
     }
 
     /* 60% decisión activa / 40% trayectoria: el foco es lo que el jugador
-       decide, no la historia. */
-    .consoleMain { flex: 1 1 58%; min-width: 0; }
-    .consoleAside { flex: 0 0 40%; min-width: 0; }
+       decide, no la historia. Las dos con `min-height: 0`, que es lo que
+       habilita el scroll interno dentro de un flex item. */
+    .consoleMain { flex: 1 1 58%; min-width: 0; min-height: 0; overflow-y: auto; }
+    .consoleAside { flex: 0 0 40%; min-width: 0; min-height: 0; overflow-y: auto; }
 
     /* En desktop la trayectoria está siempre a la vista. */
     .timelineToggle { display: none; }
-    .timelinePanel { display: block; }
+    .timelinePanel { display: block; min-height: 0; }
     .timelinePanelOpen { display: block; }
-    .timeline { max-height: 68vh; overflow-y: auto; padding-right: 2px; }
+
+    /* Con el shell de alto fijo la trayectoria ya no puede empujar la página:
+       vive dentro de su columna y scrollea ahí. Por eso se fue el `sticky` que
+       compensaba el scroll de página — ya no hay página que scrollee. */
+    .timeline { max-height: none; flex: 1 1 auto; overflow-y: auto; padding-right: 2px; }
 }
 
 /* ---- Resultado inline de la temporada (reemplaza SeasonReveal) ---- */
@@ -1210,7 +1335,7 @@
 
 .resultTag {
     font-weight: 700;
-    color: var(--color-accent);
+    color: var(--color-accent-ink);
 }
 
 .resultClub {
@@ -1269,11 +1394,65 @@
     border: 1px solid var(--color-accent); color: var(--color-accent);
 }
 
+/* ASCENSO Y DESCENSO. Llenos y no delineados: no es un dato más de la temporada,
+   es el club cambiando de división. Mismo verde y rojo que el resto del juego. */
+.badgeUp,
+.badgeDown {
+    font-size: 0.74rem;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    color: #fff;
+}
+
+.badgeUp { background: #00794A; }
+.badgeDown { background: #B32E1B; }
+
 .resultDecision {
     margin: 0;
     font-size: 0.82rem;
     font-style: italic;
     color: var(--color-text-secondary);
+}
+
+/* ---- Tramo de varias temporadas (ritmo Normal / Exprés) ---- */
+/* Una línea por temporada debajo del saldo: el jugador apretó un botón y le
+   pasaron tres años, así que ninguno puede quedar sin figurar. */
+.blockSeasons {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 0;
+    padding: 8px 0 0;
+    border-top: 1px solid var(--color-border);
+    list-style: none;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+}
+
+.blockSeason {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+}
+
+/* Separador entre datos de una misma línea, sin caracteres en el markup. */
+.blockSeason > * + *::before {
+    content: '·';
+    margin-right: 6px;
+    opacity: 0.45;
+}
+
+.blockSeasonClub {
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.blockSeasonFlag {
+    font-weight: 600;
+    color: var(--color-danger, #d2504f);
 }
 
 /* ---- Selector de país ---- */
@@ -1475,71 +1654,196 @@
    REDISEÑO v2: barra de carrera full-width + trayectoria vertical densa
    ============================================================ */
 
-/* ---- Barra de carrera (ocupa ambas columnas) ---- */
+/* ---- Barra de carrera (ocupa ambas columnas) ----
+   REFERENCIA, no protagonista: ~90 px. El OVR como bloque de color a la
+   izquierda, la identidad en DOS renglones sobre el escudo en marca de agua, y
+   ningún acumulado — esos viven en la espina, repartidos por temporada, donde
+   además dicen cuándo pasaron. */
 .careerBar {
+    /* Ancla del panel flotante del escalafón. */
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 14px 16px;
+    gap: 8px;
+    padding: 10px 12px;
     border: 1px solid var(--color-border);
     border-radius: 12px;
     background: var(--color-surface-subtle, transparent);
 }
 
-/* Fila superior: identidad a la izquierda, OVR y planilla a la derecha. */
+/* Fila superior: el OVR a la izquierda, la identidad ocupando el resto. */
 .cbTop {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px 20px;
+    align-items: stretch;
+    gap: 12px;
+    min-width: 0;
 }
 
-.cbIdentity { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.cbFlag { border-radius: 3px; flex: none; }
-.cbWho { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+/* ---- El panel de identidad ---- */
+.cbPanel {
+    position: relative;
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    padding-right: 6px;
+}
+
+/* El escudo del club, grande y difuminado detrás de la identidad: riqueza
+   visual a costo cero de alto. Recortado por `.cbPanel`. */
+.cbWatermark {
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.1;
+    filter: blur(0.5px);
+    pointer-events: none;
+}
+
+/* Renglón 1: bandera, dorsal, apellido, puesto, edad. */
+.cbName {
+    position: relative;
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0 8px;
+    min-width: 0;
+}
+
+.cbFlag { border-radius: 3px; flex: none; align-self: center; }
+
+.cbSurname {
+    font-size: 1.12rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+    overflow-wrap: anywhere;
+}
 
 .cbPos {
     margin: 0;
-    font-size: 1.02rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: var(--color-text-primary);
 }
-.cbAge { font-size: 0.82rem; font-weight: 600; color: var(--color-text-secondary); margin-left: 4px; }
+.cbAge { font-size: 0.82rem; font-weight: 600; color: var(--color-text-secondary); }
 
-.cbClub { margin: 0; display: flex; align-items: center; gap: 6px; min-width: 0; }
+/* Los separadores son del RENGLÓN, no de cada dato: así "12 Romero · Wing ·
+   22 años" se lee como una línea y no como tres fichas sueltas. */
+.cbPos::before,
+.cbAge::before,
+.cbComp::before { content: '·'; margin-right: 8px; opacity: 0.55; }
+
+/* Renglón 2: escudo, club, permanencia, división, vínculo. */
+.cbClub {
+    position: relative;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
 .cbClubName {
     font-size: 0.9rem; font-weight: 600; color: var(--color-text-primary);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-.cbContext { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+/* Contador de permanencia. Va pegado al club y en tono secundario: informa,
+   no compite con el nombre. `flex: none` para que el que se recorta con
+   ellipsis siga siendo el nombre del club, nunca el contador. */
+.cbTenure {
+    flex: none;
+    font-size: 0.78rem; font-weight: 600; color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+.cbTenure::before { content: '·'; margin-right: 6px; opacity: 0.6; }
+
 .cbComp {
     font-size: 0.78rem; font-weight: 600; color: var(--color-text-secondary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+
+/* El vínculo ES el escalafón colapsado: dice en qué escalón está y abre el
+   detalle. Por eso es un botón y no una etiqueta — el escalafón dejó de ocupar
+   una barra fija en el banner sin dejar de estar a un clic. */
 .cbContract {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: inherit;
     font-size: 0.72rem; font-weight: 700;
     padding: 2px 8px; border-radius: 999px;
     color: var(--color-accent);
+    background: transparent;
     border: 1px solid var(--color-accent);
+    cursor: pointer;
+    white-space: nowrap;
 }
 
-/* Bloque de puntaje: el OVR es el ANCLA visual; los demás datos, secundarios. */
-.cbScore { display: flex; align-items: center; gap: 18px; }
+.cbContract:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+.cbContract:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* Subiste de escalón: el chip queda pintado hasta que el jugador abra el panel,
+   que es donde está el aviso completo. Con el panel cerrado por defecto y sin
+   esta marca, el ascenso —que es EL momento de la ruta amateur— pasaría en
+   silencio. */
+.cbContractNew {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #ffffff;
+}
+
+/* Distinción por permanencia (5ª temporada en adelante).
+   Va COLGADA DE LA PERMANENCIA, no al lado del chip de contrato, y pesa menos
+   que él a propósito: el empleo es estado que hay que poder leer siempre, esto
+   es un logro. Cuando dos fichas del mismo peso dicen cosas de distinto orden,
+   el adorno le gana al dato. Por eso cede en tamaño y en relleno, no en color:
+   cambiarle el tono lo habría disimulado nomás. */
+.cbTenureTier {
+    flex: none;
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.64rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 1px 7px; border-radius: 999px;
+    /* El acento de marca da 3,05:1 como texto y esto son 10 px: va con el
+       acento de tinta, que llega al mínimo. El FONDO sí puede ser el de marca:
+       ahí el acento está calibrado. */
+    color: var(--color-accent-ink);
+    background: color-mix(in srgb, var(--color-accent) 13%, transparent);
+    white-space: nowrap;
+}
+
+/* Estrellita del logro. Decorativa: el texto al lado ya lo nombra. */
+.cbTenureTier::before { content: '★'; font-size: 0.7em; line-height: 1; }
+
+/* ---- El OVR: bloque de color macizo, a la izquierda y primero ----
+   El color pinta el FONDO y no el número. Con el número de color, la etiqueta
+   "OVR" tenía que quedarse en gris y el bloque no llegaba a leerse como un
+   bloque; con el fondo pintado, número y etiqueta van los dos en blanco.
+   El `--ovr-bg` lo fija el rango (ver `.ovr_*`). */
 .cbOvr {
-    display: flex; flex-direction: column; align-items: center; line-height: 1;
-    padding-right: 18px; border-right: 1px solid var(--color-border);
+    flex: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1px;
+    min-width: 84px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    line-height: 1;
+    background: var(--ovr-bg, var(--color-accent));
+    color: #ffffff;
 }
 .cbOvrValue {
-    font-size: 2.6rem; font-weight: 900; letter-spacing: -0.03em;
-    color: var(--color-accent);
+    font-size: 2.7rem; font-weight: 900; letter-spacing: -0.03em; line-height: 0.95;
+    color: #ffffff;
 }
 .cbOvrLabel {
-    font-size: 0.62rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--color-text-secondary); margin-top: 3px;
+    font-size: 0.7rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
+    color: #ffffff; opacity: 0.9;
 }
 
-.cbHonours { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; margin: 0; }
 .cbStat { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; }
 .cbStat dt {
     font-size: 0.62rem; font-weight: 700; color: var(--color-text-secondary);
@@ -1553,25 +1857,25 @@
    se lee como que el juego esta roto. */
 .cbZero { color: var(--color-text-tertiary); opacity: 0.55; font-weight: 700; }
 
-/* Planilla fija: partidos, puntos, tries, tackles + la metrica del puesto. */
+/* Planilla ACUMULADA. Sólo mobile: en desktop la espina la dice mejor,
+   temporada por temporada, y acá volvería a costarle alto al banner.
+   Cuatro columnas, las mismas que la espina. */
 .cbStatline {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px 10px;
     margin: 0;
-    padding-top: 12px;
-    border-top: 1px solid var(--color-border);
 }
 
 @media (max-width: 620px) {
-    .cbTop { gap: 12px 14px; }
-    .cbScore { width: 100%; justify-content: flex-start; gap: 14px; }
+    .cbTop { gap: 10px; }
+    .cbOvr { min-width: 66px; padding: 4px 8px; }
     .cbOvrValue { font-size: 2.1rem; }
-    .cbHonours { flex: 1; gap: 6px 10px; }
+    .cbSurname { font-size: 1rem; }
     .cbStatValue { font-size: 1rem; }
-    /* Cinco columnas no entran a 390 px sin partir las etiquetas: pasan a dos
-       filas, con partidos y puntos arriba, que es lo que se mira primero. */
-    .cbStatline { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    /* Cuatro columnas no entran a 390 px sin partir las etiquetas: pasan a dos
+       filas de dos, con partidos y puntos arriba, que es lo que se mira primero. */
+    .cbStatline { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
     .cbStat dt { font-size: 0.56rem; letter-spacing: 0; }
 }
 
@@ -1878,7 +2182,7 @@
     font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--color-accent);
+    color: var(--color-accent-ink);
 }
 
 .optionBtn {
@@ -1927,7 +2231,7 @@
 }
 
 .offerDir {
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.03em;
     text-transform: uppercase;
@@ -2099,25 +2403,13 @@
 
 .numChip:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
 
-/* Nombre y número en la cabecera de carrera. */
-.cbName {
-    display: flex;
-    align-items: baseline;
-    gap: 7px;
-    margin: 0 0 1px;
-    font-size: 1.06rem;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    color: var(--color-text-primary);
-    min-width: 0;
-    overflow-wrap: anywhere;
-}
-
+/* El dorsal en la cabecera de carrera. El renglón entero se maqueta arriba,
+   con `.cbName`: acá quedó sólo lo propio del número. */
 .cbNumber {
     font-size: 0.82rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
-    color: var(--color-accent);
+    color: var(--color-accent-ink);
     flex: none;
 }
 
@@ -2128,4 +2420,2845 @@
     line-height: 1.4;
     color: var(--color-accent);
     font-weight: 600;
+}
+
+/* ── Carrera compartida ──────────────────────────────────────────────────────
+   La tarjeta viene con la medida fija de una og:image (1200×630) porque es
+   LA MISMA pieza que se ve en el chat. Acá no se reflowea: se escala. Si se
+   maquetara aparte para la web, las dos versiones se separarían con el primer
+   cambio y el link mostraría una cosa distinta de la que promete la vista
+   previa. */
+.sharePage {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 28px 20px 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.shareCardFrame {
+    width: 100%;
+    max-width: var(--card-w);
+    /* Reserva el alto que va a ocupar la tarjeta ya escalada, para que la página
+       no salte cuando termina de cargar el escudo de un club.
+       La razón va SIN UNIDADES: `aspect-ratio: 1080px / 1350px` es inválido, y
+       con la propiedad caída el marco se quedaba con el alto real de la tarjeta
+       (1350), que es el que ocupa ANTES de escalar. */
+    aspect-ratio: var(--card-ratio);
+    /* El escalado se calcula contra ESTE ancho, no contra el viewport: así la
+       tarjeta entra igual si mañana la página la mete en una columna. */
+    container-type: inline-size;
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 10px 30px rgba(13, 27, 20, 0.09);
+}
+
+.shareCardScaler {
+    width: var(--card-w);
+    height: var(--card-h);
+    transform-origin: top left;
+    /* Se divide por una LONGITUD (`--card-w` ya viene en px), no por un número.
+       `100cqw / 1200` da una longitud, y `scale()` sólo acepta números: la regla
+       era inválida y el navegador la tiraba entera, así que la tarjeta se
+       dibujaba a tamaño real y el marco le cortaba todo menos la esquina
+       superior izquierda. Dividiendo longitud por longitud el resultado es un
+       número, que es lo que `scale()` pide. */
+    transform: scale(calc(100cqw / var(--card-w)));
+}
+
+.shareFoot {
+    margin: 0;
+    max-width: 62ch;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+.shareBroken {
+    max-width: 62ch;
+    text-align: center;
+    padding: 36px 24px;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-subtle, transparent);
+}
+
+.shareBrokenTitle { margin: 0 0 10px; font-size: 1.3rem; font-weight: 800; }
+.shareBrokenText { margin: 0; color: var(--color-text-secondary); line-height: 1.55; }
+
+.shareCta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 26px;
+    border-radius: 12px;
+    background: var(--color-accent);
+    color: #ffffff;
+    font-size: 0.98rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.shareCta:hover { filter: brightness(1.06); }
+
+/* Respaldo cuando el portapapeles está bloqueado (http, permiso denegado): se
+   muestra el link para copiarlo a mano en vez de fallar en silencio. */
+.shareFallback {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+.shareFallback input {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    /* Misma trampa que en los chips de la cancha: `--color-surface` no existe y
+       el fallback dejaba el campo blanco con texto claro en modo oscuro. */
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+/* "Continuar" de un homenaje. Tiene que verse DISTINTO de las tarjetas de
+   decisión: aquellas son elecciones con consecuencia, esta es un acuse de
+   recibo. Por eso no es una tarjeta ancha con hint y chevron a la derecha sino
+   un botón angosto, alineado al final y sin cuerpo. Si se pareciera a una
+   opción, el jugador buscaría la otra. */
+.continueBtn {
+    align-self: flex-end;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 999px;
+    border: 1px solid var(--color-accent);
+    background: transparent;
+    color: var(--color-accent);
+    font-size: 0.92rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.continueBtn:hover { background: var(--color-accent); color: #ffffff; }
+.continueBtn:active { transform: translateY(1px); }
+
+/* ── Mobile: LA PANTALLA EN TRES ZONAS ────────────────────────────────────
+   Arriba la cabecera, en el medio la carrera, abajo la decisión. Las tres
+   entran en la pantalla y el reparto es EXPLÍCITO, que es justamente lo que
+   antes no pasaba: la espina tenía `flex: none`, se quedaba con todo el alto
+   que pedía y a la decisión le sobraban 246 px de los 1035 que mide. La
+   tarjeta de "Mercado de pases" salía cortada al medio, con las opciones abajo
+   de un borde que no se ve, y en 320 px la escena medía CERO. El bug no era el
+   alto fijo: era que nadie le había reservado su parte a la decisión.
+
+   Ahora la decisión se queda con el tercio de abajo —`flex: 1`, el resto— y es
+   la única que crece. La carrera pide diez temporadas y ahí se planta: si la
+   carrera es más larga, scrollea DENTRO de su caja en vez de empujar a la
+   decisión fuera de la pantalla. Es la excepción que la regla de scroll admite:
+   una lista explícita, con su barra, adentro de una pantalla que no scrollea. */
+/* LA COLUMNA DE LA DERECHA DE LA CABECERA: dos datos rotulados (edad y
+   vínculo), alineados a la derecha, uno debajo del otro.
+   Esto vivía SÓLO adentro de la media query de 899px, así que en pantalla ancha
+   el marcado se dibujaba sin estilo: el rótulo y el número quedaban pegados
+   —"Edad20"—, sin versalita y sin alinear. La forma va acá, que aplica siempre;
+   adentro de la media query queda nada más que el tamaño. */
+.cbMeta {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    text-align: right;
+}
+
+.cbMetaItem {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.cbMetaLabel {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary, var(--color-text-secondary));
+}
+
+.cbMetaValue {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    line-height: 1;
+}
+
+@media (max-width: 899px) {
+    .console {
+        flex: 1 1 auto;
+        min-height: 0;
+        gap: 10px;
+    }
+
+    /* LA CARRERA, en el medio. `order` y no un cambio de DOM: en escritorio la
+       espina es la columna derecha y en el teléfono va arriba de la decisión,
+       con el mismo árbol. */
+    .consoleAside {
+        order: 1;
+        /* `1 1 auto`: la carrera es la que ABSORBE el sobrante. Antes crecía la
+           decisión y se quedaba con el 38 % de la pantalla sin necesitarlo,
+           porque era la única con `grow`. Y con `shrink: 1` a secas competía
+           contra los 863 px de la tarjeta y el reparto proporcional le dejaba
+           58 px: dos temporadas de las diez. Lo que la acota es su techo. */
+        flex: 1 1 auto;
+        min-height: 0;
+        /* DOS QUINTOS DE PANTALLA, fijos. No es un techo del que puede sobrar:
+           es la franja que la línea de tiempo ocupa siempre, así el bloque no
+           cambia de tamaño según cuántas opciones traiga la decisión de abajo.
+           Lo que no entre scrollea dentro de la lista.
+
+           `1 1 auto` con piso: dos quintos es el MÍNIMO, y todo lo que la
+           decisión no use se lo queda ella. Con un alto fijo, cuando la
+           decisión era corta el sobrante no era de nadie y quedaba como una
+           banda negra al pie. */
+        flex: 1 1 auto;
+        min-height: 40dvh;
+        overflow: hidden;
+    }
+
+    /* El rótulo "Carrera" se va: la tabla se explica sola y esos 18 px son casi
+       una temporada más a la vista. */
+    .spine .asideTitle { display: none; }
+
+    /* ── LA DECISIÓN, EN EL CUARTO DE ABAJO ───────────────────────────────
+       Lo que la hace entrar en un cuarto no es achicar la caja —eso sólo le
+       agrega barra— sino que las opciones de MERCADO dejen de ser tarjetas
+       apiladas de 200 px y pasen a ser tres fichas en fila: escudo, club y
+       división, que es con lo que se elige un club. El `hint` y el motivo de la
+       oferta salen de la ficha porque a ese ancho no se leen; siguen en el
+       `title` y para el lector de pantalla.
+
+       En las decisiones que NO son mercado esto no aplica: ahí la opción es una
+       frase y su `hint` dice qué resignás. Esas se apilan. */
+    /* TODAS las decisiones reparten sus opciones EN FILA, no sólo el mercado.
+       Apiladas, dos opciones con su `hint` ya medían más que el quinto de
+       pantalla que les toca, y la tarjeta terminaba con barra propia: se veía
+       la primera opción y media. En columnas cada opción es una ficha y las
+       tres entran de una. */
+    .event .options {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 5px;
+        align-items: stretch;
+    }
+
+    .event .options .optionBtn {
+        flex: 1 1 0;
+        min-width: 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        text-align: center;
+        gap: 1px;
+        padding: 6px 5px;
+        min-height: 44px;
+    }
+
+    .event .options .optionBody {
+        align-items: center;
+        text-align: center;
+        gap: 1px;
+    }
+
+    .event .options .optionLabel { font-size: 0.6rem; line-height: 1.15; }
+    .event .options .optionHint { font-size: 0.5rem; line-height: 1.15; }
+
+    /* La flecha no aporta en una ficha: la ficha entera ES el botón. */
+    .event .options .optionChevron { display: none; }
+
+    /* Con el descendiente: `.options` se define más abajo y le ganaba el
+       `display` por orden, así que las fichas seguían apiladas. */
+    .event .optionsMarket {
+        display: flex;
+        /* `row` explícito: `.options` es `column` y se define más abajo, así
+           que sin esto las fichas seguían apiladas aunque tuvieran `flex: 1`. */
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    /* Los clubes, en fila y del mismo ancho. */
+    .optionsMarket .optionCrest {
+        flex: 1 1 0;
+        min-width: 0;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 4px;
+        padding: 10px 6px;
+        min-height: 44px;
+    }
+
+    /* Lo que no es un club —retirarse— va abajo, a lo ancho y en una línea. Es
+       una decisión de otra naturaleza y no tiene que parecer un club más.
+       Con `.event` adelante para ganarle a la regla de fila de arriba, que al
+       ser 0,3,0 lo estaba metiendo como una cuarta columna. */
+    .event .optionsMarket .optionPlain {
+        flex: 1 1 100%;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 9px;
+        min-height: 44px;
+    }
+
+    .event .optionsMarket .optionPlain .optionBody { align-items: flex-start; text-align: left; }
+    .event .optionsMarket .optionPlain .optionLabel { font-size: 0.65rem; }
+    .event .optionsMarket .optionPlain .optionHint { display: block; font-size: 0.56rem; }
+
+    .optionsMarket .optionCrest .optionBody {
+        align-items: center;
+        text-align: center;
+        gap: 2px;
+    }
+
+    /* El rótulo chico arriba: "Fichar por" / "Quedarse en". */
+    .optionsMarket .optionCrest .optionKicker {
+        display: block;
+        font-size: 0.47rem;
+        font-weight: 700;
+        color: var(--color-text-tertiary, var(--color-text-secondary));
+        line-height: 1.1;
+    }
+
+    /* En la ficha manda el nombre del club; el label completo se oculta a la
+       vista pero sigue nombrando el botón. */
+    .optionsMarket .optionCrest .optionClubShort {
+        display: block;
+        font-size: 0.62rem;
+        font-weight: 800;
+        line-height: 1.15;
+        color: var(--color-text-primary);
+    }
+
+    .optionsMarket .optionCrest .optionLabel {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+    }
+
+    /* Fuera de la ficha: a 110 px de ancho no se leen y son las que estiran la
+       tarjeta. La información sigue en el `title` del botón. */
+    .optionsMarket .optionCrest .optionHint,
+    .optionsMarket .offerReason,
+    .optionsMarket .optionChevron { display: none; }
+
+    .optionsMarket .offerMeta {
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .optionsMarket .offerLeague { font-size: 0.53rem; }
+
+    /* El chip de dirección envuelve en vez de desbordar la ficha: a 110 px de
+       ancho, "Bajás un escalón" en una línea se salía por los dos costados y
+       pisaba la ficha de al lado. */
+    .optionsMarket .optionCrest .offerDir {
+        font-size: 0.44rem;
+        padding: 1px 4px;
+        white-space: normal;
+        line-height: 1.15;
+        text-align: center;
+    }
+
+    /* Las tres fichas arrancan arriba y del mismo alto: con el contenido
+       centrado, la que tenía el nombre en dos renglones bajaba el escudo y las
+       tres quedaban desparejas. */
+    .optionsMarket .optionCrest { justify-content: flex-start; }
+    .optionsMarket .optionCrest .optionBody { flex: 1 1 auto; justify-content: flex-start; }
+
+    /* La cabecera de la tarjeta también se aprieta: la categoría se va —el
+       título ya dice de qué se trata— y el relato baja a dos renglones. */
+    .eventCategory { display: none; }
+    .eventTitle { font-size: 0.75rem; line-height: 1.2; }
+
+    /* El relato, a dos renglones. No se recorta el texto en el dato: se recorta
+       en la PRESENTACIÓN, así que el evento sigue diciendo lo suyo completo en
+       el lector de pantalla y en escritorio. */
+    .eventText {
+        font-size: 0.6rem;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .event { gap: 4px; padding: 7px 8px; }
+
+    /* El escudo de la ficha: 32 px alcanza para reconocer el club y son 8 px
+       menos por ficha. */
+    .optionsMarket .optionCrest img,
+    .optionsMarket .optionCrest [class*="clubBadge"] {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        min-height: 30px;
+        margin: 1px 0;
+    }
+
+    /* En un teléfono bajo (el SE mide 568) el tercio del medio deja a la
+       decisión sin lugar: ahí la carrera cede primero, porque el que no puede
+       quedarse sin pantalla es el que hay que tocar. */
+    @media (max-height: 700px) {
+        .consoleAside { max-height: 26dvh; }
+    }
+
+    /* LA DECISIÓN, EN EL CUARTO DE ABAJO. Pide lo que mide y no más: con las
+       fichas de mercado en fila eso son ~230 px, que es el cuarto. El techo
+       está para que una decisión larga scrollee adentro de su zona en vez de
+       comerse la carrera — que es exactamente lo que pasaba antes al revés. */
+    /* La consola no reserva el hueco del nav inferior del sitio: en esta ruta
+       el nav no se dibuja, y esos 96 px quedaban como una banda muerta abajo de
+       la decisión. */
+    .wrapConsole { padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+
+    .consoleMain {
+        order: 2;
+        /* `0 0 auto`: la decisión MIDE LO QUE MIDE y nunca se recorta. Antes
+           tenía techo y el mercado con sus escudos quedaba cortado al medio
+           —se veía la liga y el chip de dirección quedaba abajo del borde—
+           mientras la carrera, al lado, tenía 426 px. El que no puede quedar a
+           medias es el que hay que tocar.
+
+           El quinto sigue siendo el piso: si la decisión es corta igual reserva
+           esa franja, así el bloque de abajo no salta de tamaño en cada
+           temporada. Y 40dvh es el tope de seguridad para una decisión larga
+           de verdad; recién ahí scrollea. */
+        /* Toma todo lo que la línea de tiempo no usa y NO SCROLLEA: la
+           decisión se ve entera o no se ve bien. Lo que la hace entrar es que
+           su tipografía y sus espacios son un 25 % más chicos que los del resto
+           del juego —los escudos NO, que son lo que se compara de un vistazo. */
+        flex: 0 0 auto;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    /* EL RETIRO PIDE LO CONTRARIO. Vive en la misma zona que la decisión, pero
+       es la pantalla más larga del juego —planilla, títulos, logros y la fila de
+       acciones— y no hay forma de que entre en un teléfono. Con el `overflow:
+       hidden` de arriba quedaba RECORTADA y sin scroll: la fila de botones
+       existía en el DOM, medía 129 px y estaba a 400 px por debajo del borde,
+       inalcanzable con el dedo.
+       Se recorta el alcance con `:has()` en vez de sacarle el `hidden` a la
+       decisión, que lo necesita para no partirse al medio. */
+    .consoleMain:has(.summary) {
+        flex: 1 1 auto;
+        overflow: visible;
+    }
+
+    /* Y LA ESPINA LLEGA HASTA LOS BOTONES. El retiro se lee de arriba abajo:
+       primero la carrera entera (la tabla, que termina en la fila de la
+       selección) y después el resumen. Sin esto, la primera pantalla cortaba el
+       resumen al medio —se veía "FIN DE LA CARRERA", el titular y media línea de
+       la frase, tapada por la fila de acciones— que es texto que no se puede
+       leer ocupando el lugar de datos que sí.
+       Con la espina estirada hasta el borde del holder, lo que se ve entero son
+       temporadas; el resumen empieza justo abajo y se lee scrolleando.
+       El descuento es el alto de la fila de acciones: dos filas de botones a
+       375px (una para compartir, otra para los otros dos) más su aire. */
+    .console:has(.summary) { --acciones-retiro: 132px; }
+
+    .console:has(.summary) > .consoleAside {
+        min-height: calc(100% - var(--acciones-retiro));
+    }
+
+    /* La espina LLENA el alto que le dieron en vez de pedir el suyo: con
+       `0 1 auto` medía su contenido y dejaba 250 px de aire entre la banda de
+       selección y la decisión. Estirada, las filas se reparten ese alto y la
+       tabla se lee como la referencia: renglones altos, no una lista fina
+       flotando arriba de un hueco. */
+    .spine { flex: 1 1 auto; min-height: 0; }
+
+    /* Diez temporadas a la vista y las demás con la barra. El alto sale de la
+       cuenta y no de un número mágico: fila + separación, por diez, más el
+       encabezado y la banda de selección, que están fuera de la lista. */
+    .spine .spineList {
+        --spine-rows: 10;
+        /* Crece con su zona: con `0 1 auto` la lista medía sus filas y el
+           sobrante quedaba como un hueco entre la carrera y la decisión. */
+        flex: 1 1 auto;
+        /* Sin techo propio: el alto lo da la ZONA (`.consoleAside`), y con un
+           `max-height` acá encima la lista se plantaba en 320 px y dejaba el
+           resto como hueco. A 62dvh la zona da para 15 renglones en un teléfono
+           común y 9 en uno chico, así que las diez temporadas están cubiertas y
+           lo que sobra scrollea. */
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        /* Sin `overscroll-behavior` el tirón al final de la lista arrastra la
+           pantalla de atrás, que en un juego de una sola vista se siente roto. */
+        overscroll-behavior: contain;
+    }
+
+    /* EL RESULTADO DE LA TEMPORADA NO VA EN EL TELÉFONO. No es que no entre:
+       es que lo dice dos veces. "Temporada 1 · 19 años · Peñarol · 8 partidos ·
+       40 puntos · 2 tries · 72% al palo · OVR 49" es exactamente la fila que la
+       línea de tiempo ya muestra, y ahí además queda escrita en su lugar de la
+       carrera en vez de desaparecer en la temporada siguiente. Son ~300 px, que
+       es justo lo que la decisión necesitaba.
+
+       En escritorio se queda: ahí hay dos columnas y el relato de la temporada
+       —el titular, los hitos— es lo que le da voz a la planilla. */
+    .result { display: none; }
+
+    /* El festejo cubre el VIEWPORT. El `zoom: 0.7` que obligaba a `absolute`
+       es de escritorio; acá abajo no hay zoom y `fixed` es más honesto. */
+    .celebration {
+        position: fixed;
+    }
+
+    /* ── LA CABECERA, ACHICADA ────────────────────────────────────────────
+       El banner es REFERENCIA, no protagonista: cada píxel que toma sale de la
+       decisión. El bloque de OVR baja de 84 a 62 px de ancho y el número de
+       2,7 a 2rem; sigue siendo lo primero que ve el ojo porque es un bloque de
+       color, que es lo que lo hace grande, no su tamaño. */
+    .careerBar { gap: 4px; padding: 7px 9px; }
+    .cbTop { gap: 9px; align-items: center; }
+
+    /* El desplegable se va del flujo: el chip del vínculo, que está a la
+       derecha, abre el mismo panel. Un botón a lo ancho que dice "Ver planilla
+       y escalafón" cuesta 35 px y un renglón entero de la cabecera. */
+    .careerBar .cbDisclosure { display: none; }
+
+    /* En el teléfono los dos datos son más chicos: la cabecera compite con la
+       decisión por el alto. La forma de la columna se define AFUERA (ver
+       `.cbMeta` en la sección de la cabecera). */
+    .cbMetaLabel { font-size: 0.6rem; }
+    .cbMetaValue { font-size: 1.1rem; }
+
+    /* Los dos renglones de identidad no envuelven: el ancho que les faltaba se
+       lo estaba comiendo la edad, que ahora vive en su columna. */
+    .cbName, .cbClub { flex-wrap: nowrap; min-width: 0; }
+    .cbPanel { min-width: 0; }
+
+    /* Y si aun así no entran, TRUNCAN. Sin esto el nombre se partía letra por
+       letra —"Ign / aci / o"— que es peor que no mostrarlo: `nowrap` en el
+       contenedor no impide que el hijo rompa la palabra. */
+    .cbSurname,
+    .cbClubName {
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* El puesto escrito se va del banner: el DORSAL ya lo dice —en rugby el 10
+       es el apertura— y es lo que hace la referencia usa el chip corto en vez
+       del nombre largo. Sigue en la ficha del jugador y en el detalle. */
+    .cbPos { display: none; }
+
+    /* EL CLUB MANDA EN SU RENGLÓN. La permanencia, la división y la distinción
+       se van: con `flex: none` se quedaban con el ancho y al club —que tiene
+       `min-width: 0` para poder truncar— le tocaba cero, así que el renglón
+       quedaba en "escudo · 3ª temporada · Pro" SIN el nombre del club. Los tres
+       son contexto y siguen en el detalle; el club es identidad.
+       La división además ya está en la tabla, temporada por temporada. */
+    .cbComp, .cbTenure, .cbTenureTier { display: none; }
+    .cbClubName { flex: 0 1 auto; font-size: 0.95rem; font-weight: 700; }
+
+    @media (max-width: 379px) {
+        .cbMetaValue { font-size: 1rem; }
+        .cbContract { font-size: 0.68rem; padding: 3px 7px; }
+    }
+    .cbOvr { min-width: 58px; padding: 3px 7px; }
+    .cbOvrValue { font-size: 1.85rem; }
+    .cbOvrLabel { font-size: 0.6rem; letter-spacing: 0.1em; }
+    .cbPanel { gap: 1px; }
+    .cbSurname { font-size: 1rem; }
+    .cbClubName { font-size: 0.82rem; }
+    .cbName, .cbClub { gap: 0 6px; }
+
+    /* La marca de agua del escudo se va: a este tamaño no se lee como escudo,
+       queda como una mancha atrás del nombre del club. */
+    .cbWatermark { display: none; }
+}
+
+/* ── Cabecera: qué se pliega y cuándo ─────────────────────────────────────
+   El detalle (escalafón, y en mobile además la planilla acumulada) arranca
+   CERRADO en todos los tamaños. En desktop se abre como capa flotante sobre la
+   consola: si empujara el layout, el panel del escalafón le comería a la
+   tarjeta de decisión los píxeles que este rediseño le devolvió. Una capa que
+   el jugador abre a propósito es la excepción admitida a la regla de cero
+   scroll. */
+.cbDisclosure { display: none; }
+
+.cbDetails {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cbDetailsOpen { display: flex; }
+
+@media (min-width: 900px) {
+    .cbDetails {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 12px;
+        z-index: 30;
+        width: min(560px, calc(100% - 24px));
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        /* `--color-bg-elevated` y no `--color-surface`: esa variable no existe
+           y el fallback dejaba el panel blanco en modo oscuro. */
+        background: var(--color-bg-elevated);
+        box-shadow: 0 16px 40px rgba(13, 27, 20, 0.18);
+    }
+
+    /* La planilla acumulada NO va acá: la espina la dice temporada por
+       temporada, que además cuenta cuándo pasó cada cosa. */
+    .cbStatline { display: none; }
+}
+
+@media (max-width: 899px) {
+    .cbDisclosure {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        align-self: stretch;
+        padding: 7px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--color-border);
+        background: transparent;
+        color: var(--color-text-secondary);
+        font-size: 0.76rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    /* La identidad SIGUE envolviendo. Forzar identidad y OVR en una sola fila a
+       389 px parece que ahorra alto y hace lo contrario: el texto se parte en
+       más líneas y el bloque crece. Medido. Lo que se aprieta es el gap y los
+       tamaños, no la dirección. */
+    .cbTop { gap: 10px; }
+    .cbOvr { min-width: 62px; padding: 4px 8px; }
+    .cbOvrValue { font-size: 2rem; }
+    .cbSurname { font-size: 0.98rem; }
+    .cbPos { font-size: 0.86rem; }
+    .cbDetails { padding-top: 10px; border-top: 1px solid var(--color-border); }
+    .careerBar { gap: 8px; padding: 10px 12px; }
+}
+
+/* ═══ CREACIÓN DE JUGADOR ═══════════════════════════════════════════════════
+   UNA tarjeta dueña del alto, no una pila de secciones.
+
+   La versión anterior apilaba apellido → nacionalidad → posición → ruta →
+   ritmo en una columna angosta y centrada. Medido: se acababa el alto (la
+   grilla de países scrolleaba) mientras sobraban ~300 px abajo y media
+   pantalla a los costados. El espacio no faltaba: estaba mal usado.
+
+   Mobile-first: acá abajo fluye en una columna, que es lo correcto cuando el
+   ancho es lo escaso. La tarjeta de tres columnas entra en la media query. */
+.creator {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+}
+
+/* ── EL ASISTENTE DE PASOS (sólo teléfono) ────────────────────────────────
+   En escritorio la tarjeta muestra las cinco decisiones a la vez y estas dos
+   piezas no existen. Abajo de 900 px es UN PASO POR DECISIÓN: apilar cinco
+   secciones en una columna angosta hacía que el jugador viera el arranque de
+   todas y no terminara ninguna.
+
+   El truco para no tener dos árboles de JSX: `display: contents` en los dos
+   agrupadores. Sus hijos pasan a ser hermanos directos de `.creator`, así que
+   el paso activo puede mostrarse solo aunque en el DOM viva adentro de la
+   grilla de escritorio. */
+.stepBar,
+.stepFoot { display: none; }
+
+@media (max-width: 899px) {
+    .creatorBody,
+    .creatorBands { display: contents; }
+
+    /* Con `.creatorStep` a secas no alcanza: las secciones también llevan
+       `.creatorCol`, que trae su propio `display` y se define más abajo en este
+       archivo, así que ganaba por orden y las cuatro pantallas se veían juntas.
+       El descendiente sube la especificidad y zanja el empate. */
+    .creator .creatorStep { display: none; }
+
+    /* La cabecera de la tarjeta se va: repetir "Elegí y arrancá" y su bajada en
+       las cuatro pantallas cuesta 250 px de las 844 que hay, y la barra de
+       pasos ya dice dónde estás. Con el descendiente, por lo mismo que las
+       secciones y el pie: `.creatorHead` se define más abajo. */
+    .creator .creatorHead { display: none; }
+
+    /* Un botón deshabilitado tiene que VERSE deshabilitado. "Continuar" en
+       verde pleno mientras el texto de al lado dice que falta elegir el puesto
+       se lee como un botón roto, no como uno que espera algo. */
+    .stepFootRow .primaryBtn:disabled {
+        background: var(--color-bg-hover);
+        color: var(--color-text-tertiary);
+        border-color: transparent;
+        box-shadow: none;
+        cursor: not-allowed;
+        opacity: 1;
+    }
+
+    /* El título de la sección también sobra —la barra de pasos lo dice— pero NO
+       se puede sacar del DOM: cada `<section>` lo referencia con
+       `aria-labelledby`, así que se oculta a la vista y sigue nombrando la
+       sección para el lector de pantalla. */
+    .creator .creatorStep .colTitle {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+    }
+
+    .creator .creatorStepOn {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 0;
+        /* Entrada lateral corta: dice "avanzaste", no "cargó otra página".
+           Sólo `transform` y `opacity`, que es lo que el compositor puede
+           mover sin repintar. */
+        animation: stepIn 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    /* El pie de escritorio se va: su botón es "Comenzar carrera" y acá eso
+       sólo corresponde en el último paso. Con el descendiente, por lo mismo
+       que las secciones: `.creatorFoot` se define más abajo y ganaba por
+       orden, así que quedaban DOS "Comenzar carrera" en la misma pantalla. */
+    .creator .creatorFoot { display: none; }
+
+    .stepBar { display: flex; flex-direction: column; gap: 6px; }
+
+    .stepFoot {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        /* Pegado abajo y sobre el fondo, no flotando entre el contenido: el
+           pulgar tiene que encontrar Continuar en el mismo lugar los cuatro
+           pasos. `sticky` y no `fixed` para que no tape el último control
+           cuando el paso es largo. */
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+        padding: 10px 0 calc(8px + env(safe-area-inset-bottom));
+        background: linear-gradient(to top, var(--color-bg-primary) 72%, transparent);
+    }
+
+    .stepFootRow { display: flex; align-items: center; gap: 10px; }
+
+    /* Blancos de toque de 48 px: es el pie que se usa cuatro veces seguidas. */
+    .stepFootRow .ghostBtn,
+    .stepFootRow .primaryBtn {
+        flex: 1 1 auto;
+        justify-content: center;
+        min-height: 48px;
+    }
+
+    .stepFootRow .ghostBtn { flex: 0 0 auto; min-width: 92px; }
+}
+
+@keyframes stepIn {
+    from { opacity: 0; transform: translateX(12px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* Con movimiento reducido el paso aparece: la información llega igual. */
+@media (prefers-reduced-motion: reduce) {
+    .creatorStepOn { animation: none; }
+}
+
+.stepName {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.stepCount {
+    flex: none;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+.stepTrack { display: flex; gap: 4px; }
+
+.stepSeg {
+    flex: 1 1 0;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--color-border);
+    transition: background 200ms ease-out;
+}
+
+.stepSegOn { background: var(--color-accent); }
+
+.stepHint {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+}
+
+.creatorHead { display: flex; flex-direction: column; gap: 2px; }
+
+.creatorTitle {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+}
+
+.creatorLead { margin: 0; font-size: 0.86rem; color: var(--color-text-secondary); }
+
+.creatorBody { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+
+.creatorCol { display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; }
+
+.colTitle {
+    margin: 0;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.creatorBands { display: flex; flex-direction: column; gap: 14px; }
+.bandRoute, .bandPace { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+.creatorFoot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+}
+
+.creatorFootRight { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.creatorFootRight .primaryBtn { flex: none; }
+
+/* ── La camiseta ────────────────────────────────────────────────────────── */
+.jersey {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 0;
+}
+
+/* `container-type: inline-size` para que el apellido y el número se midan en
+   `cqw` — porcentaje del ancho de la CAMISETA, no del viewport. Así el texto
+   crece con ella cuando la columna le da más lugar, que es lo que arregla que
+   el apellido casi no se leyera. */
+.jerseyFrame {
+    position: relative;
+    container-type: inline-size;
+    width: min(100%, 210px);
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.jerseyImg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    position: relative;
+    /* `multiply` deja pasar el color de abajo por las zonas blancas y conserva
+       el trazo oscuro. Teñir con `filter` no sirve: el blanco no vira. */
+    mix-blend-mode: multiply;
+}
+
+/* La silueta, recortada con la propia imagen. Es lo que se pinta. */
+.jerseyTint {
+    position: absolute;
+    inset: 0;
+    background: var(--kit, #D8DEE3);
+    /* Ruta RELATIVA a este archivo: el bundler la resuelve y la hashea. La
+       imagen vive en `src/img/`, no en `public/`, así que una ruta absoluta no
+       existiría en tiempo de ejecución. */
+    -webkit-mask-image: url('../../../../img/CARRERA KIT.png');
+    mask-image: url('../../../../img/CARRERA KIT.png');
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+}
+
+.jerseyName,
+.jerseyNumber {
+    position: absolute;
+    left: 50%;
+    white-space: nowrap;
+    /* Tinta según la camiseta: Inglaterra juega de blanco y Nueva Zelanda de
+       negro, y el apellido tiene que leerse en las dos. */
+    color: var(--kit-ink, #16201A);
+    /* Guarda dura. 34% y no 44: el torso mide 47% de la imagen, así que con 44
+       el texto llegaba hasta las costuras y se leía como que se sale de la
+       camiseta. Si un apellido se pasa igual, se recorta acá —con puntos
+       suspensivos, no a cuchillo— y nunca por arriba de los hombros. */
+    max-width: 34%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+}
+
+/* EL NÚMERO manda y va centrado en el torso, en los dos ejes. El 47% es el
+   centro real de la espalda: el cuello termina cerca del 10% y el ruedo cerca
+   del 81%, así que la mitad de la tela cae un poco por encima de la mitad de la
+   imagen. El cuerpo lo fija el componente según cuántos dígitos tenga. */
+.jerseyNumber {
+    top: 47%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    /* El número va donde el torso es más ancho, así que se le permite más que
+       al apellido —que va abajo, cerca del ruedo— sin salirse de la tela. */
+    max-width: 40%;
+}
+
+/* El apellido, DEBAJO del número y a un tercio de su altura. */
+.jerseyName {
+    top: 67%;
+    transform: translateX(-50%);
+    line-height: 1;
+}
+
+.jerseyNamePlaceholder { opacity: 0.42; }
+
+/* ── La cancha ──────────────────────────────────────────────────────────── */
+.pitch {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background:
+        repeating-linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--color-accent) 9%, transparent) 0 6%,
+            color-mix(in srgb, var(--color-accent) 5%, transparent) 6% 12%
+        );
+    overflow: hidden;
+}
+
+.pitchLine {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--at);
+    width: 1px;
+    background: color-mix(in srgb, var(--color-accent) 32%, transparent);
+}
+
+.pitchTry { width: 2px; background: color-mix(in srgb, var(--color-accent) 50%, transparent); }
+.pitch22 { border-left: 1px dashed color-mix(in srgb, var(--color-accent) 30%, transparent); background: none; }
+.pitchHalf { background: color-mix(in srgb, var(--color-accent) 40%, transparent); }
+
+/* Los puestos se posicionan por el CENTRO, que es lo que hace que la
+   formación se lea: si se anclaran por la esquina, un chip ancho y uno
+   angosto no quedarían alineados con su lugar en la cancha. */
+.pitchSpot {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    padding: 6px 11px;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    /* Fondo SÓLIDO Y DEL TEMA. Acá estuvo el bug que sobrevivió a dos arreglos:
+       decía `var(--color-surface, #fff)` y `--color-surface` NO EXISTE en
+       globals.css —están `--color-surface-light` y `--color-surface-dark`, que
+       son otra cosa—, así que el fallback `#fff` ganaba siempre. En oscuro
+       quedaba un chip BLANCO con texto #f2f2f2 encima: contraste 1,12:1. Los
+       arreglos anteriores cambiaron el color del texto, que sí es del tema, y
+       por eso no alcanzaron nunca. `--color-bg-elevated` existe en los dos
+       temas (#ffffff claro / #2a2a2e oscuro) y es lo que hay que usar. */
+    background: var(--color-bg-elevated);
+    box-shadow: 0 1px 3px rgba(13, 27, 20, 0.14);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.12s, background 0.12s, transform 0.12s;
+}
+
+.pitchSpot:hover { border-color: var(--color-accent); transform: translate(-50%, -50%) scale(1.04); }
+
+/* ── La cancha PARADA, en el teléfono ─────────────────────────────────────
+   Mismas coordenadas, leídas al revés: lo que en escritorio es avanzar hacia
+   la derecha, acá es avanzar hacia abajo. El pack arriba, los tres cuartos
+   abriéndose y el fullback último. Con 16/9 sobre 390 px de ancho quedaban
+   219 px de alto para nueve puestos y se tapaban entre ellos; cuadrada hay
+   390 y cada puesto tiene su renglón. */
+@media (max-width: 899px) {
+    .pitch { aspect-ratio: 1 / 1; }
+
+    .pitchSpot {
+        left: var(--y);
+        top: var(--x);
+        /* Blanco de toque de 44 px: es el control principal de la pantalla. */
+        min-height: 44px;
+        justify-content: center;
+        padding: 6px 9px;
+    }
+
+    .pitchSpot:hover { transform: translate(-50%, -50%); }
+
+    .pitchLine {
+        top: var(--at);
+        bottom: auto;
+        left: 0;
+        right: 0;
+        width: auto;
+        height: 1px;
+    }
+}
+
+/* Seleccionado: verde OSCURO, no el acento. El acento (#00a365) con texto
+   blanco da 3,3:1 y no llega al 4,5:1 que se exige para texto chico; este verde
+   da 5,5:1 y es el mismo que usa el bloque de OVR. */
+.pitchSpotOn {
+    border-color: #00794A;
+    background: #00794A;
+    color: #ffffff;
+}
+
+.pitchSpot .pitchName { color: var(--color-text-primary); }
+.pitchSpotOn .pitchName { color: #ffffff; }
+
+/* Los dos textos se miden en píxeles REALES, no en CSS: la app corre con
+   `html { zoom: 0.7 }` en desktop, así que 0,75rem se veían 8,4 px de verdad
+   —justo lo que se reportó— aunque el CSS dijera 12. Con 1rem el nombre queda
+   en 11,2 px reales, que es el piso pedido. */
+.pitchNum { font-size: 1.4rem; font-weight: 900; line-height: 1; letter-spacing: -0.02em; }
+/* El nombre acompaña; el que identifica es el número. `nowrap` porque
+   "Segunda línea" partido en dos renglones era ilegible. */
+.pitchName { font-size: 1rem; font-weight: 700; line-height: 1.15; white-space: nowrap; }
+
+/* ── Ritmo: tres tercios del contenedor ─────────────────────────────────── */
+/* Un tercio cada uno, siempre. Era una fila de chips comprimidos en la cuarta
+   parte del ancho porque las tres tarjetas de ruta se llevaban el resto; sin
+   ellas el ritmo es la única banda y le entra la explicación adentro. */
+.paceRow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+
+.paceChip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    min-width: 0;
+    text-align: left;
+}
+
+.paceChip:hover { border-color: var(--color-border-light); }
+.paceChip:active { transform: scale(0.99); }
+.paceChipOn { border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+.paceHead { display: flex; width: 100%; align-items: baseline; justify-content: space-between; gap: 8px; }
+.paceName { font-size: 0.85rem; font-weight: 800; }
+.paceChipOn .paceName { color: var(--color-accent); }
+.paceTag { font-size: 0.66rem; font-weight: 600; color: var(--color-text-secondary); white-space: nowrap; }
+.paceText { font-size: 0.72rem; line-height: 1.35; color: var(--color-text-secondary); }
+
+@media (max-width: 640px) {
+    /* En el teléfono el tercio no alcanza para leer: se apilan. */
+    .paceRow { grid-template-columns: 1fr; gap: 8px; }
+    .paceChip { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+    .paceHead { width: auto; flex: 0 0 auto; }
+    .paceText { flex: 1 1 100%; }
+}
+
+/* ── Grilla de países con cupo medido ───────────────────────────────────── */
+.countryGridFit {
+    /* `flex-basis: 0` y NO `auto`: con `auto` el alto de la grilla sale de su
+       propio contenido, y su contenido sale del alto medido — un bucle que se
+       estabiliza en el mínimo (se veían 4 países con media columna vacía
+       debajo). Con base 0 el alto lo fija el contenedor y la medición es
+       estable. */
+    flex: 1 1 0;
+    min-height: 0;
+    /* Sin scroll A PROPÓSITO: el cupo lo calcula `useFittingCount` midiendo
+       esta caja. Si algún día vuelve a desbordar, el bug está en el cálculo
+       y una barra lo taparía en vez de mostrarlo.
+       El `max-height` y el `overflow-y: auto` de `.countryGrid` son justo lo
+       que este modo viene a reemplazar, así que se anulan. */
+    max-height: none;
+    overflow: hidden;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+}
+
+/* ── Escritorio: la tarjeta ─────────────────────────────────────────────── */
+@media (min-width: 900px) {
+    .creator {
+        /* `flex: 1` y NO `height: 100%`. El porcentaje se resolvía contra
+           `.wrap`, que además del creador tiene el link de volver y el aviso de
+           partida vieja: la tarjeta pedía el 100% del padre, no le entraba, y
+           el flex la encogía a lo que sobraba — quedaba a media altura con
+           ~300 px muertos abajo. Creciendo se queda con TODO el resto, que es
+           lo que hace que las columnas tengan alto que repartir. */
+        flex: 1 1 auto;
+        min-height: 0;
+        max-width: 1500px;
+        margin-inline: auto;
+        padding: 16px 20px 14px;
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-subtle, transparent);
+        gap: 12px;
+        overflow: hidden;
+    }
+
+    /* Tres columnas de igual alto. La de la cancha pide más ancho porque una
+       formación aplastada deja de leerse como una formación. */
+    .creatorBody {
+        flex: 1 1 auto;
+        flex-direction: row;
+        gap: 22px;
+        min-height: 0;
+    }
+
+    .creatorCol { flex: 1 1 26%; }
+    .creatorColWide { flex: 1.6 1 40%; }
+
+    /* UNA banda a lo ancho: el ritmo. La separación dura se conserva —sin ella
+       el título de la banda quedaba pegado al texto de ayuda del apellido y se
+       leía como parte de esa columna—. */
+    .creatorBands {
+        flex-direction: row;
+        align-items: stretch;
+        gap: 14px;
+        padding-top: 14px;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .bandPace { flex: 1 1 0; }
+
+    .creatorTitle { font-size: 1.6rem; }
+}
+
+/* La creación necesita el MISMO trato de alto y ancho que la consola: `.wrap`
+   la limitaba a 460 px, que es de donde salía "vivimos en 700 con aire a los
+   costados". Acá el ancho no es un lujo, es el recurso que reemplaza al
+   scroll. */
+.wrapCreate {
+    max-width: 1560px;
+    width: 100%;
+    margin-inline: auto;
+    padding: 10px 14px 12px;
+    gap: 10px;
+}
+
+@media (min-width: 900px) {
+    .wrapCreate {
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+    }
+}
+
+/* El contenedor del selector tiene que ESTIRARSE para que la grilla tenga
+   contra qué medir. Sin esto la grilla es hija de una caja de alto automático,
+   mide 0 y el cupo cae al mínimo: se veían 4 países con media columna vacía
+   debajo. */
+.pickerFit {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+}
+
+/* La camiseta y la cancha CRECEN con la columna en vez de dejar aire muerto
+   debajo. Es la diferencia entre "respira" y "sobra": el alto que no usa la
+   camiseta no se lo puede quedar nadie más, porque las tres columnas ya están
+   a la par. */
+@media (min-width: 900px) {
+    /* La camiseta CRECE con la columna: el hueco entre ella y APELLIDO era
+       espacio que no se podía quedar nadie más, y llenarlo es lo que hace que
+       el apellido se lea. */
+    .jersey { flex: 1 1 auto; min-height: 140px; }
+    /* Sin tope de 280 px: la camiseta se queda con el ancho de su columna y el
+       alto lo limita `max-height`. El tope la dejaba de 280 flotando en una
+       caja de 840, que era el hueco que había que llenar. */
+    .jerseyFrame { width: 100%; height: 100%; max-height: 100%; aspect-ratio: auto; }
+
+    .pitch {
+        flex: 1 1 auto;
+        /* Se saca el aspecto fijo: manda el alto de la columna. El mínimo evita
+           que en una pantalla baja la formación quede ilegible. */
+        aspect-ratio: auto;
+        min-height: 180px;
+    }
+}
+
+/* La cabecera en UNA LÍNEA en escritorio. Medida: apilada se llevaba 83 px de
+   una tarjeta de 634 en un portátil de 768, y esos 83 px salían de la grilla de
+   países, que es lo único de la tarjeta que de verdad los necesita. */
+@media (min-width: 900px) {
+    .creatorHead {
+        flex-direction: row;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 4px 12px;
+    }
+
+    .creatorTitle { font-size: 1.3rem; }
+    .creatorLead { flex: 1 1 200px; }
+
+    /* Fila de país un poco más compacta dentro de la tarjeta — el TEXTO no
+       cambia de tamaño, sólo el relleno. Achicar tipografía para que entre es
+       justo lo que no se hace acá. */
+    .countryGridFit .countryOption { min-height: 40px; padding: 6px 10px; }
+}
+
+/* ── La espina dorsal ──────────────────────────────────────────────────────
+   Una fila por edad, del debut a los 39, CON LA PLANILLA DE CADA TEMPORADA. No
+   scrollea: las filas se reparten el alto y la futura pide la mitad que la
+   jugada. Las columnas están alineadas por una grilla común entre encabezado,
+   filas y la fila de selección — si cada fila maquetara lo suyo, los números no
+   formarían columna y dejaría de leerse como una planilla.
+
+   `--spine-cols` es una sola variable para las tres piezas: cambiar el reparto
+   en un lugar y que dos se desalineen es exactamente el bug que evita. */
+.spine {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 0;
+    flex: 1 1 auto;
+    /* La primera columna mide para "EDAD": con 22 px el propio encabezado se
+       cortaba en "E…", que es el único rótulo que nadie puede deducir.
+       Las cuatro fijas —PJ, PTS, TRIES— y al final la del puesto, que desde que
+       su encabezado es un ícono ya no necesita reservar 52 px para el rótulo
+       "Al palo": el ancho lo pide el dato, que son tres o cuatro dígitos. */
+    --spine-cols: 30px minmax(0, 1fr) 32px 26px 30px 30px 30px 38px;
+}
+
+/* SIN COLUMNA DE PUESTO (los pateadores: su ranura era el % al palo). Una
+   columna menos, y el ancho que dejan los palos se reparte entre las que
+   quedan. El reparto se declara acá y no en el componente para que encabezado,
+   filas y selección sigan leyendo la MISMA variable: es lo único que garantiza
+   que los números formen columna con su ícono. */
+.spineSinPuesto {
+    --spine-cols: 30px minmax(0, 1fr) 34px 30px 34px 30px 32px;
+}
+
+
+.spineHead,
+.spineRow,
+.spineNation {
+    display: grid;
+    grid-template-columns: var(--spine-cols);
+    align-items: center;
+    gap: 0 6px;
+    padding: 0 8px;
+}
+/* El encabezado y la fila de la selección viven FUERA de la lista que scrollea,
+   así que no pierden el ancho de la barra y sus íconos quedaban corridos
+   respecto de los números. `--spine-barra` la mide el componente (es 0 donde la
+   barra se superpone, como en el celular). */
+.spineHead,
+.spineNation {
+    padding-right: calc(8px + var(--spine-barra, 0px));
+}
+
+
+/* Encabezado de columnas: sin él, seis números por fila son un jeroglífico.
+   A 0,6 rem medía 9,6 px, que en un teléfono es un rótulo que se adivina más
+   que se lee. 11 px es el piso: abajo de eso la mayúscula chica con tracking
+   deja de tener forma. */
+.spineHead {
+    font-size: 0.69rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary, var(--color-text-secondary));
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.spineHead span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.spineList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    /* La lista mide LO QUE MIDEN SUS FILAS, no lo que le den. Cuando crecía
+       para llenar la columna, las filas —que tienen techo— se quedaban arriba
+       y el sobrante caía adentro de la lista: 400 px de aire entre la última
+       temporada y la fila de selección, que quedaba flotando sola abajo de
+       todo. Ahora el sobrante queda debajo del bloque entero, que es donde no
+       molesta. */
+    flex: 0 1 auto;
+    min-height: 0;
+    justify-content: flex-start;
+    /* Sin `overflow`: si esta columna scrollea deja de ser una espina dorsal y
+       vuelve a ser una lista. Lo que entra lo resuelve el reparto de flex. */
+}
+
+/* Filas densas y de alto parejo. La jugada mide el doble que la futura, que es
+   una línea fina — y esa diferencia de peso es justamente lo que muestra
+   cuánta carrera queda por delante. */
+.spineRow {
+    flex: 0 1 auto;
+    min-height: 24px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    /* El interlineado manda sobre el alto de la fila futura, que no tiene más
+       contenido que su edad: con el 1.5 heredado, una fila "fina" medía lo
+       mismo que una jugada y se perdía la diferencia de peso que muestra
+       cuánta carrera queda. */
+    line-height: 1.15;
+}
+
+.spineRowFuture { min-height: 12px; font-size: 0.72rem; }
+
+.spineAge {
+    font-weight: 800;
+    color: var(--color-text-secondary);
+    text-align: right;
+}
+
+/* Celda del club: escudo + nombre + el título de esa temporada. */
+.spineClub {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+}
+
+.spineClubName {
+    min-width: 0;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* El título va en la temporada en que se ganó, no en un contador de la
+   cabecera: así se ve CUÁNDO pasó, que es lo que un acumulado no dice. */
+.spineTitle { flex: none; display: inline-flex; color: #C9971B; }
+
+/* Los íconos que cuentan el tramo, al lado del club: pase, escalón, título y
+   lesión. Van con el peso del texto secundario salvo el título y la lesión, que
+   son los dos que sí tienen color propio — si todos gritaran, ninguno diría
+   nada. */
+.spineMark {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    color: var(--color-text-tertiary, var(--color-text-secondary));
+}
+
+.spineMarkCount { font-size: 0.6rem; font-weight: 800; }
+
+.spineInjury { color: #B32E1B; }
+
+.spineOvr { font-weight: 800; color: var(--color-accent-ink); text-align: right; }
+
+/* El OVR de cada tramo, PÍLDORA PINTADA POR RANGO. Es el mismo bloque de color
+   que la cabecera —la escala vive en `ovrBand.ts`, una sola para las dos— y con
+   él la columna se lee sola: dónde despegó, dónde tocó techo y dónde empezó a
+   caer, sin leer un número. En verde plano, veintipico de temporadas se veían
+   todas iguales y la columna no aportaba nada que el número no dijera ya.
+
+   El texto va en blanco sobre los cinco fondos, que están calibrados para eso:
+   el más claro (#4A5B54) da 6,3:1 y el más ajustado (#00794A) 4,9:1. */
+.spineOvrPill {
+    justify-self: stretch;
+    text-align: center;
+    padding: 1px 0;
+    border-radius: 5px;
+    background: var(--ovr-bg);
+    color: #fff;
+    font-size: 0.72rem;
+    line-height: 1.35;
+}
+
+.spineCell { text-align: right; font-weight: 600; color: var(--color-text-secondary); }
+
+/* Un cero no es un dato: es la ausencia de uno. Un pilar termina la carrera
+   con 0 puntos y 0 tries, y si pesan igual que el resto la planilla se lee
+   como que el juego está roto. */
+.spineCellZero { color: var(--color-text-tertiary); opacity: 0.5; }
+
+/* El futuro se dibuja como una línea y no como un hueco: es lo que da la
+   sensación de cuánta carrera queda por delante. Ocupa todas las columnas de
+   datos porque ahí todavía no hay nada que alinear. */
+.spineEmpty {
+    grid-column: 2 / -1;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--color-border);
+}
+
+.spineRowFuture .spineAge { opacity: 0.5; }
+
+/* Filas alternadas. Con veintipico de renglones de números pegados, el ojo se
+   salta de fila al recorrer una columna; la banda tenue lo ancla. Sólo en las
+   jugadas: la futura es una línea de 2 px y pintarle el fondo la convertiría en
+   una fila más, que es justo lo que no es. */
+.spineRow:not(.spineRowFuture):nth-child(even) {
+    background: color-mix(in srgb, var(--color-text-primary) 4%, transparent);
+}
+
+/* El "estás acá". Va después del zebra para ganarle: es el único renglón que
+   tiene que saltar a la vista. */
+.spineRowNow,
+.spineRow.spineRowNow:nth-child(even) {
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    box-shadow: inset 2px 0 0 var(--color-accent);
+}
+
+/* El tramo en curso todavía no tiene planilla, pero sí club y OVR. El club va
+   atenuado porque lo que dice es "acá estás jugando", no "esto lograste". */
+.spineNowTag {
+    flex: none;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--color-accent-ink);
+}
+
+.spineClubPending .spineClubName {
+    color: var(--color-text-secondary);
+    font-style: italic;
+    font-weight: 500;
+}
+
+/* ── La selección, al pie y aparte ─────────────────────────────────────────
+   Es el ÚNICO total destacado de la pantalla, y va separado del club porque en
+   rugby los caps pesan más que los títulos. Los caps caen bajo la columna PJ:
+   eso son, partidos. Mientras no haya convocatoria la fila igual está, en
+   gris — es una promesa pendiente, no un hueco. */
+/* El bloque envuelve la fila Y su segunda línea. El borde superior vive acá y
+   no en la fila: separa el pie entero de la trayectoria, no la fila de su
+   propia nota. */
+.spineNationBlock {
+    flex: none;
+    margin-top: 4px;
+    padding-top: 6px;
+    border-top: 1px solid var(--color-border);
+}
+
+.spineNation {
+    flex: none;
+    padding-bottom: 2px;
+    font-size: 0.78rem;
+    min-height: 26px;
+}
+
+.spineNation .spineCell { color: var(--color-text-primary); font-weight: 800; }
+.spineNationPending { opacity: 0.55; }
+.spineNationPending .spineCell { font-weight: 600; }
+
+/* El puesto en el ranking, al lado de la bandera. Convierte "Georgia" en
+   "Georgia, 12ª del mundo", que es la diferencia entre un dato y una
+   referencia: sin él, el jugador no tiene contra qué medir la camiseta que le
+   tocó. */
+.spineNationRank {
+    flex: none;
+    font-size: 0.69rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+}
+
+/* LA SEGUNDA LÍNEA. Dice dónde estás parado y cuánto te falta, todas las
+   temporadas. No es decoración: es la única pieza que evita que un jugador de
+   un país sin selección afiliada juegue una carrera entera esperando una
+   convocatoria que el motor nunca le va a mandar. */
+.spineNationNote {
+    margin: 0;
+    padding: 1px 0 2px;
+    font-size: 0.69rem;
+    line-height: 1.3;
+    color: var(--color-text-secondary);
+}
+
+/* Sin selección: el mensaje NO se apaga en gris claro como si fuera un detalle
+   menor. Es la información más importante de la fila. */
+.spineNationNoteOff {
+    color: var(--color-text-primary);
+    opacity: 0.85;
+}
+
+/* Los encabezados con ícono se alinean a la derecha como los números que
+   encabezan: un ícono centrado sobre una columna alineada a la derecha se lee
+   como que encabeza la columna de al lado. */
+.spineHead .spineNum {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    text-align: right;
+}
+
+/* "seleccionado" al lado del país: sin esto la fila es una bandera y números,
+   y no dice que son acumulados de carrera con la camiseta. */
+.spineNationTag {
+    flex: none;
+    font-size: 0.69rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary, var(--color-text-secondary));
+}
+
+/* Mobile: la espina se queda con edad, club, OVR y partidos. Las otras tres
+   columnas no entran sin achicar la tipografía por debajo de lo legible, así
+   que se REDISTRIBUYE: el acumulado completo vive en el desplegable de la
+   cabecera, que en mobile es justo donde hay lugar para él. */
+@media (max-width: 899px) {
+    /* Cinco columnas de datos donde antes entraban dos. Lo que las hizo entrar
+       no fue achicar la tipografía sino sacarle ancho a los RÓTULOS: con el
+       encabezado en íconos, la columna del puesto pasó de reservar 52 px para
+       "Al palo" a pedir los 38 que mide su número. La única que se cae es
+       Tries, que es la que el acumulado de la cabecera repite igual. */
+    /* 33 px la primera y no 28: con el encabezado a 11 px, "Edad" se cortaba en
+       "ED…" y dejaba una "d" suelta en el renglón de abajo. El ancho sale de la
+       columna del puesto, que con su ícono no lo necesita. */
+    /* SEIS COLUMNAS, con puesto o sin él: edad, club, OVR, PJ, PTS y TRIES.
+       Los anchos son los del DATO más largo que puede caer ahí —tres dígitos en
+       partidos, puntos y tries— para que ningún número se parta ni se recorte. */
+    .spine,
+    .spineSinPuesto { --spine-cols: 34px minmax(0, 1fr) 30px 25px 32px 25px 29px; }
+
+    /* La ranura del puesto es la que sobra en el teléfono: es la única que
+       cambia según quién juegue, y sin ella la planilla sigue contando lo mismo
+       para todos. Antes la prescindible era TRIES, que es justo lo que una
+       trayectoria muestra mejor. El descendiente es obligatorio: `.spineHead
+       .spineNum` vale 0,2,0 y le gana a `.spinePuesto` (0,1,0), así que la
+       columna se ocultaba en los datos pero no en el encabezado. */
+    .spinePuesto,
+    .spineHead .spinePuesto { display: none; }
+    .spineHead { letter-spacing: 0; }
+
+
+
+    /* "seleccionado" se va: se comía el ancho del país y dejaba "Arg…". La
+       fila ya está separada por su línea y lleva la bandera, y la frase
+       completa sigue estando para el lector de pantalla. */
+    .spineNationTag { display: none; }
+
+    /* FILAS ALTAS, no finas. La trayectoria es la mitad de la pantalla y lo que
+       más se mira: a 20 px las once temporadas entraban pero se leían como una
+       planilla de Excel. A 30 px cada temporada es un renglón con su escudo, su
+       píldora de OVR y sus números, que es lo que la hace mirable. */
+    /* Las jugadas se reparten el alto disponible, con techo: así llenan la
+       zona sin estirarse a lo absurdo cuando la carrera recién empieza.
+       Con `.spineList` adelante porque la regla base está más abajo. */
+    .spineList .spineRow { min-height: 30px; flex: 1 1 auto; max-height: 60px; }
+
+    /* La futura es una LÍNEA, no una fila: alto fijo y sin crecer. Con `flex`
+       se repartía el alto igual que las jugadas y quince temporadas por delante
+       se comían la tabla —empujando al scroll las que sí tienen datos— cuando
+       justamente son las que todavía no tienen nada que mostrar. */
+    .spineList .spineRowFuture {
+        min-height: 0;
+        height: 11px;
+        flex: 0 0 auto;
+    }
+
+    /* La edad, en píldora. Es la columna que ordena la tabla y con ella se
+       lee la carrera como una línea de tiempo y no como una lista. */
+    .spineRow:not(.spineRowFuture) .spineAge {
+        justify-self: start;
+        min-width: 27px;
+        padding: 2px 0;
+        border-radius: 7px;
+        text-align: center;
+        background: color-mix(in srgb, var(--color-text-primary) 7%, transparent);
+        color: var(--color-text-secondary);
+    }
+
+    .spineRowNow .spineAge {
+        background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+        color: var(--color-text-primary);
+    }
+    .spineNationBlock { margin-top: 2px; padding-top: 4px; }
+    .spineNation { min-height: 22px; }
+    /* La nota SE QUEDA en el teléfono aunque el rótulo se vaya: el rótulo es
+       redundante con ella, y ella es la que dice si hay selección o no. */
+    .spineNationNote { font-size: 0.66rem; }
+}
+
+/* ── El OVR, protagonista ───────────────────────────────────────────────────
+   Es EL número del juego y ahora es un BLOQUE DE COLOR, no un número teñido:
+   el rango pinta el fondo y adentro va todo en blanco. Los cinco tonos son
+   versiones oscurecidas de la escala anterior — sobre los originales, la
+   etiqueta "OVR" no llegaba al contraste mínimo en blanco.
+
+   Los cortes están calibrados sobre NUESTROS techos, no sobre los del juego de
+   fútbol: 40 % de las carreras de desarrollo/profesional pican en 80+, 5,6 %
+   en 90+, y la ruta amateur topea por debajo de 80. Por eso 85 es "élite" de
+   verdad y un 62 no puede leerse igual que un 82. */
+.ovr_inicial { --ovr-bg: #4A5B54; }
+.ovr_bajo { --ovr-bg: #2F6FB0; }
+.ovr_medio { --ovr-bg: #00794A; }
+.ovr_alto { --ovr-bg: #A85C0C; }
+.ovr_elite { --ovr-bg: #B32E1B; }
+
+@media (min-width: 900px) {
+    .cbOvr { min-width: 96px; }
+    .cbOvrValue { font-size: 3.1rem; }
+}
+
+/* ── El OVR contando ────────────────────────────────────────────────────── */
+.cbOvrPulse .cbOvrValue { animation: ovrPulse 600ms ease-out 1; }
+
+/* Bajar tiene que verse distinto de subir. Con el bloque pintado, el que se
+   pone rojo es el FONDO: un número rojo sobre verde no se leería. */
+.cbOvrDown { --ovr-bg: #B32E1B; }
+
+@keyframes ovrPulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.09); }
+    100% { transform: scale(1); }
+}
+
+/* ── La planilla entrando escalonada ────────────────────────────────────── */
+.cbStat {
+    animation: statIn 320ms ease-out both;
+}
+
+@keyframes statIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* Con movimiento reducido la información llega igual: aparece, no se anima. */
+@media (prefers-reduced-motion: reduce) {
+    .cbOvrPulse .cbOvrValue { animation: none; }
+    .cbStat { animation: none; }
+}
+
+/* ═══ LA CAPA DE FESTEJO ═════════════════════════════════════════════════════
+   Un título es una imagen, no un párrafo. Pantalla completa, escudo grande,
+   nombre y año, confeti cayendo, y se va sola a los 3 s o con un toque.
+
+   Sólo se animan `transform` y `opacity`: animar `width`, `height` o
+   `box-shadow` saca la animación del compositor y en un teléfono se nota.
+   La entrada es `ease-out` marcado (arranca rápido, frena) y la salida es más
+   corta y `ease-in`, que es como se sienten las cosas que se van. */
+.celebration {
+    /* `absolute` sobre el área de juego y NO `fixed`: la app corre con
+       `html { zoom: 0.7 }` en desktop, y un elemento fijo se posiciona contra el
+       viewport SIN escalar, así que el velo cubría dos tercios de la pantalla y
+       la tarjeta quedaba centrada en una caja que no era la que se ve. Anclado
+       al `.wrap` se comporta igual en los dos zooms — y además el festejo es de
+       la pantalla del juego, no del sitio entero. */
+    position: absolute;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: rgba(8, 12, 10, 0.72);
+    backdrop-filter: blur(3px);
+    animation: celebIn 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.celebrationLeaving { animation: celebOut 200ms cubic-bezier(0.4, 0, 1, 1) both; }
+
+@keyframes celebIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes celebOut { from { opacity: 1 } to { opacity: 0 } }
+
+/* La tarjeta entra desde 0.92, no desde 0: algo que crece desde cero se ve
+   barato; desde 0.92 se lee como que ya estaba y se acercó. */
+.celebrationCard {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 32px 40px;
+    border-radius: 20px;
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    background: color-mix(in srgb, var(--accent) 14%, #0c1410);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    text-align: center;
+    animation: celebCard 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── La tarjeta RESUMEN: una temporada con más de un motivo ────────────────────
+   Misma caja, pero con la lista adentro en vez del ícono gigante. El ancho se
+   suelta porque acá hay renglones de texto y no una sola palabra grande. */
+.celebrationCardRecap {
+    align-items: stretch;
+    text-align: left;
+    padding: 26px 28px;
+    width: min(92vw, 460px);
+}
+
+.celebrationCardRecap .celebrationEyebrow,
+.celebrationCardRecap .celebrationHeadline {
+    text-align: center;
+}
+
+.celebrationCardRecap .celebrationHeadline {
+    font-size: 1.05rem;
+    font-weight: 700;
+    opacity: 0.86;
+    margin-bottom: 4px;
+}
+
+.celebrationList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Cada renglón lleva SU color en el borde izquierdo: la copa del club, la del
+   país y el premio individual son tres cosas distintas y se leen como tres. */
+.celebrationRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    border-left: 3px solid var(--accent);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.celebrationRowIcon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex: none;
+}
+
+.celebrationRowIcon img,
+.celebrationRowIcon span {
+    width: 40px;
+    height: 40px;
+}
+
+.celebrationRowText {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.celebrationRowEyebrow {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.celebrationRowHeadline {
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #f2f5f3;
+}
+
+.celebrationRowSub {
+    font-size: 0.76rem;
+    color: rgba(226, 232, 228, 0.62);
+}
+
+@keyframes celebCard {
+    from { opacity: 0; transform: scale(0.92) translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* Los tres elementos entran ESCALONADOS: primero el escudo, después el nombre,
+   después el año. Cada uno en 260 ms — corto, aunque la capa se quede 3 s. */
+.celebrationIcon { animation: celebItem 260ms cubic-bezier(0.16, 1, 0.3, 1) 60ms both; }
+.celebrationHeadline { animation: celebItem 260ms cubic-bezier(0.16, 1, 0.3, 1) 140ms both; }
+.celebrationSub { animation: celebItem 260ms cubic-bezier(0.16, 1, 0.3, 1) 220ms both; }
+
+@keyframes celebItem {
+    from { opacity: 0; transform: translateY(8px) scale(0.96); }
+    to { opacity: 1; transform: none; }
+}
+
+.celebrationEyebrow {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--accent) 60%, #ffffff);
+}
+
+.celebrationIcon { display: flex; align-items: center; justify-content: center; }
+.celebrationIcon img, .celebrationIcon span { border-radius: 14px; }
+/* La bandera trae su propio tamaño del componente y el escudo el suyo: acá los
+   iguala el festejo, que es donde tienen que verse del mismo porte. */
+.celebrationIcon img { height: 72px; width: auto; max-width: none; }
+
+.celebrationHeadline {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    max-width: 9em;
+}
+
+.celebrationSub {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+/* ---- El confeti ----
+   Papelitos que CAEN desde arriba, no un estallido puntual. Cada uno con su
+   retardo, su duración y su giro, todo sembrado desde la semilla de la partida
+   (ver `confetti.ts`): el mismo título se festeja igual del otro lado de un
+   link compartido. */
+.celebrationSheet { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+
+.confetti {
+    position: absolute;
+    top: -6%;
+    width: 7px;
+    border-radius: 1px;
+    opacity: 0;
+    animation-name: confettiFall;
+    animation-timing-function: linear;
+    animation-iteration-count: 1;
+    animation-fill-mode: both;
+}
+
+@keyframes confettiFall {
+    0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(0deg); }
+    8% { opacity: 1; }
+    100% { opacity: 0.9; transform: translate3d(var(--drift), 120%, 0) rotate(var(--spin)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* La capa SE MUESTRA igual: sin confeti (no se dibuja) y sin
+       transformaciones. Se muestra, no se saltea. */
+    .celebration, .celebrationLeaving, .celebrationCard,
+    .celebrationIcon, .celebrationHeadline, .celebrationSub { animation: none; }
+}
+
+/* ═══ MOVIMIENTO ═════════════════════════════════════════════════════════════
+   Cuatro reglas, y las cuatro salen de para qué sirve una animación:
+
+   1. Sólo `transform` y `opacity`. Todo lo demás pasa por layout o paint y en
+      un teléfono se ve.
+   2. Curvas propias. Las de CSS son flojas: `ease-out` arranca lento comparado
+      con esto, y el arranque es justo el momento que el ojo mira.
+   3. Entra con `ease-out` y sale MÁS RÁPIDO. Lo que llega se anuncia; lo que se
+      va no tiene nada que decir.
+   4. Nada arranca en escala 0. En el mundo real nada aparece de la nada: 0.96
+      se lee como que ya estaba y se acercó.
+
+   Y una regla de frecuencia: acá sólo se anima lo que el jugador ve UNA VEZ POR
+   TEMPORADA (la decisión, el resultado, el festejo). Lo que toca todo el tiempo
+   —el desplegable del escalafón, los chips— no se anima o casi. */
+.wrap {
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* ---- La tarjeta de decisión ---- */
+.event {
+    animation: cardIn 260ms var(--ease-out) both;
+    transition: opacity 200ms cubic-bezier(0.4, 0, 1, 1), transform 200ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* La salida es más corta que la entrada y con curva de salida: la tarjeta ya
+   cumplió, no tiene que hacerse notar al irse. */
+.eventLeaving {
+    opacity: 0;
+    transform: scale(0.985) translateY(-4px);
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.99); }
+    to { opacity: 1; transform: none; }
+}
+
+/* ---- Las opciones ---- */
+.optionBtn {
+    animation: optionIn 240ms var(--ease-out) both;
+    /* `transform` y `border-color` explícitos: nunca `all`. */
+    transition: transform 160ms var(--ease-out), border-color 160ms ease, opacity 200ms ease;
+}
+
+@keyframes optionIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* El botón tiene que sentirse escuchado. 0.985 y no 0.97: son tarjetas
+   grandes, y en algo de este porte un 3% se lee como un salto. */
+.optionBtn:active:not(:disabled) { transform: scale(0.985); }
+
+/* La elegida se queda marcada mientras corre el latido, y las otras se apagan.
+   Eso es lo que hace que el jugador vea QUÉ eligió antes de que cambie la
+   pantalla. */
+.optionChosen {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    transform: scale(0.995);
+}
+
+.optionDimmed { opacity: 0.35; }
+
+.optionBtn:disabled { cursor: default; }
+
+/* ---- Botones de acción ---- */
+.primaryBtn, .continueBtn, .ghostBtn, .dangerBtn {
+    transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease;
+}
+.primaryBtn:active:not(:disabled),
+.continueBtn:active:not(:disabled),
+.ghostBtn:active:not(:disabled),
+.dangerBtn:active:not(:disabled) { transform: scale(0.97); }
+
+/* ---- El resultado de la temporada ---- */
+/* Entra DESPUÉS de que la decisión se fue: 80 ms de retardo es lo que separa
+   una cosa de la otra sin que se sienta una espera. */
+.result {
+    animation: resultIn 280ms var(--ease-out) 80ms both;
+}
+
+@keyframes resultIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.995); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    /* Sólo con mouse: en touch el hover se dispara al tocar y queda pegado. */
+    .optionBtn:hover:not(:disabled) { transform: translateY(-1px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* Menos movimiento, no menos información: se conservan las opacidades que
+       explican qué pasó (la opción elegida sigue marcándose) y se van las
+       traslaciones y las escalas. */
+    .event, .optionBtn, .result { animation: none; }
+    .eventLeaving { transform: none; }
+    .optionChosen, .optionBtn:active:not(:disabled), .optionBtn:hover:not(:disabled) { transform: none; }
+    .primaryBtn:active:not(:disabled),
+    .continueBtn:active:not(:disabled),
+    .ghostBtn:active:not(:disabled),
+    .dangerBtn:active:not(:disabled) { transform: none; }
+}
+
+/* ═══ EL PULSO DE LA TEMPORADA ═══════════════════════════════════════════════
+   Pasa TODAS las temporadas, así que dura 900 ms y no pide un click. A esa
+   frecuencia una capa que hay que cerrar deja de ser información y pasa a ser
+   un peaje — por eso `pointer-events: none`: se ve y se va, y si el jugador ya
+   quiere seguir, la tarjeta de abajo está viva debajo. */
+.pulse {
+    position: absolute;
+    inset: 0;
+    z-index: 150;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    animation: pulseVeil 900ms linear both;
+}
+
+/* El velo entra y sale solo, sin quedarse: lo que tiene que verse es la
+   tarjeta, no el fondo. */
+@keyframes pulseVeil {
+    0% { background: rgba(8, 12, 10, 0); }
+    18% { background: rgba(8, 12, 10, 0.5); }
+    72% { background: rgba(8, 12, 10, 0.5); }
+    100% { background: rgba(8, 12, 10, 0); }
+}
+
+.pulseCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 32px;
+    border-radius: 18px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    animation: pulseCard 900ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
+}
+
+/* Entra desde 0.94 —nunca desde cero— y sale más rápido de lo que entró. */
+@keyframes pulseCard {
+    0% { opacity: 0; transform: scale(0.94) translateY(8px); }
+    16% { opacity: 1; transform: none; }
+    78% { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: scale(0.985) translateY(-6px); }
+}
+
+/* ---- El OVR ---- */
+.pulseOvr { display: flex; align-items: center; gap: 10px; line-height: 1; }
+
+.pulseFrom {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-text-tertiary, var(--color-text-secondary));
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    opacity: 0.7;
+}
+
+.pulseTo {
+    font-size: 2.6rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    /* El número nuevo llega un toque después que el resto: es el dato. */
+    animation: pulseTo 320ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) 120ms both;
+}
+
+@keyframes pulseTo {
+    from { opacity: 0; transform: scale(0.86); }
+    to { opacity: 1; transform: none; }
+}
+
+.pulse_up .pulseTo, .pulse_up .pulseTrend { color: #00794A; }
+.pulse_down .pulseTo, .pulse_down .pulseTrend { color: #B32E1B; }
+.pulse_flat .pulseTo, .pulse_flat .pulseTrend { color: var(--color-text-secondary); }
+
+.pulseLabel {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+/* ---- El pase ---- */
+.pulseClubs { display: flex; align-items: center; gap: 12px; }
+.pulseArrow { color: var(--color-text-tertiary, var(--color-text-secondary)); }
+
+/* El escudo que se va se apaga y se corre; el que llega entra. Los dos con la
+   misma curva, para que se lea como UN movimiento y no como dos animaciones. */
+.pulseClubOut { animation: clubOut 420ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both; }
+.pulseClubIn { animation: clubIn 420ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) 100ms both; }
+
+@keyframes clubOut {
+    from { opacity: 1; transform: none; }
+    to { opacity: 0.35; transform: scale(0.9) translateX(-4px); }
+}
+
+@keyframes clubIn {
+    from { opacity: 0; transform: scale(0.88) translateX(8px); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* Se muestra igual, quieto: el dato es el número nuevo, no el movimiento. */
+    .pulse, .pulseCard, .pulseTo, .pulseClubOut, .pulseClubIn { animation: none; }
+    .pulse { background: rgba(8, 12, 10, 0.5); }
+    .pulseClubOut { opacity: 0.35; }
+}
+
+/* ============================================================
+   ARTICULAT CF — la tipografía de la TARJETA (no del juego)
+   ============================================================
+   Va acá y no en globals porque la usa una sola pieza: la tarjeta compartible.
+   El navegador la necesita para la VISTA PREVIA; la imagen que se baja la dibuja
+   Satori en el servidor con estos mismos archivos (ver `cardFonts.ts`). Si el
+   navegador no la tuviera, lo que se mira y lo que se baja no coincidirían.
+
+   Sólo oblicuas: en esta tarjeta no hay texto derecho. */
+
+@font-face {
+    font-family: 'Articulat CF';
+    src: url('/fonts/articulat/ArticulatCF-HeavyOblique.otf') format('opentype');
+    font-weight: 900;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Articulat CF';
+    src: url('/fonts/articulat/ArticulatCF-DemiBoldOblique.otf') format('opentype');
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Articulat CF';
+    src: url('/fonts/articulat/ArticulatCF-MediumOblique.otf') format('opentype');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* ============================================================
+   CAPA DEL RESUMEN COMPARTIBLE (pantalla de retiro)
+   ============================================================
+   La única pantalla del juego que scrollea, y a propósito: la abre el jugador
+   con "Ver resumen" y adentro hay una tarjeta alta más dos descargas. El scroll
+   queda ATRAPADO en la capa (`overscroll-behavior`), así que la pantalla de
+   atrás no se mueve. */
+
+.cardOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(6, 12, 9, 0.74);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.cardOverlayPanel {
+    /* Lo que ocupa TODO lo que no es la tarjeta: cabecera, aclaración, las dos
+       descargas, los espacios, el padding del panel y el de la capa. Es lo que
+       se le descuenta a la ventana para calcular cuánto puede medir la tarjeta.
+       Incluye el selector de formato. Medido en Historia (9:16), que es la
+       tarjeta más alta, y a 320×568, que es el piso: ahí la aclaración se va a
+       tres líneas y el panel queda más alto en proporción. */
+    --card-alrededor: 400px;
+    width: 100%;
+    max-width: 460px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 18px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.4);
+}
+
+.cardOverlayHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.cardOverlayTitle {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.cardOverlayClose {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid var(--color-border-light);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.cardOverlayClose:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text-primary);
+}
+
+.cardOverlayClose:focus-visible,
+.cardOverlayActions a:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* Misma técnica que la página del link: la tarjeta se dibuja a su medida real y
+   se ESCALA, en vez de reflowear. Así lo que se mira es lo que se baja. */
+.cardOverlayFrame {
+    /* LA CAPA TIENE QUE ENTRAR EN LA PANTALLA. La tarjeta es 4:5, así que si el
+       ancho manda —y el teléfono es angosto y bajo— el alto se dispara y las dos
+       descargas quedan abajo del borde: hay que scrollear para ver el botón que
+       es la razón de abrir la capa.
+       Por eso el ancho sale del MENOR de dos límites: el que da la columna y el
+       que permite el alto libre (la ventana menos lo que ocupa el resto del
+       panel). `--card-ar` es ancho/alto de la tarjeta, un número puro, que es lo
+       único que `calc()` acepta como factor. */
+    width: min(100%, calc((100dvh - var(--card-alrededor)) * var(--card-ar)));
+    max-width: var(--card-w);
+    /* Sin unidades: `aspect-ratio: 1080px / 1350px` es inválido y el marco se
+       quedaba con el alto REAL de la tarjeta (1350), que es el alto que ocupa
+       antes de escalar, y dejaba media pantalla vacía debajo. */
+    aspect-ratio: var(--card-ratio);
+    container-type: inline-size;
+    overflow: hidden;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+}
+
+.cardOverlayScaler {
+    width: var(--card-w);
+    height: var(--card-h);
+    transform-origin: top left;
+    transform: scale(calc(100cqw / var(--card-w)));
+}
+
+.cardOverlayNote {
+    margin: 0;
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+}
+
+.cardOverlayActions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cardOverlayActions a {
+    text-decoration: none;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* La medida es un dato de servicio, no el rótulo del botón. */
+.cardOverlaySize {
+    font-size: 0.76rem;
+    font-weight: 600;
+    opacity: 0.75;
+    font-variant-numeric: tabular-nums;
+}
+
+/* El retiro tiene TRES botones (compartir, ver resumen, volver a jugar) y a
+   375px no entran en una línea. Compartir se lleva la primera fila entera —es
+   la acción principal— y los otros dos comparten la segunda. */
+.retireBtnRow {
+    flex-wrap: wrap;
+    /* PEGADA ABAJO. La pantalla de retiro es la más larga del juego y las
+       acciones viven al final: sin esto hay que recorrer planilla, títulos y
+       logros para descubrir que existe un botón. Queda a la vista desde el
+       primer momento y el resumen pasa por detrás. */
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: var(--color-bg-primary);
+    padding-top: 10px;
+    padding-bottom: 2px;
+}
+
+.retireBtnRow .primaryBtn,
+.retireBtnRow .shareFallback {
+    flex: 1 1 100%;
+}
+
+.retireBtnRow .ghostBtn {
+    flex: 1 1 130px;
+}
+
+/* Selector de formato de la tarjeta. Dos opciones, del ancho de la mitad: la
+   elección va ANTES de la vista previa porque es lo que la cambia. */
+.cardFormatPicker {
+    display: flex;
+    gap: 8px;
+}
+
+.cardFormatOption {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border-light);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.cardFormatOptionOn {
+    border-color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.12);
+    color: var(--color-text-primary);
+}
+
+.cardFormatOption:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.cardFormatLabel {
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+/* Bajar y copiar el link comparten renglón: la acción principal es compartir. */
+.cardOverlaySecundarias {
+    display: flex;
+    gap: 8px;
+}
+
+.cardOverlaySecundarias .ghostBtn {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 0.88rem;
+}
+
+/* ---- Sin barras de scroll a la vista ----
+   El juego es una consola de alto fijo con zonas que se recorren por dentro
+   (la consola en el teléfono, la planilla de la trayectoria, la decisión larga).
+   La barra del sistema mete una franja gris sobre el borde de la tabla, se
+   superpone a la última columna y ensucia justo lo que se está leyendo.
+   El contenido sigue scrolleando igual —con el dedo, con la rueda y con el
+   teclado—; lo que se va es el indicador. */
+.console,
+.consoleMain,
+.consoleAside,
+.spineList,
+.timeline {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.console::-webkit-scrollbar,
+.consoleMain::-webkit-scrollbar,
+.consoleAside::-webkit-scrollbar,
+.spineList::-webkit-scrollbar,
+.timeline::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+/* Ícono del premio individual, a la izquierda del nombre. Sin él la ficha se
+   dibuja igual: hoy no hay ninguno cargado y la pantalla no puede depender de
+   que aparezcan. */
+.awardIcon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex: none;
+    margin-right: 2px;
+}
+
+/* El trofeo dibujado que va mientras el premio no tenga PNG. Hereda el acento
+   del festejo, así que se lee como parte de la tarjeta y no como un ícono
+   prestado de otro lado. */
+.awardFallback {
+    color: var(--accent, #c8a63c);
+    flex: none;
+}
+
+
+/* ── Posición del club en su liga, dentro de la fila de la trayectoria ────── */
+/* Tono secundario y no acento: es contexto del club, no un logro del jugador.
+   La única que se destaca es la de campeón, porque el 1° sí es un logro. */
+.spinePos {
+    flex: 0 0 auto;
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    color: var(--color-text-secondary);
+    background: color-mix(in srgb, var(--color-text-secondary) 12%, transparent);
+    font-variant-numeric: tabular-nums;
+}
+
+.spinePosOf { font-weight: 500; opacity: 0.7; }
+
+.spinePosTop {
+    color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+}
+
+/* ASCENSO Y DESCENSO EN LA ESPINA. La flecha ocupa el lugar del puesto: el número
+   se lee sabiendo en qué división estaba, la flecha se lee sola. Mismo verde y
+   rojo que el resto del juego (el pulso del OVR, las fichas de decisión). El
+   tamaño sube un punto porque un triángulo a 0.62rem se pierde entre el escudo y
+   el nombre del club. */
+.spinePosUp,
+.spinePosDown {
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.spinePosUp {
+    color: #00794A;
+    background: rgba(0, 121, 74, 0.16);
+}
+
+.spinePosDown {
+    color: #B32E1B;
+    background: rgba(179, 46, 27, 0.16);
+}
+
+/* Bandera + nombre de la unión en la tarjeta de decisión.
+   Se usa en el cambio de selección: la decisión es entre dos países, así que la
+   opción tiene que mostrar cuáles antes de que el jugador elija. */
+.optionUnion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.optionUnionName {
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.1;
+    text-align: center;
+    color: var(--carrera-text-dim, #9aa3ad);
+    /* En 110 px de ancho "Nueva Zelanda" no entra en una línea y romperlo a
+       mitad de palabra se lee peor que dejarlo en dos. */
+    overflow-wrap: anywhere;
+}
+
+/* ── La trayectoria en el teléfono: el club es el sujeto ──────────────────────
+   A 390 px las seis columnas fijas más sus separaciones se comen 230 px de 374,
+   y al nombre del club le quedaban unos 90: "Old Georgians" salía "Old Ge…" y la
+   fila dejaba de decir dónde jugaste, que es lo único que no se puede deducir
+   mirando otra cosa.
+
+   Las columnas numéricas se achican SOLO acá, y no en el ancho general, porque
+   en escritorio no hay conflicto: tres dígitos entran en 28 px sin apretarse.
+   Los números siguen formando columna con su ícono porque todo el reparto sale
+   de la misma variable (`--spine-cols`) que leen encabezado, filas y selección. */
+@media (max-width: 620px) {
+    .spine {
+        --spine-cols: 24px minmax(0, 1fr) 28px 24px 26px 26px 26px 32px;
+    }
+
+    .spineSinPuesto {
+        --spine-cols: 24px minmax(0, 1fr) 30px 26px 30px 26px 28px;
+    }
+
+    .spineHead,
+    .spineRow,
+    .spineNation {
+        gap: 0 4px;
+        padding: 0 4px;
+    }
+
+    /* El chip del puesto en la liga pierde el aire lateral: es un dato de dos
+       caracteres y no necesita marco de botón. */
+    .spinePos {
+        padding: 2px 3px;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LOS CINCO EJES: posibilidades y revelado
+   ────────────────────────────────────────────────────────────────────────────
+   La decisión dejó de ser una elección entre dos frases. Cada opción muestra sus
+   desenlaces con probabilidad y consecuencia, y al elegir se revela el que salió
+   con los números girando.
+
+   Verde y rojo son los MISMOS del pulso de temporada (#00794A / #B32E1B): un OVR
+   que sube y una valoración que sube tienen que ser el mismo verde, o el jugador
+   aprende dos códigos de color para la misma noticia.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ---- Fichas de eje (compartidas por la opción y el revelado) ---- */
+.chip_good {
+    color: #00794A;
+    border-color: rgba(0, 121, 74, 0.34);
+    background: rgba(0, 121, 74, 0.09);
+}
+
+.chip_bad {
+    color: #B32E1B;
+    border-color: rgba(179, 46, 27, 0.32);
+    background: rgba(179, 46, 27, 0.08);
+}
+
+.chip_neutral {
+    color: var(--color-text-secondary);
+    border-color: var(--color-border);
+    background: transparent;
+}
+
+/* ---- Posibilidades, debajo de cada opción ---- */
+.odds {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 7px;
+}
+
+.odd {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.74rem;
+    line-height: 1.5;
+}
+
+/* Los porcentajes forman columna: se comparan de arriba para abajo, y con
+   ancho variable el ojo tiene que buscarlos en cada renglón. */
+.oddChance {
+    min-width: 2.7em;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+}
+
+.oddChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 6px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.oddNothing {
+    color: var(--color-text-tertiary, var(--color-text-secondary));
+    font-style: italic;
+}
+
+/* ---- El revelado ---- */
+.roll {
+    position: absolute;
+    inset: 0;
+    z-index: 160;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    /* Clickeable: un toque saltea. Es lo único de esta capa que recibe eventos. */
+    cursor: pointer;
+    animation: rollVeil 2100ms linear both;
+}
+
+@keyframes rollVeil {
+    0% { background: rgba(8, 12, 10, 0); }
+    12% { background: rgba(8, 12, 10, 0.58); }
+    82% { background: rgba(8, 12, 10, 0.58); }
+    100% { background: rgba(8, 12, 10, 0); }
+}
+
+.rollCard {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    max-width: 420px;
+    padding: 18px 22px;
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    background: var(--color-bg-elevated);
+    animation: rollCard 2100ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
+}
+
+@keyframes rollCard {
+    0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+    10% { opacity: 1; transform: none; }
+    88% { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: scale(0.99) translateY(-6px); }
+}
+
+/* EL COLOR ES LA NOTICIA. El halo entra un poco después que la tarjeta: primero
+   se ve qué salió, después cómo se sintió. */
+.rollGood {
+    border-color: rgba(0, 121, 74, 0.55);
+    box-shadow: 0 0 0 1px rgba(0, 121, 74, 0.25), 0 18px 50px rgba(0, 60, 35, 0.4), 0 0 60px rgba(0, 121, 74, 0.18) inset;
+}
+
+.rollBad {
+    border-color: rgba(179, 46, 27, 0.55);
+    box-shadow: 0 0 0 1px rgba(179, 46, 27, 0.25), 0 18px 50px rgba(60, 12, 6, 0.4), 0 0 60px rgba(179, 46, 27, 0.16) inset;
+}
+
+.rollFlat {
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+.rollEyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.rollChance {
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--color-bg-subtle, rgba(127, 127, 127, 0.12));
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+}
+
+.rollOption {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.rollChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 2px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rollChip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 4px 9px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    animation: rollChip 420ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both;
+}
+
+@keyframes rollChip {
+    0% { opacity: 0; transform: translateY(6px) scale(0.96); }
+    100% { opacity: 1; transform: none; }
+}
+
+.rollIcon { font-size: 0.9rem; }
+.rollAxis { font-weight: 700; }
+.rollValue { font-weight: 900; }
+
+/* ---- El número que gira ---- */
+.rollNumber {
+    display: inline-flex;
+    align-items: baseline;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.rollSign { margin-right: 1px; }
+/* La coma decimal no gira: es un separador, no un dígito. */
+.rollSep { padding: 0 0.5px; }
+/* El dígito quieto, para movimiento reducido: mismo alto que la ventanilla. */
+.rollDigitStill { display: inline-block; height: 1em; line-height: 1em; }
+
+/* La ventanilla: un dígito de alto, el resto de la cinta tapado. */
+.rollDigit {
+    display: inline-block;
+    height: 1em;
+    overflow: hidden;
+    vertical-align: baseline;
+}
+
+.rollStrip {
+    display: block;
+    animation: rollSpin 760ms cubic-bezier(0.12, 0.9, 0.16, 1) both;
+}
+
+.rollStrip > span {
+    display: block;
+    height: 1em;
+    line-height: 1em;
+}
+
+/* Dos vueltas completas y frena en el dígito que salió (`--to`). */
+@keyframes rollSpin {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(var(--to)); }
+}
+
+.rollText {
+    margin: 2px 0 0;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+}
+
+/* La decisión que quedó, dentro del resultado de la temporada: el revelado se
+   va y la frase no puede irse con él. */
+.resultDecision {
+    margin: 6px 0 0;
+    padding-left: 9px;
+    border-left: 2px solid var(--color-border);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* Sin giro y sin viaje: la tarjeta aparece, se lee y se va. El color y el
+       signo siguen ahí, que es donde está la información. */
+    .rollStrip { animation: none; transform: translateY(var(--to)); }
+    .rollChip { animation-duration: 1ms; }
+    .roll { animation: rollVeil 1100ms linear both; }
+    .rollCard {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+@media (max-width: 620px) {
+    .rollCard {
+        max-width: none;
+        width: 100%;
+        padding: 16px 18px;
+    }
+
+    /* En el teléfono el porcentaje va arriba y las fichas abajo: en 320 px de
+       ancho, tres fichas y un porcentaje en la misma línea se cortan. */
+    .odd {
+        font-size: 0.72rem;
+    }
+}
+
+/* ═══ PUERTA DE ESTRENO ══════════════════════════════════════════════════════
+   La cuenta regresiva que ocupa el lugar del juego hasta la hora de apertura.
+   Comparte la caja y el acento del resto del minijuego: es la misma pantalla,
+   no una landing pegada al costado. */
+.gate {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.gate .topbar {
+    align-self: flex-start;
+}
+
+.gateEyebrow {
+    display: inline-block;
+    margin-top: 28px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent, #00c476);
+}
+
+.gateTitle {
+    font-size: clamp(2rem, 7vw, 3rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin: 10px 0 0;
+}
+
+.gateLead {
+    margin: 18px 0 0;
+    font-size: 0.95rem;
+    color: rgba(226, 232, 228, 0.66);
+}
+
+.gateClock {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.gateUnit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 84px;
+    padding: 14px 10px 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(var(--color-accent-rgb, 0, 196, 118), 0.28);
+    background: rgba(var(--color-accent-rgb, 0, 196, 118), 0.07);
+}
+
+/* Tabular para que el número no baile al cambiar de segundo. */
+.gateNum {
+    font-size: clamp(1.9rem, 8vw, 2.6rem);
+    font-weight: 900;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-accent, #00c476);
+}
+
+.gateLabel {
+    margin-top: 6px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(226, 232, 228, 0.5);
+}
+
+.gateWhen {
+    margin: 22px 0 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: rgba(226, 232, 228, 0.6);
 }

@@ -7,6 +7,7 @@ import {
     NATIONS_VERSION,
     RUGBY_UNIONS,
     SELECTABLE_COUNTRIES,
+    SELECTABLE_NATIONALITIES,
     findCountry,
     findCountryByName,
     flagPathOf,
@@ -14,9 +15,13 @@ import {
     normalizeSearch,
     regionOfCountry,
     searchCountries,
+    unionAbsenceReason,
+    unionReputation,
+    worldRanking,
+    RANKED_UNION_COUNT,
 } from './nations.ts';
 import { MIGRATION_ROUTES } from '../engine/market-routes.ts';
-import { createPlayer } from '../engine/create-player.ts';
+import { START_OVR_MAX, START_OVR_MIN, createPlayer } from '../engine/create-player.ts';
 import { createRng } from '../engine/random.ts';
 import { computeOvr } from '../engine/scoring.ts';
 
@@ -84,7 +89,15 @@ test('la búsqueda tolera mayúsculas, minúsculas y tildes', () => {
     }
     assert.ok(searchCountries('japon').some((c) => c.code === 'jp'), 'Japón sin tilde');
     assert.ok(searchCountries('sudafrica').some((c) => c.code === 'za'), 'Sudáfrica sin tilde');
-    assert.equal(searchCountries('').length, SELECTABLE_COUNTRIES.length, 'sin query devuelve todo');
+    // Sin query devuelve todo lo OFRECIBLE, que es el catálogo menos las uniones
+    // suspendidas: el buscador y la grilla tienen que mostrar la misma lista.
+    assert.equal(searchCountries('').length, SELECTABLE_NATIONALITIES.length, 'sin query devuelve todo lo ofrecible');
+    // Ojo: 'rusia' matchea Bielorrusia, que sí se ofrece. Lo que no puede
+    // aparecer es el código suspendido.
+    assert.ok(
+        !searchCountries('rusia').some((c) => c.code === 'ru'),
+        'una unión suspendida tampoco aparece buscándola',
+    );
     assert.equal(searchCountries('zzzzz').length, 0, 'sin resultados no rompe');
 
     assert.equal(findCountryByName('Espana')?.code, 'es', 'busca por nombre sin tilde');
@@ -100,9 +113,48 @@ test('las naciones de rugby frecuentes encabezan el catálogo', () => {
     assert.deepEqual(rest, [...rest].sort((a, b) => a.localeCompare(b, 'es')), 'el resto no está alfabético');
 });
 
+test('el ranking mundial es completo, sin empates y ordenado por reputación', () => {
+    const puestos = Object.keys(RUGBY_UNIONS).map((code) => worldRanking(code));
+    assert.ok(puestos.every((p) => p !== null), 'toda unión tiene puesto');
+    assert.equal(new Set(puestos).size, puestos.length, 'dos uniones comparten puesto');
+    assert.deepEqual(
+        [...puestos].sort((a, b) => a! - b!),
+        Array.from({ length: RANKED_UNION_COUNT }, (_, i) => i + 1),
+        'el ranking tiene que ser 1..N sin huecos',
+    );
+    // Ordenado por reputación: nadie de una banda alta queda debajo de una baja.
+    for (const a of Object.keys(RUGBY_UNIONS)) {
+        for (const b of Object.keys(RUGBY_UNIONS)) {
+            if (unionReputation(a) <= unionReputation(b)) continue;
+            assert.ok(worldRanking(a)! < worldRanking(b)!, `${a} (rep ${unionReputation(a)}) tiene que rankear sobre ${b}`);
+        }
+    }
+    assert.equal(worldRanking('xx-no-existe'), null);
+    assert.equal(worldRanking(null), null);
+});
+
+test('un país sin selección lo dice: no tiene puesto ni promete convocatorias', () => {
+    // El bug de Egipto: diecinueve temporadas, 392 partidos, cero caps, y la fila
+    // decía "Egipto SELECCIONADO". Un país sin unión no puede tener un puesto en
+    // el ranking, porque tener puesto es exactamente lo que implica que existe.
+    // Egipto YA NO sirve de ejemplo, y ése era el objetivo: es miembro pleno de
+    // Rugby Africa desde 2024 y ahora tiene unión y fixture. Los ejemplos de acá
+    // son exclusiones deliberadas: Nueva Caledonia y Wallis y Futuna dependen de
+    // la federación francesa y no son uniones propias.
+    assert.equal(hasUnion('eg'), true, 'Egipto tiene unión: era el caso que abrió todo esto');
+    for (const code of ['gl', 'nc', 'wf']) {
+        assert.equal(hasUnion(code), false, `control: ${code} no tiene unión modelada`);
+        assert.equal(worldRanking(code), null, `${code} no puede tener puesto en el ranking`);
+        assert.equal(unionAbsenceReason(code), 'sin-federacion');
+    }
+});
+
 test('un país SIN unión de rugby puede crear una carrera igual', () => {
     const withoutUnion = SELECTABLE_COUNTRIES.filter((c) => !hasUnion(c.code));
-    assert.ok(withoutUnion.length > 150, 'debería haber muchos países sin unión');
+    // Bajó de 210 a ~127 con el catálogo completo de uniones: las seis
+    // asociaciones regionales juntas son 128 uniones. Los que quedan afuera
+    // siguen siendo mayoría del catálogo ISO y siguen pudiendo jugar.
+    assert.ok(withoutUnion.length > 100, `sólo ${withoutUnion.length} países sin unión`);
 
     for (const country of [withoutUnion[0], withoutUnion[40], withoutUnion[100]]) {
         const player = createPlayer({ position: 'wing', nationalityCountryCode: country.code }, createRng(2026));
@@ -110,8 +162,18 @@ test('un país SIN unión de rugby puede crear una carrera igual', () => {
         assert.equal(player.eligibility.nationalityCountryCode, country.code);
         assert.deepEqual(player.eligibility.claims, [], 'sin selección ficticia');
         assert.ok(player.club.length > 0, 'igual recibe un club inicial');
+        // La banda va LEÍDA de `create-player`, no escrita a mano. Acá decía
+        // 34-46, que era el arranque de antes de que 1.26.0 unificara las rutas:
+        // el test pedía un jugador que el motor ya no produce y fallaba con 55,
+        // que es un valor perfectamente correcto. Un número copiado a mano de otro
+        // módulo es un test que envejece solo.
+        //
+        // EL PISO DE 45 ES UNA REGLA DEL JUEGO, no una consecuencia: nadie que
+        // entre a una carrera vale menos que eso. De ahí a que le vaya bien hay un
+        // trecho, y ése lo decide la carrera.
         const ovr = computeOvr(player.attributes, player.position);
-        assert.ok(ovr >= 34 && ovr <= 46, `OVR fuera de banda: ${ovr}`);
+        assert.ok(ovr >= START_OVR_MIN && ovr <= START_OVR_MAX, `OVR fuera de banda: ${ovr}`);
+        assert.ok(START_OVR_MIN >= 45, `el piso de arranque bajó a ${START_OVR_MIN}`);
     }
 });
 

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CLUBS, getClub } from '../data/clubs.ts';
 import { CUPS, MOVEMENTS, PARALLEL_COMPETITIONS, transferDestinations } from '../data/clubs2026/competitions2026.ts';
+import { AR_DIVISIONS } from '../data/clubs2026/arSystem2026.ts';
 import {
     MIGRATION_ROUTES,
     TRANSFER_PATHWAYS,
@@ -17,16 +18,27 @@ import {
     resolveStartRoute,
 } from './market-routes.ts';
 import {
-    VETERAN_AGE, allowedRungs, clubIsInterested, generateOffers, isVeteranHomecoming,
+    VETERAN_AGE, allowedRungs, clubIsInterested, generateOffers, isLadderBridge, isVeteranHomecoming,
     marketValue, qualifiesForExceptionalJump,
 } from './club-offers.ts';
 import { createPlayer } from './create-player.ts';
-import { computeEffectiveOvr } from './scoring.ts';
+import { computeEffectiveOvr, computeOvr } from './scoring.ts';
 import { createRng } from './random.ts';
 import { runCareer, type Chooser } from './run-career.ts';
 
 const SEEDS = Array.from({ length: 60 }, (_, i) => (i + 1) * 7919);
 const CLUB_IDS = new Set(CLUBS.map((c) => c.id));
+
+/**
+ * Un club doméstico de ese país. Argentina ya no tiene una competición paraguas
+ * `sa-ar`: hay que buscarlo por país, porque sus clubes están repartidos en las
+ * divisiones reales de las dos ramas.
+ */
+function domesticClubOf(countryCode: string) {
+    const club = CLUBS.find((c) => c.countryCode === countryCode && c.level === 'amateur');
+    assert.ok(club, `sin clubes domésticos para ${countryCode}`);
+    return club!;
+}
 
 function startClubFor(nationality: string, seed: number, origin = 'academia-club') {
     return getClub(createPlayer({ position: 'centre', nationality, origin }, createRng(seed)).club);
@@ -38,13 +50,24 @@ test('un argentino empieza en Argentina, un uruguayo en Uruguay, un chileno en C
         for (const seed of SEEDS) {
             const club = startClubFor(nationality, seed);
             assert.equal(club.countryCode, code, `${nationality} seed ${seed} arrancó en ${club.name} (${club.countryCode})`);
-            assert.equal(club.source, 'supabase', 'debe salir del snapshot real AR/UY/CL');
+            // Argentina sale del canon (`arSystem2026.ts`); Uruguay y Chile del
+            // snapshot real. En los dos casos es un club REAL, no inventado.
+            const expected = code === 'ar' ? 'canon-ar' : 'supabase';
+            assert.equal(club.source, expected, `${club.name}: fuente del club inicial`);
         }
     }
 });
 
 test('los países con liga modelada usan su ruta doméstica', () => {
-    for (const [nationality, code] of [['Francia', 'fr'], ['Inglaterra', 'gb-eng'], ['España', 'es'], ['Japón', 'jp'], ['Sudáfrica', 'za'], ['Nueva Zelanda', 'nz']] as const) {
+    // Estados Unidos, Italia, Portugal y Brasil entraron en el catálogo `2026-27.9`
+    // y por eso están acá y ya no en la lista de abajo: un estadounidense arranca en
+    // la Ivy o en la D1A, un italiano en la Serie A, un portugués en la Divisão de
+    // Honra y un brasileño en el Super 12.
+    for (const [nationality, code] of [
+        ['Francia', 'fr'], ['Inglaterra', 'gb-eng'], ['España', 'es'], ['Japón', 'jp'],
+        ['Sudáfrica', 'za'], ['Nueva Zelanda', 'nz'],
+        ['Estados Unidos', 'us'], ['Italia', 'it'], ['Portugal', 'pt'], ['Brasil', 'br'],
+    ] as const) {
         for (const seed of SEEDS.slice(0, 20)) {
             assert.equal(startClubFor(nationality, seed).countryCode, code, `${nationality} debería arrancar en su país`);
         }
@@ -52,7 +75,9 @@ test('los países con liga modelada usan su ruta doméstica', () => {
 });
 
 test('una nacionalidad sin liga modelada usa una ruta migratoria DOCUMENTADA', () => {
-    for (const nationality of ['Fiyi', 'Samoa', 'Italia', 'Irlanda', 'Australia', 'Brasil', 'Namibia', 'Corea del Sur']) {
+    // Italia y Brasil SALIERON de esta lista al entrar sus ligas (catálogo
+    // `2026-27.9`): ahora tienen escalera propia y su ruta es doméstica.
+    for (const nationality of ['Fiyi', 'Samoa', 'Irlanda', 'Australia', 'Namibia', 'Corea del Sur']) {
         assert.equal(homeCountryOf(nationality), null, `${nationality} no debería tener escalera propia`);
         const region = migrationRegionOf(nationality);
         const allowed = new Set(MIGRATION_ROUTES[region].map((r) => r.countryCode));
@@ -99,6 +124,16 @@ test('el escalafón ordena el catálogo entero y respeta el techo amateur', () =
         if (club.level === 'amateur') assert.ok(rung <= 3, `${club.name}: un amateur no puede estar arriba`);
         if (club.level === 'elite-world') assert.equal(rung, 8, `${club.name}: élite mundial`);
     }
+    // QUÉ PROTEGE EL TECHO, que no es una opinión sobre el nivel del amateurismo:
+    // la SRA tiene que quedar a MÁS de un escalón de cualquier club amateur. Un
+    // pase de ±1 escalón es un movimiento normal y no pide nada; el salto al
+    // profesionalismo tiene que pasar por la vía, que exige 59 de media. Con el
+    // URBA Top 14 en el escalón 4 la SRA quedaba a ±1 y la oferta entraba por la
+    // ventana normal: medido, un jugador de 56 en La Plata recibía oferta de
+    // franquicia sin cumplir el requisito.
+    const amateurCeiling = Math.max(...CLUBS.filter((c) => c.level === 'amateur').map(marketRung));
+    const sraRung = marketRung(CLUBS.find((c) => c.competitionId === 'sra')!);
+    assert.ok(sraRung - amateurCeiling >= 2, `SRA (${sraRung}) debe quedar a más de un escalón del amateurismo (${amateurCeiling})`);
     assert.ok(countriesWithLadder().length >= 9, 'debe haber escaleras para los países modelados');
     for (const code of countriesWithLadder()) {
         assert.ok(domesticLadder(code).every((r) => r.clubs.length > 0), `${code}: escalón vacío`);
@@ -159,7 +194,7 @@ test('AR/UY/CL doméstico tiene vía a la franquicia SRA de SU país', () => {
         ['cl', 'cl-domestic-to-sra', ['selknam']],
     ];
     for (const [country, pathwayId, targets] of expected) {
-        const domestic = CLUBS.find((c) => c.competitionId === `sa-${country}`)!;
+        const domestic = domesticClubOf(country);
         const pathway = pathwaysFrom(domestic).find((p) => p.id === pathwayId);
         assert.ok(pathway, `falta la vía ${pathwayId}`);
         assert.deepEqual(pathwayTargets(pathway!).map((c) => c.id).sort(), [...targets].sort());
@@ -180,14 +215,63 @@ test('ninguna vía queda vacía y ninguna apunta a una copa', () => {
             assert.ok(!cupIds.has(target.competitionId), `${pathway.id} apunta a una copa`);
             assert.ok(CLUB_IDS.has(target.id), `${pathway.id} apunta a un club inexistente`);
         }
+        // TODA VÍA TIENE QUE DECLARAR DE DÓNDE SALE, por competición o por club.
+        // Desde que existe `fromClubIds` —lo pide el reparto de academias italiano,
+        // que nace en Benetton y Zebre y no en la URC entera— una vía puede tener
+        // `fromCompetitions: []`, y sin esta línea el bucle de abajo no recorrería
+        // nada y una vía sin origen pasaría en silencio.
+        assert.ok(
+            pathway.fromCompetitions.length > 0 || (pathway.fromClubIds?.length ?? 0) > 0,
+            `${pathway.id}: no declara ningún origen`,
+        );
         for (const from of pathway.fromCompetitions) {
             assert.ok(CLUBS.some((c) => c.competitionId === from), `${pathway.id}: origen sin clubes (${from})`);
         }
+        for (const from of pathway.fromClubIds ?? []) {
+            assert.ok(CLUB_IDS.has(from), `${pathway.id}: club de origen inexistente (${from})`);
+        }
     }
     for (const country of ['ar', 'uy', 'cl']) {
-        const domestic = CLUBS.find((c) => c.competitionId === `sa-${country}`)!;
-        assert.ok(pathwaysFrom(domestic).length > 0, `${country} se quedó sin vía de salida`);
+        assert.ok(pathwaysFrom(domesticClubOf(country)).length > 0, `${country} se quedó sin vía de salida`);
     }
+    // Y la vía argentina sale de TODAS sus divisiones, no solo del Top 14: se
+    // abre por el nivel del jugador, no por el escudo que tiene puesto.
+    for (const division of AR_DIVISIONS) {
+        const club = CLUBS.find((c) => c.competitionId === division.competitionId)!;
+        assert.ok(
+            pathwaysFrom(club).some((p) => p.id === 'ar-domestic-to-sra'),
+            `${division.label} se quedó sin vía a la SRA`,
+        );
+    }
+});
+
+test('las cinco ligas nuevas tienen su vía de salida DECLARADA', () => {
+    const vias = (competitionId: string) => {
+        const club = CLUBS.find((c) => c.competitionId === competitionId)!;
+        return pathwaysFrom(club).map((p) => p.id);
+    };
+    // Cada una sale por donde sale en la realidad, y ninguna por mercado abierto.
+    assert.ok(vias('us-d1a').includes('us-college-to-mlr'), 'la D1A sale a la MLR');
+    assert.ok(vias('us-ncr-d1').includes('us-college-to-mlr'), 'NCR también: es lo único que las conecta');
+    assert.ok(vias('us-mlr').includes('mlr-to-abroad'), 'con la liga contrayéndose, hay salida al exterior');
+    assert.ok(vias('pt-honra').includes('pt-honra-to-lusitanos'), 'Portugal sale por Lusitanos XV');
+    assert.ok(vias('pt-honra').includes('emerging-europe-to-pro'), 'y por Francia, que es donde juegan los Lobos');
+    assert.ok(vias('ita-serie-a-elite').includes('ita-elite-to-franchises'), 'Italia sale por los permit players');
+    assert.ok(vias('br-super12').includes('br-super12-to-cobras'), 'Brasil sale por Cobras');
+
+    // EL REPARTO DE ACADEMIAS VA AL REVÉS: nace en Benetton y Zebre y baja a la
+    // Élite. Es la única vía del archivo declarada por CLUB de origen, y tiene que
+    // seguir siéndolo: desde `urc` le llevaría ofertas de Viadana a un juvenil de
+    // Leinster por un mecanismo que sólo existe en Italia.
+    const reparto = TRANSFER_PATHWAYS.find((p) => p.id === 'ita-franchise-academy-to-elite')!;
+    assert.deepEqual(reparto.fromCompetitions, [], 'no nace en una competición entera');
+    assert.deepEqual([...reparto.fromClubIds!].sort(), ['benetton-treviso', 'zebre-parma']);
+    assert.ok(pathwaysFrom(getClub('benetton-treviso')).some((p) => p.id === reparto.id));
+    assert.ok(pathwaysFrom(getClub('zebre-parma')).some((p) => p.id === reparto.id));
+    assert.ok(
+        !pathwaysFrom(getClub('leinster')).some((p) => p.id === reparto.id),
+        'un juvenil de Leinster no entra al reparto de la FIR',
+    );
 });
 
 test('una vía NO garantiza oferta: sin nivel, el destino no se interesa', () => {
@@ -197,11 +281,21 @@ test('una vía NO garantiza oferta: sin nivel, el destino no se interesa', () =>
     const franchise = getClub('penarol-rugby');
     const pathway = pathwaysFrom(getClub(rookie.club)).find((p) => p.id === 'uy-domestic-to-sra')!;
     assert.ok(pathway, 'la vía existe');
-    assert.equal(
-        clubIsInterested(franchise, marketValue(rookie, computeEffectiveOvr(rookie)), pathway.demandTolerance),
-        false,
+
+    // EL GATE ES `minOvr`, y es el que hace el trabajo que antes se le pedía a
+    // `clubIsInterested`. Ese seguía dejando pasar al juvenil porque compara
+    // `marketValue`, que a los 18 suma hasta 7 puntos de proyección por encima del
+    // OVR: la promesa abría una puerta que no le correspondía.
+    const ovr = computeOvr(rookie.attributes, rookie.position);
+    assert.ok(ovr < pathway.minOvr!, `un juvenil de 18 (OVR ${ovr}) no llega al nivel que pide la vía`);
+
+    // Y no es sólo la precondición: la oferta NO aparece.
+    const offers = generateOffers(rookie, computeEffectiveOvr(rookie), createRng(31337));
+    assert.ok(
+        !offers.some((o) => o.club === franchise.id),
         'un juvenil de 18 no puede entrar a la franquicia solo porque existe la ruta',
     );
+
     // Con nivel de sobra, la misma vía sí abre.
     assert.equal(clubIsInterested(franchise, franchise.rating + 5, pathway.demandTolerance), true);
 });
@@ -250,6 +344,22 @@ test('fuera de una vía profesional no se salta más de un escalón', () => {
             const limit = qualifiesForExceptionalJump(player, computeEffectiveOvr(player)) ? 2 : 1;
             for (const offer of offers) {
                 if (offer.via !== 'window') continue; // pathway y homecoming tienen sus propias reglas
+                // EL PUENTE SOBRE EL POZO es la cuarta razón legítima. Siete
+                // pirámides tienen un hueco entre su base y el escalón de arriba
+                // (fr 2→5, nz 1→6, gb-eng 2→6…), y sin puente el que arrancaba en
+                // el sótano quedaba atrapado de por vida. Se pregunta al motor en
+                // vez de recalcular la regla acá: un test que la reimplementa deja
+                // de vigilarla.
+                if (isLadderBridge(player.club, offer.club, player.nationality)) continue;
+                // LA APERTURA POR NIVEL es la quinta razón legítima: si sos tan
+                // bueno que le alcanzás al club sin tolerancia, saltás escalones.
+                // Se le pregunta al motor con la misma función que decide, en vez
+                // de recalcular la regla acá.
+                const destino = getClub(offer.club);
+                if (
+                    marketRung(destino) > current
+                    && clubIsInterested(destino, marketValue(player, computeEffectiveOvr(player)), 0)
+                ) continue;
                 const delta = Math.abs(marketRung(getClub(offer.club)) - current);
                 assert.ok(delta <= limit, `salto de ${delta} escalones por ventana sin excepción (${nationality})`);
             }
@@ -444,10 +554,39 @@ test('en una carrera completa TODO salto grande tiene un motivo identificable', 
                     reasons.set('excepción ±2', (reasons.get('excepción ±2') ?? 0) + 1);
                     continue;
                 }
-                // 3) Regreso del veterano: solo hacia abajo y a partir de los 33.
+                // 3) El PUENTE sobre el pozo de la escalera propia: el escalón
+                //    inmediatamente superior de tu pirámide, esté a uno o a cinco.
+                if (isLadderBridge(previous.club, season.club, nationality)) {
+                    reasons.set('puente', (reasons.get('puente') ?? 0) + 1);
+                    continue;
+                }
+                // 3b) LA APERTURA POR NIVEL, que cambia el CONTRATO de este test.
+                //
+                //     Subir de escalón porque le alcanzás al club es exactamente lo
+                //     que el mercado tiene que permitir: si sos muy bueno saltás, y
+                //     si no, la peleás desde abajo. Así que un salto HACIA ARRIBA de
+                //     cualquier tamaño ya no necesita justificarse — la puerta la
+                //     abrió `clubIsInterested` con tolerancia cero, que es más duro
+                //     que la ventana de ±1.
+                //
+                //     No se verifica acá con un proxy sobre el OVR y es a propósito:
+                //     el motor decide con `marketValue` del momento —que descuenta
+                //     edad y lesiones— y el historial no guarda ese número. Un proxy
+                //     que no coincide con la regla real no vigila nada; sólo falla
+                //     en los bordes y se termina aflojando hasta que no sirve.
+                //
+                //     Lo que este test SIGUE vigilando, que es donde estaba el
+                //     riesgo real, es el salto grande HACIA ABAJO: bajar tres
+                //     escalones sin vía, sin ser veterano y sin volver a casa es un
+                //     bug, y ninguna regla nueva lo justifica.
+                if (marketRung(to) > marketRung(from)) {
+                    reasons.set('nivel', (reasons.get('nivel') ?? 0) + 1);
+                    continue;
+                }
+                // 4) Regreso del veterano: solo hacia abajo y a partir de los 33.
                 assert.ok(
                     season.age >= VETERAN_AGE && marketRung(to) < marketRung(from),
-                    `${nationality} seed ${seed}: salto de ${delta} escalones a los ${season.age} sin vía, excepción ni regreso`,
+                    `${nationality} seed ${seed}: salto de ${delta} escalones a los ${season.age} sin vía, excepción, puente ni regreso`,
                 );
                 reasons.set('veterano', (reasons.get('veterano') ?? 0) + 1);
             }

@@ -169,6 +169,155 @@
     color: var(--color-text-tertiary);
 }
 
+/* ===== TARJETA CON AFICHE ===== */
+.cardPoster {
+    padding: 0;
+    gap: 0;
+    min-height: 0;
+}
+
+/* El velo de acento del hover sobra acá: el cambio de afiche ya es la respuesta
+   visual, y encima del afiche el velo solo lo ensucia. */
+.cardPoster::after {
+    display: none;
+}
+
+/* Afiche que no lleva a ningún lado (lo que viene). Conserva el cambio de imagen
+   al pasar el mouse —es lo que le da vida— pero pierde el empuje y la sombra:
+   una tarjeta que se levanta promete un clic, y acá no hay adónde ir. */
+.cardStatic {
+    cursor: default;
+}
+
+.cardStatic:hover {
+    transform: none;
+    border-color: var(--color-border);
+    box-shadow: none;
+}
+
+.cover {
+    position: relative;
+    display: block;
+    flex: none;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #04120c;
+}
+
+.coverImg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.22s ease;
+}
+
+/* Sin hover (mobile y cualquier pantalla táctil) la portada es el afiche verde:
+   el gris es un estado de reposo que ahí no existe. Va con `display: none` y no
+   con `opacity: 0` para que el teléfono ni siquiera lo baje: una imagen invisible
+   pero presente igual se descarga. */
+.coverIdle {
+    display: none;
+}
+
+.coverActive {
+    opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .coverIdle {
+        display: block;
+        opacity: 1;
+    }
+
+    .coverActive {
+        opacity: 0;
+    }
+
+    /* El foco de teclado cambia el afiche igual que el mouse: quien navega con
+       Tab tiene que ver el mismo estado que quien pasa el puntero. */
+    .card:hover .coverIdle,
+    .card:focus-visible .coverIdle {
+        opacity: 0;
+    }
+
+    .card:hover .coverActive,
+    .card:focus-visible .coverActive {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .coverImg {
+        transition: none;
+    }
+}
+
+/* El único texto de la tarjeta. Va en el rincón de abajo a la derecha y chico:
+   el afiche ya trae su título y su bajada dibujados, así que el botón tiene que
+   caber en el margen que queda libre sin pisar una letra. Oscuro con el texto
+   verde, no al revés: sobre el afiche —que además cambia de color al pasar el
+   mouse— una pastilla verde llena compite con la imagen; una oscura se apoya. */
+.playBtn {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    background: rgba(4, 18, 12, 0.82);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.34);
+    color: var(--color-accent);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(6px);
+    transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.playBtn svg {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.18s ease;
+}
+
+.card:hover .playBtn,
+.card:focus-visible .playBtn {
+    transform: translateY(-1px);
+    background: rgba(4, 18, 12, 0.92);
+}
+
+.card:hover .playBtn svg,
+.card:focus-visible .playBtn svg {
+    transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .playBtn,
+    .playBtn svg {
+        transition: none;
+    }
+}
+
+/* Para nombrar el juego en texto sin repetir lo que ya dice el afiche. */
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .cardBody {
     display: flex;
     flex-direction: column;

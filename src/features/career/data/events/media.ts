@@ -205,4 +205,62 @@ export const MEDIA_EVENTS: GameEvent[] = [
             },
         ],
     },
+    // ── Reputación de la chica ───────────────────────────────────────────────
+    // Los dos eventos de reputación que no necesitan prensa nacional: el pibe
+    // esperando en el alambrado existe en todas las bandas, y el rumor también.
+    {
+        id: 'med-kid-photo',
+        category: 'media',
+        title: 'Un pibe te espera en el alambrado',
+        text: 'Perdieron por veinte y no querés ver a nadie. En la salida hay un pibe con la camiseta tuya esperando una foto, y atrás hay diez más.',
+        weight: 10,
+        repeatable: true,
+        cooldown: 4,
+        options: [
+            {
+                id: 'stay',
+                label: 'Quedarte con todos',
+                hint: 'Media hora firmando con la bronca todavía en el cuerpo.',
+                outcomes: [
+                    { weight: 1, effect: { fame: 6, morale: 3, flags: { querido: 1 } }, resultText: 'Te quedás hasta el último. Ese pibe se va a acordar toda la vida de esa foto.' },
+                ],
+            },
+            {
+                id: 'leave',
+                label: 'Irte rápido al micro',
+                hint: 'Te guardás la bronca. Los que esperaban se van sin nada.',
+                outcomes: [
+                    { weight: 1, effect: { fame: -4, mental: 2 }, resultText: 'Subís al micro con la cabeza baja. Alguien filma la escena y no sale bien.' },
+                ],
+            },
+        ],
+    },
+    {
+        id: 'med-invented-rumor',
+        category: 'media',
+        title: 'El rumor inventado',
+        text: 'Un periodista cuenta que te peleaste con el entrenador en el vestuario. No pasó nada de eso.',
+        weight: 10,
+        repeatable: true,
+        cooldown: 3,
+        options: [
+            {
+                id: 'answer',
+                label: 'Salir a contestar',
+                hint: 'Aclarás las cosas o le das una semana más de tema.',
+                outcomes: [
+                    { weight: 50, effect: { fame: 5, morale: 2, mental: 1 }, resultText: 'Contestás con nombre y apellido y el periodista tiene que salir a explicarse.' },
+                    { weight: 50, effect: { fame: -6, morale: -4, form: -2 }, resultText: 'Tu respuesta le da otra semana de vida al tema. Ahora sí hay conflicto.' },
+                ],
+            },
+            {
+                id: 'ignore',
+                label: 'Dejarlo pasar',
+                hint: 'Se apaga solo. Mientras tanto, queda dando vueltas.',
+                outcomes: [
+                    { weight: 1, effect: { mental: 2, morale: -1 }, resultText: 'No decís una palabra y a los cuatro días nadie se acuerda.' },
+                ],
+            },
+        ],
+    },
 ];

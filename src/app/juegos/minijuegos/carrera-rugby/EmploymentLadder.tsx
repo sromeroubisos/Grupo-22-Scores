@@ -1,8 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import type { CareerSeasonEntry, EmploymentStatus, SquadTrack } from '@/features/career';
-import { BY_EMPLOYMENT, DEVELOPMENT_TRACK, EMPLOYMENT_LABELS, EMPLOYMENT_ORDER, employmentRank } from '@/features/career';
+import type { CareerSeasonEntry, EmploymentStatus, Locale, SquadTrack } from '@/features/career';
+import {
+    BY_EMPLOYMENT, DEVELOPMENT_TRACK, EMPLOYMENT_LABELS, EMPLOYMENT_ORDER, employmentLabel,
+    employmentRank, RUNG_SUMMARY_EN, STEP_COPY_EN,
+} from '@/features/career';
+import { useLocale } from './LocaleContext';
 import styles from './carrera.module.css';
 
 /**
@@ -18,22 +22,10 @@ import styles from './carrera.module.css';
  * sola.
  */
 
-/** Las cinco dimensiones, en lenguaje de jugador y no de planilla. */
-const DIMENSIONS: {
-    key: keyof typeof BY_EMPLOYMENT['amateur'];
-    label: string;
-    /** true = el número BAJA cuando mejora (la vida fuera del rugby pesa menos). */
-    inverted?: boolean;
-    note?: string;
-}[] = [
-    { key: 'trainingQuality', label: 'Calidad de entrenamiento' },
-    { key: 'trainingLoad', label: 'Volumen de trabajo' },
-    { key: 'recoverySupport', label: 'Recuperación' },
-    { key: 'medicalSupport', label: 'Cuerpo médico' },
-    { key: 'lifeLoad', label: 'Vida fuera del rugby', inverted: true, note: 'menos carga es mejor' },
-];
+// Las CINCO DIMENSIONES viven en `i18n/ui.ts` (`t.dimensions`): son rótulos de
+// pantalla, no datos del motor. Los números siguen saliendo de `BY_EMPLOYMENT`.
 
-/** Qué significa cada escalón, en una línea. */
+/** Qué significa cada escalón, en una línea. El inglés está en `i18n/catalog.ts`. */
 const RUNG_SUMMARY: Record<EmploymentStatus, string> = {
     amateur: 'Trabajás o estudiás. Entrenás cuando el día te deja.',
     'amateur-compensated': 'El club te cubre los gastos. Seguís laburando, pero ya no ponés de tu bolsillo.',
@@ -48,15 +40,34 @@ const STEP_COPY: Partial<Record<EmploymentStatus, string>> = {
     'full-time-professional': 'El rugby pasa a ser el trabajo. No hay red debajo.',
 };
 
+function rungSummary(status: EmploymentStatus, locale: Locale): string {
+    return locale === 'en' ? RUNG_SUMMARY_EN[status] : RUNG_SUMMARY[status];
+}
+
+function stepCopy(status: EmploymentStatus, locale: Locale): string | undefined {
+    return locale === 'en' ? STEP_COPY_EN[status] : STEP_COPY[status];
+}
+
 interface Props {
     employment: EmploymentStatus;
     squadTrack: SquadTrack;
     /** Trayectoria congelada: de acá sale si el escalón se ganó ESTA temporada. */
     history: CareerSeasonEntry[];
+    /**
+     * Abre la comparación de una. Se usa cuando el escalafón ya está detrás de
+     * un desplegable: pedir dos clics para ver lo mismo no protege nada.
+     */
+    defaultOpen?: boolean;
 }
 
-/** ¿El jugador subió de escalón en la última temporada jugada? */
-function justPromoted(history: CareerSeasonEntry[]): EmploymentStatus | null {
+/**
+ * ¿El jugador subió de escalón en la última temporada jugada?
+ *
+ * Exportada porque la cabecera marca el chip del vínculo con esto: el aviso
+ * completo vive en este panel, que arranca cerrado, y sin la marca el ascenso
+ * —que es EL momento de la ruta amateur— pasaría en silencio.
+ */
+export function justPromoted(history: CareerSeasonEntry[]): EmploymentStatus | null {
     if (history.length < 2) return null;
     const last = history[history.length - 1];
     const previous = history[history.length - 2];
@@ -66,8 +77,9 @@ function justPromoted(history: CareerSeasonEntry[]): EmploymentStatus | null {
 /** Valor 0..1 → porcentaje entero. Es lo que ve el jugador, no el decimal crudo. */
 const pct = (value: number) => Math.round(value * 100);
 
-export default function EmploymentLadder({ employment, squadTrack, history }: Props) {
-    const [open, setOpen] = useState(false);
+export default function EmploymentLadder({ employment, squadTrack, history, defaultOpen = false }: Props) {
+    const { locale, t } = useLocale();
+    const [open, setOpen] = useState(defaultOpen);
 
     const currentIndex = employmentRank(employment);
     const isTop = currentIndex === EMPLOYMENT_ORDER.length - 1;
@@ -89,12 +101,16 @@ export default function EmploymentLadder({ employment, squadTrack, history }: Pr
             key={promotedTo ?? 'stable'}
             aria-labelledby="escalafon-titulo"
         >
-            <h2 id="escalafon-titulo" className={styles.eltTitle}>Escalafón</h2>
+            {/* El h2 va oculto a la vista: los cuatro escalones con sus
+                etiquetas ya dicen qué es esto, y el rótulo costaba 20 px de un
+                banner que tiene que medir 150. El lector de pantalla lo
+                necesita igual. */}
+            <h2 id="escalafon-titulo" className={styles.srOnly}>{t.ladderTitle}</h2>
 
             {promotedTo && (
                 <p className={styles.eltPromotion} role="status">
-                    <span className={styles.eltPromotionTag}>Subiste de escalón</span>
-                    Ahora sos <strong>{EMPLOYMENT_LABELS[promotedTo]}</strong>. {STEP_COPY[promotedTo]}
+                    <span className={styles.eltPromotionTag}>{t.steppedUp}</span>
+                    {t.youAreNow(employmentLabel(promotedTo, EMPLOYMENT_LABELS[promotedTo], locale))} {stepCopy(promotedTo, locale)}
                 </p>
             )}
 
@@ -116,37 +132,39 @@ export default function EmploymentLadder({ employment, squadTrack, history }: Pr
                                 className={`${styles.eltStep} ${stateClass} ${promotedTo === status ? styles.eltStepNew : ''}`}
                             >
                                 <span className={styles.eltStepDot} aria-hidden="true" />
-                                <span className={styles.eltStepLabel}>{EMPLOYMENT_LABELS[status]}</span>
+                                <span className={styles.eltStepLabel}>
+                                    {employmentLabel(status, EMPLOYMENT_LABELS[status], locale)}
+                                </span>
                             </span>
                         );
                     })}
                 </span>
 
                 <span className={styles.eltToggle}>
-                    {open ? 'Ocultar' : isTop ? 'Ver qué ganaste' : 'Ver qué cambia al subir'}
+                    {open ? t.hide : isTop ? t.seeWhatYouGained : t.seeWhatChanges}
                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={open ? styles.chevronOpen : undefined}><path d="M6 9l6 6 6-6" /></svg>
                 </span>
             </button>
 
-            <p className={styles.eltNow}>
-                {RUNG_SUMMARY[employment]}
-                {inAcademy && (
-                    <span className={styles.eltAcademy}>
-                        Estás en la academia: entrenás como un profesional aunque tu vínculo todavía no lo sea.
-                    </span>
-                )}
+            {/* La frase de resumen se fue AL PANEL. Estaba siempre visible
+                debajo de la barra y era referencia pura: costaba ~30 px del
+                banner para decir algo que no cambia entre temporadas. Ahora se
+                lee cuando el jugador abre "Ver qué cambia al subir". */}
+            <p className={`${styles.eltNow} ${open ? '' : styles.srOnly}`}>
+                {rungSummary(employment, locale)}
+                {inAcademy && <span className={styles.eltAcademy}>{t.inAcademyNote}</span>}
             </p>
 
             <div id="escalafon-panel" className={`${styles.eltPanel} ${open ? styles.eltPanelOpen : ''}`} hidden={!open}>
                 <p className={styles.eltPanelHead}>
-                    <span className={styles.eltPanelFrom}>{EMPLOYMENT_LABELS[from]}</span>
+                    <span className={styles.eltPanelFrom}>{employmentLabel(from, EMPLOYMENT_LABELS[from], locale)}</span>
                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></svg>
-                    <span className={styles.eltPanelTo}>{EMPLOYMENT_LABELS[to]}</span>
+                    <span className={styles.eltPanelTo}>{employmentLabel(to, EMPLOYMENT_LABELS[to], locale)}</span>
                 </p>
-                {STEP_COPY[to] && <p className={styles.eltPanelCopy}>{STEP_COPY[to]}</p>}
+                {stepCopy(to, locale) && <p className={styles.eltPanelCopy}>{stepCopy(to, locale)}</p>}
 
                 <dl className={styles.eltRows}>
-                    {DIMENSIONS.map(({ key, label, inverted, note }) => {
+                    {t.dimensions.map(({ key, label, inverted, note }) => {
                         const a = BY_EMPLOYMENT[from][key];
                         const b = BY_EMPLOYMENT[to][key];
                         // Barra siempre en clave "cuánto mejor es": la vida fuera
@@ -176,8 +194,7 @@ export default function EmploymentLadder({ employment, squadTrack, history }: Pr
 
                 {inAcademy && (
                     <p className={styles.eltPanelFoot}>
-                        La academia ya te da {pct(DEVELOPMENT_TRACK.trainingQuality)} de calidad y{' '}
-                        {pct(DEVELOPMENT_TRACK.trainingLoad)} de volumen, por encima de tu escalón.
+                        {t.academyFoot(pct(DEVELOPMENT_TRACK.trainingQuality), pct(DEVELOPMENT_TRACK.trainingLoad))}
                     </p>
                 )}
             </div>

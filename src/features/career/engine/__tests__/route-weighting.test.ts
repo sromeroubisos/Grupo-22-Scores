@@ -29,18 +29,18 @@ function stateWith(opts: {
 }
 
 test('el boost es una función pura y estable', () => {
-    const s = stateWith({ employment: 'amateur', startRoute: 'amateur', seasonsPlayed: 2 });
+    const s = stateWith({ employment: 'amateur', startRoute: 'development', seasonsPlayed: 2 });
     assert.equal(familyBoost('env-amateur-derby', s), familyBoost('env-amateur-derby', s));
 });
 
 test('un id sin familia conocida no recibe boost', () => {
-    const s = stateWith({ employment: 'amateur', startRoute: 'amateur', seasonsPlayed: 0 });
+    const s = stateWith({ employment: 'amateur', startRoute: 'development', seasonsPlayed: 0 });
     assert.equal(familyBoost('vaya-a-saber-que', s), 1);
     assert.equal(familyBoost('singuion', s), 1);
 });
 
 test('el amateur ve más entorno y vida, y menos prensa y selección', () => {
-    const s = stateWith({ employment: 'amateur', startRoute: 'amateur', seasonsPlayed: 1 });
+    const s = stateWith({ employment: 'amateur', startRoute: 'development', seasonsPlayed: 1 });
     assert.ok(familyBoost('env-amateur-commute', s) > 1.5, 'el entorno tiene que pesar más');
     assert.ok(familyBoost('per-family', s) > 1.5, 'la vida personal tiene que pesar más');
     assert.ok(familyBoost('med-sponsor', s) < 0.5, 'la prensa tiene que pesar menos');
@@ -48,7 +48,7 @@ test('el amateur ve más entorno y vida, y menos prensa y selección', () => {
 });
 
 test('el profesional ve más selección y prensa que el amateur', () => {
-    const amateur = stateWith({ employment: 'amateur', startRoute: 'amateur', seasonsPlayed: 6 });
+    const amateur = stateWith({ employment: 'amateur', startRoute: 'development', seasonsPlayed: 6 });
     const pro = stateWith({ employment: 'full-time-professional', startRoute: 'professional', seasonsPlayed: 6 });
     assert.ok(familyBoost('nt-captaincy', pro) > familyBoost('nt-captaincy', amateur));
     assert.ok(familyBoost('med-sponsor', pro) > familyBoost('med-sponsor', amateur));
@@ -58,7 +58,7 @@ test('el profesional ve más selección y prensa que el amateur', () => {
 test('NINGÚN boost llega a cero: el peso se mueve, no se filtra', () => {
     const families = ['env', 'club', 'per', 'mil', 'nt', 'tac', 'med', 'inj'];
     const employments: EmploymentStatus[] = ['amateur', 'amateur-compensated', 'semi-professional', 'full-time-professional'];
-    const routes: StartRouteId[] = ['amateur', 'development', 'professional'];
+    const routes: StartRouteId[] = ['development', 'professional'];
 
     for (const employment of employments) {
         for (const startRoute of routes) {
@@ -78,21 +78,33 @@ test('NINGÚN boost llega a cero: el peso se mueve, no se filtra', () => {
     }
 });
 
-test('el empujón de la ruta se diluye con las temporadas', () => {
-    // Mismo entorno, distinta antigüedad: al principio la ruta amateur empuja
-    // el entorno; para la temporada 5 ya no aporta nada por sí sola.
-    const debut = stateWith({ employment: 'semi-professional', startRoute: 'amateur', seasonsPlayed: 0 });
-    const veterano = stateWith({ employment: 'semi-professional', startRoute: 'amateur', seasonsPlayed: 5 });
-    assert.ok(
-        familyBoost('env-lo-que-sea', debut) > familyBoost('env-lo-que-sea', veterano),
-        'la ruta inicial tiene que pesar más al principio de la carrera',
-    );
+test('la RAMA no pesa: el boost sale del entorno vivo y de nada más', () => {
+    // Acá se protegia lo contrario: que la ruta empujara al principio y se
+    // diluyera hacia la temporada 5. Ese eje se fue en 1.26.0 porque dejó de decir
+    // nada — las dos ramas arrancan en el MISMO mundo (18 años, club amateur, sin
+    // contrato), así que un boost indexado por rama era un multiplicador constante
+    // disfrazado de tabla.
+    //
+    // El invariante nuevo es el simétrico, y es el que impide que alguien lo
+    // reintroduzca sin darse cuenta: con el mismo entorno, la rama NO puede mover
+    // la frecuencia de ninguna familia, ni al debutar ni diez temporadas después.
+    for (const seasonsPlayed of [0, 2, 5, 10]) {
+        const larga = stateWith({ employment: 'semi-professional', startRoute: 'development', seasonsPlayed });
+        const rapida = stateWith({ employment: 'semi-professional', startRoute: 'professional', seasonsPlayed });
+        for (const f of ['env', 'club', 'per', 'mil', 'nt', 'tac', 'med', 'inj']) {
+            assert.equal(
+                familyBoost(`${f}-lo-que-sea`, larga),
+                familyBoost(`${f}-lo-que-sea`, rapida),
+                `la rama movió la familia ${f} en la temporada ${seasonsPlayed}`,
+            );
+        }
+    }
 });
 
 test('pasada la ventana de dilución, manda el entorno y no la ruta sellada', () => {
     // El que arrancó amateur y llegó a profesional tiene que ver el mundo
     // profesional, no seguir diez temporadas en el amateur.
-    const subio = stateWith({ employment: 'full-time-professional', startRoute: 'amateur', seasonsPlayed: 10 });
+    const subio = stateWith({ employment: 'full-time-professional', startRoute: 'development', seasonsPlayed: 10 });
     const nacioAdentro = stateWith({ employment: 'full-time-professional', startRoute: 'professional', seasonsPlayed: 10 });
     for (const f of ['env', 'nt', 'med', 'per']) {
         assert.equal(
@@ -129,24 +141,34 @@ function familyShare(route: StartRouteId, runs: number): Map<string, number> {
     return counts;
 }
 
-test('la ruta amateur produce una mezcla de eventos distinta de la profesional', () => {
-    const amateur = familyShare('amateur', 60);
-    const pro = familyShare('professional', 60);
+test('el ENTORNO manda: el amateur ve más vida y menos prensa que el profesional', () => {
+    // Se medía por ruta y ahora se mide por lo único que quedo importando: el
+    // escalón de empleo. Es la misma regla de diseño —mover la frecuencia, nunca
+    // filtrar duro— comprobada sobre el eje correcto.
+    const amateur = stateWith({ employment: 'amateur', startRoute: 'development', seasonsPlayed: 1 });
+    const pro = stateWith({ employment: 'full-time-professional', startRoute: 'development', seasonsPlayed: 8 });
 
     assert.ok(
-        (amateur.get('env') ?? 0) > (pro.get('env') ?? 0),
-        'la ruta amateur tiene que ver más eventos de entorno que la profesional',
+        familyBoost('env-lo-que-sea', amateur) > familyBoost('env-lo-que-sea', pro),
+        'el amateur tiene que ver más entorno que el profesional',
     );
     assert.ok(
-        (pro.get('med') ?? 0) > (amateur.get('med') ?? 0),
-        'la ruta profesional tiene que ver más prensa que la amateur',
+        familyBoost('per-lo-que-sea', amateur) > familyBoost('per-lo-que-sea', pro),
+        'y más vida personal',
+    );
+    assert.ok(
+        familyBoost('med-lo-que-sea', pro) > familyBoost('med-lo-que-sea', amateur),
+        'el profesional tiene que ver más prensa',
     );
 });
 
-test('la ruta amateur igual puede ver eventos de otras familias', () => {
-    const amateur = familyShare('amateur', 60);
-    // No es un filtro: club, táctica y lesiones tienen que seguir apareciendo.
-    for (const f of ['club', 'tac', 'inj']) {
-        assert.ok((amateur.get(f) ?? 0) > 0, `la ruta amateur nunca vio un evento de la familia ${f}`);
+test('la mezcla de eventos de una carrera cubre TODAS las familias', () => {
+    // No es un filtro: sobre carreras completas tienen que aparecer las ocho
+    // familias, venga el jugador de donde venga.
+    for (const rama of ['development', 'professional'] as const) {
+        const mezcla = familyShare(rama, 60);
+        for (const f of ['env', 'club', 'per', 'tac', 'inj']) {
+            assert.ok((mezcla.get(f) ?? 0) > 0, `la rama ${rama} nunca vio un evento de la familia ${f}`);
+        }
     }
 });

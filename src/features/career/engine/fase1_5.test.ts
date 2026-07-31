@@ -12,11 +12,20 @@ import { TRANSFER_EVENT_ID } from '../data/events/index.ts';
 import { clubLeagueIdentity } from './competition-identity.ts';
 import { classifyMovement } from './market-routes.ts';
 import { economicModelOf, sportingBandOf } from '../data/competition-levels2026.ts';
+import { arRegionOf, isArDivision } from '../data/clubs2026/arSystem2026.ts';
+import { computeOvr } from './scoring.ts';
 import type { CareerState } from '../types/career.ts';
 import type { CreatePlayerInput } from './create-player.ts';
 
 const SEEDS = Array.from({ length: 40 }, (_, i) => (i + 1) * 4099);
 const NATIONS = ['ar', 'uy', 'cl', 'nz', 'za', 'es', 'fj'];
+
+/** Un club argentino cualquiera. Ya no hay una competición paraguas `sa-ar`. */
+function anyArgentineClub() {
+    const club = CLUBS.find((c) => isArDivision(c.competitionId));
+    assert.ok(club, 'el catálogo debe tener clubes argentinos');
+    return club!;
+}
 
 /** Corre una carrera aceptando ofertas (para ejercitar mercado y títulos). */
 function fullCareer(input: CreatePlayerInput, seed: number): CareerState {
@@ -39,7 +48,12 @@ function allHistory(): { state: CareerState; nat: string }[] {
 test('el título del jugador exige apariciones senior (development sin debut = 0)', () => {
     for (const { state } of allHistory()) {
         for (const h of state.history) {
-            for (const t of h.titlesWon) {
+            // SÓLO LOS TÍTULOS DE CLUB. Un título de selección no se gana con
+            // apariciones en el club sino con caps, y tiene su propia puerta —
+            // medida en el test de abajo. Sin este filtro, el día que un jugador
+            // saliera campeón con su selección en una temporada sin jugar en el
+            // club, este test lo leería como un título regalado.
+            for (const t of h.titlesWon.filter((x) => x.scope !== 'national-team')) {
                 void t;
                 const disputedSenior = h.squadTrack === 'senior' || h.appearances >= 3;
                 assert.ok(disputedSenior, `título acreditado sin disputa senior (track=${h.squadTrack}, apps=${h.appearances})`);
@@ -49,11 +63,48 @@ test('el título del jugador exige apariciones senior (development sin debut = 0
     }
 });
 
+test('el título de SELECCIÓN exige haber jugado: sin caps no hay campeonato', () => {
+    // La puerta equivalente a la de las apariciones senior, en el idioma de la
+    // selección: estar en la lista y no entrar nunca no es haber salido campeón.
+    let vistos = 0;
+    for (const { state } of allHistory()) {
+        state.history.forEach((h, i) => {
+            const nacionales = h.titlesWon.filter((x) => x.scope === 'national-team');
+            if (nacionales.length === 0) return;
+            vistos += nacionales.length;
+            assert.ok((state.seasons[i]?.capsGained ?? 0) > 0, 'título de selección sin un solo cap esa temporada');
+            for (const t of nacionales) {
+                assert.equal(t.club, null, 'un título de selección no tiene club');
+                assert.ok(t.union, 'un título de selección tiene que declarar la unión');
+                assert.equal(t.category, 'national-tournament');
+            }
+        });
+    }
+    assert.ok(vistos > 0, 'la muestra no produjo ni un título de selección: el test quedó ciego');
+});
+
 test('el título del CLUB puede existir sin acreditar al jugador (honores separados)', () => {
     for (const { state } of allHistory()) {
         for (const h of state.history) {
-            // Los honores del jugador son un SUBCONJUNTO de los del club.
-            assert.ok(h.clubTitlesWon.length >= h.titlesWon.length, 'clubTitlesWon debe contener a titlesWon');
+            // Los honores DE CLUB del jugador son un SUBCONJUNTO de los del club.
+            // La comparación se hace filtrando por scope y no sobre el total
+            // porque `titlesWon` mezcla las dos clases de honor desde que existen
+            // los títulos de selección, y `clubTitlesWon` —como su nombre dice—
+            // sigue siendo sólo del club.
+            const deClub = h.titlesWon.filter((x) => x.scope !== 'national-team');
+            assert.ok(h.clubTitlesWon.length >= deClub.length, 'clubTitlesWon debe contener a los títulos de club del jugador');
+        }
+    }
+});
+
+test('exactamente uno de club/unión está poblado en cada título', () => {
+    for (const { state } of allHistory()) {
+        for (const h of state.history) {
+            for (const t of [...h.titlesWon, ...h.clubTitlesWon]) {
+                const tieneClub = t.club !== null;
+                const tieneUnion = t.union !== null;
+                assert.ok(tieneClub !== tieneUnion, `${t.competitionId}: club=${t.club} union=${t.union}`);
+            }
         }
     }
 });
@@ -73,10 +124,21 @@ test('el título de liga AR/UY/CL es de la DIVISIÓN real, no del sistema paragu
     for (const { state } of allHistory()) {
         for (const h of state.history) {
             const club = getClub(h.clubId);
+            // La identidad del catálogo alcanza SOLO para la rama de abajo, la de
+            // los sistemas paraguas: AR/UY/CL no participan de ascensos ni
+            // descensos (son uniones paralelas, no divisiones), así que para esos
+            // clubes catálogo y carrera dicen lo mismo.
             const identity = clubLeagueIdentity(club);
             for (const t of h.titlesWon.filter((x) => x.category === 'league')) {
-                // El id del título de liga = la identidad real del club esa temporada.
-                assert.equal(t.competitionId, identity.id, 'el título de liga no coincide con la división del club');
+                // El id del título de liga = la división en la que SE JUGÓ esa
+                // temporada, que la trayectoria ya tiene congelada.
+                //
+                // Acá se recomputaba desde el catálogo (`identity.id`) y desde
+                // 1.29.0 eso es otra cosa: los clubes ASCIENDEN Y DESCIENDEN, así
+                // que el club de esta temporada puede estar hoy en otra división.
+                // Un campeón del Championship no es un campeón de la Premiership,
+                // y el dato correcto es el del año en que se ganó.
+                assert.equal(t.competitionId, h.competitionId, 'el título de liga no coincide con la división de esa temporada');
                 // Para AR/UY/CL identificadas, el id lleva la división, no es el paraguas suelto.
                 if (identity.umbrellaId && identity.identified) {
                     assert.ok(t.competitionId.includes('#'), `título de liga sin división real: ${t.competitionId}`);
@@ -109,7 +171,7 @@ test('el contador de títulos de cabecera = suma de honores del jugador', () => 
 
 test('un club amateur NUNCA firma contrato profesional (terminología)', () => {
     const amateurClubs = CLUBS.filter((c) => economicModelOf(c) === 'amateur');
-    const from = CLUBS.find((c) => c.competitionId === 'sa-ar')!;
+    const from = anyArgentineClub();
     for (const target of amateurClubs.slice(0, 60)) {
         for (const emp of ['amateur', 'amateur-compensated'] as const) {
             const kind = classifyMovement(from, target, emp, 'senior');
@@ -120,24 +182,44 @@ test('un club amateur NUNCA firma contrato profesional (terminología)', () => {
 });
 
 test('pase dentro de la misma unión vs entre uniones', () => {
-    const urba = CLUBS.filter((c) => c.competitionId === 'sa-ar' && (c.divisionName ?? '').includes('URBA'));
-    const cordoba = CLUBS.filter((c) => c.competitionId === 'sa-ar' && (c.divisionName ?? '').includes('Centro'));
-    assert.ok(urba.length >= 2 && cordoba.length >= 1, 'necesito clubes de URBA y Córdoba');
-    // Dentro de la URBA → pase amateur.
+    // La unión ya no se adivina del nombre del torneo: sale del canon. Antes esto
+    // filtraba por `divisionName.includes('URBA')`, que además de frágil no podía
+    // distinguir las regiones del interior entre sí.
+    const inRegion = (region: string) => CLUBS.filter((c) => arRegionOf(c.competitionId) === region);
+    const urba = inRegion('urba');
+    const cordoba = inRegion('centro');
+    const patagonia = inRegion('patagonia');
+    assert.ok(urba.length >= 2 && cordoba.length >= 1 && patagonia.length >= 1, 'faltan clubes por región');
+
+    // Dentro de la URBA → pase amateur, incluso cruzando de división.
     assert.equal(classifyMovement(urba[0], urba[1], 'amateur', 'senior'), 'amateur-pass');
-    // URBA → Córdoba → pase interuniones (sistemas paralelos).
+    // URBA → Córdoba → pase interuniones (ramas distintas, sistemas paralelos).
     assert.equal(classifyMovement(urba[0], cordoba[0], 'amateur', 'senior'), 'inter-union-pass');
+    // Y entre dos regiones del interior también: Córdoba y la Patagonia no
+    // comparten sistema. Antes las dos caían en el mismo cajón cuando el nombre
+    // del torneo no nombraba la unión.
+    assert.equal(classifyMovement(cordoba[0], patagonia[0], 'amateur', 'senior'), 'inter-union-pass');
 });
 
 test('un club profesional de otro país sí firma contrato / academia es invitación', () => {
-    const from = CLUBS.find((c) => c.competitionId === 'sa-ar')!;
+    const from = anyArgentineClub();
     const pro = CLUBS.find((c) => economicModelOf(c) === 'professional')!;
     assert.equal(classifyMovement(from, pro, 'full-time-professional', 'senior'), 'professional-contract');
     assert.equal(classifyMovement(from, pro, 'semi-professional', 'development'), 'development-invite');
 });
 
-test('un 4ª/3ª división amateur NO recibe oferta directa de la SRA', () => {
-    // Recorremos carreras AR que se quedan abajo: ningún salto a SRA desde banda <2.
+test('la SRA se ofrece por NIVEL, no por la división en la que jugués', () => {
+    // Acá se exigía banda de origen ≥2: la vía llevaba `minSourceBand` y el test
+    // protegía que un 4ª división no saltara a Dogos. En 1.26.0 esa presunción se
+    // reemplazó por la medición directa (`minOvr: 59`), porque se equivocaba en los
+    // dos extremos: dejaba afuera al de 59 de Primera B —invisible por el escudo
+    // que tenía puesto y no por lo que valía— y dejaba entrar al de 48 de Primera
+    // A, porque la aceptación corre contra `marketValue`, que a un pibe de 18 le
+    // suma proyección. Medido con la banda, el 62% de los debutantes de la rama
+    // larga recibía oferta de la SRA; con el nivel, el 0%.
+    //
+    // El invariante nuevo es el que de verdad importa y es más fuerte: la SRA NO
+    // aparece sin el nivel que la vía declara, en ninguna división.
     for (const seed of SEEDS.slice(0, 20)) {
         let state = createInitialCareer({ position: 'prop', nationalityCountryCode: 'ar' }, seed);
         let guard = 0;
@@ -146,10 +228,24 @@ test('un 4ª/3ª división amateur NO recibe oferta directa de la SRA', () => {
             const event = getPendingEvent(state);
             if (event && event.id === TRANSFER_EVENT_ID) {
                 const before = getClub(state.player.club);
+                const ovr = computeOvr(state.player.attributes, state.player.position);
                 for (const offer of state.offers) {
                     const target = getClub(offer.club);
+                    // EL QUE YA ESTÁ EN LA SRA NO TIENE QUE VOLVER A ENTRAR.
+                    //
+                    // El `minOvr: 59` de la vía es un requisito de INGRESO: cuánto
+                    // hay que valer para que una franquicia te saque de tu liga
+                    // doméstica. Desde 1.28.0 se puede ARRANCAR en Selknam —un
+                    // juvenil de academia de una franquicia SRA— y entonces pasar
+                    // de Selknam a Dogos no es entrar a la SRA: es moverse adentro,
+                    // que es un pase normal entre clubes del mismo nivel y no tiene
+                    // por qué pedir el nivel de ingreso.
+                    if (before.competitionId === 'sra') continue;
                     if (target.competitionId === 'sra') {
-                        assert.ok(sportingBandOf(before) >= 2, `SRA ofrecida desde banda ${sportingBandOf(before)} (${before.name})`);
+                        assert.ok(
+                            ovr >= 59,
+                            `SRA ofrecida con OVR ${ovr} desde ${before.name} (banda ${sportingBandOf(before)})`,
+                        );
                     }
                 }
             }
@@ -226,7 +322,15 @@ test('OVR nunca supera al potencial (techo respetado) y no hay NaN', () => {
         assert.ok(!Number.isNaN(state.player.potential));
         for (const h of state.history) {
             assert.ok(!Number.isNaN(h.ovr), 'OVR NaN');
-            assert.ok(h.ovr <= state.player.potential + 1, `OVR ${h.ovr} supera potencial ${state.player.potential}`);
+            // La tolerancia es de RUIDO, no de crecimiento: `growthScaleFor`
+            // devuelve 0 en el techo, pero `attributeDelta` sigue sumando su
+            // ±0.4 por atributo, y el pico de la carrera es un MÁXIMO sobre
+            // veinte temporadas, así que captura la mayor excursión positiva de
+            // ese ruido. Medido sobre 29.411 temporadas: el 3,44% queda por
+            // encima del techo, el 85% de esas por 1 solo punto, y el desborde
+            // máximo observado es 4. Que el techo se respete de verdad lo
+            // vigila `progression-ceiling.test.ts`, que mide crecimiento real.
+            assert.ok(h.ovr <= state.player.potential + 4, `OVR ${h.ovr} supera potencial ${state.player.potential}`);
         }
     }
 });

@@ -153,11 +153,33 @@ test('cada NIVEL vive dentro de su banda de rating y la pirámide no se invierte
     }
 });
 
-test('ningún club amateur supera rating 46 (regla dura AR/UY/CL)', () => {
+test('el amateurismo topea debajo del piso profesional de la región', () => {
+    // La regla vieja era "ningún club amateur supera 46", y se escribió cuando
+    // Argentina eran cuatro escalones planos. Con los SIETE niveles del canon,
+    // 46 no puede sostener a la vez la cima y la base de la pirámide: el URBA
+    // Top 14 y el Torneo Local de Córdoba quedarían casi empatados.
+    //
+    // El invariante que importa —y que es más fuerte— es que dar el salto al
+    // profesionalismo siga siendo un salto: el techo amateur tiene que quedar
+    // DEBAJO de la franquicia más floja de Super Rugby Americas.
     const [, amateurCap] = LEVEL_RATING.amateur;
-    assert.equal(amateurCap, 46, 'la banda amateur debe topear en 46');
-    for (const club of CLUBS.filter((c) => c.level === 'amateur')) {
-        assert.ok(club.rating <= 46, `${club.name}: amateur con rating ${club.rating}`);
+    assert.equal(amateurCap, 52, 'la banda amateur debe topear en 52');
+
+    const amateurs = CLUBS.filter((c) => c.level === 'amateur');
+    for (const club of amateurs) {
+        assert.ok(club.rating <= amateurCap, `${club.name}: amateur con rating ${club.rating}`);
+    }
+
+    const sraFloor = Math.min(...CLUBS.filter((c) => c.competitionId === 'sra').map((c) => c.rating));
+    const amateurCeiling = Math.max(...amateurs.map((c) => c.rating));
+    assert.ok(
+        amateurCeiling < sraFloor,
+        `el techo amateur (${amateurCeiling}) debe quedar debajo del piso SRA (${sraFloor})`,
+    );
+
+    // Uruguay y Chile siguen saliendo del loader de Supabase, con su tope en 46.
+    for (const club of CLUBS.filter((c) => c.competitionId === 'sa-uy' || c.competitionId === 'sa-cl')) {
+        assert.ok(club.rating <= 46, `${club.name}: UY/CL topea en 46, tiene ${club.rating}`);
     }
 });
 
@@ -190,6 +212,86 @@ test('Super Rugby Americas: 8 franquicias REALES, profesionales y regionales', (
         assert.equal(club.professionalStatus, 'professional', `${club.name}: debe ser profesional`);
         assert.equal(club.source, 'career-static', 'las franquicias SRA no son clubes de Supabase');
     }
+});
+
+test('MLR 2026: SEIS equipos, no los once de 2025', () => {
+    // El conteo es el gate que impide mezclar temporadas, y acá es lo único que
+    // atrapa el error más probable de esta liga: la MLR se derrumbó de once equipos
+    // a seis en un año —se retiraron NOLA Gold, Miami Sharks, Houston SaberCats
+    // (finalista 2025) y Utah Warriors, y San Diego + Los Angeles se fusionaron en
+    // California Legion— así que cualquier roster de 2025 que se cuele tiene el
+    // tamaño mal.
+    const mlr = ROSTERS_2026_27.find((g) => g.competitionId === 'us-mlr');
+    assert.ok(mlr, 'la MLR debe estar en el catálogo');
+    assert.equal(mlr!.clubs.length, 6, 'seis equipos en 2026');
+    assert.deepEqual(
+        [...mlr!.clubs].sort(),
+        ['Anthem RC', 'California Legion', 'Chicago Hounds', 'New England Free Jacks', 'Old Glory DC', 'Seattle Seawolves'],
+    );
+    // Los cuatro que se retiraron y los dos que se fusionaron NO pueden estar.
+    for (const ido of ['NOLA Gold', 'Miami Sharks', 'Houston SaberCats', 'Utah Warriors', 'San Diego Legion', 'Rugby FC Los Angeles']) {
+        assert.ok(!CLUBS.some((c) => c.name === ido), `${ido} ya no juega la MLR 2026`);
+    }
+    // Profesional de verdad: convenio colectivo firmado con la USRPA en 2026.
+    for (const club of CLUBS.filter((c) => c.competitionId === 'us-mlr')) {
+        assert.equal(club.professionalStatus, 'professional', `${club.name}: la MLR es profesional`);
+    }
+});
+
+test('el universitario de EE.UU. son DOS pirámides paralelas, no una', () => {
+    // El rugby masculino no es deporte NCAA y desde 2021 hay dos campeonatos
+    // nacionales separados: CRAA (final en primavera) y NCR (quince en diciembre).
+    // Este test cuida que sigan siendo dos competiciones distintas: si alguien las
+    // fusiona "para simplificar", se pierde el hecho estructural del país.
+    const d1a = CLUBS.filter((c) => c.competitionId === 'us-d1a');
+    const ncr = CLUBS.filter((c) => c.competitionId === 'us-ncr-d1');
+    assert.equal(d1a.length, 12, 'los doce mejores programas D1A');
+    assert.equal(ncr.length, 8, 'la Ivy League entera en NCR DI');
+    assert.equal(new Set([...d1a, ...ncr].map((c) => c.id)).size, 20, 'ningún programa en las dos');
+    // Cal es la cima y no por poco: campeón 2025 y 2026, invicto, 30 títulos.
+    const cal = CLUBS.find((c) => c.name === 'California')!;
+    assert.equal(cal.rating, Math.max(...d1a.map((c) => c.rating)), 'California es la cima de la D1A');
+    // La Ivy juega en NCR desde 2022: si aparece en la CRAA, alguien la movió mal.
+    for (const ivy of ['Brown', 'Harvard', 'Yale', 'Princeton', 'Dartmouth', 'Cornell', 'Penn', 'Columbia']) {
+        assert.equal(CLUBS.find((c) => c.name === ivy)!.competitionId, 'us-ncr-d1', `${ivy} compite en NCR`);
+    }
+});
+
+test('Portugal, Italia y Brasil entran con su plantel real', () => {
+    const count = (id: string) => CLUBS.filter((c) => c.competitionId === id).length;
+    assert.equal(count('pt-honra'), 12, 'la FPR lo llama TOP 12 Divisão de Honra');
+    assert.equal(count('ita-serie-a-elite'), 10, 'la reforma 2026-27 deja la Élite congelada en 10');
+    assert.equal(count('br-super12'), 12, 'Super 12');
+
+    // Siete de los doce portugueses son de Lisboa, y nadie fuera del eje
+    // Lisboa-Cascais pelea el título. Es la forma de esa liga, no una casualidad.
+    const lisboa = ['Agronomia', 'Belenenses', 'Benfica', 'São Miguel', 'Técnico', 'CDUL', 'Direito'];
+    for (const name of lisboa) {
+        assert.equal(CLUBS.find((c) => c.name === name)!.competitionId, 'pt-honra', name);
+    }
+    // Benfica campeón 2025-26 (su 10º título, el primero desde 2001) tiene que
+    // estar arriba, y CDUL —20 títulos y hoy sin pelear— arriba en PRESTIGIO.
+    const pt = (name: string) => CLUBS.find((c) => c.name === name)!;
+    assert.equal(pt('Benfica').rating, Math.max(...CLUBS.filter((c) => c.competitionId === 'pt-honra').map((c) => c.rating)));
+    assert.equal(pt('CDUL').prestige, Math.max(...CLUBS.filter((c) => c.competitionId === 'pt-honra').map((c) => c.prestige)));
+
+    // BENETTON Y ZEBRE NO ESTÁN EN LA PIRÁMIDE ITALIANA: juegan la URC. Es la clave
+    // del rugby italiano y lo que hace que el Scudetto no lo peleen los dos mejores
+    // clubes del país.
+    for (const name of ['Benetton Treviso', 'Zebre Parma']) {
+        assert.equal(CLUBS.find((c) => c.name === name)!.competitionId, 'urc', `${name} está fuera de la Serie A Élite`);
+    }
+    // Valorugby, primer Scudetto de su historia y doblete, es la cima de la Élite.
+    const elite = CLUBS.filter((c) => c.competitionId === 'ita-serie-a-elite');
+    assert.equal(CLUBS.find((c) => c.name === 'Valorugby Emilia')!.rating, Math.max(...elite.map((c) => c.rating)));
+    // Colorno fue excluido el 2 de marzo de 2026: no puede estar en el catálogo.
+    assert.ok(!CLUBS.some((c) => /colorno/i.test(c.name)), 'HBS Colorno retiró su primer equipo');
+
+    // Brasil: Cobras NO es un club del Super 12, es la franquicia de la
+    // confederación. Si apareciera en la liga doméstica, el sistema estaría mal.
+    assert.equal(CLUBS.find((c) => c.name === 'Cobras Brasil Rugby')!.competitionId, 'sra');
+    // Nova Lima, primer club de Minas Gerais en la historia de la primera división.
+    assert.equal(CLUBS.find((c) => c.name === 'Nova Lima')!.competitionId, 'br-super12');
 });
 
 test('marketBand refleja economía, no solo fuerza (Japón D1 rico)', () => {

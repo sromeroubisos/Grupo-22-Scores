@@ -222,4 +222,74 @@ export const PERSONAL_EVENTS: GameEvent[] = [
             },
         ],
     },
+    {
+        id: 'per-summer-coach',
+        category: 'personal',
+        title: 'El verano con un ex Puma',
+        text: 'Un ex Puma que se retiró en tu zona te ofrece entrenarte de lunes a sábado todo el verano. Sin cobrarte.',
+        weight: 8,
+        repeatable: true,
+        cooldown: 6,
+        maxAge: 30,
+        options: [
+            {
+                id: 'train',
+                label: 'Entrenar con él',
+                hint: 'Te come el verano entero. Volvés otro jugador.',
+                outcomes: [
+                    // ⭐ +1 y no +2, MEDIDO: con +2 el jugador llegaba a su techo
+                    // dos o tres temporadas antes y la meseta del pico se estiraba
+                    // a seis (`progression-ceiling.test.ts` la acota en cuatro).
+                    // El grueso del crecimiento tiene que salir de la temporada,
+                    // no de las tarjetas.
+                    { weight: 70, effect: { valoracion: 1, fatigue: 5 }, resultText: 'Tres meses de doble turno con alguien que jugó arriba. Se te nota desde la primera fecha.' },
+                    { weight: 30, effect: { fatigue: 10, morale: -2, mental: 1 }, resultText: 'Le metés al verano entero y llegás a la pretemporada con el tanque a medio llenar.' },
+                ],
+            },
+            {
+                id: 'rest',
+                label: 'Descansar el verano',
+                hint: 'Llegás fresco a la pretemporada y sin nada nuevo.',
+                outcomes: [
+                    { weight: 1, effect: { fatigue: -12, injuryRisk: -3, morale: 2 }, resultText: 'Te tomás el verano. Volvés entero, con el mismo juego que te fuiste.' },
+                ],
+            },
+        ],
+    },
+    {
+        id: 'per-teammate-late',
+        category: 'personal',
+        title: 'El que llegó tarde',
+        text: 'Un compañero cayó a entrenar una hora tarde y sin aviso. El técnico junta al plantel y pregunta quién fue.',
+        weight: 9,
+        repeatable: true,
+        cooldown: 5,
+        options: [
+            {
+                id: 'cover',
+                label: 'Cubrirlo',
+                hint: 'El vestuario te lo va a devolver. Si se enteran, lo pagás vos.',
+                outcomes: [
+                    { weight: 60, effect: { morale: 4, flags: { vestuario: 1 } }, resultText: 'Decís que venía con vos y llegaron juntos. El plantel se da cuenta y te lo anota a favor.' },
+                    { weight: 40, effect: { morale: -4, playingTime: -1 }, resultText: 'El técnico ya sabía la respuesta antes de preguntar. Mentirle te sale caro.' },
+                ],
+            },
+            {
+                id: 'truth',
+                label: 'Decir la verdad',
+                hint: 'El cuerpo técnico te cree. El vestuario tarda más.',
+                outcomes: [
+                    { weight: 1, effect: { mental: 2, morale: -3, flags: { derecho: 1 } }, resultText: 'Lo decís sin adornos. El técnico te lo agradece y el grupo se queda callado.' },
+                ],
+            },
+            {
+                id: 'stay-out',
+                label: 'No involucrarte',
+                hint: 'Nadie te va a reprochar nada. Nadie te va a deber nada.',
+                outcomes: [
+                    { weight: 1, effect: { mental: 1 }, resultText: 'Mirás el pasto hasta que la reunión termina. Alguien más contesta.' },
+                ],
+            },
+        ],
+    },
 ];

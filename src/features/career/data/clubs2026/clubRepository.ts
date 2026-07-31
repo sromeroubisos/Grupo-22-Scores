@@ -132,12 +132,17 @@ function contentHash(clubs: ClubDef[]): string {
 export async function buildCatalogSnapshot(repo: ClubRepository, catalogVersion: string): Promise<CatalogSnapshot> {
     const sa = await repo.listSouthAmericaClubs();
     const seen = new Set(WORLD_CLUBS.map((c) => c.id));
-    const extra = sa.filter((c) => !seen.has(c.id));
+    // ARGENTINA YA NO SALE DE ACÁ. Sus clubes vienen del canon
+    // (`arSystem2026.ts`), con su división real y su rama. Una fila argentina del
+    // repositorio que no matcheó con el canon entraría como club de `sa-ar`, que
+    // es una liga que dejó de existir: quedaría en un torneo fantasma, sin campo
+    // competitivo y sin título posible. El repositorio sirve Uruguay y Chile.
+    const extra = sa.filter((c) => !seen.has(c.id) && c.countryCode !== 'ar');
     const merged = [...WORLD_CLUBS, ...extra];
-    // Se cuenta sobre el resultado FUSIONADO: los clubes de Supabase ya pueden
-    // venir integrados en el catálogo, y entonces `extra` queda vacío.
     const fromSupabase = merged.filter((c) => c.source === 'supabase');
-    const byCountry = (cc: string) => fromSupabase.filter((c) => c.countryCode === cc).length;
+    // Se cuenta POR PAÍS sobre el catálogo fusionado, sin mirar el `source`: a
+    // los argentinos los pone el canon y antes esto los contaba como cero.
+    const byCountry = (cc: string) => merged.filter((c) => c.countryCode === cc).length;
 
     return {
         catalogVersion,

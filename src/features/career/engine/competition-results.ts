@@ -116,7 +116,15 @@ function scoreField(field: ClubDef[], volatility: number, rng: Rng, boostedClubI
  * jugador (rendimiento + empujes de decisiones), en puntos de rating.
  */
 export function resolveLeagueFinish(club: ClubDef, rng: Rng, boost: number): LeagueStanding {
-    const field = leagueFieldOf(club);
+    // EL ASCENDIDO ENTRA A SU CAMPO NUEVO. `leagueFieldOf` arma el campo desde el
+    // CATÁLOGO, donde el club sigue figurando en su división vieja: sin esto, un
+    // club que ascendió no se encontraba a sí mismo en la tabla del Top 14 y
+    // `findIndex` devolvía −1, o sea último todos los años. Se agrega en vez de
+    // sacar al peor: sacarlo sería inventarle un descenso a otro club, y el motor
+    // no simula las otras ligas. Sin ascensos ni descensos el club ya está en su
+    // campo y esta línea no cambia nada.
+    const base = leagueFieldOf(club);
+    const field = base.some((c) => c.id === club.id) ? base : [...base, club];
     if (field.length <= 1) {
         return { competitionId: club.competitionId, position: 1, teams: Math.max(1, field.length) };
     }

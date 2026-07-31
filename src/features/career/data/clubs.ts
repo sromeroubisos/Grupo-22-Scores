@@ -9,10 +9,18 @@
 import { ROSTERS_2026_27, LEVEL_RATING, CATALOG_SEASON, type ClubLevel, type ProfessionalStatus } from './clubs2026/rosters2026.ts';
 import { CLUB_STRENGTH, type ClubStrength } from './clubs2026/clubStrength.ts';
 import { SA_CLUBS, SA_SNAPSHOT_VERSION } from './clubs2026/saClubs.generated.ts';
+import { AR_CLUBS } from './clubs2026/arCatalog.ts';
+import { AR_DIVISIONS, AR_SYSTEM_VERSION } from './clubs2026/arSystem2026.ts';
 
-// 2026-27.6: se elimina la copa ficticia "Copa Sudamericana" y entra la
-// competición REAL de la región (Super Rugby Americas, 8 franquicias).
-export const CLUB_CATALOG_VERSION = '2026-27.7';
+// 2026-27.8: Argentina deja de ser una liga paraguas de cuatro escalones y pasa
+// a ser el sistema real de dos ramas (URBA + interior) declarado en
+// `clubs2026/arSystem2026.ts`.
+// 2026-27.9: entran cinco sistemas nuevos — Major League Rugby y el universitario
+// de EE.UU. (dos pirámides paralelas: CRAA D1A y NCR DI), la Divisão de Honra
+// portuguesa, la Serie A Élite italiana con su Serie A debajo, y el Super 12
+// brasileño. Con ellos, cuatro países más tienen escalera doméstica propia (us,
+// pt, it, br) y tres copas nuevas (Taça de Portugal, Supertaça, Coppa Italia).
+export const CLUB_CATALOG_VERSION = '2026-27.9';
 
 /**
  * Versión del catálogo NORMALIZADO completo = estático internacional + snapshot
@@ -21,7 +29,7 @@ export const CLUB_CATALOG_VERSION = '2026-27.7';
  * constante escrita a mano no puede versionar filas remotas mutables: por eso
  * son dos piezas y la carrera sella las dos.
  */
-export const NORMALIZED_CATALOG_VERSION = `${CLUB_CATALOG_VERSION}+sa.${SA_SNAPSHOT_VERSION}`;
+export const NORMALIZED_CATALOG_VERSION = `${CLUB_CATALOG_VERSION}+sa.${SA_SNAPSHOT_VERSION}+ar.${AR_SYSTEM_VERSION}`;
 
 export type MarketBand = number; // 1 amateur … 6 gigante
 export type { ProfessionalStatus };
@@ -78,7 +86,15 @@ export interface ClubDef {
     rating: number;
     marketBand: MarketBand;
     professionalStatus: ProfessionalStatus;
-    source: 'career-static' | 'supabase';
+    /**
+     * De dónde salió el club:
+     *   · `career-static` — roster internacional escrito a mano en este repo;
+     *   · `canon-ar` — sistema argentino declarado en `arSystem2026.ts` (la
+     *     división y la fuerza salen del canon; el `sourceId` con el que se pide
+     *     el escudo se hereda del catálogo real);
+     *   · `supabase` — fila del catálogo real (hoy Uruguay y Chile).
+     */
+    source: 'career-static' | 'canon-ar' | 'supabase';
     sourceId: string | null;
     seasonVersion: string;
 
@@ -161,11 +177,35 @@ function buildCatalog(): { clubs: ClubDef[]; leagues: Record<string, LeagueDef> 
         }
     }
 
-    // Ligas domésticas AR/UY/CL: reales, alimentadas por el snapshot generado
-    // desde Supabase. Se registran solo si hay clubes, para que `clubLeague()`
-    // resuelva y el grafo no quede con ligas fantasma.
+    // ── Argentina: una liga POR DIVISIÓN REAL ────────────────────────────────
+    //
+    // No hay "Liga Argentina". El rugby argentino son dos ramas paralelas —la
+    // URBA y el interior— y cada división es su propia competición, igual que
+    // Pro D2 o Fédérale 1. Es lo que permite declarar que el campeón de Primera
+    // A asciende al Top 14 sin que ascienda también el campeón de Córdoba, y que
+    // los cupos del Torneo del Interior salgan de cada regional.
+    for (const division of AR_DIVISIONS) {
+        leagues[division.competitionId] = {
+            id: division.competitionId,
+            labelEs: division.label,
+            tier: LEVEL_TIER.amateur,
+            continental: false,
+            kind: 'domestic-league',
+            region: 'south-america',
+            level: 'amateur',
+        };
+    }
+    for (const club of AR_CLUBS) {
+        if (usedIds.has(club.id)) continue;
+        usedIds.add(club.id);
+        clubs.push(club);
+    }
+
+    // Ligas domésticas UY/CL: siguen saliendo del snapshot generado desde
+    // Supabase, que es la única fuente que hay para ellas. Se registran solo si
+    // hay clubes, para que `clubLeague()` resuelva y el grafo no quede con ligas
+    // fantasma. `sa-ar` ya no está: lo reemplaza el sistema de arriba.
     const SA_LEAGUES: [string, string, string][] = [
-        ['sa-ar', 'Liga Argentina', 'ar'],
         ['sa-uy', 'Liga Uruguaya', 'uy'],
         ['sa-cl', 'Liga Chilena', 'cl'],
     ];

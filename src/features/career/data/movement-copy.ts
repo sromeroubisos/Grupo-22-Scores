@@ -4,6 +4,7 @@
 // profesionales firman contrato. Sin números internos.
 
 import type { MovementKind } from '../types/career.ts';
+import type { ClubTenure } from '../engine/club-tenure.ts';
 
 /** Etiqueta corta del vínculo/movimiento (para chips e hitos). */
 export const MOVEMENT_LABELS: Readonly<Record<MovementKind, string>> = {
@@ -21,11 +22,34 @@ export interface MovementOptionCopy {
     hint: string;
 }
 
-/** Texto de la opción de decisión para un movimiento concreto. */
+/** Femenino, para contar temporadas. "Una más" se lee; "1 más" se cuenta. */
+const SEASONS_AWAY = ['Cero', 'Una', 'Dos', 'Tres', 'Cuatro', 'Cinco', 'Seis', 'Siete', 'Ocho', 'Nueve'];
+
+/**
+ * Hint de "seguir en el club": dice QUÉ ESTÁ CONSTRUYENDO, no una abstracción.
+ *
+ * Enfrente hay dos ofertas con club, liga, escalón y motivo. Contra eso,
+ * "Fidelidad y estabilidad" no compite: es una virtud, no un progreso. El
+ * jugador tiene que poder ver que quedarse también avanza hacia algo.
+ */
+export function stayHint(tenure: ClubTenure): string {
+    const season = `Tu ${tenure.current}ª temporada en el club.`;
+    if (tenure.next === null) {
+        return `${season} Ya sos ${tenure.tier ? tenure.tier.label.toLowerCase() : 'parte de la casa'} acá.`;
+    }
+    const away = SEASONS_AWAY[tenure.next.seasonsAway] ?? String(tenure.next.seasonsAway);
+    return `${season} ${away} más para ser ${tenure.next.tier.label.toLowerCase()}.`;
+}
+
+/**
+ * Texto de la opción de decisión para un movimiento concreto. `tenure` solo se
+ * usa en `stay`: sin él la opción cae al texto genérico de siempre.
+ */
 export function movementOptionCopy(
     kind: MovementKind,
     clubName: string,
     roleLabel: string,
+    tenure?: ClubTenure,
 ): MovementOptionCopy {
     switch (kind) {
         case 'amateur-pass':
@@ -42,7 +66,10 @@ export function movementOptionCopy(
             return { label: `Firmar con ${clubName}`, hint: `Contrato profesional · ${roleLabel}` };
         case 'stay':
         default:
-            return { label: `Seguir en ${clubName}`, hint: 'Fidelidad y estabilidad.' };
+            return {
+                label: `Seguir en ${clubName}`,
+                hint: tenure ? stayHint(tenure) : 'Fidelidad y estabilidad.',
+            };
     }
 }
 
@@ -74,17 +101,43 @@ export interface OfferSignals {
 }
 
 /**
- * La razón MÁS FUERTE, en una línea. Se muestra una sola: dos o tres motivos
- * juntos convierten la tarjeta en un informe y dejan de leerse.
+ * CUÁL es la razón más fuerte, como dato. La frase sale de acá (abajo) y también
+ * la traducción: si la capa de idioma tuviera que deducirla del texto en español,
+ * un motivo nuevo aparecería sin traducir y nadie se enteraría.
  */
-export function offerReason(s: OfferSignals): string | null {
-    if (s.outperformsClub) return 'Venís rindiendo por encima de tu club';
-    if (s.starterSeasons >= 2) return `Sos titular hace ${s.starterSeasons} temporadas`;
-    if (s.homecoming) return 'Te quieren de vuelta en casa';
-    if (s.pathway) return 'Te vienen siguiendo desde afuera';
-    if (s.hot) return 'Venís en racha';
-    if (s.youngProspect) return 'Les interesa tu proyección';
+export type OfferReasonKey =
+    | 'outperformsClub'
+    | 'starterSeasons'
+    | 'homecoming'
+    | 'pathway'
+    | 'hot'
+    | 'youngProspect';
+
+/**
+ * La razón MÁS FUERTE. Se elige una sola: dos o tres motivos juntos convierten la
+ * tarjeta en un informe y dejan de leerse.
+ */
+export function offerReasonKey(s: OfferSignals): OfferReasonKey | null {
+    if (s.outperformsClub) return 'outperformsClub';
+    if (s.starterSeasons >= 2) return 'starterSeasons';
+    if (s.homecoming) return 'homecoming';
+    if (s.pathway) return 'pathway';
+    if (s.hot) return 'hot';
+    if (s.youngProspect) return 'youngProspect';
     return null;
+}
+
+/** La misma razón, ya escrita en una línea. */
+export function offerReason(s: OfferSignals): string | null {
+    switch (offerReasonKey(s)) {
+        case 'outperformsClub': return 'Venís rindiendo por encima de tu club';
+        case 'starterSeasons': return `Sos titular hace ${s.starterSeasons} temporadas`;
+        case 'homecoming': return 'Te quieren de vuelta en casa';
+        case 'pathway': return 'Te vienen siguiendo desde afuera';
+        case 'hot': return 'Venís en racha';
+        case 'youngProspect': return 'Les interesa tu proyección';
+        default: return null;
+    }
 }
 
 /** Frase de resultado al concretar el movimiento (para el revelado). */

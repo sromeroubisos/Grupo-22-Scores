@@ -7,6 +7,16 @@ export interface OriginDef {
     id: string;
     labelEs: string;
     description: string;
+    /**
+     * YA NO FIJA LA EDAD DE DEBUT (1.26.0): todos debutan a los 18
+     * (`START_AGE` en engine/create-player.ts). Se conserva porque la guía de
+     * orígenes lo muestra como rasgo del camino —el universitario llega tarde al
+     * rugby organizado, y eso sigue siendo cierto— pero el motor no lo lee.
+     *
+     * Si alguien viene a usarlo para calcular una edad, ésa es la razón por la
+     * que no debe: dos partidas con distinta edad de arranque no se pueden
+     * comparar, y la diferencia no era la decisión de nadie.
+     */
     startAge: number;
     startTier: number; // nivel del primer club (1 elite … 4 ascenso)
     fameStart: number;

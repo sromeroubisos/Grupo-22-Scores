@@ -239,4 +239,112 @@ export const CLUB_EVENTS: GameEvent[] = [
             },
         ],
     },
+    // ── El puesto, semana a semana ───────────────────────────────────────────
+    // Las tres decisiones que faltaban del eje 🕒: la competencia por el puesto,
+    // el banco que se hace largo y la cinta que queda libre. Son las que hacen
+    // que el tiempo de juego se pueda pelear, y no sólo esperar.
+    {
+        id: 'club-coach-doubts',
+        category: 'club',
+        title: 'El técnico duda entre vos y otro',
+        text: 'El entrenador prueba a los dos en la semana y no larga el equipo hasta el viernes. Vos sabés que el puesto es de uno.',
+        weight: 12,
+        repeatable: true,
+        cooldown: 3,
+        options: [
+            {
+                id: 'meeting',
+                label: 'Pedir una reunión',
+                hint: 'Sabés a qué atenerte. La respuesta puede no gustarte.',
+                outcomes: [
+                    { weight: 60, effect: { playingTime: 2, mental: 1 }, resultText: 'Te dice qué quiere ver y se lo das. El viernes tu nombre está en el equipo.' },
+                    { weight: 40, effect: { mental: 2, morale: -2 }, resultText: 'Te escucha, te agradece la charla y arranca el otro. Al menos ya sabés dónde estás parado.' },
+                ],
+            },
+            {
+                id: 'wait',
+                label: 'Esperar tu oportunidad',
+                hint: 'Sin ruido. El puesto lo decide él y puede no ser tuyo.',
+                outcomes: [
+                    { weight: 30, effect: { playingTime: 1, technique: 1 }, resultText: 'Trabajás en silencio y la oportunidad llega igual, a mitad de temporada.' },
+                    { weight: 70, effect: { playingTime: -1, morale: -2 }, resultText: 'El otro arranca y no lo saca más. Tu semana se vuelve entrenar y mirar.' },
+                ],
+            },
+            {
+                id: 'other-position',
+                label: 'Ofrecerte para otro puesto',
+                hint: 'Entrás igual, en un lugar que no es el tuyo.',
+                outcomes: [
+                    { weight: 1, effect: { vision: 2, mental: 2, playingTime: 1, form: -2 }, resultText: 'Le decís que podés cubrir el otro lado. Jugás casi todo, aunque nunca donde querés.' },
+                ],
+            },
+        ],
+    },
+    {
+        id: 'club-bench-third-game',
+        category: 'club',
+        title: 'Tercer partido en el banco',
+        text: 'Tercer domingo sin entrar. Calentás veinte minutos, te sentás y el partido se termina sin vos.',
+        weight: 12,
+        repeatable: true,
+        cooldown: 3,
+        minAge: 20,
+        options: [
+            {
+                id: 'talk',
+                label: 'Hablar con el entrenador',
+                hint: 'Te va a decir la verdad. La verdad puede ser que no entrás.',
+                outcomes: [
+                    { weight: 55, effect: { playingTime: 2, morale: 2 }, resultText: 'Le pedís cinco minutos y salís con una lista de cosas para corregir. El domingo entrás.' },
+                    { weight: 45, effect: { playingTime: -1, morale: -4 }, resultText: 'Te dice que hoy no estás para arrancar. Es honesto y duele igual.' },
+                ],
+            },
+            {
+                id: 'work',
+                label: 'Esperar trabajando',
+                hint: 'Nadie se enoja. Tampoco nadie se acuerda de vos.',
+                outcomes: [
+                    { weight: 35, effect: { playingTime: 1, technique: 1, mental: 1 }, resultText: 'Sos el primero en llegar y el último en irse. Una lesión te abre la puerta y no la sueltas.' },
+                    { weight: 65, effect: { playingTime: -1, form: -3 }, resultText: 'Las semanas pasan iguales. Sin partidos, el ritmo se va solo.' },
+                ],
+            },
+            {
+                id: 'ask-out',
+                label: 'Pedir salir del club',
+                hint: 'Te sacás la mochila. El club deja de contar con vos.',
+                outcomes: [
+                    { weight: 1, effect: { playingTime: -2, morale: -3, fame: 2, flags: { pidio_salir: 1 } }, resultText: 'Pedís permiso para buscar club. Te lo dan, y desde ese lunes ya no entrás en los planes.' },
+                ],
+            },
+        ],
+    },
+    {
+        id: 'club-captain-injured',
+        category: 'club',
+        title: 'El capitán se rompió',
+        text: 'El capitán sale en camilla y estará afuera medio año. El técnico mira al plantel buscando quién agarra la cinta.',
+        weight: 10,
+        repeatable: true,
+        cooldown: 5,
+        minAge: 23,
+        options: [
+            {
+                id: 'step-up',
+                label: 'Ofrecerte para liderar',
+                hint: 'Cargás con el grupo además de con tu partido.',
+                outcomes: [
+                    { weight: 70, effect: { valoracion: 1, fame: 5, morale: 3, flags: { capitan_interino: 1 } }, resultText: 'Levantás la mano y el vestuario te acompaña. Te queda bien la cinta.' },
+                    { weight: 30, effect: { morale: -3, form: -2 }, resultText: 'Te queda grande por ahora: pensando en los otros catorce, tu partido se te escapa.' },
+                ],
+            },
+            {
+                id: 'let-be',
+                label: 'Dejar que elijan a otro',
+                hint: 'Seguís con lo tuyo. La cinta pasa de largo.',
+                outcomes: [
+                    { weight: 1, effect: { technique: 1, mental: 1, form: 2 }, resultText: 'Preferís no levantar la mano. Jugás liviano y sin discursos.' },
+                ],
+            },
+        ],
+    },
 ];

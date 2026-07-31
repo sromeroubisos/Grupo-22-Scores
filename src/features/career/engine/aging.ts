@@ -71,7 +71,7 @@ function clamp(value: number, lo: number, hi: number): number {
  * recorrido y CERO al llegar. Así el techo se alcanza (el empuje le gana al
  * declive incipiente) y además se respeta (no hay crecimiento por encima).
  */
-const CEILING_PUSH = 0.85;
+const CEILING_PUSH = 0.6;
 
 /**
  * Escala de crecimiento según lo lejos que esté el TECHO del jugador. Es lo que
@@ -83,11 +83,30 @@ const CEILING_PUSH = 0.85;
  * Sin `position` conserva la forma vieja (asintótica, sin empuje): la usan los
  * tests de progresión que miden la curva desnuda.
  */
+/**
+ * TOPE DE LA ESCALA. 2.8 → 3.4 en 1.13.0.
+ *
+ * La FORMA no cambió: el ritmo sigue siendo proporcional al margen que falta y
+ * sigue dando cero en el techo. Lo que cambió es hasta dónde puede escalar esa
+ * proporcionalidad. Con 2.8 el recorte mordía justo a quien más margen tenía —un
+ * juvenil de OVR 40 con techo 90 pide 5.0 y recibía 2.8—, así que el de techo
+ * alto crecía al mismo ritmo que el de techo medio y se quedaba clavado a mitad
+ * de camino.
+ *
+ * Medido: con el reparto de techos ensanchado y el recorte en 2.8, sólo el 61%
+ * de las mesetas largas ocurría EN el techo, contra el 70% que exige el
+ * invariante de 1.9.0. Con 3.4 vuelve a cumplirse.
+ *
+ * No es "que todos crezcan más rápido": el de techo 70 pide 2.5 y nunca tocó el
+ * recorte, así que su carrera es idéntica. Es que el de techo 90 pueda llegar.
+ */
+const GROWTH_SCALE_CAP = 3.4;
+
 export function growthScaleFor(ovr: number, potential: number, position?: Position): number {
     const gap = potential - ovr;
     if (gap <= 0) return 0; // el techo es un techo: no se crece por encima
     const push = position === undefined ? 0 : CEILING_PUSH;
-    return clamp(gap / 12 + push, 0, 2.8);
+    return clamp(gap / 12 + push, 0, GROWTH_SCALE_CAP);
 }
 
 /**
@@ -99,12 +118,47 @@ export function growthScaleFor(ovr: number, potential: number, position?: Positi
  * envejecimiento se aplica ANTES de simular la temporada (no hay rating todavía)
  * y además es lo más fiel al deporte — venías de un gran año y das el salto.
  */
-export function meritDrive(previous: { rating: number; role: PlayerRole } | undefined): number {
+export function meritDrive(
+    previous: { rating: number; role: PlayerRole; leaguePosition?: number; teams?: number } | undefined,
+): number {
     if (previous === undefined) return 1; // debut: no hay nada que premiar ni castigar
     // 6.6 es el rating de una temporada correcta: por encima empuja, por debajo frena.
     const byRating = clamp(1 + (previous.rating - 6.6) * 0.13, 0.82, 1.22);
     const byRole = previous.role === 'starter' ? 1.06 : previous.role === 'rotation' ? 1 : 0.93;
-    return clamp(byRating * byRole, 0.8, 1.26);
+    // EL RANGO PROPIO SE ACOTA PRIMERO, y después se aplica el club. Multiplicar
+    // los tres y recortar una sola vez al final ensanchaba el rango del jugador
+    // SIN club: un 9,9 de titular pasaba de 1,26 a 1,2932 sin que nadie hubiera
+    // pedido que rendir valiera más. El aporte del club tiene que sumarse encima
+    // del techo viejo, no correrlo.
+    const propio = clamp(byRating * byRole, 0.8, 1.26);
+    return clamp(propio * clubSuccessDrive(previous), 0.8, CLUB_SUCCESS_CEILING);
+}
+
+/**
+ * CÓMO LE FUE AL CLUB, que es la tercera pata del desarrollo.
+ *
+ * El motor ya premiaba rendir (`byRating`) y tener el puesto (`byRole`), pero no
+ * miraba nada del equipo. Y en rugby entrenás con el plantel: un año peleando el
+ * título te hace mejor jugador que el mismo año en un club que terminó último,
+ * aunque tu planilla personal sea idéntica. Faltaba, y se nota en las mesetas —
+ * el jugador que elegía bien no tenía por dónde despegarse del que elegía mal.
+ *
+ * Es DELIBERADAMENTE CHICO (±6%). No es una palanca de balance sino la diferencia
+ * entre dos entornos parecidos: si fuera grande, elegir club se convertiría en la
+ * única decisión que importa y el resto del juego sería decorado.
+ *
+ * Se lee de `leaguePosition`, que la temporada ya congela: no hace falta guardar
+ * nada nuevo. Sin el dato —temporadas viejas, o una liga sin tabla— devuelve 1 y
+ * no cambia nada, que es lo correcto para un modificador que se agrega tarde.
+ */
+const CLUB_SUCCESS_CEILING = 1.26 * 1.06;
+
+function clubSuccessDrive(previous: { leaguePosition?: number; teams?: number }): number {
+    const { leaguePosition, teams } = previous;
+    if (leaguePosition === undefined || teams === undefined || teams < 4) return 1;
+    // 0 = campeón, 1 = último. El tercio de arriba empuja, el de abajo frena.
+    const cuantil = (leaguePosition - 1) / (teams - 1);
+    return clamp(1.06 - cuantil * 0.12, 0.94, 1.06);
 }
 
 /**

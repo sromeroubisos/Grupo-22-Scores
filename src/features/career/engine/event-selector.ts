@@ -1,14 +1,20 @@
-import type { CareerState, ClubOffer, StartRouteId } from '../types/career.ts';
+import type { CareerState, ClubOffer } from '../types/career.ts';
 import type { EventContext, EventRequirements, GameEvent } from '../types/event.ts';
+import type { Player } from '../types/player.ts';
+import { retirementIsOptional, veteranSeasonEvent, withRetirementOption } from './retirement.ts';
+import { clubDeclinesRenewal, NO_RENEWAL_EVENT_ID } from './renewal.ts';
 import { ALL_EVENTS, getEvent, TRANSFER_EVENT_ID } from '../data/events/index.ts';
-import { movementOptionCopy, movementResultText, offerReason, type OfferSignals } from '../data/movement-copy.ts';
+import { movementOptionCopy, movementResultText, offerReason, offerReasonKey, type OfferSignals } from '../data/movement-copy.ts';
 import { getClub, clubTier } from '../data/clubs.ts';
 import { getPosition } from '../data/positions.ts';
 import { competitionLabelOf, economicModelOf, sportingBandOf } from '../data/competition-levels2026.ts';
 import { canRepresent, targetUnion } from './eligibility.ts';
+import { unionReputation } from '../data/nations.ts';
 import { computeEffectiveOvr, computeOvr } from './scoring.ts';
 import { generateOffers } from './club-offers.ts';
+import { clubTenure } from './club-tenure.ts';
 import { marketRung, movementBetween } from './market-routes.ts';
+import { resolveClub } from './promotion.ts';
 import { isProfessionalEmployment, type EmploymentStatus, type SquadTrack } from './contracts.ts';
 import type { Rng } from './random.ts';
 
@@ -18,11 +24,22 @@ export const CAREER_MARKET_VERSION = '2026-27.1';
 const SEASON_EVENT_PROB = 0.82; // no todas las temporadas traen decisión
 // Temporadas de silencio del mercado tras un PASE (no tras rechazar una oferta):
 // evita el cambio de club anual sin volver el mercado mudo.
-const MARKET_COOLDOWN_SEASONS = 2;
+const MARKET_COOLDOWN_SEASONS = 1;
 
 export interface Selection {
     event: GameEvent;
     offers: ClubOffer[] | null; // presente solo en el mercado de pases
+}
+
+export interface SelectOptions {
+    /**
+     * Mirar SOLO el mercado. Lo usan las temporadas silenciosas de un tramo
+     * (modos de duración): el mercado se evalúa TODAS las temporadas —es una
+     * fase, no un evento raro— pero los eventos estáticos no cortan el tramo.
+     * Sin esto, avanzar de a tres temporadas equivaldría a mirar el mercado un
+     * año de cada tres, que no es un cambio de ritmo sino de balance.
+     */
+    marketOnly?: boolean;
 }
 
 // ---- Peso por entorno y ruta (Fase 4) ----------------------------------------
@@ -40,9 +57,9 @@ export interface Selection {
 // temporadas, que es cuando de verdad define cómo se siente la carrera.
 
 /** Familia del evento, deducida del prefijo del id (`env-amateur-derby` → `env`). */
-export type EventFamily = 'env' | 'club' | 'per' | 'mil' | 'nt' | 'tac' | 'med' | 'inj';
+export type EventFamily = 'env' | 'club' | 'per' | 'mil' | 'nt' | 'tac' | 'med' | 'inj' | 'dis';
 
-const FAMILIES: readonly EventFamily[] = ['env', 'club', 'per', 'mil', 'nt', 'tac', 'med', 'inj'];
+const FAMILIES: readonly EventFamily[] = ['env', 'club', 'per', 'mil', 'nt', 'tac', 'med', 'inj', 'dis'];
 
 function familyOf(eventId: string): EventFamily | null {
     const prefix = eventId.slice(0, eventId.indexOf('-'));
@@ -69,15 +86,18 @@ const BOOST_BY_SQUAD_TRACK: Readonly<Record<SquadTrack, FamilyBoost>> = {
     senior: {},
 };
 
-/** Empujón de la ruta elegida al crear. Se diluye (ver ROUTE_FADE_SEASONS). */
-const BOOST_BY_ROUTE: Readonly<Record<StartRouteId, FamilyBoost>> = {
-    amateur: { env: 1.5, per: 1.4, med: 0.7 },
-    development: { club: 1.35, tac: 1.3, mil: 1.15, med: 0.8 },
-    professional: { nt: 1.3, med: 1.25, club: 1.1, per: 0.85 },
-};
-
-/** Temporadas en las que el empujón de la ruta inicial se apaga hasta 1. */
-const ROUTE_FADE_SEASONS = 5;
+// Había acá un tercer eje, `BOOST_BY_ROUTE`, que empujaba familias según la ruta
+// elegida al crear y se diluía hacia la temporada 5. Se fue en 1.26.0, y no por
+// simplificar: dejó de decir nada. Las dos ramas que sobreviven arrancan en el
+// MISMO mundo —18 años, club amateur, sin contrato—, así que un empujón indexado
+// por rama era un multiplicador constante disfrazado de tabla.
+//
+// Lo que de verdad diferencia a las dos ramas es que la rápida sube de escalón
+// antes, y eso ya lo cuenta `BOOST_BY_EMPLOYMENT`: el que llega a profesional a
+// los 22 ve la prensa y la selección tres temporadas antes que el que llega a los
+// 26. El sabor amateur del comienzo tampoco se perdió — todos debutan con
+// `employment: 'amateur'`, que es el boost más fuerte de la tabla (env 1.8,
+// per 1.6).
 
 /**
  * Multiplicador de frecuencia del evento según el entorno del jugador. Es una
@@ -91,12 +111,7 @@ export function familyBoost(eventId: string, state: CareerState): number {
     const employment = BOOST_BY_EMPLOYMENT[p.employment][family] ?? 1;
     const track = BOOST_BY_SQUAD_TRACK[p.squadTrack][family] ?? 1;
 
-    // La ruta inicial arranca pesando completo y se apaga hacia la temporada 5.
-    const routeRaw = BOOST_BY_ROUTE[state.startRoute][family] ?? 1;
-    const fade = Math.min(1, p.seasonsPlayed / ROUTE_FADE_SEASONS);
-    const route = routeRaw + (1 - routeRaw) * fade;
-
-    return employment * track * route;
+    return employment * track;
 }
 
 function makeContext(state: CareerState): EventContext {
@@ -131,13 +146,12 @@ function eligible(event: GameEvent, ctx: EventContext): boolean {
 /** ¿El entorno del jugador cumple los requisitos del evento? */
 function meetsRequirements(req: EventRequirements, ctx: EventContext): boolean {
     const p = ctx.state.player;
-    const club = getClub(p.club);
+    const club = resolveClub(ctx.state, p.club);
     const band = sportingBandOf(club);
 
     if (req.employment && !req.employment.includes(p.employment)) return false;
     if (req.squadTrack && !req.squadTrack.includes(p.squadTrack)) return false;
     if (req.economicModels && !req.economicModels.includes(economicModelOf(club))) return false;
-    if (req.startRoutes && !req.startRoutes.includes(ctx.state.startRoute)) return false;
     if (req.minSportingBand !== undefined && band < req.minSportingBand) return false;
     if (req.maxSportingBand !== undefined && band > req.maxSportingBand) return false;
     if (req.minAge !== undefined && p.age < req.minAge) return false;
@@ -151,12 +165,41 @@ function meetsRequirements(req: EventRequirements, ctx: EventContext): boolean {
     if (req.requiresRecentInjury) {
         if (!p.injuries.some((i) => i.season >= p.seasonsPlayed - 1)) return false;
     }
-    if (req.requiresInternationalLoad && p.nationalTeam === null) return false;
+    // Carga internacional = estar EN el plantel. El que perdió la camiseta no
+    // viaja, así que tampoco le corresponden los eventos de desgaste de gira.
+    if (req.requiresInternationalLoad && p.nationalStatus !== 'squad' && p.nationalStatus !== 'starter') return false;
+    if (req.nationalStatus && !req.nationalStatus.includes(p.nationalStatus)) return false;
     if (req.requiresEligibleUnion) {
         const union = targetUnion(p.eligibility);
         if (union === null || !canRepresent(p.eligibility, union)) return false;
     }
+    if (req.requiresRivalUnion && rivalUnionOf(p) === null) return false;
     return true;
+}
+
+/**
+ * LA OTRA UNIÓN QUE LO PUEDE LLEVAR, o null si no hay ninguna.
+ *
+ * Sale de los claims que el jugador se ganó jugando —`advanceRegistration` los
+ * viene acumulando desde siempre y nadie los leía— y no de una tabla de
+ * ascendencia inventada. De todos los que califican se devuelve el MÁS FUERTE,
+ * porque es el que genera la tentación: nadie duda entre su selección y una peor.
+ *
+ * El orden se desempata por código de unión y no por el orden de `claims`, que
+ * depende de en qué orden se fueron cumpliendo los plazos (CLAUDE.md §1).
+ */
+export function rivalUnionOf(p: Player): string | null {
+    // Al que ya lo capturaron no lo tantea nadie: la 8.2 es definitiva.
+    if (p.eligibility.capturedBy !== null) return null;
+    const propia = targetUnion(p.eligibility);
+    const rivales = p.eligibility.claims
+        .map((c) => c.union)
+        .filter((u) => u !== propia && canRepresent(p.eligibility, u))
+        .sort((a, b) => unionReputation(b) - unionReputation(a) || a.localeCompare(b));
+    if (rivales.length === 0) return null;
+    // Y tiene que ser MÁS PODEROSA, que es lo que la tarjeta promete. Si la otra
+    // es igual o peor, no hay decisión de vida que tomar.
+    return unionReputation(rivales[0]) > unionReputation(propia) ? rivales[0] : null;
 }
 
 // ---- Mercado de pases (evento dinámico) --------------------------------------
@@ -171,11 +214,11 @@ function meetsRequirements(req: EventRequirements, ctx: EventContext): boolean {
  */
 function surfaceMarketProbability(state: CareerState, offers: ClubOffer[]): number {
     const p = state.player;
-    const current = getClub(p.club);
+    const current = resolveClub(state, p.club);
     const best = offers[0]; // ordenadas por prestigio desc
     const bestClub = getClub(best.club);
 
-    let prob = 0.1;
+    let prob = 0.6;
     if (marketRung(bestClub) > marketRung(current)) prob += 0.4; // subir de banda
     if (best.movementKind === 'professional-contract' && !isProfessionalEmployment(p.employment)) prob += 0.25;
     if (best.movementKind === 'development-invite' && p.age <= 21) prob += 0.3;
@@ -184,7 +227,7 @@ function surfaceMarketProbability(state: CareerState, offers: ClubOffer[]): numb
     if (p.dynamics.morale < 45) prob += 0.15;
     if ((p.flags['ambicioso'] ?? 0) > 0) prob += 0.08;
     if ((p.flags['leal'] ?? 0) > 0) prob -= 0.12;
-    return Math.min(0.85, Math.max(0.05, prob));
+    return Math.min(0.92, Math.max(0.05, prob));
 }
 
 /** Temporadas consecutivas de titular, contando hacia atrás desde la última. */
@@ -204,7 +247,7 @@ function consecutiveStarterSeasons(state: CareerState): number {
  */
 function signalsFor(state: CareerState, offer: ClubOffer, effectiveOvr: number): OfferSignals {
     const p = state.player;
-    const currentClub = getClub(p.club);
+    const currentClub = resolveClub(state, p.club);
     return {
         outperformsClub: effectiveOvr - currentClub.rating >= 3,
         starterSeasons: consecutiveStarterSeasons(state),
@@ -215,30 +258,48 @@ function signalsFor(state: CareerState, offer: ClubOffer, effectiveOvr: number):
     };
 }
 
-/** Reconstruye el evento de transferencia a partir de las ofertas guardadas. */
-export function buildTransferEvent(state: CareerState, offers: ClubOffer[]): GameEvent {
+/**
+ * Reconstruye el evento de transferencia a partir de las ofertas guardadas.
+ *
+ * `forced` es la NO RENOVACIÓN: la misma tarjeta, con las mismas ofertas, pero
+ * SIN la opción de quedarse. Esa ausencia es todo el peso de la decisión — no
+ * hace falta un evento aparte ni una pantalla especial para que se entienda que
+ * esta vez no elegís si te vas, elegís a dónde.
+ */
+export function buildTransferEvent(state: CareerState, offers: ClubOffer[], forced = false): GameEvent {
     const p = state.player;
-    const currentClub = getClub(p.club);
+    const currentClub = resolveClub(state, p.club);
     const currentTier = clubTier(p.club);
     const effectiveOvr = computeEffectiveOvr(p);
 
     const roleLabel: Record<string, string> = { starter: 'titular', rotation: 'rotación', fringe: 'suplente' };
 
-    const options = [
-        {
+    const stayOption = {
             id: 'stay',
-            ...movementOptionCopy('stay', currentClub.labelEs, roleLabel[p.role] ?? ''),
+            // Quedarse compite: el hint dice las temporadas que lleva en el club
+            // y las que le faltan para la próxima distinción, no una virtud.
+            ...movementOptionCopy('stay', currentClub.labelEs, roleLabel[p.role] ?? '', clubTenure(state)),
+            // Y el escudo del club actual, para que la tarjeta pese lo mismo que
+            // las dos ofertas que tiene enfrente.
+            crestClubId: p.club,
             outcomes: [
                 { weight: 1, effect: { morale: 4, flags: { leal: 1 } }, resultText: `Rechazás las ofertas y seguís en ${currentClub.labelEs}.` },
             ],
-        },
+    };
+
+    const options = [
+        // En la NO RENOVACIÓN no hay opción de quedarse: el club ya decidió.
+        ...(forced ? [] : [stayOption]),
         // Máximo 2 ofertas (quedarte + 2 = 3 opciones), las de mayor prestigio.
         // El TEXTO sale de `movementKind`: un club amateur no "firma", hace un pase.
-        ...offers.slice(0, 2).map((offer) => {
+        // Cuando el club no renueva se ofrecen TRES destinos y no dos: sin la
+        // opción de quedarse, dos tarjetas dejaban la decisión demasiado angosta.
+        ...offers.slice(0, forced ? 3 : 2).map((offer) => {
             const club = getClub(offer.club);
             const moraleDelta = (offer.role === 'starter' ? 5 : offer.role === 'rotation' ? 0 : -4) + (offer.tier < currentTier ? 3 : offer.tier > currentTier ? -1 : 0);
             const fameDelta = Math.round((offer.prestige - currentClub.prestige) * 0.15);
             const copy = movementOptionCopy(offer.movementKind, club.labelEs, roleLabel[offer.role]);
+            const signals = signalsFor(state, offer, effectiveOvr);
             return {
                 id: `move-${offer.club}`,
                 label: copy.label,
@@ -250,7 +311,14 @@ export function buildTransferEvent(state: CareerState, offers: ClubOffer[]): Gam
                     clubName: club.labelEs,
                     league: competitionLabelOf(club.competitionId),
                     direction: movementBetween(currentClub, club),
-                    reason: offerReason(signalsFor(state, offer, effectiveOvr)),
+                    reason: offerReason(signals),
+                    // El motivo, el número que lleva adentro y la naturaleza del
+                    // pase, como datos: es lo que le permite a `i18n/` reescribir
+                    // esta opción sin leer el español. Presentación pura, igual que
+                    // el resto de `OfferPresentation`.
+                    reasonKey: offerReasonKey(signals),
+                    starterSeasons: signals.starterSeasons,
+                    movementKind: offer.movementKind,
                 },
                 outcomes: [
                     { weight: 1, effect: { moveToOffer: offer, morale: moraleDelta, fame: Math.max(-6, fameDelta), form: -3 }, resultText: movementResultText(offer.movementKind, club.labelEs) },
@@ -258,6 +326,18 @@ export function buildTransferEvent(state: CareerState, offers: ClubOffer[]): Gam
             };
         }),
     ];
+
+    if (forced) {
+        return {
+            id: NO_RENEWAL_EVENT_ID,
+            category: 'club',
+            title: 'El club no te renueva',
+            text: `En ${currentClub.labelEs} no te renuevan el vínculo. Hay que buscar dónde seguir jugando.`,
+            weight: 1,
+            repeatable: true,
+            options,
+        };
+    }
 
     return {
         id: TRANSFER_EVENT_ID,
@@ -278,7 +358,7 @@ export function buildTransferEvent(state: CareerState, offers: ClubOffer[]): Gam
  *  2) si no, un evento estático elegido por probabilidad ponderada.
  * Puede devolver null (temporada sin decisión).
  */
-export function selectEvent(state: CareerState, rng: Rng): Selection | null {
+export function selectEvent(state: CareerState, rng: Rng, options: SelectOptions = {}): Selection | null {
     const p = state.player;
 
     // 1) MERCADO: se EVALÚA explícitamente TODAS las temporadas (fase, no evento
@@ -287,6 +367,7 @@ export function selectEvent(state: CareerState, rng: Rng): Selection | null {
     //    mercado (el jugador puede volver a ver ofertas al año siguiente); solo un
     //    cambio de club reciente lo frena, para no mudarlo todos los años.
     state.marketEvaluatedSeason = p.seasonsPlayed;
+
     const seasonsSinceMove = p.seasonsPlayed - state.lastMoveSeason;
     if (seasonsSinceMove >= MARKET_COOLDOWN_SEASONS) {
         const offers = generateOffers(p, computeEffectiveOvr(p), rng);
@@ -295,12 +376,14 @@ export function selectEvent(state: CareerState, rng: Rng): Selection | null {
         }
     }
 
-    // 2) Evento estático.
-    if (!rng.chance(SEASON_EVENT_PROB)) return null;
+    // 2) Evento estático. En una temporada silenciosa de un tramo se corta acá:
+    //    el mercado ya se miró (arriba), y es lo único que puede interrumpir.
+    if (options.marketOnly) return null;
+    if (!rng.chance(SEASON_EVENT_PROB)) return veteranFallback(p);
 
     const ctx = makeContext(state);
     const pool = ALL_EVENTS.filter((e) => eligible(e, ctx));
-    if (pool.length === 0) return null;
+    if (pool.length === 0) return veteranFallback(p);
 
     const chosen = rng.weighted(pool, (e) => {
         // Penaliza lo visto recientemente para dar variedad.
@@ -312,11 +395,63 @@ export function selectEvent(state: CareerState, rng: Rng): Selection | null {
     return { event: chosen, offers: null };
 }
 
-/** Devuelve el evento pendiente (estático por id, o el mercado desde las ofertas). */
+/**
+ * Temporada tranquila de un veterano: no hubo evento, pero entre los 34 y los 38
+ * SIEMPRE tiene que haber una decisión, porque es donde vive la opción de
+ * retirarse. No consume RNG: es la misma tarjeta todos los años.
+ */
+function veteranFallback(player: Player): Selection | null {
+    if (!retirementIsOptional(player)) return null;
+    const event = veteranSeasonEvent();
+    return event ? { event, offers: null } : null;
+}
+
+/**
+ * Devuelve el evento pendiente (estático por id, o el mercado desde las ofertas).
+ *
+ * Y le cuelga la opción de retirarse cuando corresponde. Va acá y no en el
+ * selector porque este es el camino que recorren TODOS: la UI para dibujar la
+ * tarjeta y `resolveAndPlay` para resolverla. Si se agregara sólo al elegir, una
+ * recarga a mitad de temporada devolvería la tarjeta sin la opción.
+ */
 export function getPendingEvent(state: CareerState): GameEvent | null {
     if (!state.pendingEventId) return null;
-    if (state.pendingEventId === TRANSFER_EVENT_ID) {
-        return state.offers.length > 0 ? buildTransferEvent(state, state.offers) : null;
+    if (state.pendingEventId === NO_RENEWAL_EVENT_ID) {
+        return state.offers.length > 0
+            ? withRetirementOption(buildTransferEvent(state, state.offers, true), state.player)
+            : null;
     }
-    return getEvent(state.pendingEventId) ?? null;
+    if (state.pendingEventId === TRANSFER_EVENT_ID) {
+        return state.offers.length > 0
+            ? withRetirementOption(buildTransferEvent(state, state.offers), state.player)
+            : null;
+    }
+    const event = getEvent(state.pendingEventId);
+    return event ? withRetirementOption(withFlags(event, state.player), state.player) : null;
+}
+
+/** Id del evento de cambio de selección. Vive acá para no repetir el string. */
+const ELIGIBILITY_SWITCH_ID = 'nt-eligibility-switch';
+
+/**
+ * Le pone BANDERA a las opciones que eligen entre dos selecciones.
+ *
+ * Es decoración de presentación y se reconstruye en cada render, igual que
+ * `crestClubId`: no toca el estado, no entra en el `stateHash` y no puede mover
+ * una carrera guardada. Por eso vive acá, en la puerta de salida hacia la UI, y
+ * no en el catálogo de eventos — el evento es DATO y no sabe quién lo está
+ * jugando.
+ */
+function withFlags(event: GameEvent, p: Player): GameEvent {
+    if (event.id !== ELIGIBILITY_SWITCH_ID) return event;
+    const rival = rivalUnionOf(p);
+    const propia = targetUnion(p.eligibility);
+    if (rival === null || propia === null) return event;
+    return {
+        ...event,
+        options: event.options.map((o) => ({
+            ...o,
+            flagCountryCode: o.id === 'switch' ? rival : o.id === 'stay' ? propia : o.flagCountryCode,
+        })),
+    };
 }

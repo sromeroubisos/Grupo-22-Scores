@@ -7,6 +7,8 @@ import { TACTICAL_EVENTS } from './tactical.ts';
 import { MEDIA_EVENTS } from './media.ts';
 import { MILESTONE_EVENTS } from './milestones.ts';
 import { ENVIRONMENT_EVENTS } from './environment-events.ts';
+import { VETERAN_EVENTS } from './veteran.ts';
+import { DISCIPLINE_EVENTS } from './discipline.ts';
 
 // Los eventos de selección SOLO aparecen si el jugador puede representar a una
 // unión: se garantiza acá en vez de repetir el requisito en 21 definiciones.
@@ -24,6 +26,8 @@ export const ALL_EVENTS: GameEvent[] = [
     ...MEDIA_EVENTS,
     ...MILESTONE_EVENTS,
     ...ENVIRONMENT_EVENTS,
+    ...VETERAN_EVENTS,
+    ...DISCIPLINE_EVENTS,
 ];
 
 const EVENT_BY_ID: Record<string, GameEvent> = Object.fromEntries(ALL_EVENTS.map((e) => [e.id, e]));
@@ -33,3 +37,4 @@ export function getEvent(id: string): GameEvent | undefined {
 }
 
 export const TRANSFER_EVENT_ID = 'club-transfer';
+export { VETERAN_END_OF_SEASON_ID } from './veteran.ts';

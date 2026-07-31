@@ -203,4 +203,36 @@ export const TACTICAL_EVENTS: GameEvent[] = [
             },
         ],
     },
+    {
+        id: 'tac-new-tackle-technique',
+        category: 'tactical',
+        title: 'Otra forma de tacklear',
+        text: 'El coach de defensa te propone bajar el punto de impacto y entrar más abajo. Es cambiar algo que ya te sale de memoria.',
+        weight: 11,
+        repeatable: true,
+        cooldown: 4,
+        options: [
+            {
+                id: 'adopt',
+                label: 'Cambiar la técnica',
+                hint: 'Si la agarrás, cambia tu defensa. Mientras la aprendés, fallás.',
+                outcomes: [
+                    // El premio grande es la PLANILLA (los tackles del año), no el
+                    // OVR: el tackle sube dos y no cuatro, porque en un puesto que
+                    // pesa el tackle cuatro puntos son casi un punto de OVR y la
+                    // suma de tarjetas termina adelantando el techo.
+                    { weight: 65, effect: { tackle: 2, statBoost: { tackles: 3 }, mental: 1 }, resultText: 'Te lleva media temporada y después no fallás uno. La estadística lo dice sola.' },
+                    { weight: 35, effect: { valoracion: -1, form: -3 }, resultText: 'Entre lo nuevo y lo viejo te quedás en el medio, y en el medio se pasan los rivales.' },
+                ],
+            },
+            {
+                id: 'keep',
+                label: 'Seguir con la tuya',
+                hint: 'Lo que sabés, te sale. No vas a mejorar en eso.',
+                outcomes: [
+                    { weight: 1, effect: { tackle: 1, mental: 1 }, resultText: 'Le decís que a esta altura no te vas a reaprender el tackle. Y tacklés como siempre.' },
+                ],
+            },
+        ],
+    },
 ];

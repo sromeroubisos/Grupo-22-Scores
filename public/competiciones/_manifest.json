@@ -1,0 +1,554 @@
+[
+  {
+    "id": "top14",
+    "name": "Top 14",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/top14.svg",
+    "real": false
+  },
+  {
+    "id": "prod2",
+    "name": "Pro D2",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/prod2.svg",
+    "real": false
+  },
+  {
+    "id": "nationale",
+    "name": "Nationale",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/nationale.svg",
+    "real": false
+  },
+  {
+    "id": "prem",
+    "name": "Gallagher PREM",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/prem.svg",
+    "real": false
+  },
+  {
+    "id": "championship",
+    "name": "Championship",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/championship.svg",
+    "real": false
+  },
+  {
+    "id": "urc",
+    "name": "URC",
+    "kind": "league",
+    "scope": "regional",
+    "file": "public/competiciones/urc.svg",
+    "real": false
+  },
+  {
+    "id": "super-rugby",
+    "name": "Super Rugby Pacific",
+    "kind": "league",
+    "scope": "regional",
+    "file": "public/competiciones/super-rugby.svg",
+    "real": false
+  },
+  {
+    "id": "npc",
+    "name": "NPC",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/npc.png",
+    "real": true
+  },
+  {
+    "id": "currie-premier",
+    "name": "Currie Cup Premier",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/currie-premier.png",
+    "real": true
+  },
+  {
+    "id": "currie-first",
+    "name": "Currie Cup First Division",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/currie-first.png",
+    "real": true
+  },
+  {
+    "id": "super-cup",
+    "name": "Rugby Europe Super Cup",
+    "kind": "league",
+    "scope": "regional",
+    "file": "public/competiciones/super-cup.svg",
+    "real": false
+  },
+  {
+    "id": "sra",
+    "name": "Super Rugby Americas",
+    "kind": "league",
+    "scope": "regional",
+    "file": "public/competiciones/sra.svg",
+    "real": false
+  },
+  {
+    "id": "esp-dh",
+    "name": "División de Honor",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/esp-dh.svg",
+    "real": false
+  },
+  {
+    "id": "esp-dhelite",
+    "name": "División de Honor Élite",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/esp-dhelite.svg",
+    "real": false
+  },
+  {
+    "id": "esp-dhb",
+    "name": "División de Honor B",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/esp-dhb.svg",
+    "real": false
+  },
+  {
+    "id": "jpn-d1",
+    "name": "Japan League One D1",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/jpn-d1.svg",
+    "real": false
+  },
+  {
+    "id": "jpn-d2",
+    "name": "Japan League One D2",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/jpn-d2.svg",
+    "real": false
+  },
+  {
+    "id": "jpn-d3",
+    "name": "Japan League One D3",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/jpn-d3.svg",
+    "real": false
+  },
+  {
+    "id": "nz-heartland",
+    "name": "Heartland Championship",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/nz-heartland.svg",
+    "real": false
+  },
+  {
+    "id": "fr-federale1",
+    "name": "Fédérale 1",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/fr-federale1.svg",
+    "real": false
+  },
+  {
+    "id": "fr-federale2",
+    "name": "Fédérale 2",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/fr-federale2.svg",
+    "real": false
+  },
+  {
+    "id": "eng-national1",
+    "name": "National League 1",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/eng-national1.svg",
+    "real": false
+  },
+  {
+    "id": "eng-national2",
+    "name": "National League 2",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/eng-national2.svg",
+    "real": false
+  },
+  {
+    "id": "za-community",
+    "name": "Community Cup",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/za-community.svg",
+    "real": false
+  },
+  {
+    "id": "jpn-regional",
+    "name": "Top Regional Leagues",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/jpn-regional.svg",
+    "real": false
+  },
+  {
+    "id": "us-mlr",
+    "name": "Major League Rugby",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/us-mlr.svg",
+    "real": false
+  },
+  {
+    "id": "us-d1a",
+    "name": "D1A universitaria (CRAA)",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/us-d1a.svg",
+    "real": false
+  },
+  {
+    "id": "us-ncr-d1",
+    "name": "DI universitaria (NCR)",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/us-ncr-d1.svg",
+    "real": false
+  },
+  {
+    "id": "pt-honra",
+    "name": "Divisão de Honra",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/pt-honra.svg",
+    "real": false
+  },
+  {
+    "id": "ita-serie-a-elite",
+    "name": "Serie A Élite",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ita-serie-a-elite.svg",
+    "real": false
+  },
+  {
+    "id": "ita-serie-a",
+    "name": "Serie A",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ita-serie-a.svg",
+    "real": false
+  },
+  {
+    "id": "br-super12",
+    "name": "Super 12",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/br-super12.svg",
+    "real": false
+  },
+  {
+    "id": "ar-urba-top14",
+    "name": "Top 14 de la URBA",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-urba-top14.svg",
+    "real": false
+  },
+  {
+    "id": "ar-urba-primera-a",
+    "name": "Primera A de la URBA",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-urba-primera-a.svg",
+    "real": false
+  },
+  {
+    "id": "ar-urba-primera-b",
+    "name": "Primera B de la URBA",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-urba-primera-b.svg",
+    "real": false
+  },
+  {
+    "id": "ar-urba-primera-c",
+    "name": "Primera C de la URBA",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-urba-primera-c.svg",
+    "real": false
+  },
+  {
+    "id": "ar-urba-segunda",
+    "name": "Segunda de la URBA",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-urba-segunda.svg",
+    "real": false
+  },
+  {
+    "id": "ar-urba-tercera",
+    "name": "Tercera de la URBA",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-urba-tercera.svg",
+    "real": false
+  },
+  {
+    "id": "ar-urba-desarrollo",
+    "name": "Desarrollo de la URBA",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-urba-desarrollo.svg",
+    "real": false
+  },
+  {
+    "id": "ar-centro-top10",
+    "name": "Top 10 A de Córdoba",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-centro-top10.svg",
+    "real": false
+  },
+  {
+    "id": "ar-centro-super9b",
+    "name": "Súper 9 B de Córdoba",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-centro-super9b.svg",
+    "real": false
+  },
+  {
+    "id": "ar-litoral-top10",
+    "name": "Top 10 del Litoral",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-litoral-top10.svg",
+    "real": false
+  },
+  {
+    "id": "ar-litoral-segunda",
+    "name": "Segunda del Litoral",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-litoral-segunda.svg",
+    "real": false
+  },
+  {
+    "id": "ar-oeste-oro",
+    "name": "Copa de Oro del Oeste",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-oeste-oro.svg",
+    "real": false
+  },
+  {
+    "id": "ar-oeste-plata",
+    "name": "Copa de Plata del Oeste",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-oeste-plata.svg",
+    "real": false
+  },
+  {
+    "id": "ar-noa-a",
+    "name": "Regional del NOA A",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-noa-a.svg",
+    "real": false
+  },
+  {
+    "id": "ar-noa-b",
+    "name": "Regional del NOA B",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-noa-b.svg",
+    "real": false
+  },
+  {
+    "id": "ar-nea-a",
+    "name": "Regional NEA A",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-nea-a.svg",
+    "real": false
+  },
+  {
+    "id": "ar-nea-ascenso",
+    "name": "Torneo de Ascenso del NEA",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-nea-ascenso.svg",
+    "real": false
+  },
+  {
+    "id": "ar-pampeana-a",
+    "name": "Regional Pampeano A",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-pampeana-a.svg",
+    "real": false
+  },
+  {
+    "id": "ar-pampeana-b",
+    "name": "Regional Pampeano B",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-pampeana-b.svg",
+    "real": false
+  },
+  {
+    "id": "ar-patagonia-regional",
+    "name": "Regional Patagónico",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-patagonia-regional.svg",
+    "real": false
+  },
+  {
+    "id": "ar-centro-local",
+    "name": "Torneo Local de Córdoba",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-centro-local.svg",
+    "real": false
+  },
+  {
+    "id": "ar-litoral-local",
+    "name": "Torneos Locales del Litoral",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-litoral-local.svg",
+    "real": false
+  },
+  {
+    "id": "ar-pampeana-local",
+    "name": "Torneos Locales Pampeanos",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-pampeana-local.svg",
+    "real": false
+  },
+  {
+    "id": "ar-patagonia-local",
+    "name": "Torneos Locales Patagónicos",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-patagonia-local.svg",
+    "real": false
+  },
+  {
+    "id": "sa-uy",
+    "name": "Liga Uruguaya",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/sa-uy.svg",
+    "real": false
+  },
+  {
+    "id": "sa-cl",
+    "name": "Liga Chilena",
+    "kind": "league",
+    "scope": "domestic",
+    "file": "public/competiciones/sa-cl.svg",
+    "real": false
+  },
+  {
+    "id": "champions-cup",
+    "name": "Champions Cup",
+    "kind": "continental-cup",
+    "scope": "continental",
+    "file": "public/competiciones/champions-cup.svg",
+    "real": false
+  },
+  {
+    "id": "challenge-cup",
+    "name": "Challenge Cup",
+    "kind": "continental-cup",
+    "scope": "continental",
+    "file": "public/competiciones/challenge-cup.svg",
+    "real": false
+  },
+  {
+    "id": "prem-rugby-cup",
+    "name": "PREM Rugby Cup",
+    "kind": "league-cup",
+    "scope": "domestic",
+    "file": "public/competiciones/prem-rugby-cup.svg",
+    "real": false
+  },
+  {
+    "id": "copa-del-rey",
+    "name": "Copa del Rey",
+    "kind": "knockout-cup",
+    "scope": "domestic",
+    "file": "public/competiciones/copa-del-rey.svg",
+    "real": false
+  },
+  {
+    "id": "supercopa-esp",
+    "name": "Supercopa de España",
+    "kind": "super-cup",
+    "scope": "domestic",
+    "file": "public/competiciones/supercopa-esp.svg",
+    "real": false
+  },
+  {
+    "id": "taca-portugal",
+    "name": "Taça de Portugal",
+    "kind": "knockout-cup",
+    "scope": "domestic",
+    "file": "public/competiciones/taca-portugal.svg",
+    "real": false
+  },
+  {
+    "id": "supertaca-pt",
+    "name": "Supertaça",
+    "kind": "super-cup",
+    "scope": "domestic",
+    "file": "public/competiciones/supertaca-pt.svg",
+    "real": false
+  },
+  {
+    "id": "coppa-italia",
+    "name": "Coppa Italia",
+    "kind": "knockout-cup",
+    "scope": "domestic",
+    "file": "public/competiciones/coppa-italia.svg",
+    "real": false
+  },
+  {
+    "id": "ar-tdi-a",
+    "name": "Torneo del Interior A",
+    "kind": "knockout-cup",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-tdi-a.svg",
+    "real": false
+  },
+  {
+    "id": "ar-tdi-b",
+    "name": "Torneo del Interior B",
+    "kind": "knockout-cup",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-tdi-b.svg",
+    "real": false
+  },
+  {
+    "id": "ar-nacional-de-clubes",
+    "name": "Nacional de Clubes",
+    "kind": "super-cup",
+    "scope": "domestic",
+    "file": "public/competiciones/ar-nacional-de-clubes.svg",
+    "real": false
+  }
+]

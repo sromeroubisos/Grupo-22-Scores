@@ -125,17 +125,22 @@ export const INJURY_EVENTS: GameEvent[] = [
             {
                 id: 'rotate',
                 label: 'Aceptar la rotación',
-                hint: 'Menos desgaste, menos protagonismo.',
+                hint: 'Sin sorpresas: menos desgaste y menos protagonismo.',
                 outcomes: [
-                    { weight: 1, effect: { fatigue: -10, injuryRisk: -5, morale: -2 }, resultText: 'Dosificás minutos. Llegás más entero al final del año.' },
+                    { weight: 1, effect: { fatigue: -10, injuryRisk: -5, playingTime: -1, morale: -2 }, resultText: 'Dosificás minutos. Llegás más entero al final del año, jugando menos.' },
                 ],
             },
             {
                 id: 'all-in',
                 label: 'Jugar todo',
-                hint: 'Protagonismo total, más desgaste.',
+                // La APUESTA de este evento: aceptar la rotación mantiene lo que hay,
+                // jugar todo se arriesga a mejorar o a empeorar. Los pesos son la
+                // chance del jugador PROMEDIO — con más media el desenlace bueno se
+                // vuelve más probable y con menos, menos (`outcomeWeights`).
+                hint: 'Te la juegas: a esta edad el cuerpo puede responder o pasarte la factura.',
                 outcomes: [
-                    { weight: 1, effect: { fatigue: 8, fame: 3, injuryRisk: 4 }, resultText: 'Jugás absolutamente todo. El cuerpo lo va a sentir.' },
+                    { weight: 55, effect: { stamina: 3, power: 2, playingTime: 2, fame: 3, fatigue: 8 }, resultText: 'Jugás absolutamente todo y el cuerpo aguanta. Terminás el año como referente del plantel.' },
+                    { weight: 45, effect: { stamina: -2, form: -6, fatigue: 14, injuryRisk: 8 }, resultText: 'Jugás absolutamente todo y lo pagás: llegás fundido a la última parte del año.' },
                 ],
             },
         ],
@@ -166,6 +171,97 @@ export const INJURY_EVENTS: GameEvent[] = [
                 hint: 'Seguro pero lento.',
                 outcomes: [
                     { weight: 1, effect: { injuryRisk: -6, form: -2, mental: 1 }, resultText: 'Sumás minutos de a poco, cuidándote de más.' },
+                ],
+            },
+        ],
+    },
+    // ── La molestia de esta semana ───────────────────────────────────────────
+    // El cuerpo avisando ANTES del partido, que es la versión más común de la
+    // lesión y la que el pool no tenía: no la lesión ya ocurrida, sino la
+    // decisión de arriesgarla.
+    {
+        id: 'inj-derby-niggle',
+        category: 'injury',
+        title: 'Una molestia antes del clásico',
+        text: 'Arrastrás un tirón en el aductor desde el martes. El kinesiólogo levanta las cejas y el partido es el domingo.',
+        weight: 12,
+        repeatable: true,
+        cooldown: 3,
+        options: [
+            {
+                id: 'play',
+                label: 'Jugar igual',
+                hint: 'Es el clásico. Si aguanta, sos parte.',
+                outcomes: [
+                    { weight: 70, effect: { statBoost: { tries: 1 }, fame: 4, morale: 4 }, resultText: 'Aguanta los ochenta minutos y encima apoyás. El clásico se cuenta con tu nombre.' },
+                    { weight: 30, effect: { forceInjury: { name: 'Desgarro de aductor', severity: 'moderada', seasonsOut: 0.25 }, morale: -4 }, resultText: 'A los treinta minutos el aductor se corta del todo. Salís caminando despacio.' },
+                ],
+            },
+            {
+                id: 'rest',
+                label: 'Parar esta semana',
+                hint: 'Llegás entero al resto del año. Te perdés el clásico.',
+                outcomes: [
+                    { weight: 1, effect: { injuryRisk: -4, playingTime: -1, morale: -3 }, resultText: 'Avisás que no llegás. Lo ves por televisión con hielo en la pierna.' },
+                ],
+            },
+        ],
+    },
+    {
+        id: 'inj-hamstring-warmup',
+        category: 'injury',
+        title: 'Un pinchazo en el calentamiento',
+        text: 'Faltan diez minutos para salir y sentís un pinchazo en el isquiotibial. Nadie lo vio.',
+        weight: 11,
+        repeatable: true,
+        cooldown: 3,
+        options: [
+            {
+                id: 'tell',
+                label: 'Avisar al médico',
+                hint: 'Te bajás del partido y te ahorrás lo grave.',
+                outcomes: [
+                    { weight: 1, effect: { injuryRisk: -5, playingTime: -1, mental: 1 }, resultText: 'Levantás la mano antes de salir. El isquiotibial se queda en un susto.' },
+                ],
+            },
+            {
+                id: 'hide',
+                label: 'Salir a jugar igual',
+                hint: 'Nadie se entera. El isquiotibial sí.',
+                outcomes: [
+                    { weight: 55, effect: { form: 3, mental: 2 }, resultText: 'Sale bien: entrás en calor de nuevo y el pinchazo no vuelve.' },
+                    { weight: 45, effect: { forceInjury: { name: 'Desgarro de isquiotibial', severity: 'grave', seasonsOut: 0.45 }, morale: -6 }, resultText: 'A los diez minutos se rompe en una corrida. Ese pinchazo era el aviso.' },
+                ],
+            },
+        ],
+    },
+    {
+        id: 'inj-physical-prep',
+        category: 'injury',
+        title: 'Cambiar la preparación física',
+        text: 'El preparador te ofrece un plan más exigente que el del plantel. Más carga, menos margen de recuperación.',
+        weight: 10,
+        repeatable: true,
+        cooldown: 4,
+        options: [
+            {
+                id: 'harder',
+                label: 'Entrenar más fuerte',
+                hint: 'Ganás en el cuerpo. El riesgo de romperte sube.',
+                outcomes: [
+                    // Misma medición que `per-summer-coach`: la ⭐ de una tarjeta
+                    // se queda en +1. Lo que sube el plan exigente es el techo de
+                    // la temporada, no un regalo de OVR.
+                    { weight: 70, effect: { valoracion: 1, stamina: 2, fatigue: 5 }, resultText: 'El plan rinde: llegás a fin de año más fuerte que nunca.' },
+                    { weight: 30, effect: { forceInjury: { name: 'Sobrecarga de cuádriceps', severity: 'leve', seasonsOut: 0.15 }, injuryRisk: 5 }, resultText: 'El cuerpo no llega a asimilar la carga y te agarra una sobrecarga.' },
+                ],
+            },
+            {
+                id: 'keep-plan',
+                label: 'Mantener el plan del plantel',
+                hint: 'Sin sobresaltos y sin saltos.',
+                outcomes: [
+                    { weight: 1, effect: { injuryRisk: -3, mental: 1, stamina: 1 }, resultText: 'Seguís el plan de todos. Nada espectacular, nada roto.' },
                 ],
             },
         ],

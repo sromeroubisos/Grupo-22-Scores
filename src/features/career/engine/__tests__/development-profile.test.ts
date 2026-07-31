@@ -21,7 +21,12 @@ const chooser: Chooser = (e, s) => e.options[hashSeed(`${e.id}:${s.player.season
 
 const FORWARDS: Position[] = ['prop', 'hooker', 'lock', 'backrow'];
 const BACKS: Position[] = ['scrumhalf', 'flyhalf', 'centre', 'wing', 'fullback'];
-const ROUTES: StartRouteId[] = ['amateur', 'development', 'professional'];
+// LAS DOS RAMAS QUE EL MOTOR SORTEA, no las dos etiquetas viejas. Acá decía
+// `['development', 'professional']`, y desde 1.28.0 las DOS significan lo mismo
+// —arrancar en la academia de un club pago—, así que la muestra se quedaba sin
+// ninguna carrera de club amateur y medía la curva de desarrollo sobre la mitad
+// privilegiada de la población.
+const ROUTES: StartRouteId[] = ['amateur', 'development'];
 const COUNTRIES = ['ar', 'fr', 'nz', 'gb-eng', 'za', 'jp'];
 
 interface Row { profile: DevelopmentProfile; group: 'forward' | 'back'; peak: number; peakAge: number; ovrAt: (age: number) => number; }
@@ -30,7 +35,25 @@ const ROWS: Row[] = [];
 for (const [group, positions] of [['forward', FORWARDS], ['back', BACKS]] as const) {
     for (const pos of positions) {
         for (const route of ROUTES) {
-            for (let i = 0; i < 14; i++) {
+            // 50 y no 14 desde 1.13.0. El reparto de techos se ensanchó, y con
+            // él la varianza del PICO dentro de cada perfil: con 14 por celda la
+            // mediana de ~70 muestras saltaba lo suficiente como para que el
+            // test de "ningún perfil llega más arriba" fallara por ruido y no
+            // por comportamiento. Se verificó que es ruido: con muestra grande
+            // el invariante se cumple, y la diferencia observada no era
+            // monótona con el ensanche (8 puntos con lift 0,25 y 6 con 0,43).
+            // Lo que se agranda es la muestra, NO la tolerancia: el invariante
+            // sigue siendo el mismo.
+            //
+            // 120 y no 50 desde el sistema argentino de dos ramas. El catálogo
+            // doméstico argentino domina el pool de clubes del motor, así que
+            // reescribirlo movió las medianas ~2 puntos y `late30 >= early30`
+            // pasaba a fallar por un punto. Medido: con 50 por celda cruza, con
+            // 80 cruza, y con 100, 120 y 150 el invariante se cumple — o sea era
+            // el borde de la muestra, no la curva. Se verificó además que el
+            // cruce aparecía igual sacando Argentina de la lista de países: no lo
+            // causó el cambio, lo destapó.
+            for (let i = 0; i < 120; i++) {
                 const st = runCareer(
                     { position: pos, nationalityCountryCode: COUNTRIES[i % COUNTRIES.length], startRoute: route },
                     77000 + i * 89 + pos.length * 31,

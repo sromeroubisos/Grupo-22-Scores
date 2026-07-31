@@ -21,7 +21,7 @@ const TRANSFER_EVENT_ID = 'club-transfer';
 function collectMarkets(n: number): GameEvent[] {
     const found: GameEvent[] = [];
     const positions = ['fullback', 'flyhalf', 'prop', 'wing'] as const;
-    const routes = ['professional', 'development', 'amateur'] as const;
+    const routes = ['professional', 'development'] as const;
 
     for (let s = 0; s < 400 && found.length < n; s++) {
         const input: CreatePlayerInput = {
@@ -69,11 +69,24 @@ test('toda opción de pase trae la ficha del club', () => {
     }
 });
 
-test('la opción de quedarse NO trae ficha de club', () => {
+test('la opción de quedarse NO trae ficha de club, PERO sí trae escudo', () => {
+    // Las dos mitades importan y dicen cosas distintas. Sin ficha, porque
+    // quedarse no es un pase: no tiene liga de destino ni escalón. Con escudo,
+    // porque enfrente hay dos tarjetas que sí lo tienen, y una tarjeta pelada se
+    // lee como la opción menor antes de que el jugador lea una palabra.
     for (const market of MARKETS) {
         const stay = market.options.find((o) => o.id === 'stay');
         assert.ok(stay, 'el mercado siempre tiene que ofrecer quedarse');
         assert.equal(stay.offer, undefined, 'quedarse no es un pase, no lleva ficha');
+        assert.ok(stay.crestClubId, 'quedarse lleva el escudo del club actual');
+
+        for (const move of market.options.filter((o) => o.id.startsWith('move-'))) {
+            assert.ok(move.offer, 'un pase siempre trae su ficha');
+            assert.notEqual(
+                move.offer.clubId, stay.crestClubId,
+                'no se puede ofrecer un pase al club en el que ya está',
+            );
+        }
     }
 });
 

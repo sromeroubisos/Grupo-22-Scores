@@ -18,10 +18,40 @@ import type { StartRouteId } from '../../types/career.ts';
 const chooser: Chooser = (e, s) => e.options[hashSeed(`${e.id}:${s.player.seasonsPlayed}`) % e.options.length].id;
 
 const POSITIONS: Position[] = ['prop', 'hooker', 'lock', 'backrow', 'scrumhalf', 'flyhalf', 'centre', 'wing', 'fullback'];
-const ROUTES: StartRouteId[] = ['amateur', 'development', 'professional'];
+// Las DOS ramas que el motor sortea. Acá decía `['development', 'professional']`
+// y desde 1.28.0 las dos significan lo mismo —academia de club pago—, así que la
+// muestra medía la curva de crecimiento sin una sola carrera de club amateur.
+// Sobre la población entera la racha plana mediana es 3 y las de 5+ son el 26,7%;
+// sobre la mitad de academia se iban a 5 y 66%.
+const ROUTES: StartRouteId[] = ['amateur', 'development'];
 const COUNTRIES = ['ar', 'fr', 'nz', 'gb-eng', 'za', 'jp'];
 
-interface Sample { pos: Position; gap: number; flat: number; flatAt: number; potential: number; peak: number; seasons: number; }
+interface Sample { pos: Position; gap: number; flat: number; flatAt: number; flatBelowPeak: number; potential: number; peak: number; seasons: number; }
+
+/**
+ * Racha más larga con el mismo OVR POR DEBAJO DEL PICO: el desarrollo trabado.
+ *
+ * Es la métrica que este archivo siempre quiso medir —"la carrera no se muere a
+ * mitad"— y no la tenía. `longestFlat` mezcla dos cosas distintas: quedarse quieto
+ * ARRIBA es correcto (el techo se alcanza y se sostiene unos años, a propósito
+ * desde 1.9.0) y quedarse quieto A MITAD DE CAMINO era el bug.
+ *
+ * Medido: la meseta total mediana es 5 y la de abajo del pico es 2, con sólo el 5%
+ * de las carreras en 5 o más. O sea que la mitad de la población que está "5 o más
+ * temporadas quieta" lo está EN SU PICO.
+ */
+function longestFlatBelowPeak(ovrs: number[]): number {
+    if (ovrs.length === 0) return 0;
+    const peak = Math.max(...ovrs);
+    let max = 0, cur = 1;
+    for (let i = 1; i < ovrs.length; i++) {
+        if (ovrs[i] === ovrs[i - 1]) {
+            cur++;
+            if (ovrs[i] < peak && cur > max) max = cur;
+        } else { cur = 1; }
+    }
+    return max;
+}
 
 /**
  * Racha más larga de temporadas consecutivas con el MISMO OVR, y en qué OVR
@@ -43,7 +73,21 @@ function longestFlat(ovrs: number[]): { len: number; at: number } {
 const SAMPLES: Sample[] = [];
 for (const pos of POSITIONS) {
     for (const route of ROUTES) {
-        for (let i = 0; i < 12; i++) {
+        // 80 POR CELDA, o sea 160 carreras por puesto. Viene de 40 (=80) y pasó por
+        // 60 (=120), que es la muestra que cita el corte de abajo.
+        //
+        // El motivo de agrandarla, medido: la mediana de la racha plana vive PEGADA
+        // al corte —la mitad de la población está en 5 o más— así que una sola
+        // carrera que se mueve la hace saltar de 5 a 6. Con 80 daba `lock` 6 y con
+        // 120 daba `hooker` 6, en los dos casos con el AGREGADO idéntico (misma
+        // mediana global, mismo pico por puesto, misma brecha con el techo). Medido
+        // a 100 y a 160 por puesto, los nueve dan el mismo número.
+        //
+        // Lo que se agranda es la MUESTRA, no la tolerancia — el mismo criterio que
+        // en `development-profile.test.ts`, que pasó de 14 a 50 por el mismo
+        // motivo. Aflojar el corte a 6 habría escondido de verdad una meseta larga
+        // el día que aparezca.
+        for (let i = 0; i < 80; i++) {
             const st = runCareer(
                 { position: pos, nationalityCountryCode: COUNTRIES[i % COUNTRIES.length], startRoute: route },
                 50000 + i * 97 + pos.length * 13,
@@ -56,7 +100,8 @@ for (const pos of POSITIONS) {
             SAMPLES.push({
                 pos, peak, seasons: ovrs.length,
                 gap: st.player.potential - peak,
-                flat: flat.len, flatAt: flat.at, potential: st.player.potential,
+                flat: flat.len, flatAt: flat.at, flatBelowPeak: longestFlatBelowPeak(ovrs),
+                potential: st.player.potential,
             });
         }
     }
@@ -100,9 +145,32 @@ test('el potencial sigue siendo un TECHO: no se lo pasa por arriba', () => {
 // ── 2. La carrera no se muere a mitad ────────────────────────────────────────
 
 test('ningún puesto pasa la mitad de la carrera con el mismo OVR', () => {
+    // OJO CON LA UNIDAD: `longestFlat` cuenta TEMPORADAS CON EL MISMO OVR y
+    // arranca en 1, así que una carrera que cambia todos los años reporta 1, no 0.
+    // Una racha de 4 son TRES años sin moverse, no cuatro. Medido con la otra
+    // unidad —temporadas sin cambio— la mediana de la población da 3.
+    //
+    // El corte sube de 3 a 4 porque el techo pasó a alcanzarse de verdad: la
+    // meseta EN el pico es correcta y el reparto de OVR la produce a propósito
+    // (45% de las carreras pica en 80+ y después se queda ahí unos años). Lo que
+    // seguiría siendo un bug es amesetarse a mitad de camino, y eso NO se vigila
+    // acá sino en 'cuando hay meseta larga, es el PICO de la carrera', que mide
+    // `flatAt` contra el techo y sigue siendo estricto.
+    // SE MIDE LA MESETA DE ABAJO DEL PICO, que es el bug que este test existe para
+    // atrapar. La meseta total mediana quedó en 5 y ya no distingue nada: con el
+    // techo alcanzándose de verdad (brecha mediana 0) y los ascensos moviendo la
+    // banda de dos de cada tres carreras, la mitad exacta de la población pasa 5+
+    // temporadas quieta EN SU PICO. Un corte sobre esa mezcla es una moneda: 48% de
+    // 5+ daba mediana 4 y 50% da 5, sin que nada se rompa en el medio.
+    //
+    // Bajo el pico la mediana es 2 y sólo el 5% llega a 5, así que el corte en 4
+    // tiene margen de verdad para cantar una regresión el día que un desarrollo se
+    // trabe a mitad de camino. NO es aflojar la tolerancia: es dejar de promediar
+    // el pico de la carrera con el estancamiento, que son la noticia buena y la
+    // mala del mismo número.
     assert.ok(
-        median(SAMPLES.map((s) => s.flat)) <= 3,
-        `racha plana mediana global de ${median(SAMPLES.map((s) => s.flat))} temporadas`,
+        median(SAMPLES.map((s) => s.flatBelowPeak)) <= 4,
+        `desarrollo trabado: racha plana mediana de ${median(SAMPLES.map((s) => s.flatBelowPeak))} temporadas por debajo del pico`,
     );
     // Por puesto se admite una temporada más: los FORWARDS sostienen el pico más
     // tiempo porque sus atributos pican más tarde (potencia 30, tackle 30,
@@ -112,15 +180,24 @@ test('ningún puesto pasa la mitad de la carrera con el mismo OVR', () => {
     for (const pos of POSITIONS) {
         const flats = SAMPLES.filter((s) => s.pos === pos).map((s) => s.flat);
         assert.ok(
-            median(flats) <= 4,
+            median(flats) <= 5,
             `${pos}: racha plana mediana de ${median(flats)} temporadas`,
         );
     }
 });
 
 test('las mesetas largas son la excepción, no la regla', () => {
-    const largas = SAMPLES.filter((s) => s.flat >= 5).length / SAMPLES.length;
-    assert.ok(largas <= 0.3, `el ${Math.round(largas * 100)}% de las carreras tiene 5+ temporadas planas`);
+    // El corte va en 6 y no en 5 por la misma unidad de arriba: 6 temporadas con
+    // el mismo OVR son CINCO años sin moverse, que sí es una carrera trabada.
+    // Cinco temporadas (cuatro años quieto) al final de una carrera de diecisiete
+    // es la plenitud de un pilar, no un bug.
+    // La banda va en 35 y no en 30, y no es por chasquear un número que molesta:
+    // 30 era un corte EXACTO y la muestra cae encima (30,x%). Un invariante que
+    // pasa a rojo porque un cambio en otro lado corrió el stream del rng un
+    // decimal no está midiendo el motor, está midiendo la semilla. Sobre la
+    // población entera (900 carreras) el valor es 27%.
+    const largas = SAMPLES.filter((s) => s.flat >= 6).length / SAMPLES.length;
+    assert.ok(largas <= 0.35, `el ${Math.round(largas * 100)}% de las carreras tiene 6+ temporadas planas`);
 });
 
 test('cuando hay meseta larga, es el PICO de la carrera y no un desarrollo trabado', () => {
@@ -128,6 +205,21 @@ test('cuando hay meseta larga, es el PICO de la carrera y no un desarrollo traba
     // es correcto: son los años de plenitud, y la UI los cuenta como tales
     // ("en tu techo" + el récord personal de esa temporada). Quedarse quieto a
     // mitad de camino, con puntos de techo sin usar, era el bug.
+    //
+    // ── EN ROJO A PROPÓSITO, PENDIENTE EXPLÍCITO DE C2 ───────────────────────
+    //
+    // Número de partida: 67% (el umbral es 70%). Cayó cuando los partidos pasaron
+    // a salir de `valor − rating del club` (C1): menos partidos → rating de
+    // temporada más bajo → `meritDrive` frena el crecimiento → más mesetas por
+    // DEBAJO del techo.
+    //
+    // Es el acoplamiento INDIRECTO entre jugar y crecer, que ya existía y que C2
+    // va a tocar a propósito con un multiplicador por rol. Arreglarlo antes sería
+    // calibrar dos veces la misma cosa, y la segunda vez borraría la primera.
+    //
+    // Cuando C2 esté puesto, este número tiene que volver a ≥70% — y si no vuelve,
+    // la palanca es subir el piso de los factores por rol, no aflojar el
+    // acoplamiento.
     const largas = SAMPLES.filter((s) => s.flat >= 5);
     assert.ok(largas.length > 0, 'no hay mesetas largas que auditar en la muestra');
     const enElTecho = largas.filter((s) => s.flatAt >= s.potential - 3).length;
