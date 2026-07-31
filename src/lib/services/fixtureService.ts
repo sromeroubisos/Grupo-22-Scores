@@ -545,9 +545,13 @@ export class FixtureService {
     // +1 detecta el exceso sin un COUNT extra (evita corte silencioso).
     const FIXTURE_MATCH_CAP = 1000;
 
+    // OJO: tournament_phases NO tiene start_date/end_date (esas columnas viven en
+    // tournament_rounds). Pedirlas devuelve 42703 y tumba TODO el fixture: la query
+    // falla, este metodo retorna null y la ruta cae al payload de emergencia (fases
+    // sin jornadas ni partidos). No las agregues sin migracion previa.
     let phasesQuery = supabase
       .from('tournament_phases')
-      .select('id, tournament_id, name, phase_type, order_index, start_date, end_date, is_active, settings, created_at, updated_at')
+      .select('id, tournament_id, name, phase_type, order_index, is_active, settings, created_at, updated_at')
       .eq('tournament_id', tournamentId)
       .order('order_index', { ascending: true });
 
@@ -2221,8 +2225,9 @@ export class FixtureService {
       name: phase.name,
       phaseType: phase.phase_type,
       orderIndex: phase.order_index,
-      startDate: phase.start_date,
-      endDate: phase.end_date,
+      // La fase no tiene fechas propias en la base; el rango real sale de sus jornadas.
+      startDate: phase.start_date ?? null,
+      endDate: phase.end_date ?? null,
       isActive: phase.is_active,
       settings: phase.settings || {},
       createdAt: phase.created_at,
