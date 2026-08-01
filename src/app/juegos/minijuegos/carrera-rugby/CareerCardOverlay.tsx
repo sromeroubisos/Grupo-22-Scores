@@ -22,7 +22,7 @@ import styles from './carrera.module.css';
  * teléfono: tiene que salir idéntica en todos los aparatos.
  */
 
-type Estado = 'listo' | 'preparando' | 'link-copiado' | 'sin-permiso';
+type Estado = 'listo' | 'preparando' | 'link-copiado' | 'sin-permiso' | 'sin-imagen';
 
 export default function CareerCardOverlay({ career, onClose }: { career: CareerState; onClose: () => void }) {
     const { locale, t } = useLocale();
@@ -91,11 +91,28 @@ export default function CareerCardOverlay({ career, onClose }: { career: CareerS
         return () => document.removeEventListener('keydown', alTeclear);
     }, [onClose]);
 
-    function bajar(f: CardFormat): void {
+    // NO se navega a la URL de la imagen. `a.href` guarda lo que responda el servidor,
+    // sea lo que sea: cuando la ruta contesta 404 `text/plain` —un link que no se pudo
+    // reconstruir— el jugador terminaba con un .txt en Descargas y ningun aviso. Se baja
+    // el archivo que YA se pidio y se valido, y si no hay archivo se dice.
+    async function bajar(f: CardFormat): Promise<void> {
+        const file = await pedirArchivo(f);
+        const url = URL.createObjectURL(file);
         const a = document.createElement('a');
-        a.href = urlDe(f);
-        a.download = '';
+        a.href = url;
+        a.download = file.name;
         a.click();
+        window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+    }
+
+    async function bajarDesdeBoton(f: CardFormat): Promise<void> {
+        setEstado('preparando');
+        try {
+            await bajar(f);
+            setEstado('listo');
+        } catch {
+            setEstado('sin-imagen');
+        }
     }
 
     async function compartir(): Promise<void> {
@@ -112,12 +129,13 @@ export default function CareerCardOverlay({ career, onClose }: { career: CareerS
             // Sin hoja de compartir con archivos (escritorio, navegadores viejos)
             // la foto igual tiene que llegar: se baja, que es lo que el jugador
             // vino a buscar.
-            bajar(formato);
+            await bajar(formato);
             setEstado('listo');
         } catch {
-            // Cancelar la hoja no es un error, y una imagen que no se pudo pedir
-            // tampoco puede dejar el botón trabado en "preparando".
-            setEstado('listo');
+            // Cancelar la hoja no es un error y no se avisa nada. Pero una imagen que
+            // no se pudo pedir SI: antes los dos casos terminaban en 'listo' y el boton
+            // volvia a su texto normal sin que pasara nada, que es como se ve un bug.
+            setEstado(archivos.current.has(formato) ? 'listo' : 'sin-imagen');
         }
     }
 
@@ -196,7 +214,7 @@ export default function CareerCardOverlay({ career, onClose }: { career: CareerS
                         {estado === 'preparando' ? t.preparingImage : t.shareImage}
                     </button>
                     <div className={styles.cardOverlaySecundarias}>
-                        <button type="button" className={styles.ghostBtn} onClick={() => bajar(formato)}>
+                        <button type="button" className={styles.ghostBtn} onClick={() => void bajarDesdeBoton(formato)} disabled={estado === 'preparando'}>
                             {t.downloadImage}
                         </button>
                         <button type="button" className={styles.ghostBtn} onClick={copiarLink}>
@@ -204,6 +222,10 @@ export default function CareerCardOverlay({ career, onClose }: { career: CareerS
                         </button>
                     </div>
                 </div>
+
+                {estado === 'sin-imagen' && (
+                    <p className={styles.cardOverlayNote} role="status">{t.imageFailed}</p>
+                )}
 
                 {estado === 'sin-permiso' && (
                     <label className={styles.shareFallback}>
