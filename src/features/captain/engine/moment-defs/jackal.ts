@@ -31,6 +31,7 @@ import type {
     MomentResult,
     MomentSetup,
     MomentSetupCtx,
+    PlayLevel,
 } from '../../types/moment-def.ts';
 import { createRng } from '../random.ts';
 
@@ -230,6 +231,33 @@ export const JACKAL: MomentDef<JackalSetup, JackalInput> = {
             headKnock,
             minute: ctx.minute,
         };
+    },
+
+    /**
+     * Esperar bien es llegar a las tres. Esperar mal es ENTRAR ANTES.
+     *
+     * El nivel se lee contra las ventanas del Setup y no contra un tiempo fijo:
+     * una ventana de 300 ms y una de 90 son el mismo minijuego jugado por dos
+     * jugadores distintos, y "reaccionar en 165 ms" sería un premio en la primera
+     * y un fracaso en la segunda.
+     *
+     * `mal` no es llegar tarde a las tres: es el offside. Llegar tarde sale
+     * gratis y entrar antes se cobra —esa asimetría es lo que hace que el
+     * minijuego se parezca al puesto—, así que el nivel malo tiene que caer del
+     * lado que duele.
+     */
+    playAt(setup: JackalSetup, level: PlayLevel, variation: number): JackalInput {
+        const rondas = setup.windows.length;
+        // La ronda que se juega distinto: la única que roba, o la del offside.
+        const cual = rondas > 0 ? Math.min(rondas - 1, Math.floor(variation * rondas)) : 0;
+
+        const reactions = setup.windows.map((window, i) => {
+            if (level === 'bien') return Math.round(window * 0.55);
+            if (level === 'regular') return Math.round(window * (i === cual ? 0.6 : 1.6));
+            return i === cual ? -80 : Math.round(window * 1.6);
+        });
+
+        return { kind: 'jackal', reactions };
     },
 
     resolve(setup: JackalSetup, input: JackalInput): MomentResult {

@@ -151,7 +151,9 @@ export type {
     MomentResult,
     MomentSetup,
     MomentSetupCtx,
+    PlayLevel,
 } from './types/moment-def.ts';
+export { PLAY_LEVELS } from './types/moment-def.ts';
 
 export type { TackleZones } from './engine/moments.ts';
 export {
@@ -161,6 +163,7 @@ export {
     pickMomentKind,
     proficiencyFor,
     rollMoment,
+    tacklePlayAt,
     tackleZones,
     zoneAt,
 } from './engine/moments.ts';

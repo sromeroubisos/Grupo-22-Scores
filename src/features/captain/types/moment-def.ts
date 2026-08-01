@@ -137,7 +137,45 @@ export interface MomentSetup {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  3 · EL RESULTADO
+//  3 · EL NIVEL DE JUEGO — cómo se juega un Momento sin pantalla
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Qué tan bien lo jugó el que no está sentado adelante de la pantalla.
+ *
+ * ── Por qué existe ──
+ * El digest congelado necesita un jugador simulado, y hasta la 0.5.0 la receta
+ * del test le daba a cada Momento una POSICIÓN DE INPUT CRUDA: dónde frenaba la
+ * barra, dónde apuntaba, cuántas veces insistía. Eso no porta entre mecánicas.
+ * "Frena en 0,62" no significa nada para un juego de memoria, y elegido uniforme
+ * significa MENOS QUE NADA: al apertura de la tabla le tocó una puntería
+ * uniforme en [−1, 1] contra tolerancias de 0,19 a 0,31, o sea un pateador que
+ * ignora la bandera. Erró ocho de nueve patadas en trece temporadas y el digest
+ * lo leyó como si Los Palos le hubieran arruinado la carrera. No era el balance:
+ * era la receta.
+ *
+ * Con el nivel declarado, la traducción a inputs la hace CADA MOMENTO —el único
+ * que sabe qué es apuntar bien en su mecánica— y el digest vuelve a ser
+ * comparable entre Momentos y entre versiones, que es lo único que se le pide.
+ *
+ * ── Qué significa cada uno ──
+ *   · `bien`    — la jugada le sale. Es tu jugada de héroe: TIENE que pagar en
+ *                 promedio, y hay un test que lo verifica.
+ *   · `regular` — la del que la juega sin ser su mejor tarde. Ni premio ni
+ *                 desastre.
+ *   · `mal`     — la falla, y la falla como se falla en ese puesto.
+ *
+ * El nivel NO es información: `playAt` ve el Setup entero, incluido lo que el
+ * jugador de carne no puede ver —el punto de quiebre del scrum—. Un jugador que
+ * juega bien es uno al que le sale, no uno que adivina.
+ */
+export type PlayLevel = 'bien' | 'regular' | 'mal';
+
+/** Los tres, en orden de mejor a peor. Es el orden que verifica el contrato. */
+export const PLAY_LEVELS: readonly PlayLevel[] = ['bien', 'regular', 'mal'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  4 · EL RESULTADO
 // ═══════════════════════════════════════════════════════════════════════════
 
 export interface MomentResult {
@@ -159,7 +197,7 @@ export interface MomentResult {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  4 · LA DEFINICIÓN
+//  5 · LA DEFINICIÓN
 // ═══════════════════════════════════════════════════════════════════════════
 
 export interface MomentDef<S extends MomentSetup, I> {
@@ -188,6 +226,35 @@ export interface MomentDef<S extends MomentSetup, I> {
      * el lugar donde se agrega es el Setup.
      */
     resolve(setup: S, input: I): MomentResult;
+    /**
+     * La mano que juega un simulado de nivel `level`. Es OBLIGATORIA.
+     *
+     * ── Por qué es obligatoria y no opcional ──
+     * Es la única forma de que el Momento número quince no vuelva a romper el
+     * digest como lo rompió el cuarto. Con un método opcional, el que escribe un
+     * Momento nuevo no se entera de que existe; con uno obligatorio, olvidárselo
+     * es un error de compilación y hay que sentarse a decidir qué es jugar bien
+     * en esa mecánica — que es exactamente la conversación que no queremos
+     * saltear.
+     *
+     * ── `variation`, de 0 a 1 ──
+     * La da quien llama y sirve para moverse ADENTRO del nivel: de qué lado se
+     * va la pelota, qué gesto de la seña se equivoca, en qué ronda llega tarde.
+     * Es un número, no un rng: `playAt` tiene que ser pura y determinista, igual
+     * que `resolve`. Un mismo (setup, level, variation) da siempre la misma mano.
+     *
+     * ── Lo que este método NO es ──
+     * No es un piloto automático para el jugador de carne, y la pantalla no lo
+     * llama: si algún día el juego ofrece "simular la temporada", esa decisión se
+     * toma aparte. Hoy vive acá porque el digest necesita un jugador y el único
+     * que sabe cómo se juega un Momento es el Momento.
+     *
+     * OJO AL VERSIONADO: como es parte del motor, tocar las bandas de un nivel
+     * mueve el digest congelado sin que el juego haya cambiado para nadie. Es
+     * legítimo, pero se revisa como lo que es —un cambio en lo que el digest
+     * SIGNIFICA— y no como un ajuste de balance.
+     */
+    playAt(setup: S, level: PlayLevel, variation: number): I;
 }
 
 // La vista con los genéricos borrados —`AnyMomentDef`— vive en el registry

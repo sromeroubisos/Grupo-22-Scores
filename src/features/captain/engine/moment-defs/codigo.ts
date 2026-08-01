@@ -40,6 +40,7 @@ import type {
     MomentResult,
     MomentSetup,
     MomentSetupCtx,
+    PlayLevel,
 } from '../../types/moment-def.ts';
 import { createRng } from '../random.ts';
 
@@ -208,6 +209,29 @@ export const CODIGO: MomentDef<CodigoSetup, CodigoInput> = {
             headKnock,
             minute: ctx.minute,
         };
+    },
+
+    /**
+     * Acordarse bien es repetirla entera. Acordarse mal es equivocarse TEMPRANO.
+     *
+     * Dónde cae el gesto errado es todo el nivel, y sale de que los aciertos se
+     * cuentan EN ORDEN: un error en la segunda mitad deja la seña entendida a
+     * medias —la pelota llega, el maul no— y uno en la primera la pierde entera.
+     * Por eso el nivel acá no se declara con un número de aciertos sino con la
+     * MITAD en la que se equivoca: si mañana la seña pasa a tener seis gestos,
+     * esto sigue significando lo mismo sin tocarlo.
+     */
+    playAt(setup: CodigoSetup, level: PlayLevel, variation: number): CodigoInput {
+        const call = [...setup.call];
+        if (level === 'bien' || call.length === 0) return { kind: 'codigo', call };
+
+        const mitad = Math.ceil(call.length / 2);
+        const donde = level === 'regular'
+            ? mitad + Math.floor(variation * (call.length - mitad))
+            : Math.floor(variation * mitad);
+
+        if (donde < call.length) call[donde] = (call[donde] + 1) % CODIGO_SYMBOLS;
+        return { kind: 'codigo', call };
     },
 
     resolve(setup: CodigoSetup, input: CodigoInput): MomentResult {

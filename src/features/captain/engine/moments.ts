@@ -35,7 +35,7 @@ import type {
     PendingMoment,
     TackleZone,
 } from '../types/moment.ts';
-import type { MomentDeltas, MomentResult, MomentSetupCtx } from '../types/moment-def.ts';
+import type { MomentDeltas, MomentResult, MomentSetupCtx, PlayLevel } from '../types/moment-def.ts';
 import type { Rng } from './random.ts';
 import { FAME_MAX, FAME_MIN } from '../types/currencies.ts';
 import { MOMENT_LABEL, SELECTABLE_MOMENTS } from '../types/moment-kinds.ts';
@@ -300,6 +300,41 @@ export function zoneAt(pos: number, zones: TackleZones): TackleZone {
     if (pos < zones.legalEnd) return 'legal';
     if (pos < zones.altoEnd) return 'alto';
     return 'tarde';
+}
+
+/**
+ * Dónde frena la barra un simulado de nivel `level`. El `playAt` del tackle.
+ *
+ * Vive acá y no en una `MomentDef` por lo mismo que `tackleZones`: el tackle es
+ * PRE-CONTRATO. Cuando se migre —justo antes del último Momento por puesto, que
+ * es lo que dice `moment-kinds.ts`— se muda adentro de la def con todo lo demás.
+ *
+ * Devuelve la posición Y la zona juntas, igual que hace la pantalla, porque son
+ * un par: una zona que no se derive de ese `at` deja el bunker calculando una
+ * profundidad que no corresponde a la jugada.
+ *
+ *   · bien    — el medio de la zona legal. Lo frena en seco.
+ *   · regular — abajo, a las piernas: seguro y sin premio.
+ *   · mal     — alto (y al bunker) o tarde (y try), mitad y mitad. LAS DOS, no
+ *               una: la zona alta es la única puerta al bunker, y con la receta
+ *               uniforme de la 0.4.0 —que caía casi siempre en `tarde`— el
+ *               bunker no se jugó en ninguna de las tres carreras congeladas.
+ *               Que la mitad de los `mal` vayan arriba pone el carril AL ALCANCE
+ *               del digest; que una semilla concreta lo pise sigue siendo cosa
+ *               de la semilla.
+ */
+export function tacklePlayAt(
+    zones: TackleZones,
+    level: PlayLevel,
+    variation: number,
+): { at: number; zone: TackleZone } {
+    let at: number;
+    if (level === 'bien') at = (zones.piernasEnd + zones.legalEnd) / 2;
+    else if (level === 'regular') at = zones.piernasEnd * 0.6;
+    else if (variation < 0.5) at = (zones.legalEnd + zones.altoEnd) / 2;
+    else at = (zones.altoEnd + 1) / 2;
+
+    return { at, zone: zoneAt(at, zones) };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

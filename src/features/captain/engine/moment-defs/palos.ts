@@ -36,6 +36,7 @@ import type {
     MomentResult,
     MomentSetup,
     MomentSetupCtx,
+    PlayLevel,
 } from '../../types/moment-def.ts';
 import { createRng } from '../random.ts';
 
@@ -208,6 +209,40 @@ export const PALOS: MomentDef<PalosSetup, PalosInput> = {
             tolerance: Math.round(palosTolerance(ctx.attrs, distance, angle, ctx.pressure, ctx.proficiency) * 1000) / 1000,
             minute: ctx.minute,
         };
+    },
+
+    /**
+     * Apuntar bien es apuntar A CONTRAVIENTO, y el nivel se mide EN TOLERANCIAS.
+     *
+     * Es el Momento donde la receta vieja se rompía y por eso vale decirlo acá:
+     * un desvío en unidades de barra no significa nada —0,2 es adentro con
+     * tolerancia 0,3 y afuera con 0,15—, así que el error de cada nivel se
+     * expresa como fracción del margen que ESTE pateador tiene en ESTA patada.
+     * Así "juega bien" quiere decir lo mismo a treinta metros de frente que a
+     * cuarenta y ocho contra la ceja.
+     *
+     *   · bien    — adentro de media tolerancia: entra.
+     *   · regular — alrededor del borde: entra, pega en el palo o se va, y las
+     *               tres cosas pasan de verdad.
+     *   · mal     — más allá del poste. No es "casi": es afuera.
+     */
+    playAt(setup: PalosSetup, level: PlayLevel, variation: number): PalosInput {
+        const perfecto = palosPerfectAim(setup.wind);
+        const [desde, hasta] = level === 'bien'
+            ? [0, 0.55]
+            : level === 'regular' ? [0.6, 1.5] : [1.6, 3.2];
+
+        // La variación decide de qué lado se va y cuánto, en ese orden.
+        const lado = variation < 0.5 ? -1 : 1;
+        const dentroDelLado = (variation * 2) % 1;
+        const error = (desde + dentroDelLado * (hasta - desde)) * setup.tolerance;
+
+        // Si por ese lado se sale de la barra, se va por el otro: el desvío lo
+        // manda el nivel y no lo puede recortar el borde de la pantalla.
+        const propuesto = perfecto + lado * error;
+        const aim = Math.abs(propuesto) <= 1 ? propuesto : perfecto - lado * error;
+
+        return { kind: 'palos', aim: Math.max(-1, Math.min(1, aim)) };
     },
 
     resolve(setup: PalosSetup, input: PalosInput): MomentResult {

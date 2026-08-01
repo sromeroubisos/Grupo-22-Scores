@@ -14,34 +14,48 @@
 // El archivo se escribió ANTES de los Momentos por puesto, a propósito: es la
 // línea de base contra la cual se va a leer qué movieron.
 //
-// ── Por qué la receta se declara acá y no se importa ──
-// El chooser, la posición donde frena la barra del tackle y el reparto de las
-// seis fichas SON PARTE DE LO CONGELADO: son los inputs del jugador simulado. Si
-// se importaran de `reducer.test.ts`, tocar un helper de aquel archivo movería
-// esta tabla sin que nadie hubiera tocado el motor, y el digest dejaría de
-// significar lo que dice que significa.
+// ── Qué se declara acá y qué se importa: la línea se movió, y por qué ──
+// El chooser y el reparto de las seis fichas siguen declarados acá, por lo de
+// siempre: si se importaran de `reducer.test.ts`, tocar un helper de aquel
+// archivo movería esta tabla sin que nadie hubiera tocado el motor, y el digest
+// dejaría de significar lo que dice que significa.
+//
+// LO QUE SÍ SE IMPORTA AHORA es cómo se JUEGA cada Momento (`def.playAt`), y no
+// es una excepción a esa regla sino la misma regla bien aplicada. La cuestión
+// nunca fue "acá contra allá" sino QUIÉN ES EL DUEÑO del dato: un helper de otro
+// test no es dueño de nada, pero el Momento sí es dueño de su mecánica, viaja
+// con la versión del motor y es lo que este archivo está probando.
+//
+// Y la versión declarada era, además, insostenible: la receta traía una posición
+// de input CRUDA por Momento, escrita a mano, y una de ellas —la puntería de Los
+// Palos, uniforme en [−1, 1]— resultó ser un pateador que apuntaba al azar. Le
+// erró a ocho de nueve patadas y esta tabla lo congeló como si fuera el
+// comportamiento del motor. Con el nivel declarado, el que agrega el Momento
+// número doce no puede volver a hacerlo: `playAt` es obligatoria y el contrato
+// verifica que jugar bien pague.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { isDeepStrictEqual } from 'node:util';
 
 import type {
-    AnclaSetup,
     CaptainState,
-    CodigoSetup,
     CreateCaptainInput,
-    TackleZone,
+    MomentKind,
+    PlayLevel,
 } from '../../index.ts';
 import {
     CAPTAIN_ENGINE_VERSION,
+    PLAY_LEVELS,
     TIME_TOKENS_PER_SEASON,
     belongingOf,
     captainReducer,
     createInitialCaptain,
+    getMomentDef,
     getPendingEvent,
     hashSeed,
+    tacklePlayAt,
     tackleZones,
-    zoneAt,
 } from '../../index.ts';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -78,68 +92,27 @@ function elegir(optionIds: string[], eventId: string, season: number): string {
 }
 
 /**
- * Dónde frena la barra del tackle, de 0 a 1.
+ * Con qué nivel juega el Momento de esta temporada.
  *
- * Es la MISMA entrada que produce la pantalla: una posición, no una zona. La
- * zona se deriva con `zoneAt` sobre los márgenes reales del jugador, igual que
- * en `TackleMoment.tsx`. Por eso el digest también cubre `tackleZones`: si
- * alguien ensancha la zona legal, estas carreras cambian y el test lo dice.
+ * UNO SOLO PARA TODOS LOS MOMENTOS, y ahí está la gracia: cada def traduce el
+ * mismo nivel a lo suyo —apuntar a contraviento, repetir la seña, insistir en el
+ * scrum— así que las tres carreras congeladas juegan al mismo nivel medio aunque
+ * les toquen mecánicas distintas. Es lo que hace comparable la tabla entre
+ * puestos: si el apertura cierra con menos Cartel que el pilar, ahora es porque
+ * el motor los trata distinto y no porque a uno le tocó una receta peor escrita.
+ *
+ * Se cicla por temporada en vez de sortearse para que las carreras pasen por los
+ * tres niveles. Y se indexa por (kind, temporada) porque `nextChain` prohíbe que
+ * un Momento se encadene a sí mismo: dos del mismo kind en la misma temporada no
+ * existen, así que la clave no puede colisionar.
  */
-function frenaEn(season: number, intento: number): number {
-    return (hashSeed(`tackle:${season}:${intento}`) % 10_000) / 10_000;
+function nivelDe(kind: MomentKind, season: number): PlayLevel {
+    return PLAY_LEVELS[hashSeed(`nivel:${kind}:${season}`) % PLAY_LEVELS.length];
 }
 
-/**
- * Cuánto tarda en tocar en cada ronda del jackal, en ms desde el destello.
- *
- * Igual que `frenaEn`: es la MISMA entrada que produce la pantalla —un tiempo de
- * reacción, no un veredicto— y el motor la clasifica contra las ventanas del
- * Setup. El rango va de −200 a 800 para que la receta pase por las tres salidas
- * (offside, robo y llegar tarde) y no solo por la cómoda.
- *
- * Ninguno de los tres casos congelados es tercera línea, así que HOY esto no
- * mueve un solo valor de la tabla. Está igual, y no es ceremonia: sin esta
- * rama, el día que alguien agregue un caso de tercera línea al digest la receta
- * quedaría trabada en la fase de Momento y el diagnóstico sería incomprensible.
- */
-function reaccionaEn(season: number, ronda: number): number {
-    return (hashSeed(`jackal:${season}:${ronda}`) % 1_000) - 200;
-}
-
-/**
- * Cuántas veces insiste en el scrum, de 0 a `maxPushes`.
- *
- * El Ancla no tiene "mano perfecta" —el punto de quiebre está oculto— así que la
- * receta apuesta distinto cada temporada y pasa por las cuatro decisiones.
- */
-function insisteEn(season: number, maxPushes: number): number {
-    return hashSeed(`ancla:${season}`) % (maxPushes + 1);
-}
-
-/**
- * Cómo repite la seña del line-out.
- *
- * Copia la seña real y le corrompe UN gesto, elegido por la temporada. Cuando el
- * índice cae fuera de la seña, la repite entera bien. Así la receta pasa por los
- * tres desenlaces —limpio, sucio y perdido— en vez de fallar siempre, que es lo
- * que daría una seña sorteada al azar (una entre 256 de acertar).
- */
-function repiteLaSena(call: readonly number[], season: number): number[] {
-    const repetida = [...call];
-    const donde = hashSeed(`codigo:${season}`) % (call.length + 2);
-    if (donde < call.length) repetida[donde] = (repetida[donde] + 1) % 4;
-    return repetida;
-}
-
-/**
- * Dónde apunta en Los Palos, de −1 a 1.
- *
- * NO usa `palosPerfectAim`: la receta tiene que poder errarle. Un pateador que
- * compensa el viento exacto todas las veces congelaría una carrera que nadie
- * juega.
- */
-function apuntaEn(season: number): number {
-    return ((hashSeed(`palos:${season}`) % 2_000) - 1_000) / 1_000;
+/** Cómo se mueve adentro del nivel: de qué lado se va, qué gesto se equivoca. */
+function variacionDe(kind: MomentKind, season: number): number {
+    return (hashSeed(`variacion:${kind}:${season}`) % 1_000) / 1_000;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -160,41 +133,34 @@ function repartir(state: CaptainState): CaptainState {
  *
  * Un tackle alto encadena el bunker, así que una sola vuelta no alcanza: deja la
  * carrera trabada en `moment` y el bucle de afuera gira sin avanzar.
+ *
+ * TRES CARRILES Y NO UNO POR MOMENTO. Antes había una rama por kind y esa era la
+ * grieta: agregar el Momento doce obligaba a escribir su rama acá, a mano, y una
+ * rama escrita de apuro es exactamente lo que congeló a un pateador tirando al
+ * azar. Ahora el que va por el contrato se juega solo, y este bucle no vuelve a
+ * tocarse nunca más.
  */
 function jugarMomentos(state: CaptainState): CaptainState {
     let next = state;
     let intento = 0;
     while (next.phase === 'moment' && next.pendingMoment && intento < 4) {
         const pendiente = next.pendingMoment;
-        if (pendiente.kind === 'bunker') {
-            next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } });
-        } else if (pendiente.kind === 'jackal') {
-            const reactions = [0, 1, 2].map((ronda) => reaccionaEn(next.season, ronda));
-            next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: { kind: 'jackal', reactions } });
-        } else if (pendiente.kind === 'ancla') {
-            const setup = pendiente.setup as AnclaSetup;
-            next = captainReducer(next, {
-                type: 'RESOLVE_MOMENT',
-                outcome: { kind: 'ancla', pushes: insisteEn(next.season, setup.maxPushes) },
-            });
-        } else if (pendiente.kind === 'codigo') {
-            const setup = pendiente.setup as CodigoSetup;
-            next = captainReducer(next, {
-                type: 'RESOLVE_MOMENT',
-                outcome: { kind: 'codigo', call: repiteLaSena(setup.call, next.season) },
-            });
-        } else if (pendiente.kind === 'palos') {
-            next = captainReducer(next, {
-                type: 'RESOLVE_MOMENT',
-                outcome: { kind: 'palos', aim: apuntaEn(next.season) },
-            });
-        } else {
-            const at = frenaEn(next.season, intento);
-            const zone: TackleZone = zoneAt(
-                at,
-                tackleZones(next.player, next.damage.cuerpo, pendiente.pressure),
-            );
+        const nivel = nivelDe(pendiente.kind, next.season);
+        const variacion = variacionDe(pendiente.kind, next.season);
+        const def = getMomentDef(pendiente.kind);
+
+        if (def && pendiente.setup) {
+            // El contrato: la mano la arma el Momento, que es el que sabe.
+            const outcome = def.playAt(pendiente.setup, nivel, variacion);
+            next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome });
+        } else if (pendiente.kind === 'tackle') {
+            // Pre-contrato, con su traducción al lado de sus márgenes.
+            const zones = tackleZones(next.player, next.damage.cuerpo, pendiente.pressure);
+            const { at, zone } = tacklePlayAt(zones, nivel, variacion);
             next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone, at } });
+        } else {
+            // El bunker no se juega: el veredicto ya estaba decidido.
+            next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } });
         }
         intento += 1;
     }
@@ -319,85 +285,119 @@ function digest(state: CaptainState): Digest {
 
 // ── La tabla ─────────────────────────────────────────────────────────────────
 //
-// MOTOR 0.4.0. La segunda foto, y la primera vez que se puede leer un
-// movimiento en vez de tener que confiar.
+// MOTOR 0.5.0. La tercera foto, y la única hasta ahora que se movió por DOS
+// causas a la vez. Las dos están medidas, y el orden importa: sin la segunda,
+// esta tabla habría congelado un bug.
 //
-// ── Qué se movió al entrar los Momentos por puesto: SOLO LA VERSIÓN ──
-// De los diez campos del digest, ocho quedaron IDÉNTICOS en los tres casos:
-// temporadas, edad de retiro, último club, Pertenencia, Cartel, caps, títulos y
-// Momentos jugados. Se movieron `engineVersion` —de 0.3.0 a 0.4.0— y con él el
-// `stateHash`, que cubre el estado entero y adentro lleva `state.version`.
+// ── CAUSA 1: el pool de ajenos pasó de 1 a 4 ──
+// Entraron El Ancla, El Código y Los Palos. Un perfil recibe Momentos ajenos por
+// EL CRUCE (`CROSS_CHANCE`), así que el sorteo cambió para los tres casos y no
+// solo para el apertura, que es el único que ganó un Momento propio. Por eso el
+// wing —que sigue sin Momento de su familia— también se movió: su pool ajeno
+// pasó de {jackal} a {jackal, ancla, codigo, palos}. Movimiento esperado y
+// legible; el que NO se explicara así sería el sospechoso.
 //
-// Y no es una inferencia: se corrió la tabla con la versión pineada de vuelta en
-// 0.3.0 y los tres casos dieron BYTE-IDÉNTICOS a la línea de base anterior. O
-// sea que el motor no cambió de comportamiento en una sola carrera; lo único que
-// cambió es la cadena de la versión.
+// ── CAUSA 2: la receta pasó a declarar NIVEL DE JUEGO ──
+// Y esta es la que hay que leer con atención, porque hasta la 0.4.0 la tabla
+// venía mintiendo. La receta le daba a cada Momento una posición de input cruda,
+// y la de Los Palos era una puntería uniforme en [−1, 1]. Medido sobre la
+// carrera congelada del apertura: nueve patadas, UNA adentro, dos al palo, seis
+// erradas, con un desvío promedio contra la puntería perfecta de 0,643 y
+// tolerancias de 0,19 a 0,31. O sea que le erraba por el triple del margen que
+// tenía. La 0.4.0 lo había leído como "Los Palos le arruinó la carrera al
+// apertura" —perdía dos temporadas y 23 puntos de Cartel— cuando lo que pasaba
+// es que el simulado apuntaba al azar.
 //
-// Que se pueda afirmar eso es el punto entero de las semillas derivadas. El kind
-// del Momento sale de `hash(semilla:temporada:momentPick)` y los márgenes de
-// `hash(semilla:kind:temporada:idx)`, así que `rollMoment` sigue consumiendo
-// `chance` + `int` + `int` del stream principal igual que antes. Si la elección
-// hubiera salido del stream de la carrera, los diez campos se habrían movido en
-// los tres casos y este comentario tendría que decir "confiá".
+// El tackle tenía el mismo vicio y era peor, porque lo juegan los quince: la
+// barra uniforme le daba al apertura 0,865 / 0,950 / 0,991, o sea `tarde` tres
+// de tres.
 //
-// Ninguno de los tres perfiles es tercera línea, que es la única familia a la
-// que hoy le toca El Jackal. El día que se agregue un caso de tercera línea, ESE
-// caso se va a mover solo y los otros dos van a quedar quietos — que es
-// exactamente la propiedad que hace revisable este archivo.
+// ── Lo que el arreglo movió, medido sobre 40 semillas por perfil ──
+// Las carreras NO se acortaron: es lo primero que hubo que descartar, porque el
+// apertura 99 se retira dos años antes que en la 0.4.0.
+//
+//     perfil           temporadas          retiro           Cartel
+//     primera-linea    15,93 → 15,73    33,83 → 33,63    27,59 → 31,86
+//     wing-fullback    12,73 → 12,85    30,73 → 30,85    12,48 → 16,40
+//     apertura         15,03 → 15,00    33,03 → 33,00    18,11 → 25,46
+//     tercera-linea    13,93 → 14,03    31,90 → 32,03    21,58 → 28,02
+//     segunda-linea    14,80 → 14,85    32,78 → 32,78    23,01 → 26,05
+//
+// Duración y edad de retiro quedan planas en los cinco perfiles: la receta no
+// acorta carreras. Que el apertura 99 pase de 15 temporadas a 13 es la tirada de
+// `retireIfDue` cayendo del otro lado —entre el tope blando y el duro se tira una
+// moneda por temporada, y la carrera diverge desde la primera jugada—, no un
+// castigo sistemático. Con el promedio plano, es la semilla y no el motor.
+//
+// El Cartel sube en LOS CINCO, incluidos los tres perfiles que no recibieron
+// ningún Momento nuevo. Eso dice que la receta vieja no era un problema de Los
+// Palos: era un impuesto parejo que se cobraba en todos los puestos, y Los Palos
+// solo lo hizo visible porque al apertura le tocaba pagarlo dos veces.
+//
+// ── Lo que sigue valiendo de la foto anterior ──
+// El kind del Momento sale de `hash(semilla:temporada:momentPick)` y los márgenes
+// de `hash(semilla:kind:temporada:idx)`, así que `rollMoment` sigue consumiendo
+// `chance` + `int` + `int` del stream principal. Es lo que hace que un Momento
+// nuevo mueva solo lo que cambió de verdad, en vez de mover todo.
 //
 // Cuando esto se mueva, lo que hay que mirar NO es el `stateHash` —se mueve
 // siempre, porque cubre el estado entero— sino qué OTROS campos se movieron y en
 // cuántos de los tres casos. Un solo caso movido es una regresión localizada;
-// los tres, un cambio de stream del rng.
-// Tres cosas de esta tabla que son hallazgos y no ruido, y que conviene tener a
-// mano cuando se mueva:
+// los tres, un cambio de stream del rng. Y si el movimiento no se puede explicar
+// con una causa nombrada, NO SE CONGELA: la 0.4.0 se congeló con una explicación
+// que solo describía la correlación ("le entró su Momento") y así estuvo tres
+// commits diciendo que Los Palos rompía al apertura.
 //
-//   · el pilar cierra con Pertenencia 50,94 y los otros dos con 0. No es un bug:
+// Tres cosas de esta tabla que son hallazgos y no ruido:
+//
+//   · el pilar cierra con Pertenencia 24,28 y los otros dos con 0. No es un bug:
 //     `belongingOf` mide el vínculo con el CLUB ACTUAL, y los otros dos se
-//     mudaron cerca del final. El pilar es el único que se queda, que es
-//     exactamente lo que la curva del puesto más longevo debería producir.
-//   · el apertura es el único que sale del país (Clermont) y el único con caps.
-//     Las dos cosas van juntas y esa es la regla: el cartel abre el mercado.
-//     Cierra con fama 63,9 contra 7,9 y 8,1 de los otros dos.
-//   · los tres suman 3 títulos. Con doce, nueve y ocho Momentos jugados
-//     respectivamente — el `moments` del digest es lo que va a moverse primero
-//     cuando entren los Momentos por puesto, y por eso está en la tabla.
+//     mudaron cerca del final. El pilar es el único que se queda, que es lo que
+//     la curva del puesto más longevo debería producir.
+//   · el apertura es el único que sale del país (Moana Pasifika) y el único con
+//     caps. Las dos cosas van juntas y esa es la regla: el cartel abre el
+//     mercado. Cierra con 66,6 contra 13,6 y 14,8 de los otros dos.
+//   · ninguna de las tres carreras pisa el bunker. La única puerta es la zona
+//     `alto` del tackle y las dos manos `mal` que salieron cayeron del lado de
+//     `tarde`. El carril está al alcance de la receta —la mitad de los `mal` van
+//     arriba— pero HOY el digest no lo cubre: si alguien toca `bunkerVerdict`,
+//     esta tabla no se entera. Es la razón principal para sumar un cuarto caso.
 const EXPECTED: Record<string, Digest> = {
     'pilar argentino': {
-        engineVersion: '0.4.0',
-        seasons: 17,
-        retirementAge: 35,
-        lastClub: 'sb-club-newman',
-        belonging: 50.94,
-        fame: 7.9,
+        engineVersion: '0.5.0',
+        seasons: 16,
+        retirementAge: 34,
+        lastClub: 'ar-sociedad-hebraica',
+        belonging: 24.28,
+        fame: 13.6,
         caps: 0,
         titles: 3,
-        moments: 12,
-        stateHash: 2447863682, // 0.3.0 era 3990923497 — se movió solo por la versión
+        moments: 13,
+        stateHash: 3116498538, // 0.4.0 era 2447863682
     },
     'wing argentino': {
-        engineVersion: '0.4.0',
+        engineVersion: '0.5.0',
         seasons: 13,
         retirementAge: 31,
         lastClub: 'ar-jockey-club-villa-maria',
         belonging: 0,
-        fame: 8.1,
+        fame: 14.8,
         caps: 0,
         titles: 3,
-        moments: 9,
-        stateHash: 3720333449, // 0.3.0 era 301923702
+        moments: 8,
+        stateHash: 4185683751, // 0.4.0 era 3720333449
     },
     'apertura argentino': {
-        engineVersion: '0.4.0',
-        seasons: 15,
-        retirementAge: 33,
-        lastClub: 'asm-clermont',
+        engineVersion: '0.5.0',
+        seasons: 13,
+        retirementAge: 31,
+        lastClub: 'moana-pasifika',
         belonging: 0,
-        fame: 63.9,
-        caps: 14,
+        fame: 66.6,
+        caps: 13,
         titles: 3,
-        moments: 8,
-        stateHash: 2468468574, // 0.3.0 era 612484219
+        moments: 12,
+        stateHash: 396654071, // 0.4.0 era 2468468574
     },
 };
 

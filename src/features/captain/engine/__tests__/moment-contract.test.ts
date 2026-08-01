@@ -23,11 +23,22 @@ import type { MomentResult, MomentSetupCtx } from '../../types/moment-def.ts';
 import type { PendingMoment } from '../../types/moment.ts';
 import type { CaptainAction } from '../../state/captain-actions.ts';
 import { TIME_SLOTS, TIME_TOKENS_PER_SEASON } from '../../types/currencies.ts';
+import { PLAY_LEVELS } from '../../types/moment-def.ts';
 import { ALL_FAMILIES, baseAttributes } from '../../data/positions.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
 import { createRng } from '../random.ts';
 import { MOMENT_DEFS } from '../moment-defs/index.ts';
-import { applyMomentDeltas, momentSeed, nextChain, pickMomentKind, proficiencyFor, rollMoment } from '../moments.ts';
+import {
+    applyMomentDeltas,
+    momentSeed,
+    nextChain,
+    pickMomentKind,
+    proficiencyFor,
+    rollMoment,
+    tacklePlayAt,
+    tackleZones,
+    zoneAt,
+} from '../moments.ts';
 
 const TERCERA: CreateCaptainInput = {
     name: 'Ciro',
@@ -388,6 +399,141 @@ test('cada carril de MomentDeltas cae donde dice', () => {
     assert.equal(s.pendingPlayingTime, -1);
     assert.equal(s.damage.cuerpo, 5);
     assert.ok(s.damage.cabeza > 0, 'el HIA no se contó');
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  6 · EL NIVEL DE JUEGO
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Lo que estos tests cuidan no es el balance de ningún Momento: es que la
+// palabra "bien" signifique lo mismo en los cinco minijuegos. Sin eso, el digest
+// congelado vuelve a ser lo que fue hasta la 0.5.0 —una tabla donde cada Momento
+// se jugaba con una receta escrita a ojo— y el apertura vuelve a errar ocho de
+// nueve patadas sin que nada se ponga en rojo.
+
+/** Un contexto de prueba con la familia dueña del Momento. */
+function ctxDe(def: typeof MOMENT_DEFS[number], seed: number): MomentSetupCtx {
+    const family = (def.families ?? ALL_FAMILIES)[0];
+    return {
+        kind: def.kind,
+        season: 1 + (seed % 12),
+        minute: 48 + (seed % 30),
+        scoreDelta: (seed % 13) - 6,
+        pressure: (seed % 10) / 10,
+        family,
+        proficiency: 1,
+        attrs: baseAttributes(family),
+        bodyDamage: seed % 30,
+        seed: momentSeed(seed, def.kind, 1, 0),
+    };
+}
+
+const VARIACIONES = [0.05, 0.3, 0.55, 0.8, 0.95];
+
+test('playAt recibe TRES argumentos y devuelve una mano de su propio kind', () => {
+    for (const def of MOMENT_DEFS) {
+        assert.equal(def.playAt.length, 3, `${def.kind}: playAt tiene que ser (setup, level, variation)`);
+
+        for (let seed = 1; seed <= 12; seed += 1) {
+            const setup = def.setup(ctxDe(def, seed));
+            for (const level of PLAY_LEVELS) {
+                for (const v of VARIACIONES) {
+                    const mano = def.playAt(setup, level, v);
+                    assert.equal(mano.kind, def.kind, `${def.kind}: playAt devolvió una mano de otro Momento`);
+                }
+            }
+        }
+    }
+});
+
+test('playAt es pura: mismo setup, nivel y variación dan la misma mano', () => {
+    // Si no lo fuera, el digest congelado dejaría de ser reproducible y el
+    // fallo aparecería como "el motor cambió" tres commits más tarde.
+    for (const def of MOMENT_DEFS) {
+        const setup = def.setup(ctxDe(def, 7));
+        for (const level of PLAY_LEVELS) {
+            const a = def.playAt(setup, level, 0.42);
+            const b = def.playAt(setup, level, 0.42);
+            assert.deepEqual(b, a, `${def.kind}: dos manos del mismo nivel dieron distinto`);
+        }
+    }
+});
+
+test('EL NIVEL ORDENA EL RESULTADO: bien paga más que regular, y regular más que mal', () => {
+    // El test que le faltaba al proyecto. Se mide en Cartel porque es el único
+    // carril que los cinco Momentos mueven en las dos direcciones, y se promedia
+    // sobre un barrido de Setups: un Momento puede tener una patada imposible o
+    // un scrum que aguanta todo, y ninguna de las dos cosas puede decidir el
+    // veredicto.
+    for (const def of MOMENT_DEFS) {
+        const promedio: Record<string, number> = {};
+
+        for (const level of PLAY_LEVELS) {
+            let suma = 0;
+            let n = 0;
+            for (let seed = 1; seed <= 40; seed += 1) {
+                const setup = def.setup(ctxDe(def, seed));
+                for (const v of VARIACIONES) {
+                    suma += def.resolve(setup, def.playAt(setup, level, v)).deltas.fame ?? 0;
+                    n += 1;
+                }
+            }
+            promedio[level] = suma / n;
+        }
+
+        const detalle = PLAY_LEVELS.map((l) => `${l}=${promedio[l].toFixed(2)}`).join(' ');
+
+        assert.ok(
+            promedio.bien > promedio.regular,
+            `${def.kind}: jugarlo bien no paga más que jugarlo regular (${detalle})`,
+        );
+        assert.ok(
+            promedio.regular > promedio.mal,
+            `${def.kind}: jugarlo regular no paga más que jugarlo mal (${detalle})`,
+        );
+    }
+});
+
+test('UN MOMENTO PROPIO ES BUENO EN PROMEDIO: es tu jugada de héroe', () => {
+    // La regla de diseño, hecha test: un Momento del puesto se juega con los
+    // bonos de atributo de ese puesto, así que jugarlo bien TIENE que dejar
+    // Cartel. Si un Momento nuevo entra en negativo con nivel `bien`, o la
+    // calibración está mal o `playAt` no está declarando lo que dice declarar —y
+    // las dos cosas son la conversación que hay que tener antes de congelar.
+    for (const def of MOMENT_DEFS) {
+        let suma = 0;
+        let n = 0;
+        for (let seed = 1; seed <= 40; seed += 1) {
+            const setup = def.setup(ctxDe(def, seed));
+            for (const v of VARIACIONES) {
+                suma += def.resolve(setup, def.playAt(setup, 'bien', v)).deltas.fame ?? 0;
+                n += 1;
+            }
+        }
+        assert.ok(suma / n > 0, `${def.kind}: jugado BIEN deja ${(suma / n).toFixed(2)} de Cartel en promedio`);
+    }
+});
+
+test('el tackle, que es pre-contrato, cumple el mismo trato', () => {
+    // No tiene def, así que su traducción vive al lado de sus márgenes. Que se
+    // pruebe igual es lo que hace que la migración al contrato —cuando toque— no
+    // pueda cambiar el significado del nivel sin avisar.
+    const base = createInitialCaptain(TERCERA, 3);
+    const zones = tackleZones(base.player, 10, 0.6);
+
+    assert.equal(tacklePlayAt(zones, 'bien', 0.2).zone, 'legal', 'jugado bien, el tackle no frena en seco');
+    assert.equal(tacklePlayAt(zones, 'regular', 0.2).zone, 'piernas', 'jugado regular, el tackle no baja a las piernas');
+    assert.equal(tacklePlayAt(zones, 'mal', 0.2).zone, 'alto', 'jugado mal, el tackle no se va arriba');
+    assert.equal(tacklePlayAt(zones, 'mal', 0.8).zone, 'tarde', 'jugado mal, el tackle no llega tarde');
+
+    // Y la posición tiene que ser coherente con la zona: el bunker calcula la
+    // profundidad con el `at`, así que un par desalineado le miente al veredicto.
+    for (const level of PLAY_LEVELS) {
+        for (const v of VARIACIONES) {
+            const { at, zone } = tacklePlayAt(zones, level, v);
+            assert.equal(zoneAt(at, zones), zone, `${level}: la zona no se deriva de la posición`);
+        }
+    }
 });
 
 test('la cabeza no baja ni aunque un Momento lo pida', () => {

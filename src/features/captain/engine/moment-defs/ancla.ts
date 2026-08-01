@@ -37,6 +37,7 @@ import type {
     MomentResult,
     MomentSetup,
     MomentSetupCtx,
+    PlayLevel,
 } from '../../types/moment-def.ts';
 import { createRng } from '../random.ts';
 
@@ -201,6 +202,32 @@ export const ANCLA: MomentDef<AnclaSetup, AnclaInput> = {
             headKnock,
             minute: ctx.minute,
         };
+    },
+
+    /**
+     * Insistir bien es insistir HASTA JUSTO ANTES del quiebre.
+     *
+     * El que juega mal no es el que insiste más: es el que se equivoca de lado.
+     * Por eso `mal` tiene dos caras según el scrum que le tocó —se pasa uno y lo
+     * tira abajo, o suelta un scrum que aguantaba todo y se queda sin nada—. Un
+     * `mal` que siempre insistiera al máximo sacaría tres penales cada vez que el
+     * scrum no se cae, y "jugar mal" pasaría a pagar mejor que jugar regular.
+     */
+    playAt(setup: AnclaSetup, level: PlayLevel, variation: number): AnclaInput {
+        const ideal = Math.min(setup.maxPushes, setup.breakAt - 1);
+
+        if (level === 'bien') return { kind: 'ancla', pushes: ideal };
+
+        if (level === 'regular') {
+            // Se queda uno corto o se pasa por uno, mitad y mitad.
+            const pushes = variation < 0.5
+                ? Math.max(0, ideal - 1)
+                : Math.min(setup.maxPushes, ideal + 1);
+            return { kind: 'ancla', pushes };
+        }
+
+        // El scrum se caía y fue igual; o aguantaba todo y soltó en la primera.
+        return { kind: 'ancla', pushes: setup.breakAt <= setup.maxPushes ? setup.breakAt : 0 };
     },
 
     resolve(setup: AnclaSetup, input: AnclaInput): MomentResult {
