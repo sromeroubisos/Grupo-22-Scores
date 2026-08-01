@@ -145,6 +145,20 @@ export const OFFER_REASON_EN = {
     youngProspect: 'They like your ceiling',
 } as const;
 
+/**
+ * LA VUELTA AL CLUB DONDE EMPEZASTE (`engine/homecoming.ts`).
+ *
+ * No vive en `SHARED_OPTIONS_EN` como "Retirarte ahora" porque lleva el nombre de
+ * un club adentro, así que es una función y no una frase fija — el mismo motivo
+ * por el que el mercado se arma acá con funciones.
+ */
+export const HOMECOMING_EN = {
+    label: (club: string) => `Go back to ${club}`,
+    hint: 'The club where you started opens the door for you to finish there.',
+    result: (club: string) => `You go back to ${club}, the club where it all started.`,
+    reason: 'Where you started',
+} as const;
+
 // ── Permanencia en el club ───────────────────────────────────────────────────
 
 export const TENURE_TIER_LABELS_EN: Readonly<Record<'referente' | 'idolo', string>> = {

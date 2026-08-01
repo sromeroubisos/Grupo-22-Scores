@@ -101,6 +101,10 @@ export function createInitialCareer(input: CreatePlayerInput, seed: number): Car
         seed: seed >>> 0,
         rngState: rng.state,
         startRoute,
+        // El club de creación se SELLA acá y no se vuelve a tocar: es el único
+        // momento en que existe con certeza (un pase en la ventana previa a la
+        // primera temporada lo pisaría en `player.club`).
+        startClub: player.club,
         paceMode: input.paceMode ?? 'intense',
         player,
         seasons: [],

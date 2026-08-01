@@ -76,7 +76,14 @@ const KEY = 'g22-carrera-rugby';
 // una partida migrada mostraría los premios en el retiro y ninguno en la
 // trayectoria: la vitrina y la espina dorsal dirían cosas distintas sobre la misma
 // carrera. Se descarta con el aviso de siempre.
-const SCHEMA = 16;
+// Schema 17: entra `startClub`, EL CLUB DONDE EMPEZÓ LA CARRERA. Hace falta para
+// la vuelta a casa del tramo final, y no se puede derivar de una partida vieja: el
+// mercado se evalúa antes de la primera temporada, así que un pase en esa ventana
+// deja `history[0]` apuntando a un club que no es el de creación. Rellenarlo con
+// `history[0].clubId` al migrar sería inventar un origen —y encima uno que el
+// juego después le ofrecería al jugador como "tu club"—, así que se descarta con
+// el aviso de siempre.
+const SCHEMA = 17;
 
 interface SavedCareer {
     schema: number;

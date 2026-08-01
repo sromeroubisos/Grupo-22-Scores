@@ -155,27 +155,55 @@ test('ningún puesto gasta la ranura variable en una estadística fija', () => {
 });
 
 test('un pilar y un apertura producen planillas claramente distintas', () => {
-    const totalizar = (position: Position) =>
-        todasLasTemporadas(position, 20260726).reduce(
+    // POR TEMPORADA Y SOBRE VARIAS SEMILLAS, no el total de una carrera.
+    //
+    // Este test comparaba los TOTALES de una sola semilla, y eso mide dos cosas a
+    // la vez: cuánto tacklea un puesto por temporada y CUÁNTAS TEMPORADAS jugó.
+    // Medido: con la semilla 20260726 el pilar cerraba en 17 temporadas y el
+    // apertura en 21, así que el apertura acumulaba más tackles totales (2516
+    // contra 2293) tackleando bastante menos por temporada (120 contra 135). El
+    // día que algo movió la longevidad de esa carrera —cualquier cosa que cambie
+    // una decisión del tramo final— el test se puso rojo sin que la planilla por
+    // puesto hubiera cambiado nada.
+    //
+    // La afirmación que hay que proteger es la del deporte: el pilar tacklea más
+    // y el apertura anota más, POR TEMPORADA. Se mide entonces la tasa, y sobre
+    // las cinco semillas juntas: en una sola, un apertura titular de un club
+    // grande contra un pilar suplente puede darlo vuelta (pasa en 3 de cada 12
+    // semillas), y eso es variación de carrera, no de puesto.
+    const tasas = (position: Position) => {
+        const seasons = SEMILLAS.flatMap((seed) => todasLasTemporadas(position, seed));
+        const total = seasons.reduce(
             (acc, s) => ({
                 puntos: acc.puntos + s.stats.points,
-                tries: acc.tries + s.stats.tries,
                 tackles: acc.tackles + s.stats.tackles,
                 scrums: acc.scrums + s.stats.scrumsWon,
                 intentos: acc.intentos + s.stats.kicksAtGoal,
             }),
-            { puntos: 0, tries: 0, tackles: 0, scrums: 0, intentos: 0 },
+            { puntos: 0, tackles: 0, scrums: 0, intentos: 0 },
         );
+        return {
+            ...total,
+            puntosPorTemporada: total.puntos / seasons.length,
+            tacklesPorTemporada: total.tackles / seasons.length,
+        };
+    };
 
-    const pilar = totalizar('prop');
-    const apertura = totalizar('flyhalf');
+    const pilar = tasas('prop');
+    const apertura = tasas('flyhalf');
 
     assert.equal(pilar.intentos, 0, 'el pilar no patea a los palos');
     assert.ok(pilar.scrums > 0, 'el pilar gana scrums');
     assert.ok(apertura.intentos > 0, 'el apertura patea a los palos');
     assert.equal(apertura.scrums, 0, 'el apertura no gana scrums');
-    assert.ok(apertura.puntos > pilar.puntos, 'el apertura tiene que anotar bastante más que el pilar');
-    assert.ok(pilar.tackles > apertura.tackles, 'el pilar tiene que tacklear bastante más que el apertura');
+    assert.ok(
+        apertura.puntosPorTemporada > pilar.puntosPorTemporada * 3,
+        `el apertura tiene que anotar bastante más: ${apertura.puntosPorTemporada.toFixed(1)} vs ${pilar.puntosPorTemporada.toFixed(1)} por temporada`,
+    );
+    assert.ok(
+        pilar.tacklesPorTemporada > apertura.tacklesPorTemporada,
+        `el pilar tiene que tacklear más: ${pilar.tacklesPorTemporada.toFixed(1)} vs ${apertura.tacklesPorTemporada.toFixed(1)} por temporada`,
+    );
 });
 
 function vacio(): SeasonStats {

@@ -3260,6 +3260,120 @@
 .creatorBands { display: flex; flex-direction: column; gap: 14px; }
 .bandRoute, .bandPace { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 
+/* ── Club de inicio: la fila que confirma qué club quedó elegido ─────────── */
+/* Va DEBAJO de los dos chips y no adentro de uno: el chip dice qué modo elegiste
+   (al azar o a mano) y esta fila dice el resultado. Meterlo adentro haría crecer
+   un chip y no el otro, y los dos dejarían de leerse como una misma decisión. */
+.startClubRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 8px 10px;
+    border: 1px solid var(--color-accent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+.startClubName {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Pantalla de elección de club ────────────────────────────────────────── */
+/* Pantalla propia y no panel adentro de la creación: son 227 clubes argentinos
+   en 25 divisiones, y la tarjeta de creación tiene como promesa que nada
+   scrollea. Acá el scroll es el mecanismo, no un accidente. */
+.clubPick {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+    padding: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+}
+
+.clubPickSearch { display: flex; flex-direction: column; gap: 6px; }
+
+.clubPickList {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 0;
+    max-height: 58vh;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.clubGroup { display: flex; flex-direction: column; gap: 8px; }
+
+.clubGroupTitle {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: 0;
+    padding: 4px 0;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+}
+
+.clubGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.clubOption {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: none;
+    color: var(--color-text-primary);
+    font-size: 0.86rem;
+    text-align: left;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.clubOption:hover { border-color: var(--color-text-secondary); }
+
+.clubOption:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+}
+
+/* Seleccionado: color, borde grueso Y peso de fuente, igual que los países.
+   Con el color solo, el elegido no se distingue sin ver el color. */
+.clubOptionOn {
+    border-color: var(--color-accent);
+    border-width: 2px;
+    font-weight: 700;
+}
+
+.clubOptionName {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .creatorFoot {
     display: flex;
     align-items: center;

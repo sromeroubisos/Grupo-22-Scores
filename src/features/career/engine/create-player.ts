@@ -5,8 +5,9 @@ import { computeEffectiveOvr, clampAttr, ovrExact } from './scoring.ts';
 import { marketValue } from './club-offers.ts';
 import { playerRoleAt } from './squad-role.ts';
 import type { PaceModeId, StartRouteId } from '../types/career.ts';
-import type { EconomicModel } from '../data/competition-levels2026.ts';
-import { pickInitialClub } from './market-routes.ts';
+import { economicModelOf, type EconomicModel } from '../data/competition-levels2026.ts';
+import type { ClubDef } from '../data/clubs.ts';
+import { pickInitialClub, startClubChoices, type InitialPlacement } from './market-routes.ts';
 import { createEligibility } from './eligibility.ts';
 import { countryCodeOfNationality, findCountry } from '../data/nations.ts';
 import type { Rng } from './random.ts';
@@ -27,6 +28,15 @@ export interface CreatePlayerInput {
     number?: number;
     /** Desde dónde arranca. Si no viene, la ruta más dura (y la histórica). */
     startRoute?: StartRouteId;
+    /**
+     * Club donde arranca, ELEGIDO por el jugador. Si no viene, lo sortea el motor
+     * (que es el comportamiento histórico y sigue siendo el default de la UI).
+     *
+     * Tiene que ser uno de `startClubChoices(país)` — si no lo es, se ignora en
+     * silencio y arranca el sorteo: un id inválido llega de una partida vieja o de
+     * un token manipulado, y ninguna de las dos cosas puede romper una carrera.
+     */
+    startClubId?: string;
     /**
      * Cuántas temporadas pasan por decisión. `createPlayer` NO lo usa: no es una
      * propiedad del jugador sino de la partida, y vive en `CareerState`. Viaja
@@ -432,6 +442,21 @@ function shiftToTargetOvr(attributes: Attributes, position: Position, targetOvr:
     }
 }
 
+/** Código de país de la nacionalidad, con la MISMA precedencia que usa el jugador. */
+function nationalityCountryCodeOf(fromCode: { code: string } | null, nationality: string): string | null {
+    return fromCode?.code ?? countryCodeOfNationality(nationality);
+}
+
+/**
+ * El club elegido, si es una opción válida para esa nacionalidad. Se valida
+ * contra la misma lista que ve la pantalla: el motor no confía en el id que le
+ * llega, porque puede venir de un guardado viejo o de un token editado a mano.
+ */
+function resolveChosenStartClub(clubId: string | undefined, countryCode: string | null): ClubDef | null {
+    if (clubId === undefined || countryCode === null) return null;
+    return startClubChoices(countryCode).find((c) => c.id === clubId) ?? null;
+}
+
 export function createPlayer(input: CreatePlayerInput, rng: Rng): Player {
     const pos = getPosition(input.position);
     // La rama la SORTEA el reducer y llega sellada (ver `drawStartRoute`). El
@@ -460,7 +485,28 @@ export function createPlayer(input: CreatePlayerInput, rng: Rng): Player {
     // en Wellington porque cayó ese tier): el rng elige el club concreto dentro
     // del universo de su país, que es lo que hace que dos carreras del mismo país
     // no sean la misma carrera.
-    const placement = pickInitialClub(nationality, origin.id, origin.startTier, rng, isAcademyStart(startRoute));
+    const drawn = pickInitialClub(nationality, origin.id, origin.startTier, rng, isAcademyStart(startRoute));
+
+    // EL CLUB ELEGIDO PISA AL SORTEADO, PERO EL SORTEO SE HACE IGUAL.
+    //
+    // `pickInitialClub` consume RNG (la ruta y el club), así que saltearlo cuando
+    // hay elección correría el stream y dos carreras con la misma semilla —una
+    // eligiendo club y otra no— dejarían de ser comparables. Es la misma
+    // disciplina que `drawStartRoute` en el reducer: se tira siempre y se usa lo
+    // que corresponda.
+    //
+    // Y la elección GANA sobre la rama sorteada: si el motor había sacado
+    // academia y el jugador eligió un club amateur, arranca amateur en el club que
+    // eligió. `routeDowngraded` queda en false a propósito — esa marca significa
+    // "tu país no tenía un club de ese nivel", que es una limitación del catálogo,
+    // y acá no hubo tal cosa sino una decisión.
+    const elegido = resolveChosenStartClub(input.startClubId, nationalityCountryCodeOf(fromCode, nationality));
+    const placement: InitialPlacement = elegido === null ? drawn : {
+        club: elegido,
+        entryMode: 'domestic-senior',
+        resolvedModel: economicModelOf(elegido),
+        routeDowngraded: false,
+    };
     const club = placement.club;
 
     // Atributos = base de posición + sesgo de origen + ruido de "prospecto".

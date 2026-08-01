@@ -21,9 +21,10 @@ import type { Locale } from './locale.ts';
 import { ALL_EVENTS_EN, MARKET_EN, SHARED_OPTIONS_EN } from './events/index.ts';
 import type { EventOptionTextEn } from './events/index.ts';
 import {
-    MOVEMENT_OPTION_EN, MOVEMENT_RESULT_EN, OFFER_REASON_EN, ordinalEn, ROLE_LABELS_EN,
-    SPELLED_EN, TENURE_TIER_LABELS_EN,
+    HOMECOMING_EN, MOVEMENT_OPTION_EN, MOVEMENT_RESULT_EN, OFFER_REASON_EN, ordinalEn,
+    ROLE_LABELS_EN, SPELLED_EN, TENURE_TIER_LABELS_EN,
 } from './catalog.ts';
+import { homecomingClubIdOf, isHomecomingOption } from '../engine/homecoming.ts';
 
 // ── El mercado, que el motor arma en tiempo real ─────────────────────────────
 
@@ -82,6 +83,22 @@ function localizeMarketOption(option: EventOption, state: CareerState): EventOpt
     };
 }
 
+/**
+ * La vuelta al club de origen, en inglés. Se resuelve por SU CUENTA y no por la
+ * tabla compartida porque lleva el nombre del club adentro; el club sale del
+ * `offer` que la opción ya trae, no del texto en español.
+ */
+function localizeHomecomingOption(option: EventOption): EventOption {
+    const club = option.offer?.clubName ?? '';
+    return {
+        ...option,
+        label: HOMECOMING_EN.label(club),
+        hint: HOMECOMING_EN.hint,
+        offer: option.offer ? { ...option.offer, reason: HOMECOMING_EN.reason } : undefined,
+        outcomes: option.outcomes.map((o): Outcome => ({ ...o, resultText: HOMECOMING_EN.result(club) })),
+    };
+}
+
 function localizeMarketEvent(event: GameEvent, state: CareerState): GameEvent {
     const club = getClub(state.player.club);
     const head = event.id === NO_RENEWAL_EVENT_ID
@@ -96,6 +113,10 @@ function localizeMarketEvent(event: GameEvent, state: CareerState): GameEvent {
             // de mercado y su texto vive en la tabla compartida.
             const shared = SHARED_OPTIONS_EN[option.id];
             if (shared) return applyOptionText(option, shared);
+            // La vuelta a casa viaja igual, y tampoco es una opción de mercado:
+            // sin esta línea `localizeMarketOption` la trataría como una oferta y
+            // le escribiría el texto de un pase cualquiera.
+            if (isHomecomingOption(option.id)) return localizeHomecomingOption(option);
             return localizeMarketOption(option, state);
         }),
     };
@@ -137,6 +158,7 @@ export function localizeEvent(event: GameEvent, state: CareerState, locale: Loca
         title: table.title,
         text: table.text,
         options: event.options.map((option) => {
+            if (isHomecomingOption(option.id)) return localizeHomecomingOption(option);
             const text = table.options[option.id] ?? SHARED_OPTIONS_EN[option.id];
             return text ? applyOptionText(option, text) : option;
         }),
@@ -161,6 +183,12 @@ export function decisionTextIn(
     locale: Locale,
 ): string {
     if (locale === 'es') return entry.text;
+
+    // La vuelta a casa puede haberse elegido desde CUALQUIER evento, así que se
+    // resuelve antes de mirar de cuál. El club sale del id (`homecoming-<clubId>`),
+    // que es lo mismo que hace el mercado con `move-<clubId>`.
+    const homecomingClub = homecomingClubIdOf(entry.optionId);
+    if (homecomingClub !== null) return HOMECOMING_EN.result(getClub(homecomingClub).labelEs);
 
     if (isMarketEvent(entry.eventId)) {
         if (entry.optionId === 'stay') return entry.text;

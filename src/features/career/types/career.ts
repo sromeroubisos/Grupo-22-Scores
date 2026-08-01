@@ -433,7 +433,16 @@ export type MovementKind =
 // aparte para que el torneo exista con o sin vos) y `TitleWon` pasa a llevar
 // `club`/`union` excluyentes. El Grand Slam y la Triple Corona siguen sin darse:
 // dependen del resultado partido a partido, que el motor no simula.
-export const ENGINE_VERSION = '1.34.0';
+// 1.35.0: DOS PUERTAS QUE ANTES NO EXISTÍAN, una en cada punta de la carrera.
+// · Al empezar, el club se puede ELEGIR (`startClubId`): el sorteo se hace igual
+//   —el stream del RNG no se corre— y el club elegido lo pisa, así que una carrera
+//   con club elegido y otra sin él siguen siendo comparables con la misma semilla.
+// · Al terminar, de los 34 en adelante toda decisión ofrece VOLVER AL CLUB DONDE
+//   EMPEZASTE (`engine/homecoming.ts`), colgada con el mismo mecanismo que
+//   "Retirarte ahora" y por el mismo motivo: tiene que estar siempre, no cuando el
+//   mercado quiera. Cambia la lista de opciones del tramo final, así que mueve
+//   cualquier carrera que llegue a los 34.
+export const ENGINE_VERSION = '1.35.0';
 
 export type CareerPhase = 'setup' | 'season' | 'event' | 'retired';
 
@@ -559,6 +568,21 @@ export interface CareerState {
 
     /** Ruta elegida al crear el jugador. Se sella: define cómo se juega la carrera. */
     startRoute: StartRouteId;
+
+    /**
+     * EL CLUB DONDE EMPEZÓ TODO. Es el club que tenía al crearse, lo haya elegido
+     * el jugador o lo haya sorteado el motor.
+     *
+     * Y ES UN CAMPO GUARDADO, aunque la regla del proyecto sea que lo derivado no
+     * se guarda (CLAUDE.md §2): acá el estado NO lo contiene. La primera versión
+     * lo derivaba de `history[0].clubId` —el club de la primera temporada jugada—
+     * y estaba mal por un caso que aparece a la primera partida: el mercado se
+     * evalúa ANTES de la temporada 1, así que un pase en esa ventana borraba para
+     * siempre el club de creación. Medido: eligiendo CASI, la carrera arrancaba en
+     * CUBA y a los 34 el juego ofrecía "volver" a un club donde nunca había
+     * empezado nada.
+     */
+    startClub: string;
 
     /**
      * Ritmo elegido al crear. Se sella igual que `startRoute`, y por el mismo

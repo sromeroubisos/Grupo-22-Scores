@@ -130,8 +130,11 @@ export {
 export type { NoUnionReason, UnionMembership, HeritageLink } from './data/nations.ts';
 export {
     TRANSFER_PATHWAYS, TRANSFER_RULES_VERSION, classifyMovement, marketRung, movementBetween,
-    pathwayFor, pathwaysFrom, pathwayTargets,
+    pathwayFor, pathwaysFrom, pathwayTargets, startClubChoices, isStartClubChoice,
 } from './engine/market-routes.ts';
+export {
+    firstClubIdOf, homecomingIsAvailable, homecomingOffer, isHomecomingOption,
+} from './engine/homecoming.ts';
 export { getPendingEvent } from './engine/event-selector.ts';
 export { buildCareerSummary } from './engine/statistics.ts';
 export {

@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import type { PaceModeId, Position } from '@/features/career';
-import { getPosition, SURNAME_MAX } from '@/features/career';
+import { getPosition, startClubChoices, SURNAME_MAX } from '@/features/career';
 import { useLocale } from './LocaleContext';
+import ClubBadge from './ClubBadge';
 import CountryPicker from './CountryPicker';
 import JerseyPreview from './JerseyPreview';
 import PitchPositions from './PitchPositions';
@@ -15,11 +16,17 @@ interface Props {
     paceMode: PaceModeId;
     surname: string;
     number: number | null;
+    /** Club elegido, o null si arranca al azar (que es el default). */
+    startClubId: string | null;
     onSurname: (value: string) => void;
     onNumber: (value: number) => void;
     onCountry: (code: string) => void;
     onPosition: (value: Position) => void;
     onPaceMode: (value: PaceModeId) => void;
+    /** Vuelve al azar: el motor elige. */
+    onRandomClub: () => void;
+    /** Abre la pantalla de elección de club. */
+    onPickClub: () => void;
     onStart: () => void;
     /** Vuelve a la portada. El pie de la tarjeta necesita una salida. */
     onBack: () => void;
@@ -65,13 +72,20 @@ interface Props {
  * el teléfono se muestra sólo la del paso activo. Nada de dos árboles paralelos
  * que después se desincronizan.
  */
-export default function CreatePlayer({ countryCode, position, paceMode, surname, number, onSurname, onNumber, onCountry, onPosition, onPaceMode, onStart, onBack }: Props) {
+export default function CreatePlayer({ countryCode, position, paceMode, surname, number, startClubId, onSurname, onNumber, onCountry, onPosition, onPaceMode, onRandomClub, onPickClub, onStart, onBack }: Props) {
     const { t } = useLocale();
     const ready = countryCode !== null && position !== null;
 
     const STEPS = t.steps;
     const [step, setStep] = useState(0);
     const last = STEPS.length - 1;
+
+    // Clubes elegibles del país. Vacío = ese país no tiene escalera propia
+    // modelada, y entonces "Elegir club" no se puede ofrecer: hay que decir por
+    // qué en vez de mostrar una lista vacía.
+    const clubesDelPais = countryCode === null ? [] : startClubChoices(countryCode);
+    const puedeElegirClub = clubesDelPais.length > 0;
+    const clubElegido = startClubId === null ? null : clubesDelPais.find((c) => c.id === startClubId) ?? null;
 
     // Números de camiseta del puesto elegido. El primero es el canónico (10 el
     // apertura, 2 el hooker, 15 el fullback) y es el que queda por defecto; los
@@ -89,7 +103,7 @@ export default function CreatePlayer({ countryCode, position, paceMode, surname,
     // apellido es opcional y el número viene con el del puesto puesto) y el último
     // paso tampoco: el ritmo viene elegido de fábrica y el arranque ya no se elige.
     const faltaDelPaso = step === 0 && countryCode === null ? t.stepMissingNationality
-        : step === 1 && position === null ? t.stepMissingPosition
+        : step === 2 && position === null ? t.stepMissingPosition
             : null;
 
     const stepClass = (index: number) => `${styles.creatorStep} ${index === step ? styles.creatorStepOn : ''}`;
@@ -122,7 +136,7 @@ export default function CreatePlayer({ countryCode, position, paceMode, surname,
             </div>
 
             <div className={styles.creatorBody}>
-                <section className={`${styles.creatorCol} ${stepClass(2)}`} aria-labelledby="crear-identidad">
+                <section className={`${styles.creatorCol} ${stepClass(3)}`} aria-labelledby="crear-identidad">
                     <h3 className={styles.colTitle} id="crear-identidad">{t.identity}</h3>
 
                     <JerseyPreview surname={surname} number={chosenNumber} countryCode={countryCode} />
@@ -173,7 +187,7 @@ export default function CreatePlayer({ countryCode, position, paceMode, surname,
                     <CountryPicker value={countryCode} onChange={onCountry} fitToBox />
                 </section>
 
-                <section className={`${styles.creatorCol} ${styles.creatorColWide} ${stepClass(1)}`} aria-labelledby="crear-posicion">
+                <section className={`${styles.creatorCol} ${styles.creatorColWide} ${stepClass(2)}`} aria-labelledby="crear-posicion">
                     <h3 className={styles.colTitle} id="crear-posicion">{t.position}</h3>
                     {/* Sin etiqueta debajo repitiendo el puesto elegido: el
                         chip de la cancha ya lo dice, y en verde. Decirlo dos
@@ -198,7 +212,61 @@ export default function CreatePlayer({ countryCode, position, paceMode, surname,
                 contenedor entero, que es lo que hace que las tres opciones entren
                 con su explicación al lado del nombre en vez de apretadas. */}
             <div className={styles.creatorBands}>
-                <section className={`${styles.bandPace} ${stepClass(3)}`} aria-labelledby="crear-ritmo">
+                {/* CLUB DE INICIO. Va como banda y no como columna porque es una
+                    decisión de dos botones: la lista de clubes vive en su propia
+                    pantalla, que es la única forma de mostrar doscientos escudos
+                    sin comerse la creación entera. */}
+                <section className={`${styles.bandPace} ${stepClass(1)}`} aria-labelledby="crear-club">
+                    <h3 className={styles.colTitle} id="crear-club">{t.startClub}</h3>
+                    <div className={styles.paceRow} role="radiogroup" aria-labelledby="crear-club">
+                        <button
+                            type="button"
+                            role="radio"
+                            aria-checked={startClubId === null}
+                            className={`${styles.paceChip} ${startClubId === null ? styles.paceChipOn : ''}`}
+                            onClick={onRandomClub}
+                        >
+                            <span className={styles.paceHead}>
+                                <span className={styles.paceName}>{t.startClubRandom}</span>
+                            </span>
+                            <span className={styles.paceText}>{t.startClubRandomText}</span>
+                        </button>
+                        <button
+                            type="button"
+                            role="radio"
+                            aria-checked={startClubId !== null}
+                            className={`${styles.paceChip} ${startClubId !== null ? styles.paceChipOn : ''}`}
+                            onClick={onPickClub}
+                            disabled={!puedeElegirClub}
+                        >
+                            <span className={styles.paceHead}>
+                                <span className={styles.paceName}>{t.startClubChoose}</span>
+                            </span>
+                            <span className={styles.paceText}>
+                                {/* El deshabilitado dice qué falta: primero la
+                                    nacionalidad, y si el país no tiene liga propia,
+                                    por qué no se puede elegir. */}
+                                {countryCode === null ? t.startClubPickFirst
+                                    : !puedeElegirClub ? t.startClubNoLadder
+                                        : t.startClubChooseText}
+                            </span>
+                        </button>
+                    </div>
+
+                    {/* El club elegido, con escudo: sin verlo, "Elegir club" es una
+                        promesa que el jugador no puede comprobar hasta empezar. */}
+                    {clubElegido && (
+                        <div className={styles.startClubRow}>
+                            <ClubBadge clubId={clubElegido.id} clubName={clubElegido.labelEs} size={26} />
+                            <span className={styles.startClubName}>{clubElegido.labelEs}</span>
+                            <button type="button" className={styles.linkBtn} onClick={onPickClub}>
+                                {t.startClubChange}
+                            </button>
+                        </div>
+                    )}
+                </section>
+
+                <section className={`${styles.bandPace} ${stepClass(4)}`} aria-labelledby="crear-ritmo">
                     <h3 className={styles.colTitle} id="crear-ritmo">{t.pace}</h3>
                     <div className={styles.paceRow} role="radiogroup" aria-labelledby="crear-ritmo">
                         {t.paces.map((pace) => {
