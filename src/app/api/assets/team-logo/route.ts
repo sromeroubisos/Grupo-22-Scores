@@ -1,3 +1,4 @@
+import { lookup } from 'node:dns/promises';
 import { access } from 'node:fs/promises';
 import path from 'node:path';
 import { NextResponse } from 'next/server';
@@ -8,6 +9,7 @@ import {
 } from '@/lib/server/externalTeamLogoOverrides';
 import { getExternalTournamentOverride } from '@/lib/server/externalTournamentOverrides';
 import { getPlayerDetails, getTeamDetails } from '@/lib/services/flashscore';
+import { isUuid } from '@/lib/utils/postgrest';
 
 const LOGO_DIR = path.join(process.cwd(), 'public', 'logos', 'clubs');
 const EXTENSIONS = ['.png', '.svg', '.webp', '.jpg', '.jpeg', '.avif'];
@@ -21,6 +23,80 @@ function resolveProxyCacheControl(url: URL): string {
     return url.searchParams.has('v')
         ? PROXY_CACHE_CONTROL_VERSIONED
         : PROXY_CACHE_CONTROL_VOLATILE;
+}
+
+// El `fallback` de la query lo escribe cualquiera en la barra de direcciones, y esta ruta
+// hace el fetch desde el servidor: sin control, `?fallback=http://169.254.169.254/...`
+// convierte al proxy en un telescopio hacia la red interna de Vercel. No usamos lista
+// blanca de hosts a proposito — los logos cargados a mano (overrides, clubs.logo_url)
+// pueden vivir en cualquier dominio publico y tienen que seguir andando. Lo que se
+// bloquea es el DESTINO: loopback, link-local, rangos privados y puertos raros.
+function isPrivateIpv4(address: string): boolean {
+    const parts = address.split('.').map((part) => Number(part));
+    if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) {
+        return true;
+    }
+
+    const [first, second] = parts;
+    if (first === 0 || first === 10 || first === 127) return true;
+    if (first === 169 && second === 254) return true;          // metadata de la nube
+    if (first === 172 && second >= 16 && second <= 31) return true;
+    if (first === 192 && (second === 0 || second === 168)) return true;
+    if (first === 100 && second >= 64 && second <= 127) return true;  // CGNAT
+    if (first === 198 && (second === 18 || second === 19)) return true;
+    if (first >= 224) return true;                              // multicast / reservados
+    return false;
+}
+
+function isPrivateIpv6(address: string): boolean {
+    const normalized = address.toLowerCase().split('%')[0];
+    if (normalized === '::' || normalized === '::1') return true;
+    if (normalized.startsWith('fc') || normalized.startsWith('fd')) return true;   // unique local
+    if (normalized.startsWith('fe80')) return true;                                 // link local
+
+    const mapped = normalized.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/);
+    if (mapped) return isPrivateIpv4(mapped[1]);
+    return false;
+}
+
+async function isPublicHttpUrl(rawUrl: string): Promise<boolean> {
+    let parsed: URL;
+    try {
+        parsed = new URL(rawUrl);
+    } catch {
+        return false;
+    }
+
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+    if (parsed.port && parsed.port !== '80' && parsed.port !== '443') return false;
+
+    const hostname = parsed.hostname.replace(/^\[/, '').replace(/\]$/, '').toLowerCase();
+    if (!hostname) return false;
+    if (hostname === 'localhost' || hostname.endsWith('.localhost')) return false;
+    if (hostname.endsWith('.internal') || hostname.endsWith('.local')) return false;
+
+    try {
+        // Resolver el nombre es lo que atrapa el caso feo: un dominio publico que apunta
+        // a una IP privada. Chequear el texto del host no alcanza.
+        const addresses = await lookup(hostname, { all: true });
+        if (addresses.length === 0) return false;
+
+        return addresses.every(({ address, family }) => (
+            family === 6 ? !isPrivateIpv6(address) : !isPrivateIpv4(address)
+        ));
+    } catch {
+        return false;
+    }
+}
+
+function buildBlockedSourceResponse() {
+    return new NextResponse(null, {
+        status: 400,
+        headers: {
+            'Cache-Control': 'no-store',
+            'Access-Control-Allow-Origin': '*',
+        },
+    });
 }
 
 function normalizeSourceUrl(source: string): string {
@@ -350,22 +426,31 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string, en
 
         const tournamentCandidates = candidates.filter((candidate) => /^[a-z0-9-]+$/i.test(candidate) && !hasExternalCandidatePrefix(candidate));
         if (tournamentCandidates.length > 0) {
-            const tournamentsByIdResult = await (readClient as any)
-                .from('tournaments')
-                .select('id, name, display_name, slug, logo_url, banner_url')
-                .in('id', tournamentCandidates);
-            let tournamentsById = tournamentsByIdResult.data;
+            // `tournaments.id` is a uuid column: only probe it with candidates that are real
+            // UUIDs. External FlashScore/ESPN identifiers (base62 slugs, team/tournament names)
+            // are handled by the slug/name lookups below — sending them to `.in('id', ...)`
+            // triggers Postgres 22P02 (invalid input syntax for type uuid).
+            const tournamentIdCandidates = tournamentCandidates.filter(isUuid);
+            let tournamentsById: unknown[] | null = null;
 
-            if (tournamentsByIdResult.error) {
-                const fallback = await (readClient as any)
+            if (tournamentIdCandidates.length > 0) {
+                const tournamentsByIdResult = await (readClient as any)
                     .from('tournaments')
-                    .select('id, name, display_name, slug, logo_url')
-                    .in('id', tournamentCandidates);
-                tournamentsById = fallback.data;
+                    .select('id, name, display_name, slug, logo_url, banner_url')
+                    .in('id', tournamentIdCandidates);
+                tournamentsById = tournamentsByIdResult.data;
+
+                if (tournamentsByIdResult.error) {
+                    const fallback = await (readClient as any)
+                        .from('tournaments')
+                        .select('id, name, display_name, slug, logo_url')
+                        .in('id', tournamentIdCandidates);
+                    tournamentsById = fallback.data;
+                }
             }
 
             const tournamentIdMap = new Map<string, Record<string, unknown>>();
-            for (const row of tournamentsById || []) {
+            for (const row of (tournamentsById as Record<string, unknown>[]) || []) {
                 if (row?.id) {
                     tournamentIdMap.set(String(row.id), row);
                 }
@@ -566,6 +651,10 @@ async function buildImageResponse(source: string, url: URL) {
     }
 
     if (normalizedSource.startsWith('http://') || normalizedSource.startsWith('https://')) {
+        if (!(await isPublicHttpUrl(normalizedSource))) {
+            return buildBlockedSourceResponse();
+        }
+
         try {
             // Fetch the image server-side to bypass potential CORS/hotlinking issues
             const imgResponse = await fetch(normalizedSource, {
@@ -615,6 +704,7 @@ export async function GET(request: Request) {
     const teamName = url.searchParams.get('name')?.trim() || '';
     const entity = url.searchParams.get('entity')?.trim().toLowerCase() || '';
     const sport = normalizeSportHint(url.searchParams.get('sport'));
+    const noFallback = url.searchParams.get('noFallback') === '1';
 
     if (!key) {
         return NextResponse.json({ ok: false, error: 'key is required' }, { status: 400 });
@@ -632,6 +722,18 @@ export async function GET(request: Request) {
 
     if (fallback) {
         return buildImageResponse(fallback, url);
+    }
+
+    // `noFallback`: quien pregunta prefiere NO recibir imagen antes que recibir una con
+    // iniciales. Lo pide el export, donde la imagen se publica (ver getTournamentLogoImageSource).
+    if (noFallback) {
+        return new NextResponse(null, {
+            status: 404,
+            headers: {
+                'Cache-Control': 'no-store',
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
     }
 
     return buildFallbackLogoResponse(teamName, key, url);
