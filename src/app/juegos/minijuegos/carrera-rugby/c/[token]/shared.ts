@@ -62,6 +62,34 @@ export async function resolveSharedCareer(token: string, locale: Locale = 'es'):
 
     const replay = replayRecipe(decoded.recipe);
     if (replay.kind !== 'ok') {
+        // Mismo criterio que el desajuste de motor de arriba: con RECIBO el link sigue
+        // sirviendo. Para quien mira la tarjeta las dos fallas son la misma —la carrera
+        // no se puede rearmar y lo unico cierto es lo que decia al compartirse—, asi que
+        // no hay razon para que una degrade con gracia y la otra mate el link.
+        //
+        // Y el replay diverge por mas motivos que un motor viejo: el token sella
+        // ENGINE_VERSION pero NO las versiones de catalogo, asi que un cambio de clubes
+        // o del sistema argentino tira por aca sin pasar por `engine-mismatch`. Tambien
+        // cae aca una carrera vieja que quedo en memoria: el token se estampa con el
+        // ENGINE_VERSION de AHORA, no con el que la jugo.
+        //
+        // Sin esto la tarjeta terminaba en `broken`, /imagen respondia 404 text/plain y
+        // el boton de bajar guardaba ESE TEXTO como archivo: un .txt en Descargas.
+        if (decoded.recipe.receipt !== null) {
+            return {
+                kind: 'receipt',
+                card: receiptCardData(
+                    {
+                        surname: decoded.recipe.surname,
+                        position: decoded.recipe.position,
+                        nationalityCountryCode: decoded.recipe.nationalityCountryCode,
+                    },
+                    decoded.recipe.receipt,
+                    locale,
+                ),
+            };
+        }
+
         return { kind: 'broken', title: t.shareReplayFailedTitle, detail: t.shareReplayFailedDetail };
     }
 
