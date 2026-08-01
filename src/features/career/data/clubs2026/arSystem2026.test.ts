@@ -29,7 +29,7 @@ import { SA_CLUBS } from './saClubs.generated.ts';
 import { CLUBS } from '../clubs.ts';
 
 test('la versión del sistema está sellada', () => {
-    assert.equal(AR_SYSTEM_VERSION, '2026.1');
+    assert.equal(AR_SYSTEM_VERSION, '2026.2');
 });
 
 // ── Estructura ───────────────────────────────────────────────────────────────
@@ -197,7 +197,10 @@ test('NINGÚN club del catálogo real se queda sin división', () => {
 test('NINGÚN club existente pierde el escudo: el sourceId se hereda', () => {
     assert.deepEqual(AR_CATALOG.brokenAliases, [], 'alias que apuntan a un nombre que ya no existe');
     assert.deepEqual(AR_CATALOG.ambiguous, [], 'nombres que resuelven a dos filas distintas');
-    assert.ok(AR_CATALOG.matched >= 180, `esperaba heredar ~181 escudos, heredó ${AR_CATALOG.matched}`);
+    // 179 = las 181 filas argentinas menos las dos declaradas en
+    // AR_SNAPSHOT_UNPLACED (Policía CABA y el "Caballeros", que es un torneo de
+    // veteranos y no un club).
+    assert.ok(AR_CATALOG.matched >= 179, `esperaba heredar ~179 escudos, heredó ${AR_CATALOG.matched}`);
     // Todo club que matcheó conserva su sourceId (la clave del escudo) y su id
     // original (con el que quedó escrito en partidas y comparativas).
     const conEscudo = AR_CATALOG.clubs.filter((c) => c.sourceId !== null);

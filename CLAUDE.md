@@ -322,7 +322,7 @@ src/features/career/
                                        tope de caps por temporada, y de nadie más)
               clubs2026/{saClubs.generated, competitions2026, rosters2026, clubStrength}
               clubs2026/arSystem2026  (CANON del rugby argentino: dos ramas —URBA
-                                       e interior—, 24 divisiones, cupos del TDI.
+                                       e interior—, 25 divisiones, cupos del TDI.
                                        Datos puros, sin dependencias)
               clubs2026/arCatalog     (resuelve el canon a ClubDef heredando del
                                        snapshot el sourceId con el que se pide el
