@@ -33,7 +33,7 @@
 // francesas o inglesas del catálogo internacional.
 
 /** Sube si cambia CUALQUIER cosa de este archivo. Va dentro de la versión de catálogo. */
-export const AR_SYSTEM_VERSION = '2026.1';
+export const AR_SYSTEM_VERSION = '2026.2';
 
 /** Las dos ramas del sistema. No hay ascenso ni descenso entre ellas. */
 export type ArBranch = 'urba' | 'interior';
@@ -51,7 +51,7 @@ export type ArRegion =
     | 'centro' // Córdoba (una sola unión)
     | 'litoral' // Rosario + Santafesina + Entrerriana
     | 'oeste' // Cuyo + Sanjuanina
-    | 'noa' // Tucumán + Salta + Santiago del Estero + Jujuy
+    | 'noa' // Tucumán + Salta + Santiago del Estero + Jujuy + Andina (Catamarca y La Rioja)
     | 'nea' // Nordeste + Misiones + Formosa (+ dos clubes paraguayos)
     | 'pampeana' // Mar del Plata + Unión del Sur + UROBA
     | 'patagonia'; // Valle del Chubut + Austral + Alto Valle + Lagos del Sur
@@ -318,7 +318,7 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
         clubs: [
             'Baguales', 'Córdoba Rugby Club', 'Los Cuervos', 'Alta Gracia',
             'San Francisco', 'Santa Rosa de Córdoba', 'Río Tercero',
-            'Aero Club Río Cuarto', 'Social Carlota',
+            'Aero Club Río Cuarto', 'Social La Carlota',
         ],
     },
 
@@ -347,7 +347,7 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
         note: '11 fechas y después Copa de Oro (1°-6°, define campeón y ascenso directo) y Copa de Plata (7°-12°)',
         clubs: [
             'CRAR', 'Logaritmo', 'Universitario de Santa Fe', 'Alma Juniors',
-            'Los Caranchos', 'Provincial', 'Tilcara', 'Regatas y Belgrano de San Nicolás',
+            'Los Caranchos', 'Provincial', 'Tilcara', 'San Nicolás Rugby',
             'La Salle Jobson', 'Cha Roga', 'Los Pampas de Rufino',
             'Gimnasia y Esgrima de Pergamino',
         ],
@@ -366,7 +366,7 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
         note: '6 plazas de Mendoza + 2 de San Juan, repartidas por los torneos provinciales',
         clubs: [
             'Los Tordos', 'Marista', 'Mendoza Rugby Club', 'Liceo', 'CPBM',
-            'Universitario de San Juan', 'San Juan Rugby Club', 'Teqüé',
+            'Universitario de San Juan', 'San Juan Rugby Club', 'Teqüe Rugby Club',
         ],
     },
     {
@@ -375,12 +375,25 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
         branch: 'interior', region: 'oeste', canonLevel: 4, band: 'n4',
         regularSeasonMatches: 14,
         promotesTo: 'ar-oeste-oro', promotionSlots: 1,
-        note: '5 plazas de Mendoza + 3 de San Juan. Va un noveno club: San Jorge es un club real de Mendoza y la Copa de Bronce, que es su nivel, no tiene nómina publicada — antes que inventarle una liga de un equipo solo, juega la Plata',
+        relegatesTo: 'ar-oeste-bronce', relegationSlots: 1,
+        note: '5 plazas de Mendoza + 3 de San Juan',
         clubs: [
-            'Peumayén', 'Universitario de Mendoza', 'Huazihul', 'Banco Mendoza',
-            'Tacurú', 'Jockey Club de San Juan', 'Rivadavia', 'Alfiles',
-            'San Jorge de Mendoza',
+            'Peumayén', 'Universitario de Mendoza', 'Huazihul', 'Banco Rugby Club',
+            'Tacurú', 'Jockey Club de San Juan', 'Alfiles', 'Belgrano Rugby Club',
         ],
+    },
+    {
+        // La Bronce SÍ existe y es el tercer nivel real del Oeste. Antes no se
+        // modelaba porque el único club de ese nivel en el catálogo era San
+        // Jorge y una liga de un equipo no reparte título: con Rivadavia —que
+        // estaba mal puesto en la Plata— son dos, y la división se sostiene.
+        competitionId: 'ar-oeste-bronce',
+        label: 'Copa de Bronce del Oeste',
+        branch: 'interior', region: 'oeste', canonLevel: 6, band: 'n6',
+        regularSeasonMatches: 12,
+        promotesTo: 'ar-oeste-plata', promotionSlots: 1,
+        note: 'los dos clubes con respaldo en el catálogo real; la nómina completa de la Bronce no se publica. El Torneo Reubicación (playoff Oro-Plata-Bronce) todavía no se modela',
+        clubs: ['Rivadavia', 'San Jorge de Mendoza'],
     },
 
     // ── NOROESTE · Regional del NOA · Nivel 4 / Nivel 6 ─────────────────────
@@ -407,23 +420,40 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
         branch: 'interior', region: 'noa', canonLevel: 6, band: 'n6',
         regularSeasonMatches: 14,
         promotesTo: 'ar-noa-a', promotionSlots: 2,
-        note: 'Tucumán no tiene una Primera B de clubes propia: su segundo nivel se canaliza por acá y por el Torneo Desarrollo de la unión',
+        note: 'Tucumán no tiene una Primera B de clubes propia: su segundo nivel se canaliza por acá y por el Torneo Desarrollo de la unión. Tigres y Old Lions bajaron del A en 2025',
         clubs: [
             'Tigres', 'Santiago Lawn Tennis', 'Gimnasia y Tiro', 'Old Lions',
             'Jockey Club de Tucumán', 'Tiro Federal de Salta', 'Santiago Rugby',
             'Aguará Guazú',
         ],
     },
+    {
+        // La Unión Andina (Catamarca y La Rioja) integra el NOA por abajo, no el
+        // NEA ni el Litoral. Estos dos clubes estaban puestos a mil kilómetros de
+        // su casa: Los Hurones es de Valle Viejo (Catamarca) y Los Teros, de la
+        // capital catamarqueña.
+        competitionId: 'ar-noa-andina',
+        label: 'Torneo Andino (Catamarca y La Rioja)',
+        branch: 'interior', region: 'noa', canonLevel: 7, band: 'n7',
+        regularSeasonMatches: 10,
+        promotesTo: 'ar-noa-b', promotionSlots: 1,
+        note: 'la base del NOA: los clubes de la Unión Andina con respaldo en el catálogo real',
+        clubs: ['Los Teros', 'Los Hurones'],
+    },
 
     // ── NORDESTE · Regional del Nordeste · Nivel 5 / Nivel 6 ────────────────
     // Uniones del Nordeste (Chaco + Corrientes), Misiones y Formosa. INCLUYE
-    // DOS CLUBES PARAGUAYOS: no se sacan.
+    // DOS CLUBES PARAGUAYOS Y NO SE SACAN: San José (Asunción) y CURDA (Club
+    // Universitario de Rugby de Asunción) entran por invitación como campeón y
+    // subcampeón del Campeonato Paraguayo del año anterior, y compiten de igual
+    // a igual — en 2026 los dos terminaron la primera rueda en zona de playoff.
+    // O sea: el sistema son 225 clubes argentinos + 2 paraguayos.
     {
         competitionId: 'ar-nea-a',
         label: 'Regional NEA A',
         branch: 'interior', region: 'nea', canonLevel: 5, band: 'n5',
         regularSeasonMatches: 14,
-        relegatesTo: 'ar-nea-ascenso', relegationSlots: 2,
+        relegatesTo: 'ar-nea-bc', relegationSlots: 2,
         note: 'primera rueda de 9 partidos; los 8 primeros pasan a segunda ronda arrastrando puntos; 9° y 10° caen al Ascenso. Los 4 primeros a semis y final; 5°-8° juegan reválida',
         clubs: [
             'Taragüy', 'Aranduroga', 'CURNE', 'San Patricio de Corrientes',
@@ -432,14 +462,20 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
         ],
     },
     {
-        competitionId: 'ar-nea-ascenso',
-        label: 'Torneo de Ascenso del NEA',
+        // NO es "el torneo de Ascenso": la zona Ascenso es la SEGUNDA FASE de la
+        // tabla del Regional A, no un torneo aparte. El segundo nivel real del
+        // NEA es el Regional B/C (cuatro zonas), al que se suman los torneos de
+        // Desarrollo y los clasificatorios de cada unión. Acá van los clubes
+        // reales de ese escalón, que son de tres uniones distintas: URNE (Chaco
+        // y Corrientes), Formosa y Misiones.
+        competitionId: 'ar-nea-bc',
+        label: 'Regional del NEA B/C',
         branch: 'interior', region: 'nea', canonLevel: 6, band: 'n6',
         regularSeasonMatches: 12,
         promotesTo: 'ar-nea-a', promotionSlots: 2,
-        note: 'COMPOSICIÓN VARIABLE: se arma en la segunda fase con los que terminan 9° y 10° del Regional A más dos representantes de cada unión (Nordeste, Misiones, Formosa). La nómina exacta no está publicada; acá van los clubes reales de la región que hoy juegan este nivel',
+        note: 'el Regional B/C real son 16 equipos en 4 zonas y la nómina completa no se publica. Pay Ubre y UNCAUS juegan además el clasificatorio de la URNE; Italiana de Charata y Abipones, el Torneo Desarrollo; Chajá y Caza y Pesca son de Formosa, y Carayá y Centro Cazadores de Misiones',
         clubs: [
-            'Pay Ubre', 'UNCAUS', 'Italiana de Charata', 'Chaja', 'Los Hurones',
+            'Pay Ubre', 'UNCAUS', 'Italiana de Charata', 'Chajá', 'Centro Cazadores',
             'Carayá', 'Abipones', 'Caza y Pesca',
         ],
     },
@@ -457,8 +493,8 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
         note: 'etapa clasificatoria marplatense: dos zonas de 6 (Torneo A y Torneo B). Los 4 primeros del A van directo; los 2 últimos del A más los 2 primeros del B juegan un Final Four por los cupos restantes',
         clubs: [
             'Sociedad Sportiva de Bahía Blanca', 'Argentino de Bahía Blanca',
-            'Mar del Plata Club', 'Universitario de Mar del Plata', 'Sporting',
-            'Comercial', 'Los Cardos', 'San Ignacio',
+            'Mar del Plata Club', 'Universitario de Mar del Plata', 'IPR Sporting',
+            'Comercial Rugby Club', 'Los Cardos', 'San Ignacio',
         ],
     },
     {
@@ -484,20 +520,24 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
         label: 'Regional Patagónico',
         branch: 'interior', region: 'patagonia', canonLevel: 5, band: 'n5',
         regularSeasonMatches: 6,
-        relegatesTo: 'ar-patagonia-local', relegationSlots: 1,
+        relegatesTo: 'ar-patagonia-austral', relegationSlots: 1,
         note: '2 zonas de 4: 3 fechas todos contra todos, semifinales cruzadas y final',
         clubs: [
-            'Trelew', 'Bigornia', 'Chenque', 'Roca', 'Neuquén', 'Deportivo Portugués',
-            'Marabunta', 'CL Águilas',
+            'Trelew', 'Bigornia Club', 'Chenque', 'Roca', 'Neuquén',
+            'Deportivo Portugués', 'Marabunta', 'Las Águilas',
         ],
     },
 ];
 
-// ── NIVEL 7 · TORNEOS LOCALES Y DE DESARROLLO DE LAS UNIONES ────────────────
+// ── LA BASE · TORNEOS LOCALES, DE DESARROLLO Y CLASIFICATORIOS ──────────────
 //
 // El canon cierra la pirámide con "torneos locales y de desarrollo de las
 // uniones del interior". No es relleno: son los clubes REALES que juegan por
 // debajo del regional de su región, y existen en el catálogo del sitio.
+//
+// No todos son Nivel 7. El que CLASIFICA al regional del año siguiente —el
+// Torneo Austral en la Patagonia— es el segundo nivel de su región, no la base,
+// y va en Nivel 6.
 //
 // Tienen que estar por dos motivos. Uno del canon: sin ellos el interior no
 // tiene base y la pirámide se corta en el aire. Y uno del juego: si el club de
@@ -509,37 +549,38 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
 
 const LOCAL_DIVISIONS: readonly ArDivision[] = [
     {
-        competitionId: 'ar-centro-local',
-        label: 'Torneo Local de Córdoba',
+        competitionId: 'ar-centro-desarrollo',
+        label: 'Torneo Oficial de Desarrollo de Córdoba',
         branch: 'interior', region: 'centro', canonLevel: 7, band: 'n7',
         regularSeasonMatches: 14,
         promotesTo: 'ar-centro-super9b', promotionSlots: 1,
-        clubs: ['Jockey Club Córdoba Caballeros', 'Los Chelcos', 'La Querencia'],
+        note: 'el Desarrollo cordobés real son ~24 equipos en 3 zonas; acá van los que tienen respaldo en el catálogo real. Los Chelcos está registrado en La Rioja pero juega el torneo de Córdoba',
+        clubs: ['Los Chelcos', 'La Querencia'],
     },
     {
-        competitionId: 'ar-litoral-local',
-        label: 'Torneos Locales del Litoral',
-        branch: 'interior', region: 'litoral', canonLevel: 6, band: 'n6',
-        regularSeasonMatches: 10,
-        note: 'agrupa la Copa Santa Fe (6 equipos, SIN cupos al TDI, en paralelo al TRL) y los locales de la Entrerriana. Nómina publicada parcial',
-        clubs: ['Los Teros', 'Belgrano de Paraná', 'Centro Cazadores'],
-    },
-    {
-        competitionId: 'ar-pampeana-local',
-        label: 'Torneos Locales Pampeanos',
+        // Sin "Torneos Locales del Litoral": el TRL 2026 estrenó formato con DOS
+        // divisiones (Primera de 10 y Segunda de 12) y eliminó la Tercera. Los
+        // tres clubes que estaban acá no eran del Litoral y se fueron a su
+        // región: Los Teros a la Andina, Centro Cazadores al NEA (Misiones) y
+        // Belgrano Rugby Club a Cuyo (Mendoza).
+        competitionId: 'ar-pampeana-uroba-sur',
+        label: 'Regional Pampeano UROBA-Sur',
         branch: 'interior', region: 'pampeana', canonLevel: 7, band: 'n7',
         regularSeasonMatches: 12,
         promotesTo: 'ar-pampeana-b', promotionSlots: 1,
-        note: 'los torneos de Mar del Plata, Unión del Sur y UROBA que clasifican al Regional Pampeano',
-        clubs: ['Santa Rosa de Bahía Blanca', 'El Nacional'],
+        note: 'la división real que clasifica al Regional Pampeano por la Unión del Sur y la UROBA. Cuatro de los seis clubes no están en el catálogo real y van sin escudo, declarados',
+        clubs: [
+            'El Nacional', 'Santa Rosa de La Pampa', 'Punta Alta Rugby Club',
+            'Pico Rugby Club', 'Kamikazes de Colón', 'Los Indios de Bolívar',
+        ],
     },
     {
-        competitionId: 'ar-patagonia-local',
-        label: 'Torneos Locales Patagónicos',
-        branch: 'interior', region: 'patagonia', canonLevel: 7, band: 'n7',
+        competitionId: 'ar-patagonia-austral',
+        label: 'Torneo Austral y locales patagónicos',
+        branch: 'interior', region: 'patagonia', canonLevel: 6, band: 'n6',
         regularSeasonMatches: 12,
         promotesTo: 'ar-patagonia-regional', promotionSlots: 1,
-        note: 'el segundo nivel de la región: Torneo Austral (Valle del Chubut + Austral) más los locales de Alto Valle y Lagos del Sur',
+        note: 'el Torneo Austral (Valle del Chubut + Austral) es CLASIFICATORIO al Regional Patagónico, así que es el segundo nivel de la región y no su base. Puerto Madryn, finalista del Regional 2025, encabeza la nómina',
         clubs: [
             'Puerto Madryn', 'Comodoro', 'Calafate', 'Patoruzú', 'Draig Goch',
             'Cazones', 'San Jorge de la Austral',
@@ -683,10 +724,11 @@ export function arExpectedCounts(): Record<string, number> {
  * completas.
  */
 export const AR_PENDING_ROSTERS: readonly { competitionId: string; note: string }[] = [
-    { competitionId: 'ar-nea-ascenso', note: 'composición variable año a año; la nómina oficial no se publica' },
-    { competitionId: 'ar-litoral-local', note: 'la Copa Santa Fe son 6 equipos; hay 3 identificados en el catálogo real' },
-    { competitionId: 'ar-pampeana-local', note: 'los locales de MdP/Unión del Sur/UROBA no tienen nómina unificada publicada' },
-    { competitionId: 'ar-centro-local', note: 'el Torneo Desarrollo cordobés no publica nómina completa' },
+    { competitionId: 'ar-nea-bc', note: 'el Regional B/C son 16 equipos en 4 zonas; hay 8 identificados en el catálogo real' },
+    { competitionId: 'ar-centro-desarrollo', note: 'el Torneo Oficial de Desarrollo cordobés son ~24 equipos en 3 zonas; hay 2 identificados' },
+    { competitionId: 'ar-oeste-bronce', note: 'la Copa de Bronce no publica nómina; hay 2 clubes identificados' },
+    { competitionId: 'ar-noa-andina', note: 'la Unión Andina no publica fixture unificado; hay 2 clubes identificados' },
+    { competitionId: 'ar-pampeana-uroba-sur', note: '4 de los 6 clubes no tienen fila en el catálogo real y van sin escudo' },
 ];
 
 /**
@@ -695,12 +737,20 @@ export const AR_PENDING_ROSTERS: readonly { competitionId: string; note: string 
  */
 export const AR_NOT_MODELLED: readonly { label: string; reason: string }[] = [
     {
-        label: 'Copa de Bronce del Oeste',
-        reason: 'la nómina no está publicada y el único club real de ese nivel en el catálogo es San Jorge; una liga de un equipo solo no reparte título, así que juega la Copa de Plata',
-    },
-    {
         label: 'Regional Pampeano C',
         reason: 'el canon la menciona sin nómina conocida: no se inventa',
+    },
+    {
+        label: 'Torneo Reubicación del Oeste',
+        reason: 'es el playoff que reordena Oro, Plata y Bronce al cierre; el motor resuelve ascensos y descensos con `promotesTo`/`relegatesTo` y todavía no modela playoffs entre tres divisiones',
+    },
+    {
+        label: 'Liga Norte Grande',
+        reason: 'clasificatorio de Salta y Santiago del Estero que corre ANTES del Regional del NOA: reparte plazas, no reparte título propio',
+    },
+    {
+        label: 'Torneo Tucumano',
+        reason: 'lo mismo del lado tucumano: reparte las plazas del NOA A',
     },
 ];
 
@@ -727,25 +777,30 @@ export const AR_SNAPSHOT_ALIAS: Readonly<Record<string, string>> = {
     SIC: 'San Isidro Club',
     'Universitario de Quilmes': 'CUQ',
     CPBM: 'C.P.B.M.',
-    'CL Águilas': 'Club Las Águilas',
-    Sporting: 'IPR Sporting',
-    'Social Carlota': 'C.S. La Carlota',
+    'Social La Carlota': 'C.S. La Carlota',
     'Aero Club Río Cuarto': 'Aero Club Río IV',
-    'Banco Mendoza': 'Banco Rugby Club',
     Tacurú: 'Tacurú Rugby Hockey Club',
-    'Belgrano de Paraná': 'Belgrano Rugby Club',
+    'San Nicolás Rugby': 'Regatas Belgrano San Nicolás', // la fusión de 2019
     // HOMÓNIMOS: el orden importa, cada uno apunta a SU fila.
     'San Patricio': 'Club San Patricio', // URBA Primera B
     'San Patricio de Corrientes': 'San Patricio', // Regional NEA A
     'San Jorge de Mendoza': 'San Jorge R.C.',
     'San Jorge de la Austral': 'San Jorge R.C. (UA)',
-    'Santa Rosa de Bahía Blanca': 'Santa Rosa R.C.',
+    'Santa Rosa de La Pampa': 'Santa Rosa R.C.',
 };
 
 /**
- * Clubes del catálogo real que quedan FUERA del sistema argentino, con el
- * motivo. Hoy uno: Policía Ciudad de Buenos Aires no aparece en ninguna de las
- * divisiones que el canon nombra, y meterlo en Desarrollo rompería el plantel
- * de 10 que el canon declara. Se registra para no perderlo de vista.
+ * Filas del catálogo real que quedan FUERA del sistema argentino, con el motivo.
+ * Se registran para no perderlas de vista:
+ *
+ *   · Policía Ciudad de Buenos Aires no aparece en ninguna de las divisiones que
+ *     el canon nombra, y meterlo en Desarrollo rompería el plantel de 10 que el
+ *     canon declara;
+ *   · "Jockey Club Córdoba Caballeros" NO ES UN CLUB: es el Torneo
+ *     Interprovincial Caballeros (veteranos) del Jockey Club Córdoba, que ya
+ *     juega el Top 10 A. Ponerlo en la pirámide de mayores lo duplicaba.
  */
-export const AR_SNAPSHOT_UNPLACED: readonly string[] = ['Policia Ciudad de Buenos Aires'];
+export const AR_SNAPSHOT_UNPLACED: readonly string[] = [
+    'Policia Ciudad de Buenos Aires',
+    'Jockey Club Córdoba Caballeros',
+];

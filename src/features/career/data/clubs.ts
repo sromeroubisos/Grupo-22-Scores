@@ -20,7 +20,14 @@ import { AR_DIVISIONS, AR_SYSTEM_VERSION } from './clubs2026/arSystem2026.ts';
 // portuguesa, la Serie A Élite italiana con su Serie A debajo, y el Super 12
 // brasileño. Con ellos, cuatro países más tienen escalera doméstica propia (us,
 // pt, it, br) y tres copas nuevas (Taça de Portugal, Supertaça, Coppa Italia).
-export const CLUB_CATALOG_VERSION = '2026-27.9';
+// 2026-27.10: auditoría del canon argentino contra las temporadas 2025 y 2026.
+// El interior se reordena: el "Ascenso del NEA" no existía (es la segunda fase
+// del Regional A) y pasa a ser el Regional B/C; aparecen la Copa de Bronce del
+// Oeste y el Torneo Andino (Catamarca y La Rioja); el Litoral pierde su tercer
+// nivel, que el TRL eliminó en 2026; el Torneo Austral sube a Nivel 6 porque
+// clasifica al Regional Patagónico. Cinco clubes estaban a mil kilómetros de su
+// casa y volvieron a su región.
+export const CLUB_CATALOG_VERSION = '2026-27.10';
 
 /**
  * Versión del catálogo NORMALIZADO completo = estático internacional + snapshot
