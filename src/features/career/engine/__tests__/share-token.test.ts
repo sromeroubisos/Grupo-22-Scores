@@ -9,7 +9,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
     buildCareerSummary, decodeCareerToken, encodeCareerToken, ENGINE_VERSION, recipeFromCareer,
-    replayRecipe, runCareer, acceptBestEligibleOfferChooser, hashSeed,
+    replayRecipe, runCareer, acceptBestEligibleOfferChooser, hashSeed, startClubChoices,
     type CareerRecipe, type Chooser,
 } from '../../index.ts';
 import type { CreatePlayerInput } from '../create-player.ts';
@@ -160,6 +160,52 @@ test('un token anterior al recibo sigue decodificando', () => {
     if (result.kind !== 'ok') return;
     assert.equal(result.recipe.receipt, null, 'y se nota que no lo trae');
     assert.equal(replayRecipe(result.recipe).kind, 'ok', 'la carrera se reconstruye igual');
+});
+
+test('el club ELEGIDO viaja: sin él la carrera se reconstruye en otro club', () => {
+    // El agujero real: `startClubId` es una entrada del motor que el jugador elige
+    // y durante un tiempo NO viajaba en la receta. El token decodificaba bien, el
+    // motor coincidía, y el replay sorteaba OTRO club de arranque: divergía toda la
+    // carrera y el link caía al recibo. El que compartía veía su tarjeta completa en
+    // pantalla y bajaba la de otro jugador.
+    const club = startClubChoices('ar')[3].id;
+    const input: CreatePlayerInput = {
+        position: 'flyhalf', nationalityCountryCode: 'ar', startRoute: 'club',
+        paceMode: 'normal', surname: 'Prueba', number: 10, startClubId: club,
+    };
+    const recipe = recipeFromCareer(runCareer(input, 20260801, (e) => e.options[0].id));
+
+    assert.equal(recipe.startClubId, club, 'la receta tiene que llevar el club elegido');
+    assert.equal(replayRecipe(recipe).kind, 'ok', 'con el club, la carrera se reconstruye entera');
+
+    // El control negativo: es ESTE campo el que sostiene la reconstrucción, no otra cosa.
+    assert.equal(
+        replayRecipe({ ...recipe, startClubId: undefined }).kind,
+        'diverged',
+        'sin el club el motor sortea otro y la carrera ya no es la misma',
+    );
+
+    // Y sobrevive el viaje por el token, que es donde tiene que llegar.
+    const vuelta = decodeCareerToken(encodeCareerToken(recipe));
+    assert.equal(vuelta.kind, 'ok');
+    if (vuelta.kind !== 'ok') return;
+    assert.equal(vuelta.recipe.startClubId, club, 'el club no puede perderse al codificar');
+    assert.equal(replayRecipe(vuelta.recipe).kind, 'ok');
+});
+
+test('un token anterior al club elegido sigue reconstruyendo', () => {
+    // `startClubId` es ADITIVO como el recibo: se agregó sin subir
+    // SHARE_TOKEN_VERSION. Un token de antes no lo trae y tiene que caer al sorteo,
+    // que es exactamente lo que hacía cuando se generó.
+    const recipe = recipeFromCareer(played(CASES[0]));
+    const sinClub = jsonToken(
+        JSON.stringify({ ...JSON.parse(tokenJson(encodeCareerToken(recipe))), g: undefined }),
+    );
+
+    const result = decodeCareerToken(sinClub);
+    assert.equal(result.kind, 'ok', 'un token sin club no es un token roto');
+    if (result.kind !== 'ok') return;
+    assert.equal(result.recipe.startClubId, undefined, 'y se nota que no lo trae');
 });
 
 test('el costo del recibo se mantiene acotado', () => {
