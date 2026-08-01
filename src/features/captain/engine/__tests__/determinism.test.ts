@@ -260,8 +260,31 @@ function digest(state: CaptainState): Digest {
 
 // ── La tabla ─────────────────────────────────────────────────────────────────
 //
-// LÍNEA DE BASE INICIAL, motor 0.3.0. No hay nada anterior contra qué comparar:
-// esta es la primera foto, tomada justo antes de meter los Momentos por puesto.
+// MOTOR 0.4.0. La segunda foto, y la primera vez que se puede leer un
+// movimiento en vez de tener que confiar.
+//
+// ── Qué se movió al entrar los Momentos por puesto: SOLO LA VERSIÓN ──
+// De los diez campos del digest, ocho quedaron IDÉNTICOS en los tres casos:
+// temporadas, edad de retiro, último club, Pertenencia, Cartel, caps, títulos y
+// Momentos jugados. Se movieron `engineVersion` —de 0.3.0 a 0.4.0— y con él el
+// `stateHash`, que cubre el estado entero y adentro lleva `state.version`.
+//
+// Y no es una inferencia: se corrió la tabla con la versión pineada de vuelta en
+// 0.3.0 y los tres casos dieron BYTE-IDÉNTICOS a la línea de base anterior. O
+// sea que el motor no cambió de comportamiento en una sola carrera; lo único que
+// cambió es la cadena de la versión.
+//
+// Que se pueda afirmar eso es el punto entero de las semillas derivadas. El kind
+// del Momento sale de `hash(semilla:temporada:momentPick)` y los márgenes de
+// `hash(semilla:kind:temporada:idx)`, así que `rollMoment` sigue consumiendo
+// `chance` + `int` + `int` del stream principal igual que antes. Si la elección
+// hubiera salido del stream de la carrera, los diez campos se habrían movido en
+// los tres casos y este comentario tendría que decir "confiá".
+//
+// Ninguno de los tres perfiles es tercera línea, que es la única familia a la
+// que hoy le toca El Jackal. El día que se agregue un caso de tercera línea, ESE
+// caso se va a mover solo y los otros dos van a quedar quietos — que es
+// exactamente la propiedad que hace revisable este archivo.
 //
 // Cuando esto se mueva, lo que hay que mirar NO es el `stateHash` —se mueve
 // siempre, porque cubre el estado entero— sino qué OTROS campos se movieron y en
@@ -282,7 +305,7 @@ function digest(state: CaptainState): Digest {
 //     cuando entren los Momentos por puesto, y por eso está en la tabla.
 const EXPECTED: Record<string, Digest> = {
     'pilar argentino': {
-        engineVersion: '0.3.0',
+        engineVersion: '0.4.0',
         seasons: 17,
         retirementAge: 35,
         lastClub: 'sb-club-newman',
@@ -291,10 +314,10 @@ const EXPECTED: Record<string, Digest> = {
         caps: 0,
         titles: 3,
         moments: 12,
-        stateHash: 3990923497,
+        stateHash: 2447863682, // 0.3.0 era 3990923497 — se movió solo por la versión
     },
     'wing argentino': {
-        engineVersion: '0.3.0',
+        engineVersion: '0.4.0',
         seasons: 13,
         retirementAge: 31,
         lastClub: 'ar-jockey-club-villa-maria',
@@ -303,10 +326,10 @@ const EXPECTED: Record<string, Digest> = {
         caps: 0,
         titles: 3,
         moments: 9,
-        stateHash: 301923702,
+        stateHash: 3720333449, // 0.3.0 era 301923702
     },
     'apertura argentino': {
-        engineVersion: '0.3.0',
+        engineVersion: '0.4.0',
         seasons: 15,
         retirementAge: 33,
         lastClub: 'asm-clermont',
@@ -315,7 +338,7 @@ const EXPECTED: Record<string, Digest> = {
         caps: 14,
         titles: 3,
         moments: 8,
-        stateHash: 612484219,
+        stateHash: 2468468574, // 0.3.0 era 612484219
     },
 };
 
