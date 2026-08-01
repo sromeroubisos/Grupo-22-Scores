@@ -25,7 +25,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { isDeepStrictEqual } from 'node:util';
 
-import type { CaptainState, CreateCaptainInput, TackleZone } from '../../index.ts';
+import type {
+    AnclaSetup,
+    CaptainState,
+    CodigoSetup,
+    CreateCaptainInput,
+    TackleZone,
+} from '../../index.ts';
 import {
     CAPTAIN_ENGINE_VERSION,
     TIME_TOKENS_PER_SEASON,
@@ -100,6 +106,42 @@ function reaccionaEn(season: number, ronda: number): number {
     return (hashSeed(`jackal:${season}:${ronda}`) % 1_000) - 200;
 }
 
+/**
+ * Cuántas veces insiste en el scrum, de 0 a `maxPushes`.
+ *
+ * El Ancla no tiene "mano perfecta" —el punto de quiebre está oculto— así que la
+ * receta apuesta distinto cada temporada y pasa por las cuatro decisiones.
+ */
+function insisteEn(season: number, maxPushes: number): number {
+    return hashSeed(`ancla:${season}`) % (maxPushes + 1);
+}
+
+/**
+ * Cómo repite la seña del line-out.
+ *
+ * Copia la seña real y le corrompe UN gesto, elegido por la temporada. Cuando el
+ * índice cae fuera de la seña, la repite entera bien. Así la receta pasa por los
+ * tres desenlaces —limpio, sucio y perdido— en vez de fallar siempre, que es lo
+ * que daría una seña sorteada al azar (una entre 256 de acertar).
+ */
+function repiteLaSena(call: readonly number[], season: number): number[] {
+    const repetida = [...call];
+    const donde = hashSeed(`codigo:${season}`) % (call.length + 2);
+    if (donde < call.length) repetida[donde] = (repetida[donde] + 1) % 4;
+    return repetida;
+}
+
+/**
+ * Dónde apunta en Los Palos, de −1 a 1.
+ *
+ * NO usa `palosPerfectAim`: la receta tiene que poder errarle. Un pateador que
+ * compensa el viento exacto todas las veces congelaría una carrera que nadie
+ * juega.
+ */
+function apuntaEn(season: number): number {
+    return ((hashSeed(`palos:${season}`) % 2_000) - 1_000) / 1_000;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  Correr una carrera entera con la receta
 // ═══════════════════════════════════════════════════════════════════════════
@@ -129,6 +171,23 @@ function jugarMomentos(state: CaptainState): CaptainState {
         } else if (pendiente.kind === 'jackal') {
             const reactions = [0, 1, 2].map((ronda) => reaccionaEn(next.season, ronda));
             next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: { kind: 'jackal', reactions } });
+        } else if (pendiente.kind === 'ancla') {
+            const setup = pendiente.setup as AnclaSetup;
+            next = captainReducer(next, {
+                type: 'RESOLVE_MOMENT',
+                outcome: { kind: 'ancla', pushes: insisteEn(next.season, setup.maxPushes) },
+            });
+        } else if (pendiente.kind === 'codigo') {
+            const setup = pendiente.setup as CodigoSetup;
+            next = captainReducer(next, {
+                type: 'RESOLVE_MOMENT',
+                outcome: { kind: 'codigo', call: repiteLaSena(setup.call, next.season) },
+            });
+        } else if (pendiente.kind === 'palos') {
+            next = captainReducer(next, {
+                type: 'RESOLVE_MOMENT',
+                outcome: { kind: 'palos', aim: apuntaEn(next.season) },
+            });
         } else {
             const at = frenaEn(next.season, intento);
             const zone: TackleZone = zoneAt(

@@ -737,6 +737,195 @@
     }
 }
 
+/* ── EL ANCLA: insistir en el scrum ───────────────────────────────────────── */
+.anclaTally {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.anclaMark {
+    width: 46px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--color-border);
+}
+
+.anclaMarkHeld {
+    background: var(--color-accent);
+}
+
+.anclaMarkBroken {
+    background: #d64545;
+}
+
+.anclaState {
+    margin: 14px 0 0;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--color-bg-tertiary);
+    border: 1px dashed var(--color-border);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.4;
+    color: var(--color-text-secondary);
+}
+
+.anclaChoices {
+    margin-top: 16px;
+}
+
+/* ── EL CÓDIGO: la seña del line-out ──────────────────────────────────────── */
+.codigoProgress {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.codigoPip {
+    width: 26px;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--color-border);
+}
+
+.codigoPipDone {
+    background: var(--color-accent);
+}
+
+.codigoGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 14px;
+}
+
+@media (min-width: 480px) {
+    .codigoGrid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.codigoKey {
+    display: grid;
+    place-items: center;
+    gap: 4px;
+    min-height: 92px;
+    padding: 14px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    cursor: pointer;
+    font-family: inherit;
+    /* Sin transición de salida: el gesto se apaga en seco para que se pueda
+       contar cuántas veces se encendió el mismo. */
+    transition: background-color 80ms linear, border-color 80ms linear;
+}
+
+.codigoKey:disabled {
+    cursor: default;
+}
+
+.codigoKeyOn {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 22px rgba(var(--color-accent-rgb), 0.5);
+}
+
+.codigoKeyNum {
+    font-size: 1.5rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.codigoKeyName {
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--color-text-tertiary);
+}
+
+.codigoKeyOn .codigoKeyNum,
+.codigoKeyOn .codigoKeyName {
+    color: var(--color-bg-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .codigoKey {
+        transition: none;
+    }
+}
+
+/* ── LOS PALOS: la patada que decide ──────────────────────────────────────── */
+.palosWind {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.palosWindLabel {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+}
+
+.palosFlag {
+    display: inline-block;
+    font-size: 1.2rem;
+    line-height: 1;
+    color: var(--color-accent);
+}
+
+.palosBar {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 42px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+}
+
+/* Los palos están dibujados en el MEDIO y no se mueven: el viento corre la
+   pelota, no el arco. Que el blanco esté quieto y la pelota no llegue ahí es
+   todo el minijuego. */
+.palosTarget {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: rgba(var(--color-accent-rgb), 0.22);
+    border-left: 2px solid var(--color-accent);
+    border-right: 2px solid var(--color-accent);
+}
+
+.palosBall {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+}
+
+.palosBallIn {
+    background: var(--color-accent);
+    box-shadow: 0 0 14px rgba(var(--color-accent-rgb), 0.7);
+}
+
+.palosBallOut {
+    background: #d64545;
+}
+
 /* ── Trayectoria ──────────────────────────────────────────────────────────── */
 .timeline {
     display: grid;

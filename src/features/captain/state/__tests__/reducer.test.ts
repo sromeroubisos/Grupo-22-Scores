@@ -15,7 +15,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { CaptainState, CreateCaptainInput } from '../../types/captain.ts';
-import type { TackleZone } from '../../types/moment.ts';
+import type { MomentOutcome, TackleZone } from '../../types/moment.ts';
+import type { AnclaSetup } from '../../engine/moment-defs/ancla.ts';
+import type { CodigoSetup } from '../../engine/moment-defs/codigo.ts';
 import type { CaptainAction } from '../captain-actions.ts';
 import { TIME_SLOTS, TIME_TOKENS_PER_SEASON } from '../../types/currencies.ts';
 import { MATCH_CAP_PER_SEASON } from '../../types/season.ts';
@@ -74,17 +76,41 @@ function pasarMomentos(state: CaptainState, vuelta: number): CaptainState {
     let next = state;
     let guarda = 0;
     while (next.phase === 'moment' && guarda < 4) {
-        const pendiente = next.pendingMoment!;
-        const outcome: CaptainAction = pendiente.kind === 'bunker'
-            ? { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } }
-            : pendiente.kind === 'jackal'
-                ? { type: 'RESOLVE_MOMENT', outcome: { kind: 'jackal', reactions: REACCIONES[vuelta % REACCIONES.length] } }
-                : { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: ZONAS[vuelta % ZONAS.length], at: 0.5 } };
-        next = captainReducer(next, outcome);
+        next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: manoRotativa(next, vuelta) });
         guarda += 1;
     }
     return next;
 }
+
+/**
+ * Una mano distinta por vuelta, para que una carrera de prueba recorra todos los
+ * desenlaces de cada Momento en vez de repetir el cómodo.
+ */
+function manoRotativa(state: CaptainState, vuelta: number): MomentOutcome {
+    const pendiente = state.pendingMoment!;
+    switch (pendiente.kind) {
+        case 'bunker':
+            return { kind: 'bunker' };
+        case 'jackal':
+            return { kind: 'jackal', reactions: REACCIONES[vuelta % REACCIONES.length] };
+        case 'ancla':
+            // De soltar enseguida a insistir hasta que se caiga.
+            return { kind: 'ancla', pushes: vuelta % ((pendiente.setup as AnclaSetup).maxPushes + 1) };
+        case 'codigo': {
+            // La repite bien, o con un gesto cambiado, según la vuelta.
+            const call = [...(pendiente.setup as CodigoSetup).call];
+            if (vuelta % 3 !== 0) call[vuelta % call.length] = (call[vuelta % call.length] + 1) % 4;
+            return { kind: 'codigo', call };
+        }
+        case 'palos':
+            return { kind: 'palos', aim: PUNTERIAS[vuelta % PUNTERIAS.length] };
+        default:
+            return { kind: 'tackle', zone: ZONAS[vuelta % ZONAS.length], at: 0.5 };
+    }
+}
+
+/** Punterías de Los Palos: al medio, muy afuera, y a los dos lados. */
+const PUNTERIAS = [0, 0.85, -0.4, 0.35, -0.9];
 
 /**
  * Una temporada completa: repartir, jugar la jugada si la hay, simular y —si

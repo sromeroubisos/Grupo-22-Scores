@@ -10,11 +10,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { CaptainState, CreateCaptainInput } from '../../types/captain.ts';
-import type { TackleZone } from '../../types/moment.ts';
+import type { MomentOutcome, TackleZone } from '../../types/moment.ts';
+import type { CodigoSetup } from '../moment-defs/codigo.ts';
+import type { PalosSetup } from '../moment-defs/palos.ts';
 import type { CaptainAction } from '../../state/captain-actions.ts';
 import { TIME_SLOTS, TIME_TOKENS_PER_SEASON } from '../../types/currencies.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
 import { tackleZones, zoneAt } from '../moments.ts';
+import { palosPerfectAim } from '../moment-defs/palos.ts';
 
 const INPUT: CreateCaptainInput = {
     name: 'Ciro',
@@ -40,23 +43,23 @@ function repartir(state: CaptainState): CaptainState {
  * estado sin tocar, con lo cual el bucle de afuera gira sin avanzar.
  */
 function resolverPendiente(state: CaptainState): CaptainState {
-    const kind = state.pendingMoment?.kind;
-    if (kind === 'bunker') {
-        return captainReducer(state, { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } });
-    }
-    if (kind === 'jackal') {
-        return captainReducer(state, { type: 'RESOLVE_MOMENT', outcome: { kind: 'jackal', reactions: [240, 240, 240] } });
-    }
-    return captainReducer(state, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: 'legal', at: 0.5 } });
+    const pendiente = state.pendingMoment!;
+    const outcome: MomentOutcome = pendiente.kind === 'bunker' ? { kind: 'bunker' }
+        : pendiente.kind === 'jackal' ? { kind: 'jackal', reactions: [240, 240, 240] }
+            : pendiente.kind === 'ancla' ? { kind: 'ancla', pushes: 1 }
+                : pendiente.kind === 'codigo' ? { kind: 'codigo', call: [...(pendiente.setup as CodigoSetup).call] }
+                    : pendiente.kind === 'palos' ? { kind: 'palos', aim: palosPerfectAim((pendiente.setup as PalosSetup).wind) }
+                        : { kind: 'tackle', zone: 'legal', at: 0.5 };
+    return captainReducer(state, { type: 'RESOLVE_MOMENT', outcome });
 }
 
 /**
  * Avanza hasta encontrar una temporada que traiga UN TACKLE.
  *
  * El jugador de prueba es tercera línea, que es justo la familia a la que
- * también le toca el jackal: si sale ese, se juega y se sigue buscando. Los
- * tests de abajo son sobre la barra del tackle, así que tienen que recibir un
- * tackle y no "el Momento que haya salido".
+ * también le toca el jackal —y cada tanto, por el cruce, cualquier otro—: si
+ * sale otro, se juega y se sigue buscando. Los tests de abajo son sobre la barra
+ * del tackle, así que tienen que recibir un tackle y no "el Momento que salió".
  */
 function hastaElTackle(seed: number, max = 25): CaptainState | null {
     let s = createInitialCaptain(INPUT, seed);
@@ -64,7 +67,7 @@ function hastaElTackle(seed: number, max = 25): CaptainState | null {
         s = repartir(s);
 
         let guarda = 0;
-        while (s.phase === 'moment' && s.pendingMoment?.kind === 'jackal' && guarda < 4) {
+        while (s.phase === 'moment' && s.pendingMoment && s.pendingMoment.kind !== 'tackle' && guarda < 4) {
             s = resolverPendiente(s);
             guarda += 1;
         }

@@ -63,15 +63,39 @@ const MIN_SHARE = 0.3;
 const TACKLE_WEIGHT = 10;
 
 /**
- * Cuánto oficio tiene el que juega un Momento que no es de su puesto.
+ * Cuánto oficio tiene el que juega un Momento que NO es de su puesto.
  *
- * HOY NO SE USA EN PARTIDA: `pickMomentKind` solo ofrece Momentos elegibles, así
- * que el que juega el jackal es siempre tercera línea y el oficio es 1. Existe
- * igual, y no es adorno: el día que un transversal pase por el contrato —el
- * tackle es el candidato— un wing y un flanker no lo pueden jugar con los mismos
- * márgenes. Los tests del jackal sí lo ejercitan, llamando al `setup` derecho.
+ * Se despierta con EL CRUCE (abajo): un centro que se encuentra parado sobre la
+ * pelota en el breakdown, un wing que tiene que patear porque el 10 salió. La
+ * juega, pero la juega peor.
+ *
+ * ── Por qué el tackle NO lleva proficiency ──
+ * La intuición de que un wing y un flanker no tacklean igual es correcta, y aun
+ * así `proficiency` es el concepto equivocado para expresarla. El tackle es el
+ * TRABAJO DE LOS QUINCE: nadie lo juega prestado. Si el oficio viviera ahí
+ * pasaría a significar "qué tan bueno es tu puesto tackleando", y entonces el
+ * 0,6 de un wing tackleando y el 0,6 de un wing pateando en Los Palos serían el
+ * mismo número queriendo decir dos cosas distintas — y ya no se podrían
+ * distinguir ni calibrar por separado.
+ *
+ * Si algún día hacen falta márgenes por familia en un transversal, van con un
+ * modificador PROPIO derivado de la familia, no con este.
  */
 const OUTSIDER_PROFICIENCY = 0.75;
+
+/**
+ * EL CRUCE: cada tanto te toca una jugada que no es tuya.
+ *
+ * El rugby real está lleno: el 10 sale lesionado y patea el fullback, el centro
+ * llega primero al ruck, el ala termina levantando en el line-out porque el
+ * segunda está en el piso. Es raro, y por eso el número es chico — pero que
+ * exista es lo que hace que `proficiency` signifique algo y que un puesto no
+ * viva en un tubo de dos minijuegos para siempre.
+ *
+ * Sale del stream DERIVADO, igual que la elección del kind, así que no corre el
+ * rng de la carrera.
+ */
+const CROSS_CHANCE = 0.08;
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Las semillas derivadas
@@ -112,12 +136,22 @@ function weightOf(kind: MomentKind): number {
  * `Object.keys` sobre el registry.
  */
 export function pickMomentKind(seed: number, season: number, family: PositionFamilyId): MomentKind {
-    const elegibles = SELECTABLE_MOMENTS.filter((kind) => appliesTo(kind, family));
-    // El tackle le toca a todos, así que el pool nunca queda vacío. Si algún día
-    // dejara de ser transversal, esto avisa en vez de devolver `undefined`.
+    const rng = createRng(hashSeed(`${seed}:${season}:momentPick`));
+
+    // El cruce se tira SIEMPRE, aunque después no cambie nada: si solo se tirara
+    // cuando hay Momentos ajenos disponibles, el stream derivado dependería del
+    // tamaño del catálogo y agregar el Momento doce movería los once anteriores.
+    const cruce = rng.chance(CROSS_CHANCE);
+
+    const propios = SELECTABLE_MOMENTS.filter((kind) => appliesTo(kind, family));
+    const ajenos = SELECTABLE_MOMENTS.filter((kind) => !appliesTo(kind, family));
+    const elegibles = cruce && ajenos.length > 0 ? ajenos : propios;
+
+    // El tackle le toca a todos, así que el pool propio nunca queda vacío. Si
+    // algún día dejara de ser transversal, esto avisa en vez de devolver
+    // `undefined`.
     if (elegibles.length === 0) return 'tackle';
 
-    const rng = createRng(hashSeed(`${seed}:${season}:momentPick`));
     return rng.weighted(elegibles, weightOf);
 }
 
@@ -359,10 +393,24 @@ export interface MomentResolution {
  *
  * Devuelve `null` si la mano no es de esta jugada —mandar un tackle a un
  * jackal—. Es el mismo trato que le da el reducer a una opción que no existe:
- * la acción no vale, el estado no se mueve y nada explota. El chequeo vive ACÁ
- * y no adentro de cada def, porque el registry borra los genéricos y la garantía
- * de tipos se pierde justo en el borde: si cada def tuviera que defenderse sola,
- * el decimoquinto Momento se va a olvidar.
+ * la acción no vale, el estado no se mueve y nada explota.
+ *
+ * ── POR QUÉ EL GUARDIA VIVE ACÁ Y NO EN CADA DEF ──
+ * El registry borra los genéricos —tiene que hacerlo, indexa por kind— y en ese
+ * borde se pierde la garantía de tipos: un `MomentOutcome` de cualquier kind
+ * puede llegarle a cualquier `resolve`. Hay dos formas de taparlo y no son
+ * equivalentes.
+ *
+ * Pedirle a cada def que se defienda sola es una CONVENCIÓN, y las convenciones
+ * se cumplen catorce veces y se olvidan la quince. Peor: se olvidan en el
+ * Momento que se escribió apurado, que es justo el que va a recibir la mano
+ * rara. El síntoma no sería un mensaje claro sino un `undefined.length` adentro
+ * de un minijuego, a tres archivos de distancia de la causa.
+ *
+ * Acá arriba es un INVARIANTE. No hay def que pueda incumplirlo porque ninguna
+ * llega a ejecutarse sin pasar por esta línea, y el que escriba el Momento
+ * número quince no necesita saber que la regla existe. Esa es toda la
+ * diferencia entre las dos, y es la razón de que el chequeo esté en el armazón.
  */
 export function resolveMoment(
     state: CaptainState,

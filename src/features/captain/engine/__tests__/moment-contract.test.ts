@@ -27,7 +27,7 @@ import { ALL_FAMILIES, baseAttributes } from '../../data/positions.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
 import { createRng } from '../random.ts';
 import { MOMENT_DEFS } from '../moment-defs/index.ts';
-import { applyMomentDeltas, momentSeed, nextChain, pickMomentKind, rollMoment } from '../moments.ts';
+import { applyMomentDeltas, momentSeed, nextChain, pickMomentKind, proficiencyFor, rollMoment } from '../moments.ts';
 
 const TERCERA: CreateCaptainInput = {
     name: 'Ciro',
@@ -221,16 +221,39 @@ test('elegir el kind no depende del rng de la carrera, solo de la semilla', () =
     assert.equal(b, a, 'la elección tiene que ser función de (semilla, temporada, familia)');
 });
 
-test('a cada familia solo le tocan los Momentos que son suyos', () => {
-    // El jackal es del que vive en el piso. Un wing que se tira sobre la pelota
-    // en el minuto 70 es una anécdota, no un puesto.
+test('EL CRUCE: casi siempre te toca lo tuyo, y cada tanto lo de otro', () => {
+    // El rugby real está lleno de cruces —el 10 sale y patea el fullback, el
+    // centro llega primero al ruck— pero son raros. Lo que este test cuida es la
+    // FORMA: que el cruce exista y que sea excepción, no que valga exactamente
+    // 0,08. La banda es ancha a propósito; si algún día se calibra, este test no
+    // se pone en rojo por eso.
+    let propios = 0;
+    let cruces = 0;
+
     for (const family of ALL_FAMILIES) {
-        for (let season = 1; season <= 20; season += 1) {
+        for (let season = 1; season <= 200; season += 1) {
             const kind = pickMomentKind(909, season, family);
-            if (kind === 'jackal') {
-                assert.equal(family, 'tercera-linea', `${family} recibió un jackal y no es suyo`);
-            }
+            if (proficiencyFor(kind, family) < 1) cruces += 1;
+            else propios += 1;
         }
+    }
+
+    const total = propios + cruces;
+    const tasa = cruces / total;
+    assert.ok(tasa > 0.02, `el cruce no aparece nunca (${(tasa * 100).toFixed(1)}%): proficiency queda dormido`);
+    assert.ok(tasa < 0.2, `el cruce dejó de ser excepción (${(tasa * 100).toFixed(1)}%)`);
+});
+
+test('el que juega una jugada prestada la juega con menos oficio', () => {
+    // Es la otra mitad del cruce: sin esto, recibir un Momento ajeno sería
+    // gratis y el puesto dejaría de significar algo.
+    assert.equal(proficiencyFor('jackal', 'tercera-linea'), 1);
+    assert.ok(proficiencyFor('jackal', 'wing-fullback') < 1);
+    assert.equal(proficiencyFor('palos', 'apertura'), 1);
+    assert.ok(proficiencyFor('palos', 'primera-linea') < 1);
+    // El tackle es transversal: lo juegan los quince con el mismo oficio.
+    for (const family of ALL_FAMILIES) {
+        assert.equal(proficiencyFor('tackle', family), 1, `${family} tacklea con oficio prestado`);
     }
 });
 
@@ -273,6 +296,59 @@ test('cada def declara el kind con el que está indexada y su setup lo repite', 
         assert.ok(def.labelEs.length > 0, `${def.kind}: sin título no hay nada que dibujar`);
         if (def.families !== null) {
             assert.ok(def.families.length > 0, `${def.kind}: lista de familias vacía — usá null si es transversal`);
+        }
+    }
+});
+
+test('LA REGLA DEL statBoost: ningún Momento cobra dos veces su propia gloria', () => {
+    // La regla está escrita arriba del registry: `statBoost` es para Momentos
+    // cuyo premio NO ES YA la métrica-gloria del puesto. Los cuatro que hay hoy
+    // pagan exactamente en la gloria de su familia —penales de scrum, line-outs,
+    // turnovers, puntos— así que ninguno puede usarlo: si lo usara, el jugador
+    // vería la jugada en la crónica Y otra vez inflada en la planilla de fin de
+    // año.
+    //
+    // Si algún día entra un Momento cuyo premio NO es la gloria de su puesto,
+    // se agrega acá a la lista de excepciones CON el motivo escrito. Que haya que
+    // tocar este test es la idea: obliga a decir por qué.
+    const PUEDEN_USARLO: string[] = [];
+
+    for (const def of MOMENT_DEFS) {
+        if (PUEDEN_USARLO.includes(def.kind)) continue;
+
+        const setup = def.setup({
+            kind: def.kind,
+            season: 3,
+            minute: 61,
+            scoreDelta: -3,
+            pressure: 0.6,
+            family: (def.families ?? ALL_FAMILIES)[0],
+            proficiency: 1,
+            attrs: baseAttributes((def.families ?? ALL_FAMILIES)[0]),
+            bodyDamage: 15,
+            seed: momentSeed(5150, def.kind, 3, 0),
+        });
+
+        // Un abanico de manos que cubre bien y mal en los cinco minijuegos. Las
+        // que no correspondan al kind las ignora `resolve` por su propia forma.
+        const manos: MomentOutcome[] = [
+            { kind: 'jackal', reactions: [10, 10, 10] },
+            { kind: 'jackal', reactions: [-90, null, 9_000] },
+            { kind: 'ancla', pushes: 0 },
+            { kind: 'ancla', pushes: 3 },
+            { kind: 'codigo', call: [0, 1, 2, 3] },
+            { kind: 'codigo', call: [] },
+            { kind: 'palos', aim: 0 },
+            { kind: 'palos', aim: 1 },
+        ].filter((m) => m.kind === def.kind);
+
+        for (const mano of manos) {
+            const { deltas } = def.resolve(setup, mano);
+            assert.equal(
+                deltas.statBoost,
+                undefined,
+                `${def.kind} usa statBoost y su premio ya es la gloria de su puesto: estaría cobrando dos veces`,
+            );
         }
     }
 });

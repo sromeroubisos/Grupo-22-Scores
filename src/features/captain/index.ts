@@ -165,14 +165,28 @@ export {
     zoneAt,
 } from './engine/moments.ts';
 
-export type { AnyMomentDef, JackalSetup } from './engine/moment-defs/index.ts';
+export type {
+    AnclaSetup,
+    AnyMomentDef,
+    CodigoSetup,
+    JackalSetup,
+    PalosSetup,
+} from './engine/moment-defs/index.ts';
 export {
+    ANCLA_MAX_PUSHES,
+    CODIGO_LENGTH,
+    CODIGO_SYMBOLS,
     JACKAL_ROUNDS,
     MOMENT_DEFS,
+    anclaHoldChance,
+    codigoAciertos,
     getMomentDef,
     jackalBeat,
     jackalGrade,
     jackalWindows,
+    palosGrade,
+    palosLanding,
+    palosPerfectAim,
 } from './engine/moment-defs/index.ts';
 
 // ── Temporada y decisiones ──────────────────────────────────────────────────

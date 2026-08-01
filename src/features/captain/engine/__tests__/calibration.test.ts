@@ -19,13 +19,42 @@ import assert from 'node:assert/strict';
 
 import type { CaptainState, CreateCaptainInput, SquadTrack } from '../../types/captain.ts';
 import type { TimeSlot } from '../../types/currencies.ts';
+import type { MomentOutcome } from '../../types/moment.ts';
+import type { CodigoSetup } from '../moment-defs/codigo.ts';
+import type { PalosSetup } from '../moment-defs/palos.ts';
 import { ALL_FAMILIES } from '../../data/positions.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
 import { getPendingEvent } from '../event-selector.ts';
 import { belongingOf } from '../belonging.ts';
+import { palosPerfectAim } from '../moment-defs/palos.ts';
 
 /** Veinte carreras por familia: ciento sesenta en total. */
 const POR_FAMILIA = 20;
+
+/**
+ * La mano del jugador de referencia, para el Momento que haya salido.
+ *
+ * Lee el Setup del estado, que es exactamente lo que hace la pantalla: la seña
+ * del line-out y el viento de la patada están A LA VISTA del jugador. No es
+ * espiar el motor, es jugar con la información que el juego muestra.
+ */
+function manoDeReferencia(state: CaptainState): MomentOutcome {
+    const pendiente = state.pendingMoment!;
+    switch (pendiente.kind) {
+        case 'bunker':
+            return { kind: 'bunker' };
+        case 'jackal':
+            return { kind: 'jackal', reactions: [240, 240, 240] };
+        case 'ancla':
+            return { kind: 'ancla', pushes: 1 };
+        case 'codigo':
+            return { kind: 'codigo', call: [...(pendiente.setup as CodigoSetup).call] };
+        case 'palos':
+            return { kind: 'palos', aim: palosPerfectAim((pendiente.setup as PalosSetup).wind) };
+        default:
+            return { kind: 'tackle', zone: 'legal', at: 0.5 };
+    }
+}
 
 /** El reparto de un jugador normal: entrena, labura, va al club y descansa. */
 const REPARTO: TimeSlot[] = ['entrenar', 'entrenar', 'trabajar', 'club', 'familia', 'gimnasio'];
@@ -64,19 +93,21 @@ function jugar(seed: number, family: (typeof ALL_FAMILIES)[number], fiel: boolea
         // un tackle limpio: la calibración de la temporada no se mide con un
         // jugador que se va expulsado todos los años.
         //
-        // Y en el jackal reacciona en 240 ms las tres veces: es el tiempo de
-        // reacción visual de una persona normal, así que roba las que la ventana
-        // le permite y NO se va nunca de offside. Misma idea que el tackle
-        // limpio — la pirámide no se puede medir con un jugador que regala un
-        // penal por año.
+        // El JUGADOR DE REFERENCIA juega bien y no regala nada, en los cinco
+        // Momentos. Es la misma idea que el tackle limpio: la pirámide no se
+        // puede medir con alguien que se va expulsado o regala un penal por año.
+        //
+        //   tackle → zona legal        jackal → 240 ms, el tiempo de reacción
+        //   ancla  → insiste UNA vez     de una persona normal
+        //   código → repite bien       palos  → compensa el viento exacto
+        //
+        // El único que no es "perfecto" es El Ancla, y por eso vale la aclaración:
+        // la mano perfecta ahí no existe, porque el punto de quiebre está oculto.
+        // Insistir una vez es la apuesta prudente, que es lo que haría un jugador
+        // de referencia.
         let guarda = 0;
         while (s.phase === 'moment' && guarda < 4) {
-            const kind = s.pendingMoment?.kind;
-            s = kind === 'bunker'
-                ? captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } })
-                : kind === 'jackal'
-                    ? captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'jackal', reactions: [240, 240, 240] } })
-                    : captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: 'legal', at: 0.5 } });
+            s = captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: manoDeReferencia(s) });
             guarda += 1;
         }
 

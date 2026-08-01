@@ -42,8 +42,19 @@ import type { MomentRecord, PendingMoment } from './moment.ts';
  *         `rollMoment` sigue consumiendo lo mismo del stream principal, así que
  *         el digest congelado no se mueve por agregar Momentos: se mueve solo
  *         donde uno cambió de verdad el resultado.
+ * 0.5.0 — Tres Momentos más, y con ellos tres VERBOS que el juego no tenía. El
+ *         Ancla (primera línea) se juega insistiendo: push-your-luck sobre un
+ *         punto de quiebre oculto, y es el único que no mide reflejos. El Código
+ *         (hooker y segunda línea) se juega acordándose: la seña del line-out se
+ *         muestra y se repite. Los Palos (apertura) se juega apuntando afuera:
+ *         el viento corre la pelota, así que frenar sobre el blanco es errarle.
+ *         Un juego de puestos donde los quince minijuegos midan lo mismo no es
+ *         un juego de puestos.
+ *         Y EL CRUCE: el 8% de las veces te toca una jugada que no es tuya y la
+ *         jugás con menos oficio. Es lo que despierta `proficiency`, que hasta
+ *         acá existía sin usarse en partida.
  */
-export const CAPTAIN_ENGINE_VERSION = '0.4.0';
+export const CAPTAIN_ENGINE_VERSION = '0.5.0';
 
 /**
  * Las fases del ciclo. `offseason` es propia de este juego y no la tiene

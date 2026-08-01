@@ -8,11 +8,37 @@
 //
 // Acá NO hay React. La pantalla de cada Momento se registra aparte, del lado de
 // `app/`, para que el motor pueda correr en un test de Node sin DOM.
+//
+// ═══════════════════════════════════════════════════════════════════════════
+//  LA REGLA DEL statBoost — leerla antes de escribir el próximo Momento
+// ═══════════════════════════════════════════════════════════════════════════
+//
+//   `statBoost` es para Momentos cuyo premio NO ES YA la métrica-gloria del
+//   puesto.
+//
+// Cada familia tiene su propio gol (`data/positions.ts`): el pilar cuenta
+// penales de scrum, el 7 turnovers, la segunda línea line-outs, el apertura
+// puntos. Si un Momento paga en la misma moneda que la planilla ya cuenta, el
+// `statBoost` cobra dos veces la misma jugada — el jugador ve el turnover en la
+// crónica Y otra vez inflado en la planilla de fin de año, y la calibración del
+// puesto queda mintiendo sin que nada falle.
+//
+// Por eso ni El Jackal, ni El Ancla, ni El Código, ni Los Palos lo usan: los
+// cuatro pagan exactamente en la gloria de su puesto, así que cobran en Cartel y
+// Pertenencia y nada más. El Tackle SÍ lo usa, y por el mismo criterio: frenar
+// en seco no es la gloria de ninguna familia, así que no hay dónde se cuente
+// solo.
+//
+// Está escrita acá y no en cada def a propósito. Es la clase de decisión que se
+// vuelve a derivar de cero en el Momento #12 y se deriva distinto.
 
 import type { MomentKind } from '../../types/moment-kinds.ts';
 import type { MomentOutcome } from '../../types/moment.ts';
 import type { MomentDef, MomentSetup } from '../../types/moment-def.ts';
 import { JACKAL } from './jackal.ts';
+import { ANCLA } from './ancla.ts';
+import { CODIGO } from './codigo.ts';
+import { PALOS } from './palos.ts';
 
 /**
  * La definición como la ve el registry, con los genéricos borrados.
@@ -37,8 +63,20 @@ function widen<S extends MomentSetup, I extends MomentOutcome>(def: MomentDef<S,
     return def as unknown as AnyMomentDef;
 }
 
-/** Todas las definiciones, en orden declarado y estable. */
-export const MOMENT_DEFS: readonly AnyMomentDef[] = [widen(JACKAL)];
+/**
+ * Todas las definiciones, en ORDEN DECLARADO y estable.
+ *
+ * El orden es el del equipo, de adelante hacia atrás, igual que `ALL_FAMILIES`:
+ * primera línea, line-out, tercera línea, apertura. Que sea el mismo criterio en
+ * los dos lugares no es estética — es que cuando alguien busque "el Momento del
+ * hooker" mire en el mismo renglón en los dos archivos.
+ */
+export const MOMENT_DEFS: readonly AnyMomentDef[] = [
+    widen(ANCLA),
+    widen(CODIGO),
+    widen(JACKAL),
+    widen(PALOS),
+];
 
 const BY_KIND: Partial<Record<MomentKind, AnyMomentDef>> = {};
 for (const def of MOMENT_DEFS) BY_KIND[def.kind] = def;
@@ -55,3 +93,20 @@ export function getMomentDef(kind: MomentKind): AnyMomentDef | null {
 
 export type { JackalSetup } from './jackal.ts';
 export { JACKAL, JACKAL_ROUNDS, jackalBeat, jackalGrade, jackalWindows } from './jackal.ts';
+
+export type { AnclaSetup } from './ancla.ts';
+export { ANCLA, ANCLA_MAX_PUSHES, anclaGrade, anclaHoldChance } from './ancla.ts';
+
+export type { CodigoSetup } from './codigo.ts';
+export {
+    CODIGO,
+    CODIGO_LENGTH,
+    CODIGO_SYMBOLS,
+    codigoAciertos,
+    codigoDestreza,
+    codigoGrade,
+    codigoShowMs,
+} from './codigo.ts';
+
+export type { PalosSetup } from './palos.ts';
+export { PALOS, palosGrade, palosLanding, palosPerfectAim, palosTolerance } from './palos.ts';

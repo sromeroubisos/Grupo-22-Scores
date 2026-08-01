@@ -88,7 +88,16 @@ export type MomentOutcome =
      * DESTELLO. Negativo es haber tocado antes —offside—, y `null` es no haber
      * tocado nunca. El motor los clasifica contra las ventanas del Setup.
      */
-    | { kind: 'jackal'; reactions: (number | null)[] };
+    | { kind: 'jackal'; reactions: (number | null)[] }
+    /** Cuántas veces insististe en el scrum antes de soltar. Cero es soltar enseguida. */
+    | { kind: 'ancla'; pushes: number }
+    /** La seña que repetiste, en el orden en que la tocaste. */
+    | { kind: 'codigo'; call: number[] }
+    /**
+     * Dónde apuntaste, de −1 (izquierda del todo) a 1 (derecha del todo). El
+     * viento lo corre después: apuntar al medio NO es apuntar bien.
+     */
+    | { kind: 'palos'; aim: number };
 
 /** Una jugada ya resuelta, para la trayectoria. */
 export interface MomentRecord {

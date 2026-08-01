@@ -5,6 +5,9 @@ import type { CaptainState, MomentKind, MomentOutcome } from '@/features/captain
 import TackleMoment from './TackleMoment';
 import BunkerScene from './BunkerScene';
 import JackalMoment from './JackalMoment';
+import AnclaMoment from './AnclaMoment';
+import CodigoMoment from './CodigoMoment';
+import PalosMoment from './PalosMoment';
 
 /**
  * EL REGISTRY DE PANTALLAS.
@@ -47,5 +50,8 @@ function BunkerScreen({ state, onResolve }: MomentScreenProps) {
 export const MOMENT_SCREENS: Record<MomentKind, ComponentType<MomentScreenProps>> = {
     tackle: TackleScreen,
     bunker: BunkerScreen,
+    ancla: AnclaMoment,
+    codigo: CodigoMoment,
     jackal: JackalMoment,
+    palos: PalosMoment,
 };

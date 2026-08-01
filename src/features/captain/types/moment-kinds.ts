@@ -17,9 +17,26 @@
 // rng a la semilla del Setup, y eso corre la carrera entera de cualquiera que
 // alguna vez haya hecho un tackle alto. O sea, movería el digest congelado por
 // PLOMERÍA y no por diseño — que es exactamente el ruido que la semilla
-// derivada existe para evitar. Se migran cuando haya un motivo de diseño.
+// derivada existe para evitar.
+//
+// ┌───────────────────────────────────────────────────────────────────────────┐
+// │ CUÁNDO SE MIGRAN — decidido, no pendiente de decidir                      │
+// │                                                                            │
+// │ JUSTO ANTES DEL ÚLTIMO MOMENTO POR PUESTO. Ni ahora ni al final del todo.  │
+// │                                                                            │
+// │ El motivo es el digest. Migrarlos mueve la tabla congelada una vez, y esa  │
+// │ vez el diff es 100% plomería: mismo diseño, otro stream. Si la migración   │
+// │ se hace hoy, ese movimiento queda mezclado con los quince movimientos de   │
+// │ contenido que vienen después y ya no se puede leer cuál fue cuál. Si se    │
+// │ hace al final del todo, es lo mismo al revés.                              │
+// │                                                                            │
+// │ Puesta justo antes del último, el commit de migración es el único de toda  │
+// │ la feature cuyo diff de digest NO se explica por contenido — y se puede    │
+// │ revisar solo. Después entra el Momento quince y su movimiento vuelve a ser │
+// │ legible.                                                                   │
+// └───────────────────────────────────────────────────────────────────────────┘
 
-export type MomentKind = 'tackle' | 'bunker' | 'jackal';
+export type MomentKind = 'tackle' | 'bunker' | 'jackal' | 'ancla' | 'codigo' | 'palos';
 
 /**
  * Los que puede sortear el selector, en ORDEN CANÓNICO.
@@ -28,10 +45,13 @@ export type MomentKind = 'tackle' | 'bunker' | 'jackal';
  * tampoco se decide acá sino en su `MomentDef.families` — este archivo no
  * importa nada y no va a empezar ahora.
  */
-export const SELECTABLE_MOMENTS: readonly MomentKind[] = ['tackle', 'jackal'];
+export const SELECTABLE_MOMENTS: readonly MomentKind[] = ['tackle', 'jackal', 'ancla', 'codigo', 'palos'];
 
 export const MOMENT_LABEL: Record<MomentKind, string> = {
     tackle: 'El tackle',
     bunker: 'El bunker',
     jackal: 'El jackal',
+    ancla: 'El ancla',
+    codigo: 'El código',
+    palos: 'Los palos',
 };
