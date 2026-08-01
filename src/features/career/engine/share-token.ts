@@ -62,6 +62,17 @@ export interface CareerRecipe {
     paceMode: PaceModeId;
     surname: string;
     number: number;
+    /**
+     * Club donde arrancó. VIAJA porque el jugador lo puede ELEGIR, y sin él la
+     * receta no reconstruye la carrera: el motor sortea otro club y desde ahí
+     * diverge todo. Es aditivo como el recibo — un token anterior lo trae
+     * `undefined` y cae al sorteo, que es exactamente lo que hacía.
+     *
+     * Mandarlo NO cambia el resultado de una carrera sorteada: el sorteo se hace
+     * igual y la elección solo lo pisa (`createPlayer`), así que el RNG se
+     * consume idéntico con club elegido o sin él.
+     */
+    startClubId?: string;
     /** Ids de opción elegidos, EN ORDEN. */
     decisions: string[];
     /**
@@ -104,6 +115,8 @@ interface Payload {
     u: number;
     k: string[]; // diccionario de ids únicos, en orden de aparición
     d: number[]; // índices dentro de `k`
+    /** Club de arranque. Aditivo: los tokens anteriores no lo traen. */
+    g?: string;
     /** Recibo. Cuesta ~73 caracteres medidos sobre carreras reales. */
     b?: { a: string; c: number; t: number; o: number };
 }
@@ -195,6 +208,7 @@ export function encodeCareerToken(recipe: CareerRecipe): string {
         u: recipe.number,
         k: dictionary,
         d: indices,
+        ...(recipe.startClubId === undefined ? {} : { g: recipe.startClubId }),
         ...(recipe.receipt === null ? {} : {
             b: {
                 a: recipe.receipt.archetype,
@@ -274,6 +288,9 @@ export function decodeCareerToken(token: string): DecodeResult {
             paceMode: payload.m,
             surname: payload.n,
             number: payload.u,
+            // Un token anterior a este campo lo trae `undefined` y cae al sorteo, que
+            // es lo que hacía cuando se generó: sigue reconstruyendo igual.
+            startClubId: typeof payload.g === 'string' && payload.g ? payload.g : undefined,
             decisions,
             receipt,
         },
@@ -289,6 +306,7 @@ export function recipeInput(recipe: CareerRecipe): CreatePlayerInput {
         paceMode: recipe.paceMode,
         surname: recipe.surname,
         number: recipe.number,
+        startClubId: recipe.startClubId,
     };
 }
 
@@ -311,6 +329,10 @@ export function recipeFromCareer(state: CareerState): CareerRecipe {
         paceMode: state.paceMode,
         surname: state.player.surname,
         number: state.player.number,
+        // El club donde ARRANCÓ, no donde terminó: `state.player.clubId` ya se movió
+        // con los pases. La primera entrada de la historia es el club de origen, que
+        // es lo único que `createPlayer` necesita para volver a plantar la carrera.
+        startClubId: state.history[0]?.clubId,
         decisions: state.decisionLog.map((d) => d.optionId),
     };
 }
