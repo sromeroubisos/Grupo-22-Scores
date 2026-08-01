@@ -1,14 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { CaptainState, CreateCaptainInput, MomentOutcome, TackleZone, TimeSlot } from '@/features/captain';
+import type { CaptainState, CreateCaptainInput, MomentOutcome, TimeSlot } from '@/features/captain';
 import { captainReducer, createInitialCaptain, getPendingEvent } from '@/features/captain';
 import { clearCaptain, loadCaptain, saveCaptain } from './captainStorage';
 import CreatePlayer from './CreatePlayer';
 import PlayerHeader from './PlayerHeader';
 import TimeBudget from './TimeBudget';
-import TackleMoment from './TackleMoment';
-import BunkerScene from './BunkerScene';
+import { MOMENT_SCREENS } from './MomentScreens';
 import EventCard from './EventCard';
 import SeasonResult from './SeasonResult';
 import Retirement from './Retirement';
@@ -212,6 +211,12 @@ export default function CaptainFlow() {
 
     const evento = getPendingEvent(career);
 
+    // La pantalla de la jugada sale del registry: agregar un Momento no toca el
+    // orquestador, que es lo mismo que pasa del lado del motor con `MomentDef`.
+    const MomentScreen = career.phase === 'moment' && career.pendingMoment
+        ? MOMENT_SCREENS[career.pendingMoment.kind]
+        : null;
+
     return (
         <div className={styles.shell}>
             <GameTitle />
@@ -224,17 +229,8 @@ export default function CaptainFlow() {
                     ovrDelta={pendingResult.ovrDelta}
                     onContinue={() => setPendingResult(null)}
                 />
-            ) : career.phase === 'moment' && career.pendingMoment?.kind === 'bunker' ? (
-                <BunkerScene
-                    state={career}
-                    verdict={career.pendingMoment.verdict ?? 'amarilla'}
-                    onDone={() => resolveMomentInput({ kind: 'bunker' })}
-                />
-            ) : career.phase === 'moment' && career.pendingMoment ? (
-                <TackleMoment
-                    state={career}
-                    onResolve={(zone: TackleZone, at: number) => resolveMomentInput({ kind: 'tackle', zone, at })}
-                />
+            ) : MomentScreen ? (
+                <MomentScreen state={career} onResolve={resolveMomentInput} />
             ) : evento ? (
                 <EventCard event={evento} onChoose={choose} />
             ) : (

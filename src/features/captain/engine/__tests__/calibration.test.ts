@@ -63,11 +63,20 @@ function jugar(seed: number, family: (typeof ALL_FAMILIES)[number], fiel: boolea
         // que se insiste hasta salir de la fase. El jugador de referencia hace
         // un tackle limpio: la calibración de la temporada no se mide con un
         // jugador que se va expulsado todos los años.
+        //
+        // Y en el jackal reacciona en 240 ms las tres veces: es el tiempo de
+        // reacción visual de una persona normal, así que roba las que la ventana
+        // le permite y NO se va nunca de offside. Misma idea que el tackle
+        // limpio — la pirámide no se puede medir con un jugador que regala un
+        // penal por año.
         let guarda = 0;
         while (s.phase === 'moment' && guarda < 4) {
-            s = s.pendingMoment?.kind === 'bunker'
+            const kind = s.pendingMoment?.kind;
+            s = kind === 'bunker'
                 ? captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } })
-                : captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: 'legal', at: 0.5 } });
+                : kind === 'jackal'
+                    ? captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'jackal', reactions: [240, 240, 240] } })
+                    : captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: 'legal', at: 0.5 } });
             guarda += 1;
         }
 

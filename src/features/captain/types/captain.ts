@@ -31,8 +31,19 @@ import type { MomentRecord, PendingMoment } from './moment.ts';
  *         armazón (cuándo aparece, con qué márgenes, cómo vuelve a la
  *         temporada) y los dos transversales, El Tackle y El Bunker. Los quince
  *         por puesto entran por el mismo carril sin tocar el reducer.
+ * 0.4.0 — El CONTRATO de un Momento (`types/moment-def.ts`) y el primero que lo
+ *         cumple, El Jackal, para la tercera línea. Tres cosas que el contrato
+ *         impone y antes eran disciplina: `resolve` no ve el contexto —lo que
+ *         necesita viaja masticado en el Setup, así que la jugada se resuelve
+ *         igual antes y después de un F5—, `MomentDeltas` está cerrado a los
+ *         carriles del motor, y una cadena se resuelve a lo sumo una vez.
+ *         Las semillas son DERIVADAS: `hash(semilla:temporada:momentPick)` para
+ *         elegir el kind y `hash(semilla:kind:temporada:idx)` para el minijuego.
+ *         `rollMoment` sigue consumiendo lo mismo del stream principal, así que
+ *         el digest congelado no se mueve por agregar Momentos: se mueve solo
+ *         donde uno cambió de verdad el resultado.
  */
-export const CAPTAIN_ENGINE_VERSION = '0.3.0';
+export const CAPTAIN_ENGINE_VERSION = '0.4.0';
 
 /**
  * Las fases del ciclo. `offseason` es propia de este juego y no la tiene

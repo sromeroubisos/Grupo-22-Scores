@@ -18,6 +18,7 @@
 // veredicto del bunker— y eso sale del rng sembrado.
 
 import type { MomentKind } from './moment-kinds.ts';
+import type { MomentSetup } from './moment-def.ts';
 
 export type { MomentKind };
 
@@ -42,8 +43,27 @@ export interface PendingMoment {
      * Lo decide el motor con el rng sembrado, no la cuenta regresiva: si lo
      * sorteara la pantalla, recargar en el segundo siete daría otro resultado y
      * la partida dejaría de ser reproducible.
+     *
+     * Es del carril PRE-CONTRATO (tackle y bunker). Los Momentos que van por
+     * `MomentDef` guardan lo suyo adentro de `setup`.
      */
     verdict?: BunkerVerdict;
+    /**
+     * Los márgenes con los que se juega, ya sorteados.
+     *
+     * Presente solo en los Momentos que van por el contrato. VIAJA AL GUARDADO
+     * y es lo único que `resolve` va a ver: por eso una jugada retomada después
+     * de un F5 se resuelve con los mismos márgenes con los que apareció.
+     */
+    setup?: MomentSetup;
+    /**
+     * Esta jugada llegó encadenada desde otra.
+     *
+     * La marca la pone `nextChain` y sirve para una sola cosa: que una cadena se
+     * resuelva A LO SUMO UNA VEZ. Sin esto, dos Momentos que se encadenen mutuamente
+     * dejan la carrera girando sin que el jugador tenga forma de salir.
+     */
+    chained?: true;
 }
 
 /** Dónde frenaste la barra del tackle. El orden es el del riesgo creciente. */
@@ -54,11 +74,21 @@ export type BunkerVerdict = 'amarilla' | 'roja-20';
 
 /**
  * Lo que el jugador produjo. Se guarda en el estado: es su jugada, no un dado.
+ *
+ * La pantalla reporta LO QUE HIZO, en crudo, y el motor decide qué significa.
+ * Nunca al revés: si la pantalla mandara "acerté", la clasificación viviría en
+ * React y el motor no podría reproducir la jugada sin la pantalla.
  */
 export type MomentOutcome =
     /** `at` es dónde frenaste, de 0 a 1: cuánto te pasaste importa. */
     | { kind: 'tackle'; zone: TackleZone; at: number }
-    | { kind: 'bunker' };
+    | { kind: 'bunker' }
+    /**
+     * Los tres tiempos de reacción del jackal, en milisegundos DESDE EL
+     * DESTELLO. Negativo es haber tocado antes —offside—, y `null` es no haber
+     * tocado nunca. El motor los clasifica contra las ventanas del Setup.
+     */
+    | { kind: 'jackal'; reactions: (number | null)[] };
 
 /** Una jugada ya resuelta, para la trayectoria. */
 export interface MomentRecord {

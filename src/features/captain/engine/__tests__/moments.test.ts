@@ -32,12 +32,45 @@ function repartir(state: CaptainState): CaptainState {
     return acciones.reduce(captainReducer, state);
 }
 
-/** Avanza hasta encontrar una temporada que traiga jugada decisiva. */
-function hastaElMomento(seed: number, max = 25): CaptainState | null {
+/**
+ * Resuelve el pendiente sea el que sea, para poder seguir avanzando.
+ *
+ * Desde que hay Momentos por puesto, la mano tiene que ser DEL KIND pendiente:
+ * mandarle un tackle a un jackal es una acción inválida y el reducer devuelve el
+ * estado sin tocar, con lo cual el bucle de afuera gira sin avanzar.
+ */
+function resolverPendiente(state: CaptainState): CaptainState {
+    const kind = state.pendingMoment?.kind;
+    if (kind === 'bunker') {
+        return captainReducer(state, { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } });
+    }
+    if (kind === 'jackal') {
+        return captainReducer(state, { type: 'RESOLVE_MOMENT', outcome: { kind: 'jackal', reactions: [240, 240, 240] } });
+    }
+    return captainReducer(state, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: 'legal', at: 0.5 } });
+}
+
+/**
+ * Avanza hasta encontrar una temporada que traiga UN TACKLE.
+ *
+ * El jugador de prueba es tercera línea, que es justo la familia a la que
+ * también le toca el jackal: si sale ese, se juega y se sigue buscando. Los
+ * tests de abajo son sobre la barra del tackle, así que tienen que recibir un
+ * tackle y no "el Momento que haya salido".
+ */
+function hastaElTackle(seed: number, max = 25): CaptainState | null {
     let s = createInitialCaptain(INPUT, seed);
     for (let i = 0; i < max && s.phase !== 'retired'; i += 1) {
         s = repartir(s);
-        if (s.phase === 'moment') return s;
+
+        let guarda = 0;
+        while (s.phase === 'moment' && s.pendingMoment?.kind === 'jackal' && guarda < 4) {
+            s = resolverPendiente(s);
+            guarda += 1;
+        }
+        if (s.phase === 'moment' && s.pendingMoment?.kind === 'tackle') return s;
+        if (s.phase !== 'season') return null;
+
         s = captainReducer(s, { type: 'ADVANCE' });
         if (s.phase === 'event') {
             s = captainReducer(s, { type: 'CHOOSE', optionId: 'x' });
@@ -104,19 +137,22 @@ test('cerrar el reparto deja la temporada lista: o a simular, o a la jugada', ()
     assert.ok(['season', 'moment'].includes(s.phase), `fase inesperada: ${s.phase}`);
     if (s.phase === 'moment') {
         assert.ok(s.pendingMoment, 'fase de momento sin jugada que dibujar');
-        assert.equal(s.pendingMoment!.kind, 'tackle');
+        // A la tercera línea le tocan los dos, y cuál sale lo decide una semilla
+        // derivada. Lo que este test cuida es el CONTEXTO compartido —el minuto
+        // y el marcador—, que lo pone el armazón para cualquier kind.
+        assert.ok(['tackle', 'jackal'].includes(s.pendingMoment!.kind), `kind inesperado: ${s.pendingMoment!.kind}`);
         assert.ok(s.pendingMoment!.minute >= 48 && s.pendingMoment!.minute <= 79);
     }
 });
 
 test('sin resolver la jugada no se simula la temporada', () => {
-    const s = hastaElMomento(21) ?? hastaElMomento(88);
+    const s = hastaElTackle(21) ?? hastaElTackle(88);
     if (!s) return;
     assert.equal(captainReducer(s, { type: 'ADVANCE' }), s, 'la temporada se jugó sin resolver el Momento');
 });
 
 test('un tackle limpio deja empuje en la planilla y cierra la jugada', () => {
-    const s = hastaElMomento(21) ?? hastaElMomento(88);
+    const s = hastaElTackle(21) ?? hastaElTackle(88);
     if (!s) return;
 
     const antes = s.pendingStatBoost;
@@ -125,12 +161,14 @@ test('un tackle limpio deja empuje en la planilla y cierra la jugada', () => {
     assert.equal(despues.phase, 'season');
     assert.equal(despues.pendingMoment, null);
     assert.ok(despues.pendingStatBoost > antes, 'el tackle dominante no empujó la planilla');
-    assert.equal(despues.moments.length, 1);
-    assert.equal(despues.moments[0].result, 'Tackle dominante');
+    // Se cuenta el DELTA y no el total: buscar un tackle puede haber jugado un
+    // jackal antes, y ese también dejó su registro.
+    assert.equal(despues.moments.length, s.moments.length + 1);
+    assert.equal(despues.moments[despues.moments.length - 1].result, 'Tackle dominante');
 });
 
 test('un tackle alto NO cierra la jugada: te manda al bunker', () => {
-    const s = hastaElMomento(21) ?? hastaElMomento(88);
+    const s = hastaElTackle(21) ?? hastaElTackle(88);
     if (!s) return;
 
     const zonas = tackleZones(s.player, s.damage.cuerpo, s.pendingMoment!.pressure);
@@ -150,7 +188,7 @@ test('EL VEREDICTO DEL BUNKER LO DECIDE EL MOTOR, NO LA CUENTA REGRESIVA', () =>
     // Si lo sorteara la pantalla, recargar en el segundo siete daría otro
     // resultado y la partida dejaría de ser reproducible. Se prueba mandando el
     // mismo estado al bunker dos veces: el veredicto tiene que coincidir.
-    const s = hastaElMomento(21) ?? hastaElMomento(88);
+    const s = hastaElTackle(21) ?? hastaElTackle(88);
     if (!s) return;
 
     const alto = { kind: 'tackle' as const, zone: 'alto' as const, at: 0.75 };
@@ -164,7 +202,7 @@ test('EL VEREDICTO DEL BUNKER LO DECIDE EL MOTOR, NO LA CUENTA REGRESIVA', () =>
 });
 
 test('salir del bunker cobra la suspensión y devuelve a la temporada', () => {
-    const base = hastaElMomento(21) ?? hastaElMomento(88);
+    const base = hastaElTackle(21) ?? hastaElTackle(88);
     if (!base) return;
 
     // Con Cartel para perder. Un pibe de la primera temporada está en cero y el
@@ -182,16 +220,17 @@ test('salir del bunker cobra la suspensión y devuelve a la temporada', () => {
     assert.equal(salido.pendingMoment, null);
     assert.ok(salido.pendingSanction > 0, 'una tarjeta tiene que costar partidos');
     assert.ok(salido.fame < enBunker.fame, 'una tarjeta tiene que costar Cartel');
-    // Dos registros: el tackle y el veredicto. Son la misma jugada contada en
-    // dos tiempos, y la trayectoria los muestra juntos.
-    assert.equal(salido.moments.length, 2);
-    assert.equal(salido.moments[1].kind, 'bunker');
-    assert.equal(salido.moments[1].result, veredicto === 'roja-20' ? 'Roja de veinte' : 'Amarilla');
+    // Dos registros nuevos: el tackle y el veredicto. Son la misma jugada
+    // contada en dos tiempos, y la trayectoria los muestra juntos.
+    assert.equal(salido.moments.length, s.moments.length + 2);
+    const ultimo = salido.moments[salido.moments.length - 1];
+    assert.equal(ultimo.kind, 'bunker');
+    assert.equal(ultimo.result, veredicto === 'roja-20' ? 'Roja de veinte' : 'Amarilla');
 });
 
 test('la roja de veinte cuesta más que la amarilla', () => {
     // No hace falta jugar: se comparan los dos caminos desde el mismo estado.
-    const base = hastaElMomento(21) ?? hastaElMomento(88);
+    const base = hastaElTackle(21) ?? hastaElTackle(88);
     if (!base) return;
     const s: CaptainState = { ...base, fame: 30 };
 
@@ -213,7 +252,7 @@ test('la roja de veinte cuesta más que la amarilla', () => {
 });
 
 test('la jugada queda escrita en la temporada', () => {
-    const s = hastaElMomento(21) ?? hastaElMomento(88);
+    const s = hastaElTackle(21) ?? hastaElTackle(88);
     if (!s) return;
 
     const resuelto = captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: 'legal', at: 0.5 } });
@@ -233,9 +272,14 @@ test('la jugada es una entrada del jugador: la misma mano da la misma carrera', 
             s = repartir(s);
             let guarda = 0;
             while (s.phase === 'moment' && guarda < 4) {
-                s = s.pendingMoment?.kind === 'bunker'
+                const kind = s.pendingMoment?.kind;
+                s = kind === 'bunker'
                     ? captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } })
-                    : captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: zona, at: 0.5 } });
+                    : kind === 'jackal'
+                        // El jackal se juega siempre igual: lo que este test
+                        // compara es qué cambia al mover LA ZONA DEL TACKLE.
+                        ? captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'jackal', reactions: [240, 240, 240] } })
+                        : captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: zona, at: 0.5 } });
                 guarda += 1;
             }
             s = captainReducer(s, { type: 'ADVANCE' });

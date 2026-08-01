@@ -47,23 +47,40 @@ function repartir(state: CaptainState, slot: (typeof TIME_SLOTS)[number] = 'entr
 const ZONAS: TackleZone[] = ['legal', 'piernas', 'alto', 'legal', 'tarde'];
 
 /**
+ * Manos del jackal, en milisegundos desde el destello.
+ *
+ * Las tres filas cubren las tres salidas del minijuego —robar, irse antes
+ * (offside) y llegar tarde— porque una carrera de prueba que siempre acierte no
+ * recorre el carril de la sanción.
+ */
+const REACCIONES: (number | null)[][] = [
+    [170, 190, 200],
+    [-80, 230, 900],
+    [null, null, null],
+];
+
+/**
  * Resuelve los Momentos que aparezcan.
  *
  * Un tackle alto encadena el bunker, así que hay que insistir hasta salir de la
  * fase: el bucle de una sola vuelta dejaba la carrera trabada, que es
  * exactamente lo que pasó la primera vez que corrí esto.
+ *
+ * La mano tiene que ser DEL KIND que está pendiente: desde que hay Momentos por
+ * puesto, mandarle un tackle a un jackal es una acción inválida y el reducer
+ * devuelve el estado sin tocar — con lo cual el bucle giraría sin avanzar.
  */
 function pasarMomentos(state: CaptainState, vuelta: number): CaptainState {
     let next = state;
     let guarda = 0;
     while (next.phase === 'moment' && guarda < 4) {
         const pendiente = next.pendingMoment!;
-        next = pendiente.kind === 'bunker'
-            ? captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } })
-            : captainReducer(next, {
-                type: 'RESOLVE_MOMENT',
-                outcome: { kind: 'tackle', zone: ZONAS[vuelta % ZONAS.length], at: 0.5 },
-            });
+        const outcome: CaptainAction = pendiente.kind === 'bunker'
+            ? { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } }
+            : pendiente.kind === 'jackal'
+                ? { type: 'RESOLVE_MOMENT', outcome: { kind: 'jackal', reactions: REACCIONES[vuelta % REACCIONES.length] } }
+                : { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: ZONAS[vuelta % ZONAS.length], at: 0.5 } };
+        next = captainReducer(next, outcome);
         guarda += 1;
     }
     return next;

@@ -649,6 +649,94 @@
     color: var(--color-accent);
 }
 
+/* ── EL JACKAL: esperar y tocar ───────────────────────────────────────────── */
+.jackalRounds {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.jackalPip {
+    width: 34px;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--color-border);
+}
+
+.jackalPipNow {
+    background: var(--color-text-tertiary);
+}
+
+.jackalPipWon {
+    background: var(--color-accent);
+}
+
+.jackalPipFoul {
+    background: #d64545;
+}
+
+.jackalPipLost {
+    background: var(--color-text-tertiary);
+    opacity: 0.5;
+}
+
+.jackalZone {
+    display: grid;
+    place-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 176px;
+    margin-top: 12px;
+    padding: 22px;
+    border-radius: 14px;
+    border: 1px dashed var(--color-border);
+    background: var(--color-bg-tertiary);
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.jackalZone:disabled {
+    cursor: default;
+}
+
+/* La luz apagada es la pelota que todavía no está libre. Es lo único que hay
+   que mirar, así que no compite con nada más en la tarjeta. */
+.jackalLight {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    transition: background-color 90ms linear, border-color 90ms linear, box-shadow 90ms linear;
+}
+
+.jackalOpen .jackalLight {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 26px rgba(var(--color-accent-rgb), 0.55);
+}
+
+.jackalCta {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
+}
+
+.jackalOpen .jackalCta {
+    color: var(--color-accent);
+}
+
+/* El destello es información, no decoración: sin él no se puede jugar. Así que
+   con `reduce` no se apaga, se le saca la transición y pasa a ser un corte
+   seco — que además es más fácil de leer. */
+@media (prefers-reduced-motion: reduce) {
+    .jackalLight {
+        transition: none;
+    }
+}
+
 /* ── Trayectoria ──────────────────────────────────────────────────────────── */
 .timeline {
     display: grid;

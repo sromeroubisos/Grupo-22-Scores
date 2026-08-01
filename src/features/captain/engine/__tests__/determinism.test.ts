@@ -83,6 +83,23 @@ function frenaEn(season: number, intento: number): number {
     return (hashSeed(`tackle:${season}:${intento}`) % 10_000) / 10_000;
 }
 
+/**
+ * Cuánto tarda en tocar en cada ronda del jackal, en ms desde el destello.
+ *
+ * Igual que `frenaEn`: es la MISMA entrada que produce la pantalla —un tiempo de
+ * reacción, no un veredicto— y el motor la clasifica contra las ventanas del
+ * Setup. El rango va de −200 a 800 para que la receta pase por las tres salidas
+ * (offside, robo y llegar tarde) y no solo por la cómoda.
+ *
+ * Ninguno de los tres casos congelados es tercera línea, así que HOY esto no
+ * mueve un solo valor de la tabla. Está igual, y no es ceremonia: sin esta
+ * rama, el día que alguien agregue un caso de tercera línea al digest la receta
+ * quedaría trabada en la fase de Momento y el diagnóstico sería incomprensible.
+ */
+function reaccionaEn(season: number, ronda: number): number {
+    return (hashSeed(`jackal:${season}:${ronda}`) % 1_000) - 200;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  Correr una carrera entera con la receta
 // ═══════════════════════════════════════════════════════════════════════════
@@ -109,6 +126,9 @@ function jugarMomentos(state: CaptainState): CaptainState {
         const pendiente = next.pendingMoment;
         if (pendiente.kind === 'bunker') {
             next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } });
+        } else if (pendiente.kind === 'jackal') {
+            const reactions = [0, 1, 2].map((ronda) => reaccionaEn(next.season, ronda));
+            next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: { kind: 'jackal', reactions } });
         } else {
             const at = frenaEn(next.season, intento);
             const zone: TackleZone = zoneAt(

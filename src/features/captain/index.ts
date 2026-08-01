@@ -142,8 +142,38 @@ export type {
     TackleZone,
 } from './types/moment.ts';
 export { MOMENT_LABEL, SELECTABLE_MOMENTS } from './types/moment-kinds.ts';
+
+// El contrato. Lo consume `app/` para tipar la pantalla de cada Momento, y los
+// tests para escribir defs de mentira sin fabricar una carrera.
+export type {
+    MomentDef,
+    MomentDeltas,
+    MomentResult,
+    MomentSetup,
+    MomentSetupCtx,
+} from './types/moment-def.ts';
+
 export type { TackleZones } from './engine/moments.ts';
-export { rollMoment, tackleZones, zoneAt } from './engine/moments.ts';
+export {
+    applyMomentDeltas,
+    momentSeed,
+    nextChain,
+    pickMomentKind,
+    proficiencyFor,
+    rollMoment,
+    tackleZones,
+    zoneAt,
+} from './engine/moments.ts';
+
+export type { AnyMomentDef, JackalSetup } from './engine/moment-defs/index.ts';
+export {
+    JACKAL_ROUNDS,
+    MOMENT_DEFS,
+    getMomentDef,
+    jackalBeat,
+    jackalGrade,
+    jackalWindows,
+} from './engine/moment-defs/index.ts';
 
 // ── Temporada y decisiones ──────────────────────────────────────────────────
 export type { PlayingTime } from './engine/statistics.ts';

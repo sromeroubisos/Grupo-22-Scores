@@ -252,13 +252,18 @@ export function captainReducer(state: CaptainState, action: CaptainAction): Capt
         case 'RESOLVE_MOMENT': {
             if (next.phase !== 'moment' || !next.pendingMoment) return state;
 
-            // `resolveMoment` deja el pendiente en 'bunker' con el veredicto ya
-            // sorteado cuando el tackle sale alto: de ahí en adelante el
-            // jugador es espectador de su propio destino.
+            // `resolveMoment` deja OTRO pendiente cuando la jugada encadena: el
+            // tackle alto encadena el bunker con el veredicto ya sorteado, y de
+            // ahí en adelante el jugador es espectador de su propio destino. La
+            // cadena se resuelve a lo sumo una vez y eso lo garantiza
+            // `nextChain`, no este `if`.
+            // Una mano que no es de esta jugada no vale, igual que una opción
+            // que no existe: se devuelve el estado sin tocar.
             const resolucion = resolveMoment(next, next.pendingMoment, action.outcome, rng);
+            if (!resolucion) return state;
             next.moments.push(resolucion.record);
 
-            if (!resolucion.needsBunker) {
+            if (!resolucion.continues) {
                 next.pendingMoment = null;
                 next.phase = 'season';
             }
