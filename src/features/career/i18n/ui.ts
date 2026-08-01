@@ -47,7 +47,7 @@ export interface UiStrings {
     playSeasons: (n: number) => string;
 
     // ── Crear jugador ────────────────────────────────────────────────────────
-    steps: readonly [string, string, string, string];
+    steps: readonly [string, string, string, string, string];
     createEyebrow: string;
     createTitle: string;
     createLead: string;
@@ -70,6 +70,22 @@ export interface UiStrings {
     stepMissingNationality: string;
     stepMissingPosition: string;
     paces: readonly { id: 'intense' | 'normal' | 'express'; label: string; text: string; tag: string }[];
+
+    // ── Club de inicio ───────────────────────────────────────────────────────
+    startClub: string;
+    startClubRandom: string;
+    startClubRandomText: string;
+    startClubChoose: string;
+    startClubChooseText: string;
+    startClubNoLadder: string;
+    startClubPickFirst: string;
+    startClubChange: string;
+    pickClubTitle: string;
+    pickClubLead: string;
+    searchClub: string;
+    noClubMatches: string;
+    clubsFound: (n: number) => string;
+    useThisClub: string;
 
     // ── Selector de país ─────────────────────────────────────────────────────
     searchCountry: string;
@@ -179,6 +195,7 @@ export interface UiStrings {
     formatFeed: string;
     formatStory: string;
     preparingImage: string;
+    imageFailed: string;
     shareImage: string;
     downloadImage: string;
     linkCopied: string;
@@ -261,7 +278,7 @@ const ES: UiStrings = {
     playSeason: 'Jugar temporada',
     playSeasons: (n) => `Jugar ${n === 2 ? 'dos' : n === 3 ? 'tres' : n} temporadas`,
 
-    steps: ['Nacionalidad', 'Posición', 'Identidad', 'Ritmo'],
+    steps: ['Nacionalidad', 'Club', 'Posición', 'Identidad', 'Ritmo'],
     createEyebrow: 'Crear jugador',
     createTitle: 'Elegí y arrancá',
     createLead: 'Tu nombre, tu bandera, tu puesto y desde dónde arrancás.',
@@ -288,6 +305,21 @@ const ES: UiStrings = {
         { id: 'normal', label: 'Normal', text: 'Dos temporadas por decisión. Avanzás más rápido y te perdés algún año.', tag: '2 temporadas' },
         { id: 'express', label: 'Exprés', text: 'Tres temporadas por decisión. Del debut al retiro en un rato.', tag: '3 temporadas' },
     ],
+
+    startClub: 'Club de inicio',
+    startClubRandom: 'Al azar',
+    startClubRandomText: 'El motor te ubica donde te toque. Puede tocarte una academia profesional.',
+    startClubChoose: 'Elegir club',
+    startClubChooseText: 'Empezás donde vos digas, en el amateurismo de tu país.',
+    startClubNoLadder: 'Tu país no tiene liga propia en el juego: el club lo pone el motor.',
+    startClubPickFirst: 'Elegí primero tu nacionalidad.',
+    startClubChange: 'Cambiar',
+    pickClubTitle: 'Elegí tu club',
+    pickClubLead: 'Donde arranca todo. De la primera categoría al último local.',
+    searchClub: 'Buscar club',
+    noClubMatches: 'Ningún club coincide',
+    clubsFound: (n) => `${n} ${n === 1 ? 'club' : 'clubes'}`,
+    useThisClub: 'Empezar acá',
 
     searchCountry: 'Buscar país',
     noCountryMatches: 'Ningún país coincide',
@@ -408,6 +440,7 @@ const ES: UiStrings = {
     formatFeed: 'Feed',
     formatStory: 'Historia',
     preparingImage: 'Preparando la imagen…',
+    imageFailed: 'No se pudo preparar la imagen. Probá de nuevo.',
     shareImage: 'Compartir la imagen',
     downloadImage: 'Bajar la imagen',
     linkCopied: 'Link copiado',
@@ -484,7 +517,7 @@ const EN: UiStrings = {
     playSeason: 'Play the season',
     playSeasons: (n) => `Play ${n === 2 ? 'two' : n === 3 ? 'three' : n} seasons`,
 
-    steps: ['Nationality', 'Position', 'Identity', 'Pace'],
+    steps: ['Nationality', 'Club', 'Position', 'Identity', 'Pace'],
     createEyebrow: 'Create a player',
     createTitle: 'Choose and get going',
     createLead: 'Your name, your flag, your position and where you start from.',
@@ -511,6 +544,21 @@ const EN: UiStrings = {
         { id: 'normal', label: 'Normal', text: 'Two seasons per decision. You move faster and miss the odd year.', tag: '2 seasons' },
         { id: 'express', label: 'Express', text: 'Three seasons per decision. Debut to retirement in one sitting.', tag: '3 seasons' },
     ],
+
+    startClub: 'Starting club',
+    startClubRandom: 'Random',
+    startClubRandomText: 'The engine places you wherever you land. A pro academy is on the table.',
+    startClubChoose: 'Pick a club',
+    startClubChooseText: 'You start where you say, in your country’s amateur game.',
+    startClubNoLadder: 'Your country has no league of its own in the game: the engine picks the club.',
+    startClubPickFirst: 'Choose your nationality first.',
+    startClubChange: 'Change',
+    pickClubTitle: 'Pick your club',
+    pickClubLead: 'Where it all starts. From the top flight to the last local side.',
+    searchClub: 'Search for a club',
+    noClubMatches: 'No club matches',
+    clubsFound: (n) => `${n} ${n === 1 ? 'club' : 'clubs'}`,
+    useThisClub: 'Start here',
 
     searchCountry: 'Search for a country',
     noCountryMatches: 'No country matches',
@@ -631,6 +679,7 @@ const EN: UiStrings = {
     formatFeed: 'Feed',
     formatStory: 'Story',
     preparingImage: 'Preparing the image…',
+    imageFailed: 'The image could not be prepared. Try again.',
     shareImage: 'Share the image',
     downloadImage: 'Download the image',
     linkCopied: 'Link copied',

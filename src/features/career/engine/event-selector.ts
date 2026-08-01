@@ -2,6 +2,7 @@ import type { CareerState, ClubOffer } from '../types/career.ts';
 import type { EventContext, EventRequirements, GameEvent } from '../types/event.ts';
 import type { Player } from '../types/player.ts';
 import { retirementIsOptional, veteranSeasonEvent, withRetirementOption } from './retirement.ts';
+import { withHomecomingOption } from './homecoming.ts';
 import { clubDeclinesRenewal, NO_RENEWAL_EVENT_ID } from './renewal.ts';
 import { ALL_EVENTS, getEvent, TRANSFER_EVENT_ID } from '../data/events/index.ts';
 import { movementOptionCopy, movementResultText, offerReason, offerReasonKey, type OfferSignals } from '../data/movement-copy.ts';
@@ -407,27 +408,42 @@ function veteranFallback(player: Player): Selection | null {
 }
 
 /**
+ * LAS DOS OPCIONES DEL TRAMO FINAL, que no son de ningún evento.
+ *
+ * De los 34 en adelante toda decisión ofrece lo mismo además de lo suyo:
+ * retirarte, y volver al club donde empezaste. Van juntas porque son la misma
+ * pregunta —dónde termina esto— y porque las dos tienen que cumplirse en TODAS
+ * las tarjetas: el mercado, la nota de prensa y la decisión del veterano.
+ *
+ * El orden importa: la vuelta a casa va antes que el retiro, porque el retiro es
+ * el final de la lista en cualquier tarjeta donde aparece.
+ */
+function withEndgameOptions(event: GameEvent, state: CareerState): GameEvent {
+    return withRetirementOption(withHomecomingOption(event, state), state.player);
+}
+
+/**
  * Devuelve el evento pendiente (estático por id, o el mercado desde las ofertas).
  *
- * Y le cuelga la opción de retirarse cuando corresponde. Va acá y no en el
+ * Y le cuelga las opciones del tramo final cuando corresponde. Va acá y no en el
  * selector porque este es el camino que recorren TODOS: la UI para dibujar la
- * tarjeta y `resolveAndPlay` para resolverla. Si se agregara sólo al elegir, una
- * recarga a mitad de temporada devolvería la tarjeta sin la opción.
+ * tarjeta y `resolveAndPlay` para resolverla. Si se agregaran sólo al elegir, una
+ * recarga a mitad de temporada devolvería la tarjeta sin ellas.
  */
 export function getPendingEvent(state: CareerState): GameEvent | null {
     if (!state.pendingEventId) return null;
     if (state.pendingEventId === NO_RENEWAL_EVENT_ID) {
         return state.offers.length > 0
-            ? withRetirementOption(buildTransferEvent(state, state.offers, true), state.player)
+            ? withEndgameOptions(buildTransferEvent(state, state.offers, true), state)
             : null;
     }
     if (state.pendingEventId === TRANSFER_EVENT_ID) {
         return state.offers.length > 0
-            ? withRetirementOption(buildTransferEvent(state, state.offers), state.player)
+            ? withEndgameOptions(buildTransferEvent(state, state.offers), state)
             : null;
     }
     const event = getEvent(state.pendingEventId);
-    return event ? withRetirementOption(withFlags(event, state.player), state.player) : null;
+    return event ? withEndgameOptions(withFlags(event, state.player), state) : null;
 }
 
 /** Id del evento de cambio de selección. Vive acá para no repetir el string. */

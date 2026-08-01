@@ -14,6 +14,7 @@ import ClubBadge from './ClubBadge';
 import AwardIcon from './AwardIcon';
 import styles from './carrera.module.css';
 import CreatePlayer from './CreatePlayer';
+import ClubPicker from './ClubPicker';
 import PlayerHeader from './PlayerHeader';
 import EventCard from './EventCard';
 import SeasonResultInline from './SeasonResultInline';
@@ -33,7 +34,7 @@ import { saveCareer, loadCareer, clearCareer } from './careerStorage';
  * bug: el juego hace lo correcto (la carrera está en disco y se retoma entera) y
  * mientras tanto el único botón visible propone tirarla.
  */
-type Step = 'loading' | 'intro' | 'create' | 'career';
+type Step = 'loading' | 'intro' | 'create' | 'club' | 'career';
 
 /**
  * La portada de Juegos entra con `?nuevo=1` para saltear la intro: sin partida
@@ -63,6 +64,11 @@ export default function CareerFlow() {
     const [surname, setSurname] = useState('');
     // null = todavía no eligió: el motor pone el canónico del puesto.
     const [number, setNumber] = useState<number | null>(null);
+    /**
+     * Club de arranque elegido. null = al azar, que es el default y el
+     * comportamiento histórico: el motor lo sortea desde la semilla.
+     */
+    const [startClubId, setStartClubId] = useState<string | null>(null);
     const [career, setCareer] = useState<CareerState | null>(null);
     const [lastSeason, setLastSeason] = useState<number | null>(null);
     /**
@@ -145,6 +151,11 @@ export default function CareerFlow() {
                 // `undefined` y no `null`: que el motor aplique su propio default
                 // (el número canónico del puesto) en vez de recibir un no-valor.
                 ...(number !== null ? { number } : {}),
+                // Sin club elegido no se manda el campo: el motor sortea, que es
+                // lo de siempre. Con club elegido, el sorteo se hace igual y el
+                // club lo pisa (ver `createPlayer`), así que la semilla sigue
+                // valiendo lo mismo en los dos casos.
+                ...(startClubId !== null ? { startClubId } : {}),
             },
             seed,
         );
@@ -253,6 +264,7 @@ export default function CareerFlow() {
         setConfirmingReset(false);
         setCountryCode(null);
         setPosition(null);
+        setStartClubId(null);
         setLastSeason(null);
         setBlockFrom(null);
         setOutdatedNotice(false);
@@ -267,7 +279,7 @@ export default function CareerFlow() {
     const retired = career?.phase === 'retired';
 
     return (
-        <div className={`${styles.wrap} ${step === 'career' ? styles.wrapConsole : ''} ${step === 'create' ? styles.wrapCreate : ''}`}>
+        <div className={`${styles.wrap} ${step === 'career' ? styles.wrapConsole : ''} ${step === 'create' || step === 'club' ? styles.wrapCreate : ''}`}>
             <div className={styles.topbar}>
                 <Link href="/juegos/minijuegos" className={styles.back}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
@@ -357,15 +369,36 @@ export default function CareerFlow() {
                     paceMode={paceMode}
                     surname={surname}
                     number={number}
+                    startClubId={startClubId}
                     onSurname={setSurname}
                     onNumber={setNumber}
-                    onCountry={setCountryCode}
+                    // Cambiar de país invalida el club elegido: un club argentino
+                    // no es una opción para un francés, y dejarlo puesto haría
+                    // que el motor lo descartara en silencio al crear.
+                    onCountry={(code) => { setCountryCode(code); setStartClubId(null); }}
                     // Cambiar de puesto invalida el número elegido: el 10 no
                     // existe para un pilar. Vuelve al canónico del puesto nuevo.
                     onPosition={(pos) => { setPosition(pos); setNumber(null); }}
                     onPaceMode={setPaceMode}
+                    onRandomClub={() => setStartClubId(null)}
+                    onPickClub={() => setStep('club')}
                     onStart={startCareer}
                     onBack={() => setStep('intro')}
+                />
+            )}
+
+            {/* LA PANTALLA DE CLUB, aparte de la creación. Doscientos escudos no
+                entran en la tarjeta, y meterlos con scroll rompería la promesa de
+                que nada scrollea. Vuelve sola a la creación con el club puesto. */}
+            {step === 'club' && countryCode !== null && (
+                <ClubPicker
+                    countryCode={countryCode}
+                    value={startClubId}
+                    onChange={setStartClubId}
+                    onDone={() => setStep('create')}
+                    // Salir sin elegir vuelve al azar: quedarse a medio camino
+                    // dejaría marcado "Elegir club" sin club, que no es un estado.
+                    onBack={() => { setStartClubId(null); setStep('create'); }}
                 />
             )}
 

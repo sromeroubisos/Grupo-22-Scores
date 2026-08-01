@@ -870,6 +870,39 @@ function clubsForFirstClub(
     return { clubs: all.filter((c) => economicModelOf(c) === available[0]), model: available[0], downgraded: true };
 }
 
+/**
+ * LOS CLUBES ENTRE LOS QUE EL JUGADOR PUEDE ELEGIR SU ARRANQUE.
+ *
+ * Determinística y sin RNG: la UI la llama apenas se elige la nacionalidad, o
+ * sea antes de que exista la semilla. Devuelve los clubes AMATEUR del país,
+ * TODOS y no sólo los escalones de entrada: elegir es justamente lo contrario de
+ * que te toque, y un pibe de 18 debutando en la primera de un club grande del
+ * amateurismo es una historia corriente del rugby, no una anomalía.
+ *
+ * Lista vacía = ese país no tiene escalera propia modelada (un checo, un
+ * jamaiquino). Ahí el club lo sigue poniendo el motor por ruta migratoria y la
+ * UI tiene que decirlo en vez de ofrecer una lista vacía.
+ *
+ * Ojo con lo que NO incluye: las franquicias profesionales. El arranque en
+ * academia lo sortea el motor (`drawStartRoute`) y se descubre jugando; ofrecer
+ * Dogos en la pantalla de creación convertiría en elección lo que el juego
+ * decidió que fuera un descubrimiento.
+ */
+export function startClubChoices(countryCode: string): ClubDef[] {
+    const ladder = domesticLadder(countryCode);
+    if (ladder.length === 0) return [];
+    const { clubs, model } = clubsForFirstClub(ladder, false, countryCode);
+    if (model !== 'amateur') return [];
+    // Del más fuerte al más flojo, con desempate estable por id: es el orden en
+    // el que se lee una pirámide y no depende del recorrido del catálogo.
+    return [...clubs].sort((a, b) => b.rating - a.rating || a.id.localeCompare(b.id));
+}
+
+/** ¿Ese club es una opción válida de arranque para esa nacionalidad? */
+export function isStartClubChoice(countryCode: string, clubId: string): boolean {
+    return startClubChoices(countryCode).some((c) => c.id === clubId);
+}
+
 export function pickInitialClub(
     nationality: string,
     originId: string,
