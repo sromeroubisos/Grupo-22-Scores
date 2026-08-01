@@ -26,6 +26,26 @@
 // sirve— y la segunda línea pone el `salto`. `setup` ve la familia, así que la
 // distinción vive donde tiene que vivir y no en un `if` de la pantalla.
 //
+// ┌───────────────────────────────────────────────────────────────────────────┐
+// │ LA SEGUNDA LÍNEA ACÁ ES UN ATAJO, NO UNA DECISIÓN                         │
+// │                                                                            │
+// │ El verbo de la segunda línea NO es acordarse. En la spec son dos Momentos  │
+// │ y son dos porque son dos roles distintos: EL SALTO (timing — el que        │
+// │ ejecuta) y LA PIZARRA (deducción — el que decide). El Código le da hoy     │
+// │ cobertura interina para que el puesto no viva de tackles hasta que le      │
+// │ toque, y nada más que para eso.                                            │
+// │                                                                            │
+// │ VENCE CUANDO ENTRE EL SALTO. Ese día esta def se queda con `['hooker']` y  │
+// │ la segunda línea se va con lo suyo. No es una migración cara —una línea de │
+// │ `families` y `codigoDestreza` pierde su rama del medio— pero mueve el      │
+// │ digest, así que va sola en su commit.                                      │
+// │                                                                            │
+// │ Y EL PLAN NO CAMBIA: siguen siendo quince. Este atajo no fusiona dos       │
+// │ Momentos en uno, le presta uno a un puesto que todavía no tiene el suyo.   │
+// │ El día que alguien lea `families: ['hooker', 'segunda-linea']` y lo tome   │
+// │ por diseño, este cajón es lo que se lo desmiente.                          │
+// └───────────────────────────────────────────────────────────────────────────┘
+//
 // ── Calibración ──
 // El line-out propio se gana entre el 85 y el 90% de las veces en el rugby de
 // élite (el `perMatch` del hooker es 88). Un Momento no es un line-out
@@ -171,7 +191,8 @@ function cronica(grade: CodigoGrade, minute: number): string {
 
 export const CODIGO: MomentDef<CodigoSetup, CodigoInput> = {
     kind: 'codigo',
-    // Los dos que hacen el line-out: el que la tira y el que salta.
+    // El que la tira, y —INTERINAMENTE— el que salta: la segunda línea está acá
+    // prestada hasta que entre El Salto. El cajón de la cabecera dice por qué.
     families: ['hooker', 'segunda-linea'],
     weight: 10,
     labelEs: 'El código',
