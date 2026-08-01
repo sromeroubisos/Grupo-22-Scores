@@ -4843,6 +4843,12 @@ function getTournamentLogoImageSource(data: TournamentLogoSourceData): string {
     const proxyUrl = new URL('/api/assets/team-logo', window.location.origin);
     proxyUrl.searchParams.set('key', tournamentKey);
     proxyUrl.searchParams.set('entity', 'tournament');
+    // Logo real o nada. Sin este flag el proxy responde 200 con un escudo generico y
+    // las INICIALES del torneo, y el poster lo dibuja como si fuera el logo de la
+    // competencia: el export termina publicado con letras en lugar del logo. El resto
+    // de la app sigue usando ese fallback (una lista con un hueco es peor que un
+    // placeholder); acá no, porque acá la imagen se publica.
+    proxyUrl.searchParams.set('noFallback', '1');
 
     const label = (data.tournament || data.title || '').trim();
     if (label) {
@@ -6364,6 +6370,18 @@ async function drawG22Poster(
         loadImage(getTournamentLogoImageSource(data)),
         loadImage('/g22-scores-wordmark.png'),
     ]);
+
+    // Escudo real o no hay poster. Si un escudo no cargo, `g22pCrestWindow` rellena su
+    // ventana de gris y la imagen se descarga igual: media tarjeta vacia, sin aviso, lista
+    // para publicar. Cortamos acá nombrando al club que falta — el preview del modal
+    // muestra este mismo mensaje, asi que el problema se ve ANTES de exportar.
+    const missingCrests = [
+        homeLogo ? '' : (data.homeTeam || '').trim() || 'el local',
+        awayLogo ? '' : (data.awayTeam || '').trim() || 'el visitante',
+    ].filter(Boolean);
+    if (missingCrests.length > 0) {
+        throw new Error(`No se pudo cargar el escudo de ${missingCrests.join(' y ')}`);
+    }
 
     const W = canvas.width;
     const H = canvas.height;
