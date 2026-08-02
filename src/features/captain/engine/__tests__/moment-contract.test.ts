@@ -24,10 +24,11 @@ import type { PendingMoment } from '../../types/moment.ts';
 import type { CaptainAction } from '../../state/captain-actions.ts';
 import { TIME_SLOTS, TIME_TOKENS_PER_SEASON } from '../../types/currencies.ts';
 import { PLAY_LEVELS } from '../../types/moment-def.ts';
+import { ALL_MOMENT_KINDS, MOMENT_LABEL, PRE_CONTRACT_KINDS } from '../../types/moment-kinds.ts';
 import { ALL_FAMILIES, baseAttributes } from '../../data/positions.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
 import { createRng } from '../random.ts';
-import { MOMENT_DEFS } from '../moment-defs/index.ts';
+import { MOMENT_DEFS, isContractKind } from '../moment-defs/index.ts';
 import {
     applyMomentDeltas,
     momentSeed,
@@ -284,6 +285,41 @@ test('las semillas del minijuego no se repiten entre kind, temporada ni jugada',
 // ═══════════════════════════════════════════════════════════════════════════
 //  4 · EL REGISTRY
 // ═══════════════════════════════════════════════════════════════════════════
+
+test('LA GUARDA NO MIENTE: todo kind que no es pre-contrato tiene su def', () => {
+    // `isContractKind` promete `kind is ContractKind` y lo verifica mirando el
+    // registry EN RUNTIME. La promesa solo es honesta mientras todo kind que no
+    // esté en PRE_CONTRACT_KINDS tenga def: si alguien agrega uno al tipo y se
+    // olvida de las dos cosas, la guarda devuelve false y el `else` recibe un
+    // valor que su tipo dice que no puede llegar.
+    //
+    // Este test es lo que sostiene ese estrechamiento. Sin él, el `never` de los
+    // switches es una promesa que nadie chequea.
+    for (const kind of ALL_MOMENT_KINDS) {
+        const esPreContrato = PRE_CONTRACT_KINDS.includes(kind as never);
+        assert.equal(
+            isContractKind(kind),
+            !esPreContrato,
+            esPreContrato
+                ? `${kind} es pre-contrato pero tiene def: sacalo de PRE_CONTRACT_KINDS`
+                : `${kind} no tiene MomentDef ni está en PRE_CONTRACT_KINDS: nadie sabe cómo se resuelve`,
+        );
+    }
+});
+
+test('la lista de kinds está completa: ninguno se agregó sin sumarlo', () => {
+    // `ALL_MOMENT_KINDS` se recorre a mano en varios lados y `Object.keys` está
+    // prohibido para ELEGIR (§1). Contar no es elegir, así que acá sí se usa: el
+    // `Record<MomentKind, string>` de etiquetas ya no compila si aparece un kind
+    // nuevo, y esta cuenta detecta el caso contrario —que se haya agregado a la
+    // etiqueta y no a la lista—.
+    assert.equal(
+        ALL_MOMENT_KINDS.length,
+        Object.keys(MOMENT_LABEL).length,
+        'ALL_MOMENT_KINDS quedó corta contra MOMENT_LABEL: hay un kind que no se sumó',
+    );
+    assert.equal(new Set(ALL_MOMENT_KINDS).size, ALL_MOMENT_KINDS.length, 'hay un kind repetido');
+});
 
 test('cada def declara el kind con el que está indexada y su setup lo repite', () => {
     // Es lo que hace HONESTO el borrado de genéricos del registry: sin esto, la

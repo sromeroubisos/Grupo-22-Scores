@@ -34,7 +34,7 @@
 // Está escrita acá y no en cada def a propósito. Es la clase de decisión que se
 // vuelve a derivar de cero en el Momento #12 y se deriva distinto.
 
-import type { MomentKind } from '../../types/moment-kinds.ts';
+import type { ContractKind, MomentKind } from '../../types/moment-kinds.ts';
 import type { MomentOutcome } from '../../types/moment.ts';
 import type { MomentDef, MomentSetup } from '../../types/moment-def.ts';
 import { JACKAL } from './jackal.ts';
@@ -93,6 +93,28 @@ for (const def of MOMENT_DEFS) BY_KIND[def.kind] = def;
  */
 export function getMomentDef(kind: MomentKind): AnyMomentDef | null {
     return BY_KIND[kind] ?? null;
+}
+
+/**
+ * ¿Este kind va por el contrato? Estrecha el tipo, que es para lo que existe.
+ *
+ * Con esta guarda, el `else` de quien la use queda tipado como
+ * `PreContractKind`, y ahí un `switch` con `default: (kind: never)` deja de
+ * compilar el día que aparezca un pre-contrato nuevo sin su caso escrito. Es la
+ * medicina contra el `default` silencioso que le mandó una mano de tackle a una
+ * corrida.
+ *
+ * ── El límite, dicho en voz alta ──
+ * La guarda promete algo que verifica el REGISTRY EN RUNTIME, así que solo es
+ * honesta mientras todo `ContractKind` tenga def. Si alguien agrega un kind al
+ * tipo y no escribe su def ni lo suma a `PRE_CONTRACT_KINDS`, la guarda devuelve
+ * `false` y el `else` recibe un valor que su tipo dice que no puede llegar. Por
+ * eso hay un test —"cada kind del contrato tiene su def"— que lo impide, y por
+ * eso el `default` de esos switches TIRA con el kind adentro del mensaje en vez
+ * de seguir de largo.
+ */
+export function isContractKind(kind: MomentKind): kind is ContractKind {
+    return BY_KIND[kind] !== undefined;
 }
 
 export type { JackalSetup } from './jackal.ts';

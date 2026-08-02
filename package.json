@@ -14,6 +14,8 @@
     "import:tournaments": "npx tsx src/scripts/trigger-import.ts",
     "backfill:club-derivatives": "node src/scripts/backfill-club-derivatives.cjs",
     "test": "node --test \"src/**/*.test.ts\"",
+    "test:captain": "node --test \"src/features/captain/**/*.test.ts\"",
+    "test:captain-freeze": "node scripts/captain-freeze.mjs",
     "test:perf": "node --test src/lib/perf/editTrace.test.ts src/lib/perf/labFlags.test.ts",
     "lab:guard": "node scripts/etapa0-lab-guard.mjs",
     "dev:perf-lab": "node scripts/dev-perf-lab.mjs",

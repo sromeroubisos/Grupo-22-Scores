@@ -46,6 +46,7 @@ import type {
 } from '../../index.ts';
 import {
     CAPTAIN_ENGINE_VERSION,
+    NORMALIZED_CATALOG_VERSION,
     PLAY_LEVELS,
     TIME_TOKENS_PER_SEASON,
     belongingOf,
@@ -54,6 +55,7 @@ import {
     getMomentDef,
     getPendingEvent,
     hashSeed,
+    isContractKind,
     tacklePlayAt,
     tackleZones,
 } from '../../index.ts';
@@ -115,6 +117,17 @@ function variacionDe(kind: MomentKind, season: number): number {
     return (hashSeed(`variacion:${kind}:${season}`) % 1_000) / 1_000;
 }
 
+/**
+ * El kind pre-contrato que no tiene mano escrita.
+ *
+ * Recibe `never`: si el tipo todavía contempla un caso sin escribir, esto no
+ * compila. Es la medicina contra el `default` que le mandó una mano de tackle a
+ * una corrida.
+ */
+function manoImposible(kind: never): never {
+    throw new Error(`El Momento pre-contrato '${String(kind)}' no tiene mano en la receta del digest.`);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  Correr una carrera entera con la receta
 // ═══════════════════════════════════════════════════════════════════════════
@@ -140,27 +153,54 @@ function repartir(state: CaptainState): CaptainState {
  * azar. Ahora el que va por el contrato se juega solo, y este bucle no vuelve a
  * tocarse nunca más.
  */
+/**
+ * Los topes de estos bucles TIRAN, no cortan.
+ *
+ * Un tope que corta convierte el próximo bucle infinito en una carrera corta
+ * SILENCIOSA: la tabla se mueve, el diagnóstico dice "cambió el motor" y nadie
+ * mira el bucle. Colgarse noventa segundos es malo; mentir en silencio es peor.
+ */
+function trabada(state: CaptainState, donde: string): never {
+    throw new Error(
+        `${donde}: la carrera quedó trabada en la fase '${state.phase}' `
+        + `(temporada ${state.season}, jugada pendiente: ${state.pendingMoment?.kind ?? 'ninguna'}).`,
+    );
+}
+
+const MAX_TEMPORADAS = 60;
+const MAX_JUGADAS_POR_TEMPORADA = 4;
+
 function jugarMomentos(state: CaptainState): CaptainState {
     let next = state;
     let intento = 0;
-    while (next.phase === 'moment' && next.pendingMoment && intento < 4) {
+    while (next.phase === 'moment' && next.pendingMoment) {
+        if (intento >= MAX_JUGADAS_POR_TEMPORADA) trabada(next, 'jugarMomentos');
         const pendiente = next.pendingMoment;
         const nivel = nivelDe(pendiente.kind, next.season);
         const variacion = variacionDe(pendiente.kind, next.season);
-        const def = getMomentDef(pendiente.kind);
 
-        if (def && pendiente.setup) {
+        if (isContractKind(pendiente.kind)) {
             // El contrato: la mano la arma el Momento, que es el que sabe.
-            const outcome = def.playAt(pendiente.setup, nivel, variacion);
+            const def = getMomentDef(pendiente.kind)!;
+            const outcome = def.playAt(pendiente.setup!, nivel, variacion);
             next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome });
-        } else if (pendiente.kind === 'tackle') {
-            // Pre-contrato, con su traducción al lado de sus márgenes.
-            const zones = tackleZones(next.player, next.damage.cuerpo, pendiente.pressure);
-            const { at, zone } = tacklePlayAt(zones, nivel, variacion);
-            next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone, at } });
         } else {
-            // El bunker no se juega: el veredicto ya estaba decidido.
-            next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } });
+            // Pre-contrato. El `default` es `never`: agregar uno sin escribir su
+            // mano deja de compilar, en vez de mandarle la mano de otro.
+            switch (pendiente.kind) {
+                case 'tackle': {
+                    const zones = tackleZones(next.player, next.damage.cuerpo, pendiente.pressure);
+                    const { at, zone } = tacklePlayAt(zones, nivel, variacion);
+                    next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone, at } });
+                    break;
+                }
+                case 'bunker':
+                    // El bunker no se juega: el veredicto ya estaba decidido.
+                    next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } });
+                    break;
+                default:
+                    manoImposible(pendiente.kind);
+            }
         }
         intento += 1;
     }
@@ -182,7 +222,8 @@ function unaTemporada(state: CaptainState): CaptainState {
 function carreraCompleta(input: CreateCaptainInput, seed: number): CaptainState {
     let state = createInitialCaptain(input, seed);
     let guarda = 0;
-    while (state.phase !== 'retired' && guarda < 60) {
+    while (state.phase !== 'retired') {
+        if (guarda >= MAX_TEMPORADAS) trabada(state, `carrera con semilla ${seed}`);
         state = unaTemporada(state);
         guarda += 1;
     }
@@ -477,6 +518,56 @@ const EXPECTED: Record<string, Digest> = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  0 · EL CATÁLOGO, ANTES DE SIMULAR NADA
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * La versión del catálogo con la que se midió la tabla de abajo.
+ *
+ * `NORMALIZED_CATALOG_VERSION` es compuesta —catálogo de clubes + snapshot SA +
+ * canon argentino— así que este único string cubre los tres. Es el mismo que
+ * sella el guardado.
+ */
+const CATALOGO_CONGELADO = '2026-27.10+sa.464399ffada4+ar.2026.2';
+
+const CATALOGO_AL_DIA = NORMALIZED_CATALOG_VERSION === CATALOGO_CONGELADO;
+
+/**
+ * SE PREGUNTA PRIMERO Y NO SE SIMULA NADA SI NO COINCIDE.
+ *
+ * El motivo es una tarde perdida. Al refrescar la 0.6.0 los cuatro casos se
+ * movieron y el commit iba a decir que los movió un Momento nuevo; los había
+ * movido el catálogo, que estaba editado sin commitear en el árbol de trabajo.
+ * Distinguir una cosa de la otra costó montar un worktree limpio, porque EL ROJO
+ * DEL CATÁLOGO Y EL ROJO DEL MOTOR ERAN EL MISMO ROJO: una tabla de números que
+ * no coinciden.
+ *
+ * Ahora son dos rojos distintos. Si el catálogo se movió, este test falla con su
+ * propio mensaje y el digest ni siquiera corre una carrera — porque no tendría
+ * nada que decir del motor.
+ *
+ * Y sí sirve: el día del incidente el canon había pasado de `ar.2026.2` a
+ * `ar.2026.3` y el catálogo de `2026-27.10` a `.11`, así que esta comparación
+ * habría cortado en el primer segundo.
+ *
+ * Cuando el catálogo cambia a propósito, se refresca EXPECTED y se actualiza
+ * esta constante EN EL MISMO COMMIT, que además no debería traer nada más.
+ */
+test('EL CATÁLOGO ES EL QUE SE CONGELÓ', () => {
+    assert.equal(
+        NORMALIZED_CATALOG_VERSION,
+        CATALOGO_CONGELADO,
+        `el catálogo cambió: ${CATALOGO_CONGELADO} → ${NORMALIZED_CATALOG_VERSION}. `
+        + 'El motor NO se evaluó. Estas carreras se juegan contra el catálogo de clubes, '
+        + 'así que con otro catálogo el jugador termina en otro club, gana otros títulos y '
+        + 'se retira en otro año, sin que el motor haya cambiado una línea.\n'
+        + 'Si el cambio del catálogo es intencional: refrescá EXPECTED y esta constante en '
+        + 'un commit que no traiga nada más, para que el próximo movimiento del motor se '
+        + 'siga pudiendo leer solo.',
+    );
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  1 · AUTOCONSISTENCIA — estos tests NO se actualizan NUNCA
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -508,6 +599,16 @@ test('la semilla importa: semillas distintas dan carreras distintas', () => {
 // y los siguientes no se evalúan nunca — y eso cambia el diagnóstico, que es
 // justo lo que este test tiene que dar de entrada.
 test('digest congelado: el comportamiento del motor no cambió sin querer', () => {
+    // Con el catálogo movido no hay nada que medir del motor: se corta acá y no
+    // se simula una sola temporada, para que el diagnóstico no sea una tabla de
+    // números que no coinciden por un motivo que no es el motor.
+    if (!CATALOGO_AL_DIA) {
+        assert.fail(
+            `el catálogo cambió (${CATALOGO_CONGELADO} → ${NORMALIZED_CATALOG_VERSION}): `
+            + 'el motor no se evaluó. Mirá el test de más arriba.',
+        );
+    }
+
     const movidos = CASES
         .map(({ name, input, seed }) => ({ name, actual: digest(carreraCompleta(input, seed)) }))
         .filter(({ name, actual }) => !isDeepStrictEqual(actual, EXPECTED[name]));

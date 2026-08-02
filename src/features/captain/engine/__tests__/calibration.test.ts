@@ -24,7 +24,7 @@ import { ALL_FAMILIES } from '../../data/positions.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
 import { getPendingEvent } from '../event-selector.ts';
 import { belongingOf } from '../belonging.ts';
-import { getMomentDef } from '../moment-defs/index.ts';
+import { getMomentDef, isContractKind } from '../moment-defs/index.ts';
 import { tacklePlayAt, tackleZones } from '../moments.ts';
 
 /** Veinte carreras por familia: ciento sesenta en total. */
@@ -48,14 +48,36 @@ const POR_FAMILIA = 20;
  */
 function manoDeReferencia(state: CaptainState): MomentOutcome {
     const pendiente = state.pendingMoment!;
-    if (pendiente.kind === 'bunker') return { kind: 'bunker' };
 
-    const def = getMomentDef(pendiente.kind);
-    if (def && pendiente.setup) return def.playAt(pendiente.setup, 'bien', 0.5);
+    if (isContractKind(pendiente.kind)) {
+        return getMomentDef(pendiente.kind)!.playAt(pendiente.setup!, 'bien', 0.5);
+    }
 
-    const zones = tackleZones(state.player, state.damage.cuerpo, pendiente.pressure);
-    const { at, zone } = tacklePlayAt(zones, 'bien', 0.5);
-    return { kind: 'tackle', zone, at };
+    // Pre-contrato, con el `default` en `never`: un carril nuevo sin mano no
+    // compila, en vez de recibir la de otro y deformar la pirámide en silencio.
+    switch (pendiente.kind) {
+        case 'bunker':
+            return { kind: 'bunker' };
+        case 'tackle': {
+            const zones = tackleZones(state.player, state.damage.cuerpo, pendiente.pressure);
+            const { at, zone } = tacklePlayAt(zones, 'bien', 0.5);
+            return { kind: 'tackle', zone, at };
+        }
+        default:
+            return manoImposible(pendiente.kind);
+    }
+}
+
+function manoImposible(kind: never): never {
+    throw new Error(`El Momento pre-contrato '${String(kind)}' no tiene mano de referencia.`);
+}
+
+/** Un bucle trabado tira con fase y temporada, en vez de cortar en silencio. */
+function trabada(state: CaptainState, donde: string): never {
+    throw new Error(
+        `${donde}: la carrera quedó trabada en la fase '${state.phase}' `
+        + `(temporada ${state.season}, jugada pendiente: ${state.pendingMoment?.kind ?? 'ninguna'}).`,
+    );
 }
 
 /** El reparto de un jugador normal: entrena, labura, va al club y descansa. */
@@ -86,7 +108,8 @@ function jugar(seed: number, family: (typeof ALL_FAMILIES)[number], fiel: boolea
     let s = createInitialCaptain(input, seed);
     let vuelta = 0;
 
-    while (s.phase !== 'retired' && vuelta < 60) {
+    while (s.phase !== 'retired') {
+        if (vuelta >= 60) trabada(s, `${family} con semilla ${seed}`);
         for (const slot of REPARTO) s = captainReducer(s, { type: 'SPEND_TIME', slot });
         s = captainReducer(s, { type: 'CONFIRM_TIME' });
 
@@ -108,7 +131,10 @@ function jugar(seed: number, family: (typeof ALL_FAMILIES)[number], fiel: boolea
         // Insistir una vez es la apuesta prudente, que es lo que haría un jugador
         // de referencia.
         let guarda = 0;
-        while (s.phase === 'moment' && guarda < 4) {
+        while (s.phase === 'moment') {
+            // El tope tira: una carrera trabada acá no deforma la pirámide en
+            // silencio, que fue exactamente lo que pasó cuando entró La Banda.
+            if (guarda >= 4) trabada(s, `${family} con semilla ${seed}`);
             s = captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: manoDeReferencia(s) });
             guarda += 1;
         }

@@ -39,6 +39,45 @@
 export type MomentKind = 'tackle' | 'bunker' | 'jackal' | 'ancla' | 'codigo' | 'palos' | 'banda';
 
 /**
+ * Los que NO van por el contrato, y son estos dos y nada más.
+ *
+ * Existe como TIPO y no solo como comentario por un bicho concreto: un `switch`
+ * sobre `MomentKind` con un `default` que resolvía el tackle. Cuando entró La
+ * Banda, ese default le mandó una mano de tackle a una corrida —el tipo sabía
+ * que faltaba un caso, el runtime no— y la carrera quedó trabada sin que nada
+ * fallara con un mensaje. Es el mismo bicho que el borrado de genéricos del
+ * registry, y lleva la misma medicina.
+ *
+ * Con los dos carriles declarados, `isContractKind` estrecha y el `default` de un
+ * switch queda en `never`: agregar un pre-contrato sin escribir su caso deja de
+ * compilar.
+ */
+export type PreContractKind = 'tackle' | 'bunker';
+
+export const PRE_CONTRACT_KINDS: readonly PreContractKind[] = ['tackle', 'bunker'];
+
+/** Los que sí van por el contrato. Se deriva: nadie la mantiene a mano. */
+export type ContractKind = Exclude<MomentKind, PreContractKind>;
+
+/**
+ * Todos, en ORDEN CANÓNICO y con el bunker adentro.
+ *
+ * `SELECTABLE_MOMENTS` no sirve para recorrerlos todos —el bunker no se sortea—
+ * y `Object.keys(MOMENT_LABEL)` está prohibido por §1. Que la lista esté completa
+ * lo verifica `moment-contract.test.ts` contra el `Record` de etiquetas, que es
+ * el que ya no compila si aparece un kind nuevo.
+ */
+export const ALL_MOMENT_KINDS: readonly MomentKind[] = [
+    'tackle',
+    'bunker',
+    'jackal',
+    'ancla',
+    'codigo',
+    'palos',
+    'banda',
+];
+
+/**
  * Los que puede sortear el selector, en ORDEN CANÓNICO.
  *
  * `bunker` no está: no se sortea, se llega a él. A qué familia le toca cada uno

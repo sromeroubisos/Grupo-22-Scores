@@ -142,7 +142,13 @@ export type {
     PendingMoment,
     TackleZone,
 } from './types/moment.ts';
-export { MOMENT_LABEL, SELECTABLE_MOMENTS } from './types/moment-kinds.ts';
+export type { ContractKind, PreContractKind } from './types/moment-kinds.ts';
+export {
+    ALL_MOMENT_KINDS,
+    MOMENT_LABEL,
+    PRE_CONTRACT_KINDS,
+    SELECTABLE_MOMENTS,
+} from './types/moment-kinds.ts';
 
 // El contrato. Lo consume `app/` para tipar la pantalla de cada Momento, y los
 // tests para escribir defs de mentira sin fabricar una carrera.
@@ -192,6 +198,7 @@ export {
     bandaSpaceCost,
     codigoAciertos,
     getMomentDef,
+    isContractKind,
     jackalBeat,
     jackalGrade,
     jackalWindows,

@@ -18,7 +18,7 @@ import type { CaptainState, CreateCaptainInput } from '../../types/captain.ts';
 import type { MomentOutcome } from '../../types/moment.ts';
 import type { CaptainAction } from '../captain-actions.ts';
 import { PLAY_LEVELS } from '../../types/moment-def.ts';
-import { getMomentDef } from '../../engine/moment-defs/index.ts';
+import { getMomentDef, isContractKind } from '../../engine/moment-defs/index.ts';
 import { tacklePlayAt, tackleZones } from '../../engine/moments.ts';
 import { TIME_SLOTS, TIME_TOKENS_PER_SEASON } from '../../types/currencies.ts';
 import { MATCH_CAP_PER_SEASON } from '../../types/season.ts';
@@ -60,11 +60,23 @@ function repartir(state: CaptainState, slot: (typeof TIME_SLOTS)[number] = 'entr
 function pasarMomentos(state: CaptainState, vuelta: number): CaptainState {
     let next = state;
     let guarda = 0;
-    while (next.phase === 'moment' && guarda < 4) {
+    while (next.phase === 'moment') {
+        // El tope TIRA. Si cortara, una mano que el reducer no acepta dejaría la
+        // carrera trabada y el test seguiría como si nada: carrera corta
+        // silenciosa, tabla movida, y nadie mirando el bucle.
+        if (guarda >= 4) trabada(next, 'pasarMomentos');
         next = captainReducer(next, { type: 'RESOLVE_MOMENT', outcome: manoRotativa(next, vuelta) });
         guarda += 1;
     }
     return next;
+}
+
+/** El mensaje que hace diagnosticable un bucle trabado: fase y temporada. */
+function trabada(state: CaptainState, donde: string): never {
+    throw new Error(
+        `${donde}: la carrera quedó trabada en la fase '${state.phase}' `
+        + `(temporada ${state.season}, jugada pendiente: ${state.pendingMoment?.kind ?? 'ninguna'}).`,
+    );
 }
 
 /**
@@ -89,17 +101,31 @@ function pasarMomentos(state: CaptainState, vuelta: number): CaptainState {
  */
 function manoRotativa(state: CaptainState, vuelta: number): MomentOutcome {
     const pendiente = state.pendingMoment!;
-    if (pendiente.kind === 'bunker') return { kind: 'bunker' };
-
     const nivel = PLAY_LEVELS[vuelta % PLAY_LEVELS.length];
     const variacion = (vuelta % 7) / 7;
 
-    const def = getMomentDef(pendiente.kind);
-    if (def && pendiente.setup) return def.playAt(pendiente.setup, nivel, variacion);
+    if (isContractKind(pendiente.kind)) {
+        return getMomentDef(pendiente.kind)!.playAt(pendiente.setup!, nivel, variacion);
+    }
 
-    const zones = tackleZones(state.player, state.damage.cuerpo, pendiente.pressure);
-    const { at, zone } = tacklePlayAt(zones, nivel, variacion);
-    return { kind: 'tackle', zone, at };
+    // Pre-contrato. El `default` es `never`, así que el pre-contrato número tres
+    // no compila hasta que alguien escriba su mano.
+    switch (pendiente.kind) {
+        case 'bunker':
+            return { kind: 'bunker' };
+        case 'tackle': {
+            const zones = tackleZones(state.player, state.damage.cuerpo, pendiente.pressure);
+            const { at, zone } = tacklePlayAt(zones, nivel, variacion);
+            return { kind: 'tackle', zone, at };
+        }
+        default:
+            return manoImposible(pendiente.kind);
+    }
+}
+
+/** Ver `carrilImposible` en el motor: mismo bicho, misma medicina. */
+function manoImposible(kind: never): never {
+    throw new Error(`El Momento pre-contrato '${String(kind)}' no tiene mano en esta receta.`);
 }
 
 /**
@@ -142,10 +168,7 @@ function hastaElRetiro(seed: number, mirar: (state: CaptainState) => void, input
     let state = createInitialCaptain(input, seed);
     let vueltas = 0;
     while (state.phase !== 'retired') {
-        assert.ok(
-            vueltas < 60,
-            `semilla ${seed}: la carrera no llegó al retiro en 60 temporadas y quedó trabada en '${state.phase}'`,
-        );
+        if (vueltas >= 60) trabada(state, `carrera con semilla ${seed}`);
         state = unaTemporada(state, rotativo);
         mirar(state);
         vueltas += 1;
@@ -157,7 +180,8 @@ function hastaElRetiro(seed: number, mirar: (state: CaptainState) => void, input
 function carreraCompleta(seed: number, input: CreateCaptainInput = INPUT): CaptainState {
     let state = createInitialCaptain(input, seed);
     let vueltas = 0;
-    while (state.phase !== 'retired' && vueltas < 60) {
+    while (state.phase !== 'retired') {
+        if (vueltas >= 60) trabada(state, `carrera con semilla ${seed}`);
         state = unaTemporada(state, rotativo);
         vueltas += 1;
     }
@@ -424,7 +448,7 @@ test('en amateur la plata no se mueve', () => {
     let state = createInitialCaptain(INPUT, 71);
     let vueltas = 0;
     while (state.phase !== 'retired' && state.stage === 'amateur') {
-        assert.ok(vueltas < 60, `la carrera quedó trabada en '${state.phase}' sin salir del amateurismo`);
+        if (vueltas >= 60) trabada(state, 'la carrera amateur');
         state = unaTemporada(state, rotativo);
         if (state.stage === 'amateur') {
             assert.equal(state.money, 0, 'el rugby de club no paga, y el motor no puede olvidarlo');

@@ -41,7 +41,7 @@ import { FAME_MAX, FAME_MIN } from '../types/currencies.ts';
 import { MOMENT_LABEL, SELECTABLE_MOMENTS } from '../types/moment-kinds.ts';
 import { createRng, hashSeed } from './random.ts';
 import type { AnyMomentDef } from './moment-defs/index.ts';
-import { getMomentDef } from './moment-defs/index.ts';
+import { getMomentDef, isContractKind } from './moment-defs/index.ts';
 import { applyBelonging } from './belonging.ts';
 import { addBodyDamage, addHeadDamage } from './damage.ts';
 import { belongingSituation } from './contracts.ts';
@@ -455,12 +455,44 @@ export function resolveMoment(
 ): MomentResolution | null {
     if (outcome.kind !== moment.kind) return null;
 
-    const def = getMomentDef(moment.kind);
-    if (def && moment.setup) return resolveByContract(state, moment, def, outcome);
+    if (isContractKind(moment.kind)) {
+        const def = getMomentDef(moment.kind);
+        // Un Momento del contrato SIN Setup es un guardado corrupto, no una
+        // jugada: se trata como la mano que no corresponde —la acción no vale y
+        // el estado no se mueve— en vez de caer al carril de otro.
+        if (!def || !moment.setup) return null;
+        return resolveByContract(state, moment, def, outcome);
+    }
 
-    if (outcome.kind === 'tackle') return resolveTackle(state, moment, outcome.zone, outcome.at, rng);
-    // El veredicto ya estaba decidido cuando el jugador entró al bunker.
-    return resolveBunker(state, moment.verdict ?? 'amarilla');
+    // Acá abajo el tipo ya dice `PreContractKind`, así que el `default` es
+    // `never`: el día que entre un pre-contrato nuevo sin su caso, no compila.
+    switch (moment.kind) {
+        case 'tackle':
+            return outcome.kind === 'tackle'
+                ? resolveTackle(state, moment, outcome.zone, outcome.at, rng)
+                : null;
+        case 'bunker':
+            // El veredicto ya estaba decidido cuando el jugador entró al bunker.
+            return resolveBunker(state, moment.verdict ?? 'amarilla');
+        default:
+            return carrilImposible(moment.kind);
+    }
+}
+
+/**
+ * El kind que no es de ningún carril.
+ *
+ * Recibe `never`, así que llamarla con algo que el tipo todavía contempla es un
+ * error de compilación — que es todo el punto. Y si igual llega en runtime
+ * —porque alguien agregó un kind al tipo sin def y sin sumarlo a
+ * `PRE_CONTRACT_KINDS`— tira con el nombre adentro, en vez de resolverse como un
+ * bunker que nadie pidió.
+ */
+function carrilImposible(kind: never): never {
+    throw new Error(
+        `El Momento '${String(kind)}' no tiene def ni carril pre-contrato: `
+        + 'agregá su MomentDef o sumalo a PRE_CONTRACT_KINDS.',
+    );
 }
 
 function resolveByContract(
