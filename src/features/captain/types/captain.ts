@@ -53,8 +53,22 @@ import type { MomentRecord, PendingMoment } from './moment.ts';
  *         Y EL CRUCE: el 8% de las veces te toca una jugada que no es tuya y la
  *         jugás con menos oficio. Es lo que despierta `proficiency`, que hasta
  *         acá existía sin usarse en partida.
+ * 0.6.0 — La Banda (wing y fullback), el sexto verbo: ELEGIR CUÁNDO. El defensor
+ *         viene y vos decidís a qué distancia lo resolvés —amague de lejos,
+ *         cambio de ritmo a media, atropellar solo encima—, y lo que se gasta es
+ *         LA CANCHA: el amague es el más seguro y el que más lateral se come, así
+ *         que amagarlos a todos no entra. La cal corta la jugada pero no borra
+ *         los metros, que es de dónde salen sus cuatro notas.
+ *         Es el primer Momento cuya mano es una SECUENCIA que puede cortarse a la
+ *         mitad: `resolve` la camina hasta el primer fallo y cobra el parcial.
+ *         El contrato lo aguantó sin un carril nuevo.
+ *         Y `playAt`: cada Momento declara cómo lo juega un simulado de nivel
+ *         bien / regular / mal. No cambia lo que pasa en partida —la pantalla no
+ *         lo llama— pero es lo que hace comparable el digest entre Momentos, y lo
+ *         que impide que la receta de un test vuelva a congelar a un pateador que
+ *         apunta al azar.
  */
-export const CAPTAIN_ENGINE_VERSION = '0.5.0';
+export const CAPTAIN_ENGINE_VERSION = '0.6.0';
 
 /**
  * Las fases del ciclo. `offseason` es propia de este juego y no la tiene

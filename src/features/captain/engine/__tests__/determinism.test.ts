@@ -200,7 +200,7 @@ interface Case {
 }
 
 /**
- * Tres perfiles con curvas de edad incompatibles a propósito.
+ * Cuatro perfiles con curvas de edad incompatibles a propósito.
  *
  *   · primera línea — el puesto más longevo (hard 36) y el que más tarda en
  *     hacerse. Gloria que NO son tries: penales de scrum.
@@ -208,6 +208,21 @@ interface Case {
  *     detecta si alguien toca la curva de declive.
  *   · apertura — el pateador, y el único con `liderazgo` pesando 25. Es el caso
  *     que va a cubrir Los Palos cuando entren los Momentos por puesto.
+ *   · tercera línea — EL CUARTO, y entró por una razón puntual: es el único que
+ *     PISA EL BUNKER. Ver abajo.
+ *
+ * ── Por qué el cuarto, y por qué esta semilla ──
+ * Hasta la 0.5.0 el digest tenía un agujero declarado: ninguna de las tres
+ * carreras entraba nunca al bunker, así que `bunkerVerdict` y las dos ramas de
+ * `resolveBunker` —la amarilla y la roja de veinte, que son cuatro carriles de
+ * estado entre sanción, Cartel y banderas— podían cambiar sin que esta tabla se
+ * enterara. La única puerta al bunker es la zona `alto` del tackle.
+ *
+ * Se buscó una semilla que la pisara, sin tocar las otras tres: los tres casos
+ * viejos quedan comparables con todo lo anterior y el bunker gana termómetro
+ * propio. La 8 de tercera línea salió mejor que lo pedido — pisa el bunker DOS
+ * veces y saca los DOS veredictos, roja de veinte y amarilla — y encima cubre El
+ * Jackal, que era la otra familia sin caso propio.
  *
  * ── Las semillas NO son arbitrarias: se eligieron por COBERTURA ──
  * Las tres primeras que probé cerraban las tres con 0 caps, así que el digest no
@@ -242,6 +257,11 @@ const CASES: Case[] = [
         name: 'apertura argentino',
         input: { name: 'Ignacio', surname: 'Bengochea', family: 'apertura', countryCode: 'ar' },
         seed: 99,
+    },
+    {
+        name: 'tercera línea argentino',
+        input: { name: 'Ciro', surname: 'Bertranou', family: 'tercera-linea', countryCode: 'ar' },
+        seed: 8,
     },
 ];
 
@@ -285,9 +305,48 @@ function digest(state: CaptainState): Digest {
 
 // ── La tabla ─────────────────────────────────────────────────────────────────
 //
-// MOTOR 0.5.0. La tercera foto, y la única hasta ahora que se movió por DOS
-// causas a la vez. Las dos están medidas, y el orden importa: sin la segunda,
-// esta tabla habría congelado un bug.
+// MOTOR 0.6.0. La cuarta foto, y la primera con cuatro casos.
+//
+// ═══════════════════════════════════════════════════════════════════════════
+//  ESTA TABLA SE MIDE CONTRA EL CATÁLOGO COMMITEADO. LEER ANTES DE REFRESCAR.
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// El Capitán no tiene catálogo propio: `data/catalogs.ts` lee los clubes de
+// `features/career/data/` —`clubs.ts`, `clubs2026/arSystem2026.ts`,
+// `competition-levels2026.ts`—, que es el mismo árbol donde se trabaja Carrera
+// de Rugby. Con ediciones SIN COMMITEAR ahí, estas cuatro carreras se mueven
+// enteras y el movimiento NO ES DEL MOTOR: el jugador termina en otro club,
+// gana otros títulos y se retira en otro año porque el mercado que lo rodea es
+// otro.
+//
+// Pasó de verdad refrescando la 0.6.0: los cuatro casos se movieron, el commit
+// iba a decir que los movió La Banda, y La Banda no había tocado a tres de
+// ellos. Cómo se separó, y cómo se separa la próxima vez:
+//
+//   git worktree add --detach /tmp/limpio <commit>
+//   cd /tmp/limpio && node --test src/features/captain/engine/__tests__/determinism.test.ts
+//
+// Un worktree no toca el árbol de trabajo de nadie y trae el catálogo tal como
+// está commiteado. Si ahí pasa y en tu carpeta no, no busques el bug en el
+// motor: son los datos de abajo, que están a mitad de camino.
+//
+// ── Qué se movió al entrar La Banda: SOLO EL WING ──
+// De los tres casos viejos, el pilar y el apertura quedaron IDÉNTICOS en los
+// nueve campos —temporadas, edad, club, Pertenencia, Cartel, caps, títulos,
+// Momentos— y solo se les movió el `stateHash`, que adentro lleva la cadena de
+// la versión. El wing se movió entero, y es el único que recibió un Momento
+// propio.
+//
+// Es la primera vez que se ve cumplirse la propiedad que este archivo promete
+// desde la 0.4.0: un Momento por puesto mueve SU caso y deja los otros quietos.
+//
+// El mecanismo, medido y no deducido: se corrieron las carreras del pilar y del
+// apertura con `banda` adentro y afuera de `SELECTABLE_MOMENTS`, trazando cada
+// temporada, y las dos salieron BYTE-IDÉNTICAS. O sea que a estas dos semillas
+// ningún cruce les tocó el Momento nuevo. Lo que queda demostrado es lo que hay
+// que demostrar —agregar un kind no corre la carrera del que no lo juega— y no
+// más que eso: el día que un cruce sí caiga en un Momento nuevo, ESE caso se va
+// a mover, y va a estar bien que se mueva.
 //
 // ── CAUSA 1: el pool de ajenos pasó de 1 a 4 ──
 // Entraron El Ancla, El Código y Los Palos. Un perfil recibe Momentos ajenos por
@@ -364,7 +423,7 @@ function digest(state: CaptainState): Digest {
 //     esta tabla no se entera. Es la razón principal para sumar un cuarto caso.
 const EXPECTED: Record<string, Digest> = {
     'pilar argentino': {
-        engineVersion: '0.5.0',
+        engineVersion: '0.6.0',
         seasons: 16,
         retirementAge: 34,
         lastClub: 'ar-sociedad-hebraica',
@@ -373,22 +432,25 @@ const EXPECTED: Record<string, Digest> = {
         caps: 0,
         titles: 3,
         moments: 13,
-        stateHash: 3116498538, // 0.4.0 era 2447863682
+        // Los nueve campos de arriba son IDÉNTICOS a la 0.5.0. Solo se movió el
+        // hash, que adentro lleva la cadena de la versión.
+        stateHash: 3959283877, // 0.5.0 era 3116498538
     },
     'wing argentino': {
-        engineVersion: '0.5.0',
-        seasons: 13,
-        retirementAge: 31,
-        lastClub: 'ar-jockey-club-villa-maria',
-        belonging: 0,
-        fame: 14.8,
+        engineVersion: '0.6.0',
+        // EL ÚNICO QUE SE MOVIÓ DE VERDAD, y es el que recibió La Banda.
+        seasons: 12,
+        retirementAge: 30,
+        lastClub: 'sb-hindu-club',
+        belonging: 21.043,
+        fame: 14.5,
         caps: 0,
         titles: 3,
-        moments: 8,
-        stateHash: 4185683751, // 0.4.0 era 3720333449
+        moments: 10,
+        stateHash: 1267169825, // 0.5.0 era 4185683751
     },
     'apertura argentino': {
-        engineVersion: '0.5.0',
+        engineVersion: '0.6.0',
         seasons: 13,
         retirementAge: 31,
         lastClub: 'moana-pasifika',
@@ -397,7 +459,20 @@ const EXPECTED: Record<string, Digest> = {
         caps: 13,
         titles: 3,
         moments: 12,
-        stateHash: 396654071, // 0.4.0 era 2468468574
+        // Idéntico a la 0.5.0 en los nueve, igual que el pilar.
+        stateHash: 231311238, // 0.5.0 era 396654071
+    },
+    'tercera línea argentino': {
+        engineVersion: '0.6.0',
+        seasons: 13,
+        retirementAge: 31,
+        lastClub: 'sb-casi',
+        belonging: 23.681,
+        fame: 16.3,
+        caps: 0,
+        titles: 5,
+        moments: 13,
+        stateHash: 730581646, // primera foto de este caso
     },
 };
 
