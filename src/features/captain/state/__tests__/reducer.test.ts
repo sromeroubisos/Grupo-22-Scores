@@ -15,10 +15,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { CaptainState, CreateCaptainInput } from '../../types/captain.ts';
-import type { MomentOutcome, TackleZone } from '../../types/moment.ts';
-import type { AnclaSetup } from '../../engine/moment-defs/ancla.ts';
-import type { CodigoSetup } from '../../engine/moment-defs/codigo.ts';
+import type { MomentOutcome } from '../../types/moment.ts';
 import type { CaptainAction } from '../captain-actions.ts';
+import { PLAY_LEVELS } from '../../types/moment-def.ts';
+import { getMomentDef } from '../../engine/moment-defs/index.ts';
+import { tacklePlayAt, tackleZones } from '../../engine/moments.ts';
 import { TIME_SLOTS, TIME_TOKENS_PER_SEASON } from '../../types/currencies.ts';
 import { MATCH_CAP_PER_SEASON } from '../../types/season.ts';
 import { ALL_FAMILIES, getFamily } from '../../data/positions.ts';
@@ -45,22 +46,6 @@ function repartir(state: CaptainState, slot: (typeof TIME_SLOTS)[number] = 'entr
     return apply(state, acciones);
 }
 
-/** Zonas del tackle, para que una carrera de prueba las recorra todas. */
-const ZONAS: TackleZone[] = ['legal', 'piernas', 'alto', 'legal', 'tarde'];
-
-/**
- * Manos del jackal, en milisegundos desde el destello.
- *
- * Las tres filas cubren las tres salidas del minijuego —robar, irse antes
- * (offside) y llegar tarde— porque una carrera de prueba que siempre acierte no
- * recorre el carril de la sanción.
- */
-const REACCIONES: (number | null)[][] = [
-    [170, 190, 200],
-    [-80, 230, 900],
-    [null, null, null],
-];
-
 /**
  * Resuelve los Momentos que aparezcan.
  *
@@ -85,32 +70,37 @@ function pasarMomentos(state: CaptainState, vuelta: number): CaptainState {
 /**
  * Una mano distinta por vuelta, para que una carrera de prueba recorra todos los
  * desenlaces de cada Momento en vez de repetir el cómodo.
+ *
+ * ── Por qué acá NO hay una rama por kind ──
+ * La había, y terminaba en un `default` que mandaba un tackle. El día que entró
+ * La Banda, ese `default` le mandó una mano de tackle a una corrida: el reducer
+ * la rechazó —como corresponde—, la carrera quedó trabada en la fase de Momento
+ * y los bucles de abajo giraron para siempre. La suite se colgó noventa segundos
+ * para después decir 'test failed' sin nombrar la causa.
+ *
+ * Con `playAt` no puede volver a pasar: la mano la arma el Momento, así que un
+ * kind nuevo llega con la suya puesta. Y el nivel rotando cubre mejor que las
+ * manos escritas a mano, porque recorre bien / regular / mal en TODOS los
+ * Momentos en vez de en los que alguien se acordó de listar.
+ *
+ * Que este archivo dependa de `playAt` es distinto de lo que `determinism.test`
+ * evita: allá el riesgo es que un helper mueva una tabla congelada. Acá no hay
+ * tabla — hay invariantes— y ninguno depende de qué mano se jugó.
  */
 function manoRotativa(state: CaptainState, vuelta: number): MomentOutcome {
     const pendiente = state.pendingMoment!;
-    switch (pendiente.kind) {
-        case 'bunker':
-            return { kind: 'bunker' };
-        case 'jackal':
-            return { kind: 'jackal', reactions: REACCIONES[vuelta % REACCIONES.length] };
-        case 'ancla':
-            // De soltar enseguida a insistir hasta que se caiga.
-            return { kind: 'ancla', pushes: vuelta % ((pendiente.setup as AnclaSetup).maxPushes + 1) };
-        case 'codigo': {
-            // La repite bien, o con un gesto cambiado, según la vuelta.
-            const call = [...(pendiente.setup as CodigoSetup).call];
-            if (vuelta % 3 !== 0) call[vuelta % call.length] = (call[vuelta % call.length] + 1) % 4;
-            return { kind: 'codigo', call };
-        }
-        case 'palos':
-            return { kind: 'palos', aim: PUNTERIAS[vuelta % PUNTERIAS.length] };
-        default:
-            return { kind: 'tackle', zone: ZONAS[vuelta % ZONAS.length], at: 0.5 };
-    }
-}
+    if (pendiente.kind === 'bunker') return { kind: 'bunker' };
 
-/** Punterías de Los Palos: al medio, muy afuera, y a los dos lados. */
-const PUNTERIAS = [0, 0.85, -0.4, 0.35, -0.9];
+    const nivel = PLAY_LEVELS[vuelta % PLAY_LEVELS.length];
+    const variacion = (vuelta % 7) / 7;
+
+    const def = getMomentDef(pendiente.kind);
+    if (def && pendiente.setup) return def.playAt(pendiente.setup, nivel, variacion);
+
+    const zones = tackleZones(state.player, state.damage.cuerpo, pendiente.pressure);
+    const { at, zone } = tacklePlayAt(zones, nivel, variacion);
+    return { kind: 'tackle', zone, at };
+}
 
 /**
  * Una temporada completa: repartir, jugar la jugada si la hay, simular y —si
@@ -137,6 +127,31 @@ function unaTemporada(
 
 /** Rota entre las opciones para que la carrera no sea siempre la misma decisión. */
 const rotativo = (opciones: string[], seed: number): string => opciones[seed % opciones.length];
+
+/**
+ * Corre una carrera hasta el retiro, mirando algo en cada temporada.
+ *
+ * EL TOPE NO ES DECORACIÓN, y esto se aprendió caro. Los bucles que agrupa esta
+ * función no lo tenían, así que una carrera trabada —una mano que el reducer no
+ * acepta deja la fase en `moment` para siempre— no fallaba: colgaba la suite
+ * entera hasta el timeout, y el informe final decía 'test failed' sin una línea
+ * sobre la causa. Con el tope, exactamente el mismo bug falla en un segundo y
+ * dice en qué fase se quedó.
+ */
+function hastaElRetiro(seed: number, mirar: (state: CaptainState) => void, input: CreateCaptainInput = INPUT): CaptainState {
+    let state = createInitialCaptain(input, seed);
+    let vueltas = 0;
+    while (state.phase !== 'retired') {
+        assert.ok(
+            vueltas < 60,
+            `semilla ${seed}: la carrera no llegó al retiro en 60 temporadas y quedó trabada en '${state.phase}'`,
+        );
+        state = unaTemporada(state, rotativo);
+        mirar(state);
+        vueltas += 1;
+    }
+    return state;
+}
 
 /** Una carrera entera, de punta a punta. */
 function carreraCompleta(seed: number, input: CreateCaptainInput = INPUT): CaptainState {
@@ -358,14 +373,12 @@ test('el techo del potencial no se pasa en ninguna temporada', () => {
     // Invariante medido: ni el crecimiento ni una decisión pueden dejar la
     // media por encima del potencial.
     for (const seed of [3, 91, 404, 1210]) {
-        let state = createInitialCaptain(INPUT, seed);
-        while (state.phase !== 'retired') {
-            state = unaTemporada(state, rotativo);
+        hastaElRetiro(seed, (state) => {
             assert.ok(
                 state.player.ovr <= state.player.potential,
                 `semilla ${seed}: media ${state.player.ovr} por encima del potencial ${state.player.potential}`,
             );
-        }
+        });
     }
 });
 
@@ -386,10 +399,8 @@ test('el mejor escalón alcanzado no baja nunca', () => {
     // Te pueden dejar afuera de la mayor a los 33 —y te dejan— pero haber
     // llegado no se pierde. La cabecera muestra el techo, no la foto de hoy.
     for (const seed of [313, 44, 1999]) {
-        let state = createInitialCaptain(INPUT, seed);
-        let mejor = trackIndex(state.national.bestTrack);
-        while (state.phase !== 'retired') {
-            state = unaTemporada(state, rotativo);
+        let mejor = trackIndex(createInitialCaptain(INPUT, seed).national.bestTrack);
+        hastaElRetiro(seed, (state) => {
             const actual = trackIndex(state.national.bestTrack);
             assert.ok(actual >= mejor, `semilla ${seed}: el mejor escalón retrocedió`);
             assert.ok(
@@ -397,27 +408,28 @@ test('el mejor escalón alcanzado no baja nunca', () => {
                 'el escalón de hoy no puede estar por encima del mejor alcanzado',
             );
             mejor = actual;
-        }
+        });
     }
 });
 
 test('la cabeza nunca baja a lo largo de una carrera entera', () => {
-    let state = createInitialCaptain(INPUT, 606);
     let cabeza = 0;
-    while (state.phase !== 'retired') {
-        state = unaTemporada(state, rotativo);
+    hastaElRetiro(606, (state) => {
         assert.ok(state.damage.cabeza >= cabeza, 'la cuenta de conmociones bajó, y eso no puede pasar');
         cabeza = state.damage.cabeza;
-    }
+    });
 });
 
 test('en amateur la plata no se mueve', () => {
     let state = createInitialCaptain(INPUT, 71);
+    let vueltas = 0;
     while (state.phase !== 'retired' && state.stage === 'amateur') {
+        assert.ok(vueltas < 60, `la carrera quedó trabada en '${state.phase}' sin salir del amateurismo`);
         state = unaTemporada(state, rotativo);
         if (state.stage === 'amateur') {
             assert.equal(state.money, 0, 'el rugby de club no paga, y el motor no puede olvidarlo');
         }
+        vueltas += 1;
     }
 });
 

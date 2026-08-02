@@ -36,7 +36,7 @@
 // │ legible.                                                                   │
 // └───────────────────────────────────────────────────────────────────────────┘
 
-export type MomentKind = 'tackle' | 'bunker' | 'jackal' | 'ancla' | 'codigo' | 'palos';
+export type MomentKind = 'tackle' | 'bunker' | 'jackal' | 'ancla' | 'codigo' | 'palos' | 'banda';
 
 /**
  * Los que puede sortear el selector, en ORDEN CANÓNICO.
@@ -45,7 +45,7 @@ export type MomentKind = 'tackle' | 'bunker' | 'jackal' | 'ancla' | 'codigo' | '
  * tampoco se decide acá sino en su `MomentDef.families` — este archivo no
  * importa nada y no va a empezar ahora.
  */
-export const SELECTABLE_MOMENTS: readonly MomentKind[] = ['tackle', 'jackal', 'ancla', 'codigo', 'palos'];
+export const SELECTABLE_MOMENTS: readonly MomentKind[] = ['tackle', 'jackal', 'ancla', 'codigo', 'palos', 'banda'];
 
 export const MOMENT_LABEL: Record<MomentKind, string> = {
     tackle: 'El tackle',
@@ -54,4 +54,5 @@ export const MOMENT_LABEL: Record<MomentKind, string> = {
     ancla: 'El ancla',
     codigo: 'El código',
     palos: 'Los palos',
+    banda: 'La banda',
 };

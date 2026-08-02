@@ -8,6 +8,7 @@ import JackalMoment from './JackalMoment';
 import AnclaMoment from './AnclaMoment';
 import CodigoMoment from './CodigoMoment';
 import PalosMoment from './PalosMoment';
+import BandaMoment from './BandaMoment';
 
 /**
  * EL REGISTRY DE PANTALLAS.
@@ -54,4 +55,5 @@ export const MOMENT_SCREENS: Record<MomentKind, ComponentType<MomentScreenProps>
     codigo: CodigoMoment,
     jackal: JackalMoment,
     palos: PalosMoment,
+    banda: BandaMoment,
 };

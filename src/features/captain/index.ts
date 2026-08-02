@@ -134,6 +134,7 @@ export { BELONGING_RETURN_BONUS } from './engine/contracts.ts';
 
 // ── Los Momentos ────────────────────────────────────────────────────────────
 export type {
+    BandaMove,
     BunkerVerdict,
     MomentKind,
     MomentOutcome,
@@ -171,6 +172,7 @@ export {
 export type {
     AnclaSetup,
     AnyMomentDef,
+    BandaSetup,
     CodigoSetup,
     JackalSetup,
     PalosSetup,
@@ -182,6 +184,12 @@ export {
     JACKAL_ROUNDS,
     MOMENT_DEFS,
     anclaHoldChance,
+    bandaAmagueEnd,
+    bandaCloseMs,
+    bandaGrade,
+    bandaMoveAt,
+    bandaMuscleRisk,
+    bandaSpaceCost,
     codigoAciertos,
     getMomentDef,
     jackalBeat,

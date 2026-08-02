@@ -1083,3 +1083,98 @@
     white-space: nowrap;
     border: 0;
 }
+
+/* ── LA BANDA: la corrida por la orilla ───────────────────────────────────── */
+
+/* La cancha que te queda. Va arriba de todo porque es el dato con el que se
+   decide, no el marcador de lo que ya pasó. */
+.bandaSpace {
+    margin-top: 20px;
+}
+
+.bandaSpaceLabel {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+}
+
+.bandaSpaceTrack {
+    display: block;
+    position: relative;
+    height: 10px;
+    border-radius: 5px;
+    background: var(--color-border);
+    overflow: hidden;
+}
+
+.bandaSpaceFill {
+    display: block;
+    height: 100%;
+    border-radius: 5px;
+    background: var(--color-accent);
+    transition: width 220ms ease-out;
+}
+
+.bandaTally {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.bandaMark {
+    width: 38px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--color-border);
+}
+
+.bandaMarkBroken {
+    background: var(--color-accent);
+}
+
+/* El que viene. La barra llena es tenerlo encima; las dos marcas son dónde
+   termina cada franja. */
+.bandaCloser {
+    display: block;
+    position: relative;
+    height: 16px;
+    margin-top: 18px;
+    border-radius: 8px;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+}
+
+.bandaCloserFill {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-accent) 0%, #d64545 100%);
+}
+
+.bandaCloserMark {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--color-bg-primary);
+    opacity: 0.75;
+}
+
+.bandaChoices {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.bandaCost {
+    margin-left: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    opacity: 0.75;
+    font-variant-numeric: tabular-nums;
+}

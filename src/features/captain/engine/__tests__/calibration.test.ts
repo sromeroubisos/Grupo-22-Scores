@@ -20,13 +20,12 @@ import assert from 'node:assert/strict';
 import type { CaptainState, CreateCaptainInput, SquadTrack } from '../../types/captain.ts';
 import type { TimeSlot } from '../../types/currencies.ts';
 import type { MomentOutcome } from '../../types/moment.ts';
-import type { CodigoSetup } from '../moment-defs/codigo.ts';
-import type { PalosSetup } from '../moment-defs/palos.ts';
 import { ALL_FAMILIES } from '../../data/positions.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
 import { getPendingEvent } from '../event-selector.ts';
 import { belongingOf } from '../belonging.ts';
-import { palosPerfectAim } from '../moment-defs/palos.ts';
+import { getMomentDef } from '../moment-defs/index.ts';
+import { tacklePlayAt, tackleZones } from '../moments.ts';
 
 /** Veinte carreras por familia: ciento sesenta en total. */
 const POR_FAMILIA = 20;
@@ -34,26 +33,29 @@ const POR_FAMILIA = 20;
 /**
  * La mano del jugador de referencia, para el Momento que haya salido.
  *
- * Lee el Setup del estado, que es exactamente lo que hace la pantalla: la seña
- * del line-out y el viento de la patada están A LA VISTA del jugador. No es
- * espiar el motor, es jugar con la información que el juego muestra.
+ * EL JUGADOR DE REFERENCIA ES, LITERALMENTE, NIVEL `bien`. Antes esto era un
+ * `switch` con una mano escrita a mano por Momento —la puntería perfecta, la
+ * seña copiada, el tackle legal— y todas querían decir lo mismo: "este la juega
+ * bien". Ahora lo dicen con la palabra, y de paso se arregla el modo de fallo
+ * que tenía: el `default` mandaba un tackle, así que un Momento nuevo recibía una
+ * mano de otro kind, el reducer la rechazaba y la carrera quedaba trabada en la
+ * fase de Momento. No fallaba con un error claro — el barrido terminaba con
+ * carreras congeladas y la pirámide salía deformada, que es mucho peor.
+ *
+ * La forma de la pirámide se mide con un jugador que la juega bien: si se
+ * midiera con uno que la juega mal, la banda diría más del simulado que del
+ * motor.
  */
 function manoDeReferencia(state: CaptainState): MomentOutcome {
     const pendiente = state.pendingMoment!;
-    switch (pendiente.kind) {
-        case 'bunker':
-            return { kind: 'bunker' };
-        case 'jackal':
-            return { kind: 'jackal', reactions: [240, 240, 240] };
-        case 'ancla':
-            return { kind: 'ancla', pushes: 1 };
-        case 'codigo':
-            return { kind: 'codigo', call: [...(pendiente.setup as CodigoSetup).call] };
-        case 'palos':
-            return { kind: 'palos', aim: palosPerfectAim((pendiente.setup as PalosSetup).wind) };
-        default:
-            return { kind: 'tackle', zone: 'legal', at: 0.5 };
-    }
+    if (pendiente.kind === 'bunker') return { kind: 'bunker' };
+
+    const def = getMomentDef(pendiente.kind);
+    if (def && pendiente.setup) return def.playAt(pendiente.setup, 'bien', 0.5);
+
+    const zones = tackleZones(state.player, state.damage.cuerpo, pendiente.pressure);
+    const { at, zone } = tacklePlayAt(zones, 'bien', 0.5);
+    return { kind: 'tackle', zone, at };
 }
 
 /** El reparto de un jugador normal: entrena, labura, va al club y descansa. */

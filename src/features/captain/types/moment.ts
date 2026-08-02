@@ -69,6 +69,19 @@ export interface PendingMoment {
 /** Dónde frenaste la barra del tackle. El orden es el del riesgo creciente. */
 export type TackleZone = 'piernas' | 'legal' | 'alto' | 'tarde';
 
+/**
+ * Qué le hiciste al que te salió al cruce en La Banda.
+ *
+ * Vive acá y no en su def por lo mismo que `TackleZone`: es vocabulario de la
+ * MANO DEL JUGADOR, y la mano es de este archivo. Si viviera en el motor, este
+ * módulo de tipos tendría que importar de `engine/` para describir su propia
+ * unión — y el motor importa de acá, así que sería un ciclo por comodidad.
+ *
+ * El orden es el de la distancia a la que se resuelve cada uno: lejos, a media,
+ * encima.
+ */
+export type BandaMove = 'amague' | 'ritmo' | 'atropellar';
+
 /** Qué decidió el oficial revisor. */
 export type BunkerVerdict = 'amarilla' | 'roja-20';
 
@@ -97,7 +110,18 @@ export type MomentOutcome =
      * Dónde apuntaste, de −1 (izquierda del todo) a 1 (derecha del todo). El
      * viento lo corre después: apuntar al medio NO es apuntar bien.
      */
-    | { kind: 'palos'; aim: number };
+    | { kind: 'palos'; aim: number }
+    /**
+     * Qué le hiciste a cada defensor y A QUÉ DISTANCIA, en el orden en que te
+     * salieron al cruce. `at` va de 0 (recién arranca a venir) a 1 (te tiene
+     * agarrado).
+     *
+     * LA LISTA PUEDE SER MÁS CORTA QUE LOS DEFENSORES: es la primera mano del
+     * juego que es una secuencia y que puede cortarse a la mitad. Que falte el
+     * cuarto movimiento no es un dato faltante, es el dato — la corrida terminó
+     * antes. `resolve` la camina hasta donde llega y cobra el parcial.
+     */
+    | { kind: 'banda'; moves: { move: BandaMove; at: number }[] };
 
 /** Una jugada ya resuelta, para la trayectoria. */
 export interface MomentRecord {

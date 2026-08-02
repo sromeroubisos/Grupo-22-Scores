@@ -23,11 +23,13 @@
 // crónica Y otra vez inflado en la planilla de fin de año, y la calibración del
 // puesto queda mintiendo sin que nada falle.
 //
-// Por eso ni El Jackal, ni El Ancla, ni El Código, ni Los Palos lo usan: los
-// cuatro pagan exactamente en la gloria de su puesto, así que cobran en Cartel y
-// Pertenencia y nada más. El Tackle SÍ lo usa, y por el mismo criterio: frenar
-// en seco no es la gloria de ninguna familia, así que no hay dónde se cuente
-// solo.
+// Por eso no lo usa ninguno de los cinco: los cinco pagan exactamente en la
+// gloria de su puesto, así que cobran en Cartel y Pertenencia y nada más. La
+// Banda es el caso más claro de todos —el wing tiene DOS métricas-gloria, tries
+// y metros, y la corrida paga en las dos— así que un `statBoost` ahí cobraría
+// tres veces la misma jugada. El Tackle SÍ lo usa, y por el mismo criterio:
+// frenar en seco no es la gloria de ninguna familia, así que no hay dónde se
+// cuente solo.
 //
 // Está escrita acá y no en cada def a propósito. Es la clase de decisión que se
 // vuelve a derivar de cero en el Momento #12 y se deriva distinto.
@@ -39,6 +41,7 @@ import { JACKAL } from './jackal.ts';
 import { ANCLA } from './ancla.ts';
 import { CODIGO } from './codigo.ts';
 import { PALOS } from './palos.ts';
+import { BANDA } from './banda.ts';
 
 /**
  * La definición como la ve el registry, con los genéricos borrados.
@@ -67,15 +70,16 @@ function widen<S extends MomentSetup, I extends MomentOutcome>(def: MomentDef<S,
  * Todas las definiciones, en ORDEN DECLARADO y estable.
  *
  * El orden es el del equipo, de adelante hacia atrás, igual que `ALL_FAMILIES`:
- * primera línea, line-out, tercera línea, apertura. Que sea el mismo criterio en
- * los dos lugares no es estética — es que cuando alguien busque "el Momento del
- * hooker" mire en el mismo renglón en los dos archivos.
+ * primera línea, line-out, tercera línea, apertura, wing. Que sea el mismo
+ * criterio en los dos lugares no es estética — es que cuando alguien busque "el
+ * Momento del hooker" mire en el mismo renglón en los dos archivos.
  */
 export const MOMENT_DEFS: readonly AnyMomentDef[] = [
     widen(ANCLA),
     widen(CODIGO),
     widen(JACKAL),
     widen(PALOS),
+    widen(BANDA),
 ];
 
 const BY_KIND: Partial<Record<MomentKind, AnyMomentDef>> = {};
@@ -110,3 +114,14 @@ export {
 
 export type { PalosSetup } from './palos.ts';
 export { PALOS, palosGrade, palosLanding, palosPerfectAim, palosTolerance } from './palos.ts';
+
+export type { BandaSetup } from './banda.ts';
+export {
+    BANDA,
+    bandaAmagueEnd,
+    bandaCloseMs,
+    bandaGrade,
+    bandaMoveAt,
+    bandaMuscleRisk,
+    bandaSpaceCost,
+} from './banda.ts';
