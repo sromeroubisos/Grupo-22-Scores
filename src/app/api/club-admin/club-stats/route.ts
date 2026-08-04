@@ -58,6 +58,19 @@ const TEAM_METRIC_KEYS: TeamMetricKey[] = [
     'assignedEvents',
     'points',
     'scoringEvents',
+    'penaltyGoals',
+    'ownGoals',
+    'freeThrows',
+    'twoPointers',
+    'threePointers',
+    'fouls',
+    'timeouts',
+    'greenCards',
+    'touchdowns',
+    'fieldGoals',
+    'extraPoints',
+    'twoPointConversions',
+    'safeties',
     'goalKickAttempts',
     'goalKicksMade',
     'goalKicksMissed',
@@ -194,6 +207,19 @@ function createEmptyAggregatedStats(): CompleteMatchStats {
         assignedEvents: zero(),
         points: zero(),
         scoringEvents: zero(),
+        penaltyGoals: zero(),
+        ownGoals: zero(),
+        freeThrows: zero(),
+        twoPointers: zero(),
+        threePointers: zero(),
+        fouls: zero(),
+        timeouts: zero(),
+        greenCards: zero(),
+        touchdowns: zero(),
+        fieldGoals: zero(),
+        extraPoints: zero(),
+        twoPointConversions: zero(),
+        safeties: zero(),
         goalKickAttempts: zero(),
         goalKicksMade: zero(),
         goalKicksMissed: zero(),
@@ -433,7 +459,22 @@ export async function GET(request: NextRequest) {
         const matchIds = matches.map((m) => m.id);
         const relationalEventsByMatch = await fetchRelationalEventsByMatch(supabase, matchIds);
 
-        const definitionMap = buildMatchEventDefinitionMap(getDefaultMatchEventDefinitions('rugby'));
+        // El catalogo se resuelve POR PARTIDO, con el deporte de ese partido.
+        // Estaba clavado en 'rugby': para un club de futbol el mapa no tenia
+        // el tipo `goal`, asi que ningun gol contaba y el panel de temporada
+        // salia en cero. Se cachea por deporte porque una temporada son
+        // cientos de partidos del mismo.
+        const definitionMapBySport = new Map<string, ReturnType<typeof buildMatchEventDefinitionMap>>();
+        const getDefinitionMapForSport = (sport: string | null | undefined) => {
+            const key = String(sport || '').trim().toLowerCase() || 'rugby';
+            let map = definitionMapBySport.get(key);
+            if (!map) {
+                map = buildMatchEventDefinitionMap(getDefaultMatchEventDefinitions(key));
+                definitionMapBySport.set(key, map);
+            }
+            return map;
+        };
+
         const clubStats = createEmptyAggregatedStats();
         const rivalStats = createEmptyAggregatedStats();
         const comparisonStats = createEmptyAggregatedStats();
@@ -460,6 +501,7 @@ export async function GET(request: NextRequest) {
             }
 
             const score = parseMatchScore(match.score);
+            const definitionMap = getDefinitionMapForSport(match.sport_id ?? match.sport);
             const matchStats = aggregatableEvents.length > 0
                 ? buildCompleteMatchStats(aggregatableEvents, definitionMap)
                 : createEmptyAggregatedStats();

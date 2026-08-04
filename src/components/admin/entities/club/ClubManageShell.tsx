@@ -860,6 +860,7 @@ export function ClubManageShell({
                                             <DynamicClubFixtureResultsTab
                                                 clubId={id}
                                                 clubName={form.name || currentManagedClub?.name || 'Club'}
+                                                sportId={form.sport ?? null}
                                                 divisions={linkedDivisions}
                                                 upcomingMatches={operationalDashboardData.upcomingMatches}
                                                 recentMatches={operationalDashboardData.recentMatches}

@@ -128,6 +128,17 @@ function getCandidateEventTypes(eventType: string | null): string[] {
   return [eventType];
 }
 
+/**
+ * Tipos que se cargan a un equipo pero cuyo tanto es del rival.
+ *
+ * Espeja `creditsOpponent` del catalogo de eventos. Se declara aca en vez de
+ * leer la definicion porque este modulo es puro a proposito —lo importa
+ * `matchPointsCore`, que tiene que poder correr en un test de Node sin
+ * arrastrar el catalogo—. Si algun dia aparece un segundo evento asi, va en
+ * los dos lados.
+ */
+const OPPONENT_CREDITED_EVENT_TYPES = new Set(['own_goal']);
+
 export function resolveOffensiveBonusRule(rawRule: unknown): NormalizedOffensiveBonusRule | null {
   if (rawRule === true) {
     return {
@@ -199,10 +210,15 @@ export function countTeamEventMetric(
     return 0;
   }
 
+  const opponent: BonusMetricTeam = team === 'home' ? 'away' : 'home';
+
   return events.filter((event) => {
-    const teamValue = event?.team;
     const typeValue = normalizeEventTypeToken(event?.type);
-    return teamValue === team && Boolean(typeValue) && (typeValue ? eventTypes.has(typeValue) : false);
+    if (!typeValue || !eventTypes.has(typeValue)) return false;
+
+    // El gol en contra suma para el rival del equipo al que se cargo.
+    const creditedTeam = OPPONENT_CREDITED_EVENT_TYPES.has(typeValue) ? opponent : team;
+    return event?.team === creditedTeam;
   }).length;
 }
 

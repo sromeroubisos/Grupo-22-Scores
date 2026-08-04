@@ -1,7 +1,6 @@
-import type { MatchEventDefinition } from '@/lib/matchEventCatalog';
+import { normalizeSportBucket, type MatchEventDefinition } from '@/lib/matchEventCatalog';
 import {
     isGoalKickAttemptEvent,
-    isGoalKickEventType,
     isGoalKickMade,
     goalKickEffectivenessPercent,
     parseKickMetersFromDetail,
@@ -27,6 +26,25 @@ export type CompleteMatchStats = {
     assignedEvents: TeamMetricPair;
     points: TeamMetricPair;
     scoringEvents: TeamMetricPair;
+    /** Futbol / hockey: goles de penal convertidos, del equipo que anota. */
+    penaltyGoals: TeamMetricPair;
+    /** Futbol: goles en contra COMETIDOS por el equipo (el tanto es del rival). */
+    ownGoals: TeamMetricPair;
+    /* ── Basquet ── */
+    freeThrows: TeamMetricPair;
+    twoPointers: TeamMetricPair;
+    threePointers: TeamMetricPair;
+    fouls: TeamMetricPair;
+    /* ── Basquet / futbol americano ── */
+    timeouts: TeamMetricPair;
+    /* ── Hockey ── */
+    greenCards: TeamMetricPair;
+    /* ── Futbol americano ── */
+    touchdowns: TeamMetricPair;
+    fieldGoals: TeamMetricPair;
+    extraPoints: TeamMetricPair;
+    twoPointConversions: TeamMetricPair;
+    safeties: TeamMetricPair;
     goalKickAttempts: TeamMetricPair;
     goalKicksMade: TeamMetricPair;
     goalKicksMissed: TeamMetricPair;
@@ -100,6 +118,12 @@ export type CompleteStatTab = {
 
 export type CompleteStatTabsOptions = {
     includeEmptyRows?: boolean;
+    /**
+     * Deporte del partido. Sin esto se devuelven las pestanas de rugby, que era
+     * lo unico que existia: un partido de futbol mostraba "Formaciones",
+     * "Tiros a palos" y "Entradas en 22" vacias.
+     */
+    sportId?: string | null;
 };
 
 export function getConfiguredEventPoints(
@@ -111,13 +135,37 @@ export function getConfiguredEventPoints(
     if (!definition || definition.category !== 'score') {
         return 0;
     }
-    if (typeof event !== 'string' && isGoalKickEventType(event.type) && !isGoalKickAttemptEvent(event)) {
-        return 0;
-    }
-    if (typeof event !== 'string' && !isGoalKickMade(event.type, event.detail)) {
-        return 0;
+    // Solo los tiros a los palos pueden errarse y por lo tanto no sumar. El
+    // flag lo trae la definicion del deporte: decidirlo por nombre de tipo
+    // anulaba goles de penal de futbol, porque `penalty_goal` es a la vez el
+    // penal a palos del rugby y el gol de penal del futbol.
+    if (typeof event !== 'string' && definition.kickAtGoal) {
+        if (!isGoalKickAttemptEvent(event) || !isGoalKickMade(event.type, event.detail)) {
+            return 0;
+        }
     }
     return Number(definition.points) || 0;
+}
+
+/**
+ * A que equipo se le acreditan los PUNTOS de un evento.
+ *
+ * Casi siempre es el equipo al que se cargo el evento. La excepcion es el gol
+ * en contra (`creditsOpponent`): se carga al equipo del jugador que lo hizo
+ * —para que la planilla y el jugador queden bien— pero el tanto es del rival.
+ *
+ * Es la UNICA traduccion entre "de quien es el evento" y "de quien es el
+ * punto". Todo lo que sume marcador tiene que pasar por aca.
+ */
+export function resolveScoringTeam(
+    eventType: string,
+    eventTeam: 'home' | 'away',
+    definitionMap: Record<string, MatchEventDefinition>,
+): 'home' | 'away' {
+    if (!definitionMap[eventType]?.creditsOpponent) {
+        return eventTeam;
+    }
+    return eventTeam === 'home' ? 'away' : 'home';
 }
 
 function createTeamMetricPair(): TeamMetricPair {
@@ -131,6 +179,19 @@ function createEmptyCompleteMatchStats(): CompleteMatchStats {
         assignedEvents: createTeamMetricPair(),
         points: createTeamMetricPair(),
         scoringEvents: createTeamMetricPair(),
+        penaltyGoals: createTeamMetricPair(),
+        ownGoals: createTeamMetricPair(),
+        freeThrows: createTeamMetricPair(),
+        twoPointers: createTeamMetricPair(),
+        threePointers: createTeamMetricPair(),
+        fouls: createTeamMetricPair(),
+        timeouts: createTeamMetricPair(),
+        greenCards: createTeamMetricPair(),
+        touchdowns: createTeamMetricPair(),
+        fieldGoals: createTeamMetricPair(),
+        extraPoints: createTeamMetricPair(),
+        twoPointConversions: createTeamMetricPair(),
+        safeties: createTeamMetricPair(),
         goalKickAttempts: createTeamMetricPair(),
         goalKicksMade: createTeamMetricPair(),
         goalKicksMissed: createTeamMetricPair(),
@@ -221,11 +282,18 @@ export function buildCompleteMatchStats(
 
         const team = event.team;
         const points = getConfiguredEventPoints(event, definitionMap);
+        // Los puntos van al equipo que ANOTA, que no siempre es el equipo al
+        // que se cargo el evento (gol en contra). El resto de las metricas
+        // —tarjetas, cambios, formaciones— siguen siendo del equipo del evento.
+        const scoringTeam = resolveScoringTeam(event.type, team, definitionMap);
         bumpTeamMetric(stats.assignedEvents, team);
-        bumpTeamMetric(stats.points, team, points);
-        if (points > 0) bumpTeamMetric(stats.scoringEvents, team);
+        bumpTeamMetric(stats.points, scoringTeam, points);
+        if (points > 0) bumpTeamMetric(stats.scoringEvents, scoringTeam);
 
-        const isGoalAttempt = isGoalKickAttemptEvent(event);
+        // Solo cuenta como tiro a palos si el deporte lo declara asi. Sin esta
+        // guarda, un gol de penal de futbol entraba a las metricas de palos
+        // del rugby.
+        const isGoalAttempt = Boolean(definition?.kickAtGoal) && isGoalKickAttemptEvent(event);
         if (isGoalAttempt) {
             const made = isGoalKickMade(event.type, event.detail);
             bumpTeamMetric(stats.goalKickAttempts, team);
@@ -248,7 +316,53 @@ export function buildCompleteMatchStats(
                 if (isGoalAttempt) {
                     bumpTeamMetric(stats.penaltyGoalAttempts, team);
                     bumpTeamMetric(isGoalKickMade(event.type, event.detail) ? stats.penaltyGoalsMade : stats.penaltyGoalsMissed, team);
+                } else if (points > 0) {
+                    // Futbol / hockey: el gol de penal ya ES el gol convertido.
+                    bumpTeamMetric(stats.penaltyGoals, scoringTeam);
+                } else if (definition?.category === 'discipline') {
+                    // Futbol americano: 'penalty' es una penalidad, no un tanto.
+                    bumpTeamMetric(stats.penaltiesCommitted, team);
                 }
+                break;
+            case 'own_goal':
+                // Se cuenta al equipo que lo cometio; el tanto ya se le sumo al rival.
+                bumpTeamMetric(stats.ownGoals, team);
+                break;
+            /* ── Basquet ── */
+            case 'free_throw':
+                bumpTeamMetric(stats.freeThrows, team);
+                break;
+            case 'two_pointer':
+                bumpTeamMetric(stats.twoPointers, team);
+                break;
+            case 'three_pointer':
+                bumpTeamMetric(stats.threePointers, team);
+                break;
+            case 'foul':
+                bumpTeamMetric(stats.fouls, team);
+                break;
+            case 'timeout':
+                bumpTeamMetric(stats.timeouts, team);
+                break;
+            /* ── Hockey ── */
+            case 'green_card':
+                bumpTeamMetric(stats.greenCards, team);
+                break;
+            /* ── Futbol americano ── */
+            case 'touchdown':
+                bumpTeamMetric(stats.touchdowns, team);
+                break;
+            case 'field_goal':
+                bumpTeamMetric(stats.fieldGoals, team);
+                break;
+            case 'extra_point':
+                bumpTeamMetric(stats.extraPoints, team);
+                break;
+            case 'two_point_conversion':
+                bumpTeamMetric(stats.twoPointConversions, team);
+                break;
+            case 'safety':
+                bumpTeamMetric(stats.safeties, team);
                 break;
             case 'drop_goal':
                 bumpTeamMetric(stats.dropGoalAttempts, team);
@@ -376,12 +490,248 @@ function filterStatSections(sections: CompleteStatSection[], options: CompleteSt
         .filter((section) => section.rows.length > 0);
 }
 
+/**
+ * Pestanas de futbol. Salen SOLO de los eventos del catalogo: goles, tarjetas
+ * y cambios. No hay posesion, remates, corners, offsides ni asistencias porque
+ * no son eventos cargables — y una estadistica que nadie carga es una fila en
+ * cero, no un dato.
+ */
+function buildFootballStatTabs(
+    stats: CompleteMatchStats,
+    homeName: string,
+    awayName: string,
+    options: CompleteStatTabsOptions = {},
+): CompleteStatTab[] {
+    const tabs: CompleteStatTab[] = [
+        {
+            id: 'marcador',
+            label: 'Marcador',
+            sections: filterStatSections([
+                {
+                    title: 'Goles',
+                    rows: [
+                        { key: 'points', label: 'Goles', home: stats.points.home, away: stats.points.away, accent: true },
+                        { key: 'penaltyGoals', label: 'De penal', home: stats.penaltyGoals.home, away: stats.penaltyGoals.away },
+                        {
+                            key: 'ownGoals',
+                            label: 'En contra (propia valla)',
+                            home: stats.ownGoals.home,
+                            away: stats.ownGoals.away,
+                            tooltip: `Goles en contra cometidos por cada equipo. El tanto ya esta sumado al rival: ${homeName} / ${awayName}.`,
+                        },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'disciplina',
+            label: 'Disciplina',
+            sections: filterStatSections([
+                {
+                    title: 'Tarjetas',
+                    rows: [
+                        { key: 'yellowCards', label: 'Amarillas', home: stats.yellowCards.home, away: stats.yellowCards.away },
+                        { key: 'redCards', label: 'Rojas', home: stats.redCards.home, away: stats.redCards.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'plantel',
+            label: 'Plantel',
+            sections: filterStatSections([
+                {
+                    title: 'Plantel',
+                    rows: [
+                        { key: 'substitutions', label: 'Cambios', home: stats.substitutions.home, away: stats.substitutions.away },
+                    ],
+                },
+            ], options),
+        },
+    ];
+
+    return tabs.filter((tab) => tab.sections.length > 0);
+}
+
+/**
+ * Basquet. El puntaje NO es el conteo de eventos (un triple vale 3), asi que
+ * el marcador y el desglose de tiros son filas distintas.
+ */
+function buildBasketballStatTabs(
+    stats: CompleteMatchStats,
+    options: CompleteStatTabsOptions = {},
+): CompleteStatTab[] {
+    const tabs: CompleteStatTab[] = [
+        {
+            id: 'marcador',
+            label: 'Marcador',
+            sections: filterStatSections([
+                {
+                    title: 'Anotacion',
+                    rows: [
+                        { key: 'points', label: 'Puntos', home: stats.points.home, away: stats.points.away, accent: true },
+                        { key: 'threePointers', label: 'Triples', home: stats.threePointers.home, away: stats.threePointers.away },
+                        { key: 'twoPointers', label: 'Dobles', home: stats.twoPointers.home, away: stats.twoPointers.away },
+                        { key: 'freeThrows', label: 'Tiros libres', home: stats.freeThrows.home, away: stats.freeThrows.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'disciplina',
+            label: 'Disciplina',
+            sections: filterStatSections([
+                {
+                    title: 'Faltas',
+                    rows: [
+                        { key: 'fouls', label: 'Faltas', home: stats.fouls.home, away: stats.fouls.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'plantel',
+            label: 'Banco',
+            sections: filterStatSections([
+                {
+                    title: 'Banco',
+                    rows: [
+                        { key: 'timeouts', label: 'Tiempos muertos', home: stats.timeouts.home, away: stats.timeouts.away },
+                        { key: 'substitutions', label: 'Cambios', home: stats.substitutions.home, away: stats.substitutions.away },
+                    ],
+                },
+            ], options),
+        },
+    ];
+
+    return tabs.filter((tab) => tab.sections.length > 0);
+}
+
+/** Hockey sobre cesped. Unico deporte con tarjeta verde. */
+function buildHockeyStatTabs(
+    stats: CompleteMatchStats,
+    options: CompleteStatTabsOptions = {},
+): CompleteStatTab[] {
+    const tabs: CompleteStatTab[] = [
+        {
+            id: 'marcador',
+            label: 'Marcador',
+            sections: filterStatSections([
+                {
+                    title: 'Goles',
+                    rows: [
+                        { key: 'points', label: 'Goles', home: stats.points.home, away: stats.points.away, accent: true },
+                        { key: 'penaltyGoals', label: 'De penal', home: stats.penaltyGoals.home, away: stats.penaltyGoals.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'disciplina',
+            label: 'Disciplina',
+            sections: filterStatSections([
+                {
+                    title: 'Tarjetas',
+                    rows: [
+                        { key: 'greenCards', label: 'Verdes', home: stats.greenCards.home, away: stats.greenCards.away },
+                        { key: 'yellowCards', label: 'Amarillas', home: stats.yellowCards.home, away: stats.yellowCards.away },
+                        { key: 'redCards', label: 'Rojas', home: stats.redCards.home, away: stats.redCards.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'plantel',
+            label: 'Plantel',
+            sections: filterStatSections([
+                {
+                    title: 'Plantel',
+                    rows: [
+                        { key: 'substitutions', label: 'Cambios', home: stats.substitutions.home, away: stats.substitutions.away },
+                    ],
+                },
+            ], options),
+        },
+    ];
+
+    return tabs.filter((tab) => tab.sections.length > 0);
+}
+
+/** Futbol americano. Cinco formas de anotar, cada una con su valor. */
+function buildAmericanFootballStatTabs(
+    stats: CompleteMatchStats,
+    options: CompleteStatTabsOptions = {},
+): CompleteStatTab[] {
+    const tabs: CompleteStatTab[] = [
+        {
+            id: 'marcador',
+            label: 'Marcador',
+            sections: filterStatSections([
+                {
+                    title: 'Anotacion',
+                    rows: [
+                        { key: 'points', label: 'Puntos', home: stats.points.home, away: stats.points.away, accent: true },
+                        { key: 'touchdowns', label: 'Touchdowns', home: stats.touchdowns.home, away: stats.touchdowns.away },
+                        { key: 'fieldGoals', label: 'Field goals', home: stats.fieldGoals.home, away: stats.fieldGoals.away },
+                        { key: 'extraPoints', label: 'Puntos extra', home: stats.extraPoints.home, away: stats.extraPoints.away },
+                        { key: 'twoPointConversions', label: 'Conversiones de 2', home: stats.twoPointConversions.home, away: stats.twoPointConversions.away },
+                        { key: 'safeties', label: 'Safeties', home: stats.safeties.home, away: stats.safeties.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'disciplina',
+            label: 'Disciplina',
+            sections: filterStatSections([
+                {
+                    title: 'Penalidades',
+                    rows: [
+                        { key: 'penaltiesCommitted', label: 'Penalidades', home: stats.penaltiesCommitted.home, away: stats.penaltiesCommitted.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'plantel',
+            label: 'Banco',
+            sections: filterStatSections([
+                {
+                    title: 'Banco',
+                    rows: [
+                        { key: 'timeouts', label: 'Tiempos muertos', home: stats.timeouts.home, away: stats.timeouts.away },
+                    ],
+                },
+            ], options),
+        },
+    ];
+
+    return tabs.filter((tab) => tab.sections.length > 0);
+}
+
 export function buildCompleteStatTabs(
     stats: CompleteMatchStats,
     homeName: string,
     awayName: string,
     options: CompleteStatTabsOptions = {},
 ): CompleteStatTab[] {
+    // Cada deporte muestra SU reparto. El default es rugby porque es el unico
+    // que existia y el que tiene el catalogo de eventos mas grande; los demas
+    // mostraban sus filas en cero dentro de pestanas de rugby ("Formaciones",
+    // "Tiros a palos", "Entradas en 22").
+    switch (normalizeSportBucket(options.sportId)) {
+        case 'football':
+            return buildFootballStatTabs(stats, homeName, awayName, options);
+        case 'basketball':
+            return buildBasketballStatTabs(stats, options);
+        case 'hockey':
+            return buildHockeyStatTabs(stats, options);
+        case 'american-football':
+            return buildAmericanFootballStatTabs(stats, options);
+        default:
+            break;
+    }
+
     const tipPalos = (hMade: number, hAtt: number, aMade: number, aAtt: number, note?: string) => (
         `${homeName}: ${hMade}/${hAtt} · ${awayName}: ${aMade}/${aAtt}${note ? ` — ${note}` : ''}`
     );

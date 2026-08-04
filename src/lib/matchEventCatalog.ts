@@ -8,6 +8,28 @@ export interface MatchEventDefinition {
   points: number;
   team: MatchEventRequirement;
   player: MatchEventRequirement;
+  /**
+   * El evento se carga a un equipo pero los puntos van al RIVAL. Hoy lo usa el
+   * gol en contra, y es la unica forma de modelarlo sin mentir en la planilla:
+   * el gol lo hace un jugador de un equipo (por eso se carga ahi, y por eso la
+   * tarjeta o el jugador quedan bien atribuidos), pero el tanto es del otro.
+   *
+   * Va como DATO del evento y no como `if (type === 'own_goal')` porque los
+   * puntos se atribuyen en cinco lugares distintos; con un if disperso alcanza
+   * con olvidarse de uno para que el marcador y la tabla dejen de coincidir.
+   */
+  creditsOpponent?: boolean;
+  /**
+   * El evento es un TIRO A LOS PALOS: puede errarse, y si se erra no suma. Lo
+   * declara el rugby (conversion, penal a palos, drop) y nadie mas.
+   *
+   * Existe porque la deteccion vivia en `isGoalKickEventType`, que decide por
+   * NOMBRE DE TIPO — y `penalty_goal` es a la vez el penal a los palos del
+   * rugby y el gol de penal del futbol. Resultado: un gol de penal de futbol
+   * con un detalle que dijera "fallo el arquero" se anulaba solo. En futbol el
+   * gol de penal ya es el gol convertido; no hay nada que errar.
+   */
+  kickAtGoal?: boolean;
 }
 
 type ResolveArgs = {
@@ -29,10 +51,10 @@ const SPORT_EVENT_PRESETS: Record<string, MatchEventDefinition[]> = {
   rugby: [
     { type: 'try', label: 'Try', category: 'score', points: 5, team: 'required', player: 'optional' },
     { type: 'penalty_try', label: 'Penalty Try', category: 'score', points: 7, team: 'required', player: 'optional' },
-    { type: 'conversion', label: 'Conversion', category: 'score', points: 2, team: 'required', player: 'optional' },
-    { type: 'penalty', label: 'Penal', category: 'score', points: 3, team: 'required', player: 'optional' },
-    { type: 'penalty_goal', label: 'Penal a los palos', category: 'score', points: 3, team: 'required', player: 'optional' },
-    { type: 'drop_goal', label: 'Drop', category: 'score', points: 3, team: 'required', player: 'optional' },
+    { type: 'conversion', label: 'Conversion', category: 'score', points: 2, team: 'required', player: 'optional', kickAtGoal: true },
+    { type: 'penalty', label: 'Penal', category: 'score', points: 3, team: 'required', player: 'optional', kickAtGoal: true },
+    { type: 'penalty_goal', label: 'Penal a los palos', category: 'score', points: 3, team: 'required', player: 'optional', kickAtGoal: true },
+    { type: 'drop_goal', label: 'Drop', category: 'score', points: 3, team: 'required', player: 'optional', kickAtGoal: true },
     { type: 'card_yellow', label: 'Tarjeta amarilla', category: 'card', points: 0, team: 'required', player: 'optional' },
     { type: 'card_red', label: 'Tarjeta roja', category: 'card', points: 0, team: 'required', player: 'optional' },
     { type: 'substitution', label: 'Cambio', category: 'substitution', points: 0, team: 'required', player: 'optional' },
@@ -59,15 +81,32 @@ const SPORT_EVENT_PRESETS: Record<string, MatchEventDefinition[]> = {
     { type: 'start_period', label: 'Inicio de periodo', category: 'clock', points: 0, team: 'none', player: 'none' },
     { type: 'end_period', label: 'Fin de periodo', category: 'clock', points: 0, team: 'none', player: 'none' },
   ],
+  /**
+   * Futbol: el marcador se construye EXCLUSIVAMENTE con estos tres eventos de
+   * gol. No hay carga manual del resultado (ver `isManualScoreLocked`).
+   *
+   * Los cuatro eventos de reloj son la secuencia completa del partido y estan
+   * en el orden en que se aprietan:
+   *   Inicio del partido   -> rebasa a 1T (00:00)
+   *   Fin del primer tiempo-> pausa conservando el tiempo corrido
+   *   Inicio del 2do tiempo-> rebasa al offset del 2T (45:00)
+   *   Final del partido    -> pausa y cierra en FT
+   * `end_period` queda para cerrar el suplementario, que la secuencia de arriba
+   * no cubre.
+   */
   football: [
     { type: 'goal', label: 'Gol', category: 'score', points: 1, team: 'required', player: 'optional' },
     { type: 'penalty_goal', label: 'Gol de penal', category: 'score', points: 1, team: 'required', player: 'optional' },
-    { type: 'own_goal', label: 'Gol en contra', category: 'score', points: 1, team: 'required', player: 'optional' },
+    // Se carga al equipo del jugador que lo hizo; el gol se lo lleva el rival.
+    { type: 'own_goal', label: 'Gol en contra', category: 'score', points: 1, team: 'required', player: 'optional', creditsOpponent: true },
     { type: 'yellow_card', label: 'Tarjeta amarilla', category: 'card', points: 0, team: 'required', player: 'optional' },
     { type: 'red_card', label: 'Tarjeta roja', category: 'card', points: 0, team: 'required', player: 'optional' },
     { type: 'substitution', label: 'Cambio', category: 'substitution', points: 0, team: 'required', player: 'optional' },
-    { type: 'start_period', label: 'Inicio de tiempo', category: 'clock', points: 0, team: 'none', player: 'none' },
-    { type: 'end_period', label: 'Fin de tiempo', category: 'clock', points: 0, team: 'none', player: 'none' },
+    { type: 'match_start', label: 'Inicio del partido', category: 'clock', points: 0, team: 'none', player: 'none' },
+    { type: 'match_half', label: 'Fin del primer tiempo', category: 'clock', points: 0, team: 'none', player: 'none' },
+    { type: 'start_period', label: 'Inicio del segundo tiempo', category: 'clock', points: 0, team: 'none', player: 'none' },
+    { type: 'match_end', label: 'Final del partido', category: 'clock', points: 0, team: 'none', player: 'none' },
+    { type: 'end_period', label: 'Fin de período', category: 'clock', points: 0, team: 'none', player: 'none' },
   ],
   basketball: [
     { type: 'free_throw', label: 'Tiro libre', category: 'score', points: 1, team: 'required', player: 'optional' },
@@ -138,7 +177,12 @@ function cloneDefinitions(definitions: MatchEventDefinition[]) {
   return definitions.map((definition) => ({ ...definition }));
 }
 
-function normalizeSportBucket(sportId?: string | null) {
+/**
+ * Bucket de comportamiento de un deporte. Es la clave con la que se resuelven
+ * el catalogo de eventos Y el reparto de estadisticas: cada deporte muestra lo
+ * suyo y nada mas.
+ */
+export function normalizeSportBucket(sportId?: string | null) {
   const normalized = String(sportId || '').trim().toLowerCase();
 
   if (!normalized) return 'generic';
@@ -166,7 +210,7 @@ function normalizeStoredDefinitions(
   }
 
   const normalized = definitions
-    .map((item) => {
+    .map((item): MatchEventDefinition | null => {
       if (!item || typeof item !== 'object') return null;
 
       const candidate = item as Partial<MatchEventDefinition> & { key?: string; id?: string };
@@ -191,6 +235,15 @@ function normalizeStoredDefinitions(
       const points = Number.isFinite(Number(candidate.points)) ? Number(candidate.points) : fallbackDefinition?.points || 0;
       const team = isRequirement(candidate.team) ? candidate.team : fallbackDefinition?.team || 'optional';
       const player = isRequirement(candidate.player) ? candidate.player : fallbackDefinition?.player || 'optional';
+      // Se hereda del preset salvo que la config lo diga explicitamente. Sin
+      // esto, un torneo con `matchEvents` guardados perdia el flag y el gol en
+      // contra volvia a sumarle al equipo equivocado.
+      const creditsOpponent = typeof candidate.creditsOpponent === 'boolean'
+        ? candidate.creditsOpponent
+        : fallbackDefinition?.creditsOpponent ?? false;
+      const kickAtGoal = typeof candidate.kickAtGoal === 'boolean'
+        ? candidate.kickAtGoal
+        : fallbackDefinition?.kickAtGoal ?? false;
 
       return {
         type,
@@ -199,6 +252,8 @@ function normalizeStoredDefinitions(
         points,
         team,
         player,
+        creditsOpponent,
+        kickAtGoal,
       } satisfies MatchEventDefinition;
     })
     .filter((definition): definition is MatchEventDefinition => Boolean(definition));
@@ -210,6 +265,19 @@ function normalizeStoredDefinitions(
   return normalized.filter((definition, index) =>
     normalized.findIndex((candidate) => candidate.type === definition.type) === index || definition.type.startsWith('custom_'),
   );
+}
+
+/**
+ * Deportes cuyo marcador se construye EXCLUSIVAMENTE con los eventos cargados.
+ * En estos no hay carga manual del resultado: el numero sale de la planilla o
+ * no sale. Hoy es futbol (y su bucket: futsal, futbol playa).
+ *
+ * En rugby la carga manual se conserva a proposito: el marcador puede venir de
+ * una planilla en papel sin evento por evento, y el `manualOverride` con
+ * `cutoffMinute` existe justamente para eso.
+ */
+export function isEventDrivenScoreSport(sportId?: string | null): boolean {
+  return normalizeSportBucket(sportId) === 'football';
 }
 
 export function getDefaultMatchEventDefinitions(sportId?: string | null): MatchEventDefinition[] {

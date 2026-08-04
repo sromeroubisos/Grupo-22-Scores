@@ -84,12 +84,15 @@ function StatComparisonBar({ row }: { row: CompleteStatRow }) {
 export function ClubSeasonStatsPanel({
     clubId,
     clubName,
+    sportId,
     season: propSeason,
     availableSeasons = [],
     onSeasonChange,
 }: {
     clubId: string;
     clubName: string;
+    /** Deporte del club: sin esto el panel muestra el reparto de rugby. */
+    sportId?: string | null;
     season?: string;
     availableSeasons?: string[];
     onSeasonChange?: (season: string) => void;
@@ -148,8 +151,8 @@ export function ClubSeasonStatsPanel({
 
     const statTabs = useMemo(() => {
         if (!comparisonStats) return [];
-        return buildCompleteStatTabs(comparisonStats, clubName, 'Rivales', { includeEmptyRows: true });
-    }, [comparisonStats, clubName]);
+        return buildCompleteStatTabs(comparisonStats, clubName, 'Rivales', { includeEmptyRows: true, sportId });
+    }, [comparisonStats, clubName, sportId]);
 
     const selectedStatTab = useMemo(() => {
         return statTabs.find((tab) => tab.id === activeCategory) ?? statTabs[0] ?? null;

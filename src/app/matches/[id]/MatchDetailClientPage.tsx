@@ -653,7 +653,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
             return { type: rawType, team, detail };
         });
         const stats = buildCompleteMatchStats(evs, defMap);
-        return buildCompleteStatTabs(stats, homeName, awayName);
+        return buildCompleteStatTabs(stats, homeName, awayName, { sportId });
     }, [state.kind, state.matchData, state.eventsData]);
     const isSuperAdminUser = !authLoading && canUseRestrictedContentActions(user?.role);
     const isRugbyApiSportsSource = state.matchData?.externalProvider === 'rugby-api-sports';

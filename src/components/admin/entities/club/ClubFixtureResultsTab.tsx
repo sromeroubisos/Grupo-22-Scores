@@ -13,6 +13,8 @@ import type { Division } from '@/lib/services/divisionService';
 interface ClubFixtureResultsTabProps {
     clubId: string;
     clubName: string;
+    /** Deporte del club: decide que reparto de estadisticas se muestra. */
+    sportId?: string | null;
     divisions: Division[];
     upcomingMatches: ClubDashboardMatch[];
     recentMatches: ClubDashboardMatch[];
@@ -262,6 +264,7 @@ function matchMatchesOperationalFilter(entry: MatchTimelineEntry, filter: MatchO
 export function ClubFixtureResultsTab({
     clubId,
     clubName,
+    sportId,
     divisions,
     upcomingMatches,
     pastMatches,
@@ -691,6 +694,7 @@ export function ClubFixtureResultsTab({
                     <ClubSeasonStatsPanel
                         clubId={clubId}
                         clubName={clubName}
+                        sportId={sportId}
                         season={selectedSeason}
                         availableSeasons={seasonOptions}
                         onSeasonChange={setSelectedSeason}

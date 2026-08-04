@@ -1,5 +1,24 @@
 import type { Sport, SportId } from '@/lib/types';
 
+/**
+ * Catálogo de deportes.
+ *
+ * `isActive` es el DEFAULT ESTÁTICO: lo que se pinta en el primer paint y lo
+ * que leen los consumidores que no pasan por Supabase (crons de sync,
+ * creadores de club/partido, onboarding). La visibilidad real del selector la
+ * refina el super admin desde `/admin/super/deportes`, que escribe
+ * `sports.is_visible` / `sports.display_order` en la base — ver `SportContext`.
+ *
+ * Los dos tienen que decir lo mismo. Si acá activás un deporte, la fila tiene
+ * que existir en la tabla `sports` o el super admin no lo va a poder tocar
+ * (`saveChanges` hace UPDATE, nunca INSERT).
+ *
+ * Los SEIS activos son deliberados. Cinco se juegan equipo contra equipo y
+ * tienen el modelo completo (torneo → fase → partido → eventos). `motorsport`
+ * es la excepción declarada: entra SOLO como deporte de lectura vía ESPN
+ * (F1, IndyCar, NASCAR). No tiene catálogo de eventos ni reloj porque una
+ * carrera no es un partido; ver `src/lib/services/espnMotorsport.ts`.
+ */
 export const SPORTS: Record<SportId, Sport> = {
     'football': {
         id: 'football',
@@ -7,7 +26,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Fútbol',
         icon: '⚽',
         isActive: true,
-        priority: 10,
+        priority: 2,
         matchRules: {
             periods: 2,
             periodDurationMinutes: 45,
@@ -21,8 +40,8 @@ export const SPORTS: Record<SportId, Sport> = {
         name: 'Tennis',
         nameEs: 'Tenis',
         icon: '🎾',
-        isActive: true,
-        priority: 2,
+        isActive: false,
+        priority: 10,
         groupLabel: 'Categories',
         groupLabelEs: 'Categorías',
     },
@@ -49,8 +68,8 @@ export const SPORTS: Record<SportId, Sport> = {
         // que el menu no muestre dos deportes con el mismo nombre.
         nameEs: 'Hockey sobre hielo',
         icon: '🏒',
-        isActive: true,
-        priority: 4,
+        isActive: false,
+        priority: 11,
         matchRules: {
             periods: 3,
             periodDurationMinutes: 20,
@@ -64,24 +83,24 @@ export const SPORTS: Record<SportId, Sport> = {
         name: 'Volleyball',
         nameEs: 'Vóley',
         icon: '🏐',
-        isActive: true,
-        priority: 5,
+        isActive: false,
+        priority: 12,
     },
     'handball': {
         id: 'handball',
         name: 'Handball',
         nameEs: 'Handball',
         icon: '🤾',
-        isActive: true,
-        priority: 6,
+        isActive: false,
+        priority: 13,
     },
     'baseball': {
         id: 'baseball',
         name: 'Baseball',
         nameEs: 'Béisbol',
         icon: '⚾',
-        isActive: true,
-        priority: 7,
+        isActive: false,
+        priority: 14,
     },
     'rugby': {
         id: 'rugby',
@@ -104,7 +123,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'F. Am.',
         icon: '🏈',
         isActive: true,
-        priority: 9,
+        priority: 5,
         matchRules: {
             periods: 4,
             periodDurationMinutes: 15,
@@ -122,7 +141,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Hockey',
         icon: '🏑',
         isActive: true,
-        priority: 10,
+        priority: 4,
         matchRules: {
             periods: 4,
             periodDurationMinutes: 15,
@@ -135,48 +154,48 @@ export const SPORTS: Record<SportId, Sport> = {
         name: 'Cricket',
         nameEs: 'Cricket',
         icon: '🏏',
-        isActive: true,
-        priority: 11,
+        isActive: false,
+        priority: 15,
     },
     'snooker': {
         id: 'snooker',
         name: 'Snooker',
         nameEs: 'Snooker',
         icon: '🎱',
-        isActive: true,
-        priority: 12,
+        isActive: false,
+        priority: 16,
     },
     'table-tennis': {
         id: 'table-tennis',
         name: 'Table Tennis',
         nameEs: 'T. Mesa',
         icon: '🏓',
-        isActive: true,
-        priority: 13,
+        isActive: false,
+        priority: 17,
     },
     'darts': {
         id: 'darts',
         name: 'Darts',
         nameEs: 'Dardos',
         icon: '🎯',
-        isActive: true,
-        priority: 14,
+        isActive: false,
+        priority: 18,
     },
     'futsal': {
         id: 'futsal',
         name: 'Futsal',
         nameEs: 'Fútsal',
         icon: '⚽',
-        isActive: true,
-        priority: 15,
+        isActive: false,
+        priority: 19,
     },
     'esports': {
         id: 'esports',
         name: 'Esports',
         nameEs: 'Esports',
         icon: '🎮',
-        isActive: true,
-        priority: 16,
+        isActive: false,
+        priority: 20,
     },
     'golf': {
         id: 'golf',
@@ -184,7 +203,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Golf',
         icon: '⛳',
         isActive: false,
-        priority: 17,
+        priority: 21,
     },
     'floorball': {
         id: 'floorball',
@@ -192,7 +211,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Floorball',
         icon: '🏑',
         isActive: false,
-        priority: 18,
+        priority: 22,
     },
     'bandy': {
         id: 'bandy',
@@ -200,7 +219,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Bandy',
         icon: '🏒',
         isActive: false,
-        priority: 19,
+        priority: 23,
     },
     'rugby-union': {
         id: 'rugby-union',
@@ -208,7 +227,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Rugby Union',
         icon: '🏉',
         isActive: false,
-        priority: 20,
+        priority: 24,
         groupKey: 'rugby',
         groupName: 'Rugby',
     },
@@ -218,7 +237,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Rugby League',
         icon: '🏉',
         isActive: false,
-        priority: 21,
+        priority: 25,
         groupKey: 'rugby',
         groupName: 'Rugby',
     },
@@ -228,7 +247,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Boxeo',
         icon: '🥊',
         isActive: false,
-        priority: 22,
+        priority: 26,
     },
     'beach-volleyball': {
         id: 'beach-volleyball',
@@ -236,7 +255,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Voleibol de Playa',
         icon: '🏐',
         isActive: false,
-        priority: 23,
+        priority: 27,
     },
     'aussie-rules': {
         id: 'aussie-rules',
@@ -244,7 +263,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Fútbol Australiano',
         icon: '🏈',
         isActive: false,
-        priority: 24,
+        priority: 28,
     },
     'badminton': {
         id: 'badminton',
@@ -252,7 +271,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Bádminton',
         icon: '🏸',
         isActive: false,
-        priority: 25,
+        priority: 29,
     },
     'water-polo': {
         id: 'water-polo',
@@ -260,7 +279,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Waterpolo',
         icon: '🤽',
         isActive: false,
-        priority: 26,
+        priority: 30,
     },
     'beach-soccer': {
         id: 'beach-soccer',
@@ -268,7 +287,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Fútbol Playa',
         icon: '⚽',
         isActive: false,
-        priority: 27,
+        priority: 31,
     },
     'mma': {
         id: 'mma',
@@ -276,7 +295,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Artes Marciales Mixtas',
         icon: '🥋',
         isActive: false,
-        priority: 28,
+        priority: 32,
     },
     'netball': {
         id: 'netball',
@@ -284,7 +303,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Netball',
         icon: '🏀',
         isActive: false,
-        priority: 29,
+        priority: 33,
     },
     'pesapallo': {
         id: 'pesapallo',
@@ -292,15 +311,18 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Pesäpallo',
         icon: '⚾',
         isActive: false,
-        priority: 30,
+        priority: 34,
     },
     'motorsport': {
         id: 'motorsport',
         name: 'Motorsport',
         nameEs: 'Automovilismo',
         icon: '🏎️',
-        isActive: false,
-        priority: 31,
+        // Deporte de LECTURA. No se le crean torneos locales ni se le cargan
+        // eventos de partido: el modelo es carrera + parrilla, no equipo vs
+        // equipo. Los datos salen de ESPN (espnMotorsport.ts).
+        isActive: true,
+        priority: 6,
     },
     'cycling': {
         id: 'cycling',
@@ -308,7 +330,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Ciclismo',
         icon: '🚴',
         isActive: false,
-        priority: 32,
+        priority: 35,
     },
     'horse-racing': {
         id: 'horse-racing',
@@ -316,7 +338,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Carreras de Caballos',
         icon: '🏇',
         isActive: false,
-        priority: 33,
+        priority: 36,
     },
     'winter-sports': {
         id: 'winter-sports',
@@ -324,7 +346,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Deportes de Invierno',
         icon: '⛷️',
         isActive: false,
-        priority: 34,
+        priority: 37,
     },
     'kabaddi': {
         id: 'kabaddi',
@@ -332,7 +354,7 @@ export const SPORTS: Record<SportId, Sport> = {
         nameEs: 'Kabaddi',
         icon: '🤸',
         isActive: false,
-        priority: 35,
+        priority: 38,
     },
 };
 

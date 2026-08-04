@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 import {
     buildMatchEventDefinitionMap,
     getDefaultMatchEventDefinitions,
+    isEventDrivenScoreSport,
     resolveMatchEventDefinitions,
     type MatchEventDefinition,
 } from '@/lib/matchEventCatalog';
@@ -39,6 +40,7 @@ import { formatClockSeconds, getPeriodOffsetSeconds, type MatchClockTransition }
 import { useMatchClock } from '@/hooks/useMatchClock';
 import {
     getConfiguredEventPoints,
+    resolveScoringTeam,
     buildCompleteMatchStats,
     buildCompleteStatTabs,
 } from '@/lib/matchStatsFromEvents';
@@ -354,11 +356,17 @@ function buildScoreFromEvents(
 
     events.forEach((event) => {
         const points = getConfiguredEventPoints(event, definitionMap);
-        if (points > 0 && event.team === 'home') {
+        // El punto va al equipo que ANOTA, que en el gol en contra es el rival
+        // del equipo al que se cargo el evento.
+        const scoringTeam = event.team === 'home' || event.team === 'away'
+            ? resolveScoringTeam(event.type, event.team, definitionMap)
+            : null;
+
+        if (points > 0 && scoringTeam === 'home') {
             home += points;
             hasScoringEvents = true;
         }
-        if (points > 0 && event.team === 'away') {
+        if (points > 0 && scoringTeam === 'away') {
             away += points;
             hasScoringEvents = true;
         }
@@ -2163,7 +2171,14 @@ export default function MatchCenterClient({
     //     en useMatchClock y no muta nada: solo fuerza el recalculo contra el
     //     ancla del server.
 
+    // Futbol: el resultado se construye solo con eventos. El input queda de
+    // solo lectura y el handler no puede escribir un manualOverride ni por
+    // accidente (teclado, autofill, un submit programatico).
+    const isManualScoreLocked = isEventDrivenScoreSport(matchSportId);
+
     const handleScoreInputChange = useCallback((team: 'home' | 'away', value: string) => {
+        if (isManualScoreLocked) return;
+
         const parsedValue = Math.max(0, Number.parseInt(value || '0', 10) || 0);
         const currentOfficialScore = resolveOfficialScore();
         const nextHome = team === 'home' ? parsedValue : currentOfficialScore.home;
@@ -2181,7 +2196,7 @@ export default function MatchCenterClient({
                 cutoffMinute,
             },
         });
-    }, [resolveOfficialScore]);
+    }, [isManualScoreLocked, resolveOfficialScore]);
 
     const handlePenaltyInputChange = useCallback((team: 'home' | 'away', value: string) => {
         const currentOfficialScore = resolveOfficialScore();
@@ -2574,12 +2589,16 @@ export default function MatchCenterClient({
                 points > 0
                 && (manualOverride?.cutoffMinute === null || manualOverride?.cutoffMinute === undefined || event.minute > manualOverride.cutoffMinute);
 
-            if (countsForScore && event.team === 'home') {
+            const scoringTeam = event.team === 'home' || event.team === 'away'
+                ? resolveScoringTeam(event.type, event.team, eventDefinitionMap)
+                : null;
+
+            if (countsForScore && scoringTeam === 'home') {
                 home += points;
                 hasScoringEvents = true;
             }
 
-            if (countsForScore && event.team === 'away') {
+            if (countsForScore && scoringTeam === 'away') {
                 away += points;
                 hasScoringEvents = true;
             }
@@ -2753,17 +2772,25 @@ export default function MatchCenterClient({
         let stHome = 0;
         let stAway = 0;
 
+        // El corte de mitad sale del reloj del deporte, no de un 40 fijo:
+        // rugby 40', futbol 45', hockey 30'. Con el numero clavado, todos los
+        // goles del futbol entre el 41 y el 45 caian en el segundo tiempo.
+        const halfTimeMinute = getPeriodOffsetSeconds(matchSportId, '2T') / 60;
+
         events.forEach((event) => {
             const points = getConfiguredEventPoints(event, eventDefinitionMap);
+            const scoringTeam = event.team === 'home' || event.team === 'away'
+                ? resolveScoringTeam(event.type, event.team, eventDefinitionMap)
+                : null;
 
-            if (points > 0 && event.team === 'home') {
-                if (event.minute <= 40) {
+            if (points > 0 && scoringTeam === 'home') {
+                if (event.minute <= halfTimeMinute) {
                     ptHome += points;
                 } else {
                     stHome += points;
                 }
-            } else if (points > 0 && event.team === 'away') {
-                if (event.minute <= 40) {
+            } else if (points > 0 && scoringTeam === 'away') {
+                if (event.minute <= halfTimeMinute) {
                     ptAway += points;
                 } else {
                     stAway += points;
@@ -2879,8 +2906,12 @@ export default function MatchCenterClient({
             if ((event.team !== 'home' && event.team !== 'away') || !event.playerName.trim()) return;
 
             const statKey = `${event.team}:${event.playerId || normalizeLookupKey(event.playerName)}`;
-            const points = getConfiguredEventPoints(event, eventDefinitionMap);
             const definition = eventDefinitionMap[event.type];
+            // El gol en contra queda en el desglose del jugador (lo hizo el),
+            // pero no le suma puntos: el tanto fue para el rival.
+            const points = definition?.creditsOpponent
+                ? 0
+                : getConfiguredEventPoints(event, eventDefinitionMap);
             const existing = playerStatsMap.get(statKey) || {
                 key: statKey,
                 playerId: event.playerId || null,
@@ -2951,8 +2982,8 @@ export default function MatchCenterClient({
         [eventDefinitionMap, events],
     );
     const completeStatTabs = useMemo(
-        () => buildCompleteStatTabs(completeMatchStats, homeName, awayName),
-        [awayName, completeMatchStats, homeName],
+        () => buildCompleteStatTabs(completeMatchStats, homeName, awayName, { sportId: matchSportId }),
+        [awayName, completeMatchStats, homeName, matchSportId],
     );
     const firstStatsTabId = completeStatTabs[0]?.id ?? 'marcador';
     const effectiveStatsPanelTab = completeStatTabs.some((tab) => tab.id === statsPanelTab) ? statsPanelTab : firstStatsTabId;
@@ -4745,7 +4776,10 @@ export default function MatchCenterClient({
                                     type="number"
                                     value={score.home}
                                     min={0}
-                                    style={{ borderRadius: 4 }}
+                                    readOnly={isManualScoreLocked}
+                                    aria-readonly={isManualScoreLocked}
+                                    title={isManualScoreLocked ? 'El marcador se calcula con los goles cargados en la cronologia.' : undefined}
+                                    style={{ borderRadius: 4, ...(isManualScoreLocked ? { opacity: 0.7, cursor: 'not-allowed' } : null) }}
                                     onChange={(e) => handleScoreInputChange('home', e.target.value)}
                                 />
                             </div>
@@ -4755,10 +4789,26 @@ export default function MatchCenterClient({
                                     type="number"
                                     value={score.away}
                                     min={0}
-                                    style={{ borderRadius: 4 }}
+                                    readOnly={isManualScoreLocked}
+                                    aria-readonly={isManualScoreLocked}
+                                    title={isManualScoreLocked ? 'El marcador se calcula con los goles cargados en la cronologia.' : undefined}
+                                    style={{ borderRadius: 4, ...(isManualScoreLocked ? { opacity: 0.7, cursor: 'not-allowed' } : null) }}
                                     onChange={(e) => handleScoreInputChange('away', e.target.value)}
                                 />
                             </div>
+                            {isManualScoreLocked ? (
+                                <p
+                                    style={{
+                                        gridColumn: '1 / -1',
+                                        margin: '4px 0 0',
+                                        fontSize: 12,
+                                        opacity: 0.75,
+                                    }}
+                                >
+                                    El marcador se construye con los goles de la cronología. Para
+                                    corregirlo, agregá o borrá el evento que corresponda.
+                                </p>
+                            ) : null}
                             {match.status === 'final' && score.home === score.away ? (
                                 <>
                                     <div className="form-group config-field-home-penalty">
