@@ -14,6 +14,7 @@ import {
   LayoutGrid,
   List,
   Loader2,
+  MoreHorizontal,
   Pencil,
   Plus,
   PlusCircle,
@@ -29,8 +30,13 @@ import {
 import type { Database } from '@/lib/database.types';
 import type { MatchStatus, MatchWithClubs, RoundWithMatches } from '@/lib/types/fixture';
 import type { FixtureImportPreviewResult } from '@/lib/types/fixture-import';
-import { StandingsEngine } from '@/lib/services/standingsEngine';
-import { calculateBasePointsFromScore } from '@/lib/standings/matchPoints';
+import { resolveMatchPointsRules, type MatchPointsRules } from '@/lib/standings/matchPointsPreview';
+import { explainMatchPoints, type MatchPointsExplain } from '@/lib/standings/matchPointsExplain';
+import {
+  getSecondaryScoreKeys,
+  getSecondaryScoreMetric,
+  type SecondaryScoreMetric,
+} from '@/lib/sportMatchProfile';
 import {
   APP_TIMEZONE,
   combineLocalDateTimeToUtcIso,
@@ -41,7 +47,9 @@ import {
 import { FixtureImportWizard } from './FixtureImportWizard';
 import { useFixture } from './FixtureContext';
 import { useAnimatedDisclosure } from './useAnimatedDisclosure';
+import { Crest } from './Crest';
 import './fixture-management.css';
+import './operation-console.css';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 type MethodId = 'manual_match' | 'structure_only' | 'berger_algorithm' | 'import_fixture';
@@ -49,13 +57,16 @@ type WorkspaceSubtabId = 'add_matches' | 'manage_fixture';
 type ManageViewMode = 'cards' | 'list';
 type ManageGroupingMode = 'rounds' | 'groups' | 'orphans';
 type ValidationResult = { isValid?: boolean; diagnostics?: Array<{ type?: string; message?: string; context?: string }> } | null;
-type PointsRules = {
-  win: number;
-  draw: number;
-  loss: number;
-  shootoutWin: number | null;
-  shootoutLoss: number | null;
-};
+/**
+ * El reglamento completo de la fase, bonus incluidos.
+ *
+ * Antes acá vivía un `PointsRules` propio que sólo guardaba win/draw/loss y el
+ * shootout: los bonus se descartaban al resolver las reglas. Por eso
+ * «Autocompletar» nunca podía calcular el bonus por 4+ tries y había que
+ * ponerlo a mano — en Super Rugby Americas, 34 de 59 partidos terminaron con
+ * los puntos editados manualmente. Ahora se usa el mismo tipo que el motor.
+ */
+type PointsRules = MatchPointsRules;
 type RulesConfig = {
   points?: {
     win?: number;
@@ -94,6 +105,16 @@ type QuickResultFormState = {
   status: MatchStatus;
   homeScore: string;
   awayScore: string;
+  // La SEGUNDA cifra del marcador, la que el resultado no contiene. En rugby
+  // son los tries: el bonus ofensivo se define por cantidad (4+ en la mayoría
+  // de los torneos) y sin ese dato el reglamento no lo puede calcular solo.
+  //
+  // Qué cifra es —y si el deporte tiene alguna— lo dice
+  // `getSecondaryScoreMetric`. En hockey y fútbol es `null`: cada gol vale 1,
+  // así que el marcador YA es el conteo y un campo aparte sería un segundo
+  // número para lo mismo, capaz de contradecirlo.
+  homeSecondary: string;
+  awaySecondary: string;
   homePenalties: string;
   awayPenalties: string;
   homeBasePoints: string;
@@ -138,10 +159,23 @@ const METHOD_OPTIONS: Array<{
   { id: 'berger_algorithm', icon: Zap, title: 'Generacion Berger', description: 'Crear automaticamente cruces Round Robin.', tone: 'accent-neutral' },
 ];
 
+// El `label` es el botón del segmento y la `description` la línea que lo
+// acompaña en el riel. No hay `title`: era el mismo texto que el label, escrito
+// dos veces para un hero que ya no existe.
 const WORKSPACE_SUBTABS = [
-  { id: 'add_matches' as const, label: 'Agregar', title: 'Agregar partidos', description: 'Alta manual, importacion y generacion en un solo lugar.' },
-  { id: 'manage_fixture' as const, label: 'Gestionar fixture', title: 'Gestionar fixture', description: 'Cards, filtros y acciones rapidas sobre lo ya cargado.' },
+  { id: 'add_matches' as const, label: 'Agregar', description: 'Alta manual, importacion y generacion en un solo lugar.' },
+  { id: 'manage_fixture' as const, label: 'Gestionar fixture', description: 'Cards, filtros y acciones rapidas sobre lo ya cargado.' },
 ];
+
+/**
+ * Cuántos partidos se dibujan por bloque antes de pedir «mostrar más».
+ * Veinticuatro es una jornada larga entera y, en un teléfono, poco más de
+ * tres pantallas: se llega al final del bloque sin que aparezca el botón.
+ * Recién se nota cuando el bloque es de verdad grande —una fase sin jornadas
+ * asignadas, con el fixture entero adentro—, que es justo el caso que hacía
+ * inusable la pantalla.
+ */
+const MANAGE_PAGE_SIZE = 24;
 
 const GROUPING_OPTIONS: Array<{ id: ManageGroupingMode; label: string }> = [
   { id: 'rounds', label: 'Por jornada' },
@@ -149,11 +183,14 @@ const GROUPING_OPTIONS: Array<{ id: ManageGroupingMode; label: string }> = [
   { id: 'orphans', label: 'Sin jornada' },
 ];
 
+// Los dos primeros pasos LEEN, los dos últimos DECIDEN y escriben. El rótulo
+// lo dice, porque el orden de los cuatro no alcanza para saber en cuál se
+// vuelve atrás gratis y en cuál ya no.
 const IMPORT_STEPS = [
   { id: 'source', label: 'Fuente' },
-  { id: 'analysis', label: 'Analisis' },
+  { id: 'analysis', label: 'Análisis' },
   { id: 'preview', label: 'Preview' },
-  { id: 'confirmation', label: 'Confirmacion' },
+  { id: 'confirmation', label: 'Confirmación' },
 ];
 
 function todayInputValue() {
@@ -205,9 +242,14 @@ function ddMmYyyyToIso(value: string): string | null {
 function DdMmYyyyDateField({
   value,
   onChange,
+  className,
 }: {
   value: string;
   onChange: (iso: string) => void;
+  // El editor de resultado viste sus inputs desde el contenedor (`.op-field
+  // input`); el alta manual necesita la clase puesta a mano. Por eso es opcional
+  // en vez de tener un valor por defecto que rompería al primero.
+  className?: string;
 }) {
   const nativeRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState<string>(() => isoToDdMmYyyy(value));
@@ -251,6 +293,7 @@ function DdMmYyyyDateField({
         type="text"
         inputMode="numeric"
         placeholder="dd/mm/aaaa"
+        className={className}
         value={text}
         maxLength={10}
         onChange={(event) => handleText(event.target.value)}
@@ -314,18 +357,10 @@ function formatGroupLabel(groupId: string | null | undefined, groupLabelById?: M
 }
 
 function resolvePointsRules(phaseSettings: RulesConfig | null | undefined, tournamentRuleset: RulesConfig | null | undefined): PointsRules {
-  const resolved = StandingsEngine.resolveRules(phaseSettings, tournamentRuleset);
-  return {
-    win: Number(resolved.points_for_win ?? 4),
-    draw: Number(resolved.points_for_draw ?? 2),
-    loss: Number(resolved.points_for_loss ?? 0),
-    shootoutWin: Number.isFinite(Number(resolved.points_for_shootout_win))
-      ? Number(resolved.points_for_shootout_win)
-      : null,
-    shootoutLoss: Number.isFinite(Number(resolved.points_for_shootout_loss))
-      ? Number(resolved.points_for_shootout_loss)
-      : null,
-  };
+  return resolveMatchPointsRules(
+    phaseSettings as Record<string, unknown> | null | undefined,
+    tournamentRuleset as Record<string, unknown> | null | undefined,
+  );
 }
 
 function parseQuickNumber(value: string, fallback = 0) {
@@ -362,21 +397,57 @@ function shouldShowPenaltyFields(form: Pick<QuickResultFormState, 'status' | 'ho
   return Number.isFinite(homeScore) && Number.isFinite(awayScore) && homeScore === awayScore;
 }
 
-function calculateBasePoints(
-  score: {
-    home: number;
-    away: number;
-    penalties?: {
-      home: number | null;
-      away: number | null;
-    };
-  },
-  rules: PointsRules,
-) {
-  return calculateBasePointsFromScore(score, rules);
+/**
+ * El marcador tal como lo entiende el reglamento: puntos, la cifra secundaria
+ * del deporte y los penales. Es lo que se le pasa a `explainMatchPoints` y lo
+ * que termina guardado, así que la cuenta que se muestra y la que se persiste
+ * salen del mismo lugar.
+ *
+ * La clave de la cifra secundaria la da el deporte: rugby escribe `homeTries`
+ * (idéntico a antes), fútbol americano escribiría `homeTouchdowns`, y hockey
+ * no escribe nada porque no tiene.
+ */
+function quickScoreOf(form: QuickResultFormState, metric: SecondaryScoreMetric | null) {
+  const homeSecondary = parseOptionalQuickNumber(form.homeSecondary);
+  const awaySecondary = parseOptionalQuickNumber(form.awaySecondary);
+  const secondaryKeys = metric ? getSecondaryScoreKeys(metric) : null;
+  const hasPenalties = form.homePenalties.trim() !== '' && form.awayPenalties.trim() !== '';
+
+  return {
+    home: Math.max(0, parseQuickNumber(form.homeScore)),
+    away: Math.max(0, parseQuickNumber(form.awayScore)),
+    ...(secondaryKeys && homeSecondary !== null ? { [secondaryKeys.home]: homeSecondary } : {}),
+    ...(secondaryKeys && awaySecondary !== null ? { [secondaryKeys.away]: awaySecondary } : {}),
+    ...(hasPenalties
+      ? {
+          penalties: {
+            home: Math.max(0, parseQuickNumber(form.homePenalties)),
+            away: Math.max(0, parseQuickNumber(form.awayPenalties)),
+          },
+        }
+      : {}),
+  };
 }
 
-function applyQuickPointsAutofill(form: QuickResultFormState, rules: PointsRules): QuickResultFormState {
+/** Los puntos que el reglamento le da a este partido, con la cuenta explicada. */
+function explainQuickPoints(
+  form: QuickResultFormState,
+  rules: PointsRules,
+  metric: SecondaryScoreMetric | null,
+): MatchPointsExplain {
+  return explainMatchPoints(form.status, quickScoreOf(form, metric), rules);
+}
+
+/**
+ * Rellena los puntos con lo que dice el reglamento. A diferencia del
+ * «Autocompletar» anterior, ahora también resuelve el BONUS: el ofensivo sale
+ * de los tries que ahora se cargan, y el defensivo de la diferencia.
+ */
+function applyQuickPointsAutofill(
+  form: QuickResultFormState,
+  rules: PointsRules,
+  metric: SecondaryScoreMetric | null,
+): QuickResultFormState {
   if (form.status !== 'final') {
     return {
       ...form,
@@ -389,38 +460,38 @@ function applyQuickPointsAutofill(form: QuickResultFormState, rules: PointsRules
     };
   }
 
-  const basePoints = calculateBasePoints(
-    {
-      home: Math.max(0, parseQuickNumber(form.homeScore)),
-      away: Math.max(0, parseQuickNumber(form.awayScore)),
-      ...(form.status === 'final'
-        && form.homePenalties.trim()
-        && form.awayPenalties.trim()
-        ? {
-            penalties: {
-              home: Math.max(0, parseQuickNumber(form.homePenalties)),
-              away: Math.max(0, parseQuickNumber(form.awayPenalties)),
-            },
-          }
-        : {}),
-    },
-    rules,
-  );
+  const explained = explainQuickPoints(form, rules, metric);
 
   return {
     ...form,
-    homeBasePoints: String(basePoints.home),
-    awayBasePoints: String(basePoints.away),
+    homeBasePoints: String(explained.home.base),
+    awayBasePoints: String(explained.away.base),
+    homeBonusPoints: String(explained.home.bonus),
+    awayBonusPoints: String(explained.away.bonus),
     pointsAutocalculated: true,
     pointsOverrideReason: '',
   };
 }
 
-function buildQuickResultForm(match: MatchWithClubs, rules: PointsRules): QuickResultFormState {
+function buildQuickResultForm(
+  match: MatchWithClubs,
+  rules: PointsRules,
+  metric: SecondaryScoreMetric | null,
+): QuickResultFormState {
+  // `MatchScore` no tiene index signature: la cifra secundaria viaja con una
+  // clave que depende del deporte, asi que se lee por indice.
+  const rawScore = match.score as unknown as Record<string, unknown> | null | undefined;
+  const secondaryKeys = metric ? getSecondaryScoreKeys(metric) : null;
+  const readSecondary = (key: string | undefined) => {
+    const value = key ? rawScore?.[key] : null;
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  };
   const initialForm: QuickResultFormState = {
     status: match.status,
     homeScore: formatQuickNumber(match.score?.home, 0),
     awayScore: formatQuickNumber(match.score?.away, 0),
+    homeSecondary: formatOptionalQuickNumber(readSecondary(secondaryKeys?.home)),
+    awaySecondary: formatOptionalQuickNumber(readSecondary(secondaryKeys?.away)),
     homePenalties: formatOptionalQuickNumber(match.score?.penalties?.home),
     awayPenalties: formatOptionalQuickNumber(match.score?.penalties?.away),
     homeBasePoints: formatQuickNumber(match.homeBasePoints, 0),
@@ -434,7 +505,7 @@ function buildQuickResultForm(match: MatchWithClubs, rules: PointsRules): QuickR
   };
 
   return initialForm.pointsAutocalculated
-    ? applyQuickPointsAutofill(initialForm, rules)
+    ? applyQuickPointsAutofill(initialForm, rules, metric)
     : initialForm;
 }
 
@@ -474,6 +545,12 @@ export function TournamentOperationFixtureWorkspace({
   selectedPhaseId: string | null;
   onSelectPhase?: (phaseId: string) => void;
 }) {
+  // La segunda cifra del marcador sale del deporte del torneo. Rugby devuelve
+  // los tries de siempre; hockey y futbol devuelven null y el campo no se pinta.
+  const secondaryScoreMetric = useMemo(
+    () => getSecondaryScoreMetric(tournament.sport_id),
+    [tournament.sport_id],
+  );
   const {
     fixture,
     isLoadingFixture,
@@ -512,6 +589,18 @@ export function TournamentOperationFixtureWorkspace({
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [mobileInsightsOpen, setMobileInsightsOpen] = useState(false);
   const [collapsedContainerIds, setCollapsedContainerIds] = useState<Set<string>>(new Set());
+  /**
+   * Cuántos partidos se dibujan de cada bloque. Una fase regular de Super
+   * Rugby Americas son 56 partidos sin jornada asignada: todos en un mismo
+   * bloque, todos en el DOM, 11.400px de scroll en un teléfono. Trece
+   * pantallas para llegar al último, y el navegador montando 56 filas con
+   * cinco botones cada una antes de pintar la primera.
+   *
+   * No se recorta el fixture: se recorta lo que se dibuja de una, con el
+   * resto a un botón que dice cuántos quedan. Es por bloque y no global
+   * porque cada jornada se abre y se cierra por su cuenta.
+   */
+  const [manageVisibleByContainer, setManageVisibleByContainer] = useState<Record<string, number>>({});
   const [roundDraft, setRoundDraft] = useState<RoundDraftState | null>(null);
   const [availableGroups, setAvailableGroups] = useState<Array<{ id: string; name: string; phaseId: string | null; orderIndex: number | null }>>([]);
   const deferredManageSearch = useDeferredValue(manageSearch);
@@ -651,12 +740,19 @@ export function TournamentOperationFixtureWorkspace({
     [selectedPhase],
   );
 
-  const summary = useMemo(() => ({
-    matchesReady: phaseMatches.filter((match) => match.homeClubId && match.awayClubId && match.dateTime && match.status === 'scheduled').length,
-    matchesPending: phaseMatches.filter((match) => match.status !== 'final').length,
-    roundsCreated: realRounds.length,
-    roundsEmpty: realRounds.filter((round) => round.matches.length === 0).length,
-  }), [phaseMatches, realRounds]);
+  const summary = useMemo(() => {
+    const realRoundIds = new Set(realRounds.map((round) => round.id));
+    return {
+      matchesPlayed: phaseMatches.filter((match) => match.status === 'final').length,
+      matchesPending: phaseMatches.filter((match) => match.status !== 'final').length,
+      // Un partido sin jornada es el que no cayó en ninguna ronda real: vive en
+      // la ronda huérfana que arma el endpoint para los que no tienen round_id.
+      matchesOrphan: phaseMatches.filter((match) => !match.roundId || !realRoundIds.has(match.roundId)).length,
+      matchesUndated: phaseMatches.filter((match) => !match.dateTime).length,
+      roundsCreated: realRounds.length,
+      roundsEmpty: realRounds.filter((round) => round.matches.length === 0).length,
+    };
+  }, [phaseMatches, realRounds]);
 
   const structuralChecks = useMemo(() => {
     const phaseConfigured = Boolean(selectedPhaseId && selectedPhase);
@@ -940,8 +1036,15 @@ export function TournamentOperationFixtureWorkspace({
       return;
     }
     setQuickResultMatchId(match.id);
-    setQuickResultForm(buildQuickResultForm(match, pointsRules));
+    setQuickResultForm(buildQuickResultForm(match, pointsRules, secondaryScoreMetric));
   };
+
+  // Todo lo que el reglamento usa para puntuar. Al tocar cualquiera de estos
+  // campos, los puntos se vuelven a calcular en el acto —salvo que estén
+  // corregidos a mano, en cuyo caso se respeta lo escrito.
+  const SCORING_FIELDS: Array<keyof QuickResultFormState> = [
+    'status', 'homeScore', 'awayScore', 'homeSecondary', 'awaySecondary', 'homePenalties', 'awayPenalties',
+  ];
 
   const setQuickResultField = <K extends keyof QuickResultFormState>(field: K, value: QuickResultFormState[K]) => {
     setQuickResultForm((current) => {
@@ -951,8 +1054,8 @@ export function TournamentOperationFixtureWorkspace({
         next.homePenalties = '';
         next.awayPenalties = '';
       }
-      if ((field === 'status' || field === 'homeScore' || field === 'awayScore') && next.pointsAutocalculated) {
-        return applyQuickPointsAutofill(next, pointsRules);
+      if (SCORING_FIELDS.includes(field) && next.pointsAutocalculated) {
+        return applyQuickPointsAutofill(next, pointsRules, secondaryScoreMetric);
       }
       return next;
     });
@@ -987,7 +1090,7 @@ export function TournamentOperationFixtureWorkspace({
   const autofillQuickPoints = () => {
     setQuickResultForm((current) => {
       if (!current) return current;
-      return applyQuickPointsAutofill({ ...current, pointsAutocalculated: true }, pointsRules);
+      return applyQuickPointsAutofill({ ...current, pointsAutocalculated: true }, pointsRules, secondaryScoreMetric);
     });
     setQuickResultErrors((current) => {
       const next = { ...current };
@@ -1025,6 +1128,15 @@ export function TournamentOperationFixtureWorkspace({
       if (!Number.isFinite(awayBasePoints) || awayBasePoints < 0) nextErrors.awayBasePoints = 'Los puntos base del visitante deben ser 0 o mas.';
       if (!Number.isFinite(parseQuickPointNumber(quickResultForm.homeBonusPoints, Number.NaN))) nextErrors.homeBonusPoints = 'Ingresa un bonus local valido.';
       if (!Number.isFinite(parseQuickPointNumber(quickResultForm.awayBonusPoints, Number.NaN))) nextErrors.awayBonusPoints = 'Ingresa un bonus visitante valido.';
+
+      // Si los puntos no son los que da el reglamento, el motivo es obligatorio.
+      // La pantalla ya lo dice; acá se cumple. Sin esto, un punto corregido a
+      // mano queda sin explicación y dentro de tres meses nadie sabe de dónde
+      // salió — que es exactamente el estado de los 34 partidos que hoy tienen
+      // `pointsAutocalculated: false` y ningún motivo guardado.
+      if (!quickResultForm.pointsAutocalculated && !quickResultForm.pointsOverrideReason.trim()) {
+        nextErrors.pointsOverrideReason = 'Contá por qué estos puntos no son los del reglamento.';
+      }
     }
 
     setQuickResultErrors(nextErrors);
@@ -1062,6 +1174,13 @@ export function TournamentOperationFixtureWorkspace({
       const penaltiesVisible = shouldShowPenaltyFields(quickResultForm);
       const homePenalties = penaltiesVisible ? parseOptionalQuickNumber(quickResultForm.homePenalties) : null;
       const awayPenalties = penaltiesVisible ? parseOptionalQuickNumber(quickResultForm.awayPenalties) : null;
+      // La cifra secundaria va al marcador, que es donde el motor de bonus la
+      // busca (`countTeamEventMetric` lee `score.homeTries` cuando no hay
+      // eventos). Vacío se guarda como null: "no lo sé" no es "cero".
+      // Si el deporte no tiene cifra secundaria, no se escribe nada.
+      const secondaryKeys = secondaryScoreMetric ? getSecondaryScoreKeys(secondaryScoreMetric) : null;
+      const homeSecondary = secondaryKeys ? parseOptionalQuickNumber(quickResultForm.homeSecondary) : null;
+      const awaySecondary = secondaryKeys ? parseOptionalQuickNumber(quickResultForm.awaySecondary) : null;
 
       const newDateTime = quickResultForm.scheduledDate && quickResultForm.scheduledTime
         ? combineLocalDateTimeToUtcIso(quickResultForm.scheduledDate, quickResultForm.scheduledTime, APP_TIMEZONE)
@@ -1073,6 +1192,9 @@ export function TournamentOperationFixtureWorkspace({
         score: {
           home: homeScore,
           away: awayScore,
+          ...(secondaryKeys
+            ? { [secondaryKeys.home]: homeSecondary, [secondaryKeys.away]: awaySecondary }
+            : {}),
           ...(homePenalties !== null && awayPenalties !== null
             ? { penalties: { home: homePenalties, away: awayPenalties } }
             : {}),
@@ -1270,6 +1392,17 @@ export function TournamentOperationFixtureWorkspace({
     });
   };
 
+  const revealMoreMatches = (containerId: string, total: number) => {
+    setManageVisibleByContainer((current) => ({
+      ...current,
+      [containerId]: Math.min(total, (current[containerId] ?? MANAGE_PAGE_SIZE) + MANAGE_PAGE_SIZE),
+    }));
+  };
+
+  const revealAllMatches = (containerId: string, total: number) => {
+    setManageVisibleByContainer((current) => ({ ...current, [containerId]: total }));
+  };
+
   if (!fixture) {
     if (fixtureError && !isLoadingFixture) {
       return (
@@ -1309,11 +1442,16 @@ export function TournamentOperationFixtureWorkspace({
             <h4>Estado de la fase</h4>
           </div>
         </div>
+        {/* Las cifras dicen lo que pasó, no un estado interno.
+            «Partidos listos» contaba sólo los `scheduled` con todo cargado: en
+            un torneo terminado marcaba 0 con 56 partidos jugados, y se leía
+            como "no hay nada". Ahora habla el mismo idioma que la barra de
+            arriba, y todo se deriva de los partidos de la fase. */}
         <div className="operation-summary-grid">
-          <div className="operation-summary-card"><span>Partidos listos</span><strong>{summary.matchesReady}</strong></div>
-          <div className="operation-summary-card"><span>Partidos pendientes</span><strong>{summary.matchesPending}</strong></div>
-          <div className="operation-summary-card"><span>Jornadas creadas</span><strong>{summary.roundsCreated}</strong></div>
-          <div className="operation-summary-card"><span>Jornadas vacias</span><strong>{summary.roundsEmpty}</strong></div>
+          <div className="operation-summary-card"><span>Jugados</span><strong>{summary.matchesPlayed}</strong></div>
+          <div className="operation-summary-card"><span>Por jugar</span><strong>{summary.matchesPending}</strong></div>
+          <div className="operation-summary-card"><span>Sin jornada</span><strong>{summary.matchesOrphan}</strong></div>
+          <div className="operation-summary-card"><span>Sin fecha</span><strong>{summary.matchesUndated}</strong></div>
         </div>
       </section>
 
@@ -1430,18 +1568,38 @@ export function TournamentOperationFixtureWorkspace({
   return (
     <div className={`operation-fixture-workspace${activeSubtab === 'manage_fixture' ? ' is-manage-full' : ''}`}>
       <div className="operation-fixture-main">
-        <section className="operation-fixture-hero basalt-card">
-          <div className="operation-fixture-hero-copy">
-            <span className="operation-fixture-kicker">Operacion de fixture</span>
-            <h3>{activeMeta.title}</h3>
-            <p>{activeMeta.description}</p>
+        {/* Riel del workspace: la elección de modo, qué hace ese modo y la
+            única cifra propia del panel (las de la fase ya viven en la barra
+            de Operación, y el nombre del torneo en el header).
+
+            Antes eran dos piezas: un hero acristalado y, más abajo, dos
+            tarjetas de 320px en un contenedor `flex-wrap`. Ese ancho mínimo
+            hacía que se apilaran en cuanto la columna se angostaba —con el
+            cajón de fase abierto, o en cualquier pantalla media—. El segmento
+            es UNA pieza con dos botones adentro: no puede partirse de fila. */}
+        <div className="op-seg-rail">
+          <div className="op-seg" role="tablist" aria-label="Modo de trabajo del fixture">
+            {WORKSPACE_SUBTABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={activeSubtab === tab.id}
+                className="op-seg-btn"
+                onClick={() => setActiveSubtab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
-          <div className="operation-fixture-hero-meta">
-            <span className="operation-fixture-meta-label">Fase activa</span>
-            <strong>{selectedPhase?.name || 'Sin fase'}</strong>
-            <small>{tournament.name || 'Torneo'} · {summary.roundsCreated} jornadas detectadas</small>
+          <p className="op-seg-note">{activeMeta.description}</p>
+          <div className="op-bar-figures">
+            <span className="op-fig">
+              <span className="op-fig-key">Jornadas</span>
+              <b>{summary.roundsCreated}</b>
+            </span>
           </div>
-        </section>
+        </div>
 
         <section className="operation-mobile-side-trigger basalt-card" aria-label="Panel compacto de fase">
           <div className="operation-mobile-side-trigger-copy">
@@ -1461,20 +1619,6 @@ export function TournamentOperationFixtureWorkspace({
             <span>{feedback.message}</span>
           </div>
         ) : null}
-
-        <div className="operation-fixture-subtabs" role="tablist" aria-label="Subtabs de fixture">
-          {WORKSPACE_SUBTABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`operation-fixture-subtab ${activeSubtab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveSubtab(tab.id)}
-            >
-              <span>{tab.label}</span>
-              <small>{tab.description}</small>
-            </button>
-          ))}
-        </div>
 
         {activeSubtab === 'add_matches' ? (
           <>
@@ -1552,12 +1696,30 @@ export function TournamentOperationFixtureWorkspace({
                     </label>
                   )}
 
+                  {/* La jornada y la zona NO se comportan igual, y el
+                      formulario los dibujaba como si sí.
+
+                      La jornada se crea escribiéndola: `findOrCreateRound` la
+                      da de alta en la fase si no existe. La zona no: acá sólo
+                      se ASIGNA una de las que ya están definidas en Estructura.
+                      Cuando la fase no tiene ninguna, el desplegable quedaba con
+                      "Sin grupo" como única opción y sin decir por qué — parecía
+                      roto. Ahora se deshabilita y dice qué falta, que es el
+                      estándar del gestor. */}
                   <label className="operation-form-field">
                     <span>Grupo o zona</span>
-                    <select className="basalt-input" value={manualForm.groupId} onChange={(event) => setManualField('groupId', event.target.value)}>
+                    <select
+                      className="basalt-input"
+                      value={manualForm.groupId}
+                      disabled={groupOptions.length === 0}
+                      onChange={(event) => setManualField('groupId', event.target.value)}
+                    >
                       <option value="">Sin grupo</option>
                       {groupOptions.map((group) => <option key={group.value} value={group.value}>{group.label}</option>)}
                     </select>
+                    {groupOptions.length === 0 ? (
+                      <small className="operation-field-hint">Esta fase no tiene zonas. Se definen en Estructura.</small>
+                    ) : null}
                   </label>
 
                   <label className="operation-form-field">
@@ -1578,18 +1740,40 @@ export function TournamentOperationFixtureWorkspace({
                     {manualErrors.awayClubId ? <small className="operation-field-error">{manualErrors.awayClubId}</small> : null}
                   </label>
 
-                  <label className="operation-form-field">
-                    <span>Fecha del partido</span>
-                    <input className="basalt-input" type="date" value={manualForm.matchDate} onChange={(event) => setManualField('matchDate', event.target.value)} />
-                    <small className="operation-field-hint">Selecciona la fecha en la que se jugara el partido.</small>
-                    {manualErrors.matchDate ? <small className="operation-field-error">{manualErrors.matchDate}</small> : null}
-                  </label>
+                  {/* Cuándo se juega es UN dato, no dos. Iban como campos
+                      sueltos y la grilla los repartía donde caían —la fecha al
+                      final de una fila, la hora arrancando la siguiente—, con
+                      una frase debajo de cada uno repitiendo lo que ya decía el
+                      rótulo. Ahora son un grupo con su propio título y sin
+                      ayudas redundantes: lo único que el rótulo no dice es que
+                      la hora se puede dejar vacía, y eso queda en su leyenda.
 
-                  <label className="operation-form-field">
-                    <span>Hora del partido</span>
-                    <input className="basalt-input" type="time" value={manualForm.matchTime} onChange={(event) => setManualField('matchTime', event.target.value)} />
-                    <small className="operation-field-hint">Hora de inicio del partido (opcional).</small>
-                  </label>
+                      La fecha usa `DdMmYyyyDateField` como el resto del gestor.
+                      El `<input type="date">` crudo que había acá mostraba
+                      mm/dd/yyyy en cualquier sistema en inglés, sin importar el
+                      lang de la página. */}
+                  <div
+                    className="operation-form-field operation-form-field-span-2"
+                    role="group"
+                    aria-labelledby="manual-when-label"
+                  >
+                    <span id="manual-when-label">Fecha y horario</span>
+                    <div className="operation-datetime-pair">
+                      <label className="operation-datetime-slot">
+                        <small>Fecha</small>
+                        <DdMmYyyyDateField
+                          className="basalt-input"
+                          value={manualForm.matchDate}
+                          onChange={(iso) => setManualField('matchDate', iso)}
+                        />
+                      </label>
+                      <label className="operation-datetime-slot">
+                        <small>Hora · opcional</small>
+                        <input className="basalt-input" type="time" value={manualForm.matchTime} onChange={(event) => setManualField('matchTime', event.target.value)} />
+                      </label>
+                    </div>
+                    {manualErrors.matchDate ? <small className="operation-field-error">{manualErrors.matchDate}</small> : null}
+                  </div>
 
                   <label className="operation-form-field">
                     <span>Sede o cancha</span>
@@ -1744,7 +1928,7 @@ export function TournamentOperationFixtureWorkspace({
                 </div>
                 <div className="operation-form-grid" style={{ marginBottom: 16 }}>
                   <label className="operation-form-field operation-form-field-span-2">
-                    <span>Fase destino de la importacion</span>
+                    <span>Fase destino</span>
                     <select
                       className="basalt-input"
                       value={selectedPhaseId || ''}
@@ -1762,7 +1946,7 @@ export function TournamentOperationFixtureWorkspace({
                       ))}
                     </select>
                     <small className="operation-field-hint">
-                      El preview y la confirmacion usaran esta fase como destino para los partidos importados.
+                      Todos los partidos del archivo entran acá.
                     </small>
                   </label>
                 </div>
@@ -1771,7 +1955,7 @@ export function TournamentOperationFixtureWorkspace({
                   onBack={() => setSelectedMethod('manual_match')}
                   onPreviewChange={setImportPreview}
                   onComplete={() => {
-                    void afterMutation('La importacion quedo confirmada.');
+                    void afterMutation('La importación quedó confirmada.');
                     setActiveSubtab('manage_fixture');
                   }}
                 />
@@ -1837,13 +2021,21 @@ export function TournamentOperationFixtureWorkspace({
             <div className="operation-manage-toolbar">
               <label className="operation-manage-search">
                 <Search size={16} />
-                <input type="search" value={manageSearch} onChange={(event) => setManageSearch(event.target.value)} placeholder="Buscar por equipo, sede o estado..." />
+                {/* El campo se muestra a 16px —abajo de eso iOS hace zoom al
+                    enfocarlo— y con el ícono al lado quedan unos 28 caracteres
+                    de ancho útil en un teléfono. "Buscar por equipo, sede o
+                    estado..." son 34 y llegaba cortado en la mitad. */}
+                <input type="search" value={manageSearch} onChange={(event) => setManageSearch(event.target.value)} placeholder="Buscar equipo, sede o estado" />
               </label>
 
               <div className="operation-manage-mobile-row">
+                {/* El contador sale sólo cuando hay algo que contar. "Compactos"
+                    era relleno: no describe el estado del botón ni lo que pasa al
+                    tocarlo, y en 390px le comía la mitad del ancho al rótulo que
+                    sí importa — el botón terminaba diciendo "Filt... Compac...". */}
                 <button type="button" className="operation-manage-mobile-toggle" onClick={() => setShowMobileFilters((current) => !current)} aria-expanded={showMobileFilters}>
                   <span>Filtros</span>
-                  <small>{activeFilterCount > 0 ? `${activeFilterCount} activos` : 'Compactos'}</small>
+                  {activeFilterCount > 0 ? <small>{activeFilterCount} activos</small> : null}
                 </button>
                 <button type="button" className="basalt-btn basalt-btn-primary operation-manage-create-mobile" onClick={() => openManualCreate()}>
                   <Plus size={15} />
@@ -1940,6 +2132,13 @@ export function TournamentOperationFixtureWorkspace({
                 <div className="operation-manage-cards-stack">
                   {manageContainers.map((container) => {
                     const collapsed = collapsedContainerIds.has(container.id);
+                    const totalInContainer = container.matches.length;
+                    const shownCount = Math.min(
+                      totalInContainer,
+                      manageVisibleByContainer[container.id] ?? MANAGE_PAGE_SIZE,
+                    );
+                    const shownMatches = container.matches.slice(0, shownCount);
+                    const remaining = totalInContainer - shownCount;
                     return (
                       <section key={container.id} className={`fixture-round-section ${collapsed ? 'is-collapsed' : 'is-expanded'}`}>
                         <div
@@ -1965,7 +2164,11 @@ export function TournamentOperationFixtureWorkspace({
                             </div>
 
                             <div className="fixture-round-meta">
-                              <span className="fixture-round-count">{container.matches.length} visibles</span>
+                              <span className="fixture-round-count">
+                                {remaining > 0
+                                  ? `${shownCount} de ${totalInContainer}`
+                                  : `${totalInContainer} visibles`}
+                              </span>
                               <span className={`fixture-pill ${container.tone === 'empty' ? 'fixture-pill-draft' : container.tone === 'complete' ? 'fixture-pill-success' : 'fixture-pill-info'}`}>
                                 {container.tone === 'empty' ? 'Vacia' : container.tone === 'complete' ? 'Completa' : 'Activa'}
                               </span>
@@ -1995,9 +2198,11 @@ export function TournamentOperationFixtureWorkspace({
                         </div>
 
                         <div className={`fixture-round-details ${!collapsed ? 'is-expanded' : ''}`}>
-                          <div className="fixture-matches-grid">
-                            {container.matches.length > 0 ? (
-                              container.matches.map((entry) => (
+                          {/* Lista apilada, no grilla de columnas: cada partido
+                              es una fila a ancho completo. */}
+                          <div className="op-match-list">
+                            {totalInContainer > 0 ? (
+                              shownMatches.map((entry) => (
                                 <MatchCard
                                   key={entry.match.id}
                                   entry={entry}
@@ -2011,6 +2216,8 @@ export function TournamentOperationFixtureWorkspace({
                                   onQuickPointsFieldChange={setQuickPointsField}
                                   onQuickPointsAutofill={autofillQuickPoints}
                                   onQuickResultSave={() => void handleQuickResultSave(entry.match)}
+                                  pointsRules={pointsRules}
+                                  secondaryScoreMetric={secondaryScoreMetric}
                                   onMove={() => openEditMatch(entry.match, 'move')}
                                   onDuplicate={() => openDuplicateMatch(entry.match)}
                                   onDelete={() => void handleDeleteMatch(entry.match)}
@@ -2023,6 +2230,29 @@ export function TournamentOperationFixtureWorkspace({
                                 <p>Prueba con otros filtros o agrega un partido a este bloque.</p>
                               </div>
                             )}
+
+                            {/* El pie dice cuántos faltan antes de que los
+                                pidas: «quedan 32» es la diferencia entre creer
+                                que el bloque terminó y saber que sigue. */}
+                            {remaining > 0 ? (
+                              <div className="op-match-more">
+                                <button
+                                  type="button"
+                                  className="basalt-btn op-match-more-btn"
+                                  onClick={() => revealMoreMatches(container.id, totalInContainer)}
+                                >
+                                  Mostrar {Math.min(MANAGE_PAGE_SIZE, remaining)} más
+                                  <span className="op-match-more-rest">quedan {remaining}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="basalt-btn basalt-btn-ghost"
+                                  onClick={() => revealAllMatches(container.id, totalInContainer)}
+                                >
+                                  Ver los {totalInContainer}
+                                </button>
+                              </div>
+                            ) : null}
                           </div>
                         </div>
                       </section>
@@ -2159,6 +2389,8 @@ function MatchCard({
   onQuickPointsFieldChange,
   onQuickPointsAutofill,
   onQuickResultSave,
+  pointsRules,
+  secondaryScoreMetric,
   onMove,
   onDuplicate,
   onDelete,
@@ -2166,6 +2398,9 @@ function MatchCard({
   entry: ManageEntry;
   groupLabel: string | null;
   busyAction: string | null;
+  pointsRules: PointsRules;
+  /** Cifra secundaria del deporte; null si el marcador ya lo dice todo. */
+  secondaryScoreMetric: SecondaryScoreMetric | null;
   quickResultForm: QuickResultFormState | null;
   quickResultErrors: Record<string, string>;
   quickResultOpen: boolean;
@@ -2183,6 +2418,9 @@ function MatchCard({
 }) {
   const { match, round } = entry;
   const [showScheduleEdit, setShowScheduleEdit] = useState(false);
+  // Las cuatro acciones secundarias del teléfono. Vive por fila y no en el
+  // workspace: abrir el menú de un partido no tiene por qué cerrar el de otro.
+  const [moreActionsOpen, setMoreActionsOpen] = useState(false);
   const handleQuickResultToggle = () => {
     if (quickResultOpen) setShowScheduleEdit(false);
     onQuickResult();
@@ -2193,209 +2431,507 @@ function MatchCard({
   };
   const quickBusy = busyAction === `quick-save-${match.id}`;
   const scoreVisible = match.status === 'live' || match.status === 'final';
-  const totalHomePoints = quickResultForm ? parseQuickPointNumber(quickResultForm.homeBasePoints) + parseQuickPointNumber(quickResultForm.homeBonusPoints) : 0;
-  const totalAwayPoints = quickResultForm ? parseQuickPointNumber(quickResultForm.awayBasePoints) + parseQuickPointNumber(quickResultForm.awayBonusPoints) : 0;
+  /**
+   * Lo que el reglamento da por este partido, con la cuenta explicada. Se
+   * recalcula en cada tecleo del marcador o de los tries, así que los términos
+   * ("ganó · 4", "7 tries · +1") siempre describen los números que se ven.
+   */
+  const quickPointsExplain = useMemo(
+    () => (quickResultForm
+      ? explainQuickPoints(quickResultForm, pointsRules, secondaryScoreMetric)
+      : { home: { base: 0, bonus: 0, total: 0, terms: [] }, away: { base: 0, bonus: 0, total: 0, terms: [] }, resolvedByShootout: false }),
+    [quickResultForm, pointsRules, secondaryScoreMetric],
+  );
   const getGroupLabel = (groupId: string | null | undefined) => groupLabel ?? formatGroupLabel(groupId);
   const manageHref = `/admin/super/partidos/${match.id}`;
   const matchLabel = `${match.homeClub?.name || 'Local'} vs ${match.awayClub?.name || 'Visitante'}`;
 
+  // Quién ganó, para que la fila se lea sin leer el marcador: el ganador va en
+  // tinta plena y el perdedor en tinta secundaria.
+  const homeScore = match.score?.home ?? 0;
+  const awayScore = match.score?.away ?? 0;
+  const homeWon = scoreVisible && homeScore > awayScore;
+  const awayWon = scoreVisible && awayScore > homeScore;
+
   return (
-    <article
-      className={`fixture-match-card fixture-glass ${getMatchTone(match.status)}`}
-      style={{ cursor: 'pointer' }}
-    >
-      <ProtectedLink
-        href={manageHref}
-        className="fixture-match-link"
-        aria-label={`Abrir control de partido de ${matchLabel}`}
-        title="Abrir control de partido. También puedes hacer click derecho para abrirlo en otro panel."
-      />
-      <div className="fixture-match-top">
-        <div>
-          <span className="fixture-match-headline">{formatDateLabel(match.dateTime)} · {formatTimeLabel(match.dateTime)}</span>
-          <span className="fixture-match-subline">
-            {round.name}
-            {match.groupId ? ` · ${getGroupLabel(match.groupId)}` : ''}
+    /* Una FILA, no una tarjeta.
+       Antes cada partido ocupaba un bloque de ~200px de alto con los rótulos
+       LOCAL / RESULTADO / VISITANTE, la fecha repetida dos veces y la sede,
+       repartidos en una grilla de columnas. Con 56 partidos eso son varias
+       pantallas de scroll para ver un fixture. Ahora es una línea de 52px:
+       cuándo, quién contra quién con su escudo, el marcador, y las acciones.
+       El editor de resultado sigue abriéndose debajo, dentro de la misma fila. */
+    <article className={`op-match-row ${getMatchTone(match.status)} ${quickResultOpen ? 'is-editing' : ''} ${moreActionsOpen ? 'has-more-actions' : ''}`}>
+      <div className="op-match-line">
+        <ProtectedLink
+          href={manageHref}
+          className="op-match-link"
+          aria-label={`Abrir control de partido de ${matchLabel}`}
+          title="Abrir control de partido. También puedes hacer click derecho para abrirlo en otro panel."
+        />
+
+        <span className="op-match-when">
+          {formatDateLabel(match.dateTime)} · {formatTimeLabel(match.dateTime)}
+        </span>
+
+        {/* El marcador va DOS veces, y sólo una se ve por vez.
+            En escritorio el par se lee en horizontal y el «41 — 13» del medio
+            es el que ordena la lectura. En el teléfono el par se apila, y ahí
+            ese mismo nodo caía debajo de los dos equipos, alineado a la
+            derecha: el resultado quedaba lejos de ambos y no se sabía cuál era
+            de quién. La cifra por lado —cada club con su número en el mismo
+            renglón— es la lectura correcta cuando hay una columna sola.
+            El CSS apaga uno u otro con `display: none`, así que el lector de
+            pantalla siempre encuentra exactamente una versión, nunca las dos. */}
+        <div className="op-match-pair">
+          <span className={`op-match-side ${homeWon ? 'is-winner' : ''} ${awayWon ? 'is-loser' : ''}`}>
+            <Crest club={match.homeClub} size="md" />
+            <span className="op-team-name">{match.homeClub?.name || 'Local'}</span>
+            <span className={`op-match-side-score ${scoreVisible ? '' : 'is-pending'}`}>
+              {scoreVisible ? homeScore : '–'}
+            </span>
+          </span>
+
+          <span className={`op-match-score ${scoreVisible ? '' : 'is-pending'}`}>
+            {scoreVisible ? `${homeScore} — ${awayScore}` : 'vs'}
+          </span>
+
+          <span className={`op-match-side is-away ${awayWon ? 'is-winner' : ''} ${homeWon ? 'is-loser' : ''}`}>
+            <Crest club={match.awayClub} size="md" />
+            <span className="op-team-name">{match.awayClub?.name || 'Visitante'}</span>
+            <span className={`op-match-side-score ${scoreVisible ? '' : 'is-pending'}`}>
+              {scoreVisible ? awayScore : '–'}
+            </span>
           </span>
         </div>
-        <span className={`fixture-pill ${getMatchTone(match.status)}`}>{getStatusLabel(match.status)}</span>
-      </div>
 
-      <div className="fixture-match-teams">
-        <TeamBlock side="Local" team={match.homeClub} fallback="Local" />
-        <div className="fixture-match-center">
-          <span className="fixture-match-center-label">{scoreVisible ? 'Resultado' : 'Versus'}</span>
-          <strong>{scoreVisible ? `${match.score?.home ?? 0}-${match.score?.away ?? 0}` : 'VS'}</strong>
-        </div>
-        <TeamBlock side="Visitante" team={match.awayClub} fallback="Visitante" />
-      </div>
+        <span className="op-match-meta">
+          {match.venue || 'Sin sede'}
+          {match.groupId ? ` · ${getGroupLabel(match.groupId)}` : ''}
+        </span>
 
-      <div className="fixture-match-footer">
-        <div className="fixture-match-meta">
-          <span><Clock3 size={14} />{formatLongDateLabel(match.dateTime)} · {formatTimeLabel(match.dateTime)}</span>
-          <span><Calendar size={14} />{match.venue || 'Sede por definir'}</span>
-        </div>
+        {/* La píldora de estado sólo cuando dice algo. Con 56 partidos
+            finalizados, 56 etiquetas «Finalizado» son ruido: ahí el marcador ya
+            lo cuenta. Se muestra cuando el partido NO está jugado. */}
+        {match.status !== 'final' ? (
+          <span className={`fixture-pill ${getMatchTone(match.status)}`}>{getStatusLabel(match.status)}</span>
+        ) : null}
 
-        <div className="fixture-match-actions" onClick={(e) => e.stopPropagation()}>
-          <ProtectedLink href={manageHref} className="fixture-mini-btn">
-            <Pencil size={14} />
-            <span>Editar</span>
+        {/* Acciones. En escritorio son cinco botones en fila, revelados al pasar
+            por encima. En el teléfono esa fila se lleva un renglón entero de la
+            ficha, y de las cinco la única que se usa a cada rato es cargar el
+            resultado: las otras cuatro pasan detrás del `⋯`, que las despliega
+            en su propia tira sin sacarte de la lista. Es el mismo DOM: `⋯` no
+            existe con mouse, y la tira secundaria tampoco. */}
+        <div className="op-match-actions" onClick={(e) => e.stopPropagation()}>
+          <button
+            className={`basalt-btn op-match-act-primary ${quickResultOpen ? 'basalt-btn-accent' : ''}`}
+            /* En el teléfono el rótulo se oculta y queda el rayo solo: sin
+               nombre accesible el botón que carga el resultado sería un botón
+               mudo. Acá lo lleva escrito, y el rótulo visible sigue estando
+               donde hay ancho. */
+            aria-label={scoreVisible ? 'Editar resultado del partido' : 'Cargar resultado del partido'}
+            onClick={handleQuickResultToggle}
+          >
+            <Zap size={13} aria-hidden="true" />
+            <span>{scoreVisible ? 'Resultado' : 'Cargar'}</span>
+          </button>
+          {/* Abrir el control lleva su propia clase, no la genérica de las que
+              se esconden detrás del `⋯`: en el teléfono la fila entera deja de
+              ser clicable —en una tarjeta de media columna el área táctil se
+              solapa con los botones— y esta pasa a ser la puerta visible.
+              `op-match-act-more` la escondía junto con mover, duplicar y
+              eliminar, que sí son de segundo orden. */}
+          <ProtectedLink href={manageHref} className="basalt-btn op-match-act-more op-match-act-open" title="Abrir control de partido" aria-label="Abrir control de partido">
+            <Pencil size={13} aria-hidden="true" />
           </ProtectedLink>
-          <button className={`fixture-mini-btn ${quickResultOpen ? 'is-active' : ''}`} onClick={handleQuickResultToggle}>
-            <Zap size={14} />
-            <span>Resultado rapido</span>
+          <button className="basalt-btn op-match-act-more" title="Mover de jornada" aria-label="Mover de jornada" onClick={onMove}>
+            <Grip size={13} />
           </button>
-          <button className="fixture-icon-btn" title="Mover de jornada" onClick={onMove}>
-            <Grip size={14} />
+          <button className="basalt-btn op-match-act-more" title="Duplicar partido" aria-label="Duplicar partido" onClick={onDuplicate}>
+            <Copy size={13} />
           </button>
-          <button className="fixture-icon-btn" title="Duplicar partido" onClick={onDuplicate}>
-            <Copy size={14} />
+          <button
+            className="basalt-btn op-match-act-more"
+            title="Eliminar partido"
+            aria-label="Eliminar partido"
+            onClick={onDelete}
+            disabled={busyAction === `delete-${match.id}`}
+          >
+            {busyAction === `delete-${match.id}` ? <RefreshCw size={13} className="spin" /> : <Trash2 size={13} />}
           </button>
-          <button className="fixture-icon-btn" title="Eliminar partido" onClick={onDelete} disabled={busyAction === `delete-${match.id}`}>
-            {busyAction === `delete-${match.id}` ? <RefreshCw size={14} className="spin" /> : <Trash2 size={14} />}
+          <button
+            type="button"
+            className="basalt-btn op-match-act-toggle"
+            aria-label={moreActionsOpen ? 'Ocultar acciones del partido' : 'Más acciones del partido'}
+            aria-expanded={moreActionsOpen}
+            title="Más acciones"
+            onClick={() => setMoreActionsOpen((open) => !open)}
+          >
+            <MoreHorizontal size={15} aria-hidden="true" />
           </button>
         </div>
       </div>
 
+      {/* ── Cargar resultado ──────────────────────────────────────────────
+          El marcador es lo único grande del formulario: 112×84 con el número a
+          44px, contra 34px de alto de cualquier otro campo. Antes «Local 53» y
+          «Base local 4» eran la misma caja, una al lado de la otra, y nada
+          decía cuál era el resultado del partido.
+
+          Los puntos para la tabla llegan calculados por el reglamento y con la
+          cuenta a la vista ("ganó · 4" + "7 tries · +1" = 5), pero siguen
+          siendo campos: corregirlos no pide permiso, sólo pide un motivo. */}
       {quickResultOpen && quickResultForm ? (
-        <div className="fixture-quick-editor" onClick={(event) => event.stopPropagation()}>
-          <div className="fixture-quick-editor-head">
-            <div>
-              <span className="fixture-quick-kicker">Carga express</span>
-              <strong>Resultado y puntos para la tabla</strong>
-            </div>
-            <button type="button" className="fixture-icon-btn" title="Cerrar carga rapida" onClick={handleQuickResultToggle}>
+        <div className="op-result-editor" onClick={(event) => event.stopPropagation()}>
+          <div className="op-result-head">
+            <span className="op-result-title">Cargar resultado</span>
+            <span className="op-result-when">{round.name}</span>
+            <button
+              type="button"
+              className="basalt-btn basalt-btn-ghost"
+              style={{ marginLeft: 'auto' }}
+              onClick={handleQuickResultToggle}
+            >
               <X size={14} />
+              Cerrar
             </button>
           </div>
 
-          <div className="fixture-quick-grid fixture-quick-grid-score">
-            <label className="fixture-quick-field">
-              <span>Estado</span>
-              <select value={quickResultForm.status} onChange={(event) => onQuickResultFieldChange('status', event.target.value as MatchStatus)}>
-                {STATUS_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </label>
-            <label className="fixture-quick-field">
-              <span>Local</span>
-              <input type="number" min={0} value={quickResultForm.homeScore} onChange={(event) => onQuickResultFieldChange('homeScore', event.target.value)} />
-              {quickResultErrors.homeScore ? <small className="operation-field-error">{quickResultErrors.homeScore}</small> : null}
-            </label>
-            <label className="fixture-quick-field">
-              <span>Visitante</span>
-              <input type="number" min={0} value={quickResultForm.awayScore} onChange={(event) => onQuickResultFieldChange('awayScore', event.target.value)} />
-              {quickResultErrors.awayScore ? <small className="operation-field-error">{quickResultErrors.awayScore}</small> : null}
-            </label>
-          </div>
+          <div className="op-result-body">
+            <div className="op-scoreboard">
+              <div className="op-scoreboard-head">
+                <span className="op-scoreboard-head-title">Resultado</span>
+                <span className="op-result-when" style={{ marginLeft: 'auto' }}>
+                  {formatLongDateLabel(match.dateTime)} · {match.venue || 'Sede por definir'}
+                </span>
+              </div>
 
-          {shouldShowPenaltyFields(quickResultForm) ? (
-            <>
-              <div className="fixture-quick-points-head">
-                <div>
-                  <span className="fixture-quick-kicker">Desempate</span>
-                  <strong>Penales / shootout opcionales</strong>
+              <div className="op-scoreboard-grid">
+                <span className="op-scoreboard-team">
+                  <Crest club={match.homeClub} size="xl" />
+                  <span className="op-scoreboard-team-name">{match.homeClub?.name || 'Local'}</span>
+                </span>
+                <input
+                  className="op-number is-score"
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  value={quickResultForm.homeScore}
+                  aria-label={`Puntos de ${match.homeClub?.name || 'local'}`}
+                  onChange={(event) => onQuickResultFieldChange('homeScore', event.target.value)}
+                />
+                <span className="op-scoreboard-dash" aria-hidden="true">—</span>
+                <input
+                  className="op-number is-score"
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  value={quickResultForm.awayScore}
+                  aria-label={`Puntos de ${match.awayClub?.name || 'visitante'}`}
+                  onChange={(event) => onQuickResultFieldChange('awayScore', event.target.value)}
+                />
+                <span className="op-scoreboard-team is-away">
+                  <Crest club={match.awayClub} size="xl" />
+                  <span className="op-scoreboard-team-name">{match.awayClub?.name || 'Visitante'}</span>
+                </span>
+
+                {/* La cifra secundaria va debajo y alineada con su marcador: en
+                    la escala chica, pero pegada al número al que pertenece. En
+                    rugby son los tries y sin ellos el bonus ofensivo no se puede
+                    calcular. En hockey y fútbol no se pinta: el marcador ya es
+                    el conteo de goles. */}
+                {secondaryScoreMetric ? (
+                  /* `display: contents` en escritorio: el envoltorio no existe
+                     para el layout y las cinco celdas siguen siendo hijas
+                     directas de la grilla, como antes. En el teléfono el mismo
+                     div se vuelve una fila propia —rótulo a la izquierda, las
+                     dos cifras a la derecha—, que es lo que la grilla de cinco
+                     columnas no podía dar sin dejar los nombres en 30px. */
+                  <div className="op-scoreboard-subrow">
+                    <span aria-hidden="true" />
+                    <input
+                      className="op-number is-small op-scoreboard-sub-input"
+                      type="number"
+                      min={0}
+                      inputMode="numeric"
+                      placeholder="—"
+                      value={quickResultForm.homeSecondary}
+                      aria-label={`${secondaryScoreMetric.label} de ${match.homeClub?.name || 'local'}`}
+                      onChange={(event) => onQuickResultFieldChange('homeSecondary', event.target.value)}
+                    />
+                    <span className="op-scoreboard-sub-key">{secondaryScoreMetric.label}</span>
+                    <input
+                      className="op-number is-small op-scoreboard-sub-input"
+                      type="number"
+                      min={0}
+                      inputMode="numeric"
+                      placeholder="—"
+                      value={quickResultForm.awaySecondary}
+                      aria-label={`${secondaryScoreMetric.label} de ${match.awayClub?.name || 'visitante'}`}
+                      onChange={(event) => onQuickResultFieldChange('awaySecondary', event.target.value)}
+                    />
+                    <span aria-hidden="true" />
+                  </div>
+                ) : null}
+
+                {shouldShowPenaltyFields(quickResultForm) ? (
+                  <div className="op-scoreboard-subrow">
+                    <span aria-hidden="true" />
+                    <input
+                      className="op-number is-small op-scoreboard-sub-input"
+                      type="number"
+                      min={0}
+                      inputMode="numeric"
+                      placeholder="—"
+                      value={quickResultForm.homePenalties}
+                      aria-label={`Penales de ${match.homeClub?.name || 'local'}`}
+                      onChange={(event) => onQuickResultFieldChange('homePenalties', event.target.value)}
+                    />
+                    <span className="op-scoreboard-sub-key">Penales</span>
+                    <input
+                      className="op-number is-small op-scoreboard-sub-input"
+                      type="number"
+                      min={0}
+                      inputMode="numeric"
+                      placeholder="—"
+                      value={quickResultForm.awayPenalties}
+                      aria-label={`Penales de ${match.awayClub?.name || 'visitante'}`}
+                      onChange={(event) => onQuickResultFieldChange('awayPenalties', event.target.value)}
+                    />
+                    <span aria-hidden="true" />
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            {quickResultErrors.homeScore || quickResultErrors.awayScore
+              || quickResultErrors.homePenalties || quickResultErrors.awayPenalties ? (
+              <div className="op-note is-error">
+                <span className="op-note-icon"><AlertTriangle size={12} /></span>
+                <span className="op-note-copy">
+                  <span>
+                    {quickResultErrors.homeScore || quickResultErrors.awayScore
+                      || quickResultErrors.homePenalties || quickResultErrors.awayPenalties}
+                  </span>
+                </span>
+              </div>
+            ) : null}
+
+            {shouldShowPenaltyFields(quickResultForm) ? (
+              <div className="op-note is-info">
+                <span className="op-note-icon"><ShieldCheck size={12} /></span>
+                <span className="op-note-copy">
+                  <strong>Empataron en tiempo reglamentario</strong>
+                  <span>
+                    Si se definió por penales, cargalos. Si no, dejalos vacíos y queda empate.
+                  </span>
+                </span>
+              </div>
+            ) : null}
+
+            {quickResultForm.status === 'final' ? (
+              <div className={`op-points ${quickResultForm.pointsAutocalculated ? '' : 'is-edited'}`}>
+                <div className="op-points-head">
+                  <span className="op-points-title">Puntos para la tabla</span>
+                  <span className="op-points-source">
+                    {quickResultForm.pointsAutocalculated
+                      ? 'Calculados por el reglamento · podés corregirlos'
+                      : 'Corregidos a mano'}
+                  </span>
+                </div>
+
+                {(['home', 'away'] as const).map((side) => {
+                  const club = side === 'home' ? match.homeClub : match.awayClub;
+                  const explained = quickPointsExplain[side];
+                  const baseField = side === 'home' ? 'homeBasePoints' : 'awayBasePoints';
+                  const bonusField = side === 'home' ? 'homeBonusPoints' : 'awayBonusPoints';
+                  const base = parseQuickPointNumber(quickResultForm[baseField]);
+                  const bonus = parseQuickPointNumber(quickResultForm[bonusField]);
+                  // Un término que el reglamento dio pero el número escrito ya
+                  // no refleja se muestra tachado: se ve qué se cayó y por qué.
+                  const dropped = !quickResultForm.pointsAutocalculated && bonus < explained.bonus;
+
+                  return (
+                    <div
+                      key={side}
+                      className={`op-points-row ${quickResultForm.pointsAutocalculated ? '' : 'is-edited'}`}
+                    >
+                      <span className="op-points-who">
+                        <Crest club={club} size="sm" />
+                        <span className="op-team-name">
+                          {club?.name || (side === 'home' ? 'Local' : 'Visitante')}
+                        </span>
+                      </span>
+
+                      <span className="op-points-terms">
+                        {explained.terms.map((term) => (
+                          <span
+                            key={term.id}
+                            className={`op-term ${term.active ? 'is-active' : ''} ${term.active && dropped && term.id !== 'result' ? 'is-dropped' : ''}`}
+                          >
+                            {term.label}
+                          </span>
+                        ))}
+                      </span>
+
+                      <span className="op-points-inputs">
+                        <label>
+                          Base
+                          <input
+                            className="op-number"
+                            type="number"
+                            step="any"
+                            inputMode="numeric"
+                            value={quickResultForm[baseField]}
+                            aria-label={`Puntos base de ${club?.name || side}`}
+                            onChange={(event) => onQuickPointsFieldChange(baseField, event.target.value)}
+                          />
+                        </label>
+                        <label>
+                          Bonus
+                          <input
+                            className="op-number"
+                            type="number"
+                            step="any"
+                            inputMode="numeric"
+                            value={quickResultForm[bonusField]}
+                            aria-label={`Bonus de ${club?.name || side}`}
+                            onChange={(event) => onQuickPointsFieldChange(bonusField, event.target.value)}
+                          />
+                        </label>
+                      </span>
+
+                      <span className="op-points-equals" aria-hidden="true">=</span>
+                      <span className="op-points-total">{base + bonus}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+
+            {quickResultErrors.homeBasePoints || quickResultErrors.awayBasePoints
+              || quickResultErrors.homeBonusPoints || quickResultErrors.awayBonusPoints ? (
+              <div className="op-note is-error">
+                <span className="op-note-icon"><AlertTriangle size={12} /></span>
+                <span className="op-note-copy">
+                  <span>
+                    {quickResultErrors.homeBasePoints || quickResultErrors.awayBasePoints
+                      || quickResultErrors.homeBonusPoints || quickResultErrors.awayBonusPoints}
+                  </span>
+                </span>
+              </div>
+            ) : null}
+
+            {/* Corregir un punto no se bloquea: se marca. El motivo pasa a ser
+                obligatorio porque dentro de tres meses nadie se acuerda de por
+                qué ese partido tiene un punto que el reglamento no da. */}
+            {quickResultForm.status === 'final' && !quickResultForm.pointsAutocalculated ? (
+              <>
+                <div className="op-note is-warning">
+                  <span className="op-note-icon"><AlertTriangle size={12} /></span>
+                  <span className="op-note-copy">
+                    <strong>Estos puntos no son los que da el reglamento</strong>
+                    <span>
+                      Contá por qué se corrigieron. Queda guardado con el partido.
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    className="basalt-btn basalt-btn-accent op-note-action"
+                    onClick={onQuickPointsAutofill}
+                  >
+                    <RefreshCw size={14} />
+                    Volver al reglamento
+                  </button>
+                </div>
+                <label className="op-field">
+                  <span>Por qué se corrige <span className="op-field-required">· obligatorio</span></span>
+                  <textarea
+                    rows={2}
+                    value={quickResultForm.pointsOverrideReason}
+                    placeholder="Ej: sanción del tribunal, corrección de acta"
+                    onChange={(event) => onQuickPointsFieldChange('pointsOverrideReason', event.target.value)}
+                  />
+                  {quickResultErrors.pointsOverrideReason ? (
+                    <span className="op-field-error">{quickResultErrors.pointsOverrideReason}</span>
+                  ) : null}
+                </label>
+              </>
+            ) : null}
+
+            {/* Horario y sede: UN bloque detrás de UN botón. Antes había dos
+                controles «Editar horario», uno encima del otro. */}
+            {showScheduleEdit ? (
+              <div className="op-schedule">
+                <div className="op-schedule-head">
+                  <span className="op-panel-title">Horario y sede</span>
+                  <button
+                    type="button"
+                    className="basalt-btn basalt-btn-ghost"
+                    onClick={() => setShowScheduleEdit(false)}
+                  >
+                    Ocultar
+                  </button>
+                </div>
+                <div className="op-schedule-grid">
+                  <label className="op-field">
+                    <span>Fecha</span>
+                    <DdMmYyyyDateField
+                      value={quickResultForm.scheduledDate}
+                      onChange={(iso) => onQuickResultFieldChange('scheduledDate', iso)}
+                    />
+                  </label>
+                  <label className="op-field">
+                    <span>Hora</span>
+                    <input
+                      type="time"
+                      value={quickResultForm.scheduledTime}
+                      onChange={(event) => onQuickResultFieldChange('scheduledTime', event.target.value)}
+                    />
+                  </label>
                 </div>
               </div>
-              <div className="fixture-quick-grid fixture-quick-grid-score">
-                <label className="fixture-quick-field">
-                  <span>Penales / shootout local</span>
-                  <input type="number" min={0} value={quickResultForm.homePenalties} onChange={(event) => onQuickResultFieldChange('homePenalties', event.target.value)} placeholder="Opcional" />
-                  {quickResultErrors.homePenalties ? <small className="operation-field-error">{quickResultErrors.homePenalties}</small> : null}
-                </label>
-                <label className="fixture-quick-field">
-                  <span>Penales / shootout visitante</span>
-                  <input type="number" min={0} value={quickResultForm.awayPenalties} onChange={(event) => onQuickResultFieldChange('awayPenalties', event.target.value)} placeholder="Opcional" />
-                  {quickResultErrors.awayPenalties ? <small className="operation-field-error">{quickResultErrors.awayPenalties}</small> : null}
-                </label>
-              </div>
-            </>
-          ) : null}
+            ) : null}
 
-          <div className="fixture-quick-points-head">
-            <div>
-              <span className="fixture-quick-kicker">Tabla</span>
-              <strong>{quickResultForm.status === 'final' ? 'Puntos del partido' : 'Se limpiaran hasta finalizar el partido'}</strong>
-            </div>
-            <button type="button" className="basalt-btn basalt-btn-ghost fixture-quick-autofill" onClick={onQuickPointsAutofill}>
-              <RefreshCw size={14} />
-              Autocompletar
-            </button>
-          </div>
-
-          <div className="fixture-quick-grid">
-            <label className="fixture-quick-field">
-              <span>Base local</span>
-              <input type="number" min={0} step="any" value={quickResultForm.homeBasePoints} onChange={(event) => onQuickPointsFieldChange('homeBasePoints', event.target.value)} />
-              {quickResultErrors.homeBasePoints ? <small className="operation-field-error">{quickResultErrors.homeBasePoints}</small> : null}
-            </label>
-            <label className="fixture-quick-field">
-              <span>Base visitante</span>
-              <input type="number" min={0} step="any" value={quickResultForm.awayBasePoints} onChange={(event) => onQuickPointsFieldChange('awayBasePoints', event.target.value)} />
-              {quickResultErrors.awayBasePoints ? <small className="operation-field-error">{quickResultErrors.awayBasePoints}</small> : null}
-            </label>
-            <label className="fixture-quick-field">
-              <span>Bonus / ajuste local</span>
-              <input type="number" step="any" value={quickResultForm.homeBonusPoints} onChange={(event) => onQuickPointsFieldChange('homeBonusPoints', event.target.value)} />
-              {quickResultErrors.homeBonusPoints ? <small className="operation-field-error">{quickResultErrors.homeBonusPoints}</small> : null}
-            </label>
-            <label className="fixture-quick-field">
-              <span>Bonus / ajuste visitante</span>
-              <input type="number" step="any" value={quickResultForm.awayBonusPoints} onChange={(event) => onQuickPointsFieldChange('awayBonusPoints', event.target.value)} />
-              {quickResultErrors.awayBonusPoints ? <small className="operation-field-error">{quickResultErrors.awayBonusPoints}</small> : null}
-            </label>
-          </div>
-
-          <div className="fixture-quick-totals">
-            <div className="fixture-quick-total-card">
-              <span>Total local</span>
-              <strong>{quickResultForm.status === 'final' ? totalHomePoints : 0}</strong>
-            </div>
-            <div className="fixture-quick-total-card">
-              <span>Total visitante</span>
-              <strong>{quickResultForm.status === 'final' ? totalAwayPoints : 0}</strong>
-            </div>
-          </div>
-
-          {!quickResultForm.pointsAutocalculated && quickResultForm.status === 'final' ? (
-            <label className="fixture-quick-field">
-              <span>Motivo del ajuste</span>
-              <textarea rows={2} value={quickResultForm.pointsOverrideReason} onChange={(event) => onQuickPointsFieldChange('pointsOverrideReason', event.target.value)} placeholder="Ej: sancion, correccion o bonus manual" />
-            </label>
-          ) : null}
-
-          <button type="button" className="fixture-quick-schedule-toggle" onClick={() => setShowScheduleEdit((v) => !v)}>
-            <Clock3 size={13} />
-            <span>Editar horario</span>
-            <svg className={`fixture-quick-chevron ${showScheduleEdit ? 'is-open' : ''}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
-          </button>
-
-          {showScheduleEdit ? (
-            <div className="fixture-quick-grid fixture-quick-grid-schedule">
-              <label className="fixture-quick-field">
-                <span>Fecha</span>
-                <DdMmYyyyDateField value={quickResultForm.scheduledDate} onChange={(iso) => onQuickResultFieldChange('scheduledDate', iso)} />
+            <div className="op-result-foot">
+              <label className="op-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 9 }}>
+                <span>Estado</span>
+                <select
+                  value={quickResultForm.status}
+                  aria-label="Estado del partido"
+                  onChange={(event) => onQuickResultFieldChange('status', event.target.value as MatchStatus)}
+                >
+                  {STATUS_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
               </label>
-              <label className="fixture-quick-field">
-                <span>Hora</span>
-                <input type="time" value={quickResultForm.scheduledTime} onChange={(event) => onQuickResultFieldChange('scheduledTime', event.target.value)} />
-              </label>
-            </div>
-          ) : null}
 
-          <div className="fixture-quick-actions">
-            <span className={`fixture-quick-badge ${quickResultForm.pointsAutocalculated ? 'is-auto' : 'is-manual'}`}>
-              {quickResultForm.pointsAutocalculated ? 'Puntos autocompletados' : 'Puntos editados manualmente'}
-            </span>
-            <div className="fixture-quick-action-btns">
-              <button type="button" className="basalt-btn basalt-btn-ghost" onClick={() => setShowScheduleEdit((v) => !v)}>
-                <Clock3 size={14} />
-                Editar horario
+              {!showScheduleEdit ? (
+                <button
+                  type="button"
+                  className="basalt-btn basalt-btn-accent"
+                  onClick={() => setShowScheduleEdit(true)}
+                >
+                  <Clock3 size={14} />
+                  Editar horario
+                </button>
+              ) : null}
+
+              <span className="op-result-foot-spacer" />
+
+              <button type="button" className="basalt-btn" onClick={handleQuickResultToggle}>
+                Cancelar
               </button>
-              <button type="button" className="basalt-btn basalt-btn-primary" disabled={quickBusy} onClick={handleQuickResultSave}>
+              <button
+                type="button"
+                className="basalt-btn basalt-btn-primary"
+                disabled={quickBusy}
+                onClick={handleQuickResultSave}
+              >
                 {quickBusy ? <RefreshCw size={14} className="spin" /> : <CheckCircle2 size={14} />}
-                Guardar rapido
+                Guardar resultado
               </button>
             </div>
           </div>
@@ -2405,23 +2941,7 @@ function MatchCard({
   );
 }
 
-function TeamBlock({
-  side,
-  team,
-  fallback,
-}: {
-  side: string;
-  team: MatchWithClubs['homeClub'];
-  fallback: string;
-}) {
-  return (
-    <div className="fixture-team-block">
-      <span className="fixture-team-side">{side}</span>
-      <div className="fixture-team-logo">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        {team?.logo ? <img src={team.logo} alt={team.name} className="fixture-team-logo-image" /> : <ShieldCheck size={24} />}
-      </div>
-      <span className="fixture-team-name">{team?.shortName || team?.name || fallback}</span>
-    </div>
-  );
-}
+// TeamBlock se retiró con las tarjetas: pintaba el rótulo LOCAL/VISITANTE sobre
+// un escudo de 24px y caía a un ícono genérico de escudo cuando el club no
+// traía logo. La fila usa <Crest>, que resuelve el escudo real por clave y
+// nunca cae a un dibujo sin identidad.

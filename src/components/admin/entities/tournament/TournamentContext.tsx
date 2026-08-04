@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { MatchEventDefinition } from '@/lib/matchEventCatalog';
 
 export type TournamentDraftSection = 'details' | 'format' | 'structure';
@@ -52,6 +52,7 @@ interface TournamentDirtyCtxType {
     hasDirtySection: (section: TournamentDraftSection) => boolean;
     triggerSectionSavedFlash: (section: TournamentDraftSection) => void;
     hasRecentlySavedSection: (section: TournamentDraftSection) => boolean;
+    flushDraftPersistence: () => void;
 }
 
 const STORAGE_VERSION = 1;
@@ -71,6 +72,7 @@ const TournamentDirtyCtx = createContext<TournamentDirtyCtxType>({
     hasDirtySection: () => false,
     triggerSectionSavedFlash: () => { },
     hasRecentlySavedSection: () => false,
+    flushDraftPersistence: () => { },
 });
 
 function getStorageKey(tournamentId: string) {
@@ -148,21 +150,71 @@ export function TournamentDraftProvider({
     const [legacyDirty, setLegacyDirty] = useState(() => readStoredState(storageKey).legacyDirty);
     const [recentlySavedSections, setRecentlySavedSections] = useState<TournamentDirtySections>({});
 
+    // Persistencia de drafts DEBOUNCED: no escribir localStorage sincrónicamente en cada
+    // tecleo. Un ref espeja lo último a persistir para que el flush (beforeunload) sea sync.
+    const persistTimeoutRef = useRef<number | null>(null);
+    const persistPayloadRef = useRef({ drafts, dirtySections, legacyDirty });
+    useEffect(() => {
+        persistPayloadRef.current = { drafts, dirtySections, legacyDirty };
+    });
+
+    const writePersistNow = useCallback(() => {
+        if (typeof window === 'undefined') return;
+        if (persistTimeoutRef.current !== null) {
+            window.clearTimeout(persistTimeoutRef.current);
+            persistTimeoutRef.current = null;
+        }
+        const snapshot = persistPayloadRef.current;
+        if (!hasDraftContent(snapshot.drafts, snapshot.dirtySections, snapshot.legacyDirty)) {
+            window.localStorage.removeItem(storageKey);
+            return;
+        }
+        window.localStorage.setItem(storageKey, JSON.stringify({
+            version: STORAGE_VERSION,
+            drafts: snapshot.drafts,
+            dirtySections: snapshot.dirtySections,
+            legacyDirty: snapshot.legacyDirty,
+        }));
+    }, [storageKey]);
+
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
+        // Transición a "sin draft": limpiar YA y cancelar cualquier escritura pendiente,
+        // para que un setItem viejo no re-persista el draft después del removeItem. React
+        // corre este cleanup ANTES del cuerpo del efecto siguiente, así que el clearTimeout
+        // del cleanup ya cancela lo pendiente antes de llegar a este removeItem.
         if (!hasDraftContent(drafts, dirtySections, legacyDirty)) {
+            if (persistTimeoutRef.current !== null) {
+                window.clearTimeout(persistTimeoutRef.current);
+                persistTimeoutRef.current = null;
+            }
             window.localStorage.removeItem(storageKey);
             return;
         }
 
-        window.localStorage.setItem(storageKey, JSON.stringify({
-            version: STORAGE_VERSION,
-            drafts,
-            dirtySections,
-            legacyDirty,
-        }));
+        if (persistTimeoutRef.current !== null) window.clearTimeout(persistTimeoutRef.current);
+        persistTimeoutRef.current = window.setTimeout(() => {
+            persistTimeoutRef.current = null;
+            window.localStorage.setItem(storageKey, JSON.stringify({
+                version: STORAGE_VERSION,
+                drafts,
+                dirtySections,
+                legacyDirty,
+            }));
+        }, 400);
+
+        return () => {
+            if (persistTimeoutRef.current !== null) {
+                window.clearTimeout(persistTimeoutRef.current);
+                persistTimeoutRef.current = null;
+            }
+        };
     }, [drafts, dirtySections, legacyDirty, storageKey]);
+
+    const flushDraftPersistence = useCallback(() => {
+        writePersistNow();
+    }, [writePersistNow]);
 
     const setSectionDraft = useCallback(<T,>(section: TournamentDraftSection, value: T) => {
         setDrafts((current) => ({
@@ -252,6 +304,7 @@ export function TournamentDraftProvider({
         hasDirtySection,
         triggerSectionSavedFlash,
         hasRecentlySavedSection,
+        flushDraftPersistence,
     }), [
         tournamentId,
         isDirty,
@@ -266,6 +319,7 @@ export function TournamentDraftProvider({
         hasDirtySection,
         triggerSectionSavedFlash,
         hasRecentlySavedSection,
+        flushDraftPersistence,
     ]);
 
     return (

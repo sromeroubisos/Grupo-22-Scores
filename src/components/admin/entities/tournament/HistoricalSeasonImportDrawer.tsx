@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ArchiveRestore, X } from 'lucide-react';
 import { HistoricalSeasonImportWizard } from './HistoricalSeasonImportWizard';
+import { useDialog } from './useDialog';
 import './drawer-premium.css';
 
 type HistoricalSeasonImportDrawerProps = {
@@ -19,35 +19,28 @@ export function HistoricalSeasonImportDrawer({
   seasonLabel,
   onClose,
 }: HistoricalSeasonImportDrawerProps) {
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const previousOverflow = document.body.style.overflow;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [open, onClose]);
+  // This drawer already handled Escape and locked body scroll; useDialog keeps
+  // both, adds the html-level lock iOS needs, and supplies the focus trap and
+  // focus restore it was missing.
+  const { ref: drawerRef, dialogProps: drawerDialogProps } = useDialog<HTMLDivElement>({
+    open,
+    onClose,
+    label: 'Importar torneo historico legado',
+  });
 
   if (!open || typeof document === 'undefined') return null;
 
   return createPortal(
     <>
-      <div className="pp-drawer-overlay historical-season-overlay" onClick={onClose} />
       <div
+        className="pp-drawer-overlay historical-season-overlay"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div
+        ref={drawerRef}
         className="pp-drawer-panel pp-drawer-panel-wide historical-season-drawer"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Importar torneo historico legado"
+        {...drawerDialogProps}
       >
         <div className="pp-drawer-header">
           <div className="pp-drawer-header-content">

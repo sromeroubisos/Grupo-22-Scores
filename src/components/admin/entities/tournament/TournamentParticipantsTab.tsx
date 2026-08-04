@@ -17,15 +17,16 @@
  * - All buttons functional, no placebo elements
  */
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
     Users, Search, Plus, Download, FileUp, History,
-    Pencil, Trash2, IdCard, Hash, ChevronDown, ChevronUp,
+    Pencil, Trash2, IdCard, ChevronDown,
     AlertCircle, CheckCircle2, X, MoreHorizontal, MoreVertical, SlidersHorizontal,
-    CheckSquare, Square, ArrowUpDown, Layers
+    CheckSquare, ArrowUpDown, Layers
 } from 'lucide-react';
 import './tournament-participants-flash.css';
+import './participants-console.css';
 import { Database } from '@/lib/database.types';
 
 // Context & Drawers
@@ -122,19 +123,80 @@ interface Props {
     id?: string; // tournament ID
 }
 
+const STATUS_LABEL_PLURAL: Record<ParticipantStatus, string> = {
+    active: 'Activos',
+    pending: 'Pendientes',
+    inactive: 'Inactivos',
+    disqualified: 'Descalificados',
+};
+
+const STATUS_LABEL: Record<ParticipantStatus, string> = {
+    active: 'Activo',
+    pending: 'Pendiente',
+    inactive: 'Inactivo',
+    disqualified: 'Descalificado',
+};
+
+const TYPE_LABEL: Record<ParticipantType, string> = {
+    club: 'Club',
+    national_team: 'Selección',
+    franchise: 'Franquicia',
+    invited: 'Invitado',
+    individual: 'Individual',
+};
+
+// ============================================
+// VIEWPORT (SSR-safe, ÚNICA fuente del breakpoint mobile)
+// ============================================
+// 767 DEBE coincidir con el @media (max-width: 767px) de las cards en CSS.
+// En 1c-ii se borra el toggle CSS y este número queda como única autoridad.
+const PARTICIPANTS_MOBILE_MAX_WIDTH_PX = 767;
+const PARTICIPANTS_MOBILE_MEDIA_QUERY = `(max-width: ${PARTICIPANTS_MOBILE_MAX_WIDTH_PX}px)`;
+
+function subscribeParticipantsViewport(onChange: () => void) {
+    if (typeof window === 'undefined' || !window.matchMedia) return () => {};
+    const mql = window.matchMedia(PARTICIPANTS_MOBILE_MEDIA_QUERY);
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+}
+function getParticipantsViewportSnapshot() {
+    return window.matchMedia(PARTICIPANTS_MOBILE_MEDIA_QUERY).matches;
+}
+function getParticipantsViewportServerSnapshot() {
+    // SSR/primer paint: desktop. En teléfono, tras hidratar, useSyncExternalStore
+    // re-renderiza a cards una sola vez, sin hydration mismatch.
+    return false;
+}
+
 // ============================================
 // MAIN COMPONENT
 // ============================================
 
-export function TournamentParticipantsTab({ id: tournamentId }: Props) {
+export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
     const searchParams = useSearchParams();
     const currentSeasonId =
         searchParams.get('seasonId') ||
         searchParams.get('season_id') ||
         searchParams.get('season');
+    // Fallback al current_season_id que el server ya resolvió (row del torneo, prop `data`),
+    // SOLO para los 3 fetches cuyo route resuelve season (participants/phases/phase-participants):
+    // así saltean su lookup de current_season_id. NO se usa en loadGroups para no cambiar su
+    // filtrado (grupos con season_id NULL/de temporadas previas se esconderían → pantalla vacía;
+    // ver GESTOR_TORNEOS_HALLAZGOS.md H6). El seasonId de la URL (season switcher) tiene prioridad.
+    // NOTE: current_season_id no está en database.types (H5) → cast puntual.
+    const resolvedSeasonId =
+        currentSeasonId ||
+        (data as { current_season_id?: string | null } | null | undefined)?.current_season_id ||
+        null;
     usePerfComponentLifecycle('TournamentParticipantsTab', {
         tournamentId: tournamentId || 'unknown',
     });
+    // Render condicional por breakpoint (Fase 1c). SSR-safe vía useSyncExternalStore.
+    const isMobile = useSyncExternalStore(
+        subscribeParticipantsViewport,
+        getParticipantsViewportSnapshot,
+        getParticipantsViewportServerSnapshot,
+    );
     // State
     const [participants, setParticipants] = useState<Participant[]>([]);
     const [groups, setGroups] = useState<TournamentGroup[]>([]);
@@ -158,6 +220,11 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
     const [groupFilter, setGroupFilter] = useState<string>('all');
     const [sortBy, setSortBy] = useState<string>('recent');
     const [assignmentPhaseId, setAssignmentPhaseId] = useState('');
+    // Destino del bulk: la fase, y opcionalmente un grupo DENTRO de esa fase.
+    // Antes el grupo no era estado: cada grupo era un botón propio en el panel,
+    // así que la operación se elegía y se disparaba en el mismo gesto y no había
+    // forma de ver a dónde iba a ir la selección antes de confirmarla.
+    const [assignmentGroupId, setAssignmentGroupId] = useState<string | null>(null);
     const [isPhaseAssignmentOpen, setIsPhaseAssignmentOpen] = useState(true);
 
     // Selection
@@ -211,7 +278,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
         );
         observer.observe(node);
         return () => observer.disconnect();
-    }, []);
+    }, [isMobile]);
 
     const getErrorMessage = (err: unknown, fallback: string) =>
         err instanceof Error && err.message ? err.message : fallback;
@@ -236,7 +303,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                 component: 'TournamentParticipantsTab',
             });
             const query = new URLSearchParams({ full: 'true' });
-            if (currentSeasonId) query.set('seasonId', currentSeasonId);
+            if (resolvedSeasonId) query.set('seasonId', resolvedSeasonId);
             const response = await fetch(`/api/tournaments/${tournamentId}/participants?${query.toString()}`);
             request.end({
                 status: response.status,
@@ -280,7 +347,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                 component: 'TournamentParticipantsTab',
             });
             const query = new URLSearchParams();
-            if (currentSeasonId) query.set('seasonId', currentSeasonId);
+            if (resolvedSeasonId) query.set('seasonId', resolvedSeasonId);
             const response = await fetch(`/api/tournaments/${tournamentId}/phases${query.size ? `?${query.toString()}` : ''}`, { cache: 'no-store' });
             request.end({
                 status: response.status,
@@ -300,7 +367,7 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                 component: 'TournamentParticipantsTab',
             });
             const query = new URLSearchParams();
-            if (currentSeasonId) query.set('seasonId', currentSeasonId);
+            if (resolvedSeasonId) query.set('seasonId', resolvedSeasonId);
             const response = await fetch(`/api/tournaments/${tournamentId}/phase-participants${query.size ? `?${query.toString()}` : ''}`, { cache: 'no-store' });
             request.end({
                 status: response.status,
@@ -544,6 +611,16 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
         );
     }, [filteredParticipants, mobilePhaseFilter, phaseAssignmentsByParticipant]);
 
+    // El seed es opcional y la mayoría de los torneos no lo usa: la columna
+    // quedaba con un guion en TODAS las filas, ocupando ancho para no decir
+    // nada. Aparece cuando alguien lo tiene. No se toca ni la edición del seed
+    // ni el orden por seed: el dato sigue estando, lo que se va es la columna
+    // vacía.
+    const hasAnySeed = useMemo(
+        () => participants.some((p) => typeof p.seed === 'number' && p.seed > 0),
+        [participants]
+    );
+
     const phasesWithGroups = useMemo(
         () => phases.filter((phase) => groups.some((group) => group.phase_id === phase.id)),
         [phases, groups]
@@ -584,10 +661,100 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
         );
     }, [assignmentPhases]);
 
+    // Un grupo pertenece a una fase: si la fase destino cambia, el grupo elegido
+    // deja de existir en ese destino y el selector quedaría mostrando un grupo de
+    // otra fase.
+    useEffect(() => {
+        setAssignmentGroupId((current) => {
+            if (!current) return current;
+            const group = groups.find((item) => item.id === current);
+            return group && group.phase_id === assignmentPhaseId ? current : null;
+        });
+    }, [assignmentPhaseId, groups]);
+
     const formatGroupLabel = (group: TournamentGroup) => {
         const phaseName = group.phase_id ? phaseNameById.get(group.phase_id) : '';
         return phaseName ? `${phaseName} - ${group.name}` : group.name;
     };
+
+    // ============================================
+    // DERIVADOS DE LA VISTA DE ESCRITORIO
+    // ============================================
+
+    // Un estado entra a la barra cuando tiene algo que contar. "Activos" se
+    // guarda cuando son todos: repetiría el total que ya está a su izquierda en
+    // tinta plena. El estado filtrado entra siempre, aunque su cuenta caiga a
+    // cero, porque si no el usuario se queda sin el botón para desfiltrar.
+    const statusFlags = useMemo(() => {
+        const counts: Record<ParticipantStatus, number> = {
+            active: stats.active,
+            pending: stats.pending,
+            inactive: stats.inactive,
+            disqualified: stats.disqualified,
+        };
+
+        return (Object.keys(STATUS_LABEL_PLURAL) as ParticipantStatus[])
+            .filter((status) => {
+                if (statusFilter === status) return true;
+                if (counts[status] === 0) return false;
+                return !(status === 'active' && counts.active === stats.total);
+            })
+            .map((status) => ({ status, label: STATUS_LABEL_PLURAL[status], count: counts[status] }));
+    }, [stats, statusFilter]);
+
+    const hasActiveFilters =
+        Boolean(searchQuery) || typeFilter !== 'all' || statusFilter !== 'all' || groupFilter !== 'all' || sortBy !== 'recent';
+
+    const clearFilters = () => {
+        setSearchQuery('');
+        setTypeFilter('all');
+        setStatusFilter('all');
+        setGroupFilter('all');
+        setSortBy('recent');
+    };
+
+    const groupsByPhase = useMemo(() => {
+        const map = new Map<string, TournamentGroup[]>();
+        groups.forEach((group) => {
+            if (!group.phase_id) return;
+            map.set(group.phase_id, [...(map.get(group.phase_id) ?? []), group]);
+        });
+        map.forEach((list) => list.sort((a, b) => (a.order_index ?? 999) - (b.order_index ?? 999)));
+        return map;
+    }, [groups]);
+
+    // Fase y grupo viajan en un solo valor para que el <select> pueda ofrecer
+    // "toda la fase" y sus grupos en la misma lista.
+    const assignmentTargetValue = assignmentGroupId
+        ? `group:${assignmentGroupId}`
+        : assignmentPhaseId ? `phase:${assignmentPhaseId}` : '';
+
+    const handleAssignmentTargetChange = (value: string) => {
+        const [kind, id] = value.split(':');
+        if (kind === 'group') {
+            const group = groupById.get(id);
+            if (!group) return;
+            if (group.phase_id) setAssignmentPhaseId(group.phase_id);
+            setAssignmentGroupId(group.id);
+            return;
+        }
+        setAssignmentPhaseId(id);
+        setAssignmentGroupId(null);
+    };
+
+    const assignmentTargetLabel = assignmentGroupId
+        ? groupById.get(assignmentGroupId)?.name || 'el grupo'
+        : phaseNameById.get(assignmentPhaseId) || 'la fase';
+
+    const allVisibleSelected = filteredParticipants.length > 0
+        && filteredParticipants.every((participant) => selectedIds.has(participant.id));
+
+    const selectAllRef = useRef<HTMLInputElement>(null);
+    useEffect(() => {
+        if (!selectAllRef.current) return;
+        const selectedVisible = filteredParticipants.filter((p) => selectedIds.has(p.id)).length;
+        selectAllRef.current.indeterminate = selectedVisible > 0 && selectedVisible < filteredParticipants.length;
+    }, [filteredParticipants, selectedIds]);
 
     // ============================================
     // CRUD OPERATIONS
@@ -919,11 +1086,16 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
         }
     };
 
+    // Actualización funcional: leía `selectedIds` del cierre, así que dos clics
+    // en el mismo tick —dos filas seguidas, que es como se arma una selección—
+    // partían los dos del mismo conjunto y el segundo pisaba al primero.
     const toggleSelect = (id: string) => {
-        const next = new Set(selectedIds);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
-        setSelectedIds(next);
+        setSelectedIds((current) => {
+            const next = new Set(current);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
     };
 
     // ============================================
@@ -935,41 +1107,38 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
         setTimeout(() => setToast(null), 4000);
     };
 
-    const renderPhaseRosterMembers = (items: PhaseRosterItem[], phaseId: string) => {
+    const renderRoster = (items: PhaseRosterItem[], phase: TournamentPhase) => {
         if (items.length === 0) {
-            return (
-                <div className="phase-roster-empty">
-                    Sin participantes asignados.
-                </div>
-            );
+            return <p className="pc-roster-empty">Sin equipos asignados.</p>;
         }
 
         return (
-            <div className="phase-roster-members">
+            <ul className="pc-roster" role="list">
                 {items.map((item) => (
-                    <div key={`${item.assignment.id}-${item.participant.id}`} className="phase-roster-member">
-                        <div className="phase-roster-member-logo">
+                    <li key={`${item.assignment.id}-${item.participant.id}`} className="pc-roster-item">
+                        <span className="pc-crest">
                             {item.participant.clubs?.logo_url ? (
-                                <img src={item.participant.clubs.logo_url} alt={item.participant.name} />
+                                <img src={item.participant.clubs.logo_url} alt="" loading="lazy" />
                             ) : (
-                                <IdCard />
+                                <IdCard size={13} aria-hidden="true" />
                             )}
-                        </div>
-                        <div className="phase-roster-member-main">
-                            <strong>{item.participant.name}</strong>
-                            <span>{item.group?.name || item.participant.short_code || 'Sin grupo'}</span>
-                        </div>
+                        </span>
+                        {/* Sólo el nombre: el subtítulo de antes repetía el
+                            nombre del equipo debajo del nombre del equipo, y el
+                            código ya tiene su lugar en la tabla. */}
+                        <span className="pc-roster-name" title={item.participant.name}>{item.participant.name}</span>
                         <button
                             type="button"
-                            className="phase-roster-remove"
-                            onClick={() => handleRemoveOneFromPhase(phaseId, item.participant.id)}
-                            title="Quitar solo de esta fase"
+                            className="pc-roster-remove"
+                            onClick={() => handleRemoveOneFromPhase(phase.id, item.participant.id)}
+                            aria-label={`Quitar a ${item.participant.name} de ${phase.name}`}
+                            title={`Quitar de ${phase.name}`}
                         >
-                            <X />
+                            <X size={14} aria-hidden="true" />
                         </button>
-                    </div>
+                    </li>
                 ))}
-            </div>
+            </ul>
         );
     };
 
@@ -978,11 +1147,29 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
     // ============================================
 
     if (loading) {
+        // Era un spinner centrado en una pantalla vacía de alto completo: durante
+        // la espera no se sabe si lo que viene es una tabla, una grilla o un
+        // aviso, y al llegar los datos la página salta entera. El esqueleto tiene
+        // la forma de lo que va a aparecer —cabecera, barra de filtros, filas— así
+        // que reserva el espacio y la llegada no mueve nada.
         return (
-            <div className="participants-flash-container">
-                <div className="loading-container">
-                    <div className="spinner" />
-                    <div className="loading-text">Cargando participantes...</div>
+            <div className="participants-flash-container" aria-busy="true" aria-live="polite">
+                <span className="sr-only">Cargando participantes</span>
+                <div className="participants-skeleton" aria-hidden="true">
+                    <div className="participants-skeleton-header">
+                        <span className="skeleton-block skeleton-title" />
+                        <span className="skeleton-block skeleton-pill" />
+                    </div>
+                    <div className="participants-skeleton-toolbar">
+                        <span className="skeleton-block skeleton-search" />
+                        <span className="skeleton-block skeleton-filter" />
+                        <span className="skeleton-block skeleton-filter" />
+                    </div>
+                    <div className="participants-skeleton-rows">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <span key={i} className="skeleton-block skeleton-row" />
+                        ))}
+                    </div>
                 </div>
             </div>
         );
@@ -994,36 +1181,56 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
 
     return (
         <div className="participants-flash-container">
-            {/* =====================================================
-                Mobile (<= 767px) - completamente rediseñado.
-                Oculto en desktop via CSS (.participants-flash-container).
-                ===================================================== */}
+            {/* Render condicional por breakpoint (Fase 1c): cards en <=767, tabla
+                en >=768. Solo un árbol en el DOM a la vez; estado compartido arriba
+                del condicional (rotar el teléfono preserva selección/filtros). */}
+            {isMobile ? (
             <section className="tournament-participants-mobile" aria-label="Participantes del torneo">
-                {/* ===== Counter strip 5-col: Total / Activos / Inact. / Pend. / Desc. ===== */}
+                {/* La tira traía cinco cajas fijas —Total, Activos, Inact., Pend.,
+                    Desc.— y en un torneo sano tres marcan cero. Cinco columnas en
+                    390px obligan además a abreviar las etiquetas ("Inact.",
+                    "Desc."), así que se paga ancho, se recorta el idioma y tres de
+                    las cinco no dicen nada. Ahora entra la que siempre importa y
+                    las de estado sólo cuando hay algo de ese estado; con menos
+                    cajas las etiquetas entran enteras. */}
+                {/* Y si no hay ningún estado que reportar, la tira entera sobra: el
+                    chip "Todos" de los filtros, doce píxeles más abajo, ya trae el
+                    total. Una caja a todo el ancho para repetir ese número es la
+                    parte más cara de la pantalla más chica. */}
+                {(stats.inactive > 0 || stats.pending > 0 || stats.disqualified > 0) && (
                 <header className="tsm-hero">
                     <div className="tsm-counter-strip">
                         <div className="tsm-counter-box">
                             <span className="tsm-counter-label">Total</span>
                             <span className="tsm-counter-value">{stats.total}</span>
                         </div>
-                        <div className="tsm-counter-box is-active">
-                            <span className="tsm-counter-label">Activos</span>
-                            <span className="tsm-counter-value">{stats.active}</span>
-                        </div>
-                        <div className="tsm-counter-box">
-                            <span className="tsm-counter-label">Inact.</span>
-                            <span className="tsm-counter-value">{stats.inactive}</span>
-                        </div>
-                        <div className="tsm-counter-box is-pending">
-                            <span className="tsm-counter-label">Pend.</span>
-                            <span className="tsm-counter-value">{stats.pending}</span>
-                        </div>
-                        <div className="tsm-counter-box is-error">
-                            <span className="tsm-counter-label">Desc.</span>
-                            <span className="tsm-counter-value">{stats.disqualified}</span>
-                        </div>
+                        {stats.active > 0 && stats.active !== stats.total && (
+                            <div className="tsm-counter-box is-active">
+                                <span className="tsm-counter-label">Activos</span>
+                                <span className="tsm-counter-value">{stats.active}</span>
+                            </div>
+                        )}
+                        {stats.inactive > 0 && (
+                            <div className="tsm-counter-box">
+                                <span className="tsm-counter-label">Inactivos</span>
+                                <span className="tsm-counter-value">{stats.inactive}</span>
+                            </div>
+                        )}
+                        {stats.pending > 0 && (
+                            <div className="tsm-counter-box is-pending">
+                                <span className="tsm-counter-label">Pendientes</span>
+                                <span className="tsm-counter-value">{stats.pending}</span>
+                            </div>
+                        )}
+                        {stats.disqualified > 0 && (
+                            <div className="tsm-counter-box is-error">
+                                <span className="tsm-counter-label">Descalif.</span>
+                                <span className="tsm-counter-value">{stats.disqualified}</span>
+                            </div>
+                        )}
                     </div>
                 </header>
+                )}
 
                 {/* Sentinel for IntersectionObserver — when this 1px element
                      leaves the viewport, the toolbar reveals a compact count
@@ -1247,7 +1454,6 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                     <ul className="tsm-participant-list" role="list">
                         {visibleMobileParticipants.slice(0, mobileVisibleCount).map((p, idx) => {
                             const isChecked = selectedIds.has(p.id);
-                            const phaseChips = phaseAssignmentsByParticipant.get(p.id) ?? [];
                             // section letter (only when sorted alpha)
                             const sectionLetter = (sortBy === 'name-asc' || sortBy === 'name-desc')
                                 ? (p.name?.charAt(0).toUpperCase() || '#')
@@ -1682,417 +1888,446 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
                     </div>
                 )}
             </section>
+            ) : (
+            <div className="pc-shell">
 
-            {/* Header */}
-            <header className="participants-header">
-                <div className="participants-header-left">
-                    <div className="participants-section-label">Gestión de Participantes</div>
-                    <h1 className="participants-title">Participantes del Torneo</h1>
-                    <div className="participants-counters">
-                        <div className="counter-pill">
-                            <span className="counter-pill-label">Total</span>
-                            <span className="counter-pill-value">{stats.total}</span>
+            {/* Barra de comando: el recuento, los estados —que ahora filtran— y
+                las acciones. El título propio se retira: la pestaña ya se llama
+                Participantes y el torneo ya tiene su nombre en la barra de
+                arriba, así que era el tercer rótulo para la misma cosa. */}
+            <section className="pc-bar" aria-label="Resumen y acciones de participantes">
+                <div className="pc-bar-top">
+                    <div className="pc-count">
+                        <span className="pc-count-value">{stats.total}</span>
+                        <span className="pc-count-label">
+                            {stats.total === 1 ? 'Participante' : 'Participantes'}
+                        </span>
+                    </div>
+
+                    {statusFlags.length > 0 && (
+                        <div className="pc-flags" role="group" aria-label="Filtrar por estado">
+                            {statusFlags.map((flag) => {
+                                const isOn = statusFilter === flag.status;
+                                return (
+                                    <button
+                                        key={flag.status}
+                                        type="button"
+                                        className={`pc-flag is-${flag.status}`}
+                                        aria-pressed={isOn}
+                                        onClick={() => setStatusFilter(isOn ? 'all' : flag.status)}
+                                    >
+                                        <span className="pc-flag-dot" aria-hidden="true" />
+                                        <span>{flag.label}</span>
+                                        <span className="pc-flag-count">{flag.count}</span>
+                                    </button>
+                                );
+                            })}
                         </div>
-                        <div className="counter-pill active">
-                            <span className="counter-pill-label">Activos</span>
-                            <span className="counter-pill-value">{stats.active}</span>
-                        </div>
-                        <div className="counter-pill inactive">
-                            <span className="counter-pill-label">Inactivos</span>
-                            <span className="counter-pill-value">{stats.inactive}</span>
-                        </div>
-                        {stats.pending > 0 && (
-                            <div className="counter-pill pending">
-                                <span className="counter-pill-label">Pendientes</span>
-                                <span className="counter-pill-value">{stats.pending}</span>
-                            </div>
-                        )}
+                    )}
+
+                    <div className="pc-bar-actions">
+                        <button type="button" onClick={() => setIsHistoryDrawerOpen(true)} className="basalt-btn">
+                            <History size={15} aria-hidden="true" />
+                            <span>Historial</span>
+                        </button>
+                        <button type="button" onClick={handleExport} className="basalt-btn">
+                            <Download size={15} aria-hidden="true" />
+                            <span>Exportar</span>
+                        </button>
+                        <button type="button" onClick={() => setIsImportDrawerOpen(true)} className="basalt-btn">
+                            <FileUp size={15} aria-hidden="true" />
+                            <span>Importar</span>
+                        </button>
+                        <button type="button" onClick={() => setIsAddDrawerOpen(true)} className="basalt-btn basalt-btn-primary">
+                            <Plus size={15} aria-hidden="true" />
+                            <span>Nuevo participante</span>
+                        </button>
                     </div>
                 </div>
-                <div className="participants-header-actions">
-                    <button
-                        onClick={() => setIsHistoryDrawerOpen(true)}
-                        className="btn-flash"
-                        aria-label="Historial de participantes"
-                    >
-                        <History />
-                        <span>Historial</span>
-                    </button>
-                    <button
-                        onClick={handleExport}
-                        className="btn-flash"
-                        aria-label="Exportar participantes"
-                    >
-                        <Download />
-                        <span>Exportar</span>
-                    </button>
-                    <button
-                        onClick={() => setIsImportDrawerOpen(true)}
-                        className="btn-flash"
-                        aria-label="Importar participantes"
-                    >
-                        <FileUp />
-                        <span>Importar</span>
-                    </button>
-                    <button
-                        onClick={() => setIsAddDrawerOpen(true)}
-                        className="btn-flash primary"
-                        aria-label="Nuevo participante"
-                    >
-                        <Plus />
-                        <span>Nuevo Participante</span>
-                    </button>
-                </div>
-            </header>
 
-            {/* Filter Bar */}
-            <div className="participants-filter-bar">
-                <div className="filter-input-wrapper">
-                    <Search />
-                    <input
-                        type="text"
-                        className="filter-input"
-                        placeholder="Buscar por nombre o código..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-                <select className="filter-select" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                    <option value="all">Todos los Tipos</option>
-                    <option value="club">Club</option>
-                    <option value="national_team">Selección</option>
-                    <option value="individual">Individual</option>
-                </select>
-                <select className="filter-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                    <option value="all">Todos los Estados</option>
-                    <option value="active">Activos</option>
-                    <option value="inactive">Inactivos</option>
-                    <option value="pending">Pendientes</option>
-                    <option value="disqualified">Descalificados</option>
-                </select>
-                {groups.length > 0 && (
-                    <select className="filter-select" value={groupFilter} onChange={(e) => setGroupFilter(e.target.value)}>
-                        <option value="all">Todos los Grupos</option>
-                        {groups.map(g => (
-                            <option key={g.id} value={g.id}>{formatGroupLabel(g)}</option>
-                        ))}
+                <div className="pc-bar-filters">
+                    <div className="pc-search">
+                        <Search size={15} aria-hidden="true" />
+                        <input
+                            type="search"
+                            placeholder="Buscar por nombre o código"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            aria-label="Buscar participante"
+                        />
+                        {searchQuery && (
+                            <button
+                                type="button"
+                                className="pc-search-clear"
+                                onClick={() => setSearchQuery('')}
+                                aria-label="Limpiar búsqueda"
+                            >
+                                <X size={14} aria-hidden="true" />
+                            </button>
+                        )}
+                    </div>
+                    <select
+                        className="pc-select"
+                        value={typeFilter}
+                        onChange={(e) => setTypeFilter(e.target.value)}
+                        aria-label="Filtrar por tipo"
+                    >
+                        <option value="all">Todos los tipos</option>
+                        <option value="club">Club</option>
+                        <option value="national_team">Selección</option>
+                        <option value="individual">Individual</option>
                     </select>
-                )}
-                <select className="filter-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                    <option value="recent">Más recientes</option>
-                    <option value="name-asc">Nombre (A-Z)</option>
-                    <option value="name-desc">Nombre (Z-A)</option>
-                    <option value="seed">Seed / Ranking</option>
-                </select>
-            </div>
-
-            {assignmentPhases.length > 0 && (
-                <section className={`phase-assignment-panel ${isPhaseAssignmentOpen ? 'is-open' : 'is-collapsed'}`}>
-                    <button
-                        type="button"
-                        className="phase-assignment-toggle"
-                        onClick={() => setIsPhaseAssignmentOpen((current) => !current)}
-                        aria-expanded={isPhaseAssignmentOpen}
-                        aria-label={isPhaseAssignmentOpen ? 'Cerrar asignacion rapida' : 'Abrir asignacion rapida'}
+                    {groups.length > 0 && (
+                        <select
+                            className="pc-select"
+                            value={groupFilter}
+                            onChange={(e) => setGroupFilter(e.target.value)}
+                            aria-label="Filtrar por grupo"
+                        >
+                            <option value="all">Todos los grupos</option>
+                            {groups.map(g => (
+                                <option key={g.id} value={g.id}>{formatGroupLabel(g)}</option>
+                            ))}
+                        </select>
+                    )}
+                    <select
+                        className="pc-select"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        aria-label="Ordenar participantes"
                     >
-                        {isPhaseAssignmentOpen ? <ChevronUp /> : <ChevronDown />}
-                    </button>
+                        <option value="recent">Más recientes</option>
+                        <option value="name-asc">Nombre (A-Z)</option>
+                        <option value="name-desc">Nombre (Z-A)</option>
+                        <option value="seed">Seed / Ranking</option>
+                    </select>
+                    {hasActiveFilters && (
+                        <button type="button" className="pc-clear" onClick={clearFilters}>
+                            Limpiar filtros
+                        </button>
+                    )}
+                </div>
+            </section>
 
-                    <div className="phase-assignment-header">
-                        <div className="phase-assignment-copy-block">
-                            {isPhaseAssignmentOpen && <div className="phase-assignment-kicker">Gestion por fase</div>}
-                            <h2 className="phase-assignment-title">Participantes por fase</h2>
-                            {isPhaseAssignmentOpen && (
-                                <p className="phase-assignment-copy">
-                                    Agrega o quita participantes de una fase sin borrarlos del torneo.
-                                </p>
-                            )}
+            {/* Tablero de fases: cada fase es una columna con su plantel. Los
+                botones de asignación se fueron a la barra de selección, abajo,
+                que es donde está el dato que operan: acá quedaban desactivados
+                pidiendo "Selecciona equipos en la tabla" a media pantalla de
+                distancia de la tabla. */}
+            {assignmentPhases.length > 0 && (
+                <section className="pc-panel" aria-label="Participantes por fase">
+                    <div className="pc-panel-head">
+                        <div className="pc-panel-copy">
+                            <span className="pc-panel-title">Participantes por fase</span>
+                            <p className="pc-panel-hint">
+                                Cada fase tiene su propio plantel. Quitar a un equipo de una fase no lo borra del torneo.
+                            </p>
                         </div>
+                        <button
+                            type="button"
+                            className="pc-panel-toggle"
+                            onClick={() => setIsPhaseAssignmentOpen((current) => !current)}
+                            aria-expanded={isPhaseAssignmentOpen}
+                        >
+                            <span>{isPhaseAssignmentOpen ? 'Ocultar' : 'Ver planteles'}</span>
+                            <ChevronDown size={14} aria-hidden="true" />
+                        </button>
                     </div>
 
                     {isPhaseAssignmentOpen && (
-                        <div className="phase-assignment-body">
-                            <div className="phase-assignment-controls">
-                                <select
-                                    className="filter-select"
-                                    value={assignmentPhaseId}
-                                    onChange={(event) => setAssignmentPhaseId(event.target.value)}
-                                    disabled={groupAssignmentLoading}
-                                >
-                                    {assignmentPhases.map((phase) => (
-                                        <option key={phase.id} value={phase.id}>
-                                            {phase.name}
-                                        </option>
-                                    ))}
-                                </select>
+                        <div className="pc-board">
+                            {assignmentPhases.map((phase, phaseIndex) => {
+                                const roster = phaseRosterByPhase.get(phase.id) ?? [];
+                                const groupsForPhase = groupsByPhase.get(phase.id) ?? [];
+                                const ungroupedRoster = roster.filter((item) => !item.group);
+                                const phaseTotal = participantCountByPhase.get(phase.id) ?? 0;
 
-                                <button
-                                    type="button"
-                                    className="btn-flash"
-                                    onClick={() => handleBulkAssignPhase(assignmentPhaseId, null)}
-                                    disabled={groupAssignmentLoading || selectedIds.size === 0}
-                                >
-                                    Agregar a fase
-                                </button>
+                                return (
+                                    <article key={phase.id} className="pc-phase">
+                                        <header className="pc-phase-head">
+                                            {/* Decía `order_index + 1`, dando por sentado que el
+                                                índice arranca en 0. En este torneo arranca en 1,
+                                                así que la Fase Regular —"Fase 1" en Estructura—
+                                                se anunciaba acá como "Fase #2". Se numera por
+                                                posición en la lista ordenada, que es lo que hace
+                                                Estructura. */}
+                                            <span className="pc-phase-index">Fase {phaseIndex + 1}</span>
+                                            <h3 className="pc-phase-name" title={phase.name}>{phase.name}</h3>
+                                            <span className="pc-phase-count">
+                                                {phaseTotal} equipo{phaseTotal === 1 ? '' : 's'}
+                                            </span>
+                                        </header>
 
-                                <button
-                                    type="button"
-                                    className="btn-flash danger"
-                                    onClick={() => handleBulkRemoveFromPhase(assignmentPhaseId)}
-                                    disabled={groupAssignmentLoading || selectedIds.size === 0}
-                                >
-                                    Quitar de fase
-                                </button>
-                            </div>
-
-                            {assignableGroups.length > 0 && (
-                                <div className="phase-assignment-groups">
-                                    {assignableGroups.map((group) => {
-                                        const participantCount = participantCountByGroup.get(group.id) ?? 0;
-
-                                        return (
-                                            <button
-                                                key={group.id}
-                                                type="button"
-                                                className="phase-group-action"
-                                                onClick={() => handleBulkAssignPhase(group.phase_id || assignmentPhaseId, group.id)}
-                                                disabled={groupAssignmentLoading || selectedIds.size === 0}
-                                            >
-                                                <div className="phase-group-action-header">
-                                                    <span className="phase-group-name">{group.name}</span>
-                                                    <span className="phase-group-count">
-                                                        {participantCount} equipo{participantCount === 1 ? '' : 's'}
-                                                    </span>
-                                                </div>
-                                                <span className="phase-group-phase">
-                                                    {group.phase_id ? phaseNameById.get(group.phase_id) || 'Fase actual' : 'Fase actual'}
-                                                </span>
-                                                <span className="phase-group-cta">
-                                                    {selectedIds.size > 0
-                                                        ? `Asignar ${selectedIds.size} seleccionado${selectedIds.size === 1 ? '' : 's'}`
-                                                        : 'Selecciona equipos en la tabla'}
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            )}
-
-                            <div className="phase-assignment-hint">
-                                {selectedIds.size > 0
-                                    ? `${selectedIds.size} participante${selectedIds.size === 1 ? '' : 's'} seleccionado${selectedIds.size === 1 ? '' : 's'} para ${phaseNameById.get(assignmentPhaseId) || 'la fase seleccionada'}.`
-                                    : 'Marca uno o mas participantes en la tabla para operar sobre la fase elegida.'}
-                            </div>
-
-                            <div className="phase-roster-grid">
-                                {assignmentPhases.map((phase) => {
-                                    const roster = phaseRosterByPhase.get(phase.id) ?? [];
-                                    const groupsForPhase = groups.filter((group) => group.phase_id === phase.id);
-                                    const ungroupedRoster = roster.filter((item) => !item.group);
-
-                                    return (
-                                        <article key={phase.id} className="phase-roster-card">
-                                            <div className="phase-roster-card-head">
-                                                <div>
-                                                    <span className="phase-roster-kicker">Fase #{phase.order_index + 1}</span>
-                                                    <h3>{phase.name}</h3>
-                                                    <p>{phase.phase_type} - {participantCountByPhase.get(phase.id) ?? 0} participante{(participantCountByPhase.get(phase.id) ?? 0) === 1 ? '' : 's'}</p>
-                                                </div>
-                                            </div>
-
-                                            {groupsForPhase.length > 0 ? (
-                                                <div className="phase-roster-group-list">
-                                                    {groupsForPhase.map((group) => {
-                                                        const groupRoster = roster.filter((item) => item.group?.id === group.id);
-
-                                                        return (
-                                                            <div key={group.id} className="phase-roster-group-row">
-                                                                <div className="phase-roster-group-title">
-                                                                    <strong>{group.name}</strong>
-                                                                    <span>{groupRoster.length} equipo{groupRoster.length === 1 ? '' : 's'}</span>
-                                                                </div>
-                                                                {renderPhaseRosterMembers(groupRoster, phase.id)}
+                                        {groupsForPhase.length > 0 ? (
+                                            <>
+                                                {groupsForPhase.map((group) => {
+                                                    const groupRoster = roster.filter((item) => item.group?.id === group.id);
+                                                    return (
+                                                        <div key={group.id} className="pc-phase-group">
+                                                            <div className="pc-phase-group-label">
+                                                                <strong>{group.name}</strong>
+                                                                <span>{groupRoster.length}</span>
                                                             </div>
-                                                        );
-                                                    })}
-
-                                                    {ungroupedRoster.length > 0 && (
-                                                        <div className="phase-roster-group-row">
-                                                            <div className="phase-roster-group-title">
-                                                                <strong>Sin grupo</strong>
-                                                                <span>{ungroupedRoster.length} equipo{ungroupedRoster.length === 1 ? '' : 's'}</span>
-                                                            </div>
-                                                            {renderPhaseRosterMembers(ungroupedRoster, phase.id)}
+                                                            {renderRoster(groupRoster, phase)}
                                                         </div>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                renderPhaseRosterMembers(roster, phase.id)
-                                            )}
-                                        </article>
-                                    );
-                                })}
-                            </div>
+                                                    );
+                                                })}
+
+                                                {ungroupedRoster.length > 0 && (
+                                                    <div className="pc-phase-group">
+                                                        <div className="pc-phase-group-label">
+                                                            <strong>Sin grupo</strong>
+                                                            <span>{ungroupedRoster.length}</span>
+                                                        </div>
+                                                        {renderRoster(ungroupedRoster, phase)}
+                                                    </div>
+                                                )}
+                                            </>
+                                        ) : (
+                                            renderRoster(roster, phase)
+                                        )}
+                                    </article>
+                                );
+                            })}
                         </div>
                     )}
                 </section>
             )}
 
-            {/* Table */}
-            <div className="participants-table-container">
-                <div className="participants-table-scroll">
-                    <table className="participants-table">
+            {/* Tabla */}
+            <div className="pc-table-wrap">
+                <div className="pc-table-scroll">
+                    <table className="pc-table">
                         <thead>
                             <tr>
-                                <th>
+                                <th scope="col">
                                     <input
+                                        ref={selectAllRef}
                                         type="checkbox"
-                                        className="table-checkbox"
-                                        checked={selectedIds.size === filteredParticipants.length && filteredParticipants.length > 0}
+                                        className="pc-check"
+                                        checked={allVisibleSelected}
                                         onChange={toggleAll}
+                                        aria-label="Seleccionar todos los participantes visibles"
                                     />
                                 </th>
-                                <th>Participante</th>
-                                <th>Tipo</th>
-                                <th>Seed</th>
-                                {assignmentPhases.length > 0 && <th>Fases</th>}
-                                <th>Estado</th>
-                                <th>Acciones</th>
+                                {/* Estado pegado al nombre: es lo que más se
+                                    barre de una fila, y al final de la tira
+                                    quedaba a 400px del equipo que califica. */}
+                                <th scope="col" className="pc-col-name">Participante</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Tipo</th>
+                                {hasAnySeed && <th scope="col">Seed</th>}
+                                {assignmentPhases.length > 0
+                                    ? <th scope="col" className="pc-col-phases">Fases</th>
+                                    : null}
+                                <th scope="col" className={assignmentPhases.length > 0 ? undefined : 'pc-col-grow'}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredParticipants.length === 0 ? (
                                 <tr>
-                                    <td colSpan={assignmentPhases.length > 0 ? 7 : 6}>
-                                        <div className="empty-state">
-                                            <Users />
-                                            <div className="empty-state-title">No se encontraron participantes</div>
-                                            <div className="empty-state-description">
-                                                {searchQuery || typeFilter !== 'all' || statusFilter !== 'all' || groupFilter !== 'all'
-                                                    ? 'Prueba ajustando los filtros para ver más resultados.'
-                                                    : 'Todavía no hay participantes. Agrega el primer participante para comenzar.'}
-                                            </div>
-                                            {(searchQuery || typeFilter !== 'all' || statusFilter !== 'all' || groupFilter !== 'all') && (
-                                                <button
-                                                    className="empty-state-cta"
-                                                    onClick={() => {
-                                                        setSearchQuery('');
-                                                        setTypeFilter('all');
-                                                        setStatusFilter('all');
-                                                        setGroupFilter('all');
-                                                    }}
-                                                >
+                                    {/* 5 fijas (casilla, participante, tipo, estado, acciones)
+                                        más las dos que aparecen según el torneo. */}
+                                    <td className="pc-cell-empty" colSpan={5 + (hasAnySeed ? 1 : 0) + (assignmentPhases.length > 0 ? 1 : 0)}>
+                                        <div className="pc-empty">
+                                            <span className="pc-empty-glyph"><Users size={20} aria-hidden="true" /></span>
+                                            <span className="pc-empty-title">
+                                                {hasActiveFilters ? 'Ningún participante coincide' : 'Todavía no hay participantes'}
+                                            </span>
+                                            <p className="pc-empty-text">
+                                                {hasActiveFilters
+                                                    ? 'Ajustá los filtros o limpialos para volver a ver el plantel completo.'
+                                                    : 'Agregá clubes desde el catálogo o importá una lista para armar el plantel del torneo.'}
+                                            </p>
+                                            {hasActiveFilters ? (
+                                                <button type="button" className="basalt-btn" onClick={clearFilters}>
                                                     Limpiar filtros
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    className="basalt-btn basalt-btn-primary"
+                                                    onClick={() => setIsAddDrawerOpen(true)}
+                                                >
+                                                    <Plus size={15} aria-hidden="true" />
+                                                    <span>Nuevo participante</span>
                                                 </button>
                                             )}
                                         </div>
                                     </td>
                                 </tr>
                             ) : (
-                                filteredParticipants.map(p => (
-                                    <tr
-                                        key={p.id}
-                                        className={selectedIds.has(p.id) ? 'selected' : ''}
-                                        onClick={() => toggleSelect(p.id)}
-                                    >
-                                        <td onClick={(e) => e.stopPropagation()}>
-                                            <input
-                                                type="checkbox"
-                                                className="table-checkbox"
-                                                checked={selectedIds.has(p.id)}
-                                                onChange={() => toggleSelect(p.id)}
-                                            />
-                                        </td>
-                                        <td>
-                                            <div className="participant-cell">
-                                                <div className="participant-logo">
-                                                    {p.clubs?.logo_url ? (
-                                                        <img src={p.clubs.logo_url} alt={p.name} />
-                                                    ) : (
-                                                        <IdCard />
-                                                    )}
-                                                </div>
-                                                <div className="participant-info">
-                                                    <div className="participant-name">{p.name}</div>
-                                                    <div className="participant-code">{p.short_code || '---'}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div className="type-badge">
-                                                <Users />
-                                                {p.type === 'club' ? 'Club' : p.type === 'national_team' ? 'Selección' : 'Individual'}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div className="seed-cell">
-                                                <Hash />
-                                                {p.seed || '-'}
-                                            </div>
-                                        </td>
-                                        {assignmentPhases.length > 0 && (
-                                            <td>
-                                                {(phaseAssignmentsByParticipant.get(p.id) ?? []).length > 0 ? (
-                                                    <div className="participant-phase-cell">
-                                                        {(phaseAssignmentsByParticipant.get(p.id) ?? []).map((item) => (
-                                                            <span key={`${item.assignment.phase_id}-${item.assignment.group_id || 'phase'}`} className="participant-phase-chip">
-                                                                {phaseNameById.get(item.assignment.phase_id) || 'Fase'}
-                                                                {item.group ? ` - ${item.group.name}` : ''}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                ) : (
-                                                    <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>-</span>
-                                                )}
+                                filteredParticipants.map(p => {
+                                    const phaseItems = phaseAssignmentsByParticipant.get(p.id) ?? [];
+                                    return (
+                                        <tr
+                                            key={p.id}
+                                            className={selectedIds.has(p.id) ? 'is-selected' : ''}
+                                            onClick={() => toggleSelect(p.id)}
+                                        >
+                                            <td onClick={(e) => e.stopPropagation()}>
+                                                <input
+                                                    type="checkbox"
+                                                    className="pc-check"
+                                                    checked={selectedIds.has(p.id)}
+                                                    onChange={() => toggleSelect(p.id)}
+                                                    aria-label={`Seleccionar ${p.name}`}
+                                                />
                                             </td>
-                                        )}
-                                        <td>
-                                            <StatusBadge status={p.status} />
-                                        </td>
-                                        <td onClick={(e) => e.stopPropagation()}>
-                                            <div className="action-buttons">
-                                                <button
-                                                    className="action-btn"
-                                                    onClick={() => setEditingParticipant(p)}
-                                                    title="Editar"
-                                                >
-                                                    <Pencil />
-                                                </button>
-                                                <button
-                                                    className="action-btn danger"
-                                                    onClick={() => handleDelete(p.id)}
-                                                    title="Eliminar"
-                                                >
-                                                    <Trash2 />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                                            <td className="pc-col-name">
+                                                <div className="pc-team">
+                                                    <span className="pc-crest">
+                                                        {p.clubs?.logo_url ? (
+                                                            <img src={p.clubs.logo_url} alt="" loading="lazy" />
+                                                        ) : (
+                                                            <IdCard size={15} aria-hidden="true" />
+                                                        )}
+                                                    </span>
+                                                    <span className="pc-team-copy">
+                                                        <span className="pc-team-name" title={p.name}>{p.name}</span>
+                                                        {p.short_code && <span className="pc-team-code">{p.short_code}</span>}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span className={`pc-state is-${p.status}`}>
+                                                    {STATUS_LABEL[p.status] ?? p.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className="pc-cell-mono">{TYPE_LABEL[p.type] ?? p.type}</span>
+                                            </td>
+                                            {hasAnySeed && (
+                                                <td>
+                                                    <span className="pc-cell-num">{p.seed || <span className="pc-dash">—</span>}</span>
+                                                </td>
+                                            )}
+                                            {assignmentPhases.length > 0 && (
+                                                <td className="pc-col-phases">
+                                                    {phaseItems.length > 0 ? (
+                                                        <div className="pc-chips">
+                                                            {phaseItems.map((item) => (
+                                                                <span
+                                                                    key={`${item.assignment.phase_id}-${item.assignment.group_id || 'phase'}`}
+                                                                    className="pc-chip"
+                                                                >
+                                                                    {phaseNameById.get(item.assignment.phase_id) || 'Fase'}
+                                                                    {item.group ? ` · ${item.group.name}` : ''}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="pc-dash">—</span>
+                                                    )}
+                                                </td>
+                                            )}
+                                            <td
+                                                className={assignmentPhases.length > 0 ? undefined : 'pc-col-grow'}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <div className="pc-row-actions">
+                                                    <button
+                                                        type="button"
+                                                        className="pc-icon-btn"
+                                                        onClick={() => setEditingParticipant(p)}
+                                                        aria-label={`Editar ${p.name}`}
+                                                        title="Editar"
+                                                    >
+                                                        <Pencil size={15} aria-hidden="true" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="pc-icon-btn is-danger"
+                                                        onClick={() => handleDelete(p.id)}
+                                                        aria-label={`Eliminar ${p.name}`}
+                                                        title="Eliminar"
+                                                    >
+                                                        <Trash2 size={15} aria-hidden="true" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>
                 </div>
 
-                {/* Footer */}
-                <div className="participants-table-footer">
-                    <div className="footer-info">
-                        Mostrando <span>{filteredParticipants.length}</span> de <span>{participants.length}</span> participantes
-                    </div>
-                    {selectedIds.size > 0 && (
-                        <div className="footer-actions">
-                            <div className="bulk-action-badge">
-                                {selectedIds.size} seleccionados
-                            </div>
-                            <div className="separator" />
-                            <button className="btn-flash danger" onClick={handleBulkDelete}>
-                                <Trash2 />
-                                Eliminar seleccionados
-                            </button>
-                        </div>
-                    )}
+                <div className="pc-foot">
+                    <span>
+                        {filteredParticipants.length === participants.length
+                            ? <><strong>{participants.length}</strong> participante{participants.length === 1 ? '' : 's'} en el torneo</>
+                            : <><strong>{filteredParticipants.length}</strong> de {participants.length} participantes</>}
+                    </span>
+                    {selectedIds.size > 0 && <span>{selectedIds.size} seleccionado{selectedIds.size === 1 ? '' : 's'}</span>}
                 </div>
             </div>
+
+            {/* Barra de selección: aparece con la selección y trae lo que se
+                puede hacer con ella. */}
+            {selectedIds.size > 0 && (
+                <div className="pc-selection" role="region" aria-label="Acciones sobre la selección">
+                    <span className="pc-selection-count">
+                        <strong>{selectedIds.size}</strong> seleccionado{selectedIds.size === 1 ? '' : 's'}
+                    </span>
+                    <button type="button" className="pc-clear" onClick={() => setSelectedIds(new Set())}>
+                        Limpiar
+                    </button>
+
+                    {assignmentPhases.length > 0 && (
+                        <>
+                            <span className="pc-selection-sep" aria-hidden="true" />
+                            <select
+                                className="pc-select"
+                                value={assignmentTargetValue}
+                                onChange={(event) => handleAssignmentTargetChange(event.target.value)}
+                                disabled={groupAssignmentLoading}
+                                aria-label="Fase o grupo de destino"
+                            >
+                                {assignmentPhases.map((phase) => {
+                                    const phaseGroups = groupsByPhase.get(phase.id) ?? [];
+                                    return (
+                                        <optgroup key={phase.id} label={phase.name}>
+                                            <option value={`phase:${phase.id}`}>{phase.name} — sin grupo</option>
+                                            {phaseGroups.map((group) => (
+                                                <option key={group.id} value={`group:${group.id}`}>
+                                                    {group.name} ({participantCountByGroup.get(group.id) ?? 0})
+                                                </option>
+                                            ))}
+                                        </optgroup>
+                                    );
+                                })}
+                            </select>
+                            <button
+                                type="button"
+                                className="basalt-btn"
+                                onClick={() => handleBulkAssignPhase(assignmentPhaseId, assignmentGroupId)}
+                                disabled={groupAssignmentLoading || !assignmentPhaseId}
+                            >
+                                <Layers size={15} aria-hidden="true" />
+                                <span>Asignar a {assignmentTargetLabel}</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="basalt-btn"
+                                onClick={() => handleBulkRemoveFromPhase(assignmentPhaseId)}
+                                disabled={groupAssignmentLoading || !assignmentPhaseId}
+                            >
+                                Quitar de la fase
+                            </button>
+                        </>
+                    )}
+
+                    <span className="pc-selection-spacer" />
+                    <button type="button" className="basalt-btn basalt-btn-danger" onClick={handleBulkDelete}>
+                        <Trash2 size={15} aria-hidden="true" />
+                        <span>Eliminar</span>
+                    </button>
+                </div>
+            )}
+            </div>
+            )}
 
             {/* Toast */}
             {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
@@ -2142,62 +2377,21 @@ export function TournamentParticipantsTab({ id: tournamentId }: Props) {
 // SUB-COMPONENTS
 // ============================================
 
-function StatusBadge({ status }: { status: ParticipantStatus }) {
-    const statusMap = {
-        active: { label: 'Activo', class: 'active' },
-        inactive: { label: 'Inactivo', class: 'inactive' },
-        pending: { label: 'Pendiente', class: 'pending' },
-        disqualified: { label: 'Descalificado', class: 'disqualified' },
-    };
-
-    const config = statusMap[status];
-
-    return (
-        <span className={`status-badge ${config.class}`}>
-            <span className="status-dot" />
-            {config.label}
-        </span>
-    );
-}
-
+/**
+ * El aviso vivía en un objeto de estilos en línea —placa verde traslúcida,
+ * esquina de 10px, `z-index: 9999`— que no se parecía a nada más de la consola
+ * y se metía arriba a la derecha, justo debajo del menú del header. Ahora es la
+ * misma placa que el resto, en la esquina de abajo, con su capa nombrada.
+ */
 function Toast({ type, message, onClose }: { type: 'success' | 'error'; message: string; onClose: () => void }) {
     return (
-        <div
-            style={{
-                position: 'fixed',
-                top: '24px',
-                right: '24px',
-                padding: '14px 20px',
-                borderRadius: '10px',
-                background: type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                border: `1px solid ${type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
-                color: type === 'success' ? '#10b981' : '#ef4444',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                zIndex: 9999,
-                fontSize: '13px',
-                fontWeight: 600,
-                animation: 'slideInFromBottom 0.3s ease',
-            }}
-        >
-            {type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-            {message}
-            <button
-                onClick={onClose}
-                style={{
-                    marginLeft: '8px',
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'inherit',
-                    cursor: 'pointer',
-                    opacity: 0.6,
-                    transition: 'opacity 0.2s',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
-            >
-                ✕
+        <div className={`pc-toast is-${type}`} role="status" aria-live="polite">
+            {type === 'success'
+                ? <CheckCircle2 size={17} aria-hidden="true" />
+                : <AlertCircle size={17} aria-hidden="true" />}
+            <span>{message}</span>
+            <button type="button" className="pc-toast-close" onClick={onClose} aria-label="Cerrar aviso">
+                <X size={14} aria-hidden="true" />
             </button>
         </div>
     );

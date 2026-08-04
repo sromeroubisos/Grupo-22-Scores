@@ -1,9 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle2, ClipboardList, Layers, ListChecks, Trophy, Users, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Circle, ClipboardList, Layers, ListChecks, Trophy, Users, XCircle } from 'lucide-react';
 import { Database } from '@/lib/database.types';
-import './basalt.css';
+import { SPORTS } from '@/lib/data/sports';
+
+// NOTE(tokens): los colores semánticos (emerald/amber/red) están hardcodeados a
+// propósito. Los tokens de la Fase 2 (success/warning/error) todavía NO existen
+// como utilidades Tailwind — solo como vars --color-* en un :root design-system
+// (globals.css), no en el @theme. Reemplazar en la pasada de tokens del
+// saneamiento CSS (ver GESTOR_TORNEOS_FASE2_CSS.md).
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 
@@ -14,316 +21,149 @@ interface SummaryTabProps {
     matchCount?: number;
 }
 
+const tabHref = (id: string, tab: string) => `/admin/entities/${id}/manage?type=tournament&tab=${tab}`;
+
 export function TournamentSummaryTab({ data, id, unionName, matchCount = 0 }: SummaryTabProps) {
-    const progressSteps = [
-        Boolean(data.name && data.slug),
-        Boolean(data.format),
-        false,
-        false,
-        false,
-        Boolean(data.is_visible),
+    const [logoError, setLogoError] = useState(false);
+    const isVisible = Boolean(data.is_visible);
+    const statusLabel = (data.status || 'draft').toUpperCase();
+    // sport_id es un slug ('football'...) → nombre legible; season_id es TEXT (año).
+    // Ninguno es un UUID, así que no se muestra una cadena hexadecimal.
+    const sportLabel = (data.sport_id && SPORTS[data.sport_id as keyof typeof SPORTS]?.nameEs)
+        || data.sport_id?.toUpperCase() || '--';
+    const showLogo = Boolean(data.logo_url) && !logoError;
+
+    // Chequeos REALES derivables de props (0 requests). Participantes/Tabla NO se
+    // muestran: necesitan fetch y no se fabrica su estado.
+    const baseChecks = [
+        { label: 'Identidad', ok: Boolean(data.name && data.slug) },
+        { label: 'Formato', ok: Boolean(data.format) },
+        { label: 'Tiene partidos', ok: matchCount > 0 },
+        { label: 'Publicado', ok: isVisible },
     ];
-    const completionPercent = Math.round((progressSteps.filter(Boolean).length / progressSteps.length) * 100);
 
-    const stateLabel = (data.status || 'draft').toUpperCase();
-    const visibilityLabel = data.is_visible ? 'Publico' : 'Interno';
-    const seasonLabel = data.season_id || '--';
-    const sportLabel = data.sport_id?.toUpperCase() || '--';
+    const healthIssues: Array<{ tone: 'warn' | 'err'; label: string; tab: string; cta: string }> = [];
+    if (!data.slug) healthIssues.push({ tone: 'warn', label: 'Falta identificador (slug)', tab: 'detalles', cta: 'Asignar' });
+    if (!data.union_id) healthIssues.push({ tone: 'err', label: 'Falta organizador asignado', tab: 'detalles', cta: 'Vincular' });
+    // El formato competitivo se define en Estructura (TournamentStructureTab escribe
+    // tournaments.format); el modulo Formato ya no existe en el gestor.
+    if (!data.format) healthIssues.push({ tone: 'warn', label: 'Sin formato definido', tab: 'estructura', cta: 'Configurar' });
+    const healthy = healthIssues.length === 0;
 
-    const healthIssues: Array<{ tone: 'warn' | 'err'; label: string; href: string; cta: string }> = [];
-    if (!data.slug) {
-        healthIssues.push({ tone: 'warn', label: 'Falta identificador (slug)', href: `/admin/entities/${id}/manage?type=tournament&tab=detalles`, cta: 'Asignar' });
-    }
-    if (!data.union_id) {
-        healthIssues.push({ tone: 'err', label: 'Falta organizador asignado', href: `/admin/entities/${id}/manage?type=tournament&tab=detalles`, cta: 'Vincular' });
-    }
-    if (!data.format) {
-        healthIssues.push({ tone: 'warn', label: 'Sin formato definido', href: `/admin/entities/${id}/manage?type=tournament&tab=formato`, cta: 'Configurar' });
-    }
-    const everythingHealthy = healthIssues.length === 0;
+    const quickActions = [
+        { icon: ListChecks, title: 'Cargar resultados', subtitle: 'Fixture y partidos', tab: 'operacion' },
+        { icon: Users, title: 'Equipos', subtitle: 'Altas y plantel', tab: 'participantes' },
+        { icon: Layers, title: 'Estructura', subtitle: 'Fases y formato', tab: 'estructura' },
+        { icon: ClipboardList, title: 'Detalles', subtitle: 'Identidad y reglas', tab: 'detalles' },
+    ];
 
+    // Mismo lenguaje que el header: panel de borde fino y esquina de 4px,
+    // rotulo mono en versalita, dato en tinta plena. Sin tarjetas redondeadas
+    // ni repetir el nombre del torneo, que ya esta en la barra de arriba.
     return (
-        <div className="tab-content active transition-all">
-            {/* Mobile-only redesigned summary. Hidden on desktop via CSS. */}
-            <section className="tournament-summary-mobile" aria-label="Resumen del torneo">
-                <article className="tsm-card tsm-card-state">
-                    <div className="tsm-card-eyebrow">Estado actual</div>
-                    <div className="tsm-state-row">
-                        <strong className="tsm-state-status">{stateLabel}</strong>
-                        <span className={`tsm-state-pill ${data.is_visible ? 'is-public' : 'is-internal'}`}>
-                            {visibilityLabel}
-                        </span>
+        <div className="summary-console">
+            <section className="basalt-card summary-panel">
+                <div className="summary-panel-head">
+                    <span className="summary-panel-title">Estado</span>
+                    <span className={`summary-flag ${isVisible ? 'is-public' : ''}`}>{isVisible ? 'Público' : 'Interno'}</span>
+                </div>
+                <div className="summary-identity">
+                    <span className="summary-crest">
+                        {showLogo ? (
+                            <img
+                                src={data.logo_url as string}
+                                alt=""
+                                loading="lazy"
+                                onError={() => setLogoError(true)}
+                            />
+                        ) : (
+                            <Trophy size={18} aria-hidden="true" />
+                        )}
+                    </span>
+                    <span className="summary-identity-copy">
+                        <strong title={data.name || 'Torneo sin nombre'}>{data.name || 'Torneo sin nombre'}</strong>
+                        <small>{sportLabel} · {data.season_id || 'sin temporada'}{unionName ? ` · ${unionName}` : ''}</small>
+                    </span>
+                </div>
+                <dl className="summary-stats">
+                    <div>
+                        <dt>Estado</dt>
+                        <dd>{statusLabel}</dd>
                     </div>
-                    <div className="tsm-state-meta">
-                        <span><Trophy size={14} /> {sportLabel}</span>
-                        <span aria-hidden="true">·</span>
-                        <span>{seasonLabel}</span>
-                        <span aria-hidden="true">·</span>
-                        <span>{matchCount} partidos</span>
+                    <div>
+                        <dt>Partidos</dt>
+                        <dd>{matchCount}</dd>
                     </div>
-                    <div className="tsm-state-progress" aria-label={`Configuracion ${completionPercent}%`}>
-                        <div className="tsm-state-progress-bar">
-                            <div className="tsm-state-progress-fill" style={{ width: `${completionPercent}%` }} />
-                        </div>
-                        <span className="tsm-state-progress-label">{completionPercent}% configurado</span>
-                    </div>
-                </article>
-
-                <article className="tsm-card">
-                    <div className="tsm-card-eyebrow">Acciones rapidas</div>
-                    <div className="tsm-quick-grid">
-                        <Link
-                            prefetch={false}
-                            className="tsm-quick"
-                            href={`/admin/entities/${id}/manage?type=tournament&tab=operacion`}
-                        >
-                            <span className="tsm-quick-glyph"><ListChecks size={18} /></span>
-                            <span className="tsm-quick-text">
-                                <strong>Cargar resultados</strong>
-                                <small>Fixture y partidos</small>
-                            </span>
-                        </Link>
-                        <Link
-                            prefetch={false}
-                            className="tsm-quick"
-                            href={`/admin/entities/${id}/manage?type=tournament&tab=participantes`}
-                        >
-                            <span className="tsm-quick-glyph"><Users size={18} /></span>
-                            <span className="tsm-quick-text">
-                                <strong>Equipos</strong>
-                                <small>Altas y plantel</small>
-                            </span>
-                        </Link>
-                        <Link
-                            prefetch={false}
-                            className="tsm-quick"
-                            href={`/admin/entities/${id}/manage?type=tournament&tab=estructura`}
-                        >
-                            <span className="tsm-quick-glyph"><Layers size={18} /></span>
-                            <span className="tsm-quick-text">
-                                <strong>Estructura</strong>
-                                <small>Fases y formato</small>
-                            </span>
-                        </Link>
-                        <Link
-                            prefetch={false}
-                            className="tsm-quick"
-                            href={`/admin/entities/${id}/manage?type=tournament&tab=detalles`}
-                        >
-                            <span className="tsm-quick-glyph"><ClipboardList size={18} /></span>
-                            <span className="tsm-quick-text">
-                                <strong>Detalles</strong>
-                                <small>Identidad y reglas</small>
-                            </span>
-                        </Link>
-                    </div>
-                </article>
-
-                <article className="tsm-card">
-                    <div className="tsm-card-eyebrow">
-                        <span>Salud del torneo</span>
-                        <span className={`tsm-card-eyebrow-badge ${everythingHealthy ? 'is-ok' : 'is-warn'}`}>
-                            {everythingHealthy ? 'Todo OK' : `${healthIssues.length} pendiente${healthIssues.length === 1 ? '' : 's'}`}
-                        </span>
-                    </div>
-                    {everythingHealthy ? (
-                        <div className="tsm-health-empty">
-                            <CheckCircle2 size={18} aria-hidden="true" />
-                            <span>Toda la informacion basica esta completa.</span>
-                        </div>
-                    ) : (
-                        <ul className="tsm-health-list">
-                            {healthIssues.map((issue) => (
-                                <li key={issue.label} className={`tsm-health-item ${issue.tone}`}>
-                                    <span className="tsm-health-icon" aria-hidden="true">
-                                        {issue.tone === 'err' ? <XCircle size={16} /> : <AlertTriangle size={16} />}
-                                    </span>
-                                    <span className="tsm-health-label">{issue.label}</span>
-                                    <Link prefetch={false} className="tsm-health-cta" href={issue.href}>
-                                        {issue.cta}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </article>
-
-                <article className="tsm-card">
-                    <div className="tsm-card-eyebrow">Proximo evento</div>
-                    <div className="tsm-next-empty">
-                        <strong>Sin partidos programados</strong>
-                        <small>Cuando publiques una fecha aparecera aca con el horario de los partidos.</small>
-                        <Link
-                            prefetch={false}
-                            className="tsm-next-cta"
-                            href={`/admin/entities/${id}/manage?type=tournament&tab=operacion`}
-                        >
-                            Ir a operacion
-                        </Link>
-                    </div>
-                </article>
+                </dl>
             </section>
 
-            {/* Desktop layout. Hidden on mobile via CSS to avoid duplicate render. */}
-            <div className="basalt-grid tournament-summary-desktop">
-                <div className="basalt-card basalt-hero">
-                    <div className="basalt-logo-placeholder">
-                        {data.logo_url ? (
-                            <img src={data.logo_url} alt="Logo" className="w-full h-full object-contain p-2" />
-                        ) : (
-                            <span style={{ fontSize: '11px', textAlign: 'center', color: 'var(--text-dim)' }}>
-                                CLICK PARA
-                                <br />
-                                SUBIR LOGO
-                            </span>
-                        )}
-                    </div>
-
-                    <div className="hero-info flex-1">
-                        <span className="basalt-section-kicker">Resumen operativo</span>
-                        <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: 'clamp(18px, 4vw, 24px)', textTransform: 'uppercase' }}>
-                            {data.slug || 'SIN-SLUG'}
-                        </h2>
-
-                        <div className="basalt-hero-meta">
-                            <span>{unionName || data.union_id || 'SIN ORGANIZADOR'}</span>
-                            <span>{data.sport_id?.toUpperCase() || '--'}</span>
-                            <span>{data.category || '--'}</span>
-                        </div>
-
-                        <p style={{ color: 'var(--text-dim)', fontSize: '14px', maxWidth: '600px', lineHeight: '1.6' }}>
-                            {data.is_visible
-                                ? 'Visible en catalogo y home. Competencia en curso. Se publican standings y partidos automaticamente.'
-                                : 'Actualmente oculto para el publico. Los cambios no se reflejaran en la app principal.'}
-                        </p>
-
-                        <Link
-                            href={`/admin/entities/${data.id}/manage?type=tournament&tab=detalles`}
-                            prefetch={false}
-                            className="basalt-btn basalt-btn-primary mt-4 w-full sm:w-auto"
-                        >
-                            Editar detalles base
-                        </Link>
-                    </div>
-
-                    <div className="basalt-hero-completion">
-                        <span className="basalt-hero-completion-label">Completion</span>
-                        <strong className="basalt-hero-completion-value">{completionPercent}%</strong>
-                    </div>
+            {/* Datos base — chequeos REALES (props). Sin % agregado (evita el false-confiable). */}
+            <section className="basalt-card summary-panel">
+                <div className="summary-panel-head">
+                    <span className="summary-panel-title">Datos base</span>
+                    <span className="summary-panel-value">{baseChecks.filter((c) => c.ok).length}/{baseChecks.length}</span>
                 </div>
+                <ul className="summary-list">
+                    {baseChecks.map((c) => (
+                        <li key={c.label}>
+                            {c.ok ? (
+                                <CheckCircle2 size={15} className="text-emerald-400 shrink-0" aria-hidden="true" />
+                            ) : (
+                                <Circle size={15} className="text-system-secondary shrink-0" aria-hidden="true" />
+                            )}
+                            <span className={c.ok ? '' : 'is-pending'}>{c.label}</span>
+                        </li>
+                    ))}
+                </ul>
+            </section>
 
-                <div className="basalt-card basalt-summary-strip">
-                    <div className="basalt-summary-metric">
-                        <span>Estado general</span>
-                        <strong>{data.status?.toUpperCase() || 'DRAFT'}</strong>
-                        <small>Lifecycle actual del torneo</small>
-                    </div>
-                    <div className="basalt-summary-metric">
-                        <span>Visibilidad</span>
-                        <strong>{data.is_visible ? 'PUBLICO' : 'INTERNO'}</strong>
-                        <small>Salida publica y catalogo</small>
-                    </div>
-                    <div className="basalt-summary-metric">
-                        <span>Partidos</span>
-                        <strong>{matchCount}</strong>
-                        <small>Eventos asociados al torneo</small>
-                    </div>
-                    <div className="basalt-summary-metric">
-                        <span>Temporada</span>
-                        <strong>{data.season_id || '--'}</strong>
-                        <small>Contexto competitivo activo</small>
-                    </div>
+            {/* Salud — REAL (props) */}
+            <section className="basalt-card summary-panel">
+                <div className="summary-panel-head">
+                    <span className="summary-panel-title">Salud del torneo</span>
+                    <span className={`summary-flag ${healthy ? 'is-ok' : 'is-warn'}`}>
+                        {healthy ? 'Todo OK' : `${healthIssues.length} pendiente${healthIssues.length === 1 ? '' : 's'}`}
+                    </span>
                 </div>
-
-                <div className="basalt-card basalt-card-span-8">
-                    <span className="basalt-section-kicker">Wizard status</span>
-                    <h3 className="basalt-section-title">Progreso del torneo</h3>
-                    <div className="basalt-progress">
-                        {progressSteps.map((isComplete, index) => (
-                            <div key={index} className={`basalt-progress-step ${isComplete ? 'complete' : ''}`}></div>
+                {healthy ? (
+                    <p className="summary-empty">La información básica está completa.</p>
+                ) : (
+                    <ul className="summary-list">
+                        {healthIssues.map((issue) => (
+                            <li key={issue.label}>
+                                {issue.tone === 'err' ? (
+                                    <XCircle size={15} className="text-red-400 shrink-0" aria-hidden="true" />
+                                ) : (
+                                    <AlertTriangle size={15} className="text-amber-400 shrink-0" aria-hidden="true" />
+                                )}
+                                <span>{issue.label}</span>
+                                <Link prefetch={false} href={tabHref(id, issue.tab)} className="summary-cta">{issue.cta}</Link>
+                            </li>
                         ))}
-                    </div>
+                    </ul>
+                )}
+            </section>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs font-mono">
-                        <div>
-                            <span style={{ color: data.name && data.slug ? 'var(--status-active)' : 'var(--text-dim)' }}>
-                                {data.name && data.slug ? 'OK' : '•'}
-                            </span>{' '}
-                            Identidad
-                        </div>
-                        <div>
-                            <span style={{ color: data.format ? 'var(--status-active)' : 'var(--text-dim)' }}>
-                                {data.format ? 'OK' : '•'}
-                            </span>{' '}
-                            Formato
-                        </div>
-                        <div style={{ color: 'var(--text-dim)' }}>• Participantes</div>
-                        <div style={{ color: 'var(--text-dim)' }}>• Fixture</div>
-                        <div style={{ color: 'var(--text-dim)' }}>• Tabla</div>
-                        <div style={{ color: 'var(--text-dim)' }}>• Publicacion</div>
-                    </div>
+            {/* Acciones rápidas — links REALES */}
+            <section className="basalt-card summary-panel summary-panel-wide">
+                <div className="summary-panel-head">
+                    <span className="summary-panel-title">Acciones rápidas</span>
                 </div>
-
-                <div className="basalt-card basalt-card-span-4">
-                    <span className="basalt-section-kicker">Control</span>
-                    <h3 className="basalt-section-title">Salud de datos</h3>
-
-                    <div className="flex flex-col gap-2">
-                        {!data.slug && (
-                            <div className="basalt-health-item warning">
-                                <span className="text-sm">Falta slug</span>
-                                <a href="#" className="font-bold text-[10px] uppercase text-emerald-400">Resolver</a>
-                            </div>
-                        )}
-                        {!data.union_id && (
-                            <div className="basalt-health-item error">
-                                <span className="text-sm">Falta organizador</span>
-                                <a href="#" className="font-bold text-[10px] uppercase text-emerald-400">Ir</a>
-                            </div>
-                        )}
-                        {data.name && data.slug && data.union_id && (
-                            <div className="text-sm text-emerald-400 font-medium">OK Toda la informacion basica esta completa</div>
-                        )}
-                    </div>
+                <div className="summary-actions">
+                    {quickActions.map((a) => {
+                        const Icon = a.icon;
+                        return (
+                            <Link key={a.tab} prefetch={false} href={tabHref(id, a.tab)} className="summary-action">
+                                <span className="summary-action-glyph"><Icon size={17} /></span>
+                                <span className="summary-action-copy">
+                                    <strong>{a.title}</strong>
+                                    <small>{a.subtitle}</small>
+                                </span>
+                            </Link>
+                        );
+                    })}
                 </div>
-
-                <div className="basalt-card basalt-card-span-4">
-                    <span className="basalt-section-kicker">Ruta sugerida</span>
-                    <h3 className="basalt-section-title">Siguientes pasos reales</h3>
-
-                    <div className="flex flex-col gap-2">
-                        <Link prefetch={false} className="basalt-btn justify-center" href={`/admin/entities/${data.id}/manage?type=tournament&tab=estructura`}>
-                            Definir estructura
-                        </Link>
-                        <Link prefetch={false} className="basalt-btn justify-center" href={`/admin/entities/${data.id}/manage?type=tournament&tab=participantes`}>
-                            Cargar participantes
-                        </Link>
-                        <Link prefetch={false} className="basalt-btn justify-center" href={`/admin/entities/${data.id}/manage?type=tournament&tab=operacion`}>
-                            Gestionar fixture y tabla
-                        </Link>
-                    </div>
-                </div>
-
-                <div className="basalt-card basalt-card-span-8">
-                    <span className="basalt-section-kicker">Monitor</span>
-                    <h3 className="basalt-section-title">Estado competitivo</h3>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10">
-                        <div>
-                            <div className="text-[11px] text-dim mb-1 uppercase tracking-wider">PROXIMA FECHA</div>
-                            <div className="text-lg font-bold">Sin partidos programados</div>
-                        </div>
-                        <div>
-                            <div className="text-[11px] text-dim mb-1 uppercase tracking-wider">ULTIMO RECALCULO</div>
-                            <div className="text-lg font-bold font-mono">--</div>
-                        </div>
-                    </div>
-
-                    <div className="mt-6 p-4 bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm">
-                        No hay datos de competencia suficientes para mostrar estadisticas.
-                    </div>
-                </div>
-            </div>
+            </section>
         </div>
     );
 }

@@ -1,12 +1,13 @@
 'use client';
 /* eslint-disable @next/next/no-img-element */
 
-import { ArrowDownUp, Download, RefreshCw, Share2, Sparkles, Target } from 'lucide-react';
+import { ArrowDownUp, Download, RefreshCw, Share2, Target } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { MatchWithClubs, PhaseWithRounds } from '@/lib/types/fixture';
 import { useFixture } from './FixtureContext';
 import type { StandingsDataPayload, TournamentContextData } from './standings/types';
 import styles from './TournamentStatsTab.module.css';
+import './operation-console.css';
 import {
   goalKickEffectivenessPercent,
   isGoalKickAttemptEvent,
@@ -32,14 +33,14 @@ type Column = { id: string; label: string; accent?: boolean; title?: string };
 type TableModel = { title: string; subtitle: string; chartKey: string; empty: string; rows: RowData[]; columns: Column[] };
 
 const TABS: Array<{ id: StatsTabId; label: string; rugbyOnly?: boolean }> = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'team_stats', label: 'Team Stats' },
-  { id: 'player_stats', label: 'Player Stats' },
-  { id: 'attack', label: 'Attack' },
-  { id: 'defense', label: 'Defense' },
-  { id: 'discipline', label: 'Discipline' },
-  { id: 'set_pieces', label: 'Set Pieces', rugbyOnly: true },
-  { id: 'advanced', label: 'Advanced' },
+  { id: 'overview', label: 'Resumen' },
+  { id: 'team_stats', label: 'Equipos' },
+  { id: 'player_stats', label: 'Jugadores' },
+  { id: 'attack', label: 'Ataque' },
+  { id: 'defense', label: 'Defensa' },
+  { id: 'discipline', label: 'Disciplina' },
+  { id: 'set_pieces', label: 'Formaciones fijas', rugbyOnly: true },
+  { id: 'advanced', label: 'Avanzadas' },
 ];
 
 const DEFAULT_SORT: Record<StatsTabId, { key: string; direction: SortDirection }> = {
@@ -71,7 +72,6 @@ const fmt = (value: unknown, digits = 0) => {
 const logoFallback = (name: string) => name.slice(0, 2).toUpperCase();
 const isFinal = (match: MatchWithClubs) => match.status === 'final';
 const phaseMatches = (phase: PhaseWithRounds | null | undefined) => (phase ? phase.rounds.flatMap((round) => round.matches || []) : []);
-const sportLabel = (value?: string | null) => (value ? value.replace(/-/g, ' ') : 'Sin deporte');
 
 function normalizeEvent(raw: unknown) {
   if (!raw || typeof raw !== 'object') return null;
@@ -407,12 +407,23 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
     const triesLeader = [...playerRows].sort((a, b) => n(b.tries) - n(a.tries))[0];
     const tacklesLeader = [...playerRows].sort((a, b) => n(b.tackles) - n(a.tackles))[0];
     return [
-      pointsLeader ? { label: 'Top Points Scorer', value: fmt(avg(n(pointsLeader.points), n(pointsLeader.matches_played), scope), scope === 'per_match' ? 1 : 0), identity: pointsLeader.entityName, foot: pointsLeader.secondary } : { label: 'Top Points Scorer', value: '—', identity: 'Sin datos', foot: 'Sin eventos de jugador cargados' },
-      triesLeader ? { label: 'Top Try Scorer', value: fmt(avg(n(triesLeader.tries), n(triesLeader.matches_played), scope), scope === 'per_match' ? 1 : 0), identity: triesLeader.entityName, foot: triesLeader.secondary } : { label: 'Top Try Scorer', value: '—', identity: 'Sin datos', foot: 'Aún no hay tries asignados' },
-      tacklesLeader && n(tacklesLeader.tackles) > 0 ? { label: 'Top Tackler', value: fmt(avg(n(tacklesLeader.tackles), n(tacklesLeader.matches_played), scope), scope === 'per_match' ? 1 : 0), identity: tacklesLeader.entityName, foot: tacklesLeader.secondary } : { label: 'Top Tackler', value: '—', identity: 'Sin datos', foot: 'No hay tackles registrados' },
-      teamLeader ? { label: 'Leader Team', value: fmt(avg(n(teamLeader.competition_points), n(teamLeader.matches_played), scope), scope === 'per_match' ? 1 : 0), identity: teamLeader.entityName, foot: scope === 'per_match' ? 'Puntos de competencia por partido' : 'Puntos de competencia' } : { label: 'Leader Team', value: '—', identity: 'Sin datos', foot: 'Sin partidos finalizados' },
+      pointsLeader ? { label: 'Máximo anotador', value: fmt(avg(n(pointsLeader.points), n(pointsLeader.matches_played), scope), scope === 'per_match' ? 1 : 0), identity: pointsLeader.entityName, foot: pointsLeader.secondary } : { label: 'Máximo anotador', value: '—', identity: 'Sin datos', foot: 'Sin eventos de jugador cargados' },
+      triesLeader ? { label: 'Máximo try-man', value: fmt(avg(n(triesLeader.tries), n(triesLeader.matches_played), scope), scope === 'per_match' ? 1 : 0), identity: triesLeader.entityName, foot: triesLeader.secondary } : { label: 'Máximo try-man', value: '—', identity: 'Sin datos', foot: 'Aún no hay tries asignados' },
+      tacklesLeader && n(tacklesLeader.tackles) > 0 ? { label: 'Máximo tackleador', value: fmt(avg(n(tacklesLeader.tackles), n(tacklesLeader.matches_played), scope), scope === 'per_match' ? 1 : 0), identity: tacklesLeader.entityName, foot: tacklesLeader.secondary } : { label: 'Máximo tackleador', value: '—', identity: 'Sin datos', foot: 'No hay tackles registrados' },
+      teamLeader ? { label: 'Puntero', value: fmt(avg(n(teamLeader.competition_points), n(teamLeader.matches_played), scope), scope === 'per_match' ? 1 : 0), identity: teamLeader.entityName, foot: scope === 'per_match' ? 'Puntos de competencia por partido' : 'Puntos de competencia' } : { label: 'Puntero', value: '—', identity: 'Sin datos', foot: 'Sin partidos finalizados' },
     ];
   }, [playerRows, scope, teamRows]);
+
+  /**
+   * Módulos cuyos números salen de los eventos del partido y no del marcador.
+   * «Resumen», «Equipos» y «Avanzadas» se calculan con puntos y partidos, así
+   * que funcionan sin eventos; el resto queda en cero hasta que se carguen.
+   */
+  const eventDependentTab = activeTab === 'attack'
+    || activeTab === 'defense'
+    || activeTab === 'discipline'
+    || activeTab === 'set_pieces'
+    || activeTab === 'player_stats';
 
   const table = useMemo<TableModel>(() => {
     const teamStats = teamRows.map((row) => ({
@@ -472,15 +483,15 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
       ),
     }));
     switch (activeTab) {
-      case 'overview': return { title: 'Team Aggregated Stats', subtitle: 'Resumen mixto del contexto actual.', chartKey: 'competition_points', empty: 'No hay datos para el filtro seleccionado.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'matches_played', label: 'PJ' }, { id: 'competition_points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }, { id: 'points_for', label: scope === 'per_match' ? 'PF/PJ' : 'PF' }, { id: 'points_difference', label: scope === 'per_match' ? 'Dif/PJ' : 'Dif' }, { id: 'status', label: 'Estado' }] as Column[] };
-      case 'team_stats': return { title: 'Team Statistics', subtitle: 'Tabla principal por equipo.', chartKey: 'points_difference', empty: 'No hay suficientes partidos finalizados para armar la tabla principal.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'matches_played', label: 'PJ' }, { id: 'wins', label: 'PG' }, { id: 'draws', label: 'PE' }, { id: 'losses', label: 'PP' }, { id: 'points_for', label: scope === 'per_match' ? 'PF/PJ' : 'PF' }, { id: 'points_against', label: scope === 'per_match' ? 'PC/PJ' : 'PC' }, { id: 'points_difference', label: scope === 'per_match' ? 'Dif/PJ' : 'Dif' }, { id: 'tries_scored', label: scope === 'per_match' ? 'Tries/PJ' : 'Tries' }, { id: 'competition_points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }] as Column[] };
-      case 'player_stats': return { title: 'Player Statistics', subtitle: 'Derivadas desde eventos y alineaciones.', chartKey: 'points', empty: 'No hay estadísticas de jugadores disponibles todavía.', rows: players, columns: [{ id: 'entity', label: 'Player' }, { id: 'secondary', label: 'Team' }, { id: 'position', label: 'Pos' }, { id: 'matches_played', label: 'PJ' }, { id: 'points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }, { id: 'tries', label: scope === 'per_match' ? 'Tries/PJ' : 'Tries' }, { id: 'conversions', label: 'Conv OK' }, { id: 'conversion_attempts', label: 'Conv int' }, { id: 'conversion_kick_effectiveness', label: 'Efect. conv' }, { id: 'penalty_goals', label: 'Pen palos' }, { id: 'penalty_goal_attempts', label: 'Pen int' }, { id: 'penalty_palos_effectiveness', label: 'Efect. pen.' }, { id: 'kick_meters', label: scope === 'per_match' ? 'm pat/PJ' : 'm pat' }, { id: 'contests_won', label: 'Fijos G', title: 'Scrum+line+ruck+maul ganados' }, { id: 'contests_lost', label: 'Fijos P', title: 'Scrum+line+ruck+maul perdidos' }, { id: 'contest_effectiveness', label: 'Fijos %', title: 'Efectividad en duelos con resultado' }, { id: 'tackles', label: scope === 'per_match' ? 'Tack/PJ' : 'Tack' }, { id: 'yellow_cards', label: 'YC' }, { id: 'red_cards', label: 'RC' }] as Column[] };
-      case 'attack': return { title: 'Attack Metrics', subtitle: 'Producción ofensiva real por equipo.', chartKey: 'points_scored', empty: 'No hay suficientes partidos finalizados para calcular estadísticas ofensivas.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'tries_scored', label: scope === 'per_match' ? 'Tries/PJ' : 'Tries' }, { id: 'points_scored', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }, { id: 'conversions', label: 'Conv OK', title: 'Conversiones anotadas (no falladas)' }, { id: 'conversion_attempts', label: 'Conv int', title: 'Intentos de conversión' }, { id: 'conversion_kick_effectiveness', label: 'Efect. conv', title: 'Efectividad al palo en conversión' }, { id: 'penalty_goals', label: 'Pen palos OK', title: 'Penales a palos convertidos' }, { id: 'penalty_goal_attempts', label: 'Pen palos int', title: 'Intentos de penal a palos' }, { id: 'penalty_palos_effectiveness', label: 'Efect. pen. palos', title: 'Efectividad en penales a palos' }, { id: 'drop_goals', label: 'Drop' }, { id: 'kick_meters', label: scope === 'per_match' ? 'm patada/PJ' : 'm patada', title: 'Metros de patada en juego' }, { id: 'attack_efficiency', label: 'Attack Eff' }] as Column[] };
-      case 'defense': return { title: 'Defense Metrics', subtitle: 'Contención y recuperación derivadas desde partidos finales.', chartKey: 'defense_index', empty: 'No hay suficientes partidos finalizados para calcular estadísticas defensivas.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'points_against', label: scope === 'per_match' ? 'PC/PJ' : 'PC' }, { id: 'tries_conceded', label: scope === 'per_match' ? 'Tries C/PJ' : 'Tries C' }, { id: 'tackles_made', label: scope === 'per_match' ? 'Tack/PJ' : 'Tack' }, { id: 'turnovers_won', label: 'Turnovers' }, { id: 'defense_index', label: 'Def Index', accent: true, title: 'Tackles + turnovers - puntos concedidos' }] as Column[] };
-      case 'discipline': return { title: 'Discipline Metrics', subtitle: 'Tarjetas y penales registrados.', chartKey: 'discipline_index', empty: 'No hay datos disciplinarios para el filtro seleccionado.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'penalties_conceded', label: scope === 'per_match' ? 'Pen/PJ' : 'Pen' }, { id: 'yellow_cards', label: 'YC' }, { id: 'red_cards', label: 'RC' }, { id: 'discipline_index', label: 'Disc Index', accent: true }] as Column[] };
-      case 'set_pieces': return { title: 'Set Piece & contacto', subtitle: 'Scrum, line, ruck y maul con opción ganado / perdido (mismo criterio que el Match Center).', chartKey: 'set_piece_success_rate', empty: 'No hay eventos de fijos o contacto con resultado todavía.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'scrums_won', label: 'Scrums W' }, { id: 'scrums_lost', label: 'Scrums L' }, { id: 'lineouts_won', label: 'Line W' }, { id: 'lineouts_lost', label: 'Line L' }, { id: 'rucks_won', label: 'Rucks W' }, { id: 'rucks_lost', label: 'Rucks L' }, { id: 'mauls_won', label: 'Mauls W' }, { id: 'mauls_lost', label: 'Mauls L' }, { id: 'set_piece_success_rate', label: 'Efect. %', accent: true, title: 'Ganados / (G+P) en las cuatro categorías' }] as Column[] };
+      case 'overview': return { title: 'Resumen por equipo', subtitle: 'Resumen mixto del contexto actual.', chartKey: 'competition_points', empty: 'No hay datos para el filtro seleccionado.', rows: teamStats, columns: [{ id: 'entity', label: 'Equipo' }, { id: 'matches_played', label: 'PJ' }, { id: 'competition_points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }, { id: 'points_for', label: scope === 'per_match' ? 'PF/PJ' : 'PF' }, { id: 'points_difference', label: scope === 'per_match' ? 'Dif/PJ' : 'Dif' }, { id: 'status', label: 'Estado' }] as Column[] };
+      case 'team_stats': return { title: 'Tabla por equipo', subtitle: 'Tabla principal por equipo.', chartKey: 'points_difference', empty: 'No hay suficientes partidos finalizados para armar la tabla principal.', rows: teamStats, columns: [{ id: 'entity', label: 'Equipo' }, { id: 'matches_played', label: 'PJ' }, { id: 'wins', label: 'PG' }, { id: 'draws', label: 'PE' }, { id: 'losses', label: 'PP' }, { id: 'points_for', label: scope === 'per_match' ? 'PF/PJ' : 'PF' }, { id: 'points_against', label: scope === 'per_match' ? 'PC/PJ' : 'PC' }, { id: 'points_difference', label: scope === 'per_match' ? 'Dif/PJ' : 'Dif' }, { id: 'tries_scored', label: scope === 'per_match' ? 'Tries/PJ' : 'Tries' }, { id: 'competition_points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }] as Column[] };
+      case 'player_stats': return { title: 'Tabla por jugador', subtitle: 'Derivadas desde eventos y alineaciones.', chartKey: 'points', empty: 'No hay estadísticas de jugadores disponibles todavía.', rows: players, columns: [{ id: 'entity', label: 'Jugador' }, { id: 'secondary', label: 'Club' }, { id: 'position', label: 'Pos' }, { id: 'matches_played', label: 'PJ' }, { id: 'points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }, { id: 'tries', label: scope === 'per_match' ? 'Tries/PJ' : 'Tries' }, { id: 'conversions', label: 'Conv OK' }, { id: 'conversion_attempts', label: 'Conv int' }, { id: 'conversion_kick_effectiveness', label: 'Efect. conv' }, { id: 'penalty_goals', label: 'Pen palos' }, { id: 'penalty_goal_attempts', label: 'Pen int' }, { id: 'penalty_palos_effectiveness', label: 'Efect. pen.' }, { id: 'kick_meters', label: scope === 'per_match' ? 'm pat/PJ' : 'm pat' }, { id: 'contests_won', label: 'Fijos G', title: 'Scrum+line+ruck+maul ganados' }, { id: 'contests_lost', label: 'Fijos P', title: 'Scrum+line+ruck+maul perdidos' }, { id: 'contest_effectiveness', label: 'Fijos %', title: 'Efectividad en duelos con resultado' }, { id: 'tackles', label: scope === 'per_match' ? 'Tack/PJ' : 'Tack' }, { id: 'yellow_cards', label: 'Amar.' }, { id: 'red_cards', label: 'Rojas' }] as Column[] };
+      case 'attack': return { title: 'Ataque', subtitle: 'Producción ofensiva real por equipo.', chartKey: 'points_scored', empty: 'No hay suficientes partidos finalizados para calcular estadísticas ofensivas.', rows: teamStats, columns: [{ id: 'entity', label: 'Equipo' }, { id: 'tries_scored', label: scope === 'per_match' ? 'Tries/PJ' : 'Tries' }, { id: 'points_scored', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts', accent: true }, { id: 'conversions', label: 'Conv OK', title: 'Conversiones anotadas (no falladas)' }, { id: 'conversion_attempts', label: 'Conv int', title: 'Intentos de conversión' }, { id: 'conversion_kick_effectiveness', label: 'Efect. conv', title: 'Efectividad al palo en conversión' }, { id: 'penalty_goals', label: 'Pen palos OK', title: 'Penales a palos convertidos' }, { id: 'penalty_goal_attempts', label: 'Pen palos int', title: 'Intentos de penal a palos' }, { id: 'penalty_palos_effectiveness', label: 'Efect. pen. palos', title: 'Efectividad en penales a palos' }, { id: 'drop_goals', label: 'Drop' }, { id: 'kick_meters', label: scope === 'per_match' ? 'm patada/PJ' : 'm patada', title: 'Metros de patada en juego' }, { id: 'attack_efficiency', label: 'Efect. ataque' }] as Column[] };
+      case 'defense': return { title: 'Defensa', subtitle: 'Contención y recuperación derivadas desde partidos finales.', chartKey: 'defense_index', empty: 'No hay suficientes partidos finalizados para calcular estadísticas defensivas.', rows: teamStats, columns: [{ id: 'entity', label: 'Equipo' }, { id: 'points_against', label: scope === 'per_match' ? 'PC/PJ' : 'PC' }, { id: 'tries_conceded', label: scope === 'per_match' ? 'Tries C/PJ' : 'Tries C' }, { id: 'tackles_made', label: scope === 'per_match' ? 'Tack/PJ' : 'Tack' }, { id: 'turnovers_won', label: 'Turnovers' }, { id: 'defense_index', label: 'Índice def.', accent: true, title: 'Tackles + turnovers - puntos concedidos' }] as Column[] };
+      case 'discipline': return { title: 'Disciplina', subtitle: 'Tarjetas y penales registrados.', chartKey: 'discipline_index', empty: 'No hay datos disciplinarios para el filtro seleccionado.', rows: teamStats, columns: [{ id: 'entity', label: 'Equipo' }, { id: 'penalties_conceded', label: scope === 'per_match' ? 'Pen/PJ' : 'Pen' }, { id: 'yellow_cards', label: 'Amar.' }, { id: 'red_cards', label: 'Rojas' }, { id: 'discipline_index', label: 'Índice disc.', accent: true }] as Column[] };
+      case 'set_pieces': return { title: 'Formaciones fijas y contacto', subtitle: 'Scrum, line, ruck y maul con opción ganado / perdido (mismo criterio que el Match Center).', chartKey: 'set_piece_success_rate', empty: 'No hay eventos de fijos o contacto con resultado todavía.', rows: teamStats, columns: [{ id: 'entity', label: 'Equipo' }, { id: 'scrums_won', label: 'Scrum G' }, { id: 'scrums_lost', label: 'Scrum P' }, { id: 'lineouts_won', label: 'Line G' }, { id: 'lineouts_lost', label: 'Line P' }, { id: 'rucks_won', label: 'Ruck G' }, { id: 'rucks_lost', label: 'Ruck P' }, { id: 'mauls_won', label: 'Maul G' }, { id: 'mauls_lost', label: 'Maul P' }, { id: 'set_piece_success_rate', label: 'Efect. %', accent: true, title: 'Ganados / (G+P) en las cuatro categorías' }] as Column[] };
       case 'advanced':
-      default: return { title: 'Advanced Performance', subtitle: 'Índices derivados sobre la base real del torneo.', chartKey: 'net_performance_index', empty: 'No hay datos suficientes para las métricas avanzadas.', rows: teamStats, columns: [{ id: 'entity', label: 'Team' }, { id: 'attack_efficiency', label: 'Attack Eff', title: 'Puntos anotados por partido' }, { id: 'defense_efficiency', label: 'Defense Eff', title: 'Puntos concedidos por partido' }, { id: 'competition_points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts' }, { id: 'conversion_rate', label: 'Conv/Try %', title: 'Conversiones anotadas sobre tries' }, { id: 'conversion_kick_effectiveness', label: 'Efect. conv %', title: 'Aciertos en conversión / intentos' }, { id: 'penalty_palos_effectiveness', label: 'Efect. pen. %', title: 'Penales a palos anotados / intentos' }, { id: 'net_performance_index', label: 'Net Index', accent: true, title: 'Diferencial + puntos de competencia por partido' }] as Column[] };
+      default: return { title: 'Métricas avanzadas', subtitle: 'Índices derivados sobre la base real del torneo.', chartKey: 'net_performance_index', empty: 'No hay datos suficientes para las métricas avanzadas.', rows: teamStats, columns: [{ id: 'entity', label: 'Equipo' }, { id: 'attack_efficiency', label: 'Efect. ataque', title: 'Puntos anotados por partido' }, { id: 'defense_efficiency', label: 'Efect. defensa', title: 'Puntos concedidos por partido' }, { id: 'competition_points', label: scope === 'per_match' ? 'Pts/PJ' : 'Pts' }, { id: 'conversion_rate', label: 'Conv/Try %', title: 'Conversiones anotadas sobre tries' }, { id: 'conversion_kick_effectiveness', label: 'Efect. conv %', title: 'Aciertos en conversión / intentos' }, { id: 'penalty_palos_effectiveness', label: 'Efect. pen. %', title: 'Penales a palos anotados / intentos' }, { id: 'net_performance_index', label: 'Índice neto', accent: true, title: 'Diferencial + puntos de competencia por partido' }] as Column[] };
     }
   }, [activeTab, playerRows, scope, teamRows]);
 
@@ -529,33 +540,47 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
 
   return (
     <div className={styles.page}>
-      <section className={styles.header}>
-        <div className={styles.headerText}>
-          <span className={styles.eyebrow}><Sparkles size={14} /> Sports Statistics Hub</span>
-          <h2 className={styles.title}>Tournament Statistics</h2>
-          <p className={styles.subtitle}>Módulo real integrado a Operación de Torneo. Lee torneo, fase actual, standings y partidos finalizados para construir cards, tabla, visualizaciones e insights dentro del mismo tab.</p>
-          <div className={styles.meta}>
-            <span>{sportLabel(data?.sport)}</span>
-            <span>{data?.name || 'Torneo sin nombre'}</span>
-            <span>{data?.season_id || 'Temporada pendiente'}</span>
-            <span>{selectedPhase?.name || 'Fase sin nombre'}</span>
-            <span>{data?.category || 'Categoría abierta'}</span>
-            <span className={styles.metaAccent}>{data?.status || standingsContext?.tournament?.status || 'draft'}</span>
+      {/* Cabecera de panel, no de página.
+          Acá había un <h2>"Tournament Statistics"</h2> con el rótulo "Sports
+          Statistics Hub" y un párrafo que describía la propia arquitectura del
+          módulo — más el nombre del torneo, la temporada y la fase, que la
+          barra de operación ya muestra. Los módulos suben a la cabecera y los
+          botones vuelven al español. */}
+      <section className="op-panel">
+        <div className="op-panel-head">
+          <span className="op-panel-title">Estadísticas</span>
+          <div className="op-panel-actions">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                className={`basalt-btn ${activeTab === tab.id ? 'basalt-btn-accent' : ''}`}
+                aria-pressed={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
-        </div>
-        <div className={styles.actions}>
-          <button type="button" className={styles.actionButton} onClick={() => downloadCsv(`stats-${activeTab}.csv`, table.columns, rows)}><Download size={14} /> Export CSV</button>
-          <button type="button" className={styles.actionButton} onClick={handleShare}><Share2 size={14} /> Share Data</button>
-          <button type="button" className={`${styles.actionButton} ${styles.actionPrimary}`} onClick={handleRefresh} disabled={loading}><RefreshCw size={14} className={loading ? styles.spin : ''} /> {loading ? 'Refreshing...' : 'Refresh'}</button>
+          <div className="op-panel-meta">
+            <span>{finalMatches.length} partidos finalizados</span>
+            <button type="button" className="basalt-btn" onClick={() => downloadCsv(`estadisticas-${activeTab}.csv`, table.columns, rows)}>
+              <Download size={13} aria-hidden="true" /> Exportar CSV
+            </button>
+            <button type="button" className="basalt-btn" onClick={handleShare}>
+              <Share2 size={13} aria-hidden="true" /> Compartir
+            </button>
+            <button type="button" className="basalt-btn" onClick={handleRefresh} disabled={loading}>
+              <RefreshCw size={13} className={loading ? styles.spin : ''} aria-hidden="true" />
+              {loading ? 'Actualizando…' : 'Actualizar'}
+            </button>
+          </div>
         </div>
       </section>
 
-      <nav className={styles.tabs}>
-        {tabs.map((tab) => <button key={tab.id} type="button" className={`${styles.tab} ${activeTab === tab.id ? styles.tabActive : ''}`} onClick={() => setActiveTab(tab.id)}>{tab.label}</button>)}
-      </nav>
-
+      {/* La fase se elige en la barra de operación y baja por prop: acá vivía
+          el TERCER selector de fase de la pestaña. */}
       <section className={styles.filters}>
-        <label className={styles.field}><span>Fase</span><select className={styles.select} value={selectedPhase?.id || selectedPhaseId} onChange={(event) => setSelectedPhaseId(event.target.value)}>{fixturePhases.map((phase) => <option key={phase.id} value={phase.id}>{phase.name}</option>)}</select></label>
         <label className={styles.field}><span>Grupo / Zona</span><select className={styles.select} value={selectedGroupId} onChange={(event) => setSelectedGroupId(event.target.value)}><option value="all">Todos</option>{groups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}</select></label>
         <label className={styles.field}><span>Equipo</span><select className={styles.select} value={selectedTeamId} onChange={(event) => setSelectedTeamId(event.target.value)}><option value="all">Todos</option>{teamOptions.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}</select></label>
         <label className={styles.field}><span>Jugador</span><select className={styles.select} value={selectedPlayerId} onChange={(event) => setSelectedPlayerId(event.target.value)} disabled={playerOptions.length === 0}><option value="all">Todos</option>{playerOptions.map((player) => <option key={player.id} value={player.id}>{player.name}</option>)}</select></label>
@@ -569,8 +594,28 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
       <section className={styles.tableSection}>
         <div className={styles.sectionHeader}>
           <div><h3>{table.title}</h3><p>{table.subtitle}</p></div>
-          <div className={styles.sectionMeta}><span>{selectedPhase?.name || 'Fase'}</span><span>{scope === 'per_match' ? 'Per match' : 'Totals'}</span><span>{rows.length} filas</span></div>
+          <div className={styles.sectionMeta}><span>{selectedPhase?.name || 'Fase'}</span><span>{scope === 'per_match' ? 'Por partido' : 'Totales'}</span><span>{rows.length} filas</span></div>
         </div>
+
+        {/* Una columna llena de ceros no es un dato: es un dato que falta.
+            Las métricas de tries, tackles, conversiones y tarjetas salen de los
+            EVENTOS del partido, y este torneo tiene los 56 resultados cargados
+            pero ningún evento. Sin este aviso, la tabla de Ataque muestra ocho
+            equipos con 0 tries y se lee como si de verdad no hubieran anotado
+            ninguno. */}
+        {eventDependentTab && playerRows.length === 0 && rows.length > 0 ? (
+          <div className="op-note is-info" style={{ marginBottom: 12 }}>
+            <span className="op-note-icon">i</span>
+            <span className="op-note-copy">
+              <strong>Las columnas en cero esperan los eventos del partido</strong>
+              <span>
+                Tries, tackles, conversiones y tarjetas se cuentan desde los eventos que se
+                cargan en el control de cada partido. Este torneo todavía no tiene ninguno, así
+                que sólo las columnas que salen del marcador —puntos, diferencia— traen datos.
+              </span>
+            </span>
+          </div>
+        ) : null}
         {rows.length === 0 || (activeTab === 'set_pieces' && !rows.some((row) => n(row.scrums_won) + n(row.lineouts_won) + n(row.scrums_lost) + n(row.lineouts_lost) + n(row.rucks_won) + n(row.rucks_lost) + n(row.mauls_won) + n(row.mauls_lost) > 0)) ? <div className={styles.emptyBlock}>{table.empty}</div> : <div className={styles.tableWrap}><table className={styles.table}><thead><tr>{table.columns.map((column) => <th key={column.id} className={column.accent ? styles.headAccent : ''} title={column.title}><button type="button" className={styles.sortButton} onClick={() => { if (sortKey === column.id) setSortDirection((current) => current === 'desc' ? 'asc' : 'desc'); else { setSortKey(column.id); setSortDirection(column.id === DEFAULT_SORT[activeTab].key ? DEFAULT_SORT[activeTab].direction : 'desc'); } }}>{column.label}<ArrowDownUp size={12} /></button></th>)}</tr></thead><tbody>{rows.map((row) => <tr key={row.entityId}>{table.columns.map((column) => <td key={`${row.entityId}-${column.id}`}>{column.id === 'entity' ? <div className={styles.entityCell}><div className={styles.entityLogo}>{row.entityLogo ? <img src={String(row.entityLogo)} alt={row.entityName} /> : <span>{logoFallback(row.entityName)}</span>}</div><div><strong>{row.entityName}</strong>{row.secondary ? <span>{row.secondary}</span> : null}</div></div> : column.id === 'set_piece_success_rate' || column.id === 'conversion_rate' || column.id === 'conversion_kick_effectiveness' || column.id === 'penalty_palos_effectiveness' || column.id === 'contest_effectiveness'
             ? (n(row[column.id]) < 0 ? '—' : `${fmt(row[column.id], 1)}%`)
             : typeof row[column.id] === 'number' ? fmt(row[column.id], Number.isInteger(n(row[column.id])) ? 0 : 1) : String(row[column.id] ?? '—')}</td>)}</tr>)}</tbody></table></div>}
@@ -578,11 +623,11 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
 
       <section className={styles.viz}>
         <article className={styles.vizCard}>
-          <div className={styles.sectionHeader}><div><h3>Chart principal</h3><p>Comparativa del módulo activo con las filas visibles.</p></div><div className={styles.sectionMeta}><span>Top 6</span><span>{table.chartKey}</span></div></div>
+          <div className={styles.sectionHeader}><div><h3>Comparativa</h3><p>Los seis primeros del módulo activo, sobre las filas visibles.</p></div><div className={styles.sectionMeta}><span>Top 6</span></div></div>
           {chartRows.length === 0 ? <div className={styles.emptyBlock}>{table.empty}</div> : <div className={styles.chartRows}>{chartRows.map((row) => { const value = n(row[table.chartKey]); const max = Math.max(...chartRows.map((entry) => n(entry[table.chartKey])), 1); return <div key={`chart-${row.entityId}`} className={styles.chartRow}><div className={styles.chartLabel}>{row.entityName}</div><div className={styles.chartTrack}><div className={styles.chartFill} style={{ width: `${Math.max((value / max) * 100, value > 0 ? 8 : 0)}%` }} /></div><div className={styles.chartValue}>{fmt(value, Number.isInteger(value) ? 0 : 1)}</div></div>; })}</div>}
         </article>
         <article className={styles.vizCard}>
-          <div className={styles.sectionHeader}><div><h3>Insights</h3><p>Lectura editorial del dataset actual.</p></div><div className={styles.sectionMeta}><span>{finalMatches.length} finales</span><span>{playerRows.length} jugadores</span></div></div>
+          <div className={styles.sectionHeader}><div><h3>Lectura</h3><p>Qué dicen los números del recorte actual.</p></div><div className={styles.sectionMeta}><span>{finalMatches.length} finalizados</span><span>{playerRows.length} jugadores</span></div></div>
           <ul className={styles.insights}>{insights.map((insight, index) => <li key={`${insight}-${index}`}><Target size={14} /><span>{insight}</span></li>)}</ul>
         </article>
       </section>

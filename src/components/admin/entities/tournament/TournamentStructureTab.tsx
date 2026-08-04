@@ -15,6 +15,7 @@ import { buildTournamentCompetitionConfig } from '@/lib/utils/tournamentFormat';
 import {
     DEFAULT_PLAYOFF_STAGE_NAMES,
     getDefaultPlayoffStageNames,
+    getExpectedPlayoffStageCount,
     getPlayoffMatchCounts,
     getPlayoffTeamsCount,
     normalizePlayoffStageNames,
@@ -170,6 +171,13 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const initialChampionMode = useMemo<'accumulation' | 'final'>(() => {
         return (data as any)?.ruleset?.competition?.parameters?.champion_mode === 'final' ? 'final' : 'accumulation';
     }, [data]);
+    // Local mirror of tournaments.ruleset. The format selector and the fixed
+    // roster panel both merge into the SAME ruleset JSONB via updateEntity,
+    // which replaces the whole column. The `data` prop is a server snapshot
+    // that never refreshes mid-session, so reading it as the write base in each
+    // handler meant saving one panel clobbered the other's changes. This draft
+    // is the single source of truth for writes and is updated after each save.
+    const [rulesetDraft, setRulesetDraft] = useState<Record<string, any>>(() => (data as any)?.ruleset ?? {});
     const [tournamentFormat, setTournamentFormat] = useState<'circuit' | 'league'>(initialTournamentFormat);
     const [circuitChampionMode, setCircuitChampionMode] = useState<'accumulation' | 'final'>(initialChampionMode);
     const [savedFormat, setSavedFormat] = useState<'circuit' | 'league'>(initialTournamentFormat);
@@ -191,6 +199,12 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const [savingFixedRoster, setSavingFixedRoster] = useState(false);
     const [fixedRosterSaved, setFixedRosterSaved] = useState(false);
     const [fixedRosterError, setFixedRosterError] = useState<string | null>(null);
+    // Last persisted roster config, so we can flag unsaved edits to the shell.
+    const [savedFixedRoster, setSavedFixedRoster] = useState(() => ({
+        enabled: Boolean(initialFixedRoster.enabled),
+        rosterSize: typeof initialFixedRoster.rosterSize === 'number' ? initialFixedRoster.rosterSize : 23,
+        lockPhaseId: typeof initialFixedRoster.lockPhaseId === 'string' ? initialFixedRoster.lockPhaseId : '',
+    }));
 
     // Mobile-only: 'Modelo competitivo' and 'Plantel fijo' collapse into a
     // 'Configuración del torneo' panel with two drilldown rows; tapping a row
@@ -297,7 +311,24 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     };
 
     const addPlayoffStageName = () => {
-        const suggested = DEFAULT_PLAYOFF_STAGE_NAMES[playoffStageNames.length] || `Etapa ${playoffStageNames.length + 1}`;
+        // Pick a name that isn't already present. The stage list is deduped
+        // case-insensitively before persisting, so suggesting a name that
+        // already exists (e.g. a second "Final") would silently collapse the
+        // row on save — the user sees a stage that vanishes.
+        const used = new Set(playoffStageNames.map(n => n.trim().toLowerCase()).filter(Boolean));
+        const candidates = [
+            DEFAULT_PLAYOFF_STAGE_NAMES[playoffStageNames.length],
+            ...DEFAULT_PLAYOFF_STAGE_NAMES,
+        ].filter((c): c is string => Boolean(c));
+        let suggested = candidates.find(c => !used.has(c.trim().toLowerCase()));
+        if (!suggested) {
+            let n = playoffStageNames.length + 1;
+            suggested = `Etapa ${n}`;
+            while (used.has(suggested.toLowerCase())) {
+                n += 1;
+                suggested = `Etapa ${n}`;
+            }
+        }
         const nextNames = [...playoffStageNames, suggested];
         setPlayoffStageNames(nextNames);
         setPlayoffStageMatchCounts(prev => normalizePlayoffStageMatchCounts(nextNames, prev, formPlayoffTeamsCount));
@@ -333,6 +364,18 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         () => getPlayoffTeamsCount({ teamsCount: teamsCount === '' ? 0 : Number(teamsCount) }),
         [teamsCount],
     );
+
+    // The linear bracket is sized by the team count: on save the stage list is
+    // clamped to ceil(log2(equipos)), keeping the LAST N stages. Surface that
+    // so the user isn't surprised when early stages they configured disappear.
+    const playoffStageAdjustment = useMemo(() => {
+        if (phaseType !== 'playoff' && phaseType !== 'knockout') return null;
+        if (formPlayoffTeamsCount < 2) return null;
+        const expected = getExpectedPlayoffStageCount(formPlayoffTeamsCount);
+        const configured = normalizePlayoffStageNames(playoffStageNames).length;
+        if (expected <= 0 || configured === expected) return null;
+        return { expected, configured, excess: configured > expected };
+    }, [phaseType, formPlayoffTeamsCount, playoffStageNames]);
 
     useEffect(() => {
         if (phaseType !== 'playoff' && phaseType !== 'knockout') return;
@@ -529,14 +572,19 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     // Validation
     const validationErrors = useMemo(() => {
         const errors: string[] = [];
+        // Tiebreakers only apply to standings-based phases. Playoff/knockout
+        // brackets skip the Puntos/Desempate steps entirely, so requiring an
+        // active tiebreaker there would disable "Crear fase" with no visible
+        // step to fix it — an unrecoverable dead end.
+        const usesStandings = phaseType === 'league' || phaseType === 'group_stage';
         const enabled = tiebreakers.filter(tb => tb.enabled);
-        if (enabled.length === 0) errors.push('Debe haber al menos un criterio de desempate activo');
-        if (useExtraTimePoints && !tableCols.extraWon && !tableCols.extraDrawn)
+        if (usesStandings && enabled.length === 0) errors.push('Debe haber al menos un criterio de desempate activo');
+        if (usesStandings && useExtraTimePoints && !tableCols.extraWon && !tableCols.extraDrawn)
             errors.push('Prórroga activada pero sin columnas de prórroga visibles');
-        if (enabled.some(tb => tb.metric === 'points') && enabled.some(tb => tb.metric === 'won'))
+        if (usesStandings && enabled.some(tb => tb.metric === 'points') && enabled.some(tb => tb.metric === 'won'))
             errors.push('Posible redundancia: «Puntos» normalmente ya considera victorias. Mantené «Victorias» solo si querés priorizar partidos ganados como criterio adicional.');
         return errors;
-    }, [tiebreakers, useExtraTimePoints, tableCols]);
+    }, [phaseType, tiebreakers, useExtraTimePoints, tableCols]);
 
     const phaseFormErrors = useMemo(() => {
         const errors: string[] = [];
@@ -614,11 +662,12 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 tournamentFormat,
                 tournamentFormat === 'circuit' ? { champion_mode: circuitChampionMode } : undefined,
             );
-            const currentRuleset = (data as any)?.ruleset ?? {};
+            const nextRuleset = { ...rulesetDraft, competition };
             await updateEntity('tournament', id, {
                 format: tournamentFormat,
-                ruleset: { ...currentRuleset, competition },
+                ruleset: nextRuleset,
             });
+            setRulesetDraft(nextRuleset);
             setSavedFormat(tournamentFormat);
             setSavedChampionMode(circuitChampionMode);
             setFormatSaved(true);
@@ -640,18 +689,23 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             const lockPhase = fixedRosterLockPhaseId
                 ? phases.find((p) => p.id === fixedRosterLockPhaseId) ?? null
                 : null;
-            const currentRuleset = (data as any)?.ruleset ?? {};
-            await updateEntity('tournament', id, {
-                ruleset: {
-                    ...currentRuleset,
-                    fixedRoster: {
-                        enabled: fixedRosterEnabled,
-                        rosterSize: Math.min(40, Math.max(1, Math.trunc(fixedRosterSize) || 23)),
-                        enforceExactSize: false,
-                        lockPhaseId: lockPhase ? lockPhase.id : null,
-                        lockOrderIndex: lockPhase ? lockPhase.order_index : null,
-                    },
+            const persistedRosterSize = Math.min(40, Math.max(1, Math.trunc(fixedRosterSize) || 23));
+            const nextRuleset = {
+                ...rulesetDraft,
+                fixedRoster: {
+                    enabled: fixedRosterEnabled,
+                    rosterSize: persistedRosterSize,
+                    enforceExactSize: false,
+                    lockPhaseId: lockPhase ? lockPhase.id : null,
+                    lockOrderIndex: lockPhase ? lockPhase.order_index : null,
                 },
+            };
+            await updateEntity('tournament', id, { ruleset: nextRuleset });
+            setRulesetDraft(nextRuleset);
+            setSavedFixedRoster({
+                enabled: fixedRosterEnabled,
+                rosterSize: persistedRosterSize,
+                lockPhaseId: lockPhase ? lockPhase.id : '',
             });
             setFixedRosterSaved(true);
             triggerSectionSavedFlash('structure');
@@ -670,7 +724,10 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     // tournament model differing from its last saved value.
     const formatModelDirty = tournamentFormat !== savedFormat
         || (tournamentFormat === 'circuit' && circuitChampionMode !== savedChampionMode);
-    const isStructureDirty = showPhaseForm || formatModelDirty;
+    const fixedRosterDirty = fixedRosterEnabled !== savedFixedRoster.enabled
+        || fixedRosterSize !== savedFixedRoster.rosterSize
+        || fixedRosterLockPhaseId !== savedFixedRoster.lockPhaseId;
+    const isStructureDirty = showPhaseForm || formatModelDirty || fixedRosterDirty;
     useEffect(() => {
         if (isStructureDirty) {
             markStructureDirty();
@@ -730,7 +787,11 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         // al abrir la fase porque advanceTouched seguiría en false.
         setAdvanceTouched(true);
         setPhaseName(phase.name);
-        setPhaseType(phase.phase_type as any);
+        // Legacy 'knockout' phases predate the selector, which now only offers
+        // 'playoff'. They're identical server-side (isPlayoffPhaseType covers
+        // both), so surface them as 'playoff' — otherwise no type card lights
+        // up when editing an older knockout phase.
+        setPhaseType(phase.phase_type === 'knockout' ? 'playoff' : (phase.phase_type as any));
         setPlayoffStageNames(DEFAULT_PLAYOFF_STAGE_NAMES);
         setPlayoffStageMatchCounts(DEFAULT_PLAYOFF_STAGE_MATCH_COUNTS);
         setPlayoffStagesCustomized(false);
@@ -772,7 +833,12 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 setTiebreakers(active as TiebreakerItem[]);
             }
 
-            setGroupLabels(normalizeGroupLabels(s.groupLabels || []));
+            const restoredLabels = normalizeGroupLabels(s.groupLabels || []);
+            setGroupLabels(restoredLabels);
+            // Restore the global color mode from the saved labels; otherwise the
+            // toggle always reads "Automático" even for manually-colored zones,
+            // and the first edit would silently repaint them with auto colors.
+            setLabelColorMode(restoredLabels.some(l => l.colorMode === 'manual') ? 'manual' : 'auto');
             setGroupNames((s as any).group_names || []);
             const stageConfigs = resolvePlayoffStagesForTeams(s, getPlayoffTeamsCount(s));
             const stageNames = stageConfigs.map(stage => stage.name);
@@ -1075,8 +1141,12 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     // Used to gate forward navigation and to highlight the offending field.
     const getStepErrors = useCallback((step: number): string[] => {
         if (step === 1) {
+            // Note the singular "equipo": "Debe avanzar al menos 1 equipo."
+            // would slip past an "equipos"-only pattern, letting the user
+            // advance past a blocking error and then hit a disabled submit
+            // with no explanation.
             return phaseFormErrors.filter(err =>
-                /nombre|equipos|grupos|playoff|etapa/i.test(err)
+                /nombre|equipo|avanzan|grupos?|playoff|etapa/i.test(err)
             );
         }
         if (step === 3) {
@@ -1113,7 +1183,12 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         { step: 2, title: 'Puntos', desc: 'Sistema de puntuación', show: phaseType === 'league' || phaseType === 'group_stage' },
         { step: 3, title: 'Desempate', desc: 'Criterios y tabla', show: phaseType === 'league' || phaseType === 'group_stage' },
         { step: 4, title: 'Etiquetas', desc: 'Zonas de clasificación', show: true },
-        { step: 5, title: 'Estadísticas', desc: 'Atribución a jugadores', show: true },
+        // El paso 5 tenía dos casillas: una sin motor —se guardaba y nadie la
+        // leía— y el arrastre de la fase previa, que sí mueve la tabla. Sacada
+        // la primera, en la fase 1 el paso quedaba con un solo control apagado
+        // y un cartel diciendo que no se puede usar todavía: una parada del
+        // recorrido para no decidir nada. Aparece cuando hay fase previa.
+        { step: 5, title: 'Estadísticas', desc: 'Arrastre de la fase previa', show: Boolean(getPreviousPhaseForForm()) },
         { step: 6, title: 'Circuito', desc: 'Puntos por posición', show: isCircuit },
     ];
 
@@ -1125,28 +1200,28 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const currentPhaseOrdinal = editingPhaseId ? phases.findIndex(phase => phase.id === editingPhaseId) + 1 : phases.length + 1;
     const previousPhaseForForm = getPreviousPhaseForForm();
     const canSubmitPhase = phaseFormErrors.length === 0 && !validationErrors.some(error => error.includes('Debe haber'));
+
+    // El aviso del sidebar y el del paso 3 mostraban el MISMO texto al mismo
+    // tiempo: parado en Desempate se leía dos veces "Debe haber al menos un
+    // criterio". Y parado en cualquier otro paso el aviso no decía adónde ir,
+    // que es lo único que hacía falta desde ahí. Ahora la barra sólo habla
+    // cuando el problema está en otra parte, y dice en cuál.
+    const tiebreakerStep = visibleSteps.find(step => step.title === 'Desempate')?.step ?? null;
+    const tiebreakerError = validationErrors.find(error => error.includes('Debe haber')) ?? null;
+    const sidebarAlert = phaseFormErrors[0]
+        ?? (tiebreakerError && currentStep !== tiebreakerStep
+            ? `Falta resolver el paso Desempate: ${tiebreakerError.charAt(0).toLowerCase()}${tiebreakerError.slice(1)}`
+            : null);
     const progressPercent = visibleSteps.length > 0
         ? ((currentStepIndex + 1) / visibleSteps.length) * 100
         : 0;
 
-    const structureMetrics = useMemo(() => {
-        const activePhase = phases.find(phase => phase.is_active) || phases[0] || null;
-        const groupPhaseCount = phases.filter(phase => phase.phase_type === 'group_stage').length;
-        const knockoutPhaseCount = phases.filter(phase => phase.phase_type === 'knockout' || phase.phase_type === 'playoff').length;
-        const configuredGroups = phases.reduce((count, phase) => {
-            const groupCount = Array.isArray((phase.settings as any)?.group_names)
-                ? (phase.settings as any).group_names.length
-                : 0;
-            return count + groupCount;
-        }, 0);
-
-        return {
-            activePhase,
-            groupPhaseCount,
-            knockoutPhaseCount,
-            configuredGroups,
-        };
-    }, [phases]);
+    // Aca vivia `structureMetrics`: fase activa, cantidad de fases, grupos
+    // configurados y llaves, que alimentaban una grilla de cuatro placas arriba
+    // del listado. Las cuatro decian algo que la lista de abajo ya dice —y lo
+    // dice mejor, porque ahi cada dato esta pegado a la fase que lo produce—.
+    // La placa "Grupos 0" era el caso limite: una metrica cuyo unico contenido
+    // era la ausencia de la cosa. Se fue la grilla y se fue el calculo.
 
     useEffect(() => {
         if (visibleSteps.length === 0) return;
@@ -1229,6 +1304,15 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 </div>
             )}
 
+            {/* ── Configuración del torneo (2 columnas en escritorio) ──
+                 Cada uno de estos dos paneles ocupaba una banda propia de ancho
+                 completo para un puñado de controles: el modelo son dos tarjetas
+                 y el plantel fijo es una casilla. La mitad derecha quedaba vacía
+                 en los dos. Debajo de 768px el wrapper es `display: contents`,
+                 así que las secciones siguen siendo hijas directas del shell y
+                 el drilldown a bottom sheet funciona igual que antes. */}
+            <div className="structure-config-row">
+
             {/* ── Tournament model selector ── */}
             {!showPhaseForm && (
                 <section
@@ -1243,9 +1327,11 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     >
                         <X size={20} />
                     </button>
+                    {/* El kicker decía "Modelo competitivo" y el título "Rol del
+                        torneo": dos nombres para la misma cosa, uno encima del
+                        otro. Queda el que nombra el dato que se edita. */}
                     <div className="structure-module-header mb-5">
-                        <p className="basalt-section-kicker mb-1">Modelo competitivo</p>
-                        <h2 className="basalt-h1 structure-module-title">Rol del torneo</h2>
+                        <h2 className="structure-module-title">Modelo competitivo</h2>
                         <p className="structure-module-copy text-dim text-sm mt-1">
                             Define si este torneo es una competencia estándar o un circuito por eventos acumulados.
                         </p>
@@ -1262,7 +1348,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 onClick={() => setTournamentFormat(opt.value)}
                                 disabled={isApiManaged}
                                 className={`structure-option-card ${tournamentFormat === opt.value ? 'is-active' : ''} flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${tournamentFormat === opt.value
-                                    ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
+                                    ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-[var(--text-main)]'
                                     : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
                                 }`}
                             >
@@ -1288,7 +1374,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                         onClick={() => setCircuitChampionMode(opt.value)}
                                         disabled={isApiManaged}
                                         className={`structure-option-card ${circuitChampionMode === opt.value ? 'is-active' : ''} flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${circuitChampionMode === opt.value
-                                            ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
+                                            ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-[var(--text-main)]'
                                             : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
                                         }`}
                                     >
@@ -1300,15 +1386,24 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                         </div>
                     )}
 
+                    {/* `formatModelDirty` ya existia para avisarle al shell que hay
+                        cambios sin guardar; el boton lo ignoraba y quedaba verde y
+                        activo tambien cuando no habia nada que guardar. Un verde que
+                        no hace nada es la accion mas cara de la pantalla. */}
                     <div className="flex items-center gap-3 flex-wrap">
                         <button
                             type="button"
                             className="basalt-btn basalt-btn-primary"
                             onClick={handleSaveTournamentFormat}
-                            disabled={savingFormat || isApiManaged}
+                            disabled={savingFormat || isApiManaged || !formatModelDirty}
                         >
                             {savingFormat ? 'Guardando...' : 'Guardar modelo'}
                         </button>
+                        {!formatModelDirty && !savingFormat && !isApiManaged && !formatSaved && (
+                            <span className="structure-save-hint">
+                                Elegí otro modelo para habilitar el guardado.
+                            </span>
+                        )}
                         {formatError && (
                             <span className="flex items-center gap-1.5 text-sm text-[var(--status-error)] font-semibold">
                                 <AlertCircle size={15} />
@@ -1338,13 +1433,17 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     >
                         <X size={20} />
                     </button>
-                    <p className="basalt-section-kicker">Inscripción de equipos</p>
-                    <h2 className="structure-hero-title" style={{ marginBottom: 4 }}>Plantel fijo por equipo</h2>
-                    <p className="structure-hero-text" style={{ marginBottom: 16 }}>
-                        Cada equipo inscribe una sola vez su plantel/delegación en el torneo y esos jugadores
-                        se cargan automáticamente en todos sus partidos. Otros torneos siguen con la carga
-                        manual de titulares/suplentes por partido.
-                    </p>
+                    {/* Este panel era el único que titulaba con `structure-hero-*`
+                        —la escala de la placa grande— mientras los otros dos usan
+                        `structure-module-*`. Mismo rol, misma tipografía. */}
+                    <div className="structure-module-header mb-5">
+                        <h2 className="structure-module-title">Plantel fijo por equipo</h2>
+                        <p className="structure-module-copy text-dim text-sm mt-1">
+                            Cada equipo inscribe una sola vez su plantel/delegación en el torneo y esos jugadores
+                            se cargan automáticamente en todos sus partidos. Otros torneos siguen con la carga
+                            manual de titulares/suplentes por partido.
+                        </p>
+                    </div>
 
                     <label className="flex items-center gap-2 mb-4" style={{ cursor: isApiManaged ? 'default' : 'pointer' }}>
                         <input
@@ -1397,10 +1496,15 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                             type="button"
                             className="basalt-btn basalt-btn-primary"
                             onClick={handleSaveFixedRoster}
-                            disabled={savingFixedRoster || isApiManaged}
+                            disabled={savingFixedRoster || isApiManaged || !fixedRosterDirty}
                         >
                             {savingFixedRoster ? 'Guardando...' : 'Guardar plantel fijo'}
                         </button>
+                        {!fixedRosterDirty && !savingFixedRoster && !isApiManaged && !fixedRosterSaved && (
+                            <span className="structure-save-hint">
+                                Cambiá la configuración de plantel para habilitar el guardado.
+                            </span>
+                        )}
                         {fixedRosterError && (
                             <span className="flex items-center gap-1.5 text-sm text-[var(--status-error)] font-semibold">
                                 <AlertCircle size={15} />
@@ -1417,82 +1521,30 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 </section>
             )}
 
-            {!showPhaseForm && (
-                <section className="basalt-card basalt-hero structure-hero-panel">
-                    <div className="structure-hero-copy">
-                        <p className="basalt-section-kicker">Consola competitiva</p>
-                        <h2 className="structure-hero-title">Estructura y creación de fases</h2>
-                        <p className="structure-hero-text">
-                            Ordena el recorrido competitivo del torneo y prepara la base visual para fixture,
-                            clasificación y configuración avanzada.
-                        </p>
-                        <div className="structure-hero-meta">
-                            <span>{phases.length > 0 ? 'Sistema estructural activo' : 'Pendiente de configuración'}</span>
-                            <span>{phases.length} {phases.length === 1 ? 'fase configurada' : 'fases configuradas'}</span>
-                        </div>
-                    </div>
+            </div>{/* /.structure-config-row */}
 
-                    <div className="structure-summary-grid">
-                        <article className="structure-summary-card structure-summary-card--feature">
-                            <span className="structure-summary-label">Fase activa</span>
-                            <strong className="structure-summary-value structure-summary-value--text">
-                                {structureMetrics.activePhase?.name || 'Sin definir'}
-                            </strong>
-                            <small className="structure-summary-foot">
-                                {structureMetrics.activePhase
-                                    ? PHASE_TYPE_LABELS[structureMetrics.activePhase.phase_type] || structureMetrics.activePhase.phase_type
-                                    : 'Todavía no hay etapa principal'}
-                            </small>
-                        </article>
-                        <article className="structure-summary-card structure-summary-card--metric">
-                            <span className="structure-summary-label">Fases</span>
-                            <strong className="structure-summary-value">{phases.length}</strong>
-                            <small className="structure-summary-foot">
-                                {phases.length === 1 ? 'configurada' : 'configuradas'}
-                            </small>
-                        </article>
-                        <article className="structure-summary-card structure-summary-card--metric">
-                            <span className="structure-summary-label">Grupos</span>
-                            <strong className="structure-summary-value">{structureMetrics.configuredGroups}</strong>
-                            <small className="structure-summary-foot">
-                                {structureMetrics.groupPhaseCount > 0
-                                    ? `en ${structureMetrics.groupPhaseCount} fase${structureMetrics.groupPhaseCount === 1 ? '' : 's'}`
-                                    : 'sin grupos'}
-                            </small>
-                        </article>
-                        <article className="structure-summary-card structure-summary-card--metric structure-summary-card--knockout">
-                            <span className="structure-summary-label">Eliminación</span>
-                            <strong className="structure-summary-value">{structureMetrics.knockoutPhaseCount}</strong>
-                            <small className="structure-summary-foot">
-                                {structureMetrics.knockoutPhaseCount === 0
-                                    ? 'sin llaves'
-                                    : structureMetrics.knockoutPhaseCount === 1
-                                        ? 'llave activa'
-                                        : 'llaves activas'}
-                            </small>
-                        </article>
-                    </div>
-                </section>
-            )}
+            {/* La placa "Consola competitiva" que iba aca era titulo, bajada y
+                cuatro metricas — ningun control. Sus dos chips ("Sistema
+                estructural activo", "N fases configuradas") repetian el badge de
+                la placa de abajo, y los pies de las cuatro tarjetas estaban
+                apagados por CSS: markup que calculaba texto para no mostrarlo.
+                Ya venia oculta en mobile. Ahora la seccion arranca por el
+                listado, que es donde estan los datos y las acciones. */}
 
             {/* ── Phase list ── */}
             {phases.length > 0 && !showPhaseForm && (
                 <div className="basalt-card structure-module structure-phase-list-module p-6">
-                    <div className="structure-module-header flex items-center justify-between gap-4 mb-6">
-                        <div>
-                            <p className="basalt-section-kicker mb-1">Mapa competitivo</p>
-                            <h2 className="basalt-h1 structure-module-title">Fases del torneo</h2>
-                            <p className="structure-module-copy">
-                                Cada módulo concentra una etapa del torneo con su formato y reglas base.
-                            </p>
-                        </div>
-                        <span className="basalt-badge badge-ok structure-phase-count-desktop">
-                            {phases.length} FASE{phases.length !== 1 ? 'S' : ''}
-                        </span>
-                        <span className="structure-phase-count-mobile">
-                            {phases.length} fase{phases.length !== 1 ? 's' : ''} configurada{phases.length !== 1 ? 's' : ''}
-                            {phases.some(p => p.is_active) ? ' · 1 activa' : ''}
-                        </span>
+                    {/* El badge "N FASES" y su gemelo de mobile contaban en la
+                        cabecera las fases que estan listadas justo abajo, con
+                        numero y todo. Con dos o tres filas a la vista, contarlas
+                        aparte no informa: ocupa. El kicker "Mapa competitivo"
+                        tampoco nombraba nada que exista en el producto. */}
+                    <div className="structure-module-header mb-6">
+                        <h2 className="structure-module-title">Fases del torneo</h2>
+                        <p className="structure-module-copy">
+                            El orden de esta lista es el orden en que se juega. Toca una fase para editar su
+                            formato, sus grupos y sus criterios de desempate.
+                        </p>
                     </div>
 
                     <div className="structure-phase-list flex flex-col gap-4">
@@ -1519,7 +1571,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                     </div>
                                     <div className="structure-phase-copy min-w-0">
                                         <div className="structure-phase-badges flex items-center gap-2 flex-wrap mb-1">
-                                            <span className="structure-phase-step text-[10px] font-bold text-dim uppercase tracking-widest">
+                                            <span className="structure-phase-step text-[11px] font-bold text-dim uppercase tracking-widest">
                                                 Fase {index + 1}
                                             </span>
                                             <span className={`basalt-badge ${PHASE_TYPE_BADGE[phase.phase_type] || 'badge-draft'}`}>
@@ -1529,7 +1581,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                 <span className="basalt-badge badge-ok">Activa</span>
                                             )}
                                         </div>
-                                        <h3 className="structure-phase-title text-lg font-extrabold tracking-tight text-white">{phase.name}</h3>
+                                        <h3 className="structure-phase-title text-[var(--text-main)]">{phase.name}</h3>
                                         <div className="structure-phase-meta flex flex-wrap gap-3 mt-2 text-xs text-dim">
                                             {(phase.settings?.teamsCount ?? 0) > 0 && (
                                                 <span>{phase.settings!.teamsCount} equipos</span>
@@ -1544,7 +1596,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                 </span>
                                             )}
                                             {phase.phase_type !== 'group_stage' && !((phase.settings as any)?.group_names?.length > 0) && (
-                                                <span className="structure-phase-meta-single text-white/70 font-semibold">
+                                                <span className="structure-phase-meta-single text-[var(--text-main)]/70 font-semibold">
                                                     <span className="ts-meta-mobile">Una sola tabla</span>
                                                     <span className="ts-meta-desktop">Tabla única</span>
                                                 </span>
@@ -1641,13 +1693,13 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                 handleSetActivePhase(phase.id);
                                             }}
                                             disabled={activatingPhaseId === phase.id}
-                                            className="px-3 py-1.5 rounded-full border border-[var(--status-active)]/40 bg-[var(--status-active)]/8 text-[10px] font-bold uppercase tracking-widest text-[var(--status-active)] hover:bg-[var(--status-active)]/14 transition-colors disabled:opacity-60 disabled:cursor-wait"
+                                            className="px-3 py-1.5 rounded-full border border-[var(--status-active)]/40 bg-[var(--status-active)]/8 text-[11px] font-bold uppercase tracking-widest text-[var(--status-active)] hover:bg-[var(--status-active)]/14 transition-colors disabled:opacity-60 disabled:cursor-wait"
                                             title="Marcar como fase activa"
                                         >
                                             {activatingPhaseId === phase.id ? 'Activando...' : 'Activar'}
                                         </button>
                                     )}
-                                    <ChevronRight size={16} className="structure-phase-chevron text-dim group-hover:text-white transition-colors" />
+                                    <ChevronRight size={16} className="structure-phase-chevron text-dim group-hover:text-[var(--text-main)] transition-colors" />
                                     {!isApiManaged && pendingDeletePhaseId === phase.id ? (
                                         <div
                                             className="structure-phase-delete-confirm"
@@ -1656,7 +1708,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                             onClick={e => e.stopPropagation()}
                                         >
                                             <span className="structure-phase-delete-confirm-text">
-                                                ¿Eliminar fase?
+                                                ¿Eliminar fase? Se quitan sus grupos, tablas y cuadro; los partidos quedan sin fase.
                                             </span>
                                             <button
                                                 type="button"
@@ -1694,7 +1746,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                     e.stopPropagation();
                                                     setOpenMenuPhaseId(openMenuPhaseId === phase.id ? null : phase.id);
                                                 }}
-                                                className="structure-phase-menu-trigger p-2 rounded-lg text-dim hover:text-white hover:bg-[var(--surface-elevated)] transition-colors"
+                                                className="structure-phase-menu-trigger p-2 rounded-lg text-dim hover:text-[var(--text-main)] hover:bg-[var(--surface-elevated)] transition-colors"
                                                 aria-haspopup="menu"
                                                 aria-expanded={openMenuPhaseId === phase.id}
                                                 title="Más acciones"
@@ -1819,8 +1871,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                         <Layers size={28} className="text-dim" />
                     </div>
                     <div className="structure-empty-copy">
-                        <p className="basalt-section-kicker mb-3">Constructor de fases</p>
-                        <h3 className="basalt-h1 structure-empty-title mb-3">Sin fases configuradas</h3>
+                        <h3 className="structure-empty-title mb-3">Sin fases configuradas</h3>
                         <p className="structure-empty-text text-dim text-sm max-w-md mx-auto">
                             Diseña la estructura competitiva del torneo. Define cómo se competirá y qué criterios decidirán al campeón.
                         </p>
@@ -1844,15 +1895,15 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                             {/* Sidebar */}
                             <aside className="phase-wizard-sidebar structure-wizard-sidebar w-full lg:w-64 xl:w-72 flex-shrink-0 bg-[var(--surface-basalt)] border-b lg:border-b-0 lg:border-r border-[var(--border-basalt)] p-6 flex flex-col gap-4">
                                 <div className="phase-wizard-sidebar-head structure-wizard-sidebar-head mb-2">
-                                    <p className="phase-wizard-kicker text-[10px] font-bold text-dim uppercase tracking-widest mb-1">
+                                    <p className="phase-wizard-kicker text-[11px] font-bold text-dim uppercase tracking-widest mb-1">
                                         {editingPhaseId ? 'Editando' : 'Nueva'}
                                     </p>
-                                    <h2 className="phase-wizard-sidebar-title text-xl font-extrabold tracking-tight">
+                                    <h2 className="phase-wizard-sidebar-title">
                                         {phaseName || `Fase ${currentPhaseOrdinal}`}
                                     </h2>
-                                    <p className="structure-wizard-sidebar-copy">
-                                        Consola modular para definir formato, reglas y criterios de esta etapa.
-                                    </p>
+                                    {/* Acá iba "Consola modular para definir formato, reglas y
+                                        criterios de esta etapa". Es la lista de los cinco pasos
+                                        que están doce píxeles más abajo, dicha en prosa. */}
                                 </div>
 
                                 <div className="structure-wizard-progress-card">
@@ -1865,11 +1916,15 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                     </div>
                                 </div>
 
-                                {(phaseFormErrors.length > 0 || validationErrors.filter(e => e.includes('Debe haber')).length > 0) && (
-                                    <div className="structure-inline-alert structure-inline-alert-error flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
-                                        <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
-                                        <span>{phaseFormErrors[0] || validationErrors.find(e => e.includes('Debe haber'))}</span>
-                                    </div>
+                                {sidebarAlert && (
+                                    <button
+                                        type="button"
+                                        className="structure-wizard-sidebar-alert"
+                                        onClick={() => { if (tiebreakerStep) setCurrentStep(tiebreakerStep); }}
+                                    >
+                                        <AlertCircle size={14} aria-hidden="true" />
+                                        <span>{sidebarAlert}</span>
+                                    </button>
                                 )}
 
                                 <nav className="phase-wizard-stepper structure-wizard-stepper flex flex-col gap-1">
@@ -1883,16 +1938,16 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                 : 'hover:bg-[var(--surface-elevated)]'
                                                 }`}
                                         >
-                                            <span className={`phase-wizard-step-index structure-wizard-step-index ${currentStep === s.step ? 'is-active' : ''} ${currentStep > s.step ? 'is-complete' : ''} w-5 h-5 flex-shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5 ${currentStep > s.step
-                                                ? 'bg-[var(--status-active)] text-white'
+                                            <span className={`phase-wizard-step-index structure-wizard-step-index ${currentStep === s.step ? 'is-active' : ''} ${currentStep > s.step ? 'is-complete' : ''} w-5 h-5 flex-shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold mt-0.5 ${currentStep > s.step
+                                                ? 'bg-[var(--status-active)] text-[var(--text-main)]'
                                                 : currentStep === s.step
-                                                    ? 'bg-[var(--accent-primary)] text-white'
+                                                    ? 'bg-[var(--accent-primary)] text-[var(--text-main)]'
                                                     : 'bg-[var(--surface-elevated)] border border-[var(--border-basalt)] text-dim'
                                                 }`}>
                                                 {currentStep > s.step ? <CheckCircle size={12} /> : s.step}
                                             </span>
                                             <span className="phase-wizard-step-copy flex flex-col min-w-0">
-                                                <span className={`phase-wizard-step-title text-sm font-semibold ${currentStep === s.step ? 'text-white' : 'text-dim'}`}>
+                                                <span className={`phase-wizard-step-title text-sm font-semibold ${currentStep === s.step ? 'text-[var(--text-main)]' : 'text-dim'}`}>
                                                     {s.title}
                                                 </span>
                                                 <span className="phase-wizard-step-desc text-[11px] text-dim">{s.desc}</span>
@@ -1927,8 +1982,12 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 {currentStep === 1 && (
                                     <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-basic flex flex-col gap-6">
                                         <div className="phase-wizard-step-head structure-step-head">
-                                            <p className="phase-wizard-kicker text-[10px] font-bold text-dim uppercase tracking-widest mb-1">Paso 1</p>
-                                            <h3 className="phase-wizard-step-heading structure-step-heading-main text-2xl font-extrabold tracking-tight mb-1">Configuración Básica</h3>
+                                            {/* El "Paso N" estaba en tres de los cinco pasos y en
+                                                ninguno de los otros dos. Además la barra lateral ya
+                                                dice el número (1/5), marca cuál está activo y lo
+                                                nombra. Tres veces el mismo dato, y encima
+                                                inconsistente. Se numera en un solo lugar. */}
+                                            <h3 className="phase-wizard-step-heading structure-step-heading-main mb-1">Configuración Básica</h3>
                                             <p className="phase-wizard-step-subtitle text-dim text-sm">Define la estructura general de la fase</p>
                                         </div>
 
@@ -1985,7 +2044,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                     }
                                                             }}
                                                             className={`structure-option-card structure-phase-type-card ${phaseType === type ? 'is-active' : ''} flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${phaseType === type
-                                                                ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
+                                                                ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-[var(--text-main)]'
                                                                 : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
                                                                 }`}
                                                         >
@@ -2015,7 +2074,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                             <p className="text-xs font-bold text-dim uppercase tracking-widest mb-0.5">
                                                                 Etapas de eliminacion
                                                             </p>
-                                                            <p className="text-sm text-white font-semibold">
+                                                            <p className="text-sm text-[var(--text-main)] font-semibold">
                                                                 Define las etapas que guiaran el cuadro playoff
                                                             </p>
                                                         </div>
@@ -2026,10 +2085,22 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                         </span>
                                                     </div>
 
-                                                    <div className="mb-4 rounded-lg border border-[var(--accent-primary)]/40 bg-[var(--accent-primary)]/10 px-3 py-2.5 text-xs text-white/85">
+                                                    <div className="mb-4 rounded-lg border border-[var(--accent-primary)]/40 bg-[var(--accent-primary)]/10 px-3 py-2.5 text-xs text-[var(--text-main)]/85">
                                                         <strong>¿Querés copas derivadas (Oro / Plata / Bronce / Estímulo), cruces aleatorios u horarios automáticos?</strong>{' '}
                                                         Esto define solo un cuadro lineal simple. Para subcopas y avance automático: poné un nombre a la fase y guardala; después, en la lista de fases, abrí el panel <strong>“Constructor de Playoff”</strong> de esta fase.
                                                     </div>
+
+                                                    {playoffStageAdjustment && (
+                                                        <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-100" role="status">
+                                                            <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
+                                                            <span>
+                                                                Con <strong>{formPlayoffTeamsCount} equipos</strong> el cuadro lineal tiene <strong>{playoffStageAdjustment.expected} etapa{playoffStageAdjustment.expected !== 1 ? 's' : ''}</strong>.
+                                                                {playoffStageAdjustment.excess
+                                                                    ? ` Configuraste ${playoffStageAdjustment.configured}: al guardar se conservarán solo las últimas ${playoffStageAdjustment.expected} (las primeras se descartan).`
+                                                                    : ` Configuraste ${playoffStageAdjustment.configured}: al guardar se completarán las etapas faltantes al frente.`}
+                                                            </span>
+                                                        </div>
+                                                    )}
 
                                                     <div className="flex flex-col gap-2 mb-4">
                                                         {playoffStageNames.map((name, i) => (
@@ -2044,14 +2115,14 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                                     />
                                                                 </div>
                                                                 <label className="flex items-center gap-2 rounded-xl border border-[var(--border-basalt)] bg-black/20 px-3 py-2 min-w-[150px]">
-                                                                    <span className="text-[10px] font-black uppercase tracking-widest text-dim">
+                                                                    <span className="text-[11px] font-black uppercase tracking-widest text-dim">
                                                                         Partidos
                                                                     </span>
                                                                     <input
                                                                         type="number"
                                                                         min={1}
                                                                         max={64}
-                                                                        className="w-16 bg-transparent text-center text-white font-black outline-none"
+                                                                        className="w-16 bg-transparent text-center text-[var(--text-main)] font-black outline-none"
                                                                         value={playoffStageMatchCounts[i] ?? 1}
                                                                         onChange={e => updatePlayoffStageMatchCount(i, e.target.value ? Number(e.target.value) : '')}
                                                                         aria-label={`Partidos en ${name || `etapa ${i + 1}`}`}
@@ -2098,7 +2169,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                             <p className="text-xs font-bold text-dim uppercase tracking-widest mb-0.5">
                                                                 Grupos de la fase
                                                             </p>
-                                                            <p className="text-sm text-white font-semibold">
+                                                            <p className="text-sm text-[var(--text-main)] font-semibold">
                                                                 Define los grupos que componen esta fase
                                                             </p>
                                                         </div>
@@ -2147,9 +2218,9 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                         Cantidad de equipos
                                                     </label>
                                                     <div className="structure-counter-shell flex items-center border border-[var(--border-basalt)] rounded-lg bg-[var(--bg-basalt)] overflow-hidden">
-                                                        <button type="button" aria-label="Disminuir cantidad de equipos" className="structure-counter-button px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setTeamsCount(p => p === '' ? 2 : Math.max(2, Number(p) - 1))}>−</button>
-                                                        <input type="number" aria-label="Cantidad de equipos" className="structure-counter-input flex-1 bg-transparent text-center text-white font-bold text-lg outline-none py-2 border-x border-[var(--border-basalt)]" value={teamsCount} onChange={e => setTeamsCount(e.target.value ? Number(e.target.value) : '')} placeholder="—" />
-                                                        <button type="button" aria-label="Aumentar cantidad de equipos" className="structure-counter-button px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => setTeamsCount(p => p === '' ? 3 : Number(p) + 1)}>+</button>
+                                                        <button type="button" aria-label="Disminuir cantidad de equipos" className="structure-counter-button px-3 py-2 text-dim hover:text-[var(--text-main)] transition-colors" onClick={() => setTeamsCount(p => p === '' ? 2 : Math.max(2, Number(p) - 1))}>−</button>
+                                                        <input type="number" aria-label="Cantidad de equipos" className="structure-counter-input flex-1 bg-transparent text-center text-[var(--text-main)] font-bold text-lg outline-none py-2 border-x border-[var(--border-basalt)]" value={teamsCount} onChange={e => setTeamsCount(e.target.value ? Number(e.target.value) : '')} placeholder="—" />
+                                                        <button type="button" aria-label="Aumentar cantidad de equipos" className="structure-counter-button px-3 py-2 text-dim hover:text-[var(--text-main)] transition-colors" onClick={() => setTeamsCount(p => p === '' ? 3 : Number(p) + 1)}>+</button>
                                                     </div>
                                                 </div>
                                                 <div className="structure-field-panel">
@@ -2157,9 +2228,9 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                         Equipos que avanzan
                                                     </label>
                                                     <div className="structure-counter-shell flex items-center border border-[var(--border-basalt)] rounded-lg bg-[var(--bg-basalt)] overflow-hidden">
-                                                        <button type="button" aria-label="Disminuir equipos que avanzan" className="structure-counter-button px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => { setAdvanceTouched(true); setAdvanceCount(p => p === '' ? 1 : Math.max(1, Number(p) - 1)); }}>−</button>
-                                                        <input type="number" aria-label="Equipos que avanzan" className="structure-counter-input flex-1 bg-transparent text-center text-white font-bold text-lg outline-none py-2 border-x border-[var(--border-basalt)]" value={advanceCount} onChange={e => { setAdvanceTouched(true); setAdvanceCount(e.target.value ? Number(e.target.value) : ''); }} placeholder="—" />
-                                                        <button type="button" aria-label="Aumentar equipos que avanzan" className="structure-counter-button px-3 py-2 text-dim hover:text-white transition-colors" onClick={() => { setAdvanceTouched(true); setAdvanceCount(p => p === '' ? 2 : Number(p) + 1); }}>+</button>
+                                                        <button type="button" aria-label="Disminuir equipos que avanzan" className="structure-counter-button px-3 py-2 text-dim hover:text-[var(--text-main)] transition-colors" onClick={() => { setAdvanceTouched(true); setAdvanceCount(p => p === '' ? 1 : Math.max(1, Number(p) - 1)); }}>−</button>
+                                                        <input type="number" aria-label="Equipos que avanzan" className="structure-counter-input flex-1 bg-transparent text-center text-[var(--text-main)] font-bold text-lg outline-none py-2 border-x border-[var(--border-basalt)]" value={advanceCount} onChange={e => { setAdvanceTouched(true); setAdvanceCount(e.target.value ? Number(e.target.value) : ''); }} placeholder="—" />
+                                                        <button type="button" aria-label="Aumentar equipos que avanzan" className="structure-counter-button px-3 py-2 text-dim hover:text-[var(--text-main)] transition-colors" onClick={() => { setAdvanceTouched(true); setAdvanceCount(p => p === '' ? 2 : Number(p) + 1); }}>+</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2176,7 +2247,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                             type="button"
                                                             onClick={() => setLegs(opt.value)}
                                                             className={`structure-option-card ${legs === opt.value ? 'is-active' : ''} flex-1 py-3 rounded-xl border text-sm font-semibold transition-all duration-150 ${legs === opt.value
-                                                                ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-white'
+                                                                ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-[var(--text-main)]'
                                                                 : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
                                                                 }`}
                                                         >
@@ -2186,35 +2257,13 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                 </div>
                                             </div>
 
-                                            {/* Live preview of phase summary */}
-                                            <div className="structure-step-preview" aria-live="polite">
-                                                <span className="structure-step-preview-eyebrow">Resumen de la fase</span>
-                                                <p className="structure-step-preview-line">
-                                                    <strong>{phaseName.trim() || 'Fase sin nombre'}</strong>
-                                                    <span aria-hidden="true"> · </span>
-                                                    {PHASE_TYPE_LABELS[phaseType]}
-                                                    {teamsCount !== '' && (
-                                                        <>
-                                                            <span aria-hidden="true"> · </span>
-                                                            {teamsCount} equipos
-                                                        </>
-                                                    )}
-                                                    {advanceCount !== '' && phaseType !== 'playoff' && phaseType !== 'knockout' && (
-                                                        <>
-                                                            <span aria-hidden="true"> · </span>
-                                                            avanzan {advanceCount}
-                                                        </>
-                                                    )}
-                                                    <span aria-hidden="true"> · </span>
-                                                    {legs === 2 ? 'ida y vuelta' : 'partido único'}
-                                                    {phaseType === 'group_stage' && groupNames.filter(n => n.trim()).length > 0 && (
-                                                        <>
-                                                            <span aria-hidden="true"> · </span>
-                                                            {groupNames.filter(n => n.trim()).length} grupos
-                                                        </>
-                                                    )}
-                                                </p>
-                                            </div>
+                                            {/* Acá iba "Resumen de la fase": nombre · tipo · equipos ·
+                                                avanzan · formato. Los cinco datos son los cinco
+                                                controles de ESTE paso, repetidos como frase debajo
+                                                de los controles que los producen. Un resumen sirve
+                                                cuando resume algo que no está a la vista; el
+                                                contexto que sí hace falta en los pasos 2 a 5 lo
+                                                lleva la barra lateral, que no se va de pantalla. */}
                                         </div>
                                     </div>
                                 )}
@@ -2223,8 +2272,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 {currentStep === 2 && (
                                     <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-points flex flex-col gap-6">
                                         <div className="structure-step-head">
-                                            <p className="text-[10px] font-bold text-dim uppercase tracking-widest mb-1">Paso 2</p>
-                                            <h3 className="text-2xl font-extrabold tracking-tight mb-1">Sistema de Puntos</h3>
+                                            <h3 className=" mb-1">Sistema de Puntos</h3>
                                             <p className="text-dim text-sm">Configura los puntos otorgados por cada resultado</p>
                                         </div>
 
@@ -2309,23 +2357,18 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
                                 {/* STEP 3: Desempate */}
                                 {currentStep === 3 && (() => {
-                                    const enabledTiebreakerCount = tiebreakers.filter(tb => tb.enabled && (tb.priority ?? 0) > 0).length;
                                     const blockingErrors = validationErrors.filter(err => err.includes('Debe haber'));
                                     const advisoryErrors = validationErrors.filter(err => !err.includes('Debe haber'));
                                     const visibleColumnsCount = Object.values(tableCols).filter(Boolean).length;
                                     const totalColumnsCount = Object.keys(tableCols).length;
                                     return (
                                     <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-rules flex flex-col gap-5">
-                                        {/* Mobile-only progress strip — desktop has it in the sidebar */}
-                                        <div className="structure-mobile-progress" aria-hidden="true">
-                                            <div className="structure-mobile-progress-bar">
-                                                <span style={{ width: `${progressPercent}%` }} />
-                                            </div>
-                                            <p className="structure-mobile-progress-label">
-                                                Paso {currentStepIndex + 1} de {visibleSteps.length}
-                                            </p>
-                                        </div>
-
+                                        {/* Acá iba una barra de progreso "sólo para mobile", con la
+                                            premisa de que en mobile la del sidebar no se ve. Sí se
+                                            ve: el sidebar no se oculta, se aplana en una tira
+                                            horizontal que conserva "PROGRESO 3/4", su barra y los
+                                            pasos. Quedaban dos barras y dos textos del mismo dato,
+                                            una arriba de la otra. */}
                                         <div className="structure-step-head structure-step-head-tiebreakers">
                                             <div className="structure-step-head-main">
                                                 <div className="structure-step-head-icon" aria-hidden="true">
@@ -2338,10 +2381,10 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="structure-step-head-stat" aria-live="polite">
-                                                <span className="structure-step-head-stat-value">{enabledTiebreakerCount}</span>
-                                                <span className="structure-step-head-stat-label">{enabledTiebreakerCount === 1 ? 'criterio activo' : 'criterios activos'}</span>
-                                            </div>
+                                            {/* Acá iba el número grande de criterios activos. La
+                                                misma cuenta ya está en el chip "N activos" del
+                                                encabezado de la lista, a 60px de distancia, y con
+                                                cero la dice una tercera vez el estado vacío. */}
                                         </div>
 
                                         {blockingErrors.length > 0 && (
@@ -2414,7 +2457,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                         </div>
 
                                         <div className="structure-step-head">
-                                            <h3 className="text-2xl font-extrabold tracking-tight mb-1">Etiquetas de Clasificación</h3>
+                                            <h3 className=" mb-1">Etiquetas de Clasificación</h3>
                                             <p className="text-dim text-sm">Zonas coloreadas para resaltar posiciones en la tabla (ej: &quot;Clasifica&quot;, &quot;Descenso&quot;).</p>
                                         </div>
 
@@ -2622,41 +2665,39 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 {currentStep === 5 && (
                                     <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-stats flex flex-col gap-6">
                                         <div className="structure-step-head">
-                                            <p className="text-[10px] font-bold text-dim uppercase tracking-widest mb-1">Paso 5</p>
-                                            <h3 className="text-2xl font-extrabold tracking-tight mb-1">Estadísticas</h3>
-                                            <p className="text-dim text-sm">Configura cómo se atribuyen las estadísticas a los jugadores</p>
+                                            <h3 className=" mb-1">Estadísticas</h3>
+                                            <p className="text-dim text-sm">
+                                                Qué trae esta fase de la anterior cuando se arma su tabla
+                                            </p>
                                         </div>
 
+                                        {/* Acá había una segunda casilla, "Asignar estadísticas solo a
+                                            titulares", con un cartel propio que decía "Sin efecto
+                                            todavía". Era cierto: `statsAssignment` se guardaba en los
+                                            settings de la fase y se releía para repoblar el formulario,
+                                            pero `assignOnlyToStarters` no aparecía en ningún consumidor
+                                            —sólo en este formulario y en el tipo—. La atribución por
+                                            jugador se resuelve al cargar el partido, no acá.
+                                            Declararla era mejor que mentir; sacarla es mejor que
+                                            declararla. El estado sigue leyéndose y escribiéndose para
+                                            no cambiarle el valor guardado a las fases que ya lo tienen:
+                                            se fue el control, no el dato. */}
                                         <label className="structure-field-panel structure-stats-card cursor-pointer">
                                             <input
                                                 type="checkbox"
                                                 className="w-4 h-4 mt-0.5 accent-[var(--accent-primary)]"
-                                                checked={statsAssignment === 'starters'}
-                                                onChange={e => setStatsAssignment(e.target.checked ? 'starters' : 'played')}
+                                                checked={carryOverPreviousPhase}
+                                                onChange={e => setCarryOverPreviousPhase(e.target.checked)}
                                             />
                                             <div>
-                                                <span className="text-sm font-semibold text-white">Asignar estadísticas solo a titulares</span>
-                                                <p className="text-xs text-dim mt-1">Si está inactivo, se asignará a todos los jugadores que hayan jugado, incluyendo suplentes que ingresaron.</p>
+                                                <span className="text-sm font-semibold text-[var(--text-main)]">Arrastrar estadísticas de la fase previa</span>
+                                                <p className="text-xs text-dim mt-1">
+                                                    {previousPhaseForForm
+                                                        ? `La tabla de esta fase empieza con los totales acumulados en ${previousPhaseForForm.name}.`
+                                                        : 'La tabla de esta fase empieza con los totales acumulados en la fase anterior.'}
+                                                </p>
                                             </div>
                                         </label>
-
-                                        <label className={`structure-field-panel structure-stats-card ${previousPhaseForForm ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}>
-                                                <input
-                                                    type="checkbox"
-                                                    className="w-4 h-4 mt-0.5 accent-[var(--accent-primary)]"
-                                                    checked={carryOverPreviousPhase && Boolean(previousPhaseForForm)}
-                                                    disabled={!previousPhaseForForm}
-                                                    onChange={e => setCarryOverPreviousPhase(e.target.checked)}
-                                                />
-                                                <div>
-                                                    <span className="text-sm font-semibold text-white">Arrastrar estadisticas de la fase previa</span>
-                                                    <p className="text-xs text-dim mt-1">
-                                                        {previousPhaseForForm
-                                                            ? `La tabla de esta fase empieza con los totales acumulados en ${previousPhaseForForm.name}.`
-                                                            : 'Disponible desde la segunda fase del torneo.'}
-                                                    </p>
-                                                </div>
-                                            </label>
                                     </div>
                                 )}
 
@@ -2664,8 +2705,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 {currentStep === 6 && (
                                     <div className="phase-wizard-step-panel structure-step-panel flex flex-col gap-6">
                                         <div className="structure-step-head">
-                                            <p className="text-[10px] font-bold text-dim uppercase tracking-widest mb-1">Paso 6</p>
-                                            <h3 className="text-2xl font-extrabold tracking-tight mb-1">Puntos de circuito</h3>
+                                            <h3 className=" mb-1">Puntos de circuito</h3>
                                             <p className="text-dim text-sm">Asigna cuántos puntos acumula cada posición al terminar esta etapa</p>
                                         </div>
 
@@ -2753,6 +2793,14 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                             <button type="button" className="basalt-btn basalt-btn-primary" onClick={goNext}>
                                                 Siguiente →
                                             </button>
+                                        )}
+                                        {/* El submit se apaga cuando hay un error que bloquea, pero
+                                            el motivo vivía sólo en la barra lateral, al otro lado
+                                            de la pantalla. Un botón apagado dice qué le falta. */}
+                                        {currentStep === lastVisibleStep && !canSubmitPhase && !creating && (
+                                            <span className="structure-save-hint">
+                                                {phaseFormErrors[0] ?? tiebreakerError ?? 'Faltan datos de la fase.'}
+                                            </span>
                                         )}
                                         {currentStep === lastVisibleStep && (
                                             <button

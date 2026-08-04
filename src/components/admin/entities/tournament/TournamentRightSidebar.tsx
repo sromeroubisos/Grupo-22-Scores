@@ -32,13 +32,12 @@ export function TournamentRightSidebar({ id, data, onDelete }: RightSidebarProps
         },
     ];
     const completedValidations = validations.filter((item) => item.ok).length;
-    const integrityHash = `${data.id.slice(0, 4).toUpperCase()}:${(data.slug || 'draft').slice(0, 4).toUpperCase()}:${(data.season_id || '--').slice(0, 4).toUpperCase()}:${(data.status || 'draft').slice(0, 4).toUpperCase()}`;
 
     return (
         <aside className="basalt-sidebar hidden xl:block w-[320px]">
-            <div className="sidebar-section basalt-rail-section mb-8">
+            <div className="sidebar-section basalt-rail-section mb-6">
                 <div className="basalt-sidebar-section-header">
-                    <span className="basalt-sidebar-title">Quick Validations</span>
+                    <span className="basalt-sidebar-title">Chequeos</span>
                     <span className="basalt-sidebar-section-value">{completedValidations}/{validations.length}</span>
                 </div>
                 {validations.map((item) => (
@@ -51,51 +50,32 @@ export function TournamentRightSidebar({ id, data, onDelete }: RightSidebarProps
                 ))}
             </div>
 
-            <div className="sidebar-section basalt-rail-section mb-8">
+            <div className="sidebar-section basalt-rail-section mb-6">
                 <div className="basalt-sidebar-section-header">
-                    <span className="basalt-sidebar-title">Operation Shortcuts</span>
+                    <span className="basalt-sidebar-title">Atajos</span>
                 </div>
                 <Link prefetch={false} className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=participantes`}>
-                    Edit Participant List
+                    Editar participantes
                 </Link>
                 <Link prefetch={false} className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=estructura`}>
-                    Define Competitive Structure
+                    Definir estructura
                 </Link>
                 <Link prefetch={false} className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=operacion`}>
-                    Operate Fixture & Table
-                </Link>
-                <Link prefetch={false} className="basalt-shortcut-btn" href={`/admin/entities/${id}/manage?type=tournament&tab=audit`}>
-                    Review Audit Trail
+                    Operar fixture y tabla
                 </Link>
             </div>
 
-            <div className="sidebar-section basalt-rail-section mb-8">
-                <div className="basalt-sidebar-section-header">
-                    <span className="basalt-sidebar-title">Data Integrity</span>
-                </div>
-                <div className="basalt-integrity-box">
-                    <div className="basalt-integrity-label">GLOBAL HASH</div>
-                    <div className="basalt-integrity-value">{integrityHash}</div>
-                </div>
-            </div>
+            {/* Se retiro el bloque "Data Integrity / GLOBAL HASH": era un hash
+                inventado a partir de los primeros caracteres de campos que ya
+                estan a la vista, no verificaba nada. */}
 
-            <div className="sidebar-section basalt-rail-section">
-                <div className="basalt-sidebar-section-header">
-                    <span className="basalt-sidebar-title">Estado rapido</span>
-                </div>
-                <div className="basalt-sidebar-status">
-                    <strong>{data.status?.toUpperCase() || 'DRAFT'}</strong>
-                    <span>{data.is_visible ? 'Visible para publico' : 'Oculto para publico'}</span>
-                </div>
-            </div>
-
-            <div className="sidebar-section mt-12">
+            <div className="sidebar-section">
                 <button
                     className="basalt-btn basalt-btn-danger w-full justify-center"
                     onClick={onDelete}
                     type="button"
                 >
-                    BORRAR TORNEO
+                    Borrar torneo
                 </button>
             </div>
         </aside>

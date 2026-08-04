@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { requireTournamentMutationContext, TournamentApiError } from '@/lib/auth/tournamentApi';
 import { createApiPerfTracker } from '@/lib/perf/api';
+import { isUuid } from '@/lib/utils/postgrest';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,10 @@ export async function GET(
   const tournamentId = (await params).id;
   const route = `/api/tournaments/${tournamentId}/groups`;
   const perf = createApiPerfTracker(route);
+
+  // tournamentId no-UUID pega contra columna uuid → 22P02 → 500. Los hermanos
+  // (phases/participants) ya bailan a [] con este mismo patrón.
+  if (!isUuid(tournamentId)) return perf.json([]);
 
   try {
     const supabase = await perf.measureStep('create_client', () => createClient(), {

@@ -125,7 +125,6 @@
 }
 
 .basalt-season-menu {
-    top: calc(100% + 10px);
     width: min(340px, calc(100vw - 24px));
 }
 
@@ -211,7 +210,9 @@
 .basalt-floating-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 44;
+    /* Por encima del header pegajoso (120) y por debajo de la nav del sitio
+       (1000): el menu ahora se abre pegado a su boton, dentro del header. */
+    z-index: 199;
     background: rgba(3, 6, 10, 0);
     backdrop-filter: blur(0);
     transition: background 0.18s ease, backdrop-filter 0.18s ease;
@@ -230,16 +231,21 @@
     background: rgba(255, 255, 255, 0.04);
 }
 
+/* `fixed` y sin `top: calc(100% + ...)`: el menu se portalea a <body>, asi que
+   un porcentaje se mide contra el documento y lo mandaba al final de la pagina
+   (alargandola de paso). Las coordenadas reales las pone useAnchoredMenu como
+   estilo inline a partir del rect del disparador. */
 .basalt-overflow-menu {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 8px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: auto;
     width: min(280px, calc(100vw - 24px));
     background: linear-gradient(180deg, rgba(19, 22, 29, 0.98), rgba(12, 14, 18, 0.98));
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 18px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-    z-index: 55;
+    z-index: 200;
     overflow: hidden;
     font-size: 14px;
     opacity: 0;
@@ -478,6 +484,10 @@ select.basalt-input {
 }
 
 .basalt-btn {
+    /* Explicito: `.basalt-btn` tambien se aplica sobre <a>, y sin esto un enlace
+       queda content-box (min-height + padding + borde) y sale 18px mas alto que
+       el <button> de al lado. */
+    box-sizing: border-box;
     background: var(--surface-elevated);
     border: 1px solid var(--border-basalt);
     color: var(--text-main);
@@ -689,8 +699,12 @@ select.basalt-input {
 
 .basalt-tabs-sheet-title {
     display: block;
+    /* Element is an h2 (it names the dialog); reset the UA margin so swapping
+       it from <strong> doesn't shift the sheet header. */
+    margin: 0;
     color: var(--text-main);
     font-size: 18px;
+    font-weight: 700;
 }
 
 .basalt-tabs-sheet-close {
@@ -817,41 +831,6 @@ select.basalt-input {
 }
 
 /* ─── Operation Sub-Tabs (pill style) ───────────────────────── */
-
-.operation-subtab {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-dim);
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-
-.operation-subtab:hover {
-    color: var(--text-main);
-    background: rgba(255, 255, 255, 0.04);
-    border-color: var(--border-basalt);
-}
-
-.operation-subtab.active {
-    color: var(--accent-primary);
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.06) 100%);
-    border-color: rgba(59, 130, 246, 0.3);
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.operation-subtab.active svg {
-    filter: drop-shadow(0 0 3px rgba(59, 130, 246, 0.4));
-}
 
 .basalt-grid {
     display: grid;
@@ -1608,95 +1587,10 @@ select.basalt-input {
    OPERATION SUB-TAB CONTAINER
    ======================================== */
 
-.operation-subtabs-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px;
-    background: var(--surface-basalt);
-    border: 1px solid var(--border-basalt);
-    border-radius: 10px;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.operation-subtabs-bar::-webkit-scrollbar {
-    display: none;
-}
-
-.operation-subtabs-mobile {
-    display: none;
-}
-
-.operation-mobile-pickers {
-    display: none;
-}
-
-.operation-mobile-pickers-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 8px;
-}
-
-.operation-mobile-pickers-status {
-    color: var(--text-dim);
-    font-size: 11px;
-    font-family: var(--font-mono);
-}
-
 .operation-mobile-picker-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
-}
-
-.operation-mobile-trigger {
-    min-height: 70px;
-    width: 100%;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    text-align: left;
-    color: var(--text-main);
-    border-radius: 16px;
-    border: 1px solid var(--border-basalt);
-    background:
-        linear-gradient(135deg, rgba(59, 130, 246, 0.12), transparent 58%),
-        rgba(20, 20, 23, 0.96);
-}
-
-.operation-mobile-trigger-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-}
-
-.operation-mobile-trigger-label {
-    color: var(--text-dim);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-
-.operation-mobile-trigger-value {
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.operation-mobile-trigger-copy small {
-    color: var(--text-dim);
-    font-size: 11px;
-    line-height: 1.35;
-}
-
-.operation-mobile-trigger-icon {
-    color: var(--text-dim);
 }
 
 .operation-mobile-sheet {
@@ -1709,10 +1603,6 @@ select.basalt-input {
 
 .basalt-header-action-placeholder {
     display: none;
-}
-
-.operation-subtab {
-    flex: 0 0 auto;
 }
 
 .basalt-shell-layout {
@@ -1747,21 +1637,6 @@ select.basalt-input {
     gap: 18px;
 }
 
-.operation-fixture-hero {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 22px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background:
-        radial-gradient(circle at top left, rgba(0, 163, 101, 0.16), transparent 46%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
-    backdrop-filter: blur(18px);
-}
-
-.operation-fixture-hero-copy,
-.operation-fixture-hero-meta,
 .operation-fixture-panel,
 .operation-side-panel,
 .operation-summary-card,
@@ -1769,10 +1644,6 @@ select.basalt-input {
 .operation-round-card,
 .operation-form-field {
     display: grid;
-}
-
-.operation-fixture-hero-copy {
-    gap: 8px;
 }
 
 .operation-fixture-kicker {
@@ -1783,7 +1654,6 @@ select.basalt-input {
     font-weight: 800;
 }
 
-.operation-fixture-hero-copy h3,
 .operation-fixture-panel-head h4 {
     margin: 0;
     font-size: 20px;
@@ -1791,35 +1661,10 @@ select.basalt-input {
     color: rgba(255, 255, 255, 0.96);
 }
 
-.operation-fixture-hero-copy p,
 .operation-fixture-panel-head p {
     margin: 0;
     color: rgba(228, 233, 241, 0.68);
     line-height: 1.5;
-}
-
-.operation-fixture-hero-meta {
-    min-width: 220px;
-    gap: 4px;
-    padding: 16px;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(4, 12, 18, 0.48);
-}
-
-.operation-fixture-meta-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.48);
-}
-
-.operation-fixture-hero-meta strong {
-    font-size: 16px;
-}
-
-.operation-fixture-hero-meta small {
-    color: rgba(255, 255, 255, 0.56);
 }
 
 .operation-fixture-side-desktop {
@@ -1876,76 +1721,6 @@ select.basalt-input {
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
-}
-
-.operation-fixture-subtabs {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    align-items: stretch;
-    width: 100%;
-}
-
-.operation-fixture-subtab {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    gap: 4px;
-    width: 100%;
-    min-width: 0;
-    align-content: start;
-    padding: 16px 18px;
-    text-align: left;
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
-        rgba(0, 26, 44, 0.78);
-    color: rgba(255, 255, 255, 0.82);
-    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-}
-
-.operation-fixture-subtab span {
-    font-size: 15px;
-    font-weight: 800;
-    min-width: 0;
-}
-
-.operation-fixture-subtab small {
-    color: rgba(228, 233, 241, 0.62);
-    line-height: 1.4;
-    min-width: 0;
-    text-wrap: balance;
-}
-
-.operation-fixture-subtab:hover {
-    transform: translateY(-1px);
-    border-color: rgba(0, 214, 136, 0.28);
-}
-
-.operation-fixture-subtab.active {
-    border-color: rgba(0, 214, 136, 0.58);
-    box-shadow: 0 0 0 1px rgba(0, 214, 136, 0.18), 0 18px 36px rgba(0, 163, 101, 0.14);
-    background:
-        radial-gradient(circle at top left, rgba(0, 163, 101, 0.18), transparent 54%),
-        rgba(0, 46, 75, 0.84);
-}
-
-.operation-fixture-main > .operation-fixture-subtabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    align-self: stretch;
-    justify-self: start;
-    justify-content: flex-start;
-    inline-size: min(100%, 860px);
-    min-inline-size: 0;
-}
-
-.operation-fixture-main > .operation-fixture-subtabs > .operation-fixture-subtab {
-    flex: 1 1 320px;
-    min-inline-size: 280px;
-    max-inline-size: 404px;
-    min-block-size: 120px;
 }
 
 .operation-method-grid {
@@ -2776,10 +2551,6 @@ select.basalt-input {
         grid-template-columns: 1fr;
     }
 
-    .operation-fixture-main > .operation-fixture-subtabs {
-        inline-size: 100%;
-    }
-
     .operation-fixture-side-desktop {
         display: none;
     }
@@ -3068,24 +2839,15 @@ select.basalt-input {
         display: none;
     }
 
-    .operation-context-desktop,
-    .operation-subtabs-mobile,
-    .operation-subtabs-bar {
-        display: none;
-    }
+    /* Fase 1b (árbol único de Operación): .operation-context-desktop y
+       .operation-subtabs-bar ahora se muestran en mobile (antes ocultos aquí).
+       .operation-subtabs-mobile sigue oculta por su regla base (:1631).
+       .operation-mobile-pickers apunta a un bloque eliminado del JSX → inerte. */
 
-    .operation-mobile-pickers {
-        display: block;
-    }
-
-    .operation-context-card {
-        padding: 12px !important;
-        gap: 10px !important;
-    }
-
-    .operation-context-copy {
-        display: none;
-    }
+    /* OPERACION Fase 1b: la subtabs-bar es la ÚNICA nav de submódulos en mobile.
+       Repartir los 4 ítems para que entren sin scroll (el scrollbar está oculto,
+       así que "más pestañas" no se vería). Scopeado bajo .operation-console-shell
+       para ganar por especificidad al selector de :5242, sin sumar !important. */
 
     .operation-fixture-workspace,
     .operation-round-grid,
@@ -3097,14 +2859,6 @@ select.basalt-input {
     .operation-manage-toolbar-grid,
     .operation-manage-list-row {
         grid-template-columns: 1fr;
-    }
-
-    .operation-fixture-hero {
-        display: grid;
-    }
-
-    .operation-fixture-hero-meta {
-        min-width: 0;
     }
 
     .operation-mobile-side-trigger {
@@ -3178,14 +2932,6 @@ select.basalt-input {
 
     .operation-manage-list-meta {
         justify-items: start;
-    }
-
-    .operation-fixture-subtabs {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .operation-fixture-subtab {
-        min-width: 0;
     }
 
     .operation-form-field-span-2 {
@@ -3412,18 +3158,18 @@ select.basalt-input {
     }
 }
 
+/* OPERACION Fase 1b: en teléfonos <=420px, subtabs icon-only (mismo breakpoint
+   que el viejo tsm-segments) para que "SINCRONIZACION" no trunque feo. El
+   aria-label/title de cada botón mantiene el nombre accesible sin el <span>. */
+@media (max-width: 420px) {
+    .operation-console-shell .operation-subtab span {
+        display: none;
+    }
+}
+
 @media (max-width: 479px) {
     .basalt-body {
         --basalt-header-offset: 188px;
-    }
-
-    .operation-fixture-subtabs {
-        grid-template-columns: 1fr;
-    }
-
-    .operation-fixture-main > .operation-fixture-subtabs > .operation-fixture-subtab {
-        flex-basis: 100%;
-        min-inline-size: 100%;
     }
 
     .basalt-h1 {
@@ -3480,20 +3226,6 @@ select.basalt-input {
         transform-origin: bottom center;
     }
 
-    .operation-mobile-trigger {
-        min-height: 58px;
-        padding: 10px 12px;
-        border-radius: 14px;
-    }
-
-    .operation-mobile-trigger-copy {
-        gap: 2px;
-    }
-
-        .operation-mobile-trigger-copy small {
-            font-size: 10px;
-        }
-
     .operation-manage-toggle,
     .operation-match-actions {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3549,7 +3281,12 @@ select.basalt-input {
     --accent-glow: rgba(4, 120, 87, 0.18);
     --text-main: #0f172a;
     --text-soft: rgba(15, 23, 42, 0.78);
-    --text-dim: rgba(15, 23, 42, 0.58);
+    /* Subido de 0.58: a 0.58 el slug, la meta y los prefijos de los chips
+       quedaban en 4.39:1 sobre la barra clara, debajo del minimo AA. */
+    --text-dim: rgba(15, 23, 42, 0.66);
+    /* Faltaba: el bloque oscuro define --text-secondary y el claro no, asi que
+       los botones y el chip de temporada se quedaban con #94a3b8 (2.55:1). */
+    --text-secondary: rgba(15, 23, 42, 0.72);
     --grid-line: rgba(15, 23, 42, 0.06);
 
     --basalt-overlay-soft: rgba(15, 23, 42, 0.05);
@@ -3572,7 +3309,35 @@ select.basalt-input {
     background-size: auto, auto, 18px 18px, auto;
 }
 
+/* Dos capas fijas al viewport, no al alto de la caja.
+ *
+ * El problema que resuelven: `html[data-theme="dark"]` pinta el fondo verdoso
+ * de G22 (varios radiales con rgba(0,163,101,…) y uno pegado al borde
+ * inferior). El shell de la consola pinta su propio negro neutro (#050506)
+ * pero solo dentro de SU caja, que termina antes que el documento —el header
+ * del sitio queda arriba, asi que documento = header + 100vh—. Donde termina
+ * la caja aparecia una costura y abajo se veia el verde del sitio.
+ *
+ * Con el fondo colgado de un pseudo `fixed` el color de la consola cubre la
+ * pantalla completa mientras esta montada, sin importar cuanto mida el
+ * contenido, el header del sitio o el scroll. Un solo color, sin costura.
+ *
+ * ::before = base plana (abajo). ::after = rejilla con desvanecido (arriba).
+ * El orden importa: entre hermanos con el mismo z-index negativo gana el
+ * ultimo del DOM.
+ */
 .basalt-body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--bg-basalt);
+    background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.03) 1px, transparent 0);
+    background-size: 32px 32px;
+}
+
+.basalt-body::after {
     content: '';
     position: fixed;
     inset: 0;
@@ -4052,6 +3817,24 @@ select.basalt-input {
     color: rgba(196, 255, 223, 0.96);
 }
 
+/* The action footer turns near-white in light mode, but these badge colors were
+   picked against the dark footer: pale mint and pale amber both drop under
+   1.5:1 on white. Restate them against the light surface. */
+:root[data-theme="light"] .basalt-action-footer-badge {
+    border-color: rgba(15, 23, 42, 0.12);
+    background: rgba(15, 23, 42, 0.04);
+}
+
+:root[data-theme="light"] .basalt-action-footer-badge.is-live {
+    border-color: rgba(180, 83, 9, 0.3);
+    color: #b45309;
+}
+
+:root[data-theme="light"] .basalt-action-footer-badge.is-ready {
+    border-color: rgba(4, 120, 87, 0.3);
+    color: #047857;
+}
+
 @media (max-width: 1279px) {
     .basalt-summary-strip {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4135,10 +3918,13 @@ select.basalt-input {
     border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
+/* Was gradient-clipped text (a mint-to-sage linear-gradient behind
+   background-clip: text), unscoped by theme. It fades a heading toward its own
+   background at the descenders, and in dark mode the mint stop measured ~1.2:1
+   against the surface behind it. A solid token reads at every size and follows
+   the theme. */
 .basalt-body .manager-header-titles h1 {
-    background: linear-gradient(180deg, #f2fff9, rgba(191, 214, 202, 0.66));
-    -webkit-background-clip: text;
-    background-clip: text;
+    color: var(--text-main);
 }
 
 .basalt-body .manager-header-titles p,
@@ -4484,85 +4270,167 @@ select.basalt-input {
     --surface-elevated: #16161b;
     --bg-basalt: #050506;
     --text-main: #f8fafc;
-    --text-dim: #475569;
+    /* Was #475569 (slate-600). This block is the last of four .basalt-body
+       definitions, so it silently replaced the legible rgba(228,236,241,.58)
+       set at L3514 with a color that reads 2.3-2.5:1 on these surfaces. */
+    --text-dim: #8794a6;
     --text-secondary: #94a3b8;
     --basalt-header-offset: 82px;
     --basalt-tabs-offset: 58px;
+    /* El patron de puntos se mudo a la capa fija de `::before`; aca queda solo
+       el color de respaldo, sin repetir el patron dos veces. */
     background-color: var(--bg-basalt);
-    background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.03) 1px, transparent 0);
-    background-size: 32px 32px;
+    background-image: none;
+}
+
+/* ---------------------------------------------------------------------------
+   HEADER — barra de consola.
+   Antes ocupaba 285px de alto: titulo a 56px con `max-width: 14ch` (que partia
+   cualquier nombre en dos lineas), tres filas de controles alineadas a la
+   derecha con anchos distintos, y un eyebrow que quedaba CENTRADO porque el
+   bloque previo declaraba `align-items: center` en fila y este lo volvia
+   columna sin resetearlo. Ahora es una barra de dos columnas: identidad a la
+   izquierda, estado + acciones a la derecha, ambas centradas verticalmente.
+   --------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+   ESCALA TIPOGRAFICA DE LA CONSOLA
+   globals.css declara `h1..h6` con tamaños de portada (h2 = clamp(2rem, 4vw,
+   3rem)) FUERA de toda `@layer`. En Tailwind v4 lo no-capado le gana a
+   cualquier utilidad, asi que un `<h2 className="text-lg">` del gestor
+   renderizaba a 48px y un `<h3 className="text-sm">` a 32px: por eso las
+   tarjetas del Resumen ocupaban media pantalla. Acá se fija la escala de
+   producto, acotada al shell del torneo para no tocar el sitio publico.
+   --------------------------------------------------------------------------- */
+.basalt-body :is(h1, h2, h3, h4, h5, h6) {
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+}
+
+.basalt-body h2:not(.basalt-h1) {
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.basalt-body h3:not(.basalt-h1) {
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.basalt-body h4:not(.basalt-h1),
+.basalt-body h5:not(.basalt-h1),
+.basalt-body h6:not(.basalt-h1) {
+    font-size: 0.875rem;
+    font-weight: 600;
 }
 
 .basalt-header {
     position: sticky;
     top: 0;
     z-index: 120;
-    padding: 16px 32px;
+    /* El bloque "card" anterior dejaba `margin: 18px gutter 0` sobre un elemento
+       sticky: 18px de hueco por el que se veia pasar el contenido al scrollear,
+       y el titulo desalineado respecto del riel de pestañas. */
+    margin: 0;
+    padding: 18px 32px;
+    border: 0;
     border-bottom: 1px solid var(--border-basalt);
     border-radius: 0;
-    background: rgba(14, 14, 17, 0.86);
+    background: rgba(14, 14, 17, 0.92);
     backdrop-filter: blur(12px);
     box-shadow: none;
     align-items: center;
+    gap: 12px 24px;
 }
 
 .basalt-header-main {
-    flex: 1 1 760px;
+    flex: 1 1 340px;
     gap: 6px;
-    min-width: min(100%, 560px);
+    min-width: 0;
 }
 
 .basalt-header-eyebrow {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
 }
 
-.basalt-header-kicker {
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--text-main);
-}
-
+/* El slug identifica, no acciona: el acento queda reservado para la pestaña
+   activa y la accion de estado. */
 .basalt-header-slug {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
     font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--accent-primary);
+    font-size: 12.5px;
+    line-height: 1.3;
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.basalt-h1 {
-    font-size: clamp(28px, 4.8vw, 56px);
-    font-weight: 900;
-    letter-spacing: -0.055em;
+.basalt-header .basalt-header-title-row {
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    min-width: 0;
+}
+
+/* Escala de producto, no de portada: tamaño fijo, una linea, elipsis. El
+   `title` del <h1> conserva el nombre completo. Tracking POSITIVO porque el
+   texto va en mayusculas (el -0.055em anterior pegaba las letras). */
+.basalt-header .basalt-h1 {
+    margin: 0;
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: 0.005em;
     text-transform: uppercase;
     color: var(--text-main);
-    line-height: 0.92;
-    max-width: min(100%, 14ch);
-    text-wrap: balance;
+    line-height: 1.25;
+    max-width: none;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .basalt-header-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px 18px;
-    color: var(--text-secondary);
+    align-items: center;
+    gap: 2px 14px;
+    color: var(--text-dim);
     font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+/* Un bloque anterior mandaba a TODOS los `span` del header-meta a 10px / 700 /
+   0.18em / mayusculas: tres datos de contexto gritados como si fueran titulos.
+   Aca vuelven a ser texto de apoyo, en su caja y minuscula. */
+.basalt-header .basalt-header-meta span {
     font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text-dim);
 }
 
 .basalt-header-actions {
-    flex: 0 1 460px;
-    min-width: min(100%, 420px);
+    flex: 0 1 auto;
+    min-width: 0;
     align-items: flex-end;
+    gap: 8px;
 }
 
 .basalt-header-metrics {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 18px;
+    gap: 8px;
     width: 100%;
     flex-wrap: wrap;
 }
@@ -4570,8 +4438,26 @@ select.basalt-input {
 .basalt-metric-group {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
+}
+
+/* El aviso de borrador vive en la fila de chips de estado: aparece y desaparece
+   sin cambiar el alto del header (antes se insertaba como linea propia sobre el
+   titulo y empujaba todo hacia abajo mientras el usuario escribia). */
+.basalt-header .basalt-unsaved {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 27px;
+    margin: 0;
+    padding: 0 10px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 2px;
+    background: rgba(245, 158, 11, 0.09);
+    color: #fcd34d;
+    font-size: 11px;
+    letter-spacing: 0.03em;
 }
 
 .basalt-header-divider {
@@ -4582,34 +4468,36 @@ select.basalt-input {
 
 .basalt-header-season {
     border-radius: 2px;
-    border: 1px solid transparent;
-    padding: 8px 10px;
-    background: transparent;
-    color: var(--text-main);
+    border: 1px solid var(--border-basalt);
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
     font-family: var(--font-mono);
     font-size: 12px;
     letter-spacing: 0.04em;
+    white-space: nowrap;
+    flex: 0 0 auto;
 }
 
 .basalt-header-season-trigger:hover,
 .basalt-header-season-trigger.is-open {
     transform: none;
-    background: rgba(255, 255, 255, 0.04);
-    border-color: var(--border-basalt);
+    background: rgba(255, 255, 255, 0.07);
+    border-color: #3d3d46;
     color: var(--text-main);
 }
 
 .basalt-badge {
-    min-height: 28px;
+    min-height: 27px;
     padding: 0 10px;
-    gap: 8px;
+    gap: 7px;
     border-radius: 2px;
     background: var(--bg-basalt);
     border: 1px solid var(--border-basalt);
     color: var(--text-main);
     font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.08em;
+    font-size: 11px;
+    letter-spacing: 0.03em;
 }
 
 .basalt-badge-prefix {
@@ -4642,30 +4530,43 @@ select.basalt-input {
     box-shadow: 0 0 8px rgba(239, 68, 68, 0.85);
 }
 
+/* Borrador y archivado son estados inertes: el punto azul los hacia leer como
+   informacion activa, igual que "Publico". Neutro, sin halo. */
+.badge-draft .basalt-badge-dot,
+.badge-archived .basalt-badge-dot {
+    background: var(--text-dim);
+    box-shadow: none;
+}
+
 .basalt-header-secondary {
-    margin-top: 10px;
+    margin-top: 0;
 }
 
 .basalt-header-action-strip {
-    gap: 12px;
+    gap: 8px;
 }
 
 .basalt-btn {
-    min-height: 38px;
+    min-height: 36px;
     border-radius: 2px;
-    padding: 10px 16px;
-    font-size: 11px;
+    padding: 9px 15px;
+    font-size: 11.5px;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
     background: transparent;
     border-color: var(--border-basalt);
     color: var(--text-secondary);
+    text-decoration: none;
 }
 
 .basalt-btn:hover:not(:disabled) {
     transform: none;
     background: var(--border-basalt);
     color: var(--text-main);
+}
+
+.basalt-btn:active:not(:disabled) {
+    background: #2f2f36;
 }
 
 .basalt-btn-primary {
@@ -4681,10 +4582,93 @@ select.basalt-input {
     transform: scale(1.02);
 }
 
+.basalt-btn-primary:active:not(:disabled) {
+    background: #15803d;
+    transform: scale(0.99);
+}
+
+/* Nivel intermedio: la accion que manda cuando no hay nada que guardar. Contorno
+   de acento en vez de relleno, para que nunca compita con el verde de Guardar. */
+.basalt-btn-accent {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.42);
+    color: #bfdbfe;
+}
+
+.basalt-btn-accent:hover:not(:disabled) {
+    background: rgba(59, 130, 246, 0.18);
+    border-color: rgba(59, 130, 246, 0.6);
+    color: #eff6ff;
+}
+
+.basalt-btn-accent:active:not(:disabled) {
+    background: rgba(59, 130, 246, 0.26);
+}
+
 .basalt-btn-danger {
     background: #ef4444;
     border-color: #ef4444;
     color: #fff;
+}
+
+/* Columna de acciones (solo escritorio): chips de estado arriba, botones abajo,
+   todo alineado al mismo borde derecho. Rejilla en vez de flex-wrap porque con
+   `flex-wrap` el contenedor reclama el ancho de TODO en una sola linea (chips +
+   botones ~1330px) y le come el aire al titulo; la rejilla mide por fila.
+   En movil `.basalt-header-actions` sigue siendo la columna a ancho completo
+   que define tournament-mobile.css. */
+@media (min-width: 768px) {
+    .basalt-header-actions {
+        display: grid;
+        grid-template-columns: auto auto;
+        grid-auto-rows: min-content;
+        justify-content: end;
+        align-content: center;
+        gap: 8px 18px;
+    }
+
+    .basalt-header-metrics {
+        grid-column: 1 / -1;
+        width: auto;
+    }
+
+    /* Altura fija, no minima: con `min-height` el ⋯ (icono de 18px) salia 2px
+       mas alto que sus vecinos y la fila quedaba desalineada. */
+    .basalt-header .basalt-btn {
+        height: 36px;
+        min-height: 0;
+    }
+
+    /* El ⋯ comparte alto y radio con el resto de la fila; los 44px de area
+       tactil los repone tournament-mobile.css donde hacen falta. */
+    .basalt-header .basalt-overflow-trigger {
+        min-width: 36px;
+        padding: 0 10px;
+        border-radius: 2px;
+    }
+
+    /* Los menus hablan el mismo idioma que la barra: esquina de 4px, no de 18.
+       En telefono siguen siendo hoja inferior redondeada. */
+    .basalt-overflow-menu {
+        border-radius: 4px;
+    }
+
+    .basalt-overflow-menu-close,
+    .basalt-overflow-item {
+        border-radius: 2px;
+    }
+}
+
+/* La temporada actual se marca con el acento de la consola (azul), no con el
+   verde heredado: el verde ya significa "guardar" en esta pantalla. */
+.basalt-season-nav-item.is-current {
+    border: 1px solid rgba(59, 130, 246, 0.28);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.basalt-season-nav-badge {
+    background: rgba(59, 130, 246, 0.16);
+    color: #bfdbfe;
 }
 
 .basalt-tabs {
@@ -4695,17 +4679,20 @@ select.basalt-input {
     background: var(--surface-basalt);
 }
 
+/* 16 + 16 de padding del item = 32px: la primera etiqueta arranca exactamente
+   en el mismo borde que el titulo del header (que ahora tiene padding 32). */
 .basalt-tabs-inner {
     gap: 0;
-    padding: 0 32px;
+    padding: 0 16px;
 }
 
 .basalt-tab-item {
-    min-height: 56px;
+    min-height: 52px;
     padding: 0 16px;
     border-radius: 0;
     border-bottom: 2px solid transparent;
     color: var(--text-dim);
+    transition: color 160ms cubic-bezier(0.22, 1, 0.36, 1), border-color 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .basalt-tab-item:hover {
@@ -4731,41 +4718,307 @@ select.basalt-input {
 }
 
 .basalt-tab-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     color: inherit;
 }
 
+/* La barra de acciones fija se retiro (duplicaba Guardar y Recalcular, que ya
+   viven en el header pegajoso) y con ella los 110px que reservaba abajo. */
 .basalt-shell-stage {
     max-width: none;
-    padding-bottom: 110px;
+    padding-bottom: 32px;
 }
 
+/* `align-items: start` en vez de `stretch`: con stretch la columna principal se
+   estiraba al alto de la barra lateral y dejaba un vacio negro de ~280px debajo
+   del contenido. */
 .basalt-shell-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-columns: minmax(0, 1fr) 320px;
     gap: 0;
     max-width: none;
     padding-top: 0;
     padding-bottom: 0;
-    align-items: stretch;
+    align-items: start;
 }
 
 .basalt-shell-main {
     display: block;
     min-width: 0;
-    padding: 40px;
+    padding: 24px 32px 32px;
 }
 
 .basalt-shell-layout-no-sidebar {
     grid-template-columns: minmax(0, 1fr);
 }
 
+/* Mismo sangrado que el header y que el riel de pestañas (32px): el contenido
+   de cada pestaña arranca en la misma linea vertical que el titulo. */
 .basalt-shell-main-full {
     width: 100%;
-    padding-inline: clamp(32px, 3vw, 48px);
+    padding-inline: 32px;
+}
+
+/* ---------------------------------------------------------------------------
+   RESUMEN — mismo lenguaje que el header
+   Borde fino, esquina de 4px, rotulo mono en versalita y dato en tinta plena.
+   Nada de tarjetas redondeadas ni de repetir el nombre del torneo, que ya
+   ocupa la primera linea de la barra de arriba.
+   --------------------------------------------------------------------------- */
+.summary-console {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    align-items: stretch;
+}
+
+/* `.basalt-card` trae `grid-column: span 12` de la rejilla de 12 columnas del
+   shell viejo; dentro de esta rejilla de 3 eso lo mandaba a fila completa y los
+   paneles quedaban uno debajo del otro. */
+.summary-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    min-width: 0;
+    grid-column: auto;
+}
+
+.summary-panel-wide {
+    grid-column: 1 / -1;
+}
+
+.summary-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-basalt);
+}
+
+.summary-panel-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.summary-panel-value {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent-primary);
+}
+
+.summary-flag {
+    padding: 2px 8px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 2px;
+    background: var(--bg-basalt);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+.summary-flag.is-public,
+.summary-flag.is-ok {
+    border-color: rgba(16, 185, 129, 0.32);
+    background: rgba(16, 185, 129, 0.1);
+    color: #6ee7b7;
+}
+
+.summary-flag.is-warn {
+    border-color: rgba(245, 158, 11, 0.32);
+    background: rgba(245, 158, 11, 0.1);
+    color: #fcd34d;
+}
+
+.summary-identity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.summary-crest {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-basalt);
+    border-radius: 2px;
+    background: var(--bg-basalt);
+    color: var(--text-dim);
+    overflow: hidden;
+}
+
+.summary-crest img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 3px;
+}
+
+.summary-identity-copy {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.summary-identity-copy strong {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.summary-identity-copy small {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.summary-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+    margin: 0;
+}
+
+.summary-stats dt {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.summary-stats dd {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.summary-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-main);
+    min-width: 0;
+}
+
+.summary-list li > span:first-of-type {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.summary-list .is-pending {
+    color: var(--text-dim);
+}
+
+.summary-cta {
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent-primary);
+    text-decoration: none;
+}
+
+.summary-cta:hover {
+    text-decoration: underline;
+}
+
+.summary-empty {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-dim);
+}
+
+.summary-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.summary-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 2px;
+    background: var(--bg-basalt);
+    text-decoration: none;
+    min-width: 0;
+    transition: border-color 160ms cubic-bezier(0.22, 1, 0.36, 1), background 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.summary-action:hover {
+    border-color: rgba(59, 130, 246, 0.45);
+    background: rgba(59, 130, 246, 0.07);
+}
+
+.summary-action-glyph {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    background: var(--surface-elevated);
+    color: var(--accent-primary);
+}
+
+.summary-action-copy {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+}
+
+.summary-action-copy strong {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.summary-action-copy small {
+    font-size: 11px;
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .basalt-grid {
@@ -4881,17 +5134,22 @@ select.basalt-input {
     background: var(--border-basalt);
 }
 
+/* Sin alto forzado ni `overflow: auto`: la barra media exactamente 100vh menos
+   el chrome, asi que su ultimo bloque quedaba cortado detras de un scrollbar
+   propio. Ahora crece con su contenido y se pega sola; el unico scroll de la
+   pantalla es el de la pagina. */
 .basalt-sidebar {
     position: sticky;
     top: calc(var(--basalt-header-offset) + var(--basalt-tabs-offset));
-    height: calc(100vh - var(--basalt-header-offset) - var(--basalt-tabs-offset) - 70px);
+    height: auto;
     max-height: none;
-    overflow: auto;
+    overflow: visible;
+    align-self: start;
     border: 0;
     border-left: 1px solid var(--border-basalt);
     border-radius: 0;
     background: rgba(14, 14, 17, 0.4);
-    padding: 40px 24px;
+    padding: 24px 20px 32px;
 }
 
 .basalt-rail-section {
@@ -5178,60 +5436,6 @@ select.basalt-input {
 }
 
 /* Operation module */
-.operation-console-shell .operation-context-card,
-.operation-console-shell .operation-subtabs-bar,
-.operation-console-shell .operation-mobile-trigger {
-    border-radius: 4px !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
-    background: rgba(22, 22, 27, 0.94) !important;
-    box-shadow: none;
-}
-
-.operation-console-shell .operation-context-card {
-    position: relative;
-    border-left-width: 1px !important;
-    overflow: hidden;
-}
-
-.operation-console-shell .operation-context-card::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
-}
-
-.operation-console-shell .operation-context-id,
-.operation-console-shell .operation-mobile-pickers-status {
-    font-family: var(--font-mono);
-}
-
-.operation-console-shell .operation-subtabs-bar {
-    padding: 4px;
-    gap: 6px;
-}
-
-.operation-console-shell .operation-subtab {
-    border-radius: 2px;
-    min-height: 42px;
-    padding: 0 14px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-.operation-console-shell .operation-subtab.active {
-    background: #3b82f6;
-    color: #fff;
-    border-color: #3b82f6;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.18);
-}
-
-.operation-console-shell .operation-mobile-trigger-label,
-.operation-console-shell .operation-mobile-trigger-copy small {
-    letter-spacing: 0.12em;
-}
 
 /* Details and format harmonization */
 .basalt-body .manager-card,
@@ -5270,26 +5474,20 @@ select.basalt-input {
     width: 100%;
 }
 
-.basalt-body .details-api-alert {
-    border-radius: 4px !important;
-    background:
-        linear-gradient(180deg, rgba(59, 130, 246, 0.08), transparent 40%),
-        rgba(22, 22, 27, 0.96) !important;
-    border-color: rgba(59, 130, 246, 0.24) !important;
-}
-
-.basalt-body .details-console-shell .details-card,
+/* Lo que sigue re-pinta el vocabulario `manager-*` de la consola de clubes para
+   la sección de integración con FlashScore, que es lo ÚNICO que queda hablándolo
+   dentro de Detalles. Las reglas de la pestaña en sí se fueron con su markup:
+   `.details-api-alert`, `.manager-preview-frame`, `.manager-tabs`,
+   `.details-form-grid`, `.details-geo-grid`, `.details-bonus-*`,
+   `.details-savebar`, `.checkbox-container` y `.details-card` ya no existen en
+   ningún componente. */
 .basalt-body .details-console-shell .manager-card,
-.basalt-body .details-console-shell .manager-preview-frame,
 .basalt-body .details-console-shell .manager-metadata-box,
-.basalt-body .details-console-shell .manager-tabs,
 .basalt-body .details-console-shell .manager-url-input,
-.basalt-body .details-console-shell .manager-url-select,
-.basalt-body .details-console-shell .details-bonus-panel {
+.basalt-body .details-console-shell .manager-url-select {
     border-radius: 4px !important;
 }
 
-.basalt-body .details-console-shell .details-card,
 .basalt-body .details-console-shell .manager-card {
     padding: clamp(1.25rem, 2vw, 1.8rem) !important;
     background:
@@ -5328,45 +5526,8 @@ select.basalt-input {
     top: 18px;
 }
 
-.basalt-body .details-console-shell .manager-preview-frame {
-    min-height: 360px;
-    padding: 22px;
-    background:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
-        radial-gradient(circle at center, rgba(59, 130, 246, 0.08), transparent 55%),
-        rgba(18, 24, 30, 0.96);
-    background-size: 18px 18px, 18px 18px, auto, auto;
-    border-color: rgba(148, 163, 184, 0.14) !important;
-}
-
-.basalt-body .details-console-shell .manager-preview-frame img {
-    max-width: min(100%, 210px);
-    max-height: 210px;
-    object-fit: contain;
-}
-
 .basalt-body .details-console-shell .manager-controls-zone {
     min-width: 0;
-}
-
-.basalt-body .details-console-shell .manager-tabs {
-    padding: 4px;
-    gap: 6px;
-    background: rgba(22, 22, 27, 0.88);
-}
-
-.basalt-body .details-console-shell .manager-tab-btn {
-    min-height: 3.3rem;
-    border-radius: 999px;
-    font-size: 0.76rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.basalt-body .details-console-shell .manager-tab-indicator {
-    border-radius: 999px;
-    background: linear-gradient(180deg, #4f8dfd, #2563eb);
 }
 
 .basalt-body .details-console-shell .manager-input-group {
@@ -5389,44 +5550,6 @@ select.basalt-input {
 .basalt-body .details-console-shell .manager-url-select:focus {
     border-color: rgba(59, 130, 246, 0.52) !important;
     box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);
-}
-
-.basalt-body .details-console-shell .details-form-grid {
-    gap: 1rem 1.1rem;
-}
-
-.basalt-body .details-console-shell .details-geo-grid {
-    gap: 1rem 1.1rem;
-}
-
-.basalt-body .details-console-shell .details-bonus-grid {
-    gap: 1rem;
-}
-
-.basalt-body .details-console-shell .details-bonus-panel {
-    min-height: 100%;
-    padding: 1.1rem !important;
-    border-color: rgba(148, 163, 184, 0.14) !important;
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 30%),
-        rgba(18, 24, 30, 0.96) !important;
-}
-
-.basalt-body .details-console-shell .details-savebar {
-    margin-top: 8px;
-}
-
-.basalt-body .details-console-shell .details-savebar .manager-btn-inline {
-    min-height: 3.35rem;
-    min-width: min(100%, 280px);
-}
-
-.basalt-body .details-console-shell .checkbox-container {
-    min-height: 34px;
-}
-
-.basalt-body .details-console-shell .checkbox-container .checkmark {
-    border-radius: 3px;
 }
 
 .basalt-body .details-console-shell .manager-metadata-box {
@@ -5544,10 +5667,8 @@ select.basalt-input {
     background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
     animation: basalt-tabs-progress-run 1.05s ease-in-out infinite;
 }
-
 .basalt-tab-item.is-pending,
-.basalt-tabs-sheet-item.is-pending,
-.operation-subtab.is-pending {
+.basalt-tabs-sheet-item.is-pending {
     cursor: progress;
 }
 
@@ -5567,8 +5688,10 @@ select.basalt-input {
 }
 
 @media (max-width: 1023px) {
+    /* Eran 150px de despeje para la barra de acciones fija, que ya no existe.
+       Entre 768 y 1023px no hay nada anclado abajo: solo dejaba un hueco. */
     .basalt-shell-stage {
-        padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
     }
 }
 
@@ -5582,7 +5705,15 @@ select.basalt-input {
    console remains legible under a light palette.
    ============================================================================ */
 
+/* Mismo reparto que en oscuro: color de respaldo en la caja, base pintada en la
+   capa fija de `::before` y rejilla en `::after`. Asi el tema claro tampoco
+   deja ver el fondo del sitio debajo del shell. */
 :root[data-theme="light"] .basalt-body {
+    background-color: #f1f4fa;
+    background-image: none;
+}
+
+:root[data-theme="light"] .basalt-body::before {
     background:
         radial-gradient(circle at top left, rgba(4, 120, 87, 0.08), transparent 32%),
         radial-gradient(circle at top right, rgba(13, 83, 126, 0.06), transparent 30%),
@@ -5590,10 +5721,11 @@ select.basalt-input {
     background-size: auto, auto, auto;
 }
 
-:root[data-theme="light"] .basalt-body::before {
+:root[data-theme="light"] .basalt-body::after {
     background:
         linear-gradient(rgba(15, 23, 42, 0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+    background-size: 72px 72px;
     mask-image: radial-gradient(circle at center, black 65%, transparent 100%);
 }
 
@@ -5613,9 +5745,17 @@ select.basalt-input {
 }
 
 :root[data-theme="light"] .basalt-body .basalt-header-slug {
-    background: rgba(15, 23, 42, 0.05);
-    border-color: rgba(15, 23, 42, 0.1);
-    color: var(--text-soft);
+    background: none;
+    border-color: transparent;
+    color: var(--text-dim);
+}
+
+/* El chip de borrador se escribe con tinta clara sobre fondo oscuro; bajo el
+   tema claro hay que invertirla o queda amarillo pastel sobre blanco. */
+:root[data-theme="light"] .basalt-body .basalt-header .basalt-unsaved {
+    border-color: rgba(180, 83, 9, 0.35);
+    background: rgba(245, 158, 11, 0.14);
+    color: #92400e;
 }
 
 :root[data-theme="light"] .basalt-body .basalt-header-meta span:not(:last-child)::after {
@@ -5670,6 +5810,22 @@ select.basalt-input {
     color: #92400e;
 }
 
+/* The block above re-tints every badge background for light mode but only
+   restates the color for the positive and warning variants. draft/archived/
+   hidden/error kept their dark-mode foreground, so they landed at ~1.5:1 on the
+   new light background. */
+:root[data-theme="light"] .basalt-body .badge-draft,
+:root[data-theme="light"] .basalt-body .badge-archived,
+:root[data-theme="light"] .basalt-body .badge-hidden {
+    border-color: rgba(15, 23, 42, 0.2);
+    color: #475569;
+}
+
+:root[data-theme="light"] .basalt-body .badge-error {
+    border-color: rgba(185, 28, 28, 0.3);
+    color: #b91c1c;
+}
+
 :root[data-theme="light"] .basalt-body .badge-error {
     color: #b91c1c;
 }
@@ -5687,11 +5843,27 @@ select.basalt-input {
     box-shadow: 0 10px 28px rgba(15, 23, 42, 0.1);
 }
 
+/* Verde un escalon mas oscuro: con #059669 arriba, el blanco sobre el borde
+   superior del degradado medía 3.8:1, por debajo del minimo AA para 11px. */
 :root[data-theme="light"] .basalt-body .basalt-btn-primary {
-    background: linear-gradient(180deg, #059669, #047857);
-    border-color: #047857;
+    background: linear-gradient(180deg, #047857, #03624a);
+    border-color: #03624a;
     color: #ffffff;
     box-shadow: 0 14px 30px rgba(4, 120, 87, 0.22);
+}
+
+/* Va DESPUES de `.basalt-btn` a proposito: el boton lleva las dos clases y
+   ambas reglas tienen la misma especificidad, asi que gana la ultima. */
+:root[data-theme="light"] .basalt-body .basalt-btn-accent {
+    background: rgba(29, 78, 216, 0.08);
+    border-color: rgba(29, 78, 216, 0.4);
+    color: #1d4ed8;
+}
+
+:root[data-theme="light"] .basalt-body .basalt-btn-accent:hover:not(:disabled) {
+    background: rgba(29, 78, 216, 0.14);
+    border-color: rgba(29, 78, 216, 0.58);
+    color: #1e3a8a;
 }
 
 :root[data-theme="light"] .basalt-body .basalt-btn-danger {
@@ -5888,180 +6060,6 @@ select.basalt-input {
     box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.06);
 }
 
-/* Operation panels (fixture / manage / match wizards) */
-:root[data-theme="light"] .basalt-body .operation-fixture-panel,
-:root[data-theme="light"] .basalt-body .operation-side-panel,
-:root[data-theme="light"] .basalt-body .operation-method-card,
-:root[data-theme="light"] .basalt-body .operation-summary-card,
-:root[data-theme="light"] .basalt-body .operation-round-card,
-:root[data-theme="light"] .basalt-body .operation-form-field,
-:root[data-theme="light"] .basalt-body .operation-fixture-hero,
-:root[data-theme="light"] .basalt-body .operation-manage-toolbar,
-:root[data-theme="light"] .basalt-body .operation-fixture-subtab,
-:root[data-theme="light"] .basalt-body .operation-import-step,
-:root[data-theme="light"] .basalt-body .operation-validation-item,
-:root[data-theme="light"] .basalt-body .operation-context-row {
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
-    border: 1px solid rgba(15, 23, 42, 0.1);
-}
-
-:root[data-theme="light"] .basalt-body .operation-fixture-hero-copy h3,
-:root[data-theme="light"] .basalt-body .operation-fixture-panel-head h4,
-:root[data-theme="light"] .basalt-body .operation-method-card strong,
-:root[data-theme="light"] .basalt-body .operation-manage-list-main strong,
-:root[data-theme="light"] .basalt-body .operation-mobile-side-trigger-copy strong,
-:root[data-theme="light"] .basalt-body .operation-fixture-subtab span {
-    color: var(--text-main);
-}
-
-:root[data-theme="light"] .basalt-body .operation-fixture-hero-copy p,
-:root[data-theme="light"] .basalt-body .operation-fixture-panel-head p,
-:root[data-theme="light"] .basalt-body .operation-method-card p,
-:root[data-theme="light"] .basalt-body .operation-mobile-side-trigger-copy small,
-:root[data-theme="light"] .basalt-body .operation-fixture-subtab small,
-:root[data-theme="light"] .basalt-body .operation-manage-list-main small,
-:root[data-theme="light"] .basalt-body .operation-manage-list-meta,
-:root[data-theme="light"] .basalt-body .operation-manage-mobile-toggle small {
-    color: var(--text-soft);
-}
-
-:root[data-theme="light"] .basalt-body .operation-fixture-meta-label,
-:root[data-theme="light"] .basalt-body .operation-form-field span,
-:root[data-theme="light"] .basalt-body .operation-summary-card span,
-:root[data-theme="light"] .basalt-body .operation-manage-inline-label,
-:root[data-theme="light"] .basalt-body .operation-field-hint,
-:root[data-theme="light"] .basalt-body .operation-fixture-hero-meta small,
-:root[data-theme="light"] .basalt-body .operation-round-head small,
-:root[data-theme="light"] .basalt-body .operation-round-meta,
-:root[data-theme="light"] .basalt-body .operation-match-row small,
-:root[data-theme="light"] .basalt-body .operation-match-placeholder {
-    color: var(--text-dim);
-}
-
-:root[data-theme="light"] .basalt-body .operation-fixture-hero-meta {
-    background: rgba(15, 23, 42, 0.04);
-}
-
-:root[data-theme="light"] .basalt-body .operation-fixture-subtab.active,
-:root[data-theme="light"] .basalt-body .operation-method-card.is-active,
-:root[data-theme="light"] .basalt-body .operation-manage-list-row.is-selected {
-    border-color: rgba(4, 120, 87, 0.5);
-    box-shadow: 0 0 0 1px rgba(4, 120, 87, 0.2), 0 18px 36px rgba(4, 120, 87, 0.16);
-    background:
-        linear-gradient(180deg, rgba(4, 120, 87, 0.08), rgba(255, 255, 255, 0.96));
-}
-
-:root[data-theme="light"] .basalt-body .operation-mode-chip,
-:root[data-theme="light"] .basalt-body .operation-quick-action,
-:root[data-theme="light"] .basalt-body .operation-round-link,
-:root[data-theme="light"] .basalt-body .operation-match-action,
-:root[data-theme="light"] .basalt-body .operation-team-chip,
-:root[data-theme="light"] .basalt-body .operation-toggle,
-:root[data-theme="light"] .basalt-body .operation-manage-toggle button,
-:root[data-theme="light"] .basalt-body .operation-manage-mobile-toggle,
-:root[data-theme="light"] .basalt-body .operation-mobile-trigger {
-    background: rgba(15, 23, 42, 0.04);
-    border: 1px solid rgba(15, 23, 42, 0.1);
-    color: var(--text-soft);
-}
-
-:root[data-theme="light"] .basalt-body .operation-mode-chip.is-active,
-:root[data-theme="light"] .basalt-body .operation-team-chip.is-selected,
-:root[data-theme="light"] .basalt-body .operation-manage-toggle button.active {
-    border-color: rgba(4, 120, 87, 0.5);
-    background: rgba(4, 120, 87, 0.12);
-    color: #064e3b;
-}
-
-:root[data-theme="light"] .basalt-body .operation-manage-list-row {
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 249, 252, 0.92));
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
-}
-
-:root[data-theme="light"] .basalt-body .operation-manage-list-row:hover {
-    border-color: rgba(4, 120, 87, 0.32);
-    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1);
-}
-
-:root[data-theme="light"] .basalt-body .operation-manage-bulkbar {
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94));
-    border: 1px solid rgba(15, 23, 42, 0.1);
-    box-shadow: inset 0 1px 0 rgba(15, 23, 42, 0.04);
-}
-
-:root[data-theme="light"] .basalt-body .operation-manage-search {
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(15, 23, 42, 0.14);
-    color: var(--text-main);
-}
-
-:root[data-theme="light"] .basalt-body .operation-manage-check {
-    background: rgba(15, 23, 42, 0.04);
-    border: 1px solid rgba(15, 23, 42, 0.1);
-}
-
-:root[data-theme="light"] .basalt-body .operation-empty-state {
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 249, 252, 0.92));
-    border: 1px solid rgba(15, 23, 42, 0.08);
-}
-
-:root[data-theme="light"] .basalt-body .operation-empty-icon {
-    background: rgba(4, 120, 87, 0.1);
-    color: #047857;
-}
-
-:root[data-theme="light"] .basalt-body .operation-feedback {
-    background: rgba(4, 120, 87, 0.1);
-    color: #064e3b;
-}
-
-:root[data-theme="light"] .basalt-body .operation-feedback-ok {
-    background: rgba(4, 120, 87, 0.12);
-    border-color: rgba(4, 120, 87, 0.28);
-}
-
-:root[data-theme="light"] .basalt-body .operation-feedback-warn {
-    background: rgba(245, 158, 11, 0.12);
-    border-color: rgba(245, 158, 11, 0.28);
-    color: #92400e;
-}
-
-:root[data-theme="light"] .basalt-body .operation-feedback-error {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.28);
-    color: #991b1b;
-}
-
-:root[data-theme="light"] .basalt-body .operation-fixture-loading {
-    background: rgba(255, 255, 255, 0.78);
-}
-
-:root[data-theme="light"] .basalt-body .operation-round-badge.is-empty {
-    background: rgba(15, 23, 42, 0.08);
-    color: var(--text-soft);
-}
-
-:root[data-theme="light"] .basalt-body .operation-match-row,
-:root[data-theme="light"] .basalt-body .operation-match-placeholder {
-    background: rgba(15, 23, 42, 0.04);
-    border: 1px solid rgba(15, 23, 42, 0.08);
-}
-
-:root[data-theme="light"] .basalt-body .operation-import-step span {
-    background: rgba(15, 23, 42, 0.08);
-    color: var(--text-main);
-}
-
-:root[data-theme="light"] .basalt-body .operation-import-step.is-active {
-    border-color: rgba(4, 120, 87, 0.4);
-    background: rgba(4, 120, 87, 0.08);
-}
-
 /* Custom scrollbars */
 :root[data-theme="light"] .basalt-body .custom-scrollbar::-webkit-scrollbar-track {
     background: rgba(15, 23, 42, 0.06);
@@ -6112,3 +6110,547 @@ select.basalt-input {
     box-shadow: 0 -18px 48px rgba(15, 23, 42, 0.16);
 }
 
+
+/* ==========================================================================
+ * FOCUS VISIBILITY — editor-wide
+ * 38 `outline: none` declarations across 14 stylesheets stripped the focus
+ * indicator, 9 of those files offered no replacement, and 5 in
+ * tournament-structure.css used !important so the global :focus-visible in
+ * globals.css (specificity 0,1,0) could never win. Now that dialogs trap focus,
+ * a keyboard user who cannot see where they are is stuck.
+ *
+ * One ring, defined once, applied to every focusable thing in the editor. The
+ * two-layer shadow keeps it legible on any surface: an inner band in the page
+ * background separates the ring from the control, the outer band carries the
+ * accent.
+ * ========================================================================== */
+
+.basalt-body {
+    --focus-ring-color: #38bdf8;
+    --focus-ring-offset-color: var(--bg-basalt, #050506);
+}
+
+:root[data-theme="light"] .basalt-body {
+    --focus-ring-color: #0369a1;
+    --focus-ring-offset-color: #ffffff;
+}
+
+.basalt-body :is(
+    button,
+    a[href],
+    input,
+    select,
+    textarea,
+    summary,
+    [role="menuitem"],
+    [role="tab"],
+    [role="option"],
+    [tabindex]:not([tabindex="-1"])
+):focus-visible {
+    /* Transparent outline rather than none: in Windows forced-colors mode the
+       box-shadow is dropped and this is the only thing left to draw. */
+    outline: 2px solid transparent !important;
+    outline-offset: 2px;
+    box-shadow:
+        0 0 0 2px var(--focus-ring-offset-color),
+        0 0 0 4px var(--focus-ring-color) !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .basalt-body :is(button, a[href], input, select, textarea):focus-visible {
+        transition: box-shadow 120ms ease-out;
+    }
+}
+
+/* ==========================================================================
+ * LIGHT THEME PARITY — operation console
+ * The block near L5205 hardcodes rgba(22,22,27,.94) behind !important with no
+ * light counterpart, so the Operacion tab kept a near-black plate under
+ * light-mode ink: 17 strings measured under 2:1.
+ * ========================================================================== */
+
+/* Kicker and validation text were picked against the dark plate. */
+:root[data-theme="light"] .operation-fixture-kicker {
+    color: #047857;
+}
+
+:root[data-theme="light"] .operation-validation-item,
+:root[data-theme="light"] .operation-validation-item.tone-ok {
+    color: #334155;
+}
+
+/* The validation-item colour restated earlier sits on the wrapper; the copy
+   lives in a child that carries its own pale literal. */
+:root[data-theme="light"] .operation-validation-item *,
+:root[data-theme="light"] .operation-validation-item.tone-ok * {
+    color: #334155;
+}
+
+/* .manager-tabs keeps a dark plate in light mode, and the active tab paints its
+   label with text-[var(--bg)] — dark ink on a dark bar. */
+:root[data-theme="light"] .basalt-body .manager-tabs {
+    background: #ffffff;
+    border-color: rgba(15, 23, 42, 0.12);
+}
+
+:root[data-theme="light"] .basalt-body .manager-tab-btn.active {
+    background: #047857;
+    color: #ffffff;
+}
+
+/* ==========================================================================
+ * DETALLES — el cuerpo hablando el idioma de la barra
+ *
+ * La pestaña vivía en OTRO sistema: `manager-*` de la consola de clubes
+ * (`vitreous-club.css`) con un `--accent: #00a365` propio, re-pintado desde acá
+ * con un bloque de parches a fuerza de `!important`. Dos vocabularios para la
+ * misma pantalla, y mandaba el que llegaba último.
+ *
+ * Ahora usa el par que fija el contrato de diseño (§2): `.basalt-card` +
+ * `.details-panel`, tokens en vez de rgba escritas a mano, y la escala
+ * tipográfica del shell (h2 = 18px/700) en vez de `text-*`, que en Tailwind v4
+ * pierde contra los `h1..h6` sin capa de `globals.css`.
+ *
+ * Lo que sigue hablando `manager-*` es la sección de integración con
+ * FlashScore, que es otro componente: sus reglas quedan arriba, intactas.
+ * ========================================================================== */
+
+.details-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+}
+
+/* `.basalt-card` arrastra dos cosas de la rejilla vieja: `grid-column: span 12`
+   y una elevación al pasar el mouse. Lo primero no aplica acá (esto es una
+   columna, no una rejilla) pero lo segundo sí molesta: un panel de formulario
+   que se levanta al pasarle por encima promete que es clickeable, y no lo es. */
+.details-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 20px 22px;
+    grid-column: auto;
+    overflow: visible;
+}
+
+.details-panel:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--border-basalt);
+}
+
+.details-panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-basalt);
+}
+
+.details-panel-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+/* Sin `font-size`: la escala del shell ya pone 18px/700 en cualquier h2 que no
+   sea el título de la barra. Repetirlo acá sería un segundo lugar donde el
+   tamaño puede desincronizarse. */
+.details-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.details-panel-title svg {
+    color: var(--accent-primary);
+    flex-shrink: 0;
+}
+
+.details-panel-hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+    max-width: 68ch;
+}
+
+.details-panel-flag {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 2px;
+    background: var(--bg-basalt);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+/* ── Campos ───────────────────────────────────────────────────────────────
+   Vocabulario compartido: `.basalt-input` ya existe y lo usan Estructura y
+   Operación; lo que faltaba era la etiqueta, la ayuda y el prefijo. */
+
+.basalt-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.basalt-field-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text-secondary);
+}
+
+/* El deshabilitado se lee en el control, no en la etiqueta: bajarle la opacidad
+   a las dos deja el par entero debajo del piso de contraste. */
+.basalt-field-hint {
+    margin: 0;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--text-dim);
+    max-width: 60ch;
+}
+
+.basalt-field-prefixed {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.basalt-field-prefix {
+    position: absolute;
+    left: 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    pointer-events: none;
+}
+
+.basalt-field-prefixed .basalt-input {
+    padding-left: 84px;
+}
+
+.basalt-input:disabled,
+.basalt-input[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px 20px;
+}
+
+.details-grid-narrow {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* ── Escudo ─────────────────────────────────────────────────────────────── */
+
+.details-logo-layout {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.details-logo-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    padding: 16px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 4px;
+    background: var(--bg-basalt);
+}
+
+.details-logo-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.details-logo-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.details-logo-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+}
+
+/* Segmento de dos opciones: es una elección entre dos formas de cargar el
+   escudo, así que va como radiogroup y no como pestañas — no hay dos paneles de
+   contenido, hay un campo que cambia de forma. */
+.details-segment {
+    display: inline-flex;
+    padding: 3px;
+    gap: 3px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 4px;
+    background: var(--bg-basalt);
+}
+
+.details-segment-btn {
+    padding: 8px 14px;
+    border: 0;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-main);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 160ms ease-out, color 160ms ease-out;
+}
+
+.details-segment-btn:hover {
+    color: var(--text-main);
+}
+
+.details-segment-btn[aria-checked="true"] {
+    background: var(--surface-elevated);
+    color: var(--text-main);
+    box-shadow: inset 0 0 0 1px var(--border-basalt);
+}
+
+.details-upload-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 132px;
+    padding: 16px;
+    border: 1px dashed var(--border-basalt);
+    border-radius: 4px;
+    background: var(--bg-basalt);
+}
+
+/* ── Bonus ──────────────────────────────────────────────────────────────── */
+
+.details-toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 4px;
+    background: var(--bg-basalt);
+}
+
+.details-toggle-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.details-toggle-head input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.details-toggle-head input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+}
+
+.details-toggle-rule {
+    margin-left: auto;
+    padding: 2px 8px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+.details-toggle-hint {
+    margin: 0 0 0 26px;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--text-dim);
+}
+
+.details-panel-locked {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+/* ── Avisos ─────────────────────────────────────────────────────────────── */
+
+.details-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 4px;
+    background: var(--surface-elevated);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-main);
+}
+
+.details-alert svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.details-alert-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.details-alert-title {
+    font-weight: 700;
+}
+
+.details-alert-text {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.details-alert.is-info {
+    border-color: color-mix(in srgb, var(--accent-primary) 38%, var(--border-basalt));
+    background: color-mix(in srgb, var(--accent-primary) 8%, var(--surface-elevated));
+}
+
+.details-alert.is-info svg {
+    color: var(--accent-primary);
+}
+
+.details-alert.is-success {
+    border-color: color-mix(in srgb, var(--accent-success) 38%, var(--border-basalt));
+    background: color-mix(in srgb, var(--accent-success) 8%, var(--surface-elevated));
+}
+
+.details-alert.is-success svg {
+    color: var(--accent-success);
+}
+
+.details-alert.is-error {
+    border-color: color-mix(in srgb, var(--status-error) 40%, var(--border-basalt));
+    background: color-mix(in srgb, var(--status-error) 9%, var(--surface-elevated));
+}
+
+.details-alert.is-error svg {
+    color: var(--status-error);
+}
+
+/* ── Pie ────────────────────────────────────────────────────────────────── */
+
+.details-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 4px;
+}
+
+.details-footer-note {
+    margin: 0;
+    margin-right: auto;
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+@media (max-width: 860px) {
+    .details-logo-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .details-logo-preview {
+        max-width: 220px;
+    }
+}
+
+@media (max-width: 767px) {
+    .details-panel {
+        padding: 16px;
+    }
+
+    .details-segment {
+        width: 100%;
+    }
+
+    .details-segment-btn {
+        flex: 1 1 0;
+        min-height: 44px;
+    }
+
+    .details-footer .basalt-btn {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .details-segment-btn {
+        transition: none;
+    }
+}
+
+/* Puente para la sección de FlashScore, que sigue hablando `manager-*`.
+ *
+ * Esas clases se definen en `vitreous-club.css` contra variables que vivían en
+ * `.flash-ui-container` — el contenedor de la consola de CLUBES, que la pestaña
+ * usaba como envoltorio entero. Traía consigo un fondo propio, `min-height:
+ * 100vh` y una textura de ruido `position: fixed` con `z-index: 9999` encima de
+ * todo el gestor.
+ *
+ * Acá se traen SOLO las variables, mapeadas a los tokens de basalt: la sección
+ * queda con los colores de la consola —y con tema claro, que antes no tenía— sin
+ * arrastrar la pintura de otro shell. `--surface-elevated` y `--text-dim` no se
+ * remapean porque comparten nombre con los tokens del shell y ya se heredan.
+ */
+.details-legacy-vars {
+    --bg: var(--bg-basalt);
+    --surface: var(--surface-basalt);
+    --surface-soft: var(--surface-basalt);
+    --surface-input: var(--bg-basalt);
+    --surface-panel: var(--surface-elevated);
+    --border: var(--border-basalt);
+    --text: var(--text-main);
+    --text-muted: var(--text-secondary);
+    --muted-text-soft: var(--text-secondary);
+    --accent: var(--accent-primary);
+    --accent-secondary: var(--accent-primary);
+    --success: var(--accent-success);
+    --warning: var(--status-warning);
+    --danger: var(--status-error);
+    /* El degradado de titulares del shell viejo pintaba texto con
+       `background-clip: text`. Acá el titular es tinta plena. */
+    --headline-gradient: none;
+}

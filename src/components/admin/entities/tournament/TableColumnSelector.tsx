@@ -57,15 +57,15 @@ export function TableColumnSelector({
   const totalCount = categories.reduce((acc, cat) => acc + cat.columns.length, 0);
 
   return (
-    <div className="flex flex-col relative px-[24px] py-[20px] rounded-sm bg-[#151B22] border border-[#26313B] overflow-hidden">
+    <div className="flex flex-col relative px-[24px] py-[20px] rounded-sm bg-[var(--surface-elevated)] border border-[var(--border-basalt)] overflow-hidden">
       {/* Content wrapper */}
       <div className="relative z-10 flex flex-col h-full">
         {!hideHeader && (
           <div className="flex items-center justify-between mb-[20px]">
-            <h3 className="text-[0.85rem] font-mono font-semibold text-[#98A6B3] m-0 leading-none uppercase tracking-[0.14em]">
+            <h3 className="text-[0.85rem] font-mono font-semibold text-[var(--text-secondary)] m-0 leading-none uppercase tracking-[0.14em]">
               Glosario de columnas
             </h3>
-            <span className="text-[0.75rem] font-mono text-[#98A6B3]">
+            <span className="text-[0.75rem] font-mono text-[var(--text-secondary)]">
               {selectedCount} de {totalCount} seleccionadas
             </span>
           </div>
@@ -78,7 +78,7 @@ export function TableColumnSelector({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar columna..."
-            className="w-full h-[44px] pl-10 pr-4 bg-[rgba(0,0,0,0.35)] border border-[rgba(255,255,255,0.12)] focus:border-[var(--accent-cyan)] transition-all rounded text-sm text-white outline-none focus:ring-1 focus:ring-[var(--accent-cyan)]"
+            className="w-full h-[44px] pl-10 pr-4 bg-[var(--bg-basalt)] border border-[rgba(255,255,255,0.12)] focus:border-[var(--accent-cyan)] transition-all rounded text-sm text-[var(--text-main)] outline-none focus:ring-1 focus:ring-[var(--accent-cyan)]"
           />
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -114,7 +114,7 @@ export function TableColumnSelector({
                     <div className="relative flex items-center justify-center w-[16px] h-[16px]">
                       <input
                         type="checkbox"
-                        className="peer appearance-none w-4 h-4 rounded-sm border border-[rgba(255,255,255,0.3)] bg-[rgba(0,0,0,0.5)] checked:bg-[var(--accent-cyan)] checked:border-[var(--accent-cyan)] transition-all cursor-pointer m-0"
+                        className="peer appearance-none w-4 h-4 rounded-sm border border-[rgba(255,255,255,0.3)] bg-[var(--bg-basalt)] checked:bg-[var(--accent-cyan)] checked:border-[var(--accent-cyan)] transition-all cursor-pointer m-0"
                         checked={allSelected}
                         ref={input => {
                           if (input) {
@@ -132,7 +132,7 @@ export function TableColumnSelector({
                         <div className="absolute w-2 h-[2px] bg-white rounded-full pointer-events-none"></div>
                       )}
                     </div>
-                    <span className="text-[12px] font-[800] text-white uppercase tracking-[0.14em] group-hover:text-[var(--accent-cyan)] transition-colors">
+                    <span className="text-[12px] font-[800] text-[var(--text-main)] uppercase tracking-[0.14em] group-hover:text-[var(--accent-cyan)] transition-colors">
                       {category.label}
                     </span>
                   </label>
@@ -148,12 +148,12 @@ export function TableColumnSelector({
                     return (
                       <label
                         key={column.id}
-                        className="cursor-pointer flex items-center gap-3 select-none text-[14px] text-[#aaa] py-1.5 rounded hover:text-white transition-colors group"
+                        className="cursor-pointer flex items-center gap-3 select-none text-[14px] text-[#aaa] py-1.5 rounded hover:text-[var(--text-main)] transition-colors group"
                       >
                         <div className="relative flex items-center justify-center w-[16px] h-[16px] flex-shrink-0">
                           <input
                             type="checkbox"
-                            className="peer appearance-none w-4 h-4 rounded-sm border border-[rgba(255,255,255,0.2)] bg-[rgba(0,0,0,0.5)] checked:bg-[var(--accent-cyan)] checked:border-[var(--accent-cyan)] transition-all cursor-pointer m-0 group-hover:border-[rgba(255,255,255,0.4)]"
+                            className="peer appearance-none w-4 h-4 rounded-sm border border-[rgba(255,255,255,0.2)] bg-[var(--bg-basalt)] checked:bg-[var(--accent-cyan)] checked:border-[var(--accent-cyan)] transition-all cursor-pointer m-0 group-hover:border-[rgba(255,255,255,0.4)]"
                             checked={isChecked}
                             onChange={() => toggleColumn(column.id)}
                           />

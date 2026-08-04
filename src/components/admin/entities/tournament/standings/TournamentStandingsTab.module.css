@@ -1,67 +1,58 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Posiciones, hablando el idioma de la consola.
+
+   Este módulo traía su propio sistema visual: acento VERDE (#00a365, el de la
+   consola anterior) cuando el resto del gestor ya usa azul, superficies
+   esmeriladas de 16-28px de radio, dos halos radiales de fondo y colores
+   escritos a mano que no reaccionaban al tema claro.
+
+   En vez de reescribir las 1.500 líneas de reglas que cuelgan de estos tokens,
+   se remapean los tokens: las variables locales pasan a apuntar a las de
+   basalt y todo el módulo se repinta solo, tema claro incluido.
+   ───────────────────────────────────────────────────────────────────────── */
 .page {
-  --bg: #030708;
-  --bg-panel: rgba(255, 255, 255, 0.03);
-  --bg-soft: rgba(255, 255, 255, 0.02);
-  --bg-deep: #081112;
-  --bg-sticky: #091213;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-soft: rgba(255, 255, 255, 0.05);
-  --text: #e2e8f0;
-  --text-dim: #94a3b8;
-  --text-faint: #64748b;
-  --accent: #00a365;
-  --accent-soft: rgba(0, 163, 101, 0.12);
-  --accent-subtle: rgba(0, 163, 101, 0.06);
-  --row-hover: rgba(255, 255, 255, 0.06);
+  --bg: var(--bg-basalt);
+  --bg-panel: var(--surface-elevated);
+  --bg-soft: var(--bg-basalt);
+  --bg-deep: var(--bg-basalt);
+  --bg-sticky: var(--surface-elevated);
+  --border: var(--border-basalt);
+  --border-soft: var(--border-basalt);
+  --text: var(--text-main);
+  --text-dim: var(--text-secondary);
+  --text-faint: var(--text-dim);
+  --accent: var(--accent-primary);
+  --accent-soft: color-mix(in srgb, var(--accent-primary) 14%, transparent);
+  --accent-subtle: color-mix(in srgb, var(--accent-primary) 7%, transparent);
+  --row-hover: var(--basalt-overlay-soft, rgba(255, 255, 255, 0.05));
   position: relative;
-  overflow: hidden;
-  padding: 24px;
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at top left, rgba(0, 163, 101, 0.12), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(0, 163, 101, 0.08), transparent 22%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0)),
-    var(--bg);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
 
+/* Los halos siguen en el JSX de nadie, pero la clase queda inerte por si
+   algún panel del módulo todavía la referencia. */
 .pageGlow {
-  position: absolute;
-  pointer-events: none;
-  border-radius: 999px;
-}
-
-.pageGlowLeft {
-  top: -220px;
-  left: -210px;
-  width: 620px;
-  height: 620px;
-  background: radial-gradient(circle, rgba(0, 163, 101, 0.2), transparent 68%);
-}
-
-.pageGlowRight {
-  right: -180px;
-  bottom: -180px;
-  width: 520px;
-  height: 520px;
-  background: radial-gradient(circle, rgba(0, 163, 101, 0.13), transparent 68%);
+  display: none;
 }
 
 .pageInner {
   position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
+/* Mismo panel que el resto de Operación: plano, 4px, borde de 1px. */
 .glassPanel {
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-basalt);
+  backdrop-filter: none;
+  border-radius: 4px;
+  box-shadow: none;
 }
 
 .loadingState,
@@ -140,7 +131,7 @@
   height: 8px;
   border-radius: 999px;
   background: var(--accent);
-  box-shadow: 0 0 18px rgba(0, 163, 101, 0.6);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
 .title {
@@ -369,7 +360,7 @@
   width: 6px;
   height: 24px;
   border-radius: 999px;
-  background: linear-gradient(180deg, var(--accent), rgba(0, 163, 101, 0.25));
+  background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 25%, transparent));
 }
 
 .panelHeaderIcon {
@@ -416,7 +407,7 @@
 }
 
 .selectControl:focus {
-  border-color: rgba(0, 163, 101, 0.45);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
 .selectControl:disabled {
@@ -995,7 +986,7 @@
   font-size: 14px !important;
   font-weight: 800;
   text-align: center;
-  background: rgba(0, 163, 101, 0.08) !important;
+  background: color-mix(in srgb, var(--accent) 8%, transparent) !important;
 }
 
 .formGroup {
@@ -1059,8 +1050,8 @@
 
 .statusBadgeInfo {
   color: var(--accent);
-  background: rgba(0, 163, 101, 0.12);
-  border: 1px solid rgba(0, 163, 101, 0.24);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
 }
 
 .statusBadgeWarning {
@@ -1295,8 +1286,8 @@
 }
 
 .tiebreakerDragging {
-  background: rgba(0, 163, 101, 0.1);
-  border-color: rgba(0, 163, 101, 0.35);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .tiebreakerDisabled {
@@ -1605,17 +1596,99 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  /* ── La tabla de posiciones se lee de arriba abajo ──────────────────────
+     Cada equipo ocupaba ~110px en tres renglones: nombre, etiqueta, cifras y
+     «Detalle». Con ocho equipos son 880px de scroll para una tabla que se mira
+     entera de un vistazo — que es justamente lo que una tabla de posiciones
+     tiene que dejar hacer: comparar quién está arriba de quién.
+
+     No se saca ninguna cifra ni ningún control: se dejan de apilar. Las
+     cifras y «Detalle» vuelven a un solo renglón, y el número de posición deja
+     de ser un cuadro de 44px, que es medida de botón y esto no se toca. */
   .mobileCardTop {
-    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 10px;
   }
 
+  .mobileRank {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    font-size: 13px;
+  }
+
+  .mobileCardSummary {
+    gap: 9px;
+    padding: 10px 11px;
+  }
+
+  /* Flex y no grid: el resumen trae dos cifras o tres según la vista, y una
+     grilla de columnas fijas deja un hueco cuando son dos. */
   .mobileCompactStats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    gap: 7px;
+  }
+
+  /* El rótulo al lado de la cifra, no encima: apilados, cada caja medía 50px
+     de alto para mostrar «PJ 14». En línea son 28 y se leen igual. */
+  .mobileCompactStat {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 6px;
+    padding: 5px 8px;
+  }
+
+  .mobileCompactStat strong {
+    font-size: 14px;
+  }
+
+  /* El escudo mandaba el alto del renglón del equipo con 60px — más que el
+     número de posición, que es lo que ordena la tabla. */
+  .mobileCard .teamLogo,
+  .mobileCard .teamLogoFallback {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+  }
+
+  .mobileCard .teamIdentity {
+    gap: 9px;
+    align-items: center;
+  }
+
+  .mobileCard .mobileTeamText {
+    gap: 4px;
   }
 
   .mobileCompactStats > :last-child {
-    grid-column: 1 / -1;
+    flex: 0 0 auto;
+    margin-left: auto;
     text-align: right;
+  }
+
+  /* La etiqueta de clasificación es un botón, y la hoja de mobile estira TODO
+     botón a 44px. Acá eso partía en dos el renglón del nombre —el nombre
+     arriba, la etiqueta abajo— y sumaba 30px por equipo. 28 sigue por encima
+     del mínimo de WCAG 2.2 AA y entra al lado del nombre. Hacen falta las dos
+     clases para ganarle a la regla general, que también lleva `!important`. */
+  .mobileCard .teamLabelTrigger {
+    min-height: 28px !important;
+    height: 28px !important;
+    padding: 0 8px !important;
+  }
+
+  .mobileCard .teamNameRow {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .mobileCard .teamName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -1663,7 +1736,7 @@
 
 .teamLabelTrigger {
   --team-label-accent: var(--accent);
-  --team-label-bg: rgba(0, 163, 101, 0.14);
+  --team-label-bg: color-mix(in srgb, var(--accent) 14%, transparent);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1891,7 +1964,7 @@
 }
 
 .labelsInput:focus {
-  border-color: rgba(0, 163, 101, 0.45);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
 .labelsInput:disabled {
@@ -2059,8 +2132,8 @@
 }
 
 .assignDropdownItemActive {
-  background: rgba(0, 163, 101, 0.07);
-  border-color: rgba(0, 163, 101, 0.15);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
 .assignDropdownCheck {
@@ -2074,25 +2147,34 @@
 }
 
 /* Basalt tournament console overrides */
+/* ─────────────────────────────────────────────────────────────────────────
+   SEGUNDO bloque `.page`.
+
+   Este archivo declara `.page` DOS veces: al principio (donde se remapean los
+   tokens a basalt) y otra vez acá, 2.000 líneas más abajo. Al ser el último,
+   este ganaba: volvía a poner `--accent: #00a365` y con él todo el módulo se
+   repintaba de verde por más que el bloque de arriba dijera azul. Era la razón
+   por la que Posiciones seguía siendo la pestaña verde de la consola.
+
+   Se deja el bloque —quitarlo cambiaría más de lo necesario— pero apuntando a
+   los mismos tokens que el de arriba, para que no haya dos fuentes de verdad.
+   ───────────────────────────────────────────────────────────────────────── */
 .page {
-  --bg: #07101a;
-  --bg-panel: rgba(9, 15, 24, 0.86);
-  --bg-soft: rgba(255, 255, 255, 0.03);
-  --bg-deep: #09131f;
-  --bg-sticky: #0b1521;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-soft: rgba(255, 255, 255, 0.05);
-  --text: #eef4f7;
-  --text-dim: rgba(228, 236, 241, 0.58);
-  --text-faint: rgba(228, 236, 241, 0.42);
-  --accent: #00a365;
-  background:
-    radial-gradient(circle at top left, rgba(0, 163, 101, 0.16), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(11, 79, 120, 0.12), transparent 28%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 36%),
-    var(--bg);
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.24);
+  --bg: var(--bg-basalt);
+  --bg-panel: var(--surface-elevated);
+  --bg-soft: var(--bg-basalt);
+  --bg-deep: var(--bg-basalt);
+  --bg-sticky: var(--surface-elevated);
+  --border: var(--border-basalt);
+  --border-soft: var(--border-basalt);
+  --text: var(--text-main);
+  --text-dim: var(--text-secondary);
+  --text-faint: var(--text-dim);
+  --accent: var(--accent-primary);
+  /* Sin los dos radiales verdes: el shell ya pinta su fondo. */
+  background: none;
+  border-color: var(--border-basalt);
+  box-shadow: none;
 }
 
 .glassPanel,
@@ -2101,12 +2183,9 @@
 .warningBanner,
 .emptyPanel,
 .labelsPanel {
-  border-radius: 24px;
-  background:
-    linear-gradient(135deg, rgba(0, 163, 101, 0.08), transparent 42%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 36%),
-    rgba(9, 15, 24, 0.86);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
+  border-radius: 4px;
+  background: var(--surface-elevated);
+  box-shadow: none;
 }
 
 .localTabsGroup,
@@ -2120,18 +2199,66 @@
 .logicInput,
 .mobileCompactStat,
 .mobileStat {
-  border-radius: 14px;
+  border-radius: 2px;
 }
 
+/* El verde se queda SÓLO acá: son los botones que escriben —«Forzar
+   recálculo» y el alta de etiquetas—. Plano, no degradado. */
 .buttonPrimary,
 .labelsBtnPrimary {
-  background: linear-gradient(135deg, #00b26f 0%, #008f59 100%);
-  color: #f4fff9;
+  background: var(--accent-success, #22c55e);
+  border-color: var(--accent-success, #22c55e);
+  color: #052e16;
 }
 
+/* Selección: azul, como en el resto de la consola. */
 .localTabActive,
 .statusBadgeInfo,
 .pointsCell {
-  background: rgba(0, 163, 101, 0.12) !important;
-  border-color: rgba(0, 214, 136, 0.24);
+  background: color-mix(in srgb, var(--accent) 12%, transparent) !important;
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Normalización final: radios y vidrio.
+
+   El módulo tiene ~30 reglas con radios de 10 a 20px y un par de
+   `backdrop-filter` sueltos, repartidos por todo el archivo. En vez de tocar
+   cada una —y arriesgar que la próxima que se agregue vuelva al radio viejo—
+   se normaliza acá al final: 4px para cajas, 2px para controles, sin vidrio.
+
+   Si algún día un panel necesita otro radio, que lo declare DESPUÉS de este
+   bloque y quede a la vista que es una excepción.
+   ───────────────────────────────────────────────────────────────────────── */
+.page :is(section, article, aside, header, details, div)[class] {
+  backdrop-filter: none;
+}
+
+.page :is(button, input, select, textarea) {
+  border-radius: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   La etiqueta marca la LÍNEA DE CORTE, no pinta el renglón.
+
+   Cada fila con etiqueta recibe por estilo inline el color que el torneo le
+   configuró (acá `#00FF66` para «Semifinales») y la hoja lo usaba para teñir
+   el fondo de la fila al 12–18%. Con cuatro clasificados sobre ocho, media
+   tabla quedaba verde y el color perdía su trabajo: si todo está marcado,
+   nada está marcado.
+
+   El filete de 3px del borde izquierdo ya dice lo mismo y no compite con
+   nada, así que se queda él solo. El color de la etiqueta sigue siendo el que
+   eligió el usuario — no se toca — y su chip lo sigue mostrando.
+   ───────────────────────────────────────────────────────────────────────── */
+.row {
+  --standings-row-bg: transparent;
+  --standings-row-bg-strong: var(--row-hover);
+}
+
+/* El borde superior/inferior teñido con el color de la etiqueta sumaba dos
+   líneas de color por fila. Vuelven al borde neutro de la tabla. */
+.row > td {
+  border-top-color: var(--border-soft);
+  border-bottom-color: var(--border-soft);
 }

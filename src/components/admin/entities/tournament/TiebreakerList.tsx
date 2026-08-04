@@ -405,7 +405,11 @@ export function TiebreakerList({ items, onChange, phaseType }: TiebreakerListPro
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar criterio..."
-              className="manager-url-input text-sm w-full pl-10 py-2.5 bg-[rgba(255,255,255,0.03)] border-[var(--border)] focus:border-[var(--accent-cyan)] transition-all rounded-lg text-white"
+              /* `basalt-input` y no `manager-url-input`: es el mismo campo de
+                 texto que el resto de la consola, con su foco y su borde. El
+                 `pl-10` deja lugar a la lupa que va encima. El estilo anterior
+                 pedía `--accent-cyan`, una variable que ya no define nadie. */
+              className="basalt-input pl-10"
             />
             <svg
               xmlns="http://www.w3.org/2000/svg"
