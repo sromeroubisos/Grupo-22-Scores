@@ -29,6 +29,38 @@ export function isGoalKickAttemptEvent(event: GoalKickishEvent) {
 const RE_PALOS_NO = /\[palos:miss\]/i;
 const RE_PALOS_OK = /\[palos:ok\]/i;
 
+/**
+ * Vocabulario de tiro ERRADO en el detalle libre.
+ *
+ * Se amplio porque el original solo entendia "fallada/errada/erro/fallo/no
+ * convertida/missed": un detalle que dijera "desviada", "afuera", "al palo" o
+ * "erro" sin tilde pasaba como convertida y SUMABA PUNTOS. Se normalizan los
+ * acentos antes de testear, asi que aca va todo sin tilde.
+ *
+ * Ojo con los limites de palabra: "palo" tiene que matchear "al palo" pero no
+ * "a los palos", que es como se llama la jugada entera.
+ */
+const RE_KICK_MISSED = new RegExp(
+  [
+    'fallad[ao]', 'fall[oa]\\b', 'errad[ao]', 'err[oa]\\b',
+    'no convert', 'sin convert', 'no entro', 'no paso',
+    '\\bmissed\\b', '\\bmiss\\b', '\\bwide\\b', '\\bno good\\b',
+    'desviad[ao]', '\\bdesvia', '\\bafuera\\b', '\\bfuera\\b',
+    '\\bal palo\\b', '\\bpalo izquierdo\\b', '\\bpalo derecho\\b',
+    '\\bposte\\b', '\\btravesa', '\\bhorizontal\\b',
+    '\\bcorta\\b',
+  ].join('|'),
+);
+
+const RE_KICK_MADE = /convertid|acertad|\bmade\b|\bok\b|\bbuena\b|\badentro\b|\bgood\b/;
+
+/** Marcas diacriticas combinantes, por codepoint: el rango literal es ilegible. */
+const RE_COMBINING_MARKS = /[̀-ͯ]/g;
+
+function stripDiacritics(value: string) {
+  return value.normalize('NFD').replace(RE_COMBINING_MARKS, '');
+}
+
 export function isGoalKickMade(eventType: string, detail: string | null | undefined) {
   if (!isGoalKickEventType(eventType)) return true;
 
@@ -36,9 +68,17 @@ export function isGoalKickMade(eventType: string, detail: string | null | undefi
   if (RE_PALOS_NO.test(raw)) return false;
   if (RE_PALOS_OK.test(raw)) return true;
 
-  const normalized = raw.toLowerCase();
-  if (/fallad[ao]|errad[ao]|erró|falló|no convert|\bmissed\b/.test(normalized)) return false;
-  if (/convertid|acertad|made|\bok\b/.test(normalized)) return true;
+  // Sin acentos: "erró" y "erro" tienen que resolver igual. Quien carga en la
+  // cancha desde el celular no pone tildes.
+  const normalized = stripDiacritics(raw.toLowerCase());
+  if (RE_KICK_MISSED.test(normalized)) return false;
+  if (RE_KICK_MADE.test(normalized)) return true;
+
+  // `penalty` es el unico que, ante un texto que no reconoce, asume errado.
+  // Se conserva ASI a proposito: es el que menos informacion trae (no hay un
+  // tipo aparte para el penal fallado) y equivocarse hacia no-suma es mucho
+  // mas barato que inventar tres puntos. Los demas mantienen su default
+  // historico para no bajarle el marcador a partidos ya cargados.
   if (eventType === 'penalty' && normalized.trim()) return false;
 
   return true;
