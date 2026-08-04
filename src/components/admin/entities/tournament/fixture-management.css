@@ -1,22 +1,36 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Fixture, hablando el idioma de la consola.
+
+   El acento de este módulo era VERDE (#00a365, el de la consola anterior), y
+   con él se pintaba la SELECCIÓN: la card del método elegido, la sub-pestaña
+   activa, el chip de modo. Pero en esta consola el verde significa una sola
+   cosa —la acción que escribe— y la selección es azul. Dos lenguajes en la
+   misma pantalla: la card seleccionada y el botón "Crear partido" se veían
+   igual, aunque una informa y el otro guarda.
+
+   Igual que en Posiciones y Estadísticas, se remapean los tokens: el módulo
+   entero pasa al azul sin tocar sus ~450 reglas, y el verde queda libre para
+   los botones de guardar, que lo toman de `.basalt-btn-primary`.
+   ───────────────────────────────────────────────────────────────────────── */
 :root {
-    --fixture-bg-base: #05070a;
-    --fixture-glass-base: rgba(15, 20, 28, 0.68);
-    --fixture-glass-strong: rgba(12, 17, 24, 0.84);
-    --fixture-glass-border: rgba(255, 255, 255, 0.08);
-    --fixture-text-main: #e2e8f0;
-    --fixture-text-muted: #94a3b8;
-    --fixture-text-dim: rgba(148, 163, 184, 0.62);
-    --fixture-accent-primary: #00a365;
-    --fixture-accent-secondary: #00c27b;
-    --fixture-accent-success: #34c759;
-    --fixture-accent-danger: #ff2d55;
-    --fixture-accent-info: #00a365;
-    --fixture-accent-glow: rgba(0, 163, 101, 0.35);
-    --fixture-radius-lg: 24px;
-    --fixture-radius-md: 16px;
-    --fixture-radius-sm: 12px;
-    --fixture-shadow-soft: 0 24px 60px rgba(0, 0, 0, 0.28);
-    --fixture-shadow-glow: 0 0 0 1px rgba(0, 163, 101, 0.15), 0 22px 50px rgba(0, 0, 0, 0.22);
+    --fixture-bg-base: var(--bg-basalt, #05070a);
+    --fixture-glass-base: var(--surface-elevated, rgba(15, 20, 28, 0.68));
+    --fixture-glass-strong: var(--surface-basalt, rgba(12, 17, 24, 0.84));
+    --fixture-glass-border: var(--border-basalt, rgba(255, 255, 255, 0.08));
+    --fixture-text-main: var(--text-main, #e2e8f0);
+    --fixture-text-muted: var(--text-secondary, #94a3b8);
+    --fixture-text-dim: var(--text-dim, rgba(148, 163, 184, 0.62));
+    --fixture-accent-primary: var(--accent-primary, #3b82f6);
+    --fixture-accent-secondary: var(--accent-primary-strong, #1d4ed8);
+    --fixture-accent-success: var(--accent-success, #10b981);
+    --fixture-accent-danger: var(--status-error, #ef4444);
+    --fixture-accent-info: var(--accent-primary, #3b82f6);
+    --fixture-accent-glow: color-mix(in srgb, var(--accent-primary, #3b82f6) 35%, transparent);
+    --fixture-radius-lg: 4px;
+    --fixture-radius-md: 4px;
+    --fixture-radius-sm: 2px;
+    --fixture-shadow-soft: none;
+    --fixture-shadow-glow: none;
 }
 
 .operation-playoff-bracket {
@@ -149,9 +163,9 @@
 
 .fixture-management-center::before {
     background:
-        radial-gradient(circle at 8% 12%, rgba(0, 163, 101, 0.14), transparent 28%),
-        radial-gradient(circle at 82% 18%, rgba(0, 194, 123, 0.12), transparent 24%),
-        radial-gradient(circle at 50% 100%, rgba(0, 163, 101, 0.08), transparent 32%);
+        radial-gradient(circle at 8% 12%, color-mix(in srgb, var(--fixture-accent-primary) 14%, transparent), transparent 28%),
+        radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--fixture-accent-secondary) 12%, transparent), transparent 24%),
+        radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--fixture-accent-primary) 8%, transparent), transparent 32%);
     filter: blur(18px);
 }
 
@@ -268,7 +282,7 @@
 }
 
 .fixture-phase-badge {
-    background: linear-gradient(135deg, rgba(0, 163, 101, 0.15), rgba(0, 194, 123, 0.12));
+    background: linear-gradient(135deg, color-mix(in srgb, var(--fixture-accent-primary) 15%, transparent), color-mix(in srgb, var(--fixture-accent-secondary) 12%, transparent));
     box-shadow: var(--fixture-shadow-glow);
 }
 
@@ -396,8 +410,8 @@
 }
 
 .fixture-btn-primary {
-    background: linear-gradient(135deg, rgba(0, 163, 101, 0.35), rgba(0, 194, 123, 0.25));
-    border-color: rgba(0, 163, 101, 0.3);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--fixture-accent-primary) 35%, transparent), color-mix(in srgb, var(--fixture-accent-secondary) 25%, transparent));
+    border-color: color-mix(in srgb, var(--fixture-accent-primary) 30%, transparent);
     color: #f8fafc;
     box-shadow: var(--fixture-shadow-glow);
 }
@@ -539,9 +553,9 @@
 }
 
 .fixture-view-btn.active {
-    background: linear-gradient(135deg, rgba(0, 163, 101, 0.16), rgba(0, 194, 123, 0.18));
+    background: linear-gradient(135deg, color-mix(in srgb, var(--fixture-accent-primary) 16%, transparent), color-mix(in srgb, var(--fixture-accent-secondary) 18%, transparent));
     color: var(--fixture-text-main);
-    box-shadow: inset 0 0 0 1px rgba(0, 163, 101, 0.22);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fixture-accent-primary) 22%, transparent);
 }
 
 .fixture-main-grid {
@@ -620,7 +634,7 @@
     bottom: 6px;
     left: 14px;
     width: 1px;
-    background: linear-gradient(180deg, rgba(0, 163, 101, 0.3), rgba(255, 255, 255, 0.04), rgba(0, 194, 123, 0.2));
+    background: linear-gradient(180deg, color-mix(in srgb, var(--fixture-accent-primary) 30%, transparent), rgba(255, 255, 255, 0.04), color-mix(in srgb, var(--fixture-accent-secondary) 20%, transparent));
     opacity: 0.85;
 }
 
@@ -649,8 +663,8 @@
     width: 12px;
     height: 12px;
     border-radius: 999px;
-    background: linear-gradient(135deg, var(--fixture-accent-primary), rgba(0, 194, 123, 0.9));
-    box-shadow: 0 0 0 6px rgba(0, 163, 101, 0.08);
+    background: linear-gradient(135deg, var(--fixture-accent-primary), color-mix(in srgb, var(--fixture-accent-secondary) 90%, transparent));
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--fixture-accent-primary) 8%, transparent);
 }
 
 .fixture-round-title {
@@ -743,8 +757,8 @@
 }
 
 .fixture-match-card:hover {
-    border-color: rgba(0, 163, 101, 0.45);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), 0 0 20px rgba(0, 163, 101, 0.15);
+    border-color: color-mix(in srgb, var(--fixture-accent-primary) 45%, transparent);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), 0 0 20px color-mix(in srgb, var(--fixture-accent-primary) 15%, transparent);
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
         rgba(15, 20, 28, 0.85);
@@ -1946,8 +1960,8 @@ textarea.glass-input {
 }
 
 .dk-select--open .dk-select__trigger {
-    border-color: rgba(0, 163, 101, 0.5);
-    box-shadow: 0 0 0 3px rgba(0, 163, 101, 0.12);
+    border-color: color-mix(in srgb, var(--fixture-accent-primary) 50%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--fixture-accent-primary) 12%, transparent);
     background: rgba(255, 255, 255, 0.06);
 }
 
@@ -2036,13 +2050,13 @@ textarea.glass-input {
 }
 
 .dk-select__option--selected {
-    background: rgba(0, 163, 101, 0.12);
+    background: color-mix(in srgb, var(--fixture-accent-primary) 12%, transparent);
     color: #5ee9a5;
     font-weight: 600;
 }
 
 .dk-select__option--selected.dk-select__option--focused {
-    background: rgba(0, 163, 101, 0.18);
+    background: color-mix(in srgb, var(--fixture-accent-primary) 18%, transparent);
 }
 
 .dk-select__option--disabled {
@@ -2586,20 +2600,6 @@ select.glass-input option {
         gap: 16px;
     }
 
-    .operation-fixture-hero {
-        padding: 18px;
-        gap: 12px;
-    }
-
-    .operation-fixture-hero-copy h3 {
-        font-size: 18px;
-    }
-
-    .operation-fixture-hero-meta {
-        min-width: 0;
-        padding: 12px 14px;
-    }
-
     .fixture-matches-grid {
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 14px;
@@ -2610,14 +2610,6 @@ select.glass-input option {
         gap: 12px;
     }
 
-    .operation-fixture-subtab {
-        padding: 14px;
-    }
-
-    .operation-fixture-subtab small {
-        font-size: 12px;
-    }
-
     .operation-manage-toolbar-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -2625,15 +2617,19 @@ select.glass-input option {
 
 /* MOBILE (≤767px): rediseño focalizado del subtab fixture. */
 @media (max-width: 767px) {
-    /* 1) HERO REDUNDANTE — el wrapper ya muestra título y kicker arriba.
-          Lo ocultamos para ganar ~140px verticales en pantallas chicas. */
-    .operation-fixture-workspace .operation-fixture-hero {
-        display: none;
-    }
+    /* PANEL DE FASE compacto — bajamos padding y tipografía. */
+    /* Es una fila que dice qué hay y abre el panel: dos renglones de texto y un
+       botón. Medía 70px de alto y está entre el riel de modo y el buscador —o
+       sea, en el camino, no en el destino—.
 
-    /* 2) PANEL DE FASE compacto — bajamos padding y tipografía. */
-    .operation-mobile-side-trigger {
-        padding: 12px 14px !important;
+       Hacen falta las tres clases: esta caja es también `.basalt-card`, y hay
+       OCHO reglas peleando por su relleno, varias con `!important`. La que
+       ganaba era `.basalt-body .basalt-card { padding: 14px !important }`, y
+       entre dos `!important` decide la especificidad. Con una sola clase esta
+       regla no se aplicaba —y por lo mismo la de `operation-console.css`, que
+       pide 10px sin `!important`, no se aplicó nunca. */
+    .basalt-body .operation-console-shell .operation-mobile-side-trigger {
+        padding: 9px 12px !important;
         gap: 10px !important;
     }
 
@@ -2652,54 +2648,25 @@ select.glass-input option {
         padding-inline: 12px;
     }
 
-    /* 3) SUBTABS DEL WORKSPACE — de cards altas a segmented control. */
-    .operation-fixture-workspace .operation-fixture-subtabs {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 6px !important;
-        padding: 4px;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-    }
+    /* Los subtabs del workspace ya son un segmented control a cualquier ancho
+       (`.op-seg` en operation-console.css). Mobile los venía convirtiendo acá
+       a mano, porque en escritorio eran dos tarjetas de 320px; ahora es la
+       misma pieza en las dos puntas y no hay nada que rehacer. */
 
-    .operation-fixture-workspace .operation-fixture-subtabs .operation-fixture-subtab {
-        min-block-size: 0 !important;
-        flex-basis: 0 !important;
-        min-inline-size: 0 !important;
-        max-inline-size: none !important;
-        padding: 9px 10px !important;
-        border-radius: 10px;
-        background: transparent;
-        border: 1px solid transparent;
-        text-align: center;
-        gap: 0 !important;
-    }
+    /* MÉTODOS — dos por fila.
 
-    .operation-fixture-workspace .operation-fixture-subtabs .operation-fixture-subtab span {
-        font-size: 13px;
-        font-weight: 700;
-        text-align: center;
-    }
+       Eran cuatro filas apiladas de ancho completo: 300px de alto para elegir
+       entre cuatro opciones que se leen de un vistazo. En dos columnas entran
+       las cuatro en la mitad del alto y se comparan de un golpe, que es lo que
+       se hace acá: mirar las cuatro y elegir una.
 
-    /* La descripción del subtab se vuelve invisible en mobile (la
-       describimos arriba con la propia tab activa). */
-    .operation-fixture-workspace .operation-fixture-subtabs .operation-fixture-subtab small {
-        display: none;
-    }
-
-    .operation-fixture-workspace .operation-fixture-subtabs .operation-fixture-subtab.active {
-        background: rgba(0, 163, 101, 0.18);
-        border-color: rgba(0, 214, 136, 0.45);
-        box-shadow: none;
-    }
-
-    /* 4) MÉTODOS — pasamos del carrusel horizontal a una lista vertical
-          compacta. Cada método es un row tappable de altura cómoda. */
+       El ícono sube arriba del título en vez de ir al costado: en media columna
+       (~160px) una fila de ícono+texto deja al título con 110px y lo parte. */
     .operation-method-grid {
         display: grid !important;
         grid-auto-flow: row !important;
         grid-auto-columns: auto !important;
-        grid-template-columns: 1fr !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         overflow: visible !important;
         scroll-snap-type: none !important;
         gap: 8px !important;
@@ -2707,32 +2674,48 @@ select.glass-input option {
     }
 
     .operation-method-card {
-        grid-template-columns: 40px minmax(0, 1fr);
-        align-items: center;
-        gap: 12px !important;
-        padding: 12px 14px !important;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: start;
+        gap: 8px !important;
+        padding: 11px !important;
         border-radius: 14px;
         scroll-snap-align: none !important;
     }
 
     .operation-method-card .operation-method-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 12px;
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
     }
 
     .operation-method-card .operation-method-copy {
         gap: 2px;
+        min-width: 0;
     }
 
     .operation-method-card strong {
-        font-size: 14px;
+        font-size: 13px;
+        line-height: 1.25;
     }
 
     .operation-method-card p {
-        font-size: 12px;
+        font-size: 11.5px;
         line-height: 1.35;
         color: rgba(228, 233, 241, 0.6);
+    }
+
+    /* Abajo de 360 la media columna deja 130px y el título de dos palabras se
+       parte en tres renglones. Ahí vuelve a una por fila. */
+    @media (max-width: 360px) {
+        .operation-method-grid {
+            grid-template-columns: minmax(0, 1fr) !important;
+        }
+
+        .operation-method-card {
+            grid-template-columns: 34px minmax(0, 1fr);
+            align-items: center;
+            gap: 11px !important;
+        }
     }
 
     /* Fila mobile que combina [Filtros] [+ Crear partido] arriba del
@@ -2742,16 +2725,44 @@ select.glass-input option {
         gap: 8px;
         width: 100%;
         order: 2;
+        /* Un ítem flex no baja de su ancho mínimo de contenido salvo que se lo
+           permitan: `min-width` arranca en `auto`. Sin esta línea los dos
+           botones sumaban 130 + 165 + 8 = 303px dentro de 262 disponibles y los
+           41 que sobraban se cortaban contra el borde de la tarjeta — la mitad
+           del rótulo «Compactos» quedaba afuera, sin scroll que la alcanzara. */
+        min-width: 0;
     }
 
+    .operation-manage-mobile-row > * {
+        min-width: 0;
+    }
+
+    /* El que cede es el toggle: su segunda línea es un estado («3 activos»,
+       «Compactos»), y un estado se puede abreviar. El CTA no: un botón que
+       dice «Crear par…» no es un botón. */
     .operation-manage-mobile-row .operation-manage-mobile-toggle {
-        flex: 1 1 50%;
+        flex: 1 1 auto;
         min-height: 40px;
         margin: 0;
+        overflow: hidden;
+    }
+
+    .operation-manage-mobile-row .operation-manage-mobile-toggle > span,
+    .operation-manage-mobile-row .operation-manage-mobile-toggle > small {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Sin filtros puestos el botón dice una sola cosa, y `space-between` la deja
+       pegada al borde izquierdo mirando a un CTA centrado. Cuando aparece el
+       contador vuelve solo al reparto de dos extremos. */
+    .operation-manage-mobile-row .operation-manage-mobile-toggle > span:only-child {
+        margin-inline: auto;
     }
 
     .operation-manage-mobile-row .operation-manage-create-mobile {
-        flex: 1 1 50%;
+        flex: 0 1 auto;
         min-height: 40px;
         padding: 0 12px;
         font-size: 12px;
@@ -2764,25 +2775,87 @@ select.glass-input option {
         display: none;
     }
 
-    /* 5) TOOLBAR DE GESTIÓN — sticky bajo el header de la tab, mantiene
-          buscador siempre visible y saca el CTA "Crear partido" del grid
-          colapsado para que sea accesible siempre. */
+    /* 5) TOOLBAR DE GESTIÓN — pegada al flujo, no al viewport.
+
+          Esta regla la fijaba al viewport con `top: header-offset + 4px`, que
+          en escritorio son 184px de cabecera pegajosa. En el teléfono esa
+          cabecera NO se queda: se va con el scroll. El offset quedaba sin nada
+          detrás y la barra terminaba plantada 146px por debajo de su lugar
+          —hueco gris bajo el título del panel, y la primera tarjeta de partido
+          tapada—. Medido a 390px: su sitio era y=604 y aparecía en y=750.
+
+          `operation-console.css` ya la había pasado a `position: static` en el
+          teléfono, con el argumento de que 140px de barra pegada se comen media
+          pantalla justo encima de la lista que se quiere mirar. Esa decisión es
+          la vigente; lo único que la tapaba era el `!important` de acá, que gana
+          por cargar después. Se va el posicionamiento y queda la forma.
+
+          `static` se repite acá —y no sólo en `operation-console.css`— porque
+          aquel corta en 720px y este bloque en 767: sin esta línea, la franja
+          de 721 a 767 se quedaba con el sticky de escritorio. */
     .operation-manage-panel .operation-manage-toolbar {
-        position: sticky !important;
-        top: calc(var(--basalt-header-offset, 116px) + 4px) !important;
-        z-index: 9 !important;
+        position: static;
         gap: 8px !important;
-        padding: 10px !important;
+        padding: 8px !important;
         border-radius: 14px;
     }
 
-    .operation-manage-panel .operation-manage-search {
-        min-height: 42px;
+    /* EL BUSCADOR ES UNA CAJA, NO DOS.
+       -------------------------------------------------------------------
+       Acá se cruzaban dos reglas generales de `tournament-mobile.css`, las dos
+       correctas por separado y las dos equivocadas juntas sobre este control:
+
+       1) `label { display: block !important }` —acierta en los ~40 rótulos de
+          formulario de la consola— aplanaba este label, que no es un rótulo
+          sino la caja del control: la lupa se iba a un renglón propio arriba
+          del campo y la caja pasaba de 44px a 62.
+
+       2) `input { min-height: 44px; padding: 10px 12px; font-size: 16px }`
+          —acierta en un campo suelto— le daba al `<input>` su PROPIA caja de
+          44px con 12px de relleno, adentro de un label que ya tenía 11 de
+          relleno y su propio borde. Dos controles superpuestos: 23px muertos
+          antes de la primera letra del placeholder, y el campo de 44 estirando
+          un label de 46 que dejaba la lupa 14px por encima del centro.
+
+       Se resuelve una sola vez: manda el LABEL —borde, alto y relleno— y el
+       input adentro es sólo texto. Hace falta la cadena larga porque
+       `operation-console.css` fija `align-items: stretch` con tres clases, y a
+       igual `!important` decide la especificidad, no el orden de los archivos.
+
+       El `font-size: 16px` del input SE QUEDA aunque desentone con los 12 del
+       resto de la consola: por debajo de 16, Safari en iOS hace zoom al
+       enfocar el campo y te descoloca la página entera. Es el único número de
+       este archivo que no está elegido por estética. */
+    .basalt-body .operation-console-shell .operation-manage-panel .operation-manage-search {
+        display: flex !important;
+        align-items: center !important;
+        flex-wrap: nowrap;
+        gap: 9px;
+        /* Con `flex-basis: 100%` el 100% se mide contra el contenido del padre,
+           y el relleno propio se suma por afuera si la caja no está en
+           `border-box`: terminaba 21px más ancha que su renglón. */
+        box-sizing: border-box;
+        max-width: 100%;
+        min-width: 0;
+        min-height: 44px;
+        padding: 0 12px;
         border-radius: 10px;
     }
 
-    .operation-manage-panel .operation-manage-search input {
-        font-size: 14px;
+    .basalt-body .operation-console-shell .operation-manage-panel .operation-manage-search > svg {
+        flex: 0 0 auto;
+    }
+
+    .basalt-body .operation-console-shell .operation-manage-panel .operation-manage-search input {
+        flex: 1 1 auto;
+        width: auto !important;
+        min-width: 0;
+        min-height: 0 !important;
+        height: auto !important;
+        padding: 0 !important;
+        border: 0;
+        background: transparent;
+        font-size: 16px !important;
     }
 
     .operation-manage-panel .operation-manage-mobile-toggle {
@@ -2822,6 +2895,19 @@ select.glass-input option {
         gap: 10px;
     }
 
+    /* `min-width` arranca en `auto`, que para un ítem de flex o de grilla
+       significa «no me achiques por debajo de mi contenido». La caja que
+       envuelve la lista de partidos heredaba así un piso de 265px y arrastraba
+       a la sección entera —las 56 filas— fuera de una pantalla de 320: se
+       perdían 28px por la derecha de CADA partido. Con el piso en 0 la lista se
+       acomoda al ancho que hay y adentro cada fila ya sabe repartirse.
+
+       Va sobre `.fixture-round-details` y no sobre la cabecera: probado uno por
+       uno, es el único de la cadena que mueve la medida. */
+    .fixture-round-section .fixture-round-details {
+        min-width: 0;
+    }
+
     .fixture-round-section .fixture-round-title {
         flex: 1 1 100%;
         align-items: center;
@@ -2855,9 +2941,21 @@ select.glass-input option {
         gap: 6px;
     }
 
+    /* 36px es el piso del mouse, no el del dedo. Este archivo carga después de
+       `operation-console.css`, así que a igual especificidad su regla de
+       `pointer: coarse` perdía contra esta y las acciones de jornada se
+       quedaban en 36. El piso táctil se define en un solo lugar; acá sólo se
+       deja de contradecirlo. */
     .fixture-round-section .operation-manage-round-actions .fixture-icon-btn {
-        min-width: 36px;
-        min-height: 36px;
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    @media (pointer: coarse) {
+        .fixture-round-section .operation-manage-round-actions .fixture-icon-btn {
+            min-width: 44px;
+            min-height: 44px;
+        }
     }
 
     /* 7) MATCH CARD — actions ordenadas en 2 filas:

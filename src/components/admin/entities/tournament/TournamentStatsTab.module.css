@@ -1,16 +1,24 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Estadísticas, hablando el idioma de la consola.
+
+   Traía su propio sistema: acento verde #1ed760, tarjetas de 18px de radio con
+   sombras de 40px y dos halos radiales en la cabecera. Igual que en Posiciones,
+   se remapean los tokens en vez de reescribir las reglas: el módulo entero se
+   repinta con la paleta de basalt y toma el tema claro de arriba.
+   ───────────────────────────────────────────────────────────────────────── */
 .page {
-  --stats-bg: #081011;
-  --stats-surface: #121619;
-  --stats-surface-2: #181d21;
-  --stats-border: rgba(255, 255, 255, 0.08);
-  --stats-text: #f5f7fa;
-  --stats-muted: #8b949e;
-  --stats-accent: #1ed760;
-  --stats-accent-soft: rgba(30, 215, 96, 0.14);
-  --stats-accent-soft-2: rgba(30, 215, 96, 0.08);
+  --stats-bg: var(--bg-basalt);
+  --stats-surface: var(--surface-elevated);
+  --stats-surface-2: var(--bg-basalt);
+  --stats-border: var(--border-basalt);
+  --stats-text: var(--text-main);
+  --stats-muted: var(--text-dim);
+  --stats-accent: var(--accent-primary);
+  --stats-accent-soft: color-mix(in srgb, var(--accent-primary) 14%, transparent);
+  --stats-accent-soft-2: color-mix(in srgb, var(--accent-primary) 8%, transparent);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
   color: var(--stats-text);
 }
 
@@ -18,10 +26,10 @@
 .filters,
 .tableSection,
 .vizCard {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)), var(--stats-surface);
+  background: var(--stats-surface);
   border: 1px solid var(--stats-border);
-  border-radius: 18px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+  border-radius: 4px;
+  box-shadow: none;
 }
 
 .header {
@@ -29,10 +37,7 @@
   justify-content: space-between;
   gap: 20px;
   padding: 24px;
-  background:
-    radial-gradient(circle at top right, rgba(30, 215, 96, 0.12), transparent 24%),
-    radial-gradient(circle at left center, rgba(197, 255, 77, 0.06), transparent 28%),
-    var(--stats-bg);
+  background: var(--stats-surface);
 }
 
 .headerText {
@@ -107,7 +112,7 @@
 
 .metaAccent {
   background: var(--stats-accent-soft) !important;
-  border-color: rgba(30, 215, 96, 0.28) !important;
+  border-color: color-mix(in srgb, var(--accent-primary) 28%, transparent) !important;
   color: var(--stats-accent);
 }
 
@@ -135,8 +140,8 @@
 
 .actionPrimary {
   background: var(--stats-accent);
-  color: #06250f;
-  border-color: rgba(30, 215, 96, 0.3);
+  color: #fff;
+  border-color: color-mix(in srgb, var(--accent-primary) 30%, transparent);
 }
 
 .tabs {
@@ -167,12 +172,12 @@
 .tabActive {
   color: var(--stats-text);
   background: var(--stats-accent-soft);
-  border-color: rgba(30, 215, 96, 0.24);
+  border-color: color-mix(in srgb, var(--accent-primary) 24%, transparent);
 }
 
 .filters {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 14px;
   padding: 18px;
 }
@@ -213,8 +218,8 @@
 }
 
 .cardHighlight {
-  border-color: rgba(30, 215, 96, 0.24);
-  box-shadow: inset 0 0 0 1px rgba(30, 215, 96, 0.06);
+  border-color: color-mix(in srgb, var(--accent-primary) 24%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-primary) 6%, transparent);
 }
 
 .cardValue {
@@ -339,7 +344,7 @@
 .chartFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--stats-accent), #c5ff4d);
+  background: var(--stats-accent);
 }
 
 .chartValue {
@@ -412,18 +417,74 @@
   }
 }
 
-/* Basalt tournament console overrides */
+/* ─────────────────────────────────────────────────────────────────────────
+   TELÉFONO — LOS LÍDERES Y LOS FILTROS, DE A DOS
+
+   A 820px todo pasa a una columna, y en el teléfono eso deja las cuatro
+   tarjetas de líderes apiladas: 137px cada una, 548 en total, y tres de las
+   cuatro diciendo «Sin datos». Media pantalla para saber que todavía no hay
+   datos cargados.
+
+   Son cuatro cifras cortas —un nombre y un número—, no cuatro bloques de
+   prosa: entran de a dos y se comparan de un vistazo, que es para lo que está
+   un tablero. Lo mismo los filtros, que son cuatro selectores de una línea.
+
+   La comparativa NO entra acá: son barras con el nombre del club al lado, y en
+   media columna la barra se queda sin recorrido y deja de comparar nada.
+   ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .filters,
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .card {
+    padding: 11px;
+    min-width: 0;
+  }
+
+  .cardValue {
+    font-size: 20px;
+  }
+
+  .field {
+    min-width: 0;
+  }
+
+  /* Abajo de 360 la media columna deja 130px: «Máximo tackleador» se parte en
+     tres renglones y la tarjeta vuelve a crecer. Ahí una por fila. */
+  @media (max-width: 360px) {
+    .filters,
+    .cards {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   SEGUNDO bloque ".page" (y su gemelo de tema claro).
+
+   Igual que en Posiciones, este archivo declara ".page" dos veces. Al ser el
+   último, éste ganaba: volvía a poner "--stats-accent: #00a365" en oscuro y
+   "#047857" en claro, más radios de 24px y degradados verdes en las barras
+   del gráfico. Por eso la comparativa seguía verde aunque el bloque de arriba
+   dijera azul.
+
+   Ahora ambos apuntan a los tokens del shell, así que hay una sola fuente de
+   verdad y el tema claro sale del mismo lugar que el oscuro.
+   ───────────────────────────────────────────────────────────────────────── */
 .page {
-  --stats-bg: #07101a;
-  --stats-surface: rgba(9, 15, 24, 0.86);
-  --stats-surface-2: rgba(12, 21, 32, 0.92);
-  --stats-border: rgba(255, 255, 255, 0.08);
-  --stats-text: #eef4f7;
-  --stats-muted: rgba(228, 236, 241, 0.58);
-  --stats-accent: #00a365;
-  --stats-accent-soft: rgba(0, 163, 101, 0.14);
-  --stats-accent-soft-2: rgba(0, 163, 101, 0.08);
-  gap: 22px;
+  --stats-bg: var(--bg-basalt);
+  --stats-surface: var(--surface-elevated);
+  --stats-surface-2: var(--bg-basalt);
+  --stats-border: var(--border-basalt);
+  --stats-text: var(--text-main);
+  --stats-muted: var(--text-dim);
+  --stats-accent: var(--accent-primary);
+  --stats-accent-soft: color-mix(in srgb, var(--accent-primary) 14%, transparent);
+  --stats-accent-soft-2: color-mix(in srgb, var(--accent-primary) 8%, transparent);
+  gap: 14px;
 }
 
 .header,
@@ -431,12 +492,9 @@
 .tableSection,
 .vizCard,
 .card {
-  border-radius: 24px;
-  background:
-    linear-gradient(135deg, rgba(0, 163, 101, 0.08), transparent 42%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 36%),
-    rgba(9, 15, 24, 0.86);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
+  border-radius: 4px;
+  background: var(--stats-surface);
+  box-shadow: none;
 }
 
 .eyebrow,
@@ -445,7 +503,7 @@
 .cardLabel,
 .sectionMeta span,
 .sortButton {
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
 }
 
 .actionButton,
@@ -454,60 +512,125 @@
 .entityLogo,
 .insights li,
 .chartTrack {
-  border-radius: 14px;
+  border-radius: 2px;
 }
 
+/* Verde sólo para la acción que escribe. Acá no hay ninguna: Estadísticas
+   sólo lee, así que su acción destacada es azul. */
 .actionPrimary {
-  background: linear-gradient(135deg, #00b26f 0%, #008f59 100%);
-  color: #f4fff9;
+  background: color-mix(in srgb, var(--accent-primary) 14%, transparent);
+  border-color: color-mix(in srgb, var(--accent-primary) 42%, transparent);
+  color: var(--stats-text);
 }
 
 .tabActive,
 .metaAccent {
-  color: #d9ffeb;
-  border-color: rgba(0, 214, 136, 0.24);
+  color: var(--stats-text);
+  border-color: color-mix(in srgb, var(--accent-primary) 30%, transparent);
 }
 
 .tabActive {
-  background: rgba(0, 163, 101, 0.12);
+  background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
 }
 
 .chartFill {
-  background: linear-gradient(90deg, #00a365, #00d688);
+  background: var(--accent-primary);
 }
 
-/* Light theme: redefines the scoped tokens declared on .page. */
-:root[data-theme="light"] .page {
-  --stats-bg: #f4f6fb;
-  --stats-surface: #ffffff;
-  --stats-surface-2: #f7f9fc;
-  --stats-border: rgba(15, 23, 42, 0.1);
-  --stats-text: #0f172a;
-  --stats-muted: #475569;
-  --stats-accent: #047857;
-  --stats-accent-soft: rgba(4, 120, 87, 0.14);
-  --stats-accent-soft-2: rgba(4, 120, 87, 0.08);
+/* Normalización final: mismo criterio que en Posiciones. 4px para cajas, 2px
+   para controles, sin vidrio. Una excepción futura tiene que declararse
+   DESPUÉS de este bloque, para que se vea que es una excepción. */
+.page :is(section, article, aside, header, div)[class] {
+  backdrop-filter: none;
 }
 
-:root[data-theme="light"] .header,
-:root[data-theme="light"] .filters,
-:root[data-theme="light"] .tableSection,
-:root[data-theme="light"] .vizCard {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.02), rgba(15, 23, 42, 0.01)), var(--stats-surface);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+.page :is(button, input, select, textarea) {
+  border-radius: 2px;
 }
 
-:root[data-theme="light"] .header {
-  background:
-    radial-gradient(circle at top right, rgba(4, 120, 87, 0.1), transparent 28%),
-    radial-gradient(circle at left center, rgba(13, 83, 126, 0.08), transparent 30%),
-    var(--stats-bg);
+/* ─────────────────────────────────────────────────────────────────────────
+   Vocabulario de panel.
+
+   Las secciones del módulo usaban `<h3>` de 800 con tracking negativo y un
+   párrafo debajo: el mismo patrón de «rótulo + título» que se colapsó en
+   Fixture. Acá el título toma la voz del sistema —mono, versalita, tinta
+   apagada— y el subtítulo queda como apoyo, sin competir.
+   ───────────────────────────────────────────────────────────────────────── */
+.sectionHeader {
+  align-items: center;
+  margin-bottom: 12px;
 }
 
-:root[data-theme="light"] .tabActive {
-  background: rgba(4, 120, 87, 0.12);
+.sectionHeader h3 {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--stats-muted);
 }
 
-:root[data-theme="light"] .chartFill {
-  background: linear-gradient(90deg, #047857, #059669);
+.sectionHeader p {
+  font-size: 11.5px;
+  margin-top: 3px;
+}
+
+/* Las fichas de cabecera hablan la misma escala que las cifras de la barra de
+   operación: rótulo mono arriba, número mono grande y tabular abajo. */
+.cardLabel {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--stats-muted);
+}
+
+.cardValue {
+  font-variant-numeric: tabular-nums;
+}
+
+.card {
+  padding: 12px 14px;
+  gap: 4px;
+  background: var(--stats-surface);
+}
+
+/* Toda cifra comparable en la tabla va en mono tabular: las columnas quedan a
+   plomo aunque un valor pase de 9 a 503. */
+.table td:not(:first-child),
+.table th:not(:first-child) {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.table th:not(:first-child) .sortButton {
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.table th,
+.table td {
+  padding: 9px 12px;
+}
+
+/* El escudo del club, a la escala del sistema. */
+.entityLogo {
+  width: 22px;
+  height: 22px;
+  border-radius: 2px;
+  border-color: var(--stats-border);
+}
+
+/* Las barras del gráfico toman el acento de la consola, no un degradado. */
+.chartTrack {
+  height: 6px;
+  border-radius: 2px;
+  border: 1px solid var(--stats-border);
+  background: var(--stats-bg);
+}
+
+.chartValue {
+  font-variant-numeric: tabular-nums;
+}
+
+.insights li {
+  border-radius: 4px;
 }

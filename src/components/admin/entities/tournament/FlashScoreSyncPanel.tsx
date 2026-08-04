@@ -262,50 +262,57 @@ export function FlashScoreSyncPanel({ tournamentId, data, phaseId, phases }: Pro
 
     if (!isLinked) {
         return (
-            <div className="basalt-card flex flex-col items-center text-center p-12 gap-6">
-                <div className="w-16 h-16 bg-surface-elevated border border-border-basalt flex items-center justify-center rounded-xl">
-                    <Link2 className="text-status-warning" size={32} />
-                </div>
-                <div>
-                    <h2 className="basalt-h1 mb-2">Proveedor externo sin configurar</h2>
-                    <p className="text-dim max-w-md mx-auto text-sm">
-                        Configura <strong>{providerLabel}</strong> en la pestaña <strong>Detalles</strong> para poder sincronizar este torneo.
+            /* Vacío que enseña, con el mismo cuerpo que el resto de Operación:
+               por qué está vacío y el botón que lleva exactamente a llenarlo. */
+            <div className="op-panel">
+                <div className="op-empty">
+                    <span className="op-empty-glyph"><Link2 size={20} /></span>
+                    <h3>Este torneo no tiene proveedor externo</h3>
+                    <p>
+                        Sincronizar trae partidos y posiciones desde {providerLabel}. Para eso hay que
+                        vincular el torneo primero, en la pestaña Detalles.
                     </p>
+                    <div className="op-empty-actions">
+                        <button
+                            className="basalt-btn basalt-btn-accent"
+                            onClick={() => router.push(`/admin/entities/${tournamentId}/manage?type=tournament&tab=detalles`)}
+                        >
+                            <Settings2 size={14} />
+                            Ir a Detalles
+                        </button>
+                    </div>
                 </div>
-                <button
-                    className="basalt-btn basalt-btn-primary"
-                    onClick={() => router.push(`/admin/entities/${tournamentId}/manage?type=tournament&tab=detalles`)}
-                >
-                    <Settings2 size={16} />
-                    Ir a Detalles
-                </button>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col gap-6">
-            <div className="basalt-card p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-accent-primary">{providerLabel}</span>
-                    <h3 className="text-lg font-extrabold tracking-tight mt-0.5">Sincronizacion Externa</h3>
-                    <p className="text-dim text-xs mt-1">{syncProviderSummary}</p>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                    {syncLastSync ? (
-                        <span className="text-[10px] text-dim font-mono">
-                            Ultima sync: {new Date(syncLastSync).toLocaleString()}
+        <div className="flex flex-col gap-3.5">
+            {/* Cabecera de panel, no de página: el rótulo mono es el nombre del
+                módulo y las cifras van a la derecha, como en los otros tres. */}
+            <div className="op-panel">
+                <div className="op-panel-head">
+                    <span className="op-panel-title">{providerLabel}</span>
+                    <div className="op-panel-meta">
+                        <span className={`basalt-badge ${linkStatus === 'synced' ? 'badge-ok' : ''}`}>
+                            <span className="basalt-badge-dot" />
+                            {linkStatus === 'synced' ? 'Sincronizado' : 'Configurado'}
                         </span>
-                    ) : (
-                        <span className="text-[10px] text-dim font-mono">Sin sincronizaciones previas</span>
-                    )}
-                    <span className={`basalt-badge ${linkStatus === 'synced' ? 'badge-ok' : 'badge-info'}`}>
-                        {linkStatus === 'synced' ? 'SINCRONIZADO' : 'CONFIGURADO'}
-                    </span>
+                        <span>
+                            {syncLastSync
+                                ? `Última: ${new Date(syncLastSync).toLocaleString()}`
+                                : 'Sin sincronizaciones previas'}
+                        </span>
+                    </div>
                 </div>
+                {syncProviderSummary ? (
+                    <div className="op-panel-body" style={{ paddingTop: 10, paddingBottom: 10 }}>
+                        <p className="text-dim text-xs m-0">{syncProviderSummary}</p>
+                    </div>
+                ) : null}
             </div>
 
-            <div className="basalt-card p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-wrap">
+            <div className="op-panel op-panel-body flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-wrap">
                 <div className="flex gap-2">
                     <button
                         className={`basalt-btn ${sourceType === 'fixtures' ? 'basalt-btn-primary' : ''}`}
@@ -351,49 +358,69 @@ export function FlashScoreSyncPanel({ tournamentId, data, phaseId, phases }: Pro
                 </button>
             </div>
 
+            {/* Aviso con borde completo y fondo teñido, no con franja lateral:
+                `border-l-4` es el recurso que la consola ya abandonó. */}
             {standingsError && (
-                <div className="basalt-card p-4 border-l-4 border-l-red-500 flex items-start gap-3">
-                    <AlertCircle className="text-red-400 shrink-0 mt-0.5" size={16} />
-                    <span className="text-red-400 text-sm">{standingsError}</span>
+                <div className="op-note is-error">
+                    <span className="op-note-icon"><AlertCircle size={12} /></span>
+                    <span className="op-note-copy"><span>{standingsError}</span></span>
                 </div>
             )}
 
             {view === 'error' && error && (
-                <div className="basalt-card p-6 flex flex-col items-center text-center gap-4">
-                    <AlertCircle className="text-red-400" size={32} />
-                    <p className="text-red-400 text-sm">{error}</p>
-                    <button className="basalt-btn basalt-btn-primary" onClick={handleLoad}>
-                        <RefreshCw size={14} />
-                        Reintentar
-                    </button>
+                <div className="op-panel">
+                    <div className="op-empty">
+                        <span className="op-empty-glyph" style={{ color: '#ef4444' }}>
+                            <AlertCircle size={20} />
+                        </span>
+                        <h3>No se pudo traer los datos del proveedor</h3>
+                        <p>Nada se perdió: es sólo la lectura, así que podés reintentar sin riesgo.</p>
+                        <div className="op-empty-actions">
+                            <button className="basalt-btn basalt-btn-accent" onClick={handleLoad}>
+                                <RefreshCw size={14} />
+                                Reintentar
+                            </button>
+                        </div>
+                        <p className="op-empty-detail">{error}</p>
+                    </div>
                 </div>
             )}
 
             {view === 'done' && syncResult && (
-                <div className="basalt-card p-6 flex flex-col items-center text-center gap-3">
-                    <CheckCircle2 className="text-emerald-400" size={40} />
-                    <h3 className="basalt-h1">
-                        {syncResult.imported} partido{syncResult.imported !== 1 ? 's' : ''} importado{syncResult.imported !== 1 ? 's' : ''}
-                    </h3>
-                    {syncResult.errors.length > 0 && (
-                        <p className="text-red-400 text-xs">{syncResult.errors.join(' · ')}</p>
-                    )}
-                    <p className="text-dim text-sm">Los partidos se agregaron al fixture del torneo.</p>
-                    <button className="basalt-btn basalt-btn-primary" onClick={() => { setView('idle'); setExternalMatches([]); }}>
-                        Nueva sincronizacion
-                    </button>
+                <div className="op-panel">
+                    <div className="op-empty">
+                        <span className="op-empty-glyph" style={{ color: 'var(--accent-success, #10b981)' }}>
+                            <CheckCircle2 size={20} />
+                        </span>
+                        {/* Era un `basalt-h1` — el segundo <h1> de la página. */}
+                        <h3>
+                            {syncResult.imported} partido{syncResult.imported !== 1 ? 's' : ''} importado{syncResult.imported !== 1 ? 's' : ''}
+                        </h3>
+                        <p>Se agregaron al fixture del torneo, en la fase seleccionada.</p>
+                        {syncResult.errors.length > 0 && (
+                            <p className="op-empty-detail" style={{ color: '#fca5a5' }}>{syncResult.errors.join(' · ')}</p>
+                        )}
+                        <div className="op-empty-actions">
+                            <button className="basalt-btn basalt-btn-accent" onClick={() => { setView('idle'); setExternalMatches([]); }}>
+                                Nueva sincronización
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 
             {view === 'standings' && standings && (
-                <div className="basalt-card p-5">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="basalt-h2 flex items-center gap-2"><Trophy size={16} /> Tabla de posiciones ({providerLabel})</h3>
-                        <button className="basalt-btn text-xs" onClick={() => setView('preview')}>
-                            Volver al fixture
-                        </button>
+                <div className="op-panel">
+                    <div className="op-panel-head">
+                        <span className="op-panel-title">Posiciones del proveedor</span>
+                        <div className="op-panel-meta">
+                            <span>{standings.length} equipos</span>
+                            <button className="basalt-btn" onClick={() => setView('preview')}>
+                                Volver al fixture
+                            </button>
+                        </div>
                     </div>
-                    <div className="overflow-x-auto">
+                    <div className="op-panel-body overflow-x-auto">
                         <table className="w-full text-xs font-mono">
                             <thead>
                                 <tr className="border-b border-border-basalt text-dim text-[10px] uppercase tracking-wider">

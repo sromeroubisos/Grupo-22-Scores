@@ -1,50 +1,61 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     AlertCircle,
     BarChart3,
     Calendar,
-    Check,
     ChevronDown,
-    Link2,
     RefreshCw,
     Settings2,
     Trophy,
-    X,
 } from 'lucide-react';
 import { Database } from '@/lib/database.types';
 import { FixtureProvider, useFixture } from './FixtureContext';
+import type { PhaseWithRounds } from '@/lib/types/fixture';
 import { CIRCUIT_GLOBAL_SENTINEL } from './standings/types';
 import { isCircuitRuleset } from '@/lib/utils/tournamentFormat';
+import { buildPhaseFigures, computePhaseStats } from './phaseFigures';
 import './basalt.css';
-import { useAnimatedDisclosure } from './useAnimatedDisclosure';
+import './operation-console.css';
 
 // Dynamic imports for sub-tabs to optimize bundle size and prevent background data fetching
 const TournamentStandingsTab = dynamic(() => import('./standings/TournamentStandingsTab'), {
-    loading: () => <TabLoading placeholder="Cargando posiciones..." />,
+    loading: () => <PanelSkeleton rows={6} />,
 });
 
 const TournamentStatsTab = dynamic(() => import('./TournamentStatsTab').then(mod => mod.TournamentStatsTab), {
-    loading: () => <TabLoading placeholder="Cargando estadísticas..." />,
-});
-
-const FlashScoreSyncPanel = dynamic(() => import('./FlashScoreSyncPanel').then(mod => mod.FlashScoreSyncPanel), {
-    loading: () => <TabLoading placeholder="Cargando sincronización..." />,
+    loading: () => <PanelSkeleton rows={5} />,
 });
 
 const TournamentOperationFixtureWorkspace = dynamic(() => import('./TournamentOperationFixtureWorkspace').then(mod => mod.TournamentOperationFixtureWorkspace), {
-    loading: () => <TabLoading placeholder="Cargando fixture..." />,
+    loading: () => <PanelSkeleton rows={6} />,
 });
 
-// Reusable loading component for tabs
-function TabLoading({ placeholder }: { placeholder: string }) {
+/**
+ * Esqueleto con la forma de lo que viene, no un spinner centrado. El armazón
+ * ya está en pantalla: lo único que falta son los datos, así que se dibujan
+ * los huecos que van a ocupar y la página no salta cuando llegan.
+ */
+function PanelSkeleton({ rows = 5 }: { rows?: number }) {
     return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-            <RefreshCw className="animate-spin text-blue-500 opacity-20" size={32} />
-            <p className="text-dim text-xs font-mono opacity-50">{placeholder}</p>
+        <div className="op-panel" aria-busy="true" aria-live="polite">
+            <div className="op-panel-head">
+                <span className="op-skeleton" style={{ width: 120 }} />
+            </div>
+            <div className="op-panel-body is-flush">
+                {Array.from({ length: rows }).map((_, index) => (
+                    <div className="op-match-row" key={index}>
+                        <span className="op-skeleton" style={{ width: 92 }} />
+                        <span className="op-skeleton op-skeleton-crest" />
+                        <span className="op-skeleton" style={{ flex: 1 }} />
+                        <span className="op-skeleton" style={{ width: 52 }} />
+                    </div>
+                ))}
+            </div>
+            <span className="sr-only">Cargando…</span>
         </div>
     );
 }
@@ -57,22 +68,10 @@ interface TournamentOperationTabProps {
     initialSubtab?: string | null;
 }
 
-interface RawPhase {
-    id: string;
-    tournament_id: string;
-    name: string;
-    phase_type: string;
-    order_index: number;
-    is_active: boolean;
-    settings?: Record<string, unknown>;
-    created_at: string;
-}
-
 const OPERATION_SUB_TABS = [
-    { id: 'fixture', label: 'Fixture', icon: Calendar, description: 'Cruces, fechas y partidos' },
-    { id: 'tabla', label: 'Posiciones', icon: Trophy, description: 'Tabla, criterios y recalculo' },
-    { id: 'estadisticas', label: 'Estadisticas', icon: BarChart3, description: 'Metricas e insights de rendimiento' },
-    { id: 'sincronizacion', label: 'Sincronizacion', icon: Link2, description: 'Integraciones y sincronias externas' },
+    { id: 'fixture', label: 'Fixture', icon: Calendar },
+    { id: 'tabla', label: 'Posiciones', icon: Trophy },
+    { id: 'estadisticas', label: 'Estadísticas', icon: BarChart3 },
 ];
 
 const OPERATION_SUB_TAB_IDS = new Set(OPERATION_SUB_TABS.map((tab) => tab.id));
@@ -87,75 +86,117 @@ export function TournamentOperationTab({ id, data, initialSubtab }: TournamentOp
         searchParams.get('seasonId') ||
         searchParams.get('season_id') ||
         searchParams.get('season');
-    const [phases, setPhases] = useState<RawPhase[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    return (
+        <FixtureProvider tournamentId={id} initialFixture={null} seasonId={currentSeasonId}>
+            <OperationGate id={id} data={data} initialSubtab={initialSubtab} />
+        </FixtureProvider>
+    );
+}
+
+// /fixture es la fuente ÚNICA de phases en Operación (elimina el GET /phases redundante;
+// /phases sigue vivo para Estructura, Participantes, etc.). Vive dentro del provider para
+// leer el fixture y gatear la UI sin flash del empty-state.
+function OperationGate({ id, data, initialSubtab }: TournamentOperationTabProps) {
+    const { fixture, fixtureError, refreshFixture } = useFixture();
     const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
 
-    const loadPhases = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const query = new URLSearchParams();
-            if (currentSeasonId) query.set('seasonId', currentSeasonId);
-            const res = await fetch(`/api/tournaments/${id}/phases${query.size ? `?${query.toString()}` : ''}`, {
-                cache: 'no-store',
-            });
-
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.error || `HTTP ${res.status}`);
-            }
-
-            const json = await res.json();
-            const fetchedPhases: RawPhase[] = json.data || [];
-
-            setPhases(fetchedPhases);
-            setSelectedPhaseId((currentPhaseId) => {
-                if (currentPhaseId && (
-                    currentPhaseId === CIRCUIT_GLOBAL_SENTINEL ||
-                    fetchedPhases.some((phase) => phase.id === currentPhaseId)
-                )) {
-                    return currentPhaseId;
-                }
-                const active = fetchedPhases.find((phase) => phase.is_active);
-                return active?.id || fetchedPhases[0]?.id || null;
-            });
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error loading phases');
-        } finally {
-            setLoading(false);
-        }
-    }, [currentSeasonId, id]);
-
+    // Auto-fetch UNA sola vez por mount. NO dependemos del timing de isLoadingFixture/
+    // fixtureError: FixtureContext.refreshFixture retorna sin setear fixtureError en el
+    // branch isAbortLikeError (FixtureContext.tsx:260-262), así que un gate basado en esos
+    // flags podría re-disparar en loop. El ref "ya intenté" es loop-proof; el reintento
+    // manual vive en el botón del estado de error.
+    const autoFetchedRef = useRef(false);
     useEffect(() => {
-        loadPhases();
-    }, [id, loadPhases]);
+        if (fixture) return;
+        if (!autoFetchedRef.current) {
+            autoFetchedRef.current = true;
+            refreshFixture();
+        }
 
-    if (loading) {
+        // Soltar el pestillo si el efecto se limpia antes de que llegue la
+        // respuesta. Sin esto la pestaña quedaba PERMANENTEMENTE en el
+        // esqueleto durante el desarrollo: StrictMode monta, desmonta y vuelve
+        // a montar; el desmontaje hace que FixtureProvider aborte la petición
+        // en vuelo, el branch de abort de refreshFixture retorna sin setear
+        // fixtureError —así que no hay estado de error del que reintentar— y
+        // el pestillo ya marcado impedía el segundo intento.
+        //
+        // Sigue siendo a prueba de loops: el efecto sólo se vuelve a ejecutar
+        // si cambian `fixture` o `refreshFixture`, no cuando una petición
+        // falla. Un fallo real deja `fixtureError` y su botón de reintento.
+        return () => {
+            if (!fixture) autoFetchedRef.current = false;
+        };
+    }, [fixture, refreshFixture]);
+
+    const phases = useMemo<PhaseWithRounds[]>(() => fixture?.phases ?? [], [fixture?.phases]);
+
+    // Preselección: preserva una selección previa válida (incl. sentinel de circuito);
+    // sólo cae al default (fase activa que ya calcula el server, si no la primera) cuando
+    // no hay una válida. Nunca pisa una selección válida.
+    useEffect(() => {
+        if (phases.length === 0) return;
+        setSelectedPhaseId((prev) => {
+            if (prev && (prev === CIRCUIT_GLOBAL_SENTINEL || phases.some((phase) => phase.id === prev))) {
+                return prev;
+            }
+            return fixture?.currentPhaseId ?? phases[0]?.id ?? null;
+        });
+    }, [phases, fixture?.currentPhaseId]);
+
+    if (fixtureError) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-                <RefreshCw className="animate-spin text-blue-500" size={32} />
-                <p className="text-dim text-sm font-mono">Cargando consola operativa...</p>
+            <div className="operation-console-shell">
+                <div className="op-stage">
+                    <div className="op-panel">
+                        <div className="op-empty">
+                            <span className="op-empty-glyph" style={{ color: '#ef4444' }}>
+                                <AlertCircle size={20} />
+                            </span>
+                            <h3>No se pudo cargar el fixture</h3>
+                            <p>
+                                La consola no pudo leer las fases del torneo. Nada se perdió: es sólo la
+                                lectura, así que podés reintentar sin riesgo.
+                            </p>
+                            <div className="op-empty-actions">
+                                <button className="basalt-btn basalt-btn-accent" onClick={() => refreshFixture()}>
+                                    <RefreshCw size={14} />
+                                    Reintentar
+                                </button>
+                            </div>
+                            <p className="op-empty-detail">{fixtureError}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
 
-    if (error) {
+    // Mientras /fixture está en vuelo (o antes de dispararse) fixture es null → esqueleto.
+    // NoStructureMessage se evalúa DESPUÉS: sólo aparece con el fixture ya cargado y sin
+    // fases, así que no flashea antes de que lleguen los datos.
+    if (!fixture) {
         return (
-            <div className="basalt-card flex flex-col items-center text-center p-12 gap-6">
-                <div className="w-16 h-16 bg-red-500/10 border border-red-500/30 flex items-center justify-center rounded-xl">
-                    <AlertCircle className="text-red-400" size={32} />
+            <div className="operation-console-shell">
+                <div className="op-bar">
+                    <span className="op-phase-select" aria-hidden="true">
+                        <span className="op-phase-select-label">Fase</span>
+                        <span className="op-skeleton" style={{ width: 78 }} />
+                    </span>
+                    <div className="op-bar-figures">
+                        <span className="op-fig">
+                            <span className="op-fig-key">Partidos</span>
+                            <span className="op-skeleton" style={{ width: 34 }} />
+                        </span>
+                        <span className="op-fig">
+                            <span className="op-fig-key">Equipos</span>
+                            <span className="op-skeleton" style={{ width: 18 }} />
+                        </span>
+                    </div>
                 </div>
-                <div>
-                    <h2 className="basalt-h1 mb-2">Error al cargar fases</h2>
-                    <p className="text-dim max-w-md mx-auto text-sm">{error}</p>
+                <div className="op-stage">
+                    <PanelSkeleton rows={6} />
                 </div>
-                <button className="basalt-btn basalt-btn-primary" onClick={loadPhases}>
-                    <RefreshCw size={16} />
-                    Reintentar
-                </button>
             </div>
         );
     }
@@ -165,29 +206,14 @@ export function TournamentOperationTab({ id, data, initialSubtab }: TournamentOp
     }
 
     return (
-        <FixtureProvider tournamentId={id} initialFixture={null} seasonId={currentSeasonId}>
-            <OperationContent
-                id={id}
-                data={data}
-                phases={phases}
-                selectedPhaseId={selectedPhaseId}
-                onSelectPhase={setSelectedPhaseId}
-                initialSubtab={initialSubtab}
-            />
-        </FixtureProvider>
-    );
-}
-
-function GlobalOnlyPlaceholder({ label }: { label: string }) {
-    return (
-        <div className="basalt-card flex flex-col items-center text-center p-12 gap-4 opacity-60">
-            <Trophy className="text-dim" size={28} />
-            <p className="text-dim text-sm">
-                <strong>{label}</strong> no está disponible en la vista de Tabla Global (Circuito).
-                <br />
-                Selecciona una fase específica para acceder a este módulo.
-            </p>
-        </div>
+        <OperationContent
+            id={id}
+            data={data}
+            phases={phases}
+            selectedPhaseId={selectedPhaseId}
+            onSelectPhase={setSelectedPhaseId}
+            initialSubtab={initialSubtab}
+        />
     );
 }
 
@@ -195,24 +221,30 @@ function NoStructureMessage({ id }: { id: string }) {
     const router = useRouter();
 
     return (
-        <div className="basalt-card basalt-hero flex flex-col items-center text-center p-12 gap-6">
-            <div className="w-16 h-16 bg-surface-elevated border border-border-basalt flex items-center justify-center rounded-xl mb-2">
-                <AlertCircle className="text-status-warning" size={32} />
+        <div className="operation-console-shell">
+            <div className="op-stage">
+                <div className="op-panel">
+                    <div className="op-empty">
+                        <span className="op-empty-glyph">
+                            <Settings2 size={20} />
+                        </span>
+                        <h3>Este torneo todavía no tiene fases</h3>
+                        <p>
+                            Operación trabaja sobre una fase: el fixture, la tabla y las estadísticas
+                            cuelgan de ella. Definí al menos una en Estructura y volvé.
+                        </p>
+                        <div className="op-empty-actions">
+                            <button
+                                className="basalt-btn basalt-btn-accent"
+                                onClick={() => router.push(`/admin/entities/${id}/manage?type=tournament&tab=estructura`)}
+                            >
+                                <Settings2 size={14} />
+                                Ir a Estructura
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div>
-                <h2 className="basalt-h1 mb-2">Sin estructura operativa</h2>
-                <p className="text-dim max-w-md mx-auto">
-                    Este torneo aun no tiene fases configuradas. Debes definir la estructura de fases antes de poder gestionar
-                    el fixture o ver las posiciones.
-                </p>
-            </div>
-            <button
-                className="basalt-btn basalt-btn-primary"
-                onClick={() => router.push(`/admin/entities/${id}/manage?type=tournament&tab=estructura`)}
-            >
-                <Settings2 size={16} />
-                Configurar estructura
-            </button>
         </div>
     );
 }
@@ -220,7 +252,7 @@ function NoStructureMessage({ id }: { id: string }) {
 interface OperationContentProps {
     id: string;
     data: TournamentRow;
-    phases: RawPhase[];
+    phases: PhaseWithRounds[];
     selectedPhaseId: string | null;
     onSelectPhase: (phaseId: string) => void;
     initialSubtab?: string | null;
@@ -235,12 +267,6 @@ function OperationContent({
     initialSubtab,
 }: OperationContentProps) {
     const searchParams = useSearchParams();
-    const { fixture, refreshFixture } = useFixture();
-    const [mobilePhasePickerOpen, setMobilePhasePickerOpen] = useState(false);
-    const [mobileSubtabPickerOpen, setMobileSubtabPickerOpen] = useState(false);
-    const subtabSheet = useAnimatedDisclosure(mobileSubtabPickerOpen, 180);
-    const phaseSheet = useAnimatedDisclosure(mobilePhasePickerOpen, 180);
-
     const currentSubTab = normalizeOperationSubTab(searchParams.get('subtab') || initialSubtab);
     const [optimisticSubTab, setOptimisticSubTab] = useState(currentSubTab);
 
@@ -267,12 +293,6 @@ function OperationContent({
         replaceSubTabUrl(currentSubTab);
     }, [currentSubTab, replaceSubTabUrl]);
 
-    useEffect(() => {
-        if (!fixture) {
-            refreshFixture();
-        }
-    }, [fixture, refreshFixture]);
-
     const isCircuit = useMemo(() => isCircuitRuleset(data.ruleset), [data.ruleset]);
     const isGlobalSelected = selectedPhaseId === CIRCUIT_GLOBAL_SENTINEL;
 
@@ -280,14 +300,13 @@ function OperationContent({
         return phases.find((phase) => phase.id === selectedPhaseId) || null;
     }, [phases, selectedPhaseId]);
 
-    const activeSubTab = useMemo(
-        () => OPERATION_SUB_TABS.find((tab) => tab.id === optimisticSubTab) || OPERATION_SUB_TABS[0],
-        [optimisticSubTab],
-    );
+    // Las cifras se DERIVAN del fixture en memoria: no hay contador guardado que
+    // pueda desincronizarse con la realidad.
+    const figures = useMemo(() => (isGlobalSelected ? [] : buildPhaseFigures(selectedPhase)), [isGlobalSelected, selectedPhase]);
+    const stats = useMemo(() => computePhaseStats(selectedPhase), [selectedPhase]);
 
     const switchSubTab = useCallback((subTabId: string) => {
         if (subTabId === optimisticSubTab) return;
-        setMobileSubtabPickerOpen(false);
         setOptimisticSubTab(subTabId);
         replaceSubTabUrl(subTabId);
     }, [optimisticSubTab, replaceSubTabUrl]);
@@ -299,352 +318,126 @@ function OperationContent({
         }
     }, [currentSubTab, isGlobalSelected, switchSubTab]);
 
-    const selectPhaseAndClose = (phaseId: string) => {
-        setMobilePhasePickerOpen(false);
-        onSelectPhase(phaseId);
-    };
+    const phaseStateLabel = isGlobalSelected
+        ? 'Circuito'
+        : selectedPhase?.isActive
+            ? 'Activa'
+            : 'Pendiente';
+    const phaseStateClass = isGlobalSelected
+        ? ''
+        : selectedPhase?.isActive
+            ? 'badge-ok'
+            : 'badge-draft';
 
     return (
-        <div className="operation-console-shell flex flex-col gap-6 animate-in fade-in duration-500">
-            {/* Mobile-only redesigned overview. Hidden on desktop via CSS.
-                Replaces the verbose "OPERACION DE TORNEO" context card with a
-                compact summary + quick subtab segmented control. */}
-            <section className="tournament-operation-mobile" aria-label="Operacion del torneo">
-                <article className="tsm-card tsm-card-state">
-                    <div className="tsm-card-eyebrow">Fase activa</div>
-                    <div className="tsm-state-row">
-                        <strong className="tsm-state-status" style={{ fontSize: 18, letterSpacing: 0 }}>
-                            {isGlobalSelected ? 'Tabla Global' : selectedPhase?.name || 'Sin fase'}
-                        </strong>
-                        <span className={`tsm-state-pill ${isGlobalSelected || selectedPhase?.is_active ? 'is-public' : 'is-internal'}`}>
-                            {isGlobalSelected ? 'Global' : selectedPhase?.is_active ? 'Activa' : 'Pendiente'}
-                        </span>
-                    </div>
-                    <div className="tsm-state-meta">
-                        <span>{isGlobalSelected ? 'Circuito' : selectedPhase?.phase_type || '--'}</span>
-                        <span aria-hidden="true">·</span>
-                        <span>Submodulo: {activeSubTab.label}</span>
-                    </div>
-                    <button
-                        type="button"
-                        className="tsm-next-cta"
-                        onClick={() => setMobilePhasePickerOpen(true)}
-                        style={{ marginTop: 12 }}
-                    >
-                        Cambiar fase
-                    </button>
-                </article>
-
-                <article className="tsm-card" style={{ padding: 6 }}>
-                    <div role="tablist" aria-label="Submodulo" className="tsm-segments">
-                        {OPERATION_SUB_TABS.map((tab) => {
-                            const Icon = tab.icon;
-                            const isActive = optimisticSubTab === tab.id;
-                            return (
-                                <button
-                                    key={tab.id}
-                                    type="button"
-                                    role="tab"
-                                    aria-selected={isActive}
-                                    className={`tsm-segment ${isActive ? 'active' : ''}`}
-                                    onClick={() => switchSubTab(tab.id)}
-                                >
-                                    <Icon size={15} aria-hidden="true" />
-                                    <span>{tab.label}</span>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </article>
-            </section>
-
-            <div className="basalt-card operation-context-card p-4 sm:p-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-l-4 border-l-accent-primary bg-gradient-to-r from-surface-basalt to-transparent">
-                <div className="flex flex-col gap-2 min-w-0">
-                    <span className="text-[10px] font-bold text-accent-primary uppercase tracking-widest">Contexto competitivo</span>
-                    <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="text-lg sm:text-xl font-extrabold tracking-tight">OPERACION DE TORNEO</h2>
-                        <span className="operation-context-id px-2 py-0.5 rounded bg-surface-elevated border border-border-basalt text-[10px] font-mono text-dim">
-                            ID: {id.slice(0, 8)}
-                        </span>
-                    </div>
-                    <p className="operation-context-copy text-sm text-dim">
-                        Cambia de fase y submodulo sin perder el contexto operativo del torneo.
-                    </p>
-                </div>
-
-                <div className="operation-context-desktop flex flex-col sm:flex-row items-stretch sm:items-end gap-3 w-full lg:w-auto">
-                    <div className="flex flex-col gap-1 w-full sm:w-72">
-                        <label className="text-[10px] font-semibold text-dim uppercase">Fase seleccionada</label>
-                        <select
-                            className="basalt-input"
-                            value={selectedPhaseId || ''}
-                            onChange={(event) => onSelectPhase(event.target.value)}
-                        >
-                            {isCircuit && (
-                                <option value={CIRCUIT_GLOBAL_SENTINEL}>
-                                    Tabla Global (Circuito)
-                                </option>
-                            )}
-                            {phases.map((phase) => (
-                                <option key={phase.id} value={phase.id}>
-                                    {phase.name} ({phase.phase_type})
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex items-center gap-2 sm:self-end">
-                        <div className="flex flex-col items-start sm:items-end">
-                            <span className="text-[10px] font-semibold text-dim uppercase">Estado</span>
-                            <span className={`basalt-badge ${isGlobalSelected ? 'badge-ok' : selectedPhase?.is_active ? 'badge-ok' : 'badge-warning'}`}>
-                                {isGlobalSelected ? 'GLOBAL' : selectedPhase?.is_active ? 'ACTIVA' : 'PENDIENTE'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="operation-mobile-pickers">
-                <div className="operation-mobile-pickers-head">
-                    <span className="basalt-tabs-mobile-label">Navegacion rapida</span>
-                    <span className="operation-mobile-pickers-status">
-                        {isGlobalSelected ? 'Tabla global' : selectedPhase?.is_active ? 'Fase activa' : 'Fase pendiente'}
+        <div className="operation-console-shell animate-in fade-in duration-300">
+            {/* Barra de operación: la fase, su estado y sus cifras vivas. Reemplaza a
+                la tarjeta de contexto, que repetía el nombre del torneo (ya está en el
+                header) y explicaba con una frase lo que el usuario estaba mirando. */}
+            <div className="op-bar">
+                <span className="op-phase-select">
+                    <span className="op-phase-select-label">Fase</span>
+                    <span>
+                        {isGlobalSelected ? 'Tabla Global' : (selectedPhase?.name || 'Sin fase')}
                     </span>
-                </div>
-
-                <div className="operation-mobile-picker-grid">
-                    <button
-                        type="button"
-                        className="operation-mobile-trigger"
-                        onClick={() => setMobileSubtabPickerOpen(true)}
-                        aria-haspopup="dialog"
-                        aria-expanded={mobileSubtabPickerOpen}
+                    <ChevronDown size={12} aria-hidden="true" />
+                    <select
+                        aria-label="Fase seleccionada"
+                        value={selectedPhaseId || ''}
+                        onChange={(event) => onSelectPhase(event.target.value)}
                     >
-                        <span className="operation-mobile-trigger-copy">
-                            <span className="operation-mobile-trigger-label">Submodulo</span>
-                            <span className="operation-mobile-trigger-value">{activeSubTab.label}</span>
-                            <small>{activeSubTab.description}</small>
-                        </span>
-                        <ChevronDown size={16} className="operation-mobile-trigger-icon" />
-                    </button>
+                        {isCircuit && (
+                            <option value={CIRCUIT_GLOBAL_SENTINEL}>Tabla Global (Circuito)</option>
+                        )}
+                        {phases.map((phase) => (
+                            <option key={phase.id} value={phase.id}>
+                                {phase.name}
+                            </option>
+                        ))}
+                    </select>
+                </span>
 
-                    <button
-                        type="button"
-                        className="operation-mobile-trigger"
-                        onClick={() => setMobilePhasePickerOpen(true)}
-                        aria-haspopup="dialog"
-                        aria-expanded={mobilePhasePickerOpen}
-                    >
-                        <span className="operation-mobile-trigger-copy">
-                            <span className="operation-mobile-trigger-label">Fase</span>
-                            <span className="operation-mobile-trigger-value">
-                                {isGlobalSelected ? 'Tabla Global' : selectedPhase?.name || 'Sin fase'}
+                <span className={`basalt-badge ${phaseStateClass}`}>
+                    <span className="basalt-badge-dot" />
+                    {phaseStateLabel}
+                </span>
+
+                {figures.length > 0 && (
+                    <div className="op-bar-figures">
+                        {figures.map((figure) => (
+                            <span
+                                key={figure.key}
+                                className={`op-fig ${figure.attention ? 'is-attention' : ''}`}
+                            >
+                                <span className="op-fig-key">{figure.label}</span>
+                                <b>{figure.value}</b>
                             </span>
-                            <small>{isGlobalSelected ? 'circuito' : selectedPhase?.phase_type || 'manual'}</small>
-                        </span>
-                        <ChevronDown size={16} className="operation-mobile-trigger-icon" />
-                    </button>
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
-            <div className="operation-subtabs-bar">
+            <div className="op-subrail" role="tablist" aria-label="Submódulos de operación">
                 {OPERATION_SUB_TABS.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = optimisticSubTab === tab.id;
+                    // En Tabla Global sólo Posiciones tiene sentido: el resto se
+                    // deshabilita de verdad, en vez de dejar entrar a un cartel.
+                    const disabled = isGlobalSelected && tab.id !== 'tabla';
+                    const count = tab.id === 'fixture' && !isGlobalSelected ? stats.totalMatches : null;
 
                     return (
                         <button
                             key={tab.id}
                             type="button"
+                            role="tab"
                             onClick={() => switchSubTab(tab.id)}
-                            className={`operation-subtab ${isActive ? 'active' : ''}`}
-                            aria-current={currentSubTab === tab.id ? 'page' : undefined}
+                            className={`op-subtab ${isActive ? 'is-active' : ''}`}
+                            aria-selected={isActive}
+                            disabled={disabled}
+                            title={disabled ? 'Elegí una fase para habilitarlo' : tab.label}
                         >
-                            <Icon size={15} />
+                            <Icon size={14} aria-hidden="true" />
                             <span>{tab.label}</span>
+                            {count !== null && count > 0 && (
+                                <span className="op-subtab-count">{count}</span>
+                            )}
                         </button>
                     );
                 })}
             </div>
 
-            <div className="min-h-[500px]">
-                {optimisticSubTab === 'fixture' && (
-                    isGlobalSelected ? (
-                        <GlobalOnlyPlaceholder label="Fixture" />
-                    ) : (
-                        <TournamentOperationFixtureWorkspace
-                            tournament={data}
-                            selectedPhaseId={selectedPhaseId}
-                            onSelectPhase={onSelectPhase}
-                        />
-                    )
+            <div className="op-stage">
+                {isGlobalSelected && (
+                    <div className="op-note is-info">
+                        <span className="op-note-icon"><Trophy size={12} /></span>
+                        <span className="op-note-copy">
+                            <strong>La Tabla Global suma todas las etapas del circuito</strong>
+                            <span>
+                                Fixture y Estadísticas trabajan sobre una etapa concreta:
+                                elegila arriba para habilitarlas.
+                            </span>
+                        </span>
+                    </div>
+                )}
+
+                {optimisticSubTab === 'fixture' && !isGlobalSelected && (
+                    <TournamentOperationFixtureWorkspace
+                        tournament={data}
+                        selectedPhaseId={selectedPhaseId}
+                        onSelectPhase={onSelectPhase}
+                    />
                 )}
                 {optimisticSubTab === 'tabla' && (
                     <TournamentStandingsTab
                         tournamentId={id}
                         preferredPhaseId={selectedPhaseId}
-                        onPhaseChange={onSelectPhase}
                     />
                 )}
-                {optimisticSubTab === 'estadisticas' && (
-                    isGlobalSelected ? (
-                        <GlobalOnlyPlaceholder label="Estadísticas" />
-                    ) : (
-                        <TournamentStatsTab id={id} data={data} phaseId={selectedPhaseId || undefined} />
-                    )
-                )}
-                {optimisticSubTab === 'sincronizacion' && (
-                    isGlobalSelected ? (
-                        <GlobalOnlyPlaceholder label="Sincronización" />
-                    ) : (
-                        <FlashScoreSyncPanel
-                            tournamentId={id}
-                            data={data}
-                            phaseId={selectedPhaseId}
-                            phases={phases.map((phase) => ({ id: phase.id, name: phase.name }))}
-                        />
-                    )
+                {optimisticSubTab === 'estadisticas' && !isGlobalSelected && (
+                    <TournamentStatsTab id={id} data={data} phaseId={selectedPhaseId || undefined} />
                 )}
             </div>
-
-            {subtabSheet.shouldRender && (
-                <>
-                    <button
-                        type="button"
-                        className={`basalt-sheet-backdrop ${subtabSheet.isVisible ? 'is-open' : ''}`}
-                        onClick={() => setMobileSubtabPickerOpen(false)}
-                        aria-label="Cerrar selector de submodulo"
-                    />
-                    <div
-                        className={`basalt-tabs-sheet operation-mobile-sheet ${subtabSheet.isVisible ? 'is-open' : ''}`}
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label="Seleccionar submodulo"
-                    >
-                        <div className="basalt-tabs-sheet-handle" />
-                        <div className="basalt-tabs-sheet-header">
-                            <div>
-                                <span className="basalt-tabs-sheet-kicker">Operacion de torneo</span>
-                                <strong className="basalt-tabs-sheet-title">Elegir submodulo</strong>
-                            </div>
-                            <button
-                                type="button"
-                                className="basalt-tabs-sheet-close"
-                                onClick={() => setMobileSubtabPickerOpen(false)}
-                                aria-label="Cerrar"
-                            >
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        <div className="basalt-tabs-sheet-list">
-                            {OPERATION_SUB_TABS.map((tab) => {
-                                const Icon = tab.icon;
-                                const isActive = optimisticSubTab === tab.id;
-
-                                return (
-                                    <button
-                                        key={tab.id}
-                                        type="button"
-                                        className={`basalt-tabs-sheet-item ${isActive ? 'active' : ''}`}
-                                        onClick={() => switchSubTab(tab.id)}
-                                    >
-                                        <span className="basalt-tabs-sheet-item-copy">
-                                            <span className="basalt-tabs-sheet-item-glyph">
-                                                <Icon size={16} />
-                                            </span>
-                                            <span className="basalt-tabs-sheet-item-text">
-                                                <span>{tab.label}</span>
-                                                <small>{tab.description}</small>
-                                            </span>
-                                        </span>
-                                        {isActive ? <span className="basalt-tabs-sheet-badge">Actual</span> : null}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </>
-            )}
-
-            {phaseSheet.shouldRender && (
-                <>
-                    <button
-                        type="button"
-                        className={`basalt-sheet-backdrop ${phaseSheet.isVisible ? 'is-open' : ''}`}
-                        onClick={() => setMobilePhasePickerOpen(false)}
-                        aria-label="Cerrar selector de fase"
-                    />
-                    <div
-                        className={`basalt-tabs-sheet operation-mobile-sheet ${phaseSheet.isVisible ? 'is-open' : ''}`}
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label="Seleccionar fase"
-                    >
-                        <div className="basalt-tabs-sheet-handle" />
-                        <div className="basalt-tabs-sheet-header">
-                            <div>
-                                <span className="basalt-tabs-sheet-kicker">Operacion de torneo</span>
-                                <strong className="basalt-tabs-sheet-title">Elegir fase</strong>
-                            </div>
-                            <button
-                                type="button"
-                                className="basalt-tabs-sheet-close"
-                                onClick={() => setMobilePhasePickerOpen(false)}
-                                aria-label="Cerrar"
-                            >
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        <div className="basalt-tabs-sheet-list">
-                            {isCircuit && (
-                                <button
-                                    type="button"
-                                    className={`basalt-tabs-sheet-item ${isGlobalSelected ? 'active' : ''}`}
-                                    onClick={() => selectPhaseAndClose(CIRCUIT_GLOBAL_SENTINEL)}
-                                >
-                                    <span className="basalt-tabs-sheet-item-copy">
-                                        <span className="basalt-tabs-sheet-item-glyph">
-                                            <Check size={16} className={isGlobalSelected ? '' : 'opacity-0'} />
-                                        </span>
-                                        <span className="basalt-tabs-sheet-item-text">
-                                            <span>Tabla Global (Circuito)</span>
-                                            <small>Posiciones acumuladas del circuito</small>
-                                        </span>
-                                    </span>
-                                    {isGlobalSelected ? <span className="basalt-tabs-sheet-badge">Actual</span> : null}
-                                </button>
-                            )}
-                            {phases.map((phase) => {
-                                const isActive = selectedPhaseId === phase.id;
-
-                                return (
-                                    <button
-                                        key={phase.id}
-                                        type="button"
-                                        className={`basalt-tabs-sheet-item ${isActive ? 'active' : ''}`}
-                                        onClick={() => selectPhaseAndClose(phase.id)}
-                                    >
-                                        <span className="basalt-tabs-sheet-item-copy">
-                                            <span className="basalt-tabs-sheet-item-glyph">
-                                                <Check size={16} className={isActive ? '' : 'opacity-0'} />
-                                            </span>
-                                            <span className="basalt-tabs-sheet-item-text">
-                                                <span>{phase.name}</span>
-                                                <small>
-                                                    {phase.phase_type} · {phase.is_active ? 'Activa' : 'Pendiente'}
-                                                </small>
-                                            </span>
-                                        </span>
-                                        {isActive ? <span className="basalt-tabs-sheet-badge">Actual</span> : null}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </>
-            )}
         </div>
     );
 }

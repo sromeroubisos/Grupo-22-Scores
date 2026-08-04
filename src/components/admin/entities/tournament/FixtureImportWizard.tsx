@@ -3,6 +3,7 @@
 import { startTransition, useMemo, useState } from 'react';
 import { AlertTriangle, CheckCircle2, FileUp, RefreshCw, Upload, X } from 'lucide-react';
 import { useFixture } from './FixtureContext';
+import './operation-console.css';
 import type {
   FixtureColumnMapping,
   FixtureDuplicateAction,
@@ -32,6 +33,24 @@ const MAPPING_FIELDS: Array<{ key: keyof FixtureColumnMapping; label: string }> 
   { key: 'score', label: 'Resultado' },
 ];
 
+/**
+ * Lee un campo del editor de una fila respetando el «lo dejé vacío a propósito».
+ *
+ * `overrides.roundId || matched.round?.id || ''` —que era lo que había— hace que
+ * un `null` guardado a propósito caiga de nuevo en el match automático: si la
+ * fila venía enganchada a una jornada, elegir «crear una nueva» rebotaba al
+ * valor anterior y el campo parecía trabado. Con `in` se distingue «el usuario
+ * lo tocó y lo dejó vacío» de «nunca lo tocó».
+ */
+function fieldValue(
+  overrides: Record<string, unknown>,
+  key: string,
+  automatic: string | undefined,
+): string {
+  if (key in overrides) return (overrides[key] as string | null) ?? '';
+  return automatic ?? '';
+}
+
 const STATUS_LABELS: Record<FixtureImportPreviewRow['status'], string> = {
   valid: 'Valida',
   warning: 'Con advertencias',
@@ -55,6 +74,7 @@ export function FixtureImportWizard({
   const { previewFixtureImport, confirmFixtureImport } = useFixture();
   const [mode, setMode] = useState<'file' | 'text'>('file');
   const [file, setFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [pastedText, setPastedText] = useState('');
   const [preview, setPreview] = useState<FixtureImportPreviewResult | null>(null);
   const [mapping, setMapping] = useState<FixtureColumnMapping>({});
@@ -69,6 +89,32 @@ export function FixtureImportWizard({
       omitted: rows.filter((row) => row.action === 'omit').length,
     };
   }, [rows]);
+
+  // Cuántas líneas trae el texto pegado. Es la única señal que se puede dar
+  // ANTES de analizar: sin esto pegás un WhatsApp y no sabés si el asistente
+  // está viendo 12 partidos o uno solo mal cortado.
+  const pastedLines = useMemo(
+    () => pastedText.split('\n').map((line) => line.trim()).filter(Boolean).length,
+    [pastedText],
+  );
+
+  const ACCEPTED_EXTENSIONS = '.csv,.xlsx,.xls,.pdf,.png,.jpg,.jpeg,.webp';
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+    const dropped = event.dataTransfer.files?.[0];
+    if (dropped) {
+      setFile(dropped);
+      setFeedback(null);
+    }
+  };
 
   const runPreview = async (nextMapping?: FixtureColumnMapping) => {
     setIsPreviewing(true);
@@ -144,107 +190,207 @@ export function FixtureImportWizard({
   };
 
   return (
-    <section className="fixture-panel-shell fixture-glass">
-      <div className="fixture-panel-header">
-        <div>
-          <span className="fixture-kicker">Importar Fixture</span>
-          <h3>Deteccion, validacion y confirmacion</h3>
-          <p className="fixture-panel-copy">Ningun archivo crea partidos automaticamente. Todo pasa por preview y aprobacion. Formato sugerido: Jornada 1 - 19/03/2026 - Equipo A vs Equipo B - 16:30 - Cancha 1.</p>
-        </div>
-        <div className="fixture-panel-actions">
-          <button className="fixture-icon-btn" onClick={onBack} title="Cerrar" type="button">
+    <section className="op-panel op-import-panel">
+      {/* La cabecera tenía tres títulos para una sola caja —rótulo, un <h3>
+          que decía «Deteccion, validacion y confirmacion» y un párrafo que
+          volvía a contar los cuatro pasos que el riel de arriba ya dibuja—, y
+          adentro de ese párrafo, escondido al final, el dato más útil de la
+          pantalla: qué forma tiene que tener cada línea.
+
+          Queda el rótulo, que es lo que la consola usa como título de panel. El
+          resto se reparte donde sirve: la garantía de que nada se escribe solo
+          va como aviso (es lo que te deja probar sin miedo) y el formato baja
+          junto a la zona donde pegás o soltás el archivo, que es el momento en
+          que lo necesitás. */}
+      <div className="op-panel-head">
+        <span className="op-panel-title">Importar fixture</span>
+        <div className="op-panel-actions">
+          <button className="op-import-close" onClick={onBack} aria-label="Cerrar el importador" type="button">
             <X size={15} />
           </button>
         </div>
       </div>
 
-      <div className="fixture-confirm-grid">
-        <button className={`strategy-card ${mode === 'file' ? 'active' : ''}`} onClick={() => setMode('file')} type="button">
-          <Upload size={22} />
-          <strong>Archivo</strong>
-          <span>Excel, CSV, PDF o imagen</span>
+      <div className="op-panel-body op-import-body">
+        <div className="op-note is-info">
+          <span className="op-note-icon"><CheckCircle2 size={12} /></span>
+          <span className="op-note-copy">
+            <strong>Nada se crea hasta que vos lo apruebes</strong>
+            <span>Analizar sólo lee la fuente y arma un preview fila por fila. Los partidos se escriben recién en el paso 4, y podés omitir las filas que quieras.</span>
+          </span>
+        </div>
+
+      {/* Selector de fuente. Las clases `strategy-card` y `upload-drop-area`
+          NUNCA tuvieron CSS en el proyecto, así que hasta acá el paso se
+          renderizaba sin estilo: la etiqueta pegada a su descripción
+          («ArchivoEXCEL, CSV, PDF O IMAGEN»), los íconos sueltos y nada que
+          pareciera clicable. Ahora hablan el vocabulario de la consola. */}
+      <div className="op-import-sources" role="radiogroup" aria-label="Fuente a importar">
+        <button
+          className={`op-import-source ${mode === 'file' ? 'is-active' : ''}`}
+          onClick={() => setMode('file')}
+          type="button"
+          role="radio"
+          aria-checked={mode === 'file'}
+        >
+          <span className="op-import-source-icon"><Upload size={18} /></span>
+          <span className="op-import-source-copy">
+            {/* Decía «Excel, CSV, PDF o imagen» como si los cuatro fueran lo
+                mismo. No lo son: `parseFile` sólo tiene lector para Excel y CSV
+                (XLSX.read); PDF e imagen caen al return de abajo, que devuelve
+                CERO filas y el aviso «quedan en revisión obligatoria hasta
+                integrar OCR». Subir un PDF y recibir un preview vacío con una
+                advertencia críptica era la parte más confusa del asistente. Se
+                siguen aceptando —el flujo los banca como revisión manual— pero
+                la etiqueta ya no promete lo que el código no hace. */}
+            <strong>Archivo</strong>
+            <small>Excel o CSV · el PDF y las imágenes todavía no se leen solos</small>
+          </span>
         </button>
-        <button className={`strategy-card ${mode === 'text' ? 'active' : ''}`} onClick={() => setMode('text')} type="button">
-          <FileUp size={22} />
-          <strong>Texto pegado</strong>
-          <span>WhatsApp, web o documento</span>
+        <button
+          className={`op-import-source ${mode === 'text' ? 'is-active' : ''}`}
+          onClick={() => setMode('text')}
+          type="button"
+          role="radio"
+          aria-checked={mode === 'text'}
+        >
+          <span className="op-import-source-icon"><FileUp size={18} /></span>
+          <span className="op-import-source-copy">
+            <strong>Texto pegado</strong>
+            <small>WhatsApp, web o documento</small>
+          </span>
         </button>
       </div>
 
       {mode === 'file' ? (
-        <div className="fixture-upload-zone">
+        <div className="op-import-drop-wrap">
           <input
             type="file"
             id="smart-fixture-import"
             hidden
-            accept=".csv,.xlsx,.xls,.pdf,.png,.jpg,.jpeg,.webp"
-            onChange={(event) => setFile(event.target.files?.[0] || null)}
+            accept={ACCEPTED_EXTENSIONS}
+            onChange={(event) => {
+              setFile(event.target.files?.[0] || null);
+              setFeedback(null);
+            }}
           />
-          <label htmlFor="smart-fixture-import" className="upload-drop-area">
-            <FileUp size={32} />
-            <span>{file ? file.name : 'Selecciona una fuente para analizar'}</span>
-            <em>Excel, CSV, PDF, imagenes y mas</em>
-          </label>
+
+          {file ? (
+            /* Con el archivo elegido, la zona deja de pedir y pasa a confirmar
+               QUÉ se va a analizar: nombre, peso y cómo sacarlo. Antes sólo
+               cambiaba el texto por el nombre del archivo, sin forma de
+               deshacer salvo volver a abrir el explorador. */
+            <div className="op-import-file">
+              <span className="op-import-file-icon"><CheckCircle2 size={18} /></span>
+              <span className="op-import-file-copy">
+                <strong>{file.name}</strong>
+                <small>{formatFileSize(file.size)} · listo para analizar</small>
+              </span>
+              <button
+                type="button"
+                className="basalt-btn"
+                onClick={() => setFile(null)}
+              >
+                Quitar
+              </button>
+              <label htmlFor="smart-fixture-import" className="basalt-btn">
+                Cambiar
+              </label>
+            </div>
+          ) : (
+            /* Arrastrar y soltar: es el gesto natural para traer una planilla y
+               el asistente no lo aceptaba — sólo abría el explorador. El
+               <label> sigue funcionando con teclado y click. */
+            <label
+              htmlFor="smart-fixture-import"
+              className={`op-import-drop ${isDragging ? 'is-dragging' : ''}`}
+              onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }}
+              onDragEnter={(event) => { event.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+            >
+              <FileUp size={26} aria-hidden="true" />
+              <strong>{isDragging ? 'Soltá el archivo acá' : 'Arrastrá el archivo o hacé click'}</strong>
+              <small>Una planilla por vez. Con .xlsx, .xls o .csv se leen las filas solas; un .pdf o una foto entran igual, pero hay que cargarlos a mano.</small>
+            </label>
+          )}
         </div>
       ) : (
-        <div className="editor-field">
-          <label>Texto fuente</label>
+        <label className="op-field">
+          <span>
+            Texto fuente
+            {pastedLines > 0 ? (
+              <span className="op-import-lines">{pastedLines} {pastedLines === 1 ? 'línea' : 'líneas'}</span>
+            ) : null}
+          </span>
           <textarea
-            className="glass-input"
             rows={6}
             value={pastedText}
             onChange={(event) => setPastedText(event.target.value)}
             placeholder={'Jornada 1 - 19/03/2026 - Jockey Club vs Tala RC - 16:30 - Cancha 1\nJornada 1 - 19/03/2026 - CRAI vs Estudiantes - 18:00 - Cancha 2'}
-            style={{ minHeight: 140 }}
           />
-        </div>
+        </label>
       )}
 
-      <div className="fixture-panel-footer">
-        <button className="btn-secondary" onClick={onBack} type="button">
+      {/* El formato esperado estaba enterrado al final del párrafo de la
+          cabecera. Es el dato que decide si la importación sale bien o te
+          devuelve 40 filas en rojo, así que va acá, en mono, pegado al campo
+          donde tenés que producirlo. */}
+      <p className="op-import-format">
+        <span>Formato por línea</span>
+        <code>Jornada 1 - 19/03/2026 - Equipo A vs Equipo B - 16:30 - Cancha 1</code>
+      </p>
+
+      <div className="op-import-foot">
+        <button className="basalt-btn" onClick={onBack} type="button">
           Volver
         </button>
+        {/* Azul, no verde. En esta consola el verde es la acción que ESCRIBE, y
+            analizar no escribe nada: lee la fuente y arma el preview. El único
+            verde del asistente es «Confirmar importación», que es el que crea
+            los partidos — así se ve de un vistazo cuál de los dos botones es el
+            que no tiene vuelta atrás. */}
         <button
-          className="btn-primary"
+          className="basalt-btn basalt-btn-accent"
           onClick={() => runPreview()}
           disabled={isPreviewing || (mode === 'file' ? !file : !pastedText.trim())}
           type="button"
         >
           {isPreviewing ? <RefreshCw className="spin" size={16} /> : <Upload size={16} />}
-          <span>{isPreviewing ? 'Analizando...' : 'Analizar fuente'}</span>
+          <span>{isPreviewing ? 'Analizando…' : 'Analizar fuente'}</span>
         </button>
       </div>
 
       {feedback ? (
-        <div className="fixture-warning-callout">
-          <AlertTriangle size={18} />
-          <p>{feedback}</p>
+        <div className="op-note is-warning">
+          <span className="op-note-icon"><AlertTriangle size={12} /></span>
+          <span className="op-note-copy"><span>{feedback}</span></span>
         </div>
       ) : null}
 
       {preview ? (
         <>
-          <div className="fixture-confirm-grid">
-            <div className="preview-stat">
+          <div className="op-import-stats">
+            <div className="op-import-stat">
               <span>Tipo detectado</span>
               <strong>{preview.summary.sourceType}</strong>
             </div>
-            <div className="preview-stat">
+            <div className="op-import-stat">
               <span>Documento</span>
               <strong>{preview.summary.documentType}</strong>
             </div>
-            <div className="preview-stat">
+            <div className="op-import-stat">
               <span>Confianza</span>
               <strong>{preview.summary.confidence}</strong>
             </div>
-            <div className="preview-stat">
+            <div className="op-import-stat">
               <span>Partidos detectados</span>
               <strong>{preview.summary.totalRows}</strong>
             </div>
           </div>
 
           {preview.mapping.headers.length > 0 ? (
-            <div className="fixture-wizard-grid" style={{ marginTop: 12 }}>
+            <div className="fixture-wizard-grid op-import-mapping-grid">
               {MAPPING_FIELDS.map((field) => (
                 <div className="editor-field" key={field.key}>
                   <label>{field.label}</label>
@@ -262,8 +408,8 @@ export function FixtureImportWizard({
                   </select>
                 </div>
               ))}
-              <div className="fixture-panel-footer" style={{ gridColumn: '1 / -1', paddingTop: 0 }}>
-                <button className="btn-secondary" onClick={() => runPreview(mapping)} disabled={isPreviewing} type="button">
+              <div className="op-import-foot op-import-mapping-foot">
+                <button className="basalt-btn" onClick={() => runPreview(mapping)} disabled={isPreviewing} type="button">
                   {isPreviewing ? <RefreshCw className="spin" size={16} /> : <RefreshCw size={16} />}
                   <span>Reanalizar con mapeo</span>
                 </button>
@@ -271,43 +417,48 @@ export function FixtureImportWizard({
             </div>
           ) : null}
 
-          <div className="fixture-confirm-grid" style={{ marginTop: 12 }}>
-            <div className="preview-stat">
+          <div className="op-import-stats">
+            <div className="op-import-stat">
               <span>Filas aprobadas</span>
               <strong>{metrics.approved}</strong>
             </div>
-            <div className="preview-stat">
+            <div className="op-import-stat">
               <span>Filas omitidas</span>
               <strong>{metrics.omitted}</strong>
             </div>
-            <div className="preview-stat">
+            <div className="op-import-stat">
               <span>Con advertencias</span>
               <strong>{preview.summary.warningRows}</strong>
             </div>
-            <div className="preview-stat">
+            <div className="op-import-stat">
               <span>Con errores</span>
               <strong>{preview.summary.errorRows}</strong>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gap: 12, marginTop: 16, maxHeight: 480, overflow: 'auto' }}>
+          {/* Los estilos de estas filas estaban INLINE (padding, radio de 18px,
+              borde rgba fijo, alto máximo de 480). Un estilo inline gana sobre
+              cualquier hoja y no lo alcanza ningún media query, así que la lista
+              del preview era la única parte del asistente imposible de adaptar a
+              un teléfono. Ahora son clases. */}
+          <div className="op-import-preview-list">
             {rows.map((row) => (
-              <article key={row.previewId} className="fixture-glass" style={{ padding: 16, borderRadius: 18, border: '1px solid rgba(255,255,255,.08)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
-                  <div>
+              <article key={row.previewId} className="op-import-preview-row">
+                <div className="op-import-preview-head">
+                  <div className="op-import-preview-title">
                     <strong>{row.sourceLabel}</strong>
-                    <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>{STATUS_LABELS[row.status]}</div>
+                    <span>{STATUS_LABELS[row.status]}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div className="op-import-preview-actions">
                     <button
-                      className={`fixture-view-btn ${row.action === 'approve' ? 'active' : ''}`}
+                      className={`basalt-btn ${row.action === 'approve' ? 'basalt-btn-primary' : ''}`}
                       onClick={() => updateRow(row.previewId, { action: 'approve' })}
                       type="button"
                     >
                       Aprobar
                     </button>
                     <button
-                      className={`fixture-view-btn ${row.action === 'omit' ? 'active' : ''}`}
+                      className={`basalt-btn ${row.action === 'omit' ? 'basalt-btn-accent' : ''}`}
                       onClick={() => updateRow(row.previewId, { action: 'omit' })}
                       type="button"
                     >
@@ -316,7 +467,7 @@ export function FixtureImportWizard({
                   </div>
                 </div>
 
-                <div className="fixture-wizard-grid" style={{ marginTop: 12 }}>
+                <div className="fixture-wizard-grid op-import-preview-grid">
                   <div className="editor-field">
                     <label>Local</label>
                     <select
@@ -374,36 +525,73 @@ export function FixtureImportWizard({
                       onChange={(event) => updateRow(row.previewId, { overrides: { venue: event.target.value || null } })}
                     />
                   </div>
-                  <div className="editor-field">
-                    <label>Fecha / Round</label>
-                    <select
-                      className="glass-input"
-                      value={(row.overrides.roundId as string) || row.matched.round?.id || ''}
-                      onChange={(event) => updateRow(row.previewId, { overrides: { roundId: event.target.value || null } })}
-                    >
-                      <option value="">Crear/usar etiqueta libre</option>
-                      {preview.referenceData.rounds.map((round) => (
-                        <option key={round.id} value={round.id}>
-                          {round.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="editor-field">
-                    <label>Etiqueta de jornada</label>
-                    <input
-                      type="text"
-                      className="glass-input"
-                      value={String(row.overrides.round || row.normalized.round || '')}
-                      onChange={(event) => updateRow(row.previewId, { overrides: { round: event.target.value || null } })}
-                      placeholder="Fecha 1"
-                    />
-                  </div>
+                  {/* La jornada era DOS campos —«Fecha / Round» y «Etiqueta de
+                      jornada»— con nombres que se leen igual, y el desplegable
+                      caía en «Crear/usar etiqueta libre», que suena a «no
+                      entendí». No es eso: son dos cosas distintas, y la que
+                      confunde es la que no se estaba diciendo.
+
+                      El desplegable ENGANCHA con una jornada que ya existe en
+                      la fase. La etiqueta CREA una. Cuando el texto dice
+                      «Jornada 1» y la fase todavía no tiene jornadas, la
+                      detección funcionó perfecto —por eso la etiqueta dice
+                      «Fecha 1»— y lo único que falta es crearla al confirmar.
+
+                      Ahora es un solo bloque que dice qué va a pasar. */}
+                  {(() => {
+                    const boundRoundId = fieldValue(row.overrides, 'roundId', row.matched.round?.id);
+                    const roundLabel = fieldValue(row.overrides, 'round', row.normalized.round ?? undefined);
+                    const phaseRounds = preview.referenceData.rounds;
+
+                    return (
+                      <div className="editor-field op-import-round">
+                        <label>Jornada</label>
+                        <select
+                          className="glass-input"
+                          value={boundRoundId}
+                          onChange={(event) => updateRow(row.previewId, { overrides: { roundId: event.target.value || null } })}
+                        >
+                          <option value="">
+                            {roundLabel ? `Crear «${roundLabel}»` : 'Sin jornada'}
+                          </option>
+                          {phaseRounds.map((round) => (
+                            <option key={round.id} value={round.id}>
+                              {round.label}
+                            </option>
+                          ))}
+                        </select>
+
+                        {/* La etiqueta sólo tiene sentido cuando se va a crear:
+                            al lado de una jornada ya elegida es un campo muerto
+                            que invita a escribir algo que no se usa. */}
+                        {!boundRoundId ? (
+                          <input
+                            type="text"
+                            className="glass-input"
+                            value={roundLabel}
+                            onChange={(event) => updateRow(row.previewId, { overrides: { round: event.target.value || null } })}
+                            placeholder="Fecha 1"
+                            aria-label="Nombre de la jornada a crear"
+                          />
+                        ) : null}
+
+                        <small className="op-import-round-hint">
+                          {boundRoundId
+                            ? 'Se engancha con una jornada que ya existe en la fase.'
+                            : roundLabel
+                              ? phaseRounds.length
+                                ? `Detectada en el texto. No coincide con ninguna de las ${phaseRounds.length} de la fase, así que se crea al confirmar.`
+                                : 'Detectada en el texto. La fase todavía no tiene jornadas: esta se crea al confirmar.'
+                              : 'El texto no decía la jornada. Escribila acá o dejá el partido suelto.'}
+                        </small>
+                      </div>
+                    );
+                  })()}
                   <div className="editor-field">
                     <label>Grupo</label>
                     <select
                       className="glass-input"
-                      value={(row.overrides.groupId as string) || row.matched.group?.id || ''}
+                      value={fieldValue(row.overrides, 'groupId', row.matched.group?.id)}
                       onChange={(event) => updateRow(row.previewId, { overrides: { groupId: event.target.value || null } })}
                     >
                       <option value="">Sin grupo</option>
@@ -429,9 +617,9 @@ export function FixtureImportWizard({
                 </div>
 
                 {row.issues.length ? (
-                  <div style={{ display: 'grid', gap: 6, marginTop: 12 }}>
+                  <div className="op-import-preview-issues">
                     {row.issues.map((issue) => (
-                      <div key={`${row.previewId}-${issue.code}-${issue.message}`} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, opacity: 0.85 }}>
+                      <div key={`${row.previewId}-${issue.code}-${issue.message}`} className="op-import-preview-issue">
                         {issue.severity === 'error' ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
                         <span>{issue.message}</span>
                       </div>
@@ -442,20 +630,26 @@ export function FixtureImportWizard({
             ))}
           </div>
 
-          <div className="fixture-panel-footer">
-            <button className="btn-secondary" onClick={() => setRows((current) => current.map((row) => ({ ...row, action: 'omit' })))} type="button">
+          <div className="op-import-foot">
+            <button className="basalt-btn" onClick={() => setRows((current) => current.map((row) => ({ ...row, action: 'omit' })))} type="button">
               Omitir todo
             </button>
-            <button className="btn-secondary" onClick={() => setRows((current) => current.map((row) => ({ ...row, action: 'approve' })))} type="button">
+            <button className="basalt-btn" onClick={() => setRows((current) => current.map((row) => ({ ...row, action: 'approve' })))} type="button">
               Aprobar todo lo visible
             </button>
-            <button className="btn-primary" onClick={handleConfirm} disabled={isConfirming || !rows.length} type="button">
+            {/* El único verde del asistente: es el paso que escribe. */}
+            <button className="basalt-btn basalt-btn-primary" onClick={handleConfirm} disabled={isConfirming || !rows.length} type="button">
               {isConfirming ? <RefreshCw className="spin" size={16} /> : <CheckCircle2 size={16} />}
-              <span>{isConfirming ? 'Importando...' : 'Confirmar importacion'}</span>
+              <span>
+                {isConfirming
+                  ? 'Importando…'
+                  : `Confirmar ${metrics.approved} ${metrics.approved === 1 ? 'partido' : 'partidos'}`}
+              </span>
             </button>
           </div>
         </>
       ) : null}
+      </div>
     </section>
   );
 }

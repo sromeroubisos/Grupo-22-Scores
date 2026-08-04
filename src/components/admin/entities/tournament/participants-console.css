@@ -1,0 +1,1046 @@
+/* ==========================================================================
+ * PARTICIPANTES — el cuerpo hablando el idioma de la barra
+ *
+ * La pestaña venía del sistema "Flash UI": tarjetas de 12px, título propio a
+ * 2.5rem, una hairline verde decorativa arriba de cada placa y un boton primario
+ * verde que no era el verde de Guardar. Al lado de la barra —esquinas de 2px,
+ * rótulos mono en versalita, botones de 36px en mayúscula, acento azul y verde
+ * reservado a UNA acción— parecían dos productos distintos pegados.
+ *
+ * Este archivo es el vocabulario nuevo del cuerpo de escritorio (`pc-*`), y no
+ * inventa tokens: sale entero de basalt.css, así que el tema claro y el foco ya
+ * vienen resueltos. Las tres cosas que sí se declaran acá son las tintas de
+ * estado, porque `--status-warning`/`--status-error` del shell son colores de
+ * PUNTO (halo sobre placa oscura) y no de TEXTO: el ámbar #f59e0b sobre la placa
+ * clara mide 2.15:1.
+ *
+ * La vista mobile (`tsm-*`, <=767px) no se toca: vive en su propio archivo y su
+ * propio árbol.
+ * ========================================================================== */
+
+.pc-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    /* La consola no tiene ancho máximo y este monitor da casi 2000px útiles: sin
+       techo, la tabla repartía 400px de vacío entre el nombre de un equipo y su
+       estado. Un plantel se lee mejor en una columna de trabajo que en una tira
+       de pared a pared. */
+    max-width: 1560px;
+
+    /* Tintas de estado: legibles como TEXTO en las dos placas. */
+    --pc-ok: #34d399;
+    --pc-warn: #fbbf24;
+    --pc-idle: #94a3b8;
+    --pc-bad: #f87171;
+    --pc-accent-ink: #93c5fd;
+
+    --pc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root[data-theme="light"] .pc-shell {
+    --pc-ok: #047857;
+    --pc-warn: #b45309;
+    --pc-idle: #475569;
+    --pc-bad: #b91c1c;
+    --pc-accent-ink: #065f46;
+}
+
+/* ── Barra de comando ──────────────────────────────────────────────────────
+   Reemplaza la cabecera-tarjeta (un título repetido + un contador suelto que
+   ocupaba 100px de alto para decir un número) y la fila de cinco selects. El
+   recuento vive arriba a la izquierda, las acciones a la derecha, y los filtros
+   en un riel hundido debajo: una sola pieza en vez de dos tarjetas apiladas. */
+
+.pc-bar {
+    border: 1px solid var(--border-basalt);
+    border-radius: 4px;
+    background: var(--surface-elevated);
+    min-width: 0;
+}
+
+.pc-bar-top {
+    display: flex;
+    align-items: center;
+    gap: 12px 18px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+}
+
+.pc-count {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.pc-count-value {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+}
+
+.pc-count-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+/* Los contadores de estado ERAN adorno y el filtro de estado ERA un select
+   aparte: el mismo dato dos veces, una sin poder tocarse y otra sin decir
+   cuántos. Acá el número es el filtro. */
+.pc-flags {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.pc-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 30px;
+    padding: 0 10px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 2px;
+    background: var(--bg-basalt);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 160ms var(--pc-ease), background 160ms var(--pc-ease), color 160ms var(--pc-ease);
+}
+
+.pc-flag:hover {
+    border-color: color-mix(in srgb, var(--text-dim) 55%, transparent);
+    color: var(--text-main);
+}
+
+.pc-flag[aria-pressed="true"] {
+    border-color: color-mix(in srgb, var(--accent-primary) 48%, transparent);
+    background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+    color: var(--text-main);
+}
+
+.pc-flag-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--pc-idle);
+    flex: 0 0 auto;
+}
+
+.pc-flag.is-active .pc-flag-dot { background: var(--pc-ok); }
+.pc-flag.is-pending .pc-flag-dot { background: var(--pc-warn); }
+.pc-flag.is-inactive .pc-flag-dot { background: var(--pc-idle); }
+.pc-flag.is-disqualified .pc-flag-dot { background: var(--pc-bad); }
+
+.pc-flag-count {
+    color: var(--text-main);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.pc-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+/* ── Riel de filtros ─────────────────────────────────────────────────────── */
+
+.pc-bar-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    border-top: 1px solid var(--border-basalt);
+    background: var(--bg-basalt);
+    border-radius: 0 0 3px 3px;
+}
+
+.pc-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1 1 280px;
+    min-width: 200px;
+    /* Sin techo, en un monitor ancho el buscador se comía 1100px para una línea
+       de texto. */
+    max-width: 420px;
+}
+
+.pc-search > svg {
+    position: absolute;
+    left: 11px;
+    color: var(--text-dim);
+    pointer-events: none;
+}
+
+.pc-search input {
+    width: 100%;
+    height: 36px;
+    padding: 0 34px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 2px;
+    background: var(--surface-elevated);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    font-size: 12.5px;
+    outline: none;
+    transition: border-color 160ms var(--pc-ease);
+}
+
+.pc-search input::placeholder {
+    color: var(--text-dim);
+}
+
+.pc-search input:hover {
+    border-color: color-mix(in srgb, var(--text-dim) 45%, transparent);
+}
+
+.pc-search input:focus {
+    border-color: var(--accent-primary);
+}
+
+.pc-search-clear {
+    position: absolute;
+    right: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+}
+
+.pc-search-clear:hover {
+    background: var(--basalt-overlay-soft);
+    color: var(--text-main);
+}
+
+.pc-select {
+    height: 36px;
+    flex: 0 1 190px;
+    min-width: 150px;
+    padding: 0 30px 0 11px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 2px;
+    background-color: var(--surface-elevated);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238794a6' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    color: var(--text-main);
+    font-family: var(--font-main);
+    font-size: 12.5px;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 160ms var(--pc-ease);
+}
+
+.pc-select:hover {
+    border-color: color-mix(in srgb, var(--text-dim) 45%, transparent);
+}
+
+.pc-select:focus {
+    border-color: var(--accent-primary);
+}
+
+/* La lista desplegada la pinta el sistema: sin esto queda blanca sobre el
+   tema oscuro en Windows. */
+.pc-select option {
+    background: var(--surface-elevated);
+    color: var(--text-main);
+}
+
+.pc-clear {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 160ms var(--pc-ease), border-color 160ms var(--pc-ease);
+}
+
+.pc-clear:hover {
+    border-color: var(--border-basalt);
+    color: var(--text-main);
+}
+
+/* ── Tablero de fases ─────────────────────────────────────────────────────
+   Antes cada equipo era una fila de 700px con el nombre repetido abajo en
+   chico y una × perdida en el extremo derecho. Ahora las fases son columnas
+   que se reparten el ancho y cada equipo entra en 30px. */
+
+.pc-panel {
+    border: 1px solid var(--border-basalt);
+    border-radius: 4px;
+    background: var(--surface-elevated);
+    min-width: 0;
+}
+
+.pc-panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 13px 16px;
+}
+
+.pc-panel-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.pc-panel-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.pc-panel-hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+    max-width: 68ch;
+}
+
+.pc-panel-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 30px;
+    padding: 0 10px;
+    flex: 0 0 auto;
+    border: 1px solid var(--border-basalt);
+    border-radius: 2px;
+    background: var(--bg-basalt);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 160ms var(--pc-ease), border-color 160ms var(--pc-ease);
+}
+
+.pc-panel-toggle:hover {
+    border-color: color-mix(in srgb, var(--text-dim) 55%, transparent);
+    color: var(--text-main);
+}
+
+.pc-panel-toggle svg {
+    transition: transform 200ms var(--pc-ease);
+}
+
+.pc-panel-toggle[aria-expanded="false"] svg {
+    transform: rotate(-180deg);
+}
+
+/* Las columnas se reparten el ancho —si no, el panel queda con media placa
+   vacía— pero el CONTENIDO de cada una tiene techo: una lista de nombres no
+   necesita 800px, y con `1fr` a secas el recuento de la fase terminaba a media
+   pantalla del nombre que contaba. */
+.pc-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    border-top: 1px solid var(--border-basalt);
+    background: var(--surface-elevated);
+}
+
+.pc-phase > * {
+    width: 100%;
+    max-width: 420px;
+}
+
+.pc-phase {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 13px 16px 16px;
+    border-right: 1px solid var(--border-basalt);
+    background: var(--surface-elevated);
+    min-width: 0;
+}
+
+.pc-phase:last-child {
+    border-right: 0;
+}
+
+.pc-phase-head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+}
+
+.pc-phase-index {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    flex: 0 0 auto;
+}
+
+.pc-phase-name {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.pc-phase-count {
+    margin-left: auto;
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+.pc-phase-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.pc-phase-group-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border-basalt);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.pc-phase-group-label strong {
+    font-weight: 600;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pc-phase-group-label span {
+    margin-left: auto;
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+}
+
+.pc-roster {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-width: 0;
+}
+
+.pc-roster-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 30px;
+    padding: 0 2px;
+    border-radius: 2px;
+    min-width: 0;
+    transition: background 140ms var(--pc-ease);
+}
+
+.pc-roster-item:hover,
+.pc-roster-item:focus-within {
+    background: var(--basalt-overlay-soft);
+}
+
+.pc-crest {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+    border: 1px solid var(--border-basalt);
+    border-radius: 2px;
+    background: var(--bg-basalt);
+    color: var(--text-dim);
+    overflow: hidden;
+}
+
+.pc-crest img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 2px;
+}
+
+.pc-roster-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 12.5px;
+    color: var(--text-main);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pc-roster-code {
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+}
+
+/* Invisible hasta que el puntero o el foco llegan a la fila: 8 equipos son 8
+   cruces compitiendo con los nombres. Sigue en el DOM y sigue tabulable. */
+.pc-roster-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 auto;
+    border: 0;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 140ms var(--pc-ease), color 140ms var(--pc-ease), background 140ms var(--pc-ease);
+}
+
+.pc-roster-item:hover .pc-roster-remove,
+.pc-roster-remove:focus-visible {
+    opacity: 1;
+}
+
+.pc-roster-remove:hover {
+    background: color-mix(in srgb, var(--pc-bad) 16%, transparent);
+    color: var(--pc-bad);
+}
+
+.pc-roster-empty {
+    padding: 8px 0;
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+/* ── Tabla ────────────────────────────────────────────────────────────────── */
+
+.pc-table-wrap {
+    border: 1px solid var(--border-basalt);
+    border-radius: 4px;
+    background: var(--surface-elevated);
+    overflow: hidden;
+    min-width: 0;
+}
+
+/* Alto acotado con cabecera pegada al tope del propio panel: un torneo de 200
+   equipos deja de exigir volver arriba para saber qué columna es cuál, y el
+   offset no depende de cuánto mide la barra del shell. */
+.pc-table-scroll {
+    overflow: auto;
+    max-height: calc(100vh - 220px);
+}
+
+.pc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+/* Las columnas se ciñen a su contenido y quedan pegadas entre sí; el sobrante se
+   lo lleva la de fases, que es la única cuyo contenido crece de verdad. Cuando
+   el reparto era parejo entre las seis, un torneo de nombres cortos dejaba 400px
+   de vacío entre el equipo y su estado: dos datos que se leen juntos, separados
+   por el ancho del monitor. */
+.pc-table th,
+.pc-table td {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.pc-table .pc-col-grow {
+    width: 100%;
+}
+
+/* El nombre es lo único que puede quedar corto: sin piso, `width: 1%` lo dejaba
+   en 120px y "Cobras Brasil XV" salía con puntos suspensivos. */
+.pc-table .pc-col-name {
+    min-width: 250px;
+}
+
+/* Las fichas de fase entran en una línea hasta tres fases; de ahí en más
+   envuelven, que es preferible a un scroll horizontal. */
+.pc-table .pc-col-phases {
+    width: 100%;
+    min-width: 280px;
+    white-space: normal;
+}
+
+.pc-table td.pc-cell-empty {
+    width: auto;
+    white-space: normal;
+}
+
+.pc-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 10px 14px;
+    text-align: left;
+    background: var(--surface-basalt);
+    border-bottom: 1px solid var(--border-basalt);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+.pc-table thead th:first-child {
+    width: 44px;
+    padding-right: 0;
+}
+
+.pc-table thead th:last-child {
+    text-align: right;
+}
+
+.pc-table tbody tr {
+    border-bottom: 1px solid color-mix(in srgb, var(--border-basalt) 60%, transparent);
+    cursor: pointer;
+    transition: background 140ms var(--pc-ease);
+}
+
+.pc-table tbody tr:last-child {
+    border-bottom: 0;
+}
+
+.pc-table tbody tr:hover {
+    background: var(--basalt-overlay-soft);
+}
+
+.pc-table tbody tr.is-selected {
+    background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+}
+
+.pc-table td {
+    padding: 8px 14px;
+    vertical-align: middle;
+    color: var(--text-main);
+}
+
+.pc-table td:first-child {
+    padding-right: 0;
+}
+
+.pc-table td:last-child {
+    text-align: right;
+}
+
+.pc-check {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent-primary);
+    cursor: pointer;
+}
+
+.pc-team {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.pc-team .pc-crest {
+    width: 28px;
+    height: 28px;
+}
+
+.pc-team-copy {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+}
+
+.pc-team-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pc-team-code {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+}
+
+.pc-cell-mono {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.pc-cell-num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.pc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.pc-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 30%, transparent);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--accent-primary) 11%, transparent);
+    color: var(--pc-accent-ink);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.pc-dash {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.pc-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--pc-idle);
+    white-space: nowrap;
+}
+
+.pc-state::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: currentColor;
+    flex: 0 0 auto;
+}
+
+.pc-state.is-active { color: var(--pc-ok); }
+.pc-state.is-pending { color: var(--pc-warn); }
+.pc-state.is-inactive { color: var(--pc-idle); }
+.pc-state.is-disqualified { color: var(--pc-bad); }
+
+.pc-row-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.pc-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: color 140ms var(--pc-ease), border-color 140ms var(--pc-ease), background 140ms var(--pc-ease);
+}
+
+.pc-icon-btn:hover {
+    border-color: var(--border-basalt);
+    background: var(--basalt-overlay-soft);
+    color: var(--text-main);
+}
+
+.pc-icon-btn.is-danger:hover {
+    border-color: color-mix(in srgb, var(--pc-bad) 45%, transparent);
+    background: color-mix(in srgb, var(--pc-bad) 14%, transparent);
+    color: var(--pc-bad);
+}
+
+.pc-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 14px;
+    border-top: 1px solid var(--border-basalt);
+    background: var(--bg-basalt);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+}
+
+.pc-foot strong {
+    color: var(--text-main);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Barra de selección ───────────────────────────────────────────────────
+   Antes había que marcar equipos en la tabla y subir hasta el panel de fases
+   —su propio botón decía "Selecciona equipos en la tabla"— para operar. Las
+   acciones bajan a donde está la selección. */
+
+.pc-selection {
+    position: sticky;
+    bottom: 12px;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 42%, var(--border-basalt));
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--surface-basalt) 90%, var(--accent-primary));
+    box-shadow: 0 14px 34px var(--basalt-shadow-strong);
+    animation: pc-selection-in 200ms var(--pc-ease) both;
+}
+
+@keyframes pc-selection-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+}
+
+.pc-selection-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.pc-selection-count strong {
+    color: var(--text-main);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+.pc-selection-sep {
+    width: 1px;
+    height: 20px;
+    background: var(--border-basalt);
+    flex: 0 0 auto;
+}
+
+.pc-selection .pc-select {
+    flex: 0 1 260px;
+    background-color: var(--bg-basalt);
+}
+
+.pc-selection-spacer {
+    margin-left: auto;
+}
+
+/* ── Vacíos ───────────────────────────────────────────────────────────────── */
+
+.pc-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 56px 24px;
+    text-align: center;
+}
+
+.pc-empty-glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 2px;
+    background: var(--bg-basalt);
+    color: var(--text-dim);
+}
+
+.pc-empty-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.pc-empty-text {
+    margin: 0;
+    max-width: 46ch;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text-dim);
+}
+
+.pc-empty .basalt-btn {
+    margin-top: 4px;
+}
+
+/* ── Aviso ────────────────────────────────────────────────────────────────
+   Era un objeto con estilos en línea y `z-index: 9999`. Misma placa que el
+   resto de la consola y una capa nombrada. */
+
+.pc-toast {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: min(420px, calc(100vw - 40px));
+    padding: 11px 12px 11px 14px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 4px;
+    background: var(--surface-basalt);
+    box-shadow: 0 18px 40px var(--basalt-shadow-strong);
+    font-size: 12.5px;
+    color: var(--text-main);
+    animation: pc-toast-in 220ms var(--pc-ease) both;
+}
+
+.pc-toast.is-success {
+    border-color: color-mix(in srgb, var(--pc-ok) 42%, transparent);
+}
+
+.pc-toast.is-error {
+    border-color: color-mix(in srgb, var(--pc-bad) 45%, transparent);
+}
+
+.pc-toast.is-success svg { color: var(--pc-ok); }
+.pc-toast.is-error svg { color: var(--pc-bad); }
+
+.pc-toast-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 auto;
+    border: 0;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+}
+
+.pc-toast-close:hover {
+    background: var(--basalt-overlay-soft);
+    color: var(--text-main);
+}
+
+@keyframes pc-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
+
+/* ── Respuesta al ancho ───────────────────────────────────────────────────── */
+
+@media (max-width: 1279px) {
+    .pc-bar-actions {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .pc-table-scroll {
+        max-height: none;
+    }
+}
+
+@media (max-width: 1023px) {
+    .pc-board {
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    }
+
+    .pc-select {
+        flex: 1 1 160px;
+    }
+}
+
+/* En pantalla táctil no hay hover que revele la ×, y 24px no es un objetivo. */
+@media (hover: none) {
+    .pc-roster-remove {
+        opacity: 1;
+        width: 32px;
+        height: 32px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pc-shell *,
+    .pc-toast,
+    .pc-selection {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+    }
+}

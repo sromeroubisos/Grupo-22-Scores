@@ -101,12 +101,17 @@
 
     --t-text: #1f2430;
     --t-text-strong: #0b0d12;
+    /* On white, alpha below ~0.64 on this ink cannot reach 4.5:1. The old ramp
+       put the sidebar nav at 4.46, the stat labels and page subtitle at 3.29 and
+       "Volver al sitio" at 2.62. The steps below are compressed upward so every
+       level that carries text clears AA; --t-text-faint is the one level that
+       does not, and is for decorative rules and separators only. */
     --t-text-1: rgba(17, 24, 39, 0.92);
-    --t-text-2: rgba(17, 24, 39, 0.72);
-    --t-text-3: rgba(17, 24, 39, 0.6);
-    --t-text-4: rgba(17, 24, 39, 0.5);
-    --t-text-5: rgba(17, 24, 39, 0.42);
-    --t-text-faint: rgba(17, 24, 39, 0.32);
+    --t-text-2: rgba(17, 24, 39, 0.8);
+    --t-text-3: rgba(17, 24, 39, 0.74);
+    --t-text-4: rgba(17, 24, 39, 0.68);
+    --t-text-5: rgba(17, 24, 39, 0.64);
+    --t-text-faint: rgba(17, 24, 39, 0.56);
 
     --btn-primary-bg: #0b0d12;
     --btn-primary-fg: #ffffff;
@@ -1558,8 +1563,20 @@
     flex-shrink: 0;
 }
 
-.clubChip:hover .clubChipRemove {
+.clubChip:hover .clubChipRemove,
+.clubChip:focus-within .clubChipRemove {
     opacity: 1;
+}
+
+/* Revealing a destructive control on hover alone leaves it invisible but still
+   tappable on touch, where there is no hover. Keep it visible wherever hover is
+   not available; the desktop reveal above still applies when it is. */
+@media (hover: none), (pointer: coarse) {
+    .clubChipRemove {
+        opacity: 1;
+        min-height: 44px;
+        padding: 4px 10px;
+    }
 }
 
 .clubChipRemove:hover {

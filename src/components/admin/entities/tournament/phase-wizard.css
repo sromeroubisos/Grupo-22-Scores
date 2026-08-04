@@ -1,26 +1,34 @@
-/* phase-wizard.css */
-.phase-wizard-wrapper {
-    /* Aligned with Tectonic Basalt palette declared in basalt.css */
-    --carbon-black: #0B0F14;
-    --carbon-deep: #0F141A;
-    --carbon-surface: #151B22;
-    --carbon-border: #26313B;
-    --carbon-grid: rgba(244, 247, 250, 0.025);
-    --accent-cyan: #38BDF8;
-    --accent-dim: rgba(56, 189, 248, 0.15);
-    --accent-success: #22C55E;
-    --text-main: #F4F7FA;
-    --text-dim: #98A6B3;
-    --transition-smooth: cubic-bezier(0.2, 0, 0, 1);
+/* phase-wizard.css
+   ─────────────────────────────────────────────────────────────────────────
+   Estructura, hablando el idioma de la consola.
 
-    background-color: var(--carbon-black);
+   El módulo traía su propia paleta «carbon» con superficies azuladas
+   (#0B0F14 / #151B22 / borde #26313B) y un acento CIAN (#38BDF8) distinto del
+   azul del gestor, más su propia rejilla de fondo y un `min-height: 100vh` que
+   estiraba la pestaña aunque el contenido terminara antes.
+
+   Igual que en Fixture, Posiciones y Estadísticas: se remapean los tokens y el
+   módulo entero se repinta, tema claro incluido. `--text-main` y `--text-dim`
+   se BORRAN en vez de remapearse — redefinirlos con `var(--text-main)` sería
+   una referencia circular; sin la línea, se heredan de `.basalt-body`. */
+.phase-wizard-wrapper {
+    --carbon-black: var(--bg-basalt);
+    --carbon-deep: var(--bg-basalt);
+    --carbon-surface: var(--surface-elevated);
+    --carbon-border: var(--border-basalt);
+    --carbon-grid: var(--grid-line, rgba(255, 255, 255, 0.025));
+    --accent-cyan: var(--accent-primary);
+    --accent-dim: color-mix(in srgb, var(--accent-primary) 15%, transparent);
+    --accent-success: var(--accent-success, #10b981);
+    --transition-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+
+    background-color: var(--bg-basalt);
     color: var(--text-main);
-    background-image:
-        linear-gradient(var(--carbon-grid) 1px, transparent 1px),
-        linear-gradient(90deg, var(--carbon-grid) 1px, transparent 1px);
-    background-size: 40px 40px;
-    min-height: calc(100vh - 80px);
-    /* Adjusting for potential navbars */
+    /* Sin rejilla propia: el shell ya pinta la suya en una capa fija. */
+    background-image: none;
+    /* Era `min-height: calc(100vh - 80px)`: una pestaña con dos fases dejaba
+       media pantalla de superficie vacía debajo. */
+    min-height: 0;
 }
 
 /* Ensure child elements inherit box-sizing smoothly but don't force it globally */
@@ -630,7 +638,7 @@
     padding: 0.75rem 1rem;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 4px;
     transition: all 0.2s ease;
 }
 
@@ -884,7 +892,7 @@
 /* Disclosure for "Configurar columnas visibles" */
 .structure-disclosure {
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
+    border-radius: 4px;
     background: rgba(255, 255, 255, 0.02);
     overflow: hidden;
 }
@@ -994,7 +1002,7 @@
     bottom: 0;
     background-color: rgba(255, 255, 255, 0.1);
     transition: .3s;
-    border-radius: 20px;
+    border-radius: 4px;
     border: 1px solid var(--border);
 }
 
@@ -1196,7 +1204,7 @@
     align-items: center;
     gap: 14px;
     padding: 14px 16px;
-    border-radius: 16px;
+    border-radius: 4px;
     border: 1px solid rgba(0, 163, 101, 0.18);
     background:
         linear-gradient(135deg, rgba(0, 163, 101, 0.10), transparent 55%),
@@ -1217,7 +1225,7 @@
     justify-content: center;
     width: 38px;
     height: 38px;
-    border-radius: 12px;
+    border-radius: 4px;
     background: rgba(0, 163, 101, 0.18);
     color: var(--accent-cyan, #00a365);
     box-shadow: inset 0 0 0 1px rgba(0, 163, 101, 0.3);
@@ -1247,44 +1255,13 @@
     max-width: 60ch;
 }
 
-.structure-step-head-stat {
-    flex-shrink: 0;
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 84px;
-    padding: 8px 12px;
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.32);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    text-align: center;
-}
-
-.structure-step-head-stat-value {
-    color: #fff;
-    font-size: 22px;
-    font-weight: 900;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-}
-
-.structure-step-head-stat-label {
-    margin-top: 4px;
-    color: rgba(223, 232, 237, 0.65);
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}
-
 /* ---- Inline alert variants ---- */
 .structure-inline-alert {
     display: flex;
     flex-direction: column;
     gap: 6px;
     padding: 10px 12px;
-    border-radius: 12px;
+    border-radius: 4px;
     font-size: 12.5px;
     line-height: 1.5;
 }
@@ -1361,7 +1338,7 @@
 .structure-step-panel .tiebreaker-card {
     min-height: 54px;
     padding: 8px 12px;
-    border-radius: 12px;
+    border-radius: 4px;
     gap: 10px;
 }
 
@@ -1416,8 +1393,8 @@
     align-items: center;
     padding: 3px 8px;
     border-radius: 999px;
-    background: rgba(56, 189, 248, 0.14);
-    border: 1px solid rgba(56, 189, 248, 0.32);
+    background: color-mix(in srgb, var(--accent-primary) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 32%, transparent);
     color: #7dd3fc;
     font-size: 10.5px;
     font-weight: 700;
@@ -1432,7 +1409,7 @@
     gap: 14px;
     padding: 18px 18px;
     border: 1px dashed rgba(255, 255, 255, 0.14);
-    border-radius: 14px;
+    border-radius: 4px;
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(0, 0, 0, 0.0)),
         rgba(255, 255, 255, 0.015);
@@ -1445,7 +1422,7 @@
     justify-content: center;
     width: 44px;
     height: 44px;
-    border-radius: 12px;
+    border-radius: 4px;
     color: rgba(0, 163, 101, 0.95);
     background: rgba(0, 163, 101, 0.12);
     border: 1px solid rgba(0, 163, 101, 0.22);
@@ -1479,7 +1456,7 @@
 .tiebreaker-cascade-summary {
     margin: 12px 0 0;
     padding: 10px 12px;
-    border-radius: 10px;
+    border-radius: 4px;
     border: 1px solid rgba(0, 163, 101, 0.22);
     background: rgba(0, 163, 101, 0.07);
     color: rgba(238, 244, 247, 0.88);
@@ -1517,7 +1494,7 @@
     padding: 9px 12px 9px 14px;
     background: rgba(255, 255, 255, 0.025);
     border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 12px;
+    border-radius: 4px;
     text-align: left;
     cursor: pointer;
     transition: background 140ms ease, border-color 140ms ease, transform 100ms ease;
@@ -1592,7 +1569,7 @@
     padding: 18px 14px;
     text-align: center;
     border: 1px dashed rgba(255, 255, 255, 0.10);
-    border-radius: 12px;
+    border-radius: 4px;
     background: rgba(255, 255, 255, 0.015);
 }
 
@@ -1671,19 +1648,6 @@
     color: rgba(15, 23, 42, 0.72);
 }
 
-:root[data-theme="light"] .structure-step-head-stat {
-    background: rgba(15, 23, 42, 0.04);
-    border-color: rgba(15, 23, 42, 0.08);
-}
-
-:root[data-theme="light"] .structure-step-head-stat-value {
-    color: #0f172a;
-}
-
-:root[data-theme="light"] .structure-step-head-stat-label {
-    color: rgba(15, 23, 42, 0.6);
-}
-
 :root[data-theme="light"] .structure-inline-alert.structure-inline-alert-error {
     background: rgba(239, 68, 68, 0.08);
     color: #b91c1c;
@@ -1740,9 +1704,9 @@
 }
 
 :root[data-theme="light"] .tiebreaker-mode-tag {
-    background: rgba(56, 189, 248, 0.14);
+    background: color-mix(in srgb, var(--accent-primary) 14%, transparent);
     color: #0369a1;
-    border-color: rgba(56, 189, 248, 0.32);
+    border-color: color-mix(in srgb, var(--accent-primary) 32%, transparent);
 }
 
 :root[data-theme="light"] .structure-disclosure-icon {
@@ -1761,16 +1725,6 @@
         grid-template-columns: minmax(0, 1fr);
         gap: 12px;
         padding: 12px;
-    }
-    .structure-step-head-stat {
-        flex-direction: row;
-        gap: 8px;
-        justify-content: flex-start;
-        min-width: 0;
-        padding: 8px 12px;
-    }
-    .structure-step-head-stat-label {
-        margin-top: 0;
     }
     .structure-step-head-icon {
         width: 34px;
@@ -1832,7 +1786,7 @@
     padding: 8px 10px !important;
     min-height: 50px !important;
     height: auto !important;
-    border-radius: 12px !important;
+    border-radius: 4px !important;
     flex-wrap: nowrap !important;
     overflow: hidden !important;
 }
@@ -2000,7 +1954,7 @@
     align-items: flex-start !important;
     gap: 12px !important;
     padding: 14px 16px !important;
-    border-radius: 14px !important;
+    border-radius: 4px !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 50%),
@@ -2073,4 +2027,99 @@
 :root[data-theme="light"] .tournament-structure-shell .phase-wizard-footer,
 :root[data-theme="light"] .tournament-structure-shell .structure-wizard-footer {
     border-top-color: rgba(15, 23, 42, 0.10) !important;
+}
+/* ─────────────────────────────────────────────────────────────────────────
+   Normalización final de Estructura.
+
+   Va al final para que gane por orden y quede a la vista qué se corrigió del
+   módulo original en vez de esconderse entre sus 1.700 líneas.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* El contenedor reservaba una pantalla entera de alto aunque el torneo
+   tuviera dos fases: debajo del contenido quedaba una superficie vacía del
+   alto del viewport. Y el `box-shadow` de 100px lo despegaba del shell como
+   si fuera una ventana flotante. */
+.phase-wizard-wrapper .monolith-container {
+    min-height: 0;
+    box-shadow: none;
+    border: 1px solid var(--carbon-border);
+    border-radius: 4px;
+    background: var(--surface-elevated);
+    max-width: none;
+}
+
+.phase-wizard-wrapper .sidebar {
+    padding: 20px 18px;
+    min-height: 0;
+    background: var(--bg-basalt);
+}
+
+.phase-wizard-wrapper .wizard-content {
+    padding: 20px;
+    height: auto;
+}
+
+/* El título de sección era un <h1> de 2.5rem: un segundo título de página
+   dentro de una pestaña que ya tiene el suyo en el header. Pasa a la escala
+   de producto. */
+.phase-wizard-wrapper .section-header {
+    margin-bottom: 20px;
+}
+
+.phase-wizard-wrapper .section-header h1 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0;
+    margin-bottom: 6px;
+    color: var(--text-main);
+}
+
+.phase-wizard-wrapper .section-header p {
+    font-size: 12.5px;
+    color: var(--text-dim);
+}
+
+/* `color: white` y `#fff` fijos: en tema claro quedaban invisibles sobre
+   superficie clara. Se pasan a la tinta del shell, que sí reacciona. */
+.phase-wizard-wrapper .sidebar-header p,
+.phase-wizard-wrapper .step-item-title,
+.phase-wizard-wrapper .wizard-input,
+.phase-wizard-wrapper .wizard-select {
+    color: var(--text-main);
+}
+
+/* Los campos de 1.25rem de padding daban controles de ~58px de alto, el doble
+   que cualquier otro de la consola. */
+.phase-wizard-wrapper .wizard-input,
+.phase-wizard-wrapper .wizard-select {
+    padding: 0 11px;
+    height: 36px;
+    font-size: 13px;
+    border-radius: 2px;
+}
+
+.phase-wizard-wrapper textarea.wizard-input {
+    height: auto;
+    padding: 9px 11px;
+}
+
+.phase-wizard-wrapper .wizard-label {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+}
+
+.phase-wizard-wrapper .grid-layout {
+    gap: 14px;
+}
+
+/* La animación de entrada de cada paso desplazaba 20px en 600ms: en un
+   asistente que se recorre con el teclado, eso es media pantalla temblando en
+   cada paso. */
+.phase-wizard-wrapper .step-pane {
+    animation-duration: 180ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .phase-wizard-wrapper .step-pane { animation: none; }
 }

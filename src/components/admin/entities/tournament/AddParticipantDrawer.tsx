@@ -16,6 +16,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, UserPlus, IdCard, Search, AlertCircle } from 'lucide-react';
+import { useDialog } from './useDialog';
 import './participants-premium.css';
 import './drawer-premium.css';
 
@@ -195,15 +196,22 @@ export function AddParticipantDrawer({
         }
     };
 
+    const { ref: drawerRef, dialogProps: drawerDialogProps } = useDialog<HTMLDivElement>({
+        open: isOpen,
+        onClose,
+        labelledBy: 'add-participant-title',
+    });
+
     if (!isOpen || typeof document === 'undefined') return null;
 
     return createPortal((
         <>
-            {/* Overlay */}
-            <div className="pp-drawer-overlay" onClick={onClose} />
+            {/* Overlay — presentational; Escape and the close button are the
+                real dismissal paths. */}
+            <div className="pp-drawer-overlay" onClick={onClose} aria-hidden="true" />
 
             {/* Panel */}
-            <div className="pp-drawer-panel">
+            <div ref={drawerRef} className="pp-drawer-panel" {...drawerDialogProps}>
                 <form onSubmit={handleSubmit} className="flex flex-col h-full">
                     {/* ========== BLOCK 1: HEADER ========== */}
                     <div className="pp-drawer-header">
@@ -212,7 +220,7 @@ export function AddParticipantDrawer({
                                 <div className="pp-drawer-icon">
                                     <UserPlus />
                                 </div>
-                                <h2 className="pp-drawer-title">Agregar Participante</h2>
+                                <h2 id="add-participant-title" className="pp-drawer-title">Agregar Participante</h2>
                                 <p className="pp-drawer-subtitle">
                                     Selecciona un club existente para agregarlo al torneo
                                 </p>
@@ -221,8 +229,9 @@ export function AddParticipantDrawer({
                                 type="button"
                                 onClick={onClose}
                                 className="pp-drawer-close"
+                                aria-label="Cerrar"
                             >
-                                <X />
+                                <X aria-hidden="true" />
                             </button>
                         </div>
                     </div>

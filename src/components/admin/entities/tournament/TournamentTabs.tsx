@@ -4,19 +4,16 @@ import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     ChevronDown,
-    Eye,
     FileText,
     Layers,
     LayoutDashboard,
-    Link2,
     MoreHorizontal,
-    Palette,
-    Shield,
     Users,
     X,
     Zap,
 } from 'lucide-react';
 import { Database } from '@/lib/database.types';
+import { useDialog } from './useDialog';
 import './basalt.css';
 import { useAnimatedDisclosure } from './useAnimatedDisclosure';
 import { useTournamentDirty } from './TournamentContext';
@@ -26,13 +23,9 @@ type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 export const TOURNAMENT_TABS = [
     { id: 'resumen', label: 'Resumen', icon: LayoutDashboard, description: 'Estado general y salud del torneo' },
     { id: 'detalles', label: 'Detalles', icon: FileText, description: 'Identidad, temporada y datos base' },
-    { id: 'formato', label: 'Formato', icon: Palette, description: 'Puntaje, eventos y reglas deportivas' },
     { id: 'estructura', label: 'Estructura', icon: Layers, description: 'Fases, reglas y formato competitivo' },
     { id: 'participantes', label: 'Participantes', icon: Users, description: 'Altas, filtros y control de equipos' },
-    { id: 'operacion', label: 'Operacion', icon: Zap, description: 'Fixture, resultados y tabla operativa' },
-    { id: 'related', label: 'Relacionados', icon: Link2, description: 'Cruces y torneos vinculados' },
-    { id: 'publicacion', label: 'Publicacion', icon: Eye, description: 'Estado, visibilidad y destacados' },
-    { id: 'audit', label: 'Auditoria', icon: Shield, description: 'Bitacora y trazabilidad operativa' },
+    { id: 'operacion', label: 'Operación', icon: Zap, description: 'Fixture, resultados y tabla operativa' },
 ];
 
 // Mobile-only: 4 primary tabs always visible in the bottom bar.
@@ -66,10 +59,6 @@ function shouldPrefetchHref(href: string) {
     return true;
 }
 
-function isSameTournamentManageHref(href: string, tournamentId: string) {
-    return href.startsWith(`/admin/entities/${tournamentId}/manage?type=tournament`);
-}
-
 interface TournamentTabsProps {
     id: string;
     currentTab: string;
@@ -91,11 +80,9 @@ export function TournamentTabs({ id, currentTab, onPendingTabChange }: Tournamen
     const isTabNavigationPending = isPending || activeTab.id !== currentTab;
     const activeTabHasDraft =
         (activeTab.id === 'detalles' && hasDirtySection('details')) ||
-        (activeTab.id === 'formato' && hasDirtySection('format')) ||
         (activeTab.id === 'estructura' && hasDirtySection('structure'));
     const activeTabWasSaved =
         (activeTab.id === 'detalles' && hasRecentlySavedSection('details')) ||
-        (activeTab.id === 'formato' && hasRecentlySavedSection('format')) ||
         (activeTab.id === 'estructura' && hasRecentlySavedSection('structure'));
 
     const tabHref = useCallback(
@@ -110,11 +97,14 @@ export function TournamentTabs({ id, currentTab, onPendingTabChange }: Tournamen
     const prefetchTab = useCallback((tabId: string) => {
         if (tabId === currentTab || prefetchedTabsRef.current.has(tabId)) return;
         const href = tabHref(tabId);
-        if (!isSameTournamentManageHref(href, id) && !shouldPrefetchHref(href)) return;
+        // Honrar DISABLE_ADMIN_PREFETCH: sin la excepción "same-tournament", cada
+        // prefetch de ?tab= disparaba un render RSC completo de page.tsx (season sweep
+        // + resolveEntity) → tormenta de renders que saturaba el pool de conexiones.
+        if (!shouldPrefetchHref(href)) return;
 
         prefetchedTabsRef.current.add(tabId);
         router.prefetch(href);
-    }, [currentTab, id, router, tabHref]);
+    }, [currentTab, router, tabHref]);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -141,20 +131,13 @@ export function TournamentTabs({ id, currentTab, onPendingTabChange }: Tournamen
         TOURNAMENT_TABS.forEach((tab) => prefetchTab(tab.id));
     }, [mobileSelectorOpen, prefetchTab]);
 
-    useEffect(() => {
-        if (!mobileSelectorOpen || typeof document === 'undefined') return;
-        // Prevent the page from scrolling behind the bottom-sheet on iOS Safari,
-        // which doesn't honour overflow:hidden on html alone. Restore both
-        // properties on close so we don't leak state across navigations.
-        const previousBodyOverflow = document.body.style.overflow;
-        const previousHtmlOverflow = document.documentElement.style.overflow;
-        document.body.style.overflow = 'hidden';
-        document.documentElement.style.overflow = 'hidden';
-        return () => {
-            document.body.style.overflow = previousBodyOverflow;
-            document.documentElement.style.overflow = previousHtmlOverflow;
-        };
-    }, [mobileSelectorOpen]);
+    // Scroll lock moved into useDialog, which also adds the focus trap, focus
+    // restore and Escape handling this sheet was missing.
+    const { ref: sheetRef, dialogProps: sheetDialogProps } = useDialog<HTMLDivElement>({
+        open: mobileSelectorOpen,
+        onClose: () => setMobileSelectorOpen(false),
+        labelledBy: 'tournament-tabs-sheet-title',
+    });
 
     const switchTab = (tabId: string) => {
         if (tabId === visualTabId) return;
@@ -172,14 +155,12 @@ export function TournamentTabs({ id, currentTab, onPendingTabChange }: Tournamen
 
     const tabHasDraft = (tabId: string) => {
         if (tabId === 'detalles') return hasDirtySection('details');
-        if (tabId === 'formato') return hasDirtySection('format');
         if (tabId === 'estructura') return hasDirtySection('structure');
         return false;
     };
 
     const tabWasRecentlySaved = (tabId: string) => {
         if (tabId === 'detalles') return hasRecentlySavedSection('details');
-        if (tabId === 'formato') return hasRecentlySavedSection('format');
         if (tabId === 'estructura') return hasRecentlySavedSection('structure');
         return false;
     };
@@ -369,16 +350,19 @@ export function TournamentTabs({ id, currentTab, onPendingTabChange }: Tournamen
                         onClick={() => setMobileSelectorOpen(false)}
                     />
                     <div
+                        ref={sheetRef}
                         className={`basalt-tabs-sheet ${isVisible ? 'is-open' : ''}`}
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label="Selector de modulos"
+                        {...sheetDialogProps}
                     >
                         <div className="basalt-tabs-sheet-handle" />
                         <div className="basalt-tabs-sheet-header">
                             <div>
                                 <span className="basalt-tabs-sheet-kicker">Administracion de torneo</span>
-                                <strong className="basalt-tabs-sheet-title">Seleccionar modulo</strong>
+                                {/* h2 rather than strong: it is the sheet's accessible name and
+                                    belongs in the document outline. */}
+                                <h2 id="tournament-tabs-sheet-title" className="basalt-tabs-sheet-title">
+                                    Seleccionar modulo
+                                </h2>
                             </div>
                             <button
                                 type="button"

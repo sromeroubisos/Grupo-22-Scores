@@ -13,12 +13,14 @@ import type { StandingsGroup, StandingsPhase, StandingsRules } from './types';
 
 interface StandingsFiltersBarProps {
   tournamentId: string;
-  phases: StandingsPhase[];
+  // `phases` y `onPhaseChange` se retiraron junto con el selector de fase
+  // duplicado: la fase se elige UNA vez, en la barra de operación, y baja por
+  // prop. `selectedPhase` se conserva porque el panel de reglas la necesita
+  // para saber sobre qué fase guarda.
   groups: StandingsGroup[];
   selectedPhase: string | null;
   selectedGroup: string | null;
   selectedTableType: string;
-  onPhaseChange: (id: string) => void;
   onGroupChange: (id: string | null) => void;
   onTableTypeChange: (type: string) => void;
   rules?: StandingsRules | null;
@@ -200,12 +202,10 @@ function RuleItem({
 
 export function StandingsFiltersBar({
   tournamentId,
-  phases,
   groups,
   selectedPhase,
   selectedGroup,
   selectedTableType,
-  onPhaseChange,
   onGroupChange,
   onTableTypeChange,
   rules,
@@ -290,17 +290,10 @@ export function StandingsFiltersBar({
           <PanelSummary icon={<Filter size={14} />}>Filtros y vista</PanelSummary>
           <div className={styles.panelBody}>
             <div className={styles.stack}>
-              <SelectField label="Fase de torneo" value={selectedPhase || ''} onChange={onPhaseChange}>
-                <option value="" disabled>
-                  Seleccionar fase
-                </option>
-                {phases.map((phase) => (
-                  <option key={phase.id} value={phase.id}>
-                    {phase.name}
-                  </option>
-                ))}
-              </SelectField>
-
+              {/* La fase se elige UNA vez, en la barra de operación, y baja por
+                  prop. Acá había un segundo selector: podías dejar la barra
+                  diciendo "Fase Regular" mientras la tabla calculaba los
+                  playoffs, sin que nada avisara de la discrepancia. */}
               <SelectField
                 label="Grupo o zona"
                 value={phaseSupportsGroups ? (selectedGroup || '') : ''}

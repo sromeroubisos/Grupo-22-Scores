@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type {
   TournamentFixture,
   Match,
@@ -603,7 +603,7 @@ export function FixtureProvider({ children, initialFixture, tournamentId, season
     }
   }, [tournamentId, refreshFixture]);
 
-  const value: FixtureContextValue = {
+  const value = useMemo<FixtureContextValue>(() => ({
     fixture,
     isLoadingFixture,
     fixtureError,
@@ -634,7 +634,17 @@ export function FixtureProvider({ children, initialFixture, tournamentId, season
     saveMatch,
     deleteMatch,
     deleteMatches,
-  };
+  }), [
+    // Estado (los verdaderos disparadores del recomputo):
+    fixture, isLoadingFixture, fixtureError, selectedPhaseId, selectedRoundId,
+    viewMode, filterStatus, sortBy, editorOpen, editingMatch,
+    // Funciones — TODAS incluidas (ninguna omitida). Estables salvo generateFixture, que
+    // recrea con selectedPhaseId (ya listado arriba → sin recomputo extra).
+    setFixture, selectPhase, selectRound, setViewMode, setFilterStatus, setSortBy,
+    openEditor, closeEditor, refreshFixture, generateFixture, generateMatches,
+    importMatches, previewFixtureImport, confirmFixtureImport, resetRound, saveRound,
+    validateFixture, saveMatch, deleteMatch, deleteMatches,
+  ]);
 
   return <FixtureContext.Provider value={value}>{children}</FixtureContext.Provider>;
 }

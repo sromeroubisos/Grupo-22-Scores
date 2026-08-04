@@ -11,6 +11,7 @@ import {
     createTournamentSeason,
     listTournamentSeasons,
 } from '@/lib/services/tournamentSeasonService';
+import { invalidateSeasonFamilyCache } from '@/lib/server/tournamentSeasonFamilyCache';
 
 export const dynamic = 'force-dynamic';
 
@@ -154,6 +155,7 @@ export async function POST(
                 copyRosterMemberships: body?.copyRosterMemberships === true,
             }, actorUserId);
 
+            invalidateSeasonFamilyCache();
             return NextResponse.json({ ok: true, ...result });
         }
 
@@ -170,6 +172,7 @@ export async function POST(
                 settings: body?.settings ?? null,
             }, actorUserId);
 
+            invalidateSeasonFamilyCache();
             return NextResponse.json({ ok: true, season });
         }
 

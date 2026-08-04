@@ -9,20 +9,18 @@ import { RelatedSection } from '@/components/admin/entities/related/RelatedSecti
 import { AuditSection } from '@/components/admin/entities/audit/AuditSection';
 import { TournamentSummaryTab } from '@/components/admin/entities/tournament/TournamentSummaryTab';
 import { TournamentDetailsTab } from '@/components/admin/entities/tournament/TournamentDetailsTab';
-import { TournamentFormatTab } from '@/components/admin/entities/tournament/TournamentFormatTab';
 import { TournamentMediaTab } from '@/components/admin/entities/tournament/TournamentMediaTab';
-import { TournamentPublishTab } from '@/components/admin/entities/tournament/TournamentPublishTab';
 import { TournamentManageShell } from '@/components/admin/entities/tournament/TournamentManageShell';
 import { TournamentStructureTab } from '@/components/admin/entities/tournament/TournamentStructureTab';
 import { ClubManageShell } from '@/components/admin/entities/club/ClubManageShell';
 import { TournamentParticipantsTab } from '@/components/admin/entities/tournament/TournamentParticipantsTab';
 import { TournamentOperationTab } from '@/components/admin/entities/tournament/TournamentOperationTab';
-import { TournamentRelatedTab } from '@/components/admin/entities/tournament/TournamentRelatedTab';
 import { Database } from '@/lib/database.types';
-import { getTournamentRelatedTabData } from '@/lib/services/tournamentRelatedService';
 import { requireTournamentAdminContext, requireUserAccessContext } from '@/lib/auth/permissions';
 import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
 import { getServiceWriter } from '@/lib/supabase/serviceWriter';
+import { getReadClient } from '@/lib/supabase/read';
+import { getCachedSeasonFamily } from '@/lib/server/tournamentSeasonFamilyCache';
 import { getManagedClubSummaries } from '@/lib/club-admin/managedClubFamily';
 import { normalizeClubManageTab } from '@/lib/club-admin/manageTabs';
 import {
@@ -51,6 +49,8 @@ type TournamentSeasonOwnerRow = {
     season_id: string | null;
     sport_id?: string | null;
     country_id?: string | null;
+    status?: string | null;
+    is_visible?: boolean | null;
 };
 
 interface ManagePageProps {
@@ -74,17 +74,25 @@ const LEGACY_CREATE_ROUTE_BY_TYPE: Partial<Record<EntityType, string>> = {
     match: '/admin/super/partidos/crear',
 };
 
-const TOURNAMENT_OPERATION_SUBTABS = new Set(['fixture', 'tabla', 'estadisticas', 'sincronizacion']);
+const TOURNAMENT_OPERATION_SUBTABS = new Set(['fixture', 'tabla', 'estadisticas']);
 
 const TOURNAMENT_TAB_ALIASES: Record<string, string> = {
     overview: 'resumen',
     edit: 'detalles',
-    publish: 'publicacion',
-    publication: 'publicacion',
     fixture: 'operacion',
     tabla: 'operacion',
     estadisticas: 'operacion',
+    // Sincronizacion ya no es un submodulo de Operacion: el link viejo entra a
+    // Operacion y cae en Fixture (no esta en TOURNAMENT_OPERATION_SUBTABS).
     sincronizacion: 'operacion',
+    // Modulos retirados del gestor: un link viejo cae en Resumen en vez de
+    // dejar el escenario vacio.
+    formato: 'resumen',
+    publish: 'resumen',
+    publication: 'resumen',
+    publicacion: 'resumen',
+    related: 'resumen',
+    audit: 'resumen',
 };
 
 function compactText(value: unknown): string | null {
@@ -134,57 +142,71 @@ function buildTournamentManageHref(
     return `/admin/entities/${tournamentId}/manage?${params.toString()}`;
 }
 
-async function buildTournamentSeasonNavigation({
-    supabase,
-    tournament,
-    currentTab,
-    currentSubtab,
-    requestedSeasonId,
-}: {
-    supabase: Awaited<ReturnType<typeof createClient>>;
-    tournament: TournamentRow;
-    currentTab: string;
-    currentSubtab: string | null;
-    requestedSeasonId: string | null;
-}): Promise<{ shellData: TournamentRow; items: TournamentSeasonMenuItem[] }> {
+// Parte CARA y tab-independiente del switcher de temporadas → cacheable.
+// Usa getReadClient() (consistente, sin la RLS del request) para que el cache
+// COMPARTIDO no se contamine entre scopes de admin. Sin requestedSeasonId:
+// resuelve la familia natural (cierre por tournament_id/legacy/copied_from).
+async function loadTournamentSeasonFamily(
+    tournament: TournamentRow,
+): Promise<{ seasonRows: TournamentSeasonFamilyRow[]; ownerRows: TournamentSeasonOwnerRow[] }> {
+    const db = await getReadClient();
     const ownerIds = new Set<string>([tournament.id]);
 
     try {
-        const linkedIds = await collectSeasonLinkedTournamentIds(supabase as any, tournament.id);
+        const linkedIds = await collectSeasonLinkedTournamentIds(db as any, tournament.id);
         linkedIds.forEach((linkedId) => ownerIds.add(linkedId));
-    } catch {
-        // The switcher still works with the current tournament if relation metadata is unavailable.
+    } catch (error) {
+        // Corre dentro de un loader cacheado: si falla en silencio, cachearíamos
+        // una familia incompleta durante el TTL. Lo dejamos registrado.
+        console.warn('[seasonFamily] collectSeasonLinkedTournamentIds falló; la familia cacheada puede quedar incompleta:', error);
     }
 
     try {
-        await mergeSlugSeasonFamilyIntoSet(supabase as any, {
+        await mergeSlugSeasonFamilyIntoSet(db as any, {
             id: tournament.id,
             slug: tournament.slug,
             sport_id: tournament.sport_id,
             country_id: tournament.country_id,
         }, ownerIds);
         if (ownerIds.size <= 1) {
-            await mergeSlugSeasonFamilyIntoSetLoose(supabase as any, { slug: tournament.slug }, ownerIds);
+            await mergeSlugSeasonFamilyIntoSetLoose(db as any, { slug: tournament.slug }, ownerIds);
         }
-    } catch {
-        // Slug fallback is best-effort; explicit relations remain the source of truth.
+    } catch (error) {
+        console.warn('[seasonFamily] mergeSlugSeasonFamily falló; se usan solo relaciones explícitas:', error);
     }
 
-    const seasonRows = await collectTournamentSeasonFamilyRows(supabase as any, ownerIds, requestedSeasonId);
+    const seasonRows = await collectTournamentSeasonFamilyRows(db as any, ownerIds, null);
     seasonRows.forEach((season) => {
         if (season.tournament_id) ownerIds.add(season.tournament_id);
         if (season.legacy_tournament_id) ownerIds.add(season.legacy_tournament_id);
     });
 
-    const ownerIdList = Array.from(ownerIds);
-    const { data: ownerRowsData } = await supabase
+    const { data: ownerRowsData } = await db
         .from('tournaments')
-        .select('id, name, display_name, slug, season_id, sport_id, country_id')
-        .in('id', ownerIdList);
+        .select('id, name, display_name, slug, season_id, sport_id, country_id, status, is_visible')
+        .in('id', Array.from(ownerIds));
 
     const ownerRows = (Array.isArray(ownerRowsData) && ownerRowsData.length > 0
         ? ownerRowsData
         : [tournament]) as TournamentSeasonOwnerRow[];
+    return { seasonRows, ownerRows };
+}
+
+async function buildTournamentSeasonNavigation({
+    tournament,
+    currentTab,
+    currentSubtab,
+    requestedSeasonId,
+}: {
+    tournament: TournamentRow;
+    currentTab: string;
+    currentSubtab: string | null;
+    requestedSeasonId: string | null;
+}): Promise<{ shellData: TournamentRow; items: TournamentSeasonMenuItem[] }> {
+    const { seasonRows, ownerRows } = await getCachedSeasonFamily(
+        tournament.id,
+        () => loadTournamentSeasonFamily(tournament),
+    );
     const ownerMap = new Map<string, TournamentSeasonOwnerRow>();
     ownerRows.forEach((row) => ownerMap.set(row.id, row));
     ownerMap.set(tournament.id, {
@@ -197,6 +219,16 @@ async function buildTournamentSeasonNavigation({
         country_id: tournament.country_id,
     });
 
+    // Excluir del switcher ediciones en borrador/ocultas de la familia (getReadClient
+    // saltea RLS, así que el filtro tiene que ser explícito). El torneo gestionado se
+    // incluye siempre, aunque esté en borrador (su admin lo está gestionando).
+    const isListableOwnerId = (ownerId: string): boolean => {
+        if (ownerId === tournament.id) return true;
+        const owner = ownerMap.get(ownerId);
+        if (!owner) return true; // sin metadata no lo escondemos
+        return owner.status !== 'draft' && owner.is_visible !== false;
+    };
+
     const currentTournamentSeasons = seasonRows.filter((row) => row.tournament_id === tournament.id);
     const selectedSeason =
         currentTournamentSeasons.find((row) => requestedSeasonId && row.id === requestedSeasonId) ||
@@ -208,7 +240,9 @@ async function buildTournamentSeasonNavigation({
         ? { ...tournament, season_id: seasonMenuLabel(selectedSeason) } as TournamentRow
         : tournament;
 
-    const items: TournamentSeasonMenuItem[] = seasonRows.map((seasonRow) => {
+    const items: TournamentSeasonMenuItem[] = seasonRows
+        .filter((row) => isListableOwnerId(row.tournament_id))
+        .map((seasonRow) => {
         const owner = ownerMap.get(seasonRow.tournament_id) || ownerMap.get(tournament.id)!;
         const label = seasonMenuLabel(seasonRow);
         const seasonTitle = compactText(seasonRow.display_name) || compactText(seasonRow.name) || label;
@@ -228,7 +262,7 @@ async function buildTournamentSeasonNavigation({
 
     const ownersWithSeasonRows = new Set(seasonRows.map((row) => row.tournament_id));
     ownerRows
-        .filter((owner) => !ownersWithSeasonRows.has(owner.id))
+        .filter((owner) => !ownersWithSeasonRows.has(owner.id) && isListableOwnerId(owner.id))
         .forEach((owner) => {
             const label = seasonMenuLabel(owner);
             items.push({
@@ -410,18 +444,17 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
         tournamentShellData = tournamentData;
         const needsDetailsData = effectiveTab === 'detalles';
         const needsMatchCount = effectiveTab === 'resumen';
-        const [{ data: unionsData }, { data: matchRows }, { data: countriesData }, seasonNavigation] = await Promise.all([
+        const [{ data: unionsData }, { count: matchCount }, { data: countriesData }, seasonNavigation] = await Promise.all([
             needsDetailsData
                 ? supabase.from('unions').select('id, name').order('name')
                 : Promise.resolve({ data: [] as Array<{ id: string; name: string }> }),
             needsMatchCount
-                ? supabase.from('matches').select('id').eq('tournament_id', id)
-                : Promise.resolve({ data: [] as Array<{ id: string }> }),
+                ? supabase.from('matches').select('*', { count: 'exact', head: true }).eq('tournament_id', id)
+                : Promise.resolve({ count: 0 }),
             needsDetailsData
                 ? supabase.from('countries').select('id, name, code, flag_emoji').order('name')
                 : Promise.resolve({ data: [] as Array<{ id: string; name: string; code: string | null; flag_emoji: string | null }> }),
             buildTournamentSeasonNavigation({
-                supabase,
                 tournament: tournamentData,
                 currentTab: effectiveTab,
                 currentSubtab: effectiveSubtab,
@@ -430,7 +463,7 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
         ]);
         tournamentUnions = unionsData ?? [];
         tournamentCountries = countriesData ?? [];
-        tournamentMatchCount = matchRows?.length ?? 0;
+        tournamentMatchCount = matchCount ?? 0;
         tournamentShellData = seasonNavigation.shellData;
         tournamentSeasonMenuItems = seasonNavigation.items;
         if (tournamentData.union_id) {
@@ -440,7 +473,6 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
 
     const isRelatedTab = effectiveTab === 'related';
     const relatedData = isRelatedTab && !isTournament ? await getRelatedItems(result.entityType, id, offset, limit) : null;
-    const tournamentRelatedData = isRelatedTab && isTournament ? await getTournamentRelatedTabData(id) : null;
 
     // Construct base URL params for pagination inside RelatedSection
     const baseUrlParams = new URLSearchParams();
@@ -513,39 +545,11 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                                 initialSubtab={effectiveSubtab}
                             />
                         )}
-                    {effectiveTab === 'formato' && (
-                        <TournamentFormatTab
-                            data={result.data as TournamentRow}
-                            id={id}
-                            matchCount={tournamentMatchCount}
-                        />
-                    )}
                     {effectiveTab === 'medios' && (
                         <TournamentMediaTab
                             data={result.data as TournamentRow}
                             id={id}
                         />
-                    )}
-                    {effectiveTab === 'publicacion' && (
-                        <TournamentPublishTab
-                            data={result.data as TournamentRow}
-                            id={id}
-                            matchCount={tournamentMatchCount}
-                        />
-                    )}
-                    {effectiveTab === 'related' && tournamentRelatedData && (
-                        <div className="animate-in fade-in duration-300">
-                            <TournamentRelatedTab tournamentId={id} data={tournamentRelatedData} />
-                        </div>
-                    )}
-                    {effectiveTab === 'audit' && (
-                        <div className="animate-in fade-in duration-300">
-                            <div className="mb-6 border-b border-divider pb-4">
-                                <h3 className="font-semibold text-lg text-foreground">Auditoría e historial</h3>
-                                <p className="text-system-secondary text-sm">Registro inmutable de mutaciones en esta entidad.</p>
-                            </div>
-                            <AuditSection entityType={result.entityType} entityId={id} />
-                        </div>
                     )}
                 </div>
             </TournamentManageShell>

@@ -11,6 +11,7 @@ import {
   resolvePlayoffStagesForTeams,
   syncPlayoffStagesToRounds,
 } from '@/lib/server/playoffStages';
+import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 import { createApiPerfTracker } from '@/lib/perf/api';
 import { logOverfetchWarning } from '@/lib/perf/measure';
 import { isUuid } from '@/lib/utils/postgrest';
@@ -168,6 +169,64 @@ export async function POST(
 
     const shouldActivate = body.is_active === true || (existingPhaseCount ?? 0) === 0;
 
+    // Compute order_index server-side as max+1. Never trust the client's value:
+    // it sends `phases.length + 1`, which collides after an intermediate phase
+    // is deleted (e.g. phases 1,3 → length 2 → asks for 3 again) and violates
+    // UNIQUE(tournament_id, order_index), turning the create into a 500.
+    let maxOrderQuery = supabase
+      .from('tournament_phases')
+      .select('order_index')
+      .eq('tournament_id', tournamentId)
+      .order('order_index', { ascending: false })
+      .limit(1);
+
+    if (scopedSeasonId) {
+      maxOrderQuery = maxOrderQuery.eq('season_id', scopedSeasonId);
+    }
+
+    const { data: maxOrderRows, error: maxOrderError } = await perf.measureStep(
+      'max_phase_order_index',
+      async () => maxOrderQuery,
+      { bucket: 'query', logQuery: true },
+    );
+
+    if (maxOrderError) {
+      console.error('Error resolving next phase order_index:', maxOrderError);
+      return perf.json({ error: 'Error creating phase' }, { status: 500 });
+    }
+
+    const nextOrderIndex = (maxOrderRows?.[0]?.order_index ?? -1) + 1;
+
+    // Clear any currently-active sibling BEFORE inserting the new active phase,
+    // so the tournament never momentarily has two active phases (there is no DB
+    // constraint enforcing a single active phase — ordering is the guarantee).
+    // A failure here aborts before anything is created, leaving no partial state.
+    if (shouldActivate) {
+      let deactivateQuery = supabase
+        .from('tournament_phases')
+        .update({ is_active: false })
+        .eq('tournament_id', tournamentId)
+        .eq('is_active', true);
+
+      if (scopedSeasonId) {
+        deactivateQuery = deactivateQuery.eq('season_id', scopedSeasonId);
+      }
+
+      const { error: deactivateError } = await perf.measureStep(
+        'deactivate_previous_phases',
+        async () => deactivateQuery,
+        {
+          bucket: 'query',
+          logQuery: true,
+        },
+      );
+
+      if (deactivateError) {
+        console.error('Error clearing previous active phases:', deactivateError);
+        return perf.json({ error: 'Error creating phase' }, { status: 500 });
+      }
+    }
+
     const { data: phase, error } = await perf.measureStep(
       'insert_phase',
       async () => supabase
@@ -177,7 +236,7 @@ export async function POST(
           season_id: scopedSeasonId,
           name: phaseName,
           phase_type: phaseType,
-          order_index: body.order_index ?? 0,
+          order_index: nextOrderIndex,
           is_active: shouldActivate,
           settings: {
             ...syncedSettings,
@@ -203,31 +262,6 @@ export async function POST(
         code: error.code || 'UNKNOWN',
         hint: error.hint || 'No hint',
       }, { status: 500 });
-    }
-
-    if (phase && shouldActivate) {
-      let deactivateQuery = supabase
-        .from('tournament_phases')
-        .update({ is_active: false })
-        .eq('tournament_id', tournamentId)
-        .neq('id', phase.id);
-
-      if (scopedSeasonId) {
-        deactivateQuery = deactivateQuery.eq('season_id', scopedSeasonId);
-      }
-
-      const { error: deactivateError } = await perf.measureStep(
-        'deactivate_previous_phases',
-        async () => deactivateQuery,
-        {
-          bucket: 'query',
-          logQuery: true,
-        },
-      );
-
-      if (deactivateError) {
-        console.error('Error clearing previous active phases:', deactivateError);
-      }
     }
 
     if (phase && isPlayoffPhaseType(phaseType)) {
@@ -285,6 +319,21 @@ export async function POST(
 
       if (groupError) {
         console.error('Error creating groups for phase:', groupError);
+      }
+    }
+
+    // Scaffold the standings scope for the new phase, matching PATCH. Non-fatal:
+    // a brand-new phase has no matches yet, so this mostly seeds empty rows; the
+    // phase itself is already created, so a recalc hiccup must not turn the 201
+    // into a 500 and make the caller think creation failed.
+    if (phase) {
+      const recalcResult = await perf.measureStep(
+        'recalculate_phase_standings',
+        async () => recalculatePhaseStandingsScopes(tournamentId, phase.id),
+        { bucket: 'query', logQuery: true },
+      );
+      if (!recalcResult.ok) {
+        console.error('Error recalculating standings for new phase:', phase.id);
       }
     }
 

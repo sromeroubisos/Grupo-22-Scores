@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertCircle, Hash, Info, Repeat2, Save, Search, Tag, UserPlus, X } from 'lucide-react';
+import { useDialog } from './useDialog';
 import './participants-premium.css';
 import './drawer-premium.css';
 
@@ -259,15 +260,29 @@ export function UpsertParticipantDrawer({
         onClose();
     };
 
+    // Declared before the early return so the hook order stays stable. handleClose
+    // already no-ops while saving, so Escape can't discard an in-flight submit.
+    const { ref: drawerRef, dialogProps: drawerDialogProps } = useDialog<HTMLDivElement>({
+        open: isOpen,
+        onClose: handleClose,
+        labelledBy: 'upsert-participant-title',
+    });
+
     if (!isOpen || typeof document === 'undefined') {
         return null;
     }
 
     return createPortal(
         <>
-            <div className="pp-drawer-overlay" onClick={handleClose} />
+            {/* Presentational: the panel owns dismissal via Escape and the close
+                button, so this click target is a convenience, not the only path. */}
+            <div className="pp-drawer-overlay" onClick={handleClose} aria-hidden="true" />
 
-            <div className="pp-drawer-panel pp-drawer-panel-wide">
+            <div
+                ref={drawerRef}
+                className="pp-drawer-panel pp-drawer-panel-wide"
+                {...drawerDialogProps}
+            >
                 <form onSubmit={handleSubmit} className="flex flex-col h-full">
                     <div className="pp-drawer-header">
                         <div className="pp-drawer-header-content">
@@ -275,7 +290,7 @@ export function UpsertParticipantDrawer({
                                 <div className="pp-drawer-icon">
                                     <UserPlus />
                                 </div>
-                                <h2 className="pp-drawer-title">
+                                <h2 id="upsert-participant-title" className="pp-drawer-title">
                                     {isEditMode ? 'Editar Participante' : 'Nuevo Participante'}
                                 </h2>
                                 <p className="pp-drawer-subtitle">
@@ -290,8 +305,9 @@ export function UpsertParticipantDrawer({
                                 onClick={handleClose}
                                 disabled={loading}
                                 className="pp-drawer-close"
+                                aria-label="Cerrar"
                             >
-                                <X />
+                                <X aria-hidden="true" />
                             </button>
                         </div>
                     </div>

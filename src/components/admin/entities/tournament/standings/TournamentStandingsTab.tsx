@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Activity, CheckCircle2, Clock3, Layers3, XCircle } from 'lucide-react';
+import { CheckCircle2, Clock3, Tag, XCircle } from 'lucide-react';
+import '../operation-console.css';
 import { StandingsFiltersBar } from './StandingsFiltersBar';
 import { StandingsSidebar } from './StandingsSidebar';
 import { StandingsTable } from './StandingsTable';
@@ -66,14 +67,18 @@ function MetricCard({ label, value, foot }: { label: string; value: number | str
   );
 }
 
+/**
+ * `onPhaseChange` se retiró con el selector de fase duplicado: el flujo de la
+ * fase es de una sola dirección — la barra de operación la elige y baja por
+ * `preferredPhaseId`. Cuando Posiciones también podía cambiarla, la fase
+ * viajaba en los dos sentidos y podían discrepar.
+ */
 export default function TournamentStandingsTab({
   tournamentId,
   preferredPhaseId = null,
-  onPhaseChange,
 }: {
   tournamentId: string;
   preferredPhaseId?: string | null;
-  onPhaseChange?: (phaseId: string) => void;
 }) {
   const [context, setContext] = useState<TournamentContextData | null>(null);
   const [loadingContext, setLoadingContext] = useState(true);
@@ -463,7 +468,6 @@ export default function TournamentStandingsTab({
       ? 'Todos los grupos'
       : 'Tabla unica';
   const tableViewLabel = TABLE_VIEWS.find((tab) => tab.id === selectedTableType)?.label ?? selectedTableType;
-  const tournamentStatus = context?.tournament?.status || 'draft';
   const hasOwnPhaseSettings = !!activePhase?.settings;
 
   const handleLogicUpdated = async () => {
@@ -473,59 +477,25 @@ export default function TournamentStandingsTab({
 
   return (
     <div className={styles.page}>
-      <div aria-hidden className={`${styles.pageGlow} ${styles.pageGlowLeft}`} />
-      <div aria-hidden className={`${styles.pageGlow} ${styles.pageGlowRight}`} />
-
       <div className={styles.pageInner}>
-        <header className={`${styles.glassPanel} ${styles.header}`}>
-          <div className={styles.headerTop}>
-            <div className={styles.headerMain}>
-              <span className={styles.eyebrow}>
-                <span className={styles.eyebrowDot} />
-                Flash Standings Workspace
-              </span>
-              <h1 className={styles.title}>Gestion de tabla de posiciones</h1>
-              <p className={styles.subtitle}>
-                {isCompactMobile
-                  ? 'Mobile-first: fase, puntos y recálculo arriba; reglas y detalle quedan colapsados.'
-                  : 'Consola visual de standings para la fase activa del torneo. Mantiene el cálculo y los filtros existentes, pero concentra contexto, métricas y reglas en un layout premium de tres columnas.'}
-              </p>
-            </div>
+        {/* Cabecera de panel, no de página.
+            Acá vivían un <h1> propio ("Gestion de tabla de posiciones"), un
+            rótulo en inglés ("Flash Standings Workspace") y un párrafo que
+            describía su propio layout — todo dentro de un panel esmerilado con
+            dos halos de fondo, un sistema visual que no existe en ninguna otra
+            parte de la consola. El nombre del torneo y la fase ya los dice la
+            barra de operación; lo único que faltaba era elegir la vista. */}
+        <header className="op-panel">
+          <div className="op-panel-head">
+            <span className="op-panel-title">Tabla</span>
 
-              <div className={styles.headerMeta}>
-                <div className={styles.metaCard}>
-                  <span className={styles.metaLabel}>Torneo</span>
-                  <div className={styles.metaValue}>
-                    <Layers3 size={14} />
-                    {loadingContext ? <div className={`${styles.skeleton} ${styles.metaSkeleton}`} /> : <span>{context?.tournament?.name || 'Sin torneo'}</span>}
-                  </div>
-                </div>
-                <div className={styles.metaCard}>
-                  <span className={styles.metaLabel}>Fase actual</span>
-                  <div className={styles.metaValue}>
-                    <Activity size={14} />
-                    {loadingContext ? <div className={`${styles.skeleton} ${styles.metaSkeleton}`} /> : <span>{isGlobalCircuitMode ? 'Tabla Global (Circuito)' : (activePhase?.name || 'Sin fase')}</span>}
-                  </div>
-                </div>
-              <div className={styles.metaCard}>
-                <span className={styles.metaLabel}>Estado</span>
-                <div className={styles.metaValue}>
-                  <span className={isGlobalCircuitMode ? styles.statusActive : (activePhase?.is_active ? styles.statusActive : styles.statusInactive)}>
-                    {isGlobalCircuitMode ? 'Global' : (activePhase?.is_active ? 'Activa' : tournamentStatus)}
-                  </span>
-                  <span className={styles.metaMono}>{tableViewLabel}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.localTabs}>
-            <div className={styles.localTabsGroup}>
+            <div className="op-panel-actions">
               {TABLE_VIEWS.map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
-                  className={`${styles.localTab} ${selectedTableType === tab.id ? styles.localTabActive : ''}`}
+                  className={`basalt-btn ${selectedTableType === tab.id ? 'basalt-btn-accent' : ''}`}
+                  aria-pressed={selectedTableType === tab.id}
                   onClick={() => setSelectedTableType(tab.id)}
                 >
                   {tab.label}
@@ -533,33 +503,20 @@ export default function TournamentStandingsTab({
               ))}
               <button
                 type="button"
-                className={`${styles.localTab} ${showLabelsPanel ? styles.localTabActive : ''}`}
+                className={`basalt-btn ${showLabelsPanel ? 'basalt-btn-accent' : ''}`}
+                aria-pressed={showLabelsPanel}
                 onClick={() => setShowLabelsPanel((v) => !v)}
-                title="Gestionar etiquetas"
               >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4, display: 'inline' }}>
-                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
-                  <line x1="7" y1="7" x2="7.01" y2="7"/>
-                </svg>
+                <Tag size={13} aria-hidden="true" />
                 Etiquetas
-                {allLabels.length > 0 && (
-                  <span className={styles.labelCountBadge}>{allLabels.length}</span>
-                )}
+                {allLabels.length > 0 ? ` · ${allLabels.length}` : ''}
               </button>
             </div>
 
-            <div className={styles.localContext}>
-              <span className={styles.contextPill}>
-                Fase
-                <span className={styles.contextStrong}>{activePhase?.phase_type || 'manual'}</span>
-              </span>
-              <span className={styles.contextPill}>
-                Grupo
-                <span className={styles.contextStrong}>{groupLabel || 'Todos'}</span>
-              </span>
-              <span className={styles.contextPill}>
-                Reglas
-                <span className={styles.contextStrong}>{resolvedRules?.tiebreakers?.length ?? 0} desempates</span>
+            <div className="op-panel-meta">
+              <span>{groupLabel || 'Todos los grupos'}</span>
+              <span className="is-accent">
+                {resolvedRules?.tiebreakers?.length ?? 0} desempates
               </span>
             </div>
           </div>
@@ -610,16 +567,10 @@ export default function TournamentStandingsTab({
           <aside className={styles.leftRail}>
             <StandingsFiltersBar
               tournamentId={tournamentId}
-              phases={isGlobalCircuitMode ? [] : (context?.phases ?? [])}
               groups={isGlobalCircuitMode ? [] : activeGroups}
               selectedPhase={isGlobalCircuitMode ? null : selectedPhase}
               selectedGroup={isGlobalCircuitMode ? null : selectedGroup}
               selectedTableType={selectedTableType}
-              onPhaseChange={(value) => {
-                setSelectedPhase(value);
-                setSelectedGroup(null);
-                onPhaseChange?.(value);
-              }}
               onGroupChange={setSelectedGroup}
               onTableTypeChange={setSelectedTableType}
               rules={resolvedRules}

@@ -150,6 +150,7 @@ function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null
         clearAllDrafts,
         markSectionDirty,
         triggerSectionSavedFlash,
+        flushDraftPersistence,
     } = useTournamentDirty();
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -345,6 +346,9 @@ function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null
 
     useEffect(() => {
         const handler = (e: BeforeUnloadEvent) => {
+            // Flush sincrónico de la escritura de draft pendiente (el persist está debounced),
+            // para no perder los últimos cambios al cerrar/recargar la pestaña.
+            flushDraftPersistence();
             if (isDirty) {
                 e.preventDefault();
                 e.returnValue = 'Tenes cambios sin guardar. Queres salir?';
@@ -353,7 +357,7 @@ function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null
 
         window.addEventListener('beforeunload', handler);
         return () => window.removeEventListener('beforeunload', handler);
-    }, [isDirty]);
+    }, [isDirty, flushDraftPersistence]);
 
     const handleStatusTransition = async () => {
         const status = data.status ?? 'draft';
@@ -523,6 +527,10 @@ function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null
             <TournamentHeader
                 data={data}
                 isDirty={isDirty}
+                /* `handleSave` solo sabe persistir Detalles y Formato; si lo
+                   único sucio es Estructura devuelve un error pidiendo que se
+                   use el botón de la pestaña. Entonces el botón no se ofrece. */
+                canSave={hasDirtyDetails || hasDirtyFormat}
                 dirtyLabels={dirtyLabels}
                 isTransitioning={isTransitioning}
                 menuOpen={menuOpen}
@@ -591,42 +599,6 @@ function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null
                     </div>
                 )}
 
-                <footer className="basalt-action-footer">
-                    <div className="basalt-action-footer-copy">
-                        <span className="basalt-action-footer-kicker">Consola operativa</span>
-                        <strong className="basalt-action-footer-title">Gestion central del torneo</strong>
-                        <p className="basalt-action-footer-text">
-                            Coordina identidad, estructura, participantes y operacion desde una sola superficie.
-                        </p>
-                    </div>
-
-                    <div className="basalt-action-footer-meta">
-                        <span className="basalt-action-footer-shortcut">MODE: <strong>TOURNAMENT_CONSOLE</strong></span>
-                        <span className="basalt-action-footer-shortcut">ID: <strong>{id}</strong></span>
-                        <span className={`basalt-action-footer-badge ${isDirty ? 'is-live' : 'is-ready'}`}>
-                            {isDirty ? 'Cambios pendientes' : 'Systems nominal'}
-                        </span>
-                    </div>
-
-                    <div className="basalt-action-footer-actions">
-                        <button
-                            className="basalt-btn"
-                            onClick={handleRecalculate}
-                            disabled={isTransitioning}
-                            type="button"
-                        >
-                            Recalcular
-                        </button>
-                        <button
-                            className="basalt-btn basalt-btn-primary"
-                            onClick={() => void handleSave()}
-                            disabled={isTransitioning || !isDirty}
-                            type="button"
-                        >
-                            {isTransitioning ? 'Procesando...' : 'Guardar cambios'}
-                        </button>
-                    </div>
-                </footer>
             </div>
 
             <HistoricalSeasonImportDrawer

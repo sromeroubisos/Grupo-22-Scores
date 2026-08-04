@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { createClient } from '@/lib/supabase/server';
 import { createApiPerfTracker } from '@/lib/perf/api';
-import { logOverfetchWarning } from '@/lib/perf/measure';
+import { isUuid } from '@/lib/utils/postgrest';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +31,10 @@ export async function GET(
   const perf = createApiPerfTracker(route);
 
   try {
+    // tournamentId no-UUID → getTournamentFixture pega columnas uuid → 22P02 → 500.
+    if (!isUuid(tournamentId)) {
+      return perf.json({ error: 'Tournament not found' }, { status: 404 });
+    }
     console.log(`[fixture/route] GET fixture for tournament: ${tournamentId}`);
 
     if (!seasonId) {
@@ -84,14 +88,11 @@ export async function GET(
       );
     }
 
-    logOverfetchWarning({
-      endpoint: route,
-      reason: 'fallback select(*) from tournament_phases',
-    }, 'server');
-
+    // Mismo contrato de columnas que FixtureService.getTournamentFixture:
+    // tournament_phases no tiene start_date/end_date (42703 si se piden).
     let phasesQuery = supabase
       .from('tournament_phases')
-      .select('*')
+      .select('id, tournament_id, name, phase_type, order_index, is_active, settings, created_at, updated_at')
       .eq('tournament_id', tournamentId)
       .order('order_index', { ascending: true });
 

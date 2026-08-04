@@ -1,4 +1,9 @@
-import { getDefaultMatchEventDefinitions, type MatchEventCategory } from './matchEventCatalog';
+import {
+  buildMatchEventDefinitionMap,
+  getDefaultMatchEventDefinitions,
+  normalizeSportBucket,
+  type MatchEventCategory,
+} from './matchEventCatalog';
 import { goalKickOutcomeSuffixSpanish, parseSubstitutionIncomingPlayer } from './matchEventStats';
 import { getEventPeriodForType, getNextActivePeriodAfterEvent, normalizeMatchPeriod } from './matchPeriods';
 
@@ -59,6 +64,12 @@ export type LocalPlayerStatsRow = {
   points: number;
   tries: number;
   tackles: number;
+  /** Hockey / futbol: goles convertidos, incluidos los de penal. */
+  goals: number;
+  /** Subconjunto de `goals`: los que salieron de un penal. */
+  penaltyGoals: number;
+  /** Solo hockey. Se contaba a nivel equipo y se perdia en la tabla de jugadores. */
+  greenCards: number;
   yellowCards: number;
   redCards: number;
   events: number;
@@ -116,8 +127,10 @@ export function normalizeLocalLineups(raw: unknown) {
   };
 }
 
-export function normalizeLocalEvents(raw: unknown): LocalPublicEvent[] {
+export function normalizeLocalEvents(raw: unknown, sportId?: string | null): LocalPublicEvent[] {
   const events = Array.isArray(raw) ? raw : [];
+  // Sin el deporte la secuencia cae al default de dos tiempos: es lo correcto
+  // para rugby y futbol, y lo que hacian todos los llamadores hasta ahora.
   let activePeriod = normalizeMatchPeriod(null);
 
   return events.map((entry, index) => {
@@ -133,7 +146,7 @@ export function normalizeLocalEvents(raw: unknown): LocalPublicEvent[] {
       : Number(source.order);
     const period = text(source.period)
       ? normalizeMatchPeriod(source.period)
-      : getEventPeriodForType(type, activePeriod);
+      : getEventPeriodForType(type, activePeriod, sportId);
     const rawDescription = text(source.detail) || text(source.description);
     const subPlayer =
       text(source.secondaryPlayerName) ||
@@ -164,7 +177,7 @@ export function normalizeLocalEvents(raw: unknown): LocalPublicEvent[] {
       period,
       order: Number.isFinite(rawOrder) ? Math.max(0, Math.trunc(rawOrder)) : index,
     };
-    activePeriod = getNextActivePeriodAfterEvent(type, period);
+    activePeriod = getNextActivePeriodAfterEvent(type, period, sportId);
     return normalizedEvent;
   });
 }
@@ -210,8 +223,29 @@ export function buildLocalPlayerStatsRows(args: {
   events: LocalPublicEvent[];
   homeName: string;
   awayName: string;
+  sportId?: string | null;
 }) {
   const map = new Map<string, LocalPlayerStatsRow>();
+
+  // Que cuenta como GOL se decide por el deporte y por la definicion, nunca
+  // por el nombre del tipo:
+  //
+  //  - Solo los deportes cuya unidad de anotacion ES el gol tienen la cuenta.
+  //    Sin esta guarda un TRY entraba como gol: en rugby tambien es
+  //    `category: 'score'` y tampoco es `kickAtGoal`.
+  //  - `penalty_goal` es el gol de penal en hockey y futbol, pero en rugby es
+  //    el penal A LOS PALOS, que se puede errar. Es la misma trampa que
+  //    documenta `kickAtGoal` en matchEventCatalog.
+  //  - El gol en contra no se le acredita al que lo hizo (`creditsOpponent`).
+  const bucket = normalizeSportBucket(args.sportId);
+  const sportScoresInGoals = bucket === 'hockey' || bucket === 'football' || bucket === 'handball';
+  const definitionMap = buildMatchEventDefinitionMap(getDefaultMatchEventDefinitions(args.sportId));
+  const countsAsGoal = (type: string) => {
+    if (!sportScoresInGoals) return false;
+    const definition = definitionMap[type];
+    if (!definition || definition.category !== 'score') return false;
+    return !definition.kickAtGoal && !definition.creditsOpponent;
+  };
 
   const ensureRow = (
     team: LocalMatchTeam,
@@ -239,6 +273,9 @@ export function buildLocalPlayerStatsRows(args: {
         points: 0,
         tries: 0,
         tackles: 0,
+        goals: 0,
+        penaltyGoals: 0,
+        greenCards: 0,
         yellowCards: 0,
         redCards: 0,
         events: 0,
@@ -294,6 +331,13 @@ export function buildLocalPlayerStatsRows(args: {
     row.points += getEventPoints(event.type);
     if (event.type === 'try') row.tries += 1;
     if (event.type === 'tackle') row.tackles += 1;
+    // El gol de penal es un gol: entra en las dos cuentas, igual que en las
+    // estadisticas de equipo (`penaltyGoals` es un subconjunto de los goles).
+    if (countsAsGoal(event.type)) {
+      row.goals += 1;
+      if (event.type === 'penalty_goal') row.penaltyGoals += 1;
+    }
+    if (event.type === 'green_card') row.greenCards += 1;
     if (event.type === 'yellow_card' || event.type === 'card_yellow') row.yellowCards += 1;
     if (event.type === 'red_card' || event.type === 'card_red') row.redCards += 1;
   });
@@ -319,6 +363,9 @@ const STAT_CATEGORY_ORDER: Record<MatchEventCategory, number> = {
   discipline: 2,
   substitution: 3,
   other: 4,
+  // La definicion por shoot-out va despues de todo, porque pasa despues del
+  // partido. No entra en STAT_VISIBLE_CATEGORIES: no es estadistica del juego.
+  shootout: 5,
   clock: 5,
 };
 
@@ -350,13 +397,26 @@ const STAT_LABEL_OVERRIDES: Record<string, string> = {
   yellow_card: 'Tarjetas amarillas',
   red_card: 'Tarjetas rojas',
   green_card: 'Tarjetas verdes',
+  penalty_corner: 'Corners cortos',
+  penalty_stroke: 'Penales stroke',
+  foul: 'Faltas',
+  free_hit: 'Free hits',
+  assist: 'Asistencias',
+  shot_on_goal: 'Tiros al arco',
+  shot_off_target: 'Tiros desviados',
+  circle_entry: 'Ingresos al circulo',
+  interception: 'Intercepciones',
+  block: 'Bloqueos',
+  save: 'Atajadas',
+  clearance: 'Despejes',
+  shootout_scored: 'Shoot-outs convertidos',
+  shootout_missed: 'Shoot-outs fallados',
   knock_on: 'Knock-ons',
   forward_pass: 'Pases forward',
   penalty_committed: 'Penales cometidos',
   free_kick: 'Free kicks',
   handling_error: 'Errores de manejo',
   turnover_lost: 'Turnovers perdidos',
-  foul: 'Faltas',
   two_min_suspension: 'Suspensiones 2 min',
   substitution: 'Cambios',
 };
@@ -375,9 +435,26 @@ export function buildLocalTeamStats(events: LocalPublicEvent[], sportId?: string
     })
     .map((entry) => entry.definition);
 
-  return ordered.map((definition) => ({
-    label: STAT_LABEL_OVERRIDES[definition.type] || definition.label,
-    home: events.filter((event) => event.team === 'home' && event.type === definition.type).length,
-    away: events.filter((event) => event.team === 'away' && event.type === definition.type).length,
-  }));
+  // Una sola pasada sobre los eventos en vez de dos filtros por definicion
+  // (eran ~30 recorridos completos en rugby). El conteo se arma primero y las
+  // definiciones solo lo leen, asi que las filas en cero se siguen mostrando.
+  const counts = new Map<string, { home: number; away: number }>();
+  for (const event of events) {
+    if (event.team !== 'home' && event.team !== 'away') continue;
+    let entry = counts.get(event.type);
+    if (!entry) {
+      entry = { home: 0, away: 0 };
+      counts.set(event.type, entry);
+    }
+    entry[event.team] += 1;
+  }
+
+  return ordered.map((definition) => {
+    const entry = counts.get(definition.type);
+    return {
+      label: STAT_LABEL_OVERRIDES[definition.type] || definition.label,
+      home: entry?.home ?? 0,
+      away: entry?.away ?? 0,
+    };
+  });
 }

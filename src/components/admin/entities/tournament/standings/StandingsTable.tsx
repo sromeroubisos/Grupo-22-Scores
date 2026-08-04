@@ -135,13 +135,24 @@ function hexToRgba(color: string, alpha: number) {
   return normalized;
 }
 
+/**
+ * El color de la etiqueta marca la LÍNEA DE CORTE, no pinta el renglón.
+ *
+ * Antes esto emitía además un fondo al 12% (y al 18% en hover) con el color de
+ * la etiqueta. Con cuatro clasificados sobre ocho equipos, media tabla quedaba
+ * teñida y el color perdía su trabajo: si todo está marcado, nada está marcado.
+ * El filete de 3px del borde izquierdo —que sale del mismo `--standings-row-accent`—
+ * ya dice quién clasifica, y el chip de la etiqueta sigue mostrando su color.
+ *
+ * Se emite sólo el acento: el fondo se resuelve por CSS con el hover neutro de
+ * la tabla. Iba inline, así que no alcanzaba con una regla en la hoja — un
+ * estilo inline le gana a cualquier selector.
+ */
 function createAccentVars(color: string | null | undefined): CSSProperties | undefined {
   if (!color) return undefined;
 
   return {
     '--standings-row-accent': color,
-    '--standings-row-bg': hexToRgba(color, 0.12),
-    '--standings-row-bg-strong': hexToRgba(color, 0.18),
   } as CSSProperties;
 }
 

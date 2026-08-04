@@ -1,141 +1,165 @@
 .tournament-structure-shell {
     position: relative;
-    --border: rgba(255, 255, 255, 0.08);
+    --border: var(--border-basalt);
     --accent-cyan: var(--accent-primary);
     --accent: var(--accent-primary);
 }
 
-.structure-hero-panel {
-    gap: 28px;
-    align-items: stretch;
-    flex-wrap: wrap;
-}
+/* Acá vivían `.structure-hero-*` y `.structure-summary-*`: la placa de consola
+   con su grilla de cuatro métricas. La placa se fue del TSX porque no tenía un
+   solo control y sus cuatro números repetían el listado de fases; con ella se
+   van sus reglas, incluida la que apagaba los pies de las tarjetas
+   (`display: none`) mientras el componente seguía calculando ese texto.
+   `.structure-hero-title` / `.structure-hero-text` los usaba además el panel de
+   plantel fijo: ahora titula con `.structure-module-*`, como los otros dos. */
 
-.structure-hero-copy {
+/* Configuración del torneo: modelo + plantel fijo, lado a lado.
+   Los dos paneles son cortos —dos tarjetas y una casilla— y apilados dejaban
+   media pantalla vacía cada uno. Debajo de 900px vuelven a apilarse, y debajo
+   de 768px el wrapper desaparece del layout (`display: contents`) para no
+   interferir con el drilldown a bottom sheet, que posiciona las secciones
+   contra el viewport. */
+.structure-config-row {
     display: grid;
-    gap: 14px;
-    flex: 1 1 360px;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 24px;
+    align-items: start;
+}
+
+/* Los paneles del gestor arrastran un `grid-column: span 12` de una grilla de
+   12 columnas que ya no los contiene: dentro de esta fila hacían que cada uno
+   ocupara las dos pistas y volvieran a apilarse. Acá cada panel toma una. */
+.structure-config-row > * {
+    grid-column: auto !important;
     min-width: 0;
-    max-width: 720px;
 }
 
-.structure-hero-title {
-    margin: 0;
-    font-size: clamp(26px, 2.6vw, 36px);
-    line-height: 1;
-    letter-spacing: -0.04em;
-    color: var(--text-main);
-    text-transform: uppercase;
+@media (max-width: 767px) {
+    .structure-config-row {
+        display: contents;
+    }
 }
 
-.structure-hero-text {
-    margin: 0;
-    max-width: 62ch;
-    color: var(--text-dim);
-    font-size: 14px;
-    line-height: 1.7;
+/* En mobile la lista de "Disponibles" se dibujaba 437px de ancho dentro de una
+   columna de 365 y se iba 33px afuera de la tarjeta — que recorta— así que los
+   botones "+" de cada criterio quedaban cortados por el borde: se veían a la
+   mitad y no había forma de tocarlos. La lista ya traía `min-width: 0`, pero
+   eso sólo la deja ENCOGER; nada le ponía un techo, y el ancho mínimo de sus
+   filas ("Puntos en Contra" + el botón + paddings) la empujaba más allá del
+   contenedor. El techo es el que faltaba. En escritorio no cambia nada porque
+   ahí la columna ya es más ancha que el contenido. */
+.tournament-structure-shell .available-items-list,
+.tournament-structure-shell .wizard-right-panel,
+.tournament-structure-shell .wizard-content-grid {
+    max-width: 100%;
+    min-width: 0;
 }
 
-.structure-hero-meta {
+/* Paso 1: el panel del nombre y el de tipo de fase comparten fila en la grilla
+   de 12 columnas, y las filas de grid estiran por defecto. El del nombre —una
+   etiqueta y un input— crecía hasta los 255px del de al lado y dejaba ~180px de
+   caja vacía debajo del campo. Cada panel mide lo que ocupa. */
+.tournament-structure-shell .phase-wizard-fields {
+    align-items: start;
+}
+
+/* La grilla de opciones del wizard estaba clavada en dos columnas por la regla
+   general de la pestaña, así que los TRES tipos de fase entraban 2 + 1 con una
+   celda vacía al lado de "Playoff / Llaves". Con auto-fit entran los tres en
+   una fila cuando hay lugar, y los dos del formato de partido siguen de a dos
+   (auto-fit colapsa la pista que sobra). */
+.tournament-structure-shell .phase-wizard-step-panel .structure-option-grid,
+.tournament-structure-shell .structure-step-panel .structure-option-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+}
+
+/* La tira de contexto de la barra del wizard —"Liga · Round-robin / 8 equipos /
+   Avanzan 4"— se llamaba "chip strip" en los comentarios y hasta tenía una
+   regla para ESCONDERLA en mobile, pero la regla que la dibujaba en escritorio
+   no existía: los tres datos salían como texto pelado, con el color que les
+   tocara heredar. Ahora son fichas, con el mismo vocabulario que los badges de
+   la cabecera del torneo. Se quedan porque en los pasos 2 a 5 son el único
+   lugar donde se ve qué fase estás configurando. */
+.structure-sidebar-facts-inline {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px 12px;
-    color: var(--text-dim);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-basalt);
 }
 
-.structure-hero-meta span {
+.structure-sidebar-fact-inline {
     display: inline-flex;
     align-items: center;
-    min-height: 30px;
-    padding: 0 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.structure-summary-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-    flex: 1 1 540px;
-    min-width: 0;
-    max-width: 640px;
-    align-self: stretch;
-}
-
-.structure-summary-card {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    gap: 10px;
-    padding: 16px;
-    min-height: 132px;
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 42%),
-        rgba(255, 255, 255, 0.025);
-    transition: transform 200ms cubic-bezier(0.2, 0, 0, 1), border-color 200ms ease, background 200ms ease;
-}
-
-.structure-summary-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(0, 214, 136, 0.26);
-    background:
-        linear-gradient(135deg, rgba(0, 163, 101, 0.1), transparent 55%),
-        rgba(255, 255, 255, 0.03);
-}
-
-.structure-summary-label {
-    color: var(--text-dim);
-    font-size: 10px;
-    letter-spacing: 0.14em;
+    min-height: 24px;
+    padding: 0 8px;
+    border: 1px solid var(--border-basalt);
+    background: var(--surface-soft);
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
-/* Numeric values are kept prominent but no longer dwarf the text values. */
-.structure-summary-value {
-    color: var(--text-main);
-    font-size: clamp(24px, 2.2vw, 30px);
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.04em;
-    align-self: end;
+/* El aviso de la barra lleva a su paso, así que es un botón y se ve que lo es. */
+.structure-wizard-sidebar-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    text-align: left;
+    border: 1px solid color-mix(in srgb, var(--status-error) 34%, transparent);
+    background: color-mix(in srgb, var(--status-error) 12%, transparent);
+    color: var(--status-error);
+    font-size: 12px;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: background 150ms ease, border-color 150ms ease;
 }
 
-/* The text variant (active phase name) needs to fit two cramped columns
- * without overflowing or wrapping into giant headlines. */
-.structure-summary-value--text {
-    font-size: clamp(14px, 1.3vw, 16px) !important;
-    font-weight: 700 !important;
-    line-height: 1.25 !important;
-    letter-spacing: -0.01em !important;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+.structure-wizard-sidebar-alert:hover {
+    background: color-mix(in srgb, var(--status-error) 18%, transparent);
+    border-color: color-mix(in srgb, var(--status-error) 50%, transparent);
 }
 
-.structure-summary-foot {
+.structure-wizard-sidebar-alert svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* El costo de una acción se dice antes de intentarla, no después. */
+.structure-save-hint {
     color: var(--text-dim);
-    font-size: 11px;
+    font-size: 13px;
     line-height: 1.4;
 }
 
-@media (max-width: 720px) {
-    .structure-summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        max-width: none;
-    }
+/* El estado deshabilitado de `basalt-btn-primary` es el verde lleno al 40% de
+   opacidad. Alcanza mientras el botón casi nunca está apagado, pero ahora
+   "Guardar modelo" y "Guardar plantel fijo" arrancan así cada vez que se abre
+   la pestaña, y a ese nivel la etiqueta queda en 1,3:1 contra su propio fondo:
+   se ve el botón y no se lee lo que dice. Un control apagado tiene que seguir
+   diciendo qué es — si no, la única forma de saberlo es habilitarlo. */
+/* Fondo y borde salen de la MISMA tinta que el texto, mezclada con lo que haya
+   detrás: así el apagado se comporta igual en oscuro y en claro sin dos juegos
+   de valores. Con `--surface-soft` + `--border-basalt` el borde quedaba
+   invisible en oscuro (1,2:1) y casi negro en claro (15:1). */
+.tournament-structure-shell .basalt-btn-primary:disabled {
+    opacity: 1 !important;
+    background: color-mix(in srgb, var(--text-secondary) 14%, transparent) !important;
+    border-color: color-mix(in srgb, var(--text-secondary) 34%, transparent) !important;
+    color: var(--text-secondary) !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
 }
 
 .structure-module {
     background:
-        linear-gradient(135deg, rgba(0, 163, 101, 0.08), transparent 32%),
+        linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 08%, transparent), transparent 32%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 34%),
         rgba(9, 15, 24, 0.88);
 }
@@ -164,7 +188,7 @@
     overflow: hidden;
     border-radius: 22px;
     background:
-        linear-gradient(135deg, rgba(0, 163, 101, 0.06), transparent 46%),
+        linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 06%, transparent), transparent 46%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 34%),
         rgba(255, 255, 255, 0.022) !important;
 }
@@ -237,7 +261,7 @@
 }
 
 .structure-module-footer {
-    border-top-color: rgba(255, 255, 255, 0.08) !important;
+    border-top-color: var(--border-basalt) !important;
 }
 
 .structure-empty-panel {
@@ -254,8 +278,7 @@
     justify-items: center;
 }
 
-.structure-empty-title,
-.structure-hero-title {
+.structure-empty-title {
     background: linear-gradient(180deg, #f2fff9, rgba(194, 220, 209, 0.76));
     -webkit-background-clip: text;
     background-clip: text;
@@ -267,10 +290,10 @@
 }
 
 .structure-wizard-card {
-    --border: rgba(255, 255, 255, 0.08);
+    --border: var(--border-basalt);
     --accent-cyan: var(--accent-primary);
     background:
-        linear-gradient(135deg, rgba(0, 163, 101, 0.1), transparent 35%),
+        linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 10%, transparent), transparent 35%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 32%),
         rgba(9, 15, 24, 0.92);
 }
@@ -292,13 +315,6 @@
     gap: 8px;
 }
 
-.structure-wizard-sidebar-copy {
-    margin: 0;
-    color: var(--text-dim);
-    font-size: 13px;
-    line-height: 1.6;
-}
-
 .structure-wizard-sidebar .phase-wizard-sidebar-title {
     font-size: clamp(34px, 3.2vw, 48px);
     line-height: 0.96;
@@ -308,7 +324,7 @@
 .structure-sidebar-fact {
     padding: 14px 16px;
     border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-basalt);
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent),
         rgba(255, 255, 255, 0.025);
@@ -335,7 +351,7 @@
     height: 10px;
     padding: 2px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-soft);
 }
 
 .structure-wizard-progress-bar span {
@@ -343,7 +359,7 @@
     height: 100%;
     border-radius: 999px;
     background: linear-gradient(90deg, var(--accent-primary), var(--accent-primary-strong));
-    box-shadow: 0 0 20px rgba(0, 163, 101, 0.25);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--accent-primary) 25%, transparent);
     transition: width 220ms cubic-bezier(0.2, 0, 0, 1);
 }
 
@@ -364,11 +380,11 @@
     position: relative;
     border-radius: 18px !important;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
-    background: rgba(255, 255, 255, 0.025);
+    background: var(--surface-soft);
 }
 
 .structure-wizard-step:hover {
-    border-color: rgba(255, 255, 255, 0.08) !important;
+    border-color: var(--border-basalt) !important;
 }
 
 .structure-wizard-step-index {
@@ -400,7 +416,7 @@
 
 .structure-wizard-content {
     background:
-        radial-gradient(circle at top right, rgba(0, 163, 101, 0.08), transparent 24%),
+        radial-gradient(circle at top right, color-mix(in srgb, var(--accent-primary) 08%, transparent), transparent 24%),
         transparent;
 }
 
@@ -425,7 +441,7 @@
 .structure-field-panel.structure-field-panel-accent {
     padding: 18px;
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-basalt);
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 34%),
         rgba(255, 255, 255, 0.025);
@@ -555,7 +571,7 @@
 
 .structure-step-panel .phase-wizard-fields > .structure-field-panel-accent {
     background:
-        linear-gradient(135deg, rgba(0, 163, 101, 0.12), transparent 52%),
+        linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 12%, transparent), transparent 52%),
         rgba(255, 255, 255, 0.028) !important;
 }
 
@@ -593,7 +609,7 @@
 .structure-step-panel .tiebreaker-card {
     min-height: 78px;
     border-radius: 18px;
-    border-color: rgba(255, 255, 255, 0.08);
+    border-color: var(--border-basalt);
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 36%),
         rgba(255, 255, 255, 0.025);
@@ -601,7 +617,7 @@
 
 .structure-step-panel .available-item {
     border-radius: 14px;
-    border-color: rgba(255, 255, 255, 0.08);
+    border-color: var(--border-basalt);
 }
 
 .structure-step-panel .order-pill-wrapper,
@@ -621,17 +637,15 @@
     font-size: 12px;
 }
 
-.structure-labels-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
-    gap: 18px;
-    align-items: start;
-}
-
-.structure-labels-list-panel,
-.structure-labels-form-panel {
-    min-height: 100%;
-}
+/* `.structure-labels-grid` era el contenedor de dos columnas del paso Etiquetas
+   —lista a la izquierda, alta a la derecha— y ya no existe en el TSX: los dos
+   paneles son hijos directos del paso, apilados. Su regla acompañante sí quedó:
+   `min-height: 100%` sobre los dos.
+   Apilados, cada panel pedía el alto ENTERO del padre, el padre lo derivaba del
+   contenido, y los dos juntos terminaban midiendo el doble de la caja que los
+   contiene. Por eso el pie de navegación aparecía en el medio del paso y el
+   formulario "Nueva etiqueta" quedaba tirado debajo, fuera del panel: no era el
+   pie el que estaba mal puesto, era el contenido que se le iba por encima. */
 
 .structure-label-empty {
     display: grid;
@@ -640,7 +654,7 @@
     padding: 28px;
     border-radius: 18px;
     border: 1px dashed rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--surface-soft);
     color: rgba(223, 232, 237, 0.64);
     text-align: center;
     font-size: 14px;
@@ -668,9 +682,9 @@
 
 .structure-label-row:hover,
 .structure-label-row-active {
-    border-color: rgba(0, 163, 101, 0.24);
+    border-color: color-mix(in srgb, var(--accent-primary) 24%, transparent);
     background:
-        linear-gradient(135deg, rgba(0, 163, 101, 0.1), transparent 58%),
+        linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 10%, transparent), transparent 58%),
         rgba(255, 255, 255, 0.028);
 }
 
@@ -732,7 +746,7 @@
     padding: 0 12px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.09);
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--surface-soft);
     color: rgba(238, 244, 247, 0.84);
     font-size: 12px;
     font-weight: 700;
@@ -742,8 +756,8 @@
 .structure-label-action-btn:hover,
 .structure-label-mode-btn:hover {
     border-color: rgba(255, 255, 255, 0.16);
-    background: rgba(255, 255, 255, 0.06);
-    color: #fff;
+    background: var(--surface-soft);
+    color: var(--text-main);
 }
 
 .structure-label-action-btn-danger:hover {
@@ -753,16 +767,16 @@
 }
 
 .structure-label-mode-btn.is-active {
-    border-color: rgba(0, 163, 101, 0.28);
-    background: rgba(0, 163, 101, 0.16);
-    color: #fff;
+    border-color: color-mix(in srgb, var(--accent-primary) 28%, transparent);
+    background: color-mix(in srgb, var(--accent-primary) 16%, transparent);
+    color: var(--text-main);
 }
 
 .structure-label-mode-toggle-form {
     padding: 4px;
     border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-basalt);
+    background: var(--surface-soft);
     width: fit-content;
 }
 
@@ -811,7 +825,7 @@
     gap: 12px;
     margin-top: 36px;
     padding-top: 22px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--border-basalt);
     justify-content: space-between;
 }
 
@@ -840,7 +854,7 @@
     padding: 10px 14px;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.07);
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--surface-soft);
 }
 
 .structure-label-global-mode-title {
@@ -854,7 +868,7 @@
     display: inline-flex;
     padding: 3px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-basalt);
     background: rgba(0, 0, 0, 0.28);
 }
 
@@ -874,12 +888,12 @@
 }
 
 .structure-label-global-mode-btn:hover:not(.is-active) {
-    color: #fff;
+    color: var(--text-main);
 }
 
 .structure-label-global-mode-btn.is-active {
-    background: rgba(0, 163, 101, 0.22);
-    color: #fff;
+    background: color-mix(in srgb, var(--accent-primary) 22%, transparent);
+    color: var(--text-main);
 }
 
 /* --- Compact label rows (collapsed by default) --- */
@@ -904,7 +918,7 @@
 }
 
 .structure-label-row-toggle:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--surface-soft);
 }
 
 .structure-label-swatch-dot {
@@ -923,7 +937,7 @@
     white-space: nowrap;
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-main);
 }
 
 .structure-label-row-menu {
@@ -939,13 +953,13 @@
 }
 
 .structure-label-row-toggle:hover .structure-label-row-menu {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+    background: var(--surface-soft);
 }
 
 .structure-label-row-compact.is-expanded .structure-label-row-menu {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+    background: var(--surface-soft);
 }
 
 .structure-label-row-expanded {
@@ -962,7 +976,7 @@
     margin: 0 0 12px;
     padding: 10px 12px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.025);
+    background: var(--surface-soft);
     border: 1px dashed rgba(255, 255, 255, 0.1);
     color: rgba(223, 232, 237, 0.7);
     font-size: 13px;
@@ -972,16 +986,16 @@
 /* CTA secondary (Crear etiqueta) — outline verde, sin competir con SIGUIENTE */
 .structure-label-submit-cta {
     background: transparent;
-    border: 1px solid rgba(0, 163, 101, 0.45);
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 45%, transparent);
     color: #34d399;
     text-transform: none;
     letter-spacing: 0;
 }
 
 .structure-label-submit-cta:hover:not(:disabled) {
-    background: rgba(0, 163, 101, 0.12);
-    border-color: rgba(0, 163, 101, 0.6);
-    color: #fff;
+    background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+    border-color: color-mix(in srgb, var(--accent-primary) 60%, transparent);
+    color: var(--text-main);
 }
 
 .structure-label-form-cancel {
@@ -990,31 +1004,10 @@
 }
 
 /* Mobile-only progress (hidden on desktop where the sidebar already shows it) */
-.structure-mobile-progress {
-    display: none;
-}
-
-@media (max-width: 1279px) {
-    .structure-summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .structure-labels-grid {
-        grid-template-columns: 1fr;
-    }
-}
 
 @media (max-width: 767px) {
     .structure-wizard-layout {
         grid-template-columns: 1fr;
-    }
-
-    .structure-summary-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .structure-hero-meta {
-        gap: 8px;
     }
 
     .structure-phase-card {
@@ -1042,26 +1035,26 @@
     }
 
     .structure-step-panel .phase-wizard-fields > .structure-field-panel,
-    .structure-step-panel .phase-wizard-fields > .structure-field-panel-wide,
-    .structure-step-panel .phase-wizard-fields > .structure-split-grid {
+.structure-step-panel .phase-wizard-fields > .structure-field-panel-wide,
+.structure-step-panel .phase-wizard-fields > .structure-split-grid {
         grid-column: auto;
     }
 
     .structure-split-grid,
-    .structure-score-grid {
+.structure-score-grid {
         grid-template-columns: 1fr !important;
     }
 
     .structure-label-input-row,
-    .structure-label-palette,
-    .structure-label-preview,
-    .structure-label-form-actions {
+.structure-label-palette,
+.structure-label-preview,
+.structure-label-form-actions {
         flex-direction: column;
         align-items: stretch;
     }
 
     .structure-label-submit,
-    .structure-label-form-actions .basalt-btn {
+.structure-label-form-actions .basalt-btn {
         width: 100%;
     }
 
@@ -1078,7 +1071,6 @@
 
 .structure-module,
 .structure-wizard-card,
-.structure-summary-card,
 .structure-label-row,
 .structure-label-empty,
 .structure-step-panel .tiebreaker-card,
@@ -1086,7 +1078,6 @@
     border-radius: 4px !important;
 }
 
-.structure-hero-panel,
 .structure-module,
 .structure-wizard-card {
     background:
@@ -1095,50 +1086,31 @@
         rgba(14, 14, 17, 0.96) !important;
 }
 
-.structure-hero-panel {
-    padding: clamp(1.35rem, 2vw, 1.9rem) !important;
-}
-
-.structure-hero-title,
 .structure-module-title {
     text-transform: uppercase;
 }
 
-.structure-hero-text,
-.structure-module-copy,
-.structure-wizard-sidebar-copy {
-    color: rgba(226, 232, 240, 0.52);
-}
-
-.structure-summary-grid {
-    gap: 16px;
-}
-
-.structure-summary-card {
-    min-height: 170px;
-    padding: 20px;
-    border-color: rgba(125, 211, 252, 0.1);
-    background:
-        radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), transparent 40%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 32%),
-        rgba(18, 24, 30, 0.96);
-}
-
-/* Unified type scale: numeric values stay prominent but never larger than the
- * page-level h2 (clamp 26-36px). The earlier override pushed them to 52px and
- * dwarfed the section titles — keep them in band here. */
-.structure-summary-value {
-    font-size: clamp(22px, 2vw, 28px) !important;
+/* Era `rgba(226, 232, 240, 0.52)`: 4,8:1 sobre la placa —justo arriba del piso—
+   y sin contraparte clara, así que en tema claro quedaba tinta casi blanca sobre
+   fondo casi blanco. El token ya resuelve las dos cosas. */
+.structure-module-copy {
+    color: var(--text-secondary);
 }
 
 /* Section titles inside `.structure-module` reuse `.basalt-h1`, but the global
  * `.basalt-h1` cascade ends at clamp(28px, 4.8vw, 56px). Pin the in-tab modules
  * to the same scale as the hero title so all headings agree visually. */
+/* Acá vivía `font-size: clamp(22px, 2.2vw, 28px)` con `letter-spacing:
+   -0.03em`, y las dos cosas están prohibidas por el contrato:
+     · el gestor usa escala FIJA (§1) — un clamp de portada hace que el mismo
+       título mida distinto en dos monitores;
+     · el tracking negativo es sólo para caja baja (§3), y estos títulos van en
+       mayúsculas, donde junta las letras.
+   Ahora los toma la escala del shell: h2 = 18px/700, h3 = 15px/600. */
 .structure-module-title,
 .structure-empty-title {
-    font-size: clamp(22px, 2.2vw, 28px) !important;
-    letter-spacing: -0.03em !important;
-    line-height: 1.05 !important;
+    letter-spacing: 0.005em;
+    line-height: 1.25;
 }
 
 .structure-module {
@@ -1147,7 +1119,7 @@
 
 .structure-module-header {
     padding-bottom: 18px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--border-basalt);
 }
 
 .structure-phase-list {
@@ -1158,11 +1130,11 @@
     min-height: 96px;
     padding: 16px 18px !important;
     border-radius: 18px !important;
-    border-color: rgba(148, 163, 184, 0.14) !important;
+    border-color: var(--border-basalt) !important;
     background:
         radial-gradient(circle at top left, rgba(16, 185, 129, 0.12), transparent 38%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 28%),
-        rgba(18, 24, 30, 0.96) !important;
+        var(--surface-elevated) !important;
 }
 
 .structure-phase-card::before {
@@ -1174,7 +1146,7 @@
     width: 40px !important;
     height: 40px !important;
     border-radius: 12px !important;
-    background: rgba(255, 255, 255, 0.03) !important;
+    background: var(--surface-soft) !important;
 }
 
 /* Phase row title aligned with summary text values, not used as a hero title.
@@ -1194,6 +1166,11 @@
     color: rgba(226, 232, 240, 0.72) !important;
 }
 
+/* Pale slate on the now-white phase card reads 1.16:1. */
+:root[data-theme="light"] .structure-phase-meta-single {
+    color: #475569 !important;
+}
+
 .structure-module-footer {
     margin-top: 20px !important;
     padding-top: 20px !important;
@@ -1205,7 +1182,7 @@
     min-width: 0;
     min-height: 42px;
     padding-inline: 22px;
-    border-radius: 999px;
+    border-radius: 2px;
 }
 
 .tournament-structure-shell .basalt-btn,
@@ -1214,9 +1191,9 @@
 .tournament-structure-shell .structure-label-mode-btn {
     min-height: 42px;
     padding: 0 16px;
-    border-radius: 999px;
-    border: 1px solid rgba(148, 163, 184, 0.12);
-    background: rgba(18, 24, 30, 0.98);
+    border-radius: 2px;
+    border: 1px solid var(--border-basalt);
+    background: var(--surface-elevated);
     color: rgba(226, 232, 240, 0.82);
     font-size: 11px;
     font-weight: 800;
@@ -1231,38 +1208,47 @@
 .tournament-structure-shell .structure-label-mode-btn:hover {
     background: rgba(36, 36, 41, 0.98);
     border-color: rgba(226, 232, 240, 0.18);
-    color: #fff;
+    color: var(--text-main);
     transform: none;
 }
 
-.tournament-structure-shell .basalt-btn-primary,
+/* `.basalt-btn-primary` SALE DE ACÁ.
+ *
+ * Estaba pintado con un degradado azul, y el botón primario del shell es verde:
+ * es "Guardar", la única acción de confirmación de la consola (§4 del contrato).
+ * Con este override, el mismo botón era verde en la barra y azul dentro de
+ * Estructura, así que dejaba de leerse como el mismo botón. Ahora manda basalt.
+ *
+ * Los dos que quedan son afordancias locales del editor de etiquetas —enviar y
+ * el modo activo—, y van con el acento en CONTORNO, no en relleno: el acento
+ * lleno con texto blanco da 3,7:1, por debajo del piso AA para un botón de 12px.
+ * Es el mismo motivo por el que `.basalt-btn-accent` es contorno en la barra. */
 .tournament-structure-shell .structure-label-submit,
 .tournament-structure-shell .structure-label-mode-btn.is-active {
-    background: linear-gradient(180deg, #4f8dfd, #2563eb) !important;
-    border-color: #2563eb !important;
-    color: #fff !important;
-    box-shadow: 0 0 22px rgba(59, 130, 246, 0.2) !important;
+    background: color-mix(in srgb, var(--accent-primary) 14%, transparent) !important;
+    border-color: var(--accent-primary) !important;
+    color: var(--text-main) !important;
+    box-shadow: none !important;
 }
 
-.tournament-structure-shell .basalt-btn-primary:hover:not(:disabled),
 .tournament-structure-shell .structure-label-submit:hover,
 .tournament-structure-shell .structure-label-mode-btn.is-active:hover {
-    background: linear-gradient(180deg, #5b96ff, #3570f4) !important;
-    border-color: #3570f4 !important;
+    background: color-mix(in srgb, var(--accent-primary) 22%, transparent) !important;
+    border-color: var(--accent-primary) !important;
     transform: none !important;
 }
 
 .tournament-structure-shell .basalt-btn-secondary,
 .tournament-structure-shell .structure-group-row .basalt-btn,
 .tournament-structure-shell .structure-label-action-btn-danger {
-    background: rgba(18, 24, 30, 0.98) !important;
+    background: var(--surface-elevated) !important;
 }
 
 .tournament-structure-shell .structure-module-footer .basalt-btn-primary,
 .tournament-structure-shell .structure-wizard-footer .basalt-btn-primary {
     min-height: 44px;
     padding-inline: 24px;
-    border-radius: 999px;
+    border-radius: 2px;
 }
 
 .tournament-structure-shell .structure-phase-actions button {
@@ -1279,7 +1265,7 @@
     padding: 22px !important;
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 24%),
-        rgba(18, 24, 30, 0.98) !important;
+        var(--surface-elevated) !important;
 }
 
 .structure-wizard-progress-card,
@@ -1301,8 +1287,8 @@
 .structure-step-panel .wizard-right-panel {
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 28%),
-        rgba(18, 24, 30, 0.92) !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
+        var(--surface-elevated) !important;
+    border-color: var(--border-basalt) !important;
 }
 
 .structure-wizard-step {
@@ -1324,20 +1310,12 @@
 }
 
 @media (max-width: 1100px) {
-    .structure-summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
     .structure-wizard-layout {
         grid-template-columns: 1fr;
     }
 }
 
 @media (max-width: 767px) {
-    .structure-summary-grid {
-        grid-template-columns: 1fr;
-    }
-
     .structure-phase-card {
         min-height: 0;
         border-radius: 24px !important;
@@ -1369,10 +1347,10 @@
     min-height: 58px;
     padding: 14px 14px !important;
     border-radius: 26px !important;
-    border-color: rgba(148, 163, 184, 0.12) !important;
+    border-color: var(--border-basalt) !important;
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 32%),
-        rgba(18, 24, 30, 0.94) !important;
+        var(--surface-elevated) !important;
 }
 
 .structure-wizard-step.is-active {
@@ -1380,7 +1358,7 @@
     background:
         radial-gradient(circle at left center, rgba(59, 130, 246, 0.12), transparent 50%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 34%),
-        rgba(18, 24, 30, 0.98) !important;
+        var(--surface-elevated) !important;
     box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.12);
 }
 
@@ -1419,10 +1397,10 @@
 .structure-sidebar-fact {
     padding: 14px 16px;
     border-radius: 24px;
-    border: 1px solid rgba(148, 163, 184, 0.12);
+    border: 1px solid var(--border-basalt);
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 30%),
-        rgba(18, 24, 30, 0.9);
+        var(--surface-elevated);
 }
 
 .structure-sidebar-fact strong {
@@ -1434,10 +1412,10 @@
 .structure-field-panel.structure-field-panel-accent {
     padding: 20px;
     border-radius: 28px !important;
-    border-color: rgba(148, 163, 184, 0.14);
+    border-color: var(--border-basalt);
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 30%),
-        rgba(18, 24, 30, 0.96) !important;
+        var(--surface-elevated) !important;
 }
 
 .structure-field-panel.structure-field-panel-accent::before {
@@ -1458,7 +1436,7 @@
     min-height: 58px;
     border-radius: 18px !important;
     background: rgba(7, 10, 14, 0.94) !important;
-    border-color: rgba(148, 163, 184, 0.14) !important;
+    border-color: var(--border-basalt) !important;
     font-size: 1rem;
     font-weight: 700;
     color: #f8fafc;
@@ -1467,7 +1445,7 @@
 .structure-single-table-note {
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 30%),
-        rgba(18, 24, 30, 0.92) !important;
+        var(--surface-elevated) !important;
 }
 
 .structure-single-table-copy {
@@ -1485,10 +1463,10 @@
     min-height: 104px;
     padding: 16px 18px !important;
     border-radius: 28px !important;
-    border-color: rgba(148, 163, 184, 0.14) !important;
+    border-color: var(--border-basalt) !important;
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 30%),
-        rgba(18, 24, 30, 0.94) !important;
+        var(--surface-elevated) !important;
 }
 
 .structure-option-card.is-active {
@@ -1496,7 +1474,7 @@
     background:
         radial-gradient(circle at top left, rgba(59, 130, 246, 0.14), transparent 45%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 34%),
-        rgba(18, 24, 30, 0.98) !important;
+        var(--surface-elevated) !important;
     box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.16);
 }
 
@@ -1556,7 +1534,7 @@
 .structure-basic-groups-panel > .basalt-btn,
 .structure-wizard-footer .basalt-btn {
     min-height: 3.2rem;
-    border-radius: 999px;
+    border-radius: 2px;
 }
 
 .structure-step-panel .wizard-main-panel,
@@ -1572,13 +1550,13 @@
 .structure-step-panel .available-item {
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 30%),
-        rgba(18, 24, 30, 0.94) !important;
+        var(--surface-elevated) !important;
 }
 
 @media (max-width: 1100px) {
     .structure-basic-name-panel,
-    .structure-basic-type-panel,
-    .structure-basic-format-panel {
+.structure-basic-type-panel,
+.structure-basic-format-panel {
         grid-column: 1 / -1 !important;
     }
 }
@@ -1586,25 +1564,47 @@
 /* Light theme overrides */
 :root[data-theme="light"] .tournament-structure-shell {
     --border: rgba(15, 23, 42, 0.1);
+
+    /* El set `--tb-*` ya no tiene paleta propia: es una capa de nombres sobre
+       los tokens del shell, que traen su propia contraparte clara. Lo único que
+       queda acá es lo que NO es color de marca:
+         · el verde se mantiene brillante a propósito (es superficie en 4 de sus
+           5 usos, y `.basalt-btn-primary` le pone encima una etiqueta #052E16;
+           oscurecerlo bajaba esa etiqueta a 2.97:1);
+         · las sombras y el brillo interior, que en claro tienen que apoyarse en
+           tinta y no en negro. */
+    --tb-green: #22C55E;
+    --tb-plate-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.18);
+    --tb-tectonic-glow: inset 0 1px 0 0 rgba(15, 23, 42, 0.04);
 }
 
-:root[data-theme="light"] .structure-hero-meta span {
-    border-color: rgba(15, 23, 42, 0.1);
-    background: rgba(15, 23, 42, 0.04);
-    color: rgba(15, 23, 42, 0.7);
-}
-
-:root[data-theme="light"] .structure-summary-card {
-    border-color: rgba(15, 23, 42, 0.1);
+/* The plate backgrounds at L1089 are a hardcoded near-black behind !important,
+   so the token remap alone cannot reach them. */
+:root[data-theme="light"] .structure-module,
+:root[data-theme="light"] .structure-wizard-card {
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.98), transparent 42%),
-        rgba(255, 255, 255, 0.96);
+        radial-gradient(circle at top left, rgba(4, 120, 87, 0.05), transparent 28%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.02), transparent 24%),
+        #ffffff !important;
 }
 
-:root[data-theme="light"] .structure-summary-card:hover {
+/* The active phase card hardcodes rgba(18,24,30,.96) (L2856), so it stayed dark
+   while --tb-text went dark too: its title and meta rendered at 1.0:1. */
+:root[data-theme="light"] .tournament-structure-shell .structure-phase-card[aria-current="true"],
+:root[data-theme="light"] .tournament-structure-shell .structure-phase-card.structure-phase-card--active {
+    border-color: color-mix(in srgb, var(--accent-primary) 42%, transparent) !important;
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.98), transparent 42%),
-        rgba(247, 249, 252, 0.96);
+        radial-gradient(circle at top left, color-mix(in srgb, var(--accent-primary) 7%, transparent), transparent 36%),
+        #ffffff !important;
+    box-shadow: none;
+}
+
+/* --tb-green's single text use: bright green on a pale green chip is ~2:1 on a
+   light surface, so this one needs the darker green the token no longer holds. */
+:root[data-theme="light"] .tournament-structure-shell .basalt-badge.badge-ok {
+    background: rgba(21, 128, 61, 0.12) !important;
+    border-color: rgba(21, 128, 61, 0.32) !important;
+    color: #15803d !important;
 }
 
 :root[data-theme="light"] .structure-module {
@@ -1629,27 +1629,16 @@
 }
 
 :root[data-theme="light"] .structure-empty-title,
-:root[data-theme="light"] .structure-hero-title,
 :root[data-theme="light"] .structure-module-title,
 :root[data-theme="light"] .structure-phase-title {
     color: #0f172a;
 }
 
-:root[data-theme="light"] .structure-hero-text,
 :root[data-theme="light"] .structure-module-copy,
-:root[data-theme="light"] .structure-summary-foot,
+:root[data-theme="light"] .structure-save-hint,
 :root[data-theme="light"] .structure-phase-meta,
 :root[data-theme="light"] .structure-empty-copy {
     color: rgba(15, 23, 42, 0.7);
-}
-
-:root[data-theme="light"] .structure-summary-label {
-    color: rgba(15, 23, 42, 0.55);
-}
-
-:root[data-theme="light"] .structure-summary-value,
-:root[data-theme="light"] .structure-summary-value--text {
-    color: #0f172a;
 }
 
 :root[data-theme="light"] .structure-step-panel,
@@ -1678,21 +1667,37 @@
  * .tournament-structure-shell so the rest of the admin remains untouched.
  * ========================================================================== */
 
+/* LOS TOKENS DE ESTRUCTURA SON LOS DEL SHELL, NO OTROS.
+ *
+ * Este bloque declaraba una paleta propia —placas azuladas (#0F141A / #151B22 /
+ * #26313B), tinta #F4F7FA/#98A6B3 y un acento CIAN (#38BDF8)— tomada de un mock
+ * de referencia distinto al del header. Con eso, la misma consola cambiaba de
+ * color al pasar de una pestaña a otra: el borde de un panel de Estructura no
+ * era el borde de un panel del Resumen, y lo seleccionado se pintaba cian
+ * mientras la barra pintaba azul.
+ *
+ * Ahora `--tb-*` es una CAPA DE NOMBRES sobre los tokens de basalt: los 91
+ * lugares que ya los usaban siguen igual, y el tema claro sale solo porque los
+ * tokens del shell ya lo resuelven. El bloque `:root[data-theme="light"]` de más
+ * arriba, que existía para remapear esta paleta a mano, deja de hacer falta.
+ */
 .tournament-structure-shell {
-    --tb-bg: #0F141A;
-    --tb-card: #151B22;
-    --tb-border: #26313B;
-    --tb-text: #F4F7FA;
-    --tb-text-2: #98A6B3;
-    --tb-green: #22C55E;
-    --tb-blue: #38BDF8;
-    --tb-red: #EF4444;
-    --tb-orange: #F59E0B;
+    --tb-bg: var(--bg-basalt);
+    --tb-card: var(--surface-elevated);
+    --tb-border: var(--border-basalt);
+    --tb-text: var(--text-main);
+    --tb-text-2: var(--text-secondary);
+    /* Verde de confirmación, el mismo que "Guardar" en la barra. */
+    --tb-green: var(--accent-success);
+    /* Era el cian de selección. El acento de la consola es uno solo. */
+    --tb-blue: var(--accent-primary);
+    --tb-red: var(--status-error);
+    --tb-orange: var(--status-warning);
     --tb-plate-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
     --tb-tectonic-glow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 
     color: var(--tb-text);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-main), 'Inter', sans-serif;
     line-height: 1.5;
 }
 
@@ -1728,8 +1733,7 @@
 /* ---- Titles inside plates ---- */
 .tournament-structure-shell .structure-module-title,
 .tournament-structure-shell .basalt-h1.structure-module-title,
-.tournament-structure-shell .structure-empty-title,
-.tournament-structure-shell .structure-hero-title {
+.tournament-structure-shell .structure-empty-title {
     font-size: clamp(1.5rem, 2.4vw, 2rem) !important;
     font-weight: 800 !important;
     letter-spacing: -0.04em !important;
@@ -1743,7 +1747,6 @@
 }
 
 .tournament-structure-shell .structure-module-copy,
-.tournament-structure-shell .structure-hero-text,
 .tournament-structure-shell .structure-empty-text {
     color: var(--tb-text-2) !important;
     font-size: 0.9rem !important;
@@ -1760,7 +1763,7 @@
 }
 
 .tournament-structure-shell .structure-option-card {
-    background: rgba(255, 255, 255, 0.02) !important;
+    background: var(--surface-soft) !important;
     border: 1px solid var(--tb-border) !important;
     border-radius: 0 !important;
     padding: 24px !important;
@@ -1774,13 +1777,13 @@
 }
 
 .tournament-structure-shell .structure-option-card:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: var(--surface-soft) !important;
     border-color: var(--tb-blue) !important;
 }
 
 .tournament-structure-shell .structure-option-card.is-active {
     border-color: var(--tb-blue) !important;
-    background: rgba(56, 189, 248, 0.05) !important;
+    background: color-mix(in srgb, var(--accent-primary) 05%, transparent) !important;
     color: var(--tb-text) !important;
 }
 
@@ -1856,70 +1859,11 @@
     background: var(--tb-border) !important;
 }
 
-/* ---- Metrics grid (Resumen de Estructura) ---- */
-.tournament-structure-shell .structure-summary-grid {
-    display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 20px !important;
-    margin-bottom: 0 !important;
-    max-width: none !important;
-}
-
-.tournament-structure-shell .structure-summary-card {
-    background: var(--tb-bg) !important;
-    background-image: none !important;
-    border: 1px solid var(--tb-border) !important;
-    border-radius: 0 !important;
-    padding: 20px !important;
-    text-align: center !important;
-    min-height: auto !important;
-    grid-template-rows: auto auto auto !important;
-    transform: none !important;
-    box-shadow: none !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 6px !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-.tournament-structure-shell .structure-summary-card:hover {
-    background: var(--tb-bg) !important;
-    border-color: var(--tb-blue) !important;
-    transform: none !important;
-}
-
-.tournament-structure-shell .structure-summary-label {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.7rem !important;
-    color: var(--tb-text-2) !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.14em !important;
-    order: 2 !important;
-    margin-top: 4px !important;
-}
-
-.tournament-structure-shell .structure-summary-value {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 2rem !important;
-    font-weight: 800 !important;
-    color: var(--tb-blue) !important;
-    line-height: 1 !important;
-    letter-spacing: 0 !important;
-    order: 1 !important;
-    -webkit-text-fill-color: var(--tb-blue) !important;
-}
-
-.tournament-structure-shell .structure-summary-value--text {
-    font-size: 1.05rem !important;
-    color: var(--tb-text) !important;
-    -webkit-text-fill-color: var(--tb-text) !important;
-    line-height: 1.2 !important;
-}
-
-.tournament-structure-shell .structure-summary-foot {
-    display: none !important;
-}
+/* Acá estaba el override de la grilla de métricas. Pintaba las cuatro placas
+   con `--tb-bg` —el fondo de la PÁGINA— dentro de un panel elevado, así que se
+   leían como agujeros negros; ponía el número en `--tb-blue`, que es el color
+   de lo seleccionado y de los links, usado acá de adorno; e invertía el orden
+   de lectura con `order: 1`. La grilla ya no existe. */
 
 /* ---- Phase list / cards ---- */
 .tournament-structure-shell .structure-phase-list {
@@ -1949,7 +1893,7 @@
 }
 
 .tournament-structure-shell .structure-phase-icon {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: var(--surface-soft) !important;
     border: 1px solid var(--tb-border) !important;
     border-radius: 0 !important;
     width: auto !important;
@@ -2017,9 +1961,9 @@
 }
 
 .tournament-structure-shell .basalt-badge.badge-published {
-    background: rgba(56, 189, 248, 0.15) !important;
+    background: color-mix(in srgb, var(--accent-primary) 15%, transparent) !important;
     color: var(--tb-blue) !important;
-    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 30%, transparent) !important;
 }
 
 .tournament-structure-shell .basalt-badge.badge-warning {
@@ -2044,7 +1988,7 @@
 }
 
 .tournament-structure-shell .structure-empty-icon {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: var(--surface-soft) !important;
     border: 1px solid var(--tb-border) !important;
     border-radius: 0 !important;
     width: 64px !important;
@@ -2088,8 +2032,8 @@
 
 .tournament-structure-shell .structure-wizard-step.is-active,
 .tournament-structure-shell .phase-wizard-step.is-active {
-    background: rgba(56, 189, 248, 0.08) !important;
-    border-color: rgba(56, 189, 248, 0.35) !important;
+    background: color-mix(in srgb, var(--accent-primary) 08%, transparent) !important;
+    border-color: color-mix(in srgb, var(--accent-primary) 35%, transparent) !important;
     color: var(--tb-blue) !important;
 }
 
@@ -2117,7 +2061,7 @@
 .tournament-structure-shell input[type="number"]:not(.structure-counter-input),
 .tournament-structure-shell select,
 .tournament-structure-shell textarea {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: var(--surface-soft) !important;
     border: 1px solid var(--tb-border) !important;
     border-radius: 4px !important;
     color: var(--tb-text) !important;
@@ -2128,7 +2072,7 @@
 .tournament-structure-shell textarea:focus {
     border-color: var(--tb-blue) !important;
     outline: none !important;
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 15%, transparent) !important;
 }
 
 /* ---- Number stepper shell (Cantidad de equipos / avanzan) ----
@@ -2136,7 +2080,7 @@
  * and Tailwind utilities (text-lg, font-bold, text-white, py-2). */
 .tournament-structure-shell .structure-counter-shell,
 .tournament-structure-shell div.structure-counter-shell {
-    background: rgba(255, 255, 255, 0.04) !important;
+    background: var(--surface-soft) !important;
     border: 1px solid var(--tb-border) !important;
     border-radius: 4px !important;
     overflow: hidden !important;
@@ -2167,7 +2111,7 @@
 }
 
 .tournament-structure-shell .structure-counter-shell .structure-counter-button:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: var(--surface-soft) !important;
     color: var(--tb-text) !important;
 }
 
@@ -2215,7 +2159,7 @@
 }
 
 /* Outer container of TableColumnSelector */
-.tournament-structure-shell [class*="bg-[rgba(10,10,11,0.85)]"] {
+.tournament-structure-shell [class*="bg-[rgba(10, 10, 11, 0.85)]"] {
     background: var(--tb-card) !important;
     border-color: var(--tb-border) !important;
     border-radius: 4px !important;
@@ -2240,7 +2184,7 @@
 
 /* Glossary category badges (3/4, 0/4, 6/6) */
 .tournament-structure-shell .glossary-badge {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: var(--surface-soft) !important;
     color: var(--tb-text-2) !important;
     border: 1px solid var(--tb-border) !important;
     border-radius: 2px !important;
@@ -2252,9 +2196,9 @@
 }
 
 .tournament-structure-shell .glossary-badge.full {
-    background: rgba(56, 189, 248, 0.12) !important;
+    background: color-mix(in srgb, var(--accent-primary) 12%, transparent) !important;
     color: var(--tb-blue) !important;
-    border-color: rgba(56, 189, 248, 0.3) !important;
+    border-color: color-mix(in srgb, var(--accent-primary) 30%, transparent) !important;
 }
 
 .tournament-structure-shell .glossary-badge.partial {
@@ -2319,13 +2263,13 @@
 .tournament-structure-shell .structure-basic-type-card.is-active,
 .tournament-structure-shell .structure-basic-type-option.is-active {
     border-color: var(--tb-blue) !important;
-    background: rgba(56, 189, 248, 0.05) !important;
+    background: color-mix(in srgb, var(--accent-primary) 05%, transparent) !important;
 }
 
 /* ---- Mobile collapse ---- */
 @media (max-width: 768px) {
     .tournament-structure-shell .structure-option-grid,
-    .tournament-structure-shell .structure-basic-type-grid {
+.tournament-structure-shell .structure-basic-type-grid {
         grid-template-columns: 1fr !important;
     }
     .tournament-structure-shell .structure-phase-card {
@@ -2333,7 +2277,7 @@
         gap: 16px !important;
     }
     .tournament-structure-shell .structure-module-title,
-    .tournament-structure-shell .basalt-h1.structure-module-title {
+.tournament-structure-shell .basalt-h1.structure-module-title {
         font-size: 1.5rem !important;
     }
 }
@@ -2479,8 +2423,8 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
  *   segmented buttons      → 14px   / 700
  *   footer CTAs            → 13.5px / 700 / uppercase / 0.03em / 48px tall
  *
- * Greys avoid pure white: primary text rgba(248,250,252,0.96); secondary
- * rgba(203,213,225,0.92); muted rgba(148,163,184,0.78).
+ * Greys avoid pure white: primary text var(--text-main); secondary
+ * rgba(203,213,225,0.92); muted var(--text-secondary).
  *
  * The kicker / title / subtitle are matched two ways: by class
  * (.phase-wizard-kicker / .phase-wizard-step-heading / .phase-wizard-step-
@@ -2496,7 +2440,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     font-weight: 700 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.06em !important;
-    color: rgba(148, 163, 184, 0.78) !important;
+    color: var(--text-secondary) !important;
     line-height: 1.2 !important;
     margin: 0 0 6px !important;
 }
@@ -2510,7 +2454,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     line-height: 24px !important;
     letter-spacing: -0.01em !important;
     text-transform: none !important;
-    color: rgba(248, 250, 252, 0.96) !important;
+    color: var(--text-main) !important;
     margin: 0 0 4px !important;
 }
 
@@ -2520,7 +2464,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     font-size: 12.5px !important;
     font-weight: 400 !important;
     line-height: 17px !important;
-    color: rgba(148, 163, 184, 0.78) !important;
+    color: var(--text-secondary) !important;
     letter-spacing: 0 !important;
     margin: 0 !important;
 }
@@ -2544,7 +2488,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     font-size: 14.5px !important;
     font-weight: 600 !important;
     line-height: 1.4 !important;
-    color: rgba(248, 250, 252, 0.96) !important;
+    color: var(--text-main) !important;
     min-height: 48px !important;
 }
 
@@ -2562,7 +2506,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     font-size: 14.5px !important;
     font-weight: 600 !important;
     line-height: 18px !important;
-    color: rgba(248, 250, 252, 0.96) !important;
+    color: var(--text-main) !important;
     margin-bottom: 2px !important;
 }
 
@@ -2573,7 +2517,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     font-weight: 450 !important;
     line-height: 15px !important;
     letter-spacing: 0 !important;
-    color: rgba(148, 163, 184, 0.78) !important;
+    color: var(--text-secondary) !important;
     opacity: 1 !important;
     margin-top: 2px !important;
 }
@@ -2583,7 +2527,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     font-size: 15px !important;
     font-weight: 500 !important;
     line-height: 21px !important;
-    color: rgba(203, 213, 225, 0.78) !important;
+    color: var(--text-secondary) !important;
     letter-spacing: 0 !important;
 }
 
@@ -2592,7 +2536,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
 .basalt-body .tournament-structure-shell .structure-step-panel input.structure-counter-input {
     font-size: 15.5px !important;
     font-weight: 700 !important;
-    color: rgba(248, 250, 252, 0.96) !important;
+    color: var(--text-main) !important;
     line-height: 1 !important;
 }
 
@@ -2634,7 +2578,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     font-size: 14.5px !important;
     font-weight: 600 !important;
     line-height: 19px !important;
-    color: rgba(248, 250, 252, 0.96) !important;
+    color: var(--text-main) !important;
 }
 
 /* Checkbox row helper copy (the <p> below the title) */
@@ -2642,7 +2586,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     font-size: 12.5px !important;
     font-weight: 400 !important;
     line-height: 17px !important;
-    color: rgba(148, 163, 184, 0.78) !important;
+    color: var(--text-secondary) !important;
     margin-top: 2px !important;
 }
 
@@ -2723,22 +2667,53 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
  * `.phase-wizard-step-panel .rounded-xl` and `.phase-wizard-step-panel
  * .bg-[var(--surface-basalt)]`. This rule is in basalt.css line ~4201 with
  * !important and 2-class specificity (`.phase-wizard-step-panel .rounded-xl`).
- * Override with 4-class specificity inside structure shell. */
-.basalt-body .tournament-structure-shell .phase-wizard-step-panel .rounded-xl,
-.basalt-body .tournament-structure-shell .phase-wizard-step-panel .bg-\[var\(--surface-basalt\)\],
-.basalt-body .tournament-structure-shell .phase-wizard-step-panel .bg-\[var\(--accent-primary\)\]\/5,
-.basalt-body .tournament-structure-shell .structure-step-panel .rounded-xl,
-.basalt-body .tournament-structure-shell .structure-step-panel .bg-\[var\(--surface-basalt\)\] {
+ * Override with 4-class specificity inside structure shell.
+ *
+ * El `:not(.structure-option-card)` no es cosmético. `.rounded-xl` es una
+ * utilidad de Tailwind, y las tarjetas de "Tipo de fase" y "Formato de partido"
+ * la llevan igual que los paneles decorativos que esta regla quiere aplanar.
+ * Con 4 clases le ganaba a `.tournament-structure-shell .structure-option-card
+ * .is-active` (3), así que les borraba el fondo Y el borde: las dos grillas se
+ * dibujaban transparentes y la opción elegida quedaba idéntica a las otras.
+ * No es que se viera fea — no había forma de saber qué estaba seleccionado. */
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .rounded-xl:not(.structure-option-card),
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .bg-\[var\(--surface-basalt\)\]:not(.structure-option-card),
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .bg-\[var\(--accent-primary\)\]\/5:not(.structure-option-card),
+.basalt-body .tournament-structure-shell .structure-step-panel .rounded-xl:not(.structure-option-card),
+.basalt-body .tournament-structure-shell .structure-step-panel .bg-\[var\(--surface-basalt\)\]:not(.structure-option-card) {
     background: transparent !important;
     background-image: none !important;
     border-color: transparent !important;
+}
+
+/* La tarjeta elegible del wizard usa el mismo vocabulario que la de "Modelo
+   competitivo" en la pestaña: placa tenue, borde del sistema, y el azul de
+   selección cuando está activa. Una sola forma de "elegí una opción" en toda
+   la pantalla. Se declara acá, después del aplanado, para no depender de en
+   qué orden queden las hojas. */
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .structure-option-card,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-option-card {
+    background: var(--surface-soft) !important;
+    border: 1px solid var(--border-basalt) !important;
+    border-radius: 0 !important;
+}
+
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .structure-option-card:hover:not(:disabled),
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-option-card:hover:not(:disabled) {
+    border-color: var(--accent-primary) !important;
+}
+
+.basalt-body .tournament-structure-shell .phase-wizard-step-panel .structure-option-card.is-active,
+.basalt-body .tournament-structure-shell .structure-step-panel .structure-option-card.is-active {
+    background: color-mix(in srgb, var(--accent-primary) 8%, var(--surface-soft)) !important;
+    border-color: var(--accent-primary) !important;
 }
 
 /* But preserve chrome on the accent variant (Grupos / Etapas de eliminación). */
 .basalt-body .tournament-structure-shell .structure-step-panel .structure-field-panel.structure-field-panel-accent,
 .basalt-body .tournament-structure-shell .phase-wizard-step-panel .structure-field-panel.structure-field-panel-accent {
     background:
-        linear-gradient(135deg, rgba(0, 163, 101, 0.12), transparent 52%),
+        linear-gradient(135deg, color-mix(in srgb, var(--accent-primary) 12%, transparent), transparent 52%),
         rgba(255, 255, 255, 0.028) !important;
     border: 1px solid rgba(0, 214, 136, 0.22) !important;
     border-radius: 20px !important;
@@ -2759,9 +2734,9 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     gap: 12px;
     padding: 12px 14px;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.03);
-    color: rgba(248, 250, 252, 0.96);
+    border: 1px solid var(--border-basalt);
+    background: var(--surface-soft);
+    color: var(--text-main);
     font-size: 13px;
     line-height: 1.45;
     animation: tournament-structure-feedback-in 200ms ease-out;
@@ -2823,11 +2798,11 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
 /* ---- Active phase: corner ribbon + accent border (más explícito) ------- */
 .tournament-structure-shell .structure-phase-card[aria-current="true"],
 .tournament-structure-shell .structure-phase-card.structure-phase-card--active {
-    border-color: rgba(34, 197, 94, 0.42) !important;
+    border-color: color-mix(in srgb, var(--accent-primary) 42%, transparent) !important;
     background:
-        radial-gradient(circle at top left, rgba(34, 197, 94, 0.08), transparent 36%),
-        rgba(18, 24, 30, 0.96) !important;
-    box-shadow: inset 4px 0 0 0 rgba(34, 197, 94, 0.85) !important;
+        radial-gradient(circle at top left, color-mix(in srgb, var(--accent-primary) 8%, transparent), transparent 36%),
+        var(--surface-elevated) !important;
+    box-shadow: none;
 }
 
 /* ---- Trash button: visible always (no más opacity:0 + group-hover) ----- */
@@ -2859,7 +2834,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     border-color: rgba(239, 68, 68, 0.45) !important;
     background:
         radial-gradient(circle at top right, rgba(239, 68, 68, 0.08), transparent 38%),
-        rgba(18, 24, 30, 0.98) !important;
+        var(--surface-elevated) !important;
 }
 
 .tournament-structure-shell .structure-phase-delete-confirm {
@@ -2896,13 +2871,13 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
 
 .tournament-structure-shell .structure-phase-delete-confirm-cancel {
     background: transparent;
-    color: rgba(248, 250, 252, 0.86);
+    color: var(--text-main);
     border-color: rgba(255, 255, 255, 0.14);
 }
 
 .tournament-structure-shell .structure-phase-delete-confirm-cancel:hover,
 .tournament-structure-shell .structure-phase-delete-confirm-cancel:focus-visible {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-soft);
     border-color: rgba(255, 255, 255, 0.24);
     outline: none;
 }
@@ -2933,7 +2908,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     min-height: 36px !important;
     padding: 0 14px !important;
     font-size: 11px !important;
-    border-radius: 999px !important;
+    border-radius: 2px !important;
 }
 
 /* ---- Focus-visible ring system (homogéneo en todo el shell) ----------- */
@@ -2945,7 +2920,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
 .tournament-structure-shell select:focus-visible,
 .tournament-structure-shell textarea:focus-visible,
 .tournament-structure-shell .basalt-btn:focus-visible {
-    outline: 2px solid rgba(56, 189, 248, 0.65);
+    outline: 2px solid var(--accent-primary);
     outline-offset: 2px;
 }
 
@@ -2956,25 +2931,33 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25);
 }
 
-/* ---- Sticky wizard footer (desktop) ----------------------------------- */
+/* ---- Barra de acciones del wizard (desktop) ---------------------------
+ * ESTA es la regla que cortaba los botones.
+ *
+ * Venía `position: sticky` con `bottom: -24px` y `margin-bottom: -24px`: dos
+ * corrimientos negativos para que la barra quedara al ras del borde inferior de
+ * la tarjeta. Pero la tarjeta es `.basalt-card`, y el bloque tectónico le pone
+ * `overflow: hidden` — así que esos 24px que sobresalían no quedaban al ras:
+ * quedaban RECORTADOS. Medido: el pie terminaba 27px por debajo del borde de la
+ * tarjeta, y "Cancelar", "Atrás" y "Siguiente" se veían cortados a la mitad.
+ *
+ * Y el sticky nunca funcionó: un ancestro con `overflow: hidden` que no
+ * scrollea deja a `position: sticky` comportándose como `relative`. Se pagaba
+ * el precio (los corrimientos negativos para disimularlo) sin el beneficio.
+ *
+ * El bleed horizontal sí se queda: `margin-inline: -26px` cancela el padding
+ * lateral de la columna y la barra llega hasta los bordes, que es lo que se
+ * quería. Horizontalmente el recorte de la tarjeta cae justo en el borde, así
+ * que ahí no corta nada.
+ */
 .tournament-structure-shell .structure-wizard-content .structure-wizard-footer {
-    position: sticky;
-    bottom: 0;
+    position: relative;
     z-index: 4;
     margin-inline: -26px;
-    margin-bottom: -24px;
+    margin-bottom: 0;
     padding: 16px 26px;
     background: rgba(15, 20, 26, 0.96);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* ---- Hide desktop hero on mobile (mobile already shows tsm-card-state) - */
-@media (max-width: 767px) {
-    .tournament-structure-shell .structure-hero-panel {
-        display: none !important;
-    }
+    border-top: 1px solid var(--border-basalt);
 }
 
 /* ---- Wizard sidebar → progress bar collapsable on tablet & mobile ----- */
@@ -2982,7 +2965,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     .tournament-structure-shell .structure-wizard-sidebar {
         padding: 16px !important;
         gap: 10px !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        border-bottom: 1px solid var(--border-basalt);
     }
 
     .tournament-structure-shell .structure-wizard-sidebar-head {
@@ -2991,10 +2974,6 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
 
     .tournament-structure-shell .structure-wizard-sidebar-title {
         font-size: 16px !important;
-    }
-
-    .tournament-structure-shell .structure-wizard-sidebar-copy {
-        display: none;
     }
 
     /* Stepper: horizontal scroll para no perder altura. */
@@ -3051,7 +3030,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
         padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
         z-index: 50;
         background: rgba(10, 13, 18, 0.96);
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-top: 1px solid var(--border-basalt);
         box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
         display: grid !important;
         grid-template-columns: auto 1fr;
@@ -3095,7 +3074,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     }
 
     .tournament-structure-shell .structure-phase-delete-confirm-cancel,
-    .tournament-structure-shell .structure-phase-delete-confirm-go {
+.tournament-structure-shell .structure-phase-delete-confirm-go {
         flex: 1;
         text-align: center;
     }
@@ -3113,10 +3092,10 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     }
 
     .tournament-structure-shell .structure-basic-name-panel,
-    .tournament-structure-shell .structure-basic-type-panel,
-    .tournament-structure-shell .structure-basic-format-panel,
-    .tournament-structure-shell .structure-basic-groups-panel,
-    .tournament-structure-shell .structure-split-grid {
+.tournament-structure-shell .structure-basic-type-panel,
+.tournament-structure-shell .structure-basic-format-panel,
+.tournament-structure-shell .structure-basic-groups-panel,
+.tournament-structure-shell .structure-split-grid {
         grid-column: 1 / -1 !important;
     }
 
@@ -3132,7 +3111,7 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
     gap: 6px;
     margin-top: 6px;
     font-size: 11.5px;
-    color: rgba(56, 189, 248, 0.85);
+    color: var(--accent-primary);
     font-weight: 500;
 }
 
@@ -3164,18 +3143,18 @@ button.tsm-phase-item {
 
 button.tsm-phase-item:hover:not(:disabled),
 button.tsm-phase-item:focus-visible:not(:disabled) {
-    background: rgba(56, 189, 248, 0.08);
-    border-color: rgba(56, 189, 248, 0.32);
+    background: color-mix(in srgb, var(--accent-primary) 08%, transparent);
+    border-color: color-mix(in srgb, var(--accent-primary) 32%, transparent);
 }
 
 button.tsm-phase-item:focus-visible {
-    outline: 2px solid rgba(56, 189, 248, 0.65);
+    outline: 2px solid var(--accent-primary);
     outline-offset: 2px;
 }
 
 button.tsm-phase-item:active:not(:disabled) {
     transform: scale(0.99);
-    background: rgba(56, 189, 248, 0.12);
+    background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
 }
 
 button.tsm-phase-item:disabled {
@@ -3186,8 +3165,8 @@ button.tsm-phase-item:disabled {
 /* Active phase keeps the green accent on tap as well */
 button.tsm-phase-item.is-active:hover:not(:disabled),
 button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
-    background: rgba(0, 163, 101, 0.18);
-    border-color: rgba(0, 163, 101, 0.55);
+    background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
+    border-color: color-mix(in srgb, var(--accent-primary) 55%, transparent);
 }
 
 /* ===========================================================================
@@ -3210,16 +3189,16 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: rgba(56, 189, 248, 0.08);
-    border: 1px solid rgba(56, 189, 248, 0.2);
-    color: rgba(56, 189, 248, 0.95);
+    background: color-mix(in srgb, var(--accent-primary) 08%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    color: color-mix(in srgb, var(--accent-primary) 95%, transparent);
     flex-shrink: 0;
     margin-bottom: 4px;
 }
 
 .tournament-structure-shell .structure-phase-type-card.is-active .structure-phase-type-icon {
-    background: rgba(56, 189, 248, 0.18);
-    border-color: rgba(56, 189, 248, 0.45);
+    background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
+    border-color: color-mix(in srgb, var(--accent-primary) 45%, transparent);
 }
 
 @media (max-width: 480px) {
@@ -3252,36 +3231,6 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 }
 
 /* ---- Live preview at end of step 1 ------------------------------------ */
-.tournament-structure-shell .structure-step-preview {
-    margin-top: 4px;
-    padding: 14px 16px;
-    border-radius: 12px;
-    border: 1px dashed rgba(56, 189, 248, 0.32);
-    background: rgba(56, 189, 248, 0.05);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.tournament-structure-shell .structure-step-preview-eyebrow {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba(56, 189, 248, 0.85);
-}
-
-.tournament-structure-shell .structure-step-preview-line {
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.45;
-    color: rgba(248, 250, 252, 0.96);
-}
-
-.tournament-structure-shell .structure-step-preview-line strong {
-    color: #fff;
-    font-weight: 700;
-}
 
 /* ---- Step 2: live points example ------------------------------------- */
 .tournament-structure-shell .structure-points-example {
@@ -3290,10 +3239,10 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     gap: 8px;
     padding: 14px 16px;
     border-radius: 12px;
-    border: 1px solid rgba(34, 197, 94, 0.22);
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 22%, transparent);
     background:
-        radial-gradient(circle at top left, rgba(34, 197, 94, 0.08), transparent 50%),
-        rgba(34, 197, 94, 0.04);
+        radial-gradient(circle at top left, color-mix(in srgb, var(--accent-primary) 8%, transparent), transparent 50%),
+        color-mix(in srgb, var(--accent-primary) 4%, transparent);
 }
 
 .tournament-structure-shell .structure-points-example-eyebrow {
@@ -3301,7 +3250,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgba(34, 197, 94, 0.95);
+    color: color-mix(in srgb, var(--accent-primary) 95%, transparent);
 }
 
 .tournament-structure-shell .structure-points-example-row {
@@ -3319,7 +3268,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     align-items: center;
     padding: 8px 12px;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--surface-soft);
     font-size: 11px;
     color: rgba(203, 213, 225, 0.85);
     text-transform: uppercase;
@@ -3329,7 +3278,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 .tournament-structure-shell .structure-points-example-team strong {
     font-size: 22px;
     font-weight: 800;
-    color: #fff;
+    color: var(--text-main);
     font-family: 'JetBrains Mono', monospace;
     letter-spacing: -0.02em;
 }
@@ -3350,7 +3299,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 }
 
 .tournament-structure-shell .structure-points-example-foot strong {
-    color: #fff;
+    color: var(--text-main);
     font-weight: 700;
 }
 
@@ -3361,9 +3310,9 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     gap: 8px;
     padding: 10px 12px;
     border-radius: 10px;
-    background: rgba(56, 189, 248, 0.06);
-    border: 1px solid rgba(56, 189, 248, 0.18);
-    color: rgba(186, 230, 253, 0.95);
+    background: color-mix(in srgb, var(--accent-primary) 06%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 18%, transparent);
+    color: var(--text-main);
     font-size: 12px;
     line-height: 1.5;
 }
@@ -3371,7 +3320,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 .tournament-structure-shell .structure-tiebreaker-helper svg {
     flex-shrink: 0;
     margin-top: 2px;
-    color: rgba(56, 189, 248, 0.85);
+    color: var(--accent-primary);
 }
 
 /* ---- Step 4: empty-state hint cards (ejemplos típicos) ---------------- */
@@ -3386,8 +3335,8 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     padding: 8px 10px;
     border-radius: 8px;
     border: 1px dashed rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.025);
-    color: rgba(203, 213, 225, 0.78);
+    background: var(--surface-soft);
+    color: var(--text-secondary);
     font-size: 11.5px;
     text-align: center;
     cursor: pointer;
@@ -3395,9 +3344,9 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 }
 
 .tournament-structure-shell .structure-label-example-chip:hover {
-    border-color: rgba(56, 189, 248, 0.4);
-    background: rgba(56, 189, 248, 0.06);
-    color: rgba(186, 230, 253, 0.95);
+    border-color: color-mix(in srgb, var(--accent-primary) 40%, transparent);
+    background: color-mix(in srgb, var(--accent-primary) 06%, transparent);
+    color: var(--text-main);
 }
 
 /* ---- Step 6: preset selector ----------------------------------------- */
@@ -3408,8 +3357,8 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     margin-bottom: 14px;
     padding: 10px 12px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--surface-soft);
+    border: 1px solid var(--border-basalt);
 }
 
 .tournament-structure-shell .structure-circuit-presets-label {
@@ -3417,7 +3366,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: rgba(148, 163, 184, 0.85);
+    color: var(--text-secondary);
     align-self: center;
     margin-right: 4px;
 }
@@ -3428,8 +3377,8 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     padding: 6px 12px;
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(248, 250, 252, 0.92);
+    background: var(--surface-soft);
+    color: var(--text-main);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -3438,9 +3387,9 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 
 .tournament-structure-shell .structure-circuit-preset-btn:hover,
 .tournament-structure-shell .structure-circuit-preset-btn:focus-visible {
-    border-color: rgba(56, 189, 248, 0.5);
-    background: rgba(56, 189, 248, 0.1);
-    color: #fff;
+    border-color: color-mix(in srgb, var(--accent-primary) 50%, transparent);
+    background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+    color: var(--text-main);
     outline: none;
 }
 
@@ -3450,15 +3399,15 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     grid-template-columns: 18px 1fr;
     gap: 12px;
     padding: 14px 16px !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
-    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid var(--border-basalt) !important;
+    background: var(--surface-soft) !important;
     border-radius: 12px !important;
     transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .tournament-structure-shell .structure-stats-card:has(input:checked) {
-    border-color: rgba(56, 189, 248, 0.4) !important;
-    background: rgba(56, 189, 248, 0.06) !important;
+    border-color: color-mix(in srgb, var(--accent-primary) 40%, transparent) !important;
+    background: color-mix(in srgb, var(--accent-primary) 06%, transparent) !important;
 }
 
 /* Mobile adjust step 1 type cards: 2-col grid is fine but ensure icon
@@ -3503,19 +3452,19 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 
 /* Mejor color y contraste de los íconos de tipo, en activo e inactivo */
 .tournament-structure-shell .structure-phase-type-card .structure-phase-type-icon svg {
-    color: rgba(186, 230, 253, 0.95);
+    color: var(--text-main);
     width: 18px;
     height: 18px;
     stroke-width: 2;
 }
 
 .tournament-structure-shell .structure-phase-type-card:not(.is-active) .structure-phase-type-icon {
-    background: rgba(148, 163, 184, 0.08);
-    border-color: rgba(148, 163, 184, 0.2);
+    background: var(--border-basalt);
+    border-color: var(--border-basalt);
 }
 
 .tournament-structure-shell .structure-phase-type-card:not(.is-active) .structure-phase-type-icon svg {
-    color: rgba(203, 213, 225, 0.78);
+    color: var(--text-secondary);
 }
 
 /* Forzar tipografía sentence-case dentro de las phase-type cards (en lugar
@@ -3526,14 +3475,14 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     letter-spacing: -0.01em !important;
     font-size: 15px !important;
     font-weight: 700 !important;
-    color: rgba(248, 250, 252, 0.96) !important;
+    color: var(--text-main) !important;
 }
 
 .tournament-structure-shell .structure-phase-type-card > span.text-\[11px\] {
     text-transform: none !important;
     letter-spacing: 0 !important;
     font-size: 12px !important;
-    color: rgba(148, 163, 184, 0.78) !important;
+    color: var(--text-secondary) !important;
     opacity: 1 !important;
 }
 
@@ -3611,7 +3560,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     font-size: 10.5px !important;
     letter-spacing: 0.04em !important;
     font-weight: 700 !important;
-    color: rgba(148, 163, 184, 0.85) !important;
+    color: var(--text-secondary) !important;
     margin-bottom: 8px !important;
 }
 
@@ -3621,7 +3570,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     text-transform: none !important;
     letter-spacing: 0 !important;
     font-size: 12.5px !important;
-    color: rgba(148, 163, 184, 0.85) !important;
+    color: var(--text-secondary) !important;
     line-height: 1.5 !important;
 }
 
@@ -3630,8 +3579,8 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 .tournament-structure-shell .structure-single-table-note {
     padding: 12px 14px !important;
     border-radius: 10px !important;
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    background: var(--surface-soft) !important;
+    border: 1px solid var(--border-basalt) !important;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -3654,7 +3603,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 /* 4) Step 2: el ejemplo en vivo es informativo, no debe pesar más que los
       inputs. Bajamos un toque su contraste y compactamos en mobile. */
 .tournament-structure-shell .structure-points-example {
-    border-color: rgba(34, 197, 94, 0.18);
+    border-color: color-mix(in srgb, var(--accent-primary) 18%, transparent);
     padding: 10px 12px;
 }
 
@@ -3672,7 +3621,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 
 .tournament-structure-shell .structure-points-example-foot {
     font-size: 12px;
-    color: rgba(203, 213, 225, 0.78);
+    color: var(--text-secondary);
 }
 
 /* Step 2 score panels: en mobile el grid 3-col con números 18px+padding
@@ -3715,19 +3664,20 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     letter-spacing: 0 !important;
     font-size: 14px !important;
     font-weight: 600 !important;
-    color: rgba(248, 250, 252, 0.96) !important;
+    color: var(--text-main) !important;
 }
 
-/* 7) Sticky footer del wizard en desktop (no mobile): asegurar que el
-      contenedor padre permita el sticky. La regla actual usa
-      mt-auto + position:sticky pero algunos flex parents lo rompen. */
+/* 7) Este bloque era el segundo intento de arreglar el sticky del wizard: el
+      comentario decía "asegurar que el contenedor padre permita el sticky…
+      algunos flex parents lo rompen", y la solución fue bajar la barra otros
+      24px con `bottom: -24px`. No era el flex parent: era el `overflow: hidden`
+      de la tarjeta, que anula el sticky Y recorta lo que sobresale. Cada
+      corrimiento negativo empujaba los botones más adentro de la zona
+      recortada. La barra ya no es sticky (ver el bloque de arriba), así que
+      `bottom` no tiene efecto y el corrimiento se va. */
 @media (min-width: 768px) {
     .tournament-structure-shell .structure-wizard-content {
         position: relative;
-    }
-
-    .tournament-structure-shell .structure-wizard-content .structure-wizard-footer {
-        bottom: -24px;
     }
 }
 
@@ -3745,16 +3695,16 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     gap: 14px;
     padding: 14px 16px;
     border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-basalt);
+    background: var(--surface-soft);
     transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .tournament-structure-shell .structure-toggle-card.is-on {
-    border-color: rgba(56, 189, 248, 0.38);
+    border-color: color-mix(in srgb, var(--accent-primary) 38%, transparent);
     background:
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.08), transparent 50%),
-        rgba(56, 189, 248, 0.04);
+        radial-gradient(circle at top left, color-mix(in srgb, var(--accent-primary) 08%, transparent), transparent 50%),
+        color-mix(in srgb, var(--accent-primary) 04%, transparent);
 }
 
 .tournament-structure-shell .structure-toggle-card-label {
@@ -3789,7 +3739,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     font-size: 14.5px !important;
     font-weight: 700 !important;
     line-height: 1.3 !important;
-    color: rgba(248, 250, 252, 0.96) !important;
+    color: var(--text-main) !important;
     text-transform: none !important;
     letter-spacing: -0.005em !important;
 }
@@ -3798,7 +3748,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     font-size: 12.5px !important;
     font-weight: 400 !important;
     line-height: 1.5 !important;
-    color: rgba(148, 163, 184, 0.85) !important;
+    color: var(--text-secondary) !important;
     text-transform: none !important;
     letter-spacing: 0 !important;
 }
@@ -3809,7 +3759,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 10px !important;
     padding-top: 14px;
-    border-top: 1px dashed rgba(56, 189, 248, 0.22);
+    border-top: 1px dashed color-mix(in srgb, var(--accent-primary) 22%, transparent);
 }
 
 .tournament-structure-shell .structure-toggle-card-body .structure-score-panel {
@@ -3878,9 +3828,9 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     min-height: 64px !important;
     padding: 14px 4px !important;
     background: rgba(7, 10, 14, 0.94) !important;
-    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+    border: 1px solid var(--border-basalt) !important;
     border-radius: 14px !important;
-    color: #fff !important;
+    color: var(--text-main) !important;
 }
 
 .tournament-structure-shell .structure-step-panel-points .structure-score-panel .structure-field-label {
@@ -3933,7 +3883,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     margin: 0 0 14px !important;
     font-size: 16px !important;
     font-weight: 700 !important;
-    color: rgba(248, 250, 252, 0.96) !important;
+    color: var(--text-main) !important;
     text-transform: none !important;
     letter-spacing: -0.005em !important;
 }
@@ -3948,10 +3898,10 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     display: inline-flex;
     align-items: center;
     padding: 3px 10px;
-    border-radius: 999px;
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-    color: rgba(186, 230, 253, 0.95);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 25%, transparent);
+    color: var(--text-main);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0;
@@ -3968,18 +3918,18 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     height: 22px;
     margin-left: auto;
     border-radius: 50%;
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    background: rgba(148, 163, 184, 0.08);
-    color: rgba(186, 230, 253, 0.85);
+    border: 1px solid var(--border-basalt);
+    background: var(--border-basalt);
+    color: var(--text-main);
     cursor: help;
     flex-shrink: 0;
 }
 
 .tournament-structure-shell .structure-step-panel-rules .tiebreaker-info-tooltip:hover,
 .tournament-structure-shell .structure-step-panel-rules .tiebreaker-info-tooltip:focus-visible {
-    border-color: rgba(56, 189, 248, 0.5);
-    background: rgba(56, 189, 248, 0.12);
-    color: #fff;
+    border-color: color-mix(in srgb, var(--accent-primary) 50%, transparent);
+    background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+    color: var(--text-main);
     outline: none;
 }
 
@@ -3991,7 +3941,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     width: 240px;
     padding: 10px 12px;
     border-radius: 10px;
-    background: rgba(18, 24, 30, 0.98);
+    background: var(--surface-elevated);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: rgba(203, 213, 225, 0.95);
     font-size: 12px;
@@ -4029,21 +3979,21 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     min-height: 64px !important;
     padding: 10px 12px !important;
     border-radius: 14px !important;
-    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+    border: 1px solid var(--border-basalt) !important;
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)) !important;
     transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .tournament-structure-shell .structure-step-panel-rules .tiebreaker-card:hover {
-    border-color: rgba(56, 189, 248, 0.35) !important;
+    border-color: color-mix(in srgb, var(--accent-primary) 35%, transparent) !important;
     background:
-        linear-gradient(180deg, rgba(56, 189, 248, 0.05), rgba(255, 255, 255, 0.02)) !important;
+        linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 05%, transparent), rgba(255, 255, 255, 0.02)) !important;
 }
 
 .tournament-structure-shell .structure-step-panel-rules .tiebreaker-card.is-dragging {
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
-    border-color: rgba(56, 189, 248, 0.55) !important;
+    border-color: color-mix(in srgb, var(--accent-primary) 55%, transparent) !important;
 }
 
 /* Reorder column (▲▼) */
@@ -4060,18 +4010,18 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    background: rgba(255, 255, 255, 0.03);
-    color: rgba(203, 213, 225, 0.78);
+    border: 1px solid var(--border-basalt);
+    background: var(--surface-soft);
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.15s ease;
 }
 
 .tournament-structure-shell .structure-step-panel-rules .tiebreaker-reorder-btn:hover:not(:disabled),
 .tournament-structure-shell .structure-step-panel-rules .tiebreaker-reorder-btn:focus-visible:not(:disabled) {
-    border-color: rgba(56, 189, 248, 0.45);
-    background: rgba(56, 189, 248, 0.12);
-    color: #fff;
+    border-color: color-mix(in srgb, var(--accent-primary) 45%, transparent);
+    background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+    color: var(--text-main);
     outline: none;
 }
 
@@ -4101,7 +4051,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     }
 
     .tournament-structure-shell .structure-step-panel-rules .tiebreaker-drag-handle:hover {
-        color: rgba(186, 230, 253, 0.95);
+        color: var(--text-main);
     }
 
     .tournament-structure-shell .structure-step-panel-rules .tiebreaker-drag-handle:active {
@@ -4117,9 +4067,9 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: rgba(56, 189, 248, 0.12);
-    border: 1px solid rgba(56, 189, 248, 0.28);
-    color: rgba(186, 230, 253, 0.95);
+    background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 28%, transparent);
+    color: var(--text-main);
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
     font-weight: 700;
@@ -4140,7 +4090,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     gap: 6px;
     font-size: 14px !important;
     font-weight: 600 !important;
-    color: rgba(248, 250, 252, 0.96) !important;
+    color: var(--text-main) !important;
     line-height: 1.3 !important;
     text-transform: none !important;
     letter-spacing: 0 !important;
@@ -4160,9 +4110,9 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 .tournament-structure-shell .structure-step-panel-rules .order-pill-wrapper {
     display: inline-flex;
     padding: 3px;
-    border-radius: 999px;
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    background: rgba(255, 255, 255, 0.03);
+    border-radius: 2px;
+    border: 1px solid var(--border-basalt);
+    background: var(--surface-soft);
     gap: 2px;
 }
 
@@ -4170,10 +4120,10 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     appearance: none;
     -webkit-appearance: none;
     padding: 5px 10px;
-    border-radius: 999px;
+    border-radius: 2px;
     border: 0;
     background: transparent;
-    color: rgba(148, 163, 184, 0.78);
+    color: var(--text-secondary);
     font-size: 11px;
     font-weight: 600;
     cursor: pointer;
@@ -4184,15 +4134,15 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 
 .tournament-structure-shell .structure-step-panel-rules .order-pill-btn:hover,
 .tournament-structure-shell .structure-step-panel-rules .order-pill-btn:focus-visible {
-    color: rgba(248, 250, 252, 0.92);
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+    background: var(--surface-soft);
     outline: none;
 }
 
 .tournament-structure-shell .structure-step-panel-rules .order-pill-btn.active {
-    background: rgba(56, 189, 248, 0.85);
+    background: var(--accent-primary);
     color: #052339;
-    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-primary) 40%, transparent);
 }
 
 /* Remove button (✕) */
@@ -4223,8 +4173,8 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     margin: 12px 0 0;
     padding: 12px 14px;
     border-radius: 10px;
-    background: rgba(34, 197, 94, 0.06);
-    border: 1px solid rgba(34, 197, 94, 0.22);
+    background: color-mix(in srgb, var(--accent-primary) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 22%, transparent);
     color: rgba(187, 247, 208, 0.95);
     font-size: 13px;
     line-height: 1.55;
@@ -4234,7 +4184,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 }
 
 .tournament-structure-shell .structure-step-panel-rules .tiebreaker-cascade-summary strong {
-    color: #fff;
+    color: var(--text-main);
     font-weight: 700;
 }
 
@@ -4242,10 +4192,10 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 .tournament-structure-shell .structure-step-panel-rules .wizard-right-panel {
     padding: 16px !important;
     border-radius: 14px !important;
-    border: 1px solid rgba(148, 163, 184, 0.14) !important;
+    border: 1px solid var(--border-basalt) !important;
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 50%),
-        rgba(18, 24, 30, 0.94) !important;
+        var(--surface-elevated) !important;
 }
 
 .tournament-structure-shell .structure-step-panel-rules .wizard-right-panel .available-items-list {
@@ -4264,16 +4214,16 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     padding: 10px 12px !important;
     min-height: 52px !important;
     border-radius: 10px !important;
-    border: 1px solid rgba(148, 163, 184, 0.14) !important;
-    background: rgba(255, 255, 255, 0.025) !important;
+    border: 1px solid var(--border-basalt) !important;
+    background: var(--surface-soft) !important;
     cursor: pointer;
     transition: all 0.15s ease;
 }
 
 .tournament-structure-shell .structure-step-panel-rules .available-item:hover,
 .tournament-structure-shell .structure-step-panel-rules .available-item:focus-visible {
-    border-color: rgba(56, 189, 248, 0.42) !important;
-    background: rgba(56, 189, 248, 0.06) !important;
+    border-color: color-mix(in srgb, var(--accent-primary) 42%, transparent) !important;
+    background: color-mix(in srgb, var(--accent-primary) 06%, transparent) !important;
     transform: translateY(-1px);
     outline: none;
 }
@@ -4286,7 +4236,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 .tournament-structure-shell .structure-step-panel-rules .available-item > div:first-child > div:first-child {
     font-size: 13.5px !important;
     font-weight: 600 !important;
-    color: rgba(248, 250, 252, 0.92) !important;
+    color: var(--text-main) !important;
     line-height: 1.3 !important;
     text-transform: none !important;
     letter-spacing: 0 !important;
@@ -4294,7 +4244,7 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 
 .tournament-structure-shell .structure-step-panel-rules .available-item > div:first-child > div:not(:first-child) {
     font-size: 11.5px !important;
-    color: rgba(148, 163, 184, 0.85) !important;
+    color: var(--text-secondary) !important;
     line-height: 1.4 !important;
     margin-top: 2px;
     text-transform: none !important;
@@ -4305,19 +4255,19 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 .tournament-structure-shell .structure-step-panel-rules .available-item > div:last-child {
     width: 32px !important;
     height: 32px !important;
-    border-radius: 999px !important;
+    border-radius: 2px !important;
     flex-shrink: 0;
-    background: rgba(56, 189, 248, 0.12) !important;
-    color: rgba(186, 230, 253, 0.95) !important;
-    border: 1px solid rgba(56, 189, 248, 0.28) !important;
+    background: color-mix(in srgb, var(--accent-primary) 12%, transparent) !important;
+    color: var(--text-main) !important;
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 28%, transparent) !important;
     transition: all 0.15s ease !important;
     transform: none !important;
 }
 
 .tournament-structure-shell .structure-step-panel-rules .available-item:hover > div:last-child {
-    background: rgba(56, 189, 248, 0.85) !important;
+    background: var(--accent-primary) !important;
     color: #052339 !important;
-    border-color: rgba(56, 189, 248, 0.85) !important;
+    border-color: var(--accent-primary) !important;
     transform: scale(1.08) !important;
 }
 
@@ -4326,9 +4276,9 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
     min-height: 44px !important;
     padding: 10px 12px 10px 38px !important;
     border-radius: 10px !important;
-    border: 1px solid rgba(148, 163, 184, 0.18) !important;
+    border: 1px solid var(--border-basalt) !important;
     background: rgba(7, 10, 14, 0.84) !important;
-    color: rgba(248, 250, 252, 0.96) !important;
+    color: var(--text-main) !important;
     font-size: 13.5px !important;
     font-weight: 500 !important;
 }
@@ -4338,9 +4288,9 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
 }
 
 .tournament-structure-shell .structure-step-panel-rules .wizard-right-panel input.manager-url-input:focus-visible {
-    border-color: rgba(56, 189, 248, 0.5) !important;
+    border-color: color-mix(in srgb, var(--accent-primary) 50%, transparent) !important;
     outline: none !important;
-    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 15%, transparent) !important;
 }
 
 /* Empty state (no active criteria) */
@@ -4393,3 +4343,11 @@ button.tsm-phase-item.is-active:focus-visible:not(:disabled) {
         max-height: 280px !important;
     }
 }
+
+/* Marca de "esto todavía no hace nada".
+ *
+ * El primer principio del producto es que la exactitud precede a la decoración:
+ * nunca inventar datos ni ocultar su ausencia. Un control que se guarda pero que
+ * ningún motor lee es exactamente eso, así que lo dice en la cara en vez de
+ * prometer un cálculo que no ocurre. Ámbar y no rojo: no está roto, está
+ * pendiente. */

@@ -5,15 +5,20 @@ import { useRouter } from 'next/navigation';
 import { updateEntity } from '@/app/admin/entities/actions';
 import { Database } from '@/lib/database.types';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
+import { getOffensiveBonusPreset } from '@/lib/sportMatchProfile';
 import { SPORTS } from '@/lib/data/sports';
 import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
 import { type TournamentDetailsDraft, useTournamentDirty } from './TournamentContext';
-import { Shield, Globe, Image as ImageIcon } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Globe, Image as ImageIcon, Shield } from 'lucide-react';
 import LogoUploader from '@/components/LogoUploader';
 import { FlashScoreIntegrationSection } from './FlashScoreIntegrationSection';
 import { beginClientRequest, usePerfComponentLifecycle } from '@/lib/perf/react';
 import { persistTournamentLogo } from '@/lib/utils/persistTournamentLogo';
 import { normalizeSlug, normalizeText } from '@/lib/utils/normalize';
+// La pestaña ya no usa `manager-*`: habla basalt como el resto de la consola.
+// La hoja sigue importada porque `FlashScoreIntegrationSection` —que se dibuja
+// acá abajo— todavía vive en ese vocabulario. Cuando esa sección migre, esta
+// línea se va con ella.
 import '../club/vitreous-club.css';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
@@ -143,6 +148,9 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
     const isApiManaged = tournament.is_api_managed || false;
     const form = getSectionDraft<TournamentDetailsDraft>('details') ?? initialForm;
     const isDirty = hasDirtySection('details');
+    // Con qué se mide el bonus ofensivo acá: tries en rugby, goles en hockey.
+    // Sigue al deporte del formulario, así que cambiarlo actualiza el rótulo.
+    const offensiveBonusPreset = getOffensiveBonusPreset(form.sport_id);
     const bonusRules =
         form.ruleset.bonusRules &&
             typeof form.ruleset.bonusRules === 'object' &&
@@ -168,6 +176,19 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
         () => countryOptions.find((option) => option.id === form.country_id)?.label || null,
         [countryOptions, form.country_id],
     );
+
+    /**
+     * De dónde viene el escudo. Reemplaza a los cuadros `ORIGIN:` / `FORMAT:` /
+     * `STATUS: SYNCED` que había: jerga de consola decorativa, que es la
+     * anti-referencia explícita del contrato de diseño (§1). Lo único que el
+     * gestor se pregunta de verdad —si el escudo está subido o apunta afuera—
+     * cabe en una palabra.
+     */
+    const logoOrigin = useMemo(() => {
+        if (!form.logo_url) return 'Sin escudo';
+        if (form.logo_url.startsWith('data:')) return 'Archivo subido';
+        return 'Enlace externo';
+    }, [form.logo_url]);
 
     useLeaveConfirm(isDirty);
 
@@ -254,340 +275,202 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
 
     handleSaveRef.current = handleSave;
 
-    // Mobile-only computed labels for the summary card.
-    const mobileSportLabel = SPORT_OPTIONS.find((s) => s.id === form.sport_id)?.nameEs
-        || SPORT_OPTIONS.find((s) => s.id === form.sport_id)?.name
-        || form.sport_id || '--';
-    const mobileUnionLabel = unions.find((u) => u.id === form.union_id)?.name || 'Sin organizador';
-    const mobileCountryLabel = selectedCountryLabel || 'Sin pais asignado';
-
     return (
-        <div className="flash-ui-container dark bg-transparent details-console-shell" style={{ '--accent': '#00a365', minHeight: 'auto' } as React.CSSProperties}>
-            {/* Mobile-only redesigned summary + key inline editor. Hidden on
-                desktop via CSS. The legacy manager-card sections below are
-                also hidden on mobile (see tournament-details-mobile rules in
-                tournament-mobile.css). */}
-            <section className="tournament-details-mobile" aria-label="Detalles del torneo">
-                <article className="tsm-card tsm-card-state">
-                    <div className="tsm-card-eyebrow">Identidad</div>
-                    <div className="tsm-state-row">
-                        <strong className="tsm-state-status" style={{ fontSize: 18, letterSpacing: 0 }}>
-                            {form.name || 'Sin nombre'}
-                        </strong>
-                        {isDirty ? (
-                            <span className="tsm-state-pill is-internal">Sin guardar</span>
-                        ) : (
-                            <span className="tsm-state-pill is-public">Guardado</span>
-                        )}
-                    </div>
-                    <div className="tsm-state-meta">
-                        <span>{mobileSportLabel}</span>
-                        <span aria-hidden="true">·</span>
-                        <span>{form.season_id || '----'}</span>
-                        <span aria-hidden="true">·</span>
-                        <span>/{form.slug || 'sin-slug'}</span>
-                    </div>
-                    <div className="tsm-state-meta" style={{ marginTop: 6 }}>
-                        <span>{mobileCountryLabel}</span>
-                        <span aria-hidden="true">·</span>
-                        <span>{mobileUnionLabel}</span>
-                    </div>
-                </article>
-
-                <article className="tsm-card">
-                    <div className="tsm-card-eyebrow">Identidad basica</div>
-                    <div className="tsm-form-stack">
-                        <label className="tsm-field">
-                            <span>Nombre del torneo</span>
-                            <input
-                                type="text"
-                                className="tsm-input"
-                                placeholder="Ej: Top 12 Primera"
-                                value={form.name}
-                                onChange={(e) => update('name', e.target.value)}
-                                disabled={false}
-                            />
-                        </label>
-                        <label className="tsm-field">
-                            <span>Slug (URL)</span>
-                            <input
-                                type="text"
-                                className="tsm-input"
-                                placeholder="auto desde el nombre"
-                                value={form.slug}
-                                onChange={(e) => { setSlugEdited(true); update('slug', e.target.value); }}
-                                disabled={isApiManaged}
-                            />
-                        </label>
-                        <div className="tsm-field-row">
-                            <label className="tsm-field">
-                                <span>Temporada</span>
-                                <input
-                                    type="text"
-                                    inputMode="numeric"
-                                    className="tsm-input"
-                                    placeholder="2026"
-                                    value={form.season_id}
-                                    onChange={(e) => update('season_id', e.target.value)}
-                                    disabled={isApiManaged}
-                                />
-                            </label>
-                            <label className="tsm-field">
-                                <span>Prioridad</span>
-                                <input
-                                    type="number"
-                                    inputMode="numeric"
-                                    className="tsm-input"
-                                    placeholder="0"
-                                    value={String(form.priority ?? 0)}
-                                    onChange={(e) => update('priority', Number.parseInt(e.target.value, 10) || 0)}
-                                    min={0}
-                                />
-                            </label>
-                        </div>
-                        <label className="tsm-field">
-                            <span>Deporte</span>
-                            <select
-                                className="tsm-input"
-                                value={form.sport_id}
-                                onChange={(e) => update('sport_id', e.target.value)}
-                                disabled={isApiManaged}
-                            >
-                                <option value="">Seleccionar</option>
-                                {SPORT_OPTIONS.map((sport) => (
-                                    <option key={sport.id} value={sport.id}>{sport.nameEs || sport.name || sport.id}</option>
-                                ))}
-                            </select>
-                        </label>
-                        <label className="tsm-field">
-                            <span>Organizador (Union/Liga)</span>
-                            <select
-                                className="tsm-input"
-                                value={form.union_id}
-                                onChange={(e) => update('union_id', e.target.value)}
-                                disabled={isApiManaged}
-                            >
-                                <option value="">Sin vinculo</option>
-                                {unions.map((u) => (
-                                    <option key={u.id} value={u.id}>{u.name}</option>
-                                ))}
-                            </select>
-                        </label>
-                        <label className="tsm-field">
-                            <span>Pais</span>
-                            <select
-                                className="tsm-input"
-                                value={form.country_id}
-                                onChange={(e) => update('country_id', e.target.value)}
-                                disabled={isApiManaged}
-                            >
-                                <option value="">No especificado</option>
-                                {countryOptions.map((option) => (
-                                    <option key={option.id} value={option.id}>{option.label}</option>
-                                ))}
-                            </select>
-                        </label>
-                    </div>
-                </article>
-
-                <article className="tsm-card">
-                    <div className="tsm-card-eyebrow">Logo del torneo</div>
-                    <div className="tsm-logo-row">
-                        <div className="tsm-logo-preview">
-                            {form.logo_url ? (
-                                <img src={form.logo_url} alt="Logo" />
-                            ) : (
-                                <ImageIcon size={28} aria-hidden="true" />
-                            )}
-                        </div>
-                        <div className="tsm-logo-meta">
-                            <strong>{form.logo_url ? 'Logo cargado' : 'Sin logo'}</strong>
-                            <small>{form.logo_url ? 'Tap para cambiar' : 'Subi una imagen 256x256 o mas grande.'}</small>
-                        </div>
-                    </div>
-                </article>
-
-                {isApiManaged && (
-                    <article className="tsm-card" style={{ borderColor: 'rgba(96, 165, 250, 0.4)', background: 'rgba(96, 165, 250, 0.06)' }}>
-                        <div className="tsm-card-eyebrow" style={{ color: '#60a5fa' }}>API · Sincronizado</div>
-                        <p style={{ fontSize: 12, color: 'var(--text-secondary, #b6bdcc)', lineHeight: 1.5, margin: 0 }}>
-                            Este torneo se sincroniza automaticamente. Solo podes editar el <strong>nombre publico</strong>, la <strong>prioridad</strong> y el <strong>logo</strong>.
-                        </p>
-                    </article>
-                )}
-            </section>
-
-            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-28 md:pb-20">
+        <div className="details-console-shell">
+            <div className="details-stack">
                 {message && (
-                    <div className={`p-4 mb-6 text-sm border ${message.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'}`}>
-                        {message.text}
+                    <div className={`details-alert ${message.type === 'error' ? 'is-error' : 'is-success'}`} role="status" aria-live="polite">
+                        {message.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+                        <div className="details-alert-copy">
+                            <span className="details-alert-title">{message.text}</span>
+                        </div>
                     </div>
                 )}
 
                 {isApiManaged && (
-                    <div className="p-4 mb-10 bg-blue-500/10 border border-blue-500/20 rounded flex items-start gap-4 animate-in fade-in duration-700 details-api-alert">
-                        <div className="w-10 h-10 rounded bg-blue-500/20 flex items-center justify-center shrink-0 text-blue-400">
-                            <Globe size={20} />
-                        </div>
-                        <div>
-                            <h3 className="text-blue-400 font-bold text-sm uppercase tracking-wider mb-1">Torneo Gestionado por API</h3>
-                            <p className="text-blue-100/70 text-xs leading-relaxed">
-                                Este torneo se sincroniza automáticamente. Solo puedes editar el <strong>nombre para mostrar</strong> y el <strong>logo</strong>. 
-                                La estructura competitiva y los datos de origen están protegidos para evitar conflictos de sincronización.
+                    <div className="details-alert is-info">
+                        <Globe size={18} />
+                        <div className="details-alert-copy">
+                            <span className="details-alert-title">Torneo sincronizado por API</span>
+                            <p className="details-alert-text">
+                                Podés editar el nombre público, el escudo y la prioridad. El resto llega del proveedor
+                                y queda protegido para que la próxima sincronización no lo pise.
                             </p>
                         </div>
-                        <div className="text-blue-100/70 text-xs leading-relaxed">
-                            Tambien puedes ajustar la <strong>prioridad publica</strong> para definir el orden en que aparece en la vista publica.
-                        </div>
                     </div>
                 )}
 
-                {/* Logo & Public Status (Kinetic Structuralism) */}
-                <div className="manager-card details-card details-logo-card">
-                    <header className="manager-header">
-                        <div className="manager-header-titles">
-                            <h1>Escudo / Logo</h1>
-                            <p>Actualizá el logo e identidad gráfica del torneo.</p>
+                <section className="basalt-card details-panel" aria-labelledby="details-logo-title">
+                    <div className="details-panel-head">
+                        <div className="details-panel-copy">
+                            <h2 className="details-panel-title" id="details-logo-title">
+                                <ImageIcon size={18} aria-hidden="true" />
+                                Escudo
+                            </h2>
+                            <p className="details-panel-hint">La imagen que identifica al torneo en tablas, fixtures y vista pública.</p>
                         </div>
-                        <div className="manager-metadata-box" id="status-indicator">
-                            STATUS: {form.logo_url ? 'SYNCED' : 'READY'}
-                        </div>
-                    </header>
+                        <span className="details-panel-flag">{form.logo_url ? logoOrigin : 'Sin escudo'}</span>
+                    </div>
 
-                    <div className="manager-main-layout">
-                        {/* Left: Preview & Data */}
-                        <aside className="manager-preview-zone">
-                            <div className="manager-preview-frame group">
-                                {form.logo_url ? (
-                                    <img src={form.logo_url} alt="Logo" />
-                                ) : (
-                                    <div className="flex flex-col items-center gap-3 text-muted text-xs uppercase tracking-widest opacity-50">
-                                        <ImageIcon size={48} strokeWidth={1} />
-                                        <span>Sin escudo</span>
-                                    </div>
-                                )}
-                                <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
-                                    <p className="text-[10px] text-white font-bold uppercase text-center leading-tight">Configurá a la derecha</p>
+                    <div className="details-logo-layout">
+                        <div className="details-logo-preview">
+                            {form.logo_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element -- URL arbitraria del usuario, sin dominio conocido para next/image
+                                <img src={form.logo_url} alt="Escudo del torneo" />
+                            ) : (
+                                <div className="details-logo-empty">
+                                    <ImageIcon size={40} strokeWidth={1} aria-hidden="true" />
+                                    <span>Sin escudo</span>
                                 </div>
-                            </div>
+                            )}
+                        </div>
 
-                            <div className="manager-metadata-box">
-                                ORIGIN: {form.logo_url ? (form.logo_url.startsWith('data:') ? 'BASE64' : 'CDN/WEB') : 'NULL'}<br />
-                                FORMAT: {form.logo_url ? (form.logo_url.startsWith('data:') ? 'DATA_URI' : form.logo_url.split('.').pop()?.substring(0, 4).toUpperCase() || 'IMG') : '--'}
-                            </div>
-                        </aside>
-
-                        {/* Right: Controls */}
-                        <main className="manager-controls-zone">
-                            <div className="manager-tabs">
-                                <div className="manager-tab-indicator" style={{ transform: `translateX(${logoTab === 'url' ? '0%' : '100%'})` }}></div>
-                                <button className={`manager-tab-btn ${logoTab === 'url' ? 'active text-[var(--bg)]' : ''}`} onClick={(e) => { e.preventDefault(); setLogoTab('url'); }}>Pegar URL / Ajustes</button>
-                                <button className={`manager-tab-btn ${logoTab === 'upload' ? 'active text-[var(--bg)]' : ''}`} onClick={(e) => { e.preventDefault(); setLogoTab('upload'); }}>Subir archivo</button>
+                        <div className="details-logo-controls">
+                            {/* Dos formas de cargar lo mismo: radiogroup y no pestañas.
+                                No hay dos paneles de contenido, hay un campo que cambia
+                                de forma. */}
+                            <div className="details-segment" role="radiogroup" aria-label="Cómo cargar el escudo">
+                                <button
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={logoTab === 'url'}
+                                    className="details-segment-btn"
+                                    onClick={() => setLogoTab('url')}
+                                >
+                                    Pegar una URL
+                                </button>
+                                <button
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={logoTab === 'upload'}
+                                    className="details-segment-btn"
+                                    onClick={() => setLogoTab('upload')}
+                                >
+                                    Subir un archivo
+                                </button>
                             </div>
 
                             {logoTab === 'url' ? (
-                                <div className="manager-input-group mb-8">
-                                    <label className="manager-field-label">URL del escudo (CDN/Web)</label>
-                                    <div className="relative flex items-center">
-                                        <input
-                                            type="text"
-                                            className="manager-url-input pr-24"
-                                            placeholder="https://.../logo.png"
-                                            value={form.logo_url || ''}
-                                            onChange={e => update('logo_url', e.target.value)}
-                                        />
-                                        <div className="absolute right-2 flex gap-2">
-                                            <button type="button" className="manager-btn-inline secondary" onClick={(e) => { e.preventDefault(); update('logo_url', ''); }}>Limpiar</button>
+                                <div className="basalt-field">
+                                    <label className="basalt-field-label" htmlFor="details-logo-url">Dirección de la imagen</label>
+                                    <input
+                                        id="details-logo-url"
+                                        type="url"
+                                        className="basalt-input"
+                                        placeholder="https://.../escudo.png"
+                                        value={form.logo_url || ''}
+                                        onChange={e => update('logo_url', e.target.value)}
+                                    />
+                                    <p className="basalt-field-hint">Tiene que ser HTTPS. Acepta png, jpg, webp y svg.</p>
+                                    {form.logo_url ? (
+                                        <div>
+                                            <button
+                                                type="button"
+                                                className="basalt-btn"
+                                                onClick={() => update('logo_url', '')}
+                                            >
+                                                Quitar escudo
+                                            </button>
                                         </div>
-                                    </div>
-                                    <p className="text-xs text-[#888] mt-2 leading-relaxed">
-                                        Acepta: <strong>HTTPS</strong> (png, jpg, webp, svg).
-                                    </p>
+                                    ) : null}
                                 </div>
                             ) : (
-                                <div className="manager-input-group mb-8">
-                                    <label className="manager-field-label">Subir Logo (PNG/SVG/JPG)</label>
-                                    <div className="p-4 border border-[var(--border)] bg-[rgba(255,255,255,0.02)] min-h-[140px] flex items-center justify-center">
+                                <div className="basalt-field">
+                                    <span className="basalt-field-label">Archivo del escudo</span>
+                                    <div className="details-upload-slot">
                                         <LogoUploader
                                             onUpload={(url) => update('logo_url', url)}
-                                            accentColor="var(--accent)"
-                                            label="Arrastra o clic para subir"
+                                            accentColor="var(--accent-primary)"
+                                            label="Arrastrá el archivo o hacé clic para elegirlo"
                                         />
                                     </div>
+                                    <p className="basalt-field-hint">PNG, SVG o JPG. Se guarda al confirmar los cambios.</p>
                                 </div>
                             )}
-                        </main>
+                        </div>
                     </div>
-                </div>
+                </section>
 
-                <div className="manager-card details-card details-identity-card mt-10">
-                    <header className="manager-header">
-                        <div className="manager-header-titles">
-                            <h1 className="flex items-center gap-3"><Shield className="w-6 h-6 text-[var(--accent)]" /> Identidad Estratégica</h1>
-                            <p>Denominaciones y enrutamiento web del torneo.</p>
+                <section className="basalt-card details-panel" aria-labelledby="details-identity-title">
+                    <div className="details-panel-head">
+                        <div className="details-panel-copy">
+                            <h2 className="details-panel-title" id="details-identity-title">
+                                <Shield size={18} aria-hidden="true" />
+                                Identidad
+                            </h2>
+                            <p className="details-panel-hint">Cómo se llama el torneo, en qué temporada corre y por dónde se lo encuentra.</p>
                         </div>
-                    </header>
+                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 details-form-grid">
-                        <div className="manager-input-group">
-                            <label className="manager-field-label">{isApiManaged ? 'Nombre Público (Visible)' : 'Nombre del Torneo'}</label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej: Top 10 Primera División"
-                                    className="manager-url-input font-sans text-[14px]"
-                                    value={form.name}
-                                    onChange={e => update('name', e.target.value)}
-                                />
-                                {isApiManaged && (
-                                    <p className="text-[10px] text-blue-400/60 mt-2 uppercase tracking-tighter">Este es el nombre que verán los usuarios finales.</p>
-                                )}
+                    <div className="details-grid">
+                        <div className="basalt-field">
+                            <label className="basalt-field-label" htmlFor="details-name">
+                                {isApiManaged ? 'Nombre público' : 'Nombre del torneo'}
+                            </label>
+                            <input
+                                id="details-name"
+                                type="text"
+                                placeholder="Top 10 Primera División"
+                                className="basalt-input"
+                                value={form.name}
+                                onChange={e => update('name', e.target.value)}
+                            />
+                            {isApiManaged && (
+                                <p className="basalt-field-hint">Es el nombre que ve la gente en el sitio.</p>
+                            )}
                         </div>
+
                         {isApiManaged && (
-                            <div className="manager-input-group">
-                                <label className="manager-field-label opacity-50">Nombre Original (API)</label>
+                            <div className="basalt-field">
+                                <label className="basalt-field-label" htmlFor="details-api-name">Nombre en el proveedor</label>
                                 <input
+                                    id="details-api-name"
                                     type="text"
-                                    className="manager-url-input font-sans text-[14px] opacity-40 cursor-not-allowed bg-transparent"
+                                    className="basalt-input"
                                     value={data.name || ''}
                                     disabled
                                 />
-                                <p className="text-[10px] text-[#555] mt-2 uppercase tracking-tighter">Protegido por el sistema de sincronización.</p>
+                                <p className="basalt-field-hint">Llega de la API y no se edita acá.</p>
                             </div>
                         )}
-                        <div className="manager-input-group">
-                            <label className="manager-field-label">Temporada</label>
+
+                        <div className="basalt-field">
+                            <label className="basalt-field-label" htmlFor="details-season">Temporada</label>
                             <input
+                                id="details-season"
                                 type="text"
                                 placeholder="2026"
-                                className={`manager-url-input font-black uppercase ${isApiManaged ? 'opacity-50 cursor-not-allowed' : 'text-[var(--accent)]'}`}
+                                className="basalt-input"
                                 value={form.season_id}
                                 onChange={e => update('season_id', e.target.value)}
                                 disabled={isApiManaged}
                             />
                         </div>
-                        <div className="manager-input-group">
-                            <label className="manager-field-label">Prioridad Publica</label>
+
+                        <div className="basalt-field">
+                            <label className="basalt-field-label" htmlFor="details-priority">Prioridad pública</label>
                             <input
+                                id="details-priority"
                                 type="number"
                                 placeholder="0"
-                                className="manager-url-input font-black text-[var(--accent)]"
+                                className="basalt-input"
                                 value={String(form.priority ?? 0)}
                                 onChange={e => update('priority', Number.parseInt(e.target.value, 10) || 0)}
                                 min={0}
                             />
-                            <p className="text-[10px] text-[#888] mt-2 uppercase tracking-tighter">
-                                Mayor numero aparece primero en la vista publica. Si empatan, se ordenan alfabeticamente.
-                            </p>
+                            <p className="basalt-field-hint">El número más alto aparece primero. Si empatan, se ordenan alfabéticamente.</p>
                         </div>
-                        <div className="manager-input-group">
-                            <label className="manager-field-label">Deporte</label>
+
+                        <div className="basalt-field">
+                            <label className="basalt-field-label" htmlFor="details-sport">Deporte</label>
                             <select
-                                className={`manager-url-select ${isApiManaged ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                id="details-sport"
+                                className="basalt-input"
                                 value={form.sport_id}
                                 onChange={e => update('sport_id', e.target.value)}
                                 disabled={isApiManaged}
                             >
-                                <option value="">Seleccionar deporte</option>
+                                <option value="">Sin definir</option>
                                 {SPORT_OPTIONS.map((sport) => (
                                     <option key={sport.id} value={sport.id}>
                                         {sport.nameEs || sport.name || sport.id}
@@ -595,134 +478,189 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                                 ))}
                             </select>
                         </div>
-                        <div className="manager-input-group">
-                            <label className="manager-field-label">Ruta URL (Slug)</label>
-                            <div className="relative flex items-center">
-                                <span className={`absolute left-4 font-mono text-xs ${isApiManaged ? 'text-[#555]' : 'text-[#888]'}`}>/torneos/</span>
+
+                        <div className="basalt-field">
+                            <label className="basalt-field-label" htmlFor="details-slug">Dirección pública</label>
+                            <div className="basalt-field-prefixed">
+                                <span className="basalt-field-prefix" aria-hidden="true">/torneos/</span>
                                 <input
+                                    id="details-slug"
                                     type="text"
-                                    className={`manager-url-input pl-24 ${isApiManaged ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className="basalt-input"
                                     value={form.slug}
                                     onChange={e => { setSlugEdited(true); update('slug', e.target.value); }}
                                     disabled={isApiManaged}
                                 />
                             </div>
                         </div>
-                        <div className="manager-input-group">
-                            <label className="manager-field-label">Organizador (Unión/Liga)</label>
+
+                        <div className="basalt-field">
+                            <label className="basalt-field-label" htmlFor="details-union">Organizador</label>
                             <select
-                                className={`manager-url-select ${isApiManaged ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                id="details-union"
+                                className="basalt-input"
                                 value={form.union_id}
                                 onChange={e => update('union_id', e.target.value)}
                                 disabled={isApiManaged}
                             >
-                                <option value="">Seleccionar Unión</option>
+                                <option value="">Sin definir</option>
                                 {unions.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                             </select>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div className="manager-card details-card details-location-card mt-10">
-                    <header className="manager-header">
-                        <div className="manager-header-titles">
-                            <h1 className="flex items-center gap-3"><Globe className="w-6 h-6 text-[var(--accent)]" /> Ubicación y Alcance</h1>
-                            <p>Alcance geográfico y demográfico del campeonato.</p>
+                <section className="basalt-card details-panel" aria-labelledby="details-scope-title">
+                    <div className="details-panel-head">
+                        <div className="details-panel-copy">
+                            <h2 className="details-panel-title" id="details-scope-title">
+                                <Globe size={18} aria-hidden="true" />
+                                Ubicación y alcance
+                            </h2>
+                            <p className="details-panel-hint">Dónde se juega y a qué categoría corresponde. Sirve para filtrar y agrupar en la vista pública.</p>
                         </div>
-                    </header>
+                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 details-geo-grid">
-                        <div className="manager-input-group">
-                            <label className="manager-field-label">País</label>
+                    <div className="details-grid details-grid-narrow">
+                        <div className="basalt-field">
+                            <label className="basalt-field-label" htmlFor="details-country">País</label>
                             <select
-                                className={`manager-url-select ${isApiManaged ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                id="details-country"
+                                className="basalt-input"
                                 value={form.country_id}
                                 onChange={e => update('country_id', e.target.value)}
                                 disabled={isApiManaged}
                             >
-                                <option value="">No especificado</option>
+                                <option value="">Sin definir</option>
                                 {countryOptions.map((country) => (
                                     <option key={country.id} value={country.id}>{country.label}</option>
                                 ))}
                             </select>
                         </div>
-                        <div className="manager-input-group">
-                            <label className="manager-field-label">Región</label>
+                        <div className="basalt-field">
+                            <label className="basalt-field-label" htmlFor="details-region">Región</label>
                             <select
-                                className={`manager-url-select ${isApiManaged ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                id="details-region"
+                                className="basalt-input"
                                 value={form.region}
                                 onChange={e => update('region', e.target.value)}
                                 disabled={isApiManaged}
                             >
-                                <option value="">No especificada</option>
+                                <option value="">Sin definir</option>
                                 {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
                             </select>
                         </div>
-                        <div className="manager-input-group">
-                            <label className="manager-field-label">Clasificación de Edad</label>
+                        <div className="basalt-field">
+                            <label className="basalt-field-label" htmlFor="details-age-grade">Categoría de edad</label>
                             <select
-                                className={`manager-url-select ${isApiManaged ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                id="details-age-grade"
+                                className="basalt-input"
                                 value={form.age_grade}
                                 onChange={e => update('age_grade', e.target.value)}
                                 disabled={isApiManaged}
                             >
-                                <option value="">No especificada</option>
+                                <option value="">Sin definir</option>
                                 {AGE_GRADES.map(g => <option key={g} value={g}>{g}</option>)}
                             </select>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div className={`manager-card details-card details-bonus-card mt-10 ${isApiManaged ? 'opacity-50 pointer-events-none grayscale-[0.5]' : ''}`}>
-                    <header className="manager-header">
-                        <div className="manager-header-titles">
-                            <h1 className="flex items-center gap-3">🏆 Políticas del Torneo (Puntos Bonus)</h1>
-                            <p>Configura las reglas generales de puntuación bonus para todo el campeonato.</p>
-                        </div>
-                    </header>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 details-bonus-grid">
-                        <div className="p-4 border border-[var(--border)] rounded bg-[rgba(255,255,255,0.02)] details-bonus-panel">
-                            <label className="checkbox-container !border-none !p-0 !bg-transparent mb-2">
-                                <input type="checkbox" checked={bonusRules.offensiveBonus?.enabled || false} onChange={e => {
-                                    update('ruleset', { ...form.ruleset, bonusRules: { ...bonusRules, offensiveBonus: { enabled: e.target.checked, type: 'tries', threshold: 4 } } });
-                                }} disabled={isApiManaged} />
-                                <div className="checkmark"></div>
-                                <span className="text-white font-semibold flex items-center gap-2">Bonus Ofensivo <span className="text-xs bg-[var(--accent)]/20 text-[var(--accent)] px-2 py-0.5 rounded font-mono">4+ TRIES</span></span>
-                            </label>
-                            <p className="text-xs text-[#888] ml-8 mt-2">Otorga 1 punto extra al equipo que anote 4 o más tries en un partido, siempre que la fase tenga activados los puntos bonus.</p>
-                        </div>
-
-                        <div className="p-4 border border-[var(--border)] rounded bg-[rgba(255,255,255,0.02)] details-bonus-panel">
-                            <label className="checkbox-container !border-none !p-0 !bg-transparent mb-2">
-                                <input type="checkbox" checked={bonusRules.defensiveBonus?.enabled || false} onChange={e => {
-                                    update('ruleset', { ...form.ruleset, bonusRules: { ...bonusRules, defensiveBonus: { enabled: e.target.checked, type: 'point_diff', threshold: 7 } } });
-                                }} disabled={isApiManaged} />
-                                <div className="checkmark"></div>
-                                <span className="text-white font-semibold flex items-center gap-2">Bonus Defensivo <span className="text-xs text-orange-400 bg-orange-400/20 px-2 py-0.5 rounded font-mono">≤ 7 PTS DIFF</span></span>
-                            </label>
-                            <p className="text-xs text-[#888] ml-8 mt-2">Otorga 1 punto extra al equipo que pierda por 7 puntos o menos de diferencia, siempre que la fase tenga activados los puntos bonus.</p>
+                <section
+                    className={`basalt-card details-panel ${isApiManaged ? 'details-panel-locked' : ''}`}
+                    aria-labelledby="details-bonus-title"
+                >
+                    <div className="details-panel-head">
+                        <div className="details-panel-copy">
+                            <h2 className="details-panel-title" id="details-bonus-title">Puntos bonus</h2>
+                            <p className="details-panel-hint">
+                                Reglas generales del torneo. Cada fase decide después si los aplica.
+                            </p>
                         </div>
                     </div>
-                </div>
 
+                    <div className="details-grid">
+                        <div className="details-toggle">
+                            <label className="details-toggle-head" htmlFor="details-bonus-offensive">
+                                <input
+                                    id="details-bonus-offensive"
+                                    type="checkbox"
+                                    checked={bonusRules.offensiveBonus?.enabled || false}
+                                    onChange={e => {
+                                        update('ruleset', {
+                                            ...form.ruleset,
+                                            bonusRules: {
+                                                ...bonusRules,
+                                                offensiveBonus: {
+                                                    enabled: e.target.checked,
+                                                    type: offensiveBonusPreset.type,
+                                                    threshold: offensiveBonusPreset.threshold,
+                                                    label: offensiveBonusPreset.label,
+                                                },
+                                            },
+                                        });
+                                    }}
+                                    disabled={isApiManaged}
+                                />
+                                Bonus ofensivo
+                                <span className="details-toggle-rule">{offensiveBonusPreset.rule}</span>
+                            </label>
+                            <p className="details-toggle-hint">
+                                {offensiveBonusPreset.hint}
+                            </p>
+                        </div>
+
+                        <div className="details-toggle">
+                            <label className="details-toggle-head" htmlFor="details-bonus-defensive">
+                                <input
+                                    id="details-bonus-defensive"
+                                    type="checkbox"
+                                    checked={bonusRules.defensiveBonus?.enabled || false}
+                                    onChange={e => {
+                                        update('ruleset', { ...form.ruleset, bonusRules: { ...bonusRules, defensiveBonus: { enabled: e.target.checked, type: 'point_diff', threshold: 7 } } });
+                                    }}
+                                    disabled={isApiManaged}
+                                />
+                                Bonus defensivo
+                                <span className="details-toggle-rule">hasta 7 de diferencia</span>
+                            </label>
+                            <p className="details-toggle-hint">
+                                Un punto extra para el equipo que pierda por siete puntos o menos.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* La integración con FlashScore todavía habla `manager-*`. Se le
+                    da su propio ámbito con las variables que esas clases piden,
+                    mapeadas a los tokens de basalt: antes eso llegaba envolviendo
+                    la pestaña ENTERA en `.flash-ui-container`, que traía el fondo
+                    de la consola de clubes y una textura fija en z-index 9999
+                    sobre todo el gestor. */}
                 {!isApiManaged && (
-                    <FlashScoreIntegrationSection
-                        tournamentId={id}
-                        sportId={form.sport_id ?? null}
-                        ruleset={form.ruleset}
-                        onRulesetChange={(newRuleset) => update('ruleset', newRuleset)}
-                    />
+                    <div className="details-legacy-vars">
+                        <FlashScoreIntegrationSection
+                            tournamentId={id}
+                            sportId={form.sport_id ?? null}
+                            ruleset={form.ruleset}
+                            onRulesetChange={(newRuleset) => update('ruleset', newRuleset)}
+                        />
+                    </div>
                 )}
 
-                <div className="basalt-mobile-savebar details-savebar">
+                <div className="details-footer">
+                    {isDirty && (
+                        <p className="details-footer-note">
+                            También podés guardar desde la barra de arriba.
+                        </p>
+                    )}
                     <button
-                        className="manager-btn-inline"
-                        style={{ padding: '12px 24px', fontSize: '14px', borderRadius: '4px' }}
+                        type="button"
+                        className="basalt-btn basalt-btn-primary"
                         onClick={handleSave}
                         disabled={isSaving || !isDirty}
                     >
-                        {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+                        {isSaving ? 'Guardando…' : 'Guardar cambios'}
                     </button>
                 </div>
             </div>
