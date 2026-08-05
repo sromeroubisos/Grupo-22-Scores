@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
 import { listClubRankings } from '@/lib/server/clubRankings';
 
+// Mismo criterio que el detalle: el catalogo de rankings publicados cambia cuando
+// alguien guarda uno en el panel, no en cada visita.
+const PUBLIC_RANKING_CACHE_CONTROL = 'public, max-age=60, s-maxage=300, stale-while-revalidate=3600';
+
 function jsonError(message: string, status = 500, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
 }
@@ -40,7 +44,9 @@ export async function GET(request: NextRequest) {
             },
         }));
 
-        return NextResponse.json({ data });
+        return NextResponse.json({ data }, {
+            headers: { 'Cache-Control': PUBLIC_RANKING_CACHE_CONTROL },
+        });
     } catch (error) {
         return jsonError(
             error instanceof Error ? error.message : 'No se pudieron cargar los rankings publicos.',

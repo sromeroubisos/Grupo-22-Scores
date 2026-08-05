@@ -3,7 +3,7 @@ import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { isUuid } from '@/lib/utils/postgrest';
-import { markEditTrace } from '@/lib/perf/editTrace';
+import { markEditTrace, traceStageStart, traceStageEnd } from '@/lib/perf/editTrace';
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 
@@ -639,13 +639,19 @@ async function enrichMatchesWithTournamentSport(
 async function getClubsByIds(
     supabase: ReturnType<typeof getAdminClient>,
     clubIds: string[],
+    includeLogos = true,
 ) {
     const uniqueClubIds = Array.from(new Set(clubIds.filter(Boolean)));
     if (uniqueClubIds.length === 0) return new Map<string, RankingClubRow>();
 
+    // Los escudos viven en `clubs.logo_url` como data-URI y pesan hasta 850 KB:
+    // un ranking de 151 clubes son ~25 MB que cruzan Supabase en cada lectura.
+    // Quien solo necesita pintar el escudo (la vista publica) pide el catalogo
+    // sin logos y arma la URL del proxy con el club_id. El panel admin, que
+    // muestra el data-URI directo en un <img>, los sigue pidiendo.
     const { data, error } = await supabase
         .from('clubs')
-        .select('id, name, short_name, logo_url')
+        .select(includeLogos ? 'id, name, short_name, logo_url' : 'id, name, short_name')
         .in('id', uniqueClubIds);
 
     if (error) {
@@ -733,6 +739,7 @@ const RANKING_ENTRIES_HARD_LIMIT = 5000;
 async function getRankingEntries(
     supabase: ReturnType<typeof getAdminClient>,
     rankingId: string,
+    includeClubLogos = true,
 ) {
     const { data, error } = await supabase
         .from('club_ranking_entries')
@@ -750,6 +757,7 @@ async function getRankingEntries(
     const clubsById = await getClubsByIds(
         supabase,
         rows.map((row) => row.club_id),
+        includeClubLogos,
     );
 
     return rows.map((row) => ({
@@ -1722,24 +1730,45 @@ export async function updateClubRankingMetadata(
     return getClubRankingDetail(rankingId);
 }
 
-export async function getClubRankingDetail(rankingId: string): Promise<RankingDetail> {
+/**
+ * `includeActivity: false` se saltea el historial reciente, los ajustes manuales
+ * y el historial de liderazgo. Son tres consultas que solo mira el panel: la vista
+ * publica arma su payload con `ranking` y `entries` y descarta el resto, asi que
+ * las pagaba de gusto en cada visita.
+ */
+export async function getClubRankingDetail(
+    rankingId: string,
+    options: { includeClubLogos?: boolean; includeActivity?: boolean } = {},
+): Promise<RankingDetail> {
     const supabase = getAdminClient();
+    const includeActivity = options.includeActivity ?? true;
+    const emptyRes = { data: [], error: null } as const;
+    const emptyLeadership = {
+        leadershipPeriods: [],
+        leadershipSummary: [],
+        currentLeaderClubId: null,
+    } as Awaited<ReturnType<typeof getLeadershipHistory>>;
+
     const ranking = await getRankingRow(supabase, rankingId);
     const [entries, recentApplicationsRes, manualAdjustmentsRes, leadershipHistory] = await Promise.all([
-        getRankingEntries(supabase, rankingId),
-        supabase
-            .from('club_ranking_match_applications')
-            .select('*')
-            .eq('ranking_id', rankingId)
-            .order('match_date_time', { ascending: false })
-            .limit(15),
-        supabase
-            .from('club_ranking_manual_adjustments')
-            .select('*')
-            .eq('ranking_id', rankingId)
-            .order('created_at', { ascending: false })
-            .limit(20),
-        getLeadershipHistory(supabase, rankingId),
+        getRankingEntries(supabase, rankingId, options.includeClubLogos ?? true),
+        includeActivity
+            ? supabase
+                .from('club_ranking_match_applications')
+                .select('*')
+                .eq('ranking_id', rankingId)
+                .order('match_date_time', { ascending: false })
+                .limit(15)
+            : emptyRes,
+        includeActivity
+            ? supabase
+                .from('club_ranking_manual_adjustments')
+                .select('*')
+                .eq('ranking_id', rankingId)
+                .order('created_at', { ascending: false })
+                .limit(20)
+            : emptyRes,
+        includeActivity ? getLeadershipHistory(supabase, rankingId) : emptyLeadership,
     ]);
 
     if (recentApplicationsRes.error) {
@@ -2410,9 +2439,18 @@ export async function syncClubRankingsForMatchUpdate(
         }
 
         markEditTrace({ rankingIncremental: true });
+        traceStageStart('ranking_apply_match');
         await applyMatchToRanking(supabase, ranking, entryMap, currentMatch, 'incremental');
-        await recomputeEntryPositions(supabase, ranking.id);
+        traceStageEnd('ranking_apply_match');
+
+        traceStageStart('ranking_recompute_positions');
+        const recomputedEntries = await recomputeEntryPositions(supabase, ranking.id);
+        traceStageEnd('ranking_recompute_positions');
+        markEditTrace({ rankingEntriesRecomputed: recomputedEntries });
+
+        traceStageStart('ranking_leadership_history');
         await rebuildLeadershipHistory(supabase, ranking.id);
+        traceStageEnd('ranking_leadership_history');
         processedRankings += 1;
     }
 

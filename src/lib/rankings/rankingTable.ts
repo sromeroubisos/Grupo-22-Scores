@@ -175,7 +175,9 @@ export function getRankingPositionChange(
         return { value: delta, label: String(delta), tone: 'negative' as const };
     }
 
-    return { value: delta, label: '0', tone: 'neutral' as const };
+    // Quedarse en el puesto no es una variacion: devolver un "0" pone una ficha
+    // en cada fila de la tabla y el que se movio de verdad deja de destacarse.
+    return null;
 }
 
 export function paginateRankingEntries<T>(entries: T[], page: number, pageSize: number) {
@@ -250,7 +252,9 @@ export function buildRankingExportRows(entries: RankingTableEntryLike[], positio
             diff: entry.source_region || '-',
             points: entry.source_previous_position ?? '-',
             pointsDeltaLabel: positionChange?.label || '',
-            pointsDeltaTone: positionChange?.tone || 'neutral',
+            // Sin cambio de puesto, `getRankingPositionChange` devuelve null y el
+            // export no dibuja ficha de variacion.
+            pointsDeltaTone: positionChange?.tone ?? ('neutral' as const),
         };
     });
 }

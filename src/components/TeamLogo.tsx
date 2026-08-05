@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useCallback, useMemo, useState, type CSSProperties } from 'react';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
+import { isTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import styles from './TeamLogo.module.css';
 
 type LogoSource = Record<string, unknown> | null | undefined;
@@ -108,11 +109,42 @@ export default function TeamLogo({
     }, [disableLookup, lookupKey, name]);
 
     const [failedSources, setFailedSources] = useState<string[]>([]);
+    const [retryToken, setRetryToken] = useState(0);
     const candidateSources = useMemo(
         () => [resolvedLogo, lookupUrl].filter((value): value is string => Boolean(value)),
         [lookupUrl, resolvedLogo],
     );
     const currentSrc = candidateSources.find((value) => !failedSources.includes(value)) || '';
+
+    // El proxy sabe redimensionar: pedirle el escudo al tamano en que se pinta
+    // (x2 por pantallas densas) evita bajar un PNG de 1080 px para un chip de 28.
+    // Ojo: `currentSrc` sigue siendo la clave de `failedSources`, asi que el ancho
+    // va solo en el src del <img> y no rompe el descarte de fuentes caidas.
+    const imageSrc = useMemo(() => {
+        if (!currentSrc) return '';
+        const retrySuffix = retryToken ? `&retry=${retryToken}` : '';
+        if (typeof size !== 'number' || !isTeamLogoProxyUrl(currentSrc)) {
+            return `${currentSrc}${retrySuffix}`;
+        }
+        return `${currentSrc}${currentSrc.includes('?') ? '&' : '?'}w=${Math.round(size * 2)}${retrySuffix}`;
+    }, [currentSrc, retryToken, size]);
+
+    // Un pico de carga no puede dejar el escudo en iniciales para siempre: antes,
+    // el primer error marcaba la fuente como caida y no se reintentaba nunca.
+    const handleError = useCallback(() => {
+        if (retryToken < 1) {
+            setRetryToken(retryToken + 1);
+            return;
+        }
+
+        // Ya reintentamos: recien ahora damos la fuente por caida y pasamos a la
+        // siguiente candidata (con el contador en cero, para que ella tambien
+        // tenga su reintento).
+        setRetryToken(0);
+        setFailedSources((sources) => (
+            sources.includes(currentSrc) ? sources : [...sources, currentSrc]
+        ));
+    }, [currentSrc, retryToken]);
 
     const initials = useMemo(() => getInitials(name, shortName), [name, shortName]);
     const mergedStyle: CSSProperties = {
@@ -127,19 +159,15 @@ export default function TeamLogo({
             title={title || name}
             aria-hidden={false}
         >
-            {currentSrc ? (
+            {imageSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                    src={currentSrc}
+                    src={imageSrc}
                     alt={title || name}
                     className={joinClasses(styles.image, imgClassName)}
                     loading="lazy"
                     decoding="async"
-                    onError={() => {
-                        setFailedSources((current) => (
-                            current.includes(currentSrc) ? current : [...current, currentSrc]
-                        ));
-                    }}
+                    onError={handleError}
                 />
             ) : (
                 <span className={joinClasses(styles.fallback, fallbackClassName)}>

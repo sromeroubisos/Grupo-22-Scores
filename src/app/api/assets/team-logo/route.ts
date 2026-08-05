@@ -2,6 +2,7 @@ import { lookup } from 'node:dns/promises';
 import { access } from 'node:fs/promises';
 import path from 'node:path';
 import { NextResponse } from 'next/server';
+import sharp from 'sharp';
 import { getReadClient } from '@/lib/supabase/read';
 import {
     findExternalTeamLogoOverride,
@@ -625,9 +626,52 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string, en
     return null;
 }
 
+// Muchos escudos estan guardados a 600-1080 px y se pintan en chips de 18-42 px:
+// un ranking de 20 filas bajaba 2,6 MB para dibujar miniaturas. `w` es opcional,
+// asi que ningun llamador existente cambia de comportamiento; el ancho entra en
+// la URL, o sea que tambien diferencia la entrada de cache del navegador y el CDN.
+const MAX_PROXY_WIDTH = 512;
+
+function parseRequestedWidth(url: URL): number {
+    const raw = Number(url.searchParams.get('w'));
+    if (!Number.isFinite(raw) || raw <= 0) return 0;
+    // Topeado para que nadie use el endpoint como redimensionador generico.
+    return Math.min(MAX_PROXY_WIDTH, Math.round(raw));
+}
+
+type ProxyImagePayload = { payload: Uint8Array<ArrayBuffer>; contentType: string };
+
+async function downscaleImage(
+    payload: Buffer<ArrayBuffer>,
+    contentType: string,
+    width: number,
+): Promise<ProxyImagePayload> {
+    if (!width) return { payload, contentType };
+    // Un SVG ya escala solo: rasterizarlo lo empeoraria.
+    if (contentType.includes('svg')) return { payload, contentType };
+
+    try {
+        const image = sharp(payload);
+        const meta = await image.metadata();
+        if (!meta.width || meta.width <= width) return { payload, contentType };
+
+        const resized = await image
+            // `inside` conserva la proporcion: hay escudos que no son cuadrados.
+            .resize(width, width, { fit: 'inside', withoutEnlargement: true })
+            .png()
+            .toBuffer();
+
+        return { payload: new Uint8Array(resized), contentType: 'image/png' };
+    } catch {
+        // Formato que sharp no puede leer: mejor el original que ninguna imagen.
+        return { payload, contentType };
+    }
+}
+
 async function buildImageResponse(source: string, url: URL) {
     const normalizedSource = normalizeSourceUrl(source);
     const cacheControl = resolveProxyCacheControl(url);
+    const requestedWidth = parseRequestedWidth(url);
 
     if (normalizedSource.startsWith('data:')) {
         const commaIndex = normalizedSource.indexOf(',');
@@ -639,11 +683,12 @@ async function buildImageResponse(source: string, url: URL) {
         const body = normalizedSource.slice(commaIndex + 1);
         const mimeType = header.split(';')[0] || 'application/octet-stream';
         const isBase64 = header.includes(';base64');
-        const payload = isBase64 ? Buffer.from(body, 'base64') : Buffer.from(decodeURIComponent(body), 'utf-8');
+        const rawPayload = isBase64 ? Buffer.from(body, 'base64') : Buffer.from(decodeURIComponent(body), 'utf-8');
+        const { payload, contentType } = await downscaleImage(rawPayload, mimeType, requestedWidth);
 
         return new NextResponse(payload, {
             headers: {
-                'Content-Type': mimeType,
+                'Content-Type': contentType,
                 'Cache-Control': cacheControl,
                 'Access-Control-Allow-Origin': '*',
             },
@@ -666,10 +711,15 @@ async function buildImageResponse(source: string, url: URL) {
             });
 
             if (imgResponse.ok) {
-                const contentType = imgResponse.headers.get('Content-Type') || 'image/png';
+                const upstreamType = imgResponse.headers.get('Content-Type') || 'image/png';
                 const buffer = await imgResponse.arrayBuffer();
+                const { payload, contentType } = await downscaleImage(
+                    Buffer.from(buffer),
+                    upstreamType,
+                    requestedWidth,
+                );
 
-                return new NextResponse(Buffer.from(buffer), {
+                return new NextResponse(payload, {
                     headers: {
                         'Content-Type': contentType,
                         'Cache-Control': cacheControl,

@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
 import { getClubRankingDetail } from '@/lib/server/clubRankings';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
+
+// El ranking lo recalcula el cron de rankings, no el request: no hay motivo para
+// que cada visita pague la consulta entera. El navegador revalida al minuto y el
+// CDN sirve una copia tibia mientras refresca por detras.
+const PUBLIC_RANKING_CACHE_CONTROL = 'public, max-age=60, s-maxage=300, stale-while-revalidate=3600';
 
 function jsonError(message: string, status = 500, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
@@ -19,7 +25,10 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
-        const detail = await getClubRankingDetail(id);
+        // Sin logos: la vista publica no usa el data-URI guardado (TeamLogo lo
+        // descarta y pide el proxy igual), asi que traerlo solo suma ~25 MB de
+        // trafico contra Supabase por request.
+        const detail = await getClubRankingDetail(id, { includeClubLogos: false, includeActivity: false });
         return NextResponse.json({
             data: {
                 ranking: {
@@ -57,12 +66,21 @@ export async function GET(
                             ? {
                                 name: club.name,
                                 short_name: club.short_name,
-                                logo_url: club.logo_url,
+                                // El escudo viaja como URL del proxy, no como data-URI:
+                                // es lo que el navegador termina pidiendo igual (ver
+                                // resolveTeamLogo) y lo que el export necesita para
+                                // dibujar el escudo real en el poster.
+                                logo_url: buildTeamLogoProxyUrl({
+                                    key: entry.club_id,
+                                    name: club.name ?? entry.source_name,
+                                }),
                             }
                             : null,
                     };
                 }),
             },
+        }, {
+            headers: { 'Cache-Control': PUBLIC_RANKING_CACHE_CONTROL },
         });
     } catch (error) {
         return jsonError(
