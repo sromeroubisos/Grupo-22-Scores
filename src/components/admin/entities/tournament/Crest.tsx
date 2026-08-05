@@ -1,6 +1,6 @@
 'use client';
 
-import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
+import { buildTeamLogoProxyUrl, isTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 
 /**
  * El escudo de un club, en la única escala que usa la consola de operación.
@@ -49,7 +49,14 @@ export function Crest({
 }) {
   const px = SIZE_PX[size];
   const name = club?.name || club?.shortName || '';
-  const src = club?.logo || buildTeamLogoProxyUrl({ key: club?.id, name });
+  const resolved = club?.logo || buildTeamLogoProxyUrl({ key: club?.id, name });
+
+  // Los escudos están cargados a 500px y acá se dibujan a 22. Cuando la fuente es
+  // el proxy, se le pide el ancho al que se pinta (al doble, por retina): los ocho
+  // escudos de un fixture bajan de 738 KB a 23 KB. Misma convención que TeamLogo.
+  const src = resolved && isTeamLogoProxyUrl(resolved)
+    ? `${resolved}${resolved.includes('?') ? '&' : '?'}w=${px * 2}`
+    : resolved;
 
   if (!src) {
     // Sin logo y sin clave no hay forma de resolver un escudo real. Se reserva

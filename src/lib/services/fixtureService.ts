@@ -15,6 +15,7 @@ import {
   type MatchesFeedInvalidationScope,
 } from '@/lib/server/matchesFeedInvalidation';
 import { isMatchRosterLocked } from '@/lib/tournament/fixedRoster';
+import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import {
   deriveFixedRosterLineups,
   loadFixedRosterConfigForMatch,
@@ -2286,6 +2287,19 @@ export class FixtureService {
     };
   }
 
+  /**
+   * El escudo viaja como URL del proxy, nunca como data-URI.
+   *
+   * `clubs.logo_url` guarda el escudo en base64 (~62 KB cada uno). Embebido acá se
+   * multiplica por cada lado de cada partido: un fixture de 59 partidos repetía los
+   * mismos 8 escudos 118 veces y pesaba 15,3 MB, de los cuales 14,3 MB eran esa
+   * duplicación. `resolveSerializableLogoUrl` lo cambia por `/api/assets/team-logo`,
+   * que devuelve BYTE A BYTE la misma imagen resolviéndola por clave — verificado
+   * con sha256 sobre los 8 clubes— y encima la sabe redimensionar.
+   *
+   * El campo NO se borra: sigue llegando poblado y `<Crest>` lo pinta igual. Lo
+   * único que cambia es que viaja la dirección del escudo en vez del escudo entero.
+   */
   private static mapMatchWithClubs(match: any, clubLogos?: Map<string, string | null>): MatchWithClubs {
     return {
       ...this.mapMatch(match),
@@ -2293,7 +2307,10 @@ export class FixtureService {
         ? {
           id: match.tournament.id,
           name: match.tournament.name,
-          logo: match.tournament.logo ?? null,
+          logo: resolveSerializableLogoUrl(match.tournament.logo, {
+            key: match.tournament.id,
+            name: match.tournament.name,
+          }),
         }
         : null,
       homeClub: match.home_club
@@ -2301,7 +2318,10 @@ export class FixtureService {
           id: match.home_club.id,
           name: match.home_club.name,
           shortName: match.home_club.short_name,
-          logo: match.home_club.logo ?? clubLogos?.get(match.home_club.id) ?? null,
+          logo: resolveSerializableLogoUrl(
+            match.home_club.logo ?? clubLogos?.get(match.home_club.id) ?? null,
+            { key: match.home_club.id, name: match.home_club.name },
+          ),
         }
         : null,
       awayClub: match.away_club
@@ -2309,7 +2329,10 @@ export class FixtureService {
           id: match.away_club.id,
           name: match.away_club.name,
           shortName: match.away_club.short_name,
-          logo: match.away_club.logo ?? clubLogos?.get(match.away_club.id) ?? null,
+          logo: resolveSerializableLogoUrl(
+            match.away_club.logo ?? clubLogos?.get(match.away_club.id) ?? null,
+            { key: match.away_club.id, name: match.away_club.name },
+          ),
         }
         : null,
     };
@@ -2322,7 +2345,11 @@ export class FixtureService {
       clubId: p.club_id,
       name: p.name,
       shortCode: p.short_code,
-      logo: clubData?.logo_url || null,
+      // Misma regla que en mapMatchWithClubs: la dirección del escudo, no el escudo.
+      logo: resolveSerializableLogoUrl(clubData?.logo_url ?? null, {
+        key: p.club_id,
+        name: p.name,
+      }),
     };
   }
 }
