@@ -289,13 +289,18 @@ Dos cosas más que aparecieron al acotar:
 
 ### Decisiones tomadas que todavía no se ejecutaron
 
-1. **Publicar el histórico, año por año.** Es la decisión que tomaste: el menú de
-   temporadas ofrece sólo años publicados, y hoy sólo 2026 lo está, así que
-   **0 de 134 torneos muestran menú de temporadas**. El primer paso es 2025 (141
-   torneos, 10.709 partidos); después mirar el home y seguir con 2024. Cada paso
-   es un UPDATE de tres columnas con su rollback — el patrón está en
-   [urba-activar-2026.ts](src/scripts/urba-activar-2026.ts), que hay que
-   parametrizar por año.
+1. ~~**Publicar el histórico, año por año.**~~ **2025 ya está publicado**
+   (2026-08-06): 141 torneos y 10.709 partidos, con las tres puertas. El anónimo
+   ve 275 torneos de URBA y el menú de temporadas del Top 14 ya ofrece 2025. El
+   patrón quedó parametrizado en
+   [urba-publicar-temporada.ts](src/scripts/urba-publicar-temporada.ts)
+   (`--anio=YYYY --plan|--execute`), con rollback por año.
+
+   **Quedan 2024, 2023, 2022 y 2021**, uno por vez y mirando el home entre cada
+   uno. Lo que hay que mirar no es el feed de partidos —está acotado por día en
+   la consulta, así que un partido de 2025 no puede aparecer hoy, y está
+   medido— sino **el listado de competencias, que NO filtra por temporada**:
+   pasó de 129 a 251 entradas al publicar un solo año.
 
 2. **La captura del menú de temporadas.** Depende del punto anterior. Las otras
    tres están en `capturas-navegacion/`.
