@@ -39,6 +39,7 @@ import type { PositionFamilyId } from '../types/player.ts';
 import {
     POTENTIAL_BAND,
     POTENTIAL_MEAN_GAP,
+    POTENTIAL_REALIZATION,
     POTENTIAL_SD_GAP,
 } from '../types/player.ts';
 
@@ -182,7 +183,13 @@ export interface CohortCurve {
  */
 export function cohortCurve(startOvr: number, age: number): CohortCurve {
     const avance = Math.min(1, Math.max(0, (age - 18) / (COHORT_MATURITY_AGE - 18)));
-    const destino = startOvr + POTENTIAL_MEAN_GAP + POTENTIAL_BAND * TYPICAL_BUILD_SHARE;
+    // El destino es el margen REALIZADO, no el margen sorteado. Sin
+    // `POTENTIAL_REALIZATION` la camada maduraba en el techo esperado del propio
+    // jugador, el jugador típico quedaba en el percentil 50 y los tres carriles
+    // con cupo daban exactamente 0,000: el corte quedaba por encima del umbral
+    // del escalón de arriba, así que no se evaluaba nunca.
+    const margen = (POTENTIAL_MEAN_GAP + POTENTIAL_BAND * TYPICAL_BUILD_SHARE) * POTENTIAL_REALIZATION;
+    const destino = startOvr + margen;
     return {
         mean: startOvr + (destino - startOvr) * avance,
         // Piso del 40%: a los 18 la camada ya está algo separada, porque el

@@ -18,6 +18,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { CaptainState, CreateCaptainInput, SquadTrack } from '../../types/captain.ts';
+import { SQUAD_TRACKS } from '../../types/captain.ts';
 import { trainingsFor } from '../../data/trainings.ts';
 import type { MomentOutcome } from '../../types/moment.ts';
 import type { PositionFamilyId } from '../../types/player.ts';
@@ -292,6 +293,44 @@ test('la pirámide: llegar a la mayor es raro', () => {
     //
     // ALARMA-VIVA: los carriles son umbrales y no cupos — la carrera modal del rugby casi no existe
     entre(proporcion(NORMAL, (r) => r.mejorTrack === 'club'), 0.55, 0.8, 'nunca salen del club');
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ESTRUCTURA — otra especie, y por eso va con su propio encabezado
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Las bandas de arriba miden si un número está BIEN. Esto mide si el escalón
+// EXISTE, que es una pregunta anterior y que ninguna banda hace.
+//
+// Existe por un agujero medido: al convertir los carriles a cupo, el agregado
+// `nunca salen del club` cayó en 0,681 —adentro del objetivo, verde si lo
+// mirabas solo— mientras `union`, `academia` y `m20` valían EXACTAMENTE 0,000.
+// La escalera no se había graduado: se le había borrado el medio, y los que
+// salían del club saltaban directo a los dos escalones que seguían por umbral.
+// Un agregado en target escondió tres ceros.
+//
+// Y es la TERCERA vez que este motor produce una distribución todo-o-nada:
+// `no-alcanzó-su-techo = 0`, `nunca-salen-del-club = 0,01`, y ahora tres vías en
+// 0,000. Misma forma en tres capas distintas — algo resuelve por corte duro y el
+// medio queda vacío. Este test es la red para la cuarta.
+//
+// Vive en este archivo y no en uno propio por una razón práctica: el barrido de
+// 160 carreras cuesta, y `NORMAL` ya está calculado. La separación es de
+// ESPECIE, no de archivo, y por eso el encabezado.
+
+test('ESTRUCTURA: ninguna vía de la escalera queda vacía', () => {
+    // No es una banda: es que el escalón exista. Un carril que nadie pisa nunca
+    // no está mal calibrado — no está.
+    const vacias = SQUAD_TRACKS.filter((track) => proporcion(NORMAL, (r) => r.mejorTrack === track) === 0);
+
+    assert.deepEqual(
+        vacias,
+        [],
+        `hay ${vacias.length} vía(s) de la escalera que NADIE pisa como mejor escalón: ${vacias.join(', ')}.\n`
+        + 'No es calibración: es que ese escalón no existe. Casi siempre significa que su corte quedó '
+        + 'por encima del corte del escalón de ARRIBA, así que nunca se evalúa.\n'
+        + `Distribución completa: ${SQUAD_TRACKS.map((t) => `${t}=${proporcion(NORMAL, (r) => r.mejorTrack === t).toFixed(3)}`).join(' · ')}`,
+    );
 });
 
 test('ningún puesto queda afuera de la selección', () => {

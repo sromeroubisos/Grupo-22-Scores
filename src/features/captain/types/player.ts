@@ -131,6 +131,42 @@ export const POTENTIAL_MIN_GAP = 4;
 export const POTENTIAL_MAX_GAP = 40;
 
 /**
+ * QUÉ FRACCIÓN DE SU MARGEN REALIZA EL JUGADOR MEDIO DEL MUNDO.
+ *
+ * ⚠️ NO ES UNA MEDICIÓN. Es una hipótesis de comportamiento, hermana de
+ * `TYPICAL_BUILD_SHARE` en `data/cohort.ts`, y hay que tratarla con la misma
+ * desconfianza: afirma cuánto de su potencial realiza la gente, no cuánto
+ * realiza el simulado.
+ *
+ * ── Por qué NO se puede derivar del sim ──
+ * La tentación es calcular `mean(ovr) / mean(potentialOf)` sobre carreras
+ * simuladas y usar eso. Es CIRCULAR: la camada compuerta la escalera, la
+ * escalera cambia cuánto jugás, cuánto jugás cambia cuánto crecés, y el número
+ * que sacarías quedaría definido por el sim que la camada está compuertando. La
+ * camada tiene que ser una afirmación EXTERNA sobre el mundo, o no es una
+ * camada: es un espejo.
+ *
+ * ── De dónde sale el 0,70 ──
+ * De una cuenta sobre la escalera, no de una regresión. Con realización 1,0 la
+ * camada madura en el techo esperado del propio jugador (52+14+3 = 69), el
+ * jugador típico queda en el percentil 50 y el corte del cupo de unión cae en
+ * ~76,6 — ARRIBA del umbral de a-xv de Argentina (74,9), así que ese cupo no se
+ * evaluaba nunca y los tres carriles de abajo daban exactamente 0,000. Con 0,70
+ * la camada madura en 63,9, el corte cae en ~71,5 y se abre la franja
+ * 71,5–74,9. Esa franja ES la premisa: el buen jugador de club que va convocado
+ * a su unión y no llega más arriba.
+ *
+ * ── Plana en la edad, a propósito ──
+ * No es función de la edad. `avance(edad)` en `cohortCurve` ya lleva la curva, y
+ * dos curvas de edad multiplicadas dejan de ser legibles: no se puede saber cuál
+ * de las dos movió un número. Una constante, un efecto.
+ *
+ * Banda de reautorización: [0,60 – 0,80]. Fuera de ahí no es un ajuste, es otra
+ * afirmación sobre el mundo y merece su propia discusión.
+ */
+export const POTENTIAL_REALIZATION = 0.7;
+
+/**
  * Cuánto techo se puede construir encima del material sorteado.
  *
  * El número sale de `docs/el-capitan-formacion.md`, que propone arrancar
