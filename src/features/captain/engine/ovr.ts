@@ -41,9 +41,23 @@ export function ovrOf(player: CaptainPlayer): number {
 }
 
 /**
+ * EL TECHO, que es la suma de las dos mitades: lo que te tocó y lo que
+ * construiste.
+ *
+ * Es DERIVADO y por eso es una función y no un campo (CLAUDE.md §2): un
+ * `potential` guardado sería una segunda fuente de verdad, y alcanzaría un solo
+ * camino que se olvide de actualizarlo para que el techo mienta. Se recorta a
+ * `OVR_MAX` acá y en un solo lugar, así que nadie puede construir un techo de
+ * 104 sumando por su cuenta.
+ */
+export function potentialOf(player: CaptainPlayer): number {
+    return Math.min(OVR_MAX, player.potentialBase + player.built);
+}
+
+/**
  * Cuánto le falta al jugador para su techo. Nunca negativo: si la media pasó al
  * potencial, la brecha es cero y no un número al revés.
  */
 export function gapToPotential(player: CaptainPlayer): number {
-    return Math.max(0, player.potential - ovrOf(player));
+    return Math.max(0, potentialOf(player) - ovrOf(player));
 }

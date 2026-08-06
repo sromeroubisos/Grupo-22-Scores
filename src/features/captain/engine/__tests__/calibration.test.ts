@@ -18,7 +18,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { CaptainState, CreateCaptainInput, SquadTrack } from '../../types/captain.ts';
-import type { TimeSlot } from '../../types/currencies.ts';
+import { trainingsFor } from '../../data/trainings.ts';
 import type { MomentOutcome } from '../../types/moment.ts';
 import { ALL_FAMILIES } from '../../data/positions.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
@@ -80,8 +80,12 @@ function trabada(state: CaptainState, donde: string): never {
     );
 }
 
-/** El reparto de un jugador normal: entrena, labura, va al club y descansa. */
-const REPARTO: TimeSlot[] = ['entrenar', 'entrenar', 'trabajar', 'club', 'familia', 'gimnasio'];
+/**
+ * La carta del jugador normal: la primera del catálogo de su puesto, que es la
+ * del oficio principal. Es la elección más obvia y por eso es la de referencia:
+ * el barrido mide el motor, no la astucia de quien lo juega.
+ */
+const CARTA = 0;
 
 interface Resultado {
     family: string;
@@ -110,8 +114,7 @@ function jugar(seed: number, family: (typeof ALL_FAMILIES)[number], fiel: boolea
 
     while (s.phase !== 'retired') {
         if (vuelta >= 60) trabada(s, `${family} con semilla ${seed}`);
-        for (const slot of REPARTO) s = captainReducer(s, { type: 'SPEND_TIME', slot });
-        s = captainReducer(s, { type: 'CONFIRM_TIME' });
+        s = captainReducer(s, { type: 'CHOOSE_TRAINING', trainingId: trainingsFor(s.player.family)[CARTA].id });
 
         // La jugada decisiva, si la hay. El tackle alto encadena el bunker, así
         // que se insiste hasta salir de la fase. El jugador de referencia hace

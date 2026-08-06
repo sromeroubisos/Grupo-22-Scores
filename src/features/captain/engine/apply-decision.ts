@@ -12,7 +12,7 @@ import { getFamily } from '../data/positions.ts';
 import { applyBelonging } from './belonging.ts';
 import { addBodyDamage, addHeadDamage } from './damage.ts';
 import { applyMoney } from './money.ts';
-import { ovrOf } from './ovr.ts';
+import { ovrOf, potentialOf } from './ovr.ts';
 import { belongingSituation, returnHome, signProfessional } from './contracts.ts';
 import { getClub } from '../data/catalogs.ts';
 
@@ -48,8 +48,9 @@ function applyAttrs(state: CaptainState, deltas: NonNullable<CaptainEffect['attr
     }
 
     const despues = ovrOf(player);
-    if (despues > player.potential && despues > antes) {
-        const permitido = Math.max(0, player.potential - antes);
+    const techo = potentialOf(player);
+    if (despues > techo && despues > antes) {
+        const permitido = Math.max(0, techo - antes);
         const factor = permitido / (despues - antes);
         for (const key of family.attributes) {
             const original = snapshot[key]!;

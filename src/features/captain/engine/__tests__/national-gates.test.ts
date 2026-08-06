@@ -25,7 +25,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { CaptainState, CreateCaptainInput, SquadTrack } from '../../types/captain.ts';
-import type { TimeSlot } from '../../types/currencies.ts';
+import { trainingsFor } from '../../data/trainings.ts';
 import type { MomentOutcome } from '../../types/moment.ts';
 import type { PositionFamilyId } from '../../types/player.ts';
 import type { CodigoSetup } from '../moment-defs/codigo.ts';
@@ -36,6 +36,7 @@ import { hasUnion } from '../../data/catalogs.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
 import { getPendingEvent } from '../event-selector.ts';
 import { thresholdFor } from '../national-team.ts';
+import { potentialOf } from '../ovr.ts';
 import { palosPerfectAim } from '../moment-defs/palos.ts';
 
 /**
@@ -47,8 +48,8 @@ import { palosPerfectAim } from '../moment-defs/palos.ts';
  */
 const POR_FAMILIA = 60;
 
-/** El mismo reparto de un jugador normal que usa `calibration.test.ts`. */
-const REPARTO: TimeSlot[] = ['entrenar', 'entrenar', 'trabajar', 'club', 'familia', 'gimnasio'];
+/** La misma carta del jugador normal que usa `calibration.test.ts`. */
+const CARTA = 0;
 
 /**
  * El mismo jugador de referencia que `calibration.test.ts`: juega bien y no
@@ -73,15 +74,11 @@ function manoDeReferencia(state: CaptainState): MomentOutcome {
     }
 }
 
-/**
- * Lo que el gimnasio le suma a la media con la que te MIRAN.
- *
- * Está duplicado de `simulate-season.ts` a propósito y con los ojos abiertos: si
- * se importara, este barrido mediría "lo que el motor dice que hace" en vez de
- * "lo que el motor hace". Si algún día no coinciden, el que tiene razón es
- * `simulate-season.ts` y este número se actualiza a mano.
- */
-const EMPUJE_POR_FICHA_GIMNASIO = 1.2;
+// Acá vivía `EMPUJE_POR_FICHA_GIMNASIO`, el empujón que la ficha del PlaDAR le
+// daba a la media con la que te MIRAN. Se fue con las fichas en 0.7.0, y con él
+// la única palanca que el jugador tenía sobre esta escalera: hoy te miran por la
+// media pelada. Vuelve cuando entren las convocatorias jugables, y entonces este
+// barrido tiene que volver a distinguir el techo del techo-con-empujón.
 
 /** Por qué esta carrera no llegó a la mayor. */
 type Compuerta =
@@ -119,13 +116,12 @@ function jugar(seed: number, family: PositionFamilyId): Carrera {
     let s = createInitialCaptain(input, seed);
 
     const umbral = thresholdFor('nacional', s.player);
-    const techo = s.player.potential;
+    const techo = potentialOf(s.player);
     let pico = 0;
     let vuelta = 0;
 
     while (s.phase !== 'retired' && vuelta < 60) {
-        for (const slot of REPARTO) s = captainReducer(s, { type: 'SPEND_TIME', slot });
-        s = captainReducer(s, { type: 'CONFIRM_TIME' });
+        s = captainReducer(s, { type: 'CHOOSE_TRAINING', trainingId: trainingsFor(s.player.family)[CARTA].id });
 
         let guarda = 0;
         while (s.phase === 'moment' && guarda < 4) {
@@ -133,8 +129,9 @@ function jugar(seed: number, family: PositionFamilyId): Carrera {
             guarda += 1;
         }
 
-        // Acá está parado el jugador cuando el seleccionador lo mira.
-        pico = Math.max(pico, s.player.ovr + (s.time.spent.gimnasio ?? 0) * EMPUJE_POR_FICHA_GIMNASIO);
+        // Acá está parado el jugador cuando el seleccionador lo mira. Sin el
+        // empujón del gimnasio, es la media pelada y nada más.
+        pico = Math.max(pico, s.player.ovr);
 
         s = captainReducer(s, { type: 'ADVANCE' });
         if (s.phase === 'event') {
@@ -145,11 +142,10 @@ function jugar(seed: number, family: PositionFamilyId): Carrera {
     }
 
     const mejorTrack = s.national.bestTrack;
-    const techoConGimnasio = techo + REPARTO.filter((x) => x === 'gimnasio').length * EMPUJE_POR_FICHA_GIMNASIO;
 
     const compuerta: Compuerta = !hasUnion(s.player.countryCode) ? 'sin-union'
         : mejorTrack === 'nacional' ? 'llego'
-            : techoConGimnasio < umbral ? 'techo-corto'
+            : techo < umbral ? 'techo-corto'
                 : 'no-alcanzo-su-techo';
 
     return { family, compuerta, umbral, techo, pico, mejorTrack, temporadas: s.history.length };
@@ -340,18 +336,16 @@ test('TICKET: la barra por familia contra la distribución de techos', () => {
 
     // El dato que separa "estructural" de "muestra chica".
     //
-    // Se compara contra el techo MÁS el empuje del gimnasio, que es la media con
-    // la que de verdad te miran: comparar el techo pelado contra la barra daría
-    // un "cerrado" falso en las familias que entran justo por ese empujón, y este
-    // renglón se lee como veredicto.
+    // Se compara contra el techo pelado, que desde 0.7.0 ES la media con la que
+    // te miran: el empujón del gimnasio se fue con las fichas. Cuando entren las
+    // convocatorias, acá vuelve a hacer falta sumarles lo que aporten.
     lineas.push('');
-    const gimnasio = REPARTO.filter((x) => x === 'gimnasio').length * EMPUJE_POR_FICHA_GIMNASIO;
     for (const family of ALL_FAMILIES) {
         const sub = MUESTRA.filter((r) => r.family === family);
-        const mejorPosible = Math.max(...sub.map((r) => r.techo)) + gimnasio;
+        const mejorPosible = Math.max(...sub.map((r) => r.techo));
         if (mejorPosible < sub[0].umbral) {
             lineas.push(
-                `  ⚠ ${family}: ni el mejor techo sorteado (${mejorPosible.toFixed(1)} con gimnasio) alcanza la barra `
+                `  ⚠ ${family}: ni el mejor techo sorteado (${mejorPosible.toFixed(1)}) alcanza la barra `
                 + `(${sub[0].umbral.toFixed(1)}) — el puesto está CERRADO, no es raro`,
             );
         }

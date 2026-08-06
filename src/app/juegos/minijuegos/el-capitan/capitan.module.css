@@ -46,6 +46,16 @@
     opacity: 0.75;
 }
 
+/* El techo, debajo de la media. La brecha entre los dos números ES la historia
+   del que apuntó más alto y se quedó sin años, así que se lee de un vistazo. */
+.ovrCeiling {
+    font-size: 0.52rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.6;
+}
+
 .identity {
     min-width: 0;
     flex: 1;
@@ -196,139 +206,6 @@
     margin-bottom: 0;
 }
 
-/* ── El reparto de las seis fichas ────────────────────────────────────────── */
-.tokens {
-    display: flex;
-    gap: 6px;
-    margin: 4px 0 18px;
-}
-
-.token {
-    width: 26px;
-    height: 26px;
-    border-radius: 999px;
-    border: 2px solid var(--color-border-light, var(--color-border));
-    background: transparent;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.tokenUsed {
-    background: var(--color-accent);
-    border-color: var(--color-accent);
-    transform: scale(1.06);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .token {
-        transition: none;
-    }
-}
-
-.slots {
-    display: grid;
-    gap: 10px;
-}
-
-.slot {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 12px 14px;
-    border-radius: 14px;
-    background: var(--color-bg-tertiary);
-    border: 1px solid transparent;
-    text-align: left;
-    cursor: pointer;
-    transition: border-color 0.18s ease, background 0.18s ease;
-}
-
-.slot:hover:not(:disabled) {
-    border-color: rgba(var(--color-accent-rgb), 0.4);
-}
-
-.slot:disabled {
-    cursor: default;
-    opacity: 0.55;
-}
-
-.slotActive {
-    border-color: rgba(var(--color-accent-rgb), 0.55);
-    background: rgba(var(--color-accent-rgb), 0.08);
-}
-
-/* Es un botón porque poner una ficha se hace tocando la ranura entera, no un
-   ícono de 30px. Va sin fondo ni borde para que se lea como texto. */
-.slotBody {
-    flex: 1;
-    min-width: 0;
-    padding: 0;
-    border: none;
-    background: none;
-    text-align: left;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.slotBody:disabled {
-    cursor: default;
-}
-
-.slotName {
-    display: block;
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
-}
-
-.slotHint {
-    display: block;
-    font-size: 0.78rem;
-    line-height: 1.35;
-    color: var(--color-text-tertiary);
-    margin-top: 2px;
-}
-
-.slotCount {
-    display: grid;
-    place-items: center;
-    min-width: 34px;
-    height: 30px;
-    padding: 0 8px;
-    border-radius: 999px;
-    background: var(--color-bg-secondary);
-    color: var(--color-text-secondary);
-    font-size: 0.85rem;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    flex-shrink: 0;
-}
-
-.slotCountFilled {
-    background: rgba(var(--color-accent-rgb), 0.16);
-    color: var(--color-accent);
-}
-
-.slotMinus {
-    display: grid;
-    place-items: center;
-    width: 30px;
-    height: 30px;
-    flex-shrink: 0;
-    border-radius: 999px;
-    border: 1px solid var(--color-border);
-    background: transparent;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    font-size: 1.1rem;
-    line-height: 1;
-}
-
-.slotMinus:disabled {
-    opacity: 0.25;
-    cursor: default;
-}
-
 /* ── Botones ──────────────────────────────────────────────────────────────── */
 .primary {
     display: block;
@@ -429,6 +306,57 @@
     line-height: 1.4;
     color: var(--color-text-secondary);
     margin-top: 3px;
+}
+
+/* La carta de pretemporada: lo que ganás, y abajo lo que pagás. Las cuatro
+   opciones ya no reparten lo mismo, así que el tamaño y el costo tienen que
+   estar a la vista ANTES de elegir (CLAUDE.md §3.1). */
+.trainingGain {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 7px;
+}
+
+.trainingChip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.12);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.28);
+}
+
+/* El techo que levanta la carta. Va entre lo que ganás y lo que pagás porque
+   ES la mitad de arriba del trato: el jugador tiene que ver el techo moverse
+   mientras decide, no enterarse en el retiro. */
+.trainingCeiling {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-accent);
+}
+
+.trainingCost,
+.trainingFree {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.trainingCost {
+    color: #e0574f;
+}
+
+.trainingFree {
+    color: var(--color-text-secondary);
+    font-weight: 600;
 }
 
 /* Las probabilidades SE MUESTRAN: elegir a ciegas entre dos frases no es

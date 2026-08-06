@@ -28,7 +28,18 @@ const KEY = 'g22-el-capitan';
 // `carrera-rugby/careerStorage.ts` y vale la pena copiarla entera: cuando hay
 // un default honesto para un campo nuevo se dice, y aun así se descarta si el
 // resto del estado quedaría mintiendo.
-const SCHEMA = 2;
+// 3 · Se fue `time: TimeBudget` del estado y `time` de cada fila del historial,
+//     y entró `training: string | null` en los dos. Una partida de schema 2 no se
+//     puede migrar sin inventarle un entrenamiento a cada temporada ya jugada,
+//     así que se resuelve como `'outdated'` y la UI ofrece empezar de nuevo.
+// 4 · Se partió `player.potential` en `potentialBase` + `built`. Una partida de
+//     schema 3 tiene el campo viejo y ninguno de los dos nuevos, así que su
+//     techo se leería como `NaN` y la carrera se rompería en silencio en la
+//     primera temporada. Migrarla sería posible —`potentialBase = potential`,
+//     `built = 0`— pero mentiría: esa partida se jugó con cartas que no
+//     construían nada, y arrancaría con la banda entera todavía disponible a
+//     mitad de carrera. Se resuelve como `'outdated'`.
+const SCHEMA = 4;
 
 /**
  * Las versiones que se sellan, y las dos decisiones que no son obvias.

@@ -10,10 +10,15 @@
 //
 // ── Dos reglas que no se rompen ──
 //
-// 1. REPARTIR TIEMPO NO CONSUME AZAR. `SPEND_TIME` y `UNSPEND_TIME` no tocan el
-//    rng. Si lo tocaran, la carrera dependería de cuántas veces dudaste antes
-//    de confirmar el reparto, que es exactamente la clase de no-determinismo
-//    encubierto que arruina un motor sembrado.
+// 1. ELEGIR EL ENTRENAMIENTO NO CONSUME AZAR POR ELEGIR. `CHOOSE_TRAINING` tira
+//    para el Momento —eso pasa igual, se entrene lo que se entrene— pero la
+//    carta elegida no cambia cuántas tiradas se hacen ni en qué orden. Es la
+//    herencia de la regla que traía el reparto de fichas: si la elección
+//    moviera el stream, dos partidas con la misma semilla dejarían de ser
+//    comparables y el digest congelado dejaría de significar lo que dice.
+//
+//    El corolario práctico está en `aging.ts`: el ruido de la temporada se tira
+//    SIEMPRE y una sola vez, haya carta o no.
 //
 // 2. LOS SORTEOS SE HACEN SIEMPRE, aunque el input traiga el valor. El dorsal
 //    se sortea incluso cuando el jugador lo eligió, y recién después se pisa
@@ -36,7 +41,7 @@ import { NORMALIZED_CATALOG_VERSION, clubExists } from '../data/catalogs.ts';
 import { createRng } from '../engine/random.ts';
 import { emptyBelonging } from '../engine/belonging.ts';
 import { emptyDamage } from '../engine/damage.ts';
-import { isTimeBudgetFull, resetTimeBudget, spendToken, unspendToken } from '../engine/time-budget.ts';
+import { getTraining } from '../data/trainings.ts';
 import { ovrFromAttributes } from '../engine/ovr.ts';
 import { startingClub } from '../engine/clubs.ts';
 import { createRival, emptyNational } from '../engine/national-team.ts';
@@ -99,9 +104,12 @@ export function createInitialCaptain(input: CreateCaptainInput, seed: number): C
         attrs[key] = Math.max(1, attrs[key] + rng.int(-BASE_SPREAD, BASE_SPREAD));
     }
 
-    // 3 · El potencial: la media de hoy más lo que le queda por crecer.
+    // 3 · EL MATERIAL: la media de hoy más lo que le queda por crecer.
+    //     Es la mitad SORTEADA del techo y nada más: la otra mitad arranca en
+    //     cero y se construye jugando (`player.built`). Por eso lo que sale de
+    //     acá no es el destino del jugador sino las cartas que le tocaron.
     const ovr = ovrFromAttributes(input.family, attrs);
-    const potential = Math.min(
+    const potentialBase = Math.min(
         OVR_MAX,
         ovr + Math.round(rng.normal(POTENTIAL_MEAN_GAP, POTENTIAL_SD_GAP, POTENTIAL_MIN_GAP, POTENTIAL_MAX_GAP)),
     );
@@ -118,7 +126,8 @@ export function createInitialCaptain(input: CreateCaptainInput, seed: number): C
         number,
         attrs,
         ovr,
-        potential,
+        potentialBase,
+        built: 0,
         clubId,
         countryCode: input.countryCode,
         retired: false,
@@ -150,7 +159,7 @@ export function createInitialCaptain(input: CreateCaptainInput, seed: number): C
         titles: [],
         offers: [],
 
-        time: resetTimeBudget(),
+        training: null,
         belonging: emptyBelonging(),
         fame: 0,
         money: MONEY_START,
@@ -214,26 +223,20 @@ export function captainReducer(state: CaptainState, action: CaptainAction): Capt
     // Retirado no se mueve más. Se mira la trayectoria y se empieza otra.
     if (state.phase === 'retired') return state;
 
-    // ── Reparto de Tiempo: aritmética pura, sin tocar el rng ────────────────
-    if (action.type === 'SPEND_TIME' || action.type === 'UNSPEND_TIME') {
-        if (state.phase !== 'offseason') return state;
-        const time = action.type === 'SPEND_TIME'
-            ? spendToken(state.time, action.slot)
-            : unspendToken(state.time, action.slot);
-        // Si no cambió nada —no quedaban fichas, o esa ranura estaba en cero—
-        // se devuelve el mismo estado y no un clon idéntico.
-        if (time === state.time) return state;
-        return { ...state, time };
-    }
-
     const next: CaptainState = structuredClone(state);
     const rng = createRng(next.rngState);
 
     switch (action.type) {
-        case 'CONFIRM_TIME': {
-            // El botón se habilita recién con las seis puestas, y el modelo lo
-            // vuelve a chequear: la regla no puede vivir solo en la pantalla.
-            if (next.phase !== 'offseason' || !isTimeBudgetFull(next.time)) return state;
+        case 'CHOOSE_TRAINING': {
+            if (next.phase !== 'offseason') return state;
+
+            // Una carta que no es de tu puesto no es una elección, igual que una
+            // opción de evento que no existe: se devuelve el estado sin tocar y
+            // sin haber consumido azar. La validación vive acá y no solo en la
+            // pantalla, que es la misma regla que tenía el reparto.
+            const training = getTraining(next.player.family, action.trainingId);
+            if (!training) return state;
+            next.training = training.id;
 
             // Acá se decide si la temporada trae una jugada decisiva. Va antes
             // de simular porque el Momento pasa DENTRO del año, no después: si
@@ -346,8 +349,8 @@ export function captainReducer(state: CaptainState, action: CaptainAction): Capt
 }
 
 /**
- * Cierra la temporada y abre la siguiente: envejece, chequea el retiro y deja
- * el presupuesto listo para repartir de nuevo.
+ * Cierra la temporada y abre la siguiente: envejece, chequea el retiro y deja la
+ * pretemporada esperando que elijas de nuevo.
  *
  * Vive acá y no en `simulate-season.ts` porque no es parte de la temporada: es
  * lo que pasa entre una y la otra.
@@ -359,7 +362,10 @@ function closeAndOpenNext(state: CaptainState, rng: Rng): void {
     retireIfDue(state, rng);
     if (state.player.retired) return;
 
-    state.time = resetTimeBudget();
+    // La carta dura UNA temporada, como todo modificador de este motor. Si no se
+    // limpiara, el entrenamiento del año tres seguiría subiendo atributos en el
+    // doce sin que nadie lo hubiera vuelto a elegir.
+    state.training = null;
     state.matches = emptyMatchBudget();
     state.pendingMoment = null;
     state.phase = 'offseason';

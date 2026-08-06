@@ -48,7 +48,6 @@ import {
     CAPTAIN_ENGINE_VERSION,
     NORMALIZED_CATALOG_VERSION,
     PLAY_LEVELS,
-    TIME_TOKENS_PER_SEASON,
     belongingOf,
     captainReducer,
     createInitialCaptain,
@@ -58,6 +57,7 @@ import {
     isContractKind,
     tacklePlayAt,
     tackleZones,
+    trainingsFor,
 } from '../../index.ts';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -65,21 +65,19 @@ import {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Dónde van las seis fichas.
+ * Qué entrena esta pretemporada.
  *
- * NO todas al mismo slot. Seis en `entrenar` produce una carrera que nunca
- * trabaja, y §10 de `simulate-season` castiga eso con una tirada de rng propia:
- * el digest quedaría dominado por ese castigo en vez de por el motor. Este
- * reparto toca cinco de los cinco slots y rota con la temporada, así que las
- * carreras congeladas pasan por todos los carriles.
+ * NO siempre la misma. Con la carta fija, la carrera congelada pasaría toda su
+ * vida por un solo carril del catálogo y el digest no vería nunca los otros
+ * tres. Rota con la temporada, así que las tres carreras congeladas pasan por
+ * las cuatro opciones de su familia.
+ *
+ * Es la heredera del `reparto` que rotaba los cinco slots de ⏳, y existe por el
+ * mismo motivo. Lo que ya no hace falta cuidar es el castigo por no trabajar:
+ * esa tirada se fue con las fichas y hoy la estabilidad la decide un evento.
  */
-function reparto(season: number): string[] {
-    const orden = ['entrenar', 'club', 'trabajar', 'gimnasio', 'familia'];
-    const fichas: string[] = [];
-    for (let i = 0; i < TIME_TOKENS_PER_SEASON; i += 1) {
-        fichas.push(orden[(season + i) % orden.length]);
-    }
-    return fichas;
+function cartaDe(season: number, opciones: number): number {
+    return season % opciones;
 }
 
 /**
@@ -132,13 +130,11 @@ function manoImposible(kind: never): never {
 //  Correr una carrera entera con la receta
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Reparte las seis fichas de la temporada y cierra el reparto. */
+/** Elige el entrenamiento de la pretemporada y con eso arranca la temporada. */
 function repartir(state: CaptainState): CaptainState {
-    let next = state;
-    for (const slot of reparto(next.season)) {
-        next = captainReducer(next, { type: 'SPEND_TIME', slot: slot as never });
-    }
-    return captainReducer(next, { type: 'CONFIRM_TIME' });
+    const opciones = trainingsFor(state.player.family);
+    const elegida = opciones[cartaDe(state.season, opciones.length)];
+    return captainReducer(state, { type: 'CHOOSE_TRAINING', trainingId: elegida.id });
 }
 
 /**

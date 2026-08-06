@@ -1,7 +1,6 @@
 // EL CAPITÁN — la temporada: el presupuesto de partidos y lo que queda escrito.
 
 import type { CaptainStage } from './player.ts';
-import type { TimeSlot } from './currencies.ts';
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  EL TECHO DE 30 PARTIDOS
@@ -73,8 +72,8 @@ export interface CaptainSeasonEntry {
     titles: string[];
     /** Se fue de gira, se lesionó, lo suspendieron: lo que le pasó al año. */
     note: string | null;
-    /** Cómo repartiste las seis fichas. Las cinco ranuras siempre presentes. */
-    time: Record<TimeSlot, number>;
+    /** Qué entrenaste esa pretemporada. Id del catálogo, o `null` si no se eligió. */
+    training: string | null;
     headDamage: number;
     bodyDamage: number;
     /**

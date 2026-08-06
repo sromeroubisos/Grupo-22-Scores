@@ -68,6 +68,39 @@ export const ATTRIBUTE_KEYS: readonly CaptainAttributeKey[] = [
 ];
 
 /**
+ * Cómo se lee cada atributo en pantalla.
+ *
+ * Vive acá y no en el componente por la misma regla que la planilla del puesto
+ * (CLAUDE.md §5): el catálogo es el que sabe de rugby. Un `Record` completo y no
+ * un `?? key`, para que agregar un atributo sin nombrarlo no compile en vez de
+ * mostrarle `juegoAereo` al jugador.
+ *
+ * No se persiste ninguno de estos textos, así que cambiarlos no sube ninguna
+ * versión.
+ */
+export const ATTRIBUTE_LABEL: Record<CaptainAttributeKey, string> = {
+    empuje: 'Empuje',
+    choque: 'Choque',
+    manos: 'Manos',
+    lanzamiento: 'Lanzamiento',
+    salto: 'Salto',
+    trabajo: 'Trabajo',
+    tackle: 'Tackle',
+    robo: 'Robo',
+    defensa: 'Defensa',
+    salida: 'Salida',
+    patada: 'Patada',
+    pegada: 'Pegada',
+    vision: 'Visión',
+    quiebre: 'Quiebre',
+    velocidad: 'Velocidad',
+    gambeta: 'Gambeta',
+    juegoAereo: 'Juego aéreo',
+    liderazgo: 'Liderazgo',
+    aguante: 'Aguante',
+};
+
+/**
  * Lo que vale un atributo que no es de tu familia. Un wing tiene `empuje`: lo
  * tiene bajo, no lo tiene ausente. Existe para que un cambio de puesto dentro
  * del pack no arranque de cero.

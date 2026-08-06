@@ -20,11 +20,13 @@ import type { CaptainAction } from '../captain-actions.ts';
 import { PLAY_LEVELS } from '../../types/moment-def.ts';
 import { getMomentDef, isContractKind } from '../../engine/moment-defs/index.ts';
 import { tacklePlayAt, tackleZones } from '../../engine/moments.ts';
-import { TIME_SLOTS, TIME_TOKENS_PER_SEASON } from '../../types/currencies.ts';
+import { trainingsFor } from '../../data/trainings.ts';
 import { MATCH_CAP_PER_SEASON } from '../../types/season.ts';
 import { ALL_FAMILIES, getFamily } from '../../data/positions.ts';
 import { getPendingEvent } from '../../engine/event-selector.ts';
 import { trackIndex } from '../../engine/national-team.ts';
+import { potentialOf } from '../../engine/ovr.ts';
+import { POTENTIAL_BAND } from '../../types/player.ts';
 import { captainReducer, createInitialCaptain } from '../captain-reducer.ts';
 
 const INPUT: CreateCaptainInput = {
@@ -38,12 +40,13 @@ function apply(state: CaptainState, actions: CaptainAction[]): CaptainState {
     return actions.reduce(captainReducer, state);
 }
 
-/** Repartir las seis fichas donde se diga y cerrar el reparto. */
-function repartir(state: CaptainState, slot: (typeof TIME_SLOTS)[number] = 'entrenar'): CaptainState {
-    const acciones: CaptainAction[] = [];
-    for (let i = 0; i < TIME_TOKENS_PER_SEASON; i += 1) acciones.push({ type: 'SPEND_TIME', slot });
-    acciones.push({ type: 'CONFIRM_TIME' });
-    return apply(state, acciones);
+/**
+ * Elegir el entrenamiento de la pretemporada, por índice dentro del catálogo de
+ * la familia. Por defecto el primero, que es el del oficio principal del puesto.
+ */
+function repartir(state: CaptainState, indice = 0): CaptainState {
+    const trainingId = trainingsFor(state.player.family)[indice].id;
+    return captainReducer(state, { type: 'CHOOSE_TRAINING', trainingId });
 }
 
 /**
@@ -270,12 +273,13 @@ test('la carrera empieza en un club de tu país, sin plata y sin golpes', () => 
     assert.equal(state.damage.hia, 0);
     assert.deepEqual(state.belonging.byClub, {});
 
-    assert.equal(state.time.total, TIME_TOKENS_PER_SEASON);
+    assert.equal(state.training, null, 'la pretemporada arranca sin carta elegida');
     assert.equal(state.matches.cap, MATCH_CAP_PER_SEASON);
 
     assert.equal(state.player.age, 18);
     assert.equal(state.player.retired, false);
-    assert.ok(state.player.potential > state.player.ovr, 'un pibe de 18 tiene por dónde crecer');
+    assert.ok(potentialOf(state.player) > state.player.ovr, 'un pibe de 18 tiene por dónde crecer');
+    assert.equal(state.player.built, 0, 'a los 18 no construyó nada todavía: el techo es material puro');
 
     // El club de origen es donde te hiciste, y arranca siendo el actual.
     assert.ok(state.player.clubId, 'un pibe argentino tiene club: el catálogo está lleno');
@@ -298,49 +302,47 @@ test('las ocho familias arrancan una carrera válida', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  ⏳ Repartir el Tiempo no consume azar
+//  La carta de pretemporada
 // ═══════════════════════════════════════════════════════════════════════════
 
-test('poner y sacar fichas no toca el rng', () => {
-    // Si lo tocara, la carrera dependería de cuántas veces dudaste antes de
-    // confirmar el reparto. Es la regla que más fácil se rompe sin querer.
+test('una carta que no es de tu puesto no hace nada, ni siquiera consumir azar', () => {
+    // Es la heredera de la regla del reparto: una elección inválida tiene que
+    // devolver el MISMO estado, no un clon con el rng corrido. Si corriera el
+    // rng, tocar un botón de otra familia cambiaría la carrera entera.
     const base = createInitialCaptain(INPUT, 61);
-    const manoseado = apply(base, [
-        { type: 'SPEND_TIME', slot: 'entrenar' },
-        { type: 'SPEND_TIME', slot: 'club' },
-        { type: 'UNSPEND_TIME', slot: 'entrenar' },
-        { type: 'SPEND_TIME', slot: 'familia' },
-        { type: 'UNSPEND_TIME', slot: 'club' },
-        { type: 'UNSPEND_TIME', slot: 'familia' },
-    ]);
 
-    assert.equal(manoseado.rngState, base.rngState);
-    assert.deepEqual(manoseado.time, base.time, 'volver atrás todo tiene que dejar el reparto como estaba');
+    // Un id inventado, y uno que existe pero es de otra familia: los dos son
+    // igual de inválidos para un apertura.
+    const inventado = captainReducer(base, { type: 'CHOOSE_TRAINING', trainingId: 'no-existe' });
+    const ajeno = captainReducer(base, { type: 'CHOOSE_TRAINING', trainingId: trainingsFor('wing-fullback')[0].id });
+
+    assert.equal(inventado, base, 'un id que no existe devuelve el mismo estado');
+    assert.equal(ajeno, base, 'la carta de otro puesto tampoco es una elección');
+    assert.equal(base.training, null);
 });
 
-test('el reparto no se cierra hasta que estén las seis puestas', () => {
-    let state = createInitialCaptain(INPUT, 4);
-    state = captainReducer(state, { type: 'SPEND_TIME', slot: 'trabajar' });
+test('elegir el entrenamiento arranca la temporada', () => {
+    const state = createInitialCaptain(INPUT, 4);
+    assert.equal(state.phase, 'offseason');
 
-    const temprano = captainReducer(state, { type: 'CONFIRM_TIME' });
-    assert.equal(temprano.phase, 'offseason', 'con una sola ficha puesta no se juega la temporada');
-    assert.equal(temprano, state, 'una acción que no aplica devuelve el mismo estado');
-
-    // Cerrar el reparto deja la temporada lista para jugarse: o va derecho a
-    // simular, o frena antes en la jugada decisiva.
-    assert.ok(['season', 'moment'].includes(repartir(state, 'trabajar').phase));
+    // Elegir deja la temporada lista para jugarse: o va derecho a simular, o
+    // frena antes en la jugada decisiva. No hay paso de confirmar.
+    const elegido = repartir(state);
+    assert.ok(['season', 'moment'].includes(elegido.phase));
+    assert.equal(elegido.training, trainingsFor(INPUT.family)[0].id);
 });
 
-test('sin cerrar el reparto no se juega la temporada', () => {
+test('sin elegir entrenamiento no se juega la temporada', () => {
     const state = createInitialCaptain(INPUT, 4);
     assert.equal(captainReducer(state, { type: 'ADVANCE' }), state);
 });
 
-test('el reparto queda escrito en la trayectoria', () => {
-    const listo = pasarMomentos(repartir(createInitialCaptain(INPUT, 31), 'club'), 0);
+test('el entrenamiento queda escrito en la trayectoria', () => {
+    const esperado = trainingsFor(INPUT.family)[2].id;
+    const listo = pasarMomentos(repartir(createInitialCaptain(INPUT, 31), 2), 0);
     const jugada = captainReducer(listo, { type: 'ADVANCE' });
     assert.equal(jugada.history.length, 1);
-    assert.equal(jugada.history[0].time.club, TIME_TOKENS_PER_SEASON);
+    assert.equal(jugada.history[0].training, esperado);
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -378,8 +380,8 @@ test('elegir cierra la temporada y abre la siguiente', () => {
     assert.equal(despues.pendingEventId, null);
     assert.equal(despues.decisionLog.length, 1);
     assert.ok(despues.history[0].decisionText, 'el desenlace queda pegado a la temporada');
-    // Y el presupuesto vuelve a estar entero.
-    for (const slot of TIME_SLOTS) assert.equal(despues.time.spent[slot], 0);
+    // Y la carta se apagó: dura una temporada, como todo modificador.
+    assert.equal(despues.training, null);
 });
 
 test('una opción que no existe no rompe nada', () => {
@@ -399,8 +401,15 @@ test('el techo del potencial no se pasa en ninguna temporada', () => {
     for (const seed of [3, 91, 404, 1210]) {
         hastaElRetiro(seed, (state) => {
             assert.ok(
-                state.player.ovr <= state.player.potential,
-                `semilla ${seed}: media ${state.player.ovr} por encima del potencial ${state.player.potential}`,
+                state.player.ovr <= potentialOf(state.player),
+                `semilla ${seed}: media ${state.player.ovr} por encima del techo ${potentialOf(state.player)}`,
+            );
+            // Y lo construido no puede pasarse de la banda por ningún camino:
+            // es el techo del techo, y sin él una carrera larga de cartas caras
+            // convertiría el sorteo en un detalle.
+            assert.ok(
+                state.player.built >= 0 && state.player.built <= POTENTIAL_BAND,
+                `semilla ${seed}: construido ${state.player.built} fuera de [0, ${POTENTIAL_BAND}]`,
             );
         });
     }
@@ -501,7 +510,7 @@ test('el wing se retira antes que el pilar', () => {
 test('retirado no se mueve más', () => {
     const final = carreraCompleta(11);
     assert.equal(captainReducer(final, { type: 'ADVANCE' }), final);
-    assert.equal(captainReducer(final, { type: 'SPEND_TIME', slot: 'club' }), final);
+    assert.equal(captainReducer(final, { type: 'CHOOSE_TRAINING', trainingId: trainingsFor(INPUT.family)[0].id }), final);
 });
 
 test('empezar de nuevo se puede incluso desde una carrera terminada', () => {

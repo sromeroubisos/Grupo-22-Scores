@@ -1,4 +1,4 @@
-// Las invariantes de las seis monedas.
+// Las invariantes de las cinco monedas.
 //
 // Estas no son pruebas de calibración: son las reglas que SON el diseño. Si
 // alguna se rompe, el juego deja de ser el que se diseñó aunque todo compile —
@@ -13,8 +13,6 @@ import {
     BELONGING_CAP_RIVAL_JUMP,
     HEAD_MAX,
     HEAD_PER_HIA,
-    TIME_SLOTS,
-    TIME_TOKENS_PER_SEASON,
 } from '../../types/currencies.ts';
 import {
     applyBelonging,
@@ -26,14 +24,6 @@ import {
 } from '../belonging.ts';
 import { addBodyDamage, addHeadDamage, emptyDamage } from '../damage.ts';
 import { applyMoney, canEarnMoney } from '../money.ts';
-import {
-    isTimeBudgetFull,
-    resetTimeBudget,
-    spendToken,
-    tokensLeft,
-    tokensSpent,
-    unspendToken,
-} from '../time-budget.ts';
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  🧠 CABEZA — la regla que no se negocia
@@ -196,42 +186,4 @@ test('en profesional la plata se mueve y no baja de cero', () => {
     assert.equal(applyMoney(1200, -300, 'professional'), 900);
     assert.equal(applyMoney(0, 18000, 'professional'), 18000);
     assert.equal(applyMoney(100, -500, 'professional'), 0, 'acá no se debe plata');
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  ⏳ TIEMPO — seis fichas, ni una más
-// ═══════════════════════════════════════════════════════════════════════════
-
-test('el presupuesto arranca con seis fichas y las cinco ranuras en cero', () => {
-    const budget = resetTimeBudget();
-    assert.equal(budget.total, TIME_TOKENS_PER_SEASON);
-    assert.equal(tokensSpent(budget), 0);
-    assert.equal(tokensLeft(budget), TIME_TOKENS_PER_SEASON);
-    assert.deepEqual(Object.keys(budget.spent).sort(), [...TIME_SLOTS].sort());
-    for (const slot of TIME_SLOTS) assert.equal(budget.spent[slot], 0);
-});
-
-test('no se pueden poner más de seis fichas', () => {
-    let budget = resetTimeBudget();
-    for (let i = 0; i < TIME_TOKENS_PER_SEASON; i += 1) budget = spendToken(budget, 'entrenar');
-
-    assert.equal(tokensLeft(budget), 0);
-    assert.equal(isTimeBudgetFull(budget), true);
-
-    // La séptima no entra, y devuelve el mismo presupuesto: el tope es del
-    // modelo, no del botón que lo dibuja.
-    assert.equal(spendToken(budget, 'club'), budget);
-});
-
-test('no se puede sacar una ficha de una ranura vacía', () => {
-    const budget = spendToken(resetTimeBudget(), 'club');
-    assert.equal(unspendToken(budget, 'familia'), budget);
-    assert.equal(unspendToken(budget, 'club').spent.club, 0);
-});
-
-test('poner y sacar la misma ficha deja el presupuesto como estaba', () => {
-    const budget = resetTimeBudget();
-    const ida = spendToken(budget, 'gimnasio');
-    const vuelta = unspendToken(ida, 'gimnasio');
-    assert.deepEqual(vuelta, budget);
 });

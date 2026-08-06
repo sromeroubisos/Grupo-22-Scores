@@ -1,12 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { CaptainState, CreateCaptainInput, MomentOutcome, TimeSlot } from '@/features/captain';
+import type { CaptainState, CreateCaptainInput, MomentOutcome } from '@/features/captain';
 import { captainReducer, createInitialCaptain, getPendingEvent } from '@/features/captain';
 import { clearCaptain, loadCaptain, saveCaptain } from './captainStorage';
 import CreatePlayer from './CreatePlayer';
 import PlayerHeader from './PlayerHeader';
-import TimeBudget from './TimeBudget';
+import TrainingCard from './TrainingCard';
 import { MOMENT_SCREENS } from './MomentScreens';
 import EventCard from './EventCard';
 import SeasonResult from './SeasonResult';
@@ -72,19 +72,9 @@ export default function CaptainFlow() {
         setStep('career');
     }, [commit]);
 
-    const spend = useCallback((slot: TimeSlot) => {
-        if (!career) return;
-        commit(captainReducer(career, { type: 'SPEND_TIME', slot }));
-    }, [career, commit]);
-
-    const unspend = useCallback((slot: TimeSlot) => {
-        if (!career) return;
-        commit(captainReducer(career, { type: 'UNSPEND_TIME', slot }));
-    }, [career, commit]);
-
     /**
-     * Resuelve la temporada. Se llama al cerrar el reparto y otra vez al salir
-     * de un Momento, porque las dos cosas dejan el estado en `season`.
+     * Resuelve la temporada. Se llama al elegir el entrenamiento y otra vez al
+     * salir de un Momento, porque las dos cosas dejan el estado en `season`.
      */
     const resolveSeason = useCallback((listo: CaptainState) => {
         const antes = listo.player.ovr;
@@ -95,16 +85,17 @@ export default function CaptainFlow() {
     }, [commit]);
 
     /**
-     * Cerrar el reparto. Si la temporada trae una jugada decisiva, el motor
-     * frena en `moment` y la pantalla la ofrece antes de simular: el Momento
-     * pasa DENTRO del año, así que su suspensión se cobra en este.
+     * Elegir el entrenamiento arranca la temporada: no hay paso de confirmar.
+     * Si el año trae una jugada decisiva, el motor frena en `moment` y la
+     * pantalla la ofrece antes de simular — el Momento pasa DENTRO del año, así
+     * que su suspensión se cobra en este.
      */
-    const play = useCallback(() => {
+    const train = useCallback((trainingId: string) => {
         if (!career) return;
-        const confirmado = captainReducer(career, { type: 'CONFIRM_TIME' });
-        if (confirmado.phase === 'moment') { commit(confirmado); return; }
-        if (confirmado.phase !== 'season') return;
-        resolveSeason(confirmado);
+        const elegido = captainReducer(career, { type: 'CHOOSE_TRAINING', trainingId });
+        if (elegido.phase === 'moment') { commit(elegido); return; }
+        if (elegido.phase !== 'season') return;
+        resolveSeason(elegido);
     }, [career, commit, resolveSeason]);
 
     /** Lo que hiciste en la jugada. Es tu mano, y el motor la trata como tal. */
@@ -234,7 +225,7 @@ export default function CaptainFlow() {
             ) : evento ? (
                 <EventCard event={evento} onChoose={choose} />
             ) : (
-                <TimeBudget state={career} onSpend={spend} onUnspend={unspend} onConfirm={play} />
+                <TrainingCard state={career} onChoose={train} />
             )}
 
             {career.history.length > 0 && !pendingResult && (

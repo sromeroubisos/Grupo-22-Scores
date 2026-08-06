@@ -161,6 +161,94 @@ del digest y no vas a poder leer cuál hizo qué.
 
 ---
 
+## 6.bis · SI LA FORMACIÓN ALIMENTA `built`, OJO CON LA BRECHA A LOS 21
+
+Anotado cuando entró el techo partido (`potentialBase` + `built`, motor 0.8.0) y
+**hay que resolverlo antes de escribir la primera decisión de juveniles.**
+
+El techo ya no es un punto sorteado: es material más lo construido, y lo
+construido lo suben las decisiones caras. Medido, eso trajo un modo de fracaso
+nuevo y bueno —el que apunta más alto se queda sin años para alcanzarse, 17,8%
+de las carreras del brazo que se entrega— pero también trae un riesgo que la
+Formación puede volver estructural:
+
+**Si los años 16–20 también suman a `built`, un jugador puede llegar a los 21 con
+la brecha ya abierta y sin haber jugado una temporada.** O sea, empezar el juego
+propiamente dicho debiéndose seis puntos a sí mismo, por decisiones que tomó
+cuando todavía no entendía el sistema. Eso no es "apuntaste alto": es un
+handicap repartido en el prólogo.
+
+Tres salidas posibles, ninguna elegida todavía:
+
+- La Formación construye `built` pero también **acerca la media**, así que se
+  llega a los 21 con la brecha del mismo tamaño que hoy.
+- La Formación mueve `potentialBase` en vez de `built` — el prólogo reparte
+  material, no deuda.
+- `built` de la Formación entra con **tope propio**, más chico que
+  `POTENTIAL_BAND`, para que el prólogo no pueda gastar la banda entera.
+
+Medir antes de elegir: la pregunta es cuánta brecha tiene un jugador a los 21 en
+cada variante, y si el barrido de agencia la lee como decisión o como castigo.
+
+---
+
+## 6.ter · LA DIMENSIÓN QUE FALTA — PRERREQUISITO DE LOS JUVENILES
+
+**No es trabajo futuro opcional. Sin esto, la Formación no se puede escribir.**
+
+Hoy el tiempo de juego sale de una sola cuenta: `share = f(edge)`, con
+`edge = ovr − clubRating` (`engine/statistics.ts`). O sea que el juego mide **si
+sos mejor que tu club** y no tiene ningún concepto de **cuánto jugaste por
+decisiones tuyas**.
+
+Se descubrió intentando lo contrario. La idea era escalar `pull` por el
+rendimiento —"si no jugás, no llegás"— para devolver el modo de fracaso. Medido:
+no movió nada, y el porqué es peor que el síntoma. El brazo que NO se entrega
+juega MÁS que el que sí (mediana de `share` 0,90 contra 0,71), porque tiene techo
+bajo, converge rápido y le sobra para su club. Una compuerta sobre `share`
+premia al que menos se compromete.
+
+**Lo que falta no es una palanca bloqueada: es una dimensión.** Los minutos
+tienen que poder bajar por cosas que el jugador ELIGE o le PASAN, no solo por ser
+flojo:
+
+- la convocatoria que te saca del club semanas enteras
+- la lesión, que hoy solo existe como riesgo de una carta
+- el laburo contra el entrenamiento
+- la suspensión, que ya existe pero es la única de la lista
+
+Y la Formación la necesita ENTERA, no en parte: los años 16–20 son exactamente
+los años en que esas cuatro cosas definen a un jugador. Un prólogo escrito sobre
+`share = f(edge)` sería un prólogo donde el pibe que se rompe la espalda
+entrenando juega lo mismo que el que no, porque los dos tienen la misma media.
+
+**Orden: esto va ANTES del §6.bis, y los dos van antes de la primera decisión de
+juveniles.**
+
+### La forma de `f`, para cuando el canal exista
+
+Se escribió, se midió inerte y se sacó del motor —código con la forma correcta
+sobre un canal que no transporta es una trampa: el próximo que lo lea va a creer
+que los minutos afectan el crecimiento y va a diseñar encima—. Queda acá, que es
+donde no se confunde con comportamiento:
+
+```ts
+pull = (techo − media) / K × f(rendimiento)
+
+f(share) = min(1, PISO + (1 − PISO) × share / SHARE_PLENO)
+  PISO        = 0,25   // el que no juega crece POCO, no NADA. Un cero duro
+                       // convierte una lesión a los 19 en el fin de la carrera
+  SHARE_PLENO = 0,60   // f distingue entre jugar y no jugar, no entre jugar
+                       // mucho y jugar muchísimo
+```
+
+Con `SHARE_PLENO` en 0,60 la compuerta resultó inerte (f = 1 en el 95% de las
+temporadas del brazo flojo). Subirlo la activa, pero apuntando al brazo
+equivocado — el que se entrega juega menos porque paga minutos. **No es un
+problema de calibración: es que el canal no está.**
+
+---
+
 ## 7 · LO QUE NO HAY QUE HACER
 
 - **No convertir la Formación en un tutorial.** Son decisiones reales con consecuencias

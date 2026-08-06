@@ -31,18 +31,42 @@
 // Lo que NO se desacopla: el mercado. `generateOffers` lee el catálogo real, así
 // que una carrera que se muda arrastra algo de canon. Por eso las bandas de este
 // archivo son anchas y las comparaciones, pareadas.
+//
+// ┌───────────────────────────────────────────────────────────────────────────┐
+// │ SESGO CONOCIDO DEL INSTRUMENTO: EL CLUB FIJO INFLA EL `share` DEL FLOJO    │
+// │                                                                            │
+// │ Las dos carreras arrancan y se quedan en el mismo club de rating mediano.  │
+// │ Y el tiempo de juego sale de `edge = ovr − clubRating`, o sea de si SOS    │
+// │ MEJOR QUE TU CLUB — no de cuánto te esforzaste.                            │
+// │                                                                            │
+// │ Consecuencia medida, y hay que saberla al leer cualquier número de acá: el │
+// │ brazo que NO se entrega juega MÁS que el que sí (mediana de `share` 0,90   │
+// │ contra 0,71). Tiene techo bajo, converge rápido, y le sobra para un club   │
+// │ mediano: pez grande en pecera chica. El que se entrega juega menos porque  │
+// │ la carta cara le cuesta minutos.                                           │
+// │                                                                            │
+// │ En una carrera de verdad el flojo podría caer de división y perder minutos │
+// │ posta. Acá no puede, porque el club es fijo — y el club es fijo por una    │
+// │ razón buena, que es desacoplar el barrido del canon (regla 1 de arriba).   │
+// │                                                                            │
+// │ NO SE ARREGLA HOY. Se rehace con club variable cuando exista la dimensión  │
+// │ que falta: "cuánto jugaste POR DECISIONES TUYAS", agendada como            │
+// │ prerrequisito de los juveniles en `docs/el-capitan-formacion.md` §6.ter.   │
+// └───────────────────────────────────────────────────────────────────────────┘
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { CaptainState, CreateCaptainInput } from '../../types/captain.ts';
-import type { TimeSlot } from '../../types/currencies.ts';
 import type { MomentOutcome } from '../../types/moment.ts';
 import type { PlayLevel } from '../../types/moment-def.ts';
+import type { TrainingTier } from '../../data/trainings.ts';
 import { CLUBS } from '../../data/catalogs.ts';
+import { trainingsFor } from '../../data/trainings.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
 import { getPendingEvent } from '../event-selector.ts';
 import { trackIndex } from '../national-team.ts';
+import { potentialOf } from '../ovr.ts';
 import { getMomentDef, isContractKind } from '../moment-defs/index.ts';
 import { tacklePlayAt, tackleZones } from '../moments.ts';
 
@@ -79,10 +103,27 @@ const CLUB = clubDeReferencia();
  * diferencia entre las dos es, por lo tanto, un PISO de lo que las decisiones
  * pueden mover, nunca un techo. Que ese piso sea chiquito contra el sorteo del
  * potencial es exactamente lo que este archivo existe para vigilar.
+ *
+ * ── Qué cambió al irse las fichas, y qué al entrar el costo (0.7.0) ──
+ * La primera palanca cambió de naturaleza DOS VECES, y las dos hay que decirlas.
+ *
+ * El reparto de fichas era una palanca de ESFUERZO: seis fichas al rugby contra
+ * seis a la vida. Al irse, la carta de pretemporada quedó siendo una de
+ * DIRECCIÓN —las cuatro repartían el mismo presupuesto y lo único que cambiaba
+ * era dónde caían los puntos—, y eso NO alcanzó: medido acá, la decisión movía
+ * 0,3 puntos de pico contra 16,9 del sorteo del techo. Elegir dirección sin
+ * elegir compromiso no es elegir.
+ *
+ * Con el costo adentro de la carta vuelve a ser una palanca de ESFUERZO, y por
+ * eso los brazos se eligen POR TIER y ya no por índice: el que se entrega toma
+ * la cara —más media, y la paga con cuerpo, con minutos y con riesgo de
+ * romperse— y el que no toma la gratis. Un índice escrito a mano volvería a
+ * mentir el día que se reordene una familia.
  */
 interface Brazo {
     nombre: string;
-    fichas: TimeSlot[];
+    /** Cuál de las cuatro toma, elegida por lo que cuesta y no por su posición. */
+    carta: TrainingTier;
     nivel: PlayLevel;
     /** Qué opción elige de cada tarjeta. Los dos extremos del abanico. */
     opcion: (opciones: string[]) => string;
@@ -91,17 +132,35 @@ interface Brazo {
 const BRAZOS: Brazo[] = [
     {
         nombre: 'se entrega',
-        fichas: ['entrenar', 'entrenar', 'gimnasio', 'gimnasio', 'club', 'club'],
+        carta: 'cara',
         nivel: 'bien',
         opcion: (o) => o[0],
     },
     {
+        // La floja de cada familia es la del liderazgo, que pesa 15 en siete de
+        // las ocho: es la que menos media compra, y la única que no cobra nada.
+        // La excepción es el apertura, donde pesa 25 — y por eso el brazo separa
+        // menos en ese puesto, que es exactamente lo que el juego quiere decir
+        // de ese puesto.
         nombre: 'no se entrega',
-        fichas: ['trabajar', 'trabajar', 'familia', 'familia', 'trabajar', 'familia'],
+        carta: 'floja',
         nivel: 'mal',
         opcion: (o) => o[o.length - 1],
     },
 ];
+
+/**
+ * La carta del brazo, resuelta contra el catálogo de SU familia.
+ *
+ * Falla ruidosamente si esa familia no ofrece el tier: es la misma condición que
+ * `trainings.test.ts` ya exige, pero acá el barrido correría igual sobre una
+ * carta equivocada y las mediciones saldrían mal sin que nada avise.
+ */
+function cartaDe(family: CreateCaptainInput['family'], brazo: Brazo): string {
+    const elegida = trainingsFor(family).find((t) => t.tier === brazo.carta);
+    assert.ok(elegida, `${family} no ofrece ninguna carta '${brazo.carta}': el brazo '${brazo.nombre}' no se puede correr`);
+    return elegida.id;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Correr una carrera
@@ -137,7 +196,18 @@ function trabada(state: CaptainState, donde: string): never {
 }
 
 interface Corrida {
-    potential: number;
+    /**
+     * EL MATERIAL SORTEADO, y no el techo final.
+     *
+     * Es lo que ordena los terciles, y tiene que ser lo sorteado por la misma
+     * razón por la que las semillas son las mismas: si los terciles se armaran
+     * con el techo final —que ahora las decisiones mueven—, cada brazo caería en
+     * un tercil distinto y la comparación dejaría de ser pareada. El tercil
+     * pregunta "qué cartas te tocaron", no "qué hiciste con ellas".
+     */
+    material: number;
+    /** El techo con el que terminó: material más todo lo que construyó. */
+    techo: number;
     pico: number;
     ovrFinal: number;
     /**
@@ -147,6 +217,9 @@ interface Corrida {
      * declive de la edad baja la media de cualquiera, así que un jugador que
      * tocó su techo a los 27 y se retiró a los 34 aparecería como que se quedó
      * corto. Lo que se pregunta acá es si ALGUNA VEZ llegó.
+     *
+     * Se compara contra el techo FINAL y no contra el material: la pregunta es
+     * si alcanzó el techo que se construyó, que es el que el juego le prometió.
      */
     quedoCorto: boolean;
     /** Pisó algún escalón representativo, del que sea. */
@@ -163,14 +236,13 @@ function correr(seed: number, family: CreateCaptainInput['family'], brazo: Brazo
     };
 
     let s = createInitialCaptain(input, seed);
-    const potential = s.player.potential;
+    const material = s.player.potentialBase;
     let vuelta = 0;
 
     while (s.phase !== 'retired') {
         if (vuelta >= 60) trabada(s, `${family} con semilla ${seed}`);
 
-        for (const slot of brazo.fichas) s = captainReducer(s, { type: 'SPEND_TIME', slot });
-        s = captainReducer(s, { type: 'CONFIRM_TIME' });
+        s = captainReducer(s, { type: 'CHOOSE_TRAINING', trainingId: cartaDe(s.player.family, brazo) });
 
         let guarda = 0;
         while (s.phase === 'moment') {
@@ -188,11 +260,13 @@ function correr(seed: number, family: CreateCaptainInput['family'], brazo: Brazo
     }
 
     const pico = Math.max(s.player.ovr, ...s.history.map((h) => h.ovr));
+    const techo = potentialOf(s.player);
     return {
-        potential,
+        material,
+        techo,
         pico,
         ovrFinal: s.player.ovr,
-        quedoCorto: pico < s.player.potential - 1,
+        quedoCorto: pico < techo - 1,
         llego: trackIndex(s.national.bestTrack) > trackIndex('club'),
     };
 }
@@ -227,7 +301,7 @@ const uno = (n: number) => Math.round(n * 10) / 10;
  * haya movido—. Los terciles se recalculan en cada corrida.
  */
 function porTercil(filas: Corrida[]): { bajo: Corrida[]; alto: Corrida[] } {
-    const ordenadas = [...filas].sort((a, b) => a.potential - b.potential);
+    const ordenadas = [...filas].sort((a, b) => a.material - b.material);
     const corte = Math.floor(ordenadas.length / 3);
     return { bajo: ordenadas.slice(0, corte), alto: ordenadas.slice(-corte) };
 }
@@ -241,7 +315,7 @@ test('EL BARRIDO CORRE: hay carreras de los dos brazos y terminan todas', () => 
     }
     // Y que los dos brazos hayan recibido el MISMO reparto de potenciales, que es
     // lo que hace pareada la comparación.
-    const [a, b] = BRAZOS.map((br) => CORRIDAS.get(br.nombre)!.map((f) => f.potential));
+    const [a, b] = BRAZOS.map((br) => CORRIDAS.get(br.nombre)!.map((f) => f.material));
     assert.deepEqual(b, a, 'los dos brazos no vieron los mismos potenciales: la comparación no es pareada');
 });
 

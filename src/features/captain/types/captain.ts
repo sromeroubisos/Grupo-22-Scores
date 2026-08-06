@@ -6,7 +6,7 @@
 // serializando y comparando.
 
 import type { CaptainPlayer, CaptainStage, PositionFamilyId } from './player.ts';
-import type { BelongingLedger, DamageLedger, TimeBudget } from './currencies.ts';
+import type { BelongingLedger, DamageLedger } from './currencies.ts';
 import type { CaptainDecisionEntry, CaptainSeasonEntry, MatchBudget } from './season.ts';
 import type { MomentRecord, PendingMoment } from './moment.ts';
 
@@ -67,20 +67,48 @@ import type { MomentRecord, PendingMoment } from './moment.ts';
  *         lo llama— pero es lo que hace comparable el digest entre Momentos, y lo
  *         que impide que la receta de un test vuelva a congelar a un pateador que
  *         apunta al azar.
+ * 0.7.0 — SE VAN LAS SEIS FICHAS. En su lugar hay una carta de pretemporada:
+ *         elegís un entrenamiento entre cuatro y sube uno o dos atributos. No es
+ *         un cambio de balance sino de género — repartir un presupuesto es
+ *         contabilidad y no deja anécdota; elegir una cosa y comerse la
+ *         consecuencia sí.
+ *         Las otras cuatro vías que alimentaban las fichas se DERIVAN ahora: la
+ *         Pertenencia sale de quedarse, jugar y ganar; el cuerpo descansa una
+ *         pretemporada fija; la estabilidad la cubre el evento
+ *         `per-trabajo-y-entrenamiento`, que ya existía; y el resto de los
+ *         atributos se mueve por el RENDIMIENTO de la temporada en vez de por
+ *         una ficha de entrenar.
+ *         Se va también el empuje del gimnasio del PlaDAR sobre la escalera
+ *         representativa, y esa es la única vía que queda sin reemplazo hasta que
+ *         entren las convocatorias jugables.
+ * 0.8.0 — EL TECHO SE PARTE EN DOS: `potentialBase` (sorteado) + `built`
+ *         (construido, acotado a `POTENTIAL_BAND`). `potential` deja de ser un
+ *         campo y pasa a ser `potentialOf()`, derivado.
+ *         No es tuning: es el canal que el motor no tenía. Medido antes del
+ *         cambio, un jugador SIN ENTRENAR NADA tocaba su techo exacto en los
+ *         tres puestos y los tres niveles de potencial —`pull` es proporcional
+ *         a la brecha, así que el lazo converge solo—, y toda decisión caía
+ *         adentro del mismo recorte: podía hacerte llegar antes, nunca más
+ *         alto. La carta cara, encima, terminaba POR DEBAJO de la gratis,
+ *         porque el recorte es proporcional y lo dirigido le robaba al
+ *         crecimiento general mientras el costo se cobraba igual.
+ *         Ahora lo que construye la carta cae AFUERA del recorte y el costo
+ *         compra algo. Falta la otra mitad —`pull` escalado por rendimiento—
+ *         para que no llegar al techo vuelva a ser posible.
  */
-export const CAPTAIN_ENGINE_VERSION = '0.6.0';
+export const CAPTAIN_ENGINE_VERSION = '0.8.0';
 
 /**
  * Las fases del ciclo. `offseason` es propia de este juego y no la tiene
- * Carrera de Rugby: es donde se reparten las seis fichas de Tiempo, que es la
+ * Carrera de Rugby: es donde se elige el entrenamiento del año, que es la
  * decisión que se toma todas las temporadas y nunca tiene respuesta obvia.
  */
 export type CaptainPhase =
     | 'setup' // creando el jugador
-    | 'offseason' // repartiendo las seis fichas
+    | 'offseason' // eligiendo el entrenamiento
     | 'moment' // hay una jugada esperando que la juegues
     | 'event' // hay una decisión esperando
-    | 'season' // el reparto está cerrado, falta jugar
+    | 'season' // el entrenamiento está elegido, falta jugar
     | 'retired';
 
 /**
@@ -187,8 +215,16 @@ export interface CaptainState {
     /** Ofertas sobre la mesa. Se limpian al resolverse la decisión de mercado. */
     offers: ClubOffer[];
 
-    // ── Las seis monedas ────────────────────────────────────────────────────
-    time: TimeBudget; // ⏳ las seis fichas de ESTA temporada
+    // ── El entrenamiento de ESTA temporada ──────────────────────────────────
+    /**
+     * Id del `TrainingDef` elegido en la pretemporada, o `null` mientras no se
+     * eligió. Se guarda el ID y no la definición: es la misma regla que el club
+     * —guardá la clave, resolvela contra el catálogo— y así retocar un `hint` no
+     * toca ninguna partida guardada.
+     */
+    training: string | null;
+
+    // ── Las cinco monedas ───────────────────────────────────────────────────
     belonging: BelongingLedger; // por club
     fame: number; // Cartel
     money: number; // US$: quieta hasta firmar

@@ -1,15 +1,20 @@
-// EL CAPITÁN — las seis monedas.
+// EL CAPITÁN — las cinco monedas.
 //
-// El Ídolo corre sobre cuatro números: media, idolatría, fama y plata. Acá son
-// seis, y las dos que se agregan son las que hacen que esto sea rugby y no
-// fútbol con otra pelota:
+// El Ídolo corre sobre cuatro números: media, idolatría, fama y plata. Acá se
+// agrega una, y es la que hace que esto sea rugby y no fútbol con otra pelota:
 //
-//   ⏳ TIEMPO   — el recurso escaso del amateur. No hay plata que administrar:
-//                 hay seis fichas por temporada y el laburo, la facultad, el
-//                 club y la familia te las piden todas.
 //   🧠🦴 DAÑO   — el reloj real de la carrera. Dos cuentas independientes,
 //                 porque la evidencia las separa: la del cuerpo se afloja con
 //                 descanso, la de la cabeza no baja nunca.
+//
+// ── Eran seis, y por qué son cinco ──
+// La sexta era ⏳ TIEMPO: seis fichas por temporada para repartir entre el
+// laburo, la facultad, el club y la familia. Se fue entera, y no por un problema
+// de balance sino de GÉNERO: repartir un presupuesto es contabilidad, y este es
+// un juego de decisiones. En su lugar hay una carta de pretemporada —elegís un
+// entrenamiento entre cuatro, sube uno o dos atributos— y las otras cuatro vías
+// que las fichas alimentaban pasaron a derivarse de lo que hacés en la cancha.
+// El catálogo está en `data/trainings.ts` y ahí se explica adónde fue cada una.
 //
 // Acá viven los TIPOS, los TIERS y las CONSTANTES. La aritmética —el orden en
 // que se aplican los techos, la amortiguación, la monotonía de la cabeza— vive
@@ -114,44 +119,7 @@ export const MONEY_MIN = 0;
 export const MONEY_START = 0;
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  5 · TIEMPO — seis fichas por temporada
-// ═══════════════════════════════════════════════════════════════════════════
-
-export const TIME_TOKENS_PER_SEASON = 6;
-
-export type TimeSlot = 'entrenar' | 'trabajar' | 'club' | 'familia' | 'gimnasio';
-
-/**
- * ORDEN CANÓNICO. Se itera SIEMPRE por acá y nunca por `Object.keys(spent)`:
- * el orden de inserción de un objeto es una fuente de no-determinismo
- * encubierta (CLAUDE.md §1).
- */
-export const TIME_SLOTS: readonly TimeSlot[] = ['entrenar', 'trabajar', 'club', 'familia', 'gimnasio'];
-
-export interface TimeSlotDef {
-    id: TimeSlot;
-    labelEs: string;
-    /** Qué te da. Corto, y dice el costo tanto como el beneficio. */
-    hint: string;
-}
-
-export const TIME_SLOT_DEFS: Record<TimeSlot, TimeSlotDef> = {
-    entrenar: { id: 'entrenar', labelEs: 'Entrenar', hint: 'Subís más rápido. Llegás más cansado.' },
-    trabajar: { id: 'trabajar', labelEs: 'Trabajar o estudiar', hint: 'Estabilidad. Sin esto, la crisis te saca del rugby.' },
-    club: { id: 'club', labelEs: 'El club', hint: 'El asado, los infantiles, el micro. Pertenencia barata.' },
-    familia: { id: 'familia', labelEs: 'Familia y descanso', hint: 'Menos desgaste, cabeza fría.' },
-    gimnasio: { id: 'gimnasio', labelEs: 'Gimnasio del PlaDAR', hint: 'La puerta al camino representativo. Solo si te convocaron.' },
-};
-
-export interface TimeBudget {
-    /** Cuántas fichas hay para repartir esta temporada. */
-    total: number;
-    /** Las cinco ranuras SIEMPRE presentes, en 0 al arrancar. JSON sin sorpresas. */
-    spent: Record<TimeSlot, number>;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  6 · CABEZA Y CUERPO — el reloj real
+//  5 · CABEZA Y CUERPO — el reloj real
 // ═══════════════════════════════════════════════════════════════════════════
 //
 // Por qué son dos y no una: la evidencia las separa. El estudio prospectivo en

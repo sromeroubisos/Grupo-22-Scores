@@ -91,6 +91,20 @@ export type CaptainStage = 'amateur' | 'professional';
 /** Edad a la que arranca cualquier carrera: el pibe que sube de M19 a primera. */
 export const START_AGE = 18;
 
+/**
+ * Cuánto techo se puede construir encima del material sorteado.
+ *
+ * El número sale de `docs/el-capitan-formacion.md`, que propone arrancar
+ * probando ±6. Acá la banda es de una sola dirección —se construye hacia
+ * arriba, no se destruye hacia abajo— porque el modo de fracaso ya lo cubre no
+ * llegar al techo, y dos formas de terminar por debajo del material se pisarían.
+ *
+ * Es el rango entero de lo que las decisiones pueden mover el destino. Si se
+ * queda corto, la palanca vuelve a ser decorativa; si se pasa, el sorteo deja de
+ * significar algo y el juego se vuelve una escalera.
+ */
+export const POTENTIAL_BAND = 6;
+
 export interface CaptainPlayer {
     name: string;
     surname: string;
@@ -106,7 +120,29 @@ export interface CaptainPlayer {
      * `engine/ovr.ts`, nunca a mano.
      */
     ovr: number;
-    potential: number;
+    /**
+     * EL MATERIAL QUE TE TOCÓ. Se sortea a los 18 y no lo mueve nada nunca.
+     *
+     * No es el techo: es la mitad sorteada del techo. La otra mitad la
+     * construís, y por eso este campo no se llama `potential` — el nombre viejo
+     * prometía ser el destino entero cuando solo era el reparto de cartas.
+     */
+    potentialBase: number;
+    /**
+     * LO QUE CONSTRUISTE ENCIMA DEL MATERIAL, acotado a `POTENTIAL_BAND`.
+     *
+     * Es el canal que el motor no tenía. Antes de que existiera, `pull` cerraba
+     * la brecha contra un número fijo y toda decisión caía adentro del mismo
+     * recorte: podías llegar antes a tu techo, nunca más alto. Medido, eso daba
+     * `no-alcanzó-su-techo = 0` y una decisión que movía 0,1 puntos de pico
+     * contra 17 del sorteo.
+     *
+     * Sube con lo que cuesta: hoy, la carta de pretemporada cara. Están
+     * previstos como fuentes los Momentos ganados y la Formación 16–20
+     * (`docs/el-capitan-formacion.md`), y por eso el campo es un acumulador
+     * genérico y no "puntos de entrenamiento".
+     */
+    built: number;
     /** Id del catálogo de clubes. `null` mientras no tenga club resuelto. */
     clubId: string | null;
     /** País de origen, en el código del catálogo de países. */

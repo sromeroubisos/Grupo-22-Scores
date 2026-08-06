@@ -21,8 +21,7 @@ import assert from 'node:assert/strict';
 import type { CaptainState, CreateCaptainInput } from '../../types/captain.ts';
 import type { MomentResult, MomentSetupCtx } from '../../types/moment-def.ts';
 import type { PendingMoment } from '../../types/moment.ts';
-import type { CaptainAction } from '../../state/captain-actions.ts';
-import { TIME_SLOTS, TIME_TOKENS_PER_SEASON } from '../../types/currencies.ts';
+import { trainingsFor } from '../../data/trainings.ts';
 import { PLAY_LEVELS } from '../../types/moment-def.ts';
 import { ALL_MOMENT_KINDS, MOMENT_LABEL, PRE_CONTRACT_KINDS } from '../../types/moment-kinds.ts';
 import { ALL_FAMILIES, baseAttributes } from '../../data/positions.ts';
@@ -48,13 +47,10 @@ const TERCERA: CreateCaptainInput = {
     countryCode: 'ar',
 };
 
+/** Elige el primer entrenamiento de la familia y con eso arranca la temporada. */
 function repartir(state: CaptainState): CaptainState {
-    const acciones: CaptainAction[] = [];
-    for (let i = 0; i < TIME_TOKENS_PER_SEASON; i += 1) {
-        acciones.push({ type: 'SPEND_TIME', slot: TIME_SLOTS[i % TIME_SLOTS.length] });
-    }
-    acciones.push({ type: 'CONFIRM_TIME' });
-    return acciones.reduce(captainReducer, state);
+    const trainingId = trainingsFor(state.player.family)[0].id;
+    return captainReducer(state, { type: 'CHOOSE_TRAINING', trainingId });
 }
 
 /** Avanza hasta que quede un jackal pendiente. `null` si no salió ninguno. */

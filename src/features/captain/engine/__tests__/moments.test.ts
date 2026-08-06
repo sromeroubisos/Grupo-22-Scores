@@ -13,8 +13,7 @@ import type { CaptainState, CreateCaptainInput } from '../../types/captain.ts';
 import type { MomentOutcome, TackleZone } from '../../types/moment.ts';
 import type { CodigoSetup } from '../moment-defs/codigo.ts';
 import type { PalosSetup } from '../moment-defs/palos.ts';
-import type { CaptainAction } from '../../state/captain-actions.ts';
-import { TIME_SLOTS, TIME_TOKENS_PER_SEASON } from '../../types/currencies.ts';
+import { trainingsFor } from '../../data/trainings.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
 import { tackleZones, zoneAt } from '../moments.ts';
 import { palosPerfectAim } from '../moment-defs/palos.ts';
@@ -26,13 +25,10 @@ const INPUT: CreateCaptainInput = {
     countryCode: 'ar',
 };
 
+/** Elige el primer entrenamiento de la familia y con eso arranca la temporada. */
 function repartir(state: CaptainState): CaptainState {
-    const acciones: CaptainAction[] = [];
-    for (let i = 0; i < TIME_TOKENS_PER_SEASON; i += 1) {
-        acciones.push({ type: 'SPEND_TIME', slot: TIME_SLOTS[i % TIME_SLOTS.length] });
-    }
-    acciones.push({ type: 'CONFIRM_TIME' });
-    return acciones.reduce(captainReducer, state);
+    const trainingId = trainingsFor(state.player.family)[0].id;
+    return captainReducer(state, { type: 'CHOOSE_TRAINING', trainingId });
 }
 
 /**

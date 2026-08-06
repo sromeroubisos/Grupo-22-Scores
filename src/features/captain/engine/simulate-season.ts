@@ -4,21 +4,39 @@
 // y recién después se envejece: si se envejeciera primero, la temporada la
 // jugaría un jugador que todavía no existía.
 //
-// ── Adónde va cada ficha de ⏳ ──
-//   entrenar  → crecimiento de atributos (`aging.ts`)
-//   club      → Pertenencia, que es la vía barata a la camiseta
-//   familia   → descanso: baja el desgaste del cuerpo
-//   trabajar  → estabilidad: sin ninguna, la crisis te saca de la cancha
-//   gimnasio  → te acerca al escalón representativo siguiente
+// ── De dónde sale cada cosa, ahora que no hay fichas ──
+// Hasta 0.6.0 cinco de estas vías eran ranuras donde poner fichas de ⏳. Se
+// fueron todas, y cada una tiene ahora una fuente que no es una ranura:
 //
-// Ninguna es obviamente correcta, y esa es toda la idea.
+//   atributos dirigidos → la carta de pretemporada (`data/trainings.ts`)
+//   atributos generales → el RENDIMIENTO: cuánto jugaste (`aging.ts`)
+//   Pertenencia         → quedarse, jugar y ganar. Ya era el grueso; ahora es todo
+//   el cuerpo           → los partidos, más lo que se lleve la carta elegida,
+//                         menos un descanso fijo de pretemporada
+//   la estabilidad      → el evento `per-trabajo-y-entrenamiento`, que ya existía
+//
+// ── Lo que la carta cobra, y dónde ──
+// Una carta cara no es solo más puntos: se paga en tres lugares distintos de
+// este archivo, y a propósito, porque un costo que se cobra en un solo número es
+// un descuento y no una decisión.
+//
+//   minutos  → paso 1, por el mismo eje que el `playingTime` de una decisión
+//   lesión   → paso 1, una tirada que SIEMPRE se hace y a veces se aplica
+//   cuerpo   → paso 9, del lado del desgaste y no del descanso
+//
+// La que NO tiene reemplazo todavía es el empuje del gimnasio del PlaDAR sobre
+// la escalera representativa: se fue con las fichas y vuelve como convocatoria
+// jugable. Mientras tanto la escalera la decide la media y nada más, que es
+// exactamente el `no-alcanzo-su-techo = 0` que las convocatorias vienen a
+// romper. Está anotado a propósito: es deuda con fecha, no un olvido.
 
 import type { CaptainState } from '../types/captain.ts';
 import type { CaptainSeasonEntry } from '../types/season.ts';
 import type { Rng } from './random.ts';
-import { FAME_MAX, FAME_MIN, TIME_SLOTS } from '../types/currencies.ts';
+import { FAME_MAX, FAME_MIN } from '../types/currencies.ts';
 import { MATCH_CAP_PER_SEASON } from '../types/season.ts';
 import { getFamily } from '../data/positions.ts';
+import { getTraining } from '../data/trainings.ts';
 import { clubLeague, competitionLabelOf, getClub } from '../data/catalogs.ts';
 import { applyBelonging, belongingOf } from './belonging.ts';
 import { addBodyDamage, addHeadDamage } from './damage.ts';
@@ -40,9 +58,6 @@ const CLUB_MATCHES = 22;
  */
 const BELONGING_PER_SEASON = 1.5;
 
-/** Lo que suma cada ficha de ⏳ puesta en el club. La vía barata a la camiseta. */
-const BELONGING_PER_CLUB_TOKEN = 0.8;
-
 /** Título del torneo del club. */
 const BELONGING_PER_TITLE = 5;
 
@@ -55,8 +70,28 @@ const BELONGING_PER_CAP = 0.8;
 /** Desgaste del cuerpo por partido jugado. */
 const BODY_PER_MATCH = 0.42;
 
-/** Lo que descansa el cuerpo por cada ficha de familia. */
-const BODY_PER_FAMILY_TOKEN = 3.5;
+/**
+ * Lo que descansa el cuerpo en la pretemporada, siempre.
+ *
+ * Es exactamente lo que rendía UNA ficha de familia, que era la mediana de los
+ * repartos: así el reloj del cuerpo —y con él la edad de retiro, que lo lee para
+ * adelantar el tope blando— queda donde estaba para la carrera típica. Sacar las
+ * fichas era un cambio de superficie y no de esperanza de vida; si el número
+ * fuera otro, estaríamos moviendo dos cosas en el mismo commit.
+ */
+const BODY_REST_PER_SEASON = 3.5;
+
+/**
+ * Qué parte de la temporada del club te come una lesión de pretemporada.
+ *
+ * La severidad media de una lesión de rugby son 38 días, que sobre un torneo de
+ * veintidós fechas es cerca de un tercio. No es la carrera: es el año, que es
+ * exactamente lo que una carta cara tiene que poder costarte.
+ */
+const PRESEASON_INJURY_COST = 0.35;
+
+/** Y lo que la lesión le deja al cuerpo, además de los partidos que se comió. */
+const PRESEASON_INJURY_BODY = 4;
 
 /**
  * Riesgo de HIA por partido. La conmoción es la lesión número uno del rugby,
@@ -86,27 +121,50 @@ export function simulateSeason(state: CaptainState, rng: Rng): SeasonReport {
     const family = getFamily(player.family);
     const notas: string[] = [];
 
-    // ── Las fichas de esta temporada ────────────────────────────────────────
-    const fichas: Record<string, number> = {};
-    for (const slot of TIME_SLOTS) fichas[slot] = state.time.spent[slot] ?? 0;
+    // ── El entrenamiento de esta pretemporada ───────────────────────────────
+    // Se resuelve contra la familia: un id que no es de este puesto no existe, y
+    // vale lo mismo que no haber entrenado.
+    const training = state.training ? getTraining(player.family, state.training) : null;
 
     // ── 1 · Cuánto jugás ────────────────────────────────────────────────────
+    // Los minutos que cuesta la carta entran por el MISMO eje que el
+    // `playingTime` de una decisión: son escalones, no una resta de partidos.
+    // Así el que eligió la carta cara pierde lugar en el equipo de verdad —con
+    // el efecto que eso arrastra sobre el crecimiento general, la Pertenencia y
+    // la planilla— y no solo un par de fechas en la cuenta final.
     const clubRating = clubRatingOf(player.clubId);
-    const { share, role } = playingTimeOf(player, clubRating, state.damage.cuerpo, state.pendingPlayingTime);
+    const minutosResignados = training?.cost?.minutes ?? 0;
+    const { share, role } = playingTimeOf(
+        player,
+        clubRating,
+        state.damage.cuerpo,
+        state.pendingPlayingTime - minutosResignados,
+    );
+
+    // El riesgo de la pretemporada. SE TIRA SIEMPRE, haya o no carta y tenga o
+    // no riesgo: si la tirada dependiera de lo elegido, el stream dependería de
+    // la decisión y dos partidas con la misma semilla dejarían de ser
+    // comparables. Es la misma regla que el ruido de `aging.ts`.
+    const tirada = rng.float(0, 1);
+    const lesionDePretemporada = tirada < (training?.cost?.injuryRisk ?? 0);
 
     let partidosDeClub = Math.round(CLUB_MATCHES * share);
+    if (lesionDePretemporada) {
+        partidosDeClub = Math.round(partidosDeClub * (1 - PRESEASON_INJURY_COST));
+        notas.push('Te rompiste en la pretemporada y volviste con el torneo empezado.');
+    }
     if (state.pendingSanction > 0) {
         partidosDeClub = Math.max(0, partidosDeClub - state.pendingSanction);
         notas.push(`Te comiste ${state.pendingSanction} ${state.pendingSanction === 1 ? 'fecha' : 'fechas'} de suspensión.`);
     }
 
     // ── 2 · La escalera representativa ──────────────────────────────────────
-    // El gimnasio del PlaDAR te acerca al escalón siguiente: no te regala la
-    // convocatoria, te sube la media efectiva con la que te miran.
-    const empujeGimnasio = fichas.gimnasio * 1.2;
-    const jugadorMirado = { ...player, ovr: player.ovr + empujeGimnasio };
-    const track = reachableTrack(jugadorMirado);
-    const caps = capsThisSeason(jugadorMirado, track, state.rival, rng);
+    // Hoy te miran por la media y nada más. Hasta 0.6.0 la ficha del gimnasio
+    // del PlaDAR sumaba un empuje acá, y era la única palanca que el jugador
+    // tenía sobre esta escalera: se fue con las fichas y vuelve como
+    // convocatoria jugable, que es donde tiene que estar.
+    const track = reachableTrack(player);
+    const caps = capsThisSeason(player, track, state.rival, rng);
 
     state.national.track = track;
     state.national.bestTrack = higherTrack(state.national.bestTrack, track);
@@ -151,7 +209,6 @@ export function simulateSeason(state: CaptainState, rng: Rng): SeasonReport {
     if (player.clubId) {
         const situacion = belongingSituation(state, player.clubId);
         let delta = BELONGING_PER_SEASON * (0.65 + share * 0.35);
-        delta += fichas.club * BELONGING_PER_CLUB_TOKEN;
         delta += titulos.length * BELONGING_PER_TITLE;
         delta += caps * BELONGING_PER_CAP;
         state.belonging = applyBelonging(state.belonging, delta, situacion);
@@ -170,9 +227,15 @@ export function simulateSeason(state: CaptainState, rng: Rng): SeasonReport {
     }
 
     // ── 9 · El cuerpo y la cabeza ───────────────────────────────────────────
+    // Lo que se lleva la carta va del lado del desgaste y no del descanso: una
+    // pretemporada a doble turno no es "descansar menos", es sumar carga. Con el
+    // descanso fijo en 3,5, una carta de 2,5 te deja el año en apenas un punto
+    // de recuperación — no te rompe de golpe, te deja sin margen para el resto.
     const aguante = player.attrs.aguante;
     const desgaste = partidos * BODY_PER_MATCH * (1.25 - aguante / 200);
-    state.damage = addBodyDamage(state.damage, desgaste - fichas.familia * BODY_PER_FAMILY_TOKEN);
+    const cargaDeLaCarta = training?.cost?.body ?? 0;
+    state.damage = addBodyDamage(state.damage, desgaste + cargaDeLaCarta - BODY_REST_PER_SEASON);
+    if (lesionDePretemporada) state.damage = addBodyDamage(state.damage, PRESEASON_INJURY_BODY);
 
     // El tackle causa la mitad de las lesiones y la conmoción es la número uno.
     // Un tirón por partido, y el que más se expone es el que más tackle mete.
@@ -186,17 +249,12 @@ export function simulateSeason(state: CaptainState, rng: Rng): SeasonReport {
         notas.push(hia === 1 ? 'Diste positivo en un HIA.' : `Diste positivo en ${hia} HIA.`);
     }
 
-    // ── 10 · Sin laburo no hay carrera ──────────────────────────────────────
-    if (state.stage === 'amateur' && fichas.trabajar === 0 && rng.chance(0.4)) {
-        state.pendingPlayingTime -= 1;
-        notas.push('El año sin trabajo te lo cobró la vida: llegaste a marzo sin poder pagarte los viajes.');
-    }
-
-    // ── 11 · Envejecer ──────────────────────────────────────────────────────
-    const ovrDelta = ageOneSeason(player, rng, fichas.entrenar, state.damage.cuerpo);
+    // ── 10 · Envejecer ──────────────────────────────────────────────────────
+    // La carta mueve lo que apuntó; el rendimiento mueve el resto.
+    const ovrDelta = ageOneSeason(player, rng, training, state.damage.cuerpo, share);
     if (state.rival) state.rival = ageRival(state.rival, player.age, rng);
 
-    // ── 12 · Quién te quiere ────────────────────────────────────────────────
+    // ── 11 · Quién te quiere ────────────────────────────────────────────────
     state.offers = generateOffers(
         {
             player,
@@ -207,7 +265,7 @@ export function simulateSeason(state: CaptainState, rng: Rng): SeasonReport {
         rng,
     );
 
-    // ── 13 · Se apagan los modificadores ────────────────────────────────────
+    // ── 12 · Se apagan los modificadores ────────────────────────────────────
     state.pendingPlayingTime = 0;
     state.pendingStatBoost = 0;
     state.pendingSanction = 0;
@@ -228,7 +286,7 @@ export function simulateSeason(state: CaptainState, rng: Rng): SeasonReport {
         track: TRACK_LABEL[track],
         share,
         titles: titulos,
-        time: { ...state.time.spent },
+        training: training?.id ?? null,
         headDamage: state.damage.cabeza,
         bodyDamage: state.damage.cuerpo,
         decisionText: null,

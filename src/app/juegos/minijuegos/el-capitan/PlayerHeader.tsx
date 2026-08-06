@@ -8,6 +8,7 @@ import {
     clubLabel,
     competitionLabel,
     getFamily,
+    potentialOf,
     TRACK_LABEL,
 } from '@/features/captain';
 import styles from './capitan.module.css';
@@ -26,6 +27,9 @@ export default function PlayerHeader({ state }: { state: CaptainState }) {
     const tier = belongingTier(pertenencia);
     const tierDef = BELONGING_TIERS.find((t) => t.id === tier)!;
 
+    const techo = potentialOf(player);
+    const construido = Math.round(player.built);
+
     const club = clubLabel(player.clubId);
     const competencia = competitionLabel(player.clubId);
 
@@ -35,6 +39,20 @@ export default function PlayerHeader({ state }: { state: CaptainState }) {
                 <div className={styles.ovr}>
                     {player.ovr}
                     <span className={styles.ovrLabel}>MEDIA</span>
+                    {/* La brecha, que es la otra mitad de la historia que cuenta
+                        este juego: el que apuntó más alto y se quedó sin años
+                        tiene que poder VERLO mientras pasa, no enterarse en el
+                        retiro. Sin esta línea, terminar en 72 con techo 78 se
+                        lee como una estafa y no como una decisión.
+
+                        Y lo construido al lado, porque es el REGISTRO DE TUS
+                        DECISIONES: el techo sorteado no lo elegiste, esos cuatro
+                        puntos sí. Aparece recién cuando hay algo construido —a
+                        los 18 un "(+0)" no cuenta nada. */}
+                    <span className={styles.ovrCeiling}>
+                        Techo {Math.round(techo)}
+                        {construido > 0 ? ` (+${construido} construido)` : ''}
+                    </span>
                 </div>
 
                 <div className={styles.identity}>

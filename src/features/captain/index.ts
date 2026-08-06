@@ -16,7 +16,7 @@ export type {
     PositionFamilyId,
     PositionGroup,
 } from './types/player.ts';
-export { START_AGE } from './types/player.ts';
+export { POTENTIAL_BAND, START_AGE } from './types/player.ts';
 
 export type {
     CaptainPhase,
@@ -43,9 +43,6 @@ export type {
     BelongingTier,
     BelongingTierId,
     DamageLedger,
-    TimeBudget,
-    TimeSlot,
-    TimeSlotDef,
 } from './types/currencies.ts';
 export {
     BELONGING_ABROAD_FACTOR,
@@ -63,9 +60,6 @@ export {
     MONEY_START,
     OVR_MAX,
     OVR_MIN,
-    TIME_SLOTS,
-    TIME_SLOT_DEFS,
-    TIME_TOKENS_PER_SEASON,
 } from './types/currencies.ts';
 
 export type {
@@ -82,6 +76,7 @@ export {
     ALL_FAMILIES,
     ATTRIBUTE_FLOOR,
     ATTRIBUTE_KEYS,
+    ATTRIBUTE_LABEL,
     CAPTAIN_POSITIONS_VERSION,
     POSITION_FAMILIES,
     baseAttributes,
@@ -102,7 +97,7 @@ export {
 export type { Rng } from './engine/random.ts';
 export { createRng, hashSeed, rngFromState } from './engine/random.ts';
 
-export { gapToPotential, ovrFromAttributes, ovrOf } from './engine/ovr.ts';
+export { gapToPotential, ovrFromAttributes, ovrOf, potentialOf } from './engine/ovr.ts';
 
 export type { BelongingContext } from './engine/belonging.ts';
 export {
@@ -116,14 +111,17 @@ export {
 
 export { addBodyDamage, addHeadDamage, emptyDamage } from './engine/damage.ts';
 
+// ── La carta de pretemporada ────────────────────────────────────────────────
+export type { TrainingCost, TrainingDef, TrainingGain, TrainingTier } from './data/trainings.ts';
 export {
-    isTimeBudgetFull,
-    resetTimeBudget,
-    spendToken,
-    tokensLeft,
-    tokensSpent,
-    unspendToken,
-} from './engine/time-budget.ts';
+    TRAINING_CEILING,
+    TRAINING_POINTS,
+    TRAININGS,
+    getTraining,
+    isFree,
+    trainingPoints,
+    trainingsFor,
+} from './data/trainings.ts';
 
 export { applyMoney, canEarnMoney } from './engine/money.ts';
 
@@ -219,11 +217,9 @@ export type { CaptainAction } from './state/captain-actions.ts';
 export {
     advanceSeason,
     chooseOption,
-    confirmTime,
+    chooseTraining,
     retire,
-    spendTime,
     startCaptain,
-    unspendTime,
 } from './state/captain-actions.ts';
 
 export type { RetirementReason } from './state/captain-reducer.ts';
