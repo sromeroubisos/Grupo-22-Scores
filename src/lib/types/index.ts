@@ -109,6 +109,15 @@ export interface Tournament {
     dataSource?: string | null;
     categories?: TournamentCategory[] | string[];
     seasons?: TournamentSeason[];
+    /**
+     * La temporada de ESTA edición, como escalar.
+     *
+     * Distinto de `seasons`, que es la lista de ediciones y en el listado dibuja
+     * un acordeón: con un solo elemento sería un desplegable que se abre para
+     * ofrecer una sola cosa. Un torneo es una edición y tiene UNA temporada;
+     * `seasons` es para cuando el proveedor externo trae varias.
+     */
+    seasonId?: string | null;
     isWomen?: boolean;
     isYouth?: boolean;
     ageGroup?: string;

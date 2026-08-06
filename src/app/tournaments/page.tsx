@@ -9,6 +9,7 @@ import { getTournamentsBySport, getInternationalTournamentsBySport } from '@/lib
 import { buildEspnFootballTournaments, getEspnFootballInternationalTournaments } from '@/lib/data/tournaments/espnFootballCatalog';
 import { findCountryRecord, getAllCountries, resolveCountryId } from '@/lib/data/countries';
 import type { Tournament } from '@/lib/types';
+import TournamentSeasonTag from '@/components/TournamentSeasonTag';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
@@ -58,6 +59,8 @@ type PublicTournamentListItem = {
     priority?: number | null;
     type?: string | null;
     url?: string | null;
+    /** La temporada de esta edición. Null en los torneos del catálogo externo. */
+    season_id?: string | null;
     seasons?: Array<{
         seasonId?: string | null;
         season?: string | number | null;
@@ -370,6 +373,7 @@ function mapPublicTournamentToTournament(item: PublicTournamentListItem): Tourna
         logoUrl: item.logo_url || null,
         categories: [],
         seasons,
+        seasonId: item.season_id || null,
         isApiManaged: true,
         dataSource: isFlashScoreTournamentId(item.id) ? 'flashscore' : 'local-db',
     };
@@ -1125,6 +1129,7 @@ export default function TorneosPage() {
                                             <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
                                         )}
                                         <span>{tournament.name}</span>
+                                        <TournamentSeasonTag seasonId={tournament.seasonId} />
                                     </Link>
                                 ))}
                             </div>
@@ -1281,6 +1286,7 @@ export default function TorneosPage() {
                                                             <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
                                                         )}
                                                         <span>{tournament.name}</span>
+                                                        <TournamentSeasonTag seasonId={tournament.seasonId} />
                                                     </Link>
                                                 );
                                             })}
