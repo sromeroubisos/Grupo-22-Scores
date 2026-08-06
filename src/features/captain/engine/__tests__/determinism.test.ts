@@ -459,57 +459,69 @@ function digest(state: CaptainState): Digest {
 //     arriba— pero HOY el digest no lo cubre: si alguien toca `bunkerVerdict`,
 //     esta tabla no se entera. Es la razón principal para sumar un cuarto caso.
 const EXPECTED: Record<string, Digest> = {
+    // ── 0.8.0 · SE MOVIERON LOS CUATRO, Y ESTA VEZ TIENE QUE MOVERSE TODO ──
+    // El techo se partió en `potentialBase` + `built`, y lo que construye la
+    // carta cae AFUERA del recorte. Eso cambia la media de cada temporada, y la
+    // media decide el tiempo de juego, que decide los partidos, que deciden el
+    // cuerpo, los títulos y la edad de retiro. No hay campo que pueda quedarse
+    // quieto: un movimiento parcial acá sería la señal de que algo NO se enganchó.
+    //
+    // Medido en worktree limpio con `npm run test:captain-freeze`, o sea contra
+    // el catálogo COMMITEADO (`2026-27.10+…ar.2026.2`). La Patagonia sigue sin
+    // subir en el árbol de trabajo, así que este refresco es 100% motor.
     'pilar argentino': {
-        engineVersion: '0.6.0',
+        engineVersion: '0.8.0',
         seasons: 16,
         retirementAge: 34,
         lastClub: 'ar-sociedad-hebraica',
-        belonging: 24.28,
-        fame: 13.6,
+        // Cuatro títulos más y el doble de cartel: con el techo construido llega
+        // más alto y se queda más años siendo el mejor de su club.
+        belonging: 17.253,
+        fame: 22.9,
         caps: 0,
-        titles: 3,
-        moments: 13,
-        // Los nueve campos de arriba son IDÉNTICOS a la 0.5.0. Solo se movió el
-        // hash, que adentro lleva la cadena de la versión.
-        stateHash: 3959283877, // 0.5.0 era 3116498538
+        titles: 7,
+        moments: 12,
+        stateHash: 3906808908, // 0.6.0 era 3959283877
     },
     'wing argentino': {
-        engineVersion: '0.6.0',
-        // EL ÚNICO QUE SE MOVIÓ DE VERDAD, y es el que recibió La Banda.
-        seasons: 12,
-        retirementAge: 30,
-        lastClub: 'sb-hindu-club',
-        belonging: 21.043,
-        fame: 14.5,
+        engineVersion: '0.8.0',
+        seasons: 13,
+        retirementAge: 31,
+        lastClub: 'sb-universitario-de-mendoza',
+        belonging: 28.975,
+        fame: 13.1,
+        caps: 0,
+        titles: 2,
+        moments: 9,
+        stateHash: 87680738, // 0.6.0 era 1267169825
+    },
+    'apertura argentino': {
+        engineVersion: '0.8.0',
+        // EL CASO QUE MÁS SE MOVIÓ, y es el que muestra de qué se trata el
+        // cambio: 13 caps pasaron a 63, y terminó en Japón en vez de Moana.
+        // Construir el techo lo dejó arriba del umbral de la mayor durante toda
+        // la carrera en vez de rozarlo dos temporadas.
+        seasons: 15,
+        retirementAge: 33,
+        lastClub: 'yokohama-canon-eagles',
+        belonging: 0,
+        fame: 100,
+        caps: 63,
+        titles: 1,
+        moments: 9,
+        stateHash: 404031529, // 0.6.0 era 231311238
+    },
+    'tercera línea argentino': {
+        engineVersion: '0.8.0',
+        seasons: 13,
+        retirementAge: 31,
+        lastClub: 'sb-club-newman',
+        belonging: 1.469,
+        fame: 3.7,
         caps: 0,
         titles: 3,
         moments: 10,
-        stateHash: 1267169825, // 0.5.0 era 4185683751
-    },
-    'apertura argentino': {
-        engineVersion: '0.6.0',
-        seasons: 13,
-        retirementAge: 31,
-        lastClub: 'moana-pasifika',
-        belonging: 0,
-        fame: 66.6,
-        caps: 13,
-        titles: 3,
-        moments: 12,
-        // Idéntico a la 0.5.0 en los nueve, igual que el pilar.
-        stateHash: 231311238, // 0.5.0 era 396654071
-    },
-    'tercera línea argentino': {
-        engineVersion: '0.6.0',
-        seasons: 13,
-        retirementAge: 31,
-        lastClub: 'sb-casi',
-        belonging: 23.681,
-        fame: 16.3,
-        caps: 0,
-        titles: 5,
-        moments: 13,
-        stateHash: 730581646, // primera foto de este caso
+        stateHash: 1029592978, // 0.6.0 era 730581646
     },
 };
 
