@@ -27,6 +27,7 @@ import path from 'node:path';
 import { isTournamentVisibleToPublic } from '../lib/tournamentReview.ts';
 import { ocultarGradosSubordinados } from '../lib/tournamentNavigation.ts';
 import { resolveTournamentAudience } from '../lib/utils/tournamentAudience.ts';
+import { filtrarPorTemporada, temporadasDisponibles } from '../lib/tournamentSeasonFilter.ts';
 
 const REPO = process.cwd();
 const TZ = 'America/Argentina/Buenos_Aires';
@@ -121,10 +122,15 @@ async function main() {
 
   // ── 2. El listado de competencias ─────────────────────────────────────────
   const torneos = await todas(
-    'tournaments?select=id,name,display_name,sport_id,sport,status,is_visible,review_status,category,age_grade,subcategory,season_id,gender,external_id,union_id',
+    // `priority` no es decorativo acá: el filtro de temporada lo usa para no
+    // bajar un torneo que alguien fijó a mano. Sin la columna, la medición dice
+    // que la Unions Cup desaparece y el código no tiene la culpa.
+    'tournaments?select=id,name,display_name,sport_id,sport,status,is_visible,review_status,category,age_grade,subcategory,season_id,gender,external_id,union_id,priority',
   );
   const publicos = torneos.filter((t) => isTournamentVisibleToPublic(t));
-  const rugby = publicos.filter((t) => ['rugby', 'rugby-union', 'rugby-league'].includes(String(t.sport_id ?? t.sport ?? 'rugby')));
+  const rugbySinFiltrar = publicos.filter((t) => ['rugby', 'rugby-union', 'rugby-league'].includes(String(t.sport_id ?? t.sport ?? 'rugby')));
+  // El mismo orden que la ruta: temporada primero, grados subordinados después.
+  const rugby = filtrarPorTemporada(rugbySinFiltrar);
   const general = ocultarGradosSubordinados(rugby);
   const audiencia = (t: any) => resolveTournamentAudience({
     ageGrade: t.age_grade, category: t.category, subcategory: t.subcategory,
@@ -133,10 +139,13 @@ async function main() {
   const mayores = ocultarGradosSubordinados(rugby).filter((t) => audiencia(t) === 'mayores');
   const juveniles = rugby.filter((t) => audiencia(t) === 'juveniles');
 
-  console.log('\n2. LISTADO DE COMPETENCIAS (rugby, sin filtro de temporada)');
+  console.log('\n2. LISTADO DE COMPETENCIAS');
   console.log(`   el anónimo lee         : ${torneos.length} torneos (RLS is_active = true)`);
   console.log(`   pasan las tres puertas : ${publicos.length}`);
-  console.log(`   de rugby               : ${rugby.length}`);
+  console.log(`   de rugby               : ${rugbySinFiltrar.length}`);
+  console.log(`   tras el filtro de temporada: ${rugby.length}   (temporadas en juego: ${temporadasDisponibles(rugbySinFiltrar).join(', ')})`);
+  const sacados = rugbySinFiltrar.length - rugby.length;
+  console.log(`     el filtro sacó       : ${sacados}`);
   console.log(`   listado general        : ${general.length}`);
   console.log(`     por temporada        : ${linea(porTemporada(general))}`);
   console.log(`   vista mayores          : ${mayores.length}`);

@@ -11,6 +11,7 @@ import { getTournamentsBySport, getInternationalTournamentsBySport, getTournamen
 import { buildEspnFootballTournaments, getEspnFootballInternationalTournaments } from '@/lib/data/tournaments/espnFootballCatalog';
 import { findCountryRecord, getCountryById, resolveCountryId } from '@/lib/data/countries';
 import type { Tournament } from '@/lib/types'; // Keep this for existing tournament logic
+import TournamentSeasonTag from '@/components/TournamentSeasonTag';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
@@ -228,6 +229,8 @@ interface PublicTournamentListItem {
   url?: string | null;
   priority?: number | null;
   type?: string | null;
+  /** La temporada de esta edición. Null en los torneos del catálogo externo. */
+  season_id?: string | null;
   seasons?: Array<{
     seasonId?: string | null;
     season?: string | number | null;
@@ -358,6 +361,7 @@ function mapPublicTournamentToTournament(item: PublicTournamentListItem): Tourna
     logoUrl: item.logo_url || null,
     categories: [],
     seasons,
+    seasonId: item.season_id || null,
     isApiManaged: true,
     dataSource: isFlashScoreTournamentId(item.id) ? 'flashscore' : 'local-db',
   };
@@ -1743,6 +1747,7 @@ export default function HomePage() {
                               >
                                 {isLeagueFavorite(tournament.id) && <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />}
                                 <span>{tournament.name}</span>
+                                <TournamentSeasonTag seasonId={tournament.seasonId} />
                               </Link>
                             ))}
                           </div>
@@ -1757,6 +1762,7 @@ export default function HomePage() {
                           >
                             {isLeagueFavorite(tournament.id) && <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />}
                             <span>{tournament.name}</span>
+                                <TournamentSeasonTag seasonId={tournament.seasonId} />
                           </Link>
                         ))
                       )
@@ -1885,6 +1891,7 @@ export default function HomePage() {
                             >
                               {isFavLeague && <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />}
                               <span>{tournament.name}</span>
+                                <TournamentSeasonTag seasonId={tournament.seasonId} />
                             </Link>
                           );
                         }
