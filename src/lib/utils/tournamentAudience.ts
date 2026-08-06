@@ -9,7 +9,27 @@ type TournamentAudienceInput = {
     originalName?: string | null;
     categories?: Array<string | null | undefined> | null;
     isYouth?: boolean | null;
+    /**
+     * El grado, cuando el torneo lo tiene. Decide antes que todo lo demás en un
+     * caso: la Intermedia y las Preintermedias son equipos de RESERVA, y van con
+     * juveniles y no en la portada de mayores. Ver abajo.
+     */
+    subcategory?: string | null;
 };
+
+/**
+ * Los grados de reserva de una división de mayores.
+ *
+ * `age_grade` dice `mayores` —y está bien, son jugadores adultos— pero el equipo
+ * que juega la Intermedia del Top 14 no es el primero del club: es el segundo.
+ * Agrupados con la Superior, la portada muestra ocho entradas del mismo torneo;
+ * agrupados con juveniles, quedan donde el hincha los busca.
+ *
+ * Por qué se mira ANTES que el nombre: `PRIMERA A - Intermedia` matchea
+ * `/\bprimera\b/` de `ADULT_PATTERNS`, así que sin esta puerta el nombre lo
+ * mandaría a mayores.
+ */
+const RESERVA = /^(intermedia|preintermedia)\b/i;
 
 const YOUTH_PATTERNS = [
     /\bjuv(?:enil(?:es)?)?\b/i,
@@ -43,6 +63,11 @@ function matchesAnyPattern(values: string[], patterns: RegExp[]): boolean {
 
 export function resolveTournamentAudience(input: TournamentAudienceInput): TournamentAudience {
     if (input.isYouth) {
+        return 'juveniles';
+    }
+
+    // La reserva va con juveniles, no en la portada de mayores.
+    if (RESERVA.test(String(input.subcategory ?? '').trim())) {
         return 'juveniles';
     }
 
