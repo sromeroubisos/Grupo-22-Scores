@@ -120,6 +120,15 @@ interface Resultado {
     pico: number;
     caps: number;
     mejorTrack: SquadTrack;
+    /**
+     * Todos los carriles que PISÓ, temporada a temporada.
+     *
+     * Separado de `mejorTrack` por un falso positivo medido: `bestTrack` es un
+     * máximo corrido, así que un carril juvenil solo puede ser el MEJOR de
+     * alguien que nunca subió más. Los que llegan a M20 después llegan a A-XV,
+     * y M20 desaparece de la foto aunque lo hayan jugado.
+     */
+    viasPisadas: SquadTrack[];
     pertenencia: number;
     titulos: number;
     cabeza: number;
@@ -137,6 +146,7 @@ function jugar(seed: number, family: (typeof ALL_FAMILIES)[number], fiel: boolea
     const input: CreateCaptainInput = { name: 'X', surname: 'Y', family, countryCode: 'ar' };
     let s = createInitialCaptain(input, seed);
     let vuelta = 0;
+    const viasPisadas: SquadTrack[] = [];
 
     while (s.phase !== 'retired') {
         if (vuelta >= 60) trabada(s, `${family} con semilla ${seed}`);
@@ -177,6 +187,7 @@ function jugar(seed: number, family: (typeof ALL_FAMILIES)[number], fiel: boolea
                 : vuelta % evento.options.length;
             s = captainReducer(s, { type: 'CHOOSE', optionId: evento.options[i].id });
         }
+        if (!viasPisadas.includes(s.national.track)) viasPisadas.push(s.national.track);
         vuelta += 1;
     }
 
@@ -188,6 +199,7 @@ function jugar(seed: number, family: (typeof ALL_FAMILIES)[number], fiel: boolea
         pico: Math.max(s.player.ovr, ...s.history.map((h) => h.ovr)),
         caps: s.national.caps,
         mejorTrack: s.national.bestTrack,
+        viasPisadas,
         pertenencia: porClub.length > 0 ? Math.max(...porClub) : belongingOf(s.belonging, s.homeClubId),
         titulos: s.titles.length,
         cabeza: s.damage.cabeza,
@@ -319,17 +331,34 @@ test('la pirámide: llegar a la mayor es raro', () => {
 // ESPECIE, no de archivo, y por eso el encabezado.
 
 test('ESTRUCTURA: ninguna vía de la escalera queda vacía', () => {
-    // No es una banda: es que el escalón exista. Un carril que nadie pisa nunca
-    // no está mal calibrado — no está.
-    const vacias = SQUAD_TRACKS.filter((track) => proporcion(NORMAL, (r) => r.mejorTrack === track) === 0);
+    // ── SE MIDE LO PISADO, NO EL MEJOR DE LA CARRERA ──
+    // La primera versión de este test usaba `mejorTrack` y habría mentido en la
+    // dirección más cara: la de la falsa alarma. `bestTrack` es un máximo
+    // corrido, así que un carril juvenil solo puede ser el MEJOR de alguien que
+    // nunca subió más — y el que llega a M20 a los 19 llega a A-XV a los 25.
+    //
+    // Medido con `mejorTrack`: academia y M20 daban 0,000 y parecían escalones
+    // inexistentes. Medido por temporada pisada: 36 y 12 temporadas. Los
+    // escalones estaban ahí; lo que no estaba era gente que se quedara en ellos.
+    //
+    // La lección es la del §1.5 del CLAUDE.md con otra ropa: el instrumento
+    // contestaba una pregunta distinta de la que le hacíamos.
+    const pisadas = new Map<SquadTrack, number>();
+    for (const track of SQUAD_TRACKS) pisadas.set(track, 0);
+    for (const r of NORMAL) {
+        for (const track of r.viasPisadas) pisadas.set(track, (pisadas.get(track) ?? 0) + 1);
+    }
+
+    const vacias = SQUAD_TRACKS.filter((track) => pisadas.get(track) === 0);
+    const detalle = SQUAD_TRACKS.map((t) => `${t}=${pisadas.get(t)}`).join(' · ');
 
     assert.deepEqual(
         vacias,
         [],
-        `hay ${vacias.length} vía(s) de la escalera que NADIE pisa como mejor escalón: ${vacias.join(', ')}.\n`
+        `hay ${vacias.length} vía(s) de la escalera que NADIE pisa NUNCA: ${vacias.join(', ')}.\n`
         + 'No es calibración: es que ese escalón no existe. Casi siempre significa que su corte quedó '
-        + 'por encima del corte del escalón de ARRIBA, así que nunca se evalúa.\n'
-        + `Distribución completa: ${SQUAD_TRACKS.map((t) => `${t}=${proporcion(NORMAL, (r) => r.mejorTrack === t).toFixed(3)}`).join(' · ')}`,
+        + 'por encima del corte del escalón de ARRIBA, así que no se evalúa jamás.\n'
+        + `Carreras que pisaron cada vía, de ${NORMAL.length}: ${detalle}`,
     );
 });
 
