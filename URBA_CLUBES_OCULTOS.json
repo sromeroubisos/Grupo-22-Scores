@@ -1,0 +1,2680 @@
+{
+ "ocultos": 1411,
+ "conPartido": 878,
+ "sinPartido": 533,
+ "porAnio": {
+  "2021": 219,
+  "2022": 26,
+  "2023": 60,
+  "2024": 62,
+  "2025": 141
+ },
+ "sinRastro": 25,
+ "listaSinPartido": [
+  {
+   "id": "15-de-diciembre-empresarial-b",
+   "name": "15 de Diciembre Empresarial \"B\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "15-de-diciembre-empresarial",
+   "name": "15 de Diciembre Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "mariano-moreno-c",
+   "name": "Mariano Moreno \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-martin-c",
+   "name": "San Martín \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "monte-grande-b",
+   "name": "Monte Grande \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "vicentinos-b",
+   "name": "Vicentinos \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "liceo-militar-b",
+   "name": "Liceo Militar \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "sitas-b",
+   "name": "SITAS \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-carlos-b",
+   "name": "San Carlos \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "geba-c",
+   "name": "GEBA \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "banco-central-empresarial",
+   "name": "Banco Central Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "15-de-diciembre",
+   "name": "15 de Diciembre",
+   "ultimoAnio": null
+  },
+  {
+   "id": "ag-propiedades",
+   "name": "AG Propiedades",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "camioneros-r-c-formativo",
+   "name": "Camioneros R.C. Formativo",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "camioneros-r-c-femenino",
+   "name": "Camioneros R.C. Femenino",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "ciervos-pampas-empresarial",
+   "name": "Ciervos Pampas Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "circulo-policia-federal-empresarial-b",
+   "name": "Circulo Policia Federal Empresarial \"B\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "circulo-policia-federal-empresarial",
+   "name": "Circulo Policia Federal Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "cirfaa-patriotas-rugby-empresarial",
+   "name": "CIRFAA Patriotas Rugby Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "elaion-formativo",
+   "name": "Elaion Formativo",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "elaion-empresarial",
+   "name": "Elaion Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "ensenada-empresarial",
+   "name": "Ensenada Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "espartanos-empresarial",
+   "name": "Espartanos Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "lomas-social-femenino",
+   "name": "Lomas Social Femenino",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "manzanares-r-c-femenino",
+   "name": "Manzanares R.C. Femenino",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "manzanares-r-c-empresarial-b",
+   "name": "Manzanares R.C. Empresarial \"B\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "manzanares-r-c-empresarial",
+   "name": "Manzanares R.C. Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "municipalidad-de-avellaneda-empresarial-b",
+   "name": "Municipalidad de Avellaneda Empresarial \"B\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "municipalidad-de-avellaneda-empresarial",
+   "name": "Municipalidad de Avellaneda Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "municipalidad-de-moreno-formativo",
+   "name": "Municipalidad de Moreno Formativo",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "municipalidad-de-moreno-empresarial",
+   "name": "Municipalidad de Moreno Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "municipio-de-avellaneda-formativo",
+   "name": "Municipio de Avellaneda Formativo",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "municipio-de-avellaneda-femenino",
+   "name": "Municipio de Avellaneda Femenino",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "omar-etcheverry-empresarial-b",
+   "name": "Omar Etcheverry Empresarial \"B\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "omar-etcheverry-empresarial",
+   "name": "Omar Etcheverry Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "policia-de-la-ciudad-empresarial",
+   "name": "Policia de la Ciudad Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "telnet-soluciones-empresarial-b",
+   "name": "Telnet Soluciones Empresarial \"B\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "telnet-soluciones-empresarial",
+   "name": "Telnet Soluciones Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "tizal-formativo",
+   "name": "Tizal Formativo",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "tizal-empresarial",
+   "name": "Tizal Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "uba-agronomia-universitario-b",
+   "name": "UBA Agronomia Universitario \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "uba-sociales-universitario",
+   "name": "UBA Sociales Universitario",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "uba-sociales-empresarial",
+   "name": "UBA Sociales Empresarial",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "univ-nac-de-quilmes-universitario",
+   "name": "Univ. Nac de Quilmes Universitario",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "univ-nac-de-quilmes-formativo",
+   "name": "Univ. Nac de Quilmes Formativo",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "univ-nac-de-quilmes-empresarial",
+   "name": "Univ. Nac de Quilmes Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "univ-nac-de-san-martin-empresarial",
+   "name": "Univ. Nac de San Martin Empresarial",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "utn-haedo-universitario",
+   "name": "UTN Haedo Universitario",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "utn-haedo-femenino",
+   "name": "UTN Haedo Femenino",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "banco-central",
+   "name": "Banco Central",
+   "ultimoAnio": null
+  },
+  {
+   "id": "barcelo-rugby",
+   "name": "Barcelo Rugby",
+   "ultimoAnio": null
+  },
+  {
+   "id": "blue-xv",
+   "name": "Blue XV",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "cabana-camino-viejo",
+   "name": "Cabaña Camino Viejo",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "camioneros-r-c",
+   "name": "Camioneros R.C.",
+   "ultimoAnio": null
+  },
+  {
+   "id": "cardales-rugby",
+   "name": "Cardales Rugby",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "ciervos-pampas",
+   "name": "Ciervos Pampas",
+   "ultimoAnio": null
+  },
+  {
+   "id": "circulo-policia-federal",
+   "name": "Circulo Policia Federal",
+   "ultimoAnio": null
+  },
+  {
+   "id": "cirfaa-patriotas-rugby",
+   "name": "CIRFAA Patriotas Rugby",
+   "ultimoAnio": null
+  },
+  {
+   "id": "cune",
+   "name": "CUNE",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "del-oeste-rugby",
+   "name": "Del Oeste Rugby",
+   "ultimoAnio": null
+  },
+  {
+   "id": "distribuidora-del-oeste",
+   "name": "Distribuidora del Oeste",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "elaion",
+   "name": "Elaion",
+   "ultimoAnio": null
+  },
+  {
+   "id": "ensenada",
+   "name": "Ensenada",
+   "ultimoAnio": null
+  },
+  {
+   "id": "espartanos",
+   "name": "Espartanos",
+   "ultimoAnio": null
+  },
+  {
+   "id": "guernica",
+   "name": "Guernica",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "ivem",
+   "name": "Ivem",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "laz-spare-parts",
+   "name": "Laz Spare Parts",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "lomas-social",
+   "name": "Lomas Social",
+   "ultimoAnio": null
+  },
+  {
+   "id": "manzanares-r-c",
+   "name": "Manzanares R.C.",
+   "ultimoAnio": null
+  },
+  {
+   "id": "ministerio-de-seguridad-caba",
+   "name": "Ministerio de Seguridad CABA",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "municipalidad-de-avellaneda",
+   "name": "Municipalidad de Avellaneda",
+   "ultimoAnio": null
+  },
+  {
+   "id": "municipalidad-de-moreno",
+   "name": "Municipalidad de Moreno",
+   "ultimoAnio": null
+  },
+  {
+   "id": "municipio-de-avellaneda",
+   "name": "Municipio de Avellaneda",
+   "ultimoAnio": null
+  },
+  {
+   "id": "omar-etcheverry",
+   "name": "Omar Etcheverry",
+   "ultimoAnio": null
+  },
+  {
+   "id": "pacific-shark",
+   "name": "Pacific Shark",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "policia-de-la-ciudad",
+   "name": "Policia de la Ciudad",
+   "ultimoAnio": null
+  },
+  {
+   "id": "policias-de-la-ciudad",
+   "name": "Policias de la Ciudad",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "rectificacion-parra-pilar",
+   "name": "Rectificación Parra Pilar",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "resta",
+   "name": "RESTA",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "robles-campos",
+   "name": "Robles Campos",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "satsaid",
+   "name": "SATSAID",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "tactical-lacsi",
+   "name": "Tactical Lacsi",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "tehuelches",
+   "name": "Tehuelches",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "telnet-soluciones",
+   "name": "Telnet Soluciones",
+   "ultimoAnio": null
+  },
+  {
+   "id": "teqna",
+   "name": "TEQNA",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "tizal",
+   "name": "Tizal",
+   "ultimoAnio": null
+  },
+  {
+   "id": "uba-agronomia",
+   "name": "UBA Agronomia",
+   "ultimoAnio": null
+  },
+  {
+   "id": "uba-escuela-tecnica",
+   "name": "UBA Escuela Tecnica",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "uba-sociales",
+   "name": "UBA Sociales",
+   "ultimoAnio": null
+  },
+  {
+   "id": "uba-veterinaria",
+   "name": "UBA Veterinaria",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "uca-la-plata",
+   "name": "UCA la Plata",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "univ-nac-de-la-matanza",
+   "name": "Univ. Nac de la Matanza",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "univ-nac-de-la-plata",
+   "name": "Univ. Nac de la Plata",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "univ-nac-de-quilmes",
+   "name": "Univ. Nac de Quilmes",
+   "ultimoAnio": null
+  },
+  {
+   "id": "univ-nac-de-san-martin",
+   "name": "Univ. Nac de San Martin",
+   "ultimoAnio": null
+  },
+  {
+   "id": "utn-haedo",
+   "name": "UTN Haedo",
+   "ultimoAnio": null
+  },
+  {
+   "id": "asoc-alumni-m15-d",
+   "name": "Asoc. Alumni M15 \"D\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "asoc-alumni-m18-a",
+   "name": "Asoc. Alumni M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "asoc-alumni-m18-b",
+   "name": "Asoc. Alumni M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "asoc-alumni-m20",
+   "name": "Asoc. Alumni M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-areco-m18",
+   "name": "Club Areco M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-areco-m19",
+   "name": "Club Areco M19",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "club-areco-m20",
+   "name": "Club Areco M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "argentino-r-c-m15-a",
+   "name": "Argentino R.C. M15 \"A\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "argentino-r-c-m15-b",
+   "name": "Argentino R.C. M15 \"B\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "argentino-r-c-m16",
+   "name": "Argentino R.C. M16",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "argentino-r-c-m17-a",
+   "name": "Argentino R.C. M17 \"A\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "argentino-r-c-m17-b",
+   "name": "Argentino R.C. M17 \"B\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "argentino-r-c-m18",
+   "name": "Argentino R.C. M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "argentino-r-c-m18-a",
+   "name": "Argentino R.C. M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "argentino-r-c-m18-b",
+   "name": "Argentino R.C. M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "argentino-r-c-m19",
+   "name": "Argentino R.C. M19",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "argentino-r-c-m20",
+   "name": "Argentino R.C. M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "banco-nacion-m15-a",
+   "name": "Banco Nación M15 \"A\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "banco-nacion-m15-b",
+   "name": "Banco Nación M15 \"B\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "banco-nacion-m17-a",
+   "name": "Banco Nación M17 \"A\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "banco-nacion-m17-b",
+   "name": "Banco Nación M17 \"B\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "banco-nacion-m18-a",
+   "name": "Banco Nación M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "banco-nacion-m18-b",
+   "name": "Banco Nación M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "banco-nacion-m19",
+   "name": "Banco Nación M19",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "banco-nacion-m20",
+   "name": "Banco Nación M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "belgrano-athletic-m15-d",
+   "name": "Belgrano Athletic M15 \"D\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "belgrano-athletic-m18-a",
+   "name": "Belgrano Athletic M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "belgrano-athletic-m18-b",
+   "name": "Belgrano Athletic M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "belgrano-athletic-m20-a",
+   "name": "Belgrano Athletic M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "belgrano-athletic-m20-b",
+   "name": "Belgrano Athletic M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "belgrano-athletic-m20-c",
+   "name": "Belgrano Athletic M20 \"C\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "buenos-aires-crc-m16-c",
+   "name": "Buenos Aires CRC M16 \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "buenos-aires-crc-m16-d",
+   "name": "Buenos Aires CRC M16 \"D\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "buenos-aires-crc-m18-a",
+   "name": "Buenos Aires CRC M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "buenos-aires-crc-m18-b",
+   "name": "Buenos Aires CRC M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "buenos-aires-crc-m20-a",
+   "name": "Buenos Aires CRC M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "buenos-aires-crc-m20-b",
+   "name": "Buenos Aires CRC M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "cuq-m15-a",
+   "name": "CUQ M15 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "cuq-m15-b",
+   "name": "CUQ M15 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "cuq-m16",
+   "name": "CUQ M16",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "cuq-m17-a",
+   "name": "CUQ M17 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "cuq-m17-b",
+   "name": "CUQ M17 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "cuq-m18-a",
+   "name": "CUQ M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "cuq-m18-b",
+   "name": "CUQ M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "cuq-m18-c",
+   "name": "CUQ M18 \"C\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "cuq-m20-a",
+   "name": "CUQ M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "cuq-m20-b",
+   "name": "CUQ M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "casa-de-padua-m16",
+   "name": "CASA de Padua M16",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "casa-de-padua-m17",
+   "name": "CASA de Padua M17",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "casa-de-padua-m18-a",
+   "name": "CASA de Padua M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "casa-de-padua-m18-b",
+   "name": "CASA de Padua M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "casa-de-padua-m19-a",
+   "name": "CASA de Padua M19 \"A\"",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "casa-de-padua-m19-b",
+   "name": "CASA de Padua M19 \"B\"",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "casa-de-padua-m20",
+   "name": "CASA de Padua M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "casi-m18-a",
+   "name": "CASI M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "casi-m18-b",
+   "name": "CASI M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "casi-m20-a",
+   "name": "CASI M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "casi-m20-b",
+   "name": "CASI M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "centro-naval-m16-a",
+   "name": "Centro Naval M16 \"A\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "centro-naval-m16-b",
+   "name": "Centro Naval M16 \"B\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "centro-naval-m18-a",
+   "name": "Centro Naval M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "centro-naval-m18-b",
+   "name": "Centro Naval M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "centro-naval-m19",
+   "name": "Centro Naval M19",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "centro-naval-m20",
+   "name": "Centro Naval M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-champagnat-m15-d",
+   "name": "Club Champagnat M15 \"D\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "club-champagnat-m18-a",
+   "name": "Club Champagnat M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-champagnat-m18-b",
+   "name": "Club Champagnat M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-champagnat-m19-f",
+   "name": "Club Champagnat M19 \"F\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "club-champagnat-m20-a",
+   "name": "Club Champagnat M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-champagnat-m20-b",
+   "name": "Club Champagnat M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "ciudad-de-buenos-aires-m15",
+   "name": "Ciudad de Buenos Aires M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "ciudad-de-buenos-aires-m16-a",
+   "name": "Ciudad de Buenos Aires M16 \"A\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "ciudad-de-buenos-aires-m16-b",
+   "name": "Ciudad de Buenos Aires M16 \"B\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "ciudad-de-buenos-aires-m17-a",
+   "name": "Ciudad de Buenos Aires M17 \"A\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "ciudad-de-buenos-aires-m17-b",
+   "name": "Ciudad de Buenos Aires M17 \"B\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "ciudad-de-buenos-aires-m18-a",
+   "name": "Ciudad de Buenos Aires M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "ciudad-de-buenos-aires-m18-b",
+   "name": "Ciudad de Buenos Aires M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "ciudad-de-buenos-aires-m19-c",
+   "name": "Ciudad de Buenos Aires M19 \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "cuba-m18-a",
+   "name": "CUBA M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "cuba-m18-b",
+   "name": "CUBA M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "cuba-m20-a",
+   "name": "CUBA M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "cuba-m20-b",
+   "name": "CUBA M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "cuba-m20-c",
+   "name": "CUBA M20 \"C\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "curupayti-m15-a",
+   "name": "Curupaytí M15 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "curupayti-m15-b",
+   "name": "Curupaytí M15 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "curupayti-m16",
+   "name": "Curupaytí M16",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "curupayti-m17",
+   "name": "Curupaytí M17",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "curupayti-m18-a",
+   "name": "Curupaytí M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "curupayti-m18-b",
+   "name": "Curupaytí M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "curupayti-m20-a",
+   "name": "Curupaytí M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "curupayti-m20-b",
+   "name": "Curupaytí M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-daom-m16-a",
+   "name": "Club Daom M16 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-daom-m16-b",
+   "name": "Club Daom M16 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-daom-m18",
+   "name": "Club Daom M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-daom-m18-a",
+   "name": "Club Daom M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-daom-m18-b",
+   "name": "Club Daom M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "asoc-del-sur-m15-a",
+   "name": "Asoc. Del Sur M15 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "asoc-del-sur-m15-b",
+   "name": "Asoc. Del Sur M15 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "asoc-del-sur-m16",
+   "name": "Asoc. Del Sur M16",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "asoc-del-sur-m17-a",
+   "name": "Asoc. Del Sur M17 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "asoc-del-sur-m17-b",
+   "name": "Asoc. Del Sur M17 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "asoc-del-sur-m18-a",
+   "name": "Asoc. Del Sur M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "asoc-del-sur-m18-b",
+   "name": "Asoc. Del Sur M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "asoc-del-sur-m19-a",
+   "name": "Asoc. Del Sur M19 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "asoc-del-sur-m19-b",
+   "name": "Asoc. Del Sur M19 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "delta-r-c-m15-a",
+   "name": "Delta R.C. M15 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "delta-r-c-m15-b",
+   "name": "Delta R.C. M15 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "delta-r-c-m16-a",
+   "name": "Delta R.C. M16 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "delta-r-c-m16-b",
+   "name": "Delta R.C. M16 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "delta-r-c-m17-a",
+   "name": "Delta R.C. M17 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "delta-r-c-m17-b",
+   "name": "Delta R.C. M17 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "delta-r-c-m18-a",
+   "name": "Delta R.C. M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "delta-r-c-m18-b",
+   "name": "Delta R.C. M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "delta-r-c-m19-c",
+   "name": "Delta R.C. M19 \"C\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "deportiva-francesa-m15-c",
+   "name": "Deportiva Francesa M15 \"C\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "deportiva-francesa-m18-a",
+   "name": "Deportiva Francesa M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "deportiva-francesa-m18-b",
+   "name": "Deportiva Francesa M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "deportiva-francesa-m19-d",
+   "name": "Deportiva Francesa M19 \"D\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "deportiva-francesa-m20-a",
+   "name": "Deportiva Francesa M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "deportiva-francesa-m20-b",
+   "name": "Deportiva Francesa M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "don-bosco-m16-a",
+   "name": "Don Bosco M16 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "don-bosco-m16-b",
+   "name": "Don Bosco M16 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "don-bosco-m17-a",
+   "name": "Don Bosco M17 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "don-bosco-m17-b",
+   "name": "Don Bosco M17 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "don-bosco-m18-a",
+   "name": "Don Bosco M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "don-bosco-m18-b",
+   "name": "Don Bosco M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "don-bosco-m19-a",
+   "name": "Don Bosco M19 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "don-bosco-m19-b",
+   "name": "Don Bosco M19 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "geba-m15",
+   "name": "GEBA M15",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "geba-m16",
+   "name": "GEBA M16",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "geba-m17",
+   "name": "GEBA M17",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "geba-m18-a",
+   "name": "GEBA M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "geba-m18-b",
+   "name": "GEBA M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "geba-m20-a",
+   "name": "GEBA M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "geba-m20-b",
+   "name": "GEBA M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "hindu-club-m18-a",
+   "name": "Hindú Club M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "hindu-club-m18-b",
+   "name": "Hindú Club M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "hindu-club-m20-a",
+   "name": "Hindú Club M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "hindu-club-m20-b",
+   "name": "Hindú Club M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "hurling-m15-a",
+   "name": "Hurling M15 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "hurling-m15-b",
+   "name": "Hurling M15 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "hurling-m16",
+   "name": "Hurling M16",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "hurling-m17",
+   "name": "Hurling M17",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "hurling-m18-a",
+   "name": "Hurling M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "hurling-m18-b",
+   "name": "Hurling M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "hurling-m19-c",
+   "name": "Hurling M19 \"C\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "club-italiano-m15-a",
+   "name": "Club Italiano M15 \"A\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "club-italiano-m15-b",
+   "name": "Club Italiano M15 \"B\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "club-italiano-m16-a",
+   "name": "Club Italiano M16 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "club-italiano-m16-b",
+   "name": "Club Italiano M16 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "club-italiano-m17-a",
+   "name": "Club Italiano M17 \"A\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "club-italiano-m17-b",
+   "name": "Club Italiano M17 \"B\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "club-italiano-m18",
+   "name": "Club Italiano M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-italiano-m19",
+   "name": "Club Italiano M19",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "la-plata-m18-a",
+   "name": "La Plata M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "la-plata-m18-b",
+   "name": "La Plata M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "la-plata-m19-e",
+   "name": "La Plata M19 \"E\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "la-plata-m20-a",
+   "name": "La Plata M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "la-plata-m20-b",
+   "name": "La Plata M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "lanus-r-c-m18-a",
+   "name": "Lanús R.C. M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "lanus-r-c-m18-b",
+   "name": "Lanús R.C. M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "lanus-r-c-m19-a",
+   "name": "Lanús R.C. M19 \"A\"",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "lanus-r-c-m19-b",
+   "name": "Lanús R.C. M19 \"B\"",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "lanus-r-c-m20",
+   "name": "Lanús R.C. M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "liceo-militar-m15-a",
+   "name": "Liceo Militar M15 \"A\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "liceo-militar-m15-b",
+   "name": "Liceo Militar M15 \"B\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "liceo-militar-m16-a",
+   "name": "Liceo Militar M16 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "liceo-militar-m16-b",
+   "name": "Liceo Militar M16 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "liceo-militar-m17-a",
+   "name": "Liceo Militar M17 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "liceo-militar-m17-b",
+   "name": "Liceo Militar M17 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "liceo-militar-m18",
+   "name": "Liceo Militar M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "liceo-militar-m19-a",
+   "name": "Liceo Militar M19 \"A\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "liceo-militar-m19-b",
+   "name": "Liceo Militar M19 \"B\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "liceo-militar-m20",
+   "name": "Liceo Militar M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "liceo-naval-m15-c",
+   "name": "Liceo Naval M15 \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "liceo-naval-m17",
+   "name": "Liceo Naval M17",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "liceo-naval-m18-a",
+   "name": "Liceo Naval M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "liceo-naval-m18-b",
+   "name": "Liceo Naval M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "liceo-naval-m20-a",
+   "name": "Liceo Naval M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "liceo-naval-m20-b",
+   "name": "Liceo Naval M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "lomas-athletic-m15-c",
+   "name": "Lomas Athletic M15 \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "lomas-athletic-m16",
+   "name": "Lomas Athletic M16",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "lomas-athletic-m17",
+   "name": "Lomas Athletic M17",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "lomas-athletic-m18-a",
+   "name": "Lomas Athletic M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "lomas-athletic-m18-b",
+   "name": "Lomas Athletic M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "los-matreros-m15-c",
+   "name": "Los Matreros M15 \"C\"",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "los-matreros-m16-c",
+   "name": "Los Matreros M16 \"C\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "los-matreros-m17",
+   "name": "Los Matreros M17",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "los-matreros-m17-c",
+   "name": "Los Matreros M17 \"C\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "los-matreros-m18-a",
+   "name": "Los Matreros M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "los-matreros-m18-b",
+   "name": "Los Matreros M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "los-matreros-m20-a",
+   "name": "Los Matreros M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "los-matreros-m20-b",
+   "name": "Los Matreros M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "los-molinos-m15",
+   "name": "Los Molinos M15",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "los-molinos-m16",
+   "name": "Los Molinos M16",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "los-molinos-m17",
+   "name": "Los Molinos M17",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "los-molinos-m19",
+   "name": "Los Molinos M19",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "los-tilos-m15-c",
+   "name": "Los Tilos M15 \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "los-tilos-m17-d",
+   "name": "Los Tilos M17 \"D\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "los-tilos-m18-a",
+   "name": "Los Tilos M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "los-tilos-m18-b",
+   "name": "Los Tilos M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "lujan-r-c-m16-a",
+   "name": "Lujan R.C. M16 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "lujan-r-c-m16-b",
+   "name": "Lujan R.C. M16 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "lujan-r-c-m17",
+   "name": "Lujan R.C. M17",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "lujan-r-c-m18",
+   "name": "Lujan R.C. M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "lujan-r-c-m18-a",
+   "name": "Lujan R.C. M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "lujan-r-c-m18-b",
+   "name": "Lujan R.C. M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "lujan-r-c-m19",
+   "name": "Lujan R.C. M19",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "manuel-belgrano-m17",
+   "name": "Manuel Belgrano M17",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "manuel-belgrano-m18-a",
+   "name": "Manuel Belgrano M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "manuel-belgrano-m18-b",
+   "name": "Manuel Belgrano M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "mariano-moreno-m15-a",
+   "name": "Mariano Moreno M15 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "mariano-moreno-m15-b",
+   "name": "Mariano Moreno M15 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "mariano-moreno-m16",
+   "name": "Mariano Moreno M16",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "mariano-moreno-m17",
+   "name": "Mariano Moreno M17",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "mariano-moreno-m18-a",
+   "name": "Mariano Moreno M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "mariano-moreno-m18-b",
+   "name": "Mariano Moreno M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "mariano-moreno-m19-c",
+   "name": "Mariano Moreno M19 \"C\"",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "mariano-moreno-m20-a",
+   "name": "Mariano Moreno M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "mariano-moreno-m20-b",
+   "name": "Mariano Moreno M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "monte-grande-m15",
+   "name": "Monte Grande M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "monte-grande-m16-a",
+   "name": "Monte Grande M16 \"A\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "monte-grande-m16-b",
+   "name": "Monte Grande M16 \"B\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "monte-grande-m18",
+   "name": "Monte Grande M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "monte-grande-m19",
+   "name": "Monte Grande M19",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "club-newman-m18-a",
+   "name": "Club Newman M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-newman-m18-b",
+   "name": "Club Newman M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-newman-m20-a",
+   "name": "Club Newman M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "sic-m20-c",
+   "name": "SIC M20 \"C\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-newman-m20-b",
+   "name": "Club Newman M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "olivos-r-c-m16",
+   "name": "Olivos R.C. M16",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "olivos-r-c-m18-a",
+   "name": "Olivos R.C. M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "olivos-r-c-m18-b",
+   "name": "Olivos R.C. M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "olivos-r-c-m19-c",
+   "name": "Olivos R.C. M19 \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "olivos-r-c-m20",
+   "name": "Olivos R.C. M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-pucara-m18-a",
+   "name": "Club Pucará M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-pucara-m18-b",
+   "name": "Club Pucará M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-pucara-m20-a",
+   "name": "Club Pucará M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-pucara-m20-b",
+   "name": "Club Pucará M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-pucara-m20-c",
+   "name": "Club Pucará M20 \"C\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-pucara-m22",
+   "name": "Club Pucará M22",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "pueyrredon-m15-c",
+   "name": "Pueyrredón M15 \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "pueyrredon-m17-c",
+   "name": "Pueyrredón M17 \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "pueyrredon-m18",
+   "name": "Pueyrredón M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "regatas-de-bella-vista-m17-d",
+   "name": "Regatas de Bella Vista M17 \"D\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "regatas-de-bella-vista-m17-e",
+   "name": "Regatas de Bella Vista M17 \"E\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "regatas-de-bella-vista-m18-a",
+   "name": "Regatas de Bella Vista M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "regatas-de-bella-vista-m18-b",
+   "name": "Regatas de Bella Vista M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "regatas-de-bella-vista-m20",
+   "name": "Regatas de Bella Vista M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "regatas-de-bella-vista-m20-b",
+   "name": "Regatas de Bella Vista M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-albano-m15",
+   "name": "San Albano M15",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "san-albano-m15-c",
+   "name": "San Albano M15 \"C\"",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "san-albano-m18-a",
+   "name": "San Albano M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-albano-m18-b",
+   "name": "San Albano M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-albano-m19",
+   "name": "San Albano M19",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "san-albano-m19-c",
+   "name": "San Albano M19 \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-albano-m20-a",
+   "name": "San Albano M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-albano-m20-b",
+   "name": "San Albano M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-carlos-m15",
+   "name": "San Carlos M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-carlos-m16-a",
+   "name": "San Carlos M16 \"A\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "san-carlos-m16-b",
+   "name": "San Carlos M16 \"B\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "san-carlos-m17-a",
+   "name": "San Carlos M17 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-carlos-m17-b",
+   "name": "San Carlos M17 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-carlos-m18-a",
+   "name": "San Carlos M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-carlos-m18-b",
+   "name": "San Carlos M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-carlos-m19",
+   "name": "San Carlos M19",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "san-carlos-m20-a",
+   "name": "San Carlos M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-carlos-m20-b",
+   "name": "San Carlos M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-cirano-m17",
+   "name": "San Cirano M17",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-cirano-m18-a",
+   "name": "San Cirano M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-cirano-m18-b",
+   "name": "San Cirano M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-cirano-m20-a",
+   "name": "San Cirano M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-cirano-m20-b",
+   "name": "San Cirano M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-fernando-m15-a",
+   "name": "San Fernando M15 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-fernando-m15-b",
+   "name": "San Fernando M15 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-fernando-m16",
+   "name": "San Fernando M16",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-fernando-m17-a",
+   "name": "San Fernando M17 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-fernando-m17-b",
+   "name": "San Fernando M17 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-fernando-m18-a",
+   "name": "San Fernando M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-fernando-m18-b",
+   "name": "San Fernando M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-fernando-m19-c",
+   "name": "San Fernando M19 \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-luis-m18-a",
+   "name": "San Luis M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-luis-m18-b",
+   "name": "San Luis M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-luis-m20-a",
+   "name": "San Luis M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-luis-m20-b",
+   "name": "San Luis M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-martin-m16-c",
+   "name": "San Martín M16 \"C\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "san-martin-m17-c",
+   "name": "San Martín M17 \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-martin-m18-a",
+   "name": "San Martín M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-martin-m18-b",
+   "name": "San Martín M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-martin-m18-c",
+   "name": "San Martín M18 \"C\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-martin-m20-a",
+   "name": "San Martín M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-martin-m20-b",
+   "name": "San Martín M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "san-miguel-r-c-m16",
+   "name": "San Miguel R.C. M16",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-miguel-r-c-m18",
+   "name": "San Miguel R.C. M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-san-patricio-m15-a",
+   "name": "Club San Patricio M15 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "club-san-patricio-m15-b",
+   "name": "Club San Patricio M15 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "club-san-patricio-m16-a",
+   "name": "Club San Patricio M16 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-san-patricio-m16-b",
+   "name": "Club San Patricio M16 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-san-patricio-m18-a",
+   "name": "Club San Patricio M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "club-san-patricio-m18-b",
+   "name": "Club San Patricio M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "sic-m15-d",
+   "name": "SIC M15 \"D\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "sic-m18-a",
+   "name": "SIC M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "sic-m18-b",
+   "name": "SIC M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "sic-m20-a",
+   "name": "SIC M20 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "sic-m20-b",
+   "name": "SIC M20 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "sic-m20-d",
+   "name": "SIC M20 \"D\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "sic-m20-e",
+   "name": "SIC M20 \"E\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "sitas-m15",
+   "name": "SITAS M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "sitas-m16-a",
+   "name": "SITAS M16 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "sitas-m16-b",
+   "name": "SITAS M16 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "sitas-m17",
+   "name": "SITAS M17",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "sitas-m18-a",
+   "name": "SITAS M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "sitas-m18-b",
+   "name": "SITAS M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "st-brendans-m16",
+   "name": "St. Brendan's M16",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "st-brendans-m18",
+   "name": "St. Brendan's M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "st-brendans-m19",
+   "name": "St. Brendan's M19",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "st-brendans-m20",
+   "name": "St. Brendan's M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "universitario-de-la-plata-m15",
+   "name": "Universitario de La Plata M15",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "universitario-de-la-plata-m16",
+   "name": "Universitario de La Plata M16",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "universitario-de-la-plata-m17",
+   "name": "Universitario de La Plata M17",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "universitario-de-la-plata-m18-a",
+   "name": "Universitario de La Plata M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "universitario-de-la-plata-m18-b",
+   "name": "Universitario de La Plata M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "universitario-de-la-plata-m19-c",
+   "name": "Universitario de La Plata M19 \"C\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "vicentinos-m15-a",
+   "name": "Vicentinos M15 \"A\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "vicentinos-m15-b",
+   "name": "Vicentinos M15 \"B\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "vicentinos-m16-a",
+   "name": "Vicentinos M16 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "vicentinos-m16-b",
+   "name": "Vicentinos M16 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "vicentinos-m18-a",
+   "name": "Vicentinos M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "vicentinos-m18-b",
+   "name": "Vicentinos M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "vicentinos-m19-a",
+   "name": "Vicentinos M19 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "vicentinos-m19-b",
+   "name": "Vicentinos M19 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "virreyes-r-c-m15-a",
+   "name": "VIrreyes R.C. M15 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "virreyes-r-c-m15-b",
+   "name": "VIrreyes R.C. M15 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "virreyes-r-c-m16",
+   "name": "VIrreyes R.C. M16",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "virreyes-r-c-m17",
+   "name": "VIrreyes R.C. M17",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "virreyes-r-c-m18",
+   "name": "VIrreyes R.C. M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "virreyes-r-c-m20",
+   "name": "VIrreyes R.C. M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "albatros-m18",
+   "name": "Albatros M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "arsenal-zarate-m15",
+   "name": "Arsenal Zarate M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "arsenal-zarate-m18",
+   "name": "Arsenal Zarate M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "atletico-chascomus-m15",
+   "name": "Atletico Chascomus M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "atletico-chascomus-m17-a",
+   "name": "Atletico Chascomus M17 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "atletico-chascomus-m17-b",
+   "name": "Atletico Chascomus M17 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "atletico-chascomus-m18",
+   "name": "Atletico Chascomus M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "atletico-san-andres-m15",
+   "name": "Atletico San Andres M15",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "atletico-san-andres-m16",
+   "name": "Atletico San Andres M16",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "atletico-san-andres-m18",
+   "name": "Atletico San Andres M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "atletico-san-andres-m19",
+   "name": "Atletico San Andres M19",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "atletico-y-progreso-m15",
+   "name": "Atletico y Progreso M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "atletico-y-progreso-m17",
+   "name": "Atletico y Progreso M17",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "el-retiro-m18",
+   "name": "El Retiro M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "atletico-y-progreso-m18",
+   "name": "Atletico y Progreso M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "banco-hipotecario-m15",
+   "name": "Banco Hipotecario M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "banco-hipotecario-m18",
+   "name": "Banco Hipotecario M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "banco-hipotecario-m19",
+   "name": "Banco Hipotecario M19",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "berisso-m15",
+   "name": "Berisso M15",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "berisso-m16",
+   "name": "Berisso M16",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "beromama-m15",
+   "name": "Beromama M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "beromama-m18",
+   "name": "Beromama M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "ciudad-de-campana-m16",
+   "name": "Ciudad de Campana M16",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "ciudad-de-campana-m18",
+   "name": "Ciudad de Campana M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "defensores-de-glew-m16",
+   "name": "Defensores de Glew M16",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "defensores-de-glew-m19",
+   "name": "Defensores de Glew M19",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "defensores-de-glew-m20",
+   "name": "Defensores de Glew M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "el-retiro-m15",
+   "name": "El Retiro M15",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "el-retiro-m15-a",
+   "name": "El Retiro M15 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "el-retiro-m15-b",
+   "name": "El Retiro M15 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "el-retiro-m16",
+   "name": "El Retiro M16",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "el-retiro-m19-a",
+   "name": "El Retiro M19 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "el-retiro-m19-b",
+   "name": "El Retiro M19 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "ezeiza-m15",
+   "name": "Ezeiza M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "floresta-m16",
+   "name": "Floresta M16",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "g-y-e-de-ituzaingo-m15-a",
+   "name": "G y E de Ituzaingo M15 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "g-y-e-de-ituzaingo-m15-b",
+   "name": "G y E de Ituzaingo M15 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "g-y-e-de-ituzaingo-m16-a",
+   "name": "G y E de Ituzaingo M16 \"A\"",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "g-y-e-de-ituzaingo-m16-b",
+   "name": "G y E de Ituzaingo M16 \"B\"",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "g-y-e-de-ituzaingo-m18",
+   "name": "G y E de Ituzaingo M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "g-y-e-de-ituzaingo-m18-a",
+   "name": "G y E de Ituzaingo M18 \"A\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "g-y-e-de-ituzaingo-m18-b",
+   "name": "G y E de Ituzaingo M18 \"B\"",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "la-salle-m16",
+   "name": "La Salle M16",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "la-salle-m18",
+   "name": "La Salle M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "las-canas-m17-a",
+   "name": "Las Cañas M17 \"A\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "las-canas-m17-b",
+   "name": "Las Cañas M17 \"B\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "las-canas-m18",
+   "name": "Las Cañas M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "las-canas-m19-a",
+   "name": "Las Cañas M19 \"A\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "las-canas-m19-b",
+   "name": "Las Cañas M19 \"B\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "los-cedros-m16",
+   "name": "Los Cedros M16",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "los-cedros-m18",
+   "name": "Los Cedros M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "los-pinos-m16",
+   "name": "Los Pinos M16",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "los-pinos-m18",
+   "name": "Los Pinos M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "los-pinos-m19",
+   "name": "Los Pinos M19",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "marcos-paz-m16",
+   "name": "Marcos Paz M16",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "marcos-paz-m19",
+   "name": "Marcos Paz M19",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "mercedes-m16",
+   "name": "Mercedes M16",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "mercedes-m19",
+   "name": "Mercedes M19",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "municipalidad-de-berazategui-m16",
+   "name": "Municipalidad de Berazategui M16",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "municipalidad-de-berazategui-m18",
+   "name": "Municipalidad de Berazategui M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "obras-sanitarias-m18",
+   "name": "Obras Sanitarias M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "old-georgian-m16",
+   "name": "Old Georgian M16",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "old-georgian-m18",
+   "name": "Old Georgian M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "old-georgian-m19",
+   "name": "Old Georgian M19",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "old-georgian-m20",
+   "name": "Old Georgian M20",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "pac-general-rodriguez-m15",
+   "name": "Pac General Rodriguez M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "pac-general-rodriguez-m19",
+   "name": "Pac General Rodriguez M19",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "porteno-m15",
+   "name": "Porteño M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "porteno-m17",
+   "name": "Porteño M17",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "porteno-m18",
+   "name": "Porteño M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "rivadavia-de-lobos-m16",
+   "name": "Rivadavia de Lobos M16",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "san-marcos-m15",
+   "name": "San Marcos M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "san-marcos-m18",
+   "name": "San Marcos M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "sociedad-hebraica-m17",
+   "name": "Sociedad Hebraica M17",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "sociedad-hebraica-m18",
+   "name": "Sociedad Hebraica M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "sociedad-hebraica-m19",
+   "name": "Sociedad Hebraica M19",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "tigre-m18",
+   "name": "Tigre M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "tigre-m19",
+   "name": "Tigre M19",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "tiro-federal-de-baradero-m16",
+   "name": "Tiro Federal de Baradero M16",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "varela-jr-m15",
+   "name": "Varela Jr. M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "varela-jr-m18",
+   "name": "Varela Jr. M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "varela-jr-m19",
+   "name": "Varela Jr. M19",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "vicente-lopez-m15",
+   "name": "Vicente Lopez M15",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "vicente-lopez-m18",
+   "name": "Vicente Lopez M18",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "vicente-lopez-m19",
+   "name": "Vicente Lopez M19",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "atletico-san-andres-femenino",
+   "name": "Atletico San Andres Femenino",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "centro-naval-femenino-b",
+   "name": "Centro Naval Femenino \"B\"",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "el-retiro-femenino",
+   "name": "El Retiro Femenino",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "ezeiza-femenino",
+   "name": "Ezeiza Femenino",
+   "ultimoAnio": 2021
+  },
+  {
+   "id": "porteno-femenino",
+   "name": "Porteño Femenino",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "tiro-federal-de-san-pedro-femenino",
+   "name": "Tiro Federal de San Pedro Femenino",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "univ-nac-de-la-plata-femenino",
+   "name": "Univ. Nac de la Plata Femenino",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "argentino-r-c-preintermedia-a",
+   "name": "Argentino R.C. Preintermedia \"A\"",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "atletico-y-progreso-preintermedia",
+   "name": "Atletico y Progreso Preintermedia",
+   "ultimoAnio": 2023
+  },
+  {
+   "id": "cuq-preintermedia-c",
+   "name": "CUQ Preintermedia \"C\"",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "el-retiro-preintermedia",
+   "name": "El Retiro Preintermedia",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "lomas-ath-preintermedia-d",
+   "name": "Lomas Ath. Preintermedia \"D\"",
+   "ultimoAnio": 2025
+  },
+  {
+   "id": "mercedes-preintermedia",
+   "name": "Mercedes Preintermedia",
+   "ultimoAnio": 2024
+  },
+  {
+   "id": "old-georgian-preintermedia",
+   "name": "Old Georgian Preintermedia",
+   "ultimoAnio": 2022
+  },
+  {
+   "id": "regatas-bv-preintermedia-e",
+   "name": "Regatas BV Preintermedia \"E\"",
+   "ultimoAnio": 2025
+  }
+ ]
+}
