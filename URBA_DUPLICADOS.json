@@ -1,0 +1,58 @@
+[
+ {
+  "ext": "urba:2025179",
+  "nombre": "Primera \"C\" de la URBA",
+  "previos": 182,
+  "final": 112,
+  "visibles": 182
+ },
+ {
+  "ext": "urba:2025178",
+  "nombre": "Primera \"B\" de la URBA",
+  "previos": 182,
+  "final": 112,
+  "visibles": 182
+ },
+ {
+  "ext": "urba:2025176",
+  "nombre": "Top 14 de la URBA",
+  "previos": 182,
+  "final": 119,
+  "visibles": 182
+ },
+ {
+  "ext": "urba:2025177",
+  "nombre": "Primera \"A\" de la URBA",
+  "previos": 182,
+  "final": 112,
+  "visibles": 182
+ },
+ {
+  "ext": "urba:2025215",
+  "nombre": "URBA: MENORES DE 19 - G2 NIVEL 1 \"B\"",
+  "previos": 132,
+  "final": 36,
+  "visibles": 132
+ },
+ {
+  "ext": "urba:2025213",
+  "nombre": "URBA: MENORES DE 19 - G2 NIVEL 1 \"A\"",
+  "previos": 132,
+  "final": 36,
+  "visibles": 132
+ },
+ {
+  "ext": "urba:2025231",
+  "nombre": "URBA: Menores de 17 - G2 NIVEL 1 \"A\"",
+  "previos": 132,
+  "final": 71,
+  "visibles": 132
+ },
+ {
+  "ext": "urba:2025233",
+  "nombre": "URBA: Menores de 17 - G2 NIVEL 1 \"B\"",
+  "previos": 132,
+  "final": 36,
+  "visibles": 132
+ }
+]
