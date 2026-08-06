@@ -99,7 +99,33 @@ Cuando la intención cambia, el test **se da vuelta** —mismo assert, signo
 invertido— y el comentario viejo se reemplaza por **POR QUÉ CAMBIÓ LA PREMISA**.
 En seis meses eso vale más que justificar el estado actual.
 
-### 1.5 Las tres especies, y no se mezclan
+### 1.5 Nunca te refieras a algo por su posición en una lista
+
+> **UN ÍNDICE NO DICE QUÉ ES LA COSA. DICE DÓNDE ESTABA CUANDO MIRASTE.**
+>
+> Pedí por lo que la cosa ES —su tier, su kind, su id— y que falle ruidosamente
+> si no está.
+
+Van **tres** apariciones de esta misma familia, y las tres fallaron igual: en
+silencio, cuando la lista cambió abajo, devolviendo números que parecían sanos.
+
+| Dónde | Qué decía | Qué pasó |
+|---|---|---|
+| `calibration.test.ts` | `const CARTA = 0`, «la elección más obvia» | el catálogo se reordenó y el 0 pasó a ser la carta CARA. La pirámide se midió con 160 jugadores maximizando el compromiso y llamándolos "el jugador normal" |
+| `moments.ts` | `switch` con `default:` que resolvía el tackle | entró La Banda, el default le mandó una mano de tackle a una corrida, y la carrera quedó trabada sin que nada fallara |
+| `agency.test.ts` | terciles ordenados por el techo final | con el techo móvil, cada brazo caía en un tercil distinto y la comparación pareada se rompía |
+
+Las tres medicinas son la misma: **pedir por identidad y estrechar el tipo**.
+`trainingsFor(f).find(t => t.tier === 'media')` con un `assert` al lado;
+`PreContractKind` para que el `default` quede en `never`; ordenar los terciles
+por `potentialBase`, que es lo sorteado y no lo que las decisiones mueven.
+
+El olor a distancia: si tenés que leer OTRO archivo para saber qué significa el
+índice que estás escribiendo, ya está mal. Y si el comentario al lado explica qué
+hay en esa posición, peor todavía — ese comentario es exactamente lo que se va a
+quedar viejo sin que nadie lo note.
+
+### 1.6 Las tres especies, y no se mezclan
 
 | | Qué afirma | Cuándo se actualiza |
 |---|---|---|

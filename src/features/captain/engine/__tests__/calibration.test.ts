@@ -275,8 +275,23 @@ test('la pirámide: llegar a la mayor es raro', () => {
     // │ cuánto crezca nadie.                                                   │
     // └───────────────────────────────────────────────────────────────────────┘
     entre(proporcion(NORMAL, (r) => ['m20', 'a-xv', 'nacional'].includes(r.mejorTrack)), 0.1, 0.35, 'llegan a M20 o más');
+    // ── BANDA REAUTORIZADA CONTRA LA PREMISA. HOY DA 0,119 Y ESTÁ ROJA. ──
+    //
+    // Era [0,12 – 0,45] y afirmaba un mundo que ya decidimos que no queremos.
+    // Dejarla ahí era dejar una mentira que encima estaba roja por el motivo
+    // equivocado: por una milésima, como si fuera deriva. Puesta en el objetivo,
+    // el rojo dice "esto todavía no está hecho" en vez de "algo se rompió".
+    //
+    // ESTO ES UN OBJETIVO DE DISEÑO, NO UN DATO MEDIDO. No tenemos cifra dura de
+    // qué fracción de los juveniles de club argentino recibe una convocatoria de
+    // su unión, y no hay que leer este [0,55 – 0,80] como si saliera de una
+    // fuente. Sale de la premisa del juego —~500 clubes, 100.000 fichados, y "de
+    // la M14 a la 1 del club, y SI el cuerpo aguanta, a Los Pumas"—, que asume
+    // que la mayoría no sale. El próximo que la toque tiene que saber que está
+    // discutiendo con una decisión de diseño y no con investigación.
+    //
     // ALARMA-VIVA: los carriles son umbrales y no cupos — la carrera modal del rugby casi no existe
-    entre(proporcion(NORMAL, (r) => r.mejorTrack === 'club'), 0.12, 0.45, 'nunca salen del club');
+    entre(proporcion(NORMAL, (r) => r.mejorTrack === 'club'), 0.55, 0.8, 'nunca salen del club');
 });
 
 test('ningún puesto queda afuera de la selección', () => {
