@@ -289,18 +289,19 @@ Dos cosas más que aparecieron al acotar:
 
 ### Decisiones tomadas que todavía no se ejecutaron
 
-1. ~~**Publicar el histórico, año por año.**~~ **2025 ya está publicado**
-   (2026-08-06): 141 torneos y 10.709 partidos, con las tres puertas. El anónimo
-   ve 275 torneos de URBA y el menú de temporadas del Top 14 ya ofrece 2025. El
-   patrón quedó parametrizado en
+1. ~~**Publicar el histórico, año por año.**~~ **2025 y 2024 ya están
+   publicados** (2026-08-06): 268 torneos y 20.595 partidos, con las tres
+   puertas. El anónimo ve 402 torneos de URBA y el menú de temporadas del Top 14
+   ofrece 2026, 2025 y 2024. El patrón quedó parametrizado en
    [urba-publicar-temporada.ts](src/scripts/urba-publicar-temporada.ts)
    (`--anio=YYYY --plan|--execute`), con rollback por año.
 
-   **Quedan 2024, 2023, 2022 y 2021**, uno por vez y mirando el home entre cada
-   uno. Lo que hay que mirar no es el feed de partidos —está acotado por día en
-   la consulta, así que un partido de 2025 no puede aparecer hoy, y está
-   medido— sino **el listado de competencias, que NO filtra por temporada**:
-   pasó de 129 a 251 entradas al publicar un solo año.
+   **Quedan 2023, 2022 y 2021**, uno por vez. Entre 2025 y 2024 hubo que frenar
+   a arreglar el listado: publicar un solo año lo llevó de 129 a 251 entradas.
+   Ya no pasa —[tournamentSeasonFilter.ts](src/lib/tournamentSeasonFilter.ts)
+   deja una temporada por unión— y se midió: publicar 2024 lo dejó **igual, en
+   127**. El feed de partidos nunca fue el problema: está acotado por día en la
+   consulta, así que un partido de 2024 no puede aparecer hoy.
 
 2. **La captura del menú de temporadas.** Depende del punto anterior. Las otras
    tres están en `capturas-navegacion/`.
