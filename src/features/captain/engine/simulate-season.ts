@@ -192,7 +192,7 @@ export function simulateSeason(state: CaptainState, rng: Rng): SeasonReport {
 
     // ── 5 · El club ─────────────────────────────────────────────────────────
     const titulos: string[] = [];
-    if (player.clubId && wonCompetition(player.clubId, share, rng)) {
+    if (player.clubId && wonCompetition(player.clubId, share, state.season)) {
         const club = getClub(player.clubId);
         const label = clubLeague(player.clubId)?.labelEs ?? competitionLabelOf(club.competitionId) ?? 'el torneo';
         state.titles.push({

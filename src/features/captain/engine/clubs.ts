@@ -22,6 +22,7 @@ import type { CaptainPlayer, CaptainStage } from '../types/player.ts';
 import type { ClubOffer } from '../types/captain.ts';
 import type { Rng } from './random.ts';
 import { CLUBS, getClub, clubLeague } from '../data/catalogs.ts';
+import { createRng, hashSeed } from './random.ts';
 
 /** Los niveles que cuentan como profesionales de verdad. */
 const PRO_LEVELS = new Set(['elite-world', 'elite-pro', 'pro-second']);
@@ -83,25 +84,54 @@ export function startingClub(countryCode: string, rng: Rng): string | null {
 }
 
 /**
- * ¿Ganó el club su torneo?
+ * Cuánto tenés que haber jugado para que el título sea TUYO y no solo del club.
  *
- * Una moneda pesada por la fuerza del club dentro de su competición. No hay
- * tabla de posiciones: el juego dura ocho minutos y una tabla de treinta
- * equipos que nadie mira no le agrega nada.
+ * Antes esto era un factor de probabilidad —`0,45 + share × 0,55`— y ahora es un
+ * corte, porque el campeón dejó de ser un dado. Un suplente que entró tres
+ * partidos tiene la medalla; el que no se puso la camiseta en todo el año, no.
  */
-export function wonCompetition(clubId: string | null, share: number, rng: Rng): boolean {
-    if (!clubId) return false;
-    const club = getClub(clubId);
+const TITLE_MIN_SHARE = 0.25;
+
+/**
+ * EL CAMPEÓN DE UNA COMPETENCIA EN UNA TEMPORADA. UNO SOLO.
+ *
+ * ── Por qué esto no puede ser una probabilidad por club ──
+ * Lo era, y por eso el 96,9% de las carreras terminaba con vitrina: cada club
+ * tiraba su propio dado, así que VARIOS clubes "ganaban" la misma liga el mismo
+ * año y sobre catorce temporadas era casi imposible quedarse sin nada. Es el
+ * mismo bicho que tenían los carriles representativos —umbral en vez de cupo— y
+ * lleva la misma medicina: hay UNA copa, y si te la llevás vos no se la lleva
+ * nadie más.
+ *
+ * ── La semilla, y por qué es del torneo y no del jugador ──
+ * Se deriva de `(competitionId, temporada)` y NO toca el stream del jugador. Dos
+ * consecuencias, las dos buscadas: la liga tiene el mismo campeón juegue quien
+ * juegue —que es lo que la hace un mundo y no un espejo de tu carrera— y elegir
+ * una carta distinta no mueve quién salió campeón en Nueva Zelanda.
+ *
+ * ── La ponderación respeta el catálogo ──
+ * Uniforme sería más simple y estaría mal: Champagnat saldría campeón tan seguido
+ * como Newman y el `rating` que el canon cuida dejaría de significar algo. Se
+ * conserva la forma de la fórmula vieja —el mejor con peso 0,34, cayendo 0,03 por
+ * punto de diferencia, con piso en 0,02— para que la vitrina no cambie de escala
+ * al mismo tiempo que cambia de mecanismo.
+ */
+export function championOf(competitionId: string, season: number): string | null {
     const rivales = CLUBS
-        .filter((c) => c.competitionId === club.competitionId)
+        .filter((c) => c.competitionId === competitionId)
         .sort((a, b) => a.id.localeCompare(b.id));
-    if (rivales.length < 2) return false;
+    if (rivales.length < 2) return null;
 
     const mejor = rivales.reduce((max, c) => Math.max(max, c.rating), 0);
-    // Un club diez puntos por debajo del mejor casi no gana; el mejor gana una
-    // de cada tres. Y si vos no jugaste, el título es del club pero no tuyo.
-    const base = Math.max(0.02, 0.34 - (mejor - club.rating) * 0.03);
-    return rng.chance(base * (0.45 + share * 0.55));
+    const rng = createRng(hashSeed(`campeon:${competitionId}:${season}`));
+    return rng.weighted(rivales, (c) => Math.max(0.02, 0.34 - (mejor - c.rating) * 0.03)).id;
+}
+
+/** ¿Salió campeón TU club, y jugaste lo suficiente como para contarlo tuyo? */
+export function wonCompetition(clubId: string | null, share: number, season: number): boolean {
+    if (!clubId) return false;
+    const club = getClub(clubId);
+    return championOf(club.competitionId, season) === clubId && share >= TITLE_MIN_SHARE;
 }
 
 export interface OfferContext {

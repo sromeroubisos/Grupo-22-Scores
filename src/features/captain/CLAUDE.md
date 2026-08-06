@@ -125,7 +125,42 @@ El olor a distancia: si tenés que leer OTRO archivo para saber qué significa e
 hay en esa posición, peor todavía — ese comentario es exactamente lo que se va a
 quedar viejo sin que nadie lo note.
 
-### 1.6 Las tres especies, y no se mezclan
+### 1.6 Hacé el álgebra antes de escribir el mecanismo
+
+> **FIJATE A QUÉ SE REDUCE TU MECANISMO CUANDO LAS CONSTANTES SON CONSTANTES.
+> SI EL RESULTADO ES UN NÚMERO, ESCRIBISTE UN NÚMERO.**
+
+Van dos veces que un mecanismo que parecía un sistema era una constante
+disfrazada, y las dos se descubrieron tarde:
+
+**`pull = gap / 18`** parecía crecimiento y era **convergencia garantizada**. Un
+lazo proporcional a la brecha cierra la brecha siempre, con solo darle
+temporadas. Consecuencia: `no-alcanzó-su-techo = 0` no era un síntoma de
+calibración, era una identidad del modelo — y toda decisión que cayera adentro
+del recorte solo podía cambiar CUÁNDO llegabas, nunca ADÓNDE. Se rediseñó la
+carta de pretemporada dos veces antes de notarlo.
+
+**Curva sintética fija + cupo** parecía competencia y era **un percentil**:
+
+```
+entrás ⟺ rank ≤ K ⟺ C · P(X > ovr) ≤ K−1 ⟺ ovr ≥ F⁻¹(1 − (K−1)/C)
+```
+
+Con `F`, `K` y `C` fijas, el lado derecho es un número. O sea: un umbral con más
+pasos, y con la misma erosión que el umbral que venía a reemplazar. Esta se
+agarró ANTES de escribirla, y ahorró un ciclo — el rojo habría vuelto tres
+cambios después, sin saber cuál lo rompió.
+
+La verificación es de lápiz y papel y tarda menos que el commit. Preguntas útiles:
+
+- Si todas las entradas suben en la misma cantidad, ¿cambia algo el resultado?
+- ¿Hay un punto fijo al que esto converge sin importar el camino?
+- ¿La decisión del jugador entra en la fórmula, o se cancela?
+
+Es la hermana de §2 —verificar que exista el canal— pero se hace un paso antes:
+§2 mide, esto se resuelve sin correr nada.
+
+### 1.7 Las tres especies, y no se mezclan
 
 | | Qué afirma | Cuándo se actualiza |
 |---|---|---|
