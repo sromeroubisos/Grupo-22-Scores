@@ -36,6 +36,7 @@
 // distintas y la confusión entre las dos es la que costó el rediseño.
 
 import type { PositionFamilyId } from '../types/player.ts';
+import { ALL_FAMILIES } from './positions.ts';
 import {
     POTENTIAL_BAND,
     POTENTIAL_MEAN_GAP,
@@ -131,6 +132,42 @@ const CONTENDERS_PER_SHIRT: Record<CupoTrack, number> = {
     academia: 11,
     m20: 16,
 };
+
+/**
+ * CUÁNTA GENTE PELEA POR ESE CARRIL, EN TOTAL. Y por qué no es
+ * `shirts × CONTENDERS_PER_SHIRT`, que es lo que decía antes.
+ *
+ * ── El bug ──
+ * Con los aspirantes escalados por las camisetas, `shirts` se cancelaba:
+ *
+ *     porDelante = fractionAbove × (shirts × C)
+ *     entrás ⟺ porDelante < shirts ⟺ fractionAbove × C < 1 ⟺ fractionAbove < 1/C
+ *
+ * O sea que el corte era IDÉNTICO para las ocho familias y `SQUAD_SHAPE` no
+ * hacía nada. El comentario de arriba decía «un apertura pelea dos camisetas y
+ * un wing pelea cinco» y el código no lo cumplía: lo único que quedaba del
+ * puesto era el archirrival, que pesa más cuando hay pocas camisetas.
+ *
+ * Con la camada en un número FIJO por carril, el corte pasa a ser
+ * `shirts / N` y la escasez existe: el apertura pelea dos lugares en la misma
+ * fila en la que el wing pelea cinco.
+ *
+ * ── Por qué se deriva y no se escribe ──
+ * Para que este arreglo mida DISPERSIÓN y no NIVEL. `N = C × media(shirts)`
+ * deja la tasa de entrada promedio donde estaba —sobre una población uniforme
+ * en las ocho familias, que es como recorre el instrumento— y mueve solo el
+ * reparto entre puestos. Escrito a mano, el número se despegaría de
+ * `CONTENDERS_PER_SHIRT` en el primer ajuste y nadie sabría cuál manda.
+ *
+ * `CONTENDERS_PER_SHIRT` conserva su significado —cuán selectivo es el carril
+ * EN PROMEDIO— y `SQUAD_SHAPE` pasa a controlar el reparto. Dos perillas, dos
+ * efectos, sin superposición.
+ */
+export function cohortSize(track: CupoTrack): number {
+    let total = 0;
+    for (const family of ALL_FAMILIES) total += shirtsFor(track, family);
+    return CONTENDERS_PER_SHIRT[track] * (total / ALL_FAMILIES.length);
+}
 
 /**
  * QUÉ FRACCIÓN DE LA BANDA CONSTRUYE UN JUGADOR TÍPICO.
@@ -231,7 +268,7 @@ export function fitsInSquad(
     rivalOvr: number | null,
 ): boolean {
     const shirts = shirtsFor(track, family);
-    const aspirantes = shirts * CONTENDERS_PER_SHIRT[track];
+    const aspirantes = cohortSize(track);
     const curve = cohortCurve(startOvr, age);
 
     let porDelante = fractionAbove(ovr, curve) * aspirantes;
