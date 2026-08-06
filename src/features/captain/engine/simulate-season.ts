@@ -163,7 +163,7 @@ export function simulateSeason(state: CaptainState, rng: Rng): SeasonReport {
     // del PlaDAR sumaba un empuje acá, y era la única palanca que el jugador
     // tenía sobre esta escalera: se fue con las fichas y vuelve como
     // convocatoria jugable, que es donde tiene que estar.
-    const track = reachableTrack(player);
+    const track = reachableTrack(player, state.rival?.ovr ?? null);
     const caps = capsThisSeason(player, track, state.rival, rng);
 
     state.national.track = track;

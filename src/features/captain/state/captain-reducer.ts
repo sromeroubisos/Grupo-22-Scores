@@ -33,7 +33,13 @@ import type { CaptainAction } from './captain-actions.ts';
 import type { Rng } from '../engine/random.ts';
 
 import { CAPTAIN_ENGINE_VERSION } from '../types/captain.ts';
-import { START_AGE } from '../types/player.ts';
+import {
+    POTENTIAL_MAX_GAP,
+    POTENTIAL_MEAN_GAP,
+    POTENTIAL_MIN_GAP,
+    POTENTIAL_SD_GAP,
+    START_AGE,
+} from '../types/player.ts';
 import { MONEY_START, OVR_MAX } from '../types/currencies.ts';
 import { MATCH_BUCKETS, MATCH_CAP_PER_SEASON } from '../types/season.ts';
 import { CAPTAIN_POSITIONS_VERSION, baseAttributes, getFamily } from '../data/positions.ts';
@@ -52,22 +58,6 @@ import { resolveMoment, rollMoment } from '../engine/moments.ts';
 
 /** Cuánto puede desviarse un atributo de la plantilla al crear el jugador. */
 const BASE_SPREAD = 3;
-
-/**
- * El margen de crecimiento que se sortea al nacer.
- *
- * NORMAL Y NO UNIFORME, y esa es la decisión: con un sorteo plano entre +10 y
- * +34, la media de techo quedaba en 73 y el 45% de los pibes terminaba jugando
- * para la mayor. Está medido. Una campana centrada en +14 deja la media de
- * techo cerca de 65 y manda los 80 a la cola, que es donde viven.
- *
- * Que la mayoría de las carreras terminen en un club de barrio no es un defecto
- * del balance: es el rugby. Y es lo que hace que llegar signifique algo.
- */
-const POTENTIAL_MEAN_GAP = 14;
-const POTENTIAL_SD_GAP = 8;
-const POTENTIAL_MIN_GAP = 4;
-const POTENTIAL_MAX_GAP = 40;
 
 /**
  * Por qué se terminó la carrera. Son ids: la pantalla los traduce, así que

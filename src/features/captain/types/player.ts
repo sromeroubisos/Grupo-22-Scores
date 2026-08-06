@@ -91,6 +91,45 @@ export type CaptainStage = 'amateur' | 'professional';
 /** Edad a la que arranca cualquier carrera: el pibe que sube de M19 a primera. */
 export const START_AGE = 18;
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  EL MODELO GENERATIVO — de acá sale todo jugador que exista
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// ESTAS CONSTANTES NO SON TUNING. Describen de qué está hecha la población del
+// juego: cuánto margen de crecimiento se sortea al nacer y con qué dispersión.
+// Tocar una acá no ajusta una pantalla ni una dificultad: mueve la distribución
+// entera de jugadores, y con ella la escalera representativa, la vitrina y la
+// forma de la pirámide.
+//
+// ── Por qué viven acá y no en el reducer ──
+// Eran privadas de `captain-reducer.ts`, que es donde se sortea el jugador. Se
+// mudaron cuando entró la camada sintética (`data/cohort.ts`), que las LEE para
+// derivar contra quién competís. Esa lectura es lo que hace que los cupos no
+// sean un umbral disfrazado: si el modelo generativo se vuelve más generoso, la
+// camada se vuelve más generosa con él y el piso aguanta. Si estuvieran
+// escondidas en el reducer, la camada tendría que repetirlas a mano y las dos
+// copias se separarían en el primer ajuste.
+//
+// El corolario, y es la parte importante: CAMBIAR UNA DE ESTAS MUEVE LA CAMADA.
+// Es a propósito. No las "arregles" en un lado nada más.
+
+/** El margen de crecimiento que se sortea al nacer: media de la campana. */
+export const POTENTIAL_MEAN_GAP = 14;
+
+/**
+ * NORMAL Y NO UNIFORME, y esa es la decisión: con un sorteo plano entre +10 y
+ * +34, la media de techo quedaba en 73 y el 45% de los pibes terminaba jugando
+ * para la mayor. Está medido. Una campana centrada en +14 deja la media de techo
+ * cerca de 65 y manda los 80 a la cola, que es donde viven.
+ *
+ * Que la mayoría de las carreras terminen en un club de barrio no es un defecto
+ * del balance: es el rugby. Y es lo que hace que llegar signifique algo.
+ */
+export const POTENTIAL_SD_GAP = 8;
+
+export const POTENTIAL_MIN_GAP = 4;
+export const POTENTIAL_MAX_GAP = 40;
+
 /**
  * Cuánto techo se puede construir encima del material sorteado.
  *

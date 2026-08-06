@@ -18,6 +18,9 @@ import type { CaptainPlayer, PositionFamilyId } from '../types/player.ts';
 import type { NationalRecord, Rival, SquadTrack } from '../types/captain.ts';
 import type { Rng } from './random.ts';
 import { SQUAD_TRACKS } from '../types/captain.ts';
+import { fitsInSquad, isCupoTrack } from '../data/cohort.ts';
+import { baseAttributes } from '../data/positions.ts';
+import { ovrFromAttributes } from './ovr.ts';
 import { hasUnion, unionReputation } from '../data/catalogs.ts';
 import { FIRST_NAMES, SURNAMES } from '../data/names.ts';
 
@@ -107,13 +110,25 @@ export function thresholdFor(track: Exclude<SquadTrack, 'club'>, player: Captain
  * el M20 si ya está en la mayor. Sin unión —hay países sin federación— no hay
  * escalera y te quedás en el club, que es la verdad y no un castigo.
  */
-export function reachableTrack(player: CaptainPlayer): SquadTrack {
+export function reachableTrack(player: CaptainPlayer, rivalOvr: number | null = null): SquadTrack {
     if (!hasUnion(player.countryCode)) return 'club';
 
     const escalones: Exclude<SquadTrack, 'club'>[] = ['nacional', 'a-xv', 'm20', 'academia', 'union'];
     for (const track of escalones) {
         const ventana = AGE_WINDOW[track];
         if (ventana && (player.age < ventana[0] || player.age > ventana[1])) continue;
+
+        // Los tres de abajo son CUPOS: hay treinta camisetas de Pumitas y no
+        // infinitas, así que no alcanza con superar un número — hay que estar
+        // entre los mejores de tu camada EN TU PUESTO. Los dos de arriba siguen
+        // por umbral a propósito: el techo del juego ya está en objetivo y el
+        // problema medido era el piso (`data/cohort.ts`).
+        if (isCupoTrack(track)) {
+            const arranque = ovrFromAttributes(player.family, baseAttributes(player.family));
+            if (fitsInSquad(track, player.family, player.ovr, arranque, player.age, rivalOvr)) return track;
+            continue;
+        }
+
         if (player.ovr >= thresholdFor(track, player)) return track;
     }
     return 'club';
