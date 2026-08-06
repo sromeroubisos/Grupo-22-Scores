@@ -360,6 +360,15 @@ test('ESTRUCTURA: ninguna vía de la escalera queda vacía', () => {
         + 'por encima del corte del escalón de ARRIBA, así que no se evalúa jamás.\n'
         + `Carreras que pisaron cada vía, de ${NORMAL.length}: ${detalle}`,
     );
+
+    // El embudo, POR CARRERA. Se imprime siempre porque es la lectura que ningún
+    // agregado da: `mejorTrack` esconde a los que pasaron y siguieron, y contar
+    // temporadas mezcla vías de una sola temporada con vías de doce.
+    console.log(
+        `      · pisan cada vía: ${SQUAD_TRACKS.map(
+            (t) => `${t}=${(pisadas.get(t)! / NORMAL.length).toFixed(3)}`,
+        ).join(' · ')}`,
+    );
 });
 
 test('ningún puesto queda afuera de la selección', () => {
