@@ -471,15 +471,15 @@ test('la tasa de llegada al seleccionado cae en una banda, y el esfuerzo la muev
     // │ jugador cualquiera del barrido. Dos indicadores que no comparten       │
     // │ código apuntando a lo mismo.                                           │
     // │                                                                        │
-    // │ NO SE SABE CUÁL DE LAS DOS COSAS ES:                                   │
-    // │   a) el techo construido empuja a todos por encima del umbral, o       │
-    // │   b) la escalera representativa SIEMPRE fue blanda y recién ahora se   │
-    // │      nota, porque antes nadie llegaba lo bastante alto como para       │
-    // │      probarla.                                                          │
+    // │ MEDIDO: son las dos cosas. El piso existía (0,15 en 0.6.0) y lo tiró   │
+    // │ `built`, pero 0,15 tampoco era un piso — el 85% ya pisaba un carril.   │
+    // │ Los umbrales nunca filtraron. La tabla completa está en la caja de     │
+    // │ `calibration.test.ts`, test de la pirámide.                            │
     // │                                                                        │
-    // │ Arreglarlo ahora sería elegir una de las dos sin evidencia. PRIMERA    │
-    // │ MEDICIÓN A CORRER CUANDO CIERREN LOS QUINCE MOMENTOS.                  │
+    // │ ARREGLO DECIDIDO: cupos en vez de umbrales. Esta banda vuelve a bajar  │
+    // │ cuando entren, y ahí se reautoriza contra la premisa.                  │
     // └───────────────────────────────────────────────────────────────────────┘
+    // ALARMA-VIVA: los carriles son umbrales y no cupos — pisar la representativa dejó de ser raro
     assert.ok(entregado < 0.99, `pisar la representativa dejó de ser raro: ${detalle}`);
     assert.ok(entregado >= tibio, `entregarse no ayuda a llegar: ${detalle}`);
 

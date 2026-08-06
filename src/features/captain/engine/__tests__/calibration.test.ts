@@ -244,12 +244,28 @@ test('la pirámide: llegar a la mayor es raro', () => {
     // │ como si fuera el objetivo. Este rojo es la mejor señal que tenemos y   │
     // │ se deja prendido hasta que se investigue.                              │
     // │                                                                        │
-    // │ Sigue sin saberse si es el techo construido empujando a todos por      │
-    // │ encima del umbral, o si la escalera siempre fue blanda y recién ahora  │
-    // │ se nota porque antes nadie llegaba lo bastante alto como para probarla.│
-    // │ PRIMERA MEDICIÓN CUANDO CIERREN LOS QUINCE MOMENTOS.                   │
+    // │ YA SE MIDIÓ CUÁL DE LAS DOS ERA, y son las dos:                        │
+    // │                                                                        │
+    // │                           mayor    M20+    solo club                   │
+    // │   0.6.0, antes de todo    0,100    0,200     0,150                     │
+    // │   0.8.0 con built OFF     0,037    0,169     0,169                     │
+    // │   0.8.0 como está         0,200    0,506     0,013                     │
+    // │                                                                        │
+    // │ El piso EXISTÍA y lo tiró `built` — los dos controles caen adentro de  │
+    // │ la banda y solo el tercero la revienta. Pero 0,15 tampoco era un piso: │
+    // │ el 85% YA pisaba un carril antes de todo esto, y esta banda lo daba    │
+    // │ por bueno. Los umbrales nunca filtraron; bastó subir los techos seis   │
+    // │ puntos para que pasara el 99%.                                         │
+    // │                                                                        │
+    // │ ARREGLO DECIDIDO: cupos en vez de umbrales. Un carril deja de ser      │
+    // │ "OVR > X" y pasa a ser "los mejores N de tu camada", contra una curva  │
+    // │ sintética versionada. El piso vuelve por construcción y no se rompe    │
+    // │ cuando se mueva otra cosa, porque el número de camisetas no depende de │
+    // │ cuánto crezca nadie.                                                   │
     // └───────────────────────────────────────────────────────────────────────┘
+    // ALARMA-VIVA: la base de la pirámide se cayó — los carriles del medio no filtran a nadie
     entre(proporcion(NORMAL, (r) => ['m20', 'a-xv', 'nacional'].includes(r.mejorTrack)), 0.1, 0.35, 'llegan a M20 o más');
+    // ALARMA-VIVA: la base de la pirámide se cayó — la carrera modal del rugby dejó de existir
     entre(proporcion(NORMAL, (r) => r.mejorTrack === 'club'), 0.12, 0.45, 'nunca salen del club');
 });
 
