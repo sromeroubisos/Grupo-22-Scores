@@ -43,6 +43,20 @@ export function normalizeUrl(value: any): string | null {
     return s;
   }
 
+  // Ruta desde la raíz del sitio: `/competiciones/ar-urba.png`.
+  //
+  // Sin esta línea caía en el `https://` de abajo y salía `https:///competiciones/
+  // ar-urba.png`, que no carga en ningún lado — y no falla ruidosamente, sólo
+  // queda el escudo roto. Un `/` inicial NUNCA es un dominio, así que la
+  // excepción no le quita nada al caso que la función vino a resolver
+  // (pegar `https://` a un `www.club.com` escrito a mano).
+  //
+  // Importa acá y no sólo en logos: `normalizeLogoUrl` de logoUrl.ts termina en
+  // esta función, y por ahí pasa el `logo_url` de todo torneo y todo club.
+  if (s.startsWith('/') && !s.startsWith('//')) {
+    return s;
+  }
+
   // Empieza con www.
   if (s.startsWith('www.')) {
     return `https://${s}`;
