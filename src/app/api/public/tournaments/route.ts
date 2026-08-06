@@ -24,16 +24,17 @@ import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 import { isTournamentVisibleToPublic } from '@/lib/tournamentReview';
+import { ocultarGradosSubordinados } from '@/lib/tournamentNavigation';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const RUGBY_SPORT_IDS = ['rugby', 'rugby-union', 'rugby-league'];
 const RUGBY_FLASHSCORE_SPORT_KEY = 'rugby';
-const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, priority, category, age_grade';
-const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, priority, category, age_grade';
-const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, category, age_grade';
-const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, category, age_grade';
+const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, priority, category, age_grade, subcategory, season_id, gender';
+const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, priority, category, age_grade, subcategory, season_id, gender';
+const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, category, age_grade, subcategory, season_id, gender';
+const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, category, age_grade, subcategory, season_id, gender';
 const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITH_LEGACY_SPORT_AND_PRIORITY}, review_status`;
 const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY}, review_status`;
 const SELECT_WITH_LEGACY_SPORT_REVIEW = `${SELECT_WITH_LEGACY_SPORT}, review_status`;
@@ -76,6 +77,11 @@ type PublicTournamentRow = {
     priority: number | null;
     category: string | null;
     age_grade: string | null;
+    /** El grado. Decide si el torneo es reserva y si va al listado o al desplegable. */
+    subcategory: string | null;
+    /** Las tres, junto con category y age_grade, forman la división de un torneo. */
+    season_id: string | null;
+    gender: string | null;
 };
 
 type PublicTournamentQueryResult = {
@@ -876,9 +882,21 @@ function filterPublicDbTournaments(args: {
 }): PublicDbTournamentListItem[] {
     const countryFilterValues = buildCountryFilterLookupValues(args.countryFilter);
 
-    return sortTournamentsByPriority(args.tournaments
+    // Intermedia y Preintermedia son GRADOS de una división de mayores, no
+    // competencias sueltas: se llegan desde el desplegable del torneo. Sin esto,
+    // el Top 14 ocupa ocho entradas de la portada.
+    //
+    // Se sacan de la vista general y de la de mayores, PERO NO de la de
+    // juveniles/reserva, que es adonde pertenecen (`resolveTournamentAudience`
+    // los manda ahí). Si se filtraran también en esa vista no habría dónde verlos.
+    //
+    // Se aplica sobre las filas ya visibles para que la condición "su Superior
+    // está en la lista" mire el mismo conjunto que se va a mostrar.
+    const visibles = args.tournaments.filter((tournament) => isTournamentVisibleToPublic(tournament));
+    const base = args.audience === 'juveniles' ? visibles : ocultarGradosSubordinados(visibles);
+
+    return sortTournamentsByPriority(base
         .filter((tournament) => {
-            if (!isTournamentVisibleToPublic(tournament)) return false;
 
             const normalizedSport = tournament.sport_id || tournament.legacy_sport || 'rugby';
             if (!args.sportFilter.includes(normalizedSport)) return false;
@@ -889,7 +907,12 @@ function filterPublicDbTournaments(args: {
 
             if (
                 args.audience !== 'all' &&
-                resolveTournamentAudience({ ageGrade: tournament.age_grade, category: tournament.category }) !== args.audience
+                resolveTournamentAudience({
+                    ageGrade: tournament.age_grade,
+                    category: tournament.category,
+                    // La reserva (Intermedia / Preintermedia) va con juveniles.
+                    subcategory: tournament.subcategory,
+                }) !== args.audience
             ) {
                 return false;
             }
