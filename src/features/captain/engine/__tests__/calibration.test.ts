@@ -20,6 +20,7 @@ import assert from 'node:assert/strict';
 import type { CaptainState, CreateCaptainInput, SquadTrack } from '../../types/captain.ts';
 import { trainingsFor } from '../../data/trainings.ts';
 import type { MomentOutcome } from '../../types/moment.ts';
+import type { PositionFamilyId } from '../../types/player.ts';
 import { ALL_FAMILIES } from '../../data/positions.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
 import { getPendingEvent } from '../event-selector.ts';
@@ -81,11 +82,35 @@ function trabada(state: CaptainState, donde: string): never {
 }
 
 /**
- * La carta del jugador normal: la primera del catálogo de su puesto, que es la
- * del oficio principal. Es la elección más obvia y por eso es la de referencia:
- * el barrido mide el motor, no la astucia de quien lo juega.
+ * La carta del jugador normal, ELEGIDA POR TIER Y NO POR ÍNDICE.
+ *
+ * ── El bicho que hace que esto sea `'media'` y no `0` ──
+ * Decía `const CARTA = 0` con el comentario «la primera del catálogo, que es la
+ * del oficio principal, la elección más obvia». Era cierto cuando las cuatro
+ * cartas repartían el mismo presupuesto y solo cambiaba dónde caían los puntos.
+ *
+ * Cuando el catálogo se reescribió con tamaño y costo propios, el índice 0 pasó
+ * a ser LA CARA: la más cara de todas, la que construye el techo más rápido y la
+ * que se paga con cuerpo, minutos y riesgo. El comentario siguió diciendo "la
+ * elección más obvia" y nadie lo leyó de nuevo. Resultado: la pirámide se estuvo
+ * midiendo con CIENTO SESENTA jugadores maximizando el compromiso todas las
+ * temporadas de su carrera, y llamando a eso "el jugador normal".
+ *
+ * Es el modo de fallo exacto que este archivo ya conocía —el `default` que
+ * mandaba un tackle a un Momento nuevo— con otra ropa: el instrumento se
+ * desalinea del mundo y sigue devolviendo números que parecen sanos.
+ *
+ * Por eso ahora se pide por TIER. Un reordenamiento del catálogo no puede
+ * cambiar en silencio a quién estamos midiendo, y si una familia dejara de
+ * ofrecer una media, el barrido falla con un mensaje en vez de medir otra cosa.
  */
-const CARTA = 0;
+const CARTA_TIER = 'media';
+
+function cartaDeReferencia(family: PositionFamilyId): string {
+    const elegida = trainingsFor(family).find((t) => t.tier === CARTA_TIER);
+    assert.ok(elegida, `${family} no ofrece ninguna carta '${CARTA_TIER}': el barrido mediría otra cosa`);
+    return elegida.id;
+}
 
 interface Resultado {
     family: string;
@@ -114,7 +139,7 @@ function jugar(seed: number, family: (typeof ALL_FAMILIES)[number], fiel: boolea
 
     while (s.phase !== 'retired') {
         if (vuelta >= 60) trabada(s, `${family} con semilla ${seed}`);
-        s = captainReducer(s, { type: 'CHOOSE_TRAINING', trainingId: trainingsFor(s.player.family)[CARTA].id });
+        s = captainReducer(s, { type: 'CHOOSE_TRAINING', trainingId: cartaDeReferencia(s.player.family) });
 
         // La jugada decisiva, si la hay. El tackle alto encadena el bunker, así
         // que se insiste hasta salir de la fase. El jugador de referencia hace
