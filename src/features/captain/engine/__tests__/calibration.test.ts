@@ -223,8 +223,8 @@ const FIEL = muestra(true);
 test('una carrera dura lo que dura una carrera de rugby', () => {
     // La media real es de 12,7 ± 3,6 años. Que el juego se le parezca es lo que
     // hace que las curvas de edad por puesto signifiquen algo.
-    entre(media(NORMAL, (r) => r.temporadas), 11, 17, 'temporadas por carrera');
-    entre(media(NORMAL, (r) => r.edad), 30, 35, 'edad de retiro');
+    entre(media(NORMAL, (r) => r.temporadas), 11, 16, 'temporadas por carrera');
+    entre(media(NORMAL, (r) => r.edad), 30, 34, 'edad de retiro');
 });
 
 test('la pirámide: llegar a la mayor es raro', () => {
@@ -242,55 +242,40 @@ test('la pirámide: llegar a la mayor es raro', () => {
     entre(proporcion(NORMAL, (r) => r.mejorTrack === 'nacional'), 0.1, 0.3, 'llegan a la mayor');
 
     // ┌───────────────────────────────────────────────────────────────────────┐
-    // │ ESTAS DOS BANDAS NO SE MOVIERON, Y EL ROJO ES A PROPÓSITO              │
+    // │ LA BASE NO SE CAYÓ: SE EROSIONÓ. Y el susto era el instrumento.        │
     // │                                                                        │
-    // │ No es deriva ni es una banda vieja: LA BASE DE LA PIRÁMIDE SE CAYÓ.    │
-    // │ Medido con el techo partido en material + construido:                  │
-    // │                                                                        │
-    // │   llegan a la mayor      0,20   ← en el objetivo del doc (15-25%)      │
-    // │   llegan a M20 o más     0,51   ← banda [0,10 – 0,35]                  │
-    // │   nunca salen del club   0,01   ← banda [0,12 – 0,45]                  │
-    // │                                                                        │
-    // │ El techo del juego está donde tiene que estar. Lo que desapareció es   │
-    // │ el PISO: el 99% de las carreras pisa algún escalón representativo, y   │
-    // │ los carriles del medio —M20, A-XV— se tragaron a todo el mundo. En     │
-    // │ rugby de verdad la carrera modal es no salir nunca del club, y es      │
-    // │ justamente la que este juego quiere poder contar.                      │
-    // │                                                                        │
-    // │ CUARTA SEÑAL, y las cuatro no comparten código:                        │
-    // │   1. barrido de agencia — 97,2% pisa el carril representativo          │
-    // │   2. digest congelado  — el apertura pasó de 13 caps a 63              │
-    // │   3. este              — 51% llega a M20 o más                         │
-    // │   4. este              — 1% nunca sale del club                        │
-    // │                                                                        │
-    // │ POR QUÉ NO SE REBANDEAN: para que 0,01 entre habría que abrir el piso  │
-    // │ a 0, y una banda que afirma `>= 0` no afirma nada. Sería exactamente   │
-    // │ el error que estas bandas acaban de detectar: codificar el mundo roto  │
-    // │ como si fuera el objetivo. Este rojo es la mejor señal que tenemos y   │
-    // │ se deja prendido hasta que se investigue.                              │
-    // │                                                                        │
-    // │ YA SE MIDIÓ CUÁL DE LAS DOS ERA, y son las dos:                        │
+    // │ Este bloque decía que la base de la pirámide se había derrumbado —1%   │
+    // │ nunca salía del club, 51% llegaba a M20— y estaba mal. Esos números    │
+    // │ salieron de un barrido donde la carta de referencia era LA CARA, o sea │
+    // │ 160 jugadores maximizando el compromiso todas las temporadas. Con la   │
+    // │ carta media, que es lo que hace un jugador normal:                     │
     // │                                                                        │
     // │                           mayor    M20+    solo club                   │
     // │   0.6.0, antes de todo    0,100    0,200     0,150                     │
-    // │   0.8.0 con built OFF     0,037    0,169     0,169                     │
-    // │   0.8.0 como está         0,200    0,506     0,013                     │
+    // │   0.8.0 con built OFF     0,044    0,169     0,169                     │
+    // │   0.8.0 hoy               0,150    0,325     0,119                     │
     // │                                                                        │
-    // │ El piso EXISTÍA y lo tiró `built` — los dos controles caen adentro de  │
-    // │ la banda y solo el tercero la revienta. Pero 0,15 tampoco era un piso: │
-    // │ el 85% YA pisaba un carril antes de todo esto, y esta banda lo daba    │
-    // │ por bueno. Los umbrales nunca filtraron; bastó subir los techos seis   │
-    // │ puntos para que pasara el 99%.                                         │
+    // │ `built` erosiona la base de 0,150 a 0,119. Es real y es modesto: la    │
+    // │ banda se rompe por una milésima, no por un orden de magnitud.          │
     // │                                                                        │
-    // │ ARREGLO DECIDIDO: cupos en vez de umbrales. Un carril deja de ser      │
-    // │ "OVR > X" y pasa a ser "los mejores N de tu camada", contra una curva  │
+    // │ LO QUE SÍ SOBREVIVE, y es lo que importa: 0,15 TAMPOCO ERA UN PISO.    │
+    // │ El 85% ya pisaba un carril representativo antes de todo esto, y esta   │
+    // │ banda lo daba por bueno sin avisar nunca. La premisa del juego —~500   │
+    // │ clubes, 100.000 fichados, la mayoría NO SALE— nunca estuvo en el motor.│
+    // │ El problema no es que algo se rompió: es que esto nunca se modeló.     │
+    // │                                                                        │
+    // │ CAUSA ESTRUCTURAL: `reachableTrack` es `player.ovr >= thresholdFor()`, │
+    // │ un umbral puro. Todo el que pasa entra, así que cuando la distribución │
+    // │ sube entran todos y el piso se erosiona solo. Un plantel de Pumitas    │
+    // │ son ~30 camisetas, no "todos los que superen 67".                      │
+    // │                                                                        │
+    // │ ARREGLO PROPUESTO: cupos en vez de umbrales, contra una curva          │
     // │ sintética versionada. El piso vuelve por construcción y no se rompe    │
     // │ cuando se mueva otra cosa, porque el número de camisetas no depende de │
     // │ cuánto crezca nadie.                                                   │
     // └───────────────────────────────────────────────────────────────────────┘
-    // ALARMA-VIVA: la base de la pirámide se cayó — los carriles del medio no filtran a nadie
     entre(proporcion(NORMAL, (r) => ['m20', 'a-xv', 'nacional'].includes(r.mejorTrack)), 0.1, 0.35, 'llegan a M20 o más');
-    // ALARMA-VIVA: la base de la pirámide se cayó — la carrera modal del rugby dejó de existir
+    // ALARMA-VIVA: los carriles son umbrales y no cupos — la carrera modal del rugby casi no existe
     entre(proporcion(NORMAL, (r) => r.mejorTrack === 'club'), 0.12, 0.45, 'nunca salen del club');
 });
 
@@ -347,8 +332,8 @@ test('el vitalicio es un final, no un trámite', () => {
 test('la conmoción no es rutina ni es imposible', () => {
     // Si le pasa a todos, deja de significar algo y el dilema de declararla se
     // vuelve decorativo. Si no le pasa a nadie, el sistema es un adorno.
-    entre(proporcion(NORMAL, (r) => r.cabeza === 0), 0.03, 0.3, 'se retiran sin una sola conmoción');
-    entre(media(NORMAL, (r) => r.cabeza) / 12, 1, 4.5, 'HIA positivos por carrera');
+    entre(proporcion(NORMAL, (r) => r.cabeza === 0), 0.03, 0.2, 'se retiran sin una sola conmoción');
+    entre(media(NORMAL, (r) => r.cabeza) / 12, 1.5, 3.5, 'HIA positivos por carrera');
 });
 
 test('hay vitrina, pero no se regala', () => {
