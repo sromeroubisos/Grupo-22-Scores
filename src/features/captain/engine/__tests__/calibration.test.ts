@@ -203,7 +203,52 @@ test('una carrera dura lo que dura una carrera de rugby', () => {
 });
 
 test('la pirámide: llegar a la mayor es raro', () => {
-    entre(proporcion(NORMAL, (r) => r.mejorTrack === 'nacional'), 0.03, 0.18, 'llegan a la mayor');
+    // ── LA BANDA VIEJA CODIFICABA EL MUNDO ROTO ──
+    // Era [0,03 – 0,18] y se calibró cuando el juego daba 4%: describía el estado
+    // de entonces, no el objetivo. Y el objetivo estaba escrito desde el principio
+    // en `docs/el-capitan-formacion.md` §2 — «15-25% de carreras con al menos un
+    // cap, ~5% con 20+», y explícitamente «alcanzado por decisión y no por bajar
+    // la barra».
+    //
+    // Con el techo partido en material + construido, la medición dio 0,20. Eso NO
+    // es una regresión: es el destino, y cae adentro del 15-25% que el doc pedía.
+    // La banda se sube para que afirme el objetivo y no la foto de un motor que
+    // todavía no tenía cómo llegar.
+    entre(proporcion(NORMAL, (r) => r.mejorTrack === 'nacional'), 0.1, 0.3, 'llegan a la mayor');
+
+    // ┌───────────────────────────────────────────────────────────────────────┐
+    // │ ESTAS DOS BANDAS NO SE MOVIERON, Y EL ROJO ES A PROPÓSITO              │
+    // │                                                                        │
+    // │ No es deriva ni es una banda vieja: LA BASE DE LA PIRÁMIDE SE CAYÓ.    │
+    // │ Medido con el techo partido en material + construido:                  │
+    // │                                                                        │
+    // │   llegan a la mayor      0,20   ← en el objetivo del doc (15-25%)      │
+    // │   llegan a M20 o más     0,51   ← banda [0,10 – 0,35]                  │
+    // │   nunca salen del club   0,01   ← banda [0,12 – 0,45]                  │
+    // │                                                                        │
+    // │ El techo del juego está donde tiene que estar. Lo que desapareció es   │
+    // │ el PISO: el 99% de las carreras pisa algún escalón representativo, y   │
+    // │ los carriles del medio —M20, A-XV— se tragaron a todo el mundo. En     │
+    // │ rugby de verdad la carrera modal es no salir nunca del club, y es      │
+    // │ justamente la que este juego quiere poder contar.                      │
+    // │                                                                        │
+    // │ CUARTA SEÑAL, y las cuatro no comparten código:                        │
+    // │   1. barrido de agencia — 97,2% pisa el carril representativo          │
+    // │   2. digest congelado  — el apertura pasó de 13 caps a 63              │
+    // │   3. este              — 51% llega a M20 o más                         │
+    // │   4. este              — 1% nunca sale del club                        │
+    // │                                                                        │
+    // │ POR QUÉ NO SE REBANDEAN: para que 0,01 entre habría que abrir el piso  │
+    // │ a 0, y una banda que afirma `>= 0` no afirma nada. Sería exactamente   │
+    // │ el error que estas bandas acaban de detectar: codificar el mundo roto  │
+    // │ como si fuera el objetivo. Este rojo es la mejor señal que tenemos y   │
+    // │ se deja prendido hasta que se investigue.                              │
+    // │                                                                        │
+    // │ Sigue sin saberse si es el techo construido empujando a todos por      │
+    // │ encima del umbral, o si la escalera siempre fue blanda y recién ahora  │
+    // │ se nota porque antes nadie llegaba lo bastante alto como para probarla.│
+    // │ PRIMERA MEDICIÓN CUANDO CIERREN LOS QUINCE MOMENTOS.                   │
+    // └───────────────────────────────────────────────────────────────────────┘
     entre(proporcion(NORMAL, (r) => ['m20', 'a-xv', 'nacional'].includes(r.mejorTrack)), 0.1, 0.35, 'llegan a M20 o más');
     entre(proporcion(NORMAL, (r) => r.mejorTrack === 'club'), 0.12, 0.45, 'nunca salen del club');
 });
@@ -225,7 +270,12 @@ test('los picos de media son parejos entre puestos', () => {
     const picos = ALL_FAMILIES.map((f) => media(NORMAL.filter((r) => r.family === f), (r) => r.pico));
     const spread = Math.max(...picos) - Math.min(...picos);
     entre(spread, 0, 4, 'diferencia de pico entre el mejor y el peor puesto');
-    entre(media(NORMAL, (r) => r.pico), 60, 71, 'pico de media');
+    // Sube de [60, 71] a [60, 76] por aritmética y no por diseño: el techo ahora
+    // es material MÁS lo construido, así que el pico medio de la población se
+    // corre hacia arriba en cuanto alguien construye. Medido: 72,88.
+    // Lo que este test protege es el SPREAD entre puestos —que elegir puesto sea
+    // estilo y no poder—, y ese no se movió.
+    entre(media(NORMAL, (r) => r.pico), 60, 76, 'pico de media');
 });
 
 test('las dos escaleras se pelean de verdad', () => {

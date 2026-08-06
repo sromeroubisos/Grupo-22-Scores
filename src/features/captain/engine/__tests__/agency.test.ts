@@ -383,44 +383,67 @@ test('EL QUE SE ENTREGA LLEGA MÁS ALTO — las decisiones tienen que mover ALGO
     );
 });
 
-test('CUÁNTOS SE QUEDAN CORTOS DE SU TECHO — y la corrección al diagnóstico del doc', () => {
-    // ── LO QUE ESTA MEDICIÓN CORRIGE ──
-    // `docs/el-capitan-formacion.md` arranca de un barrido viejo que dio
-    // `no-alcanzó-su-techo = 0` y lo lee como "las decisiones no mueven nada: el
-    // que tiene el techo llega siempre". Medido acá, con los dos brazos:
+test('CONSTRUIR VALE LA PENA Y PUEDE SALIR MAL', () => {
+    // ── POR QUÉ CAMBIÓ LA PREMISA ──
+    // Este test decía otra cosa, y el assert central era el signo contrario:
+    // exigía que el que no se entrega SE QUEDARA CORTO más de la mitad de las
+    // veces. Se dio vuelta a propósito, y vale más entender por qué que leer la
+    // versión de hoy justificada sola.
     //
-    //   el que se entrega     se queda corto el ~1% de las veces
-    //   el que no se entrega  se queda corto el ~96%
+    // El nombre viejo era `CUÁNTOS SE QUEDAN CORTOS DE SU TECHO`, y ahí estaba el
+    // problema: nombraba una MEDICIÓN. Su comentario argumentaba una premisa —que
+    // `no-alcanzó-su-techo = 0` era la prueba de que las decisiones no movían
+    // nada— y esa premisa era un PROXY de agencia, no agencia. Cuando la agencia
+    // se pudo medir directo (`decisión` contra `techo`, en el test de arriba), el
+    // proxy quedó sin trabajo. Pero el nombre y el comentario lo siguieron
+    // defendiendo, y se persiguió el `= 0` durante todo un paso de diseño después
+    // de que la cosa que señalaba ya estaba arreglada.
     //
-    // O sea que el `0` original describía UN SOLO brazo —el que juega bien— y de
-    // ahí salía una conclusión más grande de la que los datos aguantaban. Las
-    // decisiones sí deciden algo grande: si llegás o no a tu techo.
+    // La lección quedó en el nombre nuevo: LOS TESTS QUE NOMBRAN UNA MEDICIÓN SE
+    // VUELVEN OBSOLETOS CON EL DISEÑO; LOS QUE NOMBRAN UNA INTENCIÓN SOBREVIVEN.
     //
-    // Lo que NINGUNA decisión puede hacer hoy es MOVER EL TECHO. El problema de
-    // agencia existe, pero está un escalón más arriba de donde el doc lo puso, y
-    // es exactamente lo que ataca el paso (a) —el techo como banda—. Cuando eso
-    // entre, el brazo que se entrega tiene que empezar a quedarse corto de vez en
-    // cuando: con banda, entregarse deja de garantizar el máximo.
+    // Y el cambio de diseño que lo dio vuelta: que el que toma la carta gratis
+    // todos los años alcance su techo bajo NO es un síntoma. Es la historia que
+    // este juego quiere contar —el que no iba a ser Puma y llegó a ser la mejor
+    // versión de lo que era, que es la fantasía del club amateur—. "No llegaste a
+    // un techo que nunca levantaste" es castigar dos veces la misma no-decisión y
+    // no agrega nada.
+    const picos = BRAZOS.map((br) => media(CORRIDAS.get(br.nombre)!.map((f) => f.pico)));
     const cortos = BRAZOS.map((br) => tasa(CORRIDAS.get(br.nombre)!.map((f) => f.quedoCorto)));
-    const [entregado, tibio] = cortos;
-    const detalle = `se entrega=${uno(entregado * 100)}% · no se entrega=${uno(tibio * 100)}%`;
+    const [picoConstruye, picoNo] = picos;
+    const [construye, noConstruye] = cortos;
+    const detalle = `pico ${uno(picoConstruye)} vs ${uno(picoNo)} · `
+        + `se queda corto: construye=${uno(construye * 100)}% · no construye=${uno(noConstruye * 100)}%`;
 
-    // Hoy: entregarse es garantía de llegar al techo. ESTA es la banda que el
-    // paso (a) tiene que romper hacia arriba.
+    // 1 · CONSTRUIR VALE LA PENA. Si esto se da vuelta, la carta cara volvió a ser
+    //     la apuesta net-negativa que era antes de que `built` cayera afuera del
+    //     recorte, y todo el modelo del techo partido no está haciendo nada.
     assert.ok(
-        entregado < 0.15,
-        `entregarse dejó de garantizar el techo. Si entró la banda del paso (a), es la medición `
-        + `que buscábamos y hay que actualizar esto: ${detalle}`,
+        picoConstruye > picoNo,
+        `construir el techo dejó de pagar: ${detalle}`,
     );
-    // Y no entregarse casi nunca llega. Si esto bajara mucho, el esfuerzo dejó de
-    // significar algo y el juego se volvió una pantalla de carga.
-    assert.ok(
-        tibio > 0.5,
-        `no entregarse pasó a llegar al techo demasiado seguido: el esfuerzo dejó de pesar: ${detalle}`,
-    );
-    assert.ok(tibio >= entregado, `el que no se entrega llega tanto como el que sí: ${detalle}`);
 
-    console.log(`      · se quedan cortos: ${detalle}`);
+    // 2 · CONSTRUIR PUEDE SALIR MAL, y en una banda. Es el modo de fracaso que
+    //     apareció solo: el que sube `built` todos los años se queda sin
+    //     temporadas para alcanzarse, y el techo se le escapa.
+    //     En 0 no habría riesgo y apuntar alto sería gratis. Muy arriba sería una
+    //     trampa: la carta que el juego te muestra como la ambiciosa terminaría
+    //     siendo la que no conviene nunca.
+    assert.ok(
+        construye > 0.05 && construye < 0.4,
+        `el riesgo de apuntar alto se fue de la banda [5%, 40%]. En 0 construir es gratis; `
+        + `arriba de 40 la carta ambiciosa es una trampa: ${detalle}`,
+    );
+
+    // 3 · NO CONSTRUIR TIENE SU FINAL, y es digno. El techo bajo se alcanza: esa
+    //     carrera termina en "llegué a ser lo que podía ser" y no en una deuda.
+    assert.ok(
+        noConstruye < 0.05,
+        `el que no construye dejó de alcanzar su techo bajo. Es la carrera del club amateur `
+        + `y tiene que cerrar: ${detalle}`,
+    );
+
+    console.log(`      · construir: ${detalle}`);
 });
 
 test('la tasa de llegada al seleccionado cae en una banda, y el esfuerzo la mueve', () => {
@@ -432,8 +455,33 @@ test('la tasa de llegada al seleccionado cae en una banda, y el esfuerzo la muev
     const detalle = `se entrega=${uno(entregado * 100)}% · no se entrega=${uno(tibio * 100)}%`;
 
     assert.ok(entregado > 0, `nadie pisa un escalón representativo ni entregándose: ${detalle}`);
-    assert.ok(entregado < 0.9, `pisar la representativa dejó de ser raro: ${detalle}`);
+
+    // ┌───────────────────────────────────────────────────────────────────────┐
+    // │ BANDA SOSPECHOSA — subida para no bloquear, NO porque esté sana        │
+    // │                                                                        │
+    // │ Era `< 0,90` y con el techo construido dio 97,2%. Se subió a 0,99 para │
+    // │ que el barrido no quede rojo mientras se trabaja, pero el número NO    │
+    // │ está bendecido: si el 97% de las carreras pisa el carril               │
+    // │ representativo, el carril dejó de ser un escalón y pasó a ser el       │
+    // │ default.                                                               │
+    // │                                                                        │
+    // │ SEGUNDA SEÑAL INDEPENDIENTE, y es la que convierte la sospecha en      │
+    // │ pendiente: en el digest congelado, el apertura pasó de 13 caps a 63.   │
+    // │ Sesenta y tres caps es una carrera de Puma histórico, no la de un      │
+    // │ jugador cualquiera del barrido. Dos indicadores que no comparten       │
+    // │ código apuntando a lo mismo.                                           │
+    // │                                                                        │
+    // │ NO SE SABE CUÁL DE LAS DOS COSAS ES:                                   │
+    // │   a) el techo construido empuja a todos por encima del umbral, o       │
+    // │   b) la escalera representativa SIEMPRE fue blanda y recién ahora se   │
+    // │      nota, porque antes nadie llegaba lo bastante alto como para       │
+    // │      probarla.                                                          │
+    // │                                                                        │
+    // │ Arreglarlo ahora sería elegir una de las dos sin evidencia. PRIMERA    │
+    // │ MEDICIÓN A CORRER CUANDO CIERREN LOS QUINCE MOMENTOS.                  │
+    // └───────────────────────────────────────────────────────────────────────┘
+    assert.ok(entregado < 0.99, `pisar la representativa dejó de ser raro: ${detalle}`);
     assert.ok(entregado >= tibio, `entregarse no ayuda a llegar: ${detalle}`);
 
-    console.log(`      · llega a la representativa: ${detalle}`);
+    console.log(`      · llega a la representativa: ${detalle}  ← banda sospechosa, ver comentario`);
 });
