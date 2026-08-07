@@ -22,7 +22,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { CupoTrack } from './cohort.ts';
-import { SQUAD_SHAPE, SQUAD_TOTAL, TRACK_SHIRTS, cohortSize, fitsInSquad, shirtsFor } from './cohort.ts';
+import { SQUAD_SHAPE, SQUAD_TOTAL, TRACK_SHIRTS, cohortSize, fitsInSquad, shirtsFor, tailForTest } from './cohort.ts';
 import { ALL_FAMILIES, POSITION_FAMILIES } from './positions.ts';
 import type { PositionFamilyId } from '../types/player.ts';
 
@@ -38,6 +38,33 @@ function corte(track: CupoTrack, family: PositionFamilyId, age: number): number 
     }
     return Infinity;
 }
+
+test('la cola de la normal es la normal, no una logística que la infla', () => {
+    // El bicho que esto guarda: la logística sobreestimaba la cola un 56% en
+    // relativo justo donde viven los cupos (z ≈ 2), así que todos eran más
+    // permisivos que lo declarado. Se verifican valores conocidos de 1 − Φ(z).
+    const conocidos: [number, number][] = [
+        [0, 0.5],
+        [1, 0.158655],
+        [1.645, 0.05],
+        [1.96, 0.025],
+        [2.13, 0.016586],
+        [2.576, 0.005],
+        [3, 0.001350],
+    ];
+    for (const [z, esperado] of conocidos) {
+        const dado = tailForTest(z);
+        assert.ok(
+            Math.abs(dado - esperado) < 1e-4,
+            `1 − Φ(${z}) tendría que dar ${esperado} y dio ${dado.toFixed(6)}`,
+        );
+        // Y el error RELATIVO, que es el que importa cuando el corte es 3%.
+        if (esperado > 0) {
+            const rel = Math.abs(dado - esperado) / esperado;
+            assert.ok(rel < 0.01, `1 − Φ(${z}): error relativo ${(rel * 100).toFixed(1)}%, y los cupos cortan en la cola`);
+        }
+    }
+});
 
 test('el plantel suma treinta, que es un plantel de rugby y no una división', () => {
     const total = ALL_FAMILIES.reduce((a, f) => a + SQUAD_SHAPE[f], 0);

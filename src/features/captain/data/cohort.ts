@@ -236,16 +236,44 @@ export function cohortCurve(startOvr: number, age: number): CohortCurve {
 }
 
 /**
- * Cuántos de tu camada están por encima tuyo, aproximando la normal.
+ * Cuántos de tu camada están por encima tuyo. La cola de la normal, de verdad.
  *
- * Se usa la aproximación logística de la normal acumulada en vez de un `erf`:
- * el error máximo es de menos de un punto porcentual, es una línea, y no
- * necesita tabla ni dependencia. Para decidir si entrás en un plantel de treinta
- * esa precisión sobra.
+ * ── Por qué NO es la aproximación logística ──
+ * Lo era, con el comentario «el error máximo es de menos de un punto porcentual,
+ * y para decidir si entrás en un plantel de treinta esa precisión sobra». Las
+ * dos mitades eran ciertas por separado y juntas eran falsas: el error ES chico
+ * EN ABSOLUTO, y los cupos viven donde eso no importa.
+ *
+ *     z = 2,13   logística 2,59%   ·   normal real 1,66%   ·   +56% relativo
+ *
+ * El corte de M20 está en el 3,3% y el de academia en el 4,0%: los cupos operan
+ * ENTEROS adentro de la cola, que es exactamente la región donde la logística es
+ * más gorda que la normal. O sea que todos los cupos venían siendo
+ * sistemáticamente más permisivos que lo que declaraban, y en la dirección que
+ * ya nos había roto el piso.
+ *
+ * La lección es de unidades: un error acotado en puntos absolutos no dice nada
+ * sobre una decisión que se toma en la cola. Si el umbral es 3%, el error que
+ * importa es el relativo.
+ *
+ * Ahora se usa Zelen & Severo (A&S 26.2.17), con error menor a 7,5e-8 en todo el
+ * rango. Son seis líneas y ninguna dependencia.
  */
+function normalTail(z: number): number {
+    if (z < 0) return 1 - normalTail(-z);
+    const t = 1 / (1 + 0.2316419 * z);
+    const poly = t * (0.319381530
+        + t * (-0.356563782
+            + t * (1.781477937
+                + t * (-1.821255978 + t * 1.330274429))));
+    return (Math.exp(-0.5 * z * z) / Math.sqrt(2 * Math.PI)) * poly;
+}
+
+/** Solo para `cohort.test.ts`: la cola desnuda, sin la curva alrededor. */
+export const tailForTest = normalTail;
+
 function fractionAbove(ovr: number, curve: CohortCurve): number {
-    const z = (ovr - curve.mean) / Math.max(0.001, curve.sd);
-    return 1 / (1 + Math.exp(1.702 * z));
+    return normalTail((ovr - curve.mean) / Math.max(0.001, curve.sd));
 }
 
 /**
