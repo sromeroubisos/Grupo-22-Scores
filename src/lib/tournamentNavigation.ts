@@ -1,5 +1,6 @@
 import { competitionKey, divisionKey, ordenDeSubcategory } from './competitionKey.ts';
 import { compararEjesJuveniles, ruedaDeTorneoUrba, ETIQUETA_RUEDA } from './integrations/urba/ejeJuvenil.ts';
+import { instanciaDeTorneoUrba } from './integrations/urba/externalId.ts';
 
 /**
  * Los dos desplegables de navegación de un torneo, armados a partir de sus
@@ -153,11 +154,42 @@ export function ocultarGradosSubordinados<T extends {
 }
 
 /**
+ * El orden de las fases DENTRO de un año, cuando el año aparece varias veces.
+ *
+ * Es cronológico y no alfabético: la clasificación se juega antes que la
+ * semifinal, y la semifinal antes que la final. Lo que no está en la lista va al
+ * final, como en `ordenDeSubcategory`.
+ */
+const ORDEN_INSTANCIA = ['Clasificación', 'Play Off', 'Semifinal', 'Final', 'Ascenso', 'Permanencia'];
+
+/** −1 para la temporada regular, que va primero. */
+const ordenDeInstancia = (nombre: string): number => {
+  const instancia = instanciaDeTorneoUrba(nombre);
+  if (!instancia) return -1;
+  const i = ORDEN_INSTANCIA.indexOf(instancia);
+  return i === -1 ? ORDEN_INSTANCIA.length : i;
+};
+
+/**
  * El menú de TEMPORADAS de un torneo.
  *
  * El que llama decide qué años entran: hoy sólo los publicados, porque un año
  * oculto se lista como destino y al entrar no se ve nada. Acá sólo se agrupa y
  * se ordena — de más nuevo a más viejo, que es como se busca una temporada.
+ *
+ * ── Un año puede aparecer más de una vez, y el orden adentro importa ───────
+ * Pasa en 118 de los pares (competencia, año) de URBA: la fuente parte la
+ * temporada en ruedas, o publica sus fases como torneos aparte. Se listan TODAS
+ * —esconder una obligaría a elegir a cuál llevar, y eso no tiene respuesta— pero
+ * ordenadas: la temporada regular primero y las fases después, en orden
+ * cronológico.
+ *
+ * Sin esto, el menú del Top 14 ofrecía "2022" tres veces empezando por
+ * `Semifinal`, que es la mitad del torneo. Y en 4 pares —los cuatro de 2022—
+ * URBA directamente no publicó una regular, así que ahí el primero es
+ * `Clasificación`: la fase de grupos, que es lo más parecido a la temporada.
+ * El orden no inventa un dato que la fuente no tiene; solamente deja adelante lo
+ * que más se parece a lo que el usuario fue a buscar.
  */
 export function menuDeTemporadas(actual: TorneoHermano, hermanos: TorneoHermano[]): OpcionMenu[] {
   const clave = competitionKey(actual);
@@ -169,7 +201,15 @@ export function menuDeTemporadas(actual: TorneoHermano, hermanos: TorneoHermano[
 
   return mismaCompetencia
     .slice()
-    .sort((a, b) => String(b.season_id).localeCompare(String(a.season_id)))
+    .sort((a, b) => {
+      const porAnio = String(b.season_id).localeCompare(String(a.season_id));
+      if (porAnio !== 0) return porAnio;
+      const porInstancia = ordenDeInstancia(a.name) - ordenDeInstancia(b.name);
+      if (porInstancia !== 0) return porInstancia;
+      // Desempate estable. Deja la regular antes que sus ruedas, porque el
+      // nombre de la rueda es el de la regular más un sufijo.
+      return a.name.localeCompare(b.name, 'es');
+    })
     .map((t) => ({
       id: t.id,
       label: String(t.season_id),
