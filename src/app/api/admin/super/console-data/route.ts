@@ -348,7 +348,14 @@ export async function GET(request: NextRequest) {
                         'id, name, sport_id, country_id, logo_url, created_at, updated_at',
                         'id, name'
                     ],
-                    { column: 'updated_at', ascending: false },
+                    // Ordenamos por `id` y no por `updated_at`: la consola se trae el
+                    // catálogo entero paginando con ?offset=, y `updated_at` empata en
+                    // masa (una ingesta toca cientos de filas en el mismo instante), con
+                    // lo que el offset repetiría filas y saltearía otras entre páginas.
+                    // `id` es la PK, así que el orden es total y estable. La pantalla
+                    // reagrupa por país y reordena por prioridad igual, así que el orden
+                    // que salga de acá no se ve.
+                    { column: 'id', ascending: true },
                     pagination.range,
                 ),
             ]);
