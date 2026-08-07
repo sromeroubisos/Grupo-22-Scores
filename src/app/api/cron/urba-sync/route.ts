@@ -194,14 +194,28 @@ export async function GET(request: NextRequest) {
             .from('tournaments')
             // `subcategory` viaja hasta el plan: de ella sale el horario por defecto
             // cuando URBA no informa hora (`HORARIO_POR_SUBCATEGORIA`).
-            .select('id, name, external_id, is_visible, subcategory')
+            .select('id, name, external_id, is_visible, status, subcategory')
             .like('external_id', 'urba:%')
             // El corte por temporada va en la CONSULTA y no en un filtro de abajo:
             // así los 677 del histórico no viajan ni se cuentan en ningún contador.
             .eq('season_id', String(ANIO));
         if (errTorneos) throw new Error(`no se pudieron leer los torneos: ${errTorneos.message}`);
 
-        const torneos = (torneosRaw ?? []) as Array<{ id: string; name: string; external_id: string; is_visible: boolean; subcategory: string | null }>;
+        const torneosCrudo = (torneosRaw ?? []) as Array<{ id: string; name: string; external_id: string; is_visible: boolean; status: string | null; subcategory: string | null }>;
+
+        // ── un torneo ARCHIVADO no se sincroniza, ni con `ocultos=1` ──────────
+        // Son los torneos-fase que se fusionaron: sus partidos ya no le
+        // pertenecen —viven en el torneo de la temporada, bajo una fase de
+        // playoff— pero la fila se conserva para que su `external_id` siga
+        // tomado y nadie lo vuelva a dar de alta.
+        //
+        // Si el cron los tomara, buscaria sus partidos por `tournament_id`, no
+        // encontraria ninguno —se mudaron— y los insertaria de nuevo: la
+        // fusion deshecha en silencio, y por duplicado. `ocultos=1` es para
+        // "oculto pero real", no para "retirado", asi que esta guarda no la
+        // levanta ningun parametro.
+        const archivados = torneosCrudo.filter((t) => t.status === 'archived');
+        const torneos = torneosCrudo.filter((t) => t.status !== 'archived');
         // Guarda de visibilidad. El trigger de notificaciones NO mira `is_visible`
         // —ni del partido ni del torneo—, así que pasar a 'final' un partido de un
         // torneo sin publicar le manda el aviso a quien tenga ese club en favoritos.
@@ -390,6 +404,9 @@ export async function GET(request: NextRequest) {
             anio: ANIO,
             esHistorico,
             torneosDeLaTemporada: torneos.length,
+            // Que se vea cuantos quedaron afuera por estar fusionados, en vez
+            // de que el total baje sin explicacion.
+            ...(archivados.length ? { torneosArchivados: archivados.length } : {}),
             // El histórico entró oculto, así que la guarda de visibilidad se lo
             // come entero y la corrida devuelve 0 sin que falle nada. Antes de
             // que alguien mire un `ok: true` con `updated: 0` y crea que URBA no
