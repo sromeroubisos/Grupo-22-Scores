@@ -33,6 +33,29 @@
 //
 // Está escrita acá y no en cada def a propósito. Es la clase de decisión que se
 // vuelve a derivar de cero en el Momento #12 y se deriva distinto.
+//
+// ═══════════════════════════════════════════════════════════════════════════
+//  MECÁNICA Y MAGNITUD SE ESCRIBEN EN MOMENTOS DISTINTOS
+// ═══════════════════════════════════════════════════════════════════════════
+//
+//   LA MECÁNICA NO DEPENDE DE LA CURVA DE CRECIMIENTO. LA MAGNITUD SÍ.
+//
+// Faltan nueve Momentos y viene una corrección de exactitud del crecimiento
+// —`pull` acelerado, la realización del techo, la maduración de la camada
+// derivada en vez de escrita—. Esa corrección mueve cuánto vale un punto, así
+// que mueve todo delta que se escriba antes.
+//
+// De ahí la partición, y no es estilo: es cuántas veces vas a escribir lo mismo.
+//
+//   · `setup`, `resolve` y el `Input` — el verbo, la ventana, cuántas rondas,
+//     qué cuenta como acierto — NO dependen de la curva. Se escriben hoy.
+//   · Los deltas —`statBoost` y los números del efecto— SÍ. Van todos juntos en
+//     UNA TABLA, en un solo lugar, y se ajustan de un movimiento cuando la curva
+//     esté quieta.
+//
+// Tuneados uno por uno ahora, se tunean de nuevo nueve veces. La tabla se crea
+// con el primero de los nueve; hasta entonces esto es la regla y nada más,
+// porque una tabla vacía es estructura inventada antes de tener el dato.
 
 import type { ContractKind, MomentKind } from '../../types/moment-kinds.ts';
 import type { MomentOutcome } from '../../types/moment.ts';

@@ -99,6 +99,34 @@ Cuando la intención cambia, el test **se da vuelta** —mismo assert, signo
 invertido— y el comentario viejo se reemplaza por **POR QUÉ CAMBIÓ LA PREMISA**.
 En seis meses eso vale más que justificar el estado actual.
 
+### Encabezado de §1.5 a §1.9: las cinco son la misma
+
+> **La pregunta de revisión no es «¿este código está bien?».
+> Es «¿este nombre todavía describe este código?».**
+
+| Decía | Era |
+|---|---|
+| `CARTA = 0` | "la carta cara" → la primera del array |
+| `mejorTrack` | "la mejor vía" → el máximo corrido |
+| `SQUAD_SHAPE` | "pelea dos camisetas" → `shirts` se cancelaba |
+| `COHORT_MATURITY_AGE` | parecía una constante → era una salida del modelo |
+| `ALARMA-VIVA` | "son umbrales" → los cupos ya habían entrado |
+
+Cinco de cinco. **Ninguno fue un error de lógica.** Ninguna de esas cinco líneas
+estaba mal escrita: cada una hacía exactamente lo que decía su cuerpo. Los cinco
+fueron el nombre y la cosa diciendo cosas distintas, y por eso los cinco
+sobrevivieron a la revisión —que miraba si el código estaba bien— y a los tests
+—que corrían el código, no el nombre.
+
+Es la falla más cara del proyecto porque es la única que no se ve leyendo con
+atención. Leer con atención confirma el nombre. Hay que ir a buscar el cuerpo.
+
+Las reglas que siguen son cinco formas de esa misma pregunta, cada una en el
+lugar donde ya nos costó un ciclo: el índice que se desalinea (§1.5), el
+mecanismo que es una constante disfrazada (§1.6), el instrumento que contesta
+otra cosa (§1.7), el parámetro que no es la tasa (§1.8) y la derivada congelada
+(§1.9).
+
 ### 1.5 Nunca te refieras a algo por su posición en una lista
 
 > **UN ÍNDICE NO DICE QUÉ ES LA COSA. DICE DÓNDE ESTABA CUANDO MIRASTE.**
