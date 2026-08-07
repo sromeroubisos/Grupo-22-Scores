@@ -20,6 +20,18 @@
     {
       "path": "/api/cron/rebuild-stale-rankings",
       "schedule": "*/2 * * * *"
+    },
+    {
+      "path": "/api/cron/urba-sync?scope=jornada",
+      "schedule": "*/20 21-23 * * 6,0"
+    },
+    {
+      "path": "/api/cron/urba-sync?scope=jornada",
+      "schedule": "*/20 0-5 * * 0,1"
+    },
+    {
+      "path": "/api/cron/urba-sync?scope=barrido",
+      "schedule": "0 9 * * *"
     }
   ]
 }
