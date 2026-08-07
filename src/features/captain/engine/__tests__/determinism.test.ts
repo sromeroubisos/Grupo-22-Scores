@@ -444,7 +444,11 @@ function digest(state: CaptainState): Digest {
 // que solo describía la correlación ("le entró su Momento") y así estuvo tres
 // commits diciendo que Los Palos rompía al apertura.
 //
-// Tres cosas de esta tabla que son hallazgos y no ruido:
+// Tres cosas de LA TABLA DE LA 0.6.0 que fueron hallazgos y no ruido. Se dejan
+// como historia y NO describen la tabla de hoy: las tres se movieron desde
+// entonces —el pilar ya no cierra con Pertenencia, el apertura terminó en otro
+// país— y la lectura vigente está arriba de `EXPECTED`. Ojo con el "las tres
+// carreras": se escribió cuando los casos eran tres y hoy son cuatro.
 //
 //   · el pilar cierra con Pertenencia 24,28 y los otros dos con 0. No es un bug:
 //     `belongingOf` mide el vínculo con el CLUB ACTUAL, y los otros dos se
@@ -459,69 +463,97 @@ function digest(state: CaptainState): Digest {
 //     arriba— pero HOY el digest no lo cubre: si alguien toca `bunkerVerdict`,
 //     esta tabla no se entera. Es la razón principal para sumar un cuarto caso.
 const EXPECTED: Record<string, Digest> = {
-    // ── 0.8.0 · SE MOVIERON LOS CUATRO, Y ESTA VEZ TIENE QUE MOVERSE TODO ──
-    // El techo se partió en `potentialBase` + `built`, y lo que construye la
-    // carta cae AFUERA del recorte. Eso cambia la media de cada temporada, y la
-    // media decide el tiempo de juego, que decide los partidos, que deciden el
-    // cuerpo, los títulos y la edad de retiro. No hay campo que pueda quedarse
-    // quieto: un movimiento parcial acá sería la señal de que algo NO se enganchó.
+    // ═══════════════════════════════════════════════════════════════════════
+    //  0.9.0 · UN REFRESCO QUE ABSORBE SEIS MOVIMIENTOS, Y NO LOS SEPARA
+    // ═══════════════════════════════════════════════════════════════════════
     //
-    // Medido en worktree limpio con `npm run test:captain-freeze`, o sea contra
-    // el catálogo COMMITEADO (`2026-27.10+…ar.2026.2`). La Patagonia sigue sin
-    // subir en el árbol de trabajo, así que este refresco es 100% motor.
+    // ESTA TABLA NO DICE QUÉ HIZO CADA CAMBIO. Dice dónde quedó el motor después
+    // de todos. La lectura fina —cuál de los seis movió los títulos del pilar de
+    // 7 a 1— está PERDIDA y no la devuelve ningún commit posterior: para
+    // recuperarla hay que volver a medir uno por uno.
+    //
+    // Cinco commits de motor, con el digest rojo desde el primero:
+    //
+    //   eb76b8d  una liga tiene UN campeón, y lo elige el rating
+    //   1c66b8d  los carriles de abajo son cupos, no umbrales
+    //   d4a0bd6  la camada maduraba en el techo del propio jugador
+    //   a23272e  SQUAD_SHAPE no hacía nada
+    //   0fd5008  la cola de los cupos era una logística inflada
+    //
+    // Y un sexto que NO es motor: el catálogo pasó a `2026-27.11+…ar.2026.3`
+    // —diecisiete competiciones nuevas y la Patagonia completa—, así que parte de
+    // lo que se ve acá es que estas cuatro carreras se juegan contra otro mercado.
+    // Es la mezcla que la guarda de arriba existe para impedir, y esta vez se
+    // aceptó a sabiendas: congelar antes del catálogo habría dejado el digest rojo
+    // al día siguiente.
+    //
+    // LO QUE SE VE, sin atribuir:
+    //
+    //   · LOS TÍTULOS SE DERRUMBAN en los cuatro: 7→1, 2→0, 1→1, 3→0. Es la
+    //     firma del campeón único por liga, y es la misma caída que tiene roja la
+    //     banda de `hay vitrina, pero no se regala` (0,96 contra [1,5 – 6]).
+    //   · LA PERTENENCIA SE DA VUELTA entre casos: el pilar cae de 17,25 a 0 y el
+    //     tercera línea sube de 1,47 a 15,49. Con menos títulos, quedarse dejó de
+    //     pagar donde pagaba y pasó a pagar en otro lado.
+    //   · EL APERTURA SIGUE SIENDO EL ÚNICO que sale del país y el único con caps
+    //     —58, eran 63— pero ahora termina en Munster y no en Japón. El cartel
+    //     sigue abriendo el mercado; el mercado que abre es otro.
+    //   · DOS CARRERAS SE ACORTAN una temporada (wing y tercera línea, 13→12).
+    //
+    // Sin medir: si alguna de las cuatro pisa el bunker. La afirmación anterior
+    // —"ninguna de las tres"— hablaba de una tabla de tres casos y quedó sin
+    // reautorizar cuando entró el cuarto. No se repite acá para no volver a
+    // congelar una lectura que nadie volvió a correr.
+    //
+    // Medido con el catálogo ya commiteado; verificado después con
+    // `npm run test:captain-freeze`.
     'pilar argentino': {
-        engineVersion: '0.8.0',
+        engineVersion: '0.9.0',
         seasons: 16,
         retirementAge: 34,
-        lastClub: 'ar-sociedad-hebraica',
-        // Cuatro títulos más y el doble de cartel: con el techo construido llega
-        // más alto y se queda más años siendo el mejor de su club.
-        belonging: 17.253,
-        fame: 22.9,
+        lastClub: 'sb-belgrano-athletic', // 0.8.0: ar-sociedad-hebraica
+        belonging: 0, // 0.8.0: 17.253
+        fame: 7.2, // 0.8.0: 22.9
         caps: 0,
-        titles: 7,
-        moments: 12,
-        stateHash: 3906808908, // 0.6.0 era 3959283877
+        titles: 1, // 0.8.0: 7
+        moments: 11,
+        stateHash: 2411646407, // 0.8.0 era 3906808908
     },
     'wing argentino': {
-        engineVersion: '0.8.0',
-        seasons: 13,
-        retirementAge: 31,
-        lastClub: 'sb-universitario-de-mendoza',
-        belonging: 28.975,
-        fame: 13.1,
+        engineVersion: '0.9.0',
+        seasons: 12, // 0.8.0: 13
+        retirementAge: 30,
+        lastClub: 'sb-club-newman', // 0.8.0: sb-universitario-de-mendoza
+        belonging: 4.092, // 0.8.0: 28.975
+        fame: 5.5,
         caps: 0,
-        titles: 2,
-        moments: 9,
-        stateHash: 87680738, // 0.6.0 era 1267169825
+        titles: 0, // 0.8.0: 2
+        moments: 7,
+        stateHash: 837219896, // 0.8.0 era 87680738
     },
     'apertura argentino': {
-        engineVersion: '0.8.0',
-        // EL CASO QUE MÁS SE MOVIÓ, y es el que muestra de qué se trata el
-        // cambio: 13 caps pasaron a 63, y terminó en Japón en vez de Moana.
-        // Construir el techo lo dejó arriba del umbral de la mayor durante toda
-        // la carrera en vez de rozarlo dos temporadas.
+        engineVersion: '0.9.0',
         seasons: 15,
         retirementAge: 33,
-        lastClub: 'yokohama-canon-eagles',
+        lastClub: 'munster', // 0.8.0: yokohama-canon-eagles
         belonging: 0,
         fame: 100,
-        caps: 63,
+        caps: 58, // 0.8.0: 63
         titles: 1,
         moments: 9,
-        stateHash: 404031529, // 0.6.0 era 231311238
+        stateHash: 1480274446, // 0.8.0 era 404031529
     },
     'tercera línea argentino': {
-        engineVersion: '0.8.0',
-        seasons: 13,
-        retirementAge: 31,
-        lastClub: 'sb-club-newman',
-        belonging: 1.469,
-        fame: 3.7,
+        engineVersion: '0.9.0',
+        seasons: 12, // 0.8.0: 13
+        retirementAge: 30,
+        lastClub: 'sb-casi', // 0.8.0: sb-club-newman
+        belonging: 15.487, // 0.8.0: 1.469
+        fame: 7.9,
         caps: 0,
-        titles: 3,
+        titles: 0, // 0.8.0: 3
         moments: 10,
-        stateHash: 1029592978, // 0.6.0 era 730581646
+        stateHash: 695322516, // 0.8.0 era 1029592978
     },
 };
 
@@ -536,7 +568,7 @@ const EXPECTED: Record<string, Digest> = {
  * canon argentino— así que este único string cubre los tres. Es el mismo que
  * sella el guardado.
  */
-const CATALOGO_CONGELADO = '2026-27.10+sa.464399ffada4+ar.2026.2';
+const CATALOGO_CONGELADO = '2026-27.11+sa.464399ffada4+ar.2026.3';
 
 const CATALOGO_AL_DIA = NORMALIZED_CATALOG_VERSION === CATALOGO_CONGELADO;
 

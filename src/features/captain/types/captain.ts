@@ -95,8 +95,20 @@ import type { MomentRecord, PendingMoment } from './moment.ts';
  *         Ahora lo que construye la carta cae AFUERA del recorte y el costo
  *         compra algo. Falta la otra mitad —`pull` escalado por rendimiento—
  *         para que no llegar al techo vuelva a ser posible.
+ * 0.9.0 — CINCO CAMBIOS EN UNA SOLA VERSIÓN, y hay que decirlo así porque el
+ *         digest estuvo rojo desde el primero y no se refrescó hasta el quinto:
+ *
+ *           eb76b8d  una liga tiene UN campeón, y lo elige el rating
+ *           1c66b8d  los carriles de abajo son cupos, no umbrales
+ *           d4a0bd6  la camada maduraba en el techo del propio jugador
+ *           a23272e  SQUAD_SHAPE no hacía nada
+ *           0fd5008  la cola de los cupos era una logística inflada
+ *
+ *         LA ATRIBUCIÓN INDIVIDUAL NO SE RECUPERA. Este número no dice qué hizo
+ *         cada uno: dice que entre 0.8.0 y acá pasaron esos cinco. El que quiera
+ *         saber cuál movió qué campo tiene que volver a medir commit por commit.
  */
-export const CAPTAIN_ENGINE_VERSION = '0.8.0';
+export const CAPTAIN_ENGINE_VERSION = '0.9.0';
 
 /**
  * Las fases del ciclo. `offseason` es propia de este juego y no la tiene
