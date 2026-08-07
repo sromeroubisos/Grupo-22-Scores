@@ -8,7 +8,7 @@ import {
   type TournamentManagementTarget,
   type UserAccessContext,
 } from '@/lib/auth/permissions';
-import { MANAGEMENT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
+import { MANAGEMENT_MEMBERSHIP_ROLES, VIEW_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import type { LooseSupabaseClient } from '@/lib/supabase/loose';
 
 export class TournamentApiError extends Error {
@@ -58,6 +58,27 @@ export async function requireTournamentMutationContext(
     target,
     writer: createAdminClient(),
   };
+}
+
+/**
+ * La versión de sólo lectura: exige pertenecer al torneo, pero acepta también al
+ * rol `viewer`, que no puede escribir nada.
+ *
+ * Existe porque los endpoints de lectura de Posiciones no tenían NINGÚN control:
+ * cualquiera con una sesión podía leer la tabla, las reglas y la auditoría de
+ * cualquier torneo con sólo saber su id. Y porque la alternativa que se venía
+ * usando —el cliente anónimo con RLS— no alcanza: las políticas de
+ * `admin_audit_log` piden `authorize_admin()`, así que un administrador de
+ * torneo veía el panel vacío y sin error, que es la peor de las respuestas.
+ *
+ * Devuelve el `writer` (cliente admin) a propósito: una vez resuelto QUIÉN
+ * pregunta y a QUÉ torneo, la consulta puede saltear RLS con el scope ya
+ * acotado en el código.
+ */
+export async function requireTournamentReadContext(
+  tournamentId: string,
+): Promise<TournamentMutationContext> {
+  return requireTournamentMutationContext(tournamentId, VIEW_MEMBERSHIP_ROLES);
 }
 
 export function tournamentApiErrorResponse(error: unknown, fallback = 'Internal server error') {
