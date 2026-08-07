@@ -511,6 +511,21 @@ export function instanciaDeTorneoUrba(nombre: string): string | null {
 }
 
 /**
+ * Las instancias en el orden en que SE JUEGAN.
+ *
+ * No es el orden de `INSTANCIAS`, y no se puede reusar aquél: allá el orden es
+ * de precedencia de regex —`Semifinal` antes que `Final` porque "semi final"
+ * matchea las dos— y acá es cronológico. Son dos preguntas distintas sobre la
+ * misma lista, así que viven juntas pero separadas.
+ *
+ * Lo usan el menú de temporadas, para ordenar un año que aparece repetido, y la
+ * unión de fases, para numerar el `order_index` de cada fase del torneo.
+ */
+export const ORDEN_INSTANCIA: readonly string[] = [
+  'Clasificación', 'Play Off', 'Semifinal', 'Final', 'Ascenso', 'Permanencia',
+];
+
+/**
  * Normalización MÍNIMA y predecible del nombre de un torneo, para comparar.
  *
  *   · a minúsculas
