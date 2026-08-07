@@ -192,3 +192,64 @@ test('esGradoSubordinado reconoce las variantes y nada más', () => {
   assert.ok(!esGradoSubordinado('G2 Nivel 1 Intermedia'));
   assert.ok(!esGradoSubordinado(null));
 });
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * EL ORDEN DENTRO DE UN AÑO QUE APARECE VARIAS VECES
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+const div = (id: string, name: string, season_id: string) => ({
+  id, name, season_id,
+  category: 'Top 12', subcategory: 'Superior', age_grade: 'mayores', gender: 'masculino',
+});
+
+test('cuando el año tiene fases, van despues de la regular y en orden cronologico', () => {
+  const actual = div('a', 'Top 14 de la URBA', '2026');
+  const hermanos = [
+    actual,
+    div('f', 'URBA: TOP 12 - Superior - Final', '2025'),
+    div('c', 'URBA: TOP 12 - Superior - Clasificacion', '2025'),
+    div('r', 'URBA: TOP 12 - Superior', '2025'),
+    div('s', 'URBA: TOP 12 - Superior - Semifinal', '2025'),
+  ];
+  assert.deepEqual(
+    menuDeTemporadas(actual, hermanos).map((o) => o.id),
+    ['a', 'r', 'c', 's', 'f'],
+  );
+});
+
+test('si el año NO tiene regular, arranca por la clasificacion y no por la semifinal', () => {
+  // Los 4 pares de 2022 medidos: URBA partio la division en fases y no publico
+  // una temporada regular. Antes el menu ofrecia "2022" empezando por
+  // `Semifinal`, que es la mitad del torneo.
+  const actual = div('a', 'Top 14 de la URBA', '2026');
+  const hermanos = [
+    actual,
+    div('s', 'URBA: TOP 13 - Superior - Semifinal', '2022'),
+    div('c', 'URBA: TOP 13 - Superior - Clasificacion', '2022'),
+    div('f', 'URBA: TOP 13 - Superior - Final', '2022'),
+  ];
+  assert.deepEqual(
+    menuDeTemporadas(actual, hermanos).map((o) => o.detalle),
+    ['Top 14 de la URBA', 'TOP 13 - Superior - Clasificacion', 'TOP 13 - Superior - Semifinal', 'TOP 13 - Superior - Final'],
+  );
+});
+
+test('las ruedas no son fases: la regular sigue primero y el orden es estable', () => {
+  const actual = div('a', 'Top 14 de la URBA', '2026');
+  const hermanos = [
+    actual,
+    div('zb', 'URBA: Top 12 - Superior - Zona B - Segunda Rueda', '2021'),
+    div('r', 'URBA: Top 12 - Superior', '2021'),
+    div('za', 'URBA: Top 12 - Superior - Zona A - Segunda Rueda', '2021'),
+  ];
+  assert.deepEqual(
+    menuDeTemporadas(actual, hermanos).map((o) => o.id),
+    ['a', 'r', 'za', 'zb'],
+  );
+});
+
+test('el orden de los años no se toca: del mas nuevo al mas viejo', () => {
+  const actual = div('a', 'Top 14 de la URBA', '2026');
+  const hermanos = [actual, div('v', 'URBA: TOP 12 - Superior', '2021'), div('m', 'URBA: TOP 12 - Superior', '2024')];
+  assert.deepEqual(menuDeTemporadas(actual, hermanos).map((o) => o.label), ['2026', '2024', '2021']);
+});
