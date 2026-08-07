@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  etiquetaDeTemporada,
   filtrarPorTemporada,
   temporadaActual,
   temporadasDisponibles,
@@ -12,16 +13,12 @@ const EN_2026 = new Date('2026-08-06T15:00:00Z');
 /** 1 de enero de 2027, hora argentina: el día en que la portada podría vaciarse. */
 const PRIMERO_DE_2027 = new Date('2027-01-01T15:00:00Z');
 
-const fila = (
-  id: string,
-  season_id: string | null,
-  union_id: string | null = null,
-  priority = 0,
-) => ({ id, season_id, union_id, priority });
+const fila = (id: string, season_id: string | null, union_id: string | null = null) =>
+  ({ id, season_id, union_id });
 
 const ids = (filas: Array<{ id: string }>) => filas.map((f) => f.id);
 
-test('la temporada anterior de una unión no entra al listado', () => {
+test('la temporada anterior de URBA no entra al listado', () => {
   const filas = [
     fila('urba-2026', '2026', 'urba'),
     fila('urba-2025', '2025', 'urba'),
@@ -30,35 +27,39 @@ test('la temporada anterior de una unión no entra al listado', () => {
   assert.deepEqual(ids(filtrarPorTemporada(filas, null, EN_2026)), ['urba-2026', 'urba-2026-b']);
 });
 
-test('un torneo FIJADO A MANO sobrevive aunque sea de un año viejo', () => {
-  // El caso Unions Cup: 2024, `priority = 90`, y su unión SÍ tiene un torneo de
-  // 2026 —otro torneo, no otra edición del mismo—. La primera versión de este
-  // módulo agrupaba por unión y se la comía.
+test('lo que NO es de URBA se muestra siempre, tenga el año que tenga', () => {
+  // La decisión: el filtro contiene los 677 históricos de URBA, no reordena el
+  // catálogo cargado a mano. La Unions Cup (asia-rugby, 2024) y los dos "Rugby
+  // Championship U20" (sin unión) vuelven al listado por esto, y NO por tener
+  // una prioridad que los rescate.
   const filas = [
-    fila('asia-2026', '2026', 'asia-rugby'),
-    fila('unions-cup', '2024', 'asia-rugby', 90),
+    fila('urba-2026', '2026', 'urba'),
+    fila('urba-2025', '2025', 'urba'),
+    fila('unions-cup', '2024', 'asia-rugby'),
+    fila('u20-2025', '2025'),
+    fila('u20-2024', '2024'),
   ];
-  assert.deepEqual(ids(filtrarPorTemporada(filas, null, EN_2026)), ['asia-2026', 'unions-cup']);
+  assert.deepEqual(
+    ids(filtrarPorTemporada(filas, null, EN_2026)),
+    ['urba-2026', 'unions-cup', 'u20-2025', 'u20-2024'],
+  );
 });
 
-test('sin fijar y con la unión al día, el año viejo se va', () => {
-  // El contraste del test anterior: lo único que cambia es la prioridad.
-  const filas = [
-    fila('asia-2026', '2026', 'asia-rugby'),
-    fila('viejo', '2024', 'asia-rugby', 0),
-  ];
-  assert.deepEqual(ids(filtrarPorTemporada(filas, null, EN_2026)), ['asia-2026']);
+test('una unión que no filtra no se contagia de otra que sí', () => {
+  // asia-rugby tiene un torneo de 2026 y otro de 2024, y los dos se quedan: no
+  // está en la lista de uniones que cargan por temporada.
+  const filas = [fila('asia-2026', '2026', 'asia-rugby'), fila('asia-2024', '2024', 'asia-rugby')];
+  assert.deepEqual(ids(filtrarPorTemporada(filas, null, EN_2026)), ['asia-2026', 'asia-2024']);
 });
 
-test('el 1 de enero la portada no se vacía: si la unión no cargó el año nuevo, muestra el anterior', () => {
-  // 2027 arrancó y URBA todavía no cargó un solo torneo. Sin la tercera
-  // cláusula el listado se queda sin sus 126 competencias hasta que corra el
-  // conector, y no falla nada mientras tanto.
+test('el 1 de enero la portada no se vacía: si URBA no cargó el año nuevo, muestra el anterior', () => {
+  // 2027 arrancó y el conector todavía no cargó un solo torneo. Sin esta
+  // cláusula el listado se queda sin sus 126 competencias y no falla nada.
   const filas = [fila('urba-2026', '2026', 'urba'), fila('urba-2025', '2025', 'urba')];
   assert.deepEqual(ids(filtrarPorTemporada(filas, null, PRIMERO_DE_2027)), ['urba-2026']);
 });
 
-test('el respaldo se apaga solo en cuanto la unión carga la temporada nueva', () => {
+test('el respaldo se apaga solo en cuanto URBA carga la temporada nueva', () => {
   const filas = [
     fila('urba-2027', '2027', 'urba'),
     fila('urba-2026', '2026', 'urba'),
@@ -67,55 +68,46 @@ test('el respaldo se apaga solo en cuanto la unión carga la temporada nueva', (
   assert.deepEqual(ids(filtrarPorTemporada(filas, null, PRIMERO_DE_2027)), ['urba-2027']);
 });
 
-test('un torneo suelto viejo NO revive: sin unión no hay respaldo', () => {
-  // Los dos "Rugby Championship U20" (2024 y 2025, sin union_id). No son el
-  // catálogo de nadie, así que se juzgan sólo por su año.
-  const filas = [fila('u20-2025', '2025'), fila('u20-2024', '2024'), fila('vigente', '2026')];
-  assert.deepEqual(ids(filtrarPorTemporada(filas, null, EN_2026)), ['vigente']);
-});
-
-test('una fila sin temporada se queda, con y sin año pedido', () => {
-  // Es el caso de los torneos del catálogo externo: no tienen temporada nuestra.
+test('una fila de URBA sin temporada se queda: no se la puede juzgar', () => {
   const filas = [fila('con', '2026', 'urba'), fila('sin', null, 'urba')];
   assert.deepEqual(ids(filtrarPorTemporada(filas, null, EN_2026)), ['con', 'sin']);
-  assert.deepEqual(ids(filtrarPorTemporada(filas, '2025', EN_2026)), ['sin']);
 });
 
-test('el año pedido manda sobre todo, incluso sobre la prioridad', () => {
+test('el año pedido filtra URBA y deja pasar el resto', () => {
+  // `?season=2025` es "quiero la temporada 2025 de URBA", no "escondeme el
+  // catálogo cargado a mano".
   const filas = [
-    fila('a', '2026', 'urba'),
-    fila('b', '2025', 'urba'),
-    fila('fijado', '2024', 'asia-rugby', 90),
+    fila('urba-2026', '2026', 'urba'),
+    fila('urba-2025', '2025', 'urba'),
+    fila('unions-cup', '2024', 'asia-rugby'),
   ];
-  assert.deepEqual(ids(filtrarPorTemporada(filas, '2025', EN_2026)), ['b']);
+  assert.deepEqual(ids(filtrarPorTemporada(filas, '2025', EN_2026)), ['urba-2025', 'unions-cup']);
 });
 
-test('un año pedido que no existe deja el listado vacío, no lo ignora', () => {
-  // Devolver "todo" ante un filtro que no matchea le miente al que filtró.
-  const filas = [fila('a', '2026', 'urba')];
+test('un año pedido que URBA no tiene la deja afuera entera, no la ignora', () => {
+  // Devolver "todos los años" ante un filtro que no matchea le miente al que
+  // filtró: vacío se ve y se corrige, lleno se lee como si fuera 2019.
+  const filas = [fila('urba-2026', '2026', 'urba')];
   assert.deepEqual(filtrarPorTemporada(filas, '2019', EN_2026), []);
 });
 
 test('un season_id numérico se trata igual que su cadena', () => {
   const filas = [
-    { id: 'n', season_id: 2026, union_id: 'urba', priority: 0 },
-    { id: 's', season_id: '2025', union_id: 'urba', priority: 0 },
+    { id: 'n', season_id: 2026, union_id: 'urba' },
+    { id: 's', season_id: '2025', union_id: 'urba' },
   ];
   assert.deepEqual(ids(filtrarPorTemporada(filas, null, EN_2026)), ['n']);
-});
-
-test('una prioridad negativa o nula no fija nada', () => {
-  const filas = [
-    fila('vigente', '2026', 'u'),
-    fila('negativa', '2025', 'u', -5),
-    fila('cero', '2025', 'u', 0),
-  ];
-  assert.deepEqual(ids(filtrarPorTemporada(filas, null, EN_2026)), ['vigente']);
 });
 
 test('temporadasDisponibles ordena de la más nueva a la más vieja y no repite', () => {
   const filas = [fila('a', '2025', 'urba'), fila('b', '2026', 'urba'), fila('c', '2025', 'urba'), fila('d', null)];
   assert.deepEqual(temporadasDisponibles(filas), ['2026', '2025']);
+});
+
+test('la etiqueta se calla en la temporada en curso y habla en las demás', () => {
+  assert.equal(etiquetaDeTemporada('2026', EN_2026), null);
+  assert.equal(etiquetaDeTemporada('2024', EN_2026), '2024');
+  assert.equal(etiquetaDeTemporada(null, EN_2026), null);
 });
 
 test('la temporada en curso se lee en hora de Buenos Aires, no en UTC', () => {

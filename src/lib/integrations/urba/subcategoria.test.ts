@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { subcategoriaDeTorneoUrba } from './externalId.ts';
+import { instanciaDeTorneoUrba, subcategoriaDeTorneoUrba } from './externalId.ts';
 
 /**
  * Los 134 torneos de 2026, con la subcategory que quedó backfilleada en la base.
@@ -242,4 +242,63 @@ test('los 6 sin grado dan null, y son sólo esos 6', () => {
     assert.equal(subcategoriaDeTorneoUrba(n), null);
   }
   assert.equal(CASOS.filter(([, s]) => s === null).length, 6);
+});
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * LA INSTANCIA NO ES UN GRADO
+ *
+ * La regla "una división de mayores sin grado en el nombre es la Superior" fue
+ * correcta para 6 de los 7 casos que la motivaron, y falla en el séptimo:
+ * `TOP 12 - Play Off` no es la Superior, es la fase final DE la Superior.
+ *
+ * El síntoma medible: el menú de temporadas del Top 14 de 2026 ofrecía "2025"
+ * DOS VECES —`TOP 12 - Superior` y `TOP 12 - Play Off`—, porque `competitionKey`
+ * incluye la subcategory y las dos decían 'Superior'.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+test('un Play Off de mayores no se hace pasar por la Superior', () => {
+  // Los 5 medidos sobre los 811, todos de 2025.
+  assert.equal(subcategoriaDeTorneoUrba('URBA: TOP 12 - Play Off'), 'Play Off');
+  assert.equal(subcategoriaDeTorneoUrba('URBA: PRIMERA A - Play Off'), 'Play Off');
+  assert.equal(subcategoriaDeTorneoUrba('URBA: PRIMERA B - Play Off'), 'Play Off');
+  assert.equal(subcategoriaDeTorneoUrba('URBA: PRIMERA C - Play Off'), 'Play Off');
+  assert.equal(subcategoriaDeTorneoUrba('URBA: SEGUNDA - Play Off'), 'Play Off');
+});
+
+test('el torneo que SÍ dice su grado lo conserva, aunque además sea una instancia', () => {
+  // Los 24 del otro grupo. Salen por las ramas de arriba y no llegan al
+  // fallback, así que la instancia no les toca la subcategory: su grado es
+  // real y meterles la fase adentro llevaría el menú del Top 13 de 7 a 15.
+  assert.equal(subcategoriaDeTorneoUrba('URBA: TOP 13 - Superior - Final'), 'Superior');
+  assert.equal(subcategoriaDeTorneoUrba('URBA: TOP 13 - Intermedia - Semifinal'), 'Intermedia');
+  assert.equal(subcategoriaDeTorneoUrba('URBA: TOP 12 - Preintermedia B - Clasificacion'), 'Preintermedia B');
+  assert.equal(subcategoriaDeTorneoUrba('URBA: DESARROLLO - Superior - Torneo Final A'), 'Superior');
+});
+
+test('los 6 sin grado siguen dando null: la instancia no los rescata', () => {
+  // `Femenino - Campeonato - Clasificacion` no es de mayores para
+  // `categoriaDeTorneoUrba`, así que ni siquiera llega al fallback. Si la
+  // instancia se mirara ANTES, estos 15 pasarían de null a 'Clasificación' y
+  // se les inventaría un grado que no tienen.
+  assert.equal(subcategoriaDeTorneoUrba('URBA: FEMENINO - Campeonato 12 - Clasificacion'), null);
+  assert.equal(subcategoriaDeTorneoUrba('URBA: Rugby Universitario - Campeonato - Semifinal'), null);
+  assert.equal(subcategoriaDeTorneoUrba('URBA: Rugby Formativo - Segunda Rueda - Ascenso'), null);
+});
+
+test('la división sin grado y sin instancia sigue siendo Superior', () => {
+  // Los otros 6 de los 7 que motivaron la regla: sin esto vuelven a NULL y se
+  // caen de la navegación.
+  assert.equal(subcategoriaDeTorneoUrba('URBA: SEGUNDA'), 'Superior');
+  assert.equal(subcategoriaDeTorneoUrba('URBA: PRIMERA A - Pre-Desarrollo'), 'Superior');
+});
+
+test('instanciaDeTorneoUrba reconoce las fases y nada más', () => {
+  assert.equal(instanciaDeTorneoUrba('URBA: TOP 12 - Play Off'), 'Play Off');
+  assert.equal(instanciaDeTorneoUrba('URBA: TOP 13 - Superior - Semi Final'), 'Semifinal');
+  assert.equal(instanciaDeTorneoUrba('URBA: TOP 13 - Superior - Final'), 'Final');
+  assert.equal(instanciaDeTorneoUrba('URBA: TOP 12 - Superior - Clasificacion'), 'Clasificación');
+  assert.equal(instanciaDeTorneoUrba('URBA: TOP 14 - Superior'), null);
+  // "semifinal" pegado no debe leerse como "final": el orden de la lista lo
+  // cubre, pero el que importa es el caso con espacio, que matchea los dos.
+  assert.equal(instanciaDeTorneoUrba('URBA: Semifinal'), 'Semifinal');
 });

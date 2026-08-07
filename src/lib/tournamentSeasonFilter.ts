@@ -8,49 +8,55 @@
  * nombres entre 2025 y 2026, así que las ediciones no se llaman igual. Con 2024
  * eso se termina.
  *
- * ── La regla, y por qué tiene tres cláusulas y no una ─────────────────────
- * Entra al listado por defecto la fila que cumple ALGUNA de estas:
+ * ── A QUIÉN se le aplica: sólo a quien carga temporadas enteras ───────────
+ * El filtro existe para contener los 677 torneos históricos de URBA, NO para
+ * reordenar el catálogo que se cargó a mano. Un torneo que alguien dio de alta
+ * uno por uno se muestra siempre, tenga el año que tenga.
+ *
+ * Esa distinción está en `UNIONES_CON_CATALOGO_POR_TEMPORADA` y hoy tiene un
+ * solo elemento. Es a propósito que sea una lista explícita y no una heurística:
+ * la regla dice lo que hace.
+ *
+ * ── Por qué NO se usa `priority` para esto ────────────────────────────────
+ * Fue la primera versión y estaba mal. `priority` es curación editorial —lo que
+ * `sortTournamentsByPriority` mira para decidir qué va arriba de todo— y usarla
+ * como escape del filtro obligaba a fijar un torneo para deshacer un efecto
+ * colateral nuestro. Dos significados en una columna, y el segundo no se lee en
+ * ningún lado. El caso que lo destapó: la **Unions Cup** de 2024 (`asia-rugby`,
+ * `priority = 90`) desaparecía porque su unión tiene un "Asia Rugby Championship
+ * Womens" de 2026 que NO es la edición siguiente de nada —una unión no es una
+ * competencia—. Con el filtro acotado a URBA el problema no existe: `asia-rugby`
+ * nunca entra.
+ *
+ * ── Y para las uniones que sí filtran, dos cláusulas ──────────────────────
+ * Pasa la fila que cumple alguna:
  *
  *   1. Es de la temporada en curso. Es lo pedido, y es el 99% de los casos.
- *   2. Tiene `priority > 0`. Es el único rastro de curación humana que hay en
- *      esta tabla: `sortTournamentsByPriority` la usa para decidir qué va
- *      arriba de todo. Una regla automática no puede deshacer en silencio una
- *      decisión editorial.
- *   3. Su unión NO tiene nada en la temporada en curso, y ésta es su edición
- *      más reciente.
- *
- * Las tres salieron de medir, no de imaginar:
- *
- * (2) La **Unions Cup** de 2024 tiene `priority = 90`. La primera versión de
- *     este módulo agrupaba por unión y se quedaba con la temporada más nueva de
- *     cada una: como `asia-rugby` también tiene un "Asia Rugby Championship
- *     Womens" de 2026, la Unions Cup desaparecía. **Una unión no es una
- *     competencia**: la confederación no republica el mismo torneo cada año, así
- *     que "lo más nuevo de asia-rugby" no es la edición siguiente de nada. Hoy
- *     hay exactamente DOS torneos publicados con `priority > 0`, así que la
- *     puerta es angosta y se puede contar con los dedos.
- *
- * (3) Sin esto, el 1 de enero la portada se vacía. La temporada en curso pasa a
- *     ser la nueva mientras la unión todavía no cargó un solo torneo, y el
- *     listado se queda sin sus 126 competencias hasta que el conector corra. Es
- *     el mismo modo de falla que `const ANIO = 2026`: una fecha que rompe una
- *     vez al año, en producción, sin un error. La cláusula sólo se activa cuando
- *     el año en curso está VACÍO para esa unión, así que no revive nada mientras
- *     haya temporada nueva.
- *
- * Una fila sin `union_id` no tiene la cláusula 3 —no hay grupo del que ser "lo
- * más reciente"—, así que se juzga sólo por su año y por su prioridad. Es lo
- * correcto para un torneo suelto: no tiene quién lo reemplace, pero tampoco es
- * el catálogo de nadie.
+ *   2. Su unión NO tiene nada en la temporada en curso, y ésta es su edición
+ *      más reciente. Sin esto, el 1 de enero la portada se vacía: el año en
+ *      curso pasa a ser el nuevo mientras el conector todavía no cargó un solo
+ *      torneo, y el listado se queda sin sus 126 competencias sin que falle
+ *      nada. Es el mismo modo de falla que `const ANIO = 2026`. Se apaga sola en
+ *      cuanto entra el primer torneo del año nuevo.
  */
+
+/**
+ * Las uniones que publican su calendario ENTERO, temporada por temporada, y por
+ * eso pueden inundar el listado con años viejos.
+ *
+ * URBA carga 134 torneos por año; seis temporadas son 811. Lo demás del catálogo
+ * entró a mano, de a uno, y no filtra: no hay volumen que contener y esconder un
+ * torneo que alguien dio de alta sería decidir por él.
+ *
+ * Cuando entre otra unión con carga masiva, se agrega acá y en ningún otro lado.
+ */
+const UNIONES_CON_CATALOGO_POR_TEMPORADA = new Set(['urba']);
 
 /** Lo mínimo que hace falta para decidir si una fila entra. */
 export interface FilaConTemporada {
   id?: string | null;
   season_id?: string | number | null;
   union_id?: string | null;
-  /** > 0 = alguien la fijó a mano. Ver la cláusula 2 de arriba. */
-  priority?: number | null;
 }
 
 /**
@@ -86,9 +92,10 @@ function unionDe(fila: FilaConTemporada): string | null {
   return union ? union : null;
 }
 
-/** Curada a mano: `sortTournamentsByPriority` la sube, este filtro no la baja. */
-function estaFijada(fila: FilaConTemporada): boolean {
-  return typeof fila.priority === 'number' && Number.isFinite(fila.priority) && fila.priority > 0;
+/** ¿Esta fila está sujeta al filtro? Sólo si su unión carga por temporada. */
+function filtra(fila: FilaConTemporada): boolean {
+  const union = unionDe(fila);
+  return union !== null && UNIONES_CON_CATALOGO_POR_TEMPORADA.has(union);
 }
 
 /**
@@ -141,7 +148,10 @@ export function filtrarPorTemporada<T extends FilaConTemporada>(
 ): T[] {
   const pedida = String(temporadaPedida ?? '').trim();
   if (pedida) {
+    // El año pedido tampoco toca lo que no filtra: pedir 2025 es pedir la
+    // temporada 2025 DE URBA, no esconder el catálogo cargado a mano.
     return filas.filter((f) => {
+      if (!filtra(f)) return true;
       const t = temporadaDe(f);
       return t === null || t === pedida;
     });
@@ -154,6 +164,7 @@ export function filtrarPorTemporada<T extends FilaConTemporada>(
   const unionesConTemporadaEnCurso = new Set<string>();
   const masRecienteDeLaUnion = new Map<string, string>();
   for (const fila of filas) {
+    if (!filtra(fila)) continue;
     const t = temporadaDe(fila);
     const union = unionDe(fila);
     if (!t || !union) continue;
@@ -163,13 +174,12 @@ export function filtrarPorTemporada<T extends FilaConTemporada>(
   }
 
   return filas.filter((fila) => {
+    if (!filtra(fila)) return true;           // cargado a mano: se muestra siempre
     const t = temporadaDe(fila);
     if (t === null) return true;              // sin temporada: no se la puede juzgar
     if (t === enCurso) return true;           // 1
-    if (estaFijada(fila)) return true;        // 2
 
-    const union = unionDe(fila);              // 3
-    if (!union) return false;
+    const union = unionDe(fila) as string;    // 2
     if (unionesConTemporadaEnCurso.has(union)) return false;
     return masRecienteDeLaUnion.get(union) === t;
   });
