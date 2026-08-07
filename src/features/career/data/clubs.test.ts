@@ -294,6 +294,71 @@ test('Portugal, Italia y Brasil entran con su plantel real', () => {
     assert.equal(CLUBS.find((c) => c.name === 'Nova Lima')!.competitionId, 'br-super12');
 });
 
+test('los dieciséis sistemas nuevos entran con el plantel que declaran', () => {
+    const count = (id: string) => CLUBS.filter((c) => c.competitionId === id).length;
+    for (const [id, n] of [
+        ['au-shute-shield', 12], ['au-hospital-cup', 9],
+        ['wal-premiership', 12], ['ire-ail1a', 8], ['sco-premiership', 10],
+        ['ge-didi10', 10], ['ro-liga', 8], ['ru-championship', 8],
+        ['fj-skipper', 13], ['ca-clubs', 10],
+        ['be-elite', 7], ['nl-ereklasse', 8],
+        ['pe-metropolitano', 17], ['co-liga', 10], ['py-primera', 6], ['bo-liga', 8],
+        ['mx-liga', 15],
+    ] as const) {
+        assert.equal(count(id), n, `${id}: plantel`);
+    }
+});
+
+test('los tres clubes que NO se duplican siguen donde ya estaban', () => {
+    // Las tres exclusiones de `2026-27.11`, y las tres son el mismo error evitado:
+    // el mismo club cargado dos veces en dos competiciones. Si alguien "completa"
+    // las listas de origen sin mirar el catálogo, este test se pone rojo.
+    const compOf = (name: string) => CLUBS.find((c) => c.name === name)?.competitionId ?? null;
+
+    // CURDA y San José juegan el Regional NEA argentino, no la liga paraguaya.
+    assert.equal(compOf('CURDA'), 'ar-nea-a', 'CURDA está en el NEA, no en Paraguay');
+    assert.equal(compOf('San José de Paraguay'), 'ar-nea-a', 'San José está en el NEA');
+    assert.equal(CLUBS.filter((c) => c.competitionId === 'py-primera' && /curda|san jos/i.test(c.name)).length, 0);
+
+    // Brussels Devils es la franquicia belga de la Rugby Europe Super Cup.
+    assert.equal(compOf('Brussels Devils'), 'super-cup', 'los Devils son de la Super Cup');
+
+    // "Naitasiri Highlanders" es el apodo de Naitasiri: se carga una sola vez.
+    assert.equal(compOf('Naitasiri'), 'fj-skipper');
+    assert.equal(compOf('Naitasiri Highlanders'), null, 'Highlanders es el apodo, no otro club');
+});
+
+test('las desambiguaciones de nombre no fusionan clubes distintos', () => {
+    // Cuatro pares de clubes distintos con nombre parecido. El catálogo los
+    // distingue con el sufijo de origen, que es la convención que ya usaba
+    // "San José de Paraguay".
+    const compOf = (name: string) => CLUBS.find((c) => c.name === name)?.competitionId ?? null;
+    assert.equal(compOf('Northland'), 'npc', 'la provincia neozelandesa');
+    assert.equal(compOf('Northland de Fiyi'), 'fj-skipper', 'la provincia fiyiana');
+    assert.equal(compOf('CRAR'), 'ar-litoral-segunda', 'el CRAR del Litoral');
+    assert.equal(compOf('Club Riojano Amigos del Rugby'), 'ar-noa-andina', 'el riojano, con nombre completo');
+    assert.equal(compOf('Albatros'), 'ar-urba-segunda');
+    assert.equal(compOf('Albatros del Chubut'), 'ar-patagonia-chubut-desarrollo');
+    assert.equal(compOf('Aguará'), 'ar-nea-a');
+    assert.equal(compOf('Aguará del Alto Valle'), 'ar-patagonia-alto-valle');
+    // Y los dos Calafate: el de Comodoro juega el Austral, el de El Calafate el
+    // torneo santacruceño.
+    assert.equal(compOf('Calafate'), 'ar-patagonia-austral');
+    assert.equal(compOf('El Calafate Rugby & Hockey'), 'ar-patagonia-santacruz');
+});
+
+test('los clubes extranjeros del sistema argentino no se sacan', () => {
+    // Dos paraguayos en el NEA y dos chilenos en la Unión Santacruceña. Son clubes
+    // de otro país compitiendo en el sistema argentino porque la unión de al lado
+    // les queda más cerca que cualquier otra, y el país que declaran es 'ar' porque
+    // el país del club en este catálogo es el del SISTEMA que disputa.
+    for (const name of ['CURDA', 'San José de Paraguay', 'UMAG', 'The British School']) {
+        const club = CLUBS.find((c) => c.name === name);
+        assert.ok(club, `falta ${name}`);
+        assert.equal(club!.source, 'canon-ar', `${name}: sale del canon argentino`);
+    }
+});
+
 test('marketBand refleja economía, no solo fuerza (Japón D1 rico)', () => {
     const mb = (name: string) => CLUBS.find((c) => c.name === name)?.marketBand ?? 0;
     const rt = (name: string) => CLUBS.find((c) => c.name === name)?.rating ?? 0;

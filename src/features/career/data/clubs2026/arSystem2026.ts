@@ -32,8 +32,17 @@
 // Cada división lleva entonces su propio `competitionId`, igual que las
 // francesas o inglesas del catálogo internacional.
 
-/** Sube si cambia CUALQUIER cosa de este archivo. Va dentro de la versión de catálogo. */
-export const AR_SYSTEM_VERSION = '2026.2';
+/**
+ * Sube si cambia CUALQUIER cosa de este archivo. Va dentro de la versión de catálogo.
+ *
+ * 2026.3 — la Patagonia y la Unión Andina, completas. La Patagonia deja de ser una
+ * división lump ("Torneo Austral y locales patagónicos") y pasa a tener una
+ * competición por unión: Austral+Chubut, Alto Valle, Tierra del Fuego, Santa Cruz
+ * y el desarrollo del Chubut. La Unión Andina pasa de dos clubes a siete. Y se
+ * corrigen dos ubicaciones que estaban mal: Los Chelcos juega el Andino y La
+ * Querencia el Regional del NOA, lo que dejó al Desarrollo cordobés sin nómina.
+ */
+export const AR_SYSTEM_VERSION = '2026.3';
 
 /** Las dos ramas del sistema. No hay ascenso ni descenso entre ellas. */
 export type ArBranch = 'urba' | 'interior';
@@ -420,11 +429,11 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
         branch: 'interior', region: 'noa', canonLevel: 6, band: 'n6',
         regularSeasonMatches: 14,
         promotesTo: 'ar-noa-a', promotionSlots: 2,
-        note: 'Tucumán no tiene una Primera B de clubes propia: su segundo nivel se canaliza por acá y por el Torneo Desarrollo de la unión. Tigres y Old Lions bajaron del A en 2025',
+        note: 'Tucumán no tiene una Primera B de clubes propia: su segundo nivel se canaliza por acá y por el Torneo Desarrollo de la unión. Tigres y Old Lions bajaron del A en 2025. La Querencia entra en 2026.3: estaba puesta en el Desarrollo cordobés y juega el NOA',
         clubs: [
             'Tigres', 'Santiago Lawn Tennis', 'Gimnasia y Tiro', 'Old Lions',
             'Jockey Club de Tucumán', 'Tiro Federal de Salta', 'Santiago Rugby',
-            'Aguará Guazú',
+            'Aguará Guazú', 'La Querencia',
         ],
     },
     {
@@ -432,13 +441,30 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
         // NEA ni el Litoral. Estos dos clubes estaban puestos a mil kilómetros de
         // su casa: Los Hurones es de Valle Viejo (Catamarca) y Los Teros, de la
         // capital catamarqueña.
+        // 2026.3: entra la Unión Andina COMPLETA. Antes eran dos clubes —los dos
+        // que tenían fila en el catálogo real— y ahora son los siete que juegan el
+        // torneo.
+        //
+        // Los Chelcos vuelve a casa. El canon lo tenía en el Torneo de Desarrollo
+        // de Córdoba con una nota que decía "está registrado en La Rioja pero juega
+        // el torneo de Córdoba", y no es así: juega el Andino, que es el de su
+        // unión. Con él y con La Querencia —que se fue al Regional del NOA B— el
+        // Desarrollo cordobés se queda sin nómina y sale del canon (ver
+        // `AR_NOT_MODELLED`).
+        //
+        // El nombre completo de CRAR va sin sigla y a propósito: "CRAR" ya es un
+        // club del Litoral en este catálogo, y dos clubes distintos no pueden
+        // compartir nombre. Es la misma solución que "San José de Paraguay".
         competitionId: 'ar-noa-andina',
         label: 'Torneo Andino (Catamarca y La Rioja)',
         branch: 'interior', region: 'noa', canonLevel: 7, band: 'n7',
-        regularSeasonMatches: 10,
+        regularSeasonMatches: 12,
         promotesTo: 'ar-noa-b', promotionSlots: 1,
-        note: 'la base del NOA: los clubes de la Unión Andina con respaldo en el catálogo real',
-        clubs: ['Los Teros', 'Los Hurones'],
+        note: 'la base del NOA: los siete clubes de la Unión Andina (Catamarca y La Rioja)',
+        clubs: [
+            'Los Teros', 'Los Hurones', 'Los Chelcos', 'Club Riojano Amigos del Rugby',
+            'Catamarca Rugby Club', 'Los Matacos', 'Club Social Rugby',
+        ],
     },
 
     // ── NORDESTE · Regional del Nordeste · Nivel 5 / Nivel 6 ────────────────
@@ -447,7 +473,11 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
     // Universitario de Rugby de Asunción) entran por invitación como campeón y
     // subcampeón del Campeonato Paraguayo del año anterior, y compiten de igual
     // a igual — en 2026 los dos terminaron la primera rueda en zona de playoff.
-    // O sea: el sistema son 225 clubes argentinos + 2 paraguayos.
+    //
+    // Y no son los únicos extranjeros del sistema: desde 2026.3, UMAG y The British
+    // School (Punta Arenas) juegan la Unión Santacruceña por el mismo motivo —la
+    // unión de al lado les queda más cerca que cualquier otra. El sistema son 260
+    // clubes argentinos + 2 paraguayos + 2 chilenos.
     {
         competitionId: 'ar-nea-a',
         label: 'Regional NEA A',
@@ -548,15 +578,13 @@ const INTERIOR_DIVISIONS: readonly ArDivision[] = [
 // de este archivo, es la decisión de fuerza.
 
 const LOCAL_DIVISIONS: readonly ArDivision[] = [
-    {
-        competitionId: 'ar-centro-desarrollo',
-        label: 'Torneo Oficial de Desarrollo de Córdoba',
-        branch: 'interior', region: 'centro', canonLevel: 7, band: 'n7',
-        regularSeasonMatches: 14,
-        promotesTo: 'ar-centro-super9b', promotionSlots: 1,
-        note: 'el Desarrollo cordobés real son ~24 equipos en 3 zonas; acá van los que tienen respaldo en el catálogo real. Los Chelcos está registrado en La Rioja pero juega el torneo de Córdoba',
-        clubs: ['Los Chelcos', 'La Querencia'],
-    },
+    // NO HAY "Torneo Oficial de Desarrollo de Córdoba" ACÁ, y su ausencia es el
+    // resultado de una corrección, no un olvido. La división existía en el canon
+    // con dos clubes, y los dos estaban mal puestos: Los Chelcos es de la Unión
+    // Andina y La Querencia juega el Regional del NOA. Movidos a su lugar, la
+    // división se quedó sin un solo club — y una división sin nómina no se
+    // sostiene con clubes prestados. Queda declarada en `AR_NOT_MODELLED` hasta que
+    // aparezca su nómina real, que son ~24 equipos en tres zonas.
     {
         // Sin "Torneos Locales del Litoral": el TRL 2026 estrenó formato con DOS
         // divisiones (Primera de 10 y Segunda de 12) y eliminó la Tercera. Los
@@ -574,17 +602,119 @@ const LOCAL_DIVISIONS: readonly ArDivision[] = [
             'Pico Rugby Club', 'Kamikazes de Colón', 'Los Indios de Bolívar',
         ],
     },
+    // ── PATAGONIA · UNA COMPETICIÓN POR UNIÓN (2026.3) ──────────────────────
+    //
+    // EL SISTEMA PATAGÓNICO TIENE TRES NIVELES Y ANTES ACÁ HABÍA UNO SOLO. Cada
+    // unión juega su campeonato en la primera parte del año; después los mejores
+    // clubes de esas uniones disputan el Regional Patagónico, que es la
+    // competencia que reúne a toda la región; y desde la reforma de la UAR de 2025
+    // las plazas al Torneo del Interior ya no salen directamente de ahí sino del
+    // mérito deportivo de la temporada anterior.
+    //
+    // Hasta 2026.2 todo lo que estaba debajo del Regional vivía en una sola
+    // división llamada "Torneo Austral y locales patagónicos", y eso metía en el
+    // mismo torneo a un club de Ushuaia y a uno de Cinco Saltos —1.800 km— que es
+    // exactamente el error que la auditoría 2026-27.10 corrigió en el resto del
+    // interior. Ahora hay una competición por unión, igual que hay una por región
+    // en el NOA o en el Litoral.
+    //
+    // NIVEL 6 las tres uniones cuyos clubes son habituales en el Regional (Austral
+    // con Chubut, y Alto Valle); NIVEL 7 Santa Cruz y Tierra del Fuego, cuya
+    // presencia en el Regional varió según la temporada y el formato aprobado por
+    // la UAR, y el desarrollo del Valle del Chubut.
+    //
+    // UN CLUB, UNA COMPETICIÓN: los que juegan el Regional Patagónico no se repiten
+    // acá abajo aunque también disputen el torneo de su unión. Marabunta, Neuquén y
+    // Roca no están en el Alto Valle; Las Águilas no está en Tierra del Fuego;
+    // Trelew y Bigornia no están en el Austral. Están arriba.
     {
         competitionId: 'ar-patagonia-austral',
-        label: 'Torneo Austral y locales patagónicos',
+        label: 'Torneo Austral (Valle del Chubut y Austral)',
         branch: 'interior', region: 'patagonia', canonLevel: 6, band: 'n6',
-        regularSeasonMatches: 12,
+        regularSeasonMatches: 14,
         promotesTo: 'ar-patagonia-regional', promotionSlots: 1,
-        note: 'el Torneo Austral (Valle del Chubut + Austral) es CLASIFICATORIO al Regional Patagónico, así que es el segundo nivel de la región y no su base. Puerto Madryn, finalista del Regional 2025, encabeza la nómina',
+        note: 'el Torneo Austral lo juegan juntas la Unión del Valle del Chubut y la Unión de Rugby Austral, y es CLASIFICATORIO al Regional Patagónico: es el segundo nivel de la región, no su base. Puerto Madryn, finalista del Regional 2025, encabeza la nómina',
         clubs: [
-            'Puerto Madryn', 'Comodoro', 'Calafate', 'Patoruzú', 'Draig Goch',
+            'Puerto Madryn', 'Comodoro', 'Calafate', 'Patoruzú',
+            'Universitario de Comodoro', 'Draig Goch', 'Los Cóndores', 'Huergo',
             'Cazones', 'San Jorge de la Austral',
         ],
+    },
+    {
+        // La unión más grande de la Patagonia: quince clubes afiliados, de los
+        // cuales los tres más fuertes (Marabunta, Neuquén y Roca) están en el
+        // Regional. Quedan doce acá.
+        //
+        // "Aguará del Alto Valle" lleva el sufijo porque Aguará es un club del NEA
+        // que ya está en este catálogo, y dos clubes distintos no pueden compartir
+        // nombre. Mismo criterio que "San José de Paraguay".
+        competitionId: 'ar-patagonia-alto-valle',
+        label: 'Torneo del Alto Valle',
+        branch: 'interior', region: 'patagonia', canonLevel: 6, band: 'n6',
+        regularSeasonMatches: 14,
+        promotesTo: 'ar-patagonia-regional', promotionSlots: 1,
+        note: 'la Unión de Rugby del Alto Valle (Neuquén y Río Negro) tiene 15 afiliados; tres juegan el Regional y estos doce, su torneo',
+        clubs: [
+            'Cipolletti', 'Allen', 'Trébol', 'Cinco Saltos', 'CUC', 'Regina',
+            'Patagonia Rugby Club', 'Catriel', 'Dinos', 'Los Patos', 'Zorros',
+            'Aguará del Alto Valle',
+        ],
+    },
+    {
+        // Nueve clubes afiliados, de los cuales Las Águilas juega el Regional.
+        // Ocho unions provinciales de la isla más austral del sistema: Ushuaia,
+        // Río Grande y Tolhuin.
+        competitionId: 'ar-patagonia-tdf',
+        label: 'Torneo de Tierra del Fuego',
+        branch: 'interior', region: 'patagonia', canonLevel: 7, band: 'n7',
+        regularSeasonMatches: 10,
+        promotesTo: 'ar-patagonia-austral', promotionSlots: 1,
+        note: 'la URTF tiene 9 afiliados; Las Águilas juega el Regional y estos ocho, el provincial. Su presencia en el Regional Patagónico varía según la temporada',
+        clubs: [
+            'Universitario de Río Grande', 'Ushuaia Rugby Club', 'Los Gallos',
+            'Río Grande Rugby & Hockey', 'Colegio del Sur', 'Orcas', 'Turu',
+            'Tolhuin',
+        ],
+    },
+    {
+        // DOS CLUBES CHILENOS Y NO SE SACAN, exactamente como los dos paraguayos
+        // del NEA: UMAG (Universidad de Magallanes) y The British School son de
+        // Punta Arenas y compiten en la Unión Santacruceña, porque Río Gallegos
+        // está más cerca de Punta Arenas que de cualquier otra ciudad con rugby.
+        // O sea: el sistema son clubes argentinos + 2 paraguayos + 2 chilenos.
+        //
+        // "El Calafate Rugby & Hockey" es de El Calafate (Santa Cruz) y NO es el
+        // "Calafate" del Torneo Austral, que es de Comodoro Rivadavia. Son dos
+        // clubes distintos con nombres parecidos y por eso van escritos completos.
+        competitionId: 'ar-patagonia-santacruz',
+        label: 'Torneo Santacruceño',
+        branch: 'interior', region: 'patagonia', canonLevel: 7, band: 'n7',
+        regularSeasonMatches: 10,
+        promotesTo: 'ar-patagonia-austral', promotionSlots: 1,
+        note: 'la Unión Santacruceña, con los dos clubes de Punta Arenas que compiten en ella. Su presencia en el Regional Patagónico varía según la temporada',
+        clubs: [
+            'Macá Tobiano', 'Coseba', 'El Calafate Rugby & Hockey', 'Los Guanacos',
+            'UMAG', 'The British School',
+        ],
+    },
+    {
+        // Los clubes de desarrollo del Valle del Chubut. Dos de los cuatro son de
+        // Río Negro (Valcheta y Valle Medio) y aun así compiten acá: la geografía
+        // patagónica hace que la unión más cercana no sea siempre la de la
+        // provincia. Se cargan donde juegan, no donde el mapa diría.
+        //
+        // "Albatros del Chubut" lleva sufijo porque Albatros es un club de la
+        // Segunda de la URBA que ya está en el catálogo.
+        //
+        // Los Dinos no está acá aunque la nómina de desarrollo lo nombre: es el
+        // mismo club que el Dinos del Alto Valle, y se carga una sola vez.
+        competitionId: 'ar-patagonia-chubut-desarrollo',
+        label: 'Desarrollo del Valle del Chubut',
+        branch: 'interior', region: 'patagonia', canonLevel: 7, band: 'n7',
+        regularSeasonMatches: 8,
+        promotesTo: 'ar-patagonia-austral', promotionSlots: 1,
+        note: 'los clubes de desarrollo de la Unión del Valle del Chubut; Valcheta y Valle Medio son rionegrinos y compiten igual acá',
+        clubs: ['Los Jabalíes', 'Valle Medio', 'Valcheta', 'Albatros del Chubut'],
     },
 ];
 
@@ -725,10 +855,16 @@ export function arExpectedCounts(): Record<string, number> {
  */
 export const AR_PENDING_ROSTERS: readonly { competitionId: string; note: string }[] = [
     { competitionId: 'ar-nea-bc', note: 'el Regional B/C son 16 equipos en 4 zonas; hay 8 identificados en el catálogo real' },
-    { competitionId: 'ar-centro-desarrollo', note: 'el Torneo Oficial de Desarrollo cordobés son ~24 equipos en 3 zonas; hay 2 identificados' },
     { competitionId: 'ar-oeste-bronce', note: 'la Copa de Bronce no publica nómina; hay 2 clubes identificados' },
-    { competitionId: 'ar-noa-andina', note: 'la Unión Andina no publica fixture unificado; hay 2 clubes identificados' },
     { competitionId: 'ar-pampeana-uroba-sur', note: '4 de los 6 clubes no tienen fila en el catálogo real y van sin escudo' },
+    // 2026.3: la Patagonia pasó de una división lump a una por unión, y casi
+    // ninguno de sus clubes tiene fila en el catálogo real. Están declarados como
+    // pendientes de escudo, no de nómina: los planteles son los afiliados reales de
+    // cada unión.
+    { competitionId: 'ar-patagonia-alto-valle', note: 'los 12 clubes son los afiliados reales de la URAV; casi ninguno tiene fila en el catálogo real y van sin escudo' },
+    { competitionId: 'ar-patagonia-tdf', note: 'los 8 clubes son los afiliados reales de la URTF; van sin escudo' },
+    { competitionId: 'ar-patagonia-santacruz', note: 'los 6 clubes son los de la Unión Santacruceña, con los dos de Punta Arenas; van sin escudo' },
+    { competitionId: 'ar-patagonia-chubut-desarrollo', note: 'los clubes de desarrollo de la URVCh; van sin escudo' },
 ];
 
 /**
@@ -739,6 +875,14 @@ export const AR_NOT_MODELLED: readonly { label: string; reason: string }[] = [
     {
         label: 'Regional Pampeano C',
         reason: 'el canon la menciona sin nómina conocida: no se inventa',
+    },
+    {
+        label: 'Torneo Oficial de Desarrollo de Córdoba',
+        reason: 'existía como división del canon con dos clubes, y los dos estaban mal ubicados: Los Chelcos es de la Unión Andina y La Querencia juega el Regional del NOA. Corregidos, la división se quedó sin nómina — son ~24 equipos en 3 zonas y no hay lista publicada, así que se declara en vez de sostenerla con clubes prestados',
+    },
+    {
+        label: 'Unión de Rugby de los Lagos del Sur',
+        reason: 'la unión existe y aporta clubes al Regional Patagónico, pero no tenemos su nómina de afiliados. Su club más conocido, Los Jabalíes (El Bolsón), compite en el desarrollo del Valle del Chubut y está cargado ahí',
     },
     {
         label: 'Torneo Reubicación del Oeste',

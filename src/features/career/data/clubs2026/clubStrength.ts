@@ -470,4 +470,265 @@ export const CLUB_STRENGTH: Record<string, ClubStrength> = {
     'Rio Branco': { rating: 34, prestige: 24, marketBand: 1 },
     'Nova Lima': { rating: 30, prestige: 20, marketBand: 1 }, // primer club de Minas Gerais en primera
     'Joaca': { rating: 28, prestige: 20, marketBand: 1 },
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // 2026-27.11 · dieciséis sistemas domésticos nuevos
+    // ═══════════════════════════════════════════════════════════════════════
+    //
+    // El criterio es el mismo de siempre y conviene repetirlo porque acá se nota
+    // más que en ningún otro bloque: RATING es fuerza deportiva de hoy y PRESTIGIO
+    // es historia. En estas ligas los dos números se separan muchísimo —Pontypool
+    // tuvo la primera línea más famosa del rugby y hoy pelea abajo; Hunter
+    // Wildfires no tiene historia y compite— y ahí está la gracia. Un club con
+    // prestigio alto y rating bajo es el club grande venido a menos, y el motor lo
+    // usa: el prestigio pesa en el atractivo de una oferta.
+
+    // ── Australia · Shute Shield (semipro) ───────────────────────────────────
+    // Sydney University y Randwick arriba, y por motivos distintos: la Universidad
+    // domina el siglo XXI, Randwick es el club de los Ella y el que tiene el
+    // palmarés más largo. Los dos últimos son los dos que llegaron después: los
+    // Two Blues del oeste de Sídney y los Wildfires de Newcastle.
+    'Sydney University': { rating: 62, prestige: 76, marketBand: 3 },
+    'Randwick': { rating: 60, prestige: 84, marketBand: 3 },
+    'Northern Suburbs': { rating: 58, prestige: 60, marketBand: 2 },
+    'Manly': { rating: 57, prestige: 66, marketBand: 2 },
+    'Gordon': { rating: 56, prestige: 58, marketBand: 2 },
+    'Eastwood': { rating: 55, prestige: 68, marketBand: 2 },
+    'Warringah': { rating: 54, prestige: 56, marketBand: 2 },
+    'Eastern Suburbs': { rating: 53, prestige: 54, marketBand: 2 },
+    'Southern Districts': { rating: 52, prestige: 48, marketBand: 2 },
+    'West Harbour': { rating: 50, prestige: 50, marketBand: 2 },
+    'Hunter Wildfires': { rating: 49, prestige: 34, marketBand: 1 },
+    'Western Sydney Two Blues': { rating: 48, prestige: 42, marketBand: 1 },
+
+    // ── Australia · Hospital Cup (Queensland, amateur) ───────────────────────
+    // La Universidad de Queensland y Brothers son los dos que se reparten el siglo
+    // de historia de Brisbane. Bond es la excepción del grupo: campus privado de la
+    // Gold Coast, sin historia y con estructura.
+    'University of Queensland': { rating: 54, prestige: 66, marketBand: 2 },
+    'Brothers': { rating: 52, prestige: 68, marketBand: 2 },
+    'Souths': { rating: 50, prestige: 58, marketBand: 2 },
+    'GPS': { rating: 49, prestige: 54, marketBand: 2 },
+    'Easts': { rating: 48, prestige: 52, marketBand: 2 },
+    'Bond University': { rating: 47, prestige: 40, marketBand: 2 },
+    'Norths': { rating: 46, prestige: 50, marketBand: 1 },
+    'Sunnybank': { rating: 45, prestige: 46, marketBand: 1 },
+    'Wests': { rating: 43, prestige: 44, marketBand: 1 },
+
+    // ── Gales · Premiership (amateur) ────────────────────────────────────────
+    // ACÁ EL PRESTIGIO MANDA AL REVÉS QUE EL RATING, y es la liga donde más se nota
+    // de todo el catálogo. Newport le ganó a los All Blacks en 1963 y Neath fue "los
+    // All Blacks galeses"; Pontypool tuvo la primera línea más famosa de la historia
+    // del rugby (Faulkner, Windsor, Price). Los tres están abajo en fuerza y arriba
+    // en historia. Arriba en fuerza están Cardiff RFC —el equipo de abajo del
+    // Cardiff de la URC— y Merthyr, que subió con plata reciente y sin vitrina.
+    'Cardiff RFC': { rating: 54, prestige: 70, marketBand: 2 },
+    'Pontypridd': { rating: 53, prestige: 68, marketBand: 2 },
+    'Merthyr': { rating: 52, prestige: 44, marketBand: 2 },
+    'Llandovery': { rating: 51, prestige: 46, marketBand: 1 },
+    'Aberavon': { rating: 50, prestige: 56, marketBand: 1 },
+    'Newport': { rating: 49, prestige: 72, marketBand: 2 }, // le ganó a los All Blacks en 1963
+    'RGC 1404': { rating: 48, prestige: 34, marketBand: 1 }, // el norte, el proyecto más nuevo
+    'Ebbw Vale': { rating: 47, prestige: 50, marketBand: 1 },
+    'Bridgend': { rating: 46, prestige: 58, marketBand: 1 },
+    'Neath': { rating: 45, prestige: 66, marketBand: 1 }, // los "All Blacks galeses"
+    'Carmarthen Quins': { rating: 44, prestige: 38, marketBand: 1 },
+    'Pontypool': { rating: 43, prestige: 62, marketBand: 1 }, // la Pontypool front row
+
+    // ── Irlanda · AIL 1A (amateur por reglamento) ────────────────────────────
+    // Clontarf y Cork Constitution se reparten los títulos modernos; Dublin
+    // University es el Trinity, fundado en 1854 y el club de rugby más antiguo del
+    // mundo con actividad continua — de ahí que su prestigio no se parezca a su
+    // fuerza.
+    'Clontarf': { rating: 54, prestige: 62, marketBand: 2 },
+    'Cork Constitution': { rating: 53, prestige: 66, marketBand: 2 },
+    'Lansdowne': { rating: 52, prestige: 60, marketBand: 2 },
+    'Terenure College': { rating: 51, prestige: 48, marketBand: 1 },
+    'Young Munster': { rating: 49, prestige: 56, marketBand: 1 },
+    "St. Mary's College": { rating: 48, prestige: 54, marketBand: 1 },
+    'Ballynahinch': { rating: 46, prestige: 42, marketBand: 1 },
+    'Dublin University': { rating: 44, prestige: 50, marketBand: 1 }, // Trinity, 1854
+
+    // ── Escocia · Premiership (amateur) ──────────────────────────────────────
+    // Las Borders sostienen el prestigio de esta liga: Hawick es el club más
+    // ganador de Escocia y Melrose es donde se inventó el rugby seven en 1883. En
+    // fuerza mandan hoy los de Edimburgo y Ayr.
+    'Currie Chieftains': { rating: 50, prestige: 48, marketBand: 1 },
+    'Ayr': { rating: 49, prestige: 52, marketBand: 1 },
+    "Heriot's": { rating: 48, prestige: 54, marketBand: 1 },
+    'Hawick': { rating: 47, prestige: 62, marketBand: 1 }, // el más ganador de Escocia
+    'Melrose': { rating: 46, prestige: 58, marketBand: 1 }, // donde nació el seven, 1883
+    'Watsonians': { rating: 45, prestige: 50, marketBand: 1 },
+    'Boroughmuir Bears': { rating: 44, prestige: 46, marketBand: 1 },
+    'Selkirk': { rating: 42, prestige: 40, marketBand: 1 },
+    'Jed-Forest': { rating: 41, prestige: 38, marketBand: 1 },
+    'Musselburgh': { rating: 40, prestige: 30, marketBand: 1 },
+
+    // ── Georgia · Didi 10 (semipro) ──────────────────────────────────────────
+    // Black Lion está solo arriba y la distancia es real: es la franquicia de la
+    // unión, la que juega la Rugby Europe Super Cup. Lelo Saracens es el club con
+    // más títulos y el que le pelea.
+    'Black Lion': { rating: 62, prestige: 56, marketBand: 3 },
+    'Lelo Saracens': { rating: 58, prestige: 64, marketBand: 2 },
+    'Aia Kutaisi': { rating: 56, prestige: 60, marketBand: 2 },
+    'Armazi': { rating: 54, prestige: 46, marketBand: 2 },
+    'Batumi': { rating: 53, prestige: 44, marketBand: 2 },
+    'Khvamli': { rating: 52, prestige: 40, marketBand: 1 },
+    'Akademia': { rating: 51, prestige: 38, marketBand: 1 },
+    'Kharebi': { rating: 50, prestige: 42, marketBand: 1 },
+    'Aresi': { rating: 49, prestige: 36, marketBand: 1 },
+    'Vephkhvebi': { rating: 48, prestige: 34, marketBand: 1 },
+
+    // ── Rumania · Liga Națională (semipro) ───────────────────────────────────
+    // Steaua (Ejército) y Dinamo (Interior) son los dos clubes institucionales y por
+    // eso su prestigio es más alto que su fuerza de hoy: la liga la vienen ganando
+    // Baia Mare y Timișoara.
+    'CSM Știința Baia Mare': { rating: 60, prestige: 62, marketBand: 2 },
+    'CSA Steaua București': { rating: 59, prestige: 70, marketBand: 2 },
+    'Dinamo București': { rating: 57, prestige: 64, marketBand: 2 },
+    'SCM USV Timișoara': { rating: 56, prestige: 60, marketBand: 2 },
+    'Rapid București': { rating: 52, prestige: 48, marketBand: 1 },
+    'Universitatea Cluj': { rating: 51, prestige: 42, marketBand: 1 },
+    'RC Gura Humorului': { rating: 49, prestige: 36, marketBand: 1 },
+    'RC Bârlad': { rating: 48, prestige: 38, marketBand: 1 },
+
+    // ── Rusia · Campeonato (profesional) ─────────────────────────────────────
+    // Los dos de Krasnoyarsk arriba —Enisei-STM y Krasny Yar son la misma ciudad y
+    // el clásico del rugby ruso—, y Enisei con margen: es el que llegó a jugar la
+    // Challenge Cup europea.
+    'Enisei-STM': { rating: 70, prestige: 74, marketBand: 3 },
+    'Krasny Yar': { rating: 66, prestige: 70, marketBand: 3 },
+    'Strela-Ak Bars': { rating: 63, prestige: 52, marketBand: 2 },
+    'VVA-Podmoskovye': { rating: 62, prestige: 60, marketBand: 2 },
+    'Lokomotiv Penza': { rating: 61, prestige: 46, marketBand: 2 },
+    'Slava Moscow': { rating: 60, prestige: 48, marketBand: 2 },
+    'Dinamo Moscow': { rating: 59, prestige: 44, marketBand: 2 },
+    'Metallurg Novokuznetsk': { rating: 58, prestige: 40, marketBand: 2 },
+
+    // ── Fiyi · Skipper Cup (amateur, uniones provinciales) ───────────────────
+    // Nadroga y Suva son las dos provincias históricas; Naitasiri viene siendo la
+    // más fuerte de los últimos años. Abajo están las islas chicas, que compiten con
+    // lo que tienen: Malolo, Ovalau, Yasawa.
+    'Nadroga': { rating: 54, prestige: 70, marketBand: 1 },
+    'Naitasiri': { rating: 52, prestige: 62, marketBand: 1 },
+    'Suva': { rating: 51, prestige: 64, marketBand: 1 },
+    'Namosi': { rating: 50, prestige: 52, marketBand: 1 },
+    'Tailevu': { rating: 49, prestige: 50, marketBand: 1 },
+    'Nadi': { rating: 48, prestige: 54, marketBand: 1 },
+    'Lautoka': { rating: 46, prestige: 44, marketBand: 1 },
+    'Northland de Fiyi': { rating: 45, prestige: 34, marketBand: 1 },
+    'Macuata': { rating: 44, prestige: 36, marketBand: 1 },
+    'Yasawa': { rating: 43, prestige: 30, marketBand: 1 },
+    'Ovalau': { rating: 42, prestige: 32, marketBand: 1 },
+    'Malolo': { rating: 41, prestige: 28, marketBand: 1 },
+    'Vatukoula': { rating: 40, prestige: 26, marketBand: 1 },
+
+    // ── Canadá (amateur) ─────────────────────────────────────────────────────
+    // Los dos primeros no son clubes y por eso están arriba: Pacific Pride es la
+    // academia de Rugby Canada y Ontario Blues un seleccionado provincial. Abajo sí
+    // hay clubes, con la isla de Vancouver (Castaway Wanderers, James Bay) como la
+    // zona más fuerte del país.
+    'Pacific Pride': { rating: 52, prestige: 44, marketBand: 2 }, // academia de Rugby Canada
+    'Ontario Blues': { rating: 50, prestige: 48, marketBand: 2 }, // seleccionado provincial
+    'UBC Thunderbirds': { rating: 48, prestige: 56, marketBand: 1 },
+    'Castaway Wanderers': { rating: 47, prestige: 54, marketBand: 1 },
+    'James Bay AA': { rating: 46, prestige: 50, marketBand: 1 },
+    'Meraloma RFC': { rating: 44, prestige: 42, marketBand: 1 },
+    'Toronto Scottish': { rating: 43, prestige: 40, marketBand: 1 },
+    'Calgary Hornets': { rating: 42, prestige: 36, marketBand: 1 },
+    'Edmonton Clansmen': { rating: 41, prestige: 34, marketBand: 1 },
+    'Montreal Irish': { rating: 40, prestige: 32, marketBand: 1 },
+
+    // ── Bélgica · Elite League (amateur) ─────────────────────────────────────
+    'Kituro RC': { rating: 44, prestige: 46, marketBand: 1 },
+    'Boitsfort RC': { rating: 42, prestige: 44, marketBand: 1 },
+    'ASUB Waterloo': { rating: 41, prestige: 40, marketBand: 1 },
+    'Dendermonde RC': { rating: 39, prestige: 38, marketBand: 1 },
+    'La Hulpe RC': { rating: 37, prestige: 34, marketBand: 1 },
+    'RC Liège': { rating: 35, prestige: 32, marketBand: 1 },
+    'Soignies RC': { rating: 33, prestige: 30, marketBand: 1 },
+
+    // ── Países Bajos · Ereklasse (amateur) ───────────────────────────────────
+    "RC 't Gooi": { rating: 44, prestige: 52, marketBand: 1 },
+    'Haagsche RC': { rating: 42, prestige: 48, marketBand: 1 },
+    'RC Hilversum': { rating: 40, prestige: 44, marketBand: 1 },
+    'DIOK Leiden': { rating: 38, prestige: 40, marketBand: 1 },
+    'RFC Haarlem': { rating: 36, prestige: 38, marketBand: 1 },
+    'Castricum RC': { rating: 35, prestige: 34, marketBand: 1 },
+    'Oisterwijk Oysters': { rating: 33, prestige: 30, marketBand: 1 },
+    'RC Eemland': { rating: 31, prestige: 28, marketBand: 1 },
+
+    // ── Perú · Torneo Metropolitano (amateur) ────────────────────────────────
+    // Los de Lima arriba y el interior abajo, que es la forma real de esta
+    // competición: Arequipa, Chiclayo, Trujillo, Ilo, Barranca y Piura viajan.
+    'Lima Rugby Club': { rating: 42, prestige: 46, marketBand: 1 },
+    'Alumni Rugby Club': { rating: 40, prestige: 44, marketBand: 1 },
+    'Club Cruzados': { rating: 39, prestige: 40, marketBand: 1 },
+    'Old Markhamians RFC': { rating: 38, prestige: 42, marketBand: 1 },
+    'Leones de San Marcos': { rating: 37, prestige: 34, marketBand: 1 },
+    'Blues Rugby Association': { rating: 36, prestige: 32, marketBand: 1 },
+    'Dragones Rugby Club': { rating: 35, prestige: 30, marketBand: 1 },
+    'Navy Warriors Rugby Club': { rating: 34, prestige: 32, marketBand: 1 },
+    'Flaming Lions RFC': { rating: 33, prestige: 28, marketBand: 1 },
+    'Toros Rugby Club': { rating: 32, prestige: 26, marketBand: 1 }, // Arequipa
+    'Unión Rugby Club': { rating: 31, prestige: 26, marketBand: 1 },
+    'Zuma Sport Rugby': { rating: 30, prestige: 24, marketBand: 1 },
+    'Mochikas Rugby Club': { rating: 29, prestige: 26, marketBand: 1 }, // Chiclayo
+    'Sharks Rugby Club': { rating: 28, prestige: 24, marketBand: 1 }, // Trujillo
+    'Piura Rugby Club': { rating: 27, prestige: 22, marketBand: 1 },
+    'Sea Wolf Rugby Club': { rating: 26, prestige: 20, marketBand: 1 }, // Ilo
+    'Vikingos Rugby Club': { rating: 25, prestige: 20, marketBand: 1 }, // Barranca
+
+    // ── Colombia · Liga Nacional (amateur) ───────────────────────────────────
+    'Tucanes Rugby Club': { rating: 42, prestige: 44, marketBand: 1 }, // Bogotá
+    'Bogotá Rugby Club': { rating: 40, prestige: 46, marketBand: 1 },
+    'Carneros Rugby Club': { rating: 38, prestige: 36, marketBand: 1 }, // Medellín
+    'Cali Rugby Club': { rating: 36, prestige: 38, marketBand: 1 },
+    'Gatos Rugby Club': { rating: 35, prestige: 32, marketBand: 1 }, // Medellín
+    'Universitario del Valle': { rating: 33, prestige: 34, marketBand: 1 },
+    'Barranquilla Rugby Club': { rating: 32, prestige: 30, marketBand: 1 },
+    'Lions Rugby Club': { rating: 30, prestige: 26, marketBand: 1 },
+    'Búhos Rugby Club': { rating: 28, prestige: 24, marketBand: 1 },
+    'Pasto Rugby Club': { rating: 26, prestige: 22, marketBand: 1 },
+
+    // ── Paraguay · Primera División (amateur) ────────────────────────────────
+    // Sin CURDA ni San José, que juegan el Regional NEA argentino y están cargados
+    // ahí: por eso el techo de esta liga es más bajo de lo que sería con ellos.
+    'Asunción Rugby Club': { rating: 44, prestige: 48, marketBand: 1 },
+    'Cristo Rey Rugby Club': { rating: 41, prestige: 40, marketBand: 1 },
+    'Santa Clara Rugby Club': { rating: 39, prestige: 36, marketBand: 1 },
+    'Luque Rugby Club': { rating: 36, prestige: 32, marketBand: 1 },
+    'Presidente Hayes Rugby Club': { rating: 34, prestige: 34, marketBand: 1 },
+    'Mariano Roque Alonso Rugby Club': { rating: 31, prestige: 26, marketBand: 1 },
+
+    // ── Bolivia · Liga Boliviana (amateur, la banda más baja del catálogo) ───
+    'Santa Cruz Rugby Club': { rating: 38, prestige: 40, marketBand: 1 },
+    'Jenecherú Rugby Club': { rating: 36, prestige: 34, marketBand: 1 }, // Santa Cruz
+    'La Paz Rugby Club': { rating: 34, prestige: 36, marketBand: 1 },
+    'Universitario Rugby Club': { rating: 32, prestige: 30, marketBand: 1 }, // Cochabamba
+    'Supay Rugby Club': { rating: 30, prestige: 28, marketBand: 1 }, // Cochabamba
+    'Aranjuez Rugby Club': { rating: 28, prestige: 24, marketBand: 1 }, // Tarija
+    'Tigres Rugby Club': { rating: 26, prestige: 22, marketBand: 1 }, // Tarija
+    'Yacuiba Rugby Club': { rating: 24, prestige: 20, marketBand: 1 },
+
+    // ── México · Liga Mexicana XV (amateur) ──────────────────────────────────
+    // Los cinco de abajo cambiaron al cruzar la nómina contra los escudos reales
+    // (ver el comentario de `mx-liga` en rosters2026.ts). Los ratings se conservan
+    // por POSICIÓN y no por nombre: la fuerza relativa de la liga ya estaba
+    // calibrada y lo que cambió es quién ocupa cada lugar.
+    'Pumas UNAM': { rating: 42, prestige: 48, marketBand: 1 },
+    'Wallabies RFC': { rating: 40, prestige: 44, marketBand: 1 },
+    'Tazmania RFC': { rating: 39, prestige: 40, marketBand: 1 },
+    'Black Thunder RC': { rating: 37, prestige: 34, marketBand: 1 },
+    'Koalas RFC': { rating: 36, prestige: 34, marketBand: 1 },
+    "Rhino's RFC": { rating: 35, prestige: 32, marketBand: 1 },
+    'Cumiyais RFC': { rating: 34, prestige: 30, marketBand: 1 }, // Monterrey
+    'Tigres UANL': { rating: 33, prestige: 30, marketBand: 1 }, // Universidad Autónoma de Nuevo León
+    'Templarios Rugby': { rating: 32, prestige: 28, marketBand: 1 },
+    'Legión de Cuervos': { rating: 31, prestige: 26, marketBand: 1 },
+    'Bisontes Rugby Club': { rating: 30, prestige: 26, marketBand: 1 }, // Guadalajara
+    'Coyotes Rugby Club': { rating: 29, prestige: 24, marketBand: 1 },
+    'Axolotl Rugby Club': { rating: 28, prestige: 24, marketBand: 1 },
+    'Leones Rugby': { rating: 27, prestige: 22, marketBand: 1 }, // Colima
+    'Asociación Ciudad de México': { rating: 26, prestige: 20, marketBand: 1 },
 };
