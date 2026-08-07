@@ -92,6 +92,53 @@ function autorizado(request: NextRequest): boolean {
     return request.headers.get('authorization') === `Bearer ${secret}`;
 }
 
+/**
+ * El `schedule` con el que está declarado el barrido en `vercel.json`.
+ *
+ * Se compara literal contra el header `x-vercel-cron-schedule`, así que si se
+ * cambia allá hay que cambiarlo acá. Es feo tener el dato en dos lados; la
+ * alternativa era peor, y está explicada en `resolverScope`.
+ */
+const SCHEDULE_BARRIDO = '0 9 * * *';
+
+/**
+ * De dónde sale el `scope`, y por qué no alcanza con el query string.
+ *
+ * Las entradas de `vercel.json` lo pasan por URL
+ * (`/api/cron/urba-sync?scope=barrido`), pero **Vercel no documenta el query
+ * string en el `path` de un cron**: la referencia sólo dice que el path arranca
+ * con `/` y muestra ejemplos con segmentos, no con `?`. Puede que funcione; no
+ * está prometido.
+ *
+ * Y el modo de falla, si algún día deja de pasarlo, es de los que no avisan:
+ * `scope` ausente cae en 'jornada', que es el valor por defecto, así que **el
+ * barrido diario se convertiría en una jornada más** y seguiría respondiendo
+ * `ok: true`. El cron en verde y la cola de correcciones sin levantar — el 24%
+ * de los partidos de URBA se corrige después de las 24 h, y ésa es justo la
+ * parte que el barrido existe para traer.
+ *
+ * Así que cuando el query string no viene, el scope sale del header
+ * `x-vercel-cron-schedule`, que Vercel SÍ documenta y que existe precisamente
+ * para distinguir invocaciones que comparten path. El query string sigue
+ * mandando cuando está: es lo que permite dispararlo a mano con curl.
+ */
+function resolverScope(url: URL, request: NextRequest): {
+    scope: 'jornada' | 'barrido';
+    scopeDesde: 'query' | 'schedule' | 'default';
+} {
+    const pedido = url.searchParams.get('scope');
+    if (pedido) {
+        return { scope: pedido === 'barrido' ? 'barrido' : 'jornada', scopeDesde: 'query' };
+    }
+
+    const schedule = request.headers.get('x-vercel-cron-schedule');
+    if (schedule) {
+        return { scope: schedule === SCHEDULE_BARRIDO ? 'barrido' : 'jornada', scopeDesde: 'schedule' };
+    }
+
+    return { scope: 'jornada', scopeDesde: 'default' };
+}
+
 const diaBA = (iso: string | Date) =>
     new Intl.DateTimeFormat('en-CA', {
         timeZone: 'America/Argentina/Buenos_Aires',
@@ -105,7 +152,7 @@ export async function GET(request: NextRequest) {
 
     const arrancoEn = Date.now();
     const url = new URL(request.url);
-    const scope = url.searchParams.get('scope') === 'barrido' ? 'barrido' : 'jornada';
+    const { scope, scopeDesde } = resolverScope(url, request);
     const enSeco = url.searchParams.get('dry') === '1';
     const incluirOcultos = url.searchParams.get('ocultos') === '1';
 
@@ -328,14 +375,16 @@ export async function GET(request: NextRequest) {
         }
 
         const elapsed = Date.now() - arrancoEn;
-        console.log(`[urba-sync] anio=${ANIO}${esHistorico ? ' (HISTÓRICO, a pedido)' : ''} scope=${scope}${enSeco ? ' (en seco)' : ''} torneos=${torneosLeidos}/${tanda.length} written=${written} updated=${updated} skipped=${skipped} errors=${errors.length} en ${elapsed}ms`);
+        console.log(`[urba-sync] anio=${ANIO}${esHistorico ? ' (HISTÓRICO, a pedido)' : ''} scope=${scope}(${scopeDesde})${enSeco ? ' (en seco)' : ''} torneos=${torneosLeidos}/${tanda.length} written=${written} updated=${updated} skipped=${skipped} errors=${errors.length} en ${elapsed}ms`);
 
         // El trabajo no se pudo hacer: 500. Un contador en verde con la escritura
         // caída es peor que un cron en rojo — de eso salió la regla.
         const noSePudo = torneosLeidos === 0 && tanda.length > 0;
         return NextResponse.json({
             ok: !noSePudo && errors.length === 0,
-            scope, dry: enSeco,
+            // `scopeDesde` dice de dónde salió el scope. Si un día dice "schedule",
+            // Vercel dejó de pasar el query string y el header lo salvó.
+            scope, scopeDesde, dry: enSeco,
             // Que la respuesta diga QUÉ temporada se sincronizó, siempre. Sin esto,
             // una corrida sobre el año equivocado se ve idéntica a una correcta.
             anio: ANIO,
@@ -362,7 +411,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         console.error('[urba-sync] falló:', error);
         return NextResponse.json({
-            ok: false, scope, dry: enSeco,
+            ok: false, scope, scopeDesde, dry: enSeco,
             written, updated, skipped,
             errors: [...errors, error instanceof Error ? error.message : String(error)],
             elapsed: Date.now() - arrancoEn,
