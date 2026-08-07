@@ -6,6 +6,8 @@ import { FixtureService } from '@/lib/services/fixtureService';
 import { syncClubRankingsForMatches } from '@/lib/server/clubRankings';
 import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 import { isMissingRelationError } from '@/lib/utils/fixtureImportErrors';
+import { extractDocumentText } from '@/lib/services/fixtureTextExtraction';
+import { extractRoundLabel, parseFixtureText, type ParsedFixtureText } from '@/lib/services/fixtureLineParser';
 import type {
   FixtureColumnMapping,
   FixtureColumnSuggestion,
@@ -138,9 +140,10 @@ export class FixtureImportService {
     if (documentType === 'standings_sheet') {
       issues.push(this.issue('error', 'document_not_fixture', 'El documento parece una tabla de posiciones y no un fixture.', 'document'));
     }
-    if (['pdf_text', 'pdf_scanned', 'image'].includes(parsed.sourceType) && rows.length === 0) {
-      issues.push(this.issue('warning', 'review_required', 'La fuente requiere OCR o revisión manual antes de importar.', 'document'));
-    }
+    // El aviso que había acá («la fuente requiere OCR o revisión manual») dejó
+    // de tener sentido: el OCR ya corre, y cuando no saca nada, `parseSource`
+    // devuelve el motivo concreto (escaneo sin texto, PDF protegido, imagen
+    // ilegible) en vez de este cartel genérico.
 
     const job = await this.createImportJob(supabase, params, parsed, summary, documentType, confidence);
 
@@ -716,42 +719,103 @@ export class FixtureImportService {
     };
   }
 
+  /** Las columnas que produce el parser de líneas, en el orden en que se leen. */
+  private static readonly TEXT_HEADERS = [
+    'home_team', 'away_team', 'match_date', 'match_time', 'venue', 'round', 'group', 'score', 'status',
+  ];
+
+  private static readonly TEXT_MAPPING: FixtureColumnMapping = {
+    home_team: 'home_team',
+    away_team: 'away_team',
+    match_date: 'match_date',
+    match_time: 'match_time',
+    venue: 'venue',
+    round: 'round',
+    group: 'group',
+    score: 'score',
+    status: 'status',
+  };
+
+  /**
+   * Adapta la salida del parser de líneas a las filas planas que espera el
+   * resto del pipeline (`buildPreviewRow` lee por nombre de columna).
+   *
+   * `_roundInherited` viaja para que el preview pueda decir «esta jornada la
+   * heredó del encabezado» en vez de dejar al usuario adivinando de dónde
+   * salió.
+   */
+  private static rowsFromParsedText(parsed: ParsedFixtureText) {
+    return parsed.rows.map((row) => ({
+      _line: row.raw,
+      line_number: row.lineNumber,
+      home_team: row.homeTeam,
+      away_team: row.awayTeam,
+      match_date: row.matchDate,
+      match_time: row.matchTime,
+      venue: row.venue,
+      round: row.round,
+      group: row.group,
+      score: row.score,
+      status: row.status,
+      _roundInherited: row.roundInherited,
+      _dateInherited: row.dateInherited,
+    }));
+  }
+
+  /**
+   * Avisos derivados de lo que el parser encontró (o no) en el texto.
+   * Son informativos: el preview manda, pero el usuario merece saber qué pasó
+   * antes de mirar 60 filas.
+   */
+  private static issuesFromParsedText(parsed: ParsedFixtureText): FixtureImportIssue[] {
+    const issues: FixtureImportIssue[] = [];
+
+    if (!parsed.rows.length) {
+      issues.push(this.issue('error', 'empty_text', 'No se detectaron líneas con partidos.', 'document'));
+      return issues;
+    }
+
+    if (parsed.detectedRounds.length) {
+      issues.push(this.issue(
+        'info',
+        'rounds_detected',
+        `Se detectaron ${parsed.detectedRounds.length} jornadas por encabezado: ${parsed.detectedRounds.join(', ')}.`,
+        'document',
+      ));
+    } else if (parsed.rows.every((row) => !row.round)) {
+      issues.push(this.issue(
+        'warning',
+        'no_round_detected',
+        'Ninguna línea dice a qué jornada pertenece. Podés escribir «Fecha 1» en una línea sola antes de sus partidos, y el resto la hereda.',
+        'round',
+      ));
+    }
+
+    if (parsed.skippedLines.length) {
+      const preview = parsed.skippedLines.slice(0, 3).map((line) => `línea ${line.lineNumber}`).join(', ');
+      issues.push(this.issue(
+        'warning',
+        'lines_skipped',
+        `Se saltearon ${parsed.skippedLines.length} líneas sin equipos reconocibles (${preview}${parsed.skippedLines.length > 3 ? '…' : ''}).`,
+        'document',
+      ));
+    }
+
+    return issues;
+  }
+
   private static async parseSource(file: File | null, pastedText: string | null, mapping: FixtureColumnMapping | null): Promise<ParsedSource> {
     if (pastedText?.trim()) {
-      const rows = pastedText
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .map((line, index) => {
-          const parsed = this.parseTextLine(line);
-          return {
-            _line: line,
-            line_number: index + 1,
-            home_team: parsed.homeTeam,
-            away_team: parsed.awayTeam,
-            match_date: parsed.matchDate,
-            match_time: parsed.matchTime,
-            venue: parsed.venue,
-            round: parsed.round,
-            status: parsed.status,
-          };
-        });
+      const parsed = parseFixtureText(pastedText);
+      const rows = this.rowsFromParsedText(parsed);
 
       return {
         sourceType: 'pasted_text',
-        headers: ['home_team', 'away_team', 'match_date', 'match_time', 'venue', 'round', 'status'],
+        headers: this.TEXT_HEADERS,
         rows,
         extractedText: pastedText,
-        issues: rows.length ? [] : [this.issue('error', 'empty_text', 'No se detectaron líneas con partidos.', 'document')],
-        mapping: {
-          home_team: 'home_team',
-          away_team: 'away_team',
-          match_date: 'match_date',
-          match_time: 'match_time',
-          venue: 'venue',
-          round: 'round',
-          status: 'status',
-        },
+        issues: this.issuesFromParsedText(parsed),
+        mapping: this.TEXT_MAPPING,
         suggestions: [],
         needsManualMapping: false,
         fileName: null,
@@ -812,12 +876,70 @@ export class FixtureImportService {
       };
     }
 
+    // PDF e imagen: se saca el texto y se lo manda por el MISMO parser de
+    // líneas que el texto pegado. Un fixture es un fixture venga de donde
+    // venga; lo único que cambia es cómo se llega hasta sus renglones.
+    if (sourceType === 'pdf_text' || sourceType === 'pdf_scanned' || sourceType === 'image') {
+      const extraction = await extractDocumentText(
+        buffer,
+        sourceType === 'image' ? 'image' : 'pdf',
+      );
+
+      const parsed = parseFixtureText(extraction.text, {
+        ocrTolerant: extraction.method === 'ocr',
+      });
+      const rows = this.rowsFromParsedText(parsed);
+
+      const issues: FixtureImportIssue[] = [
+        ...extraction.warnings.map((message) =>
+          this.issue('warning', 'extraction_warning', message, 'document')),
+      ];
+
+      if (!extraction.text.trim()) {
+        // El aviso de `extraction.warnings` ya explica el motivo concreto
+        // (escaneo sin texto, archivo protegido, OCR caído). Acá sólo se marca
+        // que no hay nada que importar.
+        issues.push(this.issue('error', 'no_text_extracted', 'No se pudo sacar texto de este archivo.', 'document'));
+      } else {
+        if (extraction.method === 'ocr') {
+          issues.push(this.issue(
+            'info',
+            'ocr_applied',
+            `Texto reconocido por OCR${extraction.ocrConfidence !== null ? ` (confianza ${extraction.ocrConfidence}%)` : ''}. Revisá los nombres de club antes de confirmar.`,
+            'document',
+          ));
+        }
+        issues.push(...this.issuesFromParsedText(parsed));
+      }
+
+      return {
+        // Un PDF del que SÍ salió texto embebido es `pdf_text`, aunque la
+        // extensión no lo dijera; uno que hubo que reconocer queda como
+        // escaneo. El tipo refleja lo que pasó, no lo que se supuso.
+        sourceType: sourceType === 'image'
+          ? 'image'
+          : (extraction.method === 'pdf_text' ? 'pdf_text' : 'pdf_scanned'),
+        headers: this.TEXT_HEADERS,
+        rows,
+        extractedText: extraction.text || null,
+        issues,
+        mapping: this.TEXT_MAPPING,
+        suggestions: [],
+        needsManualMapping: false,
+        fileName: file.name,
+        mimeType: file.type || null,
+        extension,
+        size: file.size,
+        buffer,
+      };
+    }
+
     return {
       sourceType,
       headers: [],
       rows: [],
       extractedText: null,
-      issues: [this.issue('warning', 'ocr_required', 'PDF e imágenes quedan en revisión obligatoria hasta integrar OCR.', 'document')],
+      issues: [this.issue('warning', 'unsupported_source', 'Formato no reconocido. Subí un Excel, un CSV, un PDF o una imagen.', 'document')],
       mapping: {},
       suggestions: [],
       needsManualMapping: false,
@@ -1028,96 +1150,6 @@ export class FixtureImportService {
     }, {});
   }
 
-  private static parseTextLine(line: string) {
-    const pipeSegments = line.split(/\s+\|\s+/).map((item) => item.trim()).filter(Boolean);
-    const dashSegments = line.split(/\s+-\s+/).map((item) => item.trim()).filter(Boolean);
-    const segments = dashSegments.length >= 3 ? dashSegments : pipeSegments;
-    const teamSegmentIndex = segments.findIndex((segment) => /\b(?:vs|v)\b/i.test(segment));
-    const metadataSegments = teamSegmentIndex >= 0 ? segments.slice(0, teamSegmentIndex) : [];
-    const trailingSegments = teamSegmentIndex >= 0 ? segments.slice(teamSegmentIndex + 1) : [];
-
-    let round: string | null = this.extractNumericRoundLabel(line);
-    const hasCanonicalRound = Boolean(round);
-    let matchDate: string | null = null;
-    let matchTime: string | null = null;
-    let venue: string | null = null;
-
-    metadataSegments.forEach((segment) => {
-      const dateMatch = segment.match(/\b(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)\b/);
-      if (dateMatch) {
-        matchDate = dateMatch[1];
-        const roundCandidate = segment.replace(dateMatch[0], '').replace(/^[\s-]+|[\s-]+$/g, '').trim();
-        if (roundCandidate && !round) {
-          round = roundCandidate;
-        }
-        return;
-      }
-
-      if (segment && !hasCanonicalRound) {
-        round = round ? `${round} ${segment}`.trim() : segment;
-      }
-    });
-
-    if (!matchDate) {
-      const inlineDateMatch = line.match(/\b(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)\b/);
-      matchDate = inlineDateMatch?.[1] || null;
-      if (matchDate && !round && segments[0]) {
-        const roundCandidate = segments[0].replace(matchDate, '').replace(/^[\s-]+|[\s-]+$/g, '').trim();
-        round = roundCandidate || null;
-      }
-    }
-
-    trailingSegments.forEach((segment) => {
-      if (!matchTime) {
-        const timeMatch = segment.match(/\b(\d{1,2}:\d{2})\b/);
-        if (timeMatch) {
-          matchTime = timeMatch[1];
-          const venueCandidate = segment.replace(timeMatch[0], '').replace(/^[\s-]+|[\s-]+$/g, '').trim();
-          if (venueCandidate) {
-            venue = venue ? `${venue} | ${venueCandidate}` : venueCandidate;
-          }
-          return;
-        }
-      }
-
-      if (segment) {
-        venue = venue ? `${venue} | ${segment}` : segment;
-      }
-    });
-
-    const teamSegment = teamSegmentIndex >= 0 ? segments[teamSegmentIndex] : line;
-    const cleanedTeamSegment = teamSegment
-      .replace(/\b(?:round|jornada|fecha|matchday)\s*(?:n[°ºo]\s*)?\d+\b/gi, '')
-      .replace(matchDate || '', '')
-      .replace(matchTime || '', '')
-      .replace(/^[\s-]+|[\s-]+$/g, '')
-      .trim();
-    const vsMatch = cleanedTeamSegment.match(/(.+?)\s+(?:vs|v)\s+(.+)/i);
-
-    if (vsMatch) {
-      return {
-        homeTeam: vsMatch[1].trim(),
-        awayTeam: vsMatch[2].trim(),
-        matchDate,
-        matchTime,
-        venue,
-        round,
-        status: 'scheduled',
-      };
-    }
-
-    const fallbackSegments = cleanedTeamSegment.split(/\s+-\s+/).map((item) => item.trim()).filter(Boolean);
-    return {
-      homeTeam: fallbackSegments[0] || null,
-      awayTeam: fallbackSegments[1] || null,
-      matchDate,
-      matchTime,
-      venue: venue || fallbackSegments.slice(2).join(' | ') || null,
-      round,
-      status: 'scheduled',
-    };
-  }
-
   private static detectSourceType(extension: string | null, mimeType: string | null): FixtureImportSourceType {
     if (extension === '.xlsx' || extension === '.xls') return 'excel';
     if (extension === '.csv') return 'csv';
@@ -1281,10 +1313,14 @@ export class FixtureImportService {
     };
   }
 
+  /**
+   * Delega en el parser de líneas a propósito: si el detector de encabezados
+   * reconoce «3ª fecha» pero el constructor de alias no, la jornada se detecta
+   * y después NO matchea contra la que existe en la fase — el partido termina
+   * creando una jornada duplicada. Una sola regla para las dos puntas.
+   */
   private static extractNumericRoundLabel(value: string): string | null {
-    const normalized = this.normalizeKey(value);
-    const match = normalized.match(/\b(?:round|jornada|fecha|matchday)\s*(?:n|no|numero)?\s*(\d+)\b/);
-    return match ? `Fecha ${match[1]}` : null;
+    return extractRoundLabel(value);
   }
 
   private static buildRoundAliases(roundName: string): string[] {

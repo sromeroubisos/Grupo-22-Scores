@@ -17,6 +17,7 @@
     "test:captain": "node --test \"src/features/captain/**/*.test.ts\"",
     "test:captain-freeze": "node scripts/captain-freeze.mjs",
     "test:perf": "node --test src/lib/perf/editTrace.test.ts src/lib/perf/labFlags.test.ts",
+    "test:contraste": "node scripts/contraste-standings.mjs",
     "lab:guard": "node scripts/etapa0-lab-guard.mjs",
     "dev:perf-lab": "node scripts/dev-perf-lab.mjs",
     "prebuild": "node scripts/gen-logo-manifest.mjs",
@@ -45,6 +46,7 @@
     "sharp": "^0.34.5",
     "swr": "^2.4.1",
     "tailwind-merge": "^3.4.0",
+    "tesseract.js": "^7.0.0",
     "xlsx": "^0.18.5",
     "zod": "^4.3.6"
   },
