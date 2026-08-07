@@ -15,6 +15,7 @@
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { resolveMatchOutcome, type MatchOutcome } from '@/lib/server/matchOutcome';
 
 type Supa = SupabaseClient<any, any, any>;
 
@@ -42,47 +43,17 @@ export interface AdvancementResult {
   error?: string;
 }
 
-interface Outcome {
-  resolved: boolean;
-  winnerClubId: string | null;
-  loserClubId: string | null;
-}
-
-/** Decide winner/loser of a match from its status, score and clubs. */
-function decideOutcome(match: MatchRow): Outcome {
-  const unresolved: Outcome = { resolved: false, winnerClubId: null, loserClubId: null };
-  if (match.status !== 'final') return unresolved;
-
-  const home = match.home_club_id;
-  const away = match.away_club_id;
-
-  // Walkover / bye: only one side present.
-  if (home && !away) return { resolved: true, winnerClubId: home, loserClubId: null };
-  if (away && !home) return { resolved: true, winnerClubId: away, loserClubId: null };
-  if (!home || !away) return unresolved;
-
-  const score = match.score || {};
-  const override = String(score.winner ?? '').toLowerCase(); // explicit DQ/walkover
-
-  if (override === 'home') return { resolved: true, winnerClubId: home, loserClubId: away };
-  if (override === 'away') return { resolved: true, winnerClubId: away, loserClubId: home };
-
-  const sh = Number(score.home ?? 0);
-  const sa = Number(score.away ?? 0);
-  if (sh > sa) return { resolved: true, winnerClubId: home, loserClubId: away };
-  if (sa > sh) return { resolved: true, winnerClubId: away, loserClubId: home };
-
-  // Regular-time draw -> penalties / shootout tiebreak.
-  const pens = score.penalties || score.shootout || score.po || null;
-  if (pens && typeof pens === 'object') {
-    const ph = Number(pens.home ?? 0);
-    const pa = Number(pens.away ?? 0);
-    if (ph > pa) return { resolved: true, winnerClubId: home, loserClubId: away };
-    if (pa > ph) return { resolved: true, winnerClubId: away, loserClubId: home };
-  }
-
-  // Knockout tie with no tiebreak -> cannot advance anyone yet.
-  return unresolved;
+/**
+ * Decide winner/loser of a match. Delegates to the shared resolver so the
+ * bracket BOARD and this writer can never disagree about who advanced.
+ */
+function decideOutcome(match: MatchRow): MatchOutcome {
+  return resolveMatchOutcome({
+    status: match.status,
+    score: match.score,
+    homeClubId: match.home_club_id,
+    awayClubId: match.away_club_id,
+  });
 }
 
 function matchHasPlayedResult(match: MatchRow): boolean {

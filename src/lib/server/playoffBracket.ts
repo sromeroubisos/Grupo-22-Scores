@@ -30,6 +30,11 @@ import {
   computeSeedOrderFromStandings,
   readPlayoffSeedingConfig,
 } from '@/lib/playoff/seedingFromStandings';
+import {
+  readShootoutScore,
+  resolveMatchOutcome,
+  type MatchOutcomeDecidedBy,
+} from '@/lib/server/matchOutcome';
 
 type Supa = SupabaseClient<any, any, any>;
 
@@ -733,6 +738,15 @@ export interface BracketBoardMatch {
   homeLogo: string | null;
   awayLogo: string | null;
   winnerClubId: string | null;
+  /**
+   * Como se definio. 'shootout' es el caso que el tablero no sabia mostrar: el
+   * marcador queda empatado y el ganador sale del desempate, asi que sin este
+   * dato la llave parecia incoherente (avanza uno, no gana ninguno).
+   */
+  winnerDecidedBy: MatchOutcomeDecidedBy | null;
+  /** Marcador del shoot-out, null si no hubo. No altera scoreHome/scoreAway. */
+  shootoutHome: number | null;
+  shootoutAway: number | null;
 }
 
 export interface BracketBoardRound {
@@ -827,11 +841,15 @@ export async function loadPlayoffBracket(
     const score = m.score || {};
     const scoreHome = Number(score.home ?? 0);
     const scoreAway = Number(score.away ?? 0);
-    let winnerClubId: string | null = null;
-    if (m.status === 'final' && m.home_club_id && m.away_club_id) {
-      if (scoreHome > scoreAway) winnerClubId = m.home_club_id;
-      else if (scoreAway > scoreHome) winnerClubId = m.away_club_id;
-    }
+    // Mismo resolvedor que usa el avance automatico: un 2-2 definido por
+    // shoot-out avanzaba de ronda pero el tablero no marcaba al ganador.
+    const outcome = resolveMatchOutcome({
+      status: m.status,
+      score: m.score,
+      homeClubId: m.home_club_id ?? null,
+      awayClubId: m.away_club_id ?? null,
+    });
+    const shootout = readShootoutScore(m.score);
 
     roundBucket.matches.push({
       id: m.id,
@@ -846,7 +864,10 @@ export async function loadPlayoffBracket(
       awayName: away?.name || m.away_source_label || 'A definir',
       homeLogo: home?.logo_url ?? null,
       awayLogo: away?.logo_url ?? null,
-      winnerClubId,
+      winnerClubId: outcome.winnerClubId,
+      winnerDecidedBy: outcome.decidedBy,
+      shootoutHome: shootout?.home ?? null,
+      shootoutAway: shootout?.away ?? null,
     });
   }
 
