@@ -9,6 +9,7 @@ import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOpti
 import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import { resolveStandingsCarryOverRows } from '@/lib/server/standingsCarryOver';
 import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
+import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 
 type PhaseRow = {
     id: string;
@@ -202,7 +203,7 @@ export async function GET(req: NextRequest) {
             .select('id, order_index, is_active, settings')
             .eq('tournament_id', tournamentId)
             .order('order_index', { ascending: true }),
-        (() => {
+        (async () => {
             let query = supabase
                 .from('tournament_standings')
                 .select(`
@@ -219,6 +220,12 @@ export async function GET(req: NextRequest) {
             } else if (requestedPhaseId) {
                 query = (query as typeof query & { is: (column: string, value: null) => typeof query }).is('group_id', null);
             }
+
+            // Endpoint público: siempre la tabla general.
+            query = applyStandingsTableType(
+                query,
+                await supportsStandingsTableTypeColumn(),
+            );
 
             return query;
         })(),

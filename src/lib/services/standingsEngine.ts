@@ -1,9 +1,15 @@
+/**
+ * Los imports van relativos y con extensión (no `@/…`) porque `node --test`
+ * corre este archivo sin el resolver de alias de Next: con `@/lib/...` falla en
+ * ERR_MODULE_NOT_FOUND antes de ejecutar el primer test. Sus dos dependencias
+ * son módulos hoja, así que el cambio se agota en estas dos líneas.
+ */
 import {
   countTeamEventMetric,
   countTeamOffensiveMetric,
   resolveOffensiveBonusRule,
-} from '@/lib/bonusRuleMetrics';
-import { calculateBasePointsFromScore } from '@/lib/standings/matchPoints';
+} from '../bonusRuleMetrics.ts';
+import { calculateBasePointsFromScore } from '../standings/matchPoints.ts';
 
 export interface PhaseSettings {
   standings?: {

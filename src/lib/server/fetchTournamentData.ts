@@ -4,6 +4,7 @@ import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOpti
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { isTournamentVisibleToPublic } from '@/lib/tournamentReview';
+import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SLUG_LOOKUP_TIMEOUT_MS = 5000;
@@ -703,6 +704,16 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
             roundsQuery = roundsQuery.eq('season_id', scopedSeasonId);
             groupsQuery = groupsQuery.eq('season_id', scopedSeasonId);
         }
+
+        /**
+         * La página pública del torneo muestra la tabla general y sólo esa. Sin
+         * este filtro, con local y visitante publicadas, cada club aparecería
+         * tres veces con tres posiciones distintas.
+         */
+        standingsQuery = applyStandingsTableType(
+            standingsQuery,
+            await supportsStandingsTableTypeColumn(),
+        );
 
         const [
             tournamentRes,

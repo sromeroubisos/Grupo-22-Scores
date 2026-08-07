@@ -18,6 +18,7 @@ import {
   toInputTimeInTimeZone,
 } from '@/lib/timezone';
 import type { MatchWithClubs } from '@/lib/types/fixture';
+import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 
 type ResultsApiClient = ReturnType<typeof createAdminClient>;
 
@@ -1622,6 +1623,13 @@ async function resolveStandingsSnapshot(client: ResultsApiClient, match: MatchWi
       is: (column: string, value: null) => typeof standingsQuery;
     }).is('group_id', null);
   }
+
+  // La API de resultados devuelve la tabla general del torneo, no una lectura
+  // por condición de local.
+  standingsQuery = applyStandingsTableType(
+    standingsQuery,
+    await supportsStandingsTableTypeColumn(),
+  );
 
   const { data: standingsRows, error: standingsError } = await standingsQuery;
   if (standingsError) {

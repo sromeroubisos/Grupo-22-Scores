@@ -18,6 +18,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 type Supa = SupabaseClient<any, any, any>;
 
+import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
+
 export type PlayoffSeedingFormat = 'overall' | 'zone_rank';
 
 export interface PlayoffSeedingConfig {
@@ -70,6 +72,12 @@ export async function computeSeedOrderFromStandings(
     .eq('tournament_id', tournamentId)
     .eq('phase_id', sourcePhaseId);
   if (seasonId) query = query.eq('season_id', seasonId);
+
+  // El sembrado se hace SIEMPRE con la tabla general: la de local y la de
+  // visitante son una lectura del rendimiento, no el orden competitivo. Sin
+  // filtrar, cada club entraría tres veces con tres posiciones distintas y los
+  // cruces saldrían mezclados.
+  query = applyStandingsTableType(query, await supportsStandingsTableTypeColumn());
 
   const { data: standings, error } = await query;
   if (error || !Array.isArray(standings) || standings.length === 0) return [];

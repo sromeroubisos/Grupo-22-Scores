@@ -3,6 +3,7 @@ import {
   type StandingsCarryOverRow,
 } from '@/lib/services/standingsEngine';
 import { FINAL_STANDINGS_STATUSES } from '@/lib/standings/matchScope';
+import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 
 type SupabaseLike = any;
@@ -156,6 +157,7 @@ async function loadPersistedRows(
   tournamentId: string,
   sourcePhase: PhaseLike,
   seasonId?: string | null,
+  tableType: string = 'general',
 ): Promise<StandingsCarryOverRow[]> {
   let query = supabase
     .from('tournament_standings')
@@ -166,6 +168,18 @@ async function loadPersistedRows(
   if (seasonId) {
     query = query.eq('season_id', seasonId);
   }
+
+  /**
+   * Sin este filtro, con las tres perspectivas publicadas cada club aparece
+   * tres veces y `mergeCarryOverRows` las SUMA por teamId: los puntos
+   * arrastrados de la fase anterior se triplicarían en silencio. Es el lector
+   * más peligroso de todos porque el resultado no se ve raro, sólo está mal.
+   */
+  query = applyStandingsTableType(
+    query,
+    await supportsStandingsTableTypeColumn(),
+    tableType,
+  );
 
   const { data, error } = await query;
   if (error) {
@@ -341,7 +355,7 @@ export async function resolveStandingsCarryOverRows({
     return { enabled: true, sourcePhaseId: null, sourcePhaseName: null, rows: [] };
   }
 
-  const persistedRows = await loadPersistedRows(supabase, tournamentId, sourcePhase, seasonId);
+  const persistedRows = await loadPersistedRows(supabase, tournamentId, sourcePhase, seasonId, tableType);
   const rows = persistedRows.length > 0
     ? persistedRows
     : await calculateSourceRows(
