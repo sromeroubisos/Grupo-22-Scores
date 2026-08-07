@@ -1,0 +1,1107 @@
+provider,external_id,club_id_sugerido,urba_club_id,categoria,sufijo,confidence,nivel,etapa_que_lo_crea,urba_institucion,urba_nombre_equipo,anios,veces
+urba,201|empresarial|,15-de-diciembre,201,empresarial,"",exacto,institucion,1,15 de Diciembre,15 de Diciembre,2021 2022 2023,4
+urba,201|empresarial|B,15-de-diciembre,201,empresarial,B,exacto,institucion,1,15 de Diciembre,15 de Diciembre B,2023,1
+urba,202|empresarial|,ag-propiedades,202,empresarial,"",exacto,institucion,1,AG Propiedades,AG Propiedades,2021 2022,3
+urba,121|formativo|,aguiluchos-rugby,121,formativo,"",exacto,institucion,1,Aguiluchos Rugby,Aguiluchos Rugby,2024 2025 2026,5
+urba,61|intermedia|,albatros,61,intermedia,"",exacto,institucion,1,Albatros,Albatros,2022 2023 2024 2025 2026,5
+urba,61|mayores|,albatros,61,mayores,"",exacto,institucion,1,Albatros,Albatros,2021 2022 2023 2024 2025 2026,6
+urba,74|intermedia|,almafuerte,74,intermedia,"",exacto,institucion,1,Almafuerte,Almafuerte,2021 2022 2023 2024 2025 2026,7
+urba,74|mayores|,almafuerte,74,mayores,"",exacto,institucion,1,Almafuerte,Almafuerte,2021 2022 2023 2024 2025 2026,7
+urba,67|intermedia|,arsenal-zarate,67,intermedia,"",exacto,institucion,1,Arsenal Zarate,Arsenal Zarate,2021 2022 2023 2024 2025 2026,6
+urba,67|mayores|,arsenal-zarate,67,mayores,"",exacto,institucion,1,Arsenal Zarate,Arsenal Zarate,2021 2022 2023 2024 2025 2026,7
+urba,60|intermedia|,atletico-chascomus,60,intermedia,"",exacto,institucion,1,Atletico Chascomus,Atletico Chascomus,2022 2023 2024 2025 2026,5
+urba,60|mayores|,atletico-chascomus,60,mayores,"",exacto,institucion,1,Atletico Chascomus,Atletico Chascomus,2021 2022 2023 2024 2025 2026,6
+urba,75|femenino|,atletico-san-andres,75,femenino,"",exacto,institucion,1,Atletico San Andres,Atletico San Andres,2021 2022 2023 2024 2025,9
+urba,75|intermedia|,atletico-san-andres,75,intermedia,"",exacto,institucion,1,Atletico San Andres,Atletico San Andres,2021 2022 2023 2024 2025 2026,6
+urba,75|mayores|,atletico-san-andres,75,mayores,"",exacto,institucion,1,Atletico San Andres,Atletico San Andres,2021 2022 2023 2024 2025 2026,6
+urba,63|femenino|,atletico-y-progreso,63,femenino,"",exacto,institucion,1,Atletico y Progreso,Atletico y Progreso,2022 2023 2026,5
+urba,63|intermedia|,atletico-y-progreso,63,intermedia,"",exacto,institucion,1,Atletico y Progreso,Atletico y Progreso,2021 2022 2023 2024 2025 2026,6
+urba,63|mayores|,atletico-y-progreso,63,mayores,"",exacto,institucion,1,Atletico y Progreso,Atletico y Progreso,2021 2022 2023 2024 2025 2026,7
+urba,63|preintermedia|,atletico-y-progreso,63,preintermedia,"",exacto,institucion,1,Atletico y Progreso,Atletico y Progreso,2022 2023,2
+urba,109|empresarial|,banco-central,109,empresarial,"",exacto,institucion,1,Banco Central,Banco Central,2021 2022 2023,4
+urba,109|formativo|,banco-central,109,formativo,"",exacto,institucion,1,Banco Central,Banco Central,2024 2025 2026,5
+urba,80|femenino|,banco-hipotecario,80,femenino,"",exacto,institucion,1,Banco Hipotecario,Banco Hipotecario,2021 2022 2023 2026,5
+urba,80|intermedia|,banco-hipotecario,80,intermedia,"",exacto,institucion,1,Banco Hipotecario,Banco Hipotecario,2021 2022 2023 2024 2025 2026,6
+urba,80|mayores|,banco-hipotecario,80,mayores,"",exacto,institucion,1,Banco Hipotecario,Banco Hipotecario,2021 2022 2023 2024 2025 2026,6
+urba,98|universitario|,barcelo-rugby,98,universitario,"",exacto,institucion,1,Barcelo Rugby,Fundacion Barcelo,2021 2022 2023 2024 2025 2026,12
+urba,98|universitario|B,barcelo-rugby,98,universitario,B,exacto,institucion,1,Barcelo Rugby,Barcelo Rugby B,2026,1
+urba,89|intermedia|,berisso,89,intermedia,"",exacto,institucion,1,Berisso,Berisso Rugby Club,2022 2023 2024 2025 2026,6
+urba,89|mayores|,berisso,89,mayores,"",exacto,institucion,1,Berisso,Berisso Rugby Club,2021 2022 2023 2024 2025 2026,7
+urba,71|femenino|,beromama,71,femenino,"",exacto,institucion,1,Beromama,Beromama,2022 2023 2024 2025 2026,6
+urba,71|intermedia|,beromama,71,intermedia,"",exacto,institucion,1,Beromama,Beromama,2021 2022 2023 2024 2025 2026,6
+urba,71|mayores|,beromama,71,mayores,"",exacto,institucion,1,Beromama,Beromama,2021 2022 2023 2024 2025 2026,6
+urba,126|formativo|,blue-xv,126,formativo,"",exacto,institucion,1,Blue XV,Blue XV,2024 2025,3
+urba,203|empresarial|,cabana-camino-viejo,203,empresarial,"",exacto,institucion,1,Cabaña Camino Viejo,Cabaña Camino Viejo,2022 2023,3
+urba,118|femenino|,camioneros-r-c,118,femenino,"",exacto,institucion,1,Camioneros R.C.,Camioneros,2025,1
+urba,118|formativo|,camioneros-r-c,118,formativo,"",exacto,institucion,1,Camioneros R.C.,Camioneros R.C.,2024 2025,4
+urba,111|formativo|,cardales-rugby,111,formativo,"",exacto,institucion,1,Cardales Rugby,Cardales Rugby,2024,2
+urba,114|empresarial|,ciervos-pampas,114,empresarial,"",exacto,institucion,1,Ciervos Pampas,Ciervos Pampas,2022 2023,3
+urba,114|formativo|,ciervos-pampas,114,formativo,"",exacto,institucion,1,Ciervos Pampas,Ciervos Pampas,2025 2026,3
+urba,204|empresarial|,circulo-policia-federal,204,empresarial,"",exacto,institucion,1,Circulo Policia Federal,Circulo Policia Federal,2022 2023,2
+urba,204|empresarial|B,circulo-policia-federal,204,empresarial,B,exacto,institucion,1,Circulo Policia Federal,Circulo Policia Federal B,2023,1
+urba,125|empresarial|,cirfaa-patriotas-rugby,125,empresarial,"",exacto,institucion,1,CIRFAA Patriotas Rugby,Patriotas,2021 2022 2023,4
+urba,125|formativo|,cirfaa-patriotas-rugby,125,formativo,"",exacto,institucion,1,CIRFAA Patriotas Rugby,Patriotas Rugby,2024 2025 2026,5
+urba,76|femenino|,ciudad-de-campana,76,femenino,"",exacto,institucion,1,Ciudad de Campana,Ciudad de Campana,2025 2026,2
+urba,76|intermedia|,ciudad-de-campana,76,intermedia,"",exacto,institucion,1,Ciudad de Campana,Ciudad De Campana,2021 2022 2023 2024 2025 2026,6
+urba,76|mayores|,ciudad-de-campana,76,mayores,"",exacto,institucion,1,Ciudad de Campana,Ciudad De Campana,2021 2022 2023 2024 2025 2026,6
+urba,97|mayores|,cune,97,mayores,"",exacto,institucion,1,CUNE,CUNE,2021,1
+urba,97|universitario|,cune,97,universitario,"",exacto,institucion,1,CUNE,CUNE,2021 2022 2023 2024 2025 2026,10
+urba,84|femenino|,defensores-de-glew,84,femenino,"",exacto,institucion,1,Defensores de Glew,Defensores de Glew,2026,1
+urba,84|intermedia|,defensores-de-glew,84,intermedia,"",exacto,institucion,1,Defensores de Glew,Defensores de Glew,2021 2022 2023 2024 2025 2026,7
+urba,84|mayores|,defensores-de-glew,84,mayores,"",exacto,institucion,1,Defensores de Glew,Defensores de Glew,2021 2022 2023 2024 2025 2026,7
+urba,127|femenino|,del-oeste-rugby,127,femenino,"",exacto,institucion,1,Del Oeste Rugby,Del Oeste Rugby,2025 2026,2
+urba,127|universitario|,del-oeste-rugby,127,universitario,"",exacto,institucion,1,Del Oeste Rugby,Del Oeste Rugby,2025 2026,2
+urba,205|empresarial|,distribuidora-del-oeste,205,empresarial,"",exacto,institucion,1,Distribuidora del Oeste,Distribuidora del Oeste,2021 2022,2
+urba,131|formativo|,dorrego-rugby,131,formativo,"",exacto,institucion,1,Dorrego Rugby,Dorrego Rugby,2025 2026,3
+urba,48|femenino|,el-retiro,48,femenino,"",exacto,institucion,1,El Retiro,El Retiro,2023 2024,4
+urba,48|intermedia|,el-retiro,48,intermedia,"",exacto,institucion,1,El Retiro,El Retiro,2021 2022 2023 2024 2025 2026,6
+urba,48|mayores|,el-retiro,48,mayores,"",exacto,institucion,1,El Retiro,El Retiro,2021 2022 2023 2024 2025 2026,7
+urba,48|preintermedia|,el-retiro,48,preintermedia,"",exacto,institucion,1,El Retiro,El Retiro,2022 2023 2024 2025,4
+urba,112|empresarial|,elaion,112,empresarial,"",exacto,institucion,1,Elaion,Elaion,2021 2022 2023,4
+urba,112|formativo|,elaion,112,formativo,"",exacto,institucion,1,Elaion,Elaion,2024,2
+urba,108|empresarial|,ensenada,108,empresarial,"",exacto,institucion,1,Ensenada,Ensenada,2021 2022 2023,4
+urba,108|formativo|,ensenada,108,formativo,"",exacto,institucion,1,Ensenada,Ensenada,2024 2025 2026,5
+urba,122|empresarial|,espartanos,122,empresarial,"",exacto,institucion,1,Espartanos,Espartanos,2023,2
+urba,122|formativo|,espartanos,122,formativo,"",exacto,institucion,1,Espartanos,Espartanos,2024 2025 2026,5
+urba,86|femenino|,ezeiza,86,femenino,"",exacto,institucion,1,Ezeiza,Ezeiza,2021,2
+urba,86|intermedia|,ezeiza,86,intermedia,"",exacto,institucion,1,Ezeiza,Ezeiza,2021 2023 2024 2025 2026,5
+urba,86|mayores|,ezeiza,86,mayores,"",exacto,institucion,1,Ezeiza,Ezeiza,2021 2023 2024 2025 2026,5
+urba,87|intermedia|,floresta,87,intermedia,"",exacto,institucion,1,Floresta,Floresta,2021 2022 2023 2024 2025 2026,7
+urba,87|mayores|,floresta,87,mayores,"",exacto,institucion,1,Floresta,Floresta,2021 2022 2023 2024 2025 2026,7
+urba,59|femenino|,g-y-e-de-ituzaingo,59,femenino,"",exacto,institucion,1,G y E de Ituzaingo,G y E de Ituzaingo,2021 2026,3
+urba,59|intermedia|,g-y-e-de-ituzaingo,59,intermedia,"",exacto,institucion,1,G y E de Ituzaingo,G y E de Ituzaingo,2022 2023 2024 2025 2026,5
+urba,59|mayores|,g-y-e-de-ituzaingo,59,mayores,"",exacto,institucion,1,G y E de Ituzaingo,G y E de Ituzaingo,2021 2022 2023 2024 2025 2026,8
+urba,59|preintermedia|,g-y-e-de-ituzaingo,59,preintermedia,"",exacto,institucion,1,G y E de Ituzaingo,G y E de Ituzaingo,2026,1
+urba,206|femenino|,guernica,206,femenino,"",exacto,institucion,1,Guernica,Guernica,2021 2022,3
+urba,133|formativo|,handoff-rugby,133,formativo,"",exacto,institucion,1,Handoff Rugby,Handoff Rugby,2025 2026,3
+urba,110|formativo|,ivem,110,formativo,"",exacto,institucion,1,Ivem,IVEM (Picapiedras),2024,2
+urba,64|femenino|,la-salle,64,femenino,"",exacto,institucion,1,La Salle,La Salle Rugby y Hockey Club,2021 2022 2023 2024 2025 2026,9
+urba,64|intermedia|,la-salle,64,intermedia,"",exacto,institucion,1,La Salle,La Salle,2022 2023 2024 2025 2026,5
+urba,64|mayores|,la-salle,64,mayores,"",exacto,institucion,1,La Salle,La Salle Rugby y Hockey Club,2021 2022 2023 2024 2025 2026,6
+urba,73|intermedia|,las-canas,73,intermedia,"",exacto,institucion,1,Las Cañas,Las Cañas,2022 2023 2024 2025 2026,5
+urba,73|mayores|,las-canas,73,mayores,"",exacto,institucion,1,Las Cañas,Las Cañas,2021 2022 2023 2024 2025 2026,6
+urba,207|empresarial|,laz-spare-parts,207,empresarial,"",exacto,institucion,1,Laz Spare Parts,Laz Spare Parts,2023,2
+urba,208|femenino|,lomas-social,208,femenino,"",exacto,institucion,1,Lomas Social,Lomas Social,2022 2023,4
+urba,208|formativo|,lomas-social,208,formativo,"",exacto,institucion,1,Lomas Social,Lomas Social,2026,1
+urba,78|intermedia|,los-cedros,78,intermedia,"",exacto,institucion,1,Los Cedros,Los Cedros,2022 2023 2024 2025 2026,5
+urba,78|mayores|,los-cedros,78,mayores,"",exacto,institucion,1,Los Cedros,Los Cedros,2021 2022 2023 2024 2025 2026,7
+urba,79|intermedia|,los-pinos,79,intermedia,"",exacto,institucion,1,Los Pinos,Los Pinos,2021 2022 2023 2024 2025 2026,6
+urba,79|mayores|,los-pinos,79,mayores,"",exacto,institucion,1,Los Pinos,Los Pinos,2021 2022 2023 2024 2025 2026,6
+urba,113|formativo|,malvinas-argentinas,113,formativo,"",exacto,institucion,1,Malvinas Argentinas,Malvinas Argentinas,2024 2025 2026,5
+urba,124|empresarial|,manzanares-r-c,124,empresarial,"",exacto,institucion,1,Manzanares R.C.,Manzanares,2023,1
+urba,124|empresarial|B,manzanares-r-c,124,empresarial,B,exacto,institucion,1,Manzanares R.C.,Manzanares B,2023,1
+urba,124|femenino|,manzanares-r-c,124,femenino,"",exacto,institucion,1,Manzanares R.C.,Manzanares,2021 2022,4
+urba,124|formativo|,manzanares-r-c,124,formativo,"",exacto,institucion,1,Manzanares R.C.,Manzanares R.C.,2024 2025 2026,5
+urba,82|femenino|,marcos-paz,82,femenino,"",exacto,institucion,1,Marcos Paz,Marcos Paz,2021 2022 2023 2024 2025 2026,9
+urba,82|intermedia|,marcos-paz,82,intermedia,"",exacto,institucion,1,Marcos Paz,Marcos Paz,2022 2023 2024 2025 2026,6
+urba,82|mayores|,marcos-paz,82,mayores,"",exacto,institucion,1,Marcos Paz,Marcos Paz,2021 2022 2023 2024 2025 2026,7
+urba,47|intermedia|,mercedes,47,intermedia,"",exacto,institucion,1,Mercedes,Mercedes,2022 2023 2024 2025 2026,5
+urba,47|mayores|,mercedes,47,mayores,"",exacto,institucion,1,Mercedes,Mercedes,2021 2022 2023 2024 2025 2026,6
+urba,47|preintermedia|,mercedes,47,preintermedia,"",exacto,institucion,1,Mercedes,Mercedes,2024,1
+urba,115|formativo|,ministerio-de-seguridad-caba,115,formativo,"",exacto,institucion,1,Ministerio de Seguridad CABA,Ministerio de Seguridad CABA,2024,2
+urba,123|empresarial|,municipalidad-de-avellaneda,123,empresarial,"",exacto,institucion,1,Municipalidad de Avellaneda,Munic de Avellaneda,2022 2023,3
+urba,123|empresarial|B,municipalidad-de-avellaneda,123,empresarial,B,exacto,institucion,1,Municipalidad de Avellaneda,Munic de Avellaneda B,2023,1
+urba,123|femenino|,municipalidad-de-avellaneda,123,femenino,"",exacto,institucion,1,Municipalidad de Avellaneda,Munic de Avellaneda,2021 2022 2023 2025 2026,9
+urba,123|formativo|,municipalidad-de-avellaneda,123,formativo,"",exacto,institucion,1,Municipalidad de Avellaneda,Municipalidad de Avellaneda,2024 2025 2026,4
+urba,91|femenino|,municipalidad-de-berazategui,91,femenino,"",exacto,institucion,1,Municipalidad de Berazategui,Municipalidad De Berazategui,2021 2022 2025 2026,5
+urba,91|intermedia|,municipalidad-de-berazategui,91,intermedia,"",exacto,institucion,1,Municipalidad de Berazategui,Municipalidad De Berazategui,2021 2022 2023 2024 2025 2026,7
+urba,91|mayores|,municipalidad-de-berazategui,91,mayores,"",exacto,institucion,1,Municipalidad de Berazategui,Municipalidad De Berazategui,2021 2022 2023 2024 2025 2026,7
+urba,119|empresarial|,municipalidad-de-moreno,119,empresarial,"",exacto,institucion,1,Municipalidad de Moreno,Municipalidad de Moreno,2023,2
+urba,119|formativo|,municipalidad-de-moreno,119,formativo,"",exacto,institucion,1,Municipalidad de Moreno,Municipalidad de Moreno,2024 2025,4
+urba,93|femenino|,municipio-de-avellaneda,93,femenino,"",exacto,institucion,1,Municipio de Avellaneda,Munic. de Avellaneda,2024,1
+urba,93|formativo|,municipio-de-avellaneda,93,formativo,"",exacto,institucion,1,Municipio de Avellaneda,Municipalidad de Avellaneda,2025,1
+urba,120|formativo|,new-lions-r-c,120,formativo,"",exacto,institucion,1,New Lions R.C.,New Lions R.C.,2024 2025 2026,5
+urba,90|intermedia|,obras-sanitarias,90,intermedia,"",exacto,institucion,1,Obras Sanitarias,Obras Sanitarias,2021 2022 2023 2024 2025 2026,7
+urba,90|mayores|,obras-sanitarias,90,mayores,"",exacto,institucion,1,Obras Sanitarias,Obras Sanitarias,2021 2022 2023 2024 2025 2026,7
+urba,128|formativo|,old-bankers,128,formativo,"",exacto,institucion,1,Old Bankers,Old Bankers,2025 2026,3
+urba,66|intermedia|,old-georgian,66,intermedia,"",exacto,institucion,1,Old Georgian,Old Georgian,2021 2022 2023 2024 2025 2026,6
+urba,66|mayores|,old-georgian,66,mayores,"",exacto,institucion,1,Old Georgian,Old Georgian,2021 2022 2023 2024 2025 2026,6
+urba,66|preintermedia|,old-georgian,66,preintermedia,"",exacto,institucion,1,Old Georgian,Old Georgian,2022,1
+urba,209|empresarial|,omar-etcheverry,209,empresarial,"",exacto,institucion,1,Omar Etcheverry,Omar Etcheverry,2021 2022 2023,4
+urba,209|empresarial|B,omar-etcheverry,209,empresarial,B,exacto,institucion,1,Omar Etcheverry,Omar Etcheverry B,2023,1
+urba,85|femenino|,pac-general-rodriguez,85,femenino,"",exacto,institucion,1,Pac General Rodriguez,Pac. General Rodriguez,2026,1
+urba,85|intermedia|,pac-general-rodriguez,85,intermedia,"",exacto,institucion,1,Pac General Rodriguez,Pac General Rodriguez,2021 2022 2023 2024 2025 2026,7
+urba,85|mayores|,pac-general-rodriguez,85,mayores,"",exacto,institucion,1,Pac General Rodriguez,Pac General Rodriguez,2021 2022 2023 2024 2025 2026,7
+urba,210|empresarial|,pacific-shark,210,empresarial,"",exacto,institucion,1,Pacific Shark,Pacific Shark,2021 2022 2023,5
+urba,211|empresarial|,policia-de-la-ciudad,211,empresarial,"",exacto,institucion,1,Policia de la Ciudad,Policia de la Ciudad,2021 2022 2023,3
+urba,211|formativo|,policia-de-la-ciudad,211,formativo,"",exacto,institucion,1,Policia de la Ciudad,Policía de la Ciudad,2026,1
+urba,134|formativo|,policias-de-la-ciudad,134,formativo,"",exacto,institucion,1,Policias de la Ciudad,Policias de la Ciudad,2025,2
+urba,70|femenino|,porteno,70,femenino,"",exacto,institucion,1,Porteño,Porteño,2021 2022 2023 2024 2025,8
+urba,70|intermedia|,porteno,70,intermedia,"",exacto,institucion,1,Porteño,Porteño,2021 2022 2023 2024 2025 2026,6
+urba,70|mayores|,porteno,70,mayores,"",exacto,institucion,1,Porteño,Porteño,2021 2022 2023 2024 2025 2026,6
+urba,212|empresarial|,rectificacion-parra-pilar,212,empresarial,"",exacto,institucion,1,Rectificación Parra Pilar,Rectificación Parra Pilar,2021 2022,3
+urba,213|empresarial|,resta,213,empresarial,"",exacto,institucion,1,RESTA,RESTA,2021 2022 2023,4
+urba,88|intermedia|,rivadavia-de-lobos,88,intermedia,"",exacto,institucion,1,Rivadavia de Lobos,Rivadavia de Lobos,2021 2022 2023 2024 2025 2026,7
+urba,88|mayores|,rivadavia-de-lobos,88,mayores,"",exacto,institucion,1,Rivadavia de Lobos,Rivadavia de Lobos,2021 2022 2023 2024 2025 2026,7
+urba,214|empresarial|,robles-campos,214,empresarial,"",exacto,institucion,1,Robles Campos,Robles Campos,2021 2022,3
+urba,129|formativo|,ruda-macho,129,formativo,"",exacto,institucion,1,Ruda Macho,Ruda Macho,2025 2026,3
+urba,57|femenino|,san-marcos,57,femenino,"",exacto,institucion,1,San Marcos,San Marcos,2026,1
+urba,57|intermedia|,san-marcos,57,intermedia,"",exacto,institucion,1,San Marcos,San Marcos,2022 2023 2024 2025 2026,5
+urba,57|mayores|,san-marcos,57,mayores,"",exacto,institucion,1,San Marcos,San Marcos,2021 2022 2023 2024 2025 2026,6
+urba,215|empresarial|,satsaid,215,empresarial,"",exacto,institucion,1,SATSAID,SATSAID,2021 2022 2023,4
+urba,81|intermedia|,sociedad-hebraica,81,intermedia,"",exacto,institucion,1,Sociedad Hebraica,Sociedad Hebraica,2021 2022 2023 2024 2025 2026,7
+urba,81|mayores|,sociedad-hebraica,81,mayores,"",exacto,institucion,1,Sociedad Hebraica,Sociedad Hebraica,2021 2022 2023 2024 2025 2026,7
+urba,132|formativo|,suipacha,132,formativo,"",exacto,institucion,1,Suipacha,Suipacha,2025 2026,3
+urba,216|empresarial|,tactical-lacsi,216,empresarial,"",exacto,institucion,1,Tactical Lacsi,Tactical Lacsi,2021,1
+urba,117|formativo|,tehuelches,117,formativo,"",exacto,institucion,1,Tehuelches,Tehuelches,2024,2
+urba,217|empresarial|,telnet-soluciones,217,empresarial,"",exacto,institucion,1,Telnet Soluciones,Telnet Soluciones,2022 2023,2
+urba,217|empresarial|B,telnet-soluciones,217,empresarial,B,exacto,institucion,1,Telnet Soluciones,Telnet Soluciones B,2023,1
+urba,218|empresarial|,teqna,218,empresarial,"",exacto,institucion,1,TEQNA,TEQNA,2021,1
+urba,72|femenino|,tigre,72,femenino,"",exacto,institucion,1,Tigre,Tigre,2021 2025 2026,4
+urba,72|intermedia|,tigre,72,intermedia,"",exacto,institucion,1,Tigre,Tigre,2022 2023 2024 2025 2026,5
+urba,72|mayores|,tigre,72,mayores,"",exacto,institucion,1,Tigre,Tigre,2021 2022 2023 2024 2025 2026,7
+urba,72|preintermedia|,tigre,72,preintermedia,"",exacto,institucion,1,Tigre,Tigre,2026,1
+urba,69|intermedia|,tiro-federal-de-baradero,69,intermedia,"",exacto,institucion,1,Tiro Federal de Baradero,Tiro Federal de Baradero,2021 2022 2024 2025 2026,5
+urba,69|mayores|,tiro-federal-de-baradero,69,mayores,"",exacto,institucion,1,Tiro Federal de Baradero,Tiro Federal de Baradero,2021 2022 2023 2024 2025 2026,6
+urba,62|femenino|,tiro-federal-de-san-pedro,62,femenino,"",exacto,institucion,1,Tiro Federal de San Pedro,Tiro Federal de San Pedro,2021 2022,4
+urba,62|intermedia|,tiro-federal-de-san-pedro,62,intermedia,"",exacto,institucion,1,Tiro Federal de San Pedro,Tiro Federal de San Pedro,2022 2023 2024 2025 2026,5
+urba,62|mayores|,tiro-federal-de-san-pedro,62,mayores,"",exacto,institucion,1,Tiro Federal de San Pedro,Tiro Federal de San Pedro,2021 2022 2023 2024 2025 2026,6
+urba,130|empresarial|,tizal,130,empresarial,"",exacto,institucion,1,Tizal,Tizal,2022 2023,3
+urba,130|formativo|,tizal,130,formativo,"",exacto,institucion,1,Tizal,Tizal ,2025,2
+urba,100|universitario|,uba-agronomia,100,universitario,"",exacto,institucion,1,UBA Agronomia,UBA Agronomia,2021 2022 2023 2024 2025 2026,12
+urba,100|universitario|B,uba-agronomia,100,universitario,B,exacto,institucion,1,UBA Agronomia,UBA Agronomia B,2023 2024 2025,3
+urba,219|universitario|,uba-escuela-tecnica,219,universitario,"",exacto,institucion,1,UBA Escuela Tecnica,UBA Escuela Tecnica,2021 2022,4
+urba,101|universitario|,uba-ingenieria,101,universitario,"",exacto,institucion,1,UBA Ingenieria,UBA Ingenieria,2021 2022 2023 2024 2025 2026,12
+urba,102|universitario|,uba-medicina,102,universitario,"",exacto,institucion,1,UBA Medicina,UBA Medicina,2021 2022 2023 2024 2025 2026,10
+urba,220|empresarial|,uba-sociales,220,empresarial,"",exacto,institucion,1,UBA Sociales,UBA Sociales,2022,1
+urba,220|universitario|,uba-sociales,220,universitario,"",exacto,institucion,1,UBA Sociales,UBA Sociales,2021,2
+urba,104|universitario|,uba-veterinaria,104,universitario,"",exacto,institucion,1,UBA Veterinaria,UBA Veterinaria,2023 2024 2025,5
+urba,96|mayores|,uca-la-plata,96,mayores,"",exacto,institucion,1,UCA la Plata,UCA la Plata,2021,1
+urba,96|universitario|,uca-la-plata,96,universitario,"",exacto,institucion,1,UCA la Plata,UCA la Plata,2021 2022 2023 2024 2025 2026,10
+urba,106|femenino|,univ-nac-de-la-matanza,106,femenino,"",exacto,institucion,1,Univ. Nac de la Matanza,Univ. De la Matanza,2026,1
+urba,106|mayores|,univ-nac-de-la-matanza,106,mayores,"",exacto,institucion,1,Univ. Nac de la Matanza,Universidad de la Matanza,2021,1
+urba,106|universitario|,univ-nac-de-la-matanza,106,universitario,"",exacto,institucion,1,Univ. Nac de la Matanza,Universidad de la Matanza,2021 2022 2023 2024 2025 2026,9
+urba,95|femenino|,univ-nac-de-la-plata,95,femenino,"",exacto,institucion,1,Univ. Nac de la Plata,Univ. Nac de la Plata,2024,1
+urba,95|mayores|,univ-nac-de-la-plata,95,mayores,"",exacto,institucion,1,Univ. Nac de la Plata,Univ. Nac. De la Plata,2021,1
+urba,95|universitario|,univ-nac-de-la-plata,95,universitario,"",exacto,institucion,1,Univ. Nac de la Plata,Univ. Nac. De la Plata,2021 2022 2023 2024 2025 2026,11
+urba,99|universitario|,univ-nac-de-lomas,99,universitario,"",exacto,institucion,1,Univ. Nac de Lomas,Universidad de Lomas,2022 2023 2024 2025 2026,8
+urba,116|empresarial|,univ-nac-de-quilmes,116,empresarial,"",exacto,institucion,1,Univ. Nac de Quilmes,Universidad de Quilmes,2023,2
+urba,116|formativo|,univ-nac-de-quilmes,116,formativo,"",exacto,institucion,1,Univ. Nac de Quilmes,Univ. Nac de Quilmes,2024 2025,4
+urba,116|universitario|,univ-nac-de-quilmes,116,universitario,"",exacto,institucion,1,Univ. Nac de Quilmes,Universidad de Quilmes,2022,1
+urba,103|empresarial|,univ-nac-de-san-martin,103,empresarial,"",exacto,institucion,1,Univ. Nac de San Martin,Univ. De San Martin,2021 2022 2023,5
+urba,103|universitario|,univ-nac-de-san-martin,103,universitario,"",exacto,institucion,1,Univ. Nac de San Martin,Univ. Nac de San Martin,2024 2025 2026,4
+urba,107|universitario|,untref,107,universitario,"",exacto,institucion,1,UNTREF,UNTREF,2021 2022 2023 2024 2025 2026,9
+urba,94|femenino|,utn-haedo,94,femenino,"",exacto,institucion,1,UTN Haedo,UTN Haedo,2021 2022 2023 2024,8
+urba,94|universitario|,utn-haedo,94,universitario,"",exacto,institucion,1,UTN Haedo,UTN Haedo,2021 2022 2023 2024,7
+urba,105|universitario|,utn-medrano,105,universitario,"",exacto,institucion,1,UTN Medrano,UTN Medrano,2021 2022 2023 2024 2025 2026,9
+urba,68|intermedia|,varela-jr,68,intermedia,"",exacto,institucion,1,Varela Jr.,Varela Jr.,2021 2022 2023 2024 2025 2026,6
+urba,68|mayores|,varela-jr,68,mayores,"",exacto,institucion,1,Varela Jr.,Varela Jr.,2021 2022 2023 2024 2025 2026,6
+urba,77|femenino|,vicente-lopez,77,femenino,"",exacto,institucion,1,Vicente Lopez,Vicente Lopez,2021 2022 2023 2024 2026,9
+urba,77|intermedia|,vicente-lopez,77,intermedia,"",exacto,institucion,1,Vicente Lopez,Vicente Lopez,2022 2023 2024 2025 2026,5
+urba,77|mayores|,vicente-lopez,77,mayores,"",exacto,institucion,1,Vicente Lopez,Vicente Lopez,2021 2022 2023 2024 2025 2026,7
+urba,12|M15|A,asoc-alumni-m15-a,12,M15,A,exacto,equipo_juvenil,3,Alumni,Alumni A,2021 2022 2023 2024 2025 2026,10
+urba,12|M15|B,asoc-alumni-m15-b,12,M15,B,exacto,equipo_juvenil,3,Alumni,Alumni B,2021 2022 2023 2024 2025 2026,10
+urba,12|M15|C,asoc-alumni-m15-c,12,M15,C,exacto,equipo_juvenil,3,Alumni,Alumni C,2025 2026,3
+urba,12|M15|D,asoc-alumni-m15-d,12,M15,D,exacto,equipo_juvenil,3,Alumni,Alumni D,2025,1
+urba,12|M16|A,asoc-alumni-m16-a,12,M16,A,exacto,equipo_juvenil,3,Alumni,Alumni A,2021 2022 2023 2024 2025 2026,11
+urba,12|M16|B,asoc-alumni-m16-b,12,M16,B,exacto,equipo_juvenil,3,Alumni,Alumni B,2021 2022 2023 2024 2025 2026,10
+urba,12|M16|C,asoc-alumni-m16-c,12,M16,C,exacto,equipo_juvenil,3,Alumni,Alumni C,2021 2024 2025 2026,6
+urba,12|M16|D,asoc-alumni-m16-d,12,M16,D,exacto,equipo_juvenil,3,Alumni,Alumni D,2026,1
+urba,12|M17|C,asoc-alumni-m17-c,12,M17,C,exacto,equipo_juvenil,3,Alumni,Alumni C,2022 2025 2026,5
+urba,12|M18|A,asoc-alumni-m18-a,12,M18,A,exacto,equipo_juvenil,3,Alumni,Alumni A,2021,2
+urba,12|M18|B,asoc-alumni-m18-b,12,M18,B,exacto,equipo_juvenil,3,Alumni,Alumni B,2021,2
+urba,12|M19|C,asoc-alumni-m19-c,12,M19,C,exacto,equipo_juvenil,3,Alumni,Alumni C,2022 2023 2024 2025 2026,10
+urba,12|M19|D,asoc-alumni-m19-d,12,M19,D,exacto,equipo_juvenil,3,Alumni,Alumni D,2023 2024 2025 2026,8
+urba,12|M19|E,asoc-alumni-m19-e,12,M19,E,exacto,equipo_juvenil,3,Alumni,Alumni E,2024 2026,3
+urba,12|M20|,asoc-alumni-m20,12,M20,"",exacto,equipo_juvenil,3,Alumni,Alumni,2021,2
+urba,12|M22|,asoc-alumni-m22,12,M22,"",exacto,equipo_juvenil,3,Alumni,Alumni,2024 2025 2026,3
+urba,46|M15|,club-areco-m15,46,M15,"",exacto,equipo_juvenil,3,Areco,Areco,2021 2022 2023 2024 2025 2026,10
+urba,46|M16|,club-areco-m16,46,M16,"",exacto,equipo_juvenil,3,Areco,Areco,2021 2022 2023 2024 2025 2026,11
+urba,46|M17|,club-areco-m17,46,M17,"",exacto,equipo_juvenil,3,Areco,Areco,2021 2022 2023 2024 2025 2026,11
+urba,46|M18|,club-areco-m18,46,M18,"",exacto,equipo_juvenil,3,Areco,Areco,2021,2
+urba,46|M19|,club-areco-m19,46,M19,"",exacto,equipo_juvenil,3,Areco,Areco,2022 2023 2024 2025,8
+urba,46|M19|A,club-areco-m19-a,46,M19,A,exacto,equipo_juvenil,3,Areco,Areco A,2026,2
+urba,46|M19|B,club-areco-m19-b,46,M19,B,exacto,equipo_juvenil,3,Areco,Areco B,2026,2
+urba,46|M20|,club-areco-m20,46,M20,"",exacto,equipo_juvenil,3,Areco,Areco,2021,2
+urba,53|M15|,argentino-r-c-m15,53,M15,"",exacto,equipo_juvenil,3,Argentino,Argentino,2021 2022 2023 2024 2025 2026,9
+urba,53|M15|A,argentino-r-c-m15-a,53,M15,A,exacto,equipo_juvenil,3,Argentino,Argentino A,2023,1
+urba,53|M15|B,argentino-r-c-m15-b,53,M15,B,exacto,equipo_juvenil,3,Argentino,Argentino B,2023,1
+urba,53|M16|,argentino-r-c-m16,53,M16,"",exacto,equipo_juvenil,3,Argentino,Argentino,2021 2022 2023 2025,7
+urba,53|M16|A,argentino-r-c-m16-a,53,M16,A,exacto,equipo_juvenil,3,Argentino,Argentino A,2024 2026,3
+urba,53|M16|B,argentino-r-c-m16-b,53,M16,B,exacto,equipo_juvenil,3,Argentino,Argentino B,2023 2024 2026,4
+urba,53|M17|,argentino-r-c-m17,53,M17,"",exacto,equipo_juvenil,3,Argentino,Argentino,2022 2023 2024 2025 2026,8
+urba,53|M17|A,argentino-r-c-m17-a,53,M17,A,exacto,equipo_juvenil,3,Argentino,Argentino A,2024,1
+urba,53|M17|B,argentino-r-c-m17-b,53,M17,B,exacto,equipo_juvenil,3,Argentino,Argentino B,2024,1
+urba,53|M18|,argentino-r-c-m18,53,M18,"",exacto,equipo_juvenil,3,Argentino,Argentino,2021,1
+urba,53|M18|A,argentino-r-c-m18-a,53,M18,A,exacto,equipo_juvenil,3,Argentino,Argentino A,2021,2
+urba,53|M18|B,argentino-r-c-m18-b,53,M18,B,exacto,equipo_juvenil,3,Argentino,Argentino B,2021,2
+urba,53|M19|,argentino-r-c-m19,53,M19,"",exacto,equipo_juvenil,3,Argentino,Argentino,2022 2023,4
+urba,53|M19|A,argentino-r-c-m19-a,53,M19,A,exacto,equipo_juvenil,3,Argentino,Argentino A,2024 2025 2026,6
+urba,53|M19|B,argentino-r-c-m19-b,53,M19,B,exacto,equipo_juvenil,3,Argentino,Argentino B,2024 2025 2026,6
+urba,53|M20|,argentino-r-c-m20,53,M20,"",exacto,equipo_juvenil,3,Argentino,Argentino,2021,2
+urba,40|M15|,banco-nacion-m15,40,M15,"",exacto,equipo_juvenil,3,Banco Nacion,Banco Nacion,2021 2022 2023 2024 2025 2026,8
+urba,40|M15|A,banco-nacion-m15-a,40,M15,A,exacto,equipo_juvenil,3,Banco Nacion,Banco Nacion A,2024,1
+urba,40|M15|B,banco-nacion-m15-b,40,M15,B,exacto,equipo_juvenil,3,Banco Nacion,Banco Nacion B,2024,1
+urba,40|M16|,banco-nacion-m16,40,M16,"",exacto,equipo_juvenil,3,Banco Nacion,Banco Nacion,2021 2022 2023 2024 2025 2026,11
+urba,40|M17|,banco-nacion-m17,40,M17,"",exacto,equipo_juvenil,3,Banco Nacion,Banco Nacion,2022 2023 2024 2025 2026,7
+urba,40|M17|A,banco-nacion-m17-a,40,M17,A,exacto,equipo_juvenil,3,Banco Nacion,Banco Nacion A,2024,1
+urba,40|M17|B,banco-nacion-m17-b,40,M17,B,exacto,equipo_juvenil,3,Banco Nacion,Banco Nacion B,2024,1
+urba,40|M18|A,banco-nacion-m18-a,40,M18,A,exacto,equipo_juvenil,3,Banco Nacion,Banco Nacion A,2021,2
+urba,40|M18|B,banco-nacion-m18-b,40,M18,B,exacto,equipo_juvenil,3,Banco Nacion,Banco Nación B,2021,2
+urba,40|M19|,banco-nacion-m19,40,M19,"",exacto,equipo_juvenil,3,Banco Nacion,Banco Nacion,2023,2
+urba,40|M19|A,banco-nacion-m19-a,40,M19,A,exacto,equipo_juvenil,3,Banco Nacion,Banco Nacion A,2022 2024 2025 2026,8
+urba,40|M19|B,banco-nacion-m19-b,40,M19,B,exacto,equipo_juvenil,3,Banco Nacion,Banco Nacion B,2022 2024 2025 2026,8
+urba,40|M20|,banco-nacion-m20,40,M20,"",exacto,equipo_juvenil,3,Banco Nacion,Banco Nacion,2021,1
+urba,7|M15|A,belgrano-athletic-m15-a,7,M15,A,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic A,2021 2022 2023 2024 2025 2026,10
+urba,7|M15|B,belgrano-athletic-m15-b,7,M15,B,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic B,2021 2022 2023 2024 2025 2026,10
+urba,7|M15|C,belgrano-athletic-m15-c,7,M15,C,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic C,2021 2023 2024 2025 2026,8
+urba,7|M15|D,belgrano-athletic-m15-d,7,M15,D,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athl. D,2025,1
+urba,7|M16|A,belgrano-athletic-m16-a,7,M16,A,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic A,2021 2022 2023 2024 2025 2026,11
+urba,7|M16|B,belgrano-athletic-m16-b,7,M16,B,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic B,2021 2022 2023 2024 2025 2026,11
+urba,7|M16|C,belgrano-athletic-m16-c,7,M16,C,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic C,2022 2023 2024 2025 2026,9
+urba,7|M16|D,belgrano-athletic-m16-d,7,M16,D,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athl. D,2026,1
+urba,7|M17|C,belgrano-athletic-m17-c,7,M17,C,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic C,2021 2023 2024 2025 2026,8
+urba,7|M18|A,belgrano-athletic-m18-a,7,M18,A,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic A,2021,2
+urba,7|M18|B,belgrano-athletic-m18-b,7,M18,B,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic B,2021,2
+urba,7|M19|A,belgrano-athletic-m19-a,7,M19,A,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic A,2022 2023 2024 2025 2026,10
+urba,7|M19|B,belgrano-athletic-m19-b,7,M19,B,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic B,2022 2023 2024 2025 2026,10
+urba,7|M19|C,belgrano-athletic-m19-c,7,M19,C,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic C,2022 2023 2024 2025 2026,10
+urba,7|M19|D,belgrano-athletic-m19-d,7,M19,D,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic D,2022 2023 2024 2025 2026,10
+urba,7|M19|E,belgrano-athletic-m19-e,7,M19,E,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athl. E,2025 2026,4
+urba,7|M20|A,belgrano-athletic-m20-a,7,M20,A,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic A,2021,2
+urba,7|M20|B,belgrano-athletic-m20-b,7,M20,B,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic B,2021,2
+urba,7|M20|C,belgrano-athletic-m20-c,7,M20,C,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic C,2021,1
+urba,7|M22|,belgrano-athletic-m22,7,M22,"",exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic,2024 2025 2026,3
+urba,7|M22|B,belgrano-athletic-m22-b,7,M22,B,exacto,equipo_juvenil,3,Belgrano Athletic,Belgrano Athletic B,2026,1
+urba,8|M15|A,buenos-aires-crc-m15-a,8,M15,A,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires A,2021 2022 2023 2024 2025 2026,10
+urba,8|M15|B,buenos-aires-crc-m15-b,8,M15,B,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires B,2021 2022 2023 2024 2025 2026,10
+urba,8|M15|C,buenos-aires-crc-m15-c,8,M15,C,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires C,2023 2024 2025 2026,7
+urba,8|M16|A,buenos-aires-crc-m16-a,8,M16,A,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires A,2021 2022 2023 2024 2025 2026,11
+urba,8|M16|B,buenos-aires-crc-m16-b,8,M16,B,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires B,2021 2022 2023 2024 2025 2026,11
+urba,8|M16|C,buenos-aires-crc-m16-c,8,M16,C,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires C,2022 2023 2024 2025,7
+urba,8|M16|D,buenos-aires-crc-m16-d,8,M16,D,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires D,2025,2
+urba,8|M17|C,buenos-aires-crc-m17-c,8,M17,C,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires C,2023 2024 2025 2026,6
+urba,8|M18|A,buenos-aires-crc-m18-a,8,M18,A,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires A,2021,2
+urba,8|M18|B,buenos-aires-crc-m18-b,8,M18,B,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires B,2021,2
+urba,8|M19|C,buenos-aires-crc-m19-c,8,M19,C,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires C,2022 2023 2024 2025 2026,10
+urba,8|M19|D,buenos-aires-crc-m19-d,8,M19,D,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires D,2024 2025 2026,6
+urba,8|M19|E,buenos-aires-crc-m19-e,8,M19,E,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires E,2025 2026,3
+urba,8|M20|A,buenos-aires-crc-m20-a,8,M20,A,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires A,2021,2
+urba,8|M20|B,buenos-aires-crc-m20-b,8,M20,B,exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires B,2021,2
+urba,8|M22|,buenos-aires-crc-m22,8,M22,"",exacto,equipo_juvenil,3,Buenos Aires CRC,Buenos Aires ,2025 2026,2
+urba,27|M15|,cuq-m15,27,M15,"",exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes,2022 2025 2026,4
+urba,27|M15|A,cuq-m15-a,27,M15,A,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes A,2021 2023 2024 2025,5
+urba,27|M15|B,cuq-m15-b,27,M15,B,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes B,2021 2023 2024 2025,6
+urba,27|M16|,cuq-m16,27,M16,"",exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes,2023,2
+urba,27|M16|A,cuq-m16-a,27,M16,A,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes A,2021 2022 2024 2025 2026,9
+urba,27|M16|B,cuq-m16-b,27,M16,B,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes B,2021 2022 2024 2025 2026,9
+urba,27|M17|,cuq-m17,27,M17,"",exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes,2022 2024 2026,4
+urba,27|M17|A,cuq-m17-a,27,M17,A,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes A,2021 2023 2024 2025,6
+urba,27|M17|B,cuq-m17-b,27,M17,B,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes B,2021 2023 2024 2025,6
+urba,27|M18|A,cuq-m18-a,27,M18,A,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes A,2021,2
+urba,27|M18|B,cuq-m18-b,27,M18,B,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes B,2021,2
+urba,27|M18|C,cuq-m18-c,27,M18,C,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes C,2021,1
+urba,27|M19|A,cuq-m19-a,27,M19,A,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes A,2022 2023 2024 2025 2026,10
+urba,27|M19|B,cuq-m19-b,27,M19,B,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes B,2022 2023 2024 2025 2026,9
+urba,27|M20|A,cuq-m20-a,27,M20,A,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes A,2021,2
+urba,27|M20|B,cuq-m20-b,27,M20,B,exacto,equipo_juvenil,3,C.U. de Quilmes,C.U. de Quilmes B,2021,2
+urba,49|M15|,casa-de-padua-m15,49,M15,"",exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua,2021 2022 2025 2026,5
+urba,49|M15|A,casa-de-padua-m15-a,49,M15,A,exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua A,2023 2024 2025,4
+urba,49|M15|B,casa-de-padua-m15-b,49,M15,B,exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua B,2023 2024 2025,5
+urba,49|M16|,casa-de-padua-m16,49,M16,"",exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua,2022 2023,4
+urba,49|M16|A,casa-de-padua-m16-a,49,M16,A,exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua A,2021 2024 2025 2026,6
+urba,49|M16|B,casa-de-padua-m16-b,49,M16,B,exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua B,2021 2024 2025 2026,6
+urba,49|M17|,casa-de-padua-m17,49,M17,"",exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua,2021 2022 2023,5
+urba,49|M18|A,casa-de-padua-m18-a,49,M18,A,exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua A,2021,2
+urba,49|M18|B,casa-de-padua-m18-b,49,M18,B,exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua B,2021,2
+urba,49|M19|,casa-de-padua-m19,49,M19,"",exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua,2023 2024 2025 2026,8
+urba,49|M19|A,casa-de-padua-m19-a,49,M19,A,exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua A,2022,2
+urba,49|M19|B,casa-de-padua-m19-b,49,M19,B,exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua B,2022,2
+urba,49|M20|,casa-de-padua-m20,49,M20,"",exacto,equipo_juvenil,3,CASA de Padua,CASA de Padua,2021,2
+urba,3|M15|A,casi-m15-a,3,M15,A,exacto,equipo_juvenil,3,CASI,CASI A,2021 2022 2023 2024 2025 2026,9
+urba,3|M15|B,casi-m15-b,3,M15,B,exacto,equipo_juvenil,3,CASI,CASI B,2021 2022 2023 2024 2025 2026,10
+urba,3|M15|C,casi-m15-c,3,M15,C,exacto,equipo_juvenil,3,CASI,CASI C,2022 2023 2024 2025 2026,9
+urba,3|M15|D,casi-m15-d,3,M15,D,exacto,equipo_juvenil,3,CASI,CASI D,2025 2026,3
+urba,3|M16|A,casi-m16-a,3,M16,A,exacto,equipo_juvenil,3,CASI,CASI A,2021 2022 2023 2024 2025 2026,11
+urba,3|M16|B,casi-m16-b,3,M16,B,exacto,equipo_juvenil,3,CASI,CASI B,2021 2022 2023 2024 2025 2026,11
+urba,3|M16|C,casi-m16-c,3,M16,C,exacto,equipo_juvenil,3,CASI,CASI C,2023 2024 2025 2026,7
+urba,3|M16|D,casi-m16-d,3,M16,D,exacto,equipo_juvenil,3,CASI,CASI D,2026,1
+urba,3|M17|C,casi-m17-c,3,M17,C,exacto,equipo_juvenil,3,CASI,CASI C,2023 2024 2025 2026,6
+urba,3|M18|A,casi-m18-a,3,M18,A,exacto,equipo_juvenil,3,CASI,CASI A,2021,2
+urba,3|M18|B,casi-m18-b,3,M18,B,exacto,equipo_juvenil,3,CASI,CASI B,2021,2
+urba,3|M19|C,casi-m19-c,3,M19,C,exacto,equipo_juvenil,3,CASI,CASI C,2022 2023 2024 2025 2026,10
+urba,3|M19|D,casi-m19-d,3,M19,D,exacto,equipo_juvenil,3,CASI,CASI D,2022 2023 2024 2025 2026,10
+urba,3|M19|E,casi-m19-e,3,M19,E,exacto,equipo_juvenil,3,CASI,CASI E,2025 2026,4
+urba,3|M19|F,casi-m19-f,3,M19,F,exacto,equipo_juvenil,3,CASI,CASI F,2026,2
+urba,3|M20|A,casi-m20-a,3,M20,A,exacto,equipo_juvenil,3,CASI,CASI A,2021,2
+urba,3|M20|B,casi-m20-b,3,M20,B,exacto,equipo_juvenil,3,CASI,CASI B,2021,2
+urba,3|M22|,casi-m22,3,M22,"",exacto,equipo_juvenil,3,CASI,CASI,2024 2025 2026,3
+urba,42|M15|,centro-naval-m15,42,M15,"",exacto,equipo_juvenil,3,Centro Naval,Centro Naval,2021 2022 2023 2025 2026,8
+urba,42|M16|,centro-naval-m16,42,M16,"",exacto,equipo_juvenil,3,Centro Naval,Centro Naval,2022 2025 2026,5
+urba,42|M16|A,centro-naval-m16-a,42,M16,A,exacto,equipo_juvenil,3,Centro Naval,Centro Naval A,2021 2024,3
+urba,42|M16|B,centro-naval-m16-b,42,M16,B,exacto,equipo_juvenil,3,Centro Naval,Centro Naval B,2021 2024,3
+urba,42|M17|,centro-naval-m17,42,M17,"",exacto,equipo_juvenil,3,Centro Naval,Centro Naval,2022 2023 2024 2025 2026,9
+urba,42|M18|A,centro-naval-m18-a,42,M18,A,exacto,equipo_juvenil,3,Centro Naval,Centro Naval A,2021,2
+urba,42|M18|B,centro-naval-m18-b,42,M18,B,exacto,equipo_juvenil,3,Centro Naval,Centro Naval B,2021,2
+urba,42|M19|,centro-naval-m19,42,M19,"",exacto,equipo_juvenil,3,Centro Naval,Centro Naval ,2025,2
+urba,42|M19|A,centro-naval-m19-a,42,M19,A,exacto,equipo_juvenil,3,Centro Naval,Centro Naval A,2022 2023 2024 2026,8
+urba,42|M19|B,centro-naval-m19-b,42,M19,B,exacto,equipo_juvenil,3,Centro Naval,Centro Naval B,2022 2023 2024 2026,8
+urba,42|M20|,centro-naval-m20,42,M20,"",exacto,equipo_juvenil,3,Centro Naval,Centro Naval,2021,2
+urba,11|M15|A,club-champagnat-m15-a,11,M15,A,exacto,equipo_juvenil,3,Champagnat,Champagnat A,2021 2022 2023 2024 2025 2026,10
+urba,11|M15|B,club-champagnat-m15-b,11,M15,B,exacto,equipo_juvenil,3,Champagnat,Champagnat B,2021 2022 2023 2024 2025 2026,10
+urba,11|M15|C,club-champagnat-m15-c,11,M15,C,exacto,equipo_juvenil,3,Champagnat,Champagnat C,2021 2023 2024 2025 2026,8
+urba,11|M15|D,club-champagnat-m15-d,11,M15,D,exacto,equipo_juvenil,3,Champagnat,Champagnat D,2025,1
+urba,11|M16|A,club-champagnat-m16-a,11,M16,A,exacto,equipo_juvenil,3,Champagnat,Champagnat A,2021 2022 2023 2024 2025 2026,11
+urba,11|M16|B,club-champagnat-m16-b,11,M16,B,exacto,equipo_juvenil,3,Champagnat,Champagnat B,2021 2022 2023 2024 2025 2026,11
+urba,11|M16|C,club-champagnat-m16-c,11,M16,C,exacto,equipo_juvenil,3,Champagnat,Champagnat C,2022 2023 2024 2025 2026,9
+urba,11|M16|D,club-champagnat-m16-d,11,M16,D,exacto,equipo_juvenil,3,Champagnat,Champagnat D,2026,1
+urba,11|M17|C,club-champagnat-m17-c,11,M17,C,exacto,equipo_juvenil,3,Champagnat,Champagnat C,2023 2024 2025 2026,7
+urba,11|M18|A,club-champagnat-m18-a,11,M18,A,exacto,equipo_juvenil,3,Champagnat,Champagnat A,2021,2
+urba,11|M18|B,club-champagnat-m18-b,11,M18,B,exacto,equipo_juvenil,3,Champagnat,Champagnat B,2021,2
+urba,11|M19|B,club-champagnat-m19-b,11,M19,B,exacto,equipo_juvenil,3,Champagnat,Champagnat B,2022 2023 2024 2025 2026,10
+urba,11|M19|C,club-champagnat-m19-c,11,M19,C,exacto,equipo_juvenil,3,Champagnat,Champagnat C,2022 2023 2024 2025 2026,10
+urba,11|M19|D,club-champagnat-m19-d,11,M19,D,exacto,equipo_juvenil,3,Champagnat,Champagnat D,2022 2024 2025 2026,8
+urba,11|M19|E,club-champagnat-m19-e,11,M19,E,exacto,equipo_juvenil,3,Champagnat,Champagnat E,2025 2026,4
+urba,11|M19|F,club-champagnat-m19-f,11,M19,F,exacto,equipo_juvenil,3,Champagnat,Champagnat F,2025,2
+urba,11|M20|A,club-champagnat-m20-a,11,M20,A,exacto,equipo_juvenil,3,Champagnat,Champagnat A,2021,2
+urba,11|M20|B,club-champagnat-m20-b,11,M20,B,exacto,equipo_juvenil,3,Champagnat,Champagnat B,2021,2
+urba,11|M22|,club-champagnat-m22,11,M22,"",exacto,equipo_juvenil,3,Champagnat,Champagnat ,2024 2026,2
+urba,54|M15|,ciudad-de-buenos-aires-m15,54,M15,"",exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As.,2021 2023 2024 2025,6
+urba,54|M15|A,ciudad-de-buenos-aires-m15-a,54,M15,A,exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As. A,2022 2023 2026,4
+urba,54|M15|B,ciudad-de-buenos-aires-m15-b,54,M15,B,exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As. B,2022 2023 2026,4
+urba,54|M16|,ciudad-de-buenos-aires-m16,54,M16,"",exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As.,2021 2022 2024 2025 2026,7
+urba,54|M16|A,ciudad-de-buenos-aires-m16-a,54,M16,A,exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As. A,2022 2023,2
+urba,54|M16|B,ciudad-de-buenos-aires-m16-b,54,M16,B,exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As. B,2022 2023,2
+urba,54|M17|,ciudad-de-buenos-aires-m17,54,M17,"",exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As.,2022 2025 2026,5
+urba,54|M17|A,ciudad-de-buenos-aires-m17-a,54,M17,A,exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As. A,2023 2024,4
+urba,54|M17|B,ciudad-de-buenos-aires-m17-b,54,M17,B,exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As. B,2023 2024,4
+urba,54|M18|A,ciudad-de-buenos-aires-m18-a,54,M18,A,exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As. A,2021,3
+urba,54|M18|B,ciudad-de-buenos-aires-m18-b,54,M18,B,exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As. B,2021,2
+urba,54|M19|,ciudad-de-buenos-aires-m19,54,M19,"",exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As.,2022 2023 2026,5
+urba,54|M19|A,ciudad-de-buenos-aires-m19-a,54,M19,A,exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As. A,2024 2025 2026,5
+urba,54|M19|B,ciudad-de-buenos-aires-m19-b,54,M19,B,exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As. B,2024 2025 2026,6
+urba,54|M19|C,ciudad-de-buenos-aires-m19-c,54,M19,C,exacto,equipo_juvenil,3,Ciudad de Bs.As.,Ciudad de Bs.As. C,2025,2
+urba,2|M15|A,cuba-m15-a,2,M15,A,exacto,equipo_juvenil,3,CUBA,CUBA A,2021 2022 2023 2024 2025 2026,10
+urba,2|M15|B,cuba-m15-b,2,M15,B,exacto,equipo_juvenil,3,CUBA,CUBA B,2021 2022 2023 2024 2025 2026,10
+urba,2|M15|C,cuba-m15-c,2,M15,C,exacto,equipo_juvenil,3,CUBA,CUBA C,2021 2022 2023 2024 2025 2026,10
+urba,2|M15|D,cuba-m15-d,2,M15,D,exacto,equipo_juvenil,3,CUBA,CUBA D,2023 2025 2026,5
+urba,2|M16|A,cuba-m16-a,2,M16,A,exacto,equipo_juvenil,3,CUBA,CUBA A,2021 2022 2023 2024 2025 2026,11
+urba,2|M16|B,cuba-m16-b,2,M16,B,exacto,equipo_juvenil,3,CUBA,CUBA B,2021 2022 2023 2024 2025 2026,11
+urba,2|M16|C,cuba-m16-c,2,M16,C,exacto,equipo_juvenil,3,CUBA,CUBA C,2021 2022 2023 2024 2025 2026,10
+urba,2|M16|D,cuba-m16-d,2,M16,D,exacto,equipo_juvenil,3,CUBA,CUBA D,2024 2025 2026,5
+urba,2|M17|C,cuba-m17-c,2,M17,C,exacto,equipo_juvenil,3,CUBA,CUBA C,2022 2023 2024 2025 2026,9
+urba,2|M17|D,cuba-m17-d,2,M17,D,exacto,equipo_juvenil,3,CUBA,CUBA D,2025 2026,3
+urba,2|M18|A,cuba-m18-a,2,M18,A,exacto,equipo_juvenil,3,CUBA,CUBA A,2021,2
+urba,2|M18|B,cuba-m18-b,2,M18,B,exacto,equipo_juvenil,3,CUBA,CUBA B,2021,2
+urba,2|M19|C,cuba-m19-c,2,M19,C,exacto,equipo_juvenil,3,CUBA,CUBA C,2022 2023 2024 2025 2026,10
+urba,2|M19|D,cuba-m19-d,2,M19,D,exacto,equipo_juvenil,3,CUBA,CUBA D,2022 2023 2024 2025 2026,9
+urba,2|M19|E,cuba-m19-e,2,M19,E,exacto,equipo_juvenil,3,CUBA,CUBA E,2024 2025 2026,6
+urba,2|M19|F,cuba-m19-f,2,M19,F,exacto,equipo_juvenil,3,CUBA,CUBA F,2025 2026,3
+urba,2|M20|A,cuba-m20-a,2,M20,A,exacto,equipo_juvenil,3,CUBA,CUBA A,2021,2
+urba,2|M20|B,cuba-m20-b,2,M20,B,exacto,equipo_juvenil,3,CUBA,CUBA B,2021,2
+urba,2|M20|C,cuba-m20-c,2,M20,C,exacto,equipo_juvenil,3,CUBA,CUBA C,2021,2
+urba,2|M22|,cuba-m22,2,M22,"",exacto,equipo_juvenil,3,CUBA,CUBA,2024 2025 2026,3
+urba,24|M15|,curupayti-m15,24,M15,"",exacto,equipo_juvenil,3,Curupayti,Curupayti,2022 2026,3
+urba,24|M15|A,curupayti-m15-a,24,M15,A,exacto,equipo_juvenil,3,Curupayti,Curupayti A,2021 2023 2024 2025,7
+urba,24|M15|B,curupayti-m15-b,24,M15,B,exacto,equipo_juvenil,3,Curupayti,Curupayti B,2021 2023 2024 2025,7
+urba,24|M16|,curupayti-m16,24,M16,"",exacto,equipo_juvenil,3,Curupayti,Curupayti,2022 2023,3
+urba,24|M16|A,curupayti-m16-a,24,M16,A,exacto,equipo_juvenil,3,Curupayti,Curupayti A,2021 2024 2025 2026,7
+urba,24|M16|B,curupayti-m16-b,24,M16,B,exacto,equipo_juvenil,3,Curupayti,Curupayti B,2021 2023 2024 2025 2026,8
+urba,24|M17|,curupayti-m17,24,M17,"",exacto,equipo_juvenil,3,Curupayti,Curupayti,2023,1
+urba,24|M17|A,curupayti-m17-a,24,M17,A,exacto,equipo_juvenil,3,Curupayti,Curupayti A,2021 2022 2023 2024 2025 2026,10
+urba,24|M17|B,curupayti-m17-b,24,M17,B,exacto,equipo_juvenil,3,Curupayti,Curupayti B,2021 2022 2023 2024 2025 2026,10
+urba,24|M18|A,curupayti-m18-a,24,M18,A,exacto,equipo_juvenil,3,Curupayti,Curupayti A,2021,2
+urba,24|M18|B,curupayti-m18-b,24,M18,B,exacto,equipo_juvenil,3,Curupayti,Curupayti B,2021,2
+urba,24|M19|A,curupayti-m19-a,24,M19,A,exacto,equipo_juvenil,3,Curupayti,Curupayti A,2022 2023 2024 2025 2026,10
+urba,24|M19|B,curupayti-m19-b,24,M19,B,exacto,equipo_juvenil,3,Curupayti,Curupayti B,2022 2023 2024 2025 2026,9
+urba,24|M20|A,curupayti-m20-a,24,M20,A,exacto,equipo_juvenil,3,Curupayti,Curupayti A,2021,2
+urba,24|M20|B,curupayti-m20-b,24,M20,B,exacto,equipo_juvenil,3,Curupayti,Curupayti B,2021,2
+urba,52|M15|,club-daom-m15,52,M15,"",exacto,equipo_juvenil,3,Daom,Daom,2022 2023 2025 2026,7
+urba,52|M16|,club-daom-m16,52,M16,"",exacto,equipo_juvenil,3,Daom,Daom,2022 2023 2024 2025 2026,9
+urba,52|M16|A,club-daom-m16-a,52,M16,A,exacto,equipo_juvenil,3,Daom,Daom A,2021,1
+urba,52|M16|B,club-daom-m16-b,52,M16,B,exacto,equipo_juvenil,3,Daom,Daom B,2021,1
+urba,52|M17|,club-daom-m17,52,M17,"",exacto,equipo_juvenil,3,Daom,Daom,2022 2023 2024 2025 2026,9
+urba,52|M18|,club-daom-m18,52,M18,"",exacto,equipo_juvenil,3,Daom,Daom,2021,1
+urba,52|M18|A,club-daom-m18-a,52,M18,A,exacto,equipo_juvenil,3,Daom,Daom A,2021,2
+urba,52|M18|B,club-daom-m18-b,52,M18,B,exacto,equipo_juvenil,3,Daom,Daom B,2021,2
+urba,52|M19|,club-daom-m19,52,M19,"",exacto,equipo_juvenil,3,Daom,Daom,2022 2023 2024 2025 2026,10
+urba,44|M15|,asoc-del-sur-m15,44,M15,"",exacto,equipo_juvenil,3,Del Sur,Del Sur Rugby,2021 2022 2023 2024 2026,7
+urba,44|M15|A,asoc-del-sur-m15-a,44,M15,A,exacto,equipo_juvenil,3,Del Sur,Del Sur A,2025,2
+urba,44|M15|B,asoc-del-sur-m15-b,44,M15,B,exacto,equipo_juvenil,3,Del Sur,Del Sur B,2025,2
+urba,44|M16|,asoc-del-sur-m16,44,M16,"",exacto,equipo_juvenil,3,Del Sur,Del Sur Rugby,2021 2022 2024,6
+urba,44|M16|A,asoc-del-sur-m16-a,44,M16,A,exacto,equipo_juvenil,3,Del Sur,Del Sur A,2026,1
+urba,44|M16|B,asoc-del-sur-m16-b,44,M16,B,exacto,equipo_juvenil,3,Del Sur,Del Sur B,2026,1
+urba,44|M17|,asoc-del-sur-m17,44,M17,"",exacto,equipo_juvenil,3,Del Sur,Del Sur Rugby,2022 2024 2026,5
+urba,44|M17|A,asoc-del-sur-m17-a,44,M17,A,exacto,equipo_juvenil,3,Del Sur,Del Sur Rugby A,2023 2025,4
+urba,44|M17|B,asoc-del-sur-m17-b,44,M17,B,exacto,equipo_juvenil,3,Del Sur,Del Sur Rugby B,2023 2025,4
+urba,44|M18|A,asoc-del-sur-m18-a,44,M18,A,exacto,equipo_juvenil,3,Del Sur,Del Sur Rugby A,2021,2
+urba,44|M18|B,asoc-del-sur-m18-b,44,M18,B,exacto,equipo_juvenil,3,Del Sur,Del Sur Rugby B,2021,2
+urba,44|M19|,asoc-del-sur-m19,44,M19,"",exacto,equipo_juvenil,3,Del Sur,Del Sur,2022 2024 2025 2026,6
+urba,44|M19|A,asoc-del-sur-m19-a,44,M19,A,exacto,equipo_juvenil,3,Del Sur,Del Sur Rugby A,2023 2024 2025,4
+urba,44|M19|B,asoc-del-sur-m19-b,44,M19,B,exacto,equipo_juvenil,3,Del Sur,Del Sur Rugby B,2023 2024 2025,4
+urba,33|M15|,delta-r-c-m15,33,M15,"",exacto,equipo_juvenil,3,Delta,Delta,2022 2024 2026,5
+urba,33|M15|A,delta-r-c-m15-a,33,M15,A,exacto,equipo_juvenil,3,Delta,Delta A,2021 2023 2025,5
+urba,33|M15|B,delta-r-c-m15-b,33,M15,B,exacto,equipo_juvenil,3,Delta,Delta B,2021 2023 2025,5
+urba,33|M16|,delta-r-c-m16,33,M16,"",exacto,equipo_juvenil,3,Delta,Delta,2021 2026,3
+urba,33|M16|A,delta-r-c-m16-a,33,M16,A,exacto,equipo_juvenil,3,Delta,Delta A,2022 2023 2024 2025,7
+urba,33|M16|B,delta-r-c-m16-b,33,M16,B,exacto,equipo_juvenil,3,Delta,Delta B,2022 2023 2024 2025,7
+urba,33|M17|,delta-r-c-m17,33,M17,"",exacto,equipo_juvenil,3,Delta,Delta,2021 2024 2025 2026,5
+urba,33|M17|A,delta-r-c-m17-a,33,M17,A,exacto,equipo_juvenil,3,Delta,Delta A,2021 2022 2023 2025,6
+urba,33|M17|B,delta-r-c-m17-b,33,M17,B,exacto,equipo_juvenil,3,Delta,Delta B,2021 2022 2023 2025,6
+urba,33|M18|A,delta-r-c-m18-a,33,M18,A,exacto,equipo_juvenil,3,Delta,Delta A,2021,2
+urba,33|M18|B,delta-r-c-m18-b,33,M18,B,exacto,equipo_juvenil,3,Delta,Delta B,2021,2
+urba,33|M19|A,delta-r-c-m19-a,33,M19,A,exacto,equipo_juvenil,3,Delta,Delta A,2022 2023 2024 2025 2026,10
+urba,33|M19|B,delta-r-c-m19-b,33,M19,B,exacto,equipo_juvenil,3,Delta,Delta B,2022 2023 2024 2025 2026,10
+urba,33|M19|C,delta-r-c-m19-c,33,M19,C,exacto,equipo_juvenil,3,Delta,Delta C,2023 2024,3
+urba,17|M15|A,deportiva-francesa-m15-a,17,M15,A,exacto,equipo_juvenil,3,Deportiva Francesa,Deportiva Francesa A,2021 2022 2023 2024 2025 2026,9
+urba,17|M15|B,deportiva-francesa-m15-b,17,M15,B,exacto,equipo_juvenil,3,Deportiva Francesa,Deportiva Francesa B,2021 2022 2023 2024 2025 2026,10
+urba,17|M15|C,deportiva-francesa-m15-c,17,M15,C,exacto,equipo_juvenil,3,Deportiva Francesa,Deportiva Francesa C,2023 2024,4
+urba,17|M16|A,deportiva-francesa-m16-a,17,M16,A,exacto,equipo_juvenil,3,Deportiva Francesa,Deportiva Francesa A,2021 2022 2023 2024 2025 2026,11
+urba,17|M16|B,deportiva-francesa-m16-b,17,M16,B,exacto,equipo_juvenil,3,Deportiva Francesa,Deportiva Francesa B,2021 2022 2023 2024 2025 2026,10
+urba,17|M16|C,deportiva-francesa-m16-c,17,M16,C,exacto,equipo_juvenil,3,Deportiva Francesa,A.D. Francesa C,2024 2025 2026,5
+urba,17|M17|C,deportiva-francesa-m17-c,17,M17,C,exacto,equipo_juvenil,3,Deportiva Francesa,Deportiva Francesa C,2022 2023 2025 2026,7
+urba,17|M18|A,deportiva-francesa-m18-a,17,M18,A,exacto,equipo_juvenil,3,Deportiva Francesa,Deportiva Francesa A,2021,2
+urba,17|M18|B,deportiva-francesa-m18-b,17,M18,B,exacto,equipo_juvenil,3,Deportiva Francesa,Deportiva Francesa B,2021,2
+urba,17|M19|C,deportiva-francesa-m19-c,17,M19,C,exacto,equipo_juvenil,3,Deportiva Francesa,Deportiva Francesa C,2022 2023 2024 2025 2026,9
+urba,17|M19|D,deportiva-francesa-m19-d,17,M19,D,exacto,equipo_juvenil,3,Deportiva Francesa,Deportiva Francesa D,2023 2024,4
+urba,17|M20|A,deportiva-francesa-m20-a,17,M20,A,exacto,equipo_juvenil,3,Deportiva Francesa,Deportiva Francesa A,2021,2
+urba,17|M20|B,deportiva-francesa-m20-b,17,M20,B,exacto,equipo_juvenil,3,Deportiva Francesa,Deportiva Francesa B,2021,2
+urba,37|M15|,don-bosco-m15,37,M15,"",exacto,equipo_juvenil,3,Don Bosco,Don Bosco,2021 2022 2023 2024 2025 2026,10
+urba,37|M16|,don-bosco-m16,37,M16,"",exacto,equipo_juvenil,3,Don Bosco,Don Bosco,2022 2024 2025 2026,7
+urba,37|M16|A,don-bosco-m16-a,37,M16,A,exacto,equipo_juvenil,3,Don Bosco,Don Bosco A,2021,2
+urba,37|M16|B,don-bosco-m16-b,37,M16,B,exacto,equipo_juvenil,3,Don Bosco,Don Bosco B,2021,2
+urba,37|M17|,don-bosco-m17,37,M17,"",exacto,equipo_juvenil,3,Don Bosco,Don Bosco,2022 2024 2025 2026,6
+urba,37|M17|A,don-bosco-m17-a,37,M17,A,exacto,equipo_juvenil,3,Don Bosco,Don Bosco A,2023 2025,3
+urba,37|M17|B,don-bosco-m17-b,37,M17,B,exacto,equipo_juvenil,3,Don Bosco,Don Bosco B,2023 2025,3
+urba,37|M18|A,don-bosco-m18-a,37,M18,A,exacto,equipo_juvenil,3,Don Bosco,Don Bosco A,2021,2
+urba,37|M18|B,don-bosco-m18-b,37,M18,B,exacto,equipo_juvenil,3,Don Bosco,Don Bosco B,2021,1
+urba,37|M19|,don-bosco-m19,37,M19,"",exacto,equipo_juvenil,3,Don Bosco,Don Bosco,2022 2023 2024 2025 2026,7
+urba,37|M19|A,don-bosco-m19-a,37,M19,A,exacto,equipo_juvenil,3,Don Bosco,Don Bosco A,2022 2023 2025,3
+urba,37|M19|B,don-bosco-m19-b,37,M19,B,exacto,equipo_juvenil,3,Don Bosco,Don Bosco B,2022 2023 2025,3
+urba,30|M15|,geba-m15,30,M15,"",exacto,equipo_juvenil,3,Gimnasia y Esgrima,Gimnasia y Esgrima Bs. As,2021 2022 2023,4
+urba,30|M15|A,geba-m15-a,30,M15,A,exacto,equipo_juvenil,3,Gimnasia y Esgrima,G y Esgrima A,2023 2024 2025 2026,6
+urba,30|M15|B,geba-m15-b,30,M15,B,exacto,equipo_juvenil,3,Gimnasia y Esgrima,G y Esgrima B,2023 2024 2025 2026,6
+urba,30|M16|,geba-m16,30,M16,"",exacto,equipo_juvenil,3,Gimnasia y Esgrima,Gimnasia y Esgrima Bs. As,2021 2023,3
+urba,30|M16|A,geba-m16-a,30,M16,A,exacto,equipo_juvenil,3,Gimnasia y Esgrima,G y Esgrima A,2022 2024 2025 2026,7
+urba,30|M16|B,geba-m16-b,30,M16,B,exacto,equipo_juvenil,3,Gimnasia y Esgrima,G y Esgrima B,2022 2024 2025 2026,7
+urba,30|M17|,geba-m17,30,M17,"",exacto,equipo_juvenil,3,Gimnasia y Esgrima,Gimnasia y Esgrima Bs. As,2022 2023 2024,5
+urba,30|M18|A,geba-m18-a,30,M18,A,exacto,equipo_juvenil,3,Gimnasia y Esgrima,Gimnasia y Esgrima bs. As A,2021,2
+urba,30|M18|B,geba-m18-b,30,M18,B,exacto,equipo_juvenil,3,Gimnasia y Esgrima,Gimnasia y Esgrima bs. As B,2021,2
+urba,30|M19|C,geba-m19-c,30,M19,C,exacto,equipo_juvenil,3,Gimnasia y Esgrima,G y Esgrima C,2024 2025 2026,6
+urba,30|M20|A,geba-m20-a,30,M20,A,exacto,equipo_juvenil,3,Gimnasia y Esgrima,Gimnasia y Esgrima bs. As A,2021,2
+urba,30|M20|B,geba-m20-b,30,M20,B,exacto,equipo_juvenil,3,Gimnasia y Esgrima,Gimnasia y Esgrima bs. As B,2021,2
+urba,6|M15|A,hindu-club-m15-a,6,M15,A,exacto,equipo_juvenil,3,Hindú,Hindu A,2021 2022 2023 2024 2025 2026,9
+urba,6|M15|B,hindu-club-m15-b,6,M15,B,exacto,equipo_juvenil,3,Hindú,Hindu B,2021 2022 2023 2024 2025 2026,10
+urba,6|M16|A,hindu-club-m16-a,6,M16,A,exacto,equipo_juvenil,3,Hindú,Hindu A,2021 2022 2023 2024 2025 2026,11
+urba,6|M16|B,hindu-club-m16-b,6,M16,B,exacto,equipo_juvenil,3,Hindú,Hindu B,2021 2022 2023 2024 2025 2026,10
+urba,6|M18|A,hindu-club-m18-a,6,M18,A,exacto,equipo_juvenil,3,Hindú,Hindu A,2021,2
+urba,6|M18|B,hindu-club-m18-b,6,M18,B,exacto,equipo_juvenil,3,Hindú,Hindu B,2021,2
+urba,6|M19|C,hindu-club-m19-c,6,M19,C,exacto,equipo_juvenil,3,Hindú,Hindu C,2022 2023 2024 2025 2026,10
+urba,6|M19|D,hindu-club-m19-d,6,M19,D,exacto,equipo_juvenil,3,Hindú,Hindu D,2026,2
+urba,6|M20|A,hindu-club-m20-a,6,M20,A,exacto,equipo_juvenil,3,Hindú,Hindu A,2021,2
+urba,6|M20|B,hindu-club-m20-b,6,M20,B,exacto,equipo_juvenil,3,Hindú,Hindu B,2021,2
+urba,6|M22|,hindu-club-m22,6,M22,"",exacto,equipo_juvenil,3,Hindú,Hindu,2024 2025 2026,3
+urba,19|M15|,hurling-m15,19,M15,"",exacto,equipo_juvenil,3,Hurling,Hurling,2022 2023 2024 2026,6
+urba,19|M15|A,hurling-m15-a,19,M15,A,exacto,equipo_juvenil,3,Hurling,Hurling A,2021 2023 2025,4
+urba,19|M15|B,hurling-m15-b,19,M15,B,exacto,equipo_juvenil,3,Hurling,Hurling B,2021 2023 2025,4
+urba,19|M16|,hurling-m16,19,M16,"",exacto,equipo_juvenil,3,Hurling,Hurling,2023,2
+urba,19|M16|A,hurling-m16-a,19,M16,A,exacto,equipo_juvenil,3,Hurling,Hurling A,2021 2022 2024 2025 2026,9
+urba,19|M16|B,hurling-m16-b,19,M16,B,exacto,equipo_juvenil,3,Hurling,Hurling B,2021 2022 2024 2025 2026,9
+urba,19|M17|,hurling-m17,19,M17,"",exacto,equipo_juvenil,3,Hurling,Hurling,2021,1
+urba,19|M17|A,hurling-m17-a,19,M17,A,exacto,equipo_juvenil,3,Hurling,Hurling A,2022 2023 2024 2025 2026,9
+urba,19|M17|B,hurling-m17-b,19,M17,B,exacto,equipo_juvenil,3,Hurling,Hurling B,2022 2023 2024 2025 2026,9
+urba,19|M18|A,hurling-m18-a,19,M18,A,exacto,equipo_juvenil,3,Hurling,Hurling A,2021,2
+urba,19|M18|B,hurling-m18-b,19,M18,B,exacto,equipo_juvenil,3,Hurling,Hurling B,2021,2
+urba,19|M19|C,hurling-m19-c,19,M19,C,exacto,equipo_juvenil,3,Hurling,Hurling C,2023 2024,3
+urba,28|M15|,club-italiano-m15,28,M15,"",exacto,equipo_juvenil,3,Italiano,Italiano,2022 2023 2024 2025 2026,6
+urba,28|M15|A,club-italiano-m15-a,28,M15,A,exacto,equipo_juvenil,3,Italiano,Italiano A,2023 2024,2
+urba,28|M15|B,club-italiano-m15-b,28,M15,B,exacto,equipo_juvenil,3,Italiano,Italiano B,2023 2024,2
+urba,28|M16|,club-italiano-m16,28,M16,"",exacto,equipo_juvenil,3,Italiano,Italiano,2021 2024 2026,3
+urba,28|M16|A,club-italiano-m16-a,28,M16,A,exacto,equipo_juvenil,3,Italiano,Italiano A,2023 2024 2025,5
+urba,28|M16|B,club-italiano-m16-b,28,M16,B,exacto,equipo_juvenil,3,Italiano,Italiano B,2024 2025,3
+urba,28|M17|,club-italiano-m17,28,M17,"",exacto,equipo_juvenil,3,Italiano,Italiano,2022 2023 2025 2026,7
+urba,28|M17|A,club-italiano-m17-a,28,M17,A,exacto,equipo_juvenil,3,Italiano,Italiano A,2024,2
+urba,28|M17|B,club-italiano-m17-b,28,M17,B,exacto,equipo_juvenil,3,Italiano,Italiano B,2024,2
+urba,28|M18|,club-italiano-m18,28,M18,"",exacto,equipo_juvenil,3,Italiano,Italiano,2021,2
+urba,28|M19|,club-italiano-m19,28,M19,"",exacto,equipo_juvenil,3,Italiano,Italiano,2022 2023,4
+urba,28|M19|A,club-italiano-m19-a,28,M19,A,exacto,equipo_juvenil,3,Italiano,Italiano A,2024 2025 2026,6
+urba,28|M19|B,club-italiano-m19-b,28,M19,B,exacto,equipo_juvenil,3,Italiano,Italiano B,2024 2025 2026,6
+urba,13|M15|A,la-plata-m15-a,13,M15,A,exacto,equipo_juvenil,3,La Plata,La Plata A,2021 2022 2023 2024 2025 2026,9
+urba,13|M15|B,la-plata-m15-b,13,M15,B,exacto,equipo_juvenil,3,La Plata,La Plata B,2021 2022 2023 2024 2025 2026,10
+urba,13|M15|C,la-plata-m15-c,13,M15,C,exacto,equipo_juvenil,3,La Plata,La Plata C,2021 2022 2023 2025 2026,7
+urba,13|M16|A,la-plata-m16-a,13,M16,A,exacto,equipo_juvenil,3,La Plata,La Plata A,2021 2022 2023 2024 2025 2026,11
+urba,13|M16|B,la-plata-m16-b,13,M16,B,exacto,equipo_juvenil,3,La Plata,La Plata B,2021 2022 2023 2024 2025 2026,10
+urba,13|M16|C,la-plata-m16-c,13,M16,C,exacto,equipo_juvenil,3,La Plata,La Plata C,2021 2022 2023 2024 2025 2026,10
+urba,13|M17|C,la-plata-m17-c,13,M17,C,exacto,equipo_juvenil,3,La Plata,La Plata C,2021 2023 2024 2025 2026,9
+urba,13|M18|A,la-plata-m18-a,13,M18,A,exacto,equipo_juvenil,3,La Plata,La Plata A,2021,2
+urba,13|M18|B,la-plata-m18-b,13,M18,B,exacto,equipo_juvenil,3,La Plata,La Plata B,2021,1
+urba,13|M19|C,la-plata-m19-c,13,M19,C,exacto,equipo_juvenil,3,La Plata,La Plata C,2022 2023 2025 2026,8
+urba,13|M19|D,la-plata-m19-d,13,M19,D,exacto,equipo_juvenil,3,La Plata,La Plata D,2024 2025 2026,6
+urba,13|M19|E,la-plata-m19-e,13,M19,E,exacto,equipo_juvenil,3,La Plata,La Plata E,2024 2025,4
+urba,13|M20|A,la-plata-m20-a,13,M20,A,exacto,equipo_juvenil,3,La Plata,La Plata A,2021,2
+urba,13|M20|B,la-plata-m20-b,13,M20,B,exacto,equipo_juvenil,3,La Plata,La Plata B,2021,2
+urba,13|M22|,la-plata-m22,13,M22,"",exacto,equipo_juvenil,3,La Plata,La Plata,2024 2025 2026,3
+urba,51|M15|,lanus-r-c-m15,51,M15,"",exacto,equipo_juvenil,3,Lanus,Lanus,2021 2022 2023 2024 2025 2026,10
+urba,51|M16|,lanus-r-c-m16,51,M16,"",exacto,equipo_juvenil,3,Lanus,Lanus,2021 2022 2023 2024 2025 2026,11
+urba,51|M17|,lanus-r-c-m17,51,M17,"",exacto,equipo_juvenil,3,Lanus,Lanus,2022 2023 2024 2025 2026,9
+urba,51|M18|A,lanus-r-c-m18-a,51,M18,A,exacto,equipo_juvenil,3,Lanus,Lanus A,2021,2
+urba,51|M18|B,lanus-r-c-m18-b,51,M18,B,exacto,equipo_juvenil,3,Lanus,Lanus B,2021,1
+urba,51|M19|,lanus-r-c-m19,51,M19,"",exacto,equipo_juvenil,3,Lanus,Lanus,2023 2024 2025 2026,8
+urba,51|M19|A,lanus-r-c-m19-a,51,M19,A,exacto,equipo_juvenil,3,Lanus,Lanus A,2022,2
+urba,51|M19|B,lanus-r-c-m19-b,51,M19,B,exacto,equipo_juvenil,3,Lanus,Lanus B,2022,2
+urba,51|M20|,lanus-r-c-m20,51,M20,"",exacto,equipo_juvenil,3,Lanus,Lanus,2021,1
+urba,36|M15|,liceo-militar-m15,36,M15,"",exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar,2021 2022 2023 2024 2025 2026,9
+urba,36|M15|A,liceo-militar-m15-a,36,M15,A,exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar A,2024,1
+urba,36|M15|B,liceo-militar-m15-b,36,M15,B,exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar B,2024,1
+urba,36|M16|,liceo-militar-m16,36,M16,"",exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar,2021 2022 2023 2024 2025 2026,9
+urba,36|M16|A,liceo-militar-m16-a,36,M16,A,exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar A,2025,1
+urba,36|M16|B,liceo-militar-m16-b,36,M16,B,exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar B,2025,1
+urba,36|M17|,liceo-militar-m17,36,M17,"",exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar,2022 2023 2024 2025 2026,8
+urba,36|M17|A,liceo-militar-m17-a,36,M17,A,exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar A,2021,2
+urba,36|M17|B,liceo-militar-m17-b,36,M17,B,exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar B,2021,2
+urba,36|M18|,liceo-militar-m18,36,M18,"",exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar,2021,2
+urba,36|M19|,liceo-militar-m19,36,M19,"",exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar,2024 2025 2026,6
+urba,36|M19|A,liceo-militar-m19-a,36,M19,A,exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar A,2022 2023,4
+urba,36|M19|B,liceo-militar-m19-b,36,M19,B,exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar B,2022 2023,4
+urba,36|M20|,liceo-militar-m20,36,M20,"",exacto,equipo_juvenil,3,Liceo Militar,Liceo Militar,2021,2
+urba,38|M15|A,liceo-naval-m15-a,38,M15,A,exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval A,2021 2022 2023 2024 2025 2026,10
+urba,38|M15|B,liceo-naval-m15-b,38,M15,B,exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval B,2021 2022 2023 2024 2025 2026,10
+urba,38|M15|C,liceo-naval-m15-c,38,M15,C,exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval C,2025,1
+urba,38|M16|A,liceo-naval-m16-a,38,M16,A,exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval A,2021 2022 2023 2024 2025 2026,11
+urba,38|M16|B,liceo-naval-m16-b,38,M16,B,exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval B,2021 2022 2023 2024 2025 2026,11
+urba,38|M16|C,liceo-naval-m16-c,38,M16,C,exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval C,2026,1
+urba,38|M17|,liceo-naval-m17,38,M17,"",exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval,2021,2
+urba,38|M17|C,liceo-naval-m17-c,38,M17,C,exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval C,2026,1
+urba,38|M18|A,liceo-naval-m18-a,38,M18,A,exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval A,2021,2
+urba,38|M18|B,liceo-naval-m18-b,38,M18,B,exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval B,2021,2
+urba,38|M19|C,liceo-naval-m19-c,38,M19,C,exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval C,2024 2025 2026,6
+urba,38|M20|A,liceo-naval-m20-a,38,M20,A,exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval A,2021,2
+urba,38|M20|B,liceo-naval-m20-b,38,M20,B,exacto,equipo_juvenil,3,Liceo Naval,Liceo Naval B,2021,2
+urba,15|M15|A,lomas-athletic-m15-a,15,M15,A,exacto,equipo_juvenil,3,Lomas Athletic,Lomas Athletic A,2021 2022 2023 2024 2025 2026,9
+urba,15|M15|B,lomas-athletic-m15-b,15,M15,B,exacto,equipo_juvenil,3,Lomas Athletic,Lomas Athletic B,2021 2022 2023 2024 2025 2026,10
+urba,15|M15|C,lomas-athletic-m15-c,15,M15,C,exacto,equipo_juvenil,3,Lomas Athletic,Lomas Athl. C,2024 2025,3
+urba,15|M16|,lomas-athletic-m16,15,M16,"",exacto,equipo_juvenil,3,Lomas Athletic,Lomas Athletic,2021,2
+urba,15|M16|A,lomas-athletic-m16-a,15,M16,A,exacto,equipo_juvenil,3,Lomas Athletic,Lomas Athletic A,2022 2023 2024 2025 2026,9
+urba,15|M16|B,lomas-athletic-m16-b,15,M16,B,exacto,equipo_juvenil,3,Lomas Athletic,Lomas Athletic B,2022 2023 2024 2025 2026,8
+urba,15|M16|C,lomas-athletic-m16-c,15,M16,C,exacto,equipo_juvenil,3,Lomas Athletic,Lomas Athletic C,2024 2026,2
+urba,15|M17|,lomas-athletic-m17,15,M17,"",exacto,equipo_juvenil,3,Lomas Athletic,Lomas Athletic,2022,1
+urba,15|M18|A,lomas-athletic-m18-a,15,M18,A,exacto,equipo_juvenil,3,Lomas Athletic,Lomas Athletic A,2021,2
+urba,15|M18|B,lomas-athletic-m18-b,15,M18,B,exacto,equipo_juvenil,3,Lomas Athletic,Lomas Athletic B,2021,1
+urba,15|M19|C,lomas-athletic-m19-c,15,M19,C,exacto,equipo_juvenil,3,Lomas Athletic,Lomas Athl. C,2025 2026,4
+urba,23|M15|A,los-matreros-m15-a,23,M15,A,exacto,equipo_juvenil,3,Los Matreros,Los Matreros A,2021 2022 2023 2024 2025 2026,10
+urba,23|M15|B,los-matreros-m15-b,23,M15,B,exacto,equipo_juvenil,3,Los Matreros,Los Matreros B,2021 2022 2023 2024 2025 2026,10
+urba,23|M15|C,los-matreros-m15-c,23,M15,C,exacto,equipo_juvenil,3,Los Matreros,Los Matreros C,2022,2
+urba,23|M16|A,los-matreros-m16-a,23,M16,A,exacto,equipo_juvenil,3,Los Matreros,Los Matreros A,2021 2022 2023 2024 2025 2026,10
+urba,23|M16|B,los-matreros-m16-b,23,M16,B,exacto,equipo_juvenil,3,Los Matreros,Los Matreros B,2021 2022 2023 2024 2025 2026,11
+urba,23|M16|C,los-matreros-m16-c,23,M16,C,exacto,equipo_juvenil,3,Los Matreros,Los Matreros C,2023,2
+urba,23|M17|,los-matreros-m17,23,M17,"",exacto,equipo_juvenil,3,Los Matreros,Los Matreros,2023,1
+urba,23|M17|C,los-matreros-m17-c,23,M17,C,exacto,equipo_juvenil,3,Los Matreros,Los Matreros C,2024,2
+urba,23|M18|A,los-matreros-m18-a,23,M18,A,exacto,equipo_juvenil,3,Los Matreros,Los Matreros A,2021,2
+urba,23|M18|B,los-matreros-m18-b,23,M18,B,exacto,equipo_juvenil,3,Los Matreros,Los Matreros B,2021,2
+urba,23|M19|A,los-matreros-m19-a,23,M19,A,exacto,equipo_juvenil,3,Los Matreros,Los Matreros A,2022 2023 2024 2025 2026,10
+urba,23|M19|B,los-matreros-m19-b,23,M19,B,exacto,equipo_juvenil,3,Los Matreros,Los Matreros B,2022 2023 2024 2025 2026,9
+urba,23|M19|C,los-matreros-m19-c,23,M19,C,exacto,equipo_juvenil,3,Los Matreros,Los Matreros C,2023 2025 2026,6
+urba,23|M20|A,los-matreros-m20-a,23,M20,A,exacto,equipo_juvenil,3,Los Matreros,Los Matreros A,2021,2
+urba,23|M20|B,los-matreros-m20-b,23,M20,B,exacto,equipo_juvenil,3,Los Matreros,Los Matreros B,2021,2
+urba,65|M15|,los-molinos-m15,65,M15,"",exacto,equipo_juvenil,3,Los Molinos,Los Molinos,2021 2022 2023 2024,5
+urba,65|M15|A,los-molinos-m15-a,65,M15,A,exacto,equipo_juvenil,3,Los Molinos,Los Molinos A,2022 2025 2026,4
+urba,65|M15|B,los-molinos-m15-b,65,M15,B,exacto,equipo_juvenil,3,Los Molinos,Los Molinos B,2022 2025 2026,4
+urba,65|M15|C,los-molinos-m15-c,65,M15,C,exacto,equipo_juvenil,3,Los Molinos,Los Molinos C,2026,1
+urba,65|M16|,los-molinos-m16,65,M16,"",exacto,equipo_juvenil,3,Los Molinos,Los Molinos,2021 2022 2024,6
+urba,65|M16|A,los-molinos-m16-a,65,M16,A,exacto,equipo_juvenil,3,Los Molinos,Los Molinos A,2023 2025 2026,5
+urba,65|M16|B,los-molinos-m16-b,65,M16,B,exacto,equipo_juvenil,3,Los Molinos,Los Molinos B,2025 2026,3
+urba,65|M17|,los-molinos-m17,65,M17,"",exacto,equipo_juvenil,3,Los Molinos,Los Molinos,2021 2022 2023,5
+urba,65|M17|A,los-molinos-m17-a,65,M17,A,exacto,equipo_juvenil,3,Los Molinos,Los Molinos A,2024 2025 2026,5
+urba,65|M17|B,los-molinos-m17-b,65,M17,B,exacto,equipo_juvenil,3,Los Molinos,Los Molinos B,2024 2025 2026,5
+urba,65|M19|,los-molinos-m19,65,M19,"",exacto,equipo_juvenil,3,Los Molinos,Los Molinos,2022,2
+urba,65|M19|A,los-molinos-m19-a,65,M19,A,exacto,equipo_juvenil,3,Los Molinos,Los Molinos A,2023 2024 2025 2026,8
+urba,65|M19|B,los-molinos-m19-b,65,M19,B,exacto,equipo_juvenil,3,Los Molinos,Los Molinos B,2023 2024 2025 2026,7
+urba,65|M19|C,los-molinos-m19-c,65,M19,C,exacto,equipo_juvenil,3,Los Molinos,Los Molinos C,2026,2
+urba,26|M15|A,los-tilos-m15-a,26,M15,A,exacto,equipo_juvenil,3,Los Tilos,Los tilos A,2021 2022 2023 2024 2025 2026,10
+urba,26|M15|B,los-tilos-m15-b,26,M15,B,exacto,equipo_juvenil,3,Los Tilos,Los Tilos B,2021 2022 2023 2024 2025 2026,10
+urba,26|M15|C,los-tilos-m15-c,26,M15,C,exacto,equipo_juvenil,3,Los Tilos,Los Tilos C,2023 2025,3
+urba,26|M16|A,los-tilos-m16-a,26,M16,A,exacto,equipo_juvenil,3,Los Tilos,Los tilos A,2021 2022 2023 2024 2025 2026,11
+urba,26|M16|B,los-tilos-m16-b,26,M16,B,exacto,equipo_juvenil,3,Los Tilos,Los Tilos B,2021 2022 2023 2024 2025 2026,11
+urba,26|M16|C,los-tilos-m16-c,26,M16,C,exacto,equipo_juvenil,3,Los Tilos,Los Tilos C,2023 2024 2025 2026,6
+urba,26|M17|C,los-tilos-m17-c,26,M17,C,exacto,equipo_juvenil,3,Los Tilos,Los Tilos C,2022 2024 2025 2026,7
+urba,26|M17|D,los-tilos-m17-d,26,M17,D,exacto,equipo_juvenil,3,Los Tilos,Los Tilos D,2024,1
+urba,26|M18|A,los-tilos-m18-a,26,M18,A,exacto,equipo_juvenil,3,Los Tilos,Los tilos A,2021,2
+urba,26|M18|B,los-tilos-m18-b,26,M18,B,exacto,equipo_juvenil,3,Los Tilos,Los Tilos B,2021,1
+urba,26|M19|C,los-tilos-m19-c,26,M19,C,exacto,equipo_juvenil,3,Los Tilos,Los Tilos C,2022 2023 2024 2025 2026,10
+urba,26|M19|D,los-tilos-m19-d,26,M19,D,exacto,equipo_juvenil,3,Los Tilos,Los Tilos D,2024 2025 2026,5
+urba,26|M22|,los-tilos-m22,26,M22,"",exacto,equipo_juvenil,3,Los Tilos,Los Tilos,2024 2025 2026,3
+urba,50|M15|,lujan-r-c-m15,50,M15,"",exacto,equipo_juvenil,3,Lujan,Lujan,2022 2023 2024 2025 2026,9
+urba,50|M16|,lujan-r-c-m16,50,M16,"",exacto,equipo_juvenil,3,Lujan,Lujan,2021 2023 2024 2025 2026,7
+urba,50|M16|A,lujan-r-c-m16-a,50,M16,A,exacto,equipo_juvenil,3,Lujan,Lujan A,2025,1
+urba,50|M16|B,lujan-r-c-m16-b,50,M16,B,exacto,equipo_juvenil,3,Lujan,Lujan B,2025,1
+urba,50|M17|,lujan-r-c-m17,50,M17,"",exacto,equipo_juvenil,3,Lujan,Lujan,2022 2023 2024 2025,8
+urba,50|M17|A,lujan-r-c-m17-a,50,M17,A,exacto,equipo_juvenil,3,Lujan,Lujan A,2026,1
+urba,50|M17|B,lujan-r-c-m17-b,50,M17,B,exacto,equipo_juvenil,3,Lujan,Lujan B,2026,1
+urba,50|M18|,lujan-r-c-m18,50,M18,"",exacto,equipo_juvenil,3,Lujan,Lujan,2021,1
+urba,50|M18|A,lujan-r-c-m18-a,50,M18,A,exacto,equipo_juvenil,3,Lujan,Lujan A,2021,2
+urba,50|M18|B,lujan-r-c-m18-b,50,M18,B,exacto,equipo_juvenil,3,Lujan,Lujan B,2021,2
+urba,50|M19|,lujan-r-c-m19,50,M19,"",exacto,equipo_juvenil,3,Lujan,Lujan,2023 2024 2025,5
+urba,50|M19|A,lujan-r-c-m19-a,50,M19,A,exacto,equipo_juvenil,3,Lujan,Lujan A,2022 2025 2026,5
+urba,50|M19|B,lujan-r-c-m19-b,50,M19,B,exacto,equipo_juvenil,3,Lujan,Lujan B,2022 2025 2026,5
+urba,34|M15|,manuel-belgrano-m15,34,M15,"",exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano,2023 2024 2026,3
+urba,34|M15|A,manuel-belgrano-m15-a,34,M15,A,exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano A,2021 2022 2023 2024 2025,7
+urba,34|M15|B,manuel-belgrano-m15-b,34,M15,B,exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano B,2021 2022 2023 2024 2025,7
+urba,34|M16|A,manuel-belgrano-m16-a,34,M16,A,exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano A,2021 2022 2023 2024 2025 2026,10
+urba,34|M16|B,manuel-belgrano-m16-b,34,M16,B,exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano B,2021 2022 2023 2024 2025 2026,10
+urba,34|M17|,manuel-belgrano-m17,34,M17,"",exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano,2021,2
+urba,34|M17|A,manuel-belgrano-m17-a,34,M17,A,exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano A,2022 2023 2024 2025 2026,9
+urba,34|M17|B,manuel-belgrano-m17-b,34,M17,B,exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano B,2022 2023 2024 2025 2026,9
+urba,34|M18|A,manuel-belgrano-m18-a,34,M18,A,exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano A,2021,2
+urba,34|M18|B,manuel-belgrano-m18-b,34,M18,B,exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano B,2021,2
+urba,34|M19|A,manuel-belgrano-m19-a,34,M19,A,exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano A,2022 2023 2024 2025 2026,10
+urba,34|M19|B,manuel-belgrano-m19-b,34,M19,B,exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano B,2022 2023 2024 2025 2026,9
+urba,34|M19|C,manuel-belgrano-m19-c,34,M19,C,exacto,equipo_juvenil,3,Manuel Belgrano,Manuel Belgrano C,2026,2
+urba,39|M15|,mariano-moreno-m15,39,M15,"",exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno,2021 2022 2026,3
+urba,39|M15|A,mariano-moreno-m15-a,39,M15,A,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno A,2022 2023 2024 2025,6
+urba,39|M15|B,mariano-moreno-m15-b,39,M15,B,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno B,2022 2023 2024 2025,7
+urba,39|M16|,mariano-moreno-m16,39,M16,"",exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno,2022,2
+urba,39|M16|A,mariano-moreno-m16-a,39,M16,A,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno A,2021 2023 2024 2025 2026,8
+urba,39|M16|B,mariano-moreno-m16-b,39,M16,B,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno B,2021 2023 2024 2025 2026,8
+urba,39|M17|,mariano-moreno-m17,39,M17,"",exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno,2023,2
+urba,39|M17|A,mariano-moreno-m17-a,39,M17,A,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno A,2021 2022 2024 2025 2026,9
+urba,39|M17|B,mariano-moreno-m17-b,39,M17,B,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno B,2021 2022 2024 2025 2026,9
+urba,39|M18|A,mariano-moreno-m18-a,39,M18,A,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno A,2021,2
+urba,39|M18|B,mariano-moreno-m18-b,39,M18,B,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno B,2021,2
+urba,39|M19|A,mariano-moreno-m19-a,39,M19,A,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno A,2022 2023 2024 2025 2026,10
+urba,39|M19|B,mariano-moreno-m19-b,39,M19,B,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno B,2022 2023 2024 2025 2026,9
+urba,39|M19|C,mariano-moreno-m19-c,39,M19,C,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno C,2022,2
+urba,39|M20|A,mariano-moreno-m20-a,39,M20,A,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno A,2021,2
+urba,39|M20|B,mariano-moreno-m20-b,39,M20,B,exacto,equipo_juvenil,3,Mariano Moreno,Mariano Moreno B,2021,2
+urba,41|M15|,monte-grande-m15,41,M15,"",exacto,equipo_juvenil,3,Monte Grande,Monte Grande,2021 2025,3
+urba,41|M15|A,monte-grande-m15-a,41,M15,A,exacto,equipo_juvenil,3,Monte Grande,Monte Grande A,2023 2024 2026,5
+urba,41|M15|B,monte-grande-m15-b,41,M15,B,exacto,equipo_juvenil,3,Monte Grande,Monte Grande B,2023 2024 2026,5
+urba,41|M16|,monte-grande-m16,41,M16,"",exacto,equipo_juvenil,3,Monte Grande,Monte Grande,2021 2022 2025 2026,7
+urba,41|M16|A,monte-grande-m16-a,41,M16,A,exacto,equipo_juvenil,3,Monte Grande,Monte Grande A,2024,2
+urba,41|M16|B,monte-grande-m16-b,41,M16,B,exacto,equipo_juvenil,3,Monte Grande,Monte Grande B,2024,2
+urba,41|M17|,monte-grande-m17,41,M17,"",exacto,equipo_juvenil,3,Monte Grande,Monte Grande,2021 2022 2023 2024 2025 2026,10
+urba,41|M18|,monte-grande-m18,41,M18,"",exacto,equipo_juvenil,3,Monte Grande,Monte Grande,2021,2
+urba,41|M19|,monte-grande-m19,41,M19,"",exacto,equipo_juvenil,3,Monte Grande,Monte Grande ,2025,2
+urba,41|M19|A,monte-grande-m19-a,41,M19,A,exacto,equipo_juvenil,3,Monte Grande,Monte Grande A,2022 2023 2024 2026,8
+urba,41|M19|B,monte-grande-m19-b,41,M19,B,exacto,equipo_juvenil,3,Monte Grande,Monte Grande B,2022 2023 2024 2026,7
+urba,9|M15|A,club-newman-m15-a,9,M15,A,exacto,equipo_juvenil,3,Newman,Newman A,2021 2022 2023 2024 2025 2026,10
+urba,9|M15|B,club-newman-m15-b,9,M15,B,exacto,equipo_juvenil,3,Newman,Newman B,2021 2022 2023 2024 2025 2026,10
+urba,9|M15|C,club-newman-m15-c,9,M15,C,exacto,equipo_juvenil,3,Newman,Newman C,2021 2022 2023 2024 2025 2026,10
+urba,9|M15|D,club-newman-m15-d,9,M15,D,exacto,equipo_juvenil,3,Newman,Newman D,2021 2023 2025,5
+urba,9|M16|A,club-newman-m16-a,9,M16,A,exacto,equipo_juvenil,3,Newman,Newman A,2021 2022 2023 2024 2025 2026,11
+urba,9|M16|B,club-newman-m16-b,9,M16,B,exacto,equipo_juvenil,3,Newman,Newman B,2021 2022 2023 2024 2025 2026,11
+urba,9|M16|C,club-newman-m16-c,9,M16,C,exacto,equipo_juvenil,3,Newman,Newman C,2021 2022 2023 2024 2025 2026,10
+urba,9|M16|D,club-newman-m16-d,9,M16,D,exacto,equipo_juvenil,3,Newman,Newman D,2025 2026,2
+urba,9|M17|C,club-newman-m17-c,9,M17,C,exacto,equipo_juvenil,3,Newman,Newman C,2021 2022 2023 2024 2025 2026,9
+urba,9|M18|A,club-newman-m18-a,9,M18,A,exacto,equipo_juvenil,3,Newman,Newman A,2021,2
+urba,9|M18|B,club-newman-m18-b,9,M18,B,exacto,equipo_juvenil,3,Newman,Newman B,2021,2
+urba,9|M19|C,club-newman-m19-c,9,M19,C,exacto,equipo_juvenil,3,Newman,Newman C,2022 2023 2024 2025 2026,10
+urba,9|M19|D,club-newman-m19-d,9,M19,D,exacto,equipo_juvenil,3,Newman,Newman D,2022 2024 2025 2026,8
+urba,9|M19|E,club-newman-m19-e,9,M19,E,exacto,equipo_juvenil,3,Newman,Newman E,2025 2026,4
+urba,9|M20|A,club-newman-m20-a,9,M20,A,exacto,equipo_juvenil,3,Newman,Newman A,2021,2
+urba,9|M20|B,club-newman-m20-b,9,M20,B,exacto,equipo_juvenil,3,Newman,Newman B,2021,2
+urba,9|M22|,club-newman-m22,9,M22,"",exacto,equipo_juvenil,3,Newman,Newman,2024 2025 2026,3
+urba,22|M15|A,olivos-r-c-m15-a,22,M15,A,exacto,equipo_juvenil,3,Olivos,Olivos A,2021 2022 2023 2024 2025 2026,9
+urba,22|M15|B,olivos-r-c-m15-b,22,M15,B,exacto,equipo_juvenil,3,Olivos,Olivos B,2021 2022 2023 2024 2025 2026,10
+urba,22|M15|C,olivos-r-c-m15-c,22,M15,C,exacto,equipo_juvenil,3,Olivos,Olivos C,2023 2026,3
+urba,22|M16|,olivos-r-c-m16,22,M16,"",exacto,equipo_juvenil,3,Olivos,Olivos,2021,1
+urba,22|M16|A,olivos-r-c-m16-a,22,M16,A,exacto,equipo_juvenil,3,Olivos,Olivos A,2022 2023 2024 2025 2026,8
+urba,22|M16|B,olivos-r-c-m16-b,22,M16,B,exacto,equipo_juvenil,3,Olivos,Olivos B,2022 2023 2024 2025 2026,9
+urba,22|M17|A,olivos-r-c-m17-a,22,M17,A,exacto,equipo_juvenil,3,Olivos,Olivos A,2021 2022 2023 2024 2025 2026,11
+urba,22|M17|B,olivos-r-c-m17-b,22,M17,B,exacto,equipo_juvenil,3,Olivos,Olivos B,2021 2022 2023 2024 2025 2026,11
+urba,22|M18|A,olivos-r-c-m18-a,22,M18,A,exacto,equipo_juvenil,3,Olivos,Olivos A,2021,2
+urba,22|M18|B,olivos-r-c-m18-b,22,M18,B,exacto,equipo_juvenil,3,Olivos,Olivos B,2021,2
+urba,22|M19|C,olivos-r-c-m19-c,22,M19,C,exacto,equipo_juvenil,3,Olivos,Olivos C,2023 2024 2025,6
+urba,22|M20|,olivos-r-c-m20,22,M20,"",exacto,equipo_juvenil,3,Olivos,Olivos,2021,2
+urba,16|M15|A,club-pucara-m15-a,16,M15,A,exacto,equipo_juvenil,3,Pucara,Pucara A,2021 2022 2023 2024 2025 2026,10
+urba,16|M15|B,club-pucara-m15-b,16,M15,B,exacto,equipo_juvenil,3,Pucara,Pucara B,2021 2022 2023 2024 2025 2026,10
+urba,16|M15|C,club-pucara-m15-c,16,M15,C,exacto,equipo_juvenil,3,Pucara,Pucara C,2022 2023 2024 2025 2026,8
+urba,16|M16|A,club-pucara-m16-a,16,M16,A,exacto,equipo_juvenil,3,Pucara,Pucara A,2021 2022 2023 2024 2025 2026,11
+urba,16|M16|B,club-pucara-m16-b,16,M16,B,exacto,equipo_juvenil,3,Pucara,Pucara B,2021 2022 2023 2024 2025 2026,11
+urba,16|M16|C,club-pucara-m16-c,16,M16,C,exacto,equipo_juvenil,3,Pucara,Pucara C,2024 2025 2026,5
+urba,16|M17|C,club-pucara-m17-c,16,M17,C,exacto,equipo_juvenil,3,Pucara,Pucara C,2022 2023 2025 2026,6
+urba,16|M17|D,club-pucara-m17-d,16,M17,D,exacto,equipo_juvenil,3,Pucara,Pucara D,2026,1
+urba,16|M18|A,club-pucara-m18-a,16,M18,A,exacto,equipo_juvenil,3,Pucara,Pucara A,2021,2
+urba,16|M18|B,club-pucara-m18-b,16,M18,B,exacto,equipo_juvenil,3,Pucara,Pucara B,2021,1
+urba,16|M19|C,club-pucara-m19-c,16,M19,C,exacto,equipo_juvenil,3,Pucara,Pucara C,2023 2024 2025 2026,8
+urba,16|M19|D,club-pucara-m19-d,16,M19,D,exacto,equipo_juvenil,3,Pucara,Pucara D,2026,2
+urba,16|M20|A,club-pucara-m20-a,16,M20,A,exacto,equipo_juvenil,3,Pucara,Pucara A,2021,2
+urba,16|M20|B,club-pucara-m20-b,16,M20,B,exacto,equipo_juvenil,3,Pucara,Pucara B,2021,2
+urba,16|M20|C,club-pucara-m20-c,16,M20,C,exacto,equipo_juvenil,3,Pucara,Pucara C,2021,2
+urba,16|M22|,club-pucara-m22,16,M22,"",exacto,equipo_juvenil,3,Pucara,Pucara ,2024,1
+urba,25|M15|A,pueyrredon-m15-a,25,M15,A,exacto,equipo_juvenil,3,Pueyrredon,Pueyrredon A,2021 2022 2023 2024 2025 2026,10
+urba,25|M15|B,pueyrredon-m15-b,25,M15,B,exacto,equipo_juvenil,3,Pueyrredon,Pueyrredon B,2021 2022 2023 2024 2025 2026,10
+urba,25|M15|C,pueyrredon-m15-c,25,M15,C,exacto,equipo_juvenil,3,Pueyrredon,Pueyrredon C,2022 2025,3
+urba,25|M16|A,pueyrredon-m16-a,25,M16,A,exacto,equipo_juvenil,3,Pueyrredon,Pueyrredon A,2021 2022 2023 2024 2025 2026,11
+urba,25|M16|B,pueyrredon-m16-b,25,M16,B,exacto,equipo_juvenil,3,Pueyrredon,Pueyrredon B,2021 2022 2023 2024 2025 2026,10
+urba,25|M16|C,pueyrredon-m16-c,25,M16,C,exacto,equipo_juvenil,3,Pueyrredon,Pueyrredon C,2022 2023 2024 2026,6
+urba,25|M17|C,pueyrredon-m17-c,25,M17,C,exacto,equipo_juvenil,3,Pueyrredon,Pueyrredon C,2024 2025,3
+urba,25|M18|,pueyrredon-m18,25,M18,"",exacto,equipo_juvenil,3,Pueyrredon,Pueyrredon,2021,2
+urba,25|M19|C,pueyrredon-m19-c,25,M19,C,exacto,equipo_juvenil,3,Pueyrredon,Pueyrredon C,2023 2024 2025 2026,7
+urba,4|M15|A,regatas-de-bella-vista-m15-a,4,M15,A,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista A,2021 2022 2023 2024 2025 2026,10
+urba,4|M15|B,regatas-de-bella-vista-m15-b,4,M15,B,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista B,2021 2022 2023 2024 2025 2026,10
+urba,4|M15|C,regatas-de-bella-vista-m15-c,4,M15,C,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista C,2023 2024 2025 2026,7
+urba,4|M15|D,regatas-de-bella-vista-m15-d,4,M15,D,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista D,2023 2025 2026,3
+urba,4|M16|A,regatas-de-bella-vista-m16-a,4,M16,A,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista A,2021 2022 2023 2024 2025 2026,11
+urba,4|M16|B,regatas-de-bella-vista-m16-b,4,M16,B,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista B,2021 2022 2023 2024 2025 2026,11
+urba,4|M16|C,regatas-de-bella-vista-m16-c,4,M16,C,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista C,2023 2024 2025 2026,6
+urba,4|M16|D,regatas-de-bella-vista-m16-d,4,M16,D,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista D,2024 2026,3
+urba,4|M17|C,regatas-de-bella-vista-m17-c,4,M17,C,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas B Vista C,2025 2026,2
+urba,4|M17|D,regatas-de-bella-vista-m17-d,4,M17,D,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas B Vista D,2025,2
+urba,4|M17|E,regatas-de-bella-vista-m17-e,4,M17,E,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas B Vista E,2025,1
+urba,4|M18|A,regatas-de-bella-vista-m18-a,4,M18,A,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista A,2021,2
+urba,4|M18|B,regatas-de-bella-vista-m18-b,4,M18,B,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista B,2021,2
+urba,4|M19|C,regatas-de-bella-vista-m19-c,4,M19,C,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista C,2022 2023 2024 2025 2026,10
+urba,4|M19|D,regatas-de-bella-vista-m19-d,4,M19,D,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista D,2022 2023 2024 2025 2026,9
+urba,4|M19|E,regatas-de-bella-vista-m19-e,4,M19,E,exacto,equipo_juvenil,3,Regatas Bella Vista,Regastas B. Vista E,2025 2026,4
+urba,4|M19|F,regatas-de-bella-vista-m19-f,4,M19,F,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas B Vista F,2026,1
+urba,4|M20|,regatas-de-bella-vista-m20,4,M20,"",exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista,2021,1
+urba,4|M20|B,regatas-de-bella-vista-m20-b,4,M20,B,exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista B,2021,2
+urba,4|M22|,regatas-de-bella-vista-m22,4,M22,"",exacto,equipo_juvenil,3,Regatas Bella Vista,Regatas Bella Vista,2025 2026,2
+urba,14|M15|,san-albano-m15,14,M15,"",exacto,equipo_juvenil,3,San Albano,San Albano,2022,2
+urba,14|M15|A,san-albano-m15-a,14,M15,A,exacto,equipo_juvenil,3,San Albano,San Albano A,2021 2022 2023 2024 2025 2026,13
+urba,14|M15|B,san-albano-m15-b,14,M15,B,exacto,equipo_juvenil,3,San Albano,San Albano B,2021 2022 2023 2024 2025 2026,13
+urba,14|M15|C,san-albano-m15-c,14,M15,C,exacto,equipo_juvenil,3,San Albano,San Andres C,2023,2
+urba,14|M16|A,san-albano-m16-a,14,M16,A,exacto,equipo_juvenil,3,San Albano,San Albano A,2021 2022 2023 2024 2025 2026,16
+urba,14|M16|B,san-albano-m16-b,14,M16,B,exacto,equipo_juvenil,3,San Albano,San Albano B,2021 2022 2023 2024 2025 2026,14
+urba,14|M17|A,san-albano-m17-a,14,M17,A,exacto,equipo_juvenil,3,San Albano,San Albano A,2022 2023 2024 2025 2026,13
+urba,14|M17|B,san-albano-m17-b,14,M17,B,exacto,equipo_juvenil,3,San Albano,San Albano B,2022 2023 2024 2025 2026,13
+urba,14|M18|A,san-albano-m18-a,14,M18,A,exacto,equipo_juvenil,3,San Albano,San Andres A,2021,4
+urba,14|M18|B,san-albano-m18-b,14,M18,B,exacto,equipo_juvenil,3,San Albano,San Andres B,2021,3
+urba,14|M19|,san-albano-m19,14,M19,"",exacto,equipo_juvenil,3,San Albano,San Andres,2023,1
+urba,14|M19|A,san-albano-m19-a,14,M19,A,exacto,equipo_juvenil,3,San Albano,San Albano A,2022 2023 2024 2025 2026,13
+urba,14|M19|B,san-albano-m19-b,14,M19,B,exacto,equipo_juvenil,3,San Albano,San Albano B,2022 2023 2024 2025 2026,12
+urba,14|M19|C,san-albano-m19-c,14,M19,C,exacto,equipo_juvenil,3,San Albano,San Albano C,2024 2025,4
+urba,14|M20|A,san-albano-m20-a,14,M20,A,exacto,equipo_juvenil,3,San Albano,San Andres A,2021,2
+urba,14|M20|B,san-albano-m20-b,14,M20,B,exacto,equipo_juvenil,3,San Albano,San Andres B,2021,2
+urba,31|M15|A,san-andres-m15-a,31,M15,A,exacto,equipo_juvenil,3,San Andres,San Andres A,2024 2025 2026,5
+urba,31|M15|B,san-andres-m15-b,31,M15,B,exacto,equipo_juvenil,3,San Andres,San Andres B,2024 2025 2026,5
+urba,31|M15|C,san-andres-m15-c,31,M15,C,exacto,equipo_juvenil,3,San Andres,San Andres C,2025 2026,3
+urba,31|M16|A,san-andres-m16-a,31,M16,A,exacto,equipo_juvenil,3,San Andres,San Andres A,2024 2025 2026,5
+urba,31|M16|B,san-andres-m16-b,31,M16,B,exacto,equipo_juvenil,3,San Andres,San Andres B,2024 2025 2026,5
+urba,31|M16|C,san-andres-m16-c,31,M16,C,exacto,equipo_juvenil,3,San Andres,San Andres C,2024 2025 2026,5
+urba,31|M17|C,san-andres-m17-c,31,M17,C,exacto,equipo_juvenil,3,San Andres,San Andres C,2026,1
+urba,31|M19|C,san-andres-m19-c,31,M19,C,exacto,equipo_juvenil,3,San Andres,San Andres C,2025 2026,4
+urba,35|M15|,san-carlos-m15,35,M15,"",exacto,equipo_juvenil,3,San Carlos,San Carlos,2021 2022 2023 2024 2025,8
+urba,35|M15|A,san-carlos-m15-a,35,M15,A,exacto,equipo_juvenil,3,San Carlos,San Carlos A,2026,1
+urba,35|M15|B,san-carlos-m15-b,35,M15,B,exacto,equipo_juvenil,3,San Carlos,San Carlos B,2026,1
+urba,35|M16|,san-carlos-m16,35,M16,"",exacto,equipo_juvenil,3,San Carlos,San Carlos,2021 2022 2023 2025 2026,9
+urba,35|M16|A,san-carlos-m16-a,35,M16,A,exacto,equipo_juvenil,3,San Carlos,San Carlos A,2024,2
+urba,35|M16|B,san-carlos-m16-b,35,M16,B,exacto,equipo_juvenil,3,San Carlos,San Carlos B,2024,2
+urba,35|M17|,san-carlos-m17,35,M17,"",exacto,equipo_juvenil,3,San Carlos,San Carlos,2022 2023 2024 2025 2026,8
+urba,35|M17|A,san-carlos-m17-a,35,M17,A,exacto,equipo_juvenil,3,San Carlos,San Carlos A,2025,1
+urba,35|M17|B,san-carlos-m17-b,35,M17,B,exacto,equipo_juvenil,3,San Carlos,San Carlos B,2025,1
+urba,35|M18|A,san-carlos-m18-a,35,M18,A,exacto,equipo_juvenil,3,San Carlos,San Carlos A,2021,3
+urba,35|M18|B,san-carlos-m18-b,35,M18,B,exacto,equipo_juvenil,3,San Carlos,San Carlos B,2021,3
+urba,35|M19|,san-carlos-m19,35,M19,"",exacto,equipo_juvenil,3,San Carlos,San Carlos,2022 2024,4
+urba,35|M19|A,san-carlos-m19-a,35,M19,A,exacto,equipo_juvenil,3,San Carlos,San Carlos A,2023 2025 2026,6
+urba,35|M19|B,san-carlos-m19-b,35,M19,B,exacto,equipo_juvenil,3,San Carlos,San Carlos B,2023 2025 2026,5
+urba,35|M20|A,san-carlos-m20-a,35,M20,A,exacto,equipo_juvenil,3,San Carlos,San Carlos A,2021,2
+urba,35|M20|B,san-carlos-m20-b,35,M20,B,exacto,equipo_juvenil,3,San Carlos,San Carlos B,2021,2
+urba,18|M15|A,san-cirano-m15-a,18,M15,A,exacto,equipo_juvenil,3,San Cirano,San Cirano A,2021 2022 2023 2024 2025 2026,9
+urba,18|M15|B,san-cirano-m15-b,18,M15,B,exacto,equipo_juvenil,3,San Cirano,San Cirano B,2021 2022 2023 2024 2025 2026,10
+urba,18|M16|A,san-cirano-m16-a,18,M16,A,exacto,equipo_juvenil,3,San Cirano,San Cirano A,2021 2022 2023 2024 2025 2026,10
+urba,18|M16|B,san-cirano-m16-b,18,M16,B,exacto,equipo_juvenil,3,San Cirano,San Cirano B,2021 2022 2023 2024 2025 2026,11
+urba,18|M17|,san-cirano-m17,18,M17,"",exacto,equipo_juvenil,3,San Cirano,San Cirano,2021,2
+urba,18|M18|A,san-cirano-m18-a,18,M18,A,exacto,equipo_juvenil,3,San Cirano,San Cirano A,2021,2
+urba,18|M18|B,san-cirano-m18-b,18,M18,B,exacto,equipo_juvenil,3,San Cirano,San Cirano B,2021,2
+urba,18|M19|C,san-cirano-m19-c,18,M19,C,exacto,equipo_juvenil,3,San Cirano,San Cirano C,2024 2025 2026,5
+urba,18|M20|A,san-cirano-m20-a,18,M20,A,exacto,equipo_juvenil,3,San Cirano,San Cirano A,2021,2
+urba,18|M20|B,san-cirano-m20-b,18,M20,B,exacto,equipo_juvenil,3,San Cirano,San Cirano B,2021,2
+urba,32|M15|,san-fernando-m15,32,M15,"",exacto,equipo_juvenil,3,San Fernando,San Fernando,2022 2023 2024 2026,6
+urba,32|M15|A,san-fernando-m15-a,32,M15,A,exacto,equipo_juvenil,3,San Fernando,San Fernando A,2021 2022 2025,4
+urba,32|M15|B,san-fernando-m15-b,32,M15,B,exacto,equipo_juvenil,3,San Fernando,San Fernando B,2021 2022 2025,4
+urba,32|M16|,san-fernando-m16,32,M16,"",exacto,equipo_juvenil,3,San Fernando,San Fernando,2021 2024 2025,5
+urba,32|M16|A,san-fernando-m16-a,32,M16,A,exacto,equipo_juvenil,3,San Fernando,San Fernando A,2022 2023 2024 2026,6
+urba,32|M16|B,san-fernando-m16-b,32,M16,B,exacto,equipo_juvenil,3,San Fernando,San Fernando B,2022 2024 2026,4
+urba,32|M17|,san-fernando-m17,32,M17,"",exacto,equipo_juvenil,3,San Fernando,San Fernando,2022 2026,2
+urba,32|M17|A,san-fernando-m17-a,32,M17,A,exacto,equipo_juvenil,3,San Fernando,San Fernando A,2022 2023 2024 2025,7
+urba,32|M17|B,san-fernando-m17-b,32,M17,B,exacto,equipo_juvenil,3,San Fernando,San Fernando B,2022 2023 2024 2025,7
+urba,32|M18|A,san-fernando-m18-a,32,M18,A,exacto,equipo_juvenil,3,San Fernando,San Fernando A,2021,3
+urba,32|M18|B,san-fernando-m18-b,32,M18,B,exacto,equipo_juvenil,3,San Fernando,San Fernando B,2021,3
+urba,32|M19|A,san-fernando-m19-a,32,M19,A,exacto,equipo_juvenil,3,San Fernando,San Fernando A,2022 2023 2024 2025 2026,10
+urba,32|M19|B,san-fernando-m19-b,32,M19,B,exacto,equipo_juvenil,3,San Fernando,San Fernando B,2022 2023 2024 2025 2026,10
+urba,32|M19|C,san-fernando-m19-c,32,M19,C,exacto,equipo_juvenil,3,San Fernando,San Fernando C,2025,2
+urba,83|M17|,san-jose-m17,83,M17,"",exacto,equipo_juvenil,3,San Jose,San Jose,2025 2026,3
+urba,5|M15|A,san-luis-m15-a,5,M15,A,exacto,equipo_juvenil,3,San Luis,San Luis A,2021 2022 2023 2024 2025 2026,10
+urba,5|M15|B,san-luis-m15-b,5,M15,B,exacto,equipo_juvenil,3,San Luis,San Luis B,2021 2022 2023 2024 2025 2026,10
+urba,5|M16|A,san-luis-m16-a,5,M16,A,exacto,equipo_juvenil,3,San Luis,San Luis A,2021 2022 2023 2024 2025 2026,11
+urba,5|M16|B,san-luis-m16-b,5,M16,B,exacto,equipo_juvenil,3,San Luis,San Luis B,2021 2022 2023 2024 2025 2026,10
+urba,5|M18|A,san-luis-m18-a,5,M18,A,exacto,equipo_juvenil,3,San Luis,San Luis A,2021,2
+urba,5|M18|B,san-luis-m18-b,5,M18,B,exacto,equipo_juvenil,3,San Luis,San Luis B,2021,1
+urba,5|M19|C,san-luis-m19-c,5,M19,C,exacto,equipo_juvenil,3,San Luis,San Luis C,2022 2023 2024 2025 2026,10
+urba,5|M20|A,san-luis-m20-a,5,M20,A,exacto,equipo_juvenil,3,San Luis,San Luis A,2021,2
+urba,5|M20|B,san-luis-m20-b,5,M20,B,exacto,equipo_juvenil,3,San Luis,San Luis B,2021,2
+urba,20|M15|A,san-martin-m15-a,20,M15,A,exacto,equipo_juvenil,3,San Martin,San Martin A,2021 2022 2023 2024 2025 2026,10
+urba,20|M15|B,san-martin-m15-b,20,M15,B,exacto,equipo_juvenil,3,San Martin,San Martin B,2021 2022 2023 2024 2025 2026,10
+urba,20|M16|A,san-martin-m16-a,20,M16,A,exacto,equipo_juvenil,3,San Martin,San Martin A,2021 2022 2023 2024 2025 2026,11
+urba,20|M16|B,san-martin-m16-b,20,M16,B,exacto,equipo_juvenil,3,San Martin,San Martin B,2021 2022 2023 2024 2025 2026,11
+urba,20|M16|C,san-martin-m16-c,20,M16,C,exacto,equipo_juvenil,3,San Martin,San Martin C,2023 2024,3
+urba,20|M17|A,san-martin-m17-a,20,M17,A,exacto,equipo_juvenil,3,San Martin,San Martin A,2022 2023 2024 2025 2026,9
+urba,20|M17|B,san-martin-m17-b,20,M17,B,exacto,equipo_juvenil,3,San Martin,San Martin B,2022 2023 2024 2025 2026,9
+urba,20|M17|C,san-martin-m17-c,20,M17,C,exacto,equipo_juvenil,3,San Martin,San Martin C,2025,2
+urba,20|M18|A,san-martin-m18-a,20,M18,A,exacto,equipo_juvenil,3,San Martin,San Martin A,2021,2
+urba,20|M18|B,san-martin-m18-b,20,M18,B,exacto,equipo_juvenil,3,San Martin,San Martin B,2021,2
+urba,20|M18|C,san-martin-m18-c,20,M18,C,exacto,equipo_juvenil,3,San Martin,San Martin C,2021,1
+urba,20|M19|C,san-martin-m19-c,20,M19,C,exacto,equipo_juvenil,3,San Martin,San Martin C,2024 2025 2026,6
+urba,20|M19|D,san-martin-m19-d,20,M19,D,exacto,equipo_juvenil,3,San Martin,San Martin D,2025 2026,4
+urba,20|M20|A,san-martin-m20-a,20,M20,A,exacto,equipo_juvenil,3,San Martin,San Martin A,2021,2
+urba,20|M20|B,san-martin-m20-b,20,M20,B,exacto,equipo_juvenil,3,San Martin,San Martin B,2021,2
+urba,56|M15|,san-miguel-r-c-m15,56,M15,"",exacto,equipo_juvenil,3,San Miguel,San Miguel,2026,1
+urba,56|M16|,san-miguel-r-c-m16,56,M16,"",exacto,equipo_juvenil,3,San Miguel,San Miguel,2022 2023 2025,4
+urba,56|M17|,san-miguel-r-c-m17,56,M17,"",exacto,equipo_juvenil,3,San Miguel,San Miguel,2021 2023 2024 2026,6
+urba,56|M18|,san-miguel-r-c-m18,56,M18,"",exacto,equipo_juvenil,3,San Miguel,San Miguel,2021,2
+urba,56|M19|,san-miguel-r-c-m19,56,M19,"",exacto,equipo_juvenil,3,San Miguel,San Miguel,2022 2023 2025 2026,7
+urba,21|M15|,club-san-patricio-m15,21,M15,"",exacto,equipo_juvenil,3,San Patricio,San Patricio,2021 2022 2023 2024 2026,7
+urba,21|M15|A,club-san-patricio-m15-a,21,M15,A,exacto,equipo_juvenil,3,San Patricio,San Patricio A,2025,2
+urba,21|M15|B,club-san-patricio-m15-b,21,M15,B,exacto,equipo_juvenil,3,San Patricio,San Patricio B,2025,2
+urba,21|M16|,club-san-patricio-m16,21,M16,"",exacto,equipo_juvenil,3,San Patricio,San Patricio,2022 2023 2024 2025 2026,9
+urba,21|M16|A,club-san-patricio-m16-a,21,M16,A,exacto,equipo_juvenil,3,San Patricio,San Patricio A,2021,1
+urba,21|M16|B,club-san-patricio-m16-b,21,M16,B,exacto,equipo_juvenil,3,San Patricio,San Patricio B,2021,1
+urba,21|M17|,club-san-patricio-m17,21,M17,"",exacto,equipo_juvenil,3,San Patricio,San Patricio,2021 2022 2023 2024 2025 2026,10
+urba,21|M18|A,club-san-patricio-m18-a,21,M18,A,exacto,equipo_juvenil,3,San Patricio,San Patricio A,2021,2
+urba,21|M18|B,club-san-patricio-m18-b,21,M18,B,exacto,equipo_juvenil,3,San Patricio,San Patricio B,2021,2
+urba,21|M19|A,club-san-patricio-m19-a,21,M19,A,exacto,equipo_juvenil,3,San Patricio,San Patricio A,2022 2023 2024 2025 2026,10
+urba,21|M19|B,club-san-patricio-m19-b,21,M19,B,exacto,equipo_juvenil,3,San Patricio,San Patricio B,2022 2023 2024 2025 2026,9
+urba,1|M15|A,sic-m15-a,1,M15,A,exacto,equipo_juvenil,3,SIC,SIC A,2021 2022 2023 2024 2025 2026,9
+urba,1|M15|B,sic-m15-b,1,M15,B,exacto,equipo_juvenil,3,SIC,SIC B,2021 2022 2023 2024 2025 2026,11
+urba,1|M15|C,sic-m15-c,1,M15,C,exacto,equipo_juvenil,3,SIC,SIC C,2021 2022 2023 2024 2025 2026,8
+urba,1|M15|D,sic-m15-d,1,M15,D,exacto,equipo_juvenil,3,SIC,SIC D,2021 2022 2023 2024 2025,8
+urba,1|M16|A,sic-m16-a,1,M16,A,exacto,equipo_juvenil,3,SIC,SIC A,2021 2022 2023 2024 2025 2026,11
+urba,1|M16|B,sic-m16-b,1,M16,B,exacto,equipo_juvenil,3,SIC,SIC B,2021 2022 2023 2024 2025 2026,11
+urba,1|M16|C,sic-m16-c,1,M16,C,exacto,equipo_juvenil,3,SIC,SIC C,2021 2022 2023 2024 2025 2026,10
+urba,1|M16|D,sic-m16-d,1,M16,D,exacto,equipo_juvenil,3,SIC,SIC D,2022 2023 2024 2025 2026,9
+urba,1|M17|C,sic-m17-c,1,M17,C,exacto,equipo_juvenil,3,SIC,SIC C,2021 2022 2023 2024 2025 2026,9
+urba,1|M17|D,sic-m17-d,1,M17,D,exacto,equipo_juvenil,3,SIC,SIC D,2023 2024 2025 2026,7
+urba,1|M18|A,sic-m18-a,1,M18,A,exacto,equipo_juvenil,3,SIC,SIC A,2021,2
+urba,1|M18|B,sic-m18-b,1,M18,B,exacto,equipo_juvenil,3,SIC,SIC B,2021,2
+urba,1|M19|C,sic-m19-c,1,M19,C,exacto,equipo_juvenil,3,SIC,SIC C,2022 2023 2024 2025 2026,10
+urba,1|M19|D,sic-m19-d,1,M19,D,exacto,equipo_juvenil,3,SIC,SIC D,2022 2023 2024 2025 2026,11
+urba,1|M19|E,sic-m19-e,1,M19,E,exacto,equipo_juvenil,3,SIC,SIC E,2023 2024 2025 2026,7
+urba,1|M19|F,sic-m19-f,1,M19,F,exacto,equipo_juvenil,3,SIC,SIC F,2023 2024 2025 2026,8
+urba,1|M19|G,sic-m19-g,1,M19,G,exacto,equipo_juvenil,3,SIC,SIC G,2024 2025 2026,5
+urba,1|M20|A,sic-m20-a,1,M20,A,exacto,equipo_juvenil,3,SIC,SIC A,2021,2
+urba,1|M20|B,sic-m20-b,1,M20,B,exacto,equipo_juvenil,3,SIC,SIC B,2021,2
+urba,1|M20|C,sic-m20-c,1,M20,C,exacto,equipo_juvenil,3,SIC,SIC C,2021,2
+urba,1|M20|D,sic-m20-d,1,M20,D,exacto,equipo_juvenil,3,SIC,SIC D,2021,2
+urba,1|M20|E,sic-m20-e,1,M20,E,exacto,equipo_juvenil,3,SIC,SIC E,2021,1
+urba,1|M22|,sic-m22,1,M22,"",exacto,equipo_juvenil,3,SIC,SIC,2024 2025 2026,3
+urba,1|M22|B,sic-m22-b,1,M22,B,exacto,equipo_juvenil,3,SIC,SIC B,2024 2025 2026,3
+urba,43|M15|,sitas-m15,43,M15,"",exacto,equipo_juvenil,3,SITAS,SITAS,2022 2023 2025,5
+urba,43|M15|A,sitas-m15-a,43,M15,A,exacto,equipo_juvenil,3,SITAS,SITAS A,2021 2024 2026,4
+urba,43|M15|B,sitas-m15-b,43,M15,B,exacto,equipo_juvenil,3,SITAS,SITAS B,2021 2024 2026,4
+urba,43|M16|,sitas-m16,43,M16,"",exacto,equipo_juvenil,3,SITAS,SITAS,2022 2023 2024 2026,6
+urba,43|M16|A,sitas-m16-a,43,M16,A,exacto,equipo_juvenil,3,SITAS,SITAS A,2021 2022 2025,4
+urba,43|M16|B,sitas-m16-b,43,M16,B,exacto,equipo_juvenil,3,SITAS,SITAS B,2021 2022 2025,4
+urba,43|M17|,sitas-m17,43,M17,"",exacto,equipo_juvenil,3,SITAS,SITAS,2022 2024 2025,5
+urba,43|M18|A,sitas-m18-a,43,M18,A,exacto,equipo_juvenil,3,SITAS,SITAS A,2021,2
+urba,43|M18|B,sitas-m18-b,43,M18,B,exacto,equipo_juvenil,3,SITAS,SITAS B,2021,2
+urba,43|M19|A,sitas-m19-a,43,M19,A,exacto,equipo_juvenil,3,SITAS,SITAS A,2022 2023 2024 2025 2026,10
+urba,43|M19|B,sitas-m19-b,43,M19,B,exacto,equipo_juvenil,3,SITAS,SITAS B,2022 2023 2024 2025 2026,10
+urba,58|M16|,st-brendans-m16,58,M16,"",exacto,equipo_juvenil,3,St. Brendans,St. Brendans,2021 2025,4
+urba,58|M17|,st-brendans-m17,58,M17,"",exacto,equipo_juvenil,3,St. Brendans,St. Brendans,2022 2023 2024 2026,6
+urba,58|M18|,st-brendans-m18,58,M18,"",exacto,equipo_juvenil,3,St. Brendans,St. Brendans,2021,2
+urba,58|M19|,st-brendans-m19,58,M19,"",exacto,equipo_juvenil,3,St. Brendans,St. Brendans,2022 2023 2024 2025,8
+urba,58|M20|,st-brendans-m20,58,M20,"",exacto,equipo_juvenil,3,St. Brendans,St. Brendans,2021,2
+urba,29|M15|,universitario-de-la-plata-m15,29,M15,"",exacto,equipo_juvenil,3,Universitario de la Plata,Universitario de La Plata,2021 2022 2023 2024,6
+urba,29|M15|A,universitario-de-la-plata-m15-a,29,M15,A,exacto,equipo_juvenil,3,Universitario de la Plata,Univ. De la Plata A,2025 2026,3
+urba,29|M15|B,universitario-de-la-plata-m15-b,29,M15,B,exacto,equipo_juvenil,3,Universitario de la Plata,Univ. De la Plata B,2025 2026,3
+urba,29|M16|,universitario-de-la-plata-m16,29,M16,"",exacto,equipo_juvenil,3,Universitario de la Plata,Universitario de La Plata,2021 2022 2023 2024,5
+urba,29|M16|A,universitario-de-la-plata-m16-a,29,M16,A,exacto,equipo_juvenil,3,Universitario de la Plata,Univ. De la Plata A,2022 2025 2026,4
+urba,29|M16|B,universitario-de-la-plata-m16-b,29,M16,B,exacto,equipo_juvenil,3,Universitario de la Plata,Univ. De la Plata B,2022 2023 2025 2026,5
+urba,29|M17|,universitario-de-la-plata-m17,29,M17,"",exacto,equipo_juvenil,3,Universitario de la Plata,Universitario de La Plata,2022 2023,2
+urba,29|M17|A,universitario-de-la-plata-m17-a,29,M17,A,exacto,equipo_juvenil,3,Universitario de la Plata,Univ. De la Plata A,2022 2024 2025 2026,6
+urba,29|M17|B,universitario-de-la-plata-m17-b,29,M17,B,exacto,equipo_juvenil,3,Universitario de la Plata,Univ. De la Plata B,2022 2024 2025 2026,6
+urba,29|M18|A,universitario-de-la-plata-m18-a,29,M18,A,exacto,equipo_juvenil,3,Universitario de la Plata,Universitario de La Plata A,2021,2
+urba,29|M18|B,universitario-de-la-plata-m18-b,29,M18,B,exacto,equipo_juvenil,3,Universitario de la Plata,Universitario de La Plata B,2021,1
+urba,29|M19|A,universitario-de-la-plata-m19-a,29,M19,A,exacto,equipo_juvenil,3,Universitario de la Plata,Universitario de La Plata A,2022 2023 2024 2025 2026,10
+urba,29|M19|B,universitario-de-la-plata-m19-b,29,M19,B,exacto,equipo_juvenil,3,Universitario de la Plata,Universitario de La Plata B,2022 2023 2024 2025 2026,10
+urba,29|M19|C,universitario-de-la-plata-m19-c,29,M19,C,exacto,equipo_juvenil,3,Universitario de la Plata,Univ. De la Plata C,2025,1
+urba,45|M15|,vicentinos-m15,45,M15,"",exacto,equipo_juvenil,3,Vicentinos,Vicentinos,2021 2022 2023 2024 2025 2026,8
+urba,45|M15|A,vicentinos-m15-a,45,M15,A,exacto,equipo_juvenil,3,Vicentinos,Vicentinos A,2023 2024,2
+urba,45|M15|B,vicentinos-m15-b,45,M15,B,exacto,equipo_juvenil,3,Vicentinos,Vicentinos B,2023 2024,2
+urba,45|M16|,vicentinos-m16,45,M16,"",exacto,equipo_juvenil,3,Vicentinos,Vicentinos,2022 2023 2024 2026,7
+urba,45|M16|A,vicentinos-m16-a,45,M16,A,exacto,equipo_juvenil,3,Vicentinos,Vicentinos A,2021 2025,3
+urba,45|M16|B,vicentinos-m16-b,45,M16,B,exacto,equipo_juvenil,3,Vicentinos,Vicentinos B,2021 2025,3
+urba,45|M17|,vicentinos-m17,45,M17,"",exacto,equipo_juvenil,3,Vicentinos,Vicentinos,2023 2024 2025 2026,6
+urba,45|M17|A,vicentinos-m17-a,45,M17,A,exacto,equipo_juvenil,3,Vicentinos,Vicentinos A,2022,2
+urba,45|M17|B,vicentinos-m17-b,45,M17,B,exacto,equipo_juvenil,3,Vicentinos,Vicentinos B,2022,2
+urba,45|M18|A,vicentinos-m18-a,45,M18,A,exacto,equipo_juvenil,3,Vicentinos,Vicentinos A,2021,2
+urba,45|M18|B,vicentinos-m18-b,45,M18,B,exacto,equipo_juvenil,3,Vicentinos,Vicentinos B,2021,2
+urba,45|M19|,vicentinos-m19,45,M19,"",exacto,equipo_juvenil,3,Vicentinos,Vicentinos,2025 2026,3
+urba,45|M19|A,vicentinos-m19-a,45,M19,A,exacto,equipo_juvenil,3,Vicentinos,Vicentinos A,2022 2023 2024 2025,7
+urba,45|M19|B,vicentinos-m19-b,45,M19,B,exacto,equipo_juvenil,3,Vicentinos,Vicentinos B,2022 2023 2024 2025,7
+urba,55|M15|,virreyes-r-c-m15,55,M15,"",exacto,equipo_juvenil,3,Virreyes,Virreyes,2026,1
+urba,55|M15|A,virreyes-r-c-m15-a,55,M15,A,exacto,equipo_juvenil,3,Virreyes,Virreyes A,2021 2022 2023 2024 2025,9
+urba,55|M15|B,virreyes-r-c-m15-b,55,M15,B,exacto,equipo_juvenil,3,Virreyes,Virreyes B,2021 2022 2023 2024 2025,9
+urba,55|M16|,virreyes-r-c-m16,55,M16,"",exacto,equipo_juvenil,3,Virreyes,Virreyes,2021 2023 2024,6
+urba,55|M16|A,virreyes-r-c-m16-a,55,M16,A,exacto,equipo_juvenil,3,Virreyes,Virreyes A,2022 2025 2026,5
+urba,55|M16|B,virreyes-r-c-m16-b,55,M16,B,exacto,equipo_juvenil,3,Virreyes,Virreyes B,2022 2025 2026,5
+urba,55|M17|,virreyes-r-c-m17,55,M17,"",exacto,equipo_juvenil,3,Virreyes,Virreyes,2023 2024 2025,6
+urba,55|M17|A,virreyes-r-c-m17-a,55,M17,A,exacto,equipo_juvenil,3,Virreyes,Virreyes A,2022 2026,3
+urba,55|M17|B,virreyes-r-c-m17-b,55,M17,B,exacto,equipo_juvenil,3,Virreyes,Virreyes B,2022 2026,3
+urba,55|M18|,virreyes-r-c-m18,55,M18,"",exacto,equipo_juvenil,3,Virreyes,Virreyes,2021,2
+urba,55|M19|,virreyes-r-c-m19,55,M19,"",exacto,equipo_juvenil,3,Virreyes,Virreyes,2022 2023 2024 2025 2026,10
+urba,55|M20|,virreyes-r-c-m20,55,M20,"",exacto,equipo_juvenil,3,Virreyes,Virreyes,2021,1
+urba,61|M15|,albatros-m15,61,M15,"",exacto,equipo_juvenil,4,Albatros,Albatros,2022 2023 2024 2025 2026,9
+urba,61|M16|,albatros-m16,61,M16,"",exacto,equipo_juvenil,4,Albatros,Albatros,2021 2023 2024 2025 2026,9
+urba,61|M17|,albatros-m17,61,M17,"",exacto,equipo_juvenil,4,Albatros,Albatros,2022 2023 2024 2025 2026,8
+urba,61|M18|,albatros-m18,61,M18,"",exacto,equipo_juvenil,4,Albatros,Albatros,2021,2
+urba,61|M19|,albatros-m19,61,M19,"",exacto,equipo_juvenil,4,Albatros,Albatros,2022 2023 2024 2026,8
+urba,74|M15|,almafuerte-m15,74,M15,"",exacto,equipo_juvenil,4,Almafuerte,Almafuerte,2021 2022 2023 2024 2025 2026,9
+urba,74|M16|,almafuerte-m16,74,M16,"",exacto,equipo_juvenil,4,Almafuerte,Almafuerte,2026,1
+urba,74|M17|,almafuerte-m17,74,M17,"",exacto,equipo_juvenil,4,Almafuerte,Almafuerte,2021 2022 2023 2024 2025 2026,11
+urba,74|M19|,almafuerte-m19,74,M19,"",exacto,equipo_juvenil,4,Almafuerte,Almafuerte,2022 2023 2024 2025 2026,8
+urba,67|M15|,arsenal-zarate-m15,67,M15,"",exacto,equipo_juvenil,4,Arsenal Zarate,Arsenal Zarate,2023 2025,4
+urba,67|M16|,arsenal-zarate-m16,67,M16,"",exacto,equipo_juvenil,4,Arsenal Zarate,Arsenal Zarate,2021 2022 2024 2026,6
+urba,67|M17|,arsenal-zarate-m17,67,M17,"",exacto,equipo_juvenil,4,Arsenal Zarate,Arsenal Zarate,2022 2023 2024 2025 2026,8
+urba,67|M18|,arsenal-zarate-m18,67,M18,"",exacto,equipo_juvenil,4,Arsenal Zarate,Arsenal Zarate,2021,2
+urba,67|M19|,arsenal-zarate-m19,67,M19,"",exacto,equipo_juvenil,4,Arsenal Zarate,Arsenal Zarate,2022 2024 2025 2026,7
+urba,60|M15|,atletico-chascomus-m15,60,M15,"",exacto,equipo_juvenil,4,Atletico Chascomus,Atletico Chascomus,2021 2022 2023 2024 2025,8
+urba,60|M16|,atletico-chascomus-m16,60,M16,"",exacto,equipo_juvenil,4,Atletico Chascomus,Atletico Chascomus,2021 2022 2026,5
+urba,60|M17|,atletico-chascomus-m17,60,M17,"",exacto,equipo_juvenil,4,Atletico Chascomus,Atletico Chascomus,2022 2023 2024 2025 2026,7
+urba,60|M17|A,atletico-chascomus-m17-a,60,M17,A,exacto,equipo_juvenil,4,Atletico Chascomus,Atl. Chascomus A,2025,1
+urba,60|M17|B,atletico-chascomus-m17-b,60,M17,B,exacto,equipo_juvenil,4,Atletico Chascomus,Atl. Chascomus B,2025,1
+urba,60|M18|,atletico-chascomus-m18,60,M18,"",exacto,equipo_juvenil,4,Atletico Chascomus,Atletico Chascomus,2021,2
+urba,60|M19|,atletico-chascomus-m19,60,M19,"",exacto,equipo_juvenil,4,Atletico Chascomus,Atletico Chascomus,2023 2024 2025 2026,8
+urba,75|M15|,atletico-san-andres-m15,75,M15,"",exacto,equipo_juvenil,4,Atletico San Andres,Atletico San Andres,2022,2
+urba,75|M16|,atletico-san-andres-m16,75,M16,"",exacto,equipo_juvenil,4,Atletico San Andres,Atletico San Andres,2021,1
+urba,75|M17|,atletico-san-andres-m17,75,M17,"",exacto,equipo_juvenil,4,Atletico San Andres,Atletico San Andres,2022 2023 2024 2026,6
+urba,75|M18|,atletico-san-andres-m18,75,M18,"",exacto,equipo_juvenil,4,Atletico San Andres,Atletico San Andres,2021,2
+urba,75|M19|,atletico-san-andres-m19,75,M19,"",exacto,equipo_juvenil,4,Atletico San Andres,Atletico San Andres,2022 2023,4
+urba,63|M15|,atletico-y-progreso-m15,63,M15,"",exacto,equipo_juvenil,4,Atletico y Progreso,Atletico y Progreso,2023 2024 2025,6
+urba,63|M16|,atletico-y-progreso-m16,63,M16,"",exacto,equipo_juvenil,4,Atletico y Progreso,Atletico y Progreso,2026,1
+urba,63|M17|,atletico-y-progreso-m17,63,M17,"",exacto,equipo_juvenil,4,Atletico y Progreso,Atletico y Progreso,2022 2023 2024 2025,8
+urba,63|M18|,atletico-y-progreso-m18,63,M18,"",exacto,equipo_juvenil,4,Atletico y Progreso,Atletico y Progreso,2021,2
+urba,63|M19|,atletico-y-progreso-m19,63,M19,"",exacto,equipo_juvenil,4,Atletico y Progreso,Atletico y Progreso,2022 2023 2024 2026,8
+urba,80|M15|,banco-hipotecario-m15,80,M15,"",exacto,equipo_juvenil,4,Banco Hipotecario,Banco Hipotecario,2023 2024 2025,6
+urba,80|M16|,banco-hipotecario-m16,80,M16,"",exacto,equipo_juvenil,4,Banco Hipotecario,Banco Hipotecario,2021 2026,2
+urba,80|M17|,banco-hipotecario-m17,80,M17,"",exacto,equipo_juvenil,4,Banco Hipotecario,Banco Hipotecario,2022 2023 2025 2026,7
+urba,80|M18|,banco-hipotecario-m18,80,M18,"",exacto,equipo_juvenil,4,Banco Hipotecario,Banco Hipotecario,2021,2
+urba,80|M19|,banco-hipotecario-m19,80,M19,"",exacto,equipo_juvenil,4,Banco Hipotecario,Banco Hipotecario,2022 2024,4
+urba,89|M15|,berisso-m15,89,M15,"",exacto,equipo_juvenil,4,Berisso,Berisso,2021 2024,3
+urba,89|M16|,berisso-m16,89,M16,"",exacto,equipo_juvenil,4,Berisso,Berisso,2025,2
+urba,89|M17|,berisso-m17,89,M17,"",exacto,equipo_juvenil,4,Berisso,Berisso Rugby Club,2021 2022 2026,5
+urba,71|M15|,beromama-m15,71,M15,"",exacto,equipo_juvenil,4,Beromama,Beromama,2022 2024 2025,6
+urba,71|M16|,beromama-m16,71,M16,"",exacto,equipo_juvenil,4,Beromama,Beromama,2021 2023 2024 2026,6
+urba,71|M17|,beromama-m17,71,M17,"",exacto,equipo_juvenil,4,Beromama,Beromama,2022 2023 2024 2025 2026,9
+urba,71|M18|,beromama-m18,71,M18,"",exacto,equipo_juvenil,4,Beromama,Beromama,2021,2
+urba,71|M19|,beromama-m19,71,M19,"",exacto,equipo_juvenil,4,Beromama,Beromama,2022 2024 2025 2026,8
+urba,76|M15|,ciudad-de-campana-m15,76,M15,"",exacto,equipo_juvenil,4,Ciudad de Campana,Ciudad de Campana,2022 2024 2025 2026,6
+urba,76|M16|,ciudad-de-campana-m16,76,M16,"",exacto,equipo_juvenil,4,Ciudad de Campana,Ciudad De Campana,2023 2025,3
+urba,76|M17|,ciudad-de-campana-m17,76,M17,"",exacto,equipo_juvenil,4,Ciudad de Campana,Ciudad De Campana,2023 2024 2025 2026,7
+urba,76|M18|,ciudad-de-campana-m18,76,M18,"",exacto,equipo_juvenil,4,Ciudad de Campana,Ciudad De Campana,2021,2
+urba,76|M19|,ciudad-de-campana-m19,76,M19,"",exacto,equipo_juvenil,4,Ciudad de Campana,Ciudad de Campana,2022 2024 2025 2026,8
+urba,84|M16|,defensores-de-glew-m16,84,M16,"",exacto,equipo_juvenil,4,Defensores de Glew,Defensores de Glew,2024,1
+urba,84|M19|,defensores-de-glew-m19,84,M19,"",exacto,equipo_juvenil,4,Defensores de Glew,Defensores de Glew,2024,1
+urba,84|M20|,defensores-de-glew-m20,84,M20,"",exacto,equipo_juvenil,4,Defensores de Glew,Defensores de Glew,2021,1
+urba,131|M16|,dorrego-rugby-m16,131,M16,"",exacto,equipo_juvenil,4,Dorrego Rugby,Dorrego Rugby,2026,1
+urba,48|M15|,el-retiro-m15,48,M15,"",exacto,equipo_juvenil,4,El Retiro,El Retiro,2021 2023 2024,5
+urba,48|M15|A,el-retiro-m15-a,48,M15,A,exacto,equipo_juvenil,4,El Retiro,El Retiro A,2025,2
+urba,48|M15|B,el-retiro-m15-b,48,M15,B,exacto,equipo_juvenil,4,El Retiro,El Retiro B,2025,2
+urba,48|M16|,el-retiro-m16,48,M16,"",exacto,equipo_juvenil,4,El Retiro,El Retiro,2022 2024 2025,5
+urba,48|M16|A,el-retiro-m16-a,48,M16,A,exacto,equipo_juvenil,4,El Retiro,El Retiro A,2026,1
+urba,48|M16|B,el-retiro-m16-b,48,M16,B,exacto,equipo_juvenil,4,El Retiro,El Retiro B,2026,1
+urba,48|M17|,el-retiro-m17,48,M17,"",exacto,equipo_juvenil,4,El Retiro,El Retiro,2023 2024 2025 2026,6
+urba,48|M18|,el-retiro-m18,48,M18,"",exacto,equipo_juvenil,4,El Retiro,El Retiro,2021,2
+urba,48|M19|,el-retiro-m19,48,M19,"",exacto,equipo_juvenil,4,El Retiro,El Retiro,2022 2024 2025 2026,7
+urba,48|M19|A,el-retiro-m19-a,48,M19,A,exacto,equipo_juvenil,4,El Retiro,El Retiro A,2025,1
+urba,48|M19|B,el-retiro-m19-b,48,M19,B,exacto,equipo_juvenil,4,El Retiro,El Retiro B,2025,1
+urba,86|M15|,ezeiza-m15,86,M15,"",exacto,equipo_juvenil,4,Ezeiza,Ezeiza,2021 2023 2025,5
+urba,86|M16|,ezeiza-m16,86,M16,"",exacto,equipo_juvenil,4,Ezeiza,Ezeiza,2026,1
+urba,86|M17|,ezeiza-m17,86,M17,"",exacto,equipo_juvenil,4,Ezeiza,Ezeiza,2021 2023 2024 2025 2026,9
+urba,86|M19|,ezeiza-m19,86,M19,"",exacto,equipo_juvenil,4,Ezeiza,Ezeiza,2024 2026,3
+urba,87|M16|,floresta-m16,87,M16,"",exacto,equipo_juvenil,4,Floresta,Floresta ,2024,1
+urba,87|M17|,floresta-m17,87,M17,"",exacto,equipo_juvenil,4,Floresta,Floresta,2023 2025 2026,4
+urba,87|M19|,floresta-m19,87,M19,"",exacto,equipo_juvenil,4,Floresta,Floresta,2025 2026,2
+urba,59|M15|,g-y-e-de-ituzaingo-m15,59,M15,"",exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo,2023 2024 2025 2026,6
+urba,59|M15|A,g-y-e-de-ituzaingo-m15-a,59,M15,A,exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo A,2021,1
+urba,59|M15|B,g-y-e-de-ituzaingo-m15-b,59,M15,B,exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo B,2021,1
+urba,59|M16|,g-y-e-de-ituzaingo-m16,59,M16,"",exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo,2021 2022 2023 2024 2025 2026,8
+urba,59|M16|A,g-y-e-de-ituzaingo-m16-a,59,M16,A,exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo A,2022,1
+urba,59|M16|B,g-y-e-de-ituzaingo-m16-b,59,M16,B,exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo B,2022,1
+urba,59|M17|,g-y-e-de-ituzaingo-m17,59,M17,"",exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo,2022 2023 2024 2025 2026,8
+urba,59|M18|,g-y-e-de-ituzaingo-m18,59,M18,"",exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo,2021,1
+urba,59|M18|A,g-y-e-de-ituzaingo-m18-a,59,M18,A,exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo A,2021,1
+urba,59|M18|B,g-y-e-de-ituzaingo-m18-b,59,M18,B,exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo B,2021,1
+urba,59|M19|,g-y-e-de-ituzaingo-m19,59,M19,"",exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo,2022 2023 2024 2025 2026,9
+urba,59|M19|A,g-y-e-de-ituzaingo-m19-a,59,M19,A,exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo A,2026,1
+urba,59|M19|B,g-y-e-de-ituzaingo-m19-b,59,M19,B,exacto,equipo_juvenil,4,G y E de Ituzaingo,G y E de Ituzaingo B,2026,1
+urba,64|M15|,la-salle-m15,64,M15,"",exacto,equipo_juvenil,4,La Salle,La Salle,2026,1
+urba,64|M16|,la-salle-m16,64,M16,"",exacto,equipo_juvenil,4,La Salle,La Salle Rugby y Hockey Club,2021 2023 2024,5
+urba,64|M17|,la-salle-m17,64,M17,"",exacto,equipo_juvenil,4,La Salle,La Salle,2022 2025 2026,5
+urba,64|M18|,la-salle-m18,64,M18,"",exacto,equipo_juvenil,4,La Salle,La Salle Rugby y Hockey Club,2021,2
+urba,64|M19|,la-salle-m19,64,M19,"",exacto,equipo_juvenil,4,La Salle,La Salle Rugby y Hockey Club,2022 2023 2024 2026,7
+urba,73|M15|,las-canas-m15,73,M15,"",exacto,equipo_juvenil,4,Las Cañas,Las Cañas,2022 2023 2024 2025 2026,8
+urba,73|M16|,las-canas-m16,73,M16,"",exacto,equipo_juvenil,4,Las Cañas,Las Cañas,2021 2023 2024 2025 2026,9
+urba,73|M17|,las-canas-m17,73,M17,"",exacto,equipo_juvenil,4,Las Cañas,Las Cañas,2022 2023 2025 2026,7
+urba,73|M17|A,las-canas-m17-a,73,M17,A,exacto,equipo_juvenil,4,Las Cañas,Las Cañas A,2024,2
+urba,73|M17|B,las-canas-m17-b,73,M17,B,exacto,equipo_juvenil,4,Las Cañas,Las Cañas B,2024,2
+urba,73|M18|,las-canas-m18,73,M18,"",exacto,equipo_juvenil,4,Las Cañas,Las Cañas,2021,2
+urba,73|M19|,las-canas-m19,73,M19,"",exacto,equipo_juvenil,4,Las Cañas,Las Cañas,2022 2024 2026,6
+urba,73|M19|A,las-canas-m19-a,73,M19,A,exacto,equipo_juvenil,4,Las Cañas,Las Cañas A,2025,2
+urba,73|M19|B,las-canas-m19-b,73,M19,B,exacto,equipo_juvenil,4,Las Cañas,Las Cañas B,2025,2
+urba,78|M15|,los-cedros-m15,78,M15,"",exacto,equipo_juvenil,4,Los Cedros,Los Cedros,2022 2023 2026,5
+urba,78|M16|,los-cedros-m16,78,M16,"",exacto,equipo_juvenil,4,Los Cedros,Los Cedros,2021 2023 2024 2025,8
+urba,78|M17|,los-cedros-m17,78,M17,"",exacto,equipo_juvenil,4,Los Cedros,Los Cedros,2022 2024 2025 2026,7
+urba,78|M18|,los-cedros-m18,78,M18,"",exacto,equipo_juvenil,4,Los Cedros,Los Cedros,2021,2
+urba,78|M19|,los-cedros-m19,78,M19,"",exacto,equipo_juvenil,4,Los Cedros,Los Cedros,2022 2023 2025 2026,8
+urba,79|M15|,los-pinos-m15,79,M15,"",exacto,equipo_juvenil,4,Los Pinos,Los Pinos,2022 2024 2026,5
+urba,79|M16|,los-pinos-m16,79,M16,"",exacto,equipo_juvenil,4,Los Pinos,Los Pinos,2021 2023 2025,5
+urba,79|M17|,los-pinos-m17,79,M17,"",exacto,equipo_juvenil,4,Los Pinos,Los Pinos,2022 2024 2026,5
+urba,79|M18|,los-pinos-m18,79,M18,"",exacto,equipo_juvenil,4,Los Pinos,Los Pinos,2021,2
+urba,79|M19|,los-pinos-m19,79,M19,"",exacto,equipo_juvenil,4,Los Pinos,Los Pinos,2023 2024 2025,6
+urba,82|M15|,marcos-paz-m15,82,M15,"",exacto,equipo_juvenil,4,Marcos Paz,Marcos Paz,2025 2026,3
+urba,82|M16|,marcos-paz-m16,82,M16,"",exacto,equipo_juvenil,4,Marcos Paz,Marcos Paz,2023,2
+urba,82|M17|,marcos-paz-m17,82,M17,"",exacto,equipo_juvenil,4,Marcos Paz,Marcos Paz,2021 2022 2024 2025 2026,8
+urba,82|M19|,marcos-paz-m19,82,M19,"",exacto,equipo_juvenil,4,Marcos Paz,Marcos Paz,2022 2023 2024,3
+urba,47|M15|,mercedes-m15,47,M15,"",exacto,equipo_juvenil,4,Mercedes,Mercedes,2022 2023 2024 2026,7
+urba,47|M16|,mercedes-m16,47,M16,"",exacto,equipo_juvenil,4,Mercedes,Mercedes,2024 2025,3
+urba,47|M17|,mercedes-m17,47,M17,"",exacto,equipo_juvenil,4,Mercedes,Mercedes,2021 2022 2023 2024 2025 2026,9
+urba,47|M19|,mercedes-m19,47,M19,"",exacto,equipo_juvenil,4,Mercedes,Mercedes,2023,2
+urba,91|M15|,municipalidad-de-berazategui-m15,91,M15,"",exacto,equipo_juvenil,4,Municipalidad de Berazategui,Munic de Berazategui,2022 2024 2025 2026,6
+urba,91|M16|,municipalidad-de-berazategui-m16,91,M16,"",exacto,equipo_juvenil,4,Municipalidad de Berazategui,Munic. de Berazategui,2021 2023,4
+urba,91|M17|,municipalidad-de-berazategui-m17,91,M17,"",exacto,equipo_juvenil,4,Municipalidad de Berazategui,Munic. de Berazategui,2022 2023 2024 2025 2026,8
+urba,91|M18|,municipalidad-de-berazategui-m18,91,M18,"",exacto,equipo_juvenil,4,Municipalidad de Berazategui,Munic. de Berazategui,2021,2
+urba,91|M19|,municipalidad-de-berazategui-m19,91,M19,"",exacto,equipo_juvenil,4,Municipalidad de Berazategui,Munic. de Berazategui,2022 2023 2024 2025 2026,10
+urba,90|M18|,obras-sanitarias-m18,90,M18,"",exacto,equipo_juvenil,4,Obras Sanitarias,Obras Sanitarias,2021,2
+urba,66|M15|,old-georgian-m15,66,M15,"",exacto,equipo_juvenil,4,Old Georgian,Old Georgian,2022 2023 2024 2025 2026,9
+urba,66|M16|,old-georgian-m16,66,M16,"",exacto,equipo_juvenil,4,Old Georgian,Old Georgian,2021,2
+urba,66|M17|,old-georgian-m17,66,M17,"",exacto,equipo_juvenil,4,Old Georgian,Old Georgian,2022 2023 2024 2025 2026,9
+urba,66|M18|,old-georgian-m18,66,M18,"",exacto,equipo_juvenil,4,Old Georgian,Old Georgian,2021,2
+urba,66|M19|,old-georgian-m19,66,M19,"",exacto,equipo_juvenil,4,Old Georgian,Old Georgian,2022 2023 2024,6
+urba,66|M19|A,old-georgian-m19-a,66,M19,A,exacto,equipo_juvenil,4,Old Georgian,Old Georgian A,2025 2026,4
+urba,66|M19|B,old-georgian-m19-b,66,M19,B,exacto,equipo_juvenil,4,Old Georgian,Old Georgian B,2025 2026,4
+urba,66|M20|,old-georgian-m20,66,M20,"",exacto,equipo_juvenil,4,Old Georgian,Old Georgian,2021,2
+urba,85|M15|,pac-general-rodriguez-m15,85,M15,"",exacto,equipo_juvenil,4,Pac General Rodriguez,Pac General Rodriguez,2023 2025,4
+urba,85|M16|,pac-general-rodriguez-m16,85,M16,"",exacto,equipo_juvenil,4,Pac General Rodriguez,Pac General Rodriguez,2021 2024 2026,4
+urba,85|M17|,pac-general-rodriguez-m17,85,M17,"",exacto,equipo_juvenil,4,Pac General Rodriguez,Pac General Rodriguez,2022 2023,4
+urba,85|M19|,pac-general-rodriguez-m19,85,M19,"",exacto,equipo_juvenil,4,Pac General Rodriguez,Pac General Rodriguez,2024 2025,3
+urba,70|M15|,porteno-m15,70,M15,"",exacto,equipo_juvenil,4,Porteño,Porteño,2022 2023 2025,6
+urba,70|M16|,porteno-m16,70,M16,"",exacto,equipo_juvenil,4,Porteño,Porteño,2021 2024 2026,5
+urba,70|M17|,porteno-m17,70,M17,"",exacto,equipo_juvenil,4,Porteño,Porteño,2022 2023 2024 2025,8
+urba,70|M18|,porteno-m18,70,M18,"",exacto,equipo_juvenil,4,Porteño,Porteño,2021,2
+urba,70|M19|,porteno-m19,70,M19,"",exacto,equipo_juvenil,4,Porteño,Porteño,2022 2023 2024 2025 2026,9
+urba,88|M16|,rivadavia-de-lobos-m16,88,M16,"",exacto,equipo_juvenil,4,Rivadavia de Lobos,Rivadavia de Lobos,2023,2
+urba,88|M17|,rivadavia-de-lobos-m17,88,M17,"",exacto,equipo_juvenil,4,Rivadavia de Lobos,Rivadavia de Lobos,2021 2022 2025 2026,6
+urba,57|M15|,san-marcos-m15,57,M15,"",exacto,equipo_juvenil,4,San Marcos,San Marcos,2021 2023 2025,5
+urba,57|M16|,san-marcos-m16,57,M16,"",exacto,equipo_juvenil,4,San Marcos,San Marcos,2022 2024 2026,5
+urba,57|M17|,san-marcos-m17,57,M17,"",exacto,equipo_juvenil,4,San Marcos,San Marcos,2023 2024 2025 2026,6
+urba,57|M18|,san-marcos-m18,57,M18,"",exacto,equipo_juvenil,4,San Marcos,San Marcos,2021,2
+urba,57|M19|,san-marcos-m19,57,M19,"",exacto,equipo_juvenil,4,San Marcos,San Marcos,2022 2023 2024 2025 2026,10
+urba,81|M17|,sociedad-hebraica-m17,81,M17,"",exacto,equipo_juvenil,4,Sociedad Hebraica,Sociedad Hebraica,2024 2025,3
+urba,81|M18|,sociedad-hebraica-m18,81,M18,"",exacto,equipo_juvenil,4,Sociedad Hebraica,Sociedad Hebraica,2021,1
+urba,81|M19|,sociedad-hebraica-m19,81,M19,"",exacto,equipo_juvenil,4,Sociedad Hebraica,Sociedad Hebraica,2024,2
+urba,72|M15|,tigre-m15,72,M15,"",exacto,equipo_juvenil,4,Tigre,Tigre,2022 2023 2024 2025 2026,9
+urba,72|M16|,tigre-m16,72,M16,"",exacto,equipo_juvenil,4,Tigre,Tigre,2021 2023 2024 2025 2026,8
+urba,72|M17|,tigre-m17,72,M17,"",exacto,equipo_juvenil,4,Tigre,Tigre,2022 2023 2024 2025 2026,9
+urba,72|M18|,tigre-m18,72,M18,"",exacto,equipo_juvenil,4,Tigre,Tigre,2021,2
+urba,72|M19|,tigre-m19,72,M19,"",exacto,equipo_juvenil,4,Tigre,Tigre,2022 2023 2024 2025,8
+urba,72|M19|A,tigre-m19-a,72,M19,A,exacto,equipo_juvenil,4,Tigre,Tigre A,2026,2
+urba,72|M19|B,tigre-m19-b,72,M19,B,exacto,equipo_juvenil,4,Tigre,Tigre B,2026,2
+urba,69|M16|,tiro-federal-de-baradero-m16,69,M16,"",exacto,equipo_juvenil,4,Tiro Federal de Baradero,Tiro Federal de Baradero,2023 2025,4
+urba,69|M17|,tiro-federal-de-baradero-m17,69,M17,"",exacto,equipo_juvenil,4,Tiro Federal de Baradero,Tiro Federal de Baradero,2021 2022 2024 2025 2026,8
+urba,69|M19|,tiro-federal-de-baradero-m19,69,M19,"",exacto,equipo_juvenil,4,Tiro Federal de Baradero,Tiro Federal de Baradero,2023 2026,4
+urba,62|M15|,tiro-federal-de-san-pedro-m15,62,M15,"",exacto,equipo_juvenil,4,Tiro Federal de San Pedro,Tiro Federal de San Pedro,2021 2022 2023 2024 2025 2026,9
+urba,62|M16|,tiro-federal-de-san-pedro-m16,62,M16,"",exacto,equipo_juvenil,4,Tiro Federal de San Pedro,Tiro F de San Pedro ,2025 2026,3
+urba,62|M17|,tiro-federal-de-san-pedro-m17,62,M17,"",exacto,equipo_juvenil,4,Tiro Federal de San Pedro,Tiro Federal de San Pedro,2021 2022 2023 2024 2025 2026,11
+urba,62|M19|,tiro-federal-de-san-pedro-m19,62,M19,"",exacto,equipo_juvenil,4,Tiro Federal de San Pedro,Tiro Federal de San Pedro,2022 2023 2024 2025 2026,9
+urba,68|M15|,varela-jr-m15,68,M15,"",exacto,equipo_juvenil,4,Varela Jr.,Varela Jr.,2021 2022 2023 2024 2025,9
+urba,68|M16|,varela-jr-m16,68,M16,"",exacto,equipo_juvenil,4,Varela Jr.,Varela Jr.,2021 2022 2023 2025 2026,9
+urba,68|M17|,varela-jr-m17,68,M17,"",exacto,equipo_juvenil,4,Varela Jr.,Varela Jr.,2022 2023 2024 2026,7
+urba,68|M18|,varela-jr-m18,68,M18,"",exacto,equipo_juvenil,4,Varela Jr.,Varela Jr.,2021,2
+urba,68|M19|,varela-jr-m19,68,M19,"",exacto,equipo_juvenil,4,Varela Jr.,Varela Jr.,2022 2023 2024 2025,8
+urba,77|M15|,vicente-lopez-m15,77,M15,"",exacto,equipo_juvenil,4,Vicente Lopez,Vicente Lopez,2024 2025,3
+urba,77|M16|,vicente-lopez-m16,77,M16,"",exacto,equipo_juvenil,4,Vicente Lopez,Vicente Lopez,2025 2026,3
+urba,77|M17|,vicente-lopez-m17,77,M17,"",exacto,equipo_juvenil,4,Vicente Lopez,Vicente Lopez,2022 2026,3
+urba,77|M18|,vicente-lopez-m18,77,M18,"",exacto,equipo_juvenil,4,Vicente Lopez,Vicente Lopez,2021,2
+urba,77|M19|,vicente-lopez-m19,77,M19,"",exacto,equipo_juvenil,4,Vicente Lopez,Vicente Lopez,2022 2023,4

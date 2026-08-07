@@ -1,0 +1,50 @@
+[
+ {
+  "external_id": "urba:2025233",
+  "nombre": "URBA: Menores de 17 - G2 NIVEL 1 \"B\"",
+  "tournament_id": "c9515ca4-4a69-454c-83ac-1760b1891943",
+  "manuales": 132
+ },
+ {
+  "external_id": "urba:2025178",
+  "nombre": "Primera \"B\" de la URBA",
+  "tournament_id": "797e1b94-6397-4d73-a676-c166e40be5a9",
+  "manuales": 182
+ },
+ {
+  "external_id": "urba:2025231",
+  "nombre": "URBA: Menores de 17 - G2 NIVEL 1 \"A\"",
+  "tournament_id": "78d168c6-a71f-4726-89f9-44235dd6e5c4",
+  "manuales": 132
+ },
+ {
+  "external_id": "urba:2025215",
+  "nombre": "URBA: MENORES DE 19 - G2 NIVEL 1 \"B\"",
+  "tournament_id": "8018994b-15be-4582-a054-ecaae431e60d",
+  "manuales": 132
+ },
+ {
+  "external_id": "urba:2025176",
+  "nombre": "Top 14 de la URBA",
+  "tournament_id": "d29703d0-125c-44a1-ab38-137450935a6e",
+  "manuales": 182
+ },
+ {
+  "external_id": "urba:2025179",
+  "nombre": "Primera \"C\" de la URBA",
+  "tournament_id": "d1c0af07-36ee-4234-8678-53fef1931e4f",
+  "manuales": 182
+ },
+ {
+  "external_id": "urba:2025177",
+  "nombre": "Primera \"A\" de la URBA",
+  "tournament_id": "e5c74c61-ff94-4091-9773-ec7303088fdc",
+  "manuales": 182
+ },
+ {
+  "external_id": "urba:2025213",
+  "nombre": "URBA: MENORES DE 19 - G2 NIVEL 1 \"A\"",
+  "tournament_id": "b68ceaef-298e-4c63-9964-c9a95ba43822",
+  "manuales": 132
+ }
+]

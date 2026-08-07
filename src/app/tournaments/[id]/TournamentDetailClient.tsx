@@ -15,6 +15,7 @@ import RadialBracketPredictor from '@/components/RadialBracketPredictor';
 import TournamentPublicStats from './TournamentPublicStats';
 import TournamentScoresPanel from './TournamentScoresPanel';
 import TournamentSofascoreStats from './TournamentSofascoreStats';
+import TournamentNavigation from './TournamentNavigation';
 import { resolveSofascoreLeague } from '@/lib/sofascoreLeagueMap';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { getAllCountries, getCountryById } from '@/lib/data/countries';
@@ -3896,6 +3897,9 @@ export default function TournamentDetailPage({
                                             <span className={styles.heroMetaItem}>Fase Eliminatoria</span>
                                         </>
                                     )}
+                                    {/* Grado/zona y temporada, cuando hay hermanos a dónde ir.
+                                        Se dibuja solo: si el torneo no los tiene, no ocupa lugar. */}
+                                    <TournamentNavigation tournamentId={id} />
                                 </div>
                             </div>
                         </div>

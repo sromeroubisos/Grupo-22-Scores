@@ -1,0 +1,653 @@
+[
+ {
+  "club": "Los Tordos",
+  "id": "los-tordos-rugby-club",
+  "dr": -3.28,
+  "pa": 13,
+  "pd": 20
+ },
+ {
+  "club": "Marista R.C.",
+  "id": "marista-rugby-club",
+  "dr": 3.17,
+  "pa": 18,
+  "pd": 11
+ },
+ {
+  "club": "San Cirano",
+  "id": "san-cirano",
+  "dr": -3.03,
+  "pa": 70,
+  "pd": 73
+ },
+ {
+  "club": "U.N.S.J.",
+  "id": "universitario-de-san-juan",
+  "dr": 2.65,
+  "pa": 49,
+  "pd": 46
+ },
+ {
+  "club": "Liceo R.C.",
+  "id": "liceo-rugby-club",
+  "dr": -2.44,
+  "pa": 25,
+  "pd": 32
+ },
+ {
+  "club": "Mar Del Plata R.C.",
+  "id": "mar-del-plata-club",
+  "dr": 2.39,
+  "pa": 44,
+  "pd": 39
+ },
+ {
+  "club": "San Albano",
+  "id": "san-albano",
+  "dr": 2.08,
+  "pa": 115,
+  "pd": 105
+ },
+ {
+  "club": "La Tablada",
+  "id": "club-la-tablada",
+  "dr": -2.08,
+  "pa": 12,
+  "pd": 16
+ },
+ {
+  "club": "Curupaytì",
+  "id": "curupayti",
+  "dr": 2.05,
+  "pa": 75,
+  "pd": 70
+ },
+ {
+  "club": "San Fernando",
+  "id": "san-fernando",
+  "dr": 2.05,
+  "pa": 85,
+  "pd": 82
+ },
+ {
+  "club": "Old Resian",
+  "id": "old-resian-club",
+  "dr": 1.99,
+  "pa": 37,
+  "pd": 33
+ },
+ {
+  "club": "Urú Curé",
+  "id": "uru-cure-rugby-club",
+  "dr": -1.96,
+  "pa": 22,
+  "pd": 28
+ },
+ {
+  "club": "Olivos R.C.",
+  "id": "olivos-r-c",
+  "dr": -1.88,
+  "pa": 94,
+  "pd": 100
+ },
+ {
+  "club": "Marabunta R.C.",
+  "id": "marabunta-r-c",
+  "dr": 1.76,
+  "pa": 84,
+  "pd": 81
+ },
+ {
+  "club": "C.U.B.A.",
+  "id": "cuba",
+  "dr": 1.65,
+  "pa": 35,
+  "pd": 29
+ },
+ {
+  "club": "Pucará",
+  "id": "club-pucara",
+  "dr": 1.59,
+  "pa": 88,
+  "pd": 84
+ },
+ {
+  "club": "CURNE",
+  "id": "curne",
+  "dr": 1.56,
+  "pa": 46,
+  "pd": 41
+ },
+ {
+  "club": "Alumni",
+  "id": "asoc-alumni",
+  "dr": 1.54,
+  "pa": 10,
+  "pd": 8
+ },
+ {
+  "club": "Santa Fe R.C.",
+  "id": "santa-fe-r-c",
+  "dr": -1.53,
+  "pa": 17,
+  "pd": 22
+ },
+ {
+  "club": "S.I.C.",
+  "id": "san-isidro-club",
+  "dr": -1.52,
+  "pa": 8,
+  "pd": 10
+ },
+ {
+  "club": "Lomas Ath.",
+  "id": "lomas-athletic",
+  "dr": -1.45,
+  "pa": 76,
+  "pd": 80
+ },
+ {
+  "club": "San Andrés",
+  "id": "san-andres",
+  "dr": 1.45,
+  "pa": 93,
+  "pd": 90
+ },
+ {
+  "club": "Pueyrredon",
+  "id": "pueyrredon",
+  "dr": -1.44,
+  "pa": 98,
+  "pd": 104
+ },
+ {
+  "club": "Tiro Federal",
+  "id": "tiro-federal-salta",
+  "dr": -1.26,
+  "pa": 106,
+  "pd": 113
+ },
+ {
+  "club": "Los Matreros",
+  "id": "los-matreros",
+  "dr": -1.2,
+  "pa": 45,
+  "pd": 48
+ },
+ {
+  "club": "Atletico Del Rosario",
+  "id": "atletico-del-rosario",
+  "dr": -1.19,
+  "pa": 48,
+  "pd": 49
+ },
+ {
+  "club": "GEBA",
+  "id": "geba",
+  "dr": -1.09,
+  "pa": 86,
+  "pd": 89
+ },
+ {
+  "club": "Tucuman L.T.C.",
+  "id": "tucuman-lawn-tennis",
+  "dr": 1.07,
+  "pa": 24,
+  "pd": 18
+ },
+ {
+  "club": "Universitario Cordoba",
+  "id": "club-universitario-de-cordoba",
+  "dr": 0.96,
+  "pa": 26,
+  "pd": 21
+ },
+ {
+  "club": "Jockey C. Rosario",
+  "id": "jockey-club-de-rosario",
+  "dr": 0.94,
+  "pa": 7,
+  "pd": 6
+ },
+ {
+  "club": "Palermo Bajo",
+  "id": "club-palermo-bajo",
+  "dr": -0.92,
+  "pa": 40,
+  "pd": 45
+ },
+ {
+  "club": "Mendoza R.C.",
+  "id": "mendoza-rugby-club",
+  "dr": -0.9,
+  "pa": 27,
+  "pd": 27
+ },
+ {
+  "club": "Huirapuca",
+  "id": "huirapuca",
+  "dr": -0.89,
+  "pa": 20,
+  "pd": 24
+ },
+ {
+  "club": "Tigres R.C.",
+  "id": "tigres-r-c",
+  "dr": 0.87,
+  "pa": 58,
+  "pd": 57
+ },
+ {
+  "club": "Duendes",
+  "id": "duendes-r-c",
+  "dr": -0.87,
+  "pa": 4,
+  "pd": 5
+ },
+ {
+  "club": "Univ. Salta",
+  "id": "universitario-de-salta",
+  "dr": -0.83,
+  "pa": 65,
+  "pd": 66
+ },
+ {
+  "club": "Univ. La Plata",
+  "id": "universitario-de-la-plata",
+  "dr": -0.82,
+  "pa": 109,
+  "pd": 116
+ },
+ {
+  "club": "Champagnat",
+  "id": "club-champagnat",
+  "dr": -0.82,
+  "pa": 51,
+  "pd": 52
+ },
+ {
+  "club": "Jockey C. Cordoba",
+  "id": "jockey-club-cordoba",
+  "dr": 0.8,
+  "pa": 2,
+  "pd": 2
+ },
+ {
+  "club": "C.A.S.I.",
+  "id": "casi",
+  "dr": 0.77,
+  "pa": 5,
+  "pd": 4
+ },
+ {
+  "club": "Tucuman R.C.",
+  "id": "tucuman-rugby-club",
+  "dr": -0.77,
+  "pa": 11,
+  "pd": 12
+ },
+ {
+  "club": "Comercial R.C.",
+  "id": "comercial-r-c",
+  "dr": -0.75,
+  "pa": 54,
+  "pd": 56
+ },
+ {
+  "club": "Peumayen",
+  "id": "peumayen-rugby-club",
+  "dr": -0.71,
+  "pa": 96,
+  "pd": 97
+ },
+ {
+  "club": "La Plata R.C.",
+  "id": "la-plata",
+  "dr": -0.71,
+  "pa": 36,
+  "pd": 38
+ },
+ {
+  "club": "Deportiva Francesa",
+  "id": "deportiva-francesa",
+  "dr": -0.68,
+  "pa": 107,
+  "pd": 108
+ },
+ {
+  "club": "Jockey Club Tucuman",
+  "id": "jockey-club-de-tucuman",
+  "dr": 0.65,
+  "pa": 57,
+  "pd": 58
+ },
+ {
+  "club": "Tacuru R.H.C.",
+  "id": "tacuru-rugby-hockey-club",
+  "dr": 0.54,
+  "pa": 116,
+  "pd": 110
+ },
+ {
+  "club": "Buenos Aires C. & R.",
+  "id": "buenos-aires-crc",
+  "dr": -0.5,
+  "pa": 41,
+  "pd": 42
+ },
+ {
+  "club": "Hindú",
+  "id": "hindu-club",
+  "dr": -0.5,
+  "pa": 15,
+  "pd": 15
+ },
+ {
+  "club": "Los Tilos",
+  "id": "los-tilos",
+  "dr": 0.49,
+  "pa": 16,
+  "pd": 14
+ },
+ {
+  "club": "Tala R.C.",
+  "id": "tala-rugby-club",
+  "dr": 0.44,
+  "pa": 3,
+  "pd": 3
+ },
+ {
+  "club": "Jockey Club Salta",
+  "id": "jockey-club-salta",
+  "dr": -0.42,
+  "pa": 53,
+  "pd": 53
+ },
+ {
+  "club": "Belgrano A.C.",
+  "id": "belgrano-athletic",
+  "dr": 0.38,
+  "pa": 14,
+  "pd": 13
+ },
+ {
+  "club": "Regatas Bella Vista",
+  "id": "regatas-de-bella-vista",
+  "dr": 0.35,
+  "pa": 21,
+  "pd": 19
+ },
+ {
+  "club": "Gimnasia Y Tiro",
+  "id": "gimnasia-y-tiro",
+  "dr": -0.34,
+  "pa": 73,
+  "pd": 74
+ },
+ {
+  "club": "Hurling",
+  "id": "hurling",
+  "dr": -0.31,
+  "pa": 90,
+  "pd": 91
+ },
+ {
+  "club": "Universitario Tucuman",
+  "id": "universitario-de-tucuman",
+  "dr": -0.31,
+  "pa": 38,
+  "pd": 37
+ },
+ {
+  "club": "Santiago L.T.C.",
+  "id": "santiago-lawn-tennis-club",
+  "dr": -0.3,
+  "pa": 68,
+  "pd": 68
+ },
+ {
+  "club": "Los Tarcos",
+  "id": "los-tarcos",
+  "dr": 0.3,
+  "pa": 43,
+  "pd": 43
+ },
+ {
+  "club": "Old Lions",
+  "id": "old-lions-r-c",
+  "dr": -0.28,
+  "pa": 69,
+  "pd": 69
+ },
+ {
+  "club": "Cordoba Athletic",
+  "id": "cordoba-athletic-club",
+  "dr": 0.24,
+  "pa": 23,
+  "pd": 23
+ },
+ {
+  "club": "IPR Sporting",
+  "id": "ipr-sporting",
+  "dr": 0.23,
+  "pa": 47,
+  "pd": 47
+ },
+ {
+  "club": "Deportivo Portugues",
+  "id": "deportivo-portugues",
+  "dr": 0.23,
+  "pa": 114,
+  "pd": 114
+ },
+ {
+  "club": "Newman",
+  "id": "club-newman",
+  "dr": -0.22,
+  "pa": 1,
+  "pd": 1
+ },
+ {
+  "club": "San Ignacio",
+  "id": "san-ignacio-r-c",
+  "dr": -0.16,
+  "pa": 71,
+  "pd": 72
+ },
+ {
+  "club": "Santiago R.C.",
+  "id": "santiago-rugby-club",
+  "dr": -0.14,
+  "pa": 124,
+  "pd": 126
+ },
+ {
+  "club": "Teque R.C.",
+  "id": "teque-r-c",
+  "dr": 0.14,
+  "pa": 60,
+  "pd": 60
+ },
+ {
+  "club": "G.E.R.",
+  "id": "gimnasia-y-esgrima-de-rosario",
+  "dr": 0.13,
+  "pa": 19,
+  "pd": 17
+ },
+ {
+  "club": "Paraná Rowing",
+  "id": "parana-rowing",
+  "dr": 0.12,
+  "pa": 28,
+  "pd": 25
+ },
+ {
+  "club": "Roca R.C.",
+  "id": "roca-r-c",
+  "dr": -0.12,
+  "pa": 95,
+  "pd": 94
+ },
+ {
+  "club": "Jockey C. Venado T.",
+  "id": "jockey-club-de-venado-tuerto",
+  "dr": 0.11,
+  "pa": 62,
+  "pd": 62
+ },
+ {
+  "club": "Banco R.C.",
+  "id": "banco-rugby-club",
+  "dr": 0.1,
+  "pa": 105,
+  "pd": 106
+ },
+ {
+  "club": "Cardenales",
+  "id": "cardenales-r-c",
+  "dr": 0.09,
+  "pa": 34,
+  "pd": 36
+ },
+ {
+  "club": "Los Cardos",
+  "id": "los-cardos-r-c",
+  "dr": -0.08,
+  "pa": 66,
+  "pd": 65
+ },
+ {
+  "club": "Jockey Club Villa Maria",
+  "id": "jockey-club-de-villa-maria",
+  "dr": 0.08,
+  "pa": 32,
+  "pd": 34
+ },
+ {
+  "club": "San Juan R.C.",
+  "id": "san-juan-rugby-club",
+  "dr": 0.08,
+  "pa": 42,
+  "pd": 44
+ },
+ {
+  "club": "C.P.B.M.",
+  "id": "c-p-b-m",
+  "dr": 0.06,
+  "pa": 39,
+  "pd": 40
+ },
+ {
+  "club": "Universitario Mendoza",
+  "id": "universitario-de-mendoza",
+  "dr": 0.06,
+  "pa": 120,
+  "pd": 120
+ },
+ {
+  "club": "C.R.A.I.",
+  "id": "crai",
+  "dr": 0.06,
+  "pa": 31,
+  "pd": 31
+ },
+ {
+  "club": "Comodoro R.C.",
+  "id": "comodoro-r-c",
+  "dr": 0.06,
+  "pa": 110,
+  "pd": 109
+ },
+ {
+  "club": "C.A.E. Paraná",
+  "id": "estudiantes-de-parana",
+  "dr": 0.06,
+  "pa": 9,
+  "pd": 9
+ },
+ {
+  "club": "Natacion Y Gimnasia",
+  "id": "natacion-y-gimnasia",
+  "dr": 0.05,
+  "pa": 6,
+  "pd": 7
+ },
+ {
+  "club": "Calafate R.C.",
+  "id": "calafate-r-c",
+  "dr": 0.05,
+  "pa": 118,
+  "pd": 118
+ },
+ {
+  "club": "Taraguy",
+  "id": "taraguy-r-c",
+  "dr": 0.04,
+  "pa": 29,
+  "pd": 26
+ },
+ {
+  "club": "Universitario Mar Del Plata",
+  "id": "universitario-de-mar-del-plata",
+  "dr": -0.04,
+  "pa": 55,
+  "pd": 54
+ },
+ {
+  "club": "San Martin Villa Maria",
+  "id": "san-martin-de-villa-maria",
+  "dr": -0.03,
+  "pa": 33,
+  "pd": 35
+ },
+ {
+  "club": "Sociedad Sportiva",
+  "id": "sociedad-sportiva-de-bahia-blanca",
+  "dr": -0.03,
+  "pa": 30,
+  "pd": 30
+ },
+ {
+  "club": "Chenque R.C.",
+  "id": "chenque-r-c",
+  "dr": 0.02,
+  "pa": 101,
+  "pd": 99
+ },
+ {
+  "club": "Universitario Rosario",
+  "id": "universitario-de-rosario",
+  "dr": 0.02,
+  "pa": 61,
+  "pd": 61
+ },
+ {
+  "club": "Huazihul",
+  "id": "huazihul",
+  "dr": 0.02,
+  "pa": 97,
+  "pd": 95
+ },
+ {
+  "club": "Jockey Club San Juan",
+  "id": "jockey-club-san-juan",
+  "dr": 0.01,
+  "pa": 122,
+  "pd": 122
+ },
+ {
+  "club": "Argentino Bahia Blanca",
+  "id": "argentino-de-bahia-blanca",
+  "dr": -0.01,
+  "pa": 79,
+  "pd": 78
+ },
+ {
+  "club": "Alfiles",
+  "id": "alfiles-s-c",
+  "dr": -0.01,
+  "pa": 126,
+  "pd": 125
+ }
+]

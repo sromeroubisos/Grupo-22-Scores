@@ -1,0 +1,1210 @@
+[
+ {
+  "club_id": "alma-juniors",
+  "source_name": "Alma Juniors",
+  "current_rating": 44.2262,
+  "current_position": 96,
+  "initial_rating": 41.32,
+  "is_active": true
+ },
+ {
+  "club_id": "natacion-y-gimnasia",
+  "source_name": "Natacion Y Gimnasia",
+  "current_rating": 86.2902,
+  "current_position": 7,
+  "initial_rating": 80.25,
+  "is_active": true
+ },
+ {
+  "club_id": "cordoba-athletic-club",
+  "source_name": "Cordoba Athletic",
+  "current_rating": 79.1511,
+  "current_position": 23,
+  "initial_rating": 83.22,
+  "is_active": true
+ },
+ {
+  "club_id": "taraguy-r-c",
+  "source_name": "Taraguy",
+  "current_rating": 77.5251,
+  "current_position": 26,
+  "initial_rating": 73.91,
+  "is_active": true
+ },
+ {
+  "club_id": "c-p-b-m",
+  "source_name": "C.P.B.M.",
+  "current_rating": 72.5489,
+  "current_position": 40,
+  "initial_rating": 68.84,
+  "is_active": true
+ },
+ {
+  "club_id": "club-palermo-bajo",
+  "source_name": "Palermo Bajo",
+  "current_rating": 71.379,
+  "current_position": 45,
+  "initial_rating": 74.03,
+  "is_active": true
+ },
+ {
+  "club_id": "tigres-r-c",
+  "source_name": "Tigres R.C.",
+  "current_rating": 64.5262,
+  "current_position": 57,
+  "initial_rating": 74.46,
+  "is_active": true
+ },
+ {
+  "club_id": "universitario-de-mendoza",
+  "source_name": "Universitario Mendoza",
+  "current_rating": 39.4367,
+  "current_position": 120,
+  "initial_rating": 39.06,
+  "is_active": true
+ },
+ {
+  "club_id": "curupayti",
+  "source_name": "Curupaytì",
+  "current_rating": 55.5317,
+  "current_position": 70,
+  "initial_rating": 49.68,
+  "is_active": true
+ },
+ {
+  "club_id": "san-fernando",
+  "source_name": "San Fernando",
+  "current_rating": 51.3592,
+  "current_position": 82,
+  "initial_rating": 53,
+  "is_active": true
+ },
+ {
+  "club_id": "club-pucara",
+  "source_name": "Pucará",
+  "current_rating": 50.1912,
+  "current_position": 84,
+  "initial_rating": 50.21,
+  "is_active": true
+ },
+ {
+  "club_id": "cordoba-rugby-club",
+  "source_name": "Cordoba Rugby",
+  "current_rating": 48.82,
+  "current_position": 87,
+  "initial_rating": 45.45,
+  "is_active": true
+ },
+ {
+  "club_id": "los-chelcos",
+  "source_name": "Los Chelcos",
+  "current_rating": 36.34,
+  "current_position": 127,
+  "initial_rating": 36.34,
+  "is_active": true
+ },
+ {
+  "club_id": "rio-tercero-r-c",
+  "source_name": "Río Tercero Iii",
+  "current_rating": 29.1145,
+  "current_position": 139,
+  "initial_rating": 27.06,
+  "is_active": true
+ },
+ {
+  "club_id": "club-el-nacional",
+  "source_name": "Club El Nacional",
+  "current_rating": 23.798,
+  "current_position": 145,
+  "initial_rating": 23,
+  "is_active": true
+ },
+ {
+  "club_id": "belgrano-rugby-club",
+  "source_name": "Belgrano R.C.",
+  "current_rating": 22.39,
+  "current_position": 147,
+  "initial_rating": 22.39,
+  "is_active": true
+ },
+ {
+  "club_id": "tala-rugby-club",
+  "source_name": "Tala R.C.",
+  "current_rating": 89.6936,
+  "current_position": 3,
+  "initial_rating": 86.78,
+  "is_active": true
+ },
+ {
+  "club_id": "liceo-rugby-club",
+  "source_name": "Liceo R.C.",
+  "current_rating": 76.1233,
+  "current_position": 32,
+  "initial_rating": 77.43,
+  "is_active": true
+ },
+ {
+  "club_id": "curne",
+  "source_name": "CURNE",
+  "current_rating": 71.9292,
+  "current_position": 41,
+  "initial_rating": 82.85,
+  "is_active": true
+ },
+ {
+  "club_id": "buenos-aires-crc",
+  "source_name": "Buenos Aires C. & R.",
+  "current_rating": 71.6221,
+  "current_position": 42,
+  "initial_rating": 76.99,
+  "is_active": true
+ },
+ {
+  "club_id": "universitario-de-san-juan",
+  "source_name": "U.N.S.J.",
+  "current_rating": 70.9278,
+  "current_position": 46,
+  "initial_rating": 67.99,
+  "is_active": true
+ },
+ {
+  "club_id": "lince-rugby-club",
+  "source_name": "Lince R.C.",
+  "current_rating": 52.71,
+  "current_position": 77,
+  "initial_rating": 50.71,
+  "is_active": true
+ },
+ {
+  "club_id": "deportiva-francesa",
+  "source_name": "Deportiva Francesa",
+  "current_rating": 41.4259,
+  "current_position": 108,
+  "initial_rating": 44.05,
+  "is_active": true
+ },
+ {
+  "club_id": "puerto-madryn-r-c",
+  "source_name": "Puerto Madryn",
+  "current_rating": 41.1236,
+  "current_position": 111,
+  "initial_rating": 47.13,
+  "is_active": true
+ },
+ {
+  "club_id": "los-caranchos",
+  "source_name": "Los Caranchos",
+  "current_rating": 40.8807,
+  "current_position": 115,
+  "initial_rating": 42.72,
+  "is_active": true
+ },
+ {
+  "club_id": "bigornia-r-c",
+  "source_name": "Bigornia R.C.",
+  "current_rating": 40.4274,
+  "current_position": 117,
+  "initial_rating": 33.25,
+  "is_active": true
+ },
+ {
+  "club_id": "alta-gracia-r-c",
+  "source_name": "Alta Gracia R.C.",
+  "current_rating": 39.5647,
+  "current_position": 119,
+  "initial_rating": 37.5,
+  "is_active": true
+ },
+ {
+  "club_id": "abipones",
+  "source_name": "Abipones",
+  "current_rating": 30,
+  "current_position": 138,
+  "initial_rating": 30,
+  "is_active": true
+ },
+ {
+  "club_id": "rivadavia-rugby-club",
+  "source_name": "Rivadavia R.C.",
+  "current_rating": 20.61,
+  "current_position": 149,
+  "initial_rating": 20.61,
+  "is_active": true
+ },
+ {
+  "club_id": "san-isidro-club",
+  "source_name": "S.I.C.",
+  "current_rating": 83.7263,
+  "current_position": 10,
+  "initial_rating": 88.2,
+  "is_active": true
+ },
+ {
+  "club_id": "los-tilos",
+  "source_name": "Los Tilos",
+  "current_rating": 82.3068,
+  "current_position": 14,
+  "initial_rating": 83.43,
+  "is_active": true
+ },
+ {
+  "club_id": "huirapuca",
+  "source_name": "Huirapuca",
+  "current_rating": 78.7029,
+  "current_position": 24,
+  "initial_rating": 75.71,
+  "is_active": true
+ },
+ {
+  "club_id": "mar-del-plata-club",
+  "source_name": "Mar Del Plata R.C.",
+  "current_rating": 73.2308,
+  "current_position": 39,
+  "initial_rating": 78.86,
+  "is_active": true
+ },
+ {
+  "club_id": "universitario-de-mar-del-plata",
+  "source_name": "Universitario Mar Del Plata",
+  "current_rating": 64.8898,
+  "current_position": 54,
+  "initial_rating": 64.89,
+  "is_active": true
+ },
+ {
+  "club_id": "curda",
+  "source_name": "CURDA",
+  "current_rating": 61.1822,
+  "current_position": 63,
+  "initial_rating": 59.49,
+  "is_active": true
+ },
+ {
+  "club_id": "sixty-r-c",
+  "source_name": "Sixty R.C.",
+  "current_rating": 55.0955,
+  "current_position": 71,
+  "initial_rating": 55.72,
+  "is_active": true
+ },
+ {
+  "club_id": "lomas-athletic",
+  "source_name": "Lomas Ath.",
+  "current_rating": 51.779,
+  "current_position": 80,
+  "initial_rating": 45.6,
+  "is_active": true
+ },
+ {
+  "club_id": "los-teros-r-c",
+  "source_name": "Los Teros R.C.",
+  "current_rating": 50.12,
+  "current_position": 85,
+  "initial_rating": 50.12,
+  "is_active": true
+ },
+ {
+  "club_id": "crar",
+  "source_name": "C.Ra.R.",
+  "current_rating": 43.1037,
+  "current_position": 102,
+  "initial_rating": 39.83,
+  "is_active": true
+ },
+ {
+  "club_id": "san-albano",
+  "source_name": "San Albano",
+  "current_rating": 42.7216,
+  "current_position": 105,
+  "initial_rating": 40.12,
+  "is_active": true
+ },
+ {
+  "club_id": "c-a-provincial",
+  "source_name": "Provincial",
+  "current_rating": 41.1004,
+  "current_position": 112,
+  "initial_rating": 40.12,
+  "is_active": true
+ },
+ {
+  "club_id": "centro-cazadores",
+  "source_name": "Centro C.",
+  "current_rating": 25,
+  "current_position": 143,
+  "initial_rating": 25,
+  "is_active": true
+ },
+ {
+  "club_id": "italiana-de-charata",
+  "source_name": "Italiana",
+  "current_rating": 22.25,
+  "current_position": 148,
+  "initial_rating": 22.25,
+  "is_active": true
+ },
+ {
+  "club_id": "duendes-r-c",
+  "source_name": "Duendes",
+  "current_rating": 86.8689,
+  "current_position": 5,
+  "initial_rating": 88.53,
+  "is_active": true
+ },
+ {
+  "club_id": "chenque-r-c",
+  "source_name": "Chenque R.C.",
+  "current_rating": 43.3692,
+  "current_position": 99,
+  "initial_rating": 48.67,
+  "is_active": true
+ },
+ {
+  "club_id": "jockey-club-de-rosario",
+  "source_name": "Jockey C. Rosario",
+  "current_rating": 86.7948,
+  "current_position": 6,
+  "initial_rating": 89.53,
+  "is_active": true
+ },
+ {
+  "club_id": "crai",
+  "source_name": "C.R.A.I.",
+  "current_rating": 76.2507,
+  "current_position": 31,
+  "initial_rating": 77.45,
+  "is_active": true
+ },
+ {
+  "club_id": "ipr-sporting",
+  "source_name": "IPR Sporting",
+  "current_rating": 69.9104,
+  "current_position": 47,
+  "initial_rating": 70,
+  "is_active": true
+ },
+ {
+  "club_id": "los-cardos-r-c",
+  "source_name": "Los Cardos",
+  "current_rating": 59.3044,
+  "current_position": 65,
+  "initial_rating": 60.17,
+  "is_active": true
+ },
+ {
+  "club_id": "carlos-paz-rugby-club",
+  "source_name": "Carlos Paz",
+  "current_rating": 58.54,
+  "current_position": 67,
+  "initial_rating": 58.54,
+  "is_active": true
+ },
+ {
+  "club_id": "capri",
+  "source_name": "CAPRI",
+  "current_rating": 53.7056,
+  "current_position": 75,
+  "initial_rating": 53.64,
+  "is_active": true
+ },
+ {
+  "club_id": "geba",
+  "source_name": "GEBA",
+  "current_rating": 47.7743,
+  "current_position": 89,
+  "initial_rating": 43,
+  "is_active": true
+ },
+ {
+  "club_id": "hurling",
+  "source_name": "Hurling",
+  "current_rating": 46.1117,
+  "current_position": 91,
+  "initial_rating": 47.48,
+  "is_active": true
+ },
+ {
+  "club_id": "union-del-sur",
+  "source_name": "Unión Del Sur",
+  "current_rating": 43.21,
+  "current_position": 101,
+  "initial_rating": 43.21,
+  "is_active": true
+ },
+ {
+  "club_id": "la-salle-jobson",
+  "source_name": "Jockey S.J.",
+  "current_rating": 37.5242,
+  "current_position": 123,
+  "initial_rating": 43.21,
+  "is_active": true
+ },
+ {
+  "club_id": "club-las-aguilas",
+  "source_name": "Club Las Aguilas",
+  "current_rating": 32.5825,
+  "current_position": 134,
+  "initial_rating": 34.6,
+  "is_active": true
+ },
+ {
+  "club_id": "caraya",
+  "source_name": "Carayá",
+  "current_rating": 29,
+  "current_position": 140,
+  "initial_rating": 29,
+  "is_active": true
+ },
+ {
+  "club_id": "hindu-club",
+  "source_name": "Hindú",
+  "current_rating": 81.7905,
+  "current_position": 15,
+  "initial_rating": 81.45,
+  "is_active": true
+ },
+ {
+  "club_id": "club-universitario-de-cordoba",
+  "source_name": "Universitario Cordoba",
+  "current_rating": 79.4427,
+  "current_position": 21,
+  "initial_rating": 79.62,
+  "is_active": true
+ },
+ {
+  "club_id": "parana-rowing",
+  "source_name": "Paraná Rowing",
+  "current_rating": 77.9798,
+  "current_position": 25,
+  "initial_rating": 73.04,
+  "is_active": true
+ },
+ {
+  "club_id": "uru-cure-rugby-club",
+  "source_name": "Urú Curé",
+  "current_rating": 77.3293,
+  "current_position": 28,
+  "initial_rating": 77.33,
+  "is_active": true
+ },
+ {
+  "club_id": "tacuru-rugby-hockey-club",
+  "source_name": "Tacuru R.H.C.",
+  "current_rating": 41.1635,
+  "current_position": 110,
+  "initial_rating": 41.12,
+  "is_active": true
+ },
+ {
+  "club_id": "calafate-r-c",
+  "source_name": "Calafate R.C.",
+  "current_rating": 40.0321,
+  "current_position": 118,
+  "initial_rating": 41.12,
+  "is_active": true
+ },
+ {
+  "club_id": "jockey-club-san-juan",
+  "source_name": "Jockey Club San Juan",
+  "current_rating": 38.5098,
+  "current_position": 122,
+  "initial_rating": 32,
+  "is_active": true
+ },
+ {
+  "club_id": "los-miuras",
+  "source_name": "Los Miuras",
+  "current_rating": 37.32,
+  "current_position": 124,
+  "initial_rating": 37.32,
+  "is_active": true
+ },
+ {
+  "club_id": "casi",
+  "source_name": "C.A.S.I.",
+  "current_rating": 87.0936,
+  "current_position": 4,
+  "initial_rating": 87.83,
+  "is_active": true
+ },
+ {
+  "club_id": "gimnasia-y-esgrima-de-rosario",
+  "source_name": "G.E.R.",
+  "current_rating": 80.5456,
+  "current_position": 17,
+  "initial_rating": 82.9,
+  "is_active": true
+ },
+ {
+  "club_id": "santa-fe-r-c",
+  "source_name": "Santa Fe R.C.",
+  "current_rating": 79.4357,
+  "current_position": 22,
+  "initial_rating": 79.2,
+  "is_active": true
+ },
+ {
+  "club_id": "mendoza-rugby-club",
+  "source_name": "Mendoza R.C.",
+  "current_rating": 77.3713,
+  "current_position": 27,
+  "initial_rating": 78.19,
+  "is_active": true
+ },
+ {
+  "club_id": "universitario-de-tucuman",
+  "source_name": "Universitario Tucuman",
+  "current_rating": 73.538,
+  "current_position": 37,
+  "initial_rating": 77.14,
+  "is_active": true
+ },
+ {
+  "club_id": "club-los-50",
+  "source_name": "Club Los 50",
+  "current_rating": 53.06,
+  "current_position": 76,
+  "initial_rating": 53.06,
+  "is_active": true
+ },
+ {
+  "club_id": "bigua-rugby-club",
+  "source_name": "Biguá R.C.",
+  "current_rating": 52.02,
+  "current_position": 79,
+  "initial_rating": 52.02,
+  "is_active": true
+ },
+ {
+  "club_id": "marabunta-r-c",
+  "source_name": "Marabunta R.C.",
+  "current_rating": 51.5268,
+  "current_position": 81,
+  "initial_rating": 53.24,
+  "is_active": true
+ },
+ {
+  "club_id": "peumayen-rugby-club",
+  "source_name": "Peumayen",
+  "current_rating": 43.8047,
+  "current_position": 97,
+  "initial_rating": 46.57,
+  "is_active": true
+ },
+ {
+  "club_id": "universitario-de-santa-fe",
+  "source_name": "Univ. Santa Fé",
+  "current_rating": 43.569,
+  "current_position": 98,
+  "initial_rating": 38.49,
+  "is_active": true
+ },
+ {
+  "club_id": "logaritmo-rugby-club",
+  "source_name": "Logaritmo",
+  "current_rating": 41.897,
+  "current_position": 107,
+  "initial_rating": 37.34,
+  "is_active": true
+ },
+ {
+  "club_id": "caza-y-pesca",
+  "source_name": "Caza Y P.",
+  "current_rating": 35,
+  "current_position": 129,
+  "initial_rating": 35,
+  "is_active": true
+ },
+ {
+  "club_id": "aguara-guazu",
+  "source_name": "Aguará Guazú",
+  "current_rating": 33.05,
+  "current_position": 132,
+  "initial_rating": 33.05,
+  "is_active": true
+ },
+ {
+  "club_id": "asoc-alumni",
+  "source_name": "Alumni",
+  "current_rating": 86.0114,
+  "current_position": 8,
+  "initial_rating": 84.41,
+  "is_active": true
+ },
+ {
+  "club_id": "tucuman-lawn-tennis",
+  "source_name": "Tucuman L.T.C.",
+  "current_rating": 79.8634,
+  "current_position": 18,
+  "initial_rating": 74.68,
+  "is_active": true
+ },
+ {
+  "club_id": "cuba",
+  "source_name": "C.U.B.A.",
+  "current_rating": 76.4811,
+  "current_position": 29,
+  "initial_rating": 76.79,
+  "is_active": true
+ },
+ {
+  "club_id": "aranduroga-r-c",
+  "source_name": "Aranduroga",
+  "current_rating": 66.5751,
+  "current_position": 51,
+  "initial_rating": 60.67,
+  "is_active": true
+ },
+ {
+  "club_id": "santiago-lawn-tennis-club",
+  "source_name": "Santiago L.T.C.",
+  "current_rating": 57.8191,
+  "current_position": 68,
+  "initial_rating": 53.2,
+  "is_active": true
+ },
+ {
+  "club_id": "san-ignacio-r-c",
+  "source_name": "San Ignacio",
+  "current_rating": 55.028,
+  "current_position": 72,
+  "initial_rating": 53.24,
+  "is_active": true
+ },
+ {
+  "club_id": "los-hurones",
+  "source_name": "Los Hurones",
+  "current_rating": 45.52,
+  "current_position": 93,
+  "initial_rating": 45.52,
+  "is_active": true
+ },
+ {
+  "club_id": "club-tilcara",
+  "source_name": "Tilcara",
+  "current_rating": 42.98,
+  "current_position": 103,
+  "initial_rating": 50.92,
+  "is_active": true
+ },
+ {
+  "club_id": "san-francisco-r-c",
+  "source_name": "San Francisco R.C.",
+  "current_rating": 34.7654,
+  "current_position": 130,
+  "initial_rating": 32.49,
+  "is_active": true
+ },
+ {
+  "club_id": "universitario-de-la-plata",
+  "source_name": "Univ. La Plata",
+  "current_rating": 40.76,
+  "current_position": 116,
+  "initial_rating": 41.2,
+  "is_active": true
+ },
+ {
+  "club_id": "san-jorge-r-c",
+  "source_name": "San Jorge",
+  "current_rating": 36.04,
+  "current_position": 128,
+  "initial_rating": 36.04,
+  "is_active": true
+ },
+ {
+  "club_id": "cazones-r-c",
+  "source_name": "Cazones R.C.",
+  "current_rating": 19.7033,
+  "current_position": 150,
+  "initial_rating": 20,
+  "is_active": true
+ },
+ {
+  "club_id": "la-plata",
+  "source_name": "La Plata R.C.",
+  "current_rating": 73.4499,
+  "current_position": 38,
+  "initial_rating": 75.17,
+  "is_active": true
+ },
+ {
+  "club_id": "club-champagnat",
+  "source_name": "Champagnat",
+  "current_rating": 66.092,
+  "current_position": 52,
+  "initial_rating": 67.28,
+  "is_active": true
+ },
+ {
+  "club_id": "san-patricio",
+  "source_name": "San Patricio",
+  "current_rating": 64.8745,
+  "current_position": 55,
+  "initial_rating": 59,
+  "is_active": true
+ },
+ {
+  "club_id": "argentino-de-bahia-blanca",
+  "source_name": "Argentino Bahia Blanca",
+  "current_rating": 52.6004,
+  "current_position": 78,
+  "initial_rating": 53.43,
+  "is_active": true
+ },
+ {
+  "club_id": "aguara",
+  "source_name": "Aguará",
+  "current_rating": 49.8891,
+  "current_position": 86,
+  "initial_rating": 46.28,
+  "is_active": true
+ },
+ {
+  "club_id": "santiago-rugby-club",
+  "source_name": "Santiago R.C.",
+  "current_rating": 37.184,
+  "current_position": 126,
+  "initial_rating": 36.96,
+  "is_active": true
+ },
+ {
+  "club_id": "roca-r-c",
+  "source_name": "Roca R.C.",
+  "current_rating": 44.5781,
+  "current_position": 94,
+  "initial_rating": 46.55,
+  "is_active": true
+ },
+ {
+  "club_id": "olivos-r-c",
+  "source_name": "Olivos R.C.",
+  "current_rating": 43.3087,
+  "current_position": 100,
+  "initial_rating": 45.4,
+  "is_active": true
+ },
+ {
+  "club_id": "pueyrredon",
+  "source_name": "Pueyrredon",
+  "current_rating": 42.8123,
+  "current_position": 104,
+  "initial_rating": 52,
+  "is_active": true
+ },
+ {
+  "club_id": "santa-rosa-r-c-c",
+  "source_name": "Santa Rosa R.C. C.",
+  "current_rating": 32.668,
+  "current_position": 133,
+  "initial_rating": 33.87,
+  "is_active": true
+ },
+ {
+  "club_id": "pay-ubre",
+  "source_name": "Pay Ubre",
+  "current_rating": 31,
+  "current_position": 137,
+  "initial_rating": 31,
+  "is_active": true
+ },
+ {
+  "club_id": "patoruzu-r-c",
+  "source_name": "Patoruzú",
+  "current_rating": 28.0093,
+  "current_position": 141,
+  "initial_rating": 27.18,
+  "is_active": true
+ },
+ {
+  "club_id": "draig-goch-r-c",
+  "source_name": "Draig Goch",
+  "current_rating": 23.9788,
+  "current_position": 144,
+  "initial_rating": 23.56,
+  "is_active": true
+ },
+ {
+  "club_id": "chaja",
+  "source_name": "Chaja",
+  "current_rating": 19.25,
+  "current_position": 151,
+  "initial_rating": 19.25,
+  "is_active": true
+ },
+ {
+  "club_id": "trelew-r-c",
+  "source_name": "Trelew R.C.",
+  "current_rating": 39.0716,
+  "current_position": 121,
+  "initial_rating": 34.15,
+  "is_active": true
+ },
+ {
+  "club_id": "club-newman",
+  "source_name": "Newman",
+  "current_rating": 95.3701,
+  "current_position": 1,
+  "initial_rating": 93.3,
+  "is_active": true
+ },
+ {
+  "club_id": "cardenales-r-c",
+  "source_name": "Cardenales",
+  "current_rating": 75.5779,
+  "current_position": 36,
+  "initial_rating": 75.23,
+  "is_active": true
+ },
+ {
+  "club_id": "alfiles-s-c",
+  "source_name": "Alfiles",
+  "current_rating": 37.2382,
+  "current_position": 125,
+  "initial_rating": 41.42,
+  "is_active": true
+ },
+ {
+  "club_id": "atletico-del-rosario",
+  "source_name": "Atletico Del Rosario",
+  "current_rating": 68.4289,
+  "current_position": 49,
+  "initial_rating": 59.88,
+  "is_active": true
+ },
+ {
+  "club_id": "neuquen-r-c",
+  "source_name": "Neuquen R.C.",
+  "current_rating": 68.026,
+  "current_position": 50,
+  "initial_rating": 68.43,
+  "is_active": true
+ },
+ {
+  "club_id": "san-jose",
+  "source_name": "San José",
+  "current_rating": 63.0314,
+  "current_position": 59,
+  "initial_rating": 66.39,
+  "is_active": true
+ },
+ {
+  "club_id": "san-cirano",
+  "source_name": "San Cirano",
+  "current_rating": 54.3386,
+  "current_position": 73,
+  "initial_rating": 51.43,
+  "is_active": true
+ },
+ {
+  "club_id": "gimnasia-y-tiro",
+  "source_name": "Gimnasia Y Tiro",
+  "current_rating": 53.8977,
+  "current_position": 74,
+  "initial_rating": 55.7,
+  "is_active": true
+ },
+ {
+  "club_id": "tiro-federal-salta",
+  "source_name": "Tiro Federal",
+  "current_rating": 40.976,
+  "current_position": 113,
+  "initial_rating": 36.2,
+  "is_active": true
+ },
+ {
+  "club_id": "marista-rugby-club",
+  "source_name": "Marista R.C.",
+  "current_rating": 83.5912,
+  "current_position": 11,
+  "initial_rating": 95.26,
+  "is_active": true
+ },
+ {
+  "club_id": "los-tordos-rugby-club",
+  "source_name": "Los Tordos",
+  "current_rating": 79.5829,
+  "current_position": 20,
+  "initial_rating": 81.13,
+  "is_active": true
+ },
+ {
+  "club_id": "san-martin-de-villa-maria",
+  "source_name": "San Martin Villa Maria",
+  "current_rating": 75.778,
+  "current_position": 35,
+  "initial_rating": 75.98,
+  "is_active": true
+ },
+ {
+  "club_id": "jockey-club-de-tucuman",
+  "source_name": "Jockey Club Tucuman",
+  "current_rating": 64.4562,
+  "current_position": 58,
+  "initial_rating": 69.97,
+  "is_active": true
+ },
+ {
+  "club_id": "universitario-de-rosario",
+  "source_name": "Universitario Rosario",
+  "current_rating": 62.8238,
+  "current_position": 61,
+  "initial_rating": 55.92,
+  "is_active": true
+ },
+ {
+  "club_id": "los-cuervos-r-c",
+  "source_name": "Los Cuervos R.C.",
+  "current_rating": 51.1884,
+  "current_position": 83,
+  "initial_rating": 55.82,
+  "is_active": true
+ },
+ {
+  "club_id": "santa-rosa-r-c",
+  "source_name": "Santa Rosa R.C.",
+  "current_rating": 33.182,
+  "current_position": 131,
+  "initial_rating": 33.98,
+  "is_active": true
+ },
+ {
+  "club_id": "c-s-la-carlota",
+  "source_name": "C.S. Carlota",
+  "current_rating": 31.507,
+  "current_position": 135,
+  "initial_rating": 30.41,
+  "is_active": true
+ },
+ {
+  "club_id": "gimnasia-y-esgrima-de-pergamino",
+  "source_name": "Gim. E. Pergamino",
+  "current_rating": 31.4946,
+  "current_position": 136,
+  "initial_rating": 32.81,
+  "is_active": true
+ },
+ {
+  "club_id": "tucuman-rugby-club",
+  "source_name": "Tucuman R.C.",
+  "current_rating": 83.5877,
+  "current_position": 12,
+  "initial_rating": 82.8,
+  "is_active": true
+ },
+ {
+  "club_id": "club-la-tablada",
+  "source_name": "La Tablada",
+  "current_rating": 81.5575,
+  "current_position": 16,
+  "initial_rating": 83.06,
+  "is_active": true
+ },
+ {
+  "club_id": "old-resian-club",
+  "source_name": "Old Resian",
+  "current_rating": 75.9319,
+  "current_position": 33,
+  "initial_rating": 74.65,
+  "is_active": true
+ },
+ {
+  "club_id": "los-tarcos",
+  "source_name": "Los Tarcos",
+  "current_rating": 71.6168,
+  "current_position": 43,
+  "initial_rating": 72.21,
+  "is_active": true
+ },
+ {
+  "club_id": "jockey-club-salta",
+  "source_name": "Jockey Club Salta",
+  "current_rating": 65.1499,
+  "current_position": 53,
+  "initial_rating": 60.7,
+  "is_active": true
+ },
+ {
+  "club_id": "comercial-r-c",
+  "source_name": "Comercial R.C.",
+  "current_rating": 64.6089,
+  "current_position": 56,
+  "initial_rating": 53.28,
+  "is_active": true
+ },
+ {
+  "club_id": "jockey-club-de-venado-tuerto",
+  "source_name": "Jockey C. Venado T.",
+  "current_rating": 61.9262,
+  "current_position": 62,
+  "initial_rating": 60.83,
+  "is_active": true
+ },
+ {
+  "club_id": "baguales-r-c",
+  "source_name": "Baguales Jm",
+  "current_rating": 45.9073,
+  "current_position": 92,
+  "initial_rating": 46.15,
+  "is_active": true
+ },
+ {
+  "club_id": "banco-rugby-club",
+  "source_name": "Banco R.C.",
+  "current_rating": 42.4695,
+  "current_position": 106,
+  "initial_rating": 42.55,
+  "is_active": true
+ },
+ {
+  "club_id": "universitario-de-salta",
+  "source_name": "Univ. Salta",
+  "current_rating": 59.12,
+  "current_position": 66,
+  "initial_rating": 51.1,
+  "is_active": true
+ },
+ {
+  "club_id": "san-andres",
+  "source_name": "San Andrés",
+  "current_rating": 46.8058,
+  "current_position": 90,
+  "initial_rating": 46.75,
+  "is_active": true
+ },
+ {
+  "club_id": "belgrano-athletic",
+  "source_name": "Belgrano A.C.",
+  "current_rating": 82.7816,
+  "current_position": 13,
+  "initial_rating": 86.25,
+  "is_active": true
+ },
+ {
+  "club_id": "regatas-de-bella-vista",
+  "source_name": "Regatas Bella Vista",
+  "current_rating": 79.845,
+  "current_position": 19,
+  "initial_rating": 81.65,
+  "is_active": true
+ },
+ {
+  "club_id": "sociedad-sportiva-de-bahia-blanca",
+  "source_name": "Sociedad Sportiva",
+  "current_rating": 76.4245,
+  "current_position": 30,
+  "initial_rating": 71.39,
+  "is_active": true
+ },
+ {
+  "club_id": "jockey-club-de-villa-maria",
+  "source_name": "Jockey Club Villa Maria",
+  "current_rating": 75.9264,
+  "current_position": 34,
+  "initial_rating": 69.89,
+  "is_active": true
+ },
+ {
+  "club_id": "san-juan-rugby-club",
+  "source_name": "San Juan R.C.",
+  "current_rating": 71.4354,
+  "current_position": 44,
+  "initial_rating": 71.52,
+  "is_active": true
+ },
+ {
+  "club_id": "los-matreros",
+  "source_name": "Los Matreros",
+  "current_rating": 69.6307,
+  "current_position": 48,
+  "initial_rating": 60,
+  "is_active": true
+ },
+ {
+  "club_id": "regatas-de-resistencia",
+  "source_name": "Regatas Resistencia",
+  "current_rating": 60.2501,
+  "current_position": 64,
+  "initial_rating": 61.5,
+  "is_active": true
+ },
+ {
+  "club_id": "huazihul",
+  "source_name": "Huazihul",
+  "current_rating": 44.5276,
+  "current_position": 95,
+  "initial_rating": 44.43,
+  "is_active": true
+ },
+ {
+  "club_id": "comodoro-r-c",
+  "source_name": "Comodoro R.C.",
+  "current_rating": 41.4112,
+  "current_position": 109,
+  "initial_rating": 31.49,
+  "is_active": true
+ },
+ {
+  "club_id": "jockey-club-cordoba",
+  "source_name": "Jockey C. Cordoba",
+  "current_rating": 92.8332,
+  "current_position": 2,
+  "initial_rating": 92.53,
+  "is_active": true
+ },
+ {
+  "club_id": "estudiantes-de-parana",
+  "source_name": "C.A.E. Paraná",
+  "current_rating": 84.55,
+  "current_position": 9,
+  "initial_rating": 87.41,
+  "is_active": true
+ },
+ {
+  "club_id": "teque-r-c",
+  "source_name": "Teque R.C.",
+  "current_rating": 63.0228,
+  "current_position": 60,
+  "initial_rating": 64.05,
+  "is_active": true
+ },
+ {
+  "club_id": "old-lions-r-c",
+  "source_name": "Old Lions",
+  "current_rating": 57.7112,
+  "current_position": 69,
+  "initial_rating": 67.14,
+  "is_active": true
+ },
+ {
+  "club_id": "san-luis",
+  "source_name": "San Luis R.C.",
+  "current_rating": 48.17,
+  "current_position": 88,
+  "initial_rating": 73.17,
+  "is_active": true
+ },
+ {
+  "club_id": "deportivo-portugues",
+  "source_name": "Deportivo Portugues",
+  "current_rating": 40.8961,
+  "current_position": 114,
+  "initial_rating": 43.27,
+  "is_active": true
+ },
+ {
+  "club_id": "aero-club-rio-iv",
+  "source_name": "Aero Club Río Iv",
+  "current_rating": 27.4189,
+  "current_position": 142,
+  "initial_rating": 32.22,
+  "is_active": true
+ },
+ {
+  "club_id": "uncaus",
+  "source_name": "UNCAUS",
+  "current_rating": 23,
+  "current_position": 146,
+  "initial_rating": 23,
+  "is_active": true
+ }
+]

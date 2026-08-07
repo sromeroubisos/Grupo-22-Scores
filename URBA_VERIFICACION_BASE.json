@@ -1,0 +1,98 @@
+[
+ {
+  "et": "matches total",
+  "v": 13559,
+  "esp": 13559,
+  "ok": true
+ },
+ {
+  "et": "matches de URBA",
+  "v": 10917,
+  "esp": 10917,
+  "ok": true
+ },
+ {
+  "et": "matches manuales (fuera de los 8)",
+  "v": 2642,
+  "esp": 2642,
+  "ok": true
+ },
+ {
+  "et": "manuales que quedan en los 8 torneos",
+  "v": 0,
+  "esp": 0,
+  "ok": true
+ },
+ {
+  "et": "URBA con fase, en los 8",
+  "v": 992,
+  "esp": 992,
+  "ok": true
+ },
+ {
+  "et": "URBA sin fase, en los 8",
+  "v": 0,
+  "esp": 0,
+  "ok": true
+ },
+ {
+  "et": "URBA sin fase (los otros 126, correcto)",
+  "v": 9925,
+  "esp": 9925,
+  "ok": true
+ },
+ {
+  "et": "URBA visibles (no se prendió nada)",
+  "v": 0,
+  "esp": 0,
+  "ok": true
+ },
+ {
+  "et": "formaciones salvadas en el Top 14",
+  "v": 49,
+  "esp": 49,
+  "ok": true
+ },
+ {
+  "et": "prode_events del Top 14",
+  "v": 182,
+  "esp": 182,
+  "ok": true
+ },
+ {
+  "et": "prode_events sin partido atado",
+  "v": 0,
+  "esp": 0,
+  "ok": true
+ },
+ {
+  "et": "prode_predictions",
+  "v": 783,
+  "esp": 783,
+  "ok": true
+ },
+ {
+  "et": "tournament_participants",
+  "v": 2181,
+  "esp": 2181,
+  "ok": true
+ },
+ {
+  "et": "participantes con marca urba-import",
+  "v": 1487,
+  "esp": 1487,
+  "ok": true
+ },
+ {
+  "et": "match_events (no se tocaron)",
+  "v": 2757,
+  "esp": 2757,
+  "ok": true
+ },
+ {
+  "et": "otros 126",
+  "v": 126,
+  "esp": 126,
+  "ok": true
+ }
+]

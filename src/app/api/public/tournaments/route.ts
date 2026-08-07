@@ -24,16 +24,18 @@ import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 import { isTournamentVisibleToPublic } from '@/lib/tournamentReview';
+import { ocultarGradosSubordinados } from '@/lib/tournamentNavigation';
+import { filtrarPorTemporada } from '@/lib/tournamentSeasonFilter';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const RUGBY_SPORT_IDS = ['rugby', 'rugby-union', 'rugby-league'];
 const RUGBY_FLASHSCORE_SPORT_KEY = 'rugby';
-const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, priority, category, age_grade';
-const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, priority, category, age_grade';
-const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, category, age_grade';
-const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, category, age_grade';
+const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, priority, category, age_grade, subcategory, season_id, gender, union_id';
+const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, priority, category, age_grade, subcategory, season_id, gender, union_id';
+const SELECT_WITH_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, legacy_sport:sport, logo_url, slug, is_visible, status, category, age_grade, subcategory, season_id, gender, union_id';
+const SELECT_WITHOUT_LEGACY_SPORT = 'id, name, display_name, country, country_id, country_ref:countries(name), sport_id, logo_url, slug, is_visible, status, category, age_grade, subcategory, season_id, gender, union_id';
 const SELECT_WITH_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITH_LEGACY_SPORT_AND_PRIORITY}, review_status`;
 const SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY_REVIEW = `${SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY}, review_status`;
 const SELECT_WITH_LEGACY_SPORT_REVIEW = `${SELECT_WITH_LEGACY_SPORT}, review_status`;
@@ -76,6 +78,13 @@ type PublicTournamentRow = {
     priority: number | null;
     category: string | null;
     age_grade: string | null;
+    /** El grado. Decide si el torneo es reserva y si va al listado o al desplegable. */
+    subcategory: string | null;
+    /** Las tres, junto con category y age_grade, forman la división de un torneo. */
+    season_id: string | null;
+    gender: string | null;
+    /** Quién carga este torneo. Agrupa el filtro de temporada — ver tournamentSeasonFilter. */
+    union_id: string | null;
 };
 
 type PublicTournamentQueryResult = {
@@ -121,6 +130,13 @@ type PublicExternalTournament = {
     priority: number;
     type: 'international' | 'local';
     seasons: [];
+    /**
+     * Siempre null: un torneo del catálogo externo no tiene temporada nuestra.
+     * Está declarado y no omitido porque estas filas se mezclan con las de base
+     * en la misma lista, y un `null` explícito dice "no tiene" — que es lo que
+     * el filtro de temporada necesita para dejarlas pasar siempre.
+     */
+    season_id: null;
     external_country_id?: string | null;
     url?: string | null;
 };
@@ -155,6 +171,12 @@ type PublicDbTournamentListItem = {
     logo_url: string | null;
     slug: string | null;
     priority: number;
+    /**
+     * La temporada de ESTA edición. Va como escalar y NO como `seasons: [...]`:
+     * ese arreglo dibuja un acordeón de temporadas en el listado, y con un solo
+     * elemento sería un desplegable que se abre para ofrecer una sola cosa.
+     */
+    season_id: string | null;
 };
 
 type PublicTournamentCountryFilter = {
@@ -176,6 +198,8 @@ type PublicTournamentsRequestParams = {
     externalCountryIds: string[];
     countryName: string | null;
     countryFlag: string | null;
+    /** `?season=2025`; null = la temporada más reciente de cada unión. */
+    season: string | null;
 };
 
 type TournamentsResponseCacheEntry = {
@@ -505,6 +529,7 @@ function mapFlashScoreTournamentToPublicTournament(
         priority: 0,
         type: countryId === 'international' ? 'international' : 'local',
         seasons: [],
+        season_id: null,
         external_country_id: entity.id,
         url: tournamentUrl,
     };
@@ -873,12 +898,34 @@ function filterPublicDbTournaments(args: {
     audience: TournamentAudience | 'all';
     search: string;
     countryFilter?: PublicTournamentCountryFilter | null;
+    /** `?season=2025`. Vacío o ausente = la más reciente de cada unión. */
+    season?: string | null;
 }): PublicDbTournamentListItem[] {
     const countryFilterValues = buildCountryFilterLookupValues(args.countryFilter);
 
-    return sortTournamentsByPriority(args.tournaments
+    // Intermedia y Preintermedia son GRADOS de una división de mayores, no
+    // competencias sueltas: se llegan desde el desplegable del torneo. Sin esto,
+    // el Top 14 ocupa ocho entradas de la portada.
+    //
+    // Se sacan de la vista general y de la de mayores, PERO NO de la de
+    // juveniles/reserva, que es adonde pertenecen (`resolveTournamentAudience`
+    // los manda ahí). Si se filtraran también en esa vista no habría dónde verlos.
+    //
+    // Se aplica sobre las filas ya visibles para que la condición "su Superior
+    // está en la lista" mire el mismo conjunto que se va a mostrar.
+    const visibles = args.tournaments.filter((tournament) => isTournamentVisibleToPublic(tournament));
+
+    // Una sola temporada por unión: la más reciente, salvo que se pida un año.
+    //
+    // Va ANTES de ocultarGradosSubordinados y no después, porque esa función
+    // decide mirando si "la Superior está en la lista". Con dos años adentro, la
+    // Superior de 2026 tapaba las Preintermedias de 2025 —el mismo grado, otro
+    // año— y las hacía desaparecer de las dos vistas a la vez.
+    const deLaTemporada = filtrarPorTemporada(visibles, args.season);
+    const base = args.audience === 'juveniles' ? deLaTemporada : ocultarGradosSubordinados(deLaTemporada);
+
+    return sortTournamentsByPriority(base
         .filter((tournament) => {
-            if (!isTournamentVisibleToPublic(tournament)) return false;
 
             const normalizedSport = tournament.sport_id || tournament.legacy_sport || 'rugby';
             if (!args.sportFilter.includes(normalizedSport)) return false;
@@ -889,7 +936,12 @@ function filterPublicDbTournaments(args: {
 
             if (
                 args.audience !== 'all' &&
-                resolveTournamentAudience({ ageGrade: tournament.age_grade, category: tournament.category }) !== args.audience
+                resolveTournamentAudience({
+                    ageGrade: tournament.age_grade,
+                    category: tournament.category,
+                    // La reserva (Intermedia / Preintermedia) va con juveniles.
+                    subcategory: tournament.subcategory,
+                }) !== args.audience
             ) {
                 return false;
             }
@@ -912,6 +964,7 @@ function filterPublicDbTournaments(args: {
             logo_url: sanitizePublicLogoUrl(tournament.logo_url, tournament.id),
             slug: tournament.slug,
             priority: typeof tournament.priority === 'number' ? tournament.priority : 0,
+            season_id: tournament.season_id ?? null,
         })));
 }
 
@@ -1264,6 +1317,7 @@ async function queryPublicDbTournamentsForRequest(
             audience: options.audience ?? params.audience,
             search: params.search,
             countryFilter: options.countryFilter ?? null,
+            season: params.season,
         })
         : [];
     if (trace) {
@@ -1301,7 +1355,20 @@ function normalizePublicTournamentsRequest(request: Request): PublicTournamentsR
         externalCountryIds,
         countryName: searchParams.get('country_name')?.trim() || null,
         countryFlag: searchParams.get('country_flag')?.trim() || null,
+        season: normalizeSeasonParam(searchParams.get('season')),
     };
+}
+
+/**
+ * `?season=2025`. Cuatro dígitos o nada.
+ *
+ * Lo que no tiene esa forma se descarta y el listado vuelve al comportamiento
+ * por defecto. La alternativa —pasarlo tal cual— haría que `?season=basura`
+ * devolviera una lista vacía indistinguible de "ese año no tiene torneos".
+ */
+function normalizeSeasonParam(value: string | null): string | null {
+    const v = String(value ?? '').trim();
+    return /^\d{4}$/.test(v) ? v : null;
 }
 
 function resolveCacheControl(params: PublicTournamentsRequestParams) {
@@ -1331,6 +1398,9 @@ function buildPublicTournamentsCacheKey(params: PublicTournamentsRequestParams) 
         buildCacheKeyPart(params.externalCountryIds.length > 0 ? params.externalCountryIds.join(',') : null),
         buildCacheKeyPart(params.countryName ? slugifyCountryId(params.countryName) : null),
         buildCacheKeyPart(params.countryFlag),
+        // Sin esto, un `?season=2025` recibiría la respuesta cacheada del listado
+        // por defecto: el filtro andaría en la consulta y no en la pantalla.
+        buildCacheKeyPart(params.season, 'ultima'),
         params.forceFullCatalog ? 'full' : 'normal',
     ].join(':');
 }
