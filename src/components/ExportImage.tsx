@@ -28,6 +28,8 @@ export type MatchExportMode = 'schedule' | 'result';
 export type MatchExportLayout = 'classic' | 'editorial4x5';
 export type StandingsExportMode = 'table' | 'groups' | 'singleGroup';
 export type LineupExportMode = 'both' | 'home' | 'away';
+// Que se lee en el centro de un partido que todavia no se jugo: la hora o un VS.
+export type DailyMatchesTimeMode = 'time' | 'vs';
 type DensityMode = 'comfortable' | 'compact' | 'ultra-compact';
 
 interface StandingsRowData {
@@ -373,6 +375,7 @@ type ExportImagePreviewProps = {
     matchExportLayout?: MatchExportLayout;
     lineupExportMode?: LineupExportMode;
     standingsExportMode?: StandingsExportMode;
+    dailyMatchesTimeMode?: DailyMatchesTimeMode;
     className?: string;
 };
 
@@ -610,6 +613,10 @@ const LINEUP_EXPORT_MODE_OPTIONS: Array<{ value: LineupExportMode; label: string
     { value: 'home', label: 'Solo local', description: 'Centra la pieza en la formacion del equipo local' },
     { value: 'away', label: 'Solo visitante', description: 'Centra la pieza en la formacion del equipo visitante' },
 ];
+const DAILY_MATCHES_TIME_MODE_OPTIONS: Array<{ value: DailyMatchesTimeMode; label: string; description: string }> = [
+    { value: 'time', label: 'Horario', description: 'Los partidos sin jugar muestran la hora de inicio' },
+    { value: 'vs', label: 'VS', description: 'Los partidos sin jugar muestran VS y la hora queda afuera' },
+];
 const EDITORIAL_LAYOUT_PRESETS: MatchEditorialLayoutPreset[] = [
     {
         id: 'balanced',
@@ -772,6 +779,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     const [typographyOverrides, setTypographyOverrides] = useState<Partial<Record<ExportTypographyRole, ExportFontFamilyOptionId>>>({});
     const [designCustomizationState, setDesignCustomizationState] = useState<ExportDesignCustomizationState | null>(null);
     const [lineupExportMode, setLineupExportMode] = useState<LineupExportMode>('both');
+    const [dailyMatchesTimeMode, setDailyMatchesTimeMode] = useState<DailyMatchesTimeMode>('time');
     const groupedStandings = useMemo(
         () => (template === 'standings' ? getExportableStandingsGroups(data as StandingsData) : []),
         [data, template]
@@ -1206,7 +1214,11 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         if (template === 'matchStats') {
             return `${getMatchExportModeLabel(matchExportMode)} · ${getMatchExportLayoutLabel(matchExportLayout)}`;
         }
-        if (template === 'dailyMatches') return 'Agenda del dia · Seleccion multiple';
+        if (template === 'dailyMatches') {
+            return dailyMatchesTimeMode === 'vs'
+                ? 'Agenda del dia · Sin horarios (VS)'
+                : 'Agenda del dia · Seleccion multiple';
+        }
         if (template === 'standings') {
             if (standingsExportMode === 'singleGroup') return selectedStandingsGroupLabel || 'Grupo especifico';
             return standingsExportMode === 'groups' ? 'Tabla por grupos' : 'Tabla corrida';
@@ -1216,7 +1228,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         if (template === 'squad') return 'Plantel completo';
         if (template === 'teamOfWeek') return 'Equipo de la semana';
         return 'Configuracion de exportacion';
-    }, [lineupExportMode, matchExportLayout, matchExportMode, selectedStandingsGroupLabel, standingsExportMode, template]);
+    }, [dailyMatchesTimeMode, lineupExportMode, matchExportLayout, matchExportMode, selectedStandingsGroupLabel, standingsExportMode, template]);
     const exportSummaryChips = useMemo(() => {
         const chips = [selectedFormatConfig.label];
         chips.push(getExportVisualFamilyLabel(visualFamily));
@@ -1725,11 +1737,11 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                 const matchesData = exportData as DailyMatchesData;
                 const selectedMatches = matchesData.matches.filter((_, index) => selectedMatchIndices.has(index));
                 if (visualFamily === 'posterV3') {
-                    await drawPosterV3DailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo);
+                    await drawPosterV3DailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo, dailyMatchesTimeMode);
                 } else if (visualFamily === 'momentumV2') {
-                    await drawMomentumDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo);
+                    await drawMomentumDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo, dailyMatchesTimeMode);
                 } else {
-                    await drawDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo);
+                    await drawDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo, dailyMatchesTimeMode);
                 }
             } else if (template === 'squad') {
                 const squadData = exportData as SquadData;
@@ -1796,6 +1808,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     };
 
     const dailyMatches = template === 'dailyMatches' ? (data as DailyMatchesData).matches : [];
+    const hasScheduledDailyMatches = dailyMatches.some((match) => match.status === 'scheduled');
     const modalPreviewData = useMemo<ExportData>(() => {
         const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset);
 
@@ -2692,6 +2705,27 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                 </div>
                             )}
 
+                            {template === 'dailyMatches' && hasScheduledDailyMatches && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Partidos sin jugar</label>
+                                    <div className={styles.formatOptions}>
+                                        {DAILY_MATCHES_TIME_MODE_OPTIONS.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                className={`${styles.formatBtn} ${dailyMatchesTimeMode === option.value ? styles.active : ''}`}
+                                                onClick={() => setDailyMatchesTimeMode(option.value)}
+                                                type="button"
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className={styles.modalHint}>
+                                        {DAILY_MATCHES_TIME_MODE_OPTIONS.find((option) => option.value === dailyMatchesTimeMode)?.description}
+                                    </p>
+                                </div>
+                            )}
+
                             {template === 'dailyMatches' && dailyMatches.length > 0 && (
                                 <div className={styles.modalSection}>
                                     <div className={styles.matchSelectHeader}>
@@ -2943,6 +2977,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                         matchExportLayout={matchExportLayout}
                                         lineupExportMode={lineupExportMode}
                                         standingsExportMode={standingsExportMode}
+                                        dailyMatchesTimeMode={dailyMatchesTimeMode}
                                         className={styles.modalPreviewImage}
                                     />
                                 </div>
@@ -2995,6 +3030,7 @@ export function ExportImagePreview({
     matchExportLayout = 'classic',
     lineupExportMode = 'both',
     standingsExportMode = 'table',
+    dailyMatchesTimeMode = 'time',
     className = '',
 }: ExportImagePreviewProps) {
     const [previewUrl, setPreviewUrl] = useState('');
@@ -3020,6 +3056,7 @@ export function ExportImagePreview({
                     matchExportLayout,
                     lineupExportMode,
                     standingsExportMode,
+                    dailyMatchesTimeMode,
                 });
 
                 if (!isMounted) return;
@@ -3040,7 +3077,7 @@ export function ExportImagePreview({
         return () => {
             isMounted = false;
         };
-    }, [customizationState, data, format, lineupExportMode, matchExportLayout, matchExportMode, previewColors, standingsExportMode, template, visualFamily]);
+    }, [customizationState, dailyMatchesTimeMode, data, format, lineupExportMode, matchExportLayout, matchExportMode, previewColors, standingsExportMode, template, visualFamily]);
 
     if (previewError && !previewUrl) {
         return <div className={className}>{previewError}</div>;
@@ -4076,6 +4113,7 @@ async function renderMatchExportPreviewDataUrl(options: {
     matchExportLayout: MatchExportLayout;
     lineupExportMode: LineupExportMode;
     standingsExportMode: StandingsExportMode;
+    dailyMatchesTimeMode?: DailyMatchesTimeMode;
 }): Promise<string> {
     const {
         template,
@@ -4088,6 +4126,7 @@ async function renderMatchExportPreviewDataUrl(options: {
         matchExportLayout,
         lineupExportMode,
         standingsExportMode,
+        dailyMatchesTimeMode = 'time',
     } = options;
 
     applyTypographyConfig(
@@ -4223,11 +4262,11 @@ async function renderMatchExportPreviewDataUrl(options: {
         }
     } else if (template === 'dailyMatches') {
         if (visualFamily === 'posterV3') {
-            await drawPosterV3DailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+            await drawPosterV3DailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, dailyMatchesTimeMode);
         } else if (visualFamily === 'momentumV2') {
-            await drawMomentumDailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+            await drawMomentumDailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, dailyMatchesTimeMode);
         } else {
-            await drawDailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+            await drawDailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, dailyMatchesTimeMode);
         }
     } else if (template === 'standings') {
         const standingsData = exportData as StandingsData;
@@ -7988,6 +8027,18 @@ async function drawStandings(
 
     drawBrandFooter(ctx, canvas, brandLogo, isDark);
 }
+// Un partido sin jugar no siempre quiere publicar la hora: el modo 'vs' la reemplaza por VS.
+// La decision se toma una sola vez aca y la comparten los tres disenos de fixture.
+function getScheduledMatchLabel(
+    match: DailyMatchesData['matches'][number],
+    timeMode: DailyMatchesTimeMode,
+    fallback = '--:--'
+): string {
+    if (timeMode === 'vs') return 'VS';
+    const time = (match.time || '').trim();
+    return time || fallback;
+}
+
 async function drawDailyMatches(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
@@ -7995,7 +8046,8 @@ async function drawDailyMatches(
     format: CanvasFormat,
     accentColor: string,
     bgColor: string,
-    brandLogo: HTMLImageElement | null
+    brandLogo: HTMLImageElement | null,
+    timeMode: DailyMatchesTimeMode = 'time'
 ) {
     const isDark = getContrastColor(bgColor) === '#ffffff';
     const textColor = getTextColor(isDark);
@@ -8083,7 +8135,7 @@ async function drawDailyMatches(
         const homeLogo = logoLoads[logoOffset] || null;
         const awayLogo = logoLoads[logoOffset + 1] || null;
         const centerText = match.status === 'scheduled'
-            ? match.time
+            ? getScheduledMatchLabel(match, timeMode, '')
             : `${match.homeScore ?? 0} - ${match.awayScore ?? 0}`;
         const crestCenterY = y + rowHeight / 2;
         const homeCrestCenterX = cardX + crestInset + crestWidth / 2;
@@ -8149,7 +8201,9 @@ async function drawDailyMatches(
         ctx.fillStyle = mutedColor;
         ctx.font = `700 ${isStory ? 16 : 14}px ${FONT_BODY}`;
         ctx.fillText(
-            match.status === 'scheduled' ? 'HORARIO' : match.status === 'live' ? 'EN JUEGO' : 'MARCADOR FINAL',
+            match.status === 'scheduled'
+                ? (timeMode === 'vs' ? 'PROGRAMADO' : 'HORARIO')
+                : match.status === 'live' ? 'EN JUEGO' : 'MARCADOR FINAL',
             safe.centerX,
             y + rowHeight / 2 + (isStory ? 38 : 32)
         );
@@ -12104,7 +12158,8 @@ async function drawMomentumDailyMatches(
     format: CanvasFormat,
     accentColor: string,
     bgColor: string,
-    brandLogo: HTMLImageElement | null
+    brandLogo: HTMLImageElement | null,
+    timeMode: DailyMatchesTimeMode = 'time'
 ) {
     void format;
     const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
@@ -12129,7 +12184,7 @@ async function drawMomentumDailyMatches(
     const heroTitleTop = canvas.height - 262;
     const scoreLabels = matches.map((match) => (
         match.status === 'scheduled'
-            ? (match.time || '--:--')
+            ? getScheduledMatchLabel(match, timeMode)
             : `${match.homeScore ?? '-'} - ${match.awayScore ?? '-'}`
     ));
     const scoreFontSize = 46;
@@ -12251,7 +12306,7 @@ async function drawMomentumDailyMatches(
         const homeLineY = y + rowHeight * 0.32;
         const awayLineY = y + rowHeight * 0.74;
         const scoreLabel = match.status === 'scheduled'
-            ? (match.time || '--:--')
+            ? getScheduledMatchLabel(match, timeMode)
             : `${match.homeScore ?? '-'} - ${match.awayScore ?? '-'}`;
         const crestSize = 30;
 
@@ -12273,7 +12328,11 @@ async function drawMomentumDailyMatches(
         ctx.textAlign = 'center';
         ctx.fillStyle = '#ffffff';
         ctx.font = `800 15px ${FONT_MONO}`;
-        ctx.fillText((match.dateLabel || match.time || '--:--').toUpperCase(), panelX + 68, y + rowHeight / 2 + 6);
+        // La capsula de la izquierda es la fecha; solo cae al horario cuando no hay fecha,
+        // y en modo VS ese fallback tambien tiene que dejar la hora afuera.
+        const chipLabel = match.dateLabel
+            || (match.status === 'scheduled' ? getScheduledMatchLabel(match, timeMode) : (match.time || '--:--'));
+        ctx.fillText(chipLabel.toUpperCase(), panelX + 68, y + rowHeight / 2 + 6);
         ctx.restore();
 
         drawOverflowCrest(ctx, {
@@ -15095,7 +15154,8 @@ async function drawPosterV3DailyMatches(
     format: CanvasFormat,
     accentColor: string,
     bgColor: string,
-    brandLogo: HTMLImageElement | null
+    brandLogo: HTMLImageElement | null,
+    timeMode: DailyMatchesTimeMode = 'time'
 ) {
     const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
     const isPost = format.height >= format.width;
@@ -15376,7 +15436,9 @@ async function drawPosterV3DailyMatches(
             const awayTextRight = awayLogoX - crestSize / 2 - crestGap;
             const centerBlockX = rowX + sideWidth;
             const scoreLabel = `${match.homeScore ?? '-'} - ${match.awayScore ?? '-'}`;
-            const centerPrimary = match.status === 'scheduled' ? formatKickoffTime(match) : match.status === 'live' ? 'LIVE' : scoreLabel;
+            const centerPrimary = match.status === 'scheduled'
+                ? (timeMode === 'vs' ? 'VS' : formatKickoffTime(match))
+                : match.status === 'live' ? 'LIVE' : scoreLabel;
             const centerSecondary = match.status === 'scheduled' ? '' : match.status === 'live' ? scoreLabel : 'FINAL';
             const homeTextWidth = Math.max(sx(92), homeBlockRight - homeTextLeft);
             const awayTextWidth = Math.max(sx(92), awayTextRight - awayBlockLeft);
