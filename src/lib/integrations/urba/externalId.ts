@@ -507,6 +507,16 @@ export function instanciaDeTorneoUrba(nombre: string): string | null {
     .replace(/^urba:\s*/, '')
     .trim();
 
+  // "RUEDA FINAL" NO ES UNA FINAL. Es la última rueda de la fase regular, o sea
+  // lo contrario de una fase de definición. Son 6 torneos —`Universitario -
+  // Campeonato - Zona A - Rueda Final`, `Formativo - Rueda Final - Desarrollo
+  // A`— y sin esta línea entraban como playoff. Importa porque de esta función
+  // depende qué se OCULTA de los menús: un falso positivo acá borra un torneo
+  // real de la navegación, que es peor que mostrarlo de más.
+  //
+  // `Torneo Final A/B` sí es una fase, y se queda: son los 4 de Desarrollo 2022.
+  if (/\brueda\s+final\b/.test(n)) return null;
+
   return INSTANCIAS.find(([, re]) => re.test(n))?.[0] ?? null;
 }
 

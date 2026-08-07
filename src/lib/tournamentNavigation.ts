@@ -58,6 +58,43 @@ export function compararGrados(a: string | null, b: string | null): number {
 }
 
 /**
+ * Saca las fases de definición de un conjunto de torneos del mismo grado.
+ *
+ * Sólo saca la fase cuando su grado tiene otra cosa que ofrecer: si de un grado
+ * TODO lo que hay son fases, se queda la más temprana —la clasificación—, porque
+ * borrarlo entero dejaría el grado sin representante en el menú.
+ *
+ * Las ruedas no son fases y no se tocan acá: dos ruedas del mismo grado son dos
+ * campeonatos con planteles distintos, y ésa fue la decisión de carga.
+ */
+function dejarUnoPorGrado(torneos: TorneoHermano[]): TorneoHermano[] {
+  const porGrado = new Map<string, TorneoHermano[]>();
+  for (const t of torneos) {
+    const k = String(t.subcategory);
+    if (!porGrado.has(k)) porGrado.set(k, []);
+    porGrado.get(k)!.push(t);
+  }
+
+  const out: TorneoHermano[] = [];
+  for (const delGrado of porGrado.values()) {
+    const sinFase = delGrado.filter((t) => instanciaDeTorneoUrba(t.name) === null);
+    if (sinFase.length) {
+      // Hay torneos regulares (uno, o uno por rueda): entran todos y las fases
+      // se van.
+      out.push(...sinFase);
+      continue;
+    }
+    // Sólo fases: se queda la más temprana, que es la que hace de temporada.
+    out.push(delGrado.slice().sort((a, b) => {
+      const d = ordenDeInstancia(a.name) - ordenDeInstancia(b.name);
+      return d !== 0 ? d : a.name.localeCompare(b.name, 'es');
+    })[0]);
+  }
+  // El orden final lo pone el llamador; acá sólo se filtra.
+  return torneos.filter((t) => out.includes(t));
+}
+
+/**
  * El menú de GRADOS de un torneo.
  *
  * ── La rueda ───────────────────────────────────────────────────────────────
@@ -71,14 +108,29 @@ export function compararGrados(a: string | null, b: string | null): number {
  */
 export function menuDeGrados(actual: TorneoHermano, hermanos: TorneoHermano[]): OpcionMenu[] {
   const clave = divisionKey({ ...actual, season_id: actual.season_id });
-  const enLaDivision = hermanos.filter(
+  const enLaDivisionCrudo = hermanos.filter(
     (t) => divisionKey({ ...t, season_id: t.season_id }) === clave && t.subcategory !== null,
   );
+
+  // UNA FASE TAMPOCO ES UN GRADO. Es el mismo error que tenía el menú de
+  // temporadas: `TOP 13 - Superior - Semifinal` comparte subcategory con
+  // `- Clasificación` y con `- Final`, así que el menú del Top 13 de 2022
+  // listaba "Superior" TRES VECES, y lo mismo cada uno de sus otros cinco
+  // grados: dieciocho ítems para seis grados.
+  //
+  // Se deja un torneo por grado: el regular. Si de un grado sólo hay fases
+  // —los 4 casos de 2022—, queda la clasificación, que es la fase de grupos.
+  // Las RUEDAS no se tocan: `G2 Zona B` de la primera y de la segunda son dos
+  // campeonatos distintos, ésa fue la decisión de carga, y siguen apareciendo
+  // las dos con la rueda como etiqueta secundaria.
+  const enLaDivision = dejarUnoPorGrado(enLaDivisionCrudo);
 
   // Un menú con un solo grado distinto no distingue nada: es el caso de los
   // juveniles antes del eje, donde decía "juvenil" veintiocho veces.
   const distintos = new Set(enLaDivision.map((t) => t.subcategory));
   if (distintos.size < 2) return [];
+
+  const estaEnLaLista = enLaDivision.some((t) => t.id === actual.id);
 
   // Cuántas veces aparece cada grado: si es una sola, la rueda no hace falta.
   const cuenta = new Map<string, number>();
@@ -96,13 +148,21 @@ export function menuDeGrados(actual: TorneoHermano, hermanos: TorneoHermano[]): 
       const orden = { primera: 0, unica: 1, segunda: 2, final: 3 } as const;
       return orden[ruedaDeTorneoUrba(a.name)] - orden[ruedaDeTorneoUrba(b.name)];
     })
-    .map((t) => {
+    .map((t, i, lista) => {
       const repetido = (cuenta.get(String(t.subcategory)) ?? 0) > 1;
       return {
         id: t.id,
         label: String(t.subcategory),
         detalle: repetido ? ETIQUETA_RUEDA[ruedaDeTorneoUrba(t.name)] : null,
-        esActual: t.id === actual.id,
+        // Si el torneo actual es una FASE, quedó filtrado por
+        // `dejarUnoPorGrado` y ningún ítem tendría su id. Parado en la
+        // Semifinal de Preintermedia A, el grado actual sigue siendo
+        // Preintermedia A: se marca el representante de ese grado, que si no el
+        // menú no muestra dónde está uno.
+        esActual: estaEnLaLista
+          ? t.id === actual.id
+          : t.subcategory === actual.subcategory
+            && lista.findIndex((o) => o.subcategory === actual.subcategory) === i,
       };
     });
 }
@@ -171,25 +231,40 @@ const ordenDeInstancia = (nombre: string): number => {
 };
 
 /**
- * El menú de TEMPORADAS de un torneo.
+ * El menú de TEMPORADAS de un torneo. **Un ítem por AÑO, y nunca más de uno.**
+ *
+ * ── Una temporada es un año, no un torneo ─────────────────────────────────
+ * Ésta es la regla, y la versión anterior la rompía. El menú emitía una opción
+ * por TORNEO, así que 2022 aparecía tres veces —Clasificación, Semifinal,
+ * Final— como si fueran tres temporadas distintas. No lo son: son **una sola
+ * temporada, la 2022**, partida en fases.
+ *
+ *     la clasificación  = la temporada regular, la que tiene tabla de posiciones
+ *     semifinal y final = los playoffs de ESA temporada
+ *
+ * Un playoff no es una edición del torneo: es cómo termina la edición. Ofrecerlo
+ * en el desplegable de temporadas le pide al usuario que elija entre "2022" y
+ * "2022", que es una pregunta sin respuesta posible.
+ *
+ * Así que el año lleva a la temporada regular y punto. Las fases de definición
+ * NO desaparecen —siguen siendo torneos con su página— pero su lugar es el
+ * CUADRO DE PLAYOFF de la temporada, no este menú. Que hoy no estén ahí es una
+ * deuda del modelo de datos, no algo que este menú pueda arreglar: URBA las
+ * publica como torneos sueltos y en G22 tendrían que ser fases del torneo de la
+ * temporada. Ver la nota en la bitácora.
+ *
+ * ── Cuál es "la temporada regular" cuando hay varias candidatas ───────────
+ * Por orden, y sin inventar:
+ *   1. El torneo sin fase en el nombre. Es la temporada regular tal cual.
+ *   2. Si no hay, la CLASIFICACIÓN — que es la fase de grupos, o sea la
+ *      temporada regular con otro nombre. Pasa en 4 divisiones, las cuatro de
+ *      2022, donde URBA no publicó un torneo regular aparte.
+ *   3. Si tampoco, la fase más temprana (semifinal antes que final).
+ * Las ruedas quedan cubiertas por (1): el nombre de la rueda es el de la regular
+ * más un sufijo, así que la regular gana el desempate por nombre.
  *
  * El que llama decide qué años entran: hoy sólo los publicados, porque un año
- * oculto se lista como destino y al entrar no se ve nada. Acá sólo se agrupa y
- * se ordena — de más nuevo a más viejo, que es como se busca una temporada.
- *
- * ── Un año puede aparecer más de una vez, y el orden adentro importa ───────
- * Pasa en 118 de los pares (competencia, año) de URBA: la fuente parte la
- * temporada en ruedas, o publica sus fases como torneos aparte. Se listan TODAS
- * —esconder una obligaría a elegir a cuál llevar, y eso no tiene respuesta— pero
- * ordenadas: la temporada regular primero y las fases después, en orden
- * cronológico.
- *
- * Sin esto, el menú del Top 14 ofrecía "2022" tres veces empezando por
- * `Semifinal`, que es la mitad del torneo. Y en 4 pares —los cuatro de 2022—
- * URBA directamente no publicó una regular, así que ahí el primero es
- * `Clasificación`: la fase de grupos, que es lo más parecido a la temporada.
- * El orden no inventa un dato que la fuente no tiene; solamente deja adelante lo
- * que más se parece a lo que el usuario fue a buscar.
+ * oculto se lista como destino y al entrar no se ve nada.
  */
 export function menuDeTemporadas(actual: TorneoHermano, hermanos: TorneoHermano[]): OpcionMenu[] {
   const clave = competitionKey(actual);
@@ -199,24 +274,38 @@ export function menuDeTemporadas(actual: TorneoHermano, hermanos: TorneoHermano[
   const anios = new Set(mismaCompetencia.map((t) => t.season_id));
   if (anios.size < 2) return [];
 
-  return mismaCompetencia
-    .slice()
-    .sort((a, b) => {
-      const porAnio = String(b.season_id).localeCompare(String(a.season_id));
-      if (porAnio !== 0) return porAnio;
-      const porInstancia = ordenDeInstancia(a.name) - ordenDeInstancia(b.name);
-      if (porInstancia !== 0) return porInstancia;
-      // Desempate estable. Deja la regular antes que sus ruedas, porque el
-      // nombre de la rueda es el de la regular más un sufijo.
-      return a.name.localeCompare(b.name, 'es');
-    })
-    .map((t) => ({
+  // Por año, el torneo que MEJOR representa la temporada. El resto de las fases
+  // de ese año no entran al menú: no son temporadas.
+  const porAnio = new Map<string, TorneoHermano>();
+  for (const t of mismaCompetencia) {
+    const anio = String(t.season_id);
+    const previo = porAnio.get(anio);
+    if (!previo || esMejorRepresentante(t, previo)) porAnio.set(anio, t);
+  }
+
+  // El año del torneo en el que se está parado queda marcado como actual aunque
+  // el representante sea otro torneo: si estoy en la Semifinal de 2022, el menú
+  // tiene que decir que estoy en 2022 y no ofrecerme 2022 como si fuera otro lado.
+  const anioActual = String(actual.season_id ?? '');
+
+  return [...porAnio.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([anio, t]) => ({
       id: t.id,
-      label: String(t.season_id),
+      label: anio,
       // El nombre completo como segunda línea: en el histórico la misma
       // competencia cambió de nombre (Top 12 -> Top 13 -> Top 14) y sin esto el
       // usuario no ve por qué "2022" lo lleva a un torneo que se llama distinto.
       detalle: t.name.replace(/^URBA:\s*/, '') || null,
-      esActual: t.id === actual.id,
+      esActual: anio === anioActual,
     }));
+}
+
+/** ¿`candidato` representa mejor a su temporada que `actual`? Ver el orden arriba. */
+function esMejorRepresentante(candidato: TorneoHermano, actual: TorneoHermano): boolean {
+  const d = ordenDeInstancia(candidato.name) - ordenDeInstancia(actual.name);
+  if (d !== 0) return d < 0;
+  // Empate: el nombre más corto gana, que es la regular contra su propia rueda
+  // (`Top 12 - Superior` contra `Top 12 - Superior - Zona A - Segunda Rueda`).
+  return candidato.name.localeCompare(actual.name, 'es') < 0;
 }

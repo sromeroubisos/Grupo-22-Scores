@@ -302,3 +302,12 @@ test('instanciaDeTorneoUrba reconoce las fases y nada más', () => {
   // cubre, pero el que importa es el caso con espacio, que matchea los dos.
   assert.equal(instanciaDeTorneoUrba('URBA: Semifinal'), 'Semifinal');
 });
+
+test('"rueda final" NO es una final: es la ultima rueda de la fase regular', () => {
+  // Son 6 torneos, medidos sobre los 811. Importa porque de `instanciaDeTorneoUrba`
+  // depende que se OCULTA de los menus: un falso positivo borra un torneo real.
+  assert.equal(instanciaDeTorneoUrba('URBA: Rugby Universitario - Campeonato - Zona A - Rueda Final'), null);
+  assert.equal(instanciaDeTorneoUrba('URBA: Rugby Formativo - Rueda Final - Desarrollo A'), null);
+  // "Torneo Final A/B" si es una fase: son los 4 de Desarrollo 2022.
+  assert.equal(instanciaDeTorneoUrba('URBA: DESARROLLO - Superior - Torneo Final A'), 'Final');
+});

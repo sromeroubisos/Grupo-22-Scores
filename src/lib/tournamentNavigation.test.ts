@@ -193,8 +193,14 @@ test('esGradoSubordinado reconoce las variantes y nada más', () => {
   assert.ok(!esGradoSubordinado(null));
 });
 
+
 /* ────────────────────────────────────────────────────────────────────────────
- * EL ORDEN DENTRO DE UN AÑO QUE APARECE VARIAS VECES
+ * UNA TEMPORADA ES UN AÑO
+ *
+ * El menú emitía una opción por TORNEO, así que 2022 salía tres veces
+ * —Clasificación, Semifinal, Final— como si fueran tres temporadas. Son una
+ * sola: la clasificación es la temporada regular y las otras dos son sus
+ * playoffs, que no son ediciones del torneo sino cómo termina la edición.
  * ──────────────────────────────────────────────────────────────────────────── */
 
 const div = (id: string, name: string, season_id: string) => ({
@@ -202,25 +208,23 @@ const div = (id: string, name: string, season_id: string) => ({
   category: 'Top 12', subcategory: 'Superior', age_grade: 'mayores', gender: 'masculino',
 });
 
-test('cuando el año tiene fases, van despues de la regular y en orden cronologico', () => {
+test('un año con playoffs sale UNA vez, y lleva a la temporada regular', () => {
   const actual = div('a', 'Top 14 de la URBA', '2026');
   const hermanos = [
     actual,
     div('f', 'URBA: TOP 12 - Superior - Final', '2025'),
-    div('c', 'URBA: TOP 12 - Superior - Clasificacion', '2025'),
     div('r', 'URBA: TOP 12 - Superior', '2025'),
     div('s', 'URBA: TOP 12 - Superior - Semifinal', '2025'),
   ];
-  assert.deepEqual(
-    menuDeTemporadas(actual, hermanos).map((o) => o.id),
-    ['a', 'r', 'c', 's', 'f'],
-  );
+  const menu = menuDeTemporadas(actual, hermanos);
+  assert.deepEqual(menu.map((o) => o.label), ['2026', '2025']);
+  assert.equal(menu[1].id, 'r');
 });
 
-test('si el año NO tiene regular, arranca por la clasificacion y no por la semifinal', () => {
-  // Los 4 pares de 2022 medidos: URBA partio la division en fases y no publico
-  // una temporada regular. Antes el menu ofrecia "2022" empezando por
-  // `Semifinal`, que es la mitad del torneo.
+test('sin torneo regular, el año lleva a la CLASIFICACION y no a la semifinal', () => {
+  // Los 4 casos medidos de 2022: URBA partió la división en fases y no publicó
+  // un torneo regular. La clasificación ES la fase de grupos, o sea la
+  // temporada regular con otro nombre.
   const actual = div('a', 'Top 14 de la URBA', '2026');
   const hermanos = [
     actual,
@@ -228,13 +232,13 @@ test('si el año NO tiene regular, arranca por la clasificacion y no por la semi
     div('c', 'URBA: TOP 13 - Superior - Clasificacion', '2022'),
     div('f', 'URBA: TOP 13 - Superior - Final', '2022'),
   ];
-  assert.deepEqual(
-    menuDeTemporadas(actual, hermanos).map((o) => o.detalle),
-    ['Top 14 de la URBA', 'TOP 13 - Superior - Clasificacion', 'TOP 13 - Superior - Semifinal', 'TOP 13 - Superior - Final'],
-  );
+  const menu = menuDeTemporadas(actual, hermanos);
+  assert.deepEqual(menu.map((o) => o.label), ['2026', '2022']);
+  assert.equal(menu[1].id, 'c');
+  assert.equal(menu[1].detalle, 'TOP 13 - Superior - Clasificacion');
 });
 
-test('las ruedas no son fases: la regular sigue primero y el orden es estable', () => {
+test('las ruedas tampoco son temporadas: el año lleva a la regular', () => {
   const actual = div('a', 'Top 14 de la URBA', '2026');
   const hermanos = [
     actual,
@@ -242,14 +246,76 @@ test('las ruedas no son fases: la regular sigue primero y el orden es estable', 
     div('r', 'URBA: Top 12 - Superior', '2021'),
     div('za', 'URBA: Top 12 - Superior - Zona A - Segunda Rueda', '2021'),
   ];
-  assert.deepEqual(
-    menuDeTemporadas(actual, hermanos).map((o) => o.id),
-    ['a', 'r', 'za', 'zb'],
-  );
+  const menu = menuDeTemporadas(actual, hermanos);
+  assert.deepEqual(menu.map((o) => o.label), ['2026', '2021']);
+  assert.equal(menu[1].id, 'r');
 });
 
-test('el orden de los años no se toca: del mas nuevo al mas viejo', () => {
+test('parado en un playoff, el menu marca su AÑO como el actual', () => {
+  // Si estoy en la Semifinal de 2022, 2022 es donde estoy: ofrecérmelo como
+  // destino sería mandarme a donde ya estoy.
+  const semi = div('s', 'URBA: TOP 13 - Superior - Semifinal', '2022');
+  const hermanos = [semi, div('c', 'URBA: TOP 13 - Superior - Clasificacion', '2022'), div('n', 'Top 14 de la URBA', '2026')];
+  const menu = menuDeTemporadas(semi, hermanos);
+  assert.deepEqual(menu.map((o) => o.label), ['2026', '2022']);
+  assert.equal(menu.find((o) => o.label === '2022')?.esActual, true);
+  assert.equal(menu.find((o) => o.label === '2026')?.esActual, false);
+});
+
+test('los años siguen del mas nuevo al mas viejo, y no se repite ninguno', () => {
   const actual = div('a', 'Top 14 de la URBA', '2026');
   const hermanos = [actual, div('v', 'URBA: TOP 12 - Superior', '2021'), div('m', 'URBA: TOP 12 - Superior', '2024')];
   assert.deepEqual(menuDeTemporadas(actual, hermanos).map((o) => o.label), ['2026', '2024', '2021']);
+});
+
+test('una fase tampoco es un grado: el menu no repite Superior tres veces', () => {
+  // El Top 13 de 2022 listaba 18 items para 6 grados, porque cada grado tenia
+  // su Clasificacion, su Semifinal y su Final compartiendo subcategory.
+  const g = (id: string, name: string, subcategory: string) => ({
+    id, name, season_id: '2022',
+    category: 'Top 13', subcategory, age_grade: 'mayores', gender: 'masculino',
+  });
+  const clasi = g('c', 'URBA: TOP 13 - Superior - Clasificacion', 'Superior');
+  const hermanos = [
+    clasi,
+    g('s', 'URBA: TOP 13 - Superior - Semifinal', 'Superior'),
+    g('f', 'URBA: TOP 13 - Superior - Final', 'Superior'),
+    g('i', 'URBA: TOP 13 - Intermedia - Clasificacion', 'Intermedia'),
+    g('is', 'URBA: TOP 13 - Intermedia - Semifinal', 'Intermedia'),
+  ];
+  const menu = menuDeGrados(clasi, hermanos);
+  assert.deepEqual(menu.map((o) => o.label), ['Superior', 'Intermedia']);
+  assert.deepEqual(menu.map((o) => o.id), ['c', 'i']);
+});
+
+test('parado en una fase, el menu de grados marca SU grado como el actual', () => {
+  const g = (id: string, name: string, subcategory: string) => ({
+    id, name, season_id: '2022',
+    category: 'Top 13', subcategory, age_grade: 'mayores', gender: 'masculino',
+  });
+  const semi = g('s', 'URBA: TOP 13 - Preintermedia A - Semifinal', 'Preintermedia A');
+  const hermanos = [
+    semi,
+    g('r', 'URBA: TOP 13 - Preintermedia A', 'Preintermedia A'),
+    g('sup', 'URBA: TOP 13 - Superior', 'Superior'),
+  ];
+  const menu = menuDeGrados(semi, hermanos);
+  // La semifinal no esta, pero su grado si, y marcado.
+  assert.deepEqual(menu.map((o) => o.label), ['Superior', 'Preintermedia A']);
+  assert.equal(menu.find((o) => o.label === 'Preintermedia A')?.esActual, true);
+});
+
+test('las ruedas del mismo grado siguen apareciendo las dos', () => {
+  const g = (id: string, name: string) => ({
+    id, name, season_id: '2021',
+    category: 'otro', subcategory: 'G2 Zona B', age_grade: 'M16', gender: 'masculino',
+  });
+  const primera = g('p', 'URBA: Menores de 16 - Grupo 2 - Zona B - Primera Rueda');
+  const hermanos = [
+    primera,
+    g('s', 'URBA: Menores de 16 - Grupo 2 - Zona B - Segunda Rueda'),
+    { ...g('o', 'URBA: Menores de 16 - Grupo 1 - Zona A'), subcategory: 'G1 Zona A' },
+  ];
+  const menu = menuDeGrados(primera, hermanos);
+  assert.equal(menu.filter((o) => o.label === 'G2 Zona B').length, 2);
 });

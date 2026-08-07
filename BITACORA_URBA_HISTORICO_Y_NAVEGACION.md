@@ -350,26 +350,55 @@ Dos cosas más que aparecieron al acotar:
    en 2021. No van a la portada —`ocultarGradosSubordinados`— y se llegan por el
    desplegable de grado de su división.
 
-10. **El año que se ofrece varias veces en el menú de temporadas.** Con las seis
-    temporadas arriba, el menú del Top 14 tiene diez entradas para seis años:
-    2022 aparece tres veces y 2021 otras tres.
+10. ~~**El año que se ofrece varias veces en el menú de temporadas.**~~
+    **CORREGIDO, y el arreglo no era de orden sino de modelo.**
 
-    2021 es el caso previsto —la temporada regular más sus dos ruedas, que se
-    distinguen por la segunda línea, tal como se decidió—. **2022 no**: sus tres
-    entradas son `Semifinal`, `Clasificación` y `Final`, y **ninguna es la
-    temporada regular**, porque URBA ese año no publicó una: partió la división
-    en fases y nada más.
+    Una temporada es un AÑO. El menú emitía una opción por TORNEO, así que 2022
+    salía tres veces —Clasificación, Semifinal, Final— como si fueran tres
+    temporadas. No lo son: son **una sola temporada partida en fases**. La
+    clasificación es la temporada regular, la que tiene tabla; la semifinal y la
+    final son sus playoffs, que no son ediciones del torneo sino cómo termina la
+    edición.
 
-    Medido sobre los 811: hay **118 pares (competencia, año) con más de un
-    torneo**; en **4** todos los torneos son una fase y no hay regular, y los
-    cuatro son de 2022 —`Top Superior`, `Top Intermedia`, `Desarrollo Superior`,
-    `Desarrollo Intermedia`—. En otros 13 hay fases *además* de la regular.
+    Ahora el menú emite **un ítem por año** y el año lleva a la temporada
+    regular. Verificado sobre los 811: 680 torneos tienen menú de temporadas y
+    **cero** repiten un año. El del Top 14 pasó de diez entradas a seis.
 
-    O sea que la segunda línea SÍ distingue —se lee cuál es cuál— pero en esos 4
-    el menú ofrece un año que no tiene adónde llevar "en general". Si molesta, lo
-    barato es ordenar dentro del año en `menuDeTemporadas`: la regular primero y
-    las fases después, sin esconder ninguna. No se hizo: es una decisión de
-    producto y el dato de la fuente es el que es.
+    Lo mismo pasaba en el menú de GRADOS y con la misma causa —una fase tampoco
+    es un grado—: el Top 13 de 2022 listaba dieciocho ítems para seis grados,
+    con `Superior` tres veces. Se deja un torneo por grado, el regular; si de un
+    grado sólo hay fases, queda la clasificación. Las ruedas NO se tocan: dos
+    ruedas del mismo grado son dos campeonatos con planteles distintos, y ésa
+    fue la decisión de carga.
+
+    De paso apareció un falso positivo que importaba: **"Rueda Final" no es una
+    final**, es la última rueda de la fase regular. Son 6 torneos
+    (`Universitario - Campeonato - Zona A - Rueda Final`, `Formativo - Rueda
+    Final - Desarrollo A`). Sin corregirlo, ahora que de esa función depende qué
+    se OCULTA, se habrían borrado de la navegación seis torneos reales.
+
+11. **La deuda que queda: los playoffs no están en el cuadro de playoff.**
+    Las fases de definición salieron de los dos menús, que es donde no iban,
+    pero su lugar propio es el **cuadro de playoff de su temporada** y ahí no
+    están. La causa es del modelo: URBA las publica como torneos sueltos con su
+    propio id, y en G22 tendrían que ser fases (`tournament_phases`) del torneo
+    de la temporada, con sus partidos en el bracket.
+
+    No es un cambio de UI: es fusionar torneos, y arrastra `external_id`,
+    partidos, participantes y tablas. Hoy siguen siendo alcanzables por su URL
+    y por el buscador, pero no desde la navegación de su división.
+
+12. **Dos ítems indistinguibles en el menú de grados, en 2021.** Cuando la
+    segunda rueda de un grado está partida por zona, el menú muestra
+    `Superior (2ª rueda)` dos veces: la etiqueta secundaria dice la rueda pero
+    no la ZONA, que es lo que las diferencia. Medido: **21 de 724** torneos con
+    menú de grados tienen al menos un par así, y los 21 son de 2021.
+
+    Es anterior a este trabajo y del mismo tipo que todo lo demás: un ítem que
+    no se puede distinguir del de al lado. La salida es la misma disciplina de
+    la rueda —agregar la zona a la etiqueta secundaria SÓLO donde la rueda no
+    alcanza—, y no se hizo para no volver a tocar el diseño de esa etiqueta sin
+    decirlo.
 
 ---
 
