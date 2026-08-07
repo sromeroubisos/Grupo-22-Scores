@@ -453,9 +453,61 @@ export function subcategoriaDeTorneoUrba(nombre: string): string | null {
   // Se apoya en `categoriaDeTorneoUrba` a propósito: la pregunta "¿es una división
   // de mayores?" ya está contestada ahí, con su lista de divisiones y sus tests.
   // Duplicar el regex acá sería la segunda implementación que después diverge.
-  if (categoriaDeTorneoUrba(nombre) === 'mayores') return 'Superior';
+  if (categoriaDeTorneoUrba(nombre) === 'mayores') {
+    // …salvo que lo que el nombre trae no sea un grado sino una INSTANCIA.
+    //
+    // `TOP 12 - Play Off` no es la Superior: es la fase final DE la Superior.
+    // Llamarlo 'Superior' hacía que el Top 12 de 2025 tuviera dos torneos con la
+    // misma `competitionKey` y el mismo año, y entonces el menú de temporadas
+    // del Top 14 ofrecía "2025" DOS VECES. Un menú que ofrece el mismo año dos
+    // veces obliga a elegir sin datos.
+    //
+    // Con grado propio se acomoda solo, y en los dos menús: `competitionKey`
+    // incluye la subcategory, así que el año deja de duplicarse, y el Play Off
+    // pasa a ofrecerse en el menú de GRADO de su división, que es donde uno lo
+    // busca cuando está parado en el Top 12.
+    //
+    // Sólo entra acá el torneo cuyo nombre NO dice ningún grado: los 24 que sí
+    // lo dicen (`TOP 13 - Superior - Final`) ya salieron por las ramas de
+    // arriba y conservan el suyo. Medido sobre los 811: son 5, los cinco Play
+    // Off de 2025.
+    return instanciaDeTorneoUrba(nombre) ?? 'Superior';
+  }
 
   return null;
+}
+
+/**
+ * Las fases de definición, cuando URBA las publica como un torneo aparte.
+ *
+ * El orden importa: `Semifinal` va antes que `Final` porque "semi final" —con
+ * espacio, y URBA lo escribe de las dos formas— matchea las dos.
+ */
+const INSTANCIAS: Array<readonly [string, RegExp]> = [
+  ['Play Off', /\bplay\s?-?\s?offs?\b/],
+  ['Semifinal', /\bsemi\s?-?\s?finals?\b/],
+  ['Final', /\bfinals?\b/],
+  ['Clasificación', /\b(?:re)?clasificacion\b/],
+  ['Ascenso', /\bascensos?\b/],
+  ['Permanencia', /\bpermanencia\b/],
+];
+
+/**
+ * La INSTANCIA que nombra un torneo, o null si nombra una competencia entera.
+ *
+ * Es una tercera dimensión, perpendicular al grado: un torneo puede ser de la
+ * Superior Y ser su semifinal. Por eso esto no reemplaza a `subcategory` en
+ * general — sólo la ocupa cuando el nombre no trae ningún grado y el hueco lo
+ * iba a llenar un `Superior` inventado.
+ */
+export function instanciaDeTorneoUrba(nombre: string): string | null {
+  const n = String(nombre ?? '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/^urba:\s*/, '')
+    .trim();
+
+  return INSTANCIAS.find(([, re]) => re.test(n))?.[0] ?? null;
 }
 
 /**
