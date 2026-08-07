@@ -282,10 +282,11 @@ test('la pirámide: llegar a la mayor es raro', () => {
     // │ sube entran todos y el piso se erosiona solo. Un plantel de Pumitas    │
     // │ son ~30 camisetas, no "todos los que superen 67".                      │
     // │                                                                        │
-    // │ ARREGLO PROPUESTO: cupos en vez de umbrales, contra una curva          │
-    // │ sintética versionada. El piso vuelve por construcción y no se rompe    │
-    // │ cuando se mueva otra cosa, porque el número de camisetas no depende de │
-    // │ cuánto crezca nadie.                                                   │
+    // │ ARREGLO HECHO: cupos en vez de umbrales. El piso volvió por            │
+    // │ construcción —el número de camisetas no depende de cuánto crezca       │
+    // │ nadie— y la base subió de 0,01 a 0,51. La causa estructural está       │
+    // │ cerrada; el número todavía no llega al objetivo, que es otra cosa y    │
+    // │ está anotado abajo.                                                    │
     // └───────────────────────────────────────────────────────────────────────┘
     entre(proporcion(NORMAL, (r) => ['m20', 'a-xv', 'nacional'].includes(r.mejorTrack)), 0.1, 0.35, 'llegan a M20 o más');
     // ── BANDA REAUTORIZADA CONTRA LA PREMISA. HOY DA 0,119 Y ESTÁ ROJA. ──
@@ -303,7 +304,7 @@ test('la pirámide: llegar a la mayor es raro', () => {
     // que la mayoría no sale. El próximo que la toque tiene que saber que está
     // discutiendo con una decisión de diseño y no con investigación.
     //
-    // ALARMA-VIVA: los carriles son umbrales y no cupos — la carrera modal del rugby casi no existe
+    // ALARMA-VIVA: la carrera modal del rugby todavía no llega — se sale del club más de lo que la premisa admite
     entre(proporcion(NORMAL, (r) => r.mejorTrack === 'club'), 0.55, 0.8, 'nunca salen del club');
 });
 
@@ -402,6 +403,15 @@ test('las dos escaleras se pelean de verdad', () => {
     const vitaliciosFieles = proporcion(FIEL, (r) => r.pertenencia >= 95);
     const vitaliciosNormales = proporcion(NORMAL, (r) => r.pertenencia >= 95);
 
+    // Se apagó junto con la vitrina, y es la misma causa: al vitalicio se llega
+    // quedándose Y ganando (ver `el vitalicio es un final`), así que un campeón
+    // por liga le corta la mitad del camino. No se reautoriza acá — la decisión
+    // sobre los títulos tiene su propio momento, y está anotada abajo.
+    //
+    // OJO al leer este rojo: `entre` corta el test, así que los dos asserts que
+    // siguen —quedarse paga, y los pases llevan al profesionalismo— NO se están
+    // midiendo. Cuando esta banda vuelva al verde hay que mirarlos de nuevo.
+    // ALARMA-VIVA: el vitalicio se apagó con la vitrina — quedarse fiel dejó de tener su final
     entre(vitaliciosFieles, 0.12, 0.5, 'vitalicios por el camino fiel');
     assert.ok(
         vitaliciosFieles > vitaliciosNormales + 0.1,
@@ -429,6 +439,16 @@ test('la conmoción no es rutina ni es imposible', () => {
 });
 
 test('hay vitrina, pero no se regala', () => {
+    // La causa está identificada: desde que una liga tiene UN campeón elegido por
+    // rating, los títulos se volvieron escasos y la media cayó a 0,96.
+    //
+    // Identificada NO ES justificada. Saber por qué da 0,96 no vuelve correcto al
+    // 0,96: una carrera promedio ganando un solo título es tacaña contra la
+    // dirección que tomamos. Y reautorizar ahora sería calibrar contra un número
+    // que está por moverse — el crecimiento acelerado hace que un jugador llegue a
+    // los 20 con más pico, juegue en mejores clubes y gane más. Se decide después,
+    // en su propio momento, con el número ya quieto.
+    // ALARMA-VIVA: la vitrina quedó tacaña — una carrera promedio gana un solo título
     entre(media(NORMAL, (r) => r.titulos), 1.5, 6, 'títulos por carrera');
     entre(proporcion(NORMAL, (r) => r.titulos === 0), 0, 0.2, 'carreras sin un solo título');
 });

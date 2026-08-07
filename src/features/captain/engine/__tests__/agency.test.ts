@@ -457,29 +457,25 @@ test('la tasa de llegada al seleccionado cae en una banda, y el esfuerzo la muev
     assert.ok(entregado > 0, `nadie pisa un escalón representativo ni entregándose: ${detalle}`);
 
     // ┌───────────────────────────────────────────────────────────────────────┐
-    // │ BANDA SOSPECHOSA — subida para no bloquear, NO porque esté sana        │
+    // │ BANDA SIN BENDECIR — la causa que vigilaba se cerró; la banda no.      │
     // │                                                                        │
-    // │ Era `< 0,90` y con el techo construido dio 97,2%. Se subió a 0,99 para │
-    // │ que el barrido no quede rojo mientras se trabaja, pero el número NO    │
-    // │ está bendecido: si el 97% de las carreras pisa el carril               │
-    // │ representativo, el carril dejó de ser un escalón y pasó a ser el       │
-    // │ default.                                                               │
+    // │ Era `< 0,90`, con el techo construido dio 97,2%, y se subió a 0,99     │
+    // │ para no bloquear el trabajo. La sospecha era que el carril             │
+    // │ representativo había dejado de ser un escalón para ser el default, y   │
+    // │ la causa medida eran los umbrales: `reachableTrack` dejaba entrar a    │
+    // │ todo el que pasara, así que cuando la distribución subía entraban      │
+    // │ todos y el escalón se borraba solo.                                    │
     // │                                                                        │
-    // │ SEGUNDA SEÑAL INDEPENDIENTE, y es la que convierte la sospecha en      │
-    // │ pendiente: en el digest congelado, el apertura pasó de 13 caps a 63.   │
-    // │ Sesenta y tres caps es una carrera de Puma histórico, no la de un      │
-    // │ jugador cualquiera del barrido. Dos indicadores que no comparten       │
-    // │ código apuntando a lo mismo.                                           │
+    // │ LOS CUPOS ENTRARON y el número cayó a 55,6%. Esa causa está cerrada:   │
+    // │ un plantel son camisetas contadas, no "todos los que superen 67".      │
     // │                                                                        │
-    // │ MEDIDO: son las dos cosas. El piso existía (0,15 en 0.6.0) y lo tiró   │
-    // │ `built`, pero 0,15 tampoco era un piso — el 85% ya pisaba un carril.   │
-    // │ Los umbrales nunca filtraron. La tabla completa está en la caja de     │
-    // │ `calibration.test.ts`, test de la pirámide.                            │
-    // │                                                                        │
-    // │ ARREGLO DECIDIDO: cupos en vez de umbrales. Esta banda vuelve a bajar  │
-    // │ cuando entren, y ahí se reautoriza contra la premisa.                  │
+    // │ LA BANDA SIGUE EN 0,99 A PROPÓSITO, y por eso este bloque no se        │
+    // │ borra. Bajarla es reautorizar contra la premisa —diseño— y no entra en │
+    // │ un pase de contabilidad. Queda pendiente junto con la base de la       │
+    // │ pirámide en `calibration.test.ts`, que es esta misma discusión mirada  │
+    // │ del otro lado: acá sobra gente pisando el carril, allá falta gente     │
+    // │ quedándose en el club.                                                 │
     // └───────────────────────────────────────────────────────────────────────┘
-    // ALARMA-VIVA: los carriles son umbrales y no cupos — pisar la representativa dejó de ser raro
     assert.ok(entregado < 0.99, `pisar la representativa dejó de ser raro: ${detalle}`);
     assert.ok(entregado >= tibio, `entregarse no ayuda a llegar: ${detalle}`);
 
