@@ -60,23 +60,39 @@ async function todas(recurso: string): Promise<any[]> {
   }
 }
 
-/** El rango UTC del día local de Buenos Aires. El mismo que arma el feed. */
-function rangoDelDia(fecha: Date) {
-  const f = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
-  const hoy = f.format(fecha);
-  // El offset de ART es fijo (-03:00): no hay horario de verano desde 2009.
-  return { dia: hoy, desde: `${hoy}T03:00:00.000Z`, hasta: `${hoy}T03:00:00.000Z`.replace(hoy, siguiente(hoy)) };
-}
-function siguiente(iso: string) {
-  const d = new Date(`${iso}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + 1);
+/**
+ * El día local de Buenos Aires, como 'YYYY-MM-DD'.
+ *
+ * Todo lo que sigue trabaja sobre ESTA cadena y no sobre un Date, y no es
+ * cosmética: la primera versión sumaba días con `setUTCDate` sobre un Date y
+ * después lo formateaba en zona argentina. Anduvo hasta que el reloj cruzó la
+ * medianoche UTC —a las 00:07Z sigue siendo el día anterior en Buenos Aires— y
+ * el "próximo sábado" salió etiquetado como viernes. Se midió un día que no era
+ * y el script no se quejó. Es el mismo corrimiento de día que ya se pagó con
+ * `playdate` y con la temporada del cron.
+ */
+const diaBA = (fecha: Date) => new Intl.DateTimeFormat('en-CA', {
+  timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit',
+}).format(fecha);
+
+/** Aritmética sobre el día calendario, sin husos de por medio: mediodía UTC nunca cambia de fecha. */
+const sumarDias = (dia: string, n: number) => {
+  const d = new Date(`${dia}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
+};
+const diaSemana = (dia: string) => new Date(`${dia}T12:00:00Z`).getUTCDay();
+
+/** El rango UTC de un día local de Buenos Aires. El mismo que arma el feed. */
+function rangoDelDia(dia: string) {
+  // El offset de ART es fijo (-03:00): no hay horario de verano desde 2009.
+  return { dia, desde: `${dia}T03:00:00.000Z`, hasta: `${sumarDias(dia, 1)}T03:00:00.000Z` };
 }
 
-/** El sábado siguiente: el día en el que URBA juega y en el que se vería la inundación. */
-function proximoSabado(desde: Date) {
-  const d = new Date(desde.getTime());
-  do { d.setUTCDate(d.getUTCDate() + 1); } while (d.getUTCDay() !== 6);
+/** El sábado siguiente al día dado: URBA juega el fin de semana, y ahí se vería la inundación. */
+function proximoSabado(dia: string) {
+  let d = sumarDias(dia, 1);
+  while (diaSemana(d) !== 6) d = sumarDias(d, 1);
   return d;
 }
 
@@ -97,8 +113,8 @@ const porTemporada = (filas: Array<{ season_id?: string | null }>) => {
 const linea = (m: Array<[string, number]>) => m.map(([k, v]) => `${k}: ${v}`).join(' · ') || '(nada)';
 
 async function main() {
-  const ahora = new Date();
-  console.log(`════ lo que ve el anónimo — ${rangoDelDia(ahora).dia} (${TZ}) ════\n`);
+  const hoy = diaBA(new Date());
+  console.log(`════ lo que ve el anónimo — ${hoy} (${TZ}) ════\n`);
 
   // ── 1. El feed del home, acotado al día como lo acota la ruta ──────────────
   //
@@ -106,9 +122,8 @@ async function main() {
   // rugby de URBA se juega el fin de semana, así que un jueves vacío seguiría
   // vacío aunque la publicación hubiera inundado el feed—.
   console.log('1. FEED DEL HOME (la consulta está acotada al día)');
-  const sabado = proximoSabado(ahora);
-  const domingo = new Date(sabado.getTime() + 24 * 3600 * 1000);
-  for (const cuando of [ahora, sabado, domingo]) {
+  const sabado = proximoSabado(hoy);
+  for (const cuando of [hoy, sabado, sumarDias(sabado, 1)]) {
     const { dia, desde, hasta } = rangoDelDia(cuando);
     const filas = await todas(
       `matches?select=id,date_time,is_visible,review_status,external_id` +

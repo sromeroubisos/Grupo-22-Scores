@@ -289,22 +289,30 @@ Dos cosas más que aparecieron al acotar:
 
 ### Decisiones tomadas que todavía no se ejecutaron
 
-1. ~~**Publicar el histórico, año por año.**~~ **2025 y 2024 ya están
-   publicados** (2026-08-06): 268 torneos y 20.595 partidos, con las tres
-   puertas. El anónimo ve 402 torneos de URBA y el menú de temporadas del Top 14
-   ofrece 2026, 2025 y 2024. El patrón quedó parametrizado en
+1. ~~**Publicar el histórico, año por año.**~~ **HECHO (2026-08-06): las seis
+   temporadas están publicadas.** El anónimo ve los **811 torneos** y los
+   **52.258 partidos**, que es toda la base de URBA.
+
+   | | 2026 | 2025 | 2024 | 2023 | 2022 | 2021 |
+   |---|---:|---:|---:|---:|---:|---:|
+   | torneos | 134 | 141 | 127 | 127 | 141 | 141 |
+   | partidos | 10.917 | 10.709 | 9.886 | 8.660 | 8.210 | 3.876 |
+
+   El patrón quedó en
    [urba-publicar-temporada.ts](src/scripts/urba-publicar-temporada.ts)
    (`--anio=YYYY --plan|--execute`), con rollback por año.
 
-   **Quedan 2023, 2022 y 2021**, uno por vez. Entre 2025 y 2024 hubo que frenar
-   a arreglar el listado: publicar un solo año lo llevó de 129 a 251 entradas.
-   Ya no pasa —[tournamentSeasonFilter.ts](src/lib/tournamentSeasonFilter.ts)
-   deja una temporada por unión— y se midió: publicar 2024 lo dejó **igual, en
-   127**. El feed de partidos nunca fue el problema: está acotado por día en la
-   consulta, así que un partido de 2024 no puede aparecer hoy.
+   Entre 2025 y 2024 hubo que frenar a arreglar el listado: publicar un solo año
+   lo llevó de 129 a 251 entradas.
+   [tournamentSeasonFilter.ts](src/lib/tournamentSeasonFilter.ts) lo contuvo, y
+   está medido en cada paso: **el listado general se quedó en 129 los cinco
+   años**, que son exactamente los 129 que había antes de publicar el primero.
+   El feed de partidos nunca fue el problema: está acotado por día en la
+   consulta, así que un partido de 2021 no puede aparecer hoy.
 
-2. **La captura del menú de temporadas.** Depende del punto anterior. Las otras
-   tres están en `capturas-navegacion/`.
+2. **La captura del menú de temporadas.** Ya hay qué capturar: el Top 14 de 2026
+   ofrece diez entradas para seis años. Las otras tres están en
+   `capturas-navegacion/`.
 
 ### Verificación pendiente
 
@@ -337,10 +345,31 @@ Dos cosas más que aparecieron al acotar:
    Si molesta, hay margen para más normalizaciones de nombre, del mismo tipo que
    `Top 12/13/14` y la letra suelta.
 
-9. **Los 22 de reserva de las temporadas históricas.** En 2026 se publicaron; en
-   2021-2025 siguen ocultos junto con todo lo demás. Cuando se publique un año,
-   hay que decidir si sus grados de reserva entran también (probablemente sí, por
-   coherencia con 2026).
+9. ~~**Los 22 de reserva de las temporadas históricas.**~~ Entraron con su año,
+   por coherencia con 2026: 19 en 2025, 18 en 2024, 20 en 2023, 28 en 2022 y 16
+   en 2021. No van a la portada —`ocultarGradosSubordinados`— y se llegan por el
+   desplegable de grado de su división.
+
+10. **El año que se ofrece varias veces en el menú de temporadas.** Con las seis
+    temporadas arriba, el menú del Top 14 tiene diez entradas para seis años:
+    2022 aparece tres veces y 2021 otras tres.
+
+    2021 es el caso previsto —la temporada regular más sus dos ruedas, que se
+    distinguen por la segunda línea, tal como se decidió—. **2022 no**: sus tres
+    entradas son `Semifinal`, `Clasificación` y `Final`, y **ninguna es la
+    temporada regular**, porque URBA ese año no publicó una: partió la división
+    en fases y nada más.
+
+    Medido sobre los 811: hay **118 pares (competencia, año) con más de un
+    torneo**; en **4** todos los torneos son una fase y no hay regular, y los
+    cuatro son de 2022 —`Top Superior`, `Top Intermedia`, `Desarrollo Superior`,
+    `Desarrollo Intermedia`—. En otros 13 hay fases *además* de la regular.
+
+    O sea que la segunda línea SÍ distingue —se lee cuál es cuál— pero en esos 4
+    el menú ofrece un año que no tiene adónde llevar "en general". Si molesta, lo
+    barato es ordenar dentro del año en `menuDeTemporadas`: la regular primero y
+    las fases después, sin esconder ninguna. No se hizo: es una decisión de
+    producto y el dato de la fuente es el que es.
 
 ---
 
