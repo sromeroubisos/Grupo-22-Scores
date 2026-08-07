@@ -160,7 +160,51 @@ La verificación es de lápiz y papel y tarda menos que el commit. Preguntas út
 Es la hermana de §2 —verificar que exista el canal— pero se hace un paso antes:
 §2 mide, esto se resuelve sin correr nada.
 
-### 1.7 Las tres especies, y no se mezclan
+### 1.7 El instrumento contesta la pregunta que tiene escrita
+
+> **EL INSTRUMENTO CONTESTA LA PREGUNTA QUE TIENE ESCRITA, NO LA QUE LE HICISTE.
+> Antes de creerle a una medición, escribí en una línea qué pregunta contesta su
+> CÓDIGO — no su nombre.**
+>
+> Corolario operativo: **un cero es una acusación contra el instrumento hasta que
+> se demuestre lo contrario.**
+
+Dos veces en un mismo día, y las dos con la misma forma:
+
+| Se llamaba | Contestaba |
+|---|---|
+| `mejorTrack` — "la mejor vía" | "máximo corrido": un carril juvenil solo puede ser el mejor de alguien que nunca subió más. Academia y M20 daban `0,000` y parecían escalones inexistentes; medidos por temporada pisada eran 36 y 12 |
+| `CARTA = 0` — "la carta del oficio principal" | "el primer elemento del array", que después del rediseño era la carta CARA. 160 jugadores maximizando el compromiso, llamados "el jugador normal" |
+
+Es pariente de §1.5 pero no es lo mismo: aquello es un índice que se desalinea de
+su lista, esto es un nombre que promete una semántica que el cuerpo no tiene. Un
+índice se arregla pidiendo por identidad; esto se arregla leyendo el cuerpo antes
+de citar el resultado.
+
+### 1.8 El promedio de la entrada no es la entrada del promedio
+
+> **SI LO QUE TE IMPORTA ES UNA TASA, CALIBRÁ LA TASA — nunca el parámetro que la
+> produce.**
+
+Medido dos veces en la misma sesión, las dos en la misma dirección:
+
+- Al arreglar `SQUAD_SHAPE` se igualó `E[corte]` para preservar el nivel. Lo que
+  había que preservar era `E[P(entra)]`, y entre uno y otro hay la normal
+  acumulada y después "alguna vez en catorce temporadas" — las dos convexas en
+  esa zona. Por Jensen, repartir cortes alrededor de una media sube el promedio
+  del resultado aunque la media del corte no se mueva. El piso cayó de 0,531 a
+  0,470 en un commit que se declaró neutral.
+- Ordenar la selectividad `q` de los carriles no ordena `P(pisa)`, porque
+  `P ≈ 1 − (1−q)ⁿ` y la ventana `n` va de 3 temporadas (M20) a la carrera entera
+  (A-XV). Con el mismo `q`, A-XV se pisa cuatro o cinco veces más por pura
+  aritmética de intentos.
+
+La regla práctica: fijá el objetivo en la unidad que te importa —`P(pisa)` por
+carrera, no el corte por temporada— y **derivá** el parámetro desde ahí. Si el
+camino de vuelta no tiene forma cerrada, resolvelo numéricamente; lo que no vale
+es calibrar el parámetro y suponer que la tasa lo sigue.
+
+### 1.9 Las tres especies, y no se mezclan
 
 | | Qué afirma | Cuándo se actualiza |
 |---|---|---|
