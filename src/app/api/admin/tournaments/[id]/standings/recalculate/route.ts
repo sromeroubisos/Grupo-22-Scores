@@ -4,6 +4,8 @@ import {
     recalculateAndPersistStandings,
     recalculatePhaseStandingsScopes,
 } from '@/lib/server/recalculateStandings';
+import { normalizeTableType } from '@/lib/standings/tableType';
+import { supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 
 export async function POST(
     request: NextRequest,
@@ -11,17 +13,46 @@ export async function POST(
 ) {
     try {
         const { id: tournamentId } = await params;
-        const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
+        const { writer: supabase, actorUserId } = await requireTournamentMutationContext(tournamentId);
         const body = await request.json();
         const {
             phaseId,
             groupId,
-            tableType = 'general',
             seasonId = body?.season_id ?? body?.season ?? null,
         } = body;
 
         if (!phaseId) {
             return NextResponse.json({ error: 'phaseId is required' }, { status: 400 });
+        }
+
+        const tableType = normalizeTableType(body?.tableType);
+        if (!tableType) {
+            return NextResponse.json(
+                { error: 'tableType inválido: se esperaba general, home o away.' },
+                { status: 400 },
+            );
+        }
+
+        /**
+         * Mientras `table_type` no sea una columna real, las filas de las tres
+         * perspectivas comparten el mismo espacio y el borrado previo al
+         * recálculo no las distingue: recalcular "Local" arrasaría con la tabla
+         * general publicada. Hasta la migración, la única perspectiva que se
+         * persiste es la general.
+         *
+         * El freno vive acá y no en el botón: un `disabled` es cortesía para el
+         * operador, no un control — cualquier cliente puede mandar el POST.
+         *
+         * Se levanta solo cuando la columna aparece, sin redeploy: el sondeo
+         * cachea el "todavía no" por 30 segundos (ver tableTypeSupport.ts).
+         */
+        if (tableType !== 'general' && !(await supportsStandingsTableTypeColumn())) {
+            return NextResponse.json(
+                {
+                    error: 'Todavía no se puede publicar la tabla de local ni la de visitante: falta la migración de table_type. Recalculá en General.',
+                },
+                { status: 409 },
+            );
         }
 
         const { data: phase, error: phaseError } = await supabase
@@ -43,11 +74,18 @@ export async function POST(
             return NextResponse.json({ error: 'Failed to recalculate standings' }, { status: 500 });
         }
 
-        // Audit log
+        /**
+         * Auditoría. `actor_user_id` es NOT NULL: sin él el insert venía
+         * fallando siempre y en silencio, así que un recálculo que reescribe la
+         * tabla publicada no dejaba ningún rastro de quién lo pidió. El error se
+         * mira —y se loguea— aunque no aborte la respuesta: la tabla ya se
+         * recalculó bien y devolver un 500 acá sería mentir sobre el resultado.
+         */
         const calculatedAt = new Date().toISOString();
-        await supabase.from('admin_audit_log').insert({
+        const { error: auditError } = await supabase.from('admin_audit_log').insert({
             entity_type: 'standings',
             entity_id: tournamentId,
+            actor_user_id: actorUserId,
             action: 'recalculated_standings_table',
             changes: {
                 phase_id: phaseId,
@@ -58,6 +96,10 @@ export async function POST(
                 calculated_at: calculatedAt,
             },
         });
+
+        if (auditError) {
+            console.error('[standings/recalculate] No se pudo registrar la auditoría', auditError);
+        }
 
         return NextResponse.json({
             ok: true,

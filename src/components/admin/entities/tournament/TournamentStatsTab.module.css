@@ -249,6 +249,11 @@
 
 .tableWrap {
   overflow-x: auto;
+  /* Sin esto, llegar al final del arrastre horizontal seguía de largo y
+     scrolleaba la PÁGINA por detrás: se buscaba una columna y se terminaba en
+     otra parte del gestor. Es la misma regla que ya tiene la tabla de
+     Posiciones. */
+  overscroll-behavior-x: contain;
 }
 
 .table {
@@ -262,6 +267,23 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 13px;
   text-align: left;
+}
+
+/* La primera columna es la identidad —de qué equipo o jugador es la fila— y se
+   queda quieta mientras las cifras pasan por debajo. Sin esto, tres columnas a
+   la derecha ya no se sabía qué se estaba leyendo. `background` opaco a
+   propósito: si fuera transparente, las columnas que scrollean se verían pasar
+   por debajo del nombre. */
+.table th:first-child,
+.table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--stats-surface, #111b2a);
+}
+
+.table th:first-child {
+  z-index: 3;
 }
 
 .headAccent {

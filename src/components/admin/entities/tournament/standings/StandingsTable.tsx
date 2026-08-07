@@ -2,6 +2,7 @@
 
 import { type CSSProperties, type ReactNode, useMemo } from 'react';
 import { normalizeStandingsRules } from './rules';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import styles from './TournamentStandingsTab.module.css';
 import type { StandingsRow, StandingsRules, UiLabel } from './types';
 
@@ -199,6 +200,11 @@ function TeamLabelCycleButton({
       }}
       disabled={disabled}
       title={label ? `Cambiar etiqueta (${label.name})` : 'Asignar etiqueta'}
+      /* En el teléfono, sin etiqueta, la ficha se queda sólo con el punto: el
+         rótulo visible desaparece y el nombre accesible tiene que venir de
+         acá. `title` alcanzaría como último recurso, pero no todos los
+         lectores de pantalla lo anuncian. */
+      aria-label={label ? `Cambiar etiqueta (actual: ${label.name})` : 'Asignar etiqueta'}
     >
       <span className={styles.teamLabelTriggerIcon} aria-hidden="true">
         {isBusy ? (
@@ -211,6 +217,40 @@ function TeamLabelCycleButton({
       </span>
       <span className={styles.teamLabelTriggerText}>{label?.name ?? 'Base'}</span>
     </button>
+  );
+}
+
+/**
+ * El escudo del club, siempre por el proxy.
+ *
+ * Acá había un `<div>LOG</div>` de respaldo: tres letras en una caja cuando la
+ * fila no traía logo. Es exactamente lo que el proyecto no hace —los equipos van
+ * con su escudo real, nunca con iniciales— y encima el camino "bueno" servía el
+ * `stats.team_logo` del JSONB, que suele ser un data URI en base64 de decenas de
+ * kilobytes repetido en cada fila.
+ *
+ * `buildTeamLogoProxyUrl` resuelve por id de club contra el proxy, que tiene
+ * caché y cache-busting; el `team_logo` guardado entra sólo como `fallback`, y
+ * el propio helper lo descarta si es un base64 gigante. Cuando no hay id no hay
+ * nada honesto que dibujar, así que se deja el hueco: el nombre del club está al
+ * lado y el `alt` vacío evita que un lector de pantalla lo repita.
+ */
+function TeamCrest({ row }: { row: StandingsRow }) {
+  const teamId = row.teamId || row.team?.id || null;
+  const teamName = row.team?.name || row.teamName || null;
+  const src = buildTeamLogoProxyUrl({
+    key: teamId,
+    name: teamName,
+    fallback: row.team?.logo ?? null,
+  });
+
+  if (!src) {
+    return <span className={styles.teamLogoFallback} aria-hidden="true" />;
+  }
+
+  return (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img src={src} alt="" loading="lazy" className={styles.teamLogo} />
   );
 }
 
@@ -347,138 +387,6 @@ function getActiveColumns({
   return columns;
 }
 
-function MobileStandingsCards({
-  data,
-  activeColumns,
-  compactMobile,
-  labelsMap,
-  allLabels,
-  onCycleLabel,
-  pendingLabelPosition,
-}: {
-  data: StandingsRow[];
-  activeColumns: ActiveColumn[];
-  compactMobile?: boolean;
-  labelsMap?: Record<string, UiLabel[]>;
-  allLabels?: UiLabel[];
-  onCycleLabel?: (target: { position: string }) => Promise<void> | void;
-  pendingLabelPosition?: string | null;
-}) {
-  const hasForm = activeColumns.some((column) => column.id === 'form');
-  const hasLabelControls = !!allLabels?.length && !!onCycleLabel;
-
-  return (
-    <div className={styles.mobileCards}>
-      {data.map((row, index) => {
-        const key = row.teamId || row.team?.id || row.teamName || String(index);
-        const labelLookupKey = getLabelLookupKeyForRow(row);
-        const cycleTargetKey = getCycleTargetKeyForRow(row);
-        const currentLabel = getPrimaryLabel(labelLookupKey ? labelsMap?.[labelLookupKey] : undefined);
-        const accentStyle = createAccentVars(currentLabel?.color);
-        return (
-          <details
-            key={key}
-            className={`${styles.glassPanel} ${styles.mobileCard} ${accentStyle ? styles.mobileCardTinted : ''}`}
-            style={accentStyle}
-          >
-            <summary className={styles.mobileCardSummary}>
-              <div className={styles.mobileCardTop}>
-                <div className={styles.mobileRank}>{row.position ?? index + 1}</div>
-                <div className={styles.mobileTeamBlock}>
-                  <div className={styles.teamIdentity}>
-                    {row.team?.logo ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={row.team.logo} alt={row.team.name} className={styles.teamLogo} />
-                    ) : (
-                      <div className={styles.teamLogoFallback}>LOG</div>
-                    )}
-                    <div className={styles.mobileTeamText}>
-                      <div className={styles.teamNameRow}>
-                        <span className={styles.teamName}>{row.team?.name || row.teamName || '--'}</span>
-                        {hasLabelControls ? (
-                          <TeamLabelCycleButton
-                            label={currentLabel}
-                            isBusy={pendingLabelPosition === cycleTargetKey}
-                            disabled={!cycleTargetKey || !!pendingLabelPosition}
-                            onClick={cycleTargetKey ? () => onCycleLabel?.({ position: cycleTargetKey }) : undefined}
-                          />
-                        ) : null}
-                      </div>
-                      {row.status ? <StatusBadge status={row.status} /> : null}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.mobileCompactStats}>
-                <div className={styles.mobileCompactStat}>
-                  <span className={styles.mobileCompactLabel}>PJ</span>
-                  <strong>{row.played ?? '--'}</strong>
-                </div>
-                <div className={styles.mobileCompactStat}>
-                  <span className={styles.mobileCompactLabel}>PTS</span>
-                  <strong>{row.total_points ?? '--'}</strong>
-                </div>
-                {!compactMobile && (
-                  <div className={styles.mobileCompactStat}>
-                    <span className={styles.mobileCompactLabel}>DIF</span>
-                    <strong><NumericValue value={row.difference ?? 0} /></strong>
-                  </div>
-                )}
-                <span className={styles.mobileExpandHint}>Detalle</span>
-              </div>
-            </summary>
-
-            <div className={styles.mobileDetails}>
-              {!compactMobile && (
-                <div className={styles.mobileSummaryGrid}>
-                  <div className={styles.mobileStat}>
-                    <span className={styles.mobileStatLabel}>DIF</span>
-                    <span className={styles.mobileStatValue}>
-                      <NumericValue value={row.difference ?? 0} />
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {hasForm && row.form && row.form.length > 0 && (
-                <div className={styles.mobileFormRow}>
-                  {row.form.map((result, resultIndex) => (
-                    <FormPill key={`${key}-form-${resultIndex}`} result={result} />
-                  ))}
-                </div>
-              )}
-
-              <div className={styles.mobileDetailsGrid}>
-                <div className={styles.mobileStat}>
-                  <span className={styles.mobileStatLabel}>PG</span>
-                  <span className={styles.mobileStatValue}>{row.won ?? '--'}</span>
-                </div>
-                <div className={styles.mobileStat}>
-                  <span className={styles.mobileStatLabel}>PE</span>
-                  <span className={styles.mobileStatValue}>{row.drawn ?? '--'}</span>
-                </div>
-                <div className={styles.mobileStat}>
-                  <span className={styles.mobileStatLabel}>PP</span>
-                  <span className={styles.mobileStatValue}>{row.lost ?? '--'}</span>
-                </div>
-                {activeColumns
-                  .filter((column) => !['played', 'won', 'drawn', 'lost', 'difference', 'total_points', 'status', 'form'].includes(column.id))
-                  .map((column) => (
-                    <div key={`${key}-${column.id}`} className={styles.mobileStat}>
-                      <span className={styles.mobileStatLabel}>{column.label}</span>
-                      <span className={styles.mobileStatValue}>{column.render(row)}</span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </details>
-        );
-      })}
-    </div>
-  );
-}
-
 export function StandingsTable({
   data,
   isLoading,
@@ -487,7 +395,6 @@ export function StandingsTable({
   tableTypeLabel,
   tableColumns,
   rules,
-  compactMobile = false,
   labelsMap,
   allLabels,
   onCycleLabel,
@@ -500,12 +407,46 @@ export function StandingsTable({
   tableTypeLabel: string;
   tableColumns?: Record<string, boolean> | null;
   rules?: StandingsRules | null;
-  compactMobile?: boolean;
+  /*
+    `compactMobile` se fue junto con las tarjetas de mobile: era su único
+    consumidor. La tabla es la misma en todos los anchos —lo que cambia es qué
+    columnas se anclan y cuánto se arrastra—, así que no necesita saber si está
+    en un teléfono.
+  */
   labelsMap?: Record<string, UiLabel[]>;
   allLabels?: UiLabel[];
   onCycleLabel?: (target: { position: string }) => Promise<void> | void;
   pendingLabelPosition?: string | null;
 }) {
+  /**
+   * Va ARRIBA de los dos returns tempranos, no abajo. Estaba después del
+   * `if (isLoading)` y del early return de tabla vacía, así que la cantidad de
+   * hooks del componente cambiaba entre renders — que es precisamente lo que
+   * denunciaba el `eslint-disable rules-of-hooks` que había acá. Silenciar la
+   * regla no arreglaba nada: React empareja los hooks por orden de llamada.
+   *
+   * Mapa columnId → prioridad, para marcar en el encabezado qué columnas
+   * desempatan y en qué orden.
+   */
+  const tiebreakerColumnMap = useMemo(() => {
+    const map: Partial<Record<ColumnId, number>> = {};
+    const tbs = rules?.tiebreakers ?? [];
+    const sorted = [...tbs]
+      .filter((tb) => typeof tb === 'string' || (tb as TiebreakerDescriptor).enabled !== false)
+      .sort((a, b) => {
+        const leftPriority = typeof a === 'string' ? 0 : ((a as TiebreakerDescriptor).priority ?? 0);
+        const rightPriority = typeof b === 'string' ? 0 : ((b as TiebreakerDescriptor).priority ?? 0);
+        return leftPriority - rightPriority;
+      });
+    sorted.forEach((tb, idx) => {
+      const descriptor = typeof tb === 'string' ? null : (tb as TiebreakerDescriptor);
+      const key = typeof tb === 'string' ? tb : (descriptor?.key || descriptor?.metric || '');
+      const colId = TIEBREAKER_METRIC_TO_COLUMN[key];
+      if (colId && !(colId in map)) map[colId] = idx + 1;
+    });
+    return map;
+  }, [rules?.tiebreakers]);
+
   if (isLoading) {
     return (
       <section className={`${styles.glassPanel} ${styles.tableShell}`}>
@@ -546,27 +487,6 @@ export function StandingsTable({
   }
 
   const activeColumns = getActiveColumns({ data, tableColumns, rules });
-
-  // Build columnId → priority map from active (enabled) tiebreakers
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const tiebreakerColumnMap = useMemo(() => {
-    const map: Partial<Record<ColumnId, number>> = {};
-    const tbs = rules?.tiebreakers ?? [];
-    const sorted = [...tbs]
-      .filter((tb) => typeof tb === 'string' || (tb as TiebreakerDescriptor).enabled !== false)
-      .sort((a, b) => {
-        const leftPriority = typeof a === 'string' ? 0 : ((a as TiebreakerDescriptor).priority ?? 0);
-        const rightPriority = typeof b === 'string' ? 0 : ((b as TiebreakerDescriptor).priority ?? 0);
-        return leftPriority - rightPriority;
-      });
-    sorted.forEach((tb, idx) => {
-      const descriptor = typeof tb === 'string' ? null : (tb as TiebreakerDescriptor);
-      const key = typeof tb === 'string' ? tb : (descriptor?.key || descriptor?.metric || '');
-      const colId = TIEBREAKER_METRIC_TO_COLUMN[key];
-      if (colId && !(colId in map)) map[colId] = idx + 1;
-    });
-    return map;
-  }, [rules?.tiebreakers]);
   const tableMinWidth = 240 + 64 + activeColumns.length * 86;
   const hasLabelControls = !!allLabels?.length && !!onCycleLabel;
 
@@ -616,9 +536,6 @@ export function StandingsTable({
                     )}
                   </th>
                 ))}
-                <th className={styles.thRight} style={{ zIndex: 30 }}>
-                  {' '}
-                </th>
               </tr>
             </thead>
 
@@ -641,12 +558,7 @@ export function StandingsTable({
 
                     <td className={`${styles.stickyTeam} ${accentStyle ? styles.stickyCellTinted : ''}`} style={{ zIndex: 20 }}>
                       <div className={styles.teamIdentity}>
-                        {row.team?.logo ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={row.team.logo} alt={row.team.name} className={styles.teamLogo} />
-                        ) : (
-                          <div className={styles.teamLogoFallback}>LOG</div>
-                        )}
+                        <TeamCrest row={row} />
                         <div className={styles.teamNameBlock}>
                           <div className={styles.teamNameRow}>
                             <span className={styles.teamName}>{row.team?.name || row.teamName || '--'}</span>
@@ -663,21 +575,19 @@ export function StandingsTable({
                       </div>
                     </td>
 
+                    {/*
+                      Acá había una tercera celda con un botón de tres puntos y
+                      el título "Ver detalles" que NO tenía `onClick`: no hacía
+                      nada, en ninguna fila, desde siempre. Un control que no
+                      responde es peor que uno que no está — se sale a buscarlo
+                      con el teclado y devuelve silencio. Vuelve cuando tenga un
+                      desglose que valga la pena mostrar.
+                    */}
                     {activeColumns.map((column) => (
                       <td key={`${rowKey}-${column.id}`} className={column.cellClassName || ''}>
                         {column.render(row)}
                       </td>
                     ))}
-
-                    <td className={styles.actionCell} style={{ position: 'relative' }}>
-                      <button type="button" className={styles.iconButton} title="Ver detalles">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="1" />
-                          <circle cx="19" cy="12" r="1" />
-                          <circle cx="5" cy="12" r="1" />
-                        </svg>
-                      </button>
-                    </td>
                   </tr>
                 );
               })}
@@ -685,16 +595,6 @@ export function StandingsTable({
           </table>
         </div>
       </div>
-
-      <MobileStandingsCards
-        data={data}
-        activeColumns={activeColumns}
-        compactMobile={compactMobile}
-        labelsMap={labelsMap}
-        allLabels={allLabels}
-        onCycleLabel={onCycleLabel}
-        pendingLabelPosition={pendingLabelPosition}
-      />
     </section>
   );
 }

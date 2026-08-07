@@ -205,13 +205,13 @@
 .statusActive {
   background: rgba(16, 185, 129, 0.14);
   border: 1px solid rgba(16, 185, 129, 0.24);
-  color: #10b981;
+  color: var(--ok-ink, #34d399);
 }
 
 .statusInactive {
   background: rgba(245, 158, 11, 0.14);
   border: 1px solid rgba(245, 158, 11, 0.24);
-  color: #f59e0b;
+  color: var(--warn-ink, #f59e0b);
 }
 
 .localTabs {
@@ -287,13 +287,13 @@
 }
 
 .feedbackSuccess {
-  color: #10b981;
+  color: var(--ok-ink, #34d399);
   background: rgba(16, 185, 129, 0.08);
   border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
 .feedbackError {
-  color: #ef4444;
+  color: var(--bad-ink, #f87171);
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid rgba(239, 68, 68, 0.25);
 }
@@ -302,6 +302,13 @@
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr) 320px;
   gap: 20px;
+  width: 100%;
+}
+
+/* En escritorio no hace nada: los rieles se muestran siempre y «Ajustes» ni
+   se dibuja. La clase existe para que el bloque de teléfono la use; acá sólo
+   declara lo que el `.workspace` de al lado ya trae, para no quedar vacía. */
+.workspaceControlsOpen {
   width: 100%;
 }
 
@@ -373,6 +380,13 @@
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
+}
+
+/* Envoltorio del campo «Perspectiva». En escritorio no hace nada: existe para
+   que el bloque de teléfono pueda apagarlo, donde duplica a los botones de
+   vista de la cabecera del panel. */
+.perspectiveField {
+  display: contents;
 }
 
 .field {
@@ -504,7 +518,7 @@
 }
 
 .ruleValueWarning {
-  color: #f59e0b;
+  color: var(--warn-ink, #f59e0b);
 }
 
 .buttonSecondary,
@@ -711,11 +725,11 @@
   border-radius: 16px;
   background: rgba(245, 158, 11, 0.06);
   border: 1px solid rgba(245, 158, 11, 0.18);
-  color: #f59e0b;
+  color: var(--warn-ink, #f59e0b);
 }
 
 .warningCopy {
-  color: #fbbf24;
+  color: var(--warn-ink, #f59e0b);
   font-size: 12px;
   line-height: 1.65;
 }
@@ -786,9 +800,16 @@
   color: var(--text);
 }
 
+/* Acá había `position: sticky; top: 0`. Nunca funcionó ni podía funcionar:
+   `.tableScroll` es `overflow-y: hidden`, así que no hay scroll vertical del que
+   despegarse — el encabezado se va con la página como cualquier fila. Se
+   sostenía la ilusión en el código y no en la pantalla.
+   La opción era ponerle `overflow-y: auto` con `max-height`, y eso mete un
+   segundo scroll anidado adentro de la página: en el teléfono el arrastre
+   horizontal ES la herramienta de esta tabla, y sumarle uno vertical la vuelve
+   una trampa. Se borra la mentira; los DOS anclajes horizontales, que sí
+   funcionan porque `overflow-x` es `auto`, siguen abajo. */
 .table thead th {
-  position: sticky;
-  top: 0;
   padding: 14px 12px;
   background: var(--bg-deep);
   color: var(--text-dim);
@@ -825,18 +846,24 @@
   height: 16px;
   padding: 0 4px;
   border-radius: 4px;
-  background: var(--accent, #22c55e);
+  /* El verde del acento con texto blanco daba 2,28:1, y el `opacity: 0.85` lo
+     bajaba todavía más. Este chip lleva un NÚMERO —el orden del criterio de
+     desempate—, así que tiene que leerse, no insinuarse. */
+  background: var(--tiebreak-chip-bg, #15803d);
   color: #fff;
   font-size: 10px;
   font-weight: 700;
   line-height: 1;
   vertical-align: middle;
-  opacity: 0.85;
   cursor: help;
 }
 
+/* El anclaje horizontal del encabezado: puesto y equipo se quedan quietos
+   mientras el resto de las columnas pasa por debajo. `position` va acá y no en
+   `.table thead th` porque es lo único que de verdad se pega. */
 .stickyPosHeader,
 .stickyTeamHeader {
+  position: sticky;
   background: var(--bg-deep) !important;
 }
 
@@ -895,8 +922,19 @@
   background: var(--bg-sticky) !important;
 }
 
+/* Dos capas, y la de abajo es opaca a propósito.
+
+   El tinte de la fila (`--standings-row-bg`) es un color CON transparencia:
+   está pensado para teñir lo que tiene detrás, no para taparlo. En una celda
+   `sticky` eso significa que las columnas que scrollean por debajo se ven a
+   través: al lado del puesto aparecían cifras sueltas de otra columna —«12 1»,
+   «10 2»— y sólo en las filas con etiqueta de color, que son justamente las
+   tintadas. La capa sólida de abajo corta esa transparencia sin cambiar el
+   color que se ve. */
 .stickyCellTinted {
-  background: linear-gradient(90deg, var(--standings-row-bg, rgba(255, 255, 255, 0.02)) 0%, var(--bg-sticky) 80%) !important;
+  background:
+    linear-gradient(90deg, var(--standings-row-bg, rgba(255, 255, 255, 0.02)) 0%, var(--bg-sticky) 80%),
+    var(--bg-sticky) !important;
 }
 
 .stickyPos {
@@ -961,13 +999,15 @@
   text-align: center;
 }
 
+/* Los tokens giran con el tema y los define `operation-console.css`, donde está
+   la medición del contraste. Los colores fijos que había acá fallaban en claro. */
 .numericPositive {
-  color: #10b981;
+  color: var(--ok-ink, #34d399);
   font-weight: 700;
 }
 
 .numericNegative {
-  color: #ef4444;
+  color: var(--bad-ink, #f87171);
   font-weight: 700;
 }
 
@@ -1010,17 +1050,17 @@
 }
 
 .formWin {
-  color: #10b981;
+  color: var(--ok-ink, #34d399);
   background: rgba(16, 185, 129, 0.18);
 }
 
 .formDraw {
-  color: #f59e0b;
+  color: var(--warn-ink, #f59e0b);
   background: rgba(245, 158, 11, 0.18);
 }
 
 .formLoss {
-  color: #ef4444;
+  color: var(--bad-ink, #f87171);
   background: rgba(239, 68, 68, 0.18);
 }
 
@@ -1043,7 +1083,7 @@
 }
 
 .statusBadgeSuccess {
-  color: #10b981;
+  color: var(--ok-ink, #34d399);
   background: rgba(16, 185, 129, 0.12);
   border: 1px solid rgba(16, 185, 129, 0.24);
 }
@@ -1055,13 +1095,13 @@
 }
 
 .statusBadgeWarning {
-  color: #f59e0b;
+  color: var(--warn-ink, #f59e0b);
   background: rgba(245, 158, 11, 0.12);
   border: 1px solid rgba(245, 158, 11, 0.24);
 }
 
 .statusBadgeDanger {
-  color: #ef4444;
+  color: var(--bad-ink, #f87171);
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.24);
 }
@@ -1085,189 +1125,15 @@
 }
 
 .emptyInline {
-  color: #334155;
+  /* Era #334155: un gris de tema CLARO sobre una superficie oscura, 1,67:1.
+     El guion que marca "sin dato" era prácticamente invisible. */
+  color: var(--muted-ink, #94a3b8);
 }
 
 .actionCell {
   text-align: right;
 }
 
-.mobileCards {
-  display: none;
-}
-
-.mobileCard {
-  overflow: hidden;
-}
-
-.mobileCardTinted {
-  border-color: color-mix(in srgb, var(--standings-row-accent, rgba(255, 255, 255, 0.08)) 42%, rgba(255, 255, 255, 0.08));
-  background: linear-gradient(180deg, var(--standings-row-bg, rgba(255, 255, 255, 0.03)) 0%, rgba(255, 255, 255, 0.03) 100%);
-  box-shadow:
-    inset 3px 0 0 var(--standings-row-accent, transparent),
-    0 8px 32px rgba(0, 0, 0, 0.35);
-}
-
-.mobileCardSummary {
-  display: grid;
-  gap: 12px;
-  padding: 14px;
-  cursor: pointer;
-  list-style: none;
-}
-
-.mobileCardSummary::-webkit-details-marker {
-  display: none;
-}
-
-.mobileCard[open] .mobileCardSummary {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.mobileCard[open] .mobileExpandHint {
-  color: var(--accent);
-}
-
-.mobileCardTop {
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  gap: 12px;
-  align-items: center;
-}
-
-.mobileRank {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text);
-  font-family: "JetBrains Mono", monospace;
-  font-weight: 800;
-}
-
-.mobileTeamBlock,
-.mobileTeamText {
-  min-width: 0;
-}
-
-.mobileTeamText {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.mobilePointsBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-}
-
-.mobileCompactStats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-  gap: 8px;
-  align-items: center;
-}
-
-.mobileCompactStat {
-  display: grid;
-  gap: 3px;
-  padding: 8px 10px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.mobileCompactStat strong {
-  color: var(--text);
-  font-size: 13px;
-  font-family: "JetBrains Mono", monospace;
-}
-
-.mobileCompactLabel {
-  color: var(--text-faint);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.mobileExpandHint {
-  color: var(--text-dim);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.mobilePointsLabel {
-  color: var(--text-faint);
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.mobilePointsValue {
-  color: var(--accent);
-  font-size: 26px;
-  font-family: "JetBrains Mono", monospace;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.mobileSummaryGrid,
-.mobileDetailsGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.mobileSummaryGrid {
-  margin-top: 2px;
-}
-
-.mobileStat {
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.mobileStatLabel {
-  display: block;
-  color: var(--text-faint);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.mobileStatValue {
-  display: block;
-  margin-top: 6px;
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.mobileFormRow {
-  display: flex;
-  gap: 6px;
-  margin-top: 14px;
-}
-
-.mobileDetails {
-  display: grid;
-  gap: 12px;
-  padding: 0 14px 14px;
-}
-
-.mobileDetailsGrid {
-  margin-top: 0;
-}
 
 .tiebreakerList {
   display: flex;
@@ -1347,11 +1213,11 @@
 }
 
 .statusTextSuccess {
-  color: #10b981;
+  color: var(--ok-ink, #34d399);
 }
 
 .statusTextError {
-  color: #ef4444;
+  color: var(--bad-ink, #f87171);
 }
 
 .emptyPanel {
@@ -1419,7 +1285,7 @@
 }
 
 .auditTime {
-  color: #475569;
+  color: var(--muted-ink, #94a3b8);
   font-size: 9px;
   font-family: "JetBrains Mono", monospace;
 }
@@ -1476,16 +1342,64 @@
     gap: 16px;
   }
 
-  .centerRail {
+  /* ── Los controles: a un toque, no debajo de la tabla ────────────────────
+     Los dos rieles caían DEBAJO del centro, o sea después de ~700px de tabla.
+     Ahí no hay «arriba y abajo» que valga: el que llega a la pantalla ve la
+     tabla y nada más, y los seis paneles —filtros, reglas, modo de cálculo,
+     criterios, desempates, auditoría— quedan en una parte del documento que
+     nadie visita porque nada anuncia que exista.
+
+     La salida NO es subirlos: plegados y en dos columnas siguen siendo ~120px
+     de ajustes antes de la primera fila, y lo que se viene a ver acá es la
+     tabla. Se pliegan enteros detrás de «Ajustes», en la cabecera, junto al
+     resto de lo que describe la tabla. Cerrado no cuesta un píxel; abierto
+     baja como una repisa de dos columnas ENTRE la cabecera y la tabla, que es
+     donde el ojo ya está y donde se ve al toque el efecto de lo que se toca.
+
+     No es esconder una función: es un control rotulado, con `aria-expanded`,
+     a un toque de distancia y en el lugar donde se lo busca. */
+  .leftRail,
+  .rightRail {
+    display: none;
+  }
+
+  .workspaceControlsOpen > .leftRail {
+    display: block;
+    order: 0;
+  }
+
+  .workspaceControlsOpen > .rightRail {
+    display: block;
     order: 1;
   }
 
-  .leftRail {
+  .centerRail {
     order: 2;
   }
 
-  .rightRail {
-    order: 3;
+  /* El aire entre bloques del riel es de escritorio: 20px entre la tira de
+     cifras, la marca de tiempo y la tabla son 60px de pantalla para separar
+     tres cosas que se leen juntas. */
+  .leftRail,
+  .centerRail,
+  .rightRail,
+  .stack {
+    gap: 10px;
+  }
+
+  /* `> .stack` y no `.stack` a secas: la misma clase arma los campos DENTRO
+     del panel de filtros, y ahí una grilla de dos columnas partiría un select
+     al medio. */
+  .leftRail > .stack,
+  .rightRail > .stack {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .leftRail > .stack > .panelDetails[open],
+  .rightRail > .stack > .panelDetails[open] {
+    grid-column: 1 / -1;
   }
 
   .headerMeta,
@@ -1494,7 +1408,11 @@
     grid-template-columns: 1fr 1fr;
   }
 
-  .metricsBar > :last-child,
+  /* «Ajustes manuales» vuelve. Esa regla escondía la tercera cifra de cuando
+     cada recuento era una tarjeta de 112px de alto y tres no entraban; desde
+     que la tira es un renglón de rótulo + número, las tres entran holgadas y
+     esconder una es perder un dato —justamente el que avisa que la tabla tiene
+     correcciones a mano encima del cálculo—. */
   .localContext > :last-child {
     display: none;
   }
@@ -1509,27 +1427,497 @@
     overflow-x: auto;
   }
 
-  .tableMetaPill:last-child {
+  /* ── La cabecera del panel de la tabla, en un renglón ────────────────────
+     Traía un titular de 16px, un párrafo y tres píldoras —«General», «Zona
+     Campeonato», «11 columnas»— en 110px de alto. Las píldoras no agregan
+     nada acá: la vista activa la dice el botón encendido de la cabecera de
+     arriba y el grupo lo dice su tira de meta, las dos a menos de 200px de
+     distancia en la misma pantalla. Repetirlas es ocupar el lugar de la
+     primera fila. El titular se queda —es el rótulo del <h2>— con el cuerpo
+     que le corresponde a un rótulo de panel. */
+  .tableHeader {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .tableTitle {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  .tableMeta {
     display: none;
   }
 
+  /* La tira de cifras y la marca de tiempo forman un solo bloque: la marca
+     venía alineada a la derecha, un hábito de escritorio que en el teléfono
+     deja un renglón suelto y sin ancla. Alineada a la izquierda cae bajo los
+     rótulos de las cifras y se lee como su pie. */
+  .metricsMeta {
+    justify-content: flex-start;
+    padding: 0 2px;
+  }
+
+  /* ── En el teléfono también es una TABLA ────────────────────────────────
+     Acá la tabla se apagaba y en su lugar salían tarjetas por equipo con dos
+     cifras —PJ y PTS— y el resto escondido detrás de un «Detalle» por fila.
+     Una tabla de posiciones existe para comparar: quién ganó más, quién tiene
+     mejor diferencia, quién viene atrás por un punto. Con dos columnas y ocho
+     desplegables eso no se puede hacer.
+
+     La tabla ya sabía vivir en poco ancho: `.tableScroll` tiene scroll
+     horizontal propio y las columnas de posición y equipo son `sticky`. Así
+     que no hace falta una vista aparte —hace falta dejar de esconderla—. Se
+     scrollea de costado con el equipo siempre a la vista, y están TODAS las
+     columnas, las mismas que en escritorio.
+
+     Las tarjetas quedan en el DOM y apagadas: son el camino de vuelta si
+     alguna vez se decide lo contrario, y borrarlas es otra tarea. */
   .tableViewport {
+    display: block;
+    padding-bottom: 10px;
+  }
+
+
+  /* `scrollbar-gutter: stable both-edges` reserva un canal a cada lado del
+     scroller. Una celda `sticky` con `left: 0` se ancla al borde del padding,
+     no al del elemento, así que ese canal quedaba libre y por ahí se veía
+     pasar el contenido de las columnas que scrollean: al costado del puesto
+     aparecían cifras sueltas de otra columna —«12 1», «10 2»—, como si el
+     equipo tuviera dos números. En escritorio el canal es para la barra de
+     scroll y está bien; en el teléfono la barra flota y no reserva nada. */
+  .tableScroll {
+    scrollbar-gutter: auto;
+    padding-inline: 0;
+  }
+
+  /* El `min-width` que el componente calcula y escribe en el `style` de la
+     tabla —1180px— es una medida de escritorio: reserva un ancho cómodo por
+     columna para que los rótulos respiren. En el teléfono ese piso era lo que
+     impedía comprimir: cada columna de dos dígitos se estiraba a 70-82px y la
+     tabla pedía 1422 para mostrar «14 12 0 2». Anulado, cada columna se queda
+     con lo que su contenido necesita.
+
+     Hace falta `!important` porque compite con un estilo en línea, que es lo
+     único que gana por defecto. */
+  .table {
+    min-width: 0 !important;
+    width: 100%;
+  }
+
+  /* ── Comprimir el aire, no la letra ─────────────────────────────────────
+     Acá la compactación había llegado hasta la tipografía: 9px en los rótulos
+     y 11px en las cifras, con 1px de relleno lateral. Eso no era densidad,
+     era una tabla que no se lee: «14 12 1 1 483 233» sin aire entre columnas
+     se lee como un número largo, no como seis datos.
+
+     El error de fondo era la premisa —que la fila entera tenía que entrar sin
+     arrastrar de costado—. Con once o doce columnas eso sólo se consigue
+     achicando la letra por debajo de lo legible. La tabla YA sabe scrollear
+     de lado con la identidad fija; el arrastre no es el problema a evitar,
+     es la herramienta. Así que las cifras vuelven a 12px con su relleno, y lo
+     que sobra se scrollea. */
+  .table thead th {
+    padding: 7px 4px;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
+
+  .table tbody td {
+    padding: 6px 4px;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  /* Los números en tabulares: con cifras de ancho variable las columnas
+     bailan de fila en fila y la comparación de arriba abajo se pierde. */
+  .table tbody td {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Piso por columna. Sin él, `width: 100%` reparte el sobrante y una columna
+     de un dígito queda en 18px pegada a la de al lado; con él, cada columna
+     pide lo suyo y si no entra, se arrastra. La de acciones queda afuera:
+     abajo se la colapsa a 0. */
+  .table tbody td:not(.stickyPos):not(.stickyTeam):not(:last-child),
+  .table thead th:not(.stickyPosHeader):not(.stickyTeamHeader):not(:last-child) {
+    min-width: 30px;
+  }
+
+  /* El separador va con `box-shadow` y no con `border`: dibuja la línea sin
+     ocupar un píxel de layout, que es justo lo que no sobra. Las fijas quedan
+     afuera —ya tienen su propio filete— y la última tampoco lo lleva, para no
+     cerrar la fila con una raya. */
+  .table tbody td:not(.stickyPos):not(.stickyTeam):not(:last-child),
+  .table thead th:not(.stickyPosHeader):not(.stickyTeamHeader):not(:last-child) {
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.07);
+  }
+
+  /* El numerito de desempate al lado del rótulo no es un dato del equipo: es
+     una referencia al panel de prioridad de desempate. Costaba unos 14px por
+     columna —150 en total, media pantalla— para decir algo que el panel de
+     abajo dice completo y con palabras. */
+  .tiebreakerBadge {
     display: none;
   }
 
-  .mobileCards {
+  /* ── El preámbulo, antes de la tabla ────────────────────────────────────
+     Entre el borde de arriba y la primera fila había 942px en una pantalla de
+     1125: el selector de vista con sus botones de 40px, las dos tarjetas de
+     recuento apiladas a 78px cada una, la marca de tiempo y el titular con su
+     párrafo. Casi una pantalla entera para llegar al dato que se vino a ver.
+
+     No se va ningún control ni ninguna cifra. Se dejan de apilar —las dos
+     tarjetas de recuento son dos números cortos y entran de a dos— y el número
+     baja de 22px, un tamaño de portada que acá no ordena nada porque no hay
+     con qué compararlo. */
+  /* ── Dos cifras, no dos tarjetas ────────────────────────────────────────
+     Cada recuento venía en su propia caja con borde, fondo y tres renglones:
+     el rótulo, el número a 22px y una glosa. 112px de alto cada una, 224 entre
+     las dos, para decir «56 contados, 0 pendientes».
+
+     Lo que se va es lo que no aporta:
+
+       · La GLOSA repite el rótulo con otras palabras. «Partidos contados» y
+         «Resultados finales procesados» son la misma frase dicha dos veces;
+         «Pendientes» y «Partidos aún fuera del cálculo», también.
+       · La TARJETA. Un borde y un fondo por número convierten dos datos en
+         dos objetos; el borde no separa nada que no separe ya el espacio.
+       · Los 22px del número. Ese tamaño ordena cuando hay una jerarquía que
+         construir; acá son dos cifras hermanas y basta con que se lean.
+
+     Queda la tira de datos que la consola ya usa arriba para las cifras de
+     fase —rótulo en versalita, número en mono al lado—, que es el mismo tipo
+     de dato y merece el mismo tratamiento. De 224px a un renglón. */
+  .metricsBar {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 0 12px 12px;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    padding: 0 2px;
   }
 
+  .metricCard {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 0;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .metricLabel {
+    display: inline;
+    margin: 0;
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .metricValue {
+    font-size: 13px !important;
+    line-height: 1.2;
+  }
+
+  .metricFoot {
+    display: none;
+  }
+
+  /* El selector de vista: los botones se aprietan y el grupo deja de ser una
+     caja dentro de otra caja. */
+  .localTabsGroup {
+    gap: 3px;
+    padding: 3px;
+  }
+
+  .localTab {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .localTabs {
+    gap: 8px;
+  }
+
+  /* El titular del panel de la tabla trae un párrafo que explica lo que la
+     tabla ya muestra. En el teléfono se va, como en el resto de la consola. */
+  .tableHeader p,
+  .tableHeaderCopy p {
+    display: none;
+  }
+
+  /* La última columna no tiene rótulo ni contenido: es la de acciones, que en
+     el teléfono no muestra nada y aun así reservaba 41px. */
+  .table thead th:last-child,
+  .table tbody td:last-child {
+    width: 0;
+    max-width: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* Las cinco píldoras de forma, más chicas: son un semáforo, no un texto. */
+  .formPill {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    font-size: 8.5px;
+    border-radius: 5px;
+  }
+
+  .table tbody td .formRow,
+  .formRow,
+  .formGroup {
+    gap: 3px;
+  }
+
+  /* La ficha de estado —«CLASIFICADO», «DESCENSO»— es una etiqueta, no un
+     botón: no necesita blanco para el dedo y con menos tracking deja de
+     empujar su columna a 90px. */
+  .statusBadge {
+    padding: 3px 6px;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Un control por decisión ─────────────────────────────────────────────
+     «Perspectiva» (Tabla general / local / visitante) escribe exactamente el
+     mismo estado que los botones General · Local · Visitante de la cabecera
+     del panel, que están arriba en la misma pantalla y siempre a la vista.
+     Dos controles para lo mismo obligan a mirar los dos para saber en qué
+     vista estás. Se queda el de arriba, que además marca el estado activo. */
+  .perspectiveField {
+    display: none;
+  }
+
+  /* ── El bloque fijo: quién es cada fila ──────────────────────────────────
+     Acá el bloque estaba en 22 + 84. Con 84px de celda, un escudo de 17 y una
+     tipografía de 10,5, al nombre del club le quedaban diez caracteres: la
+     tabla mostraba «Club Atl…», «Belgran…», «Club Uni…». Una tabla de
+     posiciones donde no se distingue a los equipos no es una tabla; y en el
+     rugby argentino los nombres comparten prefijo —«Club Universitario de
+     Buenos Aires» y «Club Universitario de La Plata» truncan igual—, así que
+     el recorte no es un detalle estético.
+
+     Ahora son 26 + 128, y el nombre entra en DOS renglones antes de recortar.
+     Los cortos siguen ocupando uno solo, así que el alto promedio de fila casi
+     no se mueve; los largos ganan el renglón que necesitan. Lo que se paga es
+     ancho de datos, que se recupera arrastrando. */
+  /* El ENCABEZADO va con las mismas medidas que la celda. En una tabla con
+     layout automático la columna se queda con el mayor ancho que pida
+     cualquiera de sus celdas, y el `<th>` pedía 240: bajar sólo el `<td>` no
+     movía nada. */
+  .stickyPos,
+  .stickyPosHeader {
+    min-width: 26px;
+    width: 26px;
+    max-width: 26px;
+    padding-inline: 2px;
+  }
+
+  .stickyTeamHeader {
+    left: 26px;
+    width: 128px;
+    min-width: 128px;
+    max-width: 128px;
+  }
+
+  /* Ancho CLAVADO, no mínimo: con `min-width` la celda crecía hasta donde
+     pedía su contenido —el nombre más la etiqueta «SEMIFINALES»— y se comía
+     230px de los 312 del scroller, dejando 40 para las cifras. */
+  /* La sombra vuelve, fina: ahora sí hay que arrastrar, y el filete avisa
+     dónde termina lo que se queda quieto. */
+  .stickyTeam {
+    left: 26px;
+    width: 128px;
+    min-width: 128px;
+    max-width: 128px;
+    box-shadow: 1px 0 0 rgba(255, 255, 255, 0.07);
+  }
+
+  .stickyPos {
+    box-shadow: none;
+  }
+
+  /* ── Los puntos no se buscan arrastrando ─────────────────────────────────
+     Con once columnas, en 340px de scroller entran la identidad y seis
+     cifras: PJ PG PE PP PF PC. PTS —el número que ORDENA la tabla y el único
+     que casi todo el mundo viene a mirar— quedaba afuera, a un arrastre de
+     distancia. Que la columna que explica el orden de las filas no se vea
+     junto a las filas es el peor reparto posible del ancho.
+
+     Se ancla a la derecha, como la identidad a la izquierda: entre las dos
+     queda una ventana de cifras que se arrastra, y las dos referencias —quién
+     es y cuánto tiene— nunca se van.
+
+     El fondo tiene que ser OPACO: el de `.pointsCell` es un color con
+     transparencia pensado para teñir, y una celda anclada deja ver por debajo
+     lo que pasa scrolleando. Va la misma receta que `.stickyCellTinted`: el
+     tinte como GRADIENTE encima y una capa sólida abajo. El gradiente no es
+     capricho: en `background: A, B` sólo la última capa puede ser un color, y
+     con dos colores la declaración entera es inválida y el navegador la tira
+     —que fue exactamente lo que pasó al primer intento: la celda quedaba
+     translúcida y por debajo se veían pasar las cifras de otra columna—. */
+  /* Los selectores van con el `td`/`th` adelante a propósito. El bloque de
+     normalización del final del archivo vuelve a declarar `.pointsCell` con
+     `!important`, y está DESPUÉS de este `@media`: entre dos `!important`
+     gana la especificidad, así que con `.pointsCell` a secas esta regla no se
+     aplicaba y la celda seguía translúcida. */
+  .table tbody td.pointsCell,
+  .table thead th.pointsHeader {
+    position: sticky;
+    right: 0;
+    z-index: 25;
+    min-width: 40px;
+    /* La sombra dice «esto está anclado, lo de abajo sigue». Sin ella el
+       ancla parece una columna más pegada a la de al lado y la superposición
+       se lee como un error de dibujo. */
+    box-shadow: -14px 0 16px -8px rgba(0, 0, 0, 0.85), -1px 0 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .table tbody td.pointsCell {
+    background:
+      linear-gradient(
+        color-mix(in srgb, var(--accent) 12%, transparent),
+        color-mix(in srgb, var(--accent) 12%, transparent)
+      ),
+      var(--bg-sticky) !important;
+  }
+
+  .table thead th.pointsHeader {
+    background: var(--bg-deep) !important;
+  }
+
+  /* La franja donde descansa PTS cuando el arrastre llega al final. Sin ella
+     la última columna —la forma— termina debajo del ancla y sus dos últimas
+     píldoras no se pueden ver de ninguna manera. Va un poco más ancha que la
+     columna anclada para que tampoco quede debajo de su sombra. */
+  .table {
+    padding-right: 44px;
+  }
+
+  /* El ancho hay que ponerlo ADENTRO. Una tabla con `table-layout: auto`
+     dimensiona cada columna por su contenido y trata el `width` del `<td>`
+     como una sugerencia: la celda seguía midiendo 240px. Lo que sí se respeta
+     es un ancho en el bloque de adentro, y con eso la columna deja de crecer. */
+  .stickyTeam .teamIdentity {
+    width: 120px;
+    max-width: 120px;
+    min-width: 0;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .stickyTeam .teamNameBlock {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    gap: 3px;
+  }
+
+  .stickyTeam .teamLogo,
+  .stickyTeam .teamLogoFallback {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+  }
+
+  /* Dos renglones y después sí, puntos suspensivos. `-webkit-line-clamp` es
+     la única forma de recortar por renglón que anda en todos lados; el
+     prefijo es parte de la especificación de facto, no un resabio. */
+  .stickyTeam .teamName {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  /* La etiqueta de clasificación baja del renglón del nombre: al lado, en
+     128px, no queda nada para el club. */
+  .stickyTeam .teamNameRow {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  /* 24px es el piso de WCAG 2.2 AA (2.5.8) para un objetivo táctil, y esta
+     ficha es el ÚNICO control que escribe desde la tabla: cicla la etiqueta
+     del puesto. Estaba en 22. */
+  .stickyTeam .teamLabelTrigger {
+    min-height: 24px !important;
+    height: 24px !important;
+    max-width: 100%;
+    padding: 0 6px !important;
+    gap: 4px;
+    font-size: 9px;
+    letter-spacing: 0.01em;
+  }
+
+  /* Cada píxel que se le saca al marco es un carácter que gana la palabra.
+     Con 9px de relleno a cada lado, 12 de punto y 6 de separación, «REPECHAJE»
+     entraba como «REPECH…»: veintiséis píxeles de marco para recortar el
+     único dato que la ficha tiene. */
+  .stickyTeam .teamLabelTriggerIcon {
+    width: 6px;
+    height: 6px;
+  }
+
+  .stickyTeam .teamLabelTriggerText {
+    max-width: none;
+  }
+
+  /* La ficha medía 100px dentro de una celda de 84: sobresalía y el borde de
+     la columna fija la cortaba al medio —«SEMIF», «REPEC», «DESCE»—. Ahora se
+     queda adentro y recorta con puntos suspensivos, que es un recorte que se
+     lee como tal. */
+  .stickyTeam .teamLabelTriggerText {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Sin etiqueta no hay nada que nombrar: «BASE» repetido en seis de diez
+     filas es ruido con forma de dato. Queda el punto, que sigue siendo el
+     mismo botón —mismo tamaño de dedo, mismo nombre accesible— y deja el
+     renglón del nombre para el nombre. */
+  .stickyTeam .teamLabelTriggerEmpty {
+    width: 24px;
+    min-width: 24px;
+    padding: 0 !important;
+    justify-content: center;
+  }
+
+  .stickyTeam .teamLabelTriggerEmpty .teamLabelTriggerText {
+    display: none;
+  }
+
+  /* Plegada, una barra es un rótulo con un toque encima: 16px de relleno la
+     dejaban en 54px de alto y seis de esas son un tercio de pantalla. Con 10
+     quedan en 36 y siguen siendo tocables de sobra. El rótulo puede envolver
+     a dos renglones —«Prioridad de desempate» no entra en media pantalla de
+     teléfono— y la grilla estira a su compañera de fila para que la repisa no
+     quede dentada. */
   .panelSummary {
-    padding: 16px;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  /* El tracking de 0.14em está pensado para un rótulo que vive solo en una
+     columna de 280px. En media pantalla de teléfono son los ~18px que hacen
+     que «Prioridad de desempate» caiga a dos renglones. */
+  .panelTitle {
+    font-size: 10.5px;
+    line-height: 1.25;
+    letter-spacing: 0.05em;
   }
 
   .panelBody {
-    padding: 0 16px 16px;
+    padding: 0 12px 12px;
   }
 
   .logicGrid,
@@ -1545,8 +1933,11 @@
 }
 
 @media (max-width: 640px) {
+  /* `.metricsBar` sale de esta lista: son dos recuentos de dos dígitos —«56
+     contados», «0 pendientes»— y apilados se llevaban 156px de alto para
+     mostrar dos números. Van de a dos, en el bloque de arriba. Los otros dos
+     sí se apilan: llevan texto, no cifras. */
   .headerMeta,
-  .metricsBar,
   .mobileDetailsGrid {
     grid-template-columns: 1fr;
   }
@@ -1575,120 +1966,36 @@
     padding: 6px 9px;
   }
 
-  .metricCard {
-    padding: 12px 14px;
+
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Teléfonos angostos (360-400px de ancho declarado: iPhone SE, Galaxy A,
+   cualquier Android de entrada).
+
+   El bloque fijo de 26 + 128 está calculado sobre un scroller de ~340px, el
+   de un teléfono de 390. En 360 el scroller queda en ~310 y esos 154px pasan
+   a ser la mitad de la fila: se ven dos columnas de datos antes de tener que
+   arrastrar. Doce píxeles menos de nombre —que a esta altura son un carácter
+   y medio, no un nombre— devuelven una columna entera de cifras.
+   ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 400px) {
+  .stickyTeamHeader,
+  .stickyTeam {
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
   }
 
-  .metricValue {
-    font-size: 22px;
+  .stickyTeam .teamIdentity {
+    width: 112px;
+    max-width: 112px;
+    gap: 5px;
   }
 
-  .tableHeader {
-    padding: 14px 16px;
-  }
-
-  .tableMetaPill {
-    padding: 7px 10px;
-    font-size: 10px;
-  }
-
-  .mobileSummaryGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  /* ── La tabla de posiciones se lee de arriba abajo ──────────────────────
-     Cada equipo ocupaba ~110px en tres renglones: nombre, etiqueta, cifras y
-     «Detalle». Con ocho equipos son 880px de scroll para una tabla que se mira
-     entera de un vistazo — que es justamente lo que una tabla de posiciones
-     tiene que dejar hacer: comparar quién está arriba de quién.
-
-     No se saca ninguna cifra ni ningún control: se dejan de apilar. Las
-     cifras y «Detalle» vuelven a un solo renglón, y el número de posición deja
-     de ser un cuadro de 44px, que es medida de botón y esto no se toca. */
-  .mobileCardTop {
-    grid-template-columns: 34px minmax(0, 1fr);
-    gap: 10px;
-  }
-
-  .mobileRank {
-    width: 34px;
-    height: 34px;
-    border-radius: 11px;
-    font-size: 13px;
-  }
-
-  .mobileCardSummary {
-    gap: 9px;
-    padding: 10px 11px;
-  }
-
-  /* Flex y no grid: el resumen trae dos cifras o tres según la vista, y una
-     grilla de columnas fijas deja un hueco cuando son dos. */
-  .mobileCompactStats {
-    display: flex;
-    gap: 7px;
-  }
-
-  /* El rótulo al lado de la cifra, no encima: apilados, cada caja medía 50px
-     de alto para mostrar «PJ 14». En línea son 28 y se leen igual. */
-  .mobileCompactStat {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    flex: 1 1 0;
-    min-width: 0;
-    gap: 6px;
-    padding: 5px 8px;
-  }
-
-  .mobileCompactStat strong {
-    font-size: 14px;
-  }
-
-  /* El escudo mandaba el alto del renglón del equipo con 60px — más que el
-     número de posición, que es lo que ordena la tabla. */
-  .mobileCard .teamLogo,
-  .mobileCard .teamLogoFallback {
-    width: 34px;
-    height: 34px;
-    flex: 0 0 34px;
-  }
-
-  .mobileCard .teamIdentity {
-    gap: 9px;
-    align-items: center;
-  }
-
-  .mobileCard .mobileTeamText {
-    gap: 4px;
-  }
-
-  .mobileCompactStats > :last-child {
-    flex: 0 0 auto;
-    margin-left: auto;
-    text-align: right;
-  }
-
-  /* La etiqueta de clasificación es un botón, y la hoja de mobile estira TODO
-     botón a 44px. Acá eso partía en dos el renglón del nombre —el nombre
-     arriba, la etiqueta abajo— y sumaba 30px por equipo. 28 sigue por encima
-     del mínimo de WCAG 2.2 AA y entra al lado del nombre. Hacen falta las dos
-     clases para ganarle a la regla general, que también lleva `!important`. */
-  .mobileCard .teamLabelTrigger {
-    min-height: 28px !important;
-    height: 28px !important;
-    padding: 0 8px !important;
-  }
-
-  .mobileCard .teamNameRow {
-    flex-wrap: nowrap;
-    gap: 6px;
-  }
-
-  .mobileCard .teamName {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .table thead th,
+  .table tbody td {
+    padding-inline: 3px;
   }
 }
 
@@ -1922,7 +2229,7 @@
 
 .labelActionBtnDanger:hover:not(:disabled) {
   background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
+  color: var(--bad-ink, #f87171);
   border-color: rgba(239, 68, 68, 0.2);
 }
 
@@ -2040,7 +2347,7 @@
 }
 
 .labelsError {
-  color: #ef4444;
+  color: var(--bad-ink, #f87171);
   font-size: 12px;
   margin: 0;
 }

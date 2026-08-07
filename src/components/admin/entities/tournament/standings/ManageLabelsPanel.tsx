@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { LabelChip } from './LabelChip';
+import { useDialog } from '../useDialog';
 import type { UiLabel } from './types';
 import styles from './TournamentStandingsTab.module.css';
 
@@ -26,6 +27,20 @@ export function ManageLabelsPanel({ labels, onClose, onCreated, onUpdated, onDel
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * Las cinco conductas de un diálogo (foco adentro, foco atrapado, foco
+   * devuelto, Escape y bloqueo de scroll). El panel se declaraba `role="dialog"`
+   * con `aria-modal` sin tener ninguna de ellas: Escape no hacía nada y el Tab
+   * se iba a la tabla de atrás.
+   */
+  const { ref: dialogRef, dialogProps } = useDialog<HTMLDivElement>({
+    open: true,
+    onClose,
+    label: 'Gestionar etiquetas',
+  });
+
+  // El foco inicial va al campo de nombre, que es lo primero que se viene a
+  // hacer acá; `useDialog` sólo lo lleva al primer foco posible del panel.
   useEffect(() => {
     nameRef.current?.focus();
   }, []);
@@ -101,10 +116,9 @@ export function ManageLabelsPanel({ labels, onClose, onCreated, onUpdated, onDel
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className={styles.labelsPanel}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Gestionar etiquetas"
+        {...dialogProps}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

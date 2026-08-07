@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import {
+  requireTournamentMutationContext,
+  requireTournamentReadContext,
+  tournamentApiErrorResponse,
+} from '@/lib/auth/tournamentApi';
 
 type RawLabel = {
   id?: string;
@@ -64,7 +68,16 @@ export async function GET(request: NextRequest) {
     const phase_id = sp.get('phase_id');
     const group_id = sp.get('group_id');
 
-    const supabase = await createClient();
+    if (!tournament_id) {
+      return NextResponse.json({ ok: false, error: 'tournament_id es obligatorio' }, { status: 400 });
+    }
+
+    let supabase: Awaited<ReturnType<typeof requireTournamentReadContext>>['writer'];
+    try {
+      ({ writer: supabase } = await requireTournamentReadContext(tournament_id));
+    } catch (authError) {
+      return tournamentApiErrorResponse(authError);
+    }
 
     let query = supabase
       .from('team_labels')
@@ -113,7 +126,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    if (!tournament_id) {
+      return NextResponse.json({ ok: false, error: 'tournament_id es obligatorio' }, { status: 400 });
+    }
+
+    /**
+     * Esta escritura no tenía ningún control: cualquiera con una sesión podía
+     * asignar etiquetas —las bandas de clasificado y descenso— en el torneo de
+     * otro. Va detrás de la membresía del torneo que la fila declara.
+     */
+    let supabase: Awaited<ReturnType<typeof requireTournamentMutationContext>>['writer'];
+    try {
+      ({ writer: supabase } = await requireTournamentMutationContext(tournament_id));
+    } catch (authError) {
+      return tournamentApiErrorResponse(authError);
+    }
+
+    /**
+     * Y la fase tiene que ser DE ESE torneo. Sin esta comprobación, alguien con
+     * permiso sobre su propio torneo podía escribir una asignación apuntando a
+     * la fase de un torneo ajeno: el guard de arriba mira `tournament_id`, que
+     * lo elige quien llama.
+     */
+    if (phase_id) {
+      const { data: phase } = await supabase
+        .from('tournament_phases')
+        .select('id')
+        .eq('id', phase_id)
+        .eq('tournament_id', tournament_id)
+        .maybeSingle();
+
+      if (!phase) {
+        return NextResponse.json(
+          { ok: false, error: 'La fase no pertenece a este torneo' },
+          { status: 400 },
+        );
+      }
+    }
+
     const { data, error } = await supabase
       .from('team_labels')
       .insert({

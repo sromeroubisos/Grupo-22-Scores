@@ -26,52 +26,97 @@ function isAbortLikeError(error: unknown): error is Error {
   );
 }
 
+/**
+ * Mete el partido guardado en el fixture que ya está en memoria, sin volver a
+ * pedir nada.
+ *
+ * Conserva la identidad de todo lo que no cambió: la fase, la jornada y los
+ * partidos que no son el guardado vuelven a salir como el MISMO objeto. No es
+ * cosmética —React compara por referencia, así que ésa es la diferencia entre
+ * re-renderizar una fila y re-renderizar las cuarenta y ocho.
+ *
+ * Antes había un `didUpdate` compartido por todo el recorrido: una vez que una
+ * jornada encontraba el partido, TODAS las siguientes se reconstruían aunque no
+ * tuvieran nada que ver, y las anteriores se saltaban la reconstrucción aunque
+ * la necesitaran.
+ */
 function applySavedMatchToFixture(
   currentFixture: TournamentFixture | null,
   savedMatch: Match,
 ): TournamentFixture | null {
   if (!currentFixture) return currentFixture;
 
-  let didUpdate = false;
+  let found = false;
 
-  const nextPhases = currentFixture.phases.map((phase) => ({
-    ...phase,
-    rounds: phase.rounds.map((round) => {
-      const nextMatches = round.matches.map((match) => {
-        if (match.id !== savedMatch.id) {
-          return match;
-        }
+  const nextPhases = currentFixture.phases.map((phase) => {
+    let phaseChanged = false;
 
-        didUpdate = true;
+    const nextRounds = phase.rounds.map((round) => {
+      const index = round.matches.findIndex((match) => match.id === savedMatch.id);
+      if (index === -1) return round;
 
-        const homeClubChanged = match.homeClubId !== savedMatch.homeClubId;
-        const awayClubChanged = match.awayClubId !== savedMatch.awayClubId;
+      found = true;
+      phaseChanged = true;
 
-        return {
-          ...match,
-          ...savedMatch,
-          tournament: match.tournament ?? null,
-          homeClub: homeClubChanged ? null : match.homeClub ?? null,
-          awayClub: awayClubChanged ? null : match.awayClub ?? null,
-        };
-      });
+      const match = round.matches[index];
+      const homeClubChanged = match.homeClubId !== savedMatch.homeClubId;
+      const awayClubChanged = match.awayClubId !== savedMatch.awayClubId;
 
-      return didUpdate
-        ? {
-            ...round,
-            matches: nextMatches,
-            matchCount: nextMatches.length,
-          }
-        : round;
-    }),
-  }));
+      const nextMatches = [...round.matches];
+      nextMatches[index] = {
+        ...match,
+        ...savedMatch,
+        tournament: match.tournament ?? null,
+        homeClub: homeClubChanged ? null : match.homeClub ?? null,
+        awayClub: awayClubChanged ? null : match.awayClub ?? null,
+      };
 
-  return didUpdate
+      return { ...round, matches: nextMatches, matchCount: nextMatches.length };
+    });
+
+    return phaseChanged ? { ...phase, rounds: nextRounds } : phase;
+  });
+
+  return found
     ? {
         ...currentFixture,
         phases: nextPhases,
       }
     : currentFixture;
+}
+
+/**
+ * Campos cuyo cambio el merge en memoria NO puede resolver solo, y que por eso
+ * obligan a recargar el fixture entero:
+ *
+ * - los clubes: la respuesta del PATCH trae `homeClubId` pero no el escudo ni
+ *   el nombre del club nuevo, así que la fila quedaría sin identidad;
+ * - fase, jornada y `roundLabel`: mueven el partido de contenedor, y con
+ *   `roundLabel` la jornada destino la crea el servidor — todavía no existe
+ *   del lado del cliente;
+ * - el grupo: la zona etiqueta la fila y se resuelve contra el fixture;
+ * - el horario: la lista viene ordenada por fecha desde el servidor y no se
+ *   reordena del lado del cliente, así que un partido movido de hora se
+ *   quedaría fuera de lugar hasta la próxima carga. Está acá y no cuesta nada
+ *   porque el panel rápido manda `dateTime` únicamente cuando de verdad se
+ *   editó el horario — mandarlo siempre era lo que hacía la carga de un
+ *   resultado indistinguible de una reprogramación.
+ *
+ * Un resultado —marcador, puntos, estado— no está en esta lista: se aplica en
+ * memoria y no viaja nadie.
+ */
+const RELOAD_TRIGGERING_MATCH_FIELDS = [
+  'homeClubId',
+  'awayClubId',
+  'phaseId',
+  'roundId',
+  'roundLabel',
+  'groupId',
+  'dateTime',
+] as const;
+
+function savedMatchNeedsFullReload(payload: JsonRecord): boolean {
+  return RELOAD_TRIGGERING_MATCH_FIELDS.some((field) => payload[field] !== undefined);
 }
 
 interface FixtureContextValue {
@@ -516,11 +561,32 @@ export function FixtureProvider({ children, initialFixture, tournamentId, season
         throw new Error(err.error || 'Failed to save match');
       }
 
+      // El servidor avisa cuando la edición arrastró a OTROS partidos: un
+      // resultado de playoff empuja al ganador al cruce siguiente, y ese cruce
+      // no viene en la respuesta. Ahí sí hay que recargar.
+      const derivedChanged = response.headers.get('x-fixture-derived-changed') === '1';
       const savedMatch = await response.json();
 
       if (isUpdate) {
         setFixture((current) => applySavedMatchToFixture(current, savedMatch as Match));
-        void refreshFixture();
+
+        // El refetch del fixture COMPLETO que había acá era lo que hacía
+        // parpadear la pantalla en cada resultado guardado: `/fixture` devuelve
+        // todas las fases, todas las jornadas y todos los partidos del torneo
+        // con sus clubes —hasta mil—, y reemplazar el estado con eso tira el
+        // scroll, los bloques desplegados y el editor de OTRO partido que
+        // estuviera abierto. Con el marcador y los puntos ya aplicados en
+        // memoria ese viaje no aporta nada: la única fila que cambió es la que
+        // se acaba de guardar.
+        //
+        // Sólo se recarga cuando el merge no alcanza: porque el payload movió
+        // al partido de lugar o le cambió de club (RELOAD_TRIGGERING_MATCH_FIELDS)
+        // o porque el servidor tocó otros partidos. Sin `await`, como estaba:
+        // quien guardó ya tiene su partido aplicado y no le debe nada a la
+        // recarga; esperarla sólo demoraría el cierre del formulario.
+        if (derivedChanged || savedMatchNeedsFullReload(match)) {
+          void refreshFixture();
+        }
         return;
       }
 

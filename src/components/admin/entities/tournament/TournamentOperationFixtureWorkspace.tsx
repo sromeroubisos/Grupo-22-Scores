@@ -573,6 +573,16 @@ export function TournamentOperationFixtureWorkspace({
   const [quickResultMatchId, setQuickResultMatchId] = useState<string | null>(null);
   const [quickResultForm, setQuickResultForm] = useState<QuickResultFormState | null>(null);
   const [quickResultErrors, setQuickResultErrors] = useState<Record<string, string>>({});
+  /**
+   * Qué editor está abierto AHORA, legible desde un `await`.
+   *
+   * Guardar un resultado tarda; mientras el PATCH viaja, el operador sigue
+   * trabajando y abre el siguiente partido. Al volver, el handler cerraba «el
+   * editor» a secas y le arrancaba de las manos el partido nuevo, a medio
+   * escribir. El estado leído desde el closure es el de cuando se apretó
+   * Guardar, no el de ahora; el ref sí es el de ahora.
+   */
+  const quickResultMatchIdRef = useRef<string | null>(null);
   const [structureForm, setStructureForm] = useState({ numRounds: 9, namePattern: 'Fecha {n}' });
   const [bergerForm, setBergerForm] = useState({ clubIds: [] as string[], startDate: todayInputValue(), matchTime: '16:00', venue: '', homeAndAway: false });
   const [importPreview, setImportPreview] = useState<FixtureImportPreviewResult | null>(null);
@@ -917,6 +927,12 @@ export function TournamentOperationFixtureWorkspace({
     setMobileInsightsOpen(false);
   }, [activeSubtab, selectedMethod, selectedPhaseId]);
 
+  // El espejo del editor abierto. Un solo lugar lo escribe, así que da igual
+  // por cuál de los seis caminos se haya cerrado o cambiado.
+  useEffect(() => {
+    quickResultMatchIdRef.current = quickResultMatchId;
+  }, [quickResultMatchId]);
+
   useEffect(() => {
     if (activeSubtab !== 'manage_fixture') {
       setQuickResultMatchId(null);
@@ -1182,7 +1198,25 @@ export function TournamentOperationFixtureWorkspace({
       const homeSecondary = secondaryKeys ? parseOptionalQuickNumber(quickResultForm.homeSecondary) : null;
       const awaySecondary = secondaryKeys ? parseOptionalQuickNumber(quickResultForm.awaySecondary) : null;
 
-      const newDateTime = quickResultForm.scheduledDate && quickResultForm.scheduledTime
+      // El horario se manda SÓLO si lo tocaron.
+      //
+      // El formulario nace con la fecha y la hora del partido ya puestas, así
+      // que la condición «hay fecha y hora» es verdadera siempre y el PATCH
+      // venía llevando `dateTime` en cada resultado cargado, aunque nadie
+      // hubiera abierto «Editar horario». Eso costaba dos cosas: un UPDATE
+      // extra por guardado (`scheduleEdited` en `FixtureService.updateMatch`
+      // dispara la escritura de `scheduling_status`), y —peor— dejaba marcado
+      // como `manual` a todo partido de cuadro cuyo resultado se cargara, que
+      // es la marca que le pide al reprogramador automático de la fase que no
+      // lo toque. Cargar resultados iba sacando el cuadro del auto-armado sin
+      // que nadie lo decidiera.
+      //
+      // La comparación va contra los mismos campos con los que `buildQuickResultForm`
+      // sembró el formulario: si siguen iguales, el horario no se tocó.
+      const scheduleUntouched =
+        quickResultForm.scheduledDate === toInputDateInTimeZone(match.dateTime, APP_TIMEZONE) &&
+        quickResultForm.scheduledTime === toInputTimeInTimeZone(match.dateTime, APP_TIMEZONE);
+      const newDateTime = quickResultForm.scheduledDate && quickResultForm.scheduledTime && !scheduleUntouched
         ? combineLocalDateTimeToUtcIso(quickResultForm.scheduledDate, quickResultForm.scheduledTime, APP_TIMEZONE)
         : undefined;
 
@@ -1209,9 +1243,14 @@ export function TournamentOperationFixtureWorkspace({
           : null,
         ...(newDateTime ? { dateTime: newDateTime } : {}),
       });
-      setQuickResultMatchId(null);
-      setQuickResultForm(null);
-      setQuickResultErrors({});
+      // Cerramos el editor SÓLO si sigue siendo el de este partido. Si el
+      // operador ya pasó al siguiente mientras el PATCH viajaba, el suyo se
+      // queda abierto con lo que llevaba escrito.
+      if (quickResultMatchIdRef.current === match.id) {
+        setQuickResultMatchId(null);
+        setQuickResultForm(null);
+        setQuickResultErrors({});
+      }
       setFeedback({ tone: 'ok', message: 'Resultado y puntos guardados.' });
       void validateFixture()
         .then((result) => setValidationData(result as ValidationResult))
@@ -1221,7 +1260,12 @@ export function TournamentOperationFixtureWorkspace({
     } catch (error) {
       setFeedback({ tone: 'error', message: error instanceof Error ? error.message : 'No se pudo guardar el resultado rapido.' });
     } finally {
-      setBusyAction(null);
+      // Sólo suelto el testigo si sigue siendo mío. `busyAction` es un lugar
+      // solo para todo el workspace: si mientras este PATCH viajaba el operador
+      // ya mandó a guardar el partido siguiente, un `setBusyAction(null)` a
+      // secas le apagaría el spinner y le reactivaría el botón a un guardado
+      // que todavía está en el aire — con el doble envío servido.
+      setBusyAction((current) => (current === `quick-save-${match.id}` ? null : current));
     }
   };
 
@@ -1649,6 +1693,18 @@ export function TournamentOperationFixtureWorkspace({
                   );
                 })}
               </div>
+
+              {/* La descripción del método ELEGIDO, una sola vez y debajo de la
+                  grilla. En el teléfono cada tarjeta lleva sólo ícono y título:
+                  cuatro descripciones a la vez son cuatro párrafos compitiendo
+                  por una pantalla en la que todavía no se eligió nada. Acá
+                  aparece la que corresponde, cuando ya hay una elección que
+                  explicar. En escritorio no se muestra —ahí cada tarjeta tiene
+                  ancho de sobra para la suya— y por eso vive en CSS y no en un
+                  segundo bloque de JSX para mobile. */}
+              <p className="operation-method-hint">
+                {METHOD_OPTIONS.find((option) => option.id === selectedMethod)?.description}
+              </p>
             </section>
 
             {selectedMethod === 'manual_match' ? (
@@ -2425,6 +2481,29 @@ function MatchCard({
     if (quickResultOpen) setShowScheduleEdit(false);
     onQuickResult();
   };
+  /**
+   * El click de la fila vive acá, en la LÍNEA, y no sólo en la lámina.
+   *
+   * La lámina (`.op-match-link`) es `position: absolute; inset: 0; z-index: 0`,
+   * y sus hermanos —la fecha, los escudos, los nombres, el marcador, la sede—
+   * llevan `z-index: 1`. O sea que la lámina queda DEBAJO de todo el contenido
+   * y sólo recibe el click en el padding de 12px y en los huecos entre
+   * elementos. Medido con `document.elementFromPoint` a 360, 390 y 1440: sobre
+   * el nombre del club, el escudo, el marcador, la fecha y la sede el click lo
+   * recibe un `<span>` inerte, y como la lámina es HERMANA y no ancestro, no
+   * hay burbujeo que valga. La fila parecía clicable entera y era clicable en
+   * una franja.
+   *
+   * Poniéndolo en la línea, el click de cualquier hijo burbujea hasta acá. Los
+   * botones no molestan: `.op-match-actions` ya corta la propagación, y el
+   * editor desplegado es hermano de la línea, no hijo.
+   */
+  const handleRowClick = () => {
+    // Un click que termina de arrastrar una selección de texto no es un click
+    // de apertura: el operador estaba copiando el nombre de un club.
+    if (typeof window !== 'undefined' && window.getSelection()?.isCollapsed === false) return;
+    handleQuickResultToggle();
+  };
   const handleQuickResultSave = () => {
     setShowScheduleEdit(false);
     onQuickResultSave();
@@ -2462,12 +2541,29 @@ function MatchCard({
        cuándo, quién contra quién con su escudo, el marcador, y las acciones.
        El editor de resultado sigue abriéndose debajo, dentro de la misma fila. */
     <article className={`op-match-row ${getMatchTone(match.status)} ${quickResultOpen ? 'is-editing' : ''} ${moreActionsOpen ? 'has-more-actions' : ''}`}>
-      <div className="op-match-line">
-        <ProtectedLink
-          href={manageHref}
+      <div className="op-match-line" onClick={handleRowClick}>
+        {/* La fila entera carga el resultado.
+            Antes abría el control de partido —eventos, alineaciones, reloj—,
+            que se usa una vez por partido y con el partido delante. Lo que se
+            hace cuarenta y ocho veces por fecha es escribir el marcador, y era
+            justamente lo único que pedía apuntarle a un botón. Se invirtió: la
+            fila abre el resultado y el control tiene su propia puerta, el botón
+            con la planilla que está entre las acciones. */}
+        <button
+          type="button"
           className="op-match-link"
-          aria-label={`Abrir control de partido de ${matchLabel}`}
-          title="Abrir control de partido. También puedes hacer click derecho para abrirlo en otro panel."
+          aria-expanded={quickResultOpen}
+          aria-label={
+            quickResultOpen
+              ? `Cerrar la carga de resultado de ${matchLabel}`
+              : `${scoreVisible ? 'Editar' : 'Cargar'} el resultado de ${matchLabel}`
+          }
+          title={scoreVisible ? 'Editar el resultado' : 'Cargar el resultado'}
+          /* Corta la propagación o el click contaría dos veces —una acá y otra
+             en la línea— y el editor se abriría y se cerraría en el mismo
+             gesto. La lámina se queda por el nombre accesible y por el foco de
+             teclado; el área clicable de verdad la pone la línea. */
+          onClick={(event) => { event.stopPropagation(); handleQuickResultToggle(); }}
         />
 
         <span className="op-match-when">
@@ -2536,14 +2632,23 @@ function MatchCard({
             <Zap size={13} aria-hidden="true" />
             <span>{scoreVisible ? 'Resultado' : 'Cargar'}</span>
           </button>
-          {/* Abrir el control lleva su propia clase, no la genérica de las que
-              se esconden detrás del `⋯`: en el teléfono la fila entera deja de
-              ser clicable —en una tarjeta de media columna el área táctil se
-              solapa con los botones— y esta pasa a ser la puerta visible.
-              `op-match-act-more` la escondía junto con mover, duplicar y
-              eliminar, que sí son de segundo orden. */}
-          <ProtectedLink href={manageHref} className="basalt-btn op-match-act-more op-match-act-open" title="Abrir control de partido" aria-label="Abrir control de partido">
-            <Pencil size={13} aria-hidden="true" />
+          {/* La puerta al control de partido: eventos, alineaciones y reloj.
+              Es la única acción de la fila que se va a otra pantalla, así que
+              lleva la planilla —no el lápiz, que ahora sería mentira: editar el
+              resultado es la fila entera— y su propio contorno, para que se lea
+              como lo que es y no como una más de la tira.
+
+              Lleva su propia clase, no la genérica de las que se esconden
+              detrás del `⋯`: en el teléfono la fila deja de ser clicable —en
+              una tarjeta de media columna el área táctil se solapa con los
+              botones— y ésta pasa a ser la puerta visible. */}
+          <ProtectedLink
+            href={manageHref}
+            className="basalt-btn op-match-act-more op-match-act-open"
+            title="Abrir el control de partido: eventos, alineaciones y reloj"
+            aria-label={`Abrir el control de partido de ${matchLabel}: eventos, alineaciones y reloj`}
+          >
+            <ClipboardList size={13} aria-hidden="true" />
           </ProtectedLink>
           <button className="basalt-btn op-match-act-more" title="Mover de jornada" aria-label="Mover de jornada" onClick={onMove}>
             <Grip size={13} />

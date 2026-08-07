@@ -63,6 +63,13 @@ export interface TournamentContextData {
     ruleset?: Record<string, unknown> | null;
   };
   phases: StandingsPhase[];
+  /**
+   * Si la base ya tiene la columna `table_type` y por lo tanto se pueden
+   * publicar las tablas de local y visitante. Lo decide el servidor —es la
+   * misma señal que el 409 de /standings/recalculate— para que el botón se
+   * habilite al correr la migración, sin redeploy.
+   */
+  supportsTableType?: boolean;
 }
 
 export interface StandingsMetrics {
@@ -108,6 +115,17 @@ export interface StandingsDataPayload {
     rows?: number;
   };
   last_calculated_at?: string | null;
+  /**
+   * Si lo GUARDADO coincide con lo que se está mostrando. La tabla de la consola
+   * se calcula en vivo por request; la publicada sólo se reescribe al
+   * recalcular, así que pueden separarse sin que nada avise.
+   */
+  published_drift?: {
+    state: 'sin_publicar' | 'al_dia' | 'desfasada';
+    count: number;
+    /** Los primeros clubes que difieren, ya armados para leer. */
+    teams: string;
+  };
 }
 
 export interface UiLabel {

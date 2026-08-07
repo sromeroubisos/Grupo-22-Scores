@@ -15,6 +15,7 @@ import {
     resolveStandingsCarryOverRows,
 } from '@/lib/server/standingsCarryOver';
 import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
+import { supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 import { isUuid } from '@/lib/utils/postgrest';
 import { markEditTrace } from '@/lib/perf/editTrace';
 
@@ -257,36 +258,21 @@ export async function recalculateAndPersistStandings(
         { carryOverRows: carryOver.rows },
     );
 
-    // 5. Persist to tournament_standings. The new table was computed successfully
-    // above, so only now clear the stale rows for this scope before inserting.
+    // 5. Persistir en tournament_standings.
+    //
+    // El orden importa más que cualquier otra cosa de este archivo. Antes era
+    // BORRAR y después insertar, con un retorno temprano en el medio si la tabla
+    // salía vacía: la peor combinación posible. Si el insert fallaba, la tabla
+    // quedaba en cero; si el motor devolvía cero filas, la tabla quedaba en cero
+    // con el borrado ya hecho y la función devolvía `ok: true`.
+    //
+    // Ahora se escribe primero y se limpian los sobrantes después:
+    //   · si falla el upsert, la tabla vieja sigue publicada;
+    //   · si falla el borrado de sobrantes, quedan filas de más — visible para el
+    //     operador y corregible con otro recálculo.
+    // Nunca queda vacía por accidente.
     const calculatedAt = new Date().toISOString();
-
-    let delQuery = supabase
-        .from('tournament_standings')
-        .delete()
-        .eq('tournament_id', tournamentId)
-        .eq('phase_id', phaseId);
-
-    if (scopedSeasonId) {
-        delQuery = delQuery.eq('season_id', scopedSeasonId);
-    }
-
-    if (groupId) {
-        delQuery = delQuery.eq('group_id', groupId);
-    } else {
-        delQuery = (delQuery as typeof delQuery & {
-            is: (column: string, value: null) => typeof delQuery;
-        }).is('group_id', null);
-    }
-    const { error: deleteError } = await delQuery;
-    if (deleteError) {
-        console.error('[recalculateStandings] Error clearing stale standings', deleteError);
-        return { ok: false, rows_calculated: 0 };
-    }
-
-    if (table.length === 0) {
-        return { ok: true, rows_calculated: 0 };
-    }
+    const supportsTableType = await supportsStandingsTableTypeColumn();
 
     const rows = table.map((row) => ({
         tournament_id: tournamentId,
@@ -294,6 +280,10 @@ export async function recalculateAndPersistStandings(
         phase_id: phaseId,
         group_id: groupId || null,
         club_id: row.teamId,
+        // Sin la migración la columna no existe y mandarla haría fallar el
+        // insert entero. `stats.table_type` se sigue escribiendo siempre: es el
+        // respaldo del backfill y lo que leen las versiones viejas.
+        ...(supportsTableType ? { table_type: tableType } : {}),
         position: row.position,
         played: row.played,
         won: row.won,
@@ -319,10 +309,123 @@ export async function recalculateAndPersistStandings(
         last_updated: calculatedAt,
     }));
 
-    const { error: insertError } = await supabase.from('tournament_standings').insert(rows);
-    if (insertError) {
-        console.error('[recalculateStandings] Error inserting standings', insertError);
+    /** Acota una query al scope exacto que este recálculo acaba de resolver. */
+    const applyScope = <Q>(query: Q): Q => {
+        let scoped = (query as any).eq('tournament_id', tournamentId).eq('phase_id', phaseId);
+        if (scopedSeasonId) scoped = scoped.eq('season_id', scopedSeasonId);
+        scoped = groupId ? scoped.eq('group_id', groupId) : scoped.is('group_id', null);
+        if (supportsTableType) scoped = scoped.eq('table_type', tableType);
+        return scoped as Q;
+    };
+
+    /**
+     * Una tabla vacía NO borra la publicada. Es la guarda que hace verdadero al
+     * comentario de arriba, y va antes de las dos ramas porque las dos podían
+     * romperlo: la vieja borraba y salía por el retorno temprano, y la nueva se
+     * salteaba el upsert pero igual limpiaba "sobrantes" — con el conjunto de
+     * clubes vigentes vacío, eso es borrar todo.
+     *
+     * El motor devuelve cero filas cuando no hay participantes, y eso casi
+     * siempre es una carga que falló, no una fase que se quedó sin equipos. Ante
+     * la duda se conserva lo publicado: una tabla vieja se ve y se corrige con
+     * otro recálculo; una borrada hay que ir a buscarla al respaldo.
+     *
+     * El costo es que una fase vaciada a propósito se queda con su última tabla.
+     * No es invisible: el indicador de desfasaje de la barra pasa a "Publicada
+     * desactualizada" y nombra los clubes que sobran.
+     */
+    if (rows.length === 0) {
+        console.warn(
+            '[recalculateStandings] El motor devolvió cero filas: se conserva la tabla publicada',
+            { tournamentId, phaseId, groupId: groupId ?? null, tableType },
+        );
+        return { ok: true, rows_calculated: 0 };
+    }
+
+    if (!supportsTableType) {
+        /**
+         * Camino previo a la migración. No se puede hacer upsert todavía: el
+         * UNIQUE viejo es (tournament_id, phase_id, group_id, club_id) —sin
+         * temporada y con NULLS DISTINCT—, así que para las filas con
+         * `group_id` NULL, que son la mayoría, el ON CONFLICT nunca dispararía y
+         * cada recálculo acumularía duplicados. El UNIQUE que hace correcto al
+         * upsert llega con la misma migración que la columna.
+         *
+         * Acá el borrado sin filtro de perspectiva no destruye nada porque el
+         * endpoint devuelve 409 para todo lo que no sea `general`: sin columna
+         * es imposible que existan filas de local o visitante.
+         */
+        const { error: deleteError } = await applyScope(
+            supabase.from('tournament_standings').delete(),
+        );
+        if (deleteError) {
+            console.error('[recalculateStandings] Error clearing stale standings', deleteError);
+            return { ok: false, rows_calculated: 0 };
+        }
+
+        const { error: insertError } = await supabase.from('tournament_standings').insert(rows);
+        if (insertError) {
+            console.error('[recalculateStandings] Error inserting standings', insertError);
+            return { ok: false, rows_calculated: 0 };
+        }
+
+        console.log(`[recalculateStandings] Persisted ${rows.length} rows for phase ${phaseId}`);
+        return { ok: true, rows_calculated: rows.length };
+    }
+
+    /**
+     * El upsert se apoya en `tournament_standings_scope_unique`, el índice de
+     * seis columnas con NULLS NOT DISTINCT que trae la migración. Las seis
+     * columnas del `onConflict` tienen que coincidir EXACTAMENTE con las del
+     * índice o Postgres no lo infiere y devuelve 42P10.
+     *
+     * `NULLS NOT DISTINCT` no es un detalle: `season_id` y `group_id` son NULL en
+     * la mayoría de las filas, y con la semántica por defecto el ON CONFLICT
+     * nunca dispararía para ellas — cada recálculo insertaría un juego nuevo
+     * encima del anterior.
+     */
+    const { error: upsertError } = await supabase
+        .from('tournament_standings')
+        .upsert(rows, {
+            onConflict: 'tournament_id,season_id,phase_id,group_id,club_id,table_type',
+        });
+
+    if (upsertError) {
+        console.error('[recalculateStandings] Error upserting standings', upsertError);
         return { ok: false, rows_calculated: 0 };
+    }
+
+    /**
+     * Sobrantes: clubes que estaban en la tabla guardada y ya no están en la
+     * nueva (se fueron de la fase, cambiaron de grupo). Se resuelven leyendo los
+     * ids y borrando por clave primaria en vez de armar un `not.in` con los
+     * club_id: los club_id son slugs de texto y meterlos en un filtro de
+     * PostgREST obliga a citarlos a mano.
+     */
+    const { data: persisted, error: readbackError } = await applyScope(
+        supabase.from('tournament_standings').select('id, club_id'),
+    );
+
+    if (readbackError) {
+        console.error('[recalculateStandings] Error listando filas para limpiar sobrantes', readbackError);
+    } else {
+        const vigentes = new Set(rows.map((row) => row.club_id));
+        const sobrantes = (persisted ?? [])
+            .filter((row: { club_id: string }) => !vigentes.has(row.club_id))
+            .map((row: { id: string }) => row.id);
+
+        if (sobrantes.length > 0) {
+            const { error: deleteError } = await supabase
+                .from('tournament_standings')
+                .delete()
+                .in('id', sobrantes);
+
+            if (deleteError) {
+                // No aborta: la tabla nueva ya está publicada y correcta. Quedan
+                // filas de más, que se ven y se arreglan con otro recálculo.
+                console.error('[recalculateStandings] Error borrando filas sobrantes', deleteError);
+            }
+        }
     }
 
     console.log(`[recalculateStandings] Persisted ${rows.length} rows for phase ${phaseId}`);

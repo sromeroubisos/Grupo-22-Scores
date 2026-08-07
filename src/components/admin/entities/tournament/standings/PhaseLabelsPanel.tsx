@@ -1,6 +1,7 @@
 'use client';
 
 import { LabelChip } from './LabelChip';
+import { useDialog } from '../useDialog';
 import styles from './TournamentStandingsTab.module.css';
 import type { UiLabel } from './types';
 
@@ -13,13 +14,26 @@ export function PhaseLabelsPanel({
   phaseName: string;
   onClose: () => void;
 }) {
+  /**
+   * `role="dialog"` y `aria-modal` estaban puestos a mano, y eso PROMETE un
+   * modelo de teclado que el panel no tenía: Escape no cerraba, el Tab se
+   * escapaba a la página de atrás y al cerrar el foco se perdía. `useDialog`
+   * pone las cinco conductas —foco adentro, foco atrapado, foco devuelto al
+   * disparador, Escape y bloqueo de scroll— y además emite los props ARIA, así
+   * que ya no se puede montar la superficie sin nombre accesible.
+   */
+  const { ref, dialogProps } = useDialog<HTMLDivElement>({
+    open: true,
+    onClose,
+    label: 'Etiquetas de la fase',
+  });
+
   return (
     <div className={styles.labelsOverlay} role="presentation" onClick={onClose}>
       <div
+        ref={ref}
         className={styles.labelsPanel}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Etiquetas de la fase"
+        {...dialogProps}
         onClick={(event) => event.stopPropagation()}
       >
         <div className={styles.labelsPanelHeader}>

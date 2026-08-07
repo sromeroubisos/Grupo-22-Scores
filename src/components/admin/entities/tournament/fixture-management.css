@@ -2593,6 +2593,18 @@ select.glass-input option {
     display: none;
 }
 
+/* Ídem la descripción del método elegido: en escritorio cada tarjeta muestra
+   la suya y repetirla abajo sería decir dos veces lo mismo. */
+.operation-method-hint {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .operation-method-hint {
+        display: block;
+    }
+}
+
 /* TABLET VERTICAL (768–1023px): suavizar paddings y permitir 2 cards de
    partido por fila aunque el workspace ya esté en 1 columna. */
 @media (max-width: 1023px) {
@@ -2698,10 +2710,22 @@ select.glass-input option {
         line-height: 1.25;
     }
 
+    /* Ícono y título, nada más. La descripción de las cuatro a la vez son
+       cuatro párrafos peleando por la pantalla antes de que se haya elegido
+       nada; la del método elegido sale abajo, en `.operation-method-hint`. */
     .operation-method-card p {
-        font-size: 11.5px;
-        line-height: 1.35;
-        color: rgba(228, 233, 241, 0.6);
+        display: none;
+    }
+
+    .operation-method-hint {
+        margin: 9px 0 0;
+        padding: 9px 11px;
+        border: 1px solid var(--border-basalt);
+        border-radius: 10px;
+        background: var(--bg-basalt);
+        color: var(--text-dim);
+        font-size: 12px;
+        line-height: 1.4;
     }
 
     /* Abajo de 360 la media columna deja 130px y el título de dos palabras se

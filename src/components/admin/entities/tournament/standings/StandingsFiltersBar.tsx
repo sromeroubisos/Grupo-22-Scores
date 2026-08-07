@@ -8,8 +8,12 @@ import {
   normalizeCalculationMode,
   normalizeStandingsRules,
 } from './rules';
+import { useDialog } from '../useDialog';
 import styles from './TournamentStandingsTab.module.css';
 import type { StandingsGroup, StandingsPhase, StandingsRules } from './types';
+
+/** El título del modal es su nombre accesible; el id los une. */
+const LOGIC_MODAL_TITLE_ID = 'standings-logic-modal-title';
 
 interface StandingsFiltersBarProps {
   tournamentId: string;
@@ -217,6 +221,21 @@ export function StandingsFiltersBar({
   phaseSupportsGroups = false,
 }: StandingsFiltersBarProps) {
   const [isLogicEditorOpen, setIsLogicEditorOpen] = useState(false);
+
+  /**
+   * El editor de lógica es el único de los tres modales con un formulario
+   * adentro, así que era el que peor se portaba sin trampa de foco: dos Tab y ya
+   * estabas escribiendo en la tabla de atrás sin verlo. Se cierra con Escape,
+   * salvo mientras guarda —interrumpir un guardado a mitad de camino deja al
+   * operador sin saber si se aplicó.
+   */
+  const { ref: logicDialogRef, dialogProps: logicDialogProps } = useDialog<HTMLDivElement>({
+    open: isLogicEditorOpen,
+    onClose: () => {
+      if (!isSavingLogic) setIsLogicEditorOpen(false);
+    },
+    labelledBy: LOGIC_MODAL_TITLE_ID,
+  });
   const [isSavingLogic, setIsSavingLogic] = useState(false);
   const [logicSaveError, setLogicSaveError] = useState<string | null>(null);
   const [logicForm, setLogicForm] = useState<LogicFormState>(() => createInitialLogicForm(rules));
@@ -286,7 +305,14 @@ export function StandingsFiltersBar({
   return (
     <>
       <div className={styles.stack}>
-        <details className={`${styles.glassPanel} ${styles.panelDetails}`} open>
+        {/* En el teléfono este panel queda debajo de la tabla y, sin grupos
+            que elegir, es un solo select deshabilitado que dice «Tabla unica»:
+            150px de pantalla para no ofrecer ninguna decisión. Se abre solo
+            cuando la fase TIENE zonas, que es cuando hay algo que elegir. */}
+        <details
+          className={`${styles.glassPanel} ${styles.panelDetails}`}
+          open={!compactMobile || (phaseSupportsGroups && groups.length > 0)}
+        >
           <PanelSummary icon={<Filter size={14} />}>Filtros y vista</PanelSummary>
           <div className={styles.panelBody}>
             <div className={styles.stack}>
@@ -312,11 +338,16 @@ export function StandingsFiltersBar({
                 ))}
               </SelectField>
 
-              <SelectField label="Perspectiva" value={selectedTableType} onChange={onTableTypeChange}>
-                <option value="general">Tabla general</option>
-                <option value="home">Tabla local</option>
-                <option value="away">Tabla visitante</option>
-              </SelectField>
+              {/* En el teléfono este campo se apaga: escribe el mismo estado
+                  que los botones General · Local · Visitante de la cabecera
+                  del panel, que quedan a la vista en la misma pantalla. */}
+              <div className={styles.perspectiveField}>
+                <SelectField label="Perspectiva" value={selectedTableType} onChange={onTableTypeChange}>
+                  <option value="general">Tabla general</option>
+                  <option value="home">Tabla local</option>
+                  <option value="away">Tabla visitante</option>
+                </SelectField>
+              </div>
             </div>
           </div>
         </details>
@@ -389,13 +420,24 @@ export function StandingsFiltersBar({
 
       {isLogicEditorOpen && (
         <div className={styles.logicModalOverlay} role="presentation" onClick={() => !isSavingLogic && setIsLogicEditorOpen(false)}>
-          <div className={`${styles.glassPanel} ${styles.logicModal}`} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+          <div
+            ref={logicDialogRef}
+            className={`${styles.glassPanel} ${styles.logicModal}`}
+            {...logicDialogProps}
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className={styles.logicModalHeader}>
               <div>
                 <span className={styles.logicModalEyebrow}>Fase actual</span>
-                <h3 className={styles.logicModalTitle}>{phaseName}</h3>
+                <h3 className={styles.logicModalTitle} id={LOGIC_MODAL_TITLE_ID}>{phaseName}</h3>
               </div>
-              <button type="button" className={styles.logicModalClose} onClick={() => setIsLogicEditorOpen(false)} disabled={isSavingLogic}>
+              <button
+                type="button"
+                className={styles.logicModalClose}
+                onClick={() => setIsLogicEditorOpen(false)}
+                disabled={isSavingLogic}
+                aria-label="Cerrar el editor de lógica"
+              >
                 <X size={16} />
               </button>
             </div>

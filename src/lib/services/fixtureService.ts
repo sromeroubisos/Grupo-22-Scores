@@ -77,6 +77,22 @@ type MatchFeedInvalidationSource = {
   sport?: string | null;
 };
 
+/**
+ * Qué se movió, además del partido editado, como consecuencia de la edición.
+ *
+ * Existe por el gestor de fixture, que desde ahora aplica el partido guardado en
+ * memoria en vez de recargar el torneo entero. Eso vale mientras lo único que
+ * cambió sea la fila que se acaba de guardar — y hay un caso donde no: cargar un
+ * resultado de playoff empuja al ganador al cruce siguiente, y ese OTRO partido
+ * cambió sin que nadie lo pidiera. Lo mismo el reseed de un cuadro sembrado
+ * desde las posiciones de una zona.
+ *
+ * Es un parámetro de salida y no parte del `Match` devuelto a propósito: el
+ * partido es un dato del dominio y esto es una nota sobre el request. Quien no
+ * lo necesita no lo pasa y no se entera.
+ */
+export type MatchUpdateSideEffects = { derivedChanged: boolean };
+
 export class FixtureService {
   private static _supportsRoundLabel: boolean | null = null;
   private static _matchColumnSupport = new Map<string, { value: boolean; at: number; ttl?: number }>();
@@ -1174,6 +1190,7 @@ export class FixtureService {
     matchId: string,
     data: Partial<MatchFormData>,
     providedClient?: any,
+    sideEffects?: MatchUpdateSideEffects,
   ): Promise<Match | null> {
     if (!isUuid(matchId)) {
       throw new Error('El partido que intentás actualizar no existe.');
@@ -1408,6 +1425,7 @@ export class FixtureService {
         const advancement = await resolveMatchAdvancement(supabase, matchId);
         if (advancement.ok && advancement.changed > 0) {
           markEditTrace({ advancementChanged: advancement.changed });
+          if (sideEffects) sideEffects.derivedChanged = true;
           await invalidateMatchesFeedCaches();
         }
         if (advancement.warnings.length > 0) {
@@ -1447,6 +1465,7 @@ export class FixtureService {
             if (cfg && !cfg.locked && cfg.sourcePhaseId === editedMatch.phase_id) {
               const r = await reseedPlayoffBracket(supabase, { phaseId: (phaseRow as any).id });
               if (r.ok && (r.reseeded ?? 0) > 0) {
+                if (sideEffects) sideEffects.derivedChanged = true;
                 await invalidateMatchesFeedCaches();
               }
             }

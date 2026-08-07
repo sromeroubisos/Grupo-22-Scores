@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { ArrowDownUp, Download, RefreshCw, Share2, Target } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { MatchWithClubs, PhaseWithRounds } from '@/lib/types/fixture';
 import { useFixture } from './FixtureContext';
 import type { StandingsDataPayload, TournamentContextData } from './standings/types';
@@ -16,11 +16,20 @@ import {
   isContestWonDetail,
   isContestLostDetail,
 } from '@/lib/matchEventStats';
+import { isRugbySport } from '@/lib/externalProviderPolicy';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
+import { PanelSkeleton } from './PanelSkeleton';
+import { pickAllowed, useStatsUrlState } from './useStatsUrlState';
 
 type TournamentRow = {
   id?: string;
   name?: string | null;
-  sport?: string | null;
+  /**
+   * El slug del deporte ('rugby', 'football'). Este tipo declaraba `sport`, una
+   * columna que no existe en `tournaments`: como era opcional, TypeScript no
+   * decía nada y la lectura devolvía `undefined` para siempre.
+   */
+  sport_id?: string | null;
   season_id?: string | null;
   category?: string | null;
   status?: string | null;
@@ -42,6 +51,10 @@ const TABS: Array<{ id: StatsTabId; label: string; rugbyOnly?: boolean }> = [
   { id: 'set_pieces', label: 'Formaciones fijas', rugbyOnly: true },
   { id: 'advanced', label: 'Avanzadas' },
 ];
+
+const TAB_IDS = TABS.map((tab) => tab.id) as readonly StatsTabId[];
+const SCOPE_MODES = ['totals', 'per_match'] as const;
+const SORT_DIRECTIONS = ['asc', 'desc'] as const;
 
 const DEFAULT_SORT: Record<StatsTabId, { key: string; direction: SortDirection }> = {
   overview: { key: 'competition_points', direction: 'desc' },
@@ -69,7 +82,29 @@ const fmt = (value: unknown, digits = 0) => {
   return num.toLocaleString('es-AR', { minimumFractionDigits: digits, maximumFractionDigits: digits });
 };
 
-const logoFallback = (name: string) => name.slice(0, 2).toUpperCase();
+/**
+ * El escudo de una fila, siempre por el proxy.
+ *
+ * Acá había un `logoFallback` que dibujaba las dos primeras letras del nombre
+ * cuando faltaba el logo. Es la regla dura del proyecto: los equipos van con su
+ * escudo real, nunca con iniciales. Si no hay id de club no hay nada honesto que
+ * poner, así que queda el hueco —el nombre está al lado.
+ *
+ * En Jugadores el `entityId` es `club:jugador`, así que el escudo se resuelve
+ * con la parte del club.
+ */
+function EntityCrest({ row }: { row: RowData }) {
+  const clubId = String(row.entityId ?? '').split(':')[0] || null;
+  const src = buildTeamLogoProxyUrl({
+    key: clubId,
+    name: row.entityName,
+    fallback: row.entityLogo ? String(row.entityLogo) : null,
+  });
+
+  if (!src) return <span aria-hidden="true" />;
+  return <img src={src} alt="" loading="lazy" />;
+}
+
 const isFinal = (match: MatchWithClubs) => match.status === 'final';
 const phaseMatches = (phase: PhaseWithRounds | null | undefined) => (phase ? phase.rounds.flatMap((round) => round.matches || []) : []);
 
@@ -109,19 +144,72 @@ function downloadCsv(filename: string, columns: Column[], rows: RowData[]) {
 export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow; id?: string; phaseId?: string }) {
   const tournamentId = id || data?.id || '';
   const { fixture, refreshFixture } = useFixture();
-  const [activeTab, setActiveTab] = useState<StatsTabId>('overview');
+  /**
+   * Los ocho filtros viven en la URL: la vista se comparte y se abre en una
+   * pestaña nueva tal cual quedó. Cada uno se valida contra lo que la pantalla
+   * sabe dibujar —una URL editada a mano no puede dejarla en un estado
+   * imposible— y los que dependen de datos (equipo, jugador) se comprueban más
+   * abajo, cuando ya se sabe qué equipos y jugadores hay.
+   */
+  const { values: urlStats, setStatsParams } = useStatsUrlState();
+
+  const activeTab = pickAllowed<StatsTabId>(urlStats.statsTab, TAB_IDS, 'overview');
+  const setActiveTab = useCallback(
+    (next: StatsTabId) => setStatsParams({ statsTab: next === 'overview' ? null : next, statsSort: null, statsDir: null }),
+    [setStatsParams],
+  );
+
   const [selectedPhaseId, setSelectedPhaseId] = useState(phaseId || '');
-  const [selectedGroupId, setSelectedGroupId] = useState('all');
-  const [selectedTeamId, setSelectedTeamId] = useState('all');
-  const [selectedPlayerId, setSelectedPlayerId] = useState('all');
-  const [scope, setScope] = useState<ScopeMode>('totals');
-  const [sortKey, setSortKey] = useState(DEFAULT_SORT.overview.key);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(DEFAULT_SORT.overview.direction);
+
+  const selectedGroupId = urlStats.statsGroup || 'all';
+  const setSelectedGroupId = useCallback(
+    (next: string) => setStatsParams({ statsGroup: next === 'all' ? null : next }),
+    [setStatsParams],
+  );
+
+  const selectedTeamId = urlStats.statsTeam || 'all';
+  const setSelectedTeamId = useCallback(
+    // Cambiar de equipo suelta al jugador: pertenece al equipo anterior.
+    (next: string) => setStatsParams({ statsTeam: next === 'all' ? null : next, statsPlayer: null }),
+    [setStatsParams],
+  );
+
+  const selectedPlayerId = urlStats.statsPlayer || 'all';
+  const setSelectedPlayerId = useCallback(
+    (next: string) => setStatsParams({ statsPlayer: next === 'all' ? null : next }),
+    [setStatsParams],
+  );
+
+  const scope = pickAllowed<ScopeMode>(urlStats.statsScope, SCOPE_MODES, 'totals');
+  const setScope = useCallback(
+    (next: ScopeMode) => setStatsParams({ statsScope: next === 'totals' ? null : next }),
+    [setStatsParams],
+  );
+
+  const sortKey = urlStats.statsSort || DEFAULT_SORT[activeTab].key;
+  const sortDirection = pickAllowed<SortDirection>(
+    urlStats.statsDir,
+    SORT_DIRECTIONS,
+    DEFAULT_SORT[activeTab].direction,
+  );
   const [loading, setLoading] = useState(false);
   const [standingsContext, setStandingsContext] = useState<TournamentContextData | null>(null);
   const [standingsData, setStandingsData] = useState<StandingsDataPayload | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const isRugby = (data?.sport || '').toLowerCase().includes('rugby');
+  /**
+   * El deporte se lee de `sport_id`, que guarda el slug ('rugby', 'football').
+   * Esto miraba `data.sport`, una columna que NO existe en el esquema: la
+   * expresión daba `''` siempre, `isRugby` era siempre falso y la pestaña
+   * "Formaciones fijas" —la única marcada `rugbyOnly`— era inalcanzable en
+   * todos los torneos, incluidos los de rugby. El mismo error ya se había
+   * arreglado en Estructura; acá seguía vivo.
+   *
+   * Se usa `isRugbySport` y no una comparación con 'rugby' porque el catálogo
+   * tiene varias formas del mismo deporte (rugby-union, rugby-league, los ids
+   * numéricos de los proveedores).
+   */
+  const isRugby = isRugbySport(data?.sport_id);
   const tabs = useMemo(() => TABS.filter((tab) => !tab.rugbyOnly || isRugby), [isRugby]);
 
   useEffect(() => {
@@ -129,26 +217,56 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
     else if (!selectedPhaseId && fixture?.currentPhaseId) setSelectedPhaseId(fixture.currentPhaseId);
   }, [fixture?.currentPhaseId, phaseId, selectedPhaseId]);
 
-  useEffect(() => {
-    const defaults = DEFAULT_SORT[activeTab];
-    setSortKey(defaults.key);
-    setSortDirection(defaults.direction);
-  }, [activeTab]);
+  /**
+   * El orden por defecto de cada pestaña ya no necesita un efecto que escriba
+   * estado: `sortKey` y `sortDirection` caen solos al default de la pestaña
+   * cuando la URL no dice otra cosa, y `setActiveTab` limpia los dos al cambiar
+   * de pestaña. Un efecto que pisa estado después del render es un parpadeo con
+   * el orden viejo.
+   */
 
+  /**
+   * Cambiar de fase suelta grupo, equipo y jugador: pertenecen a la fase
+   * anterior. Pero SÓLO al cambiar — en el montaje no.
+   *
+   * La distinción no existía cuando los tres eran `useState` inicializados en
+   * 'all': resetear a 'all' lo que ya valía 'all' no hacía nada. Ahora que viven
+   * en la URL, el mismo efecto la REESCRIBE, y correrlo al montar borraba los
+   * filtros de cualquier URL compartida apenas se abría — justo lo contrario de
+   * para qué se llevaron a la URL.
+   *
+   * El ref arranca en `null` para distinguir "primer render" de "la fase pasó a
+   * valer null", que no son lo mismo.
+   */
+  const fasePreviaRef = useRef<string | null>(null);
   useEffect(() => {
-    setSelectedGroupId('all');
-    setSelectedTeamId('all');
-    setSelectedPlayerId('all');
-  }, [selectedPhaseId]);
+    const previa = fasePreviaRef.current;
+    fasePreviaRef.current = selectedPhaseId;
 
+    if (previa === null || previa === selectedPhaseId) return;
+
+    setStatsParams({ statsGroup: null, statsTeam: null, statsPlayer: null });
+  }, [selectedPhaseId, setStatsParams]);
+
+  /**
+   * Los dos fetch avisan cuando fallan. Antes el error iba a la consola y la
+   * pantalla mostraba una tabla vacía: indistinguible de un torneo sin partidos
+   * cargados, que es la lectura equivocada y la más tranquilizadora.
+   */
   const loadContext = useCallback(async () => {
     if (!tournamentId) return;
     try {
       const response = await fetch(`/api/admin/tournaments/${tournamentId}/standings/context`, { cache: 'no-store' });
       const result = await response.json();
-      if (response.ok && result.ok) setStandingsContext(result);
+      if (response.ok && result.ok) {
+        setStandingsContext(result);
+        setLoadError(null);
+      } else {
+        setLoadError(result?.error || 'No se pudo cargar el contexto del torneo.');
+      }
     } catch (error) {
       console.error('Stats context error:', error);
+      setLoadError('Error de red al cargar el contexto del torneo.');
     }
   }, [tournamentId]);
 
@@ -159,11 +277,17 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
       if (selectedGroupId !== 'all') params.set('groupId', selectedGroupId);
       const response = await fetch(`/api/admin/tournaments/${tournamentId}/standings?${params}`, { cache: 'no-store' });
       const result = await response.json();
-      if (response.ok && result.ok) setStandingsData(result);
-      else setStandingsData(null);
+      if (response.ok && result.ok) {
+        setStandingsData(result);
+        setLoadError(null);
+      } else {
+        setStandingsData(null);
+        setLoadError(result?.error || 'No se pudo cargar la tabla de la fase.');
+      }
     } catch (error) {
       console.error('Stats standings error:', error);
       setStandingsData(null);
+      setLoadError('Error de red al cargar la tabla de la fase.');
     }
   }, [selectedGroupId, selectedPhaseId, tournamentId]);
 
@@ -178,7 +302,7 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
   const filteredMatches = useMemo(() => selectedGroupId === 'all' ? matches : matches.filter((match) => match.groupId === selectedGroupId), [matches, selectedGroupId]);
   const finalMatches = useMemo(() => filteredMatches.filter(isFinal), [filteredMatches]);
 
-  const teamRows = useMemo<RowData[]>(() => {
+  const teamRowsAll = useMemo<RowData[]>(() => {
     const byId = new Map<string, RowData>();
     const ensure = (id: string, name: string, logo?: string | null) => {
       if (!byId.has(id)) {
@@ -303,11 +427,22 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
     });
 
     return Array.from(byId.values())
-      .map((row) => ({ ...row, points_difference: n(row.points_for) - n(row.points_against) }))
-      .filter((row) => selectedTeamId === 'all' || row.entityId === selectedTeamId);
-  }, [finalMatches, selectedTeamId, standingsData?.table]);
+      .map((row) => ({ ...row, points_difference: n(row.points_for) - n(row.points_against) }));
+  }, [finalMatches, standingsData?.table]);
 
-  const playerRows = useMemo<RowData[]>(() => {
+  /**
+   * El filtro se aplica ACÁ y no adentro del memo de arriba, y esa es toda la
+   * diferencia: las opciones del selector de equipo salen de `teamRowsAll`, sin
+   * filtrar. Antes salían de la lista ya filtrada, así que elegir un equipo
+   * dejaba UN solo equipo en el desplegable y no había forma de pasar a otro sin
+   * volver a "Todos" primero. El filtro se comía su propio menú.
+   */
+  const teamRows = useMemo<RowData[]>(
+    () => teamRowsAll.filter((row) => selectedTeamId === 'all' || row.entityId === selectedTeamId),
+    [teamRowsAll, selectedTeamId],
+  );
+
+  const playerRowsForTeam = useMemo<RowData[]>(() => {
     const byId = new Map<string, RowData>();
     finalMatches.forEach((match) => {
       const counted = new Set<string>();
@@ -396,10 +531,20 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
         }
       });
     });
+    /**
+     * Acotado por EQUIPO pero no por jugador: de acá salen las opciones del
+     * selector de jugador, y filtrarlo por el jugador ya elegido dejaba uno solo
+     * en la lista. Que el equipo sí acote es lo correcto —se elige un club y
+     * después alguien de ese club—; que el jugador acote su propio menú, no.
+     */
     return Array.from(byId.values())
-      .filter((row) => selectedTeamId === 'all' || String(row.entityId).startsWith(`${selectedTeamId}:`))
-      .filter((row) => selectedPlayerId === 'all' || row.entityId === selectedPlayerId);
-  }, [finalMatches, selectedPlayerId, selectedTeamId]);
+      .filter((row) => selectedTeamId === 'all' || String(row.entityId).startsWith(`${selectedTeamId}:`));
+  }, [finalMatches, selectedTeamId]);
+
+  const playerRows = useMemo<RowData[]>(
+    () => playerRowsForTeam.filter((row) => selectedPlayerId === 'all' || row.entityId === selectedPlayerId),
+    [playerRowsForTeam, selectedPlayerId],
+  );
 
   const cards = useMemo(() => {
     const teamLeader = [...teamRows].sort((a, b) => n(b.competition_points) - n(a.competition_points))[0];
@@ -503,8 +648,9 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
   }), [sortDirection, sortKey, table.rows]);
 
   const chartRows = useMemo(() => rows.filter((row) => Number.isFinite(Number(row[table.chartKey]))).slice(0, 6), [rows, table.chartKey]);
-  const teamOptions = useMemo(() => teamRows.map((row) => ({ id: row.entityId, name: row.entityName })).sort((a, b) => a.name.localeCompare(b.name, 'es')), [teamRows]);
-  const playerOptions = useMemo(() => playerRows.map((row) => ({ id: row.entityId, name: `${row.entityName} · ${row.secondary}` })).sort((a, b) => a.name.localeCompare(b.name, 'es')), [playerRows]);
+  // Las opciones salen de las listas SIN el filtro que ellas mismas alimentan.
+  const teamOptions = useMemo(() => teamRowsAll.map((row) => ({ id: row.entityId, name: row.entityName })).sort((a, b) => a.name.localeCompare(b.name, 'es')), [teamRowsAll]);
+  const playerOptions = useMemo(() => playerRowsForTeam.map((row) => ({ id: row.entityId, name: `${row.entityName} · ${row.secondary}` })).sort((a, b) => a.name.localeCompare(b.name, 'es')), [playerRowsForTeam]);
   const insights = useMemo(() => {
     const leader = rows[0];
     return [
@@ -534,12 +680,22 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
     }
   }, [data?.name, insights, selectedPhase?.name, table.title]);
 
+  // El mismo esqueleto que usa el resto de la consola, en vez de una frase
+  // suelta sobre una página en blanco: el armazón ya está, faltan los datos.
   if (!fixture) {
-    return <div className={styles.page}><div className={styles.emptyBlock}>Cargando estadísticas del torneo...</div></div>;
+    return <div className={styles.page}><PanelSkeleton rows={6} /></div>;
   }
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} aria-busy={loading}>
+      {/* Un fallo de carga se dice. Antes iba sólo a la consola del navegador y
+          la pantalla quedaba con una tabla vacía, que se lee como "este torneo
+          no tiene datos" en vez de "no se pudieron traer". */}
+      {loadError && (
+        <div className="basalt-toast is-error" role="alert" aria-live="assertive">
+          {loadError}
+        </div>
+      )}
       {/* Cabecera de panel, no de página.
           Acá había un <h2>"Tournament Statistics"</h2> con el rótulo "Sports
           Statistics Hub" y un párrafo que describía la propia arquitectura del
@@ -616,7 +772,7 @@ export function TournamentStatsTab({ data, id, phaseId }: { data?: TournamentRow
             </span>
           </div>
         ) : null}
-        {rows.length === 0 || (activeTab === 'set_pieces' && !rows.some((row) => n(row.scrums_won) + n(row.lineouts_won) + n(row.scrums_lost) + n(row.lineouts_lost) + n(row.rucks_won) + n(row.rucks_lost) + n(row.mauls_won) + n(row.mauls_lost) > 0)) ? <div className={styles.emptyBlock}>{table.empty}</div> : <div className={styles.tableWrap}><table className={styles.table}><thead><tr>{table.columns.map((column) => <th key={column.id} className={column.accent ? styles.headAccent : ''} title={column.title}><button type="button" className={styles.sortButton} onClick={() => { if (sortKey === column.id) setSortDirection((current) => current === 'desc' ? 'asc' : 'desc'); else { setSortKey(column.id); setSortDirection(column.id === DEFAULT_SORT[activeTab].key ? DEFAULT_SORT[activeTab].direction : 'desc'); } }}>{column.label}<ArrowDownUp size={12} /></button></th>)}</tr></thead><tbody>{rows.map((row) => <tr key={row.entityId}>{table.columns.map((column) => <td key={`${row.entityId}-${column.id}`}>{column.id === 'entity' ? <div className={styles.entityCell}><div className={styles.entityLogo}>{row.entityLogo ? <img src={String(row.entityLogo)} alt={row.entityName} /> : <span>{logoFallback(row.entityName)}</span>}</div><div><strong>{row.entityName}</strong>{row.secondary ? <span>{row.secondary}</span> : null}</div></div> : column.id === 'set_piece_success_rate' || column.id === 'conversion_rate' || column.id === 'conversion_kick_effectiveness' || column.id === 'penalty_palos_effectiveness' || column.id === 'contest_effectiveness'
+        {rows.length === 0 || (activeTab === 'set_pieces' && !rows.some((row) => n(row.scrums_won) + n(row.lineouts_won) + n(row.scrums_lost) + n(row.lineouts_lost) + n(row.rucks_won) + n(row.rucks_lost) + n(row.mauls_won) + n(row.mauls_lost) > 0)) ? <div className={styles.emptyBlock}>{table.empty}</div> : <div className={styles.tableWrap}><table className={styles.table}><thead><tr>{table.columns.map((column) => <th key={column.id} className={column.accent ? styles.headAccent : ''} title={column.title}><button type="button" className={styles.sortButton} onClick={() => { if (sortKey === column.id) setStatsParams({ statsSort: column.id, statsDir: sortDirection === 'desc' ? 'asc' : 'desc' }); else setStatsParams({ statsSort: column.id, statsDir: column.id === DEFAULT_SORT[activeTab].key ? DEFAULT_SORT[activeTab].direction : 'desc' }); }}>{column.label}<ArrowDownUp size={12} /></button></th>)}</tr></thead><tbody>{rows.map((row) => <tr key={row.entityId}>{table.columns.map((column) => <td key={`${row.entityId}-${column.id}`}>{column.id === 'entity' ? <div className={styles.entityCell}><div className={styles.entityLogo}><EntityCrest row={row} /></div><div><strong>{row.entityName}</strong>{row.secondary ? <span>{row.secondary}</span> : null}</div></div> : column.id === 'set_piece_success_rate' || column.id === 'conversion_rate' || column.id === 'conversion_kick_effectiveness' || column.id === 'penalty_palos_effectiveness' || column.id === 'contest_effectiveness'
             ? (n(row[column.id]) < 0 ? '—' : `${fmt(row[column.id], 1)}%`)
             : typeof row[column.id] === 'number' ? fmt(row[column.id], Number.isInteger(n(row[column.id])) ? 0 : 1) : String(row[column.id] ?? '—')}</td>)}</tr>)}</tbody></table></div>}
       </section>

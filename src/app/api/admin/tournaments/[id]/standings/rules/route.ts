@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireTournamentMutationContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
+import { DEFAULT_TABLE_TYPE, TABLE_TYPES } from '@/lib/standings/tableType';
+import { supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 
 export async function PUT(
     request: NextRequest,
@@ -15,7 +17,7 @@ export async function PUT(
             return NextResponse.json({ error: 'phaseId and rules are required' }, { status: 400 });
         }
 
-        const { writer: supabase } = await requireTournamentMutationContext(tournamentId);
+        const { writer: supabase, actorUserId } = await requireTournamentMutationContext(tournamentId);
         const hasShootoutPoints =
             Number.isFinite(Number(rules.points_for_shootout_win))
             && Number.isFinite(Number(rules.points_for_shootout_loss));
@@ -92,21 +94,50 @@ export async function PUT(
 
         if (updateError) throw updateError;
 
-        // Log to audit log
-        await supabase.from('admin_audit_log').insert({
+        /**
+         * Auditoría. Venía escribiendo una columna `payload` que no existe en
+         * `admin_audit_log` (la columna es `changes`) y sin `actor_user_id`, que
+         * es NOT NULL: el insert fallaba siempre y nadie miraba el error, así
+         * que cambiar el reglamento de una fase no dejaba rastro.
+         */
+        const { error: auditError } = await supabase.from('admin_audit_log').insert({
             entity_type: 'phase_rules',
             entity_id: phaseId,
+            actor_user_id: actorUserId,
             action: 'updated_phase_standings_rules',
-            payload: updatedSettings
+            changes: updatedSettings,
         });
 
-        // Auto-recalculate every effective scope so grouped phases refresh too.
-        const recalcResult = await recalculatePhaseStandingsScopes(tournamentId, phaseId);
-        if (!recalcResult.ok) {
-            return NextResponse.json(
-                { error: 'No se pudieron recalcular las tablas luego de guardar las reglas.' },
-                { status: 500 },
+        if (auditError) {
+            console.error('[standings/rules] No se pudo registrar la auditoría', auditError);
+        }
+
+        /**
+         * Recalcular cada scope efectivo, para que las fases con grupos también
+         * se refresquen — y cada perspectiva publicada, no sólo la general: un
+         * cambio de reglamento afecta a las tres por igual, y recalcular sólo
+         * `general` dejaba a local y visitante desactualizadas para siempre, sin
+         * ninguna forma de que el operador se enterara.
+         *
+         * Antes de la migración sólo existe `general`, así que el bucle hace una
+         * sola vuelta y esto es idéntico al comportamiento anterior.
+         */
+        const tableTypesToRefresh = (await supportsStandingsTableTypeColumn())
+            ? TABLE_TYPES
+            : [DEFAULT_TABLE_TYPE];
+
+        for (const tableType of tableTypesToRefresh) {
+            const recalcResult = await recalculatePhaseStandingsScopes(
+                tournamentId,
+                phaseId,
+                tableType,
             );
+            if (!recalcResult.ok) {
+                return NextResponse.json(
+                    { error: `No se pudieron recalcular las tablas (${tableType}) luego de guardar las reglas.` },
+                    { status: 500 },
+                );
+            }
         }
 
         return NextResponse.json({ ok: true });

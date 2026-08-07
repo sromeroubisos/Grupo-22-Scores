@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,6 +19,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * `ui_labels` es un catálogo GLOBAL, no cuelga de un torneo, así que el control
+ * no puede ser por membresía de torneo: es el rol. Sin esto, cualquiera con una
+ * sesión podía crear, renombrar y BORRAR etiquetas que se usan en todos los
+ * torneos del sistema.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -28,11 +35,18 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+
+    let user: { id: string };
+    try {
+      const context = await requireTournamentAdminContext(supabase);
+      user = { id: context.userId };
+    } catch {
+      return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
+    }
 
     const { data, error } = await supabase
       .from('ui_labels')
-      .insert({ name: name.trim(), color, scope, created_by: user?.id ?? null })
+      .insert({ name: name.trim(), color, scope, created_by: user.id })
       .select()
       .single();
 

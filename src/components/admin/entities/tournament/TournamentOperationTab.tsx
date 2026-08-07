@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useEffect, useMemo, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -18,6 +18,8 @@ import type { PhaseWithRounds } from '@/lib/types/fixture';
 import { CIRCUIT_GLOBAL_SENTINEL } from './standings/types';
 import { isCircuitRuleset } from '@/lib/utils/tournamentFormat';
 import { buildPhaseFigures, computePhaseStats } from './phaseFigures';
+import { PanelSkeleton } from './PanelSkeleton';
+import { useStandingsUrlState } from './standings/useStandingsUrlState';
 import './basalt.css';
 import './operation-console.css';
 
@@ -33,32 +35,6 @@ const TournamentStatsTab = dynamic(() => import('./TournamentStatsTab').then(mod
 const TournamentOperationFixtureWorkspace = dynamic(() => import('./TournamentOperationFixtureWorkspace').then(mod => mod.TournamentOperationFixtureWorkspace), {
     loading: () => <PanelSkeleton rows={6} />,
 });
-
-/**
- * Esqueleto con la forma de lo que viene, no un spinner centrado. El armazón
- * ya está en pantalla: lo único que falta son los datos, así que se dibujan
- * los huecos que van a ocupar y la página no salta cuando llegan.
- */
-function PanelSkeleton({ rows = 5 }: { rows?: number }) {
-    return (
-        <div className="op-panel" aria-busy="true" aria-live="polite">
-            <div className="op-panel-head">
-                <span className="op-skeleton" style={{ width: 120 }} />
-            </div>
-            <div className="op-panel-body is-flush">
-                {Array.from({ length: rows }).map((_, index) => (
-                    <div className="op-match-row" key={index}>
-                        <span className="op-skeleton" style={{ width: 92 }} />
-                        <span className="op-skeleton op-skeleton-crest" />
-                        <span className="op-skeleton" style={{ flex: 1 }} />
-                        <span className="op-skeleton" style={{ width: 52 }} />
-                    </div>
-                ))}
-            </div>
-            <span className="sr-only">Cargando…</span>
-        </div>
-    );
-}
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 
@@ -98,7 +74,14 @@ export function TournamentOperationTab({ id, data, initialSubtab }: TournamentOp
 // leer el fixture y gatear la UI sin flash del empty-state.
 function OperationGate({ id, data, initialSubtab }: TournamentOperationTabProps) {
     const { fixture, fixtureError, refreshFixture } = useFixture();
-    const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
+
+    /**
+     * La fase vive en la URL y en ningún otro lado. Antes había dos fuentes de
+     * verdad —este estado y el `selectedPhase` de Posiciones— unidas por un
+     * efecto de diez líneas que podía discrepar; ahora Posiciones lee la misma
+     * URL que escribe esta barra.
+     */
+    const { phaseId: urlPhaseId, setPhase } = useStandingsUrlState();
 
     // Auto-fetch UNA sola vez por mount. NO dependemos del timing de isLoadingFixture/
     // fixtureError: FixtureContext.refreshFixture retorna sin setear fixtureError en el
@@ -131,18 +114,17 @@ function OperationGate({ id, data, initialSubtab }: TournamentOperationTabProps)
 
     const phases = useMemo<PhaseWithRounds[]>(() => fixture?.phases ?? [], [fixture?.phases]);
 
-    // Preselección: preserva una selección previa válida (incl. sentinel de circuito);
-    // sólo cae al default (fase activa que ya calcula el server, si no la primera) cuando
-    // no hay una válida. Nunca pisa una selección válida.
-    useEffect(() => {
-        if (phases.length === 0) return;
-        setSelectedPhaseId((prev) => {
-            if (prev && (prev === CIRCUIT_GLOBAL_SENTINEL || phases.some((phase) => phase.id === prev))) {
-                return prev;
-            }
-            return fixture?.currentPhaseId ?? phases[0]?.id ?? null;
-        });
-    }, [phases, fixture?.currentPhaseId]);
+    /**
+     * Preselección DERIVADA, no un efecto que escribe estado: se respeta lo que
+     * diga la URL mientras sea una fase de este torneo (o el centinela del
+     * circuito), y si no, se cae a la fase activa que ya resolvió el servidor.
+     * Una fase de otro torneo pegada en la URL no rompe nada: se ignora.
+     */
+    const selectedPhaseId = useMemo<string | null>(() => {
+        if (urlPhaseId === CIRCUIT_GLOBAL_SENTINEL) return urlPhaseId;
+        if (urlPhaseId && phases.some((phase) => phase.id === urlPhaseId)) return urlPhaseId;
+        return fixture?.currentPhaseId ?? phases[0]?.id ?? null;
+    }, [urlPhaseId, phases, fixture?.currentPhaseId]);
 
     if (fixtureError) {
         return (
@@ -211,7 +193,7 @@ function OperationGate({ id, data, initialSubtab }: TournamentOperationTabProps)
             data={data}
             phases={phases}
             selectedPhaseId={selectedPhaseId}
-            onSelectPhase={setSelectedPhaseId}
+            onSelectPhase={setPhase}
             initialSubtab={initialSubtab}
         />
     );
@@ -268,30 +250,37 @@ function OperationContent({
 }: OperationContentProps) {
     const searchParams = useSearchParams();
     const currentSubTab = normalizeOperationSubTab(searchParams.get('subtab') || initialSubtab);
-    const [optimisticSubTab, setOptimisticSubTab] = useState(currentSubTab);
 
     const buildSubTabUrl = useCallback((subTabId: string) => {
-        const params = new URLSearchParams(searchParams.toString());
+        const params = new URLSearchParams(
+            typeof window === 'undefined' ? searchParams.toString() : window.location.search,
+        );
         params.set('type', 'tournament');
         params.set('tab', 'operacion');
         params.set('subtab', subTabId);
         return `/admin/entities/${id}/manage?${params.toString()}`;
     }, [id, searchParams]);
 
-    const replaceSubTabUrl = useCallback((subTabId: string) => {
+    /**
+     * El subtab es una navegación, así que va con `pushState`: apretar Atrás
+     * desde Estadísticas vuelve a Posiciones. Antes usaba `replaceState`, que
+     * pisa la entrada actual del historial — por eso Atrás se saltaba la
+     * pestaña entera y salía de Operación.
+     *
+     * `pushState` nativo y no `router.push` porque `router.push` sobre la misma
+     * ruta re-renderiza los componentes de servidor de `page.tsx`, que en esta
+     * pantalla es exactamente lo que satura el pool. La API nativa está
+     * integrada con el App Router: `useSearchParams()` se entera y Atrás
+     * dispara el `popstate` que el router ya maneja.
+     */
+    const navigateToSubTab = useCallback((subTabId: string, mode: 'push' | 'replace') => {
         if (typeof window === 'undefined') return;
         const nextUrl = buildSubTabUrl(subTabId);
-        const currentUrl = `${window.location.pathname}${window.location.search}`;
+        if (nextUrl === `${window.location.pathname}${window.location.search}`) return;
 
-        if (currentUrl !== nextUrl) {
-            window.history.replaceState(null, '', nextUrl);
-        }
+        if (mode === 'push') window.history.pushState(null, '', nextUrl);
+        else window.history.replaceState(null, '', nextUrl);
     }, [buildSubTabUrl]);
-
-    useEffect(() => {
-        setOptimisticSubTab(currentSubTab);
-        replaceSubTabUrl(currentSubTab);
-    }, [currentSubTab, replaceSubTabUrl]);
 
     const isCircuit = useMemo(() => isCircuitRuleset(data.ruleset), [data.ruleset]);
     const isGlobalSelected = selectedPhaseId === CIRCUIT_GLOBAL_SENTINEL;
@@ -306,17 +295,18 @@ function OperationContent({
     const stats = useMemo(() => computePhaseStats(selectedPhase), [selectedPhase]);
 
     const switchSubTab = useCallback((subTabId: string) => {
-        if (subTabId === optimisticSubTab) return;
-        setOptimisticSubTab(subTabId);
-        replaceSubTabUrl(subTabId);
-    }, [optimisticSubTab, replaceSubTabUrl]);
+        if (subTabId === currentSubTab) return;
+        navigateToSubTab(subTabId, 'push');
+    }, [currentSubTab, navigateToSubTab]);
 
-    // When global circuit is selected, only the standings tab is meaningful
+    // En Tabla Global sólo Posiciones tiene sentido. Este salto NO lo pidió
+    // nadie, así que va con `replace`: no tiene que quedar en el historial ni
+    // hacer que Atrás rebote entre dos pestañas.
     useEffect(() => {
         if (isGlobalSelected && currentSubTab !== 'tabla') {
-            switchSubTab('tabla');
+            navigateToSubTab('tabla', 'replace');
         }
-    }, [currentSubTab, isGlobalSelected, switchSubTab]);
+    }, [currentSubTab, isGlobalSelected, navigateToSubTab]);
 
     const phaseStateLabel = isGlobalSelected
         ? 'Circuito'
@@ -380,7 +370,7 @@ function OperationContent({
             <div className="op-subrail" role="tablist" aria-label="Submódulos de operación">
                 {OPERATION_SUB_TABS.map((tab) => {
                     const Icon = tab.icon;
-                    const isActive = optimisticSubTab === tab.id;
+                    const isActive = currentSubTab === tab.id;
                     // En Tabla Global sólo Posiciones tiene sentido: el resto se
                     // deshabilita de verdad, en vez de dejar entrar a un cartel.
                     const disabled = isGlobalSelected && tab.id !== 'tabla';
@@ -421,20 +411,20 @@ function OperationContent({
                     </div>
                 )}
 
-                {optimisticSubTab === 'fixture' && !isGlobalSelected && (
+                {currentSubTab === 'fixture' && !isGlobalSelected && (
                     <TournamentOperationFixtureWorkspace
                         tournament={data}
                         selectedPhaseId={selectedPhaseId}
                         onSelectPhase={onSelectPhase}
                     />
                 )}
-                {optimisticSubTab === 'tabla' && (
+                {currentSubTab === 'tabla' && (
                     <TournamentStandingsTab
                         tournamentId={id}
                         preferredPhaseId={selectedPhaseId}
                     />
                 )}
-                {optimisticSubTab === 'estadisticas' && !isGlobalSelected && (
+                {currentSubTab === 'estadisticas' && !isGlobalSelected && (
                     <TournamentStatsTab id={id} data={data} phaseId={selectedPhaseId || undefined} />
                 )}
             </div>

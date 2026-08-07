@@ -27,10 +27,42 @@
        gira con el tema: #f59e0b da 8.5:1 en oscuro, #b45309 sigue siendo el
        correcto en claro. */
     --warn-ink: #f59e0b;
+
+    /* Las tintas de la tabla de posiciones, por el mismo motivo que `--warn-ink`:
+       estaban escritas a fuego en el módulo CSS —que no tenía ni una regla de
+       tema claro en 2.800 líneas— y fallaban el contraste, medido:
+
+         .numericPositive  #10b981  2,41:1 en claro
+         .numericNegative  #ef4444  3,57:1 en claro
+         .emptyInline      #334155  1,67:1 en OSCURO (era un gris de tema claro)
+         .tiebreakerBadge  #fff sobre #22c55e  2,28:1 en los dos
+
+       Los valores de acá dan 5,0:1 o más en los dos temas sobre las superficies
+       reales de la consola (#111b2a en oscuro, #f7f9fc en claro). */
+    --ok-ink: #34d399;          /* 9,00:1 */
+    --bad-ink: #f87171;         /* 6,25:1 */
+    --muted-ink: #94a3b8;       /* 6,75:1 */
+    --tiebreak-chip-bg: #15803d; /* con blanco: 5,02:1 */
 }
 
 :root[data-theme="light"] .operation-console-shell {
-    --warn-ink: #b45309;
+    /* Los valores de acá salieron de MEDIRLOS en un render headless, no de
+       calcularlos sobre la superficie del panel. La diferencia importa: las
+       fichas de forma y los estados van sobre un tinte propio que en tema claro
+       queda más claro que el panel, y contra ese tinte #047857 daba 4,42 y
+       #b45309 daba 4,18 — los dos por debajo del corte, por poco.
+
+       El peor caso de cada token, contra el fondo compuesto real:
+         --ok-ink   #065f46  6,22:1  (peor: la ficha W sobre #ceeee6)
+         --warn-ink #92400e  5,92:1  (peor: la ficha D sobre #f7e9d1)
+         --bad-ink  #b91c1c  4,87:1  (peor: la ficha L sobre #f6d8db)
+         --muted-ink #475569 6,88:1
+         --tiebreak-chip-bg #166534 con blanco: 7,13:1 */
+    --warn-ink: #92400e;
+    --ok-ink: #065f46;
+    --bad-ink: #b91c1c;
+    --muted-ink: #475569;
+    --tiebreak-chip-bg: #166534;
 }
 
 /* ── Escudos ─────────────────────────────────────────────────────────────
@@ -1230,6 +1262,11 @@
     gap: 12px;
     padding: 0 12px;
     min-height: 52px;
+    /* La línea entera abre el resultado, así que la mano tiene que aparecer
+       sobre la línea entera. Estaba sólo en la lámina, que queda debajo del
+       contenido: sobre el nombre del club el cursor era la flecha y nada
+       avisaba que ahí se podía hacer click. */
+    cursor: pointer;
 }
 
 .basalt-body .op-match-line:hover {
@@ -1240,12 +1277,32 @@
     background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
 }
 
-/* Toda la línea abre el control del partido; los botones se sacan del área
-   clicable con su propio z-index. */
-.op-match-link {
+/* Toda la línea abre la carga de resultado; los botones se sacan del área
+   clicable con su propio z-index.
+
+   Es un `<button>`, no un enlace: ya no navega a ningún lado, despliega el
+   editor debajo de esta misma fila. Por eso van los reset —el agente de usuario
+   le pone fondo, borde y tipografía propia a todo botón, y acá es una lámina
+   invisible del tamaño de la fila. */
+.op-match-link,
+/* Con `.basalt-body` delante para ganarle al piso de 44px que la hoja de mobile
+   le pone a TODO `button` por debajo de 767px (`.basalt-body button`, dos
+   componentes). Acá el alto lo pone `inset: 0` —es la lámina de la fila, no un
+   blanco táctil— y un mínimo de 44 la haría desbordar en las filas más bajas. */
+.basalt-body .op-match-link {
     position: absolute;
     inset: 0;
     z-index: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
 }
 
 .op-match-link:focus-visible {
@@ -1352,6 +1409,20 @@
     height: 28px;
     padding: 0 9px;
     font-size: 10px;
+}
+
+/* La puerta al control de partido es la única acción que se va de la pantalla,
+   y desde que la fila carga el resultado es también la única forma de llegar
+   ahí. Un contorno en el acento la separa de mover / duplicar / eliminar, que
+   son tres botones grises intercambiables a simple vista. */
+.basalt-body .op-match-actions .basalt-btn.op-match-act-open {
+    border-color: color-mix(in srgb, var(--accent-primary) 55%, transparent);
+    color: var(--accent-primary);
+}
+
+.basalt-body .op-match-actions .basalt-btn.op-match-act-open:hover {
+    border-color: var(--accent-primary);
+    background: color-mix(in srgb, var(--accent-primary) 14%, transparent);
 }
 
 /* El `⋯` es una pieza de teléfono: con mouse las cinco acciones caben en la
@@ -1556,6 +1627,16 @@
 
     .basalt-body .op-match-act-more {
         display: none;
+    }
+
+    /* Menos la puerta al control de partido, que no es una acción de segundo
+       orden: desde que la fila abre el resultado, es la ÚNICA forma de llegar a
+       los eventos. La regla que la mostraba vivía en
+       `(min-width: 361px) and (max-width: 767px)`, así que en un teléfono de
+       320 o 360 el botón simplemente no existía y había que pasar por el `⋯`.
+       Medido: a 320 y 360 `op-match-act-open` salía en `display: none`. */
+    .basalt-body .op-match-act-open {
+        display: inline-flex;
     }
 
     .basalt-body .op-match-act-toggle {
@@ -2132,14 +2213,67 @@
     gap: 12px 14px;
 }
 
+/* ── El formulario conserva sus pares en el teléfono ─────────────────────────
+   Los campos de este formulario están pensados de a dos: etapa y grupo,
+   local y visitante, fecha y hora, sede y estado. Apilarlos de a uno rompía
+   esa lectura y convertía el alta de un partido en ocho pantallazos de
+   scroll, además de dejar cada control con 300px de ancho para escribir
+   «Cancha 1».
+
+   Se achica lo que haga falta para que el par entre —rótulos de 10px,
+   controles de 40 y tipografía de 14— pero el orden es el mismo que en
+   escritorio. El rótulo de arriba dice qué es cada campo, así que un
+   «Selecciona el visitante» truncado no pierde información: la lleva
+   «EQUIPO VISITANTE».
+
+   Nota sobre los 14px: la hoja de mobile pone 16 en todo input para que
+   Safari en iOS no haga zoom al enfocar. Acá se baja a propósito y sólo
+   dentro de este formulario, porque el par de campos no entra de otra forma;
+   el zoom al enfocar es molesto, un control cortado a la mitad es peor. */
 @media (max-width: 720px) {
     .basalt-body .operation-console-shell .operation-form-grid,
     .basalt-body .operation-console-shell .operation-manual-grid {
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px 10px;
     }
 
+    /* El que en escritorio cruza las dos columnas, acá también. */
     .basalt-body .operation-console-shell .operation-form-field-span-2 {
-        grid-column: auto;
+        grid-column: 1 / -1;
+    }
+
+    .basalt-body .operation-console-shell .operation-manual-grid .operation-form-field > span,
+    .basalt-body .operation-console-shell .operation-form-grid .operation-form-field > span {
+        font-size: 10px;
+        letter-spacing: 0.09em;
+    }
+
+    .basalt-body .operation-console-shell .operation-manual-grid .basalt-input,
+    .basalt-body .operation-console-shell .operation-form-grid .basalt-input {
+        min-height: 40px !important;
+        height: 40px !important;
+        padding: 0 10px !important;
+        font-size: 14px !important;
+        text-overflow: ellipsis;
+    }
+
+    /* La fecha y la hora son un par como cualquier otro: no se apilan. */
+    .basalt-body .operation-console-shell .operation-datetime-pair {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 92px);
+        gap: 8px;
+    }
+
+    /* El aviso y el error son PROSA —«Esta fase no tiene zonas. Se definen en
+       Estructura.»— con vestimenta de rótulo: versalita y tracking. En media
+       columna eso son tres renglones de mayúsculas espaciadas que hay que
+       descifrar. La versalita es para etiquetas de una o dos palabras; una
+       frase se escribe como frase. */
+    .basalt-body .operation-console-shell .operation-field-hint,
+    .basalt-body .operation-console-shell .operation-field-error {
+        font-size: 10.5px;
+        line-height: 1.35;
+        text-transform: none;
+        letter-spacing: 0;
     }
 }
 
@@ -2168,11 +2302,9 @@
     color: var(--text-dim);
 }
 
-@media (max-width: 520px) {
-    .basalt-body .operation-console-shell .operation-datetime-pair {
-        grid-template-columns: minmax(0, 1fr);
-    }
-}
+/* A 520 la fecha y la hora se apilaban. Ya no: el bloque de arriba las
+   mantiene en el mismo renglón, con la hora en su ancho justo, porque son un
+   par —cuándo se juega— y separarlas obliga a leer dos veces. */
 
 /* El botón del calendario venía con radio de 9px y un token de la hoja vieja
    (`--fixture-text-dim`) que acá no existe, así que caía a color heredado. */
@@ -3519,6 +3651,30 @@
         display: none;
     }
 
+    /* ── La cabecera de un panel no se lleva tres renglones ──────────────────
+       Los cuatro botones del selector de vista de Posiciones —General, Local,
+       Visitante, Etiquetas— caían en tres filas porque la hoja de mobile
+       estira TODO botón a 44px de alto y les da 14px de relleno a cada lado.
+       Para un botón que se toca una vez por sesión y vive en una cabecera,
+       eso son 94px de los 168 que medía el panel entero. Con 30px de alto y
+       menos relleno entran en un renglón y siguen siendo tocables. */
+    .basalt-body .operation-console-shell .op-panel-head {
+        gap: 8px;
+        padding: 6px 10px;
+    }
+
+    .basalt-body .operation-console-shell .op-panel-actions {
+        gap: 5px;
+    }
+
+    .basalt-body .operation-console-shell .op-panel-actions .basalt-btn,
+    .basalt-body .operation-console-shell .op-panel-actions button {
+        min-height: 30px !important;
+        height: 30px !important;
+        padding: 0 9px !important;
+        font-size: 10.5px;
+    }
+
     /* ── El aire entre bloques, medido ───────────────────────────────────────
        Antes de este bloque el primer partido caía en y=858 dentro de una
        pantalla de 844: había que hacer scroll para ver el primero de los 56.
@@ -3876,5 +4032,224 @@
     .basalt-body .operation-console-shell .op-result-editor .op-note .basalt-btn {
         width: 100%;
         justify-content: center;
+    }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   La cabecera de Posiciones: un control segmentado, no cuatro botones
+   ─────────────────────────────────────────────────────────────────────────
+   Medido en la consola: los cuatro botones —General, Local, Visitante,
+   Etiquetas— se llevaban 150px de cabecera en TRES renglones para elegir una
+   vista. Dos causas, y las dos son de cascada:
+
+   1. `tournament-mobile.css` estira TODO botón a 44px hasta 767px de ancho.
+      La compactación a 30px que lo corrige vive en el bloque de 640px de esta
+      misma hoja. Entre 641 y 767 —una tablet, un teléfono apaisado, una
+      ventana de escritorio a media pantalla— aplica la inflación y no la
+      corrección: los botones salen a 44 y envuelven. La banda existía desde
+      que se escribió la corrección; nunca se probó dentro de ella.
+   2. Aun compactados, cuatro botones sueltos con borde propio se reparten el
+      ancho por contenido: «Visitante» pide más que «Local» y el cuarto cae
+      solo a un renglón.
+
+   La respuesta es dejar de tratarlos como cuatro acciones. Tres de ellos son
+   UNA elección entre tres —el mismo dato, tres recortes— y eso es un control
+   segmentado: una pista, tres tercios iguales, un solo borde. «Etiquetas» no
+   es la cuarta vista: abre un panel. Se va con la tira de meta, donde está el
+   resto de lo que describe la tabla.
+
+   El bloque va a 900px, no a 640, para tapar la banda entera; y con la
+   especificidad de `.op-table-toolbar` adentro para ganarle sin ambigüedad a
+   la regla general de arriba.
+   ═════════════════════════════════════════════════════════════════════════ */
+/* En escritorio el grupo de vistas es lo que era: tres botones en fila con la
+   separación del riel de acciones. La pista segmentada aparece recién en el
+   bloque de teléfono. */
+.op-view-switch {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+/* «Ajustes» sólo existe en el teléfono: en escritorio los dos rieles de
+   paneles están siempre a la vista y un botón para desplegarlos no abriría
+   nada. Va acá afuera del `@media` para que el default sea NO mostrarlo.
+
+   Lleva `.basalt-body` adelante a propósito: sin ese prefijo compite de igual
+   a igual con `.basalt-btn { display: inline-flex }` de basalt.css y el que
+   gana lo decide el ORDEN de las hojas en el bundle. Esa apuesta ya salió mal
+   una vez en esta consola; con una clase más, no hay apuesta. */
+.basalt-body .op-controls-toggle {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    /* El rótulo «TABLA» lo dice la pestaña activa del riel de submódulos, a
+       treinta píxeles de acá. Repetirlo cuesta un renglón entero. */
+    .basalt-body .operation-console-shell .op-table-toolbar .op-panel-title {
+        display: none;
+    }
+
+    .basalt-body .operation-console-shell .op-table-toolbar .op-panel-head {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 7px;
+        padding: 8px;
+    }
+
+    /* Fila principal: la pista de vistas ocupa lo que sobra y «Ajustes» se
+       queda con lo suyo a la derecha. */
+    .basalt-body .operation-console-shell .op-table-toolbar .op-panel-actions {
+        width: 100%;
+        gap: 6px;
+        flex-wrap: nowrap;
+    }
+
+    /* La pista: un borde y un fondo para las tres, no uno por botón. */
+    .basalt-body .operation-console-shell .op-table-toolbar .op-view-switch {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+        flex: 1 1 auto;
+        min-width: 0;
+        /* Tope: en una tablet de 900px la pista se estiraba a 700 y cada
+           tercio quedaba en 230px con la palabra flotando en el medio. Un
+           control segmentado se lee como un control, no como tres losas. */
+        max-width: 430px;
+        padding: 3px;
+        border: 1px solid var(--border-basalt);
+        border-radius: 3px;
+        background: var(--bg-basalt);
+    }
+
+    /* 34px de alto y un tercio del ancho cada uno: el objetivo táctil real es
+       de ~115×34, muy por encima del piso de WCAG 2.2 AA (24×24). Los 44px
+       que forzaba la hoja de mobile son la medida de un botón que vive solo,
+       no de un segmento dentro de una pista.
+
+       ── Por qué NO va en versalita ──────────────────────────────────────────
+       «VISITANTE» en mayúsculas pide ~66px de caja; el tercio de la pista en
+       un teléfono de 360 mide 64. De ahí salía el recorte —y recortaba a la
+       mitad de la letra, sin puntos suspensivos, porque el rótulo era un nodo
+       de texto suelto dentro de un flex centrado: se comía la V por izquierda
+       y la E por derecha—. La respuesta no es achicar la letra a 9,5px, que
+       es donde la versalita se vuelve ilegible además de ancha: la versalita
+       cuesta un 20% de ancho para que se lea peor, y en un control de tres
+       palabras eso no se paga.
+
+       En caja baja «Visitante» entra en ~52px con el cuerpo en 11 —más
+       grande y más legible que antes— y sobra lugar. Los botones vecinos
+       («Ajustes», «Etiquetas») siguen en versalita: son botones de la
+       consola. Esto es un control segmentado, que es otra pieza.
+
+       `display: block` con `line-height` en vez de `inline-flex`: es lo que
+       hace que `text-overflow: ellipsis` funcione de verdad si algún día un
+       rótulo no entra. Un recorte que se lee como recorte, no como una letra
+       partida al medio. */
+    .basalt-body .operation-console-shell .op-table-toolbar .op-view-switch .basalt-btn {
+        display: block;
+        min-height: 34px !important;
+        height: 34px !important;
+        min-width: 0;
+        padding: 0 8px !important;
+        border: 1px solid transparent !important;
+        border-radius: 2px;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 32px;
+        text-align: center;
+        text-transform: none;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ── El segmento elegido se TIENE que ver ────────────────────────────────
+       El reset de acá arriba apaga borde y fondo para que las tres se lean
+       como una sola pista, y con la especificidad que tiene le ganaba también
+       a `.basalt-btn-accent`: la vista activa quedaba en texto blanco a secas,
+       o sea sin marca. Una pista segmentada donde no se ve cuál está elegida
+       no es un control, son tres palabras en una caja.
+
+       La marca es una placa OPACA con el azul de la consola y el texto en
+       blanco: 20:1 de contraste contra el propio fondo de la placa, frente a
+       los 4,2:1 que daba el azul sobre el tinte transparente —por debajo del
+       4,5 que pide AA para un cuerpo de 11px—.
+
+       El coloreado se apoya en TRES escalones, no en dos: la pista es el
+       fondo más oscuro (`--bg-basalt`), los segmentos en reposo son texto
+       secundario sobre ese fondo, y el elegido es una placa que sube —más
+       clara, azul, con anillo—. Así el orden se lee sin tener que comparar
+       dos grises parecidos. */
+    .basalt-body .operation-console-shell .op-table-toolbar .op-view-switch .basalt-btn-accent {
+        background: color-mix(in srgb, var(--accent-primary) 26%, var(--surface-elevated));
+        border-color: color-mix(in srgb, var(--accent-primary) 58%, transparent) !important;
+        color: #fff;
+        font-weight: 700;
+    }
+
+    /* En reposo, un toque más apagado que el elegido pero lejos de parecer
+       deshabilitado: son opciones disponibles, no texto muerto. */
+    .basalt-body .operation-console-shell .op-table-toolbar .op-view-switch .basalt-btn:not(.basalt-btn-accent):hover {
+        background: var(--basalt-overlay-soft, rgba(255, 255, 255, 0.05));
+        color: var(--text-main);
+    }
+
+    /* La meta y «Etiquetas» comparten renglón: la tira es texto corto y el
+       botón es una sola acción, los dos entran de sobra en 366px. */
+    .basalt-body .operation-console-shell .op-table-toolbar .op-panel-meta {
+        margin-left: 0;
+        width: 100%;
+        gap: 10px;
+        font-size: 10.5px;
+    }
+
+    /* «Etiquetas» va con la tira de meta —abre un panel, no cambia la vista—
+       y se pega a la derecha: el texto a la izquierda, lo que se puede hacer
+       a la derecha, que es como se lee una cabecera. Los dos juntos en el
+       mismo renglón envolvían a tres filas en 366px. */
+    .basalt-body .operation-console-shell .op-table-toolbar .op-labels-toggle {
+        margin-left: auto;
+        min-height: 30px !important;
+        height: 30px !important;
+        padding: 0 9px !important;
+        font-size: 10px;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+    }
+
+    /* 42px = los 34 del segmento más el relleno y el borde de la pista. Con
+       40 quedaba dos píxeles más bajo que su vecina, que es la clase de
+       desalineación que se nota sin poder decir por qué. */
+    .basalt-body .operation-console-shell .op-table-toolbar .op-controls-toggle {
+        display: inline-flex;
+        flex: 0 0 auto;
+        min-height: 42px !important;
+        height: 42px !important;
+        padding: 0 11px !important;
+        font-size: 10.5px;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+    }
+}
+
+/* Teléfonos angostos. La pista ya entra en caja baja, así que acá sólo se le
+   saca marco a los dos botones de la cabecera —que sí están en versalita— y
+   un par de píxeles de relleno a los segmentos, para que el tercio de la
+   pista no baje de lo que pide «Visitante». */
+@media (max-width: 400px) {
+    .basalt-body .operation-console-shell .op-table-toolbar .op-view-switch .basalt-btn {
+        padding: 0 5px !important;
+    }
+
+    .basalt-body .operation-console-shell .op-table-toolbar .op-controls-toggle,
+    .basalt-body .operation-console-shell .op-table-toolbar .op-labels-toggle {
+        padding: 0 8px !important;
+        font-size: 9.5px;
+        letter-spacing: 0.02em;
     }
 }

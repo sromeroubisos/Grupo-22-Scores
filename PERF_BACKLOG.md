@@ -33,8 +33,19 @@ Severidad: 🔴 alta · 🟡 media · ⚪ baja.
 ## Pendiente (orden de ataque acordado)
 
 ### 1. 🔴 `select('*')` de `getMatch` para el resto de callers
-`src/lib/services/fixtureService.ts:705` (`getMatch`) sigue con `select('*')` + 3 joins (arrastra JSONB `events`/`lineups`/`clock`). En este pase solo se acotó super-admin (#1c). Callers pesados restantes: `resultsApi.ts` (varios), `club-admin/matches/[id]/route.ts:118/188`, `tournaments/[id]/matches/[matchId]/route.ts:20/60`, `integrations/whatsapp/matches/route.ts:431`.
+`src/lib/services/fixtureService.ts:705` (`getMatch`) sigue con `select('*')` + 3 joins (arrastra JSONB `events`/`lineups`/`clock`). En este pase solo se acotó super-admin (#1c). Callers pesados restantes: `resultsApi.ts` (varios), `club-admin/matches/[id]/route.ts:118/188`, `integrations/whatsapp/matches/route.ts:431`.
 - **Dirección:** para usos que solo necesitan scope (recalc/invalidación), reusar `getMatchScope`; para los que necesitan la fila completa, evaluar un select explícito sin joins innecesarios.
+- **Hecho (2026-08-06) — `tournaments/[id]/matches/[matchId]/route.ts`,** que es la ruta del gestor de fixture: PATCH y DELETE pasaron a `getMatchScope` y, ya que estaban, le pasan el `status` a `recalcAffectedPhases` (sin él, el gate por estado final es fail-safe y recalculaba standings en toda edición). **Medido contra producción desde el equipo del dev:** el `prev` bajó de **1207 ms / 290 KB** a **277 ms / 0,3 KB**.
+
+### 1d. 🔴 Los escudos se LEEN en base64 aunque después no se sirvan así
+Medido en el torneo `ed986d61` (2026-08-06): la consulta de `tournament_participants` —`clubs:club_id(logo_url)`— devuelve **4,06 MB en 2,0 s** para **16 participantes**. Los 16 escudos son `data:` URI guardados en la columna; el más pesado, Club La Tablada, mide **847 KB él solo**. Las otras cuatro consultas del mismo endpoint suman 47 KB.
+
+**Dónde NO está el problema:** la respuesta HTTP del endpoint pesa **57 KB** (medido contra el dev server, mismo torneo). `resolveSerializableLogoUrl` ya cambia el base64 por la URL del proxy antes de serializar — es lo que arreglaron `fa08b88` / `8ed9b1c` y sigue funcionando. El navegador no ve esos 4 MB.
+
+**Dónde SÍ está:** en el salto Postgres → servidor Next. Se leen, se transfieren y se descartan 4 MB en cada carga del fixture para quedarse con 16 URLs. El costo es de latencia y de memoria del servidor, no de red del cliente.
+- **Dirección:** que la consulta **no seleccione** `clubs.logo_url` cuando lo único que se necesita es la clave con la que el proxy resuelve el escudo. Aparte, mover los `data:` URI de `clubs.logo_url` a Storage. Ojo: el arreglo NO es tocar la serialización —ya está bien—, es no traer la columna.
+
+Desde el 2026-08-06 este costo dejó de estar en el camino de guardar un resultado (el gestor ya no recarga el fixture entero), pero sigue entero en la carga inicial del gestor.
 
 ### 2. 🔴 N+1 en búsqueda de resultsApi
 `src/lib/server/resultsApi.ts:1892` y `:1905` — `Promise.all(rows.map(row => FixtureService.getMatch(row.id)))`: N lecturas de match completo (`select('*')`+joins) por búsqueda.

@@ -1384,20 +1384,22 @@ export async function PATCH(
       const targetClubId = updateData.club_id;
       const replacementSeasonId = existingParticipant.season_id ?? null;
       const replacementTeamName = replacementClubForStats?.name ?? String(updateData.name ?? 'Equipo');
-      const replacementTeamLogo = replacementClubForStats?.logo_url ?? null;
-      const standingsUpdates = standingsToReplace.map((row) =>
-        supabase
+      /**
+       * `team_logo` NO se reescribe: se BORRA. Guardaba el `logo_url` del club
+       * nuevo dentro del JSONB, y esos logos suelen ser data URIs en base64 —
+       * era la vía por la que el escudo embebido volvía a entrar a la tabla
+       * después de haberlo recortado. El escudo se resuelve por id de club
+       * contra el proxy, que es la única fuente con caché y cache-busting.
+       */
+      const standingsUpdates = standingsToReplace.map((row) => {
+        const nextStats = { ...(row.stats ?? {}), team_name: replacementTeamName };
+        delete (nextStats as Record<string, unknown>).team_logo;
+
+        return supabase
           .from('tournament_standings')
-          .update({
-            club_id: targetClubId,
-            stats: {
-              ...(row.stats ?? {}),
-              team_name: replacementTeamName,
-              team_logo: replacementTeamLogo,
-            },
-          })
-          .eq('id', row.id)
-      );
+          .update({ club_id: targetClubId, stats: nextStats })
+          .eq('id', row.id);
+      });
 
       let homeUpdateQuery = supabase
         .from('matches')

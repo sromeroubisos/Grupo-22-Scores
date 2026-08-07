@@ -79,7 +79,24 @@ function resolveLabel(tiebreaker: ResolvedTiebreaker): string {
   return TIEBREAKER_LABELS[key] || key.replace(/_/g, ' ');
 }
 
-function buildItems(rules: StandingsRules | null | undefined): { id: string; key: string; label: string; enabled: boolean }[] {
+/**
+ * `source` guarda el criterio ORIGINAL, no sólo su clave.
+ *
+ * Al reordenar la lista se guardaban las claves sueltas (`newItems.map(i => i.key)`),
+ * y con eso se perdía todo lo que el criterio llevara encima. El caso que
+ * importa es `order: 'asc'`: `points_against` como objeto con `order: 'asc'`
+ * ordena de menor a mayor —primero la valla menos vencida— y como string suelto
+ * ordena al revés. Aplanarlo daba vuelta el desempate y podía cambiar el
+ * campeón, sin tocar ninguna regla y sin que nada lo dijera. Está probado en
+ * standingsEngine.test.ts ("points_against como string ordena al revés").
+ */
+function buildItems(rules: StandingsRules | null | undefined): {
+  id: string;
+  key: string;
+  label: string;
+  enabled: boolean;
+  source: ResolvedTiebreaker;
+}[] {
   if (!rules?.tiebreakers || !Array.isArray(rules.tiebreakers)) return [];
   return rules.tiebreakers
     .filter((item): item is ResolvedTiebreaker => item != null)
@@ -89,6 +106,7 @@ function buildItems(rules: StandingsRules | null | undefined): { id: string; key
       key: resolveKey(item),
       label: resolveLabel(item),
       enabled: typeof item === 'object' ? ((item as any).enabled !== false) : true,
+      source: item,
     }));
 }
 
@@ -159,6 +177,12 @@ interface StandingsSidebarProps {
   phaseId: string | null;
   onRecalculate: () => void;
   isRecalculating: boolean;
+  /**
+   * Por qué no se puede recalcular ahora mismo, o `null` si se puede. Va como
+   * texto y no como booleano porque un botón deshabilitado sin explicación deja
+   * al operador adivinando: el motivo se muestra en el `title` y debajo.
+   */
+  recalculateBlockedReason?: string | null;
   lastCalculatedLabel: string;
   compactMobile?: boolean;
 }
@@ -169,10 +193,11 @@ export function StandingsSidebar({
   phaseId,
   onRecalculate,
   isRecalculating,
+  recalculateBlockedReason = null,
   lastCalculatedLabel,
   compactMobile = false,
 }: StandingsSidebarProps) {
-  const [items, setItems] = useState<{ id: string; key: string; label: string; enabled: boolean }[]>([]);
+  const [items, setItems] = useState<ReturnType<typeof buildItems>>([]);
   const [savingOrder, setSavingOrder] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved' | 'error'>('idle');
   const [auditEntries, setAuditEntries] = useState<AuditEntry[]>([]);
@@ -227,7 +252,16 @@ export function StandingsSidebar({
             phaseId,
             rules: {
               ...rules,
-              tiebreakers: newItems.map((item) => item.key),
+              /**
+               * Se manda el criterio COMPLETO con su `priority` puesta al nuevo
+               * orden, no su clave suelta: aplanar acá perdía el `order: 'asc'`
+               * y daba vuelta desempates como `points_against`.
+               */
+              tiebreakers: newItems.map((item, index) =>
+                typeof item.source === 'string'
+                  ? item.source
+                  : { ...(item.source as Record<string, unknown>), priority: index },
+              ),
             },
           }),
         });
@@ -250,7 +284,10 @@ export function StandingsSidebar({
 
   return (
     <div className={styles.stack}>
-      <details className={`${styles.glassPanel} ${styles.panelDetails}`} open>
+      {/* En el teléfono este panel es una barra más de la repisa de controles:
+          abierto ocupaba ~200px arriba de la tabla para repetir el «último
+          cálculo» que ya dice la tira de cifras. Se pliega como los otros. */}
+      <details className={`${styles.glassPanel} ${styles.panelDetails}`} open={!compactMobile}>
         <PanelSummary icon={Zap}>Modo de cálculo</PanelSummary>
         <div className={styles.panelBody}>
           <p className={styles.sideNote}>
@@ -273,10 +310,19 @@ export function StandingsSidebar({
             </div>
           </div>
 
-          <button type="button" onClick={onRecalculate} disabled={isRecalculating} className={styles.buttonPrimary}>
+          <button
+            type="button"
+            onClick={onRecalculate}
+            disabled={isRecalculating || !!recalculateBlockedReason}
+            title={recalculateBlockedReason ?? undefined}
+            className={styles.buttonPrimary}
+          >
             <RefreshCw size={14} className={isRecalculating ? 'animate-spin' : ''} />
             {isRecalculating ? 'Recalculando...' : 'Forzar recálculo'}
           </button>
+          {recalculateBlockedReason && (
+            <p className={styles.sideNote}>{recalculateBlockedReason}</p>
+          )}
         </div>
       </details>
 
