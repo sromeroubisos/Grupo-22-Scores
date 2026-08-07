@@ -204,7 +204,35 @@ carrera, no el corte por temporada— y **derivá** el parámetro desde ahí. Si
 camino de vuelta no tiene forma cerrada, resolvelo numéricamente; lo que no vale
 es calibrar el parámetro y suponer que la tasa lo sigue.
 
-### 1.9 Las tres especies, y no se mezclan
+### 1.9 Una derivada congelada es una mentira con fecha de vencimiento
+
+> **SI UN NÚMERO SE PUEDE CALCULAR DESDE OTRO, NO LO ESCRIBAS: CALCULALO. Una
+> constante que duplica un hecho ya representado en otro lado es una mentira con
+> fecha de vencimiento.**
+
+Correcta el día que la escribís, silenciosamente falsa para siempre, porque nada
+la vuelve a mirar cuando cambia aquello de lo que dependía.
+
+| Constante | Qué era en realidad |
+|---|---|
+| `SQUAD_SHAPE` en el corte | un efecto que el álgebra cancelaba, guardado como comentario que afirmaba que existía |
+| `COHORT_MATURITY_AGE = 22` | una SALIDA del modelo de crecimiento, congelada como parámetro |
+
+Por eso la camada deriva su nivel de `POTENTIAL_MEAN_GAP` y su tiempo del ritmo
+de crecimiento, en vez de repetirlos. Y por eso `cohortSize` se calcula en vez de
+escribirse.
+
+**Al escribir una constante nueva, clasificala en el comentario:**
+
+- **PARÁMETRO LIBRE** — una elección genuina que nada más determina.
+  `POTENTIAL_BAND`, `TYPICAL_BUILD_SHARE`, `POTENTIAL_REALIZATION`. Se discute.
+- **DERIVADA** — se calcula desde otra cosa. No se escribe.
+- **ESPEJO** — se escribe por costo o por legibilidad, y el comentario dice
+  **de qué es espejo y qué hay que actualizar cuando eso cambie.**
+
+Un número sin etiqueta se lee como parámetro libre, y ahí empieza el problema.
+
+### 1.10 Las tres especies, y no se mezclan
 
 | | Qué afirma | Cuándo se actualiza |
 |---|---|---|
