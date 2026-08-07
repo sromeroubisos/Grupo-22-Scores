@@ -11,6 +11,17 @@ export type MatchStatus = 'scheduled' | 'live' | 'final' | 'postponed' | 'suspen
 export interface MatchScore {
   home: number;
   away: number;
+  /**
+   * Tries de cada lado. Ya viajaban en el JSONB de `matches.score` y el motor
+   * de bonus los lee de ahí (`countTeamEventMetric` los busca antes de mirar
+   * los eventos), pero el tipo no los declaraba: por eso la carga rápida no
+   * los pedía y el bonus ofensivo había que ponerlo a mano.
+   *
+   * `null` significa "no se cargaron", que no es lo mismo que cero: sin el
+   * dato, el bonus por 4+ tries no se puede calcular y no se inventa.
+   */
+  homeTries?: number | null;
+  awayTries?: number | null;
   penalties?: {
     home: number | null;
     away: number | null;
