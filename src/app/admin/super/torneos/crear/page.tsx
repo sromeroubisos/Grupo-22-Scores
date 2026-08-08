@@ -25,7 +25,7 @@ import {
     normalizeTournamentFormat,
     type CircuitChampionMode,
 } from '@/lib/utils/tournamentFormat';
-import { resolveTournamentAudience, syncAgeGradeWithAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
+import { AUDIENCE_LABELS, resolveTournamentAudience, syncAgeGradeWithAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import '../../creation-forms.css';
 
 const sportsCatalog = getAllSports();
@@ -147,6 +147,7 @@ function normalizeCountryId(value: string | null | undefined, options: Tournamen
 const AGE_GRADE_OPTIONS = [
     'Mayores (Adults)',
     'Juveniles',
+    'Reserva',
     'U23',
     'U20',
     'U18',
@@ -1486,9 +1487,11 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                                     className={formData.publicAudience === audience ? 'selected' : ''}
                                                     onClick={() => handlePublicAudienceChange(audience)}
                                                 >
-                                                    {audience === 'mayores' ? 'Mayores' : 'Juveniles'}
+                                                    {AUDIENCE_LABELS[audience]}
                                                     <span className="small">
-                                                        {audience === 'mayores' ? 'Aparece en la portada principal' : 'Sección juvenil'}
+                                                        {audience === 'mayores'
+                                                            ? 'Aparece en la portada principal'
+                                                            : 'Menores, juveniles e Intermedia / Preintermedia'}
                                                     </span>
                                                 </button>
                                             ))}
