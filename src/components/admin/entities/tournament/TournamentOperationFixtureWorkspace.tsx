@@ -2425,6 +2425,29 @@ function MatchCard({
     if (quickResultOpen) setShowScheduleEdit(false);
     onQuickResult();
   };
+  /**
+   * El click de la fila vive acá, en la LÍNEA, y no sólo en la lámina.
+   *
+   * La lámina (`.op-match-link`) es `position: absolute; inset: 0; z-index: 0`,
+   * y sus hermanos —la fecha, los escudos, los nombres, el marcador, la sede—
+   * llevan `z-index: 1`. O sea que la lámina queda DEBAJO de todo el contenido
+   * y sólo recibe el click en el padding de 12px y en los huecos entre
+   * elementos. Medido con `document.elementFromPoint` a 360, 390 y 1440: sobre
+   * el nombre del club, el escudo, el marcador, la fecha y la sede el click lo
+   * recibe un `<span>` inerte, y como la lámina es HERMANA y no ancestro, no
+   * hay burbujeo que valga. La fila parecía clicable entera y era clicable en
+   * una franja.
+   *
+   * Poniéndolo en la línea, el click de cualquier hijo burbujea hasta acá. Los
+   * botones no molestan: `.op-match-actions` ya corta la propagación, y el
+   * editor desplegado es hermano de la línea, no hijo.
+   */
+  const handleRowClick = () => {
+    // Un click que termina de arrastrar una selección de texto no es un click
+    // de apertura: el operador estaba copiando el nombre de un club.
+    if (typeof window !== 'undefined' && window.getSelection()?.isCollapsed === false) return;
+    handleQuickResultToggle();
+  };
   const handleQuickResultSave = () => {
     setShowScheduleEdit(false);
     onQuickResultSave();
@@ -2462,12 +2485,29 @@ function MatchCard({
        cuándo, quién contra quién con su escudo, el marcador, y las acciones.
        El editor de resultado sigue abriéndose debajo, dentro de la misma fila. */
     <article className={`op-match-row ${getMatchTone(match.status)} ${quickResultOpen ? 'is-editing' : ''} ${moreActionsOpen ? 'has-more-actions' : ''}`}>
-      <div className="op-match-line">
-        <ProtectedLink
-          href={manageHref}
+      <div className="op-match-line" onClick={handleRowClick}>
+        {/* La fila entera carga el resultado.
+            Antes abría el control de partido —eventos, alineaciones, reloj—,
+            que se usa una vez por partido y con el partido delante. Lo que se
+            hace cuarenta y ocho veces por fecha es escribir el marcador, y era
+            justamente lo único que pedía apuntarle a un botón. Se invirtió: la
+            fila abre el resultado y el control tiene su propia puerta, el botón
+            con la planilla que está entre las acciones. */}
+        <button
+          type="button"
           className="op-match-link"
-          aria-label={`Abrir control de partido de ${matchLabel}`}
-          title="Abrir control de partido. También puedes hacer click derecho para abrirlo en otro panel."
+          aria-expanded={quickResultOpen}
+          aria-label={
+            quickResultOpen
+              ? `Cerrar la carga de resultado de ${matchLabel}`
+              : `${scoreVisible ? 'Editar' : 'Cargar'} el resultado de ${matchLabel}`
+          }
+          title={scoreVisible ? 'Editar el resultado' : 'Cargar el resultado'}
+          /* Corta la propagación o el click contaría dos veces —una acá y otra
+             en la línea— y el editor se abriría y se cerraría en el mismo
+             gesto. La lámina se queda por el nombre accesible y por el foco de
+             teclado; el área clicable de verdad la pone la línea. */
+          onClick={(event) => { event.stopPropagation(); handleQuickResultToggle(); }}
         />
 
         <span className="op-match-when">
@@ -2536,14 +2576,23 @@ function MatchCard({
             <Zap size={13} aria-hidden="true" />
             <span>{scoreVisible ? 'Resultado' : 'Cargar'}</span>
           </button>
-          {/* Abrir el control lleva su propia clase, no la genérica de las que
-              se esconden detrás del `⋯`: en el teléfono la fila entera deja de
-              ser clicable —en una tarjeta de media columna el área táctil se
-              solapa con los botones— y esta pasa a ser la puerta visible.
-              `op-match-act-more` la escondía junto con mover, duplicar y
-              eliminar, que sí son de segundo orden. */}
-          <ProtectedLink href={manageHref} className="basalt-btn op-match-act-more op-match-act-open" title="Abrir control de partido" aria-label="Abrir control de partido">
-            <Pencil size={13} aria-hidden="true" />
+          {/* La puerta al control de partido: eventos, alineaciones y reloj.
+              Es la única acción de la fila que se va a otra pantalla, así que
+              lleva la planilla —no el lápiz, que ahora sería mentira: editar el
+              resultado es la fila entera— y su propio contorno, para que se lea
+              como lo que es y no como una más de la tira.
+
+              Lleva su propia clase, no la genérica de las que se esconden
+              detrás del `⋯`: en el teléfono la fila deja de ser clicable —en
+              una tarjeta de media columna el área táctil se solapa con los
+              botones— y ésta pasa a ser la puerta visible. */}
+          <ProtectedLink
+            href={manageHref}
+            className="basalt-btn op-match-act-more op-match-act-open"
+            title="Abrir el control de partido: eventos, alineaciones y reloj"
+            aria-label={`Abrir el control de partido de ${matchLabel}: eventos, alineaciones y reloj`}
+          >
+            <ClipboardList size={13} aria-hidden="true" />
           </ProtectedLink>
           <button className="basalt-btn op-match-act-more" title="Mover de jornada" aria-label="Mover de jornada" onClick={onMove}>
             <Grip size={13} />
