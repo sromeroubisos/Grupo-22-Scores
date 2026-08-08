@@ -1077,6 +1077,14 @@
 
 .op-field-required { color: var(--warn-ink); }
 
+/* "Opcional" no se pinta de alarma: es un dato que ayuda, no un requisito.
+   Baja un escalón respecto del propio rótulo, que ya viene en --text-dim. */
+.op-field-optional {
+    color: var(--text-dim);
+    opacity: 0.7;
+    font-weight: 600;
+}
+
 .op-result-foot {
     display: flex;
     align-items: center;

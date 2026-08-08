@@ -1145,14 +1145,11 @@ export function TournamentOperationFixtureWorkspace({
       if (!Number.isFinite(parseQuickPointNumber(quickResultForm.homeBonusPoints, Number.NaN))) nextErrors.homeBonusPoints = 'Ingresa un bonus local valido.';
       if (!Number.isFinite(parseQuickPointNumber(quickResultForm.awayBonusPoints, Number.NaN))) nextErrors.awayBonusPoints = 'Ingresa un bonus visitante valido.';
 
-      // Si los puntos no son los que da el reglamento, el motivo es obligatorio.
-      // La pantalla ya lo dice; acá se cumple. Sin esto, un punto corregido a
-      // mano queda sin explicación y dentro de tres meses nadie sabe de dónde
-      // salió — que es exactamente el estado de los 34 partidos que hoy tienen
-      // `pointsAutocalculated: false` y ningún motivo guardado.
-      if (!quickResultForm.pointsAutocalculated && !quickResultForm.pointsOverrideReason.trim()) {
-        nextErrors.pointsOverrideReason = 'Contá por qué estos puntos no son los del reglamento.';
-      }
+      // El motivo de una corrección de puntos NO bloquea el guardado. Sirve para
+      // que dentro de tres meses se sepa de dónde salió ese punto, pero cargar
+      // una fecha entera no puede depender de escribir cuarenta frases: el
+      // operador que está apurado termina poniendo "correccion" en todas y el
+      // campo miente igual. Queda como campo opcional y a la vista.
     }
 
     setQuickResultErrors(nextErrors);
@@ -2928,9 +2925,10 @@ function MatchCard({
               </div>
             ) : null}
 
-            {/* Corregir un punto no se bloquea: se marca. El motivo pasa a ser
-                obligatorio porque dentro de tres meses nadie se acuerda de por
-                qué ese partido tiene un punto que el reglamento no da. */}
+            {/* Corregir un punto no se bloquea: se marca. El motivo queda a mano
+                para el que quiera dejar el rastro —dentro de tres meses nadie se
+                acuerda de por qué ese partido tiene un punto que el reglamento no
+                da—, pero no traba el guardado. */}
             {quickResultForm.status === 'final' && !quickResultForm.pointsAutocalculated ? (
               <>
                 <div className="op-note is-warning">
@@ -2951,16 +2949,13 @@ function MatchCard({
                   </button>
                 </div>
                 <label className="op-field">
-                  <span>Por qué se corrige <span className="op-field-required">· obligatorio</span></span>
+                  <span>Por qué se corrige <span className="op-field-optional">· opcional</span></span>
                   <textarea
                     rows={2}
                     value={quickResultForm.pointsOverrideReason}
                     placeholder="Ej: sanción del tribunal, corrección de acta"
                     onChange={(event) => onQuickPointsFieldChange('pointsOverrideReason', event.target.value)}
                   />
-                  {quickResultErrors.pointsOverrideReason ? (
-                    <span className="op-field-error">{quickResultErrors.pointsOverrideReason}</span>
-                  ) : null}
                 </label>
               </>
             ) : null}
