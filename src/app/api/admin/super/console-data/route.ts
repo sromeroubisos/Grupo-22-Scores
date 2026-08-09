@@ -76,48 +76,35 @@ async function withSoftTimeout<T>(
     });
 }
 
+type OrderSpec = { column: string; ascending?: boolean };
+
+// El builder de PostgREST encadena: `.order()` devuelve algo que vuelve a tener
+// `.order()` y `.range()`. Lo declaramos recursivo para poder ordenar por más de
+// una columna sin perder el tipado.
+type ConsoleQuery<T> = PromiseLike<{ data: T[] | null; error: QueryError }> & {
+    order: (column: string, options?: { ascending?: boolean }) => ConsoleQuery<T>;
+    range: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: QueryError }>;
+};
+
 async function selectWithFallback<T>(
     baseQuery: {
-        select: (columns: string) => PromiseLike<{
-            data: T[] | null;
-            error: QueryError;
-        }> & {
-            order: (
-                column: string,
-                options?: { ascending?: boolean }
-            ) => PromiseLike<{
-                data: T[] | null;
-                error: QueryError;
-            }> & {
-                range: (from: number, to: number) => PromiseLike<{
-                    data: T[] | null;
-                    error: QueryError;
-                }>;
-            };
-            range: (from: number, to: number) => PromiseLike<{
-                data: T[] | null;
-                error: QueryError;
-            }>;
-        };
+        select: (columns: string) => ConsoleQuery<T>;
     },
     variants: string[],
-    orderBy?: { column: string; ascending?: boolean },
+    orderBy?: OrderSpec | OrderSpec[],
     range?: { from: number; to: number },
 ) {
     let lastError: QueryError = null;
+    const orders = orderBy ? (Array.isArray(orderBy) ? orderBy : [orderBy]) : [];
 
     for (const columns of variants) {
-        const query = baseQuery.select(columns);
-        let pending: PromiseLike<{ data: T[] | null; error: QueryError }>;
-        if (orderBy && range) {
-            pending = query.order(orderBy.column, { ascending: orderBy.ascending }).range(range.from, range.to);
-        } else if (orderBy) {
-            pending = query.order(orderBy.column, { ascending: orderBy.ascending });
-        } else if (range) {
-            pending = query.range(range.from, range.to);
-        } else {
-            pending = query;
+        let query = baseQuery.select(columns);
+        for (const order of orders) {
+            query = query.order(order.column, { ascending: order.ascending });
         }
+        const pending: PromiseLike<{ data: T[] | null; error: QueryError }> = range
+            ? query.range(range.from, range.to)
+            : query;
         const result = await pending;
 
         if (!result?.error) {
@@ -194,6 +181,7 @@ type ClubConsoleRow = {
     sport?: string | null;
     sport_id?: string | null;
     followers_count?: number;
+    updated_at?: string | null;
 };
 
 type UnionConsoleRow = {
@@ -295,11 +283,16 @@ export async function GET(request: NextRequest) {
                 selectWithFallback<ClubConsoleRow>(
                     readClient.from('clubs'),
                     [
+                        'id, name, short_name, city, region, country, primary_color, slug, is_visible, union_id, sport, sport_id, updated_at',
                         'id, name, short_name, city, region, country, primary_color, slug, is_visible, union_id, sport, sport_id',
                         'id, name, short_name, city, country, primary_color, slug, is_visible, union_id, sport',
                         'id, name, city, country, slug, is_visible, union_id',
                     ],
-                    { column: 'name', ascending: true },
+                    // `name` para que el catálogo llegue alfabético, `id` para
+                    // desempatar: la consola pagina con ?offset= y hay clubes con
+                    // el mismo nombre, así que sin la PK el orden no es total y
+                    // entre páginas se repiten filas y se saltean otras.
+                    [{ column: 'name', ascending: true }, { column: 'id', ascending: true }],
                     pagination.range,
                 ),
                 withSoftTimeout(
@@ -324,7 +317,10 @@ export async function GET(request: NextRequest) {
             const unionMap = new Map(((unionsError ? [] : unions) ?? []).map((union) => [union.id, union]));
             const data = (clubs ?? []).map((club) => ({
                 ...club,
-                logo_url: buildTeamLogoProxyUrl({ key: club.id, name: club.name }),
+                // `updated_at` como token de cache-busting: sin él, cambiar el escudo
+                // de un club se ve en su panel pero la lista sigue mostrando el viejo
+                // (el proxy sin versión se cachea en el CDN por una semana).
+                logo_url: buildTeamLogoProxyUrl({ key: club.id, name: club.name, version: club.updated_at }),
                 sport: club.sport || club.sport_id || null,
                 union: club.union_id ? unionMap.get(club.union_id) ?? null : null,
                 followers_count: 0,
@@ -348,7 +344,14 @@ export async function GET(request: NextRequest) {
                         'id, name, sport_id, country_id, logo_url, created_at, updated_at',
                         'id, name'
                     ],
-                    { column: 'updated_at', ascending: false },
+                    // Ordenamos por `id` y no por `updated_at`: la consola se trae el
+                    // catálogo entero paginando con ?offset=, y `updated_at` empata en
+                    // masa (una ingesta toca cientos de filas en el mismo instante), con
+                    // lo que el offset repetiría filas y saltearía otras entre páginas.
+                    // `id` es la PK, así que el orden es total y estable. La pantalla
+                    // reagrupa por país y reordena por prioridad igual, así que el orden
+                    // que salga de acá no se ve.
+                    { column: 'id', ascending: true },
                     pagination.range,
                 ),
             ]);

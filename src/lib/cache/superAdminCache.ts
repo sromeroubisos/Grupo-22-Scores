@@ -181,7 +181,7 @@ function getSupabase() {
 async function fetchAdminConsoleResource<T>(
     resource: 'clubs' | 'matches' | 'tournaments',
     signal?: AbortSignal,
-    options?: { limit?: number },
+    options?: { limit?: number; offset?: number },
 ): Promise<T[]> {
     type ConsolePayload = {
         data?: T[];
@@ -192,6 +192,9 @@ async function fetchAdminConsoleResource<T>(
     const searchParams = new URLSearchParams({ resource });
     if (options?.limit) {
         searchParams.set('limit', String(options.limit));
+    }
+    if (options?.offset) {
+        searchParams.set('offset', String(options.offset));
     }
 
     const response = await fetch(`/api/admin/super/console-data?${searchParams.toString()}`, {
@@ -219,6 +222,45 @@ async function fetchAdminConsoleResource<T>(
     return (payload?.data || []) as T[];
 }
 
+// El endpoint corta cada respuesta en MAX_PAGE_SIZE (2000) filas. Las pantallas que
+// buscan y filtran en el cliente necesitan el catálogo COMPLETO: lo que no llega en
+// la respuesta no existe para el buscador ni para los filtros, y la lista miente sin
+// avisar (se ve un recorte y se lee como si fuera todo).
+const CONSOLE_PAGE_SIZE = 2000;
+// Tope de seguridad: si algo hace que la última página nunca llegue incompleta,
+// preferimos cortar y avisar antes que colgar la pestaña en un bucle infinito.
+const CONSOLE_MAX_PAGES = 10;
+
+async function fetchAllAdminConsoleResource<T>(
+    resource: 'clubs' | 'matches' | 'tournaments',
+    signal?: AbortSignal,
+): Promise<T[]> {
+    const rows: T[] = [];
+    let offset = 0;
+
+    for (let page = 0; page < CONSOLE_MAX_PAGES; page += 1) {
+        const batch = await fetchAdminConsoleResource<T>(resource, signal, {
+            limit: CONSOLE_PAGE_SIZE,
+            offset,
+        });
+
+        // Cortamos con la página VACÍA, no con la incompleta: PostgREST recorta la
+        // respuesta por su propio `db-max-rows`, así que una página más corta de lo
+        // pedido no quiere decir que no haya más filas atrás. Y avanzamos el offset
+        // por lo que realmente llegó — si asumiéramos el tamaño pedido, saltearíamos
+        // justo las filas que el servidor recortó.
+        if (batch.length === 0) return rows;
+
+        rows.push(...batch);
+        offset += batch.length;
+    }
+
+    console.warn(
+        `[Cache] ${resource}: se alcanzó el tope de ${CONSOLE_MAX_PAGES} páginas (${rows.length} filas). Puede faltar contenido.`
+    );
+    return rows;
+}
+
 export interface ClubRow {
     id: string;
     name: string;
@@ -244,7 +286,11 @@ export async function fetchClubs(force = false): Promise<ClubWithUnion[]> {
     if (force) invalidateCache(KEY);
 
     return cachedFetch(KEY, async (context) => {
-        return fetchAdminConsoleResource<ClubWithUnion>('clubs', context?.signal, { limit: 2000 });
+        // Paginado, igual que torneos: pedir `limit=2000` de una no alcanza porque
+        // PostgREST recorta en su `db-max-rows` (1000) sin avisar. La consola buscaba
+        // y filtraba sobre las primeras 1000 filas y la cabecera contaba esas mismas,
+        // así que los clubes de la mitad de abajo del abecedario no existían.
+        return fetchAllAdminConsoleResource<ClubWithUnion>('clubs', context?.signal);
     }, DEFAULT_TTL_MS, { timeoutMs: CONSOLE_RESOURCE_TIMEOUT_MS });
 }
 
@@ -328,7 +374,7 @@ export async function fetchTournaments(force = false): Promise<TournamentRow[]> 
 
     return cachedFetch(KEY, async (context) => {
         try {
-            return await fetchAdminConsoleResource<TournamentRow>('tournaments', context?.signal);
+            return await fetchAllAdminConsoleResource<TournamentRow>('tournaments', context?.signal);
         } catch (err: unknown) {
             const normalized = normalizeError(err);
             console.warn('[Cache] tournaments console endpoint failed, falling back to direct query:', normalized.message);
@@ -342,23 +388,39 @@ export async function fetchTournaments(force = false): Promise<TournamentRow[]> 
  */
 async function fetchTournamentsFallback(): Promise<TournamentRow[]> {
     const supabase = getSupabase();
-    const [{ data, error }] = await Promise.all([
-        supabase
+
+    // Paginado por el mismo motivo que el camino principal: una consulta sin
+    // `range` la corta PostgREST en `db-max-rows` sin decir nada, y el panel
+    // mostraría un recorte con cara de catálogo completo. Orden por `id` porque
+    // es la PK: único y estable, que es lo que el offset necesita.
+    const rows: any[] = [];
+    let offset = 0;
+
+    for (let page = 0; page < CONSOLE_MAX_PAGES; page += 1) {
+        const { data, error } = await supabase
             .from('tournaments')
             .select(`
                 *,
                 sport:sports(name),
                 country:countries(name),
                 union:unions(name)
-            `),
-    ]);
+            `)
+            .order('id', { ascending: true })
+            .range(offset, offset + CONSOLE_PAGE_SIZE - 1);
 
-    if (error) {
-        console.warn('[Cache] Fallback query failed:', error);
-        throw error;
+        if (error) {
+            console.warn('[Cache] Fallback query failed:', error);
+            throw error;
+        }
+
+        const batch = data || [];
+        if (batch.length === 0) break;
+
+        rows.push(...batch);
+        offset += batch.length;
     }
 
-    return (data || []).map(t => {
+    return rows.map(t => {
         const row = t as any;
         return {
             ...t,

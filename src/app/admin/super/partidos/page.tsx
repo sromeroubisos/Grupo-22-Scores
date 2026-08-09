@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import styles from '../page.module.css';
+import ConsolePager from '../ConsolePager';
 import { useSuperConsole } from '../SuperConsoleContext';
 import { RefreshCw, Plus, Radio, CheckCircle, Clock, AlertTriangle, CalendarDays, Trash2, XCircle } from 'lucide-react';
 import type { MatchRow } from '@/lib/cache/superAdminCache';
@@ -12,7 +13,8 @@ import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
 
 type MatchStatus = 'scheduled' | 'live' | 'final' | 'postponed' | 'suspended';
 type ReviewFilter = 'all' | 'pending' | 'approved' | 'rejected';
-const PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 20;
+const SEARCH_DEBOUNCE_MS = 350;
 
 type PaginatedMatchesResponse = {
     data: MatchRow[];
@@ -22,6 +24,9 @@ type PaginatedMatchesResponse = {
         total: number;
         totalPages: number;
     };
+    // El servidor avisa cuando el termino de busqueda coincide con demasiados
+    // clubes o torneos como para resolverlos todos en una consulta.
+    searchTruncated?: boolean;
     error?: string;
     details?: unknown;
 };
@@ -117,11 +122,23 @@ export default function SuperadminPartidosPage() {
     const [reviewFilter, setReviewFilter] = useState<ReviewFilter>('all');
     const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
     const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
     const [pageMatches, setPageMatches] = useState<MatchRow[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [totalMatches, setTotalMatches] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [searchTruncated, setSearchTruncated] = useState(false);
+
+    // La busqueda va al servidor: filtrarla en el cliente solo alcanzaba a los 20
+    // partidos de la pagina, o sea que buscar un club escondia el resto en vez de
+    // encontrarlo. Se espera a que el usuario deje de tipear para no pedir por tecla.
+    const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(filters.search), SEARCH_DEBOUNCE_MS);
+        return () => clearTimeout(timer);
+    }, [filters.search]);
 
     // Optimistic local state
     const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
@@ -135,12 +152,13 @@ export default function SuperadminPartidosPage() {
         try {
             const params = new URLSearchParams({
                 page: String(page),
-                pageSize: String(PAGE_SIZE),
+                pageSize: String(pageSize),
             });
 
             if (statusFilter !== 'all') params.set('status', statusFilter);
             if (reviewFilter !== 'all') params.set('review', reviewFilter);
             if (filters.sport !== 'all') params.set('sport', filters.sport);
+            if (debouncedSearch.trim()) params.set('search', debouncedSearch.trim());
 
             const response = await fetch(`/api/admin/super/matches?${params.toString()}`, {
                 cache: 'no-store',
@@ -155,7 +173,7 @@ export default function SuperadminPartidosPage() {
 
             const nextMatches = Array.isArray(payload.data) ? payload.data : [];
             const nextTotal = payload.pagination?.total ?? nextMatches.length;
-            const nextTotalPages = payload.pagination?.totalPages ?? (nextTotal > 0 ? Math.ceil(nextTotal / PAGE_SIZE) : 0);
+            const nextTotalPages = payload.pagination?.totalPages ?? (nextTotal > 0 ? Math.ceil(nextTotal / pageSize) : 0);
 
             if (page > 1 && nextMatches.length === 0 && nextTotalPages > 0) {
                 setCurrentPage(nextTotalPages);
@@ -165,6 +183,7 @@ export default function SuperadminPartidosPage() {
             setPageMatches(nextMatches);
             setTotalMatches(nextTotal);
             setTotalPages(nextTotalPages);
+            setSearchTruncated(Boolean(payload.searchTruncated));
         } catch (error) {
             console.error('Failed to load paginated matches, falling back to legacy source:', error);
 
@@ -188,23 +207,29 @@ export default function SuperadminPartidosPage() {
                         const sportId = resolveMatchSportId(match);
                         if (!sportId || !getSportVariants(filters.sport).includes(sportId)) return false;
                     }
+                    if (debouncedSearch.trim()) {
+                        const term = debouncedSearch.trim().toLowerCase();
+                        const text = [match.home_team?.name, match.away_team?.name, match.tournament?.name, match.venue].join(' ').toLowerCase();
+                        if (!text.includes(term)) return false;
+                    }
                     return true;
                 });
 
                 const fallbackTotal = serverEquivalentMatches.length;
-                const fallbackTotalPages = fallbackTotal > 0 ? Math.ceil(fallbackTotal / PAGE_SIZE) : 0;
+                const fallbackTotalPages = fallbackTotal > 0 ? Math.ceil(fallbackTotal / pageSize) : 0;
 
                 if (page > 1 && fallbackTotalPages > 0 && page > fallbackTotalPages) {
                     setCurrentPage(fallbackTotalPages);
                     return;
                 }
 
-                const start = (page - 1) * PAGE_SIZE;
-                const nextMatches = serverEquivalentMatches.slice(start, start + PAGE_SIZE);
+                const start = (page - 1) * pageSize;
+                const nextMatches = serverEquivalentMatches.slice(start, start + pageSize);
 
                 setPageMatches(nextMatches);
                 setTotalMatches(fallbackTotal);
                 setTotalPages(fallbackTotalPages);
+                setSearchTruncated(false);
                 setErrorMsg(null);
             } catch (fallbackError) {
                 console.error('Failed to load matches from legacy source:', fallbackError);
@@ -216,11 +241,11 @@ export default function SuperadminPartidosPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [currentPage, filters.sport, reviewFilter, statusFilter]);
+    }, [currentPage, debouncedSearch, filters.sport, pageSize, reviewFilter, statusFilter]);
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [filters.search, filters.sport, reviewFilter, statusFilter]);
+    }, [debouncedSearch, filters.sport, pageSize, reviewFilter, statusFilter]);
 
     useEffect(() => {
         void loadMatchesPage(currentPage);
@@ -311,13 +336,11 @@ export default function SuperadminPartidosPage() {
             const sportId = resolveMatchSportId(m);
             if (!sportId || !getSportVariants(filters.sport).includes(sportId)) return false;
         }
-        if (filters.search) {
-            const term = filters.search.toLowerCase();
-            const text = [m.home_team?.name, m.away_team?.name, m.tournament?.name, m.venue].join(' ').toLowerCase();
-            if (!text.includes(term)) return false;
-        }
+        // La busqueda NO se filtra acá: la resuelve el servidor sobre los 55 mil
+        // partidos. Repetirla en el cliente solo podria esconder filas que el
+        // servidor ya dio por buenas (coincidencia por torneo, por ejemplo).
         return true;
-    }), [enrichedMatches, statusFilter, reviewFilter, filters.search, filters.sport]);
+    }), [enrichedMatches, statusFilter, reviewFilter, filters.sport]);
 
     const grouped = useMemo(() => filtered.reduce<Record<string, Record<string, MatchRow[]>>>((acc, m) => {
         const tournament = m.tournament?.name || 'Sin torneo';
@@ -330,8 +353,8 @@ export default function SuperadminPartidosPage() {
 
     const liveCount = enrichedMatches.filter(m => m.status === 'live').length;
     const pendingReviewCount = enrichedMatches.filter(m => m.review_status === MATCH_REVIEW_STATUS.pending).length;
-    const loadedFrom = totalMatches === 0 ? 0 : ((currentPage - 1) * PAGE_SIZE) + 1;
-    const loadedTo = totalMatches === 0 ? 0 : Math.min(currentPage * PAGE_SIZE, totalMatches);
+    const loadedFrom = totalMatches === 0 ? 0 : ((currentPage - 1) * pageSize) + 1;
+    const loadedTo = totalMatches === 0 ? 0 : Math.min(currentPage * pageSize, totalMatches);
 
     return (
         <div style={{ paddingBottom: 40 }}>
@@ -341,9 +364,9 @@ export default function SuperadminPartidosPage() {
                     <div className={styles.consoleSubtitle}>
                         {isLoading ? 'Cargando…' : (
                             <span>
-                                {filtered.length} visibles en esta pagina
+                                {totalMatches} partidos{debouncedSearch.trim() ? ' encontrados' : ''}
                                 <span style={{ color: 'var(--basalt-400)', marginLeft: 8 }}>
-                                    {loadedFrom}-{loadedTo} de {totalMatches}
+                                    viendo {loadedFrom}-{loadedTo}
                                 </span>
                                 {liveCount > 0 && <span style={{ color: '#f97316', marginLeft: 8 }}>● {liveCount} en vivo</span>}
                                 {pendingReviewCount > 0 && <span style={{ color: '#eab308', marginLeft: 8 }}>{pendingReviewCount} pendientes SA</span>}
@@ -392,6 +415,12 @@ export default function SuperadminPartidosPage() {
                 </div>
             )}
 
+            {searchTruncated && (
+                <div style={{ padding: '12px 16px', marginBottom: 16, background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.3)', borderRadius: 6, color: '#eab308', fontSize: 13 }}>
+                    El termino coincide con demasiados clubes o torneos: la busqueda se resolvio con una parte y puede faltar contenido. Afinalo un poco.
+                </div>
+            )}
+
             {isLoading && (
                 <div className={styles.slab} style={{ padding: 48, textAlign: 'center', color: 'var(--basalt-400)' }}>
                     <RefreshCw size={20} style={{ marginBottom: 12, animation: 'spin 1s linear infinite' }} />
@@ -403,7 +432,9 @@ export default function SuperadminPartidosPage() {
                 <div className={styles.slab} style={{ padding: 48, textAlign: 'center' }}>
                     <CalendarDays size={36} style={{ marginBottom: 16, opacity: 0.3 }} />
                     <div style={{ color: 'var(--basalt-400)' }}>
-                        {enrichedMatches.length === 0 ? 'No hay partidos en la base de datos.' : 'Ningún partido coincide con los filtros.'}
+                        {debouncedSearch.trim()
+                            ? `Ningún partido coincide con "${debouncedSearch.trim()}" en todo el historial.`
+                            : (totalMatches === 0 ? 'Ningún partido coincide con los filtros.' : 'No hay partidos en la base de datos.')}
                     </div>
                 </div>
             )}
@@ -600,30 +631,17 @@ export default function SuperadminPartidosPage() {
                 ))
             )}
 
-            {!isLoading && totalPages > 1 && (
-                <div className={styles.slab} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 20 }}>
-                    <div style={{ color: 'var(--basalt-400)', fontSize: 12, fontFamily: 'var(--font-mono)' }}>
-                        Pagina {currentPage} de {totalPages}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <button
-                            type="button"
-                            className={styles.cardAction}
-                            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-                            disabled={currentPage === 1 || isLoading}
-                        >
-                            Anterior
-                        </button>
-                        <button
-                            type="button"
-                            className={styles.cardAction}
-                            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-                            disabled={currentPage >= totalPages || isLoading}
-                        >
-                            Siguiente
-                        </button>
-                    </div>
-                </div>
+            {totalMatches > 0 && (
+                <ConsolePager
+                    page={currentPage}
+                    totalPages={totalPages}
+                    total={totalMatches}
+                    pageSize={pageSize}
+                    onPageChange={setCurrentPage}
+                    onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+                    itemLabel="partidos"
+                    disabled={isLoading}
+                />
             )}
 
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
