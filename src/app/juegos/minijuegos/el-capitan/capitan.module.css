@@ -1302,6 +1302,76 @@
         max-width: 70ch;
     }
 
+    /* ── LA ESCALA DEL JUEGO SE ALINEA CON LA DEL SITIO ─────────────────────
+       Esto es lo que faltaba, y no se arreglaba con espaciado.
+
+       Medido en el mismo viewport (1920×826), contra `/tournaments`:
+
+                            el sitio     El Capitán
+         cuerpo de texto     13,6 px       15,2 px     +12%
+         h1 de la página     21,6 px       36,8 px     +70%
+
+       O sea que el juego era una isla con su propia escala. Venís de páginas a
+       13,6 px que usan la pantalla entera y entrás a una que usa 15,2 en 780:
+       eso se percibe como zoom, y lo es — relativo al resto del producto.
+
+       Los valores de abajo NO son una preferencia: son los del sitio. El
+       objetivo es que el juego no se sienta otra aplicación.
+
+       POR QUÉ SÓLO EN ESCRITORIO. `globals.css` documenta que bajar el texto de
+       forma global ya se probó y salió mal: el `zoom: 0.7` dejaba el 97-100%
+       por debajo de 12 px reales. Acá el piso es 12,8 px con mouse, que es el
+       cuerpo secundario del propio sitio, y el teléfono no se toca — abajo de
+       1024 el cuerpo sigue en 15,2, que es donde 16 px importa de verdad. */
+    .finalTitle {
+        font-size: 1.375rem;
+    }
+
+    .finalLead {
+        font-size: 0.875rem;
+    }
+
+    .cardText {
+        font-size: 0.85rem;
+    }
+
+    .cardTitle {
+        font-size: 1.0625rem;
+    }
+
+    .name {
+        font-size: 1rem;
+    }
+
+    .role,
+    .belongingTier {
+        font-size: 0.8rem;
+    }
+
+    .optionLabel {
+        font-size: 0.875rem;
+    }
+
+    .optionHint {
+        font-size: 0.8rem;
+    }
+
+    /* Los botones bajan con el texto, pero el alto se sostiene a mano: 44 px es
+       el mínimo del objetivo táctil y no se negocia por densidad. */
+    .primary {
+        font-size: 0.9rem;
+        padding: 12px 18px;
+        border-radius: 11px;
+        min-height: 44px;
+    }
+
+    .ghost {
+        font-size: 0.85rem;
+        padding: 11px 16px;
+        border-radius: 11px;
+        min-height: 44px;
+    }
+
     /* El ancho extra se abre SÓLO cuando hay algo que poner al lado.
        El §6 del CLAUDE.md lo pide explícito —«nada de layouts que dejen una
        columna vacía»— y con `:has()` se cumple por construcción y no por
