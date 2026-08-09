@@ -1195,3 +1195,103 @@
     opacity: 0.75;
     font-variant-numeric: tabular-nums;
 }
+
+/* ── El cuerpo de la pantalla de carrera ──────────────────────────────────── */
+/* En teléfono es una columna y estas tres clases casi no hacen nada: el reparto
+   en dos lo enciende el escalón de escritorio de acá abajo. Los `min-width: 0`
+   no son decorativos: un item de grid no baja de su contenido más ancho sin
+   ellos, y un nombre de club largo estiraría la columna. */
+.console {
+    display: block;
+}
+
+.consoleMain {
+    min-width: 0;
+}
+
+.consoleAside {
+    min-width: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ESCALÓN DE DENSIDAD DE ESCRITORIO
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Hasta acá esta hoja tenía TRES media queries y ninguna por encima de 560 px:
+   la escala del teléfono se dibujaba igual en un monitor. En 1920 el juego
+   ocupaba 780 px —el 41% del ancho— con la mitad de abajo vacía, y eso se lee
+   como una pantalla de teléfono ampliada. La palabra del reporte fue
+   "zoomeado", y es exacta.
+
+   POR QUÉ SE TOCA EL ESPACIO Y NO LA TIPOGRAFÍA.
+   El sitio ya intentó lo otro: `globals.css` documenta un
+   `@media (min-width: 1024px) { html { zoom: 0.7 } }` que se sacó porque dejaba
+   el 97-100% del texto por debajo de 12 px reales y encogía los objetivos
+   táctiles. Ese mismo comentario deja escrita la política que este bloque
+   aplica: «la densidad que se buscaba se compra donde corresponde: padding de
+   los contenedores y altura de fila, no escala global del texto».
+   Así que acá no hay una sola regla de `font-size`. Se achica el aire.
+
+   Y EL ANCHO NO SE ESTIRA: SE PARTE.
+   Llevar la columna única de 780 a 1100 empeoraría la lectura —el `hint` de
+   una opción ya viaja a ~110 caracteres por línea a 780, contra los 90 que es
+   el techo—. El ancho de más se gasta en una SEGUNDA columna, no en renglones
+   más largos. */
+@media (min-width: 1024px) {
+    .shell {
+        padding: 14px 24px 18px;
+    }
+
+    .header {
+        padding: 11px 16px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+    }
+
+    .belongingBar {
+        margin: -8px 0 12px;
+        padding: 8px 16px 10px;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .card {
+        padding: 15px 17px;
+        border-radius: 12px;
+        margin-bottom: 11px;
+    }
+
+    .eyebrow {
+        margin-bottom: 6px;
+    }
+
+    .cardTitle {
+        margin-bottom: 7px;
+    }
+
+    .options {
+        gap: 7px;
+        margin-top: 11px;
+    }
+
+    .option {
+        padding: 10px 13px;
+        border-radius: 10px;
+    }
+
+    /* El ancho extra se abre SÓLO cuando hay algo que poner al lado.
+       El §6 del CLAUDE.md lo pide explícito —«nada de layouts que dejen una
+       columna vacía»— y con `:has()` se cumple por construcción y no por
+       acordarse: sin trayectoria todavía, la portada y la primera temporada
+       siguen en una columna de 780. Donde `:has()` no exista, el layout cae en
+       una columna, que es el estado de hoy. */
+    .shell:has(.consoleAside) {
+        max-width: 1240px;
+    }
+
+    .console:has(> .consoleAside) {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+    }
+}

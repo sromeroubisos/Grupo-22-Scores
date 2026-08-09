@@ -264,38 +264,48 @@ export default function CaptainFlow() {
             <GameTitle />
             <PlayerHeader state={career} />
 
-            {pendingResult ? (
-                <SeasonResult
-                    entry={career.history[pendingResult.index]}
-                    family={career.player.family}
-                    ovrDelta={pendingResult.ovrDelta}
-                    onContinue={() => setPendingResult(null)}
-                />
-            ) : MomentScreen ? (
-                <MomentScreen state={career} onResolve={resolveMomentInput} />
-            ) : evento ? (
-                <EventCard event={evento} onChoose={choose} />
-            ) : (
-                <TrainingCard state={career} onChoose={train} />
-            )}
-
-            {career.history.length > 0 && !pendingResult && (
-                <div className={styles.card}>
-                    <span className={styles.eyebrow}>Trayectoria</span>
-                    <div className={styles.timeline}>
-                        {[...career.history].reverse().slice(0, 6).map((h) => (
-                            <div key={h.season} className={styles.season}>
-                                <span className={styles.seasonAge}>{h.age}</span>
-                                <span className={styles.seasonBody}>
-                                    <span className={styles.seasonClub}>{h.ovr}</span> · {h.matchesPlayed} partidos
-                                    {h.caps > 0 ? ` · ${h.caps} caps` : ''}
-                                    {h.titles.length > 0 ? ` · ${h.titles.join(', ')}` : ''}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
+            {/* La decisión y la trayectoria son hermanas y no una arriba de la
+                otra: en escritorio se reparten en dos columnas y la trayectoria
+                deja de empujar la decisión fuera de pantalla. En teléfono esto
+                es un `div` y no hace nada. El reparto vive entero en el CSS. */}
+            <div className={styles.console}>
+                <div className={styles.consoleMain}>
+                    {pendingResult ? (
+                        <SeasonResult
+                            entry={career.history[pendingResult.index]}
+                            family={career.player.family}
+                            ovrDelta={pendingResult.ovrDelta}
+                            onContinue={() => setPendingResult(null)}
+                        />
+                    ) : MomentScreen ? (
+                        <MomentScreen state={career} onResolve={resolveMomentInput} />
+                    ) : evento ? (
+                        <EventCard event={evento} onChoose={choose} />
+                    ) : (
+                        <TrainingCard state={career} onChoose={train} />
+                    )}
                 </div>
-            )}
+
+                {career.history.length > 0 && !pendingResult && (
+                    <aside className={styles.consoleAside}>
+                        <div className={styles.card}>
+                            <span className={styles.eyebrow}>Trayectoria</span>
+                            <div className={styles.timeline}>
+                                {[...career.history].reverse().slice(0, 6).map((h) => (
+                                    <div key={h.season} className={styles.season}>
+                                        <span className={styles.seasonAge}>{h.age}</span>
+                                        <span className={styles.seasonBody}>
+                                            <span className={styles.seasonClub}>{h.ovr}</span> · {h.matchesPlayed} partidos
+                                            {h.caps > 0 ? ` · ${h.caps} caps` : ''}
+                                            {h.titles.length > 0 ? ` · ${h.titles.join(', ')}` : ''}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </aside>
+                )}
+            </div>
         </Shell>
     );
 }
