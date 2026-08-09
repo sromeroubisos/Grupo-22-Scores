@@ -6,7 +6,53 @@
 .shell {
     max-width: 780px;
     margin: 0 auto;
-    padding: 22px 18px 120px;
+    /* El pie era 120 px y no separaba de nada: en la pantalla larga sobraba y en
+       la corta no hacía falta. El aire de abajo lo pone el layout, no el
+       contenido. */
+    padding: 22px 18px 24px;
+}
+
+/* ── La salida ────────────────────────────────────────────────────────────── */
+/* El juego es una PANTALLA y no una página, así que en algún momento se va a
+   quedar sin footer y sin barra inferior — que hoy son las dos únicas formas de
+   salir de acá. La salida propia entra ANTES que eso y no después: sacarle la
+   navegación a alguien y recién entonces darle una puerta es dejarlo encerrado
+   en el medio.
+   La forma sale de `carrera.module.css`; la hoja no se comparte a propósito. */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    /* 44 px de alto: es la única salida del juego y se toca con el pulgar. Con
+       el padding que traía la forma original medía 34 y no llegaba al mínimo.
+       El margen negativo devuelve el aire extra para que la barra no crezca. */
+    min-height: 44px;
+    padding: 6px 8px;
+    margin: -5px -8px;
+}
+
+.back:hover {
+    color: var(--color-text-primary);
+}
+
+.back svg {
+    width: 16px;
+    height: 16px;
 }
 
 /* ── Cabecera del jugador ─────────────────────────────────────────────────── */
@@ -39,21 +85,21 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* ── Por qué esta etiqueta dejó de ser verde y creció ─────────────────────────
+   Estaba en 0.52rem (8,3 px) con `opacity: 0.75` sobre el acento. Medido con la
+   herramienta, eso daba 3,45 : 1 en oscuro y 2,21 : 1 en claro: no pasaba el
+   umbral de texto normal en NINGÚN tema, y en claro no pasaba ni el de
+   componentes.
+   El verde no se puede aclarar sin romper el otro tema —`--color-accent` es el
+   mismo `#00a365` en los dos, y sobre el chip verde pálido del tema claro da
+   2,73 : 1—, así que la etiqueta deja el acento y pasa al gris de texto
+   secundario: 6,40 : 1 en oscuro y 6,35 : 1 en claro. El acento se queda donde
+   importa, que es el número grande. */
 .ovrLabel {
-    font-size: 0.52rem;
+    font-size: 0.6875rem;
     font-weight: 700;
-    letter-spacing: 0.12em;
-    opacity: 0.75;
-}
-
-/* El techo, debajo de la media. La brecha entre los dos números ES la historia
-   del que apuntó más alto y se quedó sin años, así que se lee de un vistazo. */
-.ovrCeiling {
-    font-size: 0.52rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    font-variant-numeric: tabular-nums;
-    opacity: 0.6;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
 }
 
 .identity {
@@ -78,6 +124,17 @@
     margin: 0;
 }
 
+/* El techo, en la línea del puesto y NO adentro del chip.
+   La brecha entre la media y el techo es la historia del que apuntó más alto y
+   se quedó sin años, así que tiene que leerse. Adentro de un cuadrado de 62 px
+   no entra a un tamaño legible: con el sufijo "(+4 construido)" ya se
+   desbordaba hoy, sólo que tan apagado que no se notaba. Acá sigue al lado de
+   la media, en la misma cabecera y de un vistazo, pero con lugar. */
+.ceiling {
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
 .headerStats {
     display: flex;
     gap: 14px;
@@ -98,12 +155,16 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* CAPS · TÍTULOS · HIA. Estaba en el gris terciario a 0.62rem (9,9 px), que da
+   3,87 : 1 en oscuro: por debajo del 4,5 : 1 de texto normal. El terciario es
+   para lo que acompaña, no para el rótulo de un número que el jugador viene a
+   buscar. Con el secundario da 7,30 : 1 en oscuro y 7,23 : 1 en claro. */
 .statLabel {
-    font-size: 0.62rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
 }
 
 @media (max-width: 560px) {
@@ -137,12 +198,40 @@
     color: var(--color-text-primary);
 }
 
+/* Mismo caso que `.statLabel`: el gris terciario a 12 px da 3,87 : 1 en oscuro.
+   Acá pesa más todavía, porque lo que dice es el CLUB — la identidad que el
+   §5 del CLAUDE.md pone antes que la vitrina. */
 .belongingClub {
     font-size: 0.75rem;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* El club y su competición, que es el único `.belongingClub` que NO puede
+   recortarse: en 390 px se leía "Atlético San Andrés · Desarrollo de…".
+   Clase aparte y no un cambio a `.belongingClub` porque la otra aparición —la
+   línea del carril de selección— sí puede seguir en una sola línea. */
+.belongingClubMain {
+    text-align: right;
+}
+
+@media (max-width: 560px) {
+    /* El nombre del club deja de competir por el ancho con el tier: se va a su
+       propia línea y se lee entero. */
+    .belongingTop {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    .belongingClubMain {
+        text-align: left;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal;
+    }
 }
 
 .track {

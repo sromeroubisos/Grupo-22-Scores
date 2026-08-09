@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import type { CaptainState, CreateCaptainInput, MomentOutcome } from '@/features/captain';
 import { captainReducer, createInitialCaptain, getPendingEvent } from '@/features/captain';
 import { clearCaptain, loadCaptain, saveCaptain } from './captainStorage';
@@ -38,6 +39,53 @@ type Step = 'loading' | 'intro' | 'create' | 'career';
  */
 function GameTitle() {
     return <h1 className={styles.srOnly}>El Capitán</h1>;
+}
+
+/**
+ * El envoltorio de todas las pantallas, con la salida adentro.
+ *
+ * Existe porque el juego va camino a ser una pantalla de alto completo —sin
+ * footer y sin barra inferior, que hoy son las dos únicas formas de irse de
+ * acá— y cuando eso pase esta flecha queda como la única puerta. Un `div`
+ * suelto por pantalla garantiza que la próxima se olvide de ponerla.
+ *
+ * ── Por qué `salida` puede ser `false` ──
+ * La barra cuesta 58 px de alto, y en la pantalla de decisión el alto es
+ * exactamente lo que falta: medido, la agrega y la primera opción clickeable se
+ * corre de 412 px a 460 en una ventana de 900. Pagar eso HOY no compra nada,
+ * porque mientras el footer y la barra inferior sigan renderizándose la salida
+ * ya existe por otro lado.
+ *
+ * Así que la flecha va donde el espacio sobra —portada, creación, retiro— y en
+ * la pantalla de decisión entra junto con el alto completo, integrada en la
+ * cabecera del jugador y sin fila propia. Las dos cosas son el mismo commit y
+ * no se pueden separar: el día que se saque el footer, esta pantalla se queda
+ * sin puerta.
+ */
+function Shell({ children, salida = true }: { children?: React.ReactNode; salida?: boolean }) {
+    return (
+        <div className={styles.shell}>
+            {salida && (
+                <div className={styles.topbar}>
+                    <Link href="/juegos/minijuegos" className={styles.back}>
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M15 6l-6 6 6 6" />
+                        </svg>
+                        Juegos
+                    </Link>
+                </div>
+            )}
+            {children}
+        </div>
+    );
 }
 
 export default function CaptainFlow() {
@@ -127,12 +175,12 @@ export default function CaptainFlow() {
 
     if (step === 'loading') {
         // Nunca ofrecer "Continuar" antes de saber si hay partida guardada.
-        return <div className={styles.shell} />;
+        return <Shell />;
     }
 
     if (step === 'intro') {
         return (
-            <div className={styles.shell}>
+            <Shell>
                 <div className={styles.card}>
                     <span className={styles.eyebrow}>Minijuegos</span>
                     <h1 className={styles.finalTitle}>El Capitán</h1>
@@ -177,26 +225,26 @@ export default function CaptainFlow() {
                         )}
                     </div>
                 </div>
-            </div>
+            </Shell>
         );
     }
 
     if (step === 'create' || !career) {
         return (
-            <div className={styles.shell}>
+            <Shell>
                 <GameTitle />
                 <CreatePlayer onStart={start} />
-            </div>
+            </Shell>
         );
     }
 
     if (career.player.retired && !pendingResult) {
         return (
-            <div className={styles.shell}>
+            <Shell>
                 <GameTitle />
                 <PlayerHeader state={career} />
                 <Retirement state={career} onRestart={restart} />
-            </div>
+            </Shell>
         );
     }
 
@@ -209,7 +257,10 @@ export default function CaptainFlow() {
         : null;
 
     return (
-        <div className={styles.shell}>
+        // Sin barra de salida: es la pantalla donde el alto falta, y la puerta
+        // sigue estando en el footer y en la barra inferior hasta que el juego
+        // pase a alto completo. El porqué completo, en `Shell`.
+        <Shell salida={false}>
             <GameTitle />
             <PlayerHeader state={career} />
 
@@ -245,6 +296,6 @@ export default function CaptainFlow() {
                     </div>
                 </div>
             )}
-        </div>
+        </Shell>
     );
 }
