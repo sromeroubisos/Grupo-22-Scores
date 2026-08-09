@@ -83,7 +83,11 @@ function Shell({ children, salida = true }: { children?: React.ReactNode; salida
                     </Link>
                 </div>
             )}
-            {children}
+            {/* El cuerpo va envuelto para poder repartir el alto sin arrastrar
+                la barra de salida: en las pantallas de antesala se centra, y es
+                donde va a colgarse el scroll interno cuando el shell pase a
+                alto fijo. */}
+            <div className={styles.shellBody}>{children}</div>
         </div>
     );
 }

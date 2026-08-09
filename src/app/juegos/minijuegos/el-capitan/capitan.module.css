@@ -1201,6 +1201,11 @@
    en dos lo enciende el escalón de escritorio de acá abajo. Los `min-width: 0`
    no son decorativos: un item de grid no baja de su contenido más ancho sin
    ellos, y un nombre de club largo estiraría la columna. */
+.shellBody {
+    display: flex;
+    flex-direction: column;
+}
+
 .console {
     display: block;
 }
@@ -1271,11 +1276,30 @@
     .options {
         gap: 7px;
         margin-top: 11px;
+        /* Las opciones de una decisión se leen en paralelo: son alternativas,
+           no una lista. Apiladas gastaban el alto de a una y en la pretemporada
+           —cuatro— empujaban las dos últimas abajo del pliegue, que es
+           exactamente lo que rompe la regla del §3.1: no se puede elegir
+           sabiendo el costo si la mitad no entra. */
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Impar: la última ocupa el ancho entero en vez de dejar media fila muerta.
+       Cubre las decisiones de 3, que si no quedaban 2 + un hueco. */
+    .options > .option:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
     }
 
     .option {
         padding: 10px 13px;
         border-radius: 10px;
+    }
+
+    /* La prosa no se estira con el contenedor: a 1240 px un párrafo llegaría a
+       ~160 caracteres por línea y se lee en zigzag. El techo son 70. */
+    .cardText,
+    .finalLead {
+        max-width: 70ch;
     }
 
     /* El ancho extra se abre SÓLO cuando hay algo que poner al lado.
@@ -1293,5 +1317,25 @@
         grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
         gap: 18px;
         align-items: start;
+    }
+
+    /* ── Las pantallas de antesala ──────────────────────────────────────────
+       Portada y creación no tienen consola, así que no ensanchan: una columna
+       de prosa a 1240 px sería peor de leer, no mejor. Lo que sí tenían era el
+       otro problema —medido en 1920×826, la tarjeta terminaba en 528 y dejaba
+       298 px de vacío abajo—, o sea contenido colgado del techo en una pantalla
+       mayormente negra. Eso también se lee como "ampliado".
+       Se reparte el alto en vez de ensanchar: el cuerpo se centra y la barra de
+       salida se queda arriba, que es su lugar. */
+    .shell:not(:has(.console)) {
+        min-height: calc(100dvh - var(--h-header, 60px) - 46px);
+        /* El `flex: 1` del cuerpo no reparte nada si el padre no es flex. */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .shell:not(:has(.console)) .shellBody {
+        flex: 1;
+        justify-content: center;
     }
 }
