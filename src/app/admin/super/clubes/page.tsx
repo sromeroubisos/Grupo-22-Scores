@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import styles from '../page.module.css';
+import ConsolePager from '../ConsolePager';
 import { useSuperConsole } from '../SuperConsoleContext';
 import { Eye, EyeOff, MoreVertical, Pencil, Trash2, Plus, RefreshCw, MapPin, Shield, Users, GitBranch, Link2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -44,7 +45,6 @@ function ClubLogo({ logo, name, color }: { logo?: string | null; name: string; c
     );
 }
 
-const CLUBS_PER_PAGE = 20;
 const ACTIVE_SPORTS = getActiveSports();
 
 type SortKey = 'name' | 'location' | 'followers_count' | 'union' | 'color' | 'visibility';
@@ -76,6 +76,7 @@ export default function SuperadminClubesPage() {
     const [visibilityFilter, setVisibilityFilter] = useState('all');
     const [logoFilter, setLogoFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
+    const [clubsPerPage, setClubsPerPage] = useState(20);
 
     // Sort state
     const [sortBy, setSortBy] = useState<SortKey>('name');
@@ -276,21 +277,16 @@ export default function SuperadminClubesPage() {
         });
     }, [filtered, sortBy, sortDir]);
 
-    const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / CLUBS_PER_PAGE));
+    const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / clubsPerPage));
 
     useEffect(() => {
         setCurrentPage(prev => Math.min(prev, totalPages));
     }, [totalPages]);
 
     const paginatedClubs = useMemo(() => {
-        const startIndex = (currentPage - 1) * CLUBS_PER_PAGE;
-        return sortedFiltered.slice(startIndex, startIndex + CLUBS_PER_PAGE);
-    }, [sortedFiltered, currentPage]);
-
-    const paginationPages = useMemo(
-        () => Array.from({ length: totalPages }, (_, index) => index + 1),
-        [totalPages],
-    );
+        const startIndex = (currentPage - 1) * clubsPerPage;
+        return sortedFiltered.slice(startIndex, startIndex + clubsPerPage);
+    }, [sortedFiltered, currentPage, clubsPerPage]);
 
     const hasActiveFilters = filters.search || filters.country !== 'all' || unionFilter !== 'all' || visibilityFilter !== 'all' || logoFilter !== 'all';
 
@@ -304,8 +300,6 @@ export default function SuperadminClubesPage() {
 
     const visibleCount = filtered.filter(c => c.is_visible !== false).length;
     const hiddenCount = filtered.filter(c => c.is_visible === false).length;
-    const pageStart = sortedFiltered.length === 0 ? 0 : (currentPage - 1) * CLUBS_PER_PAGE + 1;
-    const pageEnd = Math.min(currentPage * CLUBS_PER_PAGE, sortedFiltered.length);
     const derivedSportMatchesBase = derivedBaseClub
         ? canonicalizeSportId(derivedBaseClub.sport) === canonicalizeSportId(derivedSport)
         : false;
@@ -746,62 +740,15 @@ export default function SuperadminClubesPage() {
                         </tbody>
                     </table>
                 </div>
-                <div
-                    className={styles.filterBar}
-                    style={{ marginTop: 16, marginBottom: 0, justifyContent: 'space-between', alignItems: 'center' }}
-                    onClick={e => e.stopPropagation()}
-                >
-                    <div className={styles.filterLabel} style={{ fontSize: 11 }}>
-                        Mostrando {pageStart}-{pageEnd} de {filtered.length} clubes
-                    </div>
-
-                    {totalPages > 1 && (
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                            <button
-                                type="button"
-                                className={styles.cardAction}
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                style={{ padding: '8px 14px' }}
-                            >
-                                Anterior
-                            </button>
-
-                            {paginationPages.map(page => {
-                                const isActive = page === currentPage;
-                                return (
-                                    <button
-                                        key={page}
-                                        type="button"
-                                        className={styles.cardAction}
-                                        onClick={() => setCurrentPage(page)}
-                                        aria-current={isActive ? 'page' : undefined}
-                                        style={{
-                                            minWidth: 40,
-                                            padding: '8px 12px',
-                                            background: isActive ? 'var(--color-accent)' : undefined,
-                                            borderColor: isActive ? 'var(--color-accent)' : undefined,
-                                            color: isActive ? '#012e1d' : undefined,
-                                            fontWeight: isActive ? 700 : undefined,
-                                        }}
-                                    >
-                                        {page}
-                                    </button>
-                                );
-                            })}
-
-                            <button
-                                type="button"
-                                className={styles.cardAction}
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                style={{ padding: '8px 14px' }}
-                            >
-                                Siguiente
-                            </button>
-                        </div>
-                    )}
-                </div>
+                <ConsolePager
+                    page={currentPage}
+                    totalPages={totalPages}
+                    total={sortedFiltered.length}
+                    pageSize={clubsPerPage}
+                    onPageChange={setCurrentPage}
+                    onPageSizeChange={(size) => { setClubsPerPage(size); setCurrentPage(1); }}
+                    itemLabel="clubes"
+                />
                 </>
             )}
 

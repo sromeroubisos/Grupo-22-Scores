@@ -3,10 +3,26 @@ import { getApiErrorStatus, requireGlobalAdminApiUser } from '@/lib/auth/apiAdmi
 import { MATCH_REVIEW_STATUS } from '@/lib/matchReview';
 import { getReadClient } from '@/lib/supabase/read';
 import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
-import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
+
+// Vista que le pega a cada partido el nombre del torneo y el de los dos clubes en
+// una sola columna de texto. Es lo que permite buscar sobre TODO el historial en vez
+// de sobre la pagina que está en pantalla. Se crea con la migración
+// `20260809120000_admin_matches_search_view.sql`; mientras no exista, el endpoint
+// usa el camino de listas de ids y avisa cuando queda corto.
+const MATCH_SEARCH_VIEW = 'admin_matches_search' as const;
 
 const DEFAULT_PAGE_SIZE = 20;
-const MAX_PAGE_SIZE = 100;
+const MAX_PAGE_SIZE = 200;
+// `matches` no guarda el nombre del club ni el del torneo, así que buscar por
+// nombre obliga a resolver ids primero y mandarlos dentro de la query. Eso tiene un
+// techo duro y medido: PostgREST devuelve la query entera en `Content-Location`, y
+// con un termino amplio ("a" engancha ~2000 clubes) la RESPUESTA se cae con
+// HeadersOverflow — la busqueda no da de menos, revienta. Por eso el corte es por
+// presupuesto de caracteres, no por cantidad, y cuando algo queda afuera se avisa
+// (`searchTruncated`) en vez de devolver un recorte silencioso.
+const SEARCH_ENTITY_LIMIT = 200;
+const SEARCH_CLAUSE_BUDGET = 3500;
 
 type MatchConsoleRow = {
   id: string;
@@ -126,6 +142,71 @@ async function findEntityIdsBySport(
   return [];
 }
 
+/**
+ * PostgREST no sabe buscar por el nombre del club o del torneo desde `matches`:
+ * son otras tablas. Se resuelven primero los ids que coinciden por nombre y se
+ * arma con eso un `or` sobre el partido, más el `venue`, que sí es columna propia.
+ */
+async function findEntityIdsByName(
+  client: Awaited<ReturnType<typeof getReadClient>>,
+  table: 'tournaments' | 'clubs',
+  term: string,
+) {
+  const pattern = `%${term.replace(/[%_]/g, (char) => `\\${char}`)}%`;
+
+  const { data, error } = await client
+    .from(table)
+    .select('id')
+    .ilike('name', pattern)
+    .limit(SEARCH_ENTITY_LIMIT + 1);
+
+  if (error) return { ids: [] as string[], truncated: false };
+
+  const ids = (data || []).map((row: { id?: string | null }) => row.id).filter(Boolean) as string[];
+  return {
+    ids: ids.slice(0, SEARCH_ENTITY_LIMIT),
+    truncated: ids.length > SEARCH_ENTITY_LIMIT,
+  };
+}
+
+function quoteId(id: string) {
+  // Los ids de club son slugs y los de torneo uuid, pero se citan igual: un id con
+  // coma o parentesis rompe la lista `in.(...)` sin decir por qué.
+  return `"${id.replace(/"/g, '\\"')}"`;
+}
+
+/**
+ * Recorta las dos listas de ids para que las clausulas entren en el presupuesto.
+ * Un club cuesta el doble que un torneo porque va en dos clausulas (local y
+ * visitante). Se reparte mitad y mitad para que un termino que pega en las dos
+ * dimensiones no deje una sin representar.
+ */
+function fitSearchIds(tournamentIds: string[], clubIds: string[]) {
+  const take = (ids: string[], budget: number, costPerId: (id: string) => number) => {
+    const kept: string[] = [];
+    let spent = 0;
+    for (const id of ids) {
+      const cost = costPerId(id);
+      if (spent + cost > budget) break;
+      kept.push(id);
+      spent += cost;
+    }
+    return { kept, truncated: kept.length < ids.length };
+  };
+
+  const half = Math.floor(SEARCH_CLAUSE_BUDGET / 2);
+  const tournaments = take(tournamentIds, half, (id) => id.length + 3);
+  // Sobrante del torneo para el club: si no hay torneos que pongan, el club usa todo.
+  const clubBudget = SEARCH_CLAUSE_BUDGET - tournaments.kept.reduce((acc, id) => acc + id.length + 3, 0);
+  const clubs = take(clubIds, clubBudget, (id) => (id.length + 3) * 2);
+
+  return {
+    tournamentIds: tournaments.kept,
+    clubIds: clubs.kept,
+    truncated: tournaments.truncated || clubs.truncated,
+  };
+}
+
 async function supportsMatchColumn(
   client: Awaited<ReturnType<typeof getReadClient>>,
   column: string,
@@ -206,6 +287,7 @@ export async function GET(request: NextRequest) {
     const pageSize = Math.min(parsePositiveInt(searchParams.get('pageSize'), DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
     const status = (searchParams.get('status') || 'all').trim().toLowerCase();
     const sport = (searchParams.get('sport') || 'all').trim().toLowerCase();
+    const search = (searchParams.get('search') || '').trim();
     const requestedReview = (searchParams.get('review') || 'all').trim().toLowerCase();
     const review = [
       MATCH_REVIEW_STATUS.pending,
@@ -251,28 +333,69 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const { data: matches, error: matchesError, count } = await selectPageWithFallback<MatchConsoleRow>(
-      (columns) => {
-        let query = readClient
-          .from('matches')
-          .select(columns, { count: 'exact' }) as any;
-        query = query.order('date_time', { ascending: false });
+    let searchTruncated = false;
 
-        if (status !== 'all') {
-          query = query.eq('status', status);
-        }
+    /**
+     * Resolver la busqueda con listas de ids es el plan B. El plan A es la vista
+     * `admin_matches_search`, que trae el nombre del torneo y de los dos clubes ya
+     * pegados a la fila: ahí la busqueda es un `ilike` sobre una columna, alcanza a
+     * los 55 mil partidos y no tiene techo. Si la vista no está creada todavía se
+     * cae al plan B, que da menos y lo dice.
+     */
+    const buildSearchClauses = async () => {
+      const [tournamentsByName, clubsByName] = await Promise.all([
+        findEntityIdsByName(readClient, 'tournaments', search),
+        findEntityIdsByName(readClient, 'clubs', search),
+      ]);
 
-        if (review !== 'all') {
-          query = query.eq('review_status', review);
-        }
+      const fitted = fitSearchIds(tournamentsByName.ids, clubsByName.ids);
+      searchTruncated = tournamentsByName.truncated || clubsByName.truncated || fitted.truncated;
 
-        if (sportClauses.length > 0) {
-          query = query.or(sportClauses.join(','));
-        }
+      const tournamentList = fitted.tournamentIds.map(quoteId).join(',');
+      const clubList = fitted.clubIds.map(quoteId).join(',');
 
-        return query.range(from, to);
-      },
-      [
+      return [
+        `venue.ilike.*${search.replace(/[*(),]/g, ' ')}*`,
+        ...(tournamentList ? [`tournament_id.in.(${tournamentList})`] : []),
+        ...(clubList
+          ? [
+            `home_club_id.in.(${clubList})`,
+            `away_club_id.in.(${clubList})`,
+          ]
+          : []),
+      ];
+    };
+
+    const buildPageQuery = (source: 'matches' | typeof MATCH_SEARCH_VIEW, searchClauses: string[]) => (columns: string) => {
+      let query = readClient
+        .from(source)
+        .select(columns, { count: 'exact' }) as any;
+      query = query.order('date_time', { ascending: false });
+
+      if (status !== 'all') {
+        query = query.eq('status', status);
+      }
+
+      if (review !== 'all') {
+        query = query.eq('review_status', review);
+      }
+
+      if (sportClauses.length > 0) {
+        query = query.or(sportClauses.join(','));
+      }
+
+      if (source === MATCH_SEARCH_VIEW && search) {
+        query = query.ilike('search_text', `%${search.replace(/[%_]/g, (char: string) => `\\${char}`)}%`);
+      } else if (searchClauses.length > 0) {
+        // Dos `or` separados se combinan con AND: el partido tiene que ser del
+        // deporte elegido Y coincidir con la busqueda.
+        query = query.or(searchClauses.join(','));
+      }
+
+      return query.range(from, to);
+    };
+
+    const COLUMN_VARIANTS = [
         'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport_id, sport, is_visible, review_status, created_by_user_id, created_by_club_id, reviewed_at, review_notes',
         'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport_id, sport, is_visible, review_status',
         'id, round_id, round_label, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport_id, sport, review_status',
@@ -285,8 +408,24 @@ export async function GET(request: NextRequest) {
         'id, round_id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id, sport',
         'id, round_id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id',
         'id, date_time, venue, status, score, tournament_id, home_club_id, away_club_id',
-      ],
-    );
+    ];
+
+    // Plan A: la vista con el texto ya pegado. Plan B (si no está creada): las
+    // listas de ids acotadas, que avisan cuando quedan cortas.
+    let pageResult = search
+      ? await selectPageWithFallback<MatchConsoleRow>(buildPageQuery(MATCH_SEARCH_VIEW, []), COLUMN_VARIANTS)
+      : null;
+
+    if (!pageResult || (pageResult.error && search)) {
+      if (pageResult?.error && !isMissingTableError(pageResult.error, MATCH_SEARCH_VIEW)) {
+        return jsonError('Failed to load matches', 500, pageResult.error.message || 'search view error');
+      }
+
+      const searchClauses = search ? await buildSearchClauses() : [];
+      pageResult = await selectPageWithFallback<MatchConsoleRow>(buildPageQuery('matches', searchClauses), COLUMN_VARIANTS);
+    }
+
+    const { data: matches, error: matchesError, count } = pageResult;
 
     if (matchesError) {
       return jsonError('Failed to load matches', 500, matchesError.message);
@@ -391,6 +530,7 @@ export async function GET(request: NextRequest) {
         total,
         totalPages,
       },
+      searchTruncated,
     });
   } catch (error) {
     return jsonError('Super matches error', 500, error instanceof Error ? error.message : String(error));

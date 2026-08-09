@@ -144,7 +144,14 @@ export default function ClubManagePage() {
             const j = await res.json();
             if (!res.ok) { showToast(j.error || 'Error al guardar', 'error'); return; }
             setClub(j.data);
-            showToast('Identidad guardada', 'success');
+            // Si el endpoint tuvo que descartar un campo que la base no tiene, se dice.
+            // Un "guardado" que en realidad guardó de menos es peor que un error.
+            showToast(
+                Array.isArray(j.skippedFields) && j.skippedFields.length > 0
+                    ? `Identidad guardada, sin ${j.skippedFields.join(', ')}: la base no tiene esos campos`
+                    : 'Identidad guardada',
+                'success',
+            );
             loadAll(); // refresh setup status
         } catch {
             showToast('Error de red', 'error');

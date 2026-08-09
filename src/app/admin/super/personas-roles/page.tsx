@@ -1134,9 +1134,11 @@ export default function PersonasRolesPage() {
                                                 );
                                             })}
                                         </div>
-                                        {clubSearchTorneo.trim().length === 0 && filteredClubsTorneo.length > 100 && (
+                                        {/* El aviso va tambien con el buscador escrito: un termino corto
+                                            sobre 2038 clubes sigue pasando de 100 y el corte quedaba mudo. */}
+                                        {filteredClubsTorneo.length > 100 && (
                                             <div style={{ fontSize: 11, color: 'var(--basalt-500)' }}>
-                                                Mostrando 100 de {filteredClubsTorneo.length} clubes. Usá el buscador para filtrar.
+                                                Mostrando 100 de {filteredClubsTorneo.length} clubes. Afiná el buscador para ver el resto.
                                             </div>
                                         )}
                                     </div>

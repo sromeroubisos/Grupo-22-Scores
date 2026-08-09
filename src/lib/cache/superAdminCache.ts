@@ -286,7 +286,11 @@ export async function fetchClubs(force = false): Promise<ClubWithUnion[]> {
     if (force) invalidateCache(KEY);
 
     return cachedFetch(KEY, async (context) => {
-        return fetchAdminConsoleResource<ClubWithUnion>('clubs', context?.signal, { limit: 2000 });
+        // Paginado, igual que torneos: pedir `limit=2000` de una no alcanza porque
+        // PostgREST recorta en su `db-max-rows` (1000) sin avisar. La consola buscaba
+        // y filtraba sobre las primeras 1000 filas y la cabecera contaba esas mismas,
+        // así que los clubes de la mitad de abajo del abecedario no existían.
+        return fetchAllAdminConsoleResource<ClubWithUnion>('clubs', context?.signal);
     }, DEFAULT_TTL_MS, { timeoutMs: CONSOLE_RESOURCE_TIMEOUT_MS });
 }
 
