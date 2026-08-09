@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 
 function err(message: string, status = 400) {
     return NextResponse.json({ error: message }, { status });
@@ -38,7 +39,9 @@ export async function GET(request: NextRequest) {
     const reader = getServiceWriter(supabase, 'admin/torneo/clubs/available');
     let query = reader
         .from('clubs')
-        .select('id, name, short_name, slug, sport, sport_id, city, region, country, logo_url, primary_color')
+        // Sin `logo_url`: es la columna con el escudo en base64 y acá se pide un
+        // catálogo entero. El escudo viaja como URL del proxy (ver abajo).
+        .select('id, name, short_name, slug, sport, sport_id, city, region, country, primary_color, updated_at')
         .order('name', { ascending: true })
         .limit(limit);
 
@@ -60,5 +63,14 @@ export async function GET(request: NextRequest) {
         return err('No se pudieron cargar los clubes disponibles', 500);
     }
 
-    return NextResponse.json({ data: data ?? [] });
+    return NextResponse.json({
+        data: (data ?? []).map((club) => ({
+            ...club,
+            logo_url: buildTeamLogoProxyUrl({
+                key: club.id,
+                name: club.name,
+                version: club.updated_at,
+            }),
+        })),
+    });
 }

@@ -5,6 +5,7 @@ import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 
 type JsonObject = Record<string, unknown>;
 
@@ -182,7 +183,11 @@ export async function GET(request: NextRequest) {
     const reader = getServiceWriter(supabase, 'admin/torneo/clubs');
     let query = reader
         .from('clubs')
-        .select('id, name, short_name, slug, sport, sport_id, city, region, country, is_visible, union_id, logo_url, primary_color, categories')
+        // `logo_url` guarda el escudo en base64 y esta consulta es la del catálogo
+        // COMPLETO: medida contra producción daba 56,79 MB en 5,5 s para quedarse
+        // con una lista de nombres. El escudo sale abajo como URL del proxy, que
+        // lo resuelve por `id`, así que el cajón de participantes lo pinta igual.
+        .select('id, name, short_name, slug, sport, sport_id, city, region, country, is_visible, union_id, primary_color, categories, updated_at')
         .order('name', { ascending: true })
         .limit(limit);
 
@@ -222,6 +227,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
         data: (data ?? []).map((club) => ({
             ...club,
+            logo_url: buildTeamLogoProxyUrl({
+                key: club.id,
+                name: club.name,
+                version: club.updated_at,
+            }),
             divisions: divisionsByClub.get(club.id) ?? [],
         })),
     });

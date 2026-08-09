@@ -639,13 +639,17 @@ async function enrichMatchesWithTournamentSport(
 async function getClubsByIds(
     supabase: ReturnType<typeof getAdminClient>,
     clubIds: string[],
+    includeLogos = true,
 ) {
     const uniqueClubIds = Array.from(new Set(clubIds.filter(Boolean)));
     if (uniqueClubIds.length === 0) return new Map<string, RankingClubRow>();
 
+    // `clubs.logo_url` guarda el escudo como data-URI: los 151 clubes de un
+    // ranking son 25,72 MB medidos contra produccion. Quien solo necesita el
+    // rating no pide la columna.
     const { data, error } = await supabase
         .from('clubs')
-        .select('id, name, short_name, logo_url')
+        .select(includeLogos ? 'id, name, short_name, logo_url' : 'id, name, short_name')
         .in('id', uniqueClubIds);
 
     if (error) {
@@ -730,9 +734,26 @@ async function getRankingEntryByClubId(
 // If a ranking ever exceeds this, the caller should paginate instead of loading all rows.
 const RANKING_ENTRIES_HARD_LIMIT = 5000;
 
+/**
+ * El default es SIN escudos, y no es una preferencia: es lo que mantiene vivo al
+ * rebuild.
+ *
+ * De los cinco que llaman aca, cuatro son de calculo —`recomputeEntryPositions`,
+ * `rebuildLeadershipHistory`, `fetchRankingEntryMap` y `rebuildRankingInternal`—
+ * y ninguno pinta un escudo: leen ratings. El unico que los muestra es
+ * `getClubRankingDetail`, que los pide explicitamente.
+ *
+ * Con el default en `true`, esos cuatro arrastraban `clubs.logo_url` de los 151
+ * clubes del ranking: 25,72 MB medidos contra produccion, contra un timeout de
+ * fetch de 8 s (`src/lib/perf/supabase.ts`). `rebuildRankingInternal` la hace como
+ * SEGUNDA operacion, ANTES de su primera escritura — por eso el ranking quedo
+ * stale desde el 2026-08-05 sin que ningun intento del cron llegara a escribir una
+ * sola fila. Ver [[perf_edit_bottleneck_rootcause]].
+ */
 async function getRankingEntries(
     supabase: ReturnType<typeof getAdminClient>,
     rankingId: string,
+    includeClubLogos = false,
 ) {
     const { data, error } = await supabase
         .from('club_ranking_entries')
@@ -750,6 +771,7 @@ async function getRankingEntries(
     const clubsById = await getClubsByIds(
         supabase,
         rows.map((row) => row.club_id),
+        includeClubLogos,
     );
 
     return rows.map((row) => ({
@@ -1726,7 +1748,8 @@ export async function getClubRankingDetail(rankingId: string): Promise<RankingDe
     const supabase = getAdminClient();
     const ranking = await getRankingRow(supabase, rankingId);
     const [entries, recentApplicationsRes, manualAdjustmentsRes, leadershipHistory] = await Promise.all([
-        getRankingEntries(supabase, rankingId),
+        // El unico consumidor que PINTA los escudos: los pide explicitamente.
+        getRankingEntries(supabase, rankingId, true),
         supabase
             .from('club_ranking_match_applications')
             .select('*')

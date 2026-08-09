@@ -15,7 +15,7 @@ import {
   type MatchesFeedInvalidationScope,
 } from '@/lib/server/matchesFeedInvalidation';
 import { isMatchRosterLocked } from '@/lib/tournament/fixedRoster';
-import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
+import { buildTeamLogoProxyUrl, resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import {
   deriveFixedRosterLineups,
   loadFixedRosterConfigForMatch,
@@ -619,7 +619,10 @@ export class FixtureService {
 
     let participantsQuery = supabase
       .from('tournament_participants')
-      .select('id, club_id, name, short_code, clubs:club_id(logo_url)')
+      // Sin `clubs:club_id(logo_url)`: eran 1,36 MB por 9 participantes (los nueve
+      // escudos en base64) para quedarse con nueve direcciones. El escudo se
+      // resuelve por `club_id` en `mapParticipant`.
+      .select('id, club_id, name, short_code')
       .eq('tournament_id', tournamentId)
       .eq('status', 'active');
 
@@ -760,8 +763,8 @@ export class FixtureService {
             home_base_points, away_base_points,
             home_bonus_points, away_bonus_points,
             points_autocalculated, points_override_reason,
-            home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
-            away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url)
+            home_club:clubs!matches_home_club_id_fkey(id, name, short_name),
+            away_club:clubs!matches_away_club_id_fkey(id, name, short_name)
           `)
           .eq('phase_id', phaseId)
           .order('date_time', { ascending: true }),
@@ -805,8 +808,8 @@ export class FixtureService {
       .from('matches')
       .select(`
         *,
-        home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
-        away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url),
+        home_club:clubs!matches_home_club_id_fkey(id, name, short_name),
+        away_club:clubs!matches_away_club_id_fkey(id, name, short_name),
         tournament:tournaments(id, name, logo:logo_url)
       `)
       .eq('id', matchId)
@@ -873,8 +876,8 @@ export class FixtureService {
       .from('matches')
       .select(`
         *,
-        home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo:logo_url),
-        away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo:logo_url)
+        home_club:clubs!matches_home_club_id_fkey(id, name, short_name),
+        away_club:clubs!matches_away_club_id_fkey(id, name, short_name)
       `)
       .or(`round_uuid.eq.${roundId},round_id.eq.${roundId}`)
       .order('date_time', { ascending: true });
@@ -2299,7 +2302,31 @@ export class FixtureService {
    *
    * El campo NO se borra: sigue llegando poblado y `<Crest>` lo pinta igual. Lo
    * único que cambia es que viaja la dirección del escudo en vez del escudo entero.
+   *
+   * Eso arreglaba la RESPUESTA, no la LECTURA: el base64 igual cruzaba de Postgres
+   * al servidor para que acá lo tiráramos. Medido contra producción en el torneo
+   * `b12830fd`, la consulta de partidos con `logo:logo_url` en los dos lados pesaba
+   * 21,81 MB contra 0,015 MB sin ella — el mismo escudo repetido en cada fila. Por
+   * eso las consultas ya no piden la columna y el escudo se resuelve POR CLAVE, que
+   * es justo lo que el proxy sabe hacer.
    */
+  private static resolveClubLogo(
+    clubId: string | null | undefined,
+    clubName: string | null | undefined,
+    rawLogo?: unknown,
+  ): string | null {
+    // Si la consulta trajo el valor crudo, mandamos lo de siempre: una URL normal
+    // viaja tal cual y un data-URI se cambia por el proxy.
+    if (typeof rawLogo === 'string' && rawLogo.trim().length > 0) {
+      return resolveSerializableLogoUrl(rawLogo, { key: clubId, name: clubName });
+    }
+
+    // Si NO lo trajo —el caso nuevo, y el que evita los megas— el escudo se pide
+    // por clave. El proxy resuelve las dos formas de guardado (data-URI y URL
+    // externa) y, para un club sin escudo, devuelve su propio reemplazo.
+    return buildTeamLogoProxyUrl({ key: clubId, name: clubName });
+  }
+
   private static mapMatchWithClubs(match: any, clubLogos?: Map<string, string | null>): MatchWithClubs {
     return {
       ...this.mapMatch(match),
@@ -2318,9 +2345,10 @@ export class FixtureService {
           id: match.home_club.id,
           name: match.home_club.name,
           shortName: match.home_club.short_name,
-          logo: resolveSerializableLogoUrl(
-            match.home_club.logo ?? clubLogos?.get(match.home_club.id) ?? null,
-            { key: match.home_club.id, name: match.home_club.name },
+          logo: this.resolveClubLogo(
+            match.home_club.id,
+            match.home_club.name,
+            match.home_club.logo ?? clubLogos?.get(match.home_club.id),
           ),
         }
         : null,
@@ -2329,9 +2357,10 @@ export class FixtureService {
           id: match.away_club.id,
           name: match.away_club.name,
           shortName: match.away_club.short_name,
-          logo: resolveSerializableLogoUrl(
-            match.away_club.logo ?? clubLogos?.get(match.away_club.id) ?? null,
-            { key: match.away_club.id, name: match.away_club.name },
+          logo: this.resolveClubLogo(
+            match.away_club.id,
+            match.away_club.name,
+            match.away_club.logo ?? clubLogos?.get(match.away_club.id),
           ),
         }
         : null,
@@ -2346,10 +2375,7 @@ export class FixtureService {
       name: p.name,
       shortCode: p.short_code,
       // Misma regla que en mapMatchWithClubs: la dirección del escudo, no el escudo.
-      logo: resolveSerializableLogoUrl(clubData?.logo_url ?? null, {
-        key: p.club_id,
-        name: p.name,
-      }),
+      logo: this.resolveClubLogo(p.club_id, p.name, clubData?.logo_url),
     };
   }
 }
