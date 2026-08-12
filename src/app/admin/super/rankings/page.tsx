@@ -445,6 +445,7 @@ export default function SuperRankingsPage() {
     const [savingMetadata, setSavingMetadata] = useState(false);
     const [savingBase, setSavingBase] = useState(false);
     const [backfilling, setBackfilling] = useState(false);
+    const [recalculando, setRecalculando] = useState(false);
     const [recalculatingMatchId, setRecalculatingMatchId] = useState<string | null>(null);
     const [manualBusy, setManualBusy] = useState(false);
     const [manualForm, setManualForm] = useState({ clubId: '', mode: 'delta' as 'delta' | 'set', value: '', reason: '' });
@@ -1052,6 +1053,25 @@ export default function SuperRankingsPage() {
             setBackfilling(false);
         }
     };
+    const handleRecalcular = async () => {
+        if (!selectedRanking) return;
+        setRecalculando(true);
+        try {
+            const payload = await readJson(await fetch(`/api/admin/super/rankings/${encodeURIComponent(selectedRanking.id)}/recalcular`, { method: 'POST' }));
+            applyDetail(payload.data as RankingDetail);
+            const resumen = payload.resumen as { aplicados?: number; ajustes?: number; clubes?: number; puntero?: string | null } | undefined;
+            setFeedback({
+                tone: 'success',
+                text: resumen
+                    ? `Ranking recalculado: ${resumen.aplicados ?? 0} partidos y ${resumen.ajustes ?? 0} ajustes manuales sobre ${resumen.clubes ?? 0} clubes.${resumen.puntero ? ` Puntero: ${resumen.puntero}.` : ''}`
+                    : 'Ranking recalculado.',
+            });
+        } catch (error) {
+            setFeedback({ tone: 'error', text: error instanceof Error ? error.message : 'No se pudo recalcular el ranking.' });
+        } finally {
+            setRecalculando(false);
+        }
+    };
     const handleRecalculateFromMatch = async (matchId: string) => {
         if (!selectedRanking || !matchId) return;
         setRecalculatingMatchId(matchId);
@@ -1237,7 +1257,7 @@ export default function SuperRankingsPage() {
                                 <button className={styles.secondaryBtn} onClick={downloadTemplate} type="button"><Download size={14} />Plantilla</button>
                                 <button type="button" className={styles.secondaryBtn} onClick={handleSaveBase} disabled={!selectedRanking || savingBase}>{savingBase ? <RefreshCw size={14} className={styles.spin} /> : <Save size={14} />}Guardar base</button>
                                 <button type="button" className={styles.secondaryBtn} onClick={handleBackfill} disabled={!selectedSummary || backfilling || hasSeasonBootstrap}>{backfilling ? <RefreshCw size={14} className={styles.spin} /> : <RefreshCw size={14} />}{hasSeasonBootstrap ? 'Inicializado' : 'Inicializar 2026'}</button>
-                                <button type="button" className={styles.secondaryBtn} onClick={() => selectedPersistedSummary?.stale_from_match_id ? handleRecalculateFromMatch(selectedPersistedSummary.stale_from_match_id) : undefined} disabled={!selectedPersistedSummary?.stale_from_match_id || Boolean(recalculatingMatchId)}>{recalculatingMatchId ? <RefreshCw size={14} className={styles.spin} /> : <RotateCcw size={14} />}Recalcular</button>
+                                <button type="button" className={styles.secondaryBtn} onClick={handleRecalcular} disabled={!selectedPersistedSummary || recalculando} title={selectedPersistedSummary ? 'Rehace la temporada entera desde los puntajes iniciales' : 'Guarda la base del ranking para poder recalcular'}>{recalculando ? <RefreshCw size={14} className={styles.spin} /> : <RotateCcw size={14} />}Recalcular</button>
                                 <Link href={publicRankingHref} className={styles.secondaryBtn}><ArrowUpRight size={14} />Ver publica</Link>
                             </div>
                         </div>
@@ -1581,7 +1601,7 @@ export default function SuperRankingsPage() {
                             <div className={styles.actionStrip}>
                                 <button type="button" className={styles.secondaryBtn} onClick={handleSaveBase} disabled={!selectedRanking || savingBase}>{savingBase ? <RefreshCw size={14} className={styles.spin} /> : <Save size={14} />}Guardar base</button>
                                 <button type="button" className={styles.secondaryBtn} onClick={handleBackfill} disabled={!selectedSummary || backfilling}>{backfilling ? <RefreshCw size={14} className={styles.spin} /> : <RefreshCw size={14} />}Backfill</button>
-                                <button type="button" className={styles.secondaryBtn} onClick={() => selectedPersistedSummary?.stale_from_match_id ? handleRecalculateFromMatch(selectedPersistedSummary.stale_from_match_id) : undefined} disabled={!selectedPersistedSummary?.stale_from_match_id || Boolean(recalculatingMatchId)}>{recalculatingMatchId ? <RefreshCw size={14} className={styles.spin} /> : <RotateCcw size={14} />}Recalcular stale</button>
+                                <button type="button" className={styles.secondaryBtn} onClick={handleRecalcular} disabled={!selectedPersistedSummary || recalculando} title={selectedPersistedSummary ? 'Rehace la temporada entera desde los puntajes iniciales' : 'Guarda la base del ranking para poder recalcular'}>{recalculando ? <RefreshCw size={14} className={styles.spin} /> : <RotateCcw size={14} />}Recalcular</button>
                                 <Link href={publicRankingHref} className={styles.secondaryBtn}><ArrowUpRight size={14} />Ver publica</Link>
                             </div>
                             <div className={styles.uploadPanel}>

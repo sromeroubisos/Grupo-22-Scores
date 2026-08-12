@@ -1,5 +1,7 @@
 {
-  "regions": ["pdx1"],
+  "regions": [
+    "pdx1"
+  ],
   "crons": [
     {
       "path": "/api/cron/live-sync",
@@ -18,8 +20,8 @@
       "schedule": "*/5 * * * *"
     },
     {
-      "path": "/api/cron/rebuild-stale-rankings",
-      "schedule": "*/2 * * * *"
+      "path": "/api/cron/weekly-club-ranking",
+      "schedule": "0 3 * * 2"
     },
     {
       "path": "/api/cron/urba-sync?scope=jornada",
