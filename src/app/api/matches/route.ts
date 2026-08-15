@@ -3,6 +3,7 @@ import { db } from '@/lib/mock-db';
 import {
     getFlashScoreMatches,
     getFlashScoreLiveMatches,
+    isExternalMatchesListDateSupported,
     isFlashScoreMatchesListDateSupported,
 } from '@/lib/services/flashscore';
 import { persistFromExternalMatches } from '@/lib/sync/catalog';
@@ -1485,7 +1486,13 @@ async function computeMatchesPayload(
                 // Check if date is today for live updates (user timezone aware when provided)
                 const todayKey = formatDateKey(new Date(), timeZone);
                 const isToday = date === todayKey;
-                const supportsFlashScoreDailyList = isFlashScoreMatchesListDateSupported(date, timeZone);
+                // La ventana de ±7 días es de FlashScore, no del calendario: para
+                // hockey el fixture completo del Mundial lo publica la FIH.
+                const supportsFlashScoreDailyList = await isExternalMatchesListDateSupported(
+                    date,
+                    sport || 'rugby',
+                    timeZone,
+                );
 
                 // Track whether FlashScore API actually failed (vs returned 0 results)
                 let fsFetchFailed = false;

@@ -33,7 +33,8 @@ export default async function TournamentPage({
         id.toLowerCase().startsWith('ras-league-') ||
         id.toLowerCase().startsWith('espn-league-') ||
         id.toLowerCase().startsWith('espn-soccer-league-') ||
-        id.toLowerCase().startsWith('espn-racing-league-');
+        id.toLowerCase().startsWith('espn-racing-league-') ||
+        id.toLowerCase().startsWith('fih-wc-');
     const isDbTournament = !isExternalTournament;
     let initialData = undefined;
 

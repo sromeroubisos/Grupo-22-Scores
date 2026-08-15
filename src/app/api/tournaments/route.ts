@@ -45,6 +45,10 @@ import {
     parseEspnFootballTournamentId,
 } from '@/lib/services/espnFootball';
 import {
+    getFihWorldCupTournamentBundle,
+    parseFihTournamentId,
+} from '@/lib/services/fihHockey';
+import {
     isBlockedTournamentId,
 } from '@/lib/utils/blockedTournaments';
 import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
@@ -721,7 +725,8 @@ async function findDbTournamentMeta(id: string) {
         id.toLowerCase().startsWith('fs-') ||
         isRugbyApiSportsTournamentId(id) ||
         isEspnAmericanFootballTournamentId(id) ||
-        isEspnMotorsportTournamentId(id)
+        isEspnMotorsportTournamentId(id) ||
+        parseFihTournamentId(id) !== null
     ) {
         return null;
     }
@@ -1075,7 +1080,51 @@ export async function GET(request: Request) {
             })
             : null);
 
+    const fihCompetition = parseFihTournamentId(id) || parseFihTournamentId(dbTournamentMeta?.external_id);
+
     try {
+        // Mundial de Hockey 2026: la fuente es la FIH (Altius RT). No pasa por la
+        // resolución de IDs de FlashScore porque el torneo no vive en FlashScore:
+        // el id ya dice qué competencia es.
+        if (fihCompetition) {
+            const bundle = await getFihWorldCupTournamentBundle(fihCompetition);
+
+            return perf.json({
+                ok: true,
+                _debug: {
+                    query: { id, url, sport, requestedSeason },
+                    resolvedIds: bundle.ids,
+                    provider: 'fih',
+                    counts: {
+                        results: bundle.results.length,
+                        fixtures: bundle.fixtures.length,
+                        standings: bundle.standings.length,
+                    },
+                },
+                _cache: {
+                    entityId: bundle.ids.tournamentId,
+                    tabSources: {
+                        details: 'api',
+                        results: 'api',
+                        fixtures: 'api',
+                        standings: 'api',
+                    },
+                },
+                ids: bundle.ids,
+                details: bundle.details,
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                standings: bundle.standings,
+                standingsForm: bundle.standingsForm,
+                standingsHtFt: bundle.standingsHtFt,
+                standingsOverUnder: bundle.standingsOverUnder,
+                teamLabels: bundle.teamLabels,
+                topScorers: bundle.topScorers,
+                draw: bundle.draw,
+                archives: bundle.archives,
+            });
+        }
+
         if (espnSoccerLeague) {
             const seasonYear = (() => {
                 const raw = String(requestedSeason ?? '').trim();

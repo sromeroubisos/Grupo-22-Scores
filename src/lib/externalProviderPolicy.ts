@@ -29,6 +29,15 @@ const MOTORSPORT_SPORT_KEYS = new Set([
     '/racing/',
 ]);
 
+// El hockey de la plataforma es sobre césped: 'field-hockey' es el que tiene los
+// torneos y el que el selector rotula "Hockey" (ver src/lib/data/sports.ts).
+// 'hockey' a secas es el de hielo y NO entra acá.
+const FIELD_HOCKEY_SPORT_KEYS = new Set([
+    'field-hockey',
+    '24',
+    '/field-hockey/',
+]);
+
 const FOOTBALL_SPORT_KEYS = new Set([
     'football',
     'soccer',
@@ -72,6 +81,12 @@ export function isMotorsportSport(value: unknown): boolean {
     const normalized = normalizeSportKey(value);
     if (!normalized) return false;
     return MOTORSPORT_SPORT_KEYS.has(normalized);
+}
+
+export function isFieldHockeySport(value: unknown): boolean {
+    const normalized = normalizeSportKey(value);
+    if (!normalized) return false;
+    return FIELD_HOCKEY_SPORT_KEYS.has(normalized);
 }
 
 export function isFootballSport(value: unknown): boolean {

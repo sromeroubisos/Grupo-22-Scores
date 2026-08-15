@@ -2,7 +2,12 @@ import { Match, MatchStatus } from '@/types/match';
 import { apiFetch } from '@/lib/apiFetch';
 import { memoryCache } from '@/lib/cache';
 import { formatDateKey } from '@/lib/timezone';
-import { isFlashScoreEnabledForSport, isFootballSport } from '@/lib/externalProviderPolicy';
+import { isFieldHockeySport, isFlashScoreEnabledForSport, isFootballSport } from '@/lib/externalProviderPolicy';
+import {
+    getFihWorldCupLiveMatches,
+    getFihWorldCupMatches,
+    hasFihWorldCupMatchesOnDate,
+} from '@/lib/services/fihHockey';
 import {
     getEspnAmericanFootballLiveMatches,
     getEspnAmericanFootballMatches,
@@ -27,14 +32,21 @@ import {
     SOFASCORE_MATCH_PREFIX,
 } from '@/lib/services/sofascore';
 
-// M10: prefer the server-only RAPIDAPI_KEY; NEXT_PUBLIC_* vars are embedded in
-// the client bundle and expose the key publicly. The fallback keeps the current
-// deploy working until RAPIDAPI_KEY is created in Vercel and the public var removed.
-const API_KEY = process.env.RAPIDAPI_KEY || process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '';
-if (!process.env.RAPIDAPI_KEY && process.env.NEXT_PUBLIC_RAPIDAPI_KEY) {
-    console.warn('[FlashScore] Using NEXT_PUBLIC_RAPIDAPI_KEY (exposed in the client bundle). Create the server-only env var RAPIDAPI_KEY and remove NEXT_PUBLIC_RAPIDAPI_KEY.');
+// M10: this module is server-only and the RapidAPI key is read exclusively from
+// RAPIDAPI_KEY. It must never be read through a NEXT_PUBLIC_* var: Next inlines
+// those into every client chunk that references them, so a single client import
+// would publish a paid key in the browser. Without that reference there is
+// nothing left to inline, and the guard below turns an accidental client import
+// into a loud failure instead of a silent leak.
+if (typeof window !== 'undefined') {
+    throw new Error('[FlashScore] Server-only module: do not import it from a client component.');
 }
-const API_HOST = process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com';
+const API_KEY = process.env.RAPIDAPI_KEY || '';
+if (!API_KEY) {
+    console.error('[FlashScore] Missing RAPIDAPI_KEY (server-only). FlashScore requests will fail until it is set.');
+}
+// The host is not a secret; NEXT_PUBLIC_RAPIDAPI_HOST stays accepted as a fallback.
+const API_HOST = process.env.RAPIDAPI_HOST || process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com';
 
 // Cache configuration
 const CACHE_TTL_MATCHES = 60;   // 60 seconds for match lists default
@@ -153,6 +165,24 @@ function isMatchesListDayOffsetSupported(dayOffset: number): boolean {
 
 export function isFlashScoreMatchesListDateSupported(targetDateKey: string, timeZone?: string): boolean {
     return isMatchesListDayOffsetSupported(getDayOffsetForDateKey(targetDateKey, timeZone));
+}
+
+/**
+ * ¿Hay algo que pedirle a un proveedor externo para esa fecha?
+ *
+ * La ventana de ±7 días es de `matches/list` de FlashScore, no del calendario:
+ * la FIH publica el fixture entero del Mundial de Hockey, así que un 30 de
+ * agosto sigue teniendo datos aunque FlashScore todavía no llegue. Sin esto la
+ * final no aparecería en el feed hasta una semana antes.
+ */
+export async function isExternalMatchesListDateSupported(
+    targetDateKey: string,
+    sportId: string,
+    timeZone?: string,
+): Promise<boolean> {
+    if (isFlashScoreMatchesListDateSupported(targetDateKey, timeZone)) return true;
+    if (isFieldHockeySport(sportId)) return hasFihWorldCupMatchesOnDate(targetDateKey, timeZone);
+    return false;
 }
 
 function getFlashScoreRawTournamentList(data: any): any[] {
@@ -354,6 +384,22 @@ export async function getFlashScoreMatches(
         return getEspnFootballMatches(date, options);
     }
 
+    // Hockey: la fuente es la FIH (Altius RT, donde la mesa carga el resultado en
+    // vivo). FlashScore queda AFUERA: lo único que publicaba era el mismo Mundial
+    // —con los nombres en inglés y la rama femenina marcada con un sufijo, así que
+    // entraba duplicado— y ni un partido propio en toda la semana medida.
+    if (isFieldHockeySport(sportId)) {
+        return getFihWorldCupMatches(date, options);
+    }
+
+    return fetchFlashScoreDailyMatches(date, sportId, options);
+}
+
+async function fetchFlashScoreDailyMatches(
+    date: Date,
+    sportId: string,
+    options?: { timeZone?: string; targetDateKey?: string }
+): Promise<Match[]> {
     const timeZone = options?.timeZone;
     const targetDateKey = options?.targetDateKey || formatDateKey(date, timeZone);
 
@@ -465,6 +511,14 @@ export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]
         return getEspnFootballLiveMatches();
     }
 
+    if (isFieldHockeySport(sportId)) {
+        return getFihWorldCupLiveMatches();
+    }
+
+    return getFlashScoreLiveMatchesRaw(sportId);
+}
+
+async function getFlashScoreLiveMatchesRaw(sportId: string): Promise<Match[]> {
     if (!isFlashScoreEnabledForSport(sportId)) {
         return [];
     }
