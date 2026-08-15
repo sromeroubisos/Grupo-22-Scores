@@ -115,6 +115,12 @@ function isEspnMotorsportMatchId(value: string) {
     return /^espn-race-[a-z0-9-]+--.+$/i.test(value);
 }
 
+// Mundial de Hockey: `fih-match-m-22334`. La `m`/`w` es la competencia y el
+// numero es el id del partido en Altius. Mismo formato que `toFihMatchId`.
+function isFihMatchId(value: string) {
+    return /^fih-match-[mw]-\d+$/i.test(value);
+}
+
 function getMotorsportStatusLabel(status: string | null | undefined) {
     if (status === 'live') return 'En vivo';
     if (status === 'final') return 'Final';
@@ -614,7 +620,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isEspnExternal = isEspnAmericanFootballMatchId(id);
     const isEspnSoccerExternal = isEspnSoccerMatchId(id);
     const isEspnMotorsportExternal = isEspnMotorsportMatchId(id);
-    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal;
+    const isFihExternal = isFihMatchId(id);
+    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal;
 
     const resolvedMatchId =
         typeof state.matchData?.id === 'string' && state.matchData.id.trim()
@@ -668,6 +675,11 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         String(state.matchData?.tournamentId || '').startsWith('espn-soccer-league-')
     );
     const isLimitedExternalSource = isRugbyApiSportsSource || (isEspnSource && !isMotorsportSource && !isEspnSoccerSource);
+    const isFihSource = state.matchData?.externalProvider === 'fih';
+    // Quien trae su propia lista de pestanas en vez de la barra completa. El
+    // Mundial no tiene comentarios narrados ni sorteo: mostrar la pestana vacia
+    // es prometer algo que la fuente no publica.
+    const usesCustomTabs = isLimitedExternalSource || isFihSource;
     const visibleTabs = useMemo(() => (
         isMotorsportSource
             ? [
@@ -682,6 +694,16 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                 { id: 'summary', label: 'Resumen' },
                 { id: 'timeline', label: 'Cronologia' },
                 { id: 'lineups', label: 'Alineaciones' },
+                { id: 'stats', label: 'Estadisticas' },
+                { id: 'h2h', label: 'H2H' },
+                { id: 'standings', label: 'Clasificacion' },
+            ]
+            : isFihSource
+            ? [
+                { id: 'summary', label: 'Resumen' },
+                { id: 'timeline', label: 'Cronologia' },
+                { id: 'lineups', label: 'Alineaciones' },
+                { id: 'players', label: 'Jugadores' },
                 { id: 'stats', label: 'Estadisticas' },
                 { id: 'h2h', label: 'H2H' },
                 { id: 'standings', label: 'Clasificacion' },
@@ -703,7 +725,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                 { id: 'standings', label: 'Clasificacion' },
                 { id: 'commentary', label: 'Comentarios' },
             ]
-    ), [isLimitedExternalSource, isMotorsportSource, isEspnSoccerSource]);
+    ), [isLimitedExternalSource, isMotorsportSource, isEspnSoccerSource, isFihSource]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -748,6 +770,25 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             eventsData: [],
                             statsData: [],
                             playerStats: null,
+                            localPlayerRows: [],
+                            commentaryData: [],
+                            issues: [],
+                            debug: {},
+                        });
+                        return;
+                    }
+
+                    // Mundial de Hockey: el bundle ya viene en el vocabulario de
+                    // la pantalla (eventos canonicos, planilla, alineaciones),
+                    // asi que no hay nada que normalizar aca.
+                    if (payload?.source === 'fih' && payload?.match) {
+                        statusRef.current = payload.match.status || 'scheduled';
+                        setState({
+                            kind: 'ok',
+                            matchData: payload.match,
+                            eventsData: Array.isArray(payload.events) ? payload.events : [],
+                            statsData: Array.isArray(payload.stats) ? payload.stats : [],
+                            playerStats: payload.playerStats || null,
                             localPlayerRows: [],
                             commentaryData: [],
                             issues: [],
@@ -1107,12 +1148,13 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             const phaseId = matchData.phaseId || matchData.phase_id || '';
                             const groupId = matchData.groupId || matchData.group_id || '';
                             const localLineups = normalizeLocalLineups(matchData.lineups || null);
-                            const localEvents = normalizeLocalEvents(matchData.events || []);
+                            const localEvents = normalizeLocalEvents(matchData.events || [], sportId);
                             const localPlayerRows = buildLocalPlayerStatsRows({
                                 lineups: localLineups,
                                 events: localEvents,
                                 homeName: matchData.homeClub?.name || 'Local',
                                 awayName: matchData.awayClub?.name || 'Visitante',
+                                sportId,
                             });
                             const localStats = buildLocalTeamStats(localEvents, sportId);
                             const resolvedDbHomeLogo = resolveMatchTeamLogo(matchData.homeClub, null, matchData.homeClub?.logo || null);
@@ -2065,7 +2107,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                 </section>
 
                 {/* Layer 4: Tabs */}
-                {isLimitedExternalSource && (
+                {usesCustomTabs && (
                     <nav className={styles.tabsNav}>
                         {visibleTabs.map((tab) => (
                             <div
@@ -2078,7 +2120,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         ))}
                     </nav>
                 )}
-                {!isLimitedExternalSource && (
+                {!usesCustomTabs && (
                 <nav className={styles.tabsNav}>
                     <div className={`${styles.tabItem} ${activeTab === 'summary' ? styles.active : ''}`} onClick={() => setActiveTab('summary')}>Resumen</div>
                     <div className={`${styles.tabItem} ${activeTab === 'timeline' ? styles.active : ''}`} onClick={() => setActiveTab('timeline')}>Cronología</div>
@@ -2383,7 +2425,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             </div>
                         )}
 
-                        {activeTab === 'stats' && isEspnSoccerSource && (
+                        {/* La planilla del proveedor manda sobre la derivada de
+                            los eventos: en hockey trae la efectividad de corner
+                            corto, que no se puede reconstruir contando goles. */}
+                        {activeTab === 'stats' && (isEspnSoccerSource || isFihSource) && (
                             <div className={styles.publicStatsPanel}>
                                 <div className={styles.panelTitle}>Estadísticas del partido</div>
                                 {statsData.length === 0 ? (
@@ -2433,7 +2478,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             </div>
                         )}
 
-                        {activeTab === 'stats' && !isEspnSoccerSource && (
+                        {activeTab === 'stats' && !isEspnSoccerSource && !isFihSource && (
                             <div className={styles.publicStatsPanel}>
                                 <div className={styles.panelTitle}>Estadísticas completas</div>
                                 {publicCompleteStatTabs.length === 0 ? (

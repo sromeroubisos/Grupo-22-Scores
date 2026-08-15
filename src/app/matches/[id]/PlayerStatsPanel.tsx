@@ -22,6 +22,10 @@ export type PlayerStatsTableData = {
 function chooseDefaultPlayerMetrics(metricIds: string[]) {
   const preferred = [
     'points',
+    // Los deportes de gol no tienen "puntos", asi que sin esta linea la tabla
+    // abria en tarjetas y escondia lo unico que la gente busca: quien convirtio.
+    // No compite con 'points': ningun deporte declara las dos.
+    'goals',
     'conversionRate',
     'minutes',
     'tries',
