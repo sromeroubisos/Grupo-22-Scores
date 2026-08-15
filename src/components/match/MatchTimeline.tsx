@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import Link from 'next/link';
 import styles from './MatchTimeline.module.css';
 import { type LocalPublicEvent } from '@/lib/localMatchData';
@@ -93,6 +93,10 @@ const TYPE_LABELS: Record<string, string> = {
   ace: 'Ace',
   block_point: 'Bloqueo',
   seven_meter_goal: 'Gol de 7m',
+  // Hockey. Sin estas dos entradas el fallback prettifica el tipo y escribe
+  // "Penalty Corner" sobre una pantalla en castellano.
+  penalty_corner: 'Corner corto',
+  penalty_stroke: 'Penal stroke',
   free_throw: 'Tiro libre',
   two_pointer: 'Doble',
   three_pointer: 'Triple',
@@ -110,6 +114,10 @@ const EVENT_COLORS: Record<string, string> = {
   run: '#22c55e',
   home_run: '#22c55e',
   conversion: '#3b82f6',
+  // El corner corto es jugada fija, no anotacion: el azul lo separa del gol
+  // verde sin bajarlo al gris de los eventos neutros.
+  penalty_corner: '#3b82f6',
+  penalty_stroke: '#3b82f6',
   penalty_goal: '#3b82f6',
   drop_goal: '#3b82f6',
   penalty: '#3b82f6',
@@ -399,7 +407,12 @@ function EventTypeIcon({ type, className }: { type: string; className?: string }
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export default function MatchTimeline({ events, homeTeam, awayTeam, sportId }: Props) {
+// Memoizado: durante un partido en vivo el detalle se re-renderiza cada segundo
+// para refrescar el reloj. Sin esto se reconcilia toda la timeline (una tarjeta
+// con SVG por evento) 60 veces por minuto sin que cambie nada.
+export default memo(MatchTimeline);
+
+function MatchTimeline({ events, homeTeam, awayTeam, sportId }: Props) {
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
   const definitionMap = useMemo(
     () => buildMatchEventDefinitionMap(getDefaultMatchEventDefinitions(String(sportId || 'rugby'))),
@@ -594,7 +607,9 @@ export default function MatchTimeline({ events, homeTeam, awayTeam, sportId }: P
 /*  Event Card sub-component                                           */
 /* ------------------------------------------------------------------ */
 
-function EventCard({
+const EventCard = memo(EventCardBase);
+
+function EventCardBase({
   evt,
   scoreMap,
   homeName,
