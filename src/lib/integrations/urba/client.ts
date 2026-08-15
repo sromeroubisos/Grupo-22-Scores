@@ -83,9 +83,35 @@ export interface UrbaChampionship {
 }
 
 /**
+ * ¿El payload tiene la forma que el conector espera?
+ *
+ * No es paranoia de tipos: es la diferencia entre "URBA no tiene partidos" y
+ * "URBA dejó de mandar el campo". Las dos cosas llegan como cero partidos, y el
+ * conector, que compara contra lo que hay en la base, leería el segundo caso
+ * como "URBA borró el torneo entero".
+ *
+ * Por eso `teams` y `rounds` tienen que ser ARRAYS de verdad. Un torneo recién
+ * creado puede traerlos vacíos —eso es legítimo y pasa—, pero ausentes o de otro
+ * tipo es una respuesta que no se entiende, y una respuesta que no se entiende
+ * se trata como una caída, no como un torneo sin fixture.
+ */
+function tieneFormaDeTorneo(ch: unknown): ch is UrbaChampionship {
+  if (!ch || typeof ch !== 'object') return false;
+  const c = ch as Record<string, unknown>;
+  return c.id != null && Array.isArray(c.teams) && Array.isArray(c.rounds);
+}
+
+/**
  * Un torneo completo. `championship` viene como ARRAY DE UN ELEMENTO — no es un
  * objeto, y confundirlo devuelve undefined en silencio.
+ *
+ * `status: -1` es la marca de "contestó, pero no se entiende lo que dijo". Se
+ * distingue del 0 (no contestó) y de los 4xx/5xx (contestó que no) porque el
+ * llamador tiene que poder decirlo en el error: un cambio de forma de la API se
+ * arregla tocando el conector, y una caída se arregla esperando.
  */
+export const HTTP_FORMA_INESPERADA = -1;
+
 export async function fetchChampionship(
   urbaId: number | string,
   opciones: { cacheDir?: string } = {},
@@ -97,7 +123,7 @@ export async function fetchChampionship(
     try {
       const crudo = zlib.gunzipSync(fs.readFileSync(archivo)).toString('utf8');
       const ch = JSON.parse(crudo)?.championship?.[0] ?? null;
-      if (ch) return { ok: true, data: ch as UrbaChampionship, status: 200, desdeCache: true };
+      if (tieneFormaDeTorneo(ch)) return { ok: true, data: ch, status: 200, desdeCache: true };
     } catch {
       // Caché corrupta: se vuelve a pedir en vez de romper.
     }
@@ -106,13 +132,26 @@ export async function fetchChampionship(
   const r = await pedir(`${BASE}/api/championship/${urbaId}`);
   if (!r.ok || !r.body) return { ok: false, data: null, status: r.status, desdeCache: false };
 
+  let ch: unknown = null;
+  try {
+    ch = JSON.parse(r.body)?.championship?.[0] ?? null;
+  } catch {
+    // Body que no es JSON: una portada de error de un proxy, típicamente.
+    return { ok: false, data: null, status: HTTP_FORMA_INESPERADA, desdeCache: false };
+  }
+
+  if (!tieneFormaDeTorneo(ch)) {
+    return { ok: false, data: null, status: HTTP_FORMA_INESPERADA, desdeCache: false };
+  }
+
+  // Se cachea DESPUÉS de validar: guardar un payload que no se entiende deja el
+  // problema pegado en disco y la próxima corrida ni siquiera vuelve a pedir.
   if (archivo && cacheDir) {
     fs.mkdirSync(cacheDir, { recursive: true });
     fs.writeFileSync(archivo, zlib.gzipSync(Buffer.from(r.body, 'utf8')));
   }
 
-  const ch = JSON.parse(r.body)?.championship?.[0] ?? null;
-  return { ok: Boolean(ch), data: ch as UrbaChampionship | null, status: r.status, desdeCache: false };
+  return { ok: true, data: ch, status: r.status, desdeCache: false };
 }
 
 export interface UrbaChampionshipListItem {
@@ -132,8 +171,18 @@ export async function fetchChampionshipList(
 ): Promise<UrbaFetchResult<UrbaChampionshipListItem[]>> {
   const r = await pedir(`${BASE}/api/championships/${anio}`);
   if (!r.ok || !r.body) return { ok: false, data: null, status: r.status, desdeCache: false };
-  const lista = JSON.parse(r.body)?.championships ?? null;
-  if (!Array.isArray(lista)) return { ok: false, data: null, status: r.status, desdeCache: false };
+  let lista: unknown = null;
+  try {
+    lista = JSON.parse(r.body)?.championships ?? null;
+  } catch {
+    return { ok: false, data: null, status: HTTP_FORMA_INESPERADA, desdeCache: false };
+  }
+  // Una lista que no es lista se reporta como forma inesperada y no como un año
+  // sin torneos: lo segundo es un dato y lo primero es un conector que hay que
+  // tocar, y el año que viene alguien va a tener que distinguirlos.
+  if (!Array.isArray(lista)) {
+    return { ok: false, data: null, status: HTTP_FORMA_INESPERADA, desdeCache: false };
+  }
   return { ok: true, data: lista as UrbaChampionshipListItem[], status: r.status, desdeCache: false };
 }
 

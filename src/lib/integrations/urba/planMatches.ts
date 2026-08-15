@@ -49,15 +49,46 @@ export interface EstadoYResultado {
  * llenan de empates falsos. El motor de posiciones sólo suma `status in (final,
  * finished, ft)`, así que hay una segunda barrera — pero la primera es ésta, y
  * es la que evita que el dato sucio llegue a la fila.
+ *
+ * `suspended` va PRIMERO, y esa parte del orden costó una tabla que no cerraba.
+ * Un partido suspendido llega de URBA con las DOS banderas prendidas —
+ * `fulfilled: true` y `suspended: true`, con 0-0—: para URBA "cumplido" quiere
+ * decir cerrado, no jugado. Preguntando por `fulfilled` primero, esos partidos
+ * entraban como final con 0-0, o sea como un EMPATE, y repartían 2 puntos por
+ * lado que la tabla de URBA no reparte. Contrastadas las 30 tablas que se
+ * recalcularon el 2026-08-09 contra `/api/positions`, las 8 que no cerraban
+ * fallaban exactamente por eso, y siempre de más: `Suipacha 28pts 8j` contra
+ * `26pts 7j`.
+ *
+ * Invertir el orden es seguro y está medido, no supuesto: sobre los 12.137
+ * partidos de los 134 torneos de 2026, `suspended: true` viene con resultado
+ * CERO veces. Los 58 que tienen las dos banderas están todos en 0-0, así que
+ * ninguno pierde un marcador por este camino.
+ *
+ * Y el 0-0 sin ninguna bandera de suspensión va por el mismo camino, por la
+ * misma razón: la tabla de URBA tampoco lo cuenta. `fulfilled` quiere decir
+ * "cerrado", y un cerrado sin marcador es un partido sin resultado publicado, no
+ * un empate. Con el empate, `Alumni C` figuraba con 29 puntos en 9 partidos
+ * contra los 27 en 8 de `/api/positions`. Acá se espeja a URBA, que es el
+ * contrato: la API manda, y lo que no cuenta allá no cuenta acá.
+ *
+ * El caso perdido es un 0-0 de verdad. En rugby prácticamente no existe —hay que
+ * remontarse a partidos sin un solo penal— y, si pasara, URBA tampoco lo
+ * contaría en su tabla, así que seguiríamos coincidiendo. Y si después cargan el
+ * marcador, la siguiente pasada del cron lo pasa a final sola.
  */
 export function mapEstadoYResultado(m: UrbaMatchLike): EstadoYResultado {
-  if (m.fulfilled === true) {
-    return {
-      status: 'final',
-      score: { home: Number(m.local_team_score ?? 0), away: Number(m.visit_team_score ?? 0) },
-    };
-  }
   if (m.suspended === true) return { status: 'suspended', score: null };
+  if (m.fulfilled === true) {
+    const home = Number(m.local_team_score ?? 0);
+    const away = Number(m.visit_team_score ?? 0);
+    // Un marcador que no es número tampoco es un resultado. Sin esto entraba un
+    // NaN en una columna que no lo acepta, y el partido se perdía con un error
+    // de escritura en vez de quedar a la espera del dato.
+    if (!Number.isFinite(home) || !Number.isFinite(away)) return { status: 'suspended', score: null };
+    if (home === 0 && away === 0) return { status: 'suspended', score: null };
+    return { status: 'final', score: { home, away } };
+  }
   return { status: 'scheduled', score: null };
 }
 
