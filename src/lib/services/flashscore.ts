@@ -8,6 +8,7 @@ import {
     getFihWorldCupMatches,
     hasFihWorldCupMatchesOnDate,
 } from '@/lib/services/fihHockey';
+import { mergeHockeyProviders } from '@/lib/services/hockeyProviderMerge';
 import {
     getEspnAmericanFootballLiveMatches,
     getEspnAmericanFootballMatches,
@@ -384,12 +385,29 @@ export async function getFlashScoreMatches(
         return getEspnFootballMatches(date, options);
     }
 
-    // Hockey: la fuente es la FIH (Altius RT, donde la mesa carga el resultado en
-    // vivo). FlashScore queda AFUERA: lo único que publicaba era el mismo Mundial
-    // —con los nombres en inglés y la rama femenina marcada con un sufijo, así que
-    // entraba duplicado— y ni un partido propio en toda la semana medida.
+    // Hockey: el Mundial sale de la FIH (Altius RT, donde la mesa carga el
+    // resultado en vivo) y el resto del hockey sigue viniendo de FlashScore. De
+    // FlashScore se cae SOLO su copia del Mundial, que entraría duplicada; ver
+    // `mergeHockeyProviders`.
     if (isFieldHockeySport(sportId)) {
-        return getFihWorldCupMatches(date, options);
+        let flashScoreError: unknown = null;
+
+        const [worldCup, flashScore] = await Promise.all([
+            getFihWorldCupMatches(date, options).catch((error) => {
+                console.warn('[FIH] fixture del Mundial no disponible:', error?.message);
+                return [] as Match[];
+            }),
+            fetchFlashScoreDailyMatches(date, sportId, options).catch((error) => {
+                flashScoreError = error;
+                return [] as Match[];
+            }),
+        ]);
+
+        // Si FlashScore se cayó y el Mundial tampoco trajo nada, el llamador tiene
+        // que enterarse del corte (cae al caché y avisa) en vez de ver un día vacío.
+        if (flashScoreError && worldCup.length === 0) throw flashScoreError;
+
+        return mergeHockeyProviders(worldCup, flashScore);
     }
 
     return fetchFlashScoreDailyMatches(date, sportId, options);
@@ -512,7 +530,15 @@ export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]
     }
 
     if (isFieldHockeySport(sportId)) {
-        return getFihWorldCupLiveMatches();
+        const [worldCup, flashScore] = await Promise.all([
+            getFihWorldCupLiveMatches().catch((error) => {
+                console.warn('[FIH] en vivo del Mundial no disponible:', error?.message);
+                return [] as Match[];
+            }),
+            getFlashScoreLiveMatchesRaw(sportId).catch(() => [] as Match[]),
+        ]);
+
+        return mergeHockeyProviders(worldCup, flashScore);
     }
 
     return getFlashScoreLiveMatchesRaw(sportId);
