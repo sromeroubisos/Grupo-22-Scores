@@ -52,7 +52,10 @@ export async function GET(request: Request) {
     }
 
     const key = process.env.RAPIDAPI_KEY || '';
-    const publicKeyPresente = Boolean(process.env.NEXT_PUBLIC_RAPIDAPI_KEY);
+    // El nombre se arma en runtime a proposito: asi ningun bundler puede
+    // reemplazarlo estaticamente y filtrar el valor a un chunk de cliente.
+    const legacyKey = process.env[['NEXT', 'PUBLIC', 'RAPIDAPI', 'KEY'].join('_')] || '';
+    const publicKeyPresente = Boolean(legacyKey);
     const host = process.env.RAPIDAPI_HOST || process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com';
 
     return NextResponse.json({
@@ -73,7 +76,16 @@ export async function GET(request: Request) {
                 ? 'RAPIDAPI_HOST'
                 : (process.env.NEXT_PUBLIC_RAPIDAPI_HOST ? 'NEXT_PUBLIC_RAPIDAPI_HOST' : 'default del codigo'),
         },
+        claveLegacy: {
+            presente: Boolean(legacyKey),
+            largo: legacyKey.length,
+            huella: legacyKey ? `${legacyKey.slice(0, 4)}…${legacyKey.slice(-4)}` : null,
+        },
         // 8 = rugby union, 3 = basquet: los dos que fallan.
         pedidos: await Promise.all([probe(host, key, 8), probe(host, key, 3)]),
+        // Lo que decide el arreglo: ¿la clave vieja todavia sirve?
+        pedidosConClaveLegacy: legacyKey
+            ? await Promise.all([probe(host, legacyKey, 8), probe(host, legacyKey, 3)])
+            : null,
     });
 }
