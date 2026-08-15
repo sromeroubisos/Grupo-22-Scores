@@ -42,9 +42,36 @@ import {
 if (typeof window !== 'undefined') {
     throw new Error('[FlashScore] Server-only module: do not import it from a client component.');
 }
-const API_KEY = process.env.RAPIDAPI_KEY || '';
+/**
+ * Puente hasta que producción tenga `RAPIDAPI_KEY`.
+ *
+ * Cuando M10 movió la clave a una variable server-only, producción quedó con el
+ * valor SÓLO en la vieja `NEXT_PUBLIC_RAPIDAPI_KEY`. Resultado: rugby y básquet
+ * —todo lo que pasa por RapidAPI— respondían 401 "Invalid API key" en el sitio
+ * publicado mientras andaban bien en local, y el feed mostraba "no se pudieron
+ * cargar los partidos".
+ *
+ * Esto NO reabre el agujero que M10 cerró. Lo que filtra la clave es que el
+ * nombre `process.env.NEXT_PUBLIC_*` aparezca ESCRITO en el código: ahí Next lo
+ * reemplaza por el valor en cada chunk que lo referencie, cliente incluido. Acá
+ * el nombre se arma en tiempo de ejecución, así que no hay nada que reemplazar
+ * y el valor sólo existe en el proceso del servidor, que sí tiene `process.env`
+ * de verdad.
+ *
+ * El arreglo definitivo es de infraestructura, no de código: definir
+ * `RAPIDAPI_KEY` en el entorno de producción y borrar la pública. Cuando eso
+ * pase, esta función deja de usarse sola y se puede sacar.
+ */
+function readLegacyPublicApiKey(): string {
+    if (typeof window !== 'undefined') return '';
+    return process.env[['NEXT', 'PUBLIC', 'RAPIDAPI', 'KEY'].join('_')] || '';
+}
+
+const API_KEY = process.env.RAPIDAPI_KEY || readLegacyPublicApiKey();
 if (!API_KEY) {
     console.error('[FlashScore] Missing RAPIDAPI_KEY (server-only). FlashScore requests will fail until it is set.');
+} else if (!process.env.RAPIDAPI_KEY) {
+    console.warn('[FlashScore] RAPIDAPI_KEY no está definida: usando la vieja variable pública. Definí RAPIDAPI_KEY en el entorno y borrá la pública.');
 }
 // The host is not a secret; NEXT_PUBLIC_RAPIDAPI_HOST stays accepted as a fallback.
 const API_HOST = process.env.RAPIDAPI_HOST || process.env.NEXT_PUBLIC_RAPIDAPI_HOST || 'flashscore4.p.rapidapi.com';
