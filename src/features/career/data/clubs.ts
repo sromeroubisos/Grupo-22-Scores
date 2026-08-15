@@ -27,7 +27,26 @@ import { AR_DIVISIONS, AR_SYSTEM_VERSION } from './clubs2026/arSystem2026.ts';
 // nivel, que el TRL eliminó en 2026; el Torneo Austral sube a Nivel 6 porque
 // clasifica al Regional Patagónico. Cinco clubes estaban a mil kilómetros de su
 // casa y volvieron a su región.
-export const CLUB_CATALOG_VERSION = '2026-27.10';
+// 2026-27.11: entran DIECISIETE competiciones de DIECISÉIS países. Lo que faltaba
+// no eran clubes sino PAÍSES: un galés, un irlandés, un escocés, un australiano o
+// un fiyiano no tenían dónde empezar y el motor los mandaba a emigrar a los 18,
+// que es exactamente al revés de cómo funcionan esas cinco potencias. Entran las
+// dos competiciones estatales australianas (Shute Shield y Hospital Cup, paralelas
+// entre sí), las tres ligas de club de las islas británicas, Georgia, Rumania,
+// Rusia —la única profesional de la tanda—, Fiyi, Canadá, Bélgica, Países Bajos y
+// cinco de Latinoamérica (Perú, Colombia, México, Paraguay y Bolivia).
+//
+// En la misma versión entra `AR_SYSTEM_VERSION` 2026.3, que completa la Patagonia
+// (una competición por unión en vez de una división lump) y la Unión Andina. Sube
+// acá porque el sistema argentino es catálogo de competiciones: ver la tabla de
+// versionado en CLAUDE.md §2.
+//
+// Y también entra la CORRECCIÓN de la liga mexicana contra los escudos reales:
+// "Búfalos Toluca" era Bisontes de Guadalajara, "Tigres Rugby" es Tigres UANL, y
+// cuatro clubes que no están en la liga se reemplazaron por los que sí. Cargar una
+// nómina de nombres sin cruzarla contra el escudo de cada club es exactamente el
+// error que produjo eso, y por eso se deja anotado acá y no sólo en el roster.
+export const CLUB_CATALOG_VERSION = '2026-27.11';
 
 /**
  * Versión del catálogo NORMALIZADO completo = estático internacional + snapshot

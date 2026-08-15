@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import MobileBottomNav from '@/components/MobileBottomNav';
+import MobileBottomNav, { BOTTOM_NAV_HIDDEN_PREFIXES } from '@/components/MobileBottomNav';
 import WorldCupTicker from '@/components/WorldCupTicker';
 import ProdeWorldCupBanner from '@/components/ProdeWorldCupBanner';
 import { SportProvider } from '@/context/SportContext';
@@ -35,6 +35,18 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
      * porque el header se queda.
      */
     const isFullHeightGame = pathname?.startsWith('/juegos/minijuegos/carrera-rugby') ?? false;
+    /**
+     * La barra inferior NO se dibuja en esta ruta, así que el pie que la reserva
+     * tampoco corresponde.
+     *
+     * `.mainContent` reserva `--mobile-nav-height` abajo de 900 px para que la
+     * barra no tape el final del contenido. La barra decide en su propio archivo
+     * dónde no aparecer (`BOTTOM_NAV_HIDDEN_PREFIXES`) y la reserva no se
+     * enteraba: en El Capitán eran 74 px de nada al final de cada pantalla —el
+     * 9% del lienzo de un teléfono— y era todo lo que separaba a la pantalla de
+     * juego de no scrollear.
+     */
+    const sinBarraInferior = BOTTOM_NAV_HIDDEN_PREFIXES.some((prefix) => pathname?.startsWith(prefix)) ?? false;
     const returnTo = pathname || '/';
 
     useEffect(() => {
@@ -107,7 +119,9 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
             <WorldCupTicker />
             <div className={styles.layoutContainer}>
                 {/* Sidebar removed as per user request to move it to page level */}
-                <main className={styles.mainContent}>{children}</main>
+                <main className={styles.mainContent} data-sin-barra={sinBarraInferior ? '' : undefined}>
+                    {children}
+                </main>
             </div>
             <Footer />
             <MobileBottomNav />

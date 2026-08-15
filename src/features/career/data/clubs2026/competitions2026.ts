@@ -439,9 +439,26 @@ export const MOVEMENTS: MovementRule[] = [
 // reales. Italia los declara en `MOVEMENTS`; las otras dos no, porque les falta el
 // escalón de abajo (ver el comentario de `MOVEMENTS`), y ésa es una ausencia de
 // datos y no una propiedad de la competición.
+//
+// LAS DOS AUSTRALIANAS entran en `2026-27.11` por el mismo motivo que las dos
+// pirámides universitarias estadounidenses: el Shute Shield y el Hospital Cup son
+// competiciones de ESTADOS DISTINTOS —Nueva Gales del Sur y Queensland— que no se
+// cruzan nunca y coronan cada una a su campeón. Salir campeón del Hospital Cup no
+// te mueve un centímetro dentro del Shute Shield, y Australia no tiene liga
+// nacional de clubes donde eso pudiera resolverse.
+//
+// Que el escalafón de mercado ponga a Sídney por encima de Brisbane es otra cosa
+// —mide cuán arriba se juega, no quién asciende— y vive en `STATIC_LADDER`.
+//
+// El resto de las ligas nuevas NO está acá, y la diferencia importa: Gales,
+// Irlanda, Escocia, Georgia, Rumania, Rusia, Fiyi, Canadá, Bélgica, Países Bajos y
+// las cinco latinoamericanas SÍ tienen ascensos y descensos reales en su país. Lo
+// que les falta es el escalón de abajo cargado (ver `PENDING_COMPETITIONS`), que
+// es una ausencia de datos y no una propiedad de la competición.
 export const PARALLEL_COMPETITIONS = new Set([
     'npc', 'super-rugby', 'urc', 'currie-premier', 'currie-first', 'super-cup', 'sra',
     'us-mlr', 'us-d1a', 'us-ncr-d1',
+    'au-shute-shield', 'au-hospital-cup',
 ]);
 
 // ── API ──────────────────────────────────────────────────────────────────────

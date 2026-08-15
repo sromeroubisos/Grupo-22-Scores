@@ -24,7 +24,12 @@ import { AR_DIVISIONS, AR_PENDING_ROSTERS, AR_SPORTING_BAND } from './clubs2026/
 // 2026-27.4: entran los perfiles de las cinco ligas nuevas — MLR, universitario
 // CRAA D1A y NCR DI, Divisão de Honra portuguesa, Serie A Élite italiana con su
 // Serie A, y Super 12 brasileño.
-export const COMPETITION_LEVELS_VERSION = '2026-27.5';
+// 2026-27.6: entran DIECISIETE competiciones de DIECISÉIS países — las dos
+// australianas (Shute Shield y Hospital Cup), las tres de las islas británicas
+// (Gales, Irlanda, Escocia), Georgia, Rumania, Rusia, Fiyi, Canadá, Bélgica,
+// Países Bajos, Perú, Colombia, México, Paraguay y Bolivia. Con ellas dieciséis
+// países más dejan de resolverse por ruta migratoria y tienen dónde empezar.
+export const COMPETITION_LEVELS_VERSION = '2026-27.6';
 
 export type SportingBand = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
@@ -106,6 +111,19 @@ const FPR = 'https://www.fpr.pt/';
 const FIR = 'https://www.federugby.it/';
 const CBRU = 'https://www.brasilrugby.com.br/';
 
+// 2026-27.6 · las uniones de los dieciséis países nuevos. Donde no hay una fuente
+// federativa que se pueda citar con confianza se usa la CONFEDERACIÓN, que es la
+// que publica los calendarios continentales: es preferible una fuente real de un
+// nivel más arriba que una URL federativa escrita de memoria.
+const RA = 'https://australia.rugby/';
+const WRU = 'https://www.wru.wales/';
+const IRFU = 'https://www.irishrugby.ie/';
+const SRU = 'https://scottishrugby.org/';
+const FRU = 'https://www.fijirugby.com/';
+const RUGBY_CANADA = 'https://rugby.ca/';
+const SUDAMERICA = 'https://sudamericarugby.org/';
+const RAN = 'https://www.rugbyamericasnorth.com/';
+
 // Escalera doméstica UY/CL: la banda depende de la división real, porque
 // `sa-uy`/`sa-cl` siguen agrupando varias categorías en una sola competición.
 // Argentina YA NO usa esto: cada una de sus divisiones tiene perfil propio.
@@ -170,6 +188,16 @@ export const COMPETITION_LEVELS: readonly CompetitionLevelProfile[] = [
     // Diez fechas de temporada regular es DATO, no calibración: tabla única de seis
     // equipos, ida y vuelta, once semanas, del 28 de marzo al 7 de junio.
     { competitionId: 'us-mlr', sportingBand: 5, economicModel: 'professional', label: 'Major League Rugby', sourceUrls: [MLR], evidence: 'official', regularSeasonMatches: 10, matchesEvidence: 'official' },
+    // Rusia: la ÚNICA liga profesional de los dieciséis sistemas que entran en
+    // `2026-27.6`, y comparte banda con la MLR y Super Rugby Americas por el mismo
+    // criterio: planteles a tiempo completo sostenidos por patrocinio industrial o
+    // gobierno regional, con un nivel que no es el de la Pro D2. Enisei-STM y Krasny
+    // Yar llegaron a jugar la Challenge Cup europea, y ésa es la vara.
+    //
+    // La suspensión internacional desde 2022 no cambia el vínculo laboral de un
+    // jugador con su club —que es lo que mide `economicModel`— pero sí explica que
+    // la banda deportiva no suba: hace años que no se miden con nadie de afuera.
+    { competitionId: 'ru-championship', sportingBand: 5, economicModel: 'professional', label: 'Campeonato de Rusia', sourceUrls: [REU], evidence: 'official-structure-inferred-status', regularSeasonMatches: 18, matchesEvidence: 'game-calibration' },
 
     // ── Banda 4 ──────────────────────────────────────────────────────────────
     { competitionId: 'esp-dh', sportingBand: 4, economicModel: 'mixed', label: 'División de Honor', sourceUrls: [FER], evidence: 'official-structure-inferred-status', regularSeasonMatches: 18, matchesEvidence: 'official-structure-inferred-status' },
@@ -189,9 +217,48 @@ export const COMPETITION_LEVELS: readonly CompetitionLevelProfile[] = [
     // de marzo y sus partidos se borraron — ése es el número de una temporada
     // accidentada, no el del formato.
     { competitionId: 'ita-serie-a-elite', sportingBand: 4, economicModel: 'mixed', label: 'Serie A Élite', sourceUrls: [FIR], evidence: 'official-structure-inferred-status', regularSeasonMatches: 18, matchesEvidence: 'official-structure-inferred-status' },
+    // El Shute Shield entra en la banda del tercer escalón semiprofesional europeo
+    // —España, Portugal, Italia— y el motivo es exactamente el mismo: es lo mejor
+    // que hay en su país por debajo de una competición regional que se lleva a los
+    // profesionales. En Australia esa competición es Super Rugby Pacific, y entre
+    // una y otra no queda nada desde que murió el National Rugby Championship.
+    //
+    // Es la única australiana con `mixed`: los clubes pagan y hay tope salarial.
+    { competitionId: 'au-shute-shield', sportingBand: 4, economicModel: 'mixed', label: 'Shute Shield', sourceUrls: [RA], evidence: 'game-calibration', regularSeasonMatches: 18, matchesEvidence: 'game-calibration' },
+    // Georgia y Rumania comparten banda con España, Portugal e Italia, y no por
+    // simetría: son los tres casos de una liga doméstica semiprofesional cuyo mejor
+    // producto se va afuera. El núcleo de los Lelos y el de los Stejarii juega en
+    // Francia, igual que el de Os Lobos.
+    { competitionId: 'ge-didi10', sportingBand: 4, economicModel: 'mixed', label: 'Didi 10', sourceUrls: [REU], evidence: 'official-structure-inferred-status', regularSeasonMatches: 18, matchesEvidence: 'game-calibration' },
+    { competitionId: 'ro-liga', sportingBand: 4, economicModel: 'mixed', label: 'Liga Națională', sourceUrls: [REU], evidence: 'official-structure-inferred-status', regularSeasonMatches: 18, matchesEvidence: 'game-calibration' },
 
     // ── Banda 3 ──────────────────────────────────────────────────────────────
     { competitionId: 'esp-dhelite', sportingBand: 3, economicModel: 'mixed', label: 'División de Honor Élite', sourceUrls: [FER], evidence: 'official-structure-inferred-status', regularSeasonMatches: 18, matchesEvidence: 'official-structure-inferred-status' },
+    // ── LAS TRES LIGAS DE CLUB DE LAS ISLAS BRITÁNICAS + FIYI + QUEENSLAND ────
+    //
+    // Cinco competiciones AMATEUR que son, en su país, lo más alto que se puede
+    // jugar sin ser profesional. Comparten banda porque comparten forma: arriba de
+    // ellas no hay una división mejor sino una FRANQUICIA REGIONAL —las cuatro
+    // provincias irlandesas, las cuatro regiones galesas, los Drua— que está fuera
+    // de la pirámide doméstica. Es la estructura italiana (Benetton y Zebre en la
+    // URC) repetida cinco veces.
+    //
+    // La consecuencia de juego es la que importa: de acá no se ASCIENDE a ningún
+    // lado. Se sale por vía declarada (`market-routes.ts`) o no se sale.
+    //
+    // Irlanda es la única con evidencia de estatus fuerte: el amateurismo de la AIL
+    // está en el reglamento de la IRFU, no inferido del mercado. Gales y Escocia se
+    // leen del estado actual de sus ligas —los recortes de la WRU, el cierre del
+    // Super6 en 2024— y por eso van como calibración.
+    { competitionId: 'ire-ail1a', sportingBand: 3, economicModel: 'amateur', label: 'All-Ireland League 1A', sourceUrls: [IRFU], evidence: 'official-structure-inferred-status', regularSeasonMatches: 18, matchesEvidence: 'game-calibration' },
+    { competitionId: 'wal-premiership', sportingBand: 3, economicModel: 'amateur', label: 'Welsh Premiership', sourceUrls: [WRU], evidence: 'game-calibration', regularSeasonMatches: 22, matchesEvidence: 'game-calibration' },
+    { competitionId: 'fj-skipper', sportingBand: 3, economicModel: 'amateur', label: 'Skipper Cup', sourceUrls: [FRU], evidence: 'game-calibration', regularSeasonMatches: 12, matchesEvidence: 'game-calibration' },
+    // Hospital Cup: el piso amateur de Australia POR DECISIÓN DECLARADA. Las dos
+    // competiciones estatales pagan algo; el Shute Shield lo tiene formalizado con
+    // tope salarial y ésta no, así que ésta hace de piso. Sin un piso amateur, un
+    // australiano de 18 arrancaba en un plantel pago — el hueco que Portugal todavía
+    // tiene y que está documentado como hueco, no como diseño.
+    { competitionId: 'au-hospital-cup', sportingBand: 3, economicModel: 'amateur', label: 'Hospital Cup', sourceUrls: [RA], evidence: 'game-calibration', regularSeasonMatches: 16, matchesEvidence: 'game-calibration' },
 
     // ── Banda 2 ──────────────────────────────────────────────────────────────
     { competitionId: 'esp-dhb', sportingBand: 2, economicModel: 'amateur', label: 'División de Honor B', sourceUrls: [FER], evidence: 'official-structure-inferred-status', regularSeasonMatches: 14, matchesEvidence: 'official-structure-inferred-status' },
@@ -221,6 +288,13 @@ export const COMPETITION_LEVELS: readonly CompetitionLevelProfile[] = [
     // partido único y no hay semifinales, así que no hay ronda intermedia que sumar.
     // Los seis que no entran al hexagonal juegan la Repescagem, que es otro torneo.
     { competitionId: 'br-super12', sportingBand: 2, economicModel: 'amateur', label: 'Super 12', sourceUrls: [CBRU], evidence: 'official-structure-inferred-status', regularSeasonMatches: 11, matchesEvidence: 'official-structure-inferred-status' },
+    // Escocia y Canadá una banda por debajo de las cinco de arriba, y cada una por
+    // su motivo. Escocia porque su Premiership perdió la capa de arriba cuando la
+    // SRU cerró el Super6 en 2024 y quedó siendo rugby de club a secas. Canadá
+    // porque no es una liga: son uniones provinciales más un torneo de
+    // seleccionados, con la academia nacional adentro.
+    { competitionId: 'sco-premiership', sportingBand: 2, economicModel: 'amateur', label: 'Scottish Premiership', sourceUrls: [SRU], evidence: 'game-calibration', regularSeasonMatches: 18, matchesEvidence: 'game-calibration' },
+    { competitionId: 'ca-clubs', sportingBand: 2, economicModel: 'amateur', label: 'Canadian Rugby Championship', sourceUrls: [RUGBY_CANADA], evidence: 'game-calibration', regularSeasonMatches: 10, matchesEvidence: 'game-calibration' },
 
     // ── Banda 1 · el piso amateur de cada pirámide ───────────────────────────
     // Sin estos escalones, elegir la ruta AMATEUR en Francia, Inglaterra, Nueva
@@ -244,6 +318,29 @@ export const COMPETITION_LEVELS: readonly CompetitionLevelProfile[] = [
     // la Ivy no sepa jugar: sus ocho miembros están acá desde 2022 y siguen dándose
     // su propio título Ivy por dentro.
     { competitionId: 'us-ncr-d1', sportingBand: 1, economicModel: 'amateur', label: 'DI universitaria (NCR)', sourceUrls: [NCR], evidence: 'game-calibration', regularSeasonMatches: 8, matchesEvidence: 'game-calibration' },
+    // ── El piso amateur de seis países más (2026-27.6) ────────────────────────
+    //
+    // Bélgica, Países Bajos, Perú, Colombia, México y Paraguay entran en la banda
+    // del rugby de club de barrio, que es donde están: planteles que trabajan,
+    // calendarios cortos y ninguna capa profesional arriba dentro del país.
+    //
+    // Lo que ganan al entrar no es "más clubes en el catálogo": es que un peruano,
+    // un mexicano o un belga tenga DÓNDE EMPEZAR. Hasta acá el motor los mandaba a
+    // emigrar a los 18 por ruta migratoria, que es lo que pasa cuando un país no
+    // está modelado — no lo que pasa en el rugby.
+    { competitionId: 'be-elite', sportingBand: 1, economicModel: 'amateur', label: 'Belgian Elite League', sourceUrls: [REU], evidence: 'game-calibration', regularSeasonMatches: 14, matchesEvidence: 'game-calibration' },
+    { competitionId: 'nl-ereklasse', sportingBand: 1, economicModel: 'amateur', label: 'Ereklasse', sourceUrls: [REU], evidence: 'game-calibration', regularSeasonMatches: 14, matchesEvidence: 'game-calibration' },
+    { competitionId: 'pe-metropolitano', sportingBand: 1, economicModel: 'amateur', label: 'Torneo Metropolitano', sourceUrls: [SUDAMERICA], evidence: 'game-calibration', regularSeasonMatches: 14, matchesEvidence: 'game-calibration' },
+    { competitionId: 'co-liga', sportingBand: 1, economicModel: 'amateur', label: 'Liga Nacional de Colombia', sourceUrls: [SUDAMERICA], evidence: 'game-calibration', regularSeasonMatches: 12, matchesEvidence: 'game-calibration' },
+    { competitionId: 'py-primera', sportingBand: 1, economicModel: 'amateur', label: 'Primera División de Paraguay', sourceUrls: [SUDAMERICA], evidence: 'game-calibration', regularSeasonMatches: 12, matchesEvidence: 'game-calibration' },
+    { competitionId: 'mx-liga', sportingBand: 1, economicModel: 'amateur', label: 'Liga Mexicana de Rugby XV', sourceUrls: [RAN], evidence: 'game-calibration', regularSeasonMatches: 12, matchesEvidence: 'game-calibration' },
+
+    // ── Banda 0 · el sótano ───────────────────────────────────────────────────
+    // Bolivia es la única competición del catálogo internacional en la banda más
+    // baja que existe, y es una afirmación deliberada: ocho clubes en cuatro
+    // ciudades, sin nada arriba dentro del país. Un boliviano que quiera llegar a
+    // algún lado se va sí o sí, y el escalafón tiene que poder decir eso.
+    { competitionId: 'bo-liga', sportingBand: 0, economicModel: 'amateur', label: 'Liga Boliviana', sourceUrls: [SUDAMERICA], evidence: 'game-calibration', regularSeasonMatches: 10, matchesEvidence: 'game-calibration' },
 
     // ── Divisiones argentinas · una por división real ─────────────────────────
     // Van al final del array, derivadas del canon. Antes había acá un único

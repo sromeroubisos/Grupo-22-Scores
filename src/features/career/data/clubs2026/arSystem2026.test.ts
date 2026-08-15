@@ -29,7 +29,9 @@ import { SA_CLUBS } from './saClubs.generated.ts';
 import { CLUBS } from '../clubs.ts';
 
 test('la versión del sistema está sellada', () => {
-    assert.equal(AR_SYSTEM_VERSION, '2026.2');
+    // 2026.3: la Patagonia pasa a tener una competición por unión y la Unión Andina
+    // entra completa.
+    assert.equal(AR_SYSTEM_VERSION, '2026.3');
 });
 
 // ── Estructura ───────────────────────────────────────────────────────────────
@@ -211,10 +213,19 @@ test('NINGÚN club existente pierde el escudo: el sourceId se hereda', () => {
 });
 
 test('los clubes nuevos están declarados y son los que el canon agrega', () => {
-    // 44 clubes que el canon nombra y el catálogo real no tenía: las tres
-    // divisiones bajas de la URBA, los dos de Villa María, los dos paraguayos del
-    // NEA y algunos del Pampeano B. Van sin escudo real, y está dicho.
-    assert.ok(AR_CATALOG.created.length <= 50, `demasiados clubes sin respaldo real: ${AR_CATALOG.created.length}`);
+    // Clubes que el canon nombra y el catálogo real no tenía: las tres divisiones
+    // bajas de la URBA, los dos de Villa María, los dos paraguayos del NEA, algunos
+    // del Pampeano B y —desde 2026.3— casi toda la Patagonia y la Unión Andina. Van
+    // sin escudo real, y está dicho.
+    //
+    // EL TECHO SUBIÓ DE 50 A 100 Y NO ES AFLOJAR EL TEST. Lo que este número vigila
+    // es que nadie invente clubes en masa sin darse cuenta, no que el catálogo real
+    // cubra todo el país: el snapshot de Supabase tiene la URBA y el interior
+    // grande, y no tiene la Patagonia profunda ni la Unión Andina. Cargar la URTF o
+    // la Unión Santacruceña significa necesariamente cargar clubes sin fila real.
+    // Lo que sigue siendo un error —y sigue vigilado por la línea de abajo— es que
+    // un club EXISTENTE pierda su escudo.
+    assert.ok(AR_CATALOG.created.length <= 100, `demasiados clubes sin respaldo real: ${AR_CATALOG.created.length}`);
     const sinEscudo = AR_CATALOG.clubs.filter((c) => c.sourceId === null).map((c) => c.name);
     assert.deepEqual([...sinEscudo].sort(), AR_CATALOG.created, 'los clubes sin escudo son exactamente los nuevos');
     // Los dos clubes paraguayos del Regional NEA A no se sacan.

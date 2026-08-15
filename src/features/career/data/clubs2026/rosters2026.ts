@@ -421,6 +421,266 @@ export const ROSTERS_2026_27: RosterGroup[] = [
             'Jacareí', 'SPAC', 'Pasteur', 'Nova Lima',
         ],
     },
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // 2026-27.11 · DIECISÉIS SISTEMAS DOMÉSTICOS NUEVOS
+    // ═══════════════════════════════════════════════════════════════════════
+    //
+    // Lo que esta tanda arregla no es "faltaban clubes": faltaban PAÍSES. Hasta
+    // acá, un galés, un irlandés, un escocés, un australiano o un fiyiano no
+    // tenían dónde empezar — el motor los mandaba a emigrar a los 18 porque su
+    // rugby de clubes no estaba modelado, y eso es exactamente al revés de cómo
+    // funcionan esas cinco potencias: en todas, la carrera arranca en el club.
+    //
+    // TRES COSAS QUE NO SE INVENTARON, y conviene dejarlas escritas:
+    //
+    //   · CURDA y San José NO están en la liga paraguaya de acá abajo, y no es un
+    //     olvido: ya viven en el catálogo, dentro del Regional NEA A argentino
+    //     (`arSystem2026.ts` los declara y avisa que "no se sacan"). En la
+    //     realidad juegan las dos cosas; en este modelo un club pertenece a una
+    //     competición, así que se quedan donde ya estaban y Paraguay entra con los
+    //     seis restantes.
+    //   · Brussels Devils NO está en la Belgian Elite League: es la franquicia
+    //     belga de la Rugby Europe Super Cup y ya está cargada ahí (`super-cup`).
+    //     Meterla otra vez sería el mismo club en dos competiciones.
+    //   · "Naitasiri Highlanders" NO se carga aparte de "Naitasiri": Highlanders
+    //     es el apodo de esa misma unión provincial, así que la lista de origen la
+    //     traía dos veces. Se carga una.
+    //
+    // Y una desambiguación, con el precedente adentro del propio catálogo: el
+    // "Northland" fiyiano entra como `Northland de Fiyi` porque Northland es una
+    // provincia del NPC neozelandés que ya está cargada. Es la misma solución que
+    // usó el canon argentino con `San José de Paraguay`.
+
+    // ── AUSTRALIA · dos competiciones estatales, ninguna nacional ─────────────
+    //
+    // AUSTRALIA NO TIENE LIGA NACIONAL DE CLUBES, y ése es el dato que ordena
+    // todo lo demás. Desde que el National Rugby Championship murió (2019), entre
+    // el club y Super Rugby no hay nada: el mejor rugby doméstico son dos
+    // competiciones ESTATALES que no se cruzan nunca —el Shute Shield en Sídney y
+    // el Hospital Cup en Brisbane— y cada una corona a su propio campeón.
+    //
+    // Por eso van como DOS competiciones y están las dos en `PARALLEL_COMPETITIONS`:
+    // no hay ascenso ni descenso entre ellas, igual que entre las dos pirámides
+    // universitarias estadounidenses. Que en la escalera de mercado el Hospital Cup
+    // quede debajo del Shute Shield es una afirmación DEPORTIVA (Sídney es el
+    // mercado más profundo del país), no institucional — el escalafón mide cuán
+    // arriba se juega, no quién asciende a dónde.
+    {
+        // Shute Shield (Sídney, NSW). Semiprofesional de verdad: los clubes pagan y
+        // hay tope salarial. Es el techo doméstico australiano.
+        competitionId: 'au-shute-shield', label: 'Shute Shield', countryCode: 'au', region: 'pacific',
+        level: 'semipro', kind: 'domestic-league',
+        clubs: ['Sydney University', 'Randwick', 'Northern Suburbs', 'Manly', 'Gordon', 'Eastwood', 'Warringah', 'Eastern Suburbs', 'Southern Districts', 'West Harbour', 'Hunter Wildfires', 'Western Sydney Two Blues'],
+    },
+    {
+        // Hospital Cup (Queensland Premier Rugby, Brisbane). Se modela AMATEUR y la
+        // decisión se declara en vez de disimularse: las dos competiciones estatales
+        // pagan algo, pero el Shute Shield lo tiene formalizado con tope salarial y
+        // el Hospital Cup no. Alguien tenía que ser el piso amateur de Australia, o
+        // un australiano de 18 arrancaba en un plantel pago —el problema que ya
+        // tiene Portugal y que está documentado como hueco, no como diseño.
+        //
+        // El día que se carguen las divisiones de abajo (Sydney Suburban, las grados
+        // inferiores de Brisbane), esto se revisa: el arreglo bueno es cargar el
+        // escalón real, no bajarle el nivel al de arriba.
+        competitionId: 'au-hospital-cup', label: 'Hospital Cup', countryCode: 'au', region: 'pacific',
+        level: 'development', kind: 'domestic-league',
+        clubs: ['University of Queensland', 'Brothers', 'Souths', 'GPS', 'Easts', 'Bond University', 'Norths', 'Sunnybank', 'Wests'],
+    },
+
+    // ── GALES · el club existe, el profesionalismo está en la URC ─────────────
+    {
+        // Welsh Premiership. Cardiff, Ospreys, Scarlets y Dragons NO están acá:
+        // viven en la URC, exactamente como Benetton y Zebre en Italia. Consecuencia
+        // idéntica y vale la pena decirla: el campeón galés no es el mejor club de
+        // Gales.
+        //
+        // Se modela AMATEUR después de los recortes de la WRU: el plantel típico
+        // trabaja o estudia. La salida al profesionalismo no es un ascenso —no hay
+        // adónde ascender— sino la vía declarada a la región (ver
+        // `wal-club-to-urc` en market-routes.ts).
+        competitionId: 'wal-premiership', label: 'Welsh Premiership', countryCode: 'gb-wls', region: 'europe',
+        level: 'development', kind: 'domestic-league',
+        clubs: ['Cardiff RFC', 'Pontypridd', 'Merthyr', 'Llandovery', 'Aberavon', 'Newport', 'RGC 1404', 'Ebbw Vale', 'Bridgend', 'Neath', 'Carmarthen Quins', 'Pontypool'],
+    },
+
+    // ── IRLANDA · la liga amateur más seria del hemisferio norte ──────────────
+    {
+        // All-Ireland League, División 1A. AMATEUR POR REGLAMENTO y no por
+        // calibración: la IRFU prohíbe el pago a los jugadores en la AIL, y ésa es
+        // la diferencia con Gales o Australia, donde el amateurismo es una lectura
+        // del mercado. Acá está escrito.
+        //
+        // Las cuatro provincias (Leinster, Munster, Ulster, Connacht) juegan la URC
+        // y no están en esta pirámide. El camino real de un jugador de la AIL es la
+        // academia provincial: vía declarada, no ascenso.
+        competitionId: 'ire-ail1a', label: 'All-Ireland League 1A', countryCode: 'ie', region: 'europe',
+        level: 'development', kind: 'domestic-league',
+        clubs: ['Clontarf', 'Cork Constitution', 'Lansdowne', 'Terenure College', 'Young Munster', "St. Mary's College", 'Ballynahinch', 'Dublin University'],
+    },
+
+    // ── ESCOCIA · lo que quedó cuando se cayó el Super6 ───────────────────────
+    {
+        // Scottish Premiership. Amateur, y el motivo es reciente: el Super6 —el
+        // intento de la SRU de meter una capa semiprofesional entre el club y las
+        // dos franquicias— se cerró en 2024. Sin él, entre Heriot's y Edinburgh no
+        // queda nada, que es la misma forma que tienen Gales e Irlanda.
+        competitionId: 'sco-premiership', label: 'Scottish Premiership', countryCode: 'gb-sct', region: 'europe',
+        level: 'development', kind: 'domestic-league',
+        clubs: ['Currie Chieftains', 'Ayr', "Heriot's", 'Hawick', 'Melrose', 'Watsonians', 'Boroughmuir Bears', 'Selkirk', 'Jed-Forest', 'Musselburgh'],
+    },
+
+    // ── GEORGIA · la liga que sostiene a los Lelos ────────────────────────────
+    {
+        // Didi 10. Semiprofesional: la unión georgiana financia los clubes y sus
+        // jugadores cobran, que es lo que la separa de la Serie A italiana o de la
+        // Divisão de Honra.
+        //
+        // Black Lion va adentro tal como lo trae la lista de origen, y hay que saber
+        // qué es: la franquicia de la GRU, la que juega la Rugby Europe Super Cup y
+        // funciona como antesala de la selección. Está muy por encima del resto de
+        // la liga y el rating lo dice.
+        competitionId: 'ge-didi10', label: 'Didi 10', countryCode: 'ge', region: 'europe-emerging',
+        level: 'semipro', kind: 'domestic-league',
+        clubs: ['Black Lion', 'Lelo Saracens', 'Aia Kutaisi', 'Armazi', 'Batumi', 'Khvamli', 'Akademia', 'Kharebi', 'Aresi', 'Vephkhvebi'],
+    },
+
+    // ── RUMANIA ──────────────────────────────────────────────────────────────
+    {
+        // Liga Națională de Rugby. Semiprofesional, con la particularidad de que sus
+        // dos clubes más grandes son institucionales —Steaua es del Ejército y
+        // Dinamo del Ministerio del Interior— y por eso sostienen planteles pagos en
+        // un mercado que no da para eso.
+        competitionId: 'ro-liga', label: 'Liga Națională', countryCode: 'ro', region: 'europe-emerging',
+        level: 'semipro', kind: 'domestic-league',
+        clubs: ['CSM Știința Baia Mare', 'CSA Steaua București', 'Dinamo București', 'SCM USV Timișoara', 'Rapid București', 'Universitatea Cluj', 'RC Gura Humorului', 'RC Bârlad'],
+    },
+
+    // ── RUSIA · la única liga NUEVA que entra como profesional ───────────────
+    {
+        // Campeonato de Rusia. Es la excepción de esta tanda: clubes con plantel
+        // profesional y presupuesto de patrocinador industrial o de gobierno
+        // regional. Enisei-STM y Krasny Yar llegaron a jugar la Challenge Cup
+        // europea, que es la vara con la que se calibra su banda.
+        //
+        // La suspensión internacional desde 2022 no cambia el vínculo laboral de un
+        // jugador ruso con su club, que es lo que este campo modela; sí explica que
+        // la banda deportiva sea 5 y no 6.
+        competitionId: 'ru-championship', label: 'Campeonato de Rusia', countryCode: 'ru', region: 'europe-emerging',
+        level: 'pro-regional', kind: 'domestic-league', professionalStatus: 'professional',
+        clubs: ['Enisei-STM', 'Krasny Yar', 'Strela-Ak Bars', 'VVA-Podmoskovye', 'Lokomotiv Penza', 'Slava Moscow', 'Dinamo Moscow', 'Metallurg Novokuznetsk'],
+    },
+
+    // ── FIYI · provincias, no clubes ─────────────────────────────────────────
+    {
+        // Skipper Cup. No la disputan clubes sino UNIONES PROVINCIALES, igual que el
+        // NPC neozelandés o la Currie Cup — por eso Nadroga o Naitasiri representan
+        // un territorio entero y no un barrio. Amateur, y la salida es una sola: los
+        // Fijian Drua, que sí son profesionales y juegan Super Rugby Pacific.
+        competitionId: 'fj-skipper', label: 'Skipper Cup', countryCode: 'fj', region: 'pacific',
+        level: 'development', kind: 'domestic-league',
+        clubs: ['Nadroga', 'Naitasiri', 'Suva', 'Namosi', 'Tailevu', 'Nadi', 'Lautoka', 'Northland de Fiyi', 'Macuata', 'Yasawa', 'Ovalau', 'Malolo', 'Vatukoula'],
+    },
+
+    // ── CANADÁ · un sistema sin liga nacional estable ─────────────────────────
+    {
+        // Canadá tampoco tiene liga nacional de clubes: lo que hay son las uniones
+        // provinciales, y por encima de ellas el Canadian Rugby Championship, que
+        // cruza seleccionados provinciales. La lista carga las dos cosas a propósito
+        // —clubes (Castaway Wanderers, UBC, James Bay) y entidades que no son clubes
+        // (Ontario Blues es un seleccionado provincial; Pacific Pride es la academia
+        // de Rugby Canada)— porque es el sistema que existe, no el que quedaría
+        // prolijo. La salida profesional es la MLR, del otro lado de la frontera.
+        competitionId: 'ca-clubs', label: 'Canadian Rugby Championship', countryCode: 'ca', region: 'north-america',
+        level: 'development', kind: 'domestic-league',
+        clubs: ['Pacific Pride', 'Ontario Blues', 'UBC Thunderbirds', 'Castaway Wanderers', 'James Bay AA', 'Meraloma RFC', 'Toronto Scottish', 'Calgary Hornets', 'Edmonton Clansmen', 'Montreal Irish'],
+    },
+
+    // ── EUROPA CONTINENTAL AMATEUR ───────────────────────────────────────────
+    {
+        // Belgian Elite League. SIN Brussels Devils: los Devils son la franquicia
+        // belga de la Rugby Europe Super Cup y ya están cargados ahí (`super-cup`).
+        // Un club no puede estar en dos competiciones de este catálogo, y de las dos
+        // la Super Cup es la que ya existía.
+        competitionId: 'be-elite', label: 'Belgian Elite League', countryCode: 'be', region: 'europe-emerging',
+        level: 'amateur', kind: 'domestic-league',
+        clubs: ['Kituro RC', 'Boitsfort RC', 'ASUB Waterloo', 'Dendermonde RC', 'La Hulpe RC', 'RC Liège', 'Soignies RC'],
+    },
+    {
+        // Ereklasse neerlandesa. Amateur de club de barrio, con el mismo rol que la
+        // Fédérale 2 francesa: es de donde sale alguien, no adonde llega.
+        competitionId: 'nl-ereklasse', label: 'Ereklasse', countryCode: 'nl', region: 'europe-emerging',
+        level: 'amateur', kind: 'domestic-league',
+        clubs: ["RC 't Gooi", 'Haagsche RC', 'RC Hilversum', 'DIOK Leiden', 'RFC Haarlem', 'Castricum RC', 'Oisterwijk Oysters', 'RC Eemland'],
+    },
+
+    // ── SUDAMÉRICA MÁS ALLÁ DEL RÍO DE LA PLATA ──────────────────────────────
+    //
+    // Cuatro países que hasta ahora no tenían dónde empezar y emigraban a los 18.
+    // Todos amateur puros —el profesionalismo sudamericano vive entero en Super
+    // Rugby Americas— así que su salida es la misma que la argentina, la uruguaya y
+    // la chilena: la vía a la franquicia, por nivel y no por pasaporte.
+    {
+        // Torneo Metropolitano de Rugby (Perú). Diecisiete clubes, con la mitad de
+        // Lima y el resto repartido por el país (Arequipa, Chiclayo, Trujillo, Ilo,
+        // Barranca, Piura): es la competición más grande de las cuatro.
+        competitionId: 'pe-metropolitano', label: 'Torneo Metropolitano', countryCode: 'pe', region: 'south-america',
+        level: 'amateur', kind: 'domestic-league',
+        clubs: ['Lima Rugby Club', 'Alumni Rugby Club', 'Club Cruzados', 'Old Markhamians RFC', 'Leones de San Marcos', 'Blues Rugby Association', 'Dragones Rugby Club', 'Navy Warriors Rugby Club', 'Flaming Lions RFC', 'Toros Rugby Club', 'Unión Rugby Club', 'Zuma Sport Rugby', 'Mochikas Rugby Club', 'Sharks Rugby Club', 'Piura Rugby Club', 'Sea Wolf Rugby Club', 'Vikingos Rugby Club'],
+    },
+    {
+        // Liga Nacional de Rugby de Colombia. Está organizada por regiones y los
+        // equipos cambian de una temporada a otra: los diez que entran son los
+        // clubes que sostienen la competición, no una nómina congelada de una
+        // temporada concreta.
+        competitionId: 'co-liga', label: 'Liga Nacional de Colombia', countryCode: 'co', region: 'south-america',
+        level: 'amateur', kind: 'domestic-league',
+        clubs: ['Tucanes Rugby Club', 'Bogotá Rugby Club', 'Carneros Rugby Club', 'Cali Rugby Club', 'Gatos Rugby Club', 'Universitario del Valle', 'Barranquilla Rugby Club', 'Lions Rugby Club', 'Búhos Rugby Club', 'Pasto Rugby Club'],
+    },
+    {
+        // Primera División de Rugby de Paraguay, SIN sus dos clubes más fuertes:
+        // CURDA y San José juegan el Regional NEA argentino y ya están en el
+        // catálogo por ahí (ver el bloque de arriba). Paraguay igual tiene salida
+        // profesional propia y es la mejor de las cuatro: Yacaré XV, su franquicia
+        // en Super Rugby Americas.
+        competitionId: 'py-primera', label: 'Primera División de Paraguay', countryCode: 'py', region: 'south-america',
+        level: 'amateur', kind: 'domestic-league',
+        clubs: ['Asunción Rugby Club', 'Cristo Rey Rugby Club', 'Santa Clara Rugby Club', 'Luque Rugby Club', 'Presidente Hayes Rugby Club', 'Mariano Roque Alonso Rugby Club'],
+    },
+    {
+        // Liga Boliviana de Rugby. La más chica del catálogo entero y va a la banda
+        // más baja que existe: ocho clubes en cuatro ciudades, sin ninguna capa
+        // profesional arriba dentro del país.
+        competitionId: 'bo-liga', label: 'Liga Boliviana', countryCode: 'bo', region: 'south-america',
+        level: 'amateur', kind: 'domestic-league',
+        clubs: ['Santa Cruz Rugby Club', 'Jenecherú Rugby Club', 'La Paz Rugby Club', 'Universitario Rugby Club', 'Supay Rugby Club', 'Aranjuez Rugby Club', 'Tigres Rugby Club', 'Yacuiba Rugby Club'],
+    },
+
+    // ── MÉXICO ───────────────────────────────────────────────────────────────
+    {
+        // Liga Mexicana de Rugby XV's: fase regional y después fase nacional.
+        // Amateur, con quince clubes repartidos entre el Valle de México, Monterrey,
+        // Guadalajara, Colima y Puebla. Su salida natural no es europea sino la MLR,
+        // que está al lado.
+        //
+        // NÓMINA CORREGIDA CONTRA LOS ESCUDOS REALES. La primera carga salió de una
+        // lista de nombres y cinco no resistieron el cruce con el logo del club:
+        //   · "Búfalos Toluca" es BISONTES RUGBY CLUB, y de Guadalajara, no de
+        //     Toluca — lo dice su propio escudo ("Bisontes Rugby Club GDL");
+        //   · "Tigres Rugby" es TIGRES UANL, el de la Universidad Autónoma de Nuevo
+        //     León. El nombre completo además lo separa de los otros dos Tigres del
+        //     catálogo, el del NOA argentino y el de Tarija;
+        //   · Lagartos, Celtas, Jabalíes y Gorilas de Puebla no están en la liga:
+        //     los reemplazan Axolotl, Coyotes, Leones y la Asociación Ciudad de
+        //     México.
+        //
+        // Es el mismo error que los escudos municipales de Catriel y Piura, visto
+        // del otro lado: un nombre plausible que no es el del club.
+        competitionId: 'mx-liga', label: 'Liga Mexicana de Rugby XV', countryCode: 'mx', region: 'north-america',
+        level: 'amateur', kind: 'domestic-league',
+        clubs: ['Pumas UNAM', 'Wallabies RFC', 'Tazmania RFC', 'Black Thunder RC', 'Koalas RFC', "Rhino's RFC", 'Cumiyais RFC', 'Tigres UANL', 'Templarios Rugby', 'Legión de Cuervos', 'Bisontes Rugby Club', 'Coyotes Rugby Club', 'Axolotl Rugby Club', 'Leones Rugby', 'Asociación Ciudad de México'],
+    },
 ];
 
 // Temporada del catálogo. Todo club/competición debe ser de ESTA temporada; no
@@ -445,6 +705,18 @@ export const EXPECTED_COUNTS: Record<string, number> = {
     'us-mlr': 6, 'us-d1a': 12, 'us-ncr-d1': 8,
     // Portugal, Italia y Brasil.
     'pt-honra': 12, 'ita-serie-a-elite': 10, 'ita-serie-a': 12, 'br-super12': 12,
+    // 2026-27.11 · los dieciséis sistemas nuevos. Tres conteos NO coinciden con la
+    // lista de origen y el gate es justamente lo que obliga a explicarlo:
+    //   · `py-primera` 6 y no 8 — CURDA y San José ya están en el Regional NEA;
+    //   · `be-elite` 7 y no 8 — Brussels Devils ya está en la Rugby Europe Super Cup;
+    //   · `fj-skipper` 13 y no 14 — "Naitasiri Highlanders" es el apodo de Naitasiri.
+    'au-shute-shield': 12, 'au-hospital-cup': 9,
+    'wal-premiership': 12, 'ire-ail1a': 8, 'sco-premiership': 10,
+    'ge-didi10': 10, 'ro-liga': 8, 'ru-championship': 8,
+    'fj-skipper': 13, 'ca-clubs': 10,
+    'be-elite': 7, 'nl-ereklasse': 8,
+    'pe-metropolitano': 17, 'co-liga': 10, 'py-primera': 6, 'bo-liga': 8,
+    'mx-liga': 15,
 };
 
 // DHB objetivo 2026/27 = 32 (4 grupos de 8). Cargados A/B/C (24) desde iSquad.
@@ -474,6 +746,20 @@ export const PENDING_COMPETITIONS: { competitionId: string; label: string; level
     // ella salen SEIS de las doce plazas de 2027 vía Repescagem. Sin sus nombres no
     // se puede declarar el ascenso: el grafo quedaría apuntando a una liga vacía.
     { competitionId: 'br-super12-2da', label: 'Super 12 · 2ª divisão', level: 'amateur', expectedCount: 12 },
+    // 2026-27.11 · los escalones de abajo de los sistemas nuevos. Todos EXISTEN y
+    // ninguno vino en la lista de origen, así que ninguno se declara en MOVEMENTS:
+    // un ascenso hacia una liga vacía es peor que no declarar el ascenso.
+    //
+    // Los cuatro primeros son los que más se notan jugando, porque son los que
+    // dejan a su país con un solo escalón: sin ellos, la carrera doméstica de un
+    // galés, un irlandés, un escocés o un australiano no tiene adónde subir dentro
+    // de su propio sistema y depende entera de la vía al profesionalismo.
+    { competitionId: 'wal-championship', label: 'Welsh Championship', level: 'amateur', expectedCount: null },
+    { competitionId: 'ire-ail1b', label: 'All-Ireland League 1B', level: 'amateur', expectedCount: null },
+    { competitionId: 'sco-national1', label: 'Scottish National League 1', level: 'amateur', expectedCount: null },
+    { competitionId: 'au-sydney-suburban', label: 'Sydney Suburban Rugby', level: 'amateur', expectedCount: null },
+    { competitionId: 'ge-didi10-b', label: 'Georgia · segunda división', level: 'amateur', expectedCount: null },
+    { competitionId: 'ro-divizia-a', label: 'Divizia Națională Seria A', level: 'amateur', expectedCount: null },
 ];
 
 /**
@@ -496,4 +782,8 @@ export const OPEN_QUESTIONS_2026_27: readonly { competitionId: string; question:
     { competitionId: 'pt-honra', question: 'Campeón de la I Divisão 2025-26 y 12º equipo de 2026-27.' },
     { competitionId: 'us-d1a', question: 'Reglas de elegibilidad académica de la CRAA (no se asume el modelo NCAA).' },
     { competitionId: 'us-ncr-d1', question: 'Reglas de elegibilidad académica de NCR (no se asume el modelo NCAA).' },
+    // 2026-27.11
+    { competitionId: 'sra', question: 'De qué unión es Capibaras XV. Yacaré XV sí está declarada como paraguaya (los Yacarés son Paraguay); Capibaras no tiene país asignado y por eso no es destino de ninguna vía nacional.' },
+    { competitionId: 'au-hospital-cup', question: '¿El Hospital Cup paga a sus jugadores como el Shute Shield? Se modela amateur para que Australia tenga piso; si resulta que paga, hace falta cargar Sydney Suburban antes de corregirlo.' },
+    { competitionId: 'ge-didi10', question: '¿Black Lion disputa la Didi 10 además de la Rugby Europe Super Cup? Acá está en la Didi 10, como vino en la lista de origen.' },
 ];

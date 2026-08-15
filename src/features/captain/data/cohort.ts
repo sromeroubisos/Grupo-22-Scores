@@ -1,0 +1,382 @@
+// EL CAPITÁN — la camada, y los cupos de cada carril.
+//
+// Un carril representativo dejó de ser "media mayor a X" y pasó a ser "estás
+// entre los N mejores de tu camada en tu puesto". Hay treinta camisetas de
+// Pumitas, no infinitas.
+//
+// ═══════════════════════════════════════════════════════════════════════════
+//  POR QUÉ ESTO NO ES UNA TABLA DE NÚMEROS
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Es la parte que hay que entender antes de tocar una línea de este archivo.
+//
+// La primera versión de este diseño era una CURVA FIJA: una tabla de medias de
+// OVR por edad, contra la que se calculaba tu percentil. Se descartó con lápiz y
+// papel, antes de escribirla, porque se reduce a lo que venía a reemplazar:
+//
+//     entrás ⟺ rank ≤ K
+//            ⟺ C · P(X > ovr) ≤ K − 1
+//            ⟺ P(X > ovr) ≤ (K−1)/C
+//            ⟺ ovr ≥ F⁻¹(1 − (K−1)/C)
+//
+// Con `F`, `K` y `C` constantes, el lado derecho ES UN NÚMERO. O sea: un umbral
+// con más pasos, y con la misma erosión que el umbral original. La próxima vez
+// que la población creciera —y crece, para eso existe `built`— más gente
+// cruzaría ese número y el piso se caería de nuevo, tres cambios después y sin
+// saber cuál lo rompió.
+//
+// La camada tiene que MOVERSE CON LA POBLACIÓN. Por eso acá no hay medias
+// escritas: hay una fórmula que lee el MODELO GENERATIVO de `types/player.ts`
+// —el mismo del que sale el jugador— y deriva contra quién competís. Si mañana
+// `POTENTIAL_BAND` pasa de 6 a 10, la camada sube con vos y el piso aguanta.
+//
+// Lo que sí queda desacoplado, y es lo que se buscaba: EL CATÁLOGO DE CLUBES. La
+// camada no lee un solo club, así que un commit de la Patagonia no mueve la
+// escalera. Desacoplado del canon, acoplado al modelo generativo: son dos cosas
+// distintas y la confusión entre las dos es la que costó el rediseño.
+
+import type { PositionFamilyId } from '../types/player.ts';
+import { ALL_FAMILIES, POSITION_FAMILIES, youthPlayingFactor } from './positions.ts';
+import {
+    POTENTIAL_BAND,
+    POTENTIAL_REALIZATION,
+    POTENTIAL_SD_GAP,
+    START_AGE,
+    expectedPotentialGap,
+} from '../types/player.ts';
+
+/**
+ * Versión de la camada. Se sella en el guardado igual que un catálogo.
+ *
+ * Sube cuando cambia CUALQUIER cosa de este archivo: los cupos, la forma del
+ * plantel, la hipótesis de comportamiento, o la fórmula. Una partida jugada con
+ * otra camada se jugó en otro mundo — las convocatorias que recibiste no se
+ * pueden recalcular hacia atrás.
+ */
+export const COHORT_VERSION = '2026-08.3';
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  1 · LAS CAMISETAS
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Cómo se reparte un plantel de treinta entre las ocho familias.
+ *
+ * Sale de la composición real de un plantel de rugby y no de dividir 30 entre 8:
+ * un plantel lleva cinco de primera línea porque los pilares se cambian, y dos
+ * aperturas porque hay uno solo en la cancha. Suma treinta exacto, y hay un test
+ * que lo verifica.
+ *
+ * Esto reemplaza a `SCARCITY`, que era una banda de dos puntos de media que
+ * inclinaba la balanza a mano. La escasez ahora es real y se explica sola: un
+ * apertura pelea dos camisetas y un wing pelea cinco.
+ */
+export const SQUAD_SHAPE: Record<PositionFamilyId, number> = {
+    'primera-linea': 5,
+    hooker: 3,
+    'segunda-linea': 4,
+    'tercera-linea': 5,
+    'medio-scrum': 2,
+    apertura: 2,
+    centro: 4,
+    'wing-fullback': 5,
+};
+
+/** Las treinta de arriba, para que los cupos se escalen contra un plantel real. */
+export const SQUAD_TOTAL = 30;
+
+/**
+ * Cuántas camisetas tiene cada carril con cupo.
+ *
+ * Los tres de abajo son los que se convirtieron; `a-xv` y `nacional` siguen por
+ * umbral, porque el techo del juego ya está en objetivo y el problema medido era
+ * el piso. Convertir los cinco de una habría movido las dos puntas a la vez y
+ * ninguna medición se podría leer.
+ */
+export const TRACK_SHIRTS = {
+    /** Seleccionado de tu unión. */
+    union: 30,
+    /** Academia regional / PlaDAR. Una franquicia del SRA lleva ~35. */
+    academia: 35,
+    /** Los Pumitas M20. */
+    m20: 30,
+} as const;
+
+export type CupoTrack = keyof typeof TRACK_SHIRTS;
+
+export function isCupoTrack(track: string): track is CupoTrack {
+    return track === 'union' || track === 'academia' || track === 'm20';
+}
+
+/** Las camisetas que le tocan a TU puesto en ese carril. Nunca menos de una. */
+export function shirtsFor(track: CupoTrack, family: PositionFamilyId): number {
+    return Math.max(1, Math.round(TRACK_SHIRTS[track] * (SQUAD_SHAPE[family] / SQUAD_TOTAL)));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  2 · LA CAMADA — cuántos pelean cada camiseta, y cómo son
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Cuántos jugadores de tu puesto pelean cada camiseta de ese carril.
+ *
+ * Es el parámetro que fija cuán selectivo es el carril: con diez aspirantes por
+ * camiseta, entrás si estás en el 10% de arriba de tu camada. No es la población
+ * de rugbiers del país —eso sería un dato y no lo tenemos— sino cuánta gente
+ * está EN LA CONVERSACIÓN por ese lugar.
+ *
+ * Sube con el escalón, y por la razón obvia: por una camiseta de tu unión pelean
+ * los buenos de tu zona, y por una de los Pumitas pelean los buenos del país.
+ */
+const CONTENDERS_PER_SHIRT: Record<CupoTrack, number> = {
+    union: 6,
+    academia: 11,
+    m20: 16,
+};
+
+/**
+ * CUÁNTA GENTE PELEA POR ESE CARRIL, EN TOTAL. Y por qué no es
+ * `shirts × CONTENDERS_PER_SHIRT`, que es lo que decía antes.
+ *
+ * ── El bug ──
+ * Con los aspirantes escalados por las camisetas, `shirts` se cancelaba:
+ *
+ *     porDelante = fractionAbove × (shirts × C)
+ *     entrás ⟺ porDelante < shirts ⟺ fractionAbove × C < 1 ⟺ fractionAbove < 1/C
+ *
+ * O sea que el corte era IDÉNTICO para las ocho familias y `SQUAD_SHAPE` no
+ * hacía nada. El comentario de arriba decía «un apertura pelea dos camisetas y
+ * un wing pelea cinco» y el código no lo cumplía: lo único que quedaba del
+ * puesto era el archirrival, que pesa más cuando hay pocas camisetas.
+ *
+ * Con la camada en un número FIJO por carril, el corte pasa a ser
+ * `shirts / N` y la escasez existe: el apertura pelea dos lugares en la misma
+ * fila en la que el wing pelea cinco.
+ *
+ * ── Por qué se deriva y no se escribe ──
+ * Para que este arreglo mida DISPERSIÓN y no NIVEL. `N = C × media(shirts)`
+ * deja la tasa de entrada promedio donde estaba —sobre una población uniforme
+ * en las ocho familias, que es como recorre el instrumento— y mueve solo el
+ * reparto entre puestos. Escrito a mano, el número se despegaría de
+ * `CONTENDERS_PER_SHIRT` en el primer ajuste y nadie sabría cuál manda.
+ *
+ * `CONTENDERS_PER_SHIRT` conserva su significado —cuán selectivo es el carril
+ * EN PROMEDIO— y `SQUAD_SHAPE` pasa a controlar el reparto. Dos perillas, dos
+ * efectos, sin superposición.
+ */
+export function cohortSize(track: CupoTrack): number {
+    let total = 0;
+    for (const family of ALL_FAMILIES) total += shirtsFor(track, family);
+    return CONTENDERS_PER_SHIRT[track] * (total / ALL_FAMILIES.length);
+}
+
+/**
+ * QUÉ FRACCIÓN DE LA BANDA CONSTRUYE UN JUGADOR TÍPICO.
+ *
+ * ⚠️ ESTO NO ES UN PARÁMETRO TÉCNICO. Es UNA AFIRMACIÓN SOBRE CÓMO JUEGA LA
+ * GENTE, y hay que tratarla con la misma desconfianza que la banda de
+ * `nunca salen del club`: es una hipótesis de comportamiento, no una medición.
+ *
+ * En 1 —todos construyen la banda entera— el jugador medio queda por debajo de
+ * su camada y no pasa nadie. En 0 —nadie construye— la camada se queda quieta
+ * mientras el jugador sube y pasan todos. Los dos extremos rompen el carril, y
+ * ninguno de los dos avisa: devuelven una tasa de convocatoria rarísima y hay
+ * que ir a buscar por qué.
+ *
+ * Está en 0,5 porque la carta media construye 0,35 por temporada contra 0,9 de
+ * la cara, o sea que quien elige "normal" llena aproximadamente media banda a lo
+ * largo de una carrera. Es defendible y NO está medido contra jugadores reales,
+ * porque todavía no hay jugadores reales.
+ *
+ * El próximo que lo toque está discutiendo con una hipótesis de comportamiento y
+ * tiene que saberlo.
+ */
+const TYPICAL_BUILD_SHARE = 0.5;
+
+/**
+ * A qué edad se considera que la camada ya terminó de crecer.
+ *
+ * No es el pico del puesto sino el final de la ventana juvenil: los tres
+ * carriles con cupo se juegan entre los 17 y los 21, así que la camada que
+ * importa es la que todavía está subiendo.
+ */
+const COHORT_MATURITY_AGE = 22;
+
+/**
+ * A qué edad la camada empieza a separarse A PLENO. DERIVADA: el debut más
+ * temprano del catálogo de puestos.
+ *
+ * Antes de esa edad la camada crece, pero amortiguada: la temporada de un pibe
+ * de 16 pesa 0,56 y la de uno de 17, 0,78. Es la misma curva con la que el motor
+ * le recorta el tiempo de juego al que todavía no debutó
+ * (`youthPlayingFactor`), y por el mismo motivo: acá lo que hace crecer es
+ * jugar, así que un grupo de chicos que todavía no juega no se separa.
+ */
+const COHORT_SPREAD_AGE = ALL_FAMILIES.reduce(
+    (menor, id) => Math.min(menor, POSITION_FAMILIES[id].age.debut),
+    99,
+);
+
+/**
+ * Qué fracción de su separación lleva recorrida la camada a una edad dada.
+ *
+ * ── POR QUÉ ES UNA SUMA DE PESOS Y NO UNA RECTA ────────────────────────────
+ * Era `(edad − X) / (madurez − X)`, y con la carrera empezando a los 16 hay que
+ * elegir X. Se probaron las dos puntas y las dos rompen el carril juvenil, cada
+ * una para su lado (medido sobre 160 carreras):
+ *
+ *     X = START_AGE (16)  →  el M20 no lo pisa NADIE. La camada sube 4,5 puntos
+ *                            por temporada desde los 16 y el jugador real 1,7,
+ *                            porque el suyo va recortado por el debut: a los 18
+ *                            ya le lleva seis puntos de ventaja a todo el mundo.
+ *     X = el debut (18)   →  el M20 lo pisa el 96%. El que arranca a los 16
+ *                            llega con dos años de trabajo encima a una camada
+ *                            que recién empieza a moverse.
+ *
+ * Con los pesos, el pibe de 16 crece y su camada también, cada uno a lo que el
+ * motor le deja: el carril queda disputado (11%) en vez de regalado o cerrado.
+ * Y el corolario es la parte linda de empezar antes: la ventaja existe, es real
+ * y es chica — dos temporadas amortiguadas, no dos temporadas enteras.
+ */
+function cohortProgress(age: number): number {
+    let hasta = 0;
+    let total = 0;
+    for (let a = START_AGE; a < COHORT_MATURITY_AGE; a += 1) {
+        const peso = youthPlayingFactor(a, COHORT_SPREAD_AGE);
+        total += peso;
+        if (a < age) hasta += peso;
+    }
+    return total > 0 ? Math.min(1, Math.max(0, hasta / total)) : 1;
+}
+
+export interface CohortCurve {
+    mean: number;
+    sd: number;
+}
+
+/**
+ * Cómo es la camada contra la que competís, a tu edad.
+ *
+ * TODO SALE DEL MODELO GENERATIVO y nada está escrito a mano: el arranque es el
+ * OVR de la plantilla del puesto, el destino es ese arranque más el margen que
+ * se sortea al nacer más lo que un jugador típico construye, y en el medio se
+ * interpola por edad. La dispersión es la del sorteo del margen, creciendo con
+ * la edad porque a los 18 todavía no se separaron.
+ *
+ * Cambiar `POTENTIAL_MEAN_GAP` o `POTENTIAL_BAND` mueve esta curva. Es el punto
+ * entero del archivo.
+ */
+export function cohortCurve(startOvr: number, age: number): CohortCurve {
+    const avance = cohortProgress(age);
+    // El destino es el margen REALIZADO, no el margen sorteado. Sin
+    // `POTENTIAL_REALIZATION` la camada maduraba en el techo esperado del propio
+    // jugador, el jugador típico quedaba en el percentil 50 y los tres carriles
+    // con cupo daban exactamente 0,000: el corte quedaba por encima del umbral
+    // del escalón de arriba, así que no se evaluaba nunca.
+    //
+    // ── EL MARGEN ES EL QUE DE VERDAD SE SORTEA, NO EL DE LA CAMPANA ────────
+    // Con `POTENTIAL_FLOOR`, la mitad de abajo de la campana no sale nunca: la
+    // media del margen que se sortea es 36 y no 27 (`expectedPotentialGap`).
+    // Leer acá la media vieja habría descrito una camada seis puntos por debajo
+    // de la población que el motor produce, y está medido lo que eso hace: la
+    // mayor pasaba de rara a la mitad de las carreras (0,51 de 160) y el M20 lo
+    // pisaba el 96%. La camada tiene que moverse con la población o el piso se
+    // erosiona solo — es el motivo por el que este archivo existe.
+    const margen = (expectedPotentialGap(startOvr) + POTENTIAL_BAND * TYPICAL_BUILD_SHARE)
+        * POTENTIAL_REALIZATION;
+    const destino = startOvr + margen;
+    return {
+        mean: startOvr + (destino - startOvr) * avance,
+        // Piso del 40%: al arrancar, la camada ya está algo separada, porque el
+        // sorteo de atributos pasa antes que cualquier crecimiento.
+        sd: POTENTIAL_SD_GAP * (0.4 + 0.6 * avance),
+    };
+}
+
+/**
+ * DÓNDE TERMINA LA CAMADA. Es `cohortCurve` en su edad de madurez, y por eso es
+ * una función de una línea y no una constante.
+ *
+ * Existe para que los DOS escalones de arriba —seleccionado A y la mayor, que
+ * son umbral y no cupo— puedan colgarse del mismo modelo generativo que los tres
+ * de abajo. Tenían su tabla escrita a mano, calibrada contra una población con
+ * techo mediano 66; cuando la población se movió, la tabla se quedó afirmando el
+ * mundo viejo y el 58,9% de las carreras pasaba a llegar a la mayor. Es la
+ * derivada congelada del §1.9, y el propio `calibration.test.ts` la tenía
+ * anotada como causa estructural antes de que pasara.
+ */
+export function cohortMaturity(startOvr: number): number {
+    return cohortCurve(startOvr, COHORT_MATURITY_AGE).mean;
+}
+
+/**
+ * Cuántos de tu camada están por encima tuyo. La cola de la normal, de verdad.
+ *
+ * ── Por qué NO es la aproximación logística ──
+ * Lo era, con el comentario «el error máximo es de menos de un punto porcentual,
+ * y para decidir si entrás en un plantel de treinta esa precisión sobra». Las
+ * dos mitades eran ciertas por separado y juntas eran falsas: el error ES chico
+ * EN ABSOLUTO, y los cupos viven donde eso no importa.
+ *
+ *     z = 2,13   logística 2,59%   ·   normal real 1,66%   ·   +56% relativo
+ *
+ * El corte de M20 está en el 3,3% y el de academia en el 4,0%: los cupos operan
+ * ENTEROS adentro de la cola, que es exactamente la región donde la logística es
+ * más gorda que la normal. O sea que todos los cupos venían siendo
+ * sistemáticamente más permisivos que lo que declaraban, y en la dirección que
+ * ya nos había roto el piso.
+ *
+ * La lección es de unidades: un error acotado en puntos absolutos no dice nada
+ * sobre una decisión que se toma en la cola. Si el umbral es 3%, el error que
+ * importa es el relativo.
+ *
+ * Ahora se usa Zelen & Severo (A&S 26.2.17), con error menor a 7,5e-8 en todo el
+ * rango. Son seis líneas y ninguna dependencia.
+ */
+function normalTail(z: number): number {
+    if (z < 0) return 1 - normalTail(-z);
+    const t = 1 / (1 + 0.2316419 * z);
+    const poly = t * (0.319381530
+        + t * (-0.356563782
+            + t * (1.781477937
+                + t * (-1.821255978 + t * 1.330274429))));
+    return (Math.exp(-0.5 * z * z) / Math.sqrt(2 * Math.PI)) * poly;
+}
+
+/** Solo para `cohort.test.ts`: la cola desnuda, sin la curva alrededor. */
+export const tailForTest = normalTail;
+
+function fractionAbove(ovr: number, curve: CohortCurve): number {
+    return normalTail((ovr - curve.mean) / Math.max(0.001, curve.sd));
+}
+
+/**
+ * ¿ENTRÁS EN EL PLANTEL?
+ *
+ * Tu puesto tiene `shirts` camisetas y `shirts × CONTENDERS_PER_SHIRT`
+ * aspirantes. Estás adentro si la cantidad de gente mejor que vos no llena las
+ * camisetas antes de que llegues.
+ *
+ * `rivalOvr` es el archirrival, y ocupa un lugar de verdad: si él es mejor que
+ * vos, es UNO de los que están adelante. No es un adorno narrativo —le estás
+ * sacando el puesto a alguien con nombre, que es literalmente cómo funciona.
+ */
+export function fitsInSquad(
+    track: CupoTrack,
+    family: PositionFamilyId,
+    ovr: number,
+    startOvr: number,
+    age: number,
+    rivalOvr: number | null,
+): boolean {
+    const shirts = shirtsFor(track, family);
+    const aspirantes = cohortSize(track);
+    const curve = cohortCurve(startOvr, age);
+
+    let porDelante = fractionAbove(ovr, curve) * aspirantes;
+    // El archirrival no es parte de la camada sintética: es un tipo concreto que
+    // se suma a la fila si te está ganando.
+    if (rivalOvr !== null && rivalOvr > ovr) porDelante += 1;
+
+    return porDelante < shirts;
+}

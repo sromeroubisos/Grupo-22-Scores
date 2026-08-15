@@ -4,7 +4,33 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from './MobileBottomNav.module.css';
 
-const hiddenPrefixes = ['/login', '/terminos', '/privacidad', '/contacto', '/ayuda'];
+/**
+ * Dónde NO se dibuja la barra.
+ *
+ * Las cinco primeras son pantallas de trámite: entrar, leer un texto legal,
+ * escribir un mensaje. La sexta es distinta y merece el renglón: los minijuegos
+ * son la única pantalla del sitio donde el alto ES el contenido. En El Capitán,
+ * la barra de 78 px era la diferencia entre ver las cuatro opciones de la
+ * pretemporada y ver tres — o sea, entre decidir mirando y decidir de memoria.
+ *
+ * La salida no se pierde: la cabecera del sitio es `sticky` y queda a la vista
+ * con el logo, la búsqueda y el menú, y el pie sigue abajo de todo.
+ *
+ * ── Por qué se exporta ──────────────────────────────────────────────────────
+ * Porque el layout RESERVA el alto de la barra con un `padding-bottom` en
+ * `.mainContent`, y esa reserva no sabía de esta lista: en El Capitán la barra
+ * no se dibujaba y el pie seguía ahí igual, o sea 74 px de nada al final de
+ * cada pantalla del juego —medido a 390 × 844—. Una lista sola, leída por los
+ * dos, es lo que hace imposible que vuelvan a discrepar.
+ */
+export const BOTTOM_NAV_HIDDEN_PREFIXES = [
+    '/login',
+    '/terminos',
+    '/privacidad',
+    '/contacto',
+    '/ayuda',
+    '/juegos/minijuegos/el-capitan',
+];
 
 const navItems = [
     { href: '/', label: 'Partidos', icon: 'matches', matchPrefixes: ['/', '/matches'] },
@@ -78,7 +104,7 @@ function NavIcon({ name, active }: { name: string; active?: boolean }) {
 export default function MobileBottomNav() {
     const pathname = usePathname();
 
-    if (hiddenPrefixes.some((prefix) => pathname?.startsWith(prefix))) {
+    if (BOTTOM_NAV_HIDDEN_PREFIXES.some((prefix) => pathname?.startsWith(prefix))) {
         return null;
     }
 

@@ -634,6 +634,7 @@ export const LOCAL_COMPETITION_LOGOS: ReadonlySet<string> = new Set([
     'ar-patagonia-regional',
     'ar-tdi-a',
     'ar-tdi-b',
+    'ar-urba',
     'ar-urba-primera-a',
     'ar-urba-primera-b',
     'ar-urba-primera-c',

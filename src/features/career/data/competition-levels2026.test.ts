@@ -15,9 +15,10 @@ import { marketRung } from '../engine/market-routes.ts';
 const bandOf = (clubName: string) => sportingBandOf(CLUBS.find((c) => c.name === clubName)!);
 
 test('la versión de la tabla de niveles está sellada', () => {
-    // 2026-27.5: `maxSigningAgeOf` — las competiciones universitarias dejan de
-    // fichar adultos. Es un dato de la competición, así que sube esta versión.
-    assert.equal(COMPETITION_LEVELS_VERSION, '2026-27.5');
+    // 2026-27.6: diecisiete competiciones nuevas en dieciséis países (las dos
+    // australianas, las tres británicas, Georgia, Rumania, Rusia, Fiyi, Canadá,
+    // Bélgica, Países Bajos, Perú, Colombia, México, Paraguay y Bolivia).
+    assert.equal(COMPETITION_LEVELS_VERSION, '2026-27.6');
     assert.ok(COMPETITION_LEVELS.length >= 20);
 });
 

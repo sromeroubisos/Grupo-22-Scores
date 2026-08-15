@@ -1,0 +1,190 @@
+// EL CAPITÁN — el registry de Momentos del motor.
+//
+// La lista es un ARRAY en orden declarado, y el índice por kind se arma a partir
+// de ella. Nunca al revés: un `Record` literal obligaría a recorrerlo con
+// `Object.keys` para listar los Momentos, y elegir sobre el orden de inserción
+// de un objeto es la fuente de no-determinismo encubierta que CLAUDE.md §1
+// prohíbe.
+//
+// Acá NO hay React. La pantalla de cada Momento se registra aparte, del lado de
+// `app/`, para que el motor pueda correr en un test de Node sin DOM.
+//
+// ═══════════════════════════════════════════════════════════════════════════
+//  LA REGLA DEL statBoost — leerla antes de escribir el próximo Momento
+// ═══════════════════════════════════════════════════════════════════════════
+//
+//   `statBoost` es para Momentos cuyo premio NO ES YA la métrica-gloria del
+//   puesto.
+//
+// Cada familia tiene su propio gol (`data/positions.ts`): el pilar cuenta
+// penales de scrum, el 7 turnovers, la segunda línea line-outs, el apertura
+// puntos. Si un Momento paga en la misma moneda que la planilla ya cuenta, el
+// `statBoost` cobra dos veces la misma jugada — el jugador ve el turnover en la
+// crónica Y otra vez inflado en la planilla de fin de año, y la calibración del
+// puesto queda mintiendo sin que nada falle.
+//
+// Por eso no lo usa ninguno de los cinco: los cinco pagan exactamente en la
+// gloria de su puesto, así que cobran en Cartel y Pertenencia y nada más. La
+// Banda es el caso más claro de todos —el wing tiene DOS métricas-gloria, tries
+// y metros, y la corrida paga en las dos— así que un `statBoost` ahí cobraría
+// tres veces la misma jugada. El Tackle SÍ lo usa, y por el mismo criterio:
+// frenar en seco no es la gloria de ninguna familia, así que no hay dónde se
+// cuente solo.
+//
+// Está escrita acá y no en cada def a propósito. Es la clase de decisión que se
+// vuelve a derivar de cero en el Momento #12 y se deriva distinto.
+//
+// ═══════════════════════════════════════════════════════════════════════════
+//  MECÁNICA Y MAGNITUD SE ESCRIBEN EN MOMENTOS DISTINTOS
+// ═══════════════════════════════════════════════════════════════════════════
+//
+//   LA MECÁNICA NO DEPENDE DE LA CURVA DE CRECIMIENTO. LA MAGNITUD SÍ.
+//
+// Faltan nueve Momentos y viene una corrección de exactitud del crecimiento
+// —`pull` acelerado, la realización del techo, la maduración de la camada
+// derivada en vez de escrita—. Esa corrección mueve cuánto vale un punto, así
+// que mueve todo delta que se escriba antes.
+//
+// De ahí la partición, y no es estilo: es cuántas veces vas a escribir lo mismo.
+//
+//   · `setup`, `resolve` y el `Input` — el verbo, la ventana, cuántas rondas,
+//     qué cuenta como acierto — NO dependen de la curva. Se escriben hoy.
+//   · Los deltas —`statBoost` y los números del efecto— SÍ. Van todos juntos en
+//     UNA TABLA, en un solo lugar, y se ajustan de un movimiento cuando la curva
+//     esté quieta.
+//
+// Tuneados uno por uno ahora, se tunean de nuevo nueve veces. La tabla se crea
+// con el primero de los nueve; hasta entonces esto es la regla y nada más,
+// porque una tabla vacía es estructura inventada antes de tener el dato.
+
+import type { ContractKind, MomentKind } from '../../types/moment-kinds.ts';
+import type { MomentOutcome } from '../../types/moment.ts';
+import type { MomentDef, MomentSetup } from '../../types/moment-def.ts';
+import { MINIGAME_SPECS } from '../../data/minigames/index.ts';
+import { defFromSpec } from './from-spec.ts';
+import { ACADEMIA } from './academia.ts';
+import { JACKAL } from './jackal.ts';
+import { ANCLA } from './ancla.ts';
+import { CODIGO } from './codigo.ts';
+import { PALOS } from './palos.ts';
+import { BANDA } from './banda.ts';
+
+/**
+ * La definición como la ve el registry, con los genéricos borrados.
+ *
+ * El borrado es seguro POR CONSTRUCCIÓN: el registry indexa por `kind`, y el
+ * `kind` ya discrimina el par (Setup, Input) —un pendiente de kind `jackal`
+ * lleva un `JackalSetup` y solo se resuelve con un outcome de kind `jackal`—.
+ * Que sea seguro por construcción no alcanza, así que `moment-contract.test.ts`
+ * lo verifica: cada def declara el kind con el que está indexada y su `setup`
+ * devuelve ese mismo kind.
+ */
+export type AnyMomentDef = MomentDef<MomentSetup, MomentOutcome>;
+
+/**
+ * La conversión, UNA sola vez y acá.
+ *
+ * Que esté en un solo lugar es lo que hace que agregar un Momento no requiera
+ * escribir un cast: se escribe la def con sus tipos propios y se la suma a la
+ * lista de abajo.
+ */
+function widen<S extends MomentSetup, I extends MomentOutcome>(def: MomentDef<S, I>): AnyMomentDef {
+    return def as unknown as AnyMomentDef;
+}
+
+/**
+ * Todas las definiciones, en ORDEN DECLARADO y estable.
+ *
+ * El orden es el del equipo, de adelante hacia atrás, igual que `ALL_FAMILIES`:
+ * primera línea, line-out, tercera línea, apertura, wing. Que sea el mismo
+ * criterio en los dos lugares no es estética — es que cuando alguien busque "el
+ * Momento del hooker" mire en el mismo renglón en los dos archivos.
+ */
+export const MOMENT_DEFS: readonly AnyMomentDef[] = [
+    widen(ANCLA),
+    widen(CODIGO),
+    widen(JACKAL),
+    widen(PALOS),
+    widen(BANDA),
+    // LA ACADEMIA. Está en el registry —hace falta para que `getMomentDef` la
+    // encuentre cuando la compuerta la abre— y NO está en `ALL_MINIGAMES`, así
+    // que `SELECTABLE` no la ve y no se sortea nunca. Es el mismo mecanismo por
+    // el que el bunker no se sortea, y por eso no hace falta ningún filtro:
+    // llega por su compuerta (`academiaDue`) o no llega.
+    widen(ACADEMIA),
+    // Y los cincuenta y nueve del catálogo por dorsal, en el orden declarado de
+    // `data/minigames/`. No se escriben acá uno por uno a propósito: una lista
+    // de cincuenta y nueve nombres mantenida a mano al lado de la lista de
+    // cincuenta y nueve objetos es la derivada congelada de CLAUDE.md §1.9, y se
+    // desincroniza la primera vez que alguien agregue un minijuego con apuro.
+    ...MINIGAME_SPECS.map((spec) => widen(defFromSpec(spec))),
+];
+
+const BY_KIND: Partial<Record<MomentKind, AnyMomentDef>> = {};
+for (const def of MOMENT_DEFS) BY_KIND[def.kind] = def;
+
+/**
+ * La definición de un kind, o `null`.
+ *
+ * `null` no es un error: `tackle` y `bunker` son PRE-CONTRATO y se resuelven por
+ * su carril propio en `engine/moments.ts`. El porqué está en `moment-kinds.ts`.
+ */
+export function getMomentDef(kind: MomentKind): AnyMomentDef | null {
+    return BY_KIND[kind] ?? null;
+}
+
+/**
+ * ¿Este kind va por el contrato? Estrecha el tipo, que es para lo que existe.
+ *
+ * Con esta guarda, el `else` de quien la use queda tipado como
+ * `PreContractKind`, y ahí un `switch` con `default: (kind: never)` deja de
+ * compilar el día que aparezca un pre-contrato nuevo sin su caso escrito. Es la
+ * medicina contra el `default` silencioso que le mandó una mano de tackle a una
+ * corrida.
+ *
+ * ── El límite, dicho en voz alta ──
+ * La guarda promete algo que verifica el REGISTRY EN RUNTIME, así que solo es
+ * honesta mientras todo `ContractKind` tenga def. Si alguien agrega un kind al
+ * tipo y no escribe su def ni lo suma a `PRE_CONTRACT_KINDS`, la guarda devuelve
+ * `false` y el `else` recibe un valor que su tipo dice que no puede llegar. Por
+ * eso hay un test —"cada kind del contrato tiene su def"— que lo impide, y por
+ * eso el `default` de esos switches TIRA con el kind adentro del mensaje en vez
+ * de seguir de largo.
+ */
+export function isContractKind(kind: MomentKind): kind is ContractKind {
+    return BY_KIND[kind] !== undefined;
+}
+
+export type { AcademiaPlay, AcademiaSetup } from './academia.ts';
+export { ACADEMIA, ACADEMIA_AGE, ACADEMIA_KIND, ACADEMIA_UNION } from './academia.ts';
+
+export type { JackalSetup } from './jackal.ts';
+export { JACKAL, JACKAL_ROUNDS, jackalBeat, jackalGrade, jackalWindows } from './jackal.ts';
+
+export type { AnclaSetup } from './ancla.ts';
+export { ANCLA, ANCLA_MAX_PUSHES, anclaGrade, anclaHoldChance } from './ancla.ts';
+
+export type { CodigoSetup } from './codigo.ts';
+export {
+    CODIGO,
+    CODIGO_LENGTH,
+    CODIGO_SYMBOLS,
+    codigoAciertos,
+    codigoDestreza,
+    codigoGrade,
+    codigoShowMs,
+} from './codigo.ts';
+
+export type { PalosSetup } from './palos.ts';
+export { PALOS, palosGrade, palosLanding, palosPerfectAim, palosTolerance } from './palos.ts';
+
+export type { BandaSetup } from './banda.ts';
+export {
+    BANDA,
+    bandaAmagueEnd,
+    bandaCloseMs,
+    bandaGrade,
+    bandaMoveAt,
+    bandaMuscleRisk,
+    bandaSpaceCost,
+} from './banda.ts';

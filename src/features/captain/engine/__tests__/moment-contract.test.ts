@@ -1,0 +1,616 @@
+// EL CONTRATO de un Momento.
+//
+// Acá no se prueba ningún minijuego: se prueba que el CARRIL cumpla lo que
+// promete, porque es lo que van a dar por cierto los catorce que faltan. Cuatro
+// garantías, y cada una existe porque romperla no rompe nada visible hasta que
+// es tarde:
+//
+//   1. `resolve` no ve el contexto — si lo viera, la jugada daría distinto
+//      antes y después de un F5, y ningún test de determinismo lo agarraría
+//      porque los tests no recargan la página.
+//   2. Una cadena se resuelve a lo sumo una vez, y nunca a sí misma.
+//   3. `rollMoment` consume exactamente lo mismo del stream principal que antes
+//      de que existieran los Momentos por puesto — es lo que hace que el digest
+//      congelado se mueva solo donde un Momento cambió el resultado.
+//   4. El registry es consistente: cada def declara el kind con el que está
+//      indexada. Es lo que hace honesto el borrado de genéricos.
+
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+import type { CaptainState, CreateCaptainInput } from '../../types/captain.ts';
+import type { MomentResult, MomentSetupCtx } from '../../types/moment-def.ts';
+import type { PendingMoment } from '../../types/moment.ts';
+import { trainingsFor } from '../../data/trainings.ts';
+import { PLAY_LEVELS } from '../../types/moment-def.ts';
+import { ALL_MOMENT_KINDS, MOMENT_LABEL, PRE_CONTRACT_KINDS } from '../../types/moment-kinds.ts';
+import { ALL_FAMILIES, baseAttributes } from '../../data/positions.ts';
+import { ALL_SHIRTS } from '../../data/minigames/index.ts';
+import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
+ import { playTournament } from '../../state/captain-autoplay.ts';
+import { createRng } from '../random.ts';
+import { MOMENT_DEFS, isContractKind } from '../moment-defs/index.ts';
+import {
+    applyMomentDeltas,
+    momentSeed,
+    nextChain,
+    pickMomentKind,
+    proficiencyFor,
+    rollMoment,
+    tacklePlayAt,
+    tackleZones,
+    zoneAt,
+} from '../moments.ts';
+
+const TERCERA: CreateCaptainInput = {
+    name: 'Ciro',
+    surname: 'Bertranou',
+    family: 'tercera-linea',
+    countryCode: 'ar',
+};
+
+/** Elige el primer entrenamiento de la familia y con eso arranca la temporada. */
+function repartir(state: CaptainState): CaptainState {
+    const trainingId = trainingsFor(state.player.family)[0].id;
+    return captainReducer(state, { type: 'CHOOSE_TRAINING', trainingId });
+}
+
+/** Avanza hasta que quede un jackal pendiente. `null` si no salió ninguno. */
+function hastaElJackal(max = 40): CaptainState | null {
+    for (let seed = 1; seed <= max; seed += 1) {
+        let s = createInitialCaptain(TERCERA, seed);
+        for (let i = 0; i < 3 && s.phase !== 'retired'; i += 1) {
+            s = repartir(s);
+            if (s.phase === 'moment' && s.pendingMoment?.kind === 'jackal') return s;
+            if (s.phase !== 'moment') {
+                s = playTournament(captainReducer(s, { type: 'ADVANCE' }));
+                if (s.phase === 'event') break; // sin chooser no se puede seguir
+            } else {
+                break; // salió otro kind: probamos otra semilla
+            }
+        }
+    }
+    return null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  1 · `resolve` NO VE EL CONTEXTO
+// ═══════════════════════════════════════════════════════════════════════════
+
+test('resolve recibe DOS argumentos y nunca un tercero', () => {
+    // Guardia estructural, barata y contundente: el día que alguien le agregue
+    // un `ctx` a `resolve` para salir del paso, esto se pone en rojo antes de
+    // que el bug exista. La aridad es lo único que se puede chequear sin correr
+    // la función.
+    for (const def of MOMENT_DEFS) {
+        assert.equal(def.resolve.length, 2, `${def.kind}: resolve tiene que ser (setup, input) y nada más`);
+    }
+});
+
+test('LA JUGADA SE RESUELVE IGUAL ANTES Y DESPUÉS DE UN F5', () => {
+    // El paso 3 del §8 de CLAUDE.md, hecho test. La recarga es exactamente esto:
+    // el estado se serializa, se rehidrata, y la misma mano tiene que dar el
+    // mismo resultado. Si `resolve` leyera el estado en vez del Setup, cualquier
+    // cosa que se recalcule al rehidratar movería la jugada.
+    const s = hastaElJackal();
+    if (!s) return;
+
+    const mano: CaptainAction = { type: 'RESOLVE_MOMENT', outcome: { kind: 'jackal', reactions: [180, 250, 400] } };
+    const directo = captainReducer(s, mano);
+
+    const recargado = JSON.parse(JSON.stringify(s)) as CaptainState;
+    const despuesDelF5 = captainReducer(recargado, mano);
+
+    assert.deepEqual(despuesDelF5, directo, 'la jugada dio distinto después de recargar');
+});
+
+test('el Setup viaja entero en el guardado: nada se recalcula al rehidratar', () => {
+    const s = hastaElJackal();
+    if (!s) return;
+
+    const setup = s.pendingMoment!.setup;
+    assert.ok(setup, 'un Momento del contrato tiene que llevar su Setup');
+
+    const viajado = JSON.parse(JSON.stringify(setup));
+    assert.deepEqual(viajado, setup, 'el Setup no es JSON puro');
+    assert.equal(typeof setup!.seed, 'number', 'el Setup tiene que llevar su semilla adentro');
+});
+
+test('el mismo Setup con la misma mano da el mismo resultado, siempre', () => {
+    for (const def of MOMENT_DEFS) {
+        const ctx: MomentSetupCtx = {
+            kind: def.kind,
+            season: 4,
+            minute: 63,
+            scoreDelta: -3,
+            pressure: 0.7,
+            family: 'tercera-linea',
+            proficiency: 1,
+            attrs: baseAttributes('tercera-linea'),
+            bodyDamage: 12,
+            seed: momentSeed(777, def.kind, 4, 0),
+        };
+        const a = def.setup(ctx);
+        const b = def.setup(ctx);
+        assert.deepEqual(b, a, `${def.kind}: dos setups con el mismo ctx dieron distinto`);
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  2 · LA CADENA
+// ═══════════════════════════════════════════════════════════════════════════
+
+const PENDIENTE: PendingMoment = { kind: 'tackle', minute: 63, scoreDelta: -3, pressure: 0.7 };
+const conChain = (chain?: PendingMoment['kind']): MomentResult => ({
+    deltas: {},
+    result: 'x',
+    text: 'x',
+    ...(chain ? { chain } : {}),
+});
+
+test('sin chain no hay cadena', () => {
+    assert.equal(nextChain(PENDIENTE, conChain()), null);
+});
+
+test('con chain, la cadena sale una vez', () => {
+    assert.equal(nextChain(PENDIENTE, conChain('bunker')), 'bunker');
+});
+
+test('UNA CADENA SE RESUELVE A LO SUMO UNA VEZ', () => {
+    // Lo que llegó encadenado ya no encadena. Sin esto, dos Momentos que se
+    // llamen entre sí dejan la carrera girando y el jugador no tiene salida:
+    // la fase nunca vuelve a `season` y el botón de jugar la temporada no
+    // aparece más.
+    const encadenado: PendingMoment = { ...PENDIENTE, kind: 'bunker', chained: true };
+    assert.equal(nextChain(encadenado, conChain('tackle')), null);
+    assert.equal(nextChain(encadenado, conChain('jackal')), null);
+});
+
+test('UN MOMENTO NO SE PUEDE ENCADENAR A SÍ MISMO', () => {
+    // Aunque una sola vuelta no sea un bucle infinito, encadenarse a sí mismo es
+    // siempre un error de escritura: lo que se quería era otra ronda del mismo
+    // minijuego, y eso se resuelve adentro del Momento.
+    assert.equal(nextChain(PENDIENTE, conChain('tackle')), null);
+
+    const jackal: PendingMoment = { ...PENDIENTE, kind: 'jackal' };
+    assert.equal(nextChain(jackal, conChain('jackal')), null);
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  3 · EL STREAM PRINCIPAL NO SE MUEVE
+// ═══════════════════════════════════════════════════════════════════════════
+
+test('ROLLMOMENT CONSUME EXACTAMENTE TRES TIRADAS, NI UNA MÁS', () => {
+    // Es la garantía que hace revisable el digest congelado. Si elegir el kind
+    // saliera del stream de la carrera, agregar un Momento consumiría una tirada
+    // más por temporada y correría TODAS las carreras: el digest se movería
+    // entero, en los tres casos, y el diff diría "se movió todo, confiá".
+    //
+    // Las tres son `chance` (¿hay jugada?) + `int` (minuto) + `int` (marcador).
+    // El kind y los márgenes salen de semillas derivadas.
+    let base = createInitialCaptain(TERCERA, 5);
+    base = repartir(base);
+    // Un estado listo para volver a tirar, sin importar en qué fase quedó.
+    //
+    // Y FUERA DE LA VENTANA DE LA ACADEMIA, que es lo que mide este test y no lo
+    // que mide aquella: la academia provincial le toca a TODO argentino de
+    // dieciséis, así que con la edad de arranque las sesenta semillas devolvían
+    // jugada y la rama del corte temprano quedaba sin recorrer. Lo cazó el propio
+    // guardia de cobertura de abajo —«todas produjeron jugada»— que es
+    // exactamente para lo que estaba puesto.
+    //
+    // Se envejece al jugador en vez de cambiarle la nacionalidad: la edad es la
+    // condición que este test necesita evitar, y la nacionalidad decide otras
+    // cosas (el club de origen, el mercado) que no queremos mover de paso.
+    const estado: CaptainState = {
+        ...base,
+        phase: 'offseason',
+        pendingMoment: null,
+        player: { ...base.player, age: 24 },
+    };
+
+    let conJugada = 0;
+    let sinJugada = 0;
+
+    for (let seed = 1; seed <= 60; seed += 1) {
+        const rng = createRng(seed);
+        const salio = rollMoment(estado, rng);
+
+        const espejo = createRng(seed);
+        // `chance` y `int` consumen una tirada cada uno, así que para comparar
+        // ESTADOS alcanza con contar tiradas: no hace falta conocer la
+        // probabilidad ni los rangos, que son calibración y pueden cambiar.
+        espejo.next();
+        if (salio) {
+            espejo.next();
+            espejo.next();
+            conJugada += 1;
+        } else {
+            sinJugada += 1;
+        }
+
+        assert.equal(
+            rng.state,
+            espejo.state,
+            `semilla ${seed}: rollMoment consumió del stream principal algo que no era chance+int+int`,
+        );
+    }
+
+    // Y que el barrido haya visto los dos caminos, si no el test no probó nada.
+    assert.ok(conJugada > 0, 'ninguna semilla produjo jugada: el test no probó el camino largo');
+    assert.ok(sinJugada > 0, 'todas produjeron jugada: el test no probó el corte temprano');
+});
+
+test('elegir el kind no depende del rng de la carrera, solo de la semilla', () => {
+    const a = pickMomentKind(1234, 7, 'tercera-linea');
+    const b = pickMomentKind(1234, 7, 'tercera-linea');
+    assert.equal(b, a, 'la elección tiene que ser función de (semilla, temporada, familia)');
+});
+
+test('EL CRUCE: casi siempre te toca lo tuyo, y cada tanto lo de otro', () => {
+    // El rugby real está lleno de cruces —el 10 sale y patea el fullback, el
+    // centro llega primero al ruck— pero son raros. Lo que este test cuida es la
+    // FORMA: que el cruce exista y que sea excepción, no que valga exactamente
+    // 0,08. La banda es ancha a propósito; si algún día se calibra, este test no
+    // se pone en rojo por eso.
+    let propios = 0;
+    let cruces = 0;
+
+    // Por DORSAL y no por familia: desde que hay cuatro minijuegos por número, el
+    // eje del sorteo es el dorsal. Recorrido por familia, el 1 contaría como
+    // propias las ocho jugadas de la primera línea —las suyas y las del 3— y el
+    // cruce se leería a la mitad de lo que es.
+    for (const shirt of ALL_SHIRTS) {
+        for (let season = 1; season <= 200; season += 1) {
+            const kind = pickMomentKind(909, season, shirt);
+            if (proficiencyFor(kind, shirt) < 1) cruces += 1;
+            else propios += 1;
+        }
+    }
+
+    const total = propios + cruces;
+    const tasa = cruces / total;
+    assert.ok(tasa > 0.02, `el cruce no aparece nunca (${(tasa * 100).toFixed(1)}%): proficiency queda dormido`);
+    assert.ok(tasa < 0.2, `el cruce dejó de ser excepción (${(tasa * 100).toFixed(1)}%)`);
+});
+
+test('el que juega una jugada prestada la juega con menos oficio', () => {
+    // Es la otra mitad del cruce: sin esto, recibir un Momento ajeno sería
+    // gratis y el puesto dejaría de significar algo.
+    //
+    // Y desde el catálogo por dorsal son TRES escalones, no dos: la tuya, la del
+    // compañero de familia, y la de otro puesto. El del medio es el que dice que
+    // los minijuegos son ESPECIALIDAD y no exclusividad — un pilar izquierdo
+    // jugando la columna del derecho la juega casi igual de bien, y un centro
+    // que se encuentra la pelota en el breakdown no.
+    assert.equal(proficiencyFor('jackal', 7), 1, 'el 7 no juega su propio jackal con oficio pleno');
+    assert.equal(proficiencyFor('palos', 10), 1, 'el 10 no patea a los palos con oficio pleno');
+
+    // Misma familia, otro dorsal: el 6 y el 8 son tercera línea como el 7.
+    const mismaFamilia = proficiencyFor('jackal', 6);
+    assert.ok(mismaFamilia < 1, 'el 6 juega el jackal del 7 como si fuera suyo');
+
+    // Otra familia: un pilar no es tercera línea.
+    const otraFamilia = proficiencyFor('jackal', 1);
+    assert.ok(otraFamilia < mismaFamilia, 'jugar la de otra familia no cuesta más que la del compañero de línea');
+
+    // Los cinco universales le tocan a los quince con el mismo oficio: no hay
+    // dorsal del que estén prestados.
+    for (const shirt of ALL_SHIRTS) {
+        assert.equal(proficiencyFor('tackle', shirt), 1, `el ${shirt} tacklea con oficio prestado`);
+        assert.equal(proficiencyFor('uni-pase', shirt), 1, `el ${shirt} pasa con oficio prestado`);
+    }
+});
+
+test('las semillas del minijuego no se repiten entre kind, temporada ni jugada', () => {
+    const vistas = new Set<number>();
+    for (const kind of ['tackle', 'jackal'] as const) {
+        for (let season = 1; season <= 20; season += 1) {
+            for (let idx = 0; idx < 3; idx += 1) {
+                const seed = momentSeed(4242, kind, season, idx);
+                assert.ok(!vistas.has(seed), `semilla repetida en ${kind}:${season}:${idx}`);
+                vistas.add(seed);
+            }
+        }
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  4 · EL REGISTRY
+// ═══════════════════════════════════════════════════════════════════════════
+
+test('LA GUARDA NO MIENTE: todo kind que no es pre-contrato tiene su def', () => {
+    // `isContractKind` promete `kind is ContractKind` y lo verifica mirando el
+    // registry EN RUNTIME. La promesa solo es honesta mientras todo kind que no
+    // esté en PRE_CONTRACT_KINDS tenga def: si alguien agrega uno al tipo y se
+    // olvida de las dos cosas, la guarda devuelve false y el `else` recibe un
+    // valor que su tipo dice que no puede llegar.
+    //
+    // Este test es lo que sostiene ese estrechamiento. Sin él, el `never` de los
+    // switches es una promesa que nadie chequea.
+    for (const kind of ALL_MOMENT_KINDS) {
+        const esPreContrato = PRE_CONTRACT_KINDS.includes(kind as never);
+        assert.equal(
+            isContractKind(kind),
+            !esPreContrato,
+            esPreContrato
+                ? `${kind} es pre-contrato pero tiene def: sacalo de PRE_CONTRACT_KINDS`
+                : `${kind} no tiene MomentDef ni está en PRE_CONTRACT_KINDS: nadie sabe cómo se resuelve`,
+        );
+    }
+});
+
+test('la lista de kinds está completa: ninguno se agregó sin sumarlo', () => {
+    // `ALL_MOMENT_KINDS` se recorre a mano en varios lados y `Object.keys` está
+    // prohibido para ELEGIR (§1). Contar no es elegir, así que acá sí se usa: el
+    // `Record<MomentKind, string>` de etiquetas ya no compila si aparece un kind
+    // nuevo, y esta cuenta detecta el caso contrario —que se haya agregado a la
+    // etiqueta y no a la lista—.
+    assert.equal(
+        ALL_MOMENT_KINDS.length,
+        Object.keys(MOMENT_LABEL).length,
+        'ALL_MOMENT_KINDS quedó corta contra MOMENT_LABEL: hay un kind que no se sumó',
+    );
+    assert.equal(new Set(ALL_MOMENT_KINDS).size, ALL_MOMENT_KINDS.length, 'hay un kind repetido');
+});
+
+test('cada def declara el kind con el que está indexada y su setup lo repite', () => {
+    // Es lo que hace HONESTO el borrado de genéricos del registry: sin esto, la
+    // conversión de `MomentDef<S, I>` a `AnyMomentDef` sería una promesa que
+    // nadie verifica.
+    for (const def of MOMENT_DEFS) {
+        const ctx: MomentSetupCtx = {
+            kind: def.kind,
+            season: 1,
+            minute: 55,
+            scoreDelta: 0,
+            pressure: 0.5,
+            family: 'tercera-linea',
+            proficiency: 1,
+            attrs: baseAttributes('tercera-linea'),
+            bodyDamage: 0,
+            seed: momentSeed(1, def.kind, 1, 0),
+        };
+        assert.equal(def.setup(ctx).kind, def.kind, `${def.kind}: el setup devuelve otro kind`);
+        assert.ok(def.weight > 0, `${def.kind}: un peso de cero lo saca del sorteo sin decirlo`);
+        assert.ok(def.labelEs.length > 0, `${def.kind}: sin título no hay nada que dibujar`);
+        if (def.families !== null) {
+            assert.ok(def.families.length > 0, `${def.kind}: lista de familias vacía — usá null si es transversal`);
+        }
+    }
+});
+
+test('LA REGLA DEL statBoost: ningún Momento cobra dos veces su propia gloria', () => {
+    // La regla está escrita arriba del registry: `statBoost` es para Momentos
+    // cuyo premio NO ES YA la métrica-gloria del puesto. Los cuatro que hay hoy
+    // pagan exactamente en la gloria de su familia —penales de scrum, line-outs,
+    // turnovers, puntos— así que ninguno puede usarlo: si lo usara, el jugador
+    // vería la jugada en la crónica Y otra vez inflada en la planilla de fin de
+    // año.
+    //
+    // Si algún día entra un Momento cuyo premio NO es la gloria de su puesto,
+    // se agrega acá a la lista de excepciones CON el motivo escrito. Que haya que
+    // tocar este test es la idea: obliga a decir por qué.
+    const PUEDEN_USARLO: string[] = [];
+
+    for (const def of MOMENT_DEFS) {
+        if (PUEDEN_USARLO.includes(def.kind)) continue;
+
+        const setup = def.setup({
+            kind: def.kind,
+            season: 3,
+            minute: 61,
+            scoreDelta: -3,
+            pressure: 0.6,
+            family: (def.families ?? ALL_FAMILIES)[0],
+            proficiency: 1,
+            attrs: baseAttributes((def.families ?? ALL_FAMILIES)[0]),
+            bodyDamage: 15,
+            seed: momentSeed(5150, def.kind, 3, 0),
+        });
+
+        // Un abanico de manos que cubre bien y mal en los cinco minijuegos. Las
+        // que no correspondan al kind las ignora `resolve` por su propia forma.
+        const manos: MomentOutcome[] = [
+            { kind: 'jackal', reactions: [10, 10, 10] },
+            { kind: 'jackal', reactions: [-90, null, 9_000] },
+            { kind: 'ancla', pushes: 0 },
+            { kind: 'ancla', pushes: 3 },
+            { kind: 'codigo', call: [0, 1, 2, 3] },
+            { kind: 'codigo', call: [] },
+            { kind: 'palos', aim: 0 },
+            { kind: 'palos', aim: 1 },
+        ].filter((m) => m.kind === def.kind);
+
+        for (const mano of manos) {
+            const { deltas } = def.resolve(setup, mano);
+            assert.equal(
+                deltas.statBoost,
+                undefined,
+                `${def.kind} usa statBoost y su premio ya es la gloria de su puesto: estaría cobrando dos veces`,
+            );
+        }
+    }
+});
+
+test('una mano que no es de esta jugada no rompe nada', () => {
+    // Mismo trato que una opción que no existe: la acción no vale y el estado no
+    // se mueve. El chequeo vive en el armazón porque el registry borra los
+    // genéricos, y ahí es donde se pierde la garantía de tipos.
+    const s = hastaElJackal();
+    if (!s) return;
+    const conManoDeOtro = captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: 'legal', at: 0.5 } });
+    assert.equal(conManoDeOtro, s, 'una mano de otro Momento movió el estado');
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  5 · LOS CARRILES
+// ═══════════════════════════════════════════════════════════════════════════
+
+test('cada carril de MomentDeltas cae donde dice', () => {
+    const base = createInitialCaptain(TERCERA, 11);
+    const s: CaptainState = structuredClone({ ...base, fame: 20 });
+
+    applyMomentDeltas(s, {
+        fame: 3,
+        belonging: 2,
+        statBoost: 1,
+        sanction: 2,
+        playingTime: -1,
+        bodyDamage: 5,
+        headDamage: 1,
+    });
+
+    assert.equal(s.fame, 23);
+    assert.ok(s.belonging.byClub[s.player.clubId!] > 0, 'la Pertenencia no se movió');
+    assert.equal(s.pendingStatBoost, 1);
+    assert.equal(s.pendingSanction, 2);
+    assert.equal(s.pendingPlayingTime, -1);
+    assert.equal(s.damage.cuerpo, 5);
+    assert.ok(s.damage.cabeza > 0, 'el HIA no se contó');
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  6 · EL NIVEL DE JUEGO
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Lo que estos tests cuidan no es el balance de ningún Momento: es que la
+// palabra "bien" signifique lo mismo en los cinco minijuegos. Sin eso, el digest
+// congelado vuelve a ser lo que fue hasta la 0.5.0 —una tabla donde cada Momento
+// se jugaba con una receta escrita a ojo— y el apertura vuelve a errar ocho de
+// nueve patadas sin que nada se ponga en rojo.
+
+/** Un contexto de prueba con la familia dueña del Momento. */
+function ctxDe(def: typeof MOMENT_DEFS[number], seed: number): MomentSetupCtx {
+    const family = (def.families ?? ALL_FAMILIES)[0];
+    return {
+        kind: def.kind,
+        season: 1 + (seed % 12),
+        minute: 48 + (seed % 30),
+        scoreDelta: (seed % 13) - 6,
+        pressure: (seed % 10) / 10,
+        family,
+        proficiency: 1,
+        attrs: baseAttributes(family),
+        bodyDamage: seed % 30,
+        seed: momentSeed(seed, def.kind, 1, 0),
+    };
+}
+
+const VARIACIONES = [0.05, 0.3, 0.55, 0.8, 0.95];
+
+test('playAt recibe TRES argumentos y devuelve una mano de su propio kind', () => {
+    for (const def of MOMENT_DEFS) {
+        assert.equal(def.playAt.length, 3, `${def.kind}: playAt tiene que ser (setup, level, variation)`);
+
+        for (let seed = 1; seed <= 12; seed += 1) {
+            const setup = def.setup(ctxDe(def, seed));
+            for (const level of PLAY_LEVELS) {
+                for (const v of VARIACIONES) {
+                    const mano = def.playAt(setup, level, v);
+                    assert.equal(mano.kind, def.kind, `${def.kind}: playAt devolvió una mano de otro Momento`);
+                }
+            }
+        }
+    }
+});
+
+test('playAt es pura: mismo setup, nivel y variación dan la misma mano', () => {
+    // Si no lo fuera, el digest congelado dejaría de ser reproducible y el
+    // fallo aparecería como "el motor cambió" tres commits más tarde.
+    for (const def of MOMENT_DEFS) {
+        const setup = def.setup(ctxDe(def, 7));
+        for (const level of PLAY_LEVELS) {
+            const a = def.playAt(setup, level, 0.42);
+            const b = def.playAt(setup, level, 0.42);
+            assert.deepEqual(b, a, `${def.kind}: dos manos del mismo nivel dieron distinto`);
+        }
+    }
+});
+
+test('EL NIVEL ORDENA EL RESULTADO: bien paga más que regular, y regular más que mal', () => {
+    // El test que le faltaba al proyecto. Se mide en Cartel porque es el único
+    // carril que los cinco Momentos mueven en las dos direcciones, y se promedia
+    // sobre un barrido de Setups: un Momento puede tener una patada imposible o
+    // un scrum que aguanta todo, y ninguna de las dos cosas puede decidir el
+    // veredicto.
+    for (const def of MOMENT_DEFS) {
+        const promedio: Record<string, number> = {};
+
+        for (const level of PLAY_LEVELS) {
+            let suma = 0;
+            let n = 0;
+            for (let seed = 1; seed <= 40; seed += 1) {
+                const setup = def.setup(ctxDe(def, seed));
+                for (const v of VARIACIONES) {
+                    suma += def.resolve(setup, def.playAt(setup, level, v)).deltas.fame ?? 0;
+                    n += 1;
+                }
+            }
+            promedio[level] = suma / n;
+        }
+
+        const detalle = PLAY_LEVELS.map((l) => `${l}=${promedio[l].toFixed(2)}`).join(' ');
+
+        assert.ok(
+            promedio.bien > promedio.regular,
+            `${def.kind}: jugarlo bien no paga más que jugarlo regular (${detalle})`,
+        );
+        assert.ok(
+            promedio.regular > promedio.mal,
+            `${def.kind}: jugarlo regular no paga más que jugarlo mal (${detalle})`,
+        );
+    }
+});
+
+test('UN MOMENTO PROPIO ES BUENO EN PROMEDIO: es tu jugada de héroe', () => {
+    // La regla de diseño, hecha test: un Momento del puesto se juega con los
+    // bonos de atributo de ese puesto, así que jugarlo bien TIENE que dejar
+    // Cartel. Si un Momento nuevo entra en negativo con nivel `bien`, o la
+    // calibración está mal o `playAt` no está declarando lo que dice declarar —y
+    // las dos cosas son la conversación que hay que tener antes de congelar.
+    for (const def of MOMENT_DEFS) {
+        let suma = 0;
+        let n = 0;
+        for (let seed = 1; seed <= 40; seed += 1) {
+            const setup = def.setup(ctxDe(def, seed));
+            for (const v of VARIACIONES) {
+                suma += def.resolve(setup, def.playAt(setup, 'bien', v)).deltas.fame ?? 0;
+                n += 1;
+            }
+        }
+        assert.ok(suma / n > 0, `${def.kind}: jugado BIEN deja ${(suma / n).toFixed(2)} de Cartel en promedio`);
+    }
+});
+
+test('el tackle, que es pre-contrato, cumple el mismo trato', () => {
+    // No tiene def, así que su traducción vive al lado de sus márgenes. Que se
+    // pruebe igual es lo que hace que la migración al contrato —cuando toque— no
+    // pueda cambiar el significado del nivel sin avisar.
+    const base = createInitialCaptain(TERCERA, 3);
+    const zones = tackleZones(base.player, 10, 0.6);
+
+    assert.equal(tacklePlayAt(zones, 'bien', 0.2).zone, 'legal', 'jugado bien, el tackle no frena en seco');
+    assert.equal(tacklePlayAt(zones, 'regular', 0.2).zone, 'piernas', 'jugado regular, el tackle no baja a las piernas');
+    assert.equal(tacklePlayAt(zones, 'mal', 0.2).zone, 'alto', 'jugado mal, el tackle no se va arriba');
+    assert.equal(tacklePlayAt(zones, 'mal', 0.8).zone, 'tarde', 'jugado mal, el tackle no llega tarde');
+
+    // Y la posición tiene que ser coherente con la zona: el bunker calcula la
+    // profundidad con el `at`, así que un par desalineado le miente al veredicto.
+    for (const level of PLAY_LEVELS) {
+        for (const v of VARIACIONES) {
+            const { at, zone } = tacklePlayAt(zones, level, v);
+            assert.equal(zoneAt(at, zones), zone, `${level}: la zona no se deriva de la posición`);
+        }
+    }
+});
+
+test('la cabeza no baja ni aunque un Momento lo pida', () => {
+    // La regla vive en `damage.ts` y este test la mira DESDE el carril de los
+    // Momentos: un delta negativo tiene que ser inofensivo por acá también.
+    const s = structuredClone(createInitialCaptain(TERCERA, 11));
+    applyMomentDeltas(s, { headDamage: 2 });
+    const despues = s.damage.cabeza;
+    applyMomentDeltas(s, { headDamage: -5 });
+    assert.equal(s.damage.cabeza, despues);
+});

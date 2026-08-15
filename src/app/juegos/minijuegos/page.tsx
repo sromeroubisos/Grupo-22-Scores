@@ -3,6 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import coverIdle from '@/img/7.png';
 import coverActive from '@/img/8.png';
+import capitanIdle from '@/img/11.png';
+import capitanActive from '@/img/12.png';
 import soonIdle from '@/img/9.png';
 import soonActive from '@/img/10.png';
 import styles from '../juegos.module.css';
@@ -65,6 +67,25 @@ export default function MinijuegosPage() {
                         />
                         <Image
                             src={coverActive}
+                            alt=""
+                            className={`${styles.coverImg} ${styles.coverActive}`}
+                            sizes="(max-width: 640px) 100vw, 520px"
+                        />
+                    </span>
+                    <span className={styles.playBtn}>Jugar <ChevronRight /></span>
+                </Link>
+
+                <Link href="/juegos/minijuegos/el-capitan" className={`${styles.card} ${styles.cardPoster}`}>
+                    <h2 className={styles.srOnly}>El Capitán</h2>
+                    <span className={styles.cover}>
+                        <Image
+                            src={capitanIdle}
+                            alt=""
+                            className={`${styles.coverImg} ${styles.coverIdle}`}
+                            sizes="(max-width: 640px) 100vw, 520px"
+                        />
+                        <Image
+                            src={capitanActive}
                             alt=""
                             className={`${styles.coverImg} ${styles.coverActive}`}
                             sizes="(max-width: 640px) 100vw, 520px"
