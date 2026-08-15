@@ -29,6 +29,8 @@ import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
 import { canUseRestrictedContentActions } from '@/lib/auth/roles';
+import { SPORTS } from '@/lib/data/sports';
+import type { SportId } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
 import { getTournamentFlashScoreConfig, getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
 import {
@@ -66,6 +68,11 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 // a la base por el devuelve 404 y ensucia la consola. La prueba de que es
 // externo es el parametro `url`, que apunta a la ruta del proveedor; el id con
 // forma de UUID, en cambio, siempre puede estar en base.
+/** Mundial de Hockey de la FIH: torneo externo, no vive en la base. */
+function isFihWorldCupTournamentId(id: string): boolean {
+    return id.toLowerCase().startsWith('fih-wc-');
+}
+
 function isExternalCatalogRoute(id: string, search: string): boolean {
     if (UUID_RE.test(id)) return false;
 
@@ -843,12 +850,15 @@ function handleTeamLogoLoad(
 
 // Bracket placeholders coming from FlashScore knockout fixtures (e.g.
 // "Group A Winner", "Group B 2nd Place", "Quarterfinal 1 Winner",
-// "Round of 16 1 Winner", "Semifinal Winner"). These are slot labels, not
-// actual teams, so they must not appear in the "Equipos" list.
+// "Round of 16 1 Winner", "Semifinal Winner") y los del Mundial de Hockey de la
+// FIH, que vienen en castellano ("Ganador 47", "Perdedor 48", "1° Pool F").
+// Son etiquetas de llave, no equipos, así que no van en la lista de "Equipos":
+// sin esto un Mundial de 16 selecciones dice tener 52.
 function isBracketPlaceholderTeamName(name: string | null | undefined): boolean {
     const n = String(name ?? '').trim();
     if (!n) return false;
-    return /\b(winner|2nd place|3rd place|runner[- ]?up|loser|best (?:third|\w+ placed)|tbd)\b/i.test(n);
+    if (/^\d+\s*°?\s*(pool|grupo|zona)\b/i.test(n)) return true;
+    return /\b(winner|2nd place|3rd place|runner[- ]?up|loser|best (?:third|\w+ placed)|tbd|ganador|perdedor)\b/i.test(n);
 }
 
 function buildGroupedStandings(dbStandings: any[], dbGroups: any[], participants: any[]) {
@@ -1883,13 +1893,13 @@ export default function TournamentDetailPage({
                 }
 
                 if (!localTournament) {
-                    if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id) || isEspnAmericanFootballTournamentId(id) || isEspnSoccerTournamentId(id)) {
+                    if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id) || isEspnAmericanFootballTournamentId(id) || isEspnSoccerTournamentId(id) || isFihWorldCupTournamentId(id)) {
                         localTournament = {
                             id,
                             name: nameParam || 'Cargando...',
                             url: '',
                             type: 'league' as any,
-                            sportId: (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : isEspnSoccerTournamentId(id) ? 'football' : 'rugby')) as any,
+                            sportId: (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : isEspnSoccerTournamentId(id) ? 'football' : isFihWorldCupTournamentId(id) ? 'field-hockey' : 'rugby')) as any,
                             countryId: 'international',
                             categories: [],
                             priority: 0,
@@ -2040,6 +2050,7 @@ export default function TournamentDetailPage({
                     !isRugbyApiSportsTournamentId(id) &&
                     !isEspnAmericanFootballTournamentId(id) &&
                     !isEspnSoccerTournamentId(id) &&
+                    !isFihWorldCupTournamentId(id) &&
                     !isExternalCatalogRoute(id, routeSearch)
                 ) {
                     try {
@@ -2206,7 +2217,7 @@ export default function TournamentDetailPage({
 
     useEffect(() => {
         // Un torneo externo no tiene temporadas en base: el selector no aplica.
-        if (id.toLowerCase().startsWith('fs-') || isExternalCatalogRoute(id, routeSearch)) {
+        if (id.toLowerCase().startsWith('fs-') || isFihWorldCupTournamentId(id) || isExternalCatalogRoute(id, routeSearch)) {
             setSeasonOptions([]);
             return;
         }
@@ -2609,6 +2620,9 @@ export default function TournamentDetailPage({
     const registerTeam = (team: { id?: string | number | null; name?: string | null; shortName?: string | null; logo?: string | null; teamUrl?: string | null; league?: string | null }) => {
         const name = String(team.name ?? '').trim();
         if (!name) return;
+        // Un slot de llave sin definir no es un equipo: si entra acá, el
+        // contador de la cabecera cuenta rivales que todavía no existen.
+        if (isBracketPlaceholderTeamName(name)) return;
 
         const shortName = getExplicitExportShortName(team.shortName) || null;
         const normalizedId = team.id != null ? String(team.id) : null;
@@ -2705,7 +2719,13 @@ export default function TournamentDetailPage({
     const bracketLogo = isFifaWorldCup ? '/FIFA%20WC.PNG' : tournamentLogo;
     const tournamentName = details?.name || details?.tournament?.name || tournamentData?.name || 'Torneo';
     const shouldShowTournamentLogo = Boolean(tournamentLogo) && !tournamentLogoFailed;
-    const sportLabel = tournamentData?.sportId ? tournamentData.sportId.charAt(0).toUpperCase() + tournamentData.sportId.slice(1) : '';
+    // El rótulo sale del catálogo de deportes, que es donde se decide cómo se
+    // llama cada uno en castellano; capitalizar el id a mano escribía
+    // "Field-hockey" donde el resto de la plataforma dice "Hockey".
+    const sportLabel = tournamentData?.sportId
+        ? (SPORTS[tournamentData.sportId as SportId]?.nameEs
+            || tournamentData.sportId.charAt(0).toUpperCase() + tournamentData.sportId.slice(1))
+        : '';
     const standingsEntityLabel = isMotorsportTournament ? 'Piloto' : 'Equipo';
     const summaryResultsTitle = isMotorsportTournament ? 'Ultimas carreras' : 'Últimos Resultados';
     const summaryFixturesTitle = isMotorsportTournament ? 'Proximos eventos' : 'Próximos Partidos';

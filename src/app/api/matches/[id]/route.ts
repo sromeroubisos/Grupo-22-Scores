@@ -39,6 +39,10 @@ import {
   parseEspnFootballMatchId,
 } from '@/lib/services/espnFootball';
 import {
+  getFihWorldCupMatchBundle,
+  parseFihMatchId,
+} from '@/lib/services/fihHockey';
+import {
   applyExternalTournamentOverride,
   getExternalTournamentOverride,
   type ExternalTournamentOverrideRecord,
@@ -316,6 +320,18 @@ export async function GET(
         matchId,
         await getEspnAmericanFootballMatchBundle(espnMatchId),
       );
+      if (!bundle) {
+        return jsonNoStore(
+          { error: 'Match not found' },
+          { status: 404 }
+        );
+      }
+
+      return jsonNoStore(bundle);
+    }
+
+    if (parseFihMatchId(matchId)) {
+      const bundle = await getFihWorldCupMatchBundle(matchId);
       if (!bundle) {
         return jsonNoStore(
           { error: 'Match not found' },

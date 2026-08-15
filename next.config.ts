@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'a.espncdn.com',
       },
+      {
+        // Banderas y logo del Mundial de Hockey, servidos por la FIH (Altius RT).
+        protocol: 'https',
+        hostname: 'hockey-cdn.altius.live',
+      },
     ],
   },
   typescript: {
