@@ -179,6 +179,13 @@ export function buildTeamLogoProxyUrl(params: {
     name?: string | null;
     fallback?: string | null;
     version?: string | number | null;
+    /**
+     * Qué tipo de entidad es `key`. Por omisión el proxy busca un club; con
+     * `'tournament'` busca en `tournaments` / `external_tournaments`, que es lo que
+     * necesita un logo de competencia. Opcional a propósito: los 37 llamadores que
+     * ya existen piden clubes y no cambian de comportamiento.
+     */
+    entity?: 'tournament' | null;
 }): string | null {
     const key = normalizeText(params.key);
     if (!key) return null;
@@ -186,6 +193,11 @@ export function buildTeamLogoProxyUrl(params: {
     const searchParams = new URLSearchParams({ key });
     const name = normalizeText(params.name);
     const fallback = normalizeText(params.fallback);
+    const entity = normalizeText(params.entity);
+
+    if (entity) {
+        searchParams.set('entity', entity);
+    }
 
     if (name) {
         searchParams.set('name', name);

@@ -15,6 +15,7 @@ import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { useAuth } from '@/context/AuthContext';
+import HistoryTab from './HistoryTab';
 
 const SPORT_LABEL: Record<string, string> = Object.fromEntries(
     Object.entries(SPORTS_BY_ID).map(([id, s]) => [id, s.name])
@@ -24,6 +25,7 @@ const TABS = [
     { id: 'summary', label: 'Resumen' },
     { id: 'results', label: 'Resultados' },
     { id: 'fixtures', label: 'Fixture' },
+    { id: 'history', label: 'Historial' },
     { id: 'squad', label: 'Plantilla' },
     { id: 'transfers', label: 'Transferencias' },
 ];
@@ -351,6 +353,8 @@ function TeamDetailInner({ id }: { id: string }) {
         if (details?.is_internal || resolvedClubId) {
             supportedTabs.add('squad');
         }
+
+        supportedTabs.add('history');
 
         return TABS.filter((tab) => supportedTabs.has(tab.id));
     }, [details?.is_internal, details?.supported_tabs, resolvedClubId]);
@@ -686,7 +690,7 @@ function TeamDetailInner({ id }: { id: string }) {
             </header>
 
             <main className="container" style={{ paddingTop: '24px', paddingBottom: '40px' }}>
-                <div className={styles.contentLayout}>
+                <div className={`${styles.contentLayout} ${activeTab === 'history' ? styles.historyContentLayout : ''}`}>
                     <div key={activeTab} className={styles.mainColumn}>
 
                         {/* Summary Tab */}
@@ -847,6 +851,14 @@ function TeamDetailInner({ id }: { id: string }) {
                                     }
                                 </div>
                             </div>
+                        )}
+
+                        {activeTab === 'history' && (
+                            <HistoryTab
+                                clubId={resolvedClubId || rawId}
+                                teamName={teamName}
+                                selectedSport={selectedSport}
+                            />
                         )}
 
                         {/* Squad Tab */}
