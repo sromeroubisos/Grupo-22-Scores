@@ -1690,28 +1690,52 @@ body:not([data-theme="light"]) .match-center-container select option:checked {
     }
 }
 
-/* ===== DESKTOP DEFAULT ZOOM =====
-   Reduce el contenido al 70% solo en desktop (≥1024px). Mobile y tablet
-   conservan su escala propia, ya ajustada en hojas dedicadas. */
-@media (min-width: 1024px) {
-    html {
-        zoom: 0.7;
-    }
-}
+/* ===== DESKTOP DEFAULT ZOOM — ELIMINADO =====
+   Acá vivía `@media (min-width: 1024px) { html { zoom: 0.7 } }`.
 
-/* ===== SHELL DE ALTO REAL (juego a pantalla completa) =====
-   `body { min-height: 100vh }` + `html { zoom: 0.7 }` no se llevan bien: dentro
-   de un root con zoom, `vh` resuelve contra el viewport SIN zoom, así que body
-   queda ~30% más corto que html. En una página que scrollea no se nota porque
-   el contenido define el alto; en una pantalla de alto fijo deja cientos de
-   píxeles muertos abajo. Medido: html 1545 px, body 1081,6 px.
+   La intención era buena: ganar densidad en desktop. El costo, medido, no lo
+   justificaba. Con la regla puesta, a 1440×900:
+
+     /clubs        100% del texto (1603 de 1606 nodos) por debajo de 12 px reales
+     /tournaments   99% (620 de 624)          802 objetivos táctiles bajo 24 px
+     /              97%                        75
+     /tablas        92%                        43
+
+   Con `zoom: 0.7` un cuerpo declarado en 14 px se dibuja en 9,8, y la fuente
+   más chica del sitio caía en 7 px. Eso no es densidad: excluye a cualquiera
+   con visión reducida. Y arrastraba dos cosas más — encogía los objetivos
+   táctiles y adelgazaba el outline de foco de 2 px a 1,43.
+
+   El dato que lo cerró: a 720 px la regla no aplicaba, así que la misma página
+   se leía MEJOR en una tablet que en un monitor de 27 pulgadas.
+
+   Se midieron 12 páginas con la regla y sin ella antes de sacarla. En las 12,
+   `documentElement.scrollWidth` siguió dentro del viewport y la cantidad de
+   contenedores que derraman quedó IDÉNTICA: los layouts son fluidos y no
+   dependían del zoom para entrar. Sacarla no rompió ningún ancho.
+
+   La densidad que se buscaba se compra donde corresponde: padding de los
+   contenedores y altura de fila, no escala global del texto. */
+
+/* ===== SHELL DE ALTO REAL (juego a pantalla completa) — ver nota =====
+   El bloque de abajo nació para compensar un efecto colateral del zoom (dentro
+   de un root con zoom, `vh` resolvía contra el viewport sin zoom y dejaba el
+   body ~30% más corto). Sin el zoom, ese desfasaje ya no existe, pero la regla
+   es inofensiva y el juego depende de ella: se deja hasta poder probar la
+   pantalla completa a fondo.
+
+   Historia, para que no se vuelva a agregar sin pensarlo: `body { min-height:
+   100vh }` y `html { zoom: 0.7 }` no se llevaban bien, porque dentro de un root
+   con zoom `vh` resolvía contra el viewport SIN zoom y el body quedaba ~30% más
+   corto que el html (medido: html 1545 px, body 1081,6). En una página que
+   scrollea no se notaba; en una pantalla de alto fijo dejaba cientos de píxeles
+   muertos abajo.
 
    Se corrige SÓLO donde hace falta, colgado del `data-full-height` que pone
-   ConditionalLayout, para no tocar el alto del resto del sitio.
-
-   Vale en los dos tamaños: el juego es una PANTALLA, no una página. Lo que
-   cambia abajo de 900 px es cómo se reparte ese alto entre las tres zonas
-   —cabecera, carrera y decisión—, y eso lo resuelve carrera.module.css. */
+   ConditionalLayout, para no tocar el alto del resto del sitio. Vale en los dos
+   tamaños: el juego es una PANTALLA, no una página. Lo que cambia abajo de
+   900 px es cómo se reparte ese alto entre las tres zonas —cabecera, carrera y
+   decisión—, y eso lo resuelve carrera.module.css. */
 html:has(main[data-full-height]),
 html:has(main[data-full-height]) body {
     height: 100%;
