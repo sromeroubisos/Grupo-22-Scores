@@ -3012,7 +3012,9 @@
     .standingsToolbar { display: none; }
     /* Bracket toolbar (Predictor + Export) stays available to everyone, mobile included. */
     .standingsToolbar.bracketToolbar { display: flex; }
-    .standingsScopeBar { display: none; }
+    /* El scope bar NO se oculta: es el único selector de fases de la tabla y de
+       cuadros del playoff (principal/reválida). Scrollea horizontal; las
+       pastillas se compactan más abajo junto con .pillBtn/.pillsGroup. */
 
     /* ── Unified background — remove section-level variations ── */
     .heroSection { background: var(--fl-bg); }
