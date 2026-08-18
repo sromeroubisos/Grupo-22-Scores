@@ -2642,6 +2642,19 @@ export default function TournamentDetailPage({
         });
     }, [navigationTabs]);
 
+    // El salto de temporada (o de grado) conserva la solapa activa: sin esto,
+    // mirar la tabla de 2024 desde Clasificación te devolvía a Resumen en cada
+    // cambio de año. El destino valida el tab contra sus propias solapas y cae
+    // a la primera si no la tiene, así que mandar una de más nunca rompe.
+    const activeTabParaNavegar = activeTab && activeTab !== 'summary' ? activeTab : null;
+    const withActiveTab = React.useCallback((href: string) => {
+        if (!activeTabParaNavegar) return href;
+        const [path, query = ''] = href.split('?');
+        const params = new URLSearchParams(query);
+        params.set('tab', activeTabParaNavegar);
+        return `${path}?${params.toString()}`;
+    }, [activeTabParaNavegar]);
+
     useEffect(() => {
         const availableViews = new Set<string>(['overall']);
         if (standingsForm.length > 0) availableViews.add('form');
@@ -4206,7 +4219,7 @@ export default function TournamentDetailPage({
                                                             {availableSeasonOptions.map((season) => (
                                                                 <Link
                                                                     key={season.id}
-                                                                    href={season.href}
+                                                                    href={withActiveTab(season.href)}
                                                                     className={`${styles.seasonSwitcherItem} ${season.isCurrent ? styles.seasonSwitcherItemActive : ''}`}
                                                                     onClick={() => setSeasonMenuOpen(false)}
                                                                     role="option"
@@ -4242,6 +4255,7 @@ export default function TournamentDetailPage({
                                     <span className={styles.heroMetaNav}>
                                         <TournamentNavigation
                                             tournamentId={id}
+                                            tabActiva={activeTabParaNavegar}
                                             onTemporadasChange={setNavTieneTemporadas}
                                         />
                                     </span>
