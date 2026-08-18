@@ -1,5 +1,7 @@
 {
-  "regions": ["pdx1"],
+  "regions": [
+    "pdx1"
+  ],
   "crons": [
     {
       "path": "/api/cron/live-sync",
@@ -22,23 +24,23 @@
       "schedule": "*/2 * * * *"
     },
     {
-      "path": "/api/cron/urba-sync?scope=jornada",
+      "path": "/api/cron/urba-sync",
       "schedule": "*/20 18-23 * * 6,0"
     },
     {
-      "path": "/api/cron/urba-sync?scope=jornada",
+      "path": "/api/cron/urba-sync",
       "schedule": "*/20 0-5 * * 0,1"
     },
     {
-      "path": "/api/cron/urba-sync?scope=barrido",
+      "path": "/api/cron/urba-sync",
       "schedule": "0 9 * * *"
     },
     {
-      "path": "/api/cron/urba-sync?scope=barrido",
+      "path": "/api/cron/urba-sync",
       "schedule": "0 10 * * *"
     },
     {
-      "path": "/api/cron/urba-sync?scope=barrido",
+      "path": "/api/cron/urba-sync",
       "schedule": "0 11 * * *"
     }
   ]
