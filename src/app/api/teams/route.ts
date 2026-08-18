@@ -25,6 +25,7 @@ import {
 import { canonicalizeSportId, getClubSportValue } from '@/lib/clubDerivatives';
 import { fetchPeopleByClub, type PersonWithRole } from '@/lib/services/personService';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import { applyExternalTeamLogoOverride } from '@/lib/utils/teamLogoOverrides';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 
@@ -77,8 +78,6 @@ type InternalMatchSource = {
 };
 type ClubMatchRelation = {
     name: string | null;
-    logo_url: string | null;
-    updated_at?: string | null;
 };
 type TournamentMatchRelation = {
     name: string | null;
@@ -1045,9 +1044,12 @@ async function fetchInternalClubFamily(readClient: ReadClient, clubId: string): 
 
         if (familyClubIds.length <= 1) return [];
 
+        // Los escudos no se traen de la base: un logo_url puede ser un base64 de
+        // cientos de KB por filial (la respuesta llegaba a 5 MB). El proxy resuelve
+        // cualquier origen a partir del id del club.
         const { data: familyClubs, error: clubsError } = await db
             .from('clubs')
-            .select('id, name, short_name, logo_url, sport, sport_id, city, region, country')
+            .select('id, name, short_name, sport, sport_id, city, region, country')
             .in('id', familyClubIds);
 
         if (clubsError) {
@@ -1058,7 +1060,6 @@ async function fetchInternalClubFamily(readClient: ReadClient, clubId: string): 
             id: string;
             name: string | null;
             short_name: string | null;
-            logo_url: string | null;
             sport: string | null;
             sport_id: string | null;
             city: string | null;
@@ -1070,7 +1071,7 @@ async function fetchInternalClubFamily(readClient: ReadClient, clubId: string): 
                 id: club.id,
                 name: club.name || club.id,
                 short_name: club.short_name,
-                logo_url: club.logo_url,
+                logo_url: buildTeamLogoProxyUrl({ key: club.id, name: club.name }),
                 sport: club.sport,
                 sport_id: club.sport_id,
                 city: club.city,
@@ -1361,27 +1362,89 @@ export async function GET(request: Request) {
 
     try {
         const readClient = await getReadClient();
-        const { data: internalClub } = await readClient
+        // El logo_url NO entra en este select: para cientos de clubes es un base64
+        // de ~800 KB que viajaba desde la base en cada carga; el proxy lo sirve por
+        // id. Si el esquema no tiene alguna de estas columnas, se reintenta con *.
+        let internalClubQuery = await readClient
             .from('clubs')
-            .select('*')
+            .select('id, name, short_name, sport, sport_id, external_id, country, city, region, categories, updated_at')
             .eq('id', rawTeamId)
             .single();
+        if (internalClubQuery.error && (internalClubQuery.error.code === '42703' || internalClubQuery.error.code === 'PGRST204')) {
+            internalClubQuery = await readClient
+                .from('clubs')
+                .select('*')
+                .eq('id', rawTeamId)
+                .single() as unknown as typeof internalClubQuery;
+        }
+        const internalClub = internalClubQuery.data as InternalClubRow | null;
 
         if (internalClub) {
             const effectiveClub = await resolveInternalClubBySport(readClient, internalClub as InternalClubRow, preferredSport);
             resolvedClubId = effectiveClub.id;
-            const internalSquadState = await fetchInternalClubSquad(readClient, effectiveClub.id, {
-                includePlayers: !skipSquad,
-            });
+
+            // Query internal matches from Supabase.
+            // Los escudos NO viajan embebidos en cada fila: un logo_url puede ser un
+            // base64 de cientos de KB y multiplicado por 600 filas la consulta muere
+            // por statement timeout (57014) — mismo aprendizaje que
+            // /api/clubs/[id]/history. Se resuelven una vez por club más abajo.
+            const internalMatchesBaseQuery = () => readClient
+                .from('matches')
+                .select(`
+                    id, date_time, status, score,
+                    home_club_id, away_club_id, tournament_id,
+                    home_club:clubs!matches_home_club_id_fkey(name),
+                    away_club:clubs!matches_away_club_id_fkey(name),
+                    tournament:tournaments!matches_tournament_id_fkey(name, sport_id)
+                `);
+
+            // Plantel, familia y partidos no dependen entre sí: viajan juntos, porque
+            // contra una base cross-region cada ida y vuelta secuencial son segundos.
+            const [internalSquadState, familyClubs, homeMatchesResult, awayMatchesResult] = await Promise.all([
+                fetchInternalClubSquad(readClient, effectiveClub.id, { includePlayers: !skipSquad }),
+                onlySquad ? Promise.resolve<PublicRelatedClub[]>([]) : fetchInternalClubFamily(readClient, effectiveClub.id),
+                onlySquad ? Promise.resolve(null) : internalMatchesBaseQuery()
+                    .eq('home_club_id', effectiveClub.id)
+                    .order('date_time', { ascending: false })
+                    .limit(300),
+                onlySquad ? Promise.resolve(null) : internalMatchesBaseQuery()
+                    .eq('away_club_id', effectiveClub.id)
+                    .order('date_time', { ascending: false })
+                    .limit(300),
+            ]);
             internalSquad = internalSquadState.squad;
             hasInternalSquad = internalSquadState.hasSquad;
-            internalClubFamily = await fetchInternalClubFamily(readClient, effectiveClub.id);
+
+            // Fast path para el fetch perezoso del plantel (`only=squad`): la pestaña
+            // Plantilla no necesita ni la familia de clubes ni los 600 partidos. Si el
+            // club tampoco tiene vínculo externo, no hay plantel remoto que buscar.
+            if (onlySquad && (hasInternalSquad || !effectiveClub.external_id)) {
+                return Response.json({
+                    ok: true,
+                    resolvedClubId,
+                    details: null,
+                    results: [],
+                    fixtures: [],
+                    squad: internalSquad,
+                    transfers: [],
+                });
+            }
+
+            internalClubFamily = familyClubs;
+            // El escudo propio también sale por el proxy: el select liviano de arriba
+            // ya no trae logo_url (y si viene de resolveInternalClubBySport, puede ser
+            // un base64 enorme que no tiene por qué viajar al cliente).
+            const clubLogoUrl = buildTeamLogoProxyUrl({
+                key: effectiveClub.id,
+                name: effectiveClub.name,
+                version: (effectiveClub as { updated_at?: string | null }).updated_at ?? null,
+            });
             details = {
                 id: effectiveClub.id,
                 name: effectiveClub.name,
-                image_path: effectiveClub.logo_url,
-                logo: effectiveClub.logo_url,
-                logo_url: effectiveClub.logo_url,
+                image_path: clubLogoUrl,
+                logo: clubLogoUrl,
+                logo_url: clubLogoUrl,
                 country: effectiveClub.country,
                 city: effectiveClub.city,
                 region: effectiveClub.region,
@@ -1396,34 +1459,37 @@ export async function GET(request: Request) {
             internalExternalId = effectiveClub.external_id || null;
             internalClubName = effectiveClub.name || '';
 
-            // Query internal matches from Supabase
-            const internalMatchesBaseQuery = () => readClient
-                .from('matches')
-                .select(`
-                    id, date_time, status, score,
-                    home_club_id, away_club_id, tournament_id,
-                    home_club:clubs!matches_home_club_id_fkey(name, logo_url, updated_at),
-                    away_club:clubs!matches_away_club_id_fkey(name, logo_url, updated_at),
-                    tournament:tournaments(name, sport_id)
-                `);
-            const [homeMatchesResult, awayMatchesResult] = await Promise.all([
-                internalMatchesBaseQuery()
-                    .eq('home_club_id', effectiveClub.id)
-                    .order('date_time', { ascending: false })
-                    .limit(300),
-                internalMatchesBaseQuery()
-                    .eq('away_club_id', effectiveClub.id)
-                    .order('date_time', { ascending: false })
-                    .limit(300),
-            ]);
-
-            if (homeMatchesResult.error) throw homeMatchesResult.error;
-            if (awayMatchesResult.error) throw awayMatchesResult.error;
+            if (homeMatchesResult?.error) throw homeMatchesResult.error;
+            if (awayMatchesResult?.error) throw awayMatchesResult.error;
 
             const typedMatchRows = mergeInternalMatchRows(
-                homeMatchesResult.data as InternalMatchRow[] | null,
-                awayMatchesResult.data as InternalMatchRow[] | null,
+                (homeMatchesResult?.data ?? null) as InternalMatchRow[] | null,
+                (awayMatchesResult?.data ?? null) as InternalMatchRow[] | null,
             );
+            // Un escudo por club, una sola vez y por el proxy: traer los logo_url
+            // crudos de 30 rivales son varios MB de base64 desde la base.
+            const matchClubIds = Array.from(new Set(
+                typedMatchRows
+                    .flatMap((row) => [row.home_club_id, row.away_club_id])
+                    .filter((value): value is string => Boolean(value))
+            ));
+            const matchClubLogos = new Map<string, { logo: string; updatedAt: string }>();
+            if (matchClubIds.length > 0) {
+                try {
+                    const { data: matchClubs } = await readClient
+                        .from('clubs')
+                        .select('id, name, updated_at')
+                        .in('id', matchClubIds);
+                    for (const club of (matchClubs ?? []) as Array<{ id: string; name: string | null; updated_at: string | null }>) {
+                        matchClubLogos.set(club.id, {
+                            logo: buildTeamLogoProxyUrl({ key: club.id, name: club.name, version: club.updated_at }) ?? '',
+                            updatedAt: club.updated_at ?? '',
+                        });
+                    }
+                } catch {
+                    // Sin escudos la lista de partidos sigue sirviendo.
+                }
+            }
             if (typedMatchRows.length > 0) {
                 const FINISHED_STATUSES = new Set([
                     'finished', 'completed', 'scored', 'ft', 'aet', 'pen', 'awarded',
@@ -1437,14 +1503,16 @@ export async function GET(request: Request) {
                     const homeClub = Array.isArray(row.home_club) ? row.home_club[0] : row.home_club;
                     const awayClub = Array.isArray(row.away_club) ? row.away_club[0] : row.away_club;
                     const tournament = Array.isArray(row.tournament) ? row.tournament[0] : row.tournament;
+                    const homeLogo = row.home_club_id ? matchClubLogos.get(row.home_club_id) : null;
+                    const awayLogo = row.away_club_id ? matchClubLogos.get(row.away_club_id) : null;
                     const normalized = normalizeInternalMatch({
                         ...row,
                         home_name: homeClub?.name,
-                        home_logo: homeClub?.logo_url,
-                        home_logo_updated_at: homeClub?.updated_at,
+                        home_logo: homeLogo?.logo,
+                        home_logo_updated_at: homeLogo?.updatedAt,
                         away_name: awayClub?.name,
-                        away_logo: awayClub?.logo_url,
-                        away_logo_updated_at: awayClub?.updated_at,
+                        away_logo: awayLogo?.logo,
+                        away_logo_updated_at: awayLogo?.updatedAt,
                         tournament_name: tournament?.name,
                         sport_id: tournament?.sport_id,
                     });
@@ -1460,8 +1528,11 @@ export async function GET(request: Request) {
                 }
             }
         }
-    } catch {
-        // Silently continue if not found or DB error
+    } catch (error) {
+        // Que el club no exista localmente es esperado (equipo externo puro), pero un
+        // error real acá dejaba la página sin resultados ni fixtures y sin rastro:
+        // así se escondió durante semanas un statement timeout de Supabase.
+        console.error('Teams API internal club/matches error:', error);
     }
 
     // If the local club is mapped to an ESPN soccer team via external_id
