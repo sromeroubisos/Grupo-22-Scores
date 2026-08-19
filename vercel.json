@@ -40,6 +40,14 @@
     {
       "path": "/api/cron/urba-sync",
       "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/cron/fedhockeycba-sync",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/ahl-sync",
+      "schedule": "30 12 * * *"
     }
   ]
 }
