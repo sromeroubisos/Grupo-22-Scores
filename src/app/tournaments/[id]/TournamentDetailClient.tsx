@@ -2345,21 +2345,24 @@ export default function TournamentDetailPage({
                     pageQuery.get('season') ||
                     ((initialData?.season as any)?.id ? String((initialData?.season as any).id) : null);
                 if (selectedSeasonParam) query.set('seasonId', selectedSeasonParam);
-                const res = await fetch(`/api/db/tournaments/${encodeURIComponent(id)}/seasons${query.size ? `?${query.toString()}` : ''}`, {
-                    signal: controller.signal,
-                    cache: 'no-store',
-                });
-                if (!res.ok) {
-                    setSeasonOptions([]);
-                    setSeasonOptionsLoaded(true);
-                    return;
+                const url = `/api/db/tournaments/${encodeURIComponent(id)}/seasons${query.size ? `?${query.toString()}` : ''}`;
+                /* El endpoint falla intermitente (ok:false o 5xx transitorio) y
+                   un solo fallo dejaba el selector sin el histórico y sin el tab
+                   de Campeones. Dos reintentos con espera corta antes de caer al
+                   fallback. */
+                let seasons: SeasonOption[] | null = null;
+                for (let intento = 0; intento < 3; intento++) {
+                    if (intento > 0) await new Promise((resolve) => setTimeout(resolve, 1200 * intento));
+                    if (controller.signal.aborted) return;
+                    const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+                    if (!res.ok) continue;
+                    const json = await res.json();
+                    if (json?.ok && Array.isArray(json.seasons)) {
+                        seasons = json.seasons;
+                        break;
+                    }
                 }
-                const json = await res.json();
-                if (json?.ok && Array.isArray(json.seasons)) {
-                    setSeasonOptions(json.seasons);
-                } else {
-                    setSeasonOptions([]);
-                }
+                setSeasonOptions(seasons ?? []);
                 setSeasonOptionsLoaded(true);
             } catch (err: any) {
                 if (err?.name !== 'AbortError') {

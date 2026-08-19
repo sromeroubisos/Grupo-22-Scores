@@ -12,7 +12,7 @@ import type { Tournament } from '@/lib/types';
 import TournamentSeasonTag from '@/components/TournamentSeasonTag';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
+import { AUDIENCE_LABELS, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { compareTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 
 type TournamentCountryGroup = {
@@ -1060,7 +1060,7 @@ export default function TorneosPage() {
                                 className={`${pageStyles.audienceSwitchBtn} ${selectedAudience === audience ? pageStyles.audienceSwitchBtnActive : ''}`}
                                 onClick={() => setSelectedAudience(audience)}
                             >
-                                {audience === 'mayores' ? 'Mayores' : 'Juveniles'}
+                                {AUDIENCE_LABELS[audience]}
                             </button>
                         ))}
                     </div>
@@ -1081,9 +1081,9 @@ export default function TorneosPage() {
                         <input
                             id="tournaments-search"
                             type="text"
-                            aria-label={`Buscar ${selectedAudience === 'juveniles' ? 'torneos juveniles' : 'ligas y torneos'} de ${selectedSport.nameEs}`}
+                            aria-label={`Buscar ${selectedAudience === 'juveniles' ? 'torneos de juveniles y reserva' : 'ligas y torneos'} de ${selectedSport.nameEs}`}
                             placeholder={selectedAudience === 'juveniles'
-                                ? `Filtrar juveniles de ${selectedSport.nameEs}...`
+                                ? `Filtrar juveniles y reserva de ${selectedSport.nameEs}...`
                                 : selectedSport.id === 'tennis'
                                     ? `Filtrar torneos de ${selectedSport.nameEs}...`
                                     : `Filtrar ligas de ${selectedSport.nameEs}...`}
@@ -1302,7 +1302,7 @@ export default function TorneosPage() {
                                         ? `Buscando "${searchQuery}"...`
                                         : `No encontramos nada con "${searchQuery}".`)
                                     : selectedAudience === 'juveniles'
-                                        ? 'No hay torneos juveniles cargados para este deporte.'
+                                        ? 'No hay torneos juveniles ni de reserva cargados para este deporte.'
                                         : 'No hay torneos disponibles para este deporte.'}
                             </div>
                         )}
