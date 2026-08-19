@@ -133,7 +133,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .matchCard {
+    .matchCard,
+    .championStrip {
         animation: none;
     }
 }
@@ -227,6 +228,179 @@
     color: inherit;
 }
 
+.logoPlaceholder {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Columna de la Final: la jerarquía del cuadro ─────────────────────────
+   La Final es el remate visual del bracket: columna más ancha, título y
+   tarjeta con el dorado de campeón (#d4a72c, el mismo del tab Campeones), y
+   debajo —más chico y sin competir— el 3.er puesto. */
+.finalColumn {
+    min-width: 264px;
+}
+
+.finalRoundTitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: #d4a72c;
+    border-bottom-color: rgba(212, 167, 44, 0.35);
+}
+
+.finalStack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    flex: 1;
+    padding: 0 8px;
+}
+
+.finalCard {
+    border-color: rgba(212, 167, 44, 0.4);
+    background: linear-gradient(180deg, rgba(212, 167, 44, 0.08), rgba(255, 255, 255, 0.02));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.finalCard:hover {
+    border-color: rgba(212, 167, 44, 0.6);
+    background: linear-gradient(180deg, rgba(212, 167, 44, 0.11), rgba(255, 255, 255, 0.03));
+}
+
+.finalCard .participant {
+    padding: 12px 14px;
+}
+
+.finalCard .logo {
+    width: 26px;
+    height: 26px;
+}
+
+.finalCard .name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.finalCard .score {
+    font-size: 16px;
+    min-width: 26px;
+}
+
+.finalCard .winner {
+    background: rgba(212, 167, 44, 0.1);
+}
+
+.finalCard .winner .name,
+.finalCard .winner .score {
+    color: #d4a72c;
+}
+
+.championStrip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(212, 167, 44, 0.3);
+    background: rgba(212, 167, 44, 0.08);
+    color: #d4a72c;
+    animation: bracketCardIn 0.42s ease both;
+}
+
+.championStripLogo {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border-radius: 3px;
+}
+
+.championStripName {
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-text-primary);
+}
+
+.championStripTag {
+    margin-left: auto;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+}
+
+/* ── 3.er puesto: presente pero subordinado ──────────────────────────────── */
+.thirdBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 88%;
+    align-self: center;
+    margin-top: 4px;
+}
+
+.thirdLabel {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-text-tertiary);
+}
+
+.thirdCard {
+    opacity: 0.9;
+}
+
+.thirdCard:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.thirdCard .matchDate {
+    padding: 4px 10px;
+    font-size: 9px;
+}
+
+.thirdCard .participant {
+    padding: 6px 10px;
+}
+
+.thirdCard .logo {
+    width: 16px;
+    height: 16px;
+}
+
+.thirdCard .name {
+    font-size: 11px;
+}
+
+.thirdCard .score {
+    font-size: 12px;
+}
+
+/* Fallback: si no hay columna Final reconocible, el 3.er puesto vuelve como
+   columna propia, pero angosta y en gris — nunca al nivel de la Final. */
+.thirdColumn {
+    min-width: 190px;
+}
+
+.thirdRoundTitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: var(--color-text-tertiary);
+}
+
 .emptyState {
     padding: 3rem;
     text-align: center;
@@ -247,5 +421,26 @@
 
     .roundTitle {
         font-size: 10px;
+    }
+
+    .finalColumn {
+        min-width: 224px;
+    }
+
+    .finalCard .name {
+        font-size: 12px;
+    }
+
+    .finalCard .score {
+        font-size: 14px;
+    }
+
+    .finalCard .logo {
+        width: 22px;
+        height: 22px;
+    }
+
+    .thirdColumn {
+        min-width: 170px;
     }
 }

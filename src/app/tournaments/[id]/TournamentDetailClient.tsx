@@ -5074,7 +5074,10 @@ export default function TournamentDetailPage({
 
                 {/* ── CHAMPIONS TAB ─────────────────────────────────────── */}
                 {activeTab === 'champions' && seasonOptionsLoaded && (
-                    <TournamentChampionsTab seasons={seasonOptions} />
+                    /* onNavigate baja la pestaña a Resumen: la fila ya navega con
+                       tab=summary en el href, pero cambiar seasonId no desmonta la
+                       página y el estado activeTab seguiría clavado en Campeones. */
+                    <TournamentChampionsTab seasons={seasonOptions} onNavigate={() => setActiveTab('summary')} />
                 )}
 
                 {/* ── ARCHIVE TAB ───────────────────────────────────────── */}
