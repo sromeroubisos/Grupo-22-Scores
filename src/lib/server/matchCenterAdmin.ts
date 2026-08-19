@@ -72,8 +72,16 @@ export async function loadManagedMatchCenterMatch(
     const context = await authPromise;
     const { data, error } = await matchPromise;
 
-    if (error || !data) {
-        throw new Error('Match not found');
+    if (!data) {
+        // Solo el "no hay fila" es un 404 real. Un fallo de lectura (red, DB)
+        // se lanza aparte para que la pagina NO lo disfrace de partido
+        // inexistente — el detalle queda en el log del server.
+        const code = (error as { code?: string } | null)?.code;
+        if (!error || code === 'PGRST116') {
+            throw new Error('Match not found');
+        }
+        console.error('[matchCenterAdmin] Failed to load match center match:', { matchId, error });
+        throw new Error('Failed to load match.');
     }
 
     return { context, match: data };

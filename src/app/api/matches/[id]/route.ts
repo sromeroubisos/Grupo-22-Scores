@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { canManageMatchContext, getMatchManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
 import { EDIT_MEMBERSHIP_ROLES, MANAGEMENT_MEMBERSHIP_ROLES, hasFederationAdminAccess } from '@/lib/auth/roles';
 import { isMatchVisibleToPublic } from '@/lib/matchReview';
+import { ensureMatchManagementAccess } from '@/lib/server/matchCenterAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
@@ -415,10 +416,11 @@ export async function PATCH(
     if (!isUuid(matchId)) {
       return NextResponse.json({ error: 'Invalid match id' }, { status: 400 });
     }
-    await ensureMatchAccess(matchId, MANAGEMENT_MEMBERSHIP_ROLES);
+    // Mismo gate que el editor y que /api/matches/[id]/can-edit: scoped al
+    // torneo de ESTE partido, nunca blanket por rol. `ensureMatchAccess` queda
+    // solo para lecturas (canReadHiddenMatch).
+    await ensureMatchManagementAccess(matchId, MANAGEMENT_MEMBERSHIP_ROLES);
     const body = await request.json();
-
-    console.log('[API PATCH /matches]', matchId, 'keys:', Object.keys(body));
 
     const { events, lineups, ...rawMatchFields } = body as Record<string, unknown>;
     const matchFields = { ...rawMatchFields };
@@ -493,7 +495,7 @@ export async function DELETE(
     if (!isUuid(matchId)) {
       return NextResponse.json({ error: 'Invalid match id' }, { status: 400 });
     }
-    await ensureMatchAccess(matchId, EDIT_MEMBERSHIP_ROLES);
+    await ensureMatchManagementAccess(matchId, EDIT_MEMBERSHIP_ROLES);
     const success = await FixtureService.deleteMatch(matchId);
 
     if (!success) {
@@ -507,9 +509,11 @@ export async function DELETE(
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';
     console.error('Error in DELETE /api/matches/[id]:', error);
+    const status = message === 'Unauthorized' ? 401 : message === 'Forbidden' ? 403 : 500;
+    // No exponer mensajes crudos de Postgres/Supabase en errores internos.
     return NextResponse.json(
-      { error: message },
-      { status: message === 'Unauthorized' ? 401 : message === 'Forbidden' ? 403 : 500 }
+      { error: status === 500 ? 'Internal server error' : message },
+      { status }
     );
   }
 }

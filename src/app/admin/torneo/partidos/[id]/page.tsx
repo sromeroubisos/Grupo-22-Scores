@@ -28,7 +28,12 @@ export default async function GestorMatchCenterPage({ params }: PageProps) {
                 `/login?returnTo=${encodeURIComponent(`/admin/torneo/partidos/${matchId}`)}`,
             );
         }
-        notFound();
+        // 404 solo para lo que ES un 404; un fallo de lectura se relanza al
+        // error boundary en vez de disfrazarse de partido inexistente.
+        if (error instanceof Error && (error.message === 'Forbidden' || error.message === 'Match not found')) {
+            notFound();
+        }
+        throw error;
     }
 
     if (!match) {

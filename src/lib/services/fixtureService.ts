@@ -1296,7 +1296,22 @@ export class FixtureService {
     if (data.notes !== undefined) updateData.notes = data.notes;
     if (supportsBroadcastUrl && data.streamUrl !== undefined) updateData.broadcast_url = data.streamUrl || null;
     if (supportsReplayUrl && data.replayUrl !== undefined) updateData.replay_url = data.replayUrl || null;
-    if (data.score !== undefined) updateData.score = data.score;
+    if (data.score !== undefined) {
+      // La columna score es JSONB y el body llega del cliente sin normalizar:
+      // se exige al menos un objeto plano con home/away numericos (claves
+      // extra como penalties/tries/notes pasan) para no romper standings,
+      // exports y todo lector downstream con estructuras arbitrarias.
+      if (data.score !== null) {
+        const score = data.score as { home?: unknown; away?: unknown };
+        const isPlainObject = typeof score === 'object' && !Array.isArray(score);
+        const sideOk = (value: unknown) =>
+          value === undefined || value === null || (typeof value === 'number' && Number.isFinite(value));
+        if (!isPlainObject || !sideOk(score.home) || !sideOk(score.away)) {
+          throw new Error('El marcador no tiene un formato válido.');
+        }
+      }
+      updateData.score = data.score;
+    }
     if (supportsClock && data.clock !== undefined) updateData.clock = data.clock;
     if (supportsHomeBasePoints && data.homeBasePoints !== undefined) updateData.home_base_points = data.homeBasePoints;
     if (supportsAwayBasePoints && data.awayBasePoints !== undefined) updateData.away_base_points = data.awayBasePoints;
@@ -1339,7 +1354,9 @@ export class FixtureService {
 
     if (error) {
       console.error('[FixtureService] Error updating match:', { error, matchId, updateData });
-      throw new Error(error.message);
+      // El mensaje crudo de Supabase queda en el log; al cliente le llega un
+      // mensaje estable (los routes reenvian error.message tal cual).
+      throw new Error('No se pudo guardar el partido.');
     }
 
     // Acá vivía el sync del ranking, y era el cuello: como los resultados se

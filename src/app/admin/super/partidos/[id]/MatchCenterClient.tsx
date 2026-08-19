@@ -256,7 +256,15 @@ function normalizeMatchEvents(events: MatchRow['events'], sportId?: string | nul
 }
 
 function normalizeMatchLineups(lineups: MatchRow['lineups']): MatchLineups {
-    return lineups || { home: [], away: [] };
+    // Un JSONB no-nulo puede venir sin home/away (o con home: null) desde una
+    // escritura vieja o de otro cliente: garantizar SIEMPRE arrays evita el
+    // TypeError que tira toda la vista (`lineups.home.length`).
+    if (!lineups) return { home: [], away: [] };
+    return {
+        ...lineups,
+        home: Array.isArray(lineups.home) ? lineups.home : [],
+        away: Array.isArray(lineups.away) ? lineups.away : [],
+    };
 }
 
 function normalizeMatchScore(score: MatchScore | null | undefined): MatchScore {
@@ -442,7 +450,14 @@ function resolveScoreAgainstEvents(
 }
 
 function hasAnyLineupPlayers(lineups: MatchLineups | null | undefined) {
-    return (lineups?.home.length ?? 0) > 0 || (lineups?.away.length ?? 0) > 0;
+    return (lineups?.home?.length ?? 0) > 0 || (lineups?.away?.length ?? 0) > 0;
+}
+
+// Matcheo por id cuando hay id; por identidad de objeto cuando no (eventos
+// importados sin id estable). Con dos eventos sin id, matchear `undefined ===
+// undefined` hacia que editar/borrar uno afectara a TODOS.
+function isSameLocalEvent(event: MatchEvent, target: MatchEvent) {
+    return event.id ? event.id === target.id : event === target;
 }
 
 function areDraftValuesEqual(left: unknown, right: unknown) {
@@ -1081,7 +1096,14 @@ function findLineupPlayerIndex(players: LineupPlayer[], player: LineupPlayer) {
 }
 
 function normalizeLookupKey(value: string | null | undefined) {
-    return String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    // Sin acentos: "Pérez" en un evento y "Perez" en el lineup son la misma
+    // persona — si no matchean, el saneo de eventos borra el nombre.
+    return String(value || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '');
 }
 
 function stripLeadingTeamAlias(value: string, aliases: string[]) {
@@ -1327,6 +1349,10 @@ function calculateAutocalculatedPoints(
 
 async function fetchMatchConfiguration(
     match: Pick<MatchRow, 'phase_id' | 'round_id' | 'tournament_id'>,
+    // El deporte que YA conocemos (del initialMatch o de un refresh previo).
+    // Un fallo transitorio de las lecturas no puede degradar el partido a
+    // rugby: null significa "no se supo nunca", no "se dejo de saber".
+    fallbackSportId: string | null = null,
 ): Promise<{ pointsRules: PointsRules; eventDefinitions: MatchEventDefinition[]; sportId: string | null }> {
     try {
         const { createClient } = await import('@/lib/supabase/client');
@@ -1367,20 +1393,21 @@ async function fetchMatchConfiguration(
             tournamentSportId = tournament?.sport_id ?? null;
         }
 
+        const resolvedSportId = tournamentSportId ?? fallbackSportId;
         return {
             pointsRules: normalizePointsRules(StandingsEngine.resolveRules(phaseSettings, tournamentRuleset)),
             eventDefinitions: resolveMatchEventDefinitions({
-                sportId: tournamentSportId,
+                sportId: resolvedSportId,
                 phaseSettings,
                 tournamentRuleset,
             }),
-            sportId: tournamentSportId,
+            sportId: resolvedSportId,
         };
     } catch {
         return {
             pointsRules: DEFAULT_POINTS_RULES,
-            eventDefinitions: getDefaultMatchEventDefinitions(null),
-            sportId: null,
+            eventDefinitions: getDefaultMatchEventDefinitions(fallbackSportId),
+            sportId: fallbackSportId,
         };
     }
 }
@@ -1479,6 +1506,14 @@ export default function MatchCenterClient({
     // Cola unica para todos los PATCH optimistas (evento + status en vivo). Si
     // corren en paralelo, la respuesta mas lenta pisa el estado de la mas rapida.
     const matchPatchQueueRef = useRef<Promise<unknown>>(Promise.resolve());
+    // TODO writer que toque refs compartidos (persisted*/applyMatchResponse)
+    // entra por aca — tambien Guardar y Guardar puntos, no solo los eventos en
+    // vivo. OJO: no anidar (una task encolada no puede encolar otra y esperarla).
+    const enqueueMatchPatch = useCallback(<T,>(task: () => Promise<T>): Promise<T> => {
+        const run = matchPatchQueueRef.current.catch(() => {}).then(task);
+        matchPatchQueueRef.current = run.catch(() => {});
+        return run;
+    }, []);
 
     // Editable state for per-match points
     const [localPoints, setLocalPoints] = useState<MatchPoints>(() => toLocalPoints(initialMatch));
@@ -2044,7 +2079,7 @@ export default function MatchCenterClient({
             phase_id: match.phase_id,
             round_id: match.round_id,
             tournament_id: match.tournament_id,
-        });
+        }, matchSportIdRef.current);
 
         setPointsRules(configuration.pointsRules);
         setMatchSportId(configuration.sportId);
@@ -2082,22 +2117,33 @@ export default function MatchCenterClient({
         setSavingPoints(true);
         try {
             if (localPoints.points_autocalculated === false) {
-                await persistMatchPatch(
+                await enqueueMatchPatch(() => persistMatchPatch(
                     toPointPatchPayload(localPoints),
                     { includePoints: false },
-                );
+                ));
             } else {
                 const eventsPatch = buildEventsPatch(localEvents, persistedEventsRef.current);
-                await persistMatchPatch({
+                await enqueueMatchPatch(() => persistMatchPatch({
                     status: match.status,
                     score: resolveOfficialScore(),
                     ...(eventsPatch ? { eventPatch: eventsPatch } : { events: localEvents }),
-                });
+                }));
             }
+        } catch (error: unknown) {
+            // Sin este catch el fallo era mudo: el boton volvia a "Guardar
+            // puntos" y el operador creia que se habian guardado.
+            console.error('[MatchCenter] Save points error:', error);
+            setSaveMsg({
+                type: 'err',
+                text: error instanceof Error && error.message
+                    ? error.message
+                    : 'No se pudieron guardar los puntos del partido.',
+            });
+            scheduleSaveMsgClear(6000);
         } finally {
             setSavingPoints(false);
         }
-    }, [localEvents, localPoints, match.status, persistMatchPatch, resolveOfficialScore]);
+    }, [enqueueMatchPatch, localEvents, localPoints, match.status, persistMatchPatch, resolveOfficialScore, scheduleSaveMsgClear]);
 
     // Reactive: recalculate whenever score/status/events change, only while in auto mode
     useEffect(() => {
@@ -2119,8 +2165,16 @@ export default function MatchCenterClient({
                 filter: `id=eq.${matchId}`,
             }, (payload) => {
                 const updated = payload.new as Record<string, unknown>;
-                const incomingEvents = Array.isArray(updated.events) ? updated.events as MatchEvent[] : null;
-                const incomingLineups = updated.lineups ? updated.lineups as MatchLineups : null;
+                // Normalizados ANTES de tocar refs/estado: si entran crudos,
+                // `localEvents` (crudo) difiere de `persistedEventsRef` (que el
+                // efecto de match.events re-normaliza) y se enciende un dirty
+                // fantasma con eventos legacy sin order/period.
+                const incomingEvents = Array.isArray(updated.events)
+                    ? normalizeMatchEvents(updated.events as MatchRow['events'], matchSportIdRef.current)
+                    : null;
+                const incomingLineups = updated.lineups
+                    ? normalizeMatchLineups(updated.lineups as MatchRow['lineups'])
+                    : null;
                 const currentPersistedMatch = persistedMatchRef.current;
                 const currentDraftMatch = matchDraftRef.current;
                 const hasUnsavedEvents = !areDraftValuesEqual(localEventsRef.current, persistedEventsRef.current);
@@ -2238,12 +2292,14 @@ export default function MatchCenterClient({
         try {
             console.log('[MatchCenter] Saving via API - events:', localEvents.length, 'lineups home:', localLineups.home.length, 'away:', localLineups.away.length);
 
-            const saveResult = await persistMatchPatch(
+            // Por la cola: un Guardar disparado mientras un evento optimista
+            // sigue en vuelo no puede pisar los refs persisted* fuera de orden.
+            const saveResult = await enqueueMatchPatch(() => persistMatchPatch(
                 payload,
                 eventsDirty && !lineupsDirty
                     ? { compactResponse: true, eventsOverride: localEvents }
                     : undefined,
-            );
+            ));
             setSaveMsg(
                 saveResult.warnings.lineupsNotPersisted
                     ? { type: 'warn', text: 'Se guardó el partido, pero este entorno no tiene almacenamiento para alineaciones.' }
@@ -2326,14 +2382,14 @@ export default function MatchCenterClient({
         });
     }, [resolveOfficialScore]);
 
-    const updateLocalEvent = useCallback((eventId: string, patch: Partial<MatchEvent>) => {
+    const updateLocalEvent = useCallback((target: MatchEvent, patch: Partial<MatchEvent>) => {
         setLocalEvents((prev) =>
-            prev.map((event) => (event.id === eventId ? { ...event, ...patch } : event)),
+            prev.map((event) => (isSameLocalEvent(event, target) ? { ...event, ...patch } : event)),
         );
     }, []);
 
-    const removeLocalEvent = useCallback((eventId: string) => {
-        setLocalEvents((prev) => prev.filter((event) => event.id !== eventId));
+    const removeLocalEvent = useCallback((target: MatchEvent) => {
+        setLocalEvents((prev) => prev.filter((event) => !isSameLocalEvent(event, target)));
     }, []);
 
     // INICIAR/REANUDAR ponen el partido en vivo. Antes esto vivia SOLO en estado
@@ -2390,7 +2446,7 @@ export default function MatchCenterClient({
     const openGuidedEvent = useCallback((definition: MatchEventDefinition) => {
         // Minuto CALCULADO contra el ancla, no leido de un snapshot.
         const minute = clock.readEventMinute();
-        const period = getEventPeriodForType(definition.type, clock.period);
+        const period = getEventPeriodForType(definition.type, clock.period, matchSportIdRef.current);
 
         setGuidedEvent({
             definition,
@@ -2482,10 +2538,20 @@ export default function MatchCenterClient({
             }
         }
 
-        // El minuto que se persiste es el CALCULADO al momento del click contra
-        // el ancla del server, no el estado del reloj ni lo que quedo en el form.
-        const minute = clock.readEventMinute();
-        const eventPeriod = getEventPeriodForType(guidedEvent.definition.type, clock.period || guidedEvent.period);
+        // Con el reloj activo, el minuto se CALCULA al momento del click contra
+        // el ancla del server (nunca el estado del form). Sin reloj — la carga
+        // post-partido, el flujo mas comun del admin — vale lo que el operador
+        // tipeo en el campo Minuto del modal: descartarlo dejaba todo en 0.
+        const usesClockMinute = clock.isRunning || clock.hasProgress;
+        const typedMinute = Number.parseInt(String(guidedEvent.minute ?? ''), 10);
+        const minute = usesClockMinute || !Number.isFinite(typedMinute)
+            ? clock.readEventMinute()
+            : Math.min(160, Math.max(0, typedMinute));
+        const eventPeriod = getEventPeriodForType(
+            guidedEvent.definition.type,
+            clock.period || guidedEvent.period,
+            matchSportIdRef.current,
+        );
         const previousEvents = localEventsRef.current;
         const nextEvent: MatchEvent = {
             id: crypto.randomUUID(),
@@ -2544,7 +2610,18 @@ export default function MatchCenterClient({
                 } catch (err: unknown) {
                     localEventsRef.current = localEventsRef.current.filter((event) => event.id !== nextEvent.id);
                     setLocalEvents(localEventsRef.current);
+                    if (statusChanged) {
+                        // Revertir tambien el status optimista (solo si nadie lo
+                        // volvio a tocar): sin esto la cabecera quedaba en FINAL
+                        // con la fila en DB todavia en vivo.
+                        setMatch((current) => (
+                            current.status === nextStatus ? { ...current, status: previousStatus } : current
+                        ));
+                    }
                     setSaveMsg({ type: 'err', text: `No se pudo guardar el evento: ${err instanceof Error ? err.message : String(err)}` });
+                    // Reagenda el clear: cancela el timer de 3s del toast
+                    // optimista, que si no borraba este error al toque.
+                    scheduleSaveMsgClear(6000);
                 }
             });
     }, [clock, guidedEvent, persistMatchPatch, reportClockError, scheduleSaveMsgClear]);
@@ -2761,6 +2838,13 @@ export default function MatchCenterClient({
                 }
 
                 const availablePlayers = lineupPlayerOptions[event.team];
+                // Con el lineup vacio (partido importado, planilla rehecha, o
+                // simplemente sin cargar) NO hay contra que validar: vaciar los
+                // nombres aca borraba jugadores de eventos ya persistidos y el
+                // proximo Guardar consolidaba la perdida.
+                if (availablePlayers.length === 0) {
+                    return event;
+                }
                 let nextEvent = event;
 
                 if (event.playerName.trim() && !isEventPlayerAvailable(availablePlayers, event.playerName)) {
@@ -4003,7 +4087,7 @@ export default function MatchCenterClient({
                                     <div className="event-list-header" style={{ display: 'grid', gridTemplateColumns: '70px 120px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.7rem', fontWeight: 800, color: '#666', borderBottom: '1px solid #222' }}>
                                         <div>MIN</div><div>PERIODO</div><div>TIPO</div><div>EQUIPO</div><div>JUGADOR / DETALLE</div><div style={{ textAlign: 'right' }}>ACCION</div>
                                     </div>
-                                    {sortedEvents.map((ev) => {
+                                    {sortedEvents.map((ev, evIndex) => {
                                         const selectedDefinition = eventDefinitionMap[ev.type] || {
                                             type: ev.type,
                                             label: eventTypeLabel(ev.type, availableEventDefinitions),
@@ -4020,12 +4104,12 @@ export default function MatchCenterClient({
                                         const eventPeriod = normalizeMatchPeriod(ev.period);
 
                                         return (
-                                        <div key={ev.id} className="event-list-row" style={{ display: 'grid', gridTemplateColumns: '70px 120px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.85rem', borderBottom: '1px solid #222', alignItems: 'center' }}>
+                                        <div key={ev.id || `ev-${evIndex}`} className="event-list-row" style={{ display: 'grid', gridTemplateColumns: '70px 120px 130px 100px 1fr 80px', padding: '12px 24px', fontSize: '0.85rem', borderBottom: '1px solid #222', alignItems: 'center' }}>
                                             <div>
                                                 <input
                                                     type="number" value={ev.minute} min={0} max={100}
                                                     style={{ width: 50, background: '#222', border: 'none', color: 'var(--accent)', fontWeight: 900, padding: 4, borderRadius: 4 }}
-                                                    onChange={(e) => updateLocalEvent(ev.id, { minute: parseInt(e.target.value, 10) || 0 })}
+                                                    onChange={(e) => updateLocalEvent(ev, { minute: parseInt(e.target.value, 10) || 0 })}
                                                 />
                                             </div>
                                             <div>
@@ -4033,7 +4117,7 @@ export default function MatchCenterClient({
                                                     value={eventPeriod}
                                                     style={{ background: '#222', border: 'none', color: '#fff', fontSize: '0.8rem', padding: 4, borderRadius: 4, maxWidth: 110 }}
                                                     title={getMatchPeriodLabel(eventPeriod)}
-                                                    onChange={(e) => updateLocalEvent(ev.id, { period: normalizeMatchPeriod(e.target.value) })}
+                                                    onChange={(e) => updateLocalEvent(ev, { period: normalizeMatchPeriod(e.target.value) })}
                                                 >
                                                     {!EVENT_PERIOD_OPTIONS.includes(eventPeriod) && (
                                                         <option value={eventPeriod}>{getMatchPeriodLabel(eventPeriod)}</option>
@@ -4050,7 +4134,7 @@ export default function MatchCenterClient({
                                                     onChange={(e) => {
                                                         const nextType = e.target.value;
                                                         const nextDefinition = eventDefinitionMap[nextType];
-                                                        updateLocalEvent(ev.id, {
+                                                        updateLocalEvent(ev, {
                                                             type: nextType,
                                                             team: nextDefinition?.team === 'none' ? null : ev.team ?? (nextDefinition?.team === 'required' ? 'home' : null),
                                                             playerId: nextDefinition?.player === 'none' ? null : ev.playerId ?? null,
@@ -4075,7 +4159,7 @@ export default function MatchCenterClient({
                                                     value={ev.team || (selectedDefinition.team === 'required' ? 'home' : '')}
                                                     disabled={selectedDefinition.team === 'none'}
                                                     style={{ background: '#222', border: 'none', color: '#fff', fontSize: '0.8rem', padding: 4, borderRadius: 4 }}
-                                                    onChange={(e) => updateLocalEvent(ev.id, {
+                                                    onChange={(e) => updateLocalEvent(ev, {
                                                         team: (e.target.value || null) as 'home' | 'away' | null,
                                                         playerId: null,
                                                         secondaryPlayerId: null,
@@ -4095,7 +4179,7 @@ export default function MatchCenterClient({
                                                         placeholder="Detalle del evento"
                                                         className="inline-input"
                                                         style={{ fontSize: '0.85rem' }}
-                                                        onChange={(e) => updateLocalEvent(ev.id, { detail: e.target.value })}
+                                                        onChange={(e) => updateLocalEvent(ev, { detail: e.target.value })}
                                                     />
                                                 ) : (
                                                     <select
@@ -4103,7 +4187,7 @@ export default function MatchCenterClient({
                                                         disabled={!ev.team || (!availableEventSelection?.active.length && !selectedPlayerValue)}
                                                         className="inline-input inline-select"
                                                         style={{ fontSize: '0.85rem' }}
-                                                        onChange={(e) => updateLocalEvent(ev.id, resolveEventPlayerSelection(ev.team, e.target.value))}
+                                                        onChange={(e) => updateLocalEvent(ev, resolveEventPlayerSelection(ev.team, e.target.value))}
                                                     >
                                                         <option value="">
                                                             {!ev.team
@@ -4133,7 +4217,7 @@ export default function MatchCenterClient({
                                                         onChange={(e) => {
                                                             const selected = resolveEventPlayerSelection(ev.team, e.target.value);
                                                             const temporalPrefix = /\[temporal\]/i.test(ev.detail) ? '[temporal] ' : '';
-                                                            updateLocalEvent(ev.id, {
+                                                            updateLocalEvent(ev, {
                                                                 secondaryPlayerId: selected.playerId,
                                                                 secondaryPlayerName: selected.playerName,
                                                                 detail: selected.playerName ? `${temporalPrefix}Entra: ${selected.playerName}` : '',
@@ -4159,7 +4243,7 @@ export default function MatchCenterClient({
                                                         placeholder="Detalle adicional (opcional)"
                                                         className="inline-input"
                                                         style={{ fontSize: '0.8rem', opacity: 0.85 }}
-                                                        onChange={(e) => updateLocalEvent(ev.id, { detail: e.target.value })}
+                                                        onChange={(e) => updateLocalEvent(ev, { detail: e.target.value })}
                                                     />
                                                 )}
                                                 {ev.type === 'substitution' ? (() => {
@@ -4181,7 +4265,7 @@ export default function MatchCenterClient({
                                                 ) : null}
                                             </div>
                                             <div className="event-list-actions" style={{ textAlign: 'right', display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
-                                                <button className="mc-btn mc-btn-outline" style={{ padding: 6, color: '#ef4444', border: '1px solid #333' }} onClick={() => removeLocalEvent(ev.id)}>
+                                                <button className="mc-btn mc-btn-outline" style={{ padding: 6, color: '#ef4444', border: '1px solid #333' }} onClick={() => removeLocalEvent(ev)}>
                                                     <X size={12} />
                                                 </button>
                                             </div>
@@ -4278,7 +4362,7 @@ export default function MatchCenterClient({
                                         <label>
                                             <span>Periodo</span>
                                             <input
-                                                value={getMatchPeriodLabel(getEventPeriodForType(guidedEvent.definition.type, clock.period || guidedEvent.period))}
+                                                value={getMatchPeriodLabel(getEventPeriodForType(guidedEvent.definition.type, clock.period || guidedEvent.period, matchSportId))}
                                                 readOnly
                                                 title="El evento se guarda en el periodo activo del partido."
                                             />

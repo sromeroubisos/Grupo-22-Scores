@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { isUuid } from '@/lib/utils/postgrest';
 import { requireUserAccessContext } from '@/lib/auth/permissions';
 import { MANAGEMENT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
+import { getManagedClubSummaries, type ManagedClubSummary } from '@/lib/club-admin/managedClubFamily';
 import type { UserAccessContext } from '@/lib/auth/permissions';
 import type { MembershipRole } from '@/lib/auth/roles';
 
@@ -34,6 +35,15 @@ async function resolveExpectedClubId(supabase: Awaited<ReturnType<typeof createC
   return data?.id ?? normalized;
 }
 
+const DENIED: Omit<ClubMatchAccessResult, 'context'> = {
+  allowed: false,
+  clubId: null,
+  isHome: false,
+  isAway: false,
+  isCreator: false,
+  role: null,
+};
+
 export async function checkClubMatchAccess(
   matchId: string,
   expectedClubId?: string | null
@@ -44,10 +54,10 @@ export async function checkClubMatchAccess(
 
   if (!context) {
     console.log('[matchAccess] No auth context');
-    return { allowed: false, context: null, clubId: null, isHome: false, isAway: false, isCreator: false, role: null };
+    return { ...DENIED, context: null };
   }
 
-  // User must have at least one club or club_family management membership
+  // Cheap pre-filter before hitting the DB for the managed-club set.
   const hasClubManagement = context.memberships.some(
     m => (m.scopeType === 'club' || m.scopeType === 'club_family')
       && MANAGEMENT_MEMBERSHIP_ROLES.has(m.role as MembershipRole)
@@ -55,11 +65,11 @@ export async function checkClubMatchAccess(
 
   if (!hasClubManagement) {
     console.log('[matchAccess] User has no club management memberships');
-    return { allowed: false, context, clubId: null, isHome: false, isAway: false, isCreator: false, role: null };
+    return { ...DENIED, context };
   }
 
   if (!isUuid(matchId)) {
-    return { allowed: false, context, clubId: null, isHome: false, isAway: false, isCreator: false, role: null };
+    return { ...DENIED, context };
   }
 
   // Load match to check club involvement
@@ -71,63 +81,61 @@ export async function checkClubMatchAccess(
 
   if (error || !match) {
     console.log('[matchAccess] Match not found:', matchId, error?.message);
-    return { allowed: false, context, clubId: null, isHome: false, isAway: false, isCreator: false, role: null };
+    return { ...DENIED, context };
   }
 
-  // If expectedClubId is provided (from the club admin panel), validate the match involves that club
+  // La autorizacion se decide contra los clubes que el usuario ADMINISTRA
+  // (directos + familia + plantel compartido) — el mismo conjunto que ofrece el
+  // panel de club — y nunca contra el `?club=` crudo del request: ese parametro
+  // lo elige el cliente y solo sirve para seleccionar entre clubes propios.
+  const { clubs: managedClubs } = await getManagedClubSummaries(supabase, context.memberships, {
+    includeLogoUrls: false,
+  });
+
+  const grant = (club: ManagedClubSummary, isHome: boolean, isAway: boolean): ClubMatchAccessResult => ({
+    allowed: true,
+    context,
+    clubId: club.id,
+    isHome,
+    isAway,
+    isCreator: false,
+    role: club.accessRole,
+  });
+
+  // If expectedClubId is provided (from the club admin panel), the user must
+  // manage THAT club and the match must involve it.
   if (resolvedExpectedClubId) {
+    const managed = managedClubs.find((club) => club.id === resolvedExpectedClubId);
+
+    if (!managed) {
+      console.log('[matchAccess] DENIED - user does not manage club:', resolvedExpectedClubId);
+      return { ...DENIED, context };
+    }
+
     const isHome = match.home_club_id === resolvedExpectedClubId;
     const isAway = match.away_club_id === resolvedExpectedClubId;
 
-    console.log('[matchAccess] Checking club:', resolvedExpectedClubId, { isHome, isAway });
-
-    if (isHome || isAway) {
-      // Find the user's best role for display purposes
-      const membership = context.memberships.find(
-        m => (m.scopeType === 'club' || m.scopeType === 'club_family')
-          && (m.scopeId === resolvedExpectedClubId || m.scopeType === 'club_family')
-          && MANAGEMENT_MEMBERSHIP_ROLES.has(m.role as MembershipRole)
-      );
-
-      console.log('[matchAccess] ALLOWED for club:', resolvedExpectedClubId);
-      return {
-        allowed: true,
-        context,
-        clubId: resolvedExpectedClubId,
-        isHome,
-        isAway,
-        isCreator: false,
-        role: membership?.role || null,
-      };
+    if (!isHome && !isAway) {
+      console.log('[matchAccess] DENIED - match does not involve club:', resolvedExpectedClubId);
+      return { ...DENIED, context };
     }
 
-    console.log('[matchAccess] DENIED - match does not involve club:', resolvedExpectedClubId);
-    return { allowed: false, context, clubId: null, isHome: false, isAway: false, isCreator: false, role: null };
+    console.log('[matchAccess] ALLOWED for club:', resolvedExpectedClubId);
+    return grant(managed, isHome, isAway);
   }
 
-  // Fallback without expectedClubId: check all user club memberships
-  const userClubIds = context.memberships
-    .filter(m =>
-      (m.scopeType === 'club' || m.scopeType === 'club_family')
-      && m.scopeId
-      && MANAGEMENT_MEMBERSHIP_ROLES.has(m.role as MembershipRole)
-    )
-    .map(m => m.scopeId!);
-
-  for (const clubId of userClubIds) {
-    const isHome = match.home_club_id === clubId;
-    const isAway = match.away_club_id === clubId;
+  // Fallback without expectedClubId: first managed club playing this match.
+  for (const club of managedClubs) {
+    const isHome = match.home_club_id === club.id;
+    const isAway = match.away_club_id === club.id;
 
     if (isHome || isAway) {
-      const membership = context.memberships.find(
-        m => (m.scopeType === 'club' || m.scopeType === 'club_family') && m.scopeId === clubId
-      );
-      return { allowed: true, context, clubId, isHome, isAway, isCreator: false, role: membership?.role || null };
+      return grant(club, isHome, isAway);
     }
   }
 
   console.log('[matchAccess] DENIED - no matching club');
-  return { allowed: false, context, clubId: null, isHome: false, isAway: false, isCreator: false, role: null };
+  return { ...DENIED, context };
 }
 
 export async function getUserManagedClubId(): Promise<string | null> {
