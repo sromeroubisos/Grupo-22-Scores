@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
     let query = reader
         .from('clubs')
         // `logo_url` guarda el escudo en base64 y esta consulta es la del catálogo
-        // COMPLETO: medida contra producción daba 56,79 MB en 5,5 s para quedarse
+        // COMPLETO: medida contra producción daba 56,8 MB en 5,5 s para quedarse
         // con una lista de nombres. El escudo sale abajo como URL del proxy, que
         // lo resuelve por `id`, así que el cajón de participantes lo pinta igual.
         .select('id, name, short_name, slug, sport, sport_id, city, region, country, is_visible, union_id, primary_color, categories, updated_at')

@@ -39,8 +39,26 @@ export interface PublicProdeCompetition {
     startAt: string | null;
     endAt: string | null;
     metadata: Record<string, unknown>;
+    /**
+     * Logo del torneo base, SIEMPRE como URL del proxy `/api/assets/team-logo`.
+     *
+     * Nunca viaja la imagen en sí: los logos de los torneos locales están guardados
+     * como data: URI de ~70 KB y por eso `stripEmbeddedImages` los saca de `metadata`.
+     * El proxy los resuelve del lado del servidor por id de torneo y devuelve bytes
+     * cacheables — o el escudo de iniciales estándar del sitio si no hay logo.
+     */
+    logoUrl: string | null;
     stats: ProdeCompetitionEventStats;
     members: ProdeCompetitionMemberStats;
+    /**
+     * Si el usuario de la sesion ya esta anotado. Sale de las mismas filas de
+     * `prode_competition_members` que ya se leen para contar participantes, asi que
+     * no agrega una consulta: solo suma `user_id` al select.
+     *
+     * Es lo que separa "donde ya juego" de "que puedo explorar" en el lobby. Sin
+     * sesion siempre es false.
+     */
+    viewerIsMember: boolean;
 }
 
 export interface PublicProdeEventSummary {

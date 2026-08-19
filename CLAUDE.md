@@ -322,7 +322,7 @@ src/features/career/
                                        tope de caps por temporada, y de nadie más)
               clubs2026/{saClubs.generated, competitions2026, rosters2026, clubStrength}
               clubs2026/arSystem2026  (CANON del rugby argentino: dos ramas —URBA
-                                       e interior—, 25 divisiones, cupos del TDI.
+                                       e interior—, 28 divisiones, cupos del TDI.
                                        Datos puros, sin dependencias)
               clubs2026/arCatalog     (resuelve el canon a ClubDef heredando del
                                        snapshot el sourceId con el que se pide el
@@ -351,3 +351,28 @@ tiene que poder correr en un test de Node sin DOM.
    se resuelve como `'outdated'` y no revienta.
 
 No marques una tarea como completa si algo de esto falla.
+
+## graphify
+
+El proyecto tiene un grafo de conocimiento en `graphify-out/`: nodos hub,
+comunidades y relaciones entre archivos, extraídos del AST. Es **derivado** —
+no se versiona (está en `.gitignore`) y se reconstruye cuando haga falta.
+
+Reglas:
+
+- Para preguntas sobre el código, primero `graphify query "<pregunta>"`.
+  `graphify path "<A>" "<B>"` para ver cómo se conectan dos cosas y
+  `graphify explain "<concepto>"` para uno solo. Devuelven un subgrafo acotado,
+  casi siempre mucho más chico que `GRAPH_REPORT.md` o que un grep a mano.
+- `graphify-out/wiki/index.md` sirve para navegar de arriba hacia abajo cuando no
+  sabés todavía qué preguntar. `graphify-out/GRAPH_REPORT.md` es para revisión
+  amplia de arquitectura, no para una pregunta puntual.
+- El vault de Obsidian vive **fuera del repo**, en
+  `~/OneDrive/Documentos/________S22/OBSIDIAN/G22 Scores` — una nota por nodo con
+  `[[wikilinks]]`, más `graph.canvas`. Se entra por `HOME.md`.
+- Después de tocar código, `graphify update .` deja el grafo al día (solo AST,
+  sin costo de API).
+
+El grafo se armó con `--code-only`: entra el código (TS/TSX/JS/PY/SQL/CSS), no
+los `.md` ni las imágenes. Sumarlos pide un backend LLM
+(`graphify extract . --backend claude-cli`).

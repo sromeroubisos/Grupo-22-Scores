@@ -16,9 +16,11 @@ import { getClub, hashSeed } from '../../../../features/career/index.ts';
  * NO lo llevan dos grupos, y por motivos distintos:
  *   · los clubes estáticos internacionales, porque el catálogo no guarda para
  *     ellos ni id externo ni clave de logo;
- *   · los 44 clubes que el canon AGREGA y que el catálogo real no tiene (URBA
+ *   · los clubes que el canon AGREGA y que el catálogo real no tiene (URBA
  *     Segunda, Tercera y Desarrollo, los dos de Villa María, los dos paraguayos
- *     del NEA). Están declarados en `AR_CATALOG.created`.
+ *     del NEA y, desde `2026.3`, casi toda la Patagonia y la Unión Andina — el
+ *     snapshot cubre la URBA y el interior grande, no la Patagonia profunda).
+ *     Están declarados en `AR_CATALOG.created`.
  *
  * Para los dos grupos hay salida sin tocar este archivo: un `.png` en
  * `public/clubs/<clubId>.png` gana sobre el proxy (ver `ClubBadge`).
@@ -32,8 +34,19 @@ export function crestKeyOf(clubId: string): string | null {
     return getClub(clubId).sourceId;
 }
 
-/** Saturación del monograma. Fija: lo que se ajusta por tono es el brillo. */
-const MONOGRAM_SATURATION = 52;
+/**
+ * Saturaciones del monograma. TRES, y hasta el catálogo `2026-27.11` era una sola.
+ *
+ * EL PROBLEMA ES DE PALOMAR, no de calidad del hash: con un solo eje hay 360
+ * colores posibles, y el catálogo pasó a tener ~600 clubes sin escudo real. A
+ * partir de 360 clubes, que dos compartan color deja de ser mala suerte y pasa a
+ * ser aritmética — y el punto del monograma es reconocer al club de un vistazo.
+ *
+ * El segundo eje lleva el espacio a 1.080 combinaciones, que alcanza. El brillo
+ * NO entra en el sorteo y no puede entrar: es la variable que se ajusta hasta
+ * garantizar el contraste con las iniciales blancas.
+ */
+export const MONOGRAM_SATURATIONS = [40, 52, 64] as const;
 
 /** Contraste que las iniciales blancas tienen que tener contra su fondo. */
 export const MONOGRAM_MIN_CONTRAST = 4.5;
@@ -80,20 +93,41 @@ function contrastWithWhite([r, g, b]: [number, number, number]): number {
  * era el que fallaba. Acá se baja el brillo de a un punto hasta que ese tono
  * llega a 4,5:1, que es lo que hace que la regla valga para los 360.
  */
-export function monogramColor(clubId: string): string {
-    const hue = hashSeed(clubId) % 360;
+/**
+ * LA REGLA, sin el hash: el color de un (tono, saturación) dado, con el brillo ya
+ * bajado hasta llegar al contraste mínimo.
+ *
+ * Está separada de `monogramColor` para poder verificar el espacio de color
+ * ENTERO —los 360 tonos por cada saturación— en vez de sólo las combinaciones que
+ * el catálogo de hoy sortea. Un club nuevo puede caer en cualquiera.
+ */
+export function monogramColorAt(hue: number, saturation: number): string {
     let light = 38;
-    while (light > 20 && contrastWithWhite(hslToRgb(hue, MONOGRAM_SATURATION, light)) < MONOGRAM_MIN_CONTRAST) {
+    while (light > 20 && contrastWithWhite(hslToRgb(hue, saturation, light)) < MONOGRAM_MIN_CONTRAST) {
         light -= 1;
     }
-    return `hsl(${hue} ${MONOGRAM_SATURATION}% ${light}%)`;
+    return `hsl(${hue} ${saturation}% ${light}%)`;
+}
+
+/** El contraste de un (tono, saturación) con el brillo que le toca. */
+export function monogramContrastAt(hue: number, saturation: number): number {
+    const light = Number(/ \d+% (\d+)%/.exec(monogramColorAt(hue, saturation))![1]);
+    return contrastWithWhite(hslToRgb(hue, saturation, light));
+}
+
+export function monogramColor(clubId: string): string {
+    const hash = hashSeed(clubId);
+    // El segundo eje sale de los dígitos ALTOS del mismo hash, no de un segundo
+    // hash: dividir antes del módulo usa la parte que el `% 360` descarta, así que
+    // los dos ejes no se mueven juntos.
+    const saturation = MONOGRAM_SATURATIONS[Math.floor(hash / 360) % MONOGRAM_SATURATIONS.length];
+    return monogramColorAt(hash % 360, saturation);
 }
 
 /** El contraste real del monograma de un club. Existe para poder testearlo. */
 export function monogramContrast(clubId: string): number {
-    const hue = hashSeed(clubId) % 360;
-    const match = /(\d+)%\)$/.exec(monogramColor(clubId));
-    return contrastWithWhite(hslToRgb(hue, MONOGRAM_SATURATION, Number(match![1])));
+    const match = /hsl\((\d+) (\d+)% (\d+)%\)/.exec(monogramColor(clubId))!;
+    return contrastWithWhite(hslToRgb(Number(match[1]), Number(match[2]), Number(match[3])));
 }
 
 /**

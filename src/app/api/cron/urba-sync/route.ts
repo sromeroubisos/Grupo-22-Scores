@@ -159,22 +159,25 @@ function autorizado(request: NextRequest): boolean {
 const SCHEDULES_BARRIDO = new Set(['0 9 * * *', '0 10 * * *', '0 11 * * *']);
 
 /**
- * De dónde sale el `scope`, y por qué NO viene por query string.
+ * De dónde sale el `scope`, y por qué no alcanza con el query string.
  *
- * Las entradas de `vercel.json` llevaban el scope en la URL
- * (`/api/cron/urba-sync?scope=barrido`) y con esa forma **Vercel no invocó el
- * cron ni una sola vez**: el fin de semana del 16-17/8 pasaron ~40 ventanas
- * programadas sin una escritura, con URBA ya publicado y el endpoint sano,
- * mientras los otros cinco crons del proyecto —paths sin query— corrían normal.
- * La referencia nunca documentó `?` en el `path` (sus ejemplos parametrizan con
- * segmentos), y "no documentado" resultó ser "no se invoca". Encima el silencio
- * es total: nada falla, nada se loguea, y el catálogo se queda quieto.
+ * Las entradas de `vercel.json` lo pasan por URL
+ * (`/api/cron/urba-sync?scope=barrido`), pero **Vercel no documenta el query
+ * string en el `path` de un cron**: la referencia sólo dice que el path arranca
+ * con `/` y muestra ejemplos con segmentos, no con `?`. Puede que funcione; no
+ * está prometido.
  *
- * Así que las entradas van con el path pelado y el scope de una invocación de
- * Vercel sale del header `x-vercel-cron-schedule`, que SÍ está documentado y
- * existe precisamente para distinguir schedules que comparten path. El query
- * string sigue mandando cuando está: es lo que permite dispararlo a mano con
- * curl, y por eso `scope` ausente cae en 'jornada' recién como último recurso.
+ * Y el modo de falla, si algún día deja de pasarlo, es de los que no avisan:
+ * `scope` ausente cae en 'jornada', que es el valor por defecto, así que **el
+ * barrido diario se convertiría en una jornada más** y seguiría respondiendo
+ * `ok: true`. El cron en verde y la cola de correcciones sin levantar — el 24%
+ * de los partidos de URBA se corrige después de las 24 h, y ésa es justo la
+ * parte que el barrido existe para traer.
+ *
+ * Así que cuando el query string no viene, el scope sale del header
+ * `x-vercel-cron-schedule`, que Vercel SÍ documenta y que existe precisamente
+ * para distinguir invocaciones que comparten path. El query string sigue
+ * mandando cuando está: es lo que permite dispararlo a mano con curl.
  */
 function resolverScope(url: URL, request: NextRequest): {
     scope: 'jornada' | 'barrido';

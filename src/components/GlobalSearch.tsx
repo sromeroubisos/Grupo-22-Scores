@@ -88,8 +88,12 @@ export default function GlobalSearch() {
                     <circle cx="11" cy="11" r="8" />
                     <line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
+                {/* El placeholder desaparece al escribir: quien vuelve al campo a
+                    mitad de una consulta se queda sin saber qué se esperaba acá.
+                    El nombre accesible tiene que ser estable. */}
                 <input
-                    type="text"
+                    type="search"
+                    aria-label="Buscar torneos o clubes"
                     placeholder="Buscar torneos o clubes..."
                     value={query}
                     onChange={(event) => {

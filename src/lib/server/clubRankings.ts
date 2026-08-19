@@ -3,7 +3,7 @@ import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { isUuid } from '@/lib/utils/postgrest';
-import { markEditTrace } from '@/lib/perf/editTrace';
+import { markEditTrace, traceStageStart, traceStageEnd } from '@/lib/perf/editTrace';
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 
@@ -238,7 +238,36 @@ function isMissingLeadershipHistorySchemaError(error: unknown) {
     );
 }
 
+/**
+ * Nombre de la columna de un PGRST204, o null si el error es otra cosa.
+ *
+ * Existe porque ese error miente por partida doble: PostgREST contesta "Could not
+ * find the 'X' column of 'club_ranking_entries' in the schema cache", y ese texto
+ * nombra la tabla y dice "schema cache", que son las dos cosas que
+ * `isMissingTableError` busca para declarar una TABLA ausente. El recalculo
+ * terminaba mandando a recargar el schema cache de PostgREST por un problema que
+ * era del payload y de nadie mas.
+ */
+function readMissingColumnName(error: unknown) {
+    if (!error || typeof error !== 'object') return null;
+
+    const code = 'code' in error ? String((error as { code?: unknown }).code || '') : '';
+    if (code !== 'PGRST204') return null;
+
+    const message = 'message' in error ? String((error as { message?: unknown }).message || '') : '';
+    return message.match(/could not find the '([^']+)' column/i)?.[1] ?? null;
+}
+
 function createClubRankingQueryError(error: unknown, fallbackMessage: string) {
+    // La columna va ANTES que la tabla: un PGRST204 pasa los dos filtros y el de
+    // tabla es el que da el diagnostico equivocado.
+    const missingColumn = readMissingColumnName(error);
+    if (missingColumn) {
+        return new Error(
+            `El recalculo mando la columna '${missingColumn}', que no existe en la tabla. Es el payload, no el schema cache de Supabase.`,
+        );
+    }
+
     if (isMissingClubRankingSchemaError(error)) {
         return new Error(CLUB_RANKING_SCHEMA_MESSAGE);
     }
@@ -397,7 +426,15 @@ function computeWorldRugbyExchange(
     awayRating: number,
     score: { home: number; away: number },
 ) {
-    const homeAdvantage = toNumber(ranking.home_advantage, 3);
+    // Cero desde el 1 de julio de 2026, cuando World Rugby saco la ventaja de
+    // local del calculo — el primer cambio de formula desde que el ranking nacio
+    // en octubre de 2003. El motivo fue la sede neutral: cada vez mas tests se
+    // juegan fuera de casa y el handicap terminaba castigando al que figuraba
+    // como local sin serlo.
+    //
+    // Sigue siendo una columna por ranking: el que quiera volver a ponerla en 3
+    // cambia la fila, no el motor.
+    const homeAdvantage = toNumber(ranking.home_advantage, 0);
     const marginThreshold = ranking.margin_threshold ?? 15;
     const marginMultiplier = toNumber(ranking.margin_multiplier, 1.5);
     const eventMultiplier = toNumber(ranking.event_multiplier, 1);
@@ -644,9 +681,11 @@ async function getClubsByIds(
     const uniqueClubIds = Array.from(new Set(clubIds.filter(Boolean)));
     if (uniqueClubIds.length === 0) return new Map<string, RankingClubRow>();
 
-    // `clubs.logo_url` guarda el escudo como data-URI: los 151 clubes de un
-    // ranking son 25,72 MB medidos contra produccion. Quien solo necesita el
-    // rating no pide la columna.
+    // Los escudos viven en `clubs.logo_url` como data-URI y pesan hasta 850 KB:
+    // un ranking de 151 clubes son ~25 MB que cruzan Supabase en cada lectura.
+    // Quien solo necesita pintar el escudo (la vista publica) pide el catalogo
+    // sin logos y arma la URL del proxy con el club_id. El panel admin, que
+    // muestra el data-URI directo en un <img>, los sigue pidiendo.
     const { data, error } = await supabase
         .from('clubs')
         .select(includeLogos ? 'id, name, short_name, logo_url' : 'id, name, short_name')
@@ -734,21 +773,73 @@ async function getRankingEntryByClubId(
 // If a ranking ever exceeds this, the caller should paginate instead of loading all rows.
 const RANKING_ENTRIES_HARD_LIMIT = 5000;
 
+// Tamaño de lote para las escrituras masivas de entradas. El rebuild recorría
+// las entradas de a una —dos veces: el reset inicial y el recálculo de
+// posiciones—, o sea 2 × (cantidad de clubes) round-trips seriales antes y
+// después del trabajo real. Con 151 clubes eran ~300 viajes de puro preámbulo.
+const RANKING_WRITE_CHUNK = 200;
+
+/**
+ * La fila tal como la acepta `club_ranking_entries`, y nada mas.
+ *
+ * `getRankingEntries` devuelve DOS campos que no son columnas: `previous_rating`,
+ * que este modulo lleva solo en memoria, y `clubs`, que es el join con el
+ * catalogo. Cualquiera de los dos dentro de un upsert hace que PostgREST rechace
+ * el LOTE ENTERO con PGRST204: no se escribe ni una fila del recalculo.
+ *
+ * Se listan las columnas en vez de sacar a mano las dos sobrantes. Sacarlas a
+ * mano es lo que habia, y por eso esto se rompio: se acordaron de
+ * `previous_rating` en los tres payloads y de `clubs` en ninguno. Con la lista,
+ * el proximo campo derivado que sume `getRankingEntries` no puede romper el
+ * recalculo.
+ *
+ * `created_at` y `updated_at` quedan afuera a proposito: los pone la tabla.
+ */
+const ENTRY_COLUMNS = [
+    'id',
+    'ranking_id',
+    'club_id',
+    'source_row_index',
+    'source_name',
+    'source_region',
+    'source_position',
+    'source_previous_position',
+    'source_variation',
+    'source_payload',
+    'initial_rating',
+    'current_rating',
+    'current_position',
+    'is_active',
+    'last_applied_match_id',
+] as const;
+
+function toEntryRow(entry: RankingEntryRow, overrides: Record<string, unknown> = {}) {
+    const merged = { ...entry, ...overrides } as Record<string, unknown>;
+    const row: Record<string, unknown> = {};
+
+    for (const column of ENTRY_COLUMNS) {
+        if (merged[column] !== undefined) {
+            row[column] = merged[column];
+        }
+    }
+
+    return row;
+}
+
 /**
  * El default es SIN escudos, y no es una preferencia: es lo que mantiene vivo al
  * rebuild.
  *
- * De los cinco que llaman aca, cuatro son de calculo —`recomputeEntryPositions`,
- * `rebuildLeadershipHistory`, `fetchRankingEntryMap` y `rebuildRankingInternal`—
- * y ninguno pinta un escudo: leen ratings. El unico que los muestra es
- * `getClubRankingDetail`, que los pide explicitamente.
+ * De los cinco que llaman acá, cuatro son de cálculo —`recomputeEntryPositions`,
+ * `rebuildLeadershipHistory`, `fetchRankingEntryMap` y el rebuild— y ninguno
+ * pinta un escudo: leen ratings. El único que los muestra es
+ * `getClubRankingDetail`, que los pide explícitamente.
  *
  * Con el default en `true`, esos cuatro arrastraban `clubs.logo_url` de los 151
- * clubes del ranking: 25,72 MB medidos contra produccion, contra un timeout de
- * fetch de 8 s (`src/lib/perf/supabase.ts`). `rebuildRankingInternal` la hace como
- * SEGUNDA operacion, ANTES de su primera escritura — por eso el ranking quedo
- * stale desde el 2026-08-05 sin que ningun intento del cron llegara a escribir una
- * sola fila. Ver [[perf_edit_bottleneck_rootcause]].
+ * clubes del ranking: 25,72 MB medidos contra producción, contra un timeout de
+ * fetch de 8 s. `rebuildRankingInternal` la hace como SEGUNDA operación, antes de
+ * su primera escritura — por eso el ranking quedó stale desde el 2026-08-05 sin
+ * que ningún intento del cron llegara a escribir una fila.
  */
 async function getRankingEntries(
     supabase: ReturnType<typeof getAdminClient>,
@@ -1170,8 +1261,9 @@ async function recomputeEntryPositions(
     const entries = await getRankingEntries(supabase, rankingId);
     const sorted = [...entries].sort(compareRankingEntries);
 
-    for (let index = 0; index < sorted.length; index += 1) {
-        const entry = sorted[index];
+    // Igual que el reset: en lote. Era un UPDATE por club, y esto corre al final
+    // de CADA rebuild y de cada aplicación incremental.
+    const conPosicion = sorted.map((entry, index) => {
         const nextPosition = index + 1;
         const previousPosition =
             entry.current_position === null || entry.current_position === undefined
@@ -1181,13 +1273,23 @@ async function recomputeEntryPositions(
         entry.source_previous_position = previousPosition;
         entry.current_position = nextPosition;
 
-        await supabase
+        return toEntryRow(entry, {
+            current_position: nextPosition,
+            source_previous_position: previousPosition,
+        });
+    });
+
+    for (let desde = 0; desde < conPosicion.length; desde += RANKING_WRITE_CHUNK) {
+        const { error } = await supabase
             .from('club_ranking_entries')
-            .update({
-                current_position: nextPosition,
-                source_previous_position: previousPosition,
-            })
-            .eq('id', entry.id);
+            .upsert(conPosicion.slice(desde, desde + RANKING_WRITE_CHUNK), { onConflict: 'id' });
+
+        if (error) {
+            throw createClubRankingQueryError(
+                error,
+                'No se pudieron recalcular las posiciones del ranking.',
+            );
+        }
     }
 
     return sorted.length;
@@ -1279,16 +1381,294 @@ async function markRankingStale(
  * proximo tick. Procesa de a `limit` (el mas antiguo primero) para no pasarse del
  * maxDuration del cron. Ver [[perf_edit_bottleneck_rootcause]].
  */
+/**
+ * Actualización SEMANAL del ranking: martes 00:00, y es el ÚNICO momento en que
+ * el ranking se mueve. Cargar un resultado ya no lo toca.
+ *
+ * La cuenta se rehace ENTERA, desde los puntajes iniciales y sobre los partidos
+ * terminados de la temporada, TODA EN MEMORIA. Eso es lo que la vuelve liviana y
+ * simple a la vez:
+ *
+ *   2 lecturas (entradas · partidos) + 1 escritura en lote + el TXT
+ *
+ * o sea ~5 viajes a la base, corran 40 partidos o 900. La versión anterior
+ * escribía por partido —4 round-trips cada uno, ~3.300 en total— y encima
+ * llevaba un libro mayor (`club_ranking_match_applications`) para saber qué ya
+ * había contado. Ese libro sobra cuando la cuenta se rehace de cero: el estado
+ * es el puntaje, y el historial son los partidos, que ya están guardados.
+ *
+ * Rehacerla de cero tiene un premio: un resultado corregido se refleja solo en
+ * la corrida siguiente. No hay nada que "invalidar" ni que reconstruir.
+ *
+ * Cada corrida deja su versión en un TXT (`escribirVersionDelRanking`), así se
+ * puede volver a ver el ranking de cualquier semana.
+ */
+export async function actualizarRankingSemanal(rankingId: string) {
+    const supabase = getAdminClient();
+    const ranking = await getRankingRow(supabase, rankingId);
+    const entries = await getRankingEntries(supabase, rankingId);
+    const activeEntries = entries.filter((entry) => entry.is_active);
+
+    const partidos = await listEligibleSeasonMatches(
+        supabase,
+        ranking,
+        activeEntries.map((entry) => entry.club_id),
+    );
+
+    // El puntaje con el que cada club TERMINÓ la semana pasada, antes de que el
+    // reset de abajo lo pise. Es lo que la tabla muestra como "anterior" y contra
+    // lo que se calcula la variación de la fila: sin guardarlo acá se pierde, y
+    // la columna queda comparando el puntaje nuevo contra sí mismo — 0,00 en las
+    // 151 filas, todas las semanas.
+    const ratingDeLaSemanaPasada = new Map(
+        entries.map((entry) => [entry.club_id, roundRating(toNumber(entry.current_rating))]),
+    );
+
+    // Desde cero, con el puntaje inicial de cada club.
+    const porClub = new Map<string, RankingEntryRow>();
+    for (const entry of entries) {
+        entry.current_rating = roundRating(toNumber(entry.initial_rating));
+        entry.last_applied_match_id = null;
+        porClub.set(entry.club_id, entry);
+    }
+
+    // En orden cronológico: el intercambio de World Rugby depende de los puntajes
+    // del momento, así que dos partidos al revés no dan lo mismo.
+    const ordenados = [...partidos].sort(compareMatchOrder);
+    let aplicados = 0;
+
+    for (const match of ordenados) {
+        if (!isRankingEligibleForMatch(ranking, match, porClub)) continue;
+        if (!match.home_club_id || !match.away_club_id) continue;
+
+        const local = porClub.get(match.home_club_id);
+        const visitante = porClub.get(match.away_club_id);
+        const score = parseScore(match.score);
+        if (!local || !visitante || !score) continue;
+
+        const ratingLocal = roundRating(toNumber(local.current_rating));
+        const ratingVisitante = roundRating(toNumber(visitante.current_rating));
+        const intercambio = computeWorldRugbyExchange(ranking, ratingLocal, ratingVisitante, score);
+
+        local.current_rating = roundRating(ratingLocal + intercambio.homeDelta);
+        visitante.current_rating = roundRating(ratingVisitante + intercambio.awayDelta);
+        local.last_applied_match_id = match.id;
+        visitante.last_applied_match_id = match.id;
+        aplicados += 1;
+    }
+
+    // Los ajustes manuales van DESPUÉS de los partidos y en el orden en que se
+    // cargaron: un `set` tiene que pisar lo que dejó el último partido, no al
+    // revés.
+    //
+    // No es un detalle: la corrida rehace la temporada desde los puntajes
+    // iniciales, así que lo que no se vuelva a aplicar acá desaparece. Sin este
+    // bloque se perdían los 2,5 puntos de cada campeón y las correcciones
+    // cargadas a mano — un club con un ajuste de −20 volvía a subir 38 puestos
+    // solo, y nada en la pantalla decía por qué.
+    const { data: ajustes, error: errorAjustes } = await supabase
+        .from('club_ranking_manual_adjustments')
+        .select('*')
+        .eq('ranking_id', rankingId)
+        .order('created_at', { ascending: true });
+
+    if (errorAjustes) {
+        throw createClubRankingQueryError(
+            errorAjustes,
+            'No se pudieron cargar los ajustes manuales del ranking.',
+        );
+    }
+
+    const ajustesAplicados = ((ajustes ?? []) as RankingManualAdjustmentRow[]).flatMap((ajuste) => {
+        const entry = porClub.get(ajuste.club_id);
+        if (!entry) return [];
+
+        const actual = toNumber(entry.current_rating);
+        const pedido = toNumber(ajuste.value);
+        entry.current_rating = roundRating(ajuste.mode === 'set' ? pedido : actual + pedido);
+
+        return [{ ...ajuste, resulting_rating: entry.current_rating }];
+    });
+
+    // Las posiciones salen de ordenar por puntaje acá mismo. La posición anterior
+    // —la que dibuja la flechita de subió/bajó— es la que estaba guardada antes
+    // de esta corrida, o sea la de la semana pasada.
+    const ordenadas = [...entries].sort(compareRankingEntries);
+    const filas = ordenadas.map((entry, index) => {
+        const posicionPrevia =
+            entry.current_position === null || entry.current_position === undefined
+                ? null
+                : Number(entry.current_position);
+
+        return toEntryRow(entry, {
+            current_position: index + 1,
+            source_previous_position: posicionPrevia,
+            source_payload: withPreviousRating(
+                entry.source_payload,
+                ratingDeLaSemanaPasada.get(entry.club_id) ?? toNumber(entry.current_rating),
+            ),
+        });
+    });
+
+    for (let desde = 0; desde < filas.length; desde += RANKING_WRITE_CHUNK) {
+        const { error } = await supabase
+            .from('club_ranking_entries')
+            .upsert(filas.slice(desde, desde + RANKING_WRITE_CHUNK), { onConflict: 'id' });
+
+        if (error) {
+            throw createClubRankingQueryError(error, 'No se pudo guardar el ranking semanal.');
+        }
+    }
+
+    // El puntaje con el que quedó cada ajuste, para que el panel muestre el
+    // efecto real y no el de la corrida de la semana pasada. Va en una sola
+    // escritura: son pocos y ya están completos.
+    if (ajustesAplicados.length > 0) {
+        const { error } = await supabase
+            .from('club_ranking_manual_adjustments')
+            .upsert(ajustesAplicados, { onConflict: 'id' });
+
+        if (error) {
+            throw createClubRankingQueryError(
+                error,
+                'No se pudieron guardar los resultados de los ajustes manuales.',
+            );
+        }
+    }
+
+    await supabase
+        .from('club_rankings')
+        .update({
+            backfill_completed_at: new Date().toISOString(),
+            last_incremental_match_id: null,
+            stale_from_match_id: null,
+            stale_from_match_date: null,
+            stale_reason: null,
+        })
+        .eq('id', rankingId);
+
+    const puntero = await escribirVersionDelRanking(supabase, ranking, ordenadas);
+
+    return { aplicados, ajustes: ajustesAplicados.length, clubes: filas.length, puntero };
+}
+
+/**
+ * Deja la versión de esta semana en dos archivos de texto, y nada más.
+ *
+ * - `rankings/{id}/{fecha}.txt` — la tabla completa de esa semana, para poder
+ *   volver a ver cómo estaba.
+ * - `rankings/{id}/punteros.txt` — una línea por cambio de puntero: desde qué
+ *   fecha, qué club y con cuántos puntos. Se agrega sólo cuando el puntero
+ *   cambia, así que es corto y se lee de un vistazo.
+ *
+ * Va a Storage y no a la base a propósito: son archivos de texto, se descargan
+ * como tales, y no obligan a migrar el esquema. Si el bucket no existe, la
+ * actualización del ranking NO falla — el ranking es lo importante y el archivo
+ * es el registro.
+ */
+async function escribirVersionDelRanking(
+    supabase: ReturnType<typeof getAdminClient>,
+    ranking: RankingRow,
+    ordenadas: RankingEntryRow[],
+) {
+    const fecha = new Date().toISOString().slice(0, 10);
+    const lider = ordenadas[0] ?? null;
+    const nombreLider = lider ? (getRankingEntryClub(lider)?.name || lider.source_name) : null;
+
+    try {
+        const tabla = [
+            `${ranking.name} — ${fecha}`,
+            ''.padEnd(48, '-'),
+            ...ordenadas.map((entry, index) => {
+                const nombre = getRankingEntryClub(entry)?.name || entry.source_name;
+                return `${String(index + 1).padStart(3)}  ${String(nombre).padEnd(34).slice(0, 34)}  ${toNumber(entry.current_rating).toFixed(2)}`;
+            }),
+        ].join('\n');
+
+        const subida = await supabase.storage
+            .from('rankings')
+            .upload(`${ranking.id}/${fecha}.txt`, tabla, {
+                contentType: 'text/plain; charset=utf-8',
+                upsert: true,
+            });
+
+        if (subida.error) {
+            console.warn('[clubRankings] No se pudo guardar la version semanal:', subida.error.message);
+            return nombreLider;
+        }
+
+        // El historial de punteros: se lee el que hay, y sólo se agrega una línea
+        // si el puntero de esta semana es distinto del último anotado.
+        const rutaPunteros = `${ranking.id}/punteros.txt`;
+        const previo = await supabase.storage.from('rankings').download(rutaPunteros);
+        const textoPrevio = previo.data ? await previo.data.text() : '';
+        const ultimaLinea = textoPrevio.trimEnd().split('\n').pop() ?? '';
+
+        if (nombreLider && !ultimaLinea.includes(`\t${nombreLider}\t`)) {
+            const linea = `${fecha}\t${nombreLider}\t${toNumber(lider?.current_rating).toFixed(2)}`;
+            await supabase.storage
+                .from('rankings')
+                .upload(rutaPunteros, `${textoPrevio}${textoPrevio && !textoPrevio.endsWith('\n') ? '\n' : ''}${linea}\n`, {
+                    contentType: 'text/plain; charset=utf-8',
+                    upsert: true,
+                });
+        }
+    } catch (error) {
+        console.warn('[clubRankings] El registro en TXT de la semana fallo:', error);
+    }
+
+    return nombreLider;
+}
+
+/** Pasada semanal sobre todos los rankings. La usa el cron del martes. */
+export async function runWeeklyClubRankingUpdate() {
+    const supabase = getAdminClient();
+    const { data, error } = await supabase.from('club_rankings').select('id');
+
+    if (error) {
+        throw createClubRankingQueryError(error, 'No se pudieron listar los rankings.');
+    }
+
+    const resultados: Array<{
+        rankingId: string;
+        aplicados?: number;
+        puntero?: string | null;
+        error?: string;
+    }> = [];
+
+    for (const row of (data ?? []) as Array<{ id: string }>) {
+        try {
+            const { aplicados, puntero } = await actualizarRankingSemanal(row.id);
+            resultados.push({ rankingId: row.id, aplicados, puntero });
+        } catch (updateError) {
+            const detalle = updateError instanceof Error ? updateError.message : String(updateError);
+            console.error('[clubRankings] La actualizacion semanal fallo:', { rankingId: row.id, error: updateError });
+            resultados.push({ rankingId: row.id, error: detalle.slice(0, 300) });
+        }
+    }
+
+    return resultados;
+}
+
+
 export async function rebuildStaleClubRankings(
     options: { limit?: number } = {},
 ): Promise<{ pending: number; rebuilt: number; failed: number }> {
     const supabase = getAdminClient();
     const limit = Math.max(1, Math.min(options.limit ?? 25, 100));
 
+    // Los tres marcadores, no solo el primero. `stale_from_match_id` es una FK a
+    // matches con ON DELETE SET NULL: si se borra el partido que dejo el ranking
+    // sucio, el puntero se vacia solo y el ranking DESAPARECE de esta consulta
+    // sin haberse reconstruido — sigue stale, con su fecha y su motivo intactos,
+    // pero el cron ya no lo ve. Paso de verdad: el ranking quedo stale el
+    // 2026-07-18 y llego al 2026-08-05 sin recalcular.
+    // `markRankingStale` escribe los tres y el rebuild los limpia los tres, asi
+    // que cualquiera de ellos alcanza como senal.
     const { data, error } = await supabase
         .from('club_rankings')
-        .select('id')
-        .not('stale_from_match_id', 'is', null)
+        .select('id, metadata')
+        .or('stale_from_match_id.not.is.null,stale_from_match_date.not.is.null,stale_reason.not.is.null')
         .order('stale_from_match_date', { ascending: true, nullsFirst: true })
         .limit(limit);
 
@@ -1296,7 +1676,7 @@ export async function rebuildStaleClubRankings(
         throw createClubRankingQueryError(error, 'No se pudieron listar los rankings pendientes de recalculo.');
     }
 
-    const pendingRankings = (data ?? []) as Array<{ id: string }>;
+    const pendingRankings = (data ?? []) as Array<{ id: string; metadata: Record<string, unknown> | null }>;
     let rebuilt = 0;
     let failed = 0;
 
@@ -1310,6 +1690,27 @@ export async function rebuildStaleClubRankings(
                 rankingId: row.id,
                 error: rebuildError,
             });
+
+            // El motivo del fallo se GUARDA, no sólo se loguea. Un ranking puede
+            // quedar stale semanas mientras el cron lo reintenta cada dos minutos
+            // —y cada reintento es un rebuild completo contra las mismas filas que
+            // el gestor está escribiendo—, y hasta acá la única forma de saber por
+            // qué era abrir los logs de la plataforma. Con esto se lee de la base.
+            const detalle =
+                rebuildError instanceof Error ? rebuildError.message : String(rebuildError);
+
+            await supabase
+                .from('club_rankings')
+                .update({
+                    metadata: {
+                        ...(row.metadata ?? {}),
+                        lastRebuildError: {
+                            message: detalle.slice(0, 500),
+                            failedAt: new Date().toISOString(),
+                        },
+                    },
+                })
+                .eq('id', row.id);
         }
     }
 
@@ -1342,16 +1743,21 @@ async function applyManualAdjustments(
                 ? requestedValue
                 : currentRating + requestedValue;
 
-        entry.previous_rating = roundRating(currentRating);
-        entry.source_payload = withPreviousRating(entry.source_payload, currentRating);
+        // El ajuste NO toca el puntaje "anterior", y esa es toda la diferencia
+        // entre que se vea una vez o para siempre.
+        //
+        // Pisarlo con el valor previo al ajuste hacia que la tabla mostrara el
+        // +2,5 del campeon como variacion de ESTA semana en cada recalculo, y el
+        // recalculo corre solo. El ajuste es permanente en el puntaje —se vuelve
+        // a aplicar en cada corrida, porque la cuenta se rehace desde cero— pero
+        // tiene que aparecer en la columna de variacion una sola vez, la semana
+        // en que se cargo. Eso ya pasa solo: esa semana, y solo esa, el puntaje
+        // anterior todavia no lo tenia adentro.
         entry.current_rating = roundRating(nextRating);
 
         await supabase
             .from('club_ranking_entries')
-            .update({
-                current_rating: entry.current_rating,
-                source_payload: entry.source_payload,
-            })
+            .update({ current_rating: entry.current_rating })
             .eq('ranking_id', rankingId)
             .eq('club_id', adjustment.club_id);
 
@@ -1566,7 +1972,16 @@ async function rebuildRankingInternal(
     const entries = await getRankingEntries(supabase, rankingId);
     const activeEntries = entries.filter((entry) => entry.is_active);
 
-    for (const entry of entries) {
+    // El reset va en LOTE, no una fila por vez. Eran 151 UPDATE seriales —uno por
+    // club— antes de empezar el trabajo de verdad; con la latencia de un
+    // round-trip cada uno, ese preámbulo se comía una porción del maxDuration de
+    // 60 s del cron sin haber aplicado todavía un solo partido.
+    //
+    // El upsert lleva la fila ENTERA (`...entry`) y encima los campos reseteados:
+    // el conflicto por `id` siempre ocurre —las filas existen—, pero el tuple que
+    // se arma tiene que satisfacer igual los NOT NULL de la tabla, así que no se
+    // puede mandar sólo el parche.
+    const entradasReseteadas = entries.map((entry) => {
         const resetRating = roundRating(toNumber(entry.initial_rating));
         entry.previous_rating = resetRating;
         entry.current_rating = resetRating;
@@ -1575,16 +1990,27 @@ async function rebuildRankingInternal(
         entry.last_applied_match_id = null;
         entry.source_payload = withPreviousRating(entry.source_payload, resetRating);
 
-        await supabase
+        return toEntryRow(entry, {
+            current_rating: resetRating,
+            current_position: null,
+            source_previous_position: null,
+            source_payload: entry.source_payload,
+            last_applied_match_id: null,
+        });
+    });
+
+    for (let desde = 0; desde < entradasReseteadas.length; desde += RANKING_WRITE_CHUNK) {
+        const lote = entradasReseteadas.slice(desde, desde + RANKING_WRITE_CHUNK);
+        const { error: resetError } = await supabase
             .from('club_ranking_entries')
-            .update({
-                current_rating: resetRating,
-                current_position: null,
-                source_previous_position: null,
-                source_payload: entry.source_payload,
-                last_applied_match_id: null,
-            })
-            .eq('id', entry.id);
+            .upsert(lote, { onConflict: 'id' });
+
+        if (resetError) {
+            throw createClubRankingQueryError(
+                resetError,
+                'No se pudieron resetear las entradas del ranking antes del recalculo.',
+            );
+        }
     }
 
     await supabase
@@ -1744,25 +2170,45 @@ export async function updateClubRankingMetadata(
     return getClubRankingDetail(rankingId);
 }
 
-export async function getClubRankingDetail(rankingId: string): Promise<RankingDetail> {
+/**
+ * `includeActivity: false` se saltea el historial reciente, los ajustes manuales
+ * y el historial de liderazgo. Son tres consultas que solo mira el panel: la vista
+ * publica arma su payload con `ranking` y `entries` y descarta el resto, asi que
+ * las pagaba de gusto en cada visita.
+ */
+export async function getClubRankingDetail(
+    rankingId: string,
+    options: { includeClubLogos?: boolean; includeActivity?: boolean } = {},
+): Promise<RankingDetail> {
     const supabase = getAdminClient();
+    const includeActivity = options.includeActivity ?? true;
+    const emptyRes = { data: [], error: null } as const;
+    const emptyLeadership = {
+        leadershipPeriods: [],
+        leadershipSummary: [],
+        currentLeaderClubId: null,
+    } as Awaited<ReturnType<typeof getLeadershipHistory>>;
+
     const ranking = await getRankingRow(supabase, rankingId);
     const [entries, recentApplicationsRes, manualAdjustmentsRes, leadershipHistory] = await Promise.all([
-        // El unico consumidor que PINTA los escudos: los pide explicitamente.
-        getRankingEntries(supabase, rankingId, true),
-        supabase
-            .from('club_ranking_match_applications')
-            .select('*')
-            .eq('ranking_id', rankingId)
-            .order('match_date_time', { ascending: false })
-            .limit(15),
-        supabase
-            .from('club_ranking_manual_adjustments')
-            .select('*')
-            .eq('ranking_id', rankingId)
-            .order('created_at', { ascending: false })
-            .limit(20),
-        getLeadershipHistory(supabase, rankingId),
+        getRankingEntries(supabase, rankingId, options.includeClubLogos ?? true),
+        includeActivity
+            ? supabase
+                .from('club_ranking_match_applications')
+                .select('*')
+                .eq('ranking_id', rankingId)
+                .order('match_date_time', { ascending: false })
+                .limit(15)
+            : emptyRes,
+        includeActivity
+            ? supabase
+                .from('club_ranking_manual_adjustments')
+                .select('*')
+                .eq('ranking_id', rankingId)
+                .order('created_at', { ascending: false })
+                .limit(20)
+            : emptyRes,
+        includeActivity ? getLeadershipHistory(supabase, rankingId) : emptyLeadership,
     ]);
 
     if (recentApplicationsRes.error) {
@@ -1867,7 +2313,7 @@ export async function importClubRankingBase(input: ImportRankingBaseInput) {
         scope: readText(input.scope) || 'clubes-designados',
         description: readText(input.description),
         algorithm: 'world_rugby',
-        home_advantage: 3,
+        home_advantage: 0,
         margin_threshold: 15,
         margin_multiplier: 1.5,
         event_multiplier: 1,
@@ -2330,6 +2776,22 @@ export async function syncClubRankingsForMatchUpdate(
     matchId: string,
     previousMatch?: MatchSnapshot | null,
 ) {
+    // Guardar un resultado NO mueve el ranking. Lo rehace entero el cron de los
+    // martes (`/api/cron/weekly-club-ranking`), que es lo unico que lo toca.
+    //
+    // El punto de entrada se mantiene —y no hace nada— porque todavia lo llaman
+    // el guardado de partidos, la importacion de fixture y el sync de la URBA.
+    // Sacar la llamada de esos tres es limpieza y va aparte; lo que importa es
+    // que el efecto ya no ocurra: los resultados se cargan fuera de orden
+    // cronologico, asi que cada uno terminaba marcando el ranking para
+    // reconstruir, y la reconstruccion le disputaba las filas al gestor que
+    // estaba cargando la fecha. Ese era el trabe al cargar varios seguidos.
+    //
+    // Debajo queda la implementacion incremental, inalcanzable a proposito: si
+    // alguna vez se vuelve a un modelo por partido, esto es lo que habia.
+    void previousMatch;
+    return { processedRankings: 0 };
+
     const supabase = getAdminClient();
     const currentMatch = await getMatchSnapshot(matchId);
     const normalizedPreviousMatch = normalizeMatchSnapshot(previousMatch);
@@ -2433,9 +2895,18 @@ export async function syncClubRankingsForMatchUpdate(
         }
 
         markEditTrace({ rankingIncremental: true });
+        traceStageStart('ranking_apply_match');
         await applyMatchToRanking(supabase, ranking, entryMap, currentMatch, 'incremental');
-        await recomputeEntryPositions(supabase, ranking.id);
+        traceStageEnd('ranking_apply_match');
+
+        traceStageStart('ranking_recompute_positions');
+        const recomputedEntries = await recomputeEntryPositions(supabase, ranking.id);
+        traceStageEnd('ranking_recompute_positions');
+        markEditTrace({ rankingEntriesRecomputed: recomputedEntries });
+
+        traceStageStart('ranking_leadership_history');
         await rebuildLeadershipHistory(supabase, ranking.id);
+        traceStageEnd('ranking_leadership_history');
         processedRankings += 1;
     }
 

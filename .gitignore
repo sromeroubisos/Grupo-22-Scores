@@ -71,3 +71,11 @@ carrera-capturas/
 # Capturas de verificación sueltas en la raíz. Las imágenes que SÍ se publican
 # viven en public/, así que un .png en la raíz siempre es una captura de trabajo.
 /*.png
+
+# Grafo de conocimiento y vault de Obsidian que genera graphify. Es derivado del
+# código: se reconstruye con `graphify update .`, así que no se versiona.
+graphify-out/
+
+# Caché de descargas de rugbyarchive.net (derivado, se rebaja solo)
+.rugbyarchive-cache/
+RUGBYARCHIVE_HISTORICO_LOG.jsonl

@@ -366,6 +366,27 @@
     border-bottom: 1px solid var(--stroke);
     padding: 0 8px;
     overflow-x: auto;
+    /* Degrade en el borde por el que todavia hay pestanas. Los data-attributes
+       los pone `useHorizontalOverflow` en MatchDetailClientPage; sin scroll
+       pendiente los dos valen 0px y la mascara no pinta nada, asi que en
+       escritorio la barra queda exactamente igual que antes. */
+    --tab-fade-left: 0px;
+    --tab-fade-right: 0px;
+    -webkit-mask-image: linear-gradient(to right,
+        transparent 0, #000 var(--tab-fade-left),
+        #000 calc(100% - var(--tab-fade-right)), transparent 100%);
+    mask-image: linear-gradient(to right,
+        transparent 0, #000 var(--tab-fade-left),
+        #000 calc(100% - var(--tab-fade-right)), transparent 100%);
+    transition: -webkit-mask-image 140ms linear, mask-image 140ms linear;
+}
+
+.tabsNav[data-overflow-start="true"] {
+    --tab-fade-left: 26px;
+}
+
+.tabsNav[data-overflow-end="true"] {
+    --tab-fade-right: 26px;
 }
 
 .tabItem {
@@ -1218,6 +1239,10 @@
 .playersStatsView {
     display: flex;
     flex-direction: column;
+    /* `--muted` (#71717a) da 4,09:1 sobre el fondo de la pagina: no llega al
+       4,5:1 que pide AA para texto normal, y este panel es casi todo texto
+       chico. Este es el gris que si llega (7,7:1). */
+    --meta: var(--color-text-secondary);
 }
 
 .playerStatsGrid {
@@ -2838,7 +2863,7 @@
 .playerStatsSubtitle {
     margin: -8px 0 16px;
     font-size: 13px;
-    color: var(--muted);
+    color: var(--meta);
 }
 
 .playerStatsHeaderBar {
@@ -2866,7 +2891,9 @@
 }
 
 .playerStatsSearch::placeholder {
-    color: var(--muted);
+    /* El texto de ayuda de un campo se lee igual que cualquier otro: pide el
+       mismo 4,5:1, no el gris tenue de siempre. */
+    color: var(--meta);
 }
 
 .playerStatsSearch:focus {
@@ -2881,6 +2908,10 @@
 }
 
 .playerStatsConfigBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     padding: 10px 16px;
     border-radius: 12px;
     border: 1px solid var(--stroke);
@@ -2890,7 +2921,16 @@
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.playerStatsConfigBtn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.playerStatsConfigIcon {
+    flex: none;
 }
 
 .playerStatsConfigBtn:hover {
@@ -3030,7 +3070,9 @@
     border: 1px solid var(--stroke);
     margin-bottom: 16px;
     font-size: 12px;
-    color: var(--muted);
+    /* `--muted` daba 4,09:1 aca (medido, no estimado): por debajo del 4,5:1
+       de AA para 12px. */
+    color: var(--meta);
 }
 
 .playerStatsSummaryItem strong {
@@ -3045,6 +3087,28 @@
 
 .playerStatsSummaryHighlight strong {
     color: var(--accent);
+}
+
+/* Ningun jugador pasa el filtro. Va antes de la tabla y de la lista: las dos
+   quedan vacias y sin esto la pantalla no dice por que. */
+.playerStatsNoMatch {
+    padding: 28px 16px;
+    border: 1px dashed var(--stroke);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.playerStatsNoMatchTitle {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.playerStatsNoMatchHint {
+    margin: 0;
+    font-size: 12px;
+    color: var(--meta);
 }
 
 .playerStatsTableWrapEnhanced {
@@ -3260,103 +3324,344 @@
     }
 }
 
-/* ========== Player Stats Mobile Cards ========== */
+/* ================================================================
+   Player Stats — LISTA DENSA MOBILE
 
-.playerStatsCardsMobile {
+   Reemplaza a las tarjetas de tres cajas iguales. La regla del bloque:
+   el nombre y la METRICA QUE ORDENA mandan; el resto son fichas chicas.
+   Cual es esa metrica lo decide el panel (`activeSortSlot`), asi que este
+   CSS no sabe si el deporte anota goles, tries o puntos.
+   ================================================================ */
+
+.playerStatsList {
     display: none;
 }
 
-.playerStatsCard {
-    padding: 14px 16px;
-    border-radius: 16px;
-    border: 1px solid var(--stroke);
-    background: rgba(255, 255, 255, 0.02);
-    display: grid;
-    gap: 10px;
+.pGroup {
+    margin-bottom: 16px;
 }
 
-.playerStatsCardHeader {
-    display: grid;
-    gap: 2px;
+.pGroup:last-child {
+    margin-bottom: 0;
 }
 
-.playerStatsCardNameWrap {
+/* Cabecera de equipo. Pega arriba con el alto de la cabecera global
+   (fixed, ~56px con la pagina scrolleada); sin el offset el rotulo se mete
+   abajo del logo de G22. */
+.pGroupHeader {
+    position: sticky;
+    top: 56px;
+    z-index: 2;
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
+    min-height: 34px;
+    padding: 6px 12px;
+    margin-bottom: 2px;
+    border: 1px solid var(--stroke);
+    border-radius: 10px;
+    background: rgba(14, 15, 18, 0.94);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-.playerStatsCardName {
+/* El lado se marca con un punto, no con un borde lateral de color. */
+.pGroupHeader::before {
+    content: "";
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(148, 163, 184, 0.55);
+}
+
+.pGroupHeaderHome::before {
+    background: var(--accent);
+}
+
+.pGroupHeaderAway::before {
+    background: rgba(148, 163, 184, 0.8);
+}
+
+.pGroupName {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
     font-weight: 700;
-    font-size: 15px;
     color: var(--text);
 }
 
-.playerStatsCardMeta {
-    font-size: 12px;
-    color: var(--muted);
-}
-
-.playerStatsCardTeamWrap {
-    display: flex;
-}
-
-.playerStatsCardMetrics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: 10px;
-}
-
-.playerStatsCardMetric {
-    display: grid;
-    gap: 4px;
-    padding: 8px 10px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.playerStatsCardMetricActive {
-    background: rgba(var(--color-accent-rgb), 0.08);
-    border-color: rgba(var(--color-accent-rgb), 0.25);
-}
-
-.cardMetricTop {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.cardMetricLabel {
-    font-size: 10px;
+.pGroupCount {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 11px;
     font-weight: 700;
+    color: var(--meta);
+}
+
+.pGroupMetric {
+    flex: none;
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--muted);
-}
-
-.cardMetricArrow {
     color: var(--accent);
-    font-weight: 800;
-    font-size: 12px;
 }
 
-.cardMetricValueWrap {
+.pRows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.pRow {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto auto;
+    align-items: center;
+    column-gap: 10px;
+    min-height: 52px;
+    padding: 4px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pRows > .pRow:last-child {
+    border-bottom: none;
+}
+
+.pRank {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--meta);
+}
+
+.pRankTop {
+    color: var(--accent);
+}
+
+/* El bloque entero es el area tactil: el nombre solo no llega a 44px. */
+.pIdentityLink,
+.pIdentity {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+    min-height: 44px;
+    color: inherit;
+    text-decoration: none;
 }
 
-.cardMetricValue {
-    font-family: var(--font-mono);
-    font-size: 16px;
-    font-weight: 700;
+.pIdentityLink:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    border-radius: 8px;
+}
+
+.pName {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
     color: var(--text);
 }
 
-.playerStatsCardMetricActive .cardMetricValue {
+.pCaptain {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: rgba(var(--color-accent-rgb), 0.16);
+    color: var(--color-accent-ink);
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 14px;
+    vertical-align: 1px;
+}
+
+.pMeta {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--meta);
+}
+
+.pChips {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 4px;
+}
+
+.pChip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+    padding: 2px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.pChipLabel {
+    font-family: var(--font-main);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--meta);
+}
+
+/* El tono lo declara la metrica (`PlayerMetricMeta.tone`), no el componente:
+   un deporte que sume su propia tarjeta hereda el color sin tocar esto. */
+.pChipCaution {
+    border-color: rgba(245, 158, 11, 0.34);
+    background: rgba(245, 158, 11, 0.13);
+}
+
+.pChipCaution .pChipLabel {
+    color: rgb(252, 211, 77);
+}
+
+.pChipDanger {
+    border-color: rgba(239, 68, 68, 0.36);
+    background: rgba(239, 68, 68, 0.14);
+}
+
+.pChipDanger .pChipLabel {
+    color: rgb(252, 165, 165);
+}
+
+.pPrimary {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    min-width: 40px;
+}
+
+.pPrimaryValue {
+    font-family: var(--font-mono);
+    font-size: 17px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: var(--meta);
+}
+
+.pPrimaryValueOn {
     color: var(--accent);
+}
+
+.pPrimaryTrack {
+    width: 38px;
+    height: 3px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.07);
+    overflow: hidden;
+}
+
+.pPrimaryFill {
+    display: block;
+    height: 100%;
+    border-radius: 99px;
+    background: rgba(var(--color-accent-rgb), 0.55);
+    transition: width 220ms var(--mo-ease-quart, ease-out);
+}
+
+/* ── Los que no registraron nada ──
+   No pueden pesar lo mismo que el que anoto. Van plegados, en una linea, y
+   se abren solos cuando NADIE del equipo registro (si no, el grupo se veria
+   vacio y pareceria un error de carga). */
+.pBlank {
+    margin-top: 2px;
+}
+
+.pBlankSummary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--meta);
+    cursor: pointer;
+    list-style: none;
+}
+
+.pBlankSummary::-webkit-details-marker {
+    display: none;
+}
+
+.pBlankSummary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.pBlankChevron {
+    flex: none;
+    transition: transform 180ms var(--mo-ease-quart, ease-out);
+}
+
+.pBlank[open] .pBlankChevron {
+    transform: rotate(180deg);
+}
+
+.pBlankRows {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 4px;
+}
+
+.pBlankRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 36px;
+    padding: 0 12px 0 30px;
+}
+
+.pBlankName,
+.pBlankLink {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--meta);
+    text-decoration: none;
+}
+
+.pBlankLink:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.pBlankMeta {
+    flex: none;
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--meta);
 }
 
 /* Scroll hint shadow for tablet table */
@@ -3375,40 +3680,64 @@
         display: none;
     }
 
-    .playerStatsCardsMobile {
-        display: grid;
-        gap: 12px;
+    .playerStatsList {
+        display: block;
     }
 
+    /* ── Menos chrome antes del primer dato ──
+       El subtitulo repite lo que el panel ya demuestra, y el buscador y el
+       boton entran en la MISMA fila de 44px en vez de dos. */
     .playerStatsSubtitle {
-        font-size: 12px;
+        display: none;
     }
 
+    .playerStatsHeaderBar {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .playerStatsSearchWrap {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .playerStatsSearch {
+        padding: 11px 14px;
+        font-size: 16px; /* 16px o menos y iOS hace zoom al enfocar */
+    }
+
+    .playerStatsHeaderActions {
+        flex: none;
+    }
+
+    .playerStatsConfigBtn {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+    }
+
+    .playerStatsConfigLabel {
+        display: none;
+    }
+
+    /* El resumen deja de ser una caja y pasa a ser una linea de metadatos. */
     .playerStatsSummaryBar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px 14px;
+        padding: 0 2px 10px;
+        margin-bottom: 4px;
+        border: none;
+        border-radius: 0;
+        background: none;
         font-size: 11px;
-        padding: 8px 10px;
     }
 
     .playerMetricsToolbarCompact {
         padding: 12px 14px;
-    }
-
-    .playerStatsHeaderBar {
-        gap: 8px;
-    }
-
-    .playerStatsConfigBtn {
-        width: 100%;
-        padding: 10px;
-        font-size: 12px;
-    }
-
-    .playerStatsSearch {
-        font-size: 16px; /* prevent iOS zoom */
-    }
-
-    .playerStatsCardMetrics {
-        grid-template-columns: repeat(3, 1fr);
     }
 }
 

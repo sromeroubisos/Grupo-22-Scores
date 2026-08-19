@@ -60,13 +60,18 @@ export async function GET(request: NextRequest) {
     const targetDates = getTargetDates();
 
     let totalSynced = 0;
-    const sportResults: Record<string, { synced: number; errors: number }> = {};
+    // `synced` cuenta filas ESCRITAS. Si la caché no está disponible (la tabla no
+    // existe), el job no hizo su trabajo y tiene que decirlo: antes respondía
+    // ok:true con un contador inflado y ningún monitor se enteraba.
+    let storageUnavailable = false;
+    const sportResults: Record<string, { synced: number; errors: number; skipped?: number }> = {};
 
     // Process sports in parallel, but dates sequentially per sport to avoid rate-limit bursts
     await Promise.allSettled(
         activeSports.map(async (sport) => {
             let synced = 0;
             let errors = 0;
+            let skipped = 0;
 
             if (!isFlashScoreEnabledForSport(sport.id)) {
                 sportResults[sport.id] = { synced: 0, errors: 0 };
@@ -82,8 +87,12 @@ export async function GET(request: NextRequest) {
 
                     if (matches.length > 0) {
                         const cached = matches.map(m => mapFlashScoreMatchToCached(m, sport.id));
-                        await upsertMatches(cached, adminClient);
-                        synced += cached.length;
+                        const result = await upsertMatches(cached, adminClient);
+                        synced += result.written;
+                        if (result.skipped) {
+                            skipped += cached.length;
+                            storageUnavailable = true;
+                        }
                     }
                 } catch (e) {
                     errors++;
@@ -91,19 +100,33 @@ export async function GET(request: NextRequest) {
                 }
             }
 
-            sportResults[sport.id] = { synced, errors };
+            sportResults[sport.id] = skipped > 0 ? { synced, errors, skipped } : { synced, errors };
             totalSynced += synced;
         })
     );
 
     const elapsed = Date.now() - startedAt;
-    console.log(`[fixture-sync] Done: ${totalSynced} matches synced in ${elapsed}ms`);
+    console.log(
+        `[fixture-sync] Done: ${totalSynced} matches written in ${elapsed}ms` +
+        (storageUnavailable ? ' — CACHÉ NO DISPONIBLE: no se escribió nada' : '')
+    );
 
-    return NextResponse.json({
-        ok: true,
+    const payload = {
+        ok: !storageUnavailable,
         synced: totalSynced,
         elapsed,
         dates: targetDates.map(d => d.dateKey),
-        sports: sportResults
-    });
+        sports: sportResults,
+        ...(storageUnavailable
+            ? {
+                storage: 'unavailable' as const,
+                reason: 'external_match_cache no existe. Aplicar 20260701090000_restore_external_match_cache.sql o dar de baja este cron.',
+            }
+            : {}),
+    };
+
+    // 500 a propósito cuando la caché no existe: el job no puede cumplir su
+    // objetivo y el cron de Vercel tiene que verse en rojo. Devolver 200 es lo
+    // que mantuvo esto invisible desde 2026-03-18.
+    return NextResponse.json(payload, { status: storageUnavailable ? 500 : 200 });
 }

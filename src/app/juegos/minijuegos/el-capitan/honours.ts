@@ -43,12 +43,14 @@
 // reescribiera entera, el `slice` devuelve vacío y el aviso no aparece: se calla,
 // que es la falla correcta para una pantalla de celebración.
 
-import type { CaptainState, MilestoneId } from '@/features/captain';
+import type { CaptainSeasonEntry, CaptainState, MilestoneId } from '@/features/captain';
 // El VALOR va por camino relativo y con extensión, y el tipo por el alias: los
 // tipos se borran al compilar, pero esta tabla existe en tiempo de ejecución y
 // `node --test` no resuelve `@/`. Es la misma razón por la que todo el motor se
 // importa así. Cambiarlo por el alias deja el test de este módulo sin arrancar.
 import { AWARD_LABELS } from '../../../../features/captain/engine/awards.ts';
+import { TITLE_MIN_SHARE } from '../../../../features/captain/engine/clubs.ts';
+import { FIRST_TEAM_AGE } from '../../../../features/captain/types/player.ts';
 
 /**
  * Los dos conjuntos que el jugador distingue: lo que ganó el equipo —con el
@@ -224,3 +226,45 @@ export function newHonours(
 
     return avisos;
 }
+
+/**
+ * LA COPA QUE NO LEVANTASTE, explicada.
+ *
+ * El motor tiene dos puertas por las que un club campeón no te deja título, y
+ * las dos son deliberadas — la medalla es del que la jugó:
+ *
+ *   · jugaste en juveniles (`FIRST_TEAM_AGE`): el de 16 no se puso la camiseta
+ *     de primera ni un sábado, jugó la suya;
+ *   · no te pusiste la camiseta (`TITLE_MIN_SHARE`): el que no jugó ni un
+ *     cuarto de la temporada no tiene medalla.
+ *
+ * Lo que NO era deliberado es el silencio: la tarjeta del año mostraba
+ * «El club · 1º de N» y después nada — ni copa, ni aviso, ni porqué. Un jugador
+ * leyó ese silencio como un guardado roto, y tenía razón en quejarse: la regla
+ * existe pero nadie se la había contado. Esta función es la que la cuenta.
+ *
+ * Es DERIVADA de la fila del año (edad, participación, puesto) y no se
+ * persiste: vive acá, al lado de la resta de la vitrina, porque contesta la
+ * pregunta espejo — qué NO entró y por qué.
+ */
+export function copaQueNoLevantaste(
+    entry: Pick<CaptainSeasonEntry, 'age' | 'share' | 'leaguePosition' | 'titles'>,
+): string | null {
+    // El puesto 1 de la tabla ES el campeón (salen de la misma tabla): si acá
+    // hay un título, la copa ya se contó; si el club no salió primero, no hay
+    // nada que explicar.
+    if (entry.leaguePosition !== 1 || entry.titles.length > 0) return null;
+
+    if (entry.age < FIRST_TEAM_AGE) {
+        return 'La primera salió campeona, pero vos jugaste en juveniles. Esa copa no es tuya todavía.';
+    }
+    if (entry.share < TITLE_MIN_SHARE) {
+        return 'El club salió campeón y vos casi no te pusiste la camiseta. La medalla es del plantel que la jugó.';
+    }
+
+    // El motor no produce este estado (primero + participación ⇒ título). Si
+    // alguna vez lo produjera, callarse es la falla correcta para una pantalla
+    // de celebración — la misma regla que la resta de arriba.
+    return null;
+}
+

@@ -33,6 +33,9 @@ interface Club {
   short_name: string | null;
   logo: string | null;
   sport?: string | null;
+  // `clubs.sport` cuando el filtro efectivo salio de `clubs.sport_id`: las dos
+  // columnas conviven y no siempre dicen lo mismo.
+  sportAlt?: string | null;
 }
 
 interface Squad {
@@ -70,7 +73,10 @@ function getSportVariants(sport: string): string[] {
     case 'rugby-union': return ['rugby', 'rugby-union'];
     case 'rugby-league': return ['rugby', 'rugby-league'];
     case 'football': return ['football', 'soccer'];
+    // Los dos hockeys se leen entre si: hay clubes viejos guardados como
+    // 'hockey' que en la plataforma juegan sobre cesped.
     case 'hockey': return ['hockey', 'field-hockey'];
+    case 'field-hockey': return ['field-hockey', 'hockey'];
     default: return [lower];
   }
 }
@@ -84,6 +90,20 @@ function sportMatchesSelection(clubSport: string | null | undefined, selectedSpo
   const normalizedClubSport = normalizeSportValue(clubSport);
   if (!normalizedClubSport) return false;
   return getSportVariants(selectedSportId).includes(normalizedClubSport);
+}
+
+// El filtro por deporte del amistoso ORDENA la lista, no la cierra: un club sin
+// deporte cargado en la ficha no puede quedar inalcanzable para siempre. Y como
+// `sport` y `sport_id` pueden estar en desacuerdo en la base, alcanza con que
+// uno de los dos coincida.
+function clubAllowedForFriendly(club: Club | undefined, selectedSportId: string) {
+  if (!selectedSportId) return true;
+  if (!club) return false;
+  const declared = [club.sport, club.sportAlt]
+    .map(normalizeSportValue)
+    .filter((value): value is string => Boolean(value));
+  if (declared.length === 0) return true;
+  return declared.some((value) => sportMatchesSelection(value, selectedSportId));
 }
 
 function isPlayoffPhaseType(phaseType: string | null | undefined) {
@@ -184,7 +204,9 @@ export default function CreateMatchPage() {
 
   const loadClubs = async () => {
     try {
-      const response = await fetch('/api/admin/clubs');
+      // Sin limite explicito el endpoint corta el catalogo y la mitad de los
+      // clubes queda fuera del buscador.
+      const response = await fetch('/api/admin/clubs?limit=10000', { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         const clubsArray = Array.isArray(data) ? data : (data.data || []);
@@ -192,6 +214,7 @@ export default function CreateMatchPage() {
           ...c,
           logo: c.logo || c.logo_url,
           sport: c.sport_id || c.sport || null,
+          sportAlt: c.sport || c.sport_id || null,
         })));
       }
     } catch (error) {
@@ -431,16 +454,13 @@ export default function CreateMatchPage() {
   }, [formData.sportId, formData.tournamentId, isFriendly, tournaments]);
 
   useEffect(() => {
-    if (!isFriendly || !formData.sportId) return;
-
-    const clubsWithSport = clubs.filter((club) => normalizeSportValue(club.sport));
-    if (clubsWithSport.length === 0) return;
+    if (!isFriendly || !formData.sportId || clubs.length === 0) return;
 
     setFormData((prev) => {
-      const nextHomeClubId = prev.homeClubId && sportMatchesSelection(clubs.find((club) => club.id === prev.homeClubId)?.sport, prev.sportId)
+      const nextHomeClubId = prev.homeClubId && clubAllowedForFriendly(clubs.find((club) => club.id === prev.homeClubId), prev.sportId)
         ? prev.homeClubId
         : '';
-      const nextAwayClubId = prev.awayClubId && sportMatchesSelection(clubs.find((club) => club.id === prev.awayClubId)?.sport, prev.sportId)
+      const nextAwayClubId = prev.awayClubId && clubAllowedForFriendly(clubs.find((club) => club.id === prev.awayClubId), prev.sportId)
         ? prev.awayClubId
         : '';
 
@@ -485,11 +505,13 @@ export default function CreateMatchPage() {
   const selectedPhase = tournamentPhases.find((phase) => phase.id === formData.phase) || null;
   const selectedPhaseRequiresDefinedStage = !isFriendly && isPlayoffPhaseType(selectedPhase?.phase_type);
   const selectedFriendlySport = ACTIVE_SPORTS.find((sport) => sport.id === formData.sportId) || null;
+  // Sin deporte elegido se ve el catalogo completo; con deporte elegido se ve
+  // esa disciplina mas los clubes sin deporte cargado. Si el filtro deja la
+  // lista vacia, gana el catalogo: un selector vacio no es un filtro, es una
+  // traba.
   const availableFriendlyClubs = (() => {
-    if (!formData.sportId) return [];
-    const clubsWithSport = clubs.filter((club) => normalizeSportValue(club.sport));
-    if (clubsWithSport.length === 0) return clubs;
-    return clubsWithSport.filter((club) => sportMatchesSelection(club.sport, formData.sportId));
+    const filtered = clubs.filter((club) => clubAllowedForFriendly(club, formData.sportId));
+    return filtered.length > 0 ? filtered : clubs;
   })();
 
   const handleSubmit = async () => {
@@ -717,14 +739,9 @@ export default function CreateMatchPage() {
             <label>Deporte del amistoso</label>
             <CustomSelect
               value={formData.sportId}
-              onChange={(val) => setFormData({
-                ...formData,
-                sportId: val,
-                homeClubId: '',
-                awayClubId: '',
-                homeSquadId: '',
-                awaySquadId: '',
-              })}
+              // Los clubes elegidos no se borran acá: el efecto de arriba saca
+              // solo los que no entran en la disciplina nueva.
+              onChange={(val) => setFormData({ ...formData, sportId: val })}
               disabled={!isFriendly}
               placeholder={isFriendly ? 'Seleccionar deporte...' : 'Se hereda del torneo'}
               options={[
@@ -821,22 +838,19 @@ export default function CreateMatchPage() {
         <div className="m-section-label">
           <span>02. EQUIPOS Y PLANTELES</span>
         </div>
-        {isFriendly && !formData.sportId && (
+        {isFriendly && (
           <div className="m-section" style={{ marginBottom: 16 }}>
             <div className="cell col-12">
-              <label>Deporte requerido</label>
-              <div style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: 12 }}>
-                Define primero el deporte del amistoso para mostrar solo clubes de esa disciplina.
-              </div>
-            </div>
-          </div>
-        )}
-        {isFriendly && formData.sportId && (
-          <div className="m-section" style={{ marginBottom: 16 }}>
-            <div className="cell col-12">
-              <label>Disciplina seleccionada</label>
+              <label>{formData.sportId ? 'Disciplina seleccionada' : 'Deporte del amistoso'}</label>
               <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>
-                {selectedFriendlySport?.nameEs || formData.sportId}
+                {formData.sportId
+                  ? (selectedFriendlySport?.nameEs || formData.sportId)
+                  : 'Sin elegir'}
+              </div>
+              <div style={{ color: 'var(--text-secondary, #9ca3af)', fontSize: 12, marginTop: 6 }}>
+                {formData.sportId
+                  ? `${availableClubs.length} clubes disponibles. La lista prioriza la disciplina elegida y suma los clubes sin deporte cargado.`
+                  : `${availableClubs.length} clubes disponibles. El deporte es obligatorio para guardar, y acomoda la lista.`}
               </div>
             </div>
           </div>

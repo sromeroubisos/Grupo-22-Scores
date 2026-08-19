@@ -6,6 +6,7 @@ import { AR_DIVISIONS } from '../data/clubs2026/arSystem2026.ts';
 import {
     MIGRATION_ROUTES,
     TRANSFER_PATHWAYS,
+    affinityCountryOf,
     countriesWithLadder,
     domesticLadder,
     homeCountryOf,
@@ -17,6 +18,7 @@ import {
     pathwaysFrom,
     resolveStartRoute,
 } from './market-routes.ts';
+import { economicModelOf } from '../data/competition-levels2026.ts';
 import {
     VETERAN_AGE, allowedRungs, clubIsInterested, generateOffers, isLadderBridge, isVeteranHomecoming,
     marketValue, qualifiesForExceptionalJump,
@@ -63,10 +65,17 @@ test('los países con liga modelada usan su ruta doméstica', () => {
     // y por eso están acá y ya no en la lista de abajo: un estadounidense arranca en
     // la Ivy o en la D1A, un italiano en la Serie A, un portugués en la Divisão de
     // Honra y un brasileño en el Super 12.
+    // Y con el catálogo `2026-27.11` se suman dieciséis países más. Los cinco que
+    // más se notan son los que antes emigraban a los 18 teniendo rugby de clubes
+    // propio: Australia, Gales, Irlanda, Escocia y Fiyi.
     for (const [nationality, code] of [
         ['Francia', 'fr'], ['Inglaterra', 'gb-eng'], ['España', 'es'], ['Japón', 'jp'],
         ['Sudáfrica', 'za'], ['Nueva Zelanda', 'nz'],
         ['Estados Unidos', 'us'], ['Italia', 'it'], ['Portugal', 'pt'], ['Brasil', 'br'],
+        ['Australia', 'au'], ['Gales', 'gb-wls'], ['Irlanda', 'ie'], ['Escocia', 'gb-sct'],
+        ['Fiyi', 'fj'], ['Canadá', 'ca'], ['México', 'mx'], ['Perú', 'pe'],
+        ['Colombia', 'co'], ['Paraguay', 'py'], ['Bolivia', 'bo'],
+        ['Bélgica', 'be'], ['Países Bajos', 'nl'], ['Georgia', 'ge'], ['Rumanía', 'ro'], ['Rusia', 'ru'],
     ] as const) {
         for (const seed of SEEDS.slice(0, 20)) {
             assert.equal(startClubFor(nationality, seed).countryCode, code, `${nationality} debería arrancar en su país`);
@@ -76,8 +85,12 @@ test('los países con liga modelada usan su ruta doméstica', () => {
 
 test('una nacionalidad sin liga modelada usa una ruta migratoria DOCUMENTADA', () => {
     // Italia y Brasil SALIERON de esta lista al entrar sus ligas (catálogo
-    // `2026-27.9`): ahora tienen escalera propia y su ruta es doméstica.
-    for (const nationality of ['Fiyi', 'Samoa', 'Irlanda', 'Australia', 'Namibia', 'Corea del Sur']) {
+    // `2026-27.9`), y en `2026-27.11` salieron Fiyi, Irlanda y Australia por lo
+    // mismo. La lista se está quedando corta a propósito: cada vez que un país
+    // entra al catálogo, deja de emigrar por defecto. Lo que queda son países que
+    // de verdad no tienen rugby de clubes modelado — Samoa, Namibia, Corea— y ahí
+    // la ruta migratoria sigue siendo la respuesta correcta, no un parche.
+    for (const nationality of ['Samoa', 'Tonga', 'Namibia', 'Corea del Sur']) {
         assert.equal(homeCountryOf(nationality), null, `${nationality} no debería tener escalera propia`);
         const region = migrationRegionOf(nationality);
         const allowed = new Set(MIGRATION_ROUTES[region].map((r) => r.countryCode));
@@ -272,6 +285,73 @@ test('las cinco ligas nuevas tienen su vía de salida DECLARADA', () => {
         !pathwaysFrom(getClub('leinster')).some((p) => p.id === reparto.id),
         'un juvenil de Leinster no entra al reparto de la FIR',
     );
+});
+
+test('NINGÚN sistema amateur de un solo escalón queda sin puerta de salida', () => {
+    // ESTE ES EL TEST QUE HACE POSIBLE CARGAR LIGAS CHICAS. La ventana de un
+    // jugador amateur no cruza la frontera (`windowStaysHome`), así que un país con
+    // una sola competición amateur y sin vía declarada es una trampa: el jugador
+    // nace ahí, no puede recibir una oferta de afuera nunca, y se retira en el mismo
+    // club por más que llegue a 90 de media. No es un desbalance, es una carrera
+    // rota — y no se ve jugando salvo que alguien juegue esa nacionalidad.
+    const trampas: string[] = [];
+    for (const code of countriesWithLadder()) {
+        const ladder = domesticLadder(code);
+        const clubs = ladder.flatMap((rung) => rung.clubs);
+        // Si el país tiene algún club pago, la ventana se abre sola al firmar ahí.
+        if (clubs.some((c) => economicModelOf(c) !== 'amateur')) continue;
+        if (clubs.every((club) => pathwaysFrom(club).length > 0)) continue;
+        trampas.push(code);
+    }
+    assert.deepEqual(trampas, [], 'países amateur puros sin vía de salida declarada');
+});
+
+test('las dieciséis ligas nuevas declaran por dónde se sale', () => {
+    const vias = (competitionId: string) => {
+        const club = CLUBS.find((c) => c.competitionId === competitionId)!;
+        return pathwaysFrom(club).map((p) => p.id);
+    };
+    // Cada una sale por donde sale en la realidad, y ninguna por mercado abierto.
+    assert.ok(vias('au-shute-shield').includes('au-club-to-super-rugby'), 'Australia sale a su franquicia');
+    assert.ok(vias('au-hospital-cup').includes('au-club-to-super-rugby'), 'Queensland también');
+    assert.ok(vias('wal-premiership').includes('wal-club-to-urc'), 'Gales, a la región');
+    assert.ok(vias('ire-ail1a').includes('ire-ail-to-provinces'), 'Irlanda, a la provincia');
+    assert.ok(vias('sco-premiership').includes('sco-club-to-urc'), 'Escocia, a Glasgow o Edinburgh');
+    // Y las tres tienen además la salida que usa el que NO entra a la franquicia,
+    // que son casi todos.
+    for (const id of ['wal-premiership', 'ire-ail1a', 'sco-premiership']) {
+        assert.ok(vias(id).includes('home-nations-club-to-pro'), `${id}: falta la salida al exterior`);
+    }
+    assert.ok(vias('fj-skipper').includes('fj-skipper-to-drua'), 'Fiyi, a los Drua');
+    assert.ok(vias('fj-skipper').includes('fj-skipper-to-abroad'), 'y a la diáspora, que es la mayoría');
+    assert.ok(vias('ca-clubs').includes('north-america-club-to-mlr'), 'Canadá, a la MLR');
+    assert.ok(vias('mx-liga').includes('north-america-club-to-mlr'), 'México también');
+    assert.ok(vias('py-primera').includes('py-domestic-to-sra'), 'Paraguay tiene franquicia propia: Yacaré');
+    for (const id of ['pe-metropolitano', 'co-liga', 'bo-liga']) {
+        assert.ok(vias(id).includes('latam-emerging-to-southern-cone'), `${id}: falta la salida regional`);
+    }
+    assert.ok(vias('be-elite').includes('benelux-club-to-franchise'), 'Bélgica, a su franquicia de la Super Cup');
+    assert.ok(vias('nl-ereklasse').includes('benelux-club-to-france'), 'y el Benelux también cruza a Francia');
+    assert.ok(vias('ge-didi10').includes('emerging-europe-to-pro'), 'Georgia sale por Francia, donde juegan los Lelos');
+    assert.ok(vias('ro-liga').includes('emerging-europe-to-pro'), 'Rumania igual');
+});
+
+test('las franquicias de las ligas nuevas son de SU país, no del exterior', () => {
+    // Para un galés, firmar en los Ospreys es el paso profesional más doméstico que
+    // tiene. Antes de `2026-27.11` ninguna de estas franquicias tenía país asignado
+    // y el motor lo contaba como emigrar.
+    const casos: [string, string][] = [
+        ['reds', 'au'], ['brumbies', 'au'], ['waratahs', 'au'], ['western-force', 'au'],
+        ['cardiff-rugby', 'gb-wls'], ['ospreys', 'gb-wls'], ['scarlets', 'gb-wls'], ['dragons', 'gb-wls'],
+        ['leinster', 'ie'], ['munster', 'ie'], ['ulster', 'ie'], ['connacht', 'ie'],
+        ['glasgow-warriors', 'gb-sct'], ['edinburgh-rugby', 'gb-sct'],
+        ['fijian-drua', 'fj'], ['yacare-xv', 'py'],
+    ];
+    for (const [id, country] of casos) {
+        assert.equal(affinityCountryOf(getClub(id)), country, `${id}`);
+    }
+    // Moana Pasifika sigue sin país: ésa sí es multinacional de verdad.
+    assert.equal(affinityCountryOf(getClub('moana-pasifika')), null, 'Moana representa a varias islas');
 });
 
 test('una vía NO garantiza oferta: sin nivel, el destino no se interesa', () => {

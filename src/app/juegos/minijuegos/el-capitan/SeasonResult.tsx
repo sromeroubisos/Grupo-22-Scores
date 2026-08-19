@@ -5,6 +5,7 @@ import type { CaptainSeasonEntry } from '@/features/captain';
 import { AWARD_LABELS, clubLabel, getFamily, money } from '@/features/captain';
 import type { PositionFamilyId } from '@/features/captain';
 import type { DecisionImpact } from './decisionImpact';
+import { copaQueNoLevantaste } from './honours';
 import ClubBadge from './ClubBadge';
 import styles from './capitan.module.css';
 
@@ -302,6 +303,10 @@ export default function SeasonResult({
     // El título ya está contado por el titular cuando fue LA noticia del año; acá
     // queda por si el titular lo pisó algo más grande.
     if (entry.titles.length > 0) notas.push(`Ganaron ${entry.titles.join(' y ')}.`);
+    // Y cuando el club salió 1º y la vitrina quedó vacía, la tarjeta dice POR
+    // QUÉ: sin esta línea, «1º de N» sin copa se lee como un guardado roto.
+    const sinCopa = copaQueNoLevantaste(entry);
+    if (sinCopa) notas.push(sinCopa);
     // Los premios individuales van en su propia línea y no adentro de la grilla:
     // no son un número del año, son un renglón de la vitrina.
     if (entry.awards.length > 0) notas.push(`${entry.awards.map((id) => AWARD_LABELS[id]).join(' · ')}.`);

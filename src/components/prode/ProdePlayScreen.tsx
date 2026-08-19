@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Shield, Gavel } from 'lucide-react';
+import { Shield, Gavel, Check } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import styles from '@/app/prode/page.module.css';
 import ProdeEventPicksModal from './ProdeEventPicksModal';
@@ -16,6 +16,8 @@ type ProdePlayScreenProps = {
     backHref: string;
     backLabel: string;
 };
+
+type ScoreDraft = { home: string; away: string };
 
 function formatDate(value: string | null) {
     if (!value) return 'Sin fecha';
@@ -46,7 +48,7 @@ function formatDateDivider(value: string) {
 
 function formatKickoffTime(value: string) {
     try {
-        return new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
+        return new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(value));
     } catch {
         return '';
     }
@@ -63,17 +65,28 @@ function formatDayChip(value: string) {
     }
 }
 
+// El cierre se cuenta en la unidad que el jugador usa para decidir: días cuando
+// falta más de un día, horas cuando entra en el día, minutos sobre la hora.
+// "Cierra en 120h 40m" obliga a dividir de memoria para entender que faltan cinco días.
 function formatTimeUntil(value: string | null) {
     if (!value) return 'Sin cierre inmediato';
 
     const diff = new Date(value).getTime() - Date.now();
     if (diff <= 0) return 'Cerrado';
 
-    const hours = Math.floor(diff / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 60) return `Cierra en ${minutes} min`;
 
-    if (hours <= 0) return `Cierra en ${minutes}m`;
-    return `Cierra en ${hours}h ${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) {
+        const restMinutes = minutes % 60;
+        return restMinutes ? `Cierra en ${hours} h ${restMinutes} min` : `Cierra en ${hours} h`;
+    }
+
+    const days = Math.floor(hours / 24);
+    const restHours = hours % 24;
+    if (days === 1) return restHours ? `Cierra en 1 día y ${restHours} h` : 'Cierra en 1 día';
+    return `Cierra en ${days} días`;
 }
 
 function getEventStatusLabel(event: ProdePlayEvent) {
@@ -118,7 +131,7 @@ function TeamCrest({ label, logoUrl, size = 'sm' }: { label: string; logoUrl: st
 
     return (
         <span className={fallbackClass} aria-hidden="true" title={label}>
-            <Shield size={isLarge ? 22 : 16} strokeWidth={2.1} />
+            <Shield size={isLarge ? 20 : 16} strokeWidth={2.1} />
         </span>
     );
 }
@@ -174,13 +187,46 @@ function getPredictionBreakdown(event: ProdePlayEvent, prediction: ProdePlayPred
     ].filter((value): value is string => Boolean(value));
 }
 
+function isDraftFilled(draft: ScoreDraft | undefined) {
+    return Boolean(draft && draft.home !== '' && draft.away !== '');
+}
+
+// Un borrador está "sin guardar" solo si está completo y difiere de lo persistido:
+// reabrir la pantalla con los picks ya guardados no puede ofrecer "Guardar 7".
+function isDraftDirty(draft: ScoreDraft | undefined, prediction: ProdePlayPrediction | null) {
+    if (!isDraftFilled(draft)) return false;
+    if (!prediction) return true;
+    return draft!.home !== (prediction.predictedHomeScore?.toString() ?? '')
+        || draft!.away !== (prediction.predictedAwayScore?.toString() ?? '');
+}
+
+/** Corre las tareas de a `size` en paralelo: 7 fetch simultáneos al mismo endpoint
+ * (que además hace upsert de la membresía) es pedirle una carrera a la base. */
+async function runPooled<T>(tasks: Array<() => Promise<T>>, size = 3) {
+    const results: T[] = [];
+    let cursor = 0;
+
+    async function worker() {
+        while (cursor < tasks.length) {
+            const index = cursor;
+            cursor += 1;
+            results[index] = await tasks[index]();
+        }
+    }
+
+    await Promise.all(Array.from({ length: Math.min(size, tasks.length) }, worker));
+    return results;
+}
+
 export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlayScreenProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user, login } = useAuth();
     const playPanelRef = useRef<HTMLDivElement | null>(null);
     const [events, setEvents] = useState(view.events);
-    const [savingEventId, setSavingEventId] = useState<string | null>(null);
+    const [savingEventIds, setSavingEventIds] = useState<Record<string, true>>({});
+    const [isSavingBatch, setIsSavingBatch] = useState(false);
+    const [batchFeedback, setBatchFeedback] = useState<string | null>(null);
     const [feedback, setFeedback] = useState<Record<string, string>>({});
     const [copiedTarget, setCopiedTarget] = useState<'code' | 'link' | null>(null);
     const [activeTab, setActiveTab] = useState<'play' | 'table' | 'rules'>('play');
@@ -205,7 +251,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
     // false = "mantener" (congela partidos ya jugados); true = "cambiar todo".
     // Default conservador: no reescribir la historia salvo que el admin lo pida.
     const [retroactiveDraft, setRetroactiveDraft] = useState(false);
-    const [scoreDrafts, setScoreDrafts] = useState<Record<string, { home: string; away: string }>>(() => Object.fromEntries(
+    const [scoreDrafts, setScoreDrafts] = useState<Record<string, ScoreDraft>>(() => Object.fromEntries(
         view.events.map((event) => [
             event.id,
             {
@@ -216,7 +262,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
     ));
 
     // Cuando alguien llega recién ingresado desde el link de invitación
-    // (?jugar=1), lo dejamos directo en el panel de cargar resultados: forzamos
+    // (?jugar=1), lo dejamos directo en el panel de cargar pronósticos: forzamos
     // el tab 'play' y scrolleamos hasta la sección, en vez de que tenga que
     // buscarla entre el hero y las pestañas.
     useEffect(() => {
@@ -271,6 +317,34 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
         () => (activeDayKey ? openEventGroups.filter((group) => group.key === activeDayKey) : openEventGroups),
         [activeDayKey, openEventGroups],
     );
+    const visibleEvents = useMemo(() => visibleGroups.flatMap((group) => group.events), [visibleGroups]);
+
+    // Progreso por día: cuántos de esos partidos ya tienen pronóstico GUARDADO.
+    // Es lo que convierte los chips de fecha en un mapa de lo que te falta.
+    const dayProgress = useMemo(() => {
+        const map: Record<string, { saved: number; total: number }> = {};
+        openEventGroups.forEach((group) => {
+            map[group.key] = {
+                saved: group.events.filter((event) => event.prediction).length,
+                total: group.events.length,
+            };
+        });
+        return map;
+    }, [openEventGroups]);
+
+    const totalProgress = useMemo(() => ({
+        saved: openEvents.filter((event) => event.prediction).length,
+        total: openEvents.length,
+    }), [openEvents]);
+
+    const dirtyEvents = useMemo(
+        () => visibleEvents.filter((event) => isDraftDirty(scoreDrafts[event.id], event.prediction)),
+        [scoreDrafts, visibleEvents],
+    );
+    const missingCount = useMemo(
+        () => visibleEvents.filter((event) => !isDraftFilled(scoreDrafts[event.id])).length,
+        [scoreDrafts, visibleEvents],
+    );
 
     const latestClosedEvents = useMemo(() => {
         // El historial dice "tus últimos cierres, con resultado y puntos": prioriza
@@ -288,26 +362,30 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
     const playEmptyMessage = useMemo(() => {
         if (openEvents.length) return null;
         if (view.isFinished || view.competitionStatus === 'finished') {
-            return 'La competencia ya termino. Abajo tenes tu resumen final y la tabla cerrada.';
+            return 'La competencia ya terminó. Abajo tenés tu resumen final y la tabla cerrada.';
         }
         if (lockedOrLiveEvents.length) {
-            return 'Los pronosticos estan cerrados para esta fecha. Tus picks ya quedaron definidos y ahora solo queda esperar los resultados.';
+            return 'Los pronósticos están cerrados para esta fecha. Tus picks ya quedaron definidos y ahora solo queda esperar los resultados.';
         }
         if (view.competitionStatus === 'draft' || view.competitionStatus === 'published') {
-            return 'La competencia todavia no comenzo. Los pronosticos se habilitan antes del inicio de la primera fecha.';
+            return 'La competencia todavía no comenzó. Los pronósticos se habilitan antes del inicio de la primera fecha.';
         }
         if (events.length) {
-            return 'No hay partidos activos en este momento. La proxima fecha se va a habilitar cuando haya nuevos partidos disponibles.';
+            return 'No hay partidos activos en este momento. La próxima fecha se va a habilitar cuando haya nuevos partidos disponibles.';
         }
-        return 'Todavia no hay partidos cargados para esta competencia.';
+        return 'Todavía no hay partidos cargados para esta competencia.';
     }, [events.length, lockedOrLiveEvents.length, openEvents.length, view.competitionStatus, view.isFinished]);
 
     const activityLabel = useMemo(() => {
-        if (openEvents.length) return `${openEvents.length} picks abiertos`;
+        if (openEvents.length) return `${openEvents.length} partidos abiertos`;
         if (lockedOrLiveEvents.length) return 'Fecha cerrada';
         if (view.isFinished) return 'Competencia cerrada';
         return 'Sin fecha activa';
     }, [lockedOrLiveEvents.length, openEvents.length, view.isFinished]);
+
+    const hasPersonalScore = Boolean(user) && (
+        view.personalSummary.totalPoints > 0 || view.personalSummary.position !== null
+    );
     const inviteCode = view.inviteCode ?? '';
     const shareUrl = view.shareUrl ?? '';
     const showInviteActions = view.scope === 'private_league' && Boolean(inviteCode || shareUrl) && (view.canInvite || view.canManage);
@@ -328,8 +406,9 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
     }
 
     function updateScoreDraft(eventId: string, side: 'home' | 'away', value: string) {
-        if (value && !/^\d+$/.test(value)) return;
+        if (value && !/^\d{0,3}$/.test(value)) return;
 
+        setBatchFeedback(null);
         setScoreDrafts((current) => ({
             ...current,
             [eventId]: {
@@ -340,24 +419,25 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
         }));
     }
 
-    async function savePrediction(event: ProdePlayEvent) {
-        if (!user) {
-            login('fan', typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/prode');
-            return;
+    const requestLogin = useCallback(() => {
+        login('fan', typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/prode');
+    }, [login]);
+
+    /** Guarda un pronóstico. Devuelve el error si falló, o null si salió bien. */
+    const savePrediction = useCallback(async (event: ProdePlayEvent, draft: ScoreDraft) => {
+        const predictedHomeScore = Number(draft.home);
+        const predictedAwayScore = Number(draft.away);
+
+        if (!draft.home || !draft.away || !Number.isInteger(predictedHomeScore) || !Number.isInteger(predictedAwayScore) || predictedHomeScore < 0 || predictedAwayScore < 0) {
+            return 'Cargá un marcador válido para los dos equipos.';
         }
 
-        const homeDraft = scoreDrafts[event.id]?.home ?? '';
-        const awayDraft = scoreDrafts[event.id]?.away ?? '';
-        const predictedHomeScore = Number(homeDraft);
-        const predictedAwayScore = Number(awayDraft);
-
-        if (!homeDraft || !awayDraft || !Number.isInteger(predictedHomeScore) || !Number.isInteger(predictedAwayScore) || predictedHomeScore < 0 || predictedAwayScore < 0) {
-            setFeedback((current) => ({ ...current, [event.id]: 'Carga un marcador valido para ambos equipos.' }));
-            return;
-        }
-
-        setSavingEventId(event.id);
-        setFeedback((current) => ({ ...current, [event.id]: 'Guardando...' }));
+        setSavingEventIds((current) => ({ ...current, [event.id]: true }));
+        setFeedback((current) => {
+            const next = { ...current };
+            delete next[event.id];
+            return next;
+        });
 
         try {
             const response = await fetch('/api/prode/predictions', {
@@ -374,7 +454,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
             const result = await response.json() as { error?: string; prediction?: ProdePlayPrediction };
 
             if (!response.ok || !result.prediction) {
-                throw new Error(result.error || 'No se pudo guardar el pronostico.');
+                throw new Error(result.error || 'No se pudo guardar el pronóstico.');
             }
 
             setEvents((current) => current.map((item) => (
@@ -389,13 +469,48 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                     away: predictedAwayScore.toString(),
                 },
             }));
-            setFeedback((current) => ({ ...current, [event.id]: 'Pronostico guardado' }));
+            return null;
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'No se pudo guardar el pronostico.';
+            const message = error instanceof Error ? error.message : 'No se pudo guardar el pronóstico.';
             setFeedback((current) => ({ ...current, [event.id]: message }));
+            return message;
         } finally {
-            setSavingEventId(null);
+            setSavingEventIds((current) => {
+                const next = { ...current };
+                delete next[event.id];
+                return next;
+            });
         }
+    }, []);
+
+    async function saveVisibleDate() {
+        if (!user) {
+            requestLogin();
+            return;
+        }
+
+        const targets = visibleEvents
+            .map((event) => ({ event, draft: scoreDrafts[event.id] }))
+            .filter((entry): entry is { event: ProdePlayEvent; draft: ScoreDraft } => isDraftDirty(entry.draft, entry.event.prediction));
+
+        if (!targets.length) return;
+
+        setIsSavingBatch(true);
+        setBatchFeedback(null);
+
+        const outcomes = await runPooled(targets.map(({ event, draft }) => () => savePrediction(event, draft)));
+        const failed = outcomes.filter(Boolean).length;
+        const saved = outcomes.length - failed;
+
+        setIsSavingBatch(false);
+        if (failed) {
+            setBatchFeedback(saved
+                ? `Se guardaron ${saved} de ${outcomes.length}. Revisá los partidos marcados en rojo.`
+                : 'No se pudo guardar. Revisá los partidos marcados en rojo.');
+            return;
+        }
+
+        setBatchFeedback(saved === 1 ? 'Pronóstico guardado.' : `${saved} pronósticos guardados.`);
     }
 
     async function saveRules() {
@@ -505,8 +620,8 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
         const isDelete = action === 'delete_league';
         const confirmed = window.confirm(
             isDelete
-                ? 'Esta accion saca la liga de circulacion. Queres borrarla?'
-                : 'La liga dejara de estar activa y quedara archivada. Queres continuar?',
+                ? 'Esta acción saca la liga de circulación. ¿Querés borrarla?'
+                : 'La liga deja de estar activa y queda archivada. ¿Querés continuar?',
         );
 
         if (!confirmed) {
@@ -544,6 +659,40 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
         }
     }
 
+    const saveBarState = (() => {
+        if (!openEvents.length) return null;
+        if (!user) {
+            return {
+                tone: 'login' as const,
+                message: 'Ingresá para guardar tus pronósticos.',
+                action: 'Ingresar',
+            };
+        }
+        if (isSavingBatch) {
+            return { tone: 'busy' as const, message: 'Guardando...', action: 'Guardando...' };
+        }
+        if (dirtyEvents.length) {
+            return {
+                tone: 'ready' as const,
+                message: missingCount
+                    ? `Quedan ${missingCount} ${missingCount === 1 ? 'partido' : 'partidos'} sin cargar.`
+                    : 'Listo para guardar.',
+                action: dirtyEvents.length === 1 ? 'Guardar pronóstico' : `Guardar ${dirtyEvents.length} pronósticos`,
+            };
+        }
+        if (missingCount) {
+            return {
+                tone: 'idle' as const,
+                message: `Cargá los marcadores: faltan ${missingCount} de ${visibleEvents.length}.`,
+                action: 'Guardar pronósticos',
+            };
+        }
+        return { tone: 'done' as const, message: 'Toda la fecha guardada.', action: 'Guardar pronósticos' };
+    })();
+
+    // La barra solo se despega y flota cuando hay algo pendiente de verdad.
+    const isSaveBarFloating = saveBarState?.tone === 'ready' || saveBarState?.tone === 'busy';
+
     return (
         <div className={`${styles.page} ${enterStyles.enter}`}>
             <div className="container">
@@ -551,24 +700,41 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                     <Link href={backHref} className={styles.backLink}>{backLabel}</Link>
 
                     <section className={styles.playHero}>
-                        <div className={styles.playHeroMain}>
-                            <div className={styles.playHeroCopy}>
-                                <p className={styles.privateLeagueEyebrow}>{view.scope === 'private_league' ? 'Liga privada' : 'Liga global'}</p>
-                                <h1 className={styles.playHeroTitle}>{view.title}</h1>
-                                <p className={styles.playHeroText}>{view.subtitle}</p>
+                        <div className={styles.playHeroCopy}>
+                            <p className={styles.privateLeagueEyebrow}>{view.scope === 'private_league' ? 'Liga privada' : 'Liga global'}</p>
+                            <h1 className={styles.playHeroTitle}>{view.title}</h1>
+                            <p className={styles.playHeroText}>{view.subtitle}</p>
 
-                                <div className={styles.playHeroMeta}>
-                                    <span className={styles.metaTag}>Jugadores: {view.memberCount}</span>
-                                    <span className={styles.metaTag}>Estado: {activityLabel}</span>
-                                    <span className={styles.metaTag}>{formatTimeUntil(view.nextLockAt)}</span>
-                                    {view.canManage ? <span className={`${styles.metaTag} ${styles.metaTagSuccess}`}>Admin</span> : null}
-                                </div>
+                            <div className={styles.playHeroMeta}>
+                                <span className={styles.metaTag}>{view.memberCount} jugadores</span>
+                                <span className={styles.metaTag}>{activityLabel}</span>
+                                <span className={styles.metaTag}>{formatTimeUntil(view.nextLockAt)}</span>
+                                {view.canManage ? <span className={`${styles.metaTag} ${styles.metaTagSuccess}`}>Admin</span> : null}
                             </div>
+                        </div>
+
+                        <div className={styles.playHeroAside}>
+                            {hasPersonalScore ? (
+                                <div className={styles.heroScoreStrip}>
+                                    <span>
+                                        <strong>{view.personalSummary.position ? `${view.personalSummary.position}º` : '—'}</strong>
+                                        posición
+                                    </span>
+                                    <span>
+                                        <strong>{view.personalSummary.totalPoints}</strong>
+                                        puntos
+                                    </span>
+                                    <span>
+                                        <strong>{view.personalSummary.correctOutcomes}</strong>
+                                        aciertos
+                                    </span>
+                                </div>
+                            ) : null}
 
                             <div className={styles.playHeroActions}>
                                 {showInviteActions && inviteCode ? (
                                     <button type="button" className={styles.posterPrimaryCta} onClick={() => void copyToClipboard(inviteCode, 'code')}>
-                                        {copiedTarget === 'code' ? 'Codigo copiado' : 'Copiar codigo'}
+                                        {copiedTarget === 'code' ? 'Código copiado' : 'Copiar código'}
                                     </button>
                                 ) : null}
                                 {showInviteActions && shareUrl ? (
@@ -576,7 +742,6 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                         {copiedTarget === 'link' ? 'Link copiado' : 'Copiar link'}
                                     </button>
                                 ) : null}
-                                <button type="button" className={styles.posterSecondaryCta} onClick={() => setActiveTab('table')}>Ver tabla</button>
                                 {showManageShortcut ? (
                                     <button
                                         type="button"
@@ -592,21 +757,6 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                 ) : null}
                             </div>
                         </div>
-
-                        <div className={styles.playHeroRail}>
-                            <article className={styles.posterStat}>
-                                <strong>{view.personalSummary.position ? `${view.personalSummary.position}o` : '-'}</strong>
-                                <span>Tu posicion</span>
-                            </article>
-                            <article className={styles.posterStat}>
-                                <strong>{view.personalSummary.totalPoints}</strong>
-                                <span>Tus puntos</span>
-                            </article>
-                            <article className={styles.posterStat}>
-                                <strong>{view.personalSummary.correctOutcomes}</strong>
-                                <span>Aciertos</span>
-                            </article>
-                        </div>
                     </section>
 
                     <div className={styles.mobilePlayTabs} role="tablist" aria-label="Secciones del prode">
@@ -617,7 +767,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                             className={`${styles.mobilePlayTab} ${activeTab === 'play' ? styles.mobilePlayTabActive : ''}`}
                             onClick={() => setActiveTab('play')}
                         >
-                            Cargar resultados
+                            Pronósticos
                         </button>
                         <button
                             type="button"
@@ -641,132 +791,158 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
 
                     <section className={styles.playGrid}>
                         <div ref={playPanelRef} className={`${styles.playMainColumn} ${activeTab === 'table' || activeTab === 'rules' ? styles.mobileTabHidden : ''}`}>
-                            <section className={styles.section}>
-                                <div className={styles.sectionHeader}>
-                                    <div>
-                                        <h2 className={styles.sectionTitle}>Jugar ahora</h2>
-                                        <p className={styles.sectionText}>
-                                            Si la competencia esta en marcha, aca aparecen primero los partidos jugables.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {openEventGroups.length > 1 ? (
-                                    <nav className={styles.datePicker} aria-label="Elegir fecha">
-                                        {openEventGroups.map((group) => (
-                                            <button
-                                                key={group.key}
-                                                type="button"
-                                                className={`${styles.dateChip} ${group.key === activeDayKey ? styles.dateChipActive : ''}`}
-                                                aria-pressed={group.key === activeDayKey}
-                                                onClick={() => setSelectedDayKey(group.key)}
-                                            >
-                                                {formatDayChip(group.events[0]?.startsAt ?? group.key)}
-                                            </button>
-                                        ))}
-                                    </nav>
-                                ) : null}
-
-                                {!user && openEvents.length ? (
-                                    <div className={styles.loginBanner}>
-                                        <div className={styles.loginBannerCopy}>
-                                            <strong>Inicia sesion para guardar</strong>
-                                            <p>Apenas elijas un resultado te llevamos directo al login.</p>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            className={styles.loginBannerBtn}
-                                            onClick={() => login('fan', typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/prode')}
-                                        >
-                                            Ingresar
-                                        </button>
-                                    </div>
-                                ) : null}
-
+                            <section className={`${styles.playSection} ${isSaveBarFloating ? styles.playSectionFloating : ''}`}>
                                 {openEvents.length ? (
-                                    <div className={styles.pickList}>
-                                        {visibleGroups.map((group) => (
-                                            <div key={group.key} className={styles.pickGroup}>
-                                                <div className={styles.dateDivider}>
-                                                    <span>{group.label}</span>
-                                                </div>
-
-                                                {group.events.map((event) => {
-                                                    const currentPrediction = event.prediction;
-                                                    return (
-                                                        <article key={event.id} className={styles.pickCard}>
-                                                            <div className={styles.cardStatusRow}>
-                                                                <span className={styles.cardStatus}>
-                                                                    <span className={`${styles.cardStatusDot} ${event.isOpen ? styles.cardStatusDotOpen : ''}`} />
-                                                                    {getEventStatusLabel(event)}
-                                                                </span>
-                                                                <span className={styles.cardTime}>{formatKickoffTime(event.startsAt)}</span>
-                                                            </div>
-
-                                                            <div className={styles.matchScoreRow}>
-                                                                <div className={styles.teamSide}>
-                                                                    <TeamCrest label={event.homeLabel} logoUrl={event.homeLogoUrl} size="lg" />
-                                                                    <span className={styles.teamName}>{event.homeLabel}</span>
-                                                                </div>
-
-                                                                <div className={styles.scoreInputs}>
-                                                                    <input
-                                                                        type="text"
-                                                                        inputMode="numeric"
-                                                                        aria-label={`Goles ${event.homeLabel}`}
-                                                                        className={styles.scoreInputBox}
-                                                                        value={scoreDrafts[event.id]?.home ?? ''}
-                                                                        onChange={(eventInput) => updateScoreDraft(event.id, 'home', eventInput.target.value)}
-                                                                        placeholder="-"
-                                                                        disabled={savingEventId === event.id}
-                                                                    />
-                                                                    <span className={styles.scoreColon}>:</span>
-                                                                    <input
-                                                                        type="text"
-                                                                        inputMode="numeric"
-                                                                        aria-label={`Goles ${event.awayLabel}`}
-                                                                        className={styles.scoreInputBox}
-                                                                        value={scoreDrafts[event.id]?.away ?? ''}
-                                                                        onChange={(eventInput) => updateScoreDraft(event.id, 'away', eventInput.target.value)}
-                                                                        placeholder="-"
-                                                                        disabled={savingEventId === event.id}
-                                                                    />
-                                                                </div>
-
-                                                                <div className={styles.teamSide}>
-                                                                    <TeamCrest label={event.awayLabel} logoUrl={event.awayLogoUrl} size="lg" />
-                                                                    <span className={styles.teamName}>{event.awayLabel}</span>
-                                                                </div>
-                                                            </div>
-
+                                    <>
+                                        <div className={styles.playToolbar}>
+                                            {openEventGroups.length > 1 ? (
+                                                <nav className={styles.datePicker} aria-label="Elegir fecha">
+                                                    {openEventGroups.map((group) => {
+                                                        const progress = dayProgress[group.key];
+                                                        const complete = progress && progress.saved === progress.total;
+                                                        const isActive = group.key === activeDayKey;
+                                                        return (
                                                             <button
+                                                                key={group.key}
                                                                 type="button"
-                                                                className={`${styles.saveBtnFull} ${currentPrediction ? styles.saveBtnFullSaved : ''}`}
-                                                                onClick={() => void savePrediction(event)}
-                                                                disabled={savingEventId === event.id}
+                                                                className={`${styles.dateChip} ${isActive ? styles.dateChipActive : ''} ${complete ? styles.dateChipDone : ''}`}
+                                                                aria-pressed={isActive}
+                                                                onClick={() => setSelectedDayKey(group.key)}
                                                             >
-                                                                {savingEventId === event.id ? 'Guardando...' : currentPrediction ? 'Actualizar pronostico' : 'Guardar pronostico'}
+                                                                {formatDayChip(group.events[0]?.startsAt ?? group.key)}
+                                                                {complete ? (
+                                                                    <Check size={13} strokeWidth={3} aria-label="fecha completa" />
+                                                                ) : progress && progress.saved > 0 ? (
+                                                                    <span className={styles.dateChipCount}>{progress.saved}/{progress.total}</span>
+                                                                ) : null}
                                                             </button>
+                                                        );
+                                                    })}
+                                                </nav>
+                                            ) : null}
 
-                                                            <span className={styles.pickFeedback}>
-                                                                {feedback[event.id] || (currentPrediction ? 'Pronostico guardado' : `Cierra: ${formatDate(event.locksAt)}`)}
-                                                            </span>
+                                            <p className={styles.playProgress}>
+                                                <strong>{totalProgress.saved}</strong> de {totalProgress.total} cargados
+                                            </p>
+                                        </div>
 
-                                                            {canSeeGroupPicks ? (
-                                                                <button
-                                                                    type="button"
-                                                                    className={styles.metaTag}
-                                                                    onClick={() => setPicksEvent({ id: event.id, homeLabel: event.homeLabel, awayLabel: event.awayLabel })}
-                                                                >
-                                                                    Ver pronósticos del grupo
-                                                                </button>
-                                                            ) : null}
-                                                        </article>
-                                                    );
-                                                })}
+                                        <div className={styles.pickList}>
+                                            {visibleGroups.map((group) => {
+                                                const times = new Set(group.events.map((event) => formatKickoffTime(event.startsAt)));
+                                                const sharedTime = times.size === 1 ? [...times][0] : null;
+
+                                                return (
+                                                    <div key={group.key} className={styles.pickGroup}>
+                                                        <div className={styles.dateDivider}>
+                                                            <span>{group.label}{sharedTime ? ` · ${sharedTime}` : ''}</span>
+                                                        </div>
+
+                                                        <ul className={styles.matchRows}>
+                                                            {group.events.map((event) => {
+                                                                const draft = scoreDrafts[event.id];
+                                                                const isSaving = Boolean(savingEventIds[event.id]);
+                                                                const rowError = feedback[event.id];
+                                                                const dirty = isDraftDirty(draft, event.prediction);
+                                                                const savedRow = Boolean(event.prediction) && !dirty;
+                                                                const kickoff = formatKickoffTime(event.startsAt);
+
+                                                                return (
+                                                                    <li
+                                                                        key={event.id}
+                                                                        className={`${styles.matchRow} ${savedRow ? styles.matchRowSaved : ''} ${rowError ? styles.matchRowError : ''}`}
+                                                                    >
+                                                                        <div className={styles.rowHome}>
+                                                                            <TeamCrest label={event.homeLabel} logoUrl={event.homeLogoUrl} size="lg" />
+                                                                            <span className={styles.teamName}>{event.homeLabel}</span>
+                                                                        </div>
+                                                                        <input
+                                                                            type="text"
+                                                                            inputMode="numeric"
+                                                                            maxLength={3}
+                                                                            aria-label={`Marcador de ${event.homeLabel}`}
+                                                                            className={styles.rowInputHome}
+                                                                            value={draft?.home ?? ''}
+                                                                            onChange={(input) => updateScoreDraft(event.id, 'home', input.target.value)}
+                                                                            placeholder="–"
+                                                                            disabled={isSaving || isSavingBatch}
+                                                                        />
+                                                                        <span className={styles.rowSep} aria-hidden="true">:</span>
+                                                                        <input
+                                                                            type="text"
+                                                                            inputMode="numeric"
+                                                                            maxLength={3}
+                                                                            aria-label={`Marcador de ${event.awayLabel}`}
+                                                                            className={styles.rowInputAway}
+                                                                            value={draft?.away ?? ''}
+                                                                            onChange={(input) => updateScoreDraft(event.id, 'away', input.target.value)}
+                                                                            placeholder="–"
+                                                                            disabled={isSaving || isSavingBatch}
+                                                                        />
+                                                                        <div className={styles.rowAway}>
+                                                                            <TeamCrest label={event.awayLabel} logoUrl={event.awayLogoUrl} size="lg" />
+                                                                            <span className={styles.teamName}>{event.awayLabel}</span>
+                                                                        </div>
+
+                                                                        <div className={styles.rowState}>
+                                                                            {rowError ? (
+                                                                                <span className={styles.rowStateError}>{rowError}</span>
+                                                                            ) : isSaving ? (
+                                                                                <span className={styles.rowStateMuted}>Guardando</span>
+                                                                            ) : savedRow ? (
+                                                                                <span className={styles.rowStateSaved}>
+                                                                                    <Check size={13} strokeWidth={3} aria-hidden="true" />
+                                                                                    Guardado
+                                                                                </span>
+                                                                            ) : dirty ? (
+                                                                                <span className={styles.rowStatePending}>Sin guardar</span>
+                                                                            ) : !sharedTime ? (
+                                                                                <span className={styles.rowStateMuted}>{kickoff}</span>
+                                                                            ) : null}
+
+                                                                            {canSeeGroupPicks ? (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    className={styles.rowPicksLink}
+                                                                                    onClick={() => setPicksEvent({ id: event.id, homeLabel: event.homeLabel, awayLabel: event.awayLabel })}
+                                                                                >
+                                                                                    Ver pronósticos del grupo
+                                                                                </button>
+                                                                            ) : null}
+                                                                        </div>
+                                                                    </li>
+                                                                );
+                                                            })}
+                                                        </ul>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {saveBarState ? (
+                                            <div
+                                                className={`${styles.saveBar} ${styles[`saveBar_${saveBarState.tone}`] ?? ''} ${isSaveBarFloating ? styles.saveBarFloating : ''}`}
+                                                role="status"
+                                            >
+                                                <p className={styles.saveBarCopy}>
+                                                    {batchFeedback ?? saveBarState.message}
+                                                </p>
+                                                {saveBarState.tone === 'login' ? (
+                                                    <button type="button" className={styles.saveBarCta} onClick={requestLogin}>
+                                                        Ingresar
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        className={styles.saveBarCta}
+                                                        onClick={() => void saveVisibleDate()}
+                                                        disabled={isSavingBatch || !dirtyEvents.length}
+                                                    >
+                                                        {saveBarState.action}
+                                                    </button>
+                                                )}
                                             </div>
-                                        ))}
-                                    </div>
+                                        ) : null}
+                                    </>
                                 ) : (
                                     <div className={styles.empty}>
                                         {playEmptyMessage}
@@ -777,8 +953,8 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                             {openEvents.length && view.rules.items.length ? (
                                 <section className={styles.quickRules}>
                                     <div className={styles.quickRulesHead}>
-                                        <Gavel size={16} color="#86f6b6" />
-                                        <h3>Reglas rapidas</h3>
+                                        <Gavel size={16} color="#86f6b6" aria-hidden="true" />
+                                        <h3>Cómo se puntúa</h3>
                                     </div>
                                     <div className={styles.quickRulesList}>
                                         {view.rules.items.map((rule) => (
@@ -796,7 +972,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                     <div>
                                         <h2 className={styles.sectionTitle}>Historial</h2>
                                         <p className={styles.sectionText}>
-                                            Tus ultimos cierres, con resultado y puntos sumados.
+                                            Tus últimos cierres, con resultado y puntos sumados.
                                         </p>
                                     </div>
                                 </div>
@@ -824,7 +1000,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                                         {canSeeGroupPicks ? (
                                                             <button
                                                                 type="button"
-                                                                className={styles.metaTag}
+                                                                className={styles.rowPicksLink}
                                                                 onClick={() => setPicksEvent({ id: event.id, homeLabel: event.homeLabel, awayLabel: event.awayLabel })}
                                                             >
                                                                 Ver pronósticos del grupo
@@ -837,7 +1013,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                     </div>
                                 ) : (
                                     <div className={styles.empty}>
-                                        Todavia no hay partidos cerrados para mostrar historial.
+                                        Todavía no hay partidos cerrados para mostrar historial.
                                     </div>
                                 )}
                             </section>
@@ -847,10 +1023,10 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                             <section className={styles.summaryCard}>
                                 <p className={styles.previewEyebrow}>Tu rendimiento</p>
                                 <div className={styles.summaryList}>
-                                    <div className={styles.summaryRow}><span>Posicion</span><strong>{view.personalSummary.position ? `${view.personalSummary.position}o` : '-'}</strong></div>
+                                    <div className={styles.summaryRow}><span>Posición</span><strong>{view.personalSummary.position ? `${view.personalSummary.position}º` : '—'}</strong></div>
                                     <div className={styles.summaryRow}><span>Puntos</span><strong>{view.personalSummary.totalPoints}</strong></div>
                                     <div className={styles.summaryRow}><span>Aciertos</span><strong>{view.personalSummary.correctOutcomes}</strong></div>
-                                    <div className={styles.summaryRow}><span>Ultima fecha</span><strong>{view.personalSummary.latestPoints > 0 ? `+${view.personalSummary.latestPoints}` : view.personalSummary.latestPoints}</strong></div>
+                                    <div className={styles.summaryRow}><span>Última fecha</span><strong>{view.personalSummary.latestPoints > 0 ? `+${view.personalSummary.latestPoints}` : view.personalSummary.latestPoints}</strong></div>
                                 </div>
                             </section>
 
@@ -880,11 +1056,11 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
 
                             {showInviteActions ? (
                                 <section className={styles.summaryCard}>
-                                    <p className={styles.previewEyebrow}>Acciones sociales</p>
+                                    <p className={styles.previewEyebrow}>Invitar</p>
                                     <div className={styles.socialActions}>
                                         {inviteCode ? (
                                             <button type="button" className={styles.inviteActionBtn} onClick={() => void copyToClipboard(inviteCode, 'code')}>
-                                                {copiedTarget === 'code' ? 'Codigo copiado' : 'Copiar codigo'}
+                                                {copiedTarget === 'code' ? 'Código copiado' : 'Copiar código'}
                                             </button>
                                         ) : null}
                                         {shareUrl ? (
@@ -917,7 +1093,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                                 setIsEditingRules((current) => !current);
                                             }}
                                         >
-                                            {isEditingRules ? 'Cancelar edicion' : 'Editar puntos'}
+                                            {isEditingRules ? 'Cancelar edición' : 'Editar puntos'}
                                         </button>
                                         <span className={styles.pickFeedback}>Al guardar elegís si recalcula lo ya jugado.</span>
                                     </div>
@@ -934,6 +1110,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                                 <input
                                                     type="text"
                                                     inputMode="numeric"
+                                                    aria-label={`Puntos por ${rule.label}`}
                                                     className={styles.rulesInput}
                                                     value={ruleDrafts[rule.key] ?? ''}
                                                     onChange={(event) => updateRuleDraft(rule.key, event.target.value)}
@@ -949,7 +1126,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                 {isEditingRules ? (
                                     <div className={styles.rulesEditorExtras}>
                                         <label className={styles.formField}>
-                                            <span className={styles.formLabel}>Cierre de picks</span>
+                                            <span className={styles.formLabel}>Cierre de picks (minutos antes)</span>
                                             <input
                                                 type="text"
                                                 inputMode="numeric"
@@ -1013,7 +1190,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
 
                             {view.canManage && view.privateLeagueId ? (
                                 <section className={styles.summaryCard}>
-                                    <p className={styles.previewEyebrow}>Administracion</p>
+                                    <p className={styles.previewEyebrow}>Administración</p>
 
                                     <label className={styles.formField}>
                                         <span className={styles.formLabel}>Nombre de la liga</span>
@@ -1039,7 +1216,7 @@ export default function ProdePlayScreen({ view, backHref, backLabel }: ProdePlay
                                     {renameFeedback ? <div className={styles.warning}>{renameFeedback}</div> : null}
 
                                     <p className={styles.leagueAdminCopy}>
-                                        Si esta liga ya no va a seguir, podes archivarla o borrarla sin tocar la competencia base.
+                                        Si esta liga ya no va a seguir, podés archivarla o borrarla sin tocar la competencia base.
                                     </p>
                                     <div className={styles.leagueAdminActions}>
                                         <button

@@ -1,0 +1,865 @@
+/* ============================================================================
+   Lobby del prode — hoja propia.
+
+   Vive aparte de `app/prode/page.module.css` a propósito: ese módulo lo comparten
+   ProdePlayScreen y CreatePrivateLeagueWizard, y media docena de clases del lobby
+   (.section, .warning, .empty, .filterChip, .posterPrimaryCta…) son las mismas que
+   usan ellos. Rediseñar el lobby ahí adentro les cambiaba la cara de rebote.
+
+   La tarjeta de competencia NO está acá: vive en ProdeCompetitionCard.module.css
+   porque la comparten esta pantalla y /prode/competencias.
+
+   El lobby responde una sola pregunta: DÓNDE PUEDO JUGAR AHORA Y CUÁNDO CIERRA.
+   Muestra una vitrina de 10 y manda el catálogo entero a la pantalla de buscar.
+   ============================================================================ */
+
+.page {
+    min-height: 100vh;
+    padding: 40px 0 96px;
+}
+
+/* Los tokens viven en el shell, no en `.page`: el modo embebido del perfil dibuja
+   el shell sin la envoltura de página y necesita la misma escala. */
+.shell {
+    --lobby-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+    --lobby-radius: 12px;
+    --lobby-radius-sm: 8px;
+    --lobby-hairline: 1px solid var(--color-border);
+    --lobby-surface: var(--color-bg-secondary);
+    --lobby-surface-raised: var(--color-bg-tertiary);
+    --lobby-accent-soft: rgba(var(--color-accent-rgb), 0.12);
+    --lobby-accent-line: rgba(var(--color-accent-rgb), 0.35);
+
+    /* El ambar de aviso CUANDO PINTA TEXTO. `--color-warning` está calibrado para
+       fondos: en oscuro da 9,3:1 y sirve, pero en claro (#ca8a04 sobre #f9fafb) da
+       2,8:1 y no llega ni de cerca al 4,5:1 de AA. El cierre urgente es justamente
+       el dato que no se puede perder, así que en claro se corre a un tono que sí
+       llega (5,8:1). Mismo criterio que `--color-accent-ink` en globals.css. */
+    --lobby-warn-ink: var(--color-warning);
+
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+:global(html[data-theme='light']) .shell,
+:global([data-theme='light']) .shell {
+    --lobby-warn-ink: #8a5a00;
+}
+
+/* ============================================================================
+   1. Cabecera de página
+   ============================================================================ */
+
+.header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 24px 32px;
+    padding-bottom: 20px;
+    border-bottom: var(--lobby-hairline);
+}
+
+.headerCopy {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    margin-bottom: 2px;
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: var(--lobby-radius-sm);
+    transition: color var(--transition-fast);
+}
+
+.backLink:hover {
+    color: var(--color-text-primary);
+}
+
+.title {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+}
+
+.lede {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+}
+
+.headerSide {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+/* Tu posición en el acumulado. Reemplaza al trío de números grandes que había
+   antes (competencias / activas / jugadores): eso hablaba del sistema, esto habla
+   del que está mirando. */
+.standing {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    border: var(--lobby-hairline);
+    border-radius: var(--radius-full);
+    background: var(--lobby-surface);
+    text-decoration: none;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.standing:hover {
+    border-color: var(--color-border-light);
+    background: var(--lobby-surface-raised);
+}
+
+.standingRank {
+    font-family: var(--lobby-mono);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-accent-ink);
+}
+
+.standingLabel {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.standingPoints {
+    padding-left: 10px;
+    border-left: var(--lobby-hairline);
+    font-family: var(--lobby-mono);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+}
+
+.headerActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* ============================================================================
+   2. Botones
+   ============================================================================ */
+
+.btnPrimary,
+.btnSecondary,
+.btnGhost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 0 16px;
+    border-radius: var(--lobby-radius-sm);
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast),
+        color var(--transition-fast), transform var(--transition-fast);
+}
+
+.btnPrimary {
+    border: 1px solid var(--color-accent);
+    /* Tinta oscura sobre el verde: 6:1. El blanco encima de este verde da 3,3:1 y
+       no llega a AA para el tamaño de un botón. */
+    background: var(--color-accent);
+    color: #06120c;
+}
+
+.btnPrimary:hover {
+    background: var(--color-accent-light);
+    border-color: var(--color-accent-light);
+}
+
+.btnSecondary {
+    border: var(--lobby-hairline);
+    background: var(--lobby-surface);
+    color: var(--color-text-primary);
+}
+
+.btnSecondary:hover {
+    border-color: var(--color-border-light);
+    background: var(--lobby-surface-raised);
+}
+
+.btnGhost {
+    min-height: 32px;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+}
+
+.btnGhost:hover {
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+}
+
+.btnPrimary:active,
+.btnSecondary:active {
+    transform: translateY(1px);
+}
+
+.btnDanger {
+    color: var(--color-error);
+}
+
+.btnDanger:hover {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+.btnPrimary:disabled,
+.btnSecondary:disabled,
+.btnGhost:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Un solo anillo de foco para toda la página. */
+.shell :is(a, button, input):focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--lobby-radius-sm);
+}
+
+/* ============================================================================
+   3. Barra del próximo cierre — la lede real de la página
+   ============================================================================ */
+
+.nextLock {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border: 1px solid var(--lobby-accent-line);
+    border-radius: var(--lobby-radius);
+    background: linear-gradient(90deg, var(--lobby-accent-soft), transparent 60%), var(--lobby-surface);
+    text-decoration: none;
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.nextLock:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
+}
+
+.nextLockUrgent {
+    border-color: rgba(245, 158, 11, 0.45);
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.12), transparent 60%), var(--lobby-surface);
+}
+
+.nextLockUrgent:hover {
+    border-color: var(--lobby-warn-ink);
+}
+
+.nextLockBody {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.nextLockLabel {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.nextLockName {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nextLockTime {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    text-align: right;
+}
+
+.nextLockCountdown {
+    font-family: var(--lobby-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-accent-ink);
+    white-space: nowrap;
+}
+
+.nextLockUrgent .nextLockCountdown {
+    color: var(--lobby-warn-ink);
+}
+
+.nextLockHint {
+    font-size: 0.6875rem;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+/* ============================================================================
+   4. Secciones
+   ============================================================================ */
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sectionHead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 20px;
+}
+
+.sectionHeading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+}
+
+/* El recuento vive al lado del título, no en tarjetas-pedestal. */
+.sectionCount {
+    font-family: var(--lobby-mono);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+}
+
+.sectionLink {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-accent-ink);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.sectionLink:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* ============================================================================
+   5. Vitrina de competencias
+   ============================================================================ */
+
+.cardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+/* Cierra la vitrina: dice cuántas quedan afuera en vez de un "ver más" a ciegas.
+   Va DENTRO de la grilla ocupando dos celdas, y con eso la última fila queda llena
+   en vez de dejar una tarjeta huérfana: con 10 tarjetas sobran exactamente dos
+   celdas tanto a 4 columnas (10 = 4+4+2) como a 3 (10 = 3+3+3+1). */
+.seeAll {
+    grid-column: span 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 46px;
+    padding: 0 20px;
+    border: 1px dashed var(--color-border-light);
+    border-radius: var(--lobby-radius);
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.seeAll:hover {
+    border-color: var(--color-accent);
+    background: var(--lobby-accent-soft);
+}
+
+.seeAllHint {
+    font-family: var(--lobby-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-accent-ink);
+}
+
+/* ============================================================================
+   6. Donde jugás — competencias y ligas del usuario
+   ============================================================================ */
+
+.mineList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mineRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px 16px;
+    padding: 13px 14px;
+    border: var(--lobby-hairline);
+    border-radius: var(--lobby-radius);
+    background: var(--lobby-surface);
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.mineRow:hover {
+    border-color: var(--color-border-light);
+}
+
+.mineLink {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    text-decoration: none;
+}
+
+.mineTop {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.mineName {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mineTag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 19px;
+    padding: 0 7px;
+    border: var(--lobby-hairline);
+    border-radius: var(--radius-full);
+    color: var(--color-text-secondary);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.mineMeta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.mineMetaNum {
+    font-family: var(--lobby-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+}
+
+.mineActions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* Código de invitación: se copia, no se transcribe a mano. */
+.inviteCode {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 0 10px;
+    border: var(--lobby-hairline);
+    border-radius: var(--lobby-radius-sm);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-family: var(--lobby-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.inviteCode:hover {
+    border-color: var(--color-border-light);
+    color: var(--color-text-primary);
+}
+
+.inviteCodeCopied {
+    border-color: var(--lobby-accent-line);
+    color: var(--color-accent-ink);
+}
+
+/* ============================================================================
+   7. Ranking global
+   ============================================================================ */
+
+.ranking {
+    display: flex;
+    flex-direction: column;
+    border: var(--lobby-hairline);
+    border-radius: var(--lobby-radius);
+    overflow: hidden;
+    background: var(--lobby-surface);
+}
+
+.rankRow {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: var(--lobby-hairline);
+}
+
+.rankRow:last-child {
+    border-bottom: 0;
+}
+
+.rankRowSelf {
+    background: var(--lobby-accent-soft);
+}
+
+/* El corte entre el podio y tu fila cuando estás lejos: una fila de puntos
+   suspensivos, no un borde suelto que se lee como error. */
+.rankGap {
+    padding: 6px 14px;
+    border-bottom: var(--lobby-hairline);
+    color: var(--color-text-secondary);
+    font-family: var(--lobby-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-align: center;
+}
+
+.rankPos {
+    font-family: var(--lobby-mono);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+    text-align: right;
+}
+
+.rankRow:first-child .rankPos,
+.rankRowSelf .rankPos {
+    color: var(--color-accent-ink);
+}
+
+.rankIdentity {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.rankName {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rankSub {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.rankSubNum {
+    font-family: var(--lobby-mono);
+    font-variant-numeric: tabular-nums;
+}
+
+.rankPoints {
+    font-family: var(--lobby-mono);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+}
+
+.selfTag {
+    display: inline-block;
+    margin-left: 7px;
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+    color: #06120c;
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+/* ============================================================================
+   8. Llamado a crear liga privada
+   ============================================================================ */
+
+.createBanner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px 32px;
+    padding: 18px 20px;
+    border: var(--lobby-hairline);
+    border-radius: var(--lobby-radius);
+    background: var(--lobby-surface);
+}
+
+.createBannerTitle {
+    margin: 0 0 4px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+}
+
+.createBannerText {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+}
+
+.createBannerActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* ============================================================================
+   9. Estados vacíos y avisos
+   ============================================================================ */
+
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 28px 20px;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--lobby-radius);
+    background: transparent;
+}
+
+.emptyTitle {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.emptyText {
+    margin: 0;
+    max-width: 60ch;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+}
+
+.notice {
+    padding: 12px 14px;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: var(--lobby-radius);
+    background: rgba(245, 158, 11, 0.08);
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.feedback {
+    padding: 10px 14px;
+    border: var(--lobby-hairline);
+    border-radius: var(--lobby-radius-sm);
+    background: var(--lobby-surface-raised);
+    color: var(--color-text-primary);
+    font-size: 0.8125rem;
+}
+
+/* ============================================================================
+   10. Adaptación por pantalla
+   ============================================================================ */
+
+@media (max-width: 900px) {
+    .header {
+        grid-template-columns: minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .headerSide {
+        align-items: flex-start;
+    }
+
+    .createBanner {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .page {
+        padding: 24px 0 calc(var(--mobile-nav-height, 78px) + 32px);
+    }
+
+    .shell {
+        gap: 32px;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .lede {
+        font-size: 0.875rem;
+    }
+
+    .headerActions {
+        width: 100%;
+    }
+
+    .headerActions .btnPrimary,
+    .headerActions .btnSecondary {
+        flex: 1;
+    }
+
+    .nextLock {
+        grid-template-columns: auto minmax(0, 1fr);
+        row-gap: 10px;
+    }
+
+    .nextLockTime {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: space-between;
+        width: 100%;
+        padding-top: 10px;
+        border-top: var(--lobby-hairline);
+        text-align: left;
+    }
+
+    .cardGrid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* A una sola columna, "span 2" se saldría de la grilla. */
+    .seeAll {
+        grid-column: 1 / -1;
+    }
+
+    .mineRow {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* Los controles quedan del ancho de su texto: cuatro botones "Entrar" a lo
+       ancho de la pantalla pesan más que las filas que abren. */
+    .mineActions {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .rankRow {
+        grid-template-columns: 26px minmax(0, 1fr) auto;
+        gap: 10px;
+        padding: 11px 12px;
+    }
+}
+
+/* ============================================================================
+   11. Modo embebido (pestaña Prode del perfil)
+   ============================================================================ */
+
+.embedded {
+    gap: 28px;
+}
+
+.embedded .section {
+    gap: 12px;
+}
+
+.embedded .cardGrid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+/* ============================================================================
+   12. Movimiento reducido
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .shell *,
+    .shell *::before,
+    .shell *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .nextLock:hover {
+        transform: none;
+    }
+}

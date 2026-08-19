@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 import { listPublicProdeCompetitions } from '@/lib/server/prodeCompetitions';
 
 function getStatusCode(error: unknown) {
@@ -9,7 +10,14 @@ function getStatusCode(error: unknown) {
 
 export async function GET() {
     try {
-        const result = await listPublicProdeCompetitions();
+        // El lobby embebido en el perfil entra por aca. Sin la sesion, `viewerIsMember`
+        // seria false para todos y el carril "Donde jugas" desapareceria ahi adentro.
+        const supabase = await createClient();
+        const {
+            data: { session },
+        } = await supabase.auth.getSession();
+
+        const result = await listPublicProdeCompetitions(session?.user?.id ?? null);
         return NextResponse.json(result);
     } catch (error) {
         return NextResponse.json(

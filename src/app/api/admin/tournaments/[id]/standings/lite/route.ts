@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireTournamentReadContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
+import { normalizeTableType } from '@/lib/standings/tableType';
+import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
+import { isUuid } from '@/lib/utils/postgrest';
 
 type ParticipantScopeRow = {
     id?: unknown;
@@ -36,19 +40,46 @@ export async function GET(
 ) {
     try {
         const { id: tournamentId } = await params;
+        // Mismas guardas que la ruta completa de standings: acá abajo estos
+        // cuatro valores entran en columnas uuid, y un slug de torneo o un
+        // nombre de pestaña se traducía en un 22P02 y un 500.
+        if (!isUuid(tournamentId)) {
+            return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
+        }
         const searchParams = request.nextUrl.searchParams;
         const phaseId = searchParams.get('phaseId');
         const groupId = searchParams.get('groupId');
-        const requestedSeasonId =
+        const rawSeasonId =
             searchParams.get('seasonId') ||
             searchParams.get('season_id') ||
             searchParams.get('season');
+        // La etiqueta de temporada ('2026') no es su id: se descarta y abajo
+        // manda la de la fase o la vigente del torneo.
+        const requestedSeasonId = isUuid(rawSeasonId) ? rawSeasonId : null;
 
         if (!phaseId) {
             return NextResponse.json({ error: 'phaseId is required' }, { status: 400 });
         }
 
-        const supabase = await createClient();
+        if (!isUuid(phaseId)) {
+            return NextResponse.json({ error: 'phaseId inválido' }, { status: 400 });
+        }
+
+        if (groupId && !isUuid(groupId)) {
+            return NextResponse.json({ error: 'groupId inválido' }, { status: 400 });
+        }
+
+        const tableType = normalizeTableType(searchParams.get('tableType'));
+        if (!tableType) {
+            return NextResponse.json(
+                { error: 'tableType inválido: se esperaba general, home o away.' },
+                { status: 400 },
+            );
+        }
+
+        // Lectura acotada a quien pertenece al torneo. Antes alcanzaba con tener
+        // una sesión y el id del torneo para leer su tabla entera.
+        const { writer: supabase } = await requireTournamentReadContext(tournamentId);
 
         // 1. Fetch phase/tournament context for season and rules
         const [{ data: phase }, { data: tournament }] = await Promise.all([
@@ -99,6 +130,14 @@ export async function GET(
             query = (query as any).is('group_id', null);
         }
 
+        // La tabla lite es la guardada tal cual: sin filtrar, las tres
+        // perspectivas se mezclarían en una sola lista de posiciones.
+        query = applyStandingsTableType(
+            query,
+            await supportsStandingsTableTypeColumn(),
+            tableType,
+        );
+
         const [
             { data: standings, error: standingsError },
             participantScope,
@@ -120,12 +159,39 @@ export async function GET(
             participantScope.participants || [],
         );
 
+        /**
+         * El plantel de la fase, para poder resolver nombre y escudo por club
+         * cuando el JSONB guardado no los tenga. Este endpoint era el único que
+         * servía `stats.team_logo` SIN respaldo: recortar los escudos base64 de
+         * la tabla lo dejaba en blanco, y por eso el paso 8 del SQL no se corre
+         * hasta que esto esté verificado en producción.
+         */
+        const clubById = new Map<string, { name?: string | null; logo_url?: string | null }>();
+        for (const participant of participantScope.participants ?? []) {
+            const raw = participant as { club_id?: unknown; id?: unknown; name?: unknown; clubs?: unknown };
+            const clubId = normalizeScopeId(raw.club_id ?? raw.id);
+            if (!clubId) continue;
+            const club = Array.isArray(raw.clubs) ? raw.clubs[0] : raw.clubs;
+            clubById.set(clubId, {
+                name: (club as { name?: string | null })?.name ?? (raw.name as string | null) ?? null,
+                logo_url: (club as { logo_url?: string | null })?.logo_url ?? null,
+            });
+        }
+
         // 3. Map to expected frontend structure
-        const table = scopedStandings.map(row => ({
+        const table = scopedStandings.map(row => {
+            const club = clubById.get(normalizeScopeId(row.club_id));
+            const teamName = row.stats?.team_name || club?.name || 'Desconocido';
+
+            return {
             teamId: row.club_id,
             team: {
-                name: row.stats?.team_name || 'Desconocido',
-                logo: row.stats?.team_logo || null
+                name: teamName,
+                logo: buildTeamLogoProxyUrl({
+                    key: row.club_id,
+                    name: teamName,
+                    fallback: club?.logo_url || row.stats?.team_logo || null,
+                }),
             },
             position: row.position,
             played: row.played,
@@ -141,7 +207,8 @@ export async function GET(
             form: row.form ? row.form.split('') : [],
             adjustments: row.stats?.adjustments || [],
             status: row.stats?.status || null
-        }));
+            };
+        });
 
         const lastCalculatedAt = scopedStandings?.[0]?.last_updated ?? null;
 
@@ -155,9 +222,6 @@ export async function GET(
 
     } catch (e: any) {
         console.error('Exception fetching standings-lite:', e);
-        return NextResponse.json(
-            { error: 'Internal server error', details: e.message },
-            { status: 500 },
-        );
+        return tournamentApiErrorResponse(e);
     }
 }

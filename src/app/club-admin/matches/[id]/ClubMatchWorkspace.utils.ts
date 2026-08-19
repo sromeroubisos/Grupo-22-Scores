@@ -420,7 +420,7 @@ export function ensureLineupsState(source: unknown, clock?: unknown): ClubLineup
   };
 }
 
-export function ensureEvents(source: unknown): ClubLiveEvent[] {
+export function ensureEvents(source: unknown, sportId?: string | null): ClubLiveEvent[] {
   if (!Array.isArray(source)) return [];
 
   let activePeriod = normalizeMatchPeriod(null);
@@ -437,7 +437,7 @@ export function ensureEvents(source: unknown): ClubLiveEvent[] {
       : Number(row.order);
     const period = ensureString(row.period)
       ? normalizeMatchPeriod(row.period)
-      : getEventPeriodForType(type, activePeriod);
+      : getEventPeriodForType(type, activePeriod, sportId);
     const team: MatchEventTeam = row.team === 'home' || row.team === 'away' ? row.team : null;
     const event = {
       id: ensureString(row.id) || crypto.randomUUID(),
@@ -455,7 +455,7 @@ export function ensureEvents(source: unknown): ClubLiveEvent[] {
       period,
       order: Number.isFinite(rawOrder) ? rawOrder : index,
     };
-    activePeriod = getNextActivePeriodAfterEvent(type, period);
+    activePeriod = getNextActivePeriodAfterEvent(type, period, sportId);
     return event;
   });
 }

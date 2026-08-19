@@ -40,6 +40,17 @@ export interface CachedExternalMatch {
     updated_at?: string;
 }
 
+/**
+ * Resultado de una escritura sobre la caché. `written` es lo que efectivamente
+ * quedó en la tabla; `skipped` marca que la escritura no pudo hacerse por una
+ * causa conocida y no fatal (hoy: la tabla no existe).
+ */
+export interface CacheWriteResult {
+    written: number;
+    skipped: boolean;
+    reason?: 'missing_table';
+}
+
 function normalizeCachedTeam(team: CachedTeam): CachedTeam {
     return {
         ...team,
@@ -174,12 +185,18 @@ export function mapCachedToEnrichedMatch(m: CachedExternalMatch, sport: string) 
 /**
  * Upsert a batch of matches into external_match_cache.
  * Uses `onConflict: 'id'` so duplicate writes are idempotent.
+ *
+ * Devuelve cuántas filas escribió DE VERDAD. Antes devolvía void y, cuando la
+ * tabla no existía, retornaba normal: los crons sumaban igual al contador y
+ * respondían `{ok: true, synced: 340}` habiendo escrito cero. La instrumentación
+ * mentía y cualquier monitor veía verde. Quien llame a esto tiene que reportar
+ * `written`, no el largo del array que le pasó.
  */
 export async function upsertMatches(
     matches: CachedExternalMatch[],
     supabase: SupabaseClient
-): Promise<void> {
-    if (matches.length === 0) return;
+): Promise<CacheWriteResult> {
+    if (matches.length === 0) return { written: 0, skipped: false };
 
     const { error } = await supabase
         .from('external_match_cache')
@@ -188,11 +205,12 @@ export async function upsertMatches(
     if (error) {
         if (error.code === '42P01' || isMissingTableError(error, 'external_match_cache')) {
             console.warn('[externalMatchCache] upsertMatches skipped: la tabla external_match_cache no existe. Aplicar la migración 20260701090000_restore_external_match_cache.sql.');
-            return;
+            return { written: 0, skipped: true, reason: 'missing_table' };
         }
         console.error('[externalMatchCache] upsertMatches error:', error.message);
         throw error;
     }
+    return { written: matches.length, skipped: false };
 }
 
 /**

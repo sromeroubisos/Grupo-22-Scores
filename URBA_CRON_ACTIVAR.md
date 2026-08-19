@@ -7,22 +7,12 @@ las decisiones que quedaron tomadas.
 ## Las entradas de cron
 
 ```json
-{ "path": "/api/cron/urba-sync", "schedule": "*/20 18-23 * * 6,0" },
-{ "path": "/api/cron/urba-sync", "schedule": "*/20 0-5 * * 0,1"  },
-{ "path": "/api/cron/urba-sync", "schedule": "0 9 * * *"  },
-{ "path": "/api/cron/urba-sync", "schedule": "0 10 * * *" },
-{ "path": "/api/cron/urba-sync", "schedule": "0 11 * * *" }
+{ "path": "/api/cron/urba-sync?scope=jornada", "schedule": "*/20 18-23 * * 6,0" },
+{ "path": "/api/cron/urba-sync?scope=jornada", "schedule": "*/20 0-5 * * 0,1"  },
+{ "path": "/api/cron/urba-sync?scope=barrido", "schedule": "0 9 * * *"  },
+{ "path": "/api/cron/urba-sync?scope=barrido", "schedule": "0 10 * * *" },
+{ "path": "/api/cron/urba-sync?scope=barrido", "schedule": "0 11 * * *" }
 ```
-
-**El path va pelado, sin `?scope=`, y eso se pagó con un fin de semana entero.**
-Las entradas llevaban query string (`?scope=jornada|barrido`) y con esa forma
-Vercel **no invocó el cron ni una sola vez**: el domingo 17/8 pasaron ~40
-ventanas programadas sin una escritura, con URBA publicado desde las 16:26 y el
-endpoint sano. Los otros cinco crons del proyecto —paths sin query— corrían
-normal. Vercel documenta paths duplicados con schedules distintos (para eso
-existe el header `x-vercel-cron-schedule`) pero nunca documentó query strings en
-el `path`, y su ejemplo de crons parametrizados usa segmentos. El scope acá sale
-del header (ver abajo); el query string sigue sirviendo para las corridas a mano.
 
 Los horarios son **UTC**, que es lo que usa Vercel. En hora de Buenos Aires (UTC-3):
 
@@ -40,10 +30,9 @@ entradas no rompe nada —el barrido sigue rotando de a una parte por día— pe
 cola de correcciones pasa a tardar tres días.
 
 Los `schedule` del barrido están declarados **también** en la ruta
-(`SCHEDULES_BARRIDO`): como las entradas ya no llevan query string, el scope de
-una invocación de Vercel sale SIEMPRE de comparar el header
-`x-vercel-cron-schedule` contra esa lista — barrido si coincide, jornada si no.
-Si se cambian acá, hay que cambiarlos allá.
+(`SCHEDULES_BARRIDO`): se comparan contra el header `x-vercel-cron-schedule` para
+resolver el scope cuando Vercel no pasa el query string. Si se cambian acá, hay
+que cambiarlos allá.
 
 ## Por qué estas ventanas
 

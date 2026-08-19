@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireTournamentReadContext, tournamentApiErrorResponse } from '@/lib/auth/tournamentApi';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { CIRCUIT_GLOBAL_SENTINEL } from '@/components/admin/entities/tournament/standings/types';
 import {
@@ -10,6 +10,10 @@ import {
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
 import { resolveStandingsCarryOverRows } from '@/lib/server/standingsCarryOver';
 import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
+import { normalizeTableType } from '@/lib/standings/tableType';
+import { comparePublishedVsLive, describeDrift } from '@/lib/standings/publishedDrift';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
+import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 import { isUuid } from '@/lib/utils/postgrest';
 
 // --- Circuit placement points helpers ---
@@ -200,6 +204,14 @@ async function handleCircuitGlobalStandings(tournamentId: string, supabase: any,
             rowsQuery = rowsQuery.eq('season_id', seasonId);
         }
 
+        // El agregador de circuito suma puntos por posición a lo largo de las
+        // fases. Sin filtrar, cada club entraría tres veces por fase y los
+        // puntos del circuito se triplicarían.
+        rowsQuery = applyStandingsTableType(
+            rowsQuery,
+            await supportsStandingsTableTypeColumn(),
+        );
+
         const { data: rows } = await rowsQuery;
 
         if (!rows || rows.length === 0) continue;
@@ -225,7 +237,13 @@ async function handleCircuitGlobalStandings(tournamentId: string, supabase: any,
             const pts = position > 0 ? (placementMap.get(position) ?? 0) : 0;
             const stats = row.stats as Record<string, unknown> | null;
             const teamName = (stats?.team_name as string) || 'Equipo';
-            const teamLogo = (stats?.team_logo as string) || null;
+            // Proxy, no el base64 guardado. Ver el comentario del otro armado de
+            // filas más abajo.
+            const teamLogo = buildTeamLogoProxyUrl({
+                key: teamId,
+                name: teamName,
+                fallback: (stats?.team_logo as string) || null,
+            });
 
             const prev = rowsByClub.get(teamId);
             if (prev) {
@@ -301,17 +319,52 @@ export async function GET(
         const searchParams = request.nextUrl.searchParams;
         const phaseId = searchParams.get('phaseId');
         const groupId = searchParams.get('groupId');
-        const tableType = searchParams.get('tableType') || 'general';
+        const tableType = normalizeTableType(searchParams.get('tableType'));
+        if (!tableType) {
+            return NextResponse.json(
+                { error: 'tableType inválido: se esperaba general, home o away.' },
+                { status: 400 },
+            );
+        }
         let seasonId =
             searchParams.get('seasonId') ||
             searchParams.get('season_id') ||
             searchParams.get('season');
 
+        // `season` llega de la URL y a veces trae la ETIQUETA de la temporada
+        // ('2026') en lugar de su id. Son dos columnas distintas con el mismo
+        // nombre: `tournaments.season_id` es TEXT con el año, pero las seis
+        // tablas del alcance (fases, grupos, partidos, participantes,
+        // posiciones) la tienen UUID. Cruzarlas tiraba 22P02 en las diez
+        // consultas de abajo — las ráfagas de la auditoría del 08/08.
+        // Se descarta y más abajo se resuelve la temporada vigente del torneo,
+        // que es la que se quería ver.
+        if (seasonId && !isUuid(seasonId)) {
+            seasonId = null;
+        }
+
         if (!phaseId) {
             return NextResponse.json({ error: 'phaseId is required' }, { status: 400 });
         }
 
-        const supabase = await createClient();
+        // Salvo el centinela del circuito, `phaseId` va derecho a una columna
+        // uuid. Un nombre de pestaña o un número de página llegando acá era un
+        // 22P02 y un 500; ahora es un 400 que dice qué pasó.
+        if (phaseId !== CIRCUIT_GLOBAL_SENTINEL && !isUuid(phaseId)) {
+            return NextResponse.json({ error: 'phaseId inválido' }, { status: 400 });
+        }
+
+        // `groupId` no se descarta en silencio: sin filtro la consulta cae en
+        // `is('group_id', null)` y devolvería la tabla sin grupos como si fuera
+        // la del grupo pedido.
+        if (groupId && !isUuid(groupId)) {
+            return NextResponse.json({ error: 'groupId inválido' }, { status: 400 });
+        }
+
+        // Lectura acotada a quien pertenece al torneo. Hasta acá alcanzaba con
+        // tener sesión y el id del torneo para leer su tabla y su reglamento.
+        const { writer: supabase } = await requireTournamentReadContext(tournamentId);
+
         if (!seasonId) {
             const { data: tournamentSeason } = await supabase
                 .from('tournaments')
@@ -368,6 +421,14 @@ export async function GET(
             if (seasonId) {
                 standingsQuery = standingsQuery.eq('season_id', seasonId);
             }
+
+            // Rama fully_manual: la tabla que se muestra es la guardada, así que
+            // tiene que ser la de la perspectiva que el operador está mirando.
+            standingsQuery = applyStandingsTableType(
+                standingsQuery,
+                await supportsStandingsTableTypeColumn(),
+                tableType,
+            );
 
             let manualMatchesQuery = scopedGroupId
                 ? supabase
@@ -428,7 +489,14 @@ export async function GET(
                     team: {
                         id: row.club_id,
                         name: row.stats?.team_name || participantClub?.name || participant?.name || 'Equipo',
-                        logo: row.stats?.team_logo || participantClub?.logo_url || null,
+                        // URL de proxy, no el base64 del JSONB: es lo que hace
+                        // posible recortar `stats.team_logo` de la tabla sin que
+                        // los escudos desaparezcan.
+                        logo: buildTeamLogoProxyUrl({
+                            key: row.club_id,
+                            name: row.stats?.team_name || participantClub?.name || participant?.name || null,
+                            fallback: participantClub?.logo_url || row.stats?.team_logo || null,
+                        }),
                     },
                     position: row.position,
                     played: row.played,
@@ -554,16 +622,28 @@ export async function GET(
             scopedGroupId,
         ).length;
 
-        // 6. last_calculated_at from persisted standings
+        /**
+         * 6. Lo que quedó PUBLICADO para este scope.
+         *
+         * Este viaje ya se hacía para sacar la fecha del último cálculo; ahora
+         * trae además `club_id`, `position` y `points` —el mismo query, un
+         * puñado de filas más— y con eso se puede decir algo que hasta ahora no
+         * se decía en ningún lado: si la tabla guardada dice lo mismo que la que
+         * el operador tiene delante.
+         *
+         * Importa porque la tabla que se muestra se calcula en vivo y casi
+         * siempre está bien; la que puede estar mal es la guardada, que es la
+         * que lee el hincha.
+         */
         let lastCalculatedAt: string | null = null;
+        let publishedDrift: ReturnType<typeof comparePublishedVsLive> = { state: 'al_dia', diffs: [] };
         {
             let cQuery = supabase
                 .from('tournament_standings')
-                .select('last_updated')
+                .select('club_id, position, points, last_updated')
                 .eq('tournament_id', tournamentId)
                 .eq('phase_id', phaseId)
-                .order('last_updated', { ascending: false })
-                .limit(1);
+                .order('last_updated', { ascending: false });
 
             if (seasonId) {
                 cQuery = cQuery.eq('season_id', seasonId);
@@ -574,8 +654,19 @@ export async function GET(
             } else {
                 cQuery = (cQuery as typeof cQuery & { is: (column: string, value: null) => typeof cQuery }).is('group_id', null);
             }
+
+            // "Último cálculo" de ESTA perspectiva. Sin filtrar, recalcular la
+            // general le refrescaría la fecha a la tabla de local sin haberla
+            // tocado.
+            cQuery = applyStandingsTableType(
+                cQuery,
+                await supportsStandingsTableTypeColumn(),
+                tableType,
+            );
+
             const { data: cached } = await cQuery;
             lastCalculatedAt = cached?.[0]?.last_updated ?? null;
+            publishedDrift = comparePublishedVsLive(cached ?? [], table);
         }
 
         return NextResponse.json({
@@ -590,13 +681,14 @@ export async function GET(
                 rows: carryOver.rows.length,
             },
             last_calculated_at: lastCalculatedAt,
+            published_drift: {
+                state: publishedDrift.state,
+                count: publishedDrift.diffs.length,
+                teams: describeDrift(publishedDrift.diffs),
+            },
         });
     } catch (e: unknown) {
-        const message = e instanceof Error ? e.message : 'Unknown error';
         console.error('Exception generating standings:', e);
-        return NextResponse.json(
-            { error: 'Internal server error', details: message },
-            { status: 500 },
-        );
+        return tournamentApiErrorResponse(e);
     }
 }

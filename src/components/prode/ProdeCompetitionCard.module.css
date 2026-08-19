@@ -1,0 +1,251 @@
+/* ============================================================================
+   Tarjeta de competencia — compartida por el lobby y la pantalla de todas.
+
+   Los tokens se declaran en `.card` y no en un contenedor de página: la tarjeta se
+   dibuja en dos pantallas distintas y tiene que traer su propia escala puesta.
+   ============================================================================ */
+
+.card {
+    --card-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+    --card-hairline: 1px solid var(--color-border);
+    --card-accent-soft: rgba(var(--color-accent-rgb), 0.12);
+    --card-accent-line: rgba(var(--color-accent-rgb), 0.35);
+    --card-warn-ink: var(--color-warning);
+
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    border: var(--card-hairline);
+    border-radius: 12px;
+    background: var(--color-bg-secondary);
+    text-decoration: none;
+    transition: border-color var(--transition-fast), transform var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+/* Mismo criterio que en el lobby: el ámbar de `--color-warning` da 2,8:1 como texto
+   sobre la superficie clara y no llega a AA. */
+:global(html[data-theme='light']) .card,
+:global([data-theme='light']) .card {
+    --card-warn-ink: #8a5a00;
+}
+
+.card:hover {
+    border-color: var(--card-accent-line);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card);
+}
+
+.card:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* ---------- Cabecera: escudo + estado ---------- */
+
+.head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+/* El recuadro del escudo es fijo: los logos vienen en proporciones dispares (PNG
+   apaisado de FlashScore, SVG cuadrado de iniciales) y sin caja se desalinean entre
+   tarjetas vecinas.
+
+   La placa va BLANCA en los dos temas. Los escudos están dibujados para fondo claro
+   y muchos son de trazo oscuro: sobre el fondo casi negro del tema oscuro, el del
+   Junior World Championship desaparecía por completo. */
+.crest {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    padding: 6px;
+    border: var(--card-hairline);
+    border-radius: 10px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.crestImg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* El respaldo se dibuja sobre la misma placa blanca, así que necesita tinta oscura
+   propia y no puede heredar el gris del tema. */
+.crestFallback {
+    width: 24px;
+    height: 24px;
+    color: #6b7280;
+}
+
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 20px;
+    padding: 0 7px;
+    border-radius: var(--radius-full);
+    background: var(--card-accent-soft);
+    color: var(--color-accent-ink);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* ---------- Estado ---------- */
+
+.state {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.stateDot {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-full);
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+.stateOpen,
+.stateLive {
+    color: var(--color-accent-ink);
+}
+
+/* El pulso solo lo lleva "en vivo": es movimiento que informa un estado. */
+.stateLive .stateDot {
+    animation: cardPulse 2s ease-in-out infinite;
+}
+
+@keyframes cardPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--color-accent-rgb), 0.5); }
+    50% { box-shadow: 0 0 0 5px rgba(var(--color-accent-rgb), 0); }
+}
+
+.statePlaying,
+.stateDone,
+.stateIdle {
+    color: var(--color-text-secondary);
+}
+
+.stateIdle .stateDot {
+    background: transparent;
+    border: 1px solid currentColor;
+}
+
+/* ---------- Cuerpo ---------- */
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.name {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 650;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+    text-wrap: balance;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.metaSport {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.sportIcon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+}
+
+.metaNum {
+    font-family: var(--card-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+/* ---------- Pie ---------- */
+
+.footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px 12px;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: var(--card-hairline);
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+.fixture {
+    white-space: nowrap;
+}
+
+.lock {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.countdown {
+    font-family: var(--card-mono);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-accent-ink);
+}
+
+.countdownUrgent {
+    color: var(--card-warn-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .stateLive .stateDot {
+        transition-duration: 0.01ms;
+        animation: none;
+    }
+
+    .card:hover {
+        transform: none;
+    }
+}

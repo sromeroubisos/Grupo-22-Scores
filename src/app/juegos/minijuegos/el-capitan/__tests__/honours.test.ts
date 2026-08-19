@@ -29,7 +29,7 @@ import type { CaptainSeasonEntry } from '../../../../../features/captain/types/s
 import type { CaptainState, CreateCaptainInput } from '../../../../../features/captain/types/captain.ts';
 import type { Milestone, MilestoneId } from '../../../../../features/captain/types/achievements.ts';
 import { createInitialCaptain } from '../../../../../features/captain/state/captain-reducer.ts';
-import { newHonours } from '../honours.ts';
+import { copaQueNoLevantaste, newHonours } from '../honours.ts';
 
 const INPUT: CreateCaptainInput = {
     name: 'Bautista',
@@ -240,4 +240,50 @@ test('dos avisos de la misma temporada no comparten identidad', () => {
     const claves = newHonours(antes, despues, NOMBRE).map((a) => a.key);
 
     assert.equal(new Set(claves).size, claves.length);
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  LA COPA QUE NO LEVANTASTE — la pregunta espejo de la vitrina
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// El caso salió de un reporte real: «gano con el club y no me guarda el
+// campeonato». El motor estaba bien —el juvenil y el que no jugó no tienen
+// medalla, a propósito— pero la tarjeta mostraba «El club · 1º de N» y después
+// silencio. Lo que se prueba acá es que el silencio ahora tiene texto, y que el
+// texto no aparece cuando la copa sí se contó.
+
+test('el juvenil ve por qué la copa de primera no es suya', () => {
+    const texto = copaQueNoLevantaste({ age: 16, share: 0.4, leaguePosition: 1, titles: [] });
+    assert.ok(texto, 'el 1º de la tabla sin copa en juveniles tiene que explicarse');
+    assert.match(texto!, /juveniles/);
+});
+
+test('el que casi no jugó ve que la medalla es del plantel', () => {
+    const texto = copaQueNoLevantaste({ age: 24, share: 0.1, leaguePosition: 1, titles: [] });
+    assert.ok(texto, 'el 1º de la tabla sin copa por participación tiene que explicarse');
+    assert.match(texto!, /camiseta/);
+});
+
+test('cuando la copa se contó, no hay nada que explicar', () => {
+    // El campeón con medalla: la nota de «Ganaron …» ya lo dice todo.
+    assert.equal(
+        copaQueNoLevantaste({ age: 24, share: 0.9, leaguePosition: 1, titles: ['Primera A'] }),
+        null,
+    );
+});
+
+test('si el club no salió primero, la tarjeta no inventa una copa perdida', () => {
+    assert.equal(copaQueNoLevantaste({ age: 16, share: 0.4, leaguePosition: 2, titles: [] }), null);
+    // Y la fila sin tabla resuelta (0º de 0) tampoco dice nada.
+    assert.equal(copaQueNoLevantaste({ age: 16, share: 0.4, leaguePosition: 0, titles: [] }), null);
+});
+
+test('el estado que el motor no produce se calla, no acusa', () => {
+    // Primero + participación de sobra + sin título: hoy es imposible (el 1º de
+    // la tabla ES el campeón). Si un cambio del motor lo produjera, la pantalla
+    // de celebración se calla — la misma falla elegida en la resta de arriba.
+    assert.equal(
+        copaQueNoLevantaste({ age: 24, share: 0.9, leaguePosition: 1, titles: [] }),
+        null,
+    );
 });

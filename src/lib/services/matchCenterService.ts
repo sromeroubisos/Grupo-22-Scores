@@ -602,6 +602,7 @@ function mapStoredEvent(
   row: any,
   match: { home_club_id?: string | null; away_club_id?: string | null },
   activePeriod: unknown = DEFAULT_MATCH_PERIOD,
+  sportId?: string | null,
 ) {
   const details = row?.details && typeof row.details === 'object' ? row.details : {};
   const type = normalizeText(row?.event_type) || 'note';
@@ -659,12 +660,12 @@ function mapStoredEvent(
           : undefined,
     period: normalizeText((details as Record<string, unknown>).period)
       ? normalizeMatchPeriod((details as Record<string, unknown>).period)
-      : getEventPeriodForType(type, activePeriod),
+      : getEventPeriodForType(type, activePeriod, sportId),
     order: normalizeEventOrderValue((details as Record<string, unknown>).order) ?? undefined,
   };
 }
 
-function mapJsonEvent(row: unknown, activePeriod: unknown = DEFAULT_MATCH_PERIOD) {
+function mapJsonEvent(row: unknown, activePeriod: unknown = DEFAULT_MATCH_PERIOD, sportId?: string | null) {
   const source = row && typeof row === 'object' ? (row as Record<string, unknown>) : {};
   const type = normalizeText(source.type) || 'note';
   return normalizeEventInput({
@@ -694,7 +695,7 @@ function mapJsonEvent(row: unknown, activePeriod: unknown = DEFAULT_MATCH_PERIOD
         : Number.isFinite(Number(source.sequence))
           ? Number(source.sequence)
           : null,
-    period: normalizeText(source.period) ? normalizeMatchPeriod(source.period) : getEventPeriodForType(type, activePeriod),
+    period: normalizeText(source.period) ? normalizeMatchPeriod(source.period) : getEventPeriodForType(type, activePeriod, sportId),
     order: normalizeEventOrderValue(source.order),
   });
 }
@@ -1606,6 +1607,17 @@ export async function fetchMatchCenterMatch(
 
   const { data: eventRows, error: eventsError } = eventsRes as { data: any[] | null; error: any };
 
+  // Deporte del torneo: de el sale la secuencia de periodos (Q1..Q4 en hockey,
+  // 1T/2T en el resto). Sin esto la timeline de un partido de hockey se
+  // reconstruia en mitades aunque el reloj ya hablara en cuartos.
+  // Misma precedencia que usa el resto del servicio (ver `sportId` del payload):
+  // la columna del partido manda, el torneo es el respaldo.
+  const eventsSportId =
+    normalizeText((data as any)?.sport_id)
+    || normalizeText((data as any)?.sport)
+    || normalizeText((data as any)?.tournament?.sport_id)
+    || null;
+
   if (!eventsError) {
     loadedFromRelationalTable = true;
     let activePeriod = normalizeMatchPeriod(null);
@@ -1616,8 +1628,8 @@ export async function fetchMatchCenterMatch(
         return [];
       }
 
-      const event = mapStoredEvent(row, data, activePeriod);
-      activePeriod = getNextActivePeriodAfterEvent(event.type, event.period);
+      const event = mapStoredEvent(row, data, activePeriod, eventsSportId);
+      activePeriod = getNextActivePeriodAfterEvent(event.type, event.period, eventsSportId);
       return [event];
     });
   } else if (!isMissingMatchEventsTableError(eventsError)) {
@@ -1634,8 +1646,8 @@ export async function fetchMatchCenterMatch(
         return [];
       }
 
-      const event = mapJsonEvent(row, activePeriod);
-      activePeriod = getNextActivePeriodAfterEvent(event.type, event.period);
+      const event = mapJsonEvent(row, activePeriod, eventsSportId);
+      activePeriod = getNextActivePeriodAfterEvent(event.type, event.period, eventsSportId);
       return [event];
     });
   }
@@ -1915,10 +1927,15 @@ export async function persistMatchCenterSupplementalData(
       ? await resolveEventsForPersistence(client, match as MatchContextRow, effectiveIncomingLineups, payload.events)
       : Array.isArray((match as any).events)
         ? (() => {
+            const persistSportId =
+              normalizeText((match as any).sport_id)
+              || normalizeText((match as any).sport)
+              || normalizeText((match as any).tournament?.sport_id)
+              || null;
             let activePeriod = normalizeMatchPeriod(null);
             return ((match as any).events as unknown[]).map((row) => {
-              const event = mapJsonEvent(row, activePeriod);
-              activePeriod = getNextActivePeriodAfterEvent(event.type, event.period);
+              const event = mapJsonEvent(row, activePeriod, persistSportId);
+              activePeriod = getNextActivePeriodAfterEvent(event.type, event.period, persistSportId);
               return event;
             });
           })()

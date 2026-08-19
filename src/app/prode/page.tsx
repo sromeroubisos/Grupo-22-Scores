@@ -10,14 +10,16 @@ export default async function ProdePage() {
     const {
         data: { session },
     } = await supabase.auth.getSession();
+    const viewerId = session?.user?.id ?? null;
+
     const [
         { schemaReady: competitionsReady, data: competitions },
         { schemaReady: totalsReady, data: totals },
         { schemaReady: privateLeaguesReady, data: privateLeagues },
     ] = await Promise.all([
-        listPublicProdeCompetitions(),
+        listPublicProdeCompetitions(viewerId),
         listPublicProdeUserTotals(),
-        session?.user?.id ? listUserPrivateLeagues(session.user.id) : Promise.resolve({ schemaReady: true, data: [] }),
+        viewerId ? listUserPrivateLeagues(viewerId) : Promise.resolve({ schemaReady: true, data: [] }),
     ]);
 
     return (
@@ -25,6 +27,7 @@ export default async function ProdePage() {
             competitions={competitions}
             totals={totals}
             privateLeagues={privateLeagues}
+            viewerId={viewerId}
             schemaReady={competitionsReady && totalsReady && privateLeaguesReady}
         />
     );

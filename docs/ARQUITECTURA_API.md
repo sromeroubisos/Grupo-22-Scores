@@ -81,7 +81,7 @@ Patrón de uso típico en los servicios: buscar en `memoryCache` → si miss, `a
 
 #### FlashScore — [src/lib/services/flashscore.ts](../src/lib/services/flashscore.ts)
 
-- Key y host desde env (`NEXT_PUBLIC_RAPIDAPI_KEY` / `NEXT_PUBLIC_RAPIDAPI_HOST`).
+- Key desde `RAPIDAPI_KEY` — **server-only, sin `NEXT_PUBLIC_`**: el prefijo haría que Next incruste la clave paga en el bundle del cliente. El módulo tira error si se lo importa desde un componente cliente. Host desde `RAPIDAPI_HOST` (o `NEXT_PUBLIC_RAPIDAPI_HOST`, que no es secreto).
 - **Control de concurrencia**: máximo 3 llamadas simultáneas (`MAX_CONCURRENT_API = 3`) con cola de espera, para evitar el efecto "thundering herd" cuando el navegador dispara muchos requests.
 - **Dedupe de requests en vuelo**: si ya hay una llamada idéntica en curso, se reusa la misma promesa.
 - **TTL dinámico**: listas 60s, live 5s, detalles 30s, equipos/torneos 24h. Caso especial: rugby a ±1 día de hoy → 30s.

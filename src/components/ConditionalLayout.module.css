@@ -1,8 +1,16 @@
 /* ===== CONDITIONAL LAYOUT ===== */
 
+/* El alto del header NO se transcribe: se lee de `--h-header`.
+   Acá decía `calc(100vh - 70px)` y el header no mide 70 en ningún breakpoint
+   —60 en escritorio, 52 en teléfono—, así que el contenedor terminaba antes que
+   la ventana y el footer asomaba cortado por el borde de abajo en toda pantalla
+   con poco contenido. Diez píxeles de pie institucional entrando sin que nada
+   los llame.
+   `dvh` en vez de `vh` porque en el teléfono la barra del navegador se retrae y
+   `vh` se queda con el alto de la barra desplegada. */
 .layoutContainer {
     display: flex;
-    min-height: calc(100vh - 70px);
+    min-height: calc(100dvh - var(--h-header, 60px));
     margin-top: 0;
 }
 

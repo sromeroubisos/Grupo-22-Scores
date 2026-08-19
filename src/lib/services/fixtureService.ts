@@ -7,10 +7,6 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
 import { createClient } from '@/lib/supabase/server';
 import {
-  getMatchRankingSnapshot,
-  syncClubRankingsForMatchUpdate,
-} from '@/lib/server/clubRankings';
-import {
   invalidateMatchesFeedCaches,
   type MatchesFeedInvalidationScope,
 } from '@/lib/server/matchesFeedInvalidation';
@@ -76,6 +72,22 @@ type MatchFeedInvalidationSource = {
   sport_id?: string | null;
   sport?: string | null;
 };
+
+/**
+ * Qué se movió, además del partido editado, como consecuencia de la edición.
+ *
+ * Existe por el gestor de fixture, que desde ahora aplica el partido guardado en
+ * memoria en vez de recargar el torneo entero. Eso vale mientras lo único que
+ * cambió sea la fila que se acaba de guardar — y hay un caso donde no: cargar un
+ * resultado de playoff empuja al ganador al cruce siguiente, y ese OTRO partido
+ * cambió sin que nadie lo pidiera. Lo mismo el reseed de un cuadro sembrado
+ * desde las posiciones de una zona.
+ *
+ * Es un parámetro de salida y no parte del `Match` devuelto a propósito: el
+ * partido es un dato del dominio y esto es una nota sobre el request. Quien no
+ * lo necesita no lo pasa y no se entera.
+ */
+export type MatchUpdateSideEffects = { derivedChanged: boolean };
 
 export class FixtureService {
   private static _supportsRoundLabel: boolean | null = null;
@@ -242,68 +254,10 @@ export class FixtureService {
     return [];
   }
 
-  private static async syncClubRankingsAfterMatchChange(
-    matchId: string,
-    previousMatch?: Awaited<ReturnType<typeof getMatchRankingSnapshot>>,
-  ) {
-    try {
-      await syncClubRankingsForMatchUpdate(matchId, previousMatch ?? null);
-    } catch (error) {
-      console.error('[FixtureService] Club ranking sync failed:', { matchId, error });
-    }
-  }
-
   private static areComparableValuesEqual(left: unknown, right: unknown) {
     return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
   }
 
-  private static shouldSyncRankingsAfterUpdate(
-    existingMatch: {
-      phase_id?: string | null;
-      round_uuid?: string | null;
-      round_id?: string | null;
-      group_id?: string | null;
-      home_club_id?: string | null;
-      away_club_id?: string | null;
-      status?: string | null;
-      score?: unknown;
-      home_base_points?: number | null;
-      away_base_points?: number | null;
-      home_bonus_points?: number | null;
-      away_bonus_points?: number | null;
-      points_autocalculated?: boolean | null;
-      points_override_reason?: string | null;
-    },
-    updateData: Record<string, unknown>,
-  ) {
-    if (
-      updateData.home_division_id !== undefined ||
-      updateData.away_division_id !== undefined ||
-      updateData.category !== undefined
-    ) {
-      return true;
-    }
-
-    const comparablePairs: Array<[unknown, unknown]> = [
-      [updateData.phase_id, existingMatch.phase_id],
-      [updateData.round_uuid, this.getMatchRoundId(existingMatch)],
-      [updateData.group_id, existingMatch.group_id],
-      [updateData.home_club_id, existingMatch.home_club_id],
-      [updateData.away_club_id, existingMatch.away_club_id],
-      [updateData.status, existingMatch.status],
-      [updateData.score, existingMatch.score],
-      [updateData.home_base_points, existingMatch.home_base_points],
-      [updateData.away_base_points, existingMatch.away_base_points],
-      [updateData.home_bonus_points, existingMatch.home_bonus_points],
-      [updateData.away_bonus_points, existingMatch.away_bonus_points],
-      [updateData.points_autocalculated, existingMatch.points_autocalculated],
-      [updateData.points_override_reason, existingMatch.points_override_reason],
-    ];
-
-    return comparablePairs.some(([nextValue, currentValue]) => (
-      nextValue !== undefined && !this.areComparableValuesEqual(nextValue, currentValue)
-    ));
-  }
 
   private static async assertPhaseBelongsToTournament(
     supabase: any,
@@ -619,7 +573,7 @@ export class FixtureService {
 
     let participantsQuery = supabase
       .from('tournament_participants')
-      // Sin `clubs:club_id(logo_url)`: eran 1,36 MB por 9 participantes (los nueve
+      // Sin `clubs:club_id(logo_url)`: eran 1,4 MB por 9 participantes (los nueve
       // escudos en base64) para quedarse con nueve direcciones. El escudo se
       // resuelve por `club_id` en `mapParticipant`.
       .select('id, club_id, name, short_code')
@@ -932,12 +886,21 @@ export class FixtureService {
 
     const nextOrder = (maxRound?.order_index || 0) + 1;
 
+    // Sin `status`: esa columna NO existe en tournament_rounds y nunca existió
+    // en ninguna migración. La tabla es
+    //   id · phase_id · name · order_index · start_date · end_date ·
+    //   is_completed · notes · created_at · updated_at · season_id · group_id
+    // y el estado se expresa con `is_completed` (BOOLEAN DEFAULT FALSE), que se
+    // deja al default. Mientras el campo fantasma estuvo en el payload fallaban
+    // las DOS escrituras de abajo —el upsert y el insert de respaldo—, así que
+    // esta función devolvía null cada vez que la fecha no existía todavía: lo
+    // contrario de lo que promete su comentario ("manual matches are always
+    // associated with a round"). El partido se creaba sin fecha asociada.
     const roundPayload = {
       phase_id: phaseId,
       season_id: phaseContext?.season_id ?? null,
       name: roundLabel,
       order_index: nextOrder,
-      status: 'draft'
     };
 
     // B2: atomic upsert on (phase_id, name) so two concurrent imports can't
@@ -1165,7 +1128,9 @@ export class FixtureService {
       throw new Error('El partido se creó con datos incompletos. Revisá la configuración de la base.');
     }
 
-    await this.syncClubRankingsAfterMatchChange(match.id);
+    // El ranking de clubes NO se toca acá. Se rehace entero los martes a las
+    // 00:00 (`/api/cron/weekly-club-ranking`) leyendo los partidos terminados de
+    // la temporada, así que el partido nuevo entra solo en la próxima corrida.
     await this.invalidatePublicMatchesFeed(supabase, this.getMatchFeedInvalidationScopes([match]));
     return this.mapMatch(match);
   }
@@ -1177,6 +1142,7 @@ export class FixtureService {
     matchId: string,
     data: Partial<MatchFormData>,
     providedClient?: any,
+    sideEffects?: MatchUpdateSideEffects,
   ): Promise<Match | null> {
     if (!isUuid(matchId)) {
       throw new Error('El partido que intentás actualizar no existe.');
@@ -1361,11 +1327,6 @@ export class FixtureService {
     const nextStatus = data.status !== undefined ? data.status : (existingMatch.status ?? null);
     const finalRelevant = isFinalStandingsStatus(prevStatus) || isFinalStandingsStatus(nextStatus);
 
-    const shouldSyncRankings = this.shouldSyncRankingsAfterUpdate(existingMatch, updateData) && finalRelevant;
-    const previousRankingSnapshot = shouldSyncRankings
-      ? await getMatchRankingSnapshot(matchId)
-      : null;
-
     traceStageEnd('validate_snapshots');
     traceStageStart('match_update');
     const { data: match, error } = await supabase
@@ -1381,16 +1342,13 @@ export class FixtureService {
       throw new Error(error.message);
     }
 
-    markEditTrace({ shouldSyncRankings });
-    if (shouldSyncRankings) {
-      if (isDerivedRecalcSkipped('ranking')) {
-        appendEditTraceFact('skippedDerived', 'ranking');
-      } else {
-        traceStageStart('ranking_sync');
-        await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
-        traceStageEnd('ranking_sync');
-      }
-    }
+    // Acá vivía el sync del ranking, y era el cuello: como los resultados se
+    // cargan fuera de orden cronológico, casi todo guardado marcaba el ranking
+    // para reconstruir, y la reconstrucción —que borraba las ~800 aplicaciones y
+    // las rehacía de a una— se relanzaba cada dos minutos peleándole las filas al
+    // gestor. El ranking pasó a actualizarse una vez por semana, los martes a las
+    // 00:00, en `/api/cron/weekly-club-ranking`.
+    markEditTrace({ rankingPath: 'weekly_cron' });
 
     // Automatic playoff advancement: when a bracket match's result or
     // participants change, push winner/loser into the next matches. No-op
@@ -1411,6 +1369,7 @@ export class FixtureService {
         const advancement = await resolveMatchAdvancement(supabase, matchId);
         if (advancement.ok && advancement.changed > 0) {
           markEditTrace({ advancementChanged: advancement.changed });
+          if (sideEffects) sideEffects.derivedChanged = true;
           await invalidateMatchesFeedCaches();
         }
         if (advancement.warnings.length > 0) {
@@ -1450,6 +1409,7 @@ export class FixtureService {
             if (cfg && !cfg.locked && cfg.sourcePhaseId === editedMatch.phase_id) {
               const r = await reseedPlayoffBracket(supabase, { phaseId: (phaseRow as any).id });
               if (r.ok && (r.reseeded ?? 0) > 0) {
+                if (sideEffects) sideEffects.derivedChanged = true;
                 await invalidateMatchesFeedCaches();
               }
             }
@@ -1500,7 +1460,6 @@ export class FixtureService {
     const supabase = await this.getWriteClient();
     const { data: existingMatch } = await this.selectMatchForUpdate(supabase, matchId);
     const invalidationScopes = this.getMatchFeedInvalidationScopes([existingMatch]);
-    const previousRankingSnapshot = await getMatchRankingSnapshot(matchId);
 
     const { error } = await supabase.from('matches').delete().eq('id', matchId);
 
@@ -1509,7 +1468,9 @@ export class FixtureService {
       return false;
     }
 
-    await this.syncClubRankingsAfterMatchChange(matchId, previousRankingSnapshot);
+    // Borrar un partido tampoco toca el ranking: como la cuenta semanal se rehace
+    // desde cero sobre los partidos que existen, el martes siguiente el partido
+    // borrado simplemente no está y sus puntos se van solos.
     await this.invalidatePublicMatchesFeed(supabase, invalidationScopes);
     return true;
   }
@@ -2304,11 +2265,11 @@ export class FixtureService {
    * único que cambia es que viaja la dirección del escudo en vez del escudo entero.
    *
    * Eso arreglaba la RESPUESTA, no la LECTURA: el base64 igual cruzaba de Postgres
-   * al servidor para que acá lo tiráramos. Medido contra producción en el torneo
-   * `b12830fd`, la consulta de partidos con `logo:logo_url` en los dos lados pesaba
-   * 21,81 MB contra 0,015 MB sin ella — el mismo escudo repetido en cada fila. Por
-   * eso las consultas ya no piden la columna y el escudo se resuelve POR CLAVE, que
-   * es justo lo que el proxy sabe hacer.
+   * al servidor para que acá lo tiráramos. Medido en el torneo `b12830fd`, la
+   * consulta de partidos con `logo:logo_url` en los dos lados pesaba 21,81 MB
+   * contra 0,02 MB sin ella — el mismo escudo repetido en cada fila. Por eso las
+   * consultas ya no piden la columna y el escudo se resuelve POR CLAVE, que es
+   * justo lo que el proxy sabe hacer.
    */
   private static resolveClubLogo(
     clubId: string | null | undefined,

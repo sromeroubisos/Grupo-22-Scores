@@ -8,6 +8,11 @@ interface Option {
     label: string;
 }
 
+// El catalogo de clubes pasa los 2.000: pintar todo de una traba el desplegable.
+// Se pintan los primeros y el resto se alcanza escribiendo, con el contador a la
+// vista para que nadie crea que la lista termina ahi.
+const RENDER_CAP = 200;
+
 interface CustomSelectProps {
     value: string;
     onChange: (value: string) => void;
@@ -41,6 +46,12 @@ export function CustomSelect({
         const normalizedSearch = searchTerm.trim().toLowerCase();
         return options.filter((option) => option.label.toLowerCase().includes(normalizedSearch));
     }, [options, searchTerm, searchable]);
+
+    const visibleOptions = useMemo(
+        () => (filteredOptions.length > RENDER_CAP ? filteredOptions.slice(0, RENDER_CAP) : filteredOptions),
+        [filteredOptions]
+    );
+    const hiddenCount = filteredOptions.length - visibleOptions.length;
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -98,18 +109,27 @@ export function CustomSelect({
                     {filteredOptions.length === 0 ? (
                         <div className="scifi-select-empty">Sin opciones</div>
                     ) : (
-                        filteredOptions.map((option) => (
-                            <div
-                                key={option.value}
-                                className={`scifi-select-item ${option.value === value ? 'selected' : ''}`}
-                                onClick={() => {
-                                    onChange(option.value);
-                                    setIsOpen(false);
-                                }}
-                            >
-                                {option.label}
-                            </div>
-                        ))
+                        <>
+                            {visibleOptions.map((option) => (
+                                <div
+                                    key={option.value}
+                                    className={`scifi-select-item ${option.value === value ? 'selected' : ''}`}
+                                    onClick={() => {
+                                        onChange(option.value);
+                                        setIsOpen(false);
+                                    }}
+                                >
+                                    {option.label}
+                                </div>
+                            ))}
+                            {hiddenCount > 0 && (
+                                <div className="scifi-select-empty">
+                                    {searchable
+                                        ? `${hiddenCount} opciones más: escribí para encontrarlas.`
+                                        : `${hiddenCount} opciones más.`}
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             )}

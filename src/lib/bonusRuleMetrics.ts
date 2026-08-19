@@ -122,11 +122,25 @@ function getCandidateEventTypes(eventType: string | null): string[] {
   if (!eventType) return [];
 
   if (eventType === 'goal') {
-    return ['goal', 'penalty_goal', 'own_goal', 'seven_meter_goal'];
+    // `penalty_corner_goal` es el gol de corner corto del hockey: sin el, un
+    // bonus configurado por goles contaba de menos justo la jugada que mas
+    // goles produce en ese deporte.
+    return ['goal', 'penalty_goal', 'own_goal', 'seven_meter_goal', 'penalty_corner_goal'];
   }
 
   return [eventType];
 }
+
+/**
+ * Tipos que se cargan a un equipo pero cuyo tanto es del rival.
+ *
+ * Espeja `creditsOpponent` del catalogo de eventos. Se declara aca en vez de
+ * leer la definicion porque este modulo es puro a proposito —lo importa
+ * `matchPointsCore`, que tiene que poder correr en un test de Node sin
+ * arrastrar el catalogo—. Si algun dia aparece un segundo evento asi, va en
+ * los dos lados.
+ */
+const OPPONENT_CREDITED_EVENT_TYPES = new Set(['own_goal']);
 
 export function resolveOffensiveBonusRule(rawRule: unknown): NormalizedOffensiveBonusRule | null {
   if (rawRule === true) {
@@ -199,10 +213,15 @@ export function countTeamEventMetric(
     return 0;
   }
 
+  const opponent: BonusMetricTeam = team === 'home' ? 'away' : 'home';
+
   return events.filter((event) => {
-    const teamValue = event?.team;
     const typeValue = normalizeEventTypeToken(event?.type);
-    return teamValue === team && Boolean(typeValue) && (typeValue ? eventTypes.has(typeValue) : false);
+    if (!typeValue || !eventTypes.has(typeValue)) return false;
+
+    // El gol en contra suma para el rival del equipo al que se cargo.
+    const creditedTeam = OPPONENT_CREDITED_EVENT_TYPES.has(typeValue) ? opponent : team;
+    return event?.team === creditedTeam;
   }).length;
 }
 

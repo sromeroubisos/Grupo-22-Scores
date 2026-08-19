@@ -1,4 +1,4 @@
-import { getNextActivePeriodAfterEvent, normalizeMatchPeriod } from './matchPeriods';
+import { getNextActivePeriodAfterEvent, normalizeMatchPeriod } from './matchPeriods.ts';
 
 /**
  * Reloj de partido DERIVADO.
@@ -71,11 +71,10 @@ export const DEFAULT_CLOCK_SPORT = 'rugby';
  * sumar codigos aca (y en matchPeriods.ts), no rearquitectura.
  *
  * hockey = hockey sobre CESPED (sport_id real en DB: 'field-hockey'; 23
- * torneos, 105 partidos). Se juega en 4 cuartos de 15' pero el vocabulario de
- * periodos solo expresa 1T/2T, asi que se aproxima a mitades de 30': el numero
- * del reloj sale correcto todo el partido porque el acumulado es cumulativo
- * (el operador pausa/reanuda entre Q1 y Q2 dentro del '1T'). Lo unico que se
- * pierde es la atribucion por cuarto en los eventos.
+ * torneos, 105 partidos). Se juega en 4 CUARTOS de 15' y desde que
+ * `matchPeriods` tiene vocabulario de cuartos el reloj los expresa de verdad,
+ * en vez de aproximarlos a mitades de 30'. Los eventos vuelven a tener
+ * atribucion por cuarto.
  */
 const SPORT_CLOCK_CONFIG: Record<string, SportClockConfig> = {
   rugby: {
@@ -88,9 +87,23 @@ const SPORT_CLOCK_CONFIG: Record<string, SportClockConfig> = {
     offsets: { PRE: 0, '1T': 0, HT: 2700, '2T': 2700, ET: 5400, FT: 5400 },
   },
   hockey: {
-    periods: ['PRE', '1T', '2T', 'ET', 'FT'],
-    // 4 cuartos de 15' aproximados a mitades de 30'.
-    offsets: { PRE: 0, '1T': 0, HT: 1800, '2T': 1800, ET: 3600, FT: 3600 },
+    periods: ['PRE', 'Q1', 'Q2', 'Q3', 'Q4', 'ET', 'FT'],
+    // 15' por cuarto, acumulado del partido. '1T' y '2T' SIGUEN en la tabla
+    // aunque ya no se ofrezcan: los partidos guardados antes de los cuartos
+    // tienen ese periodo en `matches.clock`, y sin la entrada el offset caia a
+    // 0 y el reloj retrocedia media hora al abrirlos.
+    offsets: {
+      PRE: 0,
+      Q1: 0,
+      Q2: 900,
+      HT: 1800,
+      Q3: 1800,
+      Q4: 2700,
+      ET: 3600,
+      FT: 3600,
+      '1T': 0,
+      '2T': 1800,
+    },
   },
 };
 
@@ -342,7 +355,7 @@ export function resolveClockTransitionForEvent(
   clock: StoredMatchClock,
   sportId: string | null | undefined,
 ): MatchClockTransition | null {
-  const nextPeriod = getNextActivePeriodAfterEvent(eventType, clock.period);
+  const nextPeriod = getNextActivePeriodAfterEvent(eventType, clock.period, sportId);
 
   if (PAUSE_CONSERVING_EVENTS.has(eventType)) {
     return { mode: 'pause', period: nextPeriod };

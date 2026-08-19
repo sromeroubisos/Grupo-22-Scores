@@ -1,15 +1,3 @@
-/* CSS_REBUILD_STAMP_1778099386962 */
-/* CSS_REBUILD_STAMP_1778098944791 */
-/* CSS_REBUILD_STAMP_1778098320170 */
-/* CSS_REBUILD_STAMP_1778097985614 */
-/* CSS_REBUILD_STAMP_1778094077514 */
-/* CSS_REBUILD_STAMP_1778093586631 */
-/* CSS_REBUILD_STAMP_1778093255828 */
-/* CSS_REBUILD_STAMP_1778092682759 */
-/* CSS_REBUILD_STAMP_1778091573147 */
-/* CSS_REBUILD_STAMP_1778090893065 */
-/* CSS_REBUILD_STAMP_1778089752231 */
-/* CSS_REBUILD_STAMP_1778088962101 */
 /* ============================================================================
    Tournament Console — Mobile refinements layer
    ----------------------------------------------------------------------------
@@ -56,7 +44,6 @@
 .basalt-body .grid-cols-3,
 .basalt-body .grid-cols-4,
 .basalt-body .grid-cols-5,
-.basalt-body .grid-cols-6,
 .basalt-body .sm\:grid-cols-2,
 .basalt-body .md\:grid-cols-2,
 .basalt-body .lg\:grid-cols-2,
@@ -162,9 +149,7 @@
     }
 
     /* But preserve compact rows that explicitly opt out via `.flex-nowrap` */
-    .basalt-body .basalt-shell-main .flex.flex-nowrap,
-.basalt-body .basalt-shell-main-full .flex.flex-nowrap,
-.basalt-body .structure-counter-shell {
+    .basalt-body .structure-counter-shell {
         flex-wrap: nowrap;
     }
 
@@ -223,9 +208,6 @@
        <1280px range so it never competes with the compact stacked Estructura
        layout. The header's "Guardar" button (visible while isDirty) and the
        Recalcular entry inside the overflow menu cover the same actions. */
-    .basalt-action-footer {
-        display: none !important;
-    }
 
     /* ─── Estructura tab — full responsive rewrite ───
        The Tectonic Basalt scoped block in tournament-structure.css forces the
@@ -267,7 +249,6 @@
 .basalt-body .tournament-structure-shell .structure-field-panel,
 .basalt-body .tournament-structure-shell .structure-field-panel-wide,
 .basalt-body .tournament-structure-shell .structure-sidebar-facts,
-.basalt-body .tournament-structure-shell .structure-sidebar-fact,
 .basalt-body .tournament-structure-shell .structure-wizard-progress-card,
 .basalt-body .tournament-structure-shell .structure-wizard-sidebar-head {
         max-width: 100% !important;
@@ -314,11 +295,6 @@
 .basalt-body .tournament-structure-shell .phase-wizard-step {
         min-width: 140px !important;
         max-width: 220px !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-sidebar-fact {
-        padding: 10px 12px !important;
-        border-radius: 12px !important;
     }
 
     .basalt-body .tournament-structure-shell .structure-wizard-progress-card {
@@ -401,8 +377,7 @@
     /* Hide third-tier metadata and the secondary action strip; the overflow
        menu surfaces those actions instead. */
     .basalt-header-meta span:nth-child(n+3),
-.basalt-header-secondary,
-.basalt-header-divider {
+.basalt-header-secondary {
         display: none !important;
     }
 
@@ -655,9 +630,6 @@
        Guardar/Recalcular when relevant, the "Consola operativa / Gestión
        central" copy is desktop-only chrome, and the persistent strip steals
        both vertical space and visual attention on small screens. */
-    .basalt-action-footer {
-        display: none !important;
-    }
 
     /* Shell stage — no more clearance reserved for the (now hidden) footer */
     .basalt-shell-stage {
@@ -708,9 +680,6 @@
    --------------------------------------------------------------------------- */
 
 @media (max-width: 767px) {
-    .basalt-body .basalt-grid {
-        gap: 14px !important;
-    }
 
     .basalt-body .basalt-card {
         padding: 16px !important;
@@ -727,73 +696,14 @@
         word-break: break-word;
     }
 
-    .basalt-body .basalt-logo-placeholder {
-        width: 84px !important;
-        height: 84px !important;
-    }
-
-    .basalt-body .basalt-hero-completion {
-        flex-direction: row !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        width: 100%;
-        min-width: 0 !important;
-        gap: 10px !important;
-        padding-top: 10px;
-        border-top: 1px solid var(--border-basalt);
-    }
-
-    .basalt-body .basalt-hero-completion-value {
-        font-size: clamp(1.6rem, 7vw, 2rem) !important;
-    }
-
-    .basalt-body .basalt-hero-meta {
-        gap: 6px 12px !important;
-        font-size: 11px !important;
-        margin-bottom: 8px !important;
-    }
-
     /* Summary strip: 4-col → 2-col on phones, 1-col on tiny screens */
-    .basalt-body .basalt-summary-strip {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 10px !important;
-        padding: 14px !important;
-    }
-
-    .basalt-body .basalt-summary-metric {
-        min-height: 0 !important;
-        padding: 12px !important;
-    }
-
-    .basalt-body .basalt-summary-metric strong {
-        font-size: 1.35rem !important;
-    }
-
-    .basalt-body .basalt-summary-metric span {
-        font-size: 10px !important;
-    }
-
-    .basalt-body .basalt-summary-metric small {
-        font-size: 11px !important;
-        line-height: 1.3 !important;
-    }
 
     /* Progress bar — tighter spacing on phones */
-    .basalt-body .basalt-progress {
-        margin: 14px 0 !important;
-    }
 
     /* Health items inside cards stack and breathe */
-    .basalt-body .basalt-health-item {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
 }
 
 @media (max-width: 479px) {
-    .basalt-body .basalt-summary-strip {
-        grid-template-columns: 1fr !important;
-    }
 
     .basalt-body .basalt-card {
         padding: 14px !important;
@@ -1169,8 +1079,7 @@
        only sets the grid columns; card layout is overridden later. */
 
     /* ----- Wizard sidebar (progress + facts) ----- */
-    .basalt-body .structure-wizard-progress-card,
-.basalt-body .structure-sidebar-fact {
+    .basalt-body .structure-wizard-progress-card {
         padding: 10px 12px !important;
         border-radius: 12px !important;
     }
@@ -1182,10 +1091,6 @@
     .basalt-body .structure-sidebar-facts {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: 8px !important;
-    }
-
-    .basalt-body .structure-sidebar-fact strong {
-        font-size: 13px !important;
     }
 
     .basalt-body .structure-wizard-sidebar .phase-wizard-sidebar-title {
@@ -1349,12 +1254,6 @@
         border-radius: 14px !important;
     }
 
-    .structure-label-empty {
-        min-height: 0 !important;
-        padding: 18px !important;
-        font-size: 12px !important;
-    }
-
     .structure-label-row {
         padding: 12px !important;
         gap: 10px !important;
@@ -1363,16 +1262,9 @@
 
     /* Top-level rows inside a label become column on phones — chip + actions
        stack instead of fighting for horizontal space. */
-    .structure-label-row-head,
-.structure-label-row-config {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 8px !important;
-    }
 
     .structure-label-row-actions,
-.structure-label-presets,
-.structure-label-mode-toggle {
+.structure-label-presets {
         width: 100%;
         gap: 6px !important;
     }
@@ -1381,9 +1273,7 @@
        — match its specificity (with .basalt-body prefix) plus reduce padding so
        a row of 3-4 chips fits a 360px viewport. Min-height stays at WCAG floor. */
     .basalt-body .tournament-structure-shell .structure-label-action-btn,
-.basalt-body .tournament-structure-shell .structure-label-mode-btn,
-.structure-label-action-btn,
-.structure-label-mode-btn {
+.structure-label-action-btn {
         min-height: 40px !important;
         padding: 0 10px !important;
         font-size: 11px !important;
@@ -1391,20 +1281,7 @@
         min-width: 0;
     }
 
-    .structure-label-mode-toggle-form {
-        width: 100% !important;
-    }
-
-    .structure-label-mode-toggle-form .structure-label-mode-btn {
-        flex: 1 1 0;
-    }
-
     /* Color picker + name field stack on phones */
-    .structure-label-input-row {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 8px !important;
-    }
 
     .structure-label-color-input {
         width: 100% !important;
@@ -1440,8 +1317,7 @@
         font-size: 11px !important;
     }
 
-    .structure-label-helper,
-.structure-label-row-meta {
+    .structure-label-helper {
         font-size: 11px !important;
     }
 
@@ -1452,8 +1328,7 @@
         gap: 8px !important;
     }
 
-    .structure-label-submit,
-.structure-label-form-actions .basalt-btn,
+    .structure-label-form-actions .basalt-btn,
 .structure-label-form-actions button {
         width: 100% !important;
     }
@@ -1505,115 +1380,17 @@
         padding: 14px 12px 48px !important;
     }
 
-    .participants-header {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 12px !important;
-    }
-
-    .participants-header-left {
-        gap: 6px !important;
-    }
-
-    .participants-section-label {
-        font-size: 9px !important;
-    }
-
-    .participants-title {
-        font-size: 20px !important;
-        line-height: 1.1 !important;
-    }
-
-    .participants-counters {
-        flex-wrap: nowrap !important;
-        overflow-x: auto;
-        scrollbar-width: none;
-        gap: 6px !important;
-        margin: 0 -12px;
-        padding: 0 12px 4px;
-    }
-
-    .participants-counters::-webkit-scrollbar {
-        display: none;
-    }
-
-    .counter-pill {
-        flex: 0 0 auto;
-        min-width: max-content;
-        padding: 6px 10px !important;
-    }
-
-    .counter-pill-label {
-        font-size: 9px !important;
-    }
-
-    .counter-pill-value {
-        font-size: 14px !important;
-    }
-
-    .participants-header-actions {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 6px !important;
-        width: 100% !important;
-        justify-content: stretch !important;
-    }
-
     /* Restore button labels on phones — icon-only is too cryptic for primary
        actions like Crear / Importar. Keep them readable but compact. */
-    .btn-flash {
-        min-height: 40px !important;
-        padding: 0 12px !important;
-        font-size: 11px !important;
-        gap: 6px !important;
-    }
-
-    .btn-flash span {
-        display: inline !important;
-    }
-
-    .participants-filter-bar {
-        grid-template-columns: 1fr !important;
-        gap: 8px !important;
-    }
-
-    .filter-input-wrapper {
-        grid-column: span 1 !important;
-    }
-
-    .filter-input,
-.filter-select {
-        min-height: 42px;
-    }
 
     /* Participants table — horizontal scroll with sticky first column for
        legibility, plus tighter padding. */
-    .participants-table-scroll {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .participants-table {
-        min-width: 640px;
-        font-size: 12px;
-    }
-
-    .participants-table th,
-.participants-table td {
-        padding: 10px 12px !important;
-    }
 }
 
 @media (max-width: 479px) {
-    .participants-header-actions {
-        grid-template-columns: 1fr 1fr !important;
-    }
 
     /* On very narrow phones drop button text and rely on icons for the
        secondary actions to keep the row legible. */
-    .participants-header-actions .btn-flash:not(.primary) span {
-        display: none !important;
-    }
 }
 
 /* ---------------------------------------------------------------------------
@@ -1626,10 +1403,6 @@
    --------------------------------------------------------------------------- */
 
 @media (max-width: 767px) {
-    .operation-context-card {
-        padding: 12px !important;
-        gap: 10px !important;
-    }
 
     .operation-context-row {
         padding: 10px 12px !important;
@@ -1650,10 +1423,6 @@
     }
 
     /* Match cards — ensure team names don't overflow */
-    .operation-match-row {
-        padding: 12px !important;
-        gap: 10px !important;
-    }
 
     .operation-match-action {
         min-height: 40px !important;
@@ -1708,8 +1477,7 @@
     /* Generic premium drawer used by AddParticipant, ImportParticipants, etc.
        Use 100% (not 100vw) to avoid the iOS overflow caused by scrollbar
        width math; pin via inset:0 so the drawer truly fills the viewport. */
-    .premium-drawer,
-[class*='drawerPanel'],
+    [class*='drawerPanel'],
 [class*='drawer-panel'] {
         inset: 0 !important;
         max-width: 100% !important;
@@ -1720,8 +1488,7 @@
 
     /* Visual drag-handle affordance — purely decorative, the close button
        remains the primary dismiss action. */
-    .premium-drawer::before,
-[class*='drawerPanel']::before {
+    [class*='drawerPanel']::before {
         content: '';
         position: absolute;
         top: 8px;
@@ -1795,7 +1562,6 @@
 .basalt-overflow-menu,
 .basalt-floating-backdrop,
 .basalt-sheet-backdrop,
-.premium-drawer,
 [class*='drawerPanel'],
 .basalt-toast {
         transition: none !important;
@@ -1813,9 +1579,6 @@
    --------------------------------------------------------------------------- */
 
 @media (max-width: 767px) {
-    :root[data-theme='light'] .basalt-body .basalt-action-footer {
-        border-color: rgba(15, 23, 42, 0.1) !important;
-    }
 
     :root[data-theme='light'] .basalt-body .basalt-tabs-trigger {
         background:
@@ -2079,12 +1842,6 @@
         padding-bottom: 6px !important;
         margin-bottom: 8px !important;
         gap: 2px !important;
-    }
-
-    .basalt-body .tournament-structure-shell .basalt-section-kicker {
-        font-size: 0.55rem !important;
-        letter-spacing: 0.14em !important;
-        margin-bottom: 2px !important;
     }
 
     .basalt-body .tournament-structure-shell .structure-module-title,
@@ -2477,25 +2234,6 @@
         gap: 4px !important;
     }
 
-    .basalt-body .tournament-structure-shell .structure-sidebar-fact {
-        padding: 6px 8px !important;
-        gap: 0 !important;
-        min-width: 0 !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-sidebar-fact span {
-        font-size: 8px !important;
-        letter-spacing: 0.1em !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-sidebar-fact strong {
-        font-size: 0.72rem !important;
-        line-height: 1.15 !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-    }
-
     /* --- Wizard content area --- */
     .basalt-body .tournament-structure-shell .structure-wizard-content,
 .basalt-body .tournament-structure-shell .phase-wizard-content {
@@ -2782,19 +2520,12 @@
         padding: 10px 12px !important;
     }
 
-    .basalt-body .tournament-structure-shell .structure-label-empty {
-        min-height: 0 !important;
-        padding: 16px 12px !important;
-        font-size: 0.74rem !important;
-    }
-
     .basalt-body .tournament-structure-shell .structure-label-row {
         padding: 10px !important;
         gap: 8px !important;
     }
 
-    .basalt-body .tournament-structure-shell .structure-label-action-btn,
-.basalt-body .tournament-structure-shell .structure-label-mode-btn {
+    .basalt-body .tournament-structure-shell .structure-label-action-btn {
         min-height: 34px !important;
         font-size: 0.68rem !important;
         padding: 0 10px !important;
@@ -2810,8 +2541,7 @@
         height: 28px !important;
     }
 
-    .basalt-body .tournament-structure-shell .structure-label-row-meta,
-.basalt-body .tournament-structure-shell .structure-label-helper,
+    .basalt-body .tournament-structure-shell .structure-label-helper,
 .basalt-body .tournament-structure-shell .structure-label-preview-label {
         font-size: 0.65rem !important;
     }
@@ -2964,11 +2694,6 @@
     }
 
     /* --- Typography bump: titles, headings, copy all readable --- */
-    .basalt-body .tournament-structure-shell .basalt-section-kicker {
-        font-size: 0.62rem !important;
-        letter-spacing: 0.16em !important;
-        margin-bottom: 4px !important;
-    }
 
     .basalt-body .tournament-structure-shell .structure-module-title,
 .basalt-body .tournament-structure-shell .basalt-h1.structure-module-title,
@@ -3044,19 +2769,6 @@
        the old DOM. --- */
     .basalt-body .tournament-structure-shell .structure-sidebar-facts {
         gap: 6px !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-sidebar-fact {
-        padding: 10px 12px !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-sidebar-fact span {
-        font-size: 0.58rem !important;
-        margin-bottom: 2px !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-sidebar-fact strong {
-        font-size: 0.85rem !important;
     }
 
     /* --- Sidebar facts: inline strip ("Liga · 16 equipos · Avanzan 8") ---
@@ -3243,13 +2955,6 @@
         letter-spacing: 0 !important;
     }
 
-    .basalt-body .tournament-structure-shell .tiebreaker-section-help {
-        font-size: 0.78rem !important;
-        line-height: 1.45 !important;
-        color: var(--tb-text-2, #98A6B3) !important;
-        margin-bottom: 12px !important;
-    }
-
     /* --- Cascade summary ("Se aplicará primero «X». Si persiste el
        empate, se usará «Y»...") — sits below the active list and makes
        the priority cascade tangible. Visual: subtle bordered note with
@@ -3326,14 +3031,6 @@
         hyphens: none !important;
     }
 
-    .basalt-body .tournament-structure-shell .tiebreaker-desc {
-        white-space: normal !important;
-        overflow: visible !important;
-        text-overflow: clip !important;
-        font-size: 0.7rem !important;
-        line-height: 1.35 !important;
-    }
-
     .basalt-body .tournament-structure-shell .tiebreaker-priority-badge {
         width: 26px !important;
         height: 26px !important;
@@ -3365,46 +3062,6 @@
     /* --- Tiebreaker status chip (replaces the opaque blue toggle) ---
        Text-labelled pill: "Activo" green when on, "Inactivo" dim when off.
        Clear semantic — no doubt about what state means what. */
-    .basalt-body .tournament-structure-shell .tiebreaker-status-chip {
-        flex: 0 0 auto !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        min-height: 30px !important;
-        padding: 0 12px !important;
-        font-size: 0.7rem !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.04em !important;
-        border-radius: 999px !important;
-        border: 1px solid transparent !important;
-        cursor: pointer !important;
-        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
-        white-space: nowrap !important;
-        font-family: inherit !important;
-    }
-
-    .basalt-body .tournament-structure-shell .tiebreaker-status-chip.is-on {
-        background: rgba(34, 197, 94, 0.14) !important;
-        border-color: rgba(34, 197, 94, 0.32) !important;
-        color: var(--tb-green, #22C55E) !important;
-    }
-
-    .basalt-body .tournament-structure-shell .tiebreaker-status-chip.is-on:hover {
-        background: rgba(34, 197, 94, 0.2) !important;
-        border-color: rgba(34, 197, 94, 0.45) !important;
-    }
-
-    .basalt-body .tournament-structure-shell .tiebreaker-status-chip.is-off {
-        background: rgba(255, 255, 255, 0.04) !important;
-        border-color: rgba(255, 255, 255, 0.12) !important;
-        color: var(--tb-text-2, #98A6B3) !important;
-    }
-
-    .basalt-body .tournament-structure-shell .tiebreaker-status-chip.is-off:hover {
-        background: rgba(255, 255, 255, 0.08) !important;
-        border-color: rgba(255, 255, 255, 0.2) !important;
-        color: var(--tb-text, #F4F7FA) !important;
-    }
 
     .basalt-body .tournament-structure-shell .tiebreaker-remove-btn {
         flex: 0 0 auto !important;
@@ -3472,11 +3129,6 @@
     }
 
     /* --- Typography: tighter --- */
-    .basalt-body .tournament-structure-shell .basalt-section-kicker {
-        font-size: 0.5rem !important;
-        letter-spacing: 0.13em !important;
-        margin-bottom: 1px !important;
-    }
 
     .basalt-body .tournament-structure-shell .structure-module-title,
 .basalt-body .tournament-structure-shell .basalt-h1.structure-module-title,
@@ -3722,9 +3374,6 @@
     }
 
     /* desc no longer renders inside collapsed card; keep rule defensive */
-    .basalt-body .tournament-structure-shell .tiebreaker-desc {
-        display: none !important;
-    }
 
     .basalt-body .tournament-structure-shell .tiebreaker-priority-badge {
         width: 20px !important;
@@ -3811,10 +3460,6 @@
 
     .basalt-body .tournament-structure-shell .structure-disclosure-meta {
         font-size: 0.65rem !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-disclosure-help {
-        font-size: 0.72rem !important;
     }
 
     /* --- Cascade summary --- */
@@ -4058,15 +3703,13 @@
         border-radius: 6px !important;
     }
 
-    .basalt-body .tournament-structure-shell .structure-label-row-meta,
-.basalt-body .tournament-structure-shell .structure-label-helper,
+    .basalt-body .tournament-structure-shell .structure-label-helper,
 .basalt-body .tournament-structure-shell .structure-label-preview-label {
         font-size: 0.5rem !important;
     }
 
     /* EDITAR / ELIMINAR / AUTOMATICO / MANUAL — pill buttons */
-    .basalt-body .tournament-structure-shell .structure-label-action-btn,
-.basalt-body .tournament-structure-shell .structure-label-mode-btn {
+    .basalt-body .tournament-structure-shell .structure-label-action-btn {
         min-height: 22px !important;
         padding: 0 8px !important;
         font-size: 0.5rem !important;
@@ -4074,17 +3717,12 @@
         border-radius: 4px !important;
     }
 
-    .basalt-body .tournament-structure-shell .structure-label-action-btn svg,
-.basalt-body .tournament-structure-shell .structure-label-mode-btn svg {
+    .basalt-body .tournament-structure-shell .structure-label-action-btn svg {
         width: 9px !important;
         height: 9px !important;
     }
 
     /* Mode toggle wrapper (segmented AUTOMATICO/MANUAL) */
-    .basalt-body .tournament-structure-shell .structure-label-mode-toggle-form {
-        padding: 2px !important;
-        border-radius: 6px !important;
-    }
 
     /* Color input swatch */
     .basalt-body .tournament-structure-shell .structure-label-color-input {
@@ -4101,16 +3739,6 @@
     }
 
     /* Submit button (+ AGREGAR) — was very tall green pill */
-    .basalt-body .tournament-structure-shell .structure-label-submit {
-        min-height: 28px !important;
-        padding: 4px 10px !important;
-        font-size: 0.55rem !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-label-submit svg {
-        width: 10px !important;
-        height: 10px !important;
-    }
 
     /* Form actions row */
     .basalt-body .tournament-structure-shell .structure-label-form-actions {
@@ -4128,10 +3756,6 @@
         gap: 6px !important;
     }
 
-    .basalt-body .tournament-structure-shell .structure-label-input-row {
-        gap: 4px !important;
-    }
-
     /* LabelChip preview (PLAYOFF tag) */
     .basalt-body .tournament-structure-shell .structure-label-preview span[style] {
         font-size: 0.42rem !important;
@@ -4139,10 +3763,6 @@
     }
 
     /* Empty state */
-    .basalt-body .tournament-structure-shell .structure-label-empty {
-        padding: 8px !important;
-        font-size: 0.5rem !important;
-    }
 
     /* === Step 4 refactor — readable mobile sizes for new components === */
     /* Mobile-only progress strip above the step head */
@@ -4313,25 +3933,7 @@
         flex-wrap: nowrap !important;
     }
 
-    .basalt-body .tournament-structure-shell .structure-wizard-footer .structure-wizard-back,
-.basalt-body .tournament-structure-shell .structure-wizard-footer .structure-wizard-next {
-        min-height: 44px !important;
-        font-size: 14px !important;
-        font-weight: 700 !important;
-        text-transform: none !important;
-        letter-spacing: 0 !important;
-        padding: 0 12px !important;
-        margin: 0 !important;
-    }
-
-    .basalt-body .tournament-structure-shell .structure-wizard-back-placeholder {
-        display: block !important;
-    }
-
     /* When only Siguiente is rendered (paso 1), make it full width */
-    .basalt-body .tournament-structure-shell .structure-wizard-footer:has(> .structure-wizard-back-placeholder) .structure-wizard-next {
-        grid-column: 1 / -1 !important;
-    }
 }
 
 /* La seccion 12 (resumen ultra-compacto de mobile) tenia siete pasadas de
@@ -4670,9 +4272,7 @@
     .basalt-tabs-trigger,
 .basalt-tabs-sheet-item,
 .basalt-tabs-sheet-close,
-.basalt-btn,
-.tsm-action-btn,
-.tsm-segment {
+.basalt-btn {
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
     }
@@ -4780,271 +4380,13 @@
         padding: 12px;
     }
 
-    .tsm-card {
-        background: var(--surface-1, #11151c);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 14px;
-        padding: 14px 14px 16px;
-    }
-
-    .tsm-card-state {
-        background: linear-gradient(135deg, rgba(0, 163, 101, 0.14), rgba(0, 163, 101, 0.02) 60%);
-        border-color: rgba(0, 163, 101, 0.45);
-    }
-
-    .tsm-card-eyebrow {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--text-dim, #6b7280);
-        margin-bottom: 10px;
-    }
-
-    .tsm-card-state .tsm-card-eyebrow {
-        color: rgba(0, 196, 122, 0.95);
-    }
-
-    .tsm-card-eyebrow-badge {
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 0;
-        text-transform: none;
-        padding: 2px 8px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.06);
-        color: var(--text-secondary, #b6bdcc);
-    }
-    .tsm-card-eyebrow-badge.is-ok {
-        background: rgba(52, 211, 153, 0.16);
-        color: #34d399;
-    }
-    .tsm-card-eyebrow-badge.is-warn {
-        background: rgba(250, 204, 21, 0.16);
-        color: #facc15;
-    }
-
     /* Estado actual */
-    .tsm-state-row {
-        display: flex;
-        align-items: baseline;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-bottom: 8px;
-    }
-    .tsm-state-status {
-        font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
-        font-size: 22px;
-        font-weight: 800;
-        letter-spacing: 0.04em;
-        color: #fff;
-    }
-    .tsm-state-pill {
-        font-size: 11px;
-        font-weight: 600;
-        padding: 3px 9px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.06);
-        color: var(--text-secondary, #b6bdcc);
-    }
-    .tsm-state-pill.is-public {
-        background: rgba(52, 211, 153, 0.18);
-        color: #34d399;
-    }
-    .tsm-state-pill.is-internal {
-        background: rgba(250, 204, 21, 0.16);
-        color: #facc15;
-    }
-    .tsm-state-meta {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 6px;
-        font-size: 12px;
-        color: var(--text-secondary, #b6bdcc);
-        margin-bottom: 12px;
-    }
-    .tsm-state-meta svg {
-        vertical-align: -2px;
-        margin-right: 4px;
-        opacity: 0.8;
-    }
-    .tsm-state-progress {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .tsm-state-progress-bar {
-        flex: 1;
-        height: 4px;
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 2px;
-        overflow: hidden;
-    }
-    .tsm-state-progress-fill {
-        height: 100%;
-        background: var(--accent, #00a365);
-        border-radius: 2px;
-        transition: width 240ms ease;
-    }
-    .tsm-state-progress-label {
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--text-secondary, #b6bdcc);
-        white-space: nowrap;
-    }
 
     /* Acciones rapidas */
-    .tsm-quick-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
-    }
-    .tsm-quick {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 12px;
-        text-decoration: none;
-        color: inherit;
-        min-height: 88px;
-        transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
-    }
-    .tsm-quick:active {
-        transform: scale(0.985);
-        background: rgba(0, 163, 101, 0.08);
-        border-color: rgba(0, 163, 101, 0.45);
-    }
-    .tsm-quick-glyph {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        background: rgba(0, 163, 101, 0.16);
-        color: var(--accent, #00a365);
-    }
-    .tsm-quick-text {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        min-width: 0;
-    }
-    .tsm-quick-text strong {
-        font-size: 13px;
-        font-weight: 700;
-        color: #fff;
-    }
-    .tsm-quick-text small {
-        font-size: 11px;
-        color: var(--text-dim, #6b7280);
-    }
 
     /* Salud del torneo */
-    .tsm-health-empty {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 13px;
-        color: #34d399;
-        font-weight: 500;
-    }
-    .tsm-health-list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-    .tsm-health-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 12px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.03);
-        border-left: 3px solid transparent;
-    }
-    .tsm-health-item.warn {
-        border-left-color: #facc15;
-        background: rgba(250, 204, 21, 0.05);
-    }
-    .tsm-health-item.err {
-        border-left-color: #f87171;
-        background: rgba(248, 113, 113, 0.06);
-    }
-    .tsm-health-icon {
-        flex-shrink: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        color: #facc15;
-    }
-    .tsm-health-item.err .tsm-health-icon {
-        color: #f87171;
-    }
-    .tsm-health-label {
-        flex: 1;
-        font-size: 13px;
-        color: var(--text-primary, #f4f6fa);
-        line-height: 1.3;
-    }
-    .tsm-health-cta {
-        flex-shrink: 0;
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: var(--accent, #00a365);
-        text-decoration: none;
-        padding: 4px 8px;
-        border-radius: 6px;
-    }
-    .tsm-health-cta:active {
-        background: rgba(0, 163, 101, 0.14);
-    }
 
     /* Proximo evento (empty state) */
-    .tsm-next-empty {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-    .tsm-next-empty strong {
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--text-primary, #f4f6fa);
-    }
-    .tsm-next-empty small {
-        font-size: 12px;
-        color: var(--text-dim, #6b7280);
-        line-height: 1.45;
-    }
-    .tsm-next-cta {
-        display: inline-flex;
-        align-items: center;
-        align-self: flex-start;
-        margin-top: 10px;
-        padding: 10px 16px;
-        background: var(--accent, #00a365);
-        color: #fff;
-        font-size: 13px;
-        font-weight: 600;
-        text-decoration: none;
-        border-radius: 10px;
-        min-height: 40px;
-    }
-    .tsm-next-cta:active {
-        opacity: 0.85;
-    }
 
     /* --- 18e) Make sure the existing mobile bottom-sheet selector still
                   works when triggered by the "Mas" button (z-index above
@@ -5179,25 +4521,20 @@
     /* Generic card spacing inside any tab content */
     .basalt-body .basalt-card,
 .basalt-body .partition,
-.basalt-body .creation-card,
-.basalt-body .structure-step-panel,
-.basalt-body .basalt-section {
+.basalt-body .structure-step-panel {
         padding: 14px !important;
         border-radius: 12px !important;
         margin-inline: 0 !important;
     }
 
     /* Section titles within cards: smaller, tighter */
-    .basalt-body .basalt-section-title,
-.basalt-body .basalt-section-kicker,
-.basalt-body .partition-header h2,
+    .basalt-body .partition-header h2,
 .basalt-body .partition-header h3 {
         font-size: 14px !important;
         line-height: 1.25 !important;
         margin-bottom: 6px !important;
     }
-    .basalt-body .partition-header p,
-.basalt-body .basalt-section-help {
+    .basalt-body .partition-header p {
         font-size: 12px !important;
         line-height: 1.45 !important;
     }
@@ -5214,8 +4551,7 @@
 .basalt-body select,
 .basalt-body textarea,
 .basalt-body .form-input,
-.basalt-body .form-select,
-.basalt-body .form-textarea {
+.basalt-body .form-select {
         min-height: 44px !important;
         font-size: 16px !important;
         padding: 10px 12px !important;
@@ -5228,13 +4564,10 @@
     }
 
     /* Field groups: consistent 14px vertical rhythm */
-    .basalt-body .field-group,
-.basalt-body .form-field {
+    .basalt-body .field-group {
         margin-bottom: 14px !important;
     }
-    .basalt-body label,
-.basalt-body .form-label,
-.basalt-body .field-label {
+    .basalt-body label {
         font-size: 11px !important;
         font-weight: 700 !important;
         letter-spacing: 0.06em !important;
@@ -5252,15 +4585,9 @@
         font-size: 14px !important;
         border-radius: 10px !important;
     }
-    .basalt-body .basalt-btn-sm,
-.basalt-body .btn-sm {
-        min-height: 36px !important;
-        font-size: 12px !important;
-    }
 
     /* Two-column grids that often exist in detalles/formato should stack */
     .basalt-body .grid-2,
-.basalt-body .grid-3,
 .basalt-body .form-grid,
 .basalt-body .partition-body .grid-2 {
         display: grid !important;
@@ -5278,74 +4605,23 @@
     .basalt-body .structure-step-panel + .structure-step-panel {
         margin-top: 12px !important;
     }
-    .basalt-body .structure-pill-row,
-.basalt-body .structure-tag-row {
-        flex-wrap: wrap !important;
-        gap: 6px !important;
-    }
     /* Phase summary header: stack title and badges */
-    .basalt-body .structure-phase-card-head {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 8px !important;
-    }
     /* "Sistema estructural activo / N fases configuradas" pills row */
-    .basalt-body .structure-status-pills {
-        gap: 6px !important;
-        flex-wrap: wrap !important;
-    }
 
     /* ------------------------------------------------------------------------
        18i) PARTICIPANTS TAB — flash-style filter bar + table → cards
        ----------------------------------------------------------------------- */
     /* The desktop filter bar is a horizontal flex row that overflows on mobile.
        Stack it. */
-    .basalt-body .participants-filter-bar,
-.basalt-body .flash-filter-bar,
-.basalt-body .participants-toolbar {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 8px !important;
-    }
-    .basalt-body .participants-filter-bar > *,
-.basalt-body .flash-filter-bar > *,
-.basalt-body .participants-toolbar > * {
-        width: 100% !important;
-        min-width: 0 !important;
-    }
     /* Make the participants table scroll horizontally instead of bursting the
        layout. The bottom-tabs-bar ensures bottom space. */
-    .basalt-body .participants-table-wrapper,
-.basalt-body .flash-table-wrapper {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-    }
     /* Counter badges row (Total/Active/Inactive/Pending) */
-    .basalt-body .participants-counters,
-.basalt-body .flash-counters {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 8px !important;
-    }
 
     /* ------------------------------------------------------------------------
        18j) OPERATION TAB — fixture/results/table sub-content
        ----------------------------------------------------------------------- */
     /* The sub-tab pills (Fixture / Tabla / Resultados): make them full-row
        segmented control. */
-    .basalt-body .operation-subtabs-mobile {
-        display: flex !important;
-        gap: 4px !important;
-        padding: 4px !important;
-        background: rgba(255, 255, 255, 0.04) !important;
-        border-radius: 12px !important;
-        margin-bottom: 12px !important;
-    }
-    .basalt-body .operation-subtabs-mobile > * {
-        flex: 1 !important;
-        min-height: 40px !important;
-        font-size: 13px !important;
-    }
     /* Match cards on fixture: vertical card with team rows */
     .basalt-body .fixture-match-row,
 .basalt-body .fixture-row {
@@ -5377,32 +4653,17 @@
        18k) DETAILS / FORMAT — partition cards already covered by 18g.
                                   Add the sticky save bar so users always see it.
        ----------------------------------------------------------------------- */
-    .basalt-body .basalt-tabs-save-bar,
-.basalt-body .creation-cta,
-.basalt-body .form-actions-sticky {
-        position: sticky !important;
-        bottom: calc(64px + env(safe-area-inset-bottom)) !important;
-        z-index: 30 !important;
-        background: rgba(10, 13, 18, 0.94) !important;
-        backdrop-filter: blur(12px) !important;
-        margin-inline: -12px !important;
-        padding: 10px 12px !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
-    }
 
     /* ------------------------------------------------------------------------
        18l) RELATED + AUDIT tabs — list rows tap-friendly
        ----------------------------------------------------------------------- */
-    .basalt-body .related-row,
-.basalt-body .related-list-item,
-.basalt-body .audit-row,
+    .basalt-body .audit-row,
 .basalt-body .audit-entry {
         padding: 12px 14px !important;
         min-height: 56px !important;
         gap: 10px !important;
     }
-    .basalt-body .related-row > *,
-.basalt-body .audit-row > * {
+    .basalt-body .audit-row > * {
         font-size: 13px !important;
     }
 
@@ -5464,9 +4725,6 @@
     .basalt-body .structure-disclosure-title {
         font-size: 14px !important;
     }
-    .basalt-body .structure-disclosure-help {
-        font-size: 11px !important;
-    }
     /* Field labels inside structure forms */
     .basalt-body .structure-field-label {
         font-size: 11px !important;
@@ -5479,71 +4737,14 @@
         border-radius: 10px !important;
     }
     /* Save bar specific to structure */
-    .basalt-body .structure-wizard-back,
-.basalt-body .structure-wizard-next {
-        flex: 1 !important;
-        min-height: 44px !important;
-    }
     /* "Sistema estructural activo" + "N fases configuradas" pills row should
        wrap and avoid being clipped by the card edge. */
-    .basalt-body .structure-status-pills,
-.basalt-body .structure-pill-row {
-        flex-wrap: wrap !important;
-        gap: 6px !important;
-    }
 
     /* ------------------------------------------------------------------------
        18n) PARTICIPANTS TAB — concrete class targets
        ----------------------------------------------------------------------- */
     .basalt-body .participants-flash-container {
         padding: 12px !important;
-    }
-    .basalt-body .participants-header {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 10px !important;
-    }
-    .basalt-body .participants-header-left {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 4px !important;
-    }
-    .basalt-body .participants-title {
-        font-size: 18px !important;
-    }
-    .basalt-body .participants-header-actions {
-        flex-wrap: wrap !important;
-        gap: 6px !important;
-    }
-    .basalt-body .participants-header-actions > * {
-        flex: 1 1 auto !important;
-        min-height: 40px !important;
-        font-size: 12px !important;
-    }
-    .basalt-body .participants-section-label {
-        font-size: 10px !important;
-        letter-spacing: 0.08em !important;
-    }
-    .basalt-body .participants-table-container {
-        padding: 0 !important;
-        margin-inline: -2px !important;
-    }
-    .basalt-body .participants-table-scroll {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-    }
-    .basalt-body .participants-table {
-        min-width: 540px !important;
-    }
-    .basalt-body .participants-table th,
-.basalt-body .participants-table td {
-        font-size: 12px !important;
-        padding: 8px 8px !important;
-        white-space: nowrap !important;
-    }
-    .basalt-body .participants-table-footer {
-        padding: 8px 12px !important;
-        font-size: 12px !important;
     }
 
     /* ------------------------------------------------------------------------
@@ -5638,13 +4839,11 @@
        to 767px so the real form isn't a cramped two-column layout on phones. */
     /* (bloques -mobile de Detalles/Formato eliminados en Fase 0) */
 
-    .basalt-body .details-console-shell .manager-main-layout,
-.basalt-body .format-console-shell .manager-main-layout {
+    .basalt-body .details-console-shell .manager-main-layout {
         grid-template-columns: 1fr !important;
     }
 
-    .basalt-body .details-console-shell .manager-preview-zone,
-.basalt-body .format-console-shell .manager-preview-zone {
+    .basalt-body .details-console-shell .manager-preview-zone {
         position: static !important;
         max-width: 100% !important;
     }
@@ -5669,75 +4868,10 @@
     /* --- OPERACION: hide the verbose context card and the legacy mobile
        pickers / subtabs bar (replaced by the tsm-segments segmented control
        inside the new mobile block). */
-    .tournament-operation-mobile ~ .basalt-card.operation-context-card,
-.tournament-operation-mobile ~ .operation-mobile-pickers,
-.tournament-operation-mobile ~ .operation-subtabs-bar {
-        display: none !important;
-    }
 
     /* ----------------------------------------------------------------
        Estructura: phase list inside tsm-card
        ---------------------------------------------------------------- */
-    .tsm-phase-list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-    .tsm-phase-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 12px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 10px;
-        min-height: 56px;
-        color: var(--text-secondary, #b6bdcc);
-    }
-    .tsm-phase-item.is-active {
-        background: rgba(0, 163, 101, 0.10);
-        border-color: rgba(0, 163, 101, 0.4);
-        color: var(--text-primary, #f4f6fa);
-    }
-    .tsm-phase-index {
-        font-family: var(--font-mono, ui-monospace, monospace);
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--text-dim, #6b7280);
-        min-width: 24px;
-    }
-    .tsm-phase-text {
-        flex: 1;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-    .tsm-phase-text strong {
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--text-primary, #f4f6fa);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .tsm-phase-text small {
-        font-size: 11px;
-        color: var(--text-dim, #6b7280);
-    }
-    .tsm-phase-pill {
-        font-size: 10px;
-        font-weight: 700;
-        padding: 3px 8px;
-        border-radius: 999px;
-        background: rgba(0, 163, 101, 0.18);
-        color: #34d399;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-    }
 
     /* Participantes (counters/search/list/item/logo/text/action) ELIMINADO en
        Fase 1c-ii. tournament-participants-flash.css es la fuente autoritativa:
@@ -5750,159 +4884,16 @@
     /* ----------------------------------------------------------------
        Operacion: segmented control (sub-tabs)
        ---------------------------------------------------------------- */
-    .tsm-segments {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 4px;
-        background: rgba(255, 255, 255, 0.03);
-        border-radius: 10px;
-        padding: 4px;
-    }
-    .tsm-segment {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        min-height: 40px;
-        padding: 6px 6px;
-        background: transparent;
-        border: none;
-        color: var(--text-dim, #6b7280);
-        font-size: 11px;
-        font-weight: 600;
-        cursor: pointer;
-        border-radius: 8px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .tsm-segment span {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
-        font-size: 11px;
-    }
-    .tsm-segment.active {
-        background: rgba(0, 163, 101, 0.16);
-        color: var(--text-primary, #f4f6fa);
-        box-shadow: inset 0 0 0 1px rgba(0, 163, 101, 0.4);
-    }
-    .tsm-segment.active svg {
-        color: var(--accent, #00a365);
-    }
 
     /* ----------------------------------------------------------------
        Detalles + Formato: form stack (label + input vertical) + logo row
        ---------------------------------------------------------------- */
-    .tsm-form-stack {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-    .tsm-field {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        min-width: 0;
-    }
-    .tsm-field > span {
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: var(--text-dim, #6b7280);
-    }
-    .tsm-input {
-        width: 100%;
-        min-height: 44px;
-        padding: 10px 12px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        color: var(--text-primary, #f4f6fa);
-        font-size: 16px; /* prevents iOS zoom-on-focus */
-        font-family: inherit;
-        outline: none;
-        transition: border-color 140ms ease, background 140ms ease;
-        -webkit-appearance: none;
-        appearance: none;
-    }
-    .tsm-input:focus {
-        border-color: var(--accent, #00a365);
-        background: rgba(0, 163, 101, 0.08);
-    }
-    .tsm-input:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-    select.tsm-input {
-        /* Custom chevron to replace the native one (which clashes on dark) */
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-        padding-right: 36px;
-    }
-    .tsm-field-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-    }
 
     /* Logo preview card */
-    .tsm-logo-row {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-    }
-    .tsm-logo-preview {
-        width: 64px;
-        height: 64px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        overflow: hidden;
-        color: var(--text-dim, #6b7280);
-    }
-    .tsm-logo-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        padding: 6px;
-    }
-    .tsm-logo-meta {
-        flex: 1;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-    .tsm-logo-meta strong {
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--text-primary, #f4f6fa);
-    }
-    .tsm-logo-meta small {
-        font-size: 12px;
-        color: var(--text-dim, #6b7280);
-        line-height: 1.4;
-    }
 }
 
 /* On phones <=420px (covers iPhone SE/13 mini, Galaxy S8/S9, Pixel 4a),
    collapse the sub-tab labels into icons-only to avoid overflow. */
-@media (max-width: 420px) {
-    .tsm-segment span {
-        display: none;
-    }
-    .tsm-segment {
-        min-height: 44px;
-    }
-}
 
 /* ============================================================================
    ESTRUCTURA TAB — Mobile redesign (spec 2026-05-19)
@@ -6024,8 +5015,7 @@
     /* ── 4. Hero panel — hide "Consola competitiva" kicker + meta footer ── */
 
     /* ── 5. Phase list module — hide kicker/copy/count badge; full-width CTA ── */
-    .basalt-body .structure-phase-list-module .structure-module-header .basalt-section-kicker,
-.basalt-body .structure-phase-list-module .structure-module-header .structure-module-copy {
+    .basalt-body .structure-phase-list-module .structure-module-header .structure-module-copy {
         display: none !important;
     }
     .basalt-body .structure-phase-list-module .structure-module-header {

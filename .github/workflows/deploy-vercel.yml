@@ -25,11 +25,39 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Sin esto, `vercel pull` falla con el error del CLI y no se sabe cuál de
+      # los tres secrets es. Este paso separa los dos casos que se confunden:
+      # un secret VACÍO (nunca se cargó) de uno CARGADO PERO INVÁLIDO. El
+      # workflow venía en rojo desde abril de 2026 por no distinguirlos.
+      - name: Verificar credenciales de Vercel
+        run: |
+          faltan=""
+          [ -n "$VERCEL_TOKEN" ]      || faltan="$faltan VERCEL_TOKEN"
+          [ -n "$VERCEL_ORG_ID" ]     || faltan="$faltan VERCEL_ORG_ID"
+          [ -n "$VERCEL_PROJECT_ID" ] || faltan="$faltan VERCEL_PROJECT_ID"
+          if [ -n "$faltan" ]; then
+            echo "::error::Estos secrets del repositorio están vacíos o no existen:$faltan"
+            echo "Se cargan en Settings → Secrets and variables → Actions:"
+            echo "  VERCEL_TOKEN       en vercel.com/account/tokens"
+            echo "  VERCEL_ORG_ID      campo orgId de .vercel/project.json (lo escribe 'vercel link')"
+            echo "  VERCEL_PROJECT_ID  campo projectId del mismo archivo"
+            exit 1
+          fi
+          # Los identificadores no se imprimen ni recortados: un prefijo de un
+          # secret no lo enmascara Actions, que sólo tapa el valor completo.
+          if ! npx vercel@53.1.1 whoami --token "$VERCEL_TOKEN"; then
+            echo "::error::Los tres secrets están cargados, pero VERCEL_TOKEN no sirve: está vencido, revocado, o es de otra cuenta. Generá uno nuevo en vercel.com/account/tokens con alcance sobre el equipo dueño del proyecto."
+            exit 1
+          fi
+          echo "Token válido y los tres identificadores presentes."
+
+      # Si el paso de arriba pasó y éste falla, el token sirve y el problema es
+      # el par orgId/projectId: apuntan a un proyecto que ese token no ve.
       - name: Pull Vercel environment
-        run: npx vercel@53.1.1 pull --yes --environment=production --token=$VERCEL_TOKEN
+        run: npx vercel@53.1.1 pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Build with Vercel
-        run: npx vercel@53.1.1 build --prod --token=$VERCEL_TOKEN
+        run: npx vercel@53.1.1 build --prod --token="$VERCEL_TOKEN"
 
       - name: Deploy prebuilt output to Vercel
-        run: npx vercel@53.1.1 deploy --prebuilt --prod --token=$VERCEL_TOKEN
+        run: npx vercel@53.1.1 deploy --prebuilt --prod --token="$VERCEL_TOKEN"
