@@ -43,6 +43,26 @@ function getStatusCode(error: unknown) {
     return 500;
 }
 
+// PostgREST corta cada request en 1000 filas (db_max_rows). Este catalogo trae
+// TODOS los clubes de todos los deportes y filtra por deporte en memoria, asi
+// que sin paginar la lista alfabetica moria cerca de la "J" y el alta manual
+// no veia el resto. Se pagina cortando cuando llega una pagina incompleta; el
+// orden lleva desempate por PK para que ninguna fila se repita ni se saltee.
+const CATALOG_PAGE_SIZE = 1000;
+
+async function fetchAllRows<T>(
+    fetchPage: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
+): Promise<{ rows: T[]; error: string | null }> {
+    const rows: T[] = [];
+    for (let from = 0; ; from += CATALOG_PAGE_SIZE) {
+        const { data, error } = await fetchPage(from, from + CATALOG_PAGE_SIZE - 1);
+        if (error) return { rows: [], error: error.message };
+        const page = data ?? [];
+        rows.push(...page);
+        if (page.length < CATALOG_PAGE_SIZE) return { rows, error: null };
+    }
+}
+
 export async function GET(request: NextRequest) {
     try {
         await requireExactSuperAdmin();
@@ -54,23 +74,31 @@ export async function GET(request: NextRequest) {
         const readClient = await getReadClient();
         const requestedSport = canonicalizeSportId(new URL(request.url).searchParams.get('sport'));
 
-        const [{ data: clubs, error: clubsError }, { data: aliases, error: aliasesError }] = await Promise.all([
-            readClient
+        const [clubsResult, aliasesResult] = await Promise.all([
+            fetchAllRows<ClubRow>((from, to) => readClient
                 .from('clubs')
                 .select('id, name, short_name, logo_url, sport, sport_id')
-                .order('name'),
-            readClient
+                .order('name')
+                .order('id')
+                .range(from, to)),
+            fetchAllRows<ClubAliasRow>((from, to) => readClient
                 .from('club_aliases')
-                .select('club_id, alias'),
+                .select('club_id, alias')
+                .order('club_id')
+                .order('alias')
+                .range(from, to)),
         ]);
 
-        if (clubsError) {
-            return jsonError('No se pudo cargar el catalogo de clubes.', 500, clubsError.message);
+        if (clubsResult.error) {
+            return jsonError('No se pudo cargar el catalogo de clubes.', 500, clubsResult.error);
         }
 
-        if (aliasesError) {
-            return jsonError('No se pudieron cargar los aliases de clubes.', 500, aliasesError.message);
+        if (aliasesResult.error) {
+            return jsonError('No se pudieron cargar los aliases de clubes.', 500, aliasesResult.error);
         }
+
+        const clubs = clubsResult.rows;
+        const aliases = aliasesResult.rows;
 
         const aliasMap = new Map<string, string[]>();
         (aliases as ClubAliasRow[] | null | undefined)?.forEach((row) => {

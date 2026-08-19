@@ -896,6 +896,7 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                                     columnLabels: RANKING_EXPORT_COLUMN_LABELS,
                                     plainDiff: true,
                                     showPositionDelta: true,
+                                    variant: 'rankingPoster',
                                 }}
                             />
                         </div>

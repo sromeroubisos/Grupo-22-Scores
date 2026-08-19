@@ -13,7 +13,11 @@
     background: linear-gradient(135deg, #00a365, #22c55e);
     border: none;
     border-radius: var(--radius-lg);
-    color: white;
+    /* Tinta oscura, no blanca. El blanco sobre este degradado da 3,27:1 en la punta
+       oscura (#00a365) y 2,28:1 en la clara (#22c55e): no llega a AA en ninguno de
+       los dos temas, porque el degradado no cambia con el tema. La tinta oscura da
+       6,0:1 y 8,7:1 sobre las mismas dos puntas. */
+    color: #06120c;
     font-family: var(--font-primary);
     font-size: 0.9375rem;
     font-weight: 600;
@@ -82,11 +86,10 @@
     overflow: hidden;
 }
 
-@media (min-width: 768px) {
-    .modalOverlay {
-        zoom: 1.42857143;
-    }
-}
+/* Aca vivia `zoom: 1.42857143` (la inversa de 0.7): compensaba el
+   `html { zoom: 0.7 }` global que ya no existe. Sin el zoom global, la
+   compensacion escalaba el modal al 143% del viewport y no entraba en
+   pantalla. El modal ocupa 100vw/100dvh y se adapta solo. */
 
 .modal {
     width: 100vw;
