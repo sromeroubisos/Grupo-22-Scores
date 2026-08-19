@@ -1612,6 +1612,9 @@ export default function HomePage() {
 
   return (
     <div className={styles.page}>
+      <h1 style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0 }}>
+        G22 Scores — Partidos y torneos
+      </h1>
 
       <div className={styles.mainLayout}>
 
@@ -1843,6 +1846,8 @@ export default function HomePage() {
                                     e.stopPropagation();
                                     toggleLeague(tournament.id);
                                   }}
+                                  aria-label={`${isLeagueExpanded ? 'Ocultar' : 'Ver'} temporadas de ${tournament.name}`}
+                                  aria-expanded={isLeagueExpanded}
                                   style={{
                                     padding: '10px 16px',
                                     background: 'transparent',
@@ -1969,6 +1974,7 @@ export default function HomePage() {
                     className={styles.mobileNavArrow}
                     onClick={() => navigateDate('prev')}
                     disabled={!selectedDate || dates.findIndex(d => d.date === selectedDate) <= 0}
+                    aria-label="Día anterior"
                   >
                     <ChevronLeft size={20} />
                   </button>
@@ -1981,6 +1987,7 @@ export default function HomePage() {
                     className={styles.mobileNavArrow}
                     onClick={() => navigateDate('next')}
                     disabled={!selectedDate || dates.findIndex(d => d.date === selectedDate) >= dates.length - 1}
+                    aria-label="Día siguiente"
                   >
                     <ChevronRight size={20} />
                   </button>
