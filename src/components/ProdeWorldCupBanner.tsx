@@ -20,6 +20,10 @@ const LAUNCH_MS = 340;
 // (una vez cada 12 hs, máx. 2 descartes, no si ya se sumó).
 const FORCE_ALWAYS_SHOW = false;
 
+// POPUP_DISABLED: apagado del popup. En true no aparece nunca por sí solo;
+// /?prodeBanner=1 sigue forzándolo para QA. Volver a false para reactivarlo.
+const POPUP_DISABLED = true;
+
 export default function ProdeWorldCupBanner() {
     const pathname = usePathname();
 
@@ -77,6 +81,7 @@ export default function ProdeWorldCupBanner() {
                 new URLSearchParams(window.location.search).get('prodeBanner') === '1');
 
         if (!forced) {
+            if (POPUP_DISABLED) return;
             if (!shouldShowProdeBanner()) return;
         }
 
