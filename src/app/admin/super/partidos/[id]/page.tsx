@@ -18,7 +18,14 @@ export default async function MatchCenterPage({ params }: PageProps) {
         if (error instanceof Error && error.message === 'Unauthorized') {
             redirect(`/login?returnTo=${encodeURIComponent(`/admin/super/partidos/${matchId}`)}`);
         }
-        notFound();
+        // 404 solo para lo que ES un 404 (partido inexistente o fuera del
+        // scope del usuario). Cualquier otro fallo (lectura de DB, bug) se
+        // relanza para que el error boundary lo muestre como error real en
+        // vez de disfrazarlo de partido inexistente.
+        if (error instanceof Error && (error.message === 'Forbidden' || error.message === 'Match not found')) {
+            notFound();
+        }
+        throw error;
     }
 
     if (!match) {

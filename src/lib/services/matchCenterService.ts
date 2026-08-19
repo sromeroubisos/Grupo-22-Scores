@@ -1778,6 +1778,18 @@ export async function fetchMatchCenterMatch(
   };
 }
 
+// El mensaje crudo de Supabase (columnas, constraints) va SOLO al log del
+// server: los catch de los routes reenvian `error.message` tal cual al
+// cliente, asi que lo que se lanza tiene que ser el mensaje estable.
+function throwSupplementalWriteError(
+  step: string,
+  error: { message?: string | null },
+  publicMessage: string,
+): never {
+  console.error(`[matchCenterService] ${step}:`, error);
+  throw new Error(publicMessage);
+}
+
 export async function persistMatchCenterSupplementalData(
   client: SupabaseLike,
   matchId: string,
@@ -1970,7 +1982,7 @@ export async function persistMatchCenterSupplementalData(
     if (!lineupsUpdateError) {
       persistedLineups = true;
     } else if (!isMissingColumnError(lineupsUpdateError, 'lineups')) {
-      throw new Error(lineupsUpdateError.message || 'No se pudieron guardar las alineaciones del partido.');
+      throwSupplementalWriteError('lineups update failed', lineupsUpdateError, 'No se pudieron guardar las alineaciones del partido.');
     }
   }
 
@@ -1981,7 +1993,7 @@ export async function persistMatchCenterSupplementalData(
       .eq('id', matchId);
 
     if (divisionUpdateError && !isMissingColumnError(divisionUpdateError, 'home_division_id')) {
-      throw new Error(divisionUpdateError.message || 'No se pudo guardar la division local del partido.');
+      throwSupplementalWriteError('home division update failed', divisionUpdateError, 'No se pudo guardar la division local del partido.');
     }
   }
 
@@ -1992,7 +2004,7 @@ export async function persistMatchCenterSupplementalData(
       .eq('id', matchId);
 
     if (divisionUpdateError && !isMissingColumnError(divisionUpdateError, 'away_division_id')) {
-      throw new Error(divisionUpdateError.message || 'No se pudo guardar la division visitante del partido.');
+      throwSupplementalWriteError('away division update failed', divisionUpdateError, 'No se pudo guardar la division visitante del partido.');
     }
   }
 
@@ -2007,7 +2019,7 @@ export async function persistMatchCenterSupplementalData(
       .eq('match_id', matchId);
 
     if (existingRowsError) {
-      throw new Error(existingRowsError.message || 'No se pudieron preparar los eventos del partido.');
+      throwSupplementalWriteError('events prefetch failed', existingRowsError, 'No se pudieron preparar los eventos del partido.');
     }
 
     const eventRows = resolvedEvents.map((event) => mapEventToInsert(match, event));
@@ -2017,7 +2029,7 @@ export async function persistMatchCenterSupplementalData(
         .upsert(eventRows, { onConflict: 'id' });
 
       if (upsertError) {
-        throw new Error(upsertError.message || 'No se pudieron guardar los eventos del partido.');
+        throwSupplementalWriteError('events upsert failed', upsertError, 'No se pudieron guardar los eventos del partido.');
       }
     }
 
@@ -2034,7 +2046,7 @@ export async function persistMatchCenterSupplementalData(
         .in('id', idsToDelete);
 
       if (deleteError) {
-        throw new Error(deleteError.message || 'No se pudieron depurar los eventos antiguos del partido.');
+        throwSupplementalWriteError('stale events delete failed', deleteError, 'No se pudieron depurar los eventos antiguos del partido.');
       }
     }
   }
@@ -2058,7 +2070,7 @@ export async function persistMatchCenterSupplementalData(
         .upsert(eventRows, { onConflict: 'id' });
 
       if (upsertError) {
-        throw new Error(upsertError.message || 'No se pudo guardar el evento del partido.');
+        throwSupplementalWriteError('event patch upsert failed', upsertError, 'No se pudo guardar el evento del partido.');
       }
     }
 
@@ -2070,7 +2082,7 @@ export async function persistMatchCenterSupplementalData(
         .in('id', deleteIds);
 
       if (deleteError) {
-        throw new Error(deleteError.message || 'No se pudieron eliminar eventos del partido.');
+        throwSupplementalWriteError('event patch delete failed', deleteError, 'No se pudieron eliminar eventos del partido.');
       }
     }
   }
@@ -2083,7 +2095,7 @@ export async function persistMatchCenterSupplementalData(
       .eq('event_type', CLOCK_SNAPSHOT_EVENT_TYPE);
 
     if (existingClockRowsError) {
-      throw new Error(existingClockRowsError.message || 'No se pudo preparar el reloj del partido.');
+      throwSupplementalWriteError('clock prefetch failed', existingClockRowsError, 'No se pudo preparar el reloj del partido.');
     }
 
     const clockIdsToDelete = (existingClockRows || [])
@@ -2097,7 +2109,7 @@ export async function persistMatchCenterSupplementalData(
         .in('id', clockIdsToDelete);
 
       if (deleteClockError) {
-        throw new Error(deleteClockError.message || 'No se pudo limpiar el reloj anterior del partido.');
+        throwSupplementalWriteError('stale clock delete failed', deleteClockError, 'No se pudo limpiar el reloj anterior del partido.');
       }
     }
 
@@ -2107,7 +2119,7 @@ export async function persistMatchCenterSupplementalData(
         .insert(buildClockSnapshotRelationalEvent(match, normalizedClock));
 
       if (insertClockError) {
-        throw new Error(insertClockError.message || 'No se pudo guardar el reloj del partido.');
+        throwSupplementalWriteError('clock insert failed', insertClockError, 'No se pudo guardar el reloj del partido.');
       }
     }
 
@@ -2121,7 +2133,7 @@ export async function persistMatchCenterSupplementalData(
       .eq('id', matchId);
 
     if (eventsUpdateError) {
-      throw new Error(eventsUpdateError.message || 'No se pudieron sincronizar los eventos del partido.');
+      throwSupplementalWriteError('events column sync failed', eventsUpdateError, 'No se pudieron sincronizar los eventos del partido.');
     }
 
     if (payload.clock !== undefined) {
