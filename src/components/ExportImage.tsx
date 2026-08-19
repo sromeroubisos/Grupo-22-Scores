@@ -89,6 +89,9 @@ export interface StandingsData {
     }>;
     plainDiff?: boolean;
     showPositionDelta?: boolean;
+    // 'rankingPoster' cambia el dibujo a afiche full-bleed (banda vertical con el
+    // titulo, columnas P/Equipo/PTS/VAR) en vez de la tabla de posiciones clasica.
+    variant?: 'rankingPoster';
 }
 
 export interface DailyMatchesData {
@@ -362,6 +365,10 @@ type ExportPreviewColorOverrides = {
     editorialGradientRightColor?: string;
     classicHomeColor?: string;
     classicAwayColor?: string;
+    // Solo para variant 'rankingPoster': los tres colores extra del afiche.
+    rankingGlowColor?: string;
+    rankingPanelColor?: string;
+    rankingGoldColor?: string;
 };
 
 type ExportImagePreviewProps = {
@@ -536,8 +543,38 @@ const EXPORT_PALETTES: ExportPalette[] = [
     { id: 'crimson-night', name: 'Crimson Night', description: 'Grafito con rojo intenso', bg: '#111827', accent: '#ef4444' },
     { id: 'gold-ink', name: 'Gold Ink', description: 'Negro con dorado editorial', bg: '#161616', accent: '#eab308' },
     { id: 'silver-sky', name: 'Silver Sky', description: 'Blanco con azul limpio', bg: '#ffffff', accent: '#2563eb' },
+    { id: 'ranking-navy', name: 'Ranking Navy', description: 'Azul profundo con puntos dorados', bg: '#050b1f', accent: '#12297d' },
 ];
 const DEFAULT_PALETTE = EXPORT_PALETTES[0];
+
+// El poster de ranking se pinta con CINCO colores, no con los dos usuales:
+// fondo (esquina negra), banda (columna del titulo), brillo (luz electrica de
+// abajo y barra del lider), panel (lamina donde vive la tabla) y dorado
+// (posiciones y puntos). Las combinaciones fijan los cinco de una vez.
+type RankingPosterCombo = {
+    id: string;
+    name: string;
+    description: string;
+    bg: string;
+    accent: string;
+    glow: string;
+    panel: string;
+    gold: string;
+};
+
+const RANKING_POSTER_COMBOS: RankingPosterCombo[] = [
+    { id: 'salida-azul', name: 'Salida Azul', description: 'El navy original con luz electrica', bg: '#050b1f', accent: '#12297d', glow: '#1f4dff', panel: '#3d5db8', gold: '#f6c445' },
+    { id: 'carbon-g22', name: 'Carbon G22', description: 'Carbono con verde marca', bg: '#08090a', accent: '#0b4634', glow: '#00e07c', panel: '#1d6b52', gold: '#f6c445' },
+    { id: 'bordo-noche', name: 'Bordo Noche', description: 'Granate profundo con rosa', bg: '#160610', accent: '#701a35', glow: '#f43f6b', panel: '#a13a5c', gold: '#fbbf24' },
+    { id: 'violeta-real', name: 'Violeta Real', description: 'Purpura con lavanda', bg: '#0b0720', accent: '#3f1d84', glow: '#8b5cf6', panel: '#6a50c0', gold: '#f6c445' },
+    { id: 'grafito-oro', name: 'Grafito Oro', description: 'Grises con dorado editorial', bg: '#0d0d0f', accent: '#26262b', glow: '#8b8b94', panel: '#4c4c55', gold: '#eab308' },
+];
+
+type RankingPosterExtraColors = {
+    glow?: string;
+    panel?: string;
+    gold?: string;
+};
 const DEFAULT_TIMEZONE_PRESET_ID = 'buenos-aires-ar';
 const DEFAULT_TIMEZONE_OFFSET_MINUTES = -180;
 const MAX_STANDINGS_ROWS_PER_SLIDE = 20;
@@ -746,6 +783,20 @@ const DEFAULT_EXPORT_COLOR_DEFAULTS: ExportColorDefaults = {
     editorialGradientRightColor: DEFAULT_PALETTE.accent,
 };
 
+// El poster de ranking abre siempre en su navy caracteristico; los selectores de
+// color del modal siguen mandando una vez que el usuario los toca.
+const RANKING_POSTER_COLOR_DEFAULTS: ExportColorDefaults = {
+    selectedPaletteId: 'ranking-navy',
+    bgColor: RANKING_POSTER_COMBOS[0].bg,
+    accentColor: RANKING_POSTER_COMBOS[0].accent,
+    editorialGradientLeftColor: '#df255c',
+    editorialGradientRightColor: RANKING_POSTER_COMBOS[0].glow,
+};
+
+function isRankingPosterData(template: ExportTemplate, data: ExportData): boolean {
+    return template === 'standings' && (data as StandingsData).variant === 'rankingPoster';
+}
+
 export default function ExportImage(props: ExportImageProps) {
     const { user, isLoading } = useAuth();
 
@@ -780,6 +831,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     const [designCustomizationState, setDesignCustomizationState] = useState<ExportDesignCustomizationState | null>(null);
     const [lineupExportMode, setLineupExportMode] = useState<LineupExportMode>('both');
     const [dailyMatchesTimeMode, setDailyMatchesTimeMode] = useState<DailyMatchesTimeMode>('time');
+    const isRankingPoster = isRankingPosterData(template, data);
     const groupedStandings = useMemo(
         () => (template === 'standings' ? getExportableStandingsGroups(data as StandingsData) : []),
         [data, template]
@@ -793,6 +845,10 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     const [bgColor, setBgColor] = useState(DEFAULT_PALETTE.bg);
     const [defaultExportColors, setDefaultExportColors] = useState<ExportColorDefaults>(DEFAULT_EXPORT_COLOR_DEFAULTS);
     const [hasSessionColorOverrides, setHasSessionColorOverrides] = useState(false);
+    const [selectedRankingComboId, setSelectedRankingComboId] = useState(RANKING_POSTER_COMBOS[0].id);
+    const [rankingGlowColor, setRankingGlowColor] = useState(RANKING_POSTER_COMBOS[0].glow);
+    const [rankingPanelColor, setRankingPanelColor] = useState(RANKING_POSTER_COMBOS[0].panel);
+    const [rankingGoldColor, setRankingGoldColor] = useState(RANKING_POSTER_COMBOS[0].gold);
     const showModalRef = useRef(showModal);
     const defaultExportColorsRef = useRef(defaultExportColors);
     const [editorialGradientLeftColor, setEditorialGradientLeftColor] = useState('#df255c');
@@ -988,24 +1044,31 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
             return;
         }
 
-        const defaults = defaultExportColorsRef.current;
+        const defaults = isRankingPoster ? RANKING_POSTER_COLOR_DEFAULTS : defaultExportColorsRef.current;
         setHasSessionColorOverrides(false);
         setSelectedPaletteId(defaults.selectedPaletteId);
         setBgColor(defaults.bgColor);
         setAccentColor(defaults.accentColor);
         setEditorialGradientLeftColor(defaults.editorialGradientLeftColor);
         setEditorialGradientRightColor(defaults.editorialGradientRightColor);
-    }, [showModal]);
+        if (isRankingPoster) {
+            const combo = RANKING_POSTER_COMBOS[0];
+            setSelectedRankingComboId(combo.id);
+            setRankingGlowColor(combo.glow);
+            setRankingPanelColor(combo.panel);
+            setRankingGoldColor(combo.gold);
+        }
+    }, [isRankingPoster, showModal]);
 
     useEffect(() => {
-        if (!showModal || hasSessionColorOverrides) return;
+        if (!showModal || hasSessionColorOverrides || isRankingPoster) return;
 
         setSelectedPaletteId(defaultExportColors.selectedPaletteId);
         setBgColor(defaultExportColors.bgColor);
         setAccentColor(defaultExportColors.accentColor);
         setEditorialGradientLeftColor(defaultExportColors.editorialGradientLeftColor);
         setEditorialGradientRightColor(defaultExportColors.editorialGradientRightColor);
-    }, [defaultExportColors, hasSessionColorOverrides, showModal]);
+    }, [defaultExportColors, hasSessionColorOverrides, isRankingPoster, showModal]);
 
     useEffect(() => {
         setIsPortalReady(true);
@@ -1231,7 +1294,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     }, [dailyMatchesTimeMode, lineupExportMode, matchExportLayout, matchExportMode, selectedStandingsGroupLabel, standingsExportMode, template]);
     const exportSummaryChips = useMemo(() => {
         const chips = [selectedFormatConfig.label];
-        chips.push(getExportVisualFamilyLabel(visualFamily));
+        chips.push(isRankingPoster ? 'Poster Ranking' : getExportVisualFamilyLabel(visualFamily));
         if (template === 'matchStats') {
             chips.push(getMatchExportLayoutLabel(matchExportLayout));
         } else if (template === 'standings') {
@@ -1260,6 +1323,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     }, [
         customTournamentName,
         data,
+        isRankingPoster,
         lineupExportMode,
         matchExportLayout,
         selectedFormatConfig.label,
@@ -1271,6 +1335,10 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         visualFamily,
     ]);
     const paletteUsageHint = useMemo(() => {
+        if (isRankingPoster) {
+            return 'El poster se pinta con cinco colores: Fondo (la esquina oscura), Banda (la columna del titulo), Brillo (la luz de abajo y la fila del lider), Panel (la lamina de la tabla) y Dorado (posiciones y puntos). Las combinaciones fijan los cinco de una vez.';
+        }
+
         if ((template === 'lineups' || template === 'squad' || template === 'teamOfWeek') && visualFamily === 'posterV3') {
             return 'En Poster V3, Fondo construye el clima oscuro del afiche; Acento domina barras, chips numerados y remates neon. En modo de dos equipos, el segundo bloque deriva a una variante fria para separar ambas columnas.';
         }
@@ -1296,7 +1364,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         }
 
         return 'La marca de agua G22 se mantiene en todas las exportaciones.';
-    }, [template, visualFamily]);
+    }, [isRankingPoster, template, visualFamily]);
 
     const toggleMatch = (index: number) => {
         setSelectedMatchIndices((previous) => {
@@ -1327,6 +1395,24 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         setHasSessionColorOverrides(true);
         setSelectedPaletteId('custom');
         setAccentColor(value);
+    };
+
+    const applyRankingCombo = (combo: RankingPosterCombo) => {
+        setHasSessionColorOverrides(true);
+        setSelectedRankingComboId(combo.id);
+        setBgColor(combo.bg);
+        setAccentColor(combo.accent);
+        setRankingGlowColor(combo.glow);
+        setRankingPanelColor(combo.panel);
+        setRankingGoldColor(combo.gold);
+    };
+
+    // Cualquier retoque manual saca el check de la combinacion: el poster queda
+    // en modo personalizado sin perder lo que ya estaba elegido.
+    const handleRankingColorChange = (setter: (value: string) => void) => (value: string) => {
+        setHasSessionColorOverrides(true);
+        setSelectedRankingComboId('');
+        setter(value);
     };
 
     const handleTypographyPresetChange = (presetId: ExportTypographyPresetId) => {
@@ -1717,7 +1803,13 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
 
                 for (const [index, slide] of slides.entries()) {
                     setStatus(slides.length > 1 ? `Generando ${index + 1}/${slides.length}...` : 'Generando...');
-                    if (visualFamily === 'posterV3') {
+                    if (standingsData.variant === 'rankingPoster') {
+                        await drawRankingPoster(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo, {
+                            glow: rankingGlowColor,
+                            panel: rankingPanelColor,
+                            gold: rankingGoldColor,
+                        });
+                    } else if (visualFamily === 'posterV3') {
                         await drawPosterV3Standings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
                     } else if (visualFamily === 'momentumV2') {
                         await drawMomentumStandings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
@@ -1878,7 +1970,10 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         editorialGradientRightColor,
         classicHomeColor,
         classicAwayColor,
-    }), [accentColor, bgColor, editorialGradientLeftColor, editorialGradientRightColor, classicHomeColor, classicAwayColor]);
+        rankingGlowColor,
+        rankingPanelColor,
+        rankingGoldColor,
+    }), [accentColor, bgColor, editorialGradientLeftColor, editorialGradientRightColor, classicHomeColor, classicAwayColor, rankingGlowColor, rankingPanelColor, rankingGoldColor]);
 
     return (
         <div className={`${styles.container} ${className}`}>
@@ -1928,10 +2023,11 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                 <label className={styles.modalLabel}>Diseno activo</label>
                                 <div className={styles.activeDesignCard}>
                                     <div className={styles.activeDesignCopy}>
-                                        <strong>{getExportVisualFamilyLabel(visualFamily)}</strong>
+                                        <strong>{isRankingPoster ? 'Poster Ranking' : getExportVisualFamilyLabel(visualFamily)}</strong>
                                         <span>
-                                            {EXPORT_VISUAL_FAMILY_OPTIONS.find((option) => option.value === visualFamily)?.description}
-                                            {' '}Tipografia y estilo desde el panel de gestion.
+                                            {isRankingPoster
+                                                ? 'Afiche dedicado del ranking: banda vertical con el titulo, tabla P/Equipo/PTS/VAR y fila del lider destacada.'
+                                                : <>{EXPORT_VISUAL_FAMILY_OPTIONS.find((option) => option.value === visualFamily)?.description}{' '}Tipografia y estilo desde el panel de gestion.</>}
                                         </span>
                                     </div>
                                     <span className={styles.activeDesignBadge}>Activo</span>
@@ -2812,6 +2908,68 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                 </div>
                             )}
 
+                            {isRankingPoster ? (
+                            <div className={styles.modalSection}>
+                                <label className={styles.modalLabel}>Combinaciones del poster</label>
+                                <div className={styles.paletteGrid}>
+                                    {RANKING_POSTER_COMBOS.map((combo) => (
+                                        <button
+                                            key={combo.id}
+                                            className={`${styles.paletteBtn} ${selectedRankingComboId === combo.id ? styles.paletteBtnActive : ''}`}
+                                            onClick={() => applyRankingCombo(combo)}
+                                            title={combo.name}
+                                            type="button"
+                                        >
+                                            <div
+                                                className={styles.paletteSwatch}
+                                                style={{
+                                                    '--palette-bg': combo.bg,
+                                                    '--palette-accent': combo.glow,
+                                                } as CSSProperties}
+                                            />
+                                            <div className={styles.paletteMeta}>
+                                                <span className={styles.paletteName}>{combo.name}</span>
+                                                <span className={styles.paletteDesc}>{combo.description}</span>
+                                                <span style={{ display: 'inline-flex', gap: 4, marginTop: 6 }}>
+                                                    {[combo.bg, combo.accent, combo.glow, combo.panel, combo.gold].map((swatch, swatchIndex) => (
+                                                        <span
+                                                            key={`${combo.id}-swatch-${swatchIndex}`}
+                                                            style={{ width: 12, height: 12, borderRadius: 999, background: swatch, border: '1px solid rgba(255,255,255,0.25)' }}
+                                                        />
+                                                    ))}
+                                                </span>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className={styles.modalHint}>{paletteUsageHint}</p>
+                                <div className={styles.customColors}>
+                                    <div className={styles.colorInp}>
+                                        <span>Fondo</span>
+                                        <input type="color" value={bgColor} onChange={(event) => handleRankingColorChange(setBgColor)(event.target.value)} />
+                                    </div>
+                                    <div className={styles.colorInp}>
+                                        <span>Banda</span>
+                                        <input type="color" value={accentColor} onChange={(event) => handleRankingColorChange(setAccentColor)(event.target.value)} />
+                                    </div>
+                                    <div className={styles.colorInp}>
+                                        <span>Brillo</span>
+                                        <input type="color" value={rankingGlowColor} onChange={(event) => handleRankingColorChange(setRankingGlowColor)(event.target.value)} />
+                                    </div>
+                                    <div className={styles.colorInp}>
+                                        <span>Panel</span>
+                                        <input type="color" value={rankingPanelColor} onChange={(event) => handleRankingColorChange(setRankingPanelColor)(event.target.value)} />
+                                    </div>
+                                    <div className={styles.colorInp}>
+                                        <span>Dorado</span>
+                                        <input type="color" value={rankingGoldColor} onChange={(event) => handleRankingColorChange(setRankingGoldColor)(event.target.value)} />
+                                    </div>
+                                </div>
+                                <p className={styles.modalHint}>
+                                    Al reabrir el modal vuelve la combinacion original. El oro, la plata y el bronce del 1-2-3 vienen del ranking y no cambian con estos colores.
+                                </p>
+                            </div>
+                            ) : (
                             <div className={styles.modalSection}>
                                 <label className={styles.modalLabel}>Paleta de colores</label>
                                 <div className={styles.paletteGrid}>
@@ -2956,6 +3114,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                     </div>
                                 )}
                             </div>
+                            )}
                             </div>
                             <aside className={styles.modalPreviewPanel} aria-label="Vista previa del export">
                                 <div className={styles.modalPreviewHeader}>
@@ -4272,7 +4431,13 @@ async function renderMatchExportPreviewDataUrl(options: {
         const standingsData = exportData as StandingsData;
         const slide = buildStandingsSlides(standingsData, standingsExportMode)[0];
         if (!slide) throw new Error('No hay datos para preview de tabla');
-        if (visualFamily === 'posterV3') {
+        if (standingsData.variant === 'rankingPoster') {
+            await drawRankingPoster(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, {
+                glow: previewColors?.rankingGlowColor,
+                panel: previewColors?.rankingPanelColor,
+                gold: previewColors?.rankingGoldColor,
+            });
+        } else if (visualFamily === 'posterV3') {
             await drawPosterV3Standings(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
         } else if (visualFamily === 'momentumV2') {
             await drawMomentumStandings(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
@@ -4782,6 +4947,7 @@ export async function ensureExportFonts(): Promise<void> {
             document.fonts.load('800 24px "dharma-gothic-e"'),
             document.fonts.load('900 24px "dharma-gothic-c"'),
             document.fonts.load('900 24px "dharma-gothic-m"'),
+            document.fonts.load('800 24px "dharma-gothic-m"'),
             document.fonts.load('800 24px "G22 Dharma Gothic"'),
             document.fonts.load('900 24px "Articulat CF"'),
             document.fonts.load('800 24px "Dharma Gothic Expanded Heavy"'),
@@ -8026,6 +8192,344 @@ async function drawStandings(
     }
 
     drawBrandFooter(ctx, canvas, brandLogo, isDark);
+}
+// ============================================================================
+// Poster de ranking — replica del afiche "Salida de 22": banda izquierda con
+// el titulo vertical en Dharma Gothic M ExBold, costura iluminada entre banda
+// y panel, panel de tabla con luz diagonal, grano fino y columnas
+// P / Equipo / PTS / VAR. Se pinta con CINCO colores editables (fondo, banda,
+// brillo, panel y dorado); el 1-2-3 conserva el color de positionLabels
+// (oro/plata/bronce) en el numero de posicion.
+// ============================================================================
+const FONT_DHARMA_M = '"dharma-gothic-m", "G22 Dharma Gothic", "Dharma Gothic E Heavy", "Bebas Neue", "Outfit", sans-serif';
+
+let rankingNoiseTile: HTMLCanvasElement | null = null;
+
+// Grano fino con vetas horizontales, como la textura del afiche original.
+// Determinista (g22pNoise) para poder cachear el tile sin que titile el preview.
+function getRankingNoiseTile(): HTMLCanvasElement | null {
+    if (rankingNoiseTile) return rankingNoiseTile;
+    if (typeof document === 'undefined') return null;
+
+    const size = 264;
+    const tile = document.createElement('canvas');
+    tile.width = size;
+    tile.height = size;
+    const tileCtx = tile.getContext('2d');
+    if (!tileCtx) return null;
+
+    const image = tileCtx.createImageData(size, size);
+    for (let y = 0; y < size; y += 1) {
+        const rowNoise = g22pNoise(y * 17.23);
+        for (let x = 0; x < size; x += 1) {
+            const pixelNoise = g22pNoise(y * size + x * 1.37);
+            const value = Math.round(128 + ((pixelNoise * 0.72 + rowNoise * 0.28) - 0.5) * 72);
+            const index = (y * size + x) * 4;
+            image.data[index] = value;
+            image.data[index + 1] = value;
+            image.data[index + 2] = value;
+            image.data[index + 3] = 255;
+        }
+    }
+    tileCtx.putImageData(image, 0, 0);
+    rankingNoiseTile = tile;
+    return tile;
+}
+
+async function drawRankingPoster(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: StandingsData,
+    slide: StandingsSlideData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    extraColors: RankingPosterExtraColors = {}
+) {
+    const width = canvas.width;
+    const height = canvas.height;
+    const isStory = format.height > format.width;
+    const isDark = getContrastColor(bgColor) === '#ffffff';
+    const textColor = isDark ? '#ffffff' : '#0f172a';
+    const mutedColor = getMutedColor(isDark, 0.62);
+    const glowColor = extraColors.glow || mixHexColors(accentColor, '#ffffff', 0.4);
+    const panelColor = extraColors.panel || mixHexColors(accentColor, '#ffffff', 0.28);
+    // En fondo claro el dorado cae a un ambar oscuro: el amarillo puro no llega
+    // a contraste util sobre blanco.
+    const goldColor = extraColors.gold || (isDark ? '#f6c445' : '#a16207');
+    const accentDeep = mixHexColors(accentColor, '#000000', 0.45);
+    const barFrom = mixHexColors(glowColor, '#000000', 0.3);
+    const barContrast = getContrastColor(glowColor);
+    const rows = slide.groups.flatMap((group) => group.rows);
+    const teamLogos = await Promise.all(rows.map((row) => loadImage(row.teamLogo || '')));
+
+    const bandWidth = Math.round(width * 0.265);
+
+    // ---- Fondo: la estructura del afiche de referencia ----
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, width, height);
+
+    // Banda del titulo: oscura arriba, color pleno abajo y luz electrica en la base.
+    const band = ctx.createLinearGradient(0, 0, 0, height);
+    band.addColorStop(0, mixHexColors(accentColor, bgColor, 0.55));
+    band.addColorStop(0.5, mixHexColors(accentColor, bgColor, 0.25));
+    band.addColorStop(1, accentColor);
+    ctx.fillStyle = band;
+    ctx.fillRect(0, 0, bandWidth, height);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, bandWidth, height);
+    ctx.clip();
+    const bandGlow = ctx.createRadialGradient(bandWidth * 0.2, height * 1.02, 0, bandWidth * 0.2, height * 1.02, height * 0.66);
+    bandGlow.addColorStop(0, hexToRGBA(glowColor, 0.95));
+    bandGlow.addColorStop(0.45, hexToRGBA(glowColor, 0.4));
+    bandGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = bandGlow;
+    ctx.fillRect(0, 0, bandWidth, height);
+    ctx.restore();
+
+    // Panel de la tabla: mas claro contra la costura, se apaga hacia arriba a la derecha.
+    const panel = ctx.createLinearGradient(bandWidth, height, width, height * 0.02);
+    panel.addColorStop(0, hexToRGBA(panelColor, 0.8));
+    panel.addColorStop(0.5, hexToRGBA(panelColor, 0.3));
+    panel.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = panel;
+    ctx.fillRect(bandWidth, 0, width - bandWidth, height);
+
+    const panelBloom = ctx.createRadialGradient(bandWidth, height, 0, bandWidth, height, width * 0.55);
+    panelBloom.addColorStop(0, hexToRGBA(glowColor, 0.28));
+    panelBloom.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = panelBloom;
+    ctx.fillRect(bandWidth, 0, width - bandWidth, height);
+
+    // Esquina superior derecha hundida en negro, como la referencia.
+    const cornerShade = ctx.createLinearGradient(width, 0, width * 0.4, height * 0.7);
+    cornerShade.addColorStop(0, 'rgba(0,0,0,0.62)');
+    cornerShade.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = cornerShade;
+    ctx.fillRect(0, 0, width, height);
+
+    // Costura: sombra del lado de la banda y filo iluminado del panel.
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(bandWidth - 7, 0, 7, height);
+    const seam = ctx.createLinearGradient(0, 0, 0, height);
+    seam.addColorStop(0, 'rgba(255,255,255,0.05)');
+    seam.addColorStop(1, 'rgba(255,255,255,0.22)');
+    ctx.fillStyle = seam;
+    ctx.fillRect(bandWidth, 0, 3, height);
+
+    // Grano fino sobre toda la pieza.
+    const noiseTile = getRankingNoiseTile();
+    if (noiseTile) {
+        const noisePattern = ctx.createPattern(noiseTile, 'repeat');
+        if (noisePattern) {
+            ctx.save();
+            ctx.globalAlpha = 0.09;
+            ctx.globalCompositeOperation = 'overlay';
+            ctx.fillStyle = noisePattern;
+            ctx.fillRect(0, 0, width, height);
+            ctx.restore();
+        }
+    }
+
+    // ---- Titulo vertical en Dharma Gothic M ExBold ----
+    const titleText = (data.title || 'Ranking').trim().toUpperCase();
+    const maxTitleLength = height - (isStory ? 250 : 170);
+    let titleSize = Math.round(bandWidth * (isStory ? 0.92 : 0.86));
+    ctx.save();
+    while (titleSize > 60) {
+        ctx.font = `800 ${titleSize}px ${FONT_DHARMA_M}`;
+        if (ctx.measureText(titleText).width <= maxTitleLength) break;
+        titleSize -= 6;
+    }
+    ctx.translate(bandWidth * 0.52, height / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `800 ${titleSize}px ${FONT_DHARMA_M}`;
+    ctx.fillStyle = getContrastColor(accentColor);
+    ctx.shadowColor = hexToRGBA(accentDeep, 0.55);
+    ctx.shadowBlur = 24;
+    ctx.shadowOffsetY = 0;
+    ctx.fillText(titleText, 0, 0);
+    ctx.restore();
+
+    // ---- Geometria de la tabla (sobre el panel) ----
+    const tableLeft = bandWidth + 46;
+    const tableRight = width - 54;
+    const varWidth = 106;
+    const ptsWidth = 168;
+    const posCenterX = tableLeft + 26;
+    const crestCenterX = tableLeft + 92;
+    const nameX = tableLeft + 132;
+    const varCenterX = tableRight - varWidth / 2;
+    const ptsCenterX = tableRight - varWidth - ptsWidth / 2;
+    const nameMaxWidth = Math.max(120, (tableRight - varWidth - ptsWidth) - nameX - 18);
+
+    const headerY = isStory ? 150 : 104;
+    const footerCenterY = height - (isStory ? 52 : 44);
+    const bodyTop = headerY + (isStory ? 46 : 38);
+    const bodyBottom = footerCenterY - (isStory ? 46 : 38);
+    const rowHeight = Math.min(isStory ? 82 : 62, (bodyBottom - bodyTop) / Math.max(rows.length, 1));
+    const crestSize = Math.min(isStory ? 66 : 50, rowHeight - 6);
+    const posFontSize = Math.round(Math.min(isStory ? 40 : 30, rowHeight * 0.5));
+    const ptsFontSize = Math.round(Math.min(isStory ? 40 : 30, rowHeight * 0.5));
+    const varFontSize = Math.round(Math.min(isStory ? 36 : 27, rowHeight * 0.46));
+    const baseNameSize = Math.round(Math.min(isStory ? 40 : 29, rowHeight * 0.52));
+    const sharedNameSize = getSharedFittedFontSize(
+        ctx,
+        rows.map((row) => ({ text: row.team.trim(), maxWidth: nameMaxWidth })),
+        '800',
+        baseNameSize,
+        FONT_BODY,
+        13,
+    );
+
+    // Cabecera de columnas.
+    ctx.save();
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = textColor;
+    ctx.font = `800 ${isStory ? 28 : 25}px ${FONT_BODY}`;
+    ctx.textAlign = 'center';
+    ctx.fillText('P', posCenterX, headerY);
+    ctx.fillText('PTS', ptsCenterX, headerY);
+    ctx.fillText('VAR', varCenterX, headerY);
+    ctx.textAlign = 'left';
+    ctx.fillText('Equipo', crestCenterX - crestSize / 2, headerY);
+    ctx.restore();
+
+    rows.forEach((row, index) => {
+        const y = bodyTop + index * rowHeight;
+        const centerY = y + rowHeight / 2;
+        const isLeader = row.pos === 1;
+        const rowTextColor = isLeader ? barContrast : textColor;
+        const img = teamLogos[index] || null;
+
+        ctx.save();
+        ctx.textBaseline = 'middle';
+
+        if (isLeader) {
+            // La barra del lider usa el color de brillo: es la misma luz que
+            // sube desde la base del afiche.
+            const barGradient = ctx.createLinearGradient(tableLeft - 18, 0, tableRight + 18, 0);
+            barGradient.addColorStop(0, barFrom);
+            barGradient.addColorStop(1, glowColor);
+            ctx.save();
+            ctx.fillStyle = barGradient;
+            ctx.shadowColor = hexToRGBA(glowColor, 0.5);
+            ctx.shadowBlur = 26;
+            ctx.shadowOffsetY = 6;
+            ctx.beginPath();
+            ctx.roundRect(tableLeft - 18, y + 3, tableRight - tableLeft + 36, rowHeight - 6, 12);
+            ctx.fill();
+            ctx.restore();
+        } else if (index > 0 && rows[index - 1].pos !== 1) {
+            ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.07)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(tableLeft - 6, y);
+            ctx.lineTo(tableRight + 6, y);
+            ctx.stroke();
+        }
+
+        // Posicion: oro/plata/bronce si la fila trae etiqueta; dorado base si no.
+        ctx.fillStyle = row.zoneColor || goldColor;
+        ctx.textAlign = 'center';
+        ctx.font = `800 ${posFontSize}px ${FONT_BODY}`;
+        ctx.fillText(String(row.pos), posCenterX, centerY + 1);
+
+        // Escudo directo, sin plato: la regla es escudo real siempre.
+        drawOverflowCrest(ctx, {
+            x: crestCenterX,
+            y: centerY,
+            width: crestSize,
+            height: crestSize,
+            img,
+            label: row.team,
+            rawLogo: row.teamLogo,
+            isDark,
+            showFrame: false,
+        });
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = rowTextColor;
+        ctx.font = `800 ${sharedNameSize}px ${FONT_BODY}`;
+        ctx.fillText(row.team.trim(), nameX, centerY + 1);
+
+        // En la fila del lider los puntos van con el color de contraste de la
+        // barra (como el nombre): el dorado se perdia sobre la luz de la barra.
+        const ptsText = String(row.played ?? '-').trim().replace('.', ',') || '-';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = isLeader ? barContrast : goldColor;
+        setFittedFont(ctx, ptsText, ptsWidth - 16, '800', ptsFontSize, FONT_BODY, 14);
+        ctx.fillText(ptsText, ptsCenterX, centerY + 1);
+
+        const varText = (row.pointsDeltaLabel || '').trim().replace(/^\+/, '') || '0';
+        ctx.fillStyle = rowTextColor;
+        ctx.font = `800 ${varFontSize}px ${FONT_BODY}`;
+        ctx.fillText(varText, varCenterX, centerY + 1);
+
+        ctx.restore();
+    });
+
+    // Pie: subtitulo a la izquierda, marca G22, pagina y flechas de carrusel a la derecha.
+    ctx.save();
+    ctx.textBaseline = 'middle';
+    let cursorRight = tableRight;
+
+    if (slide.pageNumber < slide.totalPages) {
+        ctx.font = `900 ${isStory ? 30 : 26}px ${FONT_BODY}`;
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'right';
+        ctx.fillText('>>>', cursorRight, footerCenterY);
+        cursorRight -= ctx.measureText('>>>').width + 26;
+    }
+
+    // La pagina va aparte del subtitulo: si compartieran renglon, el recorte del
+    // subtitulo largo se comeria el "1/8" que ubica la lamina en el carrusel.
+    if (slide.totalPages > 1) {
+        ctx.font = `700 ${isStory ? 20 : 17}px ${FONT_BODY}`;
+        ctx.fillStyle = mutedColor;
+        ctx.textAlign = 'right';
+        const pageText = `${slide.pageNumber}/${slide.totalPages}`;
+        ctx.fillText(pageText, cursorRight, footerCenterY);
+        cursorRight -= ctx.measureText(pageText).width + 22;
+    }
+
+    const brandFontSize = isStory ? 22 : 19;
+    const brandIconSize = isStory ? 30 : 26;
+    ctx.font = `800 ${brandFontSize}px ${FONT_BODY}`;
+    const brandTextWidth = ctx.measureText('G22 Scores').width;
+    ctx.fillStyle = textColor;
+    ctx.textAlign = 'right';
+    ctx.fillText('G22 Scores', cursorRight, footerCenterY);
+    if (brandLogo) {
+        drawLogoBadge(ctx, {
+            x: cursorRight - brandTextWidth - 10 - brandIconSize / 2,
+            y: footerCenterY,
+            size: brandIconSize,
+            img: brandLogo,
+            label: 'G22 Scores',
+            rawLogo: '/icon.png',
+            isDark,
+            showFrame: false,
+        });
+    }
+    const brandLeft = cursorRight - brandTextWidth - 10 - brandIconSize;
+
+    const subtitleText = (data.subtitle || '').trim().toUpperCase();
+    if (subtitleText) {
+        ctx.font = `700 ${isStory ? 20 : 17}px ${FONT_BODY}`;
+        ctx.fillStyle = mutedColor;
+        ctx.textAlign = 'left';
+        const subtitleMax = brandLeft - 24 - tableLeft;
+        if (subtitleMax > 60) {
+            ctx.fillText(truncateTextToWidth(ctx, subtitleText, subtitleMax), tableLeft, footerCenterY);
+        }
+    }
+    ctx.restore();
 }
 // Un partido sin jugar no siempre quiere publicar la hora: el modo 'vs' la reemplaza por VS.
 // La decision se toma una sola vez aca y la comparten los tres disenos de fixture.
