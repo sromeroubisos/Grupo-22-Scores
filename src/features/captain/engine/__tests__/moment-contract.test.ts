@@ -25,7 +25,9 @@ import { trainingsFor } from '../../data/trainings.ts';
 import { PLAY_LEVELS } from '../../types/moment-def.ts';
 import { ALL_MOMENT_KINDS, MOMENT_LABEL, PRE_CONTRACT_KINDS } from '../../types/moment-kinds.ts';
 import { ALL_FAMILIES, baseAttributes } from '../../data/positions.ts';
+import { ALL_SHIRTS } from '../../data/minigames/index.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
+ import { playTournament } from '../../state/captain-autoplay.ts';
 import { createRng } from '../random.ts';
 import { MOMENT_DEFS, isContractKind } from '../moment-defs/index.ts';
 import {
@@ -61,7 +63,7 @@ function hastaElJackal(max = 40): CaptainState | null {
             s = repartir(s);
             if (s.phase === 'moment' && s.pendingMoment?.kind === 'jackal') return s;
             if (s.phase !== 'moment') {
-                s = captainReducer(s, { type: 'ADVANCE' });
+                s = playTournament(captainReducer(s, { type: 'ADVANCE' }));
                 if (s.phase === 'event') break; // sin chooser no se puede seguir
             } else {
                 break; // salió otro kind: probamos otra semilla
@@ -189,7 +191,23 @@ test('ROLLMOMENT CONSUME EXACTAMENTE TRES TIRADAS, NI UNA MÁS', () => {
     let base = createInitialCaptain(TERCERA, 5);
     base = repartir(base);
     // Un estado listo para volver a tirar, sin importar en qué fase quedó.
-    const estado: CaptainState = { ...base, phase: 'offseason', pendingMoment: null };
+    //
+    // Y FUERA DE LA VENTANA DE LA ACADEMIA, que es lo que mide este test y no lo
+    // que mide aquella: la academia provincial le toca a TODO argentino de
+    // dieciséis, así que con la edad de arranque las sesenta semillas devolvían
+    // jugada y la rama del corte temprano quedaba sin recorrer. Lo cazó el propio
+    // guardia de cobertura de abajo —«todas produjeron jugada»— que es
+    // exactamente para lo que estaba puesto.
+    //
+    // Se envejece al jugador en vez de cambiarle la nacionalidad: la edad es la
+    // condición que este test necesita evitar, y la nacionalidad decide otras
+    // cosas (el club de origen, el mercado) que no queremos mover de paso.
+    const estado: CaptainState = {
+        ...base,
+        phase: 'offseason',
+        pendingMoment: null,
+        player: { ...base.player, age: 24 },
+    };
 
     let conJugada = 0;
     let sinJugada = 0;
@@ -238,10 +256,14 @@ test('EL CRUCE: casi siempre te toca lo tuyo, y cada tanto lo de otro', () => {
     let propios = 0;
     let cruces = 0;
 
-    for (const family of ALL_FAMILIES) {
+    // Por DORSAL y no por familia: desde que hay cuatro minijuegos por número, el
+    // eje del sorteo es el dorsal. Recorrido por familia, el 1 contaría como
+    // propias las ocho jugadas de la primera línea —las suyas y las del 3— y el
+    // cruce se leería a la mitad de lo que es.
+    for (const shirt of ALL_SHIRTS) {
         for (let season = 1; season <= 200; season += 1) {
-            const kind = pickMomentKind(909, season, family);
-            if (proficiencyFor(kind, family) < 1) cruces += 1;
+            const kind = pickMomentKind(909, season, shirt);
+            if (proficiencyFor(kind, shirt) < 1) cruces += 1;
             else propios += 1;
         }
     }
@@ -255,13 +277,28 @@ test('EL CRUCE: casi siempre te toca lo tuyo, y cada tanto lo de otro', () => {
 test('el que juega una jugada prestada la juega con menos oficio', () => {
     // Es la otra mitad del cruce: sin esto, recibir un Momento ajeno sería
     // gratis y el puesto dejaría de significar algo.
-    assert.equal(proficiencyFor('jackal', 'tercera-linea'), 1);
-    assert.ok(proficiencyFor('jackal', 'wing-fullback') < 1);
-    assert.equal(proficiencyFor('palos', 'apertura'), 1);
-    assert.ok(proficiencyFor('palos', 'primera-linea') < 1);
-    // El tackle es transversal: lo juegan los quince con el mismo oficio.
-    for (const family of ALL_FAMILIES) {
-        assert.equal(proficiencyFor('tackle', family), 1, `${family} tacklea con oficio prestado`);
+    //
+    // Y desde el catálogo por dorsal son TRES escalones, no dos: la tuya, la del
+    // compañero de familia, y la de otro puesto. El del medio es el que dice que
+    // los minijuegos son ESPECIALIDAD y no exclusividad — un pilar izquierdo
+    // jugando la columna del derecho la juega casi igual de bien, y un centro
+    // que se encuentra la pelota en el breakdown no.
+    assert.equal(proficiencyFor('jackal', 7), 1, 'el 7 no juega su propio jackal con oficio pleno');
+    assert.equal(proficiencyFor('palos', 10), 1, 'el 10 no patea a los palos con oficio pleno');
+
+    // Misma familia, otro dorsal: el 6 y el 8 son tercera línea como el 7.
+    const mismaFamilia = proficiencyFor('jackal', 6);
+    assert.ok(mismaFamilia < 1, 'el 6 juega el jackal del 7 como si fuera suyo');
+
+    // Otra familia: un pilar no es tercera línea.
+    const otraFamilia = proficiencyFor('jackal', 1);
+    assert.ok(otraFamilia < mismaFamilia, 'jugar la de otra familia no cuesta más que la del compañero de línea');
+
+    // Los cinco universales le tocan a los quince con el mismo oficio: no hay
+    // dorsal del que estén prestados.
+    for (const shirt of ALL_SHIRTS) {
+        assert.equal(proficiencyFor('tackle', shirt), 1, `el ${shirt} tacklea con oficio prestado`);
+        assert.equal(proficiencyFor('uni-pase', shirt), 1, `el ${shirt} pasa con oficio prestado`);
     }
 });
 

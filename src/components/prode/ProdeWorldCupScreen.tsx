@@ -155,7 +155,12 @@ export default function ProdeWorldCupScreen({
                     type="button"
                     onClick={onClose}
                     aria-label="Cerrar"
-                    className="absolute right-3 top-3 z-20 grid h-9 w-9 place-items-center rounded-full text-white/65 transition-[background-color,color,transform] duration-150 ease-out hover:bg-white/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-90"
+                    // 44×44: es el mínimo del objetivo táctil y es el ÚNICO
+                    // cierre visible del intersticial. Medía 36 y encima está
+                    // arriba a la derecha, o sea fuera de la zona del pulgar:
+                    // errarle costaba quedarse adentro de algo que no se pidió.
+                    // El ícono se queda en 18 — crece la zona, no el dibujo.
+                    className="absolute right-2 top-2 z-20 grid h-11 w-11 place-items-center rounded-full text-white/65 transition-[background-color,color,transform] duration-150 ease-out hover:bg-white/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-90"
                 >
                     <X size={18} />
                 </button>

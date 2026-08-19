@@ -48,15 +48,19 @@ export function SquadManagementShell({ clubId, squadId, clubData, squadData }: S
         const supabase = createClient();
 
         try {
-            // Cargar todos los jugadores del club
-            const { data: allPlayers, error: playersError } = await supabase
-                .from('people')
-                .select('*')
-                .eq('club_id', clubId)
-                .eq('role', 'player')
-                .order('name');
+            // Los jugadores vienen por ruta de servidor, no por consulta directa:
+            // `people` tiene DNI, fecha de nacimiento, mail y teléfono, y la clave
+            // del navegador ya no puede leer esas columnas
+            // (20260804170000_people_column_privileges.sql). La ruta verifica que
+            // el usuario administre el club y recién ahí devuelve el dato.
+            const playersRes = await fetch(`/api/club-admin/squad-players?club=${encodeURIComponent(clubId)}`);
+            const playersPayload = await playersRes.json().catch(() => null);
 
-            if (playersError) throw playersError;
+            if (!playersRes.ok || !playersPayload?.ok) {
+                throw new Error(playersPayload?.error || 'No se pudieron cargar los jugadores');
+            }
+
+            const allPlayers = playersPayload.players as any[];
 
             // Cargar jugadores que ya están en el plantel
             const { data: squadMembers, error: squadError } = await supabase

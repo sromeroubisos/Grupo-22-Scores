@@ -39,7 +39,7 @@ import type {
  * Versión del catálogo de puestos. Se sella en el guardado: cambiar un peso o
  * una curva invalida una partida en curso igual que un cambio de reglas.
  */
-export const CAPTAIN_POSITIONS_VERSION = '2026-07.3';
+export const CAPTAIN_POSITIONS_VERSION = '2026-08.1';
 
 /**
  * Las diecinueve claves, en ORDEN CANÓNICO. Se itera por acá y nunca por
@@ -136,6 +136,17 @@ export interface GloryMetric {
  * Los rangos salen de la evidencia: el loosehead es medible y consistentemente
  * el puesto más longevo (promedio 29 años en Super Rugby) y el centro externo
  * el más joven (22–23). La carrera media dura 12,7 ± 3,6 años.
+ *
+ * ── ESTA CURVA ES LA DEL PUESTO, NO LA DEL JUGADOR ─────────────────────────
+ * Nadie la lee cruda para decidir nada de una partida. Lo que corre en el motor
+ * es lo que devuelve `resolveAgeCurve` (engine/development-profile.ts), que le
+ * suma encima las dos tiradas personales: el perfil de desarrollo —cuándo
+ * llegás— y la longevidad —cuánto te dura—. Acá vive el CENTRO de esa
+ * distribución; el jugador concreto cae alrededor.
+ *
+ * Leerla cruda es el bug que ya pasó una vez: `peakShift` corría el declive dos
+ * años y el retiro no se enteraba, así que al tardío se le alargaba el buen
+ * juego y se le cortaba la carrera en la misma fecha de siempre.
  */
 export interface AgeCurve {
     /** Edad típica de asentarse en primera. */
@@ -148,6 +159,34 @@ export interface AgeCurve {
     soft: number;
     /** Acá se termina, quiera o no. */
     hard: number;
+}
+
+/**
+ * CUÁNTO SE JUEGA ANTES DEL DEBUT DEL PUESTO, de 0 a 1.
+ *
+ * A los pibes que todavía no llegaron al debut típico de su familia les alcanza
+ * para entrenar y para entrar unos minutos, no para una temporada. Cada año que
+ * falta descuenta 0,22, con piso en 0,25: el de 16 en un puesto que debuta a los
+ * 20 juega un cuarto de lo que le tocaría por media.
+ *
+ * ── Por qué vive acá y no en `engine/statistics.ts`, que es quien la usaba ──
+ * Porque tiene DOS lectores y necesita un solo dueño (CLAUDE de captain §1.9).
+ * `playingTimeOf` la aplica al tiempo de juego, y `data/cohort.ts` la usa para
+ * saber cuánto se separa una camada antes de que sus pibes empiecen a jugar. Con
+ * los números escritos dos veces, mover el 0,22 en un lado dejaba al otro
+ * midiendo una población que el motor ya no produce — y ese desfasaje no falla,
+ * solo devuelve tasas de convocatoria raras.
+ *
+ * Vive en `data/` y no en el motor porque es una afirmación sobre la CURVA DEL
+ * PUESTO, que es lo que este archivo declara, y porque así el motor y la camada
+ * pueden leerla sin que los datos dependan del motor.
+ */
+export const YOUTH_PLAYING_SLOPE = 0.22;
+export const YOUTH_PLAYING_FLOOR = 0.25;
+
+export function youthPlayingFactor(age: number, debut: number): number {
+    if (age >= debut) return 1;
+    return Math.max(YOUTH_PLAYING_FLOOR, 1 - (debut - age) * YOUTH_PLAYING_SLOPE);
 }
 
 export interface PositionFamily {
@@ -184,8 +223,9 @@ export const POSITION_FAMILIES: Record<PositionFamilyId, PositionFamily> = {
             secondary: null,
         },
         // El puesto más longevo, y el que más tarda en hacerse: un pilar de
-        // primera no existe antes de los 20.
-        age: { debut: 20, peak: [27, 31], decline: 32, soft: 33, hard: 36 },
+        // primera no existe antes de los 20. Es el que toca el tope del juego
+        // (`CAREER_HARD_CAP`, 40) sin necesitar una tirada de longevidad buena.
+        age: { debut: 20, peak: [27, 31], decline: 32, soft: 37, hard: 40 },
     },
 
     hooker: {
@@ -204,7 +244,7 @@ export const POSITION_FAMILIES: Record<PositionFamilyId, PositionFamily> = {
             secondary: { id: 'tries-maul', labelEs: 'Tries de maul', unit: 'count', perMatch: 0.22 },
         },
         // El puesto más castigado del rugby. Se retira antes que el pilar.
-        age: { debut: 20, peak: [26, 30], decline: 31, soft: 32, hard: 35 },
+        age: { debut: 20, peak: [26, 30], decline: 31, soft: 36, hard: 39 },
     },
 
     'segunda-linea': {
@@ -219,7 +259,7 @@ export const POSITION_FAMILIES: Record<PositionFamilyId, PositionFamily> = {
             primary: { id: 'lineouts-ganados', labelEs: 'Line-outs ganados', unit: 'count', perMatch: 4.4 },
             secondary: { id: 'lineouts-robados', labelEs: 'Line-outs robados', unit: 'count', perMatch: 0.35 },
         },
-        age: { debut: 19, peak: [26, 30], decline: 31, soft: 32, hard: 34 },
+        age: { debut: 19, peak: [26, 30], decline: 31, soft: 36, hard: 38 },
     },
 
     'tercera-linea': {
@@ -236,7 +276,7 @@ export const POSITION_FAMILIES: Record<PositionFamilyId, PositionFamily> = {
             primary: { id: 'turnovers', labelEs: 'Turnovers', unit: 'count', perMatch: 1.4 },
             secondary: { id: 'metros-post-contacto', labelEs: 'Metros post-contacto', unit: 'metres', perMatch: 24 },
         },
-        age: { debut: 19, peak: [25, 29], decline: 30, soft: 31, hard: 34 },
+        age: { debut: 19, peak: [25, 29], decline: 30, soft: 35, hard: 38 },
     },
 
     'medio-scrum': {
@@ -253,7 +293,7 @@ export const POSITION_FAMILIES: Record<PositionFamilyId, PositionFamily> = {
         },
         // Aguanta tanto como un pilar: en Sudáfrica es el puesto más viejo del
         // Super Rugby.
-        age: { debut: 19, peak: [26, 30], decline: 31, soft: 33, hard: 35 },
+        age: { debut: 19, peak: [26, 30], decline: 31, soft: 37, hard: 39 },
     },
 
     apertura: {
@@ -273,7 +313,7 @@ export const POSITION_FAMILIES: Record<PositionFamilyId, PositionFamily> = {
             secondary: { id: 'porcentaje-palo', labelEs: 'Porcentaje al palo', unit: 'percent', perMatch: 78 },
         },
         // El puesto con la mayor tasa de conmociones del rugby.
-        age: { debut: 19, peak: [25, 29], decline: 30, soft: 32, hard: 34 },
+        age: { debut: 19, peak: [25, 29], decline: 30, soft: 36, hard: 38 },
     },
 
     centro: {
@@ -290,7 +330,7 @@ export const POSITION_FAMILIES: Record<PositionFamilyId, PositionFamily> = {
         },
         // El centro externo es el puesto más joven del rugby: 22–23 de promedio.
         // Debuta antes que nadie y declina antes que nadie.
-        age: { debut: 18, peak: [24, 28], decline: 29, soft: 30, hard: 33 },
+        age: { debut: 18, peak: [24, 28], decline: 29, soft: 34, hard: 37 },
     },
 
     'wing-fullback': {
@@ -307,7 +347,7 @@ export const POSITION_FAMILIES: Record<PositionFamilyId, PositionFamily> = {
         },
         // Declive temprano y abrupto: cuando se va la velocidad no queda nada
         // atrás. Es el reverso del pilar.
-        age: { debut: 18, peak: [24, 28], decline: 29, soft: 30, hard: 32 },
+        age: { debut: 18, peak: [24, 28], decline: 29, soft: 34, hard: 36 },
     },
 };
 
@@ -329,6 +369,29 @@ export const ALL_FAMILIES: readonly PositionFamilyId[] = [
 
 export function getFamily(id: PositionFamilyId): PositionFamily {
     return POSITION_FAMILIES[id];
+}
+
+/**
+ * EL ATRIBUTO PRINCIPAL DE UN PUESTO: el de MAYOR PESO en su media.
+ *
+ * Se pide por identidad —el que más pesa— y no por posición en la lista, aunque
+ * hoy las ocho familias declaren el más pesado primero y `attributes[0]` diera
+ * lo mismo. Es la §1.5 del CLAUDE de captain: un índice no dice qué es la cosa,
+ * dice dónde estaba cuando miraste, y el día que alguien reordene una familia
+ * para que se lea mejor, esto seguiría dando la respuesta correcta mientras el
+ * índice pasaría a devolver otro atributo sin que nada falle.
+ *
+ * El desempate es el ORDEN DECLARADO, y hay un empate real: el apertura pondera
+ * Pegada 30 y Visión 30. Que gane Pegada no es una casualidad del `>` — es lo
+ * que declara el catálogo cuando la escribe primero.
+ */
+export function mainAttributeOf(id: PositionFamilyId): CaptainAttributeKey {
+    const family = POSITION_FAMILIES[id];
+    let mejor = 0;
+    for (let i = 1; i < family.weights.length; i += 1) {
+        if (family.weights[i] > family.weights[mejor]) mejor = i;
+    }
+    return family.attributes[mejor];
 }
 
 /** Índice dorsal → familia. Se arma una vez, recorriendo en orden canónico. */

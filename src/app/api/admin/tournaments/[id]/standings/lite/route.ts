@@ -5,6 +5,7 @@ import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
 import { normalizeTableType } from '@/lib/standings/tableType';
 import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
+import { isUuid } from '@/lib/utils/postgrest';
 
 type ParticipantScopeRow = {
     id?: unknown;
@@ -39,16 +40,33 @@ export async function GET(
 ) {
     try {
         const { id: tournamentId } = await params;
+        // Mismas guardas que la ruta completa de standings: acá abajo estos
+        // cuatro valores entran en columnas uuid, y un slug de torneo o un
+        // nombre de pestaña se traducía en un 22P02 y un 500.
+        if (!isUuid(tournamentId)) {
+            return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
+        }
         const searchParams = request.nextUrl.searchParams;
         const phaseId = searchParams.get('phaseId');
         const groupId = searchParams.get('groupId');
-        const requestedSeasonId =
+        const rawSeasonId =
             searchParams.get('seasonId') ||
             searchParams.get('season_id') ||
             searchParams.get('season');
+        // La etiqueta de temporada ('2026') no es su id: se descarta y abajo
+        // manda la de la fase o la vigente del torneo.
+        const requestedSeasonId = isUuid(rawSeasonId) ? rawSeasonId : null;
 
         if (!phaseId) {
             return NextResponse.json({ error: 'phaseId is required' }, { status: 400 });
+        }
+
+        if (!isUuid(phaseId)) {
+            return NextResponse.json({ error: 'phaseId inválido' }, { status: 400 });
+        }
+
+        if (groupId && !isUuid(groupId)) {
+            return NextResponse.json({ error: 'groupId inválido' }, { status: 400 });
         }
 
         const tableType = normalizeTableType(searchParams.get('tableType'));

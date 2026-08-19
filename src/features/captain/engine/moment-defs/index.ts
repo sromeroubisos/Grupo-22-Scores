@@ -60,6 +60,9 @@
 import type { ContractKind, MomentKind } from '../../types/moment-kinds.ts';
 import type { MomentOutcome } from '../../types/moment.ts';
 import type { MomentDef, MomentSetup } from '../../types/moment-def.ts';
+import { MINIGAME_SPECS } from '../../data/minigames/index.ts';
+import { defFromSpec } from './from-spec.ts';
+import { ACADEMIA } from './academia.ts';
 import { JACKAL } from './jackal.ts';
 import { ANCLA } from './ancla.ts';
 import { CODIGO } from './codigo.ts';
@@ -103,6 +106,18 @@ export const MOMENT_DEFS: readonly AnyMomentDef[] = [
     widen(JACKAL),
     widen(PALOS),
     widen(BANDA),
+    // LA ACADEMIA. Está en el registry —hace falta para que `getMomentDef` la
+    // encuentre cuando la compuerta la abre— y NO está en `ALL_MINIGAMES`, así
+    // que `SELECTABLE` no la ve y no se sortea nunca. Es el mismo mecanismo por
+    // el que el bunker no se sortea, y por eso no hace falta ningún filtro:
+    // llega por su compuerta (`academiaDue`) o no llega.
+    widen(ACADEMIA),
+    // Y los cincuenta y nueve del catálogo por dorsal, en el orden declarado de
+    // `data/minigames/`. No se escriben acá uno por uno a propósito: una lista
+    // de cincuenta y nueve nombres mantenida a mano al lado de la lista de
+    // cincuenta y nueve objetos es la derivada congelada de CLAUDE.md §1.9, y se
+    // desincroniza la primera vez que alguien agregue un minijuego con apuro.
+    ...MINIGAME_SPECS.map((spec) => widen(defFromSpec(spec))),
 ];
 
 const BY_KIND: Partial<Record<MomentKind, AnyMomentDef>> = {};
@@ -139,6 +154,9 @@ export function getMomentDef(kind: MomentKind): AnyMomentDef | null {
 export function isContractKind(kind: MomentKind): kind is ContractKind {
     return BY_KIND[kind] !== undefined;
 }
+
+export type { AcademiaPlay, AcademiaSetup } from './academia.ts';
+export { ACADEMIA, ACADEMIA_AGE, ACADEMIA_KIND, ACADEMIA_UNION } from './academia.ts';
 
 export type { JackalSetup } from './jackal.ts';
 export { JACKAL, JACKAL_ROUNDS, jackalBeat, jackalGrade, jackalWindows } from './jackal.ts';

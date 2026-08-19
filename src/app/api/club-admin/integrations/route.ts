@@ -8,6 +8,7 @@ import {
 import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 
 type IntegrationMeta = {
     name: string;
@@ -83,10 +84,15 @@ export async function GET(request: NextRequest) {
                 .from('matches')
                 .select('id', { count: 'exact', head: true })
                 .eq('away_club_id', clubId),
-            admin
-                .from('tournament_standings')
-                .select('id', { count: 'exact', head: true })
-                .eq('club_id', clubId),
+            // Es un contador de "en cuántas tablas aparece el club": con las
+            // tres perspectivas publicadas se triplicaría.
+            applyStandingsTableType(
+                admin
+                    .from('tournament_standings')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('club_id', clubId),
+                await supportsStandingsTableTypeColumn(),
+            ),
             admin
                 .from('news')
                 .select('id', { count: 'exact', head: true })

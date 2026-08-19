@@ -152,7 +152,7 @@ export default function ProfilePage() {
                 </nav>
 
                 {activeTab === 'prode' && (
-                    <ProdePanel />
+                    <ProdePanel viewerId={user?.id ?? null} />
                 )}
 
                 {activeTab === 'perfil' && (
@@ -795,7 +795,7 @@ function EmptySection({
     );
 }
 
-function ProdePanel() {
+function ProdePanel({ viewerId }: { viewerId: string | null }) {
     const [competitions, setCompetitions] = useState<PublicProdeCompetition[]>([]);
     const [totals, setTotals] = useState<PublicProdeUserTotal[]>([]);
     const [privateLeagues, setPrivateLeagues] = useState<ProdePrivateLeagueSummary[]>([]);
@@ -889,6 +889,7 @@ function ProdePanel() {
                     competitions={competitions}
                     totals={totals}
                     privateLeagues={privateLeagues}
+                    viewerId={viewerId}
                     schemaReady={schemaReady}
                     embedded
                 />

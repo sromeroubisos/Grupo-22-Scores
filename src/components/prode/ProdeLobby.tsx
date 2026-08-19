@@ -1,132 +1,146 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import styles from '@/app/prode/page.module.css';
+import styles from './ProdeLobby.module.css';
+import ProdeCompetitionCard, { LockTime, StateBadge } from './ProdeCompetitionCard';
+import {
+    compareByPlayableThenPopular,
+    getCompetitionState,
+    getSportLabel,
+    isUrgent,
+} from './competitionState';
+import { compareLobbyCompetitions, isCompetitionActive } from '@/lib/prode/lobbyOrder';
 import type { ProdePrivateLeagueSummary, PublicProdeCompetition, PublicProdeUserTotal } from '@/lib/prode/types';
 
 type ProdeLobbyProps = {
     competitions: PublicProdeCompetition[];
     totals: PublicProdeUserTotal[];
     privateLeagues?: ProdePrivateLeagueSummary[];
+    viewerId?: string | null;
     schemaReady: boolean;
     embedded?: boolean;
 };
 
-type StateFilter = 'all' | 'active' | 'upcoming';
+// La portada muestra una vitrina, no el catálogo entero. El resto vive en
+// /prode/competencias, que es la pantalla de buscar.
+const FEATURED_COUNT = 10;
 
-function getSportLabel(sportId: string | null) {
-    switch (sportId) {
-        case 'rugby':
-            return 'Rugby';
-        case 'football':
-            return 'Futbol';
-        case 'basketball':
-            return 'Basquet';
-        case 'tennis':
-            return 'Tenis';
-        default:
-            return sportId || 'General';
+/**
+ * Copia al portapapeles con red de contención. `navigator.clipboard` no existe fuera
+ * de un contexto seguro (http a secas, que es como se prueba en la red local) y puede
+ * rechazar por permisos. Sin el respaldo, el botón se apretaba y no pasaba nada.
+ */
+async function copyToClipboard(text: string) {
+    try {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
+    } catch {
+        // Sigue por el camino de abajo.
+    }
+
+    try {
+        const field = document.createElement('textarea');
+        field.value = text;
+        field.setAttribute('readonly', '');
+        field.style.position = 'fixed';
+        field.style.top = '0';
+        field.style.opacity = '0';
+        document.body.appendChild(field);
+        field.select();
+        const copied = document.execCommand('copy');
+        document.body.removeChild(field);
+        return copied;
+    } catch {
+        return false;
     }
 }
 
-// Ícono de deporte para escanear más rápido la tarjeta en mobile. Usa currentColor
-// para heredar el color del chip (sin introducir colores nuevos).
-function SportIcon({ sportId }: { sportId: string | null }) {
-    if (sportId === 'rugby') {
-        return (
-            <svg className={styles.leagueSportIcon} viewBox="0 0 24 24" aria-hidden="true">
-                <ellipse cx="12" cy="12" rx="10" ry="6.4" fill="none" stroke="currentColor" strokeWidth="1.6" />
-                <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" strokeWidth="1.6" />
-            </svg>
-        );
-    }
-
-    return (
-        <svg className={styles.leagueSportIcon} viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.6" />
-            <path d="M12 6.8l3.2 2.3-1.2 3.7h-4L8.8 9.1z" fill="currentColor" />
-        </svg>
-    );
-}
-
-function getTypeLabel(competition: PublicProdeCompetition) {
-    if (competition.metadata?.featured === true) return 'Destacada';
-    if (competition.visibility === 'unlisted') return 'Especial';
-    return 'Oficial';
-}
-
-function isCompetitionActive(competition: PublicProdeCompetition) {
-    return competition.status === 'active' || competition.stats.open > 0;
-}
-
-function isCompetitionUpcoming(competition: PublicProdeCompetition) {
-    if (isCompetitionActive(competition) || competition.status === 'finished') return false;
-    if (!competition.startAt) return competition.status === 'published';
-    return new Date(competition.startAt).getTime() > Date.now();
-}
-
-export default function ProdeLobby({ competitions, totals, privateLeagues = [], schemaReady, embedded = false }: ProdeLobbyProps) {
+export default function ProdeLobby({
+    competitions,
+    totals,
+    privateLeagues = [],
+    viewerId = null,
+    schemaReady,
+    embedded = false,
+}: ProdeLobbyProps) {
     const router = useRouter();
-    const [sportFilter, setSportFilter] = useState<string>('all');
-    const [stateFilter, setStateFilter] = useState<StateFilter>('all');
     const [managedPrivateLeagues, setManagedPrivateLeagues] = useState<ProdePrivateLeagueSummary[]>(privateLeagues);
     const [deletingLeagueId, setDeletingLeagueId] = useState<string | null>(null);
+    const [confirmingLeagueId, setConfirmingLeagueId] = useState<string | null>(null);
+    const [copyState, setCopyState] = useState<{ code: string; ok: boolean } | null>(null);
     const [privateLeagueFeedback, setPrivateLeagueFeedback] = useState<string | null>(null);
+
+    // El reloj entra recién en el cliente. Antes de montar, todo lo que dependa de
+    // la hora dibuja su fecha absoluta, que es idéntica en las dos puntas.
+    const [now, setNow] = useState<number | null>(null);
+
+    useEffect(() => {
+        setNow(Date.now());
+        const timer = window.setInterval(() => setNow(Date.now()), 30_000);
+        return () => window.clearInterval(timer);
+    }, []);
 
     useEffect(() => {
         setManagedPrivateLeagues(privateLeagues);
     }, [privateLeagues]);
 
-    const sportFilters = useMemo(() => {
-        const uniqueSports = Array.from(
-            new Set(
-                competitions
-                    .map((competition) => competition.sportId)
-                    .filter((sportId): sportId is string => Boolean(sportId)),
-            ),
-        );
+    useEffect(() => {
+        if (!copyState) return;
+        const timer = window.setTimeout(() => setCopyState(null), 2200);
+        return () => window.clearTimeout(timer);
+    }, [copyState]);
 
-        return ['all', ...uniqueSports];
+    const featured = useMemo(
+        () => [...competitions].sort(compareByPlayableThenPopular).slice(0, FEATURED_COUNT),
+        [competitions],
+    );
+
+    const myCompetitions = useMemo(
+        () => competitions.filter((competition) => competition.viewerIsMember).sort(compareLobbyCompetitions),
+        [competitions],
+    );
+
+    // El próximo cierre que le importa al que mira: si ya juega en algún lado, el suyo;
+    // si no, el más cercano de todo el catálogo, que acá funciona como invitación.
+    const nextLock = useMemo(() => {
+        const withLock = competitions.filter(
+            (competition) => isCompetitionActive(competition) && competition.stats.nextLockAt,
+        );
+        if (!withLock.length) return null;
+
+        const mine = withLock.filter((competition) => competition.viewerIsMember);
+        const pool = mine.length ? mine : withLock;
+
+        return pool
+            .slice()
+            .sort((left, right) => (left.stats.nextLockAt || '').localeCompare(right.stats.nextLockAt || ''))[0] || null;
     }, [competitions]);
 
-    const filteredCompetitions = useMemo(() => {
-        return [...competitions]
-            .filter((competition) => sportFilter === 'all' || competition.sportId === sportFilter)
-            .filter((competition) => {
-                if (stateFilter === 'active') return isCompetitionActive(competition);
-                if (stateFilter === 'upcoming') return isCompetitionUpcoming(competition);
-                return true;
-            })
-            .sort((left, right) => {
-                const leftFeatured = left.metadata?.featured === true ? 1 : 0;
-                const rightFeatured = right.metadata?.featured === true ? 1 : 0;
-                if (leftFeatured !== rightFeatured) return rightFeatured - leftFeatured;
+    const selfTotal = useMemo(
+        () => (viewerId ? totals.find((row) => row.userId === viewerId) || null : null),
+        [totals, viewerId],
+    );
 
-                const leftActive = isCompetitionActive(left) ? 1 : 0;
-                const rightActive = isCompetitionActive(right) ? 1 : 0;
-                if (leftActive !== rightActive) return rightActive - leftActive;
+    const podium = totals.slice(0, 3);
+    const selfInPodium = Boolean(selfTotal && podium.some((row) => row.userId === selfTotal.userId));
 
-                const leftTime = left.stats.nextLockAt || left.startAt || '';
-                const rightTime = right.stats.nextLockAt || right.startAt || '';
-                return leftTime.localeCompare(rightTime);
-            });
-    }, [competitions, sportFilter, stateFilter]);
-
-    const activeCount = competitions.filter((competition) => isCompetitionActive(competition)).length;
+    const openCount = competitions.filter(isCompetitionActive).length;
     const totalPlayers = competitions.reduce((sum, competition) => sum + competition.members.totalMembers, 0);
+    const hasMine = myCompetitions.length > 0 || managedPrivateLeagues.length > 0;
+    const hiddenCount = Math.max(0, competitions.length - featured.length);
 
-    async function handleQuickDeleteLeague(league: ProdePrivateLeagueSummary) {
-        if (!league.canManage || deletingLeagueId) {
-            return;
-        }
+    const handleCopyCode = useCallback(async (code: string) => {
+        setCopyState({ code, ok: await copyToClipboard(code) });
+    }, []);
 
-        const confirmed = window.confirm('Esta accion borra la liga privada del lobby. Queres continuar?');
-        if (!confirmed) {
-            return;
-        }
+    async function handleDeleteLeague(league: ProdePrivateLeagueSummary) {
+        if (!league.canManage || deletingLeagueId) return;
 
+        setConfirmingLeagueId(null);
         setDeletingLeagueId(league.id);
         setPrivateLeagueFeedback('Borrando liga...');
 
@@ -158,250 +172,327 @@ export default function ProdeLobby({ competitions, totals, privateLeagues = [], 
         }
     }
 
+    const actions = (
+        <div className={styles.headerActions}>
+            <Link href="/prode/ligas/unirse" className={styles.btnSecondary}>
+                Ingresar con codigo
+            </Link>
+            <Link href="/prode/ligas/nueva" className={styles.btnPrimary}>
+                Crear liga privada
+            </Link>
+        </div>
+    );
+
+    const standing = selfTotal ? (
+        <Link href="/prode/ranking-global" className={styles.standing}>
+            <span className={styles.standingRank}>{selfTotal.position ? `#${selfTotal.position}` : '-'}</span>
+            <span className={styles.standingLabel}>en el ranking global</span>
+            <span className={styles.standingPoints}>{selfTotal.totalPoints} pts</span>
+        </Link>
+    ) : null;
+
     const lobbyContent = (
-        <div className={`${styles.shell} ${embedded ? styles.embeddedShell : ''}`}>
-                    <section className={styles.posterHero}>
-                        <div className={styles.posterCopy}>
-                            {!embedded ? (
-                                <Link href="/juegos" className={styles.backLink}>← Juegos</Link>
-                            ) : null}
-                            <p className={styles.posterKicker}>G22 Prode Lobby</p>
-                            <h1 className={styles.posterTitle}>Elegi una competencia y entra a jugar.</h1>
-                            <p className={styles.posterLead}>
-                                Ligas publicas por torneo, donde los usuarios compiten con sus pronosticos dentro
-                                de cada competencia, junto a ligas privadas con acceso mediante codigo unico para
-                                jugar entre amigos o comunidades. Todo dentro de un entorno 100% gratuito y
-                                recreativo, sin apuestas ni premios economicos, con un ranking global de usuarios
-                                que permite seguir el rendimiento de los mejores en toda la plataforma.
-                            </p>
-                            <div className={styles.posterActions}>
-                                <a href="#ligas" className={styles.posterSecondaryCta}>Ver ligas disponibles</a>
-                                <Link href="/prode/ligas/nueva" className={styles.posterPrimaryCta}>
-                                    Crear liga privada
-                                </Link>
-                            </div>
-                        </div>
+        <div className={`${styles.shell} ${embedded ? styles.embedded : ''}`}>
+            {embedded ? (
+                <div className={styles.headerSide}>
+                    {standing}
+                    {actions}
+                </div>
+            ) : (
+                <header className={styles.header}>
+                    <div className={styles.headerCopy}>
+                        <Link href="/juegos" className={styles.backLink}>← Juegos</Link>
+                        <h1 className={styles.title}>Prode</h1>
+                        <p className={styles.lede}>
+                            Elegi donde jugar: ligas publicas por torneo, o una privada con codigo para
+                            competir entre amigos. Prodes no oficiales, gratis, sin apuestas ni premios.
+                        </p>
+                    </div>
+                    <div className={styles.headerSide}>
+                        {standing}
+                        {actions}
+                    </div>
+                </header>
+            )}
 
-                        <div className={styles.posterRail}>
-                            <article className={styles.posterStat}>
-                                <strong>{competitions.length}</strong>
-                                <span>Competencias</span>
-                            </article>
-                            <article className={styles.posterStat}>
-                                <strong>{activeCount}</strong>
-                                <span>Activas ahora</span>
-                            </article>
-                            <article className={styles.posterStat}>
-                                <strong>{totalPlayers}</strong>
-                                <span>Jugadores</span>
-                            </article>
-                        </div>
-                    </section>
+            {nextLock && nextLock.stats.nextLockAt ? (
+                <Link
+                    href={`/prode/${nextLock.slug}`}
+                    className={`${styles.nextLock} ${now !== null && isUrgent(nextLock.stats.nextLockAt, now) ? styles.nextLockUrgent : ''}`}
+                >
+                    <StateBadge state={getCompetitionState(nextLock)} />
 
-                    {!schemaReady ? (
-                        <section className={styles.warning}>
-                            La UI del lobby ya esta lista, pero la base activa todavia no tiene aplicadas las
-                            tablas del prode. Al correr la migracion de Supabase se van a poblar estas vistas.
-                        </section>
+                    <span className={styles.nextLockBody}>
+                        <span className={styles.nextLockLabel}>
+                            {nextLock.viewerIsMember ? 'Tu proximo cierre' : 'Proximo cierre'}
+                        </span>
+                        <span className={styles.nextLockName}>{nextLock.name}</span>
+                    </span>
+
+                    <span className={styles.nextLockTime}>
+                        <LockTime iso={nextLock.stats.nextLockAt} now={now} className={styles.nextLockCountdown} />
+                        <span className={styles.nextLockHint}>
+                            {nextLock.stats.open} {nextLock.stats.open === 1 ? 'partido abierto' : 'partidos abiertos'}
+                        </span>
+                    </span>
+                </Link>
+            ) : null}
+
+            {!schemaReady ? (
+                <p className={styles.notice}>
+                    La base activa todavia no tiene aplicadas las tablas del prode. Cuando corra la
+                    migracion de Supabase, estas listas se pueblan solas.
+                </p>
+            ) : null}
+
+            {hasMine ? (
+                <section className={styles.section}>
+                    <div className={styles.sectionHead}>
+                        <div className={styles.sectionHeading}>
+                            <h2 className={styles.sectionTitle}>Donde jugas</h2>
+                            <span className={styles.sectionCount}>
+                                {myCompetitions.length + managedPrivateLeagues.length}
+                            </span>
+                        </div>
+                    </div>
+
+                    {privateLeagueFeedback ? (
+                        <p className={styles.feedback} role="status">{privateLeagueFeedback}</p>
                     ) : null}
 
-                    {managedPrivateLeagues.length ? (
-                        <section className={styles.section}>
-                            <div className={styles.sectionHeaderLobby}>
-                                <div>
-                                    <h2 className={styles.sectionTitle}>Tus ligas privadas</h2>
-                                    <p className={styles.sectionText}>
-                                        Entra siempre desde aca para volver a tu liga privada, sin caer en la competencia global.
-                                    </p>
+                    <div className={styles.mineList}>
+                        {myCompetitions.map((competition) => {
+                            const state = getCompetitionState(competition);
+
+                            return (
+                                <div key={competition.id} className={styles.mineRow}>
+                                    <Link href={`/prode/${competition.slug}`} className={styles.mineLink}>
+                                        <span className={styles.mineTop}>
+                                            <span className={styles.mineName}>{competition.name}</span>
+                                            <StateBadge state={state} />
+                                        </span>
+                                        <span className={styles.mineMeta}>
+                                            <span>{getSportLabel(competition.sportId)}</span>
+                                            <span>
+                                                <span className={styles.mineMetaNum}>{competition.members.totalMembers}</span>
+                                                {' '}participantes
+                                            </span>
+                                            {competition.stats.nextLockAt && (state === 'open' || state === 'live') ? (
+                                                <span>
+                                                    Cierra en{' '}
+                                                    <LockTime
+                                                        iso={competition.stats.nextLockAt}
+                                                        now={now}
+                                                        className={styles.mineMetaNum}
+                                                    />
+                                                </span>
+                                            ) : null}
+                                        </span>
+                                    </Link>
+
+                                    <div className={styles.mineActions}>
+                                        <Link href={`/prode/${competition.slug}`} className={styles.btnSecondary}>
+                                            Entrar
+                                        </Link>
+                                    </div>
                                 </div>
-                            </div>
+                            );
+                        })}
 
-                            {privateLeagueFeedback ? (
-                                <div className={styles.warning}>{privateLeagueFeedback}</div>
-                            ) : null}
+                        {managedPrivateLeagues.map((league) => {
+                            const confirming = confirmingLeagueId === league.id;
+                            const deleting = deletingLeagueId === league.id;
 
-                            <div className={styles.lobbyGrid}>
-                                {managedPrivateLeagues.map((league) => (
-                                    <article key={league.id} className={styles.leagueCard}>
-                                        <div className={styles.leagueTopline}>
-                                            <span className={styles.leagueType}>Privada</span>
-                                            <span className={styles.leagueSport}>{league.sportLabel || 'General'}</span>
-                                        </div>
+                            return (
+                                <div key={league.id} className={styles.mineRow}>
+                                    <Link href={`/prode/ligas/${league.slug}`} className={styles.mineLink}>
+                                        <span className={styles.mineTop}>
+                                            <span className={styles.mineName}>{league.name}</span>
+                                            <span className={styles.mineTag}>Privada</span>
+                                            {league.canManage ? <span className={styles.mineTag}>Admin</span> : null}
+                                        </span>
+                                        <span className={styles.mineMeta}>
+                                            <span>{league.competitionName}</span>
+                                            <span>
+                                                <span className={styles.mineMetaNum}>{league.memberCount}</span>
+                                                {' '}participantes
+                                            </span>
+                                        </span>
+                                    </Link>
 
-                                        <Link href={`/prode/ligas/${league.slug}`} className={styles.leagueCompactBody}>
-                                            <h3 className={styles.leagueTitle}>{league.name}</h3>
-                                            <p className={styles.leagueSubtitle}>{league.competitionName}</p>
+                                    <div className={styles.mineActions}>
+                                        {league.inviteCode ? (
+                                            <button
+                                                type="button"
+                                                className={`${styles.inviteCode} ${
+                                                    copyState?.code === league.inviteCode && copyState.ok ? styles.inviteCodeCopied : ''
+                                                }`}
+                                                onClick={() => void handleCopyCode(league.inviteCode as string)}
+                                                aria-label={`Copiar el codigo de invitacion ${league.inviteCode}`}
+                                            >
+                                                {copyState?.code === league.inviteCode
+                                                    ? (copyState.ok ? 'Copiado' : 'Copialo a mano')
+                                                    : league.inviteCode}
+                                            </button>
+                                        ) : null}
+
+                                        <Link href={`/prode/ligas/${league.slug}`} className={styles.btnSecondary}>
+                                            Entrar
                                         </Link>
 
-                                        <div className={styles.leagueCompactMeta}>
-                                            <span>{league.memberCount} participantes</span>
-                                            {league.canManage ? <span>Admin</span> : null}
-                                            {league.inviteCode ? <span>Codigo: {league.inviteCode}</span> : null}
-                                        </div>
-
-                                        <div className={styles.leagueFooter}>
-                                            <Link href={`/prode/ligas/${league.slug}`} className={styles.leagueSecondaryCta}>
-                                                Entrar
-                                            </Link>
-                                            {league.canManage ? (
+                                        {league.canManage ? (
+                                            confirming ? (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        className={`${styles.btnGhost} ${styles.btnDanger}`}
+                                                        onClick={() => void handleDeleteLeague(league)}
+                                                        disabled={deleting}
+                                                    >
+                                                        {deleting ? 'Borrando...' : 'Confirmar borrado'}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className={styles.btnGhost}
+                                                        onClick={() => setConfirmingLeagueId(null)}
+                                                        disabled={deleting}
+                                                    >
+                                                        Cancelar
+                                                    </button>
+                                                </>
+                                            ) : (
                                                 <button
                                                     type="button"
-                                                    className={styles.leagueQuickDanger}
-                                                    onClick={() => void handleQuickDeleteLeague(league)}
-                                                    disabled={deletingLeagueId === league.id}
+                                                    className={styles.btnGhost}
+                                                    onClick={() => setConfirmingLeagueId(league.id)}
+                                                    disabled={Boolean(deletingLeagueId)}
                                                 >
-                                                    {deletingLeagueId === league.id ? 'Borrando...' : 'Borrar'}
+                                                    Borrar
                                                 </button>
-                                            ) : null}
-                                        </div>
-                                    </article>
-                                ))}
-                            </div>
-                        </section>
-                    ) : null}
+                                            )
+                                        ) : null}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </section>
+            ) : null}
 
-                    <section id="ligas" className={styles.section}>
-                        <div className={styles.sectionHeaderLobby}>
-                            <div>
-                                <h2 className={styles.sectionTitle}>Ligas disponibles</h2>
-                                <p className={styles.sectionText}>
-                                    Aca elegis donde jugar. Cada tarjeta representa una competencia lista para
-                                    entrar, seguir su cierre y competir en su liga global.
-                                </p>
-                            </div>
-                            <Link href="/prode/ligas/unirse" className={styles.joinLink}>
-                                Ingresar con codigo
+            <section id="ligas" className={styles.section}>
+                <div className={styles.sectionHead}>
+                    <div className={styles.sectionHeading}>
+                        <h2 className={styles.sectionTitle}>Ligas disponibles</h2>
+                        <span className={styles.sectionCount}>
+                            {openCount} abiertas de {competitions.length} · {totalPlayers} jugadores
+                        </span>
+                    </div>
+                    <Link href="/prode/competencias" className={styles.sectionLink}>
+                        Buscar en todas
+                    </Link>
+                </div>
+
+                {featured.length ? (
+                    <div className={styles.cardGrid}>
+                        {featured.map((competition) => (
+                            <ProdeCompetitionCard key={competition.id} competition={competition} now={now} />
+                        ))}
+
+                        {hiddenCount > 0 ? (
+                            <Link href="/prode/competencias" className={styles.seeAll}>
+                                Ver las {competitions.length} competencias
+                                <span className={styles.seeAllHint}>+{hiddenCount} mas</span>
                             </Link>
-                        </div>
+                        ) : null}
+                    </div>
+                ) : (
+                    <div className={styles.empty}>
+                        <p className={styles.emptyTitle}>Todavia no hay competencias publicadas</p>
+                        <p className={styles.emptyText}>
+                            Cuando se publique el primer prode va a aparecer aca. Mientras tanto podes
+                            armar una liga privada sobre cualquier torneo.
+                        </p>
+                    </div>
+                )}
+            </section>
 
-                        <div className={styles.filterBar}>
-                            {sportFilters.map((filter) => (
-                                <button
-                                    key={filter}
-                                    type="button"
-                                    className={`${styles.filterChip} ${sportFilter === filter ? styles.filterChipActive : ''}`}
-                                    onClick={() => setSportFilter(filter)}
-                                >
-                                    {filter === 'all' ? 'Todas' : getSportLabel(filter)}
-                                </button>
-                            ))}
+            <section className={styles.createBanner}>
+                <div>
+                    <h2 className={styles.createBannerTitle}>Jugar entre amigos</h2>
+                    <p className={styles.createBannerText}>
+                        Arma una liga privada sobre cualquier prode publicado, comparti el codigo y
+                        el ranking queda entre ustedes.
+                    </p>
+                </div>
+                <div className={styles.createBannerActions}>
+                    <Link href="/prode/ligas/unirse" className={styles.btnSecondary}>Ingresar con codigo</Link>
+                    <Link href="/prode/ligas/nueva" className={styles.btnPrimary}>Crear liga</Link>
+                </div>
+            </section>
 
-                            <button
-                                type="button"
-                                className={`${styles.filterChip} ${stateFilter === 'active' ? styles.filterChipActive : ''}`}
-                                onClick={() => setStateFilter((current) => current === 'active' ? 'all' : 'active')}
+            <section id="ranking-global" className={styles.section}>
+                <div className={styles.sectionHead}>
+                    <div className={styles.sectionHeading}>
+                        <h2 className={styles.sectionTitle}>Ranking global</h2>
+                        <span className={styles.sectionCount}>suma de todos los prodes</span>
+                    </div>
+                    <Link href="/prode/ranking-global" className={styles.sectionLink}>
+                        Ver ranking completo
+                    </Link>
+                </div>
+
+                {totals.length ? (
+                    <div className={styles.ranking}>
+                        {podium.map((row) => (
+                            <article
+                                key={row.userId}
+                                className={`${styles.rankRow} ${row.userId === viewerId ? styles.rankRowSelf : ''}`}
                             >
-                                Activas
-                            </button>
+                                <span className={styles.rankPos}>{row.position ?? '-'}</span>
+                                <span className={styles.rankIdentity}>
+                                    <span className={styles.rankName}>
+                                        {row.userName}
+                                        {row.userId === viewerId ? <span className={styles.selfTag}>Vos</span> : null}
+                                    </span>
+                                    <span className={styles.rankSub}>
+                                        <span className={styles.rankSubNum}>{row.exactHits}</span> exactos ·{' '}
+                                        <span className={styles.rankSubNum}>{row.correctOutcomes}</span> aciertos
+                                    </span>
+                                </span>
+                                <span className={styles.rankPoints}>{row.totalPoints} pts</span>
+                            </article>
+                        ))}
 
-                            <button
-                                type="button"
-                                className={`${styles.filterChip} ${stateFilter === 'upcoming' ? styles.filterChipActive : ''}`}
-                                onClick={() => setStateFilter((current) => current === 'upcoming' ? 'all' : 'upcoming')}
-                            >
-                                Proximas
-                            </button>
-                        </div>
-
-                        {filteredCompetitions.length ? (
-                            <div className={styles.lobbyGrid}>
-                                {filteredCompetitions.map((competition) => {
-                                    const featured = competition.metadata?.featured === true;
-
-                                    return (
-                                        <Link
-                                            key={competition.id}
-                                            href={`/prode/${competition.slug}`}
-                                            className={`${styles.leagueCard} ${styles.leagueCardPublic} ${featured ? styles.leagueCardFeatured : ''}`}
-                                        >
-                                            <div className={styles.leagueTopline}>
-                                                <span className={styles.leagueType}>{getTypeLabel(competition)}</span>
-                                                <span className={styles.leagueSport}>{getSportLabel(competition.sportId)}</span>
-                                            </div>
-
-                                            {/* Wrapper display:contents → en desktop es transparente (el grid
-                                                de la tarjeta queda igual); en mobile se vuelve la columna izquierda
-                                                de la fila (nombre → deporte → participantes) junto al CTA. */}
-                                            <div className={styles.leagueCardContent}>
-                                                <div className={styles.leagueCompactBody}>
-                                                    <h3 className={styles.leagueTitle}>{competition.name}</h3>
-                                                    <p className={styles.leagueSubtitle}>
-                                                        {competition.description || 'PRODE NO OFICIAL'}
-                                                    </p>
-                                                </div>
-
-                                                <div className={styles.leagueCompactMeta}>
-                                                    <span className={styles.leagueSportInline}>
-                                                        <SportIcon sportId={competition.sportId} />
-                                                        {getSportLabel(competition.sportId)}
-                                                    </span>
-                                                    <span>{competition.members.totalMembers} participantes</span>
-                                                </div>
-                                            </div>
-
-                                            <span className={styles.leagueJoinCta}>Unirse</span>
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <div className={styles.empty}>
-                                No hay ligas que coincidan con esos filtros. Proba ver todas o cambiar el estado.
-                            </div>
-                        )}
-                    </section>
-
-                    <section className={styles.privateLeagueCta}>
-                        <div>
-                            <p className={styles.privateLeagueEyebrow}>Viralidad</p>
-                            <h2 className={styles.privateLeagueTitle}>Crea tu propia liga privada.</h2>
-                            <p className={styles.privateLeagueText}>
-                                Arma una liga con amigos, comparti un codigo unico y competi sobre cualquier prode
-                                no oficial ya publicado en G22 Scores.
-                            </p>
-                        </div>
-                        <div className={styles.privateLeagueActions}>
-                            <Link href="/prode/ligas/nueva" className={styles.posterPrimaryCta}>Crear liga</Link>
-                            <Link href="/prode/ligas/unirse" className={styles.posterSecondaryCta}>Ingresar con codigo</Link>
-                        </div>
-                    </section>
-
-                    <section id="ranking-global" className={styles.section}>
-                        <div className={styles.sectionHeaderLobby}>
-                            <div>
-                                <h2 className={styles.sectionTitle}>Ranking global</h2>
-                                <p className={styles.sectionText}>
-                                    El acumulado total junta los puntos de todos los prodes y muestra quien domina
-                                    la plataforma completa.
-                                </p>
-                            </div>
-                            <Link href="/prode/ranking-global" className={styles.joinLink}>
-                                Ver ranking completo
-                            </Link>
-                        </div>
-
-                        {totals.length ? (
-                            <div className={styles.globalLeaderboardList}>
-                                {totals.slice(0, 3).map((row) => (
-                                    <article key={row.userId} className={styles.globalLeaderboardRow}>
-                                        <span className={styles.globalLeaderboardPosition}>
-                                            {row.position ? `${row.position}.` : '-'}
+                        {selfTotal && !selfInPodium ? (
+                            <>
+                                <div className={styles.rankGap} aria-hidden="true">···</div>
+                                <article className={`${styles.rankRow} ${styles.rankRowSelf}`}>
+                                    <span className={styles.rankPos}>{selfTotal.position ?? '-'}</span>
+                                    <span className={styles.rankIdentity}>
+                                        <span className={styles.rankName}>
+                                            {selfTotal.userName}
+                                            <span className={styles.selfTag}>Vos</span>
                                         </span>
-                                        <div className={styles.globalLeaderboardIdentity}>
-                                            <strong>{row.userName}</strong>
-                                            <span>{row.exactHits} exactos - {row.correctOutcomes} aciertos</span>
-                                        </div>
-                                        <span className={styles.globalLeaderboardPoints}>{row.totalPoints} pts</span>
-                                    </article>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className={styles.empty}>
-                                Todavia no hay puntajes acumulados. Cuando se empiecen a puntuar competencias,
-                                esta tabla total va a tomar protagonismo automaticamente.
-                            </div>
-                        )}
-                    </section>
+                                        <span className={styles.rankSub}>
+                                            <span className={styles.rankSubNum}>{selfTotal.exactHits}</span> exactos ·{' '}
+                                            <span className={styles.rankSubNum}>{selfTotal.correctOutcomes}</span> aciertos
+                                        </span>
+                                    </span>
+                                    <span className={styles.rankPoints}>{selfTotal.totalPoints} pts</span>
+                                </article>
+                            </>
+                        ) : null}
+                    </div>
+                ) : (
+                    <div className={styles.empty}>
+                        <p className={styles.emptyTitle}>Todavia no hay puntajes</p>
+                        <p className={styles.emptyText}>
+                            El acumulado se arma solo cuando se puntue la primera fecha. Entra a una
+                            competencia abierta y carga tus pronosticos antes del cierre.
+                        </p>
+                    </div>
+                )}
+            </section>
         </div>
     );
 

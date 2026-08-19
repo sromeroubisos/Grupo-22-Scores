@@ -12,6 +12,7 @@ import {
 import type { ClubCore, ClubProfile } from '@/lib/types/clubs';
 import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import { calculateClubHealth } from '@/lib/validation/clubValidation';
+import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -910,6 +911,8 @@ export async function getClubDashboardOverview(
             .eq('id', clubId)
             .maybeSingle();
 
+    const supportsStandingsTableType = await supportsStandingsTableTypeColumn();
+
     const [
         upcomingHomeMatchesResult,
         upcomingAwayMatchesResult,
@@ -980,16 +983,21 @@ export async function getClubDashboardOverview(
             .select('tournament_id, group_id, status, club_id')
             .in('club_id', scopedClubIds)
             .not('tournament_id', 'is', null),
-        supabase
-            .from('tournament_standings')
-            .select(`
+        // El panel del club muestra su posición en la tabla general. Sin
+        // filtrar, cada torneo aparecería tres veces con posiciones distintas.
+        applyStandingsTableType(
+            supabase
+                .from('tournament_standings')
+                .select(`
                 tournament_id, club_id, position, played, won, drawn, lost, points, scored, conceded,
                 bonus_points, form, stats, phase_id, group_id, last_updated,
                 tournament:tournaments(id, name, slug)
             `)
-            .in('club_id', scopedClubIds)
-            .order('last_updated', { ascending: false })
-            .order('position', { ascending: true }),
+                .in('club_id', scopedClubIds)
+                .order('last_updated', { ascending: false })
+                .order('position', { ascending: true }),
+            supportsStandingsTableType,
+        ),
         selectedClubRowPromise,
         supabase
             .from('club_profile')

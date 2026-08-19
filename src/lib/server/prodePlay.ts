@@ -47,7 +47,13 @@ interface LooseMutationClient {
         select(columns: string): LooseQueryBuilder;
         insert(payload: AnyRow | AnyRow[]): LooseMutationBuilder;
         update(payload: AnyRow): LooseMutationBuilder;
-        upsert(payload: AnyRow | AnyRow[], options?: { onConflict?: string }): PromiseLike<MutationResult>;
+        // `ignoreDuplicates` es lo que traduce a `resolution=ignore-duplicates`,
+        // o sea a un ON CONFLICT DO NOTHING sin target: el único que sabe
+        // resolver contra un índice único PARCIAL.
+        upsert(
+            payload: AnyRow | AnyRow[],
+            options?: { onConflict?: string; ignoreDuplicates?: boolean },
+        ): PromiseLike<MutationResult>;
     };
 }
 
@@ -131,11 +137,27 @@ function toBoolean(value: unknown) {
     return typeof value === 'boolean' ? value : false;
 }
 
+// Un escudo puede venir guardado como data: URI — hoy 905 de los 2042 clubes lo
+// están, con una mediana de 70 KB cada uno. Ese texto no se descarga aparte: viaja
+// dentro del HTML y del payload RSC, y se duplica por partido. Una fecha de 119
+// partidos daba 24 MB de página, 99% base64.
+//
+// `resolveTeamLogo` ya sabe traducirlo a una URL de `/api/assets/team-logo`, que lo
+// sirve como imagen binaria cacheable (el proxy decodifica el base64 él mismo). El
+// problema era el orden: quien leía la fila cruda devolvía el data: URI y le ganaba
+// de mano al traductor. Por eso ningún escudo del prode sale directo de la fila:
+// todos pasan por acá, y un data: URI nunca es una respuesta válida.
+function toLogoUrl(value: unknown): string | null {
+    const logo = toNullableString(value);
+    if (!logo) return null;
+    return logo.startsWith('data:') ? null : logo;
+}
+
 function resolveStoredLogo(...sources: Array<Record<string, unknown> | null>) {
     for (const source of sources) {
         if (!source) continue;
 
-        const directLogo = toNullableString(
+        const directLogo = toLogoUrl(
             source.logo_url
             ?? source.logo
             ?? source.image_path
@@ -149,6 +171,21 @@ function resolveStoredLogo(...sources: Array<Record<string, unknown> | null>) {
     }
 
     return null;
+}
+
+// Los eventos sincronizados antes de este arreglo tienen el data: URI congelado
+// dentro de `match_snapshot`. El sync reescribe el snapshot en cada corrida, así que
+// se curan solos, pero hasta que eso pase no vamos a servir 70 KB por escudo:
+// mandamos la etiqueta del equipo al proxy como clave, que es la misma forma en que
+// el proxy ya resuelve un club por nombre cuando no tiene id.
+function toSnapshotLogoUrl(value: unknown, label: string): string | null {
+    const direct = toLogoUrl(value);
+    if (direct) return direct;
+
+    const stored = toNullableString(value);
+    if (!stored || !label) return null;
+
+    return toLogoUrl(resolveTeamLogo({ id: label, name: label, logo: stored }));
 }
 
 function toOutcome(value: unknown): ProdePredictionOutcome | null {
@@ -405,34 +442,34 @@ function resolveRulesSummary(
             key: 'winner',
             label: 'Ganador correcto',
             points: winnerPoints,
-            description: 'Acertas el resultado general del partido.',
+            description: 'Acertás el resultado general del partido.',
         },
         {
             key: 'diff',
             label: 'Diferencia exacta',
             points: diffPoints,
-            description: 'Clavas la diferencia de puntos entre ambos equipos.',
+            description: 'Clavás la diferencia de puntos entre ambos equipos.',
         },
         ...(oneTeamExactPoints !== null ? [{
             key: 'one-team-exact',
             label: 'Un equipo exacto',
             points: oneTeamExactPoints,
-            description: 'Acertas el marcador exacto de uno de los dos equipos.',
+            description: 'Acertás el marcador exacto de uno de los dos equipos.',
         }] : []),
         {
             key: 'exact',
             label: oneTeamExactPoints !== null ? 'Dos equipos exactos' : 'Marcador exacto',
             points: exactPoints,
             description: oneTeamExactPoints !== null
-                ? 'Clavas el marcador completo de ambos equipos.'
-                : 'Acertas el resultado exacto del partido.',
+                ? 'Clavás el marcador completo de ambos equipos.'
+                : 'Acertás el resultado exacto del partido.',
         },
         // Solo rugby: bonus relativo a quien más cerca quede de la diferencia real.
         ...(toSafeString(competitionRow.sport_id).toLowerCase().includes('rugby') ? [{
             key: 'closest-margin',
-            label: 'Diferencia mas cercana',
+            label: 'Diferencia más cercana',
             points: 1,
-            description: 'Si sos el que mas cerca queda de la diferencia real del partido, sumas 1 punto.',
+            description: 'Si sos el que más cerca queda de la diferencia real, sumás 1 punto.',
         }] : []),
     ];
 
@@ -705,8 +742,8 @@ function mapEvents(eventRows: AnyRow[], predictionRows: AnyRow[]) {
             id: toSafeString(row.id),
             homeLabel: toSafeString(row.home_label),
             awayLabel: toSafeString(row.away_label),
-            homeLogoUrl: toNullableString(toRecord(row.match_snapshot).homeLogoUrl),
-            awayLogoUrl: toNullableString(toRecord(row.match_snapshot).awayLogoUrl),
+            homeLogoUrl: toSnapshotLogoUrl(toRecord(row.match_snapshot).homeLogoUrl, toSafeString(row.home_label)),
+            awayLogoUrl: toSnapshotLogoUrl(toRecord(row.match_snapshot).awayLogoUrl, toSafeString(row.away_label)),
             startsAt,
             locksAt,
             status,
@@ -769,8 +806,8 @@ async function getLocalBaseMatches(admin: LooseMutationClient, tournamentId: str
             status,
             score,
             round_label,
-            home_club:clubs!matches_home_club_id_fkey(name, short_name, logo_url),
-            away_club:clubs!matches_away_club_id_fkey(name, short_name, logo_url)
+            home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url),
+            away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url)
         `)
         .eq('tournament_id', tournamentId)
         .order('date_time', { ascending: true });
@@ -799,8 +836,8 @@ async function getLocalBaseMatches(admin: LooseMutationClient, tournamentId: str
             officialResult: buildOfficialResultFromScores(homeScore, awayScore),
             matchSnapshot: {
                 roundLabel: toNullableString(row.round_label),
-                homeLogoUrl: resolveStoredLogo(homeClub) || toNullableString(resolveTeamLogo(homeClub)),
-                awayLogoUrl: resolveStoredLogo(awayClub) || toNullableString(resolveTeamLogo(awayClub)),
+                homeLogoUrl: resolveStoredLogo(homeClub) || toLogoUrl(resolveTeamLogo(homeClub)),
+                awayLogoUrl: resolveStoredLogo(awayClub) || toLogoUrl(resolveTeamLogo(awayClub)),
                 score,
                 sourceMatchStatus: toSafeString(row.status) || 'scheduled',
             },
@@ -840,8 +877,8 @@ function mapEspnEventToBaseMatch(event: AnyRow, tournamentId: string): BaseMatch
             countryName: toNullableString(event.country_name),
             roundLabel: roundNumber !== null ? `Fecha ${roundNumber}` : null,
             sport: 'football',
-            homeLogoUrl: toNullableString(event.home_team_logo) || toNullableString(homeTeam.logo),
-            awayLogoUrl: toNullableString(event.away_team_logo) || toNullableString(awayTeam.logo),
+            homeLogoUrl: toLogoUrl(event.home_team_logo) || toLogoUrl(homeTeam.logo),
+            awayLogoUrl: toLogoUrl(event.away_team_logo) || toLogoUrl(awayTeam.logo),
             score,
             sourceMatchStatus: status || 'scheduled',
         },
@@ -1034,8 +1071,8 @@ async function getExternalBaseMatches(
                 countryName: toNullableString(row.country_name),
                 roundLabel: toNullableString(row.round_label),
                 sport: toNullableString(row.sport),
-                homeLogoUrl: resolveStoredLogo(homeTeamLookup, homeTeam) || toNullableString(resolveTeamLogo(homeTeamLookup || homeTeam, homeTeam)),
-                awayLogoUrl: resolveStoredLogo(awayTeamLookup, awayTeam) || toNullableString(resolveTeamLogo(awayTeamLookup || awayTeam, awayTeam)),
+                homeLogoUrl: resolveStoredLogo(homeTeamLookup, homeTeam) || toLogoUrl(resolveTeamLogo(homeTeamLookup || homeTeam, homeTeam)),
+                awayLogoUrl: resolveStoredLogo(awayTeamLookup, awayTeam) || toLogoUrl(resolveTeamLogo(awayTeamLookup || awayTeam, awayTeam)),
                 score,
                 sourceMatchStatus: toSafeString(row.status) || 'scheduled',
             },
@@ -1133,8 +1170,8 @@ async function getFlashscoreExternalBaseMatches(
                 countryName: toNullableString(externalTournament.country),
                 roundLabel: toNullableString(match.round_label || match.round || match.stage),
                 sport: toNullableString(externalTournament.sport),
-                homeLogoUrl: resolveStoredLogo(homeTeam) || toNullableString(resolveTeamLogo(homeTeam, homeTeam)),
-                awayLogoUrl: resolveStoredLogo(awayTeam) || toNullableString(resolveTeamLogo(awayTeam, awayTeam)),
+                homeLogoUrl: resolveStoredLogo(homeTeam) || toLogoUrl(resolveTeamLogo(homeTeam, homeTeam)),
+                awayLogoUrl: resolveStoredLogo(awayTeam) || toLogoUrl(resolveTeamLogo(awayTeam, awayTeam)),
                 score: score.rawScore,
                 sourceMatchStatus: toSafeString(match.status || match.state || match.match_status) || 'scheduled',
             },
@@ -1285,15 +1322,30 @@ async function syncCompetitionBaseEvents(admin: LooseMutationClient, competition
         const operations: Array<PromiseLike<MutationResult>> = [];
 
         if (inserts.length) {
-            // Upsert en vez de insert: dos syncs concurrentes podían insertar el mismo
-            // evento externo dos veces. El índice único
-            // prode_events_competition_external_unique (migración 20260701090300)
-            // respalda el onConflict; para eventos locales las columnas externas son NULL
-            // y nunca conflictúan, así que se comportan como insert normal.
+            // Upsert en vez de insert: dos syncs concurrentes podían insertar el
+            // mismo evento dos veces.
+            //
+            // Va SIN `onConflict`, y no es un olvido. Los dos índices que
+            // protegen esta tabla son PARCIALES
+            // (idx_prode_events_unique_external ... WHERE external_match_id IS
+            // NOT NULL, e idx_prode_events_unique_local ... WHERE
+            // local_match_id IS NOT NULL), y un índice parcial sólo puede
+            // arbitrar un ON CONFLICT si la sentencia repite su WHERE — cosa
+            // que PostgREST no emite. Nombrar las columnas hacía que Postgres
+            // rechazara el target con 42P10 y que este sync fallara entero:
+            // acá no hay fallback, el error sube y corta la sincronización.
+            //
+            // Sin target, Postgres resuelve contra CUALQUIER índice único, así
+            // que además cubre las dos carreras y no sólo la externa: `inserts`
+            // trae eventos locales y externos mezclados, y el onConflict
+            // anterior sólo nombraba la clave externa.
+            //
+            // DO NOTHING es lo que corresponde: una fila llega acá porque no
+            // existía cuando se leyó. Si existe al escribir, la creó otro sync
+            // recién y no hay nada que pisar — el próximo pasa por la rama de
+            // update.
             operations.push(
-                admin.from('prode_events').upsert(inserts, {
-                    onConflict: 'competition_id,external_provider,external_match_id',
-                }),
+                admin.from('prode_events').upsert(inserts, { ignoreDuplicates: true }),
             );
         }
 

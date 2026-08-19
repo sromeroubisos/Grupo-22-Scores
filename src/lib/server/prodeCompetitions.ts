@@ -4,9 +4,11 @@ import { getProdeSourceSummary, normalizeProdeSourceBinding } from '@/lib/prode/
 import { isFootballSport } from '@/lib/externalProviderPolicy';
 import { SUPPORTED_ESPN_FOOTBALL_LEAGUES, toEspnFootballTournamentId } from '@/lib/services/espnFootball';
 import { buildEspnFootballTournaments } from '@/lib/data/tournaments/espnFootballCatalog';
+import { buildTeamLogoProxyUrl, normalizeLogoUrl } from '@/lib/utils/logoUrl';
 import type {
     ProdeBaseCompetitionOption,
     ProdeCompetitionEventStats,
+    ProdeSourceBinding,
     ProdePrivateLeagueSummary,
     PublicProdeCompetition,
     PublicProdeCompetitionDetail,
@@ -229,10 +231,80 @@ function buildMemberStatsMap(rows: AnyRow[]) {
     return memberMap;
 }
 
+// Las competencias donde ya juega el usuario de la sesion, sacadas de las MISMAS
+// filas que se recorren para contar participantes. Sin `viewerId` devuelve un set
+// vacio y el lobby cae al modo explorar.
+function buildViewerMembershipSet(rows: AnyRow[], viewerId: string | null | undefined) {
+    const memberships = new Set<string>();
+    if (!viewerId) return memberships;
+
+    rows.forEach((row) => {
+        if (toSafeString(row.user_id) !== viewerId) return;
+
+        const competitionId = toSafeString(row.competition_id);
+        if (competitionId) memberships.add(competitionId);
+    });
+
+    return memberships;
+}
+
+// `metadata` se manda entero al cliente, y adentro viaja el logo del torneo base que
+// el asistente de ligas privadas guardó como data: URI. Son 2,77 MB repartidos en 20
+// de las 38 competencias — el 99% del payload del lobby — para un dato que el lobby
+// no dibuja: de metadata solo lee `featured`.
+//
+// No listamos qué campos conservar (metadata es abierta por diseño y una lista blanca
+// se desactualiza sola): sacamos las imágenes embebidas donde estén y dejamos pasar
+// el resto de la estructura intacta.
+function stripEmbeddedImages(value: unknown): unknown {
+    if (typeof value === 'string') {
+        return value.startsWith('data:image') ? null : value;
+    }
+
+    if (Array.isArray(value)) {
+        return value.map(stripEmbeddedImages);
+    }
+
+    if (value && typeof value === 'object') {
+        return Object.fromEntries(
+            Object.entries(value as Record<string, unknown>).map(([key, item]) => [key, stripEmbeddedImages(item)]),
+        );
+    }
+
+    return value;
+}
+
+/**
+ * Arma la URL del logo de una competencia.
+ *
+ * No consulta nada: el proxy ya sabe resolver `entity=tournament` contra
+ * `tournaments` y `external_tournaments`, así que alcanza con darle el id del
+ * torneo base. Eso evita dos consultas por carga del lobby y, sobre todo, evita
+ * traer los data: URI de 70 KB al cliente.
+ *
+ * El `fallback` sale de `metadata.baseCompetition.logoUrl`, que para las
+ * competencias externas es una URL de CDN de verdad. Para las locales llega en
+ * null (lo dejó así `stripEmbeddedImages`) y el proxy busca por su cuenta.
+ */
+function buildCompetitionLogoUrl(row: AnyRow, binding: ProdeSourceBinding, metadata: Record<string, unknown>) {
+    const tournamentKey = binding.localTournamentId || binding.externalTournamentId;
+    if (!tournamentKey) return null;
+
+    const baseCompetition = toRecord(metadata.baseCompetition);
+
+    return buildTeamLogoProxyUrl({
+        key: tournamentKey,
+        entity: 'tournament',
+        name: toSafeString(row.name),
+        fallback: normalizeLogoUrl(baseCompetition.logoUrl),
+    });
+}
+
 function mapCompetition(
     row: AnyRow,
     statsMap: Map<string, ProdeCompetitionEventStats>,
     memberStatsMap: Map<string, { totalMembers: number }>,
+    viewerMemberships: Set<string> = new Set(),
 ): PublicProdeCompetition {
     const binding = normalizeProdeSourceBinding({
         source_type: row.source_type,
@@ -240,6 +312,8 @@ function mapCompetition(
         external_provider: row.external_provider,
         external_tournament_id: row.external_tournament_id,
     });
+
+    const metadata = stripEmbeddedImages(toRecord(row.metadata)) as Record<string, unknown>;
 
     return {
         id: toSafeString(row.id),
@@ -254,9 +328,11 @@ function mapCompetition(
         predictionLeadMinutes: toFiniteNumber(row.prediction_lead_minutes),
         startAt: toNullableString(row.start_at),
         endAt: toNullableString(row.end_at),
-        metadata: toRecord(row.metadata),
+        metadata,
+        logoUrl: buildCompetitionLogoUrl(row, binding, metadata),
         stats: statsMap.get(toSafeString(row.id)) || getDefaultStats(),
         members: memberStatsMap.get(toSafeString(row.id)) || getDefaultMemberStats(),
+        viewerIsMember: viewerMemberships.has(toSafeString(row.id)),
     };
 }
 
@@ -547,7 +623,7 @@ async function getCompetitionRows(filter?: { slug?: string }) {
     return query;
 }
 
-export async function listPublicProdeCompetitions(): Promise<SchemaStatus<PublicProdeCompetition[]>> {
+export async function listPublicProdeCompetitions(viewerId?: string | null): Promise<SchemaStatus<PublicProdeCompetition[]>> {
     const { data: competitionRows, error } = await getCompetitionRows();
 
     if (error) {
@@ -571,7 +647,7 @@ export async function listPublicProdeCompetitions(): Promise<SchemaStatus<Public
             .in('competition_id', competitionIds),
         supabase
             .from('prode_competition_members')
-            .select('competition_id')
+            .select('competition_id, user_id')
             .in('competition_id', competitionIds)
             .eq('status', 'active'),
     ]);
@@ -585,10 +661,11 @@ export async function listPublicProdeCompetitions(): Promise<SchemaStatus<Public
 
     const statsMap = buildStatsMap((eventRows || []) as AnyRow[]);
     const memberStatsMap = buildMemberStatsMap((memberRows || []) as AnyRow[]);
+    const viewerMemberships = buildViewerMembershipSet((memberRows || []) as AnyRow[], viewerId);
 
     return {
         schemaReady: true,
-        data: competitions.map((competition) => mapCompetition(competition, statsMap, memberStatsMap)),
+        data: competitions.map((competition) => mapCompetition(competition, statsMap, memberStatsMap, viewerMemberships)),
     };
 }
 

@@ -44,41 +44,93 @@
  * ventanas de jornada y el barrido diario: la ventana levanta el 76%, el barrido
  * la cola de correcciones.
  *
+ * La ventana del fin de semana abre a las 18 UTC —15:00 en Buenos Aires— y no a
+ * las 21, y esa hora se pagó con una fecha entera. Estaba calibrada sobre la
+ * MEDIANA, que es 19,5 h y cae cómoda adentro; el problema es que la mediana
+ * esconde la cola de la izquierda. Medido sobre los 6.424 resultados de 2026: de
+ * los 4.747 que URBA carga el MISMO día del partido, el 26% entra antes de las
+ * 18:00 BA, y sólo la hora de las 16:00 son 966 partidos (20,3%). O sea que uno
+ * de cada cuatro resultados ya estaba publicado en urba.org.ar cuando este cron
+ * todavía no había abierto los ojos, y ahí se quedaba hasta la noche.
+ *
+ * El caso testigo es la Fecha 18 del Top 14: URBA la cargó a las 17:24 del
+ * sábado 15/8, treinta y seis minutos antes de la primera corrida del día. La
+ * carga más temprana que se midió en toda la temporada es a las 15:00 BA, así
+ * que la ventana abre ahí y no antes — correrla más temprano son pedidos a una
+ * API que todavía no tiene nada para dar.
+ *
  * ── Qué dispara, y qué no hace falta disparar ──────────────────────────────
- * De los tres sistemas que cuelgan de un partido, sólo UNO necesita que lo
- * llamen:
+ * De los cuatro sistemas que cuelgan de un partido, sólo UNO necesita que lo
+ * llamen desde acá:
  *
  *  · notificaciones — las crea el trigger `trg_g22_notify_match_finished`, que es
  *    `AFTER UPDATE OF status`. Con un UPDATE alcanza, venga de donde venga. (Por
  *    eso la carga inicial, que fue INSERT, no generó ninguna.)
  *  · prode — el cron `/api/cron/prode-scoring` sondea `matches` cada 5 minutos.
- *  · ranking — NO se entera solo. Hay que llamarlo, y con el snapshot PREVIO:
- *    `syncClubRankingsForMatchUpdate(id)` sin él calcula `hasKnownMatchChange =
- *    false` y, si el partido ya tenía aplicación, no hace nada y sigue de largo.
- *    Una corrección de resultado quedaría ignorada en silencio — y el 24% de los
- *    partidos se corrige después de las 24 h.
+ *  · ranking — lo rehace entero el cron de los martes a las 00:00
+ *    (`/api/cron/weekly-club-ranking`), leyendo los partidos terminados de la
+ *    temporada. Acá se sincronizaba partido por partido: un domingo de 289
+ *    partidos eran 289 sincronizaciones, cada una con su lectura previa. Y como
+ *    la cuenta semanal se rehace desde cero, la cola de correcciones —el 24% de
+ *    los partidos se corrige después de las 24 h— entra sola.
+ *  · TABLA DE POSICIONES — no se entera sola y hay que llamarla. `matches` es la
+ *    fuente, pero `tournament_standings` es una tabla MATERIALIZADA: la escribe
+ *    `recalculatePhaseStandingsScopes` y nada más. Las rutas que editan un
+ *    partido a mano la llaman por `recalcAffectedPhases`; este cron escribía
+ *    directo contra `matches` y no llamaba a nadie, así que el resultado entraba
+ *    y la tabla publicada se quedaba en la última corrida manual.
+ *
+ *    Se recalcula por torneo y ADENTRO del mismo presupuesto que la lectura, no
+ *    al final de la corrida: el corte por tiempo se toma antes de empezar un
+ *    torneo nuevo, nunca entre escribir sus partidos y recalcular su tabla. Así
+ *    no existe el estado "resultado escrito, tabla sin rehacer" — lo que no
+ *    entró en esta pasada sigue pendiente y lo levanta la siguiente con su diff
+ *    intacto.
  *
  * No se usa `FixtureService.updateMatch`: hace ~15 sondeos de columnas por
  * llamada, y un domingo de 289 partidos son ~4.300 round-trips de más.
  */
 import { NextRequest, NextResponse } from 'next/server';
 
-import { fetchChampionship, fetchChampionshipList } from '@/lib/integrations/urba/client';
-import { categoriaDeTorneoUrba, parseUrbaId, subcategoriaDeTorneoUrba } from '@/lib/integrations/urba/externalId';
+import { fetchChampionship, fetchChampionshipList, HTTP_FORMA_INESPERADA } from '@/lib/integrations/urba/client';
+import {
+    buildUrbaMatchExternalId,
+    categoriaDeTorneoUrba,
+    parseUrbaId,
+    subcategoriaDeTorneoUrba,
+} from '@/lib/integrations/urba/externalId';
 import { planTournamentMatches, type ExistenteEnBase } from '@/lib/integrations/urba/planMatches';
-import { construirPatch, rotarPorReloj } from '@/lib/integrations/urba/syncPlan';
+import { construirPatch, parteDelBarrido, PARTES_DEL_BARRIDO, rotarPorReloj } from '@/lib/integrations/urba/syncPlan';
 import { parsearAnioPedido, PRIMER_ANIO_URBA, temporadaEnCurso } from '@/lib/integrations/urba/temporada';
-import { getMatchRankingSnapshot, syncClubRankingsForMatchUpdate } from '@/lib/server/clubRankings';
 import { invalidateMatchesFeedCaches } from '@/lib/server/matchesFeedInvalidation';
+import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-/** Corte por tiempo, no por cantidad: un pedido a URBA promedia 617 ms y hay
- *  torneos de 437 KB. Con 45 s queda margen para el cierre dentro de los 60. */
-const PRESUPUESTO_MS = 45_000;
-const POR_TANDA = 50;
+/**
+ * Corte por tiempo, no por cantidad: un pedido a URBA promedia 617 ms —250 de
+ * pausa entre pedidos y el resto de red— y hay torneos de 437 KB.
+ *
+ * No son 60 porque el corte se toma ANTES de empezar un torneo, nunca en el
+ * medio: el último puede pasarse de largo lo que le lleve escribir sus partidos
+ * y rehacer su tabla. Medido, el torneo más caro de una jornada —el que finaliza
+ * seis partidos y recalcula su tabla— son unos 3 s, y una corrida con el corte
+ * en 45 s terminó en 47,8. Con 48 el peor caso queda en ~52 y sobran ocho
+ * segundos contra el techo.
+ */
+const PRESUPUESTO_MS = 48_000;
+
+/**
+ * Cuántos lugares corre el arranque de una corrida a la siguiente.
+ *
+ * Es una MEDIDA, no un cupo: una corrida de jornada con recálculo de posiciones
+ * leyó once torneos en 47 s. Ver `rotarPorReloj` — el número tiene que parecerse
+ * a lo que una corrida alcanza a hacer, porque un paso más grande que eso deja
+ * torneos sin visitar por una vuelta entera.
+ */
+const PASO_DE_ROTACION = 11;
 
 function autorizado(request: NextRequest): boolean {
     const secret = process.env.CRON_SECRET;
@@ -93,13 +145,18 @@ function autorizado(request: NextRequest): boolean {
 }
 
 /**
- * El `schedule` con el que está declarado el barrido en `vercel.json`.
+ * Los `schedule` con los que está declarado el barrido en `vercel.json`.
  *
- * Se compara literal contra el header `x-vercel-cron-schedule`, así que si se
- * cambia allá hay que cambiarlo acá. Es feo tener el dato en dos lados; la
+ * Son tres, una hora entre cada uno, y esa separación no es de comodidad: de la
+ * HORA sale qué parte del catálogo barre cada corrida (ver `parteDelBarrido`),
+ * así que las tres juntas cubren las tres partes el mismo día. Sacar una deja un
+ * tercio de los torneos esperando al día siguiente.
+ *
+ * Se comparan literal contra el header `x-vercel-cron-schedule`, así que si se
+ * cambian allá hay que cambiarlos acá. Es feo tener el dato en dos lados; la
  * alternativa era peor, y está explicada en `resolverScope`.
  */
-const SCHEDULE_BARRIDO = '0 9 * * *';
+const SCHEDULES_BARRIDO = new Set(['0 9 * * *', '0 10 * * *', '0 11 * * *']);
 
 /**
  * De dónde sale el `scope`, y por qué no alcanza con el query string.
@@ -133,7 +190,7 @@ function resolverScope(url: URL, request: NextRequest): {
 
     const schedule = request.headers.get('x-vercel-cron-schedule');
     if (schedule) {
-        return { scope: schedule === SCHEDULE_BARRIDO ? 'barrido' : 'jornada', scopeDesde: 'schedule' };
+        return { scope: SCHEDULES_BARRIDO.has(schedule) ? 'barrido' : 'jornada', scopeDesde: 'schedule' };
     }
 
     return { scope: 'jornada', scopeDesde: 'default' };
@@ -155,6 +212,44 @@ export async function GET(request: NextRequest) {
     const { scope, scopeDesde } = resolverScope(url, request);
     const enSeco = url.searchParams.get('dry') === '1';
     const incluirOcultos = url.searchParams.get('ocultos') === '1';
+    /**
+     * Los partidos que URBA sacó de su fixture se borran, y se borran SOLOS.
+     *
+     * La regla del conector es que manda la API: un partido que URBA ya no lista
+     * no existe. Cuando rehacen un fixture —borran las fechas publicadas y las
+     * vuelven a crear con ids nuevos— dejarlos era quedarse con el viejo y el
+     * nuevo a la vez: `urba:2025278` tenía 55 partidos que la API no lista y 45
+     * distintos que sí, sin un solo id en común.
+     *
+     * Automático no quiere decir sin frenos, y son tres:
+     *  · un partido con resultado NO se borra nunca, ni siquiera acá: si tiene
+     *    marcador, o lo cargó una persona o URBA lo movió de torneo, y las dos
+     *    cosas piden que las mire alguien. Se reportan y quedan;
+     *  · un torneo que llega sin un solo partido no cuenta como fixture vacío
+     *    (ver `fixtureVacioSospechoso`);
+     *  · un payload que no se entiende ni siquiera llega hasta acá: el cliente lo
+     *    corta antes (ver `HTTP_FORMA_INESPERADA`).
+     *
+     * `&huerfanos=conservar` lo apaga para una corrida puntual.
+     */
+    const borrarHuerfanos = url.searchParams.get('huerfanos') !== 'conservar';
+    /**
+     * Modo recálculo: rehacer la tabla de todos los torneos en alcance y NO
+     * pedirle nada a URBA.
+     *
+     * El cron recalcula lo que toca, que es lo correcto para la rotación: una
+     * tabla que nadie movió no necesita rehacerse. Pero eso deja una puerta
+     * cerrada — una tabla que quedó vieja por algo que pasó FUERA del conector
+     * no se arregla sola NUNCA, porque el partido ya está bien y no hay diff que
+     * dispare nada. Encontrado así: los partidos de Primera "A" coincidían uno a
+     * uno con la API y su tabla publicada era del 11 de julio, un mes vieja.
+     *
+     * No le pide nada a URBA a propósito, y no es un ahorro: es que no hay nada
+     * que preguntar. La tabla sale de `matches`, que ya está sincronizada. Sin el
+     * pedido —850 ms por torneo entre la pausa de cortesía y la red— una parte
+     * entera entra en una sola corrida en vez de en cuatro.
+     */
+    const soloRecalcular = url.searchParams.get('posiciones') === 'todas';
 
     // El año pedido. Un `?anio` inválido es 400 y no una corrida vacía: devolver
     // 0 torneos escondería el error de tipeo detrás de un 200 en verde.
@@ -177,7 +272,22 @@ export async function GET(request: NextRequest) {
     const errors: string[] = [];
     let torneosLeidos = 0;
     let finalizados = 0;      // los que pasan a 'final' en esta pasada
-    let rankingSincronizado = 0;
+    let participantesCreados = 0;
+    let tablasRecalculadas = 0;   // fases de posiciones rehechas
+    let filasDePosiciones = 0;    // filas escritas en tournament_standings
+    let huerfanosBorrados = 0;
+    let cortadoPorPresupuesto = false;
+    /**
+     * Partidos que están en la base y URBA ya no lista para ese torneo.
+     *
+     * Pasa cuando URBA rehace un fixture: borra las fechas publicadas y las
+     * vuelve a crear con ids nuevos. Sin esto el conector daba de alta las
+     * nuevas y dejaba las viejas, o sea que el torneo terminaba con el fixture
+     * DUPLICADO y la tabla de posiciones contando dos veces. Medido el
+     * 2026-08-09: `urba:2025278` tenía 55 partidos en base y 45 distintos en la
+     * API, sin un solo id en común.
+     */
+    const huerfanos: Array<{ torneo: string; external_id: string; status: string | null; jugado: boolean }> = [];
     // El torneo nuevo NO se crea: se reporta. Pero se reporta con la categoría y
     // la subcategory ya derivadas, para que quien lo dé de alta no las invente:
     // una `subcategory` en null lo deja fuera de la navegación por grados sin
@@ -242,12 +352,25 @@ export async function GET(request: NextRequest) {
         if (scope === 'jornada') {
             const hoy = diaBA(new Date());
             const ayer = diaBA(new Date(Date.now() - 86_400_000));
-            const { data: conPartido } = await supabase
+            // El rango va con un día de más de cada lado porque los bordes se
+            // comparan en UTC y el filtro fino, abajo, en hora de Buenos Aires:
+            // un partido del sábado a las 21 BA es domingo 00:00Z, y con el
+            // rango ajustado al día UTC se caía del listado.
+            const desde = new Date(Date.parse(`${ayer}T00:00:00.000Z`) - 86_400_000).toISOString();
+            const hasta = new Date(Date.parse(`${hoy}T00:00:00.000Z`) + 2 * 86_400_000).toISOString();
+            const { data: conPartido, error: errJornada } = await supabase
                 .from('matches')
                 .select('tournament_id, date_time')
                 .like('external_id', 'urba:%')
-                .gte('date_time', `${ayer}T00:00:00.000Z`)
-                .lt('date_time', `${hoy}T23:59:59.999Z`);
+                .gte('date_time', desde)
+                .lt('date_time', hasta)
+                // El default de PostgREST son 1.000 filas y un domingo grande de
+                // URBA son 289: hoy sobra, pero el corte silencioso dejaría
+                // torneos afuera sin un solo aviso, así que va explícito.
+                .limit(5000);
+            // Un error acá dejaba `juegan` vacío, y la corrida respondía ok con
+            // cero torneos en alcance: idéntica a un domingo sin partidos.
+            if (errJornada) throw new Error(`no se pudo resolver la jornada: ${errJornada.message}`);
             const juegan = new Set(
                 ((conPartido ?? []) as Array<{ tournament_id: string; date_time: string }>)
                     .filter((m) => [hoy, ayer].includes(diaBA(m.date_time)))
@@ -255,11 +378,59 @@ export async function GET(request: NextRequest) {
             );
             candidatos = enAlcance.filter((t) => juegan.has(t.id));
         } else {
-            // Barrido en tercios: 134 torneos son ~116 s y el techo son 60.
-            const tercio = Math.floor(Date.now() / 3_600_000) % 3;
-            candidatos = enAlcance.filter((t) => (parseUrbaId(t.external_id) ?? 0) % 3 === tercio);
+            // Barrido por partes: 134 torneos son ~116 s y el techo son 60. La
+            // parte sale del DÍA — con la hora, y corriendo el barrido una vez
+            // por día, siempre caía la misma. Ver `parteDelBarrido`.
+            //
+            // `&parte=N` la fuerza. Existe para el día que haya que pasar por
+            // TODOS los torneos ya mismo —un arreglo del conector que cambia lo
+            // que se escribe, por ejemplo— sin esperar tres días a que el ciclo
+            // dé la vuelta. Un valor fuera de rango se ignora y manda el reloj:
+            // un tipeo no puede dejar el barrido barriendo la nada.
+            const pedida = Number(url.searchParams.get('parte'));
+            const parte = Number.isInteger(pedida) && pedida >= 0 && pedida < PARTES_DEL_BARRIDO
+                ? pedida
+                : parteDelBarrido(Date.now());
+            candidatos = enAlcance.filter(
+                (t) => (parseUrbaId(t.external_id) ?? 0) % PARTES_DEL_BARRIDO === parte,
+            );
         }
-        const tanda = rotarPorReloj(candidatos, POR_TANDA, Date.now());
+        /**
+         * El orden de la tanda.
+         *
+         * En la sincronización sale del reloj: no importa por dónde se empiece
+         * mientras todos entren en la vuelta (ver `rotarPorReloj`).
+         *
+         * En el modo recálculo, no. Ahí lo que se busca es sacarse de encima las
+         * tablas viejas, y la rotación por reloj sólo avanza cada 20 minutos: dos
+         * corridas seguidas rehacen las MISMAS trece y la cola no se mueve.
+         * Ordenando por la tabla más vieja primero, cada corrida ataca lo peor que
+         * queda y la siguiente encuentra otra cosa — converge sin depender de que
+         * pase el tiempo. El torneo sin una sola fila va primero de todos.
+         */
+        let tanda = rotarPorReloj(candidatos, PASO_DE_ROTACION, Date.now());
+        if (soloRecalcular) {
+            const masVieja = new Map<string, string>();
+            for (let desde = 0; ; desde += 1000) {
+                const { data, error } = await supabase
+                    .from('tournament_standings')
+                    .select('tournament_id, last_updated')
+                    .in('tournament_id', candidatos.map((t) => t.id))
+                    .range(desde, desde + 999);
+                if (error) throw new Error(`no se pudo leer la antigüedad de las tablas: ${error.message}`);
+                const filas = (data ?? []) as Array<{ tournament_id: string; last_updated: string | null }>;
+                for (const f of filas) {
+                    const previo = masVieja.get(f.tournament_id);
+                    const valor = f.last_updated ?? '';
+                    // La MÁS NUEVA del torneo: si una sola fase se rehizo hoy, el
+                    // torneo no es el más urgente de la lista.
+                    if (previo === undefined || valor > previo) masVieja.set(f.tournament_id, valor);
+                }
+                if (filas.length < 1000) break;
+            }
+            tanda = [...candidatos].sort((a, b) =>
+                (masVieja.get(a.id) ?? '').localeCompare(masVieja.get(b.id) ?? ''));
+        }
 
         // ── torneos nuevos: se avisan, NO se crean ──────────────────────────
         const lista = await fetchChampionshipList(ANIO);
@@ -275,13 +446,78 @@ export async function GET(request: NextRequest) {
                     subcategory: subcategoriaDeTorneoUrba(nombre),
                 });
             }
+            // El torneo nuevo no se crea solo —la publicación y la navegación las
+            // decide una persona—, pero tampoco puede quedar sólo en el JSON de
+            // una respuesta que nadie abre: un torneo que URBA agrega y acá no
+            // existe no se sincroniza nunca, y el cron sigue en verde.
+            if (torneosNuevos.length > 0) {
+                console.warn(`[urba-sync] URBA tiene ${torneosNuevos.length} torneos de ${ANIO} que no están en la base y NO se sincronizan: `
+                    + torneosNuevos.map((t) => `${t.urba_id} "${t.nombre}"`).join(' · '));
+            }
         } else {
-            errors.push(`no se pudo leer la lista de torneos de ${ANIO} (HTTP ${lista.status})`);
+            errors.push(lista.status === HTTP_FORMA_INESPERADA
+                ? `la lista de torneos de ${ANIO} llegó con una forma que el conector no entiende`
+                : `no se pudo leer la lista de torneos de ${ANIO} (HTTP ${lista.status})`);
+        }
+
+        /**
+         * El acantilado del 1 de enero.
+         *
+         * `temporadaEnCurso()` sale del reloj, así que el 1 de enero el cron pasa
+         * solo a la temporada nueva. Eso es lo que se quiere — pero los torneos de
+         * esa temporada los da de alta una persona, y hasta que lo haga la consulta
+         * devuelve CERO torneos, la tanda queda vacía, y `noSePudo` —que sólo mira
+         * `tanda.length > 0`— da false. O sea: el cron respondería `ok: true` con
+         * todo en cero, todos los días, hasta que alguien se diera cuenta.
+         *
+         * Con torneos en la lista de URBA y ninguno en la base, eso no es un día
+         * tranquilo: es una temporada sin cargar. Va en rojo.
+         */
+        const temporadaSinCargar = torneos.length === 0 && (lista.data?.length ?? 0) > 0;
+        if (temporadaSinCargar) {
+            errors.push(`no hay un solo torneo de ${ANIO} en la base y URBA publica ${lista.data?.length}. `
+                + 'La temporada nueva no se dio de alta: hasta que se cargue, el cron no tiene nada que sincronizar.');
         }
 
         // ── el goteo ────────────────────────────────────────────────────────
         for (const t of tanda) {
-            if (Date.now() - arrancoEn > PRESUPUESTO_MS) break;
+            // El corte va acá y en ningún otro lado: entre torneo y torneo, nunca
+            // entre escribir los partidos de uno y rehacer su tabla. Lo que no
+            // entra en esta pasada queda pendiente entero y la próxima lo ve igual.
+            if (Date.now() - arrancoEn > PRESUPUESTO_MS) { cortadoPorPresupuesto = true; break; }
+
+            // ── modo recálculo: la tabla sale de `matches`, no de URBA ──────
+            if (soloRecalcular) {
+                /**
+                 * Las fases se sacan de los PARTIDOS, no de `tournament_phases`.
+                 *
+                 * Un torneo puede tener una fase declarada y todavía vacía —el Top
+                 * 14 tiene "Playoffs" desde marzo y se juega en noviembre—, y
+                 * recalcularla no devuelve una tabla vacía: devuelve una tabla de
+                 * CEROS, una fila por participante. Recorriendo las fases
+                 * declaradas, este modo le publicó al Top 14 una tabla de playoffs
+                 * con catorce equipos en cero. El camino de la sincronización nunca
+                 * tuvo el problema porque sólo toca fases donde escribió algo.
+                 */
+                const { data: fasesRaw, error: errFases } = await supabase
+                    .from('matches').select('phase_id').eq('tournament_id', t.id)
+                    .not('phase_id', 'is', null).limit(2000);
+                if (errFases) { errors.push(`${t.external_id}: no se pudieron leer las fases (${errFases.message})`); continue; }
+                torneosLeidos++;
+                const conPartidos = [...new Set(((fasesRaw ?? []) as Array<{ phase_id: string }>).map((m) => m.phase_id))];
+                for (const f of conPartidos.map((id) => ({ id }))) {
+                    if (enSeco) { tablasRecalculadas++; continue; }
+                    try {
+                        const res = await recalculatePhaseStandingsScopes(t.id, f.id, 'general');
+                        if (!res.ok) { errors.push(`${t.external_id}: la tabla de la fase ${f.id} no se pudo recalcular`); continue; }
+                        tablasRecalculadas += res.scopes_recalculated;
+                        filasDePosiciones += res.rows_calculated;
+                    } catch (e) {
+                        errors.push(`${t.external_id}: el recálculo falló (${e instanceof Error ? e.message : String(e)})`);
+                    }
+                }
+                continue;
+            }
 
             const urbaId = parseUrbaId(t.external_id);
             const categoria = urbaId == null ? undefined : categoriaPorId.get(urbaId);
@@ -289,14 +525,27 @@ export async function GET(request: NextRequest) {
 
             // Sin caché de disco: acá el objetivo es justamente ver lo que cambió.
             const r = await fetchChampionship(urbaId);
-            if (!r.ok || !r.data) { errors.push(`${t.external_id}: HTTP ${r.status}`); continue; }
+            if (!r.ok || !r.data) {
+                // Un cambio de forma de la API se arregla tocando el conector y una
+                // caída se arregla esperando: el error tiene que decir cuál es.
+                errors.push(r.status === HTTP_FORMA_INESPERADA
+                    ? `${t.external_id}: URBA contestó algo que el conector no entiende (cambió la forma del payload)`
+                    : `${t.external_id}: HTTP ${r.status}`);
+                continue;
+            }
             torneosLeidos++;
 
             const { data: yaRaw, error: errYa } = await supabase
                 .from('matches')
-                .select('id, external_id, date_time, venue, status, score, round_label, phase_id, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated')
+                // `is_visible` se lee porque de él sale la visibilidad que hereda
+                // un partido nuevo. Faltaba en esta lista y se usaba abajo: el
+                // campo llegaba `undefined`, `visibleEnEsteTorneo` daba false
+                // siempre, y una fecha reprogramada entraba INVISIBLE en un
+                // torneo publicado. Sin error y sin aviso, que es lo peor.
+                .select('id, external_id, date_time, venue, status, score, round_label, phase_id, is_visible, home_base_points, away_base_points, home_bonus_points, away_bonus_points, points_autocalculated')
                 .eq('tournament_id', t.id)
-                .like('external_id', 'urba:%');
+                .like('external_id', 'urba:%')
+                .limit(2000);
             if (errYa) { errors.push(`${t.external_id}: no se pudieron leer los partidos (${errYa.message})`); continue; }
 
             const ya = (yaRaw ?? []) as Array<ExistenteEnBase & { id: string; external_id: string; phase_id: string | null; is_visible: boolean | null }>;
@@ -312,8 +561,12 @@ export async function GET(request: NextRequest) {
             // sin error y sin aviso.
             const visibleEnEsteTorneo = ya.some((m) => m.is_visible === true);
 
-            const { data: partsRaw } = await supabase
-                .from('tournament_participants').select('club_id').eq('tournament_id', t.id);
+            const { data: partsRaw, error: errParts } = await supabase
+                .from('tournament_participants').select('club_id').eq('tournament_id', t.id).limit(2000);
+            // Sin participantes el motor de posiciones descarta TODOS los partidos
+            // del torneo: leerlos mal no puede pasar por alto.
+            if (errParts) { errors.push(`${t.external_id}: no se pudieron leer los participantes (${errParts.message})`); continue; }
+
             const plan = planTournamentMatches({
                 championship: r.data as any,
                 tournamentId: t.id,
@@ -324,6 +577,29 @@ export async function GET(request: NextRequest) {
                 participantesYaEnBase: new Set(((partsRaw ?? []) as Array<{ club_id: string }>).map((p) => p.club_id)),
             });
 
+            // Las fases que este torneo va a tener que recalcular. Se junta acá,
+            // sobre los partidos que REALMENTE se escriben, y no al final sobre
+            // el torneo entero: recalcular una fase que no se tocó es leer toda
+            // su tabla para reescribirla igual.
+            const fasesTocadas = new Set<string>();
+
+            // ── participantes que faltan ────────────────────────────────────
+            // Un club que se suma al torneo entra en `tournament_participants` o
+            // no existe para la tabla: `StandingsEngine.buildTableRows` arma el
+            // mapa desde los participantes y DESCARTA el partido si le falta
+            // alguno de los dos, sin error. Esto se calculaba y no se escribía.
+            for (const p of plan.participantesCrear) {
+                if (enSeco) {
+                    participantesCreados++;
+                    detalle.push({ torneo: t.external_id, accion: 'participante', club_id: p.club_id });
+                    continue;
+                }
+                const { error } = await supabase.from('tournament_participants').insert([p]);
+                if (error) { errors.push(`${t.external_id}: no se pudo inscribir a ${p.club_id} (${error.message})`); continue; }
+                participantesCreados++;
+                if (faseDelTorneo) fasesTocadas.add(faseDelTorneo);
+            }
+
             // altas
             for (const fila of plan.crear) {
                 if (enSeco) { written++; detalle.push({ torneo: t.external_id, accion: 'crear', external_id: fila.external_id }); continue; }
@@ -332,6 +608,7 @@ export async function GET(request: NextRequest) {
                 }]);
                 if (error) { errors.push(`${fila.external_id}: alta falló (${error.message})`); continue; }
                 written++;
+                if (faseDelTorneo) fasesTocadas.add(faseDelTorneo);
             }
 
             // actualizaciones
@@ -346,27 +623,65 @@ export async function GET(request: NextRequest) {
                     continue;
                 }
 
-                // El snapshot PREVIO, antes de escribir. Es lo que le permite al
-                // ranking distinguir "cambió" de "no lo sé", y sin él una corrección
-                // sobre un partido ya aplicado se ignora sin ruido.
-                const previo = actual?.id ? await getMatchRankingSnapshot(actual.id) : null;
-
                 const { error } = await supabase.from('matches')
                     .update(patch.patch).eq('external_id', patch.external_id);
                 if (error) { errors.push(`${patch.external_id}: update falló (${error.message})`); continue; }
                 updated++;
                 if (patch.seFinaliza) finalizados++;
+                // La fase del partido que se tocó, que puede no ser la del torneo:
+                // un torneo con fase regular y playoff tiene dos tablas.
+                if (actual?.phase_id) fasesTocadas.add(actual.phase_id);
 
-                if (actual?.id) {
-                    try {
-                        await syncClubRankingsForMatchUpdate(actual.id, previo);
-                        rankingSincronizado++;
-                    } catch (e) {
-                        errors.push(`${patch.external_id}: el ranking no se pudo sincronizar (${e instanceof Error ? e.message : String(e)})`);
-                    }
-                }
+                // El ranking ya no se sincroniza partido por partido: lo levanta
+                // entero el cron del martes a las 00:00. Un barrido de URBA que
+                // finalizaba 340 partidos disparaba 340 sincronizaciones, cada una
+                // con su propia lectura previa.
             }
             skipped += plan.sinCambios;
+
+            // ── lo que URBA sacó del fixture ────────────────────────────────
+            const idsDeUrba = new Set<string>();
+            for (const ronda of (r.data.rounds ?? [])) {
+                for (const m of (ronda.matches ?? [])) idsDeUrba.add(buildUrbaMatchExternalId(m.id));
+            }
+            // La guarda que hace que esto no sea un arma. Un torneo que llega SIN
+            // un solo partido y tiene partidos en la base no es un fixture que se
+            // vació: es una respuesta rara —o una API que cambió— y tomarla al pie
+            // de la letra convierte el torneo entero en "huérfano". Con
+            // `huerfanos=borrar` eso sería borrarlo. El caso legítimo —URBA saca
+            // fechas— siempre deja las demás en pie.
+            const fixtureVacioSospechoso = idsDeUrba.size === 0 && ya.length > 0;
+            if (fixtureVacioSospechoso) {
+                errors.push(`${t.external_id}: URBA devolvió el torneo sin un solo partido y en la base hay ${ya.length}. No se marca ningún huérfano.`);
+            }
+            const sobran = fixtureVacioSospechoso ? [] : ya.filter((m) => !idsDeUrba.has(m.external_id));
+            for (const m of sobran) {
+                const jugado = String(m.status ?? '').toLowerCase() === 'final';
+                huerfanos.push({ torneo: t.external_id, external_id: m.external_id, status: m.status, jugado });
+                // Un partido con resultado no se borra ni con el flag: si tiene
+                // marcador, o lo cargó una persona o URBA lo publicó y después lo
+                // movió de torneo. Las dos cosas piden que las mire alguien.
+                if (!borrarHuerfanos || jugado || enSeco) continue;
+                const { error } = await supabase.from('matches').delete().eq('id', m.id);
+                if (error) { errors.push(`${m.external_id}: no se pudo borrar el huérfano (${error.message})`); continue; }
+                huerfanosBorrados++;
+                if (m.phase_id) fasesTocadas.add(m.phase_id);
+            }
+
+            // ── y la tabla de posiciones de este torneo ─────────────────────
+            // Va acá, con los partidos de ESTE torneo ya escritos, y se espera.
+            // `tournament_standings` es materializada: sin esta llamada el
+            // resultado entra en `matches` y la tabla publicada no se mueve.
+            for (const phaseId of fasesTocadas) {
+                try {
+                    const res = await recalculatePhaseStandingsScopes(t.id, phaseId, 'general');
+                    if (!res.ok) { errors.push(`${t.external_id}: la tabla de la fase ${phaseId} no se pudo recalcular`); continue; }
+                    tablasRecalculadas += res.scopes_recalculated;
+                    filasDePosiciones += res.rows_calculated;
+                } catch (e) {
+                    errors.push(`${t.external_id}: el recálculo de posiciones falló (${e instanceof Error ? e.message : String(e)})`);
+                }
+            }
         }
 
         if (!enSeco && (written > 0 || updated > 0)) {
@@ -375,16 +690,21 @@ export async function GET(request: NextRequest) {
         }
 
         const elapsed = Date.now() - arrancoEn;
-        console.log(`[urba-sync] anio=${ANIO}${esHistorico ? ' (HISTÓRICO, a pedido)' : ''} scope=${scope}(${scopeDesde})${enSeco ? ' (en seco)' : ''} torneos=${torneosLeidos}/${tanda.length} written=${written} updated=${updated} skipped=${skipped} errors=${errors.length} en ${elapsed}ms`);
+        console.log(`[urba-sync] anio=${ANIO}${esHistorico ? ' (HISTÓRICO, a pedido)' : ''} scope=${scope}(${scopeDesde})${enSeco ? ' (en seco)' : ''} torneos=${torneosLeidos}/${tanda.length} written=${written} updated=${updated} skipped=${skipped} tablas=${tablasRecalculadas} filas=${filasDePosiciones} huerfanos=${huerfanos.length} errors=${errors.length} en ${elapsed}ms${cortadoPorPresupuesto ? ' (cortado por presupuesto)' : ''}`);
 
         // El trabajo no se pudo hacer: 500. Un contador en verde con la escritura
-        // caída es peor que un cron en rojo — de eso salió la regla.
-        const noSePudo = torneosLeidos === 0 && tanda.length > 0;
+        // caída es peor que un cron en rojo — de eso salió la regla. La temporada
+        // sin cargar entra por la misma puerta: ahí no hay nada que leer, y por
+        // eso mismo `tanda.length > 0` no lo agarra.
+        const noSePudo = (torneosLeidos === 0 && tanda.length > 0) || temporadaSinCargar;
         return NextResponse.json({
             ok: !noSePudo && errors.length === 0,
             // `scopeDesde` dice de dónde salió el scope. Si un día dice "schedule",
             // Vercel dejó de pasar el query string y el header lo salvó.
             scope, scopeDesde, dry: enSeco,
+            // Que la respuesta diga que esta corrida NO habló con URBA: si no,
+            // un `updated: 0` se lee como "no cambió nada allá".
+            ...(soloRecalcular ? { modo: 'recalculo (sin pedirle nada a URBA)' } : {}),
             // Que la respuesta diga QUÉ temporada se sincronizó, siempre. Sin esto,
             // una corrida sobre el año equivocado se ve idéntica a una correcta.
             anio: ANIO,
@@ -403,7 +723,27 @@ export async function GET(request: NextRequest) {
             torneosLeidos,
             torneosOcultosSalteados: ocultosSalteados,
             finalizados,
-            rankingSincronizado,
+            participantesCreados,
+            // Lo que hace que el resultado llegue a la tabla publicada. Un
+            // `updated > 0` con `tablasRecalculadas: 0` significa que los partidos
+            // entraron y las posiciones se quedaron atrás: es el síntoma exacto
+            // del bug que este contador existe para hacer visible.
+            tablasRecalculadas,
+            filasDePosiciones,
+            // `true` cuando quedaron torneos sin mirar. No es un error: la próxima
+            // corrida los toma. Sí es la señal de que el presupuesto quedó corto
+            // si aparece en todas.
+            cortadoPorPresupuesto,
+            huerfanos: huerfanos.slice(0, 100),
+            huerfanosTotal: huerfanos.length,
+            huerfanosBorrados,
+            // Los que quedaron son los que tienen resultado, y ésos no se borran
+            // solos por diseño. Que la respuesta los nombre: es lo único de todo
+            // esto que pide que lo mire una persona.
+            ...(huerfanos.some((h) => h.jugado) ? {
+                notaHuerfanos: `${huerfanos.filter((h) => h.jugado).length} partidos con resultado están en la base y URBA ya no los lista. `
+                    + 'No se borran automáticamente: o los cargó alguien a mano, o URBA los movió de torneo.',
+            } : {}),
             torneosNuevos,
             elapsed,
             ...(enSeco ? { detalle: detalle.slice(0, 200) } : {}),

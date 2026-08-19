@@ -194,6 +194,7 @@ export const CLUB_EVENTS: CaptainEvent[] = [
         title: 'El bautismo',
         text: 'Los veteranos quieren bautizar a los que suben de M19. Siempre se hizo así. Vos ahora sos el referente y te miran a vos.',
         weight: 6,
+        rarity: 'especial',
         repeatable: false,
         requires: { stage: ['amateur'], needsClub: true, minBelonging: 35 },
         options: [
@@ -232,6 +233,11 @@ export const CLUB_EVENTS: CaptainEvent[] = [
         title: 'La cinta',
         text: 'El entrenador te llama aparte. Quiere que seas el capitán: sos el que le va a hablar al referee y el que va a bancar al plantel cuando se venga la noche.',
         weight: 9,
+        // La tarjeta que le da el nombre al juego. Entra en `especial` y no en
+        // `raro` por lo que ya la gateaba: pide Pertenencia 45 y tres
+        // temporadas, así que al que llega hasta acá le corresponde, y una
+        // banda más escasa la volvería inalcanzable justo para el que se la ganó.
+        rarity: 'especial',
         repeatable: false,
         requires: { needsClub: true, minBelonging: 45, minSeasons: 3 },
         options: [

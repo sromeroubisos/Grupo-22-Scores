@@ -18,6 +18,55 @@ import { isFinalStandingsStatus } from '@/lib/standings/matchScope';
 
 type PhaseScope = { tournamentId?: string | null; phaseId?: string | null; status?: string | null } | null | undefined;
 
+/**
+ * Un recálculo en vuelo por fase, y a lo sumo uno esperando.
+ *
+ * Cargar una fecha son diez o quince resultados seguidos, todos de la MISMA
+ * fase. Sin esto, cada guardado largaba su propio recálculo: quince pasadas
+ * concurrentes leyendo los mismos partidos y haciendo DELETE+INSERT sobre las
+ * mismas filas de `tournament_standings`. Se peleaban el lock entre ellas y
+ * catorce quedaban obsoletas antes de terminar — la última es la única que
+ * cuenta, porque cada una recalcula la tabla ENTERA desde los partidos.
+ *
+ * Con la marca de "sucio" no se pierde nada: si llega un guardado mientras hay
+ * un recálculo corriendo, se anota y se vuelve a correr UNA vez al terminar, ya
+ * con el resultado nuevo en la base. Quince guardados pasan de quince pasadas a
+ * dos.
+ *
+ * Es por instancia, no global. Dos instancias de Vercel pueden solaparse, pero
+ * el caso que duele —un operador cargando una fecha— cae siempre en la misma.
+ */
+const enVuelo = new Map<string, { promesa: Promise<unknown>; sucio: boolean }>();
+
+function recalcularConCoalescing(tournamentId: string, phaseId: string): Promise<unknown> {
+  const clave = `${tournamentId}:${phaseId}`;
+  const actual = enVuelo.get(clave);
+
+  if (actual) {
+    actual.sucio = true;
+    return actual.promesa;
+  }
+
+  const estado: { promesa: Promise<unknown>; sucio: boolean } = { promesa: Promise.resolve(), sucio: false };
+
+  estado.promesa = (async () => {
+    try {
+      await recalculatePhaseStandingsScopes(tournamentId, phaseId, 'general');
+
+      // Alguien guardó mientras corríamos: una pasada más y listo.
+      if (estado.sucio) {
+        estado.sucio = false;
+        await recalculatePhaseStandingsScopes(tournamentId, phaseId, 'general');
+      }
+    } finally {
+      enVuelo.delete(clave);
+    }
+  })();
+
+  enVuelo.set(clave, estado);
+  return estado.promesa;
+}
+
 export function recalcAffectedPhases(scopes: PhaseScope[]): void {
   // Flag de laboratorio: permite aislar el costo de standings al medir.
   if (isDerivedRecalcSkipped('standings')) {
@@ -68,12 +117,7 @@ export function recalcAffectedPhases(scopes: PhaseScope[]): void {
       correlationId,
       tournamentId: values[0]?.tournamentId ?? null,
     },
-    () =>
-      Promise.all(
-        values.map((scope) =>
-          recalculatePhaseStandingsScopes(scope.tournamentId, scope.phaseId, 'general'),
-        ),
-      ),
+    () => Promise.all(values.map((scope) => recalcularConCoalescing(scope.tournamentId, scope.phaseId))),
   ).catch((err) =>
     console.error('[recalcAffectedPhases] Auto-recalculate standings failed:', err),
   );

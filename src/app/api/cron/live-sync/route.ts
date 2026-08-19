@@ -63,16 +63,25 @@ export async function GET(request: NextRequest) {
                 return { sport: sport.id, synced: 0, error: 'api_failed' };
             }
 
+            // `synced` es lo que se ESCRIBIÓ, no lo que trajo el proveedor: si la
+            // caché no existe, informar liveMatches.length sería inventar trabajo.
+            let written = 0;
+            let storageSkipped = false;
+
             if (liveMatches.length > 0) {
                 const cached = liveMatches.map(m => mapFlashScoreMatchToCached(m, sport.id));
-                await upsertMatches(cached, adminClient);
+                const result = await upsertMatches(cached, adminClient);
+                written = result.written;
+                storageSkipped = result.skipped;
             }
 
             // Only reset stale live rows when API call succeeded (even if zero results = all finished)
             const currentLiveIds = liveMatches.map(m => m.id);
             await resetStaleLiveMatches(currentLiveIds, sport.id, adminClient);
 
-            return { sport: sport.id, synced: liveMatches.length };
+            return storageSkipped
+                ? { sport: sport.id, synced: written, fetched: liveMatches.length, storage: 'unavailable' as const }
+                : { sport: sport.id, synced: written };
         })
     );
 
@@ -81,9 +90,30 @@ export async function GET(request: NextRequest) {
     );
 
     const totalSynced = summary.reduce((acc, s: any) => acc + (s.synced ?? 0), 0);
+    const storageUnavailable = summary.some((s: any) => s.storage === 'unavailable');
     const elapsed = Date.now() - startedAt;
 
-    console.log(`[live-sync] Done: ${totalSynced} live matches synced in ${elapsed}ms`);
+    console.log(
+        `[live-sync] Done: ${totalSynced} live matches written in ${elapsed}ms` +
+        (storageUnavailable ? ' — CACHÉ NO DISPONIBLE: no se escribió nada' : '')
+    );
 
-    return NextResponse.json({ ok: true, synced: totalSynced, elapsed, sports: summary });
+    // Mismo criterio que fixture-sync: si la caché no existe el job no cumplió y
+    // responde 500, para que el cron se vea en rojo en vez de verde con un
+    // contador inflado.
+    return NextResponse.json(
+        {
+            ok: !storageUnavailable,
+            synced: totalSynced,
+            elapsed,
+            sports: summary,
+            ...(storageUnavailable
+                ? {
+                    storage: 'unavailable' as const,
+                    reason: 'external_match_cache no existe. Aplicar 20260701090000_restore_external_match_cache.sql o dar de baja este cron.',
+                }
+                : {}),
+        },
+        { status: storageUnavailable ? 500 : 200 },
+    );
 }

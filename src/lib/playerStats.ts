@@ -3,11 +3,23 @@ import type { LocalPlayerStatsRow } from './localMatchData';
 export type PlayerMetricKind = 'number' | 'percent' | 'duration' | 'rating';
 export type PlayerMetricSortDirection = 'desc' | 'asc';
 
+/**
+ * Con que carga viene una metrica cuando se la lee de un vistazo. Es el UNICO
+ * lugar donde se declara: la ficha de una amarilla se pinta ambar porque la
+ * metrica lo dice, no porque el componente sepa que existe el hockey.
+ *
+ * Un deporte que sume su propia tarjeta la declara aca y hereda el color; el
+ * que no declare nada cae en 'neutral', que es lo correcto para una metrica
+ * desconocida (`getPlayerMetricMeta` la arma sola desde la etiqueta cruda).
+ */
+export type PlayerMetricTone = 'neutral' | 'caution' | 'danger';
+
 export type PlayerMetricMeta = {
   id: string;
   label: string;
   shortLabel: string;
   kind: PlayerMetricKind;
+  tone?: PlayerMetricTone;
 };
 
 export type PlayerStatsTableRow = {
@@ -30,8 +42,11 @@ export const PLAYER_METRIC_PRESETS: Record<string, PlayerMetricMeta> = {
   tackles: { id: 'tackles', label: 'Tackles', shortLabel: 'Tkl', kind: 'number' },
   minutes: { id: 'minutes', label: 'Tiempo jugado', shortLabel: 'Min', kind: 'duration' },
   matchesPlayed: { id: 'matchesPlayed', label: 'Partidos jugados', shortLabel: 'PJ', kind: 'number' },
-  yellowCards: { id: 'yellowCards', label: 'Amarillas', shortLabel: 'YC', kind: 'number' },
-  redCards: { id: 'redCards', label: 'Rojas', shortLabel: 'RC', kind: 'number' },
+  // El hockey es el unico deporte con verde, y sin esta entrada la tarjeta se
+  // contaba a nivel equipo pero desaparecia en la tabla de jugadores.
+  greenCards: { id: 'greenCards', label: 'Verdes', shortLabel: 'GC', kind: 'number', tone: 'caution' },
+  yellowCards: { id: 'yellowCards', label: 'Amarillas', shortLabel: 'YC', kind: 'number', tone: 'caution' },
+  redCards: { id: 'redCards', label: 'Rojas', shortLabel: 'RC', kind: 'number', tone: 'danger' },
   conversionsMade: { id: 'conversionsMade', label: 'Conversiones', shortLabel: 'Conv', kind: 'number' },
   conversionAttempts: { id: 'conversionAttempts', label: 'Intentos de conversion', shortLabel: 'Int.', kind: 'number' },
   conversionRate: { id: 'conversionRate', label: 'Tasa de conversion', shortLabel: 'Conv %', kind: 'percent' },
@@ -49,6 +64,7 @@ const PLAYER_METRIC_ALIASES: Array<[RegExp, string]> = [
   [/^(tackles?|placajes?)$/, 'tackles'],
   [/^(minutes?|mins?|minutes_played|played_minutes|time_played|time_on_field|tiempo|tiempo_jugado)$/, 'minutes'],
   [/^(matches_played|games_played|played|partidos_jugados|pj)$/, 'matchesPlayed'],
+  [/^(green_cards?|greencards?|tarjetas?_verdes?|verdes?|gc)$/, 'greenCards'],
   [/^(yellow_cards?|yellowcards?|tarjetas?_amarillas?|amarillas?|yc)$/, 'yellowCards'],
   [/^(red_cards?|redcards?|tarjetas?_rojas?|rojas?|rc)$/, 'redCards'],
   [/^(conversions?|successful_conversions|conversions_made|conversiones?)$/, 'conversionsMade'],
@@ -168,6 +184,7 @@ function resolvePlayerSideFromTeamName(teamName: string, homeName: string, awayN
 export function chooseDefaultPlayerMetrics(metricIds: string[]) {
   const preferred = [
     'points',
+    'goals',
     'conversionRate',
     'minutes',
     'tries',
@@ -175,6 +192,7 @@ export function chooseDefaultPlayerMetrics(metricIds: string[]) {
     'rating',
     'tackles',
     'conversionsMade',
+    'greenCards',
     'yellowCards',
     'redCards',
     'events',
@@ -288,6 +306,11 @@ export function buildPlayerStatsTableData(args: {
     setMetric(row, 'points', player.points, 'Puntos');
     setMetric(row, 'tries', player.tries, 'Tries');
     setMetric(row, 'tackles', player.tackles, 'Tackles');
+    // Solo si hubo. `setMetric` acepta el 0, asi que sin esta guarda una
+    // planilla de rugby estrenaba columnas "Goles" y "Verdes" siempre vacias.
+    if (player.goals > 0) setMetric(row, 'goals', player.goals, 'Goles');
+    if (player.penaltyGoals > 0) setMetric(row, 'penalties', player.penaltyGoals, 'De penal');
+    if (player.greenCards > 0) setMetric(row, 'greenCards', player.greenCards, 'Verdes');
     setMetric(row, 'yellowCards', player.yellowCards, 'Amarillas');
     setMetric(row, 'redCards', player.redCards, 'Rojas');
     setMetric(row, 'events', player.events, 'Intervenciones');
@@ -324,6 +347,7 @@ export function buildPlayerStatsTableData(args: {
       ['tackles', source.tackles ?? statsRecord?.tackles],
       ['minutes', source.minutes ?? source.minutes_played ?? source.time_played ?? source.played_minutes ?? statsRecord?.minutes ?? statsRecord?.minutes_played ?? statsRecord?.time_played ?? statsRecord?.played_minutes],
       ['matchesPlayed', source.played ?? source.matches_played ?? source.games_played ?? statsRecord?.played ?? statsRecord?.matches_played ?? statsRecord?.games_played],
+      ['greenCards', source.green_cards ?? source.greenCards ?? source.gc ?? statsRecord?.green_cards ?? statsRecord?.greenCards ?? statsRecord?.gc],
       ['yellowCards', source.yellow_cards ?? source.yellowCards ?? source.yc ?? statsRecord?.yellow_cards ?? statsRecord?.yellowCards ?? statsRecord?.yc],
       ['redCards', source.red_cards ?? source.redCards ?? source.rc ?? statsRecord?.red_cards ?? statsRecord?.redCards ?? statsRecord?.rc],
       ['conversionsMade', source.conversions ?? source.conversions_made ?? source.successful_conversions ?? statsRecord?.conversions ?? statsRecord?.conversions_made ?? statsRecord?.successful_conversions],

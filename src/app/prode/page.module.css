@@ -3133,3 +3133,629 @@
         font-size: 0.5rem;
     }
 }
+
+/* ==========================================================================
+   PANTALLA DE JUEGO DEL PRODE  ·  rediseño de la fila de partido
+   --------------------------------------------------------------------------
+   Va al final del archivo A PROPÓSITO: las reglas de arriba (incluidas las de
+   los media queries) declaran las mismas clases con igual especificidad, así
+   que lo último escrito es lo que gana. El bloque va de escritorio hacia abajo.
+
+   El diagnóstico que lo motivó, en números medidos a 390x844:
+   - el primer partido arrancaba a 696px (viewport 844, nav inferior 78), o sea
+     que el producto entero quedaba abajo del pliegue;
+   - 7 botones verdes a plena saturación, uno por partido, contra dos cajas de
+     44px donde de verdad se juega: jerarquía invertida;
+   - "Abierto" + hora + "Cierra: <la misma hora>" repetidos en cada tarjeta de
+     un grupo que ya tiene la fecha en su divisor: 21 cadenas redundantes.
+   ========================================================================== */
+
+/* --- Cabecera compacta ---------------------------------------------------- */
+
+.playHero {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px 24px;
+    padding: 18px 20px;
+}
+
+.playHeroCopy {
+    gap: 6px;
+    max-width: 62ch;
+}
+
+.playHeroTitle {
+    font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+    line-height: 1;
+    letter-spacing: -0.015em;
+}
+
+.playHeroText {
+    font-size: 0.86rem;
+}
+
+.playHeroAside {
+    display: grid;
+    justify-items: end;
+    gap: 10px;
+}
+
+/* Reemplaza al riel de tres fichas: el mismo dato en una línea, y solo cuando
+   el jugador YA tiene algo que mirar. Tres cajas grandes con "-  0  0" le
+   comían 100px del pliegue a quien todavía no jugó. */
+.heroScoreStrip {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 8px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.heroScoreStrip span {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    font-size: 0.76rem;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.heroScoreStrip strong {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Barra de fechas + progreso ------------------------------------------- */
+
+.playSection {
+    display: grid;
+    gap: 14px;
+}
+
+/* Grid y no flex a propósito: el carril de fechas mide 716px de chips y su
+   `overflow-x: auto` NO le baja el min-content. Como ítem flex arrastraba ese
+   ancho hacia arriba y le estiraba la columna entera del layout a 716px dentro
+   de un viewport de 390 (la lista quedaba recortada por el `overflow: hidden`
+   del grupo, así que ni siquiera aparecía barra de scroll que lo delatara).
+   `minmax(0, 1fr)` corta esa herencia de raíz. */
+.playToolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+}
+
+.playProgress {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.playProgress strong {
+    color: #ffffff;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.datePicker {
+    min-width: 0;
+    max-width: 100%;
+    /* El desbordamiento se avisa: sin el degradado el último chip queda cortado
+       y parece un defecto de layout en vez de "seguí arrastrando". */
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), transparent 100%);
+}
+
+.dateChip {
+    gap: 6px;
+    align-items: center;
+}
+
+.dateChipDone {
+    border-color: rgba(0, 200, 83, 0.28);
+    color: #86f6b6;
+}
+
+.dateChipCount {
+    font-size: 0.72rem;
+    font-weight: 700;
+    opacity: 0.75;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Lista de partidos ---------------------------------------------------- */
+
+.pickGroup {
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent), var(--color-bg-secondary);
+    overflow: hidden;
+}
+
+.dateDivider {
+    display: block;
+    padding: 11px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.dateDivider::before {
+    content: none;
+}
+
+.dateDivider span {
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.matchRows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+}
+
+/* Fila, no tarjeta: siete tarjetas idénticas una abajo de la otra son ruido.
+   La hairline separa; el fondo solo se enciende al enfocar o al fallar. */
+.matchRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 54px 16px 54px minmax(0, 1fr) auto;
+    grid-template-areas: "home hin sep ain away state";
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background-color 0.15s ease;
+}
+
+.matchRows > .matchRow:first-child {
+    border-top: none;
+}
+
+.matchRow:focus-within {
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.matchRowError {
+    background: rgba(239, 68, 68, 0.07);
+    box-shadow: inset 2px 0 0 #ef4444;
+}
+
+.rowHome,
+.rowAway {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.rowHome {
+    grid-area: home;
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+.rowAway {
+    grid-area: away;
+}
+
+.rowHome .teamName,
+.rowAway .teamName {
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rowInputHome,
+.rowInputAway {
+    width: 54px;
+    height: 48px;
+    border-radius: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.rowInputHome { grid-area: hin; }
+.rowInputAway { grid-area: ain; }
+
+.rowInputHome:hover,
+.rowInputAway:hover {
+    border-color: rgba(255, 255, 255, 0.26);
+}
+
+.rowInputHome:focus,
+.rowInputAway:focus {
+    outline: none;
+    border-color: rgba(0, 200, 83, 0.65);
+    background: rgba(0, 200, 83, 0.07);
+    box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.18);
+}
+
+.rowInputHome:disabled,
+.rowInputAway:disabled {
+    opacity: 0.55;
+}
+
+.rowInputHome::placeholder,
+.rowInputAway::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.rowSep {
+    grid-area: sep;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.rowState {
+    grid-area: state;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    text-align: right;
+    font-size: 0.78rem;
+}
+
+.rowStateSaved {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #86f6b6;
+    font-weight: 700;
+}
+
+.rowStatePending {
+    color: #ffd166;
+    font-weight: 700;
+}
+
+.rowStateMuted {
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.rowStateError {
+    color: #ff9d9d;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.rowPicksLink {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-text-secondary);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.rowPicksLink:hover {
+    color: #ffffff;
+}
+
+/* --- Barra de guardado ---------------------------------------------------- */
+
+/* Una acción por fecha, no una por partido. Es el ÚNICO verde lleno de la
+   columna, así que vuelve a significar "esto es lo que hay que tocar".
+   Va al final de la lista, que es donde termina el pulgar después de cargar
+   la fecha. Nada de `position: sticky`: `<main>` lleva `overflow-x: hidden`
+   y eso convierte a cualquier sticky descendiente en estático sin avisar. */
+.saveBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(11, 15, 22, 0.92);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.saveBar_ready {
+    border-color: rgba(0, 200, 83, 0.35);
+}
+
+.saveBar_done {
+    border-color: rgba(0, 200, 83, 0.22);
+}
+
+.saveBarCopy {
+    margin: 0;
+    min-width: 0;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    color: var(--color-text-secondary);
+}
+
+.saveBar_done .saveBarCopy {
+    color: #86f6b6;
+}
+
+.saveBarCta {
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 12px;
+    border: none;
+    background: #00c853;
+    color: #04130a;
+    font-size: 0.88rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.saveBarCta:hover:not(:disabled) {
+    filter: brightness(1.06);
+}
+
+.saveBarCta:active:not(:disabled) {
+    transform: scale(0.985);
+}
+
+.saveBarCta:disabled {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--color-text-secondary);
+    cursor: default;
+}
+
+/* --- Riel derecho --------------------------------------------------------- */
+
+.playSidebar {
+    align-content: start;
+}
+
+/* --- Pisos tipográficos --------------------------------------------------- */
+
+.metaTag {
+    font-size: 0.78rem;
+}
+
+.privateLeagueEyebrow {
+    font-size: 0.7rem;
+}
+
+/* Los rótulos de los paneles y las descripciones de las reglas venían en
+   10,9px y 11,8px. Nada de esta pantalla baja de 12px. */
+.previewEyebrow {
+    font-size: 0.76rem;
+}
+
+.rulesRow p {
+    font-size: 0.78rem;
+}
+
+@keyframes saveBarRise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .matchRow,
+    .rowInputHome,
+    .rowInputAway,
+    .saveBarCta {
+        transition: none;
+    }
+
+    .saveBarFloating {
+        animation: none;
+    }
+}
+
+@media (max-width: 1100px) {
+    .matchRow {
+        grid-template-columns: minmax(0, 1fr) 50px 14px 50px minmax(0, 1fr);
+        grid-template-areas:
+            "home hin sep ain away"
+            "state state state state state";
+        row-gap: 6px;
+    }
+
+    .rowState {
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 900px) {
+    .playHero {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 14px 16px;
+    }
+
+    .playHeroAside {
+        justify-items: stretch;
+    }
+
+    .heroScoreStrip {
+        justify-content: space-between;
+    }
+
+    .playSidebar {
+        position: static;
+        max-height: none;
+        overflow: visible;
+    }
+
+    /* Cada equipo con su casillero al lado: a 390px, dos nombres de club y dos
+       cajas no entran en una línea ("Atl. del Rosario" se queda con 72px). En
+       columna cada nombre tiene el ancho entero y los marcadores se cargan
+       bajando, que es como se completa una fecha. */
+    .matchRow {
+        grid-template-columns: minmax(0, 1fr) 56px;
+        grid-template-areas:
+            "home hin"
+            "away ain"
+            "state state";
+        gap: 8px;
+        padding: 12px 14px;
+    }
+
+    .rowHome {
+        flex-direction: row;
+        text-align: left;
+    }
+
+    .rowSep {
+        display: none;
+    }
+
+    .rowInputHome,
+    .rowInputAway {
+        width: 56px;
+        height: 46px;
+        justify-self: end;
+    }
+
+    .rowState {
+        justify-content: flex-start;
+        min-height: 0;
+    }
+
+    .rowState:empty {
+        display: none;
+    }
+
+    /* El contador baja a su propia línea: compartiendo fila con los chips le
+       comía 150px al carril y solo entraban dos fechas y media. */
+    .playToolbar {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .playProgress {
+        justify-self: end;
+        font-size: 0.78rem;
+    }
+
+    /* En el teléfono la lista es larga: si tocaste el primer partido de la
+       fecha, la acción tiene que venir a vos en vez de esperarte 900px abajo.
+       Flota SOLO cuando hay algo sin guardar, así no es una barra permanente
+       comiendo pantalla. `fixed` y no `sticky` porque el `overflow-x: hidden`
+       de <main> mata al segundo. */
+    .saveBarFloating {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: calc(var(--mobile-nav-height) + 10px + env(safe-area-inset-bottom));
+        z-index: 40;
+        animation: saveBarRise 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Deja aire para que la barra flotante no tape el último partido. */
+    .playSectionFloating {
+        padding-bottom: 68px;
+    }
+
+    .saveBar {
+        padding: 10px 12px;
+    }
+
+    .saveBarCopy {
+        flex: 1 1 130px;
+        font-size: 0.76rem;
+    }
+
+    .saveBarCta {
+        padding: 0 16px;
+        font-size: 0.84rem;
+    }
+
+    .dateDivider {
+        padding: 10px 14px;
+    }
+}
+
+@media (max-width: 560px) {
+    .playHeroTitle {
+        font-size: 1.25rem;
+    }
+
+    .playHeroText {
+        font-size: 0.8rem;
+    }
+
+    /* Piso de 12px real (0.76rem = 12,16px). El módulo tenía etiquetas de
+       0,62rem — 9,9px — que en un teléfono no se leen, se adivinan. */
+    .metaTag {
+        min-height: 22px;
+        padding: 0 8px;
+        font-size: 0.76rem;
+    }
+
+    .rulesPoints,
+    .quickRulesRow,
+    .pickMatchMeta,
+    .sectionText,
+    .pickFeedback,
+    .rowPicksLink {
+        font-size: 0.76rem;
+    }
+
+    .rowState {
+        font-size: 0.78rem;
+    }
+
+    .heroScoreStrip {
+        gap: 10px;
+        padding: 7px 12px;
+    }
+
+    .heroScoreStrip span {
+        font-size: 0.72rem;
+    }
+
+    .heroScoreStrip strong {
+        font-size: 1rem;
+    }
+
+    .rowHome .teamName,
+    .rowAway .teamName {
+        font-size: 0.88rem;
+    }
+
+    .scoreTeamCrestLg,
+    .scoreTeamCrestFallbackLg {
+        width: 34px;
+        height: 34px;
+        padding: 5px;
+    }
+
+    .mobilePlayTab {
+        min-height: 38px;
+        font-size: 0.78rem;
+    }
+}

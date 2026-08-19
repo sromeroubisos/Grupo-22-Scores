@@ -6,7 +6,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CLUBS, getClub } from '../../index.ts';
-import { crestKeyOf, initialsOf, monogramColor, monogramContrast, MONOGRAM_MIN_CONTRAST } from '../../../../app/juegos/minijuegos/carrera-rugby/clubCrest.ts';
+import {
+    crestKeyOf, initialsOf, monogramColor, monogramColorAt, monogramContrast, monogramContrastAt,
+    MONOGRAM_MIN_CONTRAST, MONOGRAM_SATURATIONS,
+} from '../../../../app/juegos/minijuegos/carrera-rugby/clubCrest.ts';
 
 test('solo se pide escudo a los clubes que tienen clave: ninguna petición al vacío', () => {
     let conEscudo = 0;
@@ -45,8 +48,14 @@ test('el color del monograma es estable entre sesiones', () => {
 
     for (const club of CLUBS) {
         const color = monogramColor(club.id);
-        // El brillo ya no es fijo: se baja por tono hasta llegar al contraste.
-        assert.match(color, /^hsl\(\d{1,3} 52% \d{2}%\)$/, `${club.name}: color con formato inesperado (${color})`);
+        // Ni el brillo ni la saturación son fijos: el brillo se baja por tono hasta
+        // llegar al contraste, y la saturación es el segundo eje del sorteo.
+        assert.match(color, /^hsl\(\d{1,3} \d{2}% \d{2}%\)$/, `${club.name}: color con formato inesperado (${color})`);
+        const saturation = Number(/ (\d+)% /.exec(color)![1]);
+        assert.ok(
+            (MONOGRAM_SATURATIONS as readonly number[]).includes(saturation),
+            `${club.name}: saturación fuera de la paleta (${color})`,
+        );
     }
 });
 
@@ -56,10 +65,19 @@ test('las iniciales blancas SIEMPRE llegan al contraste mínimo, en los 360 tono
     // mismo 38 % un azul daba 8,5:1 y un cian 4,24:1. Se verifica tono por tono
     // y no club por club, porque lo que se protege es la REGLA, no el catálogo
     // de hoy: un club nuevo puede caer en cualquier hue.
-    for (let hue = 0; hue < 360; hue++) {
-        const color = monogramColor(`tono-${hue}`);
-        const [, light] = /52% (\d+)%/.exec(color)!;
-        assert.ok(Number(light) >= 20, `hue ${hue}: brillo fuera de rango (${color})`);
+    // Se recorren los 360 tonos POR CADA saturación de la paleta: desde que la
+    // saturación es un segundo eje del sorteo, verificar un solo valor dejaría dos
+    // tercios del espacio de color sin mirar.
+    for (const saturation of MONOGRAM_SATURATIONS) {
+        for (let hue = 0; hue < 360; hue++) {
+            const color = monogramColorAt(hue, saturation);
+            const light = Number(/ \d+% (\d+)%/.exec(color)![1]);
+            assert.ok(light >= 20, `hue ${hue} · sat ${saturation}: brillo fuera de rango (${color})`);
+            assert.ok(
+                monogramContrastAt(hue, saturation) >= MONOGRAM_MIN_CONTRAST,
+                `hue ${hue} · sat ${saturation}: contraste insuficiente (${color})`,
+            );
+        }
     }
 
     for (const club of CLUBS) {
@@ -74,8 +92,15 @@ test('las iniciales blancas SIEMPRE llegan al contraste mínimo, en los 360 tono
 test('clubes distintos casi nunca comparten color', () => {
     const sinEscudo = CLUBS.filter((c) => crestKeyOf(c.id) === null);
     const tonos = new Set(sinEscudo.map((c) => monogramColor(c.id)));
-    // No se exige unicidad total (360 tonos para 282 clubes hace que colisionen
-    // algunos), pero sí que el hash reparta y no colapse en un puñado.
+    // No se exige unicidad total —con reparto al azar siempre colisionan algunos—
+    // pero sí que el hash reparta y no colapse en un puñado.
+    //
+    // ESTE TEST ES EL QUE OBLIGÓ A AGREGAR LA SEGUNDA SATURACIÓN. Con un solo eje
+    // el espacio son 360 colores, y el catálogo `2026-27.11` pasó de ~440 clubes
+    // sin escudo a ~610: el umbral de 0,6 dejó de ser alcanzable por PALOMAR, no
+    // por un hash malo. La respuesta correcta a un espacio de color chico es
+    // agrandarlo, no bajar el umbral.
+    assert.ok(sinEscudo.length > 360, 'si el catálogo cabe en 360 tonos, este test perdió su sentido');
     assert.ok(tonos.size > sinEscudo.length * 0.6, `el hash colapsa: ${tonos.size} tonos para ${sinEscudo.length} clubes`);
 });
 

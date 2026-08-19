@@ -43,9 +43,32 @@ export default function ProdeWorldCupBanner() {
     // No invitar al Prode si ya estamos dentro del Prode.
     const onProdeRoute = pathname?.startsWith('/prode') ?? false;
 
+    /* Tampoco en una página de detalle. Un intersticial se banca en un destino
+       genérico —el home, donde el usuario todavía está eligiendo qué mirar—,
+       pero no cuando vino por un link a ESTE torneo, ESTE partido o ESTE club:
+       ahí el contenido que pidió queda tapado detrás de un desenfoque y la
+       primera acción obligatoria es cerrar algo que no pidió. Encima el cierre
+       está arriba a la derecha, fuera de la zona del pulgar.
+
+       Es la peor entrada posible: la que llega de un link compartido o de una
+       búsqueda, o sea la de alguien que todavía no conoce el sitio. */
+    const onDetailRoute = /^\/(tournaments|matches|clubs|players)\/[^/]+/.test(pathname ?? '');
+
+    /* Y menos todavía arriba de un juego. El párrafo de acá arriba vale acá
+       entero y con más fuerza: en una página de detalle el intersticial te tapa
+       lo que viniste a leer, pero en un minijuego te interrumpe una PARTIDA EN
+       CURSO — el jugador está a mitad de una decisión de carrera y la primera
+       acción obligatoria es cerrar una invitación a otro deporte.
+
+       Va por prefijo `/juegos` y no por la ruta exacta del minijuego para que el
+       próximo que se agregue quede cubierto sin acordarse. */
+    const onGameRoute = pathname?.startsWith('/juegos') ?? false;
+
+    const skipBanner = onProdeRoute || onDetailRoute || onGameRoute;
+
     // Decidir si mostrar (una vez, al iniciar) y traer los datos reales del Mundial.
     useEffect(() => {
-        if (onProdeRoute) return;
+        if (skipBanner) return;
 
         // Forzado para QA: /?prodeBanner=1 ignora la lógica de aparición.
         const forced =
@@ -77,7 +100,7 @@ export default function ProdeWorldCupBanner() {
             }
         })();
         return () => controller.abort();
-    }, [onProdeRoute]);
+    }, [skipBanner]);
 
     const close = useCallback((countAsDismiss: boolean) => {
         if (countAsDismiss) incrementDismissCount();

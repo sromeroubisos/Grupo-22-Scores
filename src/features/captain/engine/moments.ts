@@ -25,7 +25,7 @@
 // stream principal, igual que antes de que existieran los Momentos por puesto.
 // Si algún día hace falta una tirada más acá, sabés lo que cuesta.
 
-import type { CaptainPlayer, PositionFamilyId } from '../types/player.ts';
+import type { CaptainPlayer } from '../types/player.ts';
 import type { CaptainState } from '../types/captain.ts';
 import type {
     BunkerVerdict,
@@ -37,11 +37,15 @@ import type {
 } from '../types/moment.ts';
 import type { MomentDeltas, MomentResult, MomentSetupCtx, PlayLevel } from '../types/moment-def.ts';
 import type { Rng } from './random.ts';
+import type { MinigameSlot } from '../types/minigame.ts';
 import { FAME_MAX, FAME_MIN } from '../types/currencies.ts';
-import { MOMENT_LABEL, SELECTABLE_MOMENTS } from '../types/moment-kinds.ts';
+import { MOMENT_LABEL } from '../types/moment-kinds.ts';
+import { isLegacySlot } from '../types/minigame.ts';
+import { ALL_MINIGAMES, getMinigame } from '../data/minigames/index.ts';
+import { familyOfNumber } from '../data/positions.ts';
 import { createRng, hashSeed } from './random.ts';
 import type { AnyMomentDef } from './moment-defs/index.ts';
-import { getMomentDef, isContractKind } from './moment-defs/index.ts';
+import { ACADEMIA_AGE, ACADEMIA_KIND, ACADEMIA_UNION, getMomentDef, isContractKind } from './moment-defs/index.ts';
 import { applyBelonging } from './belonging.ts';
 import { addBodyDamage, addHeadDamage } from './damage.ts';
 import { belongingSituation } from './contracts.ts';
@@ -65,9 +69,24 @@ const TACKLE_WEIGHT = 10;
 /**
  * Cuánto oficio tiene el que juega un Momento que NO es de su puesto.
  *
- * Se despierta con EL CRUCE (abajo): un centro que se encuentra parado sobre la
- * pelota en el breakdown, un wing que tiene que patear porque el 10 salió. La
- * juega, pero la juega peor.
+ * ── LOS MINIJUEGOS SON ESPECIALIDAD, NO EXCLUSIVIDAD ──
+ * Los cuatro de un dorsal no son un cerco: son lo que ese número hace mejor. Un
+ * 10 que pateó toda su vida puede terminar jugando el box kick del 9, un pilar
+ * puede desarrollar buenas manos, un wing puede volverse un defensor. Encerrar a
+ * un jugador en cuatro jugadas para siempre sería más pobre que el rugby real,
+ * donde en juego abierto cualquiera puede tener que ser portador, apoyo,
+ * pasador, pateador, tackleador o ganador de pelota.
+ *
+ * Los dos escalones dicen exactamente eso:
+ *
+ *   · MISMA FAMILIA, OTRO DORSAL — el pilar izquierdo jugando la columna del
+ *     derecho, el 12 leyendo el intervalo del 13. Comparten entrenamiento,
+ *     posición en la cancha y atributos: la juegan casi igual de bien.
+ *   · OTRA FAMILIA — el centro parado sobre la pelota en el breakdown, el wing
+ *     que tiene que patear porque el 10 salió. La juegan, y la juegan peor.
+ *
+ * Nunca ensancha el margen: `marginOf` acota el oficio a 1 antes de multiplicar,
+ * así que el que la juega prestada la juega peor y nunca mejor.
  *
  * ── Por qué el tackle NO lleva proficiency ──
  * La intuición de que un wing y un flanker no tacklean igual es correcta, y aun
@@ -78,10 +97,46 @@ const TACKLE_WEIGHT = 10;
  * mismo número queriendo decir dos cosas distintas — y ya no se podrían
  * distinguir ni calibrar por separado.
  *
- * Si algún día hacen falta márgenes por familia en un transversal, van con un
- * modificador PROPIO derivado de la familia, no con este.
+ * Por eso los cinco universales quedan siempre en 1: no hay un dorsal dueño del
+ * que estén prestados.
  */
 const OUTSIDER_PROFICIENCY = 0.75;
+const SAME_FAMILY_PROFICIENCY = 0.9;
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  El catálogo, indexado
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * El kind de MOTOR de una casilla del catálogo.
+ *
+ * Seis de las sesenta y cinco están ocupadas por Momentos escritos a mano, y su
+ * kind de motor es el viejo (`codigo`, `palos`, …) y no el id de la casilla
+ * (`d2-codigo`, `d10-patada`). La casilla existe para que el roster esté
+ * completo y auditable; el motor sigue hablando de `codigo`.
+ */
+function kindOfSlot(slot: MinigameSlot): MomentKind {
+    return isLegacySlot(slot) ? slot.legacyOf : slot.kind;
+}
+
+/**
+ * Todos los kinds sorteables, en ORDEN DECLARADO del catálogo.
+ *
+ * `bunker` no está y no puede estar: no se sortea, se llega a él desde el tackle
+ * alto. Que no aparezca sale solo de que el catálogo no tiene casilla para él,
+ * sin ningún filtro que haya que acordarse de mantener.
+ */
+const SELECTABLE: readonly MomentKind[] = ALL_MINIGAMES.map(kindOfSlot);
+
+/**
+ * Índice kind → dorsal dueño. `null` es universal.
+ *
+ * Se arma UNA vez recorriendo el catálogo en orden declarado. Un kind que no
+ * esté acá —hoy solo el bunker— se trata como universal: no hay dorsal del que
+ * pueda estar prestado.
+ */
+const SHIRT_OF_KIND: Map<MomentKind, number | null> = new Map();
+for (const slot of ALL_MINIGAMES) SHIRT_OF_KIND.set(kindOfSlot(slot), slot.shirt);
 
 /**
  * EL CRUCE: cada tanto te toca una jugada que no es tuya.
@@ -112,54 +167,86 @@ export function momentSeed(seed: number, kind: MomentKind, season: number, idx: 
     return hashSeed(`${seed}:${kind}:${season}:${idx}`);
 }
 
-/** Las familias a las que les toca un kind. `null` es transversal. */
-function familiesOf(kind: MomentKind): readonly PositionFamilyId[] | null {
-    const def = getMomentDef(kind);
-    // Sin def es pre-contrato, y los dos pre-contrato son transversales.
-    return def ? def.families : null;
+/** El dorsal dueño de un kind. `null` es universal. */
+export function shirtOfKind(kind: MomentKind): number | null {
+    return SHIRT_OF_KIND.get(kind) ?? null;
 }
 
-function appliesTo(kind: MomentKind, family: PositionFamilyId): boolean {
-    const families = familiesOf(kind);
-    return families === null || families.includes(family);
+/** ¿Este kind es de tu dorsal o de nadie? */
+function esPropio(kind: MomentKind, shirt: number): boolean {
+    const dueno = shirtOfKind(kind);
+    return dueno === null || dueno === shirt;
 }
 
 function weightOf(kind: MomentKind): number {
-    return getMomentDef(kind)?.weight ?? TACKLE_WEIGHT;
+    const def = getMomentDef(kind);
+    if (def) return def.weight;
+    // Sin def es pre-contrato. El bunker no se sortea, así que el único que
+    // llega acá es el tackle y su peso vive arriba.
+    return TACKLE_WEIGHT;
 }
 
 /**
  * Cuál de los Momentos elegibles toca.
  *
  * Sale de una semilla DERIVADA, no del stream de la carrera (ver la cabecera).
- * Se recorre `SELECTABLE_MOMENTS`, que está en orden canónico: nunca
- * `Object.keys` sobre el registry.
+ * Se recorre `SELECTABLE`, que está en el orden declarado del catálogo: nunca
+ * `Object.keys` sobre el registry ni sobre un `Map`.
+ *
+ * ── El eje es el DORSAL, no la familia ──
+ * Antes era la familia porque los Momentos eran cinco y ninguna familia tenía
+ * dos. Con cuatro por dorsal, filtrar por familia le daría al pilar izquierdo
+ * las ocho jugadas de la primera línea como propias —las suyas y las del
+ * derecho— y el 1 y el 3 volverían a ser el mismo jugador, que es justamente lo
+ * que el catálogo por dorsal vino a arreglar.
  */
-export function pickMomentKind(seed: number, season: number, family: PositionFamilyId): MomentKind {
+export function pickMomentKind(seed: number, season: number, shirt: number): MomentKind {
     const rng = createRng(hashSeed(`${seed}:${season}:momentPick`));
 
     // El cruce se tira SIEMPRE, aunque después no cambie nada: si solo se tirara
     // cuando hay Momentos ajenos disponibles, el stream derivado dependería del
-    // tamaño del catálogo y agregar el Momento doce movería los once anteriores.
+    // tamaño del catálogo y agregar el minijuego sesenta y seis movería los
+    // sesenta y cinco anteriores.
     const cruce = rng.chance(CROSS_CHANCE);
 
-    const propios = SELECTABLE_MOMENTS.filter((kind) => appliesTo(kind, family));
-    const ajenos = SELECTABLE_MOMENTS.filter((kind) => !appliesTo(kind, family));
+    const propios = SELECTABLE.filter((kind) => esPropio(kind, shirt));
+    const ajenos = SELECTABLE.filter((kind) => !esPropio(kind, shirt));
     const elegibles = cruce && ajenos.length > 0 ? ajenos : propios;
 
-    // El tackle le toca a todos, así que el pool propio nunca queda vacío. Si
-    // algún día dejara de ser transversal, esto avisa en vez de devolver
+    // Los cinco universales le tocan a todos, así que el pool propio nunca queda
+    // vacío. Si algún día dejaran de existir, esto avisa en vez de devolver
     // `undefined`.
     if (elegibles.length === 0) return 'tackle';
 
     return rng.weighted(elegibles, weightOf);
 }
 
-/** Cuánto es tuya esta jugada. Ver `OUTSIDER_PROFICIENCY`. */
-export function proficiencyFor(kind: MomentKind, family: PositionFamilyId): number {
-    const families = familiesOf(kind);
-    if (families === null) return 1;
-    return families.includes(family) ? 1 : OUTSIDER_PROFICIENCY;
+/**
+ * Cuánto es tuya esta jugada. Ver `OUTSIDER_PROFICIENCY`.
+ *
+ * Tres escalones: la tuya o la de nadie (1), la de tu compañero de familia
+ * (0,9), la de otro puesto (0,75).
+ */
+export function proficiencyFor(kind: MomentKind, shirt: number): number {
+    const dueno = shirtOfKind(kind);
+    if (dueno === null || dueno === shirt) return 1;
+
+    return familyOfNumber(dueno) === familyOfNumber(shirt)
+        ? SAME_FAMILY_PROFICIENCY
+        : OUTSIDER_PROFICIENCY;
+}
+
+/**
+ * Cómo se lee un Momento en la trayectoria.
+ *
+ * Los siete escritos a mano tienen su etiqueta en `MOMENT_LABEL`; los del
+ * catálogo, el título de su casilla. Vive acá y no en `moment-kinds.ts` porque
+ * aquel archivo no importa nada y no va a empezar ahora.
+ */
+export function momentLabel(kind: MomentKind): string {
+    const legacy = (MOMENT_LABEL as Record<string, string | undefined>)[kind];
+    if (legacy) return legacy;
+    return getMinigame(kind)?.copy.title ?? kind;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -200,7 +287,7 @@ function buildPending(
         scoreDelta: base.scoreDelta,
         pressure: base.pressure,
         family: state.player.family,
-        proficiency: proficiencyFor(kind, state.player.family),
+        proficiency: proficiencyFor(kind, state.player.number),
         attrs: state.player.attrs,
         bodyDamage: state.damage.cuerpo,
         seed: momentSeed(state.seed, kind, state.season, idx),
@@ -218,7 +305,56 @@ function buildPending(
  * REGLA 4 del diseño: nunca dos Momentos en la misma temporada. Por eso esto
  * devuelve uno o ninguno, y nunca una lista.
  */
+/**
+ * ¿LE TOCA LA ACADEMIA PROVINCIAL M16?
+ *
+ * Tres condiciones y ninguna es un sorteo: dieciséis años, argentino, y que no
+ * la haya jugado ya. La academia no se rifa —si te citaron, te citaron— y por
+ * eso esto es una compuerta y no un peso en el sorteo.
+ *
+ * ── Por qué se pregunta por el registro y no por la temporada ──
+ * Porque «temporada 1» y «dieciséis años» son lo mismo HOY, y ese "hoy" es
+ * exactamente la clase de derivada que envejece mal (CLAUDE.md §1.9). Se
+ * pregunta por lo que la condición ES: que no esté ya jugada.
+ */
+export function academiaDue(state: CaptainState): boolean {
+    if (state.player.age !== ACADEMIA_AGE) return false;
+    if (state.player.countryCode !== ACADEMIA_UNION) return false;
+    return !state.moments.some((m) => m.kind === ACADEMIA_KIND);
+}
+
 export function rollMoment(state: CaptainState, rng: Rng): PendingMoment | null {
+    // LA ACADEMIA REEMPLAZA A LA JUGADA DE LA TEMPORADA, no se suma. Un pibe de
+    // dieciséis que va a la provincial no juega además la jugada decisiva de la
+    // primera del club, porque a los dieciséis no está en la primera del club.
+    //
+    // ⚠️ Y CONSUME LAS MISMAS TRES TIRADAS QUE UNA JUGADA NORMAL, en el mismo
+    // orden, aunque no use ninguna.
+    //
+    // No es ceremonia: es el invariante que hace revisable el digest congelado
+    // —«rollMoment consume exactamente tres tiradas»— y salir antes de tirarlas
+    // devolvía un Momento gratis que corría el stream de toda carrera argentina
+    // media tirada. Lo agarró `moment-contract.test.ts` en cuanto la compuerta
+    // empezó a abrir de verdad; antes no, porque con el código de unión en
+    // mayúscula esta rama no se pisaba nunca.
+    if (academiaDue(state)) {
+        rng.chance(MOMENT_PROB);
+        rng.int(48, 79);
+        rng.int(-6, 6);
+
+        return buildPending(
+            state,
+            ACADEMIA_KIND,
+            // Los tres en cero, y los tres a mano: la academia es una semana de
+            // entrenamiento, así que no tiene minuto, ni marcador, ni el apriete
+            // del último cuarto. Se descartan los valores recién sorteados a
+            // propósito — se tiraron para no mover el stream, no para usarlos.
+            { minute: 0, scoreDelta: 0, pressure: 0 },
+            momentIndex(state),
+            false,
+        );
+    }
+
     const { share } = playingTimeOf(
         state.player,
         clubRatingOf(state.player.clubId),
@@ -235,7 +371,7 @@ export function rollMoment(state: CaptainState, rng: Rng): PendingMoment | null 
 
     // Y acá se corta el stream principal: el kind y los márgenes salen de
     // semillas derivadas, así que agregar Momentos no corre la carrera de nadie.
-    const kind = pickMomentKind(state.seed, state.season, state.player.family);
+    const kind = pickMomentKind(state.seed, state.season, state.player.number);
 
     return buildPending(
         state,
@@ -468,9 +604,12 @@ export function resolveMoment(
     // `never`: el día que entre un pre-contrato nuevo sin su caso, no compila.
     switch (moment.kind) {
         case 'tackle':
-            return outcome.kind === 'tackle'
-                ? resolveTackle(state, moment, outcome.zone, outcome.at, rng)
-                : null;
+            // El `in` y no `outcome.kind === 'tackle'`: desde que existe la rama
+            // genérica del catálogo —`{ kind: string; play: unknown }`— comparar
+            // el discriminante ya no estrecha sola, porque un `string` también
+            // matchea. La forma de la mano sí discrimina, y encima es lo que de
+            // verdad se está preguntando.
+            return 'zone' in outcome ? resolveTackle(state, moment, outcome.zone, outcome.at, rng) : null;
         case 'bunker':
             // El veredicto ya estaba decidido cuando el jugador entró al bunker.
             return resolveBunker(state, moment.verdict ?? 'amarilla');

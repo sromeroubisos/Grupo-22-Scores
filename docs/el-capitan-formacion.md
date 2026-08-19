@@ -194,6 +194,51 @@ cada variante, y si el barrido de agencia la lee como decisión o como castigo.
 
 ## 6.ter · LA DIMENSIÓN QUE FALTA — PRERREQUISITO DE LOS JUVENILES
 
+> ### ✅ HECHO en el motor 0.10.0. Lo de abajo queda como está escrito porque explica POR QUÉ, y esa parte no caduca.
+>
+> Los minutos ya no salen de una sola cuenta. Hay dos números y están separados:
+> **tu lugar en el equipo** (`share`, sigue siendo `f(edge)` más lo que dejó una
+> decisión) y **tus ausencias** (la gira, la lesión, la suspensión, lo que
+> arrastrás). Los partidos del club son el **producto** de los dos, no una resta
+> después del hecho — restando, tres fechas de suspensión le costaban lo mismo al
+> titular que al suplente.
+>
+> Las cuatro fuentes que pedía este apartado:
+>
+> | | antes | ahora |
+> |---|---|---|
+> | la convocatoria | sumaba partidos, no sacaba ninguno | `CLUB_MATCHES_PER_CAP`: cada cap cuesta una fecha del club |
+> | la lesión | solo como riesgo de una carta de pretemporada | tirada propia todas las temporadas, contra los partidos que ibas a jugar |
+> | el laburo | ya estaba, por `playingTime` | igual |
+> | la suspensión | ya estaba | ahora entra por el mismo canal que las otras |
+>
+> Y el crecimiento pasó a leer **los minutos jugados, de la camiseta que sea**
+> (`rendimiento`) en vez del lugar en el equipo. La gira te saca del club pero no
+> te saca del rugby; la lesión sí.
+>
+> **Medido, barrido de 160 carreras, contra 0.9.0:**
+>
+> | | 0.9.0 | 0.10.0 | |
+> |---|---|---|---|
+> | no alcanzó su techo | 0,256 | **0,294** | el modo de fracaso vuelve |
+> | nunca salen del club | 0,512 | **0,525** | hacia la banda \[0,55–0,80] |
+> | llegan a la mayor | 0,150 | 0,138 | sigue en banda |
+> | partidos por carrera | 225,9 | 201,3 | −11% |
+> | títulos por carrera | 0,963 | **0,719** | ⚠️ se alejó |
+> | vitalicios (fiel) | 0,075 | **0,025** | ⚠️ misma causa |
+>
+> Las dos flechas rojas son **una sola causa**: el corte que decide si el título
+> es tuyo ahora recibe la participación real y antes recibía el lugar en el
+> equipo. Parte de esa caída es dejar de regalar medallas al que se pasó el año
+> lesionado. No se compensó a mano —sería calibrar el parámetro para mover la
+> tasa, §1.8— y queda anotado en el `ALARMA-VIVA` de `calibration.test.ts`.
+>
+> **Lo que este paso NO movió, y es la lectura que importa para el §3:**
+> `nunca salen del club` se movió trece milésimas. Las ausencias bajan el pico de
+> todos por igual, y ese número no depende del pico sino de un **cupo** — si toda
+> la camada baja, los treinta de Pumitas siguen siendo treinta. Confirma que lo
+> que falta ahí no es calibración: son las puertas.
+
 **No es trabajo futuro opcional. Sin esto, la Formación no se puede escribir.**
 
 Hoy el tiempo de juego sale de una sola cuenta: `share = f(edge)`, con

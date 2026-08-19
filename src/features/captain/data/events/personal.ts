@@ -105,6 +105,7 @@ export const PERSONAL_EVENTS: CaptainEvent[] = [
         title: 'El laburo bueno',
         text: 'Te ofrecen un puesto en otra provincia. Es el doble de sueldo y es el trabajo que estudiaste. Queda a ochocientos kilómetros de tu club.',
         weight: 5,
+        rarity: 'especial',
         repeatable: false,
         requires: { stage: ['amateur'], minAge: 23, maxAge: 30 },
         options: [

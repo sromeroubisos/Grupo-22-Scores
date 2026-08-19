@@ -122,7 +122,10 @@ function getCandidateEventTypes(eventType: string | null): string[] {
   if (!eventType) return [];
 
   if (eventType === 'goal') {
-    return ['goal', 'penalty_goal', 'own_goal', 'seven_meter_goal'];
+    // `penalty_corner_goal` es el gol de corner corto del hockey: sin el, un
+    // bonus configurado por goles contaba de menos justo la jugada que mas
+    // goles produce en ese deporte.
+    return ['goal', 'penalty_goal', 'own_goal', 'seven_meter_goal', 'penalty_corner_goal'];
   }
 
   return [eventType];

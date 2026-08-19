@@ -10,11 +10,15 @@ import type { Rng } from './random.ts';
 import { FAME_MAX, FAME_MIN } from '../types/currencies.ts';
 import { getFamily } from '../data/positions.ts';
 import { applyBelonging } from './belonging.ts';
+import { isRivalJump, payRivalJump } from './betrayal.ts';
 import { addBodyDamage, addHeadDamage } from './damage.ts';
 import { applyMoney } from './money.ts';
 import { ovrOf, potentialOf } from './ovr.ts';
-import { belongingSituation, returnHome, signProfessional } from './contracts.ts';
-import { getClub } from '../data/catalogs.ts';
+import { belongingSituation, renewContract, returnHome, signProfessional } from './contracts.ts';
+import { renewalFor } from './clubs.ts';
+import { FAREWELL_FLAG } from './retirement.ts';
+import { switchToUnion } from './eligibility.ts';
+import { getClub, unionName } from '../data/catalogs.ts';
 
 export interface DecisionResult {
     outcomeIndex: number;
@@ -70,7 +74,16 @@ function applyAttrs(state: CaptainState, deltas: NonNullable<CaptainEffect['attr
     player.ovr = ovrOf(player);
 }
 
-function applyEffect(state: CaptainState, effect: CaptainEffect): string | null {
+/**
+ * @param unionCode La unión de la que habla la tarjeta, o `null`. Viene del
+ *   evento y no del efecto porque las tarjetas que hablan de una unión se arman
+ *   en el momento (`buildFlagSwitchEvent`) y el catálogo es estático.
+ */
+function applyEffect(
+    state: CaptainState,
+    effect: CaptainEffect,
+    unionCode: string | null,
+): string | null {
     let extra: string | null = null;
 
     if (effect.attrs) applyAttrs(state, effect.attrs);
@@ -90,6 +103,7 @@ function applyEffect(state: CaptainState, effect: CaptainEffect): string | null 
     if (effect.playingTime) state.pendingPlayingTime += effect.playingTime;
     if (effect.statBoost) state.pendingStatBoost += effect.statBoost;
     if (effect.sanction) state.pendingSanction += effect.sanction;
+    if (effect.injury) state.pendingInjury += effect.injury;
 
     if (effect.flags) {
         // Orden estable: son contadores, pero el recorrido tiene que ser el
@@ -103,17 +117,76 @@ function applyEffect(state: CaptainState, effect: CaptainEffect): string | null 
         // El pase es al club de la oferta que eligió el jugador; la opción y la
         // oferta comparten índice, y el reducer ya lo resolvió antes de llamar.
         const offer = state.offers[0];
+        // ── ¿ES EL CLÁSICO? SE PREGUNTA ACÁ, CON EL CLUB VIEJO TODAVÍA PUESTO ──
+        // Dos líneas más abajo `player.clubId` ya es el otro, y entonces la
+        // pregunta no se puede volver a hacer: el pase no deja rastro de dónde
+        // venías hasta que la temporada siguiente escribe su fila.
+        const anterior = state.player.clubId;
+        const alClasico = anterior !== null && isRivalJump(anterior, offer.clubId);
+
         if (offer.kind === 'professional') {
-            extra = signProfessional(state, offer.clubId, offer.salary);
+            // EL PLAZO Y EL SUELDO SALEN DE LA OFERTA y no se recalculan acá: son
+            // los que el jugador leyó en la tarjeta antes de elegir. Recalcularlos
+            // abriría la puerta a firmar por un número distinto del que se mostró.
+            extra = signProfessional(state, offer.clubId, offer.years, offer.salary);
         } else {
             state.player.clubId = offer.clubId;
+            // EL PAPEL VIEJO SE ROMPE AL IRSE. En el club amateur sos socio y no
+            // tenés contrato, así que dejarlo colgado sería guardar una promesa
+            // sobre un club donde ya no jugás — un contrato fantasma que le sigue
+            // contestando «hasta 2031» a quien pregunte.
+            state.contract = null;
             extra = `Ahora jugás en ${getClub(offer.clubId).name}.`;
         }
+
+        // ── Y SE COBRA DESPUÉS, CON EL PASE YA HECHO ────────────────────────
+        // El orden importa en un solo sentido y conviene dejarlo escrito: firmar
+        // profesional le cobra al club que dejás la penalidad del contrato, así
+        // que borrar antes haría que esa penalidad volviera a escribir la cuenta
+        // que acabábamos de borrar —en cero, pero escrita—. Al revés no pasa
+        // nada: el borrado es absoluto y se lleva puesto cualquier delta previo.
+        if (alClasico && anterior) {
+            const traicion = payRivalJump(state, anterior);
+            if (traicion) extra = extra ? `${extra} ${traicion}` : traicion;
+        }
+
         state.player.flags['ultimo-pase'] = state.season;
         state.offers = [];
     }
 
+    if (effect.renew && state.player.clubId) {
+        // Los términos se RECALCULAN con la misma función pura que los dibujó, en
+        // vez de viajar adentro del efecto: un efecto es un dato estático y la
+        // renovación depende de la media de hoy. Es la misma razón por la que la
+        // ⭐ de una tarjeta se deriva en vez de declararse (CLAUDE.md raíz §3.1).
+        const terms = renewalFor(state.player, state.player.clubId, state.season);
+        if (terms) extra = renewContract(state, terms.years, terms.salary);
+        state.offers = [];
+    }
+
     if (effect.returnHome) extra = returnHome(state);
+
+    // ── LA VUELTA QUE CIERRA LA CARRERA ─────────────────────────────────────
+    // Se marca la temporada, y de esa marca salen las dos consecuencias: el
+    // mercado deja de ponerte la mesa y la que viene es la última. Va DESPUÉS de
+    // `returnHome` —que ya te dejó en tu club— y separado de él, porque hay una
+    // vuelta a casa que no es una despedida (ver `farewell` en `types/event.ts`).
+    if (effect.farewell) state.player.flags[FAREWELL_FLAG] = state.season;
+
+    // ── LA OTRA BANDERA ─────────────────────────────────────────────────────
+    // Va DESPUÉS de la fama y la plata del mismo efecto y antes de nada que
+    // dependa de la unión, pero el orden acá no decide nada: la convocatoria
+    // corre en `simulate-season`, la temporada que viene, que es cuando el cambio
+    // se cobra. Es lo correcto y es lo que promete la tarjeta —«jugarías el
+    // Mundial el año que viene»—.
+    if (effect.switchUnion && unionCode !== null && switchToUnion(state.national.eligibility, unionCode)) {
+        // El escalón se resetea a mano y no se hereda: los carriles de la unión
+        // vieja no son tuyos desde hoy, y dejar `track` como estaba haría que la
+        // cabecera dijera «Seleccionado A» de una unión que ya no podés
+        // representar hasta que la temporada siguiente lo recalcule.
+        state.national.track = 'club';
+        extra = `Ahora jugás para ${unionName(unionCode)}.`;
+    }
 
     if (effect.retire) {
         state.player.retired = true;
@@ -151,7 +224,7 @@ export function applyDecision(
 
     const outcome = rng.weighted(option.outcomes, (o) => o.weight);
     const outcomeIndex = option.outcomes.indexOf(outcome);
-    const extra = applyEffect(state, outcome.effect);
+    const extra = applyEffect(state, outcome.effect, event.unionCode ?? null);
 
     state.decisionLog.push({
         season: state.season,

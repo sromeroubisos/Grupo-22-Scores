@@ -11,12 +11,14 @@ import assert from 'node:assert/strict';
 
 import type { CaptainState, CreateCaptainInput } from '../../types/captain.ts';
 import type { MomentOutcome, TackleZone } from '../../types/moment.ts';
-import type { CodigoSetup } from '../moment-defs/codigo.ts';
-import type { PalosSetup } from '../moment-defs/palos.ts';
 import { trainingsFor } from '../../data/trainings.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
+import { playTournament } from '../../state/captain-autoplay.ts';
+import { getPendingEvent } from '../event-selector.ts';
 import { tackleZones, zoneAt } from '../moments.ts';
-import { palosPerfectAim } from '../moment-defs/palos.ts';
+import { ALL_MINIGAMES, getMinigame } from '../../data/minigames/index.ts';
+import { isLegacySlot } from '../../types/minigame.ts';
+import { ACADEMIA_KIND, getMomentDef, isContractKind } from '../moment-defs/index.ts';
 
 const INPUT: CreateCaptainInput = {
     name: 'Ciro',
@@ -40,12 +42,29 @@ function repartir(state: CaptainState): CaptainState {
  */
 function resolverPendiente(state: CaptainState): CaptainState {
     const pendiente = state.pendingMoment!;
-    const outcome: MomentOutcome = pendiente.kind === 'bunker' ? { kind: 'bunker' }
-        : pendiente.kind === 'jackal' ? { kind: 'jackal', reactions: [240, 240, 240] }
-            : pendiente.kind === 'ancla' ? { kind: 'ancla', pushes: 1 }
-                : pendiente.kind === 'codigo' ? { kind: 'codigo', call: [...(pendiente.setup as CodigoSetup).call] }
-                    : pendiente.kind === 'palos' ? { kind: 'palos', aim: palosPerfectAim((pendiente.setup as PalosSetup).wind) }
-                        : { kind: 'tackle', zone: 'legal', at: 0.5 };
+
+    // ── EL CONTRATO PRIMERO, Y ES EL §1.5 OTRA VEZ ──────────────────────────
+    // Este helper terminaba en un `: { kind: 'tackle' }` que atrapaba todo lo
+    // que no fueran los cinco nombrados. Es EXACTAMENTE la falla que el CLAUDE
+    // del feature ya tiene anotada —«entró La Banda, el default le mandó una
+    // mano de tackle a una corrida, y la carrera quedó trabada sin que nada
+    // fallara»— y volvió a pasar en cuanto entró la academia: `resolveMoment`
+    // rechaza la mano por kind, el reducer devuelve el estado sin tocar, y el
+    // bucle de arriba gira hasta agotar su guarda. El síntoma no fue un error
+    // sino un test que dejó de medir: «ninguna de 400 semillas jugó un tackle».
+    //
+    // La medicina es la del contrato: la mano la arma el Momento, que es el
+    // único que sabe cómo se juega el suyo. El `default` queda solo para los dos
+    // pre-contrato, que son los que de verdad no tienen def.
+    if (isContractKind(pendiente.kind)) {
+        const def = getMomentDef(pendiente.kind)!;
+        const outcome = def.playAt(pendiente.setup!, 'regular', 0.5);
+        return captainReducer(state, { type: 'RESOLVE_MOMENT', outcome });
+    }
+
+    const outcome: MomentOutcome = pendiente.kind === 'bunker'
+        ? { kind: 'bunker' }
+        : { kind: 'tackle', zone: 'legal', at: 0.5 };
     return captainReducer(state, { type: 'RESOLVE_MOMENT', outcome });
 }
 
@@ -70,7 +89,7 @@ function hastaElTackle(seed: number, max = 25): CaptainState | null {
         if (s.phase === 'moment' && s.pendingMoment?.kind === 'tackle') return s;
         if (s.phase !== 'season') return null;
 
-        s = captainReducer(s, { type: 'ADVANCE' });
+        s = playTournament(captainReducer(s, { type: 'ADVANCE' }));
         if (s.phase === 'event') {
             s = captainReducer(s, { type: 'CHOOSE', optionId: 'x' });
             if (s.phase === 'event') return null; // opción inválida, se corta
@@ -136,11 +155,45 @@ test('cerrar el reparto deja la temporada lista: o a simular, o a la jugada', ()
     assert.ok(['season', 'moment'].includes(s.phase), `fase inesperada: ${s.phase}`);
     if (s.phase === 'moment') {
         assert.ok(s.pendingMoment, 'fase de momento sin jugada que dibujar');
-        // A la tercera línea le tocan los dos, y cuál sale lo decide una semilla
-        // derivada. Lo que este test cuida es el CONTEXTO compartido —el minuto
-        // y el marcador—, que lo pone el armazón para cualquier kind.
-        assert.ok(['tackle', 'jackal'].includes(s.pendingMoment!.kind), `kind inesperado: ${s.pendingMoment!.kind}`);
-        assert.ok(s.pendingMoment!.minute >= 48 && s.pendingMoment!.minute <= 79);
+        // Lo que este test cuida es el CONTEXTO compartido —el minuto y el
+        // marcador—, que lo pone el armazón para CUALQUIER kind.
+        //
+        // ── Acá había una lista de dos nombres y era el §1.5 otra vez ────────
+        // Decía `['tackle', 'jackal']`, con el comentario «a la tercera línea le
+        // tocan los dos». Era cierto cuando los Momentos eran cinco y ninguna
+        // familia tenía más de dos. Con sesenta y cinco en el catálogo se puso
+        // en rojo con `uni-suelta`, que es una jugada perfectamente válida para
+        // un tercera línea: el test no había encontrado un bicho, se había
+        // quedado viejo nombrando por enumeración algo que se define por
+        // pertenencia.
+        //
+        // Lo que hay que afirmar es que el kind SEA SORTEABLE, y eso se le
+        // pregunta al catálogo en vez de repetirlo a mano.
+        const kind = s.pendingMoment!.kind;
+        const sorteable = getMinigame(kind) !== null || ALL_MINIGAMES.some(
+            (slot) => isLegacySlot(slot) && slot.legacyOf === kind,
+        );
+        // O sale del catálogo, O llega por una compuerta. Las dos son formas
+        // legítimas de que una jugada aparezca, y la segunda existe desde que la
+        // academia provincial entró: no tiene casilla en `ALL_MINIGAMES` justamente
+        // para que el sorteo no la vea nunca.
+        //
+        // La lista está escrita a mano y con un solo nombre a propósito: si mañana
+        // hay otra jugada por compuerta, quien la escriba tiene que venir acá y
+        // decidir si su Momento también puede quedar pendiente en este punto del
+        // reparto. Es la fricción buena.
+        const porCompuerta = kind === ACADEMIA_KIND;
+        assert.ok(
+            sorteable || porCompuerta,
+            `kind que no está en el catálogo ni llega por compuerta: ${kind}`,
+        );
+        // El minuto SOLO se le pide a lo que pasa adentro de un partido. La
+        // academia provincial es una semana de entrenamiento y viaja con minuto
+        // cero a propósito: pedirle el rango del último cuarto sería pedirle a la
+        // pretemporada que tenga marcador.
+        if (!(s.pendingMoment!.setup as { sinPartido?: boolean } | undefined)?.sinPartido) {
+            assert.ok(s.pendingMoment!.minute >= 48 && s.pendingMoment!.minute <= 79);
+        }
     }
 });
 
@@ -265,32 +318,85 @@ test('la jugada queda escrita en la temporada', () => {
 test('la jugada es una entrada del jugador: la misma mano da la misma carrera', () => {
     // Es lo que hace que un Momento no rompa el determinismo. La habilidad del
     // jugador entra en el estado igual que una decisión.
-    const correr = (zona: TackleZone) => {
-        let s = createInitialCaptain(INPUT, 4242);
-        for (let i = 0; i < 6 && s.phase !== 'retired'; i += 1) {
+    //
+    // ── ESTE TEST SE DIO VUELTA UNA VEZ Y NO AVISÓ ─────────────────────────
+    // La versión anterior CORTABA en la primera tarjeta de decisión (`break` al
+    // entrar en fase `event`) porque el bucle no sabía contestarla. Funcionaba
+    // por accidente: con esta semilla, el primer Momento caía antes que el
+    // primer evento.
+    //
+    // Al entrar la 0.11.0 el stream se corrió un tiro —el perfil de desarrollo
+    // se sortea al crear el jugador— y el primer evento pasó a caer ANTES que
+    // ningún Momento. Con eso, las dos carreras comparadas terminaban con
+    // `moments: []`: idénticas, porque en ninguna de las dos se había jugado un
+    // tackle. El test decía "jugar distinto da lo mismo" y lo que estaba
+    // midiendo era otra cosa. Es el §1.7 del CLAUDE de captain otra vez —el
+    // instrumento contesta la pregunta que tiene ESCRITA— y el corolario en
+    // acción: una igualdad es una acusación contra el instrumento hasta que se
+    // demuestre lo contrario.
+    //
+    // Dos arreglos, y el segundo es el que importa:
+    //   · el bucle CONTESTA la tarjeta en vez de cortar, con la misma opción en
+    //     las dos corridas, así que sigue siendo una comparación pareada;
+    //   · se AFIRMA que se jugó al menos un tackle. Sin eso, este test puede
+    //     volver a quedarse ciego la próxima vez que el stream se corra, y esa
+    //     ceguera se lee exactamente igual que un motor roto.
+    // ── Y SE QUEDÓ CIEGO OTRA VEZ, POR LO MISMO Y AL REVÉS ─────────────────
+    // La semilla estaba clavada en 4242 porque con esa semilla salía un tackle.
+    // Al entrar el catálogo por dorsal, el pool de sorteo pasó de seis kinds a
+    // sesenta y cinco: la chance de que ESA semilla toque justo el tackle en
+    // ocho temporadas se derrumbó, y la carrera de prueba dejó de jugar ninguno.
+    // El `assert.ok(a.tackles > 0)` que se había agregado la vez anterior hizo
+    // exactamente su trabajo: en vez de un verde mentiroso, un rojo que dice
+    // «este test no está midiendo nada».
+    //
+    // La medicina es la misma que ya usa `hastaElTackle`: BUSCAR una semilla que
+    // pise el carril en vez de escribir la que lo pisaba cuando se escribió el
+    // test. Una semilla literal es un índice sobre una lista que cambia abajo
+    // (§1.5), y esta es la tercera vez que la familia muerde.
+    const correr = (zona: TackleZone, semilla: number) => {
+        let s = createInitialCaptain(INPUT, semilla);
+        let tackles = 0;
+        for (let i = 0; i < 8 && s.phase !== 'retired'; i += 1) {
             s = repartir(s);
             let guarda = 0;
             while (s.phase === 'moment' && guarda < 4) {
                 const kind = s.pendingMoment?.kind;
-                s = kind === 'bunker'
-                    ? captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'bunker' } })
-                    : kind === 'jackal'
-                        // El jackal se juega siempre igual: lo que este test
-                        // compara es qué cambia al mover LA ZONA DEL TACKLE.
-                        ? captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'jackal', reactions: [240, 240, 240] } })
-                        : captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: zona, at: 0.5 } });
+                if (kind === 'tackle') tackles += 1;
+                s = kind === 'tackle'
+                    ? captainReducer(s, { type: 'RESOLVE_MOMENT', outcome: { kind: 'tackle', zone: zona, at: 0.5 } })
+                    // Todo lo demás se juega SIEMPRE IGUAL: lo que este test
+                    // compara es qué cambia al mover LA ZONA DEL TACKLE.
+                    : resolverPendiente(s);
                 guarda += 1;
             }
-            s = captainReducer(s, { type: 'ADVANCE' });
-            if (s.phase === 'event') {
-                const ev = s.pendingEventId;
-                void ev;
-                break;
+            s = playTournament(captainReducer(s, { type: 'ADVANCE' }));
+            // Bucle y no `if`: la temporada trae la tarjeta del año Y la del
+            // mercado. Con un `if`, la segunda se comía una vuelta del `for` de
+            // afuera y las dos ramas de este test corrían distinta cantidad de
+            // temporadas — que es lo único que no puede pasar en una comparación
+            // pareada.
+            let decisiones = 0;
+            while (s.phase === 'event' && decisiones < 4) {
+                const evento = getPendingEvent(s);
+                if (!evento) break;
+                s = captainReducer(s, { type: 'CHOOSE', optionId: evento.options[0].id });
+                decisiones += 1;
             }
         }
-        return s;
+        return { estado: s, tackles };
     };
 
-    assert.deepEqual(correr('legal'), correr('legal'), 'la misma mano tiene que dar lo mismo');
-    assert.notDeepEqual(correr('legal'), correr('tarde'), 'jugar distinto tiene que dar distinto');
+    let semilla = 0;
+    let a: ReturnType<typeof correr> | null = null;
+    for (let s = 1; s <= 400 && a === null; s += 1) {
+        const intento = correr('legal', s);
+        if (intento.tackles > 0) { a = intento; semilla = s; }
+    }
+
+    assert.ok(a, 'ninguna de 400 semillas jugó un tackle: este test no está midiendo nada');
+    const b = correr('tarde', semilla);
+
+    assert.deepEqual(correr('legal', semilla).estado, a!.estado, 'la misma mano tiene que dar lo mismo');
+    assert.notDeepEqual(b.estado, a!.estado, 'jugar distinto tiene que dar distinto');
 });

@@ -58,6 +58,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    /* Sin gap, el logo y el breadcrumb quedaban pegados borde con borde: no se
+       superponían (medido: logo 72–215, zona central arranca en 215) pero se
+       leían como encimados, sobre todo con el logo en itálica y con sombra.
+       Mientras el sitio se dibujaba al 70% la falta de aire pasaba por apretado;
+       a escala real se nota. */
+    gap: 24px;
     position: relative;
     transition: padding 0.2s ease;
 }
@@ -71,6 +77,35 @@
 @media (max-width: 1100px) {
     .g22-header-inner {
         padding: 0 48px;
+        gap: 16px;
+    }
+}
+
+/* ── Desktop angosto (1024–1200) ───────────────────────────────────────────
+   Mientras el sitio se dibujaba al 70%, un viewport de 1024 px equivalía a
+   1463 px lógicos y en la cabecera entraba todo con aire de sobra. A escala
+   real, 1024 es 1024: el logo, el breadcrumb y las seis acciones no entran
+   juntos y el que se achicaba hasta desaparecer era el LOGO.
+
+   El breadcrumb es lo prescindible acá —la misma información está en el título
+   de la página, dos centímetros más abajo—, así que es lo que cede. El logo
+   nunca se encoge: es el ancla de la marca y el botón de volver al inicio. */
+@media (max-width: 1200px) {
+    .g22-logo {
+        flex: 0 0 auto;
+        min-width: max-content;
+    }
+    .g22-header-center-zone {
+        min-width: 0;
+        gap: 16px;
+        overflow: hidden;
+    }
+}
+
+@media (max-width: 1080px) {
+    /* Más abajo directamente no vale la pena: se pierde antes de leerse. */
+    .g22-header-center-zone {
+        display: none;
     }
 }
 

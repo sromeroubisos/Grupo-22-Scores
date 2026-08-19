@@ -3,7 +3,6 @@ import { createHash, randomUUID } from 'crypto';
 import * as XLSX from 'xlsx';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { FixtureService } from '@/lib/services/fixtureService';
-import { syncClubRankingsForMatches } from '@/lib/server/clubRankings';
 import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 import { isMissingRelationError } from '@/lib/utils/fixtureImportErrors';
 import { extractDocumentText } from '@/lib/services/fixtureTextExtraction';
@@ -304,11 +303,9 @@ export class FixtureImportService {
       payload: { created, updated, skipped, rejected },
     });
 
-    if (touchedMatchIds.length > 0) {
-      syncClubRankingsForMatches(touchedMatchIds).catch((error) => {
-        console.error('[FixtureImportService] Club ranking sync failed:', error);
-      });
-    }
+    // El ranking no se sincroniza acá: una importación toca cientos de partidos
+    // y disparaba una sincronización por cada uno. Lo levanta el cron del martes
+    // a las 00:00, que cuenta de una sola vez todo lo que todavía no contó.
 
     return { ok: rejected === 0, jobId: params.jobId, created, updated, skipped, rejected, issues };
   }

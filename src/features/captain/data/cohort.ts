@@ -36,12 +36,13 @@
 // distintas y la confusión entre las dos es la que costó el rediseño.
 
 import type { PositionFamilyId } from '../types/player.ts';
-import { ALL_FAMILIES } from './positions.ts';
+import { ALL_FAMILIES, POSITION_FAMILIES, youthPlayingFactor } from './positions.ts';
 import {
     POTENTIAL_BAND,
-    POTENTIAL_MEAN_GAP,
     POTENTIAL_REALIZATION,
     POTENTIAL_SD_GAP,
+    START_AGE,
+    expectedPotentialGap,
 } from '../types/player.ts';
 
 /**
@@ -52,7 +53,7 @@ import {
  * otra camada se jugó en otro mundo — las convocatorias que recibiste no se
  * pueden recalcular hacia atrás.
  */
-export const COHORT_VERSION = '2026-08.1';
+export const COHORT_VERSION = '2026-08.3';
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  1 · LAS CAMISETAS
@@ -201,6 +202,53 @@ const TYPICAL_BUILD_SHARE = 0.5;
  */
 const COHORT_MATURITY_AGE = 22;
 
+/**
+ * A qué edad la camada empieza a separarse A PLENO. DERIVADA: el debut más
+ * temprano del catálogo de puestos.
+ *
+ * Antes de esa edad la camada crece, pero amortiguada: la temporada de un pibe
+ * de 16 pesa 0,56 y la de uno de 17, 0,78. Es la misma curva con la que el motor
+ * le recorta el tiempo de juego al que todavía no debutó
+ * (`youthPlayingFactor`), y por el mismo motivo: acá lo que hace crecer es
+ * jugar, así que un grupo de chicos que todavía no juega no se separa.
+ */
+const COHORT_SPREAD_AGE = ALL_FAMILIES.reduce(
+    (menor, id) => Math.min(menor, POSITION_FAMILIES[id].age.debut),
+    99,
+);
+
+/**
+ * Qué fracción de su separación lleva recorrida la camada a una edad dada.
+ *
+ * ── POR QUÉ ES UNA SUMA DE PESOS Y NO UNA RECTA ────────────────────────────
+ * Era `(edad − X) / (madurez − X)`, y con la carrera empezando a los 16 hay que
+ * elegir X. Se probaron las dos puntas y las dos rompen el carril juvenil, cada
+ * una para su lado (medido sobre 160 carreras):
+ *
+ *     X = START_AGE (16)  →  el M20 no lo pisa NADIE. La camada sube 4,5 puntos
+ *                            por temporada desde los 16 y el jugador real 1,7,
+ *                            porque el suyo va recortado por el debut: a los 18
+ *                            ya le lleva seis puntos de ventaja a todo el mundo.
+ *     X = el debut (18)   →  el M20 lo pisa el 96%. El que arranca a los 16
+ *                            llega con dos años de trabajo encima a una camada
+ *                            que recién empieza a moverse.
+ *
+ * Con los pesos, el pibe de 16 crece y su camada también, cada uno a lo que el
+ * motor le deja: el carril queda disputado (11%) en vez de regalado o cerrado.
+ * Y el corolario es la parte linda de empezar antes: la ventaja existe, es real
+ * y es chica — dos temporadas amortiguadas, no dos temporadas enteras.
+ */
+function cohortProgress(age: number): number {
+    let hasta = 0;
+    let total = 0;
+    for (let a = START_AGE; a < COHORT_MATURITY_AGE; a += 1) {
+        const peso = youthPlayingFactor(a, COHORT_SPREAD_AGE);
+        total += peso;
+        if (a < age) hasta += peso;
+    }
+    return total > 0 ? Math.min(1, Math.max(0, hasta / total)) : 1;
+}
+
 export interface CohortCurve {
     mean: number;
     sd: number;
@@ -219,20 +267,46 @@ export interface CohortCurve {
  * entero del archivo.
  */
 export function cohortCurve(startOvr: number, age: number): CohortCurve {
-    const avance = Math.min(1, Math.max(0, (age - 18) / (COHORT_MATURITY_AGE - 18)));
+    const avance = cohortProgress(age);
     // El destino es el margen REALIZADO, no el margen sorteado. Sin
     // `POTENTIAL_REALIZATION` la camada maduraba en el techo esperado del propio
     // jugador, el jugador típico quedaba en el percentil 50 y los tres carriles
     // con cupo daban exactamente 0,000: el corte quedaba por encima del umbral
     // del escalón de arriba, así que no se evaluaba nunca.
-    const margen = (POTENTIAL_MEAN_GAP + POTENTIAL_BAND * TYPICAL_BUILD_SHARE) * POTENTIAL_REALIZATION;
+    //
+    // ── EL MARGEN ES EL QUE DE VERDAD SE SORTEA, NO EL DE LA CAMPANA ────────
+    // Con `POTENTIAL_FLOOR`, la mitad de abajo de la campana no sale nunca: la
+    // media del margen que se sortea es 36 y no 27 (`expectedPotentialGap`).
+    // Leer acá la media vieja habría descrito una camada seis puntos por debajo
+    // de la población que el motor produce, y está medido lo que eso hace: la
+    // mayor pasaba de rara a la mitad de las carreras (0,51 de 160) y el M20 lo
+    // pisaba el 96%. La camada tiene que moverse con la población o el piso se
+    // erosiona solo — es el motivo por el que este archivo existe.
+    const margen = (expectedPotentialGap(startOvr) + POTENTIAL_BAND * TYPICAL_BUILD_SHARE)
+        * POTENTIAL_REALIZATION;
     const destino = startOvr + margen;
     return {
         mean: startOvr + (destino - startOvr) * avance,
-        // Piso del 40%: a los 18 la camada ya está algo separada, porque el
+        // Piso del 40%: al arrancar, la camada ya está algo separada, porque el
         // sorteo de atributos pasa antes que cualquier crecimiento.
         sd: POTENTIAL_SD_GAP * (0.4 + 0.6 * avance),
     };
+}
+
+/**
+ * DÓNDE TERMINA LA CAMADA. Es `cohortCurve` en su edad de madurez, y por eso es
+ * una función de una línea y no una constante.
+ *
+ * Existe para que los DOS escalones de arriba —seleccionado A y la mayor, que
+ * son umbral y no cupo— puedan colgarse del mismo modelo generativo que los tres
+ * de abajo. Tenían su tabla escrita a mano, calibrada contra una población con
+ * techo mediano 66; cuando la población se movió, la tabla se quedó afirmando el
+ * mundo viejo y el 58,9% de las carreras pasaba a llegar a la mayor. Es la
+ * derivada congelada del §1.9, y el propio `calibration.test.ts` la tenía
+ * anotada como causa estructural antes de que pasara.
+ */
+export function cohortMaturity(startOvr: number): number {
+    return cohortCurve(startOvr, COHORT_MATURITY_AGE).mean;
 }
 
 /**

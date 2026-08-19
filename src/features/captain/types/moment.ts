@@ -121,7 +121,25 @@ export type MomentOutcome =
      * cuarto movimiento no es un dato faltante, es el dato — la corrida terminó
      * antes. `resolve` la camina hasta donde llega y cobra el parcial.
      */
-    | { kind: 'banda'; moves: { move: BandaMove; at: number }[] };
+    | { kind: 'banda'; moves: { move: BandaMove; at: number }[] }
+    /**
+     * La mano de un minijuego del catálogo por dorsal, y es UNA sola rama para
+     * los cincuenta y nueve.
+     *
+     * ── Por qué una y no cincuenta y nueve ──
+     * Porque `MomentOutcome` se discrimina por `kind`, y con una rama por
+     * minijuego esta unión tendría sesenta y seis miembros que ningún `switch`
+     * va a recorrer nunca. El único consumidor que necesita discriminar es el
+     * guardia de `resolveMoment` —`outcome.kind !== moment.kind`— y para eso el
+     * `kind` como string alcanza.
+     *
+     * La forma de `play` la decide el VERBO del minijuego, que es el único que
+     * la sabe leer: `engine/mechanics/` la tipa de los dos lados y la fábrica es
+     * la que las junta. Acá es `unknown` a propósito — declararla como una unión
+     * de los siete setups obligaría a este módulo de tipos a importar del motor,
+     * y el motor importa de acá.
+     */
+    | { kind: string; play: unknown };
 
 /** Una jugada ya resuelta, para la trayectoria. */
 export interface MomentRecord {

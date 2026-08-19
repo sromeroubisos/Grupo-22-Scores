@@ -24,8 +24,11 @@ type AdminClubRow = {
   sport_id?: string | null
 }
 
-const DEFAULT_LIMIT = 2000;
-const MAX_LIMIT = 5000;
+const DEFAULT_LIMIT = 5000;
+const MAX_LIMIT = 10000;
+// PostgREST corta cada respuesta en 1000 filas (db-max-rows): pedir range(0, 1999)
+// devuelve 1000 y nadie avisa. Para servir el catalogo entero hay que paginar.
+const PAGE_SIZE = 1000;
 
 function parseLimit(value: string | null) {
   const parsed = Number.parseInt(value || '', 10);
@@ -50,7 +53,10 @@ function getSportVariants(sport: string): string[] {
     case 'rugby-union': return ['rugby', 'rugby-union'];
     case 'rugby-league': return ['rugby', 'rugby-league'];
     case 'football': return ['football', 'soccer'];
+    // Los dos hockeys se leen entre si: el catalogo tiene clubes viejos
+    // guardados como 'hockey' que en la plataforma son de cesped.
     case 'hockey': return ['hockey', 'field-hockey'];
+    case 'field-hockey': return ['field-hockey', 'hockey'];
     default: return lower ? [lower] : [];
   }
 }
@@ -79,24 +85,41 @@ export async function GET(request: NextRequest) {
     ];
     const optionalColumns = ['sport', 'sport_id', 'entity_type', 'city', 'slug', 'primary_color'];
 
-    let clubs: AdminClubRow[] | null = null;
-    let error: { message?: string | null; details?: string | null; code?: string | null } | null = null;
+    type QueryError = { message?: string | null; details?: string | null; code?: string | null } | null;
 
-    for (const columns of variants) {
+    const fetchPage = async (columns: string, from: number, size: number) => {
       let query = supabase
         .from('clubs')
         .select(columns)
-        .order('name', { ascending: true });
+        // Desempate por PK: sin el, dos clubes con el mismo nombre pueden
+        // repetirse o desaparecer entre paginas.
+        .order('name', { ascending: true })
+        .order('id', { ascending: true });
 
       if (search) {
         const escapedSearch = escapePostgrestLike(search);
         query = query.or(`name.ilike.%${escapedSearch}%,short_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`);
       }
 
-      const result = await query.range(offset, offset + limit - 1);
+      const result = await query.range(from, from + size - 1);
+      return {
+        data: (result.data || []) as unknown as AdminClubRow[],
+        error: result.error as QueryError,
+      };
+    };
+
+    let clubs: AdminClubRow[] | null = null;
+    let error: QueryError = null;
+    let resolvedColumns: string | null = null;
+
+    // Primera pagina: sirve ademas para descubrir que columnas existen.
+    for (const columns of variants) {
+      const firstSize = Math.min(PAGE_SIZE, limit);
+      const result = await fetchPage(columns, offset, firstSize);
 
       if (!result.error) {
-        clubs = result.data || [];
+        clubs = result.data;
+        resolvedColumns = columns;
         error = null;
         break;
       }
@@ -105,6 +128,23 @@ export async function GET(request: NextRequest) {
 
       if (!optionalColumns.some((column) => isMissingColumnError(result.error, column))) {
         break;
+      }
+    }
+
+    // Resto de las paginas hasta completar el limite pedido.
+    if (!error && clubs && resolvedColumns) {
+      let lastPageSize = clubs.length;
+      while (lastPageSize === PAGE_SIZE && clubs.length < limit) {
+        const nextSize = Math.min(PAGE_SIZE, limit - clubs.length);
+        const page = await fetchPage(resolvedColumns, offset + clubs.length, nextSize);
+
+        if (page.error) {
+          error = page.error;
+          break;
+        }
+
+        clubs = clubs.concat(page.data);
+        lastPageSize = page.data.length;
       }
     }
 

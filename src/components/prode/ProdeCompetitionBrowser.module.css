@@ -1,0 +1,363 @@
+/* ============================================================================
+   Pantalla de todas las competencias.
+
+   Es la mitad "buscar" del prode: el lobby muestra diez y manda acá para el resto.
+   La tarjeta la pone ProdeCompetitionCard.module.css; este módulo es la cabecera,
+   las herramientas de filtro y la grilla.
+   ============================================================================ */
+
+.page {
+    min-height: 100vh;
+    padding: 40px 0 96px;
+}
+
+.shell {
+    --browser-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+    --browser-radius: 12px;
+    --browser-radius-sm: 8px;
+    --browser-hairline: 1px solid var(--color-border);
+    --browser-surface: var(--color-bg-secondary);
+    --browser-surface-raised: var(--color-bg-tertiary);
+    --browser-accent-soft: rgba(var(--color-accent-rgb), 0.12);
+    --browser-accent-line: rgba(var(--color-accent-rgb), 0.35);
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.shell :is(a, button, input):focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--browser-radius-sm);
+}
+
+/* ---------- Cabecera ---------- */
+
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 20px;
+    border-bottom: var(--browser-hairline);
+}
+
+.backLink {
+    align-self: flex-start;
+    margin-bottom: 2px;
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.backLink:hover {
+    color: var(--color-text-primary);
+}
+
+.title {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+}
+
+.lede {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+}
+
+.headerCount {
+    margin: 2px 0 0;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+}
+
+.headerCountNum {
+    font-family: var(--browser-mono);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+}
+
+/* ---------- Herramientas ---------- */
+
+.toolbar {
+    display: grid;
+    grid-template-columns: minmax(200px, 300px) minmax(0, 1fr);
+    align-items: center;
+    gap: 12px 16px;
+}
+
+.searchField {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 11px;
+    width: 15px;
+    height: 15px;
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+}
+
+.searchInput {
+    width: 100%;
+    min-height: 38px;
+    padding: 0 32px 0 33px;
+    border: var(--browser-hairline);
+    border-radius: var(--browser-radius-sm);
+    background: var(--browser-surface);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 0.875rem;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.searchInput::placeholder {
+    /* El placeholder es texto y le corresponde el mismo 4,5:1 que al resto. Ni
+       `--color-text-muted` ni el terciario (3,87:1 sobre esta superficie) llegan. */
+    color: var(--color-text-secondary);
+}
+
+.searchInput:hover {
+    border-color: var(--color-border-light);
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    background: var(--browser-surface-raised);
+}
+
+/* El aspa nativa se apaga porque ya dibujamos la nuestra, que tiene aria-label y
+   entra en el orden de tabulación. Con las dos, el campo mostraba dos cruces. */
+.searchInput::-webkit-search-cancel-button,
+.searchInput::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.searchClear {
+    position: absolute;
+    right: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.searchClear:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.filterRow,
+.sortRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.filterRow {
+    justify-content: flex-end;
+}
+
+.controlRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+    padding-bottom: 4px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 0 12px;
+    border: var(--browser-hairline);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast),
+        color var(--transition-fast);
+}
+
+.chip:hover {
+    border-color: var(--color-border-light);
+    color: var(--color-text-primary);
+}
+
+.chipActive {
+    border-color: var(--browser-accent-line);
+    background: var(--browser-accent-soft);
+    color: var(--color-accent-ink);
+    font-weight: 600;
+}
+
+.chipCount {
+    font-family: var(--browser-mono);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.75;
+}
+
+.resultCount {
+    margin: 0;
+    font-family: var(--browser-mono);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+}
+
+/* ---------- Resultados ---------- */
+
+/* Mismo mínimo que la vitrina del lobby: las dos pantallas muestran la misma
+   tarjeta y no tienen por qué quebrar en anchos distintos. */
+.cardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 28px 20px;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--browser-radius);
+}
+
+.emptyTitle {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.emptyText {
+    margin: 0;
+    max-width: 60ch;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+}
+
+.btnSecondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 16px;
+    border: var(--browser-hairline);
+    border-radius: var(--browser-radius-sm);
+    background: var(--browser-surface);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.btnSecondary:hover {
+    border-color: var(--color-border-light);
+    background: var(--browser-surface-raised);
+}
+
+.visuallyHidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ---------- Adaptación por pantalla ---------- */
+
+@media (max-width: 900px) {
+    .toolbar {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .filterRow {
+        justify-content: flex-start;
+        /* En pantalla angosta los chips se arrastran en lugar de envolverse en
+           cuatro filas y comerse la grilla. */
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+    }
+
+    .filterRow::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .page {
+        padding: 24px 0 calc(var(--mobile-nav-height, 78px) + 32px);
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .lede {
+        font-size: 0.875rem;
+    }
+
+    .controlRow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sortRow {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .sortRow::-webkit-scrollbar {
+        display: none;
+    }
+
+    .cardGrid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

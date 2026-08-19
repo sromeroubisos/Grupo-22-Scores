@@ -85,9 +85,20 @@ export function movementBetween(from: ClubDef, to: ClubDef): MovementDirection {
 }
 
 // ── Escaleras domésticas ─────────────────────────────────────────────────────
-// Pirámides reales, de la categoría más baja a la más alta. Los países cuyo
-// rugby de clubes vive en una liga regional (Irlanda, Gales, Escocia, Australia)
-// NO tienen escalera doméstica propia: se resuelven por ruta migratoria.
+// Pirámides reales, de la categoría más baja a la más alta.
+//
+// LA LISTA DE "PAÍSES SIN ESCALERA" SE ACORTÓ MUCHO EN 2026-27.11, y el
+// razonamiento que había antes acá estaba equivocado: decía que Irlanda, Gales,
+// Escocia y Australia no tenían escalera doméstica porque su rugby de clubes
+// "vive en una liga regional". Lo que vive en la liga regional es su rugby
+// PROFESIONAL — las provincias, las regiones, las franquicias— y eso es
+// justamente lo contrario de no tener rugby de clubes: los cuatro tienen una
+// competición de clubes bien viva debajo, que es donde EMPIEZA un jugador de esos
+// países. Mandarlos a emigrar a los 18 era el error.
+//
+// Lo que sí es cierto, y ahora está modelado donde corresponde, es que de esas
+// ligas no se ASCIENDE a la franquicia: se llega por vía declarada
+// (`TRANSFER_PATHWAYS`), igual que un italiano llega a Benetton.
 const STATIC_LADDER: Record<CountryCode, string[]> = {
     fr: ['fr-federale2', 'fr-federale1', 'nationale', 'prod2', 'top14'],
     'gb-eng': ['eng-national2', 'eng-national1', 'championship', 'prem'],
@@ -118,6 +129,48 @@ const STATIC_LADDER: Record<CountryCode, string[]> = {
     // hoy no está (ver `PENDING_COMPETITIONS`)— y no bajándole el nivel a la DH.
     pt: ['pt-honra'],
     br: ['br-super12'],
+
+    // ── 2026-27.11 · dieciséis países más ─────────────────────────────────────
+    //
+    // AUSTRALIA es la única de la tanda con dos escalones, y hay que leer la lista
+    // por lo que es: un ESCALAFÓN, no una escalera institucional. El Hospital Cup
+    // no asciende al Shute Shield —son competiciones de estados distintos que no se
+    // cruzan nunca, y están las dos en `PARALLEL_COMPETITIONS`— pero Sídney se
+    // juega más arriba que Brisbane, y el escalafón tiene que poder decirlo. Es
+    // exactamente el mismo caso que `us: [NCR, D1A, MLR]`, que tampoco es una
+    // escalera de ascensos.
+    au: ['au-hospital-cup', 'au-shute-shield'],
+    // Las tres islas británicas y Fiyi: UN SOLO ESCALÓN cada una, y la consecuencia
+    // es fuerte, así que conviene tenerla escrita. Arriba de estas ligas no hay una
+    // división mejor: hay una franquicia regional que está fuera de la pirámide
+    // (las provincias irlandesas, las regiones galesas, Glasgow y Edinburgh, los
+    // Drua). Un jugador que empieza acá NO puede subir dentro de su país —no hay
+    // adónde— y su carrera depende de la vía declarada a la franquicia o de irse a
+    // una liga profesional de otro país. Las dos puertas están en
+    // `TRANSFER_PATHWAYS`; sin ellas, estos cuatro países serían una trampa.
+    ie: ['ire-ail1a'],
+    'gb-wls': ['wal-premiership'],
+    'gb-sct': ['sco-premiership'],
+    fj: ['fj-skipper'],
+    // Canadá y México salen por la MLR, que les queda al lado. Europa emergente
+    // (Bélgica, Países Bajos) y Latinoamérica (Perú, Colombia, Paraguay, Bolivia),
+    // por sus vías respectivas.
+    ca: ['ca-clubs'],
+    mx: ['mx-liga'],
+    be: ['be-elite'],
+    nl: ['nl-ereklasse'],
+    pe: ['pe-metropolitano'],
+    co: ['co-liga'],
+    py: ['py-primera'],
+    bo: ['bo-liga'],
+    // Georgia, Rumania y Rusia arrancan ya en un plantel pago: sus ligas son
+    // semiprofesionales (o profesional, en el caso ruso) y no tienen debajo un
+    // escalón amateur cargado. Es el mismo hueco declarado que tiene Portugal —el
+    // arranque sale con `routeDowngraded`— y se cierra igual: cargando la segunda
+    // división real, que hoy figura en `PENDING_COMPETITIONS`.
+    ge: ['ge-didi10'],
+    ro: ['ro-liga'],
+    ru: ['ru-championship'],
 };
 
 // Uruguay y Chile siguen viviendo en una competición paraguas con divisiones
@@ -219,15 +272,37 @@ export type MigrationRegion =
 export const MIGRATION_ROUTES: Record<MigrationRegion, { countryCode: CountryCode; weight: number }[]> = {
     // Sudamérica sin liga propia modelada: el circuito natural es el rioplatense,
     // más Brasil desde que su Super 12 está cargado.
-    'south-america': [{ countryCode: 'ar', weight: 6 }, { countryCode: 'uy', weight: 2 }, { countryCode: 'cl', weight: 2 }, { countryCode: 'br', weight: 2 }],
+    // 2026-27.11: entran Perú, Colombia, Paraguay y Bolivia con peso bajo. No es
+    // relleno — para un venezolano o un ecuatoriano, empezar en Lima o en Bogotá es
+    // bastante más plausible que aparecer en la URBA, y las cuatro cumplen la
+    // condición que Portugal no cumple: su escalón más bajo es amateur de verdad,
+    // así que el migrante entra por abajo y no a un plantel pago.
+    'south-america': [
+        { countryCode: 'ar', weight: 6 }, { countryCode: 'uy', weight: 2 }, { countryCode: 'cl', weight: 2 }, { countryCode: 'br', weight: 2 },
+        { countryCode: 'pe', weight: 1 }, { countryCode: 'co', weight: 1 }, { countryCode: 'py', weight: 1 }, { countryCode: 'bo', weight: 1 },
+    ],
     // Norteamérica cambió de forma con la MLR y el universitario adentro: hasta acá,
     // un canadiense o un jamaiquino sin liga propia tenía que cruzar el Atlántico
     // para empezar a jugar. Estados Unidos entra con el peso más alto porque es el
     // destino de al lado, y sigue teniendo la escalera más baja de la región (la Ivy
     // en NCR), así que un debutante puede entrar por abajo de verdad.
-    'north-america': [{ countryCode: 'us', weight: 5 }, { countryCode: 'gb-eng', weight: 3 }, { countryCode: 'fr', weight: 3 }, { countryCode: 'jp', weight: 2 }],
-    // Islas Británicas: su rugby de clubes es regional (URC), así que emigran.
-    'british-isles': [{ countryCode: 'gb-eng', weight: 5 }, { countryCode: 'fr', weight: 4 }, { countryCode: 'jp', weight: 1 }],
+    // Y con Canadá y México adentro deja de hacer falta cruzar el Atlántico para
+    // que un caribeño empiece a jugar: los dos vecinos de Estados Unidos entran con
+    // ligas amateur de verdad.
+    'north-america': [
+        { countryCode: 'us', weight: 5 }, { countryCode: 'ca', weight: 3 }, { countryCode: 'mx', weight: 2 },
+        { countryCode: 'gb-eng', weight: 3 }, { countryCode: 'fr', weight: 3 }, { countryCode: 'jp', weight: 2 },
+    ],
+    // ISLAS BRITÁNICAS: acá había una afirmación que era falsa y que ahora se
+    // corrige. Decía que su rugby de clubes "es regional (URC), así que emigran", y
+    // lo regional es su rugby PROFESIONAL: Irlanda, Gales y Escocia tienen cada una
+    // su liga de clubes viva, amateur, y es donde empieza su gente. Ya no emigran
+    // por defecto — tienen ruta doméstica— y entran acá como destino para los que
+    // no la tienen (un manés, un jerseyés).
+    'british-isles': [
+        { countryCode: 'gb-eng', weight: 5 }, { countryCode: 'ie', weight: 3 }, { countryCode: 'gb-wls', weight: 2 }, { countryCode: 'gb-sct', weight: 2 },
+        { countryCode: 'fr', weight: 4 }, { countryCode: 'jp', weight: 1 },
+    ],
     // Europa suma Italia con peso bajo: la Serie A Élite importa jugadores de la
     // Europa emergente (rumanos, georgianos), pero no es un destino masivo.
     //
@@ -238,10 +313,27 @@ export const MIGRATION_ROUTES: Record<MigrationRegion, { countryCode: CountryCod
     // extranjeros a una escalera de un solo peldaño convierte una liga nueva en un
     // atajo. La DH se llena igual —los portugueses arrancan ahí por ruta doméstica—
     // y el día que entre la I Divisão, Portugal puede volver a esta lista.
-    europe: [{ countryCode: 'fr', weight: 4 }, { countryCode: 'gb-eng', weight: 3 }, { countryCode: 'es', weight: 3 }, { countryCode: 'it', weight: 2 }],
+    //
+    // Bélgica y Países Bajos entran en `2026-27.11` y GEORGIA, RUMANIA Y RUSIA NO,
+    // que es la misma decisión que dejó a Portugal afuera y por el mismo motivo
+    // medido: sus ligas son de un solo escalón semiprofesional o profesional, así
+    // que el migrante que cae ahí entra a un plantel pago en vez de empezar por
+    // abajo. La Belgian Elite League y la Ereklasse sí son amateur puras.
+    europe: [
+        { countryCode: 'fr', weight: 4 }, { countryCode: 'gb-eng', weight: 3 }, { countryCode: 'es', weight: 3 }, { countryCode: 'it', weight: 2 },
+        { countryCode: 'be', weight: 2 }, { countryCode: 'nl', weight: 2 },
+    ],
     africa: [{ countryCode: 'za', weight: 6 }, { countryCode: 'fr', weight: 3 }, { countryCode: 'gb-eng', weight: 1 }],
-    pacific: [{ countryCode: 'nz', weight: 5 }, { countryCode: 'jp', weight: 3 }, { countryCode: 'fr', weight: 2 }],
-    oceania: [{ countryCode: 'nz', weight: 5 }, { countryCode: 'jp', weight: 3 }, { countryCode: 'gb-eng', weight: 2 }],
+    // Pacífico y Oceanía suman Australia y Fiyi, que es adónde va de verdad un
+    // isleño antes que a Europa: los dos tienen su escalón de entrada amateur.
+    pacific: [
+        { countryCode: 'nz', weight: 5 }, { countryCode: 'au', weight: 4 }, { countryCode: 'fj', weight: 2 },
+        { countryCode: 'jp', weight: 3 }, { countryCode: 'fr', weight: 2 },
+    ],
+    oceania: [
+        { countryCode: 'nz', weight: 5 }, { countryCode: 'au', weight: 4 },
+        { countryCode: 'jp', weight: 3 }, { countryCode: 'gb-eng', weight: 2 },
+    ],
     asia: [{ countryCode: 'jp', weight: 7 }, { countryCode: 'nz', weight: 2 }, { countryCode: 'gb-eng', weight: 1 }],
 };
 
@@ -391,10 +483,26 @@ export interface TransferPathway {
 // `countryCode: 'multi'`, así que el subconjunto nacional se declara acá.
 const NZ_SUPER_FRANCHISES = ['blues', 'chiefs', 'crusaders', 'highlanders', 'hurricanes'];
 const SA_URC_FRANCHISES = ['bulls', 'lions', 'sharks', 'stormers'];
+// 2026-27.11 · las franquicias que ahora tienen un sistema doméstico debajo.
+// Existían en el catálogo desde el principio; lo que faltaba era el club de donde
+// sale su gente, y por eso hasta ahora no eran destino de ninguna vía.
+const AU_SUPER_FRANCHISES = ['brumbies', 'reds', 'waratahs', 'western-force'];
+const WAL_URC_REGIONS = ['cardiff-rugby', 'ospreys', 'scarlets', 'dragons'];
+const IRE_URC_PROVINCES = ['leinster', 'munster', 'ulster', 'connacht'];
+const SCO_URC_TEAMS = ['glasgow-warriors', 'edinburgh-rugby'];
 const SRA_BY_COUNTRY: Record<CountryCode, string[]> = {
     ar: ['dogos-xv', 'pampas', 'tarucas'],
     uy: ['penarol-rugby'],
     cl: ['selknam'],
+    // Yacaré XV es la franquicia PARAGUAYA —los Yacarés son Paraguay— y hasta que
+    // entró la Primera División paraguaya no era de nadie: estaba en el catálogo
+    // sin sistema doméstico debajo del cual salir. Ahora un paraguayo tiene la
+    // misma puerta que un uruguayo con Peñarol.
+    //
+    // Capibaras XV sigue sin país asignado a propósito: no sabemos de qué unión es
+    // y no se adivina (ver `OPEN_QUESTIONS_2026_27`). Mientras tanto se alcanza por
+    // las vías de competición, no por una nacional.
+    py: ['yacare-xv'],
     // Cobras es la franquicia de la CONFEDERACIÓN, no de un club: Brasil no aporta
     // clubes del Super 12 a Super Rugby Americas, aporta a los Cobras, que son el
     // brazo profesional de la CBRu y la antesala de los Tupis. Que aparezca acá es
@@ -427,6 +535,16 @@ const ITA_FRANCHISES = ['benetton-treviso', 'zebre-parma'];
 const FRANCHISE_COUNTRY: Record<string, CountryCode> = {
     ...Object.fromEntries(NZ_SUPER_FRANCHISES.map((id) => [id, 'nz'])),
     ...Object.fromEntries(SA_URC_FRANCHISES.map((id) => [id, 'za'])),
+    // 2026-27.11: las cuatro australianas, las cuatro galesas, las cuatro
+    // irlandesas, las dos escocesas y los Drua. Antes ninguna tenía país, y eso
+    // hacía que para un galés firmar en los Ospreys contara como irse al exterior
+    // — que es lo contrario de lo que es. Moana Pasifika sigue sin país porque sí
+    // es multinacional de verdad; los Drua no: son de Fiyi.
+    ...Object.fromEntries(AU_SUPER_FRANCHISES.map((id) => [id, 'au'])),
+    ...Object.fromEntries(WAL_URC_REGIONS.map((id) => [id, 'gb-wls'])),
+    ...Object.fromEntries(IRE_URC_PROVINCES.map((id) => [id, 'ie'])),
+    ...Object.fromEntries(SCO_URC_TEAMS.map((id) => [id, 'gb-sct'])),
+    'fijian-drua': 'fj',
     // Benetton y Zebre son italianas aunque jueguen la URC, exactamente como los
     // Stormers son sudafricanos. Para un italiano firmar ahí es el paso profesional
     // más doméstico que tiene, no emigrar — y sin esta línea el motor lo contaba al
@@ -649,7 +767,7 @@ export const TRANSFER_PATHWAYS: TransferPathway[] = [
     },
     {
         id: 'emerging-europe-to-pro',
-        label: 'Europa emergente (España, Portugal, Italia) → profesionalismo europeo',
+        label: 'Europa emergente (España, Portugal, Italia, Georgia, Rumania) → profesionalismo europeo',
         // Portugal e Italia entran acá por la misma razón que España: son el tercer
         // escalón semiprofesional de su país y su salida natural son las ligas
         // profesionales francesas e inglesas.
@@ -659,7 +777,10 @@ export const TRANSFER_PATHWAYS: TransferPathway[] = [
         // Nationale), no en Portugal. El Top 14 no está entre los destinos porque
         // ningún jugador salta del tercer escalón a la élite en una ventana; se llega
         // desde la Pro D2, que es como se llega en la realidad.
-        fromCompetitions: ['super-cup', 'esp-dh', 'esp-dhelite', 'pt-honra', 'ita-serie-a-elite'],
+        // Georgia y Rumania entran en `2026-27.11` por el mismo motivo y con más
+        // razón todavía: el núcleo de los Lelos y el de los Stejarii juega en
+        // Francia desde hace veinte años. Es la misma puerta, no una nueva.
+        fromCompetitions: ['super-cup', 'esp-dh', 'esp-dhelite', 'pt-honra', 'ita-serie-a-elite', 'ge-didi10', 'ro-liga'],
         toCompetitions: ['nationale', 'prod2', 'championship'],
         demandTolerance: 7,
         weight: 2,
@@ -688,6 +809,200 @@ export const TRANSFER_PATHWAYS: TransferPathway[] = [
         demandTolerance: 7,
         weight: 2,
         note: 'con la liga contrayéndose, la salida al exterior es parte de la carrera',
+    },
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // 2026-27.11 · LAS PUERTAS DE LOS DIECISÉIS SISTEMAS NUEVOS
+    // ═══════════════════════════════════════════════════════════════════════
+    //
+    // Estas vías no son un adorno: son la condición para que las ligas nuevas se
+    // puedan cargar sin trabar carreras. La ventana de un jugador amateur no cruza
+    // la frontera (`windowStaysHome` en club-offers.ts), así que un país con UN
+    // SOLO escalón amateur y sin vía es una trampa — el jugador nace ahí y se
+    // muere ahí, por bueno que sea. Irlanda, Gales, Escocia, Fiyi, Canadá, México,
+    // Bélgica, Países Bajos, Perú, Colombia, Paraguay y Bolivia son exactamente
+    // ese caso, y cada uno sale por donde sale en la realidad.
+    //
+    // El `minOvr` de las vías a una franquicia sigue la misma regla de siempre: el
+    // rating de la franquicia MÁS FLOJA del conjunto. Una vía no es un regalo — es
+    // la puerta que existe, con el peaje que tiene.
+    {
+        id: 'au-club-to-super-rugby',
+        label: 'Clubes australianos → franquicias australianas de Super Rugby',
+        // La misma forma que el NPC neozelandés: entre el club y Super Rugby no hay
+        // nada, así que el club ES la cantera. Desde que murió el National Rugby
+        // Championship (2019) no existe un escalón intermedio que amortigüe el
+        // salto, y por eso el peaje es alto: 76 es la Western Force, la franquicia
+        // más floja de las cuatro.
+        fromCompetitions: ['au-shute-shield', 'au-hospital-cup'],
+        toClubIds: AU_SUPER_FRANCHISES,
+        demandTolerance: 10,
+        weight: 3,
+        minOvr: 76,
+        note: 'sin NRC en el medio, del Shute Shield o del Hospital Cup se salta directo a la franquicia',
+    },
+    {
+        id: 'wal-club-to-urc',
+        label: 'Welsh Premiership → regiones galesas de la URC',
+        // 68 es Dragons. Que la puerta galesa sea la más barata de las tres
+        // británicas no es un favor: es que Dragons es, de lejos, la franquicia más
+        // floja de las diez que hay entre Gales, Irlanda y Escocia.
+        fromCompetitions: ['wal-premiership'],
+        toClubIds: WAL_URC_REGIONS,
+        demandTolerance: 10,
+        weight: 3,
+        minOvr: 68,
+        note: 'de la Premiership no se asciende: se firma con la región, que está fuera de la pirámide',
+    },
+    {
+        id: 'ire-ail-to-provinces',
+        label: 'All-Ireland League → provincias irlandesas',
+        // 78 es Connacht. La AIL es amateur POR REGLAMENTO y las cuatro provincias
+        // son profesionales: no hay escalón intermedio, hay una puerta y es la
+        // academia provincial. Cara, y así es en la realidad.
+        fromCompetitions: ['ire-ail1a'],
+        toClubIds: IRE_URC_PROVINCES,
+        demandTolerance: 10,
+        weight: 3,
+        minOvr: 78,
+        note: 'la academia provincial: la única forma de pasar de la AIL al profesionalismo sin irse',
+    },
+    {
+        id: 'sco-club-to-urc',
+        label: 'Scottish Premiership → Glasgow y Edinburgh',
+        // 81 es Edinburgh, y es la puerta más cara de las tres británicas por una
+        // razón concreta: Escocia tiene DOS franquicias y las dos son fuertes.
+        // Cuando existía el Super6 había un escalón en el medio; la SRU lo cerró en
+        // 2024 y quedó este salto.
+        fromCompetitions: ['sco-premiership'],
+        toClubIds: SCO_URC_TEAMS,
+        demandTolerance: 10,
+        weight: 3,
+        minOvr: 81,
+        note: 'sin Super6 en el medio, del club se pasa directo a una de las dos franquicias',
+    },
+    {
+        id: 'home-nations-club-to-pro',
+        label: 'Clubes de Gales, Irlanda y Escocia → profesionalismo inglés y francés',
+        // LA VÍA QUE HACE EL TRABAJO. Las tres de arriba son la puerta grande y
+        // cara; ésta es la que usa el jugador normal, y también es la real: el
+        // Championship inglés y la Nationale francesa están llenos de galeses,
+        // escoceses e irlandeses que no entraron a la franquicia de su país.
+        //
+        // Sin `minOvr` a propósito: acá el filtro lo hace el club destino, que es
+        // de un escalón alcanzable. Ponerle peaje sería cerrar la única salida
+        // realista de tres países enteros.
+        fromCompetitions: ['wal-premiership', 'ire-ail1a', 'sco-premiership'],
+        toCompetitions: ['championship', 'nationale', 'prod2'],
+        demandTolerance: 7,
+        weight: 3,
+        note: 'la salida del que no entra a la franquicia de su país, que son casi todos',
+    },
+    {
+        id: 'fj-skipper-to-drua',
+        label: 'Skipper Cup → Fijian Drua',
+        // 74 es el rating de los Drua. Es una puerta angosta —una sola franquicia
+        // para trece provincias— y por eso Fiyi tiene además la vía de abajo.
+        fromCompetitions: ['fj-skipper'],
+        toClubIds: ['fijian-drua'],
+        demandTolerance: 12,
+        weight: 4,
+        minOvr: 74,
+        note: 'la única franquicia profesional de Fiyi, y se llega desde la provincia',
+    },
+    {
+        id: 'fj-skipper-to-abroad',
+        label: 'Skipper Cup → Japón y Francia',
+        // LA HISTORIA FIYIANA DE VERDAD NO ES LOS DRUA: es la diáspora. El
+        // jugador de provincia que se va a jugar a Japón o a Francia es, en
+        // volumen, muchísimo más común que el que entra a la franquicia — y con
+        // trece provincias compitiendo por un solo plantel profesional, tiene que
+        // ser así también acá.
+        fromCompetitions: ['fj-skipper'],
+        toCompetitions: ['jpn-d2', 'jpn-d3', 'nationale', 'fr-federale1'],
+        demandTolerance: 8,
+        weight: 3,
+        note: 'la diáspora fiyiana: más jugadores salen del país que los que entran a los Drua',
+    },
+    {
+        id: 'north-america-club-to-mlr',
+        label: 'Clubes de Canadá y México → Major League Rugby',
+        // 57 es Anthem RC, el mismo piso que la vía universitaria estadounidense al
+        // mismo destino: el que entra a la MLR entra por lo que vale, venga de la
+        // Ivy, de Vancouver o del Valle de México. Para un canadiense es además la
+        // única salida profesional que no cruza un océano.
+        fromCompetitions: ['ca-clubs', 'mx-liga'],
+        toCompetitions: ['us-mlr'],
+        demandTolerance: 12,
+        weight: 3,
+        minOvr: 57,
+        note: 'la MLR es el profesionalismo de al lado para los dos vecinos de EE.UU.',
+    },
+    {
+        id: 'py-domestic-to-sra',
+        label: 'Clubes paraguayos → Yacaré XV (Super Rugby Americas)',
+        // La cuarta puerta nacional a la SRA, después de la argentina, la uruguaya
+        // y la chilena, y funciona igual. 58 es el rating de Yacaré: un punto por
+        // debajo del piso de las otras porque Yacaré es la franquicia más floja de
+        // las que tienen país asignado, no porque la puerta sea más blanda.
+        fromCompetitions: ['py-primera'],
+        toClubIds: SRA_BY_COUNTRY.py,
+        demandTolerance: 12,
+        weight: 4,
+        minOvr: 58,
+        note: 'Paraguay tiene franquicia propia; el salto al profesionalismo no pide emigrar',
+    },
+    {
+        id: 'latam-emerging-to-southern-cone',
+        label: 'Perú, Colombia y Bolivia → el circuito del Cono Sur',
+        // PERÚ, COLOMBIA Y BOLIVIA NO TIENEN FRANQUICIA, y ésa es la diferencia con
+        // Paraguay. Su salida no es un salto al profesionalismo sino un pase
+        // internacional amateur: irse a jugar a Uruguay, a Chile o a Brasil, que es
+        // el circuito que tienen al lado y donde sí hay una capa profesional arriba.
+        //
+        // Encadena con las vías que ya existían: el peruano que llega a Uruguay
+        // queda a un paso de Peñarol, y el que llega a Brasil, de Cobras. Ese
+        // encadenamiento es la carrera real de un jugador de una unión en
+        // desarrollo, y no hacía falta inventar nada para tenerlo.
+        //
+        // Sin `minOvr`: un pase amateur entre países vecinos no tiene peaje de
+        // nivel, lo decide el club que lo recibe.
+        fromCompetitions: ['pe-metropolitano', 'co-liga', 'bo-liga'],
+        toCompetitions: ['sa-uy', 'sa-cl', 'br-super12'],
+        demandTolerance: 8,
+        weight: 3,
+        note: 'el que quiere jugar en serio se va al Río de la Plata o a Brasil, y desde ahí sigue',
+    },
+    {
+        id: 'benelux-club-to-franchise',
+        label: 'Bélgica y Países Bajos → sus franquicias de la Rugby Europe Super Cup',
+        // Brussels Devils es la franquicia BELGA y Delta la del Benelux: son
+        // literalmente el escalón de arriba de estas dos ligas, y hasta ahora
+        // estaban en el catálogo sin nadie debajo de quien nutrirse. 54 es el
+        // rating de los Devils, la más floja de las dos.
+        //
+        // Hace falta una vía y no alcanza la ventana por lo mismo que en Portugal:
+        // las franquicias de la Super Cup llevan `countryCode: 'multi'`, así que
+        // para un amateur belga la ventana no las alcanza aunque estén al lado.
+        fromCompetitions: ['be-elite', 'nl-ereklasse'],
+        toClubIds: ['brussels-devils', 'delta'],
+        demandTolerance: 12,
+        weight: 4,
+        minOvr: 54,
+        note: 'la Super Cup es el techo del Benelux, y sus franquicias salen de estas dos ligas',
+    },
+    {
+        id: 'benelux-club-to-france',
+        label: 'Bélgica y Países Bajos → escalones franceses',
+        // La otra salida, y para un belga francófono es la más natural de todas:
+        // Francia está al lado y sus escalones amateur y semiprofesional
+        // (Fédérale 2, Fédérale 1, Nationale) reciben jugadores de todo el
+        // continente. Sin peaje de nivel, igual que la vía latinoamericana.
+        fromCompetitions: ['be-elite', 'nl-ereklasse'],
+        toCompetitions: ['fr-federale2', 'fr-federale1', 'nationale'],
+        demandTolerance: 8,
+        weight: 2,
+        note: 'la frontera francesa es la salida corta del rugby de club del Benelux',
     },
 ];
 

@@ -2,6 +2,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { parseClubBaseRosterId } from '@/lib/clubRoster';
 
 export interface PersonWithRole {
@@ -217,24 +218,75 @@ function mapPersonRecord(person: any, membership: any, divisionName?: string, di
     };
 }
 
-async function fetchPersonRowsByIds(supabase: any, personIds: string[]): Promise<PersonRow[]> {
+/**
+ * LLAMADORES AUTORIZADOS de `fetchPersonRowsByIds`. Esta unión es la lista, y es
+ * código: agregar un llamador nuevo NO COMPILA sin sumarlo acá, y sumarlo obliga a
+ * revisar si sus ids salieron de una consulta con el cliente del usuario.
+ *
+ * Cada uno de estos obtiene sus ids de una consulta previa hecha con el cliente
+ * del usuario (`squad_members`, `club_person_roles`, `team_memberships`), que ya
+ * pasó por RLS. Esa lista de ids ES el límite de autorización.
+ */
+type ScopedPersonIdsOrigin =
+    | 'fetchPersonRowById'
+    | 'fetchPeopleFromTeamMemberships'
+    | 'fetchPeopleFromLegacy';
+
+declare const rlsScopedBrand: unique symbol;
+
+/**
+ * Ids de persona que ya pasaron por RLS. El tipo está marcado a propósito: no se
+ * puede fabricar con un `string[]` suelto, hay que pasar por `rlsScopedPersonIds`
+ * y declarar de dónde salen.
+ */
+interface RlsScopedPersonIds {
+    readonly ids: string[];
+    readonly origin: ScopedPersonIdsOrigin;
+    readonly [rlsScopedBrand]: true;
+}
+
+function rlsScopedPersonIds(ids: string[], origin: ScopedPersonIdsOrigin): RlsScopedPersonIds {
+    return { ids, origin, [rlsScopedBrand]: true } as RlsScopedPersonIds;
+}
+
+/**
+ * Trae las personas por id. Lee columnas restringidas (`birth_date`, `id_number`)
+ * de un padrón que incluye menores, así que va con `service_role`, que no pasa por
+ * los privilegios de columna de 20260804170000_people_column_privileges.sql.
+ *
+ * Por eso NO acepta un `string[]`: exige `RlsScopedPersonIds`, que sólo se
+ * construye nombrando el origen. Antes esta garantía vivía en un comentario, y un
+ * llamador nuevo que armara los ids de cualquier lado no rompía nada — devolvía
+ * los DNIs y listo.
+ *
+ * Con el cliente del usuario esto devolvía [] y un console.error, porque los dos
+ * selects piden `id_number`: la pantalla se vaciaba en silencio.
+ */
+async function fetchPersonRowsByIds(scoped: RlsScopedPersonIds): Promise<PersonRow[]> {
+    const personIds = scoped.ids;
     if (personIds.length === 0) return [];
 
-    const richSelect = 'id, first_name, last_name, full_name, avatar_url, photo_url, birth_date, id_number, position, weight, height';
-    const safeSelect = 'id, first_name, last_name, full_name, avatar_url, birth_date, id_number';
+    // "existingColumns" es literal: el fallback existe por si el esquema es viejo y
+    // le faltan columnas, NO porque sea un select menos sensible — también trae DNI.
+    // Antes se llamaba `safeSelect`, que en un archivo que selecciona DNIs era una
+    // trampa esperando a alguien.
+    const fullSelect = 'id, first_name, last_name, full_name, avatar_url, photo_url, birth_date, id_number, position, weight, height';
+    const existingColumnsSelect = 'id, first_name, last_name, full_name, avatar_url, birth_date, id_number';
 
-    const { data, error } = await supabase
+    const reader = createAdminClient();
+
+    const { data, error } = await reader
         .from('people')
-        .select(richSelect)
+        .select(fullSelect)
         .in('id', personIds);
 
     if (!error) {
         return (data ?? []) as PersonRow[];
     }
 
-    const { data: safeData, error: safeError } = await supabase
+    const { data: safeData, error: safeError } = await reader
         .from('people')
-        .select(safeSelect)
+        .select(existingColumnsSelect)
         .in('id', personIds);
 
     if (safeError) {
@@ -252,7 +304,7 @@ async function fetchPersonRowsByIds(supabase: any, personIds: string[]): Promise
 }
 
 async function fetchPersonRowById(supabase: any, personId: string): Promise<PersonRow | null> {
-    const rows = await fetchPersonRowsByIds(supabase, [personId]);
+    const rows = await fetchPersonRowsByIds(rlsScopedPersonIds([personId], 'fetchPersonRowById'));
     return rows[0] ?? null;
 }
 
@@ -961,7 +1013,7 @@ async function fetchPeopleFromTeamMemberships(
     if (filteredMemberships.length === 0) return [];
 
     const personIds = Array.from(new Set(filteredMemberships.map((membership: any) => membership.person_id)));
-    const people = await fetchPersonRowsByIds(supabase, personIds);
+    const people = await fetchPersonRowsByIds(rlsScopedPersonIds(personIds, 'fetchPeopleFromTeamMemberships'));
     const peopleById = new Map<string, PersonRow>(((people ?? []) as PersonRow[]).map((person) => [person.id, person]));
 
     return filteredMemberships
@@ -1013,7 +1065,7 @@ async function fetchPeopleFromLegacy(
     const divisionIds = Array.from(new Set(roleRows.map((role) => role.division_id).filter(Boolean))) as string[];
 
     const [people, { data: divisions, error: divisionsError }] = await Promise.all([
-        fetchPersonRowsByIds(supabase, personIds),
+        fetchPersonRowsByIds(rlsScopedPersonIds(personIds, 'fetchPeopleFromLegacy')),
         divisionIds.length > 0
             ? db.from('club_divisions').select('id, name').in('id', divisionIds)
             : Promise.resolve({ data: [], error: null }),

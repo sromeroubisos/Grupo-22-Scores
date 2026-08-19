@@ -9,7 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { ensureMatchManagementAccess } from '@/lib/server/matchCenterAdmin';
 import { recalcAffectedPhases } from '@/lib/server/recalcAffectedPhasesTraced';
-import { traceEditRoute, markEditTrace } from '@/lib/perf/editTrace';
+import { traceEditRoute, markEditTrace, traceStageStart, traceStageEnd } from '@/lib/perf/editTrace';
 import { isUuid } from '@/lib/utils/postgrest';
 import type { StoredMatchClock } from '@/lib/matchClock';
 import {
@@ -73,12 +73,16 @@ export async function PATCH(
         }
         markEditTrace({ matchId, responseBeforeDerived: true });
         const compactResponse = request.nextUrl.searchParams.get('response') === 'compact';
+        traceStageStart('auth');
         await ensureMatchManagementAccess(matchId, MANAGEMENT_MEMBERSHIP_ROLES);
+        traceStageEnd('auth');
         const body = await request.json();
         const { events, eventPatch, lineups, clockTransition, ...rawMatchFields } = body as Record<string, unknown>;
         const matchFields = { ...rawMatchFields };
         const writeClient = await getWriteClient();
+        traceStageStart('scope_before');
         const previousMatch = await FixtureService.getMatchScope(matchId);
+        traceStageEnd('scope_before');
         markEditTrace({
           tournamentId: (previousMatch as { tournamentId?: string | null } | null)?.tournamentId ?? null,
         });
@@ -117,6 +121,7 @@ export async function PATCH(
           await FixtureService.updateMatch(matchId, matchFields, writeClient);
         }
 
+        traceStageStart('supplemental');
         const supplemental = await persistMatchCenterSupplementalData(writeClient, matchId, {
           events: Array.isArray(events) ? events : undefined,
           eventPatch: eventPatch && typeof eventPatch === 'object'
@@ -137,6 +142,7 @@ export async function PATCH(
               ? rawMatchFields.clock as { minute?: unknown; seconds?: unknown; period?: unknown; running?: unknown; syncedAt?: unknown } | null | undefined
               : undefined,
         });
+        traceStageEnd('supplemental');
 
         const clockDegraded =
           (parsedClockTransition !== null && !clockTransitionPersisted)
@@ -152,7 +158,9 @@ export async function PATCH(
         // Recalc standings (and carry-over dependents) for the phase before and
         // after the edit — covers score/status changes and the rare case where
         // the match was moved to a different phase.
+        traceStageStart('scope_after');
         const nextMatch = await FixtureService.getMatchScope(matchId);
+        traceStageEnd('scope_after');
         recalcAffectedPhases([previousMatch, nextMatch]);
 
         if (compactResponse) {
@@ -166,7 +174,9 @@ export async function PATCH(
           });
         }
 
+        traceStageStart('response_hydrate');
         const { data, error } = await fetchMatchCenterMatch(writeClient, matchId);
+        traceStageEnd('response_hydrate');
         if (error || !data) {
           return jsonError('Failed to update match. Check server logs for Supabase error details.', 500);
         }

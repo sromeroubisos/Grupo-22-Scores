@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { canManageClubContext, getClubManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
 import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
 function err(message: string, status: number, details?: unknown) {
@@ -30,9 +31,23 @@ export async function GET(
     const { id } = await params;
     const supabase = await createClient();
 
-    const { data, error } = await supabase
+    // `address` y `maps_link` apuntan a la ubicación exacta y no son públicos
+    // (20260804170000_people_column_privileges.sql). Pero el admin del club SÍ
+    // tiene que ver la dirección de su propia cancha para poder editarla, así que
+    // la lista se arma en dos versiones según quién pregunta.
+    const PUBLICAS = 'id, club_id, name, city, is_primary, created_at, updated_at';
+    const COMPLETAS = 'id, club_id, name, address, city, maps_link, is_primary, created_at, updated_at';
+
+    const perm = await resolvePermission(supabase, id);
+    const puedeVerUbicacion = Boolean(perm?.allowed);
+
+    // Con privilegios de columna, ni anon ni authenticated pueden leer `address`:
+    // para el admin se usa service_role, y sólo DESPUÉS de confirmar el permiso.
+    const reader = puedeVerUbicacion ? createAdminClient() : supabase;
+
+    const { data, error } = await reader
         .from('club_venues')
-        .select('*')
+        .select(puedeVerUbicacion ? COMPLETAS : PUBLICAS)
         .eq('club_id', id)
         .order('is_primary', { ascending: false })
         .order('name');
@@ -91,7 +106,10 @@ export async function POST(
     const { data, error } = await supabase
         .from('club_venues')
         .insert([payload])
-        .select('*')
+        // Sin '*', sin `address` y sin `maps_link`: los dos apuntan a la ubicación
+        // exacta y no son públicos (20260804170000_people_column_privileges.sql).
+        // Quien crea la sede ya los mandó, no necesita que se los devuelvan.
+        .select('id, club_id, name, city, is_primary, created_at, updated_at')
         .single();
 
     if (error) return err('Error al crear sede', 500, error.message);

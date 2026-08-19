@@ -157,6 +157,48 @@ function getMotorsportPointsGap(points: unknown, leaderPoints: number, index: nu
     return gap === 0 ? 'Lider' : `-${gap} pts`;
 }
 
+/**
+ * Marca por que borde de una barra scrolleable queda contenido sin ver.
+ *
+ * De aca salen los `data-overflow-start` / `data-overflow-end` que el CSS
+ * traduce en el degrade del borde. Sin esto la barra de pestanas se corta al
+ * ras contra el margen y no hay forma de saber que hay mas: en un iPhone
+ * entran hasta "Estadisticas" y las ultimas quedan invisibles.
+ *
+ * `revision` re-sincroniza cuando cambia el CONTENIDO sin cambiar el ancho de
+ * la barra (el proveedor resuelve y la lista de pestanas se acorta); el
+ * ResizeObserver solo ve los cambios de tamano del propio nodo.
+ */
+function useHorizontalOverflow<T extends HTMLElement>(revision?: unknown) {
+    const ref = useRef<T | null>(null);
+
+    useEffect(() => {
+        const node = ref.current;
+        if (!node) return;
+
+        const sync = () => {
+            const maxScroll = node.scrollWidth - node.clientWidth;
+            node.dataset.overflowStart = String(node.scrollLeft > 1);
+            node.dataset.overflowEnd = String(node.scrollLeft < maxScroll - 1);
+        };
+
+        sync();
+        node.addEventListener('scroll', sync, { passive: true });
+        window.addEventListener('resize', sync);
+
+        const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(sync) : null;
+        observer?.observe(node);
+
+        return () => {
+            node.removeEventListener('scroll', sync);
+            window.removeEventListener('resize', sync);
+            observer?.disconnect();
+        };
+    }, [revision]);
+
+    return ref;
+}
+
 function buildTeamHref(
     team: { id?: string; name?: string; teamUrl?: string; league?: string | null },
     preferredSport?: string | number | null,
@@ -726,6 +768,29 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                 { id: 'commentary', label: 'Comentarios' },
             ]
     ), [isLimitedExternalSource, isMotorsportSource, isEspnSoccerSource, isFihSource]);
+
+    // Una barra por rama (solo se monta una), y las dos avisan por que borde
+    // les quedan pestanas sin ver.
+    const customTabsNavRef = useHorizontalOverflow<HTMLElement>(visibleTabs);
+    const fullTabsNavRef = useHorizontalOverflow<HTMLElement>(usesCustomTabs);
+
+    // La pestana elegida entra en cuadro sola. Es la contracara del degrade:
+    // sin esto, en un telefono la activa puede quedar justo abajo del fundido
+    // del borde y no se ve en cual estas parado.
+    useEffect(() => {
+        const node = customTabsNavRef.current || fullTabsNavRef.current;
+        const active = node?.querySelector<HTMLElement>(`.${styles.active}`);
+        if (!active) return;
+
+        const prefersReducedMotion = typeof window.matchMedia === 'function'
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        active.scrollIntoView({
+            inline: 'center',
+            block: 'nearest',
+            behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        });
+    }, [activeTab, customTabsNavRef, fullTabsNavRef]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -2108,7 +2173,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
                 {/* Layer 4: Tabs */}
                 {usesCustomTabs && (
-                    <nav className={styles.tabsNav}>
+                    <nav className={styles.tabsNav} ref={customTabsNavRef}>
                         {visibleTabs.map((tab) => (
                             <div
                                 key={tab.id}
@@ -2121,7 +2186,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     </nav>
                 )}
                 {!usesCustomTabs && (
-                <nav className={styles.tabsNav}>
+                <nav className={styles.tabsNav} ref={fullTabsNavRef}>
                     <div className={`${styles.tabItem} ${activeTab === 'summary' ? styles.active : ''}`} onClick={() => setActiveTab('summary')}>Resumen</div>
                     <div className={`${styles.tabItem} ${activeTab === 'timeline' ? styles.active : ''}`} onClick={() => setActiveTab('timeline')}>Cronología</div>
                     <div className={`${styles.tabItem} ${activeTab === 'lineups' ? styles.active : ''}`} onClick={() => setActiveTab('lineups')}>Alineaciones</div>

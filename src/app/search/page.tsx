@@ -207,6 +207,7 @@ export default function SearchPage() {
                     <input
                         ref={inputRef}
                         className={styles.input}
+                        aria-label="Buscar torneos o clubes"
                         placeholder="Buscar torneos o clubes..."
                         value={query}
                         onChange={(event) => setQuery(event.target.value)}

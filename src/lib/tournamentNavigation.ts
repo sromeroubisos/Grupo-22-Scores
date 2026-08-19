@@ -1,6 +1,6 @@
 import { competitionKey, divisionKey, ordenDeSubcategory } from './competitionKey.ts';
 import { compararEjesJuveniles, ruedaDeTorneoUrba, ETIQUETA_RUEDA } from './integrations/urba/ejeJuvenil.ts';
-import { instanciaDeTorneoUrba } from './integrations/urba/externalId.ts';
+import { instanciaDeTorneoUrba, ORDEN_INSTANCIA } from './integrations/urba/externalId.ts';
 
 /**
  * Los dos desplegables de navegación de un torneo, armados a partir de sus
@@ -158,11 +158,11 @@ export function ocultarGradosSubordinados<T extends {
  *
  * Es cronológico y no alfabético: la clasificación se juega antes que la
  * semifinal, y la semifinal antes que la final. Lo que no está en la lista va al
- * final, como en `ordenDeSubcategory`.
+ * final, como en `ordenDeSubcategory`. La lista vive en `externalId.ts`, al lado
+ * de las instancias que ordena.
+ *
+ * −1 para la temporada regular, que va primero.
  */
-const ORDEN_INSTANCIA = ['Clasificación', 'Play Off', 'Semifinal', 'Final', 'Ascenso', 'Permanencia'];
-
-/** −1 para la temporada regular, que va primero. */
 const ordenDeInstancia = (nombre: string): number => {
   const instancia = instanciaDeTorneoUrba(nombre);
   if (!instancia) return -1;

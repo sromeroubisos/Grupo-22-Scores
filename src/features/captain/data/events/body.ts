@@ -227,6 +227,11 @@ export const BODY_EVENTS: CaptainEvent[] = [
         title: 'El banco',
         text: 'El entrenador te propone el rol de impacto: veinte o treinta minutos por partido, entrando con el partido roto. Un plantel de partido son veintitrés y el split 6-2 lo cambió todo.',
         weight: 8,
+        // La única `especial` del cuerpo, y entra por lo que ABRE y no por lo
+        // que duele: es la puerta a dos temporadas más. Sus vecinas del archivo
+        // —la rodilla, el hombro— se quedan en `normal` a propósito
+        // (`types/event.ts`: la rareza marca la oportunidad, no la gravedad).
+        rarity: 'especial',
         repeatable: false,
         requires: { minAge: 30, minSeasons: 8 },
         options: [

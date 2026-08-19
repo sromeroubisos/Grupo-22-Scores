@@ -1830,6 +1830,7 @@ export function TournamentEditor({
                                 >
                                     <option>Mayores</option>
                                     <option>Juveniles</option>
+                                    <option>Reserva</option>
                                 </select>
                             </div>
                         </div>

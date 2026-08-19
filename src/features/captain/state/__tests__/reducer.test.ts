@@ -23,11 +23,17 @@ import { tacklePlayAt, tackleZones } from '../../engine/moments.ts';
 import { trainingsFor } from '../../data/trainings.ts';
 import { MATCH_CAP_PER_SEASON } from '../../types/season.ts';
 import { ALL_FAMILIES, getFamily } from '../../data/positions.ts';
+import { CAREER_HARD_CAP, resolveAgeCurve } from '../../engine/development-profile.ts';
 import { getPendingEvent } from '../../engine/event-selector.ts';
 import { trackIndex } from '../../engine/national-team.ts';
 import { potentialOf } from '../../engine/ovr.ts';
-import { POTENTIAL_BAND } from '../../types/player.ts';
+// `START_AGE` se importa y no se escribe: estas tres afirmaciones son sobre la
+// EDAD DE ARRANQUE, no sobre el número 18. Escritas a mano se ponían rojas cada
+// vez que el juego movía su edad de debut, y el rojo no decía nada más que
+// «cambió una constante» (CLAUDE de captain §1.4).
+import { POTENTIAL_BAND, START_AGE } from '../../types/player.ts';
 import { captainReducer, createInitialCaptain } from '../captain-reducer.ts';
+ import { playTournament } from '../captain-autoplay.ts';
 
 const INPUT: CreateCaptainInput = {
     name: 'Bautista',
@@ -144,12 +150,19 @@ function unaTemporada(
     chooser: (opciones: string[], seed: number) => string,
 ): CaptainState {
     const listo = pasarMomentos(repartir(state), state.history.length);
-    let next = captainReducer(listo, { type: 'ADVANCE' });
-    if (next.phase === 'event') {
+    let next = playTournament(captainReducer(listo, { type: 'ADVANCE' }));
+    // BUCLE Y NO `if`: desde la 0.21.0 el mercado corre DESPUÉS de la tarjeta del
+    // año en vez de reemplazarla, así que una temporada puede traer dos. Con un
+    // `if`, la carrera quedaba en fase `event` y el bucle de afuera giraba sin
+    // avanzar hasta el tope.
+    let vueltas = 0;
+    while (next.phase === 'event') {
+        assert.ok(vueltas < 4, `la temporada trajo más de 4 decisiones (fase '${next.phase}')`);
         const event = getPendingEvent(next);
         assert.ok(event, 'la fase dice evento pero no hay tarjeta que dibujar');
         const elegida = chooser(event.options.map((o) => o.id), next.history.length);
         next = captainReducer(next, { type: 'CHOOSE', optionId: elegida });
+        vueltas += 1;
     }
     return next;
 }
@@ -276,10 +289,14 @@ test('la carrera empieza en un club de tu país, sin plata y sin golpes', () => 
     assert.equal(state.training, null, 'la pretemporada arranca sin carta elegida');
     assert.equal(state.matches.cap, MATCH_CAP_PER_SEASON);
 
-    assert.equal(state.player.age, 18);
+    assert.equal(state.player.age, START_AGE);
     assert.equal(state.player.retired, false);
-    assert.ok(potentialOf(state.player) > state.player.ovr, 'un pibe de 18 tiene por dónde crecer');
-    assert.equal(state.player.built, 0, 'a los 18 no construyó nada todavía: el techo es material puro');
+    assert.ok(potentialOf(state.player) > state.player.ovr, 'un pibe tiene por dónde crecer');
+    assert.equal(
+        state.player.built,
+        0,
+        'al arrancar no construyó nada todavía: el techo es material puro',
+    );
 
     // El club de origen es donde te hiciste, y arranca siendo el actual.
     assert.ok(state.player.clubId, 'un pibe argentino tiene club: el catálogo está lleno');
@@ -355,7 +372,7 @@ test('la temporada se juega y recién después llega la decisión', () => {
     // La fila de la temporada ya está escrita, se haya abierto una decisión o no.
     assert.equal(jugada.history.length, 1);
     assert.equal(jugada.history[0].season, 1);
-    assert.equal(jugada.history[0].age, 18);
+    assert.equal(jugada.history[0].age, START_AGE);
 
     if (jugada.phase === 'event') {
         assert.ok(getPendingEvent(jugada), 'fase de evento sin tarjeta');
@@ -366,27 +383,45 @@ test('la temporada se juega y recién después llega la decisión', () => {
     }
 });
 
-test('elegir cierra la temporada y abre la siguiente', () => {
+/**
+ * LA PREMISA CAMBIÓ EN LA 0.21.0, y por eso este test se dio vuelta.
+ *
+ * Decía «elegir cierra la temporada» y afirmaba UNA decisión por año: elegir la
+ * tarjeta era, siempre, el último acto del ciclo. El mercado vivía adentro del
+ * mismo sorteo y aparecía EN LUGAR de la del año.
+ *
+ * Hoy el mercado es un paso propio que corre DESPUÉS, así que una temporada
+ * puede traer dos tarjetas y lo que cierra el año es la ÚLTIMA. Lo que este test
+ * sigue custodiando —y es lo que importa— no se movió: cuando ya no queda nada
+ * pendiente, el año se cierra entero (temporada, edad, carta apagada) y el
+ * desenlace queda escrito en la fila.
+ */
+test('la última decisión de la temporada la cierra y abre la siguiente', () => {
     let state = pasarMomentos(repartir(createInitialCaptain(INPUT, 31)), 0);
-    state = captainReducer(state, { type: 'ADVANCE' });
+    state = playTournament(captainReducer(state, { type: 'ADVANCE' }));
     if (state.phase !== 'event') return; // esa semilla no trajo decisión
 
-    const event = getPendingEvent(state)!;
-    const despues = captainReducer(state, { type: 'CHOOSE', optionId: event.options[0].id });
+    let decisiones = 0;
+    while (state.phase === 'event') {
+        assert.ok(decisiones < 4, 'la temporada trajo más de 4 decisiones');
+        const event = getPendingEvent(state)!;
+        state = captainReducer(state, { type: 'CHOOSE', optionId: event.options[0].id });
+        decisiones += 1;
+    }
 
-    assert.equal(despues.phase, 'offseason');
-    assert.equal(despues.season, 2);
-    assert.equal(despues.player.age, 19);
-    assert.equal(despues.pendingEventId, null);
-    assert.equal(despues.decisionLog.length, 1);
-    assert.ok(despues.history[0].decisionText, 'el desenlace queda pegado a la temporada');
+    assert.equal(state.phase, 'offseason');
+    assert.equal(state.season, 2);
+    assert.equal(state.player.age, START_AGE + 1);
+    assert.equal(state.pendingEventId, null);
+    assert.equal(state.decisionLog.length, decisiones);
+    assert.ok(state.history[0].decisionText, 'el desenlace queda pegado a la temporada');
     // Y la carta se apagó: dura una temporada, como todo modificador.
-    assert.equal(despues.training, null);
+    assert.equal(state.training, null);
 });
 
 test('una opción que no existe no rompe nada', () => {
     let state = pasarMomentos(repartir(createInitialCaptain(INPUT, 31)), 0);
-    state = captainReducer(state, { type: 'ADVANCE' });
+    state = playTournament(captainReducer(state, { type: 'ADVANCE' }));
     if (state.phase !== 'event') return;
     assert.equal(captainReducer(state, { type: 'CHOOSE', optionId: 'no-existe' }), state);
 });
@@ -422,7 +457,11 @@ test('los caps solo salen de la mayor', () => {
         assert.equal(capsSumados, final.national.caps, `semilla ${seed}: la cuenta de caps no cierra`);
         for (const fila of final.history) {
             if (fila.caps > 0) {
-                assert.equal(fila.track, 'La mayor', 'una temporada con caps que no es de la mayor');
+                // Se compara contra el ID y no contra el rótulo: la fila guarda
+                // `trackId` desde que el nombre del A-XV depende del país. Un
+                // test contra el texto se rompe con cualquier cambio de copy y
+                // no mide nada del motor.
+                assert.equal(fila.trackId, 'nacional', 'una temporada con caps que no es de la mayor');
             }
         }
     }
@@ -470,10 +509,13 @@ test('en amateur la plata no se mueve', () => {
 //  El final
 // ═══════════════════════════════════════════════════════════════════════════
 
-test('toda carrera termina dentro de la curva del puesto', () => {
+test('toda carrera termina dentro de la curva DEL JUGADOR', () => {
     for (const family of ALL_FAMILIES) {
-        const curva = getFamily(family).age;
         const final = carreraCompleta(2027, { ...INPUT, family });
+        // LA CURVA RESUELTA, y esto es el test entero desde que existe la
+        // longevidad: contra la tabla de la familia, un wing longevo se retira
+        // cuatro años "fuera de su curva" y el rojo no diría nada de lo que pasó.
+        const curva = resolveAgeCurve(final.player);
 
         assert.equal(final.phase, 'retired', `${family} no se retiró nunca`);
         assert.equal(final.player.retired, true);
@@ -483,8 +525,33 @@ test('toda carrera termina dentro de la curva del puesto', () => {
             final.player.age > curva.soft - 4 && final.player.age <= curva.hard,
             `${family} se retiró a los ${final.player.age}, fuera de su curva (${curva.soft}–${curva.hard})`,
         );
+        assert.ok(
+            final.player.age <= CAREER_HARD_CAP,
+            `${family} se retiró a los ${final.player.age}, pasado el tope del juego`,
+        );
         assert.ok(final.history.length >= 5, `${family} se retiró con ${final.history.length} temporadas`);
     }
+});
+
+test('DOS CARRERAS DEL MISMO PUESTO NO TERMINAN EL MISMO AÑO', () => {
+    // Es la mitad que faltaba de "la carrera llega a los 40". Con el tope
+    // corrido y sin la tirada de longevidad, todos los wings del juego se
+    // retirarían a los 36 y la edad de retiro dejaría de ser una noticia.
+    //
+    // Se mide sobre el PUESTO MÁS CORTO a propósito: es donde la ventana entre
+    // el tope blando y el duro es más angosta, así que si la dispersión aparece
+    // acá, aparece en los ocho.
+    const semillas = [3, 41, 128, 600, 1001, 2718, 4096, 9999];
+    const edades = semillas.map(
+        (s) => carreraCompleta(s, { ...INPUT, family: 'wing-fullback' }).player.age,
+    );
+
+    const distintas = new Set(edades).size;
+    assert.ok(
+        distintas >= 3,
+        `ocho carreras de wing terminaron en ${distintas} edad(es) distinta(s): ${edades.join(', ')}. `
+        + 'La longevidad dejó de transportar y el retiro volvió a ser una constante del puesto.',
+    );
 });
 
 test('el wing se retira antes que el pilar', () => {

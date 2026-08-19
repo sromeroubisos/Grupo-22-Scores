@@ -12,24 +12,34 @@
   ],
   "generadoPor": "scripts/gen-logo-inventory.mjs",
   "resumen": {
-    "competencias": 89,
+    "competencias": 110,
     "competenciasConLogoReal": 33,
     "competenciasSinLogo": [
-      "ar-centro-local",
-      "ar-litoral-local",
-      "ar-nea-ascenso",
+      "ar-nea-bc",
+      "ar-noa-andina",
       "ar-noa-b",
+      "ar-oeste-bronce",
       "ar-pampeana-a",
       "ar-pampeana-b",
-      "ar-pampeana-local",
-      "ar-patagonia-local",
+      "ar-pampeana-uroba-sur",
+      "ar-patagonia-alto-valle",
+      "ar-patagonia-austral",
+      "ar-patagonia-chubut-desarrollo",
+      "ar-patagonia-santacruz",
+      "ar-patagonia-tdf",
       "ar-urba-desarrollo",
       "ar-urba-segunda",
       "ar-urba-tercera",
       "asia-rugby-championship",
       "asia-rugby-division-1",
       "asia-rugby-division-2",
+      "au-hospital-cup",
+      "au-shute-shield",
+      "be-elite",
+      "bo-liga",
+      "ca-clubs",
       "championship",
+      "co-liga",
       "copa-del-rey",
       "coppa-italia",
       "eng-national1",
@@ -37,22 +47,31 @@
       "esp-dh",
       "esp-dhb",
       "esp-dhelite",
+      "fj-skipper",
       "fr-federale1",
       "fr-federale2",
+      "ge-didi10",
+      "ire-ail1a",
       "ita-serie-a",
       "ita-serie-a-elite",
       "jpn-regional",
       "july-window",
+      "mx-liga",
       "nationale",
       "nations-championship",
+      "nl-ereklasse",
       "november-window",
       "nz-heartland",
       "oceania-cup",
       "pacific-nations-cup",
+      "pe-metropolitano",
       "prem-rugby-cup",
       "prod2",
       "pt-honra",
+      "py-primera",
       "ran-championship",
+      "ro-liga",
+      "ru-championship",
       "rugby-africa-cup",
       "rugby-africa-division-1",
       "rugby-championship",
@@ -60,6 +79,7 @@
       "rugby-europe-conference",
       "rugby-europe-trophy",
       "sa-cl",
+      "sco-premiership",
       "six-nations",
       "sudamerica-rugby-b",
       "sudamerica-rugby-championship",
@@ -68,33 +88,24 @@
       "taca-portugal",
       "us-d1a",
       "us-ncr-d1",
+      "wal-premiership",
       "world-cup",
       "world-cup-warm-ups",
       "za-community"
     ],
-    "trofeos": 91,
-    "trofeosSinLogo": 57,
+    "trofeos": 112,
+    "trofeosSinLogo": 78,
     "premiosIndividuales": 7,
     "premiosSinIcono": [],
-    "clubes": 611,
-    "clubesConLogoReal": 610,
-    "clubesSinLogo": 1,
+    "clubes": 822,
+    "clubesConLogoReal": 690,
+    "clubesSinLogo": 132,
     "clubesConEscudoPorProxy": 1,
-    "clubesConIniciales": 0,
+    "clubesConIniciales": 131,
     "clubesSinPlaceholder": 0,
-    "clubesHuerfanos": 2
+    "clubesHuerfanos": 3
   },
   "competencias": [
-    {
-      "id": "ar-centro-local",
-      "nombre": "Torneo Local de Córdoba",
-      "tipo": "liga",
-      "alcance": "domestic",
-      "region": "south-america",
-      "archivoQueEsperaElJuego": "public/competiciones/ar-centro-local.png",
-      "tieneLogoReal": false,
-      "hayPlaceholderSvg": true
-    },
     {
       "id": "ar-centro-super9b",
       "nombre": "Súper 9 B de Córdoba",
@@ -103,7 +114,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-centro-super9b.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "ar-centro-top10",
@@ -113,17 +124,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-centro-top10.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
-    },
-    {
-      "id": "ar-litoral-local",
-      "nombre": "Torneos Locales del Litoral",
-      "tipo": "liga",
-      "alcance": "domestic",
-      "region": "south-america",
-      "archivoQueEsperaElJuego": "public/competiciones/ar-litoral-local.png",
-      "tieneLogoReal": false,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "ar-litoral-segunda",
@@ -133,7 +134,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-litoral-segunda.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "ar-litoral-top10",
@@ -143,7 +144,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-litoral-top10.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "ar-nacional-de-clubes",
@@ -153,7 +154,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-nacional-de-clubes.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "ar-nea-a",
@@ -163,15 +164,15 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-nea-a.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
-      "id": "ar-nea-ascenso",
-      "nombre": "Torneo de Ascenso del NEA",
+      "id": "ar-nea-bc",
+      "nombre": "Regional del NEA B/C",
       "tipo": "liga",
       "alcance": "domestic",
       "region": "south-america",
-      "archivoQueEsperaElJuego": "public/competiciones/ar-nea-ascenso.png",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-nea-bc.png",
       "tieneLogoReal": false,
       "hayPlaceholderSvg": true
     },
@@ -183,6 +184,16 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-noa-a.png",
       "tieneLogoReal": true,
+      "hayPlaceholderSvg": false
+    },
+    {
+      "id": "ar-noa-andina",
+      "nombre": "Torneo Andino (Catamarca y La Rioja)",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "south-america",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-noa-andina.png",
+      "tieneLogoReal": false,
       "hayPlaceholderSvg": true
     },
     {
@@ -196,6 +207,16 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "ar-oeste-bronce",
+      "nombre": "Copa de Bronce del Oeste",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "south-america",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-oeste-bronce.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "ar-oeste-oro",
       "nombre": "Copa de Oro del Oeste",
       "tipo": "liga",
@@ -203,7 +224,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-oeste-oro.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "ar-oeste-plata",
@@ -213,7 +234,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-oeste-plata.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "ar-pampeana-a",
@@ -236,22 +257,42 @@
       "hayPlaceholderSvg": true
     },
     {
-      "id": "ar-pampeana-local",
-      "nombre": "Torneos Locales Pampeanos",
+      "id": "ar-pampeana-uroba-sur",
+      "nombre": "Regional Pampeano UROBA-Sur",
       "tipo": "liga",
       "alcance": "domestic",
       "region": "south-america",
-      "archivoQueEsperaElJuego": "public/competiciones/ar-pampeana-local.png",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-pampeana-uroba-sur.png",
       "tieneLogoReal": false,
       "hayPlaceholderSvg": true
     },
     {
-      "id": "ar-patagonia-local",
-      "nombre": "Torneos Locales Patagónicos",
+      "id": "ar-patagonia-alto-valle",
+      "nombre": "Torneo del Alto Valle",
       "tipo": "liga",
       "alcance": "domestic",
       "region": "south-america",
-      "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-local.png",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-alto-valle.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-patagonia-austral",
+      "nombre": "Torneo Austral (Valle del Chubut y Austral)",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "south-america",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-austral.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-patagonia-chubut-desarrollo",
+      "nombre": "Desarrollo del Valle del Chubut",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "south-america",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-chubut-desarrollo.png",
       "tieneLogoReal": false,
       "hayPlaceholderSvg": true
     },
@@ -263,6 +304,26 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-regional.png",
       "tieneLogoReal": true,
+      "hayPlaceholderSvg": false
+    },
+    {
+      "id": "ar-patagonia-santacruz",
+      "nombre": "Torneo Santacruceño",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "south-america",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-santacruz.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-patagonia-tdf",
+      "nombre": "Torneo de Tierra del Fuego",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "south-america",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-tdf.png",
+      "tieneLogoReal": false,
       "hayPlaceholderSvg": true
     },
     {
@@ -273,7 +334,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-tdi-a.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "ar-tdi-b",
@@ -283,7 +344,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-tdi-b.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "ar-urba-desarrollo",
@@ -303,7 +364,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-urba-primera-a.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "ar-urba-primera-b",
@@ -313,7 +374,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-urba-primera-b.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "ar-urba-primera-c",
@@ -323,7 +384,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-urba-primera-c.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "ar-urba-segunda",
@@ -353,7 +414,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/ar-urba-top14.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "asia-rugby-championship",
@@ -386,6 +447,46 @@
       "hayPlaceholderSvg": false
     },
     {
+      "id": "au-hospital-cup",
+      "nombre": "Hospital Cup",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "pacific",
+      "archivoQueEsperaElJuego": "public/competiciones/au-hospital-cup.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "au-shute-shield",
+      "nombre": "Shute Shield",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "pacific",
+      "archivoQueEsperaElJuego": "public/competiciones/au-shute-shield.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "be-elite",
+      "nombre": "Belgian Elite League",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "europe-emerging",
+      "archivoQueEsperaElJuego": "public/competiciones/be-elite.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "bo-liga",
+      "nombre": "Liga Boliviana",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "south-america",
+      "archivoQueEsperaElJuego": "public/competiciones/bo-liga.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "br-super12",
       "nombre": "Super 12",
       "tipo": "liga",
@@ -393,6 +494,16 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/br-super12.png",
       "tieneLogoReal": true,
+      "hayPlaceholderSvg": false
+    },
+    {
+      "id": "ca-clubs",
+      "nombre": "Canadian Rugby Championship",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "north-america",
+      "archivoQueEsperaElJuego": "public/competiciones/ca-clubs.png",
+      "tieneLogoReal": false,
       "hayPlaceholderSvg": true
     },
     {
@@ -403,7 +514,7 @@
       "region": "europe",
       "archivoQueEsperaElJuego": "public/competiciones/challenge-cup.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "champions-cup",
@@ -413,7 +524,7 @@
       "region": "europe",
       "archivoQueEsperaElJuego": "public/competiciones/champions-cup.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "championship",
@@ -422,6 +533,16 @@
       "alcance": "domestic",
       "region": "europe",
       "archivoQueEsperaElJuego": "public/competiciones/championship.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "co-liga",
+      "nombre": "Liga Nacional de Colombia",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "south-america",
+      "archivoQueEsperaElJuego": "public/competiciones/co-liga.png",
       "tieneLogoReal": false,
       "hayPlaceholderSvg": true
     },
@@ -516,6 +637,16 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "fj-skipper",
+      "nombre": "Skipper Cup",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "pacific",
+      "archivoQueEsperaElJuego": "public/competiciones/fj-skipper.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "fr-federale1",
       "nombre": "Fédérale 1",
       "tipo": "liga",
@@ -532,6 +663,26 @@
       "alcance": "domestic",
       "region": "europe",
       "archivoQueEsperaElJuego": "public/competiciones/fr-federale2.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ge-didi10",
+      "nombre": "Didi 10",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "europe-emerging",
+      "archivoQueEsperaElJuego": "public/competiciones/ge-didi10.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ire-ail1a",
+      "nombre": "All-Ireland League 1A",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "europe",
+      "archivoQueEsperaElJuego": "public/competiciones/ire-ail1a.png",
       "tieneLogoReal": false,
       "hayPlaceholderSvg": true
     },
@@ -563,7 +714,7 @@
       "region": "asia",
       "archivoQueEsperaElJuego": "public/competiciones/jpn-d1.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "jpn-d2",
@@ -573,7 +724,7 @@
       "region": "asia",
       "archivoQueEsperaElJuego": "public/competiciones/jpn-d2.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "jpn-d3",
@@ -583,7 +734,7 @@
       "region": "asia",
       "archivoQueEsperaElJuego": "public/competiciones/jpn-d3.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "jpn-regional",
@@ -606,6 +757,16 @@
       "hayPlaceholderSvg": false
     },
     {
+      "id": "mx-liga",
+      "nombre": "Liga Mexicana de Rugby XV",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "north-america",
+      "archivoQueEsperaElJuego": "public/competiciones/mx-liga.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "nationale",
       "nombre": "Nationale",
       "tipo": "liga",
@@ -624,6 +785,16 @@
       "archivoQueEsperaElJuego": "public/competiciones/nations-championship.png",
       "tieneLogoReal": false,
       "hayPlaceholderSvg": false
+    },
+    {
+      "id": "nl-ereklasse",
+      "nombre": "Ereklasse",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "europe-emerging",
+      "archivoQueEsperaElJuego": "public/competiciones/nl-ereklasse.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
     },
     {
       "id": "november-window",
@@ -676,6 +847,16 @@
       "hayPlaceholderSvg": false
     },
     {
+      "id": "pe-metropolitano",
+      "nombre": "Torneo Metropolitano",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "south-america",
+      "archivoQueEsperaElJuego": "public/competiciones/pe-metropolitano.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "prem",
       "nombre": "Gallagher PREM",
       "tipo": "liga",
@@ -683,7 +864,7 @@
       "region": "europe",
       "archivoQueEsperaElJuego": "public/competiciones/prem.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "prem-rugby-cup",
@@ -716,6 +897,16 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "py-primera",
+      "nombre": "Primera División de Paraguay",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "south-america",
+      "archivoQueEsperaElJuego": "public/competiciones/py-primera.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "ran-championship",
       "nombre": "RAN Championship",
       "tipo": "torneo de selecciones",
@@ -724,6 +915,26 @@
       "archivoQueEsperaElJuego": "public/competiciones/ran-championship.png",
       "tieneLogoReal": false,
       "hayPlaceholderSvg": false
+    },
+    {
+      "id": "ro-liga",
+      "nombre": "Liga Națională",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "europe-emerging",
+      "archivoQueEsperaElJuego": "public/competiciones/ro-liga.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ru-championship",
+      "nombre": "Campeonato de Rusia",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "europe-emerging",
+      "archivoQueEsperaElJuego": "public/competiciones/ru-championship.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
     },
     {
       "id": "rugby-africa-cup",
@@ -803,6 +1014,16 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/sa-uy.png",
       "tieneLogoReal": true,
+      "hayPlaceholderSvg": false
+    },
+    {
+      "id": "sco-premiership",
+      "nombre": "Scottish Premiership",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "europe",
+      "archivoQueEsperaElJuego": "public/competiciones/sco-premiership.png",
+      "tieneLogoReal": false,
       "hayPlaceholderSvg": true
     },
     {
@@ -823,7 +1044,7 @@
       "region": "south-america",
       "archivoQueEsperaElJuego": "public/competiciones/sra.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "sudamerica-rugby-b",
@@ -853,7 +1074,7 @@
       "region": "europe-emerging",
       "archivoQueEsperaElJuego": "public/competiciones/super-cup.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "super-rugby",
@@ -863,7 +1084,7 @@
       "region": "pacific",
       "archivoQueEsperaElJuego": "public/competiciones/super-rugby.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "supercopa-esp",
@@ -903,7 +1124,7 @@
       "region": "europe",
       "archivoQueEsperaElJuego": "public/competiciones/top14.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "urc",
@@ -913,7 +1134,7 @@
       "region": "europe-sa",
       "archivoQueEsperaElJuego": "public/competiciones/urc.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "us-d1a",
@@ -933,7 +1154,7 @@
       "region": "north-america",
       "archivoQueEsperaElJuego": "public/competiciones/us-mlr.png",
       "tieneLogoReal": true,
-      "hayPlaceholderSvg": true
+      "hayPlaceholderSvg": false
     },
     {
       "id": "us-ncr-d1",
@@ -942,6 +1163,16 @@
       "alcance": "domestic",
       "region": "north-america",
       "archivoQueEsperaElJuego": "public/competiciones/us-ncr-d1.png",
+      "tieneLogoReal": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "wal-premiership",
+      "nombre": "Welsh Premiership",
+      "tipo": "liga",
+      "alcance": "domestic",
+      "region": "europe",
+      "archivoQueEsperaElJuego": "public/competiciones/wal-premiership.png",
       "tieneLogoReal": false,
       "hayPlaceholderSvg": true
     },
@@ -978,13 +1209,6 @@
   ],
   "trofeos": [
     {
-      "nombre": "Torneo Local de Córdoba",
-      "competenciaId": "ar-centro-local",
-      "origen": "liga",
-      "archivoQueEsperaElJuego": "public/competiciones/ar-centro-local.png",
-      "tieneLogoReal": false
-    },
-    {
       "nombre": "Súper 9 B de Córdoba",
       "competenciaId": "ar-centro-super9b",
       "origen": "liga",
@@ -997,13 +1221,6 @@
       "origen": "liga",
       "archivoQueEsperaElJuego": "public/competiciones/ar-centro-top10.png",
       "tieneLogoReal": true
-    },
-    {
-      "nombre": "Torneos Locales del Litoral",
-      "competenciaId": "ar-litoral-local",
-      "origen": "liga",
-      "archivoQueEsperaElJuego": "public/competiciones/ar-litoral-local.png",
-      "tieneLogoReal": false
     },
     {
       "nombre": "Segunda del Litoral",
@@ -1034,10 +1251,10 @@
       "tieneLogoReal": true
     },
     {
-      "nombre": "Torneo de Ascenso del NEA",
-      "competenciaId": "ar-nea-ascenso",
+      "nombre": "Regional del NEA B/C",
+      "competenciaId": "ar-nea-bc",
       "origen": "liga",
-      "archivoQueEsperaElJuego": "public/competiciones/ar-nea-ascenso.png",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-nea-bc.png",
       "tieneLogoReal": false
     },
     {
@@ -1048,10 +1265,24 @@
       "tieneLogoReal": true
     },
     {
+      "nombre": "Torneo Andino (Catamarca y La Rioja)",
+      "competenciaId": "ar-noa-andina",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-noa-andina.png",
+      "tieneLogoReal": false
+    },
+    {
       "nombre": "Regional del NOA B",
       "competenciaId": "ar-noa-b",
       "origen": "liga",
       "archivoQueEsperaElJuego": "public/competiciones/ar-noa-b.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Copa de Bronce del Oeste",
+      "competenciaId": "ar-oeste-bronce",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-oeste-bronce.png",
       "tieneLogoReal": false
     },
     {
@@ -1083,17 +1314,31 @@
       "tieneLogoReal": false
     },
     {
-      "nombre": "Torneos Locales Pampeanos",
-      "competenciaId": "ar-pampeana-local",
+      "nombre": "Regional Pampeano UROBA-Sur",
+      "competenciaId": "ar-pampeana-uroba-sur",
       "origen": "liga",
-      "archivoQueEsperaElJuego": "public/competiciones/ar-pampeana-local.png",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-pampeana-uroba-sur.png",
       "tieneLogoReal": false
     },
     {
-      "nombre": "Torneos Locales Patagónicos",
-      "competenciaId": "ar-patagonia-local",
+      "nombre": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
       "origen": "liga",
-      "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-local.png",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-alto-valle.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Torneo Austral (Valle del Chubut y Austral)",
+      "competenciaId": "ar-patagonia-austral",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-austral.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Desarrollo del Valle del Chubut",
+      "competenciaId": "ar-patagonia-chubut-desarrollo",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-chubut-desarrollo.png",
       "tieneLogoReal": false
     },
     {
@@ -1102,6 +1347,20 @@
       "origen": "liga",
       "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-regional.png",
       "tieneLogoReal": true
+    },
+    {
+      "nombre": "Torneo Santacruceño",
+      "competenciaId": "ar-patagonia-santacruz",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-santacruz.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Torneo de Tierra del Fuego",
+      "competenciaId": "ar-patagonia-tdf",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/ar-patagonia-tdf.png",
+      "tieneLogoReal": false
     },
     {
       "nombre": "Torneo del Interior A",
@@ -1188,11 +1447,46 @@
       "tieneLogoReal": false
     },
     {
+      "nombre": "Hospital Cup",
+      "competenciaId": "au-hospital-cup",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/au-hospital-cup.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/au-shute-shield.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Belgian Elite League",
+      "competenciaId": "be-elite",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/be-elite.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Liga Boliviana",
+      "competenciaId": "bo-liga",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/bo-liga.png",
+      "tieneLogoReal": false
+    },
+    {
       "nombre": "Super 12",
       "competenciaId": "br-super12",
       "origen": "liga",
       "archivoQueEsperaElJuego": "public/competiciones/br-super12.png",
       "tieneLogoReal": true
+    },
+    {
+      "nombre": "Canadian Rugby Championship",
+      "competenciaId": "ca-clubs",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/ca-clubs.png",
+      "tieneLogoReal": false
     },
     {
       "nombre": "Challenge Cup",
@@ -1213,6 +1507,13 @@
       "competenciaId": "championship",
       "origen": "liga",
       "archivoQueEsperaElJuego": "public/competiciones/championship.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Liga Nacional de Colombia",
+      "competenciaId": "co-liga",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/co-liga.png",
       "tieneLogoReal": false
     },
     {
@@ -1279,6 +1580,13 @@
       "tieneLogoReal": false
     },
     {
+      "nombre": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/fj-skipper.png",
+      "tieneLogoReal": false
+    },
+    {
       "nombre": "Fédérale 1",
       "competenciaId": "fr-federale1",
       "origen": "liga",
@@ -1290,6 +1598,20 @@
       "competenciaId": "fr-federale2",
       "origen": "liga",
       "archivoQueEsperaElJuego": "public/competiciones/fr-federale2.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Didi 10",
+      "competenciaId": "ge-didi10",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/ge-didi10.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "All-Ireland League 1A",
+      "competenciaId": "ire-ail1a",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/ire-ail1a.png",
       "tieneLogoReal": false
     },
     {
@@ -1342,6 +1664,13 @@
       "tieneLogoReal": false
     },
     {
+      "nombre": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/mx-liga.png",
+      "tieneLogoReal": false
+    },
+    {
       "nombre": "Nationale",
       "competenciaId": "nationale",
       "origen": "liga",
@@ -1353,6 +1682,13 @@
       "competenciaId": "nations-championship",
       "origen": "torneo de selecciones",
       "archivoQueEsperaElJuego": "public/competiciones/nations-championship.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Ereklasse",
+      "competenciaId": "nl-ereklasse",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/nl-ereklasse.png",
       "tieneLogoReal": false
     },
     {
@@ -1391,6 +1727,13 @@
       "tieneLogoReal": false
     },
     {
+      "nombre": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/pe-metropolitano.png",
+      "tieneLogoReal": false
+    },
+    {
       "nombre": "Gallagher PREM",
       "competenciaId": "prem",
       "origen": "liga",
@@ -1419,10 +1762,31 @@
       "tieneLogoReal": false
     },
     {
+      "nombre": "Primera División de Paraguay",
+      "competenciaId": "py-primera",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/py-primera.png",
+      "tieneLogoReal": false
+    },
+    {
       "nombre": "RAN Championship",
       "competenciaId": "ran-championship",
       "origen": "torneo de selecciones",
       "archivoQueEsperaElJuego": "public/competiciones/ran-championship.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Liga Națională",
+      "competenciaId": "ro-liga",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/ro-liga.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Campeonato de Rusia",
+      "competenciaId": "ru-championship",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/ru-championship.png",
       "tieneLogoReal": false
     },
     {
@@ -1480,6 +1844,13 @@
       "origen": "liga",
       "archivoQueEsperaElJuego": "public/competiciones/sa-uy.png",
       "tieneLogoReal": true
+    },
+    {
+      "nombre": "Scottish Premiership",
+      "competenciaId": "sco-premiership",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/sco-premiership.png",
+      "tieneLogoReal": false
     },
     {
       "nombre": "Seis Naciones",
@@ -1577,6 +1948,13 @@
       "competenciaId": "us-ncr-d1",
       "origen": "liga",
       "archivoQueEsperaElJuego": "public/competiciones/us-ncr-d1.png",
+      "tieneLogoReal": false
+    },
+    {
+      "nombre": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "origen": "liga",
+      "archivoQueEsperaElJuego": "public/competiciones/wal-premiership.png",
       "tieneLogoReal": false
     },
     {
@@ -1680,8 +2058,907 @@
       "tieneIcono": true
     }
   ],
-  "clubesPorCompetencia": [],
+  "clubesPorCompetencia": [
+    {
+      "competenciaId": "pe-metropolitano",
+      "competencia": "Torneo Metropolitano",
+      "pais": "pe",
+      "conIniciales": 17,
+      "sinPng": 17,
+      "total": 17,
+      "clubes": [
+        {
+          "id": "alumni-rugby-club",
+          "nombre": "Alumni Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/alumni-rugby-club.png"
+        },
+        {
+          "id": "blues-rugby-association",
+          "nombre": "Blues Rugby Association",
+          "archivoQueEsperaElJuego": "public/clubs/blues-rugby-association.png"
+        },
+        {
+          "id": "club-cruzados",
+          "nombre": "Club Cruzados",
+          "archivoQueEsperaElJuego": "public/clubs/club-cruzados.png"
+        },
+        {
+          "id": "dragones-rugby-club",
+          "nombre": "Dragones Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/dragones-rugby-club.png"
+        },
+        {
+          "id": "flaming-lions-rfc",
+          "nombre": "Flaming Lions RFC",
+          "archivoQueEsperaElJuego": "public/clubs/flaming-lions-rfc.png"
+        },
+        {
+          "id": "leones-de-san-marcos",
+          "nombre": "Leones de San Marcos",
+          "archivoQueEsperaElJuego": "public/clubs/leones-de-san-marcos.png"
+        },
+        {
+          "id": "lima-rugby-club",
+          "nombre": "Lima Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/lima-rugby-club.png"
+        },
+        {
+          "id": "mochikas-rugby-club",
+          "nombre": "Mochikas Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/mochikas-rugby-club.png"
+        },
+        {
+          "id": "navy-warriors-rugby-club",
+          "nombre": "Navy Warriors Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/navy-warriors-rugby-club.png"
+        },
+        {
+          "id": "old-markhamians-rfc",
+          "nombre": "Old Markhamians RFC",
+          "archivoQueEsperaElJuego": "public/clubs/old-markhamians-rfc.png"
+        },
+        {
+          "id": "piura-rugby-club",
+          "nombre": "Piura Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/piura-rugby-club.png"
+        },
+        {
+          "id": "sea-wolf-rugby-club",
+          "nombre": "Sea Wolf Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/sea-wolf-rugby-club.png"
+        },
+        {
+          "id": "sharks-rugby-club",
+          "nombre": "Sharks Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/sharks-rugby-club.png"
+        },
+        {
+          "id": "toros-rugby-club",
+          "nombre": "Toros Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/toros-rugby-club.png"
+        },
+        {
+          "id": "union-rugby-club",
+          "nombre": "Unión Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/union-rugby-club.png"
+        },
+        {
+          "id": "vikingos-rugby-club",
+          "nombre": "Vikingos Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/vikingos-rugby-club.png"
+        },
+        {
+          "id": "zuma-sport-rugby",
+          "nombre": "Zuma Sport Rugby",
+          "archivoQueEsperaElJuego": "public/clubs/zuma-sport-rugby.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "fj-skipper",
+      "competencia": "Skipper Cup",
+      "pais": "fj",
+      "conIniciales": 13,
+      "sinPng": 13,
+      "total": 13,
+      "clubes": [
+        {
+          "id": "lautoka",
+          "nombre": "Lautoka",
+          "archivoQueEsperaElJuego": "public/clubs/lautoka.png"
+        },
+        {
+          "id": "macuata",
+          "nombre": "Macuata",
+          "archivoQueEsperaElJuego": "public/clubs/macuata.png"
+        },
+        {
+          "id": "malolo",
+          "nombre": "Malolo",
+          "archivoQueEsperaElJuego": "public/clubs/malolo.png"
+        },
+        {
+          "id": "nadi",
+          "nombre": "Nadi",
+          "archivoQueEsperaElJuego": "public/clubs/nadi.png"
+        },
+        {
+          "id": "nadroga",
+          "nombre": "Nadroga",
+          "archivoQueEsperaElJuego": "public/clubs/nadroga.png"
+        },
+        {
+          "id": "naitasiri",
+          "nombre": "Naitasiri",
+          "archivoQueEsperaElJuego": "public/clubs/naitasiri.png"
+        },
+        {
+          "id": "namosi",
+          "nombre": "Namosi",
+          "archivoQueEsperaElJuego": "public/clubs/namosi.png"
+        },
+        {
+          "id": "northland-de-fiyi",
+          "nombre": "Northland de Fiyi",
+          "archivoQueEsperaElJuego": "public/clubs/northland-de-fiyi.png"
+        },
+        {
+          "id": "ovalau",
+          "nombre": "Ovalau",
+          "archivoQueEsperaElJuego": "public/clubs/ovalau.png"
+        },
+        {
+          "id": "suva",
+          "nombre": "Suva",
+          "archivoQueEsperaElJuego": "public/clubs/suva.png"
+        },
+        {
+          "id": "tailevu",
+          "nombre": "Tailevu",
+          "archivoQueEsperaElJuego": "public/clubs/tailevu.png"
+        },
+        {
+          "id": "vatukoula",
+          "nombre": "Vatukoula",
+          "archivoQueEsperaElJuego": "public/clubs/vatukoula.png"
+        },
+        {
+          "id": "yasawa",
+          "nombre": "Yasawa",
+          "archivoQueEsperaElJuego": "public/clubs/yasawa.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "ar-patagonia-alto-valle",
+      "competencia": "Torneo del Alto Valle",
+      "pais": "ar",
+      "conIniciales": 11,
+      "sinPng": 11,
+      "total": 12,
+      "clubes": [
+        {
+          "id": "ar-aguara-del-alto-valle",
+          "nombre": "Aguará del Alto Valle",
+          "archivoQueEsperaElJuego": "public/clubs/ar-aguara-del-alto-valle.png"
+        },
+        {
+          "id": "ar-allen",
+          "nombre": "Allen",
+          "archivoQueEsperaElJuego": "public/clubs/ar-allen.png"
+        },
+        {
+          "id": "ar-catriel",
+          "nombre": "Catriel",
+          "archivoQueEsperaElJuego": "public/clubs/ar-catriel.png"
+        },
+        {
+          "id": "ar-cinco-saltos",
+          "nombre": "Cinco Saltos",
+          "archivoQueEsperaElJuego": "public/clubs/ar-cinco-saltos.png"
+        },
+        {
+          "id": "ar-cipolletti",
+          "nombre": "Cipolletti",
+          "archivoQueEsperaElJuego": "public/clubs/ar-cipolletti.png"
+        },
+        {
+          "id": "ar-cuc",
+          "nombre": "CUC",
+          "archivoQueEsperaElJuego": "public/clubs/ar-cuc.png"
+        },
+        {
+          "id": "ar-dinos",
+          "nombre": "Dinos",
+          "archivoQueEsperaElJuego": "public/clubs/ar-dinos.png"
+        },
+        {
+          "id": "ar-los-patos",
+          "nombre": "Los Patos",
+          "archivoQueEsperaElJuego": "public/clubs/ar-los-patos.png"
+        },
+        {
+          "id": "ar-regina",
+          "nombre": "Regina",
+          "archivoQueEsperaElJuego": "public/clubs/ar-regina.png"
+        },
+        {
+          "id": "ar-trebol",
+          "nombre": "Trébol",
+          "archivoQueEsperaElJuego": "public/clubs/ar-trebol.png"
+        },
+        {
+          "id": "ar-zorros",
+          "nombre": "Zorros",
+          "archivoQueEsperaElJuego": "public/clubs/ar-zorros.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "co-liga",
+      "competencia": "Liga Nacional de Colombia",
+      "pais": "co",
+      "conIniciales": 10,
+      "sinPng": 10,
+      "total": 10,
+      "clubes": [
+        {
+          "id": "barranquilla-rugby-club",
+          "nombre": "Barranquilla Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/barranquilla-rugby-club.png"
+        },
+        {
+          "id": "bogota-rugby-club",
+          "nombre": "Bogotá Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/bogota-rugby-club.png"
+        },
+        {
+          "id": "buhos-rugby-club",
+          "nombre": "Búhos Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/buhos-rugby-club.png"
+        },
+        {
+          "id": "cali-rugby-club",
+          "nombre": "Cali Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/cali-rugby-club.png"
+        },
+        {
+          "id": "carneros-rugby-club",
+          "nombre": "Carneros Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/carneros-rugby-club.png"
+        },
+        {
+          "id": "gatos-rugby-club",
+          "nombre": "Gatos Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/gatos-rugby-club.png"
+        },
+        {
+          "id": "lions-rugby-club",
+          "nombre": "Lions Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/lions-rugby-club.png"
+        },
+        {
+          "id": "pasto-rugby-club",
+          "nombre": "Pasto Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/pasto-rugby-club.png"
+        },
+        {
+          "id": "tucanes-rugby-club",
+          "nombre": "Tucanes Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/tucanes-rugby-club.png"
+        },
+        {
+          "id": "universitario-del-valle",
+          "nombre": "Universitario del Valle",
+          "archivoQueEsperaElJuego": "public/clubs/universitario-del-valle.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "bo-liga",
+      "competencia": "Liga Boliviana",
+      "pais": "bo",
+      "conIniciales": 8,
+      "sinPng": 8,
+      "total": 8,
+      "clubes": [
+        {
+          "id": "aranjuez-rugby-club",
+          "nombre": "Aranjuez Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/aranjuez-rugby-club.png"
+        },
+        {
+          "id": "jenecheru-rugby-club",
+          "nombre": "Jenecherú Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/jenecheru-rugby-club.png"
+        },
+        {
+          "id": "la-paz-rugby-club",
+          "nombre": "La Paz Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/la-paz-rugby-club.png"
+        },
+        {
+          "id": "santa-cruz-rugby-club",
+          "nombre": "Santa Cruz Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/santa-cruz-rugby-club.png"
+        },
+        {
+          "id": "supay-rugby-club",
+          "nombre": "Supay Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/supay-rugby-club.png"
+        },
+        {
+          "id": "tigres-rugby-club",
+          "nombre": "Tigres Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/tigres-rugby-club.png"
+        },
+        {
+          "id": "universitario-rugby-club",
+          "nombre": "Universitario Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/universitario-rugby-club.png"
+        },
+        {
+          "id": "yacuiba-rugby-club",
+          "nombre": "Yacuiba Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/yacuiba-rugby-club.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "ge-didi10",
+      "competencia": "Didi 10",
+      "pais": "ge",
+      "conIniciales": 8,
+      "sinPng": 8,
+      "total": 10,
+      "clubes": [
+        {
+          "id": "aia-kutaisi",
+          "nombre": "Aia Kutaisi",
+          "archivoQueEsperaElJuego": "public/clubs/aia-kutaisi.png"
+        },
+        {
+          "id": "akademia",
+          "nombre": "Akademia",
+          "archivoQueEsperaElJuego": "public/clubs/akademia.png"
+        },
+        {
+          "id": "aresi",
+          "nombre": "Aresi",
+          "archivoQueEsperaElJuego": "public/clubs/aresi.png"
+        },
+        {
+          "id": "armazi",
+          "nombre": "Armazi",
+          "archivoQueEsperaElJuego": "public/clubs/armazi.png"
+        },
+        {
+          "id": "batumi",
+          "nombre": "Batumi",
+          "archivoQueEsperaElJuego": "public/clubs/batumi.png"
+        },
+        {
+          "id": "kharebi",
+          "nombre": "Kharebi",
+          "archivoQueEsperaElJuego": "public/clubs/kharebi.png"
+        },
+        {
+          "id": "lelo-saracens",
+          "nombre": "Lelo Saracens",
+          "archivoQueEsperaElJuego": "public/clubs/lelo-saracens.png"
+        },
+        {
+          "id": "vephkhvebi",
+          "nombre": "Vephkhvebi",
+          "archivoQueEsperaElJuego": "public/clubs/vephkhvebi.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "nl-ereklasse",
+      "competencia": "Ereklasse",
+      "pais": "nl",
+      "conIniciales": 8,
+      "sinPng": 8,
+      "total": 8,
+      "clubes": [
+        {
+          "id": "castricum-rc",
+          "nombre": "Castricum RC",
+          "archivoQueEsperaElJuego": "public/clubs/castricum-rc.png"
+        },
+        {
+          "id": "diok-leiden",
+          "nombre": "DIOK Leiden",
+          "archivoQueEsperaElJuego": "public/clubs/diok-leiden.png"
+        },
+        {
+          "id": "haagsche-rc",
+          "nombre": "Haagsche RC",
+          "archivoQueEsperaElJuego": "public/clubs/haagsche-rc.png"
+        },
+        {
+          "id": "oisterwijk-oysters",
+          "nombre": "Oisterwijk Oysters",
+          "archivoQueEsperaElJuego": "public/clubs/oisterwijk-oysters.png"
+        },
+        {
+          "id": "rc-eemland",
+          "nombre": "RC Eemland",
+          "archivoQueEsperaElJuego": "public/clubs/rc-eemland.png"
+        },
+        {
+          "id": "rc-hilversum",
+          "nombre": "RC Hilversum",
+          "archivoQueEsperaElJuego": "public/clubs/rc-hilversum.png"
+        },
+        {
+          "id": "rc-t-gooi",
+          "nombre": "RC 't Gooi",
+          "archivoQueEsperaElJuego": "public/clubs/rc-t-gooi.png"
+        },
+        {
+          "id": "rfc-haarlem",
+          "nombre": "RFC Haarlem",
+          "archivoQueEsperaElJuego": "public/clubs/rfc-haarlem.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "ar-patagonia-tdf",
+      "competencia": "Torneo de Tierra del Fuego",
+      "pais": "ar",
+      "conIniciales": 7,
+      "sinPng": 7,
+      "total": 8,
+      "clubes": [
+        {
+          "id": "ar-colegio-del-sur",
+          "nombre": "Colegio del Sur",
+          "archivoQueEsperaElJuego": "public/clubs/ar-colegio-del-sur.png"
+        },
+        {
+          "id": "ar-los-gallos",
+          "nombre": "Los Gallos",
+          "archivoQueEsperaElJuego": "public/clubs/ar-los-gallos.png"
+        },
+        {
+          "id": "ar-orcas",
+          "nombre": "Orcas",
+          "archivoQueEsperaElJuego": "public/clubs/ar-orcas.png"
+        },
+        {
+          "id": "ar-rio-grande-rugby-hockey",
+          "nombre": "Río Grande Rugby & Hockey",
+          "archivoQueEsperaElJuego": "public/clubs/ar-rio-grande-rugby-hockey.png"
+        },
+        {
+          "id": "ar-tolhuin",
+          "nombre": "Tolhuin",
+          "archivoQueEsperaElJuego": "public/clubs/ar-tolhuin.png"
+        },
+        {
+          "id": "ar-turu",
+          "nombre": "Turu",
+          "archivoQueEsperaElJuego": "public/clubs/ar-turu.png"
+        },
+        {
+          "id": "ar-ushuaia-rugby-club",
+          "nombre": "Ushuaia Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/ar-ushuaia-rugby-club.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "au-hospital-cup",
+      "competencia": "Hospital Cup",
+      "pais": "au",
+      "conIniciales": 5,
+      "sinPng": 5,
+      "total": 9,
+      "clubes": [
+        {
+          "id": "brothers",
+          "nombre": "Brothers",
+          "archivoQueEsperaElJuego": "public/clubs/brothers.png"
+        },
+        {
+          "id": "easts",
+          "nombre": "Easts",
+          "archivoQueEsperaElJuego": "public/clubs/easts.png"
+        },
+        {
+          "id": "souths",
+          "nombre": "Souths",
+          "archivoQueEsperaElJuego": "public/clubs/souths.png"
+        },
+        {
+          "id": "sunnybank",
+          "nombre": "Sunnybank",
+          "archivoQueEsperaElJuego": "public/clubs/sunnybank.png"
+        },
+        {
+          "id": "wests",
+          "nombre": "Wests",
+          "archivoQueEsperaElJuego": "public/clubs/wests.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "be-elite",
+      "competencia": "Belgian Elite League",
+      "pais": "be",
+      "conIniciales": 5,
+      "sinPng": 5,
+      "total": 7,
+      "clubes": [
+        {
+          "id": "asub-waterloo",
+          "nombre": "ASUB Waterloo",
+          "archivoQueEsperaElJuego": "public/clubs/asub-waterloo.png"
+        },
+        {
+          "id": "dendermonde-rc",
+          "nombre": "Dendermonde RC",
+          "archivoQueEsperaElJuego": "public/clubs/dendermonde-rc.png"
+        },
+        {
+          "id": "la-hulpe-rc",
+          "nombre": "La Hulpe RC",
+          "archivoQueEsperaElJuego": "public/clubs/la-hulpe-rc.png"
+        },
+        {
+          "id": "rc-liege",
+          "nombre": "RC Liège",
+          "archivoQueEsperaElJuego": "public/clubs/rc-liege.png"
+        },
+        {
+          "id": "soignies-rc",
+          "nombre": "Soignies RC",
+          "archivoQueEsperaElJuego": "public/clubs/soignies-rc.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "ca-clubs",
+      "competencia": "Canadian Rugby Championship",
+      "pais": "ca",
+      "conIniciales": 5,
+      "sinPng": 5,
+      "total": 10,
+      "clubes": [
+        {
+          "id": "calgary-hornets",
+          "nombre": "Calgary Hornets",
+          "archivoQueEsperaElJuego": "public/clubs/calgary-hornets.png"
+        },
+        {
+          "id": "edmonton-clansmen",
+          "nombre": "Edmonton Clansmen",
+          "archivoQueEsperaElJuego": "public/clubs/edmonton-clansmen.png"
+        },
+        {
+          "id": "montreal-irish",
+          "nombre": "Montreal Irish",
+          "archivoQueEsperaElJuego": "public/clubs/montreal-irish.png"
+        },
+        {
+          "id": "toronto-scottish",
+          "nombre": "Toronto Scottish",
+          "archivoQueEsperaElJuego": "public/clubs/toronto-scottish.png"
+        },
+        {
+          "id": "ubc-thunderbirds",
+          "nombre": "UBC Thunderbirds",
+          "archivoQueEsperaElJuego": "public/clubs/ubc-thunderbirds.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "ro-liga",
+      "competencia": "Liga Națională",
+      "pais": "ro",
+      "conIniciales": 5,
+      "sinPng": 5,
+      "total": 8,
+      "clubes": [
+        {
+          "id": "csa-steaua-bucuresti",
+          "nombre": "CSA Steaua București",
+          "archivoQueEsperaElJuego": "public/clubs/csa-steaua-bucuresti.png"
+        },
+        {
+          "id": "csm-stiinta-baia-mare",
+          "nombre": "CSM Știința Baia Mare",
+          "archivoQueEsperaElJuego": "public/clubs/csm-stiinta-baia-mare.png"
+        },
+        {
+          "id": "rc-barlad",
+          "nombre": "RC Bârlad",
+          "archivoQueEsperaElJuego": "public/clubs/rc-barlad.png"
+        },
+        {
+          "id": "rc-gura-humorului",
+          "nombre": "RC Gura Humorului",
+          "archivoQueEsperaElJuego": "public/clubs/rc-gura-humorului.png"
+        },
+        {
+          "id": "universitatea-cluj",
+          "nombre": "Universitatea Cluj",
+          "archivoQueEsperaElJuego": "public/clubs/universitatea-cluj.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "ru-championship",
+      "competencia": "Campeonato de Rusia",
+      "pais": "ru",
+      "conIniciales": 5,
+      "sinPng": 5,
+      "total": 8,
+      "clubes": [
+        {
+          "id": "lokomotiv-penza",
+          "nombre": "Lokomotiv Penza",
+          "archivoQueEsperaElJuego": "public/clubs/lokomotiv-penza.png"
+        },
+        {
+          "id": "metallurg-novokuznetsk",
+          "nombre": "Metallurg Novokuznetsk",
+          "archivoQueEsperaElJuego": "public/clubs/metallurg-novokuznetsk.png"
+        },
+        {
+          "id": "slava-moscow",
+          "nombre": "Slava Moscow",
+          "archivoQueEsperaElJuego": "public/clubs/slava-moscow.png"
+        },
+        {
+          "id": "strela-ak-bars",
+          "nombre": "Strela-Ak Bars",
+          "archivoQueEsperaElJuego": "public/clubs/strela-ak-bars.png"
+        },
+        {
+          "id": "vva-podmoskovye",
+          "nombre": "VVA-Podmoskovye",
+          "archivoQueEsperaElJuego": "public/clubs/vva-podmoskovye.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "wal-premiership",
+      "competencia": "Welsh Premiership",
+      "pais": "gb-wls",
+      "conIniciales": 5,
+      "sinPng": 5,
+      "total": 12,
+      "clubes": [
+        {
+          "id": "aberavon",
+          "nombre": "Aberavon",
+          "archivoQueEsperaElJuego": "public/clubs/aberavon.png"
+        },
+        {
+          "id": "carmarthen-quins",
+          "nombre": "Carmarthen Quins",
+          "archivoQueEsperaElJuego": "public/clubs/carmarthen-quins.png"
+        },
+        {
+          "id": "llandovery",
+          "nombre": "Llandovery",
+          "archivoQueEsperaElJuego": "public/clubs/llandovery.png"
+        },
+        {
+          "id": "merthyr",
+          "nombre": "Merthyr",
+          "archivoQueEsperaElJuego": "public/clubs/merthyr.png"
+        },
+        {
+          "id": "pontypridd",
+          "nombre": "Pontypridd",
+          "archivoQueEsperaElJuego": "public/clubs/pontypridd.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "au-shute-shield",
+      "competencia": "Shute Shield",
+      "pais": "au",
+      "conIniciales": 4,
+      "sinPng": 4,
+      "total": 12,
+      "clubes": [
+        {
+          "id": "eastwood",
+          "nombre": "Eastwood",
+          "archivoQueEsperaElJuego": "public/clubs/eastwood.png"
+        },
+        {
+          "id": "hunter-wildfires",
+          "nombre": "Hunter Wildfires",
+          "archivoQueEsperaElJuego": "public/clubs/hunter-wildfires.png"
+        },
+        {
+          "id": "sydney-university",
+          "nombre": "Sydney University",
+          "archivoQueEsperaElJuego": "public/clubs/sydney-university.png"
+        },
+        {
+          "id": "west-harbour",
+          "nombre": "West Harbour",
+          "archivoQueEsperaElJuego": "public/clubs/west-harbour.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "ar-patagonia-austral",
+      "competencia": "Torneo Austral (Valle del Chubut y Austral)",
+      "pais": "ar",
+      "conIniciales": 3,
+      "sinPng": 3,
+      "total": 10,
+      "clubes": [
+        {
+          "id": "ar-huergo",
+          "nombre": "Huergo",
+          "archivoQueEsperaElJuego": "public/clubs/ar-huergo.png"
+        },
+        {
+          "id": "ar-los-condores",
+          "nombre": "Los Cóndores",
+          "archivoQueEsperaElJuego": "public/clubs/ar-los-condores.png"
+        },
+        {
+          "id": "ar-universitario-de-comodoro",
+          "nombre": "Universitario de Comodoro",
+          "archivoQueEsperaElJuego": "public/clubs/ar-universitario-de-comodoro.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "ar-patagonia-chubut-desarrollo",
+      "competencia": "Desarrollo del Valle del Chubut",
+      "pais": "ar",
+      "conIniciales": 3,
+      "sinPng": 3,
+      "total": 4,
+      "clubes": [
+        {
+          "id": "ar-albatros-del-chubut",
+          "nombre": "Albatros del Chubut",
+          "archivoQueEsperaElJuego": "public/clubs/ar-albatros-del-chubut.png"
+        },
+        {
+          "id": "ar-valcheta",
+          "nombre": "Valcheta",
+          "archivoQueEsperaElJuego": "public/clubs/ar-valcheta.png"
+        },
+        {
+          "id": "ar-valle-medio",
+          "nombre": "Valle Medio",
+          "archivoQueEsperaElJuego": "public/clubs/ar-valle-medio.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "ar-noa-andina",
+      "competencia": "Torneo Andino (Catamarca y La Rioja)",
+      "pais": "ar",
+      "conIniciales": 2,
+      "sinPng": 2,
+      "total": 7,
+      "clubes": [
+        {
+          "id": "ar-club-riojano-amigos-del-rugby",
+          "nombre": "Club Riojano Amigos del Rugby",
+          "archivoQueEsperaElJuego": "public/clubs/ar-club-riojano-amigos-del-rugby.png"
+        },
+        {
+          "id": "ar-los-matacos",
+          "nombre": "Los Matacos",
+          "archivoQueEsperaElJuego": "public/clubs/ar-los-matacos.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "ire-ail1a",
+      "competencia": "All-Ireland League 1A",
+      "pais": "ie",
+      "conIniciales": 2,
+      "sinPng": 2,
+      "total": 8,
+      "clubes": [
+        {
+          "id": "st-mary-s-college",
+          "nombre": "St. Mary's College",
+          "archivoQueEsperaElJuego": "public/clubs/st-mary-s-college.png"
+        },
+        {
+          "id": "terenure-college",
+          "nombre": "Terenure College",
+          "archivoQueEsperaElJuego": "public/clubs/terenure-college.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "sco-premiership",
+      "competencia": "Scottish Premiership",
+      "pais": "gb-sct",
+      "conIniciales": 2,
+      "sinPng": 2,
+      "total": 10,
+      "clubes": [
+        {
+          "id": "currie-chieftains",
+          "nombre": "Currie Chieftains",
+          "archivoQueEsperaElJuego": "public/clubs/currie-chieftains.png"
+        },
+        {
+          "id": "musselburgh",
+          "nombre": "Musselburgh",
+          "archivoQueEsperaElJuego": "public/clubs/musselburgh.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "ar-pampeana-uroba-sur",
+      "competencia": "Regional Pampeano UROBA-Sur",
+      "pais": "ar",
+      "conIniciales": 1,
+      "sinPng": 1,
+      "total": 6,
+      "clubes": [
+        {
+          "id": "ar-punta-alta-rugby-club",
+          "nombre": "Punta Alta Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/ar-punta-alta-rugby-club.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "ar-patagonia-santacruz",
+      "competencia": "Torneo Santacruceño",
+      "pais": "ar",
+      "conIniciales": 1,
+      "sinPng": 1,
+      "total": 6,
+      "clubes": [
+        {
+          "id": "ar-the-british-school",
+          "nombre": "The British School",
+          "archivoQueEsperaElJuego": "public/clubs/ar-the-british-school.png"
+        }
+      ]
+    },
+    {
+      "competenciaId": "py-primera",
+      "competencia": "Primera División de Paraguay",
+      "pais": "py",
+      "conIniciales": 1,
+      "sinPng": 1,
+      "total": 6,
+      "clubes": [
+        {
+          "id": "presidente-hayes-rugby-club",
+          "nombre": "Presidente Hayes Rugby Club",
+          "archivoQueEsperaElJuego": "public/clubs/presidente-hayes-rugby-club.png"
+        }
+      ]
+    }
+  ],
   "clubes": [
+    {
+      "id": "aberavon",
+      "nombre": "Aberavon",
+      "competencia": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "pais": "gb-wls",
+      "archivoQueEsperaElJuego": "public/clubs/aberavon.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
     {
       "id": "academica",
       "nombre": "Académica",
@@ -1706,6 +2983,32 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "aia-kutaisi",
+      "nombre": "Aia Kutaisi",
+      "competencia": "Didi 10",
+      "competenciaId": "ge-didi10",
+      "pais": "ge",
+      "archivoQueEsperaElJuego": "public/clubs/aia-kutaisi.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "akademia",
+      "nombre": "Akademia",
+      "competencia": "Didi 10",
+      "competenciaId": "ge-didi10",
+      "pais": "ge",
+      "archivoQueEsperaElJuego": "public/clubs/akademia.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -1774,6 +3077,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "alumni-rugby-club",
+      "nombre": "Alumni Rugby Club",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/alumni-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "amatori-alghero",
       "nombre": "Amatori Alghero",
       "competencia": "Serie A",
@@ -1839,6 +3155,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "ar-aguara-del-alto-valle",
+      "nombre": "Aguará del Alto Valle",
+      "competencia": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-aguara-del-alto-valle.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "ar-albatros",
       "nombre": "Albatros",
       "competencia": "Segunda de la URBA",
@@ -1849,6 +3178,32 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-albatros-del-chubut",
+      "nombre": "Albatros del Chubut",
+      "competencia": "Desarrollo del Valle del Chubut",
+      "competenciaId": "ar-patagonia-chubut-desarrollo",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-albatros-del-chubut.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-allen",
+      "nombre": "Allen",
+      "competencia": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-allen.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -1982,6 +3337,58 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "ar-catamarca-rugby-club",
+      "nombre": "Catamarca Rugby Club",
+      "competencia": "Torneo Andino (Catamarca y La Rioja)",
+      "competenciaId": "ar-noa-andina",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-catamarca-rugby-club.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-catriel",
+      "nombre": "Catriel",
+      "competencia": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-catriel.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-cinco-saltos",
+      "nombre": "Cinco Saltos",
+      "competencia": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-cinco-saltos.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-cipolletti",
+      "nombre": "Cipolletti",
+      "competencia": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-cipolletti.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "ar-ciudad-de-campana",
       "nombre": "Ciudad de Campana",
       "competencia": "Tercera de la URBA",
@@ -1992,6 +3399,71 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-club-riojano-amigos-del-rugby",
+      "nombre": "Club Riojano Amigos del Rugby",
+      "competencia": "Torneo Andino (Catamarca y La Rioja)",
+      "competenciaId": "ar-noa-andina",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-club-riojano-amigos-del-rugby.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-club-social-rugby",
+      "nombre": "Club Social Rugby",
+      "competencia": "Torneo Andino (Catamarca y La Rioja)",
+      "competenciaId": "ar-noa-andina",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-club-social-rugby.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-colegio-del-sur",
+      "nombre": "Colegio del Sur",
+      "competencia": "Torneo de Tierra del Fuego",
+      "competenciaId": "ar-patagonia-tdf",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-colegio-del-sur.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-coseba",
+      "nombre": "Coseba",
+      "competencia": "Torneo Santacruceño",
+      "competenciaId": "ar-patagonia-santacruz",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-coseba.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-cuc",
+      "nombre": "CUC",
+      "competencia": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-cuc.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -2014,6 +3486,32 @@
       "competenciaId": "ar-urba-desarrollo",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/ar-defensores-de-glew.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-dinos",
+      "nombre": "Dinos",
+      "competencia": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-dinos.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-el-calafate-rugby-hockey",
+      "nombre": "El Calafate Rugby & Hockey",
+      "competencia": "Torneo Santacruceño",
+      "competenciaId": "ar-patagonia-santacruz",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-el-calafate-rugby-hockey.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -2086,12 +3584,38 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "ar-huergo",
+      "nombre": "Huergo",
+      "competencia": "Torneo Austral (Valle del Chubut y Austral)",
+      "competenciaId": "ar-patagonia-austral",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-huergo.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "ar-jockey-club-villa-maria",
       "nombre": "Jockey Club Villa María",
       "competencia": "Top 10 A de Córdoba",
       "competenciaId": "ar-centro-top10",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/ar-jockey-club-villa-maria.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-kamikazes-de-colon",
+      "nombre": "Kamikazes de Colón",
+      "competencia": "Regional Pampeano UROBA-Sur",
+      "competenciaId": "ar-pampeana-uroba-sur",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-kamikazes-de-colon.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -2138,12 +3662,116 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "ar-los-condores",
+      "nombre": "Los Cóndores",
+      "competencia": "Torneo Austral (Valle del Chubut y Austral)",
+      "competenciaId": "ar-patagonia-austral",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-los-condores.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-los-gallos",
+      "nombre": "Los Gallos",
+      "competencia": "Torneo de Tierra del Fuego",
+      "competenciaId": "ar-patagonia-tdf",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-los-gallos.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-los-guanacos",
+      "nombre": "Los Guanacos",
+      "competencia": "Torneo Santacruceño",
+      "competenciaId": "ar-patagonia-santacruz",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-los-guanacos.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-los-indios-de-bolivar",
+      "nombre": "Los Indios de Bolívar",
+      "competencia": "Regional Pampeano UROBA-Sur",
+      "competenciaId": "ar-pampeana-uroba-sur",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-los-indios-de-bolivar.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-los-jabalies",
+      "nombre": "Los Jabalíes",
+      "competencia": "Desarrollo del Valle del Chubut",
+      "competenciaId": "ar-patagonia-chubut-desarrollo",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-los-jabalies.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-los-matacos",
+      "nombre": "Los Matacos",
+      "competencia": "Torneo Andino (Catamarca y La Rioja)",
+      "competenciaId": "ar-noa-andina",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-los-matacos.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-los-patos",
+      "nombre": "Los Patos",
+      "competencia": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-los-patos.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "ar-los-pinos",
       "nombre": "Los Pinos",
       "competencia": "Segunda de la URBA",
       "competenciaId": "ar-urba-segunda",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/ar-los-pinos.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-maca-tobiano",
+      "nombre": "Macá Tobiano",
+      "competencia": "Torneo Santacruceño",
+      "competenciaId": "ar-patagonia-santacruz",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-maca-tobiano.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -2203,12 +3831,51 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "ar-orcas",
+      "nombre": "Orcas",
+      "competencia": "Torneo de Tierra del Fuego",
+      "competenciaId": "ar-patagonia-tdf",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-orcas.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "ar-pac-general-rodriguez",
       "nombre": "PAC General Rodríguez",
       "competencia": "Tercera de la URBA",
       "competenciaId": "ar-urba-tercera",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/ar-pac-general-rodriguez.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-patagonia-rugby-club",
+      "nombre": "Patagonia Rugby Club",
+      "competencia": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-patagonia-rugby-club.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-pico-rugby-club",
+      "nombre": "Pico Rugby Club",
+      "competencia": "Regional Pampeano UROBA-Sur",
+      "competenciaId": "ar-pampeana-uroba-sur",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-pico-rugby-club.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -2239,6 +3906,45 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-punta-alta-rugby-club",
+      "nombre": "Punta Alta Rugby Club",
+      "competencia": "Regional Pampeano UROBA-Sur",
+      "competenciaId": "ar-pampeana-uroba-sur",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-punta-alta-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-regina",
+      "nombre": "Regina",
+      "competencia": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-regina.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-rio-grande-rugby-hockey",
+      "nombre": "Río Grande Rugby & Hockey",
+      "competencia": "Torneo de Tierra del Fuego",
+      "competenciaId": "ar-patagonia-tdf",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-rio-grande-rugby-hockey.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -2333,6 +4039,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "ar-the-british-school",
+      "nombre": "The British School",
+      "competencia": "Torneo Santacruceño",
+      "competenciaId": "ar-patagonia-santacruz",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-the-british-school.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "ar-tigre",
       "nombre": "Tigre",
       "competencia": "Segunda de la URBA",
@@ -2372,6 +4091,58 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "ar-tolhuin",
+      "nombre": "Tolhuin",
+      "competencia": "Torneo de Tierra del Fuego",
+      "competenciaId": "ar-patagonia-tdf",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-tolhuin.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-trebol",
+      "nombre": "Trébol",
+      "competencia": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-trebol.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-turu",
+      "nombre": "Turu",
+      "competencia": "Torneo de Tierra del Fuego",
+      "competenciaId": "ar-patagonia-tdf",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-turu.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-umag",
+      "nombre": "UMAG",
+      "competencia": "Torneo Santacruceño",
+      "competenciaId": "ar-patagonia-santacruz",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-umag.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "ar-uncas",
       "nombre": "Uncas",
       "competencia": "Regional Pampeano B",
@@ -2382,6 +4153,71 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-universitario-de-comodoro",
+      "nombre": "Universitario de Comodoro",
+      "competencia": "Torneo Austral (Valle del Chubut y Austral)",
+      "competenciaId": "ar-patagonia-austral",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-universitario-de-comodoro.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-universitario-de-rio-grande",
+      "nombre": "Universitario de Río Grande",
+      "competencia": "Torneo de Tierra del Fuego",
+      "competenciaId": "ar-patagonia-tdf",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-universitario-de-rio-grande.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-ushuaia-rugby-club",
+      "nombre": "Ushuaia Rugby Club",
+      "competencia": "Torneo de Tierra del Fuego",
+      "competenciaId": "ar-patagonia-tdf",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-ushuaia-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-valcheta",
+      "nombre": "Valcheta",
+      "competencia": "Desarrollo del Valle del Chubut",
+      "competenciaId": "ar-patagonia-chubut-desarrollo",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-valcheta.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ar-valle-medio",
+      "nombre": "Valle Medio",
+      "competencia": "Desarrollo del Valle del Chubut",
+      "competenciaId": "ar-patagonia-chubut-desarrollo",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-valle-medio.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -2411,6 +4247,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "ar-zorros",
+      "nombre": "Zorros",
+      "competencia": "Torneo del Alto Valle",
+      "competenciaId": "ar-patagonia-alto-valle",
+      "pais": "ar",
+      "archivoQueEsperaElJuego": "public/clubs/ar-zorros.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "aranda",
       "nombre": "Aranda",
       "competencia": "División de Honor B",
@@ -2421,6 +4270,32 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "aranjuez-rugby-club",
+      "nombre": "Aranjuez Rugby Club",
+      "competencia": "Liga Boliviana",
+      "competenciaId": "bo-liga",
+      "pais": "bo",
+      "archivoQueEsperaElJuego": "public/clubs/aranjuez-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "aresi",
+      "nombre": "Aresi",
+      "competencia": "Didi 10",
+      "competenciaId": "ge-didi10",
+      "pais": "ge",
+      "archivoQueEsperaElJuego": "public/clubs/aresi.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -2447,6 +4322,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "armazi",
+      "nombre": "Armazi",
+      "competencia": "Didi 10",
+      "competenciaId": "ge-didi10",
+      "pais": "ge",
+      "archivoQueEsperaElJuego": "public/clubs/armazi.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -2502,12 +4390,51 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "asociacion-ciudad-de-mexico",
+      "nombre": "Asociación Ciudad de México",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/asociacion-ciudad-de-mexico.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "asr-milano",
       "nombre": "ASR Milano",
       "competencia": "Serie A",
       "competenciaId": "ita-serie-a",
       "pais": "it",
       "archivoQueEsperaElJuego": "public/clubs/asr-milano.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "asub-waterloo",
+      "nombre": "ASUB Waterloo",
+      "competencia": "Belgian Elite League",
+      "competenciaId": "be-elite",
+      "pais": "be",
+      "archivoQueEsperaElJuego": "public/clubs/asub-waterloo.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "asuncion-rugby-club",
+      "nombre": "Asunción Rugby Club",
+      "competencia": "Primera División de Paraguay",
+      "competenciaId": "py-primera",
+      "pais": "py",
+      "archivoQueEsperaElJuego": "public/clubs/asuncion-rugby-club.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -2554,6 +4481,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "axolotl-rugby-club",
+      "nombre": "Axolotl Rugby Club",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/axolotl-rugby-club.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ayr",
+      "nombre": "Ayr",
+      "competencia": "Scottish Premiership",
+      "competenciaId": "sco-premiership",
+      "pais": "gb-sct",
+      "archivoQueEsperaElJuego": "public/clubs/ayr.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "az-com-maruwa-momotaro-s",
       "nombre": "AZ-COM MARUWA Momotaro's",
       "competencia": "Japan Rugby League One D3",
@@ -2573,6 +4526,19 @@
       "competenciaId": "fr-federale1",
       "pais": "fr",
       "archivoQueEsperaElJuego": "public/clubs/bagneres.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ballynahinch",
+      "nombre": "Ballynahinch",
+      "competencia": "All-Ireland League 1A",
+      "competenciaId": "ire-ail1a",
+      "pais": "ie",
+      "archivoQueEsperaElJuego": "public/clubs/ballynahinch.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -2606,6 +4572,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "barranquilla-rugby-club",
+      "nombre": "Barranquilla Rugby Club",
+      "competencia": "Liga Nacional de Colombia",
+      "competenciaId": "co-liga",
+      "pais": "co",
+      "archivoQueEsperaElJuego": "public/clubs/barranquilla-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "bath",
       "nombre": "Bath",
       "competencia": "Gallagher PREM",
@@ -2616,6 +4595,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "batumi",
+      "nombre": "Batumi",
+      "competencia": "Didi 10",
+      "competenciaId": "ge-didi10",
+      "pais": "ge",
+      "archivoQueEsperaElJuego": "public/clubs/batumi.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -2749,6 +4741,45 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "bisontes-rugby-club",
+      "nombre": "Bisontes Rugby Club",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/bisontes-rugby-club.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "black-lion",
+      "nombre": "Black Lion",
+      "competencia": "Didi 10",
+      "competenciaId": "ge-didi10",
+      "pais": "ge",
+      "archivoQueEsperaElJuego": "public/clubs/black-lion.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "black-thunder-rc",
+      "nombre": "Black Thunder RC",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/black-thunder-rc.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "blackheath",
       "nombre": "Blackheath",
       "competencia": "National League 1",
@@ -2814,12 +4845,51 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "blues-rugby-association",
+      "nombre": "Blues Rugby Association",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/blues-rugby-association.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "bogota-rugby-club",
+      "nombre": "Bogotá Rugby Club",
+      "competencia": "Liga Nacional de Colombia",
+      "competenciaId": "co-liga",
+      "pais": "co",
+      "archivoQueEsperaElJuego": "public/clubs/bogota-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "bohemia-rugby-warriors",
       "nombre": "Bohemia Rugby Warriors",
       "competencia": "Rugby Europe Super Cup",
       "competenciaId": "super-cup",
       "pais": "multi",
       "archivoQueEsperaElJuego": "public/clubs/bohemia-rugby-warriors.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "boitsfort-rc",
+      "nombre": "Boitsfort RC",
+      "competencia": "Belgian Elite League",
+      "competenciaId": "be-elite",
+      "pais": "be",
+      "archivoQueEsperaElJuego": "public/clubs/boitsfort-rc.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -2840,12 +4910,38 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "bond-university",
+      "nombre": "Bond University",
+      "competencia": "Hospital Cup",
+      "competenciaId": "au-hospital-cup",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/bond-university.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "border-bulldogs",
       "nombre": "Border Bulldogs",
       "competencia": "Currie Cup First Division",
       "competenciaId": "currie-first",
       "pais": "za",
       "archivoQueEsperaElJuego": "public/clubs/border-bulldogs.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "boroughmuir-bears",
+      "nombre": "Boroughmuir Bears",
+      "competencia": "Scottish Premiership",
+      "competenciaId": "sco-premiership",
+      "pais": "gb-sct",
+      "archivoQueEsperaElJuego": "public/clubs/boroughmuir-bears.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -2879,6 +4975,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "bridgend",
+      "nombre": "Bridgend",
+      "competencia": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "pais": "gb-wls",
+      "archivoQueEsperaElJuego": "public/clubs/bridgend.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "bristol-bears",
       "nombre": "Bristol Bears",
       "competencia": "Gallagher PREM",
@@ -2889,6 +4998,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "brothers",
+      "nombre": "Brothers",
+      "competencia": "Hospital Cup",
+      "competenciaId": "au-hospital-cup",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/brothers.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -2928,6 +5050,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "buhos-rugby-club",
+      "nombre": "Búhos Rugby Club",
+      "competencia": "Liga Nacional de Colombia",
+      "competenciaId": "co-liga",
+      "pais": "co",
+      "archivoQueEsperaElJuego": "public/clubs/buhos-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -3006,6 +5141,32 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "calgary-hornets",
+      "nombre": "Calgary Hornets",
+      "competencia": "Canadian Rugby Championship",
+      "competenciaId": "ca-clubs",
+      "pais": "ca",
+      "archivoQueEsperaElJuego": "public/clubs/calgary-hornets.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "cali-rugby-club",
+      "nombre": "Cali Rugby Club",
+      "competencia": "Liga Nacional de Colombia",
+      "competenciaId": "co-liga",
+      "pais": "co",
+      "archivoQueEsperaElJuego": "public/clubs/cali-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -3113,6 +5274,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "cardiff-rfc",
+      "nombre": "Cardiff RFC",
+      "competencia": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "pais": "gb-wls",
+      "archivoQueEsperaElJuego": "public/clubs/cardiff-rfc.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "cardiff-rugby",
       "nombre": "Cardiff Rugby",
       "competencia": "URC",
@@ -3126,12 +5300,51 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "carmarthen-quins",
+      "nombre": "Carmarthen Quins",
+      "competencia": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "pais": "gb-wls",
+      "archivoQueEsperaElJuego": "public/clubs/carmarthen-quins.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "carneros-rugby-club",
+      "nombre": "Carneros Rugby Club",
+      "competencia": "Liga Nacional de Colombia",
+      "competenciaId": "co-liga",
+      "pais": "co",
+      "archivoQueEsperaElJuego": "public/clubs/carneros-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "cascais",
       "nombre": "Cascais",
       "competencia": "Divisão de Honra",
       "competenciaId": "pt-honra",
       "pais": "pt",
       "archivoQueEsperaElJuego": "public/clubs/cascais.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "castaway-wanderers",
+      "nombre": "Castaway Wanderers",
+      "competencia": "Canadian Rugby Championship",
+      "competenciaId": "ca-clubs",
+      "pais": "ca",
+      "archivoQueEsperaElJuego": "public/clubs/castaway-wanderers.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -3162,6 +5375,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "castricum-rc",
+      "nombre": "Castricum RC",
+      "competencia": "Ereklasse",
+      "competenciaId": "nl-ereklasse",
+      "pais": "nl",
+      "archivoQueEsperaElJuego": "public/clubs/castricum-rc.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -3334,6 +5560,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "clontarf",
+      "nombre": "Clontarf",
+      "competencia": "All-Ireland League 1A",
+      "competenciaId": "ire-ail1a",
+      "pais": "ie",
+      "archivoQueEsperaElJuego": "public/clubs/clontarf.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "club-cruzados",
+      "nombre": "Club Cruzados",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/club-cruzados.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "cobras-brasil-rugby",
       "nombre": "Cobras Brasil Rugby",
       "competencia": "Super Rugby Americas",
@@ -3425,6 +5677,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "cork-constitution",
+      "nombre": "Cork Constitution",
+      "competencia": "All-Ireland League 1A",
+      "competenciaId": "ire-ail1a",
+      "pais": "ie",
+      "archivoQueEsperaElJuego": "public/clubs/cork-constitution.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "cormoran-santander",
       "nombre": "Cormorán Santander",
       "competencia": "División de Honor B",
@@ -3490,6 +5755,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "coyotes-rugby-club",
+      "nombre": "Coyotes Rugby Club",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/coyotes-rugby-club.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "cristo-rey-rugby-club",
+      "nombre": "Cristo Rey Rugby Club",
+      "competencia": "Primera División de Paraguay",
+      "competenciaId": "py-primera",
+      "pais": "py",
+      "archivoQueEsperaElJuego": "public/clubs/cristo-rey-rugby-club.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "crusaders",
       "nombre": "Crusaders",
       "competencia": "Super Rugby Pacific",
@@ -3500,6 +5791,58 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "csa-steaua-bucuresti",
+      "nombre": "CSA Steaua București",
+      "competencia": "Liga Națională",
+      "competenciaId": "ro-liga",
+      "pais": "ro",
+      "archivoQueEsperaElJuego": "public/clubs/csa-steaua-bucuresti.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "csm-stiinta-baia-mare",
+      "nombre": "CSM Știința Baia Mare",
+      "competencia": "Liga Națională",
+      "competenciaId": "ro-liga",
+      "pais": "ro",
+      "archivoQueEsperaElJuego": "public/clubs/csm-stiinta-baia-mare.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "cumiyais-rfc",
+      "nombre": "Cumiyais RFC",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/cumiyais-rfc.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "currie-chieftains",
+      "nombre": "Currie Chieftains",
+      "competencia": "Scottish Premiership",
+      "competenciaId": "sco-premiership",
+      "pais": "gb-sct",
+      "archivoQueEsperaElJuego": "public/clubs/currie-chieftains.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -3555,6 +5898,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "dendermonde-rc",
+      "nombre": "Dendermonde RC",
+      "competencia": "Belgian Elite League",
+      "competenciaId": "be-elite",
+      "pais": "be",
+      "archivoQueEsperaElJuego": "public/clubs/dendermonde-rc.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "desterro",
       "nombre": "Desterro",
       "competencia": "Super 12",
@@ -3578,6 +5934,45 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "dinamo-bucuresti",
+      "nombre": "Dinamo București",
+      "competencia": "Liga Națională",
+      "competenciaId": "ro-liga",
+      "pais": "ro",
+      "archivoQueEsperaElJuego": "public/clubs/dinamo-bucuresti.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "dinamo-moscow",
+      "nombre": "Dinamo Moscow",
+      "competencia": "Campeonato de Rusia",
+      "competenciaId": "ru-championship",
+      "pais": "ru",
+      "archivoQueEsperaElJuego": "public/clubs/dinamo-moscow.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "diok-leiden",
+      "nombre": "DIOK Leiden",
+      "competencia": "Ereklasse",
+      "competenciaId": "nl-ereklasse",
+      "pais": "nl",
+      "archivoQueEsperaElJuego": "public/clubs/diok-leiden.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -3620,12 +6015,38 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "dragones-rugby-club",
+      "nombre": "Dragones Rugby Club",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/dragones-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "dragons",
       "nombre": "Dragons",
       "competencia": "URC",
       "competenciaId": "urc",
       "pais": "multi",
       "archivoQueEsperaElJuego": "public/clubs/dragons.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "dublin-university",
+      "nombre": "Dublin University",
+      "competencia": "All-Ireland League 1A",
+      "competenciaId": "ire-ail1a",
+      "pais": "ie",
+      "archivoQueEsperaElJuego": "public/clubs/dublin-university.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -3672,6 +6093,58 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "eastern-suburbs",
+      "nombre": "Eastern Suburbs",
+      "competencia": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/eastern-suburbs.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "easts",
+      "nombre": "Easts",
+      "competencia": "Hospital Cup",
+      "competenciaId": "au-hospital-cup",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/easts.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "eastwood",
+      "nombre": "Eastwood",
+      "competencia": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/eastwood.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ebbw-vale",
+      "nombre": "Ebbw Vale",
+      "competencia": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "pais": "gb-wls",
+      "archivoQueEsperaElJuego": "public/clubs/ebbw-vale.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "edinburgh-rugby",
       "nombre": "Edinburgh Rugby",
       "competencia": "URC",
@@ -3682,6 +6155,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "edmonton-clansmen",
+      "nombre": "Edmonton Clansmen",
+      "competencia": "Canadian Rugby Championship",
+      "competenciaId": "ca-clubs",
+      "pais": "ca",
+      "archivoQueEsperaElJuego": "public/clubs/edmonton-clansmen.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -3704,6 +6190,19 @@
       "competenciaId": "esp-dhb",
       "pais": "es",
       "archivoQueEsperaElJuego": "public/clubs/el-toro.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "enisei-stm",
+      "nombre": "Enisei-STM",
+      "competencia": "Campeonato de Rusia",
+      "competenciaId": "ru-championship",
+      "pais": "ru",
+      "archivoQueEsperaElJuego": "public/clubs/enisei-stm.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -3828,6 +6327,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "flaming-lions-rfc",
+      "nombre": "Flaming Lions RFC",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/flaming-lions-rfc.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "free-state-cheetahs",
       "nombre": "Free State Cheetahs",
       "competencia": "Currie Cup Premier",
@@ -3864,6 +6376,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "gatos-rugby-club",
+      "nombre": "Gatos Rugby Club",
+      "competencia": "Liga Nacional de Colombia",
+      "competenciaId": "co-liga",
+      "pais": "co",
+      "archivoQueEsperaElJuego": "public/clubs/gatos-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -3958,6 +6483,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "gordon",
+      "nombre": "Gordon",
+      "competencia": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/gordon.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "gps",
+      "nombre": "GPS",
+      "competencia": "Hospital Cup",
+      "competenciaId": "au-hospital-cup",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/gps.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "grand-canyon",
       "nombre": "Grand Canyon",
       "competencia": "D1A universitaria (CRAA)",
@@ -4020,6 +6571,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "haagsche-rc",
+      "nombre": "Haagsche RC",
+      "competencia": "Ereklasse",
+      "competenciaId": "nl-ereklasse",
+      "pais": "nl",
+      "archivoQueEsperaElJuego": "public/clubs/haagsche-rc.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -4088,12 +6652,38 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "hawick",
+      "nombre": "Hawick",
+      "competencia": "Scottish Premiership",
+      "competenciaId": "sco-premiership",
+      "pais": "gb-sct",
+      "archivoQueEsperaElJuego": "public/clubs/hawick.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "hawke-s-bay",
       "nombre": "Hawke's Bay",
       "competencia": "NPC",
       "competenciaId": "npc",
       "pais": "nz",
       "archivoQueEsperaElJuego": "public/clubs/hawke-s-bay.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "heriot-s",
+      "nombre": "Heriot's",
+      "competencia": "Scottish Premiership",
+      "competenciaId": "sco-premiership",
+      "pais": "gb-sct",
+      "archivoQueEsperaElJuego": "public/clubs/heriot-s.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -4166,6 +6756,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "hunter-wildfires",
+      "nombre": "Hunter Wildfires",
+      "competencia": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/hunter-wildfires.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "hurricanes",
       "nombre": "Hurricanes",
       "competencia": "Super Rugby Pacific",
@@ -4231,6 +6834,45 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "james-bay-aa",
+      "nombre": "James Bay AA",
+      "competencia": "Canadian Rugby Championship",
+      "competenciaId": "ca-clubs",
+      "pais": "ca",
+      "archivoQueEsperaElJuego": "public/clubs/james-bay-aa.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "jed-forest",
+      "nombre": "Jed-Forest",
+      "competencia": "Scottish Premiership",
+      "competenciaId": "sco-premiership",
+      "pais": "gb-sct",
+      "archivoQueEsperaElJuego": "public/clubs/jed-forest.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "jenecheru-rugby-club",
+      "nombre": "Jenecherú Rugby Club",
+      "competencia": "Liga Boliviana",
+      "competenciaId": "bo-liga",
+      "pais": "bo",
+      "archivoQueEsperaElJuego": "public/clubs/jenecheru-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "joaca",
       "nombre": "Joaca",
       "competencia": "Super 12",
@@ -4270,6 +6912,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "kharebi",
+      "nombre": "Kharebi",
+      "competencia": "Didi 10",
+      "competenciaId": "ge-didi10",
+      "pais": "ge",
+      "archivoQueEsperaElJuego": "public/clubs/kharebi.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "khvamli",
+      "nombre": "Khvamli",
+      "competencia": "Didi 10",
+      "competenciaId": "ge-didi10",
+      "pais": "ge",
+      "archivoQueEsperaElJuego": "public/clubs/khvamli.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "king-country",
       "nombre": "King Country",
       "competencia": "Heartland Championship",
@@ -4283,12 +6951,51 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "kituro-rc",
+      "nombre": "Kituro RC",
+      "competencia": "Belgian Elite League",
+      "competenciaId": "be-elite",
+      "pais": "be",
+      "archivoQueEsperaElJuego": "public/clubs/kituro-rc.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "koalas-rfc",
+      "nombre": "Koalas RFC",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/koalas-rfc.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "kobelco-kobe-steelers",
       "nombre": "Kobelco Kobe Steelers",
       "competencia": "Japan Rugby League One D1",
       "competenciaId": "jpn-d1",
       "pais": "jp",
       "archivoQueEsperaElJuego": "public/clubs/kobelco-kobe-steelers.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "krasny-yar",
+      "nombre": "Krasny Yar",
+      "competencia": "Campeonato de Rusia",
+      "competenciaId": "ru-championship",
+      "pais": "ru",
+      "archivoQueEsperaElJuego": "public/clubs/krasny-yar.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -4348,6 +7055,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "la-hulpe-rc",
+      "nombre": "La Hulpe RC",
+      "competencia": "Belgian Elite League",
+      "competenciaId": "be-elite",
+      "pais": "be",
+      "archivoQueEsperaElJuego": "public/clubs/la-hulpe-rc.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "la-paz-rugby-club",
+      "nombre": "La Paz Rugby Club",
+      "competencia": "Liga Boliviana",
+      "competenciaId": "bo-liga",
+      "pais": "bo",
+      "archivoQueEsperaElJuego": "public/clubs/la-paz-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "la-unica",
       "nombre": "La Única",
       "competencia": "División de Honor B",
@@ -4400,6 +7133,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "lansdowne",
+      "nombre": "Lansdowne",
+      "competencia": "All-Ireland League 1A",
+      "competenciaId": "ire-ail1a",
+      "pais": "ie",
+      "archivoQueEsperaElJuego": "public/clubs/lansdowne.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "lautoka",
+      "nombre": "Lautoka",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/lautoka.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "lavaur",
       "nombre": "Lavaur",
       "competencia": "Fédérale 2",
@@ -4426,6 +7185,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "legion-de-cuervos",
+      "nombre": "Legión de Cuervos",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/legion-de-cuervos.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "leicester-tigers",
       "nombre": "Leicester Tigers",
       "competencia": "Gallagher PREM",
@@ -4445,6 +7217,45 @@
       "competenciaId": "urc",
       "pais": "multi",
       "archivoQueEsperaElJuego": "public/clubs/leinster.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "lelo-saracens",
+      "nombre": "Lelo Saracens",
+      "competencia": "Didi 10",
+      "competenciaId": "ge-didi10",
+      "pais": "ge",
+      "archivoQueEsperaElJuego": "public/clubs/lelo-saracens.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "leones-de-san-marcos",
+      "nombre": "Leones de San Marcos",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/leones-de-san-marcos.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "leones-rugby",
+      "nombre": "Leones Rugby",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/leones-rugby.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -4517,6 +7328,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "lima-rugby-club",
+      "nombre": "Lima Rugby Club",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/lima-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "lindenwood",
       "nombre": "Lindenwood",
       "competencia": "D1A universitaria (CRAA)",
@@ -4540,6 +7364,45 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "lions-rugby-club",
+      "nombre": "Lions Rugby Club",
+      "competencia": "Liga Nacional de Colombia",
+      "competenciaId": "co-liga",
+      "pais": "co",
+      "archivoQueEsperaElJuego": "public/clubs/lions-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "llandovery",
+      "nombre": "Llandovery",
+      "competencia": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "pais": "gb-wls",
+      "archivoQueEsperaElJuego": "public/clubs/llandovery.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "lokomotiv-penza",
+      "nombre": "Lokomotiv Penza",
+      "competencia": "Campeonato de Rusia",
+      "competenciaId": "ru-championship",
+      "pais": "ru",
+      "archivoQueEsperaElJuego": "public/clubs/lokomotiv-penza.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -4595,6 +7458,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "luque-rugby-club",
+      "nombre": "Luque Rugby Club",
+      "competencia": "Primera División de Paraguay",
+      "competenciaId": "py-primera",
+      "pais": "py",
+      "archivoQueEsperaElJuego": "public/clubs/luque-rugby-club.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "lusitanos-xv",
       "nombre": "Lusitanos XV",
       "competencia": "Rugby Europe Super Cup",
@@ -4634,6 +7510,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "macuata",
+      "nombre": "Macuata",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/macuata.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "majadahonda",
       "nombre": "Majadahonda",
       "competencia": "División de Honor B",
@@ -4644,6 +7533,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "malolo",
+      "nombre": "Malolo",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/malolo.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -4660,12 +7562,38 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "manly",
+      "nombre": "Manly",
+      "competencia": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/manly.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "marcq",
       "nombre": "Marcq",
       "competencia": "Nationale",
       "competenciaId": "nationale",
       "pais": "fr",
       "archivoQueEsperaElJuego": "public/clubs/marcq.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "mariano-roque-alonso-rugby-club",
+      "nombre": "Mariano Roque Alonso Rugby Club",
+      "competencia": "Primera División de Paraguay",
+      "competenciaId": "py-primera",
+      "pais": "py",
+      "archivoQueEsperaElJuego": "public/clubs/mariano-roque-alonso-rugby-club.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -4709,6 +7637,58 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "melrose",
+      "nombre": "Melrose",
+      "competencia": "Scottish Premiership",
+      "competenciaId": "sco-premiership",
+      "pais": "gb-sct",
+      "archivoQueEsperaElJuego": "public/clubs/melrose.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "meraloma-rfc",
+      "nombre": "Meraloma RFC",
+      "competencia": "Canadian Rugby Championship",
+      "competenciaId": "ca-clubs",
+      "pais": "ca",
+      "archivoQueEsperaElJuego": "public/clubs/meraloma-rfc.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "merthyr",
+      "nombre": "Merthyr",
+      "competencia": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "pais": "gb-wls",
+      "archivoQueEsperaElJuego": "public/clubs/merthyr.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "metallurg-novokuznetsk",
+      "nombre": "Metallurg Novokuznetsk",
+      "competencia": "Campeonato de Rusia",
+      "competenciaId": "ru-championship",
+      "pais": "ru",
+      "archivoQueEsperaElJuego": "public/clubs/metallurg-novokuznetsk.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -4777,6 +7757,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "mochikas-rugby-club",
+      "nombre": "Mochikas Rugby Club",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/mochikas-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "mogliano",
       "nombre": "Mogliano",
       "competencia": "Serie A Élite",
@@ -4816,6 +7809,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "montreal-irish",
+      "nombre": "Montreal Irish",
+      "competencia": "Canadian Rugby Championship",
+      "competenciaId": "ca-clubs",
+      "pais": "ca",
+      "archivoQueEsperaElJuego": "public/clubs/montreal-irish.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "munster",
       "nombre": "Munster",
       "competencia": "URC",
@@ -4826,6 +7832,71 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "musselburgh",
+      "nombre": "Musselburgh",
+      "competencia": "Scottish Premiership",
+      "competenciaId": "sco-premiership",
+      "pais": "gb-sct",
+      "archivoQueEsperaElJuego": "public/clubs/musselburgh.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "nadi",
+      "nombre": "Nadi",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/nadi.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "nadroga",
+      "nombre": "Nadroga",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/nadroga.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "naitasiri",
+      "nombre": "Naitasiri",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/naitasiri.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "namosi",
+      "nombre": "Namosi",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/namosi.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -4868,6 +7939,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "navy-warriors-rugby-club",
+      "nombre": "Navy Warriors Rugby Club",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/navy-warriors-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "neath",
+      "nombre": "Neath",
+      "competencia": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "pais": "gb-wls",
+      "archivoQueEsperaElJuego": "public/clubs/neath.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "new-england-free-jacks",
       "nombre": "New England Free Jacks",
       "competencia": "Major League Rugby",
@@ -4887,6 +7984,19 @@
       "competenciaId": "prem",
       "pais": "gb-eng",
       "archivoQueEsperaElJuego": "public/clubs/newcastle-red-bulls.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "newport",
+      "nombre": "Newport",
+      "competencia": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "pais": "gb-wls",
+      "archivoQueEsperaElJuego": "public/clubs/newport.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -4972,12 +8082,51 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "northern-suburbs",
+      "nombre": "Northern Suburbs",
+      "competencia": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/northern-suburbs.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "northland",
       "nombre": "Northland",
       "competencia": "NPC",
       "competenciaId": "npc",
       "pais": "nz",
       "archivoQueEsperaElJuego": "public/clubs/northland.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "northland-de-fiyi",
+      "nombre": "Northland de Fiyi",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/northland-de-fiyi.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "norths",
+      "nombre": "Norths",
+      "competencia": "Hospital Cup",
+      "competenciaId": "au-hospital-cup",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/norths.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -5024,6 +8173,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "oisterwijk-oysters",
+      "nombre": "Oisterwijk Oysters",
+      "competencia": "Ereklasse",
+      "competenciaId": "nl-ereklasse",
+      "pais": "nl",
+      "archivoQueEsperaElJuego": "public/clubs/oisterwijk-oysters.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "old-albanian",
       "nombre": "Old Albanian",
       "competencia": "National League 2",
@@ -5050,12 +8212,38 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "old-markhamians-rfc",
+      "nombre": "Old Markhamians RFC",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/old-markhamians-rfc.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "old-selbornians",
       "nombre": "Old Selbornians",
       "competencia": "Community Cup",
       "competenciaId": "za-community",
       "pais": "za",
       "archivoQueEsperaElJuego": "public/clubs/old-selbornians.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ontario-blues",
+      "nombre": "Ontario Blues",
+      "competencia": "Canadian Rugby Championship",
+      "competenciaId": "ca-clubs",
+      "pais": "ca",
+      "archivoQueEsperaElJuego": "public/clubs/ontario-blues.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -5115,12 +8303,38 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "ovalau",
+      "nombre": "Ovalau",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/ovalau.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "oyonnax",
       "nombre": "Oyonnax",
       "competencia": "Pro D2",
       "competenciaId": "prod2",
       "pais": "fr",
       "archivoQueEsperaElJuego": "public/clubs/oyonnax.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "pacific-pride",
+      "nombre": "Pacific Pride",
+      "competencia": "Canadian Rugby Championship",
+      "competenciaId": "ca-clubs",
+      "pais": "ca",
+      "archivoQueEsperaElJuego": "public/clubs/pacific-pride.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -5164,6 +8378,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "pasto-rugby-club",
+      "nombre": "Pasto Rugby Club",
+      "competencia": "Liga Nacional de Colombia",
+      "competenciaId": "co-liga",
+      "pais": "co",
+      "archivoQueEsperaElJuego": "public/clubs/pasto-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -5232,6 +8459,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "piura-rugby-club",
+      "nombre": "Piura Rugby Club",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/piura-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "plymouth-albion",
       "nombre": "Plymouth Albion",
       "competencia": "National League 1",
@@ -5258,6 +8498,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "pontypool",
+      "nombre": "Pontypool",
+      "competencia": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "pais": "gb-wls",
+      "archivoQueEsperaElJuego": "public/clubs/pontypool.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "pontypridd",
+      "nombre": "Pontypridd",
+      "competencia": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "pais": "gb-wls",
+      "archivoQueEsperaElJuego": "public/clubs/pontypridd.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "poverty-bay",
       "nombre": "Poverty Bay",
       "competencia": "Heartland Championship",
@@ -5281,6 +8547,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "presidente-hayes-rugby-club",
+      "nombre": "Presidente Hayes Rugby Club",
+      "competencia": "Primera División de Paraguay",
+      "competenciaId": "py-primera",
+      "pais": "py",
+      "archivoQueEsperaElJuego": "public/clubs/presidente-hayes-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -5336,6 +8615,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "pumas-unam",
+      "nombre": "Pumas UNAM",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/pumas-unam.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "racing-92",
       "nombre": "Racing 92",
       "competencia": "Top 14",
@@ -5362,6 +8654,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "randwick",
+      "nombre": "Randwick",
+      "competencia": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/randwick.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "rangers-vicenza",
       "nombre": "Rangers Vicenza",
       "competencia": "Serie A Élite",
@@ -5375,6 +8680,84 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "rapid-bucuresti",
+      "nombre": "Rapid București",
+      "competencia": "Liga Națională",
+      "competenciaId": "ro-liga",
+      "pais": "ro",
+      "archivoQueEsperaElJuego": "public/clubs/rapid-bucuresti.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "rc-barlad",
+      "nombre": "RC Bârlad",
+      "competencia": "Liga Națională",
+      "competenciaId": "ro-liga",
+      "pais": "ro",
+      "archivoQueEsperaElJuego": "public/clubs/rc-barlad.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "rc-eemland",
+      "nombre": "RC Eemland",
+      "competencia": "Ereklasse",
+      "competenciaId": "nl-ereklasse",
+      "pais": "nl",
+      "archivoQueEsperaElJuego": "public/clubs/rc-eemland.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "rc-gura-humorului",
+      "nombre": "RC Gura Humorului",
+      "competencia": "Liga Națională",
+      "competenciaId": "ro-liga",
+      "pais": "ro",
+      "archivoQueEsperaElJuego": "public/clubs/rc-gura-humorului.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "rc-hilversum",
+      "nombre": "RC Hilversum",
+      "competencia": "Ereklasse",
+      "competenciaId": "nl-ereklasse",
+      "pais": "nl",
+      "archivoQueEsperaElJuego": "public/clubs/rc-hilversum.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "rc-liege",
+      "nombre": "RC Liège",
+      "competencia": "Belgian Elite League",
+      "competenciaId": "be-elite",
+      "pais": "be",
+      "archivoQueEsperaElJuego": "public/clubs/rc-liege.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "rc-narbonnais",
       "nombre": "RC Narbonnais",
       "competencia": "Pro D2",
@@ -5385,6 +8768,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "rc-t-gooi",
+      "nombre": "RC 't Gooi",
+      "competencia": "Ereklasse",
+      "competenciaId": "nl-ereklasse",
+      "pais": "nl",
+      "archivoQueEsperaElJuego": "public/clubs/rc-t-gooi.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -5472,6 +8868,45 @@
       "competenciaId": "nationale",
       "pais": "fr",
       "archivoQueEsperaElJuego": "public/clubs/rennes.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "rfc-haarlem",
+      "nombre": "RFC Haarlem",
+      "competencia": "Ereklasse",
+      "competenciaId": "nl-ereklasse",
+      "pais": "nl",
+      "archivoQueEsperaElJuego": "public/clubs/rfc-haarlem.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "rgc-1404",
+      "nombre": "RGC 1404",
+      "competencia": "Welsh Premiership",
+      "competenciaId": "wal-premiership",
+      "pais": "gb-wls",
+      "archivoQueEsperaElJuego": "public/clubs/rgc-1404.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "rhino-s-rfc",
+      "nombre": "Rhino's RFC",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/rhino-s-rfc.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -5765,6 +9200,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "santa-clara-rugby-club",
+      "nombre": "Santa Clara Rugby Club",
+      "competencia": "Primera División de Paraguay",
+      "competenciaId": "py-primera",
+      "pais": "py",
+      "archivoQueEsperaElJuego": "public/clubs/santa-clara-rugby-club.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "santa-cruz-rugby-club",
+      "nombre": "Santa Cruz Rugby Club",
+      "competencia": "Liga Boliviana",
+      "competenciaId": "bo-liga",
+      "pais": "bo",
+      "archivoQueEsperaElJuego": "public/clubs/santa-cruz-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "santarem",
       "nombre": "Santarém",
       "competencia": "Divisão de Honra",
@@ -5845,8 +9306,8 @@
     {
       "id": "sb-abipones",
       "nombre": "Abipones",
-      "competencia": "Torneo de Ascenso del NEA",
-      "competenciaId": "ar-nea-ascenso",
+      "competencia": "Regional del NEA B/C",
+      "competenciaId": "ar-nea-bc",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-abipones.png",
       "tieneLogoReal": true,
@@ -6065,7 +9526,7 @@
     },
     {
       "id": "sb-banco-rugby-club",
-      "nombre": "Banco Mendoza",
+      "nombre": "Banco Rugby Club",
       "competencia": "Copa de Plata del Oeste",
       "competenciaId": "ar-oeste-plata",
       "pais": "ar",
@@ -6091,9 +9552,9 @@
     },
     {
       "id": "sb-belgrano-rugby-club",
-      "nombre": "Belgrano de Paraná",
-      "competencia": "Torneos Locales del Litoral",
-      "competenciaId": "ar-litoral-local",
+      "nombre": "Belgrano Rugby Club",
+      "competencia": "Copa de Plata del Oeste",
+      "competenciaId": "ar-oeste-plata",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-belgrano-rugby-club.png",
       "tieneLogoReal": true,
@@ -6104,7 +9565,7 @@
     },
     {
       "id": "sb-bigornia-r-c",
-      "nombre": "Bigornia",
+      "nombre": "Bigornia Club",
       "competencia": "Regional Patagónico",
       "competenciaId": "ar-patagonia-regional",
       "pais": "ar",
@@ -6156,7 +9617,7 @@
     },
     {
       "id": "sb-c-s-la-carlota",
-      "nombre": "Social Carlota",
+      "nombre": "Social La Carlota",
       "competencia": "Súper 9 B de Córdoba",
       "competenciaId": "ar-centro-super9b",
       "pais": "ar",
@@ -6170,8 +9631,8 @@
     {
       "id": "sb-calafate-r-c",
       "nombre": "Calafate",
-      "competencia": "Torneos Locales Patagónicos",
-      "competenciaId": "ar-patagonia-local",
+      "competencia": "Torneo Austral (Valle del Chubut y Austral)",
+      "competenciaId": "ar-patagonia-austral",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-calafate-r-c.png",
       "tieneLogoReal": true,
@@ -6196,8 +9657,8 @@
     {
       "id": "sb-caraya",
       "nombre": "Carayá",
-      "competencia": "Torneo de Ascenso del NEA",
-      "competenciaId": "ar-nea-ascenso",
+      "competencia": "Regional del NEA B/C",
+      "competenciaId": "ar-nea-bc",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-caraya.png",
       "tieneLogoReal": true,
@@ -6274,8 +9735,8 @@
     {
       "id": "sb-caza-y-pesca",
       "nombre": "Caza y Pesca",
-      "competencia": "Torneo de Ascenso del NEA",
-      "competenciaId": "ar-nea-ascenso",
+      "competencia": "Regional del NEA B/C",
+      "competenciaId": "ar-nea-bc",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-caza-y-pesca.png",
       "tieneLogoReal": true,
@@ -6287,8 +9748,8 @@
     {
       "id": "sb-cazones-r-c",
       "nombre": "Cazones",
-      "competencia": "Torneos Locales Patagónicos",
-      "competenciaId": "ar-patagonia-local",
+      "competencia": "Torneo Austral (Valle del Chubut y Austral)",
+      "competenciaId": "ar-patagonia-austral",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-cazones-r-c.png",
       "tieneLogoReal": true,
@@ -6326,8 +9787,8 @@
     {
       "id": "sb-centro-cazadores",
       "nombre": "Centro Cazadores",
-      "competencia": "Torneos Locales del Litoral",
-      "competenciaId": "ar-litoral-local",
+      "competencia": "Regional del NEA B/C",
+      "competenciaId": "ar-nea-bc",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-centro-cazadores.png",
       "tieneLogoReal": true,
@@ -6364,9 +9825,9 @@
     },
     {
       "id": "sb-chaja",
-      "nombre": "Chaja",
-      "competencia": "Torneo de Ascenso del NEA",
-      "competenciaId": "ar-nea-ascenso",
+      "nombre": "Chajá",
+      "competencia": "Regional del NEA B/C",
+      "competenciaId": "ar-nea-bc",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-chaja.png",
       "tieneLogoReal": true,
@@ -6469,8 +9930,8 @@
     {
       "id": "sb-club-el-nacional",
       "nombre": "El Nacional",
-      "competencia": "Torneos Locales Pampeanos",
-      "competenciaId": "ar-pampeana-local",
+      "competencia": "Regional Pampeano UROBA-Sur",
+      "competenciaId": "ar-pampeana-uroba-sur",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-club-el-nacional.png",
       "tieneLogoReal": true,
@@ -6507,7 +9968,7 @@
     },
     {
       "id": "sb-club-las-aguilas",
-      "nombre": "CL Águilas",
+      "nombre": "Las Águilas",
       "competencia": "Regional Patagónico",
       "competenciaId": "ar-patagonia-regional",
       "pais": "ar",
@@ -6637,7 +10098,7 @@
     },
     {
       "id": "sb-comercial-r-c",
-      "nombre": "Comercial",
+      "nombre": "Comercial Rugby Club",
       "competencia": "Regional Pampeano A",
       "competenciaId": "ar-pampeana-a",
       "pais": "ar",
@@ -6651,8 +10112,8 @@
     {
       "id": "sb-comodoro-r-c",
       "nombre": "Comodoro",
-      "competencia": "Torneos Locales Patagónicos",
-      "competenciaId": "ar-patagonia-local",
+      "competencia": "Torneo Austral (Valle del Chubut y Austral)",
+      "competenciaId": "ar-patagonia-austral",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-comodoro-r-c.png",
       "tieneLogoReal": true,
@@ -6833,8 +10294,8 @@
     {
       "id": "sb-draig-goch-r-c",
       "nombre": "Draig Goch",
-      "competencia": "Torneos Locales Patagónicos",
-      "competenciaId": "ar-patagonia-local",
+      "competencia": "Torneo Austral (Valle del Chubut y Austral)",
+      "competenciaId": "ar-patagonia-austral",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-draig-goch-r-c.png",
       "tieneLogoReal": true,
@@ -6988,7 +10449,7 @@
     },
     {
       "id": "sb-ipr-sporting",
-      "nombre": "Sporting",
+      "nombre": "IPR Sporting",
       "competencia": "Regional Pampeano A",
       "competenciaId": "ar-pampeana-a",
       "pais": "ar",
@@ -7002,8 +10463,8 @@
     {
       "id": "sb-italiana-de-charata",
       "nombre": "Italiana de Charata",
-      "competencia": "Torneo de Ascenso del NEA",
-      "competenciaId": "ar-nea-ascenso",
+      "competencia": "Regional del NEA B/C",
+      "competenciaId": "ar-nea-bc",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-italiana-de-charata.png",
       "tieneLogoReal": true,
@@ -7022,19 +10483,6 @@
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": true,
       "claveDelProxy": "jockey-club-cordoba",
-      "seDibujaConIniciales": false,
-      "hayPlaceholderSvg": true
-    },
-    {
-      "id": "sb-jockey-club-cordoba-caballeros",
-      "nombre": "Jockey Club Córdoba Caballeros",
-      "competencia": "Torneo Local de Córdoba",
-      "competenciaId": "ar-centro-local",
-      "pais": "ar",
-      "archivoQueEsperaElJuego": "public/clubs/sb-jockey-club-cordoba-caballeros.png",
-      "tieneLogoReal": true,
-      "tieneEscudoPorProxy": true,
-      "claveDelProxy": "jockey-club-cordoba-caballeros",
       "seDibujaConIniciales": false,
       "hayPlaceholderSvg": true
     },
@@ -7119,8 +10567,8 @@
     {
       "id": "sb-la-querencia",
       "nombre": "La Querencia",
-      "competencia": "Torneo Local de Córdoba",
-      "competenciaId": "ar-centro-local",
+      "competencia": "Regional del NOA B",
+      "competenciaId": "ar-noa-b",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-la-querencia.png",
       "tieneLogoReal": true,
@@ -7288,8 +10736,8 @@
     {
       "id": "sb-los-chelcos",
       "nombre": "Los Chelcos",
-      "competencia": "Torneo Local de Córdoba",
-      "competenciaId": "ar-centro-local",
+      "competencia": "Torneo Andino (Catamarca y La Rioja)",
+      "competenciaId": "ar-noa-andina",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-los-chelcos.png",
       "tieneLogoReal": true,
@@ -7327,8 +10775,8 @@
     {
       "id": "sb-los-hurones",
       "nombre": "Los Hurones",
-      "competencia": "Torneo de Ascenso del NEA",
-      "competenciaId": "ar-nea-ascenso",
+      "competencia": "Torneo Andino (Catamarca y La Rioja)",
+      "competenciaId": "ar-noa-andina",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-los-hurones.png",
       "tieneLogoReal": true,
@@ -7392,8 +10840,8 @@
     {
       "id": "sb-los-teros-r-c",
       "nombre": "Los Teros",
-      "competencia": "Torneos Locales del Litoral",
-      "competenciaId": "ar-litoral-local",
+      "competencia": "Torneo Andino (Catamarca y La Rioja)",
+      "competenciaId": "ar-noa-andina",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-los-teros-r-c.png",
       "tieneLogoReal": true,
@@ -7782,8 +11230,8 @@
     {
       "id": "sb-patoruzu-r-c",
       "nombre": "Patoruzú",
-      "competencia": "Torneos Locales Patagónicos",
-      "competenciaId": "ar-patagonia-local",
+      "competencia": "Torneo Austral (Valle del Chubut y Austral)",
+      "competenciaId": "ar-patagonia-austral",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-patoruzu-r-c.png",
       "tieneLogoReal": true,
@@ -7795,8 +11243,8 @@
     {
       "id": "sb-pay-ubre",
       "nombre": "Pay Ubre",
-      "competencia": "Torneo de Ascenso del NEA",
-      "competenciaId": "ar-nea-ascenso",
+      "competencia": "Regional del NEA B/C",
+      "competenciaId": "ar-nea-bc",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-pay-ubre.png",
       "tieneLogoReal": true,
@@ -7834,8 +11282,8 @@
     {
       "id": "sb-puerto-madryn-r-c",
       "nombre": "Puerto Madryn",
-      "competencia": "Torneos Locales Patagónicos",
-      "competenciaId": "ar-patagonia-local",
+      "competencia": "Torneo Austral (Valle del Chubut y Austral)",
+      "competenciaId": "ar-patagonia-austral",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-puerto-madryn-r-c.png",
       "tieneLogoReal": true,
@@ -7872,7 +11320,7 @@
     },
     {
       "id": "sb-regatas-belgrano-san-nicolas",
-      "nombre": "Regatas y Belgrano de San Nicolás",
+      "nombre": "San Nicolás Rugby",
       "competencia": "Segunda del Litoral",
       "competenciaId": "ar-litoral-segunda",
       "pais": "ar",
@@ -7925,8 +11373,8 @@
     {
       "id": "sb-rivadavia-rugby-club",
       "nombre": "Rivadavia",
-      "competencia": "Copa de Plata del Oeste",
-      "competenciaId": "ar-oeste-plata",
+      "competencia": "Copa de Bronce del Oeste",
+      "competenciaId": "ar-oeste-bronce",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-rivadavia-rugby-club.png",
       "tieneLogoReal": true,
@@ -8055,8 +11503,8 @@
     {
       "id": "sb-san-jorge-r-c",
       "nombre": "San Jorge de Mendoza",
-      "competencia": "Copa de Plata del Oeste",
-      "competenciaId": "ar-oeste-plata",
+      "competencia": "Copa de Bronce del Oeste",
+      "competenciaId": "ar-oeste-bronce",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-san-jorge-r-c.png",
       "tieneLogoReal": true,
@@ -8068,8 +11516,8 @@
     {
       "id": "sb-san-jorge-r-c-ua",
       "nombre": "San Jorge de la Austral",
-      "competencia": "Torneos Locales Patagónicos",
-      "competenciaId": "ar-patagonia-local",
+      "competencia": "Torneo Austral (Valle del Chubut y Austral)",
+      "competenciaId": "ar-patagonia-austral",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-san-jorge-r-c-ua.png",
       "tieneLogoReal": true,
@@ -8158,9 +11606,9 @@
     },
     {
       "id": "sb-santa-rosa-r-c",
-      "nombre": "Santa Rosa de Bahía Blanca",
-      "competencia": "Torneos Locales Pampeanos",
-      "competenciaId": "ar-pampeana-local",
+      "nombre": "Santa Rosa de La Pampa",
+      "competencia": "Regional Pampeano UROBA-Sur",
+      "competenciaId": "ar-pampeana-uroba-sur",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-santa-rosa-r-c.png",
       "tieneLogoReal": true,
@@ -8327,7 +11775,7 @@
     },
     {
       "id": "sb-teque-r-c",
-      "nombre": "Teqüé",
+      "nombre": "Teqüe Rugby Club",
       "competencia": "Copa de Oro del Oeste",
       "competenciaId": "ar-oeste-oro",
       "pais": "ar",
@@ -8419,8 +11867,8 @@
     {
       "id": "sb-uncaus",
       "nombre": "UNCAUS",
-      "competencia": "Torneo de Ascenso del NEA",
-      "competenciaId": "ar-nea-ascenso",
+      "competencia": "Regional del NEA B/C",
+      "competenciaId": "ar-nea-bc",
       "pais": "ar",
       "archivoQueEsperaElJuego": "public/clubs/sb-uncaus.png",
       "tieneLogoReal": true,
@@ -8625,6 +12073,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "scm-usv-timisoara",
+      "nombre": "SCM USV Timișoara",
+      "competencia": "Liga Națională",
+      "competenciaId": "ro-liga",
+      "pais": "ro",
+      "archivoQueEsperaElJuego": "public/clubs/scm-usv-timisoara.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "sea-wolf-rugby-club",
+      "nombre": "Sea Wolf Rugby Club",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/sea-wolf-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "seattle-seawolves",
       "nombre": "Seattle Seawolves",
       "competencia": "Major League Rugby",
@@ -8657,6 +12131,19 @@
       "competenciaId": "eng-national2",
       "pais": "gb-eng",
       "archivoQueEsperaElJuego": "public/clubs/sedgley-park.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "selkirk",
+      "nombre": "Selkirk",
+      "competencia": "Scottish Premiership",
+      "competenciaId": "sco-premiership",
+      "pais": "gb-sct",
+      "archivoQueEsperaElJuego": "public/clubs/selkirk.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -8700,6 +12187,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "sharks-rugby-club",
+      "nombre": "Sharks Rugby Club",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/sharks-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -8768,6 +12268,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "slava-moscow",
+      "nombre": "Slava Moscow",
+      "competencia": "Campeonato de Rusia",
+      "competenciaId": "ru-championship",
+      "pais": "ru",
+      "archivoQueEsperaElJuego": "public/clubs/slava-moscow.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "soignies-rc",
+      "nombre": "Soignies RC",
+      "competencia": "Belgian Elite League",
+      "competenciaId": "be-elite",
+      "pais": "be",
+      "archivoQueEsperaElJuego": "public/clubs/soignies-rc.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "soto-del-real",
       "nombre": "Soto del Real",
       "competencia": "División de Honor B",
@@ -8794,6 +12320,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "southern-districts",
+      "nombre": "Southern Districts",
+      "competencia": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/southern-districts.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "southland",
       "nombre": "Southland",
       "competencia": "NPC",
@@ -8804,6 +12343,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "souths",
+      "nombre": "Souths",
+      "competencia": "Hospital Cup",
+      "competenciaId": "au-hospital-cup",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/souths.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -8830,6 +12382,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "st-mary-s-college",
+      "nombre": "St. Mary's College",
+      "competencia": "All-Ireland League 1A",
+      "competenciaId": "ire-ail1a",
+      "pais": "ie",
+      "archivoQueEsperaElJuego": "public/clubs/st-mary-s-college.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -8911,6 +12476,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "strela-ak-bars",
+      "nombre": "Strela-Ak Bars",
+      "competencia": "Campeonato de Rusia",
+      "competenciaId": "ru-championship",
+      "pais": "ru",
+      "archivoQueEsperaElJuego": "public/clubs/strela-ak-bars.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "su-agen",
       "nombre": "SU Agen",
       "competencia": "Pro D2",
@@ -8921,6 +12499,32 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "sunnybank",
+      "nombre": "Sunnybank",
+      "competencia": "Hospital Cup",
+      "competenciaId": "au-hospital-cup",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/sunnybank.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "supay-rugby-club",
+      "nombre": "Supay Rugby Club",
+      "competencia": "Liga Boliviana",
+      "competenciaId": "bo-liga",
+      "pais": "bo",
+      "archivoQueEsperaElJuego": "public/clubs/supay-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -8937,6 +12541,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "suva",
+      "nombre": "Suva",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/suva.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "swd-eagles",
       "nombre": "SWD Eagles",
       "competencia": "Currie Cup First Division",
@@ -8947,6 +12564,32 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "sydney-university",
+      "nombre": "Sydney University",
+      "competencia": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/sydney-university.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "tailevu",
+      "nombre": "Tailevu",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/tailevu.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -9015,6 +12658,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "tazmania-rfc",
+      "nombre": "Tazmania RFC",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/tazmania-rfc.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "tecnico",
       "nombre": "Técnico",
       "competencia": "Divisão de Honra",
@@ -9028,12 +12684,64 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "templarios-rugby",
+      "nombre": "Templarios Rugby",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/templarios-rugby.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "terenure-college",
+      "nombre": "Terenure College",
+      "competencia": "All-Ireland League 1A",
+      "competenciaId": "ire-ail1a",
+      "pais": "ie",
+      "archivoQueEsperaElJuego": "public/clubs/terenure-college.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "thames-valley",
       "nombre": "Thames Valley",
       "competencia": "Heartland Championship",
       "competenciaId": "nz-heartland",
       "pais": "nz",
       "archivoQueEsperaElJuego": "public/clubs/thames-valley.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "tigres-rugby-club",
+      "nombre": "Tigres Rugby Club",
+      "competencia": "Liga Boliviana",
+      "competenciaId": "bo-liga",
+      "pais": "bo",
+      "archivoQueEsperaElJuego": "public/clubs/tigres-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "tigres-uanl",
+      "nombre": "Tigres UANL",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/tigres-uanl.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -9090,6 +12798,32 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "toronto-scottish",
+      "nombre": "Toronto Scottish",
+      "competencia": "Canadian Rugby Championship",
+      "competenciaId": "ca-clubs",
+      "pais": "ca",
+      "archivoQueEsperaElJuego": "public/clubs/toronto-scottish.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "toros-rugby-club",
+      "nombre": "Toros Rugby Club",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/toros-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -9158,6 +12892,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "tucanes-rugby-club",
+      "nombre": "Tucanes Rugby Club",
+      "competencia": "Liga Nacional de Colombia",
+      "competenciaId": "co-liga",
+      "pais": "co",
+      "archivoQueEsperaElJuego": "public/clubs/tucanes-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "tuks",
       "nombre": "Tuks",
       "competencia": "Community Cup",
@@ -9168,6 +12915,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "ubc-thunderbirds",
+      "nombre": "UBC Thunderbirds",
+      "competencia": "Canadian Rugby Championship",
+      "competenciaId": "ca-clubs",
+      "pais": "ca",
+      "archivoQueEsperaElJuego": "public/clubs/ubc-thunderbirds.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -9197,12 +12957,77 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "union-rugby-club",
+      "nombre": "Unión Rugby Club",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/union-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "universitario-bilbao",
       "nombre": "Universitario Bilbao",
       "competencia": "División de Honor B",
       "competenciaId": "esp-dhb",
       "pais": "es",
       "archivoQueEsperaElJuego": "public/clubs/universitario-bilbao.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "universitario-del-valle",
+      "nombre": "Universitario del Valle",
+      "competencia": "Liga Nacional de Colombia",
+      "competenciaId": "co-liga",
+      "pais": "co",
+      "archivoQueEsperaElJuego": "public/clubs/universitario-del-valle.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "universitario-rugby-club",
+      "nombre": "Universitario Rugby Club",
+      "competencia": "Liga Boliviana",
+      "competenciaId": "bo-liga",
+      "pais": "bo",
+      "archivoQueEsperaElJuego": "public/clubs/universitario-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "universitatea-cluj",
+      "nombre": "Universitatea Cluj",
+      "competencia": "Liga Națională",
+      "competenciaId": "ro-liga",
+      "pais": "ro",
+      "archivoQueEsperaElJuego": "public/clubs/universitatea-cluj.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "university-of-queensland",
+      "nombre": "University of Queensland",
+      "competencia": "Hospital Cup",
+      "competenciaId": "au-hospital-cup",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/university-of-queensland.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -9340,6 +13165,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "vatukoula",
+      "nombre": "Vatukoula",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/vatukoula.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "vephkhvebi",
+      "nombre": "Vephkhvebi",
+      "competencia": "Didi 10",
+      "competenciaId": "ge-didi10",
+      "pais": "ge",
+      "archivoQueEsperaElJuego": "public/clubs/vephkhvebi.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "verona-rugby",
       "nombre": "Verona Rugby",
       "competencia": "Serie A",
@@ -9376,6 +13227,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "vikingos-rugby-club",
+      "nombre": "Vikingos Rugby Club",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/vikingos-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -9418,6 +13282,19 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "vva-podmoskovye",
+      "nombre": "VVA-Podmoskovye",
+      "competencia": "Campeonato de Rusia",
+      "competenciaId": "ru-championship",
+      "pais": "ru",
+      "archivoQueEsperaElJuego": "public/clubs/vva-podmoskovye.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "waikato",
       "nombre": "Waikato",
       "competencia": "NPC",
@@ -9437,6 +13314,19 @@
       "competenciaId": "nz-heartland",
       "pais": "nz",
       "archivoQueEsperaElJuego": "public/clubs/wairarapa-bush.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "wallabies-rfc",
+      "nombre": "Wallabies RFC",
+      "competencia": "Liga Mexicana de Rugby XV",
+      "competenciaId": "mx-liga",
+      "pais": "mx",
+      "archivoQueEsperaElJuego": "public/clubs/wallabies-rfc.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -9483,6 +13373,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "warringah",
+      "nombre": "Warringah",
+      "competencia": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/warringah.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "watsonians",
+      "nombre": "Watsonians",
+      "competencia": "Scottish Premiership",
+      "competenciaId": "sco-premiership",
+      "pais": "gb-sct",
+      "archivoQueEsperaElJuego": "public/clubs/watsonians.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "wellington",
       "nombre": "Wellington",
       "competencia": "NPC",
@@ -9506,6 +13422,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "west-harbour",
+      "nombre": "West Harbour",
+      "competencia": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/west-harbour.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -9548,6 +13477,32 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "western-sydney-two-blues",
+      "nombre": "Western Sydney Two Blues",
+      "competencia": "Shute Shield",
+      "competenciaId": "au-shute-shield",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/western-sydney-two-blues.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "wests",
+      "nombre": "Wests",
+      "competencia": "Hospital Cup",
+      "competenciaId": "au-hospital-cup",
+      "pais": "au",
+      "archivoQueEsperaElJuego": "public/clubs/wests.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "worcester-warriors",
       "nombre": "Worcester Warriors",
       "competencia": "Champ Rugby",
@@ -9571,6 +13526,19 @@
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "yacuiba-rugby-club",
+      "nombre": "Yacuiba Rugby Club",
+      "competencia": "Liga Boliviana",
+      "competenciaId": "bo-liga",
+      "pais": "bo",
+      "archivoQueEsperaElJuego": "public/clubs/yacuiba-rugby-club.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
       "hayPlaceholderSvg": true
     },
     {
@@ -9600,12 +13568,38 @@
       "hayPlaceholderSvg": true
     },
     {
+      "id": "yasawa",
+      "nombre": "Yasawa",
+      "competencia": "Skipper Cup",
+      "competenciaId": "fj-skipper",
+      "pais": "fj",
+      "archivoQueEsperaElJuego": "public/clubs/yasawa.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
+    },
+    {
       "id": "yokohama-canon-eagles",
       "nombre": "Yokohama Canon Eagles",
       "competencia": "Japan Rugby League One D1",
       "competenciaId": "jpn-d1",
       "pais": "jp",
       "archivoQueEsperaElJuego": "public/clubs/yokohama-canon-eagles.png",
+      "tieneLogoReal": true,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": false,
+      "hayPlaceholderSvg": true
+    },
+    {
+      "id": "young-munster",
+      "nombre": "Young Munster",
+      "competencia": "All-Ireland League 1A",
+      "competenciaId": "ire-ail1a",
+      "pais": "ie",
+      "archivoQueEsperaElJuego": "public/clubs/young-munster.png",
       "tieneLogoReal": true,
       "tieneEscudoPorProxy": false,
       "claveDelProxy": null,
@@ -9624,10 +13618,24 @@
       "claveDelProxy": null,
       "seDibujaConIniciales": false,
       "hayPlaceholderSvg": true
+    },
+    {
+      "id": "zuma-sport-rugby",
+      "nombre": "Zuma Sport Rugby",
+      "competencia": "Torneo Metropolitano",
+      "competenciaId": "pe-metropolitano",
+      "pais": "pe",
+      "archivoQueEsperaElJuego": "public/clubs/zuma-sport-rugby.png",
+      "tieneLogoReal": false,
+      "tieneEscudoPorProxy": false,
+      "claveDelProxy": null,
+      "seDibujaConIniciales": true,
+      "hayPlaceholderSvg": true
     }
   ],
   "clubesHuerfanos": [
     "lazio-rugby",
+    "sb-jockey-club-cordoba-caballeros",
     "sb-policia-ciudad-de-buenos-aires"
   ]
 }

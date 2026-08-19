@@ -48,36 +48,117 @@ export interface BelongingTier {
     icon: string;
 }
 
-/** De menor a mayor. `engine/belonging.ts` lo recorre al revés para resolver. */
+/**
+ * De menor a mayor. `engine/belonging.ts` lo recorre al revés para resolver.
+ *
+ * ═══ LOS ESCALONES SE MIDEN EN TEMPORADAS, NO EN PUNTOS (0.28.0) ═══════════
+ *
+ * Estaban en 25 / 50 / 75 / 95, y esos números describían una carrera que este
+ * juego NO produce. La cuenta, medida sobre 320 carreras:
+ *
+ *     ritmo real:            4,4 puntos por temporada en el club
+ *     paso más largo medido: 4 temporadas  →  ~17 puntos
+ *     dónde se retiraba:     98,1% en «Uno del plantel», 0% en «Referente»
+ *
+ * O sea que el segundo escalón pedía seis temporadas seguidas en el mismo club y
+ * el último pedía veintidós. Un jugador con doce temporadas y dos títulos en el
+ * mismo club —el caso que destapó esto— terminaba en «Titular», que en la
+ * pantalla se lee como que el club no lo quiere.
+ *
+ * El ritmo NO se tocó: 4,4 por temporada es sano y el comentario de
+ * `BELONGING_FORM_WEIGHT` explica por qué subirlo le sacaría peso a los
+ * Momentos. Lo que estaba mal calibrado era la regla contra la que se mide.
+ *
+ * Ahora cada escalón dice cuántas temporadas cuesta, que es la unidad en la que
+ * el jugador lo vive. Son ESPEJO de `BELONGING_PER_SEASON` × el factor de forma:
+ * si el ritmo se mueve, estos se mueven con él.
+ */
 export const BELONGING_TIERS: readonly BelongingTier[] = [
     { id: 'plantel', min: 0, labelEs: 'Uno del plantel', icon: '▫️' },
-    { id: 'titular', min: 25, labelEs: 'Titular', icon: '👏' },
-    { id: 'referente', min: 50, labelEs: 'Referente', icon: '💙' },
-    { id: 'capitan', min: 75, labelEs: 'Capitán', icon: '⭐' },
-    { id: 'vitalicio', min: 95, labelEs: 'Vitalicio', icon: '🗿' },
+    // ~3 temporadas. El que completó un ciclo corto ya no es uno más.
+    { id: 'titular', min: 13, labelEs: 'Titular', icon: '👏' },
+    // ~7 temporadas en tu club, ~9 afuera. Media carrera en la misma camiseta, y
+    // donde cae el caso del reporte: doce temporadas en Toulon con el descuento
+    // del exterior dan ~40.
+    { id: 'referente', min: 30, labelEs: 'Referente', icon: '💙' },
+    // ~11 temporadas en tu club, ~15 afuera. Que la misma carrera valga un
+    // escalón más en casa que en Francia NO es un efecto colateral: es lo que
+    // `BELONGING_ABROAD_FACTOR` existe para decir.
+    { id: 'capitan', min: 48, labelEs: 'Capitán', icon: '⭐' },
+    // ~16 temporadas, y con el amortiguador de los últimos tramos, más. Sigue
+    // siendo el final del juego: casi nadie pasa toda su carrera en un club.
+    { id: 'vitalicio', min: 70, labelEs: 'Vitalicio', icon: '🗿' },
 ];
 
 export const BELONGING_MIN = 0;
 export const BELONGING_MAX = 100;
 
 /**
- * Sin un solo título con el club, la Pertenencia topea en 80.
+ * Sin un solo título con el club, la Pertenencia topea acá.
  * No hay cancha con tu nombre sin haber ganado algo.
+ *
+ * ESPEJO DE LOS ESCALONES: va entre «Capitán» y «Vitalicio». Sin título llegás a
+ * ser el capitán del club y no llegás a que le pongan tu nombre a la cancha. Si
+ * `BELONGING_TIERS` se mueve, este número se mueve con él o la invariante se
+ * rompe en silencio —con los escalones nuevos y el 80 viejo, un jugador sin un
+ * solo título podía terminar Vitalicio—.
  */
-export const BELONGING_CAP_NO_TITLES = 80;
+export const BELONGING_CAP_NO_TITLES = 60;
 
-/** Si te fuiste al clásico rival, el techo baja a 49 y no vuelve a subir. */
-export const BELONGING_CAP_RIVAL_JUMP = 49;
+/**
+ * Si te fuiste al clásico rival, el techo baja acá y no vuelve a subir.
+ *
+ * ESPEJO DE LOS ESCALONES: justo por debajo de «Referente». El que se fue al
+ * rival puede ser Titular y no pasa de ahí, por más que vuelva y gane todo.
+ */
+export const BELONGING_CAP_RIVAL_JUMP = 29;
 
-/** Desde 85 para arriba, cada ganancia rinde la mitad: los últimos quince cuestan. */
-export const BELONGING_DAMPEN_FROM = 85;
+/** Desde acá, cada ganancia rinde la mitad: los últimos diez cuestan el doble. */
+export const BELONGING_DAMPEN_FROM = 60;
 export const BELONGING_DAMPEN_FACTOR = 0.5;
 
 /**
- * En el exterior la Pertenencia rinde la mitad. La cancha con tu nombre se hace
- * en tu club: ocho años en Francia no la construyen, aunque tampoco la borran.
+ * En el exterior la Pertenencia rinde menos. La cancha con tu nombre se hace en
+ * tu club: ocho años en Francia no la construyen, aunque tampoco la borran.
+ *
+ * ── ERA 0,5, Y ESTABA CONTANDO DOS VECES LA MISMA REGLA (0.23.0) ────────────
+ * «Ocho años en Francia no construyen tu cancha» es una afirmación sobre TU
+ * CLUB, y de esa se encarga el congelamiento, que ahora deja quieta la cuenta
+ * del club que dejaste mientras dure el contrato. El factor la repetía sobre
+ * OTRO ledger —el del club donde estás parado—, donde no dice nada verdadero:
+ * la hinchada de Kobe no descuenta a la mitad al que juega ahí porque haya
+ * nacido en Buenos Aires.
+ *
+ * Queda como DESCUENTO y no como mitad: emigrar sigue siendo el camino que menos
+ * construye, y eso lo tiene que decir un número. Medido, un tramo profesional
+ * pasó de 2,97 a 4,45 puntos por temporada contra 4,74 del amateur en su club, y
+ * las dos bandas que vigilan la premisa —`las dos escaleras se pelean de verdad`
+ * y `el vitalicio es un final`— se quedaron adentro.
  */
-export const BELONGING_ABROAD_FACTOR = 0.5;
+export const BELONGING_ABROAD_FACTOR = 0.75;
+
+// ── CÓMO TE FUE EN EL AÑO, del lado de la hinchada ──────────────────────────
+//
+// PARÁMETRO LIBRE los tres. La temporada que te quedás vale distinto según cómo
+// jugaste: un año de 8,2 construye casi el doble que uno de 5,5. El eje es el
+// puntaje de la temporada (`engine/season-rating.ts`), que ya viene normalizado
+// por puesto —un pilar de la Tercera puede sacar 8,2—, así que acá no hay que
+// volver a normalizar nada.
+//
+// OJO CON EL TAMAÑO: esto modula SOLO el término de la temporada, que es el más
+// chico de los tres. El grueso del rendimiento ya entraba por los Momentos, que
+// pagan Pertenencia directamente por jugarlos bien. Subir estos números para
+// que "el rendimiento pese" no arregla nada que los Momentos no estén haciendo
+// ya, y en cambio le saca peso a quedarse, que es la premisa del juego.
+
+/** Cuánto mueve al multiplicador cada punto de puntaje por encima del pivote. */
+export const BELONGING_FORM_WEIGHT = 0.3;
+
+/** Un año malo construye, pero a la mitad. No resta: jugar mal no es irse. */
+export const BELONGING_FORM_MIN = 0.5;
+
+/** Un año excepcional vale por dos. */
+export const BELONGING_FORM_MAX = 2;
 
 /**
  * Firmar profesional te saca del plantel del club, y por eso pega el doble que

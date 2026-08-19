@@ -53,21 +53,94 @@ interface UnionRow {
     branding?: UnionBranding | null
 }
 
+interface TournamentRow {
+    id: string
+    name: string
+    display_name: string | null
+    country_id: string | null
+    sport_id: string
+    logo_url: string | null
+}
+
+// ─── Transport failures ───────────────────────────────────────────────────────
+
+type QueryError = { message?: string; code?: string }
+type QueryResult<T> = { data: T | null; error: QueryError | null }
+
+// supabase-js does not throw when the network fails: it catches the TypeError
+// and hands it back as `error.message === 'TypeError: Failed to fetch'`. That
+// bucket holds a dropped connection, a tab navigating away with the request in
+// flight, an extension blocking supabase.co, the browser's ~6 connections/host
+// cap under a burst, and a 5xx from the pooler that arrives without CORS
+// headers. None of them is a query error, and one more attempt clears most.
+const TRANSPORT_ERROR_HINTS = [
+    'failed to fetch',
+    'networkerror',
+    'network request failed',
+    'load failed',
+    'fetch failed',
+]
+
+const TRANSPORT_RETRY_DELAY_MS = 400
+
+function isTransportError(error: QueryError | null | undefined): boolean {
+    if (!error?.message) return false
+    const message = error.message.toLowerCase()
+    return TRANSPORT_ERROR_HINTS.some((hint) => message.includes(hint))
+}
+
+/**
+ * Runs a read query and retries it once when the transport failed rather than
+ * the query. Only reads go through here: every one of them degrades to an empty
+ * result, so replaying it is free. Writes stay single-shot on purpose — an
+ * insert whose response was lost may well have landed server-side.
+ *
+ * A transport failure is logged as a warning, not an error: the caller already
+ * handles it, and Next's dev overlay promotes every console.error to a full
+ * error card.
+ */
+async function readWithRetry<T>(
+    label: string,
+    run: () => Promise<QueryResult<T>>,
+    options: { ignoreCodes?: string[] } = {}
+): Promise<T | null> {
+    let result = await run()
+
+    if (isTransportError(result.error)) {
+        await new Promise((resolve) => setTimeout(resolve, TRANSPORT_RETRY_DELAY_MS))
+        result = await run()
+    }
+
+    const { data, error } = result
+    if (!error) return data
+    if (error.code && options.ignoreCodes?.includes(error.code)) return data
+
+    if (isTransportError(error)) {
+        console.warn(
+            `[preferencesService] ${label}: Supabase unreachable (${error.message}). Continuing without data.`
+        )
+    } else {
+        console.error(`[preferencesService] ${label} error:`, error.message)
+    }
+
+    return null
+}
+
 // ─── Onboarding Status ────────────────────────────────────────────────────────
 
 export async function getOnboardingStatus(
     supabase: SupabaseClient,
     userId: string
 ): Promise<OnboardingStatus | null> {
-    const { data, error } = await supabase
-        .from('user_onboarding_status')
-        .select('*')
-        .eq('user_id', userId)
-        .single()
-
-    if (error && error.code !== 'PGRST116') {
-        console.error('[preferencesService] getOnboardingStatus error:', error.message)
-    }
+    const data = await readWithRetry<OnboardingStatus>(
+        'getOnboardingStatus',
+        async () => supabase
+            .from('user_onboarding_status')
+            .select('*')
+            .eq('user_id', userId)
+            .single(),
+        { ignoreCodes: ['PGRST116'] }
+    )
 
     return data ?? null
 }
@@ -118,18 +191,16 @@ export async function getFavoriteSports(
     supabase: SupabaseClient,
     userId: string
 ): Promise<string[]> {
-    const { data, error } = await supabase
-        .from('user_favorite_sports')
-        .select('sport_id, sort_order')
-        .eq('user_id', userId)
-        .order('sort_order', { ascending: true })
+    const data = await readWithRetry<FavoriteSportRow[]>(
+        'getFavoriteSports',
+        async () => supabase
+            .from('user_favorite_sports')
+            .select('sport_id, sort_order')
+            .eq('user_id', userId)
+            .order('sort_order', { ascending: true })
+    )
 
-    if (error) {
-        console.error('[preferencesService] getFavoriteSports error:', error.message)
-        return []
-    }
-
-    return ((data ?? []) as FavoriteSportRow[]).map((row) => row.sport_id)
+    return (data ?? []).map((row) => row.sport_id)
 }
 
 export async function saveFavoriteSports(
@@ -173,19 +244,17 @@ export async function getFavoriteLeagues(
     supabase: SupabaseClient,
     userId: string
 ): Promise<FavoriteLeagueEntry[]> {
-    const { data, error } = await supabase
-        .from('user_favorite_leagues')
-        .select('league_id, sport_id, sort_order')
-        .eq('user_id', userId)
-        .order('sort_order', { ascending: true })
-        .order('created_at', { ascending: false })
+    const data = await readWithRetry<FavoriteLeagueRow[]>(
+        'getFavoriteLeagues',
+        async () => supabase
+            .from('user_favorite_leagues')
+            .select('league_id, sport_id, sort_order')
+            .eq('user_id', userId)
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: false })
+    )
 
-    if (error) {
-        console.error('[preferencesService] getFavoriteLeagues error:', error.message)
-        return []
-    }
-
-    return ((data ?? []) as FavoriteLeagueRow[]).map((row) => ({
+    return (data ?? []).map((row) => ({
         leagueId: String(row.league_id),
         sportId: String(row.sport_id || ''),
         sortOrder: typeof row.sort_order === 'number' ? row.sort_order : 0,
@@ -238,27 +307,25 @@ export async function getLeaguesBySports(
     // Query 1: tournaments table
     // - Exclude only 'archived' (include draft, published, active)
     // - Use neq(is_visible, false) to include both true AND null values
-    const { data: tourData, error: tourError } = await supabase
-        .from('tournaments')
-        .select('id, name, display_name, country_id, sport_id, logo_url, is_visible, slug')
-        .in('sport_id', sportIds)
-        .neq('is_visible', false)
-        .order('name', { ascending: true });
-
-    if (tourError) {
-        console.error('[preferencesService] getLeaguesBySports tournaments error:', tourError.message)
-    }
+    const tourData = await readWithRetry<TournamentRow[]>(
+        'getLeaguesBySports tournaments',
+        async () => supabase
+            .from('tournaments')
+            .select('id, name, display_name, country_id, sport_id, logo_url, is_visible, slug')
+            .in('sport_id', sportIds)
+            .neq('is_visible', false)
+            .order('name', { ascending: true })
+    )
 
     // Query 2: unions table (federations/leagues/associations)
     // sport column may not exist — fetch all and filter client-side via branding JSONB
-    const { data: unionData, error: unionError } = await supabase
-        .from('unions')
-        .select('id, name, country, branding')
-        .order('name', { ascending: true })
-
-    if (unionError) {
-        console.error('[preferencesService] getLeaguesBySports unions error:', unionError?.message)
-    }
+    const unionData = await readWithRetry<UnionRow[]>(
+        'getLeaguesBySports unions',
+        async () => supabase
+            .from('unions')
+            .select('id, name, country, branding')
+            .order('name', { ascending: true })
+    )
 
     const results: LeagueItem[] = []
 
@@ -275,7 +342,7 @@ export async function getLeaguesBySports(
     }
 
     // Map unions — extract sport from branding JSONB, filter client-side
-    for (const u of ((unionData ?? []) as UnionRow[])) {
+    for (const u of (unionData ?? [])) {
         const effectiveSport = u.branding?.organization?.identity?.sport
         if (!effectiveSport || !sportIds.includes(effectiveSport)) continue
         results.push({

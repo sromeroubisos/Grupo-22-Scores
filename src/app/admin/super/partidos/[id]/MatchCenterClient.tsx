@@ -12,6 +12,7 @@ import {
     buildMatchEventDefinitionMap,
     getDefaultMatchEventDefinitions,
     isEventDrivenScoreSport,
+    normalizeSportBucket,
     resolveMatchEventDefinitions,
     type MatchEventDefinition,
 } from '@/lib/matchEventCatalog';
@@ -37,6 +38,7 @@ import {
     normalizeMatchPeriod,
 } from '@/lib/matchPeriods';
 import { formatClockSeconds, getPeriodOffsetSeconds, type MatchClockTransition } from '@/lib/matchClock';
+import { getSportLineupSize, getSportMatchProfile } from '@/lib/sportMatchProfile';
 import { useMatchClock } from '@/hooks/useMatchClock';
 import {
     getConfiguredEventPoints,
@@ -222,7 +224,7 @@ type PersistMatchWarnings = {
     clockNotPersisted?: boolean;
 };
 
-function normalizeMatchEvents(events: MatchRow['events']): MatchEvent[] {
+function normalizeMatchEvents(events: MatchRow['events'], sportId?: string | null): MatchEvent[] {
     if (!Array.isArray(events)) return [];
 
     let activePeriod = normalizeMatchPeriod(null);
@@ -238,7 +240,7 @@ function normalizeMatchEvents(events: MatchRow['events']): MatchEvent[] {
             : Number(eventOrder);
         const period = event.period
             ? normalizeMatchPeriod(event.period)
-            : getEventPeriodForType(type, activePeriod);
+            : getEventPeriodForType(type, activePeriod, sportId);
         const normalizedEvent = {
             ...event,
             type,
@@ -248,7 +250,7 @@ function normalizeMatchEvents(events: MatchRow['events']): MatchEvent[] {
             secondaryPlayerName,
             detail: event.detail || (type === 'substitution' && secondaryPlayerName ? `Entra: ${secondaryPlayerName}` : ''),
         };
-        activePeriod = getNextActivePeriodAfterEvent(type, period);
+        activePeriod = getNextActivePeriodAfterEvent(type, period, sportId);
         return normalizedEvent;
     });
 }
@@ -659,14 +661,33 @@ function eventTypeColor(t: string, definitions: MatchEventDefinition[]): string 
     return '#fff';
 }
 
+/**
+ * El catalogo del deporte manda QUE eventos existen; el torneo manda COMO se
+ * llaman y cuanto valen.
+ *
+ * Antes esto era una union: todo lo guardado en el ruleset se sumaba al preset.
+ * Un torneo de hockey creado cuando el default era rugby tenia el catalogo de
+ * rugby guardado, y el panel del partido terminaba mostrando "Penal a los
+ * palos" con su convertida/fallada al lado del gol de corner corto. Dos
+ * deportes en la misma botonera.
+ *
+ * Ahora el override solo puede pisar tipos que EXISTEN en el deporte, mas los
+ * `custom_` que el torneo haya inventado a proposito. Para un torneo cuyo
+ * ruleset coincide con su deporte —el caso de todos los de rugby— el resultado
+ * es identico al de antes.
+ */
 function mergeMatchEventDefinitions(
     baseDefinitions: MatchEventDefinition[],
     overrideDefinitions: MatchEventDefinition[],
 ) {
     const merged = new Map<string, MatchEventDefinition>();
+    const belongsToSport = new Set(baseDefinitions.map((definition) => definition.type));
 
     baseDefinitions.forEach((definition) => merged.set(definition.type, definition));
-    overrideDefinitions.forEach((definition) => merged.set(definition.type, definition));
+    overrideDefinitions.forEach((definition) => {
+        if (!belongsToSport.has(definition.type) && !definition.type.startsWith('custom_')) return;
+        merged.set(definition.type, definition);
+    });
 
     return Array.from(merged.values());
 }
@@ -676,6 +697,8 @@ function getEventButtonGroup(definition: MatchEventDefinition) {
     if (definition.category === 'card' || definition.category === 'discipline') return 'Disciplina';
     if (definition.category === 'substitution') return 'Plantel';
     if (definition.category === 'clock') return 'Reloj';
+    // La definicion por shoot-out no es parte del partido: grupo propio.
+    if (definition.category === 'shootout') return 'Definicion';
     return 'Juego';
 }
 
@@ -712,33 +735,87 @@ function getEventButtonGlyph(type: string) {
         match_start: 'IN',
         match_half: 'HT',
         match_end: 'FN',
+        /* ── Hockey ──
+         * Sin estos, el fallback `type.slice(0, 2)` chocaba: "Tiro al arco" y
+         * "Tiro desviado" salian los dos SH, "Despeje" y "Oportunidad clara"
+         * los dos CL, y "Corner corto" y "Penal stroke" los dos PE. Tres pares
+         * de botones indistinguibles en la botonera del partido.
+         */
+        goal: 'GO',
+        penalty_corner: 'CC',
+        penalty_stroke: 'ST',
+        foul: 'FA',
+        free_hit: 'FH',
+        green_card: 'TV',
+        assist: 'AS',
+        // 'TA' ya es la tarjeta amarilla, que en hockey esta en la misma botonera.
+        shot_on_goal: 'SA',
+        shot_off_target: 'SD',
+        circle_entry: 'IC',
+        interception: 'IT',
+        block: 'BL',
+        save: 'AT',
+        clearance: 'DE',
+        shootout_start: 'SI',
+        shootout_scored: 'SC',
+        shootout_missed: 'SF',
+        shootout_end: 'SX',
     };
 
     return glyphs[type] || type.slice(0, 2).toUpperCase();
 }
 
-function getEventButtonLabel(definition: MatchEventDefinition) {
-    const labels: Record<string, string> = {
-        penalty_try: 'Try penal',
-        conversion: 'Conversion',
-        penalty: 'Penal a los palos',
-        penalty_goal: 'Penal a los palos',
-        drop_goal: 'Drop',
-        card_yellow: 'Amarilla',
-        card_red: 'Roja',
-        yellow_card: 'Amarilla',
-        red_card: 'Roja',
-        knock_on: 'Knock-on',
-        forward_pass: 'Pase forward',
-        penalty_committed: 'Penal cometido',
-        handling_error: 'Error manejo',
-        turnover_won: 'Turnover ganado',
-        turnover_lost: 'Turnover perdido',
-        entradas_22: 'Entradas en 22',
-        match_start: 'Inicio partido',
-        match_half: 'Entretiempo',
-        match_end: 'Final partido',
-    };
+/**
+ * Etiquetas cortas para el boton, POR DEPORTE.
+ *
+ * Este diccionario era global y pisaba la etiqueta del catalogo por tipo de
+ * evento. Como el rugby y el hockey comparten ids (`turnover_lost`,
+ * `penalty_goal`), un partido de hockey mostraba "Turnover perdido" donde su
+ * catalogo dice "Perdida", y "Penal a los palos" donde decia otra cosa: el
+ * vocabulario de un deporte escrito encima de otro.
+ *
+ * El de rugby queda tal cual —sus botones no cambian ni un caracter—. El hockey
+ * no necesita ninguno: sus etiquetas ya entran en el boton.
+ */
+const RUGBY_BUTTON_LABELS: Record<string, string> = {
+    penalty_try: 'Try penal',
+    conversion: 'Conversion',
+    penalty: 'Penal a los palos',
+    penalty_goal: 'Penal a los palos',
+    drop_goal: 'Drop',
+    card_yellow: 'Amarilla',
+    card_red: 'Roja',
+    yellow_card: 'Amarilla',
+    red_card: 'Roja',
+    knock_on: 'Knock-on',
+    forward_pass: 'Pase forward',
+    penalty_committed: 'Penal cometido',
+    handling_error: 'Error manejo',
+    turnover_won: 'Turnover ganado',
+    turnover_lost: 'Turnover perdido',
+    entradas_22: 'Entradas en 22',
+    match_start: 'Inicio partido',
+    match_half: 'Entretiempo',
+    match_end: 'Final partido',
+};
+
+const HOCKEY_BUTTON_LABELS: Record<string, string> = {
+    yellow_card: 'Amarilla',
+    red_card: 'Roja',
+    green_card: 'Verde',
+    save: 'Atajada',
+    match_start: 'Inicio partido',
+    match_end: 'Final partido',
+    shootout_start: 'Inicio shoot-outs',
+    shootout_scored: 'Convertido',
+    shootout_missed: 'Fallado',
+    shootout_end: 'Fin shoot-outs',
+};
+
+function getEventButtonLabel(definition: MatchEventDefinition, sportId?: string | null) {
+    const labels = normalizeSportBucket(sportId) === 'hockey'
+        ? HOCKEY_BUTTON_LABELS
+        : RUGBY_BUTTON_LABELS;
 
     return labels[definition.type] || definition.label;
 }
@@ -834,6 +911,11 @@ interface PointsRules {
     } | null;
 }
 
+/**
+ * Planilla de rugby. Sigue siendo el fallback de `getSportMatchProfile` para un
+ * partido sin deporte resuelto, asi que nada de rugby cambia; los deportes que
+ * resuelven usan el suyo (hockey abre 16 con 11 titulares, no 23 con 15).
+ */
 const DEFAULT_LINEUP_SIZE = 23;
 const DEFAULT_POINTS_RULES: PointsRules = {
     win: 4,
@@ -947,9 +1029,10 @@ function normalizePointsRules(rawRules: ReturnType<typeof StandingsEngine.resolv
     };
 }
 
-function getLineupSize(lineups: MatchLineups | null | undefined) {
+function getLineupSize(lineups: MatchLineups | null | undefined, sportId?: string | null) {
     const maxCount = Math.max(lineups?.home?.length ?? 0, lineups?.away?.length ?? 0);
-    return maxCount > 0 ? maxCount : DEFAULT_LINEUP_SIZE;
+    // Lo ya cargado manda: solo se cae al tamano del deporte cuando no hay nada.
+    return maxCount > 0 ? maxCount : getSportLineupSize(sportId);
 }
 
 function normalizeLineupRatingValue(value: unknown) {
@@ -1349,7 +1432,10 @@ export default function MatchCenterClient({
     const supabase = useMemo(() => createClient(), []);
     const resolvedMatchEndpoint = apiEndpoint || `/api/admin/matches/${matchId}`;
     const resolvedInitialTab = isMatchCenterTab(initialTab) ? initialTab : 'resumen';
-    const initialEvents = normalizeMatchEvents(initialMatch.events);
+    const initialEvents = normalizeMatchEvents(
+        initialMatch.events,
+        initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null,
+    );
     const initialLineups = normalizeMatchLineups(initialMatch.lineups);
     const initialScore = normalizeMatchScore(initialMatch.score);
     const [match, setMatch] = useState<MatchRow>(initialMatch);
@@ -1401,6 +1487,13 @@ export default function MatchCenterClient({
     const [matchSportId, setMatchSportId] = useState<string | null>(
         initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null,
     );
+    // Espejo en ref: `applyMatchResponse` necesita el deporte para resolver la
+    // secuencia de periodos (Q1..Q4 en hockey) y es un useCallback que no puede
+    // tomarlo como dependencia sin recrearse en cada cambio de deporte.
+    const matchSportIdRef = useRef(matchSportId);
+    useEffect(() => {
+        matchSportIdRef.current = matchSportId;
+    }, [matchSportId]);
 
     /* ─── RELOJ (aislado: no comparte estado con match ni con los eventos) ─── */
 
@@ -1448,7 +1541,10 @@ export default function MatchCenterClient({
         () => getDefaultMatchEventDefinitions(initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null),
     );
     const [guidedEvent, setGuidedEvent] = useState<GuidedEventDraft | null>(null);
-    const [lineupSizeInput, setLineupSizeInput] = useState(() => String(getLineupSize(initialMatch.lineups)));
+    const [lineupSizeInput, setLineupSizeInput] = useState(() => String(getLineupSize(
+        initialMatch.lineups,
+        initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null,
+    )));
     const [quickLineupDrafts, setQuickLineupDrafts] = useState<{ home: string; away: string }>(() => ({
         home: formatQuickLineupDraft(initialLineups.home),
         away: formatQuickLineupDraft(initialLineups.away),
@@ -1463,9 +1559,11 @@ export default function MatchCenterClient({
         [eventDefinitions, matchSportId],
     );
     const eventDefinitionMap = useMemo(() => buildMatchEventDefinitionMap(availableEventDefinitions), [availableEventDefinitions]);
+    // Tamano de planilla del deporte: rugby 23, hockey 16, basquet 12.
+    const sportLineupSize = useMemo(() => getSportLineupSize(matchSportId), [matchSportId]);
     useEffect(() => {
-        persistedEventsRef.current = normalizeMatchEvents(match.events);
-    }, [match.events]);
+        persistedEventsRef.current = normalizeMatchEvents(match.events, matchSportId);
+    }, [match.events, matchSportId]);
 
     useEffect(() => {
         persistedLineupsRef.current = normalizeMatchLineups(match.lineups);
@@ -1676,7 +1774,10 @@ export default function MatchCenterClient({
     }, [eventPlayerOptions]);
 
     const applyMatchResponse = useCallback((nextMatch: MatchRow, options?: ApplyMatchResponseOptions) => {
-        const nextEvents = normalizeMatchEvents(nextMatch.events);
+        const nextEvents = normalizeMatchEvents(
+            nextMatch.events,
+            nextMatch.tournament?.sport_id ?? nextMatch.tournament?.sportId ?? matchSportIdRef.current,
+        );
         const nextLineups = normalizeMatchLineups(nextMatch.lineups);
         const nextScore = normalizeMatchScore(nextMatch.score);
         const currentLocalEvents = localEventsRef.current;
@@ -2449,13 +2550,13 @@ export default function MatchCenterClient({
     }, [clock, guidedEvent, persistMatchPatch, reportClockError, scheduleSaveMsgClear]);
 
     const applyLineupSize = useCallback((requestedSize?: number) => {
-        const nextSize = requestedSize ?? getPositiveInteger(lineupSizeInput, getLineupSize(localLineups));
+        const nextSize = requestedSize ?? getPositiveInteger(lineupSizeInput, getLineupSize(localLineups, matchSportId));
         setLineupSizeInput(String(nextSize));
         setLocalLineups((prev) => ({
             home: buildLineupTemplate(nextSize, prev.home),
             away: buildLineupTemplate(nextSize, prev.away),
         }));
-    }, [lineupSizeInput, localLineups]);
+    }, [lineupSizeInput, localLineups, matchSportId]);
 
     // Fill a team's planilla straight from its tournament roster (the fixed
     // 23 when the tournament uses plantel fijo, or the full squad otherwise).
@@ -2470,10 +2571,11 @@ export default function MatchCenterClient({
             return;
         }
 
+        const profile = getSportMatchProfile(matchSportIdRef.current);
         const nextSize = Math.max(
-            getLineupSize(localLineupsRef.current),
+            getLineupSize(localLineupsRef.current, matchSportIdRef.current),
             roster.length,
-            DEFAULT_LINEUP_SIZE,
+            profile.lineupSize,
         );
         setLineupSizeInput(String(nextSize));
         setLocalLineups((prev) => {
@@ -2482,7 +2584,8 @@ export default function MatchCenterClient({
                 updatedTeam[index] = {
                     ...buildLineupSelectionFromRoster(updatedTeam[index], rosterEntry),
                     number: rosterEntry.jerseyNumber ?? index + 1,
-                    role: index < 15 ? 'starter' : 'substitute',
+                    // Cuantos arrancan es del deporte: 15 en rugby, 11 en hockey.
+                    role: index < profile.startersCount ? 'starter' : 'substitute',
                 };
             });
             const nextLineups = {
@@ -2515,11 +2618,12 @@ export default function MatchCenterClient({
             return;
         }
 
+        const profile = getSportMatchProfile(matchSportIdRef.current);
         const nextSize = Math.max(
-            getLineupSize(localLineupsRef.current),
+            getLineupSize(localLineupsRef.current, matchSportIdRef.current),
             homeRoster.length,
             awayRoster.length,
-            DEFAULT_LINEUP_SIZE,
+            profile.lineupSize,
         );
         setLineupSizeInput(String(nextSize));
 
@@ -2529,7 +2633,7 @@ export default function MatchCenterClient({
                 template[index] = {
                     ...buildLineupSelectionFromRoster(template[index], rosterEntry),
                     number: rosterEntry.jerseyNumber ?? index + 1,
-                    role: index < 15 ? 'starter' : 'substitute',
+                    role: index < profile.startersCount ? 'starter' : 'substitute',
                 };
             });
             return template;
@@ -3031,7 +3135,7 @@ export default function MatchCenterClient({
             if ((definition.type === 'yellow_card' || definition.type === 'red_card') && hasClubCards) return false;
             return true;
         });
-        const groups = ['Marcador', 'Disciplina', 'Juego', 'Plantel', 'Reloj'];
+        const groups = ['Marcador', 'Disciplina', 'Juego', 'Plantel', 'Definicion', 'Reloj'];
 
         return groups
             .map((group) => ({
@@ -3492,9 +3596,9 @@ export default function MatchCenterClient({
                                         <button
                                             className="mc-btn mc-btn-outline"
                                             type="button"
-                                            onClick={() => applyLineupSize(DEFAULT_LINEUP_SIZE)}
+                                            onClick={() => applyLineupSize(sportLineupSize)}
                                         >
-                                            <Plus size={14} /> Generar plantilla (23)
+                                            <Plus size={14} /> Generar plantilla ({sportLineupSize})
                                         </button>
                                         <button
                                             className="mc-btn mc-btn-primary"
@@ -3511,7 +3615,7 @@ export default function MatchCenterClient({
                                         </button>
                                     </div>
                                     <p className="quick-lineup-hint" style={{ textAlign: 'center', marginTop: 12 }}>
-                                        “Generar plantilla (23)” crea las planillas vacías para completar a mano.
+                                        “Generar plantilla ({sportLineupSize})” crea las planillas vacías para completar a mano.
                                         “Importar todo el plantel” precarga los jugadores del plantel del torneo.
                                     </p>
                                 </div>
@@ -3871,7 +3975,7 @@ export default function MatchCenterClient({
                                                     onClick={() => openGuidedEvent(definition)}
                                                 >
                                                     <span className="live-event-glyph">{getEventButtonGlyph(definition.type)}</span>
-                                                    <span className="live-event-label">{getEventButtonLabel(definition)}</span>
+                                                    <span className="live-event-label">{getEventButtonLabel(definition, matchSportId)}</span>
                                                     <span className="live-event-meta">{getEventButtonMeta(definition)}</span>
                                                 </button>
                                             ))}

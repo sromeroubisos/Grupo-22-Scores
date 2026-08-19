@@ -20,7 +20,7 @@ import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { markHireCtaSeen, shouldShowHireCtaForUser } from '@/lib/hireCtaPreferences';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
-import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
+import { AUDIENCE_LABELS, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { compareTournamentsByPriority, getTournamentPriority } from '@/lib/utils/tournamentOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { getMatchPenaltyScore, hasMatchPenaltyShootout, getMatchWinnerByScore } from '@/lib/matchUtils';
@@ -991,13 +991,16 @@ export default function HomePage() {
   }, [tournamentAudienceById, tournamentAudienceByName]);
 
   const shouldIncludeMatchForAudience = useCallback((tournament: { id?: string | null; name?: string | null; country?: string | null }) => {
-    if (selectedAudience === 'mayores') {
-      // Default sports feed should remain broad so API matches from prior/future days
-      // are still visible even when the tournament only exposes youth hints.
-      return true;
-    }
-
-    return resolveMatchAudience(tournament) === 'juveniles';
+    // Las dos pestañas usan el mismo resolutor. Antes la de mayores devolvía
+    // `true` para todo —para no perder partidos de días vecinos que llegan de la
+    // API sin catálogo— y el efecto era que "URBA: Menores de 15" y las
+    // Intermedias aparecían en la portada principal, que es justo de donde el
+    // segmento las tiene que sacar.
+    //
+    // No hace falta el atajo: `resolveTournamentAudience` cae en `mayores`
+    // cuando no reconoce ninguna pista, así que un torneo desconocido sigue
+    // entrando. Sólo se va el que se puede clasificar como juvenil o reserva.
+    return resolveMatchAudience(tournament) === selectedAudience;
   }, [resolveMatchAudience, selectedAudience]);
 
   // Filter logic
@@ -1668,7 +1671,7 @@ export default function HomePage() {
                   className={`${styles.audienceSwitchBtn} ${selectedAudience === audience ? styles.audienceSwitchBtnActive : ''}`}
                   onClick={() => setSelectedAudience(audience)}
                 >
-                  {audience === 'mayores' ? 'Mayores' : 'Juveniles'}
+                  {AUDIENCE_LABELS[audience]}
                 </button>
               ))}
             </div>
@@ -1682,7 +1685,7 @@ export default function HomePage() {
               <input
                 type="text"
                 placeholder={selectedAudience === 'juveniles'
-                  ? `Filtrar juveniles de ${selectedSport.nameEs}...`
+                  ? `Filtrar juveniles y reserva de ${selectedSport.nameEs}...`
                   : selectedSport.id === 'tennis'
                     ? `Filtrar torneos de ${selectedSport.nameEs}...`
                     : `Filtrar ligas de ${selectedSport.nameEs}...`}
@@ -1909,7 +1912,7 @@ export default function HomePage() {
               {filteredInternational.length === 0 && sortedCountryIds.length === 0 && (
                 <div className={styles.audienceEmptyState}>
                   {selectedAudience === 'juveniles'
-                    ? 'No hay torneos juveniles cargados para este deporte.'
+                    ? 'No hay torneos juveniles ni de reserva cargados para este deporte.'
                     : 'No hay torneos disponibles para este deporte.'}
                 </div>
               )}
@@ -1944,7 +1947,7 @@ export default function HomePage() {
                   className={`${styles.mobileAudienceSwitchBtn} ${selectedAudience === audience ? styles.mobileAudienceSwitchBtnActive : ''}`}
                   onClick={() => setSelectedAudience(audience)}
                 >
-                  {audience === 'mayores' ? 'Mayores' : 'Juveniles'}
+                  {AUDIENCE_LABELS[audience]}
                 </button>
               ))}
             </div>
@@ -2119,14 +2122,14 @@ export default function HomePage() {
                     {showLiveOnly
                       ? 'No hay partidos en vivo'
                       : selectedAudience === 'juveniles'
-                        ? 'No hay partidos juveniles programados'
+                        ? 'No hay partidos de juveniles ni de reserva programados'
                         : 'No hay partidos programados'}
                   </h3>
                   <p>
                     {showLiveOnly
-                      ? `No se encontraron encuentros en vivo para ${selectedAudience}.`
+                      ? `No se encontraron encuentros en vivo para ${AUDIENCE_LABELS[selectedAudience].toLowerCase()}.`
                       : selectedAudience === 'juveniles'
-                        ? 'No se encontraron encuentros juveniles para esta fecha.'
+                        ? 'No se encontraron encuentros de juveniles ni de reserva para esta fecha.'
                         : 'No se encontraron encuentros para esta fecha.'}
                   </p>
                 </div>

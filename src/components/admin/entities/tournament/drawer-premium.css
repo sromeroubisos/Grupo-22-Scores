@@ -294,14 +294,6 @@
     color: var(--pp-text-muted);
 }
 
-.pp-summary-card {
-    padding: 16px;
-    background: var(--pp-surface-accent);
-    border: 1px solid var(--pp-border);
-    border-radius: var(--pp-radius-md);
-    margin-top: 12px;
-}
-
 .pp-summary-label {
     font-size: 10px;
     font-weight: 700;
@@ -310,18 +302,6 @@
     color: var(--pp-text-muted);
     font-family: var(--pp-font-mono);
     margin-bottom: 8px;
-}
-
-.pp-summary-content {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.pp-summary-text {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--pp-text-main);
 }
 
 .pp-form-grid-2 {

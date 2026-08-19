@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   MATCH_STATUS_PERMITIDOS,
+  basePorPartido,
   bonusDeUrba,
   mapEstadoYResultado,
   planTournamentMatches,
@@ -34,9 +35,35 @@ test('fulfilled:false con scores en 0 -> scheduled y score NULL, NO un 0-0', () 
   assert.equal(r.score, null, 'un partido no jugado no puede llevar resultado');
 });
 
-test('un 0-0 REAL sí se escribe cuando el partido se jugó', () => {
+/**
+ * `fulfilled` quiere decir CERRADO, no jugado, y un cerrado sin marcador es un
+ * partido sin resultado publicado. La tabla de URBA no lo cuenta, y acá se
+ * espeja: contarlo como empate le daba 2 puntos por lado a dos clubes que en
+ * `/api/positions` tienen 0.
+ */
+test('un 0-0 sin marcador no es un empate: no cuenta, igual que en la tabla de URBA', () => {
   const r = mapEstadoYResultado(partido({ fulfilled: true, local_team_score: 0, visit_team_score: 0 }));
-  assert.deepEqual(r.score, { home: 0, away: 0 });
+  assert.equal(r.status, 'suspended');
+  assert.equal(r.score, null);
+});
+
+/** Y en cuanto URBA carga el marcador, la pasada siguiente lo pasa a final. */
+test('cargado el marcador, el mismo partido pasa a final solo', () => {
+  const r = mapEstadoYResultado(partido({ fulfilled: true, local_team_score: 24, visit_team_score: 17 }));
+  assert.deepEqual(r, { status: 'final', score: { home: 24, away: 17 } });
+});
+
+/** Un marcador que no es número no puede entrar en la columna: se espera. */
+test('un marcador que no es número no se escribe como NaN', () => {
+  const r = mapEstadoYResultado(partido({ fulfilled: true, local_team_score: 'x' as any, visit_team_score: 3 }));
+  assert.equal(r.status, 'suspended');
+  assert.equal(r.score, null);
+});
+
+/** Un 3-0 sí es un resultado: el cero de un solo lado no dispara nada. */
+test('el cero de un solo lado es un resultado normal', () => {
+  const r = mapEstadoYResultado(partido({ fulfilled: true, local_team_score: 3, visit_team_score: 0 }));
+  assert.deepEqual(r, { status: 'final', score: { home: 3, away: 0 } });
 });
 
 test('suspended:true -> suspended y sin resultado', () => {
@@ -44,9 +71,34 @@ test('suspended:true -> suspended y sin resultado', () => {
   assert.deepEqual(r, { status: 'suspended', score: null });
 });
 
-test('fulfilled gana sobre suspended: un suspendido que se jugó tiene resultado', () => {
-  const r = mapEstadoYResultado(partido({ fulfilled: true, suspended: true, local_team_score: 15, visit_team_score: 3 }));
-  assert.equal(r.status, 'final');
+/**
+ * El caso que hacía que la tabla no cerrara contra la de URBA.
+ *
+ * URBA manda las dos banderas prendidas en un partido suspendido: `fulfilled`
+ * quiere decir "cerrado", no "jugado". Con `fulfilled` primero, el partido
+ * entraba como final con 0-0 —o sea, como un EMPATE— y repartía 2 puntos por
+ * lado que la tabla de URBA no reparte.
+ *
+ * La forma exacta del payload está copiada de `urba:2023147236`, uno de los 58
+ * de 2026 que vienen así.
+ */
+test('suspended gana sobre fulfilled: un suspendido no es un empate', () => {
+  const r = mapEstadoYResultado(partido({
+    fulfilled: true, suspended: true, local_team_score: 0, visit_team_score: 0,
+  }));
+  assert.equal(r.status, 'suspended', 'las dos banderas prendidas son un suspendido, no un final');
+  assert.equal(r.score, null, 'un 0-0 de un suspendido no es un resultado');
+});
+
+/**
+ * Y la contracara: el suspendido no reparte puntos base. Con `status: 'final'` y
+ * 0-0, `basePorPartido` devolvía el empate —2 y 2— y ésos eran los puntos de más.
+ */
+test('un suspendido no reparte puntos base ni bonus', () => {
+  const m = partido({ fulfilled: true, suspended: true, local_team_score: 0, visit_team_score: 0 });
+  const { status, score } = mapEstadoYResultado(m);
+  assert.deepEqual(basePorPartido(score, status), { home: 0, away: 0 });
+  assert.equal(bonusDeUrba(m, status), null);
 });
 
 test('todo estado emitido está en el CHECK de matches.status', () => {

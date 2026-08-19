@@ -6,6 +6,8 @@ import type { LocalPlayerStatsRow } from '@/lib/localMatchData';
 import {
   type PlayerMetricSortDirection,
   type PlayerStatsTableRow,
+  chooseDefaultPlayerMetrics,
+  comparePlayerMetricValues,
   formatPlayerMetricValue,
   getPlayerMetricMeta,
   parseNumericStat,
@@ -19,65 +21,40 @@ export type PlayerStatsTableData = {
   metricLabels: Record<string, string>;
 };
 
-function chooseDefaultPlayerMetrics(metricIds: string[]) {
-  const preferred = [
-    'points',
-    // Los deportes de gol no tienen "puntos", asi que sin esta linea la tabla
-    // abria en tarjetas y escondia lo unico que la gente busca: quien convirtio.
-    // No compite con 'points': ningun deporte declara las dos.
-    'goals',
-    'conversionRate',
-    'minutes',
-    'tries',
-    'assists',
-    'rating',
-    'tackles',
-    'conversionsMade',
-    'yellowCards',
-    'redCards',
-    'events',
-    'matchesPlayed',
-  ];
-  const selected: string[] = [];
-  preferred.forEach((metricId) => {
-    if (metricIds.includes(metricId) && !selected.includes(metricId) && selected.length < 3) {
-      selected.push(metricId);
-    }
-  });
-  metricIds.forEach((metricId) => {
-    if (!selected.includes(metricId) && selected.length < 3) {
-      selected.push(metricId);
-    }
-  });
-  return selected;
+/** El valor de una metrica como numero, con el 0 explicito. */
+function metricNumber(row: PlayerStatsTableRow, metricId: string) {
+  return parseNumericStat(row.metrics[metricId]) ?? 0;
 }
 
-function comparePlayerMetricValues(
-  left: PlayerStatsTableRow,
-  right: PlayerStatsTableRow,
-  metricSorts: Array<{ metricId: string; direction: PlayerMetricSortDirection }>,
-  primarySortIndex: number,
-) {
-  const prioritizedSorts = metricSorts.length === 0
-    ? []
-    : [
-        metricSorts[Math.max(0, Math.min(primarySortIndex, metricSorts.length - 1))],
-        ...metricSorts.filter((_, index) => index !== Math.max(0, Math.min(primarySortIndex, metricSorts.length - 1))),
-      ];
+/**
+ * Un jugador "sin registro" tiene TODAS las metricas mostradas en cero.
+ *
+ * Se mide contra lo que se muestra y no contra la fila entera a proposito: si
+ * la tabla esta ordenada por amarillas, el que no vio ninguna no aporta a esa
+ * lectura aunque haya hecho tres goles, y su fila puede plegarse. Es la unica
+ * forma de que 36 jugadores de los que anotaron cuatro no sean 36 filas
+ * identicas.
+ */
+function hasAnyRecord(row: PlayerStatsTableRow, metricIds: string[]) {
+  return metricIds.some((metricId) => metricNumber(row, metricId) !== 0);
+}
 
-  for (const metricSort of prioritizedSorts) {
-    const { metricId, direction } = metricSort;
-    const leftValue = parseNumericStat(left.metrics[metricId]) ?? Number.NEGATIVE_INFINITY;
-    const rightValue = parseNumericStat(right.metrics[metricId]) ?? Number.NEGATIVE_INFINITY;
-    if (rightValue !== leftValue) {
-      return direction === 'asc' ? leftValue - rightValue : rightValue - leftValue;
-    }
-  }
+/**
+ * Puesto dentro del grupo, con los empates compartiendo numero (1, 2, 2, 4).
+ * Numerar por indice mentiria: dos jugadores con un gol cada uno no son el
+ * primero y el segundo goleador.
+ */
+function rankRows(rows: PlayerStatsTableRow[], metricId: string) {
+  let previousValue: number | null = null;
+  let previousRank = 0;
 
-  const leftRating = typeof left.rating === 'number' ? left.rating : Number.NEGATIVE_INFINITY;
-  const rightRating = typeof right.rating === 'number' ? right.rating : Number.NEGATIVE_INFINITY;
-  if (rightRating !== leftRating) return rightRating - leftRating;
-  return left.name.localeCompare(right.name, 'es');
+  return rows.map((row, index) => {
+    const value = metricId ? metricNumber(row, metricId) : 0;
+    const rank = previousValue !== null && value === previousValue ? previousRank : index + 1;
+    previousValue = value;
+    previousRank = rank;
+    return { row, rank };
+  });
 }
 
 type Props = {
@@ -112,11 +89,20 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
   const [filterPosition, setFilterPosition] = useState('all');
   const [topN, setTopN] = useState<'all' | 5 | 10 | 20>('all');
 
-  const displayedMetrics = selectedMetrics.length > 0 ? selectedMetrics : chooseDefaultPlayerMetrics(availableMetricIds);
-  const displayedSorts = displayedMetrics.map((metricId, index) => ({
-    metricId,
-    direction: metricOrders[index] || 'desc',
-  }));
+  // Memoizadas porque abajo son dependencia de otros useMemo: construidas
+  // inline cambiaban de identidad en cada render y ninguna memo pegaba.
+  const displayedMetrics = useMemo(
+    () => (selectedMetrics.length > 0 ? selectedMetrics : chooseDefaultPlayerMetrics(availableMetricIds)),
+    [selectedMetrics, availableMetricIds],
+  );
+
+  const displayedSorts = useMemo(
+    () => displayedMetrics.map((metricId, index) => ({
+      metricId,
+      direction: metricOrders[index] || 'desc',
+    })),
+    [displayedMetrics, metricOrders],
+  );
 
   const sortedRows = useMemo(() => {
     if (tableData.rows.length === 0) return [];
@@ -143,21 +129,75 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
     return rows;
   }, [sortedRows, searchQuery, filterTeam, filterPosition, topN]);
 
-  const activeMetricId = displayedMetrics[activeSortSlot] || displayedMetrics[0];
-  const activeMetricMeta = activeMetricId
-    ? getPlayerMetricMeta(activeMetricId, tableData.metricLabels[activeMetricId])
+  // La metrica que manda es la que ordena. No hay una metrica "de gol"
+  // privilegiada: en hockey manda Goles, en rugby Puntos y en un torneo que
+  // configure la suya manda esa, sin tocar una linea de este componente.
+  const primaryMetricId = displayedMetrics[activeSortSlot] || displayedMetrics[0] || '';
+  const secondaryMetricIds = displayedMetrics.filter((metricId) => metricId !== primaryMetricId);
+  const primaryMetricMeta = primaryMetricId
+    ? getPlayerMetricMeta(primaryMetricId, tableData.metricLabels[primaryMetricId])
     : null;
   const activeDirection = displayedSorts[activeSortSlot]?.direction || 'desc';
-  const topScorer = sortedRows[0];
 
   const metricMaxValues = useMemo(() => {
     const maxes: Record<string, number> = {};
     displayedMetrics.forEach((metricId) => {
-      const values = filteredRows.map((r) => parseNumericStat(r.metrics[metricId]) ?? 0);
+      const values = filteredRows.map((r) => metricNumber(r, metricId));
       maxes[metricId] = Math.max(...values, 0.0001);
     });
     return maxes;
   }, [filteredRows, displayedMetrics]);
+
+  /**
+   * Agrupacion por equipo. Sale del lado del jugador (`home` / `away`), que es
+   * dato de partido y no de deporte, asi que el mismo bloque sirve para una
+   * final del Mundial de hockey y para una fecha de la URBA.
+   */
+  const playerGroups = useMemo(() => {
+    const buckets = new Map<string, { name: string; side: 'home' | 'away' | null; rows: PlayerStatsTableRow[] }>();
+
+    filteredRows.forEach((row) => {
+      const groupId = row.team || 'neutral';
+      if (!buckets.has(groupId)) {
+        buckets.set(groupId, {
+          name: row.teamName || (row.team === 'home' ? homeName : row.team === 'away' ? awayName : 'Sin equipo'),
+          side: row.team,
+          rows: [],
+        });
+      }
+      buckets.get(groupId)!.rows.push(row);
+    });
+
+    return (['home', 'away', 'neutral'] as const)
+      .filter((groupId) => buckets.has(groupId))
+      .map((groupId) => {
+        const bucket = buckets.get(groupId)!;
+        const withRecord = bucket.rows.filter((row) => hasAnyRecord(row, displayedMetrics));
+        const withoutRecord = bucket.rows.filter((row) => !hasAnyRecord(row, displayedMetrics));
+        return {
+          id: groupId,
+          name: bucket.name,
+          side: bucket.side,
+          ranked: rankRows(withRecord, primaryMetricId),
+          blank: withoutRecord,
+          total: bucket.rows.length,
+        };
+      });
+  }, [filteredRows, displayedMetrics, primaryMetricId, homeName, awayName]);
+
+  /**
+   * El puntero de la metrica activa. Solo existe si de verdad hay uno: con
+   * orden ascendente el primero de la lista es el que MENOS tiene, y en un
+   * partido sin goles nadie es el goleador. Antes esto estaba clavado a
+   * `points` y en cualquier deporte sin puntos mostraba "(—)".
+   */
+  const leader = useMemo(() => {
+    if (!primaryMetricId || activeDirection !== 'desc') return null;
+    const candidate = filteredRows[0];
+    if (!candidate) return null;
+    if (metricNumber(candidate, primaryMetricId) <= 0) return null;
+    return candidate;
+  }, [filteredRows, primaryMetricId, activeDirection]);
 
   const handleMetricChange = (slotIndex: number, nextMetricId: string) => {
     setSelectedMetrics((current) => {
@@ -302,8 +342,27 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
             type="button"
             className={`${styles.playerStatsConfigBtn} ${showConfig ? styles.playerStatsConfigBtnActive : ''}`}
             onClick={() => setShowConfig((v) => !v)}
+            aria-expanded={showConfig}
+            aria-label={showConfig ? 'Cerrar la personalización de la tabla' : 'Personalizar la tabla'}
           >
-            {showConfig ? 'Cerrar personalización' : 'Personalizar tabla'}
+            <svg
+              className={styles.playerStatsConfigIcon}
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M3 7h6M15 7h6M3 17h12M19 17h2" />
+              <circle cx="12" cy="7" r="2.5" />
+              <circle cx="16" cy="17" r="2.5" />
+            </svg>
+            <span className={styles.playerStatsConfigLabel}>
+              {showConfig ? 'Cerrar personalización' : 'Personalizar tabla'}
+            </span>
           </button>
         </div>
       </div>
@@ -341,6 +400,7 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
                       className={styles.playerMetricSelect}
                       value={metricId}
                       onChange={(e) => handleMetricChange(index, e.target.value)}
+                      aria-label={slotLabels[index] || `Columna ${index + 1}`}
                     >
                       {availableMetricIds.map((optionId) => {
                         const optionMeta = getPlayerMetricMeta(optionId, tableData.metricLabels[optionId]);
@@ -355,7 +415,7 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
                       type="button"
                       className={`${styles.playerMetricOrderToggle} ${sortDirection === 'asc' ? styles.playerMetricOrderToggleAsc : ''}`}
                       onClick={() => handleOrderChange(index, sortDirection === 'desc' ? 'asc' : 'desc')}
-                      title={sortDirection === 'desc' ? 'Descendente' : 'Ascendente'}
+                      aria-label={sortDirection === 'desc' ? 'Ordenar de menor a mayor' : 'Ordenar de mayor a menor'}
                     >
                       {sortDirection === 'desc' ? '↓' : '↑'}
                     </button>
@@ -406,19 +466,20 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
         </div>
       )}
 
-      {/* Resumen rápido */}
+      {/* Resumen: una linea de metadatos, no una caja */}
       <div className={styles.playerStatsSummaryBar}>
         <span className={styles.playerStatsSummaryItem}>
           <strong>{filteredRows.length}</strong> jugadores
         </span>
-        {topScorer && (
-          <span className={styles.playerStatsSummaryItem}>
-            Máximo anotador: <strong>{topScorer.name}</strong> ({formatPlayerMetricValue('points', topScorer.metrics.points, 'Puntos')})
+        {primaryMetricMeta && (
+          <span className={`${styles.playerStatsSummaryItem} ${styles.playerStatsSummaryHighlight}`}>
+            <strong>{primaryMetricMeta.label}</strong> {activeDirection === 'desc' ? '↓' : '↑'}
           </span>
         )}
-        {activeMetricMeta && (
-          <span className={`${styles.playerStatsSummaryItem} ${styles.playerStatsSummaryHighlight}`}>
-            Ordenado por: <strong>{activeMetricMeta.label}</strong> ({activeDirection === 'desc' ? 'Descendente' : 'Ascendente'})
+        {leader && primaryMetricId && (
+          <span className={styles.playerStatsSummaryItem}>
+            Líder: <strong>{leader.name}</strong>{' '}
+            ({formatPlayerMetricValue(primaryMetricId, leader.metrics[primaryMetricId], tableData.metricLabels[primaryMetricId])})
           </span>
         )}
         {filterTeam !== 'all' && (
@@ -427,6 +488,15 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
         {filterPosition !== 'all' && <span className={styles.playerStatsSummaryItem}>Posición: {filterPosition}</span>}
         {topN !== 'all' && <span className={styles.playerStatsSummaryItem}>Top {topN}</span>}
       </div>
+
+      {filteredRows.length === 0 && (
+        <div className={styles.playerStatsNoMatch}>
+          <p className={styles.playerStatsNoMatchTitle}>Ningún jugador coincide con el filtro</p>
+          <p className={styles.playerStatsNoMatchHint}>
+            {searchQuery.trim() ? `No hay resultados para “${searchQuery.trim()}”.` : 'Probá quitando algún filtro.'}
+          </p>
+        </div>
+      )}
 
       {/* Tabla desktop/tablet */}
       <div className={styles.playerStatsTableWrapEnhanced}>
@@ -442,6 +512,7 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
                   <th
                     key={metricId}
                     className={`${styles.playerStatsColMetric} ${isActiveSort ? styles.playerStatsColMetricActive : ''}`}
+                    aria-sort={isActiveSort ? (activeDirection === 'desc' ? 'descending' : 'ascending') : 'none'}
                   >
                     <button
                       type="button"
@@ -496,7 +567,7 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
                 </td>
                 {displayedMetrics.map((metricId, metricIndex) => {
                   const value = formatPlayerMetricValue(metricId, player.metrics[metricId], tableData.metricLabels[metricId]);
-                  const numericValue = parseNumericStat(player.metrics[metricId]) ?? 0;
+                  const numericValue = metricNumber(player, metricId);
                   const max = metricMaxValues[metricId] || 1;
                   const pct = max > 0 ? (numericValue / max) * 100 : 0;
                   const isActiveSort = activeSortSlot === metricIndex;
@@ -524,78 +595,154 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
         </table>
       </div>
 
-      {/* Vista mobile: cards */}
-      <div className={styles.playerStatsCardsMobile}>
-        {filteredRows.map((player) => (
-          <div key={player.key} className={styles.playerStatsCard}>
-            <div className={styles.playerStatsCardHeader}>
-              <div className={styles.playerStatsCardNameWrap}>
-                <span className={styles.playerStatsCardName}>
-                  {player.playerId ? (
-                    <Link href={`/players/${player.playerId}`} className={styles.playerStatsNameLink}>
-                      {player.name}
-                    </Link>
-                  ) : (
-                    player.name
-                  )}
-                </span>
-                {player.isCaptain && <span className={styles.playerStatsBadgeCaptain}>C</span>}
-              </div>
-              <div className={styles.playerStatsCardMeta}>
-                {player.position ? player.position : 'Sin posición'}
-                {player.number != null && ` · #${player.number}`}
-              </div>
-            </div>
-            <div className={styles.playerStatsCardTeamWrap}>
-              <span
-                className={`${styles.playerStatsTeamTagEnhanced} ${
-                  player.team === 'home'
-                    ? styles.teamTagHome
-                    : player.team === 'away'
-                    ? styles.teamTagAway
+      {/* Vista mobile: lista densa agrupada por equipo */}
+      <div className={styles.playerStatsList}>
+        {playerGroups.map((group) => {
+          const primaryMax = primaryMetricId ? metricMaxValues[primaryMetricId] || 1 : 1;
+
+          return (
+            <section key={group.id} className={styles.pGroup}>
+              <header
+                className={`${styles.pGroupHeader} ${
+                  group.side === 'home'
+                    ? styles.pGroupHeaderHome
+                    : group.side === 'away'
+                    ? styles.pGroupHeaderAway
                     : ''
                 }`}
               >
-                {player.teamName}
-              </span>
-            </div>
-            <div className={styles.playerStatsCardMetrics}>
-              {displayedMetrics.map((metricId, metricIndex) => {
-                const metricMeta = getPlayerMetricMeta(metricId, tableData.metricLabels[metricId]);
-                const value = formatPlayerMetricValue(metricId, player.metrics[metricId], tableData.metricLabels[metricId]);
-                const numericValue = parseNumericStat(player.metrics[metricId]) ?? 0;
-                const max = metricMaxValues[metricId] || 1;
-                const pct = max > 0 ? (numericValue / max) * 100 : 0;
-                const isActiveSort = activeSortSlot === metricIndex;
-                return (
-                  <div
-                    key={`${player.key}-${metricId}`}
-                    className={`${styles.playerStatsCardMetric} ${
-                      isActiveSort ? styles.playerStatsCardMetricActive : ''
-                    }`}
-                  >
-                    <div className={styles.cardMetricTop}>
-                      <span className={styles.cardMetricLabel}>{metricMeta.shortLabel}</span>
-                      {isActiveSort && (
-                        <span className={styles.cardMetricArrow}>
-                          {activeDirection === 'desc' ? '↓' : '↑'}
+                <span className={styles.pGroupName}>{group.name}</span>
+                <span className={styles.pGroupCount}>{group.total}</span>
+                {primaryMetricMeta && (
+                  <span className={styles.pGroupMetric}>
+                    {primaryMetricMeta.shortLabel}
+                    <span aria-hidden="true"> {activeDirection === 'desc' ? '↓' : '↑'}</span>
+                  </span>
+                )}
+              </header>
+
+              {group.ranked.length > 0 && (
+                <ol className={styles.pRows} aria-label={`Jugadores de ${group.name} con registro`}>
+                  {group.ranked.map(({ row, rank }) => {
+                    const primaryValue = primaryMetricId ? metricNumber(row, primaryMetricId) : 0;
+                    const pct = primaryMax > 0 ? Math.min(100, (primaryValue / primaryMax) * 100) : 0;
+                    const identity = (
+                      <>
+                        <span className={styles.pName}>
+                          {row.name}
+                          {row.isCaptain && <span className={styles.pCaptain} title="Capitán">C</span>}
                         </span>
-                      )}
-                    </div>
-                    <div className={styles.cardMetricValueWrap}>
-                      <span className={styles.cardMetricValue}>{value}</span>
-                      {pct > 0 && (
-                        <div className={styles.metricBarTrack}>
-                          <div className={styles.metricBarFill} style={{ width: `${pct}%` }} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+                        <span className={styles.pMeta}>
+                          {row.position ? row.position : 'Sin posición'}
+                          {row.number != null && ` · #${row.number}`}
+                        </span>
+                      </>
+                    );
+
+                    return (
+                      <li key={row.key} className={styles.pRow}>
+                        {/* El puesto se ilumina solo si de verdad hay marca: el
+                            que entro a la lista por una tarjeta y no por la
+                            metrica que ordena no es el segundo goleador. */}
+                        <span
+                          className={`${styles.pRank} ${rank <= 3 && primaryValue > 0 ? styles.pRankTop : ''}`}
+                          aria-hidden="true"
+                        >
+                          {rank}
+                        </span>
+
+                        {row.playerId ? (
+                          <Link
+                            href={`/players/${row.playerId}`}
+                            className={styles.pIdentityLink}
+                            aria-label={row.name}
+                          >
+                            {identity}
+                          </Link>
+                        ) : (
+                          <span className={styles.pIdentity}>{identity}</span>
+                        )}
+
+                        <span className={styles.pChips}>
+                          {secondaryMetricIds.map((metricId) => {
+                            const value = metricNumber(row, metricId);
+                            if (value === 0) return null;
+                            const meta = getPlayerMetricMeta(metricId, tableData.metricLabels[metricId]);
+                            const toneClass =
+                              meta.tone === 'danger'
+                                ? styles.pChipDanger
+                                : meta.tone === 'caution'
+                                ? styles.pChipCaution
+                                : '';
+                            return (
+                              <span key={metricId} className={`${styles.pChip} ${toneClass}`}>
+                                <span className={styles.pChipLabel}>{meta.shortLabel}</span>
+                                {formatPlayerMetricValue(metricId, row.metrics[metricId], tableData.metricLabels[metricId])}
+                              </span>
+                            );
+                          })}
+                        </span>
+
+                        <span className={styles.pPrimary}>
+                          <span className={`${styles.pPrimaryValue} ${primaryValue > 0 ? styles.pPrimaryValueOn : ''}`}>
+                            {primaryMetricId
+                              ? formatPlayerMetricValue(primaryMetricId, row.metrics[primaryMetricId], tableData.metricLabels[primaryMetricId])
+                              : '—'}
+                          </span>
+                          <span className={styles.pPrimaryTrack} aria-hidden="true">
+                            <span className={styles.pPrimaryFill} style={{ width: `${pct}%` }} />
+                          </span>
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+
+              {group.blank.length > 0 && (
+                <details className={styles.pBlank} open={group.ranked.length === 0}>
+                  <summary className={styles.pBlankSummary}>
+                    <svg
+                      className={styles.pBlankChevron}
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                    {/* Sin nombrar una metrica: el corte es contra TODAS las
+                        mostradas, asi que "sin registro en goles" mentiria
+                        sobre el que tiene una amarilla y ningun gol. */}
+                    <span>{group.blank.length} sin registro</span>
+                  </summary>
+                  <ul className={styles.pBlankRows} aria-label={`Jugadores de ${group.name} sin registro`}>
+                    {group.blank.map((row) => (
+                      <li key={row.key} className={styles.pBlankRow}>
+                        {row.playerId ? (
+                          <Link href={`/players/${row.playerId}`} className={styles.pBlankLink}>
+                            {row.name}
+                          </Link>
+                        ) : (
+                          <span className={styles.pBlankName}>{row.name}</span>
+                        )}
+                        <span className={styles.pBlankMeta}>
+                          {row.position ? row.position : 'Sin posición'}
+                          {row.number != null && ` · #${row.number}`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </section>
+          );
+        })}
       </div>
     </div>
   );

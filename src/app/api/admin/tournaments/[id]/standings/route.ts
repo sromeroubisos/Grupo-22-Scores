@@ -331,8 +331,34 @@ export async function GET(
             searchParams.get('season_id') ||
             searchParams.get('season');
 
+        // `season` llega de la URL y a veces trae la ETIQUETA de la temporada
+        // ('2026') en lugar de su id. Son dos columnas distintas con el mismo
+        // nombre: `tournaments.season_id` es TEXT con el año, pero las seis
+        // tablas del alcance (fases, grupos, partidos, participantes,
+        // posiciones) la tienen UUID. Cruzarlas tiraba 22P02 en las diez
+        // consultas de abajo — las ráfagas de la auditoría del 08/08.
+        // Se descarta y más abajo se resuelve la temporada vigente del torneo,
+        // que es la que se quería ver.
+        if (seasonId && !isUuid(seasonId)) {
+            seasonId = null;
+        }
+
         if (!phaseId) {
             return NextResponse.json({ error: 'phaseId is required' }, { status: 400 });
+        }
+
+        // Salvo el centinela del circuito, `phaseId` va derecho a una columna
+        // uuid. Un nombre de pestaña o un número de página llegando acá era un
+        // 22P02 y un 500; ahora es un 400 que dice qué pasó.
+        if (phaseId !== CIRCUIT_GLOBAL_SENTINEL && !isUuid(phaseId)) {
+            return NextResponse.json({ error: 'phaseId inválido' }, { status: 400 });
+        }
+
+        // `groupId` no se descarta en silencio: sin filtro la consulta cae en
+        // `is('group_id', null)` y devolvería la tabla sin grupos como si fuera
+        // la del grupo pedido.
+        if (groupId && !isUuid(groupId)) {
+            return NextResponse.json({ error: 'groupId inválido' }, { status: 400 });
         }
 
         // Lectura acotada a quien pertenece al torneo. Hasta acá alcanzaba con

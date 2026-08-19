@@ -1,4 +1,9 @@
-import { normalizeSportBucket, type MatchEventDefinition } from '@/lib/matchEventCatalog';
+import {
+    normalizeSportBucket,
+    outcomeScores,
+    readOutcomeId,
+    type MatchEventDefinition,
+} from './matchEventCatalog.ts';
 import {
     isGoalKickAttemptEvent,
     isGoalKickMade,
@@ -6,7 +11,7 @@ import {
     parseKickMetersFromDetail,
     isContestWonDetail,
     isContestLostDetail,
-} from '@/lib/matchEventStats';
+} from './matchEventStats.ts';
 
 /** Mínimo necesario para agregar estadísticas desde cualquier fuente (Match Center, API pública, etc.). */
 export type AggregatableMatchEvent = {
@@ -39,6 +44,26 @@ export type CompleteMatchStats = {
     timeouts: TeamMetricPair;
     /* ── Hockey ── */
     greenCards: TeamMetricPair;
+    /** Corners cortos EJECUTADOS. Los no convertidos son la resta con los goles. */
+    penaltyCorners: TeamMetricPair;
+    penaltyCornerGoals: TeamMetricPair;
+    /** Penales stroke EJECUTADOS. */
+    penaltyStrokes: TeamMetricPair;
+    penaltyStrokeGoals: TeamMetricPair;
+    /** Strokes que ataja el arquero rival; el resto de los errados salen desviados. */
+    penaltyStrokesSaved: TeamMetricPair;
+    freeHits: TeamMetricPair;
+    assists: TeamMetricPair;
+    shotsOnGoal: TeamMetricPair;
+    shotsOffTarget: TeamMetricPair;
+    circleEntries: TeamMetricPair;
+    interceptions: TeamMetricPair;
+    blocks: TeamMetricPair;
+    saves: TeamMetricPair;
+    clearances: TeamMetricPair;
+    /** Definicion por shoot-out. NO entra en el marcador ni en `points`. */
+    shootoutScored: TeamMetricPair;
+    shootoutMissed: TeamMetricPair;
     /* ── Futbol americano ── */
     touchdowns: TeamMetricPair;
     fieldGoals: TeamMetricPair;
@@ -144,6 +169,15 @@ export function getConfiguredEventPoints(
             return 0;
         }
     }
+    // Eventos con desenlace declarado (corner corto, penal stroke): suman solo
+    // si el resultado elegido convierte. Sin resultado cargado no suman: un
+    // corner del que no se sabe como termino no es un gol.
+    if (definition.outcomes?.length) {
+        const detail = typeof event === 'string' ? null : event.detail;
+        if (!outcomeScores(definition, detail)) {
+            return 0;
+        }
+    }
     return Number(definition.points) || 0;
 }
 
@@ -187,6 +221,22 @@ function createEmptyCompleteMatchStats(): CompleteMatchStats {
         fouls: createTeamMetricPair(),
         timeouts: createTeamMetricPair(),
         greenCards: createTeamMetricPair(),
+        penaltyCorners: createTeamMetricPair(),
+        penaltyCornerGoals: createTeamMetricPair(),
+        penaltyStrokes: createTeamMetricPair(),
+        penaltyStrokeGoals: createTeamMetricPair(),
+        penaltyStrokesSaved: createTeamMetricPair(),
+        freeHits: createTeamMetricPair(),
+        assists: createTeamMetricPair(),
+        shotsOnGoal: createTeamMetricPair(),
+        shotsOffTarget: createTeamMetricPair(),
+        circleEntries: createTeamMetricPair(),
+        interceptions: createTeamMetricPair(),
+        blocks: createTeamMetricPair(),
+        saves: createTeamMetricPair(),
+        clearances: createTeamMetricPair(),
+        shootoutScored: createTeamMetricPair(),
+        shootoutMissed: createTeamMetricPair(),
         touchdowns: createTeamMetricPair(),
         fieldGoals: createTeamMetricPair(),
         extraPoints: createTeamMetricPair(),
@@ -347,6 +397,58 @@ export function buildCompleteMatchStats(
             /* ── Hockey ── */
             case 'green_card':
                 bumpTeamMetric(stats.greenCards, team);
+                break;
+            // El corner y el stroke se cuentan SIEMPRE como ejecutados, y su
+            // desenlace decide si ademas fueron gol. De esa resta sale la
+            // efectividad, sin que nadie tenga que cargar un evento "fallado"
+            // que pueda quedar desincronizado del otro.
+            case 'penalty_corner':
+                bumpTeamMetric(stats.penaltyCorners, team);
+                if (outcomeScores(definition, event.detail)) {
+                    bumpTeamMetric(stats.penaltyCornerGoals, scoringTeam);
+                }
+                break;
+            case 'penalty_stroke':
+                bumpTeamMetric(stats.penaltyStrokes, team);
+                if (outcomeScores(definition, event.detail)) {
+                    bumpTeamMetric(stats.penaltyStrokeGoals, scoringTeam);
+                } else if (readOutcomeId(event.detail) === 'saved') {
+                    bumpTeamMetric(stats.penaltyStrokesSaved, team);
+                }
+                break;
+            case 'free_hit':
+                bumpTeamMetric(stats.freeHits, team);
+                break;
+            /* ── Definicion por shoot-out: fuera del marcador ── */
+            case 'shootout_scored':
+                bumpTeamMetric(stats.shootoutScored, team);
+                break;
+            case 'shootout_missed':
+                bumpTeamMetric(stats.shootoutMissed, team);
+                break;
+            case 'assist':
+                bumpTeamMetric(stats.assists, team);
+                break;
+            case 'shot_on_goal':
+                bumpTeamMetric(stats.shotsOnGoal, team);
+                break;
+            case 'shot_off_target':
+                bumpTeamMetric(stats.shotsOffTarget, team);
+                break;
+            case 'circle_entry':
+                bumpTeamMetric(stats.circleEntries, team);
+                break;
+            case 'interception':
+                bumpTeamMetric(stats.interceptions, team);
+                break;
+            case 'block':
+                bumpTeamMetric(stats.blocks, team);
+                break;
+            case 'save':
+                bumpTeamMetric(stats.saves, team);
+                break;
+            case 'clearance':
+                bumpTeamMetric(stats.clearances, team);
                 break;
             /* ── Futbol americano ── */
             case 'touchdown':
@@ -607,21 +709,188 @@ function buildBasketballStatTabs(
     return tabs.filter((tab) => tab.sections.length > 0);
 }
 
-/** Hockey sobre cesped. Unico deporte con tarjeta verde. */
+/**
+ * Hockey sobre cesped. Unico deporte con tarjeta verde y con corner corto.
+ *
+ * Las efectividades son DERIVADAS, no cargadas: el corner corto se carga
+ * cuando se otorga y el gol cuando entra, asi que "fallados" es la resta y el
+ * porcentaje sale solo. Por eso no hay —ni tiene que haber— un evento
+ * "corner fallado" que se pueda desincronizar del otro.
+ */
 function buildHockeyStatTabs(
     stats: CompleteMatchStats,
+    homeName: string,
+    awayName: string,
     options: CompleteStatTabsOptions = {},
 ): CompleteStatTab[] {
+    const tipRatio = (hMade: number, hTotal: number, aMade: number, aTotal: number, note: string) => (
+        `${homeName}: ${hMade}/${hTotal} · ${awayName}: ${aMade}/${aTotal} — ${note}`
+    );
+
+    const shotsHome = stats.shotsOnGoal.home + stats.shotsOffTarget.home;
+    const shotsAway = stats.shotsOnGoal.away + stats.shotsOffTarget.away;
+    const openPlayGoals = (side: 'home' | 'away') => Math.max(
+        0,
+        stats.points[side] - stats.penaltyCornerGoals[side] - stats.penaltyStrokeGoals[side],
+    );
+
     const tabs: CompleteStatTab[] = [
         {
             id: 'marcador',
             label: 'Marcador',
             sections: filterStatSections([
                 {
+                    // Un gol es un gol: el desglose por origen es estadistica,
+                    // no marcador. Los tres de abajo suman el total de arriba.
                     title: 'Goles',
                     rows: [
                         { key: 'points', label: 'Goles', home: stats.points.home, away: stats.points.away, accent: true },
-                        { key: 'penaltyGoals', label: 'De penal', home: stats.penaltyGoals.home, away: stats.penaltyGoals.away },
+                        { key: 'openPlayGoals', label: 'De jugada', home: openPlayGoals('home'), away: openPlayGoals('away') },
+                        { key: 'penaltyCornerGoals', label: 'De corner corto', home: stats.penaltyCornerGoals.home, away: stats.penaltyCornerGoals.away },
+                        { key: 'penaltyStrokeGoalsScore', label: 'De penal stroke', home: stats.penaltyStrokeGoals.home, away: stats.penaltyStrokeGoals.away },
+                        { key: 'assists', label: 'Asistencias', home: stats.assists.home, away: stats.assists.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'jugadas-fijas',
+            label: 'Jugadas fijas',
+            sections: filterStatSections([
+                {
+                    title: 'Corner corto',
+                    rows: [
+                        { key: 'penaltyCorners', label: 'Ejecutados', home: stats.penaltyCorners.home, away: stats.penaltyCorners.away },
+                        { key: 'penaltyCornerGoalsFixed', label: 'Convertidos', home: stats.penaltyCornerGoals.home, away: stats.penaltyCornerGoals.away },
+                        {
+                            key: 'penaltyCornerEffectiveness',
+                            label: 'Efectividad (%)',
+                            home: goalKickEffectivenessPercent(stats.penaltyCornerGoals.home, stats.penaltyCorners.home),
+                            away: goalKickEffectivenessPercent(stats.penaltyCornerGoals.away, stats.penaltyCorners.away),
+                            valueKind: 'percent',
+                            tooltip: tipRatio(
+                                stats.penaltyCornerGoals.home,
+                                stats.penaltyCorners.home,
+                                stats.penaltyCornerGoals.away,
+                                stats.penaltyCorners.away,
+                                'convertidos / ejecutados',
+                            ),
+                        },
+                    ],
+                },
+                {
+                    title: 'Penal stroke',
+                    rows: [
+                        { key: 'penaltyStrokes', label: 'Ejecutados', home: stats.penaltyStrokes.home, away: stats.penaltyStrokes.away },
+                        { key: 'penaltyStrokeGoals', label: 'Convertidos', home: stats.penaltyStrokeGoals.home, away: stats.penaltyStrokeGoals.away },
+                        { key: 'penaltyStrokesSaved', label: 'Atajados', home: stats.penaltyStrokesSaved.home, away: stats.penaltyStrokesSaved.away },
+                        {
+                            key: 'penaltyStrokeEffectiveness',
+                            label: 'Efectividad (%)',
+                            home: goalKickEffectivenessPercent(stats.penaltyStrokeGoals.home, stats.penaltyStrokes.home),
+                            away: goalKickEffectivenessPercent(stats.penaltyStrokeGoals.away, stats.penaltyStrokes.away),
+                            valueKind: 'percent',
+                            tooltip: tipRatio(
+                                stats.penaltyStrokeGoals.home,
+                                stats.penaltyStrokes.home,
+                                stats.penaltyStrokeGoals.away,
+                                stats.penaltyStrokes.away,
+                                'convertidos / ejecutados',
+                            ),
+                        },
+                    ],
+                },
+                {
+                    title: 'Infracciones',
+                    rows: [
+                        { key: 'fouls', label: 'Faltas', home: stats.fouls.home, away: stats.fouls.away },
+                        { key: 'freeHits', label: 'Free hits', home: stats.freeHits.home, away: stats.freeHits.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'ataque',
+            label: 'Ataque',
+            sections: filterStatSections([
+                {
+                    title: 'Tiros',
+                    rows: [
+                        { key: 'shotsTotal', label: 'Tiros', home: shotsHome, away: shotsAway },
+                        { key: 'shotsOnGoal', label: 'Al arco', home: stats.shotsOnGoal.home, away: stats.shotsOnGoal.away },
+                        { key: 'shotsOffTarget', label: 'Desviados', home: stats.shotsOffTarget.home, away: stats.shotsOffTarget.away },
+                        {
+                            key: 'shotAccuracy',
+                            label: 'Puntería (%)',
+                            home: goalKickEffectivenessPercent(stats.shotsOnGoal.home, shotsHome),
+                            away: goalKickEffectivenessPercent(stats.shotsOnGoal.away, shotsAway),
+                            valueKind: 'percent',
+                            tooltip: tipRatio(stats.shotsOnGoal.home, shotsHome, stats.shotsOnGoal.away, shotsAway, 'al arco / totales'),
+                        },
+                    ],
+                },
+                {
+                    title: 'Aproximación',
+                    rows: [
+                        { key: 'circleEntries', label: 'Ingresos al círculo', home: stats.circleEntries.home, away: stats.circleEntries.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'defensa',
+            label: 'Defensa',
+            sections: filterStatSections([
+                {
+                    title: 'Recuperación',
+                    rows: [
+                        { key: 'interceptions', label: 'Intercepciones', home: stats.interceptions.home, away: stats.interceptions.away },
+                        { key: 'tackles', label: 'Quites', home: stats.tackles.home, away: stats.tackles.away },
+                        { key: 'recoveries', label: 'Recuperaciones', home: stats.recoveries.home, away: stats.recoveries.away },
+                    ],
+                },
+                {
+                    title: 'Contención',
+                    rows: [
+                        { key: 'blocks', label: 'Bloqueos', home: stats.blocks.home, away: stats.blocks.away },
+                        { key: 'saves', label: 'Atajadas', home: stats.saves.home, away: stats.saves.away },
+                        { key: 'clearances', label: 'Despejes', home: stats.clearances.home, away: stats.clearances.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            // Fuera del partido: el marcador reglamentario queda como quedó y
+            // el shoot-out solo decide quién avanza. Por eso va en su propia
+            // pestaña y no dentro de "Marcador".
+            id: 'definicion',
+            label: 'Definición',
+            sections: filterStatSections([
+                {
+                    title: 'Shoot-outs',
+                    rows: [
+                        { key: 'shootoutScored', label: 'Convertidos', home: stats.shootoutScored.home, away: stats.shootoutScored.away, accent: true },
+                        { key: 'shootoutMissed', label: 'Fallados', home: stats.shootoutMissed.home, away: stats.shootoutMissed.away },
+                        {
+                            key: 'shootoutEffectiveness',
+                            label: 'Efectividad (%)',
+                            home: goalKickEffectivenessPercent(
+                                stats.shootoutScored.home,
+                                stats.shootoutScored.home + stats.shootoutMissed.home,
+                            ),
+                            away: goalKickEffectivenessPercent(
+                                stats.shootoutScored.away,
+                                stats.shootoutScored.away + stats.shootoutMissed.away,
+                            ),
+                            valueKind: 'percent',
+                            tooltip: tipRatio(
+                                stats.shootoutScored.home,
+                                stats.shootoutScored.home + stats.shootoutMissed.home,
+                                stats.shootoutScored.away,
+                                stats.shootoutScored.away + stats.shootoutMissed.away,
+                                'convertidos / ejecutados',
+                            ),
+                        },
                     ],
                 },
             ], options),
@@ -725,7 +994,7 @@ export function buildCompleteStatTabs(
         case 'basketball':
             return buildBasketballStatTabs(stats, options);
         case 'hockey':
-            return buildHockeyStatTabs(stats, options);
+            return buildHockeyStatTabs(stats, homeName, awayName, options);
         case 'american-football':
             return buildAmericanFootballStatTabs(stats, options);
         default:

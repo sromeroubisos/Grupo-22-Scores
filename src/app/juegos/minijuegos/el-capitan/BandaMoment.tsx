@@ -134,7 +134,7 @@ export default function BandaMoment({
                 <span className={styles.bandaSpaceTrack} aria-hidden="true">
                     <span
                         className={styles.bandaSpaceFill}
-                        style={{ width: pct(remaining / setup.space) }}
+                        style={{ transform: `scaleX(${Math.min(1, Math.max(0, remaining / setup.space))})` }}
                     />
                 </span>
             </div>

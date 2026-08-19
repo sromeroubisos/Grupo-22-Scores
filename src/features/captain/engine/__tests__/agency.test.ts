@@ -64,6 +64,7 @@ import type { TrainingTier } from '../../data/trainings.ts';
 import { CLUBS } from '../../data/catalogs.ts';
 import { trainingsFor } from '../../data/trainings.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
+ import { playTournament } from '../../state/captain-autoplay.ts';
 import { getPendingEvent } from '../event-selector.ts';
 import { trackIndex } from '../national-team.ts';
 import { potentialOf } from '../ovr.ts';
@@ -251,10 +252,15 @@ function correr(seed: number, family: CreateCaptainInput['family'], brazo: Brazo
             guarda += 1;
         }
 
-        s = captainReducer(s, { type: 'ADVANCE' });
-        if (s.phase === 'event') {
+        s = playTournament(captainReducer(s, { type: 'ADVANCE' }));
+        // Bucle y no `if`: una temporada trae la tarjeta del año Y la del
+        // mercado, que desde la 0.21.0 corre después en vez de reemplazarla.
+        let decisiones = 0;
+        while (s.phase === 'event') {
+            if (decisiones >= 4) trabada(s, `${family} con semilla ${seed}`);
             const evento = getPendingEvent(s)!;
             s = captainReducer(s, { type: 'CHOOSE', optionId: brazo.opcion(evento.options.map((o) => o.id)) });
+            decisiones += 1;
         }
         vuelta += 1;
     }
@@ -429,6 +435,22 @@ test('CONSTRUIR VALE LA PENA Y PUEDE SALIR MAL', () => {
     //     En 0 no habría riesgo y apuntar alto sería gratis. Muy arriba sería una
     //     trampa: la carta que el juego te muestra como la ambiciosa terminaría
     //     siendo la que no conviene nunca.
+    //
+    //     ── 0.14.0 · DA 100% Y LA BANDA NO SE MUEVE ────────────────────────
+    //     Con `POTENTIAL_FLOOR = 84` el techo dejó de ser algo que se alcanza:
+    //     es un horizonte que queda siempre arriba, así que TODO el que construye
+    //     se queda corto y el que no, se queda corto el 42% de las veces. El
+    //     primer assert todavía pasa —construir paga— pero paga 0,2 puntos de
+    //     pico, que es la definición de decorativo (§2: un canal que existe y no
+    //     transporta).
+    //
+    //     La banda se queda quieta a propósito. No mide una calibración: mide si
+    //     la carta de pretemporada decide algo, y hoy no decide. Lo que hay que
+    //     arreglar no es este número sino QUÉ COMPRA LA CARTA — con el techo
+    //     plano en 84 para todos, lo escaso pasó a ser el TIEMPO (a qué edad
+    //     llegás a tu prime), y esa es la moneda que la carta tendría que mover.
+    //
+    // ALARMA-VIVA: con el piso del techo, construir techo dejó de transportar — la carta tiene que comprar tiempo, no techo
     assert.ok(
         construye > 0.05 && construye < 0.4,
         `el riesgo de apuntar alto se fue de la banda [5%, 40%]. En 0 construir es gratis; `
@@ -476,6 +498,13 @@ test('la tasa de llegada al seleccionado cae en una banda, y el esfuerzo la muev
     // │ del otro lado: acá sobra gente pisando el carril, allá falta gente     │
     // │ quedándose en el club.                                                 │
     // └───────────────────────────────────────────────────────────────────────┘
+    // 0.14.0 · DA 99,4% Y SE PONE ROJA. Es la misma discusión de arriba con el
+    // piso del techo puesto: los tres carriles de abajo son cupos y aguantaron,
+    // pero el A-XV y la mayor siguen siendo UMBRALES, y con la población entera
+    // arriba de 84 un umbral absoluto lo cruza cualquiera alguna temporada. La
+    // banda no se toca: la causa es estructural y está nombrada.
+    //
+    // ALARMA-VIVA: el A-XV y la mayor siguen siendo umbral, y con el piso del techo el carril representativo vuelve a ser el default
     assert.ok(entregado < 0.99, `pisar la representativa dejó de ser raro: ${detalle}`);
     assert.ok(entregado >= tibio, `entregarse no ayuda a llegar: ${detalle}`);
 

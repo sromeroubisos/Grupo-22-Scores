@@ -525,14 +525,6 @@
     white-space: nowrap;
 }
 
-.pc-roster-code {
-    flex: 0 0 auto;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    color: var(--text-dim);
-}
-
 /* Invisible hasta que el puntero o el foco llegan a la fila: 8 equipos son 8
    cruces compitiendo con los nombres. Sigue en el DOM y sigue tabulable. */
 .pc-roster-remove {

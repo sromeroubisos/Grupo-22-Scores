@@ -48,11 +48,24 @@ export async function persistTournamentLogo(
     });
 
   if (uploadError) {
-    if (isBucketMissingError(uploadError.message)) {
-      return normalized;
+    // Un logo que no sube NO cancela el guardado del torneo. Antes esto tiraba,
+    // y el throw se llevaba puesta la operación entera: nombre, ruleset, fechas.
+    // El logo queda como data: URI —el mismo camino que ya se usaba cuando falta
+    // el bucket— y el torneo se guarda.
+    if (!isBucketMissingError(uploadError.message)) {
+      // El cuerpo completo, no sólo el mensaje: un 400 de Storage puede ser un
+      // mime que el bucket no acepta o un request inválido, y sin el status no
+      // se distingue. Es lo que faltó para diagnosticar el caso del 07/08.
+      console.warn('[persistTournamentLogo] Storage rechazó la subida', {
+        filePath,
+        mimeType,
+        bytes: blob.size,
+        message: uploadError.message,
+        detail: uploadError,
+      });
     }
 
-    throw new Error(`No se pudo subir el logo: ${uploadError.message}`);
+    return normalized;
   }
 
   const { data } = supabase.storage.from('tournaments').getPublicUrl(filePath);

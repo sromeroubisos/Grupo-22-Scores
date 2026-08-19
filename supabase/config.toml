@@ -1,0 +1,27 @@
+# Config mínima del CLI de Supabase.
+#
+# No existía: por eso `supabase link` / `supabase db push` no reconocían el
+# directorio como proyecto, y es el candidato más probable de por qué el workflow
+# `.github/workflows/supabase-deploy.yml` venía fallando antes de que lo
+# deshabilitaran a mano el 2026-03-18.
+#
+# OJO: crear este archivo NO alcanza para reactivar el workflow. Antes hay que
+# reparar el historial de migraciones (ver PLAN_REPARACION_MIGRACIONES.md), porque
+# un `db push` contra la base actual intentaría aplicar 108 migraciones de una vez
+# sobre un esquema que se vino modificando a mano.
+
+project_id = "vxsolicapdcpemfsahbk"
+
+[db]
+# Postgres 15 es lo que usa el proyecto hospedado. Sólo afecta a `supabase start`
+# (entorno local); `db push` usa la versión real del proyecto remoto.
+major_version = 15
+
+[db.migrations]
+schema_paths = []
+
+[api]
+enabled = true
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000

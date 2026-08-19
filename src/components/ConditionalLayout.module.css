@@ -39,6 +39,15 @@
     .mainContent {
         padding: 0.475rem 0.475rem calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
     }
+
+    /* Donde la barra no se dibuja, el pie que la reserva es aire muerto: son 74
+       px al final de CADA pantalla de esas rutas. El atributo lo pone
+       ConditionalLayout leyendo la misma lista que la barra
+       (`BOTTOM_NAV_HIDDEN_PREFIXES`), así que no pueden discrepar. El área
+       segura se queda: el borde inferior del teléfono sigue existiendo. */
+    .mainContent[data-sin-barra] {
+        padding-bottom: calc(0.475rem + env(safe-area-inset-bottom));
+    }
 }
 
 /* ===== JUEGO DE ALTO FIJO (Carrera de Rugby) =====

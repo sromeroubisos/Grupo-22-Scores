@@ -6,7 +6,6 @@ import {
     POTENTIAL_BAND,
     TRAINING_CEILING,
     getFamily,
-    potentialOf,
     trainingsFor,
 } from '@/features/captain';
 import styles from './capitan.module.css';
@@ -54,13 +53,18 @@ export default function TrainingCard({
             </p>
 
             <div className={styles.options} role="group" aria-label="Entrenamiento de la pretemporada">
-                {opciones.map((t) => (
+                {opciones.map((t, i) => (
                     <button
                         key={t.id}
                         type="button"
                         className={styles.option}
+                        // El número del atajo. Va como dato y no como texto: la
+                        // tecla la resuelve el orquestador, y así la tarjeta no
+                        // tiene que saber nada del teclado.
+                        data-choice={i + 1}
                         onClick={() => onChoose(t.id)}
                     >
+                        <span className={styles.optionKey} aria-hidden="true">{i + 1}</span>
                         <span className={styles.optionLabel}>{t.labelEs}</span>
 
                         <span className={styles.trainingGain}>
@@ -121,6 +125,16 @@ function decimal(n: number): string {
  * Se arma de los tres campos y no de un texto guardado en el catálogo: si
  * alguien sube el riesgo de una carta y se olvida de reescribir la frase, la
  * frase mentiría. Acá no puede.
+ *
+ * ── Se probó en fichas, y es peor ───────────────────────────────────────────
+ * La idea era la simétrica de `.trainingGain`: lo que ganás en fichas verdes,
+ * lo que pagás en fichas rojas. No funciona porque estas frases no son rótulos:
+ * «perdés lugar en el equipo» son 24 caracteres, o sea una ficha de dos
+ * renglones —que se lee rota— y tres fichas apiladas ocupando más que la prosa
+ * que venían a reemplazar. Acortarlas a «minutos» las arreglaría de forma y las
+ * rompería de fondo: el §4 pide el idioma del jugador, no el del motor.
+ * Lo que sí era cierto del diagnóstico —tres renglones de rojo gritan— se
+ * arregla donde estaba el problema, que es el tamaño y el peso de la tinta.
  */
 function costLabel(t: TrainingDef): string {
     if (!t.cost) return 'Sin costo.';

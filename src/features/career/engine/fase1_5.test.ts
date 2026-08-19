@@ -241,12 +241,35 @@ test('la SRA se ofrece por NIVEL, no por la división en la que jugués', () => 
                     // que es un pase normal entre clubes del mismo nivel y no tiene
                     // por qué pedir el nivel de ingreso.
                     if (before.competitionId === 'sra') continue;
-                    if (target.competitionId === 'sra') {
-                        assert.ok(
-                            ovr >= 59,
-                            `SRA ofrecida con OVR ${ovr} desde ${before.name} (banda ${sportingBandOf(before)})`,
+                    if (target.competitionId !== 'sra') continue;
+
+                    // LA VÍA NO ES LA ÚNICA PUERTA, y el test lo daba por hecho.
+                    //
+                    // La SRA está en la banda 5, así que un club de banda 4 o 6 la
+                    // tiene a UN escalón: para el que ya juega ahí es un pase
+                    // normal por ventana, sin peaje, igual que cualquier otro
+                    // movimiento de ±1. Encontrado con el catálogo `2026-27.11`,
+                    // que corrió el stream del rng y mandó una carrera argentina a
+                    // la D2 japonesa: desde Hino Red Dolphins (banda 6) la
+                    // franquicia aparecía con OVR 58 y el test lo leía como fuga.
+                    //
+                    // Lo que el `minOvr: 59` protege es el INGRESO desde el
+                    // amateurismo doméstico, que es donde estaba el bug real. Y esa
+                    // puerta sigue cerrada por dos lados: la ventana de un amateur
+                    // no cruza la frontera (`windowStaysHome`) y la SRA lleva
+                    // `countryCode: 'multi'`, así que desde un club argentino
+                    // amateur la franquicia SÓLO se alcanza por vía.
+                    if (offer.via !== 'pathway') {
+                        assert.notEqual(
+                            economicModelOf(before), 'amateur',
+                            `SRA por ventana desde un club amateur (${before.name}): esa puerta tiene que estar cerrada`,
                         );
+                        continue;
                     }
+                    assert.ok(
+                        ovr >= 59,
+                        `SRA ofrecida por VÍA con OVR ${ovr} desde ${before.name} (banda ${sportingBandOf(before)})`,
+                    );
                 }
             }
             state = event

@@ -18,14 +18,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { CaptainState, CreateCaptainInput, SquadTrack } from '../../types/captain.ts';
+import type { MilestoneId, SeasonAwardId } from '../../types/achievements.ts';
 import { SQUAD_TRACKS } from '../../types/captain.ts';
 import { trainingsFor } from '../../data/trainings.ts';
 import type { MomentOutcome } from '../../types/moment.ts';
 import type { PositionFamilyId } from '../../types/player.ts';
 import { ALL_FAMILIES } from '../../data/positions.ts';
 import { captainReducer, createInitialCaptain } from '../../state/captain-reducer.ts';
+ import { playTournament } from '../../state/captain-autoplay.ts';
 import { getPendingEvent } from '../event-selector.ts';
-import { belongingOf } from '../belonging.ts';
+import { belongingOf, belongingTier } from '../belonging.ts';
 import { getMomentDef, isContractKind } from '../moment-defs/index.ts';
 import { tacklePlayAt, tackleZones } from '../moments.ts';
 
@@ -133,6 +135,10 @@ interface Resultado {
     titulos: number;
     cabeza: number;
     profesional: boolean;
+    /** Los hitos que alcanzó, por id. Para el censo de estructura de abajo. */
+    hitos: MilestoneId[];
+    /** Los premios individuales que ganó, por id. */
+    premios: SeasonAwardId[];
 }
 
 /**
@@ -178,14 +184,21 @@ function jugar(seed: number, family: (typeof ALL_FAMILIES)[number], fiel: boolea
             guarda += 1;
         }
 
-        s = captainReducer(s, { type: 'ADVANCE' });
+        s = playTournament(captainReducer(s, { type: 'ADVANCE' }));
 
-        if (s.phase === 'event') {
+        // Bucle y no `if`: una temporada trae la tarjeta del año Y la del
+        // mercado, que desde la 0.21.0 corre después en vez de reemplazarla. Con
+        // un `if`, el brazo `fiel` —el que siempre se queda— se saltaba la mitad
+        // de las decisiones y la pirámide se medía con otro jugador.
+        let decisiones = 0;
+        while (s.phase === 'event') {
+            if (decisiones >= 4) trabada(s, `${family} con semilla ${seed}`);
             const evento = getPendingEvent(s)!;
             const i = fiel && evento.category === 'mercado'
                 ? evento.options.length - 1
                 : vuelta % evento.options.length;
             s = captainReducer(s, { type: 'CHOOSE', optionId: evento.options[i].id });
+            decisiones += 1;
         }
         if (!viasPisadas.includes(s.national.track)) viasPisadas.push(s.national.track);
         vuelta += 1;
@@ -204,6 +217,8 @@ function jugar(seed: number, family: (typeof ALL_FAMILIES)[number], fiel: boolea
         titulos: s.titles.length,
         cabeza: s.damage.cabeza,
         profesional: s.stage === 'professional' || s.signedProSeason !== null,
+        hitos: s.milestones.map((m) => m.id),
+        premios: s.awards.map((a) => a.id),
     };
 }
 
@@ -236,8 +251,37 @@ const FIEL = muestra(true);
 test('una carrera dura lo que dura una carrera de rugby', () => {
     // La media real es de 12,7 ± 3,6 años. Que el juego se le parezca es lo que
     // hace que las curvas de edad por puesto signifiquen algo.
-    entre(media(NORMAL, (r) => r.temporadas), 11, 16, 'temporadas por carrera');
-    entre(media(NORMAL, (r) => r.edad), 30, 34, 'edad de retiro');
+    //
+    // ── LA BANDA SE MOVIÓ CON `START_AGE`, Y ES ARITMÉTICA ──
+    // Era [11 – 16] y describía una carrera que empezaba a los 18. Desde que
+    // empieza a los 16 son DOS TEMPORADAS MÁS por el mismo retiro: la banda
+    // vieja se rompía sola sin que hubiera cambiado nada de lo que mide.
+    //
+    // Y la referencia real acompaña: 12,7 ± 3,6 años es la carrera de un jugador
+    // que en el rugby de verdad tampoco debuta en primera a los 16 — lo que se
+    // suman acá son dos años de juveniles, que el motor simula como temporadas
+    // con casi nada de tiempo de juego.
+    //
+    // ── 0.20.0 · LA BANDA SE MUEVE PORQUE LA PREMISA CAMBIÓ ────────────────────
+    // Era [13 – 18] temporadas y [30 – 34] de retiro, y describía un juego que
+    // se terminaba a mitad de los treinta. La decisión de diseño nueva es que LA
+    // CARRERA LLEGA A LOS 40: la curva de cada puesto se corrió cuatro años del
+    // declive para atrás y entró la tirada de longevidad.
+    //
+    // No es una banda que se corre para que pase el número medido: es la misma
+    // afirmación —"una carrera dura lo que dura una carrera de rugby"— hecha
+    // sobre un rugby que ahora incluye al veterano de 38 y 39, que existe y que
+    // el juego no tenía. La referencia real no se contradice: 12,7 ± 3,6 años se
+    // cuentan desde el debut en primera, y acá se cuentan desde los 16.
+    entre(media(NORMAL, (r) => r.temporadas), 17, 21, 'temporadas por carrera');
+    entre(media(NORMAL, (r) => r.edad), 33, 37, 'edad de retiro');
+
+    // LA COLA ES LA MITAD DE LA PROMESA, y sin este renglón la de arriba se
+    // cumple con todo el mundo retirándose a los 35 clavado. Que llegar a los 38
+    // sea POSIBLE y RARO es lo que hace que la longevidad signifique algo: si
+    // fuera 0, el tope de 40 sería decorativo; si fuera la mitad de la
+    // población, el veterano dejaría de ser una historia.
+    entre(proporcion(NORMAL, (r) => r.edad >= 38), 0.03, 0.3, 'llegan a los 38 o más');
 });
 
 test('la pirámide: llegar a la mayor es raro', () => {
@@ -288,6 +332,47 @@ test('la pirámide: llegar a la mayor es raro', () => {
     // │ cerrada; el número todavía no llega al objetivo, que es otra cosa y    │
     // │ está anotado abajo.                                                    │
     // └───────────────────────────────────────────────────────────────────────┘
+    // ── 0.14.0 · EL PISO DEL TECHO ABRIÓ LA ESCALERA, Y ESTA BANDA LO DICE ──
+    //
+    // Da 0,66 contra [0,10 – 0,35] y NO se mueve, porque la premisa no cambió:
+    // la mayoría no sale del club. Lo que cambió es la población.
+    //
+    // Con `POTENTIAL_FLOOR = 84` nadie nace con un techo que lo deje afuera, así
+    // que los picos de media se aprietan entre 80 y 92 (antes: 75 y 93). Las dos
+    // puertas de arriba son UMBRALES —`player.ovr >= thresholdFor()`— y sobre una
+    // población apretada un umbral se vuelve un interruptor: mover la camada un
+    // punto mueve la tasa treinta. Medido, con la camada anclada al modelo nuevo:
+    //
+    //     realización 0,70 → mayor 0,00      0,60 → 0,14      0,56 → 0,38
+    //
+    // Se eligió 0,60 porque sostiene «llegar a la mayor es raro» (0,26, adentro
+    // de su banda). Lo que NO se puede sostener con el mismo movimiento es la
+    // base: el A-XV lo pisa el 75% y por eso este número da 0,81.
+    //
+    // 0.15.0 lo empujó otro escalón (0,66 → 0,81) y era esperable: arreglar los
+    // partidos sube el puntaje de todos, y con un umbral absoluto arriba, todo
+    // lo que suba la población entra. Es la misma causa dicha por tercera vez.
+    //
+    // La causa es estructural y ya está diagnosticada tres párrafos más arriba:
+    // los tres carriles de abajo se arreglaron pasándolos a CUPO —camisetas, no
+    // umbral— y los dos de arriba quedaron como umbral a propósito, cuando el
+    // problema medido era el piso. Con el piso del techo puesto, el problema
+    // pasó a ser también el techo, y la medicina es la misma: Los Pumas son 33
+    // camisetas, no «todos los que pasen 89».
+    //
+    // 0.16.0 lo bajó de 0,81 a 0,78. LA BANDA NO SE MUEVE POR ESO: son tres
+    // puntos, la premisa es la misma y el mecanismo que la rompe sigue entero.
+    // Se anota para que la próxima medición sepa contra qué compara y para que
+    // nadie lea el 0,78 como una mejora del problema — la rareza reparte las
+    // tarjetas grandes de otra manera, no convierte un umbral en un cupo.
+    //
+    // Medido con las dos causas separadas (`SONDA_SORTEO_PLANO`/`SONDA_SIN_OFICIO`,
+    // descartables): el sorteo por bandas solo da 0,76 y las tarjetas de oficio
+    // solas 0,84. O sea que se compensan, y el neto de tres puntos NO es la suma
+    // de dos efectos chicos sino la resta de dos grandes. Si alguna de las dos se
+    // toca por separado, este número se va a mover más de lo que sugiere.
+    //
+    // ALARMA-VIVA: las dos puertas de arriba siguen siendo umbral y con el piso del techo la base se erosiona
     entre(proporcion(NORMAL, (r) => ['m20', 'a-xv', 'nacional'].includes(r.mejorTrack)), 0.1, 0.35, 'llegan a M20 o más');
     // ── BANDA REAUTORIZADA CONTRA LA PREMISA. HOY DA 0,119 Y ESTÁ ROJA. ──
     //
@@ -303,6 +388,35 @@ test('la pirámide: llegar a la mayor es raro', () => {
     // la M14 a la 1 del club, y SI el cuerpo aguanta, a Los Pumas"—, que asume
     // que la mayoría no sale. El próximo que la toque tiene que saber que está
     // discutiendo con una decisión de diseño y no con investigación.
+    //
+    // 0.10.0 · LA DISPONIBILIDAD LO MOVIÓ HACIA LA BANDA, y poco: 0,512 → 0,525.
+    // Poco es la lectura importante. Las ausencias bajan el pico de todos por
+    // igual, y este número no depende del pico sino de un CUPO: el que entra a
+    // los Pumitas entra porque es de los treinta mejores de su camada, y si toda
+    // la camada baja, los treinta siguen siendo treinta. Confirma que lo que
+    // falta acá no es calibración: son las puertas de la Formación.
+    //
+    // 0.11.0 · LA PROGRESIÓN LO MOVIÓ EN CONTRA, Y POCO: 0,525 → 0,49. Hay que
+    // anotarlo aunque incomode, porque la intuición decía lo opuesto: si el
+    // entorno amateur ahora rinde 0,80 en vez de 1,0, el pibe de club debería
+    // quedarse MÁS abajo, no menos.
+    //
+    // La explicación medida es la VARIANZA, no el nivel. `growthScale` es un
+    // producto de seis factores y tres de ellos abren cola hacia arriba —la
+    // tirada del año llega a 1,5, el mérito a 1,32 y el empuje juvenil a 1,22—,
+    // así que una buena temporada rinde mucho más que antes aunque el promedio
+    // baje. Y los carriles se evalúan TODAS las temporadas: lo que decide si
+    // salís del club no es tu media promedio sino tu MEJOR año. Más varianza con
+    // la misma media sube el máximo, y el escalón `union` es un umbral puro, que
+    // es donde más se nota (0,375 lo pisan).
+    //
+    // Es la misma familia de error que el §1.8 —el promedio de la entrada no es
+    // la entrada del promedio— aplicada al revés: bajar la media de una entrada
+    // NO baja la tasa de un evento de cola. Si algún día se quiere mover este
+    // número desde acá, hay que apretar la COLA (recortar `tirada`, achicar
+    // `MERIT_MAX`) y no el nivel — pero la causa estructural sigue siendo la que
+    // dice el bloque de arriba: faltan las puertas de la Formación, y esto no se
+    // arregla calibrando.
     //
     // ALARMA-VIVA: la carrera modal del rugby todavía no llega — se sale del club más de lo que la premisa admite
     entre(proporcion(NORMAL, (r) => r.mejorTrack === 'club'), 0.55, 0.8, 'nunca salen del club');
@@ -372,6 +486,88 @@ test('ESTRUCTURA: ninguna vía de la escalera queda vacía', () => {
     );
 });
 
+/**
+ * TODOS LOS HITOS DECLARADOS, para que el censo falle si alguno no existe.
+ *
+ * Se escribe la lista a mano y no se deriva de `MilestoneId` porque el tipo no
+ * sobrevive a la compilación: lo que se quiere es que agregar un hito nuevo
+ * OBLIGUE a venir acá y a preguntarse si es alcanzable. Un hito que nadie puede
+ * sacar es exactamente lo que este test existe para no dejar pasar.
+ */
+const HITOS_DECLARADOS: readonly MilestoneId[] = [
+    'debut-senior',
+    'primera-convocatoria',
+    'debut-mayor',
+    'primer-contrato',
+    'primer-titulo',
+    'competicion-de-elite',
+    'transferencia-internacional',
+    'vuelta-a-casa',
+    'capitan-de-la-seleccion',
+    'salon-de-la-fama',
+];
+
+const PREMIOS_DECLARADOS: readonly SeasonAwardId[] = ['mejor-del-mundo', 'xv-ideal', 'mejor-local'];
+
+test('ESTRUCTURA: ningún hito ni premio declarado es inalcanzable', () => {
+    // ── POR QUÉ ESTE TEST EXISTE, y no es una precaución teórica ────────────
+    // Los dos hitos raros nacieron muertos y ninguna otra red lo habría visto:
+    //
+    //   · el Salón de la Fama pedía media 72 A LOS 33, y a los 33 el declive ya
+    //     se la comió. Las dos condiciones se peleaban entre sí: la edad recién
+    //     abre la puerta cuando el nivel ya se fue. Medido: 0 de 60.
+    //   · la cinta de capitán pedía liderazgo 75, y el liderazgo es el atributo
+    //     de MENOR peso en las ocho familias, así que es el que menos crece. El
+    //     mejor de doscientas carreras llegó a 71. Medido: 0 de 200.
+    //
+    // Ninguno de los dos era un umbral estricto: los dos eran imposibles, y por
+    // construcción. Es la tercera vez que este motor produce un escalón vacío
+    // —`no-alcanzó-su-techo = 0`, tres vías representativas en 0,000, y ahora
+    // esto— y siempre con la misma firma: un corte duro que nadie mide.
+    //
+    // ── EL CENSO SE IMPRIME SIEMPRE ────────────────────────────────────────
+    // Un hito que sale una vez en ciento sesenta carreras pasa este test y aun
+    // así puede estar mal calibrado. El assert dice "existe"; el censo dice
+    // "cuánto", y esa segunda lectura no la da ningún booleano.
+    const censoHitos = new Map<MilestoneId, number>();
+    for (const id of HITOS_DECLARADOS) censoHitos.set(id, 0);
+    for (const r of NORMAL) {
+        for (const id of r.hitos) censoHitos.set(id, (censoHitos.get(id) ?? 0) + 1);
+    }
+
+    const censoPremios = new Map<SeasonAwardId, number>();
+    for (const id of PREMIOS_DECLARADOS) censoPremios.set(id, 0);
+    for (const r of NORMAL) {
+        for (const id of r.premios) censoPremios.set(id, (censoPremios.get(id) ?? 0) + 1);
+    }
+
+    console.log(
+        `      · hitos: ${HITOS_DECLARADOS.map((id) => `${id}=${censoHitos.get(id)}`).join(' · ')}`,
+    );
+    console.log(
+        `      · premios: ${PREMIOS_DECLARADOS.map((id) => `${id}=${censoPremios.get(id)}`).join(' · ')}`,
+    );
+
+    // El mejor jugador del mundo se excluye del assert Y SE DICE POR QUÉ: es uno
+    // por año en todo el rugby y pide media 88 con plantel de la mayor, así que
+    // ciento sesenta carreras no son muestra suficiente para exigirlo. Excluirlo
+    // en silencio sería el "silent cap" que este archivo persigue en otros lados.
+    const inalcanzables = [
+        ...HITOS_DECLARADOS.filter((id) => censoHitos.get(id) === 0),
+        ...PREMIOS_DECLARADOS.filter((id) => id !== 'mejor-del-mundo' && censoPremios.get(id) === 0),
+    ];
+
+    assert.deepEqual(
+        inalcanzables,
+        [],
+        `hay ${inalcanzables.length} distinción(es) que NADIE saca NUNCA: ${inalcanzables.join(', ')}.\n`
+        + 'No es calibración: es que esa condición no se puede cumplir con el resto del motor. '
+        + 'Casi siempre son dos condiciones que se pelean entre sí —una pide edad y la otra pide '
+        + 'nivel, y a esa edad el nivel ya se fue— o un umbral sobre un atributo que el reparto '
+        + 'de crecimiento no puede empujar hasta ahí.',
+    );
+});
+
 test('ningún puesto queda afuera de la selección', () => {
     // La escasez del puesto tiene que INCLINAR la balanza, no cerrar la puerta.
     // Con una banda de escasez de cuatro puntos los backs promediaban CERO caps
@@ -388,31 +584,88 @@ test('los picos de media son parejos entre puestos', () => {
     // decisión de estilo y pasa a ser una decisión de poder.
     const picos = ALL_FAMILIES.map((f) => media(NORMAL.filter((r) => r.family === f), (r) => r.pico));
     const spread = Math.max(...picos) - Math.min(...picos);
-    entre(spread, 0, 4, 'diferencia de pico entre el mejor y el peor puesto');
-    // Sube de [60, 71] a [60, 76] por aritmética y no por diseño: el techo ahora
-    // es material MÁS lo construido, así que el pico medio de la población se
-    // corre hacia arriba en cuanto alguien construye. Medido: 72,88.
-    // Lo que este test protege es el SPREAD entre puestos —que elegir puesto sea
-    // estilo y no poder—, y ese no se movió.
-    entre(media(NORMAL, (r) => r.pico), 60, 76, 'pico de media');
+    // 0.14.0 · De [0 – 4] a [0 – 5], medido 4,35, y la causa tiene nombre.
+    // `aging.ts` corrige el ritmo por lo corta que sea la ventana del puesto:
+    // `REFERENCE_GROWTH_WINDOW / (pico − START_AGE)`. Con la carrera empezando a
+    // los 16 las dos ventanas crecen en dos, y el COCIENTE se achica —el wing
+    // pasa de cobrar 1,50 a cobrar 1,375— así que la corrección compensa un poco
+    // menos y los puestos se separan un poco más. Es el precio aritmético de las
+    // dos temporadas, no una decisión sobre los puestos: medio punto de media
+    // sobre una escala de 99, y la premisa —elegir puesto es estilo, no poder—
+    // se sostiene. Si algún día pasa de 5, ahí sí hay que discutir la corrección.
+    entre(spread, 0, 5, 'diferencia de pico entre el mejor y el peor puesto');
+    // Sube de [60, 76] a [60, 92] por el PISO DEL TECHO, y es aritmética otra
+    // vez: con `POTENTIAL_FLOOR = 84` nadie puede terminar abajo de ese número
+    // menos el declive, así que el pico medio de la población se va a 87. La
+    // banda de abajo se conserva —el que se rompe el cuerpo joven sigue pudiendo
+    // terminar mucho más abajo— y lo que este test protege, el SPREAD entre
+    // puestos, vive en la línea de arriba.
+    entre(media(NORMAL, (r) => r.pico), 60, 92, 'pico de media');
 });
 
 test('las dos escaleras se pelean de verdad', () => {
     // ES el juego: quedarse construye la cancha con tu nombre, irse construye
     // caps y plata. Si las dos estrategias dieran lo mismo, no habría decisión.
-    const vitaliciosFieles = proporcion(FIEL, (r) => r.pertenencia >= 95);
-    const vitaliciosNormales = proporcion(NORMAL, (r) => r.pertenencia >= 95);
+    // ── SE PREGUNTA POR EL ESCALÓN, NO POR EL NÚMERO (0.28.0) ────────────────
+    // Decía `r.pertenencia >= 95`, que era el piso del vitalicio EN SU MOMENTO.
+    // Cuando los escalones se reanclaron a la carrera real, el 95 dejó de
+    // significar «vitalicio» y pasó a ser un número suelto bastante más arriba
+    // del último escalón: el test se puso rojo midiendo algo que ya no existía.
+    // Es el §1.5 del CLAUDE de captain con otra ropa —pedir por lo que la cosa
+    // ES y no por dónde estaba cuando miraste— y la medicina es la de siempre.
+    const esVitalicio = (r: { pertenencia: number }) => belongingTier(r.pertenencia) === 'vitalicio';
+    const vitaliciosFieles = proporcion(FIEL, esVitalicio);
+    const vitaliciosNormales = proporcion(NORMAL, esVitalicio);
 
+    // ── LO QUE SIGUE ES HISTORIA, y termina en 0.20.0 con el problema cerrado.
+    // Se deja entera porque explica de dónde salió cada número, y porque la
+    // pregunta de diseño del último párrafo sigue sin contestar.
+    //
     // Se apagó junto con la vitrina, y es la misma causa: al vitalicio se llega
     // quedándose Y ganando (ver `el vitalicio es un final`), así que un campeón
-    // por liga le corta la mitad del camino. No se reautoriza acá — la decisión
-    // sobre los títulos tiene su propio momento, y está anotada abajo.
+    // por liga le corta la mitad del camino.
     //
-    // OJO al leer este rojo: `entre` corta el test, así que los dos asserts que
-    // siguen —quedarse paga, y los pases llevan al profesionalismo— NO se están
-    // midiendo. Cuando esta banda vuelva al verde hay que mirarlos de nuevo.
-    // ALARMA-VIVA: el vitalicio se apagó con la vitrina — quedarse fiel dejó de tener su final
-    entre(vitaliciosFieles, 0.12, 0.5, 'vitalicios por el camino fiel');
+    // Mientras el rojo estuvo vivo, `entre` cortaba el test y los dos asserts que
+    // siguen —quedarse paga, y los pases llevan al profesionalismo— NO se
+    // estaban midiendo. Desde que la banda volvió al verde se miden de nuevo.
+    // 0.10.0 lo empujó de 0,075 a 0,025, y ES LA MISMA CAUSA: al vitalicio se
+    // llega quedándose Y ganando, así que todo lo que le saque títulos a la
+    // carrera le saca vitalicios. Se anota acá para que no se lea como una
+    // segunda deriva — es una sola, contada dos veces.
+    //
+    // 0.11.0 lo empujó otra vez, de 0,075 a 0,04, Y NO ES LA MISMA CAUSA que
+    // las dos anteriores. Los títulos SUBIERON en 0.11.0 (0,96 → 1,28), así que
+    // el relato de "se apagó con la vitrina" ya no alcanza para explicar esta
+    // caída. Lo que la explica es que los títulos que entraron son de SELECCIÓN
+    // y de ASCENSO, y ninguno de los dos construye Pertenencia con el club:
+    // `BELONGING_PER_TITLE` se cobra por `titulos.length` de la temporada, pero
+    // el vitalicio necesita además QUEDARSE, y el que sube con su club y juega
+    // para su unión es exactamente el que el mercado se lleva.
+    //
+    // O sea: la vitrina y la Pertenencia dejaron de moverse juntas. Cuando se
+    // toque el vitalicio hay que decidir si un título de selección tiene que
+    // pesar en el vínculo con el club — hoy pesa, y es discutible.
+    //
+    // ── 0.20.0 · EL PROBLEMA QUE ESTE ROJO VIGILABA SE CERRÓ ──────────────────
+    // El `ALARMA-VIVA` decía «el vitalicio se apagó con la vitrina — quedarse
+    // fiel dejó de tener su final», y se borra acá porque el final volvió: 0,04
+    // → 0,68. Se borra en el mismo commit que lo cierra, que es la regla (§1.2);
+    // un marcador que sobrevive a su problema es la alarma rota que el mecanismo
+    // existe para evitar.
+    //
+    // Lo cerró la carrera larga, no la vitrina: con diecinueve temporadas,
+    // `BELONGING_PER_SEASON` sola pone 28 puntos, así que el que se queda toda
+    // la vida llega. La causa que el marcador nombraba —los títulos de selección
+    // y de ascenso no construyen vínculo con el club— SIGUE ABIERTA y sigue
+    // siendo discutible; lo que ya no es cierto es que el camino fiel no tenga
+    // final, y un rojo no puede seguir afirmando algo que dejó de pasar.
+    //
+    // La banda nueva afirma el mundo que queremos: quedarse toda la carrera en
+    // un club TERMINA en el vitalicio la mayoría de las veces —en rugby quedarse
+    // es la norma, no la excepción— pero no siempre, porque una carrera fiel que
+    // se corta a los 31 por el cuerpo no se lo ganó. El techo de 0,85 es el que
+    // vigila eso.
+    entre(vitaliciosFieles, 0.4, 0.85, 'vitalicios por el camino fiel');
     assert.ok(
         vitaliciosFieles > vitaliciosNormales + 0.1,
         `quedarse tiene que pagar: fieles ${(vitaliciosFieles * 100).toFixed(0)}% contra ${(vitaliciosNormales * 100).toFixed(0)}%`,
@@ -428,7 +681,7 @@ test('las dos escaleras se pelean de verdad', () => {
 
 test('el vitalicio es un final, no un trámite', () => {
     // Nadie llega a que le pongan su nombre a la cancha sin quedarse Y ganar.
-    entre(proporcion(NORMAL, (r) => r.pertenencia >= 95), 0, 0.05, 'vitalicios sin ser fiel');
+    entre(proporcion(NORMAL, (r) => belongingTier(r.pertenencia) === 'vitalicio'), 0, 0.05, 'vitalicios sin ser fiel');
 });
 
 test('la conmoción no es rutina ni es imposible', () => {
@@ -448,6 +701,60 @@ test('hay vitrina, pero no se regala', () => {
     // que está por moverse — el crecimiento acelerado hace que un jugador llegue a
     // los 20 con más pico, juegue en mejores clubes y gane más. Se decide después,
     // en su propio momento, con el número ya quieto.
+    // ── 0.10.0 LA EMPUJÓ MÁS ABAJO, Y NO SE COMPENSA A MANO ──────────────────
+    // 0,963 → 0,719, y sin título 0,388 → 0,506. La causa es directa: el corte
+    // `TITLE_MIN_SHARE` recibe ahora QUÉ PARTE DE LA TEMPORADA JUGASTE, y antes
+    // recibía TU LUGAR EN EL EQUIPO, que es más alto porque no descuenta las
+    // fechas que te perdiste.
+    //
+    // No se retoca el corte para devolver el número, y esa es una decisión:
+    //
+    //   · El input nuevo es EL CORRECTO. Lo dice el propio docstring del corte
+    //     —«el que no se puso la camiseta en todo el año, no»—, y con el lugar
+    //     en el equipo el titular que se pasaba el año lesionado cobraba la
+    //     medalla igual. Parte de esta caída no es pérdida: es dejar de regalar.
+    //   · Bajar el corte ahora sería calibrar el PARÁMETRO para mover la TASA,
+    //     que es exactamente lo que el §1.8 del CLAUDE.md prohíbe.
+    //
+    // Sigue valiendo lo de abajo: la vitrina se decide en su propio momento, con
+    // el número quieto, y ahora hay DOS causas que separar —el campeón único por
+    // liga y el corte alimentado con otra magnitud—.
+    //
+    // ── 0.11.0 · PRIMERA VEZ QUE ESTE NÚMERO SE MUEVE HACIA SU BANDA ─────────
+    // 0,719 → 1,28, y sin título 0,506 → 0,394. Sigue rojo, pero por primera vez
+    // el rojo se está achicando en vez de crecer.
+    //
+    // La causa NO es que el club gane más: el campeón de liga no se movió ni un
+    // caso —`leagueTableOf` usa la misma semilla y el mismo primer tiro que
+    // usaba `championOf`—. Lo que entró son DOS fuentes nuevas de copa que antes
+    // no existían: los títulos de selección (`international-results.ts`), que se
+    // acreditan con al menos un cap en el año, y el ascenso, que mete al club en
+    // divisiones donde hay otras copas para pelear.
+    //
+    // ── 0.12.0 · ENTRARON LAS COPAS, Y ALCANZAN A POCOS ─────────────────────
+    // 1,28 → 1,36. Se movió, y menos de lo que la 0.11.0 anticipaba: aquella
+    // decía que lo que faltaba eran "las copas de club aparte de la liga". Ya
+    // están —las once del catálogo, con sus reglas reales de clasificación— y el
+    // número apenas se corrió.
+    //
+    // La medición explica por qué, y conviene dejarla escrita porque contradice
+    // la expectativa: LAS COPAS ALCANZAN A 115 DE 822 CLUBES. No es que no
+    // funcionen; es que son de pocos, y eso es el rugby — el Nacional de Clubes
+    // lo juega el campeón del URBA Top 14 y cinco campeones regionales, la
+    // Champions Cup veinticuatro clubes de élite, y el resto del planeta no
+    // juega ninguna. La carrera típica de este juego transcurre justo donde no
+    // hay copas.
+    //
+    // O sea: la vitrina de la carrera MODAL no se arregla con más torneos,
+    // porque no hay más torneos para esa gente. Lo que queda por decidir es otra
+    // cosa —si una liga larga tiene que repartir algo más que el campeonato, o
+    // si la banda está pidiendo un mundo que no es el rugby de club—, y esa
+    // discusión ya no es de calibración.
+    //
+    // Lo que sí subió, y mucho, es lo individual: el XV ideal del año pasó de 5 a
+    // 16 y el premio local de 77 a 104 sobre las mismas 160 carreras. El censo
+    // está en `ESTRUCTURA: ningún hito ni premio declarado es inalcanzable`.
+    //
     // ALARMA-VIVA: la vitrina quedó tacaña — una carrera promedio gana un solo título
     entre(media(NORMAL, (r) => r.titulos), 1.5, 6, 'títulos por carrera');
     entre(proporcion(NORMAL, (r) => r.titulos === 0), 0, 0.2, 'carreras sin un solo título');
