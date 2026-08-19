@@ -9,7 +9,7 @@ type AnyDb = {
 
 const SEASON_LINK_TYPES = ['previous_season', 'next_season'];
 const TOURNAMENT_SEASON_SELECT =
-    'id, tournament_id, legacy_tournament_id, copied_from_season_id, season_code, name, display_name, status, is_active, start_date, end_date, created_at';
+    'id, tournament_id, legacy_tournament_id, copied_from_season_id, season_code, name, display_name, status, is_active, start_date, end_date, created_at, champion_club_id, settings';
 
 export type TournamentSeasonFamilyRow = {
     id: string;
@@ -24,6 +24,8 @@ export type TournamentSeasonFamilyRow = {
     start_date?: string | null;
     end_date?: string | null;
     created_at?: string | null;
+    champion_club_id?: string | null;
+    settings?: Record<string, unknown> | null;
 };
 
 function isActiveRelStatus(status: string | null | undefined): boolean {

@@ -192,6 +192,11 @@ const MALE_PATTERNS = [
 
 const VARIANT_CATEGORY_PREFIXES = ['gender:', 'age_grade:', 'audience:', 'variant:', 'sport:'];
 let tournamentParticipantDivisionIdSupport: boolean | null = null;
+// El sondeo se memoiza EN VUELO, no sólo su resultado. Con el caché frío, las
+// 3-5 requests que entran juntas lanzaban cada una su propio `select
+// division_id` y la base contestaba 42703 una vez por request: ráfagas de
+// errores en los logs para averiguar un dato que no cambia nunca.
+let tournamentParticipantDivisionIdProbe: Promise<boolean> | null = null;
 
 function serializeClubLogoUrl(input: {
   id?: string | null;
@@ -231,24 +236,28 @@ async function supportsTournamentParticipantDivisionId(
     return tournamentParticipantDivisionIdSupport;
   }
 
-  const { error } = await supabase
-    .from('tournament_participants')
-    .select('division_id')
-    .limit(0);
+  if (!tournamentParticipantDivisionIdProbe) {
+    tournamentParticipantDivisionIdProbe = (async () => {
+      const { error } = await supabase
+        .from('tournament_participants')
+        .select('division_id')
+        .limit(0);
 
-  if (error) {
-    if (isMissingColumnError(error, 'division_id')) {
-      tournamentParticipantDivisionIdSupport = false;
+      if (!error) return true;
+
+      // La columna ausente es el caso esperado y no se reporta: el fallback ya
+      // está escrito. Cualquier otro error sí se avisa, una sola vez.
+      if (!isMissingColumnError(error, 'division_id')) {
+        console.warn('[Participants API] Could not verify division_id support:', error.message);
+      }
+
       return false;
-    }
-
-    console.warn('[Participants API] Could not verify division_id support:', error.message);
-    tournamentParticipantDivisionIdSupport = false;
-    return false;
+    })();
   }
 
-  tournamentParticipantDivisionIdSupport = true;
-  return true;
+  const supported = await tournamentParticipantDivisionIdProbe;
+  tournamentParticipantDivisionIdSupport = supported;
+  return supported;
 }
 
 function getTournamentParticipantSelectColumns(supportsDivisionId: boolean) {
@@ -1384,20 +1393,22 @@ export async function PATCH(
       const targetClubId = updateData.club_id;
       const replacementSeasonId = existingParticipant.season_id ?? null;
       const replacementTeamName = replacementClubForStats?.name ?? String(updateData.name ?? 'Equipo');
-      const replacementTeamLogo = replacementClubForStats?.logo_url ?? null;
-      const standingsUpdates = standingsToReplace.map((row) =>
-        supabase
+      /**
+       * `team_logo` NO se reescribe: se BORRA. Guardaba el `logo_url` del club
+       * nuevo dentro del JSONB, y esos logos suelen ser data URIs en base64 —
+       * era la vía por la que el escudo embebido volvía a entrar a la tabla
+       * después de haberlo recortado. El escudo se resuelve por id de club
+       * contra el proxy, que es la única fuente con caché y cache-busting.
+       */
+      const standingsUpdates = standingsToReplace.map((row) => {
+        const nextStats = { ...(row.stats ?? {}), team_name: replacementTeamName };
+        delete (nextStats as Record<string, unknown>).team_logo;
+
+        return supabase
           .from('tournament_standings')
-          .update({
-            club_id: targetClubId,
-            stats: {
-              ...(row.stats ?? {}),
-              team_name: replacementTeamName,
-              team_logo: replacementTeamLogo,
-            },
-          })
-          .eq('id', row.id)
-      );
+          .update({ club_id: targetClubId, stats: nextStats })
+          .eq('id', row.id);
+      });
 
       let homeUpdateQuery = supabase
         .from('matches')

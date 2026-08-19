@@ -35,10 +35,12 @@ function Desplegable({
     etiqueta,
     titulo,
     opciones,
+    tabActiva,
 }: {
     etiqueta: string;
     titulo: string;
     opciones: OpcionMenu[];
+    tabActiva?: string | null;
 }) {
     const [abierto, setAbierto] = useState(false);
     const ref = useRef<HTMLSpanElement>(null);
@@ -82,7 +84,7 @@ function Desplegable({
                     {opciones.map((o) => (
                         <Link
                             key={o.id}
-                            href={`/tournaments/${o.id}`}
+                            href={`/tournaments/${o.id}${tabActiva ? `?tab=${encodeURIComponent(tabActiva)}` : ''}`}
                             className={`${styles.item} ${o.esActual ? styles.itemActive : ''}`}
                             role="option"
                             aria-selected={o.esActual}
@@ -98,7 +100,32 @@ function Desplegable({
     );
 }
 
-export default function TournamentNavigation({ tournamentId }: { tournamentId: string }) {
+export default function TournamentNavigation({
+    tournamentId,
+    tabActiva,
+    onTemporadasChange,
+}: {
+    tournamentId: string;
+    /**
+     * Solapa activa de la página, para conservarla en el salto: cambiar de
+     * grado o de temporada mirando la Clasificación tiene que aterrizar en la
+     * Clasificación del destino, no en el Resumen. Si el destino no tiene esa
+     * solapa, la página cae sola a la primera disponible.
+     */
+    tabActiva?: string | null;
+    /**
+     * Avisa si este componente terminó dibujando un selector de temporada.
+     *
+     * La cabecera tiene el suyo propio, que viene de otra fuente
+     * (`availableSeasonOptions`) y cubre casos que la ruta de navegación no
+     * atiende — por ejemplo un torneo de id externo, donde acá ni se pregunta.
+     * Sin este aviso los dos se dibujaban a la vez y el año salía repetido:
+     * «Rugby · Argentina · 2026 ⌄ · Superior ⌄ · 2026 ⌄».
+     *
+     * Gana este, que además ofrece el grado; la cabecera esconde el suyo.
+     */
+    onTemporadasChange?: (tieneTemporadas: boolean) => void;
+}) {
     const [nav, setNav] = useState<Navegacion | null>(null);
 
     useEffect(() => {
@@ -114,6 +141,13 @@ export default function TournamentNavigation({ tournamentId }: { tournamentId: s
 
     const grados = nav?.grados ?? [];
     const temporadas = nav?.temporadas ?? [];
+
+    // Antes del early return: los hooks no pueden quedar detrás de un if.
+    const hayTemporadas = temporadas.length > 0;
+    useEffect(() => {
+        onTemporadasChange?.(hayTemporadas);
+    }, [hayTemporadas, onTemporadasChange]);
+
     if (!grados.length && !temporadas.length) return null;
 
     const gradoActual = grados.find((o) => o.esActual);
@@ -126,6 +160,7 @@ export default function TournamentNavigation({ tournamentId }: { tournamentId: s
                     etiqueta={gradoActual?.label ?? 'Grado'}
                     titulo="Cambiar de grado o zona"
                     opciones={grados}
+                    tabActiva={tabActiva}
                 />
             )}
             {temporadas.length > 0 && (
@@ -133,6 +168,7 @@ export default function TournamentNavigation({ tournamentId }: { tournamentId: s
                     etiqueta={temporadaActual?.label ?? 'Temporada'}
                     titulo="Cambiar de temporada"
                     opciones={temporadas}
+                    tabActiva={tabActiva}
                 />
             )}
         </span>

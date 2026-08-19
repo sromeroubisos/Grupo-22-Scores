@@ -14,6 +14,7 @@ import PlayoffBracket from '@/components/PlayoffBracket';
 import RadialBracketPredictor from '@/components/RadialBracketPredictor';
 import TournamentPublicStats from './TournamentPublicStats';
 import TournamentScoresPanel from './TournamentScoresPanel';
+import TournamentChampionsTab, { ClubCrest, type ChampionRef } from './TournamentChampionsTab';
 import TournamentSofascoreStats from './TournamentSofascoreStats';
 import TournamentNavigation from './TournamentNavigation';
 import { resolveSofascoreLeague } from '@/lib/sofascoreLeagueMap';
@@ -28,6 +29,8 @@ import { resolveLogoPreviewSrc } from '@/lib/utils/logoUrl';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
+import { formatDifference } from '@/lib/utils/formatDifference';
+import { resolverEstado } from '@/lib/utils/matchState';
 import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { SPORTS } from '@/lib/data/sports';
 import type { SportId } from '@/lib/types';
@@ -48,6 +51,7 @@ const BASE_TABS = [
     { id: 'teams', label: 'Equipos' },
     { id: 'scores', label: 'Puntajes' },
     { id: 'stats', label: 'Estadísticas' },
+    { id: 'champions', label: 'Campeones' },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -60,6 +64,9 @@ type SeasonOption = {
     seasonId: string | null;
     isCurrent: boolean;
     href: string;
+    status?: string | null;
+    champion?: ChampionRef | null;
+    coChampions?: ChampionRef[];
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -342,8 +349,24 @@ function getParticipantClub(participant: any) {
     return participant.club ?? null;
 }
 
-function formatArgentinaDate(value: string | Date | null, options: Intl.DateTimeFormatOptions) {
-    return formatDateInTimeZone(value, 'es-AR', options, APP_TIMEZONE) || '';
+/**
+ * Formatea una fecha en la zona horaria QUE SE LE PASE.
+ *
+ * Antes se llamaba `formatArgentinaDate` y clavaba `APP_TIMEZONE`, así que la
+ * hora de un partido salía idéntica desde Buenos Aires, Madrid y Auckland:
+ * «Sábado, 15 de agosto · 15:30 hs» para los tres, cuando desde Madrid ese
+ * partido empieza 20:30 y desde Auckland 06:30 del domingo 16 — con el día
+ * cambiado, no sólo la hora.
+ *
+ * El default sigue siendo la zona del torneo: es lo que corresponde en el
+ * servidor, donde no hay navegador que preguntar.
+ */
+function formatEnZona(
+    value: string | Date | null,
+    options: Intl.DateTimeFormatOptions,
+    timeZone: string = APP_TIMEZONE,
+) {
+    return formatDateInTimeZone(value, 'es-AR', options, timeZone) || '';
 }
 
 function getCountryFlagByName(value: unknown) {
@@ -421,16 +444,18 @@ function splitMotorsportStandingsRows(rows: any[]) {
  * Format a scheduled match date/time for the mobile score box.
  * Returns "Hoy • HH:MM", "Mañana • HH:MM", or "Sáb 28 feb • HH:MM".
  */
-function formatMatchSchedule(date: Date | null, todayKey: string): string {
+function formatMatchSchedule(date: Date | null, todayKey: string, timeZone: string = APP_TIMEZONE): string {
     if (!date) return 'VS';
-    const matchDayKey = formatDateKey(date, APP_TIMEZONE);
+    // El "hoy/mañana" también es relativo al huso del que mira: a las 22:00 en
+    // Auckland ya es mañana en Buenos Aires, y viceversa.
+    const matchDayKey = formatDateKey(date, timeZone);
     const tomorrowKey = addDaysToIsoDate(todayKey, 1);
     const diffDays = matchDayKey === todayKey ? 0 : matchDayKey === tomorrowKey ? 1 : 2;
-    const timeStr = formatArgentinaDate(date, { hour: '2-digit', minute: '2-digit', hour12: false });
+    const timeStr = formatEnZona(date, { hour: '2-digit', minute: '2-digit', hour12: false }, timeZone);
     if (diffDays === 0) return `Hoy • ${timeStr}`;
     if (diffDays === 1) return `Mañana • ${timeStr}`;
-    const dayName  = formatArgentinaDate(date, { weekday: 'short' });
-    const dayMonth = formatArgentinaDate(date, { day: 'numeric', month: 'short' });
+    const dayName  = formatEnZona(date, { weekday: 'short' }, timeZone);
+    const dayMonth = formatEnZona(date, { day: 'numeric', month: 'short' }, timeZone);
     // Capitalise first letter of weekday abbrev ("sáb" → "Sáb")
     const dayLabel = dayName.charAt(0).toUpperCase() + dayName.slice(1).replace('.', '');
     return `${dayLabel} ${dayMonth} • ${timeStr}`;
@@ -509,6 +534,7 @@ function getQuickStats(
     fixtures: any[],
     overallRows: any[],
     teamsCount: number,
+    timeZone: string = APP_TIMEZONE,
 ) {
     const played = results.length;
     const upcoming = fixtures.length;
@@ -516,10 +542,17 @@ function getQuickStats(
 
     // Leader
     let leaderName = '—';
+    // El escudo del líder sale del MISMO accesor que usa la tabla de posiciones,
+    // así que si un torneo resuelve su logo por una ruta rara, la ficha de arriba
+    // y la fila de la tabla muestran lo mismo en vez de discrepar.
+    let leaderLogo: string | null = null;
+    let leaderRow: any = null;
     if (overallRows.length > 0) {
         const firstRow = overallRows[0]?.rows ? overallRows[0].rows[0] : overallRows[0];
         if (firstRow) {
+            leaderRow = firstRow;
             leaderName = firstRow.team?.name || firstRow.participant?.name || firstRow.name || '—';
+            leaderLogo = getStandingsTeamLogo(firstRow) || null;
         }
     }
 
@@ -530,11 +563,11 @@ function getQuickStats(
         if (ts) {
             // ts puede ser epoch en segundos (number) o string ISO; * 1000 sobre ISO da NaN.
             const parsed = typeof ts === 'number' ? new Date(ts * 1000) : new Date(ts);
-            nextDate = formatArgentinaDate(parsed, { day: '2-digit', month: '2-digit' }) || '—';
+            nextDate = formatEnZona(parsed, { day: '2-digit', month: '2-digit' }, timeZone) || '—';
         }
     }
 
-    return { played, upcoming, teams, leaderName, nextDate };
+    return { played, upcoming, teams, leaderName, leaderLogo, leaderRow, nextDate };
 }
 
 function hexToRgba(color: string, alpha: number) {
@@ -723,6 +756,29 @@ function getStandingsTeamName(row: any) {
 
 function getExplicitExportShortName(value: unknown) {
     return typeof value === 'string' && value.trim() ? value.trim() : '';
+}
+
+/**
+ * El nombre que entra en una fila de partido.
+ *
+ * En un teléfono cada lado de la fila tiene unos 90 px, así que el nombre
+ * completo se cortaba por ancho disponible: «Los Matr…», «Club Ne…»,
+ * «Belgran…». Eso no es abreviar, es recortar, y trae dos problemas: el mismo
+ * club aparecía con etiquetas distintas en la misma pantalla según el espacio
+ * que sobrara —«Club Newman» en la tabla y «Club …» en el lateral—, y «Club
+ * Ne…» y «Club Ch…» arrancan igual, o sea que hay que mirar el escudo para
+ * desambiguar. Al revés de como debería funcionar.
+ *
+ * `short_name` ya viene cargado en la base y trae justo la forma que se usa en
+ * la cancha: Newman, Alumni, SIC, Hindú, Regatas BV, Belgrano Ath. Con eso no
+ * hace falta truncar nada, y el club se llama igual en todos lados.
+ *
+ * El nombre completo sigue viajando en el `title` y en la ficha del club.
+ */
+function nombreDeFila(equipo: any, nombreCompleto: string) {
+    const corto = getExplicitExportShortName(equipo?.short_name)
+        || getExplicitExportShortName(equipo?.shortName);
+    return corto || nombreCompleto;
 }
 
 function getPreferredExportTeamName(
@@ -1764,6 +1820,57 @@ export default function TournamentDetailPage({
     );
 
     const [activeTab, setActiveTab] = useState('summary');
+    // Lo pone TournamentNavigation cuando él trae el selector de temporada; con
+    // esto la cabecera esconde el propio y el año deja de aparecer dos veces.
+    const [navTieneTemporadas, setNavTieneTemporadas] = useState(false);
+
+    /* ── El huso horario del que está mirando ──────────────────────────────
+       Arranca en la zona del torneo A PROPÓSITO: este componente también se
+       pinta en el servidor, donde no hay navegador que preguntar. Si tomara el
+       huso del visitante ya en el primer render, el servidor mandaría hora
+       argentina y el cliente hora local, y React rompería la hidratación.
+
+       Entonces: primer pintado con la zona del torneo (igual que el servidor),
+       y apenas monta se corrige a la del visitante. Para alguien en Argentina
+       —la enorme mayoría— no cambia nada; para el que está afuera, el ajuste
+       ocurre en el mismo frame en que la página se vuelve interactiva. */
+    const [zonaDelVisitante, setZonaDelVisitante] = useState<string>(APP_TIMEZONE);
+
+    useEffect(() => {
+        try {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (tz) setZonaDelVisitante(tz);
+        } catch {
+            // Sin Intl utilizable: se queda con la zona del torneo, que es
+            // mejor que una hora inventada.
+        }
+    }, []);
+
+    const fechaEnZonaDelVisitante = React.useCallback(
+        (value: string | Date | null, options: Intl.DateTimeFormatOptions) =>
+            formatEnZona(value, options, zonaDelVisitante),
+        [zonaDelVisitante],
+    );
+
+    /* Si el que mira NO está en la zona del torneo, la hora sola miente por
+       omisión: hay que decir de qué huso se habla. Se compara el desfasaje
+       real y no el nombre, porque `America/Buenos_Aires` y
+       `America/Argentina/Buenos_Aires` son la misma hora con dos nombres. */
+    const sufijoDeZona = useMemo(() => {
+        if (zonaDelVisitante === APP_TIMEZONE) return '';
+        try {
+            const ahora = new Date();
+            const enTorneo = new Date(ahora.toLocaleString('en-US', { timeZone: APP_TIMEZONE }));
+            const enVisitante = new Date(ahora.toLocaleString('en-US', { timeZone: zonaDelVisitante }));
+            if (Math.abs(enTorneo.getTime() - enVisitante.getTime()) < 60_000) return '';
+            const corta = new Intl.DateTimeFormat('es-AR', {
+                timeZone: zonaDelVisitante, timeZoneName: 'short',
+            }).formatToParts(ahora).find((p) => p.type === 'timeZoneName')?.value;
+            return corta ? ` (${corta})` : '';
+        } catch {
+            return '';
+        }
+    }, [zonaDelVisitante]);
     const [loading, setLoading] = useState(!preloaded);
     const [error, setError] = useState<string | null>(null);
 
@@ -1778,6 +1885,10 @@ export default function TournamentDetailPage({
     const [customStandingsTables, setCustomStandingsTables] = useState<any[]>([]);
     const [archives, setArchives] = useState<any[]>([]);
     const [seasonOptions, setSeasonOptions] = useState<SeasonOption[]>([]);
+    // El tab Campeones depende de datos que llegan por fetch: hasta que la
+    // lista de temporadas no resolvió, un deep link a ?tab=champions no se
+    // puede juzgar (el fallback lo patearía a Resumen antes de tiempo).
+    const [seasonOptionsLoaded, setSeasonOptionsLoaded] = useState(false);
     const [seasonMenuOpen, setSeasonMenuOpen] = useState(false);
     const [results, setResults] = useState<any[]>(preloaded?.results ?? []);
     const [fixtures, setFixtures] = useState<any[]>(preloaded?.fixtures ?? []);
@@ -2219,6 +2330,7 @@ export default function TournamentDetailPage({
         // Un torneo externo no tiene temporadas en base: el selector no aplica.
         if (id.toLowerCase().startsWith('fs-') || isFihWorldCupTournamentId(id) || isExternalCatalogRoute(id, routeSearch)) {
             setSeasonOptions([]);
+            setSeasonOptionsLoaded(true);
             return;
         }
 
@@ -2233,22 +2345,30 @@ export default function TournamentDetailPage({
                     pageQuery.get('season') ||
                     ((initialData?.season as any)?.id ? String((initialData?.season as any).id) : null);
                 if (selectedSeasonParam) query.set('seasonId', selectedSeasonParam);
-                const res = await fetch(`/api/db/tournaments/${encodeURIComponent(id)}/seasons${query.size ? `?${query.toString()}` : ''}`, {
-                    signal: controller.signal,
-                    cache: 'no-store',
-                });
-                if (!res.ok) {
-                    setSeasonOptions([]);
-                    return;
+                const url = `/api/db/tournaments/${encodeURIComponent(id)}/seasons${query.size ? `?${query.toString()}` : ''}`;
+                /* El endpoint falla intermitente (ok:false o 5xx transitorio) y
+                   un solo fallo dejaba el selector sin el histórico y sin el tab
+                   de Campeones. Dos reintentos con espera corta antes de caer al
+                   fallback. */
+                let seasons: SeasonOption[] | null = null;
+                for (let intento = 0; intento < 3; intento++) {
+                    if (intento > 0) await new Promise((resolve) => setTimeout(resolve, 1200 * intento));
+                    if (controller.signal.aborted) return;
+                    const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+                    if (!res.ok) continue;
+                    const json = await res.json();
+                    if (json?.ok && Array.isArray(json.seasons)) {
+                        seasons = json.seasons;
+                        break;
+                    }
                 }
-                const json = await res.json();
-                if (json?.ok && Array.isArray(json.seasons)) {
-                    setSeasonOptions(json.seasons);
-                } else {
-                    setSeasonOptions([]);
-                }
+                setSeasonOptions(seasons ?? []);
+                setSeasonOptionsLoaded(true);
             } catch (err: any) {
-                if (err?.name !== 'AbortError') setSeasonOptions([]);
+                if (err?.name !== 'AbortError') {
+                    setSeasonOptions([]);
+                    setSeasonOptionsLoaded(true);
+                }
             }
         })();
         return () => controller.abort();
@@ -2336,12 +2456,14 @@ export default function TournamentDetailPage({
     );
     const shouldForceStandingsTabVisible = tournamentData?.sportId === 'basketball';
     const hasEspnSoccerTopScorers = isEspnSoccerSource && topScorers.length > 0;
+    const hasChampionSeasons = seasonOptions.some((season) => Boolean(season.champion));
     const navigationTabs = useMemo(() => {
         let tabs = BASE_TABS
             .filter((tab: { id: string; label: string }) => !(isLimitedExternalProvider && !hasEspnSoccerTopScorers && tab.id === 'stats'))
             .filter((tab: { id: string; label: string }) => !(isLimitedExternalProvider && !isEspnSoccerSource && tab.id === 'playoff'))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'standings' && !shouldUseIntegratedBracketView && !hasVisibleStandingsData && !shouldForceStandingsTabVisible))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'playoff' && !hasDedicatedPlayoffTab))
+            .filter((tab: { id: string; label: string }) => !(tab.id === 'champions' && !hasChampionSeasons))
             .map((tab: { id: string; label: string }) => {
                 if (tab.id === 'standings' && shouldUseIntegratedBracketView) {
                     return { ...tab, label: 'Cuadro' };
@@ -2369,12 +2491,172 @@ export default function TournamentDetailPage({
         }
 
         return tabs;
-    }, [hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
+    }, [hasChampionSeasons, hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
 
     useEffect(() => {
         if (navigationTabs.some((tab: { id: string; label: string }) => tab.id === activeTab)) return;
+        // Deep link a Campeones: el tab recién existe cuando llegó la lista de
+        // temporadas — no lo patees a Resumen mientras el fetch está en vuelo.
+        if (activeTab === 'champions' && !seasonOptionsLoaded) return;
         setActiveTab(navigationTabs[0]?.id || 'summary');
+    }, [activeTab, navigationTabs, seasonOptionsLoaded]);
+
+    /* ── La pestaña vive en la URL ────────────────────────────────────────
+       Antes el estado era sólo del componente: las ocho solapas compartían la
+       misma dirección. Consecuencias medidas: mandarle a alguien «la tabla del
+       Top 14» abría siempre en Resumen, F5 perdía el lugar, y —lo peor— el
+       botón Atrás salía del sitio en vez de volver a la solapa anterior.
+
+       Va con `history.pushState` NATIVO y no con `router.push`: en el App
+       Router, `router.push` vuelve a renderizar la página en el servidor con
+       cada cambio de solapa, que es exactamente lo que no queremos para algo
+       que ya está todo en el cliente. */
+    /* Quién manda al montar: la URL. El efecto de escritura de abajo espera a
+       que este haya corrido, o pisaría la pestaña pedida por deep link con la
+       que tiene el componente por defecto — que es exactamente lo que hacía
+       que `?tab=standings` abriera en Resumen. */
+    const [urlAplicada, setUrlAplicada] = useState(false);
+
+    // Al montar (y en cada popstate) la pestaña sale de la URL.
+    useEffect(() => {
+        const leerDeUrl = () => {
+            const pedida = new URLSearchParams(window.location.search).get('tab');
+            /* Se valida contra BASE_TABS y no contra navigationTabs: las
+               pestañas que dependen de datos (Campeones necesita la lista de
+               temporadas) todavía no están en navigationTabs al montar, y
+               rechazarlas acá hacía que el efecto de escritura pisara la URL
+               con tab=summary — el deep link se perdía antes de poder juzgarse.
+               Si la pestaña pedida al final no corresponde para este torneo,
+               el efecto de fallback de arriba la baja solo. */
+            if (pedida && BASE_TABS.some((t: { id: string }) => t.id === pedida)) {
+                setActiveTab(pedida);
+            }
+            // Se marca SIEMPRE, haya o no pestaña en la URL: lo que habilita la
+            // escritura es que la lectura ya ocurrió, no que haya encontrado algo.
+            setUrlAplicada(true);
+        };
+        leerDeUrl();
+        window.addEventListener('popstate', leerDeUrl);
+        return () => window.removeEventListener('popstate', leerDeUrl);
+    }, []);
+
+    // Y cada cambio de pestaña deja una entrada en el historial.
+    useEffect(() => {
+        if (!urlAplicada) return;
+        const url = new URL(window.location.href);
+        const enLaUrl = url.searchParams.get('tab');
+        if (enLaUrl === activeTab) return;
+        url.searchParams.set('tab', activeTab);
+
+        /* Si la URL todavía no declaraba ninguna pestaña, esto no es una
+           navegación del usuario sino la sincronización inicial: va con
+           `replaceState`, o entrar a la página ya dejaría una entrada de más y
+           haría falta tocar Atrás dos veces para salir.
+
+           La distinción se hace mirando la URL y no una bandera de "primer
+           render": en desarrollo React monta los efectos dos veces, así que un
+           `useRef` como guarda se consume en la primera pasada y no protege
+           nada en la segunda. El estado de la URL, en cambio, es el mismo se
+           ejecute esto una vez o diez. */
+        if (enLaUrl === null) window.history.replaceState(null, '', url);
+        else window.history.pushState(null, '', url);
+    }, [activeTab, urlAplicada]);
+
+    // ── Barra de pestañas: señal de que hay más ───────────────────────────
+    // Ocho pestañas miden 726px y en 390px se ven 351: la mitad queda afuera y
+    // la scrollbar está oculta a propósito. Estos data-attrs encienden el
+    // desvanecido de cada borde SÓLO cuando hay algo más para revelar de ese
+    // lado, así que en desktop —donde las ocho entran— no se ve nada.
+    const navTabsRef = React.useRef<HTMLElement | null>(null);
+
+    useEffect(() => {
+        const el = navTabsRef.current;
+        if (!el) return;
+
+        const sync = () => {
+            const max = el.scrollWidth - el.clientWidth;
+            el.dataset.overflowStart = String(el.scrollLeft > 1);
+            // -1 de tolerancia: el scrollLeft es fraccionario con zoom o en pantallas HiDPI
+            el.dataset.overflowEnd = String(el.scrollLeft < max - 1);
+        };
+
+        sync();
+        el.addEventListener('scroll', sync, { passive: true });
+        const ro = new ResizeObserver(sync);
+        ro.observe(el);
+        return () => {
+            el.removeEventListener('scroll', sync);
+            ro.disconnect();
+        };
+    }, [navigationTabs]);
+
+    // La pestaña activa se arrastra a la vista: sin esto, al entrar por un deep
+    // link a Estadísticas la pestaña marcada queda fuera de pantalla.
+    useEffect(() => {
+        const el = navTabsRef.current;
+        if (!el) return;
+        const activo = el.querySelector<HTMLElement>('[aria-selected="true"]');
+        activo?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }, [activeTab, navigationTabs]);
+
+    // Cambiar de solapa estando scrolleado dejaba el panel nuevo empezado por
+    // el medio — o clampeado al fondo si era más corto que el anterior. La
+    // vista vuelve al comienzo del panel, justo debajo de la barra pegada, de
+    // un salto: el fundido de entrada del panel ya cubre la transición, y un
+    // scroll animado de miles de píxeles sería más mareo que fluidez. El
+    // primer render no scrollea: un deep link respeta dónde estaba el
+    // navegador.
+    const tabsBarRef = React.useRef<HTMLDivElement | null>(null);
+    const panelHostRef = React.useRef<HTMLDivElement | null>(null);
+    const primeraSolapaRef = React.useRef(true);
+    useEffect(() => {
+        if (primeraSolapaRef.current) {
+            primeraSolapaRef.current = false;
+            return;
+        }
+        const bar = tabsBarRef.current;
+        const host = panelHostRef.current;
+        if (!bar || !host) return;
+        const alturaPegada = (parseFloat(getComputedStyle(bar).top) || 0) + bar.offsetHeight;
+        const objetivo = host.getBoundingClientRect().top + window.scrollY - alturaPegada;
+        if (window.scrollY > objetivo) {
+            window.scrollTo({ top: Math.max(0, objetivo), behavior: 'instant' });
+        }
+    }, [activeTab]);
+
+    // Flechas ← → entre pestañas, que es lo que un usuario de teclado espera de
+    // un role=tablist. Home/End van a los extremos.
+    const onTabKeyDown = React.useCallback((e: React.KeyboardEvent, tabId: string) => {
+        const ids = navigationTabs.map((t: { id: string }) => t.id);
+        const i = ids.indexOf(tabId);
+        if (i < 0) return;
+        let next: string | undefined;
+        if (e.key === 'ArrowRight') next = ids[(i + 1) % ids.length];
+        else if (e.key === 'ArrowLeft') next = ids[(i - 1 + ids.length) % ids.length];
+        else if (e.key === 'Home') next = ids[0];
+        else if (e.key === 'End') next = ids[ids.length - 1];
+        if (!next) return;
+        e.preventDefault();
+        setActiveTab(next);
+        // El foco sigue a la selección: el tabIndex del nuevo activo pasa a 0 en
+        // el render, así que hay que esperarlo.
+        requestAnimationFrame(() => {
+            document.getElementById(`tab-${next}`)?.focus();
+        });
+    }, [navigationTabs]);
+
+    // El salto de temporada (o de grado) conserva la solapa activa: sin esto,
+    // mirar la tabla de 2024 desde Clasificación te devolvía a Resumen en cada
+    // cambio de año. El destino valida el tab contra sus propias solapas y cae
+    // a la primera si no la tiene, así que mandar una de más nunca rompe.
+    const activeTabParaNavegar = activeTab && activeTab !== 'summary' ? activeTab : null;
+    const withActiveTab = React.useCallback((href: string) => {
+        if (!activeTabParaNavegar) return href;
+        const [path, query = ''] = href.split('?');
+        const params = new URLSearchParams(query);
+        params.set('tab', activeTabParaNavegar);
+        return `${path}?${params.toString()}`;
+    }, [activeTabParaNavegar]);
 
     useEffect(() => {
         const availableViews = new Set<string>(['overall']);
@@ -2589,12 +2871,15 @@ export default function TournamentDetailPage({
                     key: 'diff',
                     label: 'DG',
                     className: `${styles.colVal} ${styles.colValDG}`,
-                    value: (row: any) =>
+                    // Con signo explícito, igual que en Estadísticas: acá se veía
+                    // "255" y allá "+220" para el mismo tipo de dato.
+                    value: (row: any) => formatDifference(
                         typeof row.goal_difference === 'number'
                             ? row.goal_difference
                             : (typeof row.goals_for === 'number' && typeof row.goals_against === 'number')
                                 ? row.goals_for - row.goals_against
                                 : 0,
+                    ),
                 },
                 ...(bonusEnabled ? [{
                     key: 'bonus',
@@ -2803,7 +3088,15 @@ export default function TournamentDetailPage({
     };
 
     // Quick stats
-    const stats = getQuickStats(results, fixtures, overallRows, teamsList.length);
+    const stats = getQuickStats(results, fixtures, overallRows, teamsList.length, zonaDelVisitante);
+
+    /* El escudo del líder pasa por el MISMO doble camino que la tabla de posiciones:
+       primero el que trae la fila y, si no trae, el del plantel resuelto por
+       `resolveTeamFallback`. Con sólo el primero, la ficha salía sin escudo en este
+       torneo aunque la tabla de abajo sí lo mostraba — que es el motivo por el que
+       las dos cosas tienen que compartir el resolvedor y no cada una el suyo. */
+    const leaderCrest = stats.leaderLogo
+        || (stats.leaderRow ? resolveTeamFallback(stats.leaderRow)?.logo || null : null);
 
     // Status
     const tournamentStatus = getTournamentStatus(details);
@@ -2978,10 +3271,10 @@ export default function TournamentDetailPage({
                 const timestamp = match.timestamp || match.start_time || match.time;
                 const matchDate = timestamp ? new Date(timestamp * 1000) : null;
                 const dateOnlyLabel = matchDate
-                    ? formatArgentinaDate(matchDate, { day: '2-digit', month: '2-digit' })
+                    ? fechaEnZonaDelVisitante(matchDate, { day: '2-digit', month: '2-digit' })
                     : '';
                 const kickoffTimeLabel = matchDate
-                    ? formatArgentinaDate(matchDate, { hour: '2-digit', minute: '2-digit', hour12: false })
+                    ? fechaEnZonaDelVisitante(matchDate, { hour: '2-digit', minute: '2-digit', hour12: false })
                     : '';
 
                 return {
@@ -2998,7 +3291,7 @@ export default function TournamentDetailPage({
                     time: mode === 'results' ? dateOnlyLabel : `${kickoffTimeLabel} ${dateOnlyLabel}`.trim(),
                     status: mode === 'results' ? 'finished' as const : 'scheduled' as const,
                     dateLabel: matchDate
-                        ? formatArgentinaDate(matchDate, { weekday: 'short', day: '2-digit', month: '2-digit' })
+                        ? fechaEnZonaDelVisitante(matchDate, { weekday: 'short', day: '2-digit', month: '2-digit' })
                         : '',
                     kickoffAt: matchDate ? matchDate.toISOString() : undefined,
                 };
@@ -3068,8 +3361,8 @@ export default function TournamentDetailPage({
     const renderMatchItem = (match: any, isResult: boolean, index: number) => {
         const timestamp = match.timestamp || match.start_time || match.time;
         const date = timestamp ? new Date(timestamp * 1000) : null;
-        const timeStr = date ? formatArgentinaDate(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
-        const dateStr = date ? formatArgentinaDate(date, { day: '2-digit', month: '2-digit' }) : '';
+        const timeStr = date ? fechaEnZonaDelVisitante(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+        const dateStr = date ? fechaEnZonaDelVisitante(date, { day: '2-digit', month: '2-digit' }) : '';
 
         const scoreHome = match.scores?.home ?? match.scores?.home_score ?? match.home_score;
         const scoreAway = match.scores?.away ?? match.scores?.away_score ?? match.away_score;
@@ -3079,16 +3372,27 @@ export default function TournamentDetailPage({
         const penAway = penaltiesRaw?.away;
         const hasPenalties = typeof penHome === 'number' && typeof penAway === 'number';
 
-        const homeName = match.home_team?.name || match.event_home_team || match.home_team_name || 'Local';
-        const awayName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Visitante';
+        const homeFull = match.home_team?.name || match.event_home_team || match.home_team_name || 'Local';
+        const awayFull = match.away_team?.name || match.event_away_team || match.away_team_name || 'Visitante';
+        // En la fila compacta va el nombre corto (Newman, SIC, Regatas BV); el
+        // completo queda en el title, para quien no reconozca la abreviatura.
+        const homeName = nombreDeFila(match.home_team, homeFull);
+        const awayName = nombreDeFila(match.away_team, awayFull);
         const homeLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
         const awayLogo = getTeamLogo(match.away_team) || match.away_team_logo || '';
 
-        const isLive = match.status === 'live' || match.status === 'in_play';
-        const isFinished = match.status === 'finished' || match.status === 'ft' || isResult;
+        /* El estado sale del resolvedor y no de un par de comparaciones sueltas:
+           así 'final' (el valor que guarda la app), 'postponed' y 'cancelled'
+           dejan de caer al caso por defecto. Un postergado ya no se dibuja como
+           programado con su horario, que es lo que mandaba a la gente a una
+           cancha donde no se juega. */
+        const estado = resolverEstado(match.status, { estaEnResultados: isResult });
+        const isLive = estado.estado === 'en-vivo';
+        const isFinished = estado.estado === 'finalizado';
+        const suspendido = estado.estado === 'suspendido';
         // Only treat as scored when the match was actually played — otherwise a default 0
         // from the API renders "0 - 0" on upcoming fixtures.
-        const hasScore = (isFinished || isLive) && scoreHome !== undefined && scoreHome !== null;
+        const hasScore = estado.muestraMarcador && scoreHome !== undefined && scoreHome !== null;
 
         const homeWon = hasScore && typeof scoreHome === 'number' && typeof scoreAway === 'number' && scoreHome > scoreAway;
         const awayWon = hasScore && typeof scoreHome === 'number' && typeof scoreAway === 'number' && scoreAway > scoreHome;
@@ -3102,21 +3406,35 @@ export default function TournamentDetailPage({
                 {/* Date / Time / Live */}
                 <div className={styles.matchDate}>
                     {isLive ? (
-                        <span className={styles.matchLive}>
+                        <span className={styles.matchLive} title={estado.descripcion}>
                             <span className={styles.matchLiveDot} />
-                            {match.minute || 'Live'}
+                            {/* El minuto sólo cuando el reloj corre de verdad. */}
+                            {(estado.relojCorriendo && match.minute) || 'EN VIVO'}
                         </span>
                     ) : (
                         <>
                             <span className={styles.matchDateDay}>{dateStr}</span>
-                            <span className={styles.matchDateTime}>{isFinished ? 'FT' : timeStr}</span>
+                            {/* Sólo el estado. La hora vivía también acá, y como la caja
+                                central ya la muestra para todo partido no jugado, la fila
+                                decía "15:30 … 15:30" — gastando la columna en repetir un
+                                dato en vez de decir el día. */}
+                            {/* Una etiqueta por estado. El programado no lleva
+                                ninguna: la hora de la caja central ya lo dice. */}
+                            {estado.etiqueta && (
+                                <span
+                                    className={`${styles.matchDateStatus} ${suspendido ? styles.matchDateStatusOff : ''}`}
+                                    title={estado.descripcion}
+                                >
+                                    {estado.etiqueta}
+                                </span>
+                            )}
                         </>
                     )}
                 </div>
 
                 {/* Home Team (right-aligned) */}
                 <div className={`${styles.matchSideTeam} ${styles.matchHomeTeam} ${homeWon ? styles.matchWinner : ''}`}>
-                    <span className={styles.matchTeamName}>{homeName}</span>
+                    <span className={styles.matchTeamName} title={homeFull}>{homeName}</span>
                     {homeLogo
                         ? <>
                             <img src={homeLogo} alt={homeName} className={styles.matchTeamLogo} loading="lazy"
@@ -3138,6 +3456,10 @@ export default function TournamentDetailPage({
                         </span>
                     ) : isLive ? (
                         <span className={styles.matchVS}>VS</span>
+                    ) : suspendido ? (
+                        // Sin hora: anunciar el horario de un partido que no se
+                        // juega es peor que no decir nada.
+                        <span className={styles.matchVS}>—</span>
                     ) : timeStr ? (
                         <span className={styles.matchKickoffTime}>{timeStr}</span>
                     ) : (
@@ -3158,13 +3480,12 @@ export default function TournamentDetailPage({
                           </>
                         : <div className={styles.matchTeamLogoEmpty} />
                     }
-                    <span className={styles.matchTeamName}>{awayName}</span>
+                    <span className={styles.matchTeamName} title={awayFull}>{awayName}</span>
                 </div>
 
-                {/* Status badge */}
-                <div className={styles.matchStatus}>
-                    {isFinished && !isLive && <span className={styles.ftBadge}>FT</span>}
-                </div>
+                {/* B3: acá había un segundo "FT" —9,6px, en el gris que no pasaba
+                    contraste— duplicando el de la columna de fecha. El estado va una
+                    sola vez, alineado con la fecha, que es donde el ojo lo busca. */}
             </Link>
         );
     };
@@ -3176,8 +3497,8 @@ export default function TournamentDetailPage({
         const isFinished = match.status === 'finished' || match.status === 'ft' || isResult;
         const eventTitle = match.event_name || match.tournament_name_short || match.tournament_name || tournamentName || 'Evento';
         const venue = match.venue || match.country_name || countryName || '';
-        const dateLabel = date ? formatArgentinaDate(date, { weekday: 'short', day: '2-digit', month: 'short' }) : '';
-        const timeLabel = date ? formatArgentinaDate(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+        const dateLabel = date ? fechaEnZonaDelVisitante(date, { weekday: 'short', day: '2-digit', month: 'short' }) : '';
+        const timeLabel = date ? fechaEnZonaDelVisitante(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
         const primaryName = match.home_team?.name || match.event_home_team || match.home_team_name || 'Competidor 1';
         const secondaryName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Competidor 2';
         const primaryLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
@@ -3235,8 +3556,8 @@ export default function TournamentDetailPage({
         const isFinished = match.status === 'finished' || match.status === 'ft' || isResult;
         const eventTitle = match.event_name || match.tournament_name_short || match.tournament_name || tournamentName || 'Evento';
         const venue = match.venue || match.country_name || countryName || '';
-        const dateLabel = date ? formatArgentinaDate(date, { weekday: 'short', day: '2-digit', month: 'short' }) : '';
-        const timeLabel = date ? formatArgentinaDate(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+        const dateLabel = date ? fechaEnZonaDelVisitante(date, { weekday: 'short', day: '2-digit', month: 'short' }) : '';
+        const timeLabel = date ? fechaEnZonaDelVisitante(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
         const primaryName = match.home_team?.name || match.event_home_team || match.home_team_name || 'Competidor 1';
         const secondaryName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Competidor 2';
         const primaryLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
@@ -3364,8 +3685,12 @@ export default function TournamentDetailPage({
                     </div>
                 </div>
                 {columns.map((column) => {
+                    // La columna 'diff' se resuelve acá y no por su value(): el
+                    // goalDifference de este scope trae más fallbacks. Pero el
+                    // formato tiene que ser el mismo que en Estadísticas, o el
+                    // mismo dato se lee "255" en una pestaña y "+220" en la otra.
                     const value = column.key === 'diff'
-                        ? goalDifference
+                        ? formatDifference(goalDifference)
                         : column.value(row);
 
                     return (
@@ -3408,9 +3733,9 @@ export default function TournamentDetailPage({
 
         const timestamp = match.timestamp || match.start_time || match.time;
         const date = timestamp ? new Date(timestamp * 1000) : null;
-        const timeStr = date ? formatArgentinaDate(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
-        const dateStr = date ? formatArgentinaDate(date, { weekday: 'long', day: '2-digit', month: 'long' }) : '';
-        const shortDateStr = date ? formatArgentinaDate(date, { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+        const timeStr = date ? fechaEnZonaDelVisitante(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+        const dateStr = date ? fechaEnZonaDelVisitante(date, { weekday: 'long', day: '2-digit', month: 'long' }) : '';
+        const shortDateStr = date ? fechaEnZonaDelVisitante(date, { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
 
         const scoreHome = match.scores?.home ?? match.scores?.home_score ?? match.home_score;
         const scoreAway = match.scores?.away ?? match.scores?.away_score ?? match.away_score;
@@ -3459,7 +3784,7 @@ export default function TournamentDetailPage({
                                         <span className={styles.featuredKickoffDate}>{shortDateStr}</span>
                                     )}
                                     {timeStr && (
-                                        <span className={styles.featuredKickoffTime}>{timeStr} hs</span>
+                                        <span className={styles.featuredKickoffTime}>{timeStr} hs{sufijoDeZona}</span>
                                     )}
                                     {!shortDateStr && !timeStr && (
                                         <span className={styles.featuredVS}>VS</span>
@@ -3484,7 +3809,7 @@ export default function TournamentDetailPage({
                 {dateStr && (
                     <div className={styles.featuredMatchMeta}>
                         <span style={{ textTransform: 'capitalize' }}>{dateStr}</span>
-                        {!isResult && timeStr && <span>· {timeStr} hs</span>}
+                        {!isResult && timeStr && <span>· {timeStr} hs{sufijoDeZona}</span>}
                         {match.venue && <span>· {match.venue}</span>}
                     </div>
                 )}
@@ -3503,8 +3828,8 @@ export default function TournamentDetailPage({
         const badgeLabel = isLive ? 'Carrera en vivo' : isResult ? 'Resultado oficial' : 'Proxima carrera';
         const eventTitle = match.event_name || match.tournament_name_short || match.tournament_name || tournamentName || 'Evento';
         const venue = match.venue || match.country_name || countryName || '';
-        const dateLabel = date ? formatArgentinaDate(date, { weekday: 'long', day: '2-digit', month: 'long' }) : '';
-        const timeLabel = date ? formatArgentinaDate(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+        const dateLabel = date ? fechaEnZonaDelVisitante(date, { weekday: 'long', day: '2-digit', month: 'long' }) : '';
+        const timeLabel = date ? fechaEnZonaDelVisitante(date, { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
         const primaryName = match.home_team?.name || match.event_home_team || match.home_team_name || 'Competidor 1';
         const secondaryName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Competidor 2';
         const primaryLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
@@ -3715,8 +4040,8 @@ export default function TournamentDetailPage({
                     </div>
                     <div className={styles.motorsportSeasonCalendarMeta}>
                         {match.venue && <span>{match.venue}</span>}
-                        {date && <span>{formatArgentinaDate(date, { day: '2-digit', month: 'short' })}</span>}
-                        {date && <span>{formatArgentinaDate(date, { hour: '2-digit', minute: '2-digit', hour12: false })} hs</span>}
+                        {date && <span>{fechaEnZonaDelVisitante(date, { day: '2-digit', month: 'short' })}</span>}
+                        {date && <span>{fechaEnZonaDelVisitante(date, { hour: '2-digit', minute: '2-digit', hour12: false })} hs</span>}
                     </div>
                     {winnerName && statusLabel === 'Finalizado' && (
                         <div className={styles.motorsportSeasonCalendarWinner}>Ganador: {winnerName}</div>
@@ -3764,7 +4089,7 @@ export default function TournamentDetailPage({
                         <div className={styles.motorsportSeasonHeroStat}>
                             <span className={styles.motorsportSeasonHeroLabel}>Proximo GP</span>
                             <strong>{motorsportNextEvent?.event_name || 'Calendario completo'}</strong>
-                            {nextDate && <span className={styles.motorsportSeasonHeroSub}>{formatArgentinaDate(nextDate, { day: '2-digit', month: 'long' })} - {formatArgentinaDate(nextDate, { hour: '2-digit', minute: '2-digit', hour12: false })} hs</span>}
+                            {nextDate && <span className={styles.motorsportSeasonHeroSub}>{fechaEnZonaDelVisitante(nextDate, { day: '2-digit', month: 'long' })} - {fechaEnZonaDelVisitante(nextDate, { hour: '2-digit', minute: '2-digit', hour12: false })} hs</span>}
                         </div>
                     </div>
                 </div>
@@ -3788,7 +4113,7 @@ export default function TournamentDetailPage({
         if (dayKey === renderTodayKey) prefix = 'Hoy · ';
         else if (dayKey === yesterdayKey) prefix = 'Ayer · ';
         else if (dayKey === tomorrowKey) prefix = 'Mañana · ';
-        const label = formatArgentinaDate(date, { weekday: 'long', day: 'numeric', month: 'long' }) || '';
+        const label = fechaEnZonaDelVisitante(date, { weekday: 'long', day: 'numeric', month: 'long' }) || '';
         const capitalized = label.charAt(0).toUpperCase() + label.slice(1);
         return `${prefix}${capitalized}`;
     };
@@ -3813,8 +4138,11 @@ export default function TournamentDetailPage({
         return nodes;
     };
 
+    // data-sticky-tabs: le pide a globals.css que pase body y main a
+    // overflow-x clip para que el sticky del header y de la barra de
+    // pestañas funcione en esta página (con hidden, el sticky muere).
     return (
-        <div className={`${styles.page}${isFifaWorldCup ? ` ${styles.fwc26}` : ''}`}>
+        <div className={`${styles.page}${isFifaWorldCup ? ` ${styles.fwc26}` : ''}`} data-sticky-tabs="">
 
             {isFifaWorldCup && (
                 <div className={styles.fwc26TopBar} aria-hidden="true" />
@@ -3857,7 +4185,10 @@ export default function TournamentDetailPage({
                                     {sportLabel && <span className={styles.heroMetaItem}>{sportLabel}</span>}
                                     {sportLabel && countryName && <span className={styles.heroMetaDot} />}
                                     {countryName && <span className={styles.heroMetaItem}>{countryName}</span>}
-                                    {yearDisplay && (
+                                    {/* Si TournamentNavigation ya trae el selector de
+                                        temporada, este se calla: los dos juntos hacían
+                                        que el año saliera dos veces en la misma línea. */}
+                                    {yearDisplay && !navTieneTemporadas && (
                                         <>
                                             <span className={styles.heroMetaDot} />
                                             {availableSeasonOptions.length > 0 ? (
@@ -3891,7 +4222,7 @@ export default function TournamentDetailPage({
                                                             {availableSeasonOptions.map((season) => (
                                                                 <Link
                                                                     key={season.id}
-                                                                    href={season.href}
+                                                                    href={withActiveTab(season.href)}
                                                                     className={`${styles.seasonSwitcherItem} ${season.isCurrent ? styles.seasonSwitcherItemActive : ''}`}
                                                                     onClick={() => setSeasonMenuOpen(false)}
                                                                     role="option"
@@ -3918,8 +4249,19 @@ export default function TournamentDetailPage({
                                         </>
                                     )}
                                     {/* Grado/zona y temporada, cuando hay hermanos a dónde ir.
-                                        Se dibuja solo: si el torneo no los tiene, no ocupa lugar. */}
-                                    <TournamentNavigation tournamentId={id} />
+                                        Se dibuja solo: si el torneo no los tiene, no ocupa lugar.
+
+                                        El envoltorio con clase propia no es decorativo: la línea
+                                        meta esconde en mobile todo hijo que no esté en su lista
+                                        blanca, y esa lista es anterior a este componente. Sin la
+                                        clase, en mobile no se ve ningún selector. */}
+                                    <span className={styles.heroMetaNav}>
+                                        <TournamentNavigation
+                                            tournamentId={id}
+                                            tabActiva={activeTabParaNavegar}
+                                            onTemporadasChange={setNavTieneTemporadas}
+                                        />
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -3987,8 +4329,22 @@ export default function TournamentDetailPage({
                             <span className={styles.statCardValue}>{stats.upcoming}</span>
                             <span className={styles.statCardLabel}>Restantes</span>
                         </div>
-                        <div className={styles.statCard}>
-                            <span className={styles.statCardValueSm}>{stats.leaderName}</span>
+                        {/* El líder es un CLUB, no un número: va con su escudo. Antes
+                            era un nombre largo metido en una ficha calibrada para
+                            cifras, en mono y recortado con puntos suspensivos. */}
+                        <div className={`${styles.statCard} ${styles.statCardLeader}`}>
+                            <span className={styles.statCardLeaderRow}>
+                                {leaderCrest ? (
+                                    <img
+                                        src={leaderCrest}
+                                        alt=""
+                                        className={styles.statCardLeaderCrest}
+                                        loading="lazy"
+                                        decoding="async"
+                                    />
+                                ) : null}
+                                <span className={styles.statCardValueSm}>{stats.leaderName}</span>
+                            </span>
                             <span className={styles.statCardLabel}>Líder</span>
                         </div>
                         <div className={styles.statCard}>
@@ -4000,14 +4356,28 @@ export default function TournamentDetailPage({
             </div>
 
             {/* ── Sticky Tabs ─────────────────────────────────────────── */}
-            <div className={styles.tabsBar}>
+            <div className={styles.tabsBar} ref={tabsBarRef}>
                 <div className="g22-container">
-                    <nav className={styles.navTabs}>
+                    {/* role=tablist + aria-selected: sin esto un lector de pantalla
+                        anuncia ocho botones sueltos, sin decir cuántos son ni cuál
+                        está activo — la pestaña activa se distinguía sólo por color. */}
+                    <nav
+                        ref={navTabsRef}
+                        className={styles.navTabs}
+                        role="tablist"
+                        aria-label="Secciones del torneo"
+                    >
                         {navigationTabs.map((tab: { id: string; label: string }) => (
                             <button
                                 key={tab.id}
+                                id={`tab-${tab.id}`}
+                                role="tab"
+                                aria-selected={activeTab === tab.id}
+                                aria-controls={`panel-${tab.id}`}
+                                tabIndex={activeTab === tab.id ? 0 : -1}
                                 className={`${styles.tabButton} ${activeTab === tab.id ? styles.activeTab : ''}`}
                                 onClick={() => setActiveTab(tab.id)}
+                                onKeyDown={(e) => onTabKeyDown(e, tab.id)}
                             >
                                 {tab.label}
                             </button>
@@ -4017,9 +4387,17 @@ export default function TournamentDetailPage({
             </div>
 
             {/* ── Main Content ─────────────────────────────────────────── */}
-            <main className="g22-container" style={{ paddingBottom: '24px' }}>
+            {/* <div>, no <main>: el layout ya aporta el landmark principal, y dos
+                <main> en el documento rompen el atajo "ir al contenido". */}
+            <div className="g22-container" style={{ paddingBottom: '24px' }} ref={panelHostRef}>
               {/* Keyed wrapper: re-mounts on tab switch so the entrance animation re-fires */}
-              <div key={activeTab} className={styles.tabPanel}>
+              <div
+                key={activeTab}
+                className={styles.tabPanel}
+                id={`panel-${activeTab}`}
+                role="tabpanel"
+                aria-labelledby={`tab-${activeTab}`}
+              >
 
                 {/* ── SUMMARY TAB ──────────────────────────────────────── */}
                 {activeTab === 'summary' && (
@@ -4027,6 +4405,33 @@ export default function TournamentDetailPage({
 
                         {/* Left: Content Area */}
                         <div className={styles.contentArea}>
+
+                            {/* Campeón de la temporada seleccionada: primero, antes que todo */}
+                            {currentSeasonOption?.champion && (
+                                <div className={styles.championBanner}>
+                                    <Trophy size={26} className={styles.championBannerIcon} aria-hidden="true" />
+                                    <div className={styles.championBannerBody}>
+                                        <span className={styles.championBannerLabel}>Campeón {currentSeasonOption.label}</span>
+                                        <span className={styles.championBannerClub}>
+                                            <ClubCrest club={currentSeasonOption.champion} size={24} />
+                                            {currentSeasonOption.champion.name}
+                                            {(currentSeasonOption.coChampions || []).map((club) => (
+                                                <span key={club.id} className={styles.championSeasonClub}>
+                                                    <span className={styles.championShared}>y</span>
+                                                    <ClubCrest club={club} size={24} />
+                                                    {club.name}
+                                                </span>
+                                            ))}
+                                        </span>
+                                    </div>
+                                    <button
+                                        className={`${styles.linkButton} ${styles.championBannerAction}`}
+                                        onClick={() => setActiveTab('champions')}
+                                    >
+                                        Ver campeones
+                                    </button>
+                                </div>
+                            )}
 
                             {/* Featured Match */}
                             {isMotorsportTournament ? renderMotorsportSeasonHero() : featured && renderCompetitionCard()}
@@ -4151,7 +4556,7 @@ export default function TournamentDetailPage({
                                                     {motorsportNextEvent.venue && <div className={styles.motorsportContextMeta}>{motorsportNextEvent.venue}</div>}
                                                     {motorsportNextEvent.timestamp && (
                                                         <div className={styles.motorsportContextMeta}>
-                                                            {formatArgentinaDate(new Date(motorsportNextEvent.timestamp * 1000), { day: '2-digit', month: 'long' })} - {formatArgentinaDate(new Date(motorsportNextEvent.timestamp * 1000), { hour: '2-digit', minute: '2-digit', hour12: false })} hs
+                                                            {fechaEnZonaDelVisitante(new Date(motorsportNextEvent.timestamp * 1000), { day: '2-digit', month: 'long' })} - {fechaEnZonaDelVisitante(new Date(motorsportNextEvent.timestamp * 1000), { hour: '2-digit', minute: '2-digit', hour12: false })} hs
                                                         </div>
                                                     )}
                                                 </div>
@@ -4280,9 +4685,9 @@ export default function TournamentDetailPage({
                                         awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
                                         homeScore: m.scores?.home ?? m.scores?.home_score ?? m.home_score,
                                         awayScore: m.scores?.away ?? m.scores?.away_score ?? m.away_score,
-                                        time: formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { day: '2-digit', month: '2-digit' }),
+                                        time: fechaEnZonaDelVisitante(new Date((m.timestamp || m.start_time || m.time) * 1000), { day: '2-digit', month: '2-digit' }),
                                         status: 'finished' as const,
-                                        dateLabel: formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { weekday: 'short', day: '2-digit', month: '2-digit' }),
+                                        dateLabel: fechaEnZonaDelVisitante(new Date((m.timestamp || m.start_time || m.time) * 1000), { weekday: 'short', day: '2-digit', month: '2-digit' }),
                                         kickoffAt: (m.timestamp || m.start_time || m.time)
                                             ? new Date((m.timestamp || m.start_time || m.time) * 1000).toISOString()
                                             : undefined,
@@ -4325,10 +4730,10 @@ export default function TournamentDetailPage({
                                         awayTeam: getMatchExportTeamName(m, 'away', isEspnTournament),
                                         homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
                                         awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
-                                        time: formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { hour: '2-digit', minute: '2-digit', hour12: false }) + ' ' +
-                                            formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { day: '2-digit', month: '2-digit' }),
+                                        time: fechaEnZonaDelVisitante(new Date((m.timestamp || m.start_time || m.time) * 1000), { hour: '2-digit', minute: '2-digit', hour12: false }) + ' ' +
+                                            fechaEnZonaDelVisitante(new Date((m.timestamp || m.start_time || m.time) * 1000), { day: '2-digit', month: '2-digit' }),
                                         status: 'scheduled' as const,
-                                        dateLabel: formatArgentinaDate(new Date((m.timestamp || m.start_time || m.time) * 1000), { weekday: 'short', day: '2-digit', month: '2-digit' }),
+                                        dateLabel: fechaEnZonaDelVisitante(new Date((m.timestamp || m.start_time || m.time) * 1000), { weekday: 'short', day: '2-digit', month: '2-digit' }),
                                         kickoffAt: (m.timestamp || m.start_time || m.time)
                                             ? new Date((m.timestamp || m.start_time || m.time) * 1000).toISOString()
                                             : undefined,
@@ -4667,6 +5072,11 @@ export default function TournamentDetailPage({
                     />
                 )}
 
+                {/* ── CHAMPIONS TAB ─────────────────────────────────────── */}
+                {activeTab === 'champions' && seasonOptionsLoaded && (
+                    <TournamentChampionsTab seasons={seasonOptions} />
+                )}
+
                 {/* ── ARCHIVE TAB ───────────────────────────────────────── */}
                 {activeTab === 'archive' && (
                     <div className={styles.section}>
@@ -4690,7 +5100,7 @@ export default function TournamentDetailPage({
                 )}
 
               </div>
-            </main>
+            </div>
 
             {showPredictor && draw.length > 0 && (
                 <RadialBracketPredictor

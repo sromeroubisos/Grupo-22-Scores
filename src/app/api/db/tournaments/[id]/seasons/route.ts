@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
 import { fetchTournamentData } from '@/lib/server/fetchTournamentData';
+import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import {
     collectSeasonLinkedTournamentIds,
     collectTournamentSeasonFamilyRows,
@@ -30,6 +31,12 @@ type TournamentRow = {
     country_id?: string | null;
 };
 
+type SeasonChampionRef = {
+    id: string;
+    name: string;
+    logo: string | null;
+};
+
 type SeasonOption = {
     id: string;
     label: string;
@@ -38,6 +45,10 @@ type SeasonOption = {
     seasonId: string | null;
     isCurrent: boolean;
     href: string;
+    status: string | null;
+    champion: SeasonChampionRef | null;
+    /** Títulos compartidos: los demás campeones de esa edición (settings.co_champions). */
+    coChampions: SeasonChampionRef[];
 };
 function jsonNoStore(body: unknown, init?: ResponseInit) {
     return NextResponse.json(body, {
@@ -78,7 +89,12 @@ function compareSeasonLabels(a: SeasonOption, b: SeasonOption): number {
 
 const ANCHOR_SELECT =
     'id, name, display_name, slug, season_id, status, is_visible, sport_id, country_id';
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Cinco grupos, no cuatro. Al que estaba acá le faltaba el tercer bloque de 4
+// (8-4-4-12 en vez de 8-4-4-4-12), así que NINGÚN uuid real lo pasaba: la
+// búsqueda por `id` no se intentaba nunca y un torneo abierto por uuid caía
+// siempre en la rama de slug, no encontraba nada y se quedaba sin el
+// desplegable de temporadas.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function coerceTournamentRow(value: Record<string, unknown> | null | undefined): TournamentRow | null {
     const id = typeof value?.id === 'string' ? value.id.trim() : '';
@@ -224,6 +240,34 @@ export async function GET(
         currentTournamentSeasons[0] ||
         null;
 
+    // Campeones: un solo lookup por todos los clubes campeones de la familia.
+    // El logo pasa por resolveSerializableLogoUrl — los escudos en base64 de
+    // `clubs.logo_url` inflarían el payload del selector si viajaran crudos.
+    const coChampionIdsOf = (season: TournamentSeasonFamilyRow): string[] => {
+        const raw = (season.settings as { co_champions?: unknown } | null)?.co_champions;
+        return Array.isArray(raw) ? raw.filter((v): v is string => typeof v === 'string' && Boolean(v.trim())) : [];
+    };
+    const championClubIds = new Set<string>();
+    for (const season of seasonRows) {
+        if (season.champion_club_id) championClubIds.add(season.champion_club_id);
+        coChampionIdsOf(season).forEach((clubId) => championClubIds.add(clubId));
+    }
+    const championById = new Map<string, SeasonChampionRef>();
+    if (championClubIds.size > 0) {
+        const { data: championRowsData } = await supabase
+            .from('clubs')
+            .select('id, name, short_name, logo_url')
+            .in('id', Array.from(championClubIds));
+        for (const club of (championRowsData ?? []) as Array<{ id: string; name: string | null; short_name: string | null; logo_url: string | null }>) {
+            const clubName = club.name || club.short_name || club.id;
+            championById.set(club.id, {
+                id: club.id,
+                name: clubName,
+                logo: resolveSerializableLogoUrl(club.logo_url, { key: club.id, name: clubName }),
+            });
+        }
+    }
+
     const seasons: SeasonOption[] = seasonRows.map((season) => {
         const owner = tournamentById.get(season.tournament_id) || lookup;
         const label = pickSeasonLabel(season);
@@ -240,6 +284,11 @@ export async function GET(
             seasonId: season.id,
             isCurrent: owner.id === currentId && season.id === activeSeason?.id,
             href: `${buildHref(owner.slug, owner.id)}?seasonId=${encodeURIComponent(season.id)}`,
+            status: season.status ?? null,
+            champion: (season.champion_club_id && championById.get(season.champion_club_id)) || null,
+            coChampions: coChampionIdsOf(season)
+                .map((clubId) => championById.get(clubId))
+                .filter((club): club is SeasonChampionRef => Boolean(club)),
         };
     });
 
@@ -254,6 +303,9 @@ export async function GET(
             seasonId: row.season_id,
             isCurrent: row.id === currentId && !activeSeason,
             href: buildHref(row.slug, row.id),
+            status: row.status ?? null,
+            champion: null,
+            coChampions: [],
         });
     }
 

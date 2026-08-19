@@ -9,6 +9,7 @@ import {
     isContestWonDetail,
     isContestLostDetail,
 } from '@/lib/matchEventStats';
+import { formatDifference } from '@/lib/utils/formatDifference';
 
 type StatsSubTab = 'teams' | 'players';
 type TeamStatsView = 'summary' | 'attack' | 'defense';
@@ -134,11 +135,49 @@ const initials = (value: string) => {
 
 const includesSearch = (value: unknown, query: string) => String(value ?? '').toLowerCase().includes(query);
 
-function formatStatValue(row: any, column: StatColumn) {
+/* ── Huecos de datos vs. ceros reales ───────────────────────────────────────
+   Estas métricas no salen del resultado del partido: se cuentan sumando eventos
+   (`tackle`, `pass`, `kick`…) que muchas competiciones sencillamente no publican.
+   Cuando el proveedor no manda un solo evento del tipo, el acumulador queda en 0
+   y la pantalla termina afirmando que catorce clubes hicieron cero tackles en
+   diecisiete fechas — que en rugby es imposible.
+
+   El criterio es el total de la competición, no el del equipo: un club puede
+   tener 0 tries en una temporada mala, pero si la LIGA ENTERA suma 0 en una
+   métrica de contacto o de volumen, el dato no existe, no es que no haya pasado.
+
+   Fuera de esta lista quedan a propósito las que derivan del marcador (PJ, PG,
+   PE, PP, PTS, PC, DIF) y las de disciplina (TA, TR): ahí el cero sí comunica. */
+const EVENT_DERIVED_METRICS = new Set([
+    // Los tries se cuentan sumando eventos `try`, igual que los tackles: si la
+    // liga entera suma 0 tries en 119 partidos, el dato no existe. Estaban
+    // afuera del set y por eso seguían mostrando un 0 que no es un cero.
+    'tries_scored', 'tries_conceded', 'tries',
+    'tackles_made', 'tackles', 'passes', 'recoveries',
+    'turnovers_won', 'turnovers_lost', 'kick_meters', 'entries_22',
+    'conversions', 'conversion_attempts', 'conversion_rate',
+    'penalty_goals', 'penalty_goal_attempts', 'drop_goals',
+    'penalties_won', 'penalties_conceded', 'free_kicks',
+    'knock_ons', 'forward_passes', 'handling_errors',
+    'defense_index',
+]);
+
+/** ids cuyo total en toda la competición es 0 ⇒ la métrica no se midió. */
+function findUnmeasuredMetrics(rows: any[]): Set<string> {
+    const sinDatos = new Set<string>();
+    if (!rows.length) return sinDatos;
+    EVENT_DERIVED_METRICS.forEach((id) => {
+        if (rows.every((row) => n(row?.[id]) === 0)) sinDatos.add(id);
+    });
+    return sinDatos;
+}
+
+function formatStatValue(row: any, column: StatColumn, unmeasured?: Set<string>) {
+    if (unmeasured?.has(column.id)) return '—';
     const value = row[column.id];
     const numeric = n(value);
     if (column.format === 'percent') return `${fmt(numeric, Number.isInteger(numeric) ? 0 : 1)}%`;
-    if (column.format === 'signed') return `${numeric > 0 ? '+' : ''}${fmt(numeric, Number.isInteger(numeric) ? 0 : 1)}`;
+    if (column.format === 'signed') return formatDifference(numeric, Number.isInteger(numeric) ? 0 : 1);
     if (column.format === 'decimal') return fmt(numeric, 1);
     return fmt(numeric, Number.isInteger(numeric) ? 0 : 1);
 }
@@ -475,7 +514,40 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
     const playerColumns = PLAYER_COLUMNS;
 
     const currentRows = activeSubTab === 'teams' ? teamRows : playerRows;
+
+    // Se calcula sobre TODAS las filas, no sobre las filtradas: si el usuario
+    // filtra por un club, la métrica no pasa a estar "sin datos" sólo porque
+    // ese club no la tenga.
+    const unmeasuredMetrics = useMemo(() => findUnmeasuredMetrics(currentRows), [currentRows]);
+
+    // La columna SE MUESTRA igual, con "—": que la métrica exista y no tengamos
+    // el dato es información, y borrarla en silencio dejaría al usuario creyendo
+    // que la pantalla nunca la contempló.
     const currentColumns = activeSubTab === 'teams' ? teamColumns : playerColumns;
+
+    // Ordenar por una columna que es toda "—" no hace nada, y un control que no
+    // hace nada se lee como un botón roto: ésa sí sale del menú.
+    const sortableColumns = useMemo(
+        () => currentColumns.filter((column) => !unmeasuredMetrics.has(column.id)),
+        [currentColumns, unmeasuredMetrics],
+    );
+
+    // Valor de tarjeta que respeta el hueco de datos. El sufijo es para CONV%,
+    // donde el "%" no debe quedar pegado al guión.
+    const measured = React.useCallback(
+        (metricId: string, value: unknown, digits = 0, suffix = '') =>
+            (unmeasuredMetrics.has(metricId) ? '—' : `${fmt(value, digits)}${suffix}`),
+        [unmeasuredMetrics],
+    );
+
+    // La vista Defensa ordena por DEF IDX por defecto, que es de las que puede
+    // quedar sin datos: si el orden activo apunta a una métrica que no se midió,
+    // se cae a la primera ordenable en vez de dejar la tabla en un orden mudo.
+    useEffect(() => {
+        if (!unmeasuredMetrics.has(sortKey)) return;
+        const fallback = sortableColumns.find((column) => column.id !== 'entity' && column.id !== 'secondary');
+        if (fallback) setSortKey(fallback.id);
+    }, [sortKey, sortableColumns, unmeasuredMetrics]);
 
     const teamOptions = useMemo(() => {
         return [...teamRows]
@@ -546,17 +618,34 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
 
     const renderTeamCard = (row: any, idx: number) => {
         const summaryGroups = [
+            // El balance como proporción: PG/PE/PP sueltos no dicen si 11-0-6 es
+            // una buena temporada hasta que uno los suma. La barra sí.
+            <BarraDeBalance
+                key="balance"
+                ganados={n(row.wins)}
+                empatados={n(row.draws)}
+                perdidos={n(row.losses)}
+            />,
+            // PG/PE/PP salieron de acá: la barra de arriba ya los dice CON su
+            // proporción. Repetirlos era el mismo defecto que el "FT" duplicado
+            // de la fila de partido — dos veces el dato, ninguna vez mejor.
             renderMobileStatGroup('Resumen', [
                 { label: 'PJ', value: fmt(row.matches_played) },
-                { label: 'PG', value: fmt(row.wins) },
-                { label: 'PE', value: fmt(row.draws) },
-                { label: 'PP', value: fmt(row.losses) },
+                { label: 'DIF', value: formatStatValue(row, { id: 'points_difference', label: 'DIF', format: 'signed' }) },
             ]),
+            // Ataque contra defensa en la misma escala, que es la comparación
+            // que esta pantalla existe para responder.
+            <BarraFavorContra
+                key="favor-contra"
+                aFavor={n(row.points_for)}
+                enContra={n(row.points_against)}
+            />,
+            // PTS y PC también salieron: los muestra la barra de arriba, y ahí
+            // además se ven en la misma escala, que era el punto.
             renderMobileStatGroup('Balance', [
-                { label: 'PTS', value: fmt(row.points_for), accent: true },
-                { label: 'PC', value: fmt(row.points_against) },
-                { label: 'DIF', value: formatStatValue(row, { id: 'points_difference', label: 'DIF', format: 'signed' }), accent: n(row.points_difference) > 0, danger: n(row.points_difference) < 0 },
-                { label: 'TACK', value: fmt(row.tackles_made) },
+                { label: 'TRIES+', value: measured('tries_scored', row.tries_scored) },
+                { label: 'TRIES-', value: measured('tries_conceded', row.tries_conceded) },
+                { label: 'TACK', value: measured('tackles_made', row.tackles_made) },
             ]),
         ];
 
@@ -568,10 +657,10 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                 { label: 'TR/PJ', value: fmt(row.tries_scored_per_match, 1) },
             ]),
             renderMobileStatGroup('Patadas', [
-                { label: 'CONV', value: fmt(row.conversions), accent: true },
-                { label: 'CONV%', value: `${fmt(row.conversion_rate, 1)}%` },
-                { label: 'PEN', value: fmt(row.penalty_goals) },
-                { label: 'M PAT', value: fmt(row.kick_meters) },
+                { label: 'CONV', value: measured('conversions', row.conversions), accent: true },
+                { label: 'CONV%', value: measured('conversion_rate', row.conversion_rate, 1, '%') },
+                { label: 'PEN', value: measured('penalty_goals', row.penalty_goals) },
+                { label: 'M PAT', value: measured('kick_meters', row.kick_meters) },
             ]),
         ];
 
@@ -583,16 +672,16 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                 { label: 'TC/PJ', value: fmt(row.tries_conceded_per_match, 1) },
             ]),
             renderMobileStatGroup('Contacto', [
-                { label: 'TACK', value: fmt(row.tackles_made), accent: true },
-                { label: 'DEF IDX', value: fmt(row.defense_index, 1), accent: true },
-                { label: 'REC', value: fmt(row.turnovers_won) },
-                { label: 'PEN C', value: fmt(row.penalties_conceded), danger: n(row.penalties_conceded) > 0 },
+                { label: 'TACK', value: measured('tackles_made', row.tackles_made), accent: true },
+                { label: 'DEF IDX', value: measured('defense_index', row.defense_index, 1), accent: true },
+                { label: 'REC', value: measured('turnovers_won', row.turnovers_won) },
+                { label: 'PEN C', value: measured('penalties_conceded', row.penalties_conceded), danger: n(row.penalties_conceded) > 0 },
             ]),
             renderMobileStatGroup('Disciplina', [
                 { label: 'TA', value: fmt(row.yellow_cards), danger: n(row.yellow_cards) > 0 },
                 { label: 'TR', value: fmt(row.red_cards), danger: n(row.red_cards) > 0 },
-                { label: 'TO-', value: fmt(row.turnovers_lost) },
-                { label: 'ERR', value: fmt(n(row.knock_ons) + n(row.forward_passes) + n(row.handling_errors)) },
+                { label: 'TO-', value: measured('turnovers_lost', row.turnovers_lost) },
+                { label: 'ERR', value: measured('knock_ons', n(row.knock_ons) + n(row.forward_passes) + n(row.handling_errors)) },
             ]),
         ];
 
@@ -624,12 +713,12 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                 { label: 'TRIES', value: fmt(row.tries), accent: true },
             ])}
             {renderMobileStatGroup('Juego', [
-                { label: 'CONV', value: fmt(row.conversions), accent: true },
-                { label: 'PEN', value: fmt(row.penalty_goals) },
-                { label: 'TACK', value: fmt(row.tackles) },
+                { label: 'CONV', value: measured('conversions', row.conversions), accent: true },
+                { label: 'PEN', value: measured('penalty_goals', row.penalty_goals) },
+                { label: 'TACK', value: measured('tackles', row.tackles) },
             ])}
             {renderMobileStatGroup('Otros', [
-                { label: 'M PAT', value: fmt(row.kick_meters) },
+                { label: 'M PAT', value: measured('kick_meters', row.kick_meters) },
                 { label: 'TA', value: fmt(row.yellow_cards), danger: n(row.yellow_cards) > 0 },
                 { label: 'TR', value: fmt(row.red_cards), danger: n(row.red_cards) > 0 },
             ])}
@@ -742,7 +831,7 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                         }}
                         aria-label="Ordenar estadísticas"
                     >
-                        {currentColumns.filter((col) => col.id !== 'entity' && col.id !== 'secondary').map((col) => (
+                        {sortableColumns.filter((col) => col.id !== 'entity' && col.id !== 'secondary').map((col) => (
                             <React.Fragment key={col.id}>
                                 <option value={`${col.id}:desc`}>{col.label} ↓</option>
                                 <option value={`${col.id}:asc`}>{col.label} ↑</option>
@@ -841,7 +930,7 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                                                 ) : col.id === 'secondary' ? (
                                                     <span className={styles.statsTeamChip}>{row.secondary}</span>
                                                 ) : (
-                                                    <span className={metricClassName}>{formatStatValue(row, col)}</span>
+                                                    <span className={metricClassName}>{formatStatValue(row, col, unmeasuredMetrics)}</span>
                                                 )}
                                             </div>
                                         );
@@ -858,6 +947,69 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                         : 'No hay estadísticas disponibles para esta sección.'}
                 </p>
             )}
+        </div>
+    );
+}
+
+/**
+ * Barra doble enfrentada: puntos a favor contra puntos en contra.
+ *
+ * Es la comparación que la pantalla pedía a gritos. Con dos números sueltos
+ * («PTS 622» y «PC 402») hay que hacer la resta en la cabeza; con la barra, el
+ * ataque y la defensa se leen de un vistazo y en la misma escala.
+ *
+ * Los valores quedan a la vista en los extremos: la barra agrega proporción,
+ * no reemplaza el dato.
+ */
+function BarraFavorContra({ aFavor, enContra }: { aFavor: number; enContra: number }) {
+    const total = aFavor + enContra;
+    // Sin partidos jugados no hay proporción que mostrar; media barra de cada
+    // lado sugeriría un empate que no ocurrió.
+    if (total <= 0) return null;
+    const pctFavor = (aFavor / total) * 100;
+    return (
+        <div className={styles.statBarBlock}>
+            <div className={styles.statBarHead}>
+                <span className={styles.statBarHeadFor}>A favor <b>{aFavor}</b></span>
+                <span className={styles.statBarHeadAgainst}><b>{enContra}</b> En contra</span>
+            </div>
+            <div
+                className={styles.statBarTrack}
+                role="img"
+                aria-label={`${aFavor} puntos a favor contra ${enContra} en contra`}
+            >
+                <span className={styles.statBarFor} style={{ width: `${pctFavor}%` }} />
+                <span className={styles.statBarAgainst} style={{ width: `${100 - pctFavor}%` }} />
+            </div>
+        </div>
+    );
+}
+
+/**
+ * Balance de la temporada como una sola proporción en vez de tres cifras
+ * sueltas. Cada tramo lleva su número en la leyenda, así que el color refuerza
+ * pero no es el único portador de la información.
+ */
+function BarraDeBalance({ ganados, empatados, perdidos }: { ganados: number; empatados: number; perdidos: number }) {
+    const total = ganados + empatados + perdidos;
+    if (total <= 0) return null;
+    const p = (n: number) => (n / total) * 100;
+    return (
+        <div className={styles.statBarBlock}>
+            <div
+                className={styles.statRecordTrack}
+                role="img"
+                aria-label={`${ganados} ganados, ${empatados} empatados, ${perdidos} perdidos de ${total} partidos`}
+            >
+                <span className={styles.statRecordWon} style={{ width: `${p(ganados)}%` }} />
+                <span className={styles.statRecordDrawn} style={{ width: `${p(empatados)}%` }} />
+                <span className={styles.statRecordLost} style={{ width: `${p(perdidos)}%` }} />
+            </div>
+            <div className={styles.statRecordLegend}>
+                <span><i className={styles.statRecordWon} />G <b>{ganados}</b></span>
+                <span><i className={styles.statRecordDrawn} />E <b>{empatados}</b></span>
+                <span><i className={styles.statRecordLost} />P <b>{perdidos}</b></span>
+            </div>
         </div>
     );
 }

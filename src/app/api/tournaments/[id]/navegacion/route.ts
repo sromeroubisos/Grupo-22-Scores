@@ -25,6 +25,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { menuDeGrados, menuDeTemporadas, type TorneoHermano } from '@/lib/tournamentNavigation';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isUuid } from '@/lib/utils/postgrest';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,10 +40,17 @@ export async function GET(
     const supabase = createAdminClient() as any;
 
     try {
+        // La URL pública de un torneo lleva SLUG o uuid, y el segmento llega acá
+        // tal cual. Contra `tournaments.id`, que es uuid, un slug no era una
+        // búsqueda sin resultado: Postgres abortaba la sentencia con 22P02, la
+        // ruta devolvía 500 y los dos desplegables desaparecían de la pantalla.
+        // Se busca por la columna que corresponde — el mismo criterio que ya usa
+        // /api/db/tournaments/[id].
+        const columnaDeBusqueda = isUuid(id) ? 'id' : 'slug';
         const { data: actualRaw, error: errActual } = await supabase
             .from('tournaments')
             .select(`${COLUMNAS}, union_id, is_active`)
-            .eq('id', id)
+            .eq(columnaDeBusqueda, id)
             .maybeSingle();
         if (errActual) throw new Error(errActual.message);
 
