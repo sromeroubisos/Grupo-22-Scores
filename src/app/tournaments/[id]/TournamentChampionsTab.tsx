@@ -2,7 +2,10 @@
 
 /**
  * Tab "Campeones": palmarés del torneo y la lista completa de temporadas con
- * su campeón. Cada fila navega a esa temporada (mismo href que el selector).
+ * su campeón. Cada fila navega al RESUMEN de esa temporada: el href fuerza
+ * tab=summary y onNavigate cambia la pestaña activa en el padre — cambiar solo
+ * el seasonId no desmonta la página, así que sin eso el usuario quedaba en
+ * Campeones mirando la misma lista y no sabía si había navegado.
  *
  * No hace ningún fetch: se alimenta de las mismas SeasonOption del selector de
  * temporadas, que ya traen campeón (y co-campeones de títulos compartidos)
@@ -52,7 +55,20 @@ function championsOf(season: ChampionSeasonItem): ChampionRef[] {
     return [season.champion, ...(season.coChampions || [])];
 }
 
-export default function TournamentChampionsTab({ seasons }: { seasons: ChampionSeasonItem[] }) {
+function hrefResumen(href: string): string {
+    const [path, query = ''] = href.split('?');
+    const params = new URLSearchParams(query);
+    params.set('tab', 'summary');
+    return `${path}?${params.toString()}`;
+}
+
+export default function TournamentChampionsTab({
+    seasons,
+    onNavigate,
+}: {
+    seasons: ChampionSeasonItem[];
+    onNavigate?: () => void;
+}) {
     const conCampeon = seasons.filter((season) => Boolean(season.champion));
 
     // Palmarés: títulos por club; un título compartido suma uno a cada club.
@@ -100,7 +116,11 @@ export default function TournamentChampionsTab({ seasons }: { seasons: ChampionS
                         const enCurso = !season.champion && (season.status === 'active' || season.status === 'draft');
                         return (
                             <li key={season.id}>
-                                <Link href={season.href} className={styles.championSeasonRow}>
+                                <Link
+                                    href={hrefResumen(season.href)}
+                                    className={styles.championSeasonRow}
+                                    onClick={() => onNavigate?.()}
+                                >
                                     <span className={styles.championSeasonYear}>{season.label}</span>
                                     {campeones.length > 0 ? (
                                         <span className={styles.championSeasonClubs}>
