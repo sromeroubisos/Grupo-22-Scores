@@ -492,9 +492,9 @@ const BASE_FONT_CANTARELL = '"Cantarell", "Inter", "Outfit", sans-serif';
 const BASE_FONT_ROBOTO_MONO = '"Roboto Mono", "JetBrains Mono", monospace';
 const BASE_FONT_RANCHO = '"Rancho", "Bebas Neue", cursive';
 let FONT_DISPLAY = BASE_FONT_OUTFIT;
-let FONT_BODY = BASE_FONT_OUTFIT;
+export let FONT_BODY = BASE_FONT_OUTFIT;
 let FONT_MONO = BASE_FONT_MONO;
-let FONT_OUTFIT_BLACK = BASE_FONT_OUTFIT;
+export let FONT_OUTFIT_BLACK = BASE_FONT_OUTFIT;
 let FONT_EDITORIAL = BASE_FONT_BEBAS;
 let FONT_CLASSIC_MATCH_SCORE = BASE_FONT_DHARMA;
 let FONT_EDITORIAL_SCORE = BASE_FONT_DHARMA;
@@ -4772,7 +4772,7 @@ async function ensureArticulatFont(): Promise<void> {
     await articulatFontPromise;
 }
 
-async function ensureExportFonts(): Promise<void> {
+export async function ensureExportFonts(): Promise<void> {
     if (typeof document === 'undefined' || !('fonts' in document)) return;
     try {
         await loadLocalExportFonts();
@@ -4897,7 +4897,7 @@ function getTournamentLogoImageSource(data: TournamentLogoSourceData): string {
     return proxyUrl.toString();
 }
 
-async function loadImage(url: string): Promise<HTMLImageElement | null> {
+export async function loadImage(url: string): Promise<HTMLImageElement | null> {
     if (!isImageSource(url)) return null;
     const normalized = normalizeImageSource(url);
     const sameOrigin = typeof window !== 'undefined' && normalized.startsWith(window.location.origin);
@@ -4931,7 +4931,7 @@ async function loadImage(url: string): Promise<HTMLImageElement | null> {
     });
 }
 
-function getContrastColor(hex: string) {
+export function getContrastColor(hex: string) {
     if (!/^#[0-9a-f]{6}$/i.test(hex)) return '#0f172a';
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
@@ -4940,7 +4940,7 @@ function getContrastColor(hex: string) {
     return yiq >= 128 ? '#0f172a' : '#ffffff';
 }
 
-function hexToRGBA(hex: string, alpha: number) {
+export function hexToRGBA(hex: string, alpha: number) {
     if (!/^#[0-9a-f]{6}$/i.test(hex)) return hex;
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
@@ -4968,16 +4968,16 @@ function mixHexColors(colorA: string, colorB: string, ratio: number) {
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
-function getSafeArea(canvas: HTMLCanvasElement): SafeArea {
+export function getSafeArea(canvas: HTMLCanvasElement): SafeArea {
     const isStory = canvas.height > 1500;
     return { top: isStory ? 320 : 220, bottom: canvas.height - (isStory ? 220 : 150), centerX: canvas.width / 2, width: canvas.width, height: canvas.height };
 }
 
-function getTextColor(isDark: boolean) {
+export function getTextColor(isDark: boolean) {
     return isDark ? '#f2f2f2' : '#0f172a';
 }
 
-function getMutedColor(isDark: boolean, alpha: number) {
+export function getMutedColor(isDark: boolean, alpha: number) {
     return isDark ? `rgba(242,242,242,${alpha})` : `rgba(15,23,42,${alpha})`;
 }
 
@@ -5093,7 +5093,7 @@ function drawStandingsTeamName(
     ctx.fillText(teamName, x, centerY + 1);
 }
 
-function drawBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, bgColor: string, accentColor: string, isDark: boolean) {
+export function drawBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, bgColor: string, accentColor: string, isDark: boolean) {
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     const topGlow = ctx.createRadialGradient(canvas.width * 0.5, 0, 0, canvas.width * 0.5, 0, canvas.height * 0.85);
@@ -5118,7 +5118,7 @@ function drawBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, 
     }
 }
 
-function drawSurfacePanel(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, isDark: boolean) {
+export function drawSurfacePanel(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, isDark: boolean) {
     ctx.save();
     ctx.shadowColor = isDark ? 'rgba(0,0,0,0.34)' : 'rgba(15,23,42,0.12)';
     ctx.shadowBlur = isDark ? 46 : 36;
@@ -5279,7 +5279,7 @@ function getContainedOpaquePlacement(
     };
 }
 
-function drawLogoBadge(ctx: CanvasRenderingContext2D, options: LogoBadgeOptions) {
+export function drawLogoBadge(ctx: CanvasRenderingContext2D, options: LogoBadgeOptions) {
     const { x, y, size, img, label, rawLogo, isDark, showFrame = true } = options;
     const shouldDrawFrame = showFrame || !img;
     ctx.save();
@@ -5403,7 +5403,7 @@ function drawEditorialCrestStroke(
     ctx.restore();
 }
 
-function drawCenteredPill(
+export function drawCenteredPill(
     ctx: CanvasRenderingContext2D,
     centerX: number,
     y: number,
@@ -5667,7 +5667,7 @@ function getBrandFooterMetrics(canvas: HTMLCanvasElement) {
     return { isStory, labelY, wordmarkY, iconSize, gap, topLine };
 }
 
-function drawBrandFooter(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, brandLogo: HTMLImageElement | null, isDark: boolean) {
+export function drawBrandFooter(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, brandLogo: HTMLImageElement | null, isDark: boolean) {
     const { isStory, labelY, wordmarkY, iconSize, gap } = getBrandFooterMetrics(canvas);
     ctx.save();
     ctx.textAlign = 'center';
