@@ -91,6 +91,7 @@ type InternalMatchRow = {
     home_club_id: string | null;
     away_club_id: string | null;
     tournament_id: string | null;
+    round_label: string | null;
     // El deporte del propio partido. Hace falta porque un AMISTOSO no tiene
     // torneo, y sin esto se quedaba sin deporte (ver más abajo).
     sport_id: string | null;
@@ -1395,7 +1396,7 @@ export async function GET(request: Request) {
             const internalMatchesBaseQuery = () => readClient
                 .from('matches')
                 .select(`
-                    id, date_time, status, score, sport_id, sport,
+                    id, date_time, status, score, sport_id, sport, round_label,
                     home_club_id, away_club_id, tournament_id,
                     home_club:clubs!matches_home_club_id_fkey(name),
                     away_club:clubs!matches_away_club_id_fkey(name),
@@ -1495,8 +1496,11 @@ export async function GET(request: Request) {
                 }
             }
             if (typedMatchRows.length > 0) {
+                // 'final' es el estado que usa ESTA base: los 88.196 partidos de
+                // `matches` lo escriben así. Faltaba en la lista, y por eso un
+                // partido terminado dependía de que la fecha lo delatara.
                 const FINISHED_STATUSES = new Set([
-                    'finished', 'completed', 'scored', 'ft', 'aet', 'pen', 'awarded',
+                    'final', 'finished', 'completed', 'scored', 'ft', 'aet', 'pen', 'awarded',
                     'finalizado', 'jugado', 'played', 'result'
                 ]);
                 const SCHEDULED_STATUSES = new Set([
@@ -1517,7 +1521,14 @@ export async function GET(request: Request) {
                         away_name: awayClub?.name,
                         away_logo: awayLogo?.logo,
                         away_logo_updated_at: awayLogo?.updatedAt,
-                        tournament_name: tournament?.name,
+                        // Un partido histórico puede no tener torneo en la base sin
+                        // ser un amistoso: el clásico Bayonne–Biarritz reparte 85
+                        // partidos en 15 competencias, de las que solo dos existen
+                        // como fila. Para esas trece el nombre viaja en
+                        // `round_label`, y sin esta caída la ficha las mostraba en
+                        // blanco, como si el club hubiera jugado sueltos partidos
+                        // sin nombre desde 1930.
+                        tournament_name: tournament?.name || row.round_label || null,
                         // El deporte salía SOLO del torneo, y un amistoso no tiene
                         // torneo: quedaba en null y la ficha del club lo tiraba a la
                         // basura, porque su filtro de deporte compara `sport_id`
@@ -1532,8 +1543,13 @@ export async function GET(request: Request) {
                             || null,
                     });
                     const st = (row.status || '').toLowerCase();
-                    const matchDate = row.date_time ? new Date(row.date_time).getTime() : 0;
-                    const isPast = matchDate > 0 && matchDate < now;
+                    const matchDate = row.date_time ? new Date(row.date_time).getTime() : NaN;
+                    // `matchDate > 0` parecía "tiene fecha", pero el epoch de
+                    // cualquier partido anterior a 1970 es NEGATIVO: los 23 del
+                    // clásico Bayonne–Biarritz jugados entre 1930 y 1969 daban
+                    // "sin fecha" y la ficha los listaba como PRÓXIMOS. Lo que hay
+                    // que preguntar es si la fecha es válida, no si es positiva.
+                    const isPast = Number.isFinite(matchDate) && matchDate < now;
                     const isFinished = FINISHED_STATUSES.has(st) || (isPast && !SCHEDULED_STATUSES.has(st));
                     if (isFinished) {
                         internalResults.push(normalized);
