@@ -12,7 +12,7 @@ import type { Tournament } from '@/lib/types';
 import TournamentSeasonTag from '@/components/TournamentSeasonTag';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { AUDIENCE_LABELS, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
+import { AUDIENCE_LABELS, matchesTournamentAudience, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { compareTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 
 type TournamentCountryGroup = {
@@ -448,14 +448,14 @@ export default function TorneosPage() {
                 return false;
             }
 
-            return resolveTournamentAudience({
+            return matchesTournamentAudience({
                 ageGroup: tournament.ageGroup,
                 categories: tournament.categories,
                 isYouth: tournament.isYouth,
                 name: tournament.name,
                 displayName: tournament.displayName || tournament.nameEs,
                 originalName: tournament.originalName,
-            }) === selectedAudience;
+            }, selectedAudience);
         });
 
         return uniqueTournamentsByIdentity(audienceMatched);
@@ -480,14 +480,14 @@ export default function TorneosPage() {
         ];
 
         combined.forEach((tournament) => {
-            if (resolveTournamentAudience({
+            if (!matchesTournamentAudience({
                 ageGroup: tournament.ageGroup,
                 categories: tournament.categories,
                 isYouth: tournament.isYouth,
                 name: tournament.name,
                 displayName: tournament.displayName || tournament.nameEs,
                 originalName: tournament.originalName,
-            }) !== selectedAudience) {
+            }, selectedAudience)) {
                 return;
             }
 

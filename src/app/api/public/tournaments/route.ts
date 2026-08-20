@@ -21,7 +21,7 @@ import {
 } from '@/lib/server/externalTournamentOverrides';
 import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
-import { resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
+import { isDualAudienceTournament, matchesTournamentAudience, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 import { isTournamentVisibleToPublic } from '@/lib/tournamentReview';
 import { ocultarGradosSubordinados } from '@/lib/tournamentNavigation';
@@ -622,10 +622,10 @@ async function queryRugbyCountryTournaments(args: {
     const withOverrides = await applyStoredTournamentOverrides([...uniqueById.values()]);
 
     return sortTournamentsByPriority(withOverrides.filter((tournament) => {
-        if (resolveTournamentAudience({
+        if (!matchesTournamentAudience({
             name: tournament.name,
             displayName: tournament.display_name,
-        }) !== args.audience) {
+        }, args.audience)) {
             return false;
         }
 
@@ -662,10 +662,10 @@ async function queryFlashScoreCountryTournaments(args: {
     const withOverrides = await applyStoredTournamentOverrides(mapped);
 
     return sortTournamentsByPriority(withOverrides.filter((tournament) => {
-        if (resolveTournamentAudience({
+        if (!matchesTournamentAudience({
             name: tournament.name,
             displayName: tournament.display_name,
-        }) !== args.audience) {
+        }, args.audience)) {
             return false;
         }
 
@@ -934,8 +934,19 @@ function filterPublicDbTournaments(args: {
                 return false;
             }
 
+            // El Campeonato Argentino Juvenil va en los dos segmentos: es M17
+            // pero es de seleccionados. La puerta se pregunta aparte y por
+            // nombre, para no meter el nombre en el resolutor de acá — que a
+            // propósito decide sólo con grado, categoría y subcategoría, y
+            // sumarle una pista más cambiaría el segmento de otros torneos.
+            const enLosDosSegmentos = isDualAudienceTournament({
+                name: tournament.name,
+                displayName: tournament.display_name,
+            });
+
             if (
                 args.audience !== 'all' &&
+                !enLosDosSegmentos &&
                 resolveTournamentAudience({
                     ageGrade: tournament.age_grade,
                     category: tournament.category,

@@ -1,7 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { AUDIENCE_LABELS, resolveTournamentAudience } from './tournamentAudience.ts';
+import {
+    AUDIENCE_LABELS,
+    isDualAudienceTournament,
+    matchesTournamentAudience,
+    resolveTournamentAudience,
+} from './tournamentAudience.ts';
 
 /**
  * La regla del segmento, escrita como se lee en pantalla.
@@ -86,4 +91,49 @@ test('la portada de mayores no se lleva puesto lo que no reconoce', () => {
 test('el rótulo de la pestaña nombra las dos cosas que hay adentro', () => {
     assert.equal(AUDIENCE_LABELS.mayores, 'Mayores');
     assert.equal(AUDIENCE_LABELS.juveniles, 'Juveniles/Reserva');
+});
+
+/**
+ * La puerta de los dos segmentos.
+ *
+ * `resolveTournamentAudience` sigue contestando *qué es* el torneo —y el
+ * Argentino Juvenil es de juveniles, eso no cambia—: lo que se agrega es *dónde
+ * se muestra*, que es otra pregunta y por eso es otra función. Los casos fijan
+ * las dos mitades: que el torneo entre en las dos pestañas, y que nadie más se
+ * cuele por el camino nuevo.
+ */
+test('el Argentino Juvenil entra en las dos pestañas sin dejar de ser juvenil', () => {
+    const torneo = { name: 'Campeonato Argentino Juvenil M17 - Zona Campeonato' };
+
+    // Lo que ES no cambia: el grado sigue mandándolo a juveniles.
+    assert.equal(resolveTournamentAudience(torneo), 'juveniles');
+    assert.equal(resolveTournamentAudience({ ageGrade: 'M17' }), 'juveniles');
+
+    // Lo que cambia es DÓNDE se muestra.
+    assert.equal(isDualAudienceTournament(torneo), true);
+    assert.equal(matchesTournamentAudience(torneo, 'juveniles'), true);
+    assert.equal(matchesTournamentAudience(torneo, 'mayores'), true);
+
+    // Por las tres vías con las que llega el nombre, porque cada pantalla tiene
+    // una distinta a mano.
+    assert.equal(isDualAudienceTournament({ displayName: 'Campeonato Argentino Juvenil M18' }), true);
+    assert.equal(isDualAudienceTournament({ originalName: 'Campeonato Argentino Juvenil M17 - Zona Ascenso' }), true);
+});
+
+test('la puerta no se lleva puesto ningún otro torneo', () => {
+    // El resto de los juveniles sigue sólo en su pestaña: si esto se rompe, la
+    // portada se llena de M15 y el segmento deja de servir para nada.
+    for (const nombre of [
+        'URBA: Menores de 15 - Segunda Rueda - Fase Regular',
+        'Juveniles - Primera rueda - M16 - Grupo II',
+        'Top 14 - Intermedia',
+        'Campeonato Argentino de Mayores',
+    ]) {
+        assert.equal(isDualAudienceTournament({ name: nombre }), false, nombre);
+    }
+
+    assert.equal(matchesTournamentAudience({ name: 'Menores de 19' }, 'mayores'), false);
+    assert.equal(matchesTournamentAudience({ name: 'Menores de 19' }, 'juveniles'), true);
+    assert.equal(matchesTournamentAudience({ name: 'Top 14' }, 'mayores'), true);
+    assert.equal(matchesTournamentAudience({ name: 'Top 14' }, 'juveniles'), false);
 });
