@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 import { getTournamentById } from '@/lib/data/tournaments';
-import { ArrowLeft, Calendar, Trophy, Users, ChevronRight, Share2, MapPin } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Calendar, Trophy, Users, ChevronRight, Share2, MapPin } from 'lucide-react';
 import ExportImage from '@/components/ExportImage';
 import { useFavorites } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
@@ -1873,6 +1873,13 @@ export default function TournamentDetailPage({
     }, [zonaDelVisitante]);
     const [loading, setLoading] = useState(!preloaded);
     const [error, setError] = useState<string | null>(null);
+    // Por qué las pestañas vinieron vacías. `null` = la respuesta no lo dice
+    // (torneo de base, proveedor que todavía no lo reporta): se trata como sano.
+    const [providerStatus, setProviderStatus] = useState<{
+        ok: boolean;
+        reason: string | null;
+        message: string | null;
+    } | null>(null);
 
     const [tournamentData, setTournamentData] = useState<any>(preloaded?.tournamentMeta ?? null);
     const [standings, setStandings] = useState<any[]>(preloaded?.standings ?? []);
@@ -2221,6 +2228,8 @@ export default function TournamentDetailPage({
                 const payload = await res.json();
                 console.log('TOURNAMENT API PAYLOAD:', payload);
                 if (controller.signal.aborted) return;
+
+                setProviderStatus(payload?.providerStatus ?? null);
 
                 if (!res.ok || !payload?.ok) {
                     if ((localTournament as any).__isDbOnly) {
@@ -4390,6 +4399,15 @@ export default function TournamentDetailPage({
             {/* <div>, no <main>: el layout ya aporta el landmark principal, y dos
                 <main> en el documento rompen el atajo "ir al contenido". */}
             <div className="g22-container" style={{ paddingBottom: '24px' }} ref={panelHostRef}>
+              {/* Una pestaña vacía puede ser un torneo sin datos o un torneo que
+                  nunca pudimos resolver contra el proveedor. Callarlo hace que
+                  las dos cosas se vean igual: acá se dice cuál de las dos es. */}
+              {providerStatus && !providerStatus.ok && providerStatus.message && (
+                <div className={styles.providerNotice} role="status">
+                  <AlertTriangle size={18} aria-hidden="true" />
+                  <span>{providerStatus.message}</span>
+                </div>
+              )}
               {/* Keyed wrapper: re-mounts on tab switch so the entrance animation re-fires */}
               <div
                 key={activeTab}

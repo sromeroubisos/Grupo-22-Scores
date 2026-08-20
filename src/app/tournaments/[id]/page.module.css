@@ -2859,6 +2859,27 @@
     font-size: 0.875rem;
 }
 
+/* Aviso de por qué las pestañas vinieron vacías. El ámbar va como fondo teñido
+   y el texto en --fl-off-text: el ámbar puro como texto da 2,8:1 en claro. */
+.providerNotice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 16px 0 0;
+    padding: 12px 14px;
+    border-radius: var(--fl-radius-md);
+    border: 1px solid color-mix(in srgb, var(--fl-warning) 34%, transparent);
+    background: color-mix(in srgb, var(--fl-warning) 14%, transparent);
+    color: var(--fl-off-text);
+    font-size: 0.875rem;
+    line-height: 1.45;
+}
+
+.providerNotice svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
 .standingsScopeBar {
     display: flex;
     align-items: center;

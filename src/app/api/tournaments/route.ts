@@ -85,6 +85,18 @@ function stripFsPrefix(val?: string): string | undefined {
     return val.toLowerCase().startsWith('fs-') ? val.slice(3) : val;
 }
 
+/**
+ * Los ids del proveedor no viajan siempre con la misma capitalización: el feed
+ * diario los devuelve en minúscula (`0erzlii7`) y el detalle del partido —de
+ * donde salen los links que ya circulan por el sitio— los devuelve mezclados
+ * (`fs-0ErZlII7`). Comparar con `===` deja al torneo sin resolver y la página
+ * termina con todas las pestañas vacías.
+ */
+function sameProviderId(a?: string | null, b?: string | null): boolean {
+    if (!a || !b) return false;
+    return String(a).trim().toLowerCase() === String(b).trim().toLowerCase();
+}
+
 function normalizeTournamentUrl(raw?: string): string | undefined {
     if (!raw) return undefined;
     const trimmed = raw.trim();
@@ -252,6 +264,19 @@ function extractUrl(data: any) {
     const cleaned = typeof raw === 'string' ? normalizeTournamentUrl(raw) : undefined;
     return cleaned && cleaned.trim().length > 0 ? cleaned : undefined;
 }
+
+/**
+ * Por qué una pestaña vino vacía. `unresolved` es el caso feo: nunca supimos
+ * contra qué ids preguntarle al proveedor, así que ni se le preguntó — muy
+ * distinto de un torneo que sí respondió y no tiene nada cargado.
+ */
+type ProviderStatus = {
+    ok: boolean;
+    reason: 'unresolved' | 'provider-error' | 'partial' | null;
+    message: string | null;
+};
+
+const PROVIDER_OK: ProviderStatus = { ok: true, reason: null, message: null };
 
 type ResolvedIds = {
     tournamentId?: string;
@@ -775,11 +800,10 @@ async function fetchAndExtractFromOffset(
         const raw = await getFlashScoreMatchesRaw(offset, sportId, undefined, { lane: 'resolution' });
         const tournaments = Array.isArray(raw) ? raw : (raw?.DATA || raw?.data || []);
 
-        const matchTournament = tournaments.find((t: any) => {
-            const tId = String(t?.tournament_id || '').trim();
-            const sId = String(t?.tournament_stage_id || '').trim();
-            return tId === tournamentId || sId === tournamentId;
-        });
+        const matchTournament = tournaments.find((t: any) => (
+            sameProviderId(t?.tournament_id, tournamentId) ||
+            sameProviderId(t?.tournament_stage_id, tournamentId)
+        ));
 
         if (!matchTournament) return {};
 
@@ -1744,6 +1768,24 @@ export async function GET(request: Request) {
         const drawFetchOk = canFetchDraw && settled[8].status === 'fulfilled';
         const archivesFetchOk = canFetchArchives && settled[9].status === 'fulfilled';
 
+        // Una pestaña vacía puede serlo por dos motivos muy distintos: el torneo
+        // no tiene nada cargado, o nunca pudimos preguntarle al proveedor. Sin
+        // separarlos la página pinta lo mismo en los dos casos.
+        const attemptedSettlements = [
+            canFetchMatches ? settled[0] : null,
+            canFetchMatches ? settled[1] : null,
+            canFetchStandings ? settled[2] : null,
+            canFetchStandings ? settled[3] : null,
+            canFetchStandings ? settled[4] : null,
+            canFetchStandings ? settled[5] : null,
+            canFetchStandings ? settled[6] : null,
+            settled[7],
+            canFetchDraw ? settled[8] : null,
+            canFetchArchives ? settled[9] : null,
+        ].filter(Boolean) as PromiseSettledResult<any>[];
+        const providerRejections = attemptedSettlements.filter((s) => s.status === 'rejected').length;
+        const couldAskProvider = canFetchMatches || canFetchStandings;
+
         let detailsPayload = resolveTab('details', normalizeDetails(detailsRes) || details, detailsFetchOk);
         const resultsPayload = sortMatchesByDate(
             resolveTab('results', resultsRes?.DATA || resultsRes || [], resultsFetchOk) || [],
@@ -2038,6 +2080,32 @@ export async function GET(request: Request) {
             });
         }
 
+        const providerStatus: ProviderStatus = (() => {
+            if (!flashScoreEnabledForSport) return PROVIDER_OK;
+            if (!couldAskProvider) {
+                return {
+                    ok: false,
+                    reason: 'unresolved',
+                    message: 'No pudimos identificar este torneo en el proveedor. Las pestañas están vacías porque no se llegó a pedir los datos, no porque el torneo no tenga partidos.',
+                };
+            }
+            if (providerRejections > 0 && !resolutionProducedData) {
+                return {
+                    ok: false,
+                    reason: 'provider-error',
+                    message: 'El proveedor de datos no respondió. Lo que ves puede estar incompleto o desactualizado.',
+                };
+            }
+            if (providerRejections > 0) {
+                return {
+                    ok: false,
+                    reason: 'partial',
+                    message: 'Algunas pestañas no se pudieron cargar: el proveedor falló al responderlas.',
+                };
+            }
+            return PROVIDER_OK;
+        })();
+
         return perf.json({
             ok: true,
             _debug: {
@@ -2055,6 +2123,7 @@ export async function GET(request: Request) {
                 entityId: snapshotEntityId,
                 tabSources
             },
+            providerStatus,
             ids: { tournamentId, stageId, templateId, seasonId, drawStageId },
             details: detailsPayload,
             results: resultsPayload,
@@ -2156,6 +2225,11 @@ export async function GET(request: Request) {
                         tabSources: fallbackSources,
                         fallback: true
                     },
+                    providerStatus: {
+                        ok: false,
+                        reason: 'provider-error',
+                        message: 'El proveedor de datos no respondió. Estás viendo la última versión guardada.',
+                    } satisfies ProviderStatus,
                     ids: { tournamentId, stageId, templateId, seasonId, drawStageId },
                     details: fallbackDetailsPayload,
                     results: fallbackResults,
