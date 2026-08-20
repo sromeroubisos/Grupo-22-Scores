@@ -257,5 +257,53 @@ export async function getAdminExportDesigns(): Promise<ExportDesign[]> {
             ],
             userConfig,
         },
+        {
+            slug: 'impacto-v4',
+            name: 'Impacto V4',
+            shortDescription: 'Cuarta familia visual: placa de color pleno, titular condensado gigante y bloques de color por fila.',
+            longDescription:
+                'Impacto V4 abandona los paneles flotantes y los degradados: el color ocupa la pieza entera con textura y vineta, el titular parte la informacion en dos mitades (etapa - torneo) con tipografia condensada de alto impacto, y dos reglas blancas encierran el marcador. En tablas cada fila es un bloque del color de su zona con la condicion como columna; en fixtures los escudos se derraman fuera de la barra de cada partido.',
+            category: 'editorial',
+            status: 'testing',
+            createdAtLabel: firstCreatedAtLabel,
+            updatedAtLabel: lastUpdatedAtLabel,
+            previewLabel: EXPORT_OUTPUT_FORMATS[0]
+                ? `${EXPORT_OUTPUT_FORMATS[0].name} - ${EXPORT_OUTPUT_FORMATS[0].width} x ${EXPORT_OUTPUT_FORMATS[0].height}`
+                : 'Sin formatos activos',
+            previewAccent: '#ffffff',
+            previewBackground: 'linear-gradient(135deg, #1d6d92 0%, #0f4c68 52%, #7a1416 100%)',
+            previewSurface: '#0f4c68',
+            formats: EXPORT_TEMPLATE_CATALOG,
+            dimensions: EXPORT_OUTPUT_FORMATS,
+            typography: EXPORT_TYPOGRAPHY_CATALOG,
+            palette: [
+                { id: 'impacto-field', label: 'Campo', value: '#1d6d92', note: 'El fondo pleno: sale de mezclar Fondo y Acento de la paleta elegida' },
+                { id: 'impacto-ink', label: 'Tinta', value: '#ffffff', note: 'Titular, reglas y numeros; se invierte solo si el campo es claro' },
+                { id: 'impacto-zone', label: 'Zona', value: '#16a34a', note: 'El color de cada fila lo pone la etiqueta de la tabla, no la paleta' },
+            ],
+            styleRules: [
+                ...BASE_EXPORT_STYLE_RULES,
+                {
+                    id: 'impacto-language',
+                    label: 'Lenguaje visual',
+                    value: 'Campo de color con textura, titular condensado partido en etapa - torneo, reglas blancas y bloques planos',
+                },
+                {
+                    id: 'impacto-coverage',
+                    label: 'Cobertura propia',
+                    value: 'Resultado de partido, tabla de posiciones y fixture de torneo; el resto de los templates cae a G22 Base',
+                },
+                {
+                    id: 'impacto-zone-colors',
+                    label: 'Color por fila',
+                    value: 'Cada fila de la tabla toma el color de su etiqueta de zona; las filas sin etiqueta quedan neutras',
+                },
+            ],
+            baseGuidelines: [
+                ...BASE_EXPORT_GUIDELINES,
+                'Impacto V4 usa la paleta como campo de color: Fondo y Acento se mezclan en un unico tono pleno en vez de repartirse en paneles.',
+            ],
+            userConfig,
+        },
     ];
 }

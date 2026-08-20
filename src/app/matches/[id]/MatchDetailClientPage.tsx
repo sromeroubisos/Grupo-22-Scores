@@ -1754,6 +1754,19 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     }
 
     const { matchData, eventsData, statsData, issues } = state;
+    // El deporte que viaja al export (de ahi sale la marca de la placa: Salida de
+    // 22, Corner Corto o Grupo 22 TV). `sportId` viene de fuentes distintas — slug
+    // propio, numero de FlashScore o nada —, asi que cuando falta lo deducimos del
+    // proveedor del partido en vez de mandar undefined y caer en Grupo 22 TV.
+    // Sin useMemo a proposito: arriba hay un return temprano para el estado de
+    // error, y un hook debajo de el se ejecutaria salteado.
+    const exportSportId = ((): string | number | undefined => {
+        const raw = matchData?.sportId;
+        if (raw != null && raw !== '') return raw as string | number;
+        if (isRugbyExternal || isRugbyApiSportsSource) return 'rugby';
+        if (isFihExternal || isFihSource) return 'field-hockey';
+        return undefined;
+    })();
     const adminMatchId = typeof matchData.id === 'string' && matchData.id.trim()
         ? matchData.id.trim()
         : id;
@@ -2370,6 +2383,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                             time: matchTimerText,
                                             kickoffAt: matchData.date,
                                             venue: matchData.venue,
+                                            // De aca sale la marca de la placa: Salida de 22, Corner Corto o Grupo 22 TV.
+                                            sport: exportSportId,
                                             stats: statsData || []
                                         }}
                                         className={styles.compactExport}
@@ -3446,6 +3461,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
                                     time: matchTimerText,
                                     kickoffAt: matchData.date,
+                                    sport: exportSportId,
                                     stats: statsData
                                 }}
                                 filename={`reporte-${matchData.home.name}-${matchData.away.name}`}

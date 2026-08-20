@@ -348,7 +348,7 @@ function buildEditableDesignState(design: ExportDesign): EditableDesignState {
         previewSurface: design.previewSurface,
         previewGradientFrom,
         previewGradientTo,
-        previewMode: design.slug === 'poster-v3' ? 'poster' : design.slug === 'momentum-v2' ? 'contrast' : 'soft',
+        previewMode: design.slug === 'poster-v3' || design.slug === 'impacto-v4' ? 'poster' : design.slug === 'momentum-v2' ? 'contrast' : 'soft',
     };
 }
 

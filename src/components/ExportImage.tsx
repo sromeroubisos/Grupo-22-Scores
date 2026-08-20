@@ -18,6 +18,7 @@ import {
     type ExportDesignTypographyContextId,
     type ExportDesignTypographySlot,
 } from '@/lib/exports/designCustomizations';
+import { findCountryRecord } from '@/lib/data/countries';
 import { createClient } from '@/lib/supabase/client';
 import styles from './ExportButton.module.css';
 
@@ -91,7 +92,9 @@ export interface StandingsData {
     showPositionDelta?: boolean;
     // 'rankingPoster' cambia el dibujo a afiche full-bleed (banda vertical con el
     // titulo, columnas P/Equipo/PTS/VAR) en vez de la tabla de posiciones clasica.
-    variant?: 'rankingPoster';
+    // 'palmares' dibuja la vitrina de un torneo: podio 2-1-3 con el escudo grande
+    // y el resto de los campeones como listado. En sus filas `points` son titulos.
+    variant?: 'rankingPoster' | 'palmares';
 }
 
 export interface DailyMatchesData {
@@ -139,6 +142,11 @@ export interface MatchStatsData {
     editorialShowHeaderArrows?: boolean;
     editorialGradientImage?: string;
     sponsors?: MatchSponsorData[];
+    // Id del deporte del partido ('rugby', 'field-hockey', 'football'...). La
+    // placa lo usa para elegir su marca; si no llega, cae en Grupo 22 TV.
+    // Llega de paginas tipadas flojo: puede venir como numero o como objeto, asi
+    // que el tipo es amplio y el consumidor lo normaliza.
+    sport?: string | number | null;
     stats: Array<{ label: string; home: number | string; away: number | string }>;
 }
 
@@ -363,12 +371,15 @@ type ExportPreviewColorOverrides = {
     bgColor: string;
     editorialGradientLeftColor?: string;
     editorialGradientRightColor?: string;
-    classicHomeColor?: string;
-    classicAwayColor?: string;
     // Solo para variant 'rankingPoster': los tres colores extra del afiche.
     rankingGlowColor?: string;
     rankingPanelColor?: string;
     rankingGoldColor?: string;
+    // Solo para la familia Impacto V4. Vacio = derivado de Fondo + Acento.
+    impactoFieldColor?: string;
+    impactoInkColor?: string;
+    impactoBarColor?: string;
+    impactoRowColor?: string;
 };
 
 type ExportImagePreviewProps = {
@@ -378,6 +389,8 @@ type ExportImagePreviewProps = {
     visualFamily: ExportVisualFamily;
     customizationState?: ExportDesignCustomizationState | null;
     previewColors?: ExportPreviewColorOverrides;
+    // Solo para la placa clasica de G22 Base: colores, marca del pie y fila de datos.
+    plateOptions?: ExportPlateOptions;
     matchExportMode?: MatchExportMode;
     matchExportLayout?: MatchExportLayout;
     lineupExportMode?: LineupExportMode;
@@ -435,7 +448,7 @@ type ExportTimeZonePreset = {
 };
 type ExportTypographyRole = 'display' | 'body' | 'mono' | 'editorial' | 'score';
 type ExportFontFamilyOptionId = 'outfit' | 'inter' | 'bebas' | 'dharma' | 'jetbrains' | 'tangerine' | 'inconsolata' | 'cantarell' | 'roboto-mono' | 'rancho';
-type ExportTypographyPresetId = 'g22-core' | 'momentum-v2' | 'poster-v3' | 'inter-tight' | 'mono-sport';
+type ExportTypographyPresetId = 'g22-core' | 'momentum-v2' | 'poster-v3' | 'impacto-v4' | 'inter-tight' | 'mono-sport';
 type LocalExportFont = {
     family: string;
     weight: string;
@@ -582,6 +595,7 @@ const EXPORT_VISUAL_FAMILY_OPTIONS: Array<{ value: ExportVisualFamily; label: st
     { value: 'g22Base', label: 'G22 Base', description: 'Sistema actual con superficies limpias y estructura modular' },
     { value: 'momentumV2', label: 'Momentum V2', description: 'Nueva familia inspirada en los templates editoriales del rar' },
     { value: 'posterV3', label: 'Poster V3', description: 'Tercera familia con lenguaje de afiche, outlines gigantes y acentos neon' },
+    { value: 'impactoV4', label: 'Impacto V4', description: 'Placa de color pleno con titular condensado gigante, reglas blancas y filas de color' },
 ];
 const EXPORT_FONT_FAMILY_OPTIONS: ExportFontFamilyOption[] = [
     { id: 'outfit', label: 'Outfit', family: BASE_FONT_OUTFIT, note: 'Sans limpia y modular', sample: 'MATCHDAY' },
@@ -625,6 +639,13 @@ const EXPORT_TYPOGRAPHY_PRESETS: ExportTypographyPreset[] = [
         roles: { display: 'bebas', body: 'inter', mono: 'jetbrains', editorial: 'bebas', score: 'dharma' },
     },
     {
+        id: 'impacto-v4',
+        label: 'Impacto Placa',
+        description: 'Titular y numeros en condensada pesada, nombres en sans bold: el reparto de la familia Impacto V4.',
+        recommendedFor: ['impactoV4'],
+        roles: { display: 'outfit', body: 'outfit', mono: 'jetbrains', editorial: 'dharma', score: 'dharma' },
+    },
+    {
         id: 'inter-tight',
         label: 'Inter Tight',
         description: 'Version mas limpia y moderna cuando quieres bajar dramatismo sin perder legibilidad.',
@@ -636,6 +657,13 @@ const EXPORT_TYPOGRAPHY_PRESETS: ExportTypographyPreset[] = [
         description: 'Look mas tecnico para overlays y layouts orientados a data.',
         roles: { display: 'outfit', body: 'outfit', mono: 'jetbrains', editorial: 'jetbrains', score: 'dharma' },
     },
+];
+type ImpactoColorControlId = 'field' | 'ink' | 'bar' | 'row';
+const IMPACTO_COLOR_CONTROLS: Array<{ id: ImpactoColorControlId; label: string; hint: string; placeholder: string }> = [
+    { id: 'field', label: 'Principal', hint: 'El campo de color de toda la pieza', placeholder: '#1d6d92' },
+    { id: 'ink', label: 'Tinta', hint: 'Titular, reglas, numeros y nombres', placeholder: '#ffffff' },
+    { id: 'bar', label: 'Barras', hint: 'Encabezado de la tabla y divisores', placeholder: '#2a3342' },
+    { id: 'row', label: 'Filas', hint: 'Barra de cada partido y filas sin etiqueta', placeholder: '#111827' },
 ];
 const MATCH_EXPORT_MODE_OPTIONS: Array<{ value: MatchExportMode; label: string; description: string }> = [
     { value: 'schedule', label: 'Horario', description: 'Muestra la programacion del partido' },
@@ -797,6 +825,10 @@ function isRankingPosterData(template: ExportTemplate, data: ExportData): boolea
     return template === 'standings' && (data as StandingsData).variant === 'rankingPoster';
 }
 
+function isPalmaresData(template: ExportTemplate, data: ExportData): boolean {
+    return template === 'standings' && (data as StandingsData).variant === 'palmares';
+}
+
 export default function ExportImage(props: ExportImageProps) {
     const { user, isLoading } = useAuth();
 
@@ -832,6 +864,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     const [lineupExportMode, setLineupExportMode] = useState<LineupExportMode>('both');
     const [dailyMatchesTimeMode, setDailyMatchesTimeMode] = useState<DailyMatchesTimeMode>('time');
     const isRankingPoster = isRankingPosterData(template, data);
+    const isPalmares = isPalmaresData(template, data);
     const groupedStandings = useMemo(
         () => (template === 'standings' ? getExportableStandingsGroups(data as StandingsData) : []),
         [data, template]
@@ -846,6 +879,10 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     const [defaultExportColors, setDefaultExportColors] = useState<ExportColorDefaults>(DEFAULT_EXPORT_COLOR_DEFAULTS);
     const [hasSessionColorOverrides, setHasSessionColorOverrides] = useState(false);
     const [selectedRankingComboId, setSelectedRankingComboId] = useState(RANKING_POSTER_COMBOS[0].id);
+    const [impactoFieldColor, setImpactoFieldColor] = useState('');
+    const [impactoInkColor, setImpactoInkColor] = useState('');
+    const [impactoBarColor, setImpactoBarColor] = useState('');
+    const [impactoRowColor, setImpactoRowColor] = useState('');
     const [rankingGlowColor, setRankingGlowColor] = useState(RANKING_POSTER_COMBOS[0].glow);
     const [rankingPanelColor, setRankingPanelColor] = useState(RANKING_POSTER_COMBOS[0].panel);
     const [rankingGoldColor, setRankingGoldColor] = useState(RANKING_POSTER_COMBOS[0].gold);
@@ -853,9 +890,13 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     const defaultExportColorsRef = useRef(defaultExportColors);
     const [editorialGradientLeftColor, setEditorialGradientLeftColor] = useState('#df255c');
     const [editorialGradientRightColor, setEditorialGradientRightColor] = useState(DEFAULT_PALETTE.accent);
-    // Override de colores por equipo para el layout clasico. '' = automatico (se deriva del escudo).
-    const [classicHomeColor, setClassicHomeColor] = useState('');
-    const [classicAwayColor, setClassicAwayColor] = useState('');
+    // Controles propios de la placa clasica de G22 Base. Color '' = derivado de
+    // Fondo + Acento; marca 'auto' = la del deporte del partido.
+    const [plateFieldColor, setPlateFieldColor] = useState('');
+    const [plateFieldEndColor, setPlateFieldEndColor] = useState('');
+    const [plateInkColor, setPlateInkColor] = useState('');
+    const [plateBrand, setPlateBrand] = useState<PlateBrandId>('auto');
+    const [plateFooterMeta, setPlateFooterMeta] = useState(true);
     const [editorialLayoutPresetId, setEditorialLayoutPresetId] = useState<MatchEditorialPresetId>(() => (
         template === 'matchStats'
             ? getEditorialLayoutPreset((data as MatchStatsData).editorialLayoutPresetId).id
@@ -1046,6 +1087,10 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
 
         const defaults = isRankingPoster ? RANKING_POSTER_COLOR_DEFAULTS : defaultExportColorsRef.current;
         setHasSessionColorOverrides(false);
+        setImpactoFieldColor('');
+        setImpactoInkColor('');
+        setImpactoBarColor('');
+        setImpactoRowColor('');
         setSelectedPaletteId(defaults.selectedPaletteId);
         setBgColor(defaults.bgColor);
         setAccentColor(defaults.accentColor);
@@ -1232,7 +1277,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset) as MatchStatsData;
         return buildAutoEditorialContextLabel(applyMatchExportMode(exportData, matchExportMode));
     }, [customTournamentName, data, matchExportMode, selectedTimeZonePreset, template]);
-    const supportsEditorialSchedule = template === 'matchStats' && matchExportLayout === 'editorial4x5' && (visualFamily === 'g22Base' || visualFamily === 'posterV3');
+    const supportsEditorialSchedule = template === 'matchStats' && matchExportLayout === 'editorial4x5' && (visualFamily === 'g22Base' || visualFamily === 'posterV3' || visualFamily === 'impactoV4');
     const supportsClassicSchedule = template === 'matchStats' && matchExportLayout === 'classic';
     const showMatchModeSelector = template === 'matchStats' && (supportsClassicSchedule || supportsEditorialSchedule);
     const showMatchTimeZoneSelector = template === 'dailyMatches'
@@ -1243,7 +1288,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     const supportsPhotoFreeEditorialSchedule = template === 'matchStats'
         && matchExportLayout === 'editorial4x5'
         && matchExportMode === 'schedule'
-        && (visualFamily === 'g22Base' || visualFamily === 'posterV3');
+        && (visualFamily === 'g22Base' || visualFamily === 'posterV3' || visualFamily === 'impactoV4');
     const hasMatchEditorialBackground = template === 'matchStats'
         ? supportsPhotoFreeEditorialSchedule || Boolean(matchBackgroundUpload?.src || (data as MatchStatsData).backgroundImage?.trim())
         : false;
@@ -1283,6 +1328,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                 : 'Agenda del dia · Seleccion multiple';
         }
         if (template === 'standings') {
+            if (isPalmares) return 'Palmares del torneo';
             if (standingsExportMode === 'singleGroup') return selectedStandingsGroupLabel || 'Grupo especifico';
             return standingsExportMode === 'groups' ? 'Tabla por grupos' : 'Tabla corrida';
         }
@@ -1291,14 +1337,16 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         if (template === 'squad') return 'Plantel completo';
         if (template === 'teamOfWeek') return 'Equipo de la semana';
         return 'Configuracion de exportacion';
-    }, [dailyMatchesTimeMode, lineupExportMode, matchExportLayout, matchExportMode, selectedStandingsGroupLabel, standingsExportMode, template]);
+    }, [dailyMatchesTimeMode, isPalmares, lineupExportMode, matchExportLayout, matchExportMode, selectedStandingsGroupLabel, standingsExportMode, template]);
     const exportSummaryChips = useMemo(() => {
         const chips = [selectedFormatConfig.label];
-        chips.push(isRankingPoster ? 'Poster Ranking' : getExportVisualFamilyLabel(visualFamily));
+        chips.push(isRankingPoster ? 'Poster Ranking' : isPalmares ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily));
         if (template === 'matchStats') {
             chips.push(getMatchExportLayoutLabel(matchExportLayout));
         } else if (template === 'standings') {
-            if (standingsExportMode === 'singleGroup') {
+            if (isPalmares) {
+                chips.push(`${(data as StandingsData).rows.length} campeones`);
+            } else if (standingsExportMode === 'singleGroup') {
                 chips.push(selectedStandingsGroupLabel || 'Grupo');
             } else {
                 chips.push(standingsExportMode === 'groups' ? 'Grupos' : 'Tabla');
@@ -1323,6 +1371,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     }, [
         customTournamentName,
         data,
+        isPalmares,
         isRankingPoster,
         lineupExportMode,
         matchExportLayout,
@@ -1337,6 +1386,10 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     const paletteUsageHint = useMemo(() => {
         if (isRankingPoster) {
             return 'El poster se pinta con cinco colores: Fondo (la esquina oscura), Banda (la columna del titulo), Brillo (la luz de abajo y la fila del lider), Panel (la lamina de la tabla) y Dorado (posiciones y puntos). Las combinaciones fijan los cinco de una vez.';
+        }
+
+        if (isPalmares) {
+            return 'En el afiche del palmares, Fondo define la base y Acento el halo que envuelve el podio. El oro, la plata y el bronce del 1-2-3 no se tocan: son la lectura del podio.';
         }
 
         if ((template === 'lineups' || template === 'squad' || template === 'teamOfWeek') && visualFamily === 'posterV3') {
@@ -1364,7 +1417,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         }
 
         return 'La marca de agua G22 se mantiene en todas las exportaciones.';
-    }, [isRankingPoster, template, visualFamily]);
+    }, [isPalmares, isRankingPoster, template, visualFamily]);
 
     const toggleMatch = (index: number) => {
         setSelectedMatchIndices((previous) => {
@@ -1716,7 +1769,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                 );
                 if (matchExportLayout === 'editorial4x5') {
                     const backgroundImage = matchBackgroundUpload?.src || matchData.backgroundImage || '';
-                    const scheduledEditorialWithoutPhoto = (visualFamily === 'posterV3' || visualFamily === 'g22Base')
+                    const scheduledEditorialWithoutPhoto = (visualFamily === 'posterV3' || visualFamily === 'g22Base' || visualFamily === 'impactoV4')
                         && (matchData.status === 'scheduled' || (matchData.mainTitle || '').trim().toLowerCase() === 'horario');
                     if (!backgroundImage && !scheduledEditorialWithoutPhoto) {
                         throw new Error('Subi una foto de fondo para usar el layout editorial 4:5');
@@ -1786,6 +1839,8 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                 } else {
                     if (visualFamily === 'posterV3') {
                         await drawPosterV3MatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
+                    } else if (visualFamily === 'impactoV4') {
+                        await drawImpactoMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo, impactoColors);
                     } else if (visualFamily === 'momentumV2') {
                         if (matchData.status === 'scheduled') {
                             await drawMomentumMatchDayClassicSchedule(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
@@ -1793,7 +1848,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                             await drawMomentumMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo);
                         }
                     } else {
-                        await drawMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo, classicHomeColor, classicAwayColor);
+                        await drawMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo, modalPlateOptions);
                     }
                 }
             } else if (template === 'standings') {
@@ -1809,8 +1864,12 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                             panel: rankingPanelColor,
                             gold: rankingGoldColor,
                         });
+                    } else if (standingsData.variant === 'palmares') {
+                        await drawPalmaresPoster(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
                     } else if (visualFamily === 'posterV3') {
                         await drawPosterV3Standings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
+                    } else if (visualFamily === 'impactoV4') {
+                        await drawImpactoStandings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo, impactoColors);
                     } else if (visualFamily === 'momentumV2') {
                         await drawMomentumStandings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
                     } else {
@@ -1830,6 +1889,8 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                 const selectedMatches = matchesData.matches.filter((_, index) => selectedMatchIndices.has(index));
                 if (visualFamily === 'posterV3') {
                     await drawPosterV3DailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo, dailyMatchesTimeMode);
+                } else if (visualFamily === 'impactoV4') {
+                    await drawImpactoDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo, dailyMatchesTimeMode, impactoColors);
                 } else if (visualFamily === 'momentumV2') {
                     await drawMomentumDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo, dailyMatchesTimeMode);
                 } else {
@@ -1963,17 +2024,44 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         standingsExportMode,
         template,
     ]);
+    const impactoColorValues: Record<ImpactoColorControlId, string> = {
+        field: impactoFieldColor,
+        ink: impactoInkColor,
+        bar: impactoBarColor,
+        row: impactoRowColor,
+    };
+    const impactoColorSetters: Record<ImpactoColorControlId, (value: string) => void> = {
+        field: setImpactoFieldColor,
+        ink: setImpactoInkColor,
+        bar: setImpactoBarColor,
+        row: setImpactoRowColor,
+    };
+    const impactoColors = useMemo(() => ({
+        field: impactoFieldColor,
+        ink: impactoInkColor,
+        bar: impactoBarColor,
+        row: impactoRowColor,
+    }), [impactoBarColor, impactoFieldColor, impactoInkColor, impactoRowColor]);
+    const modalPlateOptions = useMemo<ExportPlateOptions>(() => ({
+        field: plateFieldColor,
+        fieldEnd: plateFieldEndColor,
+        ink: plateInkColor,
+        brand: plateBrand,
+        footerMeta: plateFooterMeta,
+    }), [plateBrand, plateFieldColor, plateFieldEndColor, plateFooterMeta, plateInkColor]);
     const modalPreviewColors = useMemo<ExportPreviewColorOverrides>(() => ({
         accentColor,
         bgColor,
+        impactoFieldColor,
+        impactoInkColor,
+        impactoBarColor,
+        impactoRowColor,
         editorialGradientLeftColor,
         editorialGradientRightColor,
-        classicHomeColor,
-        classicAwayColor,
         rankingGlowColor,
         rankingPanelColor,
         rankingGoldColor,
-    }), [accentColor, bgColor, editorialGradientLeftColor, editorialGradientRightColor, classicHomeColor, classicAwayColor, rankingGlowColor, rankingPanelColor, rankingGoldColor]);
+    }), [accentColor, bgColor, editorialGradientLeftColor, editorialGradientRightColor, rankingGlowColor, rankingPanelColor, rankingGoldColor, impactoFieldColor, impactoInkColor, impactoBarColor, impactoRowColor]);
 
     return (
         <div className={`${styles.container} ${className}`}>
@@ -2023,11 +2111,13 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                 <label className={styles.modalLabel}>Diseno activo</label>
                                 <div className={styles.activeDesignCard}>
                                     <div className={styles.activeDesignCopy}>
-                                        <strong>{isRankingPoster ? 'Poster Ranking' : getExportVisualFamilyLabel(visualFamily)}</strong>
+                                        <strong>{isRankingPoster ? 'Poster Ranking' : isPalmares ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily)}</strong>
                                         <span>
                                             {isRankingPoster
                                                 ? 'Afiche dedicado del ranking: banda vertical con el titulo, tabla P/Equipo/PTS/VAR y fila del lider destacada.'
-                                                : <>{EXPORT_VISUAL_FAMILY_OPTIONS.find((option) => option.value === visualFamily)?.description}{' '}Tipografia y estilo desde el panel de gestion.</>}
+                                                : isPalmares
+                                                    ? 'Afiche dedicado del palmares: podio 2-1-3 con el escudo grande y el resto de los campeones como listado.'
+                                                    : <>{EXPORT_VISUAL_FAMILY_OPTIONS.find((option) => option.value === visualFamily)?.description}{' '}Tipografia y estilo desde el panel de gestion.</>}
                                         </span>
                                     </div>
                                     <span className={styles.activeDesignBadge}>Activo</span>
@@ -2849,7 +2939,9 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                 </div>
                             )}
 
-                            {template === 'standings' && (
+                            {/* El palmares no tiene grupos ni modo de tabla: el unico boton
+                                que quedaria es "Tabla corrida", que no hace nada. */}
+                            {template === 'standings' && !isPalmares && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Modo de tabla</label>
                                     <div className={styles.formatOptions}>
@@ -3009,48 +3101,136 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                         <input type="color" value={accentColor} onChange={(event) => handleAccentColorChange(event.target.value)} />
                                     </div>
                                 </div>
-                                {template === 'matchStats' && matchExportLayout === 'classic' && (
+                                {visualFamily === 'impactoV4' && (
                                     <div style={{ marginTop: 16 }}>
-                                        <label className={styles.modalLabel}>Colores de los equipos</label>
+                                        <label className={styles.modalLabel}>Colores de Impacto V4</label>
+                                        <div className={styles.customColors}>
+                                            {IMPACTO_COLOR_CONTROLS.map((control) => {
+                                                const value = impactoColorValues[control.id];
+                                                return (
+                                                    <div className={styles.colorInp} key={control.id}>
+                                                        <span>{control.label}</span>
+                                                        <input
+                                                            type="color"
+                                                            value={value || control.placeholder}
+                                                            onChange={(event) => impactoColorSetters[control.id](event.target.value)}
+                                                            title={control.hint}
+                                                        />
+                                                        <button
+                                                            className={styles.ghostBtn}
+                                                            type="button"
+                                                            onClick={() => impactoColorSetters[control.id]('')}
+                                                            disabled={!value}
+                                                            title="Volver al color derivado de Fondo y Acento"
+                                                        >
+                                                            Auto
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        <p className={styles.modalHint}>
+                                            Principal es el campo de color de toda la pieza; Tinta pinta el titular, las reglas y los numeros;
+                                            Barras son el encabezado de la tabla y los divisores; Filas son la barra de cada partido del fixture
+                                            y las filas sin etiqueta. El color de una fila con etiqueta lo sigue poniendo su zona en el torneo.
+                                        </p>
+                                    </div>
+                                )}
+                                {template === 'matchStats' && matchExportLayout === 'classic' && visualFamily === 'g22Base' && (
+                                    <div style={{ marginTop: 16 }}>
+                                        <label className={styles.modalLabel}>Degradado de la placa</label>
                                         <div className={styles.customColors}>
                                             <div className={styles.colorInp}>
-                                                <span>{(data as MatchStatsData).homeTeam || 'Local'}</span>
+                                                <span>Desde</span>
                                                 <input
                                                     type="color"
-                                                    value={classicHomeColor || '#3b2630'}
-                                                    onChange={(event) => setClassicHomeColor(event.target.value)}
+                                                    value={plateFieldColor || '#1d6d92'}
+                                                    onChange={(event) => setPlateFieldColor(event.target.value)}
                                                 />
                                                 <button
                                                     className={styles.ghostBtn}
                                                     type="button"
-                                                    onClick={() => setClassicHomeColor('')}
-                                                    disabled={!classicHomeColor}
-                                                    title="Volver al color automatico del escudo"
+                                                    onClick={() => setPlateFieldColor('')}
+                                                    disabled={!plateFieldColor}
+                                                    title="Volver al color derivado de Fondo y Acento"
                                                 >
                                                     Auto
                                                 </button>
                                             </div>
                                             <div className={styles.colorInp}>
-                                                <span>{(data as MatchStatsData).awayTeam || 'Visitante'}</span>
+                                                <span>Hasta</span>
                                                 <input
                                                     type="color"
-                                                    value={classicAwayColor || '#26323f'}
-                                                    onChange={(event) => setClassicAwayColor(event.target.value)}
+                                                    value={plateFieldEndColor || '#0f3d52'}
+                                                    onChange={(event) => setPlateFieldEndColor(event.target.value)}
                                                 />
                                                 <button
                                                     className={styles.ghostBtn}
                                                     type="button"
-                                                    onClick={() => setClassicAwayColor('')}
-                                                    disabled={!classicAwayColor}
-                                                    title="Volver al color automatico del escudo"
+                                                    onClick={() => setPlateFieldEndColor('')}
+                                                    disabled={!plateFieldEndColor}
+                                                    title="Volver al mismo color hundido"
+                                                >
+                                                    Auto
+                                                </button>
+                                            </div>
+                                            <div className={styles.colorInp}>
+                                                <span>Tinta</span>
+                                                <input
+                                                    type="color"
+                                                    value={plateInkColor || '#ffffff'}
+                                                    onChange={(event) => setPlateInkColor(event.target.value)}
+                                                />
+                                                <button
+                                                    className={styles.ghostBtn}
+                                                    type="button"
+                                                    onClick={() => setPlateInkColor('')}
+                                                    disabled={!plateInkColor}
+                                                    title="Volver al color con mas contraste sobre la placa"
                                                 >
                                                     Auto
                                                 </button>
                                             </div>
                                         </div>
                                         <p className={styles.modalHint}>
-                                            Por defecto cada lado usa el color dominante del escudo. Eleg&iacute; un color para forzar el fondo de ese equipo, o tocá &quot;Auto&quot; para volver al autom&aacute;tico.
+                                            El fondo va de <strong>Desde</strong> (esquina superior izquierda) a <strong>Hasta</strong> (inferior derecha);
+                                            Tinta pinta el titular, las reglas y el marcador. En &quot;Auto&quot; la placa se deriva de Fondo + Acento,
+                                            la segunda punta es ese mismo color hundido y la tinta toma el que mejor contrasta.
                                         </p>
+                                        <div style={{ marginTop: 16 }}>
+                                            <label className={styles.modalLabel} htmlFor="g22-plate-brand">Marca del medio</label>
+                                            <select
+                                                id="g22-plate-brand"
+                                                className={styles.modalSelect}
+                                                value={plateBrand}
+                                                onChange={(event) => setPlateBrand(event.target.value as PlateBrandId)}
+                                            >
+                                                {PLATE_BRAND_OPTIONS.map((option) => (
+                                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                                ))}
+                                            </select>
+                                            <p className={styles.modalHint}>
+                                                Va debajo del titular. En automatica sale por el deporte del partido: Salida de 22 en rugby,
+                                                Corner Corto en hockey y Grupo 22 TV en el resto. Abajo de todo cierra siempre G22 Scores.
+                                            </p>
+                                        </div>
+                                        <div className={styles.toggleGrid} style={{ marginTop: 16 }}>
+                                            <label className={styles.toggleCard}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={plateFooterMeta}
+                                                    onChange={(event) => setPlateFooterMeta(event.target.checked)}
+                                                />
+                                                <span className={styles.toggleCopy}>
+                                                    <span className={styles.toggleLabel}>Fila de datos al pie</span>
+                                                    <span className={styles.toggleHint}>
+                                                        {matchExportMode === 'schedule'
+                                                            ? 'La sede abajo de todo. El dia ya va arriba del horario.'
+                                                            : 'Fecha y sede abajo de todo, en chico.'}
+                                                    </span>
+                                                </span>
+                                            </label>
+                                        </div>
                                     </div>
                                 )}
                                 {!isEditorialGradientMode && (
@@ -3132,6 +3312,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                         visualFamily={visualFamily}
                                         customizationState={designCustomizationState}
                                         previewColors={modalPreviewColors}
+                                        plateOptions={modalPlateOptions}
                                         matchExportMode={matchExportMode}
                                         matchExportLayout={matchExportLayout}
                                         lineupExportMode={lineupExportMode}
@@ -3185,6 +3366,7 @@ export function ExportImagePreview({
     visualFamily,
     customizationState = null,
     previewColors,
+    plateOptions,
     matchExportMode = 'result',
     matchExportLayout = 'classic',
     lineupExportMode = 'both',
@@ -3211,6 +3393,7 @@ export function ExportImagePreview({
                     visualFamily,
                     customizationState,
                     previewColors,
+                    plateOptions,
                     matchExportMode,
                     matchExportLayout,
                     lineupExportMode,
@@ -3476,6 +3659,7 @@ function getExportTypographyPreset(id?: string): ExportTypographyPreset {
 function getDefaultTypographyPresetId(visualFamily: ExportVisualFamily): ExportTypographyPresetId {
     if (visualFamily === 'posterV3') return 'poster-v3';
     if (visualFamily === 'momentumV2') return 'momentum-v2';
+    if (visualFamily === 'impactoV4') return 'impacto-v4';
     return 'g22-core';
 }
 
@@ -4268,6 +4452,7 @@ async function renderMatchExportPreviewDataUrl(options: {
     visualFamily: ExportVisualFamily;
     customizationState: ExportDesignCustomizationState | null;
     previewColors?: ExportPreviewColorOverrides;
+    plateOptions?: ExportPlateOptions;
     matchExportMode: MatchExportMode;
     matchExportLayout: MatchExportLayout;
     lineupExportMode: LineupExportMode;
@@ -4281,6 +4466,7 @@ async function renderMatchExportPreviewDataUrl(options: {
         visualFamily,
         customizationState,
         previewColors,
+        plateOptions,
         matchExportMode,
         matchExportLayout,
         lineupExportMode,
@@ -4324,8 +4510,6 @@ async function renderMatchExportPreviewDataUrl(options: {
             bgColor: previewColors.bgColor || DEFAULT_PALETTE.bg,
             editorialGradientLeftColor: previewColors.editorialGradientLeftColor || '#df255c',
             editorialGradientRightColor: previewColors.editorialGradientRightColor || previewColors.accentColor || DEFAULT_PALETTE.accent,
-            classicHomeColor: previewColors.classicHomeColor || '',
-            classicAwayColor: previewColors.classicAwayColor || '',
         }
         : customizationState
         ? {
@@ -4333,10 +4517,8 @@ async function renderMatchExportPreviewDataUrl(options: {
             bgColor: customizationState.previewSurface || DEFAULT_PALETTE.bg,
             editorialGradientLeftColor: customizationState.previewGradientFrom || '#df255c',
             editorialGradientRightColor: customizationState.previewGradientTo || customizationState.previewAccent || DEFAULT_PALETTE.accent,
-            classicHomeColor: '',
-            classicAwayColor: '',
         }
-        : { ...DEFAULT_EXPORT_COLOR_DEFAULTS, classicHomeColor: '', classicAwayColor: '' };
+        : { ...DEFAULT_EXPORT_COLOR_DEFAULTS };
 
     const canvas = document.createElement('canvas');
     canvas.width = config.width;
@@ -4345,6 +4527,13 @@ async function renderMatchExportPreviewDataUrl(options: {
     if (!ctx) {
         throw new Error('No se pudo inicializar el canvas del preview');
     }
+
+    const impactoColors: ImpactoColorOverrides = {
+        field: previewColors?.impactoFieldColor,
+        ink: previewColors?.impactoInkColor,
+        bar: previewColors?.impactoBarColor,
+        row: previewColors?.impactoRowColor,
+    };
 
     const exportData = buildExportData(template, data, getDefaultTournamentName(template, data), findBestPresetByOffset(DEFAULT_TIMEZONE_OFFSET_MINUTES));
 
@@ -4410,6 +4599,8 @@ async function renderMatchExportPreviewDataUrl(options: {
             }
         } else if (visualFamily === 'posterV3') {
             await drawPosterV3MatchResult(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        } else if (visualFamily === 'impactoV4') {
+            await drawImpactoMatchResult(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, impactoColors);
         } else if (visualFamily === 'momentumV2') {
             if (matchData.status === 'scheduled') {
                 await drawMomentumMatchDayClassicSchedule(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
@@ -4417,11 +4608,13 @@ async function renderMatchExportPreviewDataUrl(options: {
                 await drawMomentumMatchResult(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
             }
         } else {
-            await drawMatchResult(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, previewDefaults.classicHomeColor, previewDefaults.classicAwayColor);
+            await drawMatchResult(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, plateOptions);
         }
     } else if (template === 'dailyMatches') {
         if (visualFamily === 'posterV3') {
             await drawPosterV3DailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, dailyMatchesTimeMode);
+        } else if (visualFamily === 'impactoV4') {
+            await drawImpactoDailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, dailyMatchesTimeMode, impactoColors);
         } else if (visualFamily === 'momentumV2') {
             await drawMomentumDailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, dailyMatchesTimeMode);
         } else {
@@ -4437,8 +4630,12 @@ async function renderMatchExportPreviewDataUrl(options: {
                 panel: previewColors?.rankingPanelColor,
                 gold: previewColors?.rankingGoldColor,
             });
+        } else if (standingsData.variant === 'palmares') {
+            await drawPalmaresPoster(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
         } else if (visualFamily === 'posterV3') {
             await drawPosterV3Standings(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        } else if (visualFamily === 'impactoV4') {
+            await drawImpactoStandings(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, impactoColors);
         } else if (visualFamily === 'momentumV2') {
             await drawMomentumStandings(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
         } else {
@@ -6245,341 +6442,359 @@ function getStatusColor(status: string | undefined, accentColor: string, isDark:
 // si no está, cae a Outfit/Inter sin romper el render).
 const FONT_ARTICULAT = '"Articulat CF", "Outfit", "Inter", system-ui, sans-serif';
 
-function g22pRoundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-    const rr = Math.min(r, w / 2, h / 2);
-    ctx.beginPath();
-    ctx.moveTo(x + rr, y);
-    ctx.lineTo(x + w - rr, y);
-    ctx.arcTo(x + w, y, x + w, y + rr, rr);
-    ctx.lineTo(x + w, y + h - rr);
-    ctx.arcTo(x + w, y + h, x + w - rr, y + h, rr);
-    ctx.lineTo(x + rr, y + h);
-    ctx.arcTo(x, y + h, x, y + h - rr, rr);
-    ctx.lineTo(x, y + rr);
-    ctx.arcTo(x, y, x + rr, y, rr);
-    ctx.closePath();
-}
-
 function g22pNoise(seed: number) {
     const v = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
     return v - Math.floor(v);
 }
 
-// Color dominante (más saturado) del escudo; null si no se puede leer (taint/sin imagen).
-function g22pExtractColor(img: HTMLImageElement | null): string | null {
-    try {
-        if (!img || !img.naturalWidth || typeof document === 'undefined') return null;
-        const n = 40;
-        const c = document.createElement('canvas');
-        c.width = n;
-        c.height = n;
-        const x = c.getContext('2d');
-        if (!x) return null;
-        x.drawImage(img, 0, 0, n, n);
-        const d = x.getImageData(0, 0, n, n).data;
-        let br = 0, bg = 0, bb = 0, bs = -1;
-        let sr = 0, sg = 0, sb = 0, cnt = 0;
-        for (let i = 0; i < d.length; i += 4) {
-            if (d[i + 3] < 128) continue;
-            const r = d[i], g = d[i + 1], b = d[i + 2];
-            const lum = (r + g + b) / 3;
-            if (lum > 238 || lum < 14) continue;
-            const sat = Math.max(r, g, b) - Math.min(r, g, b);
-            sr += r; sg += g; sb += b; cnt += 1;
-            if (sat > bs) { bs = sat; br = r; bg = g; bb = b; }
-        }
-        if (!cnt) return null;
-        const ar = sr / cnt, ag = sg / cnt, ab = sb / cnt;
-        const toHex = (v: number) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0');
-        return `#${toHex(br * 0.7 + ar * 0.3)}${toHex(bg * 0.7 + ag * 0.3)}${toHex(bb * 0.7 + ab * 0.3)}`;
-    } catch {
-        return null;
-    }
+// ============================================================================
+// G22 Base — LA PLACA del partido (resultado y horario).
+//
+// Una placa de color pleno, sin fotos ni paneles: arriba el titular
+// "ETAPA - TORNEO" en condensada pesada, debajo la firma, y entre dos reglas de
+// lado a lado los dos escudos con el marcador (o la hora) en el medio. Del
+// filete de abajo cuelga el logo del torneo y el pie queda libre — ahí va el
+// sticker de Instagram.
+//
+// La ETAPA sale de `mainTitle` (RESULTADO / HORARIO). Si el nombre del torneo ya
+// viene partido — "Final - TRL M19 A" —, esa partición manda y no se le antepone
+// nada: así se escribe la pieza de una final sin tocar el motor.
+//
+// Regla dura: escudos REALES. Si uno no carga, la pieza no se exporta: media
+// placa vacía publicada es peor que un error en el preview.
+// ============================================================================
+
+// La marca del pie es la del MEDIO que cubre ese deporte, no una sola: Salida de
+// 22 para rugby, Corner Corto para hockey, Grupo 22 TV para el resto. 'auto' la
+// resuelve por el deporte del partido; el modal permite forzarla.
+type PlateBrandId = 'auto' | 'salida22' | 'cornerCorto' | 'g22tv' | 'g22scores' | 'none';
+
+const PLATE_BRAND_SOURCES: Record<Exclude<PlateBrandId, 'auto' | 'none'>, string> = {
+    salida22: '/marcas/salida-de-22.png',
+    cornerCorto: '/marcas/corner-corto.png',
+    g22tv: '/marcas/grupo-22-tv.png',
+    g22scores: '/header-logo.png',
+};
+
+const PLATE_BRAND_OPTIONS: Array<{ value: PlateBrandId; label: string }> = [
+    { value: 'auto', label: 'Automatica por deporte' },
+    { value: 'salida22', label: 'Salida de 22 (rugby)' },
+    { value: 'cornerCorto', label: 'Corner Corto (hockey)' },
+    { value: 'g22tv', label: 'Grupo 22 TV' },
+    { value: 'g22scores', label: 'G22 Scores' },
+    { value: 'none', label: 'Sin marca' },
+];
+
+function isPlateBrandId(value: string | undefined): value is PlateBrandId {
+    return PLATE_BRAND_OPTIONS.some((option) => option.value === value);
 }
 
-function g22pSplitBackground(ctx: CanvasRenderingContext2D, W: number, H: number, homeColor: string, awayColor: string) {
-    // Cada lado lleva el color real de su equipo (oscurecido apenas para legibilidad).
-    const homeBase = mixHexColors(homeColor, '#0a0b0d', 0.26);
-    const awayBase = mixHexColors(awayColor, '#0a0b0d', 0.26);
-    ctx.fillStyle = homeBase;
-    ctx.fillRect(0, 0, Math.ceil(W / 2) + 2, H);
-    ctx.fillStyle = awayBase;
-    ctx.fillRect(Math.floor(W / 2) - 2, 0, Math.ceil(W / 2) + 2, H);
+// Los ids numericos son los de FlashScore (SPORT_MAPPING en services/flashscore):
+// asi llega el deporte en los partidos externos, y sin traducirlos un partido de
+// rugby (8) caia en Grupo 22 TV. Solo hacen falta los que tienen marca propia.
+const PLATE_FLASHSCORE_SPORT_SLUGS: Record<number, string> = {
+    4: 'hockey',
+    8: 'rugby',
+    19: 'rugby-league',
+    24: 'field-hockey',
+};
 
-    // Levante suave por lado (da volumen sin ensuciar el color).
-    let g = ctx.createRadialGradient(W * 0.25, H * 0.40, 40, W * 0.25, H * 0.40, W * 0.85);
-    g.addColorStop(0, hexToRGBA(mixHexColors(homeColor, '#ffffff', 0.18), 0.16));
-    g.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W / 2, H);
-    g = ctx.createRadialGradient(W * 0.75, H * 0.40, 40, W * 0.75, H * 0.40, W * 0.85);
-    g.addColorStop(0, hexToRGBA(mixHexColors(awayColor, '#ffffff', 0.18), 0.16));
-    g.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(W / 2, 0, W / 2, H);
-
-    // Textura de arcos concéntricos (muy tenue) arriba y abajo.
-    ctx.save();
-    ctx.globalAlpha = 0.05;
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
-    for (let i = 0; i < 6; i += 1) {
-        ctx.beginPath();
-        ctx.arc(W * 0.5, H * 1.05, W * (0.55 + i * 0.18), Math.PI, 2 * Math.PI);
-        ctx.stroke();
+// El deporte llega de paginas tipadas flojo: slug, numero de FlashScore o un
+// objeto con el deporte adentro. Todo eso se normaliza a un slug.
+function normalizePlateSportId(sport: unknown): string {
+    if (typeof sport === 'number' && Number.isFinite(sport)) {
+        return PLATE_FLASHSCORE_SPORT_SLUGS[sport] || '';
     }
-    for (let i = 0; i < 5; i += 1) {
-        ctx.beginPath();
-        ctx.arc(W * 0.5, -H * 0.05, W * (0.45 + i * 0.18), 0, Math.PI);
-        ctx.stroke();
+
+    if (typeof sport === 'string') {
+        const value = sport.trim().toLowerCase();
+        if (/^\d+$/.test(value)) return PLATE_FLASHSCORE_SPORT_SLUGS[Number(value)] || '';
+        return value;
     }
-    ctx.restore();
 
-    // (Sin sombra de costura central: el corte entre colores queda limpio.)
-
-    ctx.save();
-    for (let i = 0; i < 2200; i += 1) {
-        const x = g22pNoise(i * 1.7) * W;
-        const y = g22pNoise(i * 3.3 + 2) * H;
-        const a = g22pNoise(i * 5.1 + 7) * 0.045;
-        ctx.fillStyle = g22pNoise(i * 2.2) > 0.5 ? `rgba(255,255,255,${a})` : `rgba(0,0,0,${a * 1.7})`;
-        const s = 1 + g22pNoise(i * 4.4) * 2.2;
-        ctx.fillRect(x, y, s, s);
+    if (sport && typeof sport === 'object') {
+        const record = sport as Record<string, unknown>;
+        for (const key of ['id', 'slug', 'sportId', 'sport_id', 'sport', 'name']) {
+            const nested = normalizePlateSportId(record[key]);
+            if (nested) return nested;
+        }
     }
-    ctx.restore();
 
-    g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, 'rgba(0,0,0,0.42)');
-    g.addColorStop(0.16, 'rgba(0,0,0,0.08)');
-    g.addColorStop(0.55, 'rgba(0,0,0,0)');
-    g.addColorStop(0.86, 'rgba(0,0,0,0.12)');
-    g.addColorStop(1, 'rgba(0,0,0,0.5)');
-    ctx.fillStyle = g;
+    return '';
+}
+
+// El hockey de la plataforma es el de cancha ('field-hockey'); al de hielo se le
+// da la misma marca porque es el mismo programa, no un medio distinto.
+function resolvePlateBrandSource(brand: PlateBrandId | undefined, sport: unknown): string {
+    const requested = isPlateBrandId(brand) ? brand : 'auto';
+    if (requested === 'none') return '';
+    if (requested !== 'auto') return PLATE_BRAND_SOURCES[requested];
+
+    const sportId = normalizePlateSportId(sport);
+    if (sportId.startsWith('rugby')) return PLATE_BRAND_SOURCES.salida22;
+    if (sportId === 'field-hockey' || sportId === 'hockey') return PLATE_BRAND_SOURCES.cornerCorto;
+    return PLATE_BRAND_SOURCES.g22tv;
+}
+
+// El reparto tipografico de la placa es FIJO y no lo toca el preset del panel:
+// el titular y el bloque de fecha+hora van en Dharma Gothic C Heavy (la mas
+// condensada) y el marcador en Dharma Gothic E Heavy — el guion del "27-29" es
+// la diferencia que se ve, la barra ancha de la E.
+const PLATE_FONT_TITLE = `${DHARMA_GOTHIC_C_FAMILY.replace(', sans-serif', '')}, "G22 Dharma Gothic", "Bebas Neue", "Outfit", sans-serif`;
+const PLATE_FONT_SCORE = `${DHARMA_GOTHIC_E_FAMILY.replace(', sans-serif', '')}, "Dharma Gothic E Heavy", "G22 Dharma Gothic", "Bebas Neue", "Outfit", sans-serif`;
+
+type ExportPlateOptions = {
+    field?: string;
+    fieldEnd?: string;
+    ink?: string;
+    brand?: PlateBrandId;
+    footerMeta?: boolean;
+};
+
+type G22PlateTone = {
+    field: string;
+    fieldEnd: string;
+    ink: string;
+    rule: string;
+    accent: string;
+    isDarkField: boolean;
+};
+
+function isHexColor(value: string): boolean {
+    return /^#[0-9a-f]{6}$/.test(value);
+}
+
+// El color de la placa sale de Fondo + Acento. Las paletas del modal son casi
+// negras: usar el Fondo tal cual dejaría un rectángulo negro donde la referencia
+// tiene un campo de color. Los tres colores se pueden forzar desde el modal.
+function getG22PlateTone(accentColor: string, bgColor: string, overrides?: ExportPlateOptions): G22PlateTone {
+    const fieldOverride = normalizeHexColor(overrides?.field);
+    const fieldEndOverride = normalizeHexColor(overrides?.fieldEnd);
+    const inkOverride = normalizeHexColor(overrides?.ink);
+    const normalizedAccent = normalizeHexColor(accentColor);
+    const accent = isHexColor(normalizedAccent) ? normalizedAccent : BRAND_ACCENT;
+    const field = isHexColor(fieldOverride) ? fieldOverride : mixHexColors(bgColor, accent, 0.58);
+    // El campo decide si la pieza es clara u oscura aunque la tinta se fuerce a
+    // mano: de eso dependen la trama, las sombras y la viñeta.
+    const isDarkField = getContrastColor(field) === '#ffffff';
+    const ink = isHexColor(inkOverride) ? inkOverride : getContrastColor(field);
+    // La otra punta del degradado: por defecto el mismo color hundido, que es lo
+    // que hace pesar la esquina de abajo sin ensuciar el color de la placa.
+    const fieldEnd = isHexColor(fieldEndOverride)
+        ? fieldEndOverride
+        : mixHexColors(field, isDarkField ? '#000000' : '#1f2937', isDarkField ? 0.42 : 0.16);
+
+    return { field, fieldEnd, ink, rule: hexToRGBA(ink, 0.95), accent, isDarkField };
+}
+
+// El fondo ES el diseño: un degradado de ESQUINA A ESQUINA (arriba izquierda
+// hacia abajo derecha) con trama de tela y grano encima. Sin la textura el
+// degradado se ve como fondo de aplicación, no como una placa impresa.
+function drawG22PlateField(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, tone: G22PlateTone) {
+    const W = canvas.width;
+    const H = canvas.height;
+
+    const corner = ctx.createLinearGradient(0, 0, W, H);
+    corner.addColorStop(0, tone.field);
+    corner.addColorStop(1, tone.fieldEnd);
+    ctx.fillStyle = corner;
     ctx.fillRect(0, 0, W, H);
-}
 
-// Titular del póster en Articulat CF (itálica de fábrica → sin skew sintético).
-// Ajusta tamaño y tracking para no pasarse del ancho disponible.
-function g22pTitle(
-    ctx: CanvasRenderingContext2D,
-    text: string,
-    cx: number,
-    y: number,
-    size: number,
-    fill: string,
-    maxWidth: number,
-    tracking = 0,
-) {
+    // El Acento no pinta ningún texto — la placa se lee en blanco sobre color —,
+    // así que entra como luz en la esquina de arriba: se nota que cambia sin
+    // pelearse con el titular ni con el degradado.
+    const halo = ctx.createRadialGradient(W * 0.12, -H * 0.1, 0, W * 0.12, -H * 0.1, W * 1.15);
+    halo.addColorStop(0, hexToRGBA(tone.accent, 0.24));
+    halo.addColorStop(1, hexToRGBA(tone.accent, 0));
+    ctx.fillStyle = halo;
+    ctx.fillRect(0, 0, W, H);
+
     ctx.save();
-    ctx.font = `900 ${size}px ${FONT_ARTICULAT}`;
-    const supportsTracking = 'letterSpacing' in ctx;
-    if (supportsTracking) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${tracking}px`;
-    let measured = ctx.measureText(text).width + tracking * Math.max(text.length - 1, 0);
-    if (measured > maxWidth && measured > 0) {
-        const f = maxWidth / measured;
-        size = Math.max(1, Math.floor(size * f));
-        tracking *= f;
-        ctx.font = `900 ${size}px ${FONT_ARTICULAT}`;
-        if (supportsTracking) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${tracking}px`;
+    ctx.strokeStyle = hexToRGBA(tone.isDarkField ? '#ffffff' : '#000000', 0.03);
+    ctx.lineWidth = 1;
+    for (let y = 0; y <= H; y += 5) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + 0.5);
+        ctx.lineTo(W, y + 0.5);
+        ctx.stroke();
     }
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.shadowColor = 'rgba(0,0,0,0.4)';
-    ctx.shadowBlur = size * 0.10;
-    ctx.shadowOffsetY = size * 0.04;
-    ctx.fillStyle = fill;
-    ctx.fillText(text, cx, y);
     ctx.restore();
-}
 
-function g22pItalic(
-    ctx: CanvasRenderingContext2D,
-    text: string,
-    cx: number,
-    y: number,
-    size: number,
-    fill: string,
-    shadow: boolean,
-    font?: string,
-    maxWidth?: number,
-    fillWidth = false,
-) {
-    const family = font || FONT_EDITORIAL_SCORE;
-    let fontSize = size;
-    if (maxWidth) {
-        ctx.font = `900 ${fontSize}px ${family}`;
-        const measured = ctx.measureText(text).width || 1;
-        // fillWidth: escala el tamaño para que el texto OCUPE el ancho objetivo (crece o achica).
-        // Sin fillWidth: solo achica si se pasa de largo.
-        if (fillWidth || measured > maxWidth) fontSize = Math.max(1, Math.floor(fontSize * (maxWidth / measured)));
-    }
-    ctx.save();
-    ctx.translate(cx, y);
-    ctx.transform(1, 0, -0.16, 1, 0, 0);
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.font = `900 ${fontSize}px ${family}`;
-    if (shadow) {
-        ctx.shadowColor = 'rgba(0,0,0,0.45)';
-        ctx.shadowBlur = fontSize * 0.12;
-        ctx.shadowOffsetY = fontSize * 0.05;
-    }
-    ctx.fillStyle = fill;
-    ctx.fillText(text, 0, 0);
-    ctx.restore();
-}
-
-// Bounding box del contenido OPACO de la imagen (en coords naturales), cacheado en el elemento.
-// Permite recortar el padding transparente que traen muchos escudos/banderas antes del cover-fit.
-function g22pImageBounds(img: HTMLImageElement): { x: number; y: number; w: number; h: number } {
-    const cached = (img as HTMLImageElement & { __g22bounds?: { x: number; y: number; w: number; h: number } }).__g22bounds;
-    if (cached) return cached;
-    let bounds = { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
-    try {
-        if (typeof document !== 'undefined') {
-            const maxDim = 160;
-            const sc = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
-            const cw = Math.max(1, Math.round(img.naturalWidth * sc));
-            const ch = Math.max(1, Math.round(img.naturalHeight * sc));
-            const c = document.createElement('canvas');
-            c.width = cw;
-            c.height = ch;
-            const x = c.getContext('2d');
-            if (x) {
-                x.drawImage(img, 0, 0, cw, ch);
-                const d = x.getImageData(0, 0, cw, ch).data;
-                let minX = cw, minY = ch, maxX = -1, maxY = -1;
-                for (let yy = 0; yy < ch; yy += 1) {
-                    for (let xx = 0; xx < cw; xx += 1) {
-                        if (d[(yy * cw + xx) * 4 + 3] > 12) {
-                            if (xx < minX) minX = xx;
-                            if (xx > maxX) maxX = xx;
-                            if (yy < minY) minY = yy;
-                            if (yy > maxY) maxY = yy;
-                        }
-                    }
-                }
-                if (maxX >= minX && maxY >= minY) {
-                    bounds = { x: minX / sc, y: minY / sc, w: (maxX - minX + 1) / sc, h: (maxY - minY + 1) / sc };
-                }
-            }
+    const noise = getRankingNoiseTile();
+    if (noise) {
+        const pattern = ctx.createPattern(noise, 'repeat');
+        if (pattern) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'overlay';
+            ctx.globalAlpha = 0.14;
+            ctx.fillStyle = pattern;
+            ctx.fillRect(0, 0, W, H);
+            ctx.restore();
         }
-    } catch {
-        // Imagen tainted (CORS) u otro error: caemos al recuadro completo.
     }
-    (img as HTMLImageElement & { __g22bounds?: { x: number; y: number; w: number; h: number } }).__g22bounds = bounds;
-    return bounds;
-}
 
-function g22pRoundRectSides(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, tl: number, tr: number, br: number, bl: number) {
-    ctx.beginPath();
-    ctx.moveTo(x + tl, y);
-    ctx.lineTo(x + w - tr, y);
-    ctx.arcTo(x + w, y, x + w, y + tr, tr);
-    ctx.lineTo(x + w, y + h - br);
-    ctx.arcTo(x + w, y + h, x + w - br, y + h, br);
-    ctx.lineTo(x + bl, y + h);
-    ctx.arcTo(x, y + h, x, y + h - bl, bl);
-    ctx.lineTo(x, y + tl);
-    ctx.arcTo(x, y, x + tl, y, tl);
-    ctx.closePath();
-}
-
-// Escudo recortado por una máscara redondeada que LLENA su ventana (cover-fit sobre el
-// CONTENIDO opaco, ignorando el padding transparente). Sin imagen => relleno neutro.
-function g22pCrestWindow(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, radii: [number, number, number, number], img: HTMLImageElement | null) {
     ctx.save();
-    g22pRoundRectSides(ctx, x, y, w, h, radii[0], radii[1], radii[2], radii[3]);
-    ctx.clip();
-    if (img && img.naturalWidth && img.naturalHeight) {
-        const b = g22pImageBounds(img);
-        const s = Math.max(w / b.w, h / b.h);
-        const dw = img.naturalWidth * s;
-        const dh = img.naturalHeight * s;
-        const dx = x + w / 2 - (b.x + b.w / 2) * s;
-        const dy = y + h / 2 - (b.y + b.h / 2) * s;
-        ctx.drawImage(img, dx, dy, dw, dh);
-    } else {
-        ctx.fillStyle = '#eef1f4';
-        ctx.fillRect(x, y, w, h);
-    }
+    const vignette = ctx.createRadialGradient(W / 2, H / 2, W * 0.36, W / 2, H / 2, H * 0.82);
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(1, hexToRGBA('#000000', tone.isDarkField ? 0.16 : 0.07));
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, W, H);
     ctx.restore();
 }
 
-// Tarjeta blanca con dos ventanas recortadas (una por equipo), divididas al medio.
-function g22pCrestCard(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, u: (v: number) => number, homeLogo: HTMLImageElement | null, awayLogo: HTMLImageElement | null) {
+// Ancho de la TINTA, no del avance: measureText().width incluye el espacio
+// lateral de la primera y la ultima letra, y con eso un titular "al ancho" queda
+// siempre unos pixeles mas corto que la regla.
+function measureInkWidth(ctx: CanvasRenderingContext2D, text: string): number {
+    const metrics = ctx.measureText(text);
+    const left = metrics.actualBoundingBoxLeft;
+    const right = metrics.actualBoundingBoxRight;
+    if (typeof left === 'number' && typeof right === 'number') {
+        const ink = Math.abs(left) + Math.abs(right);
+        if (ink > 0) return ink;
+    }
+    return metrics.width;
+}
+
+function setFilledFont(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    targetWidth: number,
+    weight: string,
+    family: string,
+    minSize: number,
+    maxSize: number
+): number {
+    const clamp = (value: number) => Math.max(minSize, Math.min(maxSize, Math.round(value)));
+    let size = clamp(maxSize);
+    // El ancho escala casi lineal con el cuerpo: tres pasadas de regla de tres
+    // clavan el ancho aunque la fuente tenga kerning raro.
+    for (let pass = 0; pass < 3; pass += 1) {
+        ctx.font = `${weight} ${size}px ${family}`;
+        const width = measureInkWidth(ctx, text);
+        if (width <= 0) break;
+        const next = clamp(size * (targetWidth / width));
+        if (next === size) break;
+        size = next;
+    }
+    ctx.font = `${weight} ${size}px ${family}`;
+    return size;
+}
+
+function drawG22PlateRule(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    thickness: number,
+    color: string
+) {
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = u(44);
-    ctx.shadowOffsetY = u(22);
-    ctx.fillStyle = '#ffffff';
-    g22pRoundRect(ctx, x, y, w, h, u(40));
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, thickness, thickness / 2);
     ctx.fill();
     ctx.restore();
-
-    const b = u(16);        // marco blanco alrededor
-    const gapMid = u(10);   // divisor central
-    const r = u(28);        // radio de las esquinas exteriores de cada ventana
-    const innerY = y + b;
-    const innerH = h - b * 2;
-    const winW = (w - b * 2 - gapMid) / 2;
-    const leftX = x + b;
-    const rightX = x + b + winW + gapMid;
-    g22pCrestWindow(ctx, leftX, innerY, winW, innerH, [r, 0, 0, r], homeLogo);
-    g22pCrestWindow(ctx, rightX, innerY, winW, innerH, [0, r, r, 0], awayLogo);
 }
 
-// sello inferior: logo de liga (opcional, slot mascota) arriba + wordmark verde G22 SCORES debajo
-function g22pBrand(ctx: CanvasRenderingContext2D, W: number, y: number, u: (v: number) => number, wordmark: HTMLImageElement | null, league: HTMLImageElement | null) {
-    if (league && league.naturalWidth && league.naturalHeight) {
-        const h = u(120);
-        const s = h / league.naturalHeight;
-        const w = league.naturalWidth * s;
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,0.4)';
-        ctx.shadowBlur = u(22);
-        ctx.shadowOffsetY = u(8);
-        ctx.drawImage(league, W / 2 - w / 2, y - h, w, h);
-        ctx.restore();
-    }
-    if (wordmark && wordmark.naturalWidth && wordmark.naturalHeight) {
-        const w = u(360);
-        const s = w / wordmark.naturalWidth;
-        const h = wordmark.naturalHeight * s;
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,0.35)';
-        ctx.shadowBlur = u(14);
-        ctx.shadowOffsetY = u(5);
-        ctx.drawImage(wordmark, W / 2 - w / 2, y + u(34), w, h);
-        ctx.restore();
-        return;
-    }
-    g22pItalic(ctx, 'G22 SCORES', W / 2, y + u(70), u(58), BRAND_ACCENT, true);
+// El titular: "ETAPA - TORNEO" en UNA sola línea, pase lo que pase. No se parte
+// en dos: el cuerpo se ajusta para llenar el ancho de las reglas, y un nombre
+// largo sale mas chico. Devuelve su borde inferior porque el resto de la pieza
+// se cuelga de ahí.
+function drawG22PlateHeadline(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    stagePart: string,
+    tournamentPart: string,
+    tone: G22PlateTone,
+    options: { top: number; maxWidth: number; maxSize: number; minSize: number }
+): number {
+    const stage = (stagePart || '').trim().toUpperCase();
+    const tournament = (tournamentPart || '').trim().toUpperCase();
+    const headline = [stage, tournament].filter(Boolean).join(' - ');
+    if (!headline) return options.top;
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = tone.ink;
+    const size = setFilledFont(ctx, headline, options.maxWidth, '900', PLATE_FONT_TITLE, options.minSize, options.maxSize);
+    ctx.shadowColor = hexToRGBA('#000000', tone.isDarkField ? 0.34 : 0.14);
+    ctx.shadowBlur = Math.round(size * 0.16);
+    ctx.shadowOffsetY = Math.round(size * 0.04);
+    ctx.fillText(headline, canvas.width / 2, options.top);
+    ctx.restore();
+
+    return options.top + Math.round(size * 0.76);
 }
 
-async function drawG22Poster(
+// La placa lleva DOS marcas: la del medio que cubre el deporte va bajo el
+// titular, y G22 SCORES cierra abajo de todo, debajo del logo del torneo.
+//
+// Las marcas se miden por ancho Y por alto: tienen proporciones distintas
+// (Corner Corto es mucho mas larga que Salida de 22) y a alto fijo una se ve el
+// doble que la otra. Devuelve el alto que ocupo para que el bloque siguiente se
+// cuelgue de ahi.
+function drawG22PlateMark(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    mark: HTMLImageElement | null,
+    tone: G22PlateTone,
+    options: { y: number; anchor: 'top' | 'bottom'; maxHeight: number; maxWidth: number; fallbackText?: string }
+): number {
+    if (mark && mark.naturalWidth && mark.naturalHeight) {
+        const ratio = mark.naturalWidth / mark.naturalHeight;
+        const height = Math.min(options.maxHeight, options.maxWidth / ratio);
+        const width = height * ratio;
+        const top = options.anchor === 'top' ? options.y : options.y - height;
+        ctx.save();
+        ctx.globalAlpha = 0.98;
+        // Sobre placa clara la sombra es la que sostiene las letras blancas del
+        // logo: por eso ahi pesa mas, no menos.
+        ctx.shadowColor = hexToRGBA('#000000', tone.isDarkField ? 0.34 : 0.42);
+        ctx.shadowBlur = Math.round(height * (tone.isDarkField ? 0.22 : 0.3));
+        ctx.shadowOffsetY = Math.round(height * 0.07);
+        ctx.drawImage(mark, canvas.width / 2 - width / 2, top, width, height);
+        ctx.restore();
+        return height;
+    }
+
+    if (!options.fallbackText) return 0;
+
+    const size = Math.round(options.maxHeight * 0.7);
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = options.anchor === 'top' ? 'top' : 'bottom';
+    ctx.fillStyle = hexToRGBA(tone.ink, 0.94);
+    ctx.font = `900 ${size}px ${PLATE_FONT_TITLE}`;
+    setCanvasTracking(ctx, Math.round(size * 0.08));
+    ctx.fillText(options.fallbackText, canvas.width / 2, options.y);
+    setCanvasTracking(ctx, 0);
+    ctx.restore();
+
+    return size;
+}
+
+async function drawG22BasePlate(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     data: MatchStatsData,
-    opts: {
-        accentColor: string;
-        bgColor: string;
-        mode: 'result' | 'schedule';
-        homeColorOverride?: string;
-        awayColorOverride?: string;
-    },
+    accentColor: string,
+    bgColor: string,
+    plateOptions?: ExportPlateOptions
 ) {
-    const [homeLogo, awayLogo, tournamentLogo, wordmark] = await Promise.all([
+    const [homeLogo, awayLogo, tournamentLogo, sportMark, wordmark] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
         loadImage(getTournamentLogoImageSource(data)),
-        loadImage('/g22-scores-wordmark.png'),
+        loadImage(resolvePlateBrandSource(plateOptions?.brand, data.sport)),
+        loadImage('/header-logo.png'),
     ]);
 
-    // Escudo real o no hay poster. Si un escudo no cargo, `g22pCrestWindow` rellena su
-    // ventana de gris y la imagen se descarga igual: media tarjeta vacia, sin aviso, lista
-    // para publicar. Cortamos acá nombrando al club que falta — el preview del modal
-    // muestra este mismo mensaje, asi que el problema se ve ANTES de exportar.
+    // Escudo real o no hay placa. Sin este corte el escudo que falta se rellena
+    // con iniciales y la imagen se descarga igual: media pieza vacía, sin aviso,
+    // lista para publicar. Cortamos acá nombrando al club que falta — el preview
+    // del modal muestra este mismo mensaje, así que se ve ANTES de exportar.
     const missingCrests = [
         homeLogo ? '' : (data.homeTeam || '').trim() || 'el local',
         awayLogo ? '' : (data.awayTeam || '').trim() || 'el visitante',
@@ -6590,112 +6805,200 @@ async function drawG22Poster(
 
     const W = canvas.width;
     const H = canvas.height;
-    const u = (v: number) => Math.round((v * H) / 1920);
-    const homeColor = normalizeHexColor(opts.homeColorOverride || '') || g22pExtractColor(homeLogo) || '#3b2630';
-    const awayColor = normalizeHexColor(opts.awayColorOverride || '') || g22pExtractColor(awayLogo) || '#26323f';
+    // Los dos formatos miden 1080 de ancho y sólo cambian de alto: TODO lo que
+    // tiene que medir igual en post y en story se escala por ancho. El alto de
+    // más del story se reparte como AIRE entre los bloques, no como tipografía
+    // 42% más grande.
+    const u = (value: number) => Math.round((value * W) / 1080);
+    const extra = Math.max(0, H - Math.round((W * 1350) / 1080));
+    const tone = getG22PlateTone(accentColor, bgColor, plateOptions);
+    const showFooterMeta = plateOptions?.footerMeta !== false;
 
-    g22pSplitBackground(ctx, W, H, homeColor, awayColor);
+    drawG22PlateField(ctx, canvas, tone);
 
-    const isLive = data.status === 'live';
+    const padding = u(62);
+    const contentWidth = W - padding * 2;
+    const isScheduled = data.status === 'scheduled';
 
-    // Tarjeta blanca con los dos escudos recortados (máscara), mitad/mitad.
-    const cardW = W - u(110);
-    const cardX = (W - cardW) / 2;
-    const cardH = u(600);
-    const cardY = H * 0.250;
+    const tournamentLabel = stripTournamentCountryPrefix(data.tournament || '');
+    const tournamentCarriesStage = /\s[-|]\s/.test(tournamentLabel);
+    const stageLabel = tournamentCarriesStage ? '' : (data.mainTitle || getStatusLabel(data.status) || '').trim();
 
-    // Titular en Dharma Gothic C Heavy Oblique, escalado para ENTRAR en el ancho de la tarjeta.
-    const titleText = opts.mode === 'result' ? (isLive ? 'EN VIVO' : 'RESULTADO FINAL') : '¿QUIÉN GANA?';
-    g22pItalic(ctx, titleText, W / 2, cardY - u(64), u(150), '#ffffff', true, DHARMA_GOTHIC_C_FAMILY, cardW - u(46), true);
+    const headlineBottom = drawG22PlateHeadline(ctx, canvas, stageLabel, tournamentLabel, tone, {
+        top: u(96) + extra * 0.24,
+        maxWidth: contentWidth,
+        maxSize: u(260),
+        minSize: u(34),
+    });
 
-    g22pCrestCard(ctx, cardX, cardY, cardW, cardH, u, homeLogo, awayLogo);
+    // La marca del medio cuelga del titular: es la que dice de quien es la placa.
+    const sportMarkTop = headlineBottom + u(20);
+    const sportMarkHeight = drawG22PlateMark(ctx, canvas, sportMark, tone, {
+        y: sportMarkTop,
+        anchor: 'top',
+        maxHeight: u(62),
+        maxWidth: contentWidth * 0.42,
+    });
 
-    if (opts.mode === 'result') {
-        // Barra de marcador DEBAJO de la tarjeta: marcador centrado en Articulat.
-        // Si hubo penales, el resultado de cada equipo va entre paréntesis a los costados,
-        // al 50% del tamaño del marcador.
-        const scoreStr = `${data.homeScore ?? '-'} - ${data.awayScore ?? '-'}`;
-        const hasPk = data.homePenalties != null && data.awayPenalties != null;
-        const homePk = `(${data.homePenalties})`;
-        const awayPk = `(${data.awayPenalties})`;
-        const scoreSize = u(134);
-        const penSize = Math.round(scoreSize * 0.5);
-        const scoreTrack = u(6);
-        const sideGap = u(24);
-        const setLS = (v: number) => { if ('letterSpacing' in ctx) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${v}px`; };
+    const ruleThickness = Math.max(4, u(10));
+    const topRuleY = sportMarkTop + sportMarkHeight + u(28) + extra * 0.06;
+    drawG22PlateRule(ctx, padding, topRuleY, contentWidth, ruleThickness, tone.rule);
 
-        // Medir para dimensionar el bloque.
+    const bandTop = topRuleY + ruleThickness + u(16);
+    const bandHeight = u(310) + extra * 0.16;
+    const bandCenter = bandTop + bandHeight / 2;
+    const crestSize = Math.min(bandHeight * 1.02, u(256));
+    const crestCenterX = padding + crestSize / 2 - u(12);
+
+    drawOverflowCrest(ctx, {
+        x: crestCenterX,
+        y: bandCenter,
+        width: crestSize,
+        height: crestSize,
+        img: homeLogo,
+        label: data.homeTeam,
+        rawLogo: data.homeLogo,
+        isDark: tone.isDarkField,
+        showFrame: false,
+    });
+    drawOverflowCrest(ctx, {
+        x: W - crestCenterX,
+        y: bandCenter,
+        width: crestSize,
+        height: crestSize,
+        img: awayLogo,
+        label: data.awayTeam,
+        rawLogo: data.awayLogo,
+        isDark: tone.isDarkField,
+        showFrame: false,
+    });
+
+    // El centro: marcador, o fecha arriba y hora abajo. Los dos renglones del
+    // horario llenan el mismo ancho, asi que la fecha —que es mas larga— sale
+    // mas chica y la hora manda sin tener que declarar dos cuerpos a mano.
+    const hasPenalties = !isScheduled
+        && typeof data.homePenalties === 'number'
+        && typeof data.awayPenalties === 'number';
+    const scoreMaxWidth = W - (crestCenterX + crestSize / 2) * 2 - u(52);
+    const scoreCenterY = bandCenter - (hasPenalties ? u(14) : 0);
+    const dateText = isScheduled ? (data.date || '').trim().toUpperCase() : '';
+    const scoreText = isScheduled
+        ? (data.time || '--:--').trim()
+        : `${data.homeScore ?? '-'}-${data.awayScore ?? '-'}`;
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = tone.ink;
+    ctx.shadowColor = hexToRGBA('#000000', tone.isDarkField ? 0.32 : 0.14);
+    ctx.shadowBlur = u(24);
+    ctx.shadowOffsetY = u(8);
+
+    const scoreCap = Math.round(Math.min(u(268), bandHeight * (dateText ? 0.62 : 0.94)));
+    ctx.textBaseline = 'middle';
+    const scoreSize = setFilledFont(ctx, scoreText, scoreMaxWidth, '900', PLATE_FONT_SCORE, u(60), scoreCap);
+    const scoreMiddleY = dateText ? scoreCenterY + Math.round(bandHeight * 0.16) : scoreCenterY;
+    ctx.fillText(scoreText, W / 2, scoreMiddleY);
+
+    if (dateText) {
+        ctx.textBaseline = 'bottom';
+        const dateSize = setFilledFont(
+            ctx,
+            dateText,
+            scoreMaxWidth,
+            '900',
+            PLATE_FONT_SCORE,
+            u(30),
+            Math.round(bandHeight * 0.3)
+        );
+        ctx.fillText(dateText, W / 2, scoreMiddleY - scoreSize * 0.46 - u(6));
+        void dateSize;
+    }
+    ctx.restore();
+
+    if (hasPenalties) {
         ctx.save();
-        ctx.font = `900 ${scoreSize}px ${FONT_ARTICULAT}`;
-        setLS(scoreTrack);
-        const scoreW = ctx.measureText(scoreStr).width;
-        let homePkW = 0, awayPkW = 0;
-        if (hasPk) {
-            ctx.font = `900 ${penSize}px ${FONT_ARTICULAT}`;
-            setLS(0);
-            homePkW = ctx.measureText(homePk).width;
-            awayPkW = ctx.measureText(awayPk).width;
-        }
-        ctx.restore();
-
-        const contentW = scoreW + (hasPk ? homePkW + awayPkW + sideGap * 2 : 0);
-        const bw = Math.max(u(640), Math.round(contentW + u(110)));
-        const bh = u(212), bx = W / 2 - bw / 2, byy = cardY + cardH + u(8);
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,0.55)';
-        ctx.shadowBlur = u(46);
-        ctx.shadowOffsetY = u(22);
-        ctx.fillStyle = '#0b0c0e';
-        g22pRoundRect(ctx, bx, byy, bw, bh, u(32));
-        ctx.fill();
-        ctx.restore();
-
-        const midY = byy + bh / 2;
-        ctx.save();
-        ctx.textBaseline = 'middle';
-        ctx.font = `900 ${scoreSize}px ${FONT_ARTICULAT}`;
-        setLS(scoreTrack);
         ctx.textAlign = 'center';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(scoreStr, W / 2, midY);
-        if (hasPk) {
-            ctx.font = `900 ${penSize}px ${FONT_ARTICULAT}`;
-            setLS(0);
-            ctx.fillStyle = 'rgba(255,255,255,0.82)';
-            ctx.textAlign = 'right';
-            ctx.fillText(homePk, W / 2 - scoreW / 2 - sideGap, midY);
-            ctx.textAlign = 'left';
-            ctx.fillText(awayPk, W / 2 + scoreW / 2 + sideGap, midY);
-        }
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = hexToRGBA(tone.ink, 0.8);
+        ctx.font = `800 ${u(24)}px ${FONT_ARTICULAT}`;
+        setCanvasTracking(ctx, u(2));
+        ctx.fillText(`PENALES ${data.homePenalties} - ${data.awayPenalties}`, W / 2, scoreCenterY + scoreSize * 0.42);
+        setCanvasTracking(ctx, 0);
         ctx.restore();
+    }
 
-        // Sello: liga (slot mascota) + wordmark verde.
-        g22pBrand(ctx, W, H * 0.90, u, wordmark, tournamentLogo);
-    } else {
-        // Texto en Articulat CF debajo de los escudos (fecha/hora del partido).
-        const kickoffDate = toExportDate(data.kickoffAt);
-        const dateline = (() => {
-            const parts: string[] = [];
-            if (kickoffDate) {
-                const wd = new Intl.DateTimeFormat('es-AR', { weekday: 'short' }).format(kickoffDate).replace('.', '').toUpperCase();
-                const day = new Intl.DateTimeFormat('es-AR', { day: '2-digit' }).format(kickoffDate);
-                const mon = new Intl.DateTimeFormat('es-AR', { month: 'short' }).format(kickoffDate).replace('.', '').toUpperCase();
-                const time = new Intl.DateTimeFormat('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false }).format(kickoffDate);
-                parts.push(`${wd} ${day} ${mon}`, time);
-            } else {
-                if (data.date) parts.push(data.date.toUpperCase());
-                if (data.time) parts.push(data.time);
-            }
-            if (data.venue) parts.push(data.venue.toUpperCase());
-            return parts.join('  ·  ');
-        })();
-        if (dateline) {
-            g22pTitle(ctx, dateline, W / 2, cardY + cardH + u(150), u(78), 'rgba(255,255,255,0.97)', W - u(220), u(1));
-        }
+    const bottomRuleY = bandTop + bandHeight + u(14);
+    drawG22PlateRule(ctx, padding, bottomRuleY, contentWidth, ruleThickness, tone.rule);
 
-        // Debajo se deja LIBRE para el sticker de encuesta de Instagram.
-        // Horario: sin logo de liga, solo wordmark.
-        g22pBrand(ctx, W, H * 0.905, u, wordmark, null);
+    // El pie: en horario el día ya vive arriba, así que abajo queda la sede sola.
+    const metaLabel = showFooterMeta
+        ? (isScheduled
+            ? (data.venue || '').trim()
+            : [data.date, data.venue].filter(Boolean).join('   ·   '))
+        : '';
+    const metaBaseline = H - u(52);
+
+    // De abajo hacia arriba: primero la fila de datos, encima la firma G22 SCORES,
+    // y recién ahí se calcula cuánto le queda al logo del torneo. Al revés, un
+    // torneo de logo alto se comía la firma.
+    const brandMaxHeight = u(84) + extra * 0.04;
+    const brandBottom = metaBaseline - (metaLabel ? u(42) : u(6));
+    const brandTop = brandBottom - brandMaxHeight;
+
+    // El logo del torneo CUELGA del filete de abajo; lo que sobra entre él y la
+    // marca es aire a propósito — ahí va el sticker de Instagram.
+    const logoTop = bottomRuleY + ruleThickness + u(36) + extra * 0.16;
+    const logoRoom = brandTop - u(30) - logoTop;
+    const logoHeight = Math.min(u(280) + extra * 0.1, logoRoom);
+    const logoWidth = Math.min(contentWidth * 0.86, logoHeight * 3);
+
+    // Sin logo no se dibuja nada: el nombre del torneo ya está en el titular y
+    // repetirlo acá abajo sería decir dos veces lo mismo.
+    if (tournamentLogo && logoHeight >= u(90)) {
+        const logoCenterY = logoTop + logoHeight / 2;
+        drawEditorialCrestStroke(
+            ctx,
+            W / 2,
+            logoCenterY,
+            logoWidth,
+            logoHeight,
+            tournamentLogo,
+            5,
+            hexToRGBA(tone.ink, 0.16)
+        );
+        drawOverflowCrest(ctx, {
+            x: W / 2,
+            y: logoCenterY,
+            width: logoWidth,
+            height: logoHeight,
+            img: tournamentLogo,
+            label: data.tournament,
+            rawLogo: data.tournamentLogo,
+            isDark: tone.isDarkField,
+            showFrame: false,
+        });
+    }
+
+    // La firma es SIEMPRE el logo (el del header). Sobre placa clara sus letras
+    // blancas se apoyan en la sombra que le pone drawG22PlateMark.
+    drawG22PlateMark(ctx, canvas, wordmark, tone, {
+        y: brandBottom,
+        anchor: 'bottom',
+        maxHeight: brandMaxHeight,
+        maxWidth: contentWidth * 0.5,
+        fallbackText: 'G22 SCORES',
+    });
+
+    if (metaLabel) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle = hexToRGBA(tone.ink, 0.72);
+        ctx.font = `700 ${u(20)}px ${FONT_ARTICULAT}`;
+        setCanvasTracking(ctx, u(2));
+        ctx.fillText(truncateTextToWidth(ctx, metaLabel.toUpperCase(), contentWidth), W / 2, metaBaseline);
+        setCanvasTracking(ctx, 0);
+        ctx.restore();
     }
 }
 
@@ -7841,20 +8144,6 @@ async function drawLegacyClassicMatchPanel(
     ctx.restore();
 }
 
-async function drawMatchScheduleConfrontation(
-    ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement,
-    data: MatchStatsData,
-    _format: CanvasFormat,
-    accentColor: string,
-    bgColor: string,
-    _brandLogo: HTMLImageElement | null,
-    homeColorOverride?: string,
-    awayColorOverride?: string,
-) {
-    await drawG22Poster(ctx, canvas, data, { accentColor, bgColor, mode: 'schedule', homeColorOverride, awayColorOverride });
-}
-
 function drawClassicResultAccentShape(
     ctx: CanvasRenderingContext2D,
     points: Array<[number, number]>,
@@ -7871,6 +8160,8 @@ function drawClassicResultAccentShape(
     ctx.restore();
 }
 
+// El partido clasico de G22 Base: la placa. El modo (resultado u horario) ya
+// viaja en `status` — lo pone applyMatchExportMode antes de dibujar.
 async function drawMatchResult(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
@@ -7879,16 +8170,9 @@ async function drawMatchResult(
     accentColor: string,
     bgColor: string,
     _brandLogo: HTMLImageElement | null,
-    homeColorOverride?: string,
-    awayColorOverride?: string,
+    plateOptions?: ExportPlateOptions,
 ) {
-    await drawG22Poster(ctx, canvas, data, {
-        accentColor,
-        bgColor,
-        mode: data.status === 'scheduled' ? 'schedule' : 'result',
-        homeColorOverride,
-        awayColorOverride,
-    });
+    await drawG22BasePlate(ctx, canvas, data, accentColor, bgColor, plateOptions);
 }
 
 async function drawStandings(
@@ -8531,6 +8815,445 @@ async function drawRankingPoster(
     }
     ctx.restore();
 }
+// El tracking no viaja en el shorthand de ctx.font: se pone aparte y se apaga a
+// mano, porque no todos los navegadores lo devuelven con restore().
+function setCanvasTracking(ctx: CanvasRenderingContext2D, px: number) {
+    if ('letterSpacing' in ctx) {
+        (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${px}px`;
+    }
+}
+
+const PALMARES_PEDESTAL_RATIO = [1, 0.72, 0.56];
+
+// Palmares: el afiche de la vitrina. No es una tabla — manda el podio (escudo
+// grande, oro/plata/bronce y los titulos sobre su escalon) y el resto baja como
+// listado con una barra proporcional al lider. El podio se dibuja solo en la
+// primera lamina: en la segunda ya no hay 1-2-3 que mostrar.
+async function drawPalmaresPoster(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: StandingsData,
+    slide: StandingsSlideData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const width = canvas.width;
+    const height = canvas.height;
+    // Los DOS formatos son verticales: `height > width` daria story tambien para
+    // el 1080x1350 y el post saldria con las medidas del 9:16. El corte es el
+    // mismo que usa getSafeArea.
+    const isStory = height > 1500;
+    const isDark = getContrastColor(bgColor) === '#ffffff';
+    const textColor = getTextColor(isDark);
+    const mutedColor = getMutedColor(isDark, 0.6);
+    // En fondo claro el oro puro no llega a contraste util: baja a ambar oscuro.
+    const goldColor = isDark ? '#f6c445' : '#a16207';
+    const silverColor = isDark ? '#cbd5e1' : '#5b6675';
+    const bronzeColor = isDark ? '#d08c5a' : '#95562a';
+    const medalFor = (pos: number) => (pos === 1 ? goldColor : pos === 2 ? silverColor : pos === 3 ? bronzeColor : accentColor);
+    const titlesOf = (row: StandingsRowData) => {
+        const parsed = Number(row.points);
+        return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    const rows = slide.groups.flatMap((group) => group.rows);
+    const [tournamentLogo, ...teamLogos] = await Promise.all([
+        loadImage(data.tournamentLogo || ''),
+        ...rows.map((row) => loadImage(row.teamLogo || '')),
+    ]);
+
+    // ---- Fondo: halo del acento detras del podio y piso apagado ----
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, width, height);
+
+    const halo = ctx.createRadialGradient(width / 2, height * 0.3, 0, width / 2, height * 0.3, height * 0.66);
+    halo.addColorStop(0, hexToRGBA(accentColor, isDark ? 0.5 : 0.2));
+    halo.addColorStop(0.55, hexToRGBA(accentColor, isDark ? 0.14 : 0.07));
+    halo.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = halo;
+    ctx.fillRect(0, 0, width, height);
+
+    const floor = ctx.createLinearGradient(0, height * 0.42, 0, height);
+    floor.addColorStop(0, 'rgba(0,0,0,0)');
+    floor.addColorStop(1, isDark ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.6)');
+    ctx.fillStyle = floor;
+    ctx.fillRect(0, 0, width, height);
+
+    const noiseTile = getRankingNoiseTile();
+    if (noiseTile) {
+        const noisePattern = ctx.createPattern(noiseTile, 'repeat');
+        if (noisePattern) {
+            ctx.save();
+            ctx.globalAlpha = 0.07;
+            ctx.globalCompositeOperation = 'overlay';
+            ctx.fillStyle = noisePattern;
+            ctx.fillRect(0, 0, width, height);
+            ctx.restore();
+        }
+    }
+
+    const padX = Math.round(width * 0.085);
+    const contentLeft = padX;
+    const contentRight = width - padX;
+    const contentWidth = contentRight - contentLeft;
+    const footerCenterY = height - (isStory ? 170 : 68);
+    const bodyBottom = footerCenterY - (isStory ? 48 : 36);
+    // En story el contenido arranca mas abajo: arriba va la barra del usuario.
+    let cursorY = isStory ? 280 : 128;
+
+    // ---- Cabecera centrada: escudo del torneo, volanta, titulo y bajada ----
+    if (tournamentLogo) {
+        const logoSize = isStory ? 98 : 84;
+        drawLogoBadge(ctx, {
+            x: width / 2,
+            y: cursorY + logoSize / 2,
+            size: logoSize,
+            img: tournamentLogo,
+            label: data.title || 'Torneo',
+            rawLogo: data.tournamentLogo,
+            isDark,
+            showFrame: false,
+        });
+        cursorY += logoSize + (isStory ? 22 : 16);
+    }
+
+    const eyebrowSize = isStory ? 26 : 23;
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = goldColor;
+    ctx.font = `800 ${eyebrowSize}px ${FONT_BODY}`;
+    setCanvasTracking(ctx, eyebrowSize * 0.3);
+    ctx.fillText('PALMARÉS', width / 2, cursorY);
+    setCanvasTracking(ctx, 0);
+    ctx.restore();
+    cursorY += eyebrowSize + (isStory ? 20 : 15);
+
+    const titleText = (data.title || 'Palmarés').trim().toUpperCase();
+    const titleFit = fitTextLinesToWidth(ctx, titleText, contentWidth, '800', isStory ? 116 : 98, FONT_DHARMA_M, 46, 2);
+    const titleLineHeight = titleFit.size * 0.86;
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = textColor;
+    ctx.font = `800 ${titleFit.size}px ${FONT_DHARMA_M}`;
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = titleFit.size * 0.14;
+    titleFit.lines.forEach((line, index) => {
+        ctx.fillText(line, width / 2, cursorY + index * titleLineHeight);
+    });
+    ctx.restore();
+    cursorY += titleFit.lines.length * titleLineHeight + (isStory ? 14 : 10);
+
+    const subtitleText = (data.subtitle || '').trim().toUpperCase();
+    if (subtitleText) {
+        const subtitleSize = isStory ? 24 : 21;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = mutedColor;
+        ctx.font = `700 ${subtitleSize}px ${FONT_BODY}`;
+        setCanvasTracking(ctx, subtitleSize * 0.08);
+        ctx.fillText(truncateTextToWidth(ctx, subtitleText, contentWidth), width / 2, cursorY);
+        setCanvasTracking(ctx, 0);
+        ctx.restore();
+        cursorY += subtitleSize + (isStory ? 22 : 17);
+    }
+
+    ctx.fillStyle = hexToRGBA(goldColor, 0.85);
+    ctx.fillRect(width / 2 - 34, cursorY, 68, 3);
+    cursorY += 3 + (isStory ? 42 : 32);
+
+    // ---- Podio (solo lamina 1) ----
+    const podiumRows = slide.pageNumber === 1 ? rows.slice(0, Math.min(3, rows.length)) : [];
+    const listRows = rows.slice(podiumRows.length);
+    const maxTitles = Math.max(1, ...rows.map(titlesOf));
+
+    // Reparto del alto entre podio y listado. La cuenta la manda el listado: si
+    // le sobra lugar el podio se lo queda, y si le falta el podio cede hasta su
+    // piso. Un listado largo en 4:5 baja a dos columnas antes que a filas de
+    // 30px, que es donde el escudo deja de leerse.
+    const available = Math.max(220, bodyBottom - cursorY);
+    const listGap = isStory ? 40 : 36;
+    const listColumns = listRows.length > (isStory ? 10 : 6) ? 2 : 1;
+    const rowsPerColumn = Math.ceil(listRows.length / listColumns) || 1;
+    const preferredRowHeight = isStory ? 78 : 62;
+    const minRowHeight = isStory ? 46 : 38;
+    const podiumMin = isStory ? 380 : 300;
+    const podiumMax = isStory ? 620 : 440;
+
+    let podiumHeight = listRows.length > 0
+        ? Math.min(podiumMax, available * 0.52)
+        : Math.min(isStory ? 760 : 600, available);
+    let listRowHeight = 0;
+    if (podiumRows.length > 0 && listRows.length > 0) {
+        listRowHeight = (available - listGap - podiumHeight) / rowsPerColumn;
+        if (listRowHeight > preferredRowHeight) {
+            podiumHeight = Math.min(podiumMax, available - listGap - rowsPerColumn * preferredRowHeight);
+            listRowHeight = preferredRowHeight;
+        } else if (listRowHeight < minRowHeight) {
+            podiumHeight = Math.max(podiumMin, available - listGap - rowsPerColumn * minRowHeight);
+            listRowHeight = Math.max(14, (available - listGap - podiumHeight) / rowsPerColumn);
+        }
+    } else if (listRows.length > 0) {
+        listRowHeight = Math.min(preferredRowHeight, available / rowsPerColumn);
+    }
+
+    // Un palmares de tres campeones no estira el podio hasta el pie: se centra
+    // en lo que sobra y el aire queda repartido, no todo abajo.
+    if (podiumRows.length > 0 && listRows.length === 0) {
+        cursorY += Math.max(0, (available - podiumHeight) / 2);
+    }
+
+    if (podiumRows.length > 0) {
+        const baseY = cursorY + podiumHeight;
+        const slotWidth = contentWidth / podiumRows.length;
+        // El orden del podio es 2-1-3: el campeon va al medio, como en la foto.
+        const slotOrder = podiumRows.length === 3 ? [1, 0, 2] : podiumRows.map((_, index) => index);
+
+        const pedestalMaxH = podiumHeight * 0.26;
+        const captionSize = Math.round(Math.min(isStory ? 20 : 17, podiumHeight * 0.045));
+        const countSize = Math.round(Math.min(isStory ? 92 : 76, podiumHeight * 0.21));
+        const nameSize = Math.round(Math.min(isStory ? 28 : 25, podiumHeight * 0.062));
+        const crestMax = Math.min(slotWidth * 0.6, podiumHeight * 0.32);
+        const captionBaseline = baseY - pedestalMaxH - (isStory ? 18 : 14);
+        const countBaseline = captionBaseline - captionSize - (isStory ? 12 : 9);
+        const nameBottom = countBaseline - countSize * 0.98;
+
+        // Piso del podio: una linea tenue que apoya los tres escalones.
+        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.14)' : 'rgba(15,23,42,0.14)';
+        ctx.fillRect(contentLeft, baseY, contentWidth, 2);
+
+        slotOrder.forEach((rankIndex, slot) => {
+            const row = podiumRows[rankIndex];
+            if (!row) return;
+            const img = teamLogos[rankIndex] || null;
+            const centerX = contentLeft + slotWidth * (slot + 0.5);
+            const medal = row.zoneColor || medalFor(Number(row.pos));
+            const medalContrast = getContrastColor(medal);
+
+            // Escalon.
+            const pedestalH = pedestalMaxH * (PALMARES_PEDESTAL_RATIO[rankIndex] ?? 0.56);
+            const pedestalW = Math.min(slotWidth - (isStory ? 28 : 22), isStory ? 310 : 272);
+            const pedestalX = centerX - pedestalW / 2;
+            const pedestalY = baseY - pedestalH;
+            const pedestalFill = ctx.createLinearGradient(0, pedestalY, 0, baseY);
+            pedestalFill.addColorStop(0, hexToRGBA(medal, 0.95));
+            pedestalFill.addColorStop(1, hexToRGBA(medal, 0.34));
+            ctx.save();
+            ctx.fillStyle = pedestalFill;
+            ctx.shadowColor = hexToRGBA(medal, 0.35);
+            ctx.shadowBlur = 26;
+            ctx.shadowOffsetY = -4;
+            ctx.beginPath();
+            ctx.roundRect(pedestalX, pedestalY, pedestalW, pedestalH, [14, 14, 0, 0]);
+            ctx.fill();
+            ctx.restore();
+
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = medalContrast;
+            ctx.font = `800 ${Math.round(pedestalH * 0.78)}px ${FONT_DHARMA_M}`;
+            ctx.globalAlpha = 0.9;
+            ctx.fillText(String(row.pos), centerX, pedestalY + pedestalH / 2 + 2);
+            ctx.restore();
+
+            // Titulos y su etiqueta, alineados entre las tres columnas.
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillStyle = medal;
+            ctx.font = `800 ${countSize}px ${FONT_DHARMA_M}`;
+            ctx.shadowColor = hexToRGBA(medal, 0.4);
+            ctx.shadowBlur = 22;
+            ctx.fillText(String(titlesOf(row)), centerX, countBaseline);
+            ctx.restore();
+
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillStyle = mutedColor;
+            ctx.font = `700 ${captionSize}px ${FONT_BODY}`;
+            setCanvasTracking(ctx, captionSize * 0.14);
+            ctx.fillText(titlesOf(row) === 1 ? 'TÍTULO' : 'TÍTULOS', centerX, captionBaseline);
+            setCanvasTracking(ctx, 0);
+            ctx.restore();
+
+            // Escudo: el campeon va mas grande que los otros dos.
+            const crestSize = crestMax * (rankIndex === 0 ? 1 : 0.84);
+            drawOverflowCrest(ctx, {
+                x: centerX,
+                y: cursorY + crestMax / 2,
+                width: crestSize,
+                height: crestSize,
+                img,
+                label: row.team,
+                rawLogo: row.teamLogo,
+                isDark,
+                showFrame: false,
+            });
+
+            // Nombre del club entre el escudo y el numero. El alto disponible
+            // decide cuantas lineas entran: sin este techo un nombre de dos
+            // lineas se montaba sobre la cifra de titulos.
+            const nameZoneTop = cursorY + crestMax + (isStory ? 14 : 10);
+            const nameZoneHeight = Math.max(nameSize, nameBottom - nameZoneTop);
+            const nameLines = nameZoneHeight >= nameSize * 2.4 ? 2 : 1;
+            const nameFit = fitTextLinesToWidth(
+                ctx,
+                row.team.trim(),
+                slotWidth - (isStory ? 26 : 20),
+                '800',
+                Math.min(nameSize, Math.floor(nameZoneHeight / (nameLines * 1.2))),
+                FONT_BODY,
+                13,
+                nameLines,
+            );
+            const nameBlockH = nameFit.lines.length * nameFit.size * 1.16;
+            const nameTop = nameZoneTop + Math.max(0, (nameZoneHeight - nameBlockH) / 2);
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = textColor;
+            ctx.font = `800 ${nameFit.size}px ${FONT_BODY}`;
+            nameFit.lines.forEach((line, index) => {
+                ctx.fillText(line, centerX, nameTop + index * nameFit.size * 1.16);
+            });
+            ctx.restore();
+        });
+
+        cursorY = baseY + (isStory ? 40 : 30);
+    }
+
+    // ---- Resto del palmares: fila por club con barra proporcional al lider ----
+    if (listRows.length > 0) {
+        const listTop = cursorY;
+        const rowHeight = Math.max(14, Math.min(listRowHeight || preferredRowHeight, (bodyBottom - listTop) / rowsPerColumn));
+        const columnGap = isStory ? 22 : 16;
+        const columnWidth = (contentWidth - columnGap * (listColumns - 1)) / listColumns;
+        const tight = listColumns > 1;
+        const crestSize = Math.min((isStory ? 48 : 38) * (tight ? 0.88 : 1), rowHeight - 12);
+        const rankWidth = (isStory ? 56 : 46) * (tight ? 0.78 : 1);
+        const countWidth = (isStory ? 96 : 80) * (tight ? 0.7 : 1);
+        const nameOffset = rankWidth + crestSize + (isStory ? 30 : 24) * (tight ? 0.8 : 1);
+        const nameMaxWidth = Math.max(70, columnWidth - nameOffset - countWidth - 12);
+        const rankSize = Math.round(Math.min(isStory ? 28 : 23, rowHeight * 0.4));
+        const countFontSize = Math.round(Math.min(isStory ? 36 : 30, rowHeight * 0.52));
+        const nameFontSize = getSharedFittedFontSize(
+            ctx,
+            listRows.map((row) => ({ text: row.team.trim(), maxWidth: nameMaxWidth })),
+            '700',
+            Math.round(Math.min(isStory ? 30 : 25, rowHeight * 0.44)),
+            FONT_BODY,
+            13,
+        );
+
+        listRows.forEach((row, index) => {
+            const column = Math.floor(index / rowsPerColumn);
+            const left = contentLeft + column * (columnWidth + columnGap);
+            const right = left + columnWidth;
+            const y = listTop + (index % rowsPerColumn) * rowHeight;
+            const centerY = y + rowHeight / 2;
+            const img = teamLogos[podiumRows.length + index] || null;
+            // Piso del 6%: con un solo titulo la barra seria invisible y la fila
+            // parecia rota, no vacia.
+            const share = Math.max(0.06, titlesOf(row) / maxTitles);
+            const bandHeight = Math.max(8, rowHeight - 5);
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(left, y + 2, columnWidth, bandHeight, 12);
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.04)';
+            ctx.fill();
+            ctx.clip();
+            const bar = ctx.createLinearGradient(left, 0, left + columnWidth * share, 0);
+            bar.addColorStop(0, hexToRGBA(goldColor, isDark ? 0.28 : 0.22));
+            bar.addColorStop(1, hexToRGBA(goldColor, 0.02));
+            ctx.fillStyle = bar;
+            ctx.fillRect(left, y + 2, columnWidth * share, bandHeight);
+            ctx.restore();
+
+            ctx.save();
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = mutedColor;
+            ctx.font = `800 ${rankSize}px ${FONT_BODY}`;
+            ctx.fillText(String(row.pos), left + rankWidth / 2 + 4, centerY + 1);
+            ctx.restore();
+
+            drawOverflowCrest(ctx, {
+                x: left + rankWidth + crestSize / 2 + (isStory ? 12 : 9),
+                y: centerY,
+                width: crestSize,
+                height: crestSize,
+                img,
+                label: row.team,
+                rawLogo: row.teamLogo,
+                isDark,
+                showFrame: false,
+            });
+
+            ctx.save();
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = textColor;
+            ctx.font = `700 ${nameFontSize}px ${FONT_BODY}`;
+            ctx.fillText(truncateTextToWidth(ctx, row.team.trim(), nameMaxWidth), left + nameOffset, centerY + 1);
+
+            ctx.textAlign = 'right';
+            ctx.fillStyle = goldColor;
+            ctx.font = `800 ${countFontSize}px ${FONT_BODY}`;
+            ctx.fillText(String(titlesOf(row)), right - (tight ? 12 : 16), centerY + 1);
+            ctx.restore();
+        });
+    }
+
+    // ---- Pie: marca centrada y, si el palmares no entro en una lamina, la pagina ----
+    ctx.save();
+    ctx.textBaseline = 'middle';
+
+    if (slide.totalPages > 1) {
+        let cursorRight = contentRight;
+        if (slide.pageNumber < slide.totalPages) {
+            ctx.font = `900 ${isStory ? 28 : 24}px ${FONT_BODY}`;
+            ctx.fillStyle = textColor;
+            ctx.textAlign = 'right';
+            ctx.fillText('>>>', cursorRight, footerCenterY);
+            cursorRight -= ctx.measureText('>>>').width + 22;
+        }
+        ctx.font = `700 ${isStory ? 20 : 17}px ${FONT_BODY}`;
+        ctx.fillStyle = mutedColor;
+        ctx.textAlign = 'right';
+        ctx.fillText(`${slide.pageNumber}/${slide.totalPages}`, cursorRight, footerCenterY);
+    }
+
+    const brandFontSize = isStory ? 23 : 20;
+    const brandIconSize = isStory ? 32 : 28;
+    ctx.font = `800 ${brandFontSize}px ${FONT_BODY}`;
+    const brandTextWidth = ctx.measureText('G22 Scores').width;
+    const brandStartX = width / 2 - (brandTextWidth + (brandLogo ? brandIconSize + 10 : 0)) / 2;
+    if (brandLogo) {
+        drawLogoBadge(ctx, {
+            x: brandStartX + brandIconSize / 2,
+            y: footerCenterY,
+            size: brandIconSize,
+            img: brandLogo,
+            label: 'G22 Scores',
+            rawLogo: '/icon.png',
+            isDark,
+            showFrame: false,
+        });
+    }
+    ctx.font = `800 ${brandFontSize}px ${FONT_BODY}`;
+    ctx.fillStyle = textColor;
+    ctx.textAlign = 'left';
+    ctx.fillText('G22 Scores', brandStartX + (brandLogo ? brandIconSize + 10 : 0), footerCenterY);
+    ctx.restore();
+}
+
 // Un partido sin jugar no siempre quiere publicar la hora: el modo 'vs' la reemplaza por VS.
 // La decision se toma una sola vez aca y la comparten los tres disenos de fixture.
 function getScheduledMatchLabel(
@@ -16985,3 +17708,848 @@ async function drawPosterV3PlayerStats(
     drawBrandFooter(ctx, canvas, brandLogo, true);
 }
 
+// ============================================================================
+// Familia Impacto V4
+// ----------------------------------------------------------------------------
+// Placa de color pleno con textura, titular condensado gigante partido en dos
+// mitades (etapa - torneo), reglas blancas de lado a lado y bloques de color
+// por fila. Cero paneles flotantes y cero neon: el color ocupa la pieza entera
+// y la jerarquia la pone el tamano de la tipografia.
+//
+// La firma de G22 va una sola vez, centrada al pie. Arriba, donde la referencia
+// pone la fila de sponsors, no va nada: repetir la marca en las dos puntas la
+// gasta y le roba aire al titular.
+// ============================================================================
+
+// Los cuatro colores que el modal expone para esta familia. Vacio = automatico
+// (se deriva de Fondo + Acento como hasta ahora).
+type ImpactoColorOverrides = {
+    field?: string;
+    ink?: string;
+    bar?: string;
+    row?: string;
+};
+
+type ImpactoTone = {
+    field: string;
+    fieldLift: string;
+    fieldDeep: string;
+    ink: string;
+    isDarkField: boolean;
+    rule: string;
+    headerBar: string;
+    neutralRow: string;
+    neutralRowInk: string;
+    // Barra de partido del fixture: null = el sombreado negro automatico.
+    panelColor: string | null;
+};
+
+function getImpactoHexOverride(value: string | undefined): string {
+    const normalized = normalizeHexColor(value);
+    return /^#[0-9a-f]{6}$/.test(normalized) ? normalized : '';
+}
+
+function getImpactoTone(accentColor: string, bgColor: string, overrides?: ImpactoColorOverrides): ImpactoTone {
+    const fieldOverride = getImpactoHexOverride(overrides?.field);
+    const inkOverride = getImpactoHexOverride(overrides?.ink);
+    const barOverride = getImpactoHexOverride(overrides?.bar);
+    const rowOverride = getImpactoHexOverride(overrides?.row);
+
+    const field = fieldOverride || mixHexColors(bgColor, accentColor, 0.62);
+    // El campo decide si la pieza es clara u oscura aunque la tinta se fuerce a
+    // mano: de eso dependen las texturas, las sombras y el sombreado de barras.
+    const isDarkField = getContrastColor(field) === '#ffffff';
+    const ink = inkOverride || getContrastColor(field);
+    const neutralRow = rowOverride
+        || barOverride
+        || hexToRGBA(isDarkField ? '#ffffff' : '#0f172a', isDarkField ? 0.22 : 0.14);
+
+    return {
+        field,
+        fieldLift: mixHexColors(field, isDarkField ? '#ffffff' : '#000000', 0.14),
+        fieldDeep: mixHexColors(field, '#000000', isDarkField ? 0.5 : 0.24),
+        ink,
+        isDarkField,
+        rule: hexToRGBA(ink, 0.94),
+        headerBar: barOverride || hexToRGBA(isDarkField ? '#ffffff' : '#0f172a', isDarkField ? 0.26 : 0.16),
+        neutralRow,
+        neutralRowInk: rowOverride || barOverride ? getContrastColor(neutralRow) : ink,
+        panelColor: rowOverride || null,
+    };
+}
+
+// Los torneos externos llegan rotulados "Pais: Torneo" (asi los arma el feed).
+// En una placa —la de G22 Base o la de Impacto— el pais es ruido: ocupa media linea del titular y no dice nada
+// que los escudos no digan ya.
+//
+// El corte NO es por el ":" a secas: lo de adelante tiene que ser un pais o una
+// region del catalogo. "Nueva Zelanda: Bunnings NPC" pierde el pais; "URBA: Top
+// 12" se queda entero, porque ahi la sigla es el torneo.
+function stripTournamentCountryPrefix(label: string): string {
+    const value = (label || '').trim();
+    const separator = value.indexOf(':');
+    if (separator <= 0 || separator >= value.length - 1) return value;
+
+    const head = value.slice(0, separator).trim();
+    const tail = value.slice(separator + 1).trim();
+    if (!tail || !head) return value;
+
+    return findCountryRecord(null, head) ? tail : value;
+}
+
+// El fondo es el diseno: un campo de color con la luz corrida hacia arriba,
+// trama diagonal muy tenue y grano. Sin esto la placa se ve plana de imprenta.
+function drawImpactoField(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, tone: ImpactoTone) {
+    const glow = ctx.createRadialGradient(
+        canvas.width / 2,
+        canvas.height * 0.32,
+        0,
+        canvas.width / 2,
+        canvas.height * 0.42,
+        canvas.width * 1.02
+    );
+    glow.addColorStop(0, tone.fieldLift);
+    glow.addColorStop(0.46, tone.field);
+    glow.addColorStop(1, tone.fieldDeep);
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(tone.isDarkField ? '#ffffff' : '#000000', 0.035);
+    ctx.lineWidth = 1;
+    for (let offset = -canvas.height; offset <= canvas.width; offset += 9) {
+        ctx.beginPath();
+        ctx.moveTo(offset, 0);
+        ctx.lineTo(offset + canvas.height, canvas.height);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    const noise = getRankingNoiseTile();
+    if (noise) {
+        const pattern = ctx.createPattern(noise, 'repeat');
+        if (pattern) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'overlay';
+            ctx.globalAlpha = 0.16;
+            ctx.fillStyle = pattern;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.restore();
+        }
+    }
+
+    ctx.save();
+    const vignette = ctx.createRadialGradient(
+        canvas.width / 2,
+        canvas.height / 2,
+        canvas.width * 0.32,
+        canvas.width / 2,
+        canvas.height / 2,
+        canvas.height * 0.78
+    );
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(1, hexToRGBA('#000000', tone.isDarkField ? 0.34 : 0.12));
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+}
+
+// El titular: "ETAPA - TORNEO" en una sola linea si entra, dos como maximo.
+// Devuelve el borde inferior para que el resto de la pieza se cuelgue de ahi.
+function drawImpactoHeadline(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    leftPart: string,
+    rightPart: string,
+    tone: ImpactoTone,
+    options: { top: number; maxWidth: number; maxSize: number; minSize: number }
+): number {
+    const left = (leftPart || '').trim().toUpperCase();
+    const right = (rightPart || '').trim().toUpperCase();
+    const headline = [left, right].filter(Boolean).join(' - ');
+    if (!headline) return options.top;
+
+    const { lines, size } = fitTextLinesToWidth(
+        ctx,
+        headline,
+        options.maxWidth,
+        '900',
+        options.maxSize,
+        FONT_EDITORIAL_SCORE,
+        options.minSize,
+        2
+    );
+    const lineHeight = Math.round(size * 0.82);
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = tone.ink;
+    ctx.font = `900 ${size}px ${FONT_EDITORIAL_SCORE}`;
+    ctx.shadowColor = hexToRGBA('#000000', tone.isDarkField ? 0.38 : 0.16);
+    ctx.shadowBlur = Math.round(size * 0.2);
+    ctx.shadowOffsetY = Math.round(size * 0.05);
+    lines.forEach((line, index) => {
+        ctx.fillText(line, canvas.width / 2, options.top + index * lineHeight);
+    });
+    ctx.restore();
+
+    return options.top + lineHeight * (lines.length - 1) + Math.round(size * 0.78);
+}
+
+function drawImpactoRule(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    thickness: number,
+    color: string
+) {
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, thickness, thickness / 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawImpactoPageBadge(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    label: string,
+    tone: ImpactoTone,
+    radius: number
+) {
+    if (!label) return;
+
+    ctx.save();
+    ctx.fillStyle = hexToRGBA('#000000', tone.isDarkField ? 0.42 : 0.22);
+    ctx.beginPath();
+    ctx.arc(canvas.width - radius - 26, radius + 26, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = tone.ink;
+    ctx.font = `800 ${Math.round(radius * 0.72)}px ${FONT_BODY}`;
+    ctx.fillText(label, canvas.width - radius - 26, radius + 27);
+    ctx.restore();
+}
+
+// Pie: la firma centrada y, si la pieza sigue en otra lamina, las flechas a la
+// derecha. Es la UNICA marca de la pieza.
+function drawImpactoFooter(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    brandLogo: HTMLImageElement | null,
+    tone: ImpactoTone,
+    options: { padding: number; hasNext?: boolean }
+) {
+    const padding = options.padding;
+    const baseY = canvas.height - Math.round(padding * 0.86);
+    const iconSize = 42;
+    const gap = 12;
+
+    ctx.save();
+    ctx.font = `900 40px ${FONT_EDITORIAL_SCORE}`;
+    setCanvasTracking(ctx, 1);
+    const wordmark = 'G22 SCORES';
+    const textWidth = ctx.measureText(wordmark).width;
+    const totalWidth = (brandLogo ? iconSize + gap : 0) + textWidth;
+    const startX = canvas.width / 2 - totalWidth / 2;
+
+    if (brandLogo) {
+        const placement = getContainedImagePlacement(brandLogo, startX + iconSize / 2, baseY, iconSize, iconSize, 0);
+        ctx.drawImage(brandLogo, placement.x, placement.y, placement.width, placement.height);
+    }
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = tone.ink;
+    ctx.fillText(wordmark, startX + (brandLogo ? iconSize + gap : 0), baseY + 2);
+    setCanvasTracking(ctx, 0);
+
+    if (options.hasNext) {
+        ctx.textAlign = 'right';
+        ctx.fillStyle = hexToRGBA(tone.ink, 0.82);
+        ctx.font = `900 34px ${FONT_EDITORIAL_SCORE}`;
+        ctx.fillText('>>>', canvas.width - padding, baseY + 2);
+    }
+    ctx.restore();
+}
+
+// El escudo se recorta contra el borde de su fila y se derrama fuera: es la
+// firma de la referencia y lo que separa esta familia de una tabla comun.
+function drawImpactoBleedCrest(
+    ctx: CanvasRenderingContext2D,
+    options: {
+        centerX: number;
+        centerY: number;
+        size: number;
+        img: HTMLImageElement | null;
+        label: string;
+        rawLogo?: string;
+        clip: { x: number; y: number; width: number; height: number; radius: number };
+        isDark: boolean;
+    }
+) {
+    const { centerX, centerY, size, img, label, rawLogo, clip, isDark } = options;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(clip.x, clip.y, clip.width, clip.height, clip.radius);
+    ctx.clip();
+
+    if (img) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        const placement = getContainedImagePlacement(img, centerX, centerY, size, size, 0);
+        ctx.drawImage(img, placement.x, placement.y, placement.width, placement.height);
+    } else {
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = getTextColor(isDark);
+        ctx.font = `800 ${Math.round(size * 0.3)}px ${FONT_BODY}`;
+        ctx.fillText(getFallbackLogoText(rawLogo, label), centerX, centerY + 1);
+    }
+
+    ctx.restore();
+}
+
+async function drawImpactoMatchResult(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: MatchStatsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    colorOverrides?: ImpactoColorOverrides
+) {
+    const isStory = format.height >= 1600;
+    const sy = (value: number) => (value * canvas.height) / 1350;
+    // sy escala con la altura y sx con el ancho. El story es igual de ancho que
+    // el post pero mucho mas alto: medir un escudo o una columna con sy los
+    // agranda un 42% y se comen el marcador.
+    const sx = (value: number) => (value * canvas.width) / 1080;
+    const tone = getImpactoTone(accentColor, bgColor, colorOverrides);
+    const [homeLogo, awayLogo, tournamentLogo] = await Promise.all([
+        loadImage(data.homeLogo || ''),
+        loadImage(data.awayLogo || ''),
+        loadImage(getTournamentLogoImageSource(data)),
+    ]);
+
+    drawImpactoField(ctx, canvas, tone);
+
+    const padding = 62;
+    const contentWidth = canvas.width - padding * 2;
+    const isScheduled = data.status === 'scheduled';
+    // El titular se lee "ETAPA - TORNEO". El motor solo sabe si la pieza es
+    // resultado u horario, asi que esa es la etapa por defecto; si el nombre del
+    // torneo ya viene partido ("Final - TRL M19 A"), esa particion manda y no se
+    // le antepone nada.
+    const tournamentLabel = stripTournamentCountryPrefix(data.tournament || '');
+    const tournamentCarriesStage = /\s[-|]\s/.test(tournamentLabel);
+    const stageLabel = tournamentCarriesStage ? '' : (data.mainTitle || getStatusLabel(data.status) || '').trim();
+    const headlineBottom = drawImpactoHeadline(ctx, canvas, stageLabel, tournamentLabel, tone, {
+        top: sy(isStory ? 120 : 92),
+        maxWidth: contentWidth,
+        maxSize: sy(isStory ? 150 : 132),
+        minSize: sy(56),
+    });
+
+    const ruleTop = headlineBottom + sy(34);
+    drawImpactoRule(ctx, padding, ruleTop, contentWidth, sy(9), tone.rule);
+
+    const bandHeight = sy(isStory ? 400 : 312);
+    const bandTop = ruleTop + sy(16);
+    const bandCenter = bandTop + bandHeight / 2;
+    const crestSize = Math.min(bandHeight * 0.86, sx(250));
+    const crestInset = padding + crestSize / 2 + sx(4);
+
+    drawOverflowCrest(ctx, {
+        x: crestInset,
+        y: bandCenter,
+        width: crestSize,
+        height: crestSize,
+        img: homeLogo,
+        label: data.homeTeam,
+        rawLogo: data.homeLogo,
+        isDark: tone.isDarkField,
+        showFrame: false,
+    });
+    drawOverflowCrest(ctx, {
+        x: canvas.width - crestInset,
+        y: bandCenter,
+        width: crestSize,
+        height: crestSize,
+        img: awayLogo,
+        label: data.awayTeam,
+        rawLogo: data.awayLogo,
+        isDark: tone.isDarkField,
+        showFrame: false,
+    });
+
+    // En una pieza de horario el numero grande es la hora, y el dia va arriba en
+    // chico: un partido sin fecha no es informacion, es un adorno.
+    const dayLabel = isScheduled ? (data.date || '').trim() : '';
+    const scoreText = isScheduled
+        ? (data.time || '--:--')
+        : `${data.homeScore ?? '-'}-${data.awayScore ?? '-'}`;
+    const scoreMaxWidth = canvas.width - (crestInset + crestSize / 2) * 2 - sx(48);
+    const scoreCenterY = bandCenter + (dayLabel ? sy(24) : sy(6));
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = tone.ink;
+    ctx.shadowColor = hexToRGBA('#000000', tone.isDarkField ? 0.34 : 0.14);
+    ctx.shadowBlur = sy(26);
+    ctx.shadowOffsetY = sy(8);
+    const scoreSize = setFittedFont(ctx, scoreText, scoreMaxWidth, '900', sy(isStory ? 250 : 210), FONT_EDITORIAL_SCORE, sy(90));
+    ctx.fillText(scoreText, canvas.width / 2, scoreCenterY);
+    ctx.restore();
+
+    if (dayLabel) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle = hexToRGBA(tone.ink, 0.88);
+        ctx.font = `800 ${sy(34)}px ${FONT_BODY}`;
+        setCanvasTracking(ctx, 3);
+        ctx.fillText(
+            truncateTextToWidth(ctx, dayLabel.toUpperCase(), scoreMaxWidth),
+            canvas.width / 2,
+            scoreCenterY - scoreSize * 0.42 - sy(6)
+        );
+        setCanvasTracking(ctx, 0);
+        ctx.restore();
+    }
+
+    const hasPenalties = typeof data.homePenalties === 'number' && typeof data.awayPenalties === 'number';
+    if (hasPenalties && !isScheduled) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = hexToRGBA(tone.ink, 0.78);
+        ctx.font = `800 ${sy(24)}px ${FONT_BODY}`;
+        ctx.fillText(`PENALES ${data.homePenalties} - ${data.awayPenalties}`, canvas.width / 2, bandTop + bandHeight - sy(18));
+        ctx.restore();
+    }
+
+    const ruleBottom = bandTop + bandHeight + sy(10);
+    drawImpactoRule(ctx, padding, ruleBottom, contentWidth, sy(9), tone.rule);
+
+    const teamNameTop = ruleBottom + sy(26);
+    const teamNameMaxWidth = canvas.width / 2 - padding - sx(40);
+    const teamNameSize = getSharedFittedFontSize(
+        ctx,
+        [
+            { text: data.homeTeam.trim(), maxWidth: teamNameMaxWidth },
+            { text: data.awayTeam.trim(), maxWidth: teamNameMaxWidth },
+        ],
+        '800',
+        sy(isStory ? 40 : 34),
+        FONT_BODY,
+        sy(18)
+    );
+
+    ctx.save();
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = tone.ink;
+    ctx.font = `800 ${teamNameSize}px ${FONT_BODY}`;
+    ctx.textAlign = 'left';
+    ctx.fillText(truncateTextToWidth(ctx, data.homeTeam.trim(), teamNameMaxWidth), padding, teamNameTop);
+    ctx.textAlign = 'right';
+    ctx.fillText(truncateTextToWidth(ctx, data.awayTeam.trim(), teamNameMaxWidth), canvas.width - padding, teamNameTop);
+    ctx.restore();
+
+    // El dia ya vive arriba cuando la pieza es horario: abajo solo queda la sede.
+    const metaLabel = isScheduled
+        ? (data.venue || '').trim()
+        : [data.date, data.time, data.venue].filter(Boolean).join('  ·  ');
+    const footerTop = canvas.height - sy(isStory ? 150 : 122);
+    const logoSlotTop = teamNameTop + teamNameSize + sy(30);
+    const logoSlotHeight = Math.max(sy(120), footerTop - logoSlotTop - sy(46));
+    const logoHeight = Math.min(logoSlotHeight, sy(isStory ? 360 : 300));
+    const logoCenterY = logoSlotTop + logoHeight / 2;
+
+    if (tournamentLogo) {
+        drawEditorialCrestStroke(
+            ctx,
+            canvas.width / 2,
+            logoCenterY,
+            Math.min(contentWidth * 0.82, logoHeight * 2.4),
+            logoHeight,
+            tournamentLogo,
+            5,
+            hexToRGBA(tone.ink, 0.18)
+        );
+        drawOverflowCrest(ctx, {
+            x: canvas.width / 2,
+            y: logoCenterY,
+            width: Math.min(contentWidth * 0.82, logoHeight * 2.4),
+            height: logoHeight,
+            img: tournamentLogo,
+            label: data.tournament,
+            rawLogo: data.tournamentLogo,
+            isDark: tone.isDarkField,
+            showFrame: false,
+        });
+    }
+
+    if (metaLabel) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle = hexToRGBA(tone.ink, 0.72);
+        ctx.font = `700 ${sy(20)}px ${FONT_BODY}`;
+        setCanvasTracking(ctx, 2);
+        ctx.fillText(truncateTextToWidth(ctx, metaLabel.toUpperCase(), contentWidth), canvas.width / 2, footerTop + sy(24));
+        setCanvasTracking(ctx, 0);
+        ctx.restore();
+    }
+
+    drawImpactoFooter(ctx, canvas, brandLogo, tone, { padding });
+}
+
+async function drawImpactoStandings(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: StandingsData,
+    slide: StandingsSlideData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    colorOverrides?: ImpactoColorOverrides
+) {
+    const isStory = format.height >= 1600;
+    const sy = (value: number) => (value * canvas.height) / 1350;
+    const sx = (value: number) => (value * canvas.width) / 1080;
+    const tone = getImpactoTone(accentColor, bgColor, colorOverrides);
+    const rows = slide.groups.flatMap((group) => group.rows);
+    const logos = await Promise.all(rows.map((row) => loadImage(row.teamLogo || '')));
+
+    drawImpactoField(ctx, canvas, tone);
+
+    const padding = 56;
+    const contentWidth = canvas.width - padding * 2;
+    const title = stripTournamentCountryPrefix(data.title || '') || 'Tabla de posiciones';
+    const stage = data.subtitle?.trim() || '';
+    const headlineBottom = drawImpactoHeadline(ctx, canvas, stage, title, tone, {
+        top: sy(isStory ? 110 : 78),
+        maxWidth: contentWidth,
+        maxSize: sy(isStory ? 132 : 118),
+        minSize: sy(50),
+    });
+
+    const dividerY = headlineBottom + sy(30);
+    drawImpactoRule(ctx, padding, dividerY, contentWidth, sy(14), tone.headerBar);
+
+    if (slide.totalPages > 1) {
+        drawImpactoPageBadge(ctx, canvas, `${slide.pageNumber}/${slide.totalPages}`, tone, sy(38));
+    }
+
+    // Columnas: el numero, el escudo y el nombre a la izquierda; PTS, PJ y la
+    // condicion (la etiqueta de zona) como columnas fijas a la derecha.
+    const tableLeft = padding;
+    const tableRight = canvas.width - padding;
+    const condCenter = tableRight - sx(72);
+    const playedCenter = condCenter - sx(96);
+    const pointsCenter = playedCenter - sx(96);
+    const posCenter = tableLeft + sx(36);
+    const headerTop = dividerY + sy(28);
+    const headerHeight = sy(52);
+
+    ctx.save();
+    ctx.fillStyle = tone.headerBar;
+    ctx.beginPath();
+    ctx.roundRect(tableLeft, headerTop, contentWidth, headerHeight, sy(10));
+    ctx.fill();
+    ctx.restore();
+
+    const groupLabels = slide.groups.map((group) => formatStandingsGroupLabel(group));
+    const hasGroupLabels = groupLabels.some(Boolean);
+    const groupLabelHeight = hasGroupLabels ? sy(34) : 0;
+    const reservedGroupSpace = groupLabels.reduce((total, label) => (label ? total + groupLabelHeight + sy(8) : total), 0);
+    const rowsTop = headerTop + headerHeight + sy(12);
+    const rowsBottom = canvas.height - sy(isStory ? 170 : 132);
+    const rowGap = sy(7);
+    const availableHeight = Math.max(sy(200), rowsBottom - rowsTop - reservedGroupSpace);
+    const rowHeight = clampNumber(
+        (availableHeight - rowGap * Math.max(rows.length - 1, 0)) / Math.max(rows.length, 1),
+        sy(40),
+        sy(isStory ? 112 : 100)
+    );
+    // Con pocas filas la tabla no llega abajo: el sobrante se reparte en vez de
+    // dejar todo colgado del header con un hueco muerto al pie.
+    const rowsBlockHeight = rows.length * rowHeight + rowGap * Math.max(rows.length - 1, 0) + reservedGroupSpace;
+    const rowsLeftover = Math.max(0, rowsBottom - rowsTop - rowsBlockHeight);
+    const crestSize = Math.min(rowHeight * 0.78, sx(88));
+    const crestCenterX = tableLeft + sx(96);
+    const nameX = crestCenterX + crestSize / 2 + sx(18);
+    const nameMaxWidth = Math.max(sx(160), pointsCenter - sx(56) - nameX);
+    const nameFontSize = getSharedFittedFontSize(
+        ctx,
+        rows.map((row) => ({ text: row.team.trim(), maxWidth: nameMaxWidth })),
+        '800',
+        Math.min(sy(34), rowHeight * 0.44),
+        FONT_BODY,
+        sy(15)
+    );
+    const statFontSize = Math.min(sy(32), rowHeight * 0.42);
+
+    ctx.save();
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = tone.ink;
+    ctx.font = `800 ${Math.min(sy(26), headerHeight * 0.52)}px ${FONT_BODY}`;
+    ctx.textAlign = 'center';
+    ctx.fillText('P', posCenter, headerTop + headerHeight / 2 + 1);
+    ctx.textAlign = 'left';
+    ctx.fillText('Equipo', nameX, headerTop + headerHeight / 2 + 1);
+    ctx.textAlign = 'center';
+    ctx.fillText((data.columnLabels?.points?.trim() || 'PTS').toUpperCase(), pointsCenter, headerTop + headerHeight / 2 + 1);
+    ctx.fillText((data.columnLabels?.played?.trim() || 'PJ').toUpperCase(), playedCenter, headerTop + headerHeight / 2 + 1);
+    ctx.fillText('COND', condCenter, headerTop + headerHeight / 2 + 1);
+    ctx.restore();
+
+    let cursorY = rowsTop + rowsLeftover / 2;
+    let logoIndex = 0;
+
+    slide.groups.forEach((group, groupIndex) => {
+        const label = groupLabels[groupIndex];
+        if (label) {
+            ctx.save();
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = hexToRGBA(tone.ink, 0.82);
+            ctx.font = `800 ${sy(20)}px ${FONT_BODY}`;
+            setCanvasTracking(ctx, 2);
+            ctx.fillText(label, tableLeft + sx(4), cursorY + groupLabelHeight / 2);
+            setCanvasTracking(ctx, 0);
+            ctx.restore();
+            cursorY += groupLabelHeight + sy(8);
+        }
+
+        group.rows.forEach((row) => {
+            const logo = logos[logoIndex] || null;
+            logoIndex += 1;
+            const rowLabel = row.labelName?.trim() || '';
+            const rowFill = rowLabel && row.zoneColor ? row.zoneColor : '';
+            const rowInk = rowFill ? getContrastColor(rowFill) : tone.neutralRowInk;
+            const centerY = cursorY + rowHeight / 2;
+            const radius = sy(9);
+
+            ctx.save();
+            ctx.fillStyle = rowFill || tone.neutralRow;
+            ctx.beginPath();
+            ctx.roundRect(tableLeft, cursorY, contentWidth, rowHeight, radius);
+            ctx.fill();
+            ctx.restore();
+
+            ctx.save();
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = rowInk;
+            ctx.font = `800 ${statFontSize}px ${FONT_BODY}`;
+            ctx.fillText(String(row.pos), posCenter, centerY + 1);
+            ctx.fillText(String(row.points ?? '-'), pointsCenter, centerY + 1);
+            ctx.fillText(String(row.played ?? '-'), playedCenter, centerY + 1);
+            if (rowLabel) {
+                ctx.font = `800 ${Math.min(statFontSize, sy(28))}px ${FONT_BODY}`;
+                ctx.fillText(truncateTextToWidth(ctx, rowLabel.toUpperCase(), sx(130)), condCenter, centerY + 1);
+            }
+            ctx.restore();
+
+            drawImpactoBleedCrest(ctx, {
+                centerX: crestCenterX,
+                centerY,
+                size: crestSize,
+                img: logo,
+                label: row.team,
+                rawLogo: row.teamLogo,
+                clip: { x: tableLeft, y: cursorY, width: contentWidth, height: rowHeight, radius },
+                isDark: rowInk === '#ffffff',
+            });
+
+            ctx.save();
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = rowInk;
+            ctx.font = `800 ${nameFontSize}px ${FONT_BODY}`;
+            ctx.fillText(truncateTextToWidth(ctx, row.team.trim(), nameMaxWidth), nameX, centerY + 1);
+            ctx.restore();
+
+            cursorY += rowHeight + rowGap;
+        });
+    });
+
+    drawImpactoFooter(ctx, canvas, brandLogo, tone, {
+        padding,
+        hasNext: slide.totalPages > slide.pageNumber,
+    });
+}
+
+async function drawImpactoDailyMatches(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: DailyMatchesData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    timeMode: DailyMatchesTimeMode = 'time',
+    colorOverrides?: ImpactoColorOverrides
+) {
+    const isStory = format.height >= 1600;
+    const sy = (value: number) => (value * canvas.height) / 1350;
+    const sx = (value: number) => (value * canvas.width) / 1080;
+    const tone = getImpactoTone(accentColor, bgColor, colorOverrides);
+    const matches = data.matches.slice(0, 10);
+    const logos = await Promise.all(
+        matches.flatMap((match) => [loadImage(match.homeLogo || ''), loadImage(match.awayLogo || '')])
+    );
+
+    drawImpactoField(ctx, canvas, tone);
+
+    const padding = 56;
+    const contentWidth = canvas.width - padding * 2;
+    const headlineBottom = drawImpactoHeadline(ctx, canvas, stripTournamentCountryPrefix(data.tournament || ''), data.date, tone, {
+        top: sy(isStory ? 110 : 78),
+        maxWidth: contentWidth,
+        maxSize: sy(isStory ? 132 : 118),
+        minSize: sy(50),
+    });
+
+    const dividerY = headlineBottom + sy(30);
+    drawImpactoRule(ctx, padding, dividerY, contentWidth, sy(14), tone.headerBar);
+
+    const headerTop = dividerY + sy(34);
+    const timeCenter = canvas.width / 2;
+    const localCenter = canvas.width * 0.26;
+    const visitaCenter = canvas.width * 0.74;
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = tone.ink;
+    ctx.font = `800 ${sy(34)}px ${FONT_BODY}`;
+    ctx.fillText('Local', localCenter, headerTop);
+    ctx.fillText(timeMode === 'vs' ? 'Cruce' : 'Horario', timeCenter, headerTop);
+    ctx.fillText('Visita', visitaCenter, headerTop);
+    ctx.restore();
+
+    const rowsTop = headerTop + sy(62);
+    const rowsBottom = canvas.height - sy(isStory ? 170 : 132);
+    const rowGap = sy(10);
+    const rowHeight = clampNumber(
+        (rowsBottom - rowsTop - rowGap * Math.max(matches.length - 1, 0)) / Math.max(matches.length, 1),
+        sy(58),
+        sy(isStory ? 150 : 132)
+    );
+    const rowsBlockHeight = matches.length * rowHeight + rowGap * Math.max(matches.length - 1, 0);
+    const rowsLeftover = Math.max(0, rowsBottom - rowsTop - rowsBlockHeight);
+    const rowsOrigin = rowsTop + rowsLeftover / 2;
+    const radius = rowHeight / 2;
+    const crestSize = Math.min(rowHeight * 1.2, sx(128));
+    const crestInset = sx(30);
+    // El nombre arranca despues del borde visible del escudo: si comparten pixel
+    // se leen encima y la fila parece un error de composicion.
+    const nameInset = crestInset + crestSize * 0.5 + sx(12);
+    const timeFontSize = Math.min(sy(56), rowHeight * 0.56);
+    const rowInk = tone.panelColor ? getContrastColor(tone.panelColor) : '#ffffff';
+
+    const labels = matches.map((match) => (
+        match.status === 'scheduled'
+            ? getScheduledMatchLabel(match, timeMode)
+            : `${match.homeScore ?? '-'}-${match.awayScore ?? '-'}`
+    ));
+
+    ctx.save();
+    ctx.font = `900 ${timeFontSize}px ${FONT_EDITORIAL_SCORE}`;
+    const timeBlockWidth = Math.max(sx(120), ...labels.map((label) => ctx.measureText(label).width)) + sx(30);
+    ctx.restore();
+
+    const nameMaxWidth = Math.max(sx(120), (canvas.width - timeBlockWidth) / 2 - padding - nameInset - sx(16));
+    const nameFontSize = getSharedFittedFontSize(
+        ctx,
+        matches.flatMap((match) => ([
+            { text: match.homeTeam.trim(), maxWidth: nameMaxWidth },
+            { text: match.awayTeam.trim(), maxWidth: nameMaxWidth },
+        ])),
+        '800',
+        Math.min(sy(34), rowHeight * 0.34),
+        FONT_BODY,
+        sy(15)
+    );
+
+    let logoIndex = 0;
+
+    matches.forEach((match, index) => {
+        const rowY = rowsOrigin + index * (rowHeight + rowGap);
+        const centerY = rowY + rowHeight / 2;
+        const homeLogo = logos[logoIndex] || null;
+        const awayLogo = logos[logoIndex + 1] || null;
+        logoIndex += 2;
+        const clip = { x: padding, y: rowY, width: contentWidth, height: rowHeight, radius };
+
+        ctx.save();
+        if (tone.panelColor) {
+            ctx.fillStyle = tone.panelColor;
+        } else {
+            const rowGradient = ctx.createLinearGradient(padding, 0, canvas.width - padding, 0);
+            rowGradient.addColorStop(0, hexToRGBA('#000000', tone.isDarkField ? 0.5 : 0.3));
+            rowGradient.addColorStop(0.5, hexToRGBA('#000000', tone.isDarkField ? 0.3 : 0.16));
+            rowGradient.addColorStop(1, hexToRGBA('#000000', tone.isDarkField ? 0.5 : 0.3));
+            ctx.fillStyle = rowGradient;
+        }
+        ctx.beginPath();
+        ctx.roundRect(padding, rowY, contentWidth, rowHeight, radius);
+        ctx.fill();
+        ctx.strokeStyle = hexToRGBA(rowInk, 0.1);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+
+        drawImpactoBleedCrest(ctx, {
+            centerX: padding + crestInset,
+            centerY,
+            size: crestSize,
+            img: homeLogo,
+            label: match.homeTeam,
+            rawLogo: match.homeLogo,
+            clip,
+            isDark: rowInk === '#ffffff',
+        });
+        drawImpactoBleedCrest(ctx, {
+            centerX: canvas.width - padding - crestInset,
+            centerY,
+            size: crestSize,
+            img: awayLogo,
+            label: match.awayTeam,
+            rawLogo: match.awayLogo,
+            clip,
+            isDark: rowInk === '#ffffff',
+        });
+
+        ctx.save();
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = rowInk;
+        ctx.font = `800 ${nameFontSize}px ${FONT_BODY}`;
+        ctx.textAlign = 'left';
+        ctx.fillText(truncateTextToWidth(ctx, match.homeTeam.trim(), nameMaxWidth), padding + nameInset, centerY + 1);
+        ctx.textAlign = 'right';
+        ctx.fillText(truncateTextToWidth(ctx, match.awayTeam.trim(), nameMaxWidth), canvas.width - padding - nameInset, centerY + 1);
+        ctx.restore();
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = rowInk;
+        ctx.font = `900 ${timeFontSize}px ${FONT_EDITORIAL_SCORE}`;
+        ctx.fillText(labels[index], timeCenter, centerY + sy(4));
+        ctx.restore();
+    });
+
+    drawImpactoFooter(ctx, canvas, brandLogo, tone, { padding, hasNext: data.matches.length > matches.length });
+}
