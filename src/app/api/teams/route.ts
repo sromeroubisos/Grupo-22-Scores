@@ -91,6 +91,10 @@ type InternalMatchRow = {
     home_club_id: string | null;
     away_club_id: string | null;
     tournament_id: string | null;
+    // El deporte del propio partido. Hace falta porque un AMISTOSO no tiene
+    // torneo, y sin esto se quedaba sin deporte (ver más abajo).
+    sport_id: string | null;
+    sport: string | null;
     home_club: ClubMatchRelation | ClubMatchRelation[] | null;
     away_club: ClubMatchRelation | ClubMatchRelation[] | null;
     tournament: TournamentMatchRelation | TournamentMatchRelation[] | null;
@@ -1391,7 +1395,7 @@ export async function GET(request: Request) {
             const internalMatchesBaseQuery = () => readClient
                 .from('matches')
                 .select(`
-                    id, date_time, status, score,
+                    id, date_time, status, score, sport_id, sport,
                     home_club_id, away_club_id, tournament_id,
                     home_club:clubs!matches_home_club_id_fkey(name),
                     away_club:clubs!matches_away_club_id_fkey(name),
@@ -1514,7 +1518,18 @@ export async function GET(request: Request) {
                         away_logo: awayLogo?.logo,
                         away_logo_updated_at: awayLogo?.updatedAt,
                         tournament_name: tournament?.name,
-                        sport_id: tournament?.sport_id,
+                        // El deporte salía SOLO del torneo, y un amistoso no tiene
+                        // torneo: quedaba en null y la ficha del club lo tiraba a la
+                        // basura, porque su filtro de deporte compara `sport_id`
+                        // contra el elegido. Un partido que no se ve porque le falta
+                        // una etiqueta que el propio partido sí trae. Se cae al
+                        // deporte del partido y, si tampoco está, al del club.
+                        sport_id: tournament?.sport_id
+                            || row.sport_id
+                            || row.sport
+                            || effectiveClub.sport_id
+                            || effectiveClub.sport
+                            || null,
                     });
                     const st = (row.status || '').toLowerCase();
                     const matchDate = row.date_time ? new Date(row.date_time).getTime() : 0;
