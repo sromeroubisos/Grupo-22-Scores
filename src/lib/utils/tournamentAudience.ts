@@ -142,6 +142,53 @@ export function resolveTournamentAudience(input: TournamentAudienceInput): Tourn
     return 'mayores';
 }
 
+/**
+ * Las competencias que van en LOS DOS segmentos.
+ *
+ * `resolveTournamentAudience` contesta *qué es* un torneo y por eso devuelve un
+ * solo valor: de eso dependen la derivación de clubes elegibles y el grado que
+ * propone el creador, y ahí un torneo no puede ser dos cosas a la vez.
+ *
+ * Pero *dónde se muestra* es otra pregunta. El Campeonato Argentino Juvenil es
+ * de M17 y su lugar natural es la pestaña de juveniles, sólo que es un torneo de
+ * SELECCIONADOS: el hincha lo busca en la portada igual que un Seis Naciones, y
+ * esconderlo detrás de la pestaña es perderlo. Por eso la lista es de
+ * competencias, no de categorías — lo que la habilita es la jerarquía del
+ * torneo, no su edad.
+ *
+ * Sumar otra competencia es agregar un patrón acá. Va por NOMBRE y no por id
+ * porque la portada resuelve la audiencia de un partido sólo con el nombre del
+ * torneo, sin el catálogo a mano, y así las dos pantallas coinciden.
+ */
+const BOTH_AUDIENCES_PATTERNS = [
+    /\bcampeonato\s+argentino\s+juvenil\b/i,
+];
+
+/** Si el torneo se muestra en los dos segmentos en vez de en el suyo. */
+export function isDualAudienceTournament(input: TournamentAudienceInput): boolean {
+    return matchesAnyPattern(
+        collectHints([input.name, input.displayName, input.originalName]),
+        BOTH_AUDIENCES_PATTERNS,
+    );
+}
+
+/**
+ * Si un torneo entra en el segmento que se está mirando. Es lo que usan los
+ * FILTROS de pantalla —portada, listado, catálogo público—, y lo único que
+ * agrega sobre comparar la audiencia es la puerta de arriba.
+ *
+ * Los otros consumidores (clubes elegibles, requisitos del torneo, el grado que
+ * propone el creador) siguen con `resolveTournamentAudience`: ahí hace falta un
+ * valor, no una pertenencia.
+ */
+export function matchesTournamentAudience(
+    input: TournamentAudienceInput,
+    audience: TournamentAudience,
+): boolean {
+    if (isDualAudienceTournament(input)) return true;
+    return resolveTournamentAudience(input) === audience;
+}
+
 export function syncAgeGradeWithAudience(
     ageGrade: string | null | undefined,
     audience: TournamentAudience,

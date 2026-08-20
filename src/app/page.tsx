@@ -20,7 +20,7 @@ import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { markHireCtaSeen, shouldShowHireCtaForUser } from '@/lib/hireCtaPreferences';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
-import { AUDIENCE_LABELS, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
+import { AUDIENCE_LABELS, isDualAudienceTournament, matchesTournamentAudience, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { compareTournamentsByPriority, getTournamentPriority } from '@/lib/utils/tournamentOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { getMatchPenaltyScore, hasMatchPenaltyShootout, getMatchWinnerByScore } from '@/lib/matchUtils';
@@ -875,14 +875,14 @@ export default function HomePage() {
         return false;
       }
 
-      return resolveTournamentAudience({
+      return matchesTournamentAudience({
         ageGroup: tournament.ageGroup,
         categories: tournament.categories,
         isYouth: tournament.isYouth,
         name: tournament.name,
         displayName: tournament.displayName || tournament.nameEs,
         originalName: tournament.originalName,
-      }) === selectedAudience;
+      }, selectedAudience);
     });
   }, [allTournaments, loadedRugbyPublicTournaments, manualTournamentsList, selectedAudience, selectedSport.id]);
 
@@ -1000,6 +1000,11 @@ export default function HomePage() {
     // No hace falta el atajo: `resolveTournamentAudience` cae en `mayores`
     // cuando no reconoce ninguna pista, así que un torneo desconocido sigue
     // entrando. Sólo se va el que se puede clasificar como juvenil o reserva.
+    // El Argentino Juvenil entra en las dos: es de M17 pero es de seleccionados,
+    // y el hincha lo busca en la portada. Se pregunta por el nombre porque acá no
+    // hay más que eso — el partido llega del feed, sin grado ni categoría.
+    if (isDualAudienceTournament({ name: tournament.name })) return true;
+
     return resolveMatchAudience(tournament) === selectedAudience;
   }, [resolveMatchAudience, selectedAudience]);
 
@@ -1008,14 +1013,14 @@ export default function HomePage() {
     const baseInternationalTournaments = internationalTournaments;
 
     const audienceFiltered = baseInternationalTournaments.filter((tournament) => (
-      resolveTournamentAudience({
+      matchesTournamentAudience({
         ageGroup: tournament.ageGroup,
         categories: tournament.categories,
         isYouth: tournament.isYouth,
         name: tournament.name,
         displayName: tournament.displayName || tournament.nameEs,
         originalName: tournament.originalName,
-      }) === selectedAudience
+      }, selectedAudience)
     ));
 
     // Sort by priority (descending) so the most important tournaments
