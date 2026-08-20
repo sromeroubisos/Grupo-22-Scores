@@ -289,23 +289,42 @@ type ResolvedIds = {
 
 type TournamentStage = { id: string; name: string };
 
-/** Every stage of a competition, read from the id bundle its shared URL resolves to. */
-async function resolveTournamentStages(tournamentUrl: string): Promise<TournamentStage[]> {
+type TournamentStageBundle = {
+    stages: TournamentStage[];
+    tournamentId?: string;
+    seasonId?: string;
+};
+
+const EMPTY_STAGE_BUNDLE: TournamentStageBundle = { stages: [] };
+
+/**
+ * Every stage of a competition, read from the id bundle its shared URL resolves to.
+ * La URL compartida resuelve SIEMPRE a la temporada corriente del proveedor, así
+ * que el bundle vuelve con sus ids al lado de las etapas: sin ellos no hay forma
+ * de saber si esas etapas son del año que la página está mostrando.
+ */
+async function resolveTournamentStages(tournamentUrl: string): Promise<TournamentStageBundle> {
     try {
         const idsRes = await getTournamentIds(tournamentUrl); // memoized per URL
         const idsData = idsRes?.DATA || idsRes;
         const source = Array.isArray(idsData) ? idsData[0] : idsData;
+        const bundle: TournamentStageBundle = {
+            stages: [],
+            tournamentId: normalizeId(source?.tournament_id),
+            seasonId: normalizeId(source?.season_id),
+        };
         const rawStages = source?.tournament_stages;
-        if (!Array.isArray(rawStages)) return [];
-        return rawStages
+        if (!Array.isArray(rawStages)) return bundle;
+        bundle.stages = rawStages
             .map((stage: any) => ({
                 id: normalizeId(stage?.tournament_stage_id) || normalizeId(stage?.stage_id) || '',
                 name: String(stage?.name || '').trim(),
             }))
             .filter((stage: TournamentStage) => Boolean(stage.id));
+        return bundle;
     } catch (error) {
         console.warn('[Tournament API] Could not resolve tournament stages:', error);
-        return [];
+        return EMPTY_STAGE_BUNDLE;
     }
 }
 
@@ -1685,9 +1704,18 @@ export async function GET(request: Request) {
         // bracket but no table. Resolve the full stage list from the shared tournament URL
         // so standings can come from the stage that actually holds them, while the bracket
         // keeps using the current stage.
-        const tournamentStages = flashScoreEnabledForSport && url
+        const stageBundle = flashScoreEnabledForSport && url
             ? await resolveTournamentStages(url)
-            : [];
+            : EMPTY_STAGE_BUNDLE;
+        // Pero esa URL apunta siempre a la temporada CORRIENTE del proveedor. Cuando
+        // la que estamos mostrando es otra —ids fijados en el catálogo o en el ruleset
+        // del torneo— sus etapas son de otro año, y pedir la tabla contra la "Main"
+        // de la temporada nueva devuelve el plantel entero en cero mientras los
+        // resultados siguen mostrando la vieja. Ante la duda, la etapa que ya teníamos.
+        const stageBundleIsSameSeason =
+            (!stageBundle.tournamentId || !tournamentId || sameProviderId(stageBundle.tournamentId, tournamentId)) &&
+            (!stageBundle.seasonId || !seasonId || sameProviderId(stageBundle.seasonId, seasonId));
+        const tournamentStages = stageBundleIsSameSeason ? stageBundle.stages : [];
         const standingsStageId = pickStandingsStageId(tournamentStages, stageId);
 
         const canFetchMatches = flashScoreEnabledForSport && !!(templateId && seasonId);
