@@ -57,20 +57,25 @@ export function persistResolvedTournamentIds(params: {
                 ? external.flashscore as Record<string, unknown>
                 : {};
 
+            // Durable va SOLO lo que sobrevive a un cambio de temporada: la URL
+            // compartida y la plantilla. `tournament_id`, `tournament_stage_id` y
+            // `season_id` son de un año concreto, y guardarlos deja al torneo
+            // mirando para siempre la temporada en que se resolvió: el proveedor
+            // rueda en julio y la página sigue mostrando la anterior. Con la URL
+            // guardada, la resolución vuelve a ser UNA llamada memoizada 24h
+            // —no el barrido que motivó este archivo— y siempre cae en la
+            // temporada corriente.
+            //
+            // El set completo sigue viviendo en la caché de proceso de arriba,
+            // que caduca sola en 24h: rápido dentro del día, nunca eterno.
             const nextFs = {
                 ...fs,
-                tournament_id: ids.tournamentId,
-                tournament_stage_id: ids.stageId,
                 tournament_template_id: ids.templateId,
-                season_id: ids.seasonId,
                 ...(ids.url ? { tournament_url: ids.url } : {}),
             };
 
             const unchanged =
-                fs.tournament_id === nextFs.tournament_id &&
-                fs.tournament_stage_id === nextFs.tournament_stage_id &&
                 fs.tournament_template_id === nextFs.tournament_template_id &&
-                fs.season_id === nextFs.season_id &&
                 fs.tournament_url === nextFs.tournament_url;
             if (unchanged) return; // skip a DB round-trip when nothing changed
 
