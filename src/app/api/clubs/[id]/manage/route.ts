@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/server';
 import type { ClubUpdateInput } from '@/lib/types/clubs';
 import { fetchClubFull, updateClub } from '@/lib/services/clubService';
 import { syncClubLogoToExternalSources } from '@/lib/server/clubLogoExternalSync';
+import { persistClubLogo } from '@/lib/server/persistClubLogo';
 
 function err(message: string, status: number, details?: unknown) {
     return NextResponse.json({ error: message, details: details ?? null }, { status });
@@ -72,6 +73,18 @@ export async function PATCH(
     }
 
     const adminClient = createAdminClient();
+
+    // El escudo se sube a Storage ANTES de escribir la fila: si viene como data
+    // URI, lo que se guarda en `clubs.logo_url` es una URL corta y no 870 KB de
+    // base64. Si Storage falla, `persistClubLogo` devuelve el data URI y el
+    // guardado sigue — pero avisa.
+    let logoWarning: string | undefined;
+    if (body.core && Object.prototype.hasOwnProperty.call(body.core, 'logo_url')) {
+        const persisted = await persistClubLogo(id, body.core.logo_url, { supabaseClient: adminClient });
+        body.core.logo_url = persisted.url;
+        logoWarning = persisted.warning;
+    }
+
     const result = await updateClub(id, body, { supabaseClient: adminClient });
     if (!result.success || !result.club) {
         return err(result.error || 'Error al actualizar club', 400, result.validationErrors);
@@ -92,5 +105,5 @@ export async function PATCH(
         revalidatePath(`/clubs/${updatedSlug}`);
     }
 
-    return NextResponse.json({ data: result.club });
+    return NextResponse.json({ data: result.club, logoWarning: logoWarning ?? undefined });
 }

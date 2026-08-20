@@ -17,7 +17,10 @@ export async function GET(
     const supabase = await createClient();
 
     const [clubRes, divisions, venuesRes] = await Promise.all([
-        supabase.from('clubs').select('*').eq('id', id).single(),
+        // Sin `select('*')`: esa consulta se traía `logo_url`, que en los clubes
+        // con escudo embebido son ~870 KB de base64 por una pantalla que solo
+        // necesita saber SI hay escudo.
+        supabase.from('clubs').select('name, logo_url, primary_color, is_visible, status').eq('id', id).single(),
         fetchDivisions(id),
         supabase.from('club_venues').select('id',    { count: 'exact', head: true }).eq('club_id', id),
     ]);

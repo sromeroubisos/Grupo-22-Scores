@@ -617,8 +617,8 @@ export default function SuperadminClubesPage() {
 
             {!isLoading && filtered.length > 0 && (
                 <>
-                <div className={styles.slab} style={{ padding: 0, overflow: 'hidden' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                <div className={`${styles.slab} ${styles.entityTableWrap}`} style={{ padding: 0 }}>
+                    <table className={styles.entityTable} style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid var(--surface-edge)' }}>
                                 {([
@@ -677,24 +677,24 @@ export default function SuperadminClubesPage() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td style={{ padding: '12px 16px', color: 'var(--basalt-400)' }}>
+                                        <td data-label="Ciudad" style={{ padding: '12px 16px', color: 'var(--basalt-400)' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
                                                 <MapPin size={11} />
                                                 {[club.city, club.region, club.country].filter(Boolean).join(', ') || '—'}
                                             </div>
                                         </td>
-                                        <td style={{ padding: '12px 16px', color: 'var(--basalt-400)' }}>
+                                        <td data-label="Seguidores" style={{ padding: '12px 16px', color: 'var(--basalt-400)' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 }}>
                                                 <Users size={13} />
                                                 <span>{club.followers_count ?? 0}</span>
                                             </div>
                                         </td>
-                                        <td style={{ padding: '12px 16px' }}>
+                                        <td data-label="Unión" style={{ padding: '12px 16px' }}>
                                             {club.union
                                                 ? <span style={{ padding: '3px 8px', borderRadius: 4, background: 'var(--basalt-800)', border: '1px solid var(--surface-edge)', fontSize: 11, fontFamily: 'var(--font-mono)', color: '#a1a1aa' }}>{club.union.name}</span>
                                                 : <span style={{ color: 'var(--basalt-600)', fontSize: 12 }}>Sin unión</span>}
                                         </td>
-                                        <td style={{ padding: '12px 16px' }}>
+                                        <td data-label="Color" style={{ padding: '12px 16px' }}>
                                             {club.primary_color ? (
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                     <div style={{ width: 16, height: 16, borderRadius: 3, background: club.primary_color, border: '1px solid rgba(255,255,255,0.1)' }} />
@@ -702,7 +702,7 @@ export default function SuperadminClubesPage() {
                                                 </div>
                                             ) : <span style={{ color: 'var(--basalt-600)', fontSize: 12 }}>—</span>}
                                         </td>
-                                        <td style={{ padding: '12px 16px' }}>
+                                        <td data-label="Visibilidad" style={{ padding: '12px 16px' }}>
                                             <span style={{
                                                 display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 4,
                                                 background: isVisible ? 'rgba(16,185,129,0.1)' : 'rgba(107,114,128,0.1)',

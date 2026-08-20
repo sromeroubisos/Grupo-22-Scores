@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireUserAccessContext } from '@/lib/auth/permissions';
-import { getManagedClubSummaries } from '@/lib/club-admin/managedClubFamily';
+import {
+    canManageClubContext,
+    getClubManagementTarget,
+    requireUserAccessContext,
+} from '@/lib/auth/permissions';
+import { EDIT_MEMBERSHIP_ROLES, VIEW_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import {
     addPersonToClub,
     deletePersonFromClub,
@@ -15,7 +19,15 @@ function jsonError(message: string, status: number) {
     return NextResponse.json({ ok: false, error: message }, { status });
 }
 
-async function ensureManagedClub(clubId: string) {
+/**
+ * El gate se resolvia con getManagedClubSummaries(), que solo mira las
+ * membresias del usuario: un super admin sin membresia en el club recibia 403
+ * sobre un club que si puede gestionar, y la pestana de jugadores del gestor
+ * quedaba vacia. canManageClubContext() es el mismo criterio que usan
+ * /api/club-admin/users y /api/clubs/[id]/manage — rol global primero,
+ * membresias despues.
+ */
+async function ensureManagedClub(clubId: string, allowedRoles = VIEW_MEMBERSHIP_ROLES) {
     const supabase = await createClient();
     const context = await requireUserAccessContext(supabase).catch(() => null);
 
@@ -23,13 +35,16 @@ async function ensureManagedClub(clubId: string) {
         return { supabase, context: null, error: jsonError('No autenticado', 401) };
     }
 
-    const managed = await getManagedClubSummaries(supabase, context.memberships);
-    const managedClub = managed.clubs.find((club) => club.id === clubId);
-    if (!managedClub) {
+    const target = await getClubManagementTarget(supabase, clubId);
+    if (!target) {
+        return { supabase, context, error: jsonError('Club no encontrado', 404) };
+    }
+
+    if (!canManageClubContext(context, target, allowedRoles)) {
         return { supabase, context, error: jsonError('Sin permisos sobre este club', 403) };
     }
 
-    return { supabase, context, managedClub, error: null };
+    return { supabase, context, target, error: null };
 }
 
 export async function GET(request: NextRequest) {
@@ -60,7 +75,7 @@ export async function POST(request: NextRequest) {
         return jsonError('clubId es requerido', 400);
     }
 
-    const access = await ensureManagedClub(clubId);
+    const access = await ensureManagedClub(clubId, EDIT_MEMBERSHIP_ROLES);
     if (access.error) return access.error;
 
     const admin = createAdminClient();
@@ -103,7 +118,7 @@ export async function PATCH(request: NextRequest) {
         return jsonError('clubId y personId son requeridos', 400);
     }
 
-    const access = await ensureManagedClub(clubId);
+    const access = await ensureManagedClub(clubId, EDIT_MEMBERSHIP_ROLES);
     if (access.error) return access.error;
 
     const admin = createAdminClient();
@@ -139,7 +154,7 @@ export async function DELETE(request: NextRequest) {
         return jsonError('clubId y personId son requeridos', 400);
     }
 
-    const access = await ensureManagedClub(clubId);
+    const access = await ensureManagedClub(clubId, EDIT_MEMBERSHIP_ROLES);
     if (access.error) return access.error;
 
     const admin = createAdminClient();

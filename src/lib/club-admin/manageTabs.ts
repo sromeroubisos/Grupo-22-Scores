@@ -1,74 +1,66 @@
-export type ClubManageTabId =
+/**
+ * Las secciones del gestor de club.
+ *
+ * La consola vieja tenía once pestañas (entrenamientos, rendimiento, pizarra,
+ * partidos, competencias, contenido, sponsors...). Esas se fueron a un producto
+ * aparte — la copia congelada está en `proyecto-club-suite/`. Acá quedó lo que
+ * define a un club dentro de G22 Scores: quién es, quién juega, quién lo
+ * administra y con qué otros clubes está emparentado.
+ *
+ * Los alias existen porque hay links viejos dando vueltas (favoritos, mails,
+ * la tabla de clubes del super admin). Un `tab` que ya no está no tiene que
+ * romper: cae en General.
+ */
+
+export type ClubManagerTabId =
     | 'general'
-    | 'planteles'
-    | 'rendimiento'
-    | 'competencias'
-    | 'partidos'
-    | 'contenido'
-    | 'pizarra'
-    | 'sponsors'
-    | 'entrenamientos'
+    | 'jugadores'
+    | 'sedes'
     | 'usuarios'
-    | 'configuracion';
+    | 'relacionados'
+    | 'publicar';
 
-export const CLUB_MANAGE_ALLOWED_TABS = new Set<ClubManageTabId>([
-    'general',
-    'planteles',
-    'entrenamientos',
-    'rendimiento',
-    'competencias',
-    'partidos',
-    'contenido',
-    'pizarra',
-    'usuarios',
-    'configuracion',
-]);
+export const CLUB_MANAGER_TABS: ReadonlyArray<{ id: ClubManagerTabId; label: string }> = [
+    { id: 'general', label: 'General' },
+    { id: 'jugadores', label: 'Jugadores' },
+    { id: 'sedes', label: 'Sedes' },
+    { id: 'usuarios', label: 'Usuarios' },
+    { id: 'relacionados', label: 'Clubes relacionados' },
+    { id: 'publicar', label: 'Publicar' },
+];
 
-export const CLUB_MANAGE_DASHBOARD_TABS = new Set<ClubManageTabId>([
-    'general',
-    'competencias',
-    'partidos',
-    'contenido',
-]);
+const ALLOWED = new Set<ClubManagerTabId>(CLUB_MANAGER_TABS.map((tab) => tab.id));
 
-export const CLUB_MANAGE_DIVISION_TABS = new Set<ClubManageTabId>([
-    'general',
-    'partidos',
-    'planteles',
-]);
-
-export const CLUB_MANAGE_TAB_ALIASES: Record<string, ClubManageTabId> = {
+/** Nombres viejos → sección actual. Todo lo que no figure cae en General. */
+const ALIASES: Record<string, ClubManagerTabId> = {
     resumen: 'general',
-    gimnasio: 'entrenamientos',
-    testeos: 'rendimiento',
-    fisico: 'rendimiento',
-    fixture: 'partidos',
-    posiciones: 'competencias',
-    identidad: 'configuracion',
-    staff: 'configuracion',
-    medios: 'contenido',
-    estadisticas: 'rendimiento',
-    auditoria: 'configuracion',
+    identidad: 'general',
+    configuracion: 'general',
+    equipos: 'jugadores',
+    planteles: 'jugadores',
+    plantel: 'jugadores',
+    roster: 'jugadores',
+    jugadores: 'jugadores',
+    accesos: 'usuarios',
+    usuarios: 'usuarios',
+    familia: 'relacionados',
+    related: 'relacionados',
+    relacionados: 'relacionados',
+    sedes: 'sedes',
+    venues: 'sedes',
+    canchas: 'sedes',
+    publicar: 'publicar',
+    publish: 'publicar',
+    publicacion: 'publicar',
+    divisiones: 'jugadores',
 };
 
-export function normalizeClubManageTab(requestedTab?: string | null): ClubManageTabId {
-    const normalizedRequestedTab = CLUB_MANAGE_TAB_ALIASES[requestedTab ?? ''] || requestedTab || 'general';
+export function normalizeClubManagerTab(requested?: string | null): ClubManagerTabId {
+    const key = (requested ?? '').trim().toLowerCase();
+    if (!key) return 'general';
 
-    if (CLUB_MANAGE_ALLOWED_TABS.has(normalizedRequestedTab as ClubManageTabId)) {
-        return normalizedRequestedTab as ClubManageTabId;
-    }
+    const aliased = ALIASES[key];
+    if (aliased) return aliased;
 
-    return 'general';
-}
-
-export function shouldLoadClubDashboardForTab(tab: ClubManageTabId) {
-    return CLUB_MANAGE_DASHBOARD_TABS.has(tab);
-}
-
-export function shouldLoadClubDivisionsForTab(tab: ClubManageTabId) {
-    return CLUB_MANAGE_DIVISION_TABS.has(tab);
-}
-
-export function getClubDashboardModeForTab(tab: ClubManageTabId): 'summary' | 'operational' {
-    return tab === 'partidos' ? 'operational' : 'summary';
+    return ALLOWED.has(key as ClubManagerTabId) ? (key as ClubManagerTabId) : 'general';
 }
