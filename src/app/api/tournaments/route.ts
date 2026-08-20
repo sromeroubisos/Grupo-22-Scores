@@ -328,6 +328,47 @@ async function resolveTournamentStages(tournamentUrl: string): Promise<Tournamen
     }
 }
 
+/**
+ * Los ids de UNA temporada pasada, sacados de sus propios partidos.
+ *
+ * El proveedor sirve cualquier temporada vieja por `template_id + season_id`
+ * —los resultados ya salen bien—, pero la tabla se pide por
+ * `tournament_id + tournament_stage_id`, y esos NO viajan con el `season_id`:
+ * el bundle de la URL solo conoce los de la temporada corriente. Sin puente, un
+ * torneo con el selector en 2023/24 muestra los partidos de 2023/24 y la tabla
+ * de hoy. Y `tournaments/archives`, que sería la vía natural para listar
+ * temporadas, en rugby devuelve vacío.
+ *
+ * El puente es el partido: cada uno lleva el `tournament_id` y el
+ * `tournament_stage_id` de SU edición. Se usa el más viejo de los resultados
+ * porque la fase regular arranca antes que cualquier playoff, así que su etapa
+ * es la que tiene la tabla. Una sola llamada, y sobre resultados que igual
+ * había que pedir (van por la misma caché).
+ */
+async function resolveSeasonScopedIds(
+    results: any[],
+): Promise<{ tournamentId?: string; stageId?: string }> {
+    const conFecha = results
+        .filter((match) => match && Number.isFinite(Number(match.timestamp)))
+        .sort((a, b) => Number(a.timestamp) - Number(b.timestamp));
+
+    const primero = conFecha[0] ?? results[0];
+    const matchId = normalizeId(primero?.match_id ?? primero?.id);
+    if (!matchId) return {};
+
+    try {
+        const detalle = await getFlashScoreMatchDetails(matchId);
+        const torneo = (detalle as any)?.DATA?.tournament ?? (detalle as any)?.tournament;
+        return {
+            tournamentId: normalizeId(torneo?.tournament_id),
+            stageId: normalizeId(torneo?.tournament_stage_id),
+        };
+    } catch (error) {
+        console.warn('[Tournament API] No se pudieron resolver los ids de la temporada pedida:', error);
+        return {};
+    }
+}
+
 // The stage that holds the league table. Knockout/placement stages have none.
 const MAIN_STAGE_NAME_RE = /^(main|regular season|group stage|league stage|round robin)$/i;
 
@@ -1716,10 +1757,34 @@ export async function GET(request: Request) {
             (!stageBundle.tournamentId || !tournamentId || sameProviderId(stageBundle.tournamentId, tournamentId)) &&
             (!stageBundle.seasonId || !seasonId || sameProviderId(stageBundle.seasonId, seasonId));
         const tournamentStages = stageBundleIsSameSeason ? stageBundle.stages : [];
-        const standingsStageId = pickStandingsStageId(tournamentStages, stageId);
+        let standingsTournamentId = tournamentId;
+        let standingsStageId = pickStandingsStageId(tournamentStages, stageId);
+
+        // Selector de temporada: si piden una que no es la corriente, los ids que
+        // tenemos son de otro año y la tabla saldría de la edición equivocada.
+        // Los resultados no tienen ese problema —van por `template + season`— así
+        // que se usan de puente (ver resolveSeasonScopedIds). La llamada extra es
+        // una sola y comparte caché con el fetch de resultados de más abajo.
+        const pideTemporadaPasada = Boolean(
+            requestedSeason
+            && stageBundle.seasonId
+            && !sameProviderId(requestedSeason, stageBundle.seasonId),
+        );
+        if (flashScoreEnabledForSport && pideTemporadaPasada && templateId && seasonId) {
+            const previos = await getTournamentResults(templateId, seasonId).catch(() => null);
+            const crudos = previos?.DATA ?? previos ?? [];
+            const planos = Array.isArray(crudos)
+                ? crudos.flatMap((fila: any) => (Array.isArray(fila?.matches) ? fila.matches : [fila]))
+                : [];
+            const propios = await resolveSeasonScopedIds(planos);
+            if (propios.tournamentId && propios.stageId) {
+                standingsTournamentId = propios.tournamentId;
+                standingsStageId = propios.stageId;
+            }
+        }
 
         const canFetchMatches = flashScoreEnabledForSport && !!(templateId && seasonId);
-        const canFetchStandings = flashScoreEnabledForSport && !!(tournamentId && standingsStageId);
+        const canFetchStandings = flashScoreEnabledForSport && !!(standingsTournamentId && standingsStageId);
         const canFetchDraw = flashScoreEnabledForSport && !!(tournamentId && stageId); // Use stageId instead of drawStageId
         const canFetchArchives = flashScoreEnabledForSport && !!stageId;
         externalOverrideId = resolveExternalTournamentId({
@@ -1764,11 +1829,11 @@ export async function GET(request: Request) {
         const settled = await Promise.allSettled([
             canFetchMatches ? timedTab('results', getTournamentResults(templateId!, seasonId!)) : Promise.resolve([]),
             canFetchMatches ? timedTab('fixtures', getTournamentFixtures(templateId!, seasonId!)) : Promise.resolve([]),
-            canFetchStandings ? timedTab('standings', getTournamentStandings(tournamentId!, standingsStageId!)) : Promise.resolve([]),
-            canFetchStandings ? timedTab('topScorers', getTournamentTopScorers(tournamentId!, standingsStageId!)) : Promise.resolve([]),
-            canFetchStandings ? timedTab('standingsForm', getTournamentStandingsForm(tournamentId!, standingsStageId!)) : Promise.resolve([]),
-            canFetchStandings ? timedTab('standingsHtFt', getTournamentStandingsHtFt(tournamentId!, standingsStageId!)) : Promise.resolve([]),
-            canFetchStandings ? timedTab('standingsOverUnder', getTournamentStandingsOverUnder(tournamentId!, standingsStageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('standings', getTournamentStandings(standingsTournamentId!, standingsStageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('topScorers', getTournamentTopScorers(standingsTournamentId!, standingsStageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('standingsForm', getTournamentStandingsForm(standingsTournamentId!, standingsStageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('standingsHtFt', getTournamentStandingsHtFt(standingsTournamentId!, standingsStageId!)) : Promise.resolve([]),
+            canFetchStandings ? timedTab('standingsOverUnder', getTournamentStandingsOverUnder(standingsTournamentId!, standingsStageId!)) : Promise.resolve([]),
             timedTab('details', detailsPromise),
             canFetchDraw ? timedTab('draw', getTournamentDraw(tournamentId!, stageId!)) : Promise.resolve([]),
             canFetchArchives ? timedTab('archives', getTournamentArchives(stageId!)) : Promise.resolve([])
