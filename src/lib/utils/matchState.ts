@@ -170,3 +170,99 @@ export function resolverEstado(
 
     return describir('programado', token);
 }
+
+/* ── La red de tiempo ───────────────────────────────────────────────────────
+ * Hay proveedores que mandan el marcador final y dejan TODOS los flags de
+ * estado en `false`. Medido sobre `ALypVsfU` (Canterbury 12 - 36 Northland,
+ * Bunnings NPC): la ficha del partido decía `stage: "Finished"`,
+ * `is_finished: true`; la lista del día, para el MISMO id y con el marcador ya
+ * cargado, mandaba `stage: null` y todos los flags en `false`. Sin una red, ese
+ * partido se queda «Programado» para siempre.
+ *
+ * La red ya existía, pero adentro de `flashscore.ts` y con dos límites: sólo
+ * corría en el feed diario —nunca en la página del partido— y sólo para rugby,
+ * con un número fijo de 100 minutos.
+ *
+ * Ese número no se puede globalizar: a los 100 minutos un partido de rugby
+ * terminó hace rato y uno de tenis a cinco sets recién va por la mitad. Por eso
+ * la ventana es POR DEPORTE. Y los deportes sin duración acotada se quedan sin
+ * red a propósito: es preferible un «Programado» viejo que un «Finalizado»
+ * mentiroso.
+ *
+ * Ojo con el ancla: en un partido terminado, el `timestamp` de la ficha de
+ * FlashScore ya NO es el arranque —en el caso medido venía corrido 104 minutos,
+ * o sea hasta el final—. El único inicio confiable es el de la lista del día.
+ */
+
+/** Minutos desde el inicio, por `sport_id` de FlashScore. Es el techo realista
+ *  de duración del deporte más un margen, no su duración nominal. */
+const VENTANA_POR_DEPORTE: Record<number, number> = {
+    1: 140,   // fútbol: 90 + entretiempo + descuento + margen
+    2: 360,   // tenis: un cinco sets se va largo, la red tiene que ser generosa
+    3: 180,   // básquet
+    4: 180,   // hockey sobre hielo
+    5: 240,   // fútbol americano
+    6: 300,   // béisbol: sin reloj, entradas extra
+    7: 130,   // handball
+    8: 100,   // rugby union — el número que ya usaba el feed
+    9: 150,   // floorball
+    10: 150,  // bandy
+    11: 120,  // futsal
+    12: 200,  // vóley
+    14: 240,  // dardos
+    15: 480,  // snooker: un frame largo estira todo
+    16: 180,  // boxeo
+    17: 180,  // vóley playa
+    18: 200,  // aussie rules
+    19: 100,  // rugby league
+    21: 180,  // bádminton
+    22: 150,  // waterpolo
+    24: 130,  // hockey sobre césped
+    25: 180,  // tenis de mesa
+};
+
+/** Deportes que NO llevan red: su duración no está acotada por reglamento y
+ *  cualquier ventana que elijamos sería una invención. Un test de cricket dura
+ *  días; un torneo de golf, cuatro jornadas. */
+const SIN_RED = new Set([13, 23]); // cricket, golf
+
+/** Cuando el deporte no está en la tabla, cinco horas: lo bastante ancho para
+ *  no cortar nada en juego y lo bastante angosto para que sirva de algo. */
+const VENTANA_POR_DEFECTO = 300;
+
+/** Minutos que tienen que pasar desde el inicio para dar un partido por
+ *  terminado sin confirmación del proveedor. `null` = este deporte no lleva red. */
+export function ventanaDeFinalizacion(sportId: unknown): number | null {
+    const id = Number(sportId);
+    if (!Number.isFinite(id)) return VENTANA_POR_DEFECTO;
+    if (SIN_RED.has(id)) return null;
+    return VENTANA_POR_DEPORTE[id] ?? VENTANA_POR_DEFECTO;
+}
+
+/**
+ * ¿Pasó tanto tiempo desde el inicio que el partido no puede seguir en juego?
+ *
+ * Función pura: el llamador pasa el reloj. Así se puede probar sin esperar un
+ * sábado a las 15:30, que es la única forma honesta de verificar esto.
+ *
+ * NO exige marcador, igual que la red original de rugby: un partido cuyo
+ * resultado el proveedor nunca mandó igual terminó, y la página lo dice con
+ * «Sin marcador provisto por API» en vez de fingir que todavía no se juega.
+ *
+ * @param sportId  `sport_id` de FlashScore (8 = rugby union)
+ * @param inicioMs el ARRANQUE en ms — el de la lista del día, no el de la ficha
+ */
+export function finalizadoPorTiempo(opciones: {
+    sportId: unknown;
+    inicioMs: number | null | undefined;
+    ahoraMs: number;
+}): boolean {
+    const { sportId, inicioMs, ahoraMs } = opciones;
+    if (inicioMs == null || !Number.isFinite(inicioMs) || inicioMs <= 0) return false;
+
+    const ventana = ventanaDeFinalizacion(sportId);
+    if (ventana == null) return false;
+
+    const minutosDesdeElInicio = (ahoraMs - inicioMs) / 60000;
+    return minutosDesdeElInicio > ventana;
+}

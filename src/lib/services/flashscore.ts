@@ -2,6 +2,7 @@ import { Match, MatchStatus } from '@/types/match';
 import { apiFetch } from '@/lib/apiFetch';
 import { memoryCache } from '@/lib/cache';
 import { formatDateKey } from '@/lib/timezone';
+import { finalizadoPorTiempo } from '@/lib/utils/matchState';
 import { isFieldHockeySport, isFlashScoreEnabledForSport, isFootballSport } from '@/lib/externalProviderPolicy';
 import {
     getFihWorldCupLiveMatches,
@@ -803,18 +804,16 @@ function mapEventToMatch(evt: any, sportId: string, context: TournamentContext):
         }
     }
 
-    // New Request: If Rugby match > 100 minutes since start, force finalize as 'pending result'
+    // La red de tiempo: si pasó más de lo que dura el deporte, el partido no
+    // puede seguir en juego aunque el proveedor no lo confirme. Antes era un
+    // 100 fijo y sólo para rugby; ahora la ventana sale de matchState.ts, que
+    // la tiene por deporte y la comparte con la página del partido — que no
+    // tenía ninguna red y por eso dejaba terminados en «Programado».
     const flashScoreSportId = SPORT_MAPPING[sportId] || parseInt(sportId) || 1;
-    const isRugbyVariant = flashScoreSportId === 8 || flashScoreSportId === 19;
-    if (isRugbyVariant && !apiReportsHaltedState && finalMatch.status !== 'final' && finalMatch.status !== 'postponed' && finalMatch.status !== 'cancelled') {
-        const now = Date.now();
-        const matchTime = scheduledAt.getTime();
-        const minutesSinceStart = (now - matchTime) / (1000 * 60);
-
-        if (minutesSinceStart > 100) {
+    if (!apiReportsHaltedState && finalMatch.status !== 'final' && finalMatch.status !== 'postponed' && finalMatch.status !== 'cancelled') {
+        if (finalizadoPorTiempo({ sportId: flashScoreSportId, inicioMs: scheduledAt.getTime(), ahoraMs: Date.now() })) {
             finalMatch.status = 'final';
             finalMatch.result.isComplete = true;
-            // We consider it final because it exceeded time limits, even if API didn't confirm
         }
     }
 

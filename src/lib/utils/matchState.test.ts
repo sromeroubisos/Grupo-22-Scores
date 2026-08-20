@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { resolverEstado } from './matchState.ts';
+import { resolverEstado, finalizadoPorTiempo, ventanaDeFinalizacion } from './matchState.ts';
 
 /* Los estados que importan no se pueden reproducir en el navegador: hace falta
    un partido jugándose un sábado a las 15:30. Por eso el resolvedor es una
@@ -91,4 +91,77 @@ test('tolera mayúsculas, espacios y valores raros sin explotar', () => {
     assert.equal(resolverEstado(123).estado, 'programado');
     assert.equal(resolverEstado({}).estado, 'programado');
     assert.equal(resolverEstado(null).estado, 'programado');
+});
+
+/* ── La red de tiempo ────────────────────────────────────────────────────── */
+
+const MINUTO = 60_000;
+const ARRANQUE = Date.UTC(2026, 7, 20, 7, 10, 0); // 1787209800: el kickoff real de ALypVsfU
+
+test('el caso que originó todo: rugby terminado con los flags en cero', () => {
+    // Canterbury 12 - 36 Northland, Bunnings NPC. La lista del día mandaba
+    // `stage: null` y todos los flags en false CON el marcador cargado. La
+    // ficha decía "Finished". Sin red, el partido quedaba «Programado».
+    assert.equal(
+        finalizadoPorTiempo({ sportId: 8, inicioMs: ARRANQUE, ahoraMs: ARRANQUE + 104 * MINUTO }),
+        true,
+    );
+});
+
+test('la ventana es POR DEPORTE: los 100 minutos no se globalizan', () => {
+    // A los 100 minutos un rugby terminó hace rato...
+    const alos101 = { inicioMs: ARRANQUE, ahoraMs: ARRANQUE + 101 * MINUTO };
+    assert.equal(finalizadoPorTiempo({ sportId: 8, ...alos101 }), true);
+    // ...y un tenis a cinco sets recién va por la mitad. Con la red vieja
+    // globalizada, este partido se dibujaba terminado en pleno tercer set.
+    assert.equal(finalizadoPorTiempo({ sportId: 2, ...alos101 }), false);
+    // El fútbol tampoco entra: 90 + entretiempo + descuento pasan los 100.
+    assert.equal(finalizadoPorTiempo({ sportId: 1, ...alos101 }), false);
+});
+
+test('los deportes sin duración acotada se quedan SIN red', () => {
+    // Un test de cricket dura días y un torneo de golf, cuatro jornadas:
+    // cualquier ventana sería inventada. Preferimos un «Programado» viejo
+    // antes que un «Finalizado» mentiroso.
+    const unaSemana = { inicioMs: ARRANQUE, ahoraMs: ARRANQUE + 7 * 24 * 60 * MINUTO };
+    assert.equal(ventanaDeFinalizacion(13), null, 'cricket');
+    assert.equal(ventanaDeFinalizacion(23), null, 'golf');
+    assert.equal(finalizadoPorTiempo({ sportId: 13, ...unaSemana }), false);
+    assert.equal(finalizadoPorTiempo({ sportId: 23, ...unaSemana }), false);
+});
+
+test('un deporte desconocido cae en la ventana por defecto, no en cero', () => {
+    // Que un sport_id nuevo no active la red al primer minuto: el default es
+    // ancho a propósito.
+    assert.equal(ventanaDeFinalizacion(999), 300);
+    assert.equal(ventanaDeFinalizacion(undefined), 300);
+    assert.equal(finalizadoPorTiempo({ sportId: 999, inicioMs: ARRANQUE, ahoraMs: ARRANQUE + 120 * MINUTO }), false);
+    assert.equal(finalizadoPorTiempo({ sportId: 999, inicioMs: ARRANQUE, ahoraMs: ARRANQUE + 301 * MINUTO }), true);
+});
+
+test('sin arranque utilizable la red no se activa', () => {
+    // Es la diferencia entre «no sé cuándo empezó» y «empezó hace mucho».
+    const ahoraMs = ARRANQUE + 500 * MINUTO;
+    assert.equal(finalizadoPorTiempo({ sportId: 8, inicioMs: null, ahoraMs }), false);
+    assert.equal(finalizadoPorTiempo({ sportId: 8, inicioMs: undefined, ahoraMs }), false);
+    assert.equal(finalizadoPorTiempo({ sportId: 8, inicioMs: 0, ahoraMs }), false);
+    assert.equal(finalizadoPorTiempo({ sportId: 8, inicioMs: Number.NaN, ahoraMs }), false);
+});
+
+test('un partido que todavía no empezó nunca da finalizado', () => {
+    // El caso de reset: la red mira hacia adelante, no hacia atrás.
+    assert.equal(
+        finalizadoPorTiempo({ sportId: 8, inicioMs: ARRANQUE, ahoraMs: ARRANQUE - 30 * MINUTO }),
+        false,
+    );
+    assert.equal(finalizadoPorTiempo({ sportId: 8, inicioMs: ARRANQUE, ahoraMs: ARRANQUE }), false);
+});
+
+test('el borde de la ventana es estricto: 100 no alcanza, 101 sí', () => {
+    assert.equal(finalizadoPorTiempo({ sportId: 8, inicioMs: ARRANQUE, ahoraMs: ARRANQUE + 100 * MINUTO }), false);
+    assert.equal(finalizadoPorTiempo({ sportId: 8, inicioMs: ARRANQUE, ahoraMs: ARRANQUE + 100.5 * MINUTO }), true);
+});
+
+test('rugby league comparte ventana con rugby union', () => {
+    assert.equal(ventanaDeFinalizacion(19), ventanaDeFinalizacion(8));
 });

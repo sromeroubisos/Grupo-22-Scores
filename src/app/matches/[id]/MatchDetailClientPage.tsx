@@ -36,6 +36,7 @@ import { findCountryRecord } from '@/lib/data/countries';
 import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { APP_TIMEZONE } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
+import { cruzarEstado, mapMatchStatus } from '@/lib/matches/providerStatus';
 import {
     buildPlayerStatsTableData,
 } from '@/lib/playerStats';
@@ -278,50 +279,6 @@ function buildTournamentHref(tournamentId?: string, season?: string | number | n
 
     const qs = params.toString();
     return `/tournaments/${id}${qs ? `?${qs}` : ''}`;
-}
-
-function mapMatchStatus(matchStatusObj: any, simpleStatus?: string) {
-    if (matchStatusObj) {
-        if (matchStatusObj.type === 'inprogress') return 'live';
-        if (matchStatusObj.type === 'finished') return 'final';
-        if (matchStatusObj.type === 'postponed') return 'postponed';
-        if (matchStatusObj.type === 'canceled' || matchStatusObj.type === 'cancelled') return 'cancelled';
-
-        if (matchStatusObj.is_finished) return 'final';
-        if (matchStatusObj.is_in_progress || matchStatusObj.is_started) return 'live';
-        if (matchStatusObj.is_postponed) return 'postponed';
-        if (matchStatusObj.is_cancelled) return 'cancelled';
-
-        if (matchStatusObj.code) {
-            const code = String(matchStatusObj.code).toLowerCase();
-            if (code === 'ht' || code.includes('half') || code.includes('period') || code.includes('quarter') || code.includes('live')) {
-                return 'live';
-            }
-        }
-    }
-
-    const status = String(simpleStatus || '').toLowerCase();
-    const liveIndicators = [
-        'live', 'playing', 'current', 'inprogress',
-        '1st half', '2nd half', '1st period', '2nd period', '3rd period',
-        '1st quarter', '2nd quarter', '3rd quarter', '4th quarter',
-        'set 1', 'set 2', 'set 3', 'set 4', 'set 5',
-        'inning', 'batting', 'fielding',
-        'timeout', 'break', 'halftime', 'ht', 'pause'
-    ];
-
-    if (status.includes('finished') || status.includes('final') || status.includes('ended') || status.includes('full time') || status === 'ft') {
-        return 'final';
-    }
-
-    if (liveIndicators.some((indicator) => status.includes(indicator))) {
-        return 'live';
-    }
-
-    if (status.includes('postponed') || status.includes('aplazado')) return 'postponed';
-    if (status.includes('cancelled') || status.includes('cancelado') || status.includes('abandoned')) return 'cancelled';
-
-    return 'scheduled';
 }
 
 function getTeamLogo(team: any) {
@@ -1172,6 +1129,19 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         return [];
                     })();
 
+                    // El estado cruzado se calcula UNA vez y se usa en los dos lados:
+                    // el que dibuja y el que decide si el sondeo del minuto a
+                    // minuto sigue corriendo. Si sólo se actualizaba el estado
+                    // del render, el reloj seguía sondeando un partido terminado.
+                    const statusCruzado = cruzarEstado({
+                        listMatchEvt,
+                        fichaStatus: fsStatus,
+                        sportId,
+                        fichaTimestamp: evt?.timestamp,
+                        fechaBase: baseMatch?.date,
+                    });
+                    statusRef.current = statusCruzado;
+
                     setState(prev => {
                         if (!prev.matchData) return prev;
                         const resolvedHomeCountryName = getDrawParticipantCountryName(resolvedDraw, String(evt.match_id || evt.EVENT_ID || id), 'home') || prev.matchData.home?.countryName || '';
@@ -1183,7 +1153,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             secondaryReady: true,
                             matchData: {
                                 ...prev.matchData,
-                                status: listMatchEvt?.match_status ? mapMatchStatus(listMatchEvt.match_status) : fsStatus,
+                                status: statusCruzado,
                                 penalties: detailsPenalties ?? prev.matchData.penalties ?? null,
                                 tournamentUrl: evt.tournament?.tournament_url || evt.tournament?.url || evt.TOURNAMENT_URL || prev.matchData.tournamentUrl || '',
                                 tournamentLogo: resolveTournamentLogo(evt, prev.matchData.tournamentLogo || null),
