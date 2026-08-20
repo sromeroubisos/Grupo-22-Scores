@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { canManageClubContext, getClubManagementTarget, requireUserAccessContext } from '@/lib/auth/permissions';
 import { EDIT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import { syncClubLogoToExternalSources } from '@/lib/server/clubLogoExternalSync';
+import { persistClubLogo } from '@/lib/server/persistClubLogo';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { normalizeSlug } from '@/lib/utils/normalize';
@@ -134,6 +135,18 @@ export async function PATCH(
         return err('No se enviaron campos para actualizar', 400);
     }
 
+    // Mismo puente que en /api/clubs/[id]/manage: un escudo subido como archivo
+    // llega en data URI y se guarda en Storage, no dentro de la columna.
+    let cachedAdminClient: ReturnType<typeof createAdminClient> | null = null;
+    const adminClient = () => (cachedAdminClient ??= createAdminClient());
+
+    let logoWarning: string | undefined;
+    if ('logo_url' in updates) {
+        const persisted = await persistClubLogo(id, updates.logo_url, { supabaseClient: adminClient() });
+        updates.logo_url = persisted.url;
+        logoWarning = persisted.warning;
+    }
+
     const nullableTextFields = ['short_name', 'city', 'region', 'country', 'logo_url', 'primary_color', 'sport', 'union_id', 'category'];
     for (const field of nullableTextFields) {
         if (typeof updates[field] === 'string' && !String(updates[field]).trim()) {
@@ -197,9 +210,6 @@ export async function PATCH(
     // El permiso ya se resolvió arriba; el perfil se escribe con el cliente admin
     // igual que en /api/clubs/[id]/manage, para que no dependa de que `club_profile`
     // tenga política de RLS para este rol.
-    let cachedAdminClient: ReturnType<typeof createAdminClient> | null = null;
-    const adminClient = () => (cachedAdminClient ??= createAdminClient());
-
     if (Object.keys(profileUpdates).length > 0) {
         const { error: profileError } = await adminClient()
             .from('club_profile')
@@ -224,6 +234,7 @@ export async function PATCH(
     return NextResponse.json({
         data: { ...(data ?? {}), ...profileUpdates },
         skippedFields: skippedFields.length > 0 ? skippedFields : undefined,
+        logoWarning: logoWarning ?? undefined,
     });
 }
 

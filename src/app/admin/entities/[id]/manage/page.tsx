@@ -12,17 +12,17 @@ import { TournamentDetailsTab } from '@/components/admin/entities/tournament/Tou
 import { TournamentMediaTab } from '@/components/admin/entities/tournament/TournamentMediaTab';
 import { TournamentManageShell } from '@/components/admin/entities/tournament/TournamentManageShell';
 import { TournamentStructureTab } from '@/components/admin/entities/tournament/TournamentStructureTab';
-import { ClubManageShell } from '@/components/admin/entities/club/ClubManageShell';
+import { ClubManagerShell } from '@/components/admin/club-manager/ClubManagerShell';
 import { TournamentParticipantsTab } from '@/components/admin/entities/tournament/TournamentParticipantsTab';
 import { TournamentOperationTab } from '@/components/admin/entities/tournament/TournamentOperationTab';
 import { Database } from '@/lib/database.types';
-import { requireTournamentAdminContext, requireUserAccessContext } from '@/lib/auth/permissions';
+import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
 import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { getReadClient } from '@/lib/supabase/read';
 import { getCachedSeasonFamily } from '@/lib/server/tournamentSeasonFamilyCache';
-import { getManagedClubSummaries } from '@/lib/club-admin/managedClubFamily';
-import { normalizeClubManageTab } from '@/lib/club-admin/manageTabs';
+import { normalizeClubManagerTab } from '@/lib/club-admin/manageTabs';
+import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import {
     collectSeasonLinkedTournamentIds,
     collectTournamentSeasonFamilyRows,
@@ -310,9 +310,9 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
 
     // 1. Check Auth & Permissions (Basic check, RLS enforces mutations later)
     const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
 
-    if (!session?.user) {
+    if (!authUser) {
         redirect('/login');
     }
 
@@ -481,21 +481,25 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
 
     const isClub = result.entityType === 'club';
     if (isClub) {
-        const [context, { data: unionsData }] = await Promise.all([
-            requireUserAccessContext(supabase).catch(() => null),
-            supabase.from('unions').select('id, name').order('name'),
-        ]);
-        const managed = context
-            ? await getManagedClubSummaries(supabase as never, context.memberships)
-            : { clubs: [], defaultClubId: null };
+        const clubRow = result.data as ResolvedClubRow;
+        const { data: unionsData } = await supabase.from('unions').select('id, name').order('name');
+
+        // `logo_url` puede ser un data URI de 870 KB: mandarlo crudo al cliente
+        // infla el payload RSC de la pagina entera. El proxy sirve la misma
+        // imagen por una URL corta.
+        const crestSrc = resolveSerializableLogoUrl(clubRow.logo_url, {
+            key: clubRow.id,
+            name: clubRow.name || clubRow.short_name || 'Club',
+        });
 
         return (
-            <ClubManageShell
+            <ClubManagerShell
                 id={id}
-                data={result.data as ResolvedClubRow}
+                data={{ ...clubRow, logo_url: crestSrc } as never}
                 unions={unionsData ?? []}
-                managedClubs={managed.clubs}
-                initialTab={normalizeClubManageTab(tab)}
+                initialTab={normalizeClubManagerTab(tab)}
+                backHref={from}
+                crestSrc={crestSrc}
             />
         );
     }

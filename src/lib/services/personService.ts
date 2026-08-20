@@ -246,7 +246,12 @@ interface RlsScopedPersonIds {
 }
 
 function rlsScopedPersonIds(ids: string[], origin: ScopedPersonIdsOrigin): RlsScopedPersonIds {
-    return { ids, origin, [rlsScopedBrand]: true } as RlsScopedPersonIds;
+    // La marca es SOLO de tipos: `declare const rlsScopedBrand` no existe en
+    // runtime, asi que usarla como clave computada tiraba
+    // "rlsScopedBrand is not defined" en la primera llamada. El objeto viaja sin
+    // la propiedad; la garantia sigue siendo de compilacion, porque el unico
+    // modo de obtener un RlsScopedPersonIds es pasar por acá.
+    return { ids, origin } as unknown as RlsScopedPersonIds;
 }
 
 /**

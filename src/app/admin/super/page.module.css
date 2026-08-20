@@ -2620,3 +2620,95 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ── Tabla de clubes: en mobile se vuelve una lista de tarjetas ─────────────
+   El motivo: con 7 columnas la tabla mide ~875px y el .slab la recorta con
+   overflow hidden, asi que "Gestionar" y el menu de acciones quedaban fuera
+   de pantalla y sin forma de alcanzarlos. */
+.entityTableWrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 820px) {
+    .entityTableWrap {
+        overflow-x: visible;
+    }
+
+    .entityTable,
+    .entityTable tbody,
+    .entityTable tr,
+    .entityTable td {
+        display: block;
+        width: 100%;
+    }
+
+    .entityTable thead {
+        display: none;
+    }
+
+    .entityTable tr {
+        border: 1px solid var(--surface-edge);
+        border-radius: var(--card-radius, 12px);
+        background: var(--basalt-800);
+        padding: 14px;
+        margin: 0 0 10px;
+    }
+
+    .entityTable tr:last-child {
+        margin-bottom: 0;
+    }
+
+    .entityTable td {
+        padding: 8px 0 !important;
+        border-bottom: 1px dashed var(--surface-edge);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 34px;
+    }
+
+    .entityTable td[data-label]::before {
+        content: attr(data-label);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--basalt-400);
+        flex-shrink: 0;
+    }
+
+    /* La primera celda es el titulo de la tarjeta: ocupa su propia linea */
+    .entityTable td:first-child {
+        display: block;
+        padding-top: 0 !important;
+        padding-bottom: 10px !important;
+        border-bottom: 1px solid var(--surface-edge);
+    }
+
+    /* La ultima celda son las acciones: fila completa, botones grandes */
+    .entityTable td:last-child {
+        border-bottom: none;
+        padding-bottom: 0 !important;
+        padding-top: 12px !important;
+    }
+
+    .entityTable td:last-child>div {
+        width: 100%;
+    }
+
+    .entityTable td:last-child .actionBtn,
+    .entityTable td:last-child a.actionBtn {
+        flex: 1;
+        height: 40px;
+        font-size: 12px !important;
+        padding: 0 12px !important;
+    }
+
+    .entityTable td:last-child .moreMenuBtn {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+    }
+}

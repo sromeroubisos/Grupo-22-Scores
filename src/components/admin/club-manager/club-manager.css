@@ -1,0 +1,837 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Gestor de club — hoja propia y chica.
+
+   Reemplaza a vitreous-club.css (266 KB) para las cuatro pestañas que quedaron.
+   Todo se pinta con los tokens de globals.css, así que el claro y el oscuro
+   salen del `data-theme` de <html> y no del tema del dispositivo.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.cm-root {
+    --cm-gap: 20px;
+    --cm-radius: 14px;
+    --cm-field-h: 42px;
+
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 20px 16px 140px;
+    color: var(--color-text-primary);
+    font-family: var(--font-primary, 'Outfit', system-ui, sans-serif);
+}
+
+@media (min-width: 768px) {
+    .cm-root {
+        padding: 28px 24px 140px;
+    }
+}
+
+/* ── Cabecera ──────────────────────────────────────────────────────────── */
+
+.cm-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+    padding: 6px 10px 6px 6px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.cm-back:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+}
+
+.cm-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 20px;
+}
+
+.cm-crest {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+.cm-crest img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 6px;
+}
+
+.cm-crest-fallback {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #fff;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+}
+
+.cm-titles {
+    min-width: 0;
+    flex: 1 1 240px;
+}
+
+.cm-titles h1 {
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--color-text-primary);
+    overflow-wrap: anywhere;
+}
+
+.cm-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.cm-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.cm-header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ── Pestañas ──────────────────────────────────────────────────────────── */
+
+.cm-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--color-border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* El sticky muere si un ancestro tiene overflow-x hidden; acá el scroll es
+       propio de la barra, no del layout. */
+}
+
+.cm-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.cm-tab {
+    position: relative;
+    flex: 0 0 auto;
+    padding: 12px 16px;
+    border: 0;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.cm-tab:hover {
+    color: var(--color-text-secondary);
+}
+
+.cm-tab[aria-selected='true'] {
+    color: var(--color-text-primary);
+}
+
+.cm-tab[aria-selected='true']::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: -1px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--color-accent);
+}
+
+.cm-tab-count {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--color-bg-tertiary);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+}
+
+.cm-panel {
+    padding-top: 24px;
+    animation: cm-fade 200ms ease-out;
+}
+
+@keyframes cm-fade {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cm-panel {
+        animation: none;
+    }
+}
+
+/* ── Tarjetas ──────────────────────────────────────────────────────────── */
+
+.cm-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--cm-radius);
+    background: var(--color-bg-secondary);
+    padding: 20px;
+}
+
+.cm-card+.cm-card {
+    margin-top: var(--cm-gap);
+}
+
+.cm-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.cm-card-head h2 {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+}
+
+.cm-card-head p {
+    margin-top: 3px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-text-tertiary);
+}
+
+/* ── Formulario ────────────────────────────────────────────────────────── */
+
+.cm-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+    .cm-grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cm-grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.cm-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.cm-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-text-tertiary);
+}
+
+.cm-hint {
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+}
+
+.cm-input,
+.cm-select {
+    width: 100%;
+    min-height: var(--cm-field-h);
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cm-input:focus-visible,
+.cm-select:focus-visible {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.18);
+}
+
+.cm-input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.cm-input-prefixed {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.cm-input-prefix {
+    position: absolute;
+    left: 12px;
+    font-size: 12px;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    color: var(--color-text-muted);
+    pointer-events: none;
+}
+
+/* ── Botones ───────────────────────────────────────────────────────────── */
+
+.cm-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.cm-btn:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+    border-color: var(--color-border-light);
+}
+
+.cm-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.cm-btn-primary {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #04150d;
+}
+
+.cm-btn-primary:hover:not(:disabled) {
+    background: var(--color-accent-light);
+    border-color: var(--color-accent-light);
+}
+
+.cm-btn-danger {
+    color: var(--color-error);
+    border-color: color-mix(in srgb, var(--color-error) 35%, transparent);
+    background: color-mix(in srgb, var(--color-error) 8%, transparent);
+}
+
+.cm-btn-danger:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-error) 16%, transparent);
+    border-color: var(--color-error);
+}
+
+.cm-btn-icon {
+    min-height: 34px;
+    width: 34px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.cm-btn-sm {
+    min-height: 32px;
+    padding: 0 10px;
+    font-size: 12px;
+}
+
+/* ── Escudo ────────────────────────────────────────────────────────────── */
+
+.cm-logo-layout {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: 1fr;
+    align-items: start;
+}
+
+@media (min-width: 720px) {
+    .cm-logo-layout {
+        grid-template-columns: 200px minmax(0, 1fr);
+    }
+}
+
+.cm-logo-preview {
+    aspect-ratio: 1;
+    border-radius: 14px;
+    border: 1px dashed var(--color-border-light);
+    background: var(--color-bg-primary);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    max-width: 200px;
+    width: 100%;
+    margin-inline: auto;
+}
+
+.cm-logo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 14px;
+}
+
+.cm-logo-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.cm-segmented {
+    display: inline-flex;
+    padding: 3px;
+    gap: 3px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    margin-bottom: 14px;
+}
+
+.cm-segmented button {
+    border: 0;
+    border-radius: 7px;
+    padding: 6px 12px;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.cm-segmented button[aria-pressed='true'] {
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+}
+
+.cm-color-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--cm-field-h);
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+}
+
+.cm-color-row input[type='color'] {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.cm-color-row code {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+/* ── Switch ────────────────────────────────────────────────────────────── */
+
+.cm-switch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--cm-field-h);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--color-text-primary);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.cm-switch-track {
+    width: 42px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 1px solid var(--color-border-light);
+    background: var(--color-bg-tertiary);
+    padding: 2px;
+    display: flex;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.cm-switch[aria-checked='true'] .cm-switch-track {
+    background: color-mix(in srgb, var(--color-success) 24%, transparent);
+    border-color: var(--color-success);
+}
+
+.cm-switch-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: var(--color-text-muted);
+    transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.cm-switch[aria-checked='true'] .cm-switch-thumb {
+    transform: translateX(18px);
+    background: var(--color-success);
+}
+
+/* ── Listas ────────────────────────────────────────────────────────────── */
+
+.cm-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cm-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+}
+
+.cm-row-main {
+    min-width: 0;
+    flex: 1;
+}
+
+.cm-row-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+    overflow-wrap: anywhere;
+}
+
+.cm-row-sub {
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+    overflow-wrap: anywhere;
+}
+
+.cm-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.cm-row-current {
+    border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+}
+
+@media (max-width: 560px) {
+    .cm-row {
+        flex-wrap: wrap;
+    }
+
+    .cm-row-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+.cm-avatar {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 9px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--color-text-tertiary);
+}
+
+.cm-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.cm-jersey {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    font-size: 13px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+}
+
+.cm-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.cm-badge-accent {
+    border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    color: var(--color-accent-ink);
+}
+
+/* ── Estados ───────────────────────────────────────────────────────────── */
+
+.cm-empty {
+    padding: 40px 20px;
+    border: 1px dashed var(--color-border-light);
+    border-radius: var(--cm-radius);
+    text-align: center;
+    color: var(--color-text-tertiary);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.cm-empty strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+
+.cm-loading {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+.cm-alert {
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--color-error) 35%, transparent);
+    background: color-mix(in srgb, var(--color-error) 8%, transparent);
+    color: var(--color-error);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.cm-notice {
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* ── Barra de guardado ─────────────────────────────────────────────────── */
+
+.cm-savebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-sticky, 200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+    animation: cm-rise 180ms ease-out;
+}
+
+@keyframes cm-rise {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cm-savebar {
+        animation: none;
+    }
+}
+
+.cm-savebar-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.cm-savebar-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* ── Aviso flotante ────────────────────────────────────────────────────── */
+
+.cm-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 84px;
+    transform: translateX(-50%);
+    z-index: var(--z-toast, 900);
+    max-width: min(90vw, 420px);
+    padding: 11px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border-light);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+}
+
+.cm-toast-error {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+/* ── Buscador ──────────────────────────────────────────────────────────── */
+
+.cm-search {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.cm-search .cm-input {
+    flex: 1 1 220px;
+}
+
+.cm-results {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+/* En 390px las cuatro pestañas no entran con el padding de escritorio y
+   "Clubes relacionados" queda cortada a la mitad. La barra scrollea igual, pero
+   una pestaña partida se lee como un bug, no como una invitación a deslizar. */
+@media (max-width: 480px) {
+    .cm-tab {
+        padding: 12px 9px;
+        font-size: 12.5px;
+    }
+
+    .cm-tab[aria-selected='true']::after {
+        left: 7px;
+        right: 7px;
+    }
+
+    .cm-header {
+        gap: 12px;
+    }
+
+    .cm-crest {
+        width: 52px;
+        height: 52px;
+    }
+
+    .cm-card {
+        padding: 16px;
+    }
+
+    /* La barra de guardado no puede tapar el último campo del formulario. */
+    .cm-savebar-actions {
+        width: 100%;
+    }
+
+    .cm-savebar-actions .cm-btn {
+        flex: 1;
+    }
+}
