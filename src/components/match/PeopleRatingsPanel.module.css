@@ -1,0 +1,265 @@
+/* Puntaje de la gente. Usa los tokens del producto, no una paleta propia. */
+
+.panel {
+    --pr-ease: cubic-bezier(0.25, 1, 0.5, 1);
+    --pr-low: var(--color-error, #ef4444);
+    --pr-mid: var(--color-warning, #f59e0b);
+    --pr-high: var(--color-success, #22c55e);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.voters {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+}
+
+/* ── Figura del partido ─────────────────────────────────────────────────── */
+.mvp {
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 14px;
+    background: var(--color-bg-secondary);
+}
+
+.mvpLabel {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    margin-bottom: 10px;
+}
+
+.mvpBody {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mvpWho {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.mvpName {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mvpTeam {
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+}
+
+/* ── La nota ────────────────────────────────────────────────────────────── */
+.score {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    padding: 5px 9px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 14px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    flex: none;
+    color: #fff;
+}
+
+.mvp .score { font-size: 18px; min-width: 54px; padding: 8px 12px; }
+
+.tone_low  { background: var(--pr-low); }
+.tone_mid  { background: var(--pr-mid); color: #1a1205; }
+.tone_high { background: var(--pr-high); color: #04220f; }
+.tone_none {
+    background: transparent;
+    border: 1px dashed var(--color-border-light, var(--color-border));
+    color: var(--color-text-tertiary);
+}
+
+/* ── Selector de club ───────────────────────────────────────────────────── */
+.sides {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.sideBtn {
+    min-height: 44px;
+    padding: 9px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 140ms var(--pr-ease), border-color 140ms var(--pr-ease), background-color 140ms var(--pr-ease);
+}
+
+.sideActive {
+    border-color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.1);
+    color: var(--color-text-primary);
+}
+
+/* ── La lista ───────────────────────────────────────────────────────────── */
+.list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.row:last-child { border-bottom: 0; }
+
+.who { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.number {
+    display: inline-block;
+    min-width: 20px;
+    margin-right: 7px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+}
+
+.meta { font-size: 11px; color: var(--color-text-tertiary); }
+
+.actions { display: flex; align-items: center; gap: 8px; }
+
+/* El semáforo. Tres botones, no una escala: puntuar tiene que costar un toque. */
+.lights { display: flex; gap: 4px; }
+
+.light {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--color-border-light, var(--color-border));
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    position: relative;
+    transition: transform 140ms var(--pr-ease), background-color 140ms var(--pr-ease), border-color 140ms var(--pr-ease);
+}
+
+/* El blanco táctil llega a 44px sin agrandar el círculo dibujado. */
+.light::after {
+    content: '';
+    position: absolute;
+    inset: -7px;
+}
+
+.light:disabled { cursor: not-allowed; opacity: 0.45; }
+.light:active:not(:disabled) { transform: scale(0.9); }
+
+.light1 { border-color: rgba(239, 68, 68, 0.55); }
+.light2 { border-color: rgba(245, 158, 11, 0.55); }
+.light3 { border-color: rgba(34, 197, 94, 0.55); }
+
+.light1.lightOn { background: var(--pr-low); border-color: var(--pr-low); }
+.light2.lightOn { background: var(--pr-mid); border-color: var(--pr-mid); }
+.light3.lightOn { background: var(--pr-high); border-color: var(--pr-high); }
+
+@media (hover: hover) and (pointer: fine) {
+    .light1:hover:not(:disabled) { background: rgba(239, 68, 68, 0.22); }
+    .light2:hover:not(:disabled) { background: rgba(245, 158, 11, 0.22); }
+    .light3:hover:not(:disabled) { background: rgba(34, 197, 94, 0.22); }
+}
+
+/* La estrella de la figura. */
+.star {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+    padding: 0 6px;
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: color 140ms var(--pr-ease), border-color 140ms var(--pr-ease), transform 140ms var(--pr-ease);
+}
+
+.star:disabled { cursor: not-allowed; opacity: 0.45; }
+.star:active:not(:disabled) { transform: scale(0.94); }
+
+.starOn {
+    color: var(--color-warning, #f59e0b);
+    border-color: var(--color-warning, #f59e0b);
+}
+
+.starCount {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.hint {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+}
+
+.error {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-error, #ef4444);
+}
+
+@media (max-width: 480px) {
+    .row { grid-template-columns: minmax(0, 1fr) auto; row-gap: 8px; }
+    .actions { grid-column: 1 / -1; justify-content: space-between; }
+    .lights { gap: 8px; }
+}

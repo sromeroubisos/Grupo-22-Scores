@@ -359,17 +359,31 @@
 }
 
 /* --- Tabs --- */
+
+/* Curvas propias. Las de fábrica no tienen pegada: `ease-out` fuerte para lo
+   que entra (arranca rápido, se siente que responde) y `ease-in-out` para lo
+   que se mueve en pantalla. `ease-in` no se usa nunca en UI: empieza lento
+   justo en el momento que el ojo está mirando. */
+.tabsNavWrap {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+/* Riel deslizable: se arrastra con el dedo y NO muestra barra.
+   El degrade del borde avisa que hay mas pestanas de ese lado; los
+   data-attributes los pone `useHorizontalOverflow`, y sin scroll pendiente
+   valen 0px, asi que en escritorio la barra queda igual que siempre. */
 .tabsNav {
     display: flex;
-    gap: 32px;
-    margin-bottom: 24px;
+    gap: 28px;
     border-bottom: 1px solid var(--stroke);
     padding: 0 8px;
     overflow-x: auto;
-    /* Degrade en el borde por el que todavia hay pestanas. Los data-attributes
-       los pone `useHorizontalOverflow` en MatchDetailClientPage; sin scroll
-       pendiente los dos valen 0px y la mascara no pinta nada, asi que en
-       escritorio la barra queda exactamente igual que antes. */
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
     --tab-fade-left: 0px;
     --tab-fade-right: 0px;
     -webkit-mask-image: linear-gradient(to right,
@@ -381,32 +395,43 @@
     transition: -webkit-mask-image 140ms linear, mask-image 140ms linear;
 }
 
-.tabsNav[data-overflow-start="true"] {
-    --tab-fade-left: 26px;
-}
+.tabsNav::-webkit-scrollbar { display: none; }
 
-.tabsNav[data-overflow-end="true"] {
-    --tab-fade-right: 26px;
-}
+.tabsNav[data-overflow-start="true"] { --tab-fade-left: 24px; }
+.tabsNav[data-overflow-end="true"] { --tab-fade-right: 24px; }
 
 .tabItem {
     padding: 16px 4px;
+    min-height: 44px;
+    font-family: inherit;
     font-size: 14px;
     font-weight: 600;
     color: var(--muted);
+    background: none;
+    border: 0;
     cursor: pointer;
     position: relative;
     white-space: nowrap;
-    transition: color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    /* Nunca `all`: solo lo que de verdad cambia. */
+    transition: color var(--mo-fast) var(--mo-ease-quart), transform var(--mo-fast) var(--mo-ease-quart);
 }
 
-.tabItem:hover {
-    color: var(--text);
+/* El hover solo donde hay puntero fino. En touch, `:hover` se dispara al
+   tocar y deja la pestaña "encendida" después de soltar. */
+@media (hover: hover) and (pointer: fine) {
+    .tabItem:hover { color: var(--text); }
+    .tabMore:hover { color: var(--text); }
 }
 
-.tabItem.active {
-    color: var(--accent);
-}
+/* Confirmación de que la interfaz escuchó. Sutil y corto. */
+.tabItem:active,
+.tabMore:active { transform: scale(0.97); }
+
+.tabItem.active { color: var(--accent); }
 
 .tabItem.active::after {
     content: "";
@@ -417,7 +442,89 @@
     height: 2px;
     background: var(--accent);
     box-shadow: 0 0 10px var(--accent);
+    /* La animacion del subrayado vive en el bloque MOTION del final
+       (`mo-indicator-in`): es la misma que usa el resto del producto. */
 }
+
+/* Punto ámbar de "todavía no llegó". */
+.tabPending {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--warning, #f59e0b);
+    flex: none;
+}
+
+.tabMore {
+    margin-left: auto;
+    padding: 16px 8px;
+    min-height: 44px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    transition: color var(--mo-fast) var(--mo-ease-quart), transform var(--mo-fast) var(--mo-ease-quart);
+}
+
+.tabMore.active { color: var(--accent); }
+.tabMore svg { transition: transform var(--mo-mid) var(--mo-ease-quart); }
+.tabMore[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+/* La hoja del sobrante nace del botón que la abrió, no del centro. */
+.tabSheet {
+    position: absolute;
+    right: 8px;
+    top: 100%;
+    z-index: 20;
+    min-width: 190px;
+    margin-top: 6px;
+    padding: 6px;
+    display: grid;
+    gap: 2px;
+    background: var(--card, var(--bg-elevated, #17171a));
+    border: 1px solid var(--stroke);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.5);
+    transform-origin: top right;
+    animation: tabSheetIn var(--mo-mid) var(--mo-ease-expo) backwards;
+}
+
+@keyframes tabSheetIn {
+    from { opacity: 0; transform: scale(0.96) translateY(-4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.tabSheetItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: color var(--mo-fast) var(--mo-ease-quart), background-color var(--mo-fast) var(--mo-ease-quart);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .tabSheetItem:hover { color: var(--text); background: var(--bg-hover, rgba(255, 255, 255, 0.05)); }
+}
+
+.tabSheetItem.active { color: var(--accent); }
 
 /* --- Main Content --- */
 .tabContent {
@@ -1020,25 +1127,31 @@
 }
 
 
-/* H2H */
+/* H2H
+   Las tres columnas se quedan en horizontal TAMBIEN en telefono: son tres
+   listas cortas que se comparan entre si, y apilarlas obliga a scrollear para
+   confrontar lo que el diseno quiere mostrar de un vistazo. Lo que se achica
+   es la tarjeta, no la grilla. */
 .h2hGrid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 24px;
     align-items: start;
 }
 
 @media (max-width: 1024px) {
-    .h2hGrid {
-        grid-template-columns: 1fr;
-        gap: 32px;
-    }
+    .h2hGrid { gap: 12px; }
+}
+
+@media (max-width: 640px) {
+    .h2hGrid { gap: 7px; }
 }
 
 .h2hColumn {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    min-width: 0;
 }
 
 .h2hColTitle {
@@ -1052,41 +1165,161 @@
     margin-bottom: 4px;
 }
 
+@media (max-width: 640px) {
+    .h2hColTitle {
+        font-size: 9.5px;
+        letter-spacing: 0.05em;
+        line-height: 1.3;
+        letter-spacing: 0.04em;
+    }
+}
+
 .h2hList {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
+/* El resultado se lee en el color de la tarjeta. El borde lo dice de lejos y
+   el fondo lo confirma; nunca es SOLO color: el lector de pantalla recibe
+   "Victoria/Empate/Derrota" en texto y el marcador queda a la vista. */
 .h2hItem {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
     padding: 10px;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--stroke);
+    border-left: 3px solid var(--stroke);
     border-radius: 12px;
     min-height: 52px;
+    min-width: 0;
+}
+
+.h2hWin {
+    border-color: rgba(34, 197, 94, 0.32);
+    border-left-color: var(--color-success, #22c55e);
+    background: rgba(34, 197, 94, 0.07);
+}
+
+.h2hDraw {
+    border-color: rgba(245, 158, 11, 0.32);
+    border-left-color: var(--warning);
+    background: rgba(245, 158, 11, 0.07);
+}
+
+.h2hLoss {
+    border-color: rgba(239, 68, 68, 0.30);
+    border-left-color: var(--danger);
+    background: rgba(239, 68, 68, 0.06);
+}
+
+/* Frente a frente: no hay club de referencia, el partido es entre los dos.
+   Pintarla de un color seria elegir un bando. */
+.h2hNeutral {
+    border-left-color: var(--stroke);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .h2hDate {
     font-size: 11px;
     color: var(--muted);
     width: 70px;
+    flex: none;
+    min-width: 0;
+}
+
+.h2hComp {
+    font-size: 9px;
+    opacity: 0.5;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .h2hTeams {
     flex: 1;
     display: flex;
+    align-items: center;
     justify-content: center;
     gap: 12px;
     font-size: 13px;
+    min-width: 0;
+}
+
+.h2hCrestSlot {
+    flex: 1;
+    display: flex;
+    min-width: 0;
+}
+
+.h2hCrest {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex: none;
+}
+
+.h2hCrestFallback {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    flex: none;
 }
 
 .h2hScore {
     font-weight: 900;
-    color: var(--accent);
+    color: var(--text);
     font-family: var(--font-mono);
+    white-space: nowrap;
+    flex: none;
+}
+
+/* En telefono la tarjeta se apila hacia adentro: fecha arriba, escudos y
+   marcador abajo. Asi las tres columnas siguen entrando a lo ancho. */
+@media (max-width: 640px) {
+    .h2hItem {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+        padding: 7px 6px;
+        border-radius: 9px;
+        border-left-width: 1px;
+        border-top: 3px solid var(--stroke);
+    }
+
+    .h2hWin  { border-top-color: var(--color-success, #22c55e); }
+    .h2hDraw { border-top-color: var(--warning); }
+    .h2hLoss { border-top-color: var(--danger); }
+    .h2hNeutral { border-top-color: var(--stroke); }
+
+    .h2hDate {
+        width: auto;
+        font-size: 9.5px;
+        text-align: center;
+    }
+
+    .h2hComp { display: none; }
+
+    .h2hTeams { gap: 4px; font-size: 11px; }
+    .h2hCrest, .h2hCrestFallback { width: 16px; height: 16px; }
+    .h2hScore { font-size: 11px; }
+}
+
+/* Texto solo para lector de pantalla: el color nunca es el unico canal. */
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 /* Form */
@@ -2463,14 +2696,31 @@
 }
 
 /* ===== OBSIDIAN LIGHT THEME OVERRIDES ===== */
+
+/* En claro el fondo de la pagina era BLANCO PURO sobre el gris del body, y el
+   layout deja 7,6px de aire a cada lado: eso dibujaba un bloque blanco flotando
+   con dos franjas grises al costado. En oscuro no se notaba porque los dos
+   fondos son casi el mismo negro. La pagina no tiene por que pintar su propio
+   fondo: hereda el del sitio y el bloque desaparece. */
 :global([data-theme="light"]) .page {
-    --grid-line: rgba(15, 23, 42, 0.05);
-    --grid-glow: rgba(var(--color-accent-rgb), 0.05);
+    /* Ni color ni TEXTURA.
+       El color de fondo ya se habia sacado, pero `.page` seguia pintando su
+       `background-image`: el degrade verde y la grilla de 40px. Como la caja
+       mide 367px dentro de un viewport de 390 —el layout global mete 7,6px de
+       aire a cada lado—, esa textura dibujaba un rectangulo tenido con dos
+       bordes duros: el bloque. En oscuro la grilla se apoya sobre negro y
+       aporta; sobre blanco se lee como suciedad. */
+    background-color: transparent;
+    background-image: none;
 }
 
+/* La tarjeta del marcador SI es una superficie: en claro se apoya sobre el gris
+   con un borde fino y una sombra corta. La sombra de 80px de desenfoque sobre
+   fondo claro se leia como una mancha, no como elevacion. */
 :global([data-theme="light"]) .scoreboardCard {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
-    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12), var(--shadow-neon);
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.07);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 24px -14px rgba(15, 23, 42, 0.18);
 }
 
 :global([data-theme="light"]) .scoreNum {
@@ -2523,6 +2773,22 @@
         border-radius: 0;
     }
 
+    /* En telefono el marcador NO es una tarjeta: es el encabezado de la pagina.
+       Pintarlo de blanco lo dejaba como un bloque de 367px con 8px de gris a
+       cada lado —el aire que mete el layout global—, que no es ni tarjeta ni
+       borde a borde. En oscuro esta regla ya era transparente; en claro va
+       igual, y el bloque desaparece.
+
+       `[data-theme=light] .scoreboardCard` tiene mas especificidad que la regla
+       de arriba y le ganaba dentro del media query, asi que hay que repetirla
+       con el mismo peso. */
+    :global([data-theme="light"]) .scoreboardCard {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        border-radius: 0;
+    }
+
     .scoreboardCard::before {
         display: none;
     }
@@ -2552,20 +2818,29 @@
         text-align: center;
     }
 
+    /* El escudo es lo que identifica al club de un vistazo: en telefono tiene
+       que pesar como en el resto de las apps de resultados, no quedar de
+       adorno al lado del nombre. */
     .crestWrapper {
-        width: 56px;
-        height: 56px;
+        width: 72px;
+        height: 72px;
         margin: 0 auto;
         border: none;
         background: transparent;
     }
 
+    .crestWrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
     .teamName {
-        font-size: 13px;
-        font-weight: 500;
-        line-height: 1.3;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.25;
         text-align: center;
-        max-width: 100px;
+        max-width: 108px;
         color: var(--text);
         margin-top: 4px;
         overflow: hidden;
@@ -2671,27 +2946,33 @@
         display: none;
     }
 
-    /* 4. Tabs & Navigation */
+    /* 4. Tabs & Navigation
+       Cuatro pestanas repartidas en el ancho, todas visibles. No hay riel que
+       desborde: el sobrante vive en "Mas". Nunca hay una activa fuera de
+       cuadro, que era el defecto de la barra anterior. */
     .tabsNav {
         margin-top: 0;
         border-bottom: 1px solid var(--stroke);
-        padding: 0 16px;
-        gap: 24px;
+        padding: 0 12px;
+        gap: 2px;
         justify-content: flex-start;
-        scrollbar-width: none;
-        /* Hide scrollbar Firefox */
     }
 
-    .tabsNav::-webkit-scrollbar {
-        display: none;
-        /* Hide scrollbar Chrome/Safari */
+    /* Cada pestana mide lo que mide su texto: nada se corta y el sobrante se
+       alcanza deslizando. Estirarlas a partes iguales era lo que obligaba a
+       truncar los rotulos. */
+    .tabsNav {
+        gap: 18px;
+        padding: 0 12px;
+    }
+
+    .tabsNav > .tabItem {
+        flex: 0 0 auto;
     }
 
     .tabItem {
-        padding: 16px 0;
+        padding: 16px 2px;
         font-size: 14px;
-        text-transform: capitalize;
-        /* "Previa" style */
         font-weight: 600;
         opacity: 0.7;
     }
@@ -2709,7 +2990,9 @@
 
     /* 5. Content Areas */
     .tabContent {
-        padding: 24px 16px;
+        /* Menos aire arriba: la barra de pestanas ya separa lo suficiente y
+           el hueco empujaba la encuesta fuera del primer pantallazo. */
+        padding: 10px 16px 24px;
         grid-template-columns: 1fr;
         gap: 16px;
     }
@@ -3788,6 +4071,10 @@
 .tabItem { transition: color var(--mo-fast) var(--mo-ease-quart), transform var(--mo-fast) var(--mo-ease-quart); }
 .tabItem:active { transform: scale(0.96); }
 
+/* El boton "Mas" del riel angosto responde igual que una pestana: si se toca
+   y no devuelve nada, se siente que la interfaz no escucho. */
+.tabMore:active { transform: scale(0.96); }
+
 /* Tab content fades on mount and on every tab switch (keyed remount) */
 .tabContent {
     animation: mo-fade var(--mo-mid) var(--mo-ease-quart) backwards;
@@ -3960,6 +4247,193 @@
     .skScore { width: 140px; height: 60px; }
 }
 
+
+/* ── Estados vacios ─────────────────────────────────────────────────────── */
+.emptyIcon {
+    width: 34px;
+    height: 34px;
+    margin: 0 auto 14px;
+    display: block;
+    color: var(--muted);
+    opacity: 0.55;
+}
+
+/* ── Previa ─────────────────────────────────────────────────────────────── */
+.previaVote { margin-bottom: 4px; }
+
+.previaBlock {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--stroke);
+}
+
+.previaBlock:last-of-type { border-bottom: 0; }
+
+.previaHead {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+}
+
+/* Frente a frente: tres pildoras y una barra que reparte el historial. */
+.previaBalance {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    text-align: center;
+}
+
+.previaSide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+}
+
+.previaPill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 52px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+}
+
+.previaPillHome { background: var(--accent); }
+.previaPillAway { background: #3b82f6; }
+.previaPillDraw { background: #6b7280; }
+
+.previaSideName {
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.previaBar {
+    display: flex;
+    height: 6px;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 14px;
+    background: var(--stroke);
+}
+
+.previaBarHome { background: var(--accent); }
+.previaBarDraw { background: #6b7280; }
+.previaBarAway { background: #3b82f6; }
+
+.previaFoot {
+    margin: 12px 0 0;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+}
+
+/* Temporada: dos columnas de numeros con la etiqueta al medio. */
+.previaSeasonHead {
+    display: grid;
+    grid-template-columns: 1fr minmax(96px, auto) 1fr;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--stroke);
+}
+
+.previaSeasonClub {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.previaSeasonClubRight { text-align: right; }
+
+.previaStatRow {
+    display: grid;
+    grid-template-columns: 1fr minmax(96px, auto) 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+}
+
+.previaStatLabel {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.25;
+}
+
+.previaStatVal {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.previaStatRow > .previaStatVal:last-child { text-align: right; }
+
+/* El lado que sale mejor en ese renglon. Es un realce, no un premio: si
+   empatan no se resalta ninguno. */
+.previaStatBest {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--accent-muted);
+    color: var(--accent-ink, var(--accent));
+}
+
+.previaForm {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.previaStatRow > .previaFormCell:last-child { text-align: right; }
+.previaStatRow > .previaFormCell:last-child .previaForm { justify-content: flex-end; }
+
+.previaFormDot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.previaFormWin  { background: var(--color-success, #22c55e); }
+.previaFormDraw { background: var(--warning); }
+.previaFormLoss { background: var(--danger); }
+
+.previaHint {
+    margin: 18px 0 0;
+    font-size: 12px;
+    color: var(--muted);
+    opacity: 0.8;
+}
+
+@media (max-width: 640px) {
+    .previaSeasonHead,
+    .previaStatRow { grid-template-columns: 1fr minmax(84px, auto) 1fr; gap: 8px; }
+    .previaStatLabel { font-size: 11px; }
+    .previaStatVal { font-size: 13px; }
+    .previaPill { min-width: 44px; font-size: 17px; padding: 6px 11px; }
+    .previaSideName { font-size: 11px; }
+}
+
 /* ── Reduced motion: collapse all motion to an instant state ────── */
 @media (prefers-reduced-motion: reduce) {
     .page *,
@@ -3971,4 +4445,182 @@
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+/* El puntaje de la gente cuelga debajo de la planilla, separado por una regla:
+   una cosa es lo que paso en la cancha y otra lo que opina la tribuna. */
+.peopleRatingsWrap {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--stroke);
+}
+
+/* ── Cara a cara: la lista a todo el ancho ──────────────────────────────── */
+.h2hCount {
+    margin: 12px 0 0;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.h2hFeed {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0;
+    border-top: 1px solid var(--stroke);
+}
+
+.h2hFeedItem {
+    padding: 11px 0;
+    border-bottom: 1px solid var(--stroke);
+}
+
+.h2hFeedMeta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 7px;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.h2hFeedComp {
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 55%;
+}
+
+.h2hFeedRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+}
+
+.h2hFeedTeam {
+    font-size: 13.5px;
+    color: var(--muted);
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.h2hFeedTeamRight { text-align: left; }
+
+/* Al ganador se lo reconoce por el peso del nombre, no por un color: en una
+   lista larga, tenirla entera de verde y rojo la vuelve ilegible. */
+.h2hFeedWinner {
+    color: var(--text);
+    font-weight: 700;
+}
+
+.h2hFeedCrest {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex: none;
+}
+
+.h2hFeedCrestFallback {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    display: inline-block;
+}
+
+.h2hFeedScore {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    padding: 0 2px;
+}
+
+.h2hMore {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    padding: 12px;
+    min-height: 44px;
+    border: 1px solid var(--stroke);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--accent);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color var(--mo-fast) var(--mo-ease-quart), background-color var(--mo-fast) var(--mo-ease-quart);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .h2hMore:hover { border-color: var(--accent); background: var(--accent-muted); }
+}
+
+.h2hMore:active { transform: scale(0.99); }
+
+.h2hFormSection {
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--stroke);
+}
+
+.h2hGrid2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 640px) {
+    .h2hGrid2 { gap: 10px; }
+    .h2hFeedTeam { font-size: 11.5px; }
+    .h2hFeedScore { font-size: 13px; }
+    .h2hFeedCrest, .h2hFeedCrestFallback { width: 18px; height: 18px; }
+    .h2hFeedRow { gap: 5px; }
+}
+
+/* Barra de pestanas mientras el resto de los datos todavia viaja: se dibuja el
+   hueco, no una barra corta que despues cambia de largo. */
+.tabsSkeleton {
+    display: flex;
+    gap: 32px;
+    padding: 0 8px;
+    border-bottom: 1px solid var(--stroke);
+}
+
+.tabsSkeleton span {
+    height: 14px;
+    width: 74px;
+    margin: 15px 0;
+    border-radius: 6px;
+    background: var(--stroke);
+    animation: tabSkeletonPulse 1.1s ease-in-out infinite;
+}
+
+.tabsSkeleton span:nth-child(2) { animation-delay: 120ms; }
+.tabsSkeleton span:nth-child(3) { animation-delay: 240ms; }
+.tabsSkeleton span:nth-child(4) { animation-delay: 360ms; }
+
+@keyframes tabSkeletonPulse {
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 0.9; }
+}
+
+@media (max-width: 640px) {
+    .tabsSkeleton { gap: 10px; padding: 0 12px; }
+    .tabsSkeleton span { flex: 1 1 0; width: auto; }
 }

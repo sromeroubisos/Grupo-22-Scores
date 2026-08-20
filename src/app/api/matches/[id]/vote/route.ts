@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import {
     createEmptyMatchVoteSummary,
+    isMatchVoteChoice,
     type MatchVoteChoice,
     type MatchVoteSummary,
 } from '@/lib/types/matchVotes';
@@ -41,7 +42,7 @@ function toSafeString(value: unknown) {
 }
 
 function toVoteChoice(value: unknown): MatchVoteChoice | null {
-    return value === 'home' || value === 'away' ? value : null;
+    return isMatchVoteChoice(value) ? value : null;
 }
 
 function isUuid(value: string) {
@@ -49,9 +50,12 @@ function isUuid(value: string) {
 }
 
 function buildSummary(matchId: string, rows: LooseRow[], userId?: string | null): MatchVoteSummary {
-    const homeVotes = rows.reduce((sum, row) => sum + (toVoteChoice(row.choice) === 'home' ? 1 : 0), 0);
-    const awayVotes = rows.reduce((sum, row) => sum + (toVoteChoice(row.choice) === 'away' ? 1 : 0), 0);
-    const totalVotes = homeVotes + awayVotes;
+    const countOf = (choice: MatchVoteChoice) =>
+        rows.reduce((sum, row) => sum + (toVoteChoice(row.choice) === choice ? 1 : 0), 0);
+    const homeVotes = countOf('home');
+    const drawVotes = countOf('draw');
+    const awayVotes = countOf('away');
+    const totalVotes = homeVotes + drawVotes + awayVotes;
     const userChoice = userId
         ? rows.find((row) => toSafeString(row.user_id) === userId)?.choice ?? null
         : null;
@@ -60,8 +64,10 @@ function buildSummary(matchId: string, rows: LooseRow[], userId?: string | null)
         matchId,
         totalVotes,
         homeVotes,
+        drawVotes,
         awayVotes,
         homePercentage: totalVotes > 0 ? (homeVotes / totalVotes) * 100 : 0,
+        drawPercentage: totalVotes > 0 ? (drawVotes / totalVotes) * 100 : 0,
         awayPercentage: totalVotes > 0 ? (awayVotes / totalVotes) * 100 : 0,
         userChoice: toVoteChoice(userChoice),
     };
@@ -83,24 +89,24 @@ async function fetchVoteSummary(admin: LooseAdminClient, matchId: string, userId
 async function resolveOptionalUserId() {
     const supabase = await createServerClient();
     const {
-        data: { session },
-    } = await supabase.auth.getSession();
+        data: { user: authUser },
+    } = await supabase.auth.getUser();
 
-    return session?.user?.id ?? null;
+    return authUser?.id ?? null;
 }
 
 async function resolveRequiredUserId() {
     const supabase = await createServerClient();
     const {
-        data: { session },
+        data: { user: authUser },
         error,
-    } = await supabase.auth.getSession();
+    } = await supabase.auth.getUser();
 
-    if (error || !session?.user?.id) {
+    if (error || !authUser?.id) {
         return null;
     }
 
-    return session.user.id;
+    return authUser.id;
 }
 
 async function isMatchVotingClosed(admin: LooseAdminClient, matchId: string) {
