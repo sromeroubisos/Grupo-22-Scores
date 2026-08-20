@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ProtectedLink from '@/components/ProtectedLink';
@@ -8,6 +8,7 @@ import ExportImage from '@/components/ExportImage';
 import FavoriteButton from '@/components/FavoriteButton';
 import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
 import MatchTimeline from '@/components/match/MatchTimeline';
+import PeopleRatingsPanel, { type RateablePlayer } from '@/components/match/PeopleRatingsPanel';
 import styles from './page.module.css';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import {
@@ -38,6 +39,11 @@ import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import {
     buildPlayerStatsTableData,
 } from '@/lib/playerStats';
+import {
+    resolveMatchTabs,
+    toMatchStatusKind,
+    type MatchProvider,
+} from '@/lib/matches/matchTabs';
 import PlayerStatsPanel from './PlayerStatsPanel';
 import LineupRatingEditorModal from './LineupRatingEditorModal';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
@@ -197,6 +203,28 @@ function useHorizontalOverflow<T extends HTMLElement>(revision?: unknown) {
     }, [revision]);
 
     return ref;
+}
+
+/**
+ * Si el riel de pestanas entra entero o hay que mandar el sobrante a "Mas".
+ *
+ * Arranca en `false` a proposito: en el servidor no hay viewport, y suponer
+ * telefono haria que el escritorio parpadee de cuatro pestanas a siete en la
+ * hidratacion. Suponer escritorio solo cuesta un reflow en el telefono.
+ */
+function useIsNarrow(query = '(max-width: 640px)') {
+    const [narrow, setNarrow] = useState(false);
+
+    useEffect(() => {
+        if (typeof window.matchMedia !== 'function') return;
+        const mql = window.matchMedia(query);
+        const sync = () => setNarrow(mql.matches);
+        sync();
+        mql.addEventListener('change', sync);
+        return () => mql.removeEventListener('change', sync);
+    }, [query]);
+
+    return narrow;
 }
 
 function buildTeamHref(
@@ -495,6 +523,44 @@ function getTopLineupRating(
 }
 
 
+/** Promedio por partido, con un decimal. Sin partidos jugados no hay promedio. */
+function perGame(total: number | null | undefined, played: number | null | undefined) {
+    if (typeof total !== 'number' || typeof played !== 'number' || played <= 0) return null;
+    return Math.round((total / played) * 10) / 10;
+}
+
+function formatSigned(value: number | null | undefined) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return '-';
+    return value > 0 ? `+${value}` : String(value);
+}
+
+/**
+ * La racha, como cinco puntitos de color. Se acepta tanto la notación inglesa
+ * (W/D/L) como la castellana (G/E/P) porque conviven según de dónde salga la
+ * tabla; se dibujan de la más vieja a la más reciente.
+ */
+function renderForm(form: string | undefined, styles: Record<string, string>) {
+    if (!form) return null;
+    return (
+        <span className={styles.previaForm}>
+            {form.split('').map((char, i) => {
+                const win = char === 'W' || char === 'G';
+                const draw = char === 'D' || char === 'E';
+                const label = win ? 'Ganó' : draw ? 'Empató' : 'Perdió';
+                return (
+                    <span
+                        key={i}
+                        className={`${styles.previaFormDot} ${win ? styles.previaFormWin : draw ? styles.previaFormDraw : styles.previaFormLoss}`}
+                        title={label}
+                    >
+                        <span className={styles.srOnly}>{label}</span>
+                    </span>
+                );
+            })}
+        </span>
+    );
+}
+
 function canFavoriteTeam(team: { id?: string | null }) {
     const teamId = String(team.id || '').trim();
     return Boolean(teamId && teamId !== 'home' && teamId !== 'away');
@@ -576,47 +642,51 @@ function H2HItem({
     const homeLogo = resolveMatchTeamLogo(m.home_team, referenceTeams?.home, fallbackHomeLogo);
     const awayLogo = resolveMatchTeamLogo(m.away_team, referenceTeams?.away, fallbackAwayLogo);
 
-    // Determine status relative to focusTeamName if provided
-    let status = m.status;
+    // El resultado se lee en el COLOR de la tarjeta, no en una letra al costado:
+    // verde ganó, ámbar empató, rojo perdió, siempre desde el club de la columna.
+    // En la columna del medio no hay club de referencia —el partido es entre los
+    // dos— así que la tarjeta queda neutra.
+    let outcome: 'win' | 'draw' | 'loss' | null = null;
     if (focusTeam && m.scores) {
-        const hScore = parseInt(m.scores.home || '0');
-        const aScore = parseInt(m.scores.away || '0');
-
-        if (doesH2HSideMatchTeam(m, 'home', focusTeam)) {
-            status = hScore > aScore ? 'W' : hScore < aScore ? 'L' : 'D';
-        } else if (doesH2HSideMatchTeam(m, 'away', focusTeam)) {
-            status = aScore > hScore ? 'W' : aScore < hScore ? 'L' : 'D';
+        const hScore = parseInt(m.scores.home ?? '0', 10);
+        const aScore = parseInt(m.scores.away ?? '0', 10);
+        if (Number.isFinite(hScore) && Number.isFinite(aScore)) {
+            if (doesH2HSideMatchTeam(m, 'home', focusTeam)) {
+                outcome = hScore > aScore ? 'win' : hScore < aScore ? 'loss' : 'draw';
+            } else if (doesH2HSideMatchTeam(m, 'away', focusTeam)) {
+                outcome = aScore > hScore ? 'win' : aScore < hScore ? 'loss' : 'draw';
+            }
         }
     }
 
+    const outcomeLabel = outcome === 'win' ? 'Victoria' : outcome === 'loss' ? 'Derrota' : outcome === 'draw' ? 'Empate' : '';
+    const outcomeClass = outcome === 'win' ? styles.h2hWin
+        : outcome === 'loss' ? styles.h2hLoss
+        : outcome === 'draw' ? styles.h2hDraw
+        : styles.h2hNeutral;
+
+    const crest = (src: string | null, name: string) => (
+        src
+            ? <img src={src} alt={name} title={name} loading="lazy" className={styles.h2hCrest} />
+            : <div className={styles.h2hCrestFallback} aria-hidden="true" />
+    );
+
     return (
-        <div className={styles.h2hItem}>
+        <div className={`${styles.h2hItem} ${outcomeClass}`}>
+            {outcomeLabel && <span className={styles.srOnly}>{outcomeLabel}. </span>}
             <div className={styles.h2hDate}>
                 <div>{date}</div>
-                <div style={{ fontSize: '9px', opacity: 0.5, marginTop: '2px' }}>{m.tournament_name_short || m.tournament_name}</div>
+                <div className={styles.h2hComp}>{m.tournament_name_short || m.tournament_name}</div>
             </div>
             <div className={styles.h2hTeams}>
-                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                    {homeLogo ? (
-                        <img src={homeLogo} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
-                    ) : (
-                        <div style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }} />
-                    )}
+                <div className={styles.h2hCrestSlot} style={{ justifyContent: 'flex-end' }}>
+                    {crest(homeLogo, m.home_team?.name || '')}
                 </div>
                 <span className={styles.h2hScore}>{m.scores?.home} - {m.scores?.away}</span>
-                <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
-                    {awayLogo ? (
-                        <img src={awayLogo} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
-                    ) : (
-                        <div style={{ width: '22px', height: '22px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }} />
-                    )}
+                <div className={styles.h2hCrestSlot} style={{ justifyContent: 'flex-start' }}>
+                    {crest(awayLogo, m.away_team?.name || '')}
                 </div>
             </div>
-            {status && (
-                <div className={`${styles.resultCircle} ${status === 'W' ? styles.win : status === 'D' ? styles.draw : styles.loss}`} style={{ width: '20px', height: '20px', minWidth: '20px', fontSize: '10px' }}>
-                    {status}
-                </div>
-            )}
         </div>
     );
 }
@@ -636,8 +706,17 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         issues: any[];
         debug: Record<string, unknown>;
         message?: string;
+        /**
+         * La tabla y el historial llegan en una SEGUNDA consulta, despues del
+         * partido. Hasta que lleguen, la barra de pestanas no sabe cuantas
+         * secciones va a tener: dibujarla igual mostraba "Plantel" sola y
+         * despues sumaba tres mas de golpe. Mientras esto es false se dibuja el
+         * hueco de la barra en vez de una barra que va a cambiar.
+         */
+        secondaryReady: boolean;
     }>({
         kind: 'loading',
+        secondaryReady: false,
         eventsData: [],
         statsData: [],
         playerStats: null,
@@ -721,76 +800,26 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     // Quien trae su propia lista de pestanas en vez de la barra completa. El
     // Mundial no tiene comentarios narrados ni sorteo: mostrar la pestana vacia
     // es prometer algo que la fuente no publica.
-    const usesCustomTabs = isLimitedExternalSource || isFihSource;
-    const visibleTabs = useMemo(() => (
-        isMotorsportSource
-            ? [
-                { id: 'summary', label: 'Resumen' },
-                { id: 'results', label: 'Resultados' },
-                { id: 'sessions', label: 'Sesiones' },
-                { id: 'championship', label: 'Campeonato' },
-                { id: 'circuit', label: 'Circuito' },
-            ]
-            : isEspnSoccerSource
-            ? [
-                { id: 'summary', label: 'Resumen' },
-                { id: 'timeline', label: 'Cronologia' },
-                { id: 'lineups', label: 'Alineaciones' },
-                { id: 'stats', label: 'Estadisticas' },
-                { id: 'h2h', label: 'H2H' },
-                { id: 'standings', label: 'Clasificacion' },
-            ]
-            : isFihSource
-            ? [
-                { id: 'summary', label: 'Resumen' },
-                { id: 'timeline', label: 'Cronologia' },
-                { id: 'lineups', label: 'Alineaciones' },
-                { id: 'players', label: 'Jugadores' },
-                { id: 'stats', label: 'Estadisticas' },
-                { id: 'h2h', label: 'H2H' },
-                { id: 'standings', label: 'Clasificacion' },
-            ]
-            : isLimitedExternalSource
-            ? [
-                { id: 'summary', label: 'Resumen' },
-                { id: 'lineups', label: 'Alineaciones' },
-                { id: 'h2h', label: 'H2H' },
-                { id: 'standings', label: 'Clasificacion' },
-            ]
-            : [
-                { id: 'summary', label: 'Resumen' },
-                { id: 'timeline', label: 'Cronologia' },
-                { id: 'lineups', label: 'Alineaciones' },
-                { id: 'players', label: 'Jugadores' },
-                { id: 'stats', label: 'Estadisticas' },
-                { id: 'h2h', label: 'H2H' },
-                { id: 'standings', label: 'Clasificacion' },
-                { id: 'commentary', label: 'Comentarios' },
-            ]
-    ), [isLimitedExternalSource, isMotorsportSource, isEspnSoccerSource, isFihSource]);
+    // El automovilismo conserva su propia barra porque no es un partido: no
+    // tiene local, visitante ni marcador, sino una grilla de competidores.
+    const motorsportTabs = useMemo(() => ([
+        { id: 'summary', label: 'Resumen' },
+        { id: 'results', label: 'Resultados' },
+        { id: 'sessions', label: 'Sesiones' },
+        { id: 'championship', label: 'Campeonato' },
+        { id: 'circuit', label: 'Circuito' },
+    ]), []);
 
-    // Una barra por rama (solo se monta una), y las dos avisan por que borde
-    // les quedan pestanas sin ver.
-    const customTabsNavRef = useHorizontalOverflow<HTMLElement>(visibleTabs);
-    const fullTabsNavRef = useHorizontalOverflow<HTMLElement>(usesCustomTabs);
-
-    // La pestana elegida entra en cuadro sola. Es la contracara del degrade:
-    // sin esto, en un telefono la activa puede quedar justo abajo del fundido
-    // del borde y no se ve en cual estas parado.
-    useEffect(() => {
-        const node = customTabsNavRef.current || fullTabsNavRef.current;
-        const active = node?.querySelector<HTMLElement>(`.${styles.active}`);
-        if (!active) return;
-
-        const prefersReducedMotion = typeof window.matchMedia === 'function'
-            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-        active.scrollIntoView({
-            inline: 'center',
-            block: 'nearest',
-            behavior: prefersReducedMotion ? 'auto' : 'smooth',
-        });
-    }, [activeTab, customTabsNavRef, fullTabsNavRef]);
+    // Qué fuente atiende este partido. Es el único lugar donde se traduce del
+    // formato del id al vocabulario del motor de capacidades.
+    const tabProvider: MatchProvider = isMotorsportSource
+        ? 'local' // no se usa: el automovilismo no pasa por resolveMatchTabs
+        : isFihSource ? 'fih'
+        : isEspnSoccerSource ? 'espn-soccer'
+        : isRugbyApiSportsSource ? 'rugby-api-sports'
+        : isEspnSource ? 'espn-american-football'
+        : isFlashScore ? 'flashscore'
+        : 'local';
 
     useEffect(() => {
         const controller = new AbortController();
@@ -831,6 +860,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         };
                         setState({
                             kind: 'ok',
+                            secondaryReady: true,
                             matchData: rugbyMatch,
                             eventsData: [],
                             statsData: [],
@@ -850,6 +880,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         statusRef.current = payload.match.status || 'scheduled';
                         setState({
                             kind: 'ok',
+                            secondaryReady: true,
                             matchData: payload.match,
                             eventsData: Array.isArray(payload.events) ? payload.events : [],
                             statsData: Array.isArray(payload.stats) ? payload.stats : [],
@@ -877,6 +908,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         };
                         setState({
                             kind: 'ok',
+                            secondaryReady: true,
                             matchData: espnMatch,
                             eventsData: Array.isArray(payload.events) ? payload.events : (Array.isArray(payload.match.events) ? payload.match.events : []),
                             statsData: Array.isArray(payload.stats) ? payload.stats : (Array.isArray(payload.match.stats) ? payload.match.stats : []),
@@ -955,6 +987,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     setState(prev => ({
                         ...prev,
                         kind: 'ok',
+                        secondaryReady: true,
                         matchData: {
                             ...baseMatch,
                             sportId,
@@ -1147,6 +1180,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         return {
                             ...prev,
                             kind: 'ok',
+                            secondaryReady: true,
                             matchData: {
                                 ...prev.matchData,
                                 status: listMatchEvt?.match_status ? mapMatchStatus(listMatchEvt.match_status) : fsStatus,
@@ -1266,6 +1300,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             statusRef.current = matchData.status || 'scheduled';
                             setState({
                                 kind: 'ok',
+                                secondaryReady: false,
                                 matchData: baseProcessedMatch,
                                 eventsData: localEvents,
                                 statsData: localStats,
@@ -1311,6 +1346,15 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 matches_played: row.matches_total ?? 0,
                                 goal_difference: row.goal_difference ?? 0,
                                 points: row.points_total ?? 0,
+                                // La tabla ya trae el detalle de la temporada; lo
+                                // descartabamos y despues no habia con que armar
+                                // la Previa. Ahora viaja hasta el componente.
+                                wins: row.wins_total ?? 0,
+                                draws: row.draws_total ?? 0,
+                                losses: row.losses_total ?? 0,
+                                points_for: row.goals_for ?? 0,
+                                points_against: row.goals_against ?? 0,
+                                form: typeof row.form === 'string' ? row.form : (Array.isArray(row.form) ? row.form.join('') : ''),
                             }));
                             const h2h = h2hRes.status === 'fulfilled' && h2hRes.value?.matches
                                 ? h2hRes.value.matches
@@ -1357,6 +1401,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             statusRef.current = matchData.status || 'scheduled';
                             setState({
                                 kind: 'ok',
+                                secondaryReady: true,
                                 matchData: processedMatch,
                                 eventsData: localEvents,
                                 statsData: localStats,
@@ -1446,11 +1491,6 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         };
     }, [id, lineupReloadKey]);
 
-    useEffect(() => {
-        if (visibleTabs.some((tab) => tab.id === activeTab)) return;
-        setActiveTab('summary');
-    }, [activeTab, visibleTabs]);
-
     const [liveClockTick, setLiveClockTick] = useState(0);
 
     useEffect(() => {
@@ -1480,6 +1520,178 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         name: state.matchData?.away?.name || 'Visitante',
         logo: state.matchData?.away?.logo || '',
     }), [state.matchData?.away?.name, state.matchData?.away?.logo]);
+
+    // ── La barra de pestañas ────────────────────────────────────────────────
+    // Cuántas filas tiene cada sección. El motor no mira el proveedor para
+    // decidir si algo está lleno: mira esto.
+    const tabCounts = useMemo(() => {
+        const md = state.matchData;
+        if (!md) return { events: 0, lineups: 0, players: 0, stats: 0, h2h: 0, standings: 0, commentary: 0 };
+
+        const local = normalizeLocalLineups(md.lineups || null);
+        const localLineupCount =
+            local.home.filter((p) => Boolean(p.name)).length +
+            local.away.filter((p) => Boolean(p.name)).length;
+        const externalLineupCount = localLineupCount > 0 ? 0 : (
+            (Array.isArray(md.lineups?.HOME_STARTING_LINEUPS) ? md.lineups.HOME_STARTING_LINEUPS.length : 0) +
+            (Array.isArray(md.lineups?.AWAY_STARTING_LINEUPS) ? md.lineups.AWAY_STARTING_LINEUPS.length : 0) +
+            (Array.isArray(md.lineups?.home_team?.starting_lineups) ? md.lineups.home_team.starting_lineups.length : 0) +
+            (Array.isArray(md.lineups?.away_team?.starting_lineups) ? md.lineups.away_team.starting_lineups.length : 0)
+        );
+
+        // Una fila de estadística existe siempre, aunque el partido no se haya
+        // jugado: `buildLocalTeamStats` devuelve las ocho del deporte en cero.
+        // Contar filas diría "hay datos" en un partido programado, que era
+        // justo el defecto. Se cuentan las que tienen algo distinto de cero.
+        const statsWithData = (state.statsData ?? []).filter((s: any) => {
+            const h = parseFloat(String(s?.home ?? '').replace(/[^0-9.]/g, '')) || 0;
+            const a = parseFloat(String(s?.away ?? '').replace(/[^0-9.]/g, '')) || 0;
+            return h > 0 || a > 0;
+        }).length;
+
+        return {
+            events: state.eventsData?.length ?? 0,
+            lineups: localLineupCount + externalLineupCount,
+            players: playerStatsTable?.rows?.length ?? state.localPlayerRows?.length ?? 0,
+            stats: statsWithData,
+            h2h: Array.isArray(md.h2h) ? md.h2h.length : 0,
+            standings: Array.isArray(md.standings) ? md.standings.length : 0,
+            commentary: state.commentaryData?.length ?? 0,
+        };
+    }, [state.matchData, state.eventsData, state.statsData, state.localPlayerRows, state.commentaryData, playerStatsTable]);
+
+    const resolvedTabs = useMemo(
+        () => resolveMatchTabs({
+            provider: tabProvider,
+            status: toMatchStatusKind(state.matchData?.status),
+            counts: tabCounts,
+            canManage: canManageMatch || isSuperAdminUser,
+        }),
+        [tabProvider, state.matchData?.status, tabCounts, canManageMatch, isSuperAdminUser]
+    );
+
+    // Forma común: el automovilismo trae `{id,label}` y el motor trae además
+    // `shortLabel`/`state`. La barra dibuja las dos con el mismo código.
+    type RailTab = { id: string; label: string; shortLabel?: string; state?: 'ready' | 'pending'; hint?: string };
+    const visibleTabs: RailTab[] = isMotorsportSource ? motorsportTabs : resolvedTabs.tabs;
+
+    // El riel se desliza con el dedo. No hay tope ni menu "Mas": en un telefono
+    // arrastrar es mas barato que abrir una hoja, y la activa se centra sola
+    // (efecto de abajo) para que nunca quede fuera de cuadro, que era el
+    // defecto de la barra original.
+    const isNarrow = useIsNarrow();
+    const railTabs = visibleTabs;
+
+    // La pestaña viaja en la URL: el link se comparte, F5 vuelve al mismo lado
+    // y el botón atrás recorre las pestañas antes de salir del partido. Mismo
+    // criterio de pushState nativo que ya usa el gestor de torneos.
+    // Mientras el usuario no haya elegido, la pestaña abierta sigue a la de
+    // entrada. Hace falta porque el historial y la tabla llegan en una segunda
+    // consulta: si se congelara la decisión con lo que hay en el primer
+    // render, un partido programado abriría en Alineaciones —lo único
+    // resuelto en ese instante— y nunca en la Previa.
+    const tabsReadyRef = useRef(false);
+    const userPickedTabRef = useRef(false);
+    const pendingUrlTabRef = useRef<string | null>(null);
+
+    const selectTab = (id: string) => {
+        userPickedTabRef.current = true;
+        setActiveTab(id);
+    };
+
+    useEffect(() => {
+        if (state.kind !== 'ok' || visibleTabs.length === 0) return;
+
+        const valid = (candidate: string | null) =>
+            Boolean(candidate) && visibleTabs.some((t) => t.id === candidate);
+        const fallback = isMotorsportSource ? 'summary' : resolvedTabs.defaultTab;
+
+        if (!tabsReadyRef.current) {
+            tabsReadyRef.current = true;
+            // Un `?tab=` en la URL es una elección explícita. Se guarda aparte
+            // porque en el primer render la barra todavía no tiene todas las
+            // pestañas —el historial y la tabla llegan después—, y descartarlo
+            // por "todavía no existe" rompe el link compartido.
+            pendingUrlTabRef.current = new URLSearchParams(window.location.search).get('tab');
+        }
+
+        if (pendingUrlTabRef.current) {
+            if (valid(pendingUrlTabRef.current)) {
+                const wanted = String(pendingUrlTabRef.current);
+                pendingUrlTabRef.current = null;
+                userPickedTabRef.current = true;
+                if (activeTab !== wanted) setActiveTab(wanted);
+                return;
+            }
+            // Todavía puede aparecer: se sigue mostrando el default mientras
+            // tanto, sin congelar la decisión.
+            if (activeTab !== fallback) setActiveTab(fallback);
+            return;
+        }
+
+        if (!userPickedTabRef.current) {
+            if (activeTab !== fallback) setActiveTab(fallback);
+            return;
+        }
+        // La pestaña elegida dejó de existir (cambió el estado del partido):
+        // se cae a la de entrada en vez de quedar en la nada.
+        if (!valid(activeTab)) setActiveTab(fallback);
+    }, [state.kind, visibleTabs, activeTab, resolvedTabs.defaultTab, isMotorsportSource]);
+
+    useEffect(() => {
+        if (!tabsReadyRef.current || state.kind !== 'ok') return;
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('tab') === activeTab) return;
+        url.searchParams.set('tab', activeTab);
+        // Antes de que el usuario elija, la barra todavía se está acomodando
+        // con los datos que llegan: eso se reemplaza, no se apila en el
+        // historial. Si no, el botón atrás recorre pestañas que nadie abrió.
+        if (userPickedTabRef.current) window.history.pushState(null, '', url);
+        else window.history.replaceState(null, '', url);
+    }, [activeTab, state.kind]);
+
+    // El botón atrás del navegador devuelve la pestaña anterior.
+    useEffect(() => {
+        const onPop = () => {
+            const fromUrl = new URLSearchParams(window.location.search).get('tab');
+            if (fromUrl) { userPickedTabRef.current = true; setActiveTab(fromUrl); }
+        };
+        window.addEventListener('popstate', onPop);
+        return () => window.removeEventListener('popstate', onPop);
+    }, []);
+
+    const tabsNavRef = useHorizontalOverflow<HTMLDivElement>(visibleTabs);
+    const [h2hExpanded, setH2hExpanded] = useState(false);
+
+    // La pestana elegida se centra sola. Es la contracara del degrade del
+    // borde: sin esto, en un telefono la activa puede quedar tapada por el
+    // fundido y no se ve donde estas parado.
+    useEffect(() => {
+        const active = tabsNavRef.current?.querySelector<HTMLElement>('[aria-selected="true"]');
+        if (!active) return;
+        const reduced = typeof window.matchMedia === 'function'
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
+    }, [activeTab, tabsNavRef, visibleTabs]);
+
+    // Flechas ← → mueven entre pestañas, Inicio/Fin van a los extremos: es lo
+    // que un lector de pantalla anuncia y lo que espera quien no usa mouse.
+    const onTabKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+        const keys = ['ArrowRight', 'ArrowLeft', 'Home', 'End'];
+        if (!keys.includes(event.key)) return;
+        event.preventDefault();
+        const ids = visibleTabs.map((t) => t.id);
+        const current = ids.indexOf(activeTab);
+        const next =
+            event.key === 'ArrowRight' ? (current + 1) % ids.length
+            : event.key === 'ArrowLeft' ? (current - 1 + ids.length) % ids.length
+            : event.key === 'Home' ? 0
+            : ids.length - 1;
+        selectTab(ids[next]);
+        window.requestAnimationFrame(() => {
+            tabsNavRef.current?.querySelector<HTMLElement>(`[data-tab-id="${ids[next]}"]`)?.focus();
+        });
+    };
 
     if (state.kind === 'loading') return (
         <div className={styles.page}>
@@ -1576,6 +1788,77 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const awayLineupGroups = splitDisplayLineupPlayers(displayAwayLineup);
     const topMatchLineupRating = getTopLineupRating([...displayHomeLineup, ...displayAwayLineup]);
     const hasAnyLineups = displayHomeLineup.length > 0 || displayAwayLineup.length > 0;
+
+    // A quien se puede puntuar. Sale de la misma planilla que ya arma la
+    // pestana de Jugadores, asi que la clave del voto y la de la tabla son la
+    // misma: si manana cambia el origen de los jugadores, esto lo sigue solo.
+    const rateablePlayers: RateablePlayer[] = (playerStatsTable?.rows ?? [])
+        .filter((row) => row.team === 'home' || row.team === 'away')
+        .map((row) => ({
+            key: row.key,
+            name: row.name,
+            team: row.team as 'home' | 'away',
+            number: row.number,
+            position: row.position,
+        }));
+
+    // Antesala: el balance directo y dónde está cada uno en la tabla. Es lo
+    // único que se sabe de verdad antes del pitazo.
+    // Directos y forma, resueltos una sola vez. `is_direct` lo marca el servidor,
+    // que es quien sabe de que consulta salio cada fila; el filtro por nombre
+    // queda de respaldo para los proveedores externos que no lo mandan.
+    const directH2HMatches = (Array.isArray(matchData.h2h) ? matchData.h2h : [])
+        .filter((m: any) => m?.is_direct === true || isDirectH2HMatch(m, matchData.home, matchData.away));
+    const homeFormMatches = (Array.isArray(matchData.h2h) ? matchData.h2h : [])
+        .filter((m: any) => doesH2HMatchTeam(m, matchData.home)
+            && !(m?.is_direct === true || isDirectH2HMatch(m, matchData.home, matchData.away)));
+    const awayFormMatches = (Array.isArray(matchData.h2h) ? matchData.h2h : [])
+        .filter((m: any) => doesH2HMatchTeam(m, matchData.away)
+            && !(m?.is_direct === true || isDirectH2HMatch(m, matchData.home, matchData.away)));
+
+    const previaH2H = (() => {
+        const direct = directH2HMatches;
+        let home = 0, away = 0, draw = 0;
+        for (const m of direct) {
+            const hs = Number(m.scores?.home ?? m.home_score ?? NaN);
+            const as = Number(m.scores?.away ?? m.away_score ?? NaN);
+            if (!Number.isFinite(hs) || !Number.isFinite(as)) continue;
+            // El local del historial no es necesariamente el local de hoy.
+            const winnerIsMatchHome = doesH2HSideMatchTeam(m, hs > as ? 'home' : 'away', matchData.home);
+            if (hs === as) draw += 1;
+            else if (winnerIsMatchHome) home += 1;
+            else away += 1;
+        }
+        return { home, away, draw, total: home + away + draw };
+    })();
+
+    // La fila de tabla de cada club, en el orden local → visitante. La Previa
+    // compara los dos lado a lado, así que el orden es el del marcador, no el
+    // de la clasificación.
+    const previaRowFor = (team: { name?: string; id?: string }) => {
+        const rows = Array.isArray(matchData.standings) ? matchData.standings : [];
+        const wanted = String(team?.name || '').trim().toLowerCase();
+        const row = rows.find((r: any) =>
+            String(r.name || r.team_name || r.TEAM_NAME || '').trim().toLowerCase() === wanted);
+        if (!row) return null;
+        const num = (v: unknown) => Number(v ?? 0) || 0;
+        return {
+            name: String(row.name || row.team_name || ''),
+            rank: Number(row.rank ?? row.position ?? 0) || null,
+            played: num(row.matches_played),
+            wins: num(row.wins),
+            draws: num(row.draws),
+            losses: num(row.losses),
+            pointsFor: num(row.points_for),
+            pointsAgainst: num(row.points_against),
+            diff: num(row.goal_difference),
+            points: num(row.points),
+            form: String(row.form || '').toUpperCase().replace(/[^WDLGEP]/g, '').slice(-5),
+        };
+    };
+    const previaHome = previaRowFor(matchData.home);
+    const previaAway = previaRowFor(matchData.away);
+    const hasPreviaSeason = Boolean(previaHome || previaAway);
     const motorsportRows = (Array.isArray(matchData.standings) && matchData.standings.length > 0
         ? matchData.standings
         : [
@@ -1734,7 +2017,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     </section>
 
                     <nav className={styles.motorsportTabsNav}>
-                        {visibleTabs.map((tab) => (
+                        {motorsportTabs.map((tab) => (
                             <button
                                 key={tab.id}
                                 type="button"
@@ -1815,7 +2098,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                         <span className={styles.motorsportCardMeta}>{motorsportSectionMeta.sessions}</span>
                                     </div>
                                     <div className={styles.motorsportStageGrid}>
-                                        {visibleTabs.map((tab) => (
+                                        {motorsportTabs.map((tab) => (
                                             <button
                                                 key={tab.id}
                                                 type="button"
@@ -1879,7 +2162,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
                             {activeTab !== 'sessions' && (
                                 <div className={styles.motorsportStageGrid}>
-                                    {visibleTabs.map((tab) => (
+                                    {motorsportTabs.map((tab) => (
                                         <button
                                             key={tab.id}
                                             type="button"
@@ -2171,35 +2454,177 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     </div>
                 </section>
 
-                {/* Layer 4: Tabs */}
-                {usesCustomTabs && (
-                    <nav className={styles.tabsNav} ref={customTabsNavRef}>
-                        {visibleTabs.map((tab) => (
-                            <div
-                                key={tab.id}
-                                className={`${styles.tabItem} ${activeTab === tab.id ? styles.active : ''}`}
-                                onClick={() => setActiveTab(tab.id)}
-                            >
-                                {tab.label}
-                            </div>
-                        ))}
-                    </nav>
-                )}
-                {!usesCustomTabs && (
-                <nav className={styles.tabsNav} ref={fullTabsNavRef}>
-                    <div className={`${styles.tabItem} ${activeTab === 'summary' ? styles.active : ''}`} onClick={() => setActiveTab('summary')}>Resumen</div>
-                    <div className={`${styles.tabItem} ${activeTab === 'timeline' ? styles.active : ''}`} onClick={() => setActiveTab('timeline')}>Cronología</div>
-                    <div className={`${styles.tabItem} ${activeTab === 'lineups' ? styles.active : ''}`} onClick={() => setActiveTab('lineups')}>Alineaciones</div>
-                    <div className={`${styles.tabItem} ${activeTab === 'players' ? styles.active : ''}`} onClick={() => setActiveTab('players')}>Jugadores</div>
-                    <div className={`${styles.tabItem} ${activeTab === 'stats' ? styles.active : ''}`} onClick={() => setActiveTab('stats')}>Estadísticas</div>
-                    <div className={`${styles.tabItem} ${activeTab === 'h2h' ? styles.active : ''}`} onClick={() => setActiveTab('h2h')}>H2H</div>
-                    <div className={`${styles.tabItem} ${activeTab === 'standings' ? styles.active : ''}`} onClick={() => setActiveTab('standings')}>Clasificación</div>
-                    <div className={`${styles.tabItem} ${activeTab === 'commentary' ? styles.active : ''}`} onClick={() => setActiveTab('commentary')}>Comentarios</div>
-                </nav>
-                )}
+                {/* Layer 4: Tabs — se dibujan las que este partido puede llenar */}
+                <nav className={styles.tabsNavWrap} aria-label="Secciones del partido">
+                    {!state.secondaryReady && (
+                        <div className={styles.tabsSkeleton} aria-hidden="true">
+                            <span /><span /><span /><span />
+                        </div>
+                    )}
+                    {state.secondaryReady && (
+                    <div
+                        className={styles.tabsNav}
+                        role="tablist"
+                        ref={tabsNavRef}
+                        onKeyDown={onTabKeyDown}
+                    >
+                        {railTabs.map((tab) => {
+                            const selected = activeTab === tab.id;
+                            const pending = 'state' in tab && tab.state === 'pending';
+                            return (
+                                <button
+                                    key={tab.id}
+                                    type="button"
+                                    role="tab"
+                                    id={`match-tab-${tab.id}`}
+                                    data-tab-id={tab.id}
+                                    aria-selected={selected}
+                                    aria-controls={`match-panel-${tab.id}`}
+                                    tabIndex={selected ? 0 : -1}
+                                    className={`${styles.tabItem} ${selected ? styles.active : ''}`}
+                                    onClick={() => selectTab(tab.id)}
+                                >
+                                    {isNarrow && 'shortLabel' in tab ? tab.shortLabel : tab.label}
+                                    {pending && <span className={styles.tabPending} aria-hidden="true" />}
+                                </button>
+                            );
+                        })}
 
-                <main key={activeTab} className={styles.tabContent}>
-                    <section className={styles.panelBlock}>
+                    </div>
+                    )}
+
+                </nav>
+
+                {/* El aside vive FUERA de la key: es del partido, no de la
+                    pestaña. Con la key acá arriba se remontaba entero en cada
+                    cambio y la votación volvía a pedir datos siempre. */}
+                <main className={styles.tabContent}>
+                    {!state.secondaryReady ? (
+                        <section className={styles.panelBlock} aria-busy="true">
+                            <div className={styles.skPanel}>
+                                {[0, 1, 2, 3, 4].map((i) => (
+                                    <div key={i} className={`${styles.skeleton} ${styles.skRow}`} />
+                                ))}
+                            </div>
+                        </section>
+                    ) : (
+                    <section
+                        key={activeTab}
+                        id={`match-panel-${activeTab}`}
+                        role="tabpanel"
+                        aria-labelledby={`match-tab-${activeTab}`}
+                        tabIndex={0}
+                        className={styles.panelBlock}
+                    >
+                        {activeTab === 'previa' && (
+                            <div className={styles.summaryView}>
+                                {/* El voto abre la antesala: es lo único que el
+                                    hincha puede hacer antes del pitazo. */}
+                                {FAVORITES_ENABLED && (
+                                    <div className={styles.previaVote}>
+                                        <MatchWinnerVoteCard
+                                            matchId={matchData.id || id}
+                                            status={matchData.status}
+                                            homeTeam={{ name: matchData.home.name, logo: matchData.home.logo }}
+                                            awayTeam={{ name: matchData.away.name, logo: matchData.away.logo }}
+                                        />
+                                    </div>
+                                )}
+
+                                {previaH2H.total > 0 && (
+                                    <div className={styles.previaBlock}>
+                                        <div className={styles.previaHead}>Frente a frente</div>
+                                        <div className={styles.previaBalance}>
+                                            <div className={styles.previaSide}>
+                                                <span className={`${styles.previaPill} ${styles.previaPillHome}`}>{previaH2H.home}</span>
+                                                <span className={styles.previaSideName}>{matchData.home.name}</span>
+                                            </div>
+                                            <div className={styles.previaSide}>
+                                                <span className={`${styles.previaPill} ${styles.previaPillDraw}`}>{previaH2H.draw}</span>
+                                                <span className={styles.previaSideName}>Empates</span>
+                                            </div>
+                                            <div className={styles.previaSide}>
+                                                <span className={`${styles.previaPill} ${styles.previaPillAway}`}>{previaH2H.away}</span>
+                                                <span className={styles.previaSideName}>{matchData.away.name}</span>
+                                            </div>
+                                        </div>
+                                        {/* La barra reparte el historial de un vistazo. */}
+                                        <div className={styles.previaBar} role="img"
+                                             aria-label={`${previaH2H.home} victorias de ${matchData.home.name}, ${previaH2H.draw} empates, ${previaH2H.away} victorias de ${matchData.away.name}`}>
+                                            <span className={styles.previaBarHome} style={{ width: `${(previaH2H.home / previaH2H.total) * 100}%` }} />
+                                            <span className={styles.previaBarDraw} style={{ width: `${(previaH2H.draw / previaH2H.total) * 100}%` }} />
+                                            <span className={styles.previaBarAway} style={{ width: `${(previaH2H.away / previaH2H.total) * 100}%` }} />
+                                        </div>
+                                        <p className={styles.previaFoot}>
+                                            {previaH2H.total === 1
+                                                ? 'Se enfrentaron una vez.'
+                                                : `Se enfrentaron ${previaH2H.total} veces.`}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {hasPreviaSeason && (
+                                    <div className={styles.previaBlock}>
+                                        {/* No es "la temporada": estos numeros salen de la
+                                            tabla de ESTE torneo. Un club puede jugar
+                                            varios y el rotulo mentiria. */}
+                                        <div className={styles.previaHead}>
+                                            {matchData.tournament ? `Como llegan en ${matchData.tournament}` : 'Como llegan al torneo'}
+                                        </div>
+
+                                        <div className={styles.previaSeasonHead}>
+                                            <span className={styles.previaSeasonClub}>{matchData.home.name}</span>
+                                            <span />
+                                            <span className={`${styles.previaSeasonClub} ${styles.previaSeasonClubRight}`}>{matchData.away.name}</span>
+                                        </div>
+
+                                        {/* `better` dice qué lado sale favorecido en cada
+                                            renglón: 'hi' significa que gana el número más
+                                            alto, 'lo' el más bajo (posición, perdidos, en
+                                            contra). El ganador se resalta; si empatan, no
+                                            se resalta ninguno. */}
+                                        {([
+                                            ['Posición', previaHome?.rank, previaAway?.rank, 'lo', (v: number) => `${v}.º`],
+                                            ['Puntos', previaHome?.points, previaAway?.points, 'hi'],
+                                            ['Jugados', previaHome?.played, previaAway?.played, null],
+                                            ['Ganados', previaHome?.wins, previaAway?.wins, 'hi'],
+                                            ['Empatados', previaHome?.draws, previaAway?.draws, null],
+                                            ['Perdidos', previaHome?.losses, previaAway?.losses, 'lo'],
+                                            ['Puntos por partido', perGame(previaHome?.pointsFor, previaHome?.played), perGame(previaAway?.pointsFor, previaAway?.played), 'hi'],
+                                            ['Recibidos por partido', perGame(previaHome?.pointsAgainst, previaHome?.played), perGame(previaAway?.pointsAgainst, previaAway?.played), 'lo'],
+                                            ['Diferencia', previaHome?.diff, previaAway?.diff, 'hi', formatSigned],
+                                        ] as Array<[string, number | null | undefined, number | null | undefined, 'hi' | 'lo' | null, ((v: number) => string)?]>)
+                                            .map(([label, h, a, better, fmt]) => {
+                                                const show = (v: number | null | undefined) =>
+                                                    typeof v === 'number' && Number.isFinite(v) ? (fmt ? fmt(v) : String(v)) : '-';
+                                                const comparable = typeof h === 'number' && typeof a === 'number' && h !== a && better;
+                                                const homeWins = comparable && (better === 'hi' ? h > a : h < a);
+                                                const awayWins = comparable && (better === 'hi' ? a > h : a < h);
+                                                return (
+                                                    <div key={label} className={styles.previaStatRow}>
+                                                        <span className={`${styles.previaStatVal} ${homeWins ? styles.previaStatBest : ''}`}>{show(h)}</span>
+                                                        <span className={styles.previaStatLabel}>{label}</span>
+                                                        <span className={`${styles.previaStatVal} ${awayWins ? styles.previaStatBest : ''}`}>{show(a)}</span>
+                                                    </div>
+                                                );
+                                            })}
+
+                                        {(previaHome?.form || previaAway?.form) && (
+                                            <div className={styles.previaStatRow}>
+                                                <span className={styles.previaFormCell}>{renderForm(previaHome?.form, styles)}</span>
+                                                <span className={styles.previaStatLabel}>Racha</span>
+                                                <span className={styles.previaFormCell}>{renderForm(previaAway?.form, styles)}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                <p className={styles.previaHint}>
+                                    Cuando arranque el partido esta pestaña deja lugar a la cronología.
+                                </p>
+                            </div>
+                        )}
+
                         {activeTab === 'summary' && (
                             <div className={styles.summaryView}>
                                 <div className={styles.panelTitle}>Visión General</div>
@@ -2208,8 +2633,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                         const hVal = parseFloat(String(stat.home).replace(/[^0-9.]/g, '')) || 0;
                                         const aVal = parseFloat(String(stat.away).replace(/[^0-9.]/g, '')) || 0;
                                         const total = hVal + aVal;
-                                        const hPct = total > 0 ? (hVal / total) * 100 : 50;
-                                        const aPct = total > 0 ? (aVal / total) * 100 : 50;
+                                        // Sin datos no hay reparto: una barra al 50/50 dibuja un
+                                        // empate que nadie jugó. Se deja la pista vacía.
+                                        const hPct = total > 0 ? (hVal / total) * 100 : 0;
+                                        const aPct = total > 0 ? (aVal / total) * 100 : 0;
 
                                         return (
                                             <div key={i} className={styles.statItem}>
@@ -2272,7 +2699,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     ))
                                 ) : (
                                     <div className={styles.emptyState}>
-                                        <div style={{ fontSize: '40px', marginBottom: '16px', opacity: 0.3 }}>🎙️</div>
+                                        <svg className={styles.emptyIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                            <rect x="9" y="2" width="6" height="11" rx="3" />
+                                            <path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8" />
+                                        </svg>
                                         <p className={styles.placeholderText} style={{ fontSize: '16px', fontWeight: '600' }}>Aún no hay comentarios</p>
                                         <p style={{ fontSize: '13px', opacity: 0.5 }}>La narración en vivo comenzará en breve.</p>
                                     </div>
@@ -2464,9 +2894,16 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     </div>
                                 ) : (
                                     <div className={styles.emptyState}>
-                                        <div style={{ fontSize: '40px', marginBottom: '16px', opacity: 0.3 }}>📋</div>
-                                        <p className={styles.placeholderText} style={{ fontSize: '16px', fontWeight: '600' }}>Alineación no registrada</p>
-                                        <p style={{ fontSize: '13px', opacity: 0.5 }}>Los equipos aún no han confirmado sus jugadores para este encuentro.</p>
+                                        <svg className={styles.emptyIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                            <rect x="4" y="3" width="16" height="18" rx="2" />
+                                            <path d="M8 8h8M8 12h8M8 16h4" />
+                                        </svg>
+                                        <p className={styles.placeholderText} style={{ fontSize: '16px', fontWeight: '600' }}>Todavía no están los planteles</p>
+                                        <p style={{ fontSize: '13px', opacity: 0.6 }}>
+                                            {toMatchStatusKind(matchData.status) === 'final'
+                                                ? 'Los clubes no cargaron la formación de este partido.'
+                                                : 'Los clubes las confirman cerca del inicio. Volvé más cerca del horario.'}
+                                        </p>
                                         {isSuperAdminUser && (
                                             <button
                                                 type="button"
@@ -2626,66 +3063,130 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
                         {activeTab === 'h2h' && (
                             <div className={styles.h2hView}>
-                                <div className={styles.panelTitle}>Historial y Forma (H2H)</div>
-                                <div className={styles.h2hGrid}>
-                                    {/* Column 1: Home Last 5 (Excluding direct H2H) */}
-                                    <div className={styles.h2hColumn}>
-                                        <div className={styles.h2hColTitle}>Forma: {matchData.home.name}</div>
-                                        <div className={styles.h2hList}>
-                                            {matchData.h2h?.filter((m: any) => {
-                                                const isHomeMatch = doesH2HMatchTeam(m, matchData.home);
-                                                const isDirectH2H = isDirectH2HMatch(m, matchData.home, matchData.away);
-                                                return isHomeMatch && !isDirectH2H;
-                                            }).slice(0, 5).map((m: any, i: number) => (
-                                                <H2HItem
-                                                    key={i}
-                                                    m={m}
-                                                    styles={styles}
-                                                    focusTeam={matchData.home}
-                                                    referenceTeams={{ home: matchData.home, away: matchData.away }}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
+                                <div className={styles.panelTitle}>Cara a cara</div>
 
-                                    {/* Column 2: Direct H2H Last 5 */}
-                                    <div className={styles.h2hColumn}>
-                                        <div className={styles.h2hColTitle}>Frente a Frente</div>
-                                        <div className={styles.h2hList}>
-                                            {matchData.h2h?.filter((m: any) =>
-                                                isDirectH2HMatch(m, matchData.home, matchData.away)
-                                            ).slice(0, 5).map((m: any, i: number) => (
-                                                <H2HItem
-                                                    key={i}
-                                                    m={m}
-                                                    styles={styles}
-                                                    referenceTeams={{ home: matchData.home, away: matchData.away }}
-                                                />
-                                            ))}
+                                {previaH2H.total > 0 && (
+                                    <>
+                                        <div className={styles.previaBalance}>
+                                            <div className={styles.previaSide}>
+                                                <span className={`${styles.previaPill} ${styles.previaPillHome}`}>{previaH2H.home}</span>
+                                                <span className={styles.previaSideName}>{matchData.home.name}</span>
+                                            </div>
+                                            <div className={styles.previaSide}>
+                                                <span className={`${styles.previaPill} ${styles.previaPillDraw}`}>{previaH2H.draw}</span>
+                                                <span className={styles.previaSideName}>Empates</span>
+                                            </div>
+                                            <div className={styles.previaSide}>
+                                                <span className={`${styles.previaPill} ${styles.previaPillAway}`}>{previaH2H.away}</span>
+                                                <span className={styles.previaSideName}>{matchData.away.name}</span>
+                                            </div>
                                         </div>
-                                    </div>
+                                        <div
+                                            className={styles.previaBar}
+                                            role="img"
+                                            aria-label={`${previaH2H.home} victorias de ${matchData.home.name}, ${previaH2H.draw} empates, ${previaH2H.away} victorias de ${matchData.away.name}`}
+                                        >
+                                            <span className={styles.previaBarHome} style={{ width: `${(previaH2H.home / previaH2H.total) * 100}%` }} />
+                                            <span className={styles.previaBarDraw} style={{ width: `${(previaH2H.draw / previaH2H.total) * 100}%` }} />
+                                            <span className={styles.previaBarAway} style={{ width: `${(previaH2H.away / previaH2H.total) * 100}%` }} />
+                                        </div>
+                                        <p className={styles.h2hCount}>
+                                            {previaH2H.total} {previaH2H.total === 1 ? 'enfrentamiento' : 'enfrentamientos'} en el historial
+                                        </p>
+                                    </>
+                                )}
 
-                                    {/* Column 3: Away Last 5 (Excluding direct H2H) */}
-                                    <div className={styles.h2hColumn}>
-                                        <div className={styles.h2hColTitle}>Forma: {matchData.away.name}</div>
-                                        <div className={styles.h2hList}>
-                                            {matchData.h2h?.filter((m: any) => {
-                                                const isAwayMatch = doesH2HMatchTeam(m, matchData.away);
-                                                const isDirectH2H = isDirectH2HMatch(m, matchData.home, matchData.away);
-                                                return isAwayMatch && !isDirectH2H;
-                                            }).slice(0, 5).map((m: any, i: number) => (
-                                                <H2HItem
-                                                    key={i}
-                                                    m={m}
-                                                    styles={styles}
-                                                    focusTeam={matchData.away}
-                                                    referenceTeams={{ home: matchData.home, away: matchData.away }}
-                                                />
-                                            ))}
+                                {/* La lista va a todo el ancho, una fila por partido:
+                                    club, escudo, marcador, escudo, club. En tres
+                                    columnas angostas habia que reconocer al rival por
+                                    el escudo porque el nombre no entraba. */}
+                                {directH2HMatches.length > 0 && (
+                                    <ol className={styles.h2hFeed}>
+                                        {(h2hExpanded ? directH2HMatches : directH2HMatches.slice(0, 10)).map((m: any, i: number) => {
+                                            const hs = Number(m.scores?.home);
+                                            const as = Number(m.scores?.away);
+                                            const homeWon = Number.isFinite(hs) && Number.isFinite(as) && hs > as;
+                                            const awayWon = Number.isFinite(hs) && Number.isFinite(as) && as > hs;
+                                            const date = m.timestamp
+                                                ? new Date(m.timestamp * 1000).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric', timeZone: USER_TZ })
+                                                : (m.date || '');
+                                            return (
+                                                <li key={m.match_id || i} className={styles.h2hFeedItem}>
+                                                    <div className={styles.h2hFeedMeta}>
+                                                        <span>{date}</span>
+                                                        {m.tournament_name && <span className={styles.h2hFeedComp}>{m.tournament_name}</span>}
+                                                    </div>
+                                                    <div className={styles.h2hFeedRow}>
+                                                        <span className={`${styles.h2hFeedTeam} ${homeWon ? styles.h2hFeedWinner : ''}`}>
+                                                            {m.home_team?.name}
+                                                        </span>
+                                                        {m.home_team?.logo
+                                                            ? <img src={m.home_team.logo} alt="" className={styles.h2hFeedCrest} loading="lazy" />
+                                                            : <span className={styles.h2hFeedCrestFallback} />}
+                                                        <span className={styles.h2hFeedScore}>{m.scores?.home} - {m.scores?.away}</span>
+                                                        {m.away_team?.logo
+                                                            ? <img src={m.away_team.logo} alt="" className={styles.h2hFeedCrest} loading="lazy" />
+                                                            : <span className={styles.h2hFeedCrestFallback} />}
+                                                        <span className={`${styles.h2hFeedTeam} ${styles.h2hFeedTeamRight} ${awayWon ? styles.h2hFeedWinner : ''}`}>
+                                                            {m.away_team?.name}
+                                                        </span>
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ol>
+                                )}
+
+                                {directH2HMatches.length > 10 && (
+                                    <button
+                                        type="button"
+                                        className={styles.h2hMore}
+                                        onClick={() => setH2hExpanded((open) => !open)}
+                                    >
+                                        {h2hExpanded ? 'Ver menos' : `Ver los ${directH2HMatches.length} partidos`}
+                                    </button>
+                                )}
+
+                                {/* La forma de cada uno queda debajo: es contexto, no el
+                                    tema de esta pestana. */}
+                                {(homeFormMatches.length > 0 || awayFormMatches.length > 0) && (
+                                    <div className={styles.h2hFormSection}>
+                                        <div className={styles.h2hGrid2}>
+                                            <div className={styles.h2hColumn}>
+                                                <div className={styles.h2hColTitle}>Ultimos de {matchData.home.name}</div>
+                                                <div className={styles.h2hList}>
+                                                    {homeFormMatches.slice(0, 5).map((m: any, i: number) => (
+                                                        <H2HItem
+                                                            key={i}
+                                                            m={m}
+                                                            styles={styles}
+                                                            focusTeam={matchData.home}
+                                                            referenceTeams={{ home: matchData.home, away: matchData.away }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className={styles.h2hColumn}>
+                                                <div className={styles.h2hColTitle}>Ultimos de {matchData.away.name}</div>
+                                                <div className={styles.h2hList}>
+                                                    {awayFormMatches.slice(0, 5).map((m: any, i: number) => (
+                                                        <H2HItem
+                                                            key={i}
+                                                            m={m}
+                                                            styles={styles}
+                                                            focusTeam={matchData.away}
+                                                            referenceTeams={{ home: matchData.home, away: matchData.away }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                {(!matchData.h2h || matchData.h2h.length === 0) && <p className={styles.placeholderText}>Historial no disponible.</p>}
+                                )}
+
+                                {(!matchData.h2h || matchData.h2h.length === 0) && (
+                                    <p className={styles.placeholderText}>Historial no disponible.</p>
+                                )}
                             </div>
                         )}
 
@@ -2838,18 +3339,35 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         )}
 
                         {activeTab === 'players' && (
-                            <PlayerStatsPanel
-                                tableData={playerStatsTable}
-                                localPlayerRows={state.localPlayerRows}
-                                playerStats={state.playerStats}
-                                homeName={matchData.home?.name || 'Local'}
-                                awayName={matchData.away?.name || 'Visitante'}
-                            />
+                            <>
+                                <PlayerStatsPanel
+                                    tableData={playerStatsTable}
+                                    localPlayerRows={state.localPlayerRows}
+                                    playerStats={state.playerStats}
+                                    homeName={matchData.home?.name || 'Local'}
+                                    awayName={matchData.away?.name || 'Visitante'}
+                                />
+                                {rateablePlayers.length > 0 && (
+                                    <div className={styles.peopleRatingsWrap}>
+                                        <PeopleRatingsPanel
+                                            matchId={matchData.id || id}
+                                            players={rateablePlayers}
+                                            homeName={matchData.home?.name || 'Local'}
+                                            awayName={matchData.away?.name || 'Visitante'}
+                                            canVote={Boolean(user?.id)}
+                                        />
+                                    </div>
+                                )}
+                            </>
                         )}
                     </section>
+                    )}
 
                     <aside className={styles.sidebarColumn}>
-                        {FAVORITES_ENABLED && (
+                        {/* En la Previa el voto ya abre el panel, arriba de todo:
+                            repetirlo acá seria pedir lo mismo dos veces en la
+                            misma pantalla. */}
+                        {FAVORITES_ENABLED && activeTab !== 'previa' && (
                             <section className={styles.panelBlock}>
                                 <MatchWinnerVoteCard
                                     matchId={matchData.id || id}

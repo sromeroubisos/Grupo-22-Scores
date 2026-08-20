@@ -187,9 +187,18 @@ export default function MatchWinnerVoteCard({
         }
     }
 
-    function renderOption(choice: MatchVoteChoice, team: TeamOption, percent: number, votes: number) {
+    /**
+     * Una opcion = un boton. En fila: escudo local · Empate · escudo visitante.
+     *
+     * Antes cada opcion era una tarjeta ancha apilada, y con el empate serian
+     * tres bloques uno abajo del otro: el gesto "elijo entre estos tres" se
+     * pierde cuando hay que scrollear para ver la tercera.
+     */
+    function renderOption(choice: MatchVoteChoice, percent: number, votes: number) {
         const isSelected = summary.userChoice === choice;
         const isSubmitting = submittingChoice === choice;
+        const team = choice === 'home' ? homeTeam : choice === 'away' ? awayTeam : null;
+        const label = team ? team.name : 'Empate';
 
         return (
             <button
@@ -203,37 +212,43 @@ export default function MatchWinnerVoteCard({
                 onClick={() => void handleVote(choice)}
                 disabled={votingClosed || !!submittingChoice}
                 aria-pressed={isSelected}
+                aria-label={`Votar por ${label}`}
+                title={label}
             >
-                <div className={styles.optionTop}>
-                    <div className={styles.team}>
-                        {team.logo ? (
-                            <img src={team.logo} alt="" className={styles.logo} />
+                <span className={styles.optionMark}>
+                    {team ? (
+                        team.logo ? (
+                            <img src={team.logo} alt="" className={styles.logo} loading="lazy" />
                         ) : (
-                            <div className={styles.logoPlaceholder}>
-                                {team.name.slice(0, 1)}
-                            </div>
-                        )}
-                        <span className={styles.teamName}>{team.name}</span>
-                        {isSelected && <span className={styles.pickBadge}>Tu voto</span>}
-                    </div>
-                    <div className={styles.voteMeta}>
-                        <div className={styles.percent}>
-                            {isSubmitting ? '...' : `${formatPercentage(percent)}%`}
-                        </div>
-                        <div className={styles.votes}>
-                            {votes} {votes === 1 ? 'voto' : 'votos'}
-                        </div>
-                    </div>
-                </div>
-                <div className={styles.barTrack}>
-                    <div
+                            <span className={styles.logoPlaceholder}>{team.name.slice(0, 1)}</span>
+                        )
+                    ) : (
+                        <span className={styles.drawMark}>X</span>
+                    )}
+                </span>
+
+                <span className={styles.optionLabel}>{team ? team.name : 'Empate'}</span>
+
+                <span className={styles.percent}>
+                    {isSubmitting ? '…' : `${formatPercentage(percent)}%`}
+                </span>
+                {/* Sin contador por opcion: el porcentaje ya lo dice, y el total
+                    de votos vive una sola vez en la cabecera. */}
+                <span className={styles.srOnly}>{votes} {votes === 1 ? 'voto' : 'votos'}</span>
+
+                <span className={styles.barTrack} aria-hidden="true">
+                    <span
                         className={[
                             styles.barFill,
-                            choice === 'home' ? styles.barFillHome : styles.barFillAway,
+                            choice === 'home' ? styles.barFillHome
+                                : choice === 'away' ? styles.barFillAway
+                                : styles.barFillDraw,
                         ].join(' ')}
                         style={{ width: `${Math.max(0, Math.min(100, percent))}%` }}
                     />
-                </div>
+                </span>
+
+                {isSelected && <span className={styles.pickBadge}>Tu voto</span>}
             </button>
         );
     }
@@ -243,32 +258,33 @@ export default function MatchWinnerVoteCard({
         : user
             ? summary.userChoice
                 ? 'Tu voto quedo guardado. Si queres, podes cambiarlo antes del cierre.'
-                : 'Elegi quien pensas que se queda con el partido.'
+                : 'Elegi como termina: gana uno, empatan, o gana el otro.'
             : 'Los resultados son publicos. Inicia sesion para dejar tu voto.';
 
     return (
         <div className={styles.stack}>
+            <p className={styles.srOnly}>
+                {caption}
+                {isLoading ? '' : ` ${summary.totalVotes} ${summary.totalVotes === 1 ? 'voto' : 'votos'} en total.`}
+            </p>
             <div className={styles.header}>
                 <div className={styles.titleBlock}>
                     <p className={styles.eyebrow}>Comunidad</p>
                     <h3 className={styles.title}>Vota al ganador</h3>
                 </div>
-                <span className={styles.totalBadge}>
-                    {isLoading ? 'Cargando...' : `${summary.totalVotes} ${summary.totalVotes === 1 ? 'voto' : 'votos'}`}
-                </span>
             </div>
 
-            <p className={styles.caption}>{caption}</p>
-
-            <div className={styles.options}>
-                {renderOption('home', homeTeam, summary.homePercentage, summary.homeVotes)}
-                {renderOption('away', awayTeam, summary.awayPercentage, summary.awayVotes)}
+            <div className={styles.options} role="group" aria-label="Elegir resultado">
+                {renderOption('home', summary.homePercentage, summary.homeVotes)}
+                {renderOption('draw', summary.drawPercentage, summary.drawVotes)}
+                {renderOption('away', summary.awayPercentage, summary.awayVotes)}
             </div>
 
             <div className={styles.footer}>
                 {summary.userChoice && (
                     <span className={styles.pill}>
-                        Tu voto: {summary.userChoice === 'home' ? homeTeam.name : awayTeam.name}
+                        Tu voto: {summary.userChoice === 'home' ? homeTeam.name
+                            : summary.userChoice === 'away' ? awayTeam.name : 'Empate'}
                     </span>
                 )}
                 {resultLabel && (

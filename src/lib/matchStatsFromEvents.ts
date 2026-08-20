@@ -1035,7 +1035,7 @@ export function buildCompleteStatTabs(
                     ],
                 },
                 {
-                    title: 'Tiros a palos (mismos criterios que el resto del producto)',
+                    title: 'Tiros a los palos',
                     rows: [
                         {
                             key: 'conversionEfectividad',
