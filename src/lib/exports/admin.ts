@@ -305,5 +305,53 @@ export async function getAdminExportDesigns(): Promise<ExportDesign[]> {
             ],
             userConfig,
         },
+        {
+            slug: 'fan-v5',
+            name: 'Fan V5',
+            shortDescription: 'Quinta familia visual: la opcion basica para el hincha. Hoja clara, tinta negra, filetes finos y nada de efectos.',
+            longDescription:
+                'Fan V5 es la linea mas simple del motor y la unica clara: una hoja blanca apenas tenida por el Acento, tipografia sans en todos los roles, filetes de un pixel en vez de barras, y cero degradados, texturas, vinetas o sombras. Los escudos van con su nombre al lado —el hincha comparte para que se entienda de un vistazo, no para lucir la pieza— y el Acento solo pinta la etapa, la linea del encabezado y la fila del club marcado. Cubre resultado y horario del partido, tabla de posiciones y fixture del dia.',
+            category: 'stats',
+            status: 'testing',
+            createdAtLabel: firstCreatedAtLabel,
+            updatedAtLabel: lastUpdatedAtLabel,
+            previewLabel: EXPORT_OUTPUT_FORMATS[0]
+                ? `${EXPORT_OUTPUT_FORMATS[0].name} - ${EXPORT_OUTPUT_FORMATS[0].width} x ${EXPORT_OUTPUT_FORMATS[0].height}`
+                : 'Sin formatos activos',
+            previewAccent: '#0f172a',
+            previewBackground: 'linear-gradient(135deg, #ffffff 0%, #f4f5f7 100%)',
+            previewSurface: '#ffffff',
+            formats: EXPORT_TEMPLATE_CATALOG,
+            dimensions: EXPORT_OUTPUT_FORMATS,
+            typography: EXPORT_TYPOGRAPHY_CATALOG,
+            palette: [
+                { id: 'fan-sheet', label: 'Hoja', value: '#ffffff', note: 'El papel: blanco tenido por el Acento, o el Fondo tal cual si elegis uno claro' },
+                { id: 'fan-ink', label: 'Tinta', value: '#111827', note: 'Titulares, nombres y numeros; siempre oscura sobre la hoja' },
+                { id: 'fan-accent', label: 'Acento', value: '#00a365', note: 'Etapa, linea del encabezado y fila del club marcado; nada mas' },
+            ],
+            styleRules: [
+                ...BASE_EXPORT_STYLE_RULES,
+                {
+                    id: 'fan-language',
+                    label: 'Lenguaje visual',
+                    value: 'Hoja clara, filetes de un pixel, sans en todos los roles y cuerpos fijos que se achican si no entran',
+                },
+                {
+                    id: 'fan-coverage',
+                    label: 'Cobertura propia',
+                    value: 'Resultado y horario del partido, tabla de posiciones y fixture del dia; el resto de los templates cae a G22 Base',
+                },
+                {
+                    id: 'fan-names',
+                    label: 'Los nombres se leen',
+                    value: 'A diferencia de la placa de G22 Base, cada escudo lleva el nombre del club al lado',
+                },
+            ],
+            baseGuidelines: [
+                ...BASE_EXPORT_GUIDELINES,
+                'Fan V5 no usa degradados, texturas ni sombras: si un recurso decora sin explicar, no entra en la pieza.',
+            ],
+            userConfig,
+        },
     ];
 }

@@ -9,6 +9,7 @@ import { ExportImagePreview, type DailyMatchesData, type MatchStatsData, type St
 import type { ExportVisualFamily } from '@/lib/exports/activeDesign';
 
 const FAMILIES: Array<{ value: ExportVisualFamily; label: string }> = [
+    { value: 'fanV5', label: 'Fan V5' },
     { value: 'impactoV4', label: 'Impacto V4' },
     { value: 'g22Base', label: 'G22 Base' },
     { value: 'momentumV2', label: 'Momentum V2' },
