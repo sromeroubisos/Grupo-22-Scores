@@ -5,7 +5,7 @@ import { JetBrains_Mono, Outfit } from 'next/font/google';
 import { Plus, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
-import { canUseRestrictedContentActions } from '@/lib/auth/roles';
+import { resolveAdminPanel } from '@/lib/auth/roles';
 import { mapDesignSlugToVisualFamily, readActiveExportDesign, type ExportDesignSlug, type ExportVisualFamily } from '@/lib/exports/activeDesign';
 import {
     EXPORT_DESIGN_CUSTOMIZATION_EVENT,
@@ -19,6 +19,7 @@ import {
     type ExportDesignTypographySlot,
 } from '@/lib/exports/designCustomizations';
 import { findCountryRecord } from '@/lib/data/countries';
+import GuestExportInvite, { useGuestExportInvite } from '@/components/GuestExportInvite';
 import { createClient } from '@/lib/supabase/client';
 import styles from './ExportButton.module.css';
 
@@ -851,6 +852,8 @@ const RANKING_POSTER_COLOR_DEFAULTS: ExportColorDefaults = {
     editorialGradientRightColor: RANKING_POSTER_COMBOS[0].glow,
 };
 
+const FAN_DESIGN_SLUG: ExportDesignSlug = 'fan-v5';
+
 function isRankingPosterData(template: ExportTemplate, data: ExportData): boolean {
     return template === 'standings' && (data as StandingsData).variant === 'rankingPoster';
 }
@@ -860,9 +863,12 @@ function isPalmaresData(template: ExportTemplate, data: ExportData): boolean {
 }
 
 export default function ExportImage(props: ExportImageProps) {
-    const { user, isLoading } = useAuth();
+    const { isLoading } = useAuth();
 
-    if (isLoading || !canUseRestrictedContentActions(user?.role)) {
+    // Exportar dejo de ser una herramienta de gestion: lo usa cualquiera, el
+    // invitado incluido. Lo unico que se espera es a que resuelva la sesion, para
+    // no dibujar el boton y cambiarle la familia abajo de los pies un tick despues.
+    if (isLoading) {
         return null;
     }
 
@@ -871,6 +877,14 @@ export default function ExportImage(props: ExportImageProps) {
 
 function ExportImageInner({ template, data, filename = 'g22-export', className = '' }: ExportImageProps) {
     const supabase = useMemo(() => createClient(), []);
+    const { user } = useAuth();
+    const guestInvite = useGuestExportInvite();
+    // El diseno activo del panel es para quien gestiona algo. El resto de la gente
+    // —el hincha logueado y el invitado— exporta siempre con Fan V5, la familia
+    // basica: es la que se penso para el hincha, y la unica que no depende de que
+    // alguien haya elegido un diseno en /admin/super/exports (el invitado nunca
+    // tuvo esa eleccion, asi que sin esto exportaria con la placa de G22 Base).
+    const usesManagedDesign = Boolean(resolveAdminPanel(user?.role, user?.memberships));
     const [isExporting, setIsExporting] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [isPortalReady, setIsPortalReady] = useState(false);
@@ -886,8 +900,12 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     const [isMatchModeDropdownOpen, setIsMatchModeDropdownOpen] = useState(false);
     const [matchExportLayout, setMatchExportLayout] = useState<MatchExportLayout>('classic');
     const [isMatchLayoutDropdownOpen, setIsMatchLayoutDropdownOpen] = useState(false);
-    const [activeDesignSlug, setActiveDesignSlug] = useState<ExportDesignSlug>(() => readActiveExportDesign());
-    const [visualFamily, setVisualFamily] = useState<ExportVisualFamily>('g22Base');
+    const [activeDesignSlug, setActiveDesignSlug] = useState<ExportDesignSlug>(
+        () => (usesManagedDesign ? readActiveExportDesign() : FAN_DESIGN_SLUG)
+    );
+    const [visualFamily, setVisualFamily] = useState<ExportVisualFamily>(
+        () => (usesManagedDesign ? 'g22Base' : 'fanV5')
+    );
     const [selectedTypographyPresetId, setSelectedTypographyPresetId] = useState<ExportTypographyPresetId>('g22-core');
     const [typographyOverrides, setTypographyOverrides] = useState<Partial<Record<ExportTypographyRole, ExportFontFamilyOptionId>>>({});
     const [designCustomizationState, setDesignCustomizationState] = useState<ExportDesignCustomizationState | null>(null);
@@ -1016,6 +1034,13 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     }, [groupedStandings.length, selectedStandingsGroupIndex, standingsExportMode, template]);
 
     useEffect(() => {
+        if (!usesManagedDesign) {
+            // Sin panel no hay diseno que escuchar: la familia esta fijada.
+            setActiveDesignSlug(FAN_DESIGN_SLUG);
+            setVisualFamily('fanV5');
+            return;
+        }
+
         const syncActiveVisualFamily = () => {
             const nextSlug = readActiveExportDesign();
             setActiveDesignSlug(nextSlug);
@@ -1030,7 +1055,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
             window.removeEventListener('storage', syncActiveVisualFamily);
             window.removeEventListener('g22:active-export-design-change', syncActiveVisualFamily as EventListener);
         };
-    }, []);
+    }, [usesManagedDesign]);
 
     useEffect(() => {
         setSelectedTypographyPresetId(getDefaultTypographyPresetId(visualFamily));
@@ -1379,7 +1404,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     }, [dailyMatchesTimeMode, isPalmares, lineupExportMode, matchExportLayout, matchExportMode, selectedStandingsGroupLabel, standingsExportMode, template]);
     const exportSummaryChips = useMemo(() => {
         const chips = [selectedFormatConfig.label];
-        chips.push(isRankingPoster ? 'Poster Ranking' : isPalmares ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily));
+        chips.push(isRankingPoster ? 'Poster Ranking' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily));
         if (template === 'matchStats') {
             chips.push(getMatchExportLayoutLabel(matchExportLayout));
         } else if (template === 'standings') {
@@ -1839,6 +1864,11 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         setStatus('');
     };
 
+    // Las tres salidas exitosas del export pasan por aca: la tabla que baja varias
+    // laminas, el plantel que baja varias paginas y el resto, que baja una sola.
+    // Si el que exporto no tiene cuenta, es el momento de invitarlo.
+    const markExportFinished = guestInvite.notifyExportFinished;
+
     const handleExport = async () => {
         setIsExporting(true);
         setStatus('Generando...');
@@ -1968,7 +1998,11 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                             gold: rankingGoldColor,
                         });
                     } else if (standingsData.variant === 'palmares') {
-                        await drawPalmaresPoster(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
+                        if (visualFamily === 'fanV5') {
+                            await drawFanPalmares(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
+                        } else {
+                            await drawPalmaresPoster(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
+                        }
                     } else if (visualFamily === 'posterV3') {
                         await drawPosterV3Standings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
                     } else if (visualFamily === 'impactoV4') {
@@ -1988,6 +2022,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
 
                 setStatus(slides.length > 1 ? `Listo (${slides.length} imagenes)` : 'Listo');
                 window.setTimeout(() => setStatus(''), 2600);
+                markExportFinished();
                 return;
             } else if (template === 'dailyMatches') {
                 const matchesData = exportData as DailyMatchesData;
@@ -2013,6 +2048,8 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                 for (const [index, page] of pages.entries()) {
                     if (visualFamily === 'posterV3') {
                         await drawPosterV3Squad(ctx, canvas, squadData, page, config, accentColor, bgColor, brandLogo);
+                    } else if (visualFamily === 'fanV5') {
+                        await drawFanSquad(ctx, canvas, squadData, page, config, accentColor, bgColor, brandLogo);
                     } else if (visualFamily === 'momentumV2') {
                         await drawMomentumSquad(ctx, canvas, squadData, page, config, accentColor, bgColor, brandLogo);
                     } else {
@@ -2026,10 +2063,13 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
 
                 setStatus(pages.length > 1 ? `Listo (${pages.length} imagenes)` : 'Listo');
                 window.setTimeout(() => setStatus(''), 2600);
+                markExportFinished();
                 return;
             } else if (template === 'lineups') {
                 if (visualFamily === 'posterV3') {
                     await drawPosterV3Lineups(ctx, canvas, exportData as LineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode);
+                } else if (visualFamily === 'fanV5') {
+                    await drawFanLineups(ctx, canvas, exportData as LineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode);
                 } else if (visualFamily === 'momentumV2') {
                     await drawMomentumLineups(ctx, canvas, exportData as LineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode);
                 } else {
@@ -2058,6 +2098,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
             await downloadCanvas(canvas, buildExportFilename(filename, template, resolvedFormat));
             setStatus('Listo');
             window.setTimeout(() => setStatus(''), 2000);
+            markExportFinished();
         } catch (error) {
             console.error('Export error:', error);
             setStatus(error instanceof Error ? error.message : 'Error al exportar');
@@ -2218,13 +2259,20 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                 <label className={styles.modalLabel}>Diseno activo</label>
                                 <div className={styles.activeDesignCard}>
                                     <div className={styles.activeDesignCopy}>
-                                        <strong>{isRankingPoster ? 'Poster Ranking' : isPalmares ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily)}</strong>
+                                        <strong>{isRankingPoster ? 'Poster Ranking' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily)}</strong>
                                         <span>
                                             {isRankingPoster
                                                 ? 'Afiche dedicado del ranking: banda vertical con el titulo, tabla P/Equipo/PTS/VAR y fila del lider destacada.'
                                                 : isPalmares
                                                     ? 'Afiche dedicado del palmares: podio 2-1-3 con el escudo grande y el resto de los campeones como listado.'
-                                                    : <>{EXPORT_VISUAL_FAMILY_OPTIONS.find((option) => option.value === visualFamily)?.description}{' '}Tipografia y estilo desde el panel de gestion.</>}
+                                                    : (
+                                                        <>
+                                                            {EXPORT_VISUAL_FAMILY_OPTIONS.find((option) => option.value === visualFamily)?.description}
+                                                            {/* El panel solo existe para quien gestiona: al hincha no se le nombra
+                                                                una pantalla a la que no puede entrar. */}
+                                                            {usesManagedDesign ? ' Tipografia y estilo desde el panel de gestion.' : '.'}
+                                                        </>
+                                                    )}
                                         </span>
                                     </div>
                                     <span className={styles.activeDesignBadge}>Activo</span>
@@ -3142,6 +3190,10 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                     ))}
                                 </div>
                                 <p className={styles.modalHint}>{paletteUsageHint}</p>
+                                {/* Colores a mano: solo para quien gestiona. El hincha elige entre
+                                    las combinaciones predeterminadas y nada mas — una paleta abierta
+                                    es la forma mas rapida de publicar una pieza ilegible. */}
+                                {usesManagedDesign && (
                                 <div className={styles.customColors}>
                                     <div className={styles.colorInp}>
                                         <span>Fondo</span>
@@ -3164,6 +3216,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                         <input type="color" value={rankingGoldColor} onChange={(event) => handleRankingColorChange(setRankingGoldColor)(event.target.value)} />
                                     </div>
                                 </div>
+                                )}
                                 <p className={styles.modalHint}>
                                     Al reabrir el modal vuelve la combinacion original. El oro, la plata y el bronce del 1-2-3 vienen del ranking y no cambian con estos colores.
                                 </p>
@@ -3196,8 +3249,11 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                 </div>
                                 <p className={styles.modalHint}>{paletteUsageHint}</p>
                                 <p className={styles.modalHint}>
-                                    Los cambios hechos aca aplican solo a esta exportacion abierta. Al volver a abrir el modal se recuperan los colores predeterminados del diseno.
+                                    {usesManagedDesign
+                                        ? 'Los cambios hechos aca aplican solo a esta exportacion abierta. Al volver a abrir el modal se recuperan los colores predeterminados del diseno.'
+                                        : 'Elegi una de las combinaciones y listo. Al volver a abrir el modal se recuperan los colores predeterminados del diseno.'}
                                 </p>
+                                {usesManagedDesign && (
                                 <div className={styles.customColors}>
                                     <div className={styles.colorInp}>
                                         <span>Fondo</span>
@@ -3208,6 +3264,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                         <input type="color" value={accentColor} onChange={(event) => handleAccentColorChange(event.target.value)} />
                                     </div>
                                 </div>
+                                )}
                                 {visualFamily === 'impactoV4' && (
                                     <div style={{ marginTop: 16 }}>
                                         <label className={styles.modalLabel}>Colores de Impacto V4</label>
@@ -3406,7 +3463,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                 {/* La biblioteca de gradientes pinta Fondo + Acento, y en la placa
                                     clasica esos dos no pintan nada apenas tocas un color propio:
                                     ahi manda "Tus placas" y esta no tiene por que aparecer. */}
-                                {!isEditorialGradientMode && !isClassicPlate && (
+                                {!isEditorialGradientMode && !isClassicPlate && usesManagedDesign && (
                                     <div className={styles.presetLibraryCard}>
                                         <div className={styles.presetLibrarySection}>
                                             <div className={styles.presetLibraryHeader}>
@@ -3528,6 +3585,8 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                     </div>
                 </div>
             , document.body) : null}
+
+            <GuestExportInvite isOpen={guestInvite.isOpen} onClose={guestInvite.close} />
         </div>
     );
 }
@@ -4985,7 +5044,11 @@ async function renderMatchExportPreviewDataUrl(options: {
                 gold: previewColors?.rankingGoldColor,
             });
         } else if (standingsData.variant === 'palmares') {
-            await drawPalmaresPoster(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+            if (visualFamily === 'fanV5') {
+                await drawFanPalmares(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+            } else {
+                await drawPalmaresPoster(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+            }
         } else if (visualFamily === 'posterV3') {
             await drawPosterV3Standings(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
         } else if (visualFamily === 'impactoV4') {
@@ -5000,6 +5063,8 @@ async function renderMatchExportPreviewDataUrl(options: {
     } else if (template === 'lineups') {
         if (visualFamily === 'posterV3') {
             await drawPosterV3Lineups(ctx, canvas, exportData as LineupsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupExportMode);
+        } else if (visualFamily === 'fanV5') {
+            await drawFanLineups(ctx, canvas, exportData as LineupsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupExportMode);
         } else if (visualFamily === 'momentumV2') {
             await drawMomentumLineups(ctx, canvas, exportData as LineupsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupExportMode);
         } else {
@@ -5014,6 +5079,8 @@ async function renderMatchExportPreviewDataUrl(options: {
 
         if (visualFamily === 'posterV3') {
             await drawPosterV3Squad(ctx, canvas, squadData, firstPage, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        } else if (visualFamily === 'fanV5') {
+            await drawFanSquad(ctx, canvas, squadData, firstPage, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
         } else if (visualFamily === 'momentumV2') {
             await drawMomentumSquad(ctx, canvas, squadData, firstPage, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
         } else {
@@ -18991,6 +19058,11 @@ async function drawImpactoDailyMatches(
 // fixture del dia. El resto de los templates cae a G22 Base a proposito.
 // ============================================================================
 
+// La firma de la familia: el logo del header de la web. El icono de la app no
+// alcanza —es una marca de aplicacion, no de medio— y ademas se lee como un
+// sello ajeno al pie de una placa.
+const FAN_WORDMARK_SOURCE = '/header-logo.png';
+
 type FanTone = {
     sheet: string;
     ink: string;
@@ -19094,8 +19166,69 @@ function drawFanCrest(
     ctx.restore();
 }
 
+// La firma es EL LOGO DEL HEADER —el mismo de la web, no el icono de la app— y
+// entra como bloque para poder centrarlo, pegarlo a un margen o colgarlo del
+// titular sin recalcular anchos a mano en cada pieza. Devuelve el ancho que
+// ocupo, que es lo que necesita el vecino para no escribirle encima.
+//
+// Si el archivo no carga cae al icono con "G22 SCORES" al lado: una pieza sin
+// firma no se publica, pero tampoco se rompe.
+function drawFanBrand(
+    ctx: CanvasRenderingContext2D,
+    wordmarkLogo: HTMLImageElement | null,
+    fallbackIcon: HTMLImageElement | null,
+    tone: FanTone,
+    options: { centerX?: number; right?: number; centerY: number; unit: (value: number) => number; height?: number; scale?: number }
+): number {
+    const u = options.unit;
+    const scale = options.scale ?? 1;
+
+    if (wordmarkLogo && wordmarkLogo.naturalWidth && wordmarkLogo.naturalHeight) {
+        const height = Math.round((options.height ?? u(58)) * scale);
+        const width = height * (wordmarkLogo.naturalWidth / wordmarkLogo.naturalHeight);
+        const left = typeof options.right === 'number'
+            ? options.right - width
+            : (options.centerX ?? 0) - width / 2;
+        ctx.save();
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(wordmarkLogo, left, options.centerY - height / 2, width, height);
+        ctx.restore();
+        return width;
+    }
+
+    const fontSize = Math.max(12, Math.round(u(24) * scale));
+    const iconSize = Math.max(14, Math.round(u(34) * scale));
+    const gap = Math.max(6, Math.round(u(12) * scale));
+    const label = 'G22 SCORES';
+
+    ctx.save();
+    ctx.font = `800 ${fontSize}px ${FONT_BODY}`;
+    setCanvasTracking(ctx, u(2));
+    const labelWidth = ctx.measureText(label).width;
+    const totalWidth = (fallbackIcon ? iconSize + gap : 0) + labelWidth;
+    const left = typeof options.right === 'number'
+        ? options.right - totalWidth
+        : (options.centerX ?? 0) - totalWidth / 2;
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = tone.softInk;
+    ctx.fillText(label, left + (fallbackIcon ? iconSize + gap : 0), options.centerY + 1);
+    setCanvasTracking(ctx, 0);
+    ctx.restore();
+
+    if (fallbackIcon) {
+        drawFanImage(ctx, fallbackIcon, left + iconSize / 2, options.centerY, iconSize, iconSize);
+    }
+
+    return totalWidth;
+}
+
 // El encabezado de las tres piezas: el torneo arriba en gris y la etapa (o la
-// fecha) abajo en el Acento. Devuelve el borde inferior porque lo que sigue se
+// fecha) abajo en el Acento. Centrado en el post; alineado a la izquierda en el
+// story, donde la firma se va al margen de arriba a la derecha y necesita el
+// renglon del torneo corrido. Devuelve el borde inferior porque lo que sigue se
 // cuelga de ahi.
 function drawFanKicker(
     ctx: CanvasRenderingContext2D,
@@ -19103,22 +19236,33 @@ function drawFanKicker(
     kicker: string,
     highlight: string,
     tone: FanTone,
-    options: { top: number; maxWidth: number; unit: (value: number) => number }
+    options: {
+        top: number;
+        maxWidth: number;
+        unit: (value: number) => number;
+        align?: 'center' | 'left';
+        left?: number;
+        // El renglon del torneo puede tener menos ancho que el titular cuando la
+        // firma le ocupa la punta derecha; el titular, que va mas abajo, no.
+        primaryMaxWidth?: number;
+    }
 ): number {
     const u = options.unit;
+    const align = options.align ?? 'center';
+    const anchorX = align === 'left' ? (options.left ?? 0) : canvas.width / 2;
     let cursor = options.top;
 
     const primary = (kicker || '').trim().toUpperCase();
     if (primary) {
         ctx.save();
-        ctx.textAlign = 'center';
+        ctx.textAlign = align === 'left' ? 'left' : 'center';
         ctx.textBaseline = 'top';
         ctx.fillStyle = tone.muted;
         // El tracking se aplica ANTES de medir: measureText lo cuenta, y al
         // reves el titulo se pasaba del ancho util por el espaciado.
         setCanvasTracking(ctx, u(3));
-        const size = setFittedFont(ctx, primary, options.maxWidth, '700', u(26), FONT_BODY, u(15));
-        ctx.fillText(primary, canvas.width / 2, cursor);
+        const size = setFittedFont(ctx, primary, options.primaryMaxWidth ?? options.maxWidth, '700', u(26), FONT_BODY, u(15));
+        ctx.fillText(primary, anchorX, cursor);
         setCanvasTracking(ctx, 0);
         ctx.restore();
         cursor += size + u(16);
@@ -19127,12 +19271,12 @@ function drawFanKicker(
     const secondary = (highlight || '').trim().toUpperCase();
     if (secondary) {
         ctx.save();
-        ctx.textAlign = 'center';
+        ctx.textAlign = align === 'left' ? 'left' : 'center';
         ctx.textBaseline = 'top';
         ctx.fillStyle = tone.accent;
         setCanvasTracking(ctx, u(2));
         const size = setFittedFont(ctx, secondary, options.maxWidth, '800', u(44), FONT_BODY, u(20));
-        ctx.fillText(secondary, canvas.width / 2, cursor);
+        ctx.fillText(secondary, anchorX, cursor);
         setCanvasTracking(ctx, 0);
         ctx.restore();
         cursor += size + u(12);
@@ -19141,14 +19285,21 @@ function drawFanKicker(
     return cursor;
 }
 
-// El pie: un filete y una sola fila. A la izquierda el dato que sobrevive
-// (fecha, sede, pagina), a la derecha la firma. Nada centrado, nada apilado.
+// El pie: un filete y una sola fila. La firma va CENTRADA en esa fila y el dato
+// que sobrevive (fecha, sede, pagina) queda a la izquierda. En el story la firma
+// se muda arriba y el pie se queda solo con el dato: `showBrand` es esa decision.
 function drawFanFooter(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     brandLogo: HTMLImageElement | null,
     tone: FanTone,
-    options: { padding: number; unit: (value: number) => number; meta?: string }
+    options: {
+        padding: number;
+        unit: (value: number) => number;
+        meta?: string;
+        showBrand?: boolean;
+        wordmark?: HTMLImageElement | null;
+    }
 ): number {
     const u = options.unit;
     const padding = options.padding;
@@ -19157,41 +19308,38 @@ function drawFanFooter(
     drawFanRule(ctx, padding, ruleY, contentWidth, tone);
 
     const rowCenterY = ruleY + u(58);
-    const iconSize = u(34);
-    const gap = u(12);
-    const wordmark = 'G22 SCORES';
-
-    ctx.save();
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = tone.softInk;
-    ctx.font = `800 ${u(24)}px ${FONT_BODY}`;
-    setCanvasTracking(ctx, u(2));
-    const wordmarkWidth = ctx.measureText(wordmark).width;
-    const wordmarkX = canvas.width - padding - wordmarkWidth;
-    ctx.fillText(wordmark, wordmarkX, rowCenterY + 1);
-    setCanvasTracking(ctx, 0);
-    ctx.restore();
-
-    if (brandLogo) {
-        drawFanImage(ctx, brandLogo, wordmarkX - gap - iconSize / 2, rowCenterY, iconSize, iconSize);
+    const showBrand = options.showBrand !== false;
+    if (showBrand) {
+        drawFanBrand(ctx, options.wordmark ?? null, brandLogo, tone, {
+            centerX: canvas.width / 2,
+            centerY: rowCenterY,
+            unit: u,
+            height: u(60),
+        });
     }
 
     const meta = (options.meta || '').trim().toUpperCase();
     if (meta) {
         ctx.save();
-        ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = tone.muted;
-        ctx.font = `700 ${u(22)}px ${FONT_BODY}`;
+        ctx.font = `700 ${u(20)}px ${FONT_BODY}`;
         setCanvasTracking(ctx, u(1));
-        const metaMaxWidth = Math.max(u(160), contentWidth - wordmarkWidth - iconSize - u(70));
-        ctx.fillText(truncateTextToWidth(ctx, meta, metaMaxWidth), padding, rowCenterY + 1);
+        if (showBrand) {
+            // Con la firma en el medio de la fila, al dato le quedaba media hoja
+            // y "APOLLO PROJECTS STADIUM" moria en tres letras. Va centrado
+            // ARRIBA del filete, donde tiene el ancho entero.
+            ctx.textAlign = 'center';
+            ctx.fillText(truncateTextToWidth(ctx, meta, contentWidth), canvas.width / 2, ruleY - u(26));
+        } else {
+            ctx.textAlign = 'left';
+            ctx.fillText(truncateTextToWidth(ctx, meta, contentWidth), padding, rowCenterY + 1);
+        }
         setCanvasTracking(ctx, 0);
         ctx.restore();
     }
 
-    return ruleY;
+    return showBrand && meta ? ruleY - u(44) : ruleY;
 }
 
 // El partido: dos escudos con su nombre y el marcador (o la hora) en el medio,
@@ -19202,15 +19350,16 @@ async function drawFanMatch(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     data: MatchStatsData,
-    _format: CanvasFormat,
+    format: CanvasFormat,
     accentColor: string,
     bgColor: string,
     brandLogo: HTMLImageElement | null
 ) {
-    const [homeLogo, awayLogo, tournamentLogo] = await Promise.all([
+    const [homeLogo, awayLogo, tournamentLogo, wordmark] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
         loadImage(getTournamentLogoImageSource(data)),
+        loadImage(FAN_WORDMARK_SOURCE),
     ]);
 
     // Escudo real o no hay pieza: la misma regla dura que la placa de G22 Base.
@@ -19230,6 +19379,7 @@ async function drawFanMatch(
     // escala por ANCHO y el alto de mas del story se reparte como aire.
     const u = (value: number) => Math.round((value * W) / 1080);
     const extra = Math.max(0, H - Math.round((W * 1350) / 1080));
+    const isStory = format.height > format.width && format.height >= 1600;
     const tone = getFanTone(accentColor, bgColor);
 
     drawFanSheet(ctx, canvas, tone);
@@ -19265,13 +19415,31 @@ async function drawFanMatch(
         unit: u,
     });
 
+    // En el story la firma cuelga del nombre del torneo, no del pie: el pie
+    // queda tan lejos del contenido que la marca se lee como de otra pieza.
+    if (isStory) {
+        drawFanBrand(ctx, wordmark, brandLogo, tone, {
+            centerX: W / 2,
+            centerY: cursor + u(44),
+            unit: u,
+            height: u(88),
+        });
+        cursor += u(104);
+    }
+
     const topRuleY = cursor + u(16) + extra * 0.06;
     drawFanRule(ctx, padding, topRuleY, contentWidth, tone);
 
     const metaLabel = isScheduled
         ? (data.venue || '').trim()
         : [data.date, data.venue].filter(Boolean).join('   ·   ');
-    const footerRuleY = drawFanFooter(ctx, canvas, brandLogo, tone, { padding, unit: u, meta: metaLabel });
+    const footerRuleY = drawFanFooter(ctx, canvas, brandLogo, tone, {
+        padding,
+        unit: u,
+        meta: metaLabel,
+        showBrand: !isStory,
+        wordmark,
+    });
 
     const bandTop = topRuleY + u(48);
     const bandBottom = footerRuleY - u(48);
@@ -19385,7 +19553,10 @@ async function drawFanStandings(
     const isStory = format.height > format.width && format.height >= 1600;
     const tone = getFanTone(accentColor, bgColor);
     const rows = slide.groups.flatMap((group) => group.rows);
-    const logos = await Promise.all(rows.map((row) => loadImage(row.teamLogo || '')));
+    const [logos, wordmark] = await Promise.all([
+        Promise.all(rows.map((row) => loadImage(row.teamLogo || ''))),
+        loadImage(FAN_WORDMARK_SOURCE),
+    ]);
     const legendItems = collectStandingsLegendEntries(rows, tone.accent);
 
     drawFanSheet(ctx, canvas, tone);
@@ -19396,14 +19567,28 @@ async function drawFanStandings(
     const subtitle = (data.subtitle || '').trim();
 
     let cursor = u(96) + extra * 0.1;
+    // En el story la firma se va al margen de arriba a la derecha y el titulo
+    // baja a la izquierda; en el post sigue todo centrado, con la firma al pie.
+    const headerBrandWidth = isStory
+        ? drawFanBrand(ctx, wordmark, brandLogo, tone, { right: W - padding, centerY: cursor + u(20), unit: u, height: u(58) })
+        : 0;
     cursor = drawFanKicker(ctx, canvas, title, subtitle || 'TABLA DE POSICIONES', tone, {
         top: cursor,
         maxWidth: contentWidth,
+        primaryMaxWidth: isStory ? contentWidth - headerBrandWidth - u(28) : contentWidth,
+        align: isStory ? 'left' : 'center',
+        left: padding,
         unit: u,
     });
 
     const footerMeta = slide.totalPages > 1 ? `Pagina ${slide.pageNumber} de ${slide.totalPages}` : '';
-    const footerRuleY = drawFanFooter(ctx, canvas, brandLogo, tone, { padding, unit: u, meta: footerMeta });
+    const footerRuleY = drawFanFooter(ctx, canvas, brandLogo, tone, {
+        padding,
+        unit: u,
+        meta: footerMeta,
+        showBrand: !isStory,
+        wordmark,
+    });
 
     // Columnas: la izquierda es puesto + escudo + nombre; los numeros se anclan
     // a la derecha, con PTS pegado al margen porque es lo que se mira primero.
@@ -19605,9 +19790,10 @@ async function drawFanDailyMatches(
     const isStory = format.height > format.width && format.height >= 1600;
     const tone = getFanTone(accentColor, bgColor);
     const matches = data.matches.slice(0, 10);
-    const logos = await Promise.all(
-        matches.flatMap((match) => [loadImage(match.homeLogo || ''), loadImage(match.awayLogo || '')])
-    );
+    const [logos, wordmark] = await Promise.all([
+        Promise.all(matches.flatMap((match) => [loadImage(match.homeLogo || ''), loadImage(match.awayLogo || '')])),
+        loadImage(FAN_WORDMARK_SOURCE),
+    ]);
 
     drawFanSheet(ctx, canvas, tone);
 
@@ -19615,9 +19801,15 @@ async function drawFanDailyMatches(
     const contentWidth = W - padding * 2;
 
     let cursor = u(96) + extra * 0.1;
+    const headerBrandWidth = isStory
+        ? drawFanBrand(ctx, wordmark, brandLogo, tone, { right: W - padding, centerY: cursor + u(20), unit: u, height: u(58) })
+        : 0;
     cursor = drawFanKicker(ctx, canvas, stripTournamentCountryPrefix(data.tournament || ''), data.date, tone, {
         top: cursor,
         maxWidth: contentWidth,
+        primaryMaxWidth: isStory ? contentWidth - headerBrandWidth - u(28) : contentWidth,
+        align: isStory ? 'left' : 'center',
+        left: padding,
         unit: u,
     });
 
@@ -19626,6 +19818,8 @@ async function drawFanDailyMatches(
         padding,
         unit: u,
         meta: hiddenMatches > 0 ? `+${hiddenMatches} partidos mas` : '',
+        showBrand: !isStory,
+        wordmark,
     });
 
     const headerTop = cursor + u(20);
@@ -19736,6 +19930,484 @@ async function drawFanDailyMatches(
 
         if (index < matches.length - 1) {
             drawFanRule(ctx, padding, rowY + rowHeight, contentWidth, tone);
+        }
+    });
+}
+
+// El palmares del hincha: NO es el afiche del podio. La vitrina se lee como una
+// lista —quien gano y cuantas veces— con el campeon arriba, mas grande, y el
+// resto abajo en filas planas. El podio 2-1-3 sigue siendo la pieza del gestor.
+async function drawFanPalmares(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: StandingsData,
+    slide: StandingsSlideData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const W = canvas.width;
+    const H = canvas.height;
+    const u = (value: number) => Math.round((value * W) / 1080);
+    const extra = Math.max(0, H - Math.round((W * 1350) / 1080));
+    const isStory = format.height > format.width && format.height >= 1600;
+    const tone = getFanTone(accentColor, bgColor);
+    const rows = slide.groups.flatMap((group) => group.rows);
+    const [logos, wordmark] = await Promise.all([
+        Promise.all(rows.map((row) => loadImage(row.teamLogo || ''))),
+        loadImage(FAN_WORDMARK_SOURCE),
+    ]);
+
+    drawFanSheet(ctx, canvas, tone);
+
+    const padding = u(72);
+    const contentWidth = W - padding * 2;
+    const title = stripTournamentCountryPrefix(data.title || '') || 'Palmares';
+    const subtitle = (data.subtitle || '').trim();
+
+    let cursor = u(96) + extra * 0.1;
+    const headerBrandWidth = isStory
+        ? drawFanBrand(ctx, wordmark, brandLogo, tone, { right: W - padding, centerY: cursor + u(20), unit: u, height: u(58) })
+        : 0;
+    cursor = drawFanKicker(ctx, canvas, title, subtitle || 'PALMARES', tone, {
+        top: cursor,
+        maxWidth: contentWidth,
+        primaryMaxWidth: isStory ? contentWidth - headerBrandWidth - u(28) : contentWidth,
+        align: isStory ? 'left' : 'center',
+        left: padding,
+        unit: u,
+    });
+
+    const footerMeta = slide.totalPages > 1 ? `Pagina ${slide.pageNumber} de ${slide.totalPages}` : '';
+    const footerRuleY = drawFanFooter(ctx, canvas, brandLogo, tone, {
+        padding,
+        unit: u,
+        meta: footerMeta,
+        showBrand: !isStory,
+        wordmark,
+    });
+
+    const titlesLabel = (data.columnLabels?.points?.trim() || 'Titulos').toUpperCase();
+    const headerTop = cursor + u(22);
+    const headerHeight = u(46);
+    const headerCenterY = headerTop + headerHeight / 2;
+    const titlesCenter = W - padding - u(52);
+    const posCenter = padding + u(30);
+    const crestCenterX = padding + u(104);
+    const nameX = crestCenterX + u(56);
+
+    ctx.save();
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = tone.muted;
+    ctx.font = `700 ${u(22)}px ${FONT_BODY}`;
+    setCanvasTracking(ctx, u(2));
+    ctx.textAlign = 'left';
+    ctx.fillText('CAMPEON', nameX, headerCenterY);
+    ctx.textAlign = 'center';
+    ctx.fillText(titlesLabel, titlesCenter, headerCenterY);
+    setCanvasTracking(ctx, 0);
+    ctx.restore();
+
+    const headerRuleY = headerTop + headerHeight + u(6);
+    drawFanRule(ctx, padding, headerRuleY, contentWidth, tone, { thickness: u(3), color: tone.accent });
+
+    // El campeon ocupa una fila y media: es el unico gesto de jerarquia que se
+    // permite la familia, y alcanza para que la vitrina no se lea como una tabla.
+    const rowsTop = headerRuleY + u(20);
+    const rowsBottom = footerRuleY - u(26);
+    const leaderWeight = rows.length > 1 ? 1.9 : 1;
+    const rowUnits = leaderWeight + Math.max(0, rows.length - 1);
+    const baseRowHeight = clampNumber(
+        (rowsBottom - rowsTop) / Math.max(rowUnits, 1),
+        u(46),
+        u(isStory ? 128 : 108)
+    );
+
+    const nameMaxWidth = Math.max(u(180), titlesCenter - u(70) - nameX);
+    const nameSize = getSharedFittedFontSize(
+        ctx,
+        rows.slice(1).map((row) => ({ text: row.team.trim().toUpperCase(), maxWidth: nameMaxWidth })),
+        '800',
+        Math.min(u(32), baseRowHeight * 0.42),
+        FONT_BODY,
+        u(16)
+    );
+
+    let cursorY = rowsTop;
+
+    rows.forEach((row, index) => {
+        const isLeader = index === 0 && rows.length > 1;
+        const rowHeight = baseRowHeight * (isLeader ? leaderWeight : 1);
+        const centerY = cursorY + rowHeight / 2;
+        const crestSize = Math.min(rowHeight * (isLeader ? 0.72 : 0.68), u(isLeader ? 128 : 66));
+        const logo = logos[index] || null;
+
+        if (isLeader) {
+            ctx.save();
+            ctx.fillStyle = hexToRGBA(tone.accent, 0.1);
+            ctx.fillRect(padding, cursorY, contentWidth, rowHeight);
+            ctx.restore();
+        }
+
+        drawFanCrest(ctx, {
+            centerX: crestCenterX,
+            centerY,
+            size: crestSize,
+            img: logo,
+            label: row.team,
+            rawLogo: row.teamLogo,
+            tone,
+        });
+
+        ctx.save();
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = tone.muted;
+        ctx.font = `800 ${Math.min(u(26), rowHeight * 0.3)}px ${FONT_BODY}`;
+        ctx.fillText(String(row.pos), posCenter, centerY + 1);
+        ctx.restore();
+
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = tone.ink;
+        const leaderNameSize = Math.min(u(44), rowHeight * 0.3);
+        ctx.font = `800 ${isLeader ? leaderNameSize : nameSize}px ${FONT_BODY}`;
+        ctx.fillText(
+            truncateTextToWidth(ctx, row.team.trim().toUpperCase(), nameMaxWidth),
+            nameX,
+            centerY + 1
+        );
+        ctx.restore();
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = isLeader ? tone.accent : tone.ink;
+        ctx.font = `800 ${Math.min(isLeader ? u(56) : u(32), rowHeight * 0.42)}px ${FONT_BODY}`;
+        ctx.fillText(String(row.points ?? '-'), titlesCenter, centerY + 1);
+        ctx.restore();
+
+        if (index < rows.length - 1) {
+            drawFanRule(ctx, padding, cursorY + rowHeight, contentWidth, tone);
+        }
+
+        cursorY += rowHeight;
+    });
+}
+
+// El plantel: dos columnas de nombres con el rotulo de su grupo. NO usa el
+// tablero compartido de las otras familias: ese tablero tiene cuerpos fijos
+// pensados para un panel, y sobre la hoja quedaba una lista diminuta arriba con
+// media pieza vacia abajo. Aca la fila se estira hasta llenar el alto util.
+async function drawFanSquad(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: SquadData,
+    page: SquadPageData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null
+) {
+    const W = canvas.width;
+    const H = canvas.height;
+    const u = (value: number) => Math.round((value * W) / 1080);
+    const extra = Math.max(0, H - Math.round((W * 1350) / 1080));
+    const isStory = format.height > format.width && format.height >= 1600;
+    const tone = getFanTone(accentColor, bgColor);
+    const [teamLogo, wordmark] = await Promise.all([
+        loadImage(data.teamLogo || data.tournamentLogo || ''),
+        loadImage(FAN_WORDMARK_SOURCE),
+    ]);
+
+    drawFanSheet(ctx, canvas, tone);
+
+    const padding = u(72);
+    const contentWidth = W - padding * 2;
+    const clubName = (data.teamName || '').trim();
+    const tournamentLabel = stripTournamentCountryPrefix(data.tournament || '');
+    const kickerLabel = tournamentLabel && tournamentLabel !== clubName ? tournamentLabel : (data.title || 'Plantel');
+
+    let cursor = u(92) + extra * 0.1;
+    const headerBrandWidth = isStory
+        ? drawFanBrand(ctx, wordmark, brandLogo, tone, { right: W - padding, centerY: cursor + u(20), unit: u, height: u(58) })
+        : 0;
+
+    // El escudo del club va arriba del nombre: en una pieza sin foto es lo unico
+    // que dice de quien es la lista de un vistazo.
+    if (teamLogo) {
+        const crestSize = u(76);
+        drawFanImage(ctx, teamLogo, isStory ? padding + crestSize / 2 : W / 2, cursor + crestSize / 2, crestSize, crestSize);
+        cursor += crestSize + u(18);
+    }
+
+    cursor = drawFanKicker(ctx, canvas, kickerLabel, clubName || 'PLANTEL', tone, {
+        top: cursor,
+        maxWidth: contentWidth,
+        primaryMaxWidth: isStory ? contentWidth - headerBrandWidth - u(28) : contentWidth,
+        align: isStory ? 'left' : 'center',
+        left: padding,
+        unit: u,
+    });
+
+    const footerRuleY = drawFanFooter(ctx, canvas, brandLogo, tone, {
+        padding,
+        unit: u,
+        meta: getSquadPageMetaLabel(data, page),
+        showBrand: !isStory,
+        wordmark,
+    });
+
+    const listTop = cursor + u(26);
+    drawFanRule(ctx, padding, listTop - u(16), contentWidth, tone, { thickness: u(3), color: tone.accent });
+
+    const totalPlayers = page.groups.reduce((sum, group) => sum + group.players.length, 0);
+    const columnCount = page.groups.length > 1 && (totalPlayers > (isStory ? 18 : 14) || page.groups.length > 2) ? 2 : 1;
+    const columns = distributeSquadGroupsAcrossColumns(page.groups, columnCount);
+    const columnGap = columnCount > 1 ? u(40) : 0;
+    const columnWidth = (contentWidth - columnGap * (columnCount - 1)) / columnCount;
+
+    // Todas las columnas comparten alto de fila: si cada una se acomodara a su
+    // propia lista, dos grupos de largo distinto se leerian en dos cuerpos.
+    const columnUnits = columns.map((column) => column.groups.reduce(
+        (sum, group) => sum + group.players.length + 1.7,
+        0
+    ));
+    const rowHeight = clampNumber(
+        (footerRuleY - u(28) - listTop) / Math.max(1, Math.max(...columnUnits)),
+        u(26),
+        u(isStory ? 76 : 64)
+    );
+    const numberSize = Math.min(u(24), rowHeight * 0.5);
+    const nameSize = Math.min(u(27), rowHeight * 0.54);
+    const metaSize = Math.min(u(19), rowHeight * 0.38);
+
+    columns.forEach((column, columnIndex) => {
+        const columnLeft = padding + columnIndex * (columnWidth + columnGap);
+        const numberX = columnLeft + u(24);
+        const nameX = columnLeft + u(58);
+        let rowY = listTop;
+
+        column.groups.forEach((group) => {
+            ctx.save();
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = tone.muted;
+            ctx.font = `800 ${Math.min(u(20), rowHeight * 0.42)}px ${FONT_BODY}`;
+            setCanvasTracking(ctx, u(2));
+            ctx.fillText(
+                truncateTextToWidth(ctx, formatSquadGroupLabel(group), columnWidth - u(12)),
+                columnLeft + u(4),
+                rowY + rowHeight * 0.6
+            );
+            setCanvasTracking(ctx, 0);
+            ctx.restore();
+            drawFanRule(ctx, columnLeft, rowY + rowHeight - u(4), columnWidth, tone);
+            rowY += rowHeight * 1.7;
+
+            group.players.forEach((player) => {
+                const centerY = rowY + rowHeight / 2;
+                const number = player.number === null || player.number === undefined
+                    ? ''
+                    : String(player.number).trim();
+                const meta = getSquadPlayerMetaLabel(player) || String(player.position || '').trim();
+
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = tone.accent;
+                ctx.font = `800 ${numberSize}px ${FONT_BODY}`;
+                if (number) ctx.fillText(number, numberX, centerY + 1);
+                ctx.restore();
+
+                ctx.save();
+                ctx.font = `700 ${metaSize}px ${FONT_BODY}`;
+                const metaText = meta ? meta.toUpperCase() : '';
+                const metaWidth = metaText ? Math.min(ctx.measureText(metaText).width, columnWidth * 0.34) : 0;
+                ctx.restore();
+
+                ctx.save();
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = tone.ink;
+                ctx.font = `800 ${nameSize}px ${FONT_BODY}`;
+                const nameMaxWidth = columnWidth - (nameX - columnLeft) - metaWidth - u(18);
+                ctx.fillText(truncateTextToWidth(ctx, (player.name || '').trim(), nameMaxWidth), nameX, centerY + 1);
+                ctx.restore();
+
+                if (metaText) {
+                    ctx.save();
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = tone.muted;
+                    ctx.font = `700 ${metaSize}px ${FONT_BODY}`;
+                    ctx.fillText(truncateTextToWidth(ctx, metaText, metaWidth), columnLeft + columnWidth - u(4), centerY + 1);
+                    ctx.restore();
+                }
+
+                rowY += rowHeight;
+            });
+        });
+    });
+}
+
+// La formacion: una columna por equipo, el escudo con el nombre arriba y los
+// quince abajo. Los suplentes van en gris debajo de su propio rotulo, sin caja.
+async function drawFanLineups(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: LineupsData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+    mode: LineupExportMode = 'both'
+) {
+    const W = canvas.width;
+    const H = canvas.height;
+    const u = (value: number) => Math.round((value * W) / 1080);
+    const extra = Math.max(0, H - Math.round((W * 1350) / 1080));
+    const isStory = format.height > format.width && format.height >= 1600;
+    const tone = getFanTone(accentColor, bgColor);
+    const teams = getSelectedLineupTeams(data, mode);
+    const [logos, wordmark] = await Promise.all([
+        Promise.all(teams.map((team) => loadImage(team.logo || ''))),
+        loadImage(FAN_WORDMARK_SOURCE),
+    ]);
+
+    drawFanSheet(ctx, canvas, tone);
+
+    const padding = u(72);
+    const contentWidth = W - padding * 2;
+    const tournamentLabel = stripTournamentCountryPrefix(data.tournament || '');
+    const titleLabel = (data.title || '').trim() || 'FORMACIONES';
+
+    let cursor = u(92) + extra * 0.1;
+    const headerBrandWidth = isStory
+        ? drawFanBrand(ctx, wordmark, brandLogo, tone, { right: W - padding, centerY: cursor + u(20), unit: u, height: u(58) })
+        : 0;
+    cursor = drawFanKicker(ctx, canvas, tournamentLabel, titleLabel, tone, {
+        top: cursor,
+        maxWidth: contentWidth,
+        primaryMaxWidth: isStory ? contentWidth - headerBrandWidth - u(28) : contentWidth,
+        align: isStory ? 'left' : 'center',
+        left: padding,
+        unit: u,
+    });
+
+    const metaLabel = [data.date?.trim(), data.time?.trim(), data.venue?.trim()].filter(Boolean).join('   ·   ');
+    const footerRuleY = drawFanFooter(ctx, canvas, brandLogo, tone, {
+        padding,
+        unit: u,
+        meta: metaLabel,
+        showBrand: !isStory,
+        wordmark,
+    });
+
+    const columnGap = teams.length > 1 ? u(36) : 0;
+    const columnWidth = (contentWidth - columnGap * (teams.length - 1)) / teams.length;
+    const boardTop = cursor + u(22);
+    const boardBottom = footerRuleY - u(26);
+
+    // Todas las columnas usan la MISMA altura de fila: si cada una se acomodara
+    // a su propia lista, dos formaciones de largo distinto quedarian escritas en
+    // dos cuerpos distintos y la pieza se leeria torcida.
+    const maxRows = Math.max(
+        1,
+        ...teams.map((team) => {
+            const players = Array.isArray(team.starters) ? team.starters : [];
+            const starters = players.filter((player, index) => isLineupStarter(player, index));
+            const substitutes = players.filter((player, index) => !isLineupStarter(player, index));
+            return starters.length + (substitutes.length > 0 ? substitutes.length + 1 : 0);
+        })
+    );
+    const headBlock = u(112);
+    const rowHeight = clampNumber(
+        (boardBottom - boardTop - headBlock) / maxRows,
+        u(26),
+        u(isStory ? 62 : 52)
+    );
+    const numberSize = Math.min(u(24), rowHeight * 0.5);
+    const nameSize = Math.min(u(26), rowHeight * 0.54);
+
+    teams.forEach((team, teamIndex) => {
+        const columnLeft = padding + teamIndex * (columnWidth + columnGap);
+        const columnCenter = columnLeft + columnWidth / 2;
+        const players = Array.isArray(team.starters) ? team.starters : [];
+        const starters = players.filter((player, index) => isLineupStarter(player, index));
+        const substitutes = players.filter((player, index) => !isLineupStarter(player, index));
+        const crestSize = u(72);
+
+        drawFanCrest(ctx, {
+            centerX: columnCenter,
+            centerY: boardTop + crestSize / 2,
+            size: crestSize,
+            img: logos[teamIndex] || null,
+            label: team.name,
+            rawLogo: team.logo,
+            tone,
+        });
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = tone.ink;
+        const clubName = (team.name || '').trim().toUpperCase();
+        setFittedFont(ctx, clubName, columnWidth - u(16), '800', u(30), FONT_BODY, u(16));
+        ctx.fillText(clubName, columnCenter, boardTop + crestSize + u(14));
+        ctx.restore();
+
+        const listTop = boardTop + headBlock;
+        drawFanRule(ctx, columnLeft, listTop - u(14), columnWidth, tone, { thickness: u(3), color: tone.accent });
+
+        const numberX = columnLeft + u(26);
+        const nameX = columnLeft + u(62);
+        const nameMaxWidth = columnWidth - u(74);
+        let rowY = listTop;
+
+        const drawPlayerRow = (player: LineupExportPlayerData, isStarter: boolean) => {
+            const centerY = rowY + rowHeight / 2;
+            const number = player.number === null || player.number === undefined ? '' : String(player.number).trim();
+            const name = (player.name || '').trim();
+
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = isStarter ? tone.accent : tone.muted;
+            ctx.font = `800 ${numberSize}px ${FONT_BODY}`;
+            if (number) ctx.fillText(number, numberX, centerY + 1);
+            ctx.restore();
+
+            ctx.save();
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = isStarter ? tone.ink : tone.softInk;
+            ctx.font = `${isStarter ? '800' : '700'} ${nameSize}px ${FONT_BODY}`;
+            const suffix = player.isCaptain ? '  (C)' : '';
+            ctx.fillText(truncateTextToWidth(ctx, `${name}${suffix}`, nameMaxWidth), nameX, centerY + 1);
+            ctx.restore();
+
+            rowY += rowHeight;
+        };
+
+        starters.forEach((player) => drawPlayerRow(player, true));
+
+        if (substitutes.length > 0) {
+            ctx.save();
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = tone.muted;
+            ctx.font = `700 ${Math.min(u(20), rowHeight * 0.46)}px ${FONT_BODY}`;
+            setCanvasTracking(ctx, u(2));
+            ctx.fillText('SUPLENTES', columnLeft + u(4), rowY + rowHeight / 2 + 1);
+            setCanvasTracking(ctx, 0);
+            ctx.restore();
+            drawFanRule(ctx, columnLeft, rowY + rowHeight - u(6), columnWidth, tone);
+            rowY += rowHeight;
+
+            substitutes.forEach((player) => drawPlayerRow(player, false));
         }
     });
 }

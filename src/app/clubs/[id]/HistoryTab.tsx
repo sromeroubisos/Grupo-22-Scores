@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { APP_TIMEZONE } from '@/lib/timezone';
 import { shareRivalHeadToHead, type RivalExportFormat } from './rivalHeadToHeadExport';
+import GuestExportInvite, { useGuestExportInvite } from '@/components/GuestExportInvite';
 import styles from './page.module.css';
 
 type Outcome = 'win' | 'draw' | 'loss';
@@ -218,6 +219,7 @@ export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId
     const [openSeason, setOpenSeason] = useState<string | null>(null);
     const [exportingFormat, setExportingFormat] = useState<RivalExportFormat | null>(null);
     const [exportError, setExportError] = useState<string | null>(null);
+    const guestInvite = useGuestExportInvite();
 
     useEffect(() => { setExportError(null); }, [selectedRivalId]);
 
@@ -374,6 +376,9 @@ export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId
                     tournamentName: match.tournamentName,
                 })),
             }, format);
+            // El mano a mano tambien lo baja un invitado: mismo cartel que el
+            // resto de los exports, y recien cuando la imagen ya salio.
+            guestInvite.notifyExportFinished();
         } catch (error) {
             setExportError(error instanceof Error ? error.message : 'No se pudo generar la imagen.');
         } finally {
@@ -556,6 +561,7 @@ export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId
                                 </button>
                                 {exportError && <small role="alert">{exportError}</small>}
                             </div>
+                            <GuestExportInvite isOpen={guestInvite.isOpen} onClose={guestInvite.close} />
                             <div className={styles.historySeasonBody}>{selectedRival.matches.map((match) => <MatchLine key={match.id} match={match} />)}</div>
                         </div>
                     ) : (

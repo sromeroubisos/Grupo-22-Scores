@@ -18,7 +18,6 @@ import {
 import styles from './page.module.css';
 import { useSport } from '@/context/SportContext';
 import { useAuth } from '@/context/AuthContext';
-import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import type { Sport } from '@/lib/types';
 import ExportImage from '@/components/ExportImage';
 import MobileSectionTabs from '@/components/MobileSectionTabs';
@@ -383,7 +382,9 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
     );
     const rankingExportSubtitle = selectedRanking?.description?.trim()
         || `Base ${selectedRanking?.season || '-'} / resultados ${selectedRanking?.results_season || '-'}`;
-    const canExportPublicRanking = !authLoading && canUseRestrictedContentActions(user?.role);
+    // El afiche del ranking lo baja cualquiera, invitado incluido: solo se espera
+    // a que resuelva la sesion para no dibujar el boton y sacarlo un tick despues.
+    const canExportPublicRanking = !authLoading;
 
     const rankingStatusLabel = loadingList || loadingDetail
         ? 'Cargando'
