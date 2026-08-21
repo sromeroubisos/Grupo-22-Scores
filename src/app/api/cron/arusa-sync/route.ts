@@ -4,10 +4,13 @@
  *   GET /api/cron/arusa-sync                       corrida normal
  *   GET /api/cron/arusa-sync?dry=1                 plan sin escribir
  *   GET /api/cron/arusa-sync?slug=top-10-de-arusa  una sola competencia
+ *   GET /api/cron/arusa-sync?todo=1                sin saltear fechas cerradas
  *
- * ARUSA juega sábado y domingo por la tarde de Santiago, y carga los
- * marcadores esa misma noche o el lunes. Por eso el `vercel.json` lo llama los
- * domingos y lunes de madrugada UTC, más una pasada diaria de repesca.
+ * ARUSA juega sábado Y domingo, de 12 a 20 de Santiago —medido sobre los 996
+ * partidos de 2026—, y carga los marcadores durante la tarde y la noche. Por
+ * eso el `vercel.json` lo llama cada dos horas los dos días mientras se juega
+ * (16-22 UTC) y otra vez de madrugada, cuando ya terminó todo (0-4 UTC del día
+ * siguiente), más una repesca diaria a las 15 UTC.
  *
  * Qué toca: NO borra ni duplica. `planArusaMatches` empareja cada partido de
  * la fuente con el que ya está y solo corrige lo que ARUSA sabe mejor — hora,
@@ -87,6 +90,10 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const enSeco = url.searchParams.get('dry') === '1';
   const soloSlug = url.searchParams.get('slug');
+  // Sin `todo=1` se saltean las fechas ya cerradas (ver más abajo).
+  const completo = url.searchParams.get('todo') === '1';
+  const DIAS_DE_GRACIA = 21;
+  const corte = Date.now() - DIAS_DE_GRACIA * 24 * 60 * 60 * 1000;
   const objetivos = soloSlug ? TORNEOS.filter((t) => t.slug === soloSlug) : TORNEOS;
   if (!objetivos.length) {
     return NextResponse.json({ ok: false, error: `No hay ninguna competencia declarada con slug=${soloSlug}` }, { status: 400 });
@@ -158,9 +165,33 @@ export async function GET(req: Request) {
         continue;
       }
 
+      // Una fecha CERRADA no se vuelve a pedir: todos sus partidos están
+      // finales y se jugaron hace más de tres semanas. Cada fecha es un
+      // request y un torneo tiene 18; corriendo cada dos horas los sábados,
+      // releer las de abril no aporta nada. El margen es generoso a propósito:
+      // si ARUSA corrige un marcador viejo, la corrida siguiente lo agarra
+      // igual mientras esté dentro de la ventana. Con `?todo=1` se piden todas.
+      const cerradas = new Set<string>();
+      if (!completo) {
+        const porFecha = new Map<string, { todosFinales: boolean; ultima: number }>();
+        for (const m of ya.filter((x) => x.phase_id === fase.id)) {
+          const rotulo = m.round_label;
+          if (!rotulo) continue;
+          const previa = porFecha.get(rotulo) ?? { todosFinales: true, ultima: 0 };
+          previa.todosFinales &&= m.status === 'final';
+          previa.ultima = Math.max(previa.ultima, m.date_time ? new Date(m.date_time).getTime() : 0);
+          porFecha.set(rotulo, previa);
+        }
+        for (const [rotulo, d] of porFecha) {
+          if (d.todosFinales && d.ultima && d.ultima < corte) cerradas.add(rotulo);
+        }
+      }
+
       let partidos;
       try {
-        partidos = await fetchPartidosDeGrupo(rama.id, cabecera.equipos);
+        partidos = await fetchPartidosDeGrupo(rama.id, cabecera.equipos, {
+          saltear: (nombreFecha) => cerradas.has(nombreFecha),
+        });
       } catch (e) {
         errors.push(`${objetivo.slug} / ${rama.nombre}: no se pudieron leer los partidos (${e instanceof Error ? e.message : e})`);
         continue;
@@ -205,6 +236,7 @@ export async function GET(req: Request) {
         actualizar: plan.actualizar.length,
         crear: plan.crear.length,
         sinCambios: plan.sinCambios,
+        ...(cerradas.size && { fechasSalteadas: cerradas.size }),
         ...(plan.localiaCorregida && { localiaCorregida: plan.localiaCorregida }),
         ...(plan.clubesSinMapa.length && { equiposSinClub: plan.clubesSinMapa }),
         ...(plan.huerfanos.length && { sinParEnArusa: plan.huerfanos.length }),
@@ -239,5 +271,5 @@ export async function GET(req: Request) {
     }
   }
 
-  return NextResponse.json({ ok: errors.length === 0, dry: enSeco, torneos: resumen, errors });
+  return NextResponse.json({ ok: errors.length === 0, dry: enSeco, completo, torneos: resumen, errors });
 }

@@ -203,6 +203,18 @@ export async function fetchTorneo(idTorneo: string): Promise<TorneoArusa> {
 export async function fetchPartidosDeGrupo(
     idGrupo: string,
     equipos: Record<string, string>,
+    opts: {
+        /**
+         * Devolvé `true` para NO pedir esa fecha. Cada fecha es un request, y
+         * un torneo de 18 son 18: en una corrida cada dos horas, volver a leer
+         * las de abril no aporta nada.
+         *
+         * OJO: el `updated_at` de la ronda NO sirve para esto — no se mueve
+         * cuando se carga un resultado, solo cuando se reordena el fixture.
+         * Quién está cerrado lo sabe el que llama, mirando lo que ya guardó.
+         */
+        saltear?: (nombreFecha: string, orden: number) => boolean;
+    } = {},
 ): Promise<PartidoArusa[]> {
     const doc = await leer(`groups/${idGrupo}?include=rounds`);
     const fechas = (doc.included ?? [])
@@ -211,6 +223,8 @@ export async function fetchPartidosDeGrupo(
 
     const partidos: PartidoArusa[] = [];
     for (const f of fechas) {
+        const nombreFecha = String(f.attributes?.name ?? '').replace(/^\d+\.\s*/, '');
+        if (opts.saltear?.(nombreFecha, Number(f.attributes?.order ?? 0))) continue;
         const rd = await leer(`rounds/${f.id}?include=matches.results,matches.facility`);
         const inc = rd.included ?? [];
         const canchas: Record<string, string> = {};
@@ -236,7 +250,7 @@ export async function fetchPartidosDeGrupo(
 
             partidos.push({
                 id: m.id,
-                fecha: String(f.attributes?.name ?? '').replace(/^\d+\.\s*/, ''),
+                fecha: nombreFecha,
                 ordenFecha: Number(f.attributes?.order ?? 0),
                 inicioLocal: (m.attributes?.datetime as string) ?? (m.attributes?.date as string) ?? null,
                 zona: String(m.attributes?.display_timezone ?? 'America/Santiago'),
