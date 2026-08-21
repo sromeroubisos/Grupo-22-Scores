@@ -342,7 +342,20 @@ type SavedMatchGradientPreset = {
     gradientImage: MatchBackgroundUpload | null;
 };
 type ExportPresetStorageMode = 'local' | 'cloud';
-type ExportPresetKind = 'editorial' | 'gradient';
+// La placa clasica de partido se pinta con tres colores propios —las dos
+// puntas del degradado y la tinta— mas la marca del pie. No son Fondo +
+// Acento: en "Auto" se derivan de ellos, pero apenas tocas uno la placa deja
+// de mirar la paleta. Por eso las placas se guardan en su propia biblioteca y
+// no ensucian la de gradientes.
+type SavedMatchPlatePreset = {
+    id: string;
+    name: string;
+    field: string;
+    fieldEnd: string;
+    ink: string;
+    brand: PlateBrandId;
+};
+type ExportPresetKind = 'editorial' | 'gradient' | 'plate';
 type SupabaseBrowserClient = ReturnType<typeof createClient>;
 type PersistedExportPresetRow = {
     id: string;
@@ -527,14 +540,23 @@ let ACTIVE_EXPORT_ELEMENT_DIMENSIONS: ActiveExportElementDimensions = {};
 const BRAND_ACCENT = '#00a365';
 const EDITORIAL_PRESET_STORAGE_KEY = 'g22-export-editorial-presets-v1';
 const EDITORIAL_GRADIENT_PRESET_STORAGE_KEY = 'g22-export-editorial-gradient-presets-v1';
+const PLATE_PRESET_STORAGE_KEY = 'g22-export-plate-presets-v1';
 const EXPORT_STORAGE_DB_NAME = 'g22-export-storage';
 const EXPORT_STORAGE_DB_VERSION = 1;
 const EXPORT_STORAGE_STORE_NAME = 'kv';
 const EXPORT_STORAGE_EDITORIAL_PRESETS_KEY = 'editorial-presets';
 const EXPORT_STORAGE_EDITORIAL_GRADIENTS_KEY = 'editorial-gradient-presets';
+const EXPORT_STORAGE_PLATE_PRESETS_KEY = 'plate-presets';
 const EXPORT_PRESETS_TABLE = 'user_export_presets';
 const MAX_SAVED_EDITORIAL_PRESETS = 24;
 const MAX_SAVED_EDITORIAL_GRADIENT_PRESETS = 24;
+const MAX_SAVED_PLATE_PRESETS = 24;
+// Lo que muestra cada selector cuando el color esta en "Auto". Es el valor de
+// reposo del input, no el color derivado: por eso un preset guarda vacio y no
+// este hex, asi "Auto" sigue siendo "Auto" cuando la placa vuelve.
+const PLATE_FIELD_FALLBACK = '#1d6d92';
+const PLATE_FIELD_END_FALLBACK = '#0f3d52';
+const PLATE_INK_FALLBACK = '#ffffff';
 const EDITORIAL_SPONSOR_SLOTS = 6;
 const EDITORIAL_TEXTURE_SOURCE = '/textures/vecteezy_grey-distressed-grunge-background_154365.svg';
 const LOCAL_EXPORT_FONTS: LocalExportFont[] = [
@@ -919,8 +941,13 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     ));
     const [savedEditorialPresets, setSavedEditorialPresets] = useState<SavedMatchEditorialPreset[]>([]);
     const [savedGradientPresets, setSavedGradientPresets] = useState<SavedMatchGradientPreset[]>([]);
+    const [savedPlatePresets, setSavedPlatePresets] = useState<SavedMatchPlatePreset[]>([]);
     const [editorialPresetName, setEditorialPresetName] = useState('');
     const [gradientPresetName, setGradientPresetName] = useState('');
+    const [platePresetName, setPlatePresetName] = useState('');
+    // Las placas llevan su propio modo de guardado: pueden quedar en el
+    // dispositivo aunque los otros presets esten sincronizando con la cuenta.
+    const [platePresetStorageMode, setPlatePresetStorageMode] = useState<ExportPresetStorageMode>('local');
     const [editorialSponsors, setEditorialSponsors] = useState<MatchSponsorData[]>(() => (
         template === 'matchStats'
             ? buildEditorialSponsorSlots((data as MatchStatsData).sponsors)
@@ -1155,13 +1182,15 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
             try {
                 do {
                     hydrateQueued = false;
-                    const { editorialPresets, gradientPresets, storageMode } =
+                    const { editorialPresets, gradientPresets, platePresets, storageMode, plateStorageMode } =
                         await hydrateSavedPresetCollections(supabase);
 
                     if (!isMounted) return;
                     setSavedEditorialPresets(editorialPresets);
                     setSavedGradientPresets(gradientPresets);
+                    setSavedPlatePresets(platePresets);
                     setPresetStorageMode(storageMode);
+                    setPlatePresetStorageMode(plateStorageMode);
                 } while (hydrateQueued && isMounted);
             } finally {
                 hydrateInFlight = false;
@@ -1293,6 +1322,8 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
         ? supportsPhotoFreeEditorialSchedule || Boolean(matchBackgroundUpload?.src || (data as MatchStatsData).backgroundImage?.trim())
         : false;
     const isEditorialGradientMode = template === 'matchStats' && matchExportLayout === 'editorial4x5';
+    // La placa clasica del partido: la unica pieza con degradado propio.
+    const isClassicPlate = template === 'matchStats' && matchExportLayout === 'classic' && visualFamily === 'g22Base';
     const savedColorGradientPresets = useMemo(
         () => savedGradientPresets.filter((preset) => !preset.gradientImage),
         [savedGradientPresets]
@@ -1652,6 +1683,68 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
             setEditorialGradientUpload(preset.gradientImage ? { ...preset.gradientImage } : null);
         }
         setStatus(`Gradiente "${preset.name}" aplicado`);
+        window.setTimeout(() => setStatus(''), 2200);
+    };
+
+    const handleSavePlatePreset = async () => {
+        const name = platePresetName.trim();
+        if (!name) {
+            setStatus('Ponle un nombre a la placa antes de guardarla');
+            return;
+        }
+
+        const nextPreset: SavedMatchPlatePreset = {
+            id: buildPresetId('plate'),
+            name,
+            // Se guarda lo que hay, vacios incluidos: un color en "Auto" vuelve
+            // en "Auto" y no congela el hex de reposo del selector.
+            field: plateFieldColor,
+            fieldEnd: plateFieldEndColor,
+            ink: plateInkColor,
+            brand: plateBrand,
+        };
+
+        const nextPresets = upsertSavedPlatePreset(savedPlatePresets, nextPreset);
+        setSavedPlatePresets(nextPresets);
+        try {
+            const storageMode = await persistSavedPlatePreset(nextPresets, nextPreset, supabase);
+            setPlatePresetStorageMode(storageMode);
+            setPlatePresetName('');
+            setStatus(storageMode === 'cloud'
+                ? `Placa "${name}" guardada y sincronizada`
+                : `Placa "${name}" guardada en este dispositivo`);
+            window.setTimeout(() => setStatus(''), 2200);
+        } catch (error) {
+            console.error('Plate preset save error:', error);
+            setSavedPlatePresets(savedPlatePresets);
+            setStatus('No se pudo guardar la placa. Reintenta en unos segundos.');
+        }
+    };
+
+    const handleDeletePlatePreset = async (presetId: string, presetName: string) => {
+        const nextPresets = savedPlatePresets.filter((preset) => preset.id !== presetId);
+        setSavedPlatePresets(nextPresets);
+
+        try {
+            const storageMode = await deleteSavedPlatePreset(nextPresets, presetName, supabase);
+            setPlatePresetStorageMode(storageMode);
+            setStatus(storageMode === 'cloud'
+                ? `Placa "${presetName}" eliminada y sincronizada`
+                : `Placa "${presetName}" eliminada`);
+            window.setTimeout(() => setStatus(''), 2200);
+        } catch (error) {
+            console.error('Plate preset delete error:', error);
+            setSavedPlatePresets(savedPlatePresets);
+            setStatus('No se pudo borrar la placa. Reintenta en unos segundos.');
+        }
+    };
+
+    const applySavedPlatePreset = (preset: SavedMatchPlatePreset) => {
+        setPlateFieldColor(preset.field);
+        setPlateFieldEndColor(preset.fieldEnd);
+        setPlateInkColor(preset.ink);
+        setPlateBrand(preset.brand);
+        setStatus(`Placa "${preset.name}" aplicada`);
         window.setTimeout(() => setStatus(''), 2200);
     };
 
@@ -3136,7 +3229,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                         </p>
                                     </div>
                                 )}
-                                {template === 'matchStats' && matchExportLayout === 'classic' && visualFamily === 'g22Base' && (
+                                {isClassicPlate && (
                                     <div style={{ marginTop: 16 }}>
                                         <label className={styles.modalLabel}>Degradado de la placa</label>
                                         <div className={styles.customColors}>
@@ -3144,7 +3237,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                                 <span>Desde</span>
                                                 <input
                                                     type="color"
-                                                    value={plateFieldColor || '#1d6d92'}
+                                                    value={plateFieldColor || PLATE_FIELD_FALLBACK}
                                                     onChange={(event) => setPlateFieldColor(event.target.value)}
                                                 />
                                                 <button
@@ -3161,7 +3254,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                                 <span>Hasta</span>
                                                 <input
                                                     type="color"
-                                                    value={plateFieldEndColor || '#0f3d52'}
+                                                    value={plateFieldEndColor || PLATE_FIELD_END_FALLBACK}
                                                     onChange={(event) => setPlateFieldEndColor(event.target.value)}
                                                 />
                                                 <button
@@ -3178,7 +3271,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                                 <span>Tinta</span>
                                                 <input
                                                     type="color"
-                                                    value={plateInkColor || '#ffffff'}
+                                                    value={plateInkColor || PLATE_INK_FALLBACK}
                                                     onChange={(event) => setPlateInkColor(event.target.value)}
                                                 />
                                                 <button
@@ -3231,9 +3324,75 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                                 </span>
                                             </label>
                                         </div>
+                                        <div className={styles.presetLibraryCard} style={{ marginTop: 16 }}>
+                                            <div className={styles.presetLibrarySection}>
+                                                <div className={styles.presetLibraryHeader}>
+                                                    <span className={styles.presetLibraryTitle}>Tus placas</span>
+                                                    <span className={styles.presetLibraryMeta}>
+                                                        {platePresetStorageMode === 'cloud' ? 'Sincronizadas con tu cuenta' : 'Se guardan en este dispositivo'}
+                                                    </span>
+                                                </div>
+                                                <div className={styles.gradientUploadRow}>
+                                                    <input
+                                                        className={styles.modalInput}
+                                                        value={platePresetName}
+                                                        onChange={(event) => setPlatePresetName(event.target.value)}
+                                                        placeholder="Ej: Bordo del club"
+                                                    />
+                                                    <button className={styles.uploadBtn} onClick={handleSavePlatePreset} type="button">
+                                                        Guardar placa
+                                                    </button>
+                                                </div>
+                                                {savedPlatePresets.length > 0 ? (
+                                                    <div className={styles.gradientPresetGrid}>
+                                                        {savedPlatePresets.map((preset) => {
+                                                            const isActive = plateFieldColor === preset.field
+                                                                && plateFieldEndColor === preset.fieldEnd
+                                                                && plateInkColor === preset.ink
+                                                                && plateBrand === preset.brand;
+                                                            return (
+                                                                <div key={preset.id} className={styles.savedPresetCard}>
+                                                                    <button
+                                                                        className={`${styles.gradientPresetBtn} ${isActive ? styles.gradientPresetBtnActive : ''}`}
+                                                                        onClick={() => applySavedPlatePreset(preset)}
+                                                                        title={`Aplicar ${preset.name}`}
+                                                                        type="button"
+                                                                    >
+                                                                        <span
+                                                                            className={styles.gradientPresetSwatch}
+                                                                            style={{
+                                                                                background: `linear-gradient(135deg, ${preset.field || PLATE_FIELD_FALLBACK}, ${preset.fieldEnd || PLATE_FIELD_END_FALLBACK})`,
+                                                                                boxShadow: `inset 0 -4px 0 ${preset.ink || PLATE_INK_FALLBACK}`,
+                                                                            }}
+                                                                        />
+                                                                        <span className={styles.gradientPresetName}>{preset.name}</span>
+                                                                    </button>
+                                                                    <button
+                                                                        className={styles.savedPresetDeleteBtn}
+                                                                        onClick={() => handleDeletePlatePreset(preset.id, preset.name)}
+                                                                        title={`Borrar ${preset.name}`}
+                                                                        aria-label={`Borrar ${preset.name}`}
+                                                                        type="button"
+                                                                    >
+                                                                        <X size={14} />
+                                                                    </button>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ) : (
+                                                    <div className={styles.emptyPresetState}>
+                                                        Todavia no guardaste placas. Con un nombre, estos tres colores y la marca del pie vuelven en cualquier partido.
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
-                                {!isEditorialGradientMode && (
+                                {/* La biblioteca de gradientes pinta Fondo + Acento, y en la placa
+                                    clasica esos dos no pintan nada apenas tocas un color propio:
+                                    ahi manda "Tus placas" y esta no tiene por que aparecer. */}
+                                {!isEditorialGradientMode && !isClassicPlate && (
                                     <div className={styles.presetLibraryCard}>
                                         <div className={styles.presetLibrarySection}>
                                             <div className={styles.presetLibraryHeader}>
@@ -3244,12 +3403,12 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                                             </div>
                                             <div className={styles.gradientUploadRow}>
                                                 <input
-                                                    className={styles.textInput}
+                                                    className={styles.modalInput}
                                                     value={gradientPresetName}
                                                     onChange={(event) => setGradientPresetName(event.target.value)}
                                                     placeholder="Ej: Verde noche"
                                                 />
-                                                <button className={styles.secondaryBtn} onClick={handleSaveGradientPreset} type="button">
+                                                <button className={styles.uploadBtn} onClick={handleSaveGradientPreset} type="button">
                                                     Guardar gradiente
                                                 </button>
                                             </div>
@@ -3822,7 +3981,7 @@ function getActiveEditorialSponsors(sponsors: MatchSponsorData[]): MatchSponsorD
         .filter((sponsor) => Boolean(sponsor.logo || sponsor.name));
 }
 
-function buildPresetId(prefix: 'editorial' | 'gradient'): string {
+function buildPresetId(prefix: 'editorial' | 'gradient' | 'plate'): string {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
@@ -3863,6 +4022,17 @@ function upsertSavedGradientPreset(
         preset,
         ...presets.filter((current) => normalizePresetName(current.name) !== normalizedName),
     ].slice(0, MAX_SAVED_EDITORIAL_GRADIENT_PRESETS);
+}
+
+function upsertSavedPlatePreset(
+    presets: SavedMatchPlatePreset[],
+    preset: SavedMatchPlatePreset,
+): SavedMatchPlatePreset[] {
+    const normalizedName = normalizePresetName(preset.name);
+    return [
+        preset,
+        ...presets.filter((current) => normalizePresetName(current.name) !== normalizedName),
+    ].slice(0, MAX_SAVED_PLATE_PRESETS);
 }
 
 function normalizeSavedEditorialPresets(raw: unknown): SavedMatchEditorialPreset[] {
@@ -3937,6 +4107,34 @@ function openExportStorageDatabase(): Promise<IDBDatabase> {
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error || new Error('No se pudo abrir el storage de exportacion'));
     });
+}
+
+function normalizePlatePresetColor(value: unknown): string {
+    if (typeof value !== 'string') return '';
+    const trimmed = value.trim();
+    // El vacio es un valor legitimo: significa "Auto".
+    return /^#[0-9a-fA-F]{6}$/.test(trimmed) ? trimmed.toLowerCase() : '';
+}
+
+function normalizePlatePresetBrand(value: unknown): PlateBrandId {
+    return PLATE_BRAND_OPTIONS.some((option) => option.value === value)
+        ? value as PlateBrandId
+        : 'auto';
+}
+
+function normalizeSavedPlatePresets(raw: unknown): SavedMatchPlatePreset[] {
+    if (!Array.isArray(raw)) return [];
+
+    return raw
+        .map((item, index) => ({
+            id: typeof item?.id === 'string' && item.id ? item.id : `plate-${index + 1}`,
+            name: typeof item?.name === 'string' && item.name.trim() ? item.name.trim() : `Placa ${index + 1}`,
+            field: normalizePlatePresetColor(item?.field),
+            fieldEnd: normalizePlatePresetColor(item?.fieldEnd),
+            ink: normalizePlatePresetColor(item?.ink),
+            brand: normalizePlatePresetBrand(item?.brand),
+        }))
+        .slice(0, MAX_SAVED_PLATE_PRESETS);
 }
 
 async function readPersistedCollection<T>(
@@ -4035,6 +4233,32 @@ async function persistLocalSavedGradientPresets(presets: SavedMatchGradientPrese
     );
 }
 
+async function readLocalSavedPlatePresets(): Promise<SavedMatchPlatePreset[]> {
+    return readPersistedCollection(
+        EXPORT_STORAGE_PLATE_PRESETS_KEY,
+        PLATE_PRESET_STORAGE_KEY,
+        normalizeSavedPlatePresets,
+    );
+}
+
+async function persistLocalSavedPlatePresets(presets: SavedMatchPlatePreset[]): Promise<void> {
+    await persistCollection(
+        EXPORT_STORAGE_PLATE_PRESETS_KEY,
+        PLATE_PRESET_STORAGE_KEY,
+        presets,
+    );
+}
+
+function mergeSavedPlatePresetCollections(
+    remotePresets: SavedMatchPlatePreset[],
+    localPresets: SavedMatchPlatePreset[],
+): SavedMatchPlatePreset[] {
+    return localPresets.reduce(
+        (merged, preset) => upsertSavedPlatePreset(merged, preset),
+        [...remotePresets],
+    );
+}
+
 function mergeSavedEditorialPresetCollections(
     remotePresets: SavedMatchEditorialPreset[],
     localPresets: SavedMatchEditorialPreset[],
@@ -4069,6 +4293,10 @@ function buildStablePresetSignatureEntry(value: unknown): string {
         preset.gradientRightColor ?? null,
         preset.gradientImage ?? null,
         preset.sponsors ?? null,
+        preset.field ?? null,
+        preset.fieldEnd ?? null,
+        preset.ink ?? null,
+        preset.brand ?? null,
     ]);
 }
 
@@ -4172,6 +4400,16 @@ function mapRemoteGradientPresetRows(rows: PersistedExportPresetRow[]): SavedMat
     );
 }
 
+function mapRemotePlatePresetRows(rows: PersistedExportPresetRow[]): SavedMatchPlatePreset[] {
+    return normalizeSavedPlatePresets(
+        rows.map((row) => ({
+            id: row.id,
+            name: row.name,
+            ...asPresetPayload(row.payload),
+        })),
+    );
+}
+
 async function getAuthenticatedPresetUserId(supabase: SupabaseBrowserClient): Promise<string | null> {
     const { data, error } = await supabase.auth.getSession();
     if (error) {
@@ -4188,7 +4426,9 @@ async function readRemotePresetRows(
 ): Promise<PersistedExportPresetRow[]> {
     const maxRows = presetType === 'gradient'
         ? MAX_SAVED_EDITORIAL_GRADIENT_PRESETS
-        : MAX_SAVED_EDITORIAL_PRESETS;
+        : presetType === 'plate'
+            ? MAX_SAVED_PLATE_PRESETS
+            : MAX_SAVED_EDITORIAL_PRESETS;
 
     const { data, error } = await supabase
         .from(EXPORT_PRESETS_TABLE)
@@ -4233,6 +4473,22 @@ function buildRemoteGradientPresetRow(userId: string, preset: SavedMatchGradient
             gradientLeftColor: preset.gradientLeftColor,
             gradientRightColor: preset.gradientRightColor,
             gradientImage: preset.gradientImage,
+        },
+    };
+}
+
+function buildRemotePlatePresetRow(userId: string, preset: SavedMatchPlatePreset): RemoteExportPresetRow {
+    return {
+        id: buildRemotePresetRowId(userId, 'plate', preset.name),
+        user_id: userId,
+        preset_type: 'plate',
+        name: preset.name,
+        name_normalized: normalizePresetName(preset.name),
+        payload: {
+            field: preset.field,
+            fieldEnd: preset.fieldEnd,
+            ink: preset.ink,
+            brand: preset.brand,
         },
     };
 }
@@ -4288,6 +4544,14 @@ async function upsertRemoteGradientPresets(
     await upsertRemotePresetRows(supabase, presets.map((preset) => buildRemoteGradientPresetRow(userId, preset)));
 }
 
+async function upsertRemotePlatePresets(
+    supabase: SupabaseBrowserClient,
+    userId: string,
+    presets: SavedMatchPlatePreset[],
+): Promise<void> {
+    await upsertRemotePresetRows(supabase, presets.map((preset) => buildRemotePlatePresetRow(userId, preset)));
+}
+
 async function deleteRemotePresetByName(
     supabase: SupabaseBrowserClient,
     userId: string,
@@ -4309,11 +4573,14 @@ async function deleteRemotePresetByName(
 async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): Promise<{
     editorialPresets: SavedMatchEditorialPreset[];
     gradientPresets: SavedMatchGradientPreset[];
+    platePresets: SavedMatchPlatePreset[];
     storageMode: ExportPresetStorageMode;
+    plateStorageMode: ExportPresetStorageMode;
 }> {
-    const [localEditorialPresets, localGradientPresets, userId] = await Promise.all([
+    const [localEditorialPresets, localGradientPresets, localPlatePresets, userId] = await Promise.all([
         readLocalSavedEditorialPresets(),
         readLocalSavedGradientPresets(),
+        readLocalSavedPlatePresets(),
         getAuthenticatedPresetUserId(supabase),
     ]);
 
@@ -4321,23 +4588,29 @@ async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): P
         return {
             editorialPresets: localEditorialPresets,
             gradientPresets: localGradientPresets,
+            platePresets: localPlatePresets,
             storageMode: 'local',
+            plateStorageMode: 'local',
         };
     }
 
     try {
-        const [remoteEditorialRows, remoteGradientRows] = await Promise.all([
+        const [remoteEditorialRows, remoteGradientRows, remotePlateRows] = await Promise.all([
             readRemotePresetRows(supabase, userId, 'editorial'),
             readRemotePresetRows(supabase, userId, 'gradient'),
+            readRemotePresetRows(supabase, userId, 'plate'),
         ]);
         const remoteEditorialPresets = mapRemoteEditorialPresetRows(remoteEditorialRows);
         const remoteGradientPresets = mapRemoteGradientPresetRows(remoteGradientRows);
+        const remotePlatePresets = mapRemotePlatePresetRows(remotePlateRows);
         const mergedEditorialPresets = mergeSavedEditorialPresetCollections(remoteEditorialPresets, localEditorialPresets);
         const mergedGradientPresets = mergeSavedGradientPresetCollections(remoteGradientPresets, localGradientPresets);
+        const mergedPlatePresets = mergeSavedPlatePresetCollections(remotePlatePresets, localPlatePresets);
 
         await Promise.all([
             persistLocalSavedEditorialPresets(mergedEditorialPresets),
             persistLocalSavedGradientPresets(mergedGradientPresets),
+            persistLocalSavedPlatePresets(mergedPlatePresets),
         ]);
 
         if (getPresetComparableSignature(mergedEditorialPresets) !== getPresetComparableSignature(remoteEditorialPresets)) {
@@ -4348,17 +4621,36 @@ async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): P
             await upsertRemoteGradientPresets(supabase, userId, mergedGradientPresets);
         }
 
+        // El upsert de placas va en su propio try a proposito: la base acepta
+        // el tipo 'plate' recien cuando corre la migracion, y hasta entonces
+        // ese rechazo no puede arrastrar a los presets editoriales y de
+        // gradiente, que ya sincronizan bien. Las placas siguen vivas en el
+        // dispositivo y la biblioteca lo dice.
+        let plateStorageMode: ExportPresetStorageMode = 'cloud';
+        if (getPresetComparableSignature(mergedPlatePresets) !== getPresetComparableSignature(remotePlatePresets)) {
+            try {
+                await upsertRemotePlatePresets(supabase, userId, mergedPlatePresets);
+            } catch (error) {
+                logUnexpectedPresetSyncFailure('Plate preset cloud sync warning:', error);
+                plateStorageMode = 'local';
+            }
+        }
+
         return {
             editorialPresets: mergedEditorialPresets,
             gradientPresets: mergedGradientPresets,
+            platePresets: mergedPlatePresets,
             storageMode: 'cloud',
+            plateStorageMode,
         };
     } catch (error) {
         logUnexpectedPresetSyncFailure('Preset cloud hydrate warning:', error);
         return {
             editorialPresets: localEditorialPresets,
             gradientPresets: localGradientPresets,
+            platePresets: localPlatePresets,
             storageMode: 'local',
+            plateStorageMode: 'local',
         };
     }
 }
@@ -4416,6 +4708,49 @@ async function deleteSavedGradientPreset(
     if (!userId) return 'local';
 
     await deleteRemotePresetByName(supabase, userId, 'gradient', presetName);
+    return 'cloud';
+}
+
+async function persistSavedPlatePreset(
+    presets: SavedMatchPlatePreset[],
+    preset: SavedMatchPlatePreset,
+    supabase: SupabaseBrowserClient,
+): Promise<ExportPresetStorageMode> {
+    await persistLocalSavedPlatePresets(presets);
+
+    const userId = await getAuthenticatedPresetUserId(supabase);
+    if (!userId) return 'local';
+
+    // La placa ya quedo en el dispositivo. Si la nube la rechaza —tipo 'plate'
+    // todavia no habilitado en la base— no se pierde nada: se informa como
+    // guardado local en vez de mentir un error.
+    try {
+        await upsertRemotePresetRows(supabase, [buildRemotePlatePresetRow(userId, preset)]);
+    } catch (error) {
+        logUnexpectedPresetSyncFailure('Plate preset cloud save warning:', error);
+        return 'local';
+    }
+
+    return 'cloud';
+}
+
+async function deleteSavedPlatePreset(
+    presets: SavedMatchPlatePreset[],
+    presetName: string,
+    supabase: SupabaseBrowserClient,
+): Promise<ExportPresetStorageMode> {
+    await persistLocalSavedPlatePresets(presets);
+
+    const userId = await getAuthenticatedPresetUserId(supabase);
+    if (!userId) return 'local';
+
+    try {
+        await deleteRemotePresetByName(supabase, userId, 'plate', presetName);
+    } catch (error) {
+        logUnexpectedPresetSyncFailure('Plate preset cloud delete warning:', error);
+        return 'local';
+    }
+
     return 'cloud';
 }
 
