@@ -10906,7 +10906,6 @@ async function drawG22BaseLineups(
         const players = Array.isArray(team.starters)
             ? team.starters
                 .filter((player) => player && String(player.name || '').trim())
-                .slice(0, 23)
                 .sort((left, right) => {
                     const leftNumber = Number(left.number);
                     const rightNumber = Number(right.number);
@@ -10998,8 +10997,20 @@ async function drawG22BaseLineups(
     const listHeight = Math.max(sy(220), contentBottomLimit - listTop);
     const textStartOffset = sx(36);
     const numberAreaWidth = sx(28);
-    const minStarterFontSizeBase = sf(20);
-    const minNumberFontSize = sf(18);
+    // El piso tipografico no es fijo: sale del alto que queda para la lista.
+    // Una planilla de pretemporada trae 30 o 35 fichas y a 20px no entran en la
+    // columna. Antes se cortaba en 23 y los ultimos nombres no existian; ahora
+    // la letra baja hasta donde haga falta para que entren todos.
+    const maxStarterRows = Math.max(...selectedTeams.map((team) => team.starters.length), 0);
+    const maxBenchRows = Math.max(...selectedTeams.map((team) => team.bench.length), 0);
+    const longestColumnRows = Math.max(maxStarterRows + maxBenchRows, 1);
+    const benchBlockReserve = maxBenchRows > 0 ? sy(46) : 0;
+    const minStarterFontSizeBase = clampNumber(
+        Math.floor((listHeight - benchBlockReserve) / longestColumnRows) - sy(8),
+        sf(11),
+        sf(20),
+    );
+    const minNumberFontSize = Math.min(sf(18), Math.max(sf(10), Math.round(minStarterFontSizeBase * 0.9)));
     const sharedPlayerFontSize = playerLabels.length > 0
         ? getSharedFittedFontSize(
             ctx,
@@ -11010,7 +11021,7 @@ async function drawG22BaseLineups(
             minStarterFontSizeBase,
         )
         : sf(24);
-    const fitColumnMetrics = (team: typeof selectedTeams[number]) => {
+    const fitColumnMetrics = (starterCount: number, benchCount: number) => {
         let starterFontSize = sharedPlayerFontSize;
         let benchFontSize = sharedPlayerFontSize;
         let starterRowGap = sy(8);
@@ -11020,18 +11031,22 @@ async function drawG22BaseLineups(
         let starterRowHeight = Math.max(sy(34), starterFontSize + sy(10));
         let benchRowHeight = Math.max(sy(32), benchFontSize + sy(10));
         let benchLabelFontSize = sf(18);
-        const minStarterFontSize = Math.max(minStarterFontSizeBase, Math.round(sharedPlayerFontSize * 0.92));
-        const minBenchFontSize = Math.max(sf(18), Math.round(sharedPlayerFontSize * 0.88));
+        // El piso es el que sale del alto disponible. La letra es el ultimo
+        // recurso del ajuste -- primero se comen los aires y los altos de fila --,
+        // asi que atarla a un porcentaje del cuerpo compartido solo lograba que
+        // la columna se pasara de largo en vez de comprimirse.
+        const minStarterFontSize = minStarterFontSizeBase;
+        const minBenchFontSize = Math.min(sf(18), minStarterFontSizeBase);
 
         const getRequiredHeight = () =>
-            team.starters.length * starterRowHeight
-            + Math.max(0, team.starters.length - 1) * starterRowGap
-            + (team.bench.length > 0
+            starterCount * starterRowHeight
+            + Math.max(0, starterCount - 1) * starterRowGap
+            + (benchCount > 0
                 ? starterToBenchGap
                     + benchLabelFontSize
                     + benchLabelToListGap
-                    + team.bench.length * benchRowHeight
-                    + Math.max(0, team.bench.length - 1) * benchRowGap
+                    + benchCount * benchRowHeight
+                    + Math.max(0, benchCount - 1) * benchRowGap
                 : 0);
 
         let requiredHeight = getRequiredHeight();
@@ -11075,8 +11090,9 @@ async function drawG22BaseLineups(
         return {
             starterFontSize,
             benchFontSize,
-            starterNumberFontSize: Math.max(minNumberFontSize, Math.round(starterFontSize * 0.9)),
-            benchNumberFontSize: Math.max(sf(16), Math.round(benchFontSize * 0.9)),
+            // El dorsal nunca puede quedar mas grande que el nombre que acompana.
+            starterNumberFontSize: Math.min(starterFontSize, Math.max(minNumberFontSize, Math.round(starterFontSize * 0.9))),
+            benchNumberFontSize: Math.min(benchFontSize, Math.max(sf(16), Math.round(benchFontSize * 0.9))),
             starterRowHeight,
             benchRowHeight,
             starterRowGap,
@@ -11089,6 +11105,11 @@ async function drawG22BaseLineups(
         };
     };
 
+    // Las dos columnas comparten metricas y se ajustan a la mas larga. Si cada
+    // una se midiera sola, un plantel de 35 al lado de uno de 23 dejaria dos
+    // cuerpos de letra distintos enfrentados.
+    const columnMetrics = fitColumnMetrics(maxStarterRows, maxBenchRows);
+
     const preparedColumns = selectedTeams.map((team, index) => {
         const columnX = isSingleTeam ? columnStartX : columnStartX + index * (columnWidth + columnGap);
         return {
@@ -11096,7 +11117,7 @@ async function drawG22BaseLineups(
             nameLayout: teamNameLayouts[index],
             columnX,
             bannerCenterX: columnX + columnWidth / 2,
-            metrics: fitColumnMetrics(team),
+            metrics: columnMetrics,
         };
     });
 
@@ -14016,75 +14037,120 @@ async function drawMomentumLineups(
     const columnY = 324;
     const columnHeight = canvas.height - columnY - (isStory ? 236 : 178);
 
+    // La planilla entera, sin recortes. Un amistoso de pretemporada trae 30 o 35
+    // fichas y antes la placa se quedaba con 15 titulares y 8 suplentes: el
+    // resto no existia. Ahora la columna se comprime hasta que entran todos.
+    const teamSplits = teams.map(({ team }) => {
+        const teamPlayers = [...(team.starters ?? [])].sort((left, right) => Number(left.number ?? 0) - Number(right.number ?? 0));
+        return {
+            starters: teamPlayers.filter((player, playerIndex) => isLineupStarter(player, playerIndex)),
+            bench: teamPlayers.filter((player, playerIndex) => !isLineupStarter(player, playerIndex)),
+        };
+    });
+    const maxStarterRows = Math.max(...teamSplits.map((split) => split.starters.length), 0);
+    const maxBenchRows = Math.max(...teamSplits.map((split) => split.bench.length), 0);
+    // Las dos columnas se miden juntas y contra la mas larga: si cada una se
+    // ajustara sola, un plantel de 35 quedaria al lado de uno de 23 con dos
+    // cuerpos de letra distintos.
+    const densityMode = resolveDensityMode(maxStarterRows + maxBenchRows, teams.length === 2 ? 19 : 21, teams.length === 2 ? 22 : 23);
+    const starterGap = getDensitySpacing(densityMode, {
+        comfortable: teams.length === 2 ? 8 : 7,
+        compact: teams.length === 2 ? 7 : 6,
+        ultraCompact: teams.length === 2 ? 6 : 5,
+    });
+    const benchGap = getDensitySpacing(densityMode, {
+        comfortable: 5,
+        compact: 4,
+        ultraCompact: 3,
+    });
+    const starterRowHeight = getDensitySpacing(densityMode, {
+        comfortable: teams.length === 2 ? 36 : 34,
+        compact: teams.length === 2 ? 34 : 32,
+        ultraCompact: teams.length === 2 ? 32 : 30,
+    });
+    const benchRowHeight = getDensitySpacing(densityMode, {
+        comfortable: teams.length === 2 ? 28 : 26,
+        compact: teams.length === 2 ? 26 : 24,
+        ultraCompact: teams.length === 2 ? 24 : 22,
+    });
+    const baseHeaderHeight = isStory ? 124 : 116;
+    const baseBottomPadding = isStory ? 34 : 20;
+    // El alto se mide con los pisos ya aplicados, no con la cuenta ideal: si se
+    // estimara sin ellos, la escala diria que entra y la lista se pasaria igual.
+    const measureColumn = (scale: number) => {
+        const scaledHeaderHeight = Math.max(96, Math.round(baseHeaderHeight * scale));
+        const scaledContentTopPadding = Math.max(98, scaledHeaderHeight);
+        const scaledStarterGapValue = Math.max(2, Math.round(starterGap * scale));
+        const scaledBenchGapValue = Math.max(2, Math.round(benchGap * scale));
+        const scaledStarterRowHeightValue = Math.max(16, Math.round(starterRowHeight * scale));
+        const scaledBenchRowHeightValue = Math.max(13, Math.round(benchRowHeight * scale));
+        const scaledBenchSectionHeight = maxBenchRows > 0 ? Math.max(24, Math.round(40 * scale)) : 0;
+        const scaledBenchHeaderGap = Math.max(6, Math.round(8 * scale));
+        const startersHeight = maxStarterRows > 0
+            ? maxStarterRows * scaledStarterRowHeightValue + Math.max(0, maxStarterRows - 1) * scaledStarterGapValue
+            : 0;
+        const benchHeight = maxBenchRows > 0
+            ? maxBenchRows * scaledBenchRowHeightValue + Math.max(0, maxBenchRows - 1) * scaledBenchGapValue
+            : 0;
+        const total = scaledContentTopPadding
+            + startersHeight
+            + (maxBenchRows > 0 ? scaledBenchHeaderGap + scaledBenchSectionHeight + benchHeight : 0)
+            + Math.round(baseBottomPadding * scale);
+
+        return {
+            headerHeight: scaledHeaderHeight,
+            contentTopPadding: scaledContentTopPadding,
+            scaledStarterGap: scaledStarterGapValue,
+            scaledBenchGap: scaledBenchGapValue,
+            scaledStarterRowHeight: scaledStarterRowHeightValue,
+            scaledBenchRowHeight: scaledBenchRowHeightValue,
+            benchSectionHeight: scaledBenchSectionHeight,
+            benchHeaderGap: scaledBenchHeaderGap,
+            total,
+        };
+    };
+
+    let layoutScale = 1;
+    let columnLayout = measureColumn(layoutScale);
+    while (columnLayout.total > columnHeight && layoutScale > 0.4) {
+        layoutScale = Math.max(0.4, Math.round((layoutScale - 0.02) * 100) / 100);
+        columnLayout = measureColumn(layoutScale);
+    }
+
+    const {
+        headerHeight,
+        contentTopPadding,
+        scaledStarterGap,
+        scaledBenchGap,
+        scaledStarterRowHeight,
+        scaledBenchRowHeight,
+        benchSectionHeight,
+        benchHeaderGap,
+    } = columnLayout;
+    // El cuerpo de texto acompana la compresion; 0,68 es el piso por debajo del
+    // cual el nombre deja de leerse en la placa.
+    const rowFontScale = Math.max(layoutScale, 0.68);
+    const listStartY = columnY + contentTopPadding;
+    const logoY = columnY + Math.round(contentTopPadding * 0.5);
+    const titleY = columnY + Math.round(contentTopPadding * 0.57);
+    const subtitleY = columnY + Math.round(contentTopPadding * 0.79);
+    const teamTitleMaxWidth = columnWidth - 136;
+    const logoSize = Math.max(46, Math.round(54 * Math.max(layoutScale, 0.84)));
+    const titleFontSize = Math.max(20, Math.round(30 * Math.max(layoutScale, 0.82)));
+    const subtitleFontSize = Math.max(11, Math.round(14 * Math.max(layoutScale, 0.82)));
+    const starterNumberFontSize = Math.max(10, Math.round((teams.length === 2 ? 14 : 13) * rowFontScale));
+    const starterNameFontSize = Math.max(10, Math.round((teams.length === 2 ? 16 : 15) * rowFontScale));
+    const benchNumberFontSize = Math.max(9, Math.round(12 * rowFontScale));
+    const benchNameFontSize = Math.max(9, Math.round(14 * rowFontScale));
+
     teams.forEach(({ team, logo }, index) => {
         const x = columnXStart + index * (columnWidth + columnGap);
-        const teamPlayers = [...(team.starters ?? [])].sort((left, right) => Number(left.number ?? 0) - Number(right.number ?? 0));
-        const densityMode = resolveDensityMode(teamPlayers.length, teams.length === 2 ? 19 : 21, teams.length === 2 ? 22 : 23);
-        const starters = teamPlayers
-            .filter((player, playerIndex) => isLineupStarter(player, playerIndex))
-            .slice(0, 15);
-        const bench = teamPlayers
-            .filter((player, playerIndex) => !isLineupStarter(player, playerIndex))
-            .slice(0, getDensitySpacing(densityMode, {
-                comfortable: teams.length === 2 ? 8 : 8,
-                compact: teams.length === 2 ? 7 : 7,
-                ultraCompact: teams.length === 2 ? 6 : 6,
-            }));
-        const starterGap = getDensitySpacing(densityMode, {
-            comfortable: teams.length === 2 ? 8 : 7,
-            compact: teams.length === 2 ? 7 : 6,
-            ultraCompact: teams.length === 2 ? 6 : 5,
-        });
-        const benchGap = getDensitySpacing(densityMode, {
-            comfortable: 5,
-            compact: 4,
-            ultraCompact: 3,
-        });
-        const starterRowHeight = getDensitySpacing(densityMode, {
-            comfortable: teams.length === 2 ? 36 : 34,
-            compact: teams.length === 2 ? 34 : 32,
-            ultraCompact: teams.length === 2 ? 32 : 30,
-        });
-        const benchRowHeight = getDensitySpacing(densityMode, {
-            comfortable: teams.length === 2 ? 28 : 26,
-            compact: teams.length === 2 ? 26 : 24,
-            ultraCompact: teams.length === 2 ? 24 : 22,
-        });
-        const baseHeaderHeight = isStory ? 124 : 116;
-        const baseBottomPadding = isStory ? 34 : 20;
-        const starterRowsHeight = starters.length > 0
-            ? starters.length * starterRowHeight + Math.max(0, starters.length - 1) * starterGap
-            : 0;
-        const benchRowsHeight = bench.length > 0
-            ? bench.length * benchRowHeight + Math.max(0, bench.length - 1) * benchGap
-            : 0;
-        const baseBenchSectionHeight = bench.length > 0 ? 40 : 0;
-        const totalContentHeight = baseHeaderHeight + starterRowsHeight + baseBenchSectionHeight + benchRowsHeight + baseBottomPadding;
-        const layoutScale = clampNumber(columnHeight / Math.max(totalContentHeight, 1), 0.72, 1);
-        const headerHeight = Math.max(96, Math.round(baseHeaderHeight * layoutScale));
-        const scaledStarterGap = Math.max(3, Math.round(starterGap * layoutScale));
-        const scaledBenchGap = Math.max(2, Math.round(benchGap * layoutScale));
-        const scaledStarterRowHeight = Math.max(24, Math.round(starterRowHeight * layoutScale));
-        const scaledBenchRowHeight = Math.max(18, Math.round(benchRowHeight * layoutScale));
+        const { starters, bench } = teamSplits[index];
         const starterRowsBlockHeight = starters.length > 0
             ? starters.length * scaledStarterRowHeight + Math.max(0, starters.length - 1) * scaledStarterGap
             : 0;
-        const benchSectionHeight = bench.length > 0 ? Math.max(28, Math.round(40 * layoutScale)) : 0;
-        const contentTopPadding = Math.max(98, Math.round(headerHeight));
-        const listStartY = columnY + contentTopPadding;
-        const benchHeaderY = listStartY + starterRowsBlockHeight + Math.max(6, Math.round(8 * layoutScale));
+        const benchHeaderY = listStartY + starterRowsBlockHeight + benchHeaderGap;
         const accent = index === 0 ? accentColor : mixHexColors(accentColor, '#38bdf8', 0.5);
-        const logoSize = Math.max(46, Math.round(54 * Math.max(layoutScale, 0.84)));
-        const logoY = columnY + Math.round(contentTopPadding * 0.5);
-        const titleY = columnY + Math.round(contentTopPadding * 0.57);
-        const subtitleY = columnY + Math.round(contentTopPadding * 0.79);
-        const teamTitleMaxWidth = columnWidth - 136;
-        const titleFontSize = Math.max(20, Math.round(30 * Math.max(layoutScale, 0.82)));
-        const subtitleFontSize = Math.max(11, Math.round(14 * Math.max(layoutScale, 0.82)));
-        const starterNumberFontSize = Math.max(11, Math.round((teams.length === 2 ? 14 : 13) * Math.max(layoutScale, 0.82)));
-        const starterNameFontSize = Math.max(11, Math.round((teams.length === 2 ? 16 : 15) * Math.max(layoutScale, 0.82)));
-        const benchNumberFontSize = Math.max(10, Math.round(12 * Math.max(layoutScale, 0.82)));
-        const benchNameFontSize = Math.max(10, Math.round(14 * Math.max(layoutScale, 0.82)));
 
         ctx.save();
         ctx.fillStyle = 'rgba(8,8,10,0.74)';
