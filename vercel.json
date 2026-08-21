@@ -50,8 +50,20 @@
       "schedule": "30 12 * * *"
     },
     {
+      "path": "/api/cron/rebuild-stale-rankings",
+      "schedule": "*/2 * * * *"
+    },
+    {
+      "path": "/api/cron/tournament-catalog-sync",
+      "schedule": "30 4 * * *"
+    },
+    {
       "path": "/api/cron/arusa-sync",
-      "schedule": "0 2 * * 0,1"
+      "schedule": "0 16-22/2 * * 6,0"
+    },
+    {
+      "path": "/api/cron/arusa-sync",
+      "schedule": "0 0-4/2 * * 0,1"
     },
     {
       "path": "/api/cron/arusa-sync",
