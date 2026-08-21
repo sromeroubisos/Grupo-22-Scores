@@ -48,6 +48,14 @@
     {
       "path": "/api/cron/ahl-sync",
       "schedule": "30 12 * * *"
+    },
+    {
+      "path": "/api/cron/arusa-sync",
+      "schedule": "0 2 * * 0,1"
+    },
+    {
+      "path": "/api/cron/arusa-sync",
+      "schedule": "0 15 * * *"
     }
   ]
 }
