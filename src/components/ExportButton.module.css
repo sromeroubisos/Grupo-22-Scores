@@ -87,13 +87,22 @@
 }
 
 /* Aca vivia `zoom: 1.42857143` (la inversa de 0.7): compensaba el
-   `html { zoom: 0.7 }` global que ya no existe. Sin el zoom global, la
-   compensacion escalaba el modal al 143% del viewport y no entraba en
-   pantalla. El modal ocupa 100vw/100dvh y se adapta solo. */
+   `html { zoom: 0.7 }` de escritorio. En esta rama el zoom global ya no
+   existe, pero en `main` —que es lo que se sirve en produccion— sigue
+   vivo, y la compensacion se saco igual: el modal quedaba al 70% de la
+   pantalla, pegado arriba a la izquierda.
+
+   Por eso el tamano ya no se toma del viewport. `vw` y `dvh` NO se
+   dividen por el zoom del root: adentro de un `html { zoom: 0.7 }` un
+   100vw se dibuja en 0,7 de la pantalla. El `inset: 0` del overlay si
+   resuelve contra el viewport con zoom o sin el —por eso el resto de los
+   modales del sitio nunca necesitaron compensacion—, asi que el modal
+   mide 100% de su overlay y entra bien en los dos mundos, sin factor que
+   mantener sincronizado con un breakpoint. */
 
 .modal {
-    width: 100vw;
-    height: 100dvh;
+    width: 100%;
+    height: 100%;
     background:
         linear-gradient(180deg, rgba(20, 20, 23, 0.88), rgba(12, 12, 16, 0.96)),
         radial-gradient(circle at 0% 20%, rgba(59, 130, 246, 0.08), transparent 28%);
@@ -1111,6 +1120,15 @@
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+/* El campo de nombre es `.modalInput`, que viene a ancho completo: dentro de
+   esta fila eso empujaba el boton de guardar al renglon de abajo. Que crezca
+   con el espacio que sobra y el par entra en una sola linea. */
+.gradientUploadRow .modalInput {
+    flex: 1 1 180px;
+    width: auto;
+    min-width: 0;
 }
 
 .gradientUploadPreview {
