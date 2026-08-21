@@ -5,7 +5,7 @@
 // Si molesta en produccion, esta carpeta se borra sola sin dejar imports sueltos.
 
 import { useEffect, useState } from 'react';
-import { ExportImagePreview, type DailyMatchesData, type MatchStatsData, type StandingsData } from '@/components/ExportImage';
+import { ExportImagePreview, type DailyMatchesData, type LineupsData, type MatchStatsData, type SquadData, type StandingsData } from '@/components/ExportImage';
 import type { ExportVisualFamily } from '@/lib/exports/activeDesign';
 
 const FAMILIES: Array<{ value: ExportVisualFamily; label: string }> = [
@@ -67,6 +67,111 @@ const FIXTURE: DailyMatchesData = {
         { homeTeam: 'Huirapuca', awayTeam: 'Los Tarcos', homeLogo: '/clubs/sb-huirapuca.png', awayLogo: '/clubs/sb-los-tarcos.png', time: '20:40', status: 'scheduled' },
         { homeTeam: 'Lince Rugby Club', awayTeam: 'Tucuman Lawn Tennis', homeLogo: '/clubs/sb-lince-rugby-club.png', awayLogo: '/clubs/sb-tucuman-lawn-tennis.png', time: '21:00', status: 'scheduled' },
     ],
+};
+
+// La vitrina: mismas filas que una tabla, pero `points` son titulos.
+const PALMARES: StandingsData = {
+    title: 'Torneo del Interior A',
+    subtitle: 'Campeones',
+    variant: 'palmares',
+    columnLabels: { points: 'Titulos' },
+    rows: [
+        { pos: 1, team: 'Duendes', teamLogo: '/clubs/sb-duendes-r-c.png', played: 0, won: 0, lost: 0, diff: '', points: 9 },
+        { pos: 2, team: 'Jockey Club de Rosario', teamLogo: '/clubs/sb-jockey-club-de-rosario.png', played: 0, won: 0, lost: 0, diff: '', points: 6 },
+        { pos: 3, team: 'Tucuman Lawn Tennis', teamLogo: '/clubs/sb-tucuman-lawn-tennis.png', played: 0, won: 0, lost: 0, diff: '', points: 5 },
+        { pos: 4, team: 'Universitario de Tucuman', teamLogo: '/clubs/sb-universitario-de-tucuman.png', played: 0, won: 0, lost: 0, diff: '', points: 3 },
+        { pos: 5, team: 'Los Tarcos', teamLogo: '/clubs/sb-los-tarcos.png', played: 0, won: 0, lost: 0, diff: '', points: 2 },
+        { pos: 6, team: 'Cardenales Rugby Club', teamLogo: '/clubs/sb-cardenales-r-c.png', played: 0, won: 0, lost: 0, diff: '', points: 1 },
+    ],
+};
+
+const SQUAD: SquadData = {
+    tournament: 'Top 10 del Litoral',
+    teamName: 'Duendes',
+    teamLogo: '/clubs/sb-duendes-r-c.png',
+    subtitle: 'Plantel 2026',
+    groups: [
+        {
+            label: 'Forwards',
+            players: [
+                { number: 1, name: 'Mateo Alvarez', position: 'Pilar', age: 24 },
+                { number: 2, name: 'Bruno Ferrero', position: 'Hooker', age: 27 },
+                { number: 3, name: 'Ignacio Sosa', position: 'Pilar', age: 29 },
+                { number: 4, name: 'Julian Riquelme', position: 'Segunda linea', age: 22 },
+                { number: 5, name: 'Tomas Bengoechea', position: 'Segunda linea', age: 25 },
+                { number: 6, name: 'Facundo Miranda', position: 'Ala', age: 23 },
+                { number: 7, name: 'Santiago Peralta', position: 'Ala', age: 26 },
+                { number: 8, name: 'Lucas Arrieta', position: 'Octavo', age: 28 },
+            ],
+        },
+        {
+            label: 'Backs',
+            players: [
+                { number: 9, name: 'Nicolas Vera', position: 'Medio scrum', age: 21 },
+                { number: 10, name: 'Joaquin Blanco', position: 'Apertura', age: 24 },
+                { number: 11, name: 'Emiliano Diaz', position: 'Wing', age: 20 },
+                { number: 12, name: 'Martin Ocampo', position: 'Centro', age: 26 },
+                { number: 13, name: 'Franco Ledesma', position: 'Centro', age: 25 },
+                { number: 14, name: 'Agustin Rios', position: 'Wing', age: 22 },
+                { number: 15, name: 'Pedro Solano', position: 'Fullback', age: 27 },
+            ],
+        },
+    ],
+};
+
+const LINEUPS: LineupsData = {
+    tournament: 'Nueva Zelanda: Bunnings NPC',
+    title: 'Formaciones',
+    date: '17/08/2026',
+    time: '20:30',
+    venue: 'Apollo Projects Stadium',
+    homeTeam: {
+        name: 'Canterbury',
+        logo: '/clubs/canterbury.png',
+        starters: [
+            { number: 1, name: 'Mateo Alvarez' },
+            { number: 2, name: 'Bruno Ferrero' },
+            { number: 3, name: 'Ignacio Sosa' },
+            { number: 4, name: 'Julian Riquelme' },
+            { number: 5, name: 'Tomas Bengoechea' },
+            { number: 6, name: 'Facundo Miranda' },
+            { number: 7, name: 'Santiago Peralta' },
+            { number: 8, name: 'Lucas Arrieta', isCaptain: true },
+            { number: 9, name: 'Nicolas Vera' },
+            { number: 10, name: 'Joaquin Blanco' },
+            { number: 11, name: 'Emiliano Diaz' },
+            { number: 12, name: 'Martin Ocampo' },
+            { number: 13, name: 'Franco Ledesma' },
+            { number: 14, name: 'Agustin Rios' },
+            { number: 15, name: 'Pedro Solano' },
+            { number: 16, name: 'Gonzalo Prieto' },
+            { number: 17, name: 'Ramiro Cardozo' },
+            { number: 18, name: 'Ivan Barrios' },
+        ],
+    },
+    awayTeam: {
+        name: 'Northland',
+        logo: '/clubs/northland.png',
+        starters: [
+            { number: 1, name: 'Diego Ferreyra' },
+            { number: 2, name: 'Hernan Quiroga' },
+            { number: 3, name: 'Leandro Bustos' },
+            { number: 4, name: 'Matias Correa' },
+            { number: 5, name: 'Rodrigo Nunez' },
+            { number: 6, name: 'Alejo Medina' },
+            { number: 7, name: 'Damian Torres', isCaptain: true },
+            { number: 8, name: 'Cristian Vidal' },
+            { number: 9, name: 'Lautaro Gimenez' },
+            { number: 10, name: 'Sebastian Roldan' },
+            { number: 11, name: 'Manuel Aguirre' },
+            { number: 12, name: 'Federico Zarate' },
+            { number: 13, name: 'Valentin Godoy' },
+            { number: 14, name: 'Thiago Ponce' },
+            { number: 15, name: 'Bautista Cabral' },
+            { number: 16, name: 'Ezequiel Maidana' },
+            { number: 17, name: 'Marcos Ibarra' },
+        ],
+    },
 };
 
 // Los mismos cuatro controles que el modal expone para Impacto V4.
@@ -242,6 +347,41 @@ export default function ExportLabPage() {
                         visualFamily={family}
                         format={format}
                         dailyMatchesTimeMode="time"
+                        previewColors={previewColors}
+                        className="lab-preview"
+                    />
+                </figure>
+                <figure style={{ margin: 0 }}>
+                    <figcaption style={{ marginBottom: 8, fontWeight: 700 }}>Palmares</figcaption>
+                    <ExportImagePreview
+                        template="standings"
+                        data={PALMARES}
+                        visualFamily={family}
+                        format={format}
+                        standingsExportMode="table"
+                        previewColors={previewColors}
+                        className="lab-preview"
+                    />
+                </figure>
+                <figure style={{ margin: 0 }}>
+                    <figcaption style={{ marginBottom: 8, fontWeight: 700 }}>Plantel</figcaption>
+                    <ExportImagePreview
+                        template="squad"
+                        data={SQUAD}
+                        visualFamily={family}
+                        format={format}
+                        previewColors={previewColors}
+                        className="lab-preview"
+                    />
+                </figure>
+                <figure style={{ margin: 0 }}>
+                    <figcaption style={{ marginBottom: 8, fontWeight: 700 }}>Formaciones</figcaption>
+                    <ExportImagePreview
+                        template="lineups"
+                        data={LINEUPS}
+                        visualFamily={family}
+                        format={format}
+                        lineupExportMode="both"
                         previewColors={previewColors}
                         className="lab-preview"
                     />

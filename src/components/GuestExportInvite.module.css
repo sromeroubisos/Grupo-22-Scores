@@ -1,0 +1,146 @@
+/* Invitacion a registrarse, despues de que la placa ya se descargo.
+   Para cuando aparece, el modal de exportar ya se cerro solo, asi que el cartel
+   cae sobre la pagina: el que lo cierra vuelve justo a donde estaba. */
+.overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(5, 7, 11, 0.72);
+    backdrop-filter: blur(6px);
+    z-index: 100010;
+}
+
+.card {
+    position: relative;
+    width: min(420px, 100%);
+    padding: 28px 26px 22px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background:
+        linear-gradient(180deg, rgba(24, 24, 28, 0.98), rgba(13, 13, 17, 0.98)),
+        radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.16), transparent 42%);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+    display: grid;
+    gap: 10px;
+    text-align: left;
+}
+
+.close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.62);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.eyebrow {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #60a5fa;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.16rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #f4f4f5;
+    padding-right: 28px;
+}
+
+.text {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.66);
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.primary {
+    flex: 1;
+    padding: 13px 18px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    font-family: var(--font-primary);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28);
+}
+
+.secondary {
+    flex: 1;
+    padding: 13px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.78);
+    font-family: var(--font-primary);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.secondary:hover {
+    background: rgba(255, 255, 255, 0.09);
+    color: #fff;
+}
+
+.dismiss {
+    justify-self: center;
+    margin-top: 2px;
+    padding: 6px 4px;
+    border: none;
+    background: none;
+    color: rgba(255, 255, 255, 0.46);
+    font-family: var(--font-primary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.dismiss:hover {
+    color: rgba(255, 255, 255, 0.76);
+}
+
+@media (max-width: 520px) {
+    .actions {
+        flex-direction: column;
+    }
+}

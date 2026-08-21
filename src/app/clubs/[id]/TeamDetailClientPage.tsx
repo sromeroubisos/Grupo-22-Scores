@@ -866,7 +866,7 @@ function TeamDetailInner({ id }: { id: string }) {
                             <div className={styles.section}>
                                 <div className={styles.sectionHeader} style={{ marginBottom: '16px' }}>
                                     <h2 className={styles.pageTitle}>Plantilla</h2>
-                                    {isSuperAdminUser && squadExportData ? (
+                                    {squadExportData ? (
                                         <ExportImage
                                             template="squad"
                                             filename={`plantel-${teamName}`}
