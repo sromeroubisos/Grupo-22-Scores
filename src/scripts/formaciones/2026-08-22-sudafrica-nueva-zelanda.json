@@ -1,0 +1,65 @@
+{
+  "partido": "rgAJG1kD",
+  "proveedor": "flashscore",
+  "descripcion": "Sudáfrica vs Nueva Zelanda · Johannesburgo · 22/08/2026",
+  "local": {
+    "nombre": "Sudáfrica",
+    "titulares": [
+      { "numero": 1, "nombre": "Ox Nche" },
+      { "numero": 2, "nombre": "Malcolm Marx" },
+      { "numero": 3, "nombre": "Wilco Louw" },
+      { "numero": 4, "nombre": "Eben Etzebeth" },
+      { "numero": 5, "nombre": "Ruan Nortje" },
+      { "numero": 6, "nombre": "Paul de Villiers" },
+      { "numero": 7, "nombre": "Pieter-Steph du Toit", "capitan": true },
+      { "numero": 8, "nombre": "Jasper Wiese" },
+      { "numero": 9, "nombre": "Grant Williams" },
+      { "numero": 10, "nombre": "Sacha Feinberg-Mngomezulu" },
+      { "numero": 11, "nombre": "Kurt-Lee Arendse" },
+      { "numero": 12, "nombre": "Damian de Allende" },
+      { "numero": 13, "nombre": "Jesse Kriel" },
+      { "numero": 14, "nombre": "Cheslin Kolbe" },
+      { "numero": 15, "nombre": "Damian Willemse" }
+    ],
+    "suplentes": [
+      { "numero": 16, "nombre": "Jan-Hendrik Wessels" },
+      { "numero": 17, "nombre": "Gerhard Steenekamp" },
+      { "numero": 18, "nombre": "Zachary Porthen" },
+      { "numero": 19, "nombre": "Cobus Wiese" },
+      { "numero": 20, "nombre": "Andre Esterhuizen" },
+      { "numero": 21, "nombre": "Marco van Staden" },
+      { "numero": 22, "nombre": "Cobus Reinach" },
+      { "numero": 23, "nombre": "Manie Libbok" }
+    ]
+  },
+  "visitante": {
+    "nombre": "Nueva Zelanda",
+    "titulares": [
+      { "numero": 1, "nombre": "Ethan de Groot" },
+      { "numero": 2, "nombre": "Codie Taylor" },
+      { "numero": 3, "nombre": "Tyrel Lomax" },
+      { "numero": 4, "nombre": "Josh Lord" },
+      { "numero": 5, "nombre": "Fabian Holland" },
+      { "numero": 6, "nombre": "Tupou Vaa'i" },
+      { "numero": 7, "nombre": "Luke Jacobson" },
+      { "numero": 8, "nombre": "Ardie Savea", "capitan": true },
+      { "numero": 9, "nombre": "Cam Roigard" },
+      { "numero": 10, "nombre": "Ruben Love" },
+      { "numero": 11, "nombre": "Josh Moorby" },
+      { "numero": 12, "nombre": "Jordie Barrett" },
+      { "numero": 13, "nombre": "Quinn Tupaea" },
+      { "numero": 14, "nombre": "Will Jordan" },
+      { "numero": 15, "nombre": "Damian McKenzie" }
+    ],
+    "suplentes": [
+      { "numero": 16, "nombre": "Asafo Aumua" },
+      { "numero": 17, "nombre": "George Bower" },
+      { "numero": 18, "nombre": "Fletcher Newell" },
+      { "numero": 19, "nombre": "Anton Segner" },
+      { "numero": 20, "nombre": "Peter Lakai" },
+      { "numero": 21, "nombre": "Kyle Preston" },
+      { "numero": 22, "nombre": "Anton Lienert-Brown" },
+      { "numero": 23, "nombre": "Leroy Carter" }
+    ]
+  }
+}
