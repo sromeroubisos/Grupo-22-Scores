@@ -33,6 +33,26 @@ export interface EquipoArusa {
     nombre: string;
 }
 
+/**
+ * La categoría de edad de un torneo de ARUSA, leída de su NOMBRE.
+ *
+ * Es la ÚNICA fuente de `tournaments.age_grade` para ARUSA: la usa el alta
+ * (`arusa-crear-torneo.ts`) y la usa el backfill (`arusa-grado-juvenil.ts`).
+ * Si cada uno la calculara por su cuenta, el torneo que entre mañana quedaría
+ * clasificado distinto que los siete de hoy, y en silencio.
+ *
+ * Por qué importa: `resolveTournamentAudience` mira el grado ANTES que el
+ * nombre, así que un `Mayores` heredado del torneo modelo manda a la M18 a la
+ * portada de mayores aunque se llame "M18 Primera de ARUSA".
+ *
+ * Devuelve null para las competencias de mayores, que no tienen número en el
+ * nombre: ahí el grado lo pone quien la da de alta.
+ */
+export function gradoDeEdadArusa(nombre: string): string | null {
+    const m = nombre.match(/\b[MU]\s*-?\s*(\d{1,2})\b/i);
+    return m ? `M${m[1]}` : null;
+}
+
 /** `m18-segunda` → `M18 Segunda`, `intermedia` → `Intermedia`. */
 export function rotuloDeSufijo(sufijo: string): string {
     return sufijo.split('-')
