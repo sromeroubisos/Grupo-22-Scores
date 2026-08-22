@@ -33,7 +33,7 @@ import { randomUUID } from 'node:crypto';
 import * as dotenv from 'dotenv';
 
 import { fetchCabecera, fetchPartidosDeGrupo } from '../lib/integrations/arusa/client.ts';
-import { CLAVE_CLUB, CLAVE_EQUIPO, CLAVE_EQUIPO_RAMA, nombreDeFilial, normalizarNombre } from '../lib/integrations/arusa/sync.ts';
+import { CLAVE_CLUB, CLAVE_EQUIPO, CLAVE_EQUIPO_RAMA, gradoDeEdadArusa, nombreDeFilial, normalizarNombre } from '../lib/integrations/arusa/sync.ts';
 
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 
@@ -301,7 +301,7 @@ async function main() {
             id: torneoId, union_id: 'arusa', season_id: '2026',
             name: NOMBRE, original_name: NOMBRE, slug: slugTorneo,
             status: 'draft', is_active: false, is_visible: true,
-            age_grade: modelo.age_grade, region: REGION, country: 'Chile',
+            age_grade: gradoDeEdadArusa(NOMBRE) ?? modelo.age_grade, region: REGION, country: 'Chile',
             country_id: modelo.country_id, country_name: modelo.country_name,
             sport: 'rugby', sport_id: 'rugby', sport_name: modelo.sport_name,
             format: 'league', ruleset, ruleset_version: modelo.ruleset_version,
