@@ -17,6 +17,7 @@ type LooseSupabaseQuery<T> = PromiseLike<{ data: T | null; error: PostgrestError
     select: (columns?: string) => LooseSupabaseQuery<T>;
     eq: (column: string, value: unknown) => LooseSupabaseQuery<T>;
     maybeSingle: () => LooseSupabaseQuery<T>;
+    limit: (count: number) => LooseSupabaseQuery<T>;
     upsert: (values: Record<string, unknown>, options?: { onConflict?: string }) => LooseSupabaseQuery<T>;
     delete: () => LooseSupabaseQuery<T>;
 };
@@ -81,11 +82,25 @@ export async function GET(request: NextRequest) {
         subscribed: false,
     };
 
+    const db = supabase as unknown as LooseSupabaseClient;
+
+    // El sondeo del esquema corre SIEMPRE, haya o no una suscripcion en este
+    // dispositivo. Si solo se consultara con endpoint, el primer visitante veria
+    // schemaReady: true con la tabla ausente, concederia el permiso del navegador
+    // y recien ahi el POST le fallaria, dejandolo en "no se pudo revisar".
     if (!endpoint) {
-        return jsonNoStore(basePayload);
+        const probe = await db
+            .from<{ id: string }[]>('user_push_subscriptions')
+            .select('id')
+            .eq('user_id', user.id)
+            .limit(1);
+
+        return jsonNoStore({
+            ...basePayload,
+            schemaReady: !isPushSchemaMissing(probe.error),
+        });
     }
 
-    const db = supabase as unknown as LooseSupabaseClient;
     const result = await db
         .from<{ id: string; enabled: boolean }>('user_push_subscriptions')
         .select('id, enabled')

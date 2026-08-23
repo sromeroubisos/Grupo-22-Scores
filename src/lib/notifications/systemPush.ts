@@ -76,10 +76,27 @@ function derToJoseSignature(derSignature: Buffer) {
     return Buffer.concat([normalize(r), normalize(s)]);
 }
 
+const FALLBACK_VAPID_SUBJECT = 'mailto:hola@g22scores.com';
+
+/**
+ * El `sub` de un JWT VAPID solo admite `mailto:` o `https:`. NEXT_PUBLIC_SITE_URL
+ * no sirve como fallback a ciegas: en desarrollo vale `http://localhost:3000` y
+ * con eso el push service rechaza el envio con 400.
+ */
+function normalizeVapidSubject(candidate: string | undefined): string | null {
+    const value = candidate?.trim();
+    if (!value) return null;
+
+    const scheme = value.toLowerCase();
+    return scheme.startsWith('mailto:') || scheme.startsWith('https://') ? value : null;
+}
+
 function getVapidConfig(): VapidConfig | null {
     const publicKey = process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY || process.env.WEB_PUSH_PUBLIC_KEY;
     const privateKey = process.env.WEB_PUSH_PRIVATE_KEY;
-    const subject = process.env.WEB_PUSH_SUBJECT || process.env.NEXT_PUBLIC_SITE_URL || 'mailto:admin@g22scores.com';
+    const subject = normalizeVapidSubject(process.env.WEB_PUSH_SUBJECT)
+        ?? normalizeVapidSubject(process.env.NEXT_PUBLIC_SITE_URL)
+        ?? FALLBACK_VAPID_SUBJECT;
 
     if (!publicKey || !privateKey) {
         return null;
