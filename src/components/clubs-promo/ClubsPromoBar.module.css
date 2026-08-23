@@ -1,0 +1,131 @@
+/*
+ * `position: fixed` y nada más: la barra no participa del flujo del documento,
+ * así que no puede empujar un solo píxel de contenido ni sumar CLS.
+ *
+ * Se apoya ARRIBA de la barra de navegación inferior (78px, 74 abajo de 900px)
+ * más el safe-area de iOS. Taparla sería sacarle la navegación al visitante
+ * para mostrarle un aviso.
+ */
+
+.barra {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--mobile-nav-height, 78px) + env(safe-area-inset-bottom));
+    z-index: 998;
+
+    display: none;
+    align-items: center;
+    gap: 10px;
+
+    max-height: 56px;
+    padding: 0 max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
+    min-height: 52px;
+
+    background: rgba(18, 18, 20, 0.97);
+    border-top: 1px solid rgba(var(--color-accent-rgb), 0.3);
+    box-shadow: 0 -10px 26px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(16px) saturate(1.2);
+
+    transform: translateY(110%);
+    transition: transform 200ms ease-out;
+}
+
+/* En las rutas sin navegación inferior, se apoya directamente en el borde. */
+.sinNav {
+    bottom: env(safe-area-inset-bottom);
+}
+
+.visible {
+    transform: translateY(0);
+}
+
+/* Sólo mobile: es el mismo corte donde aparece la navegación inferior. */
+@media (max-width: 900px) {
+    .barra {
+        display: flex;
+    }
+}
+
+.texto {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: rgba(255, 255, 255, 0.92);
+
+    /* Una línea de texto y no más: la barra mide 56px y no crece. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.accion {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--color-accent);
+    color: #04170e;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.accion:focus-visible,
+.cerrar:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.cerrar {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    /* 36px de blanco alrededor de una X de 16: el mínimo táctil sin agrandar la barra. */
+    width: 36px;
+    height: 36px;
+
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.62);
+    cursor: pointer;
+}
+
+.cerrar:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme='light']) .barra {
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 -10px 26px rgba(15, 23, 42, 0.14);
+}
+
+:global([data-theme='light']) .texto {
+    color: var(--color-text-primary);
+}
+
+:global([data-theme='light']) .cerrar {
+    color: var(--color-text-tertiary);
+}
+
+:global([data-theme='light']) .cerrar:hover {
+    color: var(--color-text-primary);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .barra {
+        transition: none;
+        transform: translateY(0);
+    }
+}

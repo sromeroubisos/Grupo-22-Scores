@@ -15,6 +15,8 @@ const GlobalSearch = dynamic(() => import('@/components/GlobalSearch'), { ssr: f
 import { getRoleLabel, resolveAdminPanel } from '@/lib/auth/roles';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { logRefreshLoop } from '@/lib/debug/refreshLoop';
+import { trackEvent } from '@/lib/analytics';
+import { hrefParaClubes, PARA_CLUBES_HREF } from '@/content/para-clubes';
 
 export default function Header() {
     const { user, logout } = useAuth();
@@ -141,11 +143,45 @@ export default function Header() {
     // La pestaña queda marcada también mientras se navega el prode.
     const isGamesRoute = Boolean(pathname && (pathname.startsWith('/juegos') || pathname.startsWith('/prode')));
     const isNotificationsRoute = pathname?.startsWith('/notifications') ?? false;
+    /**
+     * "Para clubes" es la puerta permanente del embudo comercial: el dirigente
+     * que se interesó hoy vuelve a los tres días y tiene que encontrarla sin
+     * buscar. En desktop es un link más del nav; abajo de 768px los links del
+     * nav se ocultan por CSS y la barra inferior ya tiene sus cinco lugares
+     * ocupados, así que ahí la entrada es el menú de usuario — que se le
+     * muestra también al invitado, justamente porque un dirigente que llega de
+     * cero no tiene sesión.
+     */
+    const isParaClubesRoute = pathname?.startsWith(PARA_CLUBES_HREF) ?? false;
     const isAuthRoute =
         pathname?.startsWith('/login')
         || pathname?.startsWith('/register')
         || pathname?.startsWith('/auth/');
     const rankingsHref = `/rankings?sport=${encodeURIComponent(selectedSport.id)}`;
+
+    /**
+     * La entrada de "Para clubes" en el menú, escrita UNA vez y usada en las dos
+     * ramas: la del usuario con sesión y la del invitado. El invitado la
+     * necesita más que nadie —un dirigente que llega por primera vez no tiene
+     * cuenta— y hasta ahora su menú sólo ofrecía "Iniciar Sesión".
+     */
+    const itemParaClubes = (
+        <Link
+            href={hrefParaClubes('nav')}
+            onClick={() => {
+                setIsUserMenuOpen(false);
+                trackEvent('clubs_promo_click', { location: 'nav' });
+            }}
+            aria-current={isParaClubesRoute ? 'page' : undefined}
+        >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 21h18" />
+                <path d="M5 21V7l7-4 7 4v14" />
+                <path d="M10 21v-6h4v6" />
+            </svg>
+            Para clubes
+        </Link>
+    );
 
     if (isAuthRoute) {
         return (
@@ -225,6 +261,20 @@ export default function Header() {
                             <path d="M12 12v6" />
                         </svg>
                         <span>Rankings</span>
+                    </Link>
+
+                    <Link
+                        href={hrefParaClubes('nav')}
+                        className={`g22-desktop-link ${isParaClubesRoute ? 'active' : ''}`}
+                        aria-current={isParaClubesRoute ? 'page' : undefined}
+                        onClick={() => trackEvent('clubs_promo_click', { location: 'nav' })}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M3 21h18" />
+                            <path d="M5 21V7l7-4 7 4v14" />
+                            <path d="M10 21v-6h4v6" />
+                        </svg>
+                        <span>Para clubes</span>
                     </Link>
 
                     <NotificationsBell />
@@ -336,6 +386,8 @@ export default function Header() {
                                                 {adminPanel.label}
                                             </Link>
                                         )}
+
+                                        {itemParaClubes}
                                     </div>
 
                                     <hr />
@@ -344,6 +396,11 @@ export default function Header() {
                                         Cerrar Sesión
                                     </button>
                                 </>
+                            )}
+                            {!displayUser && (
+                                <div style={{ padding: '8px 0' }}>
+                                    {itemParaClubes}
+                                </div>
                             )}
                             {!displayUser && (
                                 <Link href="/login" className="logout" onClick={() => setIsUserMenuOpen(false)} style={{ color: 'var(--color-text-primary)' }}>
