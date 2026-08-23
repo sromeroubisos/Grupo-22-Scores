@@ -173,10 +173,17 @@ export async function sendSystemPush(subscription: StoredPushSubscription): Prom
         }
 
         const body = await response.text().catch(() => '');
+
+        // Una suscripcion creada con otro par VAPID rebota para siempre: Apple lo
+        // dice con VapidPkHashMismatch y otros push services con un 403. No se
+        // arregla reintentando, asi que se marca para que el cron la apague en
+        // vez de fallar con cada notificacion hasta el fin de los tiempos.
+        const keyMismatch = response.status === 403 || body.includes('VapidPkHashMismatch');
+
         return {
             ok: false,
             status: response.status,
-            expired: response.status === 404 || response.status === 410,
+            expired: response.status === 404 || response.status === 410 || keyMismatch,
             error: body || response.statusText || 'push_send_failed',
         };
     } catch (error) {
