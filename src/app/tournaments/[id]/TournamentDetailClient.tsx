@@ -1088,8 +1088,45 @@ function isPhaseCarryOverEnabled(settings: any): boolean {
     );
 }
 
+/**
+ * Los equipos que juegan UNA fase, no los del torneo.
+ *
+ * Una segunda instancia parte el plantel: doce clubes que se dividen en dos
+ * copas de seis. Quién juega cada copa vive en `tournament_phase_participants`;
+ * `dbData.participants` es el plantel entero y no sabe nada de fases. Armando la
+ * tabla con el segundo, cada copa mostraba los doce.
+ *
+ * Si la fase no declara equipos —lo normal en un torneo de fase única— se
+ * devuelve el plantel completo, que es lo que se hacía siempre.
+ */
+function participantsForPhase(
+    participants: any[],
+    phaseParticipants: any[],
+    phaseId: string | null,
+): any[] {
+    if (!phaseId) return participants;
+
+    const delaFase = new Set(
+        phaseParticipants
+            .filter((row: any) => String(row?.phase_id ?? '') === String(phaseId))
+            .filter((row: any) => {
+                const estado = String(row?.status ?? '').toLowerCase();
+                return estado !== 'withdrawn' && estado !== 'disqualified';
+            })
+            .map((row: any) => String(row?.participant_id ?? ''))
+            .filter(Boolean),
+    );
+    if (delaFase.size === 0) return participants;
+
+    const acotados = participants.filter((participant: any) => delaFase.has(String(participant?.id ?? '')));
+    return acotados.length > 0 ? acotados : participants;
+}
+
 function getDbStandingsContext(dbData: TournamentInitialData, preferredPhaseId?: string | null) {
     const participants = Array.isArray(dbData.participants) ? (dbData.participants as any[]) : [];
+    const phaseParticipants = Array.isArray((dbData as any).phaseParticipants)
+        ? ((dbData as any).phaseParticipants as any[])
+        : [];
     const matches = Array.isArray(dbData.matches) ? (dbData.matches as any[]) : [];
     const phases = sortTournamentPhases(Array.isArray(dbData.phases) ? (dbData.phases as any[]) : []);
     const groups = Array.isArray(dbData.groups) ? (dbData.groups as any[]) : [];
@@ -1109,6 +1146,9 @@ function getDbStandingsContext(dbData: TournamentInitialData, preferredPhaseId?:
 
     return {
         participants,
+        // El plantel de arriba sigue sirviendo para resolver nombres y escudos de
+        // cualquier fila; este es el que arma la tabla.
+        phaseParticipants: participantsForPhase(participants, phaseParticipants, activePhaseId),
         matches,
         rawStandings,
         phases,
@@ -1222,15 +1262,16 @@ function mapCalculatedDbStanding(row: any, participants: any[], phaseId: string 
 function buildCalculatedStandings(dbData: TournamentInitialData, preferredPhaseId?: string | null) {
     const {
         participants,
+        phaseParticipants,
         matches,
         activePhaseId,
         activeGroups,
         resolvedRules,
     } = getDbStandingsContext(dbData, preferredPhaseId);
 
-    if (participants.length === 0) return [];
+    if (phaseParticipants.length === 0) return [];
 
-    const engineParticipants = participants.map((participant: any) => ({
+    const engineParticipants = phaseParticipants.map((participant: any) => ({
         ...participant,
         clubs: participant.clubs || participant.club,
     }));

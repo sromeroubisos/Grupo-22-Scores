@@ -145,8 +145,16 @@ export function resolveStandingsRowLabel(
     .filter((assignment) => {
       if (assignment.position !== position || !assignment.label?.color) return false;
       const aPhasId = assignment.phase_id ?? null;
+      const aGroupId = assignment.group_id ?? null;
       // Global circuit labels (phase_id = null) must not appear in phase-specific views
       if (phaseId !== null && aPhasId === null) return false;
+      // Ni las de OTRA fase. Ordenarlas último no alcanzaba: si la fase mirada
+      // no tiene etiqueta para ese puesto, la de la fase vecina quedaba primera
+      // igual y se pintaba. Con dos fases etiquetadas a la vez —una segunda
+      // instancia que marca 1 a 6 en la fase regular y 1 a 4 en cada copa— los
+      // puestos 5 y 6 de la copa salían con el cartel de la fase regular.
+      if (phaseId !== null && aPhasId !== null && aPhasId !== phaseId) return false;
+      if (aGroupId !== null && aGroupId !== groupId) return false;
       return true;
     })
     .sort((left, right) => {
