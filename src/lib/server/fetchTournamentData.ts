@@ -22,6 +22,7 @@ const TOURNAMENT_SELECT_WITHOUT_LEGACY_SPORT_NO_URL_REVIEW = `${TOURNAMENT_SELEC
 export type TournamentQueryErrors = {
     tournament: string | null;
     participants: string | null;
+    phaseParticipants: string | null;
     matches: string | null;
     standings: string | null;
     phases: string | null;
@@ -37,6 +38,12 @@ export type TournamentInitialData = {
     tournament: Record<string, unknown> | null;
     season?: Record<string, unknown> | null;
     participants: unknown[];
+    /**
+     * Qué equipos juega cada fase. Sin esto la página arma la tabla de una fase
+     * con el plantel entero del torneo: una segunda instancia que parte a los
+     * doce en dos copas de seis mostraba los doce en cada copa.
+     */
+    phaseParticipants: unknown[];
     matches: unknown[];
     standings: unknown[];
     phases: unknown[];
@@ -54,6 +61,13 @@ type SupabaseQueryResult<T> = {
 type SettledQuery<T> = {
     data: T;
     error: string | null;
+};
+
+type TournamentPhaseParticipantRow = {
+    phase_id: string | null;
+    participant_id: string | null;
+    group_id: string | null;
+    status: string | null;
 };
 
 type TournamentGroupWithPhaseFilter = {
@@ -222,6 +236,7 @@ function emptyTournamentData(error?: string): TournamentInitialData {
         tournament: null,
         season: null,
         participants: [],
+        phaseParticipants: [],
         matches: [],
         standings: [],
         phases: [],
@@ -231,6 +246,7 @@ function emptyTournamentData(error?: string): TournamentInitialData {
         queryErrors: {
             tournament: null,
             participants: null,
+            phaseParticipants: null,
             matches: null,
             standings: null,
             phases: null,
@@ -641,6 +657,11 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
             .not('status', 'in', '("withdrawn","disqualified")')
             .order('seed', { ascending: true, nullsFirst: false });
 
+        let phaseParticipantsQuery = supabase
+            .from('tournament_phase_participants')
+            .select('phase_id, participant_id, group_id, status')
+            .eq('tournament_id', tournamentId);
+
         let matchesQueryWithEvents = supabase
             .from('matches')
             .select(`
@@ -696,6 +717,7 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
 
         if (scopedSeasonId) {
             participantsQuery = participantsQuery.eq('season_id', scopedSeasonId);
+            phaseParticipantsQuery = phaseParticipantsQuery.eq('season_id', scopedSeasonId);
             matchesQueryWithEvents = matchesQueryWithEvents.eq('season_id', scopedSeasonId);
             matchesQueryWithoutEvents = matchesQueryWithoutEvents.eq('season_id', scopedSeasonId);
             standingsQuery = standingsQuery.eq('season_id', scopedSeasonId);
@@ -707,6 +729,7 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
         const [
             tournamentRes,
             participantsRes,
+            phaseParticipantsRes,
             matchesRes,
             standingsRes,
             phasesRes,
@@ -723,6 +746,11 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
                 'participants',
                 participantsQuery,
                 [] as TournamentParticipantRow[],
+            ),
+            settleSupabaseQuery(
+                'phaseParticipants',
+                phaseParticipantsQuery,
+                [] as TournamentPhaseParticipantRow[],
             ),
             settleSupabaseQuery(
                 'matches',
@@ -802,6 +830,7 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
         const queryErrors: TournamentQueryErrors = {
             tournament: tournamentError,
             participants: participantsRes.error,
+            phaseParticipants: phaseParticipantsRes.error,
             matches: matchesRes.error,
             standings: standingsRes.error,
             phases: phasesRes.error,
@@ -841,6 +870,7 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
             } : null,
             season: seasonContext,
             participants: sanitizedParticipants,
+            phaseParticipants: phaseParticipantsRes.data,
             matches: hydratedMatches,
             standings: hydratedStandings,
             phases: phasesRes.data,
