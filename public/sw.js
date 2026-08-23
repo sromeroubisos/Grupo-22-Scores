@@ -152,7 +152,17 @@ self.addEventListener('push', (event) => {
       notification = await getLatestUnreadNotification();
     }
 
-    if (!notification) return;
+    // El envio del cron viaja sin payload: el detalle lo busca el service worker.
+    // Si esa consulta falla (sesion vencida, red caida), salir sin dibujar nada
+    // deja el push mudo, que desde el celular no se distingue de uno que nunca
+    // llego. Ademas la suscripcion es userVisibleOnly: los navegadores castigan
+    // al que recibe un push y no muestra nada.
+    if (!notification) {
+      notification = {
+        title: 'G22 Scores',
+        body: 'Tenes novedades de tus equipos seguidos.',
+      };
+    }
 
     const targetUrl = getNotificationTarget(notification);
     await self.registration.showNotification(notification.title || 'G22 Scores', {

@@ -55,6 +55,23 @@ function describeError(error: unknown) {
     return String(error);
 }
 
+/**
+ * Una suscripcion queda atada de por vida a la clave VAPID con la que nacio. Si
+ * el servidor cambia de par, la vieja sigue existiendo en el navegador y parece
+ * sana, pero el push service rechaza cada envio con VapidPkHashMismatch. Del
+ * lado del usuario no se nota nada: la tarjeta dice "activos" y no llega nunca
+ * una notificacion.
+ */
+function usesApplicationServerKey(subscription: PushSubscription, publicKey: string) {
+    const current = subscription.options?.applicationServerKey;
+    if (!current) return false;
+
+    const actual = new Uint8Array(current);
+    const expected = base64UrlToUint8Array(publicKey);
+
+    return actual.length === expected.length && actual.every((byte, index) => byte === expected[index]);
+}
+
 async function getReadyServiceWorker() {
     await navigator.serviceWorker.register('/sw.js', { scope: '/' });
     return navigator.serviceWorker.ready;
@@ -171,7 +188,11 @@ export default function SystemNotificationsControl() {
                 return;
             }
 
-            if (subscription && remoteStatus.subscribed && Notification.permission === 'granted') {
+            const subscriptionUsesCurrentKey = subscription
+                ? usesApplicationServerKey(subscription, remoteStatus.publicKey)
+                : false;
+
+            if (subscription && subscriptionUsesCurrentKey && remoteStatus.subscribed && Notification.permission === 'granted') {
                 setState('active');
                 return;
             }
@@ -295,11 +316,22 @@ export default function SystemNotificationsControl() {
                 return;
             }
 
-            const existingSubscription = await registration.pushManager.getSubscription();
-            const subscription = existingSubscription ?? await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: base64UrlToUint8Array(remoteStatus.publicKey),
-            });
+            let subscription = await registration.pushManager.getSubscription();
+
+            // Reusar una suscripcion nacida con otra clave es peor que no tener
+            // ninguna: se guarda, la tarjeta se pone en verde y cada push rebota.
+            if (subscription && !usesApplicationServerKey(subscription, remoteStatus.publicKey)) {
+                await deleteSubscription(subscription.endpoint).catch(() => undefined);
+                await subscription.unsubscribe();
+                subscription = null;
+            }
+
+            if (!subscription) {
+                subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: base64UrlToUint8Array(remoteStatus.publicKey),
+                });
+            }
 
             await saveSubscription(subscription);
             await refresh();
