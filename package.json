@@ -18,6 +18,7 @@
     "test:captain-freeze": "node scripts/captain-freeze.mjs",
     "test:perf": "node --test src/lib/perf/editTrace.test.ts src/lib/perf/labFlags.test.ts",
     "test:contraste": "node scripts/contraste-standings.mjs",
+    "verificar:web-push": "node scripts/verificar-web-push.mjs",
     "lab:guard": "node scripts/etapa0-lab-guard.mjs",
     "dev:perf-lab": "node scripts/dev-perf-lab.mjs",
     "prebuild": "node scripts/gen-logo-manifest.mjs",
