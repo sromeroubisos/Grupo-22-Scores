@@ -23,7 +23,9 @@ interface LooseQuery extends PromiseLike<{ data: LooseRow[] | null; error: Query
 interface LooseMutation extends PromiseLike<{ data: LooseRow | null; error: QueryError }> {
     select(columns: string): LooseMutation;
     single(): PromiseLike<{ data: LooseRow | null; error: QueryError }>;
-    eq(column: string, value: string): LooseMutation;
+    eq(column: string, value: string | boolean): LooseMutation;
+    is(column: string, value: null): LooseMutation;
+    not(column: string, operator: string, value: null): LooseMutation;
 }
 
 interface LooseAdmin {
@@ -44,6 +46,26 @@ function isMissingTable(error: QueryError) {
     const code = String(error?.code ?? '');
     const message = String(error?.message ?? '').toLowerCase();
     return code === 'PGRST205' || code === '42P01' || message.includes('could not find the table');
+}
+
+// Postgres habla en codigos y en nombres de constraint. El hincha no tiene por
+// que leer eso: cada caso se traduce a una frase que dice que paso y como
+// seguir. El texto crudo queda en el log del servidor, que es donde sirve.
+function friendlyError(error: QueryError, fallback = 'No se pudo guardar tu voto. Probá de nuevo.') {
+    const code = String(error?.code ?? '');
+    const message = String(error?.message ?? '').toLowerCase();
+
+    // CHECK `not_empty`: la fila quedaba sin puntaje y sin figura.
+    if (code === '23514' || message.includes('not_empty')) {
+        return 'Ese voto quedaba vacío. Para sacar el puntaje tocá de nuevo el mismo color.';
+    }
+    // UNIQUE: o el mismo jugador dos veces, o una segunda figura.
+    if (code === '23505' || message.includes('duplicate key')) {
+        return message.includes('one_mvp')
+            ? 'Ya elegiste la figura de este partido. Tocá la estrella marcada para cambiarla.'
+            : 'Ya votaste a este jugador en este partido.';
+    }
+    return fallback;
 }
 
 function str(value: unknown) {
@@ -169,7 +191,7 @@ export async function POST(
         const matchId = (await params).id;
         const userId = await resolveUserId();
         if (!userId) {
-            return NextResponse.json({ error: 'Entra con tu cuenta para puntuar.' }, { status: 401 });
+            return NextResponse.json({ error: 'Entrá con tu cuenta para puntuar.' }, { status: 401 });
         }
 
         const payload = await request.json() as RatingPayload;
@@ -190,14 +212,36 @@ export async function POST(
 
         // La figura es una sola por usuario: antes de marcar la nueva se baja la
         // anterior, si no el indice unico parcial rechaza el upsert.
+        //
+        // Y hay que bajarla de dos formas distintas, porque la figura anterior
+        // puede ser una fila que existe SOLO por la estrella (figura elegida sin
+        // semaforo). A esa, ponerle is_mvp = false la deja sin puntaje y sin
+        // figura: exactamente lo que prohibe el CHECK `not_empty`, y Postgres
+        // rechaza el update entero. Esa fila se borra; la que ademas tiene
+        // puntaje se actualiza y sigue viva.
         if (isMvp) {
+            const dropped = await admin
+                .from(TABLE)
+                .delete()
+                .eq('match_id', matchId)
+                .eq('user_id', userId)
+                .eq('is_mvp', true)
+                .is('rating', null);
+            if (dropped.error && !isMissingTable(dropped.error)) {
+                console.error('[POST player-ratings] limpiar figura sin puntaje', dropped.error);
+                return NextResponse.json({ error: friendlyError(dropped.error) }, { status: 500 });
+            }
+
             const cleared = await admin
                 .from(TABLE)
                 .update({ is_mvp: false, updated_at: new Date().toISOString() })
                 .eq('match_id', matchId)
-                .eq('user_id', userId);
+                .eq('user_id', userId)
+                .eq('is_mvp', true)
+                .not('rating', 'is', null);
             if (cleared.error && !isMissingTable(cleared.error)) {
-                return NextResponse.json({ error: cleared.error.message }, { status: 500 });
+                console.error('[POST player-ratings] bajar figura anterior', cleared.error);
+                return NextResponse.json({ error: friendlyError(cleared.error) }, { status: 500 });
             }
         }
 
@@ -211,7 +255,8 @@ export async function POST(
                 .eq('user_id', userId)
                 .eq('player_key', playerKey);
             if (removed.error && !isMissingTable(removed.error)) {
-                return NextResponse.json({ error: removed.error.message }, { status: 500 });
+                console.error('[POST player-ratings] borrar voto', removed.error);
+                return NextResponse.json({ error: friendlyError(removed.error) }, { status: 500 });
             }
             return NextResponse.json(await fetchSummary(admin, matchId, userId));
         }
@@ -235,11 +280,12 @@ export async function POST(
         if (saved.error) {
             if (isMissingTable(saved.error)) {
                 return NextResponse.json(
-                    { error: 'El puntaje de la gente todavia no esta habilitado.' },
+                    { error: 'El puntaje de la gente todavía no está habilitado.' },
                     { status: 503 },
                 );
             }
-            return NextResponse.json({ error: saved.error.message || 'No se pudo guardar tu voto.' }, { status: 500 });
+            console.error('[POST player-ratings] guardar voto', saved.error);
+            return NextResponse.json({ error: friendlyError(saved.error) }, { status: 500 });
         }
 
         return NextResponse.json(await fetchSummary(admin, matchId, userId));
