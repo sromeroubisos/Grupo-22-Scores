@@ -9,6 +9,8 @@ import FavoriteButton from '@/components/FavoriteButton';
 import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
 import MatchTimeline from '@/components/match/MatchTimeline';
 import PeopleRatingsPanel, { type RateablePlayer } from '@/components/match/PeopleRatingsPanel';
+import ClubsPromoLink from '@/components/clubs-promo/ClubsPromoLink';
+import { CONTEXTUAL } from '@/content/para-clubes';
 import styles from './page.module.css';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import {
@@ -2638,7 +2640,16 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                         );
                                     })
                                 ) : (
-                                    <p className={styles.placeholderText}>No hay estadísticas clave disponibles para este partido.</p>
+                                    /*
+                                     * El vacío es el mejor argumento que
+                                     * tenemos: quien mira un partido sin
+                                     * estadísticas está viendo exactamente lo
+                                     * que G22 le llenaría si cargara él.
+                                     */
+                                    <div className={styles.placeholderText}>
+                                        <p style={{ margin: 0 }}>No hay estadísticas clave disponibles para este partido.</p>
+                                        <ClubsPromoLink origen="partido-vacio" texto={CONTEXTUAL.partidoVacio} />
+                                    </div>
                                 )}
 
                                 {eventsData.length > 0 && (
@@ -2919,7 +2930,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             <div className={styles.publicStatsPanel}>
                                 <div className={styles.panelTitle}>Estadísticas del partido</div>
                                 {statsData.length === 0 ? (
-                                    <p className={styles.placeholderText}>No hay estadísticas disponibles para este partido.</p>
+                                    <div className={styles.placeholderText}>
+                                        <p style={{ margin: 0 }}>No hay estadísticas disponibles para este partido.</p>
+                                        <ClubsPromoLink origen="partido-vacio" texto={CONTEXTUAL.partidoVacio} />
+                                    </div>
                                 ) : (
                                     <div className={styles.publicStatsSectionGrid}>
                                         <section className={styles.publicStatsSection}>

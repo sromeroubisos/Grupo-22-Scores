@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
-import { ArrowLeft, ChevronRight, Star } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Star, Trophy } from 'lucide-react';
 import { useFavorite } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { SPORTS_BY_ID } from '@/lib/sports';
@@ -15,6 +15,8 @@ import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { useAuth } from '@/context/AuthContext';
+import ClubsPromoLink from '@/components/clubs-promo/ClubsPromoLink';
+import { CONTEXTUAL } from '@/content/para-clubes';
 import HistoryTab from './HistoryTab';
 
 const SPORT_LABEL: Record<string, string> = Object.fromEntries(
@@ -439,6 +441,14 @@ function TeamDetailInner({ id }: { id: string }) {
 
     // Extract team info from details, fallback to hintName from URL
     const teamName = details?.name || details?.team?.name || details?.team_name || hintName || rawId;
+    /**
+     * El nombre REAL del club, sin el id crudo de respaldo.
+     *
+     * `teamName` cae en `rawId` cuando el proveedor no contestó, y ahí un
+     * "¿Sos dirigente de fs-team-4821?" es peor que no preguntar nada. Cuando
+     * no hay nombre, la línea contextual usa su variante genérica.
+     */
+    const nombreClubReal = details?.name || details?.team?.name || details?.team_name || hintName || '';
     const teamLogoUrl =
         resolveTeamLogo(details, details?.team) ||
         '';
@@ -1121,6 +1131,12 @@ function TeamDetailInner({ id }: { id: string }) {
                         </div>
                     </aside>
                 </div>
+
+                {/* Al pie de la ficha, con el nombre del club cuando lo sabemos. */}
+                <ClubsPromoLink
+                    origen="club"
+                    texto={nombreClubReal ? CONTEXTUAL.club(nombreClubReal) : CONTEXTUAL.clubSinNombre}
+                />
             </main>
         </div>
     );

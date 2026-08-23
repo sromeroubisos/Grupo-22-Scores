@@ -1,0 +1,211 @@
+/*
+ * La placa se lee como contenido, no como publicidad: misma tipografía, mismo
+ * radio y mismo espaciado que una tarjeta de noticia. Lo único que la separa es
+ * el borde en el verde de marca y la etiqueta.
+ *
+ * Ojo con el verde: `--color-accent` está calibrado para fondos y como TEXTO no
+ * llega al contraste AA sobre el claro. Para texto va `--color-accent-ink`, que
+ * existe exactamente por eso.
+ */
+
+.root {
+    display: block;
+}
+
+.feed {
+    /*
+     * Arriba de 1500px la columna derecha aparece y ahí ya está la placa del
+     * sidebar. Dos veces la misma promo en la misma pantalla es ruido.
+     */
+    margin: 0;
+}
+
+@media (min-width: 1501px) {
+    .feed {
+        display: none;
+    }
+}
+
+.link {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    height: 100%;
+    padding: 18px;
+    border: 1px solid rgba(var(--color-accent-rgb), 0.34);
+    border-radius: var(--radius-lg, 12px);
+    background:
+        linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.18) 0%, rgba(var(--color-accent-rgb), 0.05) 46%, rgba(255, 255, 255, 0.03) 100%),
+        var(--color-bg-secondary);
+    color: inherit;
+    text-decoration: none;
+    transition:
+        transform var(--transition-fast, 0.15s ease),
+        border-color var(--transition-fast, 0.15s ease),
+        background var(--transition-fast, 0.15s ease);
+}
+
+.link:hover {
+    transform: translateY(-2px);
+    border-color: rgba(var(--color-accent-rgb), 0.58);
+    background:
+        linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.26) 0%, rgba(var(--color-accent-rgb), 0.08) 46%, rgba(255, 255, 255, 0.05) 100%),
+        var(--color-bg-secondary);
+}
+
+.link:focus-visible {
+    outline: 2px solid var(--color-accent-ink, #22c55e);
+    outline-offset: 3px;
+}
+
+/* La etiqueta ocupa el lugar donde una noticia dice "RUGBY". */
+.etiqueta {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-accent-ink, #22c55e);
+}
+
+.titulo {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.22;
+    color: var(--color-text-primary);
+    text-wrap: balance;
+}
+
+.modulos {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+}
+
+.moduloLinea {
+    display: block;
+}
+
+/* Las ventajas, una por línea. Sólo en la placa del sidebar. */
+.ventajas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px 12px;
+    width: 100%;
+    margin: 2px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ventaja {
+    position: relative;
+    padding-left: 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-text-secondary);
+}
+
+.ventaja::before {
+    content: '';
+    position: absolute;
+    top: 0.45em;
+    left: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--color-accent-ink, #22c55e);
+}
+
+.pasos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin: 4px 0 0;
+    padding: 14px 0 0;
+    border-top: 1px solid rgba(var(--color-accent-rgb), 0.16);
+    list-style: none;
+}
+
+.paso {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-text-secondary);
+}
+
+.pasoNumero {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: rgba(var(--color-accent-rgb), 0.16);
+    color: var(--color-accent-ink, #22c55e);
+    font-size: 0.6875rem;
+    font-weight: 800;
+}
+
+.accion {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 4px;
+    color: var(--color-accent-ink, #22c55e);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.flecha {
+    transition: transform var(--transition-fast, 0.15s ease);
+}
+
+.link:hover .flecha {
+    transform: translateX(3px);
+}
+
+/* La placa del sidebar tiene la columna entera: puede respirar. */
+.sidebar .link {
+    min-height: 260px;
+    padding: 20px;
+}
+
+.sidebar .titulo {
+    font-size: 1.15rem;
+}
+
+:global([data-theme='light']) .link {
+    background:
+        linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.14) 0%, rgba(255, 255, 255, 0.92) 54%, rgba(241, 245, 249, 0.96) 100%),
+        var(--color-bg-secondary);
+    box-shadow: 0 16px 34px -28px rgba(15, 23, 42, 0.28);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .link,
+    .flecha {
+        transition: none;
+    }
+
+    .link:hover {
+        transform: none;
+    }
+
+    .link:hover .flecha {
+        transform: none;
+    }
+}

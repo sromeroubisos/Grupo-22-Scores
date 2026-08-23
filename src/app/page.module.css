@@ -1363,88 +1363,58 @@
     flex: 0 0 auto;
 }
 
-.hirePanel {
-    display: flex;
+/*
+ * Noticias dentro del feed.
+ *
+ * Vivían en `.sidebarRight`, que se apaga abajo de 1500px: en un teléfono no se
+ * veían nunca. Ahora cierran el feed y sólo existen abajo de ese corte, porque
+ * arriba la columna derecha está y es de clubes.
+ */
+.feedNews {
+    display: none;
     flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: 14px;
-    flex: 0 0 auto;
-    min-height: 160px;
-    margin: 6px var(--spacing-sm) 0;
-    padding: 18px;
-    border: 1px solid rgba(var(--color-accent-rgb), 0.34);
+    grid-column: 1 / -1;
+    gap: 4px;
+    padding: 16px 12px 8px;
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    background:
-        linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.24) 0%, rgba(var(--color-accent-rgb), 0.06) 42%, rgba(255, 255, 255, 0.035) 100%),
-        var(--color-bg-secondary);
-    color: var(--color-text-primary);
-    font-size: 1rem;
-    font-weight: 800;
-    line-height: 1.25;
-    text-decoration: none;
-    transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+    background: var(--color-bg-secondary);
 }
 
-.hirePanelLogoWrap {
-    display: block;
-    width: 100%;
-    overflow: hidden;
+@media (max-width: 1500px) {
+    .feedNews {
+        display: flex;
+    }
 }
 
-.hirePanelLogo {
-    display: block;
-    width: min(150px, 100%);
-    height: auto;
-    max-height: 43px;
-    object-fit: contain;
-    object-position: left center;
-    filter: drop-shadow(0 8px 18px rgba(var(--color-accent-rgb), 0.2));
-}
-
-.hirePanelBenefit {
-    display: block;
-    max-width: 100%;
-    color: var(--color-text-primary);
-    font-size: 0.94rem;
-    font-weight: 800;
-    line-height: 1.18;
-}
-
-.hirePanelAction {
-    display: inline-flex;
+.feedNewsHeader {
+    display: flex;
     align-items: center;
-    gap: 6px;
-    margin-top: auto;
-    color: var(--color-accent);
-    font-size: 0.8rem;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 var(--spacing-md) 4px;
+}
+
+.feedNewsTitle {
+    margin: 0;
+    font-size: 0.9rem;
     font-weight: 800;
-    letter-spacing: 0.04em;
-    line-height: 1;
+    letter-spacing: 0.02em;
+    color: var(--color-text-primary);
     text-transform: uppercase;
 }
 
-.hirePanelAction svg {
-    transition: transform var(--transition-fast);
+.feedNewsLink {
+    color: var(--color-accent-ink);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
 }
 
-.hirePanel:hover {
-    transform: translateY(-2px);
-    border-color: rgba(var(--color-accent-rgb), 0.58);
-    background:
-        linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.31) 0%, rgba(var(--color-accent-rgb), 0.09) 42%, rgba(255, 255, 255, 0.05) 100%),
-        var(--color-bg-secondary);
-}
-
-.hirePanel:hover .hirePanelAction svg {
-    transform: translateX(3px);
-}
-
-:global([data-theme="light"]) .hirePanel {
-    background:
-        linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.16) 0%, rgba(255, 255, 255, 0.9) 52%, rgba(241, 245, 249, 0.96) 100%),
-        var(--color-bg-secondary);
-    box-shadow: 0 16px 34px -28px rgba(15, 23, 42, 0.28);
+.feedNewsLink:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
 }
 
 

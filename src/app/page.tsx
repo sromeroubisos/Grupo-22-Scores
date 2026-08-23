@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, useCallback, memo, type CSSProperties, type MouseEvent } from 'react';
-import { Trophy, ChevronRight, ChevronLeft, Star, ArrowRight } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef, useCallback, memo, Fragment, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
+import { Trophy, ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 import styles from './page.module.css';
 import InstallAppButton from '@/components/InstallAppButton';
 import { useSport } from '@/context/SportContext';
@@ -15,15 +14,22 @@ import TournamentSeasonTag from '@/components/TournamentSeasonTag';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { useAuth } from '@/context/AuthContext';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
-import { markHireCtaSeen, shouldShowHireCtaForUser } from '@/lib/hireCtaPreferences';
+import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { AUDIENCE_LABELS, isDualAudienceTournament, matchesTournamentAudience, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { compareTournamentsByPriority, getTournamentPriority } from '@/lib/utils/tournamentOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { getMatchPenaltyScore, hasMatchPenaltyShootout, getMatchWinnerByScore } from '@/lib/matchUtils';
+
+/**
+ * Después de qué bloque del feed entra la tarjeta de clubes (índice, base cero).
+ * Uno = después del segundo. Lo suficientemente arriba como para que se vea sin
+ * scrollear medio teléfono, lo suficientemente abajo como para que el hincha ya
+ * haya encontrado el resultado que vino a buscar.
+ */
+const PROMO_DESPUES_DEL_BLOQUE = 1;
 
 // Individual sports use player faces instead of team shields
 const INDIVIDUAL_SPORTS = new Set([
@@ -737,39 +743,7 @@ export default function HomePage() {
   const [selectedAudience, setSelectedAudience] = useState<TournamentAudience>('mayores');
 
   const { selectedSport, setSelectedSport, activeSports } = useSport();
-  const { user, isLoading: isAuthLoading } = useAuth();
   const { favoriteSportIds } = useUserPreferences();
-  const [showHireCta, setShowHireCta] = useState(false);
-
-  useEffect(() => {
-    if (isAuthLoading) {
-      setShowHireCta(false);
-      return;
-    }
-
-    if (!user?.id) {
-      setShowHireCta(true);
-      return;
-    }
-
-    const shouldShow = shouldShowHireCtaForUser(user.id);
-    setShowHireCta(shouldShow);
-
-    if (!shouldShow) return;
-
-    const markSeenTimer = window.setTimeout(() => {
-      markHireCtaSeen(user.id);
-    }, 800);
-
-    return () => window.clearTimeout(markSeenTimer);
-  }, [isAuthLoading, user?.id]);
-
-  const handleHireCtaClick = useCallback(() => {
-    if (user?.id) {
-      markHireCtaSeen(user.id);
-    }
-  }, [user?.id]);
-
   // Sort active sports: favorites first, then rest in original order
   const sortedActiveSports = useMemo(() => {
     if (favoriteSportIds.length === 0) return activeSports;
@@ -2207,11 +2181,34 @@ export default function HomePage() {
                   leagueIndex + (displayedFavoriteClubMatches.length > 0 ? 1 : 0)
                 );
 
+                /**
+                 * La tarjeta de clubes entra DESPUÉS del segundo bloque de
+                 * torneos, con el ancho de una tarjeta de torneo. Se scrollea
+                 * como cualquier otro contenido: no se cierra, no interrumpe y
+                 * no tiene estado.
+                 *
+                 * Va acá adentro y no después del `.map` porque el contenedor
+                 * es una grilla y el orden del DOM es el orden en pantalla. Si
+                 * hay menos de dos bloques, la tarjeta se dibuja igual al final
+                 * (ver más abajo): un día flojo de fixture no puede ser el día
+                 * en que la promo no existe.
+                 */
+                const conPromo = (bloque: ReactNode) => (
+                  leagueIndex === PROMO_DESPUES_DEL_BLOQUE
+                    ? (
+                      <Fragment key={league.leagueId}>
+                        {bloque}
+                        <ClubsPromoCard variant="feed" />
+                      </Fragment>
+                    )
+                    : bloque
+                );
+
                 if (isMotorsportSport) {
                   const eventMatch = league.matches[0];
                   if (!eventMatch) return null;
 
-                  return (
+                  return conPromo(
                     <div key={league.leagueId} className={styles.motorsportStandaloneCard}>
                       {FAVORITES_ENABLED && (
                         <div className={styles.motorsportStandaloneActions}>
@@ -2236,7 +2233,7 @@ export default function HomePage() {
                   );
                 }
 
-                return (
+                return conPromo(
                   <div key={league.leagueId} className={styles.leagueSection} style={leagueColorStyle}>
                     <div className={`${styles.leagueSectionHeader} ${isCollapsed ? styles.collapsed : ''}`}
                       onClick={() => toggleCompetitionCollapse(league.leagueId)}
@@ -2299,63 +2296,66 @@ export default function HomePage() {
                   </div>
                 );
               })}
+
+              {/* Menos de dos bloques: la tarjeta no encontró su lugar arriba. */}
+              {!loading && displayedMatchesByLeague.length <= PROMO_DESPUES_DEL_BLOQUE && (
+                <ClubsPromoCard variant="feed" />
+              )}
+
+              {/*
+                Noticias, acá abajo y sólo en pantalla chica.
+
+                Vivían en la columna derecha, que se apaga por CSS abajo de
+                1500px: en un teléfono no se veían nunca. Ahora cierran el feed,
+                que es el orden natural de un sitio de resultados —primero los
+                partidos, después la lectura— y arriba de 1500 no se dibujan
+                porque ahí la columna existe y es de clubes.
+              */}
+              {!loading && news.length > 0 && (
+                <section className={styles.feedNews} aria-labelledby="feed-news-titulo">
+                  <div className={styles.feedNewsHeader}>
+                    <h2 id="feed-news-titulo" className={styles.feedNewsTitle}>Noticias Recientes</h2>
+                    <Link href="/noticias" className={styles.feedNewsLink}>
+                      Ver noticias →
+                    </Link>
+                  </div>
+
+                  <div className={styles.newsList}>
+                    {news.slice(0, 5).map((item) => (
+                      <Link key={item.id} href={`/noticias/${item.id}`} className={styles.newsCard}>
+                        <div
+                          className={styles.newsImage}
+                          style={{ backgroundImage: item.image_url ? `url(${item.image_url})` : 'none', backgroundSize: 'cover' }}
+                        >
+                          {!item.image_url && <Trophy size={16} style={{ opacity: 0.2 }} />}
+                        </div>
+                        <div className={styles.newsContent}>
+                          <span className={styles.newsCategory}>Rugby</span>
+                          <h3 className={styles.newsTitle}>{item.title}</h3>
+                          <span className={styles.newsTime}>
+                            {item.published_at ? new Date(item.published_at).toLocaleDateString() : 'Reciente'}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
           </div>
         </main>
 
-        {/* Right Sidebar - News Only */}
+        {/*
+          Columna derecha: la puerta comercial, y nada más.
+
+          Antes vivían acá las noticias y, abajo, el panel de "Contratar ahora".
+          Eran dos placas verdes compitiendo en la misma columna y ninguna de
+          las dos se veía en un teléfono: `.sidebarRight` se apaga por CSS abajo
+          de 1500px. Ahora la columna es una sola cosa —la placa de clubes— y
+          las noticias bajaron al feed, que es lo único que un mobile ve.
+        */}
         <aside className={styles.sidebarRight}>
-          <div className={`${styles.sidebarSection} ${styles.rightNewsSection}`}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div className={styles.sidebarSectionTitle} style={{ marginBottom: 0 }}>Noticias Recientes</div>
-              <Link href="/noticias" style={{ fontSize: '0.8rem', color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 500 }}>
-                Ver noticias →
-              </Link>
-            </div>
-            <div className={styles.newsList}>
-              {news.slice(0, 5).map((item) => (
-                <Link key={item.id} href={`/noticias/${item.id}`} className={styles.newsCard}>
-                  <div
-                    className={styles.newsImage}
-                    style={{ backgroundImage: item.image_url ? `url(${item.image_url})` : 'none', backgroundSize: 'cover' }}
-                  >
-                    {!item.image_url && <Trophy size={16} style={{ opacity: 0.2 }} />}
-                  </div>
-                  <div className={styles.newsContent}>
-                    <span className={styles.newsCategory}>Rugby</span>
-                    <h3 className={styles.newsTitle}>{item.title}</h3>
-                    <span className={styles.newsTime}>
-                      {item.published_at ? new Date(item.published_at).toLocaleDateString() : 'Reciente'}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-              {news.length === 0 && (
-                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-dim)', fontSize: '0.8rem' }}>
-                  No hay noticias.
-                </div>
-              )}
-            </div>
-          </div>
-          {showHireCta && (
-            <Link href="/contacto" className={styles.hirePanel} onClick={handleHireCtaClick}>
-              <span className={styles.hirePanelLogoWrap} aria-hidden="true">
-                <Image
-                  src="/G22%20GEADER.png"
-                  alt=""
-                  width={3862}
-                  height={1083}
-                  sizes="180px"
-                  className={styles.hirePanelLogo}
-                />
-              </span>
-              <span className={styles.hirePanelBenefit}>Gestioná torneos, resultados y tablas en vivo</span>
-              <span className={styles.hirePanelAction}>
-                Contratar ahora
-                <ArrowRight size={14} strokeWidth={2.5} aria-hidden="true" />
-              </span>
-            </Link>
-          )}
+          <ClubsPromoCard variant="sidebar" />
         </aside>
       </div >
     </div >

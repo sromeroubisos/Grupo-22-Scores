@@ -1,0 +1,693 @@
+/*
+ * /para-clubes — misma paleta y mismos tokens que el resto del sitio.
+ *
+ * Dos reglas que no se rompen acá:
+ *  · El verde de TEXTO es `--color-accent-ink`. El `--color-accent` de marca
+ *    está calibrado para fondos y como texto no llega a AA sobre el claro.
+ *  · El tema es `data-theme` en `<html>`, nunca `prefers-color-scheme`: con
+ *    media query la página pintaría el tema del dispositivo y no el del sitio.
+ */
+
+.pagina {
+    width: 100%;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+}
+
+/* ── Hero ──────────────────────────────────────────────────────────────── */
+
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 32px;
+
+    padding: 36px;
+    border: 1px solid rgba(var(--color-accent-rgb), 0.24);
+    border-radius: 20px;
+    background:
+        linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.16) 0%, rgba(var(--color-accent-rgb), 0.04) 48%, transparent 100%),
+        var(--color-bg-secondary);
+}
+
+.heroTexto {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    min-width: 0;
+}
+
+.etiqueta {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-accent-ink);
+}
+
+.heroTitulo {
+    margin: 0;
+    font-size: clamp(1.9rem, 4.4vw, 2.9rem);
+    font-weight: 900;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+    text-wrap: balance;
+}
+
+.heroSubtitulo {
+    margin: 0;
+    max-width: 54ch;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+}
+
+.heroAcciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.heroMarca {
+    display: flex;
+    justify-content: center;
+}
+
+.heroLogo {
+    width: min(320px, 100%);
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 18px 34px rgba(var(--color-accent-rgb), 0.22));
+}
+
+/* ── Botones ───────────────────────────────────────────────────────────── */
+
+.botonPrimario,
+.botonSecundario,
+.botonEnviar,
+.botonWhatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 22px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.botonPrimario,
+.botonEnviar {
+    border: 1px solid transparent;
+    background: var(--color-accent);
+    color: #04170e;
+}
+
+.botonPrimario:hover,
+.botonEnviar:hover:not(:disabled) {
+    transform: translateY(-1px);
+    background: var(--color-accent-light);
+}
+
+.botonSecundario {
+    border: 1px solid var(--color-border-light);
+    background: transparent;
+    color: var(--color-text-primary);
+}
+
+.botonSecundario:hover {
+    border-color: rgba(var(--color-accent-rgb), 0.5);
+    background: rgba(var(--color-accent-rgb), 0.08);
+}
+
+.botonWhatsapp {
+    width: 100%;
+    border: 1px solid rgba(var(--color-accent-rgb), 0.4);
+    background: rgba(var(--color-accent-rgb), 0.14);
+    color: var(--color-text-primary);
+}
+
+.botonEnviar {
+    width: 100%;
+    padding: 15px 22px;
+    font-size: 0.95rem;
+}
+
+.botonEnviar:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+.botonPrimario:focus-visible,
+.botonSecundario:focus-visible,
+.botonEnviar:focus-visible,
+.botonWhatsapp:focus-visible,
+.faqPregunta:focus-visible {
+    outline: 2px solid var(--color-accent-ink);
+    outline-offset: 3px;
+}
+
+/* ── Secciones ─────────────────────────────────────────────────────────── */
+
+.seccion {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.seccionTitulo {
+    margin: 0;
+    font-size: clamp(1.35rem, 2.6vw, 1.75rem);
+    font-weight: 800;
+    line-height: 1.16;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+    text-wrap: balance;
+}
+
+.seccionTexto {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+/* ── La demo ───────────────────────────────────────────────────────────── */
+
+.demoCaja {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 30px;
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    background: var(--color-bg-secondary);
+}
+
+.demoPuntos {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.demoPunto {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+}
+
+.demoTilde {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: rgba(var(--color-accent-rgb), 0.16);
+    color: var(--color-accent-ink);
+}
+
+/* ── Tres números ──────────────────────────────────────────────────────── */
+
+.numeros {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.numero {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-bg-secondary);
+}
+
+.numeroValor {
+    font-size: 2.3rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--color-accent-ink);
+}
+
+.numeroEtiqueta {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.numeroDetalle {
+    margin: 4px 0 0;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--color-text-tertiary);
+}
+
+/* ── Módulos ───────────────────────────────────────────────────────────── */
+
+.modulos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 6px;
+}
+
+.modulo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-bg-secondary);
+    transition: border-color var(--transition-fast);
+}
+
+.modulo:hover {
+    border-color: rgba(var(--color-accent-rgb), 0.34);
+}
+
+.moduloIcono {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    margin-bottom: 4px;
+    border-radius: 11px;
+    background: rgba(var(--color-accent-rgb), 0.14);
+    color: var(--color-accent-ink);
+}
+
+.moduloTitulo {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.moduloTexto {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+}
+
+/* ── Pasos ─────────────────────────────────────────────────────────────── */
+
+.pasos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: paso;
+}
+
+.paso {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px;
+    border: 1px solid var(--color-border);
+    border-left: 2px solid rgba(var(--color-accent-rgb), 0.42);
+    border-radius: 4px 16px 16px 4px;
+    background: var(--color-bg-secondary);
+}
+
+.pasoNumero {
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    color: var(--color-accent-ink);
+}
+
+.pasoTitulo {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.pasoTexto {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+}
+
+/* ── FAQ ───────────────────────────────────────────────────────────────── */
+
+.faq {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.faqItem {
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: var(--color-bg-secondary);
+    overflow: hidden;
+}
+
+.faqPregunta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 17px 20px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    list-style: none;
+}
+
+/* El triangulito nativo de Safari, que no se va con `list-style`. */
+.faqPregunta::-webkit-details-marker {
+    display: none;
+}
+
+.faqPregunta:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.faqChevron {
+    flex-shrink: 0;
+    color: var(--color-accent-ink);
+    transition: transform var(--transition-fast);
+}
+
+.faqItem[open] .faqChevron {
+    transform: rotate(180deg);
+}
+
+.faqRespuesta {
+    margin: 0;
+    padding: 0 20px 20px;
+    max-width: 68ch;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+/* ── Cierre + formulario ───────────────────────────────────────────────── */
+
+.cierre {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    align-items: start;
+    gap: 32px;
+
+    padding: 34px;
+    border: 1px solid rgba(var(--color-accent-rgb), 0.22);
+    border-radius: 20px;
+    background:
+        linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.12) 0%, transparent 60%),
+        var(--color-bg-secondary);
+
+    /* La barra promocional no se dibuja en esta ruta, así que no hay que
+       reservarle nada: el pie de página ya deja su propio aire. */
+    scroll-margin-top: 90px;
+}
+
+.cierreTexto {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.cierreTitulo {
+    margin: 0;
+    font-size: clamp(1.5rem, 3vw, 2.05rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+    text-wrap: balance;
+}
+
+.formularioCaja {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-bg-primary);
+}
+
+.formularioTitulo {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.formularioAyuda {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--color-text-tertiary);
+}
+
+.formulario {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 4px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.campoAncho,
+.errorGeneral,
+.botonEnviar {
+    grid-column: 1 / -1;
+}
+
+.etiquetaCampo {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+.opcional {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
+.input {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.35;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.18);
+}
+
+.input:disabled {
+    opacity: 0.65;
+}
+
+.input[aria-invalid='true'] {
+    border-color: var(--color-error);
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 84px;
+}
+
+.error {
+    font-size: 0.76rem;
+    line-height: 1.35;
+    color: var(--color-error);
+}
+
+.errorGeneral {
+    margin: 0;
+    padding: 10px 13px;
+    border: 1px solid rgba(239, 68, 68, 0.34);
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.1);
+    font-size: 0.83rem;
+    color: var(--color-error);
+}
+
+/*
+ * El honeypot: fuera de pantalla, no `display: none`. Hay bots que saltean todo
+ * lo oculto por CSS, y un campo que ellos ven y las personas no es justamente
+ * lo que lo hace funcionar. `aria-hidden` en el contenedor lo saca del lector
+ * de pantalla y el `tabIndex={-1}` lo saca del recorrido por teclado.
+ */
+.trampa {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ── Éxito ─────────────────────────────────────────────────────────────── */
+
+.exito {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 28px 24px;
+    border: 1px solid rgba(var(--color-accent-rgb), 0.4);
+    border-radius: 16px;
+    background: rgba(var(--color-accent-rgb), 0.1);
+}
+
+.exito:focus-visible {
+    outline: 2px solid var(--color-accent-ink);
+    outline-offset: 3px;
+}
+
+.exitoTilde {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    background: rgba(var(--color-accent-rgb), 0.2);
+    color: var(--color-accent-ink);
+}
+
+.exitoTexto {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--color-text-primary);
+}
+
+/* ── Claro ─────────────────────────────────────────────────────────────── */
+
+:global([data-theme='light']) .hero,
+:global([data-theme='light']) .cierre {
+    background:
+        linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.12) 0%, rgba(255, 255, 255, 0.9) 58%, rgba(241, 245, 249, 0.96) 100%),
+        var(--color-bg-secondary);
+    box-shadow: 0 20px 44px -34px rgba(15, 23, 42, 0.3);
+}
+
+:global([data-theme='light']) .formularioCaja {
+    background: #fff;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+
+    .hero,
+    .cierre {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 26px 22px;
+    }
+
+    /*
+     * En mobile la marca se va: la cabecera del sitio ya tiene el logo de G22
+     * a 60px de acá, y repetirlo empujaba el título abajo del pliegue. En un
+     * teléfono, el primer pantallazo tiene que ser la promesa, no el logotipo.
+     */
+    .heroMarca {
+        display: none;
+    }
+
+    .pagina {
+        gap: 42px;
+        padding: 22px 16px 48px;
+    }
+
+    .demoCaja {
+        padding: 24px 20px;
+    }
+
+    .heroAcciones {
+        width: 100%;
+    }
+
+    .botonPrimario,
+    .botonSecundario {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 560px) {
+    .formulario {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .botonPrimario,
+    .botonSecundario,
+    .botonEnviar,
+    .botonWhatsapp,
+    .faqChevron,
+    .modulo,
+    .input {
+        transition: none;
+    }
+
+    .botonPrimario:hover,
+    .botonEnviar:hover:not(:disabled) {
+        transform: none;
+    }
+}
