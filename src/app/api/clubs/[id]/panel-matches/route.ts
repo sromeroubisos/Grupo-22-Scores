@@ -4,9 +4,10 @@ import {
     getClubManagementTarget,
     requireUserAccessContext,
 } from '@/lib/auth/permissions';
-import { MANAGEMENT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
+import { MANAGEMENT_MEMBERSHIP_ROLES, isGlobalAdminRole } from '@/lib/auth/roles';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { FixtureService } from '@/lib/services/fixtureService';
 import { TOURNAMENT_REVIEW_STATUS } from '@/lib/tournamentReview';
 import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 
@@ -151,6 +152,78 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     } catch (error) {
         const message = error instanceof Error ? error.message : 'No se pudo cargar el partido';
         console.error('[clubs/panel-matches] POST', error);
+        return err(message, 500);
+    }
+}
+
+
+/**
+ * DELETE /api/clubs/:id/panel-matches?matchId=… — se da de baja un partido
+ * desde el panel del club.
+ *
+ * Quién puede borrar qué:
+ *
+ *   · super_admin / admin_general → cualquier partido de la familia del club.
+ *   · dirigente del club → SOLO los que cargó el club (`created_by_club_id` en
+ *     su familia). Un partido oficial de la URBA lo importa el cron y lo miran
+ *     los dos clubes y la tabla de posiciones: que un dirigente pueda borrarlo
+ *     de la base porque su equipo jugó ahí sería borrarle el partido al rival.
+ *     Para eso está el gestor del torneo.
+ *
+ * Las dos puertas exigen además que el partido TOQUE a la familia: sin eso la
+ * ruta sería un borrador genérico al que se llega escribiendo un uuid en la URL.
+ */
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const { id } = await params;
+        const clubId = normalizeText(id);
+        if (!clubId) return err('club requerido', 400);
+
+        const body = await request.json().catch(() => ({}));
+        const matchId = normalizeText(request.nextUrl.searchParams.get('matchId') || body?.matchId);
+        if (!matchId) return err('Falta el partido a borrar', 400);
+
+        const supabase = await createClient();
+        const context = await requireUserAccessContext(supabase).catch(() => null);
+        if (!context) return err('No autenticado', 401);
+
+        const target = await getClubManagementTarget(supabase, clubId);
+        if (!target) return err('Club no encontrado', 404);
+
+        const isGlobalAdmin = isGlobalAdminRole(context.role);
+        if (!isGlobalAdmin && !canManageClubContext(context, target, MANAGEMENT_MEMBERSHIP_ROLES)) {
+            return err('Sin permisos para borrar partidos de este club', 403);
+        }
+
+        const admin = createAdminClient();
+        const { data: match } = await admin
+            .from('matches')
+            .select('id, home_club_id, away_club_id, created_by_club_id')
+            .eq('id', matchId)
+            .maybeSingle();
+
+        if (!match) return err('No encontramos ese partido', 404);
+
+        const familyIds = new Set(target.familyClubIds ?? [target.clubId]);
+        const touchesFamily = familyIds.has(String(match.home_club_id || ''))
+            || familyIds.has(String(match.away_club_id || ''));
+        if (!touchesFamily) {
+            return err('Ese partido no es de este club', 403);
+        }
+
+        if (!isGlobalAdmin && !familyIds.has(String(match.created_by_club_id || ''))) {
+            return err('Ese partido no lo cargó el club: pedile la baja al gestor del torneo', 403);
+        }
+
+        // Por FixtureService y no por un delete a mano: ahí adentro se invalida la
+        // caché del feed público, que si no sigue mostrando el partido borrado.
+        const deleted = await FixtureService.deleteMatch(matchId);
+        if (!deleted) return err('No se pudo borrar el partido', 500);
+
+        return NextResponse.json({ ok: true });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'No se pudo borrar el partido';
+        console.error('[clubs/panel-matches] DELETE', error);
         return err(message, 500);
     }
 }

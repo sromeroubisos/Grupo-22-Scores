@@ -2072,6 +2072,89 @@
     transform: translateY(-1px);
 }
 
+/* Fila del panel con baja habilitada: el partido a la izquierda y la acción
+   afuera del enlace. Envuelve en pantallas angostas en vez de apretar la fila. */
+.matchItemManaged {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.matchItemManaged > .matchItem {
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.matchDeleteBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm, 6px);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.matchDeleteBtn:hover,
+.matchDeleteBtn:focus-visible {
+    color: var(--color-danger, #f0796a);
+    border-color: var(--color-danger, #f0796a);
+    background: color-mix(in srgb, var(--color-danger, #f0796a) 12%, transparent);
+}
+
+.matchDeleteConfirm {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 0 1 auto;
+}
+
+.matchDeleteAsk {
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+}
+
+.matchDeleteYes,
+.matchDeleteNo {
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 7px 12px;
+    border-radius: var(--radius-sm, 6px);
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.matchDeleteYes {
+    background: var(--color-danger, #f0796a);
+    border: 1px solid var(--color-danger, #f0796a);
+    color: #200705;
+}
+
+.matchDeleteNo {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+}
+
+.matchDeleteYes:disabled,
+.matchDeleteNo:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.matchDeleteError {
+    flex-basis: 100%;
+    font-size: 0.8rem;
+    color: var(--color-danger, #f0796a);
+}
+
 .matchTime {
     display: flex;
     flex-direction: column;
@@ -2842,6 +2925,48 @@
 .panelFormError {
     font-size: 0.85rem;
     color: var(--color-danger, #f0796a);
+}
+
+/* Escalafón del club: una ficha por fila con sus dos selectores. Envuelve en
+   pantallas angostas en lugar de apretar los desplegables. */
+.categoryLevelList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+}
+
+.categoryLevelRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.categoryLevelName {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1 1 200px;
+    min-width: 0;
+    font-size: 0.9rem;
+}
+
+.categoryLevelOrigin {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+}
+
+.categoryLevelRow .panelFormInput {
+    flex: 0 1 170px;
 }
 
 .panelFormActions {

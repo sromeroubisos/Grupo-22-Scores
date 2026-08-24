@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
-import { ArrowLeft, ChevronLeft, ChevronRight, Star, Trophy } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Star, Trash2, Trophy } from 'lucide-react';
 import { useFavorite } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { SPORTS_BY_ID } from '@/lib/sports';
@@ -20,6 +20,7 @@ import ClubsPromoLink from '@/components/clubs-promo/ClubsPromoLink';
 import { CONTEXTUAL } from '@/content/para-clubes';
 import HistoryTab from './HistoryTab';
 import PanelMatchForm, { type PanelFamilyClub } from './PanelMatchForm';
+import PanelCategories from './PanelCategories';
 
 const SPORT_LABEL: Record<string, string> = Object.fromEntries(
     Object.entries(SPORTS_BY_ID).map(([id, s]) => [id, s.name])
@@ -85,6 +86,37 @@ function toDailyMatchExport(match: any, state: DayState) {
         dateLabel: formatClubDate(stamp, { weekday: 'short', day: '2-digit', month: '2-digit' }),
         kickoffAt: stamp ? new Date(stamp * 1000).toISOString() : undefined,
     };
+}
+
+/**
+ * Orden de una jornada: por ESCALAFÓN, no por horario.
+ *
+ * El rango y la letra los resuelve el servidor (`level_rank` / `level_variant`,
+ * ver `src/lib/clubs/categoryLevel.ts`), así que acá solo se comparan. Un
+ * partido sin rango —los de la caída a los partidos de este club solo, cuando
+ * la agenda no llegó— queda al final y se ordena por hora, como antes.
+ *
+ * `recentFirst` es para los Finalizados: entre dos fichas del MISMO rango, el
+ * resultado más nuevo va arriba.
+ */
+function compareMatchByLevel(left: any, right: any, recentFirst: boolean): number {
+    const leftRank = Number(left?.level_rank ?? Number.MAX_SAFE_INTEGER);
+    const rightRank = Number(right?.level_rank ?? Number.MAX_SAFE_INTEGER);
+    if (leftRank !== rightRank) return leftRank - rightRank;
+
+    // La ficha sin letra va antes que la "A": "Primera" a secas es el equipo, y
+    // "Primera A"/"Primera B" son la partición de un club que presenta dos.
+    const leftVariant = String(left?.level_variant || '');
+    const rightVariant = String(right?.level_variant || '');
+    if (leftVariant !== rightVariant) {
+        if (!leftVariant) return -1;
+        if (!rightVariant) return 1;
+        return leftVariant.localeCompare(rightVariant);
+    }
+
+    const leftTime = Number(left?.timestamp || 0);
+    const rightTime = Number(right?.timestamp || 0);
+    return recentFirst ? rightTime - leftTime : leftTime - rightTime;
 }
 
 // Etiqueta corta para los extremos de un plazo: "24 ago". La larga ocuparía
@@ -428,11 +460,27 @@ function TeamDetailInner({ id }: { id: string }) {
     const [canManageClub, setCanManageClub] = useState(false);
     const [panelFamilyClubs, setPanelFamilyClubs] = useState<PanelFamilyClub[]>([]);
     const [showMatchForm, setShowMatchForm] = useState(false);
+    const [showCategories, setShowCategories] = useState(false);
+    // Se prende al pasar por la pestaña "Hoy": deja que la agenda arranque antes
+    // del click. Ver el `onPointerEnter` de la barra de pestañas.
+    const [agendaWanted, setAgendaWanted] = useState(false);
     // Se sube para forzar una relectura de la agenda después de cargar un partido:
     // sin esto la effect no vuelve a correr, porque sus dependencias no cambiaron.
     const [agendaNonce, setAgendaNonce] = useState(0);
     const [agendaLoading, setAgendaLoading] = useState(false);
     const [agendaFailed, setAgendaFailed] = useState(false);
+    // Qué rango de fechas tiene cargado la agenda, y para qué club/nonce. Sin
+    // esto no se puede saber si navegar a otro día necesita volver a pedir.
+    const [agendaWindow, setAgendaWindow] = useState<{ from: string; to: string; loadedFor: string } | null>(null);
+    // Los vecinos con partidos que quedaron FUERA de la ventana: el estado vacío
+    // los usa para no quedarse sin sugerencia cuando la ventana entera está vacía.
+    const [agendaNearestOutside, setAgendaNearestOutside] = useState<{ before: string | null; after: string | null } | null>(null);
+    // Baja de un partido del panel. `confirmDeleteId` es el paso intermedio: el
+    // ícono de tacho no borra, abre la confirmación. Borrar un partido no se
+    // deshace, así que no puede pasar por un solo click al lado de un enlace.
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+    const [deletingMatchId, setDeletingMatchId] = useState<string | null>(null);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
     // Qué club ya se pidió. Va en un ref y NO en las dependencias: tener
     // `agendaLoading` entre las dependencias hacía que poner la carga en true
     // volviera a disparar la effect, y su cleanup marcaba `cancelled` sobre el
@@ -440,35 +488,6 @@ function TeamDetailInner({ id }: { id: string }) {
     // se quedaba en "sumando la familia" para siempre.
     const agendaRequestedFor = useRef<string | null>(null);
 
-    useEffect(() => {
-        if (activeTab !== 'today') return;
-        if (!resolvedClubId) return;
-        if (agendaRequestedFor.current === `${resolvedClubId}:${agendaNonce}`) return;
-
-        agendaRequestedFor.current = `${resolvedClubId}:${agendaNonce}`;
-        setAgendaLoading(true);
-
-        fetch(`/api/clubs/${encodeURIComponent(resolvedClubId)}/agenda`, { cache: 'no-store' })
-            .then(response => (response.ok ? response.json() : null))
-            .then(payload => {
-                if (payload?.ok) {
-                    setAgenda({
-                        results: Array.isArray(payload.results) ? payload.results : [],
-                        fixtures: Array.isArray(payload.fixtures) ? payload.fixtures : [],
-                    });
-                    // El flag es solo para DIBUJAR el botón: la ruta de escritura
-                    // revalida el permiso por su cuenta.
-                    setCanManageClub(Boolean(payload.canManage));
-                    setPanelFamilyClubs(Array.isArray(payload.familyClubs) ? payload.familyClubs : []);
-                } else {
-                    // Sin agenda el panel no se cae: sigue con los partidos de este
-                    // club, que la ficha ya tenía cargados.
-                    setAgendaFailed(true);
-                }
-            })
-            .catch(() => setAgendaFailed(true))
-            .finally(() => setAgendaLoading(false));
-    }, [activeTab, resolvedClubId, agendaNonce]);
 
     // Índice jornada -> partidos. Con la agenda cargada son los de la familia
     // entera; hasta que llegue (o si falla) son los de este club solo, que la
@@ -502,6 +521,84 @@ function TeamDetailInner({ id }: { id: string }) {
     const windowStartKey = customRange ? customRange.from : dayKey;
     const windowEndKey = customRange ? customRange.to : addDaysToIsoDate(dayKey, rangeDays - 1);
 
+    useEffect(() => {
+        if (activeTab !== 'today' && !agendaWanted) return;
+        if (!resolvedClubId) return;
+
+        // La agenda ya no trae todo el historial: viene una VENTANA alrededor del
+        // día que se está mirando (ver WINDOW_DAYS en la ruta). Mientras la
+        // navegación se quede adentro, no se pide nada — que es el caso normal,
+        // porque la ventana cubre una temporada entera para cada lado.
+        const loadedFor = `${resolvedClubId}:${agendaNonce}`;
+        const covered = agendaWindow
+            && agendaWindow.loadedFor === loadedFor
+            && windowStartKey >= agendaWindow.from
+            && windowEndKey <= agendaWindow.to;
+        if (covered) return;
+
+        const requestKey = `${loadedFor}:${windowStartKey}`;
+        if (agendaRequestedFor.current === requestKey) return;
+
+        agendaRequestedFor.current = requestKey;
+        setAgendaLoading(true);
+
+        const url = `/api/clubs/${encodeURIComponent(resolvedClubId)}/agenda`
+            + `?day=${encodeURIComponent(windowStartKey)}`;
+
+        fetch(url, { cache: 'no-store' })
+            .then(response => (response.ok ? response.json() : null))
+            .then(payload => {
+                if (payload?.ok) {
+                    setAgenda({
+                        results: Array.isArray(payload.results) ? payload.results : [],
+                        fixtures: Array.isArray(payload.fixtures) ? payload.fixtures : [],
+                    });
+                    // El flag es solo para DIBUJAR el botón: la ruta de escritura
+                    // revalida el permiso por su cuenta.
+                    setCanManageClub(Boolean(payload.canManage));
+                    setPanelFamilyClubs(Array.isArray(payload.familyClubs) ? payload.familyClubs : []);
+                    setAgendaWindow(payload.window?.from && payload.window?.to
+                        ? { from: payload.window.from, to: payload.window.to, loadedFor }
+                        : null);
+                    setAgendaNearestOutside(payload.nearestOutside ?? null);
+                } else {
+                    // Sin agenda el panel no se cae: sigue con los partidos de este
+                    // club, que la ficha ya tenía cargados.
+                    setAgendaFailed(true);
+                }
+            })
+            .catch(() => setAgendaFailed(true))
+            .finally(() => setAgendaLoading(false));
+    }, [activeTab, agendaWanted, resolvedClubId, agendaNonce, windowStartKey, windowEndKey, agendaWindow]);
+
+    const handleDeleteMatch = async (matchId: string) => {
+        if (!resolvedClubId || !matchId) return;
+        setDeletingMatchId(matchId);
+        setDeleteError(null);
+        try {
+            const response = await fetch(
+                `/api/clubs/${encodeURIComponent(resolvedClubId)}/panel-matches?matchId=${encodeURIComponent(matchId)}`,
+                { method: 'DELETE' },
+            );
+            const payload = await response.json().catch(() => null);
+            if (!response.ok || !payload?.ok) {
+                // El motivo del servidor está escrito para el dirigente ("ese
+                // partido no lo cargó el club"), así que se muestra tal cual.
+                setDeleteError(payload?.error || 'No se pudo borrar el partido');
+                return;
+            }
+            setConfirmDeleteId(null);
+            // Releer la agenda en vez de sacar la fila a mano: el conteo de cada
+            // sección y los buckets se rearman solos con la respuesta del server.
+            agendaRequestedFor.current = null;
+            setAgendaNonce(value => value + 1);
+        } catch {
+            setDeleteError('No se pudo borrar el partido');
+        } finally {
+            setDeletingMatchId(null);
+        }
+    };
+
     // Largo del plazo en días, con tope: un "desde 1990 hasta hoy" no puede
     // convertirse en un for de doce mil vueltas cada vez que React redibuja.
     const windowSpan = useMemo(() => {
@@ -514,10 +611,17 @@ function TeamDetailInner({ id }: { id: string }) {
     const isSingleDay = windowSpan === 1;
 
     const dayGroups = useMemo(() => {
-        const list = (dayIndex.get(windowStartKey) || []).slice()
-            .sort((left, right) => Number(left.timestamp || 0) - Number(right.timestamp || 0));
+        const list = (dayIndex.get(windowStartKey) || []).slice();
         const groups: Record<DayState, any[]> = { live: [], scheduled: [], final: [], off: [] };
         list.forEach(match => groups[matchDayState(match, match.__bucket)].push(match));
+        // El horario NO ordena la jornada: la Intermedia juega a las 15:15 y la
+        // Primera a las 17:00 solo porque comparten cancha. Se lee por escalafón.
+        // Dentro de cada sección, el horario queda de desempate: los resultados
+        // del último primero, lo que viene en orden de cancha.
+        groups.live.sort((left, right) => compareMatchByLevel(left, right, false));
+        groups.scheduled.sort((left, right) => compareMatchByLevel(left, right, false));
+        groups.final.sort((left, right) => compareMatchByLevel(left, right, true));
+        groups.off.sort((left, right) => compareMatchByLevel(left, right, false));
         return { ...groups, total: list.length };
     }, [dayIndex, windowStartKey]);
 
@@ -528,13 +632,22 @@ function TeamDetailInner({ id }: { id: string }) {
         let best: string | null = null;
         let bestDistance = Number.POSITIVE_INFINITY;
         const target = Date.parse(windowStartKey + 'T00:00:00Z');
-        dayIndex.forEach((_matches, key) => {
-            if (key === windowStartKey) return;
+        const consider = (key: string | null | undefined) => {
+            if (!key || key === windowStartKey) return;
             const distance = Math.abs(Date.parse(key + 'T00:00:00Z') - target);
             if (distance < bestDistance) { bestDistance = distance; best = key; }
-        });
+        };
+
+        dayIndex.forEach((_matches, key) => consider(key));
+
+        // Los vecinos de afuera de la ventana. Hacen falta para el club dormido:
+        // si en el medio año para cada lado no hay nada, el índice está vacío y
+        // sin esto el estado vacío se quedaría sin adónde mandarte.
+        consider(agendaNearestOutside?.before);
+        consider(agendaNearestOutside?.after);
+
         return best;
-    }, [dayIndex, windowStartKey]);
+    }, [dayIndex, windowStartKey, agendaNearestOutside]);
 
     // Solo las jornadas CON partidos: un plazo de 30 días no dibuja treinta
     // encabezados vacíos para mostrar tres partidos.
@@ -546,7 +659,8 @@ function TeamDetailInner({ id }: { id: string }) {
             if (!matches || !matches.length) continue;
             days.push({
                 key,
-                matches: matches.slice().sort((left, right) => Number(left.timestamp || 0) - Number(right.timestamp || 0)),
+                // Mismo criterio que la jornada suelta: escalafón primero.
+                matches: matches.slice().sort((left, right) => compareMatchByLevel(left, right, false)),
             });
         }
         return days;
@@ -755,7 +869,7 @@ function TeamDetailInner({ id }: { id: string }) {
     const coachName = details?.coach?.name || details?.manager?.name || '';
 
     // Render a match item (same pattern as tournament page)
-    const renderMatchItem = (match: any) => {
+    const renderMatchItem = (match: any, options?: { managed?: boolean }) => {
         const timestamp = match.timestamp || match.start_time || match.time;
         const date = timestamp ? new Date(timestamp * 1000) : new Date();
 
@@ -820,7 +934,11 @@ function TeamDetailInner({ id }: { id: string }) {
             </>
         );
 
-        return href ? (
+        // El botón de baja va FUERA del enlace: un <button> adentro de un <a> no
+        // es HTML válido, y además un click al borde del tacho no puede terminar
+        // navegando a la ficha del partido.
+        const canDelete = Boolean(options?.managed && match.can_delete && match.match_id);
+        const row = href ? (
             <Link href={href} key={matchKey} className={styles.matchItem}>
                 {matchBody}
                 <div className={styles.matchMeta}>
@@ -830,6 +948,51 @@ function TeamDetailInner({ id }: { id: string }) {
         ) : (
             <div key={matchKey} className={styles.matchItem}>
                 {matchBody}
+            </div>
+        );
+
+        // Sin baja posible la fila sale como siempre y sin envoltorio: el
+        // escalonado de entrada se apoya en `.matchItem:nth-child()`.
+        if (!canDelete) return row;
+
+        const matchId = String(match.match_id);
+        const isConfirming = confirmDeleteId === matchId;
+        const isDeleting = deletingMatchId === matchId;
+
+        return (
+            <div key={matchKey} className={styles.matchItemManaged}>
+                {row}
+                {isConfirming ? (
+                    <div className={styles.matchDeleteConfirm}>
+                        <span className={styles.matchDeleteAsk}>¿Borrar este partido?</span>
+                        <button
+                            type="button"
+                            className={styles.matchDeleteYes}
+                            onClick={() => handleDeleteMatch(matchId)}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? 'Borrando…' : 'Sí, borrar'}
+                        </button>
+                        <button
+                            type="button"
+                            className={styles.matchDeleteNo}
+                            onClick={() => { setConfirmDeleteId(null); setDeleteError(null); }}
+                            disabled={isDeleting}
+                        >
+                            Cancelar
+                        </button>
+                        {deleteError ? <span className={styles.matchDeleteError}>{deleteError}</span> : null}
+                    </div>
+                ) : (
+                    <button
+                        type="button"
+                        className={styles.matchDeleteBtn}
+                        aria-label={`Borrar el partido ${homeName} contra ${awayName}`}
+                        onClick={() => { setConfirmDeleteId(matchId); setDeleteError(null); }}
+                    >
+                        <Trash2 size={15} aria-hidden="true" />
+                    </button>
+                )}
             </div>
         );
     };
@@ -986,6 +1149,14 @@ function TeamDetailInner({ id }: { id: string }) {
                                 key={tab.id}
                                 className={`${styles.tabButton} ${activeTab === tab.id ? styles.activeTab : ''}`}
                                 onClick={() => setActiveTab(tab.id)}
+                                // El panel es lo único de esta ficha que pide datos
+                                // aparte. Se arranca al pasar por encima o al tocar,
+                                // así el click no espera la ida y vuelta. No se
+                                // precarga de entrada: quien nunca abre "Hoy" no
+                                // tiene por qué pagarla.
+                                onPointerEnter={tab.id === 'today' ? () => setAgendaWanted(true) : undefined}
+                                onPointerDown={tab.id === 'today' ? () => setAgendaWanted(true) : undefined}
+                                onFocus={tab.id === 'today' ? () => setAgendaWanted(true) : undefined}
                             >
                                 {tab.label}
                             </button>
@@ -1080,6 +1251,18 @@ function TeamDetailInner({ id }: { id: string }) {
                                             </button>
                                         ) : null}
 
+                                        {/* De acá sale el orden de la jornada: qué categoría
+                                            representa cada ficha del club. */}
+                                        {canManageClub && !showCategories ? (
+                                            <button
+                                                type="button"
+                                                className={styles.panelFormSecondary}
+                                                onClick={() => setShowCategories(true)}
+                                            >
+                                                Categorías
+                                            </button>
+                                        ) : null}
+
                                         {windowTotal > 0 ? (
                                             <ExportImage
                                                 template="dailyMatches"
@@ -1098,6 +1281,19 @@ function TeamDetailInner({ id }: { id: string }) {
                                         ) : null}
                                     </div>
                                 </div>
+
+                                {showCategories && resolvedClubId ? (
+                                    <PanelCategories
+                                        clubId={resolvedClubId}
+                                        onClose={() => {
+                                            setShowCategories(false);
+                                            // El escalafón cambió: la jornada se
+                                            // reordena con la agenda releída.
+                                            agendaRequestedFor.current = null;
+                                            setAgendaNonce(value => value + 1);
+                                        }}
+                                    />
+                                ) : null}
 
                                 {showMatchForm && resolvedClubId ? (
                                     <PanelMatchForm
@@ -1186,7 +1382,7 @@ function TeamDetailInner({ id }: { id: string }) {
                                                         <span className={styles.dayGroupCount}>{sectionMatches.length}</span>
                                                     </div>
                                                     <div className={styles.matchList}>
-                                                        {sectionMatches.map(match => renderMatchItem(match))}
+                                                        {sectionMatches.map(match => renderMatchItem(match, { managed: canManageClub }))}
                                                     </div>
                                                 </section>
                                             );
@@ -1207,7 +1403,7 @@ function TeamDetailInner({ id }: { id: string }) {
                                                     <span className={styles.dayGroupCount}>{day.matches.length}</span>
                                                 </div>
                                                 <div className={styles.matchList}>
-                                                    {day.matches.map(match => renderMatchItem(match))}
+                                                    {day.matches.map(match => renderMatchItem(match, { managed: canManageClub }))}
                                                 </div>
                                             </section>
                                         ))}
