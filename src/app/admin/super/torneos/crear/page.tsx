@@ -441,10 +441,12 @@ async function fetchAdminClubPage(offset: number): Promise<ClubRecord[]> {
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
-        const message = payload && typeof payload === 'object' && 'error' in payload
-            ? String(payload.error || '')
-            : '';
-        throw new Error(message || 'No se pudieron cargar los equipos.');
+        const record = payload && typeof payload === 'object' ? payload as Record<string, unknown> : null;
+        const message = record ? String(record.error || '') : '';
+        // El detalle del servidor va a la vista: sin él, el cartel dice que algo
+        // falló pero no qué, y hay que ir a mirar la terminal.
+        const details = record?.details ? ` (${String(record.details)})` : '';
+        throw new Error(`${message || 'No se pudieron cargar los equipos.'}${details}`);
     }
 
     return Array.isArray(payload) ? payload as ClubRecord[] : [];
@@ -461,11 +463,11 @@ async function fetchAllAdminClubs(): Promise<ClubRecord[]> {
 
 // En el panel de Admin de Torneos los clubes vienen scopeados (solo los que
 // creó o tiene concedidos). Mismo shape que ClubRecord.
-async function fetchTournamentAdminClubs(): Promise<ClubRecord[]> {
-    const response = await fetch('/api/admin/torneo/clubs?limit=1000', {
-        cache: 'no-store',
-        credentials: 'include',
-    });
+async function fetchTournamentAdminClubPage(offset: number): Promise<ClubRecord[]> {
+    const response = await fetch(
+        `/api/admin/torneo/clubs?limit=${ADMIN_CLUB_PAGE_SIZE}&offset=${offset}&divisions=0`,
+        { cache: 'no-store', credentials: 'include' },
+    );
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
         const message = payload && typeof payload === 'object' && 'error' in payload
@@ -474,6 +476,17 @@ async function fetchTournamentAdminClubs(): Promise<ClubRecord[]> {
         throw new Error(message || 'No se pudieron cargar los equipos.');
     }
     return Array.isArray(payload?.data) ? payload.data as ClubRecord[] : [];
+}
+
+// Mismo motivo que arriba: PostgREST no devuelve más de 1000 filas por
+// respuesta, así que un admin sin límite de alcance veía el catálogo cortado.
+async function fetchTournamentAdminClubs(): Promise<ClubRecord[]> {
+    const allClubs: ClubRecord[] = [];
+    for (let offset = 0; ; offset += ADMIN_CLUB_PAGE_SIZE) {
+        const page = await fetchTournamentAdminClubPage(offset);
+        allClubs.push(...page);
+        if (page.length < ADMIN_CLUB_PAGE_SIZE) return allClubs;
+    }
 }
 
 function createDefaultPhaseConfig(

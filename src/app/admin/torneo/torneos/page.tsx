@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Eye, EyeOff, MoreHorizontal, Plus, Search, ShieldQuestion, SlidersHorizontal, Trash2, Trophy } from 'lucide-react';
 import styles from '../tournament-admin.module.css';
+import { fetchScopedClubCatalog } from '@/lib/admin/scopedClubCatalog';
 
 type Tournament = {
     id: string;
@@ -86,17 +87,16 @@ export default function TournamentAdminTournamentsPage() {
         setLoading(true);
         setErrorMsg(null);
         try {
-            const [tournamentsRes, clubsRes] = await Promise.all([
+            const [tournamentsRes, clubsResult] = await Promise.all([
                 fetch('/api/admin/torneo/tournaments?limit=300', { cache: 'no-store', credentials: 'include' }),
-                fetch('/api/admin/torneo/clubs?limit=1000', { cache: 'no-store', credentials: 'include' }),
+                fetchScopedClubCatalog<Club>({ divisions: false }),
             ]);
             const tournamentsPayload = await tournamentsRes.json();
-            const clubsPayload = await clubsRes.json();
             if (!tournamentsRes.ok) throw new Error(tournamentsPayload.error || 'Error al cargar torneos');
-            if (!clubsRes.ok) throw new Error(clubsPayload.error || 'Error al cargar clubes');
+            if (!clubsResult.ok) throw new Error(clubsResult.error || 'Error al cargar clubes');
 
             setTournaments(Array.isArray(tournamentsPayload.data) ? tournamentsPayload.data : []);
-            setClubs(Array.isArray(clubsPayload.data) ? clubsPayload.data : []);
+            setClubs(clubsResult.rows);
         } catch (e) {
             setErrorMsg(e instanceof Error ? e.message : 'Error inesperado');
         } finally {
