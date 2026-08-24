@@ -68,3 +68,55 @@ test('un nombre vacío no matchea con todo', () => {
     assert.deepEqual(findSimilarCategories(existentes, 'Jockey', ''), []);
     assert.deepEqual(findSimilarCategories(existentes, 'Jockey', '   '), []);
 });
+
+test('el "Club" de más no esconde a la gemela (el caso que duplicó a La Tablada)', () => {
+    // Esto pasó de verdad: parado en "Club La Tablada" se creó "Intermedia" y el
+    // control no vio "La Tablada - Intermedia", que ya existía. La comparación
+    // pedía que el nombre del club fuera PREFIJO, y sobraba un "Club".
+    const existentes = [{ id: 'la-tablada-intermedia', name: 'La Tablada - Intermedia' }];
+
+    assert.deepEqual(
+        findSimilarCategories(existentes, 'Club La Tablada', 'Intermedia').map(c => c.id),
+        ['la-tablada-intermedia'],
+    );
+
+    // Y al revés: parado en la ficha corta, encuentra la larga.
+    assert.deepEqual(
+        findSimilarCategories(
+            [{ id: 'club-la-tablada-intermedia', name: 'Club La Tablada Intermedia' }],
+            'La Tablada',
+            'Intermedia',
+        ).map(c => c.id),
+        ['club-la-tablada-intermedia'],
+    );
+});
+
+test('escribir el club adelante no lo repite ni esconde la gemela', () => {
+    // "Newman M17 B" estando parado en Club Newman: el club se ignora.
+    assert.equal(buildCategoryClubName('Club Newman', 'Newman M17 "B"'), 'Club Newman M17 "B"');
+    assert.equal(buildCategoryClubName('Club Newman', 'Club Newman M17 "B"'), 'Club Newman M17 "B"');
+    assert.equal(buildCategoryClubName('Club Newman', 'M17 "B"'), 'Club Newman M17 "B"');
+
+    // Y las tres formas encuentran la misma existente.
+    const existentes = [{ id: 'club-newman-m17-b', name: 'Club Newman M17 "B"' }];
+    for (const escrito of ['M17 "B"', 'Newman M17 "B"', 'Club Newman M17 "B"']) {
+        assert.deepEqual(
+            findSimilarCategories(existentes, 'Club Newman', escrito).map(c => c.id),
+            ['club-newman-m17-b'],
+            `falló escribiendo: ${escrito}`,
+        );
+    }
+});
+
+test('sacar los tokens del club no junta categorías distintas', () => {
+    const existentes = [
+        { id: 'club-newman-m17-a', name: 'Club Newman M17 "A"' },
+        { id: 'club-newman-m17-b', name: 'Club Newman M17 "B"' },
+    ];
+    assert.deepEqual(
+        findSimilarCategories(existentes, 'Club Newman', 'M17 "A"').map(c => c.id),
+        ['club-newman-m17-a'],
+    );
+    // Un rótulo que es SOLO el nombre del club no puede matchear con todo.
+    assert.deepEqual(findSimilarCategories(existentes, 'Club Newman', 'Club Newman'), []);
+});
