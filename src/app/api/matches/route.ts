@@ -449,6 +449,7 @@ type PublicDbMatchRow = {
     sport?: string | null;
     is_visible?: boolean | null;
     review_status?: string | null;
+    created_by_club_id?: string | null;
 };
 
 type PublicDbMatchesResult = {
@@ -619,6 +620,14 @@ async function fetchPublicSupabaseMatches(options: {
                 if (match.tournament_id && (!tournament || !isTournamentPubliclyVisible(tournament))) {
                     return false;
                 }
+                // Un partido que cargó un club y no pertenece a ninguna competencia
+                // vive PUERTAS ADENTRO de su panel: es la promesa del Panel del Día,
+                // que el amistoso de la M15 no compita con los torneos oficiales en
+                // la portada. Sin esta guarda entraba igual, y peor: sin torneo que
+                // mostrar, mapDbMatchToPublicFeed le inventaba uno, 'Partido Local'.
+                if (match.created_by_club_id && !match.tournament_id) {
+                    return false;
+                }
                 if (!sportVariants) return true;
 
                 const resolvedSport = resolveMatchSport(match, tournament, homeTeam, awayTeam);
@@ -745,6 +754,7 @@ const MATCHES_DB_SELECT_COLUMNS = [
     'sport',
     'is_visible',
     'review_status',
+    'created_by_club_id',
 ].join(', ');
 const MATCHES_DB_SELECT_VARIANTS = [
     MATCHES_DB_SELECT_COLUMNS,
