@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { generateLocalDateKeys, getTodayKey } from '@/lib/timezone';
 import { logRefreshLoop } from '@/lib/debug/refreshLoop';
 
-export type SourceErrorScenario = 'fs_down_db_ok' | 'db_down_fs_ok' | 'both_down' | 'fs_cache' | null;
+export type SourceErrorScenario = 'fs_down_db_ok' | 'db_down_fs_ok' | 'both_down' | null;
 
 export interface SourceError {
   flashscore: boolean;
@@ -146,17 +146,18 @@ export function useMatchesStore(
     const fsErr = flashscore.ok === false;
     const dbErr = supabase.ok === false;
     const fsCache = flashscore.fromCache === true;
-    if (!fsErr && !dbErr && !fsCache) return null;
+    // Servir desde caché no es un error: los partidos llegan igual y el cartel solo
+    // agregaba ruido en la pantalla. Tampoco avisamos cuando FlashScore se cayó pero
+    // la caché tapó el hueco: la pantalla está completa. Solo hablamos si falta algo.
+    if (!dbErr && (!fsErr || fsCache)) return null;
+    const fsMissing = fsErr && !fsCache;
     let scenario: SourceErrorScenario = null;
     let message: string | null = null;
-    if (fsCache)              scenario = 'fs_cache';
-    else if (fsErr && !dbErr) scenario = 'fs_down_db_ok';
-    else if (!fsErr && dbErr) scenario = 'db_down_fs_ok';
-    else if (fsErr && dbErr)  scenario = 'both_down';
-    if (scenario === 'fs_cache') {
-      message = flashscore.message || 'Datos de FlashScore desde caché; puede haber un leve retraso.';
-    } else if (scenario === 'fs_down_db_ok') {
-      message = flashscore.message || 'FlashScore no disponible; mostrando solo partidos locales.';
+    if (fsMissing && !dbErr)  scenario = 'fs_down_db_ok';
+    else if (!fsMissing && dbErr) scenario = 'db_down_fs_ok';
+    else if (fsMissing && dbErr) scenario = 'both_down';
+    if (scenario === 'fs_down_db_ok') {
+      message = 'FlashScore no disponible; mostrando solo partidos locales.';
     } else if (scenario === 'db_down_fs_ok') {
       message = supabase.message || 'No se pudieron cargar los partidos desde la base de datos. Mostrando datos de FlashScore.';
     } else if (scenario === 'both_down') {
