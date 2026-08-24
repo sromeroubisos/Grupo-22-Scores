@@ -7,7 +7,7 @@ import { trackEvent } from '@/lib/analytics';
 import { hasWhatsapp, MENSAJE_DEMO, whatsappUrl } from '@/lib/contact';
 import { erroresPorCampo, leadSchema } from '@/lib/leads/schema';
 import { FORMULARIO, RANGOS_EQUIPOS, ROLES, type PromoOrigen } from '@/content/para-clubes';
-import styles from './para-clubes.module.css';
+import styles from './embudo.module.css';
 
 /**
  * El formulario de demo.

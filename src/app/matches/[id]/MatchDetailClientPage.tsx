@@ -9,8 +9,6 @@ import FavoriteButton from '@/components/FavoriteButton';
 import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
 import MatchTimeline from '@/components/match/MatchTimeline';
 import PeopleRatingsPanel, { type RateablePlayer } from '@/components/match/PeopleRatingsPanel';
-import ClubsPromoLink from '@/components/clubs-promo/ClubsPromoLink';
-import { CONTEXTUAL } from '@/content/para-clubes';
 import styles from './page.module.css';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import {
@@ -2648,7 +2646,6 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                      */
                                     <div className={styles.placeholderText}>
                                         <p style={{ margin: 0 }}>No hay estadísticas clave disponibles para este partido.</p>
-                                        <ClubsPromoLink origen="partido-vacio" texto={CONTEXTUAL.partidoVacio} />
                                     </div>
                                 )}
 
@@ -2932,7 +2929,6 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 {statsData.length === 0 ? (
                                     <div className={styles.placeholderText}>
                                         <p style={{ margin: 0 }}>No hay estadísticas disponibles para este partido.</p>
-                                        <ClubsPromoLink origen="partido-vacio" texto={CONTEXTUAL.partidoVacio} />
                                     </div>
                                 ) : (
                                     <div className={styles.publicStatsSectionGrid}>

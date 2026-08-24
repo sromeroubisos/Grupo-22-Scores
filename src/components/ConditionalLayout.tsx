@@ -5,7 +5,6 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MobileBottomNav, { BOTTOM_NAV_HIDDEN_PREFIXES } from '@/components/MobileBottomNav';
 import WorldCupTicker from '@/components/WorldCupTicker';
-import ClubsPromoBar from '@/components/clubs-promo/ClubsPromoBar';
 import ProdeWorldCupBanner from '@/components/ProdeWorldCupBanner';
 import { SportProvider } from '@/context/SportContext';
 import { useAuth } from '@/context/AuthContext';
@@ -135,7 +134,6 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
                 No la reserva nadie con padding y no hace falta: es `fixed`, así
                 que no empuja un píxel de contenido ni suma CLS.
             */}
-            <ClubsPromoBar />
             <ProdeWorldCupBanner />
         </SportProvider>
     );

@@ -11,8 +11,6 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
-import ClubsPromoLink from '@/components/clubs-promo/ClubsPromoLink';
-import { CONTEXTUAL } from '@/content/para-clubes';
 import RadialBracketPredictor from '@/components/RadialBracketPredictor';
 import TournamentPublicStats from './TournamentPublicStats';
 import TournamentScoresPanel from './TournamentScoresPanel';
@@ -5153,7 +5151,6 @@ export default function TournamentDetailPage({
                 banner, y el `?ref=torneo` es lo que después permite saber si
                 esta ubicación trajo a alguien.
               */}
-              <ClubsPromoLink origen="torneo" texto={CONTEXTUAL.torneo} />
             </div>
 
             {showPredictor && draw.length > 0 && (

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 import { esOrigenValido, META, type PromoOrigen } from '@/content/para-clubes';
-import ParaClubesClient from './ParaClubesClient';
+import ParaClubesClient from '@/components/embudo/EmbudoLanding';
 
 export const metadata: Metadata = {
     title: META.titulo,

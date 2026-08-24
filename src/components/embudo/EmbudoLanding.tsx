@@ -18,7 +18,7 @@ import {
     type PromoOrigen,
 } from '@/content/para-clubes';
 import DemoForm from './DemoForm';
-import styles from './para-clubes.module.css';
+import styles from './embudo.module.css';
 
 /**
  * La landing del embudo, con el mismo shell y el mismo tema oscuro que el resto

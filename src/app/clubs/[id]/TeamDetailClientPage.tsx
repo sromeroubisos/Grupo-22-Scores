@@ -16,8 +16,6 @@ import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { useAuth } from '@/context/AuthContext';
-import ClubsPromoLink from '@/components/clubs-promo/ClubsPromoLink';
-import { CONTEXTUAL } from '@/content/para-clubes';
 import HistoryTab from './HistoryTab';
 import PanelMatchForm, { type PanelFamilyClub } from './PanelMatchForm';
 import PanelCategories from './PanelCategories';
@@ -1887,11 +1885,6 @@ function TeamDetailInner({ id }: { id: string }) {
                     </aside>
                 </div>
 
-                {/* Al pie de la ficha, con el nombre del club cuando lo sabemos. */}
-                <ClubsPromoLink
-                    origen="club"
-                    texto={nombreClubReal ? CONTEXTUAL.club(nombreClubReal) : CONTEXTUAL.clubSinNombre}
-                />
             </main>
         </div>
     );
