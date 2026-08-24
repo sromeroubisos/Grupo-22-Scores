@@ -25,7 +25,7 @@ import {
 import { canonicalizeSportId, getClubSportValue } from '@/lib/clubDerivatives';
 import { fetchPeopleByClub, type PersonWithRole } from '@/lib/services/personService';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
-import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
+import { buildTeamLogoProxyUrl, clubLogoVersion } from '@/lib/utils/logoUrl';
 import { applyExternalTeamLogoOverride } from '@/lib/utils/teamLogoOverrides';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 
@@ -1400,7 +1400,7 @@ export async function GET(request: Request) {
 
             // Plantel, familia y partidos no dependen entre sí: viajan juntos, porque
             // contra una base cross-region cada ida y vuelta secuencial son segundos.
-            const [internalSquadState, familyClubs, homeMatchesResult, awayMatchesResult] = await Promise.all([
+            const [internalSquadState, familyClubs, homeMatchesResult, awayMatchesResult, ownCrestProbe] = await Promise.all([
                 fetchInternalClubSquad(readClient, effectiveClub.id, { includePlayers: !skipSquad }),
                 onlySquad ? Promise.resolve<PublicRelatedClub[]>([]) : fetchInternalClubFamily(readClient, effectiveClub.id),
                 onlySquad ? Promise.resolve(null) : internalMatchesBaseQuery()
@@ -1411,6 +1411,16 @@ export async function GET(request: Request) {
                     .eq('away_club_id', effectiveClub.id)
                     .order('date_time', { ascending: false })
                     .limit(300),
+                // Solo la PREGUNTA "¿tiene escudo propio?", nunca el escudo: el
+                // filtro corre en Postgres y lo que vuelve es el id o nada. Hace
+                // falta para no ponerle token de cache inmutable al escudo que una
+                // categoría hereda de su club madre — ver `clubLogoVersion`.
+                readClient
+                    .from('clubs')
+                    .select('id')
+                    .eq('id', effectiveClub.id)
+                    .not('logo_url', 'is', null)
+                    .maybeSingle(),
             ]);
             internalSquad = internalSquadState.squad;
             hasInternalSquad = internalSquadState.hasSquad;
@@ -1434,10 +1444,14 @@ export async function GET(request: Request) {
             // El escudo propio también sale por el proxy: el select liviano de arriba
             // ya no trae logo_url (y si viene de resolveInternalClubBySport, puede ser
             // un base64 enorme que no tiene por qué viajar al cliente).
+            const hasOwnCrest = Boolean((ownCrestProbe as { data?: { id?: string } | null } | null)?.data?.id);
             const clubLogoUrl = buildTeamLogoProxyUrl({
                 key: effectiveClub.id,
                 name: effectiveClub.name,
-                version: (effectiveClub as { updated_at?: string | null }).updated_at ?? null,
+                version: clubLogoVersion({
+                    logo_url: hasOwnCrest ? 'own' : null,
+                    updated_at: (effectiveClub as { updated_at?: string | null }).updated_at ?? null,
+                }),
             });
             details = {
                 id: effectiveClub.id,
@@ -1476,14 +1490,31 @@ export async function GET(request: Request) {
             const matchClubLogos = new Map<string, { logo: string; updatedAt: string }>();
             if (matchClubIds.length > 0) {
                 try {
-                    const { data: matchClubs } = await readClient
-                        .from('clubs')
-                        .select('id, name, updated_at')
-                        .in('id', matchClubIds);
+                    // La segunda consulta pregunta cuáles tienen escudo PROPIO y
+                    // devuelve solo ids: el filtro corre en Postgres y ningún base64
+                    // cruza la red — el `logo_url` crudo de 30 rivales es lo que
+                    // tumbó esta ruta con un 57014. Hace falta porque una categoría
+                    // no tiene `logo_url` y muestra el escudo de su club madre, así
+                    // que su `updated_at` no versiona nada. Ver `clubLogoVersion`.
+                    const [{ data: matchClubs }, { data: crestRows }] = await Promise.all([
+                        readClient.from('clubs').select('id, name, updated_at').in('id', matchClubIds),
+                        readClient.from('clubs').select('id').in('id', matchClubIds).not('logo_url', 'is', null),
+                    ]);
+
+                    const withOwnCrest = new Set(
+                        ((crestRows ?? []) as Array<{ id?: string | null }>)
+                            .map((row) => row.id)
+                            .filter((value): value is string => Boolean(value))
+                    );
+
                     for (const club of (matchClubs ?? []) as Array<{ id: string; name: string | null; updated_at: string | null }>) {
+                        const version = clubLogoVersion({
+                            logo_url: withOwnCrest.has(club.id) ? 'own' : null,
+                            updated_at: club.updated_at,
+                        });
                         matchClubLogos.set(club.id, {
-                            logo: buildTeamLogoProxyUrl({ key: club.id, name: club.name, version: club.updated_at }) ?? '',
-                            updatedAt: club.updated_at ?? '',
+                            logo: buildTeamLogoProxyUrl({ key: club.id, name: club.name, version }) ?? '',
+                            updatedAt: version ?? '',
                         });
                     }
                 } catch {

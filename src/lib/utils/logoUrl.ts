@@ -174,6 +174,41 @@ export function isOversizedInlineLogoUrl(value: unknown): value is string {
     return /^data:image\//i.test(trimmed) && trimmed.length > INLINE_LOGO_PROXY_THRESHOLD;
 }
 
+/**
+ * Época de la caché de escudos. Va pegada adelante de cada token `v`, así que
+ * subirla cambia TODAS las URLs versionadas de una y el navegador vuelve a
+ * preguntar por escudos que ya tenía guardados.
+ *
+ * Hace falta porque esas respuestas se sirven `immutable` por una semana: una
+ * respuesta equivocada no se corrige sola ni recargando la página. Subila cuando
+ * el proxy empiece a contestar distinto para las mismas URLs.
+ *
+ * e2 — 2026-08-24: el proxy aprendió a heredar el escudo del club madre. Las
+ * categorías creadas antes tenían congelado el SVG de iniciales.
+ */
+const LOGO_CACHE_EPOCH = 'e2-';
+
+/**
+ * Token de cache-busting para el escudo de un club.
+ *
+ * El `v` que recibe el proxy hace que la imagen se sirva como INMUTABLE por una
+ * semana, asi que solo vale cuando describe de verdad a la imagen. Un club sin
+ * `logo_url` propio —toda categoria: "Tala Rugby Club Intermedia" y las otras
+ * 198 de `club_derivatives`— muestra el escudo de su club madre, y su
+ * `updated_at` no se mueve cuando ese escudo cambia. Mandar el token igual
+ * congela por siete dias lo que el proxy haya contestado la primera vez: asi
+ * quedo pegado el SVG de iniciales de una categoria creada cinco minutos antes
+ * de que el proxy aprendiera a heredar el escudo.
+ *
+ * Sin token la respuesta cae en `max-age=300` y se corrige sola.
+ */
+export function clubLogoVersion(
+    club: { logo_url?: string | null; updated_at?: string | null } | null | undefined,
+): string | null {
+    if (!club?.logo_url) return null;
+    return club.updated_at ?? null;
+}
+
 export function buildTeamLogoProxyUrl(params: {
     key?: string | null;
     name?: string | null;
@@ -212,7 +247,7 @@ export function buildTeamLogoProxyUrl(params: {
     const version = normalizeText(params.version != null ? String(params.version) : null);
     if (version) {
         // Keep it short and URL-safe; the route ignores the param, it only differentiates cache entries.
-        searchParams.set('v', version.replace(/[^a-zA-Z0-9._-]/g, '').slice(0, 32));
+        searchParams.set('v', `${LOGO_CACHE_EPOCH}${version.replace(/[^a-zA-Z0-9._-]/g, '').slice(0, 32)}`);
     }
 
     return `/api/assets/team-logo?${searchParams.toString()}`;

@@ -14,8 +14,38 @@ import {
     findSimilarCategories,
 } from '@/lib/clubs/categoryName';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import {
+    CATEGORY_LEVELS,
+    compareCategoryLevel,
+    isCategoryLevelKey,
+    resolveCategoryLevel,
+} from '@/lib/clubs/categoryLevel';
 
 const CLAIM_COLUMNS = ['claim_status', 'created_by_club_id', 'created_by_user_id'] as const;
+const ESCALAFON_COLUMNS = ['category_level', 'category_variant'] as const;
+
+/** Normaliza lo que manda el cliente para el escalafón. `null` = "sacá la
+ *  elección y volvé a inferir del nombre", que es un pedido legítimo. */
+function readLevelInput(body: Record<string, unknown>): { level: string | null; variant: string | null } | null {
+    const rawLevel = body?.level;
+    const rawVariant = body?.variant;
+
+    let level: string | null = null;
+    if (rawLevel !== null && rawLevel !== undefined && rawLevel !== '') {
+        const candidate = String(rawLevel).trim().toLowerCase();
+        if (!isCategoryLevelKey(candidate)) return null;
+        level = candidate;
+    }
+
+    let variant: string | null = null;
+    if (rawVariant !== null && rawVariant !== undefined && rawVariant !== '') {
+        const candidate = String(rawVariant).trim().toUpperCase();
+        if (!/^[A-Z]$/.test(candidate)) return null;
+        variant = candidate;
+    }
+
+    return { level, variant };
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +108,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         const baseClubId = normalizeText(body?.baseClubId);
         const label = normalizeText(body?.label);
         const force = body?.force === true;
+
+        // El rango es opcional al crear: si no viene, se infiere del nombre y el
+        // club lo corrige después desde la pantalla de categorías.
+        const levelInput = readLevelInput(body ?? {});
+        if (!levelInput) return err('Ese rango de categoría no existe', 400);
 
         if (!baseClubId) return err('Falta el club al que pertenece la categoría', 400);
         if (!label) return err('Poné el nombre de la categoría', 400);
@@ -172,6 +207,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             claim_status: isOwn ? 'own' : 'proposed',
             created_by_club_id: target.clubId,
             created_by_user_id: context.userId,
+            category_level: levelInput.level,
+            category_variant: levelInput.variant,
         };
 
         let insertClub = await admin.from('clubs').insert(clubPayload).select('id, name').single();
@@ -186,6 +223,20 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         // Postgres y contesta `PGRST204` con "Could not find the 'claim_status'
         // column of 'clubs' in the schema cache". Mirando solo el código de
         // Postgres, ese caso —el más común de los dos— se escapaba y el alta moría.
+        // Base sin la migración del escalafón: la categoría se crea igual y el
+        // rango sale del nombre. Acá SÍ se degrada porque el rango es derivable;
+        // lo que no se degrada nunca es la trazabilidad (ver abajo).
+        if (insertClub.error && ESCALAFON_COLUMNS.some(column => isMissingColumnError(insertClub.error, column))) {
+            console.warn('[clubs/categories] clubs sin columnas de escalafón; el rango va inferido', {
+                clubId,
+                falta: 'migración 20260824180000_club_categoria_escalafon.sql',
+            });
+            for (const column of ESCALAFON_COLUMNS) {
+                delete clubPayload[column];
+            }
+            insertClub = await admin.from('clubs').insert(clubPayload).select('id, name').single();
+        }
+
         if (insertClub.error && CLAIM_COLUMNS.some(column => isMissingColumnError(insertClub.error, column))) {
             console.warn('[clubs/categories] clubs sin columnas de reclamo; alta sin trazabilidad', {
                 clubId,
@@ -235,5 +286,160 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     } catch (error) {
         console.error('[clubs/categories] POST', error);
         return err('No se pudo crear la categoría', 500);
+    }
+}
+
+
+/**
+ * Devuelve las fichas de la familia con su lugar en el escalafón, para la
+ * pantalla donde el club dice a qué categoría representa cada una.
+ *
+ * `explicit: false` significa que el rango salió del NOMBRE y nadie lo confirmó.
+ * La pantalla lo muestra distinto: es la diferencia entre "el sistema cree" y
+ * "el club dijo", y sin esa marca nadie sabe qué falta revisar.
+ */
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const { id } = await params;
+        const clubId = normalizeText(id);
+        if (!clubId) return err('club requerido', 400);
+
+        const supabase = await createClient();
+        const context = await requireUserAccessContext(supabase).catch(() => null);
+        if (!context) return err('No autenticado', 401);
+
+        const target = await getClubManagementTarget(supabase, clubId);
+        if (!target) return err('Club no encontrado', 404);
+        if (!canManageClubContext(context, target, MANAGEMENT_MEMBERSHIP_ROLES)) {
+            return err('Sin permisos para administrar este club', 403);
+        }
+
+        const familyIds = Array.from(new Set(target.familyClubIds ?? [target.clubId]));
+        const admin = createAdminClient();
+
+        const SELECT_CON_ESCALAFON = 'id, name, short_name, category_level, category_variant';
+        let query = await admin.from('clubs').select(SELECT_CON_ESCALAFON).in('id', familyIds);
+
+        // Sin la migración la pantalla igual sirve para MIRAR: muestra lo
+        // inferido. Guardar es lo que no va a poder, y el PATCH lo dice.
+        let escalafonPersistido = true;
+        if (query.error && ESCALAFON_COLUMNS.some(column => isMissingColumnError(query.error, column))) {
+            escalafonPersistido = false;
+            query = await admin.from('clubs').select('id, name, short_name').in('id', familyIds) as typeof query;
+        }
+
+        if (query.error) {
+            console.error('[clubs/categories] GET fallido', query.error);
+            return err('No se pudieron cargar las categorías', 500);
+        }
+
+        type Row = {
+            id: string;
+            name?: string | null;
+            short_name?: string | null;
+            category_level?: string | null;
+            category_variant?: string | null;
+        };
+
+        const categories = ((query.data ?? []) as Row[])
+            .map((row) => {
+                const level = resolveCategoryLevel({
+                    name: row.short_name || row.name || row.id,
+                    storedLevel: row.category_level,
+                    storedVariant: row.category_variant,
+                });
+                return {
+                    id: row.id,
+                    name: row.name || row.short_name || row.id,
+                    isBase: row.id === target.clubId,
+                    level: level.key,
+                    levelLabel: level.label,
+                    variant: level.variant,
+                    explicit: level.explicit,
+                    rank: level.rank,
+                };
+            })
+            .sort((left, right) => {
+                if (left.isBase !== right.isBase) return left.isBase ? -1 : 1;
+                const byLevel = compareCategoryLevel(left, right);
+                return byLevel !== 0 ? byLevel : left.name.localeCompare(right.name);
+            });
+
+        return NextResponse.json({
+            ok: true,
+            clubId: target.clubId,
+            escalafonPersistido,
+            levels: CATEGORY_LEVELS.map(level => ({ key: level.key, label: level.label })),
+            categories,
+        });
+    } catch (error) {
+        console.error('[clubs/categories] GET', error);
+        return err('No se pudieron cargar las categorías', 500);
+    }
+}
+
+/**
+ * PATCH /api/clubs/:id/categories — el club fija a qué categoría representa una
+ * de sus fichas.
+ *
+ * Manda `level: null` para volver a la inferencia por nombre. Es un pedido
+ * legítimo: si el club renombra la ficha, dejar que el nombre mande otra vez es
+ * más simple que mantener a mano una elección vieja.
+ */
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const { id } = await params;
+        const clubId = normalizeText(id);
+        if (!clubId) return err('club requerido', 400);
+
+        const body = await request.json().catch(() => ({}));
+        const categoryId = normalizeText(body?.categoryId);
+        if (!categoryId) return err('Falta la categoría', 400);
+
+        const levelInput = readLevelInput(body ?? {});
+        if (!levelInput) return err('Ese rango de categoría no existe', 400);
+
+        const supabase = await createClient();
+        const context = await requireUserAccessContext(supabase).catch(() => null);
+        if (!context) return err('No autenticado', 401);
+
+        const target = await getClubManagementTarget(supabase, clubId);
+        if (!target) return err('Club no encontrado', 404);
+        if (!canManageClubContext(context, target, MANAGEMENT_MEMBERSHIP_ROLES)) {
+            return err('Sin permisos para administrar este club', 403);
+        }
+
+        // Solo se toca la propia familia: con permiso sobre un club no se puede
+        // reordenar el escalafón de otro.
+        const familyIds = new Set(target.familyClubIds ?? [target.clubId]);
+        if (!familyIds.has(categoryId)) {
+            return err('Esa categoría no pertenece a este club', 403);
+        }
+
+        const admin = createAdminClient();
+        const update = await admin
+            .from('clubs')
+            .update({ category_level: levelInput.level, category_variant: levelInput.variant })
+            .eq('id', categoryId)
+            .select('id')
+            .single();
+
+        if (update.error && ESCALAFON_COLUMNS.some(column => isMissingColumnError(update.error, column))) {
+            console.error('[clubs/categories] PATCH sin columnas de escalafón', { clubId, categoryId });
+            return err(
+                'La base todavía no tiene las columnas del escalafón. Falta correr la migración 20260824180000.',
+                409,
+            );
+        }
+
+        if (update.error) {
+            console.error('[clubs/categories] PATCH fallido', update.error);
+            return err(update.error.message || 'No se pudo guardar la categoría', 500);
+        }
+
+        return NextResponse.json({ ok: true });
+    } catch (error) {
+        console.error('[clubs/categories] PATCH', error);
+        return err('No se pudo guardar la categoría', 500);
     }
 }

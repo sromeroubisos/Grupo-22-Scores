@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './page.module.css';
+import { CATEGORY_LEVELS, resolveCategoryLevel } from '@/lib/clubs/categoryLevel';
 
 /**
  * Alta de partido desde el Panel del Día.
@@ -46,6 +47,10 @@ export default function PanelMatchForm({
     // Alta de categoría, compartida por las dos puntas: la propia y la del rival.
     const [creatingFor, setCreatingFor] = useState<'ours' | 'rival' | null>(null);
     const [categoryLabel, setCategoryLabel] = useState('');
+    // '' = que el rango salga del nombre. Es el caso normal: "M15" o "Intermedia"
+    // se leen solos, y el selector está para el nombre libre que no se lee.
+    const [categoryLevel, setCategoryLevel] = useState('');
+    const [categoryVariant, setCategoryVariant] = useState('');
     const [categoryBusy, setCategoryBusy] = useState(false);
     const [categoryError, setCategoryError] = useState<string | null>(null);
     const [categorySimilar, setCategorySimilar] = useState<Array<{ id: string; name: string }>>([]);
@@ -122,6 +127,8 @@ export default function PanelMatchForm({
     const openCategoryCreator = (which: 'ours' | 'rival') => {
         setCreatingFor(which);
         setCategoryLabel('');
+        setCategoryLevel('');
+        setCategoryVariant('');
         setCategoryError(null);
         setCategorySimilar([]);
     };
@@ -145,7 +152,13 @@ export default function PanelMatchForm({
             const response = await fetch(`/api/clubs/${encodeURIComponent(clubId)}/categories`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ baseClubId, label, force }),
+                body: JSON.stringify({
+                    baseClubId,
+                    label,
+                    force,
+                    level: categoryLevel || null,
+                    variant: categoryVariant || null,
+                }),
             });
             const payload = await response.json().catch(() => null);
 
@@ -173,6 +186,8 @@ export default function PanelMatchForm({
             }
             setCreatingFor(null);
             setCategoryLabel('');
+            setCategoryLevel('');
+            setCategoryVariant('');
             setCategorySimilar([]);
         } catch {
             setCategoryError('No se pudo crear la categoría. Revisá la conexión.');
@@ -202,6 +217,12 @@ export default function PanelMatchForm({
         setCategoryError(null);
     };
 
+    // Lo que el sistema leería del nombre tal como está escrito ahora mismo.
+    // Sirve para que la opción "del nombre" no sea una caja negra.
+    const inferredLevel = resolveCategoryLevel({ name: categoryLabel });
+    const inferredLevelLabel = categoryLabel.trim() ? inferredLevel.label : '';
+    const inferredVariant = categoryLabel.trim() ? inferredLevel.variant : '';
+
     const categoryCreator = (which: 'ours' | 'rival', baseName: string) => (
         creatingFor === which ? (
             <div className={styles.categoryCreator}>
@@ -228,6 +249,34 @@ export default function PanelMatchForm({
                     <button type="button" className={styles.linkButton} onClick={() => setCreatingFor(null)}>
                         Cancelar
                     </button>
+                </div>
+
+                {/* El rango del escalafón. El nombre lo elige el club; el orden en
+                    la jornada lo da esto. Por omisión se lee del nombre y el
+                    renglón de abajo dice qué se leyó, así no hay que adivinar. */}
+                <div className={styles.panelFormInline}>
+                    <select
+                        className={styles.panelFormInput}
+                        aria-label="Rango de la categoría en el escalafón"
+                        value={categoryLevel}
+                        onChange={event => setCategoryLevel(event.target.value)}
+                    >
+                        <option value="">Rango: del nombre{inferredLevelLabel ? ` (${inferredLevelLabel})` : ''}</option>
+                        {CATEGORY_LEVELS.map(level => (
+                            <option key={level.key} value={level.key}>{level.label}</option>
+                        ))}
+                    </select>
+                    <select
+                        className={styles.panelFormInput}
+                        aria-label="Letra de la categoría"
+                        value={categoryVariant}
+                        onChange={event => setCategoryVariant(event.target.value)}
+                    >
+                        <option value="">Sin letra{inferredVariant ? ` (${inferredVariant})` : ''}</option>
+                        {['A', 'B', 'C', 'D', 'E'].map(letter => (
+                            <option key={letter} value={letter}>{letter}</option>
+                        ))}
+                    </select>
                 </div>
 
                 {categorySimilar.length > 0 ? (

@@ -19,8 +19,15 @@ const EXTENSIONS = ['.png', '.svg', '.webp', '.jpg', '.jpeg', '.avif'];
 const PROXY_CACHE_CONTROL_VERSIONED = 'public, max-age=604800, s-maxage=604800, immutable';
 const PROXY_CACHE_CONTROL_VOLATILE = 'public, max-age=300, s-maxage=604800, stale-while-revalidate=86400';
 
-function resolveProxyCacheControl(url: URL): string {
-    return url.searchParams.has('v')
+// `trustVersion` es la letra chica de "immutable": el token `v` vale una semana
+// de cache sin revalidar SOLO si describe la imagen que se esta sirviendo. No la
+// describe cuando el escudo es HEREDADO del club madre (el `v` es el
+// `updated_at` de la categoria, que no se mueve si cambia el escudo de la madre)
+// ni cuando lo que sale es el SVG de iniciales (no hay imagen que versionar).
+// Congelar cualquiera de esos dos por siete dias es como se pego el escudo de
+// "Tala Rugby Club Intermedia" en iniciales.
+function resolveProxyCacheControl(url: URL, trustVersion = true): string {
+    return trustVersion && url.searchParams.has('v')
         ? PROXY_CACHE_CONTROL_VERSIONED
         : PROXY_CACHE_CONTROL_VOLATILE;
 }
@@ -296,7 +303,9 @@ function buildFallbackLogoResponse(teamName: string, key: string, url: URL) {
     return new NextResponse(svg, {
         headers: {
             'Content-Type': 'image/svg+xml; charset=utf-8',
-            'Cache-Control': resolveProxyCacheControl(url),
+            // Nunca inmutable: las iniciales son la respuesta de "todavia no hay
+            // escudo", y cachearlas una semana sobrevive a que el escudo aparezca.
+            'Cache-Control': resolveProxyCacheControl(url, false),
             'Access-Control-Allow-Origin': '*',
         },
     });
@@ -341,7 +350,10 @@ async function findExternalTournamentLogo(candidates: string[], tournamentName: 
     return null;
 }
 
-async function findCachedLogo(key: string, teamUrl: string, teamName: string, entity: string, sport: string | null): Promise<string | null> {
+/** Lo que el proxy aprendio sobre el escudo mientras lo buscaba. */
+type LogoOrigin = { inherited: boolean };
+
+async function findCachedLogo(key: string, teamUrl: string, teamName: string, entity: string, sport: string | null, origin?: LogoOrigin): Promise<string | null> {
     const candidateSet = new Set<string>();
     addCandidate(candidateSet, key);
     if (teamUrl) addCandidate(candidateSet, teamUrl);
@@ -449,6 +461,10 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string, en
                         const baseId = baseByDerived.get(resolvedId);
                         const inherited = baseId ? logoByBase.get(baseId) : null;
                         if (inherited) {
+                            // El `v` que mando el llamador es el `updated_at` de la
+                            // categoria, no el de este escudo: no alcanza para
+                            // servirlo como inmutable.
+                            if (origin) origin.inherited = true;
                             return inherited;
                         }
                     }
@@ -681,9 +697,9 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string, en
     return null;
 }
 
-async function buildImageResponse(source: string, url: URL) {
+async function buildImageResponse(source: string, url: URL, trustVersion = true) {
     const normalizedSource = normalizeSourceUrl(source);
-    const cacheControl = resolveProxyCacheControl(url);
+    const cacheControl = resolveProxyCacheControl(url, trustVersion);
 
     if (normalizedSource.startsWith('data:')) {
         const commaIndex = normalizedSource.indexOf(',');
@@ -771,9 +787,10 @@ export async function GET(request: Request) {
         return buildImageResponse(localLogo, url);
     }
 
-    const cachedLogo = await findCachedLogo(key, teamUrl, teamName, entity, sport);
+    const origin: LogoOrigin = { inherited: false };
+    const cachedLogo = await findCachedLogo(key, teamUrl, teamName, entity, sport, origin);
     if (cachedLogo) {
-        return buildImageResponse(cachedLogo, url);
+        return buildImageResponse(cachedLogo, url, !origin.inherited);
     }
 
     if (fallback) {

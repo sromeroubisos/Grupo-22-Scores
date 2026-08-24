@@ -101,6 +101,34 @@ async function settleFollowing<T>(promise: Promise<T>): Promise<{ data: T | null
     }
 }
 
+/**
+ * Un error a la consola en forma PLANA.
+ *
+ * `console.error(err)` imprimía `{}` y no servía para nada: un `Error` tiene el
+ * mensaje y el stack como propiedades NO enumerables, así que el overlay de
+ * Next lo serializa vacío. Con la base caída (`PGRST002`, "could not query the
+ * database for the schema cache") el aviso quedaba sin una sola pista de qué
+ * había pasado.
+ */
+function describeFollowingError(error: unknown): Record<string, unknown> {
+    if (error instanceof Error) {
+        return { name: error.name, message: error.message, stack: error.stack };
+    }
+
+    if (error && typeof error === 'object') {
+        const record = error as Record<string, unknown>;
+        const described: Record<string, unknown> = {};
+        for (const key of ['message', 'code', 'details', 'hint', 'status', 'name']) {
+            if (record[key] !== undefined) described[key] = record[key];
+        }
+        // Un objeto sin ninguna de esas claves igual tiene que decir algo: se
+        // manda su forma cruda antes que otro `{}`.
+        return Object.keys(described).length > 0 ? described : { raw: String(error) };
+    }
+
+    return { raw: String(error) };
+}
+
 function buildLeagueRowFromDetail(detail: FavoriteUpdatedDetail): LeagueFollowRow {
     return {
         league_id: detail.entityId,
@@ -202,7 +230,7 @@ export function useFavorites() {
             if (isFollowingSchemaMissingError(err)) {
                 console.warn('[useFavorites] following schema not available yet.');
             } else {
-                console.error('[useFavorites] refresh error:', err);
+                console.error('[useFavorites] refresh error:', message, describeFollowingError(err));
             }
 
             setLeagueRows([]);
