@@ -125,15 +125,6 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
             </div>
             <Footer />
             <MobileBottomNav />
-            {/*
-                La barra de clubes va SÓLO en la rama pública: no en el gestor,
-                no en el club-admin, no en el onboarding y no en los minijuegos
-                a pantalla completa. A quien ya está adentro trabajando no se le
-                vende la plataforma que está usando.
-
-                No la reserva nadie con padding y no hace falta: es `fixed`, así
-                que no empuja un píxel de contenido ni suma CLS.
-            */}
             <ProdeWorldCupBanner />
         </SportProvider>
     );

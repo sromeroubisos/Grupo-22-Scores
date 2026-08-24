@@ -1,17 +1,18 @@
 import type { Metadata } from 'next';
 
-import { esOrigenValido, META, type PromoOrigen } from '@/content/para-clubes';
-import ParaClubesClient from '@/components/embudo/EmbudoLanding';
+import EmbudoLanding from '@/components/embudo/EmbudoLanding';
+import { esOrigenValido, type PromoOrigen } from '@/content/embudo';
+import { PARA_CLUBES } from '@/content/para-clubes';
 
 export const metadata: Metadata = {
-    title: META.titulo,
-    description: META.descripcion,
+    title: PARA_CLUBES.meta.titulo,
+    description: PARA_CLUBES.meta.descripcion,
     alternates: {
         canonical: '/para-clubes',
     },
     openGraph: {
-        title: META.titulo,
-        description: META.descripcion,
+        title: PARA_CLUBES.meta.titulo,
+        description: PARA_CLUBES.meta.descripcion,
         type: 'website',
         locale: 'es_AR',
         siteName: 'G22 Scores',
@@ -19,12 +20,15 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: 'summary_large_image',
-        title: META.titulo,
-        description: META.descripcion,
+        title: PARA_CLUBES.meta.titulo,
+        description: PARA_CLUBES.meta.descripcion,
     },
 };
 
 /**
+ * La puerta del club. La del que organiza es `/para-torneos`, y las dos son la
+ * misma página con distinto contenido: `EmbudoLanding`.
+ *
  * El `?ref=` se lee acá, en el servidor, y baja como prop.
  *
  * Podría leerse con `useSearchParams` en el cliente, pero eso obliga a un
@@ -40,5 +44,5 @@ export default async function ParaClubesPage({
     const resueltos = await searchParams;
     const origen: PromoOrigen | null = esOrigenValido(resueltos.ref) ? resueltos.ref : null;
 
-    return <ParaClubesClient origen={origen} />;
+    return <EmbudoLanding contenido={PARA_CLUBES} origen={origen} />;
 }

@@ -2165,7 +2165,7 @@ export default function HomePage() {
                 );
 
                 /**
-                 * La tarjeta de clubes entra DESPUÉS del segundo bloque de
+                 * La tarjeta del embudo entra DESPUÉS del segundo bloque de
                  * torneos, con el ancho de una tarjeta de torneo. Se scrollea
                  * como cualquier otro contenido: no se cierra, no interrumpe y
                  * no tiene estado.
@@ -2334,8 +2334,9 @@ export default function HomePage() {
           Antes vivían acá las noticias y, abajo, el panel de "Contratar ahora".
           Eran dos placas verdes compitiendo en la misma columna y ninguna de
           las dos se veía en un teléfono: `.sidebarRight` se apaga por CSS abajo
-          de 1500px. Ahora la columna es una sola cosa —la placa de clubes— y
-          las noticias bajaron al feed, que es lo único que un mobile ve.
+          de 1500px. Ahora la columna es una sola cosa —la placa del embudo, con
+          sus dos salidas adentro— y las noticias bajaron al feed, que es lo
+          único que un mobile ve.
         */}
         <aside className={styles.sidebarRight}>
           <ClubsPromoCard variant="sidebar" />

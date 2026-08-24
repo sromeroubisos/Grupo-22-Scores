@@ -2638,12 +2638,6 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                         );
                                     })
                                 ) : (
-                                    /*
-                                     * El vacío es el mejor argumento que
-                                     * tenemos: quien mira un partido sin
-                                     * estadísticas está viendo exactamente lo
-                                     * que G22 le llenaría si cargara él.
-                                     */
                                     <div className={styles.placeholderText}>
                                         <p style={{ margin: 0 }}>No hay estadísticas clave disponibles para este partido.</p>
                                     </div>

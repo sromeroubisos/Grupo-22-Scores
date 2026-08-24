@@ -1,295 +1,284 @@
 /**
- * G22 para clubes — el texto entero del embudo comercial.
+ * /para-clubes — la puerta del que REPRESENTA a un club.
  *
- * Todo lo que lee un dirigente sale de acá: la placa del sidebar, la tarjeta
- * del feed, la barra inferior, las líneas contextuales y la página
- * /para-clubes. Si es una frase que se ve, se edita en este archivo y no en un
- * JSX: una promesa comercial repartida en seis componentes envejece mal y
- * termina diciendo tres cosas distintas en tres lugares.
+ * Dirigente, prensa del club, entrenador. Un club solo: sus categorías, sus
+ * jugadores, su historia. No organiza el torneo, juega adentro de uno.
  *
- * Lo que NO vive acá: los precios. Esos son de `lib/billing/plans.ts` y se
- * muestran en /contacto, que sigue siendo la página de planes y checkout.
- * /para-clubes califica y pide la demo; /contacto cobra.
+ * El eje es EL DÍA DE PARTIDO, no la lista de funciones. Un club no compra "una
+ * página": compra saber qué está pasando el sábado, tener los números el lunes y
+ * que sus jugadores tengan historia. De ahí que la sección central sean tres
+ * momentos —el sábado, el lunes, la temporada— y no una grilla de features.
+ *
+ * La otra puerta es `/para-torneos`, para el que organiza. Lo compartido
+ * —tipos, formulario, atribución— vive en `content/embudo.ts`.
+ *
+ * ── LO QUE ACÁ NO SE PROMETE, Y POR QUÉ ────────────────────────────────────
+ *
+ * Tres afirmaciones quedaron afuera del copy porque el producto NO las cumple
+ * hoy, y una landing que la demo desmiente es peor que una landing floja:
+ *
+ *  · "Se sincroniza cuando vuelve la señal". FALSO. `public/sw.js` corta en
+ *    `request.method !== 'GET'`: cachea escudos y estáticos, no encola
+ *    escrituras. Sin señal no se publica nada. La respuesta de la FAQ dice lo
+ *    que pasa de verdad. Si algún día se agrega la cola, se actualiza acá.
+ *
+ *  · "Podés exportar las estadísticas cuando quieras". No hay export de datos:
+ *    lo que existe es la exportación de PLACAS (imágenes). La FAQ afirma lo que
+ *    sí es cierto —los datos son del club— y ofrece pasarlos en una planilla,
+ *    que hoy se hace a mano.
+ *
+ *  · "Minutos jugados" en la ficha del jugador. `localPlayerProfile.ts` cuenta
+ *    partidos, puntos, tries, conversiones, penales y tarjetas. Minutos no
+ *    existe, así que la ficha se describe con lo que tiene.
  */
 
-export const PARA_CLUBES_HREF = '/para-clubes';
+import {
+    ROLES_CLUB,
+    type ContenidoEmbudo,
+} from './embudo';
 
 /**
- * De dónde salió el click. Viaja en `?ref=` hasta el formulario y se guarda con
- * el lead: es la única forma de saber qué ubicación convierte y cuál sólo ocupa
- * lugar. Sin esto, dentro de tres meses la discusión sobre si la barra inferior
- * sirve se resuelve por opinión.
- */
-export type PromoOrigen =
-    | 'sidebar'
-    | 'feed'
-    | 'barra'
-    | 'nav'
-    | 'torneo'
-    | 'club'
-    | 'partido-vacio';
-
-export const ORIGENES: readonly PromoOrigen[] = [
-    'sidebar',
-    'feed',
-    'barra',
-    'nav',
-    'torneo',
-    'club',
-    'partido-vacio',
-];
-
-export function hrefParaClubes(origen: PromoOrigen): string {
-    return `${PARA_CLUBES_HREF}?ref=${origen}`;
-}
-
-export function esOrigenValido(valor: string | null | undefined): valor is PromoOrigen {
-    return typeof valor === 'string' && (ORIGENES as readonly string[]).includes(valor);
-}
-
-/**
- * Cuántos torneos publican hoy en G22.
+ * El club que se muestra como prueba en el hero.
  *
- * Queda en `null` a propósito hasta que haya un número contado contra la base.
- * Un "+30" inventado en una página de ventas es justo el dato que un dirigente
- * chequea, y si no cierra no vuelve. Mientras sea null, la tercera tarjeta de
- * números muestra el compromiso de la demo, que es verdad sin depender de
- * ninguna cuenta.
+ * Una sola constante porque es lo primero que hay que cambiar si este club deja
+ * de estar publicado o si otro queda mejor cargado. Verificado contra la base:
+ * `tala-rugby-club` existe, es de rugby, está visible, y tiene familia cargada
+ * (Intermedia y las dos Preintermedia), que es justamente lo que la página
+ * promete mostrar.
  */
-export const TORNEOS_PUBLICANDO: number | null = null;
-
-/** La placa promocional, en sus dos tamaños. */
-export const PROMO = {
-    etiqueta: 'G22 para clubes',
-    titulo: 'Tu torneo, donde la gente ya lo está mirando.',
-    modulos: [
-        'Partido en vivo · Fantasy · Prode',
-        'Estadísticas · Equipo de la Semana',
-    ],
-    /** Tarjeta del feed: es chica, no vende, califica. */
-    accionFeed: 'Ver cómo funciona',
-    /** Placa del sidebar: desde que las noticias se fueron, tiene la columna entera. */
-    accionSidebar: 'Pedir una demo',
-    pasos: [
-        'Cargás el partido desde el celular',
-        'Aparece en vivo en G22',
-        'El hincha sigue a su jugador',
-    ],
-} as const;
-
-export const BARRA = {
-    texto: '¿Organizás un torneo? Publicalo en vivo en G22.',
-    accion: 'Ver más',
-    cerrar: 'Cerrar el aviso para clubes',
-} as const;
-
-export const CONTEXTUAL = {
-    torneo: '¿Organizás un torneo? Publicalo en G22',
-    club: (nombre: string) => `¿Sos dirigente de ${nombre}? Gestioná tu equipo en G22`,
-    clubSinNombre: '¿Sos dirigente del club? Gestioná tu equipo en G22',
-    partidoVacio: 'Este partido no tiene estadísticas cargadas. Si sos del club, podés cargarlas',
-} as const;
-
-export const META = {
-    titulo: 'G22 para clubes — Publicá tu torneo en vivo',
-    descripcion:
-        'Cargás el partido desde el celular y aparece al instante en G22 Scores, junto al Top 14 y al Top 10 del Centro. Fixture, posiciones, estadísticas, fantasy y prode. Pedí una demo con un partido de tu torneo.',
-} as const;
-
-export const HERO = {
-    etiqueta: 'G22 para clubes',
-    titulo: 'Tu torneo, donde la gente ya lo está mirando.',
-    subtitulo:
-        'Cargás el partido en vivo y aparece al instante en G22 Scores, junto al Top 14 y al Top 10 del Centro. Con fantasy, prode, estadísticas y equipo de la semana incluidos.',
-    accionPrimaria: 'Pedí una demo con un partido tuyo',
-    accionSecundaria: 'Ver cómo funciona',
-} as const;
-
-/**
- * La demo, explicada donde iba la prueba en vivo.
- *
- * No hay un torneo embebido a propósito: la prueba de verdad es el fin de
- * semana, con un partido del club que pregunta. Un fixture ajeno arriba de una
- * página de ventas demuestra que la plataforma anda, no que le sirve a él.
- */
-export const DEMO = {
-    titulo: 'La demo es un partido tuyo, en vivo.',
-    texto:
-        'No te mostramos una pantalla de ejemplo. Elegís un partido de tu torneo, el fin de semana que te quede cómodo, y lo cargamos con vos desde la mesa de control. Termina el partido y tu club ya tiene su página, su fixture y sus estadísticas publicadas.',
-    puntos: [
-        'Lo coordinamos por WhatsApp durante la semana.',
-        'La carga la hace alguien del club, acompañado. Son dos minutos por partido.',
-        'Lo que quede cargado queda publicado: la demo no se borra.',
-    ],
-    accion: 'Pedir la demo',
-} as const;
-
-/** Los tres números que matan las tres objeciones típicas. */
-export type Numero = { valor: string; etiqueta: string; detalle: string };
-
-export const NUMEROS: Numero[] = [
-    {
-        valor: '2 min',
-        etiqueta: 'para crear un partido',
-        detalle: 'Equipos, hora y cancha. El fixture completo se arma una vez y queda.',
-    },
-    {
-        valor: '0',
-        etiqueta: 'instalación',
-        detalle: 'Se carga desde el celular, en la mesa de control. No hay nada que bajar.',
-    },
-    TORNEOS_PUBLICANDO === null
-        ? {
-            valor: 'Sábado',
-            etiqueta: 'la demo, con tu partido',
-            detalle: 'Elegís la fecha. Lo cargamos juntos y queda publicado.',
-        }
-        : {
-            valor: `+${TORNEOS_PUBLICANDO}`,
-            etiqueta: 'torneos ya publican en G22',
-            detalle: 'Uniones, clubes y organizadores independientes.',
-        },
-];
-
-export type Modulo = {
-    id: string;
-    icono: 'vivo' | 'torneo' | 'stats' | 'equipo' | 'fantasy' | 'prode';
-    titulo: string;
-    texto: string;
+const CLUB_DE_MUESTRA = {
+    href: '/clubs/tala-rugby-club',
+    nombre: 'Tala',
 };
 
-export const MODULOS: Modulo[] = [
-    {
-        id: 'vivo',
-        icono: 'vivo',
-        titulo: 'Partido en vivo',
-        texto: 'Try, penal, tarjeta, cambio. Minuto a minuto, mientras se juega.',
-    },
-    {
-        id: 'torneo',
-        icono: 'torneo',
-        titulo: 'Página de torneo',
-        texto: 'Fixture, posiciones y sanciones, en una dirección propia que podés compartir.',
-    },
-    {
-        id: 'stats',
-        icono: 'stats',
-        titulo: 'Estadísticas',
-        texto: 'Por jugador y por equipo. Tries, tackles, palos y minutos, temporada a temporada.',
-    },
-    {
-        id: 'equipo',
-        icono: 'equipo',
-        titulo: 'Equipo de la Semana',
-        texto: 'El quince de la fecha, armado con lo que se cargó. Sale solo y se comparte.',
-    },
-    {
-        id: 'fantasy',
-        icono: 'fantasy',
-        titulo: 'Fantasy',
-        texto: 'El hincha arma su equipo con jugadores de tu torneo y vuelve cada fecha.',
-    },
-    {
-        id: 'prode',
-        icono: 'prode',
-        titulo: 'Prode',
-        texto: 'Pronósticos por fecha, con ligas privadas entre socios del club.',
-    },
-];
+export const PARA_CLUBES: ContenidoEmbudo = {
+    embudo: 'clubes',
 
-export type Paso = { numero: string; titulo: string; texto: string };
+    meta: {
+        titulo: 'G22 para clubes — Todos los partidos de tu club, en vivo',
+        descripcion:
+            'Primera, intermedia, M19 y M17 actualizándose en vivo en la página de tu club. Estadísticas por jugador que quedan temporada a temporada. Pedí una demo con un partido tuyo.',
+    },
 
-export const PASOS: Paso[] = [
-    {
-        numero: '01',
-        titulo: 'Cargás el evento',
-        texto: 'Desde el celular, en la mesa de control. Un try son dos toques.',
+    hero: {
+        etiqueta: 'G22 para clubes',
+        /*
+         * Sin gancho: el H1 de dos líneas ya pone la escena y la promesa. La
+         * versión corta —"Todo tu club, en vivo, en una sola pantalla."— sirve
+         * como H1 alternativo si algún día se quiere una línea sola, pero abajo
+         * del H1 largo diría dos veces lo mismo.
+         */
+        gancho: '',
+        /*
+         * Dos líneas y no una: la primera pone la escena —el sábado del club— y
+         * la segunda la promesa. Partido en el JSX, no con un <br> escondido en
+         * un string.
+         */
+        titulo: [
+            'El sábado tu club juega cinco partidos.',
+            'Ahora se siguen todos, en un solo lugar.',
+        ],
+        subtitulo:
+            'Primera, intermedia, M19, M17 — cada uno actualizándose en vivo en la página de tu club. El que está parado en una cancha se entera de las otras cuatro. El que no pudo ir, también.',
+        accionPrimaria: 'Pedí tu demo',
+        accionSecundaria: {
+            texto: `Ver la página de ${CLUB_DE_MUESTRA.nombre}`,
+            href: CLUB_DE_MUESTRA.href,
+        },
     },
-    {
-        numero: '02',
-        titulo: 'Aparece en vivo',
-        texto: 'El marcador se actualiza en G22 al instante, en la misma pantalla donde ya miran el Top 14.',
-    },
-    {
-        numero: '03',
-        titulo: 'El hincha sigue a su jugador',
-        texto: 'Termina el partido y quedan las estadísticas, la tabla y el equipo de la semana.',
-    },
-];
 
-export type Faq = { pregunta: string; respuesta: string };
+    numeros: [
+        {
+            valor: '2 min',
+            etiqueta: 'para cargar un partido',
+            detalle: 'Desde el celular, en la mesa de control. El plantel se arma una vez y queda.',
+        },
+        {
+            valor: '0',
+            etiqueta: 'instalación',
+            detalle: 'Se carga del celular, desde la mesa de control. No hay nada que bajar.',
+        },
+        {
+            valor: 'Todas',
+            etiqueta: 'las categorías, en la misma vista',
+            detalle: 'De primera a M16, en la pestaña "Hoy" de la página de tu club.',
+        },
+    ],
 
-export const FAQ: Faq[] = [
-    {
-        pregunta: '¿Cuánto sale?',
-        respuesta:
-            'Depende de lo que necesites. No hay un paquete cerrado: en la reunión vemos cuántos torneos manejás, cuántas categorías y qué módulos vas a usar, y con eso armamos el precio. La demo no se cobra.',
-    },
-    {
-        pregunta: '¿Quién carga los datos?',
-        respuesta:
-            'Alguien del club, desde el celular. Le damos un usuario con permisos sobre tu torneo y nada más. Si preferís, el primer fin de semana lo cargamos juntos.',
-    },
-    {
-        pregunta: '¿Sirve para juveniles y M17?',
-        respuesta:
-            'Sí. Cada categoría es su propio torneo, con su fixture y su tabla. Los juveniles ya tienen su lugar en el sitio, separado de la primera.',
-    },
-    {
-        pregunta: '¿Puedo migrar mi torneo actual?',
-        respuesta:
-            'Sí. Importamos el fixture y los planteles desde una planilla, y si tu torneo ya tiene historial publicado en otra fuente, lo cargamos como temporadas anteriores.',
-    },
-    /*
-     * OJO CON ESTA RESPUESTA. La primera versión decía que lo cargado sin señal
-     * "sube cuando vuelve la señal", y es falso: `public/sw.js` sólo cachea GET
-     * (escudos y estáticos), no hay background sync ni cola de escritura. Sin
-     * internet no se publica nada. Si algún día se agrega la cola, esta
-     * respuesta se actualiza — mientras tanto dice lo que el producto hace.
+    /**
+     * Los tres momentos.
+     *
+     * Cada uno es verdad verificable contra el producto:
+     *  · el sábado  → la pestaña "Hoy" de `/clubs/[id]`, que suma la jornada de
+     *                 toda la familia del club (`/api/clubs/[id]/panel-matches`)
+     *  · el lunes   → los eventos se cargan con el minuto y de ahí salen las
+     *                 estadísticas del partido (`matchStatsFromEvents.ts`)
+     *  · la temporada → la ficha del jugador se arma de los partidos cargados
+     *                 (`localPlayerProfile.ts`), no de una tabla que alguien
+     *                 mantiene a mano
      */
-    {
-        pregunta: '¿Qué pasa si no tengo internet en la cancha?',
-        respuesta:
-            'En vivo no se puede: publicar el momento necesita señal. Lo que alcanzaste a cargar antes de quedarte sin datos queda guardado. Si en tu cancha la señal es mala, la salida es anotar en papel y cargar el partido entero al terminar, desde donde tengas señal: el fixture, la tabla y las estadísticas quedan exactamente iguales. Lo único que se pierde es el minuto a minuto.',
+    momentos: [
+        {
+            id: 'sabado',
+            cuando: 'El sábado',
+            titulo: 'Todo tu club, en vivo',
+            parrafos: [
+                'Entrás a la página de tu club y en "Hoy" están los partidos de todas las categorías, actualizándose solos. No hay que preguntar en el grupo ni esperar a que alguien avise.',
+                'Un link para mandarle a los socios, a los padres y a las redes del club. El mismo link, todos los sábados. Y también aparecen en el tablero de G22, donde ya entran a mirar los resultados del torneo.',
+            ],
+        },
+        {
+            id: 'lunes',
+            cuando: 'El lunes',
+            titulo: 'Los números ya están hechos',
+            parrafos: [
+                'Cada evento queda cargado con el minuto: tries, penales, conversiones, tarjetas, cambios. Cuando termina el partido, el resumen ya existe.',
+                'El cuerpo técnico llega el martes con los datos servidos, sin tener que reconstruir el partido de memoria ni mirar el video entero para contar.',
+            ],
+        },
+        {
+            id: 'temporada',
+            cuando: 'La temporada',
+            titulo: 'La historia de cada jugador',
+            parrafos: [
+                'Cada jugador tiene su ficha: partidos, puntos, tries, tarjetas, temporada tras temporada. No se borra al terminar el año.',
+                'El pibe que debuta en M16 llega a primera con su historial completo. Y el hincha puede seguirlo todo el camino.',
+            ],
+        },
+    ],
+
+    modulosTitulo: 'Lo que tiene tu club',
+    modulosTexto: 'Todo sale de la misma carga. No hay que subir la información dos veces.',
+    modulos: [
+        {
+            id: 'club',
+            icono: 'club',
+            titulo: 'Página del club',
+            texto: 'Plantel, escudo, fixture y resultados, siempre al día.',
+        },
+        {
+            id: 'vivo',
+            icono: 'vivo',
+            titulo: 'Partidos en vivo',
+            texto: 'Todas las categorías, minuto a minuto.',
+        },
+        {
+            id: 'jugador',
+            icono: 'jugador',
+            titulo: 'Ficha de jugador',
+            texto: 'Estadísticas que persisten temporada a temporada.',
+        },
+        {
+            id: 'stats',
+            icono: 'stats',
+            titulo: 'Estadísticas de equipo',
+            texto: 'Para el análisis post-partido, con los eventos y sus minutos.',
+        },
+        {
+            id: 'equipo',
+            icono: 'equipo',
+            titulo: 'Equipo de la Semana',
+            texto: 'Tus jugadores compitiendo por entrar.',
+        },
+        {
+            id: 'fantasy',
+            icono: 'fantasy',
+            titulo: 'Fantasy y Prode',
+            texto: 'Tus partidos dentro del juego del torneo.',
+        },
+    ],
+
+    pasosTitulo: 'Cómo funciona',
+    pasos: [
+        {
+            numero: '01',
+            titulo: 'Alguien del club carga',
+            texto: 'Desde el celular, en la mesa de control. Dos minutos de instrucción y ya está.',
+        },
+        {
+            numero: '02',
+            titulo: 'Aparece en vivo',
+            texto: 'En la página del club y en el tablero de G22, al instante.',
+        },
+        {
+            numero: '03',
+            titulo: 'Queda para siempre',
+            texto: 'El partido, las estadísticas y la ficha de cada jugador.',
+        },
+    ],
+
+    /**
+     * El bloque puente.
+     *
+     * Es la objeción que más frena y a la vez la mejor vía de entrada. Ojo con
+     * la segunda frase: es una afirmación sobre la historia comercial del
+     * proyecto, no sobre el producto, así que no la puede verificar el código.
+     * Si no es cierta, se cambia acá y no rompe nada.
+     */
+    puente: {
+        titulo: '¿Tu torneo todavía no está en G22?',
+        texto: 'No importa. Sumá tu club igual y nosotros nos encargamos de hablar con la organización del torneo. Muchos torneos entraron porque un club llegó primero.',
+        accion: 'Quiero sumar mi club',
+        otraPuerta: 'Organizo el torneo, no un club',
     },
-];
 
-export const CIERRE = {
-    titulo: 'Empecemos por un partido.',
-    texto:
-        'Contanos qué torneo organizás y coordinamos la demo para el fin de semana que te quede cómodo.',
-} as const;
+    roles: ROLES_CLUB,
 
-export const FORMULARIO = {
-    titulo: 'Pedí tu demo',
-    ayuda: 'Te escribimos dentro de las 24 hs hábiles. Los campos con asterisco son obligatorios.',
-    enviar: 'Pedir la demo',
-    enviando: 'Enviando...',
-    exito: 'Listo. Te escribimos dentro de las 24 hs hábiles para coordinar la demo con un partido de tu torneo.',
-    errorGenerico: 'No pudimos enviar el formulario. Probá de nuevo en un minuto.',
-    whatsapp: 'Solicitar demo por WhatsApp',
-    whatsappAyuda: 'O si preferís, dejanos los datos y te escribimos nosotros.',
-    campos: {
-        nombre: { label: 'Nombre y apellido', placeholder: 'Juan Pérez' },
-        organizacion: { label: 'Club o torneo', placeholder: 'Club Atlético Rugby' },
-        rol: { label: 'Rol' },
-        telefono: { label: 'WhatsApp o teléfono', placeholder: '11 5555 5555' },
-        email: { label: 'Email', placeholder: 'juan@club.com.ar', opcional: 'opcional' },
-        equipos: { label: 'Cantidad de equipos' },
-        mensaje: { label: 'Mensaje', placeholder: 'Contanos qué torneo organizás.', opcional: 'opcional' },
+    faq: [
+        {
+            pregunta: '¿Quién carga los datos?',
+            respuesta:
+                'Alguien del club, desde el celular. La carga está pensada para hacerse en vivo desde la mesa de control sin conocimiento técnico: son dos minutos de instrucción. Si preferís, el primer fin de semana lo cargamos con vos.',
+        },
+        {
+            pregunta: '¿Sirve si mi torneo no está en G22?',
+            respuesta:
+                'Sí. Tu club tiene su página, su plantel y sus estadísticas igual. Y nos ocupamos de acercarle la plataforma a la organización de tu torneo.',
+        },
+        {
+            pregunta: '¿Sirve para juveniles?',
+            respuesta:
+                'Sí. Todas las categorías del club, de primera a M16, en la misma vista. Los juveniles son justamente donde más se nota, porque hoy no existen en ningún lado.',
+        },
+        /*
+         * OJO. El copy original decía "podés exportarlas cuando quieras", y hoy
+         * no hay export de datos: lo que existe es la exportación de placas
+         * (imágenes). La propiedad del dato sí es verdad, y pasar una planilla a
+         * mano es un compromiso que se puede cumplir. Cuando exista el export de
+         * verdad, esta respuesta se acorta.
+         */
+        {
+            pregunta: '¿Los datos son del club?',
+            respuesta:
+                'Sí. Las estadísticas de tus jugadores son tuyas: si en algún momento querés llevártelas, te las pasamos en una planilla y listo. No quedan secuestradas acá adentro.',
+        },
+        /*
+         * OJO CON ESTA RESPUESTA. Decir que lo cargado sin señal "se sincroniza
+         * cuando vuelve" es FALSO: `public/sw.js` sólo cachea GET (escudos y
+         * estáticos), no hay background sync ni cola de escritura. Sin internet
+         * no se publica nada. Si algún día se agrega la cola, se actualiza.
+         */
+        {
+            pregunta: '¿Qué pasa si no hay internet en la cancha?',
+            respuesta:
+                'En vivo no se puede: publicar el momento necesita señal. Lo que alcanzaste a cargar antes de quedarte sin datos queda guardado. Si en tu cancha la señal es mala, la salida es anotar en papel y cargar el partido entero al terminar, desde donde tengas señal: el fixture, la tabla y las estadísticas quedan exactamente iguales. Lo único que se pierde es el minuto a minuto.',
+        },
+        {
+            pregunta: '¿Cuánto sale?',
+            respuesta:
+                'Depende del tamaño del club. No hay un paquete cerrado: en la reunión vemos cuántas categorías tenés y qué módulos vas a usar, y con eso armamos el precio. La demo no se cobra.',
+        },
+    ],
+
+    cierre: {
+        titulo: 'Probemos con un partido tuyo',
+        texto:
+            'Elegís una fecha, cargamos un partido de tu club con vos y lo ves publicado el mismo sábado. Queda online aunque después no sigas.',
     },
-} as const;
 
-export const ROLES = [
-    { valor: 'dirigente', label: 'Dirigente' },
-    { valor: 'entrenador', label: 'Entrenador' },
-    { valor: 'prensa', label: 'Prensa' },
-    { valor: 'otro', label: 'Otro' },
-] as const;
-
-export const RANGOS_EQUIPOS = [
-    { valor: '1-4', label: '1 a 4' },
-    { valor: '5-10', label: '5 a 10' },
-    { valor: '11-20', label: '11 a 20' },
-    { valor: '+20', label: 'Más de 20' },
-] as const;
+    cruce: {
+        texto: '¿Organizás un torneo en vez de un club?',
+        accion: 'Mirá G22 para torneos',
+        destino: 'torneos',
+    },
+};

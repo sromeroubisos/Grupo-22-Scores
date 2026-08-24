@@ -6,20 +6,36 @@ import type { FormEvent } from 'react';
 import { trackEvent } from '@/lib/analytics';
 import { hasWhatsapp, MENSAJE_DEMO, whatsappUrl } from '@/lib/contact';
 import { erroresPorCampo, leadSchema } from '@/lib/leads/schema';
-import { FORMULARIO, RANGOS_EQUIPOS, ROLES, type PromoOrigen } from '@/content/para-clubes';
+import {
+    CATEGORIAS,
+    FORMULARIO,
+    origenParaLead,
+    RANGOS_EQUIPOS,
+    type ContenidoEmbudo,
+    type PromoOrigen,
+} from '@/content/embudo';
 import styles from './embudo.module.css';
 
 /**
- * El formulario de demo.
+ * El formulario de demo, uno para las dos puertas.
  *
- * Hoy es el ÚNICO canal activo: no hay número de WhatsApp Business todavía, así
- * que `hasWhatsapp()` devuelve false y el sitio no dibuja un solo botón verde en
- * ninguna parte. El día que se setee `NEXT_PUBLIC_WHATSAPP_NUMBER` en Vercel, el
- * botón aparece solo, arriba del formulario, sin tocar una línea de esto.
+ * Hoy el mail es el ÚNICO canal activo: no hay número de WhatsApp Business
+ * todavía, así que `hasWhatsapp()` devuelve false y el sitio no dibuja un solo
+ * botón verde en ninguna parte. El día que se setee
+ * `NEXT_PUBLIC_WHATSAPP_NUMBER` en Vercel, el botón aparece solo, arriba del
+ * formulario, sin tocar una línea de esto.
  *
  * Valida dos veces y no por desconfianza del usuario: la validación del cliente
  * es para que no mande un formulario roto, la del servidor porque el cliente es
  * del visitante. Las dos leen el mismo schema, así que no pueden divergir.
+ *
+ * ── Dos preguntas distintas según la puerta ────────────────────────────────
+ *
+ * Al que ORGANIZA se le pregunta cuántos equipos maneja: es la medida de su
+ * torneo. Al CLUB esa pregunta no le dice nada —tiene uno por categoría—, así
+ * que se le pregunta qué categorías juegan, que da la misma medida, y en qué
+ * torneo juega, que puede no estar todavía en G22. Los campos de la otra puerta
+ * viajan vacíos y el schema no los exige.
  */
 
 type Estado = 'idle' | 'enviando' | 'exito' | 'error';
@@ -27,6 +43,7 @@ type Estado = 'idle' | 'enviando' | 'exito' | 'error';
 const VALORES_INICIALES = {
     nombre: '',
     organizacion: '',
+    torneo: '',
     rol: '',
     telefono: '',
     email: '',
@@ -35,8 +52,17 @@ const VALORES_INICIALES = {
     sitioWeb: '',
 };
 
-export default function DemoForm({ origen }: { origen: PromoOrigen | null }) {
+type Props = {
+    contenido: ContenidoEmbudo;
+    origen: PromoOrigen | null;
+};
+
+export default function DemoForm({ contenido, origen }: Props) {
+    const { embudo, roles } = contenido;
+    const esClub = embudo === 'clubes';
+
     const [valores, setValores] = useState(VALORES_INICIALES);
+    const [categorias, setCategorias] = useState<string[]>([]);
     const [errores, setErrores] = useState<Record<string, string>>({});
     const [estado, setEstado] = useState<Estado>('idle');
     const [mensajeError, setMensajeError] = useState('');
@@ -45,20 +71,36 @@ export default function DemoForm({ origen }: { origen: PromoOrigen | null }) {
 
     const enlaceWhatsapp = whatsappUrl(MENSAJE_DEMO);
 
-    const cambiar = (campo: keyof typeof VALORES_INICIALES, valor: string) => {
+    const marcarEmpezado = () => {
         // Un solo evento por sesión de formulario, en el primer tecleo real.
-        if (!empezado.current) {
-            empezado.current = true;
-            trackEvent('demo_form_start', { origin: origen ?? 'directo' });
-        }
+        if (empezado.current) return;
+        empezado.current = true;
+        trackEvent('demo_form_start', { embudo, origin: origen ?? 'directo' });
+    };
 
-        setValores((previos) => ({ ...previos, [campo]: valor }));
+    const limpiarError = (campo: string) => {
         setErrores((previos) => {
             if (!previos[campo]) return previos;
             const siguiente = { ...previos };
             delete siguiente[campo];
             return siguiente;
         });
+    };
+
+    const cambiar = (campo: keyof typeof VALORES_INICIALES, valor: string) => {
+        marcarEmpezado();
+        setValores((previos) => ({ ...previos, [campo]: valor }));
+        limpiarError(campo);
+    };
+
+    const alternarCategoria = (valor: string) => {
+        marcarEmpezado();
+        setCategorias((previas) => (
+            previas.includes(valor)
+                ? previas.filter((c) => c !== valor)
+                : [...previas, valor]
+        ));
+        limpiarError('categorias');
     };
 
     const enviar = async (evento: FormEvent<HTMLFormElement>) => {
@@ -69,7 +111,9 @@ export default function DemoForm({ origen }: { origen: PromoOrigen | null }) {
 
         const payload = {
             ...valores,
-            origen: origen ?? '',
+            embudo,
+            categorias,
+            origen: origenParaLead(embudo, origen),
             // De qué página venía. Junto al `?ref=` es lo que permite atribuir
             // el lead a una ubicación concreta de la promo.
             referrer: typeof document !== 'undefined' ? document.referrer.slice(0, 500) : '',
@@ -85,7 +129,7 @@ export default function DemoForm({ origen }: { origen: PromoOrigen | null }) {
 
         setErrores({});
         setEstado('enviando');
-        trackEvent('demo_form_submit', { origin: origen ?? 'directo' });
+        trackEvent('demo_form_submit', { embudo, origin: origen ?? 'directo' });
 
         try {
             const respuesta = await fetch('/api/leads/club-demo', {
@@ -132,6 +176,8 @@ export default function DemoForm({ origen }: { origen: PromoOrigen | null }) {
     }
 
     const enviando = estado === 'enviando';
+    const campoOrganizacion = esClub ? FORMULARIO.campos.club : FORMULARIO.campos.organizacion;
+    const campoMensaje = esClub ? FORMULARIO.campos.mensajeClub : FORMULARIO.campos.mensaje;
 
     return (
         <div className={styles.formularioCaja}>
@@ -145,7 +191,7 @@ export default function DemoForm({ origen }: { origen: PromoOrigen | null }) {
                         target="_blank"
                         rel="noopener noreferrer"
                         className={styles.botonWhatsapp}
-                        onClick={() => trackEvent('clubs_promo_click', { location: 'whatsapp' })}
+                        onClick={() => trackEvent('clubs_promo_click', { location: 'whatsapp', embudo })}
                     >
                         {FORMULARIO.whatsapp}
                     </a>
@@ -199,7 +245,7 @@ export default function DemoForm({ origen }: { origen: PromoOrigen | null }) {
 
                 <div className={styles.campo}>
                     <label htmlFor="lead-organizacion" className={styles.etiquetaCampo}>
-                        {FORMULARIO.campos.organizacion.label} <span aria-hidden="true">*</span>
+                        {campoOrganizacion.label} <span aria-hidden="true">*</span>
                     </label>
                     <input
                         id="lead-organizacion"
@@ -207,7 +253,7 @@ export default function DemoForm({ origen }: { origen: PromoOrigen | null }) {
                         type="text"
                         required
                         autoComplete="organization"
-                        placeholder={FORMULARIO.campos.organizacion.placeholder}
+                        placeholder={campoOrganizacion.placeholder}
                         className={styles.input}
                         value={valores.organizacion}
                         onChange={(e) => cambiar('organizacion', e.target.value)}
@@ -219,6 +265,37 @@ export default function DemoForm({ origen }: { origen: PromoOrigen | null }) {
                         <span id="error-organizacion" className={styles.error}>{errores.organizacion}</span>
                     )}
                 </div>
+
+                {/*
+                  El torneo se pregunta ABIERTO y sólo en la puerta del club: la
+                  mitad de los que escriben juegan un torneo que todavía no está
+                  en G22, y un desplegable donde el suyo no aparece los manda a
+                  cerrar la pestaña. Además, lo que escriban es la lista de
+                  torneos a los que hay que ir a golpear la puerta.
+                */}
+                {esClub && (
+                    <div className={styles.campo}>
+                        <label htmlFor="lead-torneo" className={styles.etiquetaCampo}>
+                            {FORMULARIO.campos.torneo.label} <span aria-hidden="true">*</span>
+                        </label>
+                        <input
+                            id="lead-torneo"
+                            name="torneo"
+                            type="text"
+                            required
+                            placeholder={FORMULARIO.campos.torneo.placeholder}
+                            className={styles.input}
+                            value={valores.torneo}
+                            onChange={(e) => cambiar('torneo', e.target.value)}
+                            aria-invalid={Boolean(errores.torneo)}
+                            aria-describedby={errores.torneo ? 'error-torneo' : undefined}
+                            disabled={enviando}
+                        />
+                        {errores.torneo && (
+                            <span id="error-torneo" className={styles.error}>{errores.torneo}</span>
+                        )}
+                    </div>
+                )}
 
                 <div className={styles.campo}>
                     <label htmlFor="lead-rol" className={styles.etiquetaCampo}>
@@ -236,7 +313,7 @@ export default function DemoForm({ origen }: { origen: PromoOrigen | null }) {
                         disabled={enviando}
                     >
                         <option value="">Elegí una opción</option>
-                        {ROLES.map((rol) => (
+                        {roles.map((rol) => (
                             <option key={rol.valor} value={rol.valor}>{rol.label}</option>
                         ))}
                     </select>
@@ -291,41 +368,85 @@ export default function DemoForm({ origen }: { origen: PromoOrigen | null }) {
                     )}
                 </div>
 
-                <div className={styles.campo}>
-                    <label htmlFor="lead-equipos" className={styles.etiquetaCampo}>
-                        {FORMULARIO.campos.equipos.label} <span aria-hidden="true">*</span>
-                    </label>
-                    <select
-                        id="lead-equipos"
-                        name="equipos"
-                        required
-                        className={styles.input}
-                        value={valores.equipos}
-                        onChange={(e) => cambiar('equipos', e.target.value)}
-                        aria-invalid={Boolean(errores.equipos)}
-                        aria-describedby={errores.equipos ? 'error-equipos' : undefined}
-                        disabled={enviando}
+                {esClub ? (
+                    /*
+                      Casillas de verdad adentro de un <fieldset> con <legend>:
+                      es un multi, y el lector de pantalla anuncia el grupo y
+                      cuántas hay marcadas sin que haya que explicárselo con
+                      aria a mano. Un select múltiple en un teléfono es una
+                      trampa; siete casillas no.
+                    */
+                    <fieldset
+                        className={`${styles.campo} ${styles.campoAncho} ${styles.grupoCategorias}`}
+                        aria-describedby={errores.categorias ? 'error-categorias' : undefined}
                     >
-                        <option value="">Elegí una opción</option>
-                        {RANGOS_EQUIPOS.map((rango) => (
-                            <option key={rango.valor} value={rango.valor}>{rango.label}</option>
-                        ))}
-                    </select>
-                    {errores.equipos && (
-                        <span id="error-equipos" className={styles.error}>{errores.equipos}</span>
-                    )}
-                </div>
+                        <legend className={styles.etiquetaCampo}>
+                            {FORMULARIO.campos.categorias.label} <span aria-hidden="true">*</span>
+                        </legend>
+
+                        <div className={styles.categorias}>
+                            {CATEGORIAS.map((categoria) => {
+                                const marcada = categorias.includes(categoria.valor);
+                                return (
+                                    <label
+                                        key={categoria.valor}
+                                        className={`${styles.categoria} ${marcada ? styles.categoriaMarcada : ''}`}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            name="categorias"
+                                            value={categoria.valor}
+                                            checked={marcada}
+                                            onChange={() => alternarCategoria(categoria.valor)}
+                                            disabled={enviando}
+                                        />
+                                        {categoria.label}
+                                    </label>
+                                );
+                            })}
+                        </div>
+
+                        {errores.categorias && (
+                            <span id="error-categorias" className={styles.error}>{errores.categorias}</span>
+                        )}
+                    </fieldset>
+                ) : (
+                    <div className={styles.campo}>
+                        <label htmlFor="lead-equipos" className={styles.etiquetaCampo}>
+                            {FORMULARIO.campos.equipos.label} <span aria-hidden="true">*</span>
+                        </label>
+                        <select
+                            id="lead-equipos"
+                            name="equipos"
+                            required
+                            className={styles.input}
+                            value={valores.equipos}
+                            onChange={(e) => cambiar('equipos', e.target.value)}
+                            aria-invalid={Boolean(errores.equipos)}
+                            aria-describedby={errores.equipos ? 'error-equipos' : undefined}
+                            disabled={enviando}
+                        >
+                            <option value="">Elegí una opción</option>
+                            {RANGOS_EQUIPOS.map((rango) => (
+                                <option key={rango.valor} value={rango.valor}>{rango.label}</option>
+                            ))}
+                        </select>
+                        {errores.equipos && (
+                            <span id="error-equipos" className={styles.error}>{errores.equipos}</span>
+                        )}
+                    </div>
+                )}
 
                 <div className={`${styles.campo} ${styles.campoAncho}`}>
                     <label htmlFor="lead-mensaje" className={styles.etiquetaCampo}>
-                        {FORMULARIO.campos.mensaje.label}
-                        <span className={styles.opcional}>{FORMULARIO.campos.mensaje.opcional}</span>
+                        {campoMensaje.label}
+                        <span className={styles.opcional}>{campoMensaje.opcional}</span>
                     </label>
                     <textarea
                         id="lead-mensaje"
                         name="mensaje"
                         rows={3}
-                        placeholder={FORMULARIO.campos.mensaje.placeholder}
+                        placeholder={campoMensaje.placeholder}
                         className={`${styles.input} ${styles.textarea}`}
                         value={valores.mensaje}
                         onChange={(e) => cambiar('mensaje', e.target.value)}

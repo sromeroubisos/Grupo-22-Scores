@@ -832,14 +832,6 @@ function TeamDetailInner({ id }: { id: string }) {
 
     // Extract team info from details, fallback to hintName from URL
     const teamName = details?.name || details?.team?.name || details?.team_name || hintName || rawId;
-    /**
-     * El nombre REAL del club, sin el id crudo de respaldo.
-     *
-     * `teamName` cae en `rawId` cuando el proveedor no contestó, y ahí un
-     * "¿Sos dirigente de fs-team-4821?" es peor que no preguntar nada. Cuando
-     * no hay nombre, la línea contextual usa su variante genérica.
-     */
-    const nombreClubReal = details?.name || details?.team?.name || details?.team_name || hintName || '';
     const teamLogoUrl =
         resolveTeamLogo(details, details?.team) ||
         '';
@@ -1884,7 +1876,6 @@ function TeamDetailInner({ id }: { id: string }) {
                         </div>
                     </aside>
                 </div>
-
             </main>
         </div>
     );

@@ -1,7 +1,7 @@
 import type { LeadValidado } from './schema';
 
 /**
- * El aviso al equipo cuando entra un lead de "G22 para clubes".
+ * El aviso al equipo cuando entra un lead del embudo comercial.
  *
  * Manda el formulario por mail. La implementación usa la API HTTP de Resend con
  * `fetch` pelado —sin SDK ni dependencia nueva en package.json— y si no hay
@@ -44,7 +44,18 @@ const ROLES_LEGIBLES: Record<string, string> = {
     dirigente: 'Dirigente',
     entrenador: 'Entrenador',
     prensa: 'Prensa',
+    jugador: 'Jugador',
     otro: 'Otro',
+};
+
+const CATEGORIAS_LEGIBLES: Record<string, string> = {
+    primera: 'Primera',
+    intermedia: 'Intermedia',
+    m19: 'M19',
+    m17: 'M17',
+    m16: 'M16',
+    femenino: 'Femenino',
+    infantiles: 'Infantiles',
 };
 
 const EQUIPOS_LEGIBLES: Record<string, string> = {
@@ -65,15 +76,52 @@ function fechaLegible(iso: string): string {
     });
 }
 
+/**
+ * Por qué puerta entró.
+ *
+ * `lead.origen` viene como `torneos:feed` o `clubes:nav` — el embudo adelante y
+ * la ubicación atrás. Antes había una sola landing y el mail podía nombrarla;
+ * ahora son dos y el que lee el aviso necesita saber cuál, porque no se le
+ * contesta lo mismo al que organiza un torneo que al que representa a un club.
+ */
+function puertaLegible(origen: string): string {
+    if (origen.startsWith('torneos')) return 'Organiza un torneo (/para-torneos)';
+    if (origen.startsWith('clubes')) return 'Representa un club (/para-clubes)';
+    return 'Sin identificar';
+}
+
 function filas(lead: LeadNotificacion): Array<[string, string]> {
+    const esClub = lead.embudo === 'clubes';
+
+    /*
+     * La fila que cambia según la puerta. Al que organiza se le preguntó cuántos
+     * equipos maneja; al club, qué categorías juegan y en qué torneo. Mostrar
+     * las dos con un guión en la que no corresponde ensucia el mail que alguien
+     * lee apurado desde el teléfono.
+     */
+    const especificas: Array<[string, string]> = esClub
+        ? [
+            ['Torneo', lead.torneo || '—'],
+            [
+                'Categorías',
+                lead.categorias.length > 0
+                    ? lead.categorias.map((c) => CATEGORIAS_LEGIBLES[c] ?? c).join(', ')
+                    : '—',
+            ],
+        ]
+        : [
+            ['Equipos', EQUIPOS_LEGIBLES[lead.equipos] ?? (lead.equipos || '—')],
+        ];
+
     return [
         ['Nombre', lead.nombre],
-        ['Club o torneo', lead.organizacion],
+        [esClub ? 'Club' : 'Club o torneo', lead.organizacion],
         ['Rol', ROLES_LEGIBLES[lead.rol] ?? lead.rol],
         ['WhatsApp / teléfono', lead.telefono],
         ['Email', lead.email || '—'],
-        ['Equipos', EQUIPOS_LEGIBLES[lead.equipos] ?? lead.equipos],
+        ...especificas,
         ['Mensaje', lead.mensaje || '—'],
+        ['Puerta', puertaLegible(lead.origen)],
         ['Vino de', lead.origen || 'directo'],
         ['Página anterior', lead.referrer || '—'],
         ['Fecha', fechaLegible(lead.creadoEn)],
@@ -91,7 +139,7 @@ function escapar(texto: string): string {
 
 function cuerpoTexto(lead: LeadNotificacion): string {
     return [
-        'Pedido de demo desde g22scores.com/para-clubes',
+        'Pedido de demo desde g22scores.com',
         '',
         ...filas(lead).map(([etiqueta, valor]) => `${etiqueta}: ${valor}`),
     ].join('\n');
@@ -109,10 +157,10 @@ function cuerpoHtml(lead: LeadNotificacion): string {
         .join('');
 
     return `<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:560px">
-        <p style="margin:0 0 4px;color:#00794a;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase">G22 para clubes</p>
+        <p style="margin:0 0 4px;color:#00794a;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase">G22 para clubes y torneos</p>
         <h2 style="margin:0 0 16px;font-size:19px;color:#111827">Pedido de demo</h2>
         <table style="border-collapse:collapse;width:100%">${celdas}</table>
-        <p style="margin:20px 0 0;color:#6b7280;font-size:12px">Enviado desde el formulario de g22scores.com/para-clubes</p>
+        <p style="margin:20px 0 0;color:#6b7280;font-size:12px">Enviado desde el formulario de g22scores.com</p>
     </div>`;
 }
 
@@ -140,7 +188,7 @@ class NotificadorResend implements LeadNotifier {
                 to: [DESTINO_NOTIFICACION],
                 // Responder el mail le escribe al dirigente, no a nosotros.
                 ...(lead.email ? { reply_to: lead.email } : {}),
-                subject: `Demo G22 — ${lead.organizacion} (${lead.nombre})`,
+                subject: `Demo G22 ${lead.embudo === 'clubes' ? 'CLUB' : 'TORNEO'} — ${lead.organizacion} (${lead.nombre})`,
                 text: cuerpoTexto(lead),
                 html: cuerpoHtml(lead),
             }),

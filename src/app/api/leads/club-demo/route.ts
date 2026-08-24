@@ -4,9 +4,10 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { notificarLead, type LeadNotificacion } from '@/lib/leads/notifier';
 import { erroresPorCampo, leadSchema, MENSAJE_ERROR_GENERICO } from '@/lib/leads/schema';
 import { consumeRateLimit } from '@/lib/rateLimit';
+import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 
 /**
- * El alta de un lead de "G22 para clubes".
+ * El alta de un lead del embudo comercial.
  *
  * Lo escribe un anónimo, así que el orden importa: honeypot (gratis) → rate
  * limit (barato) → validación (barata) → base (cara). Cobrarle a la base la
@@ -38,6 +39,21 @@ function esTablaFaltante(error: { code?: string; message?: string } | null): boo
     if (error.code === 'PGRST205' || error.code === '42P01') return true;
     const mensaje = (error.message ?? '').toLowerCase();
     return mensaje.includes('could not find the table') || mensaje.includes('does not exist');
+}
+
+/**
+ * Las columnas que agregó la segunda puerta del embudo.
+ *
+ * `20260824120000_club_leads_embudo.sql` las crea, y como en este repo las
+ * migraciones se corren A MANO en el Studio, hay un intervalo donde el código
+ * nuevo convive con la tabla vieja. En ese intervalo el insert completo falla
+ * con PGRST204 y el lead se perdería por una columna. Se reintenta sin ellas:
+ * llega un lead con menos datos, que es infinitamente mejor que ningún lead.
+ */
+const COLUMNAS_DEL_EMBUDO = ['embudo', 'torneo', 'categorias'] as const;
+
+function faltaAlgunaColumnaDelEmbudo(error: unknown): boolean {
+    return COLUMNAS_DEL_EMBUDO.some((columna) => isMissingColumnError(error, columna));
 }
 
 export async function POST(request: NextRequest) {
@@ -87,20 +103,44 @@ export async function POST(request: NextRequest) {
 
     try {
         const admin = createAdminClient();
-        const { error } = await admin.from('club_leads').insert({
+
+        const base = {
             nombre: lead.nombre,
             organizacion: lead.organizacion,
             rol: lead.rol,
             telefono: lead.telefono,
             email: lead.email || null,
-            equipos: lead.equipos,
+            /*
+             * Vacío y no null a propósito: en la tabla original `equipos` es NOT
+             * NULL, y el lead de un club no la contesta. Un string vacío entra
+             * con o sin la migración corrida; un null explota justo cuando falta.
+             */
+            equipos: lead.equipos || '',
             mensaje: lead.mensaje || null,
             origen: lead.origen || null,
             referrer: lead.referrer || null,
             // El user agent ayuda a separar un dirigente real de un scraper.
             // La IP NO se guarda: sirve para el rate limit y ahí se queda.
             user_agent: request.headers.get('user-agent')?.slice(0, 400) ?? null,
-        });
+        };
+
+        const conEmbudo = {
+            ...base,
+            embudo: lead.embudo,
+            torneo: lead.torneo || null,
+            categorias: lead.categorias.length > 0 ? lead.categorias : null,
+        };
+
+        let { error } = await admin.from('club_leads').insert(conEmbudo);
+
+        if (error && faltaAlgunaColumnaDelEmbudo(error)) {
+            console.warn(
+                '[leads] la tabla club_leads todavía no tiene las columnas del embudo; ' +
+                'el lead entra sin torneo ni categorías. Corré ' +
+                'supabase/migrations/20260824120000_club_leads_embudo.sql en el Studio.',
+            );
+            ({ error } = await admin.from('club_leads').insert(base));
+        }
 
         if (error) {
             if (esTablaFaltante(error)) {
