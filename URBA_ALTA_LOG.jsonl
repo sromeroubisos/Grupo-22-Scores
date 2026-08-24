@@ -1,0 +1,8 @@
+{"ts":"2026-08-24T05:14:00.712Z","evento":"inicio","torneos":2,"totalM":16,"totalP":9,"publicar":true}
+{"ts":"2026-08-24T05:14:02.377Z","evento":"ok","torneo":"urba:2025318","uuid":"4f94bb2d-140f-479b-ab30-b1ed34c5910a","matches":10}
+{"ts":"2026-08-24T05:14:03.957Z","evento":"ok","torneo":"urba:2025320","uuid":"d492369d-73e1-451a-8ef8-f308eaecd629","matches":6}
+{"ts":"2026-08-24T05:14:03.958Z","evento":"fin","hechosT":2,"hechosF":2,"hechosM":16,"hechosP":9,"fallidas":0}
+{"ts":"2026-08-24T05:22:59.097Z","evento":"inicio","torneos":2,"totalM":0,"totalP":9,"publicar":true}
+{"ts":"2026-08-24T05:23:00.365Z","evento":"ok","torneo":"urba:2025318","uuid":"4f94bb2d-140f-479b-ab30-b1ed34c5910a","matches":0}
+{"ts":"2026-08-24T05:23:01.637Z","evento":"ok","torneo":"urba:2025320","uuid":"d492369d-73e1-451a-8ef8-f308eaecd629","matches":0}
+{"ts":"2026-08-24T05:23:01.638Z","evento":"fin","hechosT":0,"hechosF":0,"hechosM":0,"hechosP":0,"hechosI":9,"fallidas":0}
