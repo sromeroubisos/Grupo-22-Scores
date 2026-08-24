@@ -2007,37 +2007,20 @@ export default function HomePage() {
                   borderRadius: '6px',
                   background: sourceError.flashscore && sourceError.supabase
                     ? 'rgba(255,60,60,0.08)'
-                    : sourceError.flashscoreFromCache
-                      ? 'rgba(100,180,255,0.07)'
-                      : 'rgba(255,160,0,0.08)',
+                    : 'rgba(255,160,0,0.08)',
                   border: sourceError.flashscore && sourceError.supabase
                     ? '1px solid rgba(255,80,80,0.2)'
-                    : sourceError.flashscoreFromCache
-                      ? '1px solid rgba(100,180,255,0.15)'
-                      : '1px solid rgba(255,160,0,0.2)',
+                    : '1px solid rgba(255,160,0,0.2)',
                   fontSize: '0.75rem',
                   color: sourceError.flashscore && sourceError.supabase
                     ? '#ff8080'
-                    : sourceError.flashscoreFromCache
-                      ? '#80b8ff'
-                      : 'var(--color-text-dim)',
+                    : 'var(--color-text-dim)',
                   alignItems: 'center'
                 }}>
                   <span style={{ opacity: 0.8 }}>{sourceError.message}</span>
                 </div>
               )}
               {/* Source error indicator — shown when FlashScore or Supabase is down */}
-              {false && sourceError?.scenario === 'fs_cache' && (
-                <div style={{
-                  display: 'flex', gap: '8px', padding: '8px 12px', marginBottom: '8px',
-                  borderRadius: '6px', background: 'rgba(100,180,255,0.07)',
-                  border: '1px solid rgba(100,180,255,0.15)',
-                  fontSize: '0.75rem', color: '#80b8ff',
-                  alignItems: 'center'
-                }}>
-                  <span style={{ opacity: 0.8 }}>Datos de FlashScore desde caché — puede haber un leve retraso.</span>
-                </div>
-              )}
               {false && sourceError?.scenario === 'fs_down_db_ok' && (
                 <div style={{
                   display: 'flex', gap: '8px', padding: '8px 12px', marginBottom: '8px',
