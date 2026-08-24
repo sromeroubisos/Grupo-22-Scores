@@ -56,9 +56,47 @@ export function categoryKey(value: unknown): string {
 }
 
 /**
+ * Los tokens del nombre del club, para poder restárselos a un candidato.
+ *
+ * Se compara por CONJUNTO y no por prefijo: "Club La Tablada" y
+ * "La Tablada - Intermedia" no comparten prefijo —sobra un "Club"— y una
+ * comparación por `startsWith` los da por distintos. Ese agujero creó la
+ * Intermedia de La Tablada dos veces.
+ */
+function clubTokenSet(baseClubName: string): Set<string> {
+    return new Set(categoryKey(baseClubName).split(' ').filter(Boolean));
+}
+
+/**
+ * Palabras que designan al club y nunca nombran una categoría. Se sacan aunque
+ * no estén en el nombre de la base, porque el catálogo mezcla las dos formas:
+ * "Club La Tablada" y "La Tablada" son el mismo club, y sin esto el "Club" que
+ * sobra de un lado alcanza para que dos gemelas no se reconozcan.
+ *
+ * La lista es corta a propósito: solo designadores puros. Meter acá "rugby" o
+ * "atlético" empezaría a colapsar categorías que sí son distintas.
+ */
+const DESIGNADORES_DE_CLUB = new Set(['club', 'c', 'cr', 'rc']);
+
+/** Le saca a una clave los tokens del nombre del club y los designadores. */
+function stripClubTokens(key: string, clubTokens: Set<string>): string {
+    return key
+        .split(' ')
+        .filter(token => token && !clubTokens.has(token) && !DESIGNADORES_DE_CLUB.has(token))
+        .join(' ')
+        .trim();
+}
+
+/**
  * El nombre completo con el que la categoría entra al catálogo. Se guarda con
  * el club adelante porque una categoría es un club: "Jockey M15" tiene que
  * poder leerse sola en un fixture, sin el contexto de quién es su base.
+ *
+ * Si la persona escribe el club adelante —"Newman M17 B" estando parada en
+ * Club Newman—, esa parte se ignora en vez de repetirse. Se recortan los
+ * tokens INICIALES que pertenecen al club, no un prefijo textual: con
+ * `startsWith` el caso "Newman …" sobre "Club Newman" no coincidía y salía
+ * "Club Newman Newman M17 B".
  */
 export function buildCategoryClubName(baseClubName: string, categoryLabel: string): string {
     const base = String(baseClubName || '').trim();
@@ -66,10 +104,19 @@ export function buildCategoryClubName(baseClubName: string, categoryLabel: strin
     if (!base) return label;
     if (!label) return base;
 
-    // Si ya viene con el nombre del club adelante, no se repite.
-    if (normalizeClubText(label).startsWith(normalizeClubText(base))) return label;
+    const clubTokens = clubTokenSet(base);
+    const words = label.split(/\s+/);
 
-    return `${base} ${label}`;
+    let start = 0;
+    while (start < words.length && clubTokens.has(normalizeClubText(words[start]))) {
+        start += 1;
+    }
+
+    // Todo el rótulo era el nombre del club: no queda categoría que agregar.
+    const rest = words.slice(start).join(' ').replace(/^[\s\-–—:]+/, '').trim();
+    if (!rest) return base;
+
+    return `${base} ${rest}`;
 }
 
 /** Slug estable para la fila del catálogo. */
@@ -93,21 +140,22 @@ export function findSimilarCategories(
     categoryLabel: string,
 ): CategoryCandidate[] {
     const wantedFull = categoryKey(buildCategoryClubName(baseClubName, categoryLabel));
-    const wantedLabel = categoryKey(categoryLabel);
+    const clubTokens = clubTokenSet(baseClubName);
+    // Al rótulo buscado también se le sacan los tokens del club: quien escribe
+    // "Newman M17 B" y quien escribe "M17 B" están pidiendo lo mismo.
+    const wantedLabel = stripClubTokens(categoryKey(categoryLabel), clubTokens);
     if (!wantedFull && !wantedLabel) return [];
-
-    const baseKey = categoryKey(baseClubName);
 
     return candidates.filter(candidate => {
         const fullKey = categoryKey(candidate.name);
         if (fullKey && fullKey === wantedFull) return true;
 
-        // El candidato puede estar guardado sin el club adelante ("M15" a secas):
-        // se compara también la parte que sobra al sacarle el nombre del club.
-        const withoutBase = baseKey && fullKey.startsWith(baseKey)
-            ? fullKey.slice(baseKey.length).trim()
-            : fullKey;
+        // El candidato puede estar guardado con el club escrito de otra forma
+        // ("La Tablada - Intermedia" cuando el club es "Club La Tablada") o sin
+        // el club adelante ("M15" a secas). Sacándole a los dos los tokens del
+        // club, queda la categoría sola y ahí sí se comparan.
+        const candidateLabel = stripClubTokens(fullKey, clubTokens);
 
-        return Boolean(wantedLabel) && withoutBase === wantedLabel;
+        return Boolean(wantedLabel) && candidateLabel === wantedLabel;
     });
 }
