@@ -206,14 +206,25 @@ export interface PlanArusa {
     huerfanos: PartidoExistente[];
 }
 
-/** Lo que la fila de `matches` debería decir según ARUSA. */
+/**
+ * Lo que la fila de `matches` debería decir según ARUSA.
+ *
+ * Los tres estados salen de la fuente y en ese orden: lo JUGADO manda sobre lo
+ * postergado —ARUSA no siempre limpia el flag cuando el partido finalmente se
+ * juega en la fecha nueva—, y recién si no se jugó vale `postponed`. Sin ese
+ * escalón un partido corrido quedaba `scheduled` con su horario viejo, o sea
+ * indistinguible de uno que todavía se va a jugar a esa hora.
+ *
+ * `postponed` no entra a `FINAL_STANDINGS_STATUSES`, así que la tabla lo ignora
+ * igual que a un `scheduled`: esto cambia lo que se LEE, no lo que se cuenta.
+ */
 export function filaSegunArusa(p: PartidoArusa, local: string, visita: string): Record<string, unknown> {
     const casa = p.jugado ? repartirPuntos(p.puntosLocal!, p.puntosVisita!, p.tablaLocal) : { base: 0, bonus: 0 };
     const fuera = p.jugado ? repartirPuntos(p.puntosVisita!, p.puntosLocal!, p.tablaVisita) : { base: 0, bonus: 0 };
     return {
         date_time: p.inicioLocal ? aUtcDesdeZona(p.inicioLocal, p.zona) : null,
         venue: p.cancha,
-        status: p.jugado ? 'final' : 'scheduled',
+        status: p.jugado ? 'final' : p.postergado ? 'postponed' : 'scheduled',
         score: { home: p.puntosLocal ?? 0, away: p.puntosVisita ?? 0 },
         home_club_id: local,
         away_club_id: visita,

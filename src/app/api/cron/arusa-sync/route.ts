@@ -12,10 +12,38 @@
  * (16-22 UTC) y otra vez de madrugada, cuando ya terminó todo (0-4 UTC del día
  * siguiente), más una repesca diaria a las 15 UTC.
  *
+ * ── Las ventanas en hora de Santiago, y el cambio de hora ──────────────────
+ * Vercel agenda en UTC y Chile cambia de huso, así que la misma entrada cae en
+ * horas distintas según el mes. En 2026 el salto a horario de verano es el
+ * DOMINGO 6 DE SEPTIEMBRE (de UTC-4 a UTC-3):
+ *
+ *   entrada              invierno (UTC-4)          verano (UTC-3)
+ *   0 15 * * *           11:00                     12:00
+ *   0 16-22/2 * * 6,0    12 · 14 · 16 · 18         13 · 15 · 17 · 19
+ *   0 0-4/2 * * 0,1      20 · 22 · 00              21 · 23 · 01
+ *
+ * Las dos columnas aguantan y por eso no hay nada que compensar. Lo que importa
+ * no es la apertura sino la COLA: el último partido del sábado arranca 21:00 y
+ * termina cerca de las 22:40, y lo levanta la corrida de las 00:00 en invierno o
+ * la de las 23:00 y 01:00 en verano. Del lado de la apertura, un partido de las
+ * 12:00 no termina hasta las 13:40 y ARUSA carga más tarde todavía, así que la
+ * hora que se pierde en verano no cuesta un resultado.
+ *
+ * El `dayOfWeek` engaña igual que en URBA: el `0` de la ventana de madrugada es
+ * la noche del SÁBADO, no la del domingo — la del domingo es el `1`. Corrido a
+ * hora de Santiago, sábado y domingo quedan cubiertos igual, de las 11 de la
+ * mañana a la medianoche.
+ *
  * Qué toca: NO borra ni duplica. `planArusaMatches` empareja cada partido de
  * la fuente con el que ya está y solo corrige lo que ARUSA sabe mejor — hora,
- * cancha, marcador y puntos de tabla. Cuando algún parche mueve un resultado,
- * se rehace la tabla de posiciones de esa fase; si no, no se toca nada más.
+ * cancha, marcador, puntos de tabla y si el partido quedó POSTERGADO. Cuando
+ * algún parche mueve un resultado, se rehace la tabla de posiciones de esa
+ * fase; si no, no se toca nada más.
+ *
+ * Ojo con el postergado y el salteo de fechas de más abajo: mientras el partido
+ * no sea `final` su fecha nunca se da por cerrada, así que se la sigue pidiendo
+ * hasta que ARUSA la reprograme o la juegue. Es a propósito — es justo la fecha
+ * que todavía puede moverse.
  *
  * El mapa de abajo está a mano y no en la base a propósito: ARUSA publica 13
  * competencias por temporada y casi todas con más de una rama, así que qué
