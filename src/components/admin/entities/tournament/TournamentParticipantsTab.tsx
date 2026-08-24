@@ -36,6 +36,36 @@ import { ImportParticipantsDrawerV2 } from './ImportParticipantsDrawerV2';
 import { ParticipantsHistoryDrawer } from './ParticipantsHistoryDrawer';
 import { beginClientRequest, usePerfComponentLifecycle } from '@/lib/perf/react';
 
+// PostgREST corta cada respuesta en 1000 filas (db-max-rows): una sola llamada
+// con `limit=2000` devuelve 1000 y nadie avisa. Con el catálogo arriba de 1000
+// clubes eso dejaba fuera todo lo que ordena después del corte —el cajón de
+// participantes no encontraba "Uruguay" ni ningún club de la segunda mitad del
+// abecedario— porque el buscador filtra en memoria sobre lo que llegó.
+const CLUB_CATALOG_PAGE_SIZE = 1000;
+
+type ClubCatalogPage = { status: number; ok: boolean; rows: ClubCatalogItem[] };
+
+async function fetchClubCatalogPage(url: string): Promise<ClubCatalogPage> {
+    const response = await fetch(url, { cache: 'no-store', credentials: 'include' });
+    if (!response.ok) return { status: response.status, ok: false, rows: [] };
+    const payload = await response.json().catch(() => null);
+    const rows = Array.isArray(payload?.data) ? payload.data as ClubCatalogItem[] : [];
+    return { status: response.status, ok: true, rows };
+}
+
+/** Pide página por página hasta que una venga corta: ahí se terminó el catálogo. */
+async function fetchWholeClubCatalog(buildUrl: (offset: number) => string): Promise<ClubCatalogPage> {
+    const rows: ClubCatalogItem[] = [];
+    for (let offset = 0; ; offset += CLUB_CATALOG_PAGE_SIZE) {
+        const page = await fetchClubCatalogPage(buildUrl(offset));
+        if (!page.ok) return { status: page.status, ok: false, rows };
+        rows.push(...page.rows);
+        if (page.rows.length < CLUB_CATALOG_PAGE_SIZE) {
+            return { status: page.status, ok: true, rows };
+        }
+    }
+}
+
 // ============================================
 // TYPES
 // ============================================
@@ -401,20 +431,20 @@ export function TournamentParticipantsTab({ id: tournamentId, data }: Props) {
             // scoped set for them and the full catalog for global admins
             // (unlimited scope). Other admin roles can't use that panel and get
             // 401/403 — fall back to the global catalog so nothing regresses.
-            let response = await fetch('/api/admin/torneo/clubs?limit=2000', {
-                cache: 'no-store',
-                credentials: 'include',
-            });
-            if (response.status === 401 || response.status === 403) {
-                response = await fetch('/api/clubs?include_hidden=true', { cache: 'no-store' });
+            let result = await fetchWholeClubCatalog((offset) => (
+                `/api/admin/torneo/clubs?limit=${CLUB_CATALOG_PAGE_SIZE}&offset=${offset}&divisions=0`
+            ));
+            if (result.status === 401 || result.status === 403) {
+                result = await fetchWholeClubCatalog((offset) => (
+                    `/api/clubs?include_hidden=true&limit=${CLUB_CATALOG_PAGE_SIZE}&offset=${offset}`
+                ));
             }
             request.end({
-                status: response.status,
-                error: !response.ok,
+                status: result.status,
+                error: !result.ok,
             });
-            if (!response.ok) throw new Error('Error al cargar clubes');
-            const payload = await response.json();
-            const data = Array.isArray(payload?.data) ? payload.data : [];
+            if (!result.ok) throw new Error('Error al cargar clubes');
+            const data = result.rows;
             setClubCatalog(data.map((club: ClubCatalogItem & { slug?: string | null }) => ({
                 id: club.id,
                 name: club.name,

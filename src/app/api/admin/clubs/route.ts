@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
+import { getApiErrorMessageForClient, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getReadClient } from '@/lib/supabase/read';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
@@ -150,8 +150,15 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching clubs:', error);
+      // El motivo tiene que llegar a la pantalla: un "Failed to fetch clubs"
+      // pelado obliga a mirar la terminal para saber si fue un timeout, una
+      // columna que no esta o el esquema sin recargar.
       return NextResponse.json(
-        { error: 'Failed to fetch clubs' },
+        {
+          error: 'No se pudo cargar el catalogo de clubes.',
+          code: error.code ?? null,
+          details: error.message ?? null,
+        },
         { status: 500 }
       );
     }
@@ -170,11 +177,11 @@ export async function GET(request: NextRequest) {
     })));
   } catch (error) {
     console.error('Unexpected error fetching clubs:', error);
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    const status = message === 'Unauthorized' ? 401 : 500;
+    // getApiErrorStatus distingue 401 de 403: sin eso, un segundo factor
+    // pendiente se veia como un 500 y mandaba a buscar el problema en la base.
     return NextResponse.json(
-      { error: message === 'Unauthorized' ? 'Unauthorized' : 'Internal server error' },
-      { status }
+      { error: getApiErrorMessageForClient(error, 'Internal server error') },
+      { status: getApiErrorStatus(error) }
     );
   }
 }

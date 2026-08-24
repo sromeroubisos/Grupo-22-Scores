@@ -6,8 +6,16 @@ import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
+import { escapePostgrestLike } from '@/lib/utils/postgrest';
 
 type JsonObject = Record<string, unknown>;
+
+// PostgREST corta cada respuesta en 1000 filas (db-max-rows): pedir `limit=2000`
+// devuelve 1000 y nadie avisa. Para servir más que eso hay que paginar.
+const CLUB_PAGE_SIZE = 1000;
+const CLUB_MAX_LIMIT = 5000;
+const CLUB_DEFAULT_LIMIT = 500;
+const DIVISIONS_ID_CHUNK = 200;
 
 type ClubDivisionInput = {
     name?: unknown;
@@ -175,44 +183,74 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const search = (searchParams.get('search') || '').trim();
-    const limit = Math.min(Number.parseInt(searchParams.get('limit') || '500', 10) || 500, 2000);
+    const parsedLimit = Number.parseInt(searchParams.get('limit') || '', 10);
+    const limit = Math.min(
+        Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : CLUB_DEFAULT_LIMIT,
+        CLUB_MAX_LIMIT,
+    );
+    const parsedOffset = Number.parseInt(searchParams.get('offset') || '', 10);
+    const offset = Number.isFinite(parsedOffset) && parsedOffset > 0 ? parsedOffset : 0;
 
     // Service-role read: results are constrained to scope.clubIds below, but the
     // RLS SELECT policy (public read = is_visible only) would hide the caller's
     // own draft/hidden clubs.
     const reader = getServiceWriter(supabase, 'admin/torneo/clubs');
-    let query = reader
-        .from('clubs')
-        // `logo_url` guarda el escudo en base64 y esta consulta es la del catálogo
-        // COMPLETO: medida contra producción daba 56,8 MB en 5,5 s para quedarse
-        // con una lista de nombres. El escudo sale abajo como URL del proxy, que
-        // lo resuelve por `id`, así que el cajón de participantes lo pinta igual.
-        .select('id, name, short_name, slug, sport, sport_id, city, region, country, is_visible, union_id, primary_color, categories, updated_at')
-        .order('name', { ascending: true })
-        .limit(limit);
+    const buildQuery = () => {
+        let query = reader
+            .from('clubs')
+            // `logo_url` guarda el escudo en base64 y esta consulta es la del catálogo
+            // COMPLETO: medida contra producción daba 56,8 MB en 5,5 s para quedarse
+            // con una lista de nombres. El escudo sale abajo como URL del proxy, que
+            // lo resuelve por `id`, así que el cajón de participantes lo pinta igual.
+            .select('id, name, short_name, slug, sport, sport_id, city, region, country, is_visible, union_id, primary_color, categories, updated_at')
+            .order('name', { ascending: true })
+            // Desempate por PK: sin él, dos clubes con el mismo nombre pueden
+            // repetirse o desaparecer entre páginas.
+            .order('id', { ascending: true });
 
-    if (!scope.isUnlimited) {
-        query = query.in('id', Array.from(scope.clubIds));
+        if (!scope.isUnlimited) {
+            query = query.in('id', Array.from(scope.clubIds));
+        }
+
+        if (search) {
+            const escaped = escapePostgrestLike(search);
+            query = query.or(`name.ilike.%${escaped}%,slug.ilike.%${escaped}%,short_name.ilike.%${escaped}%`);
+        }
+
+        return query;
+    };
+
+    type ScopedClubRow = { id: string; name: string; updated_at?: string | null };
+    const data: ScopedClubRow[] = [];
+
+    while (data.length < limit) {
+        const size = Math.min(CLUB_PAGE_SIZE, limit - data.length);
+        const from = offset + data.length;
+        const page = await buildQuery().range(from, from + size - 1);
+
+        if (page.error) {
+            return err('No se pudieron cargar los clubes', 500, page.error.message);
+        }
+
+        const rows = (page.data ?? []) as ScopedClubRow[];
+        data.push(...rows);
+        if (rows.length < size) break;
     }
 
-    if (search) {
-        const escaped = search.replace(/[%_]/g, (m) => `\\${m}`);
-        query = query.or(`name.ilike.%${escaped}%,slug.ilike.%${escaped}%,short_name.ilike.%${escaped}%`);
-    }
-
-    const { data, error } = await query;
-    if (error) {
-        return err('No se pudieron cargar los clubes', 500, error.message);
-    }
-
-    const clubIds = (data ?? []).map((club) => club.id).filter(Boolean);
+    // Los planteles solo los pinta el panel de clubes. Al cajón de participantes
+    // le cuesta una consulta cada 200 ids y no muestra ninguno, así que puede
+    // pedir el catálogo sin ellos.
+    const wantsDivisions = searchParams.get('divisions') !== '0';
+    const clubIds = wantsDivisions ? data.map((club) => club.id).filter(Boolean) : [];
     const divisionsByClub = new Map<string, unknown[]>();
 
-    if (clubIds.length > 0) {
+    // El `in(...)` viaja en la URL: con una página entera de ids se pasa del
+    // límite y PostgREST contesta 414. Va por tandas.
+    for (let index = 0; index < clubIds.length; index += DIVISIONS_ID_CHUNK) {
         const { data: divisions, error: divisionsError } = await reader
             .from('club_divisions')
             .select('id, club_id, name, sport, gender, category, season, status')
-            .in('club_id', clubIds)
+            .in('club_id', clubIds.slice(index, index + DIVISIONS_ID_CHUNK))
             .order('name', { ascending: true });
 
         if (!divisionsError) {
@@ -225,7 +263,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-        data: (data ?? []).map((club) => ({
+        data: data.map((club) => ({
             ...club,
             logo_url: buildTeamLogoProxyUrl({
                 key: club.id,
