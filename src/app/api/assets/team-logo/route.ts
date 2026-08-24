@@ -399,6 +399,62 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string, en
                     return String(record.logo_url);
                 }
             }
+
+            // El club existe pero no tiene escudo propio. Antes de caer en las
+            // iniciales, se sube al club madre: "Tala Rugby Club Intermedia" es
+            // una filial de "Tala Rugby Club" y le corresponde SU escudo. Una
+            // categoría casi nunca carga logo aparte —es el mismo club—, así que
+            // sin esta caída media grilla de la jornada se dibuja con iniciales,
+            // y la regla del proyecto es escudo real siempre.
+            //
+            // Va después de id y slug —el escudo propio, si existe, manda— y
+            // antes de la búsqueda por nombre, para que el escudo de la madre le
+            // gane a una coincidencia de nombre con otro club.
+            const resolvedClubIds: string[] = [];
+            for (const candidate of candidates) {
+                const record = byId.get(candidate) || slugMap.get(candidate);
+                const resolvedId = record?.id ? String(record.id) : null;
+                if (resolvedId && !resolvedClubIds.includes(resolvedId)) {
+                    resolvedClubIds.push(resolvedId);
+                }
+            }
+
+            if (resolvedClubIds.length > 0) {
+                const { data: derivatives } = await (readClient as any)
+                    .from('club_derivatives')
+                    .select('base_club_id, derived_club_id')
+                    .in('derived_club_id', resolvedClubIds);
+
+                const baseByDerived = new Map<string, string>();
+                for (const row of derivatives || []) {
+                    if (row?.derived_club_id && row?.base_club_id) {
+                        baseByDerived.set(String(row.derived_club_id), String(row.base_club_id));
+                    }
+                }
+
+                const baseIds = Array.from(new Set(baseByDerived.values()));
+                if (baseIds.length > 0) {
+                    const { data: baseRows } = await (readClient as any)
+                        .from('clubs')
+                        .select('id, logo_url')
+                        .in('id', baseIds);
+
+                    const logoByBase = new Map<string, string>();
+                    for (const row of baseRows || []) {
+                        if (row?.id && row?.logo_url) {
+                            logoByBase.set(String(row.id), String(row.logo_url));
+                        }
+                    }
+
+                    for (const resolvedId of resolvedClubIds) {
+                        const baseId = baseByDerived.get(resolvedId);
+                        const inherited = baseId ? logoByBase.get(baseId) : null;
+                        if (inherited) {
+                            return inherited;
+                        }
+                    }
+                }
+            }
         }
 
         if (!isTournamentLookup && allowClubNameLookup && teamName) {
