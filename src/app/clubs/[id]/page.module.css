@@ -32,6 +32,24 @@
 /* El compuesto le gana a .contentLayout (definida más abajo) por
    especificidad; sin él, el grid reserva los 300px del sidebar oculto
    y el tab queda con media pantalla vacía en desktop. */
+/* El Panel del Día va a ancho completo por el mismo motivo que Historial: con
+   la familia entera son decenas de partidos, y la sidebar "Equipo" —escudo y
+   país— no justifica robarle 300px a la lista. La regla del proyecto es que una
+   columna sin contenido colapsa en vez de reservar media pantalla. */
+.contentLayout.panelContentLayout {
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+}
+
+.panelContentLayout .mainColumn {
+    width: 100%;
+    min-width: 0;
+}
+
+.panelContentLayout .sidebarRight {
+    display: none;
+}
+
 .contentLayout.historyContentLayout {
     grid-template-columns: minmax(0, 1fr);
     min-width: 0;
@@ -2611,6 +2629,419 @@
 @media (max-width: 1024px) {
     .skContent { grid-template-columns: 1fr; }
     .skSidebar { display: none; }
+}
+
+/* ── Panel del Día ──────────────────────────────────────────────── */
+.dayHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.dayCaption {
+    margin-top: 4px;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+}
+
+/* Intl devuelve "sábado 22 de agosto" en minúscula. Sube solo la primera:
+   `capitalize` pondría "Sábado 22 De Agosto". */
+.dayCaption::first-letter {
+    text-transform: uppercase;
+}
+
+.dayControls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Selector de plazo. Es una elección única entre opciones excluyentes, así que
+   va como radiogroup y no como una fila de botones sueltos: el lector de
+   pantalla anuncia "1 de 3" y cuál está elegida. */
+.rangePicker {
+    display: inline-flex;
+    padding: 2px;
+    gap: 2px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm, 6px);
+    background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.04));
+}
+
+.rangeBtn {
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, color 0.2s;
+}
+
+.rangeBtn:hover {
+    color: var(--color-text-primary);
+}
+
+.rangeBtnActive {
+    background: var(--color-bg-secondary, rgba(255, 255, 255, 0.1));
+    color: var(--color-accent);
+}
+
+.dayNav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dayNavBtn {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm, 6px);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.05));
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.dayNavBtn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text-primary);
+}
+
+.dayNavToday {
+    height: 32px;
+    padding: 0 12px;
+    border-radius: var(--radius-sm, 6px);
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.dayNavToday:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-text-primary);
+}
+
+.dayNavToday:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+/* Plazo a medida: dos fechas y el largo resultante. Va debajo del encabezado
+   y no adentro, porque en mobile el encabezado ya llega justo. */
+/* ── Alta de partido desde el panel ─────────────────────────────── */
+.panelForm {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.03));
+    padding: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.panelFormHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.panelFormTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.panelFormGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.panelFormBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--color-border);
+}
+
+.panelFormField,
+.panelFormFieldWide {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.panelFormFieldWide {
+    grid-column: 1 / -1;
+}
+
+.panelFormInput {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm, 6px);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: normal;
+    text-transform: none;
+    padding: 8px 10px;
+    width: 100%;
+    color-scheme: dark light;
+}
+
+.panelFormInput:focus {
+    border-color: var(--color-accent);
+    outline: none;
+}
+
+.panelFormInline {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+
+.panelFormInline .panelFormInput {
+    flex: 1 1 200px;
+    width: auto;
+}
+
+.panelFormHint {
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--color-text-muted);
+}
+
+.panelFormError {
+    font-size: 0.85rem;
+    color: var(--color-danger, #f0796a);
+}
+
+.panelFormActions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.panelFormPrimary {
+    background: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-sm, 6px);
+    color: #06231a;
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 9px 18px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.panelFormPrimary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.panelFormSecondary {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm, 6px);
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 7px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.panelFormSecondary:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-text-primary);
+}
+
+.panelFormSecondary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.categoryCreator {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    margin-top: 4px;
+    border: 1px dashed var(--color-border-light, rgba(255, 255, 255, 0.18));
+    border-radius: var(--radius-sm, 6px);
+}
+
+.rivalResults {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm, 6px);
+    padding: 4px;
+}
+
+.rivalResult {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 0.88rem;
+    text-align: left;
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.rivalResult:hover {
+    background: var(--color-bg-secondary);
+}
+
+.rivalResultMeta {
+    font-size: 0.74rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+.customRange {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.03));
+}
+
+.customRangeField {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.customRangeInput {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm, 6px);
+    color: var(--color-text-primary);
+    font-size: 0.85rem;
+    font-family: inherit;
+    padding: 6px 10px;
+    color-scheme: dark light;
+}
+
+.customRangeInput:focus {
+    border-color: var(--color-accent);
+    outline: none;
+}
+
+.customRangeNote {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    padding-bottom: 7px;
+}
+
+.dayGroups {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.dayGroupHead {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.dayGroupTitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.dayGroupCount {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    background: var(--color-bg-tertiary, rgba(255, 255, 255, 0.06));
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-variant-numeric: tabular-nums;
+}
+
+.dayGroupDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--color-text-muted);
+}
+
+.toneLive {
+    background: var(--color-accent, #00a365);
+    animation: dayLivePulse 1.8s ease-in-out infinite;
+}
+
+.toneScheduled { background: var(--color-text-secondary); }
+.toneFinal { background: var(--color-text-muted); opacity: 0.55; }
+.toneOff { background: #b4623a; }
+
+@keyframes dayLivePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+@media (max-width: 640px) {
+    .dayHeader {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dayNav { justify-content: flex-start; }
 }
 
 /* ── Reduced motion: collapse all motion to an instant state ────── */

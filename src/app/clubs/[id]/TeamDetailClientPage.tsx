@@ -1,16 +1,17 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
-import { ArrowLeft, ChevronRight, Star, Trophy } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Star, Trophy } from 'lucide-react';
 import { useFavorite } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { SPORTS_BY_ID } from '@/lib/sports';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import ExportImage, { type SquadData } from '@/components/ExportImage';
-import { APP_TIMEZONE, formatDateInTimeZone } from '@/lib/timezone';
+import { APP_TIMEZONE, formatDateInTimeZone, formatDateKey, getTodayKey, addDaysToIsoDate } from '@/lib/timezone';
+import { estadoDesdeToken } from '@/lib/matches/providerStatus';
 import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
@@ -18,18 +19,109 @@ import { useAuth } from '@/context/AuthContext';
 import ClubsPromoLink from '@/components/clubs-promo/ClubsPromoLink';
 import { CONTEXTUAL } from '@/content/para-clubes';
 import HistoryTab from './HistoryTab';
+import PanelMatchForm, { type PanelFamilyClub } from './PanelMatchForm';
 
 const SPORT_LABEL: Record<string, string> = Object.fromEntries(
     Object.entries(SPORTS_BY_ID).map(([id, s]) => [id, s.name])
 );
+
+// ── Panel del Día ───────────────────────────────────────────────────────────
+// El día de un partido sale de la timezone del sitio, NUNCA de aritmética sobre
+// el epoch: un partido a las 21:30 de un sábado argentino ya es domingo en UTC,
+// y el panel lo mostraría el día equivocado. Por eso la clave se arma con
+// `formatDateKey` + APP_TIMEZONE, que es la misma cuenta que usa el resto del
+// sitio para agrupar por jornada.
+function matchDayKey(match: any): string | null {
+    const raw = match?.timestamp ?? match?.start_time ?? match?.time;
+    const seconds = Number(raw);
+    if (!Number.isFinite(seconds)) return null;
+    const date = new Date(seconds * 1000);
+    if (Number.isNaN(date.getTime())) return null;
+    return formatDateKey(date, APP_TIMEZONE);
+}
+
+// `estadoDesdeToken` es el vocabulario canónico de estados del proyecto y
+// devuelve null cuando el token no dice nada. Ese null NO es 'no empezó': ahí
+// cae el bucket con el que vino el partido desde /api/teams, que ya resolvió
+// finalizado-vs-programado mirando fecha y estado juntos.
+type DayBucket = 'result' | 'fixture';
+type DayState = 'live' | 'final' | 'scheduled' | 'off';
+
+function matchDayState(match: any, bucket: DayBucket): DayState {
+    const estado = estadoDesdeToken(match?.match_status || match?.event_status || match?.status);
+    if (estado === 'live') return 'live';
+    if (estado === 'final') return 'final';
+    if (estado === 'postponed' || estado === 'cancelled') return 'off';
+    return bucket === 'result' ? 'final' : 'scheduled';
+}
+
+// El mediodía UTC evita que la etiqueta se corra de día al formatear: a las
+// 12:00Z Argentina son las 09:00 del mismo día, con o sin horario de verano.
+function dayKeyLabel(key: string) {
+    const date = new Date(key + 'T12:00:00Z');
+    if (Number.isNaN(date.getTime())) return key;
+    return formatDateInTimeZone(date, 'es-AR', { weekday: 'long', day: 'numeric', month: 'long' }, APP_TIMEZONE) || key;
+}
+
+// Un partido del panel, en el idioma que habla el export `dailyMatches`.
+// El estado entra por parámetro y NO se recalcula acá: si se recalculara, la
+// placa podría decir "programado" sobre un partido que la pantalla muestra
+// terminado, porque la pantalla también mira el bucket con el que vino.
+function toDailyMatchExport(match: any, state: DayState) {
+    const stamp = match.timestamp || match.start_time || match.time;
+    const withoutScore = state === 'scheduled' || state === 'off';
+    const rawHome = match.scores?.home ?? match.scores?.home_score ?? match.home_score;
+    const rawAway = match.scores?.away ?? match.scores?.away_score ?? match.away_score;
+
+    return {
+        homeTeam: match.home_team?.name || match.event_home_team || match.home_team_name || 'Local',
+        awayTeam: match.away_team?.name || match.event_away_team || match.away_team_name || 'Visitante',
+        homeLogo: getTeamLogo(match.home_team) || match.home_team_logo || '',
+        awayLogo: getTeamLogo(match.away_team) || match.away_team_logo || '',
+        homeScore: withoutScore ? undefined : (rawHome ?? undefined),
+        awayScore: withoutScore ? undefined : (rawAway ?? undefined),
+        time: formatClubDate(stamp, { hour: '2-digit', minute: '2-digit', hour12: false }),
+        status: state === 'live' ? ('live' as const) : state === 'final' ? ('finished' as const) : ('scheduled' as const),
+        dateLabel: formatClubDate(stamp, { weekday: 'short', day: '2-digit', month: '2-digit' }),
+        kickoffAt: stamp ? new Date(stamp * 1000).toISOString() : undefined,
+    };
+}
+
+// Etiqueta corta para los extremos de un plazo: "24 ago". La larga ocuparía
+// dos renglones cuando hay que mostrar principio y fin juntos.
+function dayKeyShortLabel(key: string) {
+    const date = new Date(key + 'T12:00:00Z');
+    if (Number.isNaN(date.getTime())) return key;
+    return formatDateInTimeZone(date, 'es-AR', { day: 'numeric', month: 'short' }, APP_TIMEZONE) || key;
+}
+
+// Los plazos del panel. "Día" es la jornada sola —el comportamiento original—;
+// los otros abren una ventana hacia adelante desde el día elegido, así que
+// "7 días" parado en hoy es lo que se viene, no lo que ya pasó.
+const DAY_RANGES: Array<{ days: number; label: string }> = [
+    { days: 1, label: 'Día' },
+    { days: 7, label: '7 días' },
+    { days: 30, label: '30 días' },
+];
+
+// El orden es el de la jornada, no el alfabético: primero lo que se está
+// jugando, después lo que falta, al final lo que ya pasó.
+const DAY_SECTIONS: Array<{ id: DayState; label: string; tone: string }> = [
+    { id: 'live', label: 'En vivo', tone: 'toneLive' },
+    { id: 'scheduled', label: 'Por jugar', tone: 'toneScheduled' },
+    { id: 'final', label: 'Finalizados', tone: 'toneFinal' },
+    { id: 'off', label: 'Suspendidos', tone: 'toneOff' },
+];
 
 const TABS = [
     { id: 'summary', label: 'Resumen' },
     { id: 'results', label: 'Resultados' },
     { id: 'fixtures', label: 'Fixture' },
     { id: 'history', label: 'Historial' },
+    { id: 'titles', label: 'Títulos' },
     { id: 'squad', label: 'Plantilla' },
     { id: 'transfers', label: 'Transferencias' },
+    { id: 'today', label: 'Hoy' },
 ];
 
 const DEFAULT_PUBLIC_TABS = new Set(['summary', 'results', 'fixtures']);
@@ -152,20 +244,8 @@ function formatClubDate(timestamp: number, options: Intl.DateTimeFormatOptions) 
     return formatDateInTimeZone(new Date(timestamp * 1000), 'es-AR', options, APP_TIMEZONE) || '';
 }
 
-function formatPlayerBirthDate(value: unknown) {
-    if (typeof value !== 'string' || !value.trim()) return null;
-
-    const raw = value.trim();
-    const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
-    if (isoMatch) {
-        return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
-    }
-
-    const parsed = new Date(raw);
-    if (Number.isNaN(parsed.getTime())) return null;
-
-    return parsed.toLocaleDateString('es-AR');
-}
+// La fecha de nacimiento no se muestra ni se exporta: del padron sale la edad y
+// nada mas. El porque esta en `mapClubRosterPersonToSquad` (/api/teams).
 
 function formatPlayerStatus(value: unknown) {
     if (typeof value !== 'string' || !value.trim()) return null;
@@ -190,6 +270,7 @@ function TeamDetailInner({ id }: { id: string }) {
     const [squad, setSquad] = useState<any>(null);
     const [squadFetched, setSquadFetched] = useState(false);
     const [transfers, setTransfers] = useState<any[]>([]);
+    const [honours, setHonours] = useState<any[]>([]);
     const [resolvedClubId, setResolvedClubId] = useState<string | null>(null);
 
     const [selectedSport, setSelectedSport] = useState<string>('all');
@@ -254,6 +335,7 @@ function TeamDetailInner({ id }: { id: string }) {
                 setSquadFetched(false);
                 setSelectedSquadTab('');
                 setTransfers(payload.transfers || []);
+                setHonours(Array.isArray(payload.honours) ? payload.honours : []);
             } catch (err) {
                 console.error('Error fetching team data:', err);
                 setError('Error al cargar datos del equipo.');
@@ -338,6 +420,192 @@ function TeamDetailInner({ id }: { id: string }) {
     // Filtered matches by sport
     const filteredResults = selectedSport === 'all' ? results : results.filter(m => String(m.sport_id) === selectedSport);
     const filteredFixtures = selectedSport === 'all' ? fixtures : fixtures.filter(m => String(m.sport_id) === selectedSport);
+
+    // La agenda del panel: los partidos de TODA la familia del club, del deporte
+    // de este club. Se pide a demanda —solo al abrir la pestaña— porque son ~1000
+    // filas y no tienen por qué encarecer la carga inicial de la ficha.
+    const [agenda, setAgenda] = useState<{ results: any[]; fixtures: any[] } | null>(null);
+    const [canManageClub, setCanManageClub] = useState(false);
+    const [panelFamilyClubs, setPanelFamilyClubs] = useState<PanelFamilyClub[]>([]);
+    const [showMatchForm, setShowMatchForm] = useState(false);
+    // Se sube para forzar una relectura de la agenda después de cargar un partido:
+    // sin esto la effect no vuelve a correr, porque sus dependencias no cambiaron.
+    const [agendaNonce, setAgendaNonce] = useState(0);
+    const [agendaLoading, setAgendaLoading] = useState(false);
+    const [agendaFailed, setAgendaFailed] = useState(false);
+    // Qué club ya se pidió. Va en un ref y NO en las dependencias: tener
+    // `agendaLoading` entre las dependencias hacía que poner la carga en true
+    // volviera a disparar la effect, y su cleanup marcaba `cancelled` sobre el
+    // fetch que estaba en vuelo. El pedido llegaba, nadie lo escuchaba y el panel
+    // se quedaba en "sumando la familia" para siempre.
+    const agendaRequestedFor = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (activeTab !== 'today') return;
+        if (!resolvedClubId) return;
+        if (agendaRequestedFor.current === `${resolvedClubId}:${agendaNonce}`) return;
+
+        agendaRequestedFor.current = `${resolvedClubId}:${agendaNonce}`;
+        setAgendaLoading(true);
+
+        fetch(`/api/clubs/${encodeURIComponent(resolvedClubId)}/agenda`, { cache: 'no-store' })
+            .then(response => (response.ok ? response.json() : null))
+            .then(payload => {
+                if (payload?.ok) {
+                    setAgenda({
+                        results: Array.isArray(payload.results) ? payload.results : [],
+                        fixtures: Array.isArray(payload.fixtures) ? payload.fixtures : [],
+                    });
+                    // El flag es solo para DIBUJAR el botón: la ruta de escritura
+                    // revalida el permiso por su cuenta.
+                    setCanManageClub(Boolean(payload.canManage));
+                    setPanelFamilyClubs(Array.isArray(payload.familyClubs) ? payload.familyClubs : []);
+                } else {
+                    // Sin agenda el panel no se cae: sigue con los partidos de este
+                    // club, que la ficha ya tenía cargados.
+                    setAgendaFailed(true);
+                }
+            })
+            .catch(() => setAgendaFailed(true))
+            .finally(() => setAgendaLoading(false));
+    }, [activeTab, resolvedClubId, agendaNonce]);
+
+    // Índice jornada -> partidos. Con la agenda cargada son los de la familia
+    // entera; hasta que llegue (o si falla) son los de este club solo, que la
+    // ficha ya tenía. El filtro de deporte del encabezado se aplica igual arriba.
+    const dayIndex = useMemo(() => {
+        const index = new Map<string, any[]>();
+        const add = (match: any, bucket: DayBucket) => {
+            const key = matchDayKey(match);
+            if (!key) return;
+            const entry = { ...match, __bucket: bucket };
+            const list = index.get(key);
+            if (list) list.push(entry);
+            else index.set(key, [entry]);
+        };
+
+        const sourceResults = agenda ? agenda.results : filteredResults;
+        const sourceFixtures = agenda ? agenda.fixtures : filteredFixtures;
+        const bySport = (match: any) => selectedSport === 'all' || String(match.sport_id) === selectedSport;
+
+        sourceResults.filter(bySport).forEach(match => add(match, 'result'));
+        sourceFixtures.filter(bySport).forEach(match => add(match, 'fixture'));
+        return index;
+    }, [agenda, filteredResults, filteredFixtures, selectedSport]);
+
+    const todayKey = useMemo(() => getTodayKey(APP_TIMEZONE), []);
+    const [dayKey, setDayKey] = useState<string>(() => getTodayKey(APP_TIMEZONE));
+    const [rangeDays, setRangeDays] = useState<number>(1);
+    // Plazo a medida: cuando está puesto, manda sobre el preset.
+    const [customRange, setCustomRange] = useState<{ from: string; to: string } | null>(null);
+
+    const windowStartKey = customRange ? customRange.from : dayKey;
+    const windowEndKey = customRange ? customRange.to : addDaysToIsoDate(dayKey, rangeDays - 1);
+
+    // Largo del plazo en días, con tope: un "desde 1990 hasta hoy" no puede
+    // convertirse en un for de doce mil vueltas cada vez que React redibuja.
+    const windowSpan = useMemo(() => {
+        const from = Date.parse(windowStartKey + 'T00:00:00Z');
+        const to = Date.parse(windowEndKey + 'T00:00:00Z');
+        if (!Number.isFinite(from) || !Number.isFinite(to) || to < from) return 1;
+        return Math.min(400, Math.round((to - from) / 86400000) + 1);
+    }, [windowStartKey, windowEndKey]);
+
+    const isSingleDay = windowSpan === 1;
+
+    const dayGroups = useMemo(() => {
+        const list = (dayIndex.get(windowStartKey) || []).slice()
+            .sort((left, right) => Number(left.timestamp || 0) - Number(right.timestamp || 0));
+        const groups: Record<DayState, any[]> = { live: [], scheduled: [], final: [], off: [] };
+        list.forEach(match => groups[matchDayState(match, match.__bucket)].push(match));
+        return { ...groups, total: list.length };
+    }, [dayIndex, windowStartKey]);
+
+    // Para el estado vacío: la jornada con partidos más cercana a la elegida.
+    // Las claves son 'YYYY-MM-DD' normalizadas, así que compararlas como fecha
+    // UTC es pura aritmética y no depende de la timezone de nadie.
+    const nearestDayWithMatches = useMemo(() => {
+        let best: string | null = null;
+        let bestDistance = Number.POSITIVE_INFINITY;
+        const target = Date.parse(windowStartKey + 'T00:00:00Z');
+        dayIndex.forEach((_matches, key) => {
+            if (key === windowStartKey) return;
+            const distance = Math.abs(Date.parse(key + 'T00:00:00Z') - target);
+            if (distance < bestDistance) { bestDistance = distance; best = key; }
+        });
+        return best;
+    }, [dayIndex, windowStartKey]);
+
+    // Solo las jornadas CON partidos: un plazo de 30 días no dibuja treinta
+    // encabezados vacíos para mostrar tres partidos.
+    const windowDays = useMemo(() => {
+        const days: Array<{ key: string; matches: any[] }> = [];
+        for (let offset = 0; offset < windowSpan; offset += 1) {
+            const key = addDaysToIsoDate(windowStartKey, offset);
+            const matches = dayIndex.get(key);
+            if (!matches || !matches.length) continue;
+            days.push({
+                key,
+                matches: matches.slice().sort((left, right) => Number(left.timestamp || 0) - Number(right.timestamp || 0)),
+            });
+        }
+        return days;
+    }, [dayIndex, windowStartKey, windowSpan]);
+
+    const windowTotal = useMemo(
+        () => windowDays.reduce((sum, day) => sum + day.matches.length, 0),
+        [windowDays]
+    );
+
+    // Mover el plazo corre las DOS puntas el largo de la ventana, así el paso es
+    // el mismo que se está mirando y no un día suelto.
+    const shiftWindow = (direction: 1 | -1) => {
+        const step = windowSpan * direction;
+        if (customRange) {
+            setCustomRange({
+                from: addDaysToIsoDate(customRange.from, step),
+                to: addDaysToIsoDate(customRange.to, step),
+            });
+            return;
+        }
+        setDayKey(addDaysToIsoDate(dayKey, step));
+    };
+
+    const goToDay = (key: string) => {
+        setCustomRange(null);
+        setDayKey(key);
+    };
+
+    // El punto de color de una jornada lo manda el estado más urgente que tenga:
+    // si algo se está jugando, la jornada está en vivo aunque el resto ya terminó.
+    const dayTone = (matches: any[]) => {
+        const states = new Set(matches.map(match => matchDayState(match, match.__bucket)));
+        if (states.has('live')) return 'toneLive';
+        if (states.has('scheduled')) return 'toneScheduled';
+        if (states.has('final')) return 'toneFinal';
+        return 'toneOff';
+    };
+
+    // Palmarés agrupado por competición: temporadas de campeón y de subcampeón.
+    const honoursByCompetition = useMemo(() => {
+        const byComp = new Map<string, { name: string; titles: string[]; runnerUps: string[] }>();
+        for (const row of honours) {
+            const name = String(row?.competition_name || '').trim();
+            const season = String(row?.season || '').trim();
+            if (!name || !season) continue;
+            let entry = byComp.get(name);
+            if (!entry) {
+                entry = { name, titles: [], runnerUps: [] };
+                byComp.set(name, entry);
+            }
+            if (row.result === 'champion') entry.titles.push(season);
+            else entry.runnerUps.push(season);
+        }
+        return Array.from(byComp.values()).sort((a, b) =>
+            b.titles.length - a.titles.length ||
+            b.runnerUps.length - a.runnerUps.length ||
+            a.name.localeCompare(b.name));
+    }, [honours]);
     const isSuperAdminUser = !authLoading && canUseRestrictedContentActions(user?.role);
     const externalTeamId = getExternalTeamId(rawId, hintTeamUrl);
     const adminClubId = useMemo(() => {
@@ -356,10 +624,21 @@ function TeamDetailInner({ id }: { id: string }) {
             supportedTabs.add('squad');
         }
 
+        // El panel solo existe si el club tiene jornadas para mostrar. Un club
+        // externo sin un solo partido cargado no gana una pestaña vacía.
+        if (dayIndex.size > 0) {
+            supportedTabs.add('today');
+        }
+
         supportedTabs.add('history');
 
+        // La tab de títulos solo existe si hay palmarés: sin filas, ni aparece.
+        if (honoursByCompetition.length > 0) {
+            supportedTabs.add('titles');
+        }
+
         return TABS.filter((tab) => supportedTabs.has(tab.id));
-    }, [details?.is_internal, details?.supported_tabs, resolvedClubId]);
+    }, [details?.is_internal, details?.supported_tabs, resolvedClubId, honoursByCompetition.length, dayIndex.size]);
     const relatedFamilyClubs = useMemo(() => {
         const familyClubs: PublicRelatedClub[] = Array.isArray(details?.related_clubs)
             ? details.related_clubs.filter((club: unknown): club is PublicRelatedClub => {
@@ -454,7 +733,7 @@ function TeamDetailInner({ id }: { id: string }) {
         '';
     const returnTo = `/clubs/${rawId}${sp.toString() ? `?${sp.toString()}` : ''}`;
     const adminEditHref = adminClubId
-        ? `/admin/super/clubes/${adminClubId}/editar`
+        ? `/admin/entities/${adminClubId}/manage?type=club`
         : externalTeamId
             ? (() => {
                 const params = new URLSearchParams();
@@ -500,8 +779,16 @@ function TeamDetailInner({ id }: { id: string }) {
             if (scoreAway > scoreHome) awayClass = styles.winnerName;
         }
 
-        return (
-            <Link href={`/matches/${match.event_key || match.match_id}`} key={match.event_key || match.match_id} className={styles.matchItem}>
+        // Un partido del archivo ('ra-…') no tiene página propia: navega al
+        // torneo en cuestión cuando el torneo sí la tiene, y si no, no linkea.
+        const matchKey = String(match.event_key || match.match_id || '');
+        const isArchiveMatch = matchKey.startsWith('ra-');
+        const tournamentId = String(match.tournament_id || '');
+        const tournamentHref = tournamentId && !tournamentId.startsWith('ra-') ? `/torneos/${tournamentId}` : null;
+        const href = isArchiveMatch ? tournamentHref : `/matches/${matchKey}`;
+
+        const matchBody = (
+            <>
                 <div className={styles.matchTime}>
                     <span className={styles.matchDateStr}>{date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', weekday: 'short', timeZone: APP_TIMEZONE })}</span>
                     <span>{date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: APP_TIMEZONE })}</span>
@@ -530,10 +817,20 @@ function TeamDetailInner({ id }: { id: string }) {
                         <span className={styles.score}>{scoreAway}</span>
                     </div>
                 </div>
+            </>
+        );
+
+        return href ? (
+            <Link href={href} key={matchKey} className={styles.matchItem}>
+                {matchBody}
                 <div className={styles.matchMeta}>
                     <ChevronRight size={16} />
                 </div>
             </Link>
+        ) : (
+            <div key={matchKey} className={styles.matchItem}>
+                {matchBody}
+            </div>
         );
     };
 
@@ -579,7 +876,6 @@ function TeamDetailInner({ id }: { id: string }) {
                         const pId = player.player_id || player.id || '';
                         const playerPosition = player.position || player.position_name || '';
                         const playerDivision = player.team_name || player.tab_name || player.division_name || '';
-                        const playerBirthDate = formatPlayerBirthDate(player.birth_date);
                         const playerAge = typeof player.age === 'number' || typeof player.age === 'string'
                             ? String(player.age).trim()
                             : '';
@@ -592,7 +888,6 @@ function TeamDetailInner({ id }: { id: string }) {
                             position: playerPosition || null,
                             teamLabel: playerDivision && playerDivision !== activeSquadTabValue && playerDivision !== teamName ? playerDivision : null,
                             age: playerAge || null,
-                            birthDate: playerBirthDate || null,
                         };
                     })
                     .filter((player: any) => player && player.name),
@@ -700,10 +995,227 @@ function TeamDetailInner({ id }: { id: string }) {
             </header>
 
             <main className="container" style={{ paddingTop: '24px', paddingBottom: '40px' }}>
-                <div className={`${styles.contentLayout} ${activeTab === 'history' ? styles.historyContentLayout : ''}`}>
+                <div className={`${styles.contentLayout} ${activeTab === 'history' ? styles.historyContentLayout : ''} ${activeTab === 'today' ? styles.panelContentLayout : ''}`}>
                     <div key={activeTab} className={styles.mainColumn}>
 
                         {/* Summary Tab */}
+                        {activeTab === 'today' && (
+                            <div className={styles.card}>
+                                <div className={styles.dayHeader}>
+                                    <div>
+                                        <h2 className={styles.pageTitle}>Panel del Día</h2>
+                                        <p className={styles.dayCaption}>
+                                            {isSingleDay
+                                                ? dayKeyLabel(windowStartKey) + (windowStartKey === todayKey ? ' · hoy' : '')
+                                                : dayKeyShortLabel(windowStartKey) + ' — ' + dayKeyShortLabel(windowEndKey)
+                                                    + ' · ' + windowTotal + (windowTotal === 1 ? ' partido' : ' partidos')}
+                                            {agendaLoading ? ' · sumando la familia…' : ''}
+                                        </p>
+                                    </div>
+                                    <div className={styles.dayControls}>
+                                        <div className={styles.rangePicker} role="radiogroup" aria-label="Plazo">
+                                            {DAY_RANGES.map(range => {
+                                                const active = !customRange && rangeDays === range.days;
+                                                return (
+                                                    <button
+                                                        key={range.days}
+                                                        type="button"
+                                                        role="radio"
+                                                        aria-checked={active}
+                                                        className={styles.rangeBtn + (active ? ' ' + styles.rangeBtnActive : '')}
+                                                        onClick={() => { setCustomRange(null); setRangeDays(range.days); }}
+                                                    >
+                                                        {range.label}
+                                                    </button>
+                                                );
+                                            })}
+                                            <button
+                                                type="button"
+                                                role="radio"
+                                                aria-checked={Boolean(customRange)}
+                                                className={styles.rangeBtn + (customRange ? ' ' + styles.rangeBtnActive : '')}
+                                                onClick={() => setCustomRange({ from: windowStartKey, to: windowEndKey })}
+                                            >
+                                                A medida
+                                            </button>
+                                        </div>
+                                        <div className={styles.dayNav}>
+                                            <button
+                                                type="button"
+                                                className={styles.dayNavBtn}
+                                                aria-label={isSingleDay ? 'Jornada anterior' : 'Plazo anterior'}
+                                                onClick={() => shiftWindow(-1)}
+                                            >
+                                                <ChevronLeft size={16} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={styles.dayNavToday}
+                                                onClick={() => goToDay(todayKey)}
+                                                disabled={!customRange && windowStartKey === todayKey}
+                                            >
+                                                {!customRange && windowStartKey === todayKey ? 'Estás en hoy' : 'Volver a hoy'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={styles.dayNavBtn}
+                                                aria-label={isSingleDay ? 'Jornada siguiente' : 'Plazo siguiente'}
+                                                onClick={() => shiftWindow(1)}
+                                            >
+                                                <ChevronRight size={16} />
+                                            </button>
+                                        </div>
+
+                                        {/* La estética la elige el rol y la resuelve ExportImage solo:
+                                            quien tiene panel de gestión exporta con el diseño activo,
+                                            y el hincha y el invitado con Fan V5. Sin partidos no hay
+                                            botón: una placa vacía no es un export. */}
+                                        {canManageClub && !showMatchForm ? (
+                                            <button
+                                                type="button"
+                                                className={styles.panelFormSecondary}
+                                                onClick={() => setShowMatchForm(true)}
+                                            >
+                                                Cargar partido
+                                            </button>
+                                        ) : null}
+
+                                        {windowTotal > 0 ? (
+                                            <ExportImage
+                                                template="dailyMatches"
+                                                filename={'panel-' + teamName + '-' + windowStartKey}
+                                                data={{
+                                                    date: isSingleDay
+                                                        ? dayKeyLabel(windowStartKey)
+                                                        : dayKeyShortLabel(windowStartKey) + ' — ' + dayKeyShortLabel(windowEndKey),
+                                                    tournament: teamName,
+                                                    tournamentLogo: teamLogoUrl,
+                                                    matches: windowDays.flatMap(day => day.matches.map(
+                                                        match => toDailyMatchExport(match, matchDayState(match, match.__bucket))
+                                                    )),
+                                                }}
+                                            />
+                                        ) : null}
+                                    </div>
+                                </div>
+
+                                {showMatchForm && resolvedClubId ? (
+                                    <PanelMatchForm
+                                        clubId={resolvedClubId}
+                                        familyClubs={panelFamilyClubs}
+                                        defaultDate={windowStartKey}
+                                        onCancel={() => setShowMatchForm(false)}
+                                        onCreated={() => {
+                                            setShowMatchForm(false);
+                                            setAgenda(null);
+                                            setAgendaNonce(value => value + 1);
+                                        }}
+                                    />
+                                ) : null}
+
+                                {customRange ? (
+                                    <div className={styles.customRange}>
+                                        <label className={styles.customRangeField}>
+                                            <span>Desde</span>
+                                            <input
+                                                type="date"
+                                                className={styles.customRangeInput}
+                                                value={customRange.from}
+                                                onChange={event => {
+                                                    const from = event.target.value;
+                                                    if (!from) return;
+                                                    // Si el desde se pasa del hasta, el hasta lo sigue:
+                                                    // un plazo invertido no muestra nada y no explica por qué.
+                                                    setCustomRange(current => ({
+                                                        from,
+                                                        to: current && current.to >= from ? current.to : from,
+                                                    }));
+                                                }}
+                                            />
+                                        </label>
+                                        <label className={styles.customRangeField}>
+                                            <span>Hasta</span>
+                                            <input
+                                                type="date"
+                                                className={styles.customRangeInput}
+                                                min={customRange.from}
+                                                value={customRange.to}
+                                                onChange={event => {
+                                                    const to = event.target.value;
+                                                    if (!to) return;
+                                                    setCustomRange(current => ({
+                                                        from: current && current.from <= to ? current.from : to,
+                                                        to,
+                                                    }));
+                                                }}
+                                            />
+                                        </label>
+                                        <span className={styles.customRangeNote}>
+                                            {windowSpan === 400 ? 'Se muestran los primeros 400 días del plazo.' : windowSpan + (windowSpan === 1 ? ' día' : ' días')}
+                                        </span>
+                                    </div>
+                                ) : null}
+
+                                {windowTotal === 0 ? (
+                                    <div className={styles.emptyState}>
+                                        <p>{isSingleDay ? 'El club no juega esta jornada.' : 'El club no juega en este plazo.'}</p>
+                                        {nearestDayWithMatches ? (
+                                            <button
+                                                type="button"
+                                                className={styles.linkButton}
+                                                onClick={() => goToDay(nearestDayWithMatches)}
+                                            >
+                                                Ir al {dayKeyLabel(nearestDayWithMatches)}
+                                            </button>
+                                        ) : null}
+                                    </div>
+                                ) : isSingleDay ? (
+                                    /* Una sola jornada se lee por estado: qué se juega ahora, qué falta y
+                                       qué terminó. La fecha ya la dice el encabezado. */
+                                    <div className={styles.dayGroups}>
+                                        {DAY_SECTIONS.map(section => {
+                                            const sectionMatches = dayGroups[section.id];
+                                            // Un grupo sin partidos colapsa: no reserva media pantalla vacía.
+                                            if (!sectionMatches.length) return null;
+
+                                            return (
+                                                <section key={section.id} className={styles.dayGroup}>
+                                                    <div className={styles.dayGroupHead}>
+                                                        <span className={styles.dayGroupDot + ' ' + styles[section.tone]} aria-hidden="true" />
+                                                        <h3 className={styles.dayGroupTitle}>{section.label}</h3>
+                                                        <span className={styles.dayGroupCount}>{sectionMatches.length}</span>
+                                                    </div>
+                                                    <div className={styles.matchList}>
+                                                        {sectionMatches.map(match => renderMatchItem(match))}
+                                                    </div>
+                                                </section>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    /* Un plazo se lee por fecha: el estado de cada partido ya lo canta su
+                                       marcador, y lo que falta saber es qué día se juega cada cosa. */
+                                    <div className={styles.dayGroups}>
+                                        {windowDays.map(day => (
+                                            <section key={day.key} className={styles.dayGroup}>
+                                                <div className={styles.dayGroupHead}>
+                                                    <span className={styles.dayGroupDot + ' ' + styles[dayTone(day.matches)]} aria-hidden="true" />
+                                                    <h3 className={styles.dayGroupTitle}>
+                                                        {dayKeyLabel(day.key)}
+                                                        {day.key === todayKey ? ' · hoy' : ''}
+                                                    </h3>
+                                                    <span className={styles.dayGroupCount}>{day.matches.length}</span>
+                                                </div>
+                                                <div className={styles.matchList}>
+                                                    {day.matches.map(match => renderMatchItem(match))}
+                                                </div>
+                                            </section>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {activeTab === 'summary' && (
                             <>
                                 {filteredResults.length > 0 && (
@@ -871,6 +1383,60 @@ function TeamDetailInner({ id }: { id: string }) {
                             />
                         )}
 
+                        {/* Titles Tab */}
+                        {activeTab === 'titles' && (
+                            <div className={styles.section}>
+                                <div className={styles.sectionHeader} style={{ marginBottom: '16px' }}>
+                                    <h2 className={styles.pageTitle}>Títulos</h2>
+                                    <span style={{ fontSize: 12, color: 'var(--text-secondary, #888)' }}>
+                                        {honoursByCompetition.reduce((total, comp) => total + comp.titles.length, 0)} títulos
+                                        {' · '}
+                                        {honoursByCompetition.reduce((total, comp) => total + comp.runnerUps.length, 0)} subcampeonatos
+                                    </span>
+                                </div>
+                                <div style={{ display: 'grid', gap: 10 }}>
+                                    {honoursByCompetition.map((comp) => (
+                                        <div
+                                            key={comp.name}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'flex-start',
+                                                gap: 12,
+                                                padding: 14,
+                                                borderRadius: 14,
+                                                border: '1px solid rgba(255,255,255,0.08)',
+                                                background: 'rgba(255,255,255,0.035)',
+                                            }}
+                                        >
+                                            <span style={{ width: 42, height: 42, borderRadius: 10, flexShrink: 0, display: 'grid', placeItems: 'center', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.06)' }}>
+                                                <Trophy size={20} style={{ color: comp.titles.length > 0 ? '#eab308' : 'var(--text-secondary, #888)' }} aria-hidden="true" />
+                                            </span>
+                                            <div style={{ minWidth: 0 }}>
+                                                <div style={{ fontSize: 14, fontWeight: 700 }}>
+                                                    {comp.name}
+                                                    <span style={{ marginLeft: 8, fontWeight: 600, fontSize: 12, color: 'var(--text-secondary, #888)' }}>
+                                                        {comp.titles.length > 0
+                                                            ? `${comp.titles.length} ${comp.titles.length === 1 ? 'título' : 'títulos'}`
+                                                            : `${comp.runnerUps.length} ${comp.runnerUps.length === 1 ? 'subcampeonato' : 'subcampeonatos'}`}
+                                                    </span>
+                                                </div>
+                                                {comp.titles.length > 0 && (
+                                                    <div style={{ marginTop: 4, fontSize: 12, color: 'var(--text-secondary, #888)', lineHeight: 1.6, overflowWrap: 'anywhere' }}>
+                                                        {comp.titles.join(' · ')}
+                                                    </div>
+                                                )}
+                                                {comp.runnerUps.length > 0 && (
+                                                    <div style={{ marginTop: 2, fontSize: 11, color: 'var(--text-secondary, #888)', overflowWrap: 'anywhere' }}>
+                                                        Subcampeón: {comp.runnerUps.join(' · ')}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Squad Tab */}
                         {activeTab === 'squad' && (
                             <div className={styles.section}>
@@ -906,7 +1472,6 @@ function TeamDetailInner({ id }: { id: string }) {
                                                     const pId = player.player_id || player.id || '';
                                                     const playerPosition = player.position || player.position_name || '';
                                                     const playerDivision = player.team_name || player.tab_name || player.division_name || '';
-                                                    const playerBirthDate = formatPlayerBirthDate(player.birth_date);
                                                     const playerStatus = formatPlayerStatus(player.status);
                                                     const playerAge = typeof player.age === 'number' || typeof player.age === 'string'
                                                         ? player.age
@@ -942,12 +1507,6 @@ function TeamDetailInner({ id }: { id: string }) {
                                                                     <div className={styles.playerDetailItem}>
                                                                         <span className={styles.playerDetailLabel}>Edad</span>
                                                                         <span className={styles.playerDetailValue}>{playerAge}</span>
-                                                                    </div>
-                                                                ) : null}
-                                                                {playerBirthDate ? (
-                                                                    <div className={styles.playerDetailItem}>
-                                                                        <span className={styles.playerDetailLabel}>Nacimiento</span>
-                                                                        <span className={styles.playerDetailValue}>{playerBirthDate}</span>
                                                                     </div>
                                                                 ) : null}
                                                                 {playerStatus ? (
