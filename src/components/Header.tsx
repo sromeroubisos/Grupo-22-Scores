@@ -16,7 +16,7 @@ import { getRoleLabel, resolveAdminPanel } from '@/lib/auth/roles';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { logRefreshLoop } from '@/lib/debug/refreshLoop';
 import { trackEvent } from '@/lib/analytics';
-import { hrefParaClubes, PARA_CLUBES_HREF } from '@/content/para-clubes';
+import { hrefParaTorneos, RUTAS_EMBUDO } from '@/content/embudo';
 
 export default function Header() {
     const { user, logout } = useAuth();
@@ -144,15 +144,24 @@ export default function Header() {
     const isGamesRoute = Boolean(pathname && (pathname.startsWith('/juegos') || pathname.startsWith('/prode')));
     const isNotificationsRoute = pathname?.startsWith('/notifications') ?? false;
     /**
-     * "Para clubes" es la puerta permanente del embudo comercial: el dirigente
-     * que se interesó hoy vuelve a los tres días y tiene que encontrarla sin
-     * buscar. En desktop es un link más del nav; abajo de 768px los links del
-     * nav se ocultan por CSS y la barra inferior ya tiene sus cinco lugares
-     * ocupados, así que ahí la entrada es el menú de usuario — que se le
-     * muestra también al invitado, justamente porque un dirigente que llega de
-     * cero no tiene sesión.
+     * "Organizá" es la puerta permanente del embudo comercial: el dirigente que
+     * se interesó hoy vuelve a los tres días y tiene que encontrarla sin buscar.
+     * En desktop es un link más del nav; abajo de 768px los links del nav se
+     * ocultan por CSS y la barra inferior ya tiene sus cinco lugares ocupados,
+     * así que ahí la entrada es el menú de usuario — que se le muestra también
+     * al invitado, justamente porque un dirigente que llega de cero no tiene
+     * sesión.
+     *
+     * Se llamaba "Para clubes" y dejaba afuera justo al comprador grande, el que
+     * organiza el torneo. En un nav de palabras sueltas —Noticias, Juegos,
+     * Rankings— "Organizá" entra y no excluye a nadie. Apunta a /para-torneos,
+     * que es la venta grande; el que representa a un club encuentra su puerta en
+     * el cruce del pie de esa misma página.
+     *
+     * Esto no es un anuncio, es navegación: no emite evento de vista, sólo el
+     * click.
      */
-    const isParaClubesRoute = pathname?.startsWith(PARA_CLUBES_HREF) ?? false;
+    const enEmbudo = RUTAS_EMBUDO.some((ruta) => pathname?.startsWith(ruta) ?? false);
     const isAuthRoute =
         pathname?.startsWith('/login')
         || pathname?.startsWith('/register')
@@ -160,26 +169,26 @@ export default function Header() {
     const rankingsHref = `/rankings?sport=${encodeURIComponent(selectedSport.id)}`;
 
     /**
-     * La entrada de "Para clubes" en el menú, escrita UNA vez y usada en las dos
+     * La entrada del embudo en el menú, escrita UNA vez y usada en las dos
      * ramas: la del usuario con sesión y la del invitado. El invitado la
      * necesita más que nadie —un dirigente que llega por primera vez no tiene
      * cuenta— y hasta ahora su menú sólo ofrecía "Iniciar Sesión".
      */
-    const itemParaClubes = (
+    const itemEmbudo = (
         <Link
-            href={hrefParaClubes('nav')}
+            href={hrefParaTorneos('nav')}
             onClick={() => {
                 setIsUserMenuOpen(false);
                 trackEvent('clubs_promo_click', { location: 'nav' });
             }}
-            aria-current={isParaClubesRoute ? 'page' : undefined}
+            aria-current={enEmbudo ? 'page' : undefined}
         >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M3 21h18" />
                 <path d="M5 21V7l7-4 7 4v14" />
                 <path d="M10 21v-6h4v6" />
             </svg>
-            Para clubes
+            Organizá
         </Link>
     );
 
@@ -264,9 +273,9 @@ export default function Header() {
                     </Link>
 
                     <Link
-                        href={hrefParaClubes('nav')}
-                        className={`g22-desktop-link ${isParaClubesRoute ? 'active' : ''}`}
-                        aria-current={isParaClubesRoute ? 'page' : undefined}
+                        href={hrefParaTorneos('nav')}
+                        className={`g22-desktop-link ${enEmbudo ? 'active' : ''}`}
+                        aria-current={enEmbudo ? 'page' : undefined}
                         onClick={() => trackEvent('clubs_promo_click', { location: 'nav' })}
                     >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -274,7 +283,7 @@ export default function Header() {
                             <path d="M5 21V7l7-4 7 4v14" />
                             <path d="M10 21v-6h4v6" />
                         </svg>
-                        <span>Para clubes</span>
+                        <span>Organizá</span>
                     </Link>
 
                     <NotificationsBell />
@@ -387,7 +396,7 @@ export default function Header() {
                                             </Link>
                                         )}
 
-                                        {itemParaClubes}
+                                        {itemEmbudo}
                                     </div>
 
                                     <hr />
@@ -399,7 +408,7 @@ export default function Header() {
                             )}
                             {!displayUser && (
                                 <div style={{ padding: '8px 0' }}>
-                                    {itemParaClubes}
+                                    {itemEmbudo}
                                 </div>
                             )}
                             {!displayUser && (

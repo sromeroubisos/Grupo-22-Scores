@@ -9,8 +9,6 @@ import FavoriteButton from '@/components/FavoriteButton';
 import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
 import MatchTimeline from '@/components/match/MatchTimeline';
 import PeopleRatingsPanel, { type RateablePlayer } from '@/components/match/PeopleRatingsPanel';
-import ClubsPromoLink from '@/components/clubs-promo/ClubsPromoLink';
-import { CONTEXTUAL } from '@/content/para-clubes';
 import styles from './page.module.css';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import {
@@ -2640,15 +2638,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                         );
                                     })
                                 ) : (
-                                    /*
-                                     * El vacío es el mejor argumento que
-                                     * tenemos: quien mira un partido sin
-                                     * estadísticas está viendo exactamente lo
-                                     * que G22 le llenaría si cargara él.
-                                     */
                                     <div className={styles.placeholderText}>
                                         <p style={{ margin: 0 }}>No hay estadísticas clave disponibles para este partido.</p>
-                                        <ClubsPromoLink origen="partido-vacio" texto={CONTEXTUAL.partidoVacio} />
                                     </div>
                                 )}
 
@@ -2763,6 +2754,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
                                         <div className={styles.lineupTeam}>
                                             <div className={styles.panelTitle}>{matchData.home.name}</div>
+                                            {homeLineupGroups.starters.length > 0 && (
                                             <div className={styles.lineupSection}>
                                                 <div className={styles.lineupSectionTitle}>Titulares</div>
                                                 <div className={styles.playerList}>
@@ -2792,6 +2784,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                     })}
                                                 </div>
                                             </div>
+                                            )}
                                             {homeLineupGroups.finishers.length > 0 && (
                                                 <div className={styles.lineupSection}>
                                                     <div className={styles.lineupSectionTitle}>Suplentes</div>
@@ -2826,6 +2819,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                         </div>
                                         <div className={styles.lineupTeam}>
                                             <div className={styles.panelTitle}>{matchData.away.name}</div>
+                                            {awayLineupGroups.starters.length > 0 && (
                                             <div className={styles.lineupSection}>
                                                 <div className={styles.lineupSectionTitle}>Titulares</div>
                                                 <div className={styles.playerList}>
@@ -2855,6 +2849,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                     })}
                                                 </div>
                                             </div>
+                                            )}
                                             {awayLineupGroups.finishers.length > 0 && (
                                                 <div className={styles.lineupSection}>
                                                     <div className={styles.lineupSectionTitle}>Suplentes</div>
@@ -2932,7 +2927,6 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 {statsData.length === 0 ? (
                                     <div className={styles.placeholderText}>
                                         <p style={{ margin: 0 }}>No hay estadísticas disponibles para este partido.</p>
-                                        <ClubsPromoLink origen="partido-vacio" texto={CONTEXTUAL.partidoVacio} />
                                     </div>
                                 ) : (
                                     <div className={styles.publicStatsSectionGrid}>

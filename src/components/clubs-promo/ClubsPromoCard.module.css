@@ -6,6 +6,10 @@
  * Ojo con el verde: `--color-accent` está calibrado para fondos y como TEXTO no
  * llega al contraste AA sobre el claro. Para texto va `--color-accent-ink`, que
  * existe exactamente por eso.
+ *
+ * `.caja` era un `<a>` que envolvía la tarjeta entera. Dejó de serlo cuando la
+ * placa pasó a tener dos salidas: dos links adentro de un link es HTML inválido.
+ * Por eso el hover y el foco viven ahora en los botones y no en el contenedor.
  */
 
 .root {
@@ -26,7 +30,7 @@
     }
 }
 
-.link {
+.caja {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -39,24 +43,6 @@
         linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.18) 0%, rgba(var(--color-accent-rgb), 0.05) 46%, rgba(255, 255, 255, 0.03) 100%),
         var(--color-bg-secondary);
     color: inherit;
-    text-decoration: none;
-    transition:
-        transform var(--transition-fast, 0.15s ease),
-        border-color var(--transition-fast, 0.15s ease),
-        background var(--transition-fast, 0.15s ease);
-}
-
-.link:hover {
-    transform: translateY(-2px);
-    border-color: rgba(var(--color-accent-rgb), 0.58);
-    background:
-        linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.26) 0%, rgba(var(--color-accent-rgb), 0.08) 46%, rgba(255, 255, 255, 0.05) 100%),
-        var(--color-bg-secondary);
-}
-
-.link:focus-visible {
-    outline: 2px solid var(--color-accent-ink, #22c55e);
-    outline-offset: 3px;
 }
 
 /* La etiqueta ocupa el lugar donde una noticia dice "RUGBY". */
@@ -156,29 +142,84 @@
     font-weight: 800;
 }
 
-.accion {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+/* ── Las dos salidas ───────────────────────────────────────────────────── */
+
+/*
+ * La jerarquía es el mecanismo, no la decoración: el botón resuelve la decisión
+ * por el que no quiere decidir, y el link de texto está para el que ya sabe cuál
+ * es su caso. Dos botones iguales devolverían la pregunta que la placa vino a
+ * evitar.
+ */
+.acciones {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
     margin-top: auto;
-    padding-top: 4px;
-    color: var(--color-accent-ink, #22c55e);
-    font-size: 0.8rem;
-    font-weight: 800;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+    padding-top: 12px;
 }
 
-.flecha {
+.botonPrimario {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: var(--color-accent);
+    color: #04170e;
+    font-size: 0.8125rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    text-align: center;
+    transition:
+        transform var(--transition-fast, 0.15s ease),
+        background var(--transition-fast, 0.15s ease);
+}
+
+.botonPrimario:hover {
+    transform: translateY(-1px);
+    background: var(--color-accent-light);
+}
+
+.enlaceSecundario {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: var(--color-accent-ink, #22c55e);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.enlaceSecundario:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.botonPrimario:focus-visible,
+.enlaceSecundario:focus-visible {
+    outline: 2px solid var(--color-accent-ink, #22c55e);
+    outline-offset: 3px;
+}
+
+.flecha,
+.flechaChica {
+    flex-shrink: 0;
     transition: transform var(--transition-fast, 0.15s ease);
 }
 
-.link:hover .flecha {
+.botonPrimario:hover .flecha,
+.enlaceSecundario:hover .flechaChica {
     transform: translateX(3px);
 }
 
 /* La placa del sidebar tiene la columna entera: puede respirar. */
-.sidebar .link {
+.sidebar .caja {
     min-height: 260px;
     padding: 20px;
 }
@@ -187,7 +228,7 @@
     font-size: 1.15rem;
 }
 
-:global([data-theme='light']) .link {
+:global([data-theme='light']) .caja {
     background:
         linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.14) 0%, rgba(255, 255, 255, 0.92) 54%, rgba(241, 245, 249, 0.96) 100%),
         var(--color-bg-secondary);
@@ -196,16 +237,18 @@
 
 @media (prefers-reduced-motion: reduce) {
 
-    .link,
-    .flecha {
+    .botonPrimario,
+    .flecha,
+    .flechaChica {
         transition: none;
     }
 
-    .link:hover {
+    .botonPrimario:hover {
         transform: none;
     }
 
-    .link:hover .flecha {
+    .botonPrimario:hover .flecha,
+    .enlaceSecundario:hover .flechaChica {
         transform: none;
     }
 }

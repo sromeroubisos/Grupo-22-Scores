@@ -1,5 +1,7 @@
 /*
- * /para-clubes — misma paleta y mismos tokens que el resto del sitio.
+ * El embudo comercial (/para-torneos y /para-clubes) — misma paleta y mismos
+ * tokens que el resto del sitio. Las dos landings son la misma página con
+ * distinto contenido, así que también son la misma hoja.
  *
  * Dos reglas que no se rompen acá:
  *  · El verde de TEXTO es `--color-accent-ink`. El `--color-accent` de marca
@@ -50,6 +52,15 @@
     color: var(--color-accent-ink);
 }
 
+/*
+ * El título puede venir en una o dos líneas. Cada una es un span en bloque: en
+ * desktop caen donde el contenido las puso, y en un teléfono cada una se pliega
+ * sola sin arrastrar a la otra.
+ */
+.heroTituloLinea {
+    display: block;
+}
+
 .heroTitulo {
     margin: 0;
     font-size: clamp(1.9rem, 4.4vw, 2.9rem);
@@ -57,6 +68,24 @@
     line-height: 1.06;
     letter-spacing: -0.02em;
     color: var(--color-text-primary);
+    text-wrap: balance;
+}
+
+/*
+ * El gancho: la línea que hace verdadero al título.
+ *
+ * Va más grande que el subtítulo y más chica que el título, porque no es ni una
+ * cosa ni la otra: es la promesa aterrizada. Sin esto, el hero prometía
+ * audiencia y la prueba de esa audiencia aparecía recién en la mitad de un
+ * párrafo gris.
+ */
+.heroGancho {
+    margin: -4px 0 0;
+    max-width: 30ch;
+    font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+    font-weight: 800;
+    line-height: 1.25;
+    color: var(--color-accent-ink);
     text-wrap: balance;
 }
 
@@ -615,6 +644,281 @@
     color: var(--color-text-primary);
 }
 
+/* ── La prueba en vivo ─────────────────────────────────────────────────── */
+
+/*
+ * Tres puertas al sitio de verdad. No son tarjetas de producto: son links, y
+ * tienen que leerse como links —de ahí la flecha— para que quede claro que se
+ * sale de la página de ventas y se entra al producto.
+ */
+.prueba {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-top: 22px;
+}
+
+.pruebaEnlace {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: var(--color-bg-secondary);
+    color: inherit;
+    text-decoration: none;
+    transition:
+        transform var(--transition-fast, 0.15s ease),
+        border-color var(--transition-fast, 0.15s ease);
+}
+
+.pruebaEnlace:hover {
+    transform: translateY(-2px);
+    border-color: rgba(var(--color-accent-rgb), 0.5);
+}
+
+.pruebaEnlace:focus-visible {
+    outline: 2px solid var(--color-accent-ink);
+    outline-offset: 3px;
+}
+
+.pruebaTitulo {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: var(--color-accent-ink);
+}
+
+.pruebaFlecha {
+    display: inline-flex;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast, 0.15s ease);
+}
+
+.pruebaEnlace:hover .pruebaFlecha {
+    transform: translateX(3px);
+}
+
+.pruebaTexto {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+}
+
+/* ── El cruce de puertas ───────────────────────────────────────────────── */
+
+/*
+ * Chico y al pie, sin competir con el formulario que tiene arriba. Es para el
+ * que entró por la puerta equivocada, no para el que ya está por completar.
+ */
+.cruce {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
+    margin: -20px 0 0;
+    font-size: 0.9rem;
+}
+
+.cruceTexto {
+    color: var(--color-text-secondary);
+}
+
+.cruceEnlace {
+    font-weight: 700;
+    color: var(--color-accent-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.cruceEnlace:focus-visible {
+    outline: 2px solid var(--color-accent-ink);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* ── Los tres momentos ─────────────────────────────────────────────────── */
+
+/*
+ * Tres columnas en desktop y una pila en el teléfono. No son tarjetas de
+ * producto: son tres escenas del club, así que el peso lo lleva el texto y no
+ * el marco. El "cuándo" va arriba, chico y en el verde de marca, porque es lo
+ * que ordena la lectura: sábado, lunes, temporada.
+ */
+.momentos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+}
+
+.momento {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    border-left: 3px solid rgba(var(--color-accent-rgb), 0.55);
+    border-radius: 14px;
+    background: var(--color-bg-secondary);
+}
+
+.momentoCuando {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-accent-ink);
+}
+
+.momentoTitulo {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--color-text-primary);
+    text-wrap: balance;
+}
+
+.momentoTexto {
+    margin: 0;
+    font-size: 0.925rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+/* ── El bloque puente ──────────────────────────────────────────────────── */
+
+/*
+ * Se despega del resto a propósito: es el único lugar de la página que contesta
+ * una objeción en vez de contar una función, y si se lee como una sección más
+ * pasa de largo justo el que más la necesita.
+ */
+.puente {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 30px 32px;
+    border: 1px solid rgba(var(--color-accent-rgb), 0.3);
+    border-radius: 18px;
+    background:
+        linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.13) 0%, rgba(var(--color-accent-rgb), 0.04) 55%, transparent 100%),
+        var(--color-bg-secondary);
+}
+
+.puenteTitulo {
+    margin: 0;
+    font-size: clamp(1.3rem, 2.6vw, 1.7rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--color-text-primary);
+    text-wrap: balance;
+}
+
+.puenteTexto {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+.puenteAcciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 20px;
+    margin-top: 4px;
+}
+
+.puenteOtraPuerta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-accent-ink);
+    text-decoration: none;
+}
+
+.puenteOtraPuerta:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.puenteOtraPuerta:focus-visible {
+    outline: 2px solid var(--color-accent-ink);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* ── Las categorías del formulario ─────────────────────────────────────── */
+
+/*
+ * Un <fieldset> sin borde ni margen del navegador: la caja la pone el grupo de
+ * casillas, no el user agent.
+ */
+.grupoCategorias {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.categorias {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+/*
+ * La casilla se ve. Nada de esconderla y pintar un cuadradito falso: así el
+ * foco del teclado, el estado indeterminado y el lector de pantalla funcionan
+ * sin que haya que reimplementarlos.
+ */
+.categoria {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border-light);
+    border-radius: 999px;
+    background: var(--color-bg-primary);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.categoria:hover {
+    border-color: rgba(var(--color-accent-rgb), 0.45);
+}
+
+.categoria input {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: var(--color-accent);
+    cursor: pointer;
+}
+
+.categoria:has(input:focus-visible) {
+    outline: 2px solid var(--color-accent-ink);
+    outline-offset: 2px;
+}
+
+.categoriaMarcada {
+    border-color: rgba(var(--color-accent-rgb), 0.6);
+    background: rgba(var(--color-accent-rgb), 0.12);
+    color: var(--color-text-primary);
+}
+
 /* ── Claro ─────────────────────────────────────────────────────────────── */
 
 :global([data-theme='light']) .hero,
@@ -623,6 +927,20 @@
         linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.12) 0%, rgba(255, 255, 255, 0.9) 58%, rgba(241, 245, 249, 0.96) 100%),
         var(--color-bg-secondary);
     box-shadow: 0 20px 44px -34px rgba(15, 23, 42, 0.3);
+}
+
+:global([data-theme='light']) .momento,
+:global([data-theme='light']) .puente {
+    box-shadow: 0 16px 34px -30px rgba(15, 23, 42, 0.3);
+}
+
+:global([data-theme='light']) .categoria {
+    background: #fff;
+}
+
+:global([data-theme='light']) .pruebaEnlace {
+    background: #fff;
+    box-shadow: 0 14px 30px -26px rgba(15, 23, 42, 0.28);
 }
 
 :global([data-theme='light']) .formularioCaja {
@@ -653,8 +971,13 @@
         padding: 22px 16px 48px;
     }
 
-    .demoCaja {
+    .demoCaja,
+    .puente {
         padding: 24px 20px;
+    }
+
+    .momento {
+        padding: 20px;
     }
 
     .heroAcciones {
@@ -681,13 +1004,21 @@
     .botonEnviar,
     .botonWhatsapp,
     .faqChevron,
+    .pruebaEnlace,
+    .pruebaFlecha,
+    .categoria,
     .modulo,
     .input {
         transition: none;
     }
 
     .botonPrimario:hover,
-    .botonEnviar:hover:not(:disabled) {
+    .botonEnviar:hover:not(:disabled),
+    .pruebaEnlace:hover {
+        transform: none;
+    }
+
+    .pruebaEnlace:hover .pruebaFlecha {
         transform: none;
     }
 }

@@ -11,12 +11,10 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
-import ClubsPromoLink from '@/components/clubs-promo/ClubsPromoLink';
-import { CONTEXTUAL } from '@/content/para-clubes';
 import RadialBracketPredictor from '@/components/RadialBracketPredictor';
 import TournamentPublicStats from './TournamentPublicStats';
 import TournamentScoresPanel from './TournamentScoresPanel';
-import TournamentChampionsTab, { ClubCrest, type ChampionRef } from './TournamentChampionsTab';
+import TournamentChampionsTab, { ClubCrest, buildPalmares, buildPalmaresExportData, palmaresSubtitle, type ChampionRef } from './TournamentChampionsTab';
 import TournamentSofascoreStats from './TournamentSofascoreStats';
 import TournamentNavigation from './TournamentNavigation';
 import { resolveSofascoreLeague } from '@/lib/sofascoreLeagueMap';
@@ -3385,6 +3383,27 @@ export default function TournamentDetailPage({
             );
         }
 
+        // El palmarés arma su export con la MISMA cuenta que la tarjeta del tab
+        // (buildPalmares): la hero de mobile no puede publicar otro número.
+        if (activeTab === 'champions') {
+            const conCampeon = seasonOptions.filter((season) => Boolean(season.champion));
+            const palmares = buildPalmares(conCampeon);
+            if (palmares.length === 0) return null;
+            const titulo = tournamentData?.name?.trim() || 'Palmarés';
+            return (
+                <ExportImage
+                    className={styles.mobileHeroExportAction}
+                    template="standings"
+                    filename={`palmares-${titulo}`}
+                    data={buildPalmaresExportData(palmares, {
+                        title: titulo,
+                        subtitle: palmaresSubtitle(conCampeon.length, palmares.length),
+                        tournamentLogo,
+                    })}
+                />
+            );
+        }
+
         if (activeTab === 'standings') {
             return (
                 <ExportImage
@@ -5138,7 +5157,12 @@ export default function TournamentDetailPage({
                     /* onNavigate baja la pestaña a Resumen: la fila ya navega con
                        tab=summary en el href, pero cambiar seasonId no desmonta la
                        página y el estado activeTab seguiría clavado en Campeones. */
-                    <TournamentChampionsTab seasons={seasonOptions} onNavigate={() => setActiveTab('summary')} />
+                    <TournamentChampionsTab
+                        seasons={seasonOptions}
+                        tournamentName={tournamentData?.name}
+                        tournamentLogo={tournamentLogo}
+                        onNavigate={() => setActiveTab('summary')}
+                    />
                 )}
 
                 {/* ── ARCHIVE TAB ───────────────────────────────────────── */}
@@ -5164,14 +5188,6 @@ export default function TournamentDetailPage({
                 )}
 
               </div>
-
-              {/*
-                Al pie del torneo, no encima: el que está mirando un fixture ya
-                encontró lo que vino a buscar. Es una línea de texto, no un
-                banner, y el `?ref=torneo` es lo que después permite saber si
-                esta ubicación trajo a alguien.
-              */}
-              <ClubsPromoLink origen="torneo" texto={CONTEXTUAL.torneo} />
             </div>
 
             {showPredictor && draw.length > 0 && (
