@@ -3164,9 +3164,157 @@
     .dayHeader {
         flex-direction: column;
         align-items: stretch;
+        gap: 12px;
+        margin-bottom: 16px;
     }
 
-    .dayNav { justify-content: flex-start; }
+    /* Los controles ocupaban tres renglones apilados antes del primer
+       partido. Acá el plazo toma el ancho completo en cuatro segmentos
+       iguales y la navegación entra en una sola línea. */
+    .dayControls {
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .rangePicker {
+        width: 100%;
+    }
+
+    .rangeBtn {
+        flex: 1 1 0;
+        min-height: 44px;
+        padding: 10px 6px;
+        font-size: 0.8rem;
+    }
+
+    .dayNav {
+        justify-content: flex-start;
+        width: 100%;
+        gap: 8px;
+    }
+
+    /* 44×44 es el mínimo táctil. Venían de 30 y 32px: en el pulgar de una
+       tribuna eso se falla, y las flechas de jornada son justo lo que más
+       se toca en este panel. */
+    .dayNavBtn {
+        width: 44px;
+        height: 44px;
+        flex: none;
+    }
+
+    /* El botón de exportar lo dibuja ExportImage con sus propias clases, así
+       que no se lo alcanza por nombre desde este módulo. Se lo toma por
+       elemento: cualquier botón de la fila de controles cumple el mínimo. */
+    .dayControls button {
+        min-height: 44px;
+    }
+
+    .dayNavToday {
+        height: 44px;
+        flex: 1 1 auto;
+        padding: 0 14px;
+    }
+
+    /* La fila usaba la grilla de escritorio tal cual —`100px 1fr 40px`—, y
+       en 390px la fecha se llevaba 100 de 390: a los equipos les quedaban
+       110px y TODOS los nombres envolvían a dos renglones, con la fila en
+       132px de alto.
+
+       La fecha pasa a un riel angosto de dos renglones (día arriba, hora
+       abajo) y el chevron se va: la fila entera ya es un link, así que esa
+       flecha son 40px gastados en repetir lo que el tap ya dice. Con eso
+       los nombres pasan de 110px a ~290 y entran en una línea. */
+    .matchItem {
+        grid-template-columns: 52px minmax(0, 1fr);
+        gap: 10px;
+        padding: 10px 12px;
+    }
+
+    .matchMeta {
+        display: none;
+    }
+
+    .matchTime {
+        font-size: 0.68rem;
+        line-height: 1.35;
+    }
+
+    .teamRow {
+        padding-right: 0;
+        gap: 8px;
+    }
+
+    /* `min-width: 0` es lo que deja al nombre encogerse dentro del grid:
+       sin esto el contenido fuerza el ancho mínimo y la columna del
+       marcador se aplasta. */
+    .teamInfo {
+        min-width: 0;
+    }
+
+    .teamInfo span {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    /* El encabezado de jornada envolvía a dos renglones por el tracking y
+       la versalita. Se achica lo justo para que "sábado, 29 de agosto"
+       entre en uno. */
+    .dayGroupHead {
+        gap: 6px;
+    }
+
+    .dayGroupTitle {
+        font-size: 0.72rem;
+        letter-spacing: 0.04em;
+        min-width: 0;
+    }
+
+    .dayGroups {
+        gap: 18px;
+    }
+
+    /* El plazo a medida: dos fechas que no entran una al lado de la otra. */
+    .customRange {
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .customRangeField {
+        flex: 1 1 140px;
+    }
+
+    .customRangeInput {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .customRangeNote {
+        flex-basis: 100%;
+        padding-bottom: 0;
+    }
+
+    /* Alta de partido: campos a una columna y con altura de dedo. */
+    .panelForm {
+        padding: 14px;
+        gap: 14px;
+    }
+
+    .panelFormGrid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .panelFormInput {
+        min-height: 44px;
+    }
+
+    .panelFormPrimary,
+    .panelFormSecondary {
+        min-height: 44px;
+    }
+
+    .panelFormPrimary {
+        width: 100%;
+    }
 }
 
 /* ── Reduced motion: collapse all motion to an instant state ────── */
