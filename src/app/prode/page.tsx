@@ -8,9 +8,9 @@ export default async function ProdePage() {
     // no dispare escrituras/llamadas externas en cada visita.
     const supabase = await createClient();
     const {
-        data: { session },
-    } = await supabase.auth.getSession();
-    const viewerId = session?.user?.id ?? null;
+        data: { user: authUser },
+    } = await supabase.auth.getUser();
+    const viewerId = authUser?.id ?? null;
 
     const [
         { schemaReady: competitionsReady, data: competitions },

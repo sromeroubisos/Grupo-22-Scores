@@ -44,6 +44,12 @@
     color: var(--color-text-primary);
 }
 
+.backButton {
+    border: none;
+    font: inherit;
+    color: inherit;
+}
+
 /* Header */
 .header {
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent);
@@ -60,7 +66,7 @@
     margin-bottom: 24px;
 }
 
-.breadcrumb a:hover { color: var(--color-accent); }
+.breadcrumb a:hover { color: var(--color-accent-ink); }
 .separator { opacity: 0.5; }
 .breadcrumbActive { color: var(--color-text-primary); }
 
@@ -158,7 +164,7 @@
 
 .followBtn:hover {
     border-color: var(--color-accent);
-    color: var(--color-accent);
+    color: var(--color-accent-ink);
 }
 
 .followBtnActive {
@@ -198,7 +204,7 @@
 
 .tabButton:hover { color: var(--color-text-primary); }
 
-.activeTab { color: var(--color-accent); }
+.activeTab { color: var(--color-accent-ink); }
 
 .activeTab::after {
     content: '';
@@ -261,7 +267,8 @@
 }
 
 .teamLink {
-    color: var(--color-accent);
+    /* Tinta, no acento: `--color-accent` como texto da 3,05:1 en tema claro. */
+    color: var(--color-accent-ink);
     text-decoration: none;
     font-weight: 600;
 }
@@ -322,7 +329,7 @@
 
 .tdHighlight {
     text-align: center;
-    color: var(--color-accent);
+    color: var(--color-accent-ink);
     font-weight: 700;
 }
 

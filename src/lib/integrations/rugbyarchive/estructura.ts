@@ -193,6 +193,15 @@ export function construirEstructuraDeTemporada(
   year: string,
   data: RaStagione,
   clubMap: Record<number, string> = CLUB_MAP,
+  opts: {
+    /**
+     * Turno → nombre de fase, consultado SOLO cuando el rótulo del partido no
+     * es ninguna fase de la temporada (el Oeste 2015/2016 rotula las ruedas
+     * del Top 8 como "Regular season", que ahí no existe como fase). En los
+     * años donde el rótulo sí es una fase, el alias ni se mira.
+     */
+    aliasTurno?: Record<string, string>;
+  } = {},
 ): EstructuraDeTemporada {
   const descartados: string[] = [];
   const sinFase: string[] = [];
@@ -216,7 +225,15 @@ export function construirEstructuraDeTemporada(
     /** Solo para fases sintéticas: nombre a mostrar cuando `nombreFuente` no existe en la fuente. */
     nombreMostrar?: string;
     tablas: Array<{ nombre: string; filas: FilaTabla[]; miembros: Set<number> }>;
-    llavePorClave: Map<string, string>;   // (iso|equipos|resultado) → nomeTurno
+    /**
+     * (iso | par ordenado | puntajes ordenados) → nomeTurno. Insensible a la
+     * ORIENTACIÓN, igual que el dedup global: la fuente repite el mismo
+     * partido con local y visitante invertidos entre `partiteGiocate` y la
+     * llave (la semi de Plata 2014 del Oeste es "San Juan 27-28 Belgrano" en
+     * un lado y "Belgrano 28-27 San Juan" en el otro) y con la clave orientada
+     * el partido no se encontraba y caía a la fase sintética.
+     */
+    llavePorClave: Map<string, string>;
     turnosDeLlave: Set<string>;
     /**
      * Partidos de la llave con su detalle completo. En temporadas donde
@@ -232,6 +249,11 @@ export function construirEstructuraDeTemporada(
     }>;
   };
   const fasesFuente: FaseFuente[] = [];
+
+  // Clave de partido insensible a la orientación (fecha | par | puntajes
+  // ordenados): la comparten el dedup global y la llave.
+  const claveDedup = (iso: string, a: number, b: number, s1: number, s2: number) =>
+    `${iso}|${[a, b].sort((x, y) => x - y).join('v')}|${[s1, s2].sort((x, y) => x - y).join('-')}`;
 
   for (const fa of (data.fasi || [])) {
     const fase: FaseFuente = {
@@ -290,10 +312,9 @@ export function construirEstructuraDeTemporada(
           if (!a || !b) continue;
           for (const leg of slot.partite || []) {
             if (!leg?.data || !leg.risultato || !fechaValida(leg.data.trim())) continue;
-            const par = [a, b].sort((x, y) => x - y).join('v');
             const isoLeg = alAnio(aIso(leg.data.trim()), `${nomeTurno} ${slot.primaSquadra?.nome || a} vs ${slot.secondaSquadra?.nome || b}`);
-            fase.llavePorClave.set(`${isoLeg}|${par}|${leg.risultato}`, nomeTurno);
             const m = leg.risultato.trim().match(RESULTADO_REGEX);
+            if (m) fase.llavePorClave.set(claveDedup(isoLeg, a, b, Number(m[1]), Number(m[2])), nomeTurno);
             if (m && a !== b) {
               fase.llavePartidos.push({
                 iso: isoLeg,
@@ -313,7 +334,16 @@ export function construirEstructuraDeTemporada(
     fasesFuente.push(fase);
   }
   fasesFuente.sort((a, b) => a.progressivo - b.progressivo);
-  const fasePorNombre = new Map(fasesFuente.map((f) => [f.nombreFuente, f]));
+  // Un nombre de fase repetido (el NOA 2014 tiene DOS "Clasificacion": la llave
+  // de abril y la liguilla de fin de año) es ambiguo para la vía 1: esos
+  // nombres no entran al mapa y sus partidos se resuelven por la llave
+  // (fecha+par+resultado) o por turno único; si nada aplica, quedan en
+  // `sinFase` y bloquean — mejor explícito que misasignado.
+  const vecesPorNombre = new Map<string, number>();
+  for (const f of fasesFuente) vecesPorNombre.set(f.nombreFuente, (vecesPorNombre.get(f.nombreFuente) || 0) + 1);
+  const fasePorNombre = new Map(fasesFuente
+    .filter((f) => vecesPorNombre.get(f.nombreFuente) === 1)
+    .map((f) => [f.nombreFuente, f]));
 
   // ── Partidos: filtrar importables y asignar fase/ronda/grupo ──────────────
   type Asignado = { fase: FaseFuente; turnoRonda: string | null; p: PartidoEstructura };
@@ -321,12 +351,9 @@ export function construirEstructuraDeTemporada(
   const sinTurnoPend: Array<{ rotulo: string; iso: string; homeId: number; awayId: number; hs: number; as: number }> = [];
   const TURNO_ELIMINATORIO_REGEX = /\b(final|finals|semifinal|semifinals|quarter|round of|playout|qualifier)\b/i;
   const sinFaseEliminatoria: Array<{ turno: string; p: PartidoEstructura }> = [];
-  // Dedup global de partidos por (fecha | par | puntajes ordenados): ignora la
-  // orientación porque la fuente repite partidos con local y visitante
-  // invertidos (entre `partiteGiocate` y la llave, y a veces dentro de
-  // `partiteGiocate` mismo).
-  const claveDedup = (iso: string, a: number, b: number, s1: number, s2: number) =>
-    `${iso}|${[a, b].sort((x, y) => x - y).join('v')}|${[s1, s2].sort((x, y) => x - y).join('-')}`;
+  // Dedup global de partidos con la misma clave insensible a orientación que
+  // usa la llave (la fuente repite partidos con local y visitante invertidos
+  // entre `partiteGiocate` y la llave, y a veces dentro de `partiteGiocate`).
   const clavesVistas = new Set<string>();
 
   for (const entrada of (data.partiteGiocate || [])) {
@@ -357,11 +384,13 @@ export function construirEstructuraDeTemporada(
     const cl = claveDedup(iso, pa.squadraCasa.id, pa.squadraTrasferta.id, Number(m[1]), Number(m[2]));
     if (clavesVistas.has(cl)) { descartados.push(`${rotulo}: repetido en la fuente`); continue; }
     clavesVistas.add(cl);
-    const par = [pa.squadraCasa.id, pa.squadraTrasferta.id].sort((x, y) => x - y).join('v');
-    const claveLlave = `${iso}|${par}|${resultado}`;
+    const claveLlave = cl;
 
     let fase = fasePorNombre.get(turno) || null;
     let turnoRonda: string | null = null;
+    if (!fase && opts.aliasTurno?.[turno]) {
+      fase = fasePorNombre.get(opts.aliasTurno[turno]) || null;
+    }
     if (!fase) {
       fase = fasesFuente.find((f) => f.llavePorClave.has(claveLlave)) || null;
       if (fase) turnoRonda = fase.llavePorClave.get(claveLlave)!;
@@ -644,6 +673,77 @@ export function construirEstructuraDeTemporada(
     coCampeonesClubIds,
     clubesRaIds,
     sinMapa,
+    desde: isos[0] || null,
+    hasta: isos[isos.length - 1] || null,
+  };
+}
+
+/**
+ * Se queda con las fases que el filtro acepta y recalcula todo lo derivado.
+ *
+ * Existe porque una competición de la fuente puede contener DOS torneos de
+ * G22: el Torneo Regional del Oeste (comp 124) trae el Top 10/Copa de Oro y la
+ * Copa de Plata en el MISMO payload, y en G22 son dos torneos separados. La
+ * estructura se construye entera una sola vez (así la asignación de partidos a
+ * fases ve todo el contexto) y cada rama filtra después.
+ *
+ * Con `campeonDesdeLlave`, el podio NO sale de `vincitori` (que declara al
+ * campeón de la línea principal) sino de la final propia de las fases
+ * filtradas: la última ronda "Final" que no sea por un puesto. Sin una final
+ * jugada, el campeón queda nulo — no se inventa un campeón de Plata.
+ */
+export function filtrarEstructura(
+  est: EstructuraDeTemporada,
+  pertenece: (nombreFuente: string) => boolean,
+  opts: { campeonDesdeLlave?: boolean } = {},
+): EstructuraDeTemporada {
+  const fases = est.fases.filter((f) => pertenece(f.nombreFuente)).map((f, i) => ({ ...f, orden: i + 1 }));
+
+  const clubesRaIds = new Set<number>();
+  for (const f of fases) {
+    for (const p of f.partidos) { clubesRaIds.add(p.homeRaId); clubesRaIds.add(p.awayRaId); }
+    for (const fila of [...f.tablaUnica, ...f.grupos.flatMap((g) => g.tabla)]) clubesRaIds.add(fila.raId);
+  }
+
+  let campeonClubId = est.campeonClubId;
+  let subcampeonClubId = est.subcampeonClubId;
+  let terceroClubId = est.terceroClubId;
+  let coCampeonesClubIds = est.coCampeonesClubIds;
+  if (opts.campeonDesdeLlave) {
+    campeonClubId = null; subcampeonClubId = null; terceroClubId = null; coCampeonesClubIds = [];
+    const esFinal = (ronda: string) => /(^|[\s-])final$/i.test(ronda.trim()) && !/place|puesto/i.test(ronda);
+    const finales = fases
+      .filter((f) => f.tipo === 'playoff')
+      .flatMap((f) => f.partidos.filter((p) => esFinal(p.ronda)).map((p) => ({ fase: f, p })));
+    finales.sort((a, b) => a.p.iso.localeCompare(b.p.iso));
+    const ultima = finales[finales.length - 1];
+    if (ultima && ultima.p.homeScore !== ultima.p.awayScore) {
+      const ganaLocal = ultima.p.homeScore > ultima.p.awayScore;
+      campeonClubId = (ganaLocal ? ultima.p.homeClubId : ultima.p.awayClubId) || null;
+      subcampeonClubId = (ganaLocal ? ultima.p.awayClubId : ultima.p.homeClubId) || null;
+      const tercero = ultima.fase.partidos.find((x) => /3rd place/i.test(x.ronda));
+      if (tercero && tercero.homeScore !== tercero.awayScore) {
+        terceroClubId = (tercero.homeScore > tercero.awayScore ? tercero.homeClubId : tercero.awayClubId) || null;
+      }
+    }
+  }
+
+  const isos = fases.flatMap((f) => f.partidos.map((p) => p.iso)).sort();
+  return {
+    ...est,
+    fases,
+    partidos: fases.reduce((s, f) => s + f.partidos.length, 0),
+    // Los descartes y avisos son de la TEMPORADA (no de una rama): los reporta
+    // la rama principal; la rama que deriva su campeón de la llave los calla
+    // para no duplicarlos en el plan.
+    descartados: opts.campeonDesdeLlave ? [] : est.descartados,
+    avisos: opts.campeonDesdeLlave ? [] : est.avisos,
+    campeonClubId,
+    subcampeonClubId,
+    terceroClubId,
+    coCampeonesClubIds,
+    clubesRaIds,
+    sinMapa: est.sinMapa.filter((s) => clubesRaIds.has(s.id)),
     desde: isos[0] || null,
     hasta: isos[isos.length - 1] || null,
   };

@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchDivisions } from '@/lib/services/divisionService';
+import { getApiErrorMessage, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
 
 export async function GET(
     _request: NextRequest,
     { params }: { params: Promise<{ clubId: string }> }
 ) {
+    try {
+        await requireAdminApiUser();
+    } catch (error) {
+        return NextResponse.json(
+            { error: getApiErrorMessage(error, 'Unauthorized') },
+            { status: getApiErrorStatus(error, 401) },
+        );
+    }
+
     try {
         const { clubId } = await params;
         const divisions = await fetchDivisions(clubId);

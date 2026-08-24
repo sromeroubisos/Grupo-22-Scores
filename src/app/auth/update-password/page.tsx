@@ -1,9 +1,11 @@
 'use client'
 
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { checkPassword } from '@/lib/auth/passwordPolicy'
+import PasswordStrengthMeter from '../../login/components/PasswordStrengthMeter'
 import styles from '../../login/login.module.css'
 import AuthErrorBanner from '../../login/components/AuthErrorBanner'
 import AuthSuccessBanner from '../../login/components/AuthSuccessBanner'
@@ -17,7 +19,15 @@ export default function UpdatePasswordPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
+    // Se guarda para que la politica pueda rechazar una contrasena que contenga
+    // el propio email; el resto de la pantalla no lo usa.
+    const [email, setEmail] = useState<string | null>(null)
     const supabase = createClient()
+
+    const passwordCheck = useMemo(
+        () => checkPassword(password, { email }),
+        [password, email],
+    )
 
     useEffect(() => {
         let isMounted = true
@@ -32,6 +42,7 @@ export default function UpdatePasswordPage() {
                 setReady(false)
             } else if (data.session) {
                 setReady(true)
+                setEmail(data.session.user.email ?? null)
             } else {
                 setError('El enlace no es valido o ya expiro. Solicita un nuevo email de recuperacion.')
                 setReady(false)
@@ -47,6 +58,7 @@ export default function UpdatePasswordPage() {
             setReady(Boolean(session))
             if (session) {
                 setError(null)
+                setEmail(session.user.email ?? null)
             }
         })
 
@@ -68,8 +80,8 @@ export default function UpdatePasswordPage() {
             return
         }
 
-        if (password.length < 6) {
-            setError('La contrasena debe tener al menos 6 caracteres')
+        if (!passwordCheck.ok) {
+            setError(passwordCheck.problems[0])
             return
         }
 
@@ -133,6 +145,7 @@ export default function UpdatePasswordPage() {
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
+                        <PasswordStrengthMeter check={passwordCheck} password={password} />
                     </div>
 
                     <div className={styles.inputGroup}>

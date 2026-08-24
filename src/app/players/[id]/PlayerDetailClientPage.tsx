@@ -103,9 +103,9 @@ export default function PlayerDetailClientPage({ id }: { id: string }) {
         return (
             <div className={styles.errorContainer}>
                 <p>{error}</p>
-                <div className={styles.backButton} onClick={() => router.back()}>
-                    <ArrowLeft size={16} /> Volver
-                </div>
+                <button type="button" className={styles.backButton} onClick={() => router.back()}>
+                    <ArrowLeft size={16} aria-hidden="true" /> Volver
+                </button>
             </div>
         );
     }
@@ -331,9 +331,9 @@ export default function PlayerDetailClientPage({ id }: { id: string }) {
                                             return (
                                                 <div key={idx} className={styles.tableRow}>
                                                     <div className={styles.tdTeam}>
-                                                        {teamLogo && <img src={teamLogo} alt="" className={styles.teamLogoSmall} />}
+                                                        {teamLogo && <img src={teamLogo} alt="" loading="lazy" className={styles.teamLogoSmall} />}
                                                         {teamId ? (
-                                                            <Link href={`/clubs/fs-team-${teamId}`} className={styles.teamLink}>
+                                                            <Link href={buildTeamHref(teamId)} className={styles.teamLink}>
                                                                 {teamName}
                                                             </Link>
                                                         ) : (
@@ -363,7 +363,7 @@ export default function PlayerDetailClientPage({ id }: { id: string }) {
                             <h3>Jugador</h3>
                             {playerPhoto && (
                                 <div style={{ display: 'flex', justifyContent: 'center', margin: '8px 0 12px' }}>
-                                    <img src={playerPhoto} alt={playerName} style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover' }} />
+                                    <img src={playerPhoto} alt="" loading="lazy" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover' }} />
                                 </div>
                             )}
                             {position && (

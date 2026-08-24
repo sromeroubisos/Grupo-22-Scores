@@ -178,9 +178,9 @@ function buildTournamentDraft(
 export async function POST(request: NextRequest) {
     try {
         const supabase = await createClient();
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { user: authUser } } = await supabase.auth.getUser();
 
-        if (!session?.user?.id) {
+        if (!authUser?.id) {
             return NextResponse.json(
                 { error: 'Necesitas iniciar sesion para enviar una solicitud.' },
                 { status: 401 }
@@ -189,8 +189,8 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json() as CollaboratorBody | TournamentBody;
         const kind = body.kind;
-        const fallbackEmail = session.user.email ?? null;
-        const userId = session.user.id;
+        const fallbackEmail = authUser.email ?? null;
+        const userId = authUser.id;
 
         const draft = kind === 'collaborator'
             ? buildCollaboratorDraft(body, fallbackEmail, userId)

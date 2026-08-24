@@ -10,10 +10,10 @@ export async function GET() {
     try {
         const supabase = await createClient();
         const {
-            data: { session },
-        } = await supabase.auth.getSession();
+            data: { user: authUser },
+        } = await supabase.auth.getUser();
 
-        const data = await getProdeWorldCupScreenData(session?.user?.id ?? null);
+        const data = await getProdeWorldCupScreenData(authUser?.id ?? null);
         if (!data) {
             return NextResponse.json({ available: false });
         }

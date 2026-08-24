@@ -19,6 +19,7 @@ import {
 } from '@/lib/services/preferencesService';
 import { isAuthRateLimitError } from '@/lib/auth/errors';
 import { clearSupabaseBrowserSession, createClient, getSupabaseBrowserSessionHint } from '@/lib/supabase/client';
+import { hasRecentTerminalRefreshFailure, resetTerminalRefreshFailure } from '@/lib/supabase/auth-fetch';
 import type { LooseSupabaseClient } from '@/lib/supabase/loose';
 import { logPerf, measureAsync, nowMs, warnIfDuplicateWindow } from '@/lib/perf/measure';
 import { getReservedAdminRole } from '@/lib/types/user';
@@ -228,7 +229,6 @@ function buildOptimisticUser(sbUser: SupabaseUser, onboardingCompleted: boolean 
         role: resolveBestUserRole({
             reservedRole,
             appMetadata: sbUser.app_metadata,
-            userMetadata: sbUser.user_metadata,
         }),
         avatarUrl: sbUser.user_metadata?.avatar_url,
         onboardingCompleted,
@@ -321,7 +321,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const sessionRole = resolveBestUserRole({
             reservedRole,
             appMetadata: sbUser.app_metadata,
-            userMetadata: sbUser.user_metadata,
         });
 
         // Optimistic UI: surface the authenticated user immediately from the
@@ -444,7 +443,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         reservedRole,
                         profileRole: profile.role,
                         appMetadata: sbUser.app_metadata,
-                        userMetadata: sbUser.user_metadata,
                     }),
                     avatarUrl: profile.avatar_url || sbUser.user_metadata?.avatar_url,
                     memberships: normalizeAuthMembershipRows(membershipsResult.data),
@@ -795,14 +793,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     const explicitLogout = logoutRequestedRef.current;
                     logoutRequestedRef.current = false;
                     const cachedUser = readCachedAuthUser();
+                    // Un SIGNED_OUT nacido de un refresh token terminalmente
+                    // muerto no es el falso positivo que este guardián evita:
+                    // esa sesión no vuelve. Ignorarlo dejaba la cabecera
+                    // mostrando un usuario que el servidor ya no reconoce, y a
+                    // auth-js pidiendo /token para siempre.
+                    const deadSession = hasRecentTerminalRefreshFailure();
 
-                    if (!explicitLogout && cachedUser) {
+                    if (!explicitLogout && !deadSession && cachedUser) {
                         console.warn('[AuthContext] Ignoring non-explicit SIGNED_OUT to preserve the local session');
                         setVerifiedSessionUserId(cachedUser.id);
                         setPersistentUser((prev) => prev ?? cachedUser);
                         setIsLoading(false);
                         lastAuthEventRef.current = { event: 'USER_UPDATED', userId: cachedUser.id };
                         return;
+                    }
+
+                    if (deadSession) {
+                        // Barre el hint `g22_user` y las cookies muertas, que
+                        // es lo que auth-js no toca y lo que mantenía viva la
+                        // sesión fantasma en el navegador y en el middleware.
+                        resetTerminalRefreshFailure();
+                        clearSupabaseBrowserSession();
                     }
 
                     console.log('[AuthContext] Event result: signing out');

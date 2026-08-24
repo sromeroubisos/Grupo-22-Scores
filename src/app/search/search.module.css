@@ -138,6 +138,16 @@
     flex-shrink: 0;
 }
 
+/* El mismo icono, en la medida del historial. */
+.recentIconWrapper.playerIcon {
+    border-radius: 50%;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
 .recentLogo {
     width: 32px;
     height: 32px;
@@ -219,7 +229,8 @@
     padding: 16px 4px 8px;
     font-size: 11px;
     font-weight: 700;
-    color: var(--color-text-tertiary);
+    /* Secundaria, no terciaria: la terciaria da 4,09:1 en oscuro. */
+    color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
@@ -265,7 +276,8 @@
 
 .rowSubtitle {
     font-size: 13px;
-    color: var(--color-text-tertiary);
+    /* Secundaria, no terciaria: la terciaria da 4,09:1 en oscuro. */
+    color: var(--color-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -282,7 +294,9 @@
 
 .tournamentBadge {
     background: rgba(var(--color-accent-rgb), 0.15);
-    color: var(--color-accent);
+    /* Tinta, no acento: `--color-accent` como texto sobre el fondo claro da
+       3,05:1 y no llega al 4,5:1 de AA. Lo dice globals.css. */
+    color: var(--color-accent-ink);
 }
 
 .clubBadge {
@@ -292,6 +306,29 @@
 
 [data-theme='light'] .clubBadge {
     background: rgba(0, 0, 0, 0.05);
+}
+
+.playerBadge {
+    background: rgba(var(--color-accent-rgb), 0.08);
+    color: var(--color-text-secondary);
+}
+
+[data-theme='light'] .playerBadge {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Una persona va redonda; un escudo, cuadrado. Es lo que separa de un vistazo
+   un jugador de un club cuando los dos caen a iniciales.
+   Encadenado con `.rowIcon` porque a solas empata en especificidad y el orden
+   que salga del bundler decide el radio. */
+.rowIcon.playerIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
 }
 
 .rowChevron {

@@ -53,6 +53,29 @@ export interface CompetenciaInterior {
    * de Resistencia) en 2002-2022 — es siempre el club del NEA.
    */
   overridesClubMap?: Record<number, string>;
+  /**
+   * Ids de competición ADEMÁS de `comp` cuyos payloads pertenecen a este
+   * torneo. No es la herencia del padre: el Super Rugby Americas (678) es la
+   * MISMA competición que la Super Liga Americana de Rugby (579) renombrada
+   * (idPrincipale 678 en la fuente), y sus 2020-2022 llegan con el id viejo.
+   */
+  compsAceptadas?: number[];
+  /**
+   * Cuando una comp de la fuente contiene DOS torneos de G22 (el Oeste trae el
+   * Top 10/Oro y la Plata en el mismo payload), cada entrada se queda solo con
+   * las fases que su filtro acepta. Ver `filtrarEstructura`.
+   */
+  soloFases?: (nombreFuente: string, year: string) => boolean;
+  /**
+   * El `vincitori` del payload declara al campeón de la línea principal; la
+   * rama filtrada (Plata) deriva el suyo de su propia final.
+   */
+  campeonDesdeLlave?: boolean;
+  /**
+   * Turno → fase, solo para rótulos que no son ninguna fase de esa temporada.
+   * Ver `construirEstructuraDeTemporada` (opts.aliasTurno).
+   */
+  aliasTurno?: Record<string, string>;
 }
 
 const YEARS_INTERIOR = ['1998', '1999', '2000', '2001', '2002', '2003', '2004', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2022', '2023', '2024', '2025', '2026'];
@@ -68,6 +91,42 @@ const YEARS_NEA: string[] = [];
 for (let y = 1999; y <= 2025; y++) YEARS_NEA.push(String(y));
 const YEARS_LITORAL: string[] = [];
 for (let y = 2000; y <= 2026; y++) YEARS_LITORAL.push(String(y));
+
+// ── Tanda regionales 2026-08 (comps 678, 123, 124, 125, 127) ────────────────
+// El 2026 de todos estos torneos vive en G22 cargado a mano (fixture en curso);
+// la guarda de season_code lo saltea, pero el año va en la lista para que el
+// día que se relean estas comps el runner lo considere.
+const YEARS_SRA = ['2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+// El NOA arranca en 1944; 1950 no está en la lista de la fuente.
+const YEARS_NOA: string[] = [];
+for (let y = 1944; y <= 2026; y++) if (y !== 1950) YEARS_NOA.push(String(y));
+const YEARS_OESTE: string[] = [];
+for (let y = 2000; y <= 2026; y++) YEARS_OESTE.push(String(y));
+const YEARS_PAMPEANO: string[] = [];
+for (let y = 2008; y <= 2026; y++) YEARS_PAMPEANO.push(String(y));
+const YEARS_PATAGONICO: string[] = [];
+for (let y = 2008; y <= 2026; y++) YEARS_PATAGONICO.push(String(y));
+
+/**
+ * ¿Esta fase del Oeste (comp 124) pertenece a la línea PLATA?
+ * Decidido fase por fase contra la membresía real de clubes (2026-08):
+ *  - Las reválidas/reubicaciones "Oro/Plata" y "Top 8 / Ascenso" son la
+ *    frontera de ARRIBA y quedan en Oro (mismo criterio que la Promoción del
+ *    Litoral, que vive en la A).
+ *  - Todo lo "Plata", "Plata/Bronce" y "Plata/Desarrollo" es de la Plata.
+ *  - El "Torneo Ascenso" 2019 es la segunda división de ese año (mismos
+ *    clubes que el Torneo Plata 2021+): va a Plata. El "Zona Ascenso" 2001 NO:
+ *    es la frontera del torneo único con las ligas de abajo y queda en Oro.
+ *  - La "Reubicacion" 2023 la jugaron cuatro clubes de la Plata: es de Plata.
+ */
+function esFaseDePlata(nombreFase: string, year: string): boolean {
+  const n = nombreFase.toLowerCase();
+  if (/oro\s*\/\s*plata|top 8\s*\/\s*ascenso/.test(n)) return false;
+  if (/plata|desarrollo/.test(n)) return true;
+  if (year === '2019' && /ascenso/.test(n)) return true;
+  if (year === '2023' && n === 'reubicacion') return true;
+  return false;
+}
 
 /**
  * Nombre por época a partir del `nomeCompetizione` de cada temporada, como en
@@ -204,6 +263,78 @@ export const COMPETENCIAS: CompetenciaInterior[] = [
     slug: 'torneo-regional-del-litoral-a',
     years: YEARS_LITORAL,
     nombreTemporada: nombrePorEra,
+  },
+  // ── Tanda regionales 2026-08: SRA + NOA + Oeste + Pampeano + Patagónico ───
+  // Los siete torneos destino YA existen en G22 (ninguno se crea); sus 2026,
+  // cargados a mano, se saltean por la guarda de season_code.
+  {
+    comp: 678,
+    nombreEsperado: 'Super Rugby Americas',
+    slug: 'super-rugby-americas',
+    years: YEARS_SRA,
+    // 2020-2022 llegan con el id de la Super Liga Americana de Rugby (579),
+    // que es la misma competición renombrada (idPrincipale 678 en la fuente).
+    compsAceptadas: [579],
+    // La era vive en el nombre de la fuente: SLAR hasta 2022, SRA desde 2023.
+    nombreTemporada: (y, nome) => `${nome || 'Super Rugby Americas'} ${y}`,
+  },
+  {
+    // La fuente archiva UNA competición del NOA (la línea principal, 1944-):
+    // va entera al "A". El "B" de G22 es la segunda división creada en 2026 y
+    // no recibe historia de acá.
+    comp: 123,
+    nombreEsperado: 'Argentina - Torneo regional del NOA',
+    slug: 'torneo-regional-del-noa-a-1786145622450',
+    years: YEARS_NOA,
+    nombreTemporada: (y) => `Torneo Regional del NOA ${y}`,
+  },
+  {
+    // El Oeste/Cuyano (124) trae las DOS copas en el mismo payload: esta
+    // entrada es la línea principal (Top 10 / Copa de Oro) y la de abajo la
+    // Plata. El nombre por era sale de la fuente: Torneo Regional del Oeste /
+    // Torneo Cuyano / Top 10 Cuyano / Top 9 Cuyano.
+    comp: 124,
+    nombreEsperado: 'Argentina - Torneo Regional del Oeste',
+    slug: 'copa-oro-del-oeste-1779310761566',
+    years: YEARS_OESTE,
+    nombreTemporada: (y, nome) => `${(nome || 'Torneo Regional del Oeste').replace(/^Argentina - /, '')} ${y}`,
+    soloFases: (nombre, year) => !esFaseDePlata(nombre, year),
+    // 2015/2016 rotulan las ruedas del Top 8 como "Regular season".
+    aliasTurno: { 'Regular season': 'Top 8' },
+  },
+  {
+    comp: 124,
+    nombreEsperado: 'Argentina - Torneo Regional del Oeste',
+    slug: 'copa-plata-del-oeste-1779311499870',
+    years: YEARS_OESTE,
+    // La línea Plata cambió de rótulo: Copa de Plata (2014-2018), Torneo
+    // Ascenso (2019), Torneo Plata (2021-2025).
+    nombreTemporada: (y) => (y === '2019' ? `Torneo Ascenso ${y}`
+      : Number(y) >= 2021 && Number(y) <= 2025 ? `Torneo Plata ${y}`
+        : `Copa de Plata ${y}`),
+    soloFases: esFaseDePlata,
+    campeonDesdeLlave: true,
+    aliasTurno: { 'Regular season': 'Top 8' },
+  },
+  {
+    comp: 125,
+    nombreEsperado: 'Argentina - Torneo regional Pampeano',
+    slug: 'torneo-regional-pampeano-1782146358438',
+    years: YEARS_PAMPEANO,
+    // 2008 se jugó como "Torneo regional Mar del Plata - Sur".
+    nombreTemporada: (y, nome) => (nome.includes('Mar del Plata')
+      ? `Torneo Regional Mar del Plata - Sur ${y}`
+      : `Torneo Regional Pampeano ${y}`),
+  },
+  {
+    comp: 127,
+    nombreEsperado: 'Argentina - Torneo regional patagonico',
+    slug: 'torneo-regional-patagonico',
+    years: YEARS_PATAGONICO,
+    // 2008 se jugó como "Torneo regional de los valles".
+    nombreTemporada: (y, nome) => (nome.includes('valles')
+      ? `Torneo Regional de los Valles ${y}`
+      : `Torneo Regional Patagónico ${y}`),
   },
 ];
 
@@ -515,10 +646,82 @@ export const CLUB_MAP_INTERIOR: Record<number, string> = {
   1652: 'chaco-r-c',
   6742: 'cataratas-r-c',
   2362: 'paraguay-xv',
+  // ── Tanda regionales 2026-08 (comps 678/123/124/125/127) ──────────────────
+  // Trampas verificadas de esta tanda (ficha de la fuente + participantes 2026
+  // ya cargados en G22, que traen el club_id puesto a mano):
+  //  - 6886 "Cobras Brasil Rugby" y 6889 "Yacaré XV" son UN id por franquicia
+  //    en toda la historia SLAR/SRA (la ficha ya lleva el nombre actual).
+  //  - 10559 "Pampas Rugby" → `pampas` (la franquicia UAR; nada que ver con
+  //    `pampas-de-rufino`).
+  //  - 1356 "San Jorge R.C." (San Rafael, Mendoza) → `san-jorge-r-c`, NO es
+  //    `san-jorge-r-c-ua` (Caleta Olivia, Patagonia; RA 1246, ya mapeado).
+  //  - 1395 "Tacuru" (San Martín de Mendoza) → `tacuru-rugby-hockey-club`
+  //    (Cuyo), NO el Tacurú de Posadas (1428). El participante 2026 de la
+  //    Copa Plata lo confirma.
+  //  - 1349 "Tiro Federal" (Salta) → `tiro-federal-salta` (participante del
+  //    NOA "B" 2026).
+  //  - 1823 "Aguara Guazu" (Aguilares, Tucumán) → `aguara-guazu`, NO `aguara`
+  //    (Formosa, NEA; RA 1253).
+  //  - 1655 "Sporting Valparaiso" → `sporting-r-c` (Chile): G22 lo tiene con
+  //    ciudad "Santiago de Chile" pero es el Sporting de la V Región, único
+  //    Sporting chileno en las dos fuentes. REVISABLE.
+  //  - 11211 "Los Teros" (San Luis) NO es `los-teros-r-c` (Catamarca): se crea
+  //    aparte. REVISABLE como par.
+  //  - 6719 "Mercedes San Luis" (Villa Mercedes) NO es `mercedes` (URBA;
+  //    RA 6873): se crea aparte.
+  //  - 6885 "Los Ceibos" (Córdoba, franquicia SLAR 2020) NO es `ceibos-club`
+  //    (Montevideo): se crea aparte.
+  // ── Super Rugby Americas / SLAR ──
+  883: 'jaguares-xv',
+  3153: 'american-raptors',
+  6885: 'los-ceibos',
+  6886: 'cobras-brasil-xv',
+  6887: 'selknam',
+  6888: 'cafeteros-pro',
+  6889: 'yacare-xv',
+  6890: 'penarol',
+  10559: 'pampas',
+  10560: 'dogos-xv',
+  11521: 'tarucas',
+  11913: 'capibaras-xv',
+  // ── NOA ──
+  1349: 'tiro-federal-salta',
+  1352: 'jockey-club-santiago',
+  1353: 'corsarios-r-c',
+  1761: 'santiago-rugby-club',
+  1823: 'aguara-guazu',
+  3059: 'coipu-r-c',
+  5005: 'monteros-r-c',
+  // ── Oeste / Cuyo ──
+  1354: 'universidad-catolica',
+  1356: 'san-jorge-r-c',
+  1357: 'alfiles-s-c',
+  1358: 'huazihul',
+  1360: 'jockey-club-san-juan',
+  1395: 'tacuru-rugby-hockey-club',
+  1655: 'sporting-r-c',
+  1760: 'belgrano-rugby-club',
+  1824: 'chancay-r-c',
+  6719: 'mercedes-san-luis',
+  11211: 'los-teros-san-luis',
+  // ── Pampeano ──
+  1363: 'club-los-50',
+  1364: 'santa-rosa-r-c',
+  1509: 'union-del-sur',
+  6012: 'uncas-r-c',
+  6013: 'bigua-rugby-club',
+  // ── Patagónico ──
+  1656: 'pehuenes-r-c',
+  1657: 'catriel-r-c',
+  1658: 'patagonia-r-c',
+  1876: 'coihues-r-c',
+  6972: 'chenque-r-c',
+  10635: 'club-las-aguilas',
 };
 
 const U_TUCUMAN = 'e558d0d9-c01b-40ce-a1c7-e533cb81f97c';
 const U_SAN_JUAN = '765e6c46-b1c1-4e44-8490-aa0085ebeb99';
+const U_CUYO = '40159cd1-5876-4720-b953-d639b09d5f5b';
 const U_MDP = 'union-de-rugby-de-mar-del-plata';
 const U_MISIONES = 'union-de-rugby-de-misiones';
 
@@ -588,6 +791,26 @@ export const CLUBES_NUEVOS_INTERIOR: Array<Record<string, unknown>> = [
   { id: 'chaco-r-c', name: 'Chaco R.C.', short_name: 'Chaco', city: 'Resistencia', union_id: 'urne', region: 'Chaco', country: 'ARG' },
   { id: 'cataratas-r-c', name: 'Cataratas R.C.', short_name: 'Cataratas', city: 'Puerto Iguazú', union_id: U_MISIONES, region: 'Misiones', country: 'ARG' },
   { id: 'paraguay-xv', name: 'Paraguay XV', short_name: 'Paraguay XV', city: 'Asunción', union_id: 'union-de-rugby-de-paraguay', region: 'Paraguay', country: 'Paraguay' },
+  // ── Tanda regionales 2026-08 ──────────────────────────────────────────────
+  // Franquicias SLAR/SRA desaparecidas o sin ficha en G22
+  { id: 'jaguares-xv', name: 'Jaguares XV', short_name: 'Jaguares XV', city: 'Buenos Aires', union_id: 'union-argentina-de-rugby', region: 'Buenos Aires', country: 'Argentina' },
+  { id: 'los-ceibos', name: 'Los Ceibos', short_name: 'Los Ceibos', city: 'Córdoba', union_id: 'union-argentina-de-rugby', region: 'Córdoba', country: 'Argentina' },
+  { id: 'american-raptors', name: 'American Raptors', short_name: 'Raptors', city: 'Glendale', union_id: 'usa-rugby', region: 'Colorado', country: 'Estados Unidos' },
+  { id: 'cafeteros-pro', name: 'Cafeteros Pro', short_name: 'Cafeteros', city: 'Medellín', union_id: null, region: 'Antioquia', country: 'Colombia' },
+  // NOA
+  { id: 'jockey-club-santiago', name: 'Jockey Club Santiago', short_name: 'Jockey Santiago', city: 'Santiago del Estero', union_id: 'union-santiaguena-de-rugby', region: 'Santiago del Estero', country: 'ARG' },
+  { id: 'corsarios-r-c', name: 'Corsarios R.C.', short_name: 'Corsarios', city: 'Tafí Viejo', union_id: U_TUCUMAN, region: 'Tucumán', country: 'ARG' },
+  { id: 'coipu-r-c', name: 'Coipú R.C.', short_name: 'Coipú', city: 'Famaillá', union_id: U_TUCUMAN, region: 'Tucumán', country: 'ARG' },
+  { id: 'monteros-r-c', name: 'Monteros R.C.', short_name: 'Monteros', city: 'Monteros', union_id: U_TUCUMAN, region: 'Tucumán', country: 'ARG' },
+  // Oeste / Cuyo (los sanluiseños juegan en la Unión de Rugby de Cuyo)
+  { id: 'chancay-r-c', name: 'Chancay R.C.', short_name: 'Chancay', city: 'San Luis', union_id: U_CUYO, region: 'San Luis', country: 'ARG' },
+  { id: 'mercedes-san-luis', name: 'Mercedes Rugby (San Luis)', short_name: 'Mercedes SL', city: 'Villa Mercedes', union_id: U_CUYO, region: 'San Luis', country: 'ARG' },
+  { id: 'los-teros-san-luis', name: 'Los Teros (San Luis)', short_name: 'Los Teros SL', city: 'San Luis', union_id: U_CUYO, region: 'San Luis', country: 'ARG' },
+  // Patagónico (Lagos del Sur no tiene unión cargada en G22: van sin unión)
+  { id: 'pehuenes-r-c', name: 'Pehuenes R.C.', short_name: 'Pehuenes', city: 'Bariloche', union_id: null, region: 'Río Negro', country: 'ARG' },
+  { id: 'coihues-r-c', name: 'Coihues R.C.', short_name: 'Coihues', city: 'Villa La Angostura', union_id: null, region: 'Neuquén', country: 'ARG' },
+  { id: 'catriel-r-c', name: 'Catriel Rugby Club', short_name: 'Catriel', city: 'Catriel', union_id: 'union-de-rugby-de-alto-valle', region: 'Río Negro', country: 'ARG' },
+  { id: 'patagonia-r-c', name: 'Patagonia R.C.', short_name: 'Patagonia', city: 'Neuquén', union_id: 'union-de-rugby-de-alto-valle', region: 'Neuquén', country: 'ARG' },
 ].map((c) => ({
   ...c,
   slug: c.id,

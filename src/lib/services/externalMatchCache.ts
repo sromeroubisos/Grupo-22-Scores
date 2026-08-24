@@ -214,6 +214,86 @@ export async function upsertMatches(
 }
 
 /**
+ * Upsert de historial por equipo (página del club, importadores).
+ *
+ * A diferencia de `upsertMatches` (crons, confían en su fuente), acá la fila
+ * entrante puede ser más pobre que la guardada: el endpoint de equipo de
+ * FlashScore no distingue un partido en vivo y rugbyarchive no sabe de hoy.
+ * Reglas:
+ *   - una fila 'live' guardada no se toca (live-sync es el dueño);
+ *   - una 'final' con score no se pisa con una entrante sin score o no final.
+ */
+export async function upsertMatchHistory(
+    matches: CachedExternalMatch[],
+    supabase: SupabaseClient
+): Promise<CacheWriteResult> {
+    if (matches.length === 0) return { written: 0, skipped: false };
+
+    type ExistingRow = { id: string; status: string; score: { home: number | null; away: number | null } | null };
+    const existingById = new Map<string, ExistingRow>();
+    const ids = matches.map((m) => m.id);
+    for (let i = 0; i < ids.length; i += 200) {
+        const { data, error } = await supabase
+            .from('external_match_cache')
+            .select('id, status, score')
+            .in('id', ids.slice(i, i + 200));
+        if (error) {
+            if (error.code === '42P01' || isMissingTableError(error, 'external_match_cache')) {
+                return { written: 0, skipped: true, reason: 'missing_table' };
+            }
+            throw error;
+        }
+        for (const row of (data || []) as ExistingRow[]) existingById.set(row.id, row);
+    }
+
+    const writable = matches.filter((m) => {
+        const prev = existingById.get(m.id);
+        if (!prev) return true;
+        if (prev.status === 'live') return false;
+        const prevHasScore = prev.status === 'final' && prev.score?.home != null && prev.score?.away != null;
+        const nextHasScore = m.status === 'final' && m.score?.home != null && m.score?.away != null;
+        return !(prevHasScore && !nextHasScore);
+    });
+
+    return upsertMatches(writable, supabase);
+}
+
+/**
+ * Todos los partidos cacheados donde juega alguno de los `teamIds`, del más
+ * nuevo al más viejo. Los ids van en las variantes con que se escriben las
+ * filas: crudo de FlashScore, 'fs-team-<id>' (feed diario) y 'ra-team-<id>'
+ * (importado de rugbyarchive). Usa las columnas generadas home_team_id /
+ * away_team_id (migración 20260819200000); si esa migración no corrió
+ * todavía, devuelve [] sin romper la página.
+ */
+export async function getTeamMatchHistory(
+    teamIds: string[],
+    supabase: SupabaseClient,
+    opts: { limit?: number } = {}
+): Promise<CachedExternalMatch[]> {
+    const ids = Array.from(new Set(teamIds.map((v) => String(v || '').trim()).filter(Boolean)));
+    if (ids.length === 0) return [];
+    const list = `(${ids.map((id) => `"${id}"`).join(',')})`;
+
+    const { data, error } = await supabase
+        .from('external_match_cache')
+        .select('*')
+        .or(`home_team_id.in.${list},away_team_id.in.${list}`)
+        .order('date_time', { ascending: false })
+        .limit(opts.limit ?? 800);
+
+    if (error) {
+        // 42703: columnas generadas ausentes (migración sin aplicar) → sin historial.
+        if (error.code === '42703' || error.code === '42P01' || isMissingTableError(error, 'external_match_cache')) {
+            return [];
+        }
+        console.error('[externalMatchCache] getTeamMatchHistory error:', error.message);
+        return [];
+    }
+    return (data || []) as CachedExternalMatch[];
+}
+
+/**
  * Reset previously-live matches that no longer appear in the live snapshot.
  * Only called when the FlashScore API call succeeded (even if it returned zero results).
  * The guard against accidental mass-reset: if `currentLiveIds` is empty AND `apiFailed=true`,
@@ -240,6 +320,66 @@ export async function resetStaleLiveMatches(
         console.error('[externalMatchCache] resetStaleLiveMatches error:', error.message);
         // Non-fatal: stale data will age out via TTL check on reads
     }
+}
+
+// ── Poll gating ──────────────────────────────────────────────────────────────
+
+export type LivePollDecision = 'poll' | 'skip' | 'unknown';
+
+/**
+ * Decide si vale la pena pegarle al endpoint de vivo del proveedor.
+ *
+ * 'poll'    → hay filas en vivo, o programadas con kickoff cercano.
+ * 'skip'    → el fixture está poblado y no hay nada por jugarse: llamar sería
+ *             gastar un request en una respuesta vacía.
+ * 'unknown' → no se pudo determinar (caché sin filas para el deporte, tabla
+ *             ausente o error de lectura). El que llama tiene que fallar
+ *             abierto y pollear como siempre: el silencio de la caché puede
+ *             ser un hueco de cobertura del fixture (el rugby de FlashScore
+ *             tiene endpoints mutilados) y no un día sin partidos.
+ */
+export async function shouldPollLiveMatches(
+    sport: string,
+    supabase: SupabaseClient
+): Promise<LivePollDecision> {
+    const nowMs = Date.now();
+    const kickoffFrom = new Date(nowMs - 3 * 60 * 60 * 1000).toISOString();
+    const kickoffTo = new Date(nowMs + 15 * 60 * 1000).toISOString();
+
+    // Filas en vivo de cualquier fecha (una fila colgada en 'live' mantiene el
+    // poll abierto hasta que resetStaleLiveMatches la cierre) o programadas con
+    // kickoff entre -3 h y +15 min.
+    const pollable = await supabase
+        .from('external_match_cache')
+        .select('id')
+        .eq('sport', sport)
+        .or(`status.eq.live,and(status.eq.scheduled,date_time.gte.${kickoffFrom},date_time.lte.${kickoffTo})`)
+        .limit(1);
+
+    if (pollable.error) {
+        console.warn(`[externalMatchCache] shouldPollLiveMatches (${sport}) no pudo leer:`, pollable.error.message);
+        return 'unknown';
+    }
+    if ((pollable.data?.length ?? 0) > 0) return 'poll';
+
+    // Sin candidatos. Solo es un "no hay partidos" confiable si el fixture
+    // tiene filas en el horizonte que fixture-sync cubre; una caché vacía no
+    // distingue un día tranquilo de un sync que nunca corrió.
+    const horizonFrom = new Date(nowMs - 2 * 24 * 60 * 60 * 1000).toISOString();
+    const horizonTo = new Date(nowMs + 3 * 24 * 60 * 60 * 1000).toISOString();
+    const fixtureEvidence = await supabase
+        .from('external_match_cache')
+        .select('id')
+        .eq('sport', sport)
+        .gte('date_time', horizonFrom)
+        .lte('date_time', horizonTo)
+        .limit(1);
+
+    if (fixtureEvidence.error) {
+        console.warn(`[externalMatchCache] shouldPollLiveMatches (${sport}) no pudo leer el horizonte:`, fixtureEvidence.error.message);
+        return 'unknown';
+    }
+    return (fixtureEvidence.data?.length ?? 0) > 0 ? 'skip' : 'unknown';
 }
 
 // ── Read operations ──────────────────────────────────────────────────────────

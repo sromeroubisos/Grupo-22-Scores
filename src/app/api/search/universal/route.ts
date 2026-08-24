@@ -5,7 +5,7 @@ import { searchExternalTournamentCatalog } from '@/lib/server/externalTournament
 
 type SearchResult = {
     id: string;
-    type: 'tournament' | 'club';
+    type: 'tournament' | 'club' | 'player';
     title: string;
     subtitle: string;
     url: string;
@@ -37,6 +37,18 @@ type ClubSearchRow = {
     country: string | null;
     logo_url: string | null;
     is_visible: boolean | null;
+};
+
+type PersonSearchRow = {
+    id: string;
+    full_name: string | null;
+    name: string | null;
+    first_name: string | null;
+    last_name: string | null;
+    position: string | null;
+    club_id: string | null;
+    status: string | null;
+    role: string | null;
 };
 
 type ExternalTeamSearchRow = {
@@ -83,7 +95,7 @@ export async function GET(request: Request) {
         // The provider offers no search endpoint (/search 404s), so external results come
         // from our own indexes: the tournament catalog fed by the matches feed, and the
         // external_teams cache filled by team lookups.
-        const [tournamentsRes, clubsRes, externalTournaments, externalTeamsRes] = await Promise.all([
+        const [tournamentsRes, clubsRes, externalTournaments, externalTeamsRes, peopleRes] = await Promise.all([
             supabase.from('tournaments')
                 .select('id, name, display_name, slug, sport_id, country_id, logo_url, is_visible, status, review_status, sport:sports(name), country:countries(name)')
                 .or(`name.ilike.%${escapedSearch}%,display_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`)
@@ -99,14 +111,27 @@ export async function GET(request: Request) {
                 .select('id, name, short_name, sport, country, team_url, logo_url')
                 .or(`name.ilike.%${escapedSearch}%,short_name.ilike.%${escapedSearch}%`)
                 .limit(limit),
+            // Jugadores. `full_name` esta cargado en todas las filas, pero se
+            // buscan tambien nombre y apellido sueltos: quien escribe "baronio"
+            // no escribe el nombre completo.
+            //
+            // El club se pide EMBEBIDO pero SOLO `name`: `clubs.logo_url` guarda
+            // PNG en base64 de hasta 200 KB y traerlo por fila es como se colgo
+            // /api/teams (57014). El escudo, si hiciera falta, va por el proxy.
+            supabase.from('people')
+                .select('id, full_name, name, first_name, last_name, position, club_id, status, role, club:clubs(name)')
+                .or(`full_name.ilike.%${escapedSearch}%,name.ilike.%${escapedSearch}%,first_name.ilike.%${escapedSearch}%,last_name.ilike.%${escapedSearch}%`)
+                .limit(limit),
         ]);
 
         debugInfo = {
             ...debugInfo,
             tError: tournamentsRes.error,
             cError: clubsRes.error,
+            pError: peopleRes.error,
             tCount: tournamentsRes.data?.length || 0,
-            cCount: clubsRes.data?.length || 0
+            cCount: clubsRes.data?.length || 0,
+            pCount: peopleRes.data?.length || 0
         };
 
         if (tournamentsRes.error) {
@@ -114,6 +139,9 @@ export async function GET(request: Request) {
         }
         if (clubsRes.error) {
             console.error('[Universal Search] Club Query Error:', clubsRes.error);
+        }
+        if (peopleRes.error) {
+            console.error('[Universal Search] People Query Error:', peopleRes.error);
         }
 
         const rawResults: SearchResult[] = [];
@@ -150,6 +178,38 @@ export async function GET(request: Request) {
                 logo_url: sanitizeSearchLogoUrl(c.logo_url, c.id),
                 searchWeight: calculateWeight(c.name || c.short_name || '', c.short_name, c.slug, lSearch, 1)
             })));
+        }
+
+        if (peopleRes.data) {
+            rawResults.push(...(peopleRes.data as Array<PersonSearchRow & { club?: { name?: string | null } | null }>)
+                // Una ficha dada de baja no se ofrece en el buscador: el enlace
+                // abre igual, pero llevar a alguien que ya no esta en el club es
+                // peor que no mostrarlo.
+                .filter((person) => person.status !== 'inactive' && person.role !== 'staff')
+                .map((person) => {
+                    const title =
+                        person.full_name?.trim() ||
+                        person.name?.trim() ||
+                        [person.first_name, person.last_name].filter(Boolean).join(' ').trim() ||
+                        'Jugador';
+                    const clubName = person.club?.name?.trim() || null;
+                    // El puesto casi nunca esta cargado (144 de 1528): el
+                    // subtitulo cae al club, que si esta.
+                    const detalle = [person.position?.trim(), clubName].filter(Boolean).join(' · ');
+
+                    return {
+                        id: person.id,
+                        type: 'player' as const,
+                        title,
+                        subtitle: detalle ? `Jugador · ${detalle}` : 'Jugador',
+                        url: `/players/${person.id}`,
+                        // El avatar lo dibuja la UI con las iniciales: de 1528
+                        // jugadores, 31 tienen foto. Mandar un hueco es peor que
+                        // no mandar nada.
+                        logo_url: null,
+                        searchWeight: calculateWeight(title, person.last_name, null, lSearch, 4),
+                    };
+                }));
         }
 
         // External results are additive: a competition or club we already hold locally is
@@ -198,13 +258,43 @@ export async function GET(request: Request) {
             }
         }
 
-        const finalResults = rawResults
-            .sort((a, b) => {
-                if (a.searchWeight !== b.searchWeight) return a.searchWeight - b.searchWeight;
-                if (a.type !== b.type) return a.type === 'tournament' ? -1 : 1;
-                return a.title.localeCompare(b.title);
-            })
-            .slice(0, limit);
+        // Con tres tipos, `a.type === 'tournament' ? -1 : 1` deja de ser un
+        // comparador valido: dice que club < jugador Y que jugador < club, y el
+        // orden sale distinto segun como venga el array. Va una tabla.
+        const TYPE_ORDER: Record<SearchResult['type'], number> = { tournament: 0, club: 1, player: 2 };
+
+        const ordered = rawResults.sort((a, b) => {
+            if (a.searchWeight !== b.searchWeight) return a.searchWeight - b.searchWeight;
+            if (a.type !== b.type) return TYPE_ORDER[a.type] - TYPE_ORDER[b.type];
+            return a.title.localeCompare(b.title);
+        });
+
+        /**
+         * CUPO PARA LOS JUGADORES. Hay 1528 personas contra unos cientos de
+         * clubes, asi que un nombre comun se lleva la lista entera: buscar
+         * "juan" devolvia doce jugadores y ni un club ni un torneo.
+         *
+         * El cupo no los esconde — es un TECHO EN LA PRIMERA PASADA. Si despues
+         * de repartir sobran lugares (nadie mas matcheo), los jugadores los
+         * ocupan igual: quien escribe "baronio" esta buscando una persona y
+         * tiene que verlas todas.
+         */
+        const playerQuota = Math.max(3, Math.floor(limit / 3));
+        const primera: SearchResult[] = [];
+        const sobrantes: SearchResult[] = [];
+        let jugadores = 0;
+
+        for (const item of ordered) {
+            if (item.type === 'player' && jugadores >= playerQuota) {
+                sobrantes.push(item);
+                continue;
+            }
+            if (item.type === 'player') jugadores += 1;
+            primera.push(item);
+            if (primera.length >= limit) break;
+        }
+
+        const finalResults = primera.concat(sobrantes).slice(0, limit);
 
         const response = NextResponse.json({
             data: finalResults

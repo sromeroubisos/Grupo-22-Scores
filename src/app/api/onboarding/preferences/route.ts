@@ -52,13 +52,13 @@ function buildFallbackSports(): SportOption[] {
 
 async function getCurrentUserId() {
     const supabase = await createClient()
-    const { data: { session }, error } = await supabase.auth.getSession()
+    const { data: { user: authUser }, error } = await supabase.auth.getUser()
 
-    if (error || !session?.user) {
-        return { supabase, session: null, userId: null as string | null }
+    if (error || !authUser) {
+        return { supabase, authUser: null, userId: null as string | null }
     }
 
-    return { supabase, session, userId: session.user.id }
+    return { supabase, authUser, userId: authUser.id }
 }
 
 async function getSports(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -97,7 +97,7 @@ function normalizeSportIds(value: unknown) {
 export async function GET(request: NextRequest) {
     try {
         const mode = request.nextUrl.searchParams.get('mode')
-        const { supabase, session, userId } = await getCurrentUserId()
+        const { supabase, authUser, userId } = await getCurrentUserId()
 
         if (mode === 'status') {
             if (!userId) {
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
             }
 
             const status = await getOnboardingStatus(supabase, userId)
-            const metadataStatus = getOnboardingMetadataStatus(session?.user?.user_metadata)
+            const metadataStatus = getOnboardingMetadataStatus(authUser?.user_metadata)
             const onboardingCompleted = !!(
                 status?.preferences_onboarding_completed ||
                 status?.skipped ||
@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const payload = await request.json() as SavePreferencesPayload
-        const { supabase, session, userId } = await getCurrentUserId()
+        const { supabase, authUser, userId } = await getCurrentUserId()
 
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
 
         const persistMetadataFallback = async (skipped: boolean) => {
             const { error } = await supabase.auth.updateUser({
-                data: buildOnboardingMetadata(session?.user?.user_metadata, { skipped }),
+                data: buildOnboardingMetadata(authUser?.user_metadata, { skipped }),
             })
 
             if (error) {

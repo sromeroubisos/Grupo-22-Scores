@@ -79,3 +79,6 @@ graphify-out/
 # Caché de descargas de rugbyarchive.net (derivado, se rebaja solo)
 .rugbyarchive-cache/
 RUGBYARCHIVE_HISTORICO_LOG.jsonl
+
+# Respaldos de las fusiones de catálogo (pesados y de una sola corrida; no se versionan)
+*.backup.json

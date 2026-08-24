@@ -6,9 +6,11 @@ import { Search, X, Clock } from 'lucide-react';
 import TeamLogo from '@/components/TeamLogo';
 import styles from './search.module.css';
 
+type SearchEntityType = 'tournament' | 'club' | 'player';
+
 interface HistoryItem {
     id: string;
-    type: 'tournament' | 'club';
+    type: SearchEntityType;
     title: string;
     subtitle: string;
     url: string;
@@ -18,7 +20,7 @@ interface HistoryItem {
 
 interface ResultRow {
     id: string;
-    type: 'tournament' | 'club';
+    type: SearchEntityType;
     title: string;
     subtitle: string;
     url: string;
@@ -41,6 +43,23 @@ function SkeletonRows() {
     );
 }
 
+/**
+ * Las iniciales de un jugador. De 1528 fichas, 31 tienen foto: un avatar vacio
+ * repetido fila tras fila no identifica a nadie.
+ */
+function initialsOf(name: string) {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '?';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+
+const BADGE_LABEL: Record<SearchEntityType, string> = {
+    tournament: 'Torneo',
+    club: 'Club',
+    player: 'Jugador',
+};
+
 function ResultRowItem({ row, onSave }: { row: ResultRow; onSave: (r: ResultRow) => void }) {
     return (
         <Link href={row.url} className={styles.row} onClick={() => onSave(row)}>
@@ -52,11 +71,15 @@ function ResultRowItem({ row, onSave }: { row: ResultRow; onSave: (r: ResultRow)
                     className={styles.rowIcon}
                     size={44}
                 />
+            ) : row.type === 'player' ? (
+                <div className={`${styles.rowIcon} ${styles.playerIcon}`} aria-hidden="true">
+                    {initialsOf(row.title)}
+                </div>
             ) : (
                 <div className={styles.rowIcon}>
                     {row.logo_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={row.logo_url} alt={row.title} />
+                        <img src={row.logo_url} alt="" loading="lazy" />
                     ) : (
                         '🏆'
                     )}
@@ -66,8 +89,16 @@ function ResultRowItem({ row, onSave }: { row: ResultRow; onSave: (r: ResultRow)
                 <span className={styles.rowTitle}>{row.title}</span>
                 <span className={styles.rowSubtitle}>{row.subtitle}</span>
             </div>
-            <span className={`${styles.badge} ${row.type === 'tournament' ? styles.tournamentBadge : styles.clubBadge}`}>
-                {row.type === 'tournament' ? 'Torneo' : 'Club'}
+            <span
+                className={`${styles.badge} ${
+                    row.type === 'tournament'
+                        ? styles.tournamentBadge
+                        : row.type === 'player'
+                          ? styles.playerBadge
+                          : styles.clubBadge
+                }`}
+            >
+                {BADGE_LABEL[row.type]}
             </span>
             <svg className={styles.rowChevron} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path d="M9 18l6-6-6-6" />
@@ -198,6 +229,7 @@ export default function SearchPage() {
 
     const tournaments = results.filter((row) => row.type === 'tournament');
     const clubs = results.filter((row) => row.type === 'club');
+    const players = results.filter((row) => row.type === 'player');
 
     return (
         <div className={styles.page}>
@@ -207,8 +239,8 @@ export default function SearchPage() {
                     <input
                         ref={inputRef}
                         className={styles.input}
-                        aria-label="Buscar torneos o clubes"
-                        placeholder="Buscar torneos o clubes..."
+                        aria-label="Buscar torneos, clubes o jugadores"
+                        placeholder="Buscar torneos, clubes o jugadores..."
                         value={query}
                         onChange={(event) => setQuery(event.target.value)}
                         autoComplete="off"
@@ -258,11 +290,18 @@ export default function SearchPage() {
                                                 size={32}
                                                 radius="round"
                                             />
+                                        ) : item.type === 'player' ? (
+                                            <div
+                                                className={`${styles.recentIconWrapper} ${styles.playerIcon}`}
+                                                aria-hidden="true"
+                                            >
+                                                {initialsOf(item.title)}
+                                            </div>
                                         ) : (
                                             <div className={styles.recentIconWrapper}>
                                                 {item.logo_url ? (
                                                     // eslint-disable-next-line @next/next/no-img-element
-                                                    <img src={item.logo_url} className={styles.recentLogo} alt="" />
+                                                    <img src={item.logo_url} className={styles.recentLogo} alt="" loading="lazy" />
                                                 ) : (
                                                     <Clock size={15} className={styles.recentIcon} />
                                                 )}
@@ -324,6 +363,14 @@ export default function SearchPage() {
                                 <>
                                     <div className={styles.groupHeader}>Clubes</div>
                                     {clubs.map((row) => (
+                                        <ResultRowItem key={row.id} row={row} onSave={handleSave} />
+                                    ))}
+                                </>
+                            ) : null}
+                            {players.length > 0 ? (
+                                <>
+                                    <div className={styles.groupHeader}>Jugadores</div>
+                                    {players.map((row) => (
                                         <ResultRowItem key={row.id} row={row} onSave={handleSave} />
                                     ))}
                                 </>

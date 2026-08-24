@@ -3,6 +3,8 @@ import { getReadClient } from '@/lib/supabase/read';
 import { buildTeamLogoProxyUrl, isOversizedInlineLogoUrl, resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 import { APP_TIMEZONE } from '@/lib/timezone';
+import { getTeamMatchHistory, type CachedExternalMatch } from '@/lib/services/externalMatchCache';
+import { getTeamHonours } from '@/lib/services/externalTeamHonours';
 
 const FINISHED_STATUSES = new Set([
     'final', 'finished', 'completed', 'scored', 'ft', 'aet', 'pen', 'awarded',
@@ -158,12 +160,115 @@ async function resolveClubFamilyIds(db: Awaited<ReturnType<typeof getReadClient>
     return Array.from(ids);
 }
 
+// ── Historial externo ─────────────────────────────────────────────────────────
+// Un equipo externo (id de FlashScore) no tiene filas en `matches`: su archivo
+// vive en external_match_cache (feed diario + write-through de /api/teams +
+// imports de rugbyarchive) y se sirve acá con el mismo contrato que el interno.
+
+function normalizeCompetitionKey(name: string | null | undefined) {
+    return String(name || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim();
+}
+
+// Identidad día + par de equipos, insensible a la orientación: el mismo partido
+// puede vivir como fila interna y como fila de caché con ids distintos.
+function externalMatchIdentity(match: { date: string; home: { name: string }; away: { name: string } }) {
+    const day = match.date.slice(0, 10);
+    const names = [match.home.name, match.away.name]
+        .map((n) => normalizeCompetitionKey(n).replace(/ /g, ''))
+        .filter(Boolean);
+    if (names.length < 2) return null;
+    return `${day}|${names.sort().join('|')}`;
+}
+
+async function fetchExternalHistory(db: Awaited<ReturnType<typeof getReadClient>>, rawId: string) {
+    const empty = { matches: [] as NormalizedMatch[], honourLabels: new Map<string, string>() };
+    const teamId = rawId.replace(/^fs-team-/i, '');
+    // Solo ids con pinta de externos: un UUID interno no tiene nada en la caché.
+    if (!/^[a-zA-Z0-9]+$/.test(teamId)) return empty;
+
+    const keys = [teamId, `fs-team-${teamId}`];
+    let rugbyarchiveId = '';
+    try {
+        const { data } = await (db as any)
+            .from('external_teams')
+            .select('*')
+            .eq('id', teamId)
+            .maybeSingle();
+        rugbyarchiveId = String(data?.rugbyarchive_id || '').trim();
+    } catch {
+        // Sin vínculo conocido: alcanza con las variantes de FlashScore.
+    }
+    if (rugbyarchiveId) keys.push(`ra-team-${rugbyarchiveId}`);
+
+    const keySet = new Set(keys);
+    const [rows, honours] = await Promise.all([
+        getTeamMatchHistory(keys, db as any, { limit: 1000 }),
+        getTeamHonours([teamId, ...(rugbyarchiveId ? [`ra-team-${rugbyarchiveId}`] : [])], db as any),
+    ]);
+
+    const matches: NormalizedMatch[] = [];
+    for (const row of rows as CachedExternalMatch[]) {
+        if (row.status !== 'final' || !row.date_time) continue;
+        const score = getScore(row.score as Score);
+        if (!score) continue;
+        const isHome = keySet.has(String(row.home_team?.id || ''));
+        const pointsFor = isHome ? score.home : score.away;
+        const pointsAgainst = isHome ? score.away : score.home;
+        matches.push({
+            id: row.id,
+            date: row.date_time,
+            category: null,
+            sportId: row.sport || null,
+            tournamentId: row.tournament_id,
+            tournamentName: row.tournament_name,
+            tournamentLogo: null,
+            season: matchSeasonLabel(row.date_time),
+            phaseId: null,
+            home: {
+                id: row.home_team?.id || null,
+                name: row.home_team?.name || 'Equipo local',
+                logo: row.home_team?.small_image_path || row.home_team?.logo || '',
+            },
+            away: {
+                id: row.away_team?.id || null,
+                name: row.away_team?.name || 'Equipo visitante',
+                logo: row.away_team?.small_image_path || row.away_team?.logo || '',
+            },
+            homeScore: score.home,
+            awayScore: score.away,
+            isHome,
+            outcome: (pointsFor > pointsAgainst ? 'win' : pointsFor < pointsAgainst ? 'loss' : 'draw') as NormalizedMatch['outcome'],
+            pointsFor,
+            pointsAgainst,
+        });
+    }
+
+    // Campeonatos que la fuente declara: "<competición>|<temporada>" → puntero.
+    const honourLabels = new Map<string, string>();
+    for (const honour of honours) {
+        honourLabels.set(
+            `${normalizeCompetitionKey(honour.competition_name)}|${honour.season}`,
+            honour.result === 'champion' ? 'Campeón' : 'Subcampeón',
+        );
+    }
+    return { matches, honourLabels };
+}
+
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     if (!id) return NextResponse.json({ ok: false, error: 'Falta el equipo.' }, { status: 400 });
 
     try {
         const db = await getReadClient();
+        // El archivo externo viaja en paralelo con todo el pipeline interno; si
+        // falla, el historial interno sigue sirviendo igual.
+        const externalHistoryPromise = fetchExternalHistory(db, id)
+            .catch(() => ({ matches: [] as NormalizedMatch[], honourLabels: new Map<string, string>() }));
         const [supportsTableType, familyIds] = await Promise.all([
             supportsStandingsTableTypeColumn(),
             resolveClubFamilyIds(db, id),
@@ -371,6 +476,28 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             }
         }
 
+        // ── Historial externo: el archivo del equipo en external_match_cache ──
+        // Se suma después del remap de filiales y antes de derivar temporadas y
+        // participaciones, así el archivo externo también las alimenta.
+        const externalHistory = await externalHistoryPromise;
+        if (externalHistory.matches.length > 0) {
+            const seenIds = new Set(normalizedMatches.map((match) => match.id));
+            const seenIdentities = new Set<string>();
+            for (const match of normalizedMatches) {
+                const identity = externalMatchIdentity(match);
+                if (identity) seenIdentities.add(identity);
+            }
+            for (const match of externalHistory.matches) {
+                if (seenIds.has(match.id)) continue;
+                const identity = externalMatchIdentity(match);
+                if (identity && seenIdentities.has(identity)) continue;
+                if (identity) seenIdentities.add(identity);
+                seenIds.add(match.id);
+                normalizedMatches.push(match);
+            }
+            normalizedMatches.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        }
+
         // normalizedMatches está de más nuevo a más viejo: la primera aparición de
         // cada torneo es su temporada con actividad más reciente.
         const latestSeasonByTournament = new Map<string, string>();
@@ -455,6 +582,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
                 result: resultLabel(position, count, finished),
             };
         }).sort((a, b) => b.season.localeCompare(a.season) || a.tournamentName.localeCompare(b.tournamentName));
+
+        // Punteros que el palmarés externo declara (campeón/subcampeón por
+        // competición y temporada): solo donde el pipeline interno no puso nada.
+        if (externalHistory.honourLabels.size > 0) {
+            for (const participation of participations) {
+                if (participation.result) continue;
+                const label = externalHistory.honourLabels.get(
+                    `${normalizeCompetitionKey(participation.tournamentName)}|${participation.season}`,
+                );
+                if (label) {
+                    participation.result = label;
+                    participation.finished = true;
+                }
+            }
+        }
 
         const filterSeasons = new Set(normalizedMatches.map((match) => match.season));
         const filterTournaments = new Set(normalizedMatches.map((match) => match.tournamentName).filter((value): value is string => Boolean(value)));

@@ -10,6 +10,7 @@ import {
 } from '@/lib/services/espnFootball';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { getLocalPlayerProfile } from '@/lib/services/localPlayerProfile';
 
 function isUuidLike(value: string) {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -67,57 +68,35 @@ export async function GET(request: Request) {
             const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY
                 ? createAdminClient()
                 : await createClient();
-            const { data: person, error: personError } = await supabase
-                .from('people')
-                .select('id, full_name, name, photo_url, avatar_url, birth_date, position, height, weight, club_id')
-                .eq('id', playerId)
-                .maybeSingle();
 
-            if (personError) {
-                return Response.json(
-                    { ok: false, error: 'Failed to load local player data', details: personError.message },
-                    { status: 500 }
-                );
-            }
+            // La ficha local sale de los PARTIDOS, no de las columnas de
+            // `people`: de 1528 jugadores solo 144 tienen posicion cargada y 38
+            // fecha de nacimiento, pero 350 tienen eventos. Ver
+            // `localPlayerProfile.ts`.
+            const profile = await getLocalPlayerProfile(supabase, playerId);
 
-            if (person) {
-                const [clubRes, squadRes] = await Promise.all([
-                    person.club_id
-                        ? supabase
-                            .from('clubs')
-                            .select('id, name, logo_url')
-                            .eq('id', person.club_id)
-                            .maybeSingle()
-                        : Promise.resolve({ data: null, error: null }),
-                    supabase
-                        .from('squad_members')
-                        .select('jersey_number')
-                        .eq('person_id', playerId)
-                        .order('updated_at', { ascending: false })
-                        .limit(1)
-                        .maybeSingle(),
-                ]);
-
+            if (profile) {
                 return Response.json({
                     ok: true,
+                    source: 'local',
                     details: {
-                        id: person.id,
-                        name: person.full_name || person.name || 'Jugador',
-                        image_path: person.photo_url || person.avatar_url || '',
-                        birth_date: person.birth_date,
-                        position: person.position || '',
-                        height: person.height,
-                        weight: person.weight,
-                        jersey_number: squadRes.data?.jersey_number ?? null,
-                        team: clubRes.data
-                            ? {
-                                id: clubRes.data.id,
-                                name: clubRes.data.name,
-                                logo_url: clubRes.data.logo_url || '',
-                            }
+                        id: profile.id,
+                        name: profile.name,
+                        image_path: profile.photo || '',
+                        birth_date: profile.birthDate,
+                        position: profile.position || '',
+                        height: profile.height,
+                        weight: profile.weight,
+                        jersey_number: profile.number,
+                        // El escudo va por el proxy (`/api/assets/team-logo`),
+                        // no crudo: `clubs.logo_url` guarda PNG en base64 de
+                        // hasta 200 KB y los metia enteros en esta respuesta.
+                        team: profile.club
+                            ? { id: profile.club.id, name: profile.club.name, short_name: profile.club.shortName }
                             : null,
                     },
-                    career: []
+                    career: [],
+                    profile,
                 });
             }
         }

@@ -1,4 +1,17 @@
-const AUTH_COOKIE_MAX_AGE_DAYS = 400;
+/**
+ * Cuanto vive la cookie de sesion en el navegador.
+ *
+ * Estaba en 400 dias —el maximo que aceptan los navegadores— y eso define
+ * cuanto sirve un token robado. La cookie se emite SIN httpOnly a proposito
+ * (createBrowserClient necesita leerla), asi que cualquier XSS se la lleva; con
+ * 400 dias, esa sesion robada dura mas de un año.
+ *
+ * 30 dias es el compromiso: un mes de inactividad antes de tener que volver a
+ * entrar. Si el equipo decide que es demasiado friccion, se sube ACA y en un
+ * solo lugar — pero cada dia que se agrega es un dia mas de vida util para una
+ * sesion robada. Bajarlo NO reemplaza arreglar el httpOnly, solo acota el daño.
+ */
+const AUTH_COOKIE_MAX_AGE_DAYS = 30;
 
 export const SUPABASE_AUTH_COOKIE_MAX_AGE_SECONDS =
     AUTH_COOKIE_MAX_AGE_DAYS * 24 * 60 * 60;

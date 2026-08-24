@@ -15,15 +15,15 @@ export async function GET() {
     try {
         const supabase = await createServerClient();
         const {
-            data: { session },
-            error: sessionError,
-        } = await supabase.auth.getSession();
+            data: { user: authUser },
+            error: authError,
+        } = await supabase.auth.getUser();
 
-        if (sessionError || !session?.user?.id) {
+        if (authError || !authUser?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const result = await listUserPrivateLeagues(session.user.id);
+        const result = await listUserPrivateLeagues(authUser.id);
         return NextResponse.json(result);
     } catch (error) {
         const message = error instanceof Error ? error.message : 'No se pudieron cargar tus ligas privadas.';
@@ -398,18 +398,18 @@ export async function POST(request: Request) {
     try {
         const supabase = await createServerClient();
         const {
-            data: { session },
-            error: sessionError,
-        } = await supabase.auth.getSession();
+            data: { user: authUser },
+            error: authError,
+        } = await supabase.auth.getUser();
 
-        if (sessionError || !session?.user?.id) {
+        if (authError || !authUser?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const payload = await request.json() as CreateLeaguePayload | JoinLeaguePayload;
         const action = ensureString(payload.action);
         const admin = createAdminClient() as unknown as LooseAdminClient;
-        await ensureUserProfile(admin, session.user);
+        await ensureUserProfile(admin, authUser);
 
         if (action === 'join_by_code') {
             const inviteCode = ensureString((payload as JoinLeaguePayload).inviteCode).toUpperCase();
@@ -446,7 +446,7 @@ export async function POST(request: Request) {
                 .from('prode_private_league_members')
                 .select('private_league_id, user_id, role')
                 .eq('private_league_id', ensureString(leagueResult.data.id))
-                .eq('user_id', session.user.id)
+                .eq('user_id', authUser.id)
                 .maybeSingle();
 
             if (membershipResult.error) {
@@ -455,7 +455,7 @@ export async function POST(request: Request) {
 
             const existingRole = ensureString(membershipResult.data?.role);
             const desiredRole = existingRole || (
-                ensureString(leagueResult.data.owner_user_id) === session.user.id
+                ensureString(leagueResult.data.owner_user_id) === authUser.id
                     ? 'owner'
                     : 'member'
             );
@@ -465,14 +465,14 @@ export async function POST(request: Request) {
                     .from('prode_competition_members')
                     .upsert({
                         competition_id: competitionId,
-                        user_id: session.user.id,
+                        user_id: authUser.id,
                         status: 'active',
                     }, { onConflict: 'competition_id,user_id' }),
                 admin
                     .from('prode_private_league_members')
                     .upsert({
                         private_league_id: ensureString(leagueResult.data.id),
-                        user_id: session.user.id,
+                        user_id: authUser.id,
                         role: desiredRole,
                     }, { onConflict: 'private_league_id,user_id' }),
             ]);
@@ -524,7 +524,7 @@ export async function POST(request: Request) {
             rulesHistory: [{
                 version: 1,
                 appliedAt: new Date().toISOString(),
-                appliedBy: session.user.id,
+                appliedBy: authUser.id,
                 retroactive: false,
                 rules,
             }],
@@ -542,7 +542,7 @@ export async function POST(request: Request) {
             .from('prode_private_leagues')
             .insert({
                 competition_id: competitionId,
-                owner_user_id: session.user.id,
+                owner_user_id: authUser.id,
                 name: leagueName,
                 slug: leagueSlug,
                 invite_code: inviteCodeValue,
@@ -565,14 +565,14 @@ export async function POST(request: Request) {
                 .from('prode_competition_members')
                 .upsert({
                     competition_id: competitionId,
-                    user_id: session.user.id,
+                    user_id: authUser.id,
                     status: 'active',
                 }, { onConflict: 'competition_id,user_id' }),
             admin
                 .from('prode_private_league_members')
                 .upsert({
                     private_league_id: createdLeague.id,
-                    user_id: session.user.id,
+                    user_id: authUser.id,
                     role: 'admin',
                 }, { onConflict: 'private_league_id,user_id' }),
         ]);
@@ -649,11 +649,11 @@ export async function PATCH(request: Request) {
     try {
         const supabase = await createServerClient();
         const {
-            data: { session },
-            error: sessionError,
-        } = await supabase.auth.getSession();
+            data: { user: authUser },
+            error: authError,
+        } = await supabase.auth.getUser();
 
-        if (sessionError || !session?.user?.id) {
+        if (authError || !authUser?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -666,9 +666,9 @@ export async function PATCH(request: Request) {
         }
 
         const admin = createAdminClient() as unknown as LooseAdminClient;
-        await ensureUserProfile(admin, session.user);
+        await ensureUserProfile(admin, authUser);
 
-        const league = await getManagedLeague(admin, leagueId, session.user.id);
+        const league = await getManagedLeague(admin, leagueId, authUser.id);
 
         if (action === 'update_rules') {
             const currentMetadata = ensureObject(league.metadata);
@@ -692,13 +692,13 @@ export async function PATCH(request: Request) {
                 rules: nextRules,
                 rulesVersion: nextVersion,
                 rulesLastUpdatedAt: new Date().toISOString(),
-                rulesLastUpdatedBy: session.user.id,
+                rulesLastUpdatedBy: authUser.id,
                 rulesHistory: [
                     ...currentHistory,
                     {
                         version: nextVersion,
                         appliedAt: new Date().toISOString(),
-                        appliedBy: session.user.id,
+                        appliedBy: authUser.id,
                         retroactive,
                         rules: nextRules,
                     },
@@ -736,7 +736,7 @@ export async function PATCH(request: Request) {
                 ...currentMetadata,
                 lifecycle: nextLifecycle,
                 [timestampKey]: new Date().toISOString(),
-                [userKey]: session.user.id,
+                [userKey]: authUser.id,
             };
 
             const { error: updateLeagueError } = await admin

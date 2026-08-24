@@ -175,16 +175,30 @@ function streakLabel(matchesNewestFirst: HistoryMatch[]) {
 }
 
 function MatchLine({ match }: { match: HistoryMatch }) {
-    return (
-        <Link href={`/matches/${match.id}`} className={styles.historyMatchLine}>
+    // Un partido del archivo ('ra-…') no tiene página propia: la fila navega al
+    // torneo en cuestión cuando el torneo sí la tiene, y si no, no linkea.
+    const isArchiveMatch = match.id.startsWith('ra-');
+    const tournamentHref = match.tournamentId && !match.tournamentId.startsWith('ra-')
+        ? `/torneos/${match.tournamentId}`
+        : null;
+    const href = isArchiveMatch ? tournamentHref : `/matches/${match.id}`;
+    const body = (
+        <>
             <time dateTime={match.date}>{formatDate(match.date, true)}</time>
             <span className={`${styles.resultPill} ${styles[`result_${match.outcome}`]}`}>
                 {match.outcome === 'win' ? 'G' : match.outcome === 'draw' ? 'E' : 'P'}
             </span>
             <span className={styles.historyMatchTeams}>{match.home.name} <strong>{match.homeScore}–{match.awayScore}</strong> {match.away.name}</span>
             <span className={styles.historyMatchTournament}>{match.tournamentName || 'Sin torneo'}</span>
+        </>
+    );
+    return href ? (
+        <Link href={href} className={styles.historyMatchLine}>
+            {body}
             <ChevronRight size={15} aria-hidden="true" />
         </Link>
+    ) : (
+        <div className={styles.historyMatchLine}>{body}</div>
     );
 }
 
@@ -598,16 +612,30 @@ export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId
                         </div>
                     )}
                     <div className={styles.participationList}>
-                        {filteredParticipations.map((item) => (
-                            <Link key={`${item.tournamentId}-${item.season}`} href={`/torneos/${item.tournamentId}`} className={styles.participationRow}>
-                                <TeamMark name={item.tournamentName} logo={item.tournamentLogo} />
-                                <div className={styles.participationIdentity}><strong>{item.tournamentName}</strong><span>{item.season}{item.category ? ` · ${item.category}` : ''}{item.phase ? ` · ${item.phase}` : ''}</span></div>
-                                <div className={styles.participationResult}>{item.finished && item.position === 1 && <Medal size={16} aria-hidden="true" />}<strong>{item.result || item.phase || 'Sin posición final'}</strong><span>{item.teamsCount ? `${item.teamsCount} equipos` : 'Participación registrada'}</span></div>
-                                <div className={styles.participationRecord}><strong>{item.matchesPlayed} PJ</strong><span>{item.wins}G · {item.draws}E · {item.losses}P</span></div>
-                                <div className={styles.participationPoints}><strong>{item.tablePoints ?? '—'}</strong><span>Pts. tabla</span></div>
-                                <ChevronRight size={17} aria-hidden="true" />
-                            </Link>
-                        ))}
+                        {filteredParticipations.map((item) => {
+                            // Una participación del archivo ('ra-comp-…'/'ra-tour-…') no
+                            // tiene página de torneo: se muestra sin link en vez de romper.
+                            const linkable = Boolean(item.tournamentId) && !item.tournamentId.startsWith('ra-');
+                            const body = (
+                                <>
+                                    <TeamMark name={item.tournamentName} logo={item.tournamentLogo} />
+                                    <div className={styles.participationIdentity}><strong>{item.tournamentName}</strong><span>{item.season}{item.category ? ` · ${item.category}` : ''}{item.phase ? ` · ${item.phase}` : ''}</span></div>
+                                    <div className={styles.participationResult}>{item.finished && item.position === 1 && <Medal size={16} aria-hidden="true" />}<strong>{item.result || item.phase || 'Sin posición final'}</strong><span>{item.teamsCount ? `${item.teamsCount} equipos` : 'Participación registrada'}</span></div>
+                                    <div className={styles.participationRecord}><strong>{item.matchesPlayed} PJ</strong><span>{item.wins}G · {item.draws}E · {item.losses}P</span></div>
+                                    <div className={styles.participationPoints}><strong>{item.tablePoints ?? '—'}</strong><span>Pts. tabla</span></div>
+                                </>
+                            );
+                            return linkable ? (
+                                <Link key={`${item.tournamentId}-${item.season}`} href={`/torneos/${item.tournamentId}`} className={styles.participationRow}>
+                                    {body}
+                                    <ChevronRight size={17} aria-hidden="true" />
+                                </Link>
+                            ) : (
+                                <div key={`${item.tournamentId}-${item.season}`} className={styles.participationRow}>
+                                    {body}
+                                </div>
+                            );
+                        })}
                     </div>
                     {!filteredParticipations.length && <div className={styles.historyEmptyCompact}>No hay participaciones registradas con estos filtros.</div>}
                 </div>

@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
-import { createClient } from '@/lib/supabase/server';
-import { requireTournamentAdminContext } from '@/lib/auth/permissions';
+import { requireRequestTournamentAdminContext } from '@/lib/auth/permissions';
 import { resolveAdminGuardRedirect } from '@/lib/auth/adminGuardRedirect';
 import { jakarta, mono } from './fonts';
 import TournamentAdminSidebar from './components/TournamentAdminSidebar';
@@ -17,10 +16,9 @@ export default async function TournamentAdminLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const supabase = await createClient();
-
     try {
-        await requireTournamentAdminContext(supabase);
+        // Memoizado: /admin/layout.tsx ya resolvio el contexto en este mismo render.
+        await requireRequestTournamentAdminContext();
     } catch (error) {
         redirect(await resolveAdminGuardRedirect(error));
     }

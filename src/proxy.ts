@@ -8,6 +8,7 @@ import { logRefreshFlow } from '@/lib/debug/refreshFlow'
 import { logRefreshLoop } from '@/lib/debug/refreshLoop'
 import { updateSession, readUserFromCookie, PROTECTED_AUTH_REFRESH_TIMEOUT_MS } from '@/lib/supabase/proxy'
 import { measureAsync } from '@/lib/perf/measure';
+import { GUEST_CLUB_ACCESS_COOKIE, isGuestClubAccessEnabled } from '@/lib/auth/guestClubAccess';
 
 // Only refresh the Supabase session on routes that genuinely depend on auth.
 // This avoids hitting `auth/v1/user` on public traffic, which is what was
@@ -39,7 +40,6 @@ const AUTH_CALLBACK_PATHS = new Set([
 // Se mantiene específica a "nueva" para no romper el flujo de /prode/ligas/unirse,
 // que muestra el formulario de código y recién pide login al enviar.
 const PROTECTED_ROUTE_PREFIXES = ['/admin', '/club-admin', '/profile', '/prode/ligas/nueva'];
-const GUEST_CLUB_ACCESS_COOKIE = 'g22_guest_club_access';
 
 function shouldRefreshSession(pathname: string): boolean {
     // Note: the `/?code=...` OAuth-landing case is handled earlier in proxy()
@@ -56,6 +56,12 @@ function isProtectedRoute(pathname: string): boolean {
 }
 
 function hasGuestClubAccess(request: NextRequest): boolean {
+    // Tercer punto donde se chequea el flag, ademas de la ruta que emite la
+    // cookie y de getGuestAccessContext(). Este es el que mas importa: saltea
+    // el redirect a /login por completo, asi que con el flag apagado y solo los
+    // otros dos cerrados un visitante seguiria entrando a /club-admin.
+    if (!isGuestClubAccessEnabled()) return false;
+
     const rawValue = request.cookies.get(GUEST_CLUB_ACCESS_COOKIE)?.value;
     if (!rawValue) return false;
 

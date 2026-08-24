@@ -7,12 +7,19 @@ import styles from '../login.module.css'
 import { sanitizeReturnTo } from '../redirects'
 import { normalizeEmail, signInWithPasswordAndRedirect } from '../auth-client'
 import { clearSupabaseBrowserSession } from '@/lib/supabase/client'
+import { CAPTCHA_PENDING_MESSAGE, isCaptchaEnabled } from '@/lib/auth/captcha'
+import CaptchaField from './CaptchaField'
 
 export default function EmailLoginForm({ onError }: { onError: (msg: string | null) => void }) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+    // Turnstile entrega tokens de un solo uso: despues de cada intento fallido
+    // hay que pedir uno nuevo, o el siguiente reenvia el mismo y Supabase lo
+    // rechaza sin siquiera mirar la credencial.
+    const [captchaReset, setCaptchaReset] = useState(0)
     const submittingRef = useRef(false)
     const searchParams = useSearchParams()
     const roleIntent = searchParams.get('roleIntent')
@@ -30,6 +37,11 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
             return
         }
 
+        if (isCaptchaEnabled() && !captchaToken) {
+            onError(CAPTCHA_PENDING_MESSAGE)
+            return
+        }
+
         submittingRef.current = true
         setLoading(true)
         try {
@@ -37,9 +49,11 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
                 email: normalizedEmail,
                 password,
                 returnTo,
+                captchaToken,
             })
         } catch (error: unknown) {
             onError(error instanceof Error ? error.message : 'Ocurrio un error al iniciar sesion')
+            setCaptchaReset((n) => n + 1)
         } finally {
             submittingRef.current = false
             setLoading(false)
@@ -96,6 +110,8 @@ export default function EmailLoginForm({ onError }: { onError: (msg: string | nu
                     </button>
                 </div>
             </div>
+
+            <CaptchaField onToken={setCaptchaToken} resetSignal={captchaReset} />
 
             <button type="submit" className={styles.submitBtn} disabled={loading}>
                 {loading ? 'Ingresando...' : 'Ingresar'}

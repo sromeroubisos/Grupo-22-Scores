@@ -28,6 +28,13 @@ import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { buildTeamLogoProxyUrl, clubLogoVersion } from '@/lib/utils/logoUrl';
 import { applyExternalTeamLogoOverride } from '@/lib/utils/teamLogoOverrides';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
+import {
+    getTeamMatchHistory,
+    mapExternalMatchToCached,
+    upsertMatchHistory,
+    type CachedExternalMatch,
+} from '@/lib/services/externalMatchCache';
+import { getTeamHonours, type TeamHonourRow } from '@/lib/services/externalTeamHonours';
 
 type ReadClient = Awaited<ReturnType<typeof getReadClient>>;
 type InternalClubRow = Database['public']['Tables']['clubs']['Row'] & {
@@ -121,6 +128,9 @@ type NormalizedInternalMatch = {
     match_status: string;
     timestamp: number;
     tournament_name: string;
+    // Id de torneo navegable ('fs-…' o UUID interno) cuando se conoce; las filas
+    // 'ra-…' sin página y las de FlashScore por equipo (que no traen liga) van sin él.
+    tournament_id?: string | null;
     sport_id: string | null;
 };
 type InternalSquadState = {
@@ -162,6 +172,7 @@ type ExternalTeamCacheRow = {
     sport?: string | null;
     country?: string | null;
     team_url?: string | null;
+    rugbyarchive_id?: string | null;
     updated_at?: string | null;
 };
 
@@ -262,6 +273,168 @@ async function persistExternalTeamUrlCache(input: {
 
     externalTeamCacheWriteLocks.set(writeKey, writePromise);
     await writePromise;
+}
+
+// ── Historial persistido por equipo (external_match_cache) ───────────────────
+// Los resultados y fixtures que FlashScore devuelve por equipo se guardan en
+// external_match_cache (write-through con backoff) y se leen de vuelta para
+// extender la lista más allá de la ventana que da la API. Convención de ids:
+// el partido va con su match_id crudo (igual que el feed diario) y los equipos
+// con prefijo 'fs-team-' (igual que mapFlashScoreMatchToCached).
+
+const TEAM_HISTORY_WRITE_BACKOFF_MS = 10 * 60 * 1000;
+const teamHistoryWriteNextAllowedAt = new Map<string, number>();
+
+function buildTeamHistoryCachedTeam(
+    team: NormalizedInternalMatch['home_team'],
+    fallbackShort: string
+) {
+    const logo = team?.small_image_path || '';
+    return {
+        id: team?.team_id ? `fs-team-${team.team_id}` : '',
+        name: team?.name || '',
+        logo,
+        shortName: team?.name ? team.name.substring(0, 3).toUpperCase() : fallbackShort,
+        image_path: logo,
+        small_image_path: logo,
+    };
+}
+
+function buildTeamHistoryCacheRows(
+    matches: NormalizedInternalMatch[],
+    kind: 'result' | 'fixture',
+    sport: string
+): CachedExternalMatch[] {
+    const rows: CachedExternalMatch[] = [];
+    for (const m of matches) {
+        if (!m.match_id) continue;
+        if (!Number.isFinite(m.timestamp) || m.timestamp <= 0) continue;
+        rows.push(mapExternalMatchToCached({
+            id: String(m.match_id),
+            sport,
+            tournamentName: m.tournament_name || null,
+            homeTeam: buildTeamHistoryCachedTeam(m.home_team, 'LOC'),
+            awayTeam: buildTeamHistoryCachedTeam(m.away_team, 'VIS'),
+            score: kind === 'result'
+                ? { home: m.scores?.home ?? null, away: m.scores?.away ?? null }
+                : { home: null, away: null },
+            status: kind === 'result' ? 'final' : 'scheduled',
+            dateTime: new Date(m.timestamp * 1000).toISOString(),
+        }));
+    }
+    return rows;
+}
+
+async function persistTeamMatchHistory(input: {
+    teamId: string;
+    sport: string;
+    results: NormalizedInternalMatch[];
+    fixtures: NormalizedInternalMatch[];
+}) {
+    const rows = [
+        ...buildTeamHistoryCacheRows(input.results, 'result', input.sport),
+        ...buildTeamHistoryCacheRows(input.fixtures, 'fixture', input.sport),
+    ];
+    if (rows.length === 0) return;
+
+    const backoffKey = `${input.sport}|${input.teamId}`;
+    const now = Date.now();
+    if ((teamHistoryWriteNextAllowedAt.get(backoffKey) || 0) > now) return;
+    teamHistoryWriteNextAllowedAt.set(backoffKey, now + TEAM_HISTORY_WRITE_BACKOFF_MS);
+
+    const writeClient = getExternalTeamCacheWriteClient();
+    if (!writeClient) return;
+
+    try {
+        await upsertMatchHistory(rows, writeClient);
+    } catch (error) {
+        console.warn('[teams] No se pudo persistir el historial del equipo.', {
+            teamId: input.teamId,
+            error: error instanceof Error ? error.message : String(error),
+        });
+    }
+}
+
+function normalizeCachedHistoryMatch(
+    row: CachedExternalMatch,
+    sportIdHint: string | null
+): NormalizedInternalMatch | null {
+    const ts = Date.parse(row.date_time);
+    if (!Number.isFinite(ts)) return null;
+    return {
+        match_id: row.id,
+        home_team: {
+            name: row.home_team?.name || '',
+            small_image_path: row.home_team?.small_image_path || row.home_team?.image_path || row.home_team?.logo || '',
+            team_id: row.home_team?.id || '',
+        },
+        away_team: {
+            name: row.away_team?.name || '',
+            small_image_path: row.away_team?.small_image_path || row.away_team?.image_path || row.away_team?.logo || '',
+            team_id: row.away_team?.id || '',
+        },
+        scores: { home: row.score?.home ?? null, away: row.score?.away ?? null },
+        match_status: row.status === 'final' ? 'FT' : 'NS',
+        timestamp: ts / 1000,
+        tournament_name: row.tournament_name || '',
+        tournament_id: row.tournament_id || null,
+        // El filtro de deporte de la UI compara sport_id crudo (el numérico de
+        // FlashScore); las filas de caché heredan el de las filas frescas para
+        // no partir el selector en dos entradas del mismo deporte.
+        sport_id: sportIdHint,
+    };
+}
+
+function buildMatchIdentityKey(m: NormalizedInternalMatch): string | null {
+    if (!Number.isFinite(m.timestamp) || m.timestamp <= 0) return null;
+    const day = new Date(m.timestamp * 1000).toISOString().slice(0, 10);
+    const names = [m.home_team?.name, m.away_team?.name]
+        .map((n) => String(n || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]+/g, ''))
+        .filter(Boolean);
+    if (names.length < 2) return null;
+    // Insensible a la orientación: el mismo partido puede venir con local y
+    // visitante invertidos según la fuente (FlashScore vs rugbyarchive).
+    return `${day}|${names.sort().join('|')}`;
+}
+
+/**
+ * Suma el historial cacheado a la lista fresca sin duplicar: primero por id y
+ * después por identidad (día + par de equipos), porque el mismo partido puede
+ * vivir con id de FlashScore y con id 'ra-' de rugbyarchive a la vez.
+ */
+function mergeTeamMatchHistory(
+    fresh: NormalizedInternalMatch[],
+    history: NormalizedInternalMatch[]
+): NormalizedInternalMatch[] {
+    if (history.length === 0) return fresh;
+
+    const seenIds = new Set<string>();
+    const seenGames = new Set<string>();
+    const merged = [...fresh];
+    for (const m of fresh) {
+        if (m.match_id) seenIds.add(m.match_id);
+        const identity = buildMatchIdentityKey(m);
+        if (identity) seenGames.add(identity);
+    }
+
+    // Las filas de FlashScore van primero: ante el mismo partido duplicado en
+    // las dos fuentes, gana la que tiene ids navegables y escudos propios.
+    const ordered = [...history].sort(
+        (a, b) => Number(a.match_id.startsWith('ra-')) - Number(b.match_id.startsWith('ra-'))
+    );
+    for (const m of ordered) {
+        if (!m.match_id || seenIds.has(m.match_id)) continue;
+        const identity = buildMatchIdentityKey(m);
+        if (identity && seenGames.has(identity)) continue;
+        seenIds.add(m.match_id);
+        if (identity) seenGames.add(identity);
+        merged.push(m);
+    }
+    return merged;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -594,11 +767,18 @@ function mapClubRosterPersonToSquad(person: PersonWithRole, clubId: string) {
         shirt_number: null,
         number: null,
         position: person.position || null,
+        // Del padrón sale la EDAD y nada más. `birth_date`, `id_number` (DNI),
+        // `weight` y `height` viajaban crudos al navegador SOLO por este camino
+        // —los otros dos armados de plantel mandan `age` y se terminó—, así que
+        // la ficha filtraba o no según cómo se hubiera resuelto el plantel.
+        //
+        // La migración 20260804170000 ya le revoca esas columnas a la clave
+        // anónima, pero esta ruta lee con `getReadClient()`, que es service_role
+        // y NO pasa por los privilegios de columna. Acá la única defensa es no
+        // ponerlos en la respuesta.
+        //
+        // El padrón incluye juveniles M15 a M19: son menores.
         age: calculateAge(person.birth_date),
-        birth_date: person.birth_date || null,
-        id_number: person.id_number || null,
-        weight: person.weight ?? null,
-        height: person.height ?? null,
         status: person.status || 'active',
         role: person.role,
         division_id: person.division_id || null,
@@ -1701,9 +1881,11 @@ export async function GET(request: Request) {
     if (effectiveExternalId) {
         try {
             const readClient = await getReadClient();
+            // select('*') a propósito: tolera esquemas sin team_url o sin
+            // rugbyarchive_id (columnas de migraciones recientes) sin romper la lectura.
             const { data: extTeam } = await (readClient as any)
                 .from('external_teams')
-                .select('id, source, name, short_name, logo_url, sport, country, team_url, updated_at')
+                .select('*')
                 .eq('id', effectiveExternalId)
                 .maybeSingle();
             if (extTeam) cachedExternalTeam = extTeam as ExternalTeamCacheRow;
@@ -1829,8 +2011,58 @@ export async function GET(request: Request) {
             }
         }
 
-        const baseResults = sortMatchesByDate(internalResults.length > 0 ? internalResults : fsResults, 'desc');
-        const baseFixtures = sortMatchesByDate(internalFixtures.length > 0 ? internalFixtures : fsFixtures, 'asc');
+        // ── Historial persistido: write-through + lectura DB-first ───────────
+        const historySport = preferredSport || cachedExternalTeam?.sport || 'rugby';
+        const rugbyarchiveTeamId = String(cachedExternalTeam?.rugbyarchive_id || '').trim();
+        const historyTeamKeys = resolvedExternalId
+            ? [resolvedExternalId, `fs-team-${resolvedExternalId}`]
+            : [];
+        if (rugbyarchiveTeamId) historyTeamKeys.push(`ra-team-${rugbyarchiveTeamId}`);
+
+        if (resolvedExternalId && (fsResults.length > 0 || fsFixtures.length > 0)) {
+            await persistTeamMatchHistory({
+                teamId: resolvedExternalId,
+                sport: historySport,
+                results: fsResults,
+                fixtures: fsFixtures,
+            });
+        }
+
+        const historyResults: NormalizedInternalMatch[] = [];
+        const historyFixtures: NormalizedInternalMatch[] = [];
+        let honours: TeamHonourRow[] = [];
+        if (historyTeamKeys.length > 0) {
+            try {
+                const readClient = await getReadClient();
+                const honourKeys = [
+                    ...(resolvedExternalId ? [resolvedExternalId] : []),
+                    ...(rugbyarchiveTeamId ? [`ra-team-${rugbyarchiveTeamId}`] : []),
+                ];
+                const sportIdHint = fsResults[0]?.sport_id ?? fsFixtures[0]?.sport_id ?? null;
+                const [cachedHistory, honourRows] = await Promise.all([
+                    getTeamMatchHistory(historyTeamKeys, readClient as any),
+                    getTeamHonours(honourKeys, readClient as any),
+                ]);
+                honours = honourRows;
+                const nowMs = Date.now();
+                for (const row of cachedHistory) {
+                    const normalized = normalizeCachedHistoryMatch(row, sportIdHint);
+                    if (!normalized) continue;
+                    if (row.status === 'final') {
+                        historyResults.push(normalized);
+                    } else if (row.status === 'scheduled' && normalized.timestamp * 1000 >= nowMs - 3 * 60 * 60 * 1000) {
+                        historyFixtures.push(normalized);
+                    }
+                }
+            } catch {
+                // Sin caché de historial (tabla o columnas ausentes): la página sigue con lo fresco.
+            }
+        }
+
+        const externalResults = mergeTeamMatchHistory(fsResults, historyResults);
+        const externalFixtures = mergeTeamMatchHistory(fsFixtures, historyFixtures);
+        const baseResults = sortMatchesByDate(internalResults.length > 0 ? internalResults : externalResults, 'desc');
+        const baseFixtures = sortMatchesByDate(internalFixtures.length > 0 ? internalFixtures : externalFixtures, 'asc');
         const matchExternalTeamIds = Array.from(new Set(
             [...baseResults, ...baseFixtures]
                 .flatMap((match) => [match.home_team?.team_id, match.away_team?.team_id])
@@ -1900,6 +2132,7 @@ export async function GET(request: Request) {
             fixtures: finalFixtures,
             squad: squad || [],
             transfers,
+            honours,
         });
     } catch (e: unknown) {
         const message = e instanceof Error ? e.message : String(e);

@@ -24,7 +24,10 @@ export default function AdminWrapper({ children }: { children: React.ReactNode }
 
     const currentReturnTo = buildReturnTo(pathname ?? '', searchParams);
 
-    const isMatchConsole = pathname?.startsWith('/admin/matches/');
+    // Habia un bypass por `/admin/matches/*` que dejaba pasar sin sesion ni
+    // rol. Esa pagina no existe: lo unico en esa URL es la ruta de API
+    // `/api/admin/matches/[id]`, que no pasa por acá. No habilitaba ninguna
+    // consola, solo agujereaba el guard.
     const isEditorialRoute = pathname === '/admin';
 
     const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
@@ -44,11 +47,11 @@ export default function AdminWrapper({ children }: { children: React.ReactNode }
         );
     }
 
-    if (!isAuthenticated && !isMatchConsole) {
+    if (!isAuthenticated) {
         return <LoginScreen returnTo={currentReturnTo} />;
     }
 
-    if (isAuthenticated && !isAllowed && !isMatchConsole) {
+    if (isAuthenticated && !isAllowed) {
         return (
             <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-[var(--color-bg-primary)] text-[var(--color-text-primary)]">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-500/10 rounded-full blur-[120px]" />

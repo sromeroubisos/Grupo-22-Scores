@@ -14,10 +14,10 @@ export async function GET() {
         // seria false para todos y el carril "Donde jugas" desapareceria ahi adentro.
         const supabase = await createClient();
         const {
-            data: { session },
-        } = await supabase.auth.getSession();
+            data: { user: authUser },
+        } = await supabase.auth.getUser();
 
-        const result = await listPublicProdeCompetitions(session?.user?.id ?? null);
+        const result = await listPublicProdeCompetitions(authUser?.id ?? null);
         return NextResponse.json(result);
     } catch (error) {
         return NextResponse.json(

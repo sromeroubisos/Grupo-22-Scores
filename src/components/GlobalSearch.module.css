@@ -67,6 +67,12 @@
     top: calc(100% + 8px);
     left: 0;
     right: 0;
+    /* El desplegable NO puede medir lo que mide el input. En el header el
+       campo son ~230 px y, entre el icono, la ficha de tipo y la flecha, al
+       nombre le quedaban 60: el titulo se recortaba a nada y el subtitulo se
+       apilaba en cinco lineas. Se estira a un ancho legible sin pasarse de la
+       pantalla. */
+    min-width: min(360px, calc(100vw - 32px));
     background: var(--color-bg-secondary);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -124,7 +130,8 @@
     padding: 12px 16px 4px;
     font-size: 11px;
     font-weight: 700;
-    color: var(--color-text-tertiary);
+    /* Secundaria, no terciaria: la terciaria da 4,09:1 en oscuro. */
+    color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -177,7 +184,13 @@
 
 .resultSubtitle {
     font-size: 12px;
-    color: var(--color-text-tertiary);
+    /* Secundaria, no terciaria: la terciaria da 4,09:1 en oscuro. */
+    color: var(--color-text-secondary);
+    /* Una linea. "Jugador · Santiago del Estero" envuelto en cuatro renglones
+       no se lee mas: se lee peor. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .badge {
@@ -191,7 +204,9 @@
 
 .tournamentBadge {
     background: rgba(var(--color-accent-rgb), 0.15);
-    color: var(--color-accent);
+    /* Tinta, no acento: `--color-accent` como texto sobre el fondo claro da
+       3,05:1 y no llega al 4,5:1 de AA. Lo dice globals.css. */
+    color: var(--color-accent-ink);
 }
 
 .clubBadge {
@@ -201,6 +216,26 @@
 
 [data-theme='light'] .clubBadge {
     background: rgba(0, 0, 0, 0.05);
+}
+
+.playerBadge {
+    background: rgba(var(--color-accent-rgb), 0.08);
+    color: var(--color-text-secondary);
+}
+
+[data-theme='light'] .playerBadge {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* El jugador se distingue del club por la FORMA del icono: redondo para una
+   persona, cuadrado para un escudo. Sin eso, dos filas seguidas con iniciales
+   se leen como el mismo tipo de cosa. */
+.resultIcon.playerIcon {
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
 }
 
 .arrowIcon {

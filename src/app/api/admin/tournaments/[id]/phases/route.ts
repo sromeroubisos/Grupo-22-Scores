@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, PhaseConfiguration } from '@/lib/mock-db';
+import { getApiErrorMessage, getApiErrorStatus, requireAdminApiUser } from '@/lib/auth/apiAdmin';
 
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    try {
+        await requireAdminApiUser();
+    } catch (error) {
+        return NextResponse.json(
+            { error: getApiErrorMessage(error, 'Unauthorized') },
+            { status: getApiErrorStatus(error, 401) },
+        );
+    }
+
     const { id } = await params;
     const configs = db.phaseConfigurations[id] || [];
     return NextResponse.json({ ok: true, configs });
@@ -14,6 +24,15 @@ export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    try {
+        await requireAdminApiUser();
+    } catch (error) {
+        return NextResponse.json(
+            { error: getApiErrorMessage(error, 'Unauthorized') },
+            { status: getApiErrorStatus(error, 401) },
+        );
+    }
+
     const { id } = await params;
     const body = await request.json();
     const { config, phaseIndex, isDraft } = body;

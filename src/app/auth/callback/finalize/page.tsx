@@ -53,7 +53,6 @@ function FinalizeContent() {
                             role: resolveBestUserRole({
                                 reservedRole: getReservedAdminRole(sb.email),
                                 appMetadata: sb.app_metadata,
-                                userMetadata: sb.user_metadata,
                             }),
                             avatarUrl:
                                 typeof sb.user_metadata?.avatar_url === 'string'

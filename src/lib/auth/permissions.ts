@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { getReadClient } from '@/lib/supabase/read';
 import { cookies } from 'next/headers';
@@ -18,10 +19,10 @@ import {
     type MembershipScope,
 } from '@/lib/auth/roles';
 import { getReservedAdminRole } from '@/lib/types/user';
+import { GUEST_CLUB_ACCESS_COOKIE, isGuestClubAccessEnabled } from '@/lib/auth/guestClubAccess';
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 type AllowedMembershipRoles = ReadonlySet<string>;
-const GUEST_CLUB_ACCESS_COOKIE = 'g22_guest_club_access';
 const MISSING_TABLE_CODES = new Set(['PGRST204', '42P01']);
 
 export interface UserAccessContext {
@@ -172,6 +173,13 @@ async function resolveGuestClubIdFromHint(clubHint: string): Promise<string | nu
 }
 
 async function getGuestAccessContext(): Promise<UserAccessContext | null> {
+    // Se chequea tambien acá y no solo en la ruta que la emite: una cookie ya
+    // repartida seguiria dando panel de club durante 12 horas despues de
+    // apagar el flag.
+    if (!isGuestClubAccessEnabled()) {
+        return null;
+    }
+
     const cookieStore = await cookies();
     const payload = parseGuestClubCookie(cookieStore.get(GUEST_CLUB_ACCESS_COOKIE)?.value);
 
@@ -253,7 +261,6 @@ export async function getUserAccessContext(
         reservedRole: getReservedAdminRole(user.email),
         profileRole: profileData?.role ?? null,
         appMetadata: user.app_metadata,
-        userMetadata: user.user_metadata,
     });
 
     return {
@@ -262,6 +269,58 @@ export async function getUserAccessContext(
         role,
         memberships,
     };
+}
+
+/**
+ * El contexto de acceso resuelto UNA sola vez por request.
+ *
+ * Los layouts de admin anidan: `/admin/layout.tsx` corre su guard y despues
+ * `/admin/super/layout.tsx` corre el suyo, en el mismo render. Sin memoizar,
+ * cada navegacion a `/admin/super` paga dos `getUser()` contra Supabase Auth
+ * mas cuatro queries a `users` y `memberships` — y esta app ya tiene latencia
+ * cross-region documentada.
+ *
+ * `cache()` de React es por request, que es exactamente el alcance correcto:
+ * el contexto sale de las cookies de ESE request y no puede cambiar en el medio.
+ * Toma su propio cliente a proposito, para que la memoizacion no dependa de que
+ * el llamador pase la misma instancia.
+ */
+export const getRequestUserAccessContext = cache(async (): Promise<UserAccessContext | null> => {
+    const supabase = await createClient();
+    return getUserAccessContext(supabase);
+});
+
+/** Como requireUserAccessContext, sobre el contexto memoizado del request. */
+export async function requireRequestUserAccessContext(): Promise<UserAccessContext> {
+    const context = await getRequestUserAccessContext();
+
+    if (!context) {
+        throw new Error('Unauthorized');
+    }
+
+    return context;
+}
+
+/** Como requireGlobalAdminContext, sobre el contexto memoizado del request. */
+export async function requireRequestGlobalAdminContext(): Promise<UserAccessContext> {
+    const context = await requireRequestUserAccessContext();
+
+    if (!isGlobalAdminRole(context.role)) {
+        throw new Error('Forbidden');
+    }
+
+    return context;
+}
+
+/** Como requireTournamentAdminContext, sobre el contexto memoizado del request. */
+export async function requireRequestTournamentAdminContext(): Promise<UserAccessContext> {
+    const context = await requireRequestUserAccessContext();
+
+    if (!isGlobalAdminRole(context.role) && !isTournamentAdminRole(context.role)) {
+        throw new Error('Forbidden');
+    }
+
+    return context;
 }
 
 export async function requireUserAccessContext(

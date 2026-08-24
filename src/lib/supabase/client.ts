@@ -473,7 +473,7 @@ export function createClient() {
     const performAuthFetch = async (input: string | URL | Request, init?: RequestInit) => {
         const response = await withAuthTimeout(input, init)
         const normalizedResponse = url
-            ? await coerceRefreshFailureToRetryable(input, url, response)
+            ? await coerceRefreshFailureToRetryable(input, url, response, init)
             : response
 
         return normalizedResponse.clone()

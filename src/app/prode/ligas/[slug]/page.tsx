@@ -13,17 +13,17 @@ export default async function ProdePrivateLeaguePage({
     const { slug } = await params;
     const supabase = await createClient();
     const {
-        data: { session },
-    } = await supabase.auth.getSession();
+        data: { user: authUser },
+    } = await supabase.auth.getUser();
 
-    if (!session?.user?.id) {
+    if (!authUser?.id) {
         redirect(`/login?returnTo=${encodeURIComponent(`/prode/ligas/${slug}`)}`);
     }
 
     const requestHeaders = await headers();
     const view = await getPrivateLeaguePlayView(
         slug,
-        session.user.id,
+        authUser.id,
         getPublicShareOriginFromHeaders(requestHeaders),
     );
 

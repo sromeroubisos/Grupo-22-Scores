@@ -7,7 +7,7 @@ import styles from './GlobalSearch.module.css';
 
 type SearchResult = {
     id: string;
-    type: 'tournament' | 'club';
+    type: 'tournament' | 'club' | 'player';
     title: string;
     subtitle: string;
     url: string;
@@ -93,8 +93,8 @@ export default function GlobalSearch() {
                     El nombre accesible tiene que ser estable. */}
                 <input
                     type="search"
-                    aria-label="Buscar torneos o clubes"
-                    placeholder="Buscar torneos o clubes..."
+                    aria-label="Buscar torneos, clubes o jugadores"
+                    placeholder="Buscar torneos, clubes o jugadores..."
                     value={query}
                     onChange={(event) => {
                         setQuery(event.target.value);
@@ -122,6 +122,13 @@ export default function GlobalSearch() {
                             {results.filter((result) => result.type === 'club').map((result) => (
                                 <SearchResultItem key={result.id} res={result} onSelect={handleSelect} />
                             ))}
+
+                            {results.some((result) => result.type === 'player') ? (
+                                <div className={styles.groupHeader}>Jugadores</div>
+                            ) : null}
+                            {results.filter((result) => result.type === 'player').map((result) => (
+                                <SearchResultItem key={result.id} res={result} onSelect={handleSelect} />
+                            ))}
                         </>
                     ) : !loading ? (
                         <div className={styles.noResults}>No se encontraron resultados</div>
@@ -131,6 +138,24 @@ export default function GlobalSearch() {
         </div>
     );
 }
+
+/**
+ * Las iniciales de un jugador. La foto no sirve como identidad en el buscador:
+ * de 1528 fichas, 31 tienen una — el resto quedaria como un hueco gris repetido
+ * fila tras fila.
+ */
+function initialsOf(name: string) {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '?';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+
+const BADGE_LABEL: Record<SearchResult['type'], string> = {
+    tournament: 'Torneo',
+    club: 'Club',
+    player: 'Jugador',
+};
 
 function SearchResultItem({ res, onSelect }: { res: SearchResult; onSelect: (url: string) => void }) {
     return (
@@ -146,11 +171,15 @@ function SearchResultItem({ res, onSelect }: { res: SearchResult; onSelect: (url
                     className={styles.resultIcon}
                     size={40}
                 />
+            ) : res.type === 'player' ? (
+                <div className={`${styles.resultIcon} ${styles.playerIcon}`} aria-hidden="true">
+                    {initialsOf(res.title)}
+                </div>
             ) : (
                 <div className={styles.resultIcon}>
                     {res.logo_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={res.logo_url} alt={res.title} />
+                        <img src={res.logo_url} alt="" loading="lazy" />
                     ) : (
                         '🏆'
                     )}
@@ -160,8 +189,16 @@ function SearchResultItem({ res, onSelect }: { res: SearchResult; onSelect: (url
                 <span className={styles.resultTitle}>{res.title}</span>
                 <span className={styles.resultSubtitle}>{res.subtitle}</span>
             </div>
-            <span className={`${styles.badge} ${res.type === 'tournament' ? styles.tournamentBadge : styles.clubBadge}`}>
-                {res.type === 'tournament' ? 'Torneo' : 'Club'}
+            <span
+                className={`${styles.badge} ${
+                    res.type === 'tournament'
+                        ? styles.tournamentBadge
+                        : res.type === 'player'
+                          ? styles.playerBadge
+                          : styles.clubBadge
+                }`}
+            >
+                {BADGE_LABEL[res.type]}
             </span>
             <svg className={styles.arrowIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6" />

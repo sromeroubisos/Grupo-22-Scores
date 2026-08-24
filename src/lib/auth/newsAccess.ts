@@ -41,20 +41,29 @@ export async function getServerAuthRole(): Promise<ServerAuthContext> {
         return fallbackToAnonymous();
     }
 
+    // getSession() decodifica la cookie sin verificar la firma, y de este rol
+    // cuelga requireNewsSuperAdminServer(). Se conserva el `session` porque los
+    // llamadores lo usan, pero el rol se resuelve sobre el usuario que Supabase
+    // valida en getUser(). Si no coinciden, la cookie es fabricada.
+    const { data: { user: verifiedUser }, error: verifyError } = await authClient.auth.getUser();
+
+    if (verifyError || !verifiedUser || verifiedUser.id !== session.user.id) {
+        return fallbackToAnonymous(verifyError);
+    }
+
     const { data: userData } = await authClient
         .from('users')
         .select('role')
-        .eq('id', session.user.id)
+        .eq('id', verifiedUser.id)
         .maybeSingle();
 
     return {
         supabase: authClient,
         session,
         role: resolveBestUserRole({
-            reservedRole: getReservedAdminRole(session.user.email),
+            reservedRole: getReservedAdminRole(verifiedUser.email),
             profileRole: userData?.role ?? null,
-            appMetadata: session.user.app_metadata,
-            userMetadata: session.user.user_metadata,
+            appMetadata: verifiedUser.app_metadata,
         }),
     };
 }

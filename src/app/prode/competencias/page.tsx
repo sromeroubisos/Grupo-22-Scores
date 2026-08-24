@@ -12,10 +12,10 @@ export default async function ProdeCompetitionsPage() {
     // La sesión solo se usa para marcar en qué competencias ya juega el usuario.
     const supabase = await createClient();
     const {
-        data: { session },
-    } = await supabase.auth.getSession();
+        data: { user: authUser },
+    } = await supabase.auth.getUser();
 
-    const { data: competitions } = await listPublicProdeCompetitions(session?.user?.id ?? null);
+    const { data: competitions } = await listPublicProdeCompetitions(authUser?.id ?? null);
 
     return <ProdeCompetitionBrowser competitions={competitions} />;
 }

@@ -4,6 +4,7 @@ import { getActiveSports } from '@/lib/data/sports';
 import { getAllCountries } from '@/lib/data/countries';
 import { getAllTournaments } from '@/lib/data/tournaments';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { getApiErrorMessage, getApiErrorStatus, requireGlobalAdminApiUser } from '@/lib/auth/apiAdmin';
 
 function createImportClient() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,13 +18,18 @@ function createImportClient() {
     return createClient(supabaseUrl, supabaseKey) as any;
 }
 
-export async function POST(request: Request) {
-    // Basic protection: requiring a secret header or checking auth.
-    // For now, let's use a simple secret for this script or assume it's protected by middleware.
-    // Given the task, let's implement the import logic directly.
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`) {
-        // Just a simple check for safety during development.
+export async function POST() {
+    // Este POST hace upsert masivo sobre sports, countries, tournaments,
+    // categories y seasons con la SERVICE KEY, saltando RLS. Estaba abierto: el
+    // unico chequeo era un `if` con el cuerpo vacio que no rechazaba nada, y
+    // ademas comparaba contra la anon key, que es publica.
+    try {
+        await requireGlobalAdminApiUser();
+    } catch (error) {
+        return NextResponse.json(
+            { error: getApiErrorMessage(error, 'Unauthorized') },
+            { status: getApiErrorStatus(error, 401) },
+        );
     }
 
     try {

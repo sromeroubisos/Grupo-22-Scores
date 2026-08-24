@@ -5,6 +5,7 @@ import { getAuthErrorMessage } from '@/lib/auth/errors'
 import { commitSupabaseSessionForServer } from '@/lib/supabase/sessionBridge'
 import { resolveBestUserRole } from '@/lib/auth/roles'
 import { getReservedAdminRole } from '@/lib/types/user'
+import { captchaOptions } from '@/lib/auth/captcha'
 
 export function normalizeEmail(value: string): string {
     return value.trim().toLowerCase()
@@ -37,6 +38,8 @@ export async function signInWithPasswordAndRedirect(input: {
     email: string
     password: string
     returnTo: string
+    /** Token de Turnstile. Lo valida Supabase, no nosotros. */
+    captchaToken?: string | null
 }) {
     const normalizedEmail = normalizeEmail(input.email)
     const trimmedPassword = input.password.trim()
@@ -55,9 +58,12 @@ export async function signInWithPasswordAndRedirect(input: {
     clearSupabaseBrowserSession()
 
     let supabase = createClient()
+    const captcha = captchaOptions(input.captchaToken ?? null)
+
     let { data, error } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
         password: trimmedPassword,
+        options: captcha,
     })
 
     // One automatic retry after a forced reset when the failure smells
@@ -66,9 +72,14 @@ export async function signInWithPasswordAndRedirect(input: {
         console.warn('[login] first attempt failed with recoverable auth error, retrying after reset:', error.message)
         clearSupabaseBrowserSession()
         supabase = createClient()
+        // Mismo token: este reintento es automatico y ocurre en milisegundos,
+        // sin que el usuario vuelva a resolver el desafio. Turnstile acepta el
+        // token una sola vez, asi que si el primer intento ya lo consumio, el
+        // reintento cae y el formulario pide uno nuevo — que es lo correcto.
         const retry = await supabase.auth.signInWithPassword({
             email: normalizedEmail,
             password: trimmedPassword,
+            options: captcha,
         })
         data = retry.data
         error = retry.error
@@ -128,7 +139,6 @@ export async function signInWithPasswordAndRedirect(input: {
                 role: resolveBestUserRole({
                     reservedRole: getReservedAdminRole(sb.email || normalizedEmail),
                     appMetadata: sb.app_metadata,
-                    userMetadata: sb.user_metadata,
                 }),
                 avatarUrl:
                     typeof sb.user_metadata?.avatar_url === 'string'

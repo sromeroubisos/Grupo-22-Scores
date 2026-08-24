@@ -14,7 +14,8 @@ import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
 import {
     mapFlashScoreMatchToCached,
     upsertMatches,
-    resetStaleLiveMatches
+    resetStaleLiveMatches,
+    shouldPollLiveMatches
 } from '@/lib/services/externalMatchCache';
 
 export const dynamic = 'force-dynamic';
@@ -47,6 +48,14 @@ export async function GET(request: NextRequest) {
         activeSports.map(async (sport) => {
             if (!isFlashScoreEnabledForSport(sport.id)) {
                 return { sport: sport.id, synced: 0, skipped: true };
+            }
+
+            // Gate por ventana: si el fixture en external_match_cache dice que
+            // no hay nada en vivo ni por arrancar, el request al proveedor se
+            // ahorra. 'unknown' falla abierto y pollea como siempre.
+            const pollDecision = await shouldPollLiveMatches(sport.id, adminClient);
+            if (pollDecision === 'skip') {
+                return { sport: sport.id, synced: 0, gated: true };
             }
 
             let apiFailed = false;
@@ -90,11 +99,13 @@ export async function GET(request: NextRequest) {
     );
 
     const totalSynced = summary.reduce((acc, s: any) => acc + (s.synced ?? 0), 0);
+    const gatedCount = summary.filter((s: any) => s.gated).length;
     const storageUnavailable = summary.some((s: any) => s.storage === 'unavailable');
     const elapsed = Date.now() - startedAt;
 
     console.log(
         `[live-sync] Done: ${totalSynced} live matches written in ${elapsed}ms` +
+        (gatedCount > 0 ? ` (${gatedCount} sports gated, sin request al proveedor)` : '') +
         (storageUnavailable ? ' — CACHÉ NO DISPONIBLE: no se escribió nada' : '')
     );
 

@@ -9,9 +9,15 @@ import { isGlobalAdminRole, resolveBestUserRole } from '@/lib/auth/roles'
 export async function getCurrentUser(): Promise<User | null> {
     const supabase = await createClient()
 
-    const { data: { session } } = await supabase.auth.getSession()
+    // getUser() y NO getSession(). getSession() lee la cookie de sesion y la
+    // decodifica sin verificar la firma contra el servidor de auth: como la
+    // cookie se emite sin httpOnly (ver api/auth/commit-session), un token
+    // fabricado pasaba el chequeo. getUser() la valida contra Supabase.
+    // De esto cuelgan isSuperAdmin() y requireSuperAdmin(), asi que el ida y
+    // vuelta extra es el precio de que el guard sea real.
+    const { data: { user: authUser } } = await supabase.auth.getUser()
 
-    if (!session?.user) {
+    if (!authUser) {
         return null
     }
 
@@ -19,7 +25,7 @@ export async function getCurrentUser(): Promise<User | null> {
     const { data: user, error } = await supabase
         .from('users')
         .select('*')
-        .eq('id', session.user.id)
+        .eq('id', authUser.id)
         .single()
 
     if (error || !user) {
@@ -29,10 +35,9 @@ export async function getCurrentUser(): Promise<User | null> {
     return {
         ...user,
         role: resolveBestUserRole({
-            reservedRole: getReservedAdminRole(session.user.email),
+            reservedRole: getReservedAdminRole(authUser.email),
             profileRole: user.role,
-            appMetadata: session.user.app_metadata,
-            userMetadata: session.user.user_metadata,
+            appMetadata: authUser.app_metadata,
         }),
     } as User
 }

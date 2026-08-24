@@ -38,6 +38,7 @@ import {
 } from '../lib/integrations/rugbyarchive/interior-nacional.ts';
 import {
   construirEstructuraDeTemporada,
+  filtrarEstructura,
   type EstructuraDeTemporada,
 } from '../lib/integrations/rugbyarchive/estructura.ts';
 
@@ -466,13 +467,26 @@ async function main() {
       if (!res.ok || !res.data) { errores.push(`${target.comp}-${year}: ${res.error || 'sin payload'}`); continue; }
       // Propia vs heredada: por id, no por nombre — el nombre cambia por época
       // (URBA Top 14/Top 12…) pero un payload heredado trae el id del PADRE.
-      if (res.data.competizioneStagione?.idCompetizione !== target.comp) {
+      // `compsAceptadas` suma los ids de la misma competición renombrada
+      // (la SLAR 579 es el Super Rugby Americas 678 con el nombre viejo).
+      const idPayload = res.data.competizioneStagione?.idCompetizione;
+      if (idPayload !== target.comp && !target.compsAceptadas?.includes(idPayload as number)) {
         heredadas.push(`${target.comp}-${year}`);
         continue;
       }
       if (codigos.has(year)) { salteadas.push(`${target.slug} ${year}`); continue; }
-      const est = construirEstructuraDeTemporada(year, res.data, mapaDe(target));
-      const campeonRaNome = res.data.vincitori?.[0]?.squadre?.[0]?.nome || null;
+      let est = construirEstructuraDeTemporada(year, res.data, mapaDe(target), { aliasTurno: target.aliasTurno });
+      if (target.soloFases) {
+        est = filtrarEstructura(est, (n) => target.soloFases!(n, year), {
+          campeonDesdeLlave: target.campeonDesdeLlave,
+        });
+      }
+      // El `vincitori` del payload es el campeón de la línea principal: una
+      // rama que deriva su campeón de la llave (la Plata del Oeste) no lo usa
+      // ni para el fallback solo-campeón ni para el bloqueo de mapeo.
+      const campeonRaNome = target.campeonDesdeLlave
+        ? null
+        : res.data.vincitori?.[0]?.squadre?.[0]?.nome || null;
       const nombre = target.nombreTemporada(year, res.data.competizioneStagione?.nomeCompetizione || '');
       // Tabla REAL = alguna fila con partidos jugados o puntos. Los sorteos
       // que no se jugaron (2020, covid) publican la tabla en cero: eso no es

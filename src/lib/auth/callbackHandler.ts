@@ -5,7 +5,7 @@ import { createServerClient } from '@supabase/ssr';
 import { getAuthCookieHost, getRequestOrigin } from '@/lib/auth/requestOrigin'
 import { syncUserProfile } from '@/lib/auth/syncUserProfile';
 import { sanitizeNext } from '@/lib/auth/redirect'
-import { rateLimitAuthCallback } from '@/lib/rateLimit';
+import { consumeRateLimit } from '@/lib/rateLimit';
 import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie';
 import { appendAuthSetCookieHeader, clearAllAuthCookieScopes } from '@/lib/supabase/proxy';
 
@@ -21,7 +21,8 @@ function getClientIp(request: NextRequest | Request): string {
 
 export async function handleAuthCallback(request: NextRequest | Request) {
     const ip = getClientIp(request);
-    const limit = rateLimitAuthCallback(ip);
+    // 5 por minuto: un callback de OAuth legitimo ocurre una vez por login.
+    const limit = await consumeRateLimit(`auth-callback:${ip}`, 5);
     if (!limit.allowed) {
         return NextResponse.json(
             { error: 'Too many requests. Please try again later.' },

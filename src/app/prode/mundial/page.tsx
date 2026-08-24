@@ -6,10 +6,10 @@ import { getProdeWorldCupScreenData } from '@/lib/server/prodeWorldCupScreenData
 export default async function ProdeMundialPage() {
     const supabase = await createClient();
     const {
-        data: { session },
-    } = await supabase.auth.getSession();
+        data: { user: authUser },
+    } = await supabase.auth.getUser();
 
-    const data = await getProdeWorldCupScreenData(session?.user?.id ?? null);
+    const data = await getProdeWorldCupScreenData(authUser?.id ?? null);
 
     // Si todavía no hay un prode del Mundial publicado, mandamos al lobby a elegir.
     if (!data) {

@@ -5,7 +5,7 @@ import { getAuthCookieHost, getRequestOriginDebugInfo, isSameOriginRequest } fro
 import { syncUserProfile } from '@/lib/auth/syncUserProfile'
 import { getSupabaseAuthCookieOptions } from '@/lib/supabase/auth-cookie'
 import { appendAuthSetCookieHeader, clearAllAuthCookieScopes } from '@/lib/supabase/proxy'
-import { rateLimitByIp } from '@/lib/rateLimit'
+import { consumeRateLimit } from '@/lib/rateLimit'
 
 function getClientIp(request: NextRequest): string {
     const forwarded = request.headers.get('x-forwarded-for')
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // (a commit only happens when the access token is actually stale), so a
     // burst here means a retry loop or abuse — cap it before it reaches
     // Supabase Auth (setSession) and the users table (syncUserProfile).
-    const rate = rateLimitByIp(`commit-session:${getClientIp(request)}`)
+    const rate = await consumeRateLimit(`commit-session:${getClientIp(request)}`)
     if (!rate.allowed) {
         return NextResponse.json(
             { error: 'Too many requests. Please try again shortly.' },

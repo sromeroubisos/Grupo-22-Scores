@@ -48,10 +48,14 @@ export async function syncUserProfile(user: AuthUser) {
 
     const admin = createAdminClient()
     const reservedRole = getReservedAdminRole(email)
+    // Esta funcion escribe con la SERVICE KEY, asi que el rol que resuelva acá
+    // se persiste saltando RLS. Las unicas fuentes admitidas son el allowlist
+    // de emails reservados y app_metadata (solo escribible por la Admin API).
+    // NO agregues user_metadata: lo escribe el propio usuario y convierte a
+    // cualquier registro nuevo en super_admin en el primer login.
     const metadataRole = resolveBestUserRole({
         reservedRole,
         appMetadata: user.app_metadata,
-        userMetadata: user.user_metadata,
     })
     const now = new Date().toISOString()
 

@@ -102,11 +102,11 @@ export async function POST(request: Request) {
     try {
         const supabase = await createServerClient();
         const {
-            data: { session },
-            error: sessionError,
-        } = await supabase.auth.getSession();
+            data: { user: authUser },
+            error: authError,
+        } = await supabase.auth.getUser();
 
-        if (sessionError || !session?.user?.id) {
+        if (authError || !authUser?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
         }
 
         const admin = createAdminClient() as unknown as LooseAdminClient;
-        await ensureUserProfile(admin, session.user);
+        await ensureUserProfile(admin, authUser);
 
         const { data: eventRow, error: eventError } = await admin
             .from('prode_events')
@@ -156,7 +156,7 @@ export async function POST(request: Request) {
                 .from('prode_competition_members')
                 .upsert({
                     competition_id: competitionId,
-                    user_id: session.user.id,
+                    user_id: authUser.id,
                     status: 'active',
                 }, { onConflict: 'competition_id,user_id' }),
             admin
@@ -164,7 +164,7 @@ export async function POST(request: Request) {
                 .upsert({
                     competition_id: competitionId,
                     event_id: payload.eventId,
-                    user_id: session.user.id,
+                    user_id: authUser.id,
                     predicted_outcome: predictedOutcome,
                     predicted_home_score: predictedHomeScore,
                     predicted_away_score: predictedAwayScore,

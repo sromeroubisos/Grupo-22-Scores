@@ -1,9 +1,13 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { getAuthErrorMessage } from '@/lib/auth/errors'
+import { CAPTCHA_PENDING_MESSAGE, captchaOptions, isCaptchaEnabled } from '@/lib/auth/captcha'
+import CaptchaField from '../../login/components/CaptchaField'
+import { checkPassword } from '@/lib/auth/passwordPolicy'
+import PasswordStrengthMeter from '../../login/components/PasswordStrengthMeter'
 import styles from '../../login/login.module.css'
 
 function normalizeEmail(value: string): string {
@@ -28,7 +32,20 @@ export default function RegisterForm({ onError, onSuccess }: RegisterFormProps) 
     const [confirmPassword, setConfirmPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+    // Turnstile entrega tokens de un solo uso: despues de cada intento fallido
+    // hay que pedir uno nuevo, o el siguiente reenvia el mismo y Supabase lo
+    // rechaza sin siquiera mirar la credencial.
+    const [captchaReset, setCaptchaReset] = useState(0)
     const submittingRef = useRef(false)
+
+    // El mismo veredicto alimenta la barra y la validacion del submit: si se
+    // calcularan por separado, la pantalla podria decir que esta bien y el
+    // submit rechazarla.
+    const passwordCheck = useMemo(
+        () => checkPassword(password, { email }),
+        [password, email],
+    )
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -48,8 +65,13 @@ export default function RegisterForm({ onError, onSuccess }: RegisterFormProps) 
             return
         }
 
-        if (password.length < 6) {
-            onError('La contrasena debe tener al menos 6 caracteres')
+        if (!passwordCheck.ok) {
+            onError(passwordCheck.problems[0])
+            return
+        }
+
+        if (isCaptchaEnabled() && !captchaToken) {
+            onError(CAPTCHA_PENDING_MESSAGE)
             return
         }
 
@@ -62,6 +84,7 @@ export default function RegisterForm({ onError, onSuccess }: RegisterFormProps) 
                 password,
                 options: {
                     emailRedirectTo: getEmailConfirmationRedirect(),
+                    ...captchaOptions(captchaToken),
                 },
             })
 
@@ -70,6 +93,7 @@ export default function RegisterForm({ onError, onSuccess }: RegisterFormProps) 
             onSuccess('Te enviamos un email para confirmar tu cuenta. Revisa tu bandeja y sigue el enlace para activar el acceso.')
         } catch (error: unknown) {
             onError(getAuthErrorMessage(error, 'Ocurrio un error al registrarse'))
+            setCaptchaReset((n) => n + 1)
         } finally {
             submittingRef.current = false
             setLoading(false)
@@ -114,6 +138,7 @@ export default function RegisterForm({ onError, onSuccess }: RegisterFormProps) 
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                 </div>
+                <PasswordStrengthMeter check={passwordCheck} password={password} />
             </div>
 
             <div className={styles.inputGroup}>
@@ -131,6 +156,8 @@ export default function RegisterForm({ onError, onSuccess }: RegisterFormProps) 
                     />
                 </div>
             </div>
+
+            <CaptchaField onToken={setCaptchaToken} resetSignal={captchaReset} />
 
             <button type="submit" className={styles.submitBtn} disabled={loading}>
                 {loading ? 'Creando cuenta...' : 'Crear cuenta'}

@@ -1,8 +1,10 @@
 /**
  * /api/cron/fixture-sync
  *
- * Fetches upcoming fixture data (today + 2 days) from FlashScore and persists
- * it to external_match_cache so the API has a fallback when FlashScore is unavailable.
+ * Fetches fixture data (yesterday + today + 2 days) from FlashScore and persists
+ * it to external_match_cache, the primary source for /api/matches (DB-first).
+ * Yesterday acts as the results sweep: it re-confirms finals and scores that
+ * live-sync may have missed (a final the live feed never showed).
  *
  * Called by Vercel Cron every hour: "0 * * * *"
  *
@@ -14,6 +16,7 @@ import { getActiveSports } from '@/lib/data/sports';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { formatDateKey } from '@/lib/timezone';
 import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
+import { recordExternalTournamentsFromMatches } from '@/lib/server/externalTournamentCatalog';
 import {
     mapFlashScoreMatchToCached,
     upsertMatches
@@ -22,7 +25,8 @@ import {
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const DAYS_AHEAD = 3; // today + 2 ahead
+const DAYS_AHEAD = 3;  // today + 2 ahead
+const DAYS_BEHIND = 1; // ayer: barrido de resultados (reconfirma finales que live-sync pudo perderse)
 
 function isAuthorized(request: NextRequest): boolean {
     const secret = process.env.CRON_SECRET;
@@ -37,12 +41,12 @@ function isAuthorized(request: NextRequest): boolean {
     return authHeader === `Bearer ${secret}`;
 }
 
-/** Build an array of [Date, dateKey] pairs for today through today+DAYS_AHEAD in UTC. */
+/** Build an array of [Date, dateKey] pairs for today-DAYS_BEHIND through today+DAYS_AHEAD-1 in UTC. */
 function getTargetDates(): { date: Date; dateKey: string }[] {
     const now = new Date();
-    return Array.from({ length: DAYS_AHEAD }, (_, i) => {
+    return Array.from({ length: DAYS_BEHIND + DAYS_AHEAD }, (_, i) => {
         const d = new Date(now);
-        d.setUTCDate(d.getUTCDate() + i);
+        d.setUTCDate(d.getUTCDate() + i - DAYS_BEHIND);
         d.setUTCHours(12, 0, 0, 0); // midday UTC avoids boundary issues
         const dateKey = formatDateKey(d, 'UTC');
         return { date: d, dateKey };
@@ -93,6 +97,12 @@ export async function GET(request: NextRequest) {
                             skipped += cached.length;
                             storageUnavailable = true;
                         }
+                        // Con /api/matches en modo DB-first casi nunca llama a
+                        // FlashScore, así que el catálogo buscable de torneos
+                        // externos pasa a alimentarse desde este cron.
+                        void recordExternalTournamentsFromMatches(matches, sport.id).catch((catalogErr) => {
+                            console.warn(`[fixture-sync] catálogo de torneos externos falló para sport=${sport.id}:`, catalogErr);
+                        });
                     }
                 } catch (e) {
                     errors++;

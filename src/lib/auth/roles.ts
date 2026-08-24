@@ -228,13 +228,15 @@ export function resolveBestUserRole({
     reservedRole,
     profileRole,
     appMetadata,
-    userMetadata,
     fallback = 'fan',
 }: {
     reservedRole?: string | null;
     profileRole?: string | null;
+    // SOLO app_metadata. NUNCA user_metadata: ese objeto lo escribe el propio
+    // usuario con auth.updateUser({ data: { role: 'super_admin' } }), asi que
+    // leer un rol de ahi es entregar el panel a cualquiera que se registre.
+    // app_metadata, en cambio, solo se toca con la service key (Admin API).
     appMetadata?: Record<string, unknown> | null;
-    userMetadata?: Record<string, unknown> | null;
     fallback?: AppUserRole;
 }): AppUserRole {
     const reserved = normalizeStoredRole(reservedRole);
@@ -245,9 +247,6 @@ export function resolveBestUserRole({
 
     const appMetadataRole = getRoleFromMetadata(appMetadata);
     if (appMetadataRole) return appMetadataRole;
-
-    const userMetadataRole = getRoleFromMetadata(userMetadata);
-    if (userMetadataRole) return userMetadataRole;
 
     return profile ?? fallback;
 }

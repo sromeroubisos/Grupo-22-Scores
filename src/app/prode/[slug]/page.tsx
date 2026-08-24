@@ -11,10 +11,10 @@ export default async function ProdeCompetitionPage({
     const { slug } = await params;
     const supabase = await createClient();
     const {
-        data: { session },
-    } = await supabase.auth.getSession();
+        data: { user: authUser },
+    } = await supabase.auth.getUser();
 
-    const view = await getPublicCompetitionPlayView(slug, session?.user?.id ?? null);
+    const view = await getPublicCompetitionPlayView(slug, authUser?.id ?? null);
 
     if (!view) {
         notFound();

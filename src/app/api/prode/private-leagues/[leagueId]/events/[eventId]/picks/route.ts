@@ -54,15 +54,15 @@ export async function GET(
         const { leagueId, eventId } = await params;
         const supabase = await createServerClient();
         const {
-            data: { session },
-            error: sessionError,
-        } = await supabase.auth.getSession();
+            data: { user: authUser },
+            error: authError,
+        } = await supabase.auth.getUser();
 
-        if (sessionError || !session?.user?.id) {
+        if (authError || !authUser?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const userId = session.user.id;
+        const userId = authUser.id;
         const admin = createAdminClient() as unknown as LooseClient;
 
         const leagueResult = await admin

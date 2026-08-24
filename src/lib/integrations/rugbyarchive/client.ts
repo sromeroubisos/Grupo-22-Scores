@@ -30,17 +30,7 @@ export interface FetchResult<T> {
   error?: string;
 }
 
-/**
- * Temporada de una competición: `/api/stagionicompetizione/{comp}/stagione/{año}/`.
- * Con `cacheDir`, el archivo `{comp}-{año}.json` manda: si existe no se toca la red.
- */
-export async function fetchStagioneCompetizione<T = unknown>(
-  compId: number,
-  stagione: string,
-  opts: { cacheDir?: string } = {},
-): Promise<FetchResult<T>> {
-  const cacheFile = opts.cacheDir ? path.join(opts.cacheDir, `${compId}-${stagione}.json`) : null;
-
+async function fetchRa<T>(ruta: string, cacheFile: string | null): Promise<FetchResult<T>> {
   if (cacheFile && fs.existsSync(cacheFile)) {
     try {
       const raw = fs.readFileSync(cacheFile, 'utf8');
@@ -51,7 +41,7 @@ export async function fetchStagioneCompetizione<T = unknown>(
   }
 
   await pausaCortesia();
-  const url = `${BASE}/stagionicompetizione/${compId}/stagione/${encodeURIComponent(stagione)}/?cultura=en`;
+  const url = `${BASE}/${ruta}?cultura=en`;
   try {
     const res = await fetch(url);
     if (!res.ok) return { ok: false, data: null, fuente: 'red', error: `HTTP ${res.status}` };
@@ -68,4 +58,62 @@ export async function fetchStagioneCompetizione<T = unknown>(
   } catch (e) {
     return { ok: false, data: null, fuente: 'red', error: e instanceof Error ? e.message : String(e) };
   }
+}
+
+/**
+ * Temporada de una competición: `/api/stagionicompetizione/{comp}/stagione/{año}/`.
+ * Con `cacheDir`, el archivo `{comp}-{año}.json` manda: si existe no se toca la red.
+ */
+export async function fetchStagioneCompetizione<T = unknown>(
+  compId: number,
+  stagione: string,
+  opts: { cacheDir?: string } = {},
+): Promise<FetchResult<T>> {
+  return fetchRa<T>(
+    `stagionicompetizione/${compId}/stagione/${encodeURIComponent(stagione)}/`,
+    opts.cacheDir ? path.join(opts.cacheDir, `${compId}-${stagione}.json`) : null,
+  );
+}
+
+/**
+ * Ficha de un equipo: `/api/squadra/{id}/`. Trae nombre, escudo (`urlBadge`),
+ * últimas/próximas fechas, el palmarés agregado (`alboDOro`) y la historia por
+ * temporada (`stagioniSquadra`, HTML con "Winner in ..."/"Second in ...").
+ * La ficha cambia seguido (cada partido la mueve), así que acá NO se cachea
+ * por omisión: pasá cacheDir solo para reintentos dentro de una misma corrida.
+ */
+export async function fetchSquadra<T = unknown>(
+  teamId: number,
+  opts: { cacheDir?: string } = {},
+): Promise<FetchResult<T>> {
+  return fetchRa<T>(
+    `squadra/${teamId}/`,
+    opts.cacheDir ? path.join(opts.cacheDir, `squadra-${teamId}.json`) : null,
+  );
+}
+
+/**
+ * Archivo de partidos de un equipo: `/api/archiviopartite/{id}/` devuelve
+ * `anniAvversari` (una fila por temporada con agregados); el detalle por
+ * temporada vive en `/api/archiviopartite/{id}/dettaglio/{temporada}/`.
+ */
+export async function fetchArchivioPartite<T = unknown>(
+  teamId: number,
+  opts: { cacheDir?: string } = {},
+): Promise<FetchResult<T>> {
+  return fetchRa<T>(
+    `archiviopartite/${teamId}/`,
+    opts.cacheDir ? path.join(opts.cacheDir, `archivio-${teamId}.json`) : null,
+  );
+}
+
+export async function fetchArchivioPartiteDettaglio<T = unknown>(
+  teamId: number,
+  stagione: string,
+  opts: { cacheDir?: string } = {},
+): Promise<FetchResult<T>> {
+  return fetchRa<T>(
+    `archiviopartite/${teamId}/dettaglio/${encodeURIComponent(stagione)}/`,
+    opts.cacheDir ? path.join(opts.cacheDir, `archivio-${teamId}-${stagione}.json`) : null,
+  );
 }

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const GUEST_CLUB_ACCESS_COOKIE = 'g22_guest_club_access';
+import { GUEST_CLUB_ACCESS_COOKIE, isGuestClubAccessEnabled } from '@/lib/auth/guestClubAccess';
 
 function sanitizeClubHint(rawValue?: string | null) {
     const normalized = (rawValue || 'la-tablada')
@@ -21,6 +20,11 @@ function buildRedirectUrl(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+    // Puerta sin credenciales: apagada salvo que se prenda a proposito.
+    if (!isGuestClubAccessEnabled()) {
+        return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
     const clubHint = sanitizeClubHint(request.nextUrl.searchParams.get('club'));
     const response = NextResponse.redirect(buildRedirectUrl(request));
 
