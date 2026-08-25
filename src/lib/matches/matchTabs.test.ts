@@ -10,7 +10,7 @@ import {
 } from './matchTabs';
 
 const EMPTY: MatchTabCounts = {
-    events: 0, lineups: 0, players: 0, stats: 0, h2h: 0, standings: 0, commentary: 0,
+    events: 0, lineups: 0, players: 0, stats: 0, h2h: 0, standings: 0, commentary: 0, videos: 0,
 };
 
 const ids = (provider: MatchProvider, status: 'scheduled' | 'live' | 'final', counts: Partial<MatchTabCounts>) =>
@@ -21,8 +21,8 @@ const ids = (provider: MatchProvider, status: 'scheduled' | 'live' | 'final', co
 test('una pestana sin dato no se dibuja', () => {
     const { hidden } = resolveMatchTabs({ provider: 'local', status: 'final', counts: EMPTY });
 
-    // Ocho de nueve caen; la novena la sostiene el piso (test siguiente).
-    assert.equal(hidden.length, 8, 'las que no tienen dato salen por hidden con su motivo');
+    // Nueve de diez caen; la decima la sostiene el piso (test siguiente).
+    assert.equal(hidden.length, 9, 'las que no tienen dato salen por hidden con su motivo');
     assert.ok(hidden.every((h) => h.reason.length > 0), 'ningun motivo queda vacio');
 });
 
@@ -66,7 +66,7 @@ test('el partido auditado: programado con historial y tabla deja cuatro pestanas
     assert.ok(lineups?.hint, 'una pestana pending sin promesa no sirve de nada');
 
     // Y las que hoy salen vacias no se dibujan.
-    for (const gone of ['summary', 'timeline', 'players', 'stats', 'commentary'] as MatchTabId[]) {
+    for (const gone of ['summary', 'videos', 'timeline', 'players', 'stats', 'commentary'] as MatchTabId[]) {
         assert.ok(!tabs.some((t) => t.id === gone), `${gone} no deberia dibujarse`);
     }
 });
@@ -221,4 +221,39 @@ test('con permiso de edicion se dibujan todas, aunque esten vacias', () => {
 test('el admin no ve Previa en un partido terminado', () => {
     const { tabs } = resolveMatchTabs({ provider: 'local', status: 'final', counts: { events: 5 }, canManage: true });
     assert.ok(!tabs.some((t) => t.id === 'previa'), 'la antesala se deriva, no se carga');
+});
+
+// ── Videos: highlights y partido completo ───────────────────────────────────
+
+test('videos se dibuja en cualquier fuente y estado si hay links, y no si no hay', () => {
+    // Los links son nuestros, no del proveedor: la cobertura de la API no manda.
+    for (const provider of ['local', 'flashscore', 'rugby-api-sports', 'espn-american-football', 'espn-soccer', 'fih'] as MatchProvider[]) {
+        for (const status of ['scheduled', 'live', 'final'] as const) {
+            assert.ok(ids(provider, status, { videos: 2 }).includes('videos'), `${provider}/${status} con links`);
+            assert.ok(!ids(provider, status, { videos: 0, events: 5 }).includes('videos'), `${provider}/${status} sin links`);
+        }
+    }
+
+    const { hidden } = resolveMatchTabs({ provider: 'local', status: 'final', counts: { events: 5 } });
+    assert.ok(hidden.some((h) => h.id === 'videos' && h.reason.length > 0), 'oculta con motivo');
+});
+
+test('videos va despues del resumen y antes de la cronologia', () => {
+    assert.deepEqual(ids('local', 'final', { events: 9, videos: 1, lineups: 30 }), ['summary', 'videos', 'timeline', 'lineups']);
+});
+
+test('un partido a mano con resultado y un video abre en los videos', () => {
+    // Lo normal en un torneo local: resultado, ningun evento, y el link de los
+    // highlights que subio el club. No hace falta el piso: la unica pestana
+    // que hay es la de entrada.
+    const { tabs, defaultTab } = resolveMatchTabs({ provider: 'local', status: 'final', counts: { videos: 1 } });
+    assert.deepEqual(tabs.map((t) => t.id), ['videos']);
+    assert.equal(defaultTab, 'videos');
+});
+
+test('quien administra ve videos vacia como puerta para cargar', () => {
+    const admin = resolveMatchTabs({ provider: 'flashscore', status: 'final', counts: { events: 5 }, canManage: true });
+    const videos = admin.tabs.find((t) => t.id === 'videos');
+    assert.equal(videos?.state, 'pending');
+    assert.match(String(videos?.hint), /link/i);
 });

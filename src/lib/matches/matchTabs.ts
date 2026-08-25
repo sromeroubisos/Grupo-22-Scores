@@ -23,7 +23,8 @@ export type MatchTabId =
     | 'stats'
     | 'h2h'
     | 'standings'
-    | 'commentary';
+    | 'commentary'
+    | 'videos';
 
 export type MatchTabState = 'ready' | 'pending';
 
@@ -45,6 +46,8 @@ export interface MatchTabCounts {
     h2h: number;
     standings: number;
     commentary: number;
+    /** Links de video cargados a mano (highlights, partido completo, clips). */
+    videos: number;
 }
 
 export interface MatchTab {
@@ -83,18 +86,23 @@ const LABELS: Record<MatchTabId, { label: string; shortLabel: string }> = {
     h2h: { label: 'H2H', shortLabel: 'H2H' },
     standings: { label: 'Clasificación', shortLabel: 'Tabla' },
     commentary: { label: 'Comentarios', shortLabel: 'Relato' },
+    videos: { label: 'Highlights', shortLabel: 'Videos' },
 };
 
 // Lo que cada fuente puede publicar ALGUNA vez. Si un id no está acá, la
 // pestaña no se dibuja jamás para esa fuente: no es que esté vacía, es que la
 // integración no la trae. Sale de la matriz relevada sobre los conectores.
+//
+// `videos` está en todas: los links los cargamos nosotros, no vienen del
+// proveedor, así que un partido de FlashScore los puede tener igual que uno
+// de un torneo local.
 const SUPPORTED: Record<MatchProvider, readonly MatchTabId[]> = {
-    local: ['previa', 'summary', 'timeline', 'lineups', 'players', 'stats', 'h2h', 'standings', 'commentary'],
-    flashscore: ['previa', 'summary', 'timeline', 'lineups', 'players', 'stats', 'h2h', 'standings', 'commentary'],
-    'rugby-api-sports': ['previa', 'summary', 'lineups', 'h2h', 'standings'],
-    'espn-american-football': ['previa', 'summary', 'lineups', 'h2h', 'standings'],
-    'espn-soccer': ['previa', 'summary', 'timeline', 'lineups', 'stats', 'h2h', 'standings'],
-    fih: ['previa', 'summary', 'timeline', 'lineups', 'players', 'stats', 'h2h', 'standings'],
+    local: ['previa', 'summary', 'videos', 'timeline', 'lineups', 'players', 'stats', 'h2h', 'standings', 'commentary'],
+    flashscore: ['previa', 'summary', 'videos', 'timeline', 'lineups', 'players', 'stats', 'h2h', 'standings', 'commentary'],
+    'rugby-api-sports': ['previa', 'summary', 'videos', 'lineups', 'h2h', 'standings'],
+    'espn-american-football': ['previa', 'summary', 'videos', 'lineups', 'h2h', 'standings'],
+    'espn-soccer': ['previa', 'summary', 'videos', 'timeline', 'lineups', 'stats', 'h2h', 'standings'],
+    fih: ['previa', 'summary', 'videos', 'timeline', 'lineups', 'players', 'stats', 'h2h', 'standings'],
 };
 
 // Las fuentes que publican el plantel poco antes del inicio. Para el resto,
@@ -105,10 +113,12 @@ const PUBLISHES_LINEUPS_BEFORE_KICKOFF: readonly MatchProvider[] = [
 
 // Lo que un administrador carga a mano. El resto se deriva de los eventos, asi
 // que abrir su pestana vacia no le da ninguna accion.
-const MANUALLY_LOADABLE: readonly MatchTabId[] = ['lineups', 'stats'];
+// Los videos entran acá aunque no pasen por el editor: se pegan en la misma
+// pestaña, y la pestaña vacía es justamente donde se pegan.
+const MANUALLY_LOADABLE: readonly MatchTabId[] = ['lineups', 'stats', 'videos'];
 
 const ORDER: readonly MatchTabId[] = [
-    'previa', 'summary', 'timeline', 'lineups', 'players', 'stats', 'h2h', 'standings', 'commentary',
+    'previa', 'summary', 'videos', 'timeline', 'lineups', 'players', 'stats', 'h2h', 'standings', 'commentary',
 ];
 
 export interface ResolveMatchTabsInput {
@@ -137,6 +147,7 @@ export function resolveMatchTabs({ provider, status, counts, canManage = false }
         h2h: n(counts.h2h),
         standings: n(counts.standings),
         commentary: n(counts.commentary),
+        videos: n(counts.videos),
     };
 
     // Con permiso de edición manda el catálogo local, que es todo lo que el
@@ -165,8 +176,9 @@ export function resolveMatchTabs({ provider, status, counts, canManage = false }
         // directamente, se derivan de los eventos. Una pestana vacia que no
         // lleva a ningun lado es ruido tambien para el administrador.
         if (canManage && MANUALLY_LOADABLE.includes(id)) {
-            const has = id === 'lineups' ? c.lineups > 0 : c.stats > 0;
+            const has = id === 'lineups' ? c.lineups > 0 : id === 'videos' ? c.videos > 0 : c.stats > 0;
             if (has) show(id, 'ready');
+            else if (id === 'videos') show(id, 'pending', 'Sin videos todavía. Podés pegar el link de YouTube acá mismo.');
             else show(id, 'pending', 'Sin datos cargados todavía. Podés cargarlos desde el editor.');
             continue;
         }
@@ -227,6 +239,15 @@ export function resolveMatchTabs({ provider, status, counts, canManage = false }
             case 'standings': {
                 if (c.standings > 0) show(id, 'ready');
                 else hide(id, 'El torneo no tiene tabla publicada.');
+                break;
+            }
+
+            // Los videos son nuestros, no del proveedor, y valen en cualquier
+            // estado: un partido programado puede tener el de ida, y uno en
+            // vivo la transmisión que alguien subió.
+            case 'videos': {
+                if (c.videos > 0) show(id, 'ready');
+                else hide(id, 'Sin videos cargados.');
                 break;
             }
 

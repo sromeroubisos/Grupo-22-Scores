@@ -45,8 +45,10 @@ import {
     toMatchStatusKind,
     type MatchProvider,
 } from '@/lib/matches/matchTabs';
+import { normalizeMatchVideoLinks, type MatchVideoLink } from '@/lib/matches/videoLinks';
 import PlayerStatsPanel from './PlayerStatsPanel';
 import LineupRatingEditorModal from './LineupRatingEditorModal';
+import MatchVideosPanel from './MatchVideosPanel';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { useAuth } from '@/context/AuthContext';
@@ -660,6 +662,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         playerStats: any;
         localPlayerRows: LocalPlayerStatsRow[];
         commentaryData: any[];
+        /** Links de video (highlights, partido completo). Llegan con el partido en `videos`. */
+        videosData: MatchVideoLink[];
         issues: any[];
         debug: Record<string, unknown>;
         message?: string;
@@ -679,6 +683,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         playerStats: null,
         localPlayerRows: [],
         commentaryData: [],
+        videosData: [],
         issues: [],
         debug: {}
     });
@@ -819,6 +824,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             kind: 'ok',
                             secondaryReady: true,
                             matchData: rugbyMatch,
+                            videosData: normalizeMatchVideoLinks(payload?.videos),
                             eventsData: [],
                             statsData: [],
                             playerStats: null,
@@ -839,6 +845,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             kind: 'ok',
                             secondaryReady: true,
                             matchData: payload.match,
+                            videosData: normalizeMatchVideoLinks(payload?.videos),
                             eventsData: Array.isArray(payload.events) ? payload.events : [],
                             statsData: Array.isArray(payload.stats) ? payload.stats : [],
                             playerStats: payload.playerStats || null,
@@ -867,6 +874,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             kind: 'ok',
                             secondaryReady: true,
                             matchData: espnMatch,
+                            videosData: normalizeMatchVideoLinks(payload?.videos),
                             eventsData: Array.isArray(payload.events) ? payload.events : (Array.isArray(payload.match.events) ? payload.match.events : []),
                             statsData: Array.isArray(payload.stats) ? payload.stats : (Array.isArray(payload.match.stats) ? payload.match.stats : []),
                             playerStats: null,
@@ -1189,6 +1197,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             playerStats: playerStatsRes?.DATA || playerStatsRes || null,
                             localPlayerRows: [],
                             commentaryData: commentaryRes?.DATA || commentaryRes || [],
+                            videosData: normalizeMatchVideoLinks(payload?.videos),
                             issues: zodIssues,
                             debug: { ...prev.debug, details: debugDetails }
                         };
@@ -1272,6 +1281,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 kind: 'ok',
                                 secondaryReady: false,
                                 matchData: baseProcessedMatch,
+                                videosData: normalizeMatchVideoLinks(matchData.videos),
                                 eventsData: localEvents,
                                 statsData: localStats,
                                 playerStats: null,
@@ -1373,6 +1383,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 kind: 'ok',
                                 secondaryReady: true,
                                 matchData: processedMatch,
+                                videosData: normalizeMatchVideoLinks(matchData.videos),
                                 eventsData: localEvents,
                                 statsData: localStats,
                                 playerStats: null,
@@ -1527,8 +1538,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
             h2h: Array.isArray(md.h2h) ? md.h2h.length : 0,
             standings: Array.isArray(md.standings) ? md.standings.length : 0,
             commentary: state.commentaryData?.length ?? 0,
+            videos: state.videosData.length,
         };
-    }, [state.matchData, state.eventsData, state.statsData, state.localPlayerRows, state.commentaryData, playerStatsTable]);
+    }, [state.matchData, state.eventsData, state.statsData, state.localPlayerRows, state.commentaryData, state.videosData, playerStatsTable]);
 
     const resolvedTabs = useMemo(
         () => resolveMatchTabs({
@@ -2663,6 +2675,16 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     </div>
                                 )}
                             </div>
+                        )}
+
+                        {activeTab === 'videos' && (
+                            <MatchVideosPanel
+                                matchId={id}
+                                videos={state.videosData}
+                                canManage={canManageMatch || isSuperAdminUser}
+                                matchLabel={`${matchData.home.name} vs ${matchData.away.name}`}
+                                onChange={(videos) => setState((prev) => ({ ...prev, videosData: videos }))}
+                            />
                         )}
 
                         {activeTab === 'timeline' && (
