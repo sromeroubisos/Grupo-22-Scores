@@ -5,13 +5,59 @@ export type BonusMetricEvent = {
   team?: unknown;
 };
 
+/**
+ * Contra qué se compara el umbral del bonus ofensivo.
+ *
+ * En rugby hay dos reglamentos vivos y los dos son "bonus por tries":
+ *
+ * - `count`: lo anotado por el equipo. Cuatro tries o más, sin mirar al rival
+ *   (Six Nations, URBA, el clásico).
+ * - `difference`: lo anotado POR ENCIMA del rival. Tres tries más que el otro:
+ *   3-0, 4-1, 5-2 (World Rugby desde 2016, Super Rugby, Top 14, Rugby
+ *   Championship). Con este modo un 4-4 no da bonus a nadie y un 3-0 sí.
+ *
+ * Es un modo de la misma regla y no una regla aparte porque comparten todo lo
+ * demás —la unidad, los puntos, quién la configura— y porque un torneo elige
+ * UNA de las dos, nunca las dos a la vez.
+ */
+export type OffensiveBonusMode = 'count' | 'difference';
+
 export type NormalizedOffensiveBonusRule = {
   threshold: number;
   points: number;
   metric: 'event_count' | 'team_score';
   eventType: string | null;
   label: string;
+  mode: OffensiveBonusMode;
 };
+
+/** El umbral que cada modo trae de fábrica: 4 tries anotados, 3 de diferencia. */
+export const DEFAULT_OFFENSIVE_BONUS_THRESHOLD: Record<OffensiveBonusMode, number> = {
+  count: 4,
+  difference: 3,
+};
+
+const DIFFERENCE_MODE_TOKENS = new Set([
+  'difference',
+  'diff',
+  'differential',
+  'delta',
+  'margin',
+  'diferencia',
+  'triesdifference',
+  'trydifference',
+  'tries_difference',
+]);
+
+const COUNT_MODE_TOKENS = new Set([
+  'count',
+  'total',
+  'for',
+  'scored',
+  'absolute',
+  'anotados',
+  'threshold',
+]);
 
 const TEAM_SCORE_TOKENS = new Set([
   'score',
@@ -142,14 +188,27 @@ function getCandidateEventTypes(eventType: string | null): string[] {
  */
 const OPPONENT_CREDITED_EVENT_TYPES = new Set(['own_goal']);
 
+/**
+ * Lee el modo de una regla escrita a mano o guardada por otra versión.
+ * Devuelve `null` si no dice nada, para que quien llama decida el default.
+ */
+export function normalizeOffensiveBonusMode(value: unknown): OffensiveBonusMode | null {
+  const compact = compactToken(value);
+  if (!compact) return null;
+  if (DIFFERENCE_MODE_TOKENS.has(compact)) return 'difference';
+  if (COUNT_MODE_TOKENS.has(compact)) return 'count';
+  return null;
+}
+
 export function resolveOffensiveBonusRule(rawRule: unknown): NormalizedOffensiveBonusRule | null {
   if (rawRule === true) {
     return {
-      threshold: 4,
+      threshold: DEFAULT_OFFENSIVE_BONUS_THRESHOLD.count,
       points: 1,
       metric: 'event_count',
       eventType: 'try',
       label: 'tries',
+      mode: 'count',
     };
   }
 
@@ -158,9 +217,22 @@ export function resolveOffensiveBonusRule(rawRule: unknown): NormalizedOffensive
   }
 
   const source = rawRule as Record<string, unknown>;
+
+  // `triesDifference: 3` es la forma corta de `{ mode: 'difference', tries: 3 }`.
+  // Se acepta por si alguien la escribe así en un settings a mano, pero lo que
+  // se guarda es siempre la forma larga, que un lector viejo entiende como
+  // "3 tries o más" en vez de ignorarla.
+  const differenceShortcut = toFiniteNumber(
+    source.triesDifference ?? source.tries_difference ?? source.tryDifference ?? source.difference,
+  );
+  const explicitMode = normalizeOffensiveBonusMode(
+    source.mode ?? source.basis ?? source.comparison ?? source.compare,
+  );
+  const mode: OffensiveBonusMode = explicitMode ?? (differenceShortcut !== null ? 'difference' : 'count');
+
   const threshold = toFiniteNumber(
     source.threshold ?? source.tries ?? source.count ?? source.minimum ?? source.min,
-  ) ?? 4;
+  ) ?? (mode === 'difference' ? differenceShortcut : null) ?? DEFAULT_OFFENSIVE_BONUS_THRESHOLD[mode];
   const points = toFiniteNumber(source.points ?? source.value) ?? 1;
   const rawMetric =
     source.metric ??
@@ -189,7 +261,82 @@ export function resolveOffensiveBonusRule(rawRule: unknown): NormalizedOffensive
     metric,
     eventType,
     label: getRuleLabel(source, metric, eventType),
+    mode,
   };
+}
+
+/**
+ * La UNIDAD que se cuenta, no el nombre de la regla.
+ *
+ * Ojo con `rule.label`: en el catálogo suele traer el nombre de la regla, no el
+ * sustantivo. Super Rugby Americas la llama "4+ Tries", así que usarla tal cual
+ * escribiría "7 4+ Tries · +1". La unidad sale del `eventType` —que ya viene
+ * normalizado a 'try' | 'goal' | ...— y el label queda como último recurso, para
+ * un deporte que cuente algo que no está en la tabla.
+ */
+export function offensiveBonusUnit(rule: Pick<NormalizedOffensiveBonusRule, 'metric' | 'eventType' | 'label'>): string {
+  if (rule.metric === 'team_score') return 'puntos';
+  switch (rule.eventType) {
+    case 'try': return 'tries';
+    case 'goal': return 'goles';
+    case 'point': return 'puntos';
+    case 'run': return 'carreras';
+    case 'touchdown': return 'touchdowns';
+    default:
+      return rule.eventType ? rule.eventType.replace(/_/g, ' ') : (rule.label || 'unidades');
+  }
+}
+
+/**
+ * La regla en una frase corta, para rótulos: "4+ tries", "3+ tries de
+ * diferencia". Es la misma traducción en el creador, el gestor y el Match
+ * Center, así que ninguna pantalla puede describir la regla distinto de como
+ * el motor la aplica.
+ */
+export function describeOffensiveBonusRule(
+  rule: Pick<NormalizedOffensiveBonusRule, 'metric' | 'eventType' | 'label' | 'threshold' | 'mode'>,
+): string {
+  const unit = offensiveBonusUnit(rule);
+  return rule.mode === 'difference'
+    ? `${rule.threshold}+ ${unit} de diferencia`
+    : `${rule.threshold}+ ${unit}`;
+}
+
+export type OffensiveBonusOutcome = {
+  /** Lo que anotó el equipo evaluado (tries, goles o puntos según la regla). */
+  own: number;
+  /** Lo que anotó el rival, en la misma unidad. */
+  opponent: number;
+  /** Lo que se compara contra el umbral: `own` o `own - opponent` según el modo. */
+  value: number;
+  fires: boolean;
+};
+
+/**
+ * La ÚNICA cuenta de "¿le toca el bonus ofensivo?". El motor de posiciones, la
+ * vista previa de puntos y el Match Center pasan por acá: antes cada uno
+ * repetía `metric >= threshold` y agregar un modo hubiera sido agregarlo en
+ * cuatro lugares, con la garantía de olvidarse de uno.
+ *
+ * Sin dato no se inventa: si no hay tries cargados los dos lados cuentan cero
+ * y el bonus no se cumple, igual que antes. En modo `difference` la diferencia
+ * de cero contra cero es cero, así que tampoco.
+ */
+export function resolveOffensiveBonusOutcome(
+  score: unknown,
+  events: BonusMetricEvent[] | null | undefined,
+  team: BonusMetricTeam,
+  rule: NormalizedOffensiveBonusRule | null | undefined,
+): OffensiveBonusOutcome {
+  if (!rule) {
+    return { own: 0, opponent: 0, value: 0, fires: false };
+  }
+
+  const own = countTeamOffensiveMetric(score, events, team, rule);
+  const opponent = countTeamOffensiveMetric(score, events, team === 'home' ? 'away' : 'home', rule);
+  const value = rule.mode === 'difference' ? own - opponent : own;
+
+  return { own, opponent, value, fires: value >= rule.threshold };
 }
 
 export function countTeamEventMetric(

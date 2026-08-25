@@ -8,7 +8,11 @@ export interface StandingsRules {
   points_for_win?: number;
   points_for_draw?: number;
   points_for_loss?: number;
-  offensive_bonus_rule?: boolean | { tries?: number; threshold?: number } | null;
+  /**
+   * `mode` dice contra qué se mide el umbral: `count` (4+ tries anotados) o
+   * `difference` (3+ tries más que el rival). Sin `mode` es `count`.
+   */
+  offensive_bonus_rule?: boolean | { tries?: number; threshold?: number; mode?: string; points?: number } | null;
   defensive_bonus_rule?: boolean | { margin?: number } | null;
   editable?: boolean;
   editable_mode?: boolean;

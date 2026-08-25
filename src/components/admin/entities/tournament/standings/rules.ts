@@ -1,3 +1,8 @@
+import {
+  DEFAULT_OFFENSIVE_BONUS_THRESHOLD,
+  normalizeOffensiveBonusMode,
+  type OffensiveBonusMode,
+} from '@/lib/bonusRuleMetrics';
 import type { StandingsRules } from './types';
 
 export type NormalizedCalculationMode = 'automatic' | 'manual' | 'hybrid' | 'undefined';
@@ -12,6 +17,8 @@ export interface NormalizedStandingsRules {
   bonusOffensive: {
     active: boolean;
     threshold: number | null;
+    /** Contra qué se mide el umbral: tries anotados o tries de diferencia. */
+    mode: OffensiveBonusMode;
   };
   bonusDefensive: {
     active: boolean;
@@ -46,8 +53,11 @@ export function normalizeStandingsRules(rules?: StandingsRules | null): Normaliz
   const defensiveRule = rules?.defensive_bonus_rule ?? null;
   const offensiveObject = isRuleObject(offensiveRule) ? offensiveRule : null;
   const defensiveObject = isRuleObject(defensiveRule) ? defensiveRule : null;
+  const offensiveMode = normalizeOffensiveBonusMode(offensiveObject?.mode) ?? 'count';
   const offensiveThreshold = offensiveRule
-    ? (getFiniteNumber(offensiveObject?.tries) ?? getFiniteNumber(offensiveObject?.threshold) ?? 4)
+    ? (getFiniteNumber(offensiveObject?.tries)
+      ?? getFiniteNumber(offensiveObject?.threshold)
+      ?? DEFAULT_OFFENSIVE_BONUS_THRESHOLD[offensiveMode])
     : null;
   const defensiveMargin = defensiveRule ? (getFiniteNumber(defensiveObject?.margin) ?? 7) : null;
 
@@ -61,6 +71,7 @@ export function normalizeStandingsRules(rules?: StandingsRules | null): Normaliz
     bonusOffensive: {
       active: !!offensiveRule,
       threshold: offensiveThreshold,
+      mode: offensiveMode,
     },
     bonusDefensive: {
       active: !!defensiveRule,

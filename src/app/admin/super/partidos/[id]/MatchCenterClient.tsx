@@ -26,8 +26,10 @@ import {
     teamKickAccuracyBreakdown,
 } from '@/lib/matchEventStats';
 import {
-    countTeamOffensiveMetric,
     resolveOffensiveBonusRule,
+    resolveOffensiveBonusOutcome,
+    describeOffensiveBonusRule,
+    offensiveBonusUnit,
     type NormalizedOffensiveBonusRule,
 } from '@/lib/bonusRuleMetrics';
 import {
@@ -1320,12 +1322,11 @@ function calculateAutocalculatedPoints(
     homeBase = resolvedBasePoints.home;
     awayBase = resolvedBasePoints.away;
 
-    const homeOffensiveMetric = countTeamOffensiveMetric(score, events, 'home', rules.offensive);
-    const awayOffensiveMetric = countTeamOffensiveMetric(score, events, 'away', rules.offensive);
-
     if (rules.offensive) {
-        if (homeOffensiveMetric >= rules.offensive.threshold) homeBonus += rules.offensive.points;
-        if (awayOffensiveMetric >= rules.offensive.threshold) awayBonus += rules.offensive.points;
+        // La misma cuenta que el motor de posiciones: 4+ anotados o 3+ de
+        // diferencia según el modo de la regla.
+        if (resolveOffensiveBonusOutcome(score, events, 'home', rules.offensive).fires) homeBonus += rules.offensive.points;
+        if (resolveOffensiveBonusOutcome(score, events, 'away', rules.offensive).fires) awayBonus += rules.offensive.points;
     }
 
     if (rules.defensive) {
@@ -2919,20 +2920,25 @@ export default function MatchCenterClient({
             };
         }
 
-        const offensiveMetricLabel = pointsRules.offensive?.label || 'eventos';
-        const homeOffensiveMetricCount = countTeamOffensiveMetric(score, events, 'home', pointsRules.offensive);
-        const awayOffensiveMetricCount = countTeamOffensiveMetric(score, events, 'away', pointsRules.offensive);
-        const homeBonusOff = pointsRules.offensive ? homeOffensiveMetricCount >= pointsRules.offensive.threshold : false;
-        const awayBonusOff = pointsRules.offensive ? awayOffensiveMetricCount >= pointsRules.offensive.threshold : false;
-        const offensiveThresholdLabel = pointsRules.offensive?.threshold ?? 0;
+        // Lo que se contó, en el idioma de la regla: "7 tries" por cantidad,
+        // "7 tries a 3" por diferencia (ahí el rival ES la cuenta).
+        const offensiveUnitLabel = pointsRules.offensive ? offensiveBonusUnit(pointsRules.offensive) : 'eventos';
+        const homeOffensiveOutcome = resolveOffensiveBonusOutcome(score, events, 'home', pointsRules.offensive);
+        const awayOffensiveOutcome = resolveOffensiveBonusOutcome(score, events, 'away', pointsRules.offensive);
+        const homeBonusOff = homeOffensiveOutcome.fires;
+        const awayBonusOff = awayOffensiveOutcome.fires;
+        const describeOffensiveCount = (outcome: typeof homeOffensiveOutcome) =>
+            pointsRules.offensive?.mode === 'difference'
+                ? `${outcome.own} ${offensiveUnitLabel} a ${outcome.opponent}`
+                : `${outcome.own} ${offensiveUnitLabel}`;
         const bonusOffText = !pointsRules.offensive
             ? 'No aplica'
             : homeBonusOff && awayBonusOff
-                ? `${homeName} y ${awayName} (${offensiveThresholdLabel}+ ${offensiveMetricLabel})`
+                ? `${homeName} y ${awayName} (${describeOffensiveBonusRule(pointsRules.offensive)})`
                 : homeBonusOff
-                    ? `${homeName} (${homeOffensiveMetricCount} ${offensiveMetricLabel})`
+                    ? `${homeName} (${describeOffensiveCount(homeOffensiveOutcome)})`
                     : awayBonusOff
-                        ? `${awayName} (${awayOffensiveMetricCount} ${offensiveMetricLabel})`
+                        ? `${awayName} (${describeOffensiveCount(awayOffensiveOutcome)})`
                         : 'No';
 
         const diff = Math.abs(score.home - score.away);

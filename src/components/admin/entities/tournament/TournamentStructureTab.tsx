@@ -12,6 +12,7 @@ import { LabelChip } from './standings/LabelChip';
 import { PhaseSettings, GroupLabel } from '@/types/phase-settings';
 import { updateEntity } from '@/app/admin/entities/actions';
 import { buildTournamentCompetitionConfig } from '@/lib/utils/tournamentFormat';
+import { normalizeOffensiveBonusMode, type OffensiveBonusMode } from '@/lib/bonusRuleMetrics';
 import {
     DEFAULT_PLAYOFF_STAGE_NAMES,
     getDefaultPlayoffStageNames,
@@ -238,6 +239,8 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const [pointsDraw, setPointsDraw] = useState(isRugby ? 2 : 1);
     const [pointsLoss, setPointsLoss] = useState(0);
     const [allowBonusPoints, setAllowBonusPoints] = useState(isRugby);
+    // Contra qué se mide el bonus ofensivo: 4+ tries anotados o 3+ de diferencia.
+    const [bonusTryMode, setBonusTryMode] = useState<OffensiveBonusMode>('count');
     const [useExtraTimePoints, setUseExtraTimePoints] = useState(false);
     const [pointsWinExtra, setPointsWinExtra] = useState(2);
     const [pointsDrawExtra, setPointsDrawExtra] = useState(1);
@@ -807,6 +810,12 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 setPointsDraw(s.pointsSystem.draw);
                 setPointsLoss(s.pointsSystem.loss);
                 setAllowBonusPoints(!!s.pointsSystem.allowBonusPoints);
+                // El modo puede venir de la forma vieja (`pointsSystem.bonusTryMode`)
+                // o de la canónica (`bonus.offensive.mode`, que escribe el editor
+                // de reglas de Posiciones). Cualquiera de las dos vale.
+                setBonusTryMode(
+                    normalizeOffensiveBonusMode(s.pointsSystem.bonusTryMode ?? s.bonus?.offensive?.mode) ?? 'count',
+                );
                 setUseExtraTimePoints(!!s.pointsSystem.extraTimeAlternativeSystem);
                 if (s.pointsSystem.behavior?.extraTimeLogic) {
                     setPointsWinExtra(s.pointsSystem.behavior.extraTimeLogic.win || 2);
@@ -1009,6 +1018,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                             loss: pointsLoss,
                             extraTimeAlternativeSystem: useExtraTimePoints,
                             allowBonusPoints,
+                            bonusTryMode,
                             behavior: {
                                 whenToCalculate: 'on_match_finalized',
                                 input: { requires: ['score'], statusRequired: 'finalized' },
@@ -2347,9 +2357,28 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                     />
                                                     <span className="structure-toggle-card-copy">
                                                         <span className="structure-toggle-card-title">Puntos bonus (Rugby)</span>
-                                                        <span className="structure-toggle-card-help">Otorgar puntos de bonificación según las reglas del torneo (4 tries = +1, perder por menos de 7 = +1).</span>
+                                                        <span className="structure-toggle-card-help">
+                                                            {bonusTryMode === 'difference'
+                                                                ? 'Otorgar puntos de bonificación según las reglas del torneo (3 tries más que el rival = +1, perder por 7 o menos = +1).'
+                                                                : 'Otorgar puntos de bonificación según las reglas del torneo (4 tries = +1, perder por 7 o menos = +1).'}
+                                                        </span>
                                                     </span>
                                                 </label>
+                                                {allowBonusPoints && (
+                                                    <div style={{ marginTop: '10px' }}>
+                                                        <label htmlFor="structure-bonus-try-mode" className="text-[12px] font-semibold block mb-1">Bonus ofensivo por</label>
+                                                        <select
+                                                            id="structure-bonus-try-mode"
+                                                            className="basalt-input"
+                                                            style={{ width: '100%' }}
+                                                            value={bonusTryMode}
+                                                            onChange={e => setBonusTryMode(e.target.value === 'difference' ? 'difference' : 'count')}
+                                                        >
+                                                            <option value="count">4 tries o más</option>
+                                                            <option value="difference">3 tries de diferencia (3-0, 4-1, 5-2)</option>
+                                                        </select>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>

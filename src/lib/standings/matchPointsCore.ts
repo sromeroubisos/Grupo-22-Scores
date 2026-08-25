@@ -12,7 +12,7 @@
  * no se entera del cambio.
  */
 import {
-  countTeamOffensiveMetric,
+  resolveOffensiveBonusOutcome,
   resolveOffensiveBonusRule,
   type NormalizedOffensiveBonusRule,
 } from '../bonusRuleMetrics.ts';
@@ -139,10 +139,10 @@ export function calculateMatchPointsPreview(
   const awayScore = finiteNumber(score?.away, 0);
 
   if (isFinal && rules.offensive) {
-    const homeOffensiveMetric = countTeamOffensiveMetric(score, events, 'home', rules.offensive);
-    const awayOffensiveMetric = countTeamOffensiveMetric(score, events, 'away', rules.offensive);
-    homeOffensiveBonus = homeOffensiveMetric >= rules.offensive.threshold;
-    awayOffensiveBonus = awayOffensiveMetric >= rules.offensive.threshold;
+    // Una sola cuenta para los dos modos (4+ tries, 3+ de diferencia): vive en
+    // `resolveOffensiveBonusOutcome` y es la misma que usa el motor de posiciones.
+    homeOffensiveBonus = resolveOffensiveBonusOutcome(score, events, 'home', rules.offensive).fires;
+    awayOffensiveBonus = resolveOffensiveBonusOutcome(score, events, 'away', rules.offensive).fires;
     if (homeOffensiveBonus) homeBonusPoints += rules.offensive.points;
     if (awayOffensiveBonus) awayBonusPoints += rules.offensive.points;
   }

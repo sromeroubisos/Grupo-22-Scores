@@ -612,3 +612,60 @@ test('la clasificación marca ascenso y descenso según el reglamento', () => {
     assert.equal(table[1].status, 'En Zona');
     assert.equal(table[3].status, 'Descenso');
 });
+
+// ---------------------------------------------------------------------------
+// E · Bonus ofensivo por diferencia de tries (3-0, 4-1, 5-2)
+// ---------------------------------------------------------------------------
+
+test('la regla canónica con mode: "difference" se resuelve como tal', () => {
+    const resolved = StandingsEngine.resolveRules(
+        { bonus: { offensive: { mode: 'difference', tries: 3, points: 1 } } },
+        {},
+    );
+    assert.equal(resolved.offensive_bonus_rule.mode, 'difference');
+    assert.equal(resolved.offensive_bonus_rule.threshold, 3);
+    assert.equal(resolved.offensive_bonus_rule.eventType, 'try');
+});
+
+test('la forma vieja (bonusTry suelto) acepta bonusTryMode y trae el umbral del modo', () => {
+    const resolved = StandingsEngine.resolveRules({ pointsSystem: { bonusTry: 1, bonusTryMode: 'difference' } }, {});
+    assert.equal(resolved.offensive_bonus_rule.mode, 'difference');
+    assert.equal(resolved.offensive_bonus_rule.threshold, 3, 'tres de diferencia, no cuatro anotados');
+    assert.equal(resolved.offensive_bonus_rule.points, 1);
+});
+
+test('la forma vieja sin modo sigue siendo el clásico de cuatro anotados', () => {
+    const resolved = StandingsEngine.resolveRules({ pointsSystem: { allowBonusPoints: true } }, {});
+    assert.equal(resolved.offensive_bonus_rule.mode, 'count');
+    assert.equal(resolved.offensive_bonus_rule.threshold, 4);
+});
+
+test('la tabla premia por diferencia: 4-1 sí, 4-2 no, 3-0 sí', () => {
+    const porDiferencia = rules({
+        offensive_bonus_rule: { threshold: 3, points: 1, metric: 'event_count', eventType: 'try', label: 'tries', mode: 'difference' },
+    });
+    const matches = [
+        match({ id: 'm1', home_club_id: 'a', away_club_id: 'b', score: { home: 30, away: 10, homeTries: 4, awayTries: 1 } }),
+        match({ id: 'm2', home_club_id: 'b', away_club_id: 'a', score: { home: 28, away: 14, homeTries: 4, awayTries: 2 } }),
+        match({ id: 'm3', home_club_id: 'a', away_club_id: 'b', score: { home: 21, away: 0, homeTries: 3, awayTries: 0 } }),
+    ];
+    const table = StandingsEngine.generateTable(AB, matches, porDiferencia, 'general');
+    const a = rowOf(table, 'a');
+    const b = rowOf(table, 'b');
+
+    assert.equal(a.bonus_offensive, 2, 'm1 (4-1) y m3 (3-0)');
+    assert.equal(b.bonus_offensive, 0, 'm2 fue 4-2: dos de diferencia no alcanzan');
+    assert.equal(a.total_points, 10, '4 + 4 de dos victorias, más 2 de bonus');
+    assert.equal(b.total_points, 4, 'una victoria sin bonus');
+});
+
+test('con el clásico el mismo 4-2 sí cobra: los dos modos se separan donde tienen que separarse', () => {
+    const clasico = rules({
+        offensive_bonus_rule: { threshold: 4, points: 1, metric: 'event_count', eventType: 'try', label: 'tries', mode: 'count' },
+    });
+    const matches = [
+        match({ id: 'm2', home_club_id: 'b', away_club_id: 'a', score: { home: 28, away: 14, homeTries: 4, awayTries: 2 } }),
+    ];
+    const table = StandingsEngine.generateTable(AB, matches, clasico, 'general');
+    assert.equal(rowOf(table, 'b').bonus_offensive, 1);
+});

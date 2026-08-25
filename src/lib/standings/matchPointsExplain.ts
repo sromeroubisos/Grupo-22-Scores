@@ -14,7 +14,11 @@
  * alcanza con que la carga rápida pida los tries: sin ese dato el bonus no se
  * puede calcular y hay que ponerlo a mano (que es lo que pasaba antes).
  */
-import { countTeamOffensiveMetric } from '../bonusRuleMetrics.ts';
+import {
+  offensiveBonusUnit,
+  resolveOffensiveBonusOutcome,
+  type OffensiveBonusOutcome,
+} from '../bonusRuleMetrics.ts';
 import {
   calculateMatchPointsPreview,
   type MatchPointsRules,
@@ -61,40 +65,31 @@ function signed(points: number) {
 }
 
 /**
- * La UNIDAD que se cuenta, no el nombre de la regla.
+ * El término ofensivo dice lo que se contó, en el idioma de la regla.
  *
- * Ojo con `rule.label`: en el catálogo suele traer el nombre de la regla, no el
- * sustantivo. Super Rugby Americas la llama "4+ Tries", así que usarla tal cual
- * escribiría "7 4+ Tries · +1". La unidad sale del `eventType` —que ya viene
- * normalizado a 'try' | 'goal' | ...— y el label queda como último recurso, para
- * un deporte que cuente algo que no está en la tabla.
+ * - Por cantidad: "7 tries · +1". El rival no entra en la cuenta, así que
+ *   tampoco en la frase.
+ * - Por diferencia: "7 tries a 3 · +1". Acá el rival ES la cuenta: sin él, un
+ *   "4 tries · sin bonus" al lado de un 4-1 que sí lo cobró sería un misterio.
+ *
+ * La unidad sale de `offensiveBonusUnit` (tries, goles, puntos) y no del
+ * `label` de la regla, que suele traer su nombre ("4+ Tries").
  */
-function offensiveUnit(rule: NonNullable<MatchPointsRules['offensive']>): string {
-  if (rule.metric === 'team_score') return 'puntos';
-  switch (rule.eventType) {
-    case 'try': return 'tries';
-    case 'goal': return 'goles';
-    case 'point': return 'puntos';
-    case 'run': return 'carreras';
-    case 'touchdown': return 'touchdowns';
-    default:
-      return rule.eventType ? rule.eventType.replace(/_/g, ' ') : (rule.label || 'unidades');
-  }
-}
-
 function offensiveTerm(
-  count: number,
-  fired: boolean,
+  outcome: OffensiveBonusOutcome,
   rule: MatchPointsRules['offensive'],
 ): PointsTerm | null {
   if (!rule) return null;
-  const unit = offensiveUnit(rule);
+  const unit = offensiveBonusUnit(rule);
+  const counted = rule.mode === 'difference'
+    ? `${outcome.own} ${unit} a ${outcome.opponent}`
+    : `${outcome.own} ${unit}`;
   return {
     id: 'offensive',
-    label: fired
-      ? `${count} ${unit} · ${signed(rule.points)}`
-      : `${count} ${unit} · sin bonus`,
-    active: fired,
+    label: outcome.fires
+      ? `${counted} · ${signed(rule.points)}`
+      : `${counted} · sin bonus`,
+    active: outcome.fires,
   };
 }
 
@@ -130,12 +125,8 @@ export function explainMatchPoints(
   const homeLostBy = awayScore > homeScore ? awayScore - homeScore : null;
   const awayLostBy = homeScore > awayScore ? homeScore - awayScore : null;
 
-  const homeOffensiveCount = rules.offensive
-    ? countTeamOffensiveMetric(score, events ?? null, 'home', rules.offensive)
-    : 0;
-  const awayOffensiveCount = rules.offensive
-    ? countTeamOffensiveMetric(score, events ?? null, 'away', rules.offensive)
-    : 0;
+  const homeOffensive = resolveOffensiveBonusOutcome(score, events ?? null, 'home', rules.offensive);
+  const awayOffensive = resolveOffensiveBonusOutcome(score, events ?? null, 'away', rules.offensive);
 
   function buildSide(side: 'home' | 'away'): TeamPointsExplain {
     const base = side === 'home' ? preview.homeBasePoints : preview.awayBasePoints;
@@ -150,8 +141,7 @@ export function explainMatchPoints(
       terms.push({ id: 'result', label: `${verb} · ${base}`, active: base > 0 });
 
       const offensive = offensiveTerm(
-        side === 'home' ? homeOffensiveCount : awayOffensiveCount,
-        side === 'home' ? preview.homeOffensiveBonus : preview.awayOffensiveBonus,
+        side === 'home' ? homeOffensive : awayOffensive,
         rules.offensive,
       );
       if (offensive) terms.push(offensive);

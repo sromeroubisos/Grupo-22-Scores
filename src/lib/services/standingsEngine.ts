@@ -6,8 +6,11 @@
  */
 import {
   countTeamEventMetric,
-  countTeamOffensiveMetric,
   resolveOffensiveBonusRule,
+  resolveOffensiveBonusOutcome,
+  normalizeOffensiveBonusMode,
+  DEFAULT_OFFENSIVE_BONUS_THRESHOLD,
+  type OffensiveBonusMode,
 } from '../bonusRuleMetrics.ts';
 import { calculateBasePointsFromScore } from '../standings/matchPoints.ts';
 
@@ -72,10 +75,18 @@ export class StandingsEngine {
     return Number.isFinite(normalized) ? normalized : null;
   }
 
+  /**
+   * La forma vieja del reglamento (`pointsSystem.bonusTry` suelto, o el toggle
+   * `allowBonusPoints`) no dice contra qué se mide: se asume el clásico de
+   * cuatro tries. `pointsSystem.bonusTryMode` lo aclara para las fases que lo
+   * guardan así (el creador rápido y el wizard de fases), y con él el umbral
+   * pasa a ser el de fábrica del modo: 3 de diferencia, 4 anotados.
+   */
   private static buildLegacyBonusRule(
     enabled: boolean,
     fallback: unknown,
     kind: 'offensive' | 'defensive',
+    offensiveMode: OffensiveBonusMode = 'count',
   ) {
     if (!enabled && fallback == null) return null;
 
@@ -83,7 +94,8 @@ export class StandingsEngine {
 
     if (kind === 'offensive') {
       return {
-        tries: 4,
+        mode: offensiveMode,
+        tries: DEFAULT_OFFENSIVE_BONUS_THRESHOLD[offensiveMode],
         points: bonusPoints,
       };
     }
@@ -120,6 +132,19 @@ export class StandingsEngine {
       tournamentRuleset?.pointsBonusTry != null ||
       tournamentRuleset?.pointsBonusLoss != null,
     );
+    // El modo (4+ anotados o 3+ de diferencia) viaja en la forma vieja como
+    // `bonusTryMode`, al lado de `bonusTry`. La fase manda sobre el torneo.
+    const phaseLegacyOffensiveMode =
+      normalizeOffensiveBonusMode(
+        phasePointsSystem?.bonusTryMode ??
+          phasePointsSystem?.behavior?.bonusTryMode ??
+          tournamentPointsSystem?.bonusTryMode ??
+          tournamentRuleset?.pointsBonusTryMode,
+      ) ?? 'count';
+    const tournamentLegacyOffensiveMode =
+      normalizeOffensiveBonusMode(
+        tournamentPointsSystem?.bonusTryMode ?? tournamentRuleset?.pointsBonusTryMode,
+      ) ?? 'count';
     const resolvedOffensiveBonusRule =
       resolveOffensiveBonusRule(phaseSettings?.bonus?.offensive) ??
       resolveOffensiveBonusRule(tournamentRuleset?.bonus?.offensive) ??
@@ -131,6 +156,7 @@ export class StandingsEngine {
             tournamentPointsSystem?.bonusTry ??
             tournamentRuleset?.pointsBonusTry,
           'offensive',
+          phaseLegacyOffensiveMode,
         ),
       ) ??
       resolveOffensiveBonusRule(
@@ -138,6 +164,7 @@ export class StandingsEngine {
           tournamentBonusEnabled,
           tournamentPointsSystem?.bonusTry ?? tournamentRuleset?.pointsBonusTry,
           'offensive',
+          tournamentLegacyOffensiveMode,
         ),
       );
     const resolvedDefensiveBonusRule =
@@ -536,10 +563,10 @@ export class StandingsEngine {
         homeStats.form.push(homeResult);
 
         if (!hasManualPoints && rules.offensive_bonus_rule) {
-          const threshold = Number(rules.offensive_bonus_rule.threshold ?? 4);
           const points = Number(rules.offensive_bonus_rule.points ?? 1);
-          const offensiveMetric = countTeamOffensiveMetric(m.score, m.events, 'home', rules.offensive_bonus_rule);
-          if (offensiveMetric >= threshold) homeStats.bonus_offensive += Number.isFinite(points) ? points : 1;
+          if (resolveOffensiveBonusOutcome(m.score, m.events, 'home', rules.offensive_bonus_rule).fires) {
+            homeStats.bonus_offensive += Number.isFinite(points) ? points : 1;
+          }
         }
         if (hasManualPoints) {
           homeStats.adjustments += Number(m.home_bonus_points ?? 0);
@@ -573,10 +600,10 @@ export class StandingsEngine {
         awayStats.form.push(awayResult);
 
         if (!hasManualPoints && rules.offensive_bonus_rule) {
-          const threshold = Number(rules.offensive_bonus_rule.threshold ?? 4);
           const points = Number(rules.offensive_bonus_rule.points ?? 1);
-          const offensiveMetric = countTeamOffensiveMetric(m.score, m.events, 'away', rules.offensive_bonus_rule);
-          if (offensiveMetric >= threshold) awayStats.bonus_offensive += Number.isFinite(points) ? points : 1;
+          if (resolveOffensiveBonusOutcome(m.score, m.events, 'away', rules.offensive_bonus_rule).fires) {
+            awayStats.bonus_offensive += Number.isFinite(points) ? points : 1;
+          }
         }
         if (hasManualPoints) {
           awayStats.adjustments += Number(m.away_bonus_points ?? 0);

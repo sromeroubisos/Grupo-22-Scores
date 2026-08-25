@@ -85,7 +85,11 @@ export interface TournamentSeason {
 
 export interface TournamentRuleset {
     bonusRules?: {
-        offensiveBonus?: { enabled: boolean; type: string; threshold: number };
+        /**
+         * `mode`: `count` (4+ tries anotados) o `difference` (3+ tries más que
+         * el rival). Sin `mode` es `count`.
+         */
+        offensiveBonus?: { enabled: boolean; type: string; threshold: number; mode?: string; label?: string };
         defensiveBonus?: { enabled: boolean; type: string; threshold: number };
     };
 }

@@ -15,6 +15,11 @@ import { updateEntitySafe } from '@/app/admin/entities/actions';
 import { invalidateCache } from '@/lib/cache/superAdminCache';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
 import { getAllSports, getSportById } from '@/lib/data/sports';
+import {
+    DEFAULT_OFFENSIVE_BONUS_THRESHOLD,
+    normalizeOffensiveBonusMode,
+    type OffensiveBonusMode,
+} from '@/lib/bonusRuleMetrics';
 import { useSport } from '@/context/SportContext';
 import type { Sport } from '@/lib/types';
 import { createUnion } from '@/lib/services/unionService';
@@ -246,7 +251,9 @@ type TournamentRecord = {
         pointsDraw?: number;
         pointsLoss?: number;
         pointsBonusTry?: number;
+        pointsBonusTryMode?: string;
         pointsBonusLoss?: number;
+        bonus?: { offensive?: { mode?: string } | null } | null;
     } | null;
 };
 
@@ -483,6 +490,7 @@ function createDefaultPhaseConfig(
         pointsDraw: number;
         pointsLoss: number;
         pointsBonusTry: number;
+        pointsBonusTryMode: OffensiveBonusMode;
         pointsBonusLoss: number;
     },
     // Viene del paso 2. Antes estaba en duro en 1, así que "Ida y vuelta" no
@@ -498,6 +506,7 @@ function createDefaultPhaseConfig(
             pointsWin: String(rules.pointsWin),
             pointsDraw: String(rules.pointsDraw),
             pointsBonusTry: String(rules.pointsBonusTry),
+            pointsBonusTryMode: rules.pointsBonusTryMode,
             pointsBonusLoss: String(rules.pointsBonusLoss),
             leagueRounds,
             playoffThirdPlace: false,
@@ -545,6 +554,9 @@ function buildQuickPhasePayload(config: PhaseConfiguration, plannedTeamCount?: n
                 draw: parsePointsValue(config.config?.pointsDraw, 2),
                 loss: 0,
                 bonusTry: parsePointsValue(config.config?.pointsBonusTry, 1),
+                // Contra qué se mide el bonus ofensivo. El motor lo lee de acá
+                // cuando la fase no trae `bonus.offensive` (la forma vieja).
+                bonusTryMode: normalizeOffensiveBonusMode(config.config?.pointsBonusTryMode) ?? 'count',
                 bonusLoss: parsePointsValue(config.config?.pointsBonusLoss, 1),
             },
             tiebreakers: config.activeCriteria.map((criterion, index) => ({
@@ -903,6 +915,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
             pointsDraw: 2,
             pointsLoss: 0,
             pointsBonusTry: 1,
+            pointsBonusTryMode: 'count' as OffensiveBonusMode,
             pointsBonusLoss: 1,
         }
     });
@@ -1019,6 +1032,9 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                         pointsDraw: data.ruleset?.pointsDraw ?? defaults.draw ?? prev.rules.pointsDraw,
                         pointsLoss: data.ruleset?.pointsLoss ?? defaults.loss ?? prev.rules.pointsLoss,
                         pointsBonusTry: data.ruleset?.pointsBonusTry ?? prev.rules.pointsBonusTry,
+                        pointsBonusTryMode:
+                            normalizeOffensiveBonusMode(data.ruleset?.pointsBonusTryMode ?? data.ruleset?.bonus?.offensive?.mode)
+                            ?? prev.rules.pointsBonusTryMode,
                         pointsBonusLoss: data.ruleset?.pointsBonusLoss ?? prev.rules.pointsBonusLoss,
                     }
                 }));
@@ -1775,6 +1791,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                 pointsLoss: formData.rules.pointsLoss,
                 ...(formData.sport === 'rugby' ? {
                     pointsBonusTry: formData.rules.pointsBonusTry,
+                    pointsBonusTryMode: formData.rules.pointsBonusTryMode,
                     pointsBonusLoss: formData.rules.pointsBonusLoss,
                 } : {})
             };
@@ -2737,29 +2754,55 @@ Listo para continuar
                                         </div>
                                         {formData.sport === 'rugby' && (
                                             <div className="field-group">
-                                                <label htmlFor="tg-bonus-try">Bonus try (4 o más)</label>
+                                                <label htmlFor="tg-bonus-try">Bonus ofensivo (puntos)</label>
                                                 <input
                                                     className="form-input"
                                                     type="number"
                                                     id="tg-bonus-try"
-                                                value={formData.rules.pointsBonusTry}
+                                                    value={formData.rules.pointsBonusTry}
                                                     onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsBonusTry: parseInt(e.target.value) || 0 } }))}
                                                 />
                                             </div>
                                         )}
                                     </div>
                                     {formData.sport === 'rugby' && (
-                                        <div className="field-group">
-                                            <label htmlFor="tg-bonus-loss">Bonus defensivo (perder por ≤7)</label>
-                                            <input
-                                                className="form-input"
-                                                type="number"
-                                                id="tg-bonus-loss"
-                                                value={formData.rules.pointsBonusLoss}
-                                                onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsBonusLoss: parseInt(e.target.value) || 0 } }))}
-                                            />
-                                            <p className="field-help">Los bonus se suman a los puntos del partido cuando se cumplen: ofensivo con 4 o más tries, defensivo al perder por 7 o menos.</p>
+                                        <div className="grid-2">
+                                            {/* Dos reglamentos vivos para el mismo bonus por tries: el
+                                                clásico de 4 anotados y el de World Rugby (2016) de 3
+                                                más que el rival. Un torneo elige uno. */}
+                                            <div className="field-group">
+                                                <label htmlFor="tg-bonus-try-mode">Se otorga por</label>
+                                                <select
+                                                    className="form-input"
+                                                    id="tg-bonus-try-mode"
+                                                    value={formData.rules.pointsBonusTryMode}
+                                                    onChange={(e) => {
+                                                        const mode: OffensiveBonusMode = e.target.value === 'difference' ? 'difference' : 'count';
+                                                        setFormData((p) => ({ ...p, rules: { ...p.rules, pointsBonusTryMode: mode } }));
+                                                    }}
+                                                >
+                                                    <option value="count">4 tries o más</option>
+                                                    <option value="difference">3 tries de diferencia</option>
+                                                </select>
+                                            </div>
+                                            <div className="field-group">
+                                                <label htmlFor="tg-bonus-loss">Bonus defensivo (perder por ≤7)</label>
+                                                <input
+                                                    className="form-input"
+                                                    type="number"
+                                                    id="tg-bonus-loss"
+                                                    value={formData.rules.pointsBonusLoss}
+                                                    onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsBonusLoss: parseInt(e.target.value) || 0 } }))}
+                                                />
+                                            </div>
                                         </div>
+                                    )}
+                                    {formData.sport === 'rugby' && (
+                                        <p className="field-help">
+                                            {formData.rules.pointsBonusTryMode === 'difference'
+                                                ? 'Los bonus se suman a los puntos del partido cuando se cumplen: ofensivo al anotar 3 tries más que el rival (3-0, 4-1, 5-2), defensivo al perder por 7 o menos.'
+                                                : 'Los bonus se suman a los puntos del partido cuando se cumplen: ofensivo con 4 o más tries, defensivo al perder por 7 o menos.'}
+                                        </p>
                                     )}
                                 </div>
                             </details>
@@ -2776,7 +2819,14 @@ Listo para continuar
                                     <div><dt>Victoria</dt><dd>{formData.rules.pointsWin} pts</dd></div>
                                     <div><dt>Empate</dt><dd>{formData.rules.pointsDraw} pts</dd></div>
                                     {formData.sport === 'rugby' && (
-                                        <div><dt>Bonus</dt><dd>{formData.rules.pointsBonusTry} try · {formData.rules.pointsBonusLoss} def</dd></div>
+                                        <div>
+                                            <dt>Bonus</dt>
+                                            <dd>
+                                                {formData.rules.pointsBonusTry} por {formData.rules.pointsBonusTryMode === 'difference'
+                                                    ? `${DEFAULT_OFFENSIVE_BONUS_THRESHOLD.difference}+ tries de diferencia`
+                                                    : `${DEFAULT_OFFENSIVE_BONUS_THRESHOLD.count}+ tries`} · {formData.rules.pointsBonusLoss} def
+                                            </dd>
+                                        </div>
                                     )}
                                 </dl>
                             </div>

@@ -9,6 +9,11 @@ import {
   normalizeStandingsRules,
 } from './rules';
 import { useDialog } from '../useDialog';
+import {
+  DEFAULT_OFFENSIVE_BONUS_THRESHOLD,
+  describeOffensiveBonusRule,
+  type OffensiveBonusMode,
+} from '@/lib/bonusRuleMetrics';
 import styles from './TournamentStandingsTab.module.css';
 import type { StandingsGroup, StandingsPhase, StandingsRules } from './types';
 
@@ -42,6 +47,8 @@ type LogicFormState = {
   points_for_loss: number;
   offensive_bonus_rule: boolean;
   offensive_bonus_threshold: number;
+  /** Contra qué se mide el umbral: tries anotados (4+) o de diferencia (3+). */
+  offensive_bonus_mode: OffensiveBonusMode;
   defensive_bonus_rule: boolean;
   defensive_bonus_margin: number;
   calculation_mode: 'automatic' | 'manual' | 'hybrid';
@@ -106,7 +113,9 @@ function createInitialLogicForm(rules?: StandingsRules | null): LogicFormState {
     points_for_draw: normalized.points.draw ?? 0,
     points_for_loss: normalized.points.loss ?? 0,
     offensive_bonus_rule: normalized.bonusOffensive.active,
-    offensive_bonus_threshold: normalized.bonusOffensive.threshold ?? 4,
+    offensive_bonus_threshold:
+      normalized.bonusOffensive.threshold ?? DEFAULT_OFFENSIVE_BONUS_THRESHOLD[normalized.bonusOffensive.mode],
+    offensive_bonus_mode: normalized.bonusOffensive.mode,
     defensive_bonus_rule: normalized.bonusDefensive.active,
     defensive_bonus_margin: normalized.bonusDefensive.margin ?? 7,
     calculation_mode:
@@ -125,9 +134,12 @@ function formatBonusRule(kind: 'offensive' | 'defensive', rules?: StandingsRules
 
   if (kind === 'offensive') {
     if (!normalized.bonusOffensive.active) return { label: 'Inactivo', tone: 'inactive' as const };
-    const threshold = normalized.bonusOffensive.threshold ?? 4;
+    const mode = normalized.bonusOffensive.mode;
+    const threshold = normalized.bonusOffensive.threshold ?? DEFAULT_OFFENSIVE_BONUS_THRESHOLD[mode];
     return {
-      label: `+1 por ${threshold}+ tries`,
+      // "+1 por 4+ tries" o "+1 por 3+ tries de diferencia": la misma frase que
+      // usan el creador y el Match Center, así que no puede decir otra cosa.
+      label: `+1 por ${describeOffensiveBonusRule({ metric: 'event_count', eventType: 'try', label: 'tries', threshold, mode })}`,
       tone: 'active' as const,
     };
   }
@@ -264,7 +276,7 @@ export function StandingsFiltersBar({
       points_for_draw: logicForm.points_for_draw,
       points_for_loss: logicForm.points_for_loss,
       offensive_bonus_rule: logicForm.offensive_bonus_rule
-        ? { tries: logicForm.offensive_bonus_threshold }
+        ? { mode: logicForm.offensive_bonus_mode, tries: logicForm.offensive_bonus_threshold }
         : null,
       defensive_bonus_rule: logicForm.defensive_bonus_rule
         ? { margin: logicForm.defensive_bonus_margin }
@@ -510,10 +522,35 @@ export function StandingsFiltersBar({
                   />
                   <span>Bonus ofensivo</span>
                 </label>
+                {/* Dos reglamentos vivos en rugby: 4+ tries anotados, o 3+ tries
+                    más que el rival (3-0, 4-1, 5-2). Cambiar el modo trae el
+                    umbral de fábrica del modo; después se puede ajustar. */}
+                <select
+                  className={styles.logicInput}
+                  aria-label="Cómo se mide el bonus ofensivo"
+                  value={logicForm.offensive_bonus_mode}
+                  disabled={!logicForm.offensive_bonus_rule}
+                  onChange={(event) => {
+                    const mode = event.target.value === 'difference' ? 'difference' : 'count';
+                    setLogicForm((current) => ({
+                      ...current,
+                      offensive_bonus_mode: mode,
+                      offensive_bonus_threshold: DEFAULT_OFFENSIVE_BONUS_THRESHOLD[mode],
+                    }));
+                  }}
+                >
+                  <option value="count">tries anotados</option>
+                  <option value="difference">tries de diferencia</option>
+                </select>
                 <input
                   className={styles.logicInput}
                   type="number"
                   min={1}
+                  aria-label={
+                    logicForm.offensive_bonus_mode === 'difference'
+                      ? 'Tries de diferencia para el bonus ofensivo'
+                      : 'Tries anotados para el bonus ofensivo'
+                  }
                   value={logicForm.offensive_bonus_threshold}
                   disabled={!logicForm.offensive_bonus_rule}
                   onChange={(event) =>

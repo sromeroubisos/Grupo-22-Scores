@@ -154,3 +154,48 @@ test('los términos y el total salen del mismo cálculo', () => {
     }
   }
 });
+
+// ---------------------------------------------------------------------------
+// Bonus ofensivo por DIFERENCIA de tries (World Rugby 2016: 3-0, 4-1, 5-2).
+// Es un modo de la misma regla; cambia la cuenta y cambia la frase, que ahora
+// tiene que nombrar al rival porque el rival ES la cuenta.
+// ---------------------------------------------------------------------------
+
+const WORLD_RUGBY: MatchPointsRules = {
+  ...SRA,
+  offensive: { threshold: 3, points: 1, metric: 'event_count', eventType: 'try', label: 'tries', mode: 'difference' },
+};
+
+test('por diferencia: 4 tries a 1 cobra y la frase nombra al rival', () => {
+  const out = explainMatchPoints('final', { home: 30, away: 10, homeTries: 4, awayTries: 1 }, WORLD_RUGBY);
+
+  assert.equal(out.home.bonus, 1);
+  assert.deepEqual(labels(out.home.terms), ['ganó · 4', '4 tries a 1 · +1']);
+  assert.equal(out.away.bonus, 0);
+  assert.deepEqual(labels(out.away.terms), ['perdió · 0', '1 tries a 4 · sin bonus', 'perdió por 20 · sin bonus']);
+});
+
+test('por diferencia: 4 tries a 2 no cobra aunque el clásico sí lo daría', () => {
+  const s = { home: 28, away: 14, homeTries: 4, awayTries: 2 };
+  const clasico = explainMatchPoints('final', s, SRA);
+  const diferencia = explainMatchPoints('final', s, WORLD_RUGBY);
+
+  assert.equal(clasico.home.bonus, 1);
+  assert.equal(diferencia.home.bonus, 0);
+  assert.deepEqual(labels(diferencia.home.terms), ['ganó · 4', '4 tries a 2 · sin bonus']);
+});
+
+test('por diferencia: 3 tries a 0 cobra, y el clásico no', () => {
+  const s = { home: 21, away: 0, homeTries: 3, awayTries: 0 };
+  assert.equal(explainMatchPoints('final', s, SRA).home.bonus, 0);
+  const out = explainMatchPoints('final', s, WORLD_RUGBY);
+  assert.equal(out.home.bonus, 1);
+  assert.deepEqual(labels(out.home.terms), ['ganó · 4', '3 tries a 0 · +1']);
+});
+
+test('por diferencia: un 4-4 no le da bonus a nadie', () => {
+  const out = explainMatchPoints('final', { home: 28, away: 28, homeTries: 4, awayTries: 4 }, WORLD_RUGBY);
+  assert.equal(out.home.bonus, 0);
+  assert.equal(out.away.bonus, 0);
+  assert.deepEqual(labels(out.home.terms), ['empató · 2', '4 tries a 4 · sin bonus']);
+});

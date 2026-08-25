@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { updateEntity } from '@/app/admin/entities/actions';
 import { Database } from '@/lib/database.types';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
-import { getOffensiveBonusPreset } from '@/lib/sportMatchProfile';
+import { getOffensiveBonusPreset, getSecondaryScoreMetric } from '@/lib/sportMatchProfile';
+import { normalizeOffensiveBonusMode, type OffensiveBonusMode } from '@/lib/bonusRuleMetrics';
 import { SPORTS } from '@/lib/data/sports';
 import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
 import { type TournamentDetailsDraft, useTournamentDirty } from './TournamentContext';
@@ -148,15 +149,38 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
     const isApiManaged = tournament.is_api_managed || false;
     const form = getSectionDraft<TournamentDetailsDraft>('details') ?? initialForm;
     const isDirty = hasDirtySection('details');
-    // Con qué se mide el bonus ofensivo acá: tries en rugby, goles en hockey.
-    // Sigue al deporte del formulario, así que cambiarlo actualiza el rótulo.
-    const offensiveBonusPreset = getOffensiveBonusPreset(form.sport_id);
     const bonusRules =
         form.ruleset.bonusRules &&
             typeof form.ruleset.bonusRules === 'object' &&
             !Array.isArray(form.ruleset.bonusRules)
-            ? form.ruleset.bonusRules as Record<string, { enabled?: boolean }>
+            ? form.ruleset.bonusRules as Record<string, { enabled?: boolean; mode?: string }>
             : {};
+    // Con qué se mide el bonus ofensivo acá: tries en rugby, goles en hockey.
+    // Sigue al deporte del formulario, así que cambiarlo actualiza el rótulo.
+    // En rugby además elige entre los dos reglamentos vivos: 4+ tries anotados
+    // o 3+ tries más que el rival. El selector sólo aparece donde la cifra
+    // secundaria existe: en hockey se cuenta contra el marcador y no hay
+    // "diferencia de tries" que elegir.
+    const offensiveBonusMode: OffensiveBonusMode =
+        normalizeOffensiveBonusMode(bonusRules.offensiveBonus?.mode) ?? 'count';
+    const offensiveBonusPreset = getOffensiveBonusPreset(form.sport_id, offensiveBonusMode);
+    const offensiveBonusHasModes = Boolean(getSecondaryScoreMetric(form.sport_id));
+    const writeOffensiveBonus = (enabled: boolean, mode: OffensiveBonusMode) => {
+        const preset = getOffensiveBonusPreset(form.sport_id, mode);
+        update('ruleset', {
+            ...form.ruleset,
+            bonusRules: {
+                ...bonusRules,
+                offensiveBonus: {
+                    enabled,
+                    type: preset.type,
+                    threshold: preset.threshold,
+                    mode: preset.mode,
+                    label: preset.label,
+                },
+            },
+        });
+    };
     const countryOptions = useMemo(() => {
         if (!form.country_id) return baseCountryOptions;
 
@@ -586,20 +610,7 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                                     id="details-bonus-offensive"
                                     type="checkbox"
                                     checked={bonusRules.offensiveBonus?.enabled || false}
-                                    onChange={e => {
-                                        update('ruleset', {
-                                            ...form.ruleset,
-                                            bonusRules: {
-                                                ...bonusRules,
-                                                offensiveBonus: {
-                                                    enabled: e.target.checked,
-                                                    type: offensiveBonusPreset.type,
-                                                    threshold: offensiveBonusPreset.threshold,
-                                                    label: offensiveBonusPreset.label,
-                                                },
-                                            },
-                                        });
-                                    }}
+                                    onChange={e => writeOffensiveBonus(e.target.checked, offensiveBonusMode)}
                                     disabled={isApiManaged}
                                 />
                                 Bonus ofensivo
@@ -608,6 +619,24 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                             <p className="details-toggle-hint">
                                 {offensiveBonusPreset.hint}
                             </p>
+                            {offensiveBonusHasModes && bonusRules.offensiveBonus?.enabled ? (
+                                <div style={{ marginTop: '10px' }}>
+                                    <label htmlFor="details-bonus-offensive-mode" className="text-[12px] font-semibold block mb-1">
+                                        Se otorga por
+                                    </label>
+                                    <select
+                                        id="details-bonus-offensive-mode"
+                                        className="basalt-input"
+                                        style={{ width: '100%' }}
+                                        value={offensiveBonusMode}
+                                        disabled={isApiManaged}
+                                        onChange={e => writeOffensiveBonus(true, e.target.value === 'difference' ? 'difference' : 'count')}
+                                    >
+                                        <option value="count">{getOffensiveBonusPreset(form.sport_id, 'count').rule}</option>
+                                        <option value="difference">{getOffensiveBonusPreset(form.sport_id, 'difference').rule}</option>
+                                    </select>
+                                </div>
+                            ) : null}
                         </div>
 
                         <div className="details-toggle">

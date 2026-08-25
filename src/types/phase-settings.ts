@@ -75,6 +75,12 @@ export interface PhasePointsSystem {
   } | null;
   extraTimeAlternativeSystem: boolean;
   allowBonusPoints?: boolean;
+  /**
+   * Contra qué se mide el bonus ofensivo cuando la fase lo guarda en esta
+   * forma (sin `bonus.offensive`): `count` = 4+ tries anotados, `difference`
+   * = 3+ tries más que el rival. Sin valor es `count`.
+   */
+  bonusTryMode?: 'count' | 'difference';
   conditionalRules?: any[];
   behavior: {
     whenToCalculate: string;
@@ -153,6 +159,15 @@ export interface PhaseSettings {
   playerStats?: PlayerStatsConfig;
   matchFormat?: MatchFormatConfig;
   pointsSystem?: PhasePointsSystem;
+  /**
+   * La forma canónica del bonus, la que escribe el editor de reglas de
+   * Posiciones y lee primero el motor. `offensive.mode` elige entre 4+ tries
+   * anotados (`count`) y 3+ de diferencia (`difference`).
+   */
+  bonus?: {
+    offensive?: { mode?: string; tries?: number; threshold?: number; points?: number; label?: string } | null;
+    defensive?: { margin?: number; points?: number; label?: string } | null;
+  } | null;
   tiebreakers?: TiebreakerMetricItem[];
   tiebreakerBehavior?: TiebreakerBehavior;
   carryOver?: PhaseCarryOverConfig;

@@ -6,6 +6,7 @@ import { createEntitySafe, updateEntitySafe } from '@/app/admin/entities/actions
 import { Database } from '@/lib/database.types';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
 import { getAllSports } from '@/lib/data/sports';
+import { DEFAULT_OFFENSIVE_BONUS_THRESHOLD, type OffensiveBonusMode } from '@/lib/bonusRuleMetrics';
 import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
 import { useAdminConsole } from '@/app/admin/AdminContext';
 import type { GroupLabel } from '@/types/phase-settings';
@@ -559,14 +560,29 @@ function inferBonusConfig(bonusRules: StandingsPreset['bonus_rules']) {
         return signature.includes('loss') || signature.includes('perd') || signature.includes('close');
     }) || null;
 
+    // "4+ Tries" es el clásico; "3 tries de diferencia" (o "margin", o
+    // "difference") es el reglamento de World Rugby 2016: 3-0, 4-1, 5-2. El
+    // umbral se lee del propio rótulo si trae un número; si no, el de fábrica
+    // del modo (4 anotados, 3 de diferencia).
+    const offensiveSignature = offensiveRule ? `${offensiveRule.id} ${offensiveRule.label}`.toLowerCase() : '';
+    const offensiveMode: OffensiveBonusMode = /diferencia|difference|margin|diff\b/.test(offensiveSignature)
+        ? 'difference'
+        : 'count';
+    const offensiveThresholdFromLabel = Number((offensiveRule?.label ?? '').match(/\d+/)?.[0]);
+    const offensiveThreshold = Number.isFinite(offensiveThresholdFromLabel) && offensiveThresholdFromLabel > 0
+        ? offensiveThresholdFromLabel
+        : DEFAULT_OFFENSIVE_BONUS_THRESHOLD[offensiveMode];
+
     return {
         bonusTry: offensiveRule?.points_awarded ?? null,
+        bonusTryMode: offensiveMode,
         bonusLoss: defensiveRule?.points_awarded ?? null,
         bonus: {
             offensive: offensiveRule
                 ? {
                     label: offensiveRule.label,
-                    tries: 4,
+                    mode: offensiveMode,
+                    tries: offensiveThreshold,
                     points: offensiveRule.points_awarded,
                 }
                 : null,
@@ -640,6 +656,7 @@ function buildTournamentPhasePayload(
                 shootout: shootoutConfig,
                 allowBonusPoints: phase.standings.bonus_rules.length > 0,
                 bonusTry: bonusConfig.bonusTry,
+                bonusTryMode: bonusConfig.bonusTryMode,
                 bonusLoss: bonusConfig.bonusLoss,
                 conditionalRules: bonusConfig.conditionalRules,
                 behavior: {
@@ -666,6 +683,7 @@ function buildTournamentPhasePayload(
                         }
                         : null,
                     bonusTry: bonusConfig.bonusTry,
+                    bonusTryMode: bonusConfig.bonusTryMode,
                     bonusLoss: bonusConfig.bonusLoss,
                     idempotency: {
                         key: 'match_id',

@@ -1,4 +1,5 @@
 import { normalizeSportBucket } from './matchEventCatalog.ts';
+import { DEFAULT_OFFENSIVE_BONUS_THRESHOLD, type OffensiveBonusMode } from './bonusRuleMetrics.ts';
 
 /**
  * Lo que cada deporte tiene de propio en la GESTION de un partido: cuanta gente
@@ -120,6 +121,8 @@ export type OffensiveBonusPreset = {
   /** Lo que se guarda en `ruleset.bonusRules.offensiveBonus.type`. */
   type: string;
   threshold: number;
+  /** Contra qué se mide el umbral: lo anotado (`count`) o la diferencia con el rival. */
+  mode: OffensiveBonusMode;
   /** Sustantivo para la tabla: 'tries', 'goles', 'touchdowns'. */
   label: string;
   /** Rotulo corto del toggle: "4+ tries". */
@@ -130,16 +133,37 @@ export type OffensiveBonusPreset = {
 
 const GOAL_BUCKETS = new Set(['hockey', 'football', 'handball']);
 
-export function getOffensiveBonusPreset(sportId?: string | null): OffensiveBonusPreset {
+/**
+ * `mode` elige entre los dos reglamentos vivos del bonus por tries: `count`
+ * (4 anotados, el clásico) y `difference` (3 más que el rival: 3-0, 4-1, 5-2,
+ * World Rugby desde 2016). Sin `mode` es `count`, así que nada de lo que ya
+ * llamaba a esta función cambia.
+ */
+export function getOffensiveBonusPreset(
+  sportId?: string | null,
+  mode: OffensiveBonusMode = 'count',
+): OffensiveBonusPreset {
   const bucket = normalizeSportBucket(sportId);
   const metric = getSecondaryScoreMetric(sportId);
 
   // Rugby y futbol americano: la cifra secundaria ES la unidad del bonus.
   if (metric) {
     const noun = metric.label.toLowerCase();
+    if (mode === 'difference') {
+      const threshold = DEFAULT_OFFENSIVE_BONUS_THRESHOLD.difference;
+      return {
+        type: metric.key,
+        threshold,
+        mode,
+        label: noun,
+        rule: `${threshold}+ ${noun} de diferencia`,
+        hint: `Un punto extra para el equipo que anote tres ${noun} más que el rival (3-0, 4-1, 5-2).`,
+      };
+    }
     return {
       type: metric.key,
-      threshold: 4,
+      threshold: DEFAULT_OFFENSIVE_BONUS_THRESHOLD.count,
+      mode: 'count',
       label: noun,
       rule: `4+ ${noun}`,
       hint: `Un punto extra para el equipo que anote cuatro ${noun} o más en un partido.`,
@@ -150,6 +174,7 @@ export function getOffensiveBonusPreset(sportId?: string | null): OffensiveBonus
     return {
       type: 'score',
       threshold: 4,
+      mode: 'count',
       label: 'goles',
       rule: '4+ goles',
       hint: 'Un punto extra para el equipo que anote cuatro goles o más en un partido.',
@@ -159,6 +184,7 @@ export function getOffensiveBonusPreset(sportId?: string | null): OffensiveBonus
   return {
     type: 'score',
     threshold: 4,
+    mode: 'count',
     label: 'puntos',
     rule: '4+ puntos',
     hint: 'Un punto extra para el equipo que llegue a cuatro puntos o más en un partido.',

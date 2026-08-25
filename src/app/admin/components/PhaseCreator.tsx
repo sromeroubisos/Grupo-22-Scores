@@ -35,6 +35,7 @@ import {
     FileSpreadsheet // Keep existing
 } from 'lucide-react';
 import styles from './PhaseCreator.module.css';
+import type { OffensiveBonusMode } from '@/lib/bonusRuleMetrics';
 
 // Lazy-loaded heavy libraries (xlsx ~500KB, pdfjs-dist ~2MB).
 // Importing them top-level pulls them into the admin route bundle on every visit;
@@ -99,6 +100,8 @@ interface PhaseConfigValues {
     pointsWin: string;
     pointsDraw: string;
     pointsBonusTry: string;
+    /** Contra qué se mide el bonus ofensivo: 4+ tries anotados o 3+ de diferencia. */
+    pointsBonusTryMode?: OffensiveBonusMode;
     pointsBonusLoss: string;
     leagueRounds?: number;
     playoffThirdPlace?: boolean;
@@ -206,6 +209,7 @@ export default function PhaseCreator({
         pointsWin: '4',
         pointsDraw: '2',
         pointsBonusTry: '+1',
+        pointsBonusTryMode: 'count',
         pointsBonusLoss: '+1',
         leagueRounds: 1,
         playoffThirdPlace: false
@@ -1236,7 +1240,9 @@ export default function PhaseCreator({
                                         </div>
 
                                         <div className="scoreRow">
-                                            <span className="scoreLabel">Bonus Try (4+)</span>
+                                            <span className="scoreLabel">
+                                                {config.pointsBonusTryMode === 'difference' ? 'Bonus Try (3+ de diferencia)' : 'Bonus Try (4+)'}
+                                            </span>
                                             <div className="scorePill scorePillAccent">
                                                 <input
                                                     type="text"
@@ -1245,6 +1251,25 @@ export default function PhaseCreator({
                                                     className="bg-transparent border-none text-center w-full focus:outline-none"
                                                     style={{ color: 'inherit', fontWeight: 'inherit', fontFamily: 'inherit' }}
                                                 />
+                                            </div>
+                                        </div>
+
+                                        {/* Dos reglamentos vivos para el bonus por tries: 4 anotados (el
+                                            clásico) o 3 más que el rival (World Rugby 2016: 3-0, 4-1, 5-2).
+                                            La fase elige uno. */}
+                                        <div className="scoreRow">
+                                            <span className="scoreLabel">Se otorga por</span>
+                                            <div className="scorePill" style={{ minWidth: 200 }}>
+                                                <select
+                                                    aria-label="Cómo se otorga el bonus ofensivo"
+                                                    value={config.pointsBonusTryMode ?? 'count'}
+                                                    onChange={(e) => handleConfigChange('pointsBonusTryMode', e.target.value === 'difference' ? 'difference' : 'count')}
+                                                    className="bg-transparent border-none text-center w-full focus:outline-none"
+                                                    style={{ color: 'inherit', fontWeight: 'inherit', fontFamily: 'inherit' }}
+                                                >
+                                                    <option value="count">4 tries o más</option>
+                                                    <option value="difference">3 tries de diferencia</option>
+                                                </select>
                                             </div>
                                         </div>
 

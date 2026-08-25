@@ -3,6 +3,11 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
+import {
+    DEFAULT_OFFENSIVE_BONUS_THRESHOLD,
+    normalizeOffensiveBonusMode,
+    type OffensiveBonusMode,
+} from '@/lib/bonusRuleMetrics';
 import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { invalidatePublicTournamentListCaches } from '@/lib/server/externalTournamentCacheInvalidation';
@@ -133,6 +138,10 @@ function buildRuleset(body: JsonObject, sport: string) {
     const pointsLoss = readNumber(body.points_loss ?? rules.pointsLoss, defaultLoss);
     const pointsBonusTry = readNumber(body.points_bonus_try ?? rules.pointsBonusTry, sport === 'rugby' ? 1 : 0);
     const pointsBonusLoss = readNumber(body.points_bonus_loss ?? rules.pointsBonusLoss, sport === 'rugby' ? 1 : 0);
+    // Contra qué se mide el bonus ofensivo: 4+ tries anotados (`count`, el
+    // clásico) o 3+ tries más que el rival (`difference`, World Rugby 2016).
+    const pointsBonusTryMode: OffensiveBonusMode =
+        normalizeOffensiveBonusMode(body.points_bonus_try_mode ?? rules.pointsBonusTryMode) ?? 'count';
 
     // Keep the legacy flat keys (read as a fallback by the standings engine) and
     // ALSO expose the canonical `points` / `pointsSystem` / `bonus` shape that the
@@ -152,9 +161,10 @@ function buildRuleset(body: JsonObject, sport: string) {
         pointsDraw,
         pointsLoss,
         pointsBonusTry,
+        pointsBonusTryMode,
         pointsBonusLoss,
         fixtureMode: readText(body.fixture_mode ?? rules.fixtureMode) || 'manual',
-        ...buildPointsSettings(pointsWin, pointsDraw, pointsLoss, pointsBonusTry, pointsBonusLoss),
+        ...buildPointsSettings(pointsWin, pointsDraw, pointsLoss, pointsBonusTry, pointsBonusLoss, pointsBonusTryMode),
         ...(competition ? { competition } : {}),
     };
 }
@@ -171,6 +181,7 @@ function buildPointsSettings(
     pointsLoss: number,
     pointsBonusTry: number,
     pointsBonusLoss: number,
+    pointsBonusTryMode: OffensiveBonusMode = 'count',
 ) {
     const allowBonusPoints = pointsBonusTry > 0 || pointsBonusLoss > 0;
     return {
@@ -182,6 +193,7 @@ function buildPointsSettings(
             allowBonusPoints,
             extraTimeAlternativeSystem: false,
             bonusTry: pointsBonusTry,
+            bonusTryMode: pointsBonusTryMode,
             bonusLoss: pointsBonusLoss,
             behavior: {
                 whenToCalculate: 'on_match_finalized',
@@ -196,7 +208,13 @@ function buildPointsSettings(
             },
         },
         bonus: {
-            offensive: pointsBonusTry > 0 ? { tries: 4, points: pointsBonusTry } : null,
+            offensive: pointsBonusTry > 0
+                ? {
+                    mode: pointsBonusTryMode,
+                    tries: DEFAULT_OFFENSIVE_BONUS_THRESHOLD[pointsBonusTryMode],
+                    points: pointsBonusTry,
+                }
+                : null,
             defensive: pointsBonusLoss > 0 ? { margin: 7, points: pointsBonusLoss } : null,
         },
     };
