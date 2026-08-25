@@ -52,6 +52,8 @@ import {
   getExternalMatchLineupOverride,
   type ExternalMatchLineupOverrideRecord,
 } from '@/lib/server/externalMatchLineupOverrides';
+import { getMatchVideos } from '@/lib/server/matchVideos';
+import type { MatchVideoLink } from '@/lib/matches/videoLinks';
 
 function jsonNoStore(body: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
@@ -297,6 +299,16 @@ export async function GET(
 ) {
   try {
     const matchId = (await params).id;
+
+    // Los videos (highlights, partido completo) son nuestros, no del
+    // proveedor: se cuelgan de cualquier partido, local o externo, con la
+    // misma llave que la URL. Van en paralelo con el partido; si la lectura
+    // falla, la página sale sin la pestaña en vez de caerse.
+    const videosPromise: Promise<MatchVideoLink[]> = getMatchVideos(matchId).catch((error: unknown) => {
+      console.error('[GET /api/matches/[id]] videos:', error);
+      return [];
+    });
+
     const espnMatchId = parseEspnAmericanFootballMatchId(matchId);
     const espnMotorsportMatchId = parseEspnMotorsportMatchId(matchId);
     const espnFootballMatchId = parseEspnFootballMatchId(matchId);
@@ -313,7 +325,7 @@ export async function GET(
         );
       }
 
-      return jsonNoStore(bundle);
+      return jsonNoStore({ ...bundle, videos: await videosPromise });
     }
 
     if (espnMatchId) {
@@ -328,7 +340,7 @@ export async function GET(
         );
       }
 
-      return jsonNoStore(bundle);
+      return jsonNoStore({ ...bundle, videos: await videosPromise });
     }
 
     if (parseFihMatchId(matchId)) {
@@ -340,7 +352,7 @@ export async function GET(
         );
       }
 
-      return jsonNoStore(bundle);
+      return jsonNoStore({ ...bundle, videos: await videosPromise });
     }
 
     if (espnMotorsportMatchId) {
@@ -352,7 +364,7 @@ export async function GET(
         );
       }
 
-      return jsonNoStore(bundle);
+      return jsonNoStore({ ...bundle, videos: await videosPromise });
     }
 
     if (isFlashScoreMatchId(matchId)) {
@@ -365,7 +377,7 @@ export async function GET(
         );
       }
 
-      return jsonNoStore(bundle);
+      return jsonNoStore({ ...bundle, videos: await videosPromise });
     }
 
     const readClient = await getReadClient();
@@ -392,7 +404,8 @@ export async function GET(
     }
 
     const isLiveMatch = (match as { status?: unknown }).status === 'live';
-    return isLiveMatch ? jsonLiveCached(match) : jsonNoStore(match);
+    const body = { ...match, videos: await videosPromise };
+    return isLiveMatch ? jsonLiveCached(body) : jsonNoStore(body);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal server error';
     console.error('Error in GET /api/matches/[id]:', error);
