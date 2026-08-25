@@ -5,19 +5,23 @@
     width: 100%;
 }
 
+/* Los colores salen de variables con el valor de HOY como fallback: las ocho
+   pantallas que ya usaban este componente no cambian ni un pixel. El wizard de
+   alta de torneo —fondo #050505 fijo— las pisa en su propio ambito, porque ahi
+   "Arrastra tu logo aqui" quedaba en 1,25:1. */
 .label {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #374151;
+    color: var(--lu-label, #374151);
 }
 
 .dropZone {
     position: relative;
     width: 100%;
     min-height: 180px;
-    border: 2px dashed #d1d5db;
+    border: 2px dashed var(--lu-border, #d1d5db);
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--lu-surface, rgba(255, 255, 255, 0.5));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -43,7 +47,7 @@
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    color: #4b5563;
+    color: var(--lu-text-sub, #4b5563);
 }
 
 .spinner {
@@ -97,11 +101,11 @@
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: #f3f4f6;
+    background: var(--lu-icon-surface, #f3f4f6);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #9ca3af;
+    color: var(--lu-icon-fg, #9ca3af);
     transition: all 0.3s;
 }
 
@@ -113,13 +117,13 @@
 
 .textMain {
     font-weight: 600;
-    color: #1f2937;
+    color: var(--lu-text-main, #1f2937);
     font-size: 0.95rem;
 }
 
 .textSub {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--lu-text-sub, #6b7280);
 }
 
 .successTag {
@@ -128,7 +132,7 @@
     gap: 6px;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #10b981;
+    color: var(--lu-success, #10b981);
     margin-top: 4px;
 }
 

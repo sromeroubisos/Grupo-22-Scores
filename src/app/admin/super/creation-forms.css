@@ -24,17 +24,37 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     display: flex;
     flex-direction: column;
+
+    /* El LogoUploader traía su paleta clara entera dentro de esta pantalla, que
+       corre sobre #050505 fijo: "Arrastra tu logo aquí" daba 1,25:1 —ilegible—
+       y el subtexto 3,78:1. El componente ahora lee estas variables; acá se le
+       dan las del wizard. Las otras pantallas que lo usan no se tocan. */
+    --lu-label: var(--text-dim);
+    --lu-border: rgba(255, 255, 255, 0.16);
+    --lu-surface: rgba(255, 255, 255, 0.02);
+    --lu-text-main: var(--text-primary);   /* 15,9:1 sobre el fondo del panel */
+    --lu-text-sub: #A8A8A8;                /* 8,2:1 */
+    --lu-icon-surface: rgba(255, 255, 255, 0.07);
+    --lu-icon-fg: #C4C4C4;
+    --lu-success: #34D399;
 }
 
+/* El techo es lo que faltaba. Sin `max-width` el campo del nombre medía 1.259 px
+   en un monitor de 1440 (~154 caracteres por línea) y 2.366 px en uno de 2560
+   (~289). El rango cómodo de lectura son 60-75. */
 .creation-container {
     width: 100%;
-    max-width: none;
-    margin: 0;
+    max-width: 1180px;
+    margin: 0 auto;
     padding: 48px clamp(24px, 4vw, 64px) 0;
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
 }
+
+/* Los pasos que son formulario se leen en una columna angosta. El catálogo de
+   participantes NO lleva esta clase: es una lista y quiere todo el ancho. */
+.form-column { max-width: 760px; }
 
 .creation-container > .partition:last-of-type,
 .creation-container > :last-child:not(.actions-footer) {
@@ -217,6 +237,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    /* Sin `gap` el titulo y su bajada se tocaban: `space-between` sólo separa
+       cuando SOBRA espacio en la fila, y hasta ~1000 px no sobra nada. Medido:
+       0 px de separación a 390, 768 y en los tres pasos. */
+    gap: 24px;
 }
 
 .partition-body {
@@ -312,9 +336,12 @@ textarea:focus {
 }
 
 /* 5. CHOICE GRIDS (Icon Buttons) */
+/* `auto-fit`, no `auto-fill`: con `auto-fill` las pistas vacías se conservan, así
+   que en 2560 se generaban 16 columnas de 136 px para cuatro botones y los
+   formatos quedaban apretados a la izquierda con 1.800 px de vacío al lado. */
 .choice-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 12px;
 }
 
@@ -391,6 +418,17 @@ textarea:focus {
     gap: 16px;
     z-index: 500;
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+    align-items: center;
+}
+
+/* Qué falta para que el primario se habilite. Sin esto el botón quedaba en
+   `opacity: .3` y no había forma de saber por qué. */
+.footer-blocked {
+    margin: 0 auto 0 0;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--text-secondary);
+    max-width: 42ch;
 }
 
 .btn {
@@ -422,6 +460,19 @@ textarea:focus {
 .btn-primary:disabled {
     opacity: 0.3;
     cursor: not-allowed;
+}
+
+/* Segundo clic de una accion que PISA algo (retomar un borrador teniendo
+   trabajo en curso). Texto negro sobre el rojo claro: 7,6:1. */
+.btn-danger {
+    background: var(--danger);
+    color: #000;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #fca5a5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(248, 113, 113, 0.3);
 }
 
 .btn-outline {
@@ -564,8 +615,13 @@ textarea:focus {
         font-size: 1.5rem;
     }
 
+    /* Apilado, como ya hacía `.creation-hero-card` acá arriba. En fila el
+       título quedaba en 75-155 px y la bajada en 130-209 px, pegadas. */
     .partition-header {
         padding: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
     }
 
     .partition-body {
@@ -586,6 +642,17 @@ textarea:focus {
         padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px));
         flex-direction: column-reverse;
         gap: 10px;
+        align-items: stretch;
+    }
+
+    /* En `column-reverse` las cajas se apilan de abajo hacia arriba, así que
+       un `order` más alto sube: el aviso tiene que quedar ARRIBA del botón que
+       explica, no debajo de "Atrás". */
+    .footer-blocked {
+        order: 1;
+        margin: 0;
+        max-width: none;
+        text-align: center;
     }
 
     .btn {
@@ -620,601 +687,6 @@ textarea:focus {
 
 /* =========================================================
    REDISEÑO 2026 — flujo nuevo de creación de torneo
-   - Template picker (paso 0)
-   - 3 pasos con stepper minimalista
-   - Validación inline + autosave
-   - Búsqueda de catálogo de clubes con squad-picker
-   ========================================================= */
-
-:root {
-    --r-md: 10px;
-    --r-lg: 14px;
-    --surface-1: #11151c;
-    --surface-2: #181d26;
-    --surface-3: #232934;
-    --text-secondary: #b6bdcc;
-    --accent-soft: rgba(0, 163, 101, 0.14);
-    --accent-2: #00c47a;
-    --success: #34d399;
-    --warning: #facc15;
-    --danger: #f87171;
-    --info: #60a5fa;
-    --border-strong: rgba(255, 255, 255, 0.14);
-}
-
-/* ===== Template picker (paso 0) ===== */
-.tplpick-wrap {
-    margin: 24px 0 8px;
-}
-.tplpick-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-top: 24px;
-}
-.tplpick-card {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--r-lg);
-    padding: 22px 18px;
-    text-align: left;
-    cursor: pointer;
-    transition: all .15s;
-    color: var(--text-primary);
-    display: grid;
-    gap: 10px;
-    position: relative;
-}
-.tplpick-card:hover {
-    background: var(--surface-2);
-    border-color: var(--accent);
-    transform: translateY(-2px);
-}
-.tplpick-card.popular {
-    border-color: rgba(0, 163, 101, 0.45);
-}
-.tplpick-card.popular::after {
-    content: 'Más usado';
-    position: absolute;
-    top: -8px;
-    right: 14px;
-    background: var(--accent);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 999px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-.tplpick-card.dashed {
-    border-style: dashed;
-}
-.tplpick-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
-    background: var(--surface-2);
-    display: grid;
-    place-items: center;
-    font-size: 24px;
-    border: 1px solid var(--border);
-}
-.tplpick-card.popular .tplpick-icon {
-    background: var(--accent-soft);
-    border-color: rgba(0, 163, 101, 0.4);
-}
-.tplpick-card h3 {
-    font-size: 15px;
-    font-weight: 700;
-    margin: 0;
-}
-.tplpick-card p {
-    font-size: 12.5px;
-    color: var(--text-dim);
-    line-height: 1.45;
-}
-.tplpick-callout {
-    background: rgba(96,165,250,0.06);
-    border: 1px solid rgba(96,165,250,0.25);
-    border-radius: var(--r-md);
-    padding: 12px 14px;
-    margin-top: 18px;
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-.tplpick-callout strong { color: var(--info); }
-
-/* ===== Stepper minimalista nuevo ===== */
-.stepper-bar {
-    margin: 16px 0 28px;
-    padding: 14px 18px;
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--r-lg);
-}
-.stepper-progress-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-.stepper-progress-row strong {
-    color: var(--text-primary);
-    text-transform: none;
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 0;
-}
-.stepper-progress-bar {
-    height: 4px;
-    background: var(--surface-3);
-    border-radius: 999px;
-    overflow: hidden;
-}
-.stepper-progress-fill {
-    display: block;
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    transition: width .3s ease;
-}
-
-/* ===== Validación inline ===== */
-.field-help-ok {
-    font-size: 12px;
-    color: var(--success);
-    margin-top: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.field-help-error {
-    font-size: 12px;
-    color: var(--danger);
-    margin-top: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.form-input.is-ok,
-.form-select.is-ok {
-    border-color: rgba(52, 211, 153, 0.45) !important;
-}
-.form-input.is-error,
-.form-select.is-error {
-    border-color: var(--danger) !important;
-    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.16);
-}
-
-/* ===== Audience picker / mini choice (selector grande con descripción) ===== */
-.choice-pair {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-@media (max-width: 480px) {
-    .choice-pair { grid-template-columns: 1fr; }
-}
-.choice-pair button {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    padding: 14px 16px;
-    border-radius: var(--r-md);
-    font-size: 13px;
-    font-weight: 600;
-    text-align: left;
-    cursor: pointer;
-    line-height: 1.35;
-    transition: all .15s;
-}
-.choice-pair button:hover {
-    background: var(--surface-mid);
-    color: var(--text-primary);
-}
-.choice-pair button.selected {
-    background: var(--accent-soft);
-    border-color: var(--accent);
-    color: var(--text-primary);
-}
-.choice-pair button .small {
-    display: block;
-    font-size: 11px;
-    color: var(--text-dim);
-    font-weight: 500;
-    margin-top: 3px;
-}
-
-/* ===== Auto-save indicator ===== */
-.autosave-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--text-dim);
-    padding: 4px 10px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-}
-.autosave-pill.saved::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--success);
-}
-.autosave-pill.saving::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--warning);
-    animation: pulse 1s infinite;
-}
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-}
-
-/* ===== Club catalog list (paso 3) ===== */
-.club-search-wrap {
-    display: grid;
-    gap: 10px;
-    margin-bottom: 14px;
-}
-.club-summary-bar {
-    background: var(--accent-soft);
-    border: 1px solid rgba(0, 163, 101, 0.3);
-    border-radius: var(--r-md);
-    padding: 10px 14px;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.club-summary-bar strong { font-size: 14px; }
-.club-filter-chips {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-.club-filter-chip {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    padding: 5px 10px;
-    border-radius: 999px;
-    font-size: 11.5px;
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-.club-filter-chip:hover { color: var(--text-primary); }
-.club-filter-chip.active {
-    background: var(--accent-soft);
-    border-color: var(--accent);
-    color: var(--text-primary);
-}
-.club-filter-chip .count {
-    font-size: 10px;
-    color: var(--text-dim);
-}
-
-.club-meta-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    color: var(--text-dim);
-    margin: 6px 2px 6px;
-}
-.club-meta-row button {
-    background: transparent;
-    border: 0;
-    color: var(--accent-2);
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.club-list-grid {
-    display: grid;
-    gap: 8px;
-    max-height: 460px;
-    overflow-y: auto;
-    padding-right: 4px;
-}
-.club-row {
-    display: grid;
-    grid-template-columns: 22px 36px 1fr auto;
-    align-items: center;
-    gap: 12px;
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--r-md);
-    padding: 10px 12px;
-    transition: all .15s;
-}
-.club-row.added {
-    border-color: rgba(0, 163, 101, 0.45);
-    background: rgba(0, 163, 101, 0.06);
-}
-.club-row .row-check {
-    width: 18px;
-    height: 18px;
-    border: 1.5px solid var(--border-strong);
-    border-radius: 4px;
-    display: grid;
-    place-items: center;
-    color: #fff;
-    font-size: 11px;
-    background: var(--surface-2);
-    cursor: pointer;
-}
-.club-row.added .row-check {
-    background: var(--accent);
-    border-color: var(--accent);
-}
-.club-row .row-logo {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    background: var(--surface-3);
-    display: grid;
-    place-items: center;
-    color: var(--text-secondary);
-    font-weight: 800;
-    font-size: 11px;
-    overflow: hidden;
-}
-.club-row .row-logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-.club-row .row-info {
-    min-width: 0;
-}
-.club-row .row-name {
-    font-size: 14px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.club-row .row-meta {
-    font-size: 11.5px;
-    color: var(--text-dim);
-    margin-top: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.entity-pill {
-    font-size: 9.5px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 2px 7px;
-    border-radius: 999px;
-    border: 1px solid var(--border-strong);
-    color: var(--text-dim);
-    flex-shrink: 0;
-}
-.entity-pill.club { color: var(--accent-2); border-color: rgba(0, 163, 101, 0.3); background: var(--accent-soft); }
-.entity-pill.seleccion { color: var(--info); border-color: rgba(96, 165, 250, 0.3); background: rgba(96, 165, 250, 0.1); }
-.entity-pill.franquicia { color: #c084fc; border-color: rgba(192, 132, 252, 0.3); background: rgba(192, 132, 252, 0.1); }
-.entity-pill.academia { color: var(--warning); border-color: rgba(250, 204, 21, 0.3); background: rgba(250, 204, 21, 0.1); }
-
-.row-action {
-    background: var(--surface-2);
-    border: 1px solid var(--border-strong);
-    color: var(--text-secondary);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 6px 12px;
-    border-radius: 999px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all .12s;
-}
-.row-action:hover { color: var(--text-primary); }
-.club-row.added .row-action {
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
-}
-
-.squad-picker-row {
-    grid-column: 1 / -1;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--border);
-    display: grid;
-    gap: 6px;
-}
-.squad-picker-row label {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-weight: 700;
-    color: var(--text-dim);
-}
-.squad-picker-row select {
-    background: var(--surface-2);
-    border: 1px solid var(--border-strong);
-    color: var(--text-primary);
-    padding: 9px 12px;
-    border-radius: 6px;
-    font-size: 12.5px;
-    width: 100%;
-}
-.squad-hint {
-    font-size: 11.5px;
-}
-.squad-hint.info { color: var(--accent-2); }
-.squad-hint.legacy { color: var(--text-dim); }
-.squad-hint.warn { color: var(--warning); }
-
-/* ===== Mode switch rápido/avanzado ===== */
-.mode-switch {
-    display: inline-flex;
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 3px;
-}
-.mode-switch button {
-    background: transparent;
-    border: 0;
-    color: var(--text-secondary);
-    padding: 8px 14px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-}
-.mode-switch button.active {
-    background: var(--accent);
-    color: #fff;
-}
-
-/* ===== Sport quick picker ===== */
-.sport-pick-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-    gap: 8px;
-}
-.sport-pick-grid button {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--r-md);
-    color: var(--text-secondary);
-    padding: 12px 6px;
-    font-size: 11.5px;
-    font-weight: 600;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    transition: all .12s;
-}
-.sport-pick-grid button:hover {
-    background: var(--surface-2);
-    color: var(--text-primary);
-}
-.sport-pick-grid button.selected {
-    background: var(--accent-soft);
-    border-color: var(--accent);
-    color: var(--accent-2);
-}
-.sport-pick-grid button .emo {
-    font-size: 20px;
-    line-height: 1;
-}
-
-/* ===== Disclosure (más opciones) ===== */
-.tg-disclosure {
-    margin-top: 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--r-md);
-    background: var(--surface-1);
-    overflow: hidden;
-}
-.tg-disclosure summary {
-    list-style: none;
-    padding: 13px 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-.tg-disclosure summary::-webkit-details-marker { display: none; }
-.tg-disclosure summary::after {
-    content: '+';
-    font-size: 18px;
-    color: var(--text-dim);
-    transition: transform .15s;
-}
-.tg-disclosure[open] summary::after { content: '−'; }
-.tg-disclosure[open] summary {
-    border-bottom: 1px solid var(--border);
-    color: var(--text-primary);
-}
-.tg-disclosure-body { padding: 14px 16px 16px; }
-
-/* ===== Counter (cantidad de equipos, etc.) ===== */
-.tg-counter {
-    display: grid;
-    grid-template-columns: 44px 1fr 44px;
-    background: var(--surface);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--r-md);
-    overflow: hidden;
-    width: max-content;
-}
-.tg-counter button {
-    background: transparent;
-    border: 0;
-    color: var(--text-primary);
-    font-size: 18px;
-    font-weight: 700;
-    transition: background .12s;
-    min-height: 44px;
-    cursor: pointer;
-}
-.tg-counter button:hover { background: var(--surface-2); }
-.tg-counter input {
-    background: transparent;
-    border: 0;
-    text-align: center;
-    color: var(--text-primary);
-    font-size: 16px;
-    font-weight: 700;
-    min-width: 64px;
-    padding: 0;
-}
-.tg-counter input:focus { outline: none; }
-
-/* Live preview chip */
-.live-preview-chip {
-    background: linear-gradient(135deg, var(--accent-soft), transparent);
-    border: 1px solid rgba(0, 163, 101, 0.3);
-    border-radius: var(--r-md);
-    padding: 14px 16px;
-    margin-top: 18px;
-}
-.live-preview-chip .kicker {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--accent-2);
-    font-weight: 800;
-    margin-bottom: 4px;
-}
-.live-preview-chip strong { font-size: 15px; }
-.live-preview-chip .meta {
-    color: var(--text-secondary);
-    font-size: 12.5px;
-    margin-top: 4px;
-}
-
-/* =========================================================
-   REDISEÑO 2026 — flujo nuevo de creación de torneo
    ========================================================= */
 
 :root {
@@ -1239,7 +711,7 @@ textarea:focus {
 .tplpick-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 22px 18px; text-align: left; cursor: pointer; transition: all .15s; color: var(--text-primary); display: grid; gap: 10px; position: relative; }
 .tplpick-card:hover { background: var(--surface-2); border-color: var(--accent); transform: translateY(-2px); }
 .tplpick-card.popular { border-color: rgba(0, 163, 101, 0.45); }
-.tplpick-card.popular::after { content: 'Más usado'; position: absolute; top: -8px; right: 14px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.04em; text-transform: uppercase; }
+.tplpick-card.popular::after { content: 'Más usado'; position: absolute; top: -8px; right: 14px; background: var(--accent); color: #000; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: 0.04em; text-transform: uppercase; }
 .tplpick-card.dashed { border-style: dashed; }
 .tplpick-icon { width: 56px; height: 56px; border-radius: 14px; background: var(--surface-2); display: grid; place-items: center; font-size: 24px; border: 1px solid var(--border); }
 .tplpick-card.popular .tplpick-icon { background: var(--accent-soft); border-color: rgba(0, 163, 101, 0.4); }
@@ -1263,9 +735,12 @@ textarea:focus {
     .tplpick-card {
         display: grid;
         grid-template-columns: auto 1fr auto;
+        /* La descripcion cruza hasta el borde. Antes el badge se llevaba una
+           columna entera en las DOS filas y le sacaba 95 px: de las cinco
+           tarjetas, la unica que se recortaba era justo la recomendada. */
         grid-template-areas:
             "icon title tag"
-            "icon desc  tag";
+            "icon desc  desc";
         align-items: center;
         column-gap: 14px;
         row-gap: 2px;
@@ -1298,7 +773,8 @@ textarea:focus {
         display: inline-flex;
         align-items: center;
         background: var(--accent);
-        color: #fff;
+        /* 3,27:1 en blanco a 10 px. En negro, 6,43:1. */
+        color: #000;
         font-size: 10px;
         font-weight: 700;
         letter-spacing: 0.04em;
@@ -1306,6 +782,7 @@ textarea:focus {
         padding: 4px 8px;
         border-radius: 6px;
         white-space: nowrap;
+        align-self: center;
     }
 }
 
@@ -1338,35 +815,97 @@ textarea:focus {
 
 /* ===== Club catalog (paso 3) ===== */
 .club-search-wrap { display: grid; gap: 10px; margin-bottom: 14px; }
-.club-summary-bar { background: var(--accent-soft); border: 1px solid rgba(0, 163, 101, 0.3); border-radius: var(--r-md); padding: 10px 14px; font-size: 13px; display: flex; align-items: center; justify-content: space-between; }
+.club-summary-bar { background: var(--accent-soft); border: 1px solid rgba(0, 163, 101, 0.3); border-radius: var(--r-md); padding: 10px 14px; font-size: 13px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .club-summary-bar strong { font-size: 14px; }
+
+/* Selección en bloque. El ancho es `auto` porque `.btn` lo pone al 100% bajo
+   768px y acá tiene que convivir con el contador en la misma barra. */
+.bulk-select-btn {
+    width: auto;
+    height: auto;
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.bulk-select-btn.is-confirming {
+    border-color: var(--warning);
+    color: var(--warning);
+    background: rgba(250, 204, 21, 0.1);
+}
+.bulk-select-btn:disabled { opacity: .45; cursor: not-allowed; }
 .club-filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.club-filter-chip { background: var(--surface-1); border: 1px solid var(--border); color: var(--text-secondary); padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.club-filter-chip { background: var(--surface-1); border: 1px solid var(--border); color: var(--text-secondary); min-height: 36px; padding: 6px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
 .club-filter-chip:hover { color: var(--text-primary); }
 .club-filter-chip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--text-primary); }
 .club-filter-chip .count { font-size: 10px; color: var(--text-dim); }
 .club-meta-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-dim); margin: 6px 2px 6px; }
-.club-list-grid { display: grid; gap: 8px; max-height: 460px; overflow-y: auto; padding-right: 4px; }
-.club-row { display: grid; grid-template-columns: 22px 36px 1fr auto; align-items: center; gap: 12px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px 12px; transition: all .15s; }
+/* Antes eran 460 px fijos en todos los anchos: unas cinco filas de 2.976, en un
+   scroll anidado que en el teléfono pelea con el de la página. */
+.club-list-grid { display: grid; gap: 8px; max-height: min(62vh, 760px); overflow-y: auto; padding-right: 4px; overscroll-behavior: contain; }
+/* `content-visibility` en lugar de virtualizar a mano: el navegador se saltea
+   el layout y el pintado de las filas fuera de la ventana de scroll. El
+   catalogo tiene 2.976 clubes; medido en un telefono con la CPU 4x mas lenta,
+   pintar la lista entera tardaba 2,2 s. `contain-intrinsic-size` le da la
+   altura estimada de una fila para que la barra de scroll no salte. */
+.club-row {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    transition: all .15s;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 58px;
+}
+
+/* En el telefono la fila apila casilla, escudo, nombre, chip, ubicacion y
+   accion: mide 102-153 px, no 58. Con la estimacion vieja la lista crecia de
+   9.595 a 15.760 px (+64%) durante el primer recorrido — la barra de scroll
+   mentia todo el viaje y "ir al final" no llegaba al final. 120 px es el
+   promedio medido a 390. */
+@media (max-width: 640px) {
+    .club-row { contain-intrinsic-size: auto 120px; }
+}
+/* Toda la fila es un solo boton: 44 px de alto minimo, con foco visible. Antes
+   el area tocable era un div de 18 px sin teclado. */
+.row-main {
+    display: grid;
+    grid-template-columns: 22px 36px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 10px 12px;
+    background: transparent;
+    border: 0;
+    border-radius: var(--r-md);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.row-main:hover { background: rgba(255, 255, 255, 0.03); }
+.row-main:focus-visible { outline: 2px solid var(--accent-2); outline-offset: -2px; }
 .club-row.added { border-color: rgba(0, 163, 101, 0.45); background: rgba(0, 163, 101, 0.06); }
-.club-row .row-check { width: 18px; height: 18px; border: 1.5px solid var(--border-strong); border-radius: 4px; display: grid; place-items: center; color: #fff; font-size: 11px; background: var(--surface-2); cursor: pointer; }
+.club-row .row-check { width: 22px; height: 22px; border: 1.5px solid var(--border-strong); border-radius: 5px; display: grid; place-items: center; color: #fff; font-size: 12px; background: var(--surface-2); }
 .club-row.added .row-check { background: var(--accent); border-color: var(--accent); }
 .club-row .row-logo { width: 36px; height: 36px; border-radius: 8px; background: var(--surface-3); display: grid; place-items: center; color: var(--text-secondary); font-weight: 800; font-size: 11px; overflow: hidden; }
 .club-row .row-logo img { width: 100%; height: 100%; object-fit: contain; }
-.club-row .row-info { min-width: 0; }
-.club-row .row-name { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.club-row .row-meta { font-size: 11.5px; color: var(--text-dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.club-row .row-info { min-width: 0; display: block; }
+.club-row .row-name { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.club-row .row-name > :first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.club-row .row-meta { display: block; font-size: 11.5px; color: var(--text-dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .entity-pill { font-size: 9.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--border-strong); color: var(--text-dim); flex-shrink: 0; }
 .entity-pill.club { color: var(--accent-2); border-color: rgba(0, 163, 101, 0.3); background: var(--accent-soft); }
 .entity-pill.seleccion { color: var(--info); border-color: rgba(96, 165, 250, 0.3); background: rgba(96, 165, 250, 0.1); }
 .entity-pill.franquicia { color: #c084fc; border-color: rgba(192, 132, 252, 0.3); background: rgba(192, 132, 252, 0.1); }
 .entity-pill.academia { color: var(--warning); border-color: rgba(250, 204, 21, 0.3); background: rgba(250, 204, 21, 0.1); }
-.row-action { background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text-secondary); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap; transition: all .12s; }
-.row-action:hover { color: var(--text-primary); }
+.row-action { display: inline-flex; align-items: center; background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text-secondary); font-size: 11px; font-weight: 700; min-height: 30px; padding: 6px 12px; border-radius: 999px; white-space: nowrap; transition: all .12s; }
+.row-main:hover .row-action { color: var(--text-primary); }
 .club-row.added .row-action { background: var(--accent); color: #fff; border-color: var(--accent); }
-.squad-picker-row { grid-column: 1 / -1; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); display: grid; gap: 6px; }
+.squad-picker-row { margin: 0 12px 12px; padding-top: 10px; border-top: 1px dashed var(--border); display: grid; gap: 6px; }
 .squad-picker-row label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; color: var(--text-dim); }
-.squad-picker-row select { background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text-primary); padding: 9px 12px; border-radius: 6px; font-size: 12.5px; width: 100%; }
+.squad-picker-row select { background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text-primary); min-height: 44px; padding: 9px 12px; border-radius: 6px; font-size: 12.5px; width: 100%; }
 .squad-hint { font-size: 11.5px; }
 .squad-hint.info { color: var(--accent-2); }
 .squad-hint.legacy { color: var(--text-dim); }
@@ -1374,8 +913,11 @@ textarea:focus {
 
 /* ===== Mode switch rápido/avanzado ===== */
 .mode-switch { display: inline-flex; background: var(--surface-1); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
-.mode-switch button { background: transparent; border: 0; color: var(--text-secondary); padding: 8px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; cursor: pointer; }
-.mode-switch button.active { background: var(--accent); color: #fff; }
+.mode-switch button { background: transparent; border: 0; color: var(--text-secondary); min-height: 36px; padding: 8px 16px; border-radius: 999px; font-size: 12px; font-weight: 700; cursor: pointer; }
+/* Negro, no blanco: blanco sobre #00A365 da 3,27:1 a 12 px y no llega al
+   minimo. Negro da 6,43:1 — y es lo que ya hace `.btn-primary` con ese mismo
+   verde, asi que esto alinea, no inventa. */
+.mode-switch button.active { background: var(--accent); color: #000; }
 
 /* ===== Sport quick picker ===== */
 .sport-pick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
@@ -1405,3 +947,451 @@ textarea:focus {
 .live-preview-chip .kicker { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-2); font-weight: 800; margin-bottom: 4px; }
 .live-preview-chip strong { font-size: 15px; }
 .live-preview-chip .meta { color: var(--text-secondary); font-size: 12.5px; margin-top: 4px; }
+
+/* ===== Carteles en pantalla (borrador, error, avisos) =====
+   Reemplazan a los `confirm()` y `alert()` nativos: un cartel que se cierra con
+   OK y encima se lleva la navegación por delante no se lee, se despacha. */
+.notice {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    margin: 0 0 20px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    background: var(--surface-1);
+}
+.notice-body { min-width: 0; flex: 1 1 260px; }
+.notice-body strong { display: block; font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.notice-body p { margin: 4px 0 0; font-size: 12.5px; color: var(--text-secondary); line-height: 1.45; }
+.notice-body ul { margin: 6px 0 0; padding-left: 18px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; }
+.notice-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+/* `.btn` pone width:100% y height:54px bajo 768: acá tienen que seguir en línea. */
+.notice-actions .btn { width: auto; height: auto; min-height: 38px; padding: 8px 16px; font-size: 11px; }
+
+/* Segunda linea del aviso: dice que pasa con lo que YA cargaste. Sin esto, la
+   barra ofrece "Retomar" sin decir que reemplaza. */
+.notice-body p.notice-sub { margin-top: 6px; color: var(--text-dim); font-size: 12px; }
+.notice-draft { border-color: rgba(96, 165, 250, 0.35); background: rgba(96, 165, 250, 0.07); }
+.notice-draft .notice-body strong { color: var(--info); }
+.notice-error { border-color: rgba(248, 113, 113, 0.45); background: rgba(248, 113, 113, 0.08); }
+.notice-error .notice-body strong { color: var(--danger); }
+.notice-warn { border-color: rgba(250, 204, 21, 0.4); background: rgba(250, 204, 21, 0.07); }
+.notice-warn .notice-body strong { color: var(--warning); }
+
+@media (max-width: 560px) {
+    .notice-actions { width: 100%; }
+    .notice-actions .btn { flex: 1 1 0; min-height: 44px; }
+}
+
+/* ===== Objetivos tactiles en el telefono =====
+   Medido a 390 px: 21 controles del paso de participantes quedaban por debajo
+   de los 44 px recomendados. Bajo `pointer: coarse` se suben todos de una, en
+   vez de ir tocando cada regla y olvidarse de la mitad. */
+@media (pointer: coarse) {
+    .club-filter-chip,
+    .mode-switch button,
+    .bulk-select-btn,
+    /* `.btn-inline` recibe `height:auto` bajo 768 y pierde los 54 px del `.btn`
+       general. Los dos que quedaban en 40 px —"Refrescar" y "Crear union"—
+       viven dentro de "Mas opciones", plegado: por eso no aparecian al medir. */
+    .btn-inline,
+    .creation-header .btn-outline { min-height: 44px; }
+
+    .row-main { min-height: 64px; }
+    .club-row .row-check { width: 24px; height: 24px; }
+}
+
+/* ===== Telefono: el nombre del club deja de recortarse =====
+   Medido a 390 px: las cinco filas visibles recortaban el nombre (le quedaban
+   134 px) y tres recortaban la ubicacion. La pildora de tipo baja a la linea
+   del meta y le devuelve el ancho al nombre. */
+@media (max-width: 640px) {
+    .row-main { grid-template-columns: 24px 30px 1fr; row-gap: 2px; }
+    .club-row .row-logo { width: 30px; height: 30px; }
+    .club-row .row-name { flex-wrap: wrap; white-space: normal; }
+    .club-row .row-name > :first-child { white-space: normal; overflow: visible; }
+    .club-row .row-meta { white-space: normal; }
+    .row-action {
+        grid-column: 3;
+        justify-self: start;
+        margin-top: 4px;
+    }
+}
+
+/* ===== Paso 0: la descripcion de la plantilla no se corta =====
+   `-webkit-line-clamp: 1` recortaba de verdad en 390 y en 360 — justo el paso
+   donde hay que comparar formatos. Dos lineas cuestan 17 px por tarjeta. */
+@media (max-width: 768px) {
+    /* Tres lineas: con dos, la descripcion mas larga ("Round-robin. Sumas
+       puntos por victoria, empate y derrota. Ida o ida y vuelta.") seguia
+       cortandose a 390 y a 360. Medido: 1 de 5 truncaba con 2, 0 de 5 con 3. */
+    .tplpick-card p { -webkit-line-clamp: 3; }
+}
+
+/* ===== El wizard es oscuro; el tema claro del admin no lo alcanza =====
+   `admin-custom.css` trae `[data-theme="light"] .btn { background: rgba(15,23,42,.04);
+   color: #0f172a }` para la consola Obsidian. Ese selector (0,2,0) le gana a
+   `.btn-outline` (0,1,0) y pinta CUALQUIER `.btn`, incluidos los de esta pantalla
+   — que corre sobre un fondo #050505 fijo. Medido con el sitio en claro: el
+   contraste del boton "Volver a torneos" y del primario "Siguiente" caia a
+   1,14:1 sobre el negro. Invisibles, y uno era la accion principal del paso.
+
+   Se reponen aca, con la especificidad justa para ganarle (0,3,0). El resto de
+   la pantalla ya es oscura por sus propios tokens; esto cierra la unica grieta
+   por donde el tema claro se colaba. */
+[data-theme="light"] .creation-body .btn {
+    background: transparent;
+    color: #fff;
+    border-color: var(--border);
+}
+[data-theme="light"] .creation-body .btn-primary {
+    background: var(--accent);
+    color: #000;
+}
+[data-theme="light"] .creation-body .btn-secondary {
+    background: var(--surface-mid);
+    color: #fff;
+}
+[data-theme="light"] .creation-body .btn-outline:hover,
+[data-theme="light"] .creation-body .btn-secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ===== Medidor de selección (paso 3) =====
+   El objetivo del paso 2 era una frase al final de un renglón: "· objetivo de la
+   plantilla: 8". Como barra, cuánto falta se lee sin leer. */
+.pick-progress { display: grid; gap: 7px; min-width: 0; flex: 1 1 220px; }
+.pick-progress-head { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; font-size: 13px; }
+.pick-progress-head strong { font-size: 20px; line-height: 1; font-weight: 800; letter-spacing: -0.02em; }
+.pick-progress-head span { color: var(--text-secondary); }
+.pick-progress-head em {
+    font-style: normal;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+}
+.pick-progress-head .pick-done { color: #04140d; background: var(--accent-2); }
+.pick-progress-head .pick-over { color: #1c1503; background: var(--warning); }
+.pick-progress-track {
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    max-width: 320px;
+}
+.pick-progress-fill {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transition: width .25s ease;
+}
+.pick-progress-fill.is-complete { background: var(--accent-2); }
+
+/* ===== Pie de la lista y estado vacío ===== */
+.club-meta-stale { color: var(--accent-2); font-weight: 600; }
+
+.club-empty { padding: 36px 24px; text-align: center; display: grid; gap: 14px; justify-items: center; }
+.club-empty-title { margin: 0; font-size: 14px; color: var(--text-secondary); max-width: 46ch; }
+.club-empty-title strong { color: var(--text-primary); }
+.club-empty-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.club-empty-actions .btn { width: auto; height: auto; min-height: 38px; padding: 8px 16px; font-size: 11px; }
+.club-empty-hint { margin: 0; font-size: 12px; color: var(--text-dim); max-width: 44ch; line-height: 1.5; }
+
+@media (pointer: coarse) {
+    .club-empty-actions .btn { min-height: 44px; }
+}
+
+/* ===== Paso 2 en dos columnas =====
+   Los controles a la izquierda, lo que se está armando al lado y a la vista.
+   La vista previa vivía debajo de "Puntos por partido": en una pantalla de
+   900 px de alto quedaba fuera del pliegue, justo el dato que dice si la
+   configuración es la que querías. */
+.structure-split { display: block; }
+.structure-main { max-width: 760px; }
+.structure-aside { display: none; }
+
+/* El umbral era 1100 y dejaba 1024 afuera —tablet horizontal y varias laptops
+   de 13"—, justo donde la vista previa todavia entra al costado. Medido a 1024:
+   la columna de contenido da 824 px, o sea 472 para los controles con el panel
+   de 320 al lado. */
+@media (min-width: 1000px) {
+    .structure-split {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 32px;
+        align-items: start;
+    }
+    .structure-main { max-width: none; }
+    /* Cuatro opciones fijas en la columna angosta entran 3+1 con `auto-fit` y
+       dejan un hueco. Son cuatro: van 2x2. */
+    .structure-main .choice-grid { grid-template-columns: repeat(2, 1fr); }
+    .structure-aside {
+        display: block;
+        position: sticky;
+        top: 24px;
+    }
+    .structure-aside .live-preview-chip { margin-top: 0; }
+}
+
+/* Bajo 1000 el panel no desaparece: baja al final de la columna. */
+@media (max-width: 999px) {
+    .structure-aside { display: block; margin-top: 18px; max-width: 760px; }
+}
+
+/* Los datos duros del panel, en tabla de definición. */
+.preview-facts {
+    margin: 14px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+    display: grid;
+    gap: 7px;
+}
+.preview-facts > div { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.preview-facts dt {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+.preview-facts dd {
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+/* ===== Paso 3: catálogo + panel de elegidos =====
+   El medidor decía "4 de 8" pero no había forma de ver CUÁLES cuatro sin
+   cazarlos entre 2.976 filas. El panel los lista, marca a los que les falta
+   plantel y deja quitarlos de a uno. */
+.participants-split { display: block; }
+.participants-aside { margin-top: 18px; }
+
+@media (min-width: 1200px) {
+    .participants-split {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 28px;
+        align-items: start;
+    }
+    .participants-aside {
+        margin-top: 0;
+        position: sticky;
+        top: 24px;
+    }
+}
+
+.picked-panel {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 14px;
+}
+.picked-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.picked-head h3 {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+.picked-count {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--accent-2);
+    background: var(--accent-soft);
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-variant-numeric: tabular-nums;
+}
+.picked-empty { margin: 0; font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+
+.picked-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 3px;
+    max-height: 46vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.picked-list li {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 8px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.03);
+    font-size: 12.5px;
+}
+.picked-list li.needs-squad { background: rgba(250, 204, 21, 0.09); }
+.picked-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.picked-flag {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--warning);
+    border: 1px solid rgba(250, 204, 21, 0.4);
+    border-radius: 999px;
+    padding: 1px 6px;
+}
+.picked-remove {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 0;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+}
+.picked-remove:hover { background: rgba(248, 113, 113, 0.15); color: var(--danger); }
+.picked-remove:focus-visible { outline: 2px solid var(--accent-2); outline-offset: -2px; }
+
+.picked-clear {
+    width: 100%;
+    height: auto;
+    min-height: 36px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    font-size: 10.5px;
+}
+
+@media (pointer: coarse) {
+    .picked-remove { width: 44px; height: 44px; }
+    .picked-clear { min-height: 44px; }
+}
+
+/* ===== Stepper con pasos nombrados =====
+   "Paso 2 de 3" decía cuánto faltaba pero no QUÉ faltaba. Los tres pasos con
+   nombre y estado (hecho / activo / pendiente); los hechos son botones que
+   vuelven atrás. A los futuros se llega con "Siguiente", que valida. */
+.stepper-steps {
+    list-style: none;
+    margin: 0 0 10px;
+    padding: 0;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.stepper-steps li { display: contents; }
+.stepper-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 0;
+    padding: 6px 12px 6px 8px;
+    border-radius: 999px;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 36px;
+    transition: color .15s, background .15s;
+}
+.stepper-step:disabled { cursor: default; }
+.stepper-step.is-done { color: var(--text-secondary); }
+.stepper-step.is-done:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
+.stepper-step.is-active { color: var(--text-primary); background: var(--accent-soft); }
+.stepper-step-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 800;
+    background: var(--surface-3);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-strong);
+    flex-shrink: 0;
+}
+.stepper-step.is-active .stepper-step-dot { background: var(--accent); border-color: var(--accent); color: #000; }
+.stepper-step.is-done .stepper-step-dot { background: transparent; border-color: var(--accent); color: var(--accent-2); }
+
+/* En el teléfono los tres rótulos no entran: queda el del paso activo y los
+   demás se reducen a su número, que con el tilde ya cuenta la historia. */
+@media (max-width: 520px) {
+    .stepper-step:not(.is-active) .stepper-step-label { display: none; }
+}
+@media (pointer: coarse) {
+    .stepper-step { min-height: 44px; }
+}
+
+/* ===== Resumen del paso final =====
+   El paso donde vive "Crear torneo" es también el de confirmar: todo lo
+   configurado, releíble sin volver atrás. */
+.final-summary {
+    background: linear-gradient(135deg, var(--accent-soft), transparent);
+    border: 1px solid rgba(0, 163, 101, 0.3);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+}
+.final-summary-kicker {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent-2);
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+.final-summary-name {
+    display: block;
+    font-size: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ===== Íconos SVG de las plantillas (antes emoji) ===== */
+.tplpick-icon svg { color: var(--text-secondary); }
+.tplpick-card:hover .tplpick-icon svg { color: var(--text-primary); }
+.tplpick-card.popular .tplpick-icon svg,
+.tplpick-card.selected .tplpick-icon svg { color: var(--accent-2); }
+
+/* ===== Foco visible con teclado, para TODOS los controles =====
+   Las reglas sueltas (.row-main, .picked-remove) cubrían dos casos; el resto
+   de los botones dependía del outline por defecto del navegador, que varios
+   resets se llevan puesto. Una sola regla al final de la cascada. */
+.creation-body :is(button, [role="radio"], select, input, textarea, summary, a):focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 2px;
+}
+/* Los dos que ya tenían foco INTERIOR lo conservan: su outline por fuera se
+   recorta contra el borde del contenedor con scroll. */
+.creation-body .row-main:focus-visible,
+.creation-body .picked-remove:focus-visible {
+    outline-offset: -2px;
+}
+
+/* ===== Movimiento reducido =====
+   Todas las transiciones y animaciones de esta pantalla se apagan si el
+   sistema lo pide. La barra de progreso y los reveles sobreviven como cambios
+   instantáneos, que es exactamente lo que se pidió. */
+@media (prefers-reduced-motion: reduce) {
+    .creation-body *,
+    .creation-body *::before,
+    .creation-body *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

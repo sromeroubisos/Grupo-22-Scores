@@ -6,6 +6,16 @@ import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { invalidatePublicTournamentListCaches } from '@/lib/server/externalTournamentCacheInvalidation';
+import { normalizeTournamentFormat } from '@/lib/utils/tournamentFormat';
+import {
+    buildPlayoffStages,
+    ensurePlayoffBracketMatches,
+    getPlayoffTeamsCount,
+    isPlayoffPhaseType,
+    resolvePlayoffStagesForTeams,
+    syncPlayoffStagesToRounds,
+} from '@/lib/server/playoffStages';
+import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 
 type JsonObject = Record<string, unknown>;
 type ClubLookup = { id: string; name: string; short_name?: string | null };
@@ -87,10 +97,20 @@ function isPublicTournamentStatus(status: string): boolean {
     return normalizedStatus === 'published' || normalizedStatus === 'active';
 }
 
+/**
+ * `groups` cuenta como fase de grupos. El creador manda el formato canonico
+ * (`normalizeTournamentFormat`: `groups`, no `groups_playoff`), y este switch
+ * solo conocia los alias viejos: un torneo "Grupos + Playoff" caia al `return
+ * 'league'` y nacia con una unica fase de liga llamada "Tabla general".
+ */
 function getPhaseTypeFromFormat(format: string): 'league' | 'group_stage' | 'playoff' {
-    if (format === 'group_stage' || format === 'groups_playoff') return 'group_stage';
+    if (format === 'groups' || format === 'group_stage' || format === 'groups_playoff') return 'group_stage';
     if (format === 'playoff' || format === 'knockout') return 'playoff';
     return 'league';
+}
+
+function isGroupsPlayoffFormat(format: string): boolean {
+    return format === 'groups' || format === 'groups_playoff';
 }
 
 function getGroupNames(groupCount: number): string[] {
@@ -119,6 +139,14 @@ function buildRuleset(body: JsonObject, sport: string) {
     // gestor (TournamentStructureTab) and the standings-rules editor consume, so
     // whatever is specified here round-trips to the manager instead of resetting
     // to sport defaults the first time a phase is opened there.
+    // `competition` viaja tal cual si el cliente lo manda. Antes se caia aca:
+    // esta funcion arma un objeto explicito y descartaba cualquier clave que no
+    // enumerara, asi que un torneo de circuito perdia `format_type` y
+    // `champion_mode` y `isCircuitRuleset()` dejaba de reconocerlo.
+    const competition = rules.competition && typeof rules.competition === 'object' && !Array.isArray(rules.competition)
+        ? rules.competition
+        : null;
+
     return {
         pointsWin,
         pointsDraw,
@@ -127,6 +155,7 @@ function buildRuleset(body: JsonObject, sport: string) {
         pointsBonusLoss,
         fixtureMode: readText(body.fixture_mode ?? rules.fixtureMode) || 'manual',
         ...buildPointsSettings(pointsWin, pointsDraw, pointsLoss, pointsBonusTry, pointsBonusLoss),
+        ...(competition ? { competition } : {}),
     };
 }
 
@@ -253,13 +282,28 @@ async function createSeason(writer: any, params: {
     return { seasonId: data.id as string, warning: null };
 }
 
+/**
+ * Un participante de torneo son TRES tablas, no una:
+ * `tournament_participants` (el vinculo), `team_season_entries` + el back-ref
+ * `season_entry_id` (la PAGINA del torneo lista por la entrada de temporada
+ * cuando el torneo tiene temporada) y `tournament_phase_participants` (la tabla
+ * de posiciones sale de ahi; la escribe `createPhases`). Este alta creaba solo
+ * la primera: el torneo se veia bien en el gestor y la pantalla publica lo
+ * mostraba vacio.
+ *
+ * La FK entre participante y entrada es circular, asi que va en tres pasos:
+ * participante sin entry → entrada apuntando al participante → UPDATE del
+ * back-ref.
+ */
 async function createParticipants(writer: any, params: {
     tournamentId: string;
     seasonId: string | null;
     clubIds: string[];
     category: string | null;
+    divisionByClub: Record<string, string>;
 }) {
-    if (params.clubIds.length === 0) return { participants: [], warning: null };
+    const warnings: string[] = [];
+    if (params.clubIds.length === 0) return { participants: [], warnings };
 
     const { data: clubs, error: clubsError } = await writer
         .from('clubs')
@@ -267,7 +311,31 @@ async function createParticipants(writer: any, params: {
         .in('id', params.clubIds);
 
     if (clubsError) {
-        return { participants: [], warning: 'No se pudieron cargar los clubes seleccionados.' };
+        return { participants: [], warnings: ['No se pudieron cargar los clubes seleccionados.'] };
+    }
+
+    // El plantel elegido se valida contra `club_divisions`: solo entra si la
+    // division existe y pertenece a ese club. Un id ajeno se descarta en
+    // silencio antes que inscribir el plantel de otro club.
+    const requestedDivisionIds = Array.from(new Set(
+        params.clubIds.map((clubId) => params.divisionByClub[clubId]).filter(Boolean),
+    ));
+    const divisionOwner = new Map<string, string>();
+    if (requestedDivisionIds.length > 0) {
+        const { data: divisionRows, error: divisionError } = await writer
+            .from('club_divisions')
+            .select('id, club_id')
+            .in('id', requestedDivisionIds);
+
+        if (divisionError) {
+            if (!isMissingTableError(divisionError, 'club_divisions')) {
+                warnings.push('No se pudieron validar los planteles elegidos; los clubes quedaron inscriptos sin plantel.');
+            }
+        } else {
+            for (const row of divisionRows ?? []) {
+                divisionOwner.set(row.id, row.club_id);
+            }
+        }
     }
 
     const clubById = new Map<string, ClubLookup>(
@@ -278,9 +346,17 @@ async function createParticipants(writer: any, params: {
             const club = clubById.get(clubId);
             if (!club) return null;
 
+            const requestedDivision = params.divisionByClub[clubId];
+            const divisionId = requestedDivision && divisionOwner.get(requestedDivision) === clubId
+                ? requestedDivision
+                : null;
+
+            // PostgREST exige claves uniformes en el insert masivo: la columna
+            // va en TODAS las filas (con null) o en ninguna.
             return {
                 tournament_id: params.tournamentId,
                 season_id: params.seasonId,
+                division_id: divisionId,
                 club_id: clubId,
                 name: club.name,
                 short_code: club.short_name ?? null,
@@ -290,38 +366,87 @@ async function createParticipants(writer: any, params: {
                 notes: params.category ? `Categoria: ${params.category}` : null,
             };
         })
-        .filter(Boolean);
+        .filter(Boolean) as Array<Record<string, unknown>>;
 
     if (rows.length === 0) {
-        return { participants: [], warning: 'Los clubes seleccionados no estan disponibles.' };
+        return { participants: [], warnings: ['Los clubes seleccionados no estan disponibles.'] };
     }
 
-    const { data, error } = await writer
+    // `season_id` y `division_id` son opcionales en el esquema real: si la base
+    // no tiene la columna, se saca de todas las filas y se reintenta.
+    const optionalColumns = ['season_id', 'division_id'];
+    let insertRows = rows;
+    let result = await writer
         .from('tournament_participants')
-        .insert(rows)
+        .insert(insertRows)
         .select('id, tournament_id, club_id, name, status, seed');
 
-    if (error) {
-        if (isMissingColumnError(error, 'season_id')) {
-            const fallbackRows = rows.map((row: any) => {
-                const rest = { ...row };
-                delete rest.season_id;
-                return rest;
-            });
-            const retry = await writer
-                .from('tournament_participants')
-                .insert(fallbackRows)
-                .select('id, tournament_id, club_id, name, status, seed');
+    for (let attempt = 0; attempt < optionalColumns.length && result.error; attempt += 1) {
+        const missing = optionalColumns.filter((column) => isMissingColumnError(result.error, column));
+        if (missing.length === 0) break;
 
-            if (!retry.error) {
-                return { participants: retry.data ?? [], warning: null };
-            }
-        }
-
-        return { participants: [], warning: 'El torneo fue creado, pero no se pudieron inscribir los clubes.' };
+        insertRows = insertRows.map((row) => {
+            const rest = { ...row };
+            for (const column of missing) delete rest[column];
+            return rest;
+        });
+        result = await writer
+            .from('tournament_participants')
+            .insert(insertRows)
+            .select('id, tournament_id, club_id, name, status, seed');
     }
 
-    return { participants: data ?? [], warning: null };
+    if (result.error) {
+        warnings.push('El torneo fue creado, pero no se pudieron inscribir los clubes.');
+        return { participants: [], warnings };
+    }
+
+    const participants = result.data ?? [];
+
+    // team_season_entries + back-ref. Solo tiene sentido con temporada: sin
+    // `season_id` la pagina lista directo por participante (patron URBA).
+    if (params.seasonId && participants.length > 0) {
+        const entries = participants
+            .filter((participant: { club_id: string | null }) => Boolean(participant.club_id))
+            .map((participant: { id: string; club_id: string; seed?: number | null }) => ({
+                id: crypto.randomUUID(),
+                season_id: params.seasonId,
+                tournament_id: params.tournamentId,
+                club_id: participant.club_id,
+                source_participant_id: participant.id,
+                status: 'active',
+                seed: participant.seed ?? null,
+                settings: { source: 'admin_torneo_creator' },
+            }));
+
+        const { error: entriesError } = await writer
+            .from('team_season_entries')
+            .insert(entries);
+
+        if (entriesError) {
+            if (!isMissingTableError(entriesError, 'team_season_entries')) {
+                warnings.push('Los clubes quedaron inscriptos, pero sin entrada de temporada: la pagina del torneo puede no listarlos.');
+                console.warn('[admin/torneo/tournaments] team_season_entries warning:', entriesError.message);
+            }
+        } else {
+            for (const entry of entries) {
+                const { error: backRefError } = await writer
+                    .from('tournament_participants')
+                    .update({ season_entry_id: entry.id })
+                    .eq('id', entry.source_participant_id);
+
+                if (backRefError) {
+                    if (!isMissingColumnError(backRefError, 'season_entry_id')) {
+                        warnings.push('No se pudo vincular a los participantes con su entrada de temporada.');
+                        console.warn('[admin/torneo/tournaments] season_entry_id warning:', backRefError.message);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    return { participants, warnings };
 }
 
 async function createPhases(writer: any, params: {
@@ -334,6 +459,10 @@ async function createPhases(writer: any, params: {
     leagueRounds: number;
     ruleset: JsonObject;
     participantRows: Array<{ id: string; club_id: string | null; seed?: number | null }>;
+    /** Configuracion del creador rapido/avanzado (quickCreator, desempates,
+     *  etiquetas de tabla). Se funde en la PRIMERA fase para que editar el
+     *  torneo restaure lo que se configuro al crearlo. */
+    settingsExtra: JsonObject | null;
 }) {
     const warnings: string[] = [];
     const phases: any[] = [];
@@ -348,7 +477,7 @@ async function createPhases(writer: any, params: {
         selectedTeamIds: params.participantRows.map((row) => row.club_id).filter(Boolean),
     };
 
-    const phasePlans = params.format === 'groups_playoff'
+    const phasePlans = isGroupsPlayoffFormat(params.format)
         ? [
             {
                 name: 'Fase de grupos',
@@ -395,6 +524,27 @@ async function createPhases(writer: any, params: {
         ];
 
     for (const plan of phasePlans) {
+        // Una fase playoff sin sus etapas ni su cuadro es un cascaron: el
+        // gestor la abre vacia y no hay llaves que completar. Se calculan aca
+        // y se materializan (rondas + partidos placeholder) tras el insert,
+        // igual que hace POST /api/tournaments/[id]/phases.
+        const planSettings: JsonObject = {
+            ...plan.settings,
+            ...(plan.order_index === 0 && params.settingsExtra ? params.settingsExtra : {}),
+        };
+
+        const playoffStages = isPlayoffPhaseType(plan.phase_type)
+            ? resolvePlayoffStagesForTeams(planSettings, getPlayoffTeamsCount(planSettings))
+            : [];
+        const playoffStageMatchCounts = playoffStages.map((stage) => stage.matchCount);
+
+        if (isPlayoffPhaseType(plan.phase_type)) {
+            planSettings.playoffStages = buildPlayoffStages(playoffStages);
+            planSettings.playoff_stage_names = playoffStages.map((stage) => stage.name);
+            planSettings.playoffStageMatchCounts = playoffStageMatchCounts;
+            planSettings.playoff_match_counts = playoffStageMatchCounts;
+        }
+
         const phasePayload = {
             tournament_id: params.tournamentId,
             season_id: params.seasonId,
@@ -402,7 +552,7 @@ async function createPhases(writer: any, params: {
             phase_type: plan.phase_type,
             order_index: plan.order_index,
             is_active: plan.order_index === 0,
-            settings: plan.settings,
+            settings: planSettings,
         };
 
         let phaseResult = await writer
@@ -431,10 +581,28 @@ async function createPhases(writer: any, params: {
         const phase = phaseResult.data;
         phases.push(phase);
 
+        if (isPlayoffPhaseType(plan.phase_type) && playoffStages.length > 0) {
+            const syncResult = await syncPlayoffStagesToRounds(writer, phase.id, params.seasonId, playoffStages);
+            if (!syncResult.ok) {
+                warnings.push(`La fase ${plan.name} se creo, pero no se pudieron crear sus etapas playoff.`);
+            } else {
+                const bracketResult = await ensurePlayoffBracketMatches(writer, {
+                    tournamentId: params.tournamentId,
+                    phaseId: phase.id,
+                    seasonId: params.seasonId,
+                    teamsCount: getPlayoffTeamsCount(planSettings),
+                    stageMatchCounts: playoffStageMatchCounts,
+                });
+                if (!bracketResult.ok) {
+                    warnings.push(`La fase ${plan.name} se creo, pero no se pudo armar el cuadro playoff.`);
+                }
+            }
+        }
+
         let groups: any[] = [];
         if (plan.phase_type === 'group_stage') {
-            const groupNames = Array.isArray((plan.settings as { group_names?: unknown }).group_names)
-                ? (plan.settings as { group_names: string[] }).group_names
+            const groupNames = Array.isArray((planSettings as { group_names?: unknown }).group_names)
+                ? (planSettings as { group_names: string[] }).group_names
                 : [];
             const groupRows = groupNames.map((name, index) => ({
                 phase_id: phase.id,
@@ -499,6 +667,21 @@ async function createPhases(writer: any, params: {
             ) {
                 warnings.push(`La fase ${plan.name} fue creada, pero no se pudo asignar su roster.`);
             }
+        }
+    }
+
+    // Siembra la tabla de posiciones de cada fase. `tournament_standings` es
+    // persistida — nadie la rehace sola: sin este paso el torneo nuevo muestra
+    // la tabla vacia hasta que alguien la recalcule a mano desde el gestor.
+    // No es fatal: la fase ya existe y el gestor puede recalcular.
+    for (const phase of phases) {
+        try {
+            const recalcResult = await recalculatePhaseStandingsScopes(params.tournamentId, phase.id);
+            if (!recalcResult.ok) {
+                console.warn('[admin/torneo/tournaments] standings seed warning for phase', phase.id);
+            }
+        } catch (recalcError) {
+            console.warn('[admin/torneo/tournaments] standings seed error:', recalcError);
         }
     }
 
@@ -593,6 +776,20 @@ export async function POST(request: NextRequest) {
     const isPopular = readBoolean(body.is_popular, false);
     const ruleset = buildRuleset(body, sport);
     const participantClubIds = readStringList(body.participant_club_ids);
+    // Plantel a inscribir por club: { [clubId]: divisionId }. Opcional.
+    const participantDivisions: Record<string, string> = {};
+    if (body.participant_divisions && typeof body.participant_divisions === 'object' && !Array.isArray(body.participant_divisions)) {
+        for (const [clubId, divisionId] of Object.entries(body.participant_divisions as JsonObject)) {
+            const cleanClubId = readText(clubId);
+            const cleanDivisionId = readText(divisionId);
+            if (cleanClubId && cleanDivisionId) participantDivisions[cleanClubId] = cleanDivisionId;
+        }
+    }
+    const phaseSettingsExtra = body.phase_settings_extra
+        && typeof body.phase_settings_extra === 'object'
+        && !Array.isArray(body.phase_settings_extra)
+        ? body.phase_settings_extra as JsonObject
+        : null;
     const teamCount = readPositiveInt(body.team_count, Math.max(participantClubIds.length, 2));
     const groupCount = readPositiveInt(body.group_count, Math.max(2, Math.ceil(teamCount / 4)));
     const qualifiersPerGroup = readPositiveInt(body.qualifiers_per_group, 2);
@@ -708,20 +905,22 @@ export async function POST(request: NextRequest) {
         seasonId,
         clubIds: participantClubIds,
         category,
+        divisionByClub: participantDivisions,
     });
-    if (participantResult.warning) warnings.push(participantResult.warning);
+    warnings.push(...participantResult.warnings);
 
     if (body.create_phase !== false) {
         const phaseResult = await createPhases(writer, {
             tournamentId: data.id,
             seasonId,
-            format,
+            format: normalizeTournamentFormat(format),
             teamCount,
             groupCount,
             qualifiersPerGroup,
             leagueRounds,
             ruleset,
             participantRows: participantResult.participants,
+            settingsExtra: phaseSettingsExtra,
         });
         warnings.push(...phaseResult.warnings);
     }

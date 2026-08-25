@@ -829,8 +829,9 @@ export default function PhaseCreator({
 
                             <div className="space-y-3">
                                 <div>
-                                    <label className="block text-xs font-semibold text-[var(--muted)] uppercase mb-1.5">Fecha</label>
+                                    <label htmlFor="pc-match-date" className="block text-xs font-semibold text-[var(--muted)] uppercase mb-1.5">Fecha</label>
                                     <input
+                                        id="pc-match-date"
                                         type="date"
                                         value={editingMatch.date}
                                         onChange={(e) => setEditingMatch({ ...editingMatch, date: e.target.value })}
@@ -838,8 +839,9 @@ export default function PhaseCreator({
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-[var(--muted)] uppercase mb-1.5">Hora</label>
+                                    <label htmlFor="pc-match-time" className="block text-xs font-semibold text-[var(--muted)] uppercase mb-1.5">Hora</label>
                                     <input
+                                        id="pc-match-time"
                                         type="time"
                                         value={editingMatch.time}
                                         onChange={(e) => setEditingMatch({ ...editingMatch, time: e.target.value })}
@@ -847,8 +849,9 @@ export default function PhaseCreator({
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-[var(--muted)] uppercase mb-1.5">Sede</label>
+                                    <label htmlFor="pc-match-venue" className="block text-xs font-semibold text-[var(--muted)] uppercase mb-1.5">Sede</label>
                                     <input
+                                        id="pc-match-venue"
                                         type="text"
                                         value={editingMatch.venue}
                                         onChange={(e) => setEditingMatch({ ...editingMatch, venue: e.target.value })}
@@ -901,10 +904,39 @@ export default function PhaseCreator({
 
             {/* TABS BAR (Sticky below header) */}
             <div className="phaseTabsBar">
-                <div className="phaseTabsInner">
-                    <div className={`tab ${activeTab === 'config' ? 'active' : ''}`} onClick={() => setActiveTab('config')}>Configuración</div>
-                    <div className={`tab ${activeTab === 'rules' ? 'active' : ''}`} onClick={() => setActiveTab('rules')}>Reglas y Bonus</div>
-                    <div className={`tab ${activeTab === 'fixture' ? 'active' : ''}`} onClick={() => setActiveTab('fixture')}>Fixture</div>
+                <div className="phaseTabsInner" role="tablist" aria-label="Secciones de la fase">
+                    {([
+                        ['config', 'Configuración'],
+                        ['rules', 'Reglas y Bonus'],
+                        ['fixture', 'Fixture'],
+                    ] as const).map(([key, etiqueta]) => (
+                        <button
+                            key={key}
+                            type="button"
+                            role="tab"
+                            id={`phase-tab-${key}`}
+                            aria-selected={activeTab === key}
+                            aria-controls={`phase-panel-${key}`}
+                            tabIndex={activeTab === key ? 0 : -1}
+                            className={`tab ${activeTab === key ? 'active' : ''}`}
+                            onClick={() => setActiveTab(key)}
+                            onKeyDown={(event) => {
+                                // Flechas para moverse entre pestañas, que es lo que
+                                // espera cualquiera que navegue con el teclado.
+                                const orden = ['config', 'rules', 'fixture'] as const;
+                                const i = orden.indexOf(activeTab as typeof orden[number]);
+                                if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+                                    event.preventDefault();
+                                    const paso = event.key === 'ArrowRight' ? 1 : -1;
+                                    const siguiente = orden[(i + paso + orden.length) % orden.length];
+                                    setActiveTab(siguiente);
+                                    document.getElementById(`phase-tab-${siguiente}`)?.focus();
+                                }
+                            }}
+                        >
+                            {etiqueta}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -921,7 +953,7 @@ export default function PhaseCreator({
 
                         {/* --- TAB: CONFIGURACIÓN --- */}
                         {(activeTab === 'config') && (
-                            <>
+                            <div role="tabpanel" id="phase-panel-config" aria-labelledby="phase-tab-config">
                                 {/* PHASE TYPE */}
                                 <div className="block">
                                     <div className="blockHeader">
@@ -1010,8 +1042,9 @@ export default function PhaseCreator({
                                             {phaseType === 'groups' && (
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                                                     <div>
-                                                        <label className="label">¿Cuántos grupos?</label>
+                                                        <label htmlFor="pc-groups-count" className="label">¿Cuántos grupos?</label>
                                                         <input
+                                                            id="pc-groups-count"
                                                             type="number"
                                                             value={config.groupsCount}
                                                             onChange={(e) => handleConfigChange('groupsCount', parseInt(e.target.value) || 0)}
@@ -1020,16 +1053,17 @@ export default function PhaseCreator({
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="label">Equipos por grupo</label>
+                                                        <span className="label">Equipos por grupo</span>
                                                         <div className="input mono flex items-center text-[var(--muted)] cursor-not-allowed">
                                                             {Math.ceil(selectedTeamIds.length / (config.groupsCount || 1))} (aprox)
                                                         </div>
                                                         <p className="p text-xs mt-1">Calculado automáticamente.</p>
                                                     </div>
                                                     <div className="md:col-span-2">
-                                                        <label className="label">¿Cuántos clasifican por grupo?</label>
+                                                        <label htmlFor="pc-qualifiers" className="label">¿Cuántos clasifican por grupo?</label>
                                                         <div className="flex items-center gap-3">
                                                             <input
+                                                                id="pc-qualifiers"
                                                                 type="number"
                                                                 value={config.qualifiersPerGroup}
                                                                 onChange={(e) => handleConfigChange('qualifiersPerGroup', parseInt(e.target.value) || 0)}
@@ -1044,8 +1078,9 @@ export default function PhaseCreator({
                                             {phaseType === 'league' && (
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                                                     <div>
-                                                        <label className="label">Formato de Vueltas</label>
+                                                        <label htmlFor="pc-league-rounds" className="label">Formato de Vueltas</label>
                                                         <select
+                                                            id="pc-league-rounds"
                                                             className="input"
                                                             value={config.leagueRounds || 1}
                                                             onChange={(e) => handleConfigChange('leagueRounds', parseInt(e.target.value))}
@@ -1055,7 +1090,7 @@ export default function PhaseCreator({
                                                         </select>
                                                     </div>
                                                     <div>
-                                                        <label className="label">Total de Fechas</label>
+                                                        <span className="label">Total de Fechas</span>
                                                         <div className="input mono flex items-center text-[var(--muted)] cursor-not-allowed">
                                                             {((selectedTeamIds.length - 1) * (config.leagueRounds || 1)) || 0} fechas
                                                         </div>
@@ -1066,7 +1101,7 @@ export default function PhaseCreator({
                                             {phaseType === 'playoff' && (
                                                 <div className="grid grid-cols-1 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                                                     <div>
-                                                        <label className="label">Estructura del Cuadro</label>
+                                                        <span className="label">Estructura del Cuadro</span>
                                                         <div className="input mono flex items-center justify-between text-[var(--muted)]">
                                                             <span>Inicia desde:</span>
                                                             <strong className="text-white">
@@ -1155,13 +1190,13 @@ export default function PhaseCreator({
                                         </div>
                                     </div>
                                 </div>
-                            </>
+                            </div>
                         )}
 
 
                         {/* --- TAB: REGLAS Y BONUS --- */}
                         {(activeTab === 'rules') && (
-                            <>
+                            <div role="tabpanel" id="phase-panel-rules" aria-labelledby="phase-tab-rules">
                                 {/* POINTS */}
                                 <section className="g22Block">
                                     <header className="g22BlockHeader">
@@ -1311,12 +1346,12 @@ export default function PhaseCreator({
                                         </div>
                                     </div>
                                 </section>
-                            </>
+                            </div>
                         )}
 
                         {/* --- TAB: FIXTURE --- */}
                         {(activeTab === 'fixture') && (
-                            <>
+                            <div role="tabpanel" id="phase-panel-fixture" aria-labelledby="phase-tab-fixture">
                                 <div className="block">
                                     <div className="blockHeader">
                                         <h2 className="blockTitle">Generación de Fixture</h2>
@@ -1462,7 +1497,7 @@ export default function PhaseCreator({
                                         </div>
                                     </div>
                                 )}
-                            </>
+                            </div>
                         )}
                     </div>
 

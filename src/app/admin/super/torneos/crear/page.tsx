@@ -1,21 +1,24 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-    ChevronLeft, Trophy, Globe, Search, Loader2, Plus, RefreshCw,
+    ChevronLeft, Search, Loader2, Plus, RefreshCw,
     LayoutGrid, ListOrdered, GitMerge, Flag, Settings2, CheckCircle2,
-    ArrowRight,
+    ArrowRight, Check, Lightbulb, type LucideIcon,
 } from 'lucide-react';
 import PhaseCreator, { type PhaseConfiguration, type Team as PhaseTeam } from '@/app/admin/components/PhaseCreator';
 import LogoUploader from '@/components/LogoUploader';
 import { useOptionalSuperConsole } from '../../SuperConsoleContext';
 import { createClient } from '@/lib/supabase/client';
-import { createEntitySafe, updateEntitySafe } from '@/app/admin/entities/actions';
+import { updateEntitySafe } from '@/app/admin/entities/actions';
 import { invalidateCache } from '@/lib/cache/superAdminCache';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
-import { getAllSports } from '@/lib/data/sports';
+import { getAllSports, getSportById } from '@/lib/data/sports';
+import { useSport } from '@/context/SportContext';
+import type { Sport } from '@/lib/types';
 import { createUnion } from '@/lib/services/unionService';
+import { persistTournamentLogo } from '@/lib/utils/persistTournamentLogo';
 import { mapExternalSportToInternalSport } from '@/lib/sports';
 import {
     buildTournamentCompetitionConfig,
@@ -29,6 +32,24 @@ import { AUDIENCE_LABELS, resolveTournamentAudience, syncAgeGradeWithAudience, t
 import '../../creation-forms.css';
 
 const sportsCatalog = getAllSports();
+
+/**
+ * Los deportes en los que se puede CREAR un torneo.
+ *
+ * No es lo mismo que "los deportes visibles". `activeSports` del contexto es lo
+ * que el super admin dejó a la vista en la portada, y ahí entra `motorsport`,
+ * que llega por ESPN como lectura: una carrera no es un partido, no tiene
+ * catálogo de eventos ni reloj. Un torneo suyo sería una fila que ninguna
+ * pantalla sabe dibujar.
+ *
+ * El discriminador sale del dato, no de una lista a mano: `matchRules` es lo
+ * que tienen los cinco deportes con el modelo completo (torneo → fase →
+ * partido → eventos) y lo único que le falta a `motorsport`. Si mañana se
+ * activa vóley con sus reglas, aparece acá solo.
+ */
+function isCreatableSport(sport: Sport): boolean {
+    return Boolean(sport.matchRules);
+}
 
 const sportDefaults: Record<string, { duration: number; win: number; draw: number; loss: number }> = {
     'football': { duration: 90, win: 3, draw: 1, loss: 0 },
@@ -72,7 +93,9 @@ type TemplateId = 'league' | 'knockout' | 'groups' | 'circuit' | 'custom';
 
 interface TournamentTemplate {
     id: TemplateId;
-    icon: string;
+    /* SVG, no emoji: el mismo juego de íconos (lucide) que usa el selector de
+       formato del paso 2, así la plantilla y el formato se reconocen entre sí. */
+    icon: LucideIcon;
     title: string;
     description: string;
     format: string;                        // se traduce a phaseType internamente
@@ -84,7 +107,7 @@ interface TournamentTemplate {
 const TOURNAMENT_TEMPLATES: TournamentTemplate[] = [
     {
         id: 'league',
-        icon: '🏆',
+        icon: ListOrdered,
         title: 'Liga · todos contra todos',
         description: 'Round-robin. Sumás puntos por victoria, empate y derrota. Ida o ida y vuelta.',
         format: 'league',
@@ -93,7 +116,7 @@ const TOURNAMENT_TEMPLATES: TournamentTemplate[] = [
     },
     {
         id: 'knockout',
-        icon: '🥊',
+        icon: GitMerge,
         title: 'Eliminación directa',
         description: 'Llaves. Cuartos → semis → final. Sin segunda chance.',
         format: 'knockout',
@@ -101,7 +124,7 @@ const TOURNAMENT_TEMPLATES: TournamentTemplate[] = [
     },
     {
         id: 'groups',
-        icon: '🎯',
+        icon: LayoutGrid,
         title: 'Grupos + Playoff',
         description: 'Fase de grupos seguida de eliminación. Ideal con muchos equipos.',
         format: 'groups',
@@ -109,7 +132,7 @@ const TOURNAMENT_TEMPLATES: TournamentTemplate[] = [
     },
     {
         id: 'circuit',
-        icon: '🏁',
+        icon: Flag,
         title: 'Circuito por eventos',
         description: 'Varias paradas en la temporada con tabla acumulada o final decisiva.',
         format: 'circuit',
@@ -117,7 +140,7 @@ const TOURNAMENT_TEMPLATES: TournamentTemplate[] = [
     },
     {
         id: 'custom',
-        icon: '⚙️',
+        icon: Settings2,
         title: 'Personalizado · multi-fase',
         description: 'Wizard avanzado. Definí cada fase, criterios y bonus desde cero.',
         format: 'groups',
@@ -228,12 +251,25 @@ type TournamentRecord = {
 };
 
 type ParticipantRow = {
+    id?: string | null;
     club_id: string;
     division_id?: string | null;
     division?: SquadRecord | null;
 };
 
+/** Foto de los participantes tal como estaban al abrir la edición. Es contra
+ *  esto que se calcula el diferencial al guardar, en vez de borrar y reponer. */
+type ExistingParticipant = { id: string; clubId: string; divisionId: string | null };
+
 type EntityFilter = 'all' | 'club' | 'seleccion' | 'franquicia' | 'academia';
+
+const ENTITY_FILTER_LABELS: Record<EntityFilter, string> = {
+    all: 'Todos',
+    club: 'Clubes',
+    seleccion: 'Selecciones',
+    franquicia: 'Franquicias',
+    academia: 'Academias',
+};
 
 function formatSquadLabel(squad: SquadRecord): string {
     const suffix = [squad.sport, squad.gender, squad.category]
@@ -243,6 +279,14 @@ function formatSquadLabel(squad: SquadRecord): string {
 
     const seasonLabel = squad.season ? ` · ${squad.season}` : '';
     return `${squad.name}${suffix ? ` (${suffix})` : ''}${seasonLabel}`;
+}
+
+/** Vuelve arriba al cambiar de paso. `smooth` solo si el sistema no pidió
+ *  movimiento reducido: el CSS apaga las transiciones, esto apaga el scroll. */
+function scrollWizardToTop() {
+    if (typeof window === 'undefined') return;
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
 }
 
 function sameIdList(left: string[], right: string[]): boolean {
@@ -262,16 +306,56 @@ function mapPhaseTypeToFormat(phaseType: string, preferredFormat?: string): stri
     return getTournamentFormatFromPhaseType(phaseType, preferredFormat);
 }
 
-function getPhaseTypeLabel(phaseType: string): string {
-    if (phaseType === 'league') return 'Liga';
-    if (phaseType === 'playoff') return 'Playoff';
-    return 'Fase de grupos';
-}
-
 function buildPhaseName(phaseType: string): string {
     if (phaseType === 'league') return 'Regular Season';
     if (phaseType === 'playoff') return 'Playoffs';
     return 'Fase de grupos';
+}
+
+/**
+ * Lo que va a salir con la configuración elegida, en el idioma del deporte.
+ *
+ * Antes esto existía sólo para la liga: elegir "Eliminación directa" o "Grupos"
+ * dejaba el panel vacío, justo en el paso donde hay que entender qué se está
+ * armando. Son cuentas de una línea; no había motivo para no mostrarlas.
+ */
+function describeFormat(format: string, teamCount: number, leagueRounds: number): { title: string; meta: string } {
+    const teams = Math.max(2, teamCount);
+
+    if (format === 'knockout') {
+        const rondas = Math.ceil(Math.log2(teams));
+        const arranque = teams > 16 ? '32avos' : teams > 8 ? 'octavos' : teams > 4 ? 'cuartos' : teams > 2 ? 'semifinales' : 'la final';
+        return {
+            title: `${teams} equipos · ${rondas} ${rondas === 1 ? 'ronda' : 'rondas'} · ${teams - 1} partidos`,
+            meta: `Arranca en ${arranque}. Sin repechaje: el que pierde queda afuera.`,
+        };
+    }
+
+    if (format === 'groups') {
+        const grupos = Math.max(2, Math.round(teams / 4));
+        const porGrupo = Math.ceil(teams / grupos);
+        const partidosGrupo = grupos * (porGrupo * (porGrupo - 1) / 2);
+        return {
+            title: `${grupos} grupos de ~${porGrupo} · ${Math.round(partidosGrupo)} partidos de grupo`,
+            meta: 'Los grupos y cuántos clasifican se afinan después, en el gestor.',
+        };
+    }
+
+    if (format === 'circuit') {
+        return {
+            title: `${teams} equipos · varias paradas`,
+            meta: 'Las fechas del circuito se cargan una por una desde el gestor.',
+        };
+    }
+
+    const fechas = Math.max(0, (teams - 1) * leagueRounds);
+    const partidos = Math.max(0, (teams * (teams - 1) / 2) * leagueRounds);
+    return {
+        title: `${teams} equipos · ${fechas} fechas · ${partidos} partidos`,
+        meta: leagueRounds === 2
+            ? 'Todos contra todos, ida y vuelta.'
+            : 'Todos contra todos, una sola rueda.',
+    };
 }
 
 function buildGroupNames(count: number): string[] {
@@ -316,6 +400,41 @@ function getClubEntityTypeSlug(value: string | null | undefined): EntityFilter {
 }
 
 const ADMIN_CLUB_PAGE_SIZE = 1000;
+
+/**
+ * Filas que se dibujan del catálogo filtrado.
+ *
+ * No es un límite de búsqueda: la selección en bloque y los contadores siguen
+ * trabajando sobre TODO lo que coincide. Es un límite de DIBUJO, y el pie de la
+ * lista dice cuántas quedaron afuera.
+ *
+ * Medido en la pantalla real con 2.976 clubes y sin frenar la CPU: cada tecla
+ * del buscador tardaba 598 ms, y borrar el campo 802 ms, porque React
+ * reconciliaba las 2.976 filas en cada pulsación. Nadie escanea 2.976 filas: se
+ * busca. Ciento veinte entran de sobra para reconocer lo que se buscó.
+ */
+const CLUB_ROWS_RENDER_CAP = 120;
+
+/** Arriba de esto, "seleccionar todos los visibles" pide un segundo clic. */
+const BULK_SELECT_CONFIRM_AT = 50;
+
+/** Planteles que se piden a la vez. Cada club es un fetch: sin tanda, elegir
+ *  200 clubes abre 200 conexiones de una y la pestaña se traba. */
+const SQUAD_FETCH_BATCH = 6;
+
+/** Altas/bajas de participantes por tanda al guardar. */
+const PARTICIPANT_WRITE_BATCH = 8;
+
+/**
+ * Corre `task` sobre `items` de a `size`. Cualquier error corta: al guardar un
+ * torneo preferimos frenar y avisar antes que seguir escribiendo sobre un
+ * estado que ya sabemos incompleto.
+ */
+async function runInBatches<T>(items: T[], size: number, task: (item: T) => Promise<void>): Promise<void> {
+    for (let index = 0; index < items.length; index += size) {
+        await Promise.all(items.slice(index, index + size).map(task));
+    }
+}
 
 async function fetchAdminClubPage(offset: number): Promise<ClubRecord[]> {
     const response = await fetch(`/api/admin/clubs?limit=${ADMIN_CLUB_PAGE_SIZE}&offset=${offset}`, { cache: 'no-store' });
@@ -366,7 +485,10 @@ function createDefaultPhaseConfig(
         pointsLoss: number;
         pointsBonusTry: number;
         pointsBonusLoss: number;
-    }
+    },
+    // Viene del paso 2. Antes estaba en duro en 1, así que "Ida y vuelta" no
+    // llegaba nunca a `settings.legs` y el fixture salía siempre de una rueda.
+    leagueRounds = 1,
 ): PhaseConfiguration {
     return {
         phaseType,
@@ -378,7 +500,7 @@ function createDefaultPhaseConfig(
             pointsDraw: String(rules.pointsDraw),
             pointsBonusTry: String(rules.pointsBonusTry),
             pointsBonusLoss: String(rules.pointsBonusLoss),
-            leagueRounds: 1,
+            leagueRounds,
             playoffThirdPlace: false,
         },
         selectedTeamIds,
@@ -390,7 +512,7 @@ function createDefaultPhaseConfig(
     };
 }
 
-function buildQuickPhasePayload(config: PhaseConfiguration) {
+function buildQuickPhasePayload(config: PhaseConfiguration, plannedTeamCount?: number) {
     const groupsCount = Math.max(1, Number(config.config?.groupsCount) || 1);
     const qualifiersPerGroup = Math.max(0, Number(config.config?.qualifiersPerGroup) || 0);
     const leagueRounds = Math.max(1, Number(config.config?.leagueRounds) || 1);
@@ -409,6 +531,10 @@ function buildQuickPhasePayload(config: PhaseConfiguration) {
             },
             phaseMode: config.phaseType,
             teamsCount: config.selectedTeamIds.length,
+            // El objetivo del paso 2, aparte de los que se inscribieron de
+            // verdad. Son cosas distintas —una liga de 8 puede arrancar con 5
+            // anotados— y el gestor necesita saber a cuántos apunta.
+            ...(plannedTeamCount ? { plannedTeamCount } : {}),
             advanceCount: qualifiersPerGroup,
             legs: normalizedPhaseType === 'league' ? leagueRounds : 1,
             group_names: groupNames,
@@ -455,6 +581,108 @@ interface DraftPayload {
     selectedTemplate: TemplateId | null;
     stage: WizardStage;
     savedAt: string;
+    /* Los participantes también son borrador. Antes sólo se guardaba el
+       formulario: retomabas en el paso 3 con la selección en cero y sin que
+       nada te avisara que se había perdido. */
+    selectedClubs?: string[];
+    selectedDivisionByClub?: Record<string, string>;
+}
+
+/** Pasado este plazo el borrador se descarta solo en vez de seguir ofreciéndose. */
+const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** "hace 3 horas" en vez de un ISO. Sirve para decidir si el borrador vale. */
+function formatDraftAge(savedAt: string): string {
+    const saved = Date.parse(savedAt);
+    if (!Number.isFinite(saved)) return 'hace un rato';
+
+    const minutes = Math.max(0, Math.round((Date.now() - saved) / 60000));
+    if (minutes < 1) return 'recién';
+    if (minutes < 60) return `hace ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`;
+
+    const hours = Math.round(minutes / 60);
+    if (hours < 24) return `hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
+
+    const days = Math.round(hours / 24);
+    return `hace ${days} ${days === 1 ? 'día' : 'días'}`;
+}
+
+/**
+ * Grupo de opciones excluyentes.
+ *
+ * El anuncio ya estaba bien —`role="radiogroup"` con `role="radio"` y
+ * `aria-checked`—, pero faltaba la otra mitad del patrón y eso lo dejaba peor
+ * que botones pelados en un punto: el lector anuncia un grupo y le enseña al
+ * usuario a moverse con flechas, y las flechas scrolleaban la página. Medido:
+ * con el foco en "Solo ida", ArrowDown dejaba la selección igual, el foco igual
+ * y bajaba la página 920 px.
+ *
+ * Va acá y no en cada botón porque los cinco grupos de esta pantalla están
+ * escritos de dos formas distintas (uno mapeado, cuatro a mano) y son quince
+ * botones: el comportamiento es del grupo, no de cada opción.
+ */
+function RadioGroup({
+    className,
+    labelledBy,
+    children,
+}: {
+    className?: string;
+    labelledBy: string;
+    children: React.ReactNode;
+}) {
+    const ref = useRef<HTMLDivElement>(null);
+
+    /* Tabulador rotativo: el grupo es UNA parada de tabulador y adentro se
+       mueve con flechas. Se sincroniza desde `aria-checked`, que ya es la
+       única verdad sobre qué está elegido — así no hay un segundo estado que
+       se pueda desfasar. */
+    useEffect(() => {
+        const group = ref.current;
+        if (!group) return;
+
+        const sync = () => {
+            const radios = Array.from(group.querySelectorAll<HTMLElement>('[role="radio"]'));
+            if (radios.length === 0) return;
+            const checked = radios.findIndex((radio) => radio.getAttribute('aria-checked') === 'true');
+            const focusable = checked === -1 ? 0 : checked;
+            radios.forEach((radio, index) => { radio.tabIndex = index === focusable ? 0 : -1; });
+        };
+
+        sync();
+        const observer = new MutationObserver(sync);
+        observer.observe(group, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-checked'] });
+        return () => observer.disconnect();
+    }, []);
+
+    const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        const step: Record<string, number> = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
+        const isEdge = event.key === 'Home' || event.key === 'End';
+        if (!(event.key in step) && !isEdge) return;
+
+        const radios = Array.from(
+            event.currentTarget.querySelectorAll<HTMLElement>('[role="radio"]:not([disabled])'),
+        );
+        if (radios.length === 0) return;
+
+        const active = document.activeElement;
+        const current = radios.findIndex((radio) => radio === active || radio.contains(active));
+        if (current === -1) return;
+
+        event.preventDefault();
+        const next = isEdge
+            ? (event.key === 'Home' ? 0 : radios.length - 1)
+            : (current + step[event.key] + radios.length) % radios.length;
+
+        radios[next].focus();
+        // En un radiogroup mover el foco ES elegir: no hace falta un Enter aparte.
+        radios[next].click();
+    };
+
+    return (
+        <div ref={ref} className={className} role="radiogroup" aria-labelledby={labelledBy} onKeyDown={onKeyDown}>
+            {children}
+        </div>
+    );
 }
 
 type SuperCreateTournamentProps = {
@@ -481,9 +709,18 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
     };
     const refresh = superConsole?.refresh ?? (() => {});
 
+    // La visibilidad real de los deportes la escribe el super admin en la tabla
+    // `sports`; el contexto ya la resuelve y cae a `isActive` si Supabase no
+    // contesta. `ConditionalLayout` monta el provider en todas las ramas, así
+    // que acá siempre está.
+    const { activeSports } = useSport();
+
     /* ============== Estado del wizard ============== */
     const [stage, setStage] = useState<WizardStage>('template');
     const [selectedTemplate, setSelectedTemplate] = useState<TemplateId | null>(null);
+    // La plantilla "Personalizado" pide el configurador de fases, pero recien
+    // despues de completar lo basico y elegir participantes.
+    const [wantsAdvanced, setWantsAdvanced] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [autosaveState, setAutosaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
     const [autosaveLabel, setAutosaveLabel] = useState<string>('');
@@ -499,6 +736,23 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
     const [loadingSquadsByClub, setLoadingSquadsByClub] = useState<Record<string, boolean>>({});
     const [searchTerm, setSearchTerm] = useState('');
     const [entityFilter, setEntityFilter] = useState<EntityFilter>('all');
+    const [bulkConfirmPending, setBulkConfirmPending] = useState(false);
+    const [existingParticipants, setExistingParticipants] = useState<ExistingParticipant[]>([]);
+    // El resultado del guardado va a la PANTALLA, no a un alert(). Un aviso de
+    // "la fase quedo pendiente" que hay que despachar con OK antes de que la
+    // navegacion te lo lleve puesto no se lee: se cierra.
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [saveWarnings, setSaveWarnings] = useState<string[] | null>(null);
+    const [pendingDraft, setPendingDraft] = useState<DraftPayload | null>(null);
+    // Retomar PISA lo que tengas cargado. Si ya hay trabajo en curso pide un
+    // segundo clic, igual que la seleccion en bloque del catalogo.
+    const [draftConfirmPending, setDraftConfirmPending] = useState(false);
+    /* Foto del formulario tal como quedo al entrar al paso 1. El autosave se
+       guia por esto y no por `pendingDraft`: la oferta ya vive en memoria, asi
+       que escribir en localStorage no la pisa. Lo unico que hay que evitar es
+       que el formulario VACIO se guarde encima del borrador que se esta
+       ofreciendo, y eso lo dice la foto, no la barra. */
+    const pristineSnapshotRef = useRef<string | null>(null);
     const [saving, setSaving] = useState(false);
     const [countryOptions, setCountryOptions] = useState<TournamentCountryOption[]>(() => getTournamentCountryOptions());
     const [phaseConfig, setPhaseConfig] = useState<PhaseConfiguration | null>(null);
@@ -559,6 +813,15 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
     }, [isTournamentAdmin]);
 
     /* ============== Uniones ============== */
+    /* "Refrescar" tiene que refrescar en los DOS paneles. En el panel de
+       torneos no hay SuperConsole y `refresh` es un no-op: el boton se apretaba
+       y no pasaba nada. El tick relanza el fetch del catalogo local. */
+    const [unionsRefreshTick, setUnionsRefreshTick] = useState(0);
+    const refreshUnions = () => {
+        if (isTournamentAdmin) setUnionsRefreshTick((tick) => tick + 1);
+        else refresh('unions');
+    };
+
     useEffect(() => {
         if (isTournamentAdmin) {
             // Sin SuperConsole: las uniones vienen del catálogo del panel de torneos.
@@ -587,7 +850,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                 country: union.country,
             })),
         ));
-    }, [isTournamentAdmin, superConsole?.unions]);
+    }, [isTournamentAdmin, superConsole?.unions, unionsRefreshTick]);
 
     useEffect(() => {
         if (!unionCreateForm.slugManuallyEdited) {
@@ -667,6 +930,15 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
 
                 setSelectedClubs(nextSelectedClubs);
                 setSelectedDivisionByClub(nextSelectedDivisions);
+                setExistingParticipants(
+                    participants
+                        .filter((participant) => participant.id && participant.club_id)
+                        .map((participant) => ({
+                            id: String(participant.id),
+                            clubId: participant.club_id,
+                            divisionId: participant.division_id ?? null,
+                        })),
+                );
             })
             .catch((error) => console.error('Error loading tournament participants:', error));
 
@@ -683,6 +955,20 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                         setSelectedClubs(savedQuickConfig.selectedTeamIds);
                     }
                 }
+
+                // Al editar hay que repoblar el paso 2 con lo guardado. Sin
+                // esto la pantalla mostraba siempre "8 equipos · solo ida" —los
+                // valores iniciales— sin importar cómo se había creado, y al
+                // guardar los pisaba.
+                const savedRounds = Number(savedQuickConfig?.config?.leagueRounds ?? firstPhase?.settings?.legs);
+                const savedPlanned = Number(firstPhase?.settings?.plannedTeamCount ?? firstPhase?.settings?.teamsCount);
+                setFormData((prev) => ({
+                    ...prev,
+                    leagueRounds: savedRounds === 2 ? 2 : 1,
+                    teamCount: Number.isFinite(savedPlanned) && savedPlanned >= 2
+                        ? Math.min(64, Math.trunc(savedPlanned))
+                        : prev.teamCount,
+                }));
             })
             .catch((error) => console.error('Error loading phase config:', error));
     }, [countryOptions, supabase, tournamentId]);
@@ -692,6 +978,24 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
         if (isEdit || stage === 'template') return;
         if (typeof window === 'undefined') return;
 
+        /* Antes acá había un `if (pendingDraft) return`. Protegía de más: la
+           oferta se lee una sola vez al montar y vive en el estado de React, así
+           que escribir en localStorage no la borra. Lo que sí hacía era apagar
+           el autosave DURANTE TODA la sesión de quien ignoraba la barra —y la
+           barra sólo se va si tocás uno de sus dos botones—, así que se podía
+           llenar el wizard entero sin que nada se guardara. Medido: nombre,
+           formato y un club elegido, y el borrador seguía siendo el viejo.
+
+           Lo único que había que evitar es que el formulario VACÍO se guarde
+           encima del borrador ofrecido. Eso se responde comparando contra la
+           foto de entrada, no mirando la barra. */
+        const snapshot = JSON.stringify({ formData, selectedTemplate, selectedClubs, selectedDivisionByClub });
+        if (pristineSnapshotRef.current === null) {
+            pristineSnapshotRef.current = snapshot;
+            return;
+        }
+        if (snapshot === pristineSnapshotRef.current) return;
+
         setAutosaveState('saving');
         const handle = window.setTimeout(() => {
             try {
@@ -700,6 +1004,8 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                     selectedTemplate,
                     stage,
                     savedAt: new Date().toISOString(),
+                    selectedClubs,
+                    selectedDivisionByClub,
                 };
                 window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(payload));
                 setAutosaveState('saved');
@@ -711,7 +1017,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
         }, 600);
 
         return () => window.clearTimeout(handle);
-    }, [formData, selectedTemplate, stage, isEdit]);
+    }, [formData, selectedTemplate, stage, isEdit, selectedClubs, selectedDivisionByClub]);
 
     /* ============== Restaurar borrador al cargar (en create) ============== */
     useEffect(() => {
@@ -724,19 +1030,59 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
             const payload = JSON.parse(raw) as DraftPayload;
             if (!payload || !payload.formData) return;
 
-            const ok = window.confirm('Encontramos un borrador sin terminar. ¿Querés continuar donde lo dejaste?');
-            if (ok) {
-                setFormData((prev) => ({ ...prev, ...(payload.formData as object) }));
-                setSelectedTemplate(payload.selectedTemplate);
-                setStage(payload.stage || 'basics');
-            } else {
+            // Un borrador viejo no sirve de nada y te abría un cartel cada vez
+            // que entrabas a la pantalla. Pasado el plazo se descarta solo.
+            const savedAt = payload.savedAt ? Date.parse(payload.savedAt) : NaN;
+            if (Number.isFinite(savedAt) && Date.now() - savedAt > DRAFT_MAX_AGE_MS) {
                 window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+                return;
             }
+
+            // Se ofrece, no se impone: nada se restaura hasta que toques
+            // "Retomar" en la barra. Antes era un `confirm()` nativo que
+            // aparecía antes de que la pantalla terminara de dibujarse.
+            setPendingDraft(payload);
         } catch (error) {
             console.warn('No se pudo restaurar borrador local:', error);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    /* Trabajo en curso = el formulario dejó de ser el que había al entrar.
+       Se mide contra la misma foto que usa el autosave, así no hay dos
+       verdades sobre "ya empezaste". */
+    const hasWorkInProgress = useMemo(() => {
+        if (pristineSnapshotRef.current === null) return false;
+        return JSON.stringify({ formData, selectedTemplate, selectedClubs, selectedDivisionByClub })
+            !== pristineSnapshotRef.current;
+    }, [formData, selectedTemplate, selectedClubs, selectedDivisionByClub]);
+
+    const acceptPendingDraft = () => {
+        if (!pendingDraft) return;
+        // Retomar reemplaza nombre, formato, plantilla y participantes. Si ya
+        // cargaste algo, eso es una pérdida: se pide un segundo clic.
+        if (hasWorkInProgress && !draftConfirmPending) {
+            setDraftConfirmPending(true);
+            return;
+        }
+        setDraftConfirmPending(false);
+        setFormData((prev) => ({ ...prev, ...(pendingDraft.formData as object) }));
+        setSelectedTemplate(pendingDraft.selectedTemplate);
+        if (Array.isArray(pendingDraft.selectedClubs)) setSelectedClubs(pendingDraft.selectedClubs);
+        if (pendingDraft.selectedDivisionByClub) setSelectedDivisionByClub(pendingDraft.selectedDivisionByClub);
+        setStage(pendingDraft.stage || 'basics');
+        setPendingDraft(null);
+    };
+
+    const discardPendingDraft = () => {
+        setPendingDraft(null);
+        setDraftConfirmPending(false);
+        /* Sólo se borra el guardado si no empezaste nada. Si ya cargaste algo,
+           el autosave viene escribiendo TU trabajo en esa misma clave desde el
+           primer cambio: borrarla acá te lo llevaría puesto. */
+        if (hasWorkInProgress) return;
+        try { window.localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* sin localStorage */ }
+    };
 
     /* ============== Helpers de cambio ============== */
     const setClubSelection = (clubId: string, isSelected: boolean) => {
@@ -753,15 +1099,6 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                 return next;
             });
         }
-    };
-
-    const toggleAllClubs = () => {
-        if (selectedClubs.length === clubs.length) {
-            setSelectedClubs([]);
-            setSelectedDivisionByClub({});
-            return;
-        }
-        setSelectedClubs(clubs.map((club) => club.id));
     };
 
     const handleSportChange = (sportId: string) => {
@@ -798,8 +1135,25 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
 
         setFormData((prev) => ({ ...prev, format: normalizedFormat }));
         setPhaseConfig((current) => {
-            const baseConfig = current || createDefaultPhaseConfig(nextPhaseType, selectedClubs, formData.rules);
+            const baseConfig = current || createDefaultPhaseConfig(nextPhaseType, selectedClubs, formData.rules, formData.leagueRounds);
             return { ...baseConfig, phaseType: nextPhaseType };
+        });
+    };
+
+    /*
+     * La modalidad escribe en los DOS lados. `formData.leagueRounds` es lo que
+     * dibuja la vista previa; `phaseConfig.config.leagueRounds` es lo que
+     * `buildQuickPhasePayload` convierte en `settings.legs`, que es el único
+     * valor que llega a la base. Antes sólo se tocaba el primero: la pantalla
+     * decía "14 fechas" y la fase se guardaba con una sola rueda.
+     */
+    const handleLeagueRoundsChange = (leagueRounds: number) => {
+        setFormData((prev) => ({ ...prev, leagueRounds }));
+        setPhaseConfig((current) => {
+            const base = current || createDefaultPhaseConfig(
+                mapFormatToPhaseType(formData.format), selectedClubs, formData.rules, leagueRounds,
+            );
+            return { ...base, config: { ...base.config, leagueRounds } };
         });
     };
 
@@ -811,23 +1165,63 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
         });
     }, [selectedClubs]);
 
-    /* ============== Cargar planteles por club seleccionado ============== */
+    /* ============== Cargar planteles por club seleccionado ==============
+     *
+     * El guard de desmontaje va en un ref, NO en un `let` por corrida.
+     *
+     * Con `let isCancelled` adentro del efecto pasaba esto: el efecto escribe
+     * `loadingSquadsByClub`, que es una de sus propias dependencias; React
+     * corre el cleanup de la corrida anterior antes de la siguiente, así que
+     * `isCancelled` quedaba en `true` para la corrida que había disparado los
+     * fetch. Cuando el pedido volvía, el `.then` y el `.finally` se salían
+     * temprano: el plantel NUNCA se guardaba y el `loading` del club quedaba
+     * prendido para siempre.
+     *
+     * Se verificó en React 19: `dataByKey = {}` y `loadingByKey = {a:true,
+     * b:true}` después de que los dos fetch resolvieran. En pantalla eso era el
+     * selector de plantel clavado en "Cargando planteles..." y deshabilitado, y
+     * todos los participantes guardados con `division_id: null`.
+     */
+    const squadsUnmountedRef = useRef(false);
     useEffect(() => {
-        let isCancelled = false;
+        // Se REINICIA al montar, no sólo se marca al desmontar. En dev,
+        // StrictMode monta, desmonta y vuelve a montar: sin esta línea el
+        // cleanup del primer montaje deja el ref en `true` para siempre y el
+        // arreglo reproduce el bug que venía a resolver — pedidos que vuelven
+        // 200 y resultados que se descartan igual.
+        squadsUnmountedRef.current = false;
+        return () => { squadsUnmountedRef.current = true; };
+    }, []);
+
+    useEffect(() => {
         const missingClubIds = selectedClubs.filter(
             (clubId) => !(clubId in clubSquadsByClub) && !loadingSquadsByClub[clubId]
         );
 
         if (missingClubIds.length === 0) return;
 
-        missingClubIds.forEach((clubId) => {
-            if (isTournamentAdmin) {
-                // El alta por panel de torneos inscribe por club (sin división);
-                // evitamos el endpoint super y tratamos como "sin planteles".
-                setClubSquadsByClub((prev) => ({ ...prev, [clubId]: [] }));
-                return;
-            }
+        if (isTournamentAdmin) {
+            // El alta por panel de torneos inscribe por club (sin división):
+            // evitamos el endpoint super y los marcamos "sin planteles". Va en
+            // UNA escritura, no una por club: con 200 seleccionados eran 200
+            // renders encadenados.
+            setClubSquadsByClub((prev) => {
+                const next = { ...prev };
+                missingClubIds.forEach((clubId) => { next[clubId] = []; });
+                return next;
+            });
+            return;
+        }
 
+        // Puerta de concurrencia. El efecto vuelve a correr cada vez que un
+        // pedido termina (`loadingSquadsByClub` cambia), así que alcanza con
+        // arrancar los que entren en los lugares libres: la cola se drena sola.
+        // Sin esto, seleccionar 200 clubes abría 200 conexiones de una.
+        const inFlight = Object.values(loadingSquadsByClub).filter(Boolean).length;
+        const freeSlots = Math.max(0, SQUAD_FETCH_BATCH - inFlight);
+        if (freeSlots === 0) return;
+
+        missingClubIds.slice(0, freeSlots).forEach((clubId) => {
             setLoadingSquadsByClub((prev) => ({ ...prev, [clubId]: true }));
 
             fetch(`/api/admin/clubs/${clubId}/squads`, { cache: 'no-store' })
@@ -837,21 +1231,19 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                     return Array.isArray(payload) ? payload as SquadRecord[] : [];
                 })
                 .then((squads) => {
-                    if (isCancelled) return;
+                    if (squadsUnmountedRef.current) return;
                     setClubSquadsByClub((prev) => ({ ...prev, [clubId]: squads }));
                 })
                 .catch((error) => {
-                    if (isCancelled) return;
+                    if (squadsUnmountedRef.current) return;
                     console.error(`Error loading squads for club ${clubId}:`, error);
                     setClubSquadsByClub((prev) => ({ ...prev, [clubId]: [] }));
                 })
                 .finally(() => {
-                    if (isCancelled) return;
+                    if (squadsUnmountedRef.current) return;
                     setLoadingSquadsByClub((prev) => ({ ...prev, [clubId]: false }));
                 });
         });
-
-        return () => { isCancelled = true; };
     }, [clubSquadsByClub, loadingSquadsByClub, selectedClubs, isTournamentAdmin]);
 
     /* ============== Auto-seleccionar plantel único ============== */
@@ -896,10 +1288,38 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
         }));
 
     const resolvedPhaseType = phaseConfig?.phaseType || mapFormatToPhaseType(formData.format);
-    const effectivePhaseConfig = phaseConfig || createDefaultPhaseConfig(resolvedPhaseType, selectedClubs, formData.rules);
+    const effectivePhaseConfig = phaseConfig || createDefaultPhaseConfig(resolvedPhaseType, selectedClubs, formData.rules, formData.leagueRounds);
     const phaseConfigToPersist: PhaseConfiguration = { ...effectivePhaseConfig, selectedTeamIds: selectedClubs };
 
+    const formatPreview = useMemo(
+        () => describeFormat(formData.format, formData.teamCount, formData.leagueRounds),
+        [formData.format, formData.teamCount, formData.leagueRounds],
+    );
+
     const selectedSport = sportsCatalog.find((sport) => sport.id === formData.sport);
+
+    /*
+     * Lo que se pinta en el selector. Dos reglas:
+     *
+     * 1. Sólo deportes en los que se puede crear (`isCreatableSport`). Antes se
+     *    listaba `getAllSports()` entero: 35 botones, 29 de ellos deportes que
+     *    la app todavía no dibuja. Un torneo de Kabaddi se guardaba igual.
+     * 2. Si estás EDITANDO un torneo cuyo deporte ya no es creable —o nunca lo
+     *    fue— ese deporte se agrega igual, marcado. Sacarlo dejaría la grilla
+     *    sin ninguna opción seleccionada y el editor no sabría en qué deporte
+     *    está parado; peor, el primer clic se lo cambiaría sin querer.
+     */
+    const availableSports = useMemo(() => {
+        const creatable = activeSports.filter(isCreatableSport);
+        if (creatable.some((sport) => sport.id === formData.sport)) return creatable;
+
+        const current = selectedSport ?? getSportById(formData.sport as Sport['id']);
+        return current ? [...creatable, current] : creatable;
+    }, [activeSports, formData.sport, selectedSport]);
+
+    const currentSportIsLegacy = Boolean(
+        formData.sport && !activeSports.some((sport) => sport.id === formData.sport && isCreatableSport(sport)),
+    );
     const selectedCountryOption = countryOptions.find((option) => option.id === formData.country) || null;
 
     const applyPhaseConfig = (nextConfig: PhaseConfiguration) => {
@@ -968,7 +1388,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
             ]));
             setFormData((prev) => ({ ...prev, unionId: createdUnion.id }));
             invalidateCache('unions_list');
-            refresh('unions');
+            refreshUnions();
             setUnionCreateSuccess('Unión creada y seleccionada.');
             setShowUnionCreator(false);
             setUnionCreateForm({
@@ -996,15 +1416,17 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
         }));
 
         setPhaseConfig((current) => {
-            const baseConfig = current || createDefaultPhaseConfig(nextPhaseType, selectedClubs, formData.rules);
+            const baseConfig = current || createDefaultPhaseConfig(nextPhaseType, selectedClubs, formData.rules, formData.leagueRounds);
             return { ...baseConfig, phaseType: nextPhaseType };
         });
 
-        if (template.advanced) {
-            setStage('advanced');
-        } else {
-            setStage('basics');
-        }
+        // Incluso la plantilla avanzada arranca por "Lo basico": el nombre es
+        // obligatorio y saltearlo dejaba al usuario en el configurador de fases
+        // con el torneo sin nombre y sin participantes, para terminar en un
+        // error de validacion al confirmar. `wantsAdvanced` se recuerda y el
+        // wizard abre el modo avanzado cuando ya hay con que trabajar.
+        setWantsAdvanced(Boolean(template.advanced));
+        setStage('basics');
     };
 
     /* ============== Validación inline del nombre ============== */
@@ -1015,49 +1437,173 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
         return 'ok';
     }, [trimmedName]);
 
-    const computedSlug = useMemo(() => trimmedName ? slugify(trimmedName) : '', [trimmedName]);
+
+    /* ============== Filtro de catálogo de clubes ==============
+     *
+     * El texto donde se busca se arma UNA vez por club, cuando llega el
+     * catálogo. Antes cada tecla reconstruía ocho strings por club y los
+     * pasaba a minúsculas: 2.976 x 8 = casi 24.000 operaciones por pulsación,
+     * y todas daban el mismo resultado que la tecla anterior.
+     */
+    const clubHaystacks = useMemo(() => {
+        const map = new Map<string, string>();
+        clubs.forEach((club) => {
+            map.set(club.id, [
+                club.name, club.short_name, club.shortName, club.slug,
+                club.city, club.region, club.country,
+                getClubEntityTypeLabel(club.entity_type),
+            ].filter(Boolean).join(' ').toLowerCase());
+        });
+        return map;
+    }, [clubs]);
 
     /* ============== Filtro de catálogo de clubes ============== */
-    const normalizedClubSearch = searchTerm.trim().toLowerCase();
+    /*
+     * El input escribe `searchTerm`; la LISTA se filtra con el valor diferido.
+     * React deja que la tecla se pinte primero y recalcula la lista después, sin
+     * un debounce a mano que haya que ajustar. `searchIsStale` es el momento en
+     * que lo que ves todavía no corresponde a lo que escribiste: se dice, no se
+     * disimula.
+     */
+    const deferredSearchTerm = useDeferredValue(searchTerm);
+    const normalizedClubSearch = deferredSearchTerm.trim().toLowerCase();
+    const searchIsStale = searchTerm !== deferredSearchTerm;
     const filteredClubs = useMemo(() => {
         return clubs.filter((club) => {
             if (entityFilter !== 'all' && getClubEntityTypeSlug(club.entity_type) !== entityFilter) return false;
             if (!normalizedClubSearch) return true;
-            return [
-                club.name, club.short_name, club.shortName, club.slug,
-                club.city, club.region, club.country,
-                getClubEntityTypeLabel(club.entity_type),
-            ].some((value) => String(value || '').toLowerCase().includes(normalizedClubSearch));
+            return (clubHaystacks.get(club.id) || '').includes(normalizedClubSearch);
         });
-    }, [clubs, entityFilter, normalizedClubSearch]);
+    }, [clubHaystacks, clubs, entityFilter, normalizedClubSearch]);
 
+    /* Los contadores cuentan lo que la BUSQUEDA deja pasar, no el catalogo
+       entero: el chip decia "Clubes 2003" mientras la lista mostraba cuatro. El
+       filtro de tipo NO se aplica aca a proposito — si no, el chip activo seria
+       el unico con numero y el resto quedaria en cero. */
     const entityCounts = useMemo(() => {
-        const counts: Record<EntityFilter, number> = { all: clubs.length, club: 0, seleccion: 0, franquicia: 0, academia: 0 };
-        clubs.forEach((club) => {
-            const slug = getClubEntityTypeSlug(club.entity_type);
-            counts[slug]++;
+        const searched = normalizedClubSearch
+            ? clubs.filter((club) => (clubHaystacks.get(club.id) || '').includes(normalizedClubSearch))
+            : clubs;
+
+        const counts: Record<EntityFilter, number> = { all: searched.length, club: 0, seleccion: 0, franquicia: 0, academia: 0 };
+        searched.forEach((club) => {
+            counts[getClubEntityTypeSlug(club.entity_type)]++;
         });
         return counts;
-    }, [clubs]);
+    }, [clubHaystacks, clubs, normalizedClubSearch]);
+
+    /* ============== Selección en bloque ==============
+     *
+     * Opera sobre lo FILTRADO, no sobre el catálogo entero. Antes hacía
+     * `clubs.map(...)`: filtrabas por "Selecciones" —el chip decía 64— tocabas
+     * el botón y te llevabas los 2.976. Y no era sólo una selección grande: el
+     * efecto de planteles dispara un fetch por club y el alta un POST por
+     * participante, así que un clic se convertía en miles de requests.
+     *
+     * Arriba del tope pide un segundo clic. No es un `confirm()` nativo: el
+     * botón cambia de texto y dice cuántos va a agregar.
+     */
+    const visibleClubs = useMemo(
+        () => filteredClubs.slice(0, CLUB_ROWS_RENDER_CAP),
+        [filteredClubs],
+    );
+    const hiddenClubCount = filteredClubs.length - visibleClubs.length;
+
+    /* Los elegidos, resueltos a su ficha. El orden es el de selección, no el
+       del catálogo: es el orden en que el usuario los pensó. */
+    const selectedClubRecords = useMemo(() => {
+        const byId = new Map(clubs.map((club) => [club.id, club]));
+        return selectedClubs
+            .map((id) => byId.get(id))
+            .filter((club): club is ClubRecord => Boolean(club));
+    }, [clubs, selectedClubs]);
+
+    const filteredClubIds = useMemo(() => filteredClubs.map((club) => club.id), [filteredClubs]);
+    const selectedFilteredCount = useMemo(() => {
+        const selected = new Set(selectedClubs);
+        return filteredClubIds.reduce((total, id) => (selected.has(id) ? total + 1 : total), 0);
+    }, [filteredClubIds, selectedClubs]);
+
+    const allFilteredSelected = filteredClubIds.length > 0 && selectedFilteredCount === filteredClubIds.length;
+    const bulkNeedsConfirm = !allFilteredSelected && filteredClubIds.length > BULK_SELECT_CONFIRM_AT;
+
+    // El pedido de confirmación se cae solo si cambiás el filtro o la búsqueda:
+    // el "¿Añadir 2.976?" de hace dos filtros ya no es sobre lo que estás viendo.
+    useEffect(() => { setBulkConfirmPending(false); }, [entityFilter, normalizedClubSearch]);
+
+    const toggleAllFilteredClubs = () => {
+        if (allFilteredSelected) {
+            const toRemove = new Set(filteredClubIds);
+            setSelectedClubs((prev) => prev.filter((id) => !toRemove.has(id)));
+            setSelectedDivisionByClub((prev) => {
+                const next = { ...prev };
+                toRemove.forEach((id) => delete next[id]);
+                return next;
+            });
+            setBulkConfirmPending(false);
+            return;
+        }
+
+        if (bulkNeedsConfirm && !bulkConfirmPending) {
+            setBulkConfirmPending(true);
+            return;
+        }
+
+        setSelectedClubs((prev) => Array.from(new Set([...prev, ...filteredClubIds])));
+        setBulkConfirmPending(false);
+    };
 
     /* ============== Navegación entre stages ============== */
     const canAdvanceFromBasics = nameStatus === 'ok' && Boolean(formData.sport);
     const canAdvanceFromStructure = formData.teamCount >= 2;
 
+    /* El botón deshabilitado siempre dice qué falta para habilitarse. Es la
+       convención de la casa —el ejemplo que cita la guía es `CreatePlayer.tsx`,
+       con «Elegí una nacionalidad y una posición para empezar.»— y acá no se
+       cumplía: el "Siguiente" quedaba en `opacity: .3` sin `title`, sin
+       `aria-describedby` y sin nada al lado. En el paso 0 se agrava porque la
+       tarjeta recomendada ya viene con borde e ícono verdes: parece elegida sin
+       estarlo, así que el botón apagado no tenía ninguna explicación visible. */
+    const advanceBlockedReason: string | null = useMemo(() => {
+        if (saving) return null;
+        if (stage === 'template') {
+            return selectedTemplate ? null : 'Elegí un tipo de torneo para seguir.';
+        }
+        if (stage === 'basics') {
+            if (nameStatus === 'idle') return 'Ponele un nombre al torneo para seguir.';
+            if (nameStatus === 'too-short') return 'El nombre necesita al menos 3 caracteres.';
+            if (!formData.sport) return 'Elegí un deporte para seguir.';
+        }
+        if (stage === 'structure' && !canAdvanceFromStructure) {
+            return 'Un torneo necesita al menos 2 equipos.';
+        }
+        return null;
+    }, [stage, saving, selectedTemplate, nameStatus, formData.sport, canAdvanceFromStructure]);
+
     const goNext = async () => {
         if (stage === 'basics') {
             if (!canAdvanceFromBasics) return;
             setStage('structure');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            scrollWizardToTop();
             return;
         }
         if (stage === 'structure') {
             if (!canAdvanceFromStructure) return;
             setStage('participants');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            scrollWizardToTop();
             return;
         }
-        if (stage === 'participants' || stage === 'advanced') {
+        if (stage === 'participants') {
+            if (wantsAdvanced) {
+                setWantsAdvanced(false);
+                setStage('advanced');
+                scrollWizardToTop();
+                return;
+            }
+            await handleFinalize();
+            return;
+        }
+        if (stage === 'advanced') {
             await handleFinalize();
         }
     };
@@ -1067,11 +1613,11 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
         else if (stage === 'structure') setStage('basics');
         else if (stage === 'participants') setStage('structure');
         else if (stage === 'advanced') setStage('participants');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollWizardToTop();
     };
 
     /* ============== Persistir la fase (idéntico al wizard original) ============== */
-    const saveQuickPhase = async (savedId: string, config: PhaseConfiguration) => {
+    const saveQuickPhase = async (savedId: string, config: PhaseConfiguration, plannedTeamCount?: number) => {
         const existingPhasesResponse = await fetch(`/api/tournaments/${savedId}/phases`);
         let existingPhaseId: string | null = null;
 
@@ -1087,7 +1633,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
             {
                 method: existingPhaseId ? 'PATCH' : 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(buildQuickPhasePayload(config)),
+                body: JSON.stringify(buildQuickPhasePayload(config, plannedTeamCount)),
             }
         );
 
@@ -1100,6 +1646,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
     /* ============== Finalizar (crear o actualizar) ============== */
     const handleFinalize = async () => {
         setSaving(true);
+        setSaveError(null);
         try {
             const ruleset = {
                 pointsWin: formData.rules.pointsWin,
@@ -1111,99 +1658,13 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                 } : {})
             };
 
-            if (isTournamentAdmin) {
-                // Panel de Admin de Torneos: una sola llamada a la API scoped, que
-                // crea el torneo (con created_by + membership), temporada,
-                // participantes y fase inicial, y lo deja a tu nombre.
-                const participantClubIds = Array.from(new Set(selectedClubs.filter(Boolean)));
-                const response = await fetch('/api/admin/torneo/tournaments', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        name: formData.name,
-                        display_name: formData.name,
-                        sport_id: formData.sport,
-                        season_id: formData.season || '2026',
-                        category: formData.category || null,
-                        age_grade: formData.ageGrade || null,
-                        format: mapPhaseTypeToFormat(phaseConfigToPersist.phaseType, formData.format) || 'league',
-                        country: formData.country ? (selectedCountryOption?.label || formData.country) : null,
-                        country_id: formData.country ? (selectedCountryOption?.id || formData.country) : null,
-                        union_id: formData.unionId || null,
-                        logo_url: formData.logoUrl || null,
-                        primary_color: null,
-                        status: formData.visibility === 'public' ? 'published' : 'draft',
-                        is_visible: formData.visibility === 'public',
-                        ruleset,
-                        team_count: formData.teamCount || participantClubIds.length || 2,
-                        league_rounds: formData.leagueRounds || 1,
-                        participant_club_ids: participantClubIds,
-                        create_phase: true,
-                        create_season: true,
-                    }),
-                });
-                const result = await response.json().catch(() => null);
-                if (!response.ok) {
-                    throw new Error(result?.error || 'No se pudo crear el torneo.');
-                }
+            // Lo escriben los dos caminos (crear y editar), asi que vive
+            // arriba de la bifurcacion.
+            let logoWarning: string | null = null;
 
-                if (typeof window !== 'undefined') {
-                    try { window.localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* noop */ }
-                }
-
-                // The API creates the tournament even when sub-steps (season,
-                // participants, phases, membership) only partially succeed. Don't
-                // swallow those warnings — the user must know the tournament may
-                // need manual completion in the gestor.
-                const warnings: string[] = Array.isArray(result?.warnings)
-                    ? result.warnings.filter((w: unknown): w is string => typeof w === 'string' && w.trim().length > 0)
-                    : [];
-                if (warnings.length > 0 && typeof window !== 'undefined') {
-                    window.alert(
-                        `El torneo se creó, pero con avisos:\n\n- ${warnings.join('\n- ')}\n\n` +
-                        'Revisalo en el gestor para completar lo que falte.',
-                    );
-                }
-
-                router.push(tournamentsHomeHref);
-                return;
-            }
-
-            const payload: Record<string, unknown> = {
-                name: formData.name,
-                sport_id: formData.sport,
-                season_id: formData.season || '2026',
-                category: formData.category || null,
-                age_grade: formData.ageGrade || null,
-                format: mapPhaseTypeToFormat(phaseConfigToPersist.phaseType, formData.format) || null,
-                country: formData.country ? (selectedCountryOption?.label || formData.country) : null,
-                country_id: formData.country ? (selectedCountryOption?.id || formData.country) : null,
-                union_id: formData.unionId || null,
-                logo_url: formData.logoUrl || null,
-                status: formData.visibility === 'public' ? 'published' : 'draft',
-                is_visible: formData.visibility === 'public',
-                ruleset: {
-                    ...ruleset,
-                    competition: buildTournamentCompetitionConfig(formData.format, {
-                        champion_mode: formData.circuitChampionMode,
-                    }),
-                },
-            };
-
-            let savedId: string;
-
-            if (isEdit && tournamentId) {
-                const result = await updateEntitySafe('tournament', tournamentId, payload);
-                if (result.success === false) throw new Error(result.error);
-                savedId = tournamentId;
-            } else {
-                payload.slug = `${slugify(formData.name)}-${Date.now()}`;
-                const result = await createEntitySafe('tournament', payload);
-                if (result.success === false) throw new Error(result.error);
-                savedId = result.id;
-            }
-
+            // La validacion de planteles corre ANTES de escribir nada. Antes
+            // vivia despues del alta del torneo: el error llegaba con la fila
+            // ya creada y el usuario reintentaba contra un torneo duplicado.
             const participantClubIds = Array.from(new Set(selectedClubs.filter(Boolean)));
             const clubsMissingDivisionSelection = participantClubIds.filter((clubId) => {
                 const squads = clubSquadsByClub[clubId] || [];
@@ -1219,32 +1680,260 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                 throw new Error(`Seleccioná el plantel participante para: ${missingClubNames}`);
             }
 
-            // Persistir participantes
-            if (isEdit) {
-                await supabase.from('tournament_participants').delete().eq('tournament_id', savedId);
-            }
-            if (participantClubIds.length > 0) {
-                await Promise.all(
-                    participantClubIds.map(async (clubId) => {
-                        const selectedDivisionId = selectedDivisionByClub[clubId] || null;
-                        const response = await fetch(`/api/tournaments/${savedId}/participants`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                club_id: clubId,
-                                division_id: selectedDivisionId,
-                                type: 'club',
-                                status: 'active',
-                            }),
-                        });
+            if (!isEdit) {
+                /*
+                 * ALTA UNIFICADA. Una sola llamada server-side crea todo lo que
+                 * un torneo necesita para FUNCIONAR: la fila de `tournaments`
+                 * (con membership del creador), la temporada, los participantes
+                 * en sus TRES tablas (participante + entrada de temporada +
+                 * roster de fase) y las fases con grupos, cuadro playoff y
+                 * tabla de posiciones sembrada.
+                 *
+                 * Antes el camino super hacia esto a mano desde el navegador:
+                 * `createEntitySafe` + un POST por participante + la fase al
+                 * final. Ese camino no creaba temporada ni roster de fase, asi
+                 * que el torneo se veia bien en el gestor y la tabla publica
+                 * quedaba vacia para siempre (el sintoma exacto de Damas B).
+                 */
+                const participantDivisions = participantClubIds.reduce<Record<string, string>>((accumulator, clubId) => {
+                    const divisionId = selectedDivisionByClub[clubId];
+                    if (divisionId) accumulator[clubId] = divisionId;
+                    return accumulator;
+                }, {});
 
-                        const payload = await response.json().catch(() => null);
-                        if (!response.ok) {
-                            throw new Error(payload?.error || 'No se pudo agregar un participante al torneo.');
+                // Lo que el creador rapido/avanzado configuro y el endpoint no
+                // deriva solo: se funde en los settings de la primera fase para
+                // que editar el torneo restaure esta misma pantalla.
+                const quickSettings = buildQuickPhasePayload(phaseConfigToPersist, formData.teamCount).settings;
+                const phaseSettingsExtra = {
+                    quickCreator: quickSettings.quickCreator,
+                    plannedTeamCount: formData.teamCount,
+                    tiebreakers: quickSettings.tiebreakers,
+                    tableTags: quickSettings.tableTags,
+                    groupAssignments: quickSettings.groupAssignments,
+                    fixturePreview: quickSettings.fixturePreview,
+                    playoffThirdPlace: quickSettings.playoffThirdPlace,
+                };
+
+                // `LogoUploader` devuelve un data URI y este POST lo mandaba
+                // crudo a `tournaments.logo_url`. Aca todavia no hay id, asi
+                // que el torneo nace sin logo y se completa apenas se conoce.
+                const inlineLogo = Boolean(formData.logoUrl && formData.logoUrl.startsWith('data:'));
+                const response = await fetch('/api/admin/torneo/tournaments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        name: formData.name,
+                        display_name: formData.name,
+                        sport_id: formData.sport,
+                        season_id: formData.season || '2026',
+                        category: formData.category || null,
+                        age_grade: formData.ageGrade || null,
+                        format: mapPhaseTypeToFormat(phaseConfigToPersist.phaseType, formData.format) || 'league',
+                        country: formData.country ? (selectedCountryOption?.label || formData.country) : null,
+                        country_id: formData.country ? (selectedCountryOption?.id || formData.country) : null,
+                        union_id: formData.unionId || null,
+                        logo_url: inlineLogo ? null : (formData.logoUrl || null),
+                        status: formData.visibility === 'public' ? 'published' : 'draft',
+                        is_visible: formData.visibility === 'public',
+                        ruleset: {
+                            ...ruleset,
+                            // Sin esto un torneo de circuito se guardaba sin
+                            // `competition.format_type`, y `isCircuitRuleset()`
+                            // no lo reconocia como circuito.
+                            competition: buildTournamentCompetitionConfig(formData.format, {
+                                champion_mode: formData.circuitChampionMode,
+                            }),
+                        },
+                        team_count: formData.teamCount || participantClubIds.length || 2,
+                        league_rounds: formData.leagueRounds || 1,
+                        group_count: Number(effectivePhaseConfig.config?.groupsCount) || undefined,
+                        qualifiers_per_group: Number(effectivePhaseConfig.config?.qualifiersPerGroup) || undefined,
+                        participant_club_ids: participantClubIds,
+                        participant_divisions: participantDivisions,
+                        phase_settings_extra: phaseSettingsExtra,
+                        create_phase: true,
+                        create_season: true,
+                    }),
+                });
+                const result = await response.json().catch(() => null);
+                if (!response.ok) {
+                    throw new Error(result?.error || 'No se pudo crear el torneo.');
+                }
+
+                // El alta scoped contesta `{ data: {...}, warnings }`.
+                const createdId = typeof result?.data?.id === 'string' ? result.data.id : null;
+
+                if (inlineLogo && createdId) {
+                    try {
+                        const uploadedUrl = await persistTournamentLogo(createdId, formData.logoUrl);
+                        if (uploadedUrl && !uploadedUrl.startsWith('data:')) {
+                            const patch = await fetch(`/api/admin/torneo/tournaments/${createdId}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include',
+                                body: JSON.stringify({ logo_url: uploadedUrl }),
+                            });
+                            if (!patch.ok) logoWarning = 'El torneo se creo pero el logo quedo sin guardar. Cargalo desde el gestor.';
+                        } else {
+                            logoWarning = 'El logo no se pudo subir a Storage. El torneo quedo sin logo: volve a cargarlo desde el gestor.';
                         }
-                    })
-                );
+                    } catch (error) {
+                        logoWarning = error instanceof Error ? error.message : String(error);
+                    }
+                }
+
+                if (typeof window !== 'undefined') {
+                    try { window.localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* noop */ }
+                }
+
+                // El cache del SuperConsole es client-side: sin esto el torneo
+                // recien creado no aparece en el listado al volver. En el panel
+                // de torneos `refresh` es un no-op y no molesta.
+                invalidateCache('tournaments_list');
+                refresh('tournaments');
+
+                // The API creates the tournament even when sub-steps (season,
+                // participants, phases, membership) only partially succeed. Don't
+                // swallow those warnings — the user must know the tournament may
+                // need manual completion in the gestor.
+                const warnings: string[] = Array.isArray(result?.warnings)
+                    ? result.warnings.filter((w: unknown): w is string => typeof w === 'string' && w.trim().length > 0)
+                    : [];
+                const allWarnings = logoWarning ? [...warnings, logoWarning] : warnings;
+                if (allWarnings.length > 0) {
+                    setSaveWarnings(allWarnings);
+                    return;
+                }
+
+                router.push(tournamentsHomeHref);
+                return;
             }
+
+            /*
+             * EDICIÓN. El diferencial de participantes y el PATCH de la fase
+             * siguen del lado del cliente: acá el torneo ya existe y solo se
+             * toca lo que cambió.
+             */
+            if (!tournamentId) {
+                throw new Error('No se encontró el torneo a editar. Volvé al listado e intentá de nuevo.');
+            }
+
+            /*
+             * El logo se manda a Storage ANTES de escribir la fila.
+             *
+             * `LogoUploader` no sube nada: convierte el archivo a un data URI y
+             * lo devuelve por `onUpload`. Ese string entraba crudo en
+             * `tournaments.logo_url`; de ahí salió el
+             * `TOURNAMENT_LOGOS_BASE64_BACKUP.jsonl` de 7,8 MB que hubo que
+             * limpiar a mano.
+             */
+            let persistedLogoUrl: string | null = formData.logoUrl || null;
+            const logoIsInline = Boolean(formData.logoUrl && formData.logoUrl.startsWith('data:'));
+
+            if (logoIsInline) {
+                try {
+                    persistedLogoUrl = await persistTournamentLogo(tournamentId, formData.logoUrl);
+                } catch (error) {
+                    logoWarning = error instanceof Error ? error.message : String(error);
+                    persistedLogoUrl = formData.logoUrl;
+                }
+            }
+
+            const payload: Record<string, unknown> = {
+                name: formData.name,
+                sport_id: formData.sport,
+                season_id: formData.season || '2026',
+                category: formData.category || null,
+                age_grade: formData.ageGrade || null,
+                format: mapPhaseTypeToFormat(phaseConfigToPersist.phaseType, formData.format) || null,
+                country: formData.country ? (selectedCountryOption?.label || formData.country) : null,
+                country_id: formData.country ? (selectedCountryOption?.id || formData.country) : null,
+                union_id: formData.unionId || null,
+                logo_url: persistedLogoUrl,
+                status: formData.visibility === 'public' ? 'published' : 'draft',
+                is_visible: formData.visibility === 'public',
+                ruleset: {
+                    ...ruleset,
+                    competition: buildTournamentCompetitionConfig(formData.format, {
+                        champion_mode: formData.circuitChampionMode,
+                    }),
+                },
+            };
+
+            const updateResult = await updateEntitySafe('tournament', tournamentId, payload);
+            if (updateResult.success === false) throw new Error(updateResult.error);
+            const savedId = tournamentId;
+
+            /*
+             * Participantes: DIFERENCIAL, no borrar y reponer.
+             *
+             * Antes la edición hacía `delete().eq('tournament_id', …)` desde el
+             * cliente y recién después el alta de todos. Si cualquiera de esas
+             * altas fallaba —una conexión cortada, un rechazo de RLS— el torneo
+             * se quedaba con menos participantes de los que tenía y sin forma de
+             * volver atrás. Ahora sólo se toca lo que efectivamente cambió: dar
+             * de baja los que salieron, alta a los que entraron, y actualizar el
+             * plantel de los que siguen pero cambiaron de división.
+             *
+             * Y va en tandas. `Promise.all` sobre la lista entera abría un POST
+             * por participante de una sola vez: con una selección grande eran
+             * miles de conexiones simultáneas desde una pestaña.
+             */
+            const byClub = new Map(existingParticipants.map((participant) => [participant.clubId, participant]));
+            const selectedSet = new Set(participantClubIds);
+
+            const toRemove = existingParticipants.filter((participant) => !selectedSet.has(participant.clubId));
+            const toAdd = participantClubIds.filter((clubId) => !byClub.has(clubId));
+            const toUpdate = participantClubIds
+                .map((clubId) => ({ existing: byClub.get(clubId), clubId }))
+                .filter((entry): entry is { existing: ExistingParticipant; clubId: string } => Boolean(entry.existing))
+                .filter(({ existing, clubId }) => (selectedDivisionByClub[clubId] || null) !== existing.divisionId);
+
+            await runInBatches(toRemove, PARTICIPANT_WRITE_BATCH, async (participant) => {
+                const response = await fetch(
+                    `/api/tournaments/${savedId}/participants?id=${encodeURIComponent(participant.id)}`,
+                    { method: 'DELETE' },
+                );
+                if (!response.ok) {
+                    const body = await response.json().catch(() => null);
+                    throw new Error(body?.error || 'No se pudo quitar un participante del torneo.');
+                }
+            });
+
+            await runInBatches(toUpdate, PARTICIPANT_WRITE_BATCH, async ({ existing, clubId }) => {
+                const response = await fetch(
+                    `/api/tournaments/${savedId}/participants?id=${encodeURIComponent(existing.id)}`,
+                    {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ division_id: selectedDivisionByClub[clubId] || null }),
+                    },
+                );
+                if (!response.ok) {
+                    const body = await response.json().catch(() => null);
+                    throw new Error(body?.error || 'No se pudo actualizar el plantel de un participante.');
+                }
+            });
+
+            await runInBatches(toAdd, PARTICIPANT_WRITE_BATCH, async (clubId) => {
+                const response = await fetch(`/api/tournaments/${savedId}/participants`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        club_id: clubId,
+                        division_id: selectedDivisionByClub[clubId] || null,
+                        type: 'club',
+                        status: 'active',
+                    }),
+                });
+
+                const body = await response.json().catch(() => null);
+                if (!response.ok) {
+                    throw new Error(body?.error || 'No se pudo agregar un participante al torneo.');
+                }
+            });
 
             // La fase inicial es opcional: el torneo ya está creado. Sin
             // participantes (o con formato playoff que exige >=2 equipos) la
@@ -1253,7 +1942,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
             // camino del panel de gestor con sus warnings.
             let phaseWarning: string | null = null;
             try {
-                await saveQuickPhase(savedId, phaseConfigToPersist);
+                await saveQuickPhase(savedId, phaseConfigToPersist, formData.teamCount);
             } catch (phaseError: unknown) {
                 phaseWarning = phaseError instanceof Error ? phaseError.message : String(phaseError);
                 console.warn('[torneos/crear] fase inicial pendiente:', phaseWarning);
@@ -1269,16 +1958,22 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
             invalidateCache('tournaments_list');
             refresh('tournaments');
 
-            if (phaseWarning && typeof window !== 'undefined') {
-                window.alert(
-                    `El torneo se creó, pero la fase inicial quedó pendiente:\n\n- ${phaseWarning}\n\n` +
-                    'Agregá participantes y configurá la fase desde el gestor.',
-                );
+            const pendingWarnings = [
+                phaseWarning
+                    ? `La fase inicial quedo pendiente: ${phaseWarning}. Agrega participantes y configurala desde el gestor.`
+                    : null,
+                logoWarning,
+            ].filter((warning): warning is string => Boolean(warning));
+
+            if (pendingWarnings.length > 0) {
+                setSaveWarnings(pendingWarnings);
+                return;
             }
 
             router.push(tournamentsHomeHref);
         } catch (err: unknown) {
-            alert('Error al guardar el torneo: ' + (err instanceof Error ? err.message : String(err)));
+            setSaveError(err instanceof Error ? err.message : String(err));
+            scrollWizardToTop();
         } finally {
             setSaving(false);
         }
@@ -1320,7 +2015,6 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                 <button
                                     className={stage !== 'advanced' ? 'active' : ''}
                                     onClick={() => stage === 'advanced' && setStage('participants')}
-                                    disabled={stage === 'advanced' && false}
                                 >Rápido</button>
                                 <button
                                     className={stage === 'advanced' ? 'active' : ''}
@@ -1336,53 +2030,162 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                     </div>
                 </header>
 
-                {/* ===================== Stepper ===================== */}
-                {stage !== 'template' && stage !== 'advanced' && (
-                    <div className="stepper-bar">
-                        <div className="stepper-progress-row">
-                            <span>Paso <strong>{stageIndex} de {STAGE_ORDER.length - 1}</strong></span>
-                            <span>
-                                {stage === 'basics' && 'Lo básico'}
-                                {stage === 'structure' && 'Estructura'}
-                                {stage === 'participants' && 'Participantes'}
-                            </span>
+                {/* ============ Borrador sin terminar (reemplaza al confirm nativo) ============ */}
+                {pendingDraft && (
+                    <div className="notice notice-draft" role="status">
+                        <div className="notice-body">
+                            <strong>Tenés un borrador sin terminar</strong>
+                            <p>
+                                {pendingDraft.formData && typeof pendingDraft.formData === 'object' && 'name' in pendingDraft.formData && (pendingDraft.formData as { name?: string }).name
+                                    ? `«${(pendingDraft.formData as { name?: string }).name}» · `
+                                    : ''}
+                                guardado {formatDraftAge(pendingDraft.savedAt)}
+                                {Array.isArray(pendingDraft.selectedClubs) && pendingDraft.selectedClubs.length > 0
+                                    ? ` · ${pendingDraft.selectedClubs.length} equipos elegidos`
+                                    : ''}
+                            </p>
+                            {hasWorkInProgress && (
+                                <p className="notice-sub">
+                                    {draftConfirmPending
+                                        ? 'Retomar reemplaza el nombre, el formato y los participantes que cargaste recién.'
+                                        : 'Lo que cargaste recién ya se está guardando: podés ignorar este aviso.'}
+                                </p>
+                            )}
                         </div>
+                        <div className="notice-actions">
+                            <button
+                                type="button"
+                                className="btn btn-outline btn-inline"
+                                onClick={draftConfirmPending ? () => setDraftConfirmPending(false) : discardPendingDraft}
+                            >
+                                {draftConfirmPending ? 'Mejor no' : 'Descartar'}
+                            </button>
+                            <button
+                                type="button"
+                                className={`btn btn-inline ${draftConfirmPending ? 'btn-danger' : 'btn-primary'}`}
+                                onClick={acceptPendingDraft}
+                            >
+                                {draftConfirmPending ? 'Confirmar: reemplazar lo cargado' : 'Retomar'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ============ Error de guardado (reemplaza al alert nativo) ============ */}
+                {saveError && (
+                    <div className="notice notice-error" role="alert">
+                        <div className="notice-body">
+                            <strong>No se pudo guardar el torneo</strong>
+                            <p>{saveError}</p>
+                        </div>
+                        <div className="notice-actions">
+                            <button type="button" className="btn btn-outline btn-inline" onClick={() => setSaveError(null)}>Entendido</button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ============ Creado con avisos ============ */}
+                {saveWarnings && (
+                    <div className="notice notice-warn" role="status">
+                        <div className="notice-body">
+                            <strong>El torneo se {isEdit ? 'guardó' : 'creó'}, pero quedó algo pendiente</strong>
+                            <ul>
+                                {saveWarnings.map((warning) => <li key={warning}>{warning}</li>)}
+                            </ul>
+                        </div>
+                        <div className="notice-actions">
+                            <button
+                                type="button"
+                                className="btn btn-primary btn-inline"
+                                onClick={() => { setSaveWarnings(null); router.push(tournamentsHomeHref); }}
+                            >
+                                Ir a torneos
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ===================== Stepper ===================== */}
+                {/* Los tres pasos con nombre, no un "Paso 2 de 3" anónimo: se ve
+                    dónde estás, qué falta, y los pasos ya visitados son atajos de
+                    vuelta. A los futuros se llega con "Siguiente", que valida. */}
+                {stage !== 'template' && stage !== 'advanced' && (
+                    <nav className="stepper-bar" aria-label="Pasos del asistente">
+                        <ol className="stepper-steps">
+                            {([
+                                ['basics', 'Lo básico'],
+                                ['structure', 'Estructura'],
+                                ['participants', 'Participantes'],
+                            ] as const).map(([stepId, label], index) => {
+                                const stepNumber = index + 1;
+                                const isDone = stepNumber < stageIndex;
+                                const isActive = stage === stepId;
+                                return (
+                                    <li key={stepId}>
+                                        <button
+                                            type="button"
+                                            className={`stepper-step ${isActive ? 'is-active' : ''} ${isDone ? 'is-done' : ''}`}
+                                            aria-current={isActive ? 'step' : undefined}
+                                            disabled={!isDone && !isActive}
+                                            onClick={() => {
+                                                if (!isDone) return;
+                                                setStage(stepId);
+                                                scrollWizardToTop();
+                                            }}
+                                        >
+                                            <span className="stepper-step-dot" aria-hidden>
+                                                {isDone ? <Check size={12} /> : stepNumber}
+                                            </span>
+                                            <span className="stepper-step-label">{label}</span>
+                                        </button>
+                                    </li>
+                                );
+                            })}
+                        </ol>
                         <div className="stepper-progress-bar">
                             <span className="stepper-progress-fill" style={{ width: `${progress}%` }} />
                         </div>
-                    </div>
+                    </nav>
                 )}
 
                 {/* ===================== STAGE 0 · TEMPLATE PICKER ===================== */}
                 {stage === 'template' && !isEdit && (
                     <section className="tplpick-wrap">
-                        <h2 style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '-0.01em', marginBottom: '6px' }}>
+                        <h2 id="tg-template" style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '-0.01em', marginBottom: '6px' }}>
                             ¿Qué tipo de torneo querés crear?
                         </h2>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
                             Elegí una plantilla y completá lo esencial. Después podés ajustar cualquier detalle.
                         </p>
 
-                        <div className="tplpick-grid">
-                            {TOURNAMENT_TEMPLATES.map((tpl) => (
-                                <button
-                                    key={tpl.id}
-                                    type="button"
-                                    className={`tplpick-card ${tpl.popular ? 'popular' : ''} ${tpl.dashed ? 'dashed' : ''} ${selectedTemplate === tpl.id ? 'selected' : ''}`}
-                                    aria-pressed={selectedTemplate === tpl.id}
-                                    onClick={() => setSelectedTemplate(tpl.id)}
-                                    onDoubleClick={() => handleTemplateSelect(tpl)}
-                                >
-                                    <div className="tplpick-icon">{tpl.icon}</div>
-                                    <h3>{tpl.title}</h3>
-                                    <p>{tpl.description}</p>
-                                    {tpl.popular && <span className="tplpick-tag">Más usado</span>}
-                                </button>
-                            ))}
-                        </div>
+                        {/* Era la única elección excluyente del wizard modelada como cinco
+                            interruptores sueltos (`aria-pressed`) en un `<section>` sin rol:
+                            el lector decía «botón, no presionado» cinco veces, sin grupo y
+                            sin «1 de 5». Los otros cinco grupos ya son radiogroup. */}
+                        <RadioGroup className="tplpick-grid" labelledBy="tg-template">
+                            {TOURNAMENT_TEMPLATES.map((tpl) => {
+                                const TemplateIcon = tpl.icon;
+                                return (
+                                    <button
+                                        key={tpl.id}
+                                        type="button"
+                                        role="radio"
+                                        className={`tplpick-card ${tpl.popular ? 'popular' : ''} ${tpl.dashed ? 'dashed' : ''} ${selectedTemplate === tpl.id ? 'selected' : ''}`}
+                                        aria-checked={selectedTemplate === tpl.id}
+                                        onClick={() => setSelectedTemplate(tpl.id)}
+                                    >
+                                        <div className="tplpick-icon"><TemplateIcon size={22} aria-hidden /></div>
+                                        <h3>{tpl.title}</h3>
+                                        <p>{tpl.description}</p>
+                                        {tpl.popular && <span className="tplpick-tag">Más usado</span>}
+                                    </button>
+                                );
+                            })}
+                        </RadioGroup>
 
                         <div className="tplpick-callout">
-                            💡 <strong>Tip:</strong> 8 de cada 10 torneos usan &quot;Liga · todos contra todos&quot;. Si no estás seguro, empezá ahí — podés cambiar el formato más tarde sin perder participantes ni partidos cargados.
+                            <Lightbulb size={16} style={{ color: 'var(--info)', flexShrink: 0 }} aria-hidden />
+                            <div><strong>Tip:</strong> si no estás seguro, empezá con &quot;Liga · todos contra todos&quot;: es el formato más simple y podés cambiarlo más tarde sin perder participantes ni partidos cargados.</div>
                         </div>
                     </section>
                 )}
@@ -1390,9 +2193,13 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                 {/* Footer sticky del paso de plantillas (mockup) */}
                 {stage === 'template' && !isEdit && (
                     <footer className="actions-footer tplpick-footer">
+                        {advanceBlockedReason && (
+                            <p className="footer-blocked" id="tplpick-blocked">{advanceBlockedReason}</p>
+                        )}
                         <button
                             className="btn btn-primary"
                             disabled={!selectedTemplate}
+                            aria-describedby={advanceBlockedReason ? 'tplpick-blocked' : undefined}
                             onClick={() => {
                                 const tpl = TOURNAMENT_TEMPLATES.find((t) => t.id === selectedTemplate);
                                 if (tpl) handleTemplateSelect(tpl);
@@ -1410,13 +2217,13 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                         <article className="partition">
                             <div className="partition-header">
                                 <h2>Información del torneo</h2>
-                                <p>Solo lo imprescindible. Logo y publicación se configuran después.</p>
+                                <p>Solo lo imprescindible. País, unión, edad y logo viven en «Más opciones».</p>
                             </div>
-                            <div className="partition-body">
+                            <div className="partition-body form-column">
                                 <div className="form-grid">
                                     <div className="field-group">
-                                        <label>Nombre del torneo *</label>
-                                        <input
+                                        <label htmlFor="tg-name">Nombre del torneo *</label>
+                                        <input id="tg-name"
                                             className={`form-input ${nameStatus === 'ok' ? 'is-ok' : nameStatus === 'too-short' ? 'is-error' : ''}`}
                                             type="text"
                                             value={formData.name}
@@ -1427,7 +2234,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                         {nameStatus === 'ok' && (
                                             <div className="field-help-ok">
                                                 <CheckCircle2 size={14} />
-                                                URL: <code style={{ fontFamily: 'ui-monospace, monospace', marginLeft: 4 }}>/torneos/{computedSlug}</code>
+Listo para continuar
                                             </div>
                                         )}
                                         {nameStatus === 'too-short' && (
@@ -1436,12 +2243,14 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                     </div>
 
                                     <div className="field-group">
-                                        <label>Deporte *</label>
-                                        <div className="sport-pick-grid">
-                                            {sportsCatalog.map(sport => (
+                                        <label id="tg-sport-label">Deporte *</label>
+                                        <RadioGroup className="sport-pick-grid" labelledBy="tg-sport-label">
+                                            {availableSports.map(sport => (
                                                 <button
                                                     key={sport.id}
                                                     type="button"
+                                                    role="radio"
+                                                    aria-checked={formData.sport === sport.id}
                                                     className={formData.sport === sport.id ? 'selected' : ''}
                                                     onClick={() => handleSportChange(sport.id)}
                                                 >
@@ -1449,25 +2258,36 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                                     <span>{sport.nameEs}</span>
                                                 </button>
                                             ))}
-                                        </div>
+                                        </RadioGroup>
+                                        {currentSportIsLegacy && (
+                                            <p className="field-help">
+                                                Este torneo está en un deporte que ya no admite altas nuevas. Podés dejarlo como está o pasarlo a uno de los habilitados.
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div className="grid-2">
                                         <div className="field-group">
-                                            <label>Temporada</label>
-                                            <select
+                                            <label htmlFor="tg-season">Temporada</label>
+                                            <select id="tg-season"
                                                 className="form-select"
                                                 value={formData.season}
                                                 onChange={e => setFormData({ ...formData, season: e.target.value })}
                                             >
-                                                <option value="2026">2026</option>
-                                                <option value="2025">2025</option>
-                                                <option value="2024">2024</option>
+                                                {/* Del año próximo hacia atrás, más el valor guardado si es
+                                                    de otra época: un torneo viejo en edición no puede quedar
+                                                    con el select apuntando a una opción que no existe. */}
+                                                {Array.from(new Set([
+                                                    ...Array.from({ length: 4 }, (_, index) => String(new Date().getFullYear() + 1 - index)),
+                                                    formData.season,
+                                                ])).map((year) => (
+                                                    <option key={year} value={year}>{year}</option>
+                                                ))}
                                             </select>
                                         </div>
                                         <div className="field-group">
-                                            <label>Categoría</label>
-                                            <input
+                                            <label htmlFor="tg-category">Categoría</label>
+                                            <input id="tg-category"
                                                 className="form-input"
                                                 type="text"
                                                 value={formData.category}
@@ -1478,12 +2298,14 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                     </div>
 
                                     <div className="field-group">
-                                        <label>Audiencia pública</label>
-                                        <div className="choice-pair">
+                                        <label id="tg-audience">Audiencia pública</label>
+                                        <RadioGroup className="choice-pair" labelledBy="tg-audience">
                                             {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
                                                 <button
                                                     key={audience}
                                                     type="button"
+                                                    role="radio"
+                                                    aria-checked={formData.publicAudience === audience}
                                                     className={formData.publicAudience === audience ? 'selected' : ''}
                                                     onClick={() => handlePublicAudienceChange(audience)}
                                                 >
@@ -1495,7 +2317,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                                     </span>
                                                 </button>
                                             ))}
-                                        </div>
+                                        </RadioGroup>
                                     </div>
 
                                     <details className="tg-disclosure">
@@ -1503,8 +2325,8 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                         <div className="tg-disclosure-body">
                                             <div className="grid-2">
                                                 <div className="field-group">
-                                                    <label>País / Región</label>
-                                                    <select
+                                                    <label htmlFor="tg-country">País / Región</label>
+                                                    <select id="tg-country"
                                                         className="form-select"
                                                         value={formData.country}
                                                         onChange={e => setFormData({ ...formData, country: e.target.value })}
@@ -1516,8 +2338,8 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                                     </select>
                                                 </div>
                                                 <div className="field-group">
-                                                    <label>Unión vinculada</label>
-                                                    <select
+                                                    <label htmlFor="tg-union">Unión vinculada</label>
+                                                    <select id="tg-union"
                                                         className="form-select"
                                                         value={formData.unionId}
                                                         onChange={e => setFormData({ ...formData, unionId: e.target.value })}
@@ -1536,7 +2358,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                                                     : 'No hay uniones cargadas todavía.'}
                                                         </p>
                                                         <div className="inline-union-actions">
-                                                            <button type="button" className="btn btn-outline btn-inline" onClick={() => refresh('unions')}>
+                                                            <button type="button" className="btn btn-outline btn-inline" onClick={refreshUnions}>
                                                                 <RefreshCw size={14} /> Refrescar
                                                             </button>
                                                             <button type="button" className="btn btn-outline btn-inline" onClick={handleToggleUnionCreator}>
@@ -1549,20 +2371,22 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                                         <div className="inline-union-form">
                                                             <div className="grid-2">
                                                                 <div className="field-group">
-                                                                    <label>Nombre</label>
+                                                                    <label htmlFor="tg-union-name">Nombre</label>
                                                                     <input
                                                                         className="form-input"
                                                                         type="text"
+                                                                        id="tg-union-name"
                                                                         value={unionCreateForm.name}
                                                                         onChange={(e) => setUnionCreateForm((prev) => ({ ...prev, name: e.target.value, slugManuallyEdited: prev.slugManuallyEdited }))}
                                                                         placeholder="Ej: Unión de Rugby de Buenos Aires"
                                                                     />
                                                                 </div>
                                                                 <div className="field-group">
-                                                                    <label>Slug</label>
+                                                                    <label htmlFor="tg-union-slug">Slug</label>
                                                                     <input
                                                                         className="form-input"
                                                                         type="text"
+                                                                        id="tg-union-slug"
                                                                         value={unionCreateForm.slug}
                                                                         onChange={(e) => handleUnionCreateSlugChange(e.target.value)}
                                                                         placeholder="union-rugby-buenos-aires"
@@ -1571,18 +2395,20 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                                             </div>
                                                             <div className="grid-2">
                                                                 <div className="field-group">
-                                                                    <label>País</label>
+                                                                    <label htmlFor="tg-union-country">País</label>
                                                                     <input
                                                                         className="form-input"
                                                                         type="text"
+                                                                        id="tg-union-country"
                                                                         value={unionCreateForm.country}
                                                                         onChange={(e) => setUnionCreateForm((prev) => ({ ...prev, country: e.target.value }))}
                                                                     />
                                                                 </div>
                                                                 <div className="field-group">
-                                                                    <label>Nivel</label>
+                                                                    <label htmlFor="tg-union-level">Nivel</label>
                                                                     <select
                                                                         className="form-select"
+                                                                        id="tg-union-level"
                                                                         value={unionCreateForm.unionLevel}
                                                                         onChange={(e) => setUnionCreateForm((prev) => ({ ...prev, unionLevel: e.target.value }))}
                                                                     >
@@ -1604,8 +2430,8 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                             </div>
 
                                             <div className="field-group">
-                                                <label>Clasificación de edad</label>
-                                                <select
+                                                <label htmlFor="tg-agegrade">Clasificación de edad</label>
+                                                <select id="tg-agegrade"
                                                     className="form-select"
                                                     value={formData.ageGrade}
                                                     onChange={e => handleAgeGradeChange(e.target.value)}
@@ -1638,13 +2464,20 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                             <h2>¿Cómo se juega?</h2>
                             <p>Confirmá formato, cantidad de equipos y reglas. Tu plantilla ya viene precargada.</p>
                         </div>
-                        <div className="partition-body">
+                        {/* Dos columnas en escritorio: los controles a la izquierda y, al
+                            lado, lo que se está armando. Antes la vista previa quedaba
+                            debajo del pliegue en una pantalla de 900 px de alto —justo el
+                            dato que dice si la configuración es la que querés—. */}
+                        <div className="partition-body structure-split">
+                          <div className="structure-main">
 
                             <div className="field-group">
-                                <label>Formato</label>
-                                <div className="choice-grid">
+                                <label id="tg-format">Formato</label>
+                                <RadioGroup className="choice-grid" labelledBy="tg-format">
                                     <button
                                         type="button"
+                                        role="radio"
+                                        aria-checked={formData.format === 'league'}
                                         className={`choice-btn ${formData.format === 'league' ? 'selected' : ''}`}
                                         onClick={() => handleFormatChange('league')}
                                     >
@@ -1653,6 +2486,8 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                     </button>
                                     <button
                                         type="button"
+                                        role="radio"
+                                        aria-checked={formData.format === 'knockout'}
                                         className={`choice-btn ${formData.format === 'knockout' ? 'selected' : ''}`}
                                         onClick={() => handleFormatChange('knockout')}
                                     >
@@ -1661,6 +2496,8 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                     </button>
                                     <button
                                         type="button"
+                                        role="radio"
+                                        aria-checked={formData.format === 'groups'}
                                         className={`choice-btn ${formData.format === 'groups' ? 'selected' : ''}`}
                                         onClick={() => handleFormatChange('groups')}
                                     >
@@ -1669,19 +2506,21 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                     </button>
                                     <button
                                         type="button"
+                                        role="radio"
+                                        aria-checked={formData.format === 'circuit'}
                                         className={`choice-btn ${formData.format === 'circuit' ? 'selected' : ''}`}
                                         onClick={() => handleFormatChange('circuit')}
                                     >
-                                        <Trophy className="choice-icon" />
+                                        <Flag className="choice-icon" />
                                         <span className="choice-label">Circuito por eventos</span>
                                     </button>
-                                </div>
+                                </RadioGroup>
                             </div>
 
                             {formData.format === 'circuit' && (
                                 <div className="field-group">
-                                    <label>Modo del circuito</label>
-                                    <select
+                                    <label htmlFor="tg-circuit">Modo del circuito</label>
+                                    <select id="tg-circuit"
                                         className="form-select"
                                         value={formData.circuitChampionMode}
                                         onChange={(e) => setFormData((prev) => ({ ...prev, circuitChampionMode: e.target.value as CircuitChampionMode }))}
@@ -1694,75 +2533,71 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
 
                             <div className="grid-2">
                                 <div className="field-group">
-                                    <label>Cantidad de equipos</label>
+                                    <label htmlFor="tg-teamcount">Cantidad de equipos</label>
                                     <div className="tg-counter">
-                                        <button type="button" onClick={() => setFormData((p) => ({ ...p, teamCount: Math.max(2, p.teamCount - 1) }))}>−</button>
+                                        <button type="button" aria-label="Quitar un equipo" onClick={() => setFormData((p) => ({ ...p, teamCount: Math.max(2, p.teamCount - 1) }))}>−</button>
                                         <input
+                                            id="tg-teamcount"
                                             type="number"
                                             min={2}
                                             max={64}
                                             value={formData.teamCount}
                                             onChange={(e) => setFormData((p) => ({ ...p, teamCount: Math.max(2, Math.min(64, Number(e.target.value) || 2)) }))}
                                         />
-                                        <button type="button" onClick={() => setFormData((p) => ({ ...p, teamCount: Math.min(64, p.teamCount + 1) }))}>+</button>
+                                        <button type="button" aria-label="Sumar un equipo" onClick={() => setFormData((p) => ({ ...p, teamCount: Math.min(64, p.teamCount + 1) }))}>+</button>
                                     </div>
                                     <p className="field-help">Podés agregar o quitar después.</p>
                                 </div>
 
                                 {formData.format === 'league' && (
                                     <div className="field-group">
-                                        <label>Modalidad</label>
-                                        <div className="choice-pair">
+                                        <label id="tg-legs">Modalidad</label>
+                                        <RadioGroup className="choice-pair" labelledBy="tg-legs">
                                             <button
                                                 type="button"
+                                                role="radio"
+                                                aria-checked={formData.leagueRounds === 1}
                                                 className={formData.leagueRounds === 1 ? 'selected' : ''}
-                                                onClick={() => setFormData((p) => ({ ...p, leagueRounds: 1 }))}
+                                                onClick={() => handleLeagueRoundsChange(1)}
                                             >
                                                 Solo ida
                                                 <span className="small">{Math.max(0, formData.teamCount - 1)} fechas</span>
                                             </button>
                                             <button
                                                 type="button"
+                                                role="radio"
+                                                aria-checked={formData.leagueRounds === 2}
                                                 className={formData.leagueRounds === 2 ? 'selected' : ''}
-                                                onClick={() => setFormData((p) => ({ ...p, leagueRounds: 2 }))}
+                                                onClick={() => handleLeagueRoundsChange(2)}
                                             >
                                                 Ida y vuelta
                                                 <span className="small">{Math.max(0, (formData.teamCount - 1) * 2)} fechas</span>
                                             </button>
-                                        </div>
+                                        </RadioGroup>
                                     </div>
                                 )}
                             </div>
-
-                            {/* Live preview */}
-                            {formData.format === 'league' && (
-                                <div className="live-preview-chip">
-                                    <div className="kicker">Vista previa</div>
-                                    <strong>
-                                        {formData.teamCount} equipos · {Math.max(0, (formData.teamCount - 1) * formData.leagueRounds)} fechas · {Math.max(0, (formData.teamCount * (formData.teamCount - 1) / 2) * formData.leagueRounds)} partidos
-                                    </strong>
-                                    <div className="meta">Editable después. Las fechas se generan al crear el torneo.</div>
-                                </div>
-                            )}
 
                             <details className="tg-disclosure">
                                 <summary>Puntos por partido</summary>
                                 <div className="tg-disclosure-body">
                                     <div className="grid-2">
                                         <div className="field-group">
-                                            <label>Victoria</label>
+                                            <label htmlFor="tg-points-win">Victoria</label>
                                             <input
                                                 className="form-input"
                                                 type="number"
+                                                id="tg-points-win"
                                                 value={formData.rules.pointsWin}
                                                 onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsWin: parseInt(e.target.value) || 0 } }))}
                                             />
                                         </div>
                                         <div className="field-group">
-                                            <label>Empate</label>
+                                            <label htmlFor="tg-points-draw">Empate</label>
                                             <input
                                                 className="form-input"
                                                 type="number"
+                                                id="tg-points-draw"
                                                 value={formData.rules.pointsDraw}
                                                 onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsDraw: parseInt(e.target.value) || 0 } }))}
                                             />
@@ -1770,21 +2605,23 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                     </div>
                                     <div className="grid-2">
                                         <div className="field-group">
-                                            <label>Derrota</label>
+                                            <label htmlFor="tg-points-loss">Derrota</label>
                                             <input
                                                 className="form-input"
                                                 type="number"
+                                                id="tg-points-loss"
                                                 value={formData.rules.pointsLoss}
                                                 onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsLoss: parseInt(e.target.value) || 0 } }))}
                                             />
                                         </div>
                                         {formData.sport === 'rugby' && (
                                             <div className="field-group">
-                                                <label>Bonus try (4 o más)</label>
+                                                <label htmlFor="tg-bonus-try">Bonus try (4 o más)</label>
                                                 <input
                                                     className="form-input"
                                                     type="number"
-                                                    value={formData.rules.pointsBonusTry}
+                                                    id="tg-bonus-try"
+                                                value={formData.rules.pointsBonusTry}
                                                     onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsBonusTry: parseInt(e.target.value) || 0 } }))}
                                                 />
                                             </div>
@@ -1792,25 +2629,44 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                     </div>
                                     {formData.sport === 'rugby' && (
                                         <div className="field-group">
-                                            <label>Bonus defensivo (perder por ≤7)</label>
+                                            <label htmlFor="tg-bonus-loss">Bonus defensivo (perder por ≤7)</label>
                                             <input
                                                 className="form-input"
                                                 type="number"
+                                                id="tg-bonus-loss"
                                                 value={formData.rules.pointsBonusLoss}
                                                 onChange={(e) => setFormData((p) => ({ ...p, rules: { ...p.rules, pointsBonusLoss: parseInt(e.target.value) || 0 } }))}
                                             />
-                                            <p className="field-help">El editor profesional de bonus (con reglas evaluables) llega en la próxima versión. Por ahora estos campos siguen escribiendo a <code style={{ fontFamily: 'ui-monospace, monospace' }}>ruleset.pointsBonusTry / pointsBonusLoss</code>.</p>
+                                            <p className="field-help">Los bonus se suman a los puntos del partido cuando se cumplen: ofensivo con 4 o más tries, defensivo al perder por 7 o menos.</p>
                                         </div>
                                     )}
                                 </div>
                             </details>
 
+                          </div>
+
+                          <aside className="structure-aside" aria-label="Resumen de la configuración">
+                            <div className="live-preview-chip">
+                                <div className="kicker">Lo que se va a crear</div>
+                                <strong>{formatPreview.title}</strong>
+                                <div className="meta">{formatPreview.meta}</div>
+                                <dl className="preview-facts">
+                                    <div><dt>Formato</dt><dd>{getTournamentFormatLabel(formData.format)}</dd></div>
+                                    <div><dt>Victoria</dt><dd>{formData.rules.pointsWin} pts</dd></div>
+                                    <div><dt>Empate</dt><dd>{formData.rules.pointsDraw} pts</dd></div>
+                                    {formData.sport === 'rugby' && (
+                                        <div><dt>Bonus</dt><dd>{formData.rules.pointsBonusTry} try · {formData.rules.pointsBonusLoss} def</dd></div>
+                                    )}
+                                </dl>
+                            </div>
+
                             <div className="tplpick-callout" style={{ marginTop: '14px' }}>
                                 <Settings2 size={16} style={{ color: 'var(--info)', flexShrink: 0 }} />
                                 <div>
-                                    Para multi-fase (ej: clasificación + playoff), criterios de desempate funcionales, tags por posición y fixture importado, usá el botón <strong>&quot;Avanzado&quot;</strong> arriba a la derecha. Toda tu configuración se preserva.
+                                    Para multi-fase, criterios de desempate y fixture importado, usá <strong>&quot;Avanzado&quot;</strong> arriba a la derecha. Tu configuración se preserva.
                                 </div>
                             </div>
+                          </aside>
                         </div>
                     </article>
                 )}
@@ -1822,23 +2678,52 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                             <h2>Participantes</h2>
                             <p>Buscá clubes, selecciones, franquicias o academias en el catálogo y elegí su plantel.</p>
                         </div>
-                        <div className="partition-body">
+                        {/* El catálogo a la izquierda y, al lado, QUIÉNES quedaron
+                            elegidos. El medidor decía "4 de 8" pero no había forma de
+                            ver cuáles cuatro sin cazarlos entre 2.976 filas. */}
+                        <div className="partition-body participants-split">
+                          <div className="participants-main">
 
                             <div className="club-search-wrap">
                                 <div className="club-summary-bar">
-                                    <div>
-                                        <strong>{selectedClubs.length}</strong> equipos seleccionados
-                                        {formData.teamCount > 0 && (
-                                            <> · objetivo de la plantilla: <strong>{formData.teamCount}</strong></>
-                                        )}
+                                    <div className="pick-progress">
+                                        <div className="pick-progress-head">
+                                            <strong>{selectedClubs.length}</strong>
+                                            <span>de {formData.teamCount} equipos</span>
+                                            {selectedClubs.length > formData.teamCount && (
+                                                <em className="pick-over">{selectedClubs.length - formData.teamCount} de más</em>
+                                            )}
+                                            {selectedClubs.length === formData.teamCount && (
+                                                <em className="pick-done">completo</em>
+                                            )}
+                                        </div>
+                                        {/* El objetivo del paso 2 se veía como una frase al final de un
+                                            renglón. Acá es una barra: cuánto falta se lee sin leer. */}
+                                        <div
+                                            className="pick-progress-track"
+                                            role="progressbar"
+                                            aria-valuenow={selectedClubs.length}
+                                            aria-valuemin={0}
+                                            aria-valuemax={Math.max(formData.teamCount, selectedClubs.length)}
+                                            aria-label="Equipos seleccionados sobre el objetivo"
+                                        >
+                                            <span
+                                                className={`pick-progress-fill ${selectedClubs.length >= formData.teamCount ? 'is-complete' : ''}`}
+                                                style={{ width: `${Math.min(100, formData.teamCount ? (selectedClubs.length / formData.teamCount) * 100 : 0)}%` }}
+                                            />
+                                        </div>
                                     </div>
                                     <button
                                         type="button"
-                                        className="btn btn-outline btn-inline"
-                                        onClick={toggleAllClubs}
-                                        style={{ padding: '4px 10px', fontSize: '11px' }}
+                                        className={`btn btn-outline btn-inline bulk-select-btn ${bulkConfirmPending ? 'is-confirming' : ''}`}
+                                        onClick={toggleAllFilteredClubs}
+                                        disabled={filteredClubIds.length === 0}
                                     >
-                                        {selectedClubs.length === clubs.length && clubs.length > 0 ? 'Limpiar selección' : 'Seleccionar todos'}
+                                        {allFilteredSelected
+                                            ? `Quitar los ${filteredClubIds.length} visibles`
+                                            : bulkConfirmPending
+                                                ? `Confirmar: añadir ${filteredClubIds.length}`
+                                                : `Seleccionar los ${filteredClubIds.length} visibles`}
                                     </button>
                                 </div>
 
@@ -1847,6 +2732,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                     <input
                                         type="text"
                                         placeholder="Buscar por nombre, tipo o ubicación..."
+                                        aria-label="Buscar equipos en el catálogo"
                                         className="form-input"
                                         value={searchTerm}
                                         onChange={e => setSearchTerm(e.target.value)}
@@ -1861,24 +2747,23 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                             className={`club-filter-chip ${entityFilter === f ? 'active' : ''}`}
                                             onClick={() => setEntityFilter(f)}
                                         >
-                                            {f === 'all' && 'Todos'}
-                                            {f === 'club' && 'Clubes'}
-                                            {f === 'seleccion' && 'Selecciones'}
-                                            {f === 'franquicia' && 'Franquicias'}
-                                            {f === 'academia' && 'Academias'}
+                                            {ENTITY_FILTER_LABELS[f]}
                                             <span className="count">{entityCounts[f]}</span>
                                         </button>
                                     ))}
                                 </div>
 
-                                <div className="club-meta-row">
+                                <div className="club-meta-row" aria-live="polite">
                                     <span>
                                         {loadingClubs
                                             ? 'Cargando catálogo...'
                                             : clubsError
                                                 ? clubsError
-                                                : `${filteredClubs.length} de ${clubs.length} equipos disponibles`}
+                                                : hiddenClubCount > 0
+                                                    ? `Mostrando ${visibleClubs.length} de ${filteredClubs.length} coincidencias · afiná la búsqueda para ver el resto`
+                                                    : `${filteredClubs.length} de ${clubs.length} equipos`}
                                     </span>
+                                    {searchIsStale && <span className="club-meta-stale">filtrando…</span>}
                                 </div>
                             </div>
 
@@ -1891,12 +2776,32 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                 )}
 
                                 {!loadingClubs && filteredClubs.length === 0 && (
-                                    <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-dim)' }}>
-                                        No hay equipos que coincidan con la búsqueda.
+                                    /* Antes era un callejón: "No hay equipos que coincidan" y nada más.
+                                       Ahora dice qué filtro lo está tapando y ofrece salir de él. */
+                                    <div className="club-empty">
+                                        <p className="club-empty-title">
+                                            Ningún equipo coincide con «{searchTerm.trim()}»
+                                            {entityFilter !== 'all' && <> en <strong>{ENTITY_FILTER_LABELS[entityFilter]}</strong></>}
+                                        </p>
+                                        <div className="club-empty-actions">
+                                            {entityFilter !== 'all' && (
+                                                <button type="button" className="btn btn-outline btn-inline" onClick={() => setEntityFilter('all')}>
+                                                    Buscar en todos los tipos
+                                                </button>
+                                            )}
+                                            {searchTerm && (
+                                                <button type="button" className="btn btn-outline btn-inline" onClick={() => setSearchTerm('')}>
+                                                    Limpiar la búsqueda
+                                                </button>
+                                            )}
+                                        </div>
+                                        <p className="club-empty-hint">
+                                            Si el equipo no existe todavía, creálo en Clubes y volvé: el borrador se guarda solo.
+                                        </p>
                                     </div>
                                 )}
 
-                                {!loadingClubs && filteredClubs.map((club) => {
+                                {!loadingClubs && visibleClubs.map((club) => {
                                     const added = selectedClubs.includes(club.id);
                                     const squads = clubSquadsByClub[club.id] || [];
                                     const isLoadingSquads = Boolean(loadingSquadsByClub[club.id]);
@@ -1904,33 +2809,55 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                     const entitySlug = getClubEntityTypeSlug(club.entity_type);
 
                                     return (
+                                        /*
+                                         * La fila ENTERA es el objetivo tocable.
+                                         *
+                                         * Antes el check era un `<div>` con `onClick`: 18 px de alto,
+                                         * sin rol, sin foco y sin teclado, al lado de un botón "Quitar"
+                                         * de 26. Eran dos de los 21 objetivos por debajo de los 44 px
+                                         * que tenía este paso. Ahora hay un solo `<button>` con
+                                         * `aria-pressed`, y el selector de plantel queda AFUERA para no
+                                         * anidar un control adentro de otro.
+                                         */
                                         <div key={club.id} className={`club-row ${added ? 'added' : ''}`}>
-                                            <div className="row-check" onClick={() => setClubSelection(club.id, !added)}>
-                                                {added ? '✓' : ''}
-                                            </div>
-                                            <div className="row-logo">
-                                                {club.logo_url ? (
-                                                    <img src={club.logo_url} alt="" />
-                                                ) : (
-                                                    <span>{getClubShortName(club)}</span>
-                                                )}
-                                            </div>
-                                            <div className="row-info">
-                                                <div className="row-name">
-                                                    {club.name}
-                                                    <span className={`entity-pill ${entitySlug}`}>
-                                                        {getClubEntityTypeLabel(club.entity_type)}
+                                            <button
+                                                type="button"
+                                                className="row-main"
+                                                aria-pressed={added}
+                                                onClick={() => setClubSelection(club.id, !added)}
+                                            >
+                                                <span className="row-check" aria-hidden="true">
+                                                    {added ? '✓' : ''}
+                                                </span>
+                                                <span className="row-logo">
+                                                    {club.logo_url ? (
+                                                        <img src={club.logo_url} alt="" loading="lazy" decoding="async" />
+                                                    ) : (
+                                                        <span>{getClubShortName(club)}</span>
+                                                    )}
+                                                </span>
+                                                <span className="row-info">
+                                                    <span className="row-name">
+                                                        {club.name}
+                                                        <span className={`entity-pill ${entitySlug}`}>
+                                                            {getClubEntityTypeLabel(club.entity_type)}
+                                                        </span>
                                                     </span>
-                                                </div>
-                                                <div className="row-meta">
-                                                    <Flag size={11} style={{ display: 'inline', marginRight: 4 }} />
-                                                    {[club.city, club.region, club.country].filter(Boolean).join(' · ') || 'Sin ubicación'}
-                                                </div>
+                                                    <span className="row-meta">
+                                                        <Flag size={11} style={{ display: 'inline', marginRight: 4 }} />
+                                                        {[club.city, club.region, club.country].filter(Boolean).join(' · ') || 'Sin ubicación'}
+                                                    </span>
+                                                </span>
+                                                <span className="row-action" aria-hidden="true">
+                                                    {added ? 'Quitar' : 'Añadir'}
+                                                </span>
+                                            </button>
 
                                                 {added && (
                                                     <div className="squad-picker-row">
-                                                        <label>Plantel a inscribir</label>
+                                                        <label htmlFor={`squad-${club.id}`}>Plantel a inscribir</label>
                                                         <select
+                                                            id={`squad-${club.id}`}
                                                             value={selectedDivisionId}
                                                             onChange={(e) => setSelectedDivisionByClub((prev) => ({ ...prev, [club.id]: e.target.value }))}
                                                             disabled={isLoadingSquads}
@@ -1967,31 +2894,26 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                                         )}
                                                     </div>
                                                 )}
-                                            </div>
-                                            <button
-                                                type="button"
-                                                className="row-action"
-                                                onClick={() => setClubSelection(club.id, !added)}
-                                            >
-                                                {added ? 'Quitar' : 'Añadir'}
-                                            </button>
                                         </div>
                                     );
                                 })}
                             </div>
 
                             <div className="tplpick-callout" style={{ marginTop: '14px' }}>
-                                💡 <div>
+                                <Lightbulb size={16} style={{ color: 'var(--info)', flexShrink: 0 }} aria-hidden />
+                                <div>
                                     Si el equipo no está en el catálogo, podés crearlo desde la sección de Clubes y volver a este wizard. El borrador se guarda automáticamente.
                                 </div>
                             </div>
 
-                            {/* Visibilidad final + acciones */}
+                            {/* Visibilidad final */}
                             <div className="field-group" style={{ marginTop: '24px' }}>
-                                <label>Al crear</label>
-                                <div className="choice-pair">
+                                <label id="tg-visibility">Al crear</label>
+                                <RadioGroup className="choice-pair" labelledBy="tg-visibility">
                                     <button
                                         type="button"
+                                        role="radio"
+                                        aria-checked={formData.visibility === 'private'}
                                         className={formData.visibility === 'private' ? 'selected' : ''}
                                         onClick={() => setFormData((p) => ({ ...p, visibility: 'private' }))}
                                     >
@@ -2000,14 +2922,80 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                                     </button>
                                     <button
                                         type="button"
+                                        role="radio"
+                                        aria-checked={formData.visibility === 'public'}
                                         className={formData.visibility === 'public' ? 'selected' : ''}
                                         onClick={() => setFormData((p) => ({ ...p, visibility: 'public' }))}
                                     >
                                         Público
                                         <span className="small">Visible en la app al instante</span>
                                     </button>
-                                </div>
+                                </RadioGroup>
                             </div>
+                          </div>
+
+                          <aside className="participants-aside" aria-label="Resumen y equipos elegidos">
+                            {/* El paso donde vive el botón "Crear" es también el de
+                                confirmar: acá se relee TODO lo configurado sin volver
+                                atrás. Los pasos del stepper quedan como atajo si algo
+                                no cierra. */}
+                            <div className="final-summary">
+                                <div className="final-summary-kicker">{isEdit ? 'Se va a guardar' : 'Se va a crear'}</div>
+                                <strong className="final-summary-name" title={formData.name}>
+                                    {formData.name.trim() || 'Torneo sin nombre'}
+                                </strong>
+                                <dl className="preview-facts">
+                                    <div><dt>Deporte</dt><dd>{selectedSport?.nameEs || formData.sport}</dd></div>
+                                    <div><dt>Temporada</dt><dd>{formData.season}</dd></div>
+                                    <div><dt>Formato</dt><dd>{getTournamentFormatLabel(formData.format)}</dd></div>
+                                    <div><dt>Equipos</dt><dd>{selectedClubs.length} de {formData.teamCount}</dd></div>
+                                    <div><dt>{isEdit ? 'Estado' : 'Al crear'}</dt><dd>{formData.visibility === 'public' ? 'Público' : 'Borrador'}</dd></div>
+                                </dl>
+                            </div>
+
+                            <div className="picked-panel">
+                                <div className="picked-head">
+                                    <h3>Elegidos</h3>
+                                    <span className="picked-count">{selectedClubs.length}</span>
+                                </div>
+
+                                {selectedClubRecords.length === 0 ? (
+                                    <p className="picked-empty">
+                                        Todavía no elegiste ninguno. Buscá en el catálogo y tocá la fila para sumarlo.
+                                    </p>
+                                ) : (
+                                    <>
+                                        <ul className="picked-list">
+                                            {selectedClubRecords.map((club) => {
+                                                const squads = clubSquadsByClub[club.id] || [];
+                                                const falta = squads.length > 1 && !selectedDivisionByClub[club.id];
+                                                return (
+                                                    <li key={club.id} className={falta ? 'needs-squad' : ''}>
+                                                        <span className="picked-name" title={club.name}>{club.name}</span>
+                                                        {falta && <span className="picked-flag" title="Falta elegir el plantel">plantel</span>}
+                                                        <button
+                                                            type="button"
+                                                            className="picked-remove"
+                                                            aria-label={`Quitar ${club.name}`}
+                                                            onClick={() => setClubSelection(club.id, false)}
+                                                        >
+                                                            &times;
+                                                        </button>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline btn-inline picked-clear"
+                                            onClick={() => { setSelectedClubs([]); setSelectedDivisionByClub({}); }}
+                                        >
+                                            Vaciar la selección
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                          </aside>
                         </div>
                     </article>
                 )}
@@ -2041,16 +3029,20 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                 {/* ===================== Footer actions ===================== */}
                 {stage !== 'template' && stage !== 'advanced' && (
                     <footer className="actions-footer">
+                        {advanceBlockedReason && (
+                            <p className="footer-blocked" id="advance-blocked">{advanceBlockedReason}</p>
+                        )}
                         <button
                             className="btn btn-outline"
                             disabled={saving}
                             onClick={goPrev}
                         >
-                            Atrás
+                            <ChevronLeft size={16} aria-hidden /> Atrás
                         </button>
                         <button
                             className="btn btn-primary"
                             onClick={goNext}
+                            aria-describedby={advanceBlockedReason ? 'advance-blocked' : undefined}
                             disabled={
                                 saving ||
                                 (stage === 'basics' && !canAdvanceFromBasics) ||
@@ -2065,7 +3057,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                             ) : stage === 'participants' ? (
                                 isEdit ? 'Guardar cambios' : `Crear torneo${selectedClubs.length > 0 ? ` con ${selectedClubs.length} equipos` : ''}`
                             ) : (
-                                <>Siguiente <Globe size={14} style={{ marginLeft: 4 }} /></>
+                                <>Siguiente <ArrowRight size={16} aria-hidden /></>
                             )}
                         </button>
                     </footer>
