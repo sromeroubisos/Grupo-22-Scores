@@ -1138,6 +1138,44 @@ export async function POST(
       );
     }
 
+    // Un participante son TRES tablas, no una. Cuando el torneo tiene
+    // temporada, la pagina publica lista por `team_season_entries`: sin la
+    // entrada, el club existe para el motor pero no para la pantalla (el
+    // sintoma de Damas B: 2 de 13 visibles). La FK con el participante es
+    // circular, asi que la entrada nace apuntando al participante y despues se
+    // completa el back-ref. Best-effort: si la tabla no existe en este entorno
+    // el alta sigue valiendo como antes.
+    if (scopedSeasonId && data.club_id) {
+      const entryId = crypto.randomUUID();
+      const { error: entryError } = await (supabase as any)
+        .from('team_season_entries')
+        .insert([{
+          id: entryId,
+          season_id: scopedSeasonId,
+          tournament_id: tournamentId,
+          club_id: data.club_id,
+          source_participant_id: data.id,
+          status: 'active',
+          seed: data.seed ?? null,
+          settings: { source: 'participants_api' },
+        }]);
+
+      if (entryError) {
+        if (!isMissingTableError(entryError, 'team_season_entries')) {
+          console.warn('[Participants API] team_season_entries warning:', entryError.message);
+        }
+      } else {
+        const { error: backRefError } = await (supabase as any)
+          .from('tournament_participants')
+          .update({ season_entry_id: entryId })
+          .eq('id', data.id);
+
+        if (backRefError && !isMissingColumnError(backRefError, 'season_entry_id')) {
+          console.warn('[Participants API] season_entry_id warning:', backRefError.message);
+        }
+      }
+    }
+
     console.log('[Participants API] Participant created successfully:', data.id);
     return NextResponse.json(data);
   } catch (error: unknown) {
@@ -1490,6 +1528,30 @@ export async function DELETE(
 
     if (!id) {
       return NextResponse.json({ error: 'Missing participant ID' }, { status: 400 });
+    }
+
+    // La FK con `team_season_entries` es circular (season_entry_id ↔
+    // source_participant_id): antes de borrar el participante hay que soltar
+    // el back-ref y borrar su entrada, en ese orden. Sin esto, quitar un
+    // participante de un torneo con temporada devuelve un 23503.
+    const { error: backRefError } = await (supabase as any)
+      .from('tournament_participants')
+      .update({ season_entry_id: null })
+      .eq('id', id)
+      .eq('tournament_id', tournamentId);
+
+    if (backRefError && !isMissingColumnError(backRefError, 'season_entry_id')) {
+      console.warn('[Participants API] Could not clear season_entry_id before delete:', backRefError.message);
+    }
+
+    const { error: entriesError } = await (supabase as any)
+      .from('team_season_entries')
+      .delete()
+      .eq('source_participant_id', id)
+      .eq('tournament_id', tournamentId);
+
+    if (entriesError && !isMissingTableError(entriesError, 'team_season_entries')) {
+      console.warn('[Participants API] Could not delete season entries before delete:', entriesError.message);
     }
 
     const { error } = await (supabase as any)

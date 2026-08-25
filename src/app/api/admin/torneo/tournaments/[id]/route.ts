@@ -19,6 +19,10 @@ const UPDATABLE_FIELDS = [
     'country',
     'union_id',
     'sport_id',
+    // El alta crea el torneo sin logo (no hay id todavia para armar la ruta del
+    // bucket) y lo completa por aca apenas Storage devuelve la URL. Sin este
+    // campo en la lista blanca el PATCH contestaba "No hay campos para actualizar".
+    'logo_url',
 ] as const;
 
 function getDefaultTournamentVisibilityForStatus(status: unknown): boolean | null {
