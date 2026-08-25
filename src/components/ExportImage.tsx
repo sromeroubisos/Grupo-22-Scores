@@ -875,7 +875,7 @@ export default function ExportImage(props: ExportImageProps) {
     return <ExportImageInner {...props} />;
 }
 
-function ExportImageInner({ template, data, filename = 'g22-export', className = '' }: ExportImageProps) {
+function ExportImageInner({ template, data: liveData, filename = 'g22-export', className = '' }: ExportImageProps) {
     const supabase = useMemo(() => createClient(), []);
     const { user } = useAuth();
     const guestInvite = useGuestExportInvite();
@@ -887,6 +887,13 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
     const usesManagedDesign = Boolean(resolveAdminPanel(user?.role, user?.memberships));
     const [isExporting, setIsExporting] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    // El modal trabaja con una FOTO de los datos, tomada al abrirlo. Las paginas arman
+    // `data` inline en cada render (y la ficha de un partido en vivo se vuelve a
+    // renderizar cada segundo por el reloj), asi que con la prop viva el preview
+    // redibujaba la pieza entera sin que nadie tocara nada, y los efectos que leen
+    // `data` pisaban el marcador cargado a mano. Se exporta lo que se vio al abrir.
+    const [frozenData, setFrozenData] = useState<ExportData>(liveData);
+    const data = frozenData;
     const [isPortalReady, setIsPortalReady] = useState(false);
     const [format, setFormat] = useState<ExportFormat>('1080x1350');
     const [status, setStatus] = useState('');
@@ -1000,12 +1007,16 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
             ? formatExportScoreInput((data as MatchStatsData).awayScore)
             : ''
     ));
-    const [selectedMatchIndices, setSelectedMatchIndices] = useState<Set<number>>(() => {
-        if (template !== 'dailyMatches') return new Set<number>();
-        const matches = (data as DailyMatchesData).matches ?? [];
-        return new Set(Array.from({ length: Math.min(matches.length, 10) }, (_, index) => index));
-    });
-
+    const [selectedMatchIndices, setSelectedMatchIndices] = useState<Set<number>>(
+        () => buildDefaultMatchSelection(template, data)
+    );
+    const openModal = () => {
+        setFrozenData(liveData);
+        // La foto nueva puede traer otra lista de partidos: los indices viejos
+        // apuntarian a cualquier cosa.
+        setSelectedMatchIndices(buildDefaultMatchSelection(template, liveData));
+        setShowModal(true);
+    };
     useEffect(() => {
         setCustomTournamentName(defaultTournamentName);
     }, [defaultTournamentName]);
@@ -2227,7 +2238,7 @@ function ExportImageInner({ template, data, filename = 'g22-export', className =
                 <span className={exportOutfitFont.className}>OUTFIT BLACK</span>
                 <span className={exportJetBrainsMonoFont.className}>0123456789 +-</span>
             </div>
-            <button className={styles.exportButton} onClick={() => setShowModal(true)} disabled={isExporting} type="button">
+            <button className={styles.exportButton} onClick={openModal} disabled={isExporting} type="button">
                 {isExporting ? 'Generando...' : 'Exportar'}
             </button>
             {status && <div className={styles.status}>{status}</div>}
@@ -3606,62 +3617,123 @@ export function ExportImagePreview({
     dailyMatchesTimeMode = 'time',
     className = '',
 }: ExportImagePreviewProps) {
-    const [previewUrl, setPreviewUrl] = useState('');
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [previewError, setPreviewError] = useState('');
+    const [hasPreview, setHasPreview] = useState(false);
     const [isRenderingPreview, setIsRenderingPreview] = useState(false);
 
+    // Las opciones vigentes viven en un ref y el bucle de dibujo las lee recien cuando
+    // le toca dibujar: un arrastre del selector de color o el tipeo del nombre no
+    // encolan un dibujo por cada cambio, se pliegan en la pasada siguiente.
+    const renderOptions: ExportPreviewRenderOptions = {
+        template,
+        data,
+        format,
+        visualFamily,
+        customizationState,
+        previewColors,
+        plateOptions,
+        matchExportMode,
+        matchExportLayout,
+        lineupExportMode,
+        standingsExportMode,
+        dailyMatchesTimeMode,
+    };
+    const latestOptionsRef = useRef<ExportPreviewRenderOptions>(renderOptions);
+    latestOptionsRef.current = renderOptions;
+    const renderLoopRef = useRef({ inFlight: false, dirty: false, dirtyAt: 0 });
+    const isMountedRef = useRef(true);
+
     useEffect(() => {
-        let isMounted = true;
-
-        const renderPreview = async () => {
-            if (isMounted) {
-                setIsRenderingPreview(true);
-            }
-            try {
-                const dataUrl = await renderMatchExportPreviewDataUrl({
-                    template,
-                    data,
-                    format,
-                    visualFamily,
-                    customizationState,
-                    previewColors,
-                    plateOptions,
-                    matchExportMode,
-                    matchExportLayout,
-                    lineupExportMode,
-                    standingsExportMode,
-                    dailyMatchesTimeMode,
-                });
-
-                if (!isMounted) return;
-                setPreviewUrl(dataUrl);
-                setPreviewError('');
-            } catch (error) {
-                if (!isMounted) return;
-                setPreviewError(error instanceof Error ? error.message : 'No se pudo generar el preview');
-            } finally {
-                if (isMounted) {
-                    setIsRenderingPreview(false);
-                }
-            }
+        isMountedRef.current = true;
+        return () => {
+            isMountedRef.current = false;
         };
+    }, []);
 
-        void renderPreview();
+    useEffect(() => {
+        const loop = renderLoopRef.current;
+        if (!loop.dirty) loop.dirtyAt = Date.now();
+        loop.dirty = true;
+        // Si hay un dibujo en curso alcanza con dejar marcado que quedo algo pendiente:
+        // el bucle vuelve a pasar con las opciones mas nuevas cuando termine.
+        if (loop.inFlight) return undefined;
+
+        // Se espera a que la rafaga afloje, pero no para siempre: un arrastre largo del
+        // selector de color igual ve la pieza cambiar cada tanto.
+        const waited = Date.now() - loop.dirtyAt;
+        const delay = Math.max(0, Math.min(PREVIEW_RENDER_DEBOUNCE_MS, PREVIEW_RENDER_MAX_WAIT_MS - waited));
+        const timer = window.setTimeout(async () => {
+            loop.inFlight = true;
+            if (isMountedRef.current) setIsRenderingPreview(true);
+            try {
+                while (loop.dirty && isMountedRef.current) {
+                    loop.dirty = false;
+                    try {
+                        const rendered = await renderMatchExportPreviewCanvas(latestOptionsRef.current);
+                        if (!isMountedRef.current) return;
+                        paintPreviewCanvas(canvasRef.current, rendered);
+                        setHasPreview(true);
+                        setPreviewError('');
+                    } catch (error) {
+                        if (!isMountedRef.current) return;
+                        setPreviewError(error instanceof Error ? error.message : 'No se pudo generar el preview');
+                    }
+                }
+            } finally {
+                loop.inFlight = false;
+                if (isMountedRef.current) setIsRenderingPreview(false);
+            }
+        }, delay);
 
         return () => {
-            isMounted = false;
+            window.clearTimeout(timer);
         };
-    }, [customizationState, dailyMatchesTimeMode, data, format, lineupExportMode, matchExportLayout, matchExportMode, previewColors, standingsExportMode, template, visualFamily]);
+    }, [customizationState, dailyMatchesTimeMode, data, format, lineupExportMode, matchExportLayout, matchExportMode, plateOptions, previewColors, standingsExportMode, template, visualFamily]);
 
-    if (previewError && !previewUrl) {
-        return <div className={className}>{previewError}</div>;
+    // El lienzo queda montado siempre, aunque este oculto: si se desmontara mientras
+    // se muestra el error o el "Generando", el dibujo siguiente no tendria donde caer.
+    return (
+        <>
+            {!hasPreview && <div className={className}>{previewError || 'Generando preview...'}</div>}
+            <canvas
+                ref={canvasRef}
+                className={className}
+                role="img"
+                aria-label={isRenderingPreview ? 'Preview del export actualizandose' : 'Preview del export'}
+                aria-busy={isRenderingPreview}
+                style={{
+                    display: hasPreview ? undefined : 'none',
+                    opacity: isRenderingPreview ? 0.65 : 1,
+                    transition: 'opacity 160ms ease',
+                }}
+            />
+        </>
+    );
+}
+
+// Cuanto se espera antes de dibujar, para que una rafaga de cambios (una tecla atras
+// de otra, el arrastre del color) sea una pasada y no una por cambio.
+const PREVIEW_RENDER_DEBOUNCE_MS = 120;
+// Tope de espera cuando los cambios no paran de llegar.
+const PREVIEW_RENDER_MAX_WAIT_MS = 350;
+
+function buildDefaultMatchSelection(template: ExportTemplate, data: ExportData): Set<number> {
+    if (template !== 'dailyMatches') return new Set<number>();
+    const matches = (data as DailyMatchesData).matches ?? [];
+    return new Set(Array.from({ length: Math.min(matches.length, 10) }, (_, index) => index));
+}
+
+function paintPreviewCanvas(target: HTMLCanvasElement | null, rendered: HTMLCanvasElement) {
+    if (!target) return;
+    if (target.width !== rendered.width || target.height !== rendered.height) {
+        target.width = rendered.width;
+        target.height = rendered.height;
     }
-
-    if (!previewUrl) {
-        return <div className={className}>Generando preview...</div>;
-    }
-
-    return <img className={className} src={previewUrl} alt={isRenderingPreview ? 'Preview del export actualizandose' : 'Preview del export'} />;
+    const ctx = target.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, target.width, target.height);
+    ctx.drawImage(rendered, 0, 0);
 }
 
 function getDefaultTournamentName(template: ExportTemplate, data: ExportData): string {
@@ -4854,7 +4926,7 @@ function applyManualMatchScore(data: MatchStatsData, homeScoreInput: string, awa
     };
 }
 
-async function renderMatchExportPreviewDataUrl(options: {
+type ExportPreviewRenderOptions = {
     template: ExportTemplate;
     data: ExportData;
     format: ExportFormat;
@@ -4867,7 +4939,12 @@ async function renderMatchExportPreviewDataUrl(options: {
     lineupExportMode: LineupExportMode;
     standingsExportMode: StandingsExportMode;
     dailyMatchesTimeMode?: DailyMatchesTimeMode;
-}): Promise<string> {
+};
+
+// Devuelve el lienzo dibujado, no un PNG: codificar 1080x1350 con toDataURL bloquea el
+// hilo principal y deja un string de varios MB que el <img> tenia que volver a
+// decodificar. El preview lo copia con un drawImage y listo.
+async function renderMatchExportPreviewCanvas(options: ExportPreviewRenderOptions): Promise<HTMLCanvasElement> {
     const {
         template,
         data,
@@ -4907,7 +4984,6 @@ async function renderMatchExportPreviewDataUrl(options: {
             throw new Error('Formato de preview no soportado');
         }
 
-        await ensureExportFonts();
         const [, brandLogo] = await Promise.all([
             ensureExportFonts(),
             loadImage('/icon.png'),
@@ -5104,7 +5180,7 @@ async function renderMatchExportPreviewDataUrl(options: {
         }
     }
 
-        return canvas.toDataURL('image/png');
+        return canvas;
     } finally {
         resetActiveElementDimensions();
     }
@@ -5683,11 +5759,51 @@ function getTournamentLogoImageSource(data: TournamentLogoSourceData): string {
     return proxyUrl.toString();
 }
 
+// Un escudo se pide UNA vez por sesion. Sin esto cada pasada del preview volvia a crear
+// un <img> por escudo y a esperar su decodificacion; con el modal abierto y veinte
+// filas en la tabla, eso era lo que se sentia como "trabado".
+const exportImageCache = new Map<string, Promise<HTMLImageElement | null>>();
+
+// Ancho que se le pide al proxy para escudos y logos: el mas grande que dibuja una
+// pieza anda por los 280 px sobre 1080, asi que 512 sobra y evita decodificar
+// originales de 2000 px. Solo aplica a URLs del proxy resueltas por la app (escudos y
+// logos por construccion); el `fallback` externo del export no se toca, porque por
+// ahi tambien puede llegar una foto de fondo que no hay que achicar.
+const EXPORT_CREST_PROXY_WIDTH = 512;
+
+function withExportCrestWidth(url: string): string {
+    if (typeof window === 'undefined') return url;
+    try {
+        const parsed = new URL(url);
+        if (parsed.origin !== window.location.origin || parsed.pathname !== '/api/assets/team-logo') return url;
+        if (parsed.searchParams.has('w') || parsed.searchParams.has('fallback')) return url;
+        parsed.searchParams.set('w', String(EXPORT_CREST_PROXY_WIDTH));
+        return parsed.toString();
+    } catch {
+        return url;
+    }
+}
+
 export async function loadImage(url: string): Promise<HTMLImageElement | null> {
     if (!isImageSource(url)) return null;
     const normalized = normalizeImageSource(url);
     const sameOrigin = typeof window !== 'undefined' && normalized.startsWith(window.location.origin);
-    const sources = normalized.startsWith('http') && !sameOrigin ? [buildProxyUrl(normalized), normalized] : [normalized];
+    const sources = (normalized.startsWith('http') && !sameOrigin ? [buildProxyUrl(normalized), normalized] : [normalized])
+        .map(withExportCrestWidth);
+    const cacheKey = sources[0];
+    const cached = exportImageCache.get(cacheKey);
+    if (cached) return cached;
+
+    const pending = loadImageFromSources(sources).then((image) => {
+        // Un fallo (timeout, 404 transitorio) no queda pegado: la proxima pasada reintenta.
+        if (!image) exportImageCache.delete(cacheKey);
+        return image;
+    });
+    exportImageCache.set(cacheKey, pending);
+    return pending;
+}
+
+function loadImageFromSources(sources: string[]): Promise<HTMLImageElement | null> {
     return new Promise((resolve) => {
         const tryLoad = (index: number) => {
             if (index >= sources.length) {

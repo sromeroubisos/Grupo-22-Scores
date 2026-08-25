@@ -19,6 +19,9 @@ const EXTENSIONS = ['.png', '.svg', '.webp', '.jpg', '.jpeg', '.avif'];
 // updated logo shows up without waiting a day, while the CDN keeps a long copy to protect quota.
 const PROXY_CACHE_CONTROL_VERSIONED = 'public, max-age=604800, s-maxage=604800, immutable';
 const PROXY_CACHE_CONTROL_VOLATILE = 'public, max-age=300, s-maxage=604800, stale-while-revalidate=86400';
+// La key con la que el export (buildProxyUrl en ExportImage.tsx) pide un escudo externo
+// via `fallback`. No nombra a ningun club: es una etiqueta, no una busqueda.
+const EXPORT_IMAGE_PROXY_KEY = 'export-image';
 
 // `trustVersion` es la letra chica de "immutable": el token `v` vale una semana
 // de cache sin revalidar SOLO si describe la imagen que se esta sirviendo. No la
@@ -830,6 +833,13 @@ export async function GET(request: Request) {
 
     if (!key) {
         return NextResponse.json({ ok: false, error: 'key is required' }, { status: 400 });
+    }
+
+    // Buscar `export-image` como si fuera un club costaba seis `access()` a disco y una
+    // cascada de consultas a clubs/external_teams —cada una un viaje cross-region— antes
+    // de llegar al fallback, por cada escudo y por cada pasada del preview.
+    if (key === EXPORT_IMAGE_PROXY_KEY && fallback) {
+        return buildImageResponse(fallback, url);
     }
 
     const localLogo = await findLogoFile(key);
