@@ -1,6 +1,6 @@
 'use client';
 
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     ChevronLeft, Search, Loader2, Plus, RefreshCw,
@@ -401,20 +401,6 @@ function getClubEntityTypeSlug(value: string | null | undefined): EntityFilter {
 
 const ADMIN_CLUB_PAGE_SIZE = 1000;
 
-/**
- * Filas que se dibujan del catálogo filtrado.
- *
- * No es un límite de búsqueda: la selección en bloque y los contadores siguen
- * trabajando sobre TODO lo que coincide. Es un límite de DIBUJO, y el pie de la
- * lista dice cuántas quedaron afuera.
- *
- * Medido en la pantalla real con 2.976 clubes y sin frenar la CPU: cada tecla
- * del buscador tardaba 598 ms, y borrar el campo 802 ms, porque React
- * reconciliaba las 2.976 filas en cada pulsación. Nadie escanea 2.976 filas: se
- * busca. Ciento veinte entran de sobra para reconocer lo que se buscó.
- */
-const CLUB_ROWS_RENDER_CAP = 120;
-
 /** Arriba de esto, "seleccionar todos los visibles" pide un segundo clic. */
 const BULK_SELECT_CONFIRM_AT = 50;
 
@@ -697,6 +683,122 @@ function RadioGroup({
         </div>
     );
 }
+
+/** Referencia estable para los clubes sin planteles cargados: un `[]` literal
+ *  por fila sería un objeto nuevo en cada render y anularía el `memo`. */
+const EMPTY_SQUADS: SquadRecord[] = [];
+
+type ClubCatalogRowProps = {
+    club: ClubRecord;
+    added: boolean;
+    squads: SquadRecord[];
+    isLoadingSquads: boolean;
+    selectedDivisionId: string;
+    onToggle: (clubId: string, isSelected: boolean) => void;
+    onDivisionChange: (clubId: string, divisionId: string) => void;
+};
+
+/**
+ * Una fila del catálogo, memoizada.
+ *
+ * La lista se dibuja ENTERA, sin tope: con 2.976 clubes, un clic no puede
+ * costar reconciliar las 2.976 filas. Con `memo` y callbacks estables, React
+ * sólo vuelve a dibujar la fila cuyas props cambiaron.
+ *
+ * La fila ENTERA es el objetivo tocable: un solo `<button>` con
+ * `aria-pressed`, y el selector de plantel queda AFUERA para no anidar un
+ * control adentro de otro.
+ */
+const ClubCatalogRow = memo(function ClubCatalogRow({
+    club,
+    added,
+    squads,
+    isLoadingSquads,
+    selectedDivisionId,
+    onToggle,
+    onDivisionChange,
+}: ClubCatalogRowProps) {
+    const entitySlug = getClubEntityTypeSlug(club.entity_type);
+
+    return (
+        <div className={`club-row ${added ? 'added' : ''}`}>
+            <button
+                type="button"
+                className="row-main"
+                aria-pressed={added}
+                onClick={() => onToggle(club.id, !added)}
+            >
+                <span className="row-check" aria-hidden="true">
+                    {added ? '✓' : ''}
+                </span>
+                <span className="row-logo">
+                    {club.logo_url ? (
+                        <img src={club.logo_url} alt="" loading="lazy" decoding="async" />
+                    ) : (
+                        <span>{getClubShortName(club)}</span>
+                    )}
+                </span>
+                <span className="row-info">
+                    <span className="row-name">
+                        {club.name}
+                        <span className={`entity-pill ${entitySlug}`}>
+                            {getClubEntityTypeLabel(club.entity_type)}
+                        </span>
+                    </span>
+                    <span className="row-meta">
+                        <Flag size={11} style={{ display: 'inline', marginRight: 4 }} />
+                        {[club.city, club.region, club.country].filter(Boolean).join(' · ') || 'Sin ubicación'}
+                    </span>
+                </span>
+                <span className="row-action" aria-hidden="true">
+                    {added ? 'Quitar' : 'Añadir'}
+                </span>
+            </button>
+
+            {added && (
+                <div className="squad-picker-row">
+                    <label htmlFor={`squad-${club.id}`}>Plantel a inscribir</label>
+                    <select
+                        id={`squad-${club.id}`}
+                        value={selectedDivisionId}
+                        onChange={(e) => onDivisionChange(club.id, e.target.value)}
+                        disabled={isLoadingSquads}
+                    >
+                        <option value="">
+                            {isLoadingSquads
+                                ? 'Cargando planteles...'
+                                : squads.length === 0
+                                    ? 'Sin planteles vinculados'
+                                    : squads.length === 1
+                                        ? 'Plantel detectado automáticamente'
+                                        : 'Seleccioná un plantel'}
+                        </option>
+                        {squads.map((squad) => (
+                            <option key={squad.id} value={squad.id}>
+                                {formatSquadLabel(squad)}
+                            </option>
+                        ))}
+                    </select>
+                    {!isLoadingSquads && squads.length === 0 && (
+                        <span className="squad-hint legacy">
+                            Competirá en modo legacy hasta que tenga planteles vinculados.
+                        </span>
+                    )}
+                    {squads.length > 1 && !selectedDivisionId && (
+                        <span className="squad-hint warn">
+                            Elegí cuál plantel querés inscribir.
+                        </span>
+                    )}
+                    {squads.length === 1 && selectedDivisionId && (
+                        <span className="squad-hint info">
+                            ✓ Plantel único · {formatSquadLabel(squads[0])}
+                        </span>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+});
 
 type SuperCreateTournamentProps = {
     navigationMode?: 'admin' | 'tournament-admin';
@@ -1098,7 +1200,9 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
     };
 
     /* ============== Helpers de cambio ============== */
-    const setClubSelection = (clubId: string, isSelected: boolean) => {
+    /* Estables (`useCallback` sin dependencias: sólo usan setters): son las
+       props que reciben las 2.976 filas memoizadas del catálogo. */
+    const setClubSelection = useCallback((clubId: string, isSelected: boolean) => {
         setSelectedClubs((prev) => {
             if (isSelected) return prev.includes(clubId) ? prev : [...prev, clubId];
             return prev.filter((id) => id !== clubId);
@@ -1112,7 +1216,11 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                 return next;
             });
         }
-    };
+    }, []);
+
+    const handleDivisionChange = useCallback((clubId: string, divisionId: string) => {
+        setSelectedDivisionByClub((prev) => ({ ...prev, [clubId]: divisionId }));
+    }, []);
 
     const handleSportChange = (sportId: string) => {
         const d = sportDefaults[sportId] || { duration: 60, win: 1, draw: 0, loss: 0 };
@@ -1516,11 +1624,11 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
      * Arriba del tope pide un segundo clic. No es un `confirm()` nativo: el
      * botón cambia de texto y dice cuántos va a agregar.
      */
-    const visibleClubs = useMemo(
-        () => filteredClubs.slice(0, CLUB_ROWS_RENDER_CAP),
-        [filteredClubs],
-    );
-    const hiddenClubCount = filteredClubs.length - visibleClubs.length;
+    /* La lista se dibuja ENTERA. Antes había un tope de 120 filas porque cada
+       tecla reconciliaba las 2.976; ahora la fila es un componente memoizado y
+       React sólo vuelve a dibujar la que cambió. `content-visibility: auto` en
+       el CSS hace que el navegador tampoco pinte las que están fuera de vista. */
+    const selectedClubSet = useMemo(() => new Set(selectedClubs), [selectedClubs]);
 
     /* Los elegidos, resueltos a su ficha. El orden es el de selección, no el
        del catálogo: es el orden en que el usuario los pensó. */
@@ -2772,9 +2880,7 @@ Listo para continuar
                                             ? 'Cargando catálogo...'
                                             : clubsError
                                                 ? clubsError
-                                                : hiddenClubCount > 0
-                                                    ? `Mostrando ${visibleClubs.length} de ${filteredClubs.length} coincidencias · afiná la búsqueda para ver el resto`
-                                                    : `${filteredClubs.length} de ${clubs.length} equipos`}
+                                                : `${filteredClubs.length} de ${clubs.length} equipos`}
                                     </span>
                                     {searchIsStale && <span className="club-meta-stale">filtrando…</span>}
                                 </div>
@@ -2814,102 +2920,18 @@ Listo para continuar
                                     </div>
                                 )}
 
-                                {!loadingClubs && visibleClubs.map((club) => {
-                                    const added = selectedClubs.includes(club.id);
-                                    const squads = clubSquadsByClub[club.id] || [];
-                                    const isLoadingSquads = Boolean(loadingSquadsByClub[club.id]);
-                                    const selectedDivisionId = selectedDivisionByClub[club.id] || '';
-                                    const entitySlug = getClubEntityTypeSlug(club.entity_type);
-
-                                    return (
-                                        /*
-                                         * La fila ENTERA es el objetivo tocable.
-                                         *
-                                         * Antes el check era un `<div>` con `onClick`: 18 px de alto,
-                                         * sin rol, sin foco y sin teclado, al lado de un botón "Quitar"
-                                         * de 26. Eran dos de los 21 objetivos por debajo de los 44 px
-                                         * que tenía este paso. Ahora hay un solo `<button>` con
-                                         * `aria-pressed`, y el selector de plantel queda AFUERA para no
-                                         * anidar un control adentro de otro.
-                                         */
-                                        <div key={club.id} className={`club-row ${added ? 'added' : ''}`}>
-                                            <button
-                                                type="button"
-                                                className="row-main"
-                                                aria-pressed={added}
-                                                onClick={() => setClubSelection(club.id, !added)}
-                                            >
-                                                <span className="row-check" aria-hidden="true">
-                                                    {added ? '✓' : ''}
-                                                </span>
-                                                <span className="row-logo">
-                                                    {club.logo_url ? (
-                                                        <img src={club.logo_url} alt="" loading="lazy" decoding="async" />
-                                                    ) : (
-                                                        <span>{getClubShortName(club)}</span>
-                                                    )}
-                                                </span>
-                                                <span className="row-info">
-                                                    <span className="row-name">
-                                                        {club.name}
-                                                        <span className={`entity-pill ${entitySlug}`}>
-                                                            {getClubEntityTypeLabel(club.entity_type)}
-                                                        </span>
-                                                    </span>
-                                                    <span className="row-meta">
-                                                        <Flag size={11} style={{ display: 'inline', marginRight: 4 }} />
-                                                        {[club.city, club.region, club.country].filter(Boolean).join(' · ') || 'Sin ubicación'}
-                                                    </span>
-                                                </span>
-                                                <span className="row-action" aria-hidden="true">
-                                                    {added ? 'Quitar' : 'Añadir'}
-                                                </span>
-                                            </button>
-
-                                                {added && (
-                                                    <div className="squad-picker-row">
-                                                        <label htmlFor={`squad-${club.id}`}>Plantel a inscribir</label>
-                                                        <select
-                                                            id={`squad-${club.id}`}
-                                                            value={selectedDivisionId}
-                                                            onChange={(e) => setSelectedDivisionByClub((prev) => ({ ...prev, [club.id]: e.target.value }))}
-                                                            disabled={isLoadingSquads}
-                                                        >
-                                                            <option value="">
-                                                                {isLoadingSquads
-                                                                    ? 'Cargando planteles...'
-                                                                    : squads.length === 0
-                                                                        ? 'Sin planteles vinculados'
-                                                                        : squads.length === 1
-                                                                            ? 'Plantel detectado automáticamente'
-                                                                            : 'Seleccioná un plantel'}
-                                                            </option>
-                                                            {squads.map((squad) => (
-                                                                <option key={squad.id} value={squad.id}>
-                                                                    {formatSquadLabel(squad)}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                        {!isLoadingSquads && squads.length === 0 && (
-                                                            <span className="squad-hint legacy">
-                                                                Competirá en modo legacy hasta que tenga planteles vinculados.
-                                                            </span>
-                                                        )}
-                                                        {squads.length > 1 && !selectedDivisionId && (
-                                                            <span className="squad-hint warn">
-                                                                Elegí cuál plantel querés inscribir.
-                                                            </span>
-                                                        )}
-                                                        {squads.length === 1 && selectedDivisionId && (
-                                                            <span className="squad-hint info">
-                                                                ✓ Plantel único · {formatSquadLabel(squads[0])}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                )}
-                                        </div>
-                                    );
-                                })}
+                                {!loadingClubs && filteredClubs.map((club) => (
+                                    <ClubCatalogRow
+                                        key={club.id}
+                                        club={club}
+                                        added={selectedClubSet.has(club.id)}
+                                        squads={clubSquadsByClub[club.id] || EMPTY_SQUADS}
+                                        isLoadingSquads={Boolean(loadingSquadsByClub[club.id])}
+                                        selectedDivisionId={selectedDivisionByClub[club.id] || ''}
+                                        onToggle={setClubSelection}
+                                        onDivisionChange={handleDivisionChange}
+                                    />
+                                ))}
                             </div>
 
                             <div className="tplpick-callout" style={{ marginTop: '14px' }}>
