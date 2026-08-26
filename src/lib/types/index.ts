@@ -1,3 +1,5 @@
+import type { AmericanFootballRuleset } from '../americanFootballRules';
+
 // ===== SPORT TYPES =====
 export type SportId =
     | 'football'
@@ -84,6 +86,12 @@ export interface TournamentSeason {
 }
 
 export interface TournamentRuleset {
+    /**
+     * Reglamento de futbol americano del torneo (disciplina tackle/flag,
+     * periodos, patadas, overtime, plantel). Solo lo escribe el creador cuando
+     * el deporte es `american-football`; lo lee el match center.
+     */
+    americanFootball?: AmericanFootballRuleset;
     bonusRules?: {
         offensiveBonus?: { enabled: boolean; type: string; threshold: number };
         defensiveBonus?: { enabled: boolean; type: string; threshold: number };

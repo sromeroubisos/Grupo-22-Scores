@@ -122,6 +122,34 @@ export function parseKickMetersFromDetail(detail: string | null | undefined): nu
   return 0;
 }
 
+/**
+ * Yardas de una jugada de futbol americano, leidas del detalle.
+ *
+ * Forma canonica `Yds: +7` / `Yds: -8` (la escribe `formatYardsDetail`);
+ * tambien entiende "24 yd", "24 yds", "24 yardas" tipeado a mano. El signo
+ * importa: un sack son yardas negativas para la ofensiva. Sin dato, 0.
+ */
+export function parseYardsFromDetail(detail: string | null | undefined): number {
+  const s = String(detail || '');
+  const tagged = s.match(/\bYds?:\s*([+-]?\d+)/i);
+  if (tagged) {
+    const v = parseInt(tagged[1], 10);
+    return Number.isFinite(v) ? v : 0;
+  }
+  const generic = s.match(/([+-]?\d+)\s*(?:yd\b|yds\b|yardas?\b)/i);
+  if (generic) {
+    const v = parseInt(generic[1], 10);
+    return Number.isFinite(v) ? v : 0;
+  }
+  return 0;
+}
+
+/** La marca con la que las yardas viajan en el detalle. Signo siempre explicito. */
+export function formatYardsDetail(yards: number): string {
+  const v = Math.trunc(yards);
+  return `Yds: ${v >= 0 ? '+' : ''}${v}`;
+}
+
 export function goalKickEffectivenessPercent(made: number, attempts: number): number {
   if (attempts <= 0) return -1;
   return (made / attempts) * 100;

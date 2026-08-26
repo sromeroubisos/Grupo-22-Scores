@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { normalizeAmericanFootballRuleset } from '@/lib/americanFootballRules';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getServiceWriter } from '@/lib/supabase/serviceWriter';
@@ -146,6 +147,9 @@ function buildRuleset(body: JsonObject, sport: string) {
     const competition = rules.competition && typeof rules.competition === 'object' && !Array.isArray(rules.competition)
         ? rules.competition
         : null;
+    const americanFootball = sport === 'american-football'
+        ? normalizeAmericanFootballRuleset(rules.americanFootball)
+        : null;
 
     return {
         pointsWin,
@@ -156,6 +160,10 @@ function buildRuleset(body: JsonObject, sport: string) {
         fixtureMode: readText(body.fixture_mode ?? rules.fixtureMode) || 'manual',
         ...buildPointsSettings(pointsWin, pointsDraw, pointsLoss, pointsBonusTry, pointsBonusLoss),
         ...(competition ? { competition } : {}),
+        // El reglamento de futbol americano (tackle/flag, cuartos, patadas,
+        // plantel) viaja si el deporte lo tiene. Se normaliza aca para que lo
+        // guardado sea siempre un reglamento completo, venga de donde venga.
+        ...(americanFootball ? { americanFootball } : {}),
     };
 }
 

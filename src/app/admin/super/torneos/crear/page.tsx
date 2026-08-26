@@ -21,6 +21,22 @@ import { createUnion } from '@/lib/services/unionService';
 import { persistTournamentLogo } from '@/lib/utils/persistTournamentLogo';
 import { mapExternalSportToInternalSport } from '@/lib/sports';
 import {
+    AMERICAN_FOOTBALL_DISCIPLINE_LABELS,
+    AMERICAN_FOOTBALL_FIRST_DOWN_LABELS,
+    AMERICAN_FOOTBALL_OVERTIME_LABELS,
+    CUSTOM_AMERICAN_FOOTBALL_PRESET_ID,
+    DEFAULT_AMERICAN_FOOTBALL_PRESET_ID,
+    createAmericanFootballRuleset,
+    describeAmericanFootballRuleset,
+    getAmericanFootballPreset,
+    getAmericanFootballPresetsByDiscipline,
+    getDefaultAmericanFootballPreset,
+    normalizeAmericanFootballRuleset,
+    type AmericanFootballDiscipline,
+    type AmericanFootballOvertimeFormat,
+    type AmericanFootballRuleset,
+} from '@/lib/americanFootballRules';
+import {
     buildTournamentCompetitionConfig,
     getTournamentFormatFromPhaseType,
     getTournamentFormatLabel,
@@ -247,6 +263,7 @@ type TournamentRecord = {
         pointsLoss?: number;
         pointsBonusTry?: number;
         pointsBonusLoss?: number;
+        americanFootball?: unknown;
     } | null;
 };
 
@@ -620,6 +637,333 @@ function formatDraftAge(savedAt: string): string {
  * escritos de dos formas distintas (uno mapeado, cuatro a mano) y son quince
  * botones: el comportamiento es del grupo, no de cada opción.
  */
+/**
+ * Reglamento de futbol americano del torneo: disciplina (tackle o flag),
+ * preset de partida y todos los campos editables. Tocar un campo deja el
+ * reglamento en "Personalizado"; elegir un preset lo pisa entero.
+ *
+ * Vive en este archivo porque usa `RadioGroup` y las clases del formulario
+ * de creacion; los datos y su validacion estan en lib/americanFootballRules.
+ */
+function AmericanFootballRulesEditor({
+    value,
+    onChange,
+}: {
+    value: AmericanFootballRuleset;
+    onChange: (next: AmericanFootballRuleset) => void;
+}) {
+    const flag = value.discipline === 'flag';
+    const presets = getAmericanFootballPresetsByDiscipline(value.discipline);
+    const isCustom = value.preset === CUSTOM_AMERICAN_FOOTBALL_PRESET_ID;
+    const presetDescription = isCustom
+        ? 'Reglas editadas a mano para este torneo.'
+        : getAmericanFootballPreset(value.preset).description;
+
+    const patch = (changes: Partial<AmericanFootballRuleset>) => (
+        onChange({ ...value, ...changes, preset: CUSTOM_AMERICAN_FOOTBALL_PRESET_ID })
+    );
+    const patchScoring = (changes: Partial<AmericanFootballRuleset['scoring']>) => patch({ scoring: { ...value.scoring, ...changes } });
+    const patchKicking = (changes: Partial<AmericanFootballRuleset['kicking']>) => patch({ kicking: { ...value.kicking, ...changes } });
+    const patchOvertime = (changes: Partial<AmericanFootballRuleset['overtime']>) => patch({ overtime: { ...value.overtime, ...changes } });
+    const patchRoster = (changes: Partial<AmericanFootballRuleset['roster']>) => patch({ roster: { ...value.roster, ...changes } });
+    const int = (raw: string, fallback: number) => {
+        const parsed = parseInt(raw, 10);
+        return Number.isFinite(parsed) ? parsed : fallback;
+    };
+    const nullableInt = (raw: string) => (raw.trim() === '' ? null : int(raw, 0));
+
+    const selectDiscipline = (discipline: AmericanFootballDiscipline) => {
+        if (discipline === value.discipline) return;
+        onChange(createAmericanFootballRuleset(getDefaultAmericanFootballPreset(discipline).id));
+    };
+    const selectPreset = (presetId: string) => {
+        if (presetId === CUSTOM_AMERICAN_FOOTBALL_PRESET_ID) {
+            onChange({ ...value, preset: CUSTOM_AMERICAN_FOOTBALL_PRESET_ID });
+            return;
+        }
+        onChange(createAmericanFootballRuleset(presetId));
+    };
+
+    const checkbox = (id: string, label: string, checked: boolean, onToggle: (next: boolean) => void) => (
+        <label htmlFor={id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <input id={id} type="checkbox" checked={checked} onChange={(e) => onToggle(e.target.checked)} />
+            <span>{label}</span>
+        </label>
+    );
+
+    return (
+        <div className="tg-disclosure-body">
+            <div className="field-group">
+                <label id="tg-amfoot-discipline-label">Disciplina</label>
+                <RadioGroup className="sport-pick-grid" labelledBy="tg-amfoot-discipline-label">
+                    {(['tackle', 'flag'] as AmericanFootballDiscipline[]).map((discipline) => (
+                        <button
+                            key={discipline}
+                            type="button"
+                            role="radio"
+                            aria-checked={value.discipline === discipline}
+                            className={value.discipline === discipline ? 'selected' : ''}
+                            onClick={() => selectDiscipline(discipline)}
+                        >
+                            <span className="emo">{discipline === 'flag' ? '🚩' : '🏈'}</span>
+                            <span>{AMERICAN_FOOTBALL_DISCIPLINE_LABELS[discipline]}</span>
+                        </button>
+                    ))}
+                </RadioGroup>
+                <p className="field-help">
+                    {flag
+                        ? 'Sin contacto ni bloqueo: la jugada termina al sacar la bandera. No hay patadas y el primer down es cruzar la mitad.'
+                        : 'Con tackle: cuatro downs para diez yardas, patadas y kickoff. Elegí el reglamento de la competencia y ajustá lo que haga falta.'}
+                </p>
+            </div>
+
+            <div className="field-group">
+                <label htmlFor="tg-amfoot-preset">Reglamento de partida</label>
+                <select
+                    className="form-input"
+                    id="tg-amfoot-preset"
+                    value={isCustom ? CUSTOM_AMERICAN_FOOTBALL_PRESET_ID : value.preset}
+                    onChange={(e) => selectPreset(e.target.value)}
+                >
+                    {presets.map((preset) => (
+                        <option key={preset.id} value={preset.id}>{preset.label}</option>
+                    ))}
+                    <option value={CUSTOM_AMERICAN_FOOTBALL_PRESET_ID}>Personalizado</option>
+                </select>
+                <p className="field-help">{presetDescription}</p>
+            </div>
+
+            <div className="grid-2">
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-periods">Períodos</label>
+                    <select
+                        className="form-input"
+                        id="tg-amfoot-periods"
+                        value={String(value.periods)}
+                        onChange={(e) => patch({ periods: e.target.value === '2' ? 2 : 4 })}
+                    >
+                        <option value="4">4 cuartos</option>
+                        <option value="2">2 tiempos</option>
+                    </select>
+                </div>
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-period-minutes">Minutos por período</label>
+                    <input
+                        className="form-input"
+                        type="number"
+                        min={1}
+                        max={90}
+                        id="tg-amfoot-period-minutes"
+                        value={value.periodDurationMinutes}
+                        onChange={(e) => patch({ periodDurationMinutes: Math.max(1, int(e.target.value, value.periodDurationMinutes)) })}
+                    />
+                </div>
+            </div>
+
+            <div className="grid-2">
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-play-clock">Play clock (segundos)</label>
+                    <input
+                        className="form-input"
+                        type="number"
+                        min={5}
+                        max={120}
+                        id="tg-amfoot-play-clock"
+                        value={value.playClockSeconds}
+                        onChange={(e) => patch({ playClockSeconds: Math.max(5, int(e.target.value, value.playClockSeconds)) })}
+                    />
+                </div>
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-downs">Downs por serie</label>
+                    <input
+                        className="form-input"
+                        type="number"
+                        min={1}
+                        max={10}
+                        id="tg-amfoot-downs"
+                        value={value.downs}
+                        onChange={(e) => patch({ downs: Math.max(1, int(e.target.value, value.downs)) })}
+                    />
+                </div>
+            </div>
+
+            <div className="grid-2">
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-first-down">Primer down</label>
+                    <select
+                        className="form-input"
+                        id="tg-amfoot-first-down"
+                        value={value.firstDownRule}
+                        onChange={(e) => patch({ firstDownRule: e.target.value === 'midfield' ? 'midfield' : 'yards' })}
+                    >
+                        {(Object.keys(AMERICAN_FOOTBALL_FIRST_DOWN_LABELS) as Array<keyof typeof AMERICAN_FOOTBALL_FIRST_DOWN_LABELS>).map((rule) => (
+                            <option key={rule} value={rule}>{AMERICAN_FOOTBALL_FIRST_DOWN_LABELS[rule]}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-first-down-yards">Yardas para el primer down</label>
+                    <input
+                        className="form-input"
+                        type="number"
+                        min={0}
+                        max={100}
+                        id="tg-amfoot-first-down-yards"
+                        value={value.firstDownYards}
+                        disabled={value.firstDownRule === 'midfield'}
+                        onChange={(e) => patch({ firstDownYards: Math.max(0, int(e.target.value, value.firstDownYards)) })}
+                    />
+                </div>
+            </div>
+
+            <div className="grid-2">
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-td">Touchdown (puntos)</label>
+                    <input className="form-input" type="number" min={0} id="tg-amfoot-td" value={value.scoring.touchdown} onChange={(e) => patchScoring({ touchdown: Math.max(0, int(e.target.value, value.scoring.touchdown)) })} />
+                </div>
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-safety">Safety (puntos)</label>
+                    <input className="form-input" type="number" min={0} id="tg-amfoot-safety" value={value.scoring.safety} onChange={(e) => patchScoring({ safety: Math.max(0, int(e.target.value, value.scoring.safety)) })} />
+                </div>
+            </div>
+            <div className="grid-2">
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-try-one">{flag ? 'Try de 1 (desde la 5)' : 'Punto extra'}</label>
+                    <input className="form-input" type="number" min={0} id="tg-amfoot-try-one" value={value.scoring.tryOne} onChange={(e) => patchScoring({ tryOne: Math.max(0, int(e.target.value, value.scoring.tryOne)) })} />
+                </div>
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-try-two">{flag ? 'Try de 2 (desde la 10)' : 'Conversión de 2'}</label>
+                    <input className="form-input" type="number" min={0} id="tg-amfoot-try-two" value={value.scoring.tryTwo} onChange={(e) => patchScoring({ tryTwo: Math.max(0, int(e.target.value, value.scoring.tryTwo)) })} />
+                </div>
+            </div>
+
+            {!flag && (
+                <div className="grid-2">
+                    <div className="field-group">
+                        <label htmlFor="tg-amfoot-fg">Field goal (puntos)</label>
+                        <input className="form-input" type="number" min={0} id="tg-amfoot-fg" value={value.scoring.fieldGoal} disabled={!value.kicking.fieldGoal} onChange={(e) => patchScoring({ fieldGoal: Math.max(0, int(e.target.value, value.scoring.fieldGoal)) })} />
+                    </div>
+                    <div className="field-group">
+                        <label>Patadas en juego</label>
+                        <div style={{ display: 'grid', gap: '0.35rem' }}>
+                            {checkbox('tg-amfoot-kick-fg', 'Field goal', value.kicking.fieldGoal, (next) => patchKicking({ fieldGoal: next }))}
+                            {checkbox('tg-amfoot-kick-punt', 'Punt', value.kicking.punt, (next) => patchKicking({ punt: next }))}
+                            {checkbox('tg-amfoot-kick-kickoff', 'Kickoff', value.kicking.kickoff, (next) => patchKicking({ kickoff: next }))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="field-group">
+                {checkbox('tg-amfoot-fumbles', 'El balón suelto sigue en juego (fumble)', value.fumbles, (next) => patch({ fumbles: next }))}
+                {flag && <p className="field-help">En la mayoría de los formatos de flag el balón que toca el suelo es balón muerto: sin fumble.</p>}
+            </div>
+
+            <div className="grid-2">
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-ot-format">Tiempo extra</label>
+                    <select
+                        className="form-input"
+                        id="tg-amfoot-ot-format"
+                        value={value.overtime.format}
+                        onChange={(e) => patchOvertime({ format: e.target.value as AmericanFootballOvertimeFormat })}
+                    >
+                        {(Object.keys(AMERICAN_FOOTBALL_OVERTIME_LABELS) as AmericanFootballOvertimeFormat[]).map((format) => (
+                            <option key={format} value={format}>{AMERICAN_FOOTBALL_OVERTIME_LABELS[format]}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-ot-minutes">Minutos por período extra</label>
+                    <input
+                        className="form-input"
+                        type="number"
+                        min={0}
+                        max={60}
+                        id="tg-amfoot-ot-minutes"
+                        value={value.overtime.periodDurationMinutes}
+                        disabled={value.overtime.format === 'none'}
+                        onChange={(e) => patchOvertime({ periodDurationMinutes: Math.max(0, int(e.target.value, value.overtime.periodDurationMinutes)) })}
+                    />
+                </div>
+            </div>
+            <div className="grid-2">
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-ot-max">Períodos extra como máximo</label>
+                    <input
+                        className="form-input"
+                        type="number"
+                        min={1}
+                        max={20}
+                        id="tg-amfoot-ot-max"
+                        placeholder="Sin tope"
+                        value={value.overtime.maxPeriods ?? ''}
+                        disabled={value.overtime.format === 'none'}
+                        onChange={(e) => patchOvertime({ maxPeriods: nullableInt(e.target.value) })}
+                    />
+                </div>
+                {!flag && (
+                    <div className="field-group">
+                        <label htmlFor="tg-amfoot-ot-two">Conversión de 2 obligatoria desde el período extra</label>
+                        <input
+                            className="form-input"
+                            type="number"
+                            min={1}
+                            max={20}
+                            id="tg-amfoot-ot-two"
+                            placeholder="Nunca"
+                            value={value.overtime.twoPointAfterPeriod ?? ''}
+                            disabled={value.overtime.format === 'none'}
+                            onChange={(e) => patchOvertime({ twoPointAfterPeriod: nullableInt(e.target.value) })}
+                        />
+                    </div>
+                )}
+            </div>
+
+            <div className="grid-2">
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-timeouts">Tiempos muertos por mitad</label>
+                    <input className="form-input" type="number" min={0} max={10} id="tg-amfoot-timeouts" value={value.timeoutsPerHalf} onChange={(e) => patch({ timeoutsPerHalf: Math.max(0, int(e.target.value, value.timeoutsPerHalf)) })} />
+                </div>
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-roster-size">Plantel por partido</label>
+                    <input className="form-input" type="number" min={1} max={120} id="tg-amfoot-roster-size" value={value.roster.size} onChange={(e) => patchRoster({ size: Math.max(1, int(e.target.value, value.roster.size)) })} />
+                </div>
+            </div>
+            <div className="grid-2">
+                <div className="field-group">
+                    <label htmlFor="tg-amfoot-roster-starters">Titulares en la planilla</label>
+                    <input className="form-input" type="number" min={1} max={120} id="tg-amfoot-roster-starters" value={value.roster.starters} onChange={(e) => patchRoster({ starters: Math.max(1, int(e.target.value, value.roster.starters)) })} />
+                </div>
+                {flag && (
+                    <div className="field-group">
+                        <label htmlFor="tg-amfoot-no-run">No-run zone (yardas antes del ingoal)</label>
+                        <input className="form-input" type="number" min={0} max={50} id="tg-amfoot-no-run" placeholder="No aplica" value={value.noRunZoneYards ?? ''} onChange={(e) => patch({ noRunZoneYards: nullableInt(e.target.value) })} />
+                    </div>
+                )}
+            </div>
+            {flag && (
+                <div className="grid-2">
+                    <div className="field-group">
+                        <label htmlFor="tg-amfoot-blitz">Blitz desde (yardas)</label>
+                        <input className="form-input" type="number" min={0} max={50} id="tg-amfoot-blitz" placeholder="Sin restricción" value={value.blitzYards ?? ''} onChange={(e) => patch({ blitzYards: nullableInt(e.target.value) })} />
+                    </div>
+                    <div className="field-group">
+                        <label htmlFor="tg-amfoot-qb-seconds">Segundos del QB para lanzar</label>
+                        <input className="form-input" type="number" min={1} max={60} id="tg-amfoot-qb-seconds" placeholder="Sin límite" value={value.qbSecondsToThrow ?? ''} onChange={(e) => patch({ qbSecondsToThrow: nullableInt(e.target.value) })} />
+                    </div>
+                </div>
+            )}
+
+            <p className="field-help">
+                Estos números viajan con el torneo. El panel de partido arma con ellos el reloj, los períodos,
+                los eventos disponibles, la planilla y los tiempos muertos. Downs, play clock, no-run zone y blitz
+                quedan guardados para cuando el panel lleve el drive jugada por jugada.
+            </p>
+        </div>
+    );
+}
+
 function RadioGroup({
     className,
     labelledBy,
@@ -904,7 +1248,10 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
             pointsLoss: 0,
             pointsBonusTry: 1,
             pointsBonusLoss: 1,
-        }
+        },
+        // Solo se guarda cuando el deporte es futbol americano. Arranca en NFL
+        // para que el bloque nunca aparezca vacio.
+        americanFootball: createAmericanFootballRuleset(DEFAULT_AMERICAN_FOOTBALL_PRESET_ID),
     });
 
     /* ============== Carga catálogo de clubes ============== */
@@ -1013,6 +1360,7 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                     country: normalizeCountryId(data.country_id || data.country || '', countryOptions),
                     unionId: data.union_id || '',
                     logoUrl: data.logo_url || '',
+                    americanFootball: normalizeAmericanFootballRuleset(data.ruleset?.americanFootball) ?? prev.americanFootball,
                     rules: {
                         ...prev.rules,
                         pointsWin: data.ruleset?.pointsWin ?? defaults.win ?? prev.rules.pointsWin,
@@ -1220,6 +1568,10 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
 
     const handleDivisionChange = useCallback((clubId: string, divisionId: string) => {
         setSelectedDivisionByClub((prev) => ({ ...prev, [clubId]: divisionId }));
+    }, []);
+
+    const handleAmericanFootballChange = useCallback((next: AmericanFootballRuleset) => {
+        setFormData((prev) => ({ ...prev, americanFootball: next }));
     }, []);
 
     const handleSportChange = (sportId: string) => {
@@ -1776,7 +2128,13 @@ export default function SuperCreateTournament({ navigationMode = 'admin' }: Supe
                 ...(formData.sport === 'rugby' ? {
                     pointsBonusTry: formData.rules.pointsBonusTry,
                     pointsBonusLoss: formData.rules.pointsBonusLoss,
-                } : {})
+                } : {}),
+                // El reglamento (tackle/flag, cuartos, patadas, plantel) viaja
+                // con el torneo y lo lee el match center. En otro deporte no
+                // se escribe: un torneo de rugby no lleva reglas de downs.
+                ...(formData.sport === 'american-football' ? {
+                    americanFootball: formData.americanFootball,
+                } : {}),
             };
 
             // Lo escriben los dos caminos (crear y editar), asi que vive
@@ -2699,6 +3057,16 @@ Listo para continuar
                                 )}
                             </div>
 
+                            {formData.sport === 'american-football' && (
+                                <details className="tg-disclosure" open>
+                                    <summary>Reglamento de fútbol americano</summary>
+                                    <AmericanFootballRulesEditor
+                                        value={formData.americanFootball}
+                                        onChange={handleAmericanFootballChange}
+                                    />
+                                </details>
+                            )}
+
                             <details className="tg-disclosure">
                                 <summary>Puntos por partido</summary>
                                 <div className="tg-disclosure-body">
@@ -2775,6 +3143,9 @@ Listo para continuar
                                     <div><dt>Formato</dt><dd>{getTournamentFormatLabel(formData.format)}</dd></div>
                                     <div><dt>Victoria</dt><dd>{formData.rules.pointsWin} pts</dd></div>
                                     <div><dt>Empate</dt><dd>{formData.rules.pointsDraw} pts</dd></div>
+                                    {formData.sport === 'american-football' && (
+                                        <div><dt>Reglamento</dt><dd>{describeAmericanFootballRuleset(formData.americanFootball)}</dd></div>
+                                    )}
                                     {formData.sport === 'rugby' && (
                                         <div><dt>Bonus</dt><dd>{formData.rules.pointsBonusTry} try · {formData.rules.pointsBonusLoss} def</dd></div>
                                     )}
@@ -2981,6 +3352,9 @@ Listo para continuar
                                 </strong>
                                 <dl className="preview-facts">
                                     <div><dt>Deporte</dt><dd>{selectedSport?.nameEs || formData.sport}</dd></div>
+                                    {formData.sport === 'american-football' && (
+                                        <div><dt>Reglamento</dt><dd>{describeAmericanFootballRuleset(formData.americanFootball)}</dd></div>
+                                    )}
                                     <div><dt>Temporada</dt><dd>{formData.season}</dd></div>
                                     <div><dt>Formato</dt><dd>{getTournamentFormatLabel(formData.format)}</dd></div>
                                     <div><dt>Equipos</dt><dd>{selectedClubs.length} de {formData.teamCount}</dd></div>

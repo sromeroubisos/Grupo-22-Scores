@@ -1,4 +1,10 @@
-import { getNextActivePeriodAfterEvent, normalizeMatchPeriod } from './matchPeriods.ts';
+import {
+  getNextActivePeriodAfterEvent,
+  normalizeMatchPeriod,
+  unpackPeriodSportRef,
+  type MatchPeriodRules,
+  type PeriodSportRef,
+} from './matchPeriods.ts';
 
 /**
  * Reloj de partido DERIVADO.
@@ -105,6 +111,31 @@ const SPORT_CLOCK_CONFIG: Record<string, SportClockConfig> = {
       '2T': 1800,
     },
   },
+  /**
+   * Cuatro cuartos de 15' (60' reglamentarios). Caia al default de rugby y el
+   * reloj rebasaba a 40' en el segundo tiempo de un deporte que no lo tiene.
+   *
+   * El reloj sigue siendo CUMULATIVO Y ASCENDENTE, como en todos los deportes
+   * de la plataforma: Q2 07:34 de la NFL (que cuenta para atras) aca se ve
+   * como 22:26. Cambiarlo a cuenta regresiva es una decision de presentacion
+   * que toca a todos los consumidores del espejo minute/seconds, no de esta
+   * tabla. '1T'/'2T' estan por si algun partido viejo guardo mitades.
+   */
+  'american-football': {
+    periods: ['PRE', 'Q1', 'Q2', 'Q3', 'Q4', 'ET', 'FT'],
+    offsets: {
+      PRE: 0,
+      Q1: 0,
+      Q2: 900,
+      HT: 1800,
+      Q3: 1800,
+      Q4: 2700,
+      ET: 3600,
+      FT: 3600,
+      '1T': 0,
+      '2T': 1800,
+    },
+  },
 };
 
 /** Mismos buckets que normalizeSportBucket de matchEventCatalog. */
@@ -115,16 +146,49 @@ export function normalizeClockSportBucket(sportId?: string | null) {
   if (['rugby', 'rugby-union', 'rugby-league', 'rugby7s', 'rugby-7s'].includes(normalized)) return 'rugby';
   if (['football', 'futsal', 'beach-soccer'].includes(normalized)) return 'football';
   if (['hockey', 'field-hockey'].includes(normalized)) return 'hockey';
+  if (normalized === 'american-football') return 'american-football';
 
   return DEFAULT_CLOCK_SPORT;
 }
 
-export function getSportClockConfig(sportId?: string | null): SportClockConfig {
+/**
+ * Reloj derivado de las reglas de periodo del torneo (futbol americano). Los
+ * offsets son cumulativos como en todas las tablas de arriba; '1T'/'2T' se
+ * conservan por si un partido viejo guardo mitades.
+ */
+export function buildClockConfigFromPeriodRules(rules: MatchPeriodRules): SportClockConfig {
+  const period = Math.max(1, Math.trunc(rules.periodDurationMinutes)) * 60;
+  if (rules.periods === 4) {
+    return {
+      periods: ['PRE', 'Q1', 'Q2', 'Q3', 'Q4', 'ET', 'FT'],
+      offsets: {
+        PRE: 0,
+        Q1: 0,
+        Q2: period,
+        HT: period * 2,
+        Q3: period * 2,
+        Q4: period * 3,
+        ET: period * 4,
+        FT: period * 4,
+        '1T': 0,
+        '2T': period * 2,
+      },
+    };
+  }
+  return {
+    periods: ['PRE', '1T', '2T', 'ET', 'FT'],
+    offsets: { PRE: 0, '1T': 0, HT: period, '2T': period, ET: period * 2, FT: period * 2 },
+  };
+}
+
+export function getSportClockConfig(ref?: PeriodSportRef): SportClockConfig {
+  const { sportId, periodRules } = unpackPeriodSportRef(ref);
+  if (periodRules) return buildClockConfigFromPeriodRules(periodRules);
   return SPORT_CLOCK_CONFIG[normalizeClockSportBucket(sportId)] ?? SPORT_CLOCK_CONFIG[DEFAULT_CLOCK_SPORT];
 }
 
 /** Offset cumulativo al que rebasa el arranque de `period`. */
-export function getPeriodOffsetSeconds(sportId: string | null | undefined, period: unknown) {
+export function getPeriodOffsetSeconds(sportId: PeriodSportRef, period: unknown) {
   const config = getSportClockConfig(sportId);
   const normalized = normalizeMatchPeriod(period);
   return Math.max(0, config.offsets[normalized] ?? 0);
@@ -353,7 +417,7 @@ const START_REBASE_EVENTS = new Set(['match_start', 'start_period']);
 export function resolveClockTransitionForEvent(
   eventType: string,
   clock: StoredMatchClock,
-  sportId: string | null | undefined,
+  sportId: PeriodSportRef,
 ): MatchClockTransition | null {
   const nextPeriod = getNextActivePeriodAfterEvent(eventType, clock.period, sportId);
 

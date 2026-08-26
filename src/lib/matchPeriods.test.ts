@@ -37,6 +37,29 @@ test('el entretiempo del hockey cae entre Q2 y Q3, no a la mitad de la lista de 
   assert.equal(getNextActivePeriodAfterEvent('start_period', 'HT', HOCKEY), 'Q3');
 });
 
+test('el futbol americano tambien son cuatro cuartos, con el entretiempo entre Q2 y Q3', () => {
+  const AMFOOT = 'american-football';
+  assert.deepEqual(getPeriodSequence(AMFOOT), ['Q1', 'Q2', 'Q3', 'Q4']);
+  assert.deepEqual(getClockPeriodOptions(AMFOOT), ['PRE', 'Q1', 'Q2', 'HT', 'Q3', 'Q4', 'ET', 'FT']);
+  assert.equal(getNextActivePeriodAfterEvent('match_start', 'PRE', AMFOOT), 'Q1');
+  assert.equal(getNextActivePeriodAfterEvent('end_period', 'Q2', AMFOOT), 'Q3');
+  assert.equal(getNextActivePeriodAfterEvent('match_half', 'Q2', AMFOOT), 'Q3');
+  assert.equal(getNextActivePeriodAfterEvent('start_period', 'HT', AMFOOT), 'Q3');
+  assert.equal(getNextActivePeriodAfterEvent('end_period', 'Q4', AMFOOT), 'FT');
+});
+
+test('el reloj del futbol americano rebasa a 15 minutos por cuarto, no a 40 como el rugby', () => {
+  const AMFOOT = 'american-football';
+  assert.equal(getPeriodOffsetSeconds(AMFOOT, 'Q1'), 0);
+  assert.equal(getPeriodOffsetSeconds(AMFOOT, 'Q2'), 900);
+  assert.equal(getPeriodOffsetSeconds(AMFOOT, 'HT'), 1800);
+  assert.equal(getPeriodOffsetSeconds(AMFOOT, 'Q3'), 1800);
+  assert.equal(getPeriodOffsetSeconds(AMFOOT, 'Q4'), 2700);
+  assert.equal(getPeriodOffsetSeconds(AMFOOT, 'ET'), 3600);
+  // Un partido viejo guardado en mitades no retrocede al abrirse.
+  assert.equal(getPeriodOffsetSeconds(AMFOOT, '2T'), 1800);
+});
+
 test('rugby y futbol no se movieron: siguen siendo dos tiempos', () => {
   for (const sport of ['rugby', 'football', undefined]) {
     assert.deepEqual(getPeriodSequence(sport), ['1T', '2T'], `secuencia de ${sport}`);

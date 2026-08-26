@@ -2,7 +2,9 @@ import {
   buildMatchEventDefinitionMap,
   getDefaultMatchEventDefinitions,
   normalizeSportBucket,
+  outcomeScores,
   type MatchEventCategory,
+  type MatchEventDefinition,
 } from './matchEventCatalog';
 import { goalKickOutcomeSuffixSpanish, parseSubstitutionIncomingPlayer } from './matchEventStats';
 import { getEventPeriodForType, getNextActivePeriodAfterEvent, normalizeMatchPeriod } from './matchPeriods';
@@ -189,7 +191,23 @@ export function publicEventTypeDisplay(evt: Pick<LocalPublicEvent, 'type' | 'des
   return `${label}${goalKickOutcomeSuffixSpanish(rawType, evt.description)}`;
 }
 
-function getEventPoints(type: string) {
+/**
+ * Puntos de un evento para la fila del jugador. Tabla fija por tipo, mas la
+ * regla de los desenlaces: un evento que declara resultados (field goal,
+ * punto extra) suma solo si el elegido convierte. Rugby no declara ninguno y
+ * sigue exactamente igual.
+ */
+function getEventPoints(
+  type: string,
+  description: string | null | undefined,
+  definitionMap: Record<string, MatchEventDefinition>,
+) {
+  const definition = definitionMap[type];
+  if (definition?.outcomes?.length && !outcomeScores(definition, description)) return 0;
+  return getEventPointsByType(type);
+}
+
+function getEventPointsByType(type: string) {
   switch (type) {
     case 'try': return 5;
     case 'conversion': return 2;
@@ -203,13 +221,15 @@ function getEventPoints(type: string) {
     case 'two_point_conversion':
     case 'safety':
       return 2;
+    // Valia 1: la tabla se escribio pensando en "anotaciones" y no en puntos.
+    case 'touchdown':
+      return 6;
     case 'goal':
     case 'own_goal':
     case 'free_throw':
     case 'point':
     case 'ace':
     case 'extra_point':
-    case 'touchdown':
     case 'run':
     case 'home_run':
       return 1;
@@ -328,7 +348,7 @@ export function buildLocalPlayerStatsRows(args: {
     if (!row) return;
 
     row.events += 1;
-    row.points += getEventPoints(event.type);
+    row.points += getEventPoints(event.type, event.description, definitionMap);
     if (event.type === 'try') row.tries += 1;
     if (event.type === 'tackle') row.tackles += 1;
     // El gol de penal es un gol: entra en las dos cuentas, igual que en las
@@ -389,6 +409,17 @@ const STAT_LABEL_OVERRIDES: Record<string, string> = {
   extra_point: 'Puntos extra',
   two_point_conversion: 'Conversiones de 2',
   safety: 'Safeties',
+  rush: 'Carreras',
+  pass_complete: 'Pases completos',
+  pass_incomplete: 'Pases incompletos',
+  first_down: 'Primeros downs',
+  sack: 'Sacks',
+  forced_fumble: 'Fumbles forzados',
+  fumble: 'Fumbles',
+  turnover_on_downs: 'Pérdidas en downs',
+  punt: 'Punts',
+  kickoff: 'Kickoffs',
+  touchback: 'Touchbacks',
   run: 'Carreras',
   home_run: 'Home runs',
   seven_meter_goal: 'Goles de 7m',
