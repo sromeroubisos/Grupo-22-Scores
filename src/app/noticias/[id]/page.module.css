@@ -1,19 +1,47 @@
+/* La nota: la lectura. Una sola columna editorial, sin losas ni tarjetas
+   dentro de tarjetas.
+
+   Sin paleta propia: los tokens del sitio, que siguen al tema (data-theme).
+   Antes esta pantalla pintaba su propio degradado negro con tinta blanca fija,
+   así que en modo claro quedaba una isla oscura entre la cabecera y el pie
+   blancos, y el cuerpo se leía gris sobre negro. Ahora la página NO pinta
+   fondo: el del sitio pasa por debajo y la nota se lee en los dos temas.
+
+   La medida manda: el cuerpo vive en `--measure` (~68ch), que es lo que se lee
+   sin perder el renglón. Antes el texto quedaba pegado a la izquierda de una
+   tarjeta de 1080px con medio ancho vacío al lado. */
+
 .readerPage {
-    min-height: 100vh;
-    padding: 48px 24px 80px;
-    background:
-        radial-gradient(circle at top, rgba(255, 106, 42, 0.18), transparent 28%),
-        linear-gradient(180deg, #09090b 0%, #111217 42%, #0b0d12 100%);
-    color: #f5f5f5;
+    --ink: var(--color-text-primary);
+    /* El resumen: casi tinta plena, pero un escalón por debajo del titular. */
+    --ink-soft: color-mix(in srgb, var(--color-text-primary) 82%, var(--color-text-secondary));
+    --ink-muted: var(--color-text-secondary); /* 7:1 en los dos temas */
+    --edge: var(--color-border);
+    --edge-strong: var(--color-border-light);
+    --raised: var(--color-bg-tertiary);
+    --accent: var(--color-accent, #00a365);
+    --accent-ink: var(--color-accent-ink, #22c55e); /* el acento cuando pinta texto */
+    --accent-rgb: var(--color-accent-rgb, 0, 163, 101);
+    --on-accent: #04130c; /* tinta oscura sobre el acento: 6:1 */
+    --font-sans: var(--font-primary, 'Outfit', 'Inter', system-ui, sans-serif);
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    --measure: 68ch;
+    --ease: cubic-bezier(0.25, 1, 0.5, 1);
+
+    color: var(--ink);
+    font-family: var(--font-sans);
+    padding: 24px 24px 96px;
 }
 
 .readerShell {
-    max-width: 1080px;
+    max-width: 760px;
     margin: 0 auto;
-    display: grid;
-    gap: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
 }
 
+/* ── Barra de vuelta ────────────────────────────────────────────────────── */
 .readerTopBar {
     display: flex;
     align-items: center;
@@ -22,62 +50,91 @@
 }
 
 .backLink {
-    width: fit-content;
-    color: rgba(255, 255, 255, 0.78);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    color: var(--ink-muted);
     text-decoration: none;
-    font-size: 0.95rem;
-    letter-spacing: 0.01em;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.18s var(--ease);
 }
 
-.backLink:hover {
-    color: #ffffff;
+.backLink::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-left: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.18s var(--ease);
+}
+
+.backLink:hover,
+.backLink:focus-visible {
+    color: var(--ink);
+}
+
+.backLink:hover::before {
+    transform: rotate(45deg) translate(2px, -2px);
 }
 
 .topBarMeta {
-    color: rgba(255, 255, 255, 0.56);
-    font-size: 0.84rem;
-    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
     letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
+/* ── Cabecera de la nota ────────────────────────────────────────────────── */
 .heroCard {
-    display: grid;
-    gap: 24px;
-    padding: 32px;
-    border-radius: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: linear-gradient(180deg, rgba(18, 18, 24, 0.96), rgba(12, 14, 19, 0.92));
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .metaRow {
     display: flex;
     justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
     align-items: center;
+    gap: 12px 16px;
+    flex-wrap: wrap;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--edge);
 }
 
 .badgeRow {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .badge {
-    padding: 8px 12px;
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    font-size: 0.8rem;
-    text-transform: uppercase;
+    border: 1px solid var(--edge-strong);
+    background: var(--raised);
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.4;
     letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.86);
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
-.dateLabel {
-    color: rgba(255, 255, 255, 0.64);
-    font-size: 0.95rem;
+/* El ámbito es el rótulo que ordena la nota: va con el acento. */
+.badgeAccent {
+    border-color: rgba(var(--accent-rgb), 0.32);
+    background: rgba(var(--accent-rgb), 0.1);
+    color: var(--accent-ink);
 }
 
 .dateCluster {
@@ -87,150 +144,190 @@
     flex-wrap: wrap;
 }
 
+.dateLabel {
+    color: var(--ink-muted);
+    font-size: 13px;
+}
+
 .dateDivider {
-    width: 4px;
-    height: 4px;
+    width: 3px;
+    height: 3px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.32);
+    background: var(--ink-muted);
+    opacity: 0.6;
 }
 
 .headline {
-    display: grid;
-    gap: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .headline h1 {
     margin: 0;
-    font-size: clamp(2.3rem, 5vw, 4.5rem);
-    line-height: 0.98;
-    letter-spacing: -0.04em;
-    max-width: 14ch;
+    /* Sin `max-width: 14ch`: forzaba cinco renglones cortados en escritorio. */
+    font-size: clamp(2rem, 4.6vw, 3.15rem);
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    font-weight: 800;
+    color: var(--ink);
+    text-wrap: balance;
 }
 
 .summary {
     margin: 0;
-    max-width: 760px;
-    color: rgba(255, 255, 255, 0.78);
-    font-size: clamp(1rem, 1.6vw, 1.2rem);
-    line-height: 1.7;
+    max-width: var(--measure);
+    color: var(--ink-soft);
+    font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+    line-height: 1.6;
+    font-weight: 400;
+    text-wrap: pretty;
 }
 
 .imageWrap {
     overflow: hidden;
-    border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
+    border-radius: 14px;
+    border: 1px solid var(--edge);
+    background: var(--raised);
 }
 
 .heroImage {
     display: block;
     width: 100%;
-    max-height: 540px;
+    aspect-ratio: 16 / 9;
     object-fit: cover;
 }
 
+/* ── Cuerpo ─────────────────────────────────────────────────────────────── */
 .bodyCard {
-    display: grid;
-    gap: 28px;
-    padding: 32px;
-    border-radius: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(10, 12, 17, 0.9);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
 }
 
 .bodyContent {
-    display: grid;
-    gap: 20px;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 1.05rem;
-    line-height: 1.95;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    color: var(--ink);
+    font-size: 1.075rem;
+    line-height: 1.75;
 }
 
 .bodyContent p {
     margin: 0;
-    max-width: 68ch;
+    max-width: var(--measure);
+    text-wrap: pretty;
 }
 
 .leadParagraph {
-    font-size: 1.14rem;
-    line-height: 1.9;
-    color: rgba(255, 255, 255, 0.96);
+    font-size: 1.2rem;
+    line-height: 1.65;
+    font-weight: 500;
+    color: var(--ink);
 }
 
 .emptyBody {
     margin: 0;
-    color: rgba(255, 255, 255, 0.62);
+    padding: 20px;
+    border: 1px dashed var(--edge-strong);
+    border-radius: 12px;
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+}
+
+/* ── Etiquetas y acciones ───────────────────────────────────────────────── */
+.tagSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 24px;
+    border-top: 1px solid var(--edge);
+}
+
+.tagSectionLabel {
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .actionRow {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
+    padding-top: 24px;
+    border-top: 1px solid var(--edge);
 }
 
 .actionLink {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 18px;
+    min-height: 44px;
+    padding: 0 20px;
     border-radius: 999px;
     text-decoration: none;
+    font-size: 0.94rem;
     font-weight: 600;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    transition: background 0.18s var(--ease), border-color 0.18s var(--ease), color 0.18s var(--ease);
 }
 
 .secondaryLink {
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.04);
-    color: #ffffff;
+    border: 1px solid var(--edge-strong);
+    background: transparent;
+    color: var(--ink);
+}
+
+.secondaryLink:hover,
+.secondaryLink:focus-visible {
+    border-color: var(--ink-muted);
+    background: var(--raised);
 }
 
 .primaryLink {
-    background: linear-gradient(135deg, #ff6a2a, #ff884d);
-    color: #111111;
+    border: 1px solid transparent;
+    background: var(--accent);
+    color: var(--on-accent);
 }
 
-.actionLink:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.24);
+.primaryLink:hover,
+.primaryLink:focus-visible {
+    background: color-mix(in srgb, var(--accent) 88%, #000);
 }
 
+.readerPage a:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+/* ── Mobile ─────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .readerPage {
         padding:
             calc(env(safe-area-inset-top, 0px) + 12px)
-            10px
-            calc(env(safe-area-inset-bottom, 0px) + 30px);
+            16px
+            calc(env(safe-area-inset-bottom, 0px) + 72px);
     }
 
     .readerShell {
-        gap: 16px;
+        gap: 22px;
     }
 
+    /* La vuelta queda al alcance del pulgar durante toda la lectura. */
     .readerTopBar {
         position: sticky;
         top: calc(env(safe-area-inset-top, 0px) + 8px);
         z-index: 20;
-        padding: 9px 12px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        margin-inline: -6px;
+        padding: 6px 14px;
+        border: 1px solid var(--edge);
         border-radius: 999px;
-        background: rgba(10, 12, 17, 0.72);
-        backdrop-filter: blur(16px);
-    }
-
-    .backLink {
-        font-size: 0.92rem;
-    }
-
-    .topBarMeta {
-        font-size: 0.72rem;
-    }
-
-    .heroCard,
-    .bodyCard {
-        padding: 16px;
-        border-radius: 18px;
+        background: var(--color-glass, var(--color-bg-secondary));
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
     }
 
     .heroCard {
@@ -239,11 +336,7 @@
 
     .metaRow {
         gap: 10px;
-    }
-
-    .badge {
-        padding: 6px 9px;
-        font-size: 0.68rem;
+        padding-bottom: 14px;
     }
 
     .dateCluster {
@@ -252,51 +345,42 @@
     }
 
     .headline h1 {
-        max-width: none;
-        font-size: clamp(1.72rem, 7.2vw, 2.5rem);
-        line-height: 1.04;
+        font-size: clamp(1.75rem, 7.2vw, 2.3rem);
+        line-height: 1.12;
     }
 
     .summary {
-        max-width: none;
-        font-size: 0.94rem;
-        line-height: 1.68;
+        font-size: 1rem;
+        line-height: 1.6;
     }
 
+    /* La foto va de borde a borde: es la portada de la nota, no una tarjeta. */
     .imageWrap {
         width: calc(100% + 32px);
         margin-inline: -16px;
-        border-left: none;
-        border-right: none;
+        border-inline: none;
         border-radius: 0;
     }
 
     .heroImage {
-        max-height: none;
         aspect-ratio: 16 / 10;
     }
 
     .bodyCard {
-        padding-top: 2px;
-        padding-inline: 6px;
-        background: transparent;
-        border: none;
-        box-shadow: none;
+        gap: 26px;
     }
 
     .bodyContent {
-        gap: 14px;
-        font-size: 0.95rem;
-        line-height: 1.76;
-    }
-
-    .bodyContent p {
-        max-width: none;
+        gap: 18px;
+        /* 17px: el renglón corto de un teléfono pide un cuerpo más grande, no
+           más chico. Antes bajaba a 0,93rem y se leía apretado. */
+        font-size: 1.0625rem;
+        line-height: 1.72;
     }
 
     .leadParagraph {
-        font-size: 1rem;
-        line-height: 1.8;
+        font-size: 1.125rem;
+        line-height: 1.62;
     }
 
     .actionRow {
@@ -306,61 +390,28 @@
 
     .actionLink {
         width: 100%;
-        min-height: 46px;
-        padding-inline: 14px;
     }
 }
 
 @media (max-width: 430px) {
     .readerPage {
-        padding:
-            calc(env(safe-area-inset-top, 0px) + 10px)
-            8px
-            calc(env(safe-area-inset-bottom, 0px) + 24px);
-    }
-
-    .readerTopBar {
-        padding: 8px 10px;
-    }
-
-    .backLink {
-        font-size: 0.86rem;
-    }
-
-    .topBarMeta {
-        font-size: 0.68rem;
-    }
-
-    .heroCard {
-        padding: 14px;
-        gap: 14px;
-    }
-
-    .bodyCard {
-        padding-inline: 2px;
+        padding-inline: 14px;
     }
 
     .headline h1 {
-        font-size: clamp(1.58rem, 7vw, 2.1rem);
-    }
-
-    .summary {
-        font-size: 0.9rem;
-        line-height: 1.64;
+        font-size: clamp(1.62rem, 7.4vw, 2rem);
     }
 
     .imageWrap {
         width: calc(100% + 28px);
         margin-inline: -14px;
     }
+}
 
-    .bodyContent {
-        font-size: 0.93rem;
-        line-height: 1.72;
-    }
+@media (prefers-reduced-motion: reduce) {
 
-    .leadParagraph {
-        font-size: 0.98rem;
-        line-height: 1.76;
+    .readerPage *,
+    .readerPage *::before {
+        transition-duration: 0.01ms !important;
     }
 }
