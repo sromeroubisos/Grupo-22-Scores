@@ -1,7 +1,8 @@
 'use client';
 
-// El editor de noticias del super admin: crear, editar, publicar, despublicar
-// y eliminar. Vive en el shell oscuro del admin.
+// El editor de noticias (cualquier rol de administración o de redacción):
+// crear, editar, publicar, despublicar y eliminar. Vive en /admin/noticias,
+// con el tono oscuro del admin.
 //
 // Lo que cuida: etiquetas visibles, validación en línea (al salir del campo
 // y al guardar) que dice qué falta, subida de la imagen al bucket `news` (o
@@ -351,7 +352,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
             setSuccess(
                 finalStatus === 'published'
                     ? (mode === 'publish' ? 'Noticia publicada. Ya se ve en la portada.' : 'Cambios guardados. La nota sigue publicada.')
-                    : (mode === 'unpublish' ? 'La nota volvió a borrador: ya no se ve en público.' : 'Borrador guardado. Solo el super admin lo ve hasta publicarlo.'),
+                    : (mode === 'unpublish' ? 'La nota volvió a borrador: ya no se ve en público.' : 'Borrador guardado. Solo quienes administran noticias lo ven hasta publicarlo.'),
             );
 
             // Recién creada: la URL pasa a la de edición sin recargar (la
@@ -489,10 +490,10 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
 
             <header className={styles.masthead}>
                 <div>
-                    <p className={styles.eyebrow}>Super admin · Noticias</p>
+                    <p className={styles.eyebrow}>Editorial · Noticias</p>
                     <h1 className={styles.title}>{recordId ? 'Editar noticia' : 'Nueva noticia'}</h1>
                     <p className={styles.lede}>
-                        Un borrador lo ve solo el super admin. Al publicar, la nota sale en la portada de noticias.
+                        Un borrador lo ven solo quienes administran noticias. Al publicar, la nota sale en la portada.
                     </p>
                 </div>
                 <div className={styles.statusCluster}>

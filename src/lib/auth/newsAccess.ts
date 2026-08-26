@@ -64,6 +64,11 @@ export async function canManageNewsServer(): Promise<boolean> {
     return hasNewsManagementAccess(role);
 }
 
+/**
+ * Exige sesión verificada y permiso de noticias. El nombre viene de cuando
+ * era solo el super admin; hoy `hasNewsManagementAccess` cubre cualquier rol
+ * de administración y la redacción.
+ */
 export async function requireNewsSuperAdminServer() {
     const context = await getServerAuthRole();
 

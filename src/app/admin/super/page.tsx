@@ -303,7 +303,7 @@ export default function AdminPage() {
                     <div className={styles.slabHeader}>
                         <span className={styles.slabLabel}>News CMS</span>
                         {/* Go to news page */}
-                        <Link href="/admin/super/noticias" prefetch={false} className={styles.btn}>
+                        <Link href="/noticias" prefetch={false} className={styles.btn}>
                             Gestionar Noticias
                         </Link>
                     </div>

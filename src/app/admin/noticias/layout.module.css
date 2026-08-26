@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap');
+
+/* El mismo tono oscuro del shell del super admin (admin/super/layout.module.css),
+   sin la barra lateral: el editor de noticias pinta con estos tokens. */
+.shell {
+    --basalt-950: #0a0a0b;
+    --basalt-900: #121214;
+    --basalt-800: #1c1c1f;
+    --basalt-700: #2a2a2e;
+    --basalt-600: #3f3f46;
+    --basalt-400: #a1a1aa;
+    --surface-edge: rgba(255, 255, 255, 0.05);
+    --font-sans: 'Geist', var(--font-primary, 'Outfit', system-ui, sans-serif);
+    --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+    min-height: 100vh;
+    background: var(--basalt-950);
+    color: #ececec;
+    font-family: var(--font-sans);
+}

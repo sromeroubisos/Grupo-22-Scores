@@ -3,7 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import LoginScreen from './components/LoginScreen';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { hasEditorialAccess, hasFederationAdminAccess, resolveAdminPanel } from '@/lib/auth/roles';
+import { hasEditorialAccess, hasFederationAdminAccess, hasNewsManagementAccess, resolveAdminPanel } from '@/lib/auth/roles';
 import { useEffect, useState } from 'react';
 
 function buildReturnTo(pathname: string, searchParams: ReturnType<typeof useSearchParams>): string {
@@ -26,11 +26,14 @@ export default function AdminWrapper({ children }: { children: React.ReactNode }
 
     const isMatchConsole = pathname?.startsWith('/admin/matches/');
     const isEditorialRoute = pathname === '/admin';
+    // El editor de noticias: cualquier rol de administración o de redacción.
+    const isNewsRoute = (pathname ?? '').startsWith('/admin/noticias');
 
     const adminPanel = resolveAdminPanel(user?.role, user?.memberships);
     const isFederationAdmin = hasFederationAdminAccess(user?.role, user?.memberships);
     const isEditorialUser = hasEditorialAccess(user?.role, user?.memberships);
-    const isAllowed = user && (isFederationAdmin || (isEditorialUser && isEditorialRoute));
+    const isNewsManager = hasNewsManagementAccess(user?.role, user?.memberships);
+    const isAllowed = user && (isFederationAdmin || (isEditorialUser && isEditorialRoute) || (isNewsRoute && isNewsManager));
 
     if (!hasMounted || isLoading) {
         return (

@@ -174,7 +174,7 @@ function NewsCard({ item, canManage, menuOpen, onToggleMenu, onToggleStatus, onD
 
             {canManage && (
                 <div className={styles.newsAdmin}>
-                    <ProtectedLink href={`/admin/super/noticias/editar/${item.id}`} className={`${styles.btn} ${styles.btnSm}`}>
+                    <ProtectedLink href={`/admin/noticias/editar/${item.id}`} className={`${styles.btn} ${styles.btnSm}`}>
                         <Pencil size={14} aria-hidden="true" /> Editar
                     </ProtectedLink>
                     <div className={styles.menuWrap}>
@@ -336,7 +336,7 @@ export default function NoticiasClient({ initialNews, canManageNews, videoHubs =
                             </span>
                             {/* ProtectedLink: asegura la sesion antes de entrar al admin (en el
                                 telefono el token vencido rebotaba a /login). */}
-                            <ProtectedLink href="/admin/super/noticias/nueva" className={`${styles.btn} ${styles.btnPrimary}`}>
+                            <ProtectedLink href="/admin/noticias/nueva" className={`${styles.btn} ${styles.btnPrimary}`}>
                                 <Plus size={16} aria-hidden="true" /> Nueva noticia
                             </ProtectedLink>
                         </div>

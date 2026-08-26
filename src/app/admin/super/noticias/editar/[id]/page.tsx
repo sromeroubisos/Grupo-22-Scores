@@ -1,20 +1,13 @@
 import { redirect } from 'next/navigation';
 
-import { canManageNewsServer } from '@/lib/auth/newsAccess';
-import NewsEditorClient from '../../NewsEditorClient';
-
 type EditarNoticiaPageProps = {
     params: Promise<{
         id: string;
     }>;
 };
 
-export default async function EditarNoticiaPage({ params }: EditarNoticiaPageProps) {
-    if (!(await canManageNewsServer())) {
-        redirect('/noticias');
-    }
-
+// El editor vive ahora en /admin/noticias. Los links viejos siguen andando.
+export default async function EditarNoticiaLegacyPage({ params }: EditarNoticiaPageProps) {
     const { id } = await params;
-
-    return <NewsEditorClient newsId={id} />;
+    redirect(`/admin/noticias/editar/${encodeURIComponent(id)}`);
 }
