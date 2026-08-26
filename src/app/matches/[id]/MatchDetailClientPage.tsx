@@ -2683,6 +2683,17 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 videos={state.videosData}
                                 canManage={canManageMatch || isSuperAdminUser}
                                 matchLabel={`${matchData.home.name} vs ${matchData.away.name}`}
+                                plate={{
+                                    // La ficha normaliza `tournament` como string (el bundle crudo trae el objeto).
+                                    tournamentName: (typeof matchData.tournament === 'string' ? matchData.tournament : matchData.tournament?.name) || null,
+                                    roundLabel: matchData.round || matchData.roundLabel || null,
+                                    sportId: matchData.sportId || null,
+                                    home: { name: matchData.home.name, logoUrl: matchData.home.logo || null },
+                                    away: { name: matchData.away.name, logoUrl: matchData.away.logo || null },
+                                    score: typeof matchData.home.score === 'number' && typeof matchData.away.score === 'number'
+                                        ? { home: matchData.home.score, away: matchData.away.score }
+                                        : null,
+                                }}
                                 onChange={(videos) => setState((prev) => ({ ...prev, videosData: videos }))}
                             />
                         )}

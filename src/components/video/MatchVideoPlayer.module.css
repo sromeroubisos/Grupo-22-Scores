@@ -1,0 +1,163 @@
+/* El reproductor de un video de partido. Tokens del producto, sin paleta propia. */
+
+.player {
+    --mvp-ease: cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+/* ── El marco ───────────────────────────────────────────────────────────── */
+.frame {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    /* El play se mide contra el marco (cqw): el mismo tamaño relativo que el
+       hueco que le deja la placa generada. */
+    container-type: inline-size;
+}
+
+/* Shorts y reels: alto, no ancho. El ancho sale de la altura. */
+.framePortrait {
+    width: auto;
+    max-width: 100%;
+    height: min(70vh, 640px);
+    aspect-ratio: 9 / 16;
+    margin: 0 auto;
+}
+
+.iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.poster {
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    color: #fff;
+}
+
+.poster:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.thumb {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.posterName {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 88px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: clamp(44px, 13cqw, 72px);
+    height: clamp(44px, 13cqw, 72px);
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    transition: transform 160ms var(--mvp-ease, ease), background-color 160ms var(--mvp-ease, ease);
+}
+
+.poster:hover .play,
+.poster:focus-visible .play {
+    transform: translate(-50%, -50%) scale(1.06);
+    background: var(--color-accent);
+}
+
+/* ── Lo que se abre afuera ──────────────────────────────────────────────── */
+.external {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-bg-primary);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 140ms ease;
+}
+
+.external:hover {
+    border-color: var(--color-accent);
+}
+
+.externalBody {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.externalName {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+}
+
+.externalUrl {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.externalCta {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+/* ── El link de abajo ───────────────────────────────────────────────────── */
+.foot {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.openLink {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+}
+
+.openLink:hover {
+    color: var(--color-accent);
+}
