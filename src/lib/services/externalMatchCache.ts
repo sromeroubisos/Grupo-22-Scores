@@ -389,6 +389,34 @@ export async function shouldPollLiveMatches(
  * Queries a ±1 day UTC range to cover timezone boundary cases;
  * the caller (matches/route.ts) applies `formatDateKey` post-filter.
  */
+/**
+ * ¿fixture-sync sigue vivo para este deporte? Verdadero si escribió alguna fila
+ * en las últimas `maxAgeMinutes` (corre cada hora; live-sync cada minuto). Con
+ * esa evidencia, una fecha SIN filas dentro del horizonte que el cron cubre es
+ * un día sin partidos, no un sync que nunca corrió, y no hace falta gastar el
+ * fan-out del proveedor para confirmarlo. 'unknown' si la tabla no responde:
+ * el llamador falla abierto y repara con el proveedor como siempre.
+ */
+export async function hasRecentFixtureSyncEvidence(
+    sport: string,
+    supabase: SupabaseClient,
+    maxAgeMinutes = 180,
+): Promise<boolean | 'unknown'> {
+    const since = new Date(Date.now() - maxAgeMinutes * 60 * 1000).toISOString();
+    const { data, error } = await supabase
+        .from('external_match_cache')
+        .select('id')
+        .eq('sport', sport)
+        .gte('updated_at', since)
+        .limit(1);
+
+    if (error) {
+        console.warn(`[externalMatchCache] hasRecentFixtureSyncEvidence (${sport}) no pudo leer:`, error.message);
+        return 'unknown';
+    }
+    return (data?.length ?? 0) > 0;
+}
+
 export async function getMatchesForDate(
     date: string,                // YYYY-MM-DD
     sport: string,

@@ -79,6 +79,13 @@ const API_HOST = process.env.RAPIDAPI_HOST || process.env.NEXT_PUBLIC_RAPIDAPI_H
 
 // Cache configuration
 const CACHE_TTL_MATCHES = 60;   // 60 seconds for match lists default
+// Un día sin partidos también se recuerda: antes el vacío no se memoizaba y cada
+// request de un día tranquilo volvía a pagar el fan-out entero contra el proveedor.
+const CACHE_TTL_EMPTY_LIST = 60;
+// Un listado que está en el camino crítico de la portada no puede esperar los 25 s
+// por defecto de apiFetch: si el proveedor se cuelga, se corta acá y el route cae
+// a la caché. El cliente corta a los 15 s, así que el servidor tiene que rendirse antes.
+const PROVIDER_LIST_TIMEOUT_MS = 8000;
 const CACHE_TTL_LIVE = 5;       // 5 seconds for live matches
 const CACHE_TTL_DETAILS = 30;   // 30 seconds for match details
 const CACHE_TTL_TOURNAMENTS = 24 * 60 * 60; // 24 hours for tournaments (metadata: details/archives/ids)
@@ -361,14 +368,14 @@ export async function getFlashScoreMatchesRaw(
                 headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
                 debugTag: 'MatchesListRaw',
                 silent: true,
-                cacheTtl: 0
+                cacheTtl: 0,
+                timeoutMs: PROVIDER_LIST_TIMEOUT_MS,
             });
 
             if (data) {
+                // `null` (falla) no se guarda; un listado vacío sí, con TTL corto.
                 const matchCount = countFlashScoreRawMatches(data);
-                if (matchCount > 0) {
-                    memoryCache.set(cacheKey, data, dynamicTtl);
-                }
+                memoryCache.set(cacheKey, data, matchCount > 0 ? dynamicTtl : CACHE_TTL_EMPTY_LIST);
             }
 
             return data;
@@ -380,18 +387,6 @@ export async function getFlashScoreMatchesRaw(
 
     inflightRequests.set(cacheKey, promise);
     return promise;
-}
-
-async function getFlashScoreMatchesRawWithEmptyRetry(
-    dayOffset: number,
-    sportId: string | number,
-    timeZone?: string,
-): Promise<any> {
-    const first = await getFlashScoreMatchesRaw(dayOffset, sportId, timeZone);
-    if (countFlashScoreRawMatches(first) > 0) return first;
-
-    await delay(150);
-    return getFlashScoreMatchesRaw(dayOffset, sportId, timeZone, { bypassCache: true });
 }
 
 // formatDateKey is now imported from @/lib/timezone
@@ -468,8 +463,12 @@ async function fetchFlashScoreDailyMatches(
             ? offsets.flatMap(o => ([[o, 'rugby-union'], [o, 'rugby-league']] as [number, string][]))
             : offsets.map(o => [o, sportId] as [number, string]);
 
+    // Sin reintento por vacío: duplicaba las llamadas (8 en vez de 4 para rugby)
+    // en el camino crítico de la portada, y un día sin partidos es un resultado
+    // válido. El listado diario lo mantiene fixture-sync desde external_match_cache;
+    // acá solo se repara.
     const results = await Promise.all(
-        rawFetches.map(([o, sid]) => getFlashScoreMatchesRawWithEmptyRetry(o, sid, timeZone))
+        rawFetches.map(([o, sid]) => getFlashScoreMatchesRaw(o, sid, timeZone))
     );
 
     // Tell a real "no matches" day apart from an upstream failure. apiFetch never
@@ -612,7 +611,8 @@ async function getFlashScoreLiveMatchesRaw(sportId: string): Promise<Match[]> {
     const { data } = await apiFetch<any>(url, {
         headers: { 'x-rapidapi-host': API_HOST, 'x-rapidapi-key': API_KEY },
         debugTag: 'LiveMatches',
-        cacheTtl: CACHE_TTL_LIVE
+        cacheTtl: CACHE_TTL_LIVE,
+        timeoutMs: PROVIDER_LIST_TIMEOUT_MS,
     });
 
     if (!data) return [];

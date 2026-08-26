@@ -39,6 +39,7 @@ import { isTournamentVisibleToPublic } from '@/lib/tournamentReview';
 import {
     getMatchesForDate,
     getLiveMatches,
+    hasRecentFixtureSyncEvidence,
     mapCachedToEnrichedMatch,
     mapFlashScoreMatchToCached,
     shouldPollLiveMatches,
@@ -932,6 +933,25 @@ function normalizeMatchesRequest(request: Request): MatchesRequestParams {
     };
 }
 
+/**
+ * Lo único del timezone que cambia el payload es DÓNDE empieza y termina el día
+ * pedido (y el offset con el que se escriben las horas locales). Doce zonas
+ * argentinas, Montevideo y Santiago dan el mismo listado, pero con el nombre
+ * IANA en la clave eran doce cálculos y doce fan-outs al proveedor por el
+ * mismo día. Se identifica el día por sus bordes en UTC.
+ */
+function buildDayWindowKey(params: MatchesRequestParams) {
+    const dayStart = combineLocalDateTimeToUtcIso(params.requestedDate, '00:00:00', params.timeZone);
+    const nextDayStart = combineLocalDateTimeToUtcIso(addDaysToIsoDate(params.requestedDate, 1), '00:00:00', params.timeZone);
+    if (!dayStart || !nextDayStart) return params.timeZone;
+
+    const offsetMinutes = (iso: string, localDate: string) =>
+        Math.round((Date.parse(`${localDate}T00:00:00Z`) - Date.parse(iso)) / 60000);
+    const startOffset = offsetMinutes(dayStart, params.requestedDate);
+    const endOffset = offsetMinutes(nextDayStart, addDaysToIsoDate(params.requestedDate, 1));
+    return startOffset === endOffset ? `utc${startOffset}` : `utc${startOffset}_${endOffset}`;
+}
+
 function buildMatchesCacheKey(params: MatchesRequestParams) {
     return [
         MATCHES_RESPONSE_CACHE_PREFIX,
@@ -940,7 +960,7 @@ function buildMatchesCacheKey(params: MatchesRequestParams) {
         params.sport || 'all',
         params.status || 'all',
         params.useExternal ? 'external' : 'local',
-        params.timeZone,
+        buildDayWindowKey(params),
     ].join(':');
 }
 
@@ -948,8 +968,30 @@ function shouldUsePersistedFeedCache(params: MatchesRequestParams) {
     return !params.liveOnly;
 }
 
-function shouldServeStaleMatchesFeed(params: MatchesRequestParams) {
-    return !params.useExternal;
+/**
+ * Stale-while-revalidate para todos. Antes estaba apagado con external=true
+ * —que es lo que manda la portada— y cada request pasada la ventana fresh
+ * esperaba el recálculo entero (proveedor incluido) con el usuario mirando.
+ * Servir lo viejo y refrescar atrás es exactamente lo que ese caso necesita.
+ */
+function shouldServeStaleMatchesFeed(_params: MatchesRequestParams) {
+    return true;
+}
+
+/**
+ * fixture-sync cubre, en días UTC, de ayer a hoy+2. Un día local cuyo rango
+ * entero cae dentro de ese horizonte puede confiar en la caché como fuente
+ * completa: si no tiene filas, no hay partidos.
+ */
+function isWithinFixtureSyncHorizon(params: MatchesRequestParams, nowMs: number = Date.now()) {
+    const dayStart = combineLocalDateTimeToUtcIso(params.requestedDate, '00:00:00', params.timeZone);
+    const nextDayStart = combineLocalDateTimeToUtcIso(addDaysToIsoDate(params.requestedDate, 1), '00:00:00', params.timeZone);
+    if (!dayStart || !nextDayStart) return false;
+
+    const todayUtc = new Date(nowMs);
+    const horizonFrom = Date.UTC(todayUtc.getUTCFullYear(), todayUtc.getUTCMonth(), todayUtc.getUTCDate() - 1);
+    const horizonTo = Date.UTC(todayUtc.getUTCFullYear(), todayUtc.getUTCMonth(), todayUtc.getUTCDate() + 3);
+    return Date.parse(dayStart) >= horizonFrom && Date.parse(nextDayStart) <= horizonTo;
 }
 
 function buildExternalPersistKey(
@@ -986,8 +1028,11 @@ function hasShortLivedExternalResult(params: MatchesRequestParams, payload?: Mat
     if (!params.useExternal || !payload?.sources) return false;
     if (hasSourceDegradation(payload)) return true;
 
+    // Un día sin partidos es un resultado válido y se cachea como cualquier otro.
+    // Solo queda corto el caso dudoso: el proveedor contestó vacío para un día
+    // en el que la caché tenía filas sin cerrar.
     const flashscoreReason = payload.sources.flashscore?.reason;
-    return flashscoreReason === 'empty_result' || flashscoreReason === 'flashscore_empty_cache_fallback';
+    return flashscoreReason === 'flashscore_empty_cache_fallback';
 }
 
 function getMatchesResponseCachePolicy(params: MatchesRequestParams, payload?: MatchesPayload) {
@@ -1526,6 +1571,9 @@ async function computeMatchesPayload(
                 // no puede responder por la fecha pedida.
                 let cachedEnriched: any[] = [];
                 let cacheIsServable = false;
+                // Día sin filas pero con el sync vivo: no hay partidos, y se sirve
+                // sin tocar al proveedor. Ver hasRecentFixtureSyncEvidence.
+                let emptyDayFromCache = false;
                 try {
                     const cacheReadStartedAt = Date.now();
                     const supabaseForCache = await readClientPromise;
@@ -1567,6 +1615,12 @@ async function computeMatchesPayload(
                             addDurationMetric(trace.metrics, 'enrich_matches_ms', Date.now() - enrichCacheStartedAt);
                         }
                         cacheIsServable = !hasStaleNonTerminal;
+                    } else if (supportsFlashScoreDailyList && isWithinFixtureSyncHorizon(params)) {
+                        const evidenceStartedAt = Date.now();
+                        emptyDayFromCache = (await hasRecentFixtureSyncEvidence(sport || 'rugby', supabaseForCache)) === true;
+                        if (trace) {
+                            addDurationMetric(trace.metrics, 'external_cache_read_ms', Date.now() - evidenceStartedAt);
+                        }
                     }
                 } catch (cacheErr) {
                     console.warn('[matches] external cache primary read failed:', cacheErr);
@@ -1581,6 +1635,12 @@ async function computeMatchesPayload(
                     fsCount = cachedEnriched.length;
                     fsReason = 'external_cache_primary';
                     console.log(`[matches] external cache primary: ${fsCount} matches for date=${date}`);
+                } else if (emptyDayFromCache) {
+                    fsOk = true;
+                    fsFromCache = true;
+                    fsCount = 0;
+                    fsReason = 'external_cache_empty_day';
+                    console.log(`[matches] external cache empty day: no matches for date=${date}`);
                 }
 
                 // Track whether FlashScore API actually failed (vs returned 0 results)
@@ -1591,7 +1651,7 @@ async function computeMatchesPayload(
                 }
 
                 // Reparación: FlashScore solo corre cuando la caché no sirvió.
-                const shouldFetchExternal = !servedFromExternalCache && supportsFlashScoreDailyList;
+                const shouldFetchExternal = !servedFromExternalCache && !emptyDayFromCache && supportsFlashScoreDailyList;
                 const externalFetchStartedAt = Date.now();
                 const [externalMatches, liveMatches] = await Promise.all([
                     shouldFetchExternal

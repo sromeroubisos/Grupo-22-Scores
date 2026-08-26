@@ -13,6 +13,12 @@ export async function apiFetch<T = unknown>(
         debugTag?: string;
         silent?: boolean;
         cacheTtl?: number; // Cache TTL in seconds, 0 = no cache
+        /**
+         * Tope por request. El default de 25 s está pensado para cargas largas
+         * (detalle de torneo, historial); un listado que se sirve en el camino
+         * crítico de una página tiene que rendirse mucho antes y caer a caché.
+         */
+        timeoutMs?: number;
     } = {}
     // M9: `ok`/`status` let callers distinguish a failed request (network error,
     // timeout, non-2xx) from a legitimately empty payload without breaking the
@@ -33,7 +39,7 @@ export async function apiFetch<T = unknown>(
 
     // Set a timeout to prevent hanging requests
     const controller = new AbortController();
-    const TIMEOUT_MS = 25000; // 25s timeout
+    const TIMEOUT_MS = opts.timeoutMs && opts.timeoutMs > 0 ? opts.timeoutMs : 25000; // 25s por defecto
     const timeoutId = setTimeout(() => controller.abort(new Error("Request timeout")), TIMEOUT_MS);
 
     // Chain external signal if provided
