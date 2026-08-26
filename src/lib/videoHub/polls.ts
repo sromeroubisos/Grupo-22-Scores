@@ -207,6 +207,8 @@ export function playLabelForSport(sportId: string | null | undefined): PlayLabel
         case 'tennis':
         case 'padel':
             return { singular: 'punto', plural: 'puntos' };
+        case 'american-football':
+            return { singular: 'touchdown', plural: 'touchdowns' };
         default:
             return { singular: 'jugada', plural: 'jugadas' };
     }

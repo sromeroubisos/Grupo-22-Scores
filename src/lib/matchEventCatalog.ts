@@ -4,6 +4,12 @@
  * y el shoot-out solo decide quien avanza, asi que sus eventos no pueden caer
  * en el mismo grupo que una intercepcion ni sumar al marcador.
  */
+import {
+  buildAmericanFootballEventDefinitions,
+  createAmericanFootballRuleset,
+  readAmericanFootballRuleset,
+} from './americanFootballRules.ts';
+
 export type MatchEventCategory = 'score' | 'card' | 'discipline' | 'substitution' | 'clock' | 'shootout' | 'other';
 export type MatchEventRequirement = 'required' | 'optional' | 'none';
 
@@ -64,6 +70,21 @@ export interface MatchEventDefinition {
    * gol de corner corto es un gol y la diferencia es estadistica.
    */
   outcomes?: MatchEventOutcome[];
+  /**
+   * Desenlace que se asume cuando el evento NO trae marca `[res:]`.
+   *
+   * Existe para el touchdown: sus desenlaces son el TIPO (carrera, pase,
+   * devolucion) y todos suman seis. Un touchdown importado de ESPN o cargado
+   * antes de que existieran los tipos no tiene marca, y sin este campo
+   * `outcomeScores` lo trataria como un corner corto sin resultado: cero
+   * puntos. Un corner sin desenlace sigue sin sumar, porque no lo declara.
+   */
+  defaultOutcome?: string;
+  /**
+   * Como se le pregunta al operador por el desenlace. "Como termino" sirve
+   * para un corner corto; a un touchdown se le pregunta "Tipo de touchdown".
+   */
+  outcomePrompt?: string;
 }
 
 type ResolveArgs = {
@@ -246,15 +267,28 @@ const SPORT_EVENT_PRESETS: Record<string, MatchEventDefinition[]> = {
     { type: 'match_half', label: 'Entretiempo', category: 'clock', points: 0, team: 'none', player: 'none' },
     { type: 'match_end', label: 'Final del partido', category: 'clock', points: 0, team: 'none', player: 'none' },
   ],
+  /* ── Handball ──
+   * Entra SIN proveedor externo: todo lo que se vea sale de alguien cargando el
+   * partido a mano, asi que el catalogo tiene que alcanzar solo. Los tipos que
+   * ya estaban (`seven_meter_goal`, `two_min_suspension`) NO se renombran:
+   * cualquier evento guardado con esos nombres dejaria de resolver.
+   */
   handball: [
     { type: 'goal', label: 'Gol', category: 'score', points: 1, team: 'required', player: 'optional' },
     { type: 'seven_meter_goal', label: 'Gol de 7m', category: 'score', points: 1, team: 'required', player: 'optional' },
+    { type: 'seven_meter_miss', label: '7m errado', category: 'other', points: 0, team: 'required', player: 'optional' },
+    { type: 'save', label: 'Atajada', category: 'other', points: 0, team: 'required', player: 'optional' },
     { type: 'yellow_card', label: 'Tarjeta amarilla', category: 'card', points: 0, team: 'required', player: 'optional' },
-    { type: 'red_card', label: 'Tarjeta roja', category: 'card', points: 0, team: 'required', player: 'optional' },
     { type: 'two_min_suspension', label: 'Suspensión 2 min', category: 'discipline', points: 0, team: 'required', player: 'optional' },
+    { type: 'red_card', label: 'Tarjeta roja', category: 'card', points: 0, team: 'required', player: 'optional' },
+    { type: 'blue_card', label: 'Tarjeta azul', category: 'card', points: 0, team: 'required', player: 'optional' },
+    { type: 'timeout', label: 'Tiempo muerto', category: 'other', points: 0, team: 'required', player: 'none' },
     { type: 'substitution', label: 'Cambio', category: 'substitution', points: 0, team: 'required', player: 'optional' },
+    { type: 'match_start', label: 'Inicio del partido', category: 'clock', points: 0, team: 'none', player: 'none' },
     { type: 'start_period', label: 'Inicio de tiempo', category: 'clock', points: 0, team: 'none', player: 'none' },
     { type: 'end_period', label: 'Fin de tiempo', category: 'clock', points: 0, team: 'none', player: 'none' },
+    { type: 'match_half', label: 'Entretiempo', category: 'clock', points: 0, team: 'none', player: 'none' },
+    { type: 'match_end', label: 'Final del partido', category: 'clock', points: 0, team: 'none', player: 'none' },
   ],
   volleyball: [
     { type: 'point', label: 'Punto', category: 'score', points: 1, team: 'required', player: 'optional' },
@@ -267,17 +301,13 @@ const SPORT_EVENT_PRESETS: Record<string, MatchEventDefinition[]> = {
     { type: 'start_period', label: 'Inicio de set', category: 'clock', points: 0, team: 'none', player: 'none' },
     { type: 'end_period', label: 'Fin de set', category: 'clock', points: 0, team: 'none', player: 'none' },
   ],
-  'american-football': [
-    { type: 'touchdown', label: 'Touchdown', category: 'score', points: 6, team: 'required', player: 'optional' },
-    { type: 'field_goal', label: 'Field goal', category: 'score', points: 3, team: 'required', player: 'optional' },
-    { type: 'extra_point', label: 'Punto extra', category: 'score', points: 1, team: 'required', player: 'optional' },
-    { type: 'two_point_conversion', label: 'Conversión de 2', category: 'score', points: 2, team: 'required', player: 'optional' },
-    { type: 'safety', label: 'Safety', category: 'score', points: 2, team: 'required', player: 'optional' },
-    { type: 'penalty', label: 'Penalidad', category: 'discipline', points: 0, team: 'required', player: 'optional' },
-    { type: 'timeout', label: 'Tiempo muerto', category: 'other', points: 0, team: 'required', player: 'none' },
-    { type: 'start_period', label: 'Inicio de cuarto', category: 'clock', points: 0, team: 'none', player: 'none' },
-    { type: 'end_period', label: 'Fin de cuarto', category: 'clock', points: 0, team: 'none', player: 'none' },
-  ],
+  /**
+   * Futbol americano: el catalogo NO vive aca. Sale del reglamento del torneo
+   * (tackle o flag, con o sin patadas) en americanFootballRules.ts, y este
+   * preset es ese mismo catalogo con el reglamento NFL, para los partidos
+   * cuyo torneo no declara ninguno.
+   */
+  'american-football': buildAmericanFootballEventDefinitions(createAmericanFootballRuleset('nfl')),
   baseball: [
     { type: 'run', label: 'Carrera', category: 'score', points: 1, team: 'required', player: 'optional' },
     { type: 'home_run', label: 'Home run', category: 'score', points: 1, team: 'required', player: 'optional' },
@@ -356,9 +386,18 @@ export function readOutcomeId(detail: string | null | undefined): string | null 
  */
 export function outcomeScores(definition: MatchEventDefinition | undefined, detail: string | null | undefined) {
   if (!definition?.outcomes?.length) return true;
-  const outcomeId = readOutcomeId(detail);
+  const outcomeId = resolveOutcomeId(definition, detail);
   if (!outcomeId) return false;
   return Boolean(definition.outcomes.find((outcome) => outcome.id === outcomeId)?.scores);
+}
+
+/**
+ * El desenlace efectivo: el guardado en `detail`, o el `defaultOutcome` de la
+ * definicion si no hay marca. Es lo que tienen que leer las estadisticas para
+ * clasificar (un touchdown sin tipo cae en `other`, no desaparece).
+ */
+export function resolveOutcomeId(definition: MatchEventDefinition | undefined, detail: string | null | undefined): string | null {
+  return readOutcomeId(detail) ?? definition?.defaultOutcome ?? null;
 }
 
 const OUTCOME_TAG_RE = /\[res:[a-z0-9_-]+\]\s*/gi;
@@ -453,6 +492,12 @@ function normalizeStoredDefinitions(
       // torneo con `matchEvents` guardados perdia los seis resultados del
       // corner corto y el evento pasaba a sumar siempre.
       const outcomes = normalizeOutcomes(candidate.outcomes, fallbackDefinition?.outcomes);
+      const defaultOutcome = typeof candidate.defaultOutcome === 'string' && candidate.defaultOutcome.trim()
+        ? candidate.defaultOutcome.trim()
+        : fallbackDefinition?.defaultOutcome;
+      const outcomePrompt = typeof candidate.outcomePrompt === 'string' && candidate.outcomePrompt.trim()
+        ? candidate.outcomePrompt.trim()
+        : fallbackDefinition?.outcomePrompt;
 
       return {
         type,
@@ -464,6 +509,8 @@ function normalizeStoredDefinitions(
         creditsOpponent,
         kickAtGoal,
         ...(outcomes ? { outcomes } : {}),
+        ...(defaultOutcome ? { defaultOutcome } : {}),
+        ...(outcomePrompt ? { outcomePrompt } : {}),
       } satisfies MatchEventDefinition;
     })
     .filter((definition): definition is MatchEventDefinition => Boolean(definition));
@@ -495,8 +542,26 @@ export function getDefaultMatchEventDefinitions(sportId?: string | null): MatchE
   return cloneDefinitions(SPORT_EVENT_PRESETS[bucket] || GENERIC_EVENTS);
 }
 
+/**
+ * El catalogo BASE de un partido: el del deporte, salvo que el torneo traiga
+ * un reglamento que lo redefina (futbol americano: tackle o flag, con o sin
+ * patadas). Es lo que la consola usa como base antes de fundir la
+ * configuracion de eventos guardada, y lo que `resolveMatchEventDefinitions`
+ * usa como fallback.
+ */
+export function getBaseMatchEventDefinitions(
+  sportId: string | null | undefined,
+  tournamentRuleset: Record<string, unknown> | null | undefined,
+): MatchEventDefinition[] {
+  if (normalizeSportBucket(sportId) === 'american-football') {
+    const rules = readAmericanFootballRuleset(tournamentRuleset);
+    if (rules) return buildAmericanFootballEventDefinitions(rules);
+  }
+  return getDefaultMatchEventDefinitions(sportId);
+}
+
 export function resolveMatchEventDefinitions({ sportId, phaseSettings, tournamentRuleset }: ResolveArgs): MatchEventDefinition[] {
-  const fallback = getDefaultMatchEventDefinitions(sportId);
+  const fallback = getBaseMatchEventDefinitions(sportId, tournamentRuleset);
   const configured =
     phaseSettings?.matchEvents ??
     (phaseSettings?.matchRules as Record<string, unknown> | undefined)?.enabledEvents ??

@@ -13,7 +13,7 @@ import {
     type MatchClockTransition,
     type StoredMatchClock,
 } from '@/lib/matchClock';
-import { normalizeMatchPeriod } from '@/lib/matchPeriods';
+import { normalizeMatchPeriod, type PeriodSportRef } from '@/lib/matchPeriods';
 
 /**
  * Reloj del partido, AISLADO.
@@ -30,7 +30,8 @@ import { normalizeMatchPeriod } from '@/lib/matchPeriods';
 export interface UseMatchClockOptions {
     /** matches.clock crudo, en cualquiera de sus formas historicas */
     initialClock: unknown;
-    sportId: string | null | undefined;
+    /** El deporte, o el deporte mas las reglas de periodo del torneo. */
+    sportId: PeriodSportRef;
     /** kickoff, para sembrar el reloj de un partido que ya esta en vivo sin reloj cargado */
     kickoffIso?: string | null;
     initialStatus?: string;

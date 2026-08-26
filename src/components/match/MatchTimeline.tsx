@@ -87,6 +87,20 @@ const TYPE_LABELS: Record<string, string> = {
   extra_point: 'Punto extra',
   two_point_conversion: 'Conversion de 2',
   safety: 'Safety',
+  // Futbol americano. Sin estas el fallback escribe "Pass Complete" y
+  // "Turnover On Downs" en una pantalla en castellano.
+  rush: 'Carrera',
+  pass_complete: 'Pase completo',
+  pass_incomplete: 'Pase incompleto',
+  first_down: 'Primer down',
+  sack: 'Sack',
+  interception: 'Intercepcion',
+  forced_fumble: 'Fumble forzado',
+  fumble: 'Fumble',
+  turnover_on_downs: 'Perdida en downs',
+  punt: 'Punt',
+  kickoff: 'Kickoff',
+  touchback: 'Touchback',
   run: 'Carrera',
   home_run: 'Home run',
   point: 'Punto',
@@ -122,6 +136,22 @@ const EVENT_COLORS: Record<string, string> = {
   drop_goal: '#3b82f6',
   penalty: '#3b82f6',
   field_goal: '#3b82f6',
+  extra_point: '#3b82f6',
+  two_point_conversion: '#3b82f6',
+  safety: '#22c55e',
+  // Lo que pierde la posesion va en rojo, como el turnover del rugby.
+  interception: '#f43f5e',
+  fumble: '#f43f5e',
+  turnover_on_downs: '#f43f5e',
+  sack: '#f97316',
+  forced_fumble: '#f97316',
+  first_down: '#60a5fa',
+  rush: '#9ca3af',
+  pass_complete: '#9ca3af',
+  pass_incomplete: '#9ca3af',
+  punt: '#9ca3af',
+  kickoff: '#9ca3af',
+  touchback: '#9ca3af',
   kick: '#60a5fa',
   free_kick: '#60a5fa',
   penalty_committed: '#f43f5e',
@@ -191,6 +221,7 @@ function getEventCategories(type: string): FilterKey[] {
   const foulTypes = [
     'knock_on', 'forward_pass', 'penalty_committed', 'handling_error',
     'turnover_lost', 'foul', 'two_min_suspension',
+    'interception', 'fumble', 'turnover_on_downs',
   ];
   if (foulTypes.includes(t)) cats.push('fouls');
 

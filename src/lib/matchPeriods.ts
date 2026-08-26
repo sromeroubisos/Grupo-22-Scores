@@ -1,3 +1,30 @@
+import type { MatchPeriodRules } from './americanFootballRules.ts';
+
+export type { MatchPeriodRules };
+
+/**
+ * Con que se resuelven los periodos: el deporte a secas (lo de siempre) o el
+ * deporte MAS las reglas de periodo del torneo. Existe porque el futbol
+ * americano no tiene un unico reglamento: un torneo de flag juega dos tiempos
+ * de 20' y uno de tackle cuatro cuartos de 12' o de 15'. Todo lo que ya
+ * pasaba un `sportId` string sigue compilando y haciendo exactamente lo mismo.
+ */
+export type PeriodSportRef =
+  | string
+  | null
+  | undefined
+  | { sportId: string | null | undefined; periodRules?: MatchPeriodRules | null };
+
+type PeriodSportRefObject = { sportId: string | null | undefined; periodRules?: MatchPeriodRules | null };
+
+export function unpackPeriodSportRef(ref: PeriodSportRef): { sportId: string | null | undefined; periodRules: MatchPeriodRules | null } {
+  if (ref !== null && ref !== undefined && typeof ref === 'object') {
+    const object = ref as PeriodSportRefObject;
+    return { sportId: object.sportId, periodRules: object.periodRules ?? null };
+  }
+  return { sportId: ref as string | null | undefined, periodRules: null };
+}
+
 export const DEFAULT_MATCH_PERIOD = '1T';
 
 const PERIOD_ALIAS_MAP: Record<string, string> = {
@@ -112,6 +139,10 @@ const DEFAULT_PERIOD_SEQUENCE = ['1T', '2T'] as const;
 
 const SPORT_PERIOD_SEQUENCE: Record<string, readonly string[]> = {
   hockey: ['Q1', 'Q2', 'Q3', 'Q4'],
+  // Cuatro cuartos de 15' con el descanso largo entre Q2 y Q3. Sin esta fila
+  // el deporte caia en dos tiempos: los botones decian "Fin de cuarto" y el
+  // selector solo ofrecia 1T y 2T.
+  'american-football': ['Q1', 'Q2', 'Q3', 'Q4'],
 };
 
 /**
@@ -121,7 +152,7 @@ const SPORT_PERIOD_SEQUENCE: Record<string, readonly string[]> = {
  * matchClock, localMatchData y el match center) y tiene que poder cargarse en
  * un test de Node sin arrastrar el catalogo de eventos entero.
  *
- * Solo necesita distinguir el hockey; el resto cae al default.
+ * Solo necesita distinguir los deportes de cuartos; el resto cae al default.
  */
 function periodSportBucket(sportId?: string | null) {
   const normalized = String(sportId || '').trim().toLowerCase();
@@ -129,7 +160,12 @@ function periodSportBucket(sportId?: string | null) {
   return normalized;
 }
 
-export function getPeriodSequence(sportId?: string | null): readonly string[] {
+const QUARTERS_SEQUENCE = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
+
+export function getPeriodSequence(ref?: PeriodSportRef): readonly string[] {
+  const { sportId, periodRules } = unpackPeriodSportRef(ref);
+  // El reglamento del torneo manda sobre el default del deporte.
+  if (periodRules) return periodRules.periods === 4 ? QUARTERS_SEQUENCE : DEFAULT_PERIOD_SEQUENCE;
   return SPORT_PERIOD_SEQUENCE[periodSportBucket(sportId)] ?? DEFAULT_PERIOD_SEQUENCE;
 }
 
@@ -148,14 +184,14 @@ function secondHalfOpener(sequence: readonly string[]) {
  * mano con vocabulario de mitades: en un partido de hockey se veia el cuarto
  * actual pero no se podia elegir ningun otro.
  */
-export function getClockPeriodOptions(sportId?: string | null): string[] {
+export function getClockPeriodOptions(sportId?: PeriodSportRef): string[] {
   const sequence = getPeriodSequence(sportId);
   const half = Math.floor(sequence.length / 2);
   return ['PRE', ...sequence.slice(0, half), 'HT', ...sequence.slice(half), 'ET', 'FT'];
 }
 
 /** Periodos en los que puede vivir un evento: los jugables, el suplementario y el cierre. */
-export function getEventPeriodOptions(sportId?: string | null): string[] {
+export function getEventPeriodOptions(sportId?: PeriodSportRef): string[] {
   return [...getPeriodSequence(sportId), 'ET', 'FT'];
 }
 
@@ -192,7 +228,7 @@ function resolveStartedPeriod(period: string, sequence: readonly string[]) {
   return period;
 }
 
-export function getEventPeriodForType(eventType: string, activePeriod: unknown, sportId?: string | null) {
+export function getEventPeriodForType(eventType: string, activePeriod: unknown, sportId?: PeriodSportRef) {
   const period = normalizeMatchPeriod(activePeriod);
   const sequence = getPeriodSequence(sportId);
 
@@ -208,7 +244,7 @@ export function getEventPeriodForType(eventType: string, activePeriod: unknown, 
   return period;
 }
 
-export function getNextActivePeriodAfterEvent(eventType: string, activePeriod: unknown, sportId?: string | null) {
+export function getNextActivePeriodAfterEvent(eventType: string, activePeriod: unknown, sportId?: PeriodSportRef) {
   const period = normalizeMatchPeriod(activePeriod);
   const sequence = getPeriodSequence(sportId);
 

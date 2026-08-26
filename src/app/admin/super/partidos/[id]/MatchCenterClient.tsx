@@ -15,11 +15,12 @@ import {
     joinOutcomeDetail,
     normalizeSportBucket,
     resolveMatchEventDefinitions,
+    getBaseMatchEventDefinitions,
     splitOutcomeDetail,
     type MatchEventDefinition,
 } from '@/lib/matchEventCatalog';
 import {
-    isGoalKickEventType,
+    formatYardsDetail,
     formatGoalKickDetailPrefix,
     formatMatchTimelineEventDescription,
     goalKickEffectivenessPercent,
@@ -44,7 +45,14 @@ import {
     getPeriodSequence,
     isPeriodTransitionEvent,
     normalizeMatchPeriod,
+    type PeriodSportRef,
 } from '@/lib/matchPeriods';
+import {
+    getAmericanFootballQuickActions,
+    readAmericanFootballRuleset,
+    toPeriodRules,
+    type AmericanFootballRuleset,
+} from '@/lib/americanFootballRules';
 import { formatClockSeconds, getPeriodOffsetSeconds, type MatchClockTransition } from '@/lib/matchClock';
 import { getSportLineupSize, getSportMatchProfile, isGoalCountingSport } from '@/lib/sportMatchProfile';
 import { useMatchClock } from '@/hooks/useMatchClock';
@@ -233,7 +241,7 @@ type PersistMatchWarnings = {
     clockNotPersisted?: boolean;
 };
 
-function normalizeMatchEvents(events: MatchRow['events'], sportId?: string | null): MatchEvent[] {
+function normalizeMatchEvents(events: MatchRow['events'], sportId?: PeriodSportRef): MatchEvent[] {
     if (!Array.isArray(events)) return [];
 
     let activePeriod = normalizeMatchPeriod(null);
@@ -560,6 +568,8 @@ type GuidedEventDraft = {
     /** Desenlace elegido cuando `definition.outcomes` existe (corner corto, stroke). Vacio = sin elegir. */
     outcomeId: string;
     isTemporary: boolean;
+    /** Yardas de la jugada (futbol americano). Vacio = sin dato. Negativas si retrocede. */
+    yards: string;
 };
 
 /**
@@ -805,6 +815,26 @@ function getEventButtonGlyph(type: string) {
         shootout_scored: 'SC',
         shootout_missed: 'SF',
         shootout_end: 'SX',
+        /* ── Futbol americano ──
+         * `touchdown` y `turnover_on_downs` chocaban en TD, y `timeout` con
+         * `touchback` en TO. */
+        touchdown: 'TD',
+        field_goal: 'FG',
+        extra_point: 'XP',
+        two_point_conversion: '2P',
+        safety: 'SF',
+        rush: 'CA',
+        pass_complete: 'PC',
+        pass_incomplete: 'PI',
+        first_down: '1D',
+        sack: 'SK',
+        forced_fumble: 'FF',
+        fumble: 'FU',
+        turnover_on_downs: 'PD',
+        punt: 'PU',
+        kickoff: 'KO',
+        touchback: 'TB',
+        timeout: 'TM',
     };
 
     return glyphs[type] || type.slice(0, 2).toUpperCase();
@@ -857,10 +887,24 @@ const HOCKEY_BUTTON_LABELS: Record<string, string> = {
     shootout_end: 'Fin shoot-outs',
 };
 
+/**
+ * Futbol americano: las etiquetas del catalogo ya entran en el boton. Lo que
+ * hace falta es que NO herede las de rugby: `penalty` es "Penalidad", no
+ * "Penal a los palos".
+ */
+const AMERICAN_FOOTBALL_BUTTON_LABELS: Record<string, string> = {
+    two_point_conversion: 'Conversión 2 pts',
+    pass_incomplete: 'Pase incompleto',
+    turnover_on_downs: 'Pérdida en downs',
+};
+
 function getEventButtonLabel(definition: MatchEventDefinition, sportId?: string | null) {
-    const labels = normalizeSportBucket(sportId) === 'hockey'
+    const bucket = normalizeSportBucket(sportId);
+    const labels = bucket === 'hockey'
         ? HOCKEY_BUTTON_LABELS
-        : RUGBY_BUTTON_LABELS;
+        : bucket === 'american-football'
+            ? AMERICAN_FOOTBALL_BUTTON_LABELS
+            : RUGBY_BUTTON_LABELS;
 
     return labels[definition.type] || definition.label;
 }
@@ -873,7 +917,16 @@ function getEventButtonLabel(definition: MatchEventDefinition, sportId?: string 
  */
 const QUICK_ACTIONS_BY_SPORT: Record<string, readonly string[]> = {
     hockey: ['goal', 'penalty_corner', 'penalty_stroke', 'shot_on_goal', 'green_card', 'yellow_card', 'red_card', 'foul'],
+    // Futbol americano no tiene fila: sus acciones salen del reglamento del
+    // torneo (tackle o flag), ver getAmericanFootballQuickActions.
 };
+
+/**
+ * Segunda fila de acciones rapidas: las JUGADAS. En futbol americano el
+ * operador carga una por snap, asi que no pueden vivir plegadas en "Mas
+ * acciones". Un deporte sin fila aca no muestra la segunda tira.
+ */
+const QUICK_PLAY_ACTIONS_BY_SPORT: Record<string, readonly string[]> = {};
 
 /**
  * Los eventos de reloj tambien van a mano, en su propia fila: inicio, fin de
@@ -884,9 +937,21 @@ const QUICK_CLOCK_ACTIONS_BY_SPORT: Record<string, readonly string[]> = {
     hockey: ['match_start', 'end_period', 'start_period', 'match_half', 'match_end'],
 };
 
-function getQuickActionTypes(sportId?: string | null): readonly string[] {
-    return QUICK_ACTIONS_BY_SPORT[normalizeSportBucket(sportId)] ?? [];
+function getQuickActionTypes(sportId: string | null | undefined, rules: AmericanFootballRuleset | null): readonly string[] {
+    const bucket = normalizeSportBucket(sportId);
+    if (bucket === 'american-football') return getAmericanFootballQuickActions(rules?.discipline ?? 'tackle').scoring;
+    return QUICK_ACTIONS_BY_SPORT[bucket] ?? [];
 }
+
+function getQuickPlayActionTypes(sportId: string | null | undefined, rules: AmericanFootballRuleset | null): readonly string[] {
+    const bucket = normalizeSportBucket(sportId);
+    if (bucket === 'american-football') return getAmericanFootballQuickActions(rules?.discipline ?? 'tackle').plays;
+    return QUICK_PLAY_ACTIONS_BY_SPORT[bucket] ?? [];
+}
+
+/** Tiempos muertos por mitad en futbol americano. Es estado del partido, no una estadistica. */
+const AMERICAN_FOOTBALL_TIMEOUTS_PER_HALF = 3;
+const SECOND_HALF_PERIODS = new Set(['Q3', 'Q4', '2T', 'ET', 'FT']);
 
 /**
  * Los cuatro numeros de la cabecera de Estadisticas, por deporte. Eran los de
@@ -907,6 +972,19 @@ function getSportKpis(stats: CompleteMatchStats, sportId?: string | null): { lab
         ];
     }
 
+    // Por club y no sumados: "turnovers 3" entre los dos no dice nada. Es el
+    // resumen que pide el deporte: puntos, touchdowns, primeros downs y
+    // posesiones perdidas.
+    if (bucket === 'american-football') {
+        const pair = (value: { home: number; away: number }) => `${value.home} · ${value.away}`;
+        return [
+            { label: 'Puntos', value: pair(stats.points) },
+            { label: 'Touchdowns', value: pair(stats.touchdowns) },
+            { label: 'Primeros downs', value: pair(stats.firstDowns) },
+            { label: 'Turnovers', value: pair(stats.turnovers) },
+        ];
+    }
+
     if (isGoalCountingSport(sportId)) {
         return [
             { label: 'Eventos cargados', value: String(stats.totalEvents) },
@@ -924,13 +1002,17 @@ function getSportKpis(stats: CompleteMatchStats, sportId?: string | null): { lab
     ];
 }
 
-function getQuickClockActionTypes(sportId?: string | null): readonly string[] {
-    return QUICK_CLOCK_ACTIONS_BY_SPORT[normalizeSportBucket(sportId)] ?? [];
+function getQuickClockActionTypes(sportId: string | null | undefined, rules: AmericanFootballRuleset | null): readonly string[] {
+    const bucket = normalizeSportBucket(sportId);
+    if (bucket === 'american-football') return getAmericanFootballQuickActions(rules?.discipline ?? 'tackle').clock;
+    return QUICK_CLOCK_ACTIONS_BY_SPORT[bucket] ?? [];
 }
 
 function getEventButtonMeta(definition: MatchEventDefinition, sportId?: string | null) {
-    if (definition.outcomes?.length) return 'Cómo terminó';
-    if (isGoalKickEventType(definition.type)) return 'Convertida / fallada';
+    if (definition.outcomes?.length) return definition.outcomePrompt ?? 'Cómo terminó';
+    // Por la definicion y no por el nombre del tipo: `penalty` es el penal a
+    // los palos en rugby y la penalidad en futbol americano.
+    if (definition.kickAtGoal) return 'Convertida / fallada';
     if (isPenaltyCommittedEvent(definition.type)) return 'Club + motivo';
     if (definition.points > 0) {
         // En hockey y futbol el marcador cuenta goles: "1 puntos" era un
@@ -960,10 +1042,44 @@ function requiresContestOutcome(eventType: string) {
         || eventType === 'maul';
 }
 
+/**
+ * Jugadas de futbol americano que se miden en yardas. Las yardas viajan en el
+ * detalle (`Yds: +7`) porque el evento no tiene campo numerico; el motor las
+ * lee con `parseYardsFromDetail`. Un sack son yardas negativas.
+ */
+const YARDAGE_EVENT_TYPES = new Set(['rush', 'pass_complete', 'sack', 'punt', 'kickoff', 'field_goal', 'penalty', 'touchdown']);
+
+function usesYards(definition: MatchEventDefinition) {
+    return YARDAGE_EVENT_TYPES.has(definition.type) && !definition.kickAtGoal;
+}
+
+/**
+ * Segundo jugador en futbol americano: un pase tiene dos protagonistas. El
+ * jugador del evento es quien lanza; el receptor va en el detalle. En el
+ * touchdown es al reves: el jugador es quien anota, y si fue de pase el
+ * lanzador va en el detalle.
+ */
+function getAmericanFootballSecondaryRole(eventType: string): { label: string; prefix: string } | null {
+    if (eventType === 'pass_complete') return { label: 'Receptor', prefix: 'Recibe' };
+    if (eventType === 'touchdown') return { label: 'Lanzador (si fue de pase)', prefix: 'Pase de' };
+    return null;
+}
+
 function formatGuidedEventDetail(draft: GuidedEventDraft) {
     const eventType = draft.definition.type;
     const baseLabel = draft.definition.label;
-    const customDetail = draft.detail.trim();
+    // El detalle que escribe el operador, mas lo que la jugada trae por su
+    // cuenta: el segundo jugador y las yardas. Van ANTES del texto libre para
+    // que el parser los encuentre aunque el operador escriba lo que quiera.
+    const secondaryRole = getAmericanFootballSecondaryRole(eventType);
+    const secondaryLine = secondaryRole && draft.secondaryPlayerName.trim()
+        ? `${secondaryRole.prefix}: ${draft.secondaryPlayerName.trim()}`
+        : '';
+    const yardsValue = Number(draft.yards.trim());
+    const yardsLine = usesYards(draft.definition) && draft.yards.trim() !== '' && Number.isFinite(yardsValue)
+        ? formatYardsDetail(yardsValue)
+        : '';
+    const customDetail = [secondaryLine, yardsLine, draft.detail.trim()].filter(Boolean).join(' | ');
 
     // Eventos con desenlace declarado (corner corto, penal stroke): la marca
     // que suma el punto la escribe joinOutcomeDetail, nunca este formateador.
@@ -971,19 +1087,21 @@ function formatGuidedEventDetail(draft: GuidedEventDraft) {
         return joinOutcomeDetail(draft.definition, draft.outcomeId, customDetail);
     }
 
-    if (eventType === 'conversion') {
+    // Los tres tiros a los palos se reconocen por `kickAtGoal`, no por el
+    // nombre: en futbol americano `penalty` es una penalidad y no se patea.
+    if (eventType === 'conversion' && draft.definition.kickAtGoal) {
         const human = draft.goalKickResult === 'made' ? 'Conversion convertida' : 'Conversion fallada';
         const extra = customDetail ? ` | ${customDetail}` : '';
         return `${formatGoalKickDetailPrefix(draft.goalKickResult === 'made')} ${human}${extra}`;
     }
 
-    if (eventType === 'penalty' || eventType === 'penalty_goal') {
+    if ((eventType === 'penalty' || eventType === 'penalty_goal') && draft.definition.kickAtGoal) {
         const human = draft.goalKickResult === 'made' ? 'Penal convertido' : 'Penal fallado';
         const extra = customDetail ? ` | ${customDetail}` : '';
         return `${formatGoalKickDetailPrefix(draft.goalKickResult === 'made')} ${human}${extra}`;
     }
 
-    if (eventType === 'drop_goal') {
+    if (eventType === 'drop_goal' && draft.definition.kickAtGoal) {
         const human = draft.goalKickResult === 'made' ? 'Drop convertido' : 'Drop fallado';
         const extra = customDetail ? ` | ${customDetail}` : '';
         return `${formatGoalKickDetailPrefix(draft.goalKickResult === 'made')} ${human}${extra}`;
@@ -1150,10 +1268,11 @@ function normalizePointsRules(rawRules: ReturnType<typeof StandingsEngine.resolv
     };
 }
 
-function getLineupSize(lineups: MatchLineups | null | undefined, sportId?: string | null) {
+function getLineupSize(lineups: MatchLineups | null | undefined, fallbackSize: number) {
     const maxCount = Math.max(lineups?.home?.length ?? 0, lineups?.away?.length ?? 0);
-    // Lo ya cargado manda: solo se cae al tamano del deporte cuando no hay nada.
-    return maxCount > 0 ? maxCount : getSportLineupSize(sportId);
+    // Lo ya cargado manda: solo se cae al tamano del deporte (o del reglamento
+    // del torneo) cuando no hay nada.
+    return maxCount > 0 ? maxCount : fallbackSize;
 }
 
 function normalizeLineupRatingValue(value: unknown) {
@@ -1458,7 +1577,13 @@ async function fetchMatchConfiguration(
     // Un fallo transitorio de las lecturas no puede degradar el partido a
     // rugby: null significa "no se supo nunca", no "se dejo de saber".
     fallbackSportId: string | null = null,
-): Promise<{ pointsRules: PointsRules; eventDefinitions: MatchEventDefinition[]; sportId: string | null }> {
+): Promise<{
+    pointsRules: PointsRules;
+    eventDefinitions: MatchEventDefinition[];
+    sportId: string | null;
+    /** Reglamento de futbol americano del torneo (tackle/flag, periodos, plantel). null en los demas deportes. */
+    americanFootball: AmericanFootballRuleset | null;
+}> {
     try {
         const { createClient } = await import('@/lib/supabase/client');
         const supabase = createClient();
@@ -1507,12 +1632,16 @@ async function fetchMatchConfiguration(
                 tournamentRuleset,
             }),
             sportId: resolvedSportId,
+            americanFootball: normalizeSportBucket(resolvedSportId) === 'american-football'
+                ? readAmericanFootballRuleset(tournamentRuleset)
+                : null,
         };
     } catch {
         return {
             pointsRules: DEFAULT_POINTS_RULES,
             eventDefinitions: getDefaultMatchEventDefinitions(fallbackSportId),
             sportId: fallbackSportId,
+            americanFootball: null,
         };
     }
 }
@@ -1634,6 +1763,37 @@ export default function MatchCenterClient({
     useEffect(() => {
         matchSportIdRef.current = matchSportId;
     }, [matchSportId]);
+    /**
+     * Reglamento del torneo (futbol americano: tackle o flag, cuartos o
+     * tiempos, plantel, tiempos muertos). null en los demas deportes y hasta
+     * que llega la configuracion. Todo lo que dependia del deporte a secas
+     * —periodos, reloj, planilla— lee `sportRef` / `matchProfile`, que lo
+     * incorporan; sin reglamento dan exactamente lo de siempre.
+     */
+    const [matchRules, setMatchRules] = useState<AmericanFootballRuleset | null>(null);
+    const matchRulesRef = useRef<AmericanFootballRuleset | null>(null);
+    useEffect(() => {
+        matchRulesRef.current = matchRules;
+    }, [matchRules]);
+    const sportRef = useMemo<PeriodSportRef>(
+        () => ({ sportId: matchSportId, periodRules: toPeriodRules(matchRules) }),
+        [matchSportId, matchRules],
+    );
+    const sportRefRef = useRef<PeriodSportRef>(sportRef);
+    useEffect(() => {
+        sportRefRef.current = sportRef;
+    }, [sportRef]);
+    const matchProfile = useMemo(() => {
+        const base = getSportMatchProfile(matchSportId);
+        return matchRules
+            ? { ...base, lineupSize: matchRules.roster.size, startersCount: matchRules.roster.starters }
+            : base;
+    }, [matchSportId, matchRules]);
+    const matchProfileRef = useRef(matchProfile);
+    useEffect(() => {
+        matchProfileRef.current = matchProfile;
+    }, [matchProfile]);
+    const timeoutsPerHalf = matchRules?.timeoutsPerHalf ?? AMERICAN_FOOTBALL_TIMEOUTS_PER_HALF;
 
     /* ─── RELOJ (aislado: no comparte estado con match ni con los eventos) ─── */
 
@@ -1668,7 +1828,7 @@ export default function MatchCenterClient({
 
     const clock = useMatchClock({
         initialClock: initialMatch.clock,
-        sportId: matchSportId,
+        sportId: sportRef,
         kickoffIso: initialMatch.date_time,
         initialStatus: initialMatch.status,
         persistTransition: persistClockTransition,
@@ -1684,7 +1844,7 @@ export default function MatchCenterClient({
     const [undoCandidate, setUndoCandidate] = useState<UndoCandidate | null>(null);
     const [lineupSizeInput, setLineupSizeInput] = useState(() => String(getLineupSize(
         initialMatch.lineups,
-        initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null,
+        getSportLineupSize(initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null),
     )));
     const [quickLineupDrafts, setQuickLineupDrafts] = useState<{ home: string; away: string }>(() => ({
         home: formatQuickLineupDraft(initialLineups.home),
@@ -1696,18 +1856,21 @@ export default function MatchCenterClient({
     });
     const [dateTimeDraft, setDateTimeDraft] = useState(() => toDateTimeLocalInput(initialMatch.date_time));
     const availableEventDefinitions = useMemo(
-        () => mergeMatchEventDefinitions(getDefaultMatchEventDefinitions(matchSportId ?? 'rugby'), eventDefinitions),
-        [eventDefinitions, matchSportId],
+        () => mergeMatchEventDefinitions(
+            getBaseMatchEventDefinitions(matchSportId ?? 'rugby', matchRules ? { americanFootball: matchRules } : null),
+            eventDefinitions,
+        ),
+        [eventDefinitions, matchSportId, matchRules],
     );
     const eventDefinitionMap = useMemo(() => buildMatchEventDefinitionMap(availableEventDefinitions), [availableEventDefinitions]);
     // Tamano de planilla del deporte: rugby 23, hockey 16, basquet 12.
-    const sportLineupSize = useMemo(() => getSportLineupSize(matchSportId), [matchSportId]);
-    // Periodos del deporte para los selectores: Q1..Q4 en hockey, 1T/2T en el resto.
-    const clockPeriodOptions = useMemo(() => getClockPeriodOptions(matchSportId), [matchSportId]);
-    const eventPeriodOptions = useMemo(() => getEventPeriodOptions(matchSportId), [matchSportId]);
+    const sportLineupSize = matchProfile.lineupSize;
+    // Periodos del deporte (o del reglamento del torneo) para los selectores.
+    const clockPeriodOptions = useMemo(() => getClockPeriodOptions(sportRef), [sportRef]);
+    const eventPeriodOptions = useMemo(() => getEventPeriodOptions(sportRef), [sportRef]);
     useEffect(() => {
-        persistedEventsRef.current = normalizeMatchEvents(match.events, matchSportId);
-    }, [match.events, matchSportId]);
+        persistedEventsRef.current = normalizeMatchEvents(match.events, sportRef);
+    }, [match.events, sportRef]);
 
     useEffect(() => {
         persistedLineupsRef.current = normalizeMatchLineups(match.lineups);
@@ -1848,7 +2011,7 @@ export default function MatchCenterClient({
             return;
         }
 
-        const nextSize = Math.max(getLineupSize(localLineupsRef.current), parsedEntries.length);
+        const nextSize = Math.max(getLineupSize(localLineupsRef.current, matchProfileRef.current.lineupSize), parsedEntries.length);
         setLineupSizeInput(String(nextSize));
         setLocalLineups((prev) => {
             const nextHome = buildLineupTemplate(nextSize, team === 'home' ? [] : prev.home);
@@ -1918,10 +2081,10 @@ export default function MatchCenterClient({
     }, [eventPlayerOptions]);
 
     const applyMatchResponse = useCallback((nextMatch: MatchRow, options?: ApplyMatchResponseOptions) => {
-        const nextEvents = normalizeMatchEvents(
-            nextMatch.events,
-            nextMatch.tournament?.sport_id ?? nextMatch.tournament?.sportId ?? matchSportIdRef.current,
-        );
+        const nextEvents = normalizeMatchEvents(nextMatch.events, {
+            sportId: nextMatch.tournament?.sport_id ?? nextMatch.tournament?.sportId ?? matchSportIdRef.current,
+            periodRules: toPeriodRules(matchRulesRef.current),
+        });
         const nextLineups = normalizeMatchLineups(nextMatch.lineups);
         const nextScore = normalizeMatchScore(nextMatch.score);
         const currentLocalEvents = localEventsRef.current;
@@ -1961,7 +2124,7 @@ export default function MatchCenterClient({
         setLocalEvents(resolvedEvents);
         setLocalLineups(resolvedLineups);
         setLocalPoints(toLocalPoints(nextMatch));
-        setLineupSizeInput(String(getLineupSize(resolvedLineups)));
+        setLineupSizeInput(String(getLineupSize(resolvedLineups, matchProfileRef.current.lineupSize)));
         setDateTimeDraft(toDateTimeLocalInput(nextMatch.date_time));
     }, []);
 
@@ -2192,6 +2355,7 @@ export default function MatchCenterClient({
 
         setPointsRules(configuration.pointsRules);
         setMatchSportId(configuration.sportId);
+        setMatchRules(configuration.americanFootball);
         setEventDefinitions(configuration.eventDefinitions);
     }, [match.phase_id, match.round_id, match.tournament_id]);
 
@@ -2279,7 +2443,7 @@ export default function MatchCenterClient({
                 // efecto de match.events re-normaliza) y se enciende un dirty
                 // fantasma con eventos legacy sin order/period.
                 const incomingEvents = Array.isArray(updated.events)
-                    ? normalizeMatchEvents(updated.events as MatchRow['events'], matchSportIdRef.current)
+                    ? normalizeMatchEvents(updated.events as MatchRow['events'], sportRefRef.current)
                     : null;
                 const incomingLineups = updated.lineups
                     ? normalizeMatchLineups(updated.lineups as MatchRow['lineups'])
@@ -2578,7 +2742,7 @@ export default function MatchCenterClient({
     const openGuidedEvent = useCallback((definition: MatchEventDefinition) => {
         // Minuto CALCULADO contra el ancla, no leido de un snapshot.
         const minute = clock.readEventMinute();
-        const period = getEventPeriodForType(definition.type, clock.period, matchSportIdRef.current);
+        const period = getEventPeriodForType(definition.type, clock.period, sportRefRef.current);
 
         setGuidedEvent({
             definition,
@@ -2595,6 +2759,7 @@ export default function MatchCenterClient({
             contestOutcome: requiresContestOutcome(definition.type) ? 'won' : '',
             outcomeId: '',
             isTemporary: false,
+            yards: '',
         });
     }, [clock]);
 
@@ -2654,7 +2819,13 @@ export default function MatchCenterClient({
         // Un corner corto sin desenlace no es un gol ni una estadistica: no se
         // guarda a medias, se pide el resultado.
         if (guidedEvent.definition.outcomes?.length && !guidedEvent.outcomeId) {
-            setSaveMsg({ type: 'warn', text: `Elegí cómo terminó el ${guidedEvent.definition.label.toLowerCase()} antes de guardar.` });
+            const prompt = guidedEvent.definition.outcomePrompt;
+            setSaveMsg({
+                type: 'warn',
+                text: prompt
+                    ? `Elegí ${prompt.toLowerCase()} antes de guardar.`
+                    : `Elegí cómo terminó el ${guidedEvent.definition.label.toLowerCase()} antes de guardar.`,
+            });
             return;
         }
 
@@ -2690,7 +2861,7 @@ export default function MatchCenterClient({
         const eventPeriod = getEventPeriodForType(
             guidedEvent.definition.type,
             clock.period || guidedEvent.period,
-            matchSportIdRef.current,
+            sportRefRef.current,
         );
         const previousEvents = localEventsRef.current;
         const nextEvent: MatchEvent = {
@@ -2885,13 +3056,13 @@ export default function MatchCenterClient({
     }, [clock, persistMatchPatch, reportClockError, scheduleSaveMsgClear, undoCandidate]);
 
     const applyLineupSize = useCallback((requestedSize?: number) => {
-        const nextSize = requestedSize ?? getPositiveInteger(lineupSizeInput, getLineupSize(localLineups, matchSportId));
+        const nextSize = requestedSize ?? getPositiveInteger(lineupSizeInput, getLineupSize(localLineups, matchProfileRef.current.lineupSize));
         setLineupSizeInput(String(nextSize));
         setLocalLineups((prev) => ({
             home: buildLineupTemplate(nextSize, prev.home),
             away: buildLineupTemplate(nextSize, prev.away),
         }));
-    }, [lineupSizeInput, localLineups, matchSportId]);
+    }, [lineupSizeInput, localLineups]);
 
     // Fill a team's planilla straight from its tournament roster (the fixed
     // 23 when the tournament uses plantel fijo, or the full squad otherwise).
@@ -2906,9 +3077,9 @@ export default function MatchCenterClient({
             return;
         }
 
-        const profile = getSportMatchProfile(matchSportIdRef.current);
+        const profile = matchProfileRef.current;
         const nextSize = Math.max(
-            getLineupSize(localLineupsRef.current, matchSportIdRef.current),
+            getLineupSize(localLineupsRef.current, profile.lineupSize),
             roster.length,
             profile.lineupSize,
         );
@@ -2953,9 +3124,9 @@ export default function MatchCenterClient({
             return;
         }
 
-        const profile = getSportMatchProfile(matchSportIdRef.current);
+        const profile = matchProfileRef.current;
         const nextSize = Math.max(
-            getLineupSize(localLineupsRef.current, matchSportIdRef.current),
+            getLineupSize(localLineupsRef.current, profile.lineupSize),
             homeRoster.length,
             awayRoster.length,
             profile.lineupSize,
@@ -3226,7 +3397,7 @@ export default function MatchCenterClient({
         // El corte de mitad sale del reloj del deporte, no de un 40 fijo:
         // rugby 40', futbol 45', hockey 30'. Con el numero clavado, todos los
         // goles del futbol entre el 41 y el 45 caian en el segundo tiempo.
-        const halfTimeMinute = getPeriodOffsetSeconds(matchSportId, '2T') / 60;
+        const halfTimeMinute = getPeriodOffsetSeconds(sportRef, '2T') / 60;
 
         events.forEach((event) => {
             const points = getConfiguredEventPoints(event, eventDefinitionMap);
@@ -3328,7 +3499,7 @@ export default function MatchCenterClient({
             bonusOffText,
             bonusDefText,
         };
-    }, [activeTab, awayName, availableEventDefinitions, eventDefinitionMap, events, homeName, match.status, pointsRules, score]);
+    }, [activeTab, awayName, availableEventDefinitions, eventDefinitionMap, events, homeName, match.status, pointsRules, score, sportRef]);
     const {
         ptScore,
         stScore,
@@ -3437,8 +3608,8 @@ export default function MatchCenterClient({
         [eventDefinitionMap, events],
     );
     const completeStatTabs = useMemo(
-        () => buildCompleteStatTabs(completeMatchStats, homeName, awayName, { sportId: matchSportId }),
-        [awayName, completeMatchStats, homeName, matchSportId],
+        () => buildCompleteStatTabs(completeMatchStats, homeName, awayName, { sportId: matchSportId, discipline: matchRules?.discipline ?? null }),
+        [awayName, completeMatchStats, homeName, matchSportId, matchRules],
     );
     const firstStatsTabId = completeStatTabs[0]?.id ?? 'marcador';
     const effectiveStatsPanelTab = completeStatTabs.some((tab) => tab.id === statsPanelTab) ? statsPanelTab : firstStatsTabId;
@@ -3482,7 +3653,7 @@ export default function MatchCenterClient({
         const hasClubCards = availableEventDefinitions.some((definition) => definition.type === 'card_yellow' || definition.type === 'card_red');
         // Con dos tiempos, inicio/fin de periodo duplican a inicio/entretiempo/
         // final y se esconden. Con cuartos son LOS eventos que mueven el reloj.
-        const hidesGenericPeriodEvents = hasMatchClockEvents && getPeriodSequence(matchSportId).length <= 2;
+        const hidesGenericPeriodEvents = hasMatchClockEvents && getPeriodSequence(sportRef).length <= 2;
         const visibleDefinitions = availableEventDefinitions.filter((definition) => {
             if (definition.type === 'penalty_goal' && hasPenalty) return false;
             if ((definition.type === 'start_period' || definition.type === 'end_period') && hidesGenericPeriodEvents) return false;
@@ -3497,26 +3668,52 @@ export default function MatchCenterClient({
                 definitions: visibleDefinitions.filter((definition) => getEventButtonGroup(definition) === group),
             }))
             .filter((group) => group.definitions.length > 0);
-    }, [availableEventDefinitions, matchSportId]);
+    }, [availableEventDefinitions, sportRef]);
     // Las acciones grandes del deporte (si tiene) y el resto plegado.
     const quickActionDefinitions = useMemo(
-        () => getQuickActionTypes(matchSportId)
+        () => getQuickActionTypes(matchSportId, matchRules)
             .map((type) => eventDefinitionMap[type])
             .filter((definition): definition is MatchEventDefinition => Boolean(definition)),
-        [eventDefinitionMap, matchSportId],
+        [eventDefinitionMap, matchSportId, matchRules],
+    );
+    const quickPlayDefinitions = useMemo(
+        () => getQuickPlayActionTypes(matchSportId, matchRules)
+            .map((type) => eventDefinitionMap[type])
+            .filter((definition): definition is MatchEventDefinition => Boolean(definition)),
+        [eventDefinitionMap, matchSportId, matchRules],
     );
     const quickClockDefinitions = useMemo(
-        () => getQuickClockActionTypes(matchSportId)
+        () => getQuickClockActionTypes(matchSportId, matchRules)
             .map((type) => eventDefinitionMap[type])
             .filter((definition): definition is MatchEventDefinition => Boolean(definition)),
-        [eventDefinitionMap, matchSportId],
+        [eventDefinitionMap, matchSportId, matchRules],
     );
     const secondaryPanelGroups = useMemo(() => {
-        const quick = new Set([...quickActionDefinitions, ...quickClockDefinitions].map((definition) => definition.type));
+        const quick = new Set([...quickActionDefinitions, ...quickPlayDefinitions, ...quickClockDefinitions].map((definition) => definition.type));
         return eventPanelGroups
             .map((group) => ({ ...group, definitions: group.definitions.filter((definition) => !quick.has(definition.type)) }))
             .filter((group) => group.definitions.length > 0);
-    }, [eventPanelGroups, quickActionDefinitions, quickClockDefinitions]);
+    }, [eventPanelGroups, quickActionDefinitions, quickPlayDefinitions, quickClockDefinitions]);
+    /**
+     * Tiempos muertos que le quedan a cada club en la mitad actual. Tres por
+     * mitad; se cuentan los `timeout` cargados en los periodos de esa mitad.
+     * Solo en futbol americano: en los demas deportes es null y no se dibuja.
+     */
+    const timeoutsRemaining = useMemo(() => {
+        if (normalizeSportBucket(matchSportId) !== 'american-football') return null;
+        const inSecondHalf = SECOND_HALF_PERIODS.has(normalizeMatchPeriod(clock.period, 'PRE'));
+        const used = { home: 0, away: 0 };
+        events.forEach((event) => {
+            if (event.type !== 'timeout' || (event.team !== 'home' && event.team !== 'away')) return;
+            if (SECOND_HALF_PERIODS.has(normalizeMatchPeriod(event.period, '1T')) !== inSecondHalf) return;
+            used[event.team] += 1;
+        });
+        return {
+            home: Math.max(0, timeoutsPerHalf - used.home),
+            away: Math.max(0, timeoutsPerHalf - used.away),
+            half: inSecondHalf ? 'segunda' : 'primera',
+        };
+    }, [events, clock.period, matchSportId, timeoutsPerHalf]);
     // Lo ultimo que el operador CARGO (mayor `order`), no lo ultimo cronologico.
     const lastLoadedEvent = useMemo(() => events.reduce<{ event: MatchEvent; order: number } | null>((acc, event, index) => {
         const order = getEventOrder(event, index);
@@ -3531,7 +3728,7 @@ export default function MatchCenterClient({
      */
     const primaryClockAction = useMemo(() => {
         const period = normalizeMatchPeriod(clock.period, 'PRE');
-        const sequence = getPeriodSequence(matchSportId);
+        const sequence = getPeriodSequence(sportRef);
         const pick = (type: string) => eventDefinitionMap[type] ?? null;
         const withHint = (definition: MatchEventDefinition | null, hint: string) => (definition ? { definition, hint } : null);
 
@@ -3541,8 +3738,8 @@ export default function MatchCenterClient({
         const lastType = lastLoadedEvent?.type;
         const justClosedPeriod = (lastType === 'end_period' || lastType === 'match_half') && !clock.isRunning;
         if ((period === 'HT' || justClosedPeriod) && pick('start_period')) {
-            const opener = period === 'HT' ? getNextActivePeriodAfterEvent('start_period', period, matchSportId) : period;
-            return withHint(pick('start_period'), `Lleva el reloj a ${formatClockSeconds(getPeriodOffsetSeconds(matchSportId, opener))}`);
+            const opener = period === 'HT' ? getNextActivePeriodAfterEvent('start_period', period, sportRef) : period;
+            return withHint(pick('start_period'), `Lleva el reloj a ${formatClockSeconds(getPeriodOffsetSeconds(sportRef, opener))}`);
         }
 
         const lastPlayable = sequence[sequence.length - 1];
@@ -3553,7 +3750,7 @@ export default function MatchCenterClient({
         const closes = `Cierra ${getMatchPeriodLabel(period).toLowerCase()}`;
         if (nextInSequence === secondHalfOpener && pick('match_half')) return withHint(pick('match_half'), closes);
         return withHint(pick('end_period') ?? pick('match_half'), closes);
-    }, [clock.isRunning, clock.period, eventDefinitionMap, lastLoadedEvent, matchSportId]);
+    }, [clock.isRunning, clock.period, eventDefinitionMap, lastLoadedEvent, sportRef]);
     // Un solo boton de reloj con tres estados en vez de cuatro botones de
     // los que siempre hay dos o tres apagados.
     const clockToggle = canPauseClock
@@ -4308,6 +4505,18 @@ export default function MatchCenterClient({
                                     <span className="live-clock-state">
                                         {clock.isRunning ? 'En juego' : clock.hasProgress ? 'Pausado' : 'Sin iniciar'}
                                     </span>
+                                    {timeoutsRemaining ? (
+                                        <span
+                                            className="live-clock-timeouts"
+                                            title={`Tiempos muertos que quedan en la ${timeoutsRemaining.half} mitad`}
+                                            aria-label={`Tiempos muertos: ${homeName} ${timeoutsRemaining.home}, ${awayName} ${timeoutsRemaining.away}`}
+                                        >
+                                            <span>{homeName}</span>
+                                            <span aria-hidden="true">{'●'.repeat(timeoutsRemaining.home)}{'○'.repeat(Math.max(0, timeoutsPerHalf - timeoutsRemaining.home))}</span>
+                                            <span>{awayName}</span>
+                                            <span aria-hidden="true">{'●'.repeat(timeoutsRemaining.away)}{'○'.repeat(Math.max(0, timeoutsPerHalf - timeoutsRemaining.away))}</span>
+                                        </span>
+                                    ) : null}
                                 </div>
                                 {/* El periodo activo, imposible de confundir: una tira con
                                   * todos los del deporte y el actual encendido. Tocar uno
@@ -4410,7 +4619,7 @@ export default function MatchCenterClient({
                                         type="button"
                                         className="mc-btn live-match-clock-btn"
                                         onClick={() => clock.rebaseToPeriodStart(clock.period).catch(reportClockError)}
-                                        title={`Llevar el reloj al inicio del periodo (${formatClockSeconds(getPeriodOffsetSeconds(matchSportId, clock.period))})`}
+                                        title={`Llevar el reloj al inicio del periodo (${formatClockSeconds(getPeriodOffsetSeconds(sportRef, clock.period))})`}
                                     >
                                         Ir al inicio del periodo
                                     </button>
@@ -4453,6 +4662,31 @@ export default function MatchCenterClient({
                                                 </button>
                                             ))}
                                         </div>
+                                        {quickPlayDefinitions.length > 0 ? (
+                                            <>
+                                                <div className="live-event-group-title live-quick-subtitle">
+                                                    <span>Jugadas</span>
+                                                    <small>Una por snap: las yardas se cargan en el paso 3</small>
+                                                </div>
+                                                <div className="live-quick-grid live-quick-grid-clock">
+                                                    {quickPlayDefinitions.map((definition) => (
+                                                        <button
+                                                            key={definition.type}
+                                                            type="button"
+                                                            className="live-event-button live-quick-button"
+                                                            data-tone={getEventButtonTone(definition)}
+                                                            data-event-type={definition.type}
+                                                            aria-label={`Cargar ${definition.label}`}
+                                                            onClick={() => openGuidedEvent(definition)}
+                                                        >
+                                                            <span className="live-event-glyph">{getEventButtonGlyph(definition.type)}</span>
+                                                            <span className="live-event-label">{getEventButtonLabel(definition, matchSportId)}</span>
+                                                            <span className="live-event-meta">{getEventButtonMeta(definition, matchSportId)}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </>
+                                        ) : null}
                                         {quickClockDefinitions.length > 0 ? (
                                             <>
                                                 <div className="live-event-group-title live-quick-subtitle">
@@ -4827,14 +5061,14 @@ export default function MatchCenterClient({
                                         // Un evento de reloj mueve el reloj: se dice ANTES de
                                         // confirmar, para que "Fin de cuarto" nunca sea sorpresa.
                                         const type = guidedEvent.definition.type;
-                                        const next = getNextActivePeriodAfterEvent(type, clock.period, matchSportId);
+                                        const next = getNextActivePeriodAfterEvent(type, clock.period, sportRef);
                                         const at = formatClockSeconds(clock.elapsedSeconds);
                                         const nextLabel = getMatchPeriodLabel(next).toLowerCase();
                                         let effect: string;
                                         if (type === 'match_start' || type === 'start_period') {
                                             effect = clock.isRunning
                                                 ? `El reloj sigue corriendo en ${at}. Se registra el inicio de ${nextLabel}.`
-                                                : `El reloj se lleva a ${formatClockSeconds(getPeriodOffsetSeconds(matchSportId, next))}, listo para iniciar ${nextLabel}.`;
+                                                : `El reloj se lleva a ${formatClockSeconds(getPeriodOffsetSeconds(sportRef, next))}, listo para iniciar ${nextLabel}.`;
                                         } else if (type === 'match_end') {
                                             effect = `El reloj queda pausado en ${at} y el partido pasa a final.`;
                                         } else {
@@ -4844,7 +5078,7 @@ export default function MatchCenterClient({
                                     })()}
                                     {guidedEvent.definition.outcomes?.length ? (
                                         <div className="guided-option-block">
-                                            <span>¿Cómo terminó?</span>
+                                            <span>{guidedEvent.definition.outcomePrompt ? `${guidedEvent.definition.outcomePrompt}?` : '¿Cómo terminó?'}</span>
                                             <div className="guided-outcome-grid" role="radiogroup" aria-label="Desenlace">
                                                 {guidedEvent.definition.outcomes.map((outcome) => (
                                                     <button
@@ -4857,7 +5091,10 @@ export default function MatchCenterClient({
                                                         onClick={() => setGuidedEvent((current) => current ? { ...current, outcomeId: outcome.id } : current)}
                                                     >
                                                         <strong>{outcome.label}</strong>
-                                                        <small>{outcome.scores ? `+${guidedEvent.definition.points} · suma` : 'No suma'}</small>
+                                                        {/* Sin puntos en juego (primer down, fumble) la nota "No suma" es ruido. */}
+                                                        {guidedEvent.definition.points > 0 ? (
+                                                            <small>{outcome.scores ? `+${guidedEvent.definition.points} · suma` : 'No suma'}</small>
+                                                        ) : null}
                                                     </button>
                                                 ))}
                                             </div>
@@ -4882,7 +5119,7 @@ export default function MatchCenterClient({
                                         <label>
                                             <span>Periodo</span>
                                             <input
-                                                value={getMatchPeriodLabel(getEventPeriodForType(guidedEvent.definition.type, clock.period || guidedEvent.period, matchSportId))}
+                                                value={getMatchPeriodLabel(getEventPeriodForType(guidedEvent.definition.type, clock.period || guidedEvent.period, sportRef))}
                                                 readOnly
                                                 title="El evento se guarda en el periodo activo del partido."
                                             />
@@ -4901,7 +5138,7 @@ export default function MatchCenterClient({
                                         )}
                                     </div>
 
-                                    {isGoalKickEventType(guidedEvent.definition.type) && (
+                                    {guidedEvent.definition.kickAtGoal && (
                                         <div className="guided-option-block">
                                             <span>¿Entró entre los palos? (puntos y estadísticas)</span>
                                             <div className="guided-toggle-row">
@@ -4960,9 +5197,15 @@ export default function MatchCenterClient({
                                         </label>
                                     )}
 
-                                    {(guidedEvent.definition.type === 'substitution' || guidedEvent.definition.type === 'try') && guidedEvent.team && (
+                                    {(guidedEvent.definition.type === 'substitution' || guidedEvent.definition.type === 'try' || getAmericanFootballSecondaryRole(guidedEvent.definition.type)) && guidedEvent.team && (
                                         <label className="guided-secondary-select">
-                                            <span>{guidedEvent.definition.type === 'try' ? 'Asistencia opcional' : 'Jugador que entra'}</span>
+                                            <span>
+                                                {guidedEvent.definition.type === 'try'
+                                                    ? 'Asistencia opcional'
+                                                    : guidedEvent.definition.type === 'substitution'
+                                                        ? 'Jugador que entra'
+                                                        : getAmericanFootballSecondaryRole(guidedEvent.definition.type)?.label}
+                                            </span>
                                             <select
                                                 value={guidedEvent.secondaryPlayerName}
                                                 onChange={(event) => selectGuidedSecondaryPlayer(event.target.value)}
@@ -4987,6 +5230,19 @@ export default function MatchCenterClient({
                                         </label>
                                     )}
 
+                                    {usesYards(guidedEvent.definition) && (
+                                        <label className="guided-detail-text">
+                                            <span>Yardas (negativas si retrocede)</span>
+                                            <input
+                                                type="number"
+                                                inputMode="numeric"
+                                                step={1}
+                                                value={guidedEvent.yards}
+                                                onChange={(event) => setGuidedEvent((current) => current ? { ...current, yards: event.target.value } : current)}
+                                                placeholder={guidedEvent.definition.type === 'sack' ? 'Ej: -8' : 'Ej: 12'}
+                                            />
+                                        </label>
+                                    )}
                                     {!isPenaltyCommittedEvent(guidedEvent.definition.type) && (
                                         <label className="guided-detail-text">
                                             <span>Detalle opcional</span>

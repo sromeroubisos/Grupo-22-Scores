@@ -2,6 +2,7 @@ import {
     normalizeSportBucket,
     outcomeScores,
     readOutcomeId,
+    resolveOutcomeId,
     type MatchEventDefinition,
 } from './matchEventCatalog.ts';
 import {
@@ -9,6 +10,7 @@ import {
     isGoalKickMade,
     goalKickEffectivenessPercent,
     parseKickMetersFromDetail,
+    parseYardsFromDetail,
     isContestWonDetail,
     isContestLostDetail,
 } from './matchEventStats.ts';
@@ -64,12 +66,55 @@ export type CompleteMatchStats = {
     /** Definicion por shoot-out. NO entra en el marcador ni en `points`. */
     shootoutScored: TeamMetricPair;
     shootoutMissed: TeamMetricPair;
-    /* ── Futbol americano ── */
+    /* ── Futbol americano ──
+     * `touchdowns`, `fieldGoals`, `extraPoints` y `twoPointConversions` son los
+     * CONVERTIDOS; los intentos van aparte y los fallados son la resta, igual
+     * que el corner corto de hockey. */
     touchdowns: TeamMetricPair;
+    touchdownsRushing: TeamMetricPair;
+    touchdownsPassing: TeamMetricPair;
+    /** Devoluciones de intercepcion y de fumble. */
+    touchdownsDefensive: TeamMetricPair;
+    /** Devoluciones de kickoff y de punt. */
+    touchdownsReturn: TeamMetricPair;
     fieldGoals: TeamMetricPair;
+    fieldGoalAttempts: TeamMetricPair;
+    fieldGoalsBlocked: TeamMetricPair;
     extraPoints: TeamMetricPair;
+    extraPointAttempts: TeamMetricPair;
     twoPointConversions: TeamMetricPair;
+    twoPointAttempts: TeamMetricPair;
     safeties: TeamMetricPair;
+    rushes: TeamMetricPair;
+    rushYards: TeamMetricPair;
+    passAttempts: TeamMetricPair;
+    passCompletions: TeamMetricPair;
+    passYards: TeamMetricPair;
+    firstDowns: TeamMetricPair;
+    /** Sacks HECHOS por la defensa del equipo. Los recibidos son los del rival. */
+    sacks: TeamMetricPair;
+    forcedFumbles: TeamMetricPair;
+    /** Fumbles SOLTADOS por el equipo, los recupere quien los recupere. */
+    fumbles: TeamMetricPair;
+    /** De esos, los que recupero el rival. */
+    fumblesLost: TeamMetricPair;
+    /** Fumbles del RIVAL que el equipo recupero. */
+    fumbleRecoveries: TeamMetricPair;
+    turnoversOnDowns: TeamMetricPair;
+    /**
+     * Posesiones PERDIDAS: intercepciones sufridas + fumbles perdidos +
+     * perdidas en downs. Derivado; nadie lo carga.
+     */
+    turnovers: TeamMetricPair;
+    punts: TeamMetricPair;
+    kickoffs: TeamMetricPair;
+    touchbacks: TeamMetricPair;
+    penaltyYards: TeamMetricPair;
+    /* ── Flag ── */
+    flagPulls: TeamMetricPair;
+    flagPullsForLoss: TeamMetricPair;
+    blitzes: TeamMetricPair;
+    passesDefended: TeamMetricPair;
     goalKickAttempts: TeamMetricPair;
     goalKicksMade: TeamMetricPair;
     goalKicksMissed: TeamMetricPair;
@@ -149,6 +194,11 @@ export type CompleteStatTabsOptions = {
      * "Tiros a palos" y "Entradas en 22" vacias.
      */
     sportId?: string | null;
+    /**
+     * Futbol americano: `flag` cambia las pestanas (flag pulls en vez de
+     * patadas y fumbles). Sin esto, tackle.
+     */
+    discipline?: 'tackle' | 'flag' | null;
 };
 
 export function getConfiguredEventPoints(
@@ -238,10 +288,39 @@ function createEmptyCompleteMatchStats(): CompleteMatchStats {
         shootoutScored: createTeamMetricPair(),
         shootoutMissed: createTeamMetricPair(),
         touchdowns: createTeamMetricPair(),
+        touchdownsRushing: createTeamMetricPair(),
+        touchdownsPassing: createTeamMetricPair(),
+        touchdownsDefensive: createTeamMetricPair(),
+        touchdownsReturn: createTeamMetricPair(),
         fieldGoals: createTeamMetricPair(),
+        fieldGoalAttempts: createTeamMetricPair(),
+        fieldGoalsBlocked: createTeamMetricPair(),
         extraPoints: createTeamMetricPair(),
+        extraPointAttempts: createTeamMetricPair(),
         twoPointConversions: createTeamMetricPair(),
+        twoPointAttempts: createTeamMetricPair(),
         safeties: createTeamMetricPair(),
+        rushes: createTeamMetricPair(),
+        rushYards: createTeamMetricPair(),
+        passAttempts: createTeamMetricPair(),
+        passCompletions: createTeamMetricPair(),
+        passYards: createTeamMetricPair(),
+        firstDowns: createTeamMetricPair(),
+        sacks: createTeamMetricPair(),
+        forcedFumbles: createTeamMetricPair(),
+        fumbles: createTeamMetricPair(),
+        fumblesLost: createTeamMetricPair(),
+        fumbleRecoveries: createTeamMetricPair(),
+        turnoversOnDowns: createTeamMetricPair(),
+        turnovers: createTeamMetricPair(),
+        punts: createTeamMetricPair(),
+        kickoffs: createTeamMetricPair(),
+        touchbacks: createTeamMetricPair(),
+        penaltyYards: createTeamMetricPair(),
+        flagPulls: createTeamMetricPair(),
+        flagPullsForLoss: createTeamMetricPair(),
+        blitzes: createTeamMetricPair(),
+        passesDefended: createTeamMetricPair(),
         goalKickAttempts: createTeamMetricPair(),
         goalKicksMade: createTeamMetricPair(),
         goalKicksMissed: createTeamMetricPair(),
@@ -292,6 +371,10 @@ function createEmptyCompleteMatchStats(): CompleteMatchStats {
 
 function bumpTeamMetric(pair: TeamMetricPair, team: 'home' | 'away', amount = 1) {
     pair[team] += amount;
+}
+
+function opponentOf(team: 'home' | 'away'): 'home' | 'away' {
+    return team === 'home' ? 'away' : 'home';
 }
 
 function countContestMetric(
@@ -371,7 +454,9 @@ export function buildCompleteMatchStats(
                     bumpTeamMetric(stats.penaltyGoals, scoringTeam);
                 } else if (definition?.category === 'discipline') {
                     // Futbol americano: 'penalty' es una penalidad, no un tanto.
+                    // Las yardas del castigo van en el detalle.
                     bumpTeamMetric(stats.penaltiesCommitted, team);
+                    bumpTeamMetric(stats.penaltyYards, team, Math.abs(parseYardsFromDetail(event.detail)));
                 }
                 break;
             case 'own_goal':
@@ -439,7 +524,9 @@ export function buildCompleteMatchStats(
                 bumpTeamMetric(stats.circleEntries, team);
                 break;
             case 'interception':
+                // Se carga al equipo que la captura. La posesion la perdio el otro.
                 bumpTeamMetric(stats.interceptions, team);
+                bumpTeamMetric(stats.turnovers, opponentOf(team));
                 break;
             case 'block':
                 bumpTeamMetric(stats.blocks, team);
@@ -450,21 +537,98 @@ export function buildCompleteMatchStats(
             case 'clearance':
                 bumpTeamMetric(stats.clearances, team);
                 break;
-            /* ── Futbol americano ── */
-            case 'touchdown':
-                bumpTeamMetric(stats.touchdowns, team);
+            /* ── Futbol americano ──
+             * Lo pateado se cuenta SIEMPRE como intento y el desenlace dice si
+             * ademas convirtio: de la resta sale la efectividad. El touchdown
+             * siempre suma; su desenlace es el tipo. */
+            case 'touchdown': {
+                bumpTeamMetric(stats.touchdowns, scoringTeam);
+                const kind = resolveOutcomeId(definition, event.detail);
+                if (kind === 'rushing') bumpTeamMetric(stats.touchdownsRushing, scoringTeam);
+                else if (kind === 'passing') bumpTeamMetric(stats.touchdownsPassing, scoringTeam);
+                else if (kind === 'interception_return' || kind === 'fumble_return') bumpTeamMetric(stats.touchdownsDefensive, scoringTeam);
+                else if (kind === 'kickoff_return' || kind === 'punt_return') bumpTeamMetric(stats.touchdownsReturn, scoringTeam);
                 break;
+            }
             case 'field_goal':
-                bumpTeamMetric(stats.fieldGoals, team);
+                bumpTeamMetric(stats.fieldGoalAttempts, team);
+                if (outcomeScores(definition, event.detail)) {
+                    bumpTeamMetric(stats.fieldGoals, scoringTeam);
+                } else if (readOutcomeId(event.detail) === 'blocked') {
+                    bumpTeamMetric(stats.fieldGoalsBlocked, team);
+                }
                 break;
             case 'extra_point':
-                bumpTeamMetric(stats.extraPoints, team);
+                bumpTeamMetric(stats.extraPointAttempts, team);
+                if (outcomeScores(definition, event.detail)) bumpTeamMetric(stats.extraPoints, scoringTeam);
                 break;
             case 'two_point_conversion':
-                bumpTeamMetric(stats.twoPointConversions, team);
+                bumpTeamMetric(stats.twoPointAttempts, team);
+                if (outcomeScores(definition, event.detail)) bumpTeamMetric(stats.twoPointConversions, scoringTeam);
                 break;
             case 'safety':
                 bumpTeamMetric(stats.safeties, team);
+                break;
+            case 'rush':
+                bumpTeamMetric(stats.rushes, team);
+                bumpTeamMetric(stats.rushYards, team, parseYardsFromDetail(event.detail));
+                break;
+            case 'pass_complete':
+                bumpTeamMetric(stats.passAttempts, team);
+                bumpTeamMetric(stats.passCompletions, team);
+                bumpTeamMetric(stats.passYards, team, parseYardsFromDetail(event.detail));
+                break;
+            case 'pass_incomplete':
+                bumpTeamMetric(stats.passAttempts, team);
+                break;
+            case 'first_down':
+                bumpTeamMetric(stats.firstDowns, team);
+                break;
+            case 'sack':
+                bumpTeamMetric(stats.sacks, team);
+                break;
+            case 'forced_fumble':
+                bumpTeamMetric(stats.forcedFumbles, team);
+                break;
+            // Se carga al equipo que lo suelta. Solo es turnover si lo recupera el
+            // rival; un fumble sin desenlace es un fumble, no una perdida.
+            case 'fumble':
+                bumpTeamMetric(stats.fumbles, team);
+                if (readOutcomeId(event.detail) === 'lost') {
+                    bumpTeamMetric(stats.fumblesLost, team);
+                    bumpTeamMetric(stats.turnovers, team);
+                    bumpTeamMetric(stats.fumbleRecoveries, opponentOf(team));
+                }
+                break;
+            case 'turnover_on_downs':
+                bumpTeamMetric(stats.turnoversOnDowns, team);
+                bumpTeamMetric(stats.turnovers, team);
+                break;
+            case 'punt':
+                bumpTeamMetric(stats.punts, team);
+                break;
+            case 'kickoff':
+                bumpTeamMetric(stats.kickoffs, team);
+                // Un kickoff que termina en touchback ES el touchback: no hace
+                // falta cargarlo dos veces.
+                if (readOutcomeId(event.detail) === 'touchback') bumpTeamMetric(stats.touchbacks, team);
+                break;
+            case 'touchback':
+                bumpTeamMetric(stats.touchbacks, team);
+                break;
+            /* ── Flag ── */
+            case 'flag_pull':
+                bumpTeamMetric(stats.flagPulls, team);
+                break;
+            case 'flag_pull_for_loss':
+                bumpTeamMetric(stats.flagPulls, team);
+                bumpTeamMetric(stats.flagPullsForLoss, team);
+                break;
+            case 'blitz':
+                bumpTeamMetric(stats.blitzes, team);
+                break;
+            case 'pass_defended':
+                bumpTeamMetric(stats.passesDefended, team);
                 break;
             case 'drop_goal':
                 bumpTeamMetric(stats.dropGoalAttempts, team);
@@ -927,10 +1091,29 @@ function buildHockeyStatTabs(
 }
 
 /** Futbol americano. Cinco formas de anotar, cada una con su valor. */
+/**
+ * Futbol americano: marcador, ofensiva, turnovers y disciplina. Lo que se
+ * patea muestra convertidos sobre intentos; las yardas salen del detalle de
+ * cada jugada. "Sacks recibidos" son los sacks que hizo el rival: la fila se
+ * lee desde la ofensiva porque es ahi donde duelen.
+ */
 function buildAmericanFootballStatTabs(
     stats: CompleteMatchStats,
+    homeName: string,
+    awayName: string,
     options: CompleteStatTabsOptions = {},
 ): CompleteStatTab[] {
+    const ratio = (hMade: number, hAtt: number, aMade: number, aAtt: number) => (
+        `${homeName}: ${hMade}/${hAtt} · ${awayName}: ${aMade}/${aAtt}`
+    );
+    const percent = (made: number, attempts: number) => goalKickEffectivenessPercent(made, attempts);
+
+    // Flag: no se patea, el try se juega desde la 5 o la 10, y la defensa se
+    // mide en flag pulls. El resto de las filas es el mismo deporte.
+    if (options.discipline === 'flag') {
+        return buildFlagFootballStatTabs(stats, homeName, awayName, options);
+    }
+
     const tabs: CompleteStatTab[] = [
         {
             id: 'marcador',
@@ -941,10 +1124,95 @@ function buildAmericanFootballStatTabs(
                     rows: [
                         { key: 'points', label: 'Puntos', home: stats.points.home, away: stats.points.away, accent: true },
                         { key: 'touchdowns', label: 'Touchdowns', home: stats.touchdowns.home, away: stats.touchdowns.away },
-                        { key: 'fieldGoals', label: 'Field goals', home: stats.fieldGoals.home, away: stats.fieldGoals.away },
-                        { key: 'extraPoints', label: 'Puntos extra', home: stats.extraPoints.home, away: stats.extraPoints.away },
-                        { key: 'twoPointConversions', label: 'Conversiones de 2', home: stats.twoPointConversions.home, away: stats.twoPointConversions.away },
+                        { key: 'touchdownsRushing', label: 'TD de carrera', home: stats.touchdownsRushing.home, away: stats.touchdownsRushing.away },
+                        { key: 'touchdownsPassing', label: 'TD de pase', home: stats.touchdownsPassing.home, away: stats.touchdownsPassing.away },
+                        { key: 'touchdownsDefensive', label: 'TD defensivos', home: stats.touchdownsDefensive.home, away: stats.touchdownsDefensive.away },
+                        { key: 'touchdownsReturn', label: 'TD de devolucion', home: stats.touchdownsReturn.home, away: stats.touchdownsReturn.away },
                         { key: 'safeties', label: 'Safeties', home: stats.safeties.home, away: stats.safeties.away },
+                    ],
+                },
+                {
+                    title: 'Patadas',
+                    rows: [
+                        {
+                            key: 'fieldGoalsPct',
+                            label: 'Field goals (%)',
+                            home: percent(stats.fieldGoals.home, stats.fieldGoalAttempts.home),
+                            away: percent(stats.fieldGoals.away, stats.fieldGoalAttempts.away),
+                            valueKind: 'percent',
+                            tooltip: ratio(stats.fieldGoals.home, stats.fieldGoalAttempts.home, stats.fieldGoals.away, stats.fieldGoalAttempts.away),
+                        },
+                        { key: 'fieldGoals', label: 'Field goals convertidos', home: stats.fieldGoals.home, away: stats.fieldGoals.away },
+                        { key: 'fieldGoalsBlocked', label: 'Field goals bloqueados', home: stats.fieldGoalsBlocked.home, away: stats.fieldGoalsBlocked.away },
+                        {
+                            key: 'extraPointsPct',
+                            label: 'Puntos extra (%)',
+                            home: percent(stats.extraPoints.home, stats.extraPointAttempts.home),
+                            away: percent(stats.extraPoints.away, stats.extraPointAttempts.away),
+                            valueKind: 'percent',
+                            tooltip: ratio(stats.extraPoints.home, stats.extraPointAttempts.home, stats.extraPoints.away, stats.extraPointAttempts.away),
+                        },
+                        { key: 'extraPoints', label: 'Puntos extra convertidos', home: stats.extraPoints.home, away: stats.extraPoints.away },
+                        { key: 'twoPointConversions', label: 'Conversiones de 2', home: stats.twoPointConversions.home, away: stats.twoPointConversions.away },
+                        { key: 'twoPointAttempts', label: 'Intentos de 2', home: stats.twoPointAttempts.home, away: stats.twoPointAttempts.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'ofensiva',
+            label: 'Ofensiva',
+            sections: filterStatSections([
+                {
+                    title: 'Avance',
+                    rows: [
+                        { key: 'firstDowns', label: 'Primeros downs', home: stats.firstDowns.home, away: stats.firstDowns.away, accent: true },
+                        { key: 'totalYards', label: 'Yardas totales', home: stats.rushYards.home + stats.passYards.home, away: stats.rushYards.away + stats.passYards.away },
+                        { key: 'passYards', label: 'Yardas de pase', home: stats.passYards.home, away: stats.passYards.away },
+                        { key: 'rushYards', label: 'Yardas de carrera', home: stats.rushYards.home, away: stats.rushYards.away },
+                    ],
+                },
+                {
+                    title: 'Jugadas',
+                    rows: [
+                        {
+                            key: 'passPct',
+                            label: 'Pases completos (%)',
+                            home: percent(stats.passCompletions.home, stats.passAttempts.home),
+                            away: percent(stats.passCompletions.away, stats.passAttempts.away),
+                            valueKind: 'percent',
+                            tooltip: ratio(stats.passCompletions.home, stats.passAttempts.home, stats.passCompletions.away, stats.passAttempts.away),
+                        },
+                        { key: 'passCompletions', label: 'Pases completos', home: stats.passCompletions.home, away: stats.passCompletions.away },
+                        { key: 'passAttempts', label: 'Pases intentados', home: stats.passAttempts.home, away: stats.passAttempts.away },
+                        { key: 'rushes', label: 'Carreras', home: stats.rushes.home, away: stats.rushes.away },
+                        { key: 'sacksTaken', label: 'Sacks recibidos', home: stats.sacks.away, away: stats.sacks.home },
+                        { key: 'punts', label: 'Punts', home: stats.punts.home, away: stats.punts.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'turnovers',
+            label: 'Turnovers',
+            sections: filterStatSections([
+                {
+                    title: 'Posesiones perdidas',
+                    rows: [
+                        { key: 'turnovers', label: 'Turnovers', home: stats.turnovers.home, away: stats.turnovers.away, accent: true },
+                        { key: 'interceptionsThrown', label: 'Intercepciones sufridas', home: stats.interceptions.away, away: stats.interceptions.home },
+                        { key: 'fumbles', label: 'Fumbles', home: stats.fumbles.home, away: stats.fumbles.away },
+                        { key: 'fumblesLost', label: 'Fumbles perdidos', home: stats.fumblesLost.home, away: stats.fumblesLost.away },
+                        { key: 'turnoversOnDowns', label: 'Perdidas en downs', home: stats.turnoversOnDowns.home, away: stats.turnoversOnDowns.away },
+                    ],
+                },
+                {
+                    title: 'Defensa',
+                    rows: [
+                        { key: 'sacks', label: 'Sacks', home: stats.sacks.home, away: stats.sacks.away },
+                        { key: 'interceptions', label: 'Intercepciones', home: stats.interceptions.home, away: stats.interceptions.away },
+                        { key: 'forcedFumbles', label: 'Fumbles forzados', home: stats.forcedFumbles.home, away: stats.forcedFumbles.away },
+                        { key: 'fumbleRecoveries', label: 'Fumbles recuperados', home: stats.fumbleRecoveries.home, away: stats.fumbleRecoveries.away },
                     ],
                 },
             ], options),
@@ -957,24 +1225,133 @@ function buildAmericanFootballStatTabs(
                     title: 'Penalidades',
                     rows: [
                         { key: 'penaltiesCommitted', label: 'Penalidades', home: stats.penaltiesCommitted.home, away: stats.penaltiesCommitted.away },
+                        { key: 'penaltyYards', label: 'Yardas penalizadas', home: stats.penaltyYards.home, away: stats.penaltyYards.away },
                     ],
                 },
-            ], options),
-        },
-        {
-            id: 'plantel',
-            label: 'Banco',
-            sections: filterStatSections([
                 {
-                    title: 'Banco',
+                    title: 'Partido',
                     rows: [
                         { key: 'timeouts', label: 'Tiempos muertos', home: stats.timeouts.home, away: stats.timeouts.away },
+                        { key: 'kickoffs', label: 'Kickoffs', home: stats.kickoffs.home, away: stats.kickoffs.away },
+                        { key: 'touchbacks', label: 'Touchbacks', home: stats.touchbacks.home, away: stats.touchbacks.away },
                     ],
                 },
             ], options),
         },
     ];
 
+    return tabs.filter((tab) => tab.sections.length > 0);
+}
+
+function buildFlagFootballStatTabs(
+    stats: CompleteMatchStats,
+    homeName: string,
+    awayName: string,
+    options: CompleteStatTabsOptions = {},
+): CompleteStatTab[] {
+    const ratio = (hMade: number, hAtt: number, aMade: number, aAtt: number) => (
+        `${homeName}: ${hMade}/${hAtt} · ${awayName}: ${aMade}/${aAtt}`
+    );
+    const tabs: CompleteStatTab[] = [
+        {
+            id: 'marcador',
+            label: 'Marcador',
+            sections: filterStatSections([
+                {
+                    title: 'Anotacion',
+                    rows: [
+                        { key: 'points', label: 'Puntos', home: stats.points.home, away: stats.points.away, accent: true },
+                        { key: 'touchdowns', label: 'Touchdowns', home: stats.touchdowns.home, away: stats.touchdowns.away },
+                        { key: 'touchdownsRushing', label: 'TD de carrera', home: stats.touchdownsRushing.home, away: stats.touchdownsRushing.away },
+                        { key: 'touchdownsPassing', label: 'TD de pase', home: stats.touchdownsPassing.home, away: stats.touchdownsPassing.away },
+                        { key: 'touchdownsDefensive', label: 'TD defensivos', home: stats.touchdownsDefensive.home, away: stats.touchdownsDefensive.away },
+                        { key: 'safeties', label: 'Safeties', home: stats.safeties.home, away: stats.safeties.away },
+                    ],
+                },
+                {
+                    title: 'Tries',
+                    rows: [
+                        { key: 'extraPoints', label: 'Tries de 1 convertidos', home: stats.extraPoints.home, away: stats.extraPoints.away },
+                        { key: 'extraPointAttempts', label: 'Tries de 1 intentados', home: stats.extraPointAttempts.home, away: stats.extraPointAttempts.away },
+                        { key: 'twoPointConversions', label: 'Tries de 2 convertidos', home: stats.twoPointConversions.home, away: stats.twoPointConversions.away },
+                        { key: 'twoPointAttempts', label: 'Tries de 2 intentados', home: stats.twoPointAttempts.home, away: stats.twoPointAttempts.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'ofensiva',
+            label: 'Ofensiva',
+            sections: filterStatSections([
+                {
+                    title: 'Avance',
+                    rows: [
+                        { key: 'firstDowns', label: 'Primeros downs', home: stats.firstDowns.home, away: stats.firstDowns.away, accent: true },
+                        { key: 'totalYards', label: 'Yardas totales', home: stats.rushYards.home + stats.passYards.home, away: stats.rushYards.away + stats.passYards.away },
+                        { key: 'passYards', label: 'Yardas de pase', home: stats.passYards.home, away: stats.passYards.away },
+                        { key: 'rushYards', label: 'Yardas de carrera', home: stats.rushYards.home, away: stats.rushYards.away },
+                    ],
+                },
+                {
+                    title: 'Jugadas',
+                    rows: [
+                        {
+                            key: 'passPct',
+                            label: 'Pases completos (%)',
+                            home: goalKickEffectivenessPercent(stats.passCompletions.home, stats.passAttempts.home),
+                            away: goalKickEffectivenessPercent(stats.passCompletions.away, stats.passAttempts.away),
+                            valueKind: 'percent',
+                            tooltip: ratio(stats.passCompletions.home, stats.passAttempts.home, stats.passCompletions.away, stats.passAttempts.away),
+                        },
+                        { key: 'passCompletions', label: 'Pases completos', home: stats.passCompletions.home, away: stats.passCompletions.away },
+                        { key: 'passAttempts', label: 'Pases intentados', home: stats.passAttempts.home, away: stats.passAttempts.away },
+                        { key: 'rushes', label: 'Carreras', home: stats.rushes.home, away: stats.rushes.away },
+                        { key: 'sacksTaken', label: 'Sacks recibidos', home: stats.sacks.away, away: stats.sacks.home },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'turnovers',
+            label: 'Defensa',
+            sections: filterStatSections([
+                {
+                    title: 'Defensa',
+                    rows: [
+                        { key: 'flagPulls', label: 'Flag pulls', home: stats.flagPulls.home, away: stats.flagPulls.away, accent: true },
+                        { key: 'flagPullsForLoss', label: 'Flag pulls con pérdida', home: stats.flagPullsForLoss.home, away: stats.flagPullsForLoss.away },
+                        { key: 'sacks', label: 'Sacks', home: stats.sacks.home, away: stats.sacks.away },
+                        { key: 'interceptions', label: 'Intercepciones', home: stats.interceptions.home, away: stats.interceptions.away },
+                        { key: 'passesDefended', label: 'Pases defendidos', home: stats.passesDefended.home, away: stats.passesDefended.away },
+                        { key: 'blitzes', label: 'Blitzes', home: stats.blitzes.home, away: stats.blitzes.away },
+                    ],
+                },
+                {
+                    title: 'Posesiones perdidas',
+                    rows: [
+                        { key: 'turnovers', label: 'Turnovers', home: stats.turnovers.home, away: stats.turnovers.away },
+                        { key: 'interceptionsThrown', label: 'Intercepciones sufridas', home: stats.interceptions.away, away: stats.interceptions.home },
+                        { key: 'turnoversOnDowns', label: 'Perdidas en downs', home: stats.turnoversOnDowns.home, away: stats.turnoversOnDowns.away },
+                        { key: 'fumblesLost', label: 'Fumbles perdidos', home: stats.fumblesLost.home, away: stats.fumblesLost.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'disciplina',
+            label: 'Disciplina',
+            sections: filterStatSections([
+                {
+                    title: 'Penalidades',
+                    rows: [
+                        { key: 'penaltiesCommitted', label: 'Penalidades', home: stats.penaltiesCommitted.home, away: stats.penaltiesCommitted.away },
+                        { key: 'penaltyYards', label: 'Yardas penalizadas', home: stats.penaltyYards.home, away: stats.penaltyYards.away },
+                        { key: 'timeouts', label: 'Tiempos muertos', home: stats.timeouts.home, away: stats.timeouts.away },
+                    ],
+                },
+            ], options),
+        },
+    ];
     return tabs.filter((tab) => tab.sections.length > 0);
 }
 
@@ -996,7 +1373,7 @@ export function buildCompleteStatTabs(
         case 'hockey':
             return buildHockeyStatTabs(stats, homeName, awayName, options);
         case 'american-football':
-            return buildAmericanFootballStatTabs(stats, options);
+            return buildAmericanFootballStatTabs(stats, homeName, awayName, options);
         default:
             break;
     }
