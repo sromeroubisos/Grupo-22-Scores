@@ -43,6 +43,7 @@ export interface NewsItem {
     status: 'draft' | 'published' | 'archived';
     sport?: string;
     scope?: 'global' | 'tournament' | 'club' | 'union' | string;
+    tags?: string[] | null;
 }
 
 interface NoticiasClientProps {
@@ -303,7 +304,7 @@ export default function NoticiasClient({ initialNews, canManageNews, videoHubs =
 
     const query = searchQuery.trim().toLowerCase();
     const filteredNews = useMemo(() => news.filter((item) => {
-        if (query && !`${item.title} ${item.summary ?? ''}`.toLowerCase().includes(query)) return false;
+        if (query && !`${item.title} ${item.summary ?? ''} ${(item.tags ?? []).join(' ')}`.toLowerCase().includes(query)) return false;
         if (activeFolder === 'all') return true;
         if ((SPORT_ORDER as string[]).includes(activeFolder)) return sportFolderOf(item.sport) === activeFolder;
         return scopeFolderOf(item.scope) === activeFolder;
