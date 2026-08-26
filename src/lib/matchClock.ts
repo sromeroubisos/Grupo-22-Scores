@@ -92,6 +92,13 @@ const SPORT_CLOCK_CONFIG: Record<string, SportClockConfig> = {
     periods: ['PRE', '1T', '2T', 'ET', 'FT'],
     offsets: { PRE: 0, '1T': 0, HT: 2700, '2T': 2700, ET: 5400, FT: 5400 },
   },
+  // Dos tiempos de 30'. Sin fila propia caia al default de rugby y el
+  // segundo tiempo arrancaba en 40:00 en un deporte que termina en 60:00.
+  // ET colapsa los dos suplementarios de 5' en uno, como en rugby.
+  handball: {
+    periods: ['PRE', '1T', '2T', 'ET', 'FT'],
+    offsets: { PRE: 0, '1T': 0, HT: 1800, '2T': 1800, ET: 3600, FT: 3600 },
+  },
   hockey: {
     periods: ['PRE', 'Q1', 'Q2', 'Q3', 'Q4', 'ET', 'FT'],
     // 15' por cuarto, acumulado del partido. '1T' y '2T' SIGUEN en la tabla
@@ -147,6 +154,7 @@ export function normalizeClockSportBucket(sportId?: string | null) {
   if (['football', 'futsal', 'beach-soccer'].includes(normalized)) return 'football';
   if (['hockey', 'field-hockey'].includes(normalized)) return 'hockey';
   if (normalized === 'american-football') return 'american-football';
+  if (normalized === 'handball') return 'handball';
 
   return DEFAULT_CLOCK_SPORT;
 }

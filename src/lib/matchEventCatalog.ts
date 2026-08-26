@@ -85,6 +85,14 @@ export interface MatchEventDefinition {
    * para un corner corto; a un touchdown se le pregunta "Tipo de touchdown".
    */
   outcomePrompt?: string;
+  /**
+   * Tipo VIEJO que sigue en el catalogo solo para que lo guardado resuelva:
+   * suma, se cuenta y se muestra en la planilla, pero no se ofrece como
+   * boton. Existe porque un tipo no se puede renombrar (los eventos ya
+   * guardados llevan el nombre) y tampoco puede convivir en la botonera con
+   * el que lo reemplaza sin que el operador cargue dos veces lo mismo.
+   */
+  legacy?: boolean;
 }
 
 type ResolveArgs = {
@@ -269,26 +277,139 @@ const SPORT_EVENT_PRESETS: Record<string, MatchEventDefinition[]> = {
   ],
   /* ── Handball ──
    * Entra SIN proveedor externo: todo lo que se vea sale de alguien cargando el
-   * partido a mano, asi que el catalogo tiene que alcanzar solo. Los tipos que
-   * ya estaban (`seven_meter_goal`, `two_min_suspension`) NO se renombran:
-   * cualquier evento guardado con esos nombres dejaria de resolver.
+   * partido a mano, asi que el catalogo tiene que alcanzar solo. Por eso el
+   * detalle de una accion va como DESENLACE (`outcomes`) del evento base y no
+   * como tipos nuevos: un gol de contraataque es un gol con su origen, no un
+   * "gol_contraataque". Es el mismo mecanismo que el corner corto de hockey y
+   * el tipo de touchdown, asi que marcador y estadisticas lo leen sin codigo
+   * especial, y sumar un origen es agregar una linea, no un tipo.
+   *
+   * `seven_meter_goal` y `seven_meter_miss` son los tipos VIEJOS del 7 metros.
+   * NO se renombran: cualquier evento guardado con esos nombres dejaria de
+   * resolver. Quedan con `legacy` para seguir sumando y contando, pero el
+   * boton es `seven_meter`, que ademas distingue el atajado del desviado.
    */
   handball: [
-    { type: 'goal', label: 'Gol', category: 'score', points: 1, team: 'required', player: 'optional' },
-    { type: 'seven_meter_goal', label: 'Gol de 7m', category: 'score', points: 1, team: 'required', player: 'optional' },
-    { type: 'seven_meter_miss', label: '7m errado', category: 'other', points: 0, team: 'required', player: 'optional' },
-    { type: 'save', label: 'Atajada', category: 'other', points: 0, team: 'required', player: 'optional' },
+    {
+      type: 'goal',
+      label: 'Gol',
+      category: 'score',
+      points: 1,
+      team: 'required',
+      player: 'optional',
+      // Todos convierten: el desenlace es el ORIGEN, para la estadistica. Un
+      // gol guardado sin marca cae en "de jugada" y sigue sumando.
+      outcomes: [
+        { id: 'open_play', label: 'De jugada (6 metros)', scores: true },
+        { id: 'backcourt', label: 'Lanzamiento exterior (9 metros)', scores: true },
+        { id: 'wing', label: 'Desde el extremo', scores: true },
+        { id: 'pivot', label: 'De pivote', scores: true },
+        { id: 'fast_break', label: 'Contraataque', scores: true },
+        { id: 'empty_net', label: 'Arco vacío', scores: true },
+      ],
+      defaultOutcome: 'open_play',
+      outcomePrompt: 'Origen del gol',
+    },
+    {
+      type: 'seven_meter',
+      label: 'Lanzamiento de 7m',
+      category: 'score',
+      points: 1,
+      team: 'required',
+      player: 'optional',
+      // Se carga cuando se ejecuta y el desenlace dice si fue gol: de la
+      // resta sale la efectividad, sin un evento "7m errado" aparte que se
+      // pueda desincronizar del otro.
+      outcomes: [
+        { id: 'goal', label: 'Gol', scores: true },
+        { id: 'saved', label: 'Atajado' },
+        { id: 'missed', label: 'Desviado o al palo' },
+      ],
+    },
+    { type: 'seven_meter_goal', label: 'Gol de 7m', category: 'score', points: 1, team: 'required', player: 'optional', legacy: true },
+    { type: 'seven_meter_miss', label: '7m errado', category: 'other', points: 0, team: 'required', player: 'optional', legacy: true },
+    /* ── Ataque ──
+     * El lanzamiento que NO termina en gol se carga al que lanza; el gol va
+     * por `goal`. De la suma de los dos sale la efectividad de tiro. */
+    {
+      type: 'shot',
+      label: 'Lanzamiento sin gol',
+      category: 'other',
+      points: 0,
+      team: 'required',
+      player: 'optional',
+      outcomes: [
+        { id: 'saved', label: 'Atajado' },
+        { id: 'missed', label: 'Desviado o al palo' },
+        { id: 'blocked', label: 'Bloqueado' },
+      ],
+    },
+    { type: 'assist', label: 'Asistencia', category: 'other', points: 0, team: 'required', player: 'optional' },
+    {
+      // Se carga al equipo que PIERDE la pelota, con el motivo. El robo del
+      // rival se carga aparte (`steal`) al que la recupera, para que el
+      // defensor tenga su estadistica sin duplicar la perdida.
+      type: 'turnover_lost',
+      label: 'Pérdida',
+      category: 'discipline',
+      points: 0,
+      team: 'required',
+      player: 'optional',
+      outcomes: [
+        { id: 'bad_pass', label: 'Mal pase' },
+        { id: 'offensive_foul', label: 'Falta en ataque' },
+        { id: 'technical_fault', label: 'Falta técnica (pasos, dobles, área)' },
+        { id: 'passive_play', label: 'Juego pasivo' },
+      ],
+      outcomePrompt: 'Motivo',
+    },
+    /* ── Defensa ── */
+    {
+      type: 'save',
+      label: 'Atajada',
+      category: 'other',
+      points: 0,
+      team: 'required',
+      player: 'optional',
+      // El jugador es el arquero; el desenlace es de donde vino el lanzamiento.
+      outcomes: [
+        { id: 'open_play', label: 'De jugada' },
+        { id: 'seven_meter', label: 'De 7 metros' },
+        { id: 'backcourt', label: 'Lanzamiento exterior' },
+        { id: 'wing', label: 'Desde el extremo' },
+        { id: 'pivot', label: 'De pivote' },
+        { id: 'fast_break', label: 'De contraataque' },
+      ],
+      defaultOutcome: 'open_play',
+      outcomePrompt: 'Origen del lanzamiento',
+    },
+    { type: 'block', label: 'Bloqueo', category: 'other', points: 0, team: 'required', player: 'optional' },
+    { type: 'steal', label: 'Robo', category: 'other', points: 0, team: 'required', player: 'optional' },
+    { type: 'foul', label: 'Falta', category: 'discipline', points: 0, team: 'required', player: 'optional' },
+    /* ── Sanciones ── */
     { type: 'yellow_card', label: 'Tarjeta amarilla', category: 'card', points: 0, team: 'required', player: 'optional' },
     { type: 'two_min_suspension', label: 'Suspensión 2 min', category: 'discipline', points: 0, team: 'required', player: 'optional' },
     { type: 'red_card', label: 'Tarjeta roja', category: 'card', points: 0, team: 'required', player: 'optional' },
     { type: 'blue_card', label: 'Tarjeta azul', category: 'card', points: 0, team: 'required', player: 'optional' },
-    { type: 'timeout', label: 'Tiempo muerto', category: 'other', points: 0, team: 'required', player: 'none' },
+    /* ── Plantel y tiempo ── */
+    { type: 'timeout', label: 'Tiempo muerto de equipo', category: 'other', points: 0, team: 'required', player: 'none' },
+    { type: 'official_timeout', label: 'Tiempo muerto del árbitro', category: 'other', points: 0, team: 'none', player: 'none' },
     { type: 'substitution', label: 'Cambio', category: 'substitution', points: 0, team: 'required', player: 'optional' },
+    /* ── Reloj: dos tiempos de 30' ── */
     { type: 'match_start', label: 'Inicio del partido', category: 'clock', points: 0, team: 'none', player: 'none' },
     { type: 'start_period', label: 'Inicio de tiempo', category: 'clock', points: 0, team: 'none', player: 'none' },
     { type: 'end_period', label: 'Fin de tiempo', category: 'clock', points: 0, team: 'none', player: 'none' },
     { type: 'match_half', label: 'Entretiempo', category: 'clock', points: 0, team: 'none', player: 'none' },
     { type: 'match_end', label: 'Final del partido', category: 'clock', points: 0, team: 'none', player: 'none' },
+    /* ── Definicion por 7 metros ──
+     * Fuera del partido: `points: 0` y categoria propia, igual que el
+     * shoot-out de hockey. El resultado reglamentario queda empatado; esto
+     * solo decide quien avanza. Es lo que `hasShootout: true` del reglamento
+     * promete y hasta ahora no tenia con que cargarse. */
+    { type: 'shootout_start', label: 'Inicio de la tanda de 7m', category: 'shootout', points: 0, team: 'none', player: 'none' },
+    { type: 'shootout_scored', label: 'Lanzamiento convertido', category: 'shootout', points: 0, team: 'required', player: 'optional' },
+    { type: 'shootout_missed', label: 'Lanzamiento fallado', category: 'shootout', points: 0, team: 'required', player: 'optional' },
+    { type: 'shootout_end', label: 'Fin de la tanda de 7m', category: 'shootout', points: 0, team: 'none', player: 'none' },
   ],
   volleyball: [
     { type: 'point', label: 'Punto', category: 'score', points: 1, team: 'required', player: 'optional' },
@@ -498,6 +619,9 @@ function normalizeStoredDefinitions(
       const outcomePrompt = typeof candidate.outcomePrompt === 'string' && candidate.outcomePrompt.trim()
         ? candidate.outcomePrompt.trim()
         : fallbackDefinition?.outcomePrompt;
+      const legacy = typeof candidate.legacy === 'boolean'
+        ? candidate.legacy
+        : fallbackDefinition?.legacy;
 
       return {
         type,
@@ -511,6 +635,7 @@ function normalizeStoredDefinitions(
         ...(outcomes ? { outcomes } : {}),
         ...(defaultOutcome ? { defaultOutcome } : {}),
         ...(outcomePrompt ? { outcomePrompt } : {}),
+        ...(legacy ? { legacy } : {}),
       } satisfies MatchEventDefinition;
     })
     .filter((definition): definition is MatchEventDefinition => Boolean(definition));
