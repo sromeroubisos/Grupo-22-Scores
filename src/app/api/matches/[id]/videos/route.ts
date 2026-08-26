@@ -5,8 +5,10 @@ import { z } from 'zod';
 import { MANAGEMENT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 import { ensureMatchManagementAccess } from '@/lib/server/matchCenterAdmin';
 import { getMatchVideos, saveMatchVideos } from '@/lib/server/matchVideos';
+import { enrichVideoThumbnails } from '@/lib/server/videoThumbnails';
 import {
     MATCH_VIDEO_KINDS,
+    MATCH_VIDEO_POSTERS,
     MAX_MATCH_VIDEOS,
     MAX_VIDEO_TITLE_LENGTH,
     MAX_VIDEO_URL_LENGTH,
@@ -28,6 +30,7 @@ const PayloadSchema = z.object({
                 url: z.string().trim().min(1).max(MAX_VIDEO_URL_LENGTH),
                 kind: z.enum(MATCH_VIDEO_KINDS),
                 title: z.string().trim().max(MAX_VIDEO_TITLE_LENGTH).nullish(),
+                poster: z.enum(MATCH_VIDEO_POSTERS).optional(),
             }),
         )
         .max(MAX_MATCH_VIDEOS, `Tope de ${MAX_MATCH_VIDEOS} videos por partido.`),
@@ -122,6 +125,8 @@ export async function PUT(
             seen.add(dedupeKey);
 
             const previous = item.id ? existingById.get(item.id) : undefined;
+            // La portada ya resuelta se conserva mientras el link sea el mismo.
+            const keepsThumbnail = previous !== undefined && previous.url === url && previous.thumbnailUrl !== undefined;
             videos.push({
                 id: previous?.id ?? randomUUID(),
                 url,
@@ -129,10 +134,15 @@ export async function PUT(
                 title: item.title?.trim() || null,
                 provider: parsedUrl.provider,
                 addedAt: previous?.addedAt || now,
+                ...(keepsThumbnail ? { thumbnailUrl: previous.thumbnailUrl } : {}),
+                ...(item.poster === 'generated' ? { poster: 'generated' as const } : {}),
             });
         }
 
-        const saved = await saveMatchVideos({ matchId, videos, updatedBy: userId });
+        // La portada de lo nuevo (la que publica la plataforma) se busca ahora,
+        // una sola vez, y queda guardada con el link.
+        const { videos: withThumbnails } = await enrichVideoThumbnails(videos);
+        const saved = await saveMatchVideos({ matchId, videos: withThumbnails, updatedBy: userId });
         return json({ videos: saved });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Internal server error';

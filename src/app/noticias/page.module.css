@@ -423,3 +423,121 @@
         flex-wrap: wrap;
     }
 }
+
+/* ── Videos por torneo (la tira de hubs) ────────────────────────────────── */
+.hubStrip {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+.hubStripHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.hubStripTitle {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.hubStripHint {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--basalt-400);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.hubStripScroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+}
+
+.hubCard {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 260px;
+    max-width: 340px;
+    padding: 14px 16px;
+    background: var(--basalt-900);
+    border: 1px solid var(--surface-edge);
+    color: inherit;
+    text-decoration: none;
+    box-shadow: var(--slab-shadow);
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.hubCard:hover,
+.hubCard:focus-visible {
+    border-color: var(--magma-primary);
+    transform: translateY(-2px);
+}
+
+.hubCard:focus-visible {
+    outline: 2px solid var(--magma-primary);
+    outline-offset: 4px;
+}
+
+.hubLogo {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    flex: none;
+}
+
+.hubLogoFallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--basalt-700);
+    font-weight: 800;
+    flex: none;
+}
+
+.hubBody {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+}
+
+.hubName {
+    font-size: 14px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hubMeta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--basalt-400);
+    font-variant-numeric: tabular-nums;
+}
+
+.hubCta {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #fff;
+}

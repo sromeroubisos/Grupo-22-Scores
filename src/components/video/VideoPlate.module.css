@@ -1,0 +1,214 @@
+/* La placa de G22 Base como portada de un video. Todo en cqw: escala con el marco. */
+
+.plate {
+    --plate-font-title: "dharma-gothic-c", "G22 Dharma Gothic", "Bebas Neue", "Outfit", Impact, sans-serif;
+    --plate-font-score: "dharma-gothic-e", "Dharma Gothic E Heavy", "G22 Dharma Gothic", "Bebas Neue", "Outfit", Impact, sans-serif;
+    /* El hueco que le deja el marcador al botón de play (mismo ancho que el botón). */
+    --plate-play-slot: 15cqw;
+
+    position: absolute;
+    inset: 0;
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    padding: 4cqw 4.5cqw;
+    color: var(--plate-ink);
+    /* El fondo ES el diseño: degradado de esquina a esquina, la luz del acento
+       arriba a la izquierda y la trama fina encima, como en el export. */
+    background:
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 5px),
+        radial-gradient(circle at 12% -10%, color-mix(in srgb, var(--plate-accent) 24%, transparent), transparent 70%),
+        linear-gradient(135deg, var(--plate-field), var(--plate-field-end));
+    overflow: hidden;
+    text-align: left;
+}
+
+.light {
+    background:
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.03) 0 1px, transparent 1px 5px),
+        radial-gradient(circle at 12% -10%, color-mix(in srgb, var(--plate-accent) 24%, transparent), transparent 70%),
+        linear-gradient(135deg, var(--plate-field), var(--plate-field-end));
+}
+
+/* ── El título del video y la marca del medio ───────────────────────────── */
+.head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 3cqw;
+    min-width: 0;
+}
+
+.caption {
+    display: flex;
+    align-items: baseline;
+    gap: 1.8cqw;
+    flex: 1;
+    min-width: 0;
+}
+
+.kind {
+    flex: none;
+    padding: 0.6cqw 1.4cqw;
+    border: 0.25cqw solid var(--plate-ink);
+    border-radius: 999px;
+    font-family: var(--plate-font-title);
+    font-size: 2.8cqw;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1;
+    opacity: 0.9;
+}
+
+.title {
+    min-width: 0;
+    font-family: var(--plate-font-title);
+    font-weight: 800;
+    font-size: min(10cqw, calc(80cqw / (var(--plate-title-chars) * 0.46)));
+    line-height: 0.92;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 0.6cqw 1.6cqw rgba(0, 0, 0, 0.25);
+}
+
+.mark {
+    flex: none;
+    height: 5.2cqw;
+    max-width: 30cqw;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 0.4cqw 1cqw rgba(0, 0, 0, 0.3));
+}
+
+/* ── Reglas y banda del marcador ────────────────────────────────────────── */
+.rule {
+    display: block;
+    height: 0.7cqw;
+    background: var(--plate-ink);
+    opacity: 0.95;
+}
+
+.band {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3cqw;
+    min-height: 17cqw;
+}
+
+.crest,
+.crestFallback {
+    flex: none;
+    width: 15cqw;
+    height: 15cqw;
+}
+
+.crest {
+    object-fit: contain;
+    filter: drop-shadow(0 0.8cqw 1.8cqw rgba(0, 0, 0, 0.32));
+}
+
+.crestFallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 0.4cqw solid var(--plate-ink);
+    font-family: var(--plate-font-title);
+    font-size: 5cqw;
+    font-weight: 800;
+    opacity: 0.85;
+}
+
+.score {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1cqw;
+    font-family: var(--plate-font-score);
+    font-weight: 900;
+    font-size: 16cqw;
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    text-shadow: 0 0.8cqw 2.4cqw rgba(0, 0, 0, 0.32);
+}
+
+/* Con el play encima, los dos números se reparten a los lados del hueco y
+   cada uno se alinea hacia el centro: "33 ▶ 15" queda centrado en la placa. */
+.scoreSplit {
+    gap: 0;
+}
+
+.scoreSplit .scoreHome,
+.scoreSplit .scoreAway {
+    flex: 1;
+    min-width: 0;
+}
+
+.scoreSplit .scoreHome {
+    text-align: right;
+}
+
+.scoreSplit .scoreAway {
+    text-align: left;
+}
+
+.playSlot {
+    flex: none;
+    width: var(--plate-play-slot);
+}
+
+.scoreDash {
+    margin: 0 0.6cqw;
+}
+
+.scoreVs {
+    font-size: 10cqw;
+    letter-spacing: 0.08em;
+}
+
+/* ── Etapa · torneo y la firma ──────────────────────────────────────────── */
+.foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3cqw;
+    min-width: 0;
+}
+
+.meta {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--plate-font-title);
+    font-size: 4cqw;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.92;
+}
+
+.wordmark {
+    flex: none;
+    height: 4.2cqw;
+    width: auto;
+    object-fit: contain;
+}
+
+.wordmarkText {
+    flex: none;
+    font-family: var(--plate-font-title);
+    font-size: 3.4cqw;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}

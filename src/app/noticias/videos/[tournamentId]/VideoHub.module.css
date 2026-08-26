@@ -1,0 +1,912 @@
+/* Hub de videos de un torneo. Misma familia que /noticias (tectonic, oscura). */
+
+.page {
+    --basalt-950: #0a0a0b;
+    --basalt-900: #121214;
+    --basalt-800: #1c1c1f;
+    --basalt-700: #2a2a2e;
+    --basalt-600: #3f3f46;
+    --basalt-400: #a1a1aa;
+    --magma-primary: var(--color-accent, #ff4d00);
+    --surface-edge: rgba(255, 255, 255, 0.06);
+    --font-sans: 'Geist', sans-serif;
+    --font-mono: 'Geist Mono', monospace;
+    --hub-ease: cubic-bezier(0.25, 1, 0.5, 1);
+
+    /* El reproductor compartido habla en tokens del producto: acá se fijan
+       al tono oscuro del hub, que no cambia con el tema del sitio. */
+    --color-bg-primary: var(--basalt-950);
+    --color-bg-secondary: var(--basalt-900);
+    --color-border: var(--surface-edge);
+    --color-text-primary: #ececec;
+    --color-text-secondary: #c7c7cc;
+    --color-text-tertiary: var(--basalt-400);
+
+    min-height: 100vh;
+    background: var(--basalt-950);
+    color: #ececec;
+    font-family: var(--font-sans);
+}
+
+.shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ── Cabecera ───────────────────────────────────────────────────────────── */
+.topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--basalt-400);
+}
+
+.backLink {
+    color: #fff;
+    text-decoration: none;
+}
+
+.backLink:hover,
+.backLink:focus-visible {
+    color: var(--magma-primary);
+}
+
+.topMeta {
+    font-variant-numeric: tabular-nums;
+}
+
+.hero {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+    background: var(--basalt-900);
+    border: 1px solid var(--surface-edge);
+}
+
+.heroLogo {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    flex: none;
+}
+
+.eyebrow {
+    margin: 0 0 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--basalt-400);
+}
+
+.heroTitle {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+}
+
+.heroHint {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: var(--basalt-400);
+}
+
+/* ── Secciones ──────────────────────────────────────────────────────────── */
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sectionHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.btn {
+    background: var(--basalt-700);
+    border: 1px solid var(--surface-edge);
+    color: #fff;
+    padding: 10px 18px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 160ms var(--hub-ease), transform 160ms var(--hub-ease);
+}
+
+.btn:hover:not(:disabled) {
+    background: var(--basalt-600);
+    transform: translateY(-1px);
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.btnPrimary {
+    background: var(--magma-primary);
+    border-color: transparent;
+    font-weight: 700;
+}
+
+.btnPrimary:hover:not(:disabled) {
+    background: #ff6a2a;
+}
+
+.btnDanger {
+    color: #f87171;
+}
+
+.btnDanger:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.notice {
+    margin: 0;
+    padding: 12px 14px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #fbbf24;
+    font-size: 13px;
+}
+
+.notice code {
+    font-family: var(--font-mono);
+}
+
+.hint,
+.caption,
+.emptyLine {
+    margin: 0;
+    font-size: 13px;
+    color: var(--basalt-400);
+}
+
+.emptyLine {
+    padding: 24px;
+    text-align: center;
+    border: 1px dashed var(--basalt-600);
+}
+
+.error {
+    margin: 0;
+    font-size: 13px;
+    color: #f87171;
+}
+
+/* ── Votación ───────────────────────────────────────────────────────────── */
+.pollList {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.poll {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    background: var(--basalt-900);
+    border: 1px solid var(--surface-edge);
+}
+
+.pollHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pollTitle {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.pollTotal {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--basalt-400);
+    font-variant-numeric: tabular-nums;
+}
+
+.pollQuestion {
+    margin: 4px 0 0;
+    font-size: 15px;
+    color: var(--basalt-400);
+}
+
+.pollOptions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+
+.pollOption {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid var(--surface-edge);
+    border-radius: 14px;
+    background: var(--basalt-800);
+    transition: border-color 160ms var(--hub-ease);
+}
+
+.pollOptionMine {
+    border-color: var(--magma-primary);
+}
+
+.pollOptionLeads {
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.35);
+}
+
+.pollOptionBody {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.pollOptionTitle {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pollBar {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--basalt-700);
+    overflow: hidden;
+}
+
+.pollBarFill {
+    display: block;
+    height: 100%;
+    background: var(--magma-primary);
+    transition: width 400ms var(--hub-ease);
+}
+
+.pollOptionFoot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pollPercent {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.pill {
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.pillMine {
+    border-color: rgba(255, 77, 0, 0.45);
+    background: rgba(255, 77, 0, 0.12);
+    color: var(--magma-primary);
+}
+
+.voteBtn {
+    margin-left: auto;
+    min-height: 36px;
+    padding: 0 16px;
+    border-radius: 9px;
+    border: 1px solid var(--magma-primary);
+    background: var(--magma-primary);
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 140ms var(--hub-ease), opacity 140ms var(--hub-ease);
+}
+
+.voteBtn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.voteBtn:disabled {
+    cursor: default;
+    opacity: 0.55;
+}
+
+.voteBtnMine,
+.voteBtnMine:disabled {
+    background: transparent;
+    color: var(--magma-primary);
+    opacity: 1;
+}
+
+.pollFoot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    border-top: 1px solid var(--surface-edge);
+}
+
+.adminBar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ── El editor de la votación (solo quien administra) ───────────────────── */
+.editor {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px;
+    background: var(--basalt-900);
+    border: 1px solid var(--magma-primary);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.fieldRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 12px;
+}
+
+.fieldWide {
+    min-width: 0;
+}
+
+.label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--basalt-400);
+}
+
+.input {
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid var(--surface-edge);
+    border-radius: 8px;
+    background: var(--basalt-800);
+    color: #fff;
+    font: inherit;
+    font-size: 15px;
+}
+
+.input:focus-visible {
+    outline: 2px solid var(--magma-primary);
+    outline-offset: 1px;
+}
+
+.input[type="datetime-local"] {
+    color-scheme: dark;
+    max-width: 280px;
+}
+
+.inputMissing {
+    border-color: rgba(245, 158, 11, 0.6);
+}
+
+/* El título del video dentro de la votación, debajo de su casilla. */
+.candidateLabel {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 2px 0 8px 34px;
+}
+
+.candidateLabel .input {
+    min-height: 38px;
+    font-size: 14px;
+}
+
+.labelSoft {
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: 0.8;
+}
+
+.dateRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.candidates {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+.candidates legend {
+    margin-bottom: 6px;
+}
+
+.candidateMatch {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--basalt-800);
+}
+
+.candidateList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.candidate {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.candidate:hover {
+    background: var(--basalt-700);
+}
+
+.candidateChecked {
+    border-color: var(--magma-primary);
+    background: rgba(255, 77, 0, 0.08);
+}
+
+.candidateKind {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--basalt-400);
+}
+
+.candidateTitle {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.candidateProvider {
+    flex: none;
+    font-size: 11px;
+    color: var(--basalt-400);
+}
+
+.editorActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ── Videos: tarjetas chicas, por día ───────────────────────────────────── */
+.sectionMeta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--basalt-400);
+}
+
+.day {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dayTitle {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 8px 0 0;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.dayCount {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--basalt-400);
+}
+
+/* Dos o tres por fila en escritorio, una en el teléfono. */
+.cardGrid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+
+.videoCard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    padding: 10px;
+    background: var(--basalt-900);
+    border: 1px solid var(--surface-edge);
+    border-radius: 16px;
+    transition: border-color 200ms var(--hub-ease), transform 200ms var(--hub-ease);
+}
+
+.videoCard:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+    transform: translateY(-2px);
+}
+
+.videoBody {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 4px 2px;
+    min-width: 0;
+}
+
+/* El partido al que pertenece el video: una fila, y es el link a la ficha. */
+.videoMatch {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    min-height: 36px;
+    margin: 0 -6px;
+    padding: 4px 6px;
+    border-radius: 8px;
+    color: inherit;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background-color 160ms var(--hub-ease);
+}
+
+.videoMatch:hover,
+.videoMatch:focus-visible {
+    background: var(--basalt-800);
+}
+
+.videoMatch:focus-visible {
+    outline: 2px solid var(--magma-primary);
+    outline-offset: 1px;
+}
+
+.videoMatchName {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.videoMatchAway {
+    text-align: right;
+}
+
+.videoScore {
+    flex: none;
+    padding: 1px 7px;
+    border-radius: 5px;
+    background: var(--basalt-800);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.videoFoot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.videoMeta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--basalt-400);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.videoOpen {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--basalt-400);
+    text-decoration: none;
+}
+
+.videoOpen:hover,
+.videoOpen:focus-visible {
+    color: #fff;
+}
+
+/* ── El partido en la votación y el editor ──────────────────────────────── */
+.matchHead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.matchHeadCompact .matchName {
+    font-size: 13px;
+}
+
+.matchHeadCompact .matchScore {
+    font-size: 14px;
+}
+
+.matchTeam {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.matchTeamAway {
+    justify-content: flex-end;
+}
+
+.matchName {
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.matchScore {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    padding: 2px 10px;
+    border-radius: 6px;
+    background: var(--basalt-800);
+    white-space: nowrap;
+}
+
+.matchMeta {
+    grid-column: 1 / -1;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--basalt-400);
+}
+
+
+.crest {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex: none;
+}
+
+.crestFallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--basalt-700);
+    font-size: 12px;
+    font-weight: 800;
+    flex: none;
+}
+
+.crestSm {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+}
+
+
+.videoHead {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.videoTitle {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.kind {
+    flex: none;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.kind_full {
+    color: var(--magma-primary);
+    border-color: rgba(255, 77, 0, 0.35);
+    background: rgba(255, 77, 0, 0.1);
+}
+
+.kind_highlights {
+    color: #4ade80;
+    border-color: rgba(34, 197, 94, 0.35);
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.kind_clip {
+    color: var(--basalt-400);
+    border-color: var(--surface-edge);
+}
+
+@media (max-width: 640px) {
+    .shell {
+        padding: 20px 14px 48px;
+        gap: 24px;
+    }
+
+    .hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .heroTitle {
+        font-size: 24px;
+    }
+
+    .pollOptions {
+        grid-template-columns: 1fr;
+    }
+
+    .matchHead {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .matchTeamAway {
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+
+    .matchScore {
+        justify-self: start;
+    }
+
+    .pollFoot,
+    .adminBar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .fieldRow {
+        grid-template-columns: 1fr;
+    }
+
+    .candidateLabel {
+        margin-left: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .videoCard,
+    .videoMatch,
+    .btn,
+    .voteBtn,
+    .pollBarFill {
+        transition: none;
+    }
+
+    .videoCard:hover,
+    .btn:hover:not(:disabled) {
+        transform: none;
+    }
+}

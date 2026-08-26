@@ -2,33 +2,35 @@
 
 // Videos del partido: highlights, partido completo o clips, cargados como
 // links. El video no se aloja acá: se embebe el reproductor de la plataforma
-// (YouTube, Vimeo, Dailymotion, Facebook, Twitch) y, si la plataforma no lo
-// permite, se abre afuera.
-//
-// El reproductor no se carga hasta que alguien toca "Reproducir": un iframe
-// de YouTube pesa más que el resto de la página, y con tres videos la pestaña
-// tardaría más que el partido en cargar. Hasta entonces se ve la miniatura.
+// (YouTube, Vimeo, Dailymotion, Facebook, Twitch, ESPN) y, si la plataforma no lo
+// permite, se abre afuera. El reproductor en sí vive en
+// components/video/MatchVideoPlayer, compartido con el hub de videos.
 //
 // Quien administra carga y quita los links acá mismo, en la pestaña: es la
 // puerta por donde entra el dato, igual que en alineaciones. El servidor
-// vuelve a chequear el permiso en cada guardado.
+// vuelve a chequear el permiso en cada guardado, y al guardar busca la
+// portada que publica la plataforma para dejarla persistida.
 
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 
+import MatchVideoPlayer, { useEmbedParent } from '@/components/video/MatchVideoPlayer';
 import {
     MATCH_VIDEO_KINDS,
+    MATCH_VIDEO_POSTERS,
     MAX_MATCH_VIDEOS,
     MAX_VIDEO_TITLE_LENGTH,
     VIDEO_KIND_LABELS,
+    VIDEO_POSTER_LABELS,
     VIDEO_PROVIDER_LABELS,
     describeVideo,
+    isMatchVideoPoster,
     normalizeMatchVideoLinks,
     parseVideoUrl,
-    withAutoplay,
     type MatchVideoKind,
     type MatchVideoLink,
-    type ParsedVideoUrl,
+    type MatchVideoPoster,
 } from '@/lib/matches/videoLinks';
+import type { VideoPlateContext } from '@/lib/matches/videoPlate';
 
 import styles from './MatchVideosPanel.module.css';
 
@@ -39,41 +41,19 @@ interface Props {
     canManage: boolean;
     /** "SIC vs CASI": va en el título del reproductor para el lector de pantalla. */
     matchLabel: string;
+    /** El partido, para la placa generada (portada estilo G22 Base). */
+    plate?: VideoPlateContext | null;
     onChange: (videos: MatchVideoLink[]) => void;
 }
 
-// Twitch exige el dominio que embebe. Se lee después de montar para no
-// desincronizar el HTML del servidor con el del navegador.
-function useEmbedParent() {
-    const [parent, setParent] = useState<string | null>(null);
-    useEffect(() => {
-        setParent(window.location.hostname || null);
-    }, []);
-    return parent;
-}
-
-function PlayIcon() {
-    return (
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M8 5.5v13a1 1 0 0 0 1.53.85l10.2-6.5a1 1 0 0 0 0-1.7L9.53 4.65A1 1 0 0 0 8 5.5Z" />
-        </svg>
-    );
-}
-
-export default function MatchVideosPanel({ matchId, videos, canManage, matchLabel, onChange }: Props) {
+export default function MatchVideosPanel({ matchId, videos, canManage, matchLabel, plate = null, onChange }: Props) {
     const embedParent = useEmbedParent();
-    const [playing, setPlaying] = useState<Record<string, boolean>>({});
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [draftUrl, setDraftUrl] = useState('');
     const [draftKind, setDraftKind] = useState<MatchVideoKind>('highlights');
     const [draftTitle, setDraftTitle] = useState('');
-
-    const parsedById = useMemo(() => {
-        const map = new Map<string, ParsedVideoUrl | null>();
-        for (const video of videos) map.set(video.id, parseVideoUrl(video.url, { embedParent }));
-        return map;
-    }, [videos, embedParent]);
+    const [draftPoster, setDraftPoster] = useState<MatchVideoPoster>('original');
 
     const draftTrimmed = draftUrl.trim();
     const draftParsed = useMemo(
@@ -113,6 +93,7 @@ export default function MatchVideosPanel({ matchId, videos, canManage, matchLabe
                         url: video.url,
                         kind: video.kind,
                         title: video.title,
+                        poster: video.poster,
                     })),
                 }),
             });
@@ -143,16 +124,28 @@ export default function MatchVideosPanel({ matchId, videos, canManage, matchLabe
                 title: draftTitle.trim() || null,
                 provider: draftParsed.provider,
                 addedAt: '',
+                ...(draftPoster === 'generated' ? { poster: 'generated' as const } : {}),
             },
         ]);
         if (ok) {
             setDraftUrl('');
             setDraftTitle('');
+            setDraftPoster('original');
         }
     }
 
     async function handleRemove(id: string) {
         await persist(videos.filter((video) => video.id !== id));
+    }
+
+    /** Cambiar la portada de un video ya cargado. */
+    async function handlePoster(id: string, poster: MatchVideoPoster) {
+        await persist(videos.map((video) => {
+            if (video.id !== id) return video;
+            const { poster: _previous, ...rest } = video;
+            void _previous;
+            return poster === 'generated' ? { ...rest, poster } : rest;
+        }));
     }
 
     return (
@@ -196,6 +189,19 @@ export default function MatchVideosPanel({ matchId, videos, canManage, matchLabe
                             </select>
                         </label>
                         <label className={styles.field}>
+                            <span className={styles.label}>Portada</span>
+                            <select
+                                className={styles.select}
+                                value={draftPoster}
+                                onChange={(event) => setDraftPoster(isMatchVideoPoster(event.target.value) ? event.target.value : 'original')}
+                                disabled={saving}
+                            >
+                                {MATCH_VIDEO_POSTERS.map((poster) => (
+                                    <option key={poster} value={poster}>{VIDEO_POSTER_LABELS[poster]}</option>
+                                ))}
+                            </select>
+                        </label>
+                        <label className={styles.field}>
                             <span className={styles.label}>
                                 Título <span className={styles.optional}>(opcional)</span>
                             </span>
@@ -216,6 +222,9 @@ export default function MatchVideosPanel({ matchId, videos, canManage, matchLabe
                     <p className={`${styles.hint} ${draftIsBad ? styles.hintBad : ''}`} aria-live="polite">
                         {draftHint}
                     </p>
+                    <p className={styles.hint}>
+                        La portada original es la miniatura que publica la plataforma. La placa G22 se genera con los escudos, el marcador y el título del video, y es la que se ve cuando la plataforma no tiene miniatura.
+                    </p>
                     {error && <p className={styles.error} role="alert">{error}</p>}
                 </form>
             )}
@@ -225,21 +234,14 @@ export default function MatchVideosPanel({ matchId, videos, canManage, matchLabe
                     <p className={styles.emptyTitle}>Todavía no hay videos de este partido.</p>
                     {canManage && (
                         <p className={styles.emptyHint}>
-                            Pegá arriba el link de YouTube, Vimeo, Dailymotion o Facebook con los highlights o el partido completo.
+                            Pegá arriba el link de YouTube, Vimeo, Dailymotion, Facebook o ESPN con los highlights o el partido completo.
                         </p>
                     )}
                 </div>
             ) : (
                 <ul className={styles.list}>
                     {videos.map((video) => {
-                        const parsed = parsedById.get(video.id) ?? null;
                         const label = describeVideo(video);
-                        const providerLabel = video.provider === 'other'
-                            ? (parsed?.host ?? 'el sitio')
-                            : VIDEO_PROVIDER_LABELS[video.provider];
-                        const portrait = parsed?.aspect === 'portrait';
-                        const isPlaying = Boolean(playing[video.id]);
-
                         return (
                             <li key={video.id} className={styles.card}>
                                 <div className={styles.cardHead}>
@@ -248,68 +250,39 @@ export default function MatchVideosPanel({ matchId, videos, canManage, matchLabe
                                     </span>
                                     <h3 className={styles.cardTitle} title={label}>{label}</h3>
                                     {canManage && (
-                                        <button
-                                            type="button"
-                                            className={styles.remove}
-                                            onClick={() => handleRemove(video.id)}
-                                            disabled={saving}
-                                            aria-label={`Quitar ${label}`}
-                                        >
-                                            Quitar
-                                        </button>
+                                        <>
+                                            <select
+                                                className={styles.posterSelect}
+                                                value={video.poster ?? 'original'}
+                                                onChange={(event) => {
+                                                    if (isMatchVideoPoster(event.target.value)) void handlePoster(video.id, event.target.value);
+                                                }}
+                                                disabled={saving}
+                                                aria-label={`Portada de ${label}`}
+                                                title="Portada"
+                                            >
+                                                {MATCH_VIDEO_POSTERS.map((poster) => (
+                                                    <option key={poster} value={poster}>
+                                                        {poster === 'original' && !video.thumbnailUrl
+                                                            ? `${VIDEO_POSTER_LABELS[poster]} (no tiene)`
+                                                            : VIDEO_POSTER_LABELS[poster]}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <button
+                                                type="button"
+                                                className={styles.remove}
+                                                onClick={() => handleRemove(video.id)}
+                                                disabled={saving}
+                                                aria-label={`Quitar ${label}`}
+                                            >
+                                                Quitar
+                                            </button>
+                                        </>
                                     )}
                                 </div>
 
-                                {parsed?.embedUrl ? (
-                                    isPlaying ? (
-                                        <div className={`${styles.frame} ${portrait ? styles.framePortrait : ''}`}>
-                                            <iframe
-                                                className={styles.iframe}
-                                                src={withAutoplay(video.provider, parsed.embedUrl)}
-                                                title={`${label} — ${matchLabel}`}
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                                allowFullScreen
-                                                loading="lazy"
-                                                referrerPolicy="strict-origin-when-cross-origin"
-                                            />
-                                        </div>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            className={`${styles.frame} ${styles.poster} ${portrait ? styles.framePortrait : ''}`}
-                                            onClick={() => setPlaying((prev) => ({ ...prev, [video.id]: true }))}
-                                            aria-label={`Reproducir ${label}`}
-                                        >
-                                            {parsed.thumbnailUrl ? (
-                                                // eslint-disable-next-line @next/next/no-img-element -- miniatura remota de la plataforma; no pasa por el optimizador.
-                                                <img
-                                                    className={styles.thumb}
-                                                    src={parsed.thumbnailUrl}
-                                                    alt=""
-                                                    loading="lazy"
-                                                    decoding="async"
-                                                />
-                                            ) : (
-                                                <span className={styles.posterName}>{providerLabel}</span>
-                                            )}
-                                            <span className={styles.play} aria-hidden="true"><PlayIcon /></span>
-                                        </button>
-                                    )
-                                ) : (
-                                    <a className={styles.external} href={video.url} target="_blank" rel="noopener noreferrer">
-                                        <span className={styles.externalName}>{providerLabel}</span>
-                                        <span className={styles.externalUrl}>{video.url}</span>
-                                        <span className={styles.externalCta}>Abrir en {providerLabel} ↗</span>
-                                    </a>
-                                )}
-
-                                {parsed?.embedUrl && (
-                                    <div className={styles.cardFoot}>
-                                        <a className={styles.openLink} href={video.url} target="_blank" rel="noopener noreferrer">
-                                            Abrir en {providerLabel} ↗
-                                        </a>
-                                    </div>
-                                )}
+                                <MatchVideoPlayer video={video} matchLabel={matchLabel} embedParent={embedParent} plate={plate} />
                             </li>
                         );
                     })}

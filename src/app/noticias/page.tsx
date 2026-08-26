@@ -1,5 +1,6 @@
 import { getServerAuthRole } from '@/lib/auth/newsAccess';
 import { hasNewsManagementAccess } from '@/lib/auth/roles';
+import { listVideoHubs } from '@/lib/server/videoHub';
 import NoticiasClient from './NoticiasClient';
 import { Metadata } from 'next';
 
@@ -26,13 +27,21 @@ export default async function NoticiasPage() {
         query = query.limit(INITIAL_NEWS_LIMIT);
     }
 
-    const { data: initialNews } = await query;
+    const [{ data: initialNews }, videoHubs] = await Promise.all([
+        query,
+        // Los hubs de video son un extra de la portada: si fallan, la portada sale igual.
+        listVideoHubs().catch((error: unknown) => {
+            console.error('[noticias] video hubs read failed:', error);
+            return [];
+        }),
+    ]);
 
     return (
         <div style={{ minHeight: '100vh', background: '#0a0a0b' }}>
             <NoticiasClient
                 initialNews={initialNews || []}
                 canManageNews={canManageNews}
+                videoHubs={videoHubs}
             />
         </div>
     );

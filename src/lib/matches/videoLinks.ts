@@ -11,12 +11,19 @@
 
 export type MatchVideoKind = 'full' | 'highlights' | 'clip';
 
+/**
+ * Qué portada se muestra: la original de la plataforma (y, si no tiene, la
+ * placa generada) o siempre la placa generada con la estética de G22 Base.
+ */
+export type MatchVideoPoster = 'original' | 'generated';
+
 export type MatchVideoProvider =
     | 'youtube'
     | 'vimeo'
     | 'dailymotion'
     | 'facebook'
     | 'twitch'
+    | 'espn'
     | 'instagram'
     | 'tiktok'
     | 'x'
@@ -33,9 +40,23 @@ export interface MatchVideoLink {
     provider: MatchVideoProvider;
     /** ISO. Vacío en filas viejas que no lo traían. */
     addedAt: string;
+    /**
+     * Portada del video: la que publica la plataforma (og:image, oEmbed), no
+     * una fabricada acá. La resuelve el servidor al guardar y queda persistida.
+     * Ausente = todavía no se buscó · null = se buscó y no hay · string = URL.
+     */
+    thumbnailUrl?: string | null;
+    /** Ausente = 'original'. Ver `MatchVideoPoster`. */
+    poster?: MatchVideoPoster;
 }
 
 export const MATCH_VIDEO_KINDS = ['highlights', 'full', 'clip'] as const;
+export const MATCH_VIDEO_POSTERS = ['original', 'generated'] as const;
+
+export const VIDEO_POSTER_LABELS: Record<MatchVideoPoster, string> = {
+    original: 'Original de la plataforma',
+    generated: 'Placa G22',
+};
 
 export const VIDEO_KIND_LABELS: Record<MatchVideoKind, string> = {
     full: 'Partido completo',
@@ -49,6 +70,7 @@ export const VIDEO_PROVIDER_LABELS: Record<MatchVideoProvider, string> = {
     dailymotion: 'Dailymotion',
     facebook: 'Facebook',
     twitch: 'Twitch',
+    espn: 'ESPN',
     instagram: 'Instagram',
     tiktok: 'TikTok',
     x: 'X',
@@ -302,6 +324,50 @@ function parseTwitch(url: URL, host: string, parent: string | null): ParsedVideo
     return linkOnly('twitch', 'twitch.tv');
 }
 
+// ── ESPN ──────────────────────────────────────────────────────────────────
+//
+// espn.com y sus ediciones (espn.com.ar, espn.com.mx, espn.co.uk, espn.cl…).
+// La página del clip no se deja enmarcar (frame-ancestors solo de ESPN),
+// pero el reproductor sindicado sí: /watch/syndicatedplayer/_/id/{id}, que es
+// a donde redirige el viejo /core/video/iframe?id=. Se arma sobre la misma
+// edición que pegaron: un clip regional no siempre existe en la global.
+
+const ESPN_HOST = /^(?:[a-z0-9-]+\.)*espn\.(?:com(?:\.[a-z]{2})?|co\.[a-z]{2}|cl|in|ph|nl)$/;
+const ESPN_VIDEO_ID = /^\d{4,12}$/;
+
+function parseEspn(url: URL, host: string): ParsedVideoUrl | null {
+    if (!ESPN_HOST.test(host)) return null;
+
+    // /video/clip/_/id/{id} · /video/clip?id= · /core/video/iframe?id= ·
+    // /core/video/iframe/_/id/{id}/… · /watch/syndicatedplayer/_/id/{id}.
+    // /watch/player/_/id/ es ESPN+ (con suscripción) y una nota no es un
+    // video: se abren afuera.
+    const segments = segmentsOf(url);
+    const [first, second] = segments;
+    const isClip = first === 'video'
+        || (first === 'core' && second === 'video')
+        || (first === 'watch' && second === 'syndicatedplayer');
+    if (!isClip) return linkOnly('espn', host);
+
+    const idIndex = segments.indexOf('id');
+    const raw = idIndex >= 0 ? segments[idIndex + 1] : url.searchParams.get('id');
+    const id = raw && ESPN_VIDEO_ID.test(raw) ? raw : null;
+    if (!id) return linkOnly('espn', host);
+
+    // La edición apex y la móvil redirigen a www.; un subdominio propio
+    // (espndeportes.espn.com) se respeta.
+    const apex = host.replace(/^m\./, '');
+    const edition = apex.startsWith('espn.') ? `www.${apex}` : host;
+
+    return {
+        provider: 'espn',
+        embedUrl: `https://${edition}/watch/syndicatedplayer/_/id/${id}`,
+        thumbnailUrl: null,
+        aspect: 'video',
+        host,
+    };
+}
+
 // ── Las que solo se abren afuera ──────────────────────────────────────────
 
 function parseLinkOnlyProviders(host: string): ParsedVideoUrl | null {
@@ -327,6 +393,7 @@ export function parseVideoUrl(raw: unknown, options: ParseVideoUrlOptions = {}):
         ?? parseDailymotion(url, host)
         ?? parseFacebook(url, host)
         ?? parseTwitch(url, host, parent)
+        ?? parseEspn(url, host)
         ?? parseLinkOnlyProviders(host)
         ?? { provider: 'other', embedUrl: null, thumbnailUrl: null, aspect: 'video', host }
     );
@@ -345,6 +412,7 @@ export function withAutoplay(provider: MatchVideoProvider, embedUrl: string): st
     switch (provider) {
         case 'facebook':
         case 'twitch':
+        case 'espn':
             url.searchParams.set('autoplay', 'true');
             break;
         default:
@@ -370,6 +438,15 @@ export function stableVideoId(url: string): string {
 
 export function isMatchVideoKind(value: unknown): value is MatchVideoKind {
     return typeof value === 'string' && KINDS.has(value);
+}
+
+export function isMatchVideoPoster(value: unknown): value is MatchVideoPoster {
+    return value === 'original' || value === 'generated';
+}
+
+/** true si quien lo cargó pidió la placa generada aunque haya miniatura original. */
+export function wantsGeneratedPoster(video: Pick<MatchVideoLink, 'poster'>): boolean {
+    return video.poster === 'generated';
 }
 
 /**
@@ -400,14 +477,25 @@ export function normalizeMatchVideoLinks(raw: unknown): MatchVideoLink[] {
             ? record.title.trim().slice(0, MAX_VIDEO_TITLE_LENGTH)
             : null;
 
-        out.push({
+        const link: MatchVideoLink = {
             id: typeof record.id === 'string' && record.id.trim() ? record.id.trim() : stableVideoId(url),
             url,
             kind: isMatchVideoKind(record.kind) ? record.kind : 'highlights',
             title,
             provider,
             addedAt: typeof record.addedAt === 'string' ? record.addedAt : '',
-        });
+        };
+
+        // La portada solo viaja si es un link sano; null se respeta (ya se
+        // buscó y no hay); cualquier otra cosa se descarta y se vuelve a buscar.
+        const thumbnail = record.thumbnailUrl;
+        if (thumbnail === null) link.thumbnailUrl = null;
+        else if (typeof thumbnail === 'string' && isSafeHttpUrl(thumbnail)) link.thumbnailUrl = thumbnail.trim();
+
+        // 'original' es lo que se asume: solo se guarda lo que se pidió a mano.
+        if (record.poster === 'generated') link.poster = 'generated';
+
+        out.push(link);
 
         if (out.length >= MAX_MATCH_VIDEOS) break;
     }
@@ -419,4 +507,20 @@ export function normalizeMatchVideoLinks(raw: unknown): MatchVideoLink[] {
 export function describeVideo(video: Pick<MatchVideoLink, 'title' | 'kind' | 'provider'>): string {
     if (video.title) return video.title;
     return `${VIDEO_KIND_LABELS[video.kind]} · ${VIDEO_PROVIDER_LABELS[video.provider]}`;
+}
+
+/**
+ * La portada que se muestra: la guardada (la de la plataforma) o, si todavía
+ * no se buscó, la que se deduce de la URL sin pedir nada (hoy solo YouTube).
+ */
+export function videoPosterUrl(
+    video: Pick<MatchVideoLink, 'thumbnailUrl'>,
+    parsed: Pick<ParsedVideoUrl, 'thumbnailUrl'> | null | undefined,
+): string | null {
+    return video.thumbnailUrl || parsed?.thumbnailUrl || null;
+}
+
+/** true si al video nunca se le buscó portada (ni encontrada ni descartada). */
+export function needsThumbnailLookup(video: Pick<MatchVideoLink, 'thumbnailUrl'>): boolean {
+    return video.thumbnailUrl === undefined;
 }

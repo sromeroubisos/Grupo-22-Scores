@@ -41,7 +41,7 @@
 
 .editorRow {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
     gap: 10px;
     align-items: end;
 }
@@ -247,152 +247,43 @@
     opacity: 0.45;
 }
 
-/* ── El marco del reproductor ───────────────────────────────────────────── */
-.frame {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    border-radius: 12px;
-    overflow: hidden;
-    background: #000;
-}
-
-/* Shorts y reels: alto, no ancho. El ancho sale de la altura. */
-.framePortrait {
-    width: auto;
-    max-width: 100%;
-    height: min(70vh, 640px);
-    aspect-ratio: 9 / 16;
-    margin: 0 auto;
-}
-
-.iframe {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-}
-
-.poster {
-    display: block;
-    padding: 0;
-    border: 0;
-    cursor: pointer;
-    color: #fff;
-}
-
-.poster:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
-}
-
-.thumb {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.posterName {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-bottom: 88px;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-}
-
-.play {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 64px;
-    height: 64px;
-    margin: -32px 0 0 -32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    background: rgba(0, 0, 0, 0.65);
-    color: #fff;
-    transition: transform 160ms var(--mv-ease), background-color 160ms var(--mv-ease);
-}
-
-.poster:hover .play,
-.poster:focus-visible .play {
-    transform: scale(1.06);
-    background: var(--color-accent);
-}
-
-/* ── Lo que se abre afuera ──────────────────────────────────────────────── */
-.external {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-    padding: 14px;
+/* La portada de un video ya cargado: original de la plataforma o placa G22. */
+.posterSelect {
+    flex: none;
+    max-width: 46%;
+    min-height: 32px;
+    padding: 0 8px;
     border: 1px solid var(--color-border);
-    border-radius: 12px;
+    border-radius: 8px;
     background: var(--color-bg-primary);
-    color: inherit;
-    text-decoration: none;
-    transition: border-color 140ms var(--mv-ease);
-}
-
-.external:hover {
-    border-color: var(--color-accent);
-}
-
-.externalName {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-tertiary);
-}
-
-.externalUrl {
-    font-size: 13px;
     color: var(--color-text-secondary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.externalCta {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--color-accent);
-}
-
-.cardFoot {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.openLink {
+    font: inherit;
     font-size: 12px;
     font-weight: 600;
-    color: var(--color-text-secondary);
-    text-decoration: none;
 }
 
-.openLink:hover {
-    color: var(--color-accent);
+.posterSelect:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+}
+
+.posterSelect:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
 }
 
 @media (max-width: 640px) {
     .editorRow {
         grid-template-columns: 1fr;
+    }
+
+    .cardHead {
+        flex-wrap: wrap;
+    }
+
+    .posterSelect {
+        max-width: none;
+        flex: 1 1 100%;
     }
 
     .add {

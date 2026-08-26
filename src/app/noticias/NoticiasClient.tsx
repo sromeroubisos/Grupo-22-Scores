@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { useSport } from '@/context/SportContext';
+import type { VideoHubSummary } from '@/lib/videoHub/types';
 import MobileSectionTabs from '@/components/MobileSectionTabs';
 import {
     Plus,
@@ -39,6 +40,20 @@ export interface NewsItem {
 interface NoticiasClientProps {
     initialNews: NewsItem[];
     canManageNews: boolean;
+    /** Los torneos con videos cargados, para la tira "Videos por torneo". */
+    videoHubs?: VideoHubSummary[];
+}
+
+/** El deporte del torneo, en la carpeta de la portada. */
+const SPORT_FOLDERS: Record<string, FolderType> = {
+    rugby: 'rugby',
+    'field-hockey': 'hockey',
+    hockey: 'hockey',
+    football: 'football',
+};
+
+function pluralize(count: number, singular: string, plural: string) {
+    return `${count} ${count === 1 ? singular : plural}`;
 }
 
 function buildNewsPreview(item: NewsItem) {
@@ -67,7 +82,7 @@ function formatPublishedAt(value?: string) {
     });
 }
 
-export default function NoticiasClient({ initialNews, canManageNews }: NoticiasClientProps) {
+export default function NoticiasClient({ initialNews, canManageNews, videoHubs = [] }: NoticiasClientProps) {
     const router = useRouter();
     const { selectedSport } = useSport();
     const [news, setNews] = useState<NewsItem[]>(
@@ -163,6 +178,13 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
         });
     }, [activeFolder, searchQuery, news]);
 
+    const visibleHubs = useMemo(() => {
+        if (['rugby', 'hockey', 'football'].includes(activeFolder)) {
+            return videoHubs.filter((hub) => SPORT_FOLDERS[hub.tournament.sportId ?? ''] === activeFolder);
+        }
+        return videoHubs;
+    }, [activeFolder, videoHubs]);
+
     const folders = [
         { id: 'all', label: 'Todas', icon: FolderOpen },
         { id: 'rugby', label: 'Rugby', icon: Trophy },
@@ -205,6 +227,34 @@ export default function NoticiasClient({ initialNews, canManageNews }: NoticiasC
             </div>
 
             <div style={{ padding: '0 24px 40px' }}>
+                {visibleHubs.length > 0 && (
+                    <section className={styles.hubStrip} aria-labelledby="video-hubs-title">
+                        <div className={styles.hubStripHead}>
+                            <h2 id="video-hubs-title" className={styles.hubStripTitle}>Videos por torneo</h2>
+                            <p className={styles.hubStripHint}>Highlights, partidos completos y la votación al mejor try o gol.</p>
+                        </div>
+                        <div className={styles.hubStripScroll}>
+                            {visibleHubs.map((hub) => (
+                                <Link key={hub.tournament.id} href={`/noticias/videos/${hub.tournament.id}`} className={styles.hubCard}>
+                                    {hub.tournament.logoUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element -- logo por el proxy propio.
+                                        <img className={styles.hubLogo} src={hub.tournament.logoUrl} alt="" width={44} height={44} loading="lazy" decoding="async" />
+                                    ) : (
+                                        <span className={styles.hubLogoFallback} aria-hidden="true">{hub.tournament.name.slice(0, 1)}</span>
+                                    )}
+                                    <span className={styles.hubBody}>
+                                        <span className={styles.hubName}>{hub.tournament.name}</span>
+                                        <span className={styles.hubMeta}>
+                                            {pluralize(hub.videoCount, 'video', 'videos')} · {pluralize(hub.matchCount, 'partido', 'partidos')}
+                                        </span>
+                                    </span>
+                                    <span className={styles.hubCta}>Ver →</span>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
                 <div className={styles.categoryBar}>
                     <div className={styles.categoryScroll}>
                         {folders.map((folder) => (
