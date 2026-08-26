@@ -2,7 +2,7 @@
 // partido con sus videos, resuelto en el servidor. Tipos puros y dos
 // utilidades sin dependencias.
 
-import type { MatchVideoLink } from '../matches/videoLinks';
+import type { MatchVideoKind, MatchVideoLink, MatchVideoProvider } from '../matches/videoLinks';
 import type { VideoPollOptionRef } from './polls';
 
 export interface VideoHubTeam {
@@ -42,6 +42,36 @@ export interface VideoHub {
     videoCount: number;
 }
 
+/** El video cargado más recientemente en el torneo: la portada de su tarjeta en noticias. */
+export interface VideoHubFeaturedVideo {
+    id: string;
+    kind: MatchVideoKind;
+    title: string | null;
+    provider: MatchVideoProvider;
+    /** ISO. En filas viejas sin fecha propia, la de la fila. */
+    addedAt: string;
+    /**
+     * La portada que publica la plataforma, si ya está guardada o se deduce
+     * de la URL. null = se dibuja la placa G22. La portada de noticias no sale
+     * a buscar nada: lo que no está, se dibuja.
+     */
+    posterUrl: string | null;
+    /** true si quien lo cargó pidió la placa G22 aunque haya miniatura. */
+    generatedPoster: boolean;
+    match: Pick<VideoHubMatch, 'id' | 'dateTime' | 'roundLabel' | 'home' | 'away' | 'score'>;
+}
+
+/** La votación abierta de un torneo, para invitar a votar desde la portada. */
+export interface VideoHubOpenPoll {
+    id: string;
+    name: string;
+    title: string;
+    closesAt: string | null;
+    /** null = no se pudieron contar (la portada no muestra el número). */
+    totalVotes: number | null;
+    optionCount: number;
+}
+
 /** Una tarjeta en la portada de noticias: el torneo y cuánto hay para ver. */
 export interface VideoHubSummary {
     tournament: VideoHubTournament;
@@ -49,6 +79,10 @@ export interface VideoHubSummary {
     matchCount: number;
     /** ISO del video cargado más recientemente. */
     latestAddedAt: string | null;
+    /** El video más reciente, con su partido: la portada de la tarjeta. */
+    latestVideo: VideoHubFeaturedVideo | null;
+    /** La votación abierta, si hay. La pega la página (ver noticias/page.tsx). */
+    openPoll: VideoHubOpenPoll | null;
 }
 
 export function matchLabelOf(match: Pick<VideoHubMatch, 'home' | 'away'>): string {

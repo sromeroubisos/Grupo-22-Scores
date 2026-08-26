@@ -10,6 +10,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { getVideoHub } from '@/lib/server/videoHub';
 import {
+    isPollOpen,
     isVideoPollStatus,
     normalizePollOptions,
     summarizePoll,
@@ -20,7 +21,7 @@ import {
     type VideoPollSummary,
     type VideoPollVote,
 } from '@/lib/videoHub/polls';
-import { findHubVideo } from '@/lib/videoHub/types';
+import { findHubVideo, type VideoHubOpenPoll } from '@/lib/videoHub/types';
 
 const POLLS_TABLE = 'video_polls';
 const VOTES_TABLE = 'video_poll_votes';
@@ -141,6 +142,61 @@ export async function listVideoPolls(tournamentId: string, userId: string | null
         available: true,
         polls: polls.map((poll) => summarizePoll(poll, votes.get(poll.id) ?? [], userId, now)),
     };
+}
+
+/**
+ * La votación abierta de cada torneo (la más nueva, si hay varias), para
+ * anunciarla en la portada de noticias. Nunca lanza: sin tablas, o con un
+ * error, no hay nada que anunciar y la portada sale igual.
+ */
+export async function listOpenVideoPolls(): Promise<Map<string, VideoHubOpenPoll>> {
+    const out = new Map<string, VideoHubOpenPoll>();
+    const admin = createAdminClient();
+    const { data, error } = await admin
+        .from(POLLS_TABLE)
+        .select(POLL_COLUMNS)
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(PAGE);
+    if (error) {
+        if (!isMissingTableError(error, POLLS_TABLE) && !isOutdatedTableError(error)) {
+            console.error('[videoPolls] open polls read failed:', error);
+        }
+        return out;
+    }
+
+    // Vienen de la más nueva a la más vieja: la primera de cada torneo gana.
+    const now = Date.now();
+    const polls: VideoPoll[] = [];
+    for (const row of (data ?? []) as Row[]) {
+        const poll = rowToPoll(row);
+        if (!poll || !isPollOpen(poll, now)) continue;
+        if (polls.some((entry) => entry.tournamentId === poll.tournamentId)) continue;
+        polls.push(poll);
+    }
+    if (polls.length === 0) return out;
+
+    let votes: Map<string, VideoPollVote[]> | null = null;
+    try {
+        votes = await readVotes(polls.map((poll) => poll.id));
+    } catch (error) {
+        // Sin conteo la votación igual se anuncia; solo se calla el número.
+        console.error('[videoPolls] open polls votes read failed:', error);
+    }
+
+    for (const poll of polls) {
+        const optionIds = new Set(poll.options.map((option) => option.id));
+        const rows = votes?.get(poll.id) ?? [];
+        out.set(poll.tournamentId, {
+            id: poll.id,
+            name: poll.name,
+            title: poll.title,
+            closesAt: poll.closesAt,
+            optionCount: poll.options.length,
+            totalVotes: votes ? rows.filter((vote) => optionIds.has(vote.optionId)).length : null,
+        });
+    }
+    return out;
 }
 
 export async function getVideoPoll(id: string): Promise<VideoPoll | null> {

@@ -1,31 +1,32 @@
-/* Hub de videos de un torneo. Misma familia que /noticias (tectonic, oscura). */
+/* Hub de videos de un torneo. Misma familia que /noticias: tokens del sitio, sigue al tema. */
 
 .page {
-    --basalt-950: #0a0a0b;
-    --basalt-900: #121214;
-    --basalt-800: #1c1c1f;
-    --basalt-700: #2a2a2e;
-    --basalt-600: #3f3f46;
-    --basalt-400: #a1a1aa;
-    --magma-primary: var(--color-accent, #ff4d00);
-    --surface-edge: rgba(255, 255, 255, 0.06);
-    --font-sans: 'Geist', sans-serif;
-    --font-mono: 'Geist Mono', monospace;
+    /* Los nombres "basalt/magma" quedaron de la primera versión, que era
+       oscura fija. Hoy son alias de los tokens del sitio: la página sigue al
+       tema (data-theme) y no pinta fondo propio, así el degradado del sitio
+       pasa por debajo en vez de verse un bloque. */
+    --basalt-950: var(--color-bg-primary);
+    --basalt-900: var(--color-bg-secondary);
+    --basalt-800: var(--color-bg-tertiary);
+    --basalt-700: var(--color-bg-hover);
+    --basalt-600: var(--color-border-light);
+    --basalt-400: var(--color-text-secondary);
+    --magma-primary: var(--color-accent, #00a365);
+    /* El acento cuando pinta texto (calibrado por tema en globals.css). */
+    --magma-ink: var(--color-accent-ink, #22c55e);
+    --surface-edge: var(--color-border);
+    /* La fuente del sitio: Geist no está cargada fuera del admin y caía en la genérica. */
+    --font-sans: var(--font-primary, 'Outfit', 'Inter', system-ui, sans-serif);
+    --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
     --hub-ease: cubic-bezier(0.25, 1, 0.5, 1);
 
-    /* El reproductor compartido habla en tokens del producto: acá se fijan
-       al tono oscuro del hub, que no cambia con el tema del sitio. */
-    --color-bg-primary: var(--basalt-950);
-    --color-bg-secondary: var(--basalt-900);
-    --color-border: var(--surface-edge);
-    --color-text-primary: #ececec;
-    --color-text-secondary: #c7c7cc;
-    --color-text-tertiary: var(--basalt-400);
-
     min-height: 100vh;
-    background: var(--basalt-950);
-    color: #ececec;
+    color: var(--color-text-primary);
     font-family: var(--font-sans);
+}
+
+:global(html[data-theme="dark"]) .page {
+    color-scheme: dark;
 }
 
 .shell {
@@ -64,13 +65,13 @@
 }
 
 .backLink {
-    color: #fff;
+    color: var(--color-text-primary);
     text-decoration: none;
 }
 
 .backLink:hover,
 .backLink:focus-visible {
-    color: var(--magma-primary);
+    color: var(--magma-ink);
 }
 
 .topMeta {
@@ -141,7 +142,7 @@
 .btn {
     background: var(--basalt-700);
     border: 1px solid var(--surface-edge);
-    color: #fff;
+    color: var(--color-text-primary);
     padding: 10px 18px;
     font-family: var(--font-mono);
     font-size: 11px;
@@ -167,6 +168,7 @@
 .btnPrimary {
     background: var(--magma-primary);
     border-color: transparent;
+    color: #04130c;
     font-weight: 700;
 }
 
@@ -175,7 +177,7 @@
 }
 
 .btnDanger {
-    color: #f87171;
+    color: var(--color-error);
 }
 
 .btnDanger:hover:not(:disabled) {
@@ -187,7 +189,7 @@
     padding: 12px 14px;
     background: rgba(245, 158, 11, 0.1);
     border: 1px solid rgba(245, 158, 11, 0.35);
-    color: #fbbf24;
+    color: var(--color-warning);
     font-size: 13px;
 }
 
@@ -212,7 +214,7 @@
 .error {
     margin: 0;
     font-size: 13px;
-    color: #f87171;
+    color: var(--color-error);
 }
 
 /* ── Votación ───────────────────────────────────────────────────────────── */
@@ -337,7 +339,7 @@
     border-radius: 999px;
     border: 1px solid rgba(34, 197, 94, 0.35);
     background: rgba(34, 197, 94, 0.12);
-    color: #4ade80;
+    color: var(--color-success);
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -345,9 +347,9 @@
 }
 
 .pillMine {
-    border-color: rgba(255, 77, 0, 0.45);
-    background: rgba(255, 77, 0, 0.12);
-    color: var(--magma-primary);
+    border-color: rgba(var(--color-accent-rgb), 0.45);
+    background: rgba(var(--color-accent-rgb), 0.12);
+    color: var(--magma-ink);
 }
 
 .voteBtn {
@@ -357,7 +359,7 @@
     border-radius: 9px;
     border: 1px solid var(--magma-primary);
     background: var(--magma-primary);
-    color: #fff;
+    color: #04130c;
     font: inherit;
     font-size: 13px;
     font-weight: 700;
@@ -377,7 +379,7 @@
 .voteBtnMine,
 .voteBtnMine:disabled {
     background: transparent;
-    color: var(--magma-primary);
+    color: var(--magma-ink);
     opacity: 1;
 }
 
@@ -438,7 +440,7 @@
     border: 1px solid var(--surface-edge);
     border-radius: 8px;
     background: var(--basalt-800);
-    color: #fff;
+    color: var(--color-text-primary);
     font: inherit;
     font-size: 15px;
 }
@@ -449,7 +451,6 @@
 }
 
 .input[type="datetime-local"] {
-    color-scheme: dark;
     max-width: 280px;
 }
 
@@ -532,7 +533,7 @@
 
 .candidateChecked {
     border-color: var(--magma-primary);
-    background: rgba(255, 77, 0, 0.08);
+    background: rgba(var(--color-accent-rgb), 0.08);
 }
 
 .candidateKind {
@@ -622,7 +623,7 @@
 }
 
 .videoCard:hover {
-    border-color: rgba(255, 255, 255, 0.14);
+    border-color: var(--color-border-light);
     transform: translateY(-2px);
 }
 
@@ -703,6 +704,13 @@
     white-space: nowrap;
 }
 
+.videoActions {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
 .videoOpen {
     flex: none;
     display: inline-flex;
@@ -716,7 +724,7 @@
 
 .videoOpen:hover,
 .videoOpen:focus-visible {
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 /* ── El partido en la votación y el editor ──────────────────────────────── */
@@ -832,13 +840,13 @@
 }
 
 .kind_full {
-    color: var(--magma-primary);
-    border-color: rgba(255, 77, 0, 0.35);
-    background: rgba(255, 77, 0, 0.1);
+    color: var(--magma-ink);
+    border-color: rgba(var(--color-accent-rgb), 0.35);
+    background: rgba(var(--color-accent-rgb), 0.1);
 }
 
 .kind_highlights {
-    color: #4ade80;
+    color: var(--color-success);
     border-color: rgba(34, 197, 94, 0.35);
     background: rgba(34, 197, 94, 0.1);
 }
@@ -908,5 +916,61 @@
     .videoCard:hover,
     .btn:hover:not(:disabled) {
         transform: none;
+    }
+}
+
+/* ── Cargar un clip desde la votación ───────────────────────────────────── */
+.clipForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+    padding: 12px;
+    border: 1px dashed var(--basalt-600);
+    border-radius: 10px;
+}
+
+.clipRow {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 10px;
+}
+
+.linkBtn {
+    align-self: flex-start;
+    min-height: 36px;
+    padding: 0 6px;
+    border: 0;
+    background: transparent;
+    color: var(--magma-ink);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.linkBtn:hover:not(:disabled) {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.linkBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.linkBtn:focus-visible {
+    outline: 2px solid var(--magma-ink);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+select.input {
+    appearance: auto;
+}
+
+@media (max-width: 640px) {
+    .clipRow {
+        grid-template-columns: 1fr;
     }
 }
