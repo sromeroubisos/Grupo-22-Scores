@@ -268,7 +268,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
                         </Link>
                         {canManageNews && (
                             <ProtectedLink
-                                href={`/admin/super/noticias/editar/${news.id}`}
+                                href={`/admin/noticias/editar/${news.id}`}
                                 className={`${styles.actionLink} ${styles.primaryLink}`}
                             >
                                 Editar noticia

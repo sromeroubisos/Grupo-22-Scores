@@ -20,6 +20,9 @@ type AppUserRow = {
 type PersonasRolesResponse = {
     data?: {
         users?: AppUserRow[];
+        total?: number;
+        page?: number;
+        pageSize?: number;
     };
     error?: string;
     details?: unknown;
@@ -132,8 +135,16 @@ const ROLE_PRESETS = [
     accent: string;
 }>;
 
+/** Usuarios por página. La búsqueda y el corte los hace el servidor. */
+const USERS_PAGE_SIZE = 50;
+const SEARCH_DEBOUNCE_MS = 300;
+
 export default function PersonasRolesPage() {
     const [searchQuery, setSearchQuery] = useState('');
+    /** Lo que se manda al servidor: la búsqueda, con un respiro tras la última tecla. */
+    const [debouncedQuery, setDebouncedQuery] = useState('');
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
     const [users, setUsers] = useState<AppUserRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -159,12 +170,24 @@ export default function PersonasRolesPage() {
     const [initialTournamentIds, setInitialTournamentIds] = useState<string[]>([]);
     const [initialClubIdsTorneo, setInitialClubIdsTorneo] = useState<string[]>([]);
 
+    // La búsqueda viaja al servidor con un respiro, y vuelve a la página 1.
+    useEffect(() => {
+        const handle = window.setTimeout(() => {
+            setDebouncedQuery(searchQuery.trim());
+            setPage(1);
+        }, SEARCH_DEBOUNCE_MS);
+        return () => window.clearTimeout(handle);
+    }, [searchQuery]);
+
     const fetchUsers = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
 
-            const response = await fetch('/api/admin/super/personas-roles', {
+            const params = new URLSearchParams({ page: String(page), pageSize: String(USERS_PAGE_SIZE) });
+            if (debouncedQuery) params.set('q', debouncedQuery);
+
+            const response = await fetch(`/api/admin/super/personas-roles?${params.toString()}`, {
                 cache: 'no-store',
                 credentials: 'include',
             });
@@ -174,18 +197,18 @@ export default function PersonasRolesPage() {
                 throw new Error(payload.error || 'No se pudieron cargar los usuarios.');
             }
 
-            setUsers(
-                (payload.data?.users ?? []).map((user) => ({
-                    ...user,
-                    role: normalizeRole(user.role),
-                }))
-            );
+            const rows = (payload.data?.users ?? []).map((user) => ({
+                ...user,
+                role: normalizeRole(user.role),
+            }));
+            setUsers(rows);
+            setTotal(typeof payload.data?.total === 'number' ? payload.data.total : rows.length);
         } catch (fetchError) {
             setError(fetchError instanceof Error ? fetchError.message : 'No se pudieron cargar los usuarios.');
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [debouncedQuery, page]);
 
     useEffect(() => {
         void fetchUsers();
@@ -251,21 +274,16 @@ export default function PersonasRolesPage() {
         void fetchAssignmentOptions();
     }, [fetchAssignmentOptions]);
 
-    const filteredUsers = useMemo(() => {
-        const query = searchQuery.trim().toLowerCase();
+    // El servidor ya filtró y cortó: la página muestra lo que llegó.
+    const filteredUsers = users;
+    const pageCount = Math.max(1, Math.ceil(total / USERS_PAGE_SIZE));
+    const rangeStart = total === 0 ? 0 : (page - 1) * USERS_PAGE_SIZE + 1;
+    const rangeEnd = Math.min(page * USERS_PAGE_SIZE, total);
 
-        return users.filter((user) => {
-            if (!query) {
-                return true;
-            }
-
-            return (
-                (user.name || '').toLowerCase().includes(query) ||
-                user.email.toLowerCase().includes(query) ||
-                normalizeRole(user.role).includes(query)
-            );
-        });
-    }, [searchQuery, users]);
+    // Si una búsqueda achica el total y la página quedó fuera de rango, vuelve a la última.
+    useEffect(() => {
+        if (!loading && page > pageCount) setPage(pageCount);
+    }, [loading, page, pageCount]);
 
     useEffect(() => {
         if (!editingUser) {
@@ -683,7 +701,7 @@ export default function PersonasRolesPage() {
                                 <Search size={16} className={styles.personasSearchIcon} />
                                 <input
                                     className={styles.personasSearchInput}
-                                    placeholder="Buscar usuario por nombre, email o rol..."
+                                    placeholder="Buscar por nombre, email o rol (en toda la base)"
                                     value={searchQuery}
                                     onChange={(event) => setSearchQuery(event.target.value)}
                                 />
@@ -703,8 +721,34 @@ export default function PersonasRolesPage() {
 
                     {!loading && !error && (
                         <section className={styles.section}>
-                            <div className={styles.sectionHeaderRow} style={{ marginBottom: 16 }}>
-                                <h2 className={styles.sectionTitle}>Directorio de Usuarios ({filteredUsers.length})</h2>
+                            <div className={styles.sectionHeaderRow} style={{ marginBottom: 16, gap: 12, flexWrap: 'wrap' }}>
+                                <h2 className={styles.sectionTitle}>Directorio de Usuarios ({total.toLocaleString('es-AR')})</h2>
+                                <nav aria-label="Páginas del directorio" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--basalt-400)' }}>
+                                        {total === 0 ? 'Sin resultados' : `${rangeStart}–${rangeEnd} de ${total.toLocaleString('es-AR')}`}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className={styles.btn}
+                                        onClick={() => setPage((current) => Math.max(1, current - 1))}
+                                        disabled={page <= 1 || loading}
+                                        style={page <= 1 || loading ? { opacity: 0.45, cursor: 'not-allowed' } : undefined}
+                                    >
+                                        ‹ Anterior
+                                    </button>
+                                    <span style={{ fontSize: 13, color: 'var(--basalt-400)', whiteSpace: 'nowrap' }} aria-live="polite">
+                                        Página {page} de {pageCount}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className={styles.btn}
+                                        onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
+                                        disabled={page >= pageCount || loading}
+                                        style={page >= pageCount || loading ? { opacity: 0.45, cursor: 'not-allowed' } : undefined}
+                                    >
+                                        Siguiente ›
+                                    </button>
+                                </nav>
                             </div>
                             <div className={styles.card}>
                                 <div className={styles.personasDesktopTable}>

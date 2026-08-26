@@ -369,12 +369,17 @@ export function hasEditorialAccess(
     return isGlobalAdminRole(normalized) || EDITORIAL_PANEL_ROLES.has(normalized);
 }
 
+/**
+ * Quién crea, edita y publica noticias (y arma votaciones): cualquier rol de
+ * administración —global, unión, torneo, club, gestores, operador, o una
+ * membresía de admin/editor— y la redacción. El fan, el jugador y el
+ * entrenador, no. Antes era solo el super admin.
+ */
 export function hasNewsManagementAccess(
     role?: string | null,
-    _memberships?: MembershipLike[] | null
+    memberships?: MembershipLike[] | null
 ): boolean {
-    void _memberships;
-    return isSuperAdminRole(role);
+    return isAdminUser(role, memberships) || hasEditorialAccess(role, memberships);
 }
 
 export function hasFederationAdminAccess(

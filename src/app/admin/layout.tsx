@@ -4,7 +4,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getRequestUserAccessContext, requireRequestUserAccessContext } from '@/lib/auth/permissions';
 import { resolveAdminGuardRedirect } from '@/lib/auth/adminGuardRedirect';
-import { hasEditorialAccess, hasFederationAdminAccess, resolveAdminPanel } from '@/lib/auth/roles';
+import { hasEditorialAccess, hasFederationAdminAccess, hasNewsManagementAccess, resolveAdminPanel } from '@/lib/auth/roles';
 import { assertMfaSatisfied } from '@/lib/auth/mfa';
 import AdminWrapper from './AdminWrapper';
 import { AdminConsoleProvider } from './AdminContext';
@@ -32,10 +32,13 @@ async function resolveAdminAccess() {
     // el guard pide admin de federacion: falla cerrado, no abierto.
     const pathname = (await headers()).get('x-pathname') || '';
     const isEditorialRoute = pathname === '/admin';
+    // El editor de noticias: cualquier rol de administración o de redacción.
+    const isNewsRoute = pathname.startsWith('/admin/noticias');
 
     const allowed =
         hasFederationAdminAccess(context.role, context.memberships) ||
-        (isEditorialRoute && hasEditorialAccess(context.role, context.memberships));
+        (isEditorialRoute && hasEditorialAccess(context.role, context.memberships)) ||
+        (isNewsRoute && hasNewsManagementAccess(context.role, context.memberships));
 
     if (!allowed) {
         throw new Error('Forbidden');

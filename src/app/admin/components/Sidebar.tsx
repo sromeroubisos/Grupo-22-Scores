@@ -35,7 +35,7 @@ const sidebarItems: SidebarItem[] = [
     { id: 'clubs', icon: 'shield', label: 'Clubes', href: '/admin/super/clubes', roles: ['super_admin'] },
     { id: 'players', icon: 'group', label: 'Jugadores', href: '/admin/super/jugadores', roles: ['super_admin'] },
     { id: 'roles', icon: 'badge', label: 'Personas y Roles', href: '/admin/super/personas-roles', roles: ['super_admin'] },
-    { id: 'news', icon: 'newspaper', label: 'Noticias', href: '/admin/super/noticias', roles: ['super_admin'] },
+    { id: 'news', icon: 'newspaper', label: 'Noticias', href: '/noticias', roles: ['super_admin'] },
     { id: 'moderation', icon: 'policy', label: 'Moderación', href: '/admin/super/moderacion', roles: ['super_admin'] },
     { id: 'sync', icon: 'sync', label: 'Sincronización', href: '/admin/super/sync', roles: ['super_admin'] }
 ];
