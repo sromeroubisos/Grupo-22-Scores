@@ -3,6 +3,7 @@ import path from 'node:path';
 import { getReadClient } from '@/lib/supabase/read';
 import { resolveTournamentCountryId, resolveTournamentCountryLabel } from '@/lib/data/countries';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 
 export type ExternalTournamentOverrideRecord = {
     id: string;
@@ -709,7 +710,19 @@ export function applyExternalTournamentOverride<T extends Record<string, unknown
 
     const normalizedOverride = coerceExternalTournamentOverrideRecord(override);
     const resolvedName = normalizeString(normalizedOverride.display_name) || normalizeString(normalizedOverride.name);
-    const resolvedLogo = normalizeString(normalizedOverride.logo_url);
+    const storedLogo = normalizeString(normalizedOverride.logo_url);
+    // Un escudo en base64 acá se copia seis veces en CADA partido del torneo:
+    // con la NRL (1,2 MB) el listado diario pasaba de 20 KB a 2 MB, superaba el
+    // tope del snapshot persistido y cada lambda lo recalculaba siempre. El
+    // proxy resuelve el logo por id de torneo y el navegador lo cachea aparte.
+    const resolvedLogo = storedLogo && /^data:/i.test(storedLogo)
+        ? buildTeamLogoProxyUrl({
+            key: normalizedOverride.id,
+            name: resolvedName,
+            entity: 'tournament',
+            version: normalizedOverride.updated_at ?? null,
+        })
+        : storedLogo;
 
     return {
         ...tournament,

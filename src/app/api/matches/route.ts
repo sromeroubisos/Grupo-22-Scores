@@ -39,7 +39,11 @@ import { isTournamentVisibleToPublic } from '@/lib/tournamentReview';
 import {
     getMatchesForDate,
     getLiveMatches,
+    hasRecentFixtureSyncEvidence,
     mapCachedToEnrichedMatch,
+    mapFlashScoreMatchToCached,
+    shouldPollLiveMatches,
+    upsertMatches,
 } from '@/lib/services/externalMatchCache';
 
 function isUuidLike(value: unknown): value is string {
@@ -929,6 +933,25 @@ function normalizeMatchesRequest(request: Request): MatchesRequestParams {
     };
 }
 
+/**
+ * Lo único del timezone que cambia el payload es DÓNDE empieza y termina el día
+ * pedido (y el offset con el que se escriben las horas locales). Doce zonas
+ * argentinas, Montevideo y Santiago dan el mismo listado, pero con el nombre
+ * IANA en la clave eran doce cálculos y doce fan-outs al proveedor por el
+ * mismo día. Se identifica el día por sus bordes en UTC.
+ */
+function buildDayWindowKey(params: MatchesRequestParams) {
+    const dayStart = combineLocalDateTimeToUtcIso(params.requestedDate, '00:00:00', params.timeZone);
+    const nextDayStart = combineLocalDateTimeToUtcIso(addDaysToIsoDate(params.requestedDate, 1), '00:00:00', params.timeZone);
+    if (!dayStart || !nextDayStart) return params.timeZone;
+
+    const offsetMinutes = (iso: string, localDate: string) =>
+        Math.round((Date.parse(`${localDate}T00:00:00Z`) - Date.parse(iso)) / 60000);
+    const startOffset = offsetMinutes(dayStart, params.requestedDate);
+    const endOffset = offsetMinutes(nextDayStart, addDaysToIsoDate(params.requestedDate, 1));
+    return startOffset === endOffset ? `utc${startOffset}` : `utc${startOffset}_${endOffset}`;
+}
+
 function buildMatchesCacheKey(params: MatchesRequestParams) {
     return [
         MATCHES_RESPONSE_CACHE_PREFIX,
@@ -937,7 +960,7 @@ function buildMatchesCacheKey(params: MatchesRequestParams) {
         params.sport || 'all',
         params.status || 'all',
         params.useExternal ? 'external' : 'local',
-        params.timeZone,
+        buildDayWindowKey(params),
     ].join(':');
 }
 
@@ -945,8 +968,30 @@ function shouldUsePersistedFeedCache(params: MatchesRequestParams) {
     return !params.liveOnly;
 }
 
-function shouldServeStaleMatchesFeed(params: MatchesRequestParams) {
-    return !params.useExternal;
+/**
+ * Stale-while-revalidate para todos. Antes estaba apagado con external=true
+ * —que es lo que manda la portada— y cada request pasada la ventana fresh
+ * esperaba el recálculo entero (proveedor incluido) con el usuario mirando.
+ * Servir lo viejo y refrescar atrás es exactamente lo que ese caso necesita.
+ */
+function shouldServeStaleMatchesFeed(_params: MatchesRequestParams) {
+    return true;
+}
+
+/**
+ * fixture-sync cubre, en días UTC, de ayer a hoy+2. Un día local cuyo rango
+ * entero cae dentro de ese horizonte puede confiar en la caché como fuente
+ * completa: si no tiene filas, no hay partidos.
+ */
+function isWithinFixtureSyncHorizon(params: MatchesRequestParams, nowMs: number = Date.now()) {
+    const dayStart = combineLocalDateTimeToUtcIso(params.requestedDate, '00:00:00', params.timeZone);
+    const nextDayStart = combineLocalDateTimeToUtcIso(addDaysToIsoDate(params.requestedDate, 1), '00:00:00', params.timeZone);
+    if (!dayStart || !nextDayStart) return false;
+
+    const todayUtc = new Date(nowMs);
+    const horizonFrom = Date.UTC(todayUtc.getUTCFullYear(), todayUtc.getUTCMonth(), todayUtc.getUTCDate() - 1);
+    const horizonTo = Date.UTC(todayUtc.getUTCFullYear(), todayUtc.getUTCMonth(), todayUtc.getUTCDate() + 3);
+    return Date.parse(dayStart) >= horizonFrom && Date.parse(nextDayStart) <= horizonTo;
 }
 
 function buildExternalPersistKey(
@@ -983,8 +1028,11 @@ function hasShortLivedExternalResult(params: MatchesRequestParams, payload?: Mat
     if (!params.useExternal || !payload?.sources) return false;
     if (hasSourceDegradation(payload)) return true;
 
+    // Un día sin partidos es un resultado válido y se cachea como cualquier otro.
+    // Solo queda corto el caso dudoso: el proveedor contestó vacío para un día
+    // en el que la caché tenía filas sin cerrar.
     const flashscoreReason = payload.sources.flashscore?.reason;
-    return flashscoreReason === 'empty_result' || flashscoreReason === 'flashscore_empty_cache_fallback';
+    return flashscoreReason === 'flashscore_empty_cache_fallback';
 }
 
 function getMatchesResponseCachePolicy(params: MatchesRequestParams, payload?: MatchesPayload) {
@@ -1255,8 +1303,19 @@ async function computeMatchesPayload(
                 trace,
             });
             try {
+                // Gate por ventana: si external_match_cache dice que no hay nada
+                // en vivo ni por arrancar, el poll del usuario no gasta un request
+                // del proveedor. 'unknown' falla abierto y pollea como siempre.
+                let livePollGated = false;
+                try {
+                    const supabaseForGate = await readClientPromise;
+                    livePollGated = (await shouldPollLiveMatches(sport, supabaseForGate)) === 'skip';
+                } catch {
+                    livePollGated = false;
+                }
+
                 const externalFetchStartedAt = Date.now();
-                const liveMatches = await getFlashScoreLiveMatches(sport);
+                const liveMatches = livePollGated ? [] : await getFlashScoreLiveMatches(sport);
                 externalItemsCount = liveMatches?.length || 0;
                 if (trace) {
                     const durationMs = trackDuration(trace.metrics, 'external_fetch_ms', externalFetchStartedAt);
@@ -1366,6 +1425,7 @@ async function computeMatchesPayload(
                         supabase_items_count: supabaseItemsCount,
                         merged_items_count: mergedItemsCount,
                         final_items_count: finalItemsCount,
+                        live_poll_gated: livePollGated,
                     });
                 }
                 return { data: finalLiveMatches };
@@ -1504,18 +1564,97 @@ async function computeMatchesPayload(
                     timeZone,
                 );
 
+                // ── DB-first: external_match_cache es la fuente primaria ──────
+                // fixture-sync (cada hora) y live-sync (cada minuto) la mantienen
+                // al día, así que servir desde acá no gasta requests del proveedor.
+                // FlashScore queda como camino de reparación para cuando la caché
+                // no puede responder por la fecha pedida.
+                let cachedEnriched: any[] = [];
+                let cacheIsServable = false;
+                // Día sin filas pero con el sync vivo: no hay partidos, y se sirve
+                // sin tocar al proveedor. Ver hasRecentFixtureSyncEvidence.
+                let emptyDayFromCache = false;
+                try {
+                    const cacheReadStartedAt = Date.now();
+                    const supabaseForCache = await readClientPromise;
+                    const cachedRows = await getMatchesForDate(date, sport || 'rugby', supabaseForCache);
+                    if (trace) {
+                        trackDuration(trace.metrics, 'external_cache_read_ms', cacheReadStartedAt);
+                    }
+
+                    // getMatchesForDate trae ±1 día UTC; acá solo cuentan las
+                    // filas que caen en la fecha pedida según la timezone del
+                    // request. Sin este corte, un día futuro que fixture-sync
+                    // todavía no cubrió se serviría "desde caché" con el derrame
+                    // del día anterior.
+                    const rowsForDate = cachedRows.filter((row) => {
+                        const rowDate = new Date(row.date_time);
+                        return !Number.isNaN(rowDate.getTime()) && formatDateKey(rowDate, timeZone) === date;
+                    });
+
+                    // Una fila sin resultado con kickoff de hace más de 3 horas
+                    // es una deuda del sync (un final que live-sync no vio): en
+                    // ese caso se repara con el proveedor en vez de servir un
+                    // "scheduled" viejo. El write-through de la reparación la
+                    // sana para los próximos requests.
+                    const nowMs = Date.now();
+                    const hasStaleNonTerminal = rowsForDate.some((row) => {
+                        if (row.status === 'final' || row.status === 'cancelled' || row.status === 'postponed') {
+                            return false;
+                        }
+                        const kickoffMs = new Date(row.date_time).getTime();
+                        return !Number.isNaN(kickoffMs) && nowMs - kickoffMs > 3 * 60 * 60 * 1000;
+                    });
+
+                    if (rowsForDate.length > 0) {
+                        const enrichCacheStartedAt = Date.now();
+                        cachedEnriched = rowsForDate
+                            .map(m => mapCachedToEnrichedMatch(m, sport || 'rugby'))
+                            .filter(m => !isBlockedTournamentId(m.tournamentId));
+                        if (trace) {
+                            addDurationMetric(trace.metrics, 'enrich_matches_ms', Date.now() - enrichCacheStartedAt);
+                        }
+                        cacheIsServable = !hasStaleNonTerminal;
+                    } else if (supportsFlashScoreDailyList && isWithinFixtureSyncHorizon(params)) {
+                        const evidenceStartedAt = Date.now();
+                        emptyDayFromCache = (await hasRecentFixtureSyncEvidence(sport || 'rugby', supabaseForCache)) === true;
+                        if (trace) {
+                            addDurationMetric(trace.metrics, 'external_cache_read_ms', Date.now() - evidenceStartedAt);
+                        }
+                    }
+                } catch (cacheErr) {
+                    console.warn('[matches] external cache primary read failed:', cacheErr);
+                }
+
+                const servedFromExternalCache = cacheIsServable && cachedEnriched.length > 0;
+                if (servedFromExternalCache) {
+                    enrichedMatches = [...enrichedMatches, ...cachedEnriched];
+                    externalItemsCount = cachedEnriched.length;
+                    fsOk = true;
+                    fsFromCache = true;
+                    fsCount = cachedEnriched.length;
+                    fsReason = 'external_cache_primary';
+                    console.log(`[matches] external cache primary: ${fsCount} matches for date=${date}`);
+                } else if (emptyDayFromCache) {
+                    fsOk = true;
+                    fsFromCache = true;
+                    fsCount = 0;
+                    fsReason = 'external_cache_empty_day';
+                    console.log(`[matches] external cache empty day: no matches for date=${date}`);
+                }
+
                 // Track whether FlashScore API actually failed (vs returned 0 results)
                 let fsFetchFailed = false;
-                let usedExternalCacheFallback = false;
-                if (!supportsFlashScoreDailyList) {
+                if (!servedFromExternalCache && !supportsFlashScoreDailyList) {
                     fsOk = true;
                     fsReason = 'flashscore_date_out_of_window';
                 }
 
-                // Parallel fetch if today, otherwise just list
+                // Reparación: FlashScore solo corre cuando la caché no sirvió.
+                const shouldFetchExternal = !servedFromExternalCache && !emptyDayFromCache && supportsFlashScoreDailyList;
                 const externalFetchStartedAt = Date.now();
                 const [externalMatches, liveMatches] = await Promise.all([
-                    supportsFlashScoreDailyList
+                    shouldFetchExternal
                         ? getFlashScoreMatches(localDate, sport || 'rugby', {
                             timeZone,
                             targetDateKey: date || undefined
@@ -1527,54 +1666,44 @@ async function computeMatchesPayload(
                             return [];
                         })
                         : Promise.resolve([]),
-                    isToday ? getFlashScoreLiveMatches(sport || 'rugby').catch(e => {
+                    shouldFetchExternal && isToday ? getFlashScoreLiveMatches(sport || 'rugby').catch(e => {
                         console.warn('[matches] FlashScore live fetch failed', e?.message);
                         return [];
                     }) : Promise.resolve([])
                 ]);
-                if (trace) {
+                if (trace && shouldFetchExternal) {
                     const durationMs = trackDuration(trace.metrics, 'external_fetch_ms', externalFetchStartedAt);
                     trace.metrics.external_fetch_time_ms = durationMs;
                 }
-                externalItemsCount = externalMatches.length;
-
-                // ── Cache fallback when FlashScore is unavailable ─────────────
-                if (fsFetchFailed || !supportsFlashScoreDailyList || externalMatches.length === 0) {
-                    try {
-                        const externalCacheFallbackStartedAt = Date.now();
-                        const supabaseForCache = await readClientPromise;
-                        const cached = await getMatchesForDate(date, sport || 'rugby', supabaseForCache);
-                        if (cached.length > 0) {
-                            const enrichFallbackStartedAt = Date.now();
-                            const fromCache = cached.map(m => mapCachedToEnrichedMatch(m, sport || 'rugby'));
-                            if (trace) {
-                                addDurationMetric(trace.metrics, 'enrich_matches_ms', Date.now() - enrichFallbackStartedAt);
-                            }
-                            const mergeFallbackStartedAt = Date.now();
-                            enrichedMatches = [...enrichedMatches, ...fromCache];
-                            if (trace) {
-                                addDurationMetric(trace.metrics, 'merge_sources_ms', Date.now() - mergeFallbackStartedAt);
-                                trackDuration(trace.metrics, 'external_cache_fallback_ms', externalCacheFallbackStartedAt);
-                            }
-                            fsOk = !fsFetchFailed;
-                            fsFromCache = true;
-                            usedExternalCacheFallback = true;
-                            fsCount = fromCache.length;
-                            fsReason = !supportsFlashScoreDailyList
-                                ? 'flashscore_date_out_of_window'
-                                : fsFetchFailed
-                                    ? 'flashscore_cache_fallback'
-                                    : 'flashscore_empty_cache_fallback';
-                            fsMessage = 'Datos de FlashScore desde caché; puede haber un leve retraso.';
-                            console.log(`[matches] FlashScore cache fallback: ${fsCount} matches for date=${date}`);
-                        }
-                    } catch (cacheErr) {
-                        console.warn('[matches] Cache fallback also failed:', cacheErr);
-                    }
-                    // A populated cache fallback replaces the FlashScore list enrichment path.
+                if (!servedFromExternalCache) {
+                    externalItemsCount = externalMatches.length;
                 }
 
-                if (supportsFlashScoreDailyList && !fsFetchFailed && !usedExternalCacheFallback) {
+                // ── Cache fallback (semántica previa): el proveedor falló, vino
+                // vacío o la fecha está fuera de ventana, y la caché tenía filas
+                // que no calificaron como primarias.
+                const repairProducedNothing = shouldFetchExternal && (fsFetchFailed || externalMatches.length === 0);
+                const outOfWindowWithCache = !servedFromExternalCache && !supportsFlashScoreDailyList;
+                const servedCacheAsFallback = (repairProducedNothing || outOfWindowWithCache) && cachedEnriched.length > 0;
+                if (servedCacheAsFallback) {
+                    const mergeFallbackStartedAt = Date.now();
+                    enrichedMatches = [...enrichedMatches, ...cachedEnriched];
+                    if (trace) {
+                        addDurationMetric(trace.metrics, 'merge_sources_ms', Date.now() - mergeFallbackStartedAt);
+                    }
+                    fsOk = !fsFetchFailed;
+                    fsFromCache = true;
+                    fsCount = cachedEnriched.length;
+                    fsReason = !supportsFlashScoreDailyList
+                        ? 'flashscore_date_out_of_window'
+                        : fsFetchFailed
+                            ? 'flashscore_cache_fallback'
+                            : 'flashscore_empty_cache_fallback';
+                    fsMessage = 'Datos de FlashScore desde caché; puede haber un leve retraso.';
+                    console.log(`[matches] FlashScore cache fallback: ${fsCount} matches for date=${date}`);
+                }
+
+                if (shouldFetchExternal && !fsFetchFailed && !servedCacheAsFallback) {
                 // Merge live data into list
                 const mergeExternalStartedAt = Date.now();
                 const mergedExternalMatches = liveMatches && liveMatches.length > 0
@@ -1691,8 +1820,22 @@ async function computeMatchesPayload(
                         // searchable catalog of external tournaments comes from.
                         void recordExternalTournamentsFromMatches(mergedExternalMatches, sport || 'rugby');
                     }
+
+                    // Write-through: la reparación deja la fecha en la caché para
+                    // que el próximo request se resuelva DB-first sin gastar otro
+                    // request del proveedor.
+                    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+                        void (async () => {
+                            try {
+                                const rows = mergedExternalMatches.map((m) => mapFlashScoreMatchToCached(m, sport || 'rugby'));
+                                await upsertMatches(rows, createAdminClient());
+                            } catch (writeThroughErr) {
+                                console.warn('[matches] write-through a external_match_cache falló:', writeThroughErr);
+                            }
+                        })();
+                    }
                 }
-                } // end if (!fsFetchFailed)
+                } // end repair path (FlashScore)
             } catch (e) {
                 console.error('External section processing failed:', e);
                 fsReason = 'flashscore_processing_failed';
