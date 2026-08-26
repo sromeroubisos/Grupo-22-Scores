@@ -37,7 +37,7 @@ export type ThumbnailLookup = string | null | undefined;
 
 type Fetched = { finalUrl: string; body: string };
 
-function isFetchableHost(hostname: string): boolean {
+export function isFetchableHost(hostname: string): boolean {
     const host = hostname.toLowerCase();
     if (!host.includes('.')) return false;
     if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.internal')) return false;

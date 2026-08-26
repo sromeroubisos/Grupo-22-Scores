@@ -13,7 +13,18 @@ import { useMemo, useState, type FormEvent } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import MatchVideoPlayer, { useEmbedParent } from '@/components/video/MatchVideoPlayer';
-import { VIDEO_KIND_LABELS, VIDEO_PROVIDER_LABELS, describeVideo } from '@/lib/matches/videoLinks';
+import {
+    MATCH_VIDEO_KINDS,
+    MAX_MATCH_VIDEOS,
+    VIDEO_KIND_LABELS,
+    VIDEO_PROVIDER_LABELS,
+    describeVideo,
+    isDirectMediaUrl,
+    normalizeMatchVideoLinks,
+    parseVideoUrl,
+    type MatchVideoKind,
+    type MatchVideoLink,
+} from '@/lib/matches/videoLinks';
 import type { VideoPlateContext } from '@/lib/matches/videoPlate';
 import {
     MAX_POLL_NAME_LENGTH,
@@ -47,6 +58,13 @@ interface Props {
     /** true = la tabla existe pero es de una versión vieja del archivo (sin name/closes_at). */
     pollsOutdated?: boolean;
     migration: string;
+    /** true = arrancar con el editor de una votación nueva abierto (atajo desde la portada). */
+    initialEditing?: boolean;
+    /**
+     * Los partidos del torneo (con `videos` vacío), para cargarles un clip
+     * desde el editor de la votación. Solo llegan a quien administra.
+     */
+    candidateMatches?: VideoHubMatch[];
 }
 
 interface PollInput {
@@ -223,16 +241,155 @@ function MatchHeading({ match, compact = false }: { match: VideoHubMatch; compac
     );
 }
 
+/** Los partidos del hub van del más reciente al más viejo, como los arma el servidor. */
+function byMatchRecency(a: VideoHubMatch, b: VideoHubMatch): number {
+    return (b.dateTime ?? '').localeCompare(a.dateTime ?? '') || a.id.localeCompare(b.id);
+}
+
+/** "Lobos PdE 20–17 Montevideo · 22 ago": el partido en una línea, para el selector. */
+function matchOptionLabel(match: VideoHubMatch): string {
+    const score = scoreLabelOf(match);
+    const parts = [`${match.home.name} ${score ?? 'vs'} ${match.away.name}`];
+    const when = [match.roundLabel, formatDay(match.dateTime)].filter(Boolean).join(' · ');
+    if (when) parts.push(when);
+    return parts.join(' · ');
+}
+
+interface ClipFormProps {
+    match: VideoHubMatch;
+    onCancel: () => void;
+    /** La lista guardada del partido y el video recién agregado. */
+    onAdded: (videos: MatchVideoLink[], added: MatchVideoLink) => void;
+}
+
+/**
+ * Cargar un clip a un partido sin salir de la votación: el mismo PUT que la
+ * ficha (reemplaza la lista entera), con la lista que ya tiene más el nuevo.
+ * El video queda en la ficha del partido; la votación lo elige recién después.
+ */
+function ClipForm({ match, onCancel, onAdded }: ClipFormProps) {
+    const [url, setUrl] = useState('');
+    const [title, setTitle] = useState('');
+    const [kind, setKind] = useState<MatchVideoKind>('clip');
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const trimmed = url.trim();
+    const parsed = useMemo(() => (trimmed ? parseVideoUrl(trimmed) : null), [trimmed]);
+    const duplicate = Boolean(trimmed) && match.videos.some((video) => video.url.toLowerCase() === trimmed.toLowerCase());
+    const full = match.videos.length >= MAX_MATCH_VIDEOS;
+    // El botón deshabilitado siempre dice qué falta para habilitarse.
+    const hint = !trimmed
+        ? 'Pegá el link del clip (YouTube, ESPN, Instagram, lo que sea).'
+        : !parsed
+            ? 'Ese link no es una dirección válida. Tiene que empezar con https://.'
+            : duplicate
+                ? 'Ese link ya está cargado en este partido.'
+                : full
+                    ? `Tope de ${MAX_MATCH_VIDEOS} videos por partido.`
+                    : `${VIDEO_PROVIDER_LABELS[parsed.provider]} · queda en la ficha del partido y entra a la votación.`;
+    const canAdd = Boolean(parsed) && !duplicate && !full && !saving;
+
+    async function submit() {
+        if (!canAdd) return;
+        setSaving(true);
+        setError(null);
+        try {
+            const existingIds = new Set(match.videos.map((video) => video.id));
+            const response = await fetch(`/api/matches/${encodeURIComponent(match.id)}/videos`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    videos: [
+                        ...match.videos.map((video) => ({ id: video.id, url: video.url, kind: video.kind, title: video.title, poster: video.poster })),
+                        { url: trimmed, kind, title: title.trim() || null },
+                    ],
+                }),
+            });
+            const payload = await response.json().catch(() => null) as Record<string, unknown> | null;
+            if (!response.ok) {
+                setError(typeof payload?.error === 'string' ? payload.error : 'No se pudo guardar el clip. Probá de nuevo.');
+                return;
+            }
+            const videos = normalizeMatchVideoLinks(payload?.videos);
+            const added = videos.find((video) => !existingIds.has(video.id))
+                ?? videos.find((video) => video.url.toLowerCase() === trimmed.toLowerCase());
+            if (!added) {
+                setError('El clip se guardó pero no se pudo ubicar en la lista. Recargá la página.');
+                return;
+            }
+            onAdded(videos, added);
+        } catch {
+            setError('No se pudo guardar el clip. Revisá la conexión y probá de nuevo.');
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    return (
+        <div className={styles.clipForm} role="group" aria-label={`Agregar un clip a ${matchLabelOf(match)}`}>
+            <label className={styles.field}>
+                <span className={styles.label}>Link del clip</span>
+                <input
+                    className={`${styles.input} ${trimmed && (!parsed || duplicate) ? styles.inputMissing : ''}`}
+                    type="url"
+                    inputMode="url"
+                    value={url}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    onChange={(event) => setUrl(event.target.value)}
+                    disabled={saving}
+                    autoFocus
+                />
+            </label>
+            <div className={styles.clipRow}>
+                <label className={`${styles.field} ${styles.fieldWide}`}>
+                    <span className={styles.label}>Título <span className={styles.labelSoft}>(opcional)</span></span>
+                    <input
+                        className={styles.input}
+                        type="text"
+                        value={title}
+                        maxLength={120}
+                        placeholder="Try de Boffelli"
+                        onChange={(event) => setTitle(event.target.value)}
+                        disabled={saving}
+                    />
+                </label>
+                <label className={styles.field}>
+                    <span className={styles.label}>Tipo</span>
+                    <select className={styles.input} value={kind} onChange={(event) => setKind(event.target.value as MatchVideoKind)} disabled={saving}>
+                        {MATCH_VIDEO_KINDS.map((option) => (
+                            <option key={option} value={option}>{VIDEO_KIND_LABELS[option]}</option>
+                        ))}
+                    </select>
+                </label>
+            </div>
+            <p className={`${styles.hint} ${trimmed && (!parsed || duplicate) ? styles.error : ''}`} aria-live="polite">{hint}</p>
+            {error && <p className={styles.error} role="alert">{error}</p>}
+            <div className={styles.editorActions}>
+                <button type="button" className={styles.btn} onClick={onCancel} disabled={saving}>Cancelar</button>
+                <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => void submit()} disabled={!canAdd}>
+                    {saving ? 'Guardando…' : 'Agregar el clip'}
+                </button>
+            </div>
+        </div>
+    );
+}
+
 interface PollEditorProps {
     hub: VideoHub;
     initial: VideoPollSummary | null;
     saving: boolean;
     error: string | null;
+    /** Los partidos del torneo que todavía no tienen videos. */
+    candidates: VideoHubMatch[];
     onCancel: () => void;
     onSave: (input: PollInput) => void;
+    /** Un clip nuevo ya guardado en la ficha: el hub se actualiza sin recargar. */
+    onVideosChange: (match: VideoHubMatch, videos: MatchVideoLink[]) => void;
 }
 
-function PollEditor({ hub, initial, saving, error, onCancel, onSave }: PollEditorProps) {
+function PollEditor({ hub, initial, saving, error, candidates, onCancel, onSave, onVideosChange }: PollEditorProps) {
     // El nombre suele ser la fecha: se sugiere la del partido más reciente con videos.
     const [name, setName] = useState(initial?.poll.name ?? (hub.matches[0]?.roundLabel ?? ''));
     const [title, setTitle] = useState(initial?.poll.title ?? defaultPollTitle(hub.tournament.sportId));
@@ -247,6 +404,27 @@ function PollEditor({ hub, initial, saving, error, onCancel, onSave }: PollEdito
         return out;
     });
     const [closesInput, setClosesInput] = useState(() => toLocalInput(initial?.poll.closesAt ?? null));
+    /** El partido al que se le está cargando un clip, si hay uno abierto. */
+    const [clipFor, setClipFor] = useState<string | null>(null);
+    /** El partido elegido en "otro partido del torneo". */
+    const [pickedId, setPickedId] = useState('');
+
+    // Los partidos que todavía no están en el hub, para cargarles el primer clip.
+    const extraCandidates = useMemo(
+        () => candidates.filter((candidate) => !hub.matches.some((match) => match.id === candidate.id)),
+        [candidates, hub.matches],
+    );
+    const picked = extraCandidates.find((candidate) => candidate.id === pickedId) ?? null;
+
+    /** El clip ya está en la ficha: entra al hub y queda elegido en la votación. */
+    function clipAdded(match: VideoHubMatch, videos: MatchVideoLink[], added: MatchVideoLink) {
+        const id = pollOptionId({ matchId: match.id, videoId: added.id });
+        onVideosChange(match, videos);
+        setSelected((prev) => new Set(prev).add(id));
+        setLabels((prev) => ({ ...prev, [id]: added.title ?? '' }));
+        setClipFor(null);
+        setPickedId('');
+    }
 
     const trimmedName = name.trim();
     const trimmed = title.trim();
@@ -383,8 +561,49 @@ function PollEditor({ hub, initial, saving, error, onCancel, onSave }: PollEdito
                                 );
                             })}
                         </ul>
+                        {clipFor === match.id ? (
+                            <ClipForm
+                                match={match}
+                                onCancel={() => setClipFor(null)}
+                                onAdded={(videos, added) => clipAdded(match, videos, added)}
+                            />
+                        ) : (
+                            <button type="button" className={styles.linkBtn} onClick={() => { setClipFor(match.id); setPickedId(''); }} disabled={saving}>
+                                + Agregar un clip a este partido
+                            </button>
+                        )}
                     </div>
                 ))}
+
+                {extraCandidates.length > 0 && (
+                    <div className={styles.candidateMatch}>
+                        <label className={styles.field}>
+                            <span className={styles.label}>Otro partido del torneo <span className={styles.labelSoft}>(todavía sin videos)</span></span>
+                            <select
+                                className={styles.input}
+                                value={pickedId}
+                                onChange={(event) => { setPickedId(event.target.value); setClipFor(null); }}
+                                disabled={saving}
+                            >
+                                <option value="">Elegí un partido para cargarle un clip</option>
+                                {extraCandidates.map((candidate) => (
+                                    <option key={candidate.id} value={candidate.id}>{matchOptionLabel(candidate)}</option>
+                                ))}
+                            </select>
+                        </label>
+                        {picked && (
+                            <>
+                                <MatchHeading match={picked} compact />
+                                <ClipForm
+                                    key={picked.id}
+                                    match={picked}
+                                    onCancel={() => setPickedId('')}
+                                    onAdded={(videos, added) => clipAdded(picked, videos, added)}
+                                />
+                            </>
+                        )}
+                    </div>
+                )}
             </fieldset>
 
             <p className={styles.hint} aria-live="polite">{hint}</p>
@@ -508,12 +727,41 @@ function PollCard({ hub, summary, embedParent, canManage, loggedIn, busy, onVote
 
 // ── La página ─────────────────────────────────────────────────────────────
 
-export default function VideoHubClient({ hub, canManage, initialPolls, pollsAvailable, pollsOutdated = false, migration }: Props) {
+export default function VideoHubClient({
+    hub: initialHub,
+    canManage,
+    initialPolls,
+    pollsAvailable,
+    pollsOutdated = false,
+    migration,
+    initialEditing = false,
+    candidateMatches = [],
+}: Props) {
+    // Los partidos con videos, vivos: un clip cargado desde la votación entra
+    // acá sin recargar, y de acá salen la votación y la lista de videos.
+    const [matches, setMatches] = useState<VideoHubMatch[]>(initialHub.matches);
+    const hub = useMemo<VideoHub>(() => ({
+        ...initialHub,
+        matches,
+        videoCount: matches.reduce((sum, match) => sum + match.videos.length, 0),
+    }), [initialHub, matches]);
+
+    function replaceMatchVideos(match: VideoHubMatch, videos: MatchVideoLink[]) {
+        setMatches((prev) => {
+            const next = prev.some((entry) => entry.id === match.id)
+                ? prev.map((entry) => (entry.id === match.id ? { ...entry, videos } : entry))
+                : [...prev, { ...match, videos }];
+            return next.filter((entry) => entry.videos.length > 0).sort(byMatchRecency);
+        });
+    }
+
     const { user, login } = useAuth();
     const embedParent = useEmbedParent();
     const [polls, setPolls] = useState<VideoPollSummary[]>(initialPolls);
     /** 'new' o el id de la votación que se está editando. */
-    const [editing, setEditing] = useState<'new' | string | null>(null);
+    const [editing, setEditing] = useState<'new' | string | null>(
+        initialEditing && canManage && pollsAvailable && initialHub.videoCount >= MIN_POLL_OPTIONS ? 'new' : null,
+    );
     const [busyId, setBusyId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -661,7 +909,7 @@ export default function VideoHubClient({ hub, canManage, initialPolls, pollsAvai
                                     type="button"
                                     className={`${styles.btn} ${styles.btnPrimary}`}
                                     onClick={() => { setError(null); setEditing('new'); }}
-                                    disabled={hub.videoCount < MIN_POLL_OPTIONS}
+                                    disabled={hub.videoCount === 0 && candidateMatches.length === 0}
                                 >
                                     Nueva votación
                                 </button>
@@ -675,9 +923,9 @@ export default function VideoHubClient({ hub, canManage, initialPolls, pollsAvai
                                     : <>La votación todavía no está habilitada: falta correr la migración <code>{migration}</code> en Supabase.</>}
                             </p>
                         )}
-                        {canManage && pollsAvailable && hub.videoCount < MIN_POLL_OPTIONS && editing === null && (
+                        {canManage && pollsAvailable && hub.videoCount < MIN_POLL_OPTIONS && editing === null && candidateMatches.length === 0 && (
                             <p className={styles.hint}>
-                                Para armar una votación hacen falta al menos {MIN_POLL_OPTIONS} videos cargados en las fichas del torneo.
+                                Para armar una votación hacen falta al menos {MIN_POLL_OPTIONS} videos cargados en las fichas del torneo. Podés cargarlos desde acá: abrí la votación y agregá un clip a un partido.
                             </p>
                         )}
 
@@ -687,8 +935,10 @@ export default function VideoHubClient({ hub, canManage, initialPolls, pollsAvai
                                 initial={null}
                                 saving={busyId === 'new'}
                                 error={error}
+                                candidates={candidateMatches}
                                 onCancel={() => { setEditing(null); setError(null); }}
                                 onSave={(input) => void save(input, null)}
+                                onVideosChange={replaceMatchVideos}
                             />
                         )}
 
@@ -711,8 +961,10 @@ export default function VideoHubClient({ hub, canManage, initialPolls, pollsAvai
                                         initial={summary}
                                         saving={busyId === summary.poll.id}
                                         error={error}
+                                        candidates={candidateMatches}
                                         onCancel={() => { setEditing(null); setError(null); }}
                                         onSave={(input) => void save(input, summary)}
+                                        onVideosChange={replaceMatchVideos}
                                     />
                                 ) : (
                                     <PollCard
@@ -780,9 +1032,17 @@ export default function VideoHubClient({ hub, canManage, initialPolls, pollsAvai
                                                 </Link>
                                                 <div className={styles.videoFoot}>
                                                     <span className={styles.videoMeta}>{match.roundLabel ?? ''}</span>
-                                                    <a className={styles.videoOpen} href={video.url} target="_blank" rel="noopener noreferrer">
-                                                        Abrir en {providerLabel} ↗
-                                                    </a>
+                                                    <span className={styles.videoActions}>
+                                                        {/* Solo un ARCHIVO se puede bajar; un video de plataforma solo se abre allá. */}
+                                                        {canManage && isDirectMediaUrl(video.url) && (
+                                                            <a className={styles.videoOpen} href={`/api/matches/${match.id}/videos/${video.id}/download`} download>
+                                                                Descargar ↓
+                                                            </a>
+                                                        )}
+                                                        <a className={styles.videoOpen} href={video.url} target="_blank" rel="noopener noreferrer">
+                                                            Abrir en {providerLabel} ↗
+                                                        </a>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </li>

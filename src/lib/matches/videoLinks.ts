@@ -524,3 +524,23 @@ export function videoPosterUrl(
 export function needsThumbnailLookup(video: Pick<MatchVideoLink, 'thumbnailUrl'>): boolean {
     return video.thumbnailUrl === undefined;
 }
+
+// ── Archivos directos ─────────────────────────────────────────────────────
+
+const DIRECT_MEDIA_EXTENSIONS: readonly string[] = ['mp4', 'webm', 'mov', 'm4v', 'ogv'];
+
+/**
+ * La extensión si el link es un ARCHIVO de video (un .mp4 en un storage
+ * propio), a diferencia de un video de plataforma (YouTube, ESPN...), que solo
+ * existe como link. null si no lo es.
+ */
+export function directMediaExtension(raw: unknown): string | null {
+    const url = parseHttpUrl(raw);
+    if (!url) return null;
+    const ext = url.pathname.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1];
+    return ext && DIRECT_MEDIA_EXTENSIONS.includes(ext) ? ext : null;
+}
+
+export function isDirectMediaUrl(raw: unknown): boolean {
+    return directMediaExtension(raw) !== null;
+}

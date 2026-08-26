@@ -1,543 +1,1268 @@
-.tectonicPage {
-    --basalt-950: #0a0a0b;
-    --basalt-900: #121214;
-    --basalt-800: #1c1c1f;
-    --basalt-700: #2a2a2e;
-    --basalt-600: #3f3f46;
-    --basalt-400: #a1a1aa;
-    --magma-primary: var(--color-accent);
-    --magma-glow: rgba(255, 77, 0, 0.15);
-    --cyanite: #00f2ff;
-    --surface-edge: rgba(255, 255, 255, 0.05);
-    --font-sans: 'Geist', sans-serif;
-    --font-mono: 'Geist Mono', monospace;
-    --slab-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+/* La portada de Noticias y el índice de videos (/noticias/videos).
+   Sin paleta propia: los tokens del sitio, que siguen al tema (data-theme).
+   La página no pinta fondo: el degradado del sitio pasa por debajo, en vez
+   de verse un bloque. Lo único fijo son las portadas de video, que son
+   oscuras en los dos temas porque llevan texto blanco sobre la imagen. */
 
-    min-height: 100%;
-    color: #ececec;
+.page {
+    --ink: var(--color-text-primary);
+    --ink-soft: color-mix(in srgb, var(--color-text-primary) 72%, var(--color-text-secondary));
+    --ink-muted: var(--color-text-secondary); /* 7:1 en los dos temas: alcanza para texto chico */
+    --slab: var(--color-bg-secondary);
+    --raised: var(--color-bg-tertiary);
+    --raised-2: var(--color-bg-hover);
+    --edge: var(--color-border);
+    --edge-strong: var(--color-border-light);
+    --accent: var(--color-accent, #00a365);
+    --accent-ink: var(--color-accent-ink, #22c55e); /* el acento cuando pinta texto */
+    --accent-rgb: var(--color-accent-rgb, 0, 163, 101);
+    --accent-soft: rgba(var(--accent-rgb), 0.14);
+    --on-accent: #04130c; /* tinta oscura sobre el acento: 6:1 */
+    /* Sobre una portada de video el fondo es siempre oscuro: verde claro fijo. */
+    --accent-on-dark: #4ade80;
+    --danger: var(--color-error, #f87171);
+    --font-sans: var(--font-primary, 'Outfit', 'Inter', system-ui, sans-serif);
+    --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    --ease: cubic-bezier(0.25, 1, 0.5, 1);
+    --radius-card: 18px;
+
+    color: var(--ink);
     font-family: var(--font-sans);
 }
 
-.tectonicHeader {
+.shell {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 28px 24px 88px;
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ── Cabecera ───────────────────────────────────────────────────────────── */
+.masthead {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
     gap: 24px;
-    margin-bottom: 40px;
     flex-wrap: wrap;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--edge);
 }
 
-.headerInfo h1 {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    margin-bottom: 8px;
+.mastheadText {
+    min-width: 0;
 }
 
-.headerInfo p {
+.topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: -20px;
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     font-family: var(--font-mono);
     font-size: 12px;
-    color: var(--basalt-400);
-    text-transform: uppercase;
     letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
 }
 
-.statusSync {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    flex-wrap: wrap;
+.backLink:hover,
+.backLink:focus-visible {
+    color: var(--accent-ink);
 }
 
-.statusPill {
-    background: var(--basalt-900);
-    border: 1px solid var(--surface-edge);
-    padding: 10px 16px;
+.backLink:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.title {
+    margin: 0;
+    font-size: clamp(36px, 4.5vw, 52px);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1;
+}
+
+.lede {
+    margin: 12px 0 0;
+    max-width: 52ch;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink-muted);
+}
+
+.mastheadActions {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-family: var(--font-mono);
-    font-size: 11px;
+    flex-wrap: wrap;
 }
 
-.statusIndicator {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #10b981;
-    box-shadow: 0 0 8px #10b981;
-}
-
-.tectonicGrid {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 24px;
-    margin-bottom: 40px;
-}
-
-.slab {
-    background: var(--basalt-900);
-    border: 1px solid var(--surface-edge);
-    padding: 24px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--slab-shadow);
-}
-
-.slab::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--surface-edge), transparent);
-}
-
-.col4 {
-    grid-column: span 4;
-}
-
-.col8 {
-    grid-column: span 8;
-}
-
-.col12 {
-    grid-column: span 12;
-}
-
-.slabLabel {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--basalt-600);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 20px;
-    display: block;
-}
-
-.slabTitle {
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.btn {
-    background: var(--basalt-700);
-    border: 1px solid var(--surface-edge);
-    color: #fff;
-    padding: 10px 20px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+.editorialTag {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.editorialDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-ink);
+    box-shadow: 0 0 8px var(--accent-ink);
+}
+
+/* ── Botones ────────────────────────────────────────────────────────────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 12px;
+    border: 1px solid var(--edge-strong);
+    background: var(--raised);
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 180ms var(--ease), border-color 180ms var(--ease), transform 180ms var(--ease);
 }
 
 .btn:hover {
-    background: var(--basalt-600);
-    transform: translateY(-2px);
+    background: var(--raised-2);
+    border-color: var(--ink-muted);
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
 }
 
 .btnPrimary {
-    background: var(--magma-primary);
-    border: none;
+    background: var(--accent);
+    border-color: transparent;
+    color: var(--on-accent);
     font-weight: 700;
 }
 
 .btnPrimary:hover {
-    background: #ff6a2a;
-    box-shadow: 0 0 20px var(--magma-glow);
+    background: var(--color-accent-light, #22c55e);
+    border-color: transparent;
 }
 
-.slabHeader {
+.btnSm {
+    min-height: 38px;
+    padding: 0 12px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.btnIcon {
+    width: 40px;
+    padding: 0;
+}
+
+/* ── Secciones ──────────────────────────────────────────────────────────── */
+.section {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-}
-
-.rowMeta {
-    font-size: 11px;
-    color: var(--basalt-600);
-}
-
-.badge {
-    padding: 4px 8px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    background: var(--basalt-800);
-    border-radius: 2px;
-    display: inline-block;
-}
-
-.newsGrid {
-    display: flex;
+    flex-direction: column;
     gap: 20px;
-    margin-top: 20px;
-    flex-wrap: wrap;
 }
 
-.newsCard {
-    flex: 1;
-    min-width: 220px;
-    border-right: 1px solid var(--surface-edge);
-    padding-right: 20px;
-}
-
-.newsPreview {
-    background: var(--basalt-800);
-    height: 120px;
-    margin-bottom: 12px;
-    border: 1px dashed var(--basalt-600);
+.sectionHead {
     display: flex;
+    justify-content: space-between;
     align-items: flex-end;
-    justify-content: flex-start;
-    padding: 10px;
-    font-size: 10px;
-    color: var(--basalt-400);
-    font-family: var(--font-mono);
-}
-
-.newsTitle {
-    font-size: 14px;
-    margin-bottom: 8px;
-    font-weight: 700;
-}
-
-.newsBody {
-    font-size: 12px;
-    color: var(--basalt-400);
-    line-height: 1.5;
-}
-
-.newsSide {
-    width: 200px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.newsCard {
-    border-right: none;
-    padding-right: 0;
-}
-
-.filterInput {
-    padding: 8px 12px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
-    background: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
-    font-size: 0.875rem;
-}
-
-.categoryBar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 24px;
-    overflow-x: auto;
-    padding-bottom: 8px;
-    scrollbar-width: none;
-}
-
-.categoryBar::-webkit-scrollbar {
-    display: none;
-}
-
-.categoryScroll {
-    display: flex;
-    gap: 8px;
-}
-
-.categoryChip {
-    padding: 8px 16px;
-    border-radius: 99px;
-    background: var(--basalt-800);
-    border: 1px solid var(--surface-edge);
-    color: var(--basalt-400);
-    font-size: 13px;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-}
-
-.categoryChip:hover {
-    background: var(--basalt-700);
-    color: #fff;
-}
-
-.categoryChipActive {
-    background: var(--magma-primary);
-    color: #fff;
-    border-color: var(--magma-primary);
-}
-
-.compactSearch {
-    position: relative;
-    min-width: 200px;
-}
-
-.compactSearch input {
-    width: 100%;
-    background: var(--basalt-800);
-    border: 1px solid var(--surface-edge);
-    border-radius: 99px;
-    padding: 8px 16px 8px 36px;
-    color: #fff;
-    font-size: 13px;
-}
-
-.compactSearch svg {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.badgeDraft {
-    background: #f59e0b;
-    color: #000;
-}
-
-.badgePublished {
-    background: var(--magma-primary);
-    color: #fff;
-}
-
-.newsImage {
-    height: 160px;
-    border-radius: 4px;
-    margin-bottom: 16px;
-    position: relative;
-    background: var(--basalt-800);
-    transition: transform 0.25s ease, filter 0.25s ease;
-}
-
-.newsContent {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.newsCardShell {
-    display: flex;
-    flex-direction: column;
     gap: 16px;
-}
-
-.newsCardLink {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    color: inherit;
-    text-decoration: none;
-    cursor: pointer;
-    min-height: 100%;
-}
-
-.newsCardLink:hover .newsImage,
-.newsCardLink:focus-visible .newsImage {
-    transform: scale(1.02);
-    filter: saturate(1.05);
-}
-
-.newsCardLink:focus-visible {
-    outline: 2px solid var(--magma-primary);
-    outline-offset: 6px;
-}
-
-.newsMetaRow {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 8px;
     flex-wrap: wrap;
 }
 
-.readMore {
-    margin-top: auto;
-    padding-top: 16px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #ffffff;
-}
-
-.newsActions {
-    display: flex;
-    gap: 8px;
-    margin-top: auto;
-    padding-top: 16px;
-    border-top: 1px solid var(--surface-edge);
-}
-
-.mobileActionsBar {
-    display: none;
-}
-
-@media (max-width: 1100px) {
-    .col4 {
-        grid-column: span 6;
-    }
-}
-
-@media (max-width: 768px) {
-    .col4,
-    .col8,
-    .col12 {
-        grid-column: span 12;
-    }
-
-    .categoryBar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .compactSearch {
-        width: 100%;
-    }
-
-    .mobileActionsBar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-    }
-
-    .slab {
-        padding: 16px;
-    }
-
-    .newsActions {
-        flex-wrap: wrap;
-    }
-}
-
-/* ── Videos por torneo (la tira de hubs) ────────────────────────────────── */
-.hubStrip {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-bottom: 28px;
-}
-
-.hubStripHead {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.hubStripTitle {
+.sectionTitle {
     margin: 0;
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
 }
 
-.hubStripHint {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--basalt-400);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+.sectionHint {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--ink-muted);
 }
 
-.hubStripScroll {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding-bottom: 6px;
-    scrollbar-width: thin;
-}
-
-.hubCard {
-    flex: 0 0 auto;
+.sectionAside {
     display: flex;
     align-items: center;
-    gap: 12px;
-    min-width: 260px;
-    max-width: 340px;
-    padding: 14px 16px;
-    background: var(--basalt-900);
-    border: 1px solid var(--surface-edge);
-    color: inherit;
-    text-decoration: none;
-    box-shadow: var(--slab-shadow);
-    transition: border-color 0.2s, transform 0.2s;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
-.hubCard:hover,
-.hubCard:focus-visible {
-    border-color: var(--magma-primary);
+.sectionMeta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* El atajo a la lista completa. */
+.sectionLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-ink);
+    text-decoration: none;
+}
+
+.sectionLink svg {
+    transition: transform 200ms var(--ease);
+}
+
+.sectionLink:hover svg {
+    transform: translateX(3px);
+}
+
+.sectionLink:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.sectionLink:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* "Ver más torneos": despliega el resto de la grilla acá mismo. */
+.moreBtn {
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 999px;
+    border: 1px solid var(--edge-strong);
+    background: var(--raised);
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 180ms var(--ease), border-color 180ms var(--ease);
+}
+
+.moreBtn:hover {
+    background: var(--raised-2);
+    border-color: var(--ink-muted);
+}
+
+.moreBtn:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
+}
+
+.moreCount {
+    display: inline-grid;
+    place-items: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Los torneos con videos: de a dos por fila, siempre ──────────────────── */
+.hubGrid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* En escritorio la tarjeta es apaisada: portada a la izquierda, texto a la
+   derecha. En el teléfono, portada arriba (ver el media query al final). */
+.hubCard {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    min-width: 0;
+    background: var(--slab);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: border-color 200ms var(--ease), transform 200ms var(--ease);
+}
+
+.hubCard:hover {
+    border-color: var(--edge-strong);
     transform: translateY(-2px);
 }
 
-.hubCard:focus-visible {
-    outline: 2px solid var(--magma-primary);
-    outline-offset: 4px;
-}
-
-.hubLogo {
-    width: 44px;
-    height: 44px;
-    object-fit: contain;
-    flex: none;
-}
-
-.hubLogoFallback {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--basalt-700);
-    font-weight: 800;
-    flex: none;
+.hubCover {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    /* Sin aspect-ratio en la tarjeta apaisada: con el alto fijado por la fila,
+       la proporción calcularía el ancho y la portada se saldría de su columna. */
+    min-height: 170px;
+    background: #000;
+    color: #fff;
+    text-decoration: none;
+    overflow: hidden;
+    /* La placa generada y el play se miden contra el marco (cqw). */
+    container-type: inline-size;
 }
 
 .hubBody {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
     min-width: 0;
-    flex: 1;
+    padding: 14px 16px;
+}
+
+.hubIdentity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
 }
 
 .hubName {
-    font-size: 14px;
-    font-weight: 700;
+    margin: 0;
+    min-width: 0;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.hubNameLink {
+    color: inherit;
+    text-decoration: none;
+}
+
+.hubNameLink:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+
+.hubNameLink:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.hubMeta {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.hubLatest {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ink-soft);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.hubMeta {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--basalt-400);
-    font-variant-numeric: tabular-nums;
+.hubLatest strong {
+    font-weight: 600;
+    color: var(--ink);
+}
+
+/* La votación abierta: un chip que lleva a votar. */
+.hubPollChip {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    min-height: 30px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--accent-rgb), 0.35);
+    background: var(--accent-soft);
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: border-color 160ms var(--ease), background-color 160ms var(--ease);
+}
+
+.hubPollChip svg {
+    flex: none;
+    color: var(--accent-ink);
+}
+
+.hubPollChip:hover {
+    border-color: var(--accent-ink);
+    background: rgba(var(--accent-rgb), 0.22);
+}
+
+.hubPollChip:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
+}
+
+.hubActions {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-top: 2px;
+}
+
+.hubCta,
+.hubAdmin {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
 }
 
 .hubCta {
+    color: var(--accent-ink);
+}
+
+.hubCta svg {
+    transition: transform 200ms var(--ease);
+}
+
+.hubCard:hover .hubCta svg {
+    transform: translateX(3px);
+}
+
+.hubAdmin {
+    color: var(--ink-muted);
+}
+
+.hubAdmin:hover {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.hubCta:focus-visible,
+.hubAdmin:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* ── Las portadas (siempre oscuras: hay texto blanco sobre la imagen) ────── */
+.coverImg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 500ms var(--ease);
+}
+
+.hubCard:hover .coverImg {
+    transform: scale(1.03);
+}
+
+.coverShade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 32%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, 0.78) 100%);
+    pointer-events: none;
+}
+
+.coverEmpty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.08), transparent 60%),
+        #1c1c1f;
+}
+
+.coverKind {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(10, 10, 11, 0.72);
+    backdrop-filter: blur(8px);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.coverPlay {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* Mismo tamaño relativo que el hueco que deja la placa (15cqw). */
+    width: clamp(40px, 15cqw, 64px);
+    height: clamp(40px, 15cqw, 64px);
+    transform: translate(-50%, -50%);
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(10, 10, 11, 0.66);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    transition: transform 200ms var(--ease), background-color 200ms var(--ease), color 200ms var(--ease);
+}
+
+.coverPlay svg {
+    width: 42%;
+    height: 42%;
+    margin-left: 6%;
+}
+
+.hubCard:hover .coverPlay,
+.hubCover:focus-visible .coverPlay {
+    transform: translate(-50%, -50%) scale(1.06);
+    background: var(--accent);
+    border-color: transparent;
+    color: var(--on-accent);
+}
+
+/* El partido, sobre la miniatura. La placa ya lo trae dibujado. */
+.coverMatch {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.coverTeam {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.coverTeamAway {
+    justify-content: flex-end;
+}
+
+.coverName {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.coverScore {
     flex: none;
+    padding: 2px 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #0a0a0b;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    text-shadow: none;
+}
+
+/* En una portada angosta (dos por fila en el teléfono) quedan escudos y marcador. */
+@container (max-width: 300px) {
+    .coverName {
+        display: none;
+    }
+
+    .coverTeam {
+        flex: none;
+    }
+
+    .coverMatch {
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .coverKind {
+        top: 8px;
+        left: 8px;
+        padding: 3px 7px;
+        font-size: 9px;
+    }
+}
+
+.crest,
+.crestFallback {
+    flex: none;
+    width: 22px;
+    height: 22px;
+}
+
+.crest {
+    object-fit: contain;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.crestFallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.tMark,
+.tMarkFallback {
+    flex: none;
+    width: 32px;
+    height: 32px;
+}
+
+.tMark {
+    object-fit: contain;
+}
+
+.tMarkFallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--raised-2);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.coverEmpty .tMark,
+.coverEmpty .tMarkFallback {
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+}
+
+/* ── Filtros y búsqueda ─────────────────────────────────────────────────── */
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.chips {
+    display: flex;
+    gap: 8px;
+    max-width: 100%;
+    padding: 3px;
+    margin: -3px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar {
+    display: none;
+}
+
+.chip {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 14px 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--edge);
+    background: var(--raised);
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 160ms var(--ease), color 160ms var(--ease), border-color 160ms var(--ease);
+}
+
+.chip:hover {
+    background: var(--raised-2);
+    color: var(--ink);
+}
+
+.chip:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
+}
+
+.chipActive,
+.chipActive:hover {
+    background: var(--accent);
+    border-color: transparent;
+    color: var(--on-accent);
+}
+
+.chipCount {
     font-family: var(--font-mono);
     font-size: 11px;
+    font-weight: 500;
+    opacity: 0.85;
+    font-variant-numeric: tabular-nums;
+}
+
+.search {
+    position: relative;
+    /* Sin flex-basis: en la barra apilada del teléfono se volvería alto. */
+    flex: 1 1 auto;
+    min-width: min(100%, 240px);
+    max-width: 320px;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-muted);
+    pointer-events: none;
+}
+
+.searchInput {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 42px 0 40px;
+    border-radius: 12px;
+    border: 1px solid var(--edge);
+    background: var(--raised);
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+}
+
+.searchInput::placeholder {
+    color: var(--ink-muted);
+}
+
+.searchInput::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.searchInput:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 1px;
+}
+
+.searchClear {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink-muted);
+    cursor: pointer;
+}
+
+.searchClear:hover {
+    background: var(--raised-2);
+    color: var(--ink);
+}
+
+.searchClear:focus-visible {
+    outline: 2px solid var(--accent-ink);
+}
+
+/* ── Las notas ──────────────────────────────────────────────────────────── */
+.newsGrid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+
+.newsCard {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--slab);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: border-color 200ms var(--ease), transform 200ms var(--ease);
+}
+
+.newsCard:hover {
+    border-color: var(--edge-strong);
+    transform: translateY(-2px);
+}
+
+.newsLink {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    color: inherit;
+    text-decoration: none;
+}
+
+.newsLink:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: -3px;
+    border-radius: var(--radius-card);
+}
+
+.newsMedia {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9;
+    background: var(--raised);
+    overflow: hidden;
+}
+
+.newsImg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 500ms var(--ease);
+}
+
+.newsCard:hover .newsImg {
+    transform: scale(1.03);
+}
+
+.newsNoImage {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--color-text-muted, #71717a);
+    background:
+        repeating-linear-gradient(135deg, rgba(127, 127, 127, 0.08) 0 2px, transparent 2px 12px),
+        var(--raised);
+}
+
+.newsBody {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px 18px;
+    min-width: 0;
+}
+
+.newsMeta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.newsScope {
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--edge);
+    color: var(--ink-soft);
+}
+
+.newsTitle {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.newsExcerpt {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.newsCta {
+    margin-top: auto;
+    padding-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-ink);
+}
+
+.newsCta svg {
+    transition: transform 200ms var(--ease);
+}
+
+.newsCard:hover .newsCta svg {
+    transform: translateX(3px);
+}
+
+/* Las etiquetas van sobre la imagen: vidrio oscuro en los dos temas. */
+.badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 800;
     letter-spacing: 0.08em;
-    color: #fff;
+    text-transform: uppercase;
+}
+
+.badgePublished {
+    border: 1px solid rgba(var(--accent-rgb), 0.45);
+    background: rgba(10, 10, 11, 0.72);
+    backdrop-filter: blur(6px);
+    color: var(--accent-on-dark);
+}
+
+.badgeDraft {
+    background: #f59e0b;
+    color: #1a1200;
+}
+
+/* Las acciones de quien administra, al pie de la nota. */
+.newsAdmin {
+    display: flex;
+    gap: 8px;
+    padding: 12px 14px;
+    border-top: 1px solid var(--edge);
+}
+
+.newsAdmin > .btn {
+    flex: 1;
+}
+
+.menuWrap {
+    position: relative;
+    flex: none;
+}
+
+.menu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 8px);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 180px;
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid var(--edge-strong);
+    background: var(--color-bg-elevated, var(--raised));
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.25);
+}
+
+.menuItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.menuItem:hover {
+    background: var(--raised-2);
+}
+
+.menuItem:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: -2px;
+}
+
+.menuItemDanger {
+    color: var(--danger);
+}
+
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 56px 20px;
+    border: 1px dashed var(--edge-strong);
+    border-radius: var(--radius-card);
+    text-align: center;
+    color: var(--ink-muted);
+}
+
+.emptyTitle {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+/* ── Pantallas chicas ───────────────────────────────────────────────────── */
+@media (max-width: 760px) {
+    /* La tarjeta se apila: portada arriba, texto abajo. Siguen siendo dos por fila. */
+    .hubCard {
+        grid-template-columns: 1fr;
+        border-radius: 14px;
+    }
+
+    .hubCover {
+        height: auto;
+        min-height: 0;
+        aspect-ratio: 16 / 9;
+    }
+
+    .hubBody {
+        gap: 6px;
+        padding: 10px 12px 12px;
+    }
+
+    .hubIdentity {
+        gap: 8px;
+    }
+
+    .hubIdentity .tMark,
+    .hubIdentity .tMarkFallback {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+
+    .hubName {
+        font-size: 14px;
+    }
+
+    .hubMeta {
+        font-size: 10px;
+        letter-spacing: 0.02em;
+    }
+
+    .hubLatest {
+        display: none;
+    }
+
+    .hubPollChip {
+        min-height: 28px;
+        font-size: 11px;
+    }
+
+    .hubActions {
+        gap: 10px;
+    }
+
+    .hubCta,
+    .hubAdmin {
+        min-height: 32px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    .shell {
+        padding: 20px 14px 72px;
+        gap: 32px;
+    }
+
+    .masthead {
+        padding-bottom: 20px;
+    }
+
+    .title {
+        font-size: 34px;
+    }
+
+    .lede {
+        font-size: 15px;
+    }
+
+    .sectionTitle {
+        font-size: 20px;
+    }
+
+    .sectionAside {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .hubGrid {
+        gap: 10px;
+    }
+
+    .moreBtn {
+        align-self: stretch;
+        justify-content: center;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search {
+        max-width: none;
+    }
+
+    .newsBody {
+        padding: 14px;
+    }
+
+    .newsTitle {
+        font-size: 17px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn,
+    .chip,
+    .hubCard,
+    .newsCard,
+    .coverImg,
+    .coverPlay,
+    .newsImg,
+    .newsCta svg,
+    .hubCta svg,
+    .sectionLink svg,
+    .hubPollChip,
+    .moreBtn {
+        transition: none;
+    }
+
+    .btn:active,
+    .hubCard:hover,
+    .newsCard:hover,
+    .hubCard:hover .coverImg,
+    .newsCard:hover .newsImg,
+    .newsCard:hover .newsCta svg,
+    .hubCard:hover .hubCta svg,
+    .sectionLink:hover svg {
+        transform: none;
+    }
+
+    .hubCard:hover .coverPlay {
+        transform: translate(-50%, -50%);
+    }
 }
