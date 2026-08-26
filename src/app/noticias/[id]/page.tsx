@@ -203,14 +203,20 @@ export default async function NewsPage({ params }: NewsPageProps) {
                 <article className={styles.heroCard}>
                     <div className={styles.metaRow}>
                         <div className={styles.badgeRow}>
-                            <span className={styles.badge}>{scope.toUpperCase()}</span>
+                            <span className={`${styles.badge} ${styles.badgeAccent}`}>{scope.toUpperCase()}</span>
                             {sport && <span className={styles.badge}>{sport}</span>}
                             {canManageNews && news.status !== 'published' && (
                                 <span className={styles.badge}>{news.status === 'draft' ? 'Borrador' : news.status}</span>
                             )}
                         </div>
                         <div className={styles.dateCluster}>
-                            <span className={styles.dateLabel}>{publishedLabel}</span>
+                            {news.published_at ? (
+                                <time className={styles.dateLabel} dateTime={news.published_at}>
+                                    {publishedLabel}
+                                </time>
+                            ) : (
+                                <span className={styles.dateLabel}>{publishedLabel}</span>
+                            )}
                             <span className={styles.dateDivider}></span>
                             <span className={styles.dateLabel}>{readingMinutes} min</span>
                         </div>
@@ -252,10 +258,15 @@ export default async function NewsPage({ params }: NewsPageProps) {
                     </div>
 
                     {tags.length > 0 && (
-                        <div className={styles.badgeRow} role="list" aria-label="Etiquetas">
-                            {tags.map((tag) => (
-                                <span key={tag} role="listitem" className={styles.badge}>{tag}</span>
-                            ))}
+                        <div className={styles.tagSection}>
+                            <span className={styles.tagSectionLabel} id={`tags-${news.id}`}>
+                                Etiquetas
+                            </span>
+                            <div className={styles.badgeRow} role="list" aria-labelledby={`tags-${news.id}`}>
+                                {tags.map((tag) => (
+                                    <span key={tag} role="listitem" className={styles.badge}>{tag}</span>
+                                ))}
+                            </div>
                         </div>
                     )}
 
