@@ -40,14 +40,20 @@ export interface UserProfile {
 
 // Super Admin constant
 export const SUPER_ADMIN_EMAIL = 'superadmin@g22scores.com';
+// Cuentas que /api/setup aprovisiona con contraseña: solo las de email.
 export const AUTHORIZED_SUPER_ADMIN_EMAILS = [SUPER_ADMIN_EMAIL] as const;
-export const AUTHORIZED_ADMIN_GENERAL_EMAILS = ['sromeroubisos@gmail.com'] as const;
+// Cuentas cuyo rol reservado es super_admin: las aprovisionadas más la del
+// dueño, que entra por Google y no va en la lista de arriba (le fijaría una
+// contraseña). El rol reservado gana sobre users.role y syncUserProfile lo
+// persiste en cada login; la RLS lee la tabla, no el mail.
+export const SUPER_ADMIN_ROLE_EMAILS = [...AUTHORIZED_SUPER_ADMIN_EMAILS, 'sromeroubisos@gmail.com'] as const;
+export const AUTHORIZED_ADMIN_GENERAL_EMAILS: readonly string[] = [];
 
 // Helper to check if email is super admin
 export function isSuperAdminEmail(email?: string | null): boolean {
     if (!email) return false;
     const lowerEmail = email.toLowerCase();
-    return AUTHORIZED_SUPER_ADMIN_EMAILS.some(adminEmail => adminEmail.toLowerCase() === lowerEmail);
+    return SUPER_ADMIN_ROLE_EMAILS.some(adminEmail => adminEmail.toLowerCase() === lowerEmail);
 }
 
 export function isAdminGeneralEmail(email?: string | null): boolean {
