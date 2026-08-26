@@ -191,13 +191,15 @@ const SPORT_EVENT_PRESETS: Record<string, MatchEventDefinition[]> = {
         { id: 'shot_on_goal', label: 'Tiro al arco' },
         { id: 'wide', label: 'Desviado' },
         { id: 'defended', label: 'Recuperado por la defensa' },
-        { id: 'penalty_stroke', label: 'Penal stroke' },
+        { id: 'penalty_stroke', label: 'Penal' },
         { id: 'new_corner', label: 'Nuevo corner' },
       ],
     },
     {
+      // En la cancha se dice "penal", a secas. El id conserva "stroke" para
+      // que los datos guardados y el parser de la FIH sigan entendiendose.
       type: 'penalty_stroke',
-      label: 'Penal stroke',
+      label: 'Penal',
       category: 'score',
       points: 1,
       team: 'required',
@@ -357,6 +359,47 @@ export function outcomeScores(definition: MatchEventDefinition | undefined, deta
   const outcomeId = readOutcomeId(detail);
   if (!outcomeId) return false;
   return Boolean(definition.outcomes.find((outcome) => outcome.id === outcomeId)?.scores);
+}
+
+const OUTCOME_TAG_RE = /\[res:[a-z0-9_-]+\]\s*/gi;
+
+/** Saca la marca del desenlace. Lo que queda es lo que lee una persona. */
+export function stripOutcomeTag(detail: string | null | undefined) {
+  return String(detail || '').replace(OUTCOME_TAG_RE, '').trim();
+}
+
+/**
+ * El `detail` de un evento con desenlace tiene dos partes: el desenlace
+ * elegido y el texto libre que agrego el operador. Estas dos funciones son la
+ * ida y la vuelta entre esa cadena y sus partes, y son lo UNICO que la escribe
+ * o la lee: el operador nunca ve `[res:goal]`, ve "Gol", y la UI edita cada
+ * parte por separado sin arriesgarse a romper la marca que suma el punto.
+ *
+ * Forma persistida: `[res:goal] Gol | texto libre`. El rotulo va escrito al
+ * lado de la marca a proposito, para que un lector que no conozca el tag (un
+ * export viejo, un log) siga entendiendo el evento.
+ */
+export function joinOutcomeDetail(definition: MatchEventDefinition, outcomeId: string, extra?: string | null) {
+  const label = definition.outcomes?.find((outcome) => outcome.id === outcomeId)?.label ?? outcomeId;
+  const cleanExtra = String(extra || '').trim();
+  return cleanExtra
+    ? `${formatOutcomeTag(outcomeId)} ${label} | ${cleanExtra}`
+    : `${formatOutcomeTag(outcomeId)} ${label}`;
+}
+
+export function splitOutcomeDetail(
+  definition: MatchEventDefinition | undefined,
+  detail: string | null | undefined,
+): { outcomeId: string | null; extra: string } {
+  const outcomeId = readOutcomeId(detail);
+  let rest = stripOutcomeTag(detail);
+  const label = outcomeId
+    ? definition?.outcomes?.find((outcome) => outcome.id === outcomeId)?.label
+    : undefined;
+  if (label && rest.toLowerCase().startsWith(label.toLowerCase())) {
+    rest = rest.slice(label.length).replace(/^\s*\|\s*/, '').trim();
+  }
+  return { outcomeId, extra: rest };
 }
 
 function isRequirement(value: unknown): value is MatchEventRequirement {

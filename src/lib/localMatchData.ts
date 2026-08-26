@@ -398,7 +398,7 @@ const STAT_LABEL_OVERRIDES: Record<string, string> = {
   red_card: 'Tarjetas rojas',
   green_card: 'Tarjetas verdes',
   penalty_corner: 'Corners cortos',
-  penalty_stroke: 'Penales stroke',
+  penalty_stroke: 'Penales',
   foul: 'Faltas',
   free_hit: 'Free hits',
   assist: 'Asistencias',

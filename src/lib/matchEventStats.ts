@@ -4,6 +4,8 @@
  * - Metros de patada in-game parseados desde el texto de detalle
  */
 
+import { stripOutcomeTag } from './matchEventCatalog.ts';
+
 export type GoalKickishEvent = Pick<{ type: string; detail: string }, 'type' | 'detail'>;
 
 export function isGoalKickEventType(eventType: string) {
@@ -290,6 +292,8 @@ export function formatMatchTimelineEventDescription(
     const mins = minutesPlayedWhenSubstitutedOut(orderedAsc, indexInOrdered);
     return formatSubstitutionTimelineDescription(event, mins);
   }
-  const line = [event.playerName, event.detail].filter((s) => String(s || '').trim()).join(' · ');
+  // La marca del desenlace (`[res:goal]`) es para el motor; el rotulo ya viene
+  // escrito al lado, asi que sacarla deja "Gol" y no un hueco.
+  const line = [event.playerName, stripOutcomeTag(event.detail)].filter((s) => String(s || '').trim()).join(' · ');
   return line || emptyFallback;
 }

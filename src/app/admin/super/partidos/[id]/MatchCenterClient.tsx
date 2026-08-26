@@ -5,15 +5,17 @@ import { useRouter } from 'next/navigation';
 import {
     Save, Share2, ChevronLeft, Layout, Users, Clock,
     BarChart2, Shield, Settings, ImageIcon, Plus, RefreshCw, X, Video, Search, AlertTriangle, CheckCircle,
-    Play, Pause, RotateCcw, FileText
+    Play, Pause, RotateCcw, FileText, Undo2
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import {
     buildMatchEventDefinitionMap,
     getDefaultMatchEventDefinitions,
     isEventDrivenScoreSport,
+    joinOutcomeDetail,
     normalizeSportBucket,
     resolveMatchEventDefinitions,
+    splitOutcomeDetail,
     type MatchEventDefinition,
 } from '@/lib/matchEventCatalog';
 import {
@@ -34,19 +36,24 @@ import {
 } from '@/lib/bonusRuleMetrics';
 import {
     compareMatchPeriodValues,
+    getClockPeriodOptions,
     getEventPeriodForType,
+    getEventPeriodOptions,
     getMatchPeriodLabel,
     getNextActivePeriodAfterEvent,
+    getPeriodSequence,
+    isPeriodTransitionEvent,
     normalizeMatchPeriod,
 } from '@/lib/matchPeriods';
 import { formatClockSeconds, getPeriodOffsetSeconds, type MatchClockTransition } from '@/lib/matchClock';
-import { getSportLineupSize, getSportMatchProfile } from '@/lib/sportMatchProfile';
+import { getSportLineupSize, getSportMatchProfile, isGoalCountingSport } from '@/lib/sportMatchProfile';
 import { useMatchClock } from '@/hooks/useMatchClock';
 import {
     getConfiguredEventPoints,
     resolveScoringTeam,
     buildCompleteMatchStats,
     buildCompleteStatTabs,
+    type CompleteMatchStats,
 } from '@/lib/matchStatsFromEvents';
 import { exportMatchSheetPdf } from '@/lib/matchSheetPdf';
 import {
@@ -550,7 +557,28 @@ type GuidedEventDraft = {
     detail: string;
     goalKickResult: GuidedGoalKickResult;
     contestOutcome: GuidedContestOutcome;
+    /** Desenlace elegido cuando `definition.outcomes` existe (corner corto, stroke). Vacio = sin elegir. */
+    outcomeId: string;
     isTemporary: boolean;
+};
+
+/**
+ * Lo que el operador esta por deshacer, con todo lo que se revierte ya
+ * calculado para mostrarlo ANTES de confirmar. El marcador y las estadisticas
+ * se recalculan solos al sacar el evento; el periodo y el estado del partido
+ * no, porque los movio una transicion aparte, y por eso van explicitos.
+ */
+type UndoCandidate = {
+    event: MatchEvent;
+    label: string;
+    scoreBefore: { home: number; away: number };
+    scoreAfter: { home: number; away: number };
+    /** Era el unico evento que sumaba: el marcador guardado se lleva a cero explicito. */
+    resetScore: boolean;
+    /** Periodo al que vuelve el reloj, o null si el evento no lo habia movido. */
+    revertsPeriodTo: string | null;
+    /** Estado al que vuelve el partido, o null si no cambia. */
+    revertsStatusTo: string | null;
 };
 
 interface MatchCenterClientProps {
@@ -760,7 +788,7 @@ function getEventButtonGlyph(type: string) {
          */
         goal: 'GO',
         penalty_corner: 'CC',
-        penalty_stroke: 'ST',
+        penalty_stroke: 'PN',
         foul: 'FA',
         free_hit: 'FH',
         green_card: 'TV',
@@ -837,13 +865,82 @@ function getEventButtonLabel(definition: MatchEventDefinition, sportId?: string 
     return labels[definition.type] || definition.label;
 }
 
-function getEventButtonMeta(definition: MatchEventDefinition) {
+/**
+ * Acciones que un anotador de hockey carga una y otra vez, en el orden en
+ * que las busca. Son las que van grandes arriba; el resto del catalogo queda
+ * plegado en "Mas acciones". Un deporte sin fila aca muestra el panel
+ * completo como siempre.
+ */
+const QUICK_ACTIONS_BY_SPORT: Record<string, readonly string[]> = {
+    hockey: ['goal', 'penalty_corner', 'penalty_stroke', 'shot_on_goal', 'green_card', 'yellow_card', 'red_card', 'foul'],
+};
+
+/**
+ * Los eventos de reloj tambien van a mano, en su propia fila: inicio, fin de
+ * cuarto, inicio de cuarto, entretiempo y final. El que toca ahora se
+ * enciende (`primaryClockAction`), pero los cinco estan siempre a un toque.
+ */
+const QUICK_CLOCK_ACTIONS_BY_SPORT: Record<string, readonly string[]> = {
+    hockey: ['match_start', 'end_period', 'start_period', 'match_half', 'match_end'],
+};
+
+function getQuickActionTypes(sportId?: string | null): readonly string[] {
+    return QUICK_ACTIONS_BY_SPORT[normalizeSportBucket(sportId)] ?? [];
+}
+
+/**
+ * Los cuatro numeros de la cabecera de Estadisticas, por deporte. Eran los de
+ * rugby para todos: en hockey "a los palos" y "errores de manejo" no existen y
+ * mostraban 0/0, mientras que el corner corto —la estadistica mas mirada del
+ * deporte— no aparecia.
+ */
+function getSportKpis(stats: CompleteMatchStats, sportId?: string | null): { label: string; value: string }[] {
+    const both = (pair: { home: number; away: number }) => pair.home + pair.away;
+    const bucket = normalizeSportBucket(sportId);
+
+    if (bucket === 'hockey') {
+        return [
+            { label: 'Eventos cargados', value: String(stats.totalEvents) },
+            { label: 'Corners cortos (gol / ejecutados)', value: `${both(stats.penaltyCornerGoals)}/${both(stats.penaltyCorners)}` },
+            { label: 'Tiros (al arco / totales)', value: `${both(stats.shotsOnGoal)}/${both(stats.shotsOnGoal) + both(stats.shotsOffTarget)}` },
+            { label: 'Tarjetas', value: String(both(stats.greenCards) + both(stats.yellowCards) + both(stats.redCards)) },
+        ];
+    }
+
+    if (isGoalCountingSport(sportId)) {
+        return [
+            { label: 'Eventos cargados', value: String(stats.totalEvents) },
+            { label: 'Goles', value: String(both(stats.points)) },
+            { label: 'Tarjetas', value: String(both(stats.yellowCards) + both(stats.redCards)) },
+            { label: 'Cambios', value: String(both(stats.substitutions)) },
+        ];
+    }
+
+    return [
+        { label: 'Eventos cargados', value: String(stats.totalEvents) },
+        { label: 'A los palos', value: `${both(stats.goalKicksMade)}/${both(stats.goalKickAttempts)}` },
+        { label: 'Errores', value: String(both(stats.knockOns) + both(stats.forwardPasses) + both(stats.handlingErrors)) },
+        { label: 'Disciplina', value: String(both(stats.yellowCards) + both(stats.redCards) + both(stats.penaltiesCommitted)) },
+    ];
+}
+
+function getQuickClockActionTypes(sportId?: string | null): readonly string[] {
+    return QUICK_CLOCK_ACTIONS_BY_SPORT[normalizeSportBucket(sportId)] ?? [];
+}
+
+function getEventButtonMeta(definition: MatchEventDefinition, sportId?: string | null) {
+    if (definition.outcomes?.length) return 'Cómo terminó';
     if (isGoalKickEventType(definition.type)) return 'Convertida / fallada';
     if (isPenaltyCommittedEvent(definition.type)) return 'Club + motivo';
-    if (definition.points > 0) return `${definition.points} puntos`;
+    if (definition.points > 0) {
+        // En hockey y futbol el marcador cuenta goles: "1 puntos" era un
+        // error de gramatica y de deporte al mismo tiempo.
+        if (isGoalCountingSport(sportId)) return definition.points === 1 ? 'Suma 1 gol' : `Suma ${definition.points} goles`;
+        return definition.points === 1 ? '1 punto' : `${definition.points} puntos`;
+    }
     if (requiresContestOutcome(definition.type)) return 'Ganado / perdido';
     if (definition.type === 'substitution') return 'Sale / entra';
-    if (definition.category === 'clock') return 'Sin jugador';
+    if (definition.category === 'clock') return 'Mueve el reloj';
     return 'Equipo + jugador';
 }
 
@@ -867,6 +964,12 @@ function formatGuidedEventDetail(draft: GuidedEventDraft) {
     const eventType = draft.definition.type;
     const baseLabel = draft.definition.label;
     const customDetail = draft.detail.trim();
+
+    // Eventos con desenlace declarado (corner corto, penal stroke): la marca
+    // que suma el punto la escribe joinOutcomeDetail, nunca este formateador.
+    if (draft.definition.outcomes?.length && draft.outcomeId) {
+        return joinOutcomeDetail(draft.definition, draft.outcomeId, customDetail);
+    }
 
     if (eventType === 'conversion') {
         const human = draft.goalKickResult === 'made' ? 'Conversion convertida' : 'Conversion fallada';
@@ -943,8 +1046,9 @@ const DEFAULT_POINTS_RULES: PointsRules = {
     offensive: null,
     defensive: null,
 };
-const COMMON_MATCH_PERIODS = ['Previa', '1T', 'HT', '2T', 'ET', 'Final'];
-const EVENT_PERIOD_OPTIONS = ['1T', '2T', 'ET', 'FT'];
+// Las listas de periodos de los selectores salen del deporte
+// (getClockPeriodOptions / getEventPeriodOptions): con la lista escrita a mano
+// un partido de hockey mostraba el cuarto actual y no dejaba elegir otro.
 
 function normalizeEventOrder(value: unknown, fallback: number) {
     if (value === null || value === undefined || value === '') return fallback;
@@ -1577,6 +1681,7 @@ export default function MatchCenterClient({
         () => getDefaultMatchEventDefinitions(initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null),
     );
     const [guidedEvent, setGuidedEvent] = useState<GuidedEventDraft | null>(null);
+    const [undoCandidate, setUndoCandidate] = useState<UndoCandidate | null>(null);
     const [lineupSizeInput, setLineupSizeInput] = useState(() => String(getLineupSize(
         initialMatch.lineups,
         initialMatch.tournament?.sport_id ?? initialMatch.tournament?.sportId ?? null,
@@ -1597,6 +1702,9 @@ export default function MatchCenterClient({
     const eventDefinitionMap = useMemo(() => buildMatchEventDefinitionMap(availableEventDefinitions), [availableEventDefinitions]);
     // Tamano de planilla del deporte: rugby 23, hockey 16, basquet 12.
     const sportLineupSize = useMemo(() => getSportLineupSize(matchSportId), [matchSportId]);
+    // Periodos del deporte para los selectores: Q1..Q4 en hockey, 1T/2T en el resto.
+    const clockPeriodOptions = useMemo(() => getClockPeriodOptions(matchSportId), [matchSportId]);
+    const eventPeriodOptions = useMemo(() => getEventPeriodOptions(matchSportId), [matchSportId]);
     useEffect(() => {
         persistedEventsRef.current = normalizeMatchEvents(match.events, matchSportId);
     }, [match.events, matchSportId]);
@@ -2253,6 +2361,29 @@ export default function MatchCenterClient({
     }, [matchId, supabase]);
 
     /* â”€â”€â”€ SAVE â”€â”€â”€ */
+    // "Publicar" era un boton sin onClick. Ahora comparte la ficha PUBLICA del
+    // partido: la hoja nativa de compartir en el telefono, copia del link en
+    // escritorio. Lo que se comparte es lo que ya esta guardado.
+    const handleShare = useCallback(async () => {
+        const url = `${window.location.origin}/matches/${matchId}`;
+        const current = matchDraftRef.current;
+        const title = `${current.homeClub?.short_name || current.homeClub?.name || 'Local'} vs ${current.awayClub?.short_name || current.awayClub?.name || 'Visitante'}`;
+        try {
+            if (typeof navigator.share === 'function') {
+                await navigator.share({ title, url });
+                return;
+            }
+            await navigator.clipboard.writeText(url);
+            setSaveMsg({ type: 'ok', text: 'Link de la ficha pública copiado.' });
+            scheduleSaveMsgClear(3000);
+        } catch (err: unknown) {
+            // Cerrar la hoja de compartir no es un error.
+            if (err instanceof DOMException && err.name === 'AbortError') return;
+            setSaveMsg({ type: 'err', text: `No se pudo compartir. El link es ${url}` });
+            scheduleSaveMsgClear(6000);
+        }
+    }, [matchId, scheduleSaveMsgClear]);
+
     const handleSave = async () => {
         if (!match) return;
         const payload = buildPersistableMatchPayload();
@@ -2462,6 +2593,7 @@ export default function MatchCenterClient({
             detail: '',
             goalKickResult: 'made',
             contestOutcome: requiresContestOutcome(definition.type) ? 'won' : '',
+            outcomeId: '',
             isTemporary: false,
         });
     }, [clock]);
@@ -2516,6 +2648,13 @@ export default function MatchCenterClient({
 
         if (isPenaltyCommittedEvent(guidedEvent.definition.type) && !guidedEvent.detail.trim()) {
             setSaveMsg({ type: 'warn', text: 'Selecciona por que se comete el penal antes de guardar.' });
+            return;
+        }
+
+        // Un corner corto sin desenlace no es un gol ni una estadistica: no se
+        // guarda a medias, se pide el resultado.
+        if (guidedEvent.definition.outcomes?.length && !guidedEvent.outcomeId) {
+            setSaveMsg({ type: 'warn', text: `Elegí cómo terminó el ${guidedEvent.definition.label.toLowerCase()} antes de guardar.` });
             return;
         }
 
@@ -2626,6 +2765,124 @@ export default function MatchCenterClient({
                 }
             });
     }, [clock, guidedEvent, persistMatchPatch, reportClockError, scheduleSaveMsgClear]);
+
+    /**
+     * DESHACER: saca el ULTIMO evento cargado (el de mayor `order`, no el
+     * ultimo cronologico: si el operador carga tarde un gol del minuto 3,
+     * eso es lo ultimo que hizo y eso es lo que quiere revertir).
+     *
+     * Primero arma el resumen de lo que se revierte y lo muestra; el evento
+     * no se toca hasta que confirma.
+     */
+    const openUndo = useCallback(() => {
+        const current = localEventsRef.current;
+        if (current.length === 0) return;
+
+        const last = current.reduce((candidate, event, index) => (
+            getEventOrder(event, index) >= getEventOrder(candidate.event, candidate.index)
+                ? { event, index }
+                : candidate
+        ), { event: current[0], index: 0 }).event;
+
+        const nextEvents = current.filter((event) => !isSameLocalEvent(event, last));
+        const points = getConfiguredEventPoints(last, eventDefinitionMap);
+        const remainingScores = nextEvents.some((event) => getConfiguredEventPoints(event, eventDefinitionMap) > 0);
+        const draft = normalizeMatchScore(scoreDraftRef.current);
+        // Si se deshace el unico evento que sumaba, el marcador guardado (que
+        // ya se recalculo desde los eventos al cargarlo) volveria como si fuera
+        // manual. Sin eventos que sumen no hay marcador: se lleva a cero.
+        const resetScore = points > 0 && !remainingScores && !draft.manualOverride;
+        const scoreBefore = resolveOfficialScore();
+        const scoreAfter = resetScore
+            ? { home: 0, away: 0 }
+            : resolveOfficialScore(undefined, nextEvents);
+
+        const type = last.type;
+        // Los eventos que cierran un periodo lo adelantaron: vuelve al que
+        // cerraron. Los que abren uno ya rebasaron el reloj y el operador pudo
+        // haberlo puesto a correr; con el reloj andando no se le pisa nada.
+        let revertsPeriodTo: string | null = null;
+        if (isPeriodTransitionEvent(type) && !clock.isRunning) {
+            const target = type === 'match_start'
+                ? 'PRE'
+                : type === 'start_period'
+                    ? null
+                    : normalizeMatchPeriod(last.period, clock.period);
+            if (target && target !== normalizeMatchPeriod(clock.period, 'PRE')) revertsPeriodTo = target;
+        }
+        const revertsStatusTo = type === 'match_end' && matchDraftRef.current.status === 'final' ? 'live' : null;
+
+        setUndoCandidate({
+            event: last,
+            label: eventDefinitionMap[type]?.label || eventTypeLabel(type, availableEventDefinitions),
+            scoreBefore: { home: scoreBefore.home, away: scoreBefore.away },
+            scoreAfter: { home: scoreAfter.home, away: scoreAfter.away },
+            resetScore,
+            revertsPeriodTo,
+            revertsStatusTo,
+        });
+    }, [availableEventDefinitions, clock, eventDefinitionMap, resolveOfficialScore]);
+
+    const confirmUndo = useCallback(() => {
+        if (!undoCandidate) return;
+        const { event: target, resetScore, revertsPeriodTo, revertsStatusTo } = undoCandidate;
+        const previousEvents = localEventsRef.current;
+        const nextEvents = previousEvents.filter((event) => !isSameLocalEvent(event, target));
+        const previousStatus = matchDraftRef.current.status;
+        const zeroScore: MatchScore = {
+            ...normalizeMatchScore(scoreDraftRef.current),
+            home: 0,
+            away: 0,
+            penalties: null,
+            homeTries: undefined,
+            awayTries: undefined,
+        };
+
+        // Optimista, igual que la carga: la cronologia cambia al instante y el
+        // guardado va en background por la misma cola. Rollback si falla.
+        localEventsRef.current = nextEvents;
+        setLocalEvents(nextEvents);
+        if (resetScore) {
+            scoreDraftRef.current = zeroScore;
+            setScoreDraft(zeroScore);
+        }
+        if (revertsStatusTo) {
+            setMatch((current) => ({ ...current, status: revertsStatusTo }));
+        }
+        if (revertsPeriodTo) {
+            clock.changePeriod(revertsPeriodTo).catch(reportClockError);
+        }
+        setUndoCandidate(null);
+        setSaveMsg({ type: 'ok', text: `Se deshizo: ${undoCandidate.label}.` });
+        scheduleSaveMsgClear(3000);
+
+        const payload = {
+            eventPatch: { upsert: [], deleteIds: [target.id] },
+            ...(resetScore ? { score: zeroScore } : {}),
+            ...(revertsStatusTo ? { status: revertsStatusTo } : {}),
+        };
+        matchPatchQueueRef.current = matchPatchQueueRef.current
+            .catch(() => {})
+            .then(async () => {
+                try {
+                    await persistMatchPatch(
+                        payload,
+                        { compactResponse: true, eventsOverride: nextEvents, preserveUnsavedEvents: true },
+                    );
+                } catch (err: unknown) {
+                    // Vuelve el evento a su lugar, con el orden que tenia.
+                    localEventsRef.current = [...localEventsRef.current, target];
+                    setLocalEvents(localEventsRef.current);
+                    if (revertsStatusTo) {
+                        setMatch((current) => (
+                            current.status === revertsStatusTo ? { ...current, status: previousStatus } : current
+                        ));
+                    }
+                    setSaveMsg({ type: 'err', text: `No se pudo deshacer el evento: ${err instanceof Error ? err.message : String(err)}` });
+                    scheduleSaveMsgClear(6000);
+                }
+            });
+    }, [clock, persistMatchPatch, reportClockError, scheduleSaveMsgClear, undoCandidate]);
 
     const applyLineupSize = useCallback((requestedSize?: number) => {
         const nextSize = requestedSize ?? getPositiveInteger(lineupSizeInput, getLineupSize(localLineups, matchSportId));
@@ -3013,7 +3270,11 @@ export default function MatchCenterClient({
         const totPctH = goalKickEffectivenessPercent(kickH.totalMade, kickH.totalAttempts);
         const totPctA = goalKickEffectivenessPercent(kickA.totalMade, kickA.totalAttempts);
 
-        const teamComparableKickRates = [
+        // Las efectividades a los palos son de rugby: solo existen si el
+        // deporte declara tiros a los palos. En hockey salian tres filas con
+        // "—" bajo un titulo que no tiene nada que ver con el deporte.
+        const hasKicksAtGoal = availableEventDefinitions.some((definition) => definition.kickAtGoal);
+        const teamComparableKickRates = !hasKicksAtGoal ? [] : [
             {
                 key: 'pen_palos_pct',
                 label: 'Penales a palos (%)',
@@ -3200,8 +3461,6 @@ export default function MatchCenterClient({
     const notesDirty = !areTextValuesEqual(match.notes, persistedMatchRef.current.notes);
     const dateTimeDirty = dateTimeDraft !== toDateTimeLocalInput(persistedMatchRef.current.date_time);
     const hasUnsavedMatchParameters = scoreDirty || statusDirty || venueDirty || notesDirty || dateTimeDirty;
-    const liveClockLabel = clock.label;
-    const canStartClock = !clock.isRunning && !clock.hasProgress;
     const canPauseClock = clock.isRunning;
     const canResumeClock = !clock.isRunning && clock.hasProgress;
     // El reloj ya no tiene estado "sin guardar": cada transicion se persiste sola
@@ -3219,9 +3478,12 @@ export default function MatchCenterClient({
         const hasPenalty = availableEventDefinitions.some((definition) => definition.type === 'penalty');
         const hasMatchClockEvents = availableEventDefinitions.some((definition) => definition.type === 'match_start' || definition.type === 'match_end');
         const hasClubCards = availableEventDefinitions.some((definition) => definition.type === 'card_yellow' || definition.type === 'card_red');
+        // Con dos tiempos, inicio/fin de periodo duplican a inicio/entretiempo/
+        // final y se esconden. Con cuartos son LOS eventos que mueven el reloj.
+        const hidesGenericPeriodEvents = hasMatchClockEvents && getPeriodSequence(matchSportId).length <= 2;
         const visibleDefinitions = availableEventDefinitions.filter((definition) => {
             if (definition.type === 'penalty_goal' && hasPenalty) return false;
-            if ((definition.type === 'start_period' || definition.type === 'end_period') && hasMatchClockEvents) return false;
+            if ((definition.type === 'start_period' || definition.type === 'end_period') && hidesGenericPeriodEvents) return false;
             if ((definition.type === 'yellow_card' || definition.type === 'red_card') && hasClubCards) return false;
             return true;
         });
@@ -3233,7 +3495,95 @@ export default function MatchCenterClient({
                 definitions: visibleDefinitions.filter((definition) => getEventButtonGroup(definition) === group),
             }))
             .filter((group) => group.definitions.length > 0);
-    }, [availableEventDefinitions]);
+    }, [availableEventDefinitions, matchSportId]);
+    // Las acciones grandes del deporte (si tiene) y el resto plegado.
+    const quickActionDefinitions = useMemo(
+        () => getQuickActionTypes(matchSportId)
+            .map((type) => eventDefinitionMap[type])
+            .filter((definition): definition is MatchEventDefinition => Boolean(definition)),
+        [eventDefinitionMap, matchSportId],
+    );
+    const quickClockDefinitions = useMemo(
+        () => getQuickClockActionTypes(matchSportId)
+            .map((type) => eventDefinitionMap[type])
+            .filter((definition): definition is MatchEventDefinition => Boolean(definition)),
+        [eventDefinitionMap, matchSportId],
+    );
+    const secondaryPanelGroups = useMemo(() => {
+        const quick = new Set([...quickActionDefinitions, ...quickClockDefinitions].map((definition) => definition.type));
+        return eventPanelGroups
+            .map((group) => ({ ...group, definitions: group.definitions.filter((definition) => !quick.has(definition.type)) }))
+            .filter((group) => group.definitions.length > 0);
+    }, [eventPanelGroups, quickActionDefinitions, quickClockDefinitions]);
+    // Lo ultimo que el operador CARGO (mayor `order`), no lo ultimo cronologico.
+    const lastLoadedEvent = useMemo(() => events.reduce<{ event: MatchEvent; order: number } | null>((acc, event, index) => {
+        const order = getEventOrder(event, index);
+        return !acc || order >= acc.order ? { event, order } : acc;
+    }, null)?.event ?? null, [events]);
+    /**
+     * El unico boton de reloj que hace falta en cada momento: en la previa
+     * "Inicio partido", en un cuarto "Fin de cuarto" (o "Entretiempo" si es el
+     * que cierra la primera mitad), recien cerrado uno "Inicio de cuarto", y
+     * en el ultimo "Final partido". Abre la carga guiada, que muestra que le
+     * pasa al reloj antes de confirmar.
+     */
+    const primaryClockAction = useMemo(() => {
+        const period = normalizeMatchPeriod(clock.period, 'PRE');
+        const sequence = getPeriodSequence(matchSportId);
+        const pick = (type: string) => eventDefinitionMap[type] ?? null;
+        const withHint = (definition: MatchEventDefinition | null, hint: string) => (definition ? { definition, hint } : null);
+
+        if (period === 'FT') return null;
+        if (period === 'PRE') return withHint(pick('match_start'), `Arranca ${getMatchPeriodLabel(sequence[0]).toLowerCase()}`);
+
+        const lastType = lastLoadedEvent?.type;
+        const justClosedPeriod = (lastType === 'end_period' || lastType === 'match_half') && !clock.isRunning;
+        if ((period === 'HT' || justClosedPeriod) && pick('start_period')) {
+            const opener = period === 'HT' ? getNextActivePeriodAfterEvent('start_period', period, matchSportId) : period;
+            return withHint(pick('start_period'), `Lleva el reloj a ${formatClockSeconds(getPeriodOffsetSeconds(matchSportId, opener))}`);
+        }
+
+        const lastPlayable = sequence[sequence.length - 1];
+        if (period === 'ET' || period === lastPlayable) return withHint(pick('match_end'), 'Cierra el partido');
+
+        const secondHalfOpener = sequence[Math.floor(sequence.length / 2)];
+        const nextInSequence = sequence[sequence.indexOf(period) + 1] ?? null;
+        const closes = `Cierra ${getMatchPeriodLabel(period).toLowerCase()}`;
+        if (nextInSequence === secondHalfOpener && pick('match_half')) return withHint(pick('match_half'), closes);
+        return withHint(pick('end_period') ?? pick('match_half'), closes);
+    }, [clock.isRunning, clock.period, eventDefinitionMap, lastLoadedEvent, matchSportId]);
+    // Un solo boton de reloj con tres estados en vez de cuatro botones de
+    // los que siempre hay dos o tres apagados.
+    const clockToggle = canPauseClock
+        ? { label: 'Pausar', Icon: Pause, onClick: handlePauseClock }
+        : canResumeClock
+            ? { label: 'Reanudar', Icon: Play, onClick: handleResumeClock }
+            : { label: 'Iniciar reloj', Icon: Play, onClick: handleStartClock };
+    const renderEventGroups = (groups: typeof eventPanelGroups) => groups.map((group) => (
+        <section key={group.group} className="live-event-group" data-group={group.group.toLowerCase()}>
+            <div className="live-event-group-title">
+                <span>{group.group}</span>
+                <small>{group.definitions.length} eventos</small>
+            </div>
+            <div className="live-event-button-grid">
+                {group.definitions.map((definition) => (
+                    <button
+                        key={definition.type}
+                        type="button"
+                        className="live-event-button"
+                        data-tone={getEventButtonTone(definition)}
+                        data-event-type={definition.type}
+                        aria-label={`Cargar ${definition.label}`}
+                        onClick={() => openGuidedEvent(definition)}
+                    >
+                        <span className="live-event-glyph">{getEventButtonGlyph(definition.type)}</span>
+                        <span className="live-event-label">{getEventButtonLabel(definition, matchSportId)}</span>
+                        <span className="live-event-meta">{getEventButtonMeta(definition, matchSportId)}</span>
+                    </button>
+                ))}
+            </div>
+        </section>
+    ));
     const guidedPlayers = guidedEvent?.team ? eventPlayerSelections[guidedEvent.team].active : [];
     const guidedSecondaryPlayers = guidedEvent?.team
         ? guidedEvent.definition.type === 'substitution'
@@ -3433,12 +3783,23 @@ export default function MatchCenterClient({
                 </div>
 
                 <div className="header-actions">
-                    <button className="mc-btn" onClick={handleSave} disabled={saving}>
-                        {saving ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
+                    <button
+                        className="mc-btn mc-btn-primary"
+                        onClick={handleSave}
+                        disabled={saving}
+                        aria-label="Guardar cambios"
+                        title="Guardar cambios"
+                    >
+                        {saving ? <RefreshCw className="animate-spin" size={16} aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
                         <span className="btn-label">Guardar</span>
                     </button>
-                    <button className="mc-btn mc-btn-primary">
-                        <Share2 size={16} /> <span className="btn-label">Publicar</span>
+                    <button
+                        className="mc-btn"
+                        onClick={handleShare}
+                        aria-label="Compartir la ficha pública del partido"
+                        title="Compartir la ficha pública del partido"
+                    >
+                        <Share2 size={16} aria-hidden="true" /> <span className="btn-label">Compartir</span>
                     </button>
                     {saveMsg && (
                         <div className="save-feedback-toast" style={{
@@ -3936,129 +4297,149 @@ export default function MatchCenterClient({
                     <>
                     <div className="event-live-workspace">
                         <article className="mc-partition live-event-console">
-                            <div className="mc-card-header live-event-console-header">
-                                <div className="live-event-heading">
-                                    <h4>Carga rapida de eventos</h4>
-                                    <span className="live-event-header-note">El tiempo actual se aplica al guardar cada evento.</span>
+                            {/* ── Reloj. El marcador y los clubes ya estan en la cabecera: no se repiten. ── */}
+                            <div className="live-clock-bar" data-running={clock.isRunning ? 'true' : 'false'}>
+                                <div className="live-clock-readout" role="status" aria-live="off">
+                                    <Clock size={16} aria-hidden="true" />
+                                    <span className="live-clock-time">{formatClockSeconds(clock.elapsedSeconds)}</span>
+                                    <span className="live-clock-period">{getMatchPeriodLabel(normalizeMatchPeriod(clock.period, 'PRE'))}</span>
+                                    <span className="live-clock-state">
+                                        {clock.isRunning ? 'En juego' : clock.hasProgress ? 'Pausado' : 'Sin iniciar'}
+                                    </span>
                                 </div>
-                                <div className="live-match-clock" data-running={clock.isRunning ? 'true' : 'false'}>
-                                    <div className="live-match-clock-readout">
-                                        <Clock size={15} />
-                                        <span>{liveClockLabel}</span>
-                                    </div>
-                                    <div className="live-match-clock-actions" role="group" aria-label="Controles del reloj del partido">
-                                        <button
-                                            type="button"
-                                            className="mc-btn live-match-clock-btn"
-                                            onClick={handleStartClock}
-                                            disabled={!canStartClock}
-                                            title="Iniciar reloj"
-                                        >
-                                            <Play size={13} /> Iniciar
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="mc-btn live-match-clock-btn"
-                                            onClick={handlePauseClock}
-                                            disabled={!canPauseClock}
-                                            title="Pausar reloj"
-                                        >
-                                            <Pause size={13} /> Pausar
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="mc-btn live-match-clock-btn"
-                                            onClick={handleResumeClock}
-                                            disabled={!canResumeClock}
-                                            title="Reanudar reloj"
-                                        >
-                                            <Play size={13} /> Reanudar
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="mc-btn live-match-clock-btn live-match-clock-reset"
-                                            onClick={handleResetClock}
-                                            title="Reiniciar reloj"
-                                        >
-                                            <RotateCcw size={13} /> Reiniciar
-                                        </button>
-                                    </div>
+                                {/* El periodo activo, imposible de confundir: una tira con
+                                  * todos los del deporte y el actual encendido. Tocar uno
+                                  * re-rotula el reloj igual que el select de ajuste. */}
+                                <div className="live-match-period-strip" role="group" aria-label="Periodo del partido">
+                                    {clockPeriodOptions.map((period) => {
+                                        const isActive = normalizeMatchPeriod(clock.period, 'PRE') === period;
+                                        return (
+                                            <button
+                                                key={period}
+                                                type="button"
+                                                className={isActive ? 'active' : ''}
+                                                aria-pressed={isActive}
+                                                title={getMatchPeriodLabel(period)}
+                                                onClick={() => clock.changePeriod(period).catch(reportClockError)}
+                                            >
+                                                {period}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
+
+                            {/* ── Dos botones: el reloj y deshacer. Los eventos de reloj van como tiles. ── */}
+                            <div className="live-console-actions">
+                                <button
+                                    type="button"
+                                    className="mc-btn live-clock-toggle"
+                                    data-running={clock.isRunning ? 'true' : 'false'}
+                                    onClick={clockToggle.onClick}
+                                    title={`${clockToggle.label} el reloj`}
+                                >
+                                    <clockToggle.Icon size={16} aria-hidden="true" /> {clockToggle.label}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="mc-btn live-undo-btn"
+                                    onClick={openUndo}
+                                    disabled={events.length === 0 || saving}
+                                    title={events.length === 0 ? 'No hay eventos cargados para deshacer.' : 'Deshacer el último evento cargado'}
+                                >
+                                    <Undo2 size={15} aria-hidden="true" /> Deshacer último
+                                </button>
+                            </div>
+
                             {/*
                               * MIN/SEG son OVERRIDE MANUAL: escribir ajusta el
                               * acumulado, nunca al reves. Mientras el input tiene
                               * foco el tick no lo pisa (el hook mantiene un draft
                               * aparte); al salir del campo se persiste como una
                               * transicion 'set' anclada igual que el resto.
+                              * Va plegado: en un partido en vivo se usa una vez cada
+                              * muchos partidos, y abierto competia con las acciones.
                               */}
-                            <div className="live-match-clock-editor">
-                                <label>
-                                    <span>Periodo</span>
-                                    <select
-                                        value={clock.period || ''}
-                                        onChange={(e) => clock.changePeriod(e.target.value).catch(reportClockError)}
+                            <details className="live-clock-manual">
+                                <summary>Ajustar el reloj a mano</summary>
+                                <div className="live-match-clock-editor">
+                                    <label>
+                                        <span>Periodo</span>
+                                        <select
+                                            value={clock.period || ''}
+                                            onChange={(e) => clock.changePeriod(e.target.value).catch(reportClockError)}
+                                        >
+                                            {/* Codigos canonicos con rotulo legible: el hook guarda
+                                              * 'PRE'/'FT', no 'Previa'/'Final', y sin normalizar el
+                                              * select mostraba las dos formas del mismo periodo. */}
+                                            {Array.from(new Set(
+                                                [clock.period, ...clockPeriodOptions]
+                                                    .filter(Boolean)
+                                                    .map((period) => normalizeMatchPeriod(period)),
+                                            )).map((period) => (
+                                                <option key={period} value={period}>{getMatchPeriodLabel(period)}</option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>Min</span>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            value={clock.manual.minute}
+                                            onFocus={clock.beginManualEdit}
+                                            onChange={(e) => clock.changeManualField('minute', e.target.value)}
+                                            onBlur={() => clock.commitManualEdit().catch(reportClockError)}
+                                        />
+                                    </label>
+                                    <label>
+                                        <span>Seg</span>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            max={59}
+                                            value={clock.manual.seconds}
+                                            onFocus={clock.beginManualEdit}
+                                            onChange={(e) => clock.changeManualField('seconds', e.target.value)}
+                                            onBlur={() => clock.commitManualEdit().catch(reportClockError)}
+                                        />
+                                    </label>
+                                    <button
+                                        type="button"
+                                        className="mc-btn live-match-clock-btn"
+                                        onClick={() => clock.rebaseToPeriodStart(clock.period).catch(reportClockError)}
+                                        title={`Llevar el reloj al inicio del periodo (${formatClockSeconds(getPeriodOffsetSeconds(matchSportId, clock.period))})`}
                                     >
-                                        {/* Codigos canonicos con rotulo legible: el hook guarda
-                                          * 'PRE'/'FT', no 'Previa'/'Final', y sin normalizar el
-                                          * select mostraba las dos formas del mismo periodo. */}
-                                        {Array.from(new Set(
-                                            [clock.period, ...COMMON_MATCH_PERIODS]
-                                                .filter(Boolean)
-                                                .map((period) => normalizeMatchPeriod(period)),
-                                        )).map((period) => (
-                                            <option key={period} value={period}>{getMatchPeriodLabel(period)}</option>
-                                        ))}
-                                    </select>
-                                </label>
-                                <label>
-                                    <span>Min</span>
-                                    <input
-                                        type="number"
-                                        min={0}
-                                        value={clock.manual.minute}
-                                        onFocus={clock.beginManualEdit}
-                                        onChange={(e) => clock.changeManualField('minute', e.target.value)}
-                                        onBlur={() => clock.commitManualEdit().catch(reportClockError)}
-                                    />
-                                </label>
-                                <label>
-                                    <span>Seg</span>
-                                    <input
-                                        type="number"
-                                        min={0}
-                                        max={59}
-                                        value={clock.manual.seconds}
-                                        onFocus={clock.beginManualEdit}
-                                        onChange={(e) => clock.changeManualField('seconds', e.target.value)}
-                                        onBlur={() => clock.commitManualEdit().catch(reportClockError)}
-                                    />
-                                </label>
-                                <button
-                                    type="button"
-                                    className="mc-btn live-match-clock-btn"
-                                    onClick={() => clock.rebaseToPeriodStart(clock.period).catch(reportClockError)}
-                                    title={`Llevar el reloj al inicio del periodo (${formatClockSeconds(getPeriodOffsetSeconds(matchSportId, clock.period))})`}
-                                >
-                                    Ir al inicio del periodo
-                                </button>
-                                {clock.manual.isEditing ? (
-                                    <span className="live-match-clock-dirty">Editando (se aplica al salir del campo)</span>
-                                ) : null}
-                            </div>
-                            <div className="live-event-panel">
-                                {eventPanelGroups.map((group) => (
-                                    <section key={group.group} className="live-event-group" data-group={group.group.toLowerCase()}>
+                                        Ir al inicio del periodo
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="mc-btn live-match-clock-btn live-match-clock-reset"
+                                        onClick={handleResetClock}
+                                        disabled={!clock.hasProgress && !clock.isRunning}
+                                        title="Reiniciar reloj"
+                                    >
+                                        <RotateCcw size={13} aria-hidden="true" /> Reiniciar
+                                    </button>
+                                    {clock.manual.isEditing ? (
+                                        <span className="live-match-clock-dirty">Editando (se aplica al salir del campo)</span>
+                                    ) : null}
+                                </div>
+                            </details>
+
+                            {quickActionDefinitions.length > 0 ? (
+                                <>
+                                    <section className="live-quick-actions" aria-label="Acciones rápidas">
                                         <div className="live-event-group-title">
-                                            <span>{group.group}</span>
-                                            <small>{group.definitions.length} eventos</small>
+                                            <span>Acciones rápidas</span>
+                                            <small>Cada evento se guarda con el minuto del reloj</small>
                                         </div>
-                                        <div className="live-event-button-grid">
-                                            {group.definitions.map((definition) => (
+                                        <div className="live-quick-grid">
+                                            {quickActionDefinitions.map((definition) => (
                                                 <button
                                                     key={definition.type}
                                                     type="button"
-                                                    className="live-event-button"
+                                                    className="live-event-button live-quick-button"
                                                     data-tone={getEventButtonTone(definition)}
                                                     data-event-type={definition.type}
                                                     aria-label={`Cargar ${definition.label}`}
@@ -4066,13 +4447,59 @@ export default function MatchCenterClient({
                                                 >
                                                     <span className="live-event-glyph">{getEventButtonGlyph(definition.type)}</span>
                                                     <span className="live-event-label">{getEventButtonLabel(definition, matchSportId)}</span>
-                                                    <span className="live-event-meta">{getEventButtonMeta(definition)}</span>
+                                                    <span className="live-event-meta">{getEventButtonMeta(definition, matchSportId)}</span>
                                                 </button>
                                             ))}
                                         </div>
+                                        {quickClockDefinitions.length > 0 ? (
+                                            <>
+                                                <div className="live-event-group-title live-quick-subtitle">
+                                                    <span>Reloj del partido</span>
+                                                    <small>
+                                                        {primaryClockAction
+                                                            ? `Ahora toca: ${getEventButtonLabel(primaryClockAction.definition, matchSportId)}`
+                                                            : 'Partido finalizado'}
+                                                    </small>
+                                                </div>
+                                                <div className="live-quick-grid live-quick-grid-clock">
+                                                    {quickClockDefinitions.map((definition) => {
+                                                        const suggested = primaryClockAction?.definition.type === definition.type;
+                                                        return (
+                                                            <button
+                                                                key={definition.type}
+                                                                type="button"
+                                                                className="live-event-button live-quick-button"
+                                                                data-tone="clock"
+                                                                data-event-type={definition.type}
+                                                                data-suggested={suggested ? 'true' : 'false'}
+                                                                aria-label={`Cargar ${definition.label}${suggested ? ' (sugerido ahora)' : ''}`}
+                                                                onClick={() => openGuidedEvent(definition)}
+                                                            >
+                                                                <span className="live-event-glyph">{getEventButtonGlyph(definition.type)}</span>
+                                                                <span className="live-event-label">{getEventButtonLabel(definition, matchSportId)}</span>
+                                                                <span className="live-event-meta">
+                                                                    {suggested ? primaryClockAction?.hint : getEventButtonMeta(definition, matchSportId)}
+                                                                </span>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </>
+                                        ) : null}
                                     </section>
-                                ))}
-                            </div>
+                                    {secondaryPanelGroups.length > 0 ? (
+                                        <details className="live-more-actions">
+                                            <summary>
+                                                Más acciones
+                                                <small>{secondaryPanelGroups.reduce((total, group) => total + group.definitions.length, 0)} eventos</small>
+                                            </summary>
+                                            <div className="live-event-panel">{renderEventGroups(secondaryPanelGroups)}</div>
+                                        </details>
+                                    ) : null}
+                                </>
+                            ) : (
+                                <div className="live-event-panel">{renderEventGroups(eventPanelGroups)}</div>
+                            )}
                         </article>
                     </div>
                     <article className="mc-partition event-timeline-panel">
@@ -4125,10 +4552,10 @@ export default function MatchCenterClient({
                                                     title={getMatchPeriodLabel(eventPeriod)}
                                                     onChange={(e) => updateLocalEvent(ev, { period: normalizeMatchPeriod(e.target.value) })}
                                                 >
-                                                    {!EVENT_PERIOD_OPTIONS.includes(eventPeriod) && (
+                                                    {!eventPeriodOptions.includes(eventPeriod) && (
                                                         <option value={eventPeriod}>{getMatchPeriodLabel(eventPeriod)}</option>
                                                     )}
-                                                    {EVENT_PERIOD_OPTIONS.map((period) => (
+                                                    {eventPeriodOptions.map((period) => (
                                                         <option key={period} value={period}>{getMatchPeriodLabel(period)}</option>
                                                     ))}
                                                 </select>
@@ -4242,16 +4669,59 @@ export default function MatchCenterClient({
                                                             : null}
                                                     </select>
                                                 )}
-                                                {selectedDefinition.player !== 'none' && ev.type !== 'substitution' && (
-                                                    <input
-                                                        type="text"
-                                                        value={ev.detail}
-                                                        placeholder="Detalle adicional (opcional)"
-                                                        className="inline-input"
-                                                        style={{ fontSize: '0.8rem', opacity: 0.85 }}
-                                                        onChange={(e) => updateLocalEvent(ev, { detail: e.target.value })}
-                                                    />
-                                                )}
+                                                {selectedDefinition.player !== 'none' && ev.type !== 'substitution' && (() => {
+                                                    // Eventos con desenlace (corner corto, stroke): el
+                                                    // operador edita el resultado y el texto libre por
+                                                    // separado; la marca [res:...] la arma joinOutcomeDetail.
+                                                    const outcomeDefinition = eventDefinitionMap[ev.type];
+                                                    if (!outcomeDefinition?.outcomes?.length) {
+                                                        return (
+                                                            <input
+                                                                type="text"
+                                                                value={ev.detail}
+                                                                placeholder="Detalle adicional (opcional)"
+                                                                className="inline-input"
+                                                                style={{ fontSize: '0.8rem', opacity: 0.85 }}
+                                                                onChange={(e) => updateLocalEvent(ev, { detail: e.target.value })}
+                                                            />
+                                                        );
+                                                    }
+                                                    const { outcomeId, extra } = splitOutcomeDetail(outcomeDefinition, ev.detail);
+                                                    return (
+                                                        <>
+                                                            <select
+                                                                value={outcomeId ?? ''}
+                                                                className="inline-input inline-select"
+                                                                style={{ fontSize: '0.8rem', color: outcomeId ? undefined : '#f59e0b' }}
+                                                                title="Cómo terminó"
+                                                                onChange={(e) => updateLocalEvent(ev, {
+                                                                    detail: e.target.value
+                                                                        ? joinOutcomeDetail(outcomeDefinition, e.target.value, extra)
+                                                                        : extra,
+                                                                })}
+                                                            >
+                                                                <option value="">Sin desenlace (no suma)</option>
+                                                                {outcomeDefinition.outcomes.map((outcome) => (
+                                                                    <option key={outcome.id} value={outcome.id}>
+                                                                        {outcome.label}{outcome.scores ? ` · +${outcomeDefinition.points}` : ''}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                            <input
+                                                                type="text"
+                                                                value={extra}
+                                                                placeholder="Detalle adicional (opcional)"
+                                                                className="inline-input"
+                                                                style={{ fontSize: '0.8rem', opacity: 0.85 }}
+                                                                onChange={(e) => updateLocalEvent(ev, {
+                                                                    detail: outcomeId
+                                                                        ? joinOutcomeDetail(outcomeDefinition, outcomeId, e.target.value)
+                                                                        : e.target.value,
+                                                                })}
+                                                            />
+                                                        </>
+                                                    );
+                                                })()}
                                                 {ev.type === 'substitution' ? (() => {
                                                     const chronologicalIndex = chronologicalIndexById.get(ev.id) ?? -1;
                                                     const mins = chronologicalIndex >= 0
@@ -4301,7 +4771,9 @@ export default function MatchCenterClient({
                             <div className="guided-event-steps">
                                 <span className={guidedEvent.step === 'team' ? 'active' : ''}>1 Equipo</span>
                                 <span className={guidedEvent.step === 'player' ? 'active' : ''}>2 Jugador</span>
-                                <span className={guidedEvent.step === 'details' ? 'active' : ''}>3 Guardar</span>
+                                <span className={guidedEvent.step === 'details' ? 'active' : ''}>
+                                    3 {guidedEvent.definition.outcomes?.length ? 'Resultado' : 'Guardar'}
+                                </span>
                             </div>
 
                             {guidedEvent.step === 'team' && (
@@ -4349,6 +4821,46 @@ export default function MatchCenterClient({
 
                             {guidedEvent.step === 'details' && (
                                 <div className="guided-event-body">
+                                    {guidedEvent.definition.category === 'clock' && (() => {
+                                        // Un evento de reloj mueve el reloj: se dice ANTES de
+                                        // confirmar, para que "Fin de cuarto" nunca sea sorpresa.
+                                        const type = guidedEvent.definition.type;
+                                        const next = getNextActivePeriodAfterEvent(type, clock.period, matchSportId);
+                                        const at = formatClockSeconds(clock.elapsedSeconds);
+                                        const nextLabel = getMatchPeriodLabel(next).toLowerCase();
+                                        let effect: string;
+                                        if (type === 'match_start' || type === 'start_period') {
+                                            effect = clock.isRunning
+                                                ? `El reloj sigue corriendo en ${at}. Se registra el inicio de ${nextLabel}.`
+                                                : `El reloj se lleva a ${formatClockSeconds(getPeriodOffsetSeconds(matchSportId, next))}, listo para iniciar ${nextLabel}.`;
+                                        } else if (type === 'match_end') {
+                                            effect = `El reloj queda pausado en ${at} y el partido pasa a final.`;
+                                        } else {
+                                            effect = `El reloj queda pausado en ${at} y el partido pasa a ${nextLabel}.`;
+                                        }
+                                        return <p className="guided-clock-effect">{effect}</p>;
+                                    })()}
+                                    {guidedEvent.definition.outcomes?.length ? (
+                                        <div className="guided-option-block">
+                                            <span>¿Cómo terminó?</span>
+                                            <div className="guided-outcome-grid" role="radiogroup" aria-label="Desenlace">
+                                                {guidedEvent.definition.outcomes.map((outcome) => (
+                                                    <button
+                                                        key={outcome.id}
+                                                        type="button"
+                                                        role="radio"
+                                                        aria-checked={guidedEvent.outcomeId === outcome.id}
+                                                        className={guidedEvent.outcomeId === outcome.id ? 'active' : ''}
+                                                        data-scores={outcome.scores ? 'true' : 'false'}
+                                                        onClick={() => setGuidedEvent((current) => current ? { ...current, outcomeId: outcome.id } : current)}
+                                                    >
+                                                        <strong>{outcome.label}</strong>
+                                                        <small>{outcome.scores ? `+${guidedEvent.definition.points} · suma` : 'No suma'}</small>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : null}
                                     <div className="guided-details-grid">
                                         <label>
                                             <span>Minuto</span>
@@ -4516,6 +5028,60 @@ export default function MatchCenterClient({
                     </div>
                 )}
 
+                {undoCandidate && (() => {
+                    const { event: target, scoreBefore, scoreAfter } = undoCandidate;
+                    const scoreChanges = scoreBefore.home !== scoreAfter.home || scoreBefore.away !== scoreAfter.away;
+                    const targetTeam = target.team === 'home' ? homeName : target.team === 'away' ? awayName : '';
+                    const where = [
+                        `${Number(target.minute) || 0}'`,
+                        getMatchPeriodLabel(target.period),
+                        targetTeam,
+                        target.playerName?.trim(),
+                    ].filter(Boolean).join(' · ');
+                    return (
+                        <div className="guided-event-backdrop" role="dialog" aria-modal="true" aria-label="Deshacer el último evento">
+                            <div className="guided-event-modal undo-event-modal">
+                                <div className="guided-event-header">
+                                    <div>
+                                        <span className="guided-event-kicker">Deshacer último evento</span>
+                                        <h3>{undoCandidate.label}</h3>
+                                    </div>
+                                    <button className="guided-event-close" type="button" onClick={() => setUndoCandidate(null)} aria-label="Cerrar">
+                                        <X size={18} />
+                                    </button>
+                                </div>
+                                <div className="guided-event-body">
+                                    <p className="undo-event-where">{where}</p>
+                                    <div className="guided-option-block">
+                                        <span>Se revierte</span>
+                                        <ul className="undo-event-list">
+                                            <li>El evento sale de la cronología.</li>
+                                            {scoreChanges && (
+                                                <li>
+                                                    Marcador <strong>{scoreBefore.home}-{scoreBefore.away}</strong> → <strong>{scoreAfter.home}-{scoreAfter.away}</strong>
+                                                </li>
+                                            )}
+                                            {undoCandidate.revertsPeriodTo && (
+                                                <li>El reloj vuelve a <strong>{getMatchPeriodLabel(undoCandidate.revertsPeriodTo)}</strong>.</li>
+                                            )}
+                                            {undoCandidate.revertsStatusTo === 'live' && (
+                                                <li>El partido vuelve a estar <strong>en vivo</strong>.</li>
+                                            )}
+                                            <li>Las estadísticas se recalculan solas.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div className="guided-event-footer">
+                                    <button className="mc-btn mc-btn-outline" type="button" onClick={() => setUndoCandidate(null)}>Cancelar</button>
+                                    <button className="mc-btn mc-btn-primary undo-event-confirm" type="button" onClick={confirmUndo}>
+                                        <Undo2 size={14} /> Deshacer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
+
                 {/* Stats */}
                 {activeTab === 'estadisticas' && (
                     <div className="stats-workspace">
@@ -4540,41 +5106,23 @@ export default function MatchCenterClient({
                                             <span>{homeName}</span>
                                             <strong>{completeMatchStats.points.home}</strong>
                                         </div>
-                                        <div className="stats-scoreline-divider">PTS</div>
+                                        <div className="stats-scoreline-divider">{isGoalCountingSport(matchSportId) ? 'GOLES' : 'PTS'}</div>
                                         <div className="stats-scoreline-team away">
                                             <span>{awayName}</span>
                                             <strong>{completeMatchStats.points.away}</strong>
                                         </div>
                                     </div>
 
+                                    {/* Los cuatro numeros de arriba son del deporte: en hockey
+                                      * "a los palos" y "errores de manejo" no existen, y lo
+                                      * que se mira es el corner corto y el tiro al arco. */}
                                     <div className="stats-kpi-grid">
-                                        <div className="stats-kpi">
-                                            <span>Eventos cargados</span>
-                                            <strong>{completeMatchStats.totalEvents}</strong>
-                                        </div>
-                                        <div className="stats-kpi">
-                                            <span>A los palos</span>
-                                            <strong>
-                                                {completeMatchStats.goalKicksMade.home + completeMatchStats.goalKicksMade.away}
-                                                /{completeMatchStats.goalKickAttempts.home + completeMatchStats.goalKickAttempts.away}
-                                            </strong>
-                                        </div>
-                                        <div className="stats-kpi">
-                                            <span>Errores</span>
-                                            <strong>
-                                                {completeMatchStats.knockOns.home + completeMatchStats.knockOns.away
-                                                    + completeMatchStats.forwardPasses.home + completeMatchStats.forwardPasses.away
-                                                    + completeMatchStats.handlingErrors.home + completeMatchStats.handlingErrors.away}
-                                            </strong>
-                                        </div>
-                                        <div className="stats-kpi">
-                                            <span>Disciplina</span>
-                                            <strong>
-                                                {completeMatchStats.yellowCards.home + completeMatchStats.yellowCards.away
-                                                    + completeMatchStats.redCards.home + completeMatchStats.redCards.away
-                                                    + completeMatchStats.penaltiesCommitted.home + completeMatchStats.penaltiesCommitted.away}
-                                            </strong>
-                                        </div>
+                                        {getSportKpis(completeMatchStats, matchSportId).map((kpi) => (
+                                            <div key={kpi.label} className="stats-kpi">
+                                                <span>{kpi.label}</span>
+                                                <strong>{kpi.value}</strong>
+                                            </div>
+                                        ))}
                                     </div>
 
                                     <div className="stats-panel-tabs" role="tablist" aria-label="Tipos de estadisticas">
@@ -4762,7 +5310,7 @@ export default function MatchCenterClient({
                                                             <strong>{player.name}</strong>
                                                             <span>{player.team === 'home' ? homeName : awayName}</span>
                                                         </div>
-                                                        <strong>{player.points} pts</strong>
+                                                        <strong>{player.points} {isGoalCountingSport(matchSportId) ? (player.points === 1 ? 'gol' : 'goles') : 'pts'}</strong>
                                                     </div>
                                                 ))}
                                             </div>
@@ -4797,7 +5345,7 @@ export default function MatchCenterClient({
                                                                     </div>
                                                                     <div className="player-stat-points">
                                                                         <strong className={player.points > 0 ? 'is-positive' : ''}>{player.points}</strong>
-                                                                        <span>puntos</span>
+                                                                        <span>{isGoalCountingSport(matchSportId) ? 'goles' : 'puntos'}</span>
                                                                     </div>
                                                                 </div>
                                                                 <div className="player-stat-breakdown">

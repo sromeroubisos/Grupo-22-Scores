@@ -5,7 +5,10 @@ import {
   buildMatchEventDefinitionMap,
   formatOutcomeTag,
   getDefaultMatchEventDefinitions,
+  joinOutcomeDetail,
   outcomeScores,
+  splitOutcomeDetail,
+  stripOutcomeTag,
 } from './matchEventCatalog.ts';
 import { buildCompleteMatchStats } from './matchStatsFromEvents.ts';
 
@@ -140,4 +143,54 @@ test('los eventos de shoot-out viven en su propia categoria', () => {
 test('outcomeScores: sin desenlaces declarados el evento suma normal', () => {
   // El gol de jugada no tiene resultados: no hay nada que elegir.
   assert.equal(outcomeScores(map.goal, ''), true);
+});
+
+/*
+ * El detalle de un evento con desenlace es `[res:goal] Gol | texto libre`.
+ * `join` y `split` son la unica ida y vuelta: la UI edita cada parte por
+ * separado y el operador nunca ve la marca.
+ */
+test('joinOutcomeDetail escribe la marca, el rotulo y el texto libre', () => {
+  assert.equal(joinOutcomeDetail(map.penalty_corner, 'goal'), '[res:goal] Gol');
+  assert.equal(
+    joinOutcomeDetail(map.penalty_corner, 'defended', 'salio por la izquierda'),
+    '[res:defended] Recuperado por la defensa | salio por la izquierda',
+  );
+});
+
+test('splitOutcomeDetail es la inversa exacta de joinOutcomeDetail', () => {
+  for (const outcome of map.penalty_corner.outcomes ?? []) {
+    for (const extra of ['', 'segundo intento']) {
+      const detail = joinOutcomeDetail(map.penalty_corner, outcome.id, extra);
+      assert.deepEqual(splitOutcomeDetail(map.penalty_corner, detail), { outcomeId: outcome.id, extra });
+    }
+  }
+});
+
+test('un detalle sin marca se lee como sin desenlace y conserva el texto', () => {
+  assert.deepEqual(splitOutcomeDetail(map.penalty_corner, 'bien ejecutado'), { outcomeId: null, extra: 'bien ejecutado' });
+  assert.deepEqual(splitOutcomeDetail(map.penalty_corner, ''), { outcomeId: null, extra: '' });
+});
+
+test('lo que arma la UI suma: un corner cargado desde el modal termina en el marcador', () => {
+  const stats = buildCompleteMatchStats(
+    [ev('penalty_corner', 'home', joinOutcomeDetail(map.penalty_corner, 'goal', 'tiro a la base'))],
+    map,
+  );
+  assert.equal(stats.points.home, 1);
+  assert.equal(stats.penaltyCornerGoals.home, 1);
+});
+
+test('stripOutcomeTag deja lo que lee una persona', () => {
+  assert.equal(stripOutcomeTag('[res:goal] Gol | tiro a la base'), 'Gol | tiro a la base');
+  assert.equal(stripOutcomeTag('sin marca'), 'sin marca');
+});
+
+test('en la cancha se dice penal, a secas: ningun rotulo dice stroke', () => {
+  assert.equal(map.penalty_stroke.label, 'Penal');
+  const cornerToStroke = map.penalty_corner.outcomes?.find((outcome) => outcome.id === 'penalty_stroke');
+  assert.equal(cornerToStroke?.label, 'Penal');
+  for (const definition of definitions) {
+    assert.ok(!/stroke/i.test(definition.label), `${definition.type} sigue diciendo stroke`);
+  }
 });

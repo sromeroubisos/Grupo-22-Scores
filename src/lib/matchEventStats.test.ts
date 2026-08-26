@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isGoalKickMade, isGoalKickAttemptEvent } from './matchEventStats.ts';
+import { formatMatchTimelineEventDescription, isGoalKickMade, isGoalKickAttemptEvent } from './matchEventStats.ts';
 
 /**
  * Un tiro a los palos errado NO puede sumar puntos.
@@ -103,4 +103,13 @@ test('el penal jugado al touch no es un tiro a los palos', () => {
   assert.equal(isGoalKickAttemptEvent({ type: 'penalty', detail: 'al touch' }), false);
   assert.equal(isGoalKickAttemptEvent({ type: 'penalty', detail: 'tap' }), false);
   assert.equal(isGoalKickAttemptEvent({ type: 'penalty', detail: 'a los palos' }), true);
+});
+
+/*
+ * La marca del desenlace ([res:goal]) es para el motor. En la cronologia, el
+ * PDF y la ficha publica se lee el rotulo que viene escrito al lado.
+ */
+test('la descripcion de la cronologia no muestra la marca del desenlace', () => {
+  const event = { type: 'penalty_corner', playerName: 'Perez', secondaryPlayerName: '', detail: '[res:goal] Gol | tiro a la base', minute: 12 };
+  assert.equal(formatMatchTimelineEventDescription(event, [event], 0, ''), 'Perez · Gol | tiro a la base');
 });
