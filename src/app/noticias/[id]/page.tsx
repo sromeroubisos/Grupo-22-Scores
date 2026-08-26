@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import ProtectedLink from '@/components/ProtectedLink';
 import { notFound } from 'next/navigation';
 
 import { getServerAuthRole } from '@/lib/auth/newsAccess';
@@ -118,13 +119,12 @@ export default async function NewsPage({ params }: NewsPageProps) {
                             Ver mas noticias
                         </Link>
                         {canManageNews && (
-                            <Link
+                            <ProtectedLink
                                 href={`/admin/super/noticias/editar/${news.id}`}
-                                prefetch={false}
                                 className={`${styles.actionLink} ${styles.primaryLink}`}
                             >
                                 Editar noticia
-                            </Link>
+                            </ProtectedLink>
                         )}
                     </div>
                 </section>

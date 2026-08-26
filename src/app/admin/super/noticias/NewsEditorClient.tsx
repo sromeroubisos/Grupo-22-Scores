@@ -14,6 +14,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import { AlertCircle, ArrowLeft, CheckCircle2, Circle, Eye, EyeOff, ImagePlus, Newspaper, Trash2 } from 'lucide-react';
 
+import { sessionFetch } from '@/lib/supabase/freshSession';
+
 import styles from './NewsEditor.module.css';
 
 type NewsStatus = 'draft' | 'published' | 'archived';
@@ -240,7 +242,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
         try {
             const body = new FormData();
             body.append('file', file);
-            const response = await fetch('/api/news/image', { method: 'POST', body, credentials: 'same-origin' });
+            const response = await sessionFetch('/api/news/image', { method: 'POST', body });
             const payload = await response.json().catch(() => null);
             if (!response.ok || typeof payload?.url !== 'string') {
                 setImageError(typeof payload?.error === 'string' ? payload.error : 'No se pudo subir la imagen. Probá de nuevo.');
@@ -290,10 +292,9 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
 
         setBusy(mode);
         try {
-            const response = await fetch('/api/news', {
+            const response = await sessionFetch('/api/news', {
                 method: recordId ? 'PUT' : 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'same-origin',
                 body: JSON.stringify({
                     id: recordId ?? undefined,
                     title: form.title.trim(),
@@ -343,7 +344,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
         setBusy('delete');
         setError(null);
         try {
-            const response = await fetch(`/api/news?id=${encodeURIComponent(recordId)}`, { method: 'DELETE', credentials: 'same-origin' });
+            const response = await sessionFetch(`/api/news?id=${encodeURIComponent(recordId)}`, { method: 'DELETE' });
             const payload = await response.json().catch(() => null);
             if (!response.ok) throw new Error(typeof payload?.error === 'string' ? payload.error : 'No se pudo eliminar la noticia.');
             setSaved(form); // sin aviso de cambios sin guardar al salir

@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 
 import MobileSectionTabs from '@/components/MobileSectionTabs';
+import ProtectedLink from '@/components/ProtectedLink';
+import { sessionFetch } from '@/lib/supabase/freshSession';
 import { useSport } from '@/context/SportContext';
 import type { VideoHubSummary } from '@/lib/videoHub/types';
 
@@ -171,9 +173,9 @@ function NewsCard({ item, canManage, menuOpen, onToggleMenu, onToggleStatus, onD
 
             {canManage && (
                 <div className={styles.newsAdmin}>
-                    <Link href={`/admin/super/noticias/editar/${item.id}`} className={`${styles.btn} ${styles.btnSm}`}>
+                    <ProtectedLink href={`/admin/super/noticias/editar/${item.id}`} className={`${styles.btn} ${styles.btnSm}`}>
                         <Pencil size={14} aria-hidden="true" /> Editar
-                    </Link>
+                    </ProtectedLink>
                     <div className={styles.menuWrap}>
                         <button
                             type="button"
@@ -236,7 +238,7 @@ export default function NoticiasClient({ initialNews, canManageNews, videoHubs =
         setActiveMenuId(null);
         if (!window.confirm('¿Eliminar esta noticia? No se puede deshacer.')) return;
         try {
-            const response = await fetch(`/api/news?id=${id}`, { method: 'DELETE' });
+            const response = await sessionFetch(`/api/news?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
             if (!response.ok) throw new Error('Failed to delete');
             setNews((current) => current.filter((item) => item.id !== id));
         } catch (error) {
@@ -251,7 +253,7 @@ export default function NoticiasClient({ initialNews, canManageNews, videoHubs =
 
         const newStatus = item.status === 'published' ? 'draft' : 'published';
         try {
-            const response = await fetch('/api/news', {
+            const response = await sessionFetch('/api/news', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: item.id, status: newStatus }),
@@ -331,9 +333,11 @@ export default function NoticiasClient({ initialNews, canManageNews, videoHubs =
                                 <span className={styles.editorialDot} aria-hidden="true" />
                                 Modo editorial · ves los borradores
                             </span>
-                            <Link href="/admin/super/noticias/nueva" className={`${styles.btn} ${styles.btnPrimary}`}>
+                            {/* ProtectedLink: asegura la sesion antes de entrar al admin (en el
+                                telefono el token vencido rebotaba a /login). */}
+                            <ProtectedLink href="/admin/super/noticias/nueva" className={`${styles.btn} ${styles.btnPrimary}`}>
                                 <Plus size={16} aria-hidden="true" /> Nueva noticia
-                            </Link>
+                            </ProtectedLink>
                         </div>
                     )}
                 </header>

@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { useMemo, useState, type FormEvent } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
+import { sessionFetch } from '@/lib/supabase/freshSession';
 import MatchVideoPlayer, { useEmbedParent } from '@/components/video/MatchVideoPlayer';
 import {
     MATCH_VIDEO_KINDS,
@@ -296,10 +297,9 @@ function ClipForm({ match, onCancel, onAdded }: ClipFormProps) {
         setError(null);
         try {
             const existingIds = new Set(match.videos.map((video) => video.id));
-            const response = await fetch(`/api/matches/${encodeURIComponent(match.id)}/videos`, {
+            const response = await sessionFetch(`/api/matches/${encodeURIComponent(match.id)}/videos`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
                 body: JSON.stringify({
                     videos: [
                         ...match.videos.map((video) => ({ id: video.id, url: video.url, kind: video.kind, title: video.title, poster: video.poster })),
@@ -394,11 +394,14 @@ function PollEditor({ hub, initial, saving, error, candidates, onCancel, onSave,
     const [name, setName] = useState(initial?.poll.name ?? (hub.matches[0]?.roundLabel ?? ''));
     const [title, setTitle] = useState(initial?.poll.title ?? defaultPollTitle(hub.tournament.sportId));
     const [selected, setSelected] = useState<Set<string>>(() => new Set(initial?.poll.options.map((option) => option.id) ?? []));
-    // El título de cada video en la votación: el que ya tiene en la ficha, o el que se escriba acá.
+    // El título de cada video en la votación: el que ya tiene en la ficha o,
+    // si no tiene (los highlights de ESPN no traen), el partido. Con un
+    // título puesto de entrada, tildar dos videos alcanza para publicar; el
+    // texto se puede cambiar debajo de cada uno.
     const [labels, setLabels] = useState<Record<string, string>>(() => {
         const out: Record<string, string> = {};
         for (const match of hub.matches) {
-            for (const video of match.videos) out[pollOptionId({ matchId: match.id, videoId: video.id })] = video.title ?? '';
+            for (const video of match.videos) out[pollOptionId({ matchId: match.id, videoId: video.id })] = video.title ?? matchLabelOf(match);
         }
         for (const option of initial?.poll.options ?? []) if (option.label) out[option.id] = option.label;
         return out;
@@ -421,7 +424,7 @@ function PollEditor({ hub, initial, saving, error, candidates, onCancel, onSave,
         const id = pollOptionId({ matchId: match.id, videoId: added.id });
         onVideosChange(match, videos);
         setSelected((prev) => new Set(prev).add(id));
-        setLabels((prev) => ({ ...prev, [id]: added.title ?? '' }));
+        setLabels((prev) => ({ ...prev, [id]: added.title ?? matchLabelOf(match) }));
         setClipFor(null);
         setPickedId('');
     }
@@ -790,8 +793,9 @@ export default function VideoHubClient({
      * token de paso, y lo que corresponde es reintentar, no patear al admin.
      */
     async function request(url: string, init: RequestInit, fallback: string, loginOn401 = false): Promise<Record<string, unknown> | null> {
-        const response = await fetch(url, {
-            credentials: 'same-origin',
+        // sessionFetch asegura la cookie antes de pedir: en el telefono el token
+        // vence con la pestana suspendida y el primer pedido daba 401.
+        const response = await sessionFetch(url, {
             headers: { 'Content-Type': 'application/json' },
             ...init,
         });
