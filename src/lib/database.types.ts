@@ -551,6 +551,7 @@ export type Database = {
           sport: string | null
           status: string
           summary: string | null
+          tags: string[] | null
           title: string
           updated_at: string
         }
@@ -566,6 +567,7 @@ export type Database = {
           sport?: string | null
           status?: string
           summary?: string | null
+          tags?: string[] | null
           title: string
           updated_at?: string
         }
@@ -581,6 +583,7 @@ export type Database = {
           sport?: string | null
           status?: string
           summary?: string | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
         }

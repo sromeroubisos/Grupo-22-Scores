@@ -26,6 +26,7 @@ type NewsRequestBody = {
     sport?: unknown;
     scope?: unknown;
     scope_id?: unknown;
+    tags?: unknown;
 };
 
 const MISSING_NEWS_COLUMN_REGEX = /Could not find the '([^']+)' column of 'news' in the schema cache/i;
@@ -39,6 +40,8 @@ const SUMMARY_MAX = 280;
 const CONTENT_MAX = 20000;
 const SPORT_MAX = 40;
 const IMAGE_URL_MAX = 2048;
+const TAG_MAX = 30;
+const TAGS_MAX = 10;
 const STATUSES = new Set<NewsRow['status']>(['draft', 'published', 'archived']);
 const SCOPES = new Set(['global', 'tournament', 'club', 'union']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -96,17 +99,24 @@ function removeUndefinedFields(record: Record<string, unknown>) {
     );
 }
 
+/** Lo guardado y las columnas que la base todavía no tiene (se descartan y se avisan). */
+interface NewsWriteResult {
+    data: NewsRow;
+    dropped: string[];
+}
+
 async function insertNewsWithSchemaFallback(
     admin: ReturnType<typeof createAdminClient>,
     payload: NewsInsert
-) {
+): Promise<NewsWriteResult> {
     const insertPayload: Record<string, unknown> = removeUndefinedFields({ ...payload });
+    const dropped: string[] = [];
 
     while (true) {
         const { data, error } = await admin.from('news').insert(insertPayload).select().single();
 
         if (!error) {
-            return data;
+            return { data: data as NewsRow, dropped };
         }
 
         const missingColumn = extractMissingNewsColumn(error);
@@ -115,6 +125,7 @@ async function insertNewsWithSchemaFallback(
         }
 
         delete insertPayload[missingColumn];
+        dropped.push(missingColumn);
     }
 }
 
@@ -122,14 +133,15 @@ async function updateNewsWithSchemaFallback(
     admin: ReturnType<typeof createAdminClient>,
     id: string,
     payload: NewsUpdate
-) {
+): Promise<NewsWriteResult> {
     const updatePayload: Record<string, unknown> = removeUndefinedFields({ ...payload });
+    const dropped: string[] = [];
 
     while (true) {
         const { data, error } = await admin.from('news').update(updatePayload).eq('id', id).select().single();
 
         if (!error) {
-            return data;
+            return { data: data as NewsRow, dropped };
         }
 
         const missingColumn = extractMissingNewsColumn(error);
@@ -138,6 +150,7 @@ async function updateNewsWithSchemaFallback(
         }
 
         delete updatePayload[missingColumn];
+        dropped.push(missingColumn);
     }
 }
 
@@ -176,6 +189,30 @@ function cleanScope(value: unknown): string | undefined {
         throw new NewsValidationError('El alcance tiene que ser general, torneo, club o unión.');
     }
     return value;
+}
+
+/**
+ * undefined = no vino (en un PUT, no se toca); [] = vino vacío. Sin
+ * repetidas (sin distinguir mayúsculas), recortadas y con tope.
+ */
+function cleanTags(value: unknown): string[] | undefined {
+    if (value === undefined) return undefined;
+    if (value === null || value === '') return [];
+    if (!Array.isArray(value)) throw new NewsValidationError('Las etiquetas tienen que ser una lista.');
+    const out: string[] = [];
+    const seen = new Set<string>();
+    for (const item of value) {
+        if (typeof item !== 'string') throw new NewsValidationError('Cada etiqueta tiene que ser texto.');
+        const tag = item.replace(/\s+/g, ' ').trim();
+        if (!tag) continue;
+        if (tag.length > TAG_MAX) throw new NewsValidationError(`Una etiqueta no puede pasar los ${TAG_MAX} caracteres.`);
+        const key = tag.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(tag);
+        if (out.length > TAGS_MAX) throw new NewsValidationError(`Como mucho ${TAGS_MAX} etiquetas por noticia.`);
+    }
+    return out;
 }
 
 function cleanId(value: unknown): string {
@@ -267,11 +304,12 @@ export async function POST(req: Request) {
             sport: cleanText(body.sport, SPORT_MAX, 'El deporte') ?? null,
             scope,
             scope_id: scope === 'global' ? null : scopeId,
+            tags: cleanTags(body.tags) ?? [],
             published_at: status === 'published' ? new Date().toISOString() : null,
         };
 
-        const data = await insertNewsWithSchemaFallback(admin, payload);
-        return NextResponse.json({ data });
+        const { data, dropped } = await insertNewsWithSchemaFallback(admin, payload);
+        return NextResponse.json({ data, dropped });
     } catch (error) {
         return errorResponse('POST', error);
     }
@@ -315,10 +353,13 @@ export async function PUT(req: Request) {
             if (status === 'draft') updateData.published_at = null;
         }
 
+        const tags = cleanTags(body.tags);
+        if (tags !== undefined) updateData.tags = tags;
+
         if (Object.keys(updateData).length === 0) throw new NewsValidationError('No hay nada para guardar.');
 
-        const data = await updateNewsWithSchemaFallback(admin, id, updateData);
-        return NextResponse.json({ data });
+        const { data, dropped } = await updateNewsWithSchemaFallback(admin, id, updateData);
+        return NextResponse.json({ data, dropped });
     } catch (error) {
         return errorResponse('PUT', error);
     }

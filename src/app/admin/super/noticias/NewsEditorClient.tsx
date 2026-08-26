@@ -11,8 +11,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
-import { AlertCircle, ArrowLeft, CheckCircle2, Circle, Eye, EyeOff, ImagePlus, Newspaper, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { AlertCircle, AlertTriangle, ArrowLeft, CheckCircle2, Circle, Eye, EyeOff, ImagePlus, Newspaper, Trash2, X } from 'lucide-react';
 
 import { sessionFetch } from '@/lib/supabase/freshSession';
 
@@ -27,6 +27,7 @@ interface NewsForm {
     image_url: string;
     sport: string;
     scope: string;
+    tags: string[];
 }
 
 type FormField = keyof NewsForm;
@@ -41,13 +42,14 @@ interface NewsRecord {
     image_url?: string | null;
     sport?: string | null;
     scope?: string | null;
+    tags?: string[] | null;
 }
 
 type NewsEditorClientProps = {
     newsId?: string;
 };
 
-const EMPTY: NewsForm = { title: '', summary: '', content: '', image_url: '', sport: 'rugby', scope: 'global' };
+const EMPTY: NewsForm = { title: '', summary: '', content: '', image_url: '', sport: 'rugby', scope: 'global', tags: [] };
 
 // Los mismos topes que valida la API.
 const TITLE_MAX = 140;
@@ -55,6 +57,14 @@ const SUMMARY_MAX = 280;
 const CONTENT_MAX = 20000;
 const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+const SPORT_MAX = 40;
+const TAG_MAX = 30;
+const TAGS_MAX = 10;
+/** El valor del select que abre el campo de deporte propio. */
+const CUSTOM_SPORT = '__custom';
+const NEWS_COLUMNS_MIGRATION = '20260826150000_news_sport_scope_tags.sql';
+/** Las columnas que la base puede no tener todavía, con su nombre para el aviso. */
+const DROPPABLE_FIELDS: Partial<Record<FormField, string>> = { sport: 'el deporte', scope: 'el alcance', tags: 'las etiquetas' };
 
 /** Los ids que entiende la portada (sus carpetas por deporte). */
 const SPORTS = [
@@ -106,6 +116,7 @@ function toForm(record: NewsRecord): NewsForm {
         image_url: record.image_url ?? '',
         sport: record.sport ?? 'rugby',
         scope: record.scope ?? 'global',
+        tags: Array.isArray(record.tags) ? record.tags.filter((tag): tag is string => typeof tag === 'string' && tag.trim() !== '') : [],
     };
 }
 
@@ -118,6 +129,7 @@ function validate(form: NewsForm): Partial<Record<FormField, string>> {
     if (form.content.length > CONTENT_MAX) errors.content = `El contenido no puede pasar los ${CONTENT_MAX} caracteres.`;
     const image = form.image_url.trim();
     if (image && !isHttpUrl(image)) errors.image_url = 'Tiene que ser un link que empiece con https://, o subí el archivo desde acá.';
+    if (form.sport.trim().length > SPORT_MAX) errors.sport = `El deporte no puede pasar los ${SPORT_MAX} caracteres.`;
     return errors;
 }
 
@@ -162,6 +174,13 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
     const [imageBroken, setImageBroken] = useState(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const titleRef = useRef<HTMLInputElement | null>(null);
+    const tagInputRef = useRef<HTMLInputElement | null>(null);
+    /** Lo que se está escribiendo en el campo de etiquetas, antes de convertirse en chip. */
+    const [tagDraft, setTagDraft] = useState('');
+    /** true = quien edita eligió "Otro deporte" y escribe el suyo. */
+    const [sportCustom, setSportCustom] = useState(false);
+    /** Se guardó, pero con una advertencia (por ejemplo, la columna de etiquetas no existe todavía). */
+    const [warning, setWarning] = useState<string | null>(null);
 
     const errors = useMemo(() => validate(form), [form]);
     const invalid = Object.keys(errors).length > 0;
@@ -303,6 +322,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                     image_url: image || null,
                     sport: form.sport.trim() || null,
                     scope: form.scope,
+                    tags: form.tags,
                     ...(nextStatus ? { status: nextStatus } : {}),
                 }),
             });
@@ -312,7 +332,16 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
             const record = (payload?.data ?? null) as NewsRecord | null;
             const id = record?.id ?? recordId;
             const finalStatus: NewsStatus = record?.status ?? nextStatus ?? status;
-            const snapshot: NewsForm = record ? toForm(record) : { ...form };
+            // La base puede no tener todavía alguna columna (deporte, alcance,
+            // etiquetas): la API la descarta y lo avisa. Lo escrito se conserva
+            // en el formulario y se advierte qué faltó.
+            const dropped: string[] = Array.isArray(payload?.dropped) ? payload.dropped.filter((column: unknown): column is string => typeof column === 'string') : [];
+            const lost = (Object.keys(DROPPABLE_FIELDS) as FormField[]).filter((field) => dropped.includes(field));
+            const kept = Object.fromEntries(lost.map((field) => [field, form[field]])) as Partial<NewsForm>;
+            const snapshot: NewsForm = record ? { ...toForm(record), ...kept } : { ...form };
+            setWarning(lost.length > 0
+                ? `No se guardaron ${lost.map((field) => DROPPABLE_FIELDS[field]).join(', ')}: falta correr la migración ${NEWS_COLUMNS_MIGRATION} en Supabase. El resto de la nota sí se guardó.`
+                : null);
 
             setSaved(snapshot);
             setForm(snapshot);
@@ -375,9 +404,36 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
 
     // ── Textos derivados ──
 
-    const sportOptions = SPORTS.some((sport) => sport.id === form.sport)
-        ? SPORTS
-        : [...SPORTS, { id: form.sport, label: form.sport || 'Sin deporte' }];
+    // Deporte: uno de la lista o uno propio. Un valor viejo que no está en la
+    // lista se muestra como propio, sin perderse.
+    const knownSport = SPORTS.some((sport) => sport.id === form.sport);
+    const customSport = sportCustom || (form.sport.trim() !== '' && !knownSport);
+
+    function addTag(raw: string) {
+        const tag = raw.replace(/\s+/g, ' ').trim().slice(0, TAG_MAX);
+        setTagDraft('');
+        if (!tag) return;
+        setSuccess(null);
+        setForm((current) => {
+            if (current.tags.length >= TAGS_MAX) return current;
+            if (current.tags.some((existing) => existing.toLowerCase() === tag.toLowerCase())) return current;
+            return { ...current, tags: [...current.tags, tag] };
+        });
+    }
+
+    function removeTag(tag: string) {
+        setSuccess(null);
+        setForm((current) => ({ ...current, tags: current.tags.filter((existing) => existing !== tag) }));
+    }
+
+    function onTagKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
+        if (event.key === 'Enter' || event.key === ',') {
+            event.preventDefault();
+            addTag(tagDraft);
+        } else if (event.key === 'Backspace' && tagDraft === '' && form.tags.length > 0) {
+            removeTag(form.tags[form.tags.length - 1]);
+        }
+    }
     const words = wordCount(`${form.summary} ${form.content}`);
     const minutes = Math.max(1, Math.ceil(words / 220));
     const paragraphs = paragraphCount(form.content);
@@ -397,6 +453,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
         { label: 'Resumen para la tarjeta', done: Boolean(form.summary.trim()) },
         { label: 'Imagen', done: imageOk },
         { label: 'Contenido', done: Boolean(form.content.trim()) },
+        { label: 'Etiquetas (SEO)', done: form.tags.length > 0 },
     ];
 
     if (loading) {
@@ -592,10 +649,45 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                         <div className={styles.fieldRow}>
                             <div className={styles.field}>
                                 <label htmlFor="news-sport" className={styles.label}>Deporte</label>
-                                <select id="news-sport" className={styles.select} value={form.sport} onChange={(event) => update('sport', event.target.value)}>
-                                    {sportOptions.map((sport) => <option key={sport.id} value={sport.id}>{sport.label}</option>)}
+                                <select
+                                    id="news-sport"
+                                    className={styles.select}
+                                    value={customSport ? CUSTOM_SPORT : form.sport}
+                                    onChange={(event) => {
+                                        if (event.target.value === CUSTOM_SPORT) {
+                                            setSportCustom(true);
+                                            update('sport', '');
+                                        } else {
+                                            setSportCustom(false);
+                                            update('sport', event.target.value);
+                                        }
+                                    }}
+                                >
+                                    {SPORTS.map((sport) => <option key={sport.id} value={sport.id}>{sport.label}</option>)}
+                                    <option value={CUSTOM_SPORT}>Otro (escribirlo)</option>
                                 </select>
-                                <p className={styles.hint}>La portada filtra por deporte.</p>
+                                {customSport ? (
+                                    <>
+                                        <label htmlFor="news-sport-custom" className={styles.srOnly}>Deporte propio</label>
+                                        <input
+                                            id="news-sport-custom"
+                                            className={`${styles.input} ${showError('sport') ? styles.inputInvalid : ''}`}
+                                            type="text"
+                                            value={form.sport}
+                                            placeholder="Rugby femenino, Seven, Fútbol 5…"
+                                            maxLength={SPORT_MAX + 10}
+                                            autoFocus={sportCustom}
+                                            onChange={(event) => update('sport', event.target.value)}
+                                            onBlur={() => touch('sport')}
+                                            aria-invalid={Boolean(showError('sport'))}
+                                        />
+                                        <p className={`${styles.hint} ${showError('sport') ? styles.hintError : ''}`}>
+                                            {showError('sport') ?? 'Una etiqueta propia. La portada no la filtra como deporte, pero sale en la nota y en las palabras clave.'}
+                                        </p>
+                                    </>
+                                ) : (
+                                    <p className={styles.hint}>La portada filtra por deporte.</p>
+                                )}
                             </div>
                             <div className={styles.field}>
                                 <label htmlFor="news-scope" className={styles.label}>Alcance</label>
@@ -605,12 +697,55 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                                 <p className={styles.hint}>General, o de un torneo, un club o una unión.</p>
                             </div>
                         </div>
+
+                        <div className={styles.field}>
+                            <div className={styles.labelRow}>
+                                <label htmlFor="news-tags" className={styles.label}>Etiquetas <span className={styles.labelSoft}>(SEO)</span></label>
+                                <span className={styles.counter}>{form.tags.length}/{TAGS_MAX}</span>
+                            </div>
+                            <div className={styles.tagBox} onClick={() => tagInputRef.current?.focus()}>
+                                {form.tags.map((tag) => (
+                                    <span key={tag} className={styles.tagChip}>
+                                        {tag}
+                                        <button type="button" className={styles.tagRemove} onClick={() => removeTag(tag)} aria-label={`Quitar la etiqueta ${tag}`}>
+                                            <X size={13} aria-hidden="true" />
+                                        </button>
+                                    </span>
+                                ))}
+                                <input
+                                    id="news-tags"
+                                    ref={tagInputRef}
+                                    className={styles.tagInput}
+                                    type="text"
+                                    value={tagDraft}
+                                    placeholder={form.tags.length === 0 ? 'urba, top 14, final, alumni…' : ''}
+                                    maxLength={TAG_MAX}
+                                    autoComplete="off"
+                                    disabled={form.tags.length >= TAGS_MAX}
+                                    onChange={(event) => setTagDraft(event.target.value)}
+                                    onKeyDown={onTagKeyDown}
+                                    onBlur={() => addTag(tagDraft)}
+                                    aria-describedby="news-tags-hint"
+                                />
+                            </div>
+                            <p id="news-tags-hint" className={styles.hint}>
+                                {form.tags.length >= TAGS_MAX
+                                    ? `Tope de ${TAGS_MAX} etiquetas. Quitá una para agregar otra.`
+                                    : 'Enter o coma para agregar. Van a las palabras clave y al Open Graph de la nota, y a la búsqueda de la portada.'}
+                            </p>
+                        </div>
                     </section>
 
                     {error && (
                         <div className={`${styles.notice} ${styles.noticeError}`} role="alert">
                             <AlertCircle size={18} aria-hidden="true" />
                             <span>{error}</span>
+                        </div>
+                    )}
+                    {warning && (
+                        <div className={`${styles.notice} ${styles.noticeWarning}`} role="status">
+                            <AlertTriangle size={18} aria-hidden="true" />
+                            <span>{warning}</span>
                         </div>
                     )}
                     {success && (
@@ -692,6 +827,11 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                                 {form.title.trim() || 'El título de la nota'}
                             </h3>
                             <p className={styles.previewExcerpt}>{excerptOf(form)}</p>
+                            {form.tags.length > 0 && (
+                                <div className={styles.previewTags} aria-label="Etiquetas">
+                                    {form.tags.map((tag) => <span key={tag} className={styles.previewTag}>{tag}</span>)}
+                                </div>
+                            )}
                             <span className={styles.previewCta}>Leer la nota →</span>
                         </div>
                     </div>
