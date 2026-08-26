@@ -1,10 +1,14 @@
 'use client';
 
 // Los torneos con videos, como tarjetas uniformes de a dos por fila (en el
-// teléfono también): la portada de su último video con el marcador, el
-// nombre, cuánto hay para ver y la votación abierta si hay. La portada de
-// noticias muestra una fila y despliega el resto con "Ver más"; el índice
-// /noticias/videos las muestra todas.
+// teléfono también): la placa generada del último video —con el NOMBRE del
+// clip, los escudos y el marcador—, el nombre del torneo, cuánto hay para ver
+// y la votación abierta si hay. La portada de noticias muestra una fila y
+// despliega el resto con "Ver más"; el índice /noticias/videos las muestra
+// todas.
+//
+// Acá NO entra el fotograma remoto del clip: la miniatura del proveedor es un
+// cuadro suelto del partido y falta seguido. La portada la dibuja la web.
 
 import Link from 'next/link';
 import { useState } from 'react';
@@ -15,11 +19,9 @@ import { VIDEO_KIND_LABELS, describeVideo } from '@/lib/matches/videoLinks';
 import { plateCaption, type VideoPlateContext } from '@/lib/matches/videoPlate';
 import { playLabelForSport } from '@/lib/videoHub/polls';
 import {
-    scoreLabelOf,
     type VideoHubFeaturedVideo,
     type VideoHubOpenPoll,
     type VideoHubSummary,
-    type VideoHubTeam,
     type VideoHubTournament,
 } from '@/lib/videoHub/types';
 
@@ -69,14 +71,6 @@ function TournamentMark({ tournament, eager = false }: { tournament: VideoHubTou
     return <span className={styles.tMarkFallback} aria-hidden="true">{tournament.name.slice(0, 1)}</span>;
 }
 
-function TeamMark({ team }: { team: VideoHubTeam }) {
-    if (team.logoUrl) {
-        // eslint-disable-next-line @next/next/no-img-element -- escudo por el proxy propio.
-        return <img className={styles.crest} src={team.logoUrl} alt="" width={22} height={22} loading="lazy" decoding="async" />;
-    }
-    return <span className={styles.crestFallback} aria-hidden="true">{team.name.slice(0, 1)}</span>;
-}
-
 function plateContextOf(hub: VideoHubSummary, video: VideoHubFeaturedVideo): VideoPlateContext {
     return {
         tournamentName: hub.tournament.name,
@@ -91,12 +85,16 @@ function plateContextOf(hub: VideoHubSummary, video: VideoHubFeaturedVideo): Vid
 }
 
 /**
- * La portada de un hub: la miniatura del último video con el partido encima,
- * o la placa G22 (que ya trae escudos y marcador) cuando no hay miniatura o
- * quien lo cargó la pidió. `priority` = está sobre el pliegue: no se difiere.
+ * La portada de un hub: SIEMPRE la placa generada acá, con el NOMBRE del clip
+ * (más escudos, marcador y etapa).
+ *
+ * En la pantalla de noticias no se muestra el fotograma remoto del video: esa
+ * miniatura es un cuadro suelto del partido, la pone el proveedor y cuando
+ * falta —o el proveedor no la sirve— queda el recuadro gris roto que se veía
+ * en la portada. La placa se dibuja en el DOM, dice de qué video se trata y
+ * sale igual siempre. `priority` = está sobre el pliegue: no se difiere.
  */
 function HubCover({ hub, priority = false }: { hub: VideoHubSummary; priority?: boolean }) {
-    const [broken, setBroken] = useState(false);
     const video = hub.latestVideo;
 
     if (!video) {
@@ -107,44 +105,11 @@ function HubCover({ hub, priority = false }: { hub: VideoHubSummary; priority?: 
         );
     }
 
-    const usePlate = video.generatedPoster || !video.posterUrl || broken;
     const caption = plateCaption({ title: video.title, kindLabel: VIDEO_KIND_LABELS[video.kind] });
-    const score = scoreLabelOf(video.match);
 
     return (
         <>
-            {usePlate ? (
-                <VideoPlate context={plateContextOf(hub, video)} title={caption.title} kind={caption.kind} playSlot />
-            ) : (
-                <>
-                    {/* eslint-disable-next-line @next/next/no-img-element -- portada remota de la plataforma; no pasa por el optimizador. */}
-                    <img
-                        className={styles.coverImg}
-                        src={video.posterUrl ?? undefined}
-                        alt=""
-                        width={640}
-                        height={360}
-                        loading={priority ? 'eager' : 'lazy'}
-                        fetchPriority={priority ? 'high' : 'auto'}
-                        decoding="async"
-                        referrerPolicy="no-referrer"
-                        onError={() => setBroken(true)}
-                    />
-                    <span className={styles.coverShade} aria-hidden="true" />
-                    <span className={styles.coverKind} aria-hidden="true">{VIDEO_KIND_LABELS[video.kind]}</span>
-                    <span className={styles.coverMatch} aria-hidden="true">
-                        <span className={styles.coverTeam}>
-                            <TeamMark team={video.match.home} />
-                            <span className={styles.coverName}>{video.match.home.name}</span>
-                        </span>
-                        <span className={styles.coverScore}>{score ?? 'vs'}</span>
-                        <span className={`${styles.coverTeam} ${styles.coverTeamAway}`}>
-                            <span className={styles.coverName}>{video.match.away.name}</span>
-                            <TeamMark team={video.match.away} />
-                        </span>
-                    </span>
-                </>
-            )}
+            <VideoPlate context={plateContextOf(hub, video)} title={caption.title} kind={caption.kind} playSlot />
             <span className={styles.coverPlay} aria-hidden="true">
                 <Play size={22} fill="currentColor" strokeWidth={0} />
             </span>
